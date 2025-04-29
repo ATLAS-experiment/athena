@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -8,13 +8,9 @@
  **/
 
 #include "LumiBlockMetaDataTool.h"
-#include "GoodRunsLists/IGoodRunsListSelectorTool.h"
-#include "GoodRunsLists/TGoodRunsListReader.h"
+
+#include "StoreGate/StoreGateSvc.h"
 #include "xAODLuminosity/SortLumiBlockRangeByStart.h"
-
-#include "GoodRunsLists/TGoodRunsList.h"
-
-#include "TROOT.h"
 
 #include <algorithm>
 
@@ -22,19 +18,11 @@
 LumiBlockMetaDataTool::LumiBlockMetaDataTool(const std::string& type
 					     , const std::string& name
 					     , const IInterface* parent)
-  : AthAlgTool(type, name, parent)
+  : base_class(type, name, parent)
   , m_pMetaDataStore ("StoreGateSvc/MetaDataStore", name)
   , m_pInputStore    ("StoreGateSvc/InputMetaDataStore", name)
-  , m_fileCurrentlyOpened(false)
-  , m_CurrentFileName("none")
 {
-  declareInterface<IMetaDataTool>(this);
-
-  declareProperty("LBCollName",m_LBColl_name = "LumiBlocks");
-  declareProperty("unfinishedLBCollName",m_unfinishedLBColl_name = "IncompleteLumiBlocks");
-  declareProperty("suspectLBCollName", m_suspectLBColl_name="SuspectLumiBlocks");
-
-  // Here is where we create the LumiBlockRange objects.  When we open a 
+  // Here is where we create the LumiBlockRange objects.  When we open a
   // file, we fill the m_cacheInputRangeContainer from the input metadata store.  
   // When the file closes, we move the LumiBlockRange objects to the
   // m_cacheOutputRangeContainer.  Objects in the m_cacheOutputRangeContainer
@@ -44,34 +32,14 @@ LumiBlockMetaDataTool::LumiBlockMetaDataTool(const std::string& type
   // If a file is only partially read, the objects in the m_cacheInputRangeContainer
   // will be moved to the m_suspectOutputRangeContainer 
   
-  m_cacheInputRangeContainer = new xAOD::LumiBlockRangeContainer();
-  m_cacheInputRangeAuxContainer = new xAOD::LumiBlockRangeAuxContainer();
-  m_cacheInputRangeContainer->setStore( m_cacheInputRangeAuxContainer );
-   
-  m_cacheSuspectInputRangeContainer = new xAOD::LumiBlockRangeContainer();
-  m_cacheSuspectInputRangeAuxContainer = new xAOD::LumiBlockRangeAuxContainer();
-  m_cacheSuspectInputRangeContainer->setStore( m_cacheSuspectInputRangeAuxContainer );
-
-  m_cacheOutputRangeContainer = new xAOD::LumiBlockRangeContainer();
-  m_cacheOutputRangeAuxContainer = new xAOD::LumiBlockRangeAuxContainer();
-  m_cacheOutputRangeContainer->setStore( m_cacheOutputRangeAuxContainer );
-  
-  m_cacheSuspectOutputRangeContainer = new xAOD::LumiBlockRangeContainer();
-  m_cacheSuspectOutputRangeAuxContainer = new xAOD::LumiBlockRangeAuxContainer();
-  m_cacheSuspectOutputRangeContainer->setStore( m_cacheSuspectOutputRangeAuxContainer );
+  m_cacheInputRangeContainer.setStore( &m_cacheInputRangeAuxContainer );
+  m_cacheSuspectInputRangeContainer.setStore( &m_cacheSuspectInputRangeAuxContainer );
+  m_cacheOutputRangeContainer.setStore( &m_cacheOutputRangeAuxContainer );
+  m_cacheSuspectOutputRangeContainer.setStore( &m_cacheSuspectOutputRangeAuxContainer );
 }
-  
+
 //___________________________________________________________________________
 LumiBlockMetaDataTool::~LumiBlockMetaDataTool() {
-  delete m_cacheInputRangeContainer;
-  delete m_cacheInputRangeAuxContainer;
-  delete m_cacheSuspectInputRangeContainer;
-  delete m_cacheSuspectInputRangeAuxContainer;
-
-  delete m_cacheOutputRangeContainer;
-  delete m_cacheOutputRangeAuxContainer;
-  delete m_cacheSuspectOutputRangeContainer;
-  delete m_cacheSuspectOutputRangeAuxContainer;
 }
 
 //___________________________________________________________________________
@@ -83,11 +51,8 @@ StatusCode LumiBlockMetaDataTool::initialize() {
 
   return(StatusCode::SUCCESS);
 }
-//___________________________________________________________________________
-StatusCode LumiBlockMetaDataTool::finalize() {
-  return(StatusCode::SUCCESS);
-}
 
+//___________________________________________________________________________
 StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
 {
   std::string fileName = "Undefined ";
@@ -116,7 +81,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );
     for ( const auto* lb : *lbrange ) {
       xAOD::LumiBlockRange* iovr = new xAOD::LumiBlockRange(*lb);
-      m_cacheInputRangeContainer->push_back(iovr);
+      m_cacheInputRangeContainer.push_back(iovr);
     }
   }
   if (m_pInputStore->contains<xAOD::LumiBlockRangeContainer>(m_unfinishedLBColl_name)) {
@@ -130,7 +95,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );
     for ( const auto* lb : *lbrange ) {
       xAOD::LumiBlockRange* iovr = new xAOD::LumiBlockRange(*lb);
-      m_cacheInputRangeContainer->push_back(iovr);
+      m_cacheInputRangeContainer.push_back(iovr);
     }
   }
   if (m_pInputStore->contains<xAOD::LumiBlockRangeContainer>(m_suspectLBColl_name)) {
@@ -144,7 +109,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );
     for ( const auto* lb : *lbrange ) {
       xAOD::LumiBlockRange* iovr = new xAOD::LumiBlockRange(*lb);
-      m_cacheSuspectInputRangeContainer->push_back(iovr);
+      m_cacheSuspectInputRangeContainer.push_back(iovr);
     }
   }
   return(StatusCode::SUCCESS);
@@ -153,17 +118,17 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
 StatusCode LumiBlockMetaDataTool::endInputFile(const SG::SourceID&)
 {
   m_fileCurrentlyOpened=false;
-  for (const auto range : *m_cacheInputRangeContainer) {
+  for (const auto range : m_cacheInputRangeContainer) {
     auto iovr = std::make_unique<xAOD::LumiBlockRange>(*range);
-    m_cacheOutputRangeContainer->push_back(std::move(iovr));
+    m_cacheOutputRangeContainer.push_back(std::move(iovr));
   }
-  m_cacheInputRangeContainer->clear();
+  m_cacheInputRangeContainer.clear();
   
-  for (const auto range : *m_cacheSuspectInputRangeContainer) {
+  for (const auto range : m_cacheSuspectInputRangeContainer) {
     auto iovr = std::make_unique<xAOD::LumiBlockRange>(*range);
-    m_cacheSuspectOutputRangeContainer->push_back(std::move(iovr));
+    m_cacheSuspectOutputRangeContainer.push_back(std::move(iovr));
   }
-  m_cacheSuspectInputRangeContainer->clear();
+  m_cacheSuspectInputRangeContainer.clear();
   return(StatusCode::SUCCESS);
 }
 
@@ -171,11 +136,11 @@ StatusCode LumiBlockMetaDataTool::metaDataStop()
 {
   if(m_fileCurrentlyOpened) {
     ATH_MSG_INFO( "MetaDataStop called when input file open: LumiBlock is suspect" );
-    for (const auto range : *m_cacheInputRangeContainer) {
+    for (const auto range : m_cacheInputRangeContainer) {
       auto iovr = std::make_unique<xAOD::LumiBlockRange>(*range);
-      m_cacheSuspectOutputRangeContainer->push_back(std::move(iovr));
+      m_cacheSuspectOutputRangeContainer.push_back(std::move(iovr));
     }
-    m_cacheInputRangeContainer->clear();
+    m_cacheInputRangeContainer.clear();
   }
   
   ATH_CHECK( finishUp() );
@@ -201,17 +166,17 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
   auto piovSuspectAux = std::make_unique<xAOD::LumiBlockRangeAuxContainer>();
   piovSuspect->setStore( piovSuspectAux.get() );
   
-  if(!m_cacheSuspectOutputRangeContainer->empty()) {
-    ATH_MSG_VERBOSE("Suspect OutputRangeCollection with size " << m_cacheSuspectOutputRangeContainer->size());
-    for (const auto range : *m_cacheSuspectOutputRangeContainer) {
+  if(!m_cacheSuspectOutputRangeContainer.empty()) {
+    ATH_MSG_VERBOSE("Suspect OutputRangeCollection with size " << m_cacheSuspectOutputRangeContainer.size());
+    for (const auto range : m_cacheSuspectOutputRangeContainer) {
       auto iovr = std::make_unique<xAOD::LumiBlockRange>(*range);
       piovSuspect->push_back(std::move(iovr));
     }
   }
   
-  if(!m_cacheOutputRangeContainer->empty()) {
-    ATH_MSG_VERBOSE("OutputRangeCollection with size " << m_cacheOutputRangeContainer->size());
-    m_cacheOutputRangeContainer->sort(xAOD::SortLumiBlockRangeByStart());
+  if(!m_cacheOutputRangeContainer.empty()) {
+    ATH_MSG_VERBOSE("OutputRangeCollection with size " << m_cacheOutputRangeContainer.size());
+    m_cacheOutputRangeContainer.sort(xAOD::SortLumiBlockRangeByStart());
     
     //  Use tmp collection to do the merging
     xAOD::LumiBlockRangeContainer tempLBColl;
@@ -220,9 +185,9 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
     
     // Sort and Merge LumiBlockRange objects if necessary
     // Merge LumiBlockRange objects for same run and lumiblock
-    xAOD::LumiBlockRangeContainer::const_iterator i = m_cacheOutputRangeContainer->begin();
-    xAOD::LumiBlockRangeContainer::const_iterator ie = m_cacheOutputRangeContainer->end();
-    xAOD::LumiBlockRangeContainer::const_iterator ilast = m_cacheOutputRangeContainer->begin();
+    xAOD::LumiBlockRangeContainer::const_iterator i = m_cacheOutputRangeContainer.begin();
+    xAOD::LumiBlockRangeContainer::const_iterator ie = m_cacheOutputRangeContainer.end();
+    xAOD::LumiBlockRangeContainer::const_iterator ilast = m_cacheOutputRangeContainer.begin();
     xAOD::LumiBlockRange* iovr = new xAOD::LumiBlockRange(*(*i));
     tempLBColl.push_back(iovr);
     ATH_MSG_VERBOSE(  "Push_back tmpLBColl with run  " 

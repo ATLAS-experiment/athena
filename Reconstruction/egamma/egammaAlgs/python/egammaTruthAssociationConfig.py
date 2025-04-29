@@ -44,6 +44,9 @@ def egammaTruthAssociationCfg(flags, name='egammaTruthAssociation',
     kwargs.setdefault(
         "MatchForwardElectrons",
         flags.Egamma.doForward)
+    kwargs.setdefault(
+        "UPCmode",
+        flags.Egamma.doLowMu)
 
     egtruthAlg = CompFactory.egammaTruthAssociationAlg(name, **kwargs)
 

@@ -58,18 +58,6 @@ There are several user-level tools here:
        - `FLIP_SIGN`: Save all IP, flip sign of z0 and d0. Use
          Flip/Neg versions of other taggers (as above).
 
-   - `GNN`: Similar to `DL2`, but uses ONNX-based backend.
-
-   - `GNNTool`: ASG Interface to `GNN`.
-
-   - `MultifoldGNN`, `MultifoldGNNTool`: Like `GNN`, but initializes
-     with a number of network "folds". The network applied to a given
-     jet is determined by the `jetFoldHash`.
-
-   - `FoldDecoratorAlg`: adds a hash (`jetFoldHash`) to each jet based
-     on some jet and event information. This should ensure that the
-     applied fold is (in the `MultifoldGNN`) is random.
-
 ### Hbb Tagging ###
 
 Some components of Hbb tagging also live here. These include:
@@ -101,16 +89,6 @@ Some components of Hbb tagging also live here. These include:
 
    - `VRJetOverlapDecoratorTool`: ASG interface around the class
      above.
-
-
-### Other Files ###
-
-There are also several tools that you _probably_ don't have to touch:
-
- - `CustomGetterUtils`: DL2 relies on some information that isn't stored in
-   accessors that we can get with a string (i.e. `pt`, `eta`,
-   ...). These are defined in `CustomGetterUtils`.
-
 
 
 Inputs and Outputs from DL2

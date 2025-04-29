@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERSHTFILTER_H
@@ -8,6 +8,7 @@
 #include "GeneratorModules/GenFilter.h"
 #include <string>
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 class MsgStream;
 class StoreGateSvc;
@@ -24,16 +25,16 @@ public:
 
 private:
 
-    double m_MinJetPt;  //!< Min pT for the truth jets
-    double m_MaxJetEta; //!< Max eta for the truth jets
-    double m_MinHT;  //!< Min HT for events
-    double m_MaxHT;  //!< Max HT for events
-    double m_MinLepPt;  //!< Min pT for the truth jets
-    double m_MaxLepEta; //!< Max eta for the truth jets
-    bool   m_UseNu;  //!< Use neutrinos in HT
-    bool   m_UseLep;   //!< Use leptons in HT
-
-    std::string m_TruthJetContainerName;  //!< Name of the truth jet container
+  Gaudi::Property<double> m_MinJetPt{this, "MinJetPt", 0*Gaudi::Units::GeV};
+  Gaudi::Property<double> m_MaxJetEta{this, "MaxJetEta",10.0};
+  Gaudi::Property<std::string> m_TruthJetContainerName{this,"TruthJetContainer","AntiKt4TruthWZJets","Truht jet container name"};
+  Gaudi::Property<double> m_MinHT{this, "MinHT", 20.*Gaudi::Units::GeV};
+  Gaudi::Property<double> m_MaxHT{this, "MaxHT", 14000.*Gaudi::Units::GeV};
+  Gaudi::Property<bool> m_UseNu{this, "UseNeutrinosFromWZTau",false, "Include neutrinos from W/Z/tau decays in the calculation of HT"};
+  Gaudi::Property<bool> m_UseLep{this,"UseLeptonsFromWZTau", false, "Include e/mu from W/Z/tau decays in the HT"};
+  Gaudi::Property<double> m_MinLepPt{this, "MinLeptonPt",0*Gaudi::Units::GeV};
+  Gaudi::Property<double> m_MaxLepEta{this, "MaxLeptonEta", 10.0};
+  Gaudi::Property<bool> m_allowOld{this, "AllowOldFilter", false};
 
     long m_total;    //!< Total number of events tested
     long m_passed;   //!< Number of events passing all cuts

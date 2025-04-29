@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file SCT_ReadCalibDataTool.cxx Implementation file for SCT_ReadCalibDataTool.
@@ -12,7 +12,7 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SCT_ReadoutGeometry/SCT_ChipUtils.h"
-#include "SCT_DetectorElementStatus.h"
+#include "SCT_ReadoutGeometry/SCT_DetectorElementStatus.h"
 #include "InDetIdentifier/SCT_ID.h"
 
 // Include STL

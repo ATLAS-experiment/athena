@@ -13,7 +13,7 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r24.0.67"
+relname="r25.0.26"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 inputBS=${artdata}/RecJobTransformTests/data24_13p6TeV.00484909.physics_Main.daq.RAW/data24_13p6TeV.00484909.physics_Main.daq.RAW._lb0098._SFO-16._0001.data
@@ -21,8 +21,8 @@ dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physva
 
 script=test_data_reco.sh
 
-conditions="CONDBR2-BLKPA-2024-04"
-geotag="ATLAS-R3S-2021-03-02-00"
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA)")
+geotag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 
 echo "Executing script ${script}"
 echo " "

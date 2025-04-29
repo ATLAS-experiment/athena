@@ -61,17 +61,17 @@ protected:
   /// parameters for truth labeling
   SG::ReadHandleKey<xAOD::JetContainer> m_truthJetCollectionName{this, "TruthJetContainer", "", "Do not configure manually!"};
   SG::ReadHandleKey<xAOD::JetContainer> m_truthGroomedJetCollectionName{this, "TruthGroomedJetContainer", "", "Do not configure manually!"};
-  bool m_useDRMatch; /// Use dR to match partons to truth jet
-  bool m_useWZMassHigh; /// Use upper mass cut for W/Z labels
-  bool m_matchUngroomedParent; /// Use the ungroomed reco jet parent to match to truth jet
-  bool m_getTruthGroomedJetValues; /// When truth jet matching to ungroomed truth, allow saving properties of groomed truth jets
-  double m_dRTruthJet; /// dR to match truth jet to reco jet
-  double m_dRTruthPart; /// dR to match truth particles to truth jet
-  double m_mLowTop; /// Lower mass cut for top label
-  double m_mLowW; /// Lower mass cut for W label
-  double m_mHighW; /// Upper mass cut for W label
-  double m_mLowZ; /// Lower mass cut for Z label
-  double m_mHighZ; /// Upper mass cut for Z label
+  bool m_useDRMatch{}; /// Use dR to match partons to truth jet
+  bool m_useWZMassHigh{}; /// Use upper mass cut for W/Z labels
+  bool m_matchUngroomedParent{}; /// Use the ungroomed reco jet parent to match to truth jet
+  bool m_getTruthGroomedJetValues{}; /// When truth jet matching to ungroomed truth, allow saving properties of groomed truth jets
+  double m_dRTruthJet{}; /// dR to match truth jet to reco jet
+  double m_dRTruthPart{}; /// dR to match truth particles to truth jet
+  double m_mLowTop{}; /// Lower mass cut for top label
+  double m_mLowW{}; /// Lower mass cut for W label
+  double m_mHighW{}; /// Upper mass cut for W label
+  double m_mLowZ{}; /// Lower mass cut for Z label
+  double m_mHighZ{}; /// Upper mass cut for Z label
 
   struct DecorHandles {
     DecorHandles (const JetTruthLabelingTool& tool, const EventContext& ctx);

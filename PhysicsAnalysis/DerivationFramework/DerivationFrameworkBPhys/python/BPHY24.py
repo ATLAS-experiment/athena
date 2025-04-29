@@ -203,12 +203,30 @@ def BPHY24Cfg(flags):
 
     BPHY24_V0FinderTool = acc.popToolsAndMerge(BPHY_InDetV0FinderToolCfg(
         flags, BPHYDerivationName,
-        TrackParticleCollection = mainIDInput,
-        V0ContainerName = V0ContainerName,
-        KshortContainerName = KshortContainerName,
-        LambdaContainerName = LambdaContainerName,
-        LambdabarContainerName = LambdabarContainerName,
-        RelinkTracks = originalTrackCond))
+        TrackParticleCollection     = mainIDInput,
+        V0ContainerName             = V0ContainerName,
+        KshortContainerName         = KshortContainerName,
+        LambdaContainerName         = LambdaContainerName,
+        LambdabarContainerName      = LambdabarContainerName,
+        RelinkTracks                = originalTrackCond,
+        use_innerPixHits            = True,
+        errmass                     = 99999,
+        uksmin                      = 400,
+        uksmax                      = 600,
+        ksmin                       = 400,
+        ksmax                       = 600,
+        ulamin                      = -1,
+        ulamax                      = -1,
+        lamin                       = -1,
+        lamax                       = -1,
+        d0_cut                      = -1,
+        max_d0_cut                  = 50,
+        max_z0_cut                  = 250,
+        ptTRT                       = 0,
+        minConstrVertProb           = 0.000001,
+        useBDT                      = True,
+        BDTCut                      = 0.1,
+        use_TrackSelector           = False))
 
     BPHY24_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
         flags, derivation = BPHYDerivationName,
@@ -216,6 +234,7 @@ def BPHY24Cfg(flags):
         KshortContainerName = KshortContainerName,
         LambdaContainerName = LambdaContainerName,
         LambdabarContainerName = LambdabarContainerName,
+        VxPrimaryCandidateName      = "BPHY24_DiMuon_Candidates",
         CheckVertexContainers = ['BPHY24_DiMuon_Candidates',
                                  'BPHY24_DiElectron_Candidates'],
         V0FinderTool = BPHY24_V0FinderTool))
@@ -340,29 +359,11 @@ def BPHY24Cfg(flags):
       InputVertexContainer            = "BPHY24_DiMuon_Candidates",
       FixElecExclusion                = False,
       IncludeV0                       = False)
-    
-    BPHY24TrackIsolationDecoratorKshort = CompFactory.DerivationFramework.VertexTrackIsolation(
-      name                            = "BPHY24TrackIsolationDecoratorKshort",
-      TrackIsoTool                    = TrackIsoTool,
-      TrackContainer                  = "InDetTrackParticles",
-      InputVertexContainer            = "BPHY24RecoKshortCandidates",
-      FixElecExclusion                = False,
-      IncludeV0                       = False)
-
-    BPHY24TrackIsolationDecoratorV0 = CompFactory.DerivationFramework.VertexTrackIsolation(
-      name                            = "BPHY24TrackIsolationDecoratorV0",
-      TrackIsoTool                    = TrackIsoTool,
-      TrackContainer                  = "InDetTrackParticles",
-      InputVertexContainer            = "BPHY24RecoV0Candidates",
-      FixElecExclusion                = False,
-      IncludeV0                       = False)
 
     augsList += [ BPHY24TrackIsolationDecoratorBtoKee,
               BPHY24TrackIsolationDecoratorBtoKmumu,
               BPHY24TrackIsolationDecoratorJpsiee,
-              BPHY24TrackIsolationDecoratorJpsimumu,
-              BPHY24TrackIsolationDecoratorKshort,
-              BPHY24TrackIsolationDecoratorV0]
+              BPHY24TrackIsolationDecoratorJpsimumu]
 
     trigger_list = [ # Pure muon triggers
     "HLT_mu11_mu6_bDimu",
@@ -469,6 +470,10 @@ def BPHY24Cfg(flags):
     thinList += [ BPHY24_Thin_PV ]
 
     if isSimulation:
+
+      #Decorate Truth Particles with track parameters
+      from InDetPhysValMonitoring.InDetPhysValDecorationConfig import InDetPhysValTruthDecoratorAlgCfg
+      acc.merge(InDetPhysValTruthDecoratorAlgCfg(flags, BPHYDerivationName))
     
       # Keep all muons and electrons
       keepParticles = ('abs(TruthParticles.pdgId) == 11 || ' # mu
@@ -569,5 +574,5 @@ def BPHY24Cfg(flags):
     BPHY24ItemList = BPHY24SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY24", ItemList=BPHY24ItemList, AcceptAlgs=["BPHY24Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY24", AcceptAlgs=["BPHY24Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc

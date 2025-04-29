@@ -4,6 +4,7 @@
 #include "RpcRdoToRpcPrepDataTool.h"
 
 #include <StoreGate/WriteHandle.h>
+#include <MuonCablingData/RpcCablingData.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <xAODMuonPrepData/RpcStrip2DAuxContainer.h>
 #include <xAODMuonPrepData/RpcStripAuxContainer.h>
@@ -12,17 +13,10 @@
 
 
 namespace MuonR4{
-    RpcRdoToRpcPrepDataTool::RpcRdoToRpcPrepDataTool(const std::string& type,
-                                                     const std::string& name,
-                                                     const IInterface* parent): 
-        base_class(type, name, parent) {}
-
-
     StatusCode RpcRdoToRpcPrepDataTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_rdoKey.initialize());
         ATH_CHECK(m_cablingKey.initialize());
-        ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_writeKeyBI.initialize(m_decode2DStrips));
@@ -33,21 +27,21 @@ namespace MuonR4{
                                                const std::vector<IdentifierHash>& idVect) const {
         
         
-        SG::ReadHandle<xAOD::NRPCRDOContainer> rdoContainer{m_rdoKey, ctx};
-        ATH_CHECK(rdoContainer.isPresent());
-        
-        SG::ReadCondHandle<MuonNRPC_CablingMap> cablingMap{m_cablingKey, ctx};
-        ATH_CHECK(cablingMap.isValid());
-        
+        const xAOD::NRPCRDOContainer* rdoContainer{nullptr};
+        ATH_CHECK(SG::get(rdoContainer, m_rdoKey, ctx));
+
+        const Muon::RpcCablingMap* cablingMap{nullptr};
+        ATH_CHECK(SG::get(cablingMap, m_cablingKey, ctx));
+
         const std::unordered_set<IdentifierHash> hashToSelect(idVect.begin(), idVect.end());        
         using RdoPairs = std::array<const xAOD::NRPCRDO*, 2>;
         std::map<Identifier, RdoPairs, Muon::IdentifierByDetElSorter> sortedRdos{Muon::IdentifierByDetElSorter{m_idHelperSvc.get()}};
         for (const xAOD::NRPCRDO* rdo : *rdoContainer){
             /* cabling data conversion */
-            NrpcCablingData cabling{};
+            Muon::RpcCablingData cabling{};
             cabling.subDetector = rdo->subdetector();
-            cabling.tdcSector = rdo->tdcsector();
-            cabling.tdc = rdo->tdc();
+            cabling.boardSector = rdo->boardsector();
+            cabling.board = rdo->board();
             cabling.channelId = rdo->channel();
 
 
@@ -148,7 +142,7 @@ namespace MuonR4{
     }
     StatusCode RpcRdoToRpcPrepDataTool::decode(const EventContext& ctx,
                                                const std::vector<uint32_t>& robIds) const {
-        SG::ReadCondHandle<MuonNRPC_CablingMap> cablingMap{m_cablingKey, ctx};
+        SG::ReadCondHandle cablingMap{m_cablingKey, ctx};
         ATH_CHECK(cablingMap.isValid());
         return decode(ctx, cablingMap->getChamberHashVec(robIds, msgStream()));
     }

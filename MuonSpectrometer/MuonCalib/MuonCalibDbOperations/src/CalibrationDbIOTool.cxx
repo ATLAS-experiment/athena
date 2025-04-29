@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -68,8 +68,8 @@ namespace MuonCalib {
     }
 
     StatusCode CalibrationDbIOTool::initialize() {
-        SmartIF<RegionSelectionSvc> reg_sel_svc{service("RegionSelectionSvc")};
-        ATH_CHECK(reg_sel_svc.isValid());
+        ServiceHandle<RegionSelectionSvc> reg_sel_svc{"RegionSelectionSvc", name()};
+        ATH_CHECK(reg_sel_svc.retrieve());
         m_region_ids = reg_sel_svc->GetStationsInRegions();
         ATH_MSG_INFO(" CalibrationDbIOTool::initialize() - number of selected regions: " << m_region_ids.size());
 
@@ -187,7 +187,7 @@ namespace MuonCalib {
                     SamplePoint outpoint(in_point.x1(), in_point.x2(), 1.0);
                     outpoints.push_back(outpoint);
                 }
-                rts[*it] = new RtRelationLookUp(rt_from_points.getRtRelationLookUp(outpoints));
+                rts[*it] = rt_from_points.getRtRelationLookUp(outpoints).release();
                 if (tmax_diff > -8e8) { rts[*it]->SetTmaxDiff(tmax_diff); }
                 outpoints.clear();
                 for (auto & in_point : in_points) {

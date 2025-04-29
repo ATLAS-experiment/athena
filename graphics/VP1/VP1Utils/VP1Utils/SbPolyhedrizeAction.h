@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ---------------------------------------------------------------------//
@@ -12,6 +12,7 @@
 #ifndef SbPolyhedrizeAction_h
 #define SbPolyhedrizeAction_h 1
 #include "GeoModelKernel/GeoShapeAction.h"
+#include <memory>
 class SbPolyhedron;
 class SbPolyhedrizeAction : public GeoShapeAction
 
@@ -55,7 +56,7 @@ class SbPolyhedrizeAction : public GeoShapeAction
 
       virtual void handleGenericTrap (const GeoGenericTrap *gentrap);
       
-      const SbPolyhedron * getPolyhedron() const;
+      SbPolyhedron * getPolyhedron();
 
 
   private:
@@ -63,7 +64,7 @@ class SbPolyhedrizeAction : public GeoShapeAction
       SbPolyhedrizeAction(const SbPolyhedrizeAction &right);
       const SbPolyhedrizeAction & operator=(const SbPolyhedrizeAction &right);
 
-      SbPolyhedron *m_polyhedron;
+      std::unique_ptr<SbPolyhedron> m_polyhedron;
 
 };
 

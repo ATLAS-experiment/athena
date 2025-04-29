@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODDecayTimeFilter.h"
@@ -8,18 +8,8 @@
 #include <limits>       // std::numeric_limits
 
 
-xAODDecayTimeFilter::xAODDecayTimeFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name, pSvcLocator)
-{
-  declareProperty("LifetimeLow",m_lifetimeLow = std::numeric_limits<float>::lowest(), "proper decay time value in ps");
-  declareProperty("LifetimeHigh",m_lifetimeHigh = std::numeric_limits<float>::max(), "proper decay time value in ps");
-  declareProperty("Seedlifetime",m_seedlifetime = std::numeric_limits<float>::lowest(), "proper decay time value in ps");
-  declareProperty("Flatlifetime",m_flatlifetime = false, "proper decay time value in ps");
-  declareProperty("PDGs",m_particleID);
-}
-
-
 StatusCode xAODDecayTimeFilter::filterInitialize() {
+  CHECK(m_truthPartContKey.initialize());
   CHECK(m_rndmSvc.retrieve());
   ATH_MSG_INFO("lifetimeLow=" << m_lifetimeLow);
   ATH_MSG_INFO("lifetimeHigh=" << m_lifetimeHigh);
@@ -47,13 +37,10 @@ double xAODDecayTimeFilter::tau(const xAOD::TruthParticle* ptr) const {
 
 StatusCode xAODDecayTimeFilter::filterEvent() {
 
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   int nPassPDG = 0;
   bool passed = true;
@@ -65,11 +52,8 @@ StatusCode xAODDecayTimeFilter::filterEvent() {
     return StatusCode::SUCCESS;
   }
 
-  // Loop over all particles in the event 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
-
+  // Loop over all particles in the event
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
             for (int pdg : m_particleID){
                 if(pdg == part->pdgId()){
                     nPassPDG++;

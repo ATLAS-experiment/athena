@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -47,7 +47,10 @@ def MuonRdoToPrepDataAlgCfg(flags, name="MuonRdoToPrepDataAlg", **kwargs):
     # Make sure muon geometry is configured
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
-    
+    if flags.Muon.usePhaseIIGeoSetup:
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        result.merge(ActsGeometryContextAlgCfg(flags))
+
     kwargs.setdefault("DoSeededDecoding", flags.Trigger.doHLT )
     the_alg = CompFactory.MuonRdoToPrepDataAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
@@ -55,7 +58,7 @@ def MuonRdoToPrepDataAlgCfg(flags, name="MuonRdoToPrepDataAlg", **kwargs):
 ## This configuration function sets up everything for decoding RPC RDO to PRD conversion
 #
 # The function returns a ComponentAccumulator and the data-converting algorithm, which should be added to the right sequence by the user
-def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = None, **kwargs):
+def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
     result = ComponentAccumulator()
     #### Check whether the input collection contains an old legacy pad container. 
     #### Introduce the digit conversion bypass to convert them into the new RDO format
@@ -66,13 +69,17 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
        
         cnv_args = {}
         if RDOContainer: cnv_args.setdefault("RpcRdoContainer", RDOContainer)
-        result.merge(RpcRdoToRpcDigitCfg(flags,
-                                         RpcDigitContainer="CnvRpcDigits", **cnv_args))
         
-        result.merge(NrpcDigitToNrpcRDOCfg(flags,RpcDigitContainer="CnvRpcDigits",
-                                                 NrpcRdoKey="CnvRpcRDOs"))
-    
-        kwargs.setdefault("RdoCollection", "CnvRpcRDOs")
+        result.merge(RpcRdoToRpcDigitCfg(flags,
+                                         name="RpcRdoDigitPatchAlg" + suffix,
+                                         RpcDigitContainer="CnvRpcDigits",
+                                         **cnv_args))
+        
+        result.merge(NrpcDigitToNrpcRDOCfg(flags,
+                                           name="RpcBackConverterAlg" + suffix,
+                                           RpcDigitContainer="CnvRpcDigits",
+                                           NrpcRdoKey="CnvRpcRDOs"))
+        kwargs.setdefault("RpcRdoContainer", "CnvRpcRDOs")
     ####
     ####
     if RDOContainer: 
@@ -85,9 +92,8 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
         kwargs.setdefault("decode2DStrips", flags.GeoModel.Run >= LHCPeriod.Run4)
         if not kwargs["decode2DStrips"]:
             kwargs.setdefault("OutputContainer", "xRpcMeasurements")
-        the_tool = CompFactory.MuonR4.RpcRdoToRpcPrepDataTool(name, **kwargs)
+        the_tool = CompFactory.MuonR4.RpcRdoToRpcPrepDataTool(name="RpcPrepDataProviderTool", **kwargs)
         result.setPrivateTools(the_tool)
-
     else:
         # We need the RPC cabling to be setup
         from MuonConfig.MuonCablingConfig import RPCLegacyCablingConfigCfg
@@ -114,10 +120,18 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
         kwargs["xAODKey"] = "xRpcMeasurements" if flags.Muon.writexAODPRD or \
                                                   flags.Muon.usePhaseIIGeoSetup else ""
 
+        #### After the tree ripping the main LHC powerline, the Rpc
+        #### community has managed to introduce a 50 ns shift on top
+        #### of the already existing 12.5ns shift in the RDO -> PRD conversion
+        #### Favoloso...
+        #### corresponding elog entry: https://atlasop.cern.ch/elisa/display/512036
+        if not flags.Input.isMC and (flags.Muon.MuonTrigger or flags.Input.RunNumbers[0] >= 454434):
+            kwargs["timeShift"] = 37.5
         #Setup RPC RDO decoder to be consistent with RPC readout settings
         if flags.Muon.MuonTrigger:
             kwargs["RdoDecoderTool"] = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
         
+        kwargs.setdefault("isMC", flags.Input.isMC)
         the_tool =  CompFactory.Muon.RpcRdoToPrepDataToolMT(name="RpcPrepDataProviderTool",**kwargs)
         result.setPrivateTools(the_tool)
 
@@ -126,9 +140,10 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
 def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
     
+    suffix = name[name.find("_") :] if name.find("_") != -1 else ""
     # Conditions not needed for online
     # Get the RDO -> PRD tool
-    kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(RpcRdoToPrepDataToolCfg(flags)))
+    kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(RpcRdoToPrepDataToolCfg(flags, suffix=suffix, RDOContainer=RDOContainer)))
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_RPC_Cfg
     kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_RPC_Cfg(flags)))
@@ -136,6 +151,15 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
     
     # Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
+   
+   
+    if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToRpcPrepDataCnvAlgCfg
+        acc.merge(xRpcToRpcPrepDataCnvAlgCfg(flags, name=f"xAODRpcToPrepDataCnvAlg{suffix}"))
+        from AthenaConfiguration.Enums import LHCPeriod
+        if flags.GeoModel.Run >= LHCPeriod.Run4:
+            from xAODMuonViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
+            acc.merge(RpcMeasViewAlgCfg(flags, name=f"RpcMeasViewAlg{suffix}"))
     return acc
 
 
@@ -206,8 +230,14 @@ def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
     kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_STGC_Cfg(flags)))
     kwargs.setdefault("useROBs", False)
 
+
     ## Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
+    if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup:
+        suffix = name[name.find("_") :] if name.find("_") != -1 else ""
+        from xAODMuonViewAlgs.ViewAlgsConfig import sTgcMeasViewAlgCfg
+        acc.merge(sTgcMeasViewAlgCfg(flags, name=f"sTgcMeasViewAlg{suffix}"))
+
     return acc
 
 
@@ -243,18 +273,27 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
     acc = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
 
+    tool_kwargs = {}
+
+    # Twin tube conditions not available in COMP200.
+    tool_kwargs.setdefault('UseTwin', True)
+    if flags.IOVDb.DatabaseInstance == 'COMP200':
+        tool_kwargs['UseTwin'] = False
+
     # We need the MDT cabling to be setup
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg, MdtTwinTubeMapCondAlgCfg
     acc.merge(MDTCablingConfigCfg(flags))
-    acc.merge(MdtTwinTubeMapCondAlgCfg(flags))
+    if tool_kwargs['UseTwin']:
+        acc.merge(MdtTwinTubeMapCondAlgCfg(flags))
 
-    tool_kwargs = {}
-    tool_kwargs["xAODKey"] =  "xMdtDriftCircles" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
-    tool_kwargs["xAODTwinKey"] =  "xMdtTwinDriftCircles" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
+    writexAOD = flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup
+    tool_kwargs["xAODKey"] =  "xMdtDriftCircles" if writexAOD else ""
+    tool_kwargs["xAODTwinKey"] =  "xMdtTwinDriftCircles" if writexAOD else ""
     
     ### Disable the twin tubes in the Phase II geometry setup
     tool_kwargs["UseR4DetMgr"]  = flags.Muon.usePhaseIIGeoSetup
-    tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, DoPropagationCorrection = False))
+    tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, 
+                                                                                DoPropagationCorrection = False))
     if RDOContainer: tool_kwargs["RDOContainer"] = RDOContainer
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool", **tool_kwargs))
@@ -262,9 +301,13 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg
     kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags)))
-
+    
     # Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
+    if writexAOD:
+        suffix = name[name.find("_") :] if name.find("_") != -1 else ""
+        from xAODMuonViewAlgs.ViewAlgsConfig import MdtMeasViewAlgCfg
+        acc.merge(MdtMeasViewAlgCfg(flags, name=f"MdtMeasViewAlg{suffix}"))
     return acc
 
 
@@ -372,7 +415,6 @@ def MuonRDOtoPRDConvertorsCfg(flags):
 
     if flags.Input.isMC and not flags.Muon.usePhaseIIGeoSetup:
         acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
-
     return acc
 
 

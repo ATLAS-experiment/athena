@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_ComponentFactory.h"
+#include "SCT_ComponentFactory.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GeoModelRead/ReadGeoModel.h"
 #include <sstream>

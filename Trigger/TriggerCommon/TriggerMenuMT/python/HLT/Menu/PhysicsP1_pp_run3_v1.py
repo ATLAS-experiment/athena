@@ -64,12 +64,11 @@ def addPhysicsP1Chains(chains):
         ChainProp(name='HLT_noalg_L1MU9VFC',    l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU12FCH',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU14FCHR',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1MU14EOF',   l1SeedThresholds=['FSNOSEED'], stream=['Main','express'], groups=SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_L1MU14EOF',   l1SeedThresholds=['FSNOSEED'], stream=['Main','express'], groups=SingleMuonGroup+SupportGroup,monGroups=['detMon'] ),
         ChainProp(name='HLT_noalg_L1MU15VFCH',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU15VFCHR', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU20VFC',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
 
-        ChainProp(name='HLT_noalg_L1eTAU20L',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+TauPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1eTAU35',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+TauPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1eTAU40HM',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+TauPhaseIStreamersGroup),
 
@@ -80,7 +79,7 @@ def addPhysicsP1Chains(chains):
         ChainProp(name='HLT_noalg_L1eEM22M',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+EgammaPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1eEM24VM',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+EgammaPhaseIStreamersGroup),
 
-        ChainProp(name='HLT_noalg_L1jEM20',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+EgammaPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1jEM25',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+EgammaPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1jEM20M',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+EgammaPhaseIStreamersGroup),
 
         ChainProp(name='HLT_noalg_L1jJ30p0ETA25',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+JetPhaseIStreamersGroup),

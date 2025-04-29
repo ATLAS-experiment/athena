@@ -185,6 +185,19 @@ def InDetPreProcessingCfg(flags):
 
     return result
 
+def SiDetectorElementStatusCfg(flags, suffix="") :
+    result = ComponentAccumulator()
+    if flags.Detector.GeometryITk:
+        if flags.Detector.EnableITkPixel:
+            from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
+                ITkPixelDetectorElementStatusAlgCfg)
+            result.merge(ITkPixelDetectorElementStatusAlgCfg(flags,name=f"ITkPixelDetectorElementStatusAlg{suffix}"))
+        if flags.Detector.EnableITkStrip:
+            from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
+                ITkStripDetectorElementStatusAlgCfg)
+            result.merge(ITkStripDetectorElementStatusAlgCfg(flags,name=f"ITkStripDetectorElementStatusAlg{suffix}"))
+    return result
+
 
 # Returns CA + ClusterSplitProbContainer
 def SiSubDetTrackRecoCfg(flags, detector="",

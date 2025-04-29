@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1380,18 +1380,10 @@ globalPositionsImpl(
 Trk::RungeKuttaPropagator::RungeKuttaPropagator(const std::string& p,
                                                 const std::string& n,
                                                 const IInterface* t)
-    : AthAlgTool(p, n, t),
-      m_dlt(.000200),
-      m_helixStep(1.),
-      m_straightStep(.01),
-      m_usegradient(false) {
-
+    : AthAlgTool(p, n, t)
+{
   declareInterface<Trk::IPropagator>(this);
   declareInterface<Trk::IPatternParametersPropagator>(this);
-  declareProperty("AccuracyParameter", m_dlt);
-  declareProperty("MaxHelixStep", m_helixStep);
-  declareProperty("MaxStraightLineStep", m_straightStep);
-  declareProperty("IncludeBgradients", m_usegradient);
 }
 
 StatusCode

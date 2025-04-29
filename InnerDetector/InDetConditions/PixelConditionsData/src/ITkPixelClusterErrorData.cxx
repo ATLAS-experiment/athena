@@ -1,110 +1,89 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/ITkPixelClusterErrorData.h"
 
 #include "GaudiKernel/ISvcLocator.h"
 
-#include "Identifier/IdentifierHash.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include <fstream>
-#include <string>
 #include <stdexcept>
 
 
 namespace ITk
 {
 
-void PixelClusterErrorData::Initialize()
+void PixelClusterErrorData::initialize()
 {
   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
   if(!detStore){
     throw std::runtime_error("Could not retrieve DetectorStore");
   }
   StatusCode sc = detStore->retrieve(m_pixelID, "PixelID");
-  if(sc.isFailure()){
+  if(sc.isFailure() or (m_pixelID == nullptr)){
     throw std::runtime_error("Could not retrieve PixelID");
   }
-
+  m_constmap.resize(m_pixelID->wafer_hash_max(),std::array<float,kNParam>{});
 }
 
 
-std::pair<double,double> PixelClusterErrorData::getDelta(const Identifier* pixelId,
+std::pair<double,double> PixelClusterErrorData::getDelta(IdentifierHash idHash,
                                                          int sizePhi, double angle,
                                                          int sizeZ, double eta) const
 {
 
-  std::vector<double> value = m_constmap.at(*pixelId);
-  double period_phi = value[0];
-  double period_sinheta = value[1];
-  double delta_x_slope = value[2];
-  double delta_x_offset = value[3];
-  double delta_y_slope = value[5];
-  double delta_y_offset = value[6];
+  const std::array<float,kNParam> &value = m_constmap.at(idHash);
+  double period_phi = value[kPeriod_phi];
+  double period_sinheta = value[kPeriod_sinheta];
+  double delta_x_slope = value[kDelta_x_slope];
+  double delta_x_offset = value[kDelta_x_offset];
+  double delta_y_slope = value[kDelta_y_slope];
+  double delta_y_offset = value[kDelta_y_offset];
 
   double delta_x = delta_x_slope * fabs(angle - period_phi*(sizePhi-2)) + delta_x_offset;
   double delta_y = delta_y_slope * fabs(sinh(fabs(eta)) - period_sinheta*(sizeZ-2)) + delta_y_offset;
-
   return std::make_pair(delta_x,delta_y);
 
 }
 
 
-std::pair<double,double> PixelClusterErrorData::getDeltaError(const Identifier* pixelId) const
-{
-
-  std::vector<double> value = m_constmap.at(*pixelId);
-
-  double delta_x_error = value[4];
-  double delta_y_error = value[7];
-
-  return std::make_pair(delta_x_error,delta_y_error);
-
-}
 
 
 // SET METHODS
 
-void PixelClusterErrorData::setDeltaError(const Identifier* pixelId,
-					     double period_phi, double period_sinheta,
-					     double delta_x_slope, double delta_x_offset, double error_x,
-					     double delta_y_slope, double delta_y_offset, double error_y)
+void PixelClusterErrorData::setDeltaError(IdentifierHash idHash,
+                                          float period_phi, float period_sinheta,
+                                          float delta_x_slope, float delta_x_offset, float error_x,
+                                          float delta_y_slope, float delta_y_offset, float error_y)
 {
-
-  std::vector<double> linevalues = {period_phi, period_sinheta,
-				    delta_x_slope, delta_x_offset, error_x,
-				    delta_y_slope, delta_y_offset, error_y};
-
-  m_constmap[*pixelId] = linevalues;
-
+   setDeltaError(idHash, std::array<float, kNParam>{period_phi, period_sinheta,
+                                                    delta_x_slope, delta_x_offset, error_x,
+                                                    delta_y_slope, delta_y_offset, error_y});
 }
 
 
 // save all constants to file
 void PixelClusterErrorData::print(const std::string& file) const
 {
-
   std::ofstream outfile(file.c_str());
-
-  for(const auto & x : m_constmap){
-
-    std::vector<double> value = x.second;
-    outfile << m_pixelID->wafer_hash(x.first) << " " << value[0] << " " << value[1] << " " << value[2] << " " << value[3] << " " << value[4] << " " << value[5] << " " << value[6] << " " << value[7] << std::endl;
-
+  for(unsigned int id_hash=0; const std::array<float, kNParam> &values : m_constmap){
+     outfile << id_hash++;
+     for (double a_val : values ) {
+        outfile << " " << a_val;
+     }
   }
-
   outfile.close();
 }
 
 
 
 // Load ITk constants from file
-void PixelClusterErrorData::load(const std::string& file){
+unsigned int PixelClusterErrorData::load(const std::string& file){
 
   std::ifstream infile( file.c_str() );
-
+  unsigned int n_entries=0;
   if(infile.is_open()){
 
     //
@@ -127,11 +106,11 @@ void PixelClusterErrorData::load(const std::string& file){
       infile >> waferID_hash_int >> period_phi >> period_sinheta >> delta_x_slope >> delta_x_offset >> delta_error_x >> delta_y_slope >> delta_y_offset >> delta_error_y;
 
       IdentifierHash waferID_hash(waferID_hash_int);
-      Identifier pixelId = m_pixelID->wafer_id(waferID_hash);
-      setDeltaError(&pixelId,
+      setDeltaError(waferID_hash,
 		    period_phi, period_sinheta,
 		    delta_x_slope, delta_x_offset, delta_error_x,
 		    delta_y_slope, delta_y_offset, delta_error_y);
+      ++n_entries;
 
     }
 
@@ -140,7 +119,7 @@ void PixelClusterErrorData::load(const std::string& file){
   } else {
     throw std::runtime_error("ITkAnalogueClusteringConstantsFile \"" + file + "\" can not be read. Unable to proceed.");
   }
-
+  return n_entries;
 }
 
 } // namespace ITk

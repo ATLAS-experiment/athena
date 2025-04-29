@@ -1,0 +1,45 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  */
+namespace InDet {
+   template <class T_EmulatedDefects>
+   StatusCode EmulatedDefectsToDetectorElementStatusCondAlg<T_EmulatedDefects>::initialize() {
+      ATH_CHECK(EmulatedDefectsToDetectorElementStatusCondAlgBase::initialize());
+      ATH_CHECK(m_emulatedDefectsKey.initialize());
+      return StatusCode::SUCCESS;
+   }
+
+   template <class T_EmulatedDefects>
+   StatusCode EmulatedDefectsToDetectorElementStatusCondAlg<T_EmulatedDefects>::execute(const EventContext& ctx) const {
+      SG::WriteCondHandle<InDet::SiDetectorElementStatus> writeHandle{this->m_writeKey, ctx};
+      if (writeHandle.isValid()) {
+         return StatusCode::SUCCESS;
+      }
+      SG::ReadCondHandle<T_EmulatedDefects> emulatedDefects(m_emulatedDefectsKey, ctx);
+      ATH_CHECK(emulatedDefects.isValid());
+      writeHandle.addDependency(emulatedDefects);
+
+      const InDetDD::SiDetectorElementCollection &det_ele_coll = emulatedDefects->getDetectorElementCollection();
+
+      std::unique_ptr<T_ConcreteDetectorElementStatusType> det_el_status
+         = std::make_unique<T_ConcreteDetectorElementStatusType>(det_ele_coll);
+
+      std::vector<bool> &module_status = det_el_status->getElementStatus();
+      std::vector<ChipFlags_t>  &chip_status = det_el_status->getElementChipStatus();
+      module_status.resize( det_ele_coll.size() );
+      chip_status.resize( det_ele_coll.size() );
+
+      ATH_CHECK(module_status.size() == det_ele_coll.size() && chip_status.size() == det_ele_coll.size());
+
+      for (unsigned int id_hash = 0; id_hash< module_status.size(); ++id_hash) {
+         const InDetDD::SiDetectorElement *det_ele=det_ele_coll[id_hash];
+         assert(det_ele);
+         module_status[id_hash] = !emulatedDefects->isModuleDefect(id_hash);
+         chip_status[id_hash] = this->makeChipStatus( *det_ele, (*(emulatedDefects.cptr()))[id_hash] );
+      }
+
+      ATH_CHECK( writeHandle.record( det_el_status.release()) );
+
+      return StatusCode::SUCCESS;
+   }
+}

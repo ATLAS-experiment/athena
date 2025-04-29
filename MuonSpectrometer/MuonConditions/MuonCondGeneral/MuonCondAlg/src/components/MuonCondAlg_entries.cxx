@@ -22,7 +22,8 @@
 #include "MuonCondAlg/CscILinesCondAlg.h"
 #include "MuonCondAlg/sTgcDigitEffiCondAlg.h"
 #include "MuonCondAlg/MmDigitEffiCondAlg.h"
-#include "MuonCondAlg/sTGCAsBuiltCondAlg2.h"
+#include "MuonCondAlg/sTGCAsBuiltCondAlg.h"
+#include "MuonCondAlg/MmCTPCondDbAlg.h"
 
 DECLARE_COMPONENT(CscCondDbAlg)
 DECLARE_COMPONENT(MdtCondDbAlg)
@@ -45,4 +46,5 @@ DECLARE_COMPONENT(CscILinesCondAlg)
 DECLARE_COMPONENT(NswUncertDbAlg)
 DECLARE_COMPONENT(MmDigitEffiCondAlg)
 DECLARE_COMPONENT(sTgcDigitEffiCondAlg)
-DECLARE_COMPONENT(sTGCAsBuiltCondAlg2)
+DECLARE_COMPONENT(sTGCAsBuiltCondAlg)
+DECLARE_COMPONENT(MmCTPCondDbAlg)

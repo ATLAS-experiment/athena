@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -30,8 +30,7 @@ class TrigMuonEFInfo_p2
   TrigMuonEFInfo_p2() {}
   virtual ~TrigMuonEFInfo_p2(){}
 
-  // private:
-  unsigned short int m_roi;
+  unsigned short int m_roi{};
 
   TPObjRef m_spectrometerTrack;
   TPObjRef m_extrapolatedTrack;

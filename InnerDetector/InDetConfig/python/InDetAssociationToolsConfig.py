@@ -46,3 +46,7 @@ def ITkPRDtoTrackMapToolGangedPixelsCfg(flags, name='ITkPRDtoTrackMapToolGangedP
     kwargs.setdefault("addTRToutliers", False)
     acc.setPrivateTools(CompFactory.InDet.InDetPRDtoTrackMapToolGangedPixels(name, **kwargs))
     return acc
+
+def TrigITkPRDtoTrackMapToolGangedPixelsCfg(flags, name='ITkPRDtoTrackMapToolGangedPixels', **kwargs):
+    kwargs.setdefault("PixelClusterAmbiguitiesMapName", flags.Trigger.ITkTracking.ClusterAmbiguitiesMap)
+    return ITkPRDtoTrackMapToolGangedPixelsCfg(flags, name, **kwargs)

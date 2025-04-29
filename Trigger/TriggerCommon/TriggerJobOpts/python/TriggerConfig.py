@@ -497,7 +497,7 @@ def triggerPOOLOutputCfg(flags):
                                             createMetadata=[MetadataCategory.TriggerMenuMetaData]))
 
         alg = acc.getEventAlgo(outputStreamName(outputType))
-        # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriterMT
+        # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriter
         alg.ExtraInputs |= {
             ("xAOD::TrigDecision", str(decmaker.TrigDecisionKey)),
             ("xAOD::TrigConfKeys", metadataOutputs)} | set(xRoIBResultOutputs)
@@ -559,7 +559,7 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInp
     # Ignore the following collections in the GapFiller. List of regular expressions
     # that are fully matched against the EDM entry ("type#key").
     ignore = [
-        # GapFiller always creates Aux stores
+        # GapFiller always creates Aux stores unless it doesn't end in a ., then there are extra decorations that need declaring
         ".*AuxContainer#.*", ".*AuxInfo#.*",
     ]
     if flags.Trigger.doHLT:
@@ -573,6 +573,23 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInp
                                        OutputTools = [tool])
     alg.ExtraInputs = set(extraInputs)
     alg.ExtraOutputs = set(extraOutputs)
+    alg.ExtraOutputs.add(("xAOD::TrigConfKeys","TrigConfKeysOnline")) # declare keys which are always produced
+
+    # adding the following extra outputs, which can come out of old data but need to eliminate
+    # remaining dependencies on them (e.g. FwdAFPHLTPFlowJetMonitoringAlg)
+    # TODO: Remove dependent algs on these non-existent objects
+    alg.ExtraOutputs.add(('xAOD::JetContainer','HLT_AntiKt4EMTopoJets_subjesIS' ))
+    alg.ExtraOutputs.add(('xAOD::JetContainer','HLT_AntiKt4EMTopoJets_subjesgscIS_ftf' ))
+    alg.ExtraOutputs.add(('xAOD::JetContainer','HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf' ))
+    alg.ExtraOutputs.add(('xAOD::JetContainer','HLT_AntiKt4EMTopoJets_subjesIS_fastftag'))
+    alg.ExtraOutputs.add(('xAOD::JetContainer','HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf' ))
+    alg.ExtraOutputs.add(('xAOD::JetContainer','HLT_AntiKt4EMPFlowJets_subjesIS_ftf'))
+    alg.ExtraOutputs.add(('xAOD::JetContainer','HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf' ))
+    alg.ExtraOutputs.add(('xAOD::JetContainer','HLT_AntiKt10LCTopoJets_subjes'))
+    alg.ExtraOutputs.add(('xAOD::CaloClusterContainer','HLT_TopoCaloClustersLCFS'))
+
+
+    tool.RenounceOutputs = flags.Trigger.doHLT # if running trigger in HLT then renounce outputs to prevent dependencies on this tool/alg
 
     if len(edmSet) != 0:
         groupedByType = defaultdict( list )
@@ -583,6 +600,15 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInp
             if not any([ outputType in el[1].split() for outputType in edmSet ]):
                 continue
             if any(ign.fullmatch(el[0]) for ign in re_ignore):
+                # aux container or aux info .. need to see if we have decorations to declare
+                collType, collName = el[0].split("#")
+                if collName[-1] != ".":
+                    collType = collType.replace("AuxInfo","Info").replace("AuxContainer","Container")
+                    __log.debug("GapFiller will create EDM decorations on type '%s' of '%s'", collType, collName)
+                    collNameList = collName.split(".") # first will be the collection name with Aux. added
+                    collName = (collNameList[0] + ".").replace("Aux.",".")
+                    for decorName in collNameList[1:]:
+                        alg.ExtraOutputs.add((collType,"StoreGateSvc+"+collName+decorName))
                 continue
             collType, collName = el[0].split("#")
             if len(el) >= 4: # see if there is an alias
@@ -648,6 +674,12 @@ def triggerRunCfg( flags, menu=None ):
         acc.merge( triggerIDCCacheCreatorsCfg( flags, seqName="AthAlgSeq" ), sequenceName="HLTBeginSeq" )
         from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
         hltSeedingAcc = HLTSeedingCfg( flags )
+        
+        from AthenaConfiguration.Enums import LHCPeriod
+        if flags.GeoModel.Run > LHCPeriod.Run3:
+            from InDetConfig.TrackRecoConfig import SiDetectorElementStatusCfg
+            acc.merge(SiDetectorElementStatusCfg( flags), sequenceName="HLTBeginSeq")
+
     # TODO, once moved to newJO the algorithm can be added to hltSeedingAcc and merging will be sufficient here
     acc.merge( hltSeedingAcc,  sequenceName="HLTBeginSeq" )
 
@@ -750,6 +782,7 @@ def triggerIDCCacheCreatorsCfg(flags, seqName = None):
         from TrigInDetConfig.TrigInDetConfig import InDetIDCCacheCreatorCfg
         acc.merge( InDetIDCCacheCreatorCfg(flags), sequenceName = seqName )
 
+    if flags.Trigger.useActsTracking:
         from TrigInDetConfig.TrigInDetConfig import ActsIDCCacheCreatorCfg
         acc.merge( ActsIDCCacheCreatorCfg(flags), sequenceName = seqName )
         

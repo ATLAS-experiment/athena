@@ -18,9 +18,9 @@ class MultiRange;
  
 class IdDictGroup{ 
 public: 
-    IdDictGroup () = default; 
-    ~IdDictGroup () = default; 
+    IdDictGroup (); 
     IdDictGroup (const std::string& name); 
+    ~IdDictGroup (); 
 
     const std::string&  name();
     const std::vector<IdDictDictEntry*>& entries();
@@ -47,7 +47,7 @@ private:
     std::string                   m_name;  
     std::vector<IdDictDictEntry*> m_entries;  // just the RegionEntries
     std::vector<IdDictRegion*>    m_regions;  // regions derived from entries
-    bool m_generated_implementation{};
+    bool m_generated_implementation;
 }; 
 
 #endif

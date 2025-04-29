@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MmFastDigiTool.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 
@@ -43,16 +44,16 @@ namespace MuonR4 {
         DigiCache digitCache{};
         /// Fetch the conditions for efficiency calculations
         const Muon::DigitEffiData* efficiencyMap{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        ATH_CHECK(SG::get(efficiencyMap, m_effiDataKey, ctx));
         const NswErrorCalibData* errorCalibDB{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_uncertCalibKey, errorCalibDB));
+        ATH_CHECK(SG::get(errorCalibDB, m_uncertCalibKey, ctx));
 
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
         do {
             DeadTimeMap deadTimes{};
             for (const TimedHit& simHit : viewer) {
-                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13){
+              if (m_digitizeMuonOnly && !MC::isMuon(simHit)){
                     continue;
                 }
                 const Identifier hitId{simHit->identify()};

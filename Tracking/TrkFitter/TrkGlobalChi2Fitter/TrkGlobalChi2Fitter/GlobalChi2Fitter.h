@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALCHI2FITTER_H
 #define GLOBALCHI2FITTER_H
-//#define GXFDEBUGCODE
+
 #include "TrkDetDescrInterfaces/IMaterialEffectsOnTrackProvider.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaBaseComps/AthCheckedComponent.h"
@@ -183,7 +183,7 @@ namespace Trk {
       S_NOT_CONVERGENT,
       S_HIGH_CHI2,
       S_LOW_MOMENTUM,
-      __S_MAX_VALUE
+      S_MAX_VALUE
     };
 
     struct Cache {
@@ -204,15 +204,15 @@ namespace Trk {
       const TrackingVolume *m_caloEntrance = nullptr;
       const TrackingVolume *m_msEntrance = nullptr;
 
-      bool m_calomat, m_extmat;
+      bool m_calomat{}, m_extmat{};
       bool m_idmat = true;
-      bool m_sirecal;
+      bool m_sirecal{};
       bool m_getmaterialfromtrack;
-      bool m_reintoutl;
+      bool m_reintoutl{};
       bool m_matfilled = false;
-      bool m_acceleration;
-      bool m_fiteloss;
-      bool m_asymeloss;
+      bool m_acceleration{};
+      bool m_fiteloss{};
+      bool m_asymeloss{};
 
       std::vector<double> m_phiweight;
       std::vector<int> m_firstmeasurement;
@@ -224,12 +224,8 @@ namespace Trk {
 
       bool m_fastmat = true;
 
-      int m_lastiter;
-      int m_miniter;
-
-      #ifdef GXFDEBUGCODE
-      int m_iterations = 0;
-      #endif
+      int m_lastiter{};
+      int m_miniter{};
 
       Amg::MatrixX m_derivmat;
       Amg::SymMatrixX m_fullcovmat;
@@ -242,8 +238,8 @@ namespace Trk {
 
       FitterStatusCode m_fittercode;
 
-      std::array<unsigned int, __S_MAX_VALUE> m_fit_status {};
-      std::array<std::atomic<unsigned int>, __S_MAX_VALUE>  *m_fit_status_out = nullptr;
+      std::array<unsigned int, S_MAX_VALUE> m_fit_status {};
+      std::array<std::atomic<unsigned int>, S_MAX_VALUE>  *m_fit_status_out = nullptr;
 
        Cache(const GlobalChi2Fitter *fitter):
         m_calomat(fitter->m_calomat),
@@ -609,36 +605,236 @@ namespace Trk {
       const ParticleHypothesis
     ) const;
 
-    void fillResiduals(
+    /*
+     * @brief Fill the residual and error vector
+     *
+     * Loop over all track states and extract residual and error data. Then
+     * fill the data sorted into vectors. Since we have all data here, we
+     * already sum over all chi2 contributions. The b-vector is in this step
+     * only filled with the scattering contributions.
+     *
+     * @param[in] ctx An event context for extrapolation.
+     * @param[in] cache General cache object for asym energy loss.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in] it The current iteration, we are in.
+     * @param[in, out] b The b-vector to be filled with scattering elements.
+     * @param[in, out] bremno_maxbrempull The position of the maxbrempull in all brempull elements.
+     * @param[in, out] state_maxbrempull The actual state holding the maxbrempull.
+     */
+    void fillResidualsAndErrors(
       const EventContext& ctx,
-      Cache &,
-      GXFTrajectory &,
-      int,
-      Amg::SymMatrixX &,
-      Amg::VectorX &,
-      Amg::SymMatrixX &,
-      bool &
+      const Cache & cache,
+      GXFTrajectory & trajectory,
+      const int it,
+      Amg::VectorX & b,
+      int & bremno_maxbrempull,
+      GXFTrackState* & state_maxbrempull
+    ) const;
+
+    /*
+     * @brief Check if we already converged and set the flag.
+     *
+     * We run a few checks on convergence. Depending on the iteration we are in,
+     * different criteria are applied.
+     *
+     * @param[in] cache General cache object for the external iteration goal.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in] it The current iteration, we are in.
+     */
+    void tryToConverge(
+      const Cache & cache,
+      GXFTrajectory & trajectory,
+      const int it
+    ) const;
+
+    /*
+     * @brief Update errors with the information from the maxbremspull.
+     *
+     * Marks the state of the maxbremspull as a kink and updates the
+     * sigmaDeltaE. Then the error for the corresponding residual is updated.
+     * The [a]-matrix is modified with the new error information.
+     *
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in] bremno_maxbrempull The position of the maxbrempull in the brempull list.
+     * @param[in, out] state_maxbrempull Pointer to the state, so we can modify it.
+     * @param[in, out] a The [a]-matrix of the system.
+     *
+     * @note You might want to redo your derivatives after this step.
+     */
+    void updateSystemWithMaxBremPull(
+      GXFTrajectory & trajectory,
+      const int bremno_maxbrempull,
+      GXFTrackState* state_maxbrempull,
+      Amg::SymMatrixX & a
     ) const;
 
     void fillDerivatives(
-      GXFTrajectory & traj,
-      bool onlybrem = false
+      GXFTrajectory & traj
     ) const;
+
+    /*
+     * @brief Find and set first and last measurement for each fit parameter.
+     *
+     * Find the first and last measurement relevant for each parameter. The
+     * perigee parameter use all real measurements. For the scattering and
+     * brems parameters, all measurements after/before encountering that
+     * surface are skipped, depending if we are still looking at upstream
+     * states or not.
+     *
+     * @param[in, out] cache General cache object to fill with first/last.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     */
+    void fillFirstLastMeasurement(
+      Cache & cache,
+      GXFTrajectory & trajectory
+    ) const;
+
+    /*
+     * @brief Fill the b-vector with the residual information from the measurements.
+     *
+     * Loop over all fit parameters. For each, loop over all relevant,
+     * measurements and add the information to the b-vector. For each fit
+     * parameter k we get:
+     *   b[k] = sum( res / error * derivative )
+     * For qOverP and brems we get also a contribution the brems elements in
+     * the b-vector.
+     *
+     * @param[out] cache General cache object for first/last measurements.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] b The b-vector of the system.
+     */
+    void fillBfromMeasurements(
+      const Cache & cache,
+      GXFTrajectory & trajectory,
+      Amg::VectorX & b
+    ) const;
+
+    /*
+     * @brief Fill the [a]-matrix with the derivative information from the measurements.
+     *
+     * Loop over all fit parameters in two dimensions k and l. For each, loop
+     * over all relevant, measurements and add the information to the
+     * [a]-matrix. We get:
+     *   [a]_kl = sum( derivative_k * derivative_l )
+     *
+     * @param[out] cache General cache object for first/last measurements.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] a The [a]-matrix of the system.
+     */
+    void fillAfromMeasurements(
+      const Cache & cache,
+      GXFTrajectory & trajectory,
+      Amg::SymMatrixX & a
+    ) const;
+
+    /*
+     * @brief Fill the [a]-matrix with the derivative information from the scatterers.
+     *
+     * Loop over non-perigee (except qOverP) parameters in two dimensions k and
+     * l. For each, loop over all relevant, derivative entries and add the
+     * information to the [a]-matrix. We get an update of the diagonal:
+     *   [a]_kk += 1 / scatSigma^2
+     * and an update of the general elements:
+     *   [a]_kl += sum( derivative_k * derivative_l )
+     *
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] a The [a]-matrix of the system.
+     */
+    void fillAfromScatterers(
+      GXFTrajectory & trajectory,
+      Amg::SymMatrixX & a
+    ) const;
+
+    /*
+     * @brief Update [a]-matrix with material effects by weighting some elements.
+     *
+     * Applies weights to the diagonal material elements in the [a]-matrix.
+     * The weights depend on the progress of the iteration and can vary on the
+     * absolute iteration number as well as on the convergence of the chi2.
+     *
+     * @param[in, out] cache General cache object for the phi weights.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] a The [a]-matrix of the system.
+     * @param[in] doDeriv If we redid derivatives in this iteration
+     * @param[in] it The current iteration, we are in.
+     * @param[in] oldRedChi2 Old reduced chi2 for convergence analysis.
+     * @param[in] newdRedChi2 New reduced chi2 for convergence analysis.
+     *
+     * @return a bool if any weights have been applied.
+     *
+     * @note prefit == 1 does not do a lot, maybe changes weightChanged. Could be wrong behaviour?
+     */
+    bool tryToWeightAfromMaterial(
+      Cache & cache,
+      GXFTrajectory & trajectory,
+      Amg::SymMatrixX & a,
+      const bool doDeriv,
+      const int it,
+      const double oldRedChi2,
+      const double newRedChi2
+    ) const;
+
+    /*
+     * @brief Effectively removes the phi weights from the [a]-matrix.
+     *
+     * Removes the phi weights added by tryToWeightAfromMaterial() from the
+     * diagonal material elements in the [a]-matrix. Then sets the stored
+     * weights to 1.
+     *
+     * @param[in, out] cache General cache object for the phi weights.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] a The [a]-matrix of the system.
+     */
+    void compensatePhiWeights(
+      Cache & cache,
+      GXFTrajectory & trajectory,
+      Amg::SymMatrixX & a
+    ) const;
+
+    /*
+     * @brief Performs the main work of the GX2F iteration.
+     *
+     * The main parts are:
+     * - calculate parameters
+     * - calculate residuals
+     * - (opt) redo derivatives
+     * - fill b-vector
+     * - (opt) update [a]-matrix
+     * - (opt) update [lu]-matrix
+     * - check for convergence
+     *
+     * @param[in] ctx An event context for extrapolation.
+     * @param[in, out] cache General cache object for.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in] it The current iteration, we are in.
+     * @param[in, out] a The [a]-matrix of the system.
+     * @param[in, out] b The b-vector of the system.
+     * @param[in, out] lu The [lu]-matrix of the system.
+     * @param[in, out] doDeriv Toggle if we need to do now and return if we need to do again.
+     *
+     * @return a status code with success or a detailed error.
+     */
 
     FitterStatusCode runIteration(
       const EventContext& ctx,
-      Cache &,
-      GXFTrajectory &,
-      int,
-      Amg::SymMatrixX &,
-      Amg::VectorX &,
-      Amg::SymMatrixX &,
-      bool &
+      Cache & cache,
+      GXFTrajectory & trajectory,
+      const int it,
+      Amg::SymMatrixX & a,
+      Amg::VectorX & b,
+      Amg::SymMatrixX & lu,
+      bool & doDeriv
     ) const;
 
+    /**
+     * @brief Method to update peregee parameters, scattering angles, and brems.
+     *
+     * Tries to solve the system [A] * deltaParameters = b and then update in
+     * the trajectory all parameters used for the fit. Returns also a status.
+     */
     FitterStatusCode updateFitParameters(
       GXFTrajectory &,
-      Amg::VectorX &,
+      const Amg::VectorX &,
       const Amg::SymMatrixX &
     ) const;
 
@@ -904,6 +1100,35 @@ namespace Trk {
     ToolHandle<IBoundaryCheckTool> m_boundaryCheckTool {this, "BoundaryCheckTool", "", "Boundary checking tool for detector sensitivities" };
 
     void throwFailedToGetTrackingGeomtry() const;
+
+    /*
+     * @brief Check if the entrance to the calo is valid. If not, attempt to fix it.
+     *
+     * Ensure that the cache contains a valid tracking geometry that we can
+     * use. If it is not set yet, set it as InDet::Containers::InnerDetector.
+     *
+     * @param[in] ctx A context for creating the geometry.
+     * @param[in, out] cache The GX2F cache objects.
+     */
+    bool ensureValidEntranceCalo(
+      const EventContext& ctx,
+      Cache& cache
+    ) const;
+
+    /*
+     * @brief Check if the entrance to the Muon Spectrometer is valid. If not, attempt to fix it.
+     *
+     * Ensure that the cache contains a valid tracking geometry that we can
+     * use. If it is not set yet, set it as MuonSpectrometerEntrance.
+     *
+     * @param[in] ctx A context for creating the geometry.
+     * @param[in, out] cache The GX2F cache objects.
+     */
+    bool ensureValidEntranceMuonSpectrometer(
+      const EventContext& ctx,
+      Cache& cache
+    ) const;
+
     const TrackingGeometry* trackingGeometry(Cache& cache,
                                              const EventContext& ctx) const
     {
@@ -991,7 +1216,7 @@ namespace Trk {
      * these members as thread_safe for the ATLAS G++ plugin.
      */
     //mutable std::mutex m_fit_status_lock ATLAS_THREAD_SAFE;
-    mutable std::array<std::atomic<unsigned int>, __S_MAX_VALUE> m_fit_status ATLAS_THREAD_SAFE = {};
+    mutable std::array<std::atomic<unsigned int>, S_MAX_VALUE> m_fit_status ATLAS_THREAD_SAFE = {};
   };
 }
 #endif

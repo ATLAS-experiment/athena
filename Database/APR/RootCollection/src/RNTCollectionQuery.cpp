@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RNTCollectionQuery.h"
@@ -15,26 +15,21 @@
 
 #include "POOLCore/Exception.h"
 
-#include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
-#include "CoralBase/MessageStream.h"
 
 #include <ROOT/RNTuple.hxx>
 #include <ROOT/RNTupleModel.hxx>
 
-//#include <iostream>
-//using namespace std;
 using namespace pool::RootCollection;
-// Import classes from experimental namespace for the time being
-using RNTupleModel = ROOT::Experimental::RNTupleModel;
 
 
 RNTCollectionQuery::RNTCollectionQuery( const pool::ICollectionDescription& description, 
-                                          RNTupleReader *reader ) :
-      m_description( description ),
-      m_reader( reader ),
-      m_cursor( 0 ),
-      m_skipEventRef( false )
+                                        ROOT::RNTupleReader *reader ) :
+   AthMessaging(std::string("RNTCollectionQuery[") + description.name() + "]"),
+   m_description( description ),
+   m_reader( reader ),
+   m_cursor( 0 ),
+   m_skipEventRef( false )
 {
 }
 
@@ -103,6 +98,10 @@ void RNTCollectionQuery::setCondition( const std::string& whereClause,
               coral::AttributeList* /* attributeBindData */,
               pool::TokenList* /*tokenBindData */ )
 {
+   if( !whereClause.empty() and whereClause != "*" ) {
+      ATH_MSG_WARNING("Selective queries not supported - will return all rows. Attempted query: "
+                      << whereClause);
+   }
    m_whereClause += whereClause;
 }
 
@@ -122,15 +121,7 @@ pool::ICollectionCursor&  RNTCollectionQuery::execute()
 {
    if( !m_skipEventRef && m_description.hasEventReferenceColumn() )  {
       addToTokenOutputList( m_description.eventReferenceColumnName() );
-   }
-  
-   if( m_whereClause.size() ) {
-        std::string errorMsg = "Queries not supported yet";
-        throw pool::Exception( errorMsg,
-                               "RNTCollectionQuery::execute", 
-                               "RootCollection");
-   }
-  
+   } 
   // Create collection row buffer to contain query output.
   pool::CollectionRowBuffer collectionRowBuffer( m_outputTokenList, m_outputAttributeList );
 
@@ -153,7 +144,7 @@ void RNTCollectionQuery::addToTokenOutputList( const std::string& columnName )
       }
       m_outputTokenList.extend( columnName );
       m_selectedColumnNames.insert( columnName );
-   }   
+   }
 }
 
 

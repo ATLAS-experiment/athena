@@ -22,7 +22,7 @@ namespace FlavorTagDiscriminants {
   StatusCode BTagAugmenterTool::initialize() {
     m_aug.reset(
       new BTagJetAugmenter(m_trackAssociator,
-                           flipTagConfigFromString(m_flipTagConfig),
+                           FlavorTagInference::flipTagConfigFromString(m_flipTagConfig),
                            m_useIpxd));
     return StatusCode::SUCCESS;
   }

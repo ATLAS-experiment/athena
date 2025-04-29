@@ -22,9 +22,8 @@ namespace {}
 DerivationFramework::GainDecorator::GainDecorator(const std::string& t,
                                                   const std::string& n,
                                                   const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("decoration_pattern",
                   m_decorationPattern = "{info}_Lr{layer}_{gain}G");
   declareProperty("gain_names",

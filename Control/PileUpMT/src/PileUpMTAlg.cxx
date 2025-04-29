@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PileUpMT includes
@@ -11,21 +11,13 @@
 #include <fmt/ostream.h>
 #include <unistd.h>
 
-#include <array>
 #include <boost/core/demangle.hpp>
 #include <chrono>
 #include <range/v3/all.hpp>
-#include <tuple>
-
-#include "AthenaKernel/RNGWrapper.h"
-#include "CLHEP/Random/RandPoisson.h"
-#include "CLHEP/Random/RandomEngine.h"
-#include "EventInfo/EventID.h"
 #include "EventInfo/EventInfo.h"
-#include "EventInfo/PileUpEventInfo.h"
+
 #include "PileUpTools/PileUpHashHelper.h"
 #include "PileUpTools/PileUpMisc.h"
-#include "src/OnDemandMinbiasSvc.h"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventInfoAuxContainer.h"
@@ -253,7 +245,12 @@ StatusCode PileUpMTAlg::execute() {
         rv::closed_iota(m_earliestDeltaBC.value(), m_latestDeltaBC.value()) |
         rv::transform(
             [this](int bc) { return int(m_beamInt->normFactor(bc)); }) |
-        rv::group_by(std::equal_to{}) | rv::transform([](const auto& rng) {
+#if RANGE_V3_VERSION >= 1200
+        rv::chunk_by(std::equal_to{}) |
+#else
+        rv::group_by(std::equal_to{}) |
+#endif
+        rv::transform([](const auto& rng) {
           return fmt::format("{}{}", rng.size(), rng[0] == 0 ? 'E' : 'F');
         }) |
         ranges::to<std::vector<std::string>>;

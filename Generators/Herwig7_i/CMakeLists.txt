@@ -78,12 +78,14 @@ atlas_add_library ( powhegHerwigBB4L
   BB4LHerwig/bb4lFullShowerVeto.h
   BB4LHerwig/herwig7_interface.f
   BB4LHerwig/herwig7_interface.h
-  BB4LHerwig/he7dechardness.f
   BB4LHerwig/herwigsettings.inc
+  BB4LHerwig/powhegAnalysis.cc
+  BB4LHerwig/powhegAnalysis.h
   NO_PUBLIC_HEADERS
   SHARED
   INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/include ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified
   LINK_LIBRARIES ${THEPEG_LIBRARIES} ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
+
 
 # Set up some environment variables for Herwig.
 set( Herwig7Environment_DIR ${CMAKE_CURRENT_SOURCE_DIR}

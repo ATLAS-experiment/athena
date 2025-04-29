@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PhotonVertexSelection_PhotonVertexSelectionTool_h
@@ -8,7 +8,9 @@
 // Framework includes
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/CurrentContext.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 
 // EDM includes
 #include "xAODEventInfo/EventInfo.h"
@@ -49,8 +51,10 @@ namespace CP {
     std::string m_derivationPrefix;
 
     /// Container declarations
-    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
-    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer {this, "VertexContainer", "PrimaryVertices", "Vertex container name"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{
+        this, "EventInfoContName", "EventInfo", "event info key"};
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer{
+        this, "VertexContainer", "PrimaryVertices", "Vertex container name"};
 
     /// TMVA
     /// ==================================================
@@ -67,47 +71,61 @@ namespace CP {
     // ==================================================
     // Name of the ONNX model file to load
     std::string m_ONNXModelFilePath1; //converted case
-    std::string m_ONNXModelFilePath2; //unconverted case 
+    std::string m_ONNXModelFilePath2; //unconverted case
 
     // declare node vars
     // converted
     std::vector<int64_t> m_input_node_dims1, m_output_node_dims1;
-    std::vector<const char*> m_input_node_names1, m_output_node_names1;   
+    std::vector<const char*> m_input_node_names1, m_output_node_names1;
     // unconverted
     std::vector<int64_t> m_input_node_dims2, m_output_node_dims2;
-    std::vector<const char*> m_input_node_names2, m_output_node_names2;   
+    std::vector<const char*> m_input_node_names2, m_output_node_names2;
 
     // The ONNX session handlers
-    std::shared_ptr<Ort::Session> m_sessionHandle1; //converted case     
-    std::shared_ptr<Ort::Session> m_sessionHandle2; //unconverted case     
+    std::shared_ptr<Ort::Session> m_sessionHandle1; //converted case
+    std::shared_ptr<Ort::Session> m_sessionHandle2; //unconverted case
     // The ONNX memory allocators, for looping
-    Ort::AllocatorWithDefaultOptions m_allocator1; //converted case     
-    Ort::AllocatorWithDefaultOptions m_allocator2; //unconverted case  
+    Ort::AllocatorWithDefaultOptions m_allocator1; //converted case
+    Ort::AllocatorWithDefaultOptions m_allocator2; //unconverted case
 
     // ONNX Methods
     // create ONNX session and return both the allocator and session handler from user-defined onnx env and model
-    std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions> setONNXSession(Ort::Env& env, const std::string& modelFilePath);
-    // get the input nodes info from the onnx model file (using session and allocator)
-    std::tuple<std::vector<int64_t>, std::vector<const char*>> getInputNodes( const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator);
-    // get the output nodes info from the onnx model file (using session and allocator)
-    std::tuple<std::vector<int64_t>, std::vector<const char*>> getOutputNodes(const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator);
-    // wrapper for getting the NN score from onnx model file (passed as onnx session)
-    float getScore(int nVars, const std::vector<std::vector<float>>& input_data, const std::shared_ptr<Ort::Session> sessionHandle, std::vector<int64_t> input_node_dims, std::vector<const char*> input_node_names, std::vector<const char*> output_node_names) const;
+    std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions>
+    setONNXSession(Ort::Env& env, const std::string& modelFilePath);
+    // get the input nodes info from the onnx model file (using session and
+    // allocator)
+    std::tuple<std::vector<int64_t>, std::vector<const char*>> getInputNodes(
+        const std::shared_ptr<Ort::Session>& sessionHandle,
+        Ort::AllocatorWithDefaultOptions& allocator);
+    // get the output nodes info from the onnx model file (using session and
+    // allocator)
+    std::tuple<std::vector<int64_t>, std::vector<const char*>> getOutputNodes(
+        const std::shared_ptr<Ort::Session>& sessionHandle,
+        Ort::AllocatorWithDefaultOptions& allocator);
+    // wrapper for getting the NN score from onnx model file (passed as onnx
+    // session)
+    float getScore(int nVars, const std::vector<std::vector<float>>& input_data,
+                   const std::shared_ptr<Ort::Session>& sessionHandle,
+                   std::vector<int64_t> input_node_dims,
+                   std::vector<const char*> input_node_names,
+                   std::vector<const char*> output_node_names) const;
     // ==================================================
 
-  private:
+   private:
     /// Get combined 4-vector of photon container
     TLorentzVector getEgammaVector(const xAOD::EgammaContainer *egammas, FailType& failType) const;
 
     /// Sort MLP results
     static bool sortMLP(const std::pair<const xAOD::Vertex*, float> &a, const std::pair<const xAOD::Vertex*, float> &b);
 
-
     /// Given a list of photons, return the MLPs of all vertices in the event
-    StatusCode getVertexImp(const xAOD::EgammaContainer &egammas, const xAOD::Vertex* &vertex, bool ignoreConv, bool noDecorate, std::vector<std::pair<const xAOD::Vertex*, float> >&, yyVtxType& , FailType& ) const;
+    StatusCode getVertexImp(const xAOD::EgammaContainer& egammas,
+                            const xAOD::Vertex*& vertex, bool ignoreConv,
+                            bool noDecorate,
+                            std::vector<std::pair<const xAOD::Vertex*, float>>&,
+                            yyVtxType&, FailType&) const;
 
-
-  public:
+   public:
     PhotonVertexSelectionTool(const std::string &name);
     virtual ~PhotonVertexSelectionTool();
 
@@ -129,7 +147,12 @@ namespace CP {
     StatusCode getVertex(const xAOD::EgammaContainer &egammas, const xAOD::Vertex* &vertex, bool ignoreConv = false) const;
 
     /// Given a list of photons, return the MLPs of all vertices in the event
-    std::vector<std::pair<const xAOD::Vertex*, float> > getVertex(const xAOD::EgammaContainer &egammas, bool ignoreConv = false, bool noDecorate = false, yyVtxType* vtxCase = nullptr, FailType* failType = nullptr) const;
+    std::vector<std::pair<const xAOD::Vertex*, float>> getVertex(
+        const xAOD::EgammaContainer& egammas,
+        bool ignoreConv = false,
+        bool noDecorate = false,
+        yyVtxType* vtxCase = nullptr,
+        FailType* failType = nullptr) const;
 
     /// Return the last case treated:
     //  Deprecated no longer use this function
@@ -139,6 +162,15 @@ namespace CP {
     const xAOD::Vertex* getPrimaryVertexFromConv(const xAOD::PhotonContainer *photons) const;
 
     /// @}
+
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_deltaPhiKey
+      { this, "DeltaPhiKey", m_vertexContainer, "deltaPhi" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_deltaZKey
+      { this, "DeltaZKey", m_vertexContainer, "deltaZ" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_sumPt2Key
+      { this, "SumPt2Key", m_vertexContainer, "sumPt2" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_sumPtKey
+      { this, "SumPtKey", m_vertexContainer, "sumPt" };
 
   }; // class PhotonVertexSelectionTool
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -227,7 +227,7 @@ void IVP13DChannelWidget::restoreFromState(QByteArray ba)
 
 	QByteArray basestate;
 	state >> basestate;
-	IVP1ChannelWidget::restoreFromState(basestate);
+	IVP1ChannelWidget::restoreFromState(std::move(basestate));
 	// ===> Decode the state info:
 
 	//Transparency types:

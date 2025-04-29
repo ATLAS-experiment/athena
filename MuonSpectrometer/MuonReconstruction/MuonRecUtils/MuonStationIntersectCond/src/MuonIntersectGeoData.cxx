@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStationIntersectCond/MuonIntersectGeoData.h"
@@ -75,6 +75,8 @@ namespace Muon {
         int chEtaLeft = stEta - 1;
         int chEtaRight = stEta + 1;
 
+        
+
         // chamber with smallest eta
         if (chEtaLeft < stEtaMin) chEtaLeft = -999;
 
@@ -110,10 +112,13 @@ namespace Muon {
             if (std::abs(chEtaLeft) == 8) chEtaLeft = -999;
             if (std::abs(chEtaRight) == 8) chEtaRight = -999;
         }
-        /// No CSC chambers -> No Mdt EI Station
+        
         if ((chIndex == Muon::MuonStationIndex::EIS || chIndex == Muon::MuonStationIndex::EIL) && !m_idHelperSvc->hasCSC()) {
-            return chIds;
+            //Chambers can only be -5, -4, 4, 5
+            if( std::abs(chEtaLeft) != 5 && std::abs(chEtaLeft) != 4 ) chEtaLeft = -999;
+            if( std::abs(chEtaRight) != 5 && std::abs(chEtaRight) != 4 ) chEtaRight = -999;
         }
+
         if (chEtaLeft != -999 &&
             m_idHelperSvc->mdtIdHelper().validElement(m_idHelperSvc->mdtIdHelper().elementID(stName, chEtaLeft, stPhi)))
             chIds.push_back(m_idHelperSvc->mdtIdHelper().elementID(stName, chEtaLeft, stPhi));

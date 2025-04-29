@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MdtCalibDbAlg.h"
@@ -14,7 +14,7 @@
 #include "CoralBase/AttributeListSpecification.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MdtCalibData/BFieldCorFunc.h"
-#include "MdtCalibData/CalibFunc.h"
+#include "MdtCalibData/RtRelationLookUp.h"
 #include "MdtCalibData/IRtRelation.h"
 #include "MdtCalibData/IRtResolution.h"
 #include "MdtCalibData/MdtFullCalibData.h"
@@ -114,7 +114,9 @@ StatusCode MdtCalibDbAlg::initialize() {
         ATH_MSG_FATAL("Failed to retrieve conditions object "<<m_readKeyDCS.fullKey());
         return StatusCode::FAILURE;
     }
-    writeHandle.addDependency(readHandle);
+    if (readHandle->hasDCS()) {
+        writeHandle.addDependency(readHandle);
+    }
     return StatusCode::SUCCESS;
 }
 StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
@@ -217,7 +219,7 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
         // for rtRel, resoRel, and MdtRtRelation
 
         // Loop over RT regions and store the default RT in each
-        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(rtRel, resoRel, 0.);
+        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(rtRel, resoRel);
         
         for(auto itr = idHelper.detectorElement_begin();
                  itr!= idHelper.detectorElement_end();++itr){
@@ -485,7 +487,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
             tr_point.set_error(1.0);
             if (tr_point.x2() < -99) {  // if radius is < -99 then treat time as ML Tmax difference
                 multilayer_tmax_diff = tr_point.x1();
-            } else if (k == 0 || (tr_points[k - 1].x1() < tr_point.x1() && tr_points[k - 1].x2() < tr_point.x2())) {
+            } else if (tr_points.empty() || (tr_points.back().x1() < tr_point.x1() && tr_points.back().x2() < tr_point.x2())) {
                 tr_points.push_back(tr_point);
                 ts_points.push_back(ts_point);
             }
@@ -521,7 +523,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         }
 
         // Create RT function from tr_points and load RT and resolution functions
-        std::unique_ptr<MuonCalib::IRtRelation> rt = std::make_unique<MuonCalib::RtRelationLookUp>(MuonCalib::RtFromPoints::getRtRelationLookUp(tr_points));
+        std::unique_ptr<MuonCalib::IRtRelation> rt = MuonCalib::RtFromPoints::getRtRelationLookUp(tr_points);
         if (!reso || !rt) { continue; }
 
         if (rt->par(1) == 0.) {
@@ -533,7 +535,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         // Save ML difference if it is available
         if (multilayer_tmax_diff > -8e8) { rt->SetTmaxDiff(multilayer_tmax_diff); }
         // Store RT and resolution functions for this region
-        RtRelationPtr rt_rel = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso), 0.);
+        RtRelationPtr rt_rel = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso));
 
         if (!writeCdo.storeData(athenaId ,rt_rel, msgStream())) return StatusCode::FAILURE;
         if (!(m_create_b_field_function || m_createSlewingFunction)) continue;
@@ -596,9 +598,6 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
 // build the transient structure and load some defaults for T0s
 StatusCode MdtCalibDbAlg::defaultT0s(MuonCalib::MdtCalibDataContainer& writeCdo) const {
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
-    
-    // Inverse of wire propagation speed
-    const float inversePropSpeed = 1. / (Gaudi::Units::c_light * m_prop_beta);
 
     // loop over modules (MDT chambers) and create an MdtTubeContainer for each
     MdtIdHelper::const_id_iterator it = id_helper.module_begin();
@@ -629,11 +628,10 @@ StatusCode MdtCalibDbAlg::defaultT0s(MuonCalib::MdtCalibDataContainer& writeCdo)
         for (unsigned int ml = 1; ml <= nml; ++ml) {
             for (unsigned int l = 1; l <= nlayers; ++l) {
                 for (unsigned int t = 1; t <= ntubes; ++t) {
-                    MuonCalib::MdtTubeCalibContainer::SingleTubeCalib data;
+                    auto data = std::make_unique<MuonCalib::MdtTubeCalibContainer::SingleTubeCalib>();
                     const Identifier tubeId = id_helper.channelID(*it, ml, l, t);
-                    data.t0 = t0;
-                    data.adcCal = 1.;
-                    data.inversePropSpeed = inversePropSpeed;
+                    data->t0 = t0;
+                    data->adcCal = 1.;                   
                     tubes->setCalib(std::move(data), tubeId, msgStream());
                 }
             }
@@ -800,6 +798,8 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx, MuonCalib::MdtCalibD
 
     // Inverse of wire propagation speed
     const float inversePropSpeed = 1. / (Gaudi::Units::c_light * m_prop_beta);
+    writeCdo.setInversePropSpeed(inversePropSpeed);
+
 
     // unpack the strings in the collection and update the
     // MdtTubeCalibContainers in TDS
@@ -858,11 +858,10 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx, MuonCalib::MdtCalibD
             
             const int statusCode = tubeChannel["status"];
             const double meanAdc = tubeChannel["meanAdc"];
-            MuonCalib::MdtTubeCalibContainer::SingleTubeCalib datatube; 
-            datatube.statusCode = statusCode;
-            datatube.inversePropSpeed = inversePropSpeed;
-            datatube.t0 = tzero;
-            datatube.adcCal = meanAdc;
+            auto datatube = std::make_unique<MuonCalib::MdtTubeCalibContainer::SingleTubeCalib>(); 
+            datatube->statusCode = statusCode;
+            datatube->t0 = tzero;
+            datatube->adcCal = meanAdc;
             const Identifier tubeId = idHelper.channelID(chId, ml, l, t);
             tubes->setCalib(std::move(datatube), tubeId, msgStream());
         }

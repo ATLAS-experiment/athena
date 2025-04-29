@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_LOCRECCORR_h
@@ -119,7 +119,6 @@ private:
 public:
 	StatusCode initialize();
 	StatusCode execute();
-	StatusCode finalize();
 
 private:
 	bool UpdateGeometryAtlas();
@@ -132,8 +131,7 @@ private:
 	HepGeom::Transform3D UserTransform3DInStation(eRPotName eRPName);
 	HepGeom::Point3D<double> Point3DInDetector(eRPotName eRPName);
 
-	StatusCode AddCOOLFolderCallback(const std::string& szFolder);
-	StatusCode COOLUpdate(IOVSVC_CALLBACK_ARGS_P(/*I*/, keys));
+	StatusCode COOLUpdate();
 };
 
 #endif	//ALFA_LOCRECCORR_h

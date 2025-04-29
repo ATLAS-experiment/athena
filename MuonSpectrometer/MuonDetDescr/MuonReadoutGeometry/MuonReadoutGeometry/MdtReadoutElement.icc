@@ -128,7 +128,7 @@ namespace MuonGM {
         CHECK_IDVALID(id);
         return isAtReadoutSide(GlobalHitPosition, m_idHelper.tubeLayer(id), m_idHelper.tube(id));       
     }
-    inline const Trk::SaggedLineSurface& MdtReadoutElement::surface(const Identifier& id) const { 
+    inline const Trk::StraightLineSurface& MdtReadoutElement::surface(const Identifier& id) const { 
         CHECK_IDVALID(id);
         return surface(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
     }

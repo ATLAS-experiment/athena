@@ -39,6 +39,9 @@ namespace MuonCalib {
     double RtSpline::tBinWidth() const {
         return m_sp3->GetDelta();
     }
+    unsigned RtSpline::nDoF() const {
+        return m_sp3->GetNp();
+    }
     double RtSpline::radius(double t) const {
         // check for t_min and t_max
         if (t > m_sp3->GetXmax()) return m_sp3->Eval(m_sp3->GetXmax());

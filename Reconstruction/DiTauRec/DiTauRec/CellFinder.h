@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_CELLFINDER_H
 #define DITAUREC_CELLFINDER_H
 
 #include "DiTauToolBase.h"
+
+#include "AsgTools/PropertyWrapper.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -26,9 +28,8 @@ class CellFinder : public DiTauToolBase {
 
 
  private:
-  std::string m_ClusterContainerName;
-  std::string m_CellContainerName;
-  float m_Rsubjet;
+
+  Gaudi::Property<float> m_Rsubjet{this, "Rsubjet", 0.2}; 
 
 };
 

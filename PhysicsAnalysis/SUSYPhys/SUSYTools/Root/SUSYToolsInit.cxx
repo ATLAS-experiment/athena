@@ -4,6 +4,10 @@
 
 #include "SUSYTools/SUSYObjDef_xAOD.h"
 
+// For making the systematics list and looping through it
+#include "PATInterfaces/SystematicsUtil.h"
+#include "PATInterfaces/SystematicRegistry.h"
+
 // For the data types to be used in configuring tools
 #include "PATCore/PATCoreEnums.h"
 
@@ -155,11 +159,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // Initialize LRT systematics tool
-  if (!m_LRTuncTool.isUserConfigured())
+  if (!m_LRTuncTool.isUserConfigured() && !isData())
   {
     ATH_MSG_INFO("Initializing LRT uncertainty tool");
     m_LRTuncTool.setTypeAndName("InDet::InclusiveTrackFilterTool/LRTUncTool");    
     ATH_CHECK( m_LRTuncTool.setProperty("Seed", 1) );
+    if (m_isRun3) {
+      if (m_mcCampaign == "mc23d" || m_mcCampaign == "mc23e")
+        ATH_MSG_WARNING("Please note that current ID recommendations only cover mc23a and not (yet) mc23d/e!");
+      ATH_CHECK( m_LRTuncTool.setProperty("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23a.root") );
+    }
+    else
+      ATH_CHECK( m_LRTuncTool.setProperty("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_24.0_2023-v00/LargeD0TrackingRecommendations_20230824.root") );
     ATH_CHECK(m_LRTuncTool.retrieve());
   } else {
     ATH_MSG_INFO("Using user-configured LRT uncertainty tool");
@@ -364,7 +375,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ATH_MSG_INFO("Set up Jet Uncertainty tool...");
 
     // if not set, derive the MCType from the simulation type and MC campaign
-    if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? "MC23" : (isAtlfast() ? "AF3" : "MC20");
+    if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? (isAtlfast() ? "MC23AF3" : "MC23") : (isAtlfast() ? "AF3" : "MC20");
 
     if (!m_jetUncertaintiesTool.isUserConfigured()) {
       std::string jetdef("AntiKt4" + xAOD::JetInput::typeName(xAOD::JetInput::Type(m_jetInputType)));
@@ -374,10 +385,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         jetdef = "AntiKt4EMPFlow";
       }
       toolName = "JetUncertaintiesTool_" + jetdef;
-
-      if (m_isRun3 && isAtlfast()) {
-          ATH_MSG_WARNING("Jet Uncertaintes pre-recommendations for Run3 only exist for full sim");
-      }
 
       m_jetUncertaintiesTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
 
@@ -413,6 +420,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("JetDefinition", jetdef) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("MCType", m_jetUncertaintiesMCType) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
+      ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("PseudoDataJERsmearingMode", true) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_jetUncertaintiesConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("OutputLevel", this->msg().level()) );
@@ -424,16 +432,21 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   }
 
   if (m_slices["fjet"]) {
-    ATH_MSG_INFO("Won't initialise jet uncertainty tool for fat jets until we get rec for UFO");
-    // Won't initialise jet uncertainty tool for fat jets until we get rec for UFO
-    /*
+
+    // JetUncertaintiesTool handles JES, JER and JMS uncertainties for large-R jets
     if (!m_fatjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_fatJetUncConfig.empty()) {
+
+      ATH_MSG_INFO("Set up Large-R Jet Uncertainty tool...");
+
+      // Print warning about missing large-R jets uncertainties for FastSim in mc23
+      if (m_isRun3 && isAtlfast())
+        ATH_MSG_WARNING("Uncertainties for large-R jets in mc23 and fast simulation not yet available; be aware uncertainties might be not complete!");
 
       toolName = "JetUncertaintiesTool_" + m_fatJets;
       m_fatjetUncertaintiesTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
 
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("JetDefinition", fatjetcoll) );
-      ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("MCType", "MC16") );
+      ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("MCType", m_jetUncertaintiesMCType) );
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("IsData", isData()) );
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("ConfigFile", m_fatJetUncConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
@@ -460,7 +473,59 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_fatjetUncertaintiesTool.retrieve() );
     } else if (m_fatjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_fatjetUncertaintiesTool.retrieve());
-    */
+
+
+    if (!m_fatjetUncertaintiesPDSmearTool.isUserConfigured() && !m_fatJets.empty() && !m_fatJetUncConfig.empty() && m_fatJetUncertaintiesPDsmearing == true) {
+
+      ATH_MSG_INFO("Set up Jet PD Smear Uncertainty tool...");
+
+      toolName = "JetUncertaintiesPDSmearTool_" + m_fatJets;
+      m_fatjetUncertaintiesPDSmearTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
+
+      // If, for some reason, you're trying to use the PDSmear, with the reduced set return an error (you shouldn't do this, you're just going to duplicate the SimpleJER results.
+      bool JERUncPDsmearing = isData() ? isData() : m_fatJetUncertaintiesPDsmearing;
+      if (m_fatJetUncConfig.find("SimpleJER") != std::string::npos && JERUncPDsmearing){
+        ATH_MSG_ERROR("You are trying to use the SimpleJER set, with PDsmearing. There is no functionality for this. Please fix your config file. Either run with PDSmear set to false, or run with the AllJER or FullJER sets.");
+        return StatusCode::FAILURE;
+      }
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("JetDefinition", fatjetcoll) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("MCType", m_jetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("PseudoDataJERsmearingMode", true) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_fatJetUncConfig) );
+      if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.retrieve() );
+    } else{
+      ATH_MSG_DEBUG("Do not retrieve the jet PD Smearing tool if it is not configured");
+    }
+
+
+    // FFSmearingTool handles JMR uncertainties for large-R jets
+    if (!m_fatjetFFSmearingTool.isUserConfigured() && !m_fatJets.empty() && !m_fatJetUncConfig.empty()) {
+
+      ATH_MSG_INFO("Set up Large-R FFJetSmearingTool ...");
+
+      toolName = "FFJetSmearingTool_" + m_fatJets;
+      m_fatjetFFSmearingTool.setTypeAndName("CP::FFJetSmearingTool/"+toolName);
+
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MassDef", "UFO") );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MCType", m_jetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("ConfigFile", "rel22/Fall2024_PreRec/R10_FullJMR.config") );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_fatjetFFSmearingTool.retrieve() );
+    } else if (m_fatjetFFSmearingTool.isUserConfigured()) ATH_CHECK(m_fatjetFFSmearingTool.retrieve());
+
+    // Need to keep track of systematics of FFJetSmearingTool
+    if (!m_fatJets.empty()) {
+      // m_fatjetFFSmearingSyst = CP::make_systematics_vector(m_fatjetFFSmearingTool->recommendedSystematics());
+      ATH_MSG_INFO("The following uncertainties have been defined for the m_fatjetFFSmearingTool");
+      for (auto & sysSet : m_fatjetFFSmearingTool->recommendedSystematics()){
+        m_fatjetFFSmearingSyst.push_back(CP::SystematicSet({sysSet}));
+        ATH_MSG_INFO("   - " << sysSet.name());
+      }
+    }
+
     ATH_MSG_INFO(" Won't initialise Wtagger uncertainty tool for fat jets until we get rec for UFO");
     // Won't initialise Wtagger uncertainty tool for fat jets until we get rec for UFO
     /*
@@ -874,6 +939,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       //ATH_CHECK( m_muonTriggerSFTool.setProperty("Isolation", m_muIso_WP)); This property has been depreacted long time ago
       ATH_CHECK( m_muonTriggerSFTool.setProperty("AllowZeroSF", true) );
       ATH_CHECK( m_muonTriggerSFTool.setProperty("OutputLevel", this->msg().level()) );
+      if(!m_muTriggerSFCalibRelease.empty() ) ATH_CHECK(  m_muonTriggerSFTool.setProperty("CalibrationRelease",m_muTriggerSFCalibRelease) );
+      if(!m_muTriggerSFCalibFilename.empty()) ATH_CHECK(  m_muonTriggerSFTool.setProperty("filename",          m_muTriggerSFCalibFilename) );
       ATH_CHECK( m_muonTriggerSFTool.retrieve() );
       m_muonTrigSFTools.push_back(m_muonTriggerSFTool.getHandle());
     } else if (m_muonTriggerSFTool.isUserConfigured()) {
@@ -1329,8 +1396,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonId << ", using Tight instead..." );
       }
 
-      ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", m_isRun3? "PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt":"PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map1.txt") );
-      ATH_CHECK( m_photonEfficiencySFTool.setProperty("ForceDataType", 1) ); // Set data type: 1 for FULLSIM, 3 for AF2
+      ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt") );
+      ATH_CHECK( m_photonEfficiencySFTool.setProperty("ForceDataType", isAtlfast()? (m_isRun3? 1: 3) : 1) ); // Set data type: 1 for FULLSIM, 3 for AtlFast. For Run3 pre-rec only FullSim SFs are available
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_photonEfficiencySFTool.retrieve() );
     } else if (m_photonEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_photonEfficiencySFTool.retrieve() );
@@ -1342,7 +1409,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
        ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonIso_WP);
      }
 
-     ATH_CHECK( m_photonIsolationSFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map1.txt") );
+     ATH_CHECK( m_photonIsolationSFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt") );
      ATH_CHECK( m_photonIsolationSFTool.setProperty("IsoKey", m_photonIso_WP != "TightCaloOnly" ? m_photonIso_WP.substr(8) : m_photonIso_WP ));    // Set isolation WP: Loose,Tight,TightCaloOnly
      ATH_CHECK( m_photonIsolationSFTool.setProperty("ForceDataType", 1) ); // Set data type: 1 for FULLSIM, 3 for AF2
      ATH_CHECK( m_photonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
@@ -1363,7 +1430,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       }
 
       // "symmetric" diphoton triggers (year dependent)
-      ATH_CHECK( m_photonTriggerSFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map1.txt") );
+      ATH_CHECK( m_photonTriggerSFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt") );
       ATH_CHECK( m_photonTriggerSFTool.setProperty("IsoKey", photonIso_forTrigSF ));    // Set isolation WP: Loose,TightCaloOnly
       ATH_CHECK( m_photonTriggerSFTool.setProperty("TriggerKey", m_photonTriggerName ));
       ATH_CHECK( m_photonTriggerSFTool.setProperty("ForceDataType", 1) ); // Set data type: 1 for FULLSIM, 3 for AF2
@@ -1381,7 +1448,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
         toolName = "AsgPhotonEfficiencyCorrectionTool_trigSF_asymm_diphoton_" + (item.first).substr(0,9) + photonIso_forTrigSF;
         auto ph_trigSF = m_photonEfficiencySFTool_trigSF_AsymDiphoton.emplace(m_photonEfficiencySFTool_trigSF_AsymDiphoton.end(), "AsgPhotonEfficiencyCorrectionTool/"+toolName);
-        ATH_CHECK( ph_trigSF->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map1.txt") );
+        ATH_CHECK( ph_trigSF->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt") );
         ATH_CHECK( ph_trigSF->setProperty("IsoKey", photonIso_forTrigSF) );
         ATH_CHECK( ph_trigSF->setProperty("TriggerKey", item.second) );
         ATH_CHECK( ph_trigSF->setProperty("ForceDataType", 1) ); // Set DataType: 1 for FullSim and 3 for AFII
@@ -1396,7 +1463,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
         toolName = "AsgPhotonEfficiencyCorrectionTool_trigEff_asymm_diphoton_" + (item.first).substr(0,9) + photonIso_forTrigSF;
         auto ph_trigEff = m_photonEfficiencySFTool_trigEff_AsymDiphoton.emplace(m_photonEfficiencySFTool_trigEff_AsymDiphoton.end(), "AsgPhotonEfficiencyCorrectionTool/"+toolName);
-        ATH_CHECK( ph_trigEff->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map1.txt") );
+        ATH_CHECK( ph_trigEff->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt") );
         ATH_CHECK( ph_trigEff->setProperty("IsoKey", photonIso_forTrigSF) );
         ATH_CHECK( ph_trigEff->setProperty("TriggerKey", "Eff_"+item.second) );
         ATH_CHECK( ph_trigEff->setProperty("ForceDataType", 1) ); // Set DataType: 1 for FullSim and 3 for AFII
@@ -1455,7 +1522,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_egammaCalibTool.isUserConfigured()) {
       m_egammaCalibTool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/EgammaCalibrationAndSmearingTool");
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
-      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2023_R22_Run2_v0") );
+      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2023_R22_Run2_v1") );
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
       // allows to bypass (intended) abort from of egamma calibration tool when configured for fastSim
       if (m_eleForceFullSimCalib) {
@@ -1911,7 +1978,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       if (m_trkMETsyst) {
         ATH_CHECK( m_metSystTool.setProperty("ConfigSoftCaloFile", "") );
-        ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "TrackSoftTerms-pflow.config") );
+        ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "TrackSoftTerms-pflow_Dec24.config") );
       }
 
       if (m_caloMETsyst) {

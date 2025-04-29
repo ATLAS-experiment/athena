@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrackSimOverlapRemovalTool.h"
+#include "../FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimObjects/FPGATrackSimVectors.h"
 
@@ -19,10 +19,13 @@ FPGATrackSimOverlapRemovalTool::FPGATrackSimOverlapRemovalTool(const std::string
 StatusCode FPGATrackSimOverlapRemovalTool::initialize()
 {
   ATH_MSG_INFO( "FPGATrackSimOverlapRemovalTool::initialize()" );
+
+  if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
+
   // Check if this is 2nd stage
   if(m_do2ndStage)
   {
-    m_totLayers = m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers();
+    m_totLayers = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers();
   }
   else
   {
@@ -116,7 +119,9 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATra
   // Otherwise, proceed
   ATH_MSG_DEBUG("Beginning runOverlapRemoval()");
 
-  return ::runOverlapRemoval(tracks, m_minChi2, m_NumOfHitPerGrouping, getAlgorithm());
+  ATH_MSG_DEBUG("Tracks in event: " << tracks.size());
+
+  return ::runOverlapRemoval(tracks, m_minChi2, m_NumOfHitPerGrouping, getAlgorithm(), m_monTool);
 }
 
 
@@ -128,14 +133,14 @@ StatusCode FPGATrackSimOverlapRemovalTool::removeOverlapping(FPGATrackSimTrack &
             auto hash_a = a->getIdentifierHash();
             auto hash_b = b->getIdentifierHash();
             if ( hash_a == hash_b ) {
-                auto phi_a = a->getPhiCoord();
-                auto phi_b = b->getPhiCoord();
+                auto phi_a = a->getPhiIndex();
+                auto phi_b = b->getPhiIndex();
                 if ( phi_a == phi_b ) {
-                    auto eta_a = a->getEtaCoord();
-                    auto eta_b = b->getEtaCoord();
+                    auto eta_a = a->getEtaIndex();
+                    auto eta_b = b->getEtaIndex();
                     if ( eta_a == eta_b) {
-                        auto layer_a = a->getLayer();
-                        auto layer_b = b->getLayer();
+                        auto layer_a = a->getPhysLayer();
+                        auto layer_b = b->getPhysLayer();
                         return layer_a < layer_b;
                     }
                     return eta_a < eta_b;

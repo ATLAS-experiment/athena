@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os
 
@@ -22,7 +22,7 @@ def trigGlobalTag(flags):
     """Return global conditions data to be used in the HLT. Return None to indicate that
     no trigger-specific tag is required. Used for IOVDb.GlobalTag in AllConfigFlags.py.
     """
-    return None if flags.Input.isMC else 'CONDBR2-HLTP-2024-02'
+    return None if flags.Input.isMC else 'CONDBR2-HLTP-2025-01'
 
 def trigGeoTag(flags):
     """Return geometry tag to be used in the HLT. Returns None to indicate that
@@ -40,10 +40,18 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.doHLT', False,
                   help='run HLT selection algorithms')
 
-    flags.addFlag("Trigger.forceEnableAllChains", False,
-                  help='always enable all configured chains (for testing)')
+    flags.addFlag("Trigger.forceEnableAllChains", lambda prevFlags: prevFlags.GeoModel.Run >= LHCPeriod.Run4,
+                  help='always enable all configured chains (for testing). Currently enabled by default for Run 4.')
+
+    flags.addFlag("Trigger.disableL1ConsistencyChecker", False,
+                  help='force disabling the L1 ConsistencyChecker')
+
+    flags.addFlag('Trigger.enableL0Muon',
+                  lambda prevFlags: prevFlags.GeoModel.Run >= LHCPeriod.Run4,
+                  help='enable Run-4+ L0 Muon simulation or decoding')
 
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags:
+                  (not prevFlags.Trigger.enableL0Muon) and
                   prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC,
                   help='enable Run-3 LVL1 muon decoding')
 
@@ -57,8 +65,16 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1TopoBWSimulation', True,
                   help='enable bitwise L1Topo simulation')
 
-    flags.addFlag('Trigger.enableL1CaloLegacy', True,
+    flags.addFlag('Trigger.enableL1CaloLegacy', lambda prevFlags:
+                  not (not prevFlags.Input.isMC and prevFlags.Trigger.doHLT), #Disable when we're running the trigger on data, keep when doing offline simulation
                   help='enable Run-2 L1Calo simulation and/or decoding')
+
+    # L0MuonSim category (for Run-4+) : needs Trigger.enableL0Muon=True
+    flags.addFlag('Trigger.L0MuonSim.doEmulation',
+                  lambda prevFlags: prevFlags.Trigger.enableL0Muon and
+                                    prevFlags.Input.isMC and
+                                    'TruthParticleContainer' in prevFlags.Input.Collections,
+                  help='Emulate the L0Muon trigger TOBs from smeared truth muon particles')
 
     # L1MuonSim category
     flags.addFlag('Trigger.L1MuonSim.EmulateNSW', False,
@@ -170,6 +186,13 @@ def createTriggerFlags(doTriggerRecoFlags):
             elif "TrigNavigation" in collections:
                 _log.info("Determined EDMVersion to be 2, because TrigNavigation found in POOL file")
                 return 2
+            elif flags.Trigger.doHLT:
+                if flags.GeoModel.Run >= LHCPeriod.Run4:
+                    _log.info("Determined EDMVersion to be 4, because we're now running the trigger and GeoModel.Run >= 4")
+                    return 4
+                else:
+                    _log.info("Determined EDMVersion to be 3, because we're now running the trigger")
+                    return 3
             elif any("HLTNav_Summary" in s for s in collections):
                 if flags.GeoModel.Run >= LHCPeriod.Run4:
                     _log.info("Determined EDMVersion to be 4, because HLTNav_Summary.* found in POOL file and GeoModel.Run >= 4")
@@ -283,6 +306,9 @@ def createTriggerFlags(doTriggerRecoFlags):
 
     flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
                   help='use online THistSvc')
+
+    flags.addFlag('Trigger.Online.useOnlineWebdaqHistSvc', False,
+                      help='use online Webdaq HistSvc')
 
     flags.addFlag('Trigger.Online.BFieldAutoConfig', True,
                   help='auto-configure magnetic field from currents in IS')

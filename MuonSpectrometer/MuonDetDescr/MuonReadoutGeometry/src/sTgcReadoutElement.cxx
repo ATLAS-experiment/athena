@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -13,9 +13,10 @@
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 
 #include <GeoModelKernel/GeoLogVol.h>
-#include <GeoModelKernel/GeoVFullPhysVol.h>
-#include <GeoModelKernel/GeoVPhysVol.h>
+#include <GeoModelKernel/GeoDefinitions.h>
 #include <GeoModelHelpers/StringUtils.h>
+#include <GeoModelHelpers/TransformToStringConverter.h>
+#include <GeoModelHelpers/getChildNodesWithTrf.h>
 
 #include <cmath>
 #include <ext/alloc_traits.h>
@@ -25,6 +26,7 @@
 #include <utility>
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "Identifier/IdentifierHash.h"
 #include "MuonAGDDDescription/sTGCDetectorDescription.h"
 #include "MuonAGDDDescription/sTGCDetectorHelper.h"
@@ -42,6 +44,7 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 #define THROW_EXCEPTION_RE(MSG)                                                                            \
      {                                                                                                  \
@@ -66,7 +69,6 @@ namespace MuonGM {
         setStationName(fixName);       
         setChamberLayer(mL);
         setIdentifier(id); // representative identifier, with stName, stEta, stPhi, mL 
-
     }
 
 
@@ -75,6 +77,16 @@ namespace MuonGM {
 
     //============================================================================
     void sTgcReadoutElement::initDesignFromSQLite(double thickness) {
+
+     PVConstLink pvc {getMaterialGeom()};
+     auto sensitiveVol = getAllSubVolumes(pvc,[](const GeoChildNodeWithTrf& node){
+         return node.nodeName.find("Gas") != std::string::npos;
+     });
+     assert(sensitiveVol.size() == m_nlayers);
+     for (unsigned int llay = 0; llay< sensitiveVol.size(); ++llay) {
+        m_Xlg[llay] = sensitiveVol[llay].transform;
+     }
+
       SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
       SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service(geoDbTag->getParamSvcName())};
 
@@ -83,7 +95,7 @@ namespace MuonGM {
       IRDBRecordset_ptr nswPars   = accessSvc->getRecordsetPtr("NSWPARS","","");
 
       PVConstLink parent = getMaterialGeom()->getParent();
-      unsigned int index=parent->indexOf(getMaterialGeom());
+      unsigned int index=parent->indexOf(getMaterialGeom()).value();
       std::string pVName=parent->getNameOfChildVol(index);
       float yCutoutCathode(0);
       if (nswPars->size()==0) {
@@ -92,29 +104,26 @@ namespace MuonGM {
         yCutoutCathode=(*nswPars)[0]->getFloat("NSW_sTGC_yCutoutCathode");
       }
 
-      for (unsigned int ind = 0; ind < wstgcRec->size(); ind++) {
-            std::string WSTGC_TYPE       = (*wstgcRec)[ind]->getString("WSTGC_TYPE");               
-    
-            if (getStationName()[2] != WSTGC_TYPE[6])            continue;
-            if (std::abs(getStationEta())!=(int) (WSTGC_TYPE[7]-'0')) continue;
-            if (m_ml != (int) (pVName[7]-'0'))                   continue;
-            const IRDBRecord *nswdim{nullptr};
-            std::string logVolSubName=getMaterialGeom()->getLogVol()->getName().substr(7,4);
-            
-            size_t w{0};
-            for (w=0;w<nswdimRec->size();w++) {
-                nswdim = (*nswdimRec)[w];
-                const std::string type = nswdim->getString("NSW_TYPE").substr(5,4);
-                if (type==logVolSubName) {
-                    break;
-                }
-            }
-    
+      for (size_t w=0;w<nswdimRec->size();w++) {
+        const IRDBRecord *nswdim = (*nswdimRec)[w];
+        const std::string type = nswdim->getString("NSW_TYPE").substr(5,4);
+        std::string logVolSubName=getMaterialGeom()->getLogVol()->getName().substr(7,4);
+        if (type==logVolSubName) {
             setSsize(nswdim->getDouble("BASE_WIDTH"));        // bottom base length (full chamber)
             setLongSsize(nswdim->getDouble("TOP_WIDTH"));     // top base length (full chamber)
             setRsize(nswdim->getDouble("LENGTH"));            // height of the trapezoid (full chamber)
+            break;
+        }
+    }
+
+      for (unsigned int ind = 0; ind < wstgcRec->size(); ind++) {
+            std::string WSTGC_TYPE       = (*wstgcRec)[ind]->getString("WSTGC_TYPE");               
     
-        
+            if (getStationName()[2] != WSTGC_TYPE[6]) continue;
+            if (std::abs(getStationEta())!=(int) (WSTGC_TYPE[7]-'0')) continue;
+            if (getStationName()[2] == 'S' &&  WSTGC_TYPE[8] != (m_ml ==2 ?'P' : 'C')) continue;
+            if (getStationName()[2] == 'L' &&  WSTGC_TYPE[8] != (m_ml ==2 ?'C' : 'P')) continue;
+
             const double gasTck = (*wstgcRec)[ind]->getDouble("gasTck");
             const double Tck = (*wstgcRec)[ind]->getDouble("Tck");
             const double xFrame = (*wstgcRec)[ind]->getDouble("xFrame");
@@ -131,31 +140,20 @@ namespace MuonGM {
             const int wireGroupWidth = (*wstgcRec)[ind]->getInt("wireGroupWidth");
             const int nStrips = (*wstgcRec)[ind]->getInt("nStrips");
             const std::vector<double> padH = tokenizeDouble((*wstgcRec)[ind]->getString("padH"),";");                   
-            const std::vector<double> rankPadPhi = tokenizeDouble((*wstgcRec)[ind]->getString("rankPadPhi"),";");             
             const std::vector<int> nPadPhi = tokenizeInt((*wstgcRec)[ind]->getString("nPadPhi"),";");                
-            const std::vector<double> firstPadPhiDivision_C = tokenizeDouble((*wstgcRec)[ind]->getString("firstPadPhiDivision_C"),";");  
-            const std::vector<double> PadPhiShift_C = tokenizeDouble((*wstgcRec)[ind]->getString("PadPhiShift_C"),";");          
             const std::vector<double> firstPadPhiDivision_A  = tokenizeDouble((*wstgcRec)[ind]->getString("firstPadPhiDivision_A"),";");  
             const std::vector<double> PadPhiShift_A  = tokenizeDouble((*wstgcRec)[ind]->getString("PadPhiShift_A"),";");          
-            const std::vector<double> rankPadH = tokenizeDouble((*wstgcRec)[ind]->getString("rankPadH"),";");               
             const std::vector<int> nPadH = tokenizeInt((*wstgcRec)[ind]->getString("nPadH"),";");                  
             const std::vector<double> firstPadH = tokenizeDouble((*wstgcRec)[ind]->getString("firstPadH"),";");              
             const std::vector<double> firstPadRow = tokenizeDouble((*wstgcRec)[ind]->getString("firstPadRow"),";");            
             const std::vector<double> wireCutout = tokenizeDouble((*wstgcRec)[ind]->getString("wireCutout"),";");             
             const std::vector<int> nWires = tokenizeInt((*wstgcRec)[ind]->getString("nWires"),";");                 
             const std::vector<int> firstWire = tokenizeInt((*wstgcRec)[ind]->getString("firstWire"),";");              
-            const std::vector<double> firstTriggerBand = tokenizeDouble((*wstgcRec)[ind]->getString("firstTriggerBand"),";");       
-            const std::vector<int> nTriggerBands = tokenizeInt((*wstgcRec)[ind]->getString("nTriggerBands"),";");          
-            const std::vector<double> firstStripInTrigger = tokenizeDouble((*wstgcRec)[ind]->getString("firstStripInTrigger"),";");    
             const std::vector<double> firstStripWidth = tokenizeDouble((*wstgcRec)[ind]->getString("firstStripWidth"),";");        
-            const std::vector<double> StripsInBandsLayer1 = tokenizeDouble((*wstgcRec)[ind]->getString("StripsInBandsLayer1"),";");    
-            const std::vector<double> StripsInBandsLayer2 = tokenizeDouble((*wstgcRec)[ind]->getString("StripsInBandsLayer2"),";");    
-            const std::vector<double> StripsInBandsLayer3 = tokenizeDouble((*wstgcRec)[ind]->getString("StripsInBandsLayer3"),";");    
-            const std::vector<double> StripsInBandsLayer4 = tokenizeDouble((*wstgcRec)[ind]->getString("StripsInBandsLayer4"),";");    
             const std::vector<int> nWireGroups = tokenizeInt((*wstgcRec)[ind]->getString("nWireGroups"),";");            
             const std::vector<double> firstWireGroup = tokenizeDouble((*wstgcRec)[ind]->getString("firstWireGroup"),";");         
     
-            char sector_l  = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
+            char sector_l  = getStationName()[2];
             int  stEta     = std::abs(getStationEta());
             int  Etasign   = getStationEta() / stEta;
             std::string side = (Etasign > 0) ? "A" : "C";
@@ -266,11 +264,43 @@ namespace MuonGM {
                   m_padDesign[il].sectorOpeningAngle = m_padDesign[il].smallSectorOpeningAngle;
                 }
                 m_padDesign[il].thickness = thickness;
-            }      
+                ATH_MSG_DEBUG("initDesign: " << idHelperSvc()->toStringDetEl(identify()) << " layer " << il << ", pad phi angular width "
+                    << m_padDesign[il].inputPhiPitch << ", eta pad size " << m_padDesign[il].inputRowPitch
+                    << "  Length: " << m_padDesign[il].Length << " sWidth: " << m_padDesign[il].sWidth
+                    << " lWidth: " << m_padDesign[il].lWidth << " firstPhiPos:" << m_padDesign[il].firstPhiPos
+                    << " padEtaMin:" << m_padDesign[il].padEtaMin << " padEtaMax:" << m_padDesign[il].padEtaMax
+                    << " firstRowPos:" << m_padDesign[il].firstRowPos << " inputRowPitch:" << m_padDesign[il].inputRowPitch
+                    << " thickness:" << m_padDesign[il].thickness << " sPadWidth: " << m_padDesign[il].sPadWidth
+                    << " lPadWidth: " << m_padDesign[il].lPadWidth << " xFrame: " << m_padDesign[il].xFrame
+                    << " ysFrame: " << m_padDesign[il].ysFrame << " ylFrame: " << m_padDesign[il].ylFrame
+                    << " yCutout: " << m_padDesign[il].yCutout );
+            }
         }
     }
     void sTgcReadoutElement::initDesignFromAGDD(double thickness) {
         
+        if (manager()->MinimalGeoFlag() == 0) {
+            PVConstLink pvc {getMaterialGeom()};
+            unsigned int nchildvol = pvc->getNChildVols();
+            int llay = 0;
+            std::string::size_type npos;
+            for (unsigned ich = 0; ich < nchildvol; ++ich) {
+                PVConstLink pc = pvc->getChildVol(ich);
+                std::string childname = (pc->getLogVol())->getName();
+
+                ATH_MSG_DEBUG("Volume Type: " << pc->getLogVol()->getShape()->type());
+                if ((npos = childname.find("Sensitive")) == std::string::npos) {
+                    continue;
+                }
+                ++llay;
+                if (llay > 4) {
+                    ATH_MSG_DEBUG("number of sTGC layers > 4: increase transform array size");
+                    continue;
+                }
+                m_Xlg[llay - 1] = pvc->getXToChildVol(ich);
+            }
+            assert(m_nlayers ==  llay);
+        }
         char sector_l  = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
         int  stEta     = std::abs(getStationEta());
         int  Etasign   = getStationEta() / stEta;
@@ -407,7 +437,8 @@ namespace MuonGM {
 
             m_padDesign[il].thickness = thickness;
 
-            ATH_MSG_DEBUG( "initDesign stationname " << getStationName() << " layer " << il << ",pad phi angular width "
+            ATH_MSG_DEBUG( "initDesign: " << idHelperSvc()->toStringDetEl(identify()) 
+                    << " layer " << il<< ", pad phi angular width "
                     << m_padDesign[il].inputPhiPitch << ", eta pad size " << m_padDesign[il].inputRowPitch
                     << "  Length: " << m_padDesign[il].Length << " sWidth: " << m_padDesign[il].sWidth
                     << " lWidth: " << m_padDesign[il].lWidth << " firstPhiPos:" << m_padDesign[il].firstPhiPos
@@ -416,33 +447,13 @@ namespace MuonGM {
                     << " thickness:" << m_padDesign[il].thickness << " sPadWidth: " << m_padDesign[il].sPadWidth
                     << " lPadWidth: " << m_padDesign[il].lPadWidth << " xFrame: " << m_padDesign[il].xFrame
                     << " ysFrame: " << m_padDesign[il].ysFrame << " ylFrame: " << m_padDesign[il].ylFrame
-                    << " yCutout: " << m_padDesign[il].yCutout );       
+                    << " yCutout: " << m_padDesign[il].yCutout );
         }    
     }
     
     void sTgcReadoutElement::initDesign(double thickness) {
         
-        if (manager()->MinimalGeoFlag() == 0) {
-            PVConstLink pvc {getMaterialGeom()};
-            unsigned int nchildvol = pvc->getNChildVols();
-            int llay = 0;
-            std::string::size_type npos;
-            for (unsigned ich = 0; ich < nchildvol; ++ich) {
-                PVConstLink pc = pvc->getChildVol(ich);
-                std::string childname = (pc->getLogVol())->getName();
 
-                ATH_MSG_DEBUG("Volume Type: " << pc->getLogVol()->getShape()->type());
-                if ((npos = childname.find("Sensitive")) != std::string::npos) {
-                    ++llay;
-                    if (llay > 4) {
-                        ATH_MSG_DEBUG("number of sTGC layers > 4: increase transform array size");
-                        continue;
-                    }
-                    m_Xlg[llay - 1] = pvc->getXToChildVol(ich);
-                }
-            }
-            assert(m_nlayers ==  llay);             
-        }
 
         SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
         if (!geoDbTag) THROW_EXCEPTION_RE( "Could not locate GeoDbTagSvc" );
@@ -716,12 +727,14 @@ namespace MuonGM {
     void sTgcReadoutElement::setDelta(const ALinePar& aline) {
         // amdb frame (s, z, t) = chamber frame (y, z, x)        
         if (aline) {
-            m_delta = aline.delta();                    
+            static const Amg::Transform3D permute{GeoTrf::GeoRotation{90.*Gaudi::Units::deg,90.*Gaudi::Units::deg, 0.}};
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 
             // of m_delta so that it can be applied on chamber frame coordinates.
             m_ALinePar  = &aline;
-            m_delta     = Amg::getTranslateZ3D(m_offset)*m_delta*Amg::getTranslateZ3D(-m_offset);
+            m_delta     = Amg::getTranslateZ3D(m_offset)* permute*aline.delta()*
+                          permute.inverse()*Amg::getTranslateZ3D(-m_offset);
+            ATH_MSG_DEBUG(idHelperSvc()->toStringDetEl(identify())<<" setup new alignment: "<<GeoTrf::toString(m_delta));
             refreshCache();
         } else {
             clearALinePar();
@@ -816,51 +829,30 @@ namespace MuonGM {
             return;
         }
 
-        bool conditionsApplied{false};
-        Amg::Transform3D trfToML{Amg::Transform3D::Identity()};
-
 #ifndef SIMULATIONBASE
         //*********************
         // As-Built (MuonNswAsBuilt is not included in AthSimulation)
         //*********************
-        const NswAsBuilt::StgcStripCalculator* sc = manager()->getStgcAsBuiltCalculator();        
-        if(manager()->getsTGCAsBuilt2() && design->type == MuonChannelDesign::ChannelType::etaStrip){
-            pos.head<2>() = manager()->getsTGCAsBuilt2()->correctPosition(layerId, pos.head<2>());
-
-        } else if (sc && design->type == MuonChannelDesign::ChannelType::etaStrip) {
-
-            Amg::Vector2D lpos(locXpos, locYpos);
-            
-            // express the local position w.r.t. the nearest active strip
-            Amg::Vector2D rel_pos;
-            int istrip = design->positionRelativeToStrip(lpos, rel_pos);
-            if (istrip < 0) {                
-                ATH_MSG_WARNING( "As-built corrections are provided only for eta strips within the active area. Returning." );
-                return;
-            }
-
-            // setup strip calculator
-            NswAsBuilt::stripIdentifier_t strip_id;
-            strip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::STL : NswAsBuilt::quadrupletIdentifier_t::STS), getStationEta(), getStationPhi(), m_ml };
-            strip_id.ilayer     = m_idHelper.gasGap(layerId);
-            strip_id.istrip     = istrip;
-
-            // get the position coordinates, in the chamber frame, from NswAsBuilt.
-            // applying the 10um shift along the beam axis for strips (see fillCache()).
-            NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y(), rel_pos.x());
-            
-            if (calcPos.isvalid == NswAsBuilt::StgcStripCalculator::IsValid::VALID) {
-                pos = calcPos.pos;
-                pos[0] += (strip_id.ilayer%2) ? 0.01 : -0.01; // 1st layer gets +0.01; layer numbering starts from 1
-
-                // signal that pos is now in the chamber reference frame
-                // (don't go back to the layer frame yet, since we may apply b-lines later on)
-                trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);   
-                conditionsApplied = true;
-            } else {                
-                ATH_MSG_DEBUG( "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<<" layer: "<<strip_id.ilayer);
+        if(manager()->getsTGCAsBuilt() && design->type == MuonChannelDesign::ChannelType::etaStrip){
+#if __GNUC__ >= 13
+// Avoid a warning seen with -march=x86-64-v3.
+// This has been cleaned up in eigen after 3.4.0.
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+            pos.head(2) = manager()->getsTGCAsBuilt()->correctPosition(layerId, pos.head(2));
+#if __GNUC__ >= 13
+# pragma GCC diagnostic pop
+#endif
+        }
+#ifndef NDEBUG
+        else {
+            MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+            if (log.level() <= MSG::DEBUG) {    
+                log << MSG::DEBUG << "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<< endmsg;
             }
         }
+#endif
 #endif 
         
 
@@ -868,18 +860,14 @@ namespace MuonGM {
         // B-Lines
         //*********************
         if (has_BLines()) {
-          // go to the multilayer reference frame if we are not already there
-          if (!conditionsApplied) {
-             trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
-             pos = trfToML*pos;             
-             // signal that pos is now in the multilayer reference frame
-             conditionsApplied = true; 
-          }
-          posOnDefChamber(pos);
+            // go to the muultilayer frame
+            Amg::Transform3D trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
+            pos = trfToML*pos;
+            posOnDefChamber(pos);
+            // back to the layer reference frame from where we started
+            pos = trfToML.inverse()*pos;
+       
         }
-        
-        // back to the layer reference frame from where we started
-        if (conditionsApplied) pos = trfToML.inverse()*pos;
     }
 
 }  // namespace MuonGM

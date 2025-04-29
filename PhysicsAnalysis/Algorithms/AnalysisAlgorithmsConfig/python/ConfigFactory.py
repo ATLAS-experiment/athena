@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # This file defines a factory method that can create a configuration
 # block sequence based on a passed in name.  This avoids having to
@@ -243,10 +243,13 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
-        from FTagAnalysisAlgorithms.FTagEventSFAnalysisConfig import FTagEventSFConfig
+        from FTagAnalysisAlgorithms.FTagSFAnalysisConfig import FlavourTaggingEventSF
         self.addAlgConfigBlock(algName="FlavourTaggingEventSF",
-                               alg=FTagEventSFConfig,
+                               alg=FlavourTaggingEventSF,
                                defaults={'selectionName': ''},
+                               superBlocks="Jets")
+        from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
+        self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
                                superBlocks="Jets")
 
         # electrons
@@ -255,6 +258,9 @@ class ConfigFactory():
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPointConfig,
             superBlocks="Electrons")
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronLRTMergedConfig
+        self.addAlgConfigBlock(algName="LRTMerging", alg=ElectronLRTMergedConfig,
+                               superBlocks="Electrons")
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronTriggerAnalysisSFBlock
         self.addAlgConfigBlock(algName="TriggerSF", alg=ElectronTriggerAnalysisSFBlock,
                                superBlocks="Electrons")
@@ -278,6 +284,12 @@ class ConfigFactory():
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonTriggerAnalysisSFBlock
         self.addAlgConfigBlock(algName="TriggerSF", alg=MuonTriggerAnalysisSFBlock,
                                superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonLRTMergedConfig
+        self.addAlgConfigBlock(algName="LRTMerging", alg=MuonLRTMergedConfig,
+                               superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonContainerMergingConfig
+        self.addAlgConfigBlock(algName="ContainerMerging", alg=MuonContainerMergingConfig,
+                               superBlocks="Muons")
 
         # tauJets
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauCalibrationConfig
@@ -294,10 +306,34 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="SystObjectLink", alg=SystObjectLinkBlock,
             superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 
+        # Particle-level truth algorithms
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelElectronsConfig import ParticleLevelElectronsBlock
+        self.addAlgConfigBlock(algName="PL_Electrons", alg=ParticleLevelElectronsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelMuonsConfig import ParticleLevelMuonsBlock
+        self.addAlgConfigBlock(algName="PL_Muons", alg=ParticleLevelMuonsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelNeutrinosConfig import ParticleLevelNeutrinosBlock
+        self.addAlgConfigBlock(algName="PL_Neutrinos", alg=ParticleLevelNeutrinosBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelJetsConfig import ParticleLevelJetsBlock
+        self.addAlgConfigBlock(algName="PL_Jets", alg=ParticleLevelJetsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelTausConfig import ParticleLevelTausBlock
+        self.addAlgConfigBlock(algName="PL_Taus", alg=ParticleLevelTausBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelPhotonsConfig import ParticleLevelPhotonsBlock
+        self.addAlgConfigBlock(algName="PL_Photons", alg=ParticleLevelPhotonsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelMissingETConfig import ParticleLevelMissingETBlock
+        self.addAlgConfigBlock(algName="PL_MissingET", alg=ParticleLevelMissingETBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelOverlapRemovalConfig import ParticleLevelOverlapRemovalBlock
+        self.addAlgConfigBlock(algName="PL_OverlapRemoval", alg=ParticleLevelOverlapRemovalBlock)
+
         # IFF truth classification
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IFFLeptonDecorationBlock
         self.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
-            superBlocks=["Electrons","Muons"])
+            superBlocks=["Electrons", "Muons",
+                         "PL_Electrons", "PL_Muons"])
+        # MCTC truth classification
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import MCTCLeptonDecorationBlock
+        self.addAlgConfigBlock(algName="MCTCClassification", alg=MCTCLeptonDecorationBlock,
+            superBlocks=["Electrons", "Muons", "TauJets",
+                         "PL_Electrons", "PL_Muons", "PL_Taus"])
 
         # generator level analysis
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock
@@ -307,7 +343,9 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PtEtaSelectionBlock
         self.addAlgConfigBlock(algName="PtEtaSelection", alg=PtEtaSelectionBlock,
             defaults={'selectionName': ''},
-            superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
+            superBlocks=[self.ROOTNAME,
+                         "Jets", "Electrons", "Photons", "Muons", "TauJets",
+                         "PL_Jets", "PL_Electrons", "PL_Photons", "PL_Muons", "PL_Taus", "PL_Neutrinos"])
 
         # met
         from MetAnalysisAlgorithms.MetAnalysisConfig import MetAnalysisConfig
@@ -325,6 +363,10 @@ class ConfigFactory():
         # jet reclustering
         from JetAnalysisAlgorithms.JetReclusteringConfig import JetReclusteringBlock
         self.addAlgConfigBlock(algName="JetReclustering", alg=JetReclusteringBlock)
+
+        # jet reclustering calibration
+        from JetAnalysisAlgorithms.ReclusteredJetCalibrationConfig import ReclusteredJetCalibrationBlock
+        self.addAlgConfigBlock(algName="ReclusteredJetCalibration", alg=ReclusteredJetCalibrationBlock)
 
         # event selection
         from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
@@ -377,5 +419,9 @@ class ConfigFactory():
         # IOStats printouts
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IOStatsBlock
         self.addAlgConfigBlock(algName="IOStats", alg=IOStatsBlock)
+
+        # configuration printer
+        from AsgAnalysisAlgorithms.PrintToolConfigAlgConfig import PrintToolConfigAlgBlock
+        self.addAlgConfigBlock(algName="PrintConfiguration", alg=PrintToolConfigAlgBlock)
 
         return

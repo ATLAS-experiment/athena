@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerMatchingTool.h"
@@ -43,9 +43,8 @@ namespace DerivationFramework {
       const std::string& type,
       const std::string& name,
       const IInterface* pSvcLocator) :
-    AthAlgTool(type, name, pSvcLocator)
+    base_class(type, name, pSvcLocator)
   {
-    declareInterface<IAugmentationTool>(this);
     declareProperty("ChainNames", m_chainNames, 
         "The list of trigger chains to match.");
     declareProperty("OnlineParticleTool", m_trigParticleTool,
@@ -162,6 +161,20 @@ namespace DerivationFramework {
       using particleRange_t = TriggerMatchingUtils::RangedItr<typename particleVec_t::const_iterator>;
       // Now build up the list of offline combinations;
       std::vector<particleVec_t> offlineCombinations;
+
+      // Projection operator to use for comparing vectors
+      // of IParticle*.  Compare by using the sum of the pts
+      // of all particles in the vector.
+      struct outerproj {
+        double operator() (const particleVec_t& v) const
+        {
+          // Unfortunately std::ranges::accumulate hasn't made it into C++
+          // as of C++23 or we could use that directly.
+          auto r = std::views::transform (v, &xAOD::IParticle::pt);
+          return std::accumulate (std::begin(r), std::end(r), 0);
+        }
+      };
+
       for (const particleVec_t& combination : onlineCombinations) {
         // Here we store the possible candidates for the matching. We use the
         // range type as a lightweight method to carry around a view of a vector
@@ -177,7 +190,9 @@ namespace DerivationFramework {
         // this particular online combination.
         auto theseOfflineCombinations = 
           TriggerMatchingUtils::getAllDistinctCombinations<const xAOD::IParticle*>(
-              matchCandidates);
+              matchCandidates,
+              &xAOD::IParticle::pt,
+              outerproj());
         if (msgLvl(MSG::VERBOSE) ) {
           // Spit out some verbose information
           ATH_MSG_VERBOSE(
@@ -195,7 +210,7 @@ namespace DerivationFramework {
         // inserting into a sorted vector that ensures that we only output
         // unique combinations
         for (const particleVec_t& vec : theseOfflineCombinations)
-          TriggerMatchingUtils::insertIntoSortedVector(offlineCombinations, vec);
+          TriggerMatchingUtils::insertIntoSortedVector(offlineCombinations, vec, outerproj());
       } //> end loop over combinations
 
 

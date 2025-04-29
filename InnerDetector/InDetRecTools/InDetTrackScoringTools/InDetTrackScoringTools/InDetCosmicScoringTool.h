@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -32,8 +32,7 @@ public:
   virtual ~InDetCosmicScoringTool () = default;
 
   /** check track selections independent from TrackSummary */
-  virtual bool passBasicSelections( const Trk::Track& ) const override
-  {return true;}
+  virtual bool passBasicSelections( const Trk::Track& ) const override;
 
   /** create a score based on how good the passed track is*/
   virtual
@@ -47,6 +46,9 @@ public:
 
   IntegerProperty m_nWeightedClustersMin{this, "nWeightedClustersMin", 0};
   IntegerProperty m_minTRTHits{this, "minTRTHits", 0};
+
+  DoubleProperty m_maxZImp
+    {this, "maxZImp", 10000., "maximal z impact parameter cut"};
 
 };
 

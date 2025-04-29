@@ -3,9 +3,6 @@
 # Needed to get name of split probability container
 from InDetConfig.TrackRecoConfig import ClusterSplitProbabilityContainerName
 
-# We need to add this algorithm to get the TrackMeasurementValidationContainer
-from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPixelPrepDataToxAODCfg, InDetSCT_PrepDataToxAODCfg
-
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -14,35 +11,44 @@ def JetHitAssociationCfg(flags, name="JetHitAssociation", **kwargs):
     acc = ComponentAccumulator()
     
     isMC = flags.Input.isMC
-
-        
-
-    acc.merge(
-        InDetPixelPrepDataToxAODCfg(
-            flags,
-            ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(flags),
-            WriteSiHits=isMC,
-            WriteSDOs=isMC,       
-            # see ATR-27293 for discussion on why this was disabled
-            WriteNNinformation=False
+  
+    if flags.Detector.GeometryITk:
+        from InDetConfig.InDetPrepRawDataToxAODConfig import (
+            ITkPixelPrepDataToxAODCfg as PixelPrepDataToxAODCfg, 
+            ITkStripPrepDataToxAODCfg as StripPrepDataToxAODCfg
         )
-    )
-
-    acc.merge(
-        InDetSCT_PrepDataToxAODCfg(
-            flags,
-            WriteSiHits=isMC,
-            WriteSDOs=isMC	     
+    else:
+        from InDetConfig.InDetPrepRawDataToxAODConfig import (
+            InDetPixelPrepDataToxAODCfg as PixelPrepDataToxAODCfg, 
+            InDetSCT_PrepDataToxAODCfg as StripPrepDataToxAODCfg
         )
+  
+    acc.merge(
+      PixelPrepDataToxAODCfg(
+        flags,
+        ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(flags),
+        WriteSiHits=isMC,
+        WriteSDOs=isMC,       
+        # see ATR-27293 for discussion on why this was disabled
+        WriteNNinformation=False
+      )
     )
-
+    acc.merge(
+      StripPrepDataToxAODCfg(
+        flags,
+        WriteSiHits=isMC,
+        WriteSDOs=isMC	     
+      )
+    )
     acc.addEventAlgo(
-        CompFactory.JetHitAssociation(
-            "JetHitAssociation",
-            jetCollectionName = flags.BTagging.Trackless_JetCollection,
-            jetPtThreshold = flags.BTagging.Trackless_JetPtMin,
-            dRmatchHitToJet = flags.BTagging.Trackless_dR
-        )
+      CompFactory.JetHitAssociation(
+        "JetHitAssociation",
+        inputPixHitCollectionName = ("ITk" if flags.Detector.GeometryITk else "") + "PixelClusters",
+        inputSCTHitCollectionName = "ITkStripClusters" if flags.Detector.GeometryITk else "SCT_Clusters",
+        jetCollectionName = flags.BTagging.Trackless_JetCollection,
+        jetPtThreshold = flags.BTagging.Trackless_JetPtMin,
+        dRmatchHitToJet = flags.BTagging.Trackless_dR
+      )
     )
 
     return acc

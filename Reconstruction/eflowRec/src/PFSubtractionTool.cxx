@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "eflowRec/PFSubtractionTool.h"
 
 #include "eflowRec/eflowCaloObject.h"
@@ -165,7 +169,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
         }//loop over caloclusters
         
       }//if have truth particle matched to track
-      else ATH_MSG_WARNING("Track with pt, eta and phi " << thisEfRecTrack->getTrack()->pt() << ", " << thisEfRecTrack->getTrack()->eta() << " and " << thisEfRecTrack->getTrack()->phi() << " does not have a valid truth pointer");
+      else ATH_MSG_VERBOSE("Track with pt, eta and phi " << thisEfRecTrack->getTrack()->pt() << ", " << thisEfRecTrack->getTrack()->eta() << " and " << thisEfRecTrack->getTrack()->phi() << " does not have a valid truth pointer");
     }
     else if (!m_recoverSplitShowers){
       /** Add cluster matches needed for pull calculation (in eflowCaloObject::simulateShowers) which is used to determine whether to run the charged shower subtraction or not.
@@ -525,16 +529,27 @@ void PFSubtractionTool::performTruthSubtraction(eflowCaloObject& thisEflowCaloOb
       //We can either remove a cell entireley if it has any truth deposit (closer to what the real 
       //reco algorithm does) or reweight the cells contribution based on subtracting the truth
       //energy from the reco cell energy
-
-      for (; theCell != lastCell; theCell++){
+      //We only advance the iterator, theCell, if we *dont* call removeCell to avoid issues with
+      //invalid iterators
+      //We also have to reset the lastCell iterator after each call to ensure the loop exits at the end, 
+      //instead of being stuck in an infinite loop.
+      for (; theCell != lastCell;){
         //get the truth energy for this cell
         double truthEnergy = thisEfRecTrack->getCellTruthEnergy(*theCell);
         //reweight the cell such that energy*weight gives the new energy
         double oldCellEnergy = theCell->energy()*(theCell.weight());
         double subtractedCellWeight = (oldCellEnergy - truthEnergy)/oldCellEnergy;
 
-        if (0.0 != truthEnergy && m_useFullCellTruthSubtraction) thisCluster->removeCell(*theCell);
-        else if (!m_useFullCellTruthSubtraction) theCell.reweight(subtractedCellWeight);
+        if (0.0 != truthEnergy && m_useFullCellTruthSubtraction) {
+          thisCluster->removeCell(*theCell);
+          lastCell = theCellLinks->end();
+        }
+        else if (!m_useFullCellTruthSubtraction) {
+          theCell.reweight(subtractedCellWeight);
+          ++theCell;
+        }
+        else ++theCell;
+
       }//cell loop
 
       float oldEnergy = thisCluster->e();
@@ -600,7 +615,7 @@ void PFSubtractionTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject,
       const CaloClusterCellLink* theCellLink = thisCluster->getCellLinks();
       CaloClusterCellLink::const_iterator theCell = theCellLink->begin();
       CaloClusterCellLink::const_iterator lastCell = theCellLink->end();
-      for (; theCell != lastCell; theCell++) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),theCell.weight()/numTracks);
+      for (; theCell != lastCell; ++theCell) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),theCell.weight()/numTracks);
     }
   }
 }

@@ -25,7 +25,6 @@ GoodRunsListSelectorTool::GoodRunsListSelectorTool( const std::string& type, con
  , m_reader(0)
  , m_boolop(0)
  , m_passthrough(true)
- , m_verbose(false)
  , m_rejectanybrl(false)
  , m_eventselectormode(false)
 {
@@ -33,7 +32,6 @@ GoodRunsListSelectorTool::GoodRunsListSelectorTool( const std::string& type, con
   declareProperty( "BlackRunsListVec", m_blackrunslistVec, "list of input xml files" );
   declareProperty( "BoolOperation", m_boolop );
   declareProperty( "PassThrough", m_passthrough = true);
-  declareProperty( "VerboseDetStatus", m_verbose = false);
   declareProperty( "RejectBlackRunsInEventSelector", m_rejectanybrl = false );
   declareProperty( "EventSelectorMode", m_eventselectormode = false );
 

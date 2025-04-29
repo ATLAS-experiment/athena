@@ -5,12 +5,12 @@ def getMonTool_TrigJetAlgorithm(flags, path):
   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
   monTool = GenericMonitoringTool(flags, 'MonTool')
   monTool.HistPath = path
-  monTool.defineHistogram( 'TIME_jetreco', path='EXPERT', type='TH1F', title='Counts',
-                           xbins=100, xmin=0, xmax=200 )
-  monTool.defineHistogram( 'TIME_jetprovider', path='EXPERT', type='TH1F', title='Counts',
-                           xbins=100, xmin=0, xmax=200 )
-  monTool.defineHistogram( 'TIME_jetmod', path='EXPERT', type='TH1F', title='Counts',
-                           xbins=100, xmin=0, xmax=100 )
+  # monTool.defineHistogram( 'TIME_jetreco', path='EXPERT', type='TH1F', title='Counts',
+  #                          xbins=100, xmin=0, xmax=200 )
+  # monTool.defineHistogram( 'TIME_jetprovider', path='EXPERT', type='TH1F', title='Counts',
+  #                          xbins=100, xmin=0, xmax=200 )
+  # monTool.defineHistogram( 'TIME_jetmod', path='EXPERT', type='TH1F', title='Counts',
+  #                          xbins=100, xmin=0, xmax=100 )
 
   monTool.defineHistogram( 'JET_n', path='EXPERT', type='TH1F', title='Counts',
                            xbins=100, xmin=0, xmax=100 )

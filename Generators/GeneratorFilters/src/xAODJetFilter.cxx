@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODJetFilter.h"
@@ -9,14 +9,10 @@
 #include <vector>
 
 #include "GaudiKernel/PhysicalConstants.h"
-#include "xAODTruth/TruthParticle.h"
-#include "xAODTruth/TruthParticleAuxContainer.h"
-#include "xAODTruth/TruthParticleContainer.h"
-
-xAODJetFilter::xAODJetFilter(const std::string& name, ISvcLocator* pSvcLocator)
-    : GenFilter(name, pSvcLocator) {}
+#include "TruthUtils/HepMCHelpers.h"
 
 StatusCode xAODJetFilter::filterInitialize() {
+  ATH_CHECK(m_truthPartContKey.initialize());
   m_emaxeta = 6.0;
   m_edphi = 2 * M_PI / m_grphi;         // cell size
   m_edeta = 2. * m_emaxeta / m_greta;  // cell size
@@ -65,23 +61,17 @@ StatusCode xAODJetFilter::filterEvent() {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  if (!xTruthParticleContainer.isValid()) {
+    ATH_MSG_ERROR("No TruthParticle collection with name " << m_truthPartContKey.key() << " found in StoreGate!");
+    return StatusCode::FAILURE;
   }
-  
+
   // Loop over all particles in the event and build up the grid
-
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
       if (part->isGenStable()) {  // stables only
-        if ((part->pdgId() != 13) && (part->pdgId() != -13) &&
-            (part->pdgId() != 12) && (part->pdgId() != -12) &&
-            (part->pdgId() != 14) && (part->pdgId() != -14) &&
-            (part->pdgId() != 16) && (part->pdgId() != -16) &&
+        if (!MC::isMuon(part) &&
+            !MC::isSMNeutrino(part) &&
             (std::abs(part->eta()) <=
              m_emaxeta)) {  // no neutrinos or muons and particles must be in
                             // active range

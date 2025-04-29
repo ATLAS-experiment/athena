@@ -13,6 +13,7 @@
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
+#include "FPGATrackSimHough/FPGATrackSimRoadUnionTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimSpacePointsToolI.h"
 #include "FPGATrackSimMaps/IFPGATrackSimHitFilteringTool.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
@@ -76,7 +77,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         std::string m_description;
 
         // Handles
-        ToolHandle<IFPGATrackSimRoadFinderTool>          m_roadFinderTool {this, "RoadFinder", "FPGATrackSimPatternMatchTool", "Road Finder Tool"};
+        ToolHandle<FPGATrackSimRoadUnionTool>            m_roadFinderTool {this, "RoadFinder", "FPGATrackSimPatternMatchTool", "Road Finder Tool"};
         ToolHandle<FPGATrackSimLLPRoadFilterTool>        m_LRTRoadFilterTool {this, "LRTRoadFilter", "FPGATrackSimLLPRoadFilterTool/FPGATrackSimLLPRoadFilterTool", "LRT Road Filter Tool"};
         ToolHandle<IFPGATrackSimRoadFinderTool>          m_LRTRoadFinderTool {this, "LRTRoadFinder", "FPGATrackSimHoughTransform_d0phi0_Tool/FPGATrackSimHoughTransform_d0phi0_Tool", "LRT Road Finder Tool"};
         ToolHandle<IFPGATrackSimRoadFilterTool>          m_roadFilterTool {this, "RoadFilter", "FPGATrackSimEtaPatternFilterTool", "Road Filter Tool"};
@@ -89,7 +90,9 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
-        
+        // chrono service
+        ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
+
         // Flags
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
@@ -97,21 +100,22 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
         Gaudi::Property<bool> m_filterRoads  {this, "FilterRoads", false, "enable first road filter"};
         Gaudi::Property<bool> m_filterRoads2  {this, "FilterRoads2", false,  "enable second road filter"};
-        Gaudi::Property<bool> m_doHoughRootOutput {this, "DoHoughRootOutput", false, "Dump output from the Hough Transform to flat ntuples"};
-        Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
+        Gaudi::Property<bool> m_doHoughRootOutput1st {this, "DoHoughRootOutput1st", false, "Dump output from the Hough Transform to flat ntuples"};
+        Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack_1st", false, "Run NN track filtering for 1st stage"};
         Gaudi::Property<bool> m_doLRT {this, "doLRT", false, "Enable Large Radius Tracking"};
         Gaudi::Property<bool> m_doLRTHitFiltering {this, "LRTHitFiltering", false, "flag to enable hit/cluster filtering for LRT"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
-        Gaudi::Property<bool> m_runOnRDO {this,"runOnRDO", false, "case when runnin on RDO file (and not or wrapper)"};
         Gaudi::Property<float> m_trackScoreCut {this, "TrackScoreCut", 25.0, "Minimum track score (e.g. chi2 or NN)." };
         Gaudi::Property<bool> m_writeOutNonSPStripHits {this, "writeOutNonSPStripHits", true, "Write tracks to RootOutput if they have strip hits which are not SPs"};
         Gaudi::Property <int> m_NumOfHitPerGrouping { this, "NumOfHitPerGrouping", 5, "Number of minimum overlapping hits for a track candidate to be removed in the HoughRootOutputTool"};
-
+        Gaudi::Property<bool> m_passLowestChi2TrackOnly {this,"passLowestChi2TrackOnly", false, "case when passing only lowest chi2 track per road"};
 
         // Properties for the output header tool.
-        Gaudi::Property<std::string> m_outputBranch     {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
+        Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for slied hits in output ROOT file." };
+        Gaudi::Property<std::string> m_outputBranch {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
 
         // ROOT pointers.
+        FPGATrackSimLogicalEventInputHeader*  m_slicedHitHeader = nullptr;
         FPGATrackSimLogicalEventOutputHeader* m_logicEventOutputHeader = nullptr;
 
         // Event storage
@@ -130,7 +134,12 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         long m_nTracksChi2Found = 0; // total number of those events with at least one track passing chi2
         long m_nTracksChi2OLRFound = 0; // total number of those events with at least one track passing chi2 and OLR
 
+        unsigned long m_maxNRoadsFound = 0; // max number of roads in an event
+        unsigned long m_maxNTracksTot = 0; // max number of tracks in an event
+        unsigned long m_maxNTracksChi2Tot = 0; // max number of tracks passing chi2 in an event
+        unsigned long m_maxNTracksChi2OLRTot = 0; // max number of tracks passing chi2 and OLR in an events
 
+        
         StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
                                    FPGATrackSimDataFlowInfo const * dataFlowInfo);
 
@@ -139,15 +148,14 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
         // Read hits from data prep algorithm. TODO: regionalize.
-        SG::ReadHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey",{"FPGAHits_1st"},"FPGATrackSim Hits key"};
-
+        SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey {this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim hits key"};
         // Write out roads, hits in roads, and tracks.
+        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey_2nd{this, "FPGATrackSimHitKey_2nd","FPGAHits_2nd","FPGATrackSim 2nd stage hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitFilteredKey{this, "FPGATrackSimHitFiltered1stKey","FPGAHitsFiltered_1st","FPGATrackSim Filtered Hits 1st stage key"};
         SG::WriteHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoads1stKey","FPGAHitsInRoads_1st","FPGATrackSim Hits in 1st stage roads key"};
         SG::WriteHandleKey<FPGATrackSimRoadCollection> m_FPGARoadKey{this, "FPGATrackSimRoad1stKey","FPGARoads_1st","FPGATrackSim Roads 1st stage key"};
         SG::WriteHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrack1stKey","FPGATracks_1st","FPGATrackSim Tracks 1st stage key"};
 
-        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleContainerKey{this, "TruthTrackContainer", "TruthParticles", "Truth Particle Container"};
         SG::ReadHandleKey<FPGATrackSimTruthTrackCollection> m_FPGATruthTrackKey {this, "FPGATrackSimTruthTrackKey", "FPGATruthTracks", "FPGATrackSim truth tracks"};
         SG::ReadHandleKey<FPGATrackSimOfflineTrackCollection> m_FPGAOfflineTrackKey {this, "FPGATrackSimOfflineTrackKey", "FPGAOfflineTracks", "FPGATrackSim offline tracks"};
 };

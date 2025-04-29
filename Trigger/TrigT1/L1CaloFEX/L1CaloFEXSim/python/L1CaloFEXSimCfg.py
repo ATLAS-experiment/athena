@@ -73,7 +73,6 @@ def TriggerTowersInputCfg(flags):
         from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
         return LVL1CaloRun2ReadBSCfg(flags)
 
-
 def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, outputSuffix="", simulateAltTau=False):
     from AthenaConfiguration.Enums import Format
 
@@ -110,7 +109,15 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         acc.merge(TriggerTowersInputCfg(flags))
 
     if 'L1_eFexEmulatedTowers' in eFexTowerInputs and "L1_eFexEmulatedTowers" not in flags.Input.Collections:
-        acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",CaloCellContainerReadKey=sCellType,ApplyMasking=not flags.Input.isMC) ) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
+        doV6Mapping=False # latome fex input mapping if different between v5 and v6 ... for now only switching to v6 in data
+        if not flags.Input.isMC and len(flags.Input.RunNumbers)>0: # in HLT reprocessing jobs, the runNumbers list will be empty ... have to default to v5 for now for these jobs
+            from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+            runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+            doV6Mapping = (runinfo.FWversion()==6)
+        builderAlg = CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",UseLATOMEv6Mapping=doV6Mapping,
+                                                            CaloCellContainerReadKey=sCellType,ApplyMasking=not flags.Input.isMC) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
+        if doV6Mapping: builderAlg.MappingFile='' # need to regenerate mapping on-the-fly for v6
+        acc.addEventAlgo( builderAlg )
 
     if flags.Trigger.L1.doeFex:
         if eFexTowerInputs==[]:
@@ -135,13 +142,28 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool = CompFactory.LVL1.eFEXSim('eFEXSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool = CompFactory.LVL1.eFEXFPGA('eFEXFPGATool')
-        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',dmCorr=deadMaterialCorrections) # only dmCorrections in data for now
-        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool = CompFactory.LVL1.eFEXtauAlgo("eFEXtauAlgo")
+
+        # read algoVersions from menu and configure the algo tools
+        from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
+        L1_menu = getL1MenuAccess(flags)
+
+        em_algoVersion = L1_menu.thresholdExtraInfo("eEM").get("algoVersion", 0)
+        tau_algoVersion = L1_menu.thresholdExtraInfo("eTAU").get("algoVersion", 0)
+
+        from PathResolver import PathResolver
+        bdtConfigJsonPath = PathResolver.FindCalibFile("Run3L1CaloSimulation/L1CaloFEXSim/eTAU/" + ("bdt_config_v17.json" if tau_algoVersion==2 else "bdt_config_v16.json"))
+
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',algoVersion=em_algoVersion,dmCorr=deadMaterialCorrections) # only dmCorrections in data for now
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool = CompFactory.LVL1.eFEXtauAlgo("eFEXtauAlgo") # heuristic algorithm
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo", BDTJsonConfigPath=bdtConfigJsonPath)
         # To dump supercells as a decorator to the tau TOB, set 
         #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool.DumpSuperCells = True
         #       and/or
         #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool.DumpSuperCells = True
-        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo", BDTJsonConfigPath="bdt_config_v16.json")
+
+
+
+
         # load noise cuts and dm corrections when running on data
         from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
 
@@ -349,7 +371,8 @@ if __name__ == '__main__':
         from AthenaConfiguration.Enums import LHCPeriod
         flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' if flags.GeoModel.Run is LHCPeriod.Run3 else 'CONDBR2-HLTP-2018-04'
     else:
-        flags.IOVDb.GlobalTag = 'OFLCOND-MC23-SDR-RUN3-05'
+        from AthenaConfiguration.TestDefaults import defaultConditionsTags
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
     flags.Output.AODFileName = 'AOD.pool.root'
     flags.Exec.MaxEvents = args.nevents
     flags.Concurrency.NumThreads = 1

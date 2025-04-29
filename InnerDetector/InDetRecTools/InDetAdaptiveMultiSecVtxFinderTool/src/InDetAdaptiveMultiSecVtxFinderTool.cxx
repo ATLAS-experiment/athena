@@ -77,7 +77,8 @@ namespace InDet {
         };
     }  // anonymous namespace
 
-    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetAdaptiveMultiSecVtxFinderTool::findVertex(
+    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> 
+    InDetAdaptiveMultiSecVtxFinderTool::findVertex(
         const xAOD::TrackParticleContainer* trackParticles) {
         ATH_MSG_DEBUG(" Number of input tracks before track selection: " << trackParticles->size());
 
@@ -117,8 +118,8 @@ namespace InDet {
         return returnContainers;
     }
 
-    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetAdaptiveMultiSecVtxFinderTool::doVertexing(
-        const std::vector<Trk::ITrackLink*>& trackVector) {
+    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> 
+    InDetAdaptiveMultiSecVtxFinderTool::doVertexing( const std::vector<Trk::ITrackLink*>& trackVector) {
         xAOD::VertexContainer* theVertexContainer = new xAOD::VertexContainer;
         xAOD::VertexAuxContainer* theVertexAuxContainer = new xAOD::VertexAuxContainer;
         theVertexContainer->setStore(theVertexAuxContainer);
@@ -220,30 +221,30 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
             }
 
             ATH_MSG_DEBUG(" Considering n. " << VTAV(*actualCandidate).size() << " tracks for the fit. ");
-            if (actualCandidate != nullptr) {
-                if (VTAV(*actualCandidate).size() < 2) {
-                    ATH_MSG_DEBUG("No tracks found near seed, while at least two tracks were expected.");
+            
+            if (VTAV(*actualCandidate).size() < 2) {
+                ATH_MSG_DEBUG("No tracks found near seed, while at least two tracks were expected.");
 
-                    if (VTAV.isAvailable(*actualCandidate)) {
-                        for (auto *tav : VTAV(*actualCandidate)) {
-                            if (tav == nullptr) continue;
+                if (VTAV.isAvailable(*actualCandidate)) {
+                    for (auto *tav : VTAV(*actualCandidate)) {
+                        if (tav == nullptr) continue;
 
-                            (static_cast<Trk::MVFVxTrackAtVertex*>(tav))->setLinkToVertices(nullptr);
-                            delete tav;
-                            tav = nullptr;
-                        }
-                        VTAV(*actualCandidate).clear();
+                        (static_cast<Trk::MVFVxTrackAtVertex*>(tav))->setLinkToVertices(nullptr);
+                        delete tav;
+                        tav = nullptr;
                     }
-                    if (MvfFitInfo.isAvailable(*actualCandidate) && MvfFitInfo(*actualCandidate) != nullptr) {
-                        delete MvfFitInfo(*actualCandidate);
-                        MvfFitInfo(*actualCandidate) = nullptr;
-                    }
-                    delete actualCandidate;
-                    actualCandidate = nullptr;
-
-                    break;
+                    VTAV(*actualCandidate).clear();
                 }
+                if (MvfFitInfo.isAvailable(*actualCandidate) && MvfFitInfo(*actualCandidate) != nullptr) {
+                    delete MvfFitInfo(*actualCandidate);
+                    MvfFitInfo(*actualCandidate) = nullptr;
+                }
+                delete actualCandidate;
+                actualCandidate = nullptr;
+
+                break;
             }
+            
             ATH_MSG_DEBUG("Going to fitter.");
 
             m_VertexFitter->addVtxTofit(actualCandidate);
@@ -480,6 +481,7 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
 
     bool InDetAdaptiveMultiSecVtxFinderTool::checkFit(xAOD::Vertex* actualCandidate) const {
         int ntracks = 0;
+        if (not actualCandidate) return false;
         float ndf = actualCandidate->numberDoF();
 
         static const xAOD::Vertex::Decorator<std::vector<Trk::VxTrackAtVertex*>> VTAV("VTAV");
@@ -491,11 +493,12 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
         ATH_MSG_DEBUG(" xAOD::Vertex : " << (actualCandidate != nullptr ? 1 : 0) << ",  #dof = " << ndf
                                          << ",  #tracks (weight>0.01) = " << ntracks);
 
-        return (actualCandidate != nullptr && ndf > 0 && ntracks >= 2);
+        return ( ndf > 0 && ntracks >= 2);
     }
 
     int InDetAdaptiveMultiSecVtxFinderTool::removeTracksFromSeeds(xAOD::Vertex* actualCandidate,
                                                                   std::vector<Trk::ITrackLink*>& seedTracks) const {
+        if (not actualCandidate) return 0;
         static const xAOD::Vertex::Decorator<std::vector<Trk::VxTrackAtVertex*>> VTAV("VTAV");
 
         std::vector<Trk::ITrackLink*>::iterator seedBegin = seedTracks.begin();

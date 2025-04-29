@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IsolationSelection_IsolationCloseByCorrectionTool_H
@@ -43,9 +43,9 @@ namespace CP {
         };
 
         using caloDecorNames = std::array<std::string, 4>;
-        /// Returns an array with the calo cluster decoration ames [0]-> eta, [1]->phi, [2]->energy. [3]->isDecorated
-        static caloDecorNames caloDecors();
-        static caloDecorNames pflowDecors();
+        /// Returns an array with the calo cluster decoration names [0]-> eta, [1]->phi, [2]->energy. [3]->isDecorated
+        static const caloDecorNames& caloDecors();
+        static const caloDecorNames& pflowDecors();
 
         using IsoHelperMap = std::map<IsoType, std::unique_ptr<IsoVariableHelper>>;
 
@@ -90,6 +90,7 @@ namespace CP {
             TrackSet tracks{};
             ClusterSet clusters{};
             PflowSet flows{};
+            UnorderedClusterSet eg_associated_clusters{};
         };
 
     private:
@@ -106,17 +107,20 @@ namespace CP {
         // particles and removes the isolation overlap between the objects
         CorrectionCode performCloseByCorrection (const EventContext& ctx, ObjectCache& cache) const;
 
+        // Lock decorations that we produced.
+        void lockDecorations (const xAOD::IParticleContainer* parts) const;
+
         // Helper function to obtain the isolation cones to use for a given particle
         const IsoVector& getIsolationTypes(const xAOD::IParticle* particle) const;
 
         // Functions to  perfrom  the isolation correction  directly
-        CorrectionCode subtractCloseByContribution(const EventContext& ctx, const xAOD::IParticle* P, const ObjectCache& cache) const;
+        CorrectionCode subtractCloseByContribution(const EventContext& ctx, const xAOD::IParticle* P, ObjectCache& cache) const;
         // Remove close-by tracks from the track isolation variables
         CorrectionCode getCloseByCorrectionTrackIso(const xAOD::IParticle* primary, const IsoType type, const ObjectCache& cache,
                                                     float& isoValue) const;
         // Remove close-by calo clusters from the topo et isolation variables
         CorrectionCode getCloseByCorrectionTopoIso(const EventContext& ctx, const xAOD::IParticle* primary, const IsoType type,
-                                                   const ObjectCache& cache, float& isoValue) const;
+                                                   ObjectCache& cache, float& isoValue) const;
         // Remove close-by flow elements from the neflow isolation variables
         CorrectionCode getCloseByCorrectionPflowIso(const EventContext& ctx, const xAOD::IParticle* primary, const IsoType type,
                                                     const ObjectCache& cache, float& isoValue) const;
@@ -125,7 +129,8 @@ namespace CP {
 
 
          /// Loads the topo clusters associated with the primary IParticle
-        ClusterSet getAssociatedClusters(const EventContext& ctx, const xAOD::IParticle* particle) const;
+        ClusterSet getAssociatedClusters(const EventContext& ctx, const xAOD::IParticle* particle,
+                                         ObjectCache& cache) const;
         /// Loads the pflow elements associated with the primary IParticle
         PflowSet getAssocFlowElements(const EventContext& ctx, const xAOD::IParticle* particle) const;
 
@@ -215,7 +220,9 @@ namespace CP {
             this, "BackupPrefix", "", "Prefix in front of the isolation variables, if the original cone values need  to  be backuped"};
 
         Gaudi::Property<std::string> m_isoDecSuffix{
-            this, "IsoDecSuffix", "", "Suffix added to output isolation variable nanes for close by corrections"};
+            this, "IsoDecSuffix", "", "Suffix added to output isolation variable names for close by corrections"};
+        Gaudi::Property<std::string> m_caloDecSuffix{
+            this, "CaloDecSuffix", "", "Suffix added to output cluster variable names for close by corrections"};
 
         /// EXPERT PROPERTIES
         Gaudi::Property<int> m_caloModel{this, "CaloCorrectionModel", TopoConeCorrectionModel::SubtractObjectsDirectly};

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/VarHandleBase.h
@@ -102,11 +102,13 @@ namespace SG {
      * @param sgkey StoreGate key of the referenced object.
      * @param mode Mode of this handle (read/write/update).
      * @param storename Name of the referenced event store.
+     * @param ctx The event context to use, or nullptr.
      */
     explicit VarHandleBase(CLID clid,
                            const std::string& sgkey,
                            Gaudi::DataHandle::Mode mode,
-                           const std::string& storename = StoreID::storeName(StoreID::EVENT_STORE));
+                           const std::string& storename,
+                           const EventContext* ctx);
 
 
     /**

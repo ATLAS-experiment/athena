@@ -18,10 +18,12 @@ HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN
 LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4149_s4150/*"
 DigiOutFileName="RUN4_presampling.mu140.RDO.pool.root"
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 Digi_tf.py \
 --CA \
 --PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
+--conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:ATLAS-P2-RUN4-03-00-00 \

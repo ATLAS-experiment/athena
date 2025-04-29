@@ -69,11 +69,7 @@ def ActsPixelClusteringToolCfg(flags,
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
 
-    kwargs.setdefault(
-        'UseWeightedPosition',
-        not (flags.Tracking.doPixelDigitalClustering or flags.Beam.Type is BeamType.Cosmics)
-    )
-
+    kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
     kwargs.setdefault('UseBroadErrors', flags.Beam.Type is BeamType.Cosmics)
 
     acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
@@ -89,9 +85,12 @@ def ActsStripClusteringToolCfg(flags,
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
 
-    if 'conditionsTool' not in kwargs:
-        from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
-        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
+    kwargs.setdefault("conditionsTool",None)
+    if "StripDetElStatus" not in kwargs :
+        from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
+            ITkStripDetectorElementStatusAlgCfg)
+        acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("StripDetElStatus", "ITkStripDetectorElementStatus")
 
     # Disable noisy modules suppression
     kwargs.setdefault("maxFiredStrips", 0)
@@ -307,7 +306,7 @@ def ActsMainClusterizationCfg(flags,
                                                        **extractChildKwargs(prefix='HgtdClusterPreparationAlg.', **kwargs)))
             
     # Analysis extensions
-    if flags.Acts.doAnalysis:
+    if flags.Acts.Clusters.doAnalysis:
         if kwargs['processPixels']:
             from ActsConfig.ActsAnalysisConfig import ActsPixelClusterAnalysisAlgCfg
             acc.merge(ActsPixelClusterAnalysisAlgCfg(flags, **extractChildKwargs(prefix='PixelClusterAnalysisAlg.', **kwargs)))
@@ -454,7 +453,7 @@ def ActsClusterizationCfg(flags,
                 kwargs.setdefault('HgtdClusterPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
     # Analysis algo(s)
-    if flags.Acts.doAnalysis:
+    if flags.Acts.Clusters.doAnalysis:
         # Run analysis code on the resulting cluster collection produced by this tracking pass
         # This collection is the result of (3) if it ran, else the result of (2). We are sure at least one of them run
         if kwargs['processPixels']:
@@ -475,5 +474,27 @@ def ActsClusterizationCfg(flags,
             kwargs.setdefault('HgtdClusterAnalysisAlg.MonGroupName', f'{flags.Tracking.ActiveConfig.extension}ClusterAnalysisAlg')
 
     acc.merge(ActsMainClusterizationCfg(flags, RoIs=roisName, **kwargs))
+
+    # Persistification
+    if flags.Acts.EDM.PersistifyClusters and kwargs['runReconstruction']:
+        toAOD = []
+        if kwargs['processPixels']:
+            pixelClusterCollection = kwargs['PixelClusterizationAlg.ClustersKey']
+            toAOD += [f'xAOD::PixelClusterContainer#{pixelClusterCollection}',
+                      f'xAOD::PixelClusterAuxContainer#{pixelClusterCollection}Aux.']
+            
+        if kwargs['processStrips']:
+            stripClusterCollection = kwargs['StripClusterizationAlg.ClustersKey']
+            toAOD += [f"xAOD::StripClusterContainer#{stripClusterCollection}",
+                      f"xAOD::StripClusterAuxContainer#{stripClusterCollection}Aux."]
+            
+        if kwargs['processHGTD']:
+            hgtdClusterCollection = kwargs['HgtdClusterizationAlg.ClusterContainerName']
+            toAOD += [f"xAOD::HGTDClusterContainer#{hgtdClusterCollection}",
+                      f"xAOD::HGTDClusterAuxContainer#{hgtdClusterCollection}Aux."]
+            
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+        acc.merge(addToAOD(flags, toAOD))
+        
     return acc
 

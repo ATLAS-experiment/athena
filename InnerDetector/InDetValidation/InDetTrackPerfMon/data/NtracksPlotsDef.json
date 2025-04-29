@@ -1,32 +1,52 @@
 {
     "num_$TRKTAG_all" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "N. of $TRKTYPEs", "nBins" : "500", "low" : "0", "high" : "5000" },
+        "xAxis" : { "title" : "N. $TRKTYPEs", "nBins" : "500", "low" : "0", "high" : "5000" },
         "yAxis" : { "title" : "Entries" }
     },
     "num_$TRKTAG_selected" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "N. of Selected $TRKTYPEs", "nBins" : "500", "low" : "0", "high" : "5000" },
+        "xAxis" : { "title" : "N. Selected $TRKTYPEs", "nBins" : "500", "low" : "0", "high" : "5000" },
         "yAxis" : { "title" : "Entries" }
     },
     "num_$TRKTAG_selectedInRoI" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "N. of Selected in RoI $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" },
+        "xAxis" : { "title" : "N. Selected in RoI $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" },
         "yAxis" : { "title" : "Entries" }
     },
     "num_$TRKTAG_matched" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "N. of Matched $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" },
+        "xAxis" : { "title" : "N. Matched $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" },
         "yAxis" : { "title" : "Entries" }
     },
     "num_$TRKTAG_selected_vs_truthMu" : {
         "type" : "TH2F",
         "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
-        "yAxis" : { "title" : "N. of Selected $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+        "yAxis" : { "title" : "N. Selected $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
     },
     "num_$TRKTAG_selected_vs_actualMu" : {
         "type" : "TH2F",
         "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
-        "yAxis" : { "title" : "N. of Selected $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+        "yAxis" : { "title" : "N. Selected $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+    },
+    "num_$TRKTAG_all_vs_num_vtx_$VTXTAG_all" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "N. $VTXTYPE", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. $TRKTYPE", "nBins" : "500", "low" : "0", "high" : "5000" }
+    },
+    "num_$TRKTAG_selected_vs_num_vtx_$VTXTAG_selected" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "N. Selected $VTXTYPE", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. Selected $TRKTYPE", "nBins" : "500", "low" : "0", "high" : "5000" }
+    },
+    "num_$TRKTAG_selectedInRoI_vs_num_vtx_$VTXTAG_selectedInRoI" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "N. Selected in RoI $VTXTYPE", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. Selected in RoI $TRKTYPE", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "num_$TRKTAG_matched_vs_num_vtx_$VTXTAG_matched" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "N. Matched $VTXTYPE", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. Matched $TRKTYPE", "nBins" : "100", "low" : "0", "high" : "100" }
     }
 }

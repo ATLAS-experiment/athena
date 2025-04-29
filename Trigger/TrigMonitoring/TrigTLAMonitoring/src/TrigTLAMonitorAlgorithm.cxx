@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTLAMonitorAlgorithm.h"
@@ -86,7 +86,7 @@ StatusCode TrigTLAMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       using J = xAOD::Jet;
       ANA_CHECK(fillParticleHistograms<J>(jets, "jet", trigName));
       if (jets->size()>0){
-        for (auto calibState: jetCalibStates){
+        for (const auto& calibState: jetCalibStates){
           ANA_CHECK(fillJetPtCalibStatesHistograms(jets,calibState, "jet", trigName));
         }
         ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"N90Constituents", "jet", trigName     )) );
@@ -99,7 +99,7 @@ StatusCode TrigTLAMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       // particle flow jets
       ANA_CHECK(fillParticleHistograms<J>(pfjets, "pfjet", trigName));
       if (pfjets->size()>0){
-        for (auto calibState: pfjetCalibStates){
+        for (const auto& calibState: pfjetCalibStates){
           ANA_CHECK(fillJetPtCalibStatesHistograms(pfjets, calibState, "pfjet", trigName));
         }
         ANA_CHECK( fillJetTrackVariableHistogram<float>(pfjets,"TrackWidthPt1000",     "pfjet", trigName) );

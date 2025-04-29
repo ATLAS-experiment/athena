@@ -50,7 +50,8 @@ class MetAnalysisConfig (ConfigBlock):
             "of this OR scheme, it should not be used in a regular analysis")
         self.addOption ('saveSignificance', True, type=bool,
             info="whether to save the MET significance (default=True)")
-
+        self.addOption ('useLRT', False, type=bool,
+            info="whether to use LRT MET Core and association map")
 
     def makeAlgs (self, config) :
 
@@ -59,6 +60,8 @@ class MetAnalysisConfig (ConfigBlock):
         else :
             jetContainer = config.originalName (self.jets)
             metSuffix = jetContainer[:-4]
+        if self.useLRT:
+            metSuffix += "_LRT"
 
         if not self.useFJVT and self.treatPUJets:
             raise ValueError ("MET significance pile-up treatment requires fJVT")
@@ -116,7 +119,7 @@ class MetAnalysisConfig (ConfigBlock):
                 config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
                 # Retrieve the calibMode from the container name.selections
                 alg.significanceTool.MuonCalibTool.calibMode = (
-                    config.calibMode(self.muons.split(".")[0]))
+                    config.getContainerMeta(self.muons.split(".")[0], 'calibMode', failOnMiss=True))
 
             alg.significanceTool.SoftTermParam = 0
             alg.significanceTool.TreatPUJets = self.treatPUJets
@@ -128,36 +131,3 @@ class MetAnalysisConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'phi', 'phi')
         config.addOutputVar (self.containerName, 'sumet', 'sumet')
 
-
-def makeMetAnalysisConfig( seq, containerName,
-                             useFJVT = None,
-                             treatPUJets = None,
-                             setMuonJetEMScale = None,
-                             jets = None,
-                             electrons = None,
-                             muons = None,
-                             photons = None,
-                             taus = None):
-    """Create a met analysis algorithm config
-
-    Note that defining a jet container is mandatory, but all other input
-    containers are optional.
-
-    Selections on each container can also be defined
-
-    Keyword arguments:
-      useFJVT -- Use FJVT decision for the calculation
-      treatPUJets -- Treat pile-up jets in the MET significance calculation
-      setMuonJetEMScale -- Use consituent scale and subtract muon eloss for jets overlapping muons
-    """
-
-    config = MetAnalysisConfig (containerName)
-    config.setOptionValue ('useFJVT', useFJVT)
-    config.setOptionValue ('treatPUJets', treatPUJets)
-    config.setOptionValue ('setMuonJetEMScale', setMuonJetEMScale)
-    config.setOptionValue ('jets', jets)
-    config.setOptionValue ('electrons', electrons)
-    config.setOptionValue ('muons', muons)
-    config.setOptionValue ('photons', photons)
-    config.setOptionValue ('taus', taus)
-    seq.append (config)

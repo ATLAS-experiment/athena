@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -52,10 +52,19 @@ class PhotonCalibrationConfig (ConfigBlock) :
         self.addOption ('minPt', 10*GeV, type=float,
             info="the minimum pT cut to apply to calibrated photons. "
             "The default is 10 GeV.")
-        self.addOption ('forceFullSimConfig', False, type=bool,
+        self.addOption ('maxEta', 2.37, type=float,
+            info="maximum photon |eta| (float). The default is 2.37.")
+        self.addOption ('forceFullSimConfigForP4', False, type=bool,
             info="whether to force the tool to use the configuration meant for "
-            "full simulation samples. Only for testing purposes. "
+            "full simulation samples for P4 corrections. Only for testing purposes. "
             "The default is False.")
+        self.addOption ('forceFullSimConfigForIso', False, type=bool,
+            info="whether to force the tool to use the configuration meant for "
+            "full simulation samples for isolation corrections. Only for testing purposes. "
+            "The default is False.")
+        self.addOption ('applyIsolationCorrection', True, type=bool,
+            info="whether to to apply the isolation corrections "
+            "The default is True.")
         self.addOption ('splitCalibrationAndSmearing', False, type=bool,
             info="EXPERIMENTAL: This splits the EgammaCalibrationAndSmearingTool "
             " into two steps. The first step applies a baseline calibration that "
@@ -63,6 +72,12 @@ class PhotonCalibrationConfig (ConfigBlock) :
             "systematics dependent corrections.  The net effect is that the "
             "slower first step only has to be run once, while the second is run "
             "once per systematic. ATLASG-2358")
+        self.addOption ('decorateTruth', False, type=bool,
+            info="decorate truth particle information on the reconstructed one")
+        self.addOption ('decorateCaloClusterEta', False, type=bool,
+            info="decorate the calo cluster eta on the reconstructed one")
+        self.addOption ('decorateEmva', False, type=bool,
+            info="decorate E_mva_only on the objects (needed for columnar tools/PHYSLITE)")
 
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
@@ -70,6 +85,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
+        log = logging.getLogger('PhotonCalibrationConfig')
+
         # Set up the calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
         config.addPrivateTool( 'calibrationAndSmearingTool',
@@ -79,11 +96,11 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.calibrationAndSmearingTool.ESModel = self.ESModel
         else:
             if config.geometry() is LHCPeriod.Run2:
-                alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v0'
+                alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v1'
             elif config.geometry() is LHCPeriod.Run3:
                 alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
             elif config.geometry() is LHCPeriod.Run4:
-                logging.warning("No ESModel set for Run4, using Run3 model")
+                log.warning("No ESModel set for Run4, using Run3 model")
                 alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
@@ -91,8 +108,9 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
         alg.calibrationAndSmearingTool.decorrelationModel = self.decorrelationModel
         alg.calibrationAndSmearingTool.useFastSim = (
-            0 if self.forceFullSimConfig
+            0 if self.forceFullSimConfigForP4
             else int( config.dataType() is DataType.FastSim ))
+        alg.calibrationAndSmearingTool.decorateEmva = self.decorateEmva
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -107,8 +125,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        if self.forceFullSimConfig:
-            log.warning("You are running PhotonCalibrationConfig forcing full sim config")
+        if self.forceFullSimConfigForP4:
+            log.warning("You are running PhotonCalibrationConfig forcing full sim config for P4 corrections")
             log.warning("This is only intended to be used for testing purposes")
 
         if config.isPhyslite() :
@@ -117,6 +135,14 @@ class PhotonCalibrationConfig (ConfigBlock) :
             config.setSourceName (self.containerName, "Photons")
 
         cleaningWP = 'NoTime' if self.cleaningAllowLate else ''
+
+        # Decorate calo cluster eta if required
+        if self.decorateCaloClusterEta:
+            alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg',
+                                          'ElectronEgammaCaloClusterEtaAlg' + self.postfix,
+                                           reentrant=True )
+            alg.particles = config.readName(self.containerName)
+            config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
@@ -128,7 +154,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonEtaCutAlg' + postfix )
         alg.selectionDecoration = 'selectEta' + postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.selectionTool.maxEta = 2.37
+        alg.selectionTool.maxEta = self.maxEta
         if self.crackVeto:
             alg.selectionTool.etaGapLow = 1.37
             alg.selectionTool.etaGapHigh = 1.52
@@ -176,7 +202,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
         # where z comes from the position of a vertex
         # Default the one tagged as Primary
         alg = config.createAlgorithm( 'CP::PhotonOriginCorrectionAlg',
-                                      'PhotonOriginCorrectionAlg' + postfix )
+                                      'PhotonOriginCorrectionAlg' + postfix,
+                                       reentrant=True )
         alg.photons = config.readName (self.containerName)
         alg.photonsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -215,8 +242,14 @@ class PhotonCalibrationConfig (ConfigBlock) :
             # turn off scale corrections for the smearing step
             alg.calibrationAndSmearingTool.doScaleCorrection = False
             alg.calibrationAndSmearingTool.useMVACalibration = False
+            alg.calibrationAndSmearingTool.decorateEmva = False
+
+        if not self.applyIsolationCorrection:
+            log.warning("You are not applying the isolation corrections")
+            log.warning("This is only intended to be used for testing purposes")
 
         if self.minPt > 0:
+                
             # Set up the the pt selection
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonPtCutAlg' + postfix )
             alg.selectionDecoration = 'selectPt' + postfix + ',as_bits'
@@ -228,17 +261,23 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                 preselection=True)
 
         # Set up the isolation correction algorithm.
-        alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
-                                      'PhotonIsolationCorrectionAlg' + postfix )
-        config.addPrivateTool( 'isolationCorrectionTool',
-                               'CP::IsolationCorrectionTool' )
-        alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
-        alg.isolationCorrectionTool.AFII_corr = (
-                0 if self.forceFullSimConfig
+        if self.applyIsolationCorrection:
+
+            if self.forceFullSimConfigForIso:
+                log.warning("You are running PhotonCalibrationConfig forcing full sim config for isolation corrections")
+                log.warning("This is only intended to be used for testing purposes")
+            
+            alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
+                                          'PhotonIsolationCorrectionAlg' + postfix )
+            config.addPrivateTool( 'isolationCorrectionTool',
+                                   'CP::IsolationCorrectionTool' )
+            alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
+            alg.isolationCorrectionTool.AFII_corr = (
+                0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
-        alg.egammas = config.readName (self.containerName)
-        alg.egammasOut = config.copyName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, '')
+            alg.egammas = config.readName (self.containerName)
+            alg.egammasOut = config.copyName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
 
         # Additional decorations
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
@@ -249,6 +288,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
 
+        # decorate truth information on the reconstructed object:
+        if self.decorateTruth and config.dataType() is not DataType.Data:
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
 
 
 class PhotonWorkingPointConfig (ConfigBlock) :
@@ -273,6 +316,9 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolationWP', None, type=str,
             info="the ID WP (string) to use. Supported isolation WPs: "
             "FixedCutLoose, FixedCutTight, TightCaloOnly, NonIso.")
+        self.addOption ('addSelectionToPreselection', True, type=bool,
+            info="whether to retain only photons satisfying the working point "
+            "requirements. The default is True.")
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points")
         self.addOption ('recomputeIsEM', False, type=bool,
@@ -283,12 +329,26 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             "purpose of FSR corrections to these muons. Expert feature "
             "requested by the H4l analysis running on PHYSLITE. "
             "The default is False.")
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
+        self.addOption ('noEffSFForID', False, type=bool,
+            info="disables the calculation of ID efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
             "factors are not available. The default is False.")
-        self.addOption ('forceFullSimConfig', False, type=bool,
-            info="whether to force the tool to use the configuration meant "
+        self.addOption ('noEffSFForIso', False, type=bool,
+            info="disables the calculation of Iso efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available. The default is False.")
+        self.addOption ('saveDetailedSF', True, type=bool,
+            info="save all the independent detailed object scale factors. "
+            "The default is True.")
+        self.addOption ('saveCombinedSF', False, type=bool,
+            info="save the combined object scale factor. "
+            "The default is False.")
+        self.addOption ('forceFullSimConfigForID', False, type=bool,
+            info="whether to force the ID tool to use the configuration meant "
+            "for full simulation samples. Only for testing purposes. "
+            "The default is False.")
+        self.addOption ('forceFullSimConfigForIso', False, type=bool,
+            info="whether to force the Iso tool to use the configuration meant "
             "for full simulation samples. Only for testing purposes. "
             "The default is False.")
 
@@ -300,9 +360,13 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the PhotonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 
-        if self.forceFullSimConfig:
-            log.warning("You are running PhotonWorkingPointConfig forcing full sim config")
+        if self.forceFullSimConfigForID:
+            log.warning("You are running PhotonWorkingPointConfig forcing full sim config for ID")
             log.warning("This is only intended to be used for testing purposes")
+           
+        if self.forceFullSimConfigForIso:
+            log.warning("You are running PhotonWorkingPointConfig forcing full sim config for Iso")
+            log.warning("This is only intended to be used for testing purposes") 
 
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
@@ -319,7 +383,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
         # Set up the photon selection algorithm:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonIsEMSelectorAlg' + postfix )
-        alg.selectionDecoration = 'selectEM' + postfix + ',as_bits'
+        alg.selectionDecoration = 'selectEM' + postfix + ',as_char'
         if self.recomputeIsEM:
             # Rerun the cut-based ID
             config.addPrivateTool( 'selectionTool', 'AsgPhotonIsEMSelector' )
@@ -345,7 +409,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.selectionTool.selectionFlags = [ dfFlag ]
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                             preselection=self.addSelectionToPreselection)
 
         # Set up the FSR selection
         if self.doFSRSelection :
@@ -359,7 +424,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         if self.isolationWP != 'NonIso' :
             alg = config.createAlgorithm( 'CP::EgammaIsolationSelectionAlg',
                                           'PhotonIsolationSelectionAlg' + postfix )
-            alg.selectionDecoration = 'isolated' + postfix + ',as_bits'
+            alg.selectionDecoration = 'isolated' + postfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.PhotonWP = self.isolationWP
             if self.closeByCorrection:
@@ -367,10 +432,12 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.isPhoton = True
             alg.egammas = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
+        sfList = []
         # Set up the ID/reco photon efficiency correction algorithm:
-        if config.dataType() is not DataType.Data and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSFForID:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgID' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -378,21 +445,24 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.scaleFactorDecoration = 'ph_id_effSF' + postfix + '_%SYS%'
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
-                    PATCore.ParticleDataType.Full if self.forceFullSimConfig else
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfigForID else
                     PATCore.ParticleDataType.Fast)
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             if config.geometry() >= LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt'
+                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_id_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'id_effSF' + postfix)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'id_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
         # Set up the ISO photon efficiency correction algorithm:
-        if config.dataType() is not DataType.Data and self.isolationWP != 'NonIso' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.isolationWP != 'NonIso' and not self.noEffSFForIso:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -400,85 +470,29 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.scaleFactorDecoration = 'ph_isol_effSF' + postfix + '_%SYS%'
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
-                    PATCore.ParticleDataType.Full if self.forceFullSimConfig else
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfigForIso else
                     PATCore.ParticleDataType.Fast)
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP.replace("FixedCut","")
             if config.geometry() >= LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt'
+                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_isol_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'isol_effSF' + postfix)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'isol_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
+        doCombEffSF = not self.noEffSFForID or not self.noEffSFForIso
+        if config.dataType() is not DataType.Data and doCombEffSF and self.saveCombinedSF:
+            alg = config.createAlgorithm( 'CP::AsgObjectScaleFactorAlg',
+                                          'PhotonCombinedEfficiencyScaleFactorAlg' + postfix )
+            alg.particles = config.readName (self.containerName)
+            alg.inScaleFactors = sfList
+            alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
+            config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
 
-
-
-
-def makePhotonCalibrationConfig( seq, containerName,
-                                 postfix = None,
-                                 crackVeto = None,
-                                 enableCleaning = None,
-                                 cleaningAllowLate = None,
-                                 recomputeIsEM = None,
-                                 forceFullSimConfig = None):
-    """Create photon calibration analysis algorithms
-
-    This makes all the algorithms that need to be run first befor
-    all working point specific algorithms and that can be shared
-    between the working points.
-
-    Keywrod arguments:
-      postfix -- a postfix to apply to decorations and algorithm
-                 names.  this is mostly used/needed when using this
-                 sequence with multiple working points to ensure all
-                 names are unique.
-      crackVeto -- Whether or not to perform eta crack veto
-      enableCleaning -- Enable photon cleaning
-      cleaningAllowLate -- Whether to ignore timing information in cleaning.
-      recomputeIsEM -- Whether to rerun the cut-based selection. If not, use derivation flags
-      forceFullSimConfig -- imposes full-sim config for FastSim for testing
-    """
-
-    config = PhotonCalibrationConfig (containerName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('crackVeto', crackVeto)
-    config.setOptionValue ('enableCleaning', enableCleaning)
-    config.setOptionValue ('cleaningAllowLate', cleaningAllowLate)
-    config.setOptionValue ('recomputeIsEM', recomputeIsEM)
-    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
-    seq.append (config)
-
-
-
-def makePhotonWorkingPointConfig( seq, containerName, workingPoint, selectionName,
-                                  recomputeIsEM = None,
-                                  noEffSF = None,
-                                  forceFullSimConfig = None):
-    """Create photon analysis algorithms for a single working point
-
-    Keywrod arguments:
-      workingPoint -- The working point to use
-      selectionName -- a postfix to apply to decorations and algorithm
-                 names.  this is mostly used/needed when using this
-                 sequence with multiple working points to ensure all
-                 names are unique.
-      recomputeIsEM -- Whether to rerun the cut-based selection. If not, use derivation flags
-      noEffSF -- Disables the calculation of efficiencies and scale factors
-      forceFullSimConfig -- imposes full-sim config for FastSim for testing
-    """
-
-    config = PhotonWorkingPointConfig (containerName, selectionName)
-    if workingPoint is not None :
-        splitWP = workingPoint.split ('.')
-        if len (splitWP) != 2 :
-            raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
-        config.setOptionValue ('qualityWP',     splitWP[0])
-        config.setOptionValue ('isolationWP',   splitWP[1])
-    config.setOptionValue ('recomputeIsEM', recomputeIsEM)
-    config.setOptionValue ('noEffSF', noEffSF)
-    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
-    seq.append (config)

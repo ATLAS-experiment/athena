@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/SubjetBuilder.h"
@@ -11,13 +11,9 @@
 SubjetBuilder::SubjetBuilder(const std::string& type,
 			     const std::string& name,
 			     const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_Rsubjet(0.2),
-  m_ptmin(10000)
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("Rsubjet", m_Rsubjet);
-  declareProperty("ptminsubjet", m_ptmin);
 }
 
 

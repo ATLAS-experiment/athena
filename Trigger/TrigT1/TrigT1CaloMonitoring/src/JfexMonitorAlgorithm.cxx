@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JfexMonitorAlgorithm.h"
@@ -7,8 +7,6 @@
 #include "TMath.h"
 #include "JfexMapForwardEmptyBins.h"
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 JfexMonitorAlgorithm::JfexMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator)
@@ -34,13 +32,6 @@ StatusCode JfexMonitorAlgorithm::initialize() {
     ATH_CHECK( m_jFexMETContainerKey.initialize()   );
     ATH_CHECK( m_jFexSumEtContainerKey.initialize() );
 
-    // TOBs may come from trigger bytestream - renounce from scheduler
-    renounce(m_jFexLRJetContainerKey );
-    renounce(m_jFexSRJetContainerKey );
-    renounce(m_jFexTauContainerKey   );
-    renounce(m_jFexFwdElContainerKey );
-    renounce(m_jFexMETContainerKey   );
-    renounce(m_jFexSumEtContainerKey );
 
     return AthMonitorAlgorithm::initialize();
 }
@@ -147,39 +138,35 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     auto weight = Monitored::Scalar<float>("weight",1);
 
     // write -1 into bins in maps that are always empty
-    {
-        std::scoped_lock lock(m_mutex);
-        if (m_firstEvent) {
-            weight = -1;
-            // empty bins due to irregular structure of FCAL
-            for (auto& [eta, phi] : jFEXMapEmptyBinCenters) {
-                jFexSRJeteta = eta;
-                jFexSRJetphi = phi;
-                jFexEMeta = eta;
-                jFexEMphi = phi;
-                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,jFexEMeta,jFexEMphi,weight);
-                fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,jFexEMeta,jFexEMphi,weight);
-            }
+    std::call_once(m_initOnce, [&]() {
+      weight = -1;
+      // empty bins due to irregular structure of FCAL
+      for (auto& [eta, phi] : jFEXMapEmptyBinCenters) {
+          jFexSRJeteta = eta;
+          jFexSRJetphi = phi;
+          jFexEMeta = eta;
+          jFexEMphi = phi;
+          fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,jFexEMeta,jFexEMphi,weight);
+          fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,jFexEMeta,jFexEMphi,weight);
+      }
 
-            for (auto& [eta, phi] : jFEXMapEmptyBinCentersJetsOnly) {
-                jFexSRJeteta = eta;
-                jFexSRJetphi = phi;
-                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
-                fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
-            }
+      for (auto& [eta, phi] : jFEXMapEmptyBinCentersJetsOnly) {
+          jFexSRJeteta = eta;
+          jFexSRJetphi = phi;
+          fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+          fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
+      }
 
-            // central region without jEM
-            for (int ieta=-23; ieta<23; ieta++){
-                jFexEMeta = 0.1 * ieta + 0.05;
-                for (int iphi=-32; iphi<33; iphi++){
-                    jFexEMphi = M_PI/32 * iphi + M_PI/64;
-                    fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
-                }
-            }
-            m_firstEvent = false;
-            weight = 1;
-        }
-    }
+      // central region without jEM
+      for (int ieta=-23; ieta<23; ieta++){
+          jFexEMeta = 0.1 * ieta + 0.05;
+          for (int iphi=-32; iphi<33; iphi++){
+              jFexEMphi = M_PI/32 * iphi + M_PI/64;
+              fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+          }
+      }
+      weight = 1;
+    });
 
     if (!jJ_isInValid) {
       for (const xAOD::jFexSRJetRoI *jFexSRJetRoI : *jFexSRJetContainer) {
@@ -327,7 +314,7 @@ template <typename TOB>
 StatusCode JfexMonitorAlgorithm::fillMapsCentralAndFCAL(
     TOB tob, Monitored::Scalar<float> &eta, Monitored::Scalar<float> &phi,
     Monitored::Scalar<int> &binNumber, Monitored::Scalar<int> &lbn,
-    std::vector<float> etaBinBorders, Monitored::Scalar<float> &weight) const {
+    const std::vector<float>& etaBinBorders, Monitored::Scalar<float> &weight) const {
   binNumber = binNumberFromCoordinates(eta, phi, etaBinBorders);
   fill(m_Groupmaps, eta, phi, lbn, binNumber, weight);
   if (passesEnergyCut(tob))
@@ -339,7 +326,7 @@ template <typename TOB>
 StatusCode JfexMonitorAlgorithm::fillMapsEndcap(
     TOB tob, Monitored::Scalar<float> &eta, Monitored::Scalar<float> &phi,
     Monitored::Scalar<int> &binNumber, Monitored::Scalar<int> &lbn,
-    std::vector<float> etaBinBorders, Monitored::Scalar<float> &weight) const {
+    const std::vector<float>& etaBinBorders, Monitored::Scalar<float> &weight) const {
   float originalPhi = phi;
   phi = originalPhi - M_PI / 64;
   fill(m_Groupmaps, eta, phi, weight);
@@ -360,7 +347,7 @@ StatusCode JfexMonitorAlgorithm::fillMapsEndcap(
 StatusCode JfexMonitorAlgorithm::fillMapsOverlap(
     const xAOD::jFexSRJetRoI *tob, Monitored::Scalar<float> &eta,
     Monitored::Scalar<float> &phi, Monitored::Scalar<int> &binNumber,
-    Monitored::Scalar<int> &lbn, std::vector<float> etaBinBorders,
+    Monitored::Scalar<int> &lbn, const std::vector<float>& etaBinBorders,
     Monitored::Scalar<float> &weight) const {
   binNumber = binNumberFromCoordinates(eta, phi, etaBinBorders);
   fill(m_Groupmaps, lbn, binNumber);
@@ -401,7 +388,7 @@ bool JfexMonitorAlgorithm::passesEnergyCut(const xAOD::jFexTauRoI *tob) const {
 }
 
 int JfexMonitorAlgorithm::binNumberFromCoordinates(
-    float eta, float phi, std::vector<float> etaBinBorders) const {
+    float eta, float phi, const std::vector<float>& etaBinBorders) const {
   if (etaBinBorders.size() == 0) {
     ANA_MSG_ERROR("List of eta bin borders is empty!");
     return 0;

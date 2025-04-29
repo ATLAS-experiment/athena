@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -66,12 +66,12 @@ namespace LVL1 {
   private:
     const unsigned int m_eFexStep = 25;
 
-    int m_id;
-    int m_efexid;
+    int m_id = 0;
+    int m_efexid = 0;
     std::vector< std::unique_ptr<eFEXegTOB> > m_emTobObjects;
     std::vector< std::unique_ptr<eFEXtauTOB> > m_tauHeuristicTobObjects;
     std::vector< std::unique_ptr<eFEXtauTOB> > m_tauBDTTobObjects;
-    int m_eTowersIDs [10][6];
+    int m_eTowersIDs [10][6]{};
 
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{
       this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu",

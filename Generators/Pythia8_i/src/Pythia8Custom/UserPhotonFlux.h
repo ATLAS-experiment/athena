@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PYTHIA8_I_USERPHOTONFLUX_H
@@ -10,7 +10,6 @@
 
 #include "Pythia8/Pythia.h"
 
-using namespace Pythia8;
 
 // Photon flux from lead-ions. Integrated over impact parameters > 2*r_Pb.
 // Suitable for photo-nuclear processes but not for photon-photon.
@@ -19,26 +18,26 @@ using namespace Pythia8;
 
 // Photon flux from leptons, corresponds to internal Lepton2gamma.
 
-class Lepton2gamma2 : public PDF {
+class Lepton2gamma2 : public Pythia8::PDF {
 
 public:
 
   // Constructor.
-  Lepton2gamma2(int idBeamIn) : PDF(idBeamIn) {}
+  Lepton2gamma2(int idBeamIn) : Pythia8::PDF(idBeamIn) {}
 
   // Update the photon flux.
   void xfUpdate(int , double x, double Q2) {
-    xgamma = 0.5 * 0.007297353080 / M_PI * (1. + pow2(1. - x)) / Q2;
+    xgamma = 0.5 * 0.007297353080 / M_PI * (1. + Pythia8::pow2(1. - x)) / Q2;
   }
 };
 
-class Nucleus2gamma2 : public PDF {
+class Nucleus2gamma2 : public Pythia8::PDF {
 
 public:
 
   // Constructor.
   //defaults for m_Z m_min_b=2*nuclear radius are for Pb208 (Z=82, R=6.62fm)
-  Nucleus2gamma2(int idBeamIn) : PDF(idBeamIn),
+  Nucleus2gamma2(int idBeamIn) : Pythia8::PDF(idBeamIn),
 				m_Z(82.),
 				m_min_b(13.24),
 				m_min_x(-1)
@@ -53,9 +52,10 @@ public:
       xgamma=0;
       return;
     }
+    using Pythia8::pow2;
     double xi = x * M_NUCLEON_EFF * m_min_b / HBAR_TIMES_C;
-    double bK0 = besselK0(xi);
-    double bK1 = besselK1(xi);
+    double bK0 = Pythia8::besselK0(xi);
+    double bK1 = Pythia8::besselK1(xi);
     double intB = xi * bK1 * bK0 - 0.5 * pow2(xi) * ( pow2(bK1) - pow2(bK0) );
     xgamma = 2. * ALPHA_EM * pow2(m_Z) / M_PI * intB;
   }
@@ -76,13 +76,13 @@ private:
 };
 
 /** Tool to implement Pythi8 main70 functionality */
-class UserPhotonFlux: public AthAlgTool, virtual public IPythia8Custom {
+class UserPhotonFlux: public extends<AthAlgTool, IPythia8Custom> {
   
   public:
   
   /** AlgTool style constructor */
-  UserPhotonFlux(const std::string&,const std::string&,const IInterface*);
-  
+  using base_class::base_class;
+
   /** Destructor */
   virtual ~UserPhotonFlux(){};
   
@@ -104,25 +104,25 @@ class UserPhotonFlux: public AthAlgTool, virtual public IPythia8Custom {
 
  private:
 
-  int m_process;
-  double m_flux_Z;
-  double m_flux_min_b;
-  double m_flux_min_x;
+  Gaudi::Property<int> m_process{this, "Process", 1};
+  Gaudi::Property<double> m_flux_Z{this, "NuclearCharge", 82.};
+  Gaudi::Property<double> m_flux_min_b{this, "MinimumB", 13.24};
+  Gaudi::Property<double> m_flux_min_x{this, "MinimumX", -1};//default applies no cut since sampled x's always >0.
 };
 
 #ifdef PYTHIA_VERSION_INTEGER
   #if PYTHIA_VERSION_INTEGER > 8300
-    typedef shared_ptr<PDF> PDFPtr;
-    typedef shared_ptr<Nucleus2gamma2> Nucleus2gammaPtr;
-    #define PNEW(X, Y) make_shared<X>(Y);
+    typedef std::shared_ptr<Pythia8::PDF> PDFPtr;
+    typedef std::shared_ptr<Nucleus2gamma2> Nucleus2gammaPtr;
+    #define PNEW(X, Y) std::make_shared<X>(Y);
   #else
     typedef Nucleus2gamma2* Nucleus2gammaPtr;
-    typedef PDF* PDFPtr;
+    typedef Pythia8::PDF* PDFPtr;
     #define PNEW(X, Y) new X(Y);
   #endif
 #else
   typedef Nucleus2gamma2* Nucleus2gammaPtr;
-  typedef PDF* PDFPtr;
+  typedef Pythia8::PDF* PDFPtr;
   #define PNEW(X, Y) new X(Y);
 #endif
 

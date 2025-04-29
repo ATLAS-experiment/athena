@@ -30,7 +30,11 @@
 
 
 #include <vector>
+#include <string>
+#include <stdexcept>
 #include <utility>
+
+#include "CxxUtils/checker_macros.h"
 
 template <typename T>
 class FPGATrackSimGenScanArray
@@ -128,7 +132,7 @@ public:
       using pointer = FPGATrackSimGenScanArray<T>::Iterator*;
       using reference = FPGATrackSimGenScanArray<T>::Iterator &;
 
-      // Construtctor
+      // Constructor
       Iterator(const std::vector<unsigned int> &idx,
                FPGATrackSimGenScanArray<T> &itrdata)
           : m_idx(idx), m_itrdata(itrdata) {
@@ -182,9 +186,10 @@ public:
         FPGATrackSimGenScanArray<T> &m_itrdata;
     };
 
+
     // ussual std iterator meanings of begin, end, and size
     Iterator begin() { return Iterator(std::vector<unsigned int>(m_dims.size(), 0), *this); }
-    Iterator end()
+    Iterator end() 
     {
         std::vector<unsigned int> retv;
         for (auto &d : m_dims)

@@ -31,13 +31,11 @@
 PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionType,
 	const std::string& inputCollection,
 	unsigned int contextId,
-	const std::string& query,
 	const IPoolSvc* svc) :
 	m_collectionType(),
 	m_connection(),
 	m_inputCollection(inputCollection),
 	m_contextId(contextId),
-	m_query(query),
 	m_poolSvc(svc),
 	m_poolCollection(nullptr),
 	m_collectionQuery(nullptr),
@@ -128,16 +126,7 @@ pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
    assert(m_poolCollection);
    delete m_collectionQuery; m_collectionQuery = nullptr;
    m_collectionQuery = m_poolCollection->newQuery();
-   m_collectionQuery->setRowCacheSize(100);   //MN: FIXME - just an arbitrary number
-   return(m_collectionQuery->execute());
-}
-//______________________________________________________________________________
-pool::ICollectionCursor& PoolCollectionConverter::executeQuery() {
-   assert(m_poolCollection);
-   delete m_collectionQuery; m_collectionQuery = nullptr;
-   m_collectionQuery = m_poolCollection->newQuery();
    m_collectionQuery->selectAll();
-   m_collectionQuery->setCondition(m_query);
    m_collectionQuery->setRowCacheSize(100);   //MN: FIXME - just an arbitrary number
    return(m_collectionQuery->execute());
 }

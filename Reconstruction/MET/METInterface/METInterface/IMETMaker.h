@@ -40,19 +40,19 @@ public:
                                 xAOD::MissingETContainer* metCont,
                                 const xAOD::IParticleContainer* collection,
                                 xAOD::MissingETAssociationHelper& helper,
-                                MissingETBase::UsageHandler::Policy objScale=MissingETBase::UsageHandler::PhysicsObject) = 0;
+                                MissingETBase::UsageHandler::Policy objScale=MissingETBase::UsageHandler::PhysicsObject) const = 0;
   // Default method that uses standard overlap removal policy
   virtual StatusCode rebuildMET(xAOD::MissingET* met,
                                 const xAOD::IParticleContainer* collection,
                                 xAOD::MissingETAssociationHelper& helper,
-                                MissingETBase::UsageHandler::Policy objScale=MissingETBase::UsageHandler::PhysicsObject) = 0;
+                                MissingETBase::UsageHandler::Policy objScale=MissingETBase::UsageHandler::PhysicsObject) const = 0;
   // Full implementation with option flags
   virtual StatusCode rebuildMET(xAOD::MissingET* met,
                                 const xAOD::IParticleContainer* collection,
                                 xAOD::MissingETAssociationHelper& helper,
                                 MissingETBase::UsageHandler::Policy p,
                                 bool removeOverlap,
-                                MissingETBase::UsageHandler::Policy objScale=MissingETBase::UsageHandler::PhysicsObject) = 0;
+                                MissingETBase::UsageHandler::Policy objScale=MissingETBase::UsageHandler::PhysicsObject) const = 0;
 
   ///////////////////////////////////////////////////////////////////
   // Jet/soft MET term rebuilding
@@ -66,7 +66,7 @@ public:
                                    const xAOD::JetContainer* jets,
                                    const xAOD::MissingETContainer* metCoreCont,
                                    xAOD::MissingETAssociationHelper& helper,
-                                   bool doJetJVT) = 0;
+                                   bool doJetJVT) const = 0;
   // Version with two soft terms
   virtual StatusCode rebuildJetMET(const std::string& metJetKey,
                                    const std::string& softClusKey,
@@ -75,7 +75,7 @@ public:
                                    const xAOD::JetContainer* jets,
                                    const xAOD::MissingETContainer* metCoreCont,
                                    xAOD::MissingETAssociationHelper& helper,
-                                   bool doJetJVT) = 0;
+                                   bool doJetJVT) const = 0;
   // Full version receiving MET pointers
   virtual StatusCode rebuildJetMET(xAOD::MissingET* metJet,
                                    const xAOD::JetContainer* jets,
@@ -86,7 +86,7 @@ public:
                                    const xAOD::MissingET* coreSoftTrk,
                                    bool doJetJVT,
                                    bool tracksForHardJets=false,
-				   std::vector<const xAOD::IParticle*>* softConst=0) = 0;
+				   std::vector<const xAOD::IParticle*>* softConst=0) const = 0;
 
   // Convenience methods that creates MET terms internally
   virtual StatusCode rebuildTrackMET(const std::string& metJetKey,
@@ -95,18 +95,18 @@ public:
                                    const xAOD::JetContainer* jets,
                                    const xAOD::MissingETContainer* metCoreCont,
                                    xAOD::MissingETAssociationHelper& helper,
-                                   bool doJetJVT) = 0;
+                                   bool doJetJVT) const = 0;
   // Full version receiving MET pointers
   virtual StatusCode rebuildTrackMET(xAOD::MissingET* metJet,
                                    const xAOD::JetContainer* jets,
                                    xAOD::MissingETAssociationHelper& helper,
                                    xAOD::MissingET* metSoftTrk,
                                    const xAOD::MissingET* coreSoftTrk,
-                                   bool doJetJVT) = 0;
+                                   bool doJetJVT) const = 0;
 
   virtual StatusCode markInvisible(const xAOD::IParticleContainer* collection,
 				   xAOD::MissingETAssociationHelper& helper,
-				   xAOD::MissingETContainer* metCont) = 0;
+				   xAOD::MissingETContainer* metCont) const = 0;
 };
 
 #endif

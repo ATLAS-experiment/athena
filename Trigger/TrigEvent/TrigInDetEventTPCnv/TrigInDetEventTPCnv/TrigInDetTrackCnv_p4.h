@@ -30,7 +30,7 @@ class TrigInDetTrackCnv_p4: public T_AthenaPoolTPCnvBase<TrigInDetTrack, TrigInD
 {
 public:
 
- TrigInDetTrackCnv_p4() : m_fpCnv(0), m_isInitialized(0) {}
+  TrigInDetTrackCnv_p4() = default;
 
   virtual void persToTrans( const TrigInDetTrack_p4 *, TrigInDetTrack *, MsgStream& );
   virtual void transToPers( const TrigInDetTrack *, TrigInDetTrack_p4 *, MsgStream& );
@@ -39,10 +39,9 @@ public:
   
 protected:
   
-  ITPConverterFor<TrigInDetTrackFitPar>        	*m_fpCnv;
-  //  TrigInDetTrackFitParCnv_p1   *m_fpCnv;
-  const PixelID *m_pixId;
-  bool m_isInitialized;
+  ITPConverterFor<TrigInDetTrackFitPar>        	*m_fpCnv{};
+  const PixelID *m_pixId{};
+  bool m_isInitialized{};
   StatusCode initialize(MsgStream &log);
 
 };

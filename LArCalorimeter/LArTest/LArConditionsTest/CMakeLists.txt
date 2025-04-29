@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArConditionsTest )
 
 # Component(s) in the package:
 atlas_add_component( LArConditionsTest
-                     src/LArConditionsTest_entries.cxx
+                     src/components/*_entries.cxx
                      src/LArCondDataTest.cxx
                      src/LArConditionsTestAlg.cxx
                      src/LArCablingTest.cxx

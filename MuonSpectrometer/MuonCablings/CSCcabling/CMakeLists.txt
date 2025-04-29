@@ -1,23 +1,15 @@
-################################################################################
-# Package: CSCcabling
-################################################################################
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CSCcabling )
-
-# External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 
 # Component(s) in the package:
 atlas_add_library( CSCcablingLib
                    src/*.cxx
                    PUBLIC_HEADERS CSCcabling
-                   PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaBaseComps GaudiKernel
-                   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} GeoModelInterfaces GeometryDBSvcLib )
+                   LINK_LIBRARIES AthenaBaseComps
+                   PRIVATE_LINK_LIBRARIES GaudiKernel GeoModelInterfaces GeometryDBSvcLib RDBAccessSvcLib )
 
 atlas_add_component( CSCcabling
                      src/components/*.cxx
-                     INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps GaudiKernel CSCcablingLib )
-
+                     LINK_LIBRARIES CSCcablingLib )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -9,7 +9,7 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__ASG_LEPTON_TRACK_SELECTION_ALG_H
 #define ASG_ANALYSIS_ALGORITHMS__ASG_LEPTON_TRACK_SELECTION_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <PATCore/IAsgSelectionTool.h>
 #include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
@@ -38,13 +38,13 @@ namespace CP
   /// at some point we may decide to change this into a selection tool
   /// instead (06 Aug 18).
 
-  class AsgLeptonTrackSelectionAlg final : public EL::AnaAlgorithm
+  class AsgLeptonTrackSelectionAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext &ctx) const override;
 
 
     /// algorithm properties
@@ -57,9 +57,6 @@ namespace CP
     Gaudi::Property<int> m_nMaxPixelHits {this, "nMaxPixelHits", -1, "maximum number of required Pixel hits (or -1 for no cut)"};
     Gaudi::Property<int> m_nMinSCTHits {this, "nMinSCTHits", -1, "minimum number of required SCT hits (or -1 for no cut)"};
     Gaudi::Property<int> m_nMaxSCTHits {this, "nMaxSCTHits", -1, "maximum number of required SCT hits (or -1 for no cut)"};
-    Gaudi::Property<bool> m_decorateTTVAVars{this, "decorateTTVAVars", false, "save the calculated d0sig and z0sinTheta variables"};
-    Gaudi::Property<std::string> m_d0sigDecoration {this, "d0sigDecoration", "", "the decoration name for d0 significance"};
-    Gaudi::Property<std::string> m_z0sinthetaDecoration {this, "z0sinthetaDecoration", "", "the decoration name for z0sintheta"};
 
     /// \}
 
@@ -92,14 +89,6 @@ namespace CP
     /// \brief the ISelectionNameSvc
   private:
     ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "AsgLeptonTrackSelectionAlg"};
-
-    /// \brief the name of the variable being decorated for d0significance
-  private:
-    std::unique_ptr<const SG::AuxElement::Decorator<float> > m_d0sigDecorator {};
-
-    /// \brief the name of the variable being decorated for z0sintheta
-  private:
-   std::unique_ptr<const SG::AuxElement::Decorator<float> > m_z0sinthetaDecorator {};
 
     /// \brief the \ref asg::AcceptInfo we are using
   private:

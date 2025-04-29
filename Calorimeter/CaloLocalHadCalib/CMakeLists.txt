@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloLocalHadCalib )
@@ -6,7 +6,7 @@ atlas_subdir( CaloLocalHadCalib )
 # External dependencies:
 find_package( Boost )
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Gpad Graf Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf3d Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Gpad Graf Core Tree Hist )
 
 # Component(s) in the package:
 atlas_add_component( CaloLocalHadCalib

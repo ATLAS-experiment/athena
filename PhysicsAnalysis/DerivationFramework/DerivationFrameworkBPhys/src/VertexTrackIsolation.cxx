@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkBPhys/VertexTrackIsolation.h"
+#include "VertexTrackIsolation.h"
 
 #include <string>
 #include <vector>
@@ -19,7 +19,7 @@ using namespace std;
 namespace DerivationFramework {
 
 VertexTrackIsolation::VertexTrackIsolation(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t, n, p),
+    : base_class(t, n, p),
       m_trackIsoTool("xAOD::TrackIsolationTool"),
       m_trackContainerName("InDetTrackParticles"),
       m_vertexContainerName("NONE"),
@@ -30,7 +30,6 @@ VertexTrackIsolation::VertexTrackIsolation(const std::string& t, const std::stri
       m_fixElecExclusion(false),
       m_includeV0(false) {
   ATH_MSG_DEBUG("in constructor");
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 
   // Declare tools
   declareProperty("TrackIsoTool", m_trackIsoTool);

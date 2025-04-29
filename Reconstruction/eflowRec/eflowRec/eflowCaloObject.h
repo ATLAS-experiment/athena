@@ -18,6 +18,7 @@ PURPOSE:  Calorimeter Object data class
 
 #include <vector>
 #include <memory>
+#include <cmath>
 #include "AthLinks/ElementLink.h"
 
 class eflowRecCluster;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDet
@@ -18,6 +18,7 @@
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
 #include "TrkSurfaces/DiscBounds.h"
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 //Athena
 #include "CxxUtils/checker_macros.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
@@ -834,7 +835,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
 
   std::vector<float> rsteps;
   std::vector<Trk::Surface*> surfs;
-  std::vector<Trk::BinUtility*>* binUtils=new std::vector<Trk::BinUtility*>();
+  auto binUtils= std::vector<Trk::BinUtility>();
   rsteps.push_back(rbounds[0].first);
   for (unsigned int id=0; id<discOrder.size(); id++) {
     unsigned int index=discOrder[id];
@@ -844,7 +845,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
         ATH_MSG_WARNING("attempt to merge 2D disc arrays, bailing out");
         return nullptr;
       }
-      binUtils->push_back(surfArray->binUtility()->clone());
+      binUtils.push_back(*(surfArray->binUtility()));
       if (id+1<discOrder.size()) rsteps.push_back( 0.5*(rbounds[id].second+rbounds[id+1].first));
       Trk::BinnedArraySpan<Trk::Surface * const> ringSurf =surfArray->arrayObjects();
       surfs.insert(surfs.end(),ringSurf.begin(),ringSurf.end());
@@ -853,10 +854,10 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
   }
   rsteps.push_back(rbounds.back().second);
 
-  std::vector< std::pair< Trk::SharedObject<Trk::Surface>, Amg::Vector3D >  > surfaces;
+  std::vector< std::pair< std::shared_ptr<Trk::Surface>, Amg::Vector3D >  > surfaces;
   for ( auto *  sf : surfs ) {
-    Trk::SharedObject<Trk::Surface> sharedSurface(sf,Trk::do_not_delete<Trk::Surface>);
-    std::pair< Trk::SharedObject<Trk::Surface>, Amg::Vector3D >  surfaceOrder(sharedSurface, sf->center());
+    std::shared_ptr<Trk::Surface> sharedSurface(sf,Trk::do_not_delete<Trk::Surface>);
+    std::pair< std::shared_ptr<Trk::Surface>, Amg::Vector3D >  surfaceOrder(sharedSurface, sf->center());
     surfaces.push_back(surfaceOrder);
   }
 
@@ -864,13 +865,13 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
   // a two-dimensional BinnedArray is needed ; takes possession of binUtils and
   // will delete it on destruction.
   auto mergeBA = std::make_unique<Trk::BinnedArray1D1D<Trk::Surface>>(
-      surfaces, new Trk::BinUtility(rsteps, Trk::open, Trk::binR), binUtils);
+      surfaces, Trk::BinUtility(rsteps, Trk::open, Trk::binR), binUtils);
 
   // DiscOverlapDescriptor takes possession of clonedBinUtils, will delete it on
   // destruction.
   //  but *does not* manage mergeBA.
-  std::vector<Trk::BinUtility*>* clonedBinUtils = new std::vector<Trk::BinUtility*>();
-  for (auto *bu : *binUtils) clonedBinUtils->push_back(bu->clone());
+  std::vector<Trk::BinUtility> clonedBinUtils = std::vector<Trk::BinUtility>();
+  for (const auto& bu : binUtils) clonedBinUtils.push_back(bu);
   auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(mergeBA.get(),clonedBinUtils,true);
 
   // position & bounds of the disc layer

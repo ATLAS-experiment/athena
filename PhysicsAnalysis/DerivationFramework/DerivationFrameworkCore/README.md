@@ -10,8 +10,6 @@ These directories contain the following source code:
 * The `DerivationKernel` algorithm which is used to drive the event loop for each DAOD output format. It is an `AthFilterAlgorithm` which executes arrays of tools for skimming (`ISkimmingTool`), thinning (`IThinningTool`) and augmenting the data (`IAugmentationTool`), which are passed to it via the format definition configuration file.
 * The `CommonAugmentation` algorithm. It is used to run common augmentation before the main format-making kernels run. It is similar to the DerivationKernel but only permits augmentation, aand is an AthAlgorithm rather than AthFilterAlgorithm - this avoids pointless entries being made in the cut flow as the job runs.
 * `GoodRunsListFilterAlgorithm`: accepts or rejects events depending on whether they are in the GRL. This may be used in tandem with kernel algorithm to filter out unwanted events. **Obsolete?**
-* `StreamAuditorTool`: **Obsolete?**
-* `TriggerMatchingAugmentation`: **Obsolete?**
 
 ## python
 

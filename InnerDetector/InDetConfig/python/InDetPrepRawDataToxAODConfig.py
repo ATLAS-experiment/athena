@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPrepRawDataToxAOD package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -43,19 +43,23 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     return acc
 
 
-def ITkActsPixelPrepDataToxAODCfg(flags, name="ITkActsPixelPrepDataToxAOD", **kwargs):
-
+def ITkActsPrepDataToxAODCfg(
+        flags, PixelMeasurementContainer = "ITkPixelMeasurements",
+        StripMeasurementContainer = "ITkStripMeasurements") -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # need to decorate truth particles and clusters with same unique identified
     # which is the origin truth particle index
-    if flags.Input.isMC:
-        
-        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+    if not flags.Input.isMC:
+        return acc
 
-        from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecorator,ActsStripClusterTruthDecorator
-        acc.merge(ActsPixelClusterTruthDecorator(flags))
-        acc.merge(ActsStripClusterTruthDecorator(flags))
+    acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+    from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecoratorAlgCfg,ActsStripClusterTruthDecoratorAlgCfg
+    acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(
+        flags, MeasurementContainer=PixelMeasurementContainer))
+    acc.merge(ActsStripClusterTruthDecoratorAlgCfg(
+        flags, MeasurementContainer=StripMeasurementContainer))
 
     return acc
 
@@ -105,7 +109,7 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     kwargs.setdefault("MC_Hits", "ITkPixelHits")
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkPixel")
     kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
-    kwargs.setdefault("OutputClusterContainer", "ITkPixelClusters")
+    kwargs.setdefault("OutputClusterContainer", "ITkPixelMeasurements")
 
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
     return acc
@@ -149,7 +153,7 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkStrip")
     kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     kwargs.setdefault("SctRdoContainer", "ITkStripRDOs")
-    kwargs.setdefault("SctxAodContainer", "ITkStripClusters")
+    kwargs.setdefault("SctxAodContainer", "ITkStripMeasurements")
     kwargs.setdefault("SctxAodOffset", "ITkStripClustersOffsets")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
@@ -220,6 +224,10 @@ def InDetPrepDataToxAODCfg(flags):
     return acc
 
 def ITkPrepDataToxAODCfg(flags):
+    from InDetConfig.ITkActsHelpers import primaryPassUsesActs
+    if primaryPassUsesActs(flags):
+        return ITkActsPrepDataToxAODCfg(flags)
+
     acc = ComponentAccumulator()
     extra_truth = flags.Tracking.doTIDE_AmbiTrackMonitoring
     if flags.Detector.EnableITkPixel:

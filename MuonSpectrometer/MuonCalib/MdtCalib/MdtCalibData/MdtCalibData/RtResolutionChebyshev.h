@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef RtResolutionChebyshevH
-#define RtResolutionChebyshevH
+#ifndef RtResolutionChebyshev_H
+#define RtResolutionChebyshev_H
 
 // standard C++ //
 #include <cstdlib>
@@ -13,6 +13,7 @@
 
 // MDT calibration //
 #include "MdtCalibData/IRtResolution.h"
+#include "MdtCalibData/MdtRtRelation.h"
 
 namespace MuonCalib {
     /**
@@ -43,33 +44,32 @@ namespace MuonCalib {
         ParVec[2...] = parameters of the Chebyshev polynomial
 
         */
-        explicit RtResolutionChebyshev(const ParVec& vec);
+        RtResolutionChebyshev(const ParVec& vec);
+        /** @brief Initialization from a  */
 
         // Methods //
         // methods required by the base classes //
-        std::string name() const;  //!< get the class name
+        virtual std::string name() const override final;  //!< get the class name
 
         //!< get the resolution corresponding to the drift time t;
         //!< if t is not within [t_low, t_up] an unphysical radius of 99999 is
         //!< returned; the background rate is ignored in present implementation
-        double resolution(double t, double bgRate = 0.0) const;
+        virtual double resolution(double t, double bgRate = 0.0) const override final;
 
         // get-methods specific to the RtResolutionChebyshev class //
 
         //!< get the lower drift-time bound
-        double tLower() const;
+        virtual double tLower() const;
 
         //!< get the upper drift-time bound
-        double tUpper() const;
+        virtual double tUpper() const;
 
         //!< get the number of parameters used to describe the resolution
-        unsigned int numberOfResParameters() const;
+        virtual unsigned int nDoF() const override final;
 
         //!< get the coefficients of the r(t) polynomial
         std::vector<double> resParameters() const;
 
-        //!< get the reduced time which is the argument of the Chebyshev polynomial
-        double get_reduced_time(const double  t) const;
     };
 }  // namespace MuonCalib
 

@@ -10,8 +10,8 @@ TauValidationPlots::TauValidationPlots(PlotBase* pParent, const std::string& sDi
   m_oGeneralTauAllProngsPlots(this, "NoCuts/Matched/", sTauJetContainerName),
   m_oHad1ProngPlots(this, "NoCuts/Matched/Tau1P/", sTauJetContainerName),             // tau1P plots : variables for tau ID
   m_oHad3ProngPlots(this, "NoCuts/Matched/Tau3P/", sTauJetContainerName),             // tau3P plots : variables for tau ID
-  m_oElMatchedParamPlots(this, "Electron/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates	  
-  m_oElMatchedEVetoPlots(this, "Electron/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates
+  m_oElMatchedParamPlots(this, "NoCuts/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates	  
+  m_oElMatchedEVetoPlots(this, "NoCuts/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates
   m_oFakeGeneralTauAllProngsPlots(this,"NoCuts/Fake/", sTauJetContainerName),  // general tau all fake prongs plots
   m_oFakeHad1ProngPlots(this,"NoCuts/Fake/Jet1P/", sTauJetContainerName), 		     // tau1P fake plots : variables for tau ID
   m_oFakeHad3ProngPlots(this,"NoCuts/Fake/Jet3P/", sTauJetContainerName),  	       // tau3P fake plots : variables for tau ID
@@ -34,8 +34,14 @@ TauValidationPlots::TauValidationPlots(PlotBase* pParent, const std::string& sDi
   m_oNewCoreMatchedPlots(this,"NoCuts/Matched/All/", sTauJetContainerName),             // all tau reco, newCore variables
   m_oNewCoreFakePlots(this,"NoCuts/Fake/All/", sTauJetContainerName),             // all tau reco, newCore variables
   m_oMigrationPlots(this,"NoCuts/Matched/Migration/", sTauJetContainerName),             // Migration Matrix
+  m_oMatchedResolutionPlots(this,"NoCuts/Matched/All/", sTauJetContainerName),
+  m_oMatchedResolution1PPlots(this,"NoCuts/Matched/Tau1P/", sTauJetContainerName),
+  m_oMatchedResolution3PPlots(this,"NoCuts/Matched/Tau3P/", sTauJetContainerName),
   
   // Plots with the "nominal" tau selection
+  m_oElMatchedParamPlotsNom(this, "Nominal/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates and passing nominal selection        
+  m_oElMatchedEVetoPlotsNom(this, "Nominal/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates and passing nominal selection
+
   m_oFakeGeneralNom(this,"Nominal/Fake/", sTauJetContainerName),
   m_oFakeHad1ProngNom(this,"Nominal/Fake/Jet1P/", sTauJetContainerName),
   m_oFakeHad3ProngNom(this,"Nominal/Fake/Jet3P/", sTauJetContainerName),
@@ -55,6 +61,9 @@ TauValidationPlots::TauValidationPlots(PlotBase* pParent, const std::string& sDi
   m_oNewCoreRecTauPlotsNom(this, "Nominal/RecTau/All/", sTauJetContainerName),
 
   m_oMatchedGeneralNom(this,"Nominal/Matched/", sTauJetContainerName),
+  m_oMatchedResolutionPlotsNom(this,"Nominal/Matched/All/", sTauJetContainerName),
+  m_oMatchedResolution1PPlotsNom(this,"Nominal/Matched/Tau1P/", sTauJetContainerName),
+  m_oMatchedResolution3PPlotsNom(this,"Nominal/Matched/Tau3P/", sTauJetContainerName),
   m_oMatchedHad1ProngNom(this,"Nominal/Matched/Tau1P/", sTauJetContainerName),
   m_oMatchedHad3ProngNom(this,"Nominal/Matched/Tau3P/", sTauJetContainerName),
   m_oMatchedTauEffPlotsNom(this, "Nominal/Matched/Eff/All/", sTauJetContainerName),

@@ -232,6 +232,20 @@ namespace InDet {
           updateRange(element, currentElement, slimit, min, max);
         }
 
+        // Eta overlap in the endcap between rows 9 and 10 (stereo element in eta row 10):
+        // The phi module granularity changes from 1 to 2 modules,
+        // and introduces an offset of ~31.4 mm on the local x values for row 10 wrt. row 9
+        // in a positive or negative direction depending on the phi position of the eta 10 row,
+        // stored as neighbours 2 or 3.
+        // This has to be taken into account when computing "diff" below
+        double lx1_offset = 0.;
+        if (m_idHelper->barrel_ec(currentElement->identify())!=0 &&
+            m_idHelper->eta_module(currentElement->identify())==10) {
+          if (currentIndex==2) lx1_offset = -1.*m_locXOffset_ECEtaOvlpRaws9n10;
+          else if (currentIndex==3) lx1_offset = m_locXOffset_ECEtaOvlpRaws9n10;
+        }
+
+        // Loop on all clusters of the stereo element
         InDet::SCTinformation sctInfo;
         for (const auto *const cluster : *clusters[currentIndex]) {
 
@@ -239,9 +253,14 @@ namespace InDet {
           const Amg::Vector2D& locpos = cluster->localPosition();
           double lx1 = locpos.x();
 
+          // Loop on all clusters of the trigger element
           for(auto& sct : sctInfos) {
 
-            double diff = lx1-sct.locX();
+            double diff = lx1+lx1_offset-sct.locX();
+
+            // In negative endcap, local x is opposite of positive endcap
+            // need to invert the difference for proper comparison
+            if( m_idHelper->barrel_ec(currentElement->identify())<0 ) diff = -diff;
 
             if(diff < min || diff > max) continue;
 

@@ -5,6 +5,7 @@
 #ifndef G4ATLASINTERFACES_IPHYSICSOPTIONTOOL_H
 #define G4ATLASINTERFACES_IPHYSICSOPTIONTOOL_H
 
+#include <memory>
 #include "GaudiKernel/IAlgTool.h"
 class G4String;
 class G4VPhysicsConstructor;
@@ -30,16 +31,18 @@ namespace G4AtlasPhysicsOption {
 class IPhysicsOptionTool : virtual public IAlgTool
 {
 public:
+ using UPPhysicsConstructor = std::unique_ptr<G4VPhysicsConstructor>;
 
-  IPhysicsOptionTool() {}
-  virtual ~IPhysicsOptionTool() {}
-  /// Creates the InterfaceID and interfaceID() method
-  DeclareInterfaceID(IPhysicsOptionTool, 1, 0);
+ IPhysicsOptionTool() {}
+ virtual ~IPhysicsOptionTool() {}
+ /// Creates the InterfaceID and interfaceID() method
+ DeclareInterfaceID(IPhysicsOptionTool, 1, 0);
 
-  // Method needed to register G4VPhysicsConstructor into G4VmodularPhysicsList
-  virtual G4VPhysicsConstructor* GetPhysicsOption() = 0 ;
+ // Method needed to register G4VPhysicsConstructor into G4VmodularPhysicsList
+ virtual UPPhysicsConstructor GetPhysicsOption() = 0;
 
-  virtual G4AtlasPhysicsOption::Type GetOptionType() const { return m_physicsOptionType; };
+ virtual G4AtlasPhysicsOption::Type GetOptionType() const {
+   return m_physicsOptionType; };
 
 protected:
 

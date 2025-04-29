@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVDBMETADATATOOLS_IOVDBMETADATATOOL_H
@@ -36,9 +36,8 @@ class IOVMetaDataContainer;
  *
  **/
 
-class IOVDbMetaDataTool : virtual public AthAlgTool,
-                          virtual public IIncidentListener,
-                          virtual public IIOVDbMetaDataTool
+class IOVDbMetaDataTool : public extends<AthAlgTool,
+                                         IIncidentListener, IIOVDbMetaDataTool>
 {
 public:    
     // Constructor

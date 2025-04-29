@@ -224,24 +224,20 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
 
 bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &hit) const
 {
-    // If the hit is unmapped, then instead of calling hit.getLayer(), use the (relevant) pmap
+    // Always assume that the hit's "layer" might not correspond to what's in the pmap
     // Also, to avoid confusion and double-counting, by convention, always use the coordinates of the inner hit
     // when testing if a spacepoint is in a (sub)region.
     uint32_t layer;
     uint32_t section;
-    if (hit.isMapped()) {
-        layer = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedLayer() : hit.getLayer();
-        section = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedSection() : hit.getSection();
+
+    LayerSection ls;
+    if (hit.getHitType() == HitType::spacepoint) {
+        ls = m_pmaps.at(region)->getLayerSection(hit.getPairedDetType(), hit.getPairedDetZone(), hit.getPairedPhysLayer());
     } else {
-        LayerSection ls;
-        if (hit.getHitType() == HitType::spacepoint) {
-            ls = m_pmaps.at(region)->getLayerSection(hit.getPairedDetType(), hit.getPairedDetZone(), hit.getPairedPhysLayer());
-        } else {
-            ls = m_pmaps.at(region)->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
-        }
-        layer = ls.layer;
-        section = ls.section;
+        ls = m_pmaps.at(region)->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     }
+    layer = ls.layer;
+    section = ls.section;
 
     int etamod = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedEtaModule() : hit.getEtaModule();
     unsigned phimod = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedPhiModule() : hit.getPhiModule();

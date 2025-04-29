@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MM_DigitizationTool.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandFlat.h"
 
 #include <fstream>
@@ -206,14 +207,14 @@ namespace MuonR4 {
 
         // Fetch the conditions for efficiency calculations
         const Muon::DigitEffiData *efficiencyMap{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        ATH_CHECK(SG::get(efficiencyMap , m_effiDataKey, ctx));
 
         const NswErrorCalibData *errorCalibDB{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_uncertCalibKey, errorCalibDB));
+        ATH_CHECK(SG::get(errorCalibDB, m_uncertCalibKey, ctx));
 
         MagField::AtlasFieldCache fieldCache;
         const AtlasFieldCacheCondObj *fieldCondObj{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_fieldCondObjInputKey, fieldCondObj));
+        ATH_CHECK(SG::get(fieldCondObj, m_fieldCondObjInputKey, ctx));
         fieldCondObj->getInitializedCache(fieldCache);
 
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
@@ -222,9 +223,9 @@ namespace MuonR4 {
             std::array<std::vector<MM_ElectronicsToolInput>, 8> v_stripDigitOutput{};
             DeadTimeMap deadTimes{};
 
-            for (const TimedHit &simHit : hitsToDigit) {
+            for (const TimedHit &simHit : viewer) {
                 // ignore radiation if you want
-                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
+              if (m_digitizeMuonOnly && !MC::isMuon(simHit)) {
                     ATH_MSG_VERBOSE("Hit is not from a muon - skipping ");
                     continue;
                 }
@@ -235,7 +236,7 @@ namespace MuonR4 {
                 // Don't consider electron hits below m_energyThreshold.
                 // Electrons aren't consider for now in any case due to the cut above.
                 // But this may change.
-                if (hitKineticEnergy < m_energyThreshold && std::abs(simHit->pdgId()) == 11) {
+                if (hitKineticEnergy < m_energyThreshold && MC::isElectron(simHit)) {
                     continue;
                 }
                 const MuonGMR4::MmReadoutElement *readOutEle = m_detMgr->getMmReadoutElement(hitId);
@@ -257,9 +258,9 @@ namespace MuonR4 {
 
                 const HepMcParticleLink particleLink = simHit->genParticleLink();
                 // Print some information about the MicroMegas hit
-                ATH_MSG_VERBOSE("hitID  " << m_idHelperSvc->toString(hitId) << " Hit bunch time  " << bunchTime << " tof/G4 hit time " << globalHitTime
-                                          << " globalHitPosition " << Amg::toString(globalHitPosition) << " hit: r " << globalHitPosition.perp() << " z " << globalHitPosition.z()
-                                          << " mclink " << particleLink << "Kinetic energy " << hitKineticEnergy);
+                ATH_MSG_VERBOSE("hitID  " << m_idHelperSvc->toString(hitId) <<" ("<< simHit.get()<< ") Hit bunch time  " << bunchTime << " tof/G4 hit time " << globalHitTime
+                            << " globalHitPosition " << Amg::toString(globalHitPosition) << " hit: r " << globalHitPosition.perp() << " z " << globalHitPosition.z()
+                            << " mclink " << particleLink << "Kinetic energy " << hitKineticEnergy);
 
                 // Angles, Geometry, and Coordinates.
                 // This is not an incident angle yet. It's atan(z/x),
@@ -305,7 +306,7 @@ namespace MuonR4 {
                 const Amg::Vector3D hitAfterTimeShiftOnSurface = hitAfterTimeShift + lambda.value_or(0.) * locDir;
 
                 if (std::abs(hitAfterTimeShiftOnSurface.z()) > 0.1) {
-                    ATH_MSG_WARNING("Bad propagation to surface after time shift " << hitAfterTimeShiftOnSurface);
+                    ATH_MSG_WARNING("Bad propagation to surface after time shift " << Amg::toString(hitAfterTimeShiftOnSurface));
                 }
 
                 // Calculate the index for the global hit counter
@@ -372,7 +373,7 @@ namespace MuonR4 {
                 ATH_MSG_VERBOSE(__func__ << "() : " << __LINE__ << " Prepared strip for digitization: " << m_idHelperSvc->toString(clusId));
                 v_stripDigitOutput[hitGapInNsw].push_back(std::move(stripDigitOutput));
 
-                addSDO(simHit, sdoContainer);
+                addSDO(simHit, sdoContainer)->setIdentifier(clusId);
                 ++m_acceptedHits[hitGapInNsw];
             } // end of loop over hits
 
@@ -430,7 +431,7 @@ namespace MuonR4 {
         const MmIdHelper &idHelper{m_idHelperSvc->mmIdHelper()};
 
         const NswCalibDbThresholdData *thresholdData{nullptr};
-        if (m_useCondThresholds && !retrieveConditions(ctx, m_condThrshldsKey, thresholdData).isSuccess()) {
+        if (!SG::get(thresholdData, m_condThrshldsKey, ctx).isSuccess()) {
             THROW_EXCEPTION("Cannot find conditions data container for VMM thresholds!");
         }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Christian Grefe
@@ -8,60 +8,52 @@
 #ifndef TAU_ANALYSIS_ALGORITHMS__TAU_TRUTH_DECORATIONS_ALG_H
 #define TAU_ANALYSIS_ALGORITHMS__TAU_TRUTH_DECORATIONS_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
-#include <TauAnalysisTools/ITauEfficiencyCorrectionsTool.h>
-#include <SelectionHelpers/OutOfValidityHelper.h>
-#include <SelectionHelpers/SysReadSelectionHandle.h>
-#include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
-#include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysReadHandle.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <xAODTau/TauJetContainer.h>
+
 
 namespace CP
 {
   /// \brief an algorithm to decorate truth matched information
 
-  class TauTruthDecorationsAlg final : public EL::AnaAlgorithm
+  class TauTruthDecorationsAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
-
-    /// \brief the systematics list we run
-  private:
-    SysListHandle m_systematicsList {this};
+    StatusCode execute (const EventContext &ctx) const override;
 
     /// \brief the tau collection we run on
   private:
-    SysReadHandle<xAOD::TauJetContainer> m_tauHandle {
-      this, "taus", "TauJets", "the tau collection to run on"};
-
-    /// \brief the preselection we apply to our input
-  private:
-    SysReadSelectionHandle m_preselection {
-      this, "preselection", "", "the preselection to apply"};
+    SG::ReadHandleKey<xAOD::TauJetContainer> m_tausKey { this, "taus", "", "the input tau jet container" };
 
     /// \brief the decoration for the tau scale factor
   private:
     Gaudi::Property<std::vector<std::string>> m_doubleDecorations {this, "doubleDecorations", {}, "the list decorations with type double to copy"};
     Gaudi::Property<std::vector<std::string>> m_floatDecorations {this, "floatDecorations", {}, "the list decorations with type float to copy"};
     Gaudi::Property<std::vector<std::string>> m_intDecorations {this, "intDecorations", {}, "the list decorations with type int to copy"};
+    Gaudi::Property<std::vector<std::string>> m_unsignedIntDecorations {this, "unsignedIntDecorations", {}, "the list decorations with type unsigned int to copy"};
     Gaudi::Property<std::vector<std::string>> m_charDecorations {this, "charDecorations", {}, "the list decorations with type char to copy"};
     Gaudi::Property<std::string> m_prefix {this, "prefix", "truth_", "the prefix to be added to all output decorations"};
 
     // the mapping of double to float is intentional to save disk space
-    std::vector<std::pair<std::unique_ptr<SG::AuxElement::ConstAccessor<double>>, std::unique_ptr<SysWriteDecorHandle<float>>>> m_doubleWriteHandles;
-    std::vector<std::pair<std::unique_ptr<SG::AuxElement::ConstAccessor<float>>, std::unique_ptr<SysWriteDecorHandle<float>>>> m_floatWriteHandles;
-    std::vector<std::pair<std::unique_ptr<SG::AuxElement::ConstAccessor<int>>, std::unique_ptr<SysWriteDecorHandle<int>>>> m_intWriteHandles;
-    std::vector<std::pair<std::unique_ptr<SG::AuxElement::ConstAccessor<char>>, std::unique_ptr<SysWriteDecorHandle<char>>>> m_charWriteHandles;
+    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<double>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_doubleWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<float>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_floatWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<int>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_intWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<unsigned int>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_unsignedIntWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<char>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_charWriteHandleKeys;
 
-    SysWriteDecorHandle<int> m_truthDecayModeDecoration {
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_truthDecayModeKey {
       this, "decayModeDecoration", "truth_DecayMode", "the decoration for the tau decay mode"};
-    SysWriteDecorHandle<int> m_truthParticleTypeDecoration {
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_truthParticleTypeKey {
       this, "particleTypeDecoration", "truth_ParticleType", "the decoration for the tau particle type"};
+
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_partonTruthLabelIDKey {
+      this, "partonTruthLabelIDDecoration", "truth_PartonTruthLabelID", "the decoration for the tau parton truth label ID from the linked jet"};
   };
 }
 

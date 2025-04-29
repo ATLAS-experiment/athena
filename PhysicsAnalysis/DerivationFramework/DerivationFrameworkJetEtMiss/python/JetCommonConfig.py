@@ -19,7 +19,7 @@ def JetCommonCfg(ConfigFlags):
     acc.merge(AddDistanceInTrainCfg(ConfigFlags))
     acc.merge(AddSidebandEventShapeCfg(ConfigFlags))
     acc.merge(AddEventCleanFlagsCfg(ConfigFlags))
-
+    
     return acc
 
 
@@ -27,7 +27,7 @@ def StandardJetsInDerivCfg(ConfigFlags):
     """Jet reconstruction needed for PHYS/PHYSLITE"""
 
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo,AntiKt4EMPFlow,AntiKtVR30Rmax4Rmin02PV0Track
-    from JetRecConfig.StandardLargeRJets import AntiKt10LCTopoTrimmed,AntiKt10UFOCSSKSoftDrop
+    from JetRecConfig.StandardLargeRJets import AntiKt10UFOCSSKSoftDrop
     from JetRecConfig.JetRecConfig import JetRecCfg
 
     acc = ComponentAccumulator()
@@ -37,13 +37,12 @@ def StandardJetsInDerivCfg(ConfigFlags):
     )
 
     AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
-        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel")
+        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
     )
 
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv,
                AntiKtVR30Rmax4Rmin02PV0Track,
-               AntiKt10LCTopoTrimmed,AntiKt10UFOCSSKSoftDrop]
-
+               AntiKt10UFOCSSKSoftDrop]
 
     for jd in jetList:
         acc.merge(JetRecCfg(ConfigFlags,jd))
@@ -120,7 +119,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow'))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doLoose=True))
+    acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doRNNLoose=True))
 
     # The overlap removal algorithm presents difficulties.
     # It leaves decorations unlocked.
@@ -143,7 +142,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
     outputLabel_legacy = 'DFCommonJets_passOR'
     bJetLabel = '' #default
-    tauLabel = 'DFTauLoose'
+    tauLabel = 'DFTauRNNLoose'
     orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
     algOR_legacy = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
                                                 JetKey="AntiKt4EMTopoJets",

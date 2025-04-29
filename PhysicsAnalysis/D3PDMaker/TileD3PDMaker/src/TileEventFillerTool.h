@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -38,7 +38,6 @@
 
 // EVENT INFO
 #include "xAODEventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 //MUONS
 #include "xAODMuon/MuonContainer.h"
@@ -50,13 +49,12 @@
 #include <math.h>
 #include <regex.h>
 #include <string>
+#include <cstdint>
 
 namespace Trk{
     class VxContainer;
 } // namespace
 
-using namespace std;
-using namespace xAOD;
 
 // ADD TILEMUONEVENTFILLERTOOL TO D3PD NAMESPACE
 namespace D3PD {
@@ -150,14 +148,14 @@ class TileEventFillerTool:public D3PD::BlockFillerTool<xAOD::EventInfo>{
         bool* m_L1_4MU0;
 
         // EVENT FLAGS
-        EventID::number_type *m_run_number;
-        EventID::number_type *m_event_number;
-        EventID::number_type *m_timestamp;
-        EventID::number_type *m_timestamp_ns;
-        EventID::number_type *m_lbn;
-        EventID::number_type *m_bcid;
-        EventID::number_type *m_detmask0;
-        EventID::number_type *m_detmask1;
+        uint32_t *m_run_number;
+        uint64_t *m_event_number;
+        uint32_t *m_timestamp;
+        uint32_t *m_timestamp_ns;
+        uint32_t *m_lbn;
+        uint32_t *m_bcid;
+        uint32_t *m_detmask0;
+        uint32_t *m_detmask1;
 
         // MISSING ENERGY VARIABLES
         std::string m_metContainer;

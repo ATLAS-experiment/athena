@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -65,6 +65,8 @@
 
 #include "CLHEP/Random/RandomEngine.h"
 
+//C++ STL includes
+#include <vector>
 #include <string>
 
 //Simulation includes
@@ -78,6 +80,7 @@ class IAthRNGSvc;
 
 class TH1F;
 class TFile;
+class TRandom3;
 
 /** 
 @class TileDigitsFromPulse
@@ -99,15 +102,15 @@ public:
 private:
     std::string m_outputContainer; //!< Name of the output TileDigitsContainer
     
-    const TileHWID* m_tileHWID;
+    const TileHWID* m_tileHWID{};
     
     // TileInfo
     std::string m_infoName;
-    const TileInfo* m_tileInfo;
-    int m_i_ADCmax;
+    const TileInfo* m_tileInfo{};
+    int m_i_ADCmax{};
     
-    TileRawChannelUnit::UNIT m_rChUnit; //!< Units used for the TileRawChannels (ADC, pCb, etc.)(see TileInfo.h)
-    TileFragHash::TYPE m_rChType; //!< Type of TileRawChannels (Digitizar, OF1, OF2, Fit, etc.)(see TileFragHash.h)
+    TileRawChannelUnit::UNIT m_rChUnit{TileRawChannelUnit::ADCcounts}; //!< Units used for the TileRawChannels (ADC, pCb, etc.)(see TileInfo.h)
+    TileFragHash::TYPE m_rChType{TileFragHash::Default}; //!< Type of TileRawChannels (Digitizar, OF1, OF2, Fit, etc.)(see TileFragHash.h)
     
     ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
         "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile sample noise tool"};
@@ -138,6 +141,7 @@ private:
     double m_GNAmpTwo; //!< Amplitude of second gaussian of double gaussian noise.
     double m_GNSigmaTwo; //!< Standard deviation of second gaussian of double gaussian noise.    
     bool m_useItADist; //!< Set to TRUE in order to use a distribution for the in-time amplitude instead of a constant value
+    double m_itAPulseProb; //!< Probability to add an in-time pulse
     bool m_useOotADist; //!< Set to TRUE in order to use a distribution for the out-of-time amplitude instead of a constant value
     float m_pileUpFraction; //!< Probability that an out-of-time component will be added
     float m_gausC2C; //!< RMS for the in-time pulse offset (channel-to-channel phase variation)
@@ -152,13 +156,14 @@ private:
     std::string m_ootADistHistName; //!< Name of  histogram for out-of-time amplitude distribution
     
     bool m_simQIE; //!<Raw PMT pulses are generated if the option is set to true. The option is intended to simulate the QIE FEB.
+    bool m_simPulseChain; //!< Simulate continous output of readout for HL-LHC paradigm
 
     int m_seed;
     int m_BunchSpacing; //!< Time between pulses in ms 25, 50 or 75
     int m_nSamples;  //!< number of read out samples
     int m_nPul;  //!< number of pileup pulses 
-    int m_nPul_eff;  //Used for symetrization of PU in computation
-    std::vector<float> m_PUAmp;
+    int m_nPul_eff{};  //Used for symetrization of PU in computation
+    std::vector<std::vector<std::vector<std::vector<float>>>> m_PUAmp; // Used to store PU amplitudes
     bool m_PhaseII; //Use parameters of TilePhaseII if the option is set to true
     bool m_bigain; //If true, save the two gains in the ntuples
 
@@ -168,8 +173,8 @@ private:
 
     //Members for simulator
     TilePulseShape*      m_ps[2]; //!< Class for defining pulse. One element for lo gain and one for hi.
-    TileSampleBuffer*    m_buf; //!< Buffer class to hold generated pulses
-    TileSampleGenerator* m_tsg; //!< Pulse generating class
+    TileSampleBuffer*    m_buf{}; //!< Buffer class to hold generated pulses
+    TileSampleGenerator* m_tsg{}; //!< Pulse generating class
     
     //Histograms for distribution
     TH1F* m_ootDist; //!< Histogram to hold the distribution of out-of-time amplitudes.
@@ -186,6 +191,12 @@ private:
     bool makeDist(TFile*& file, TH1F*& hist, const std::string& fileName, const std::string& histName="h_Eopt_hi"); //!< Method to read distribution from file
     bool makeDist(TFile*& file, std::vector<std::vector<TH1F*>>& hists, const std::string& fileName);
 
+    void addPileUp(double &n_inTimeAmp, int gain, int ros, int drawer, int channel); //!< Fill vector with pile-up amplitudes
+    void addPileUpSample(int gain, int ros, int drawer, int channel); //!< Fill only a BC with pile-up amplitude
+
+    float m_sample_tru = 0;
+
+    std::unique_ptr<TRandom3> m_random;
 };
 
 #endif // TILESIMALGS_TILEDIGITSFROMPULSE_H

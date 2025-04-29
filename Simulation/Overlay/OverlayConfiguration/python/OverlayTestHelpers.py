@@ -1,19 +1,13 @@
 #!/usr/bin/env python
 """Overlay test helpers
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 from argparse import ArgumentParser
 from AthenaCommon.Debugging import DbgStage
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.Enums import LHCPeriod
-from AthenaConfiguration.JobOptsDumper import JobOptsDumperCfg
-
-
-def OverlayJobOptsDumperCfg(flags):
-    """Configure event loop for overlay"""
-    return JobOptsDumperCfg(flags, FileName="OverlayTestConfig.txt")
 
 
 def CommonTestArgumentParser(prog):
@@ -63,6 +57,7 @@ def overlayTestFlags(flags, args):
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
         flags.IOVDb.DatabaseInstance = "CONDBR2"
         flags.Overlay.DataOverlay = True
+        flags.Overlay.ByteStream = True
         from Campaigns import DataOverlayPPTest
         DataOverlayPPTest(flags)
     else:
@@ -73,8 +68,8 @@ def overlayTestFlags(flags, args):
             from Campaigns import MC20e
             MC20e(flags)
         elif args.run is LHCPeriod.Run3:
-            flags.Input.Files = defaultTestFiles.RDO_BKG_RUN3
-            flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3
+            flags.Input.Files = defaultTestFiles.RDO_BKG_RUN3_2022
+            flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3_2022
             flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
             from Campaigns import MC23a
             MC23a(flags)

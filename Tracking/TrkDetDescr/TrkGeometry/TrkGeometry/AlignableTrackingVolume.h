@@ -11,72 +11,70 @@
 
 class MsgStream;
 
-#include "TrkSurfaces/Surface.h"
-#include "TrkGeometry/TrackingVolume.h"
-#include "TrkGeometry/BinnedMaterial.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
+#include "TrkGeometry/BinnedMaterial.h"
+#include "TrkGeometry/TrackingVolume.h"
+#include "TrkSurfaces/Surface.h"
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 
 namespace Trk {
-    
-  class Surface;
-  class MaterialProperties;
-  
-  /**
-   @class AlignableTrackingVolume
-  
-   Base Class for a navigation object (active) in the Calo realm.   
-   Takes BinnedMaterial as an argument ( can be dummy )
 
-   @author Sarka.Todorova@cern.ch
-   
-   */
+class Surface;
+class MaterialProperties;
 
-  class AlignableTrackingVolume : public TrackingVolume {
-         
-      public:                
-        /**Default Constructor*/
-        AlignableTrackingVolume();
+/**
+ @class AlignableTrackingVolume
 
-        /**Constructor*/
-        AlignableTrackingVolume(Amg::Transform3D* htrans,
-                                Amg::Transform3D* align,
-                                VolumeBounds* volbounds,
-                                const BinnedMaterial* matprop,
-                                int sampleID,
-                                const std::string& volumeName = "undefined");
+ Base Class for a navigation object (active) in the Calo realm.
+ Takes BinnedMaterial as an argument ( can be dummy )
 
-        /**Destructor*/
-        virtual ~AlignableTrackingVolume() override;
-        
-        /** returns the alignedTrackingVolume */
-        const TrackingVolume* alignedTrackingVolume() const;
+ @author Sarka.Todorova@cern.ch
 
-        /** returns the id */
-        int identify() const;
+ */
 
-        /** access to binned material */
-        const BinnedMaterial* binnedMaterial() const;
+class AlignableTrackingVolume : public TrackingVolume {
 
-        virtual bool isAlignable () const override final;
-    private:
-         
-        const TrackingVolume*                                              m_alignedTV;
-        int                                                                m_sampleID;
-	      Amg::Transform3D*                                                  m_alignment;  
-        const BinnedMaterial*                                              m_binnedMaterial;        
-  };
+ public:
+  /**Default Constructor*/
+  AlignableTrackingVolume() = default;
+  virtual ~AlignableTrackingVolume() override = default;
+  /**Constructor*/
+  AlignableTrackingVolume(Amg::Transform3D* htrans,
+                          Amg::Transform3D* align,
+                          VolumeBounds* volbounds,
+                          const BinnedMaterial* matprop,
+                          int sampleID,
+                          const std::string& volumeName = "undefined");
 
+  /** returns the alignedTrackingVolume */
+  const TrackingVolume* alignedTrackingVolume() const;
+  /** returns the id */
+  int identify() const;
+  /** access to binned material */
+  const BinnedMaterial* binnedMaterial() const;
 
-inline int AlignableTrackingVolume::identify() const { return (m_sampleID); }
+  virtual bool isAlignable() const override final;
 
-inline const BinnedMaterial* AlignableTrackingVolume::binnedMaterial() const { return m_binnedMaterial; }
- 
-inline bool AlignableTrackingVolume::isAlignable () const{return true;}
-} // end of namespace
+ private:
+  std::unique_ptr<Amg::Transform3D> m_alignment = nullptr;
+  std::unique_ptr<TrackingVolume> m_alignedTV = nullptr;
+  std::unique_ptr<const BinnedMaterial> m_binnedMaterial = nullptr;
+  int m_sampleID{};
+};
 
-#endif // TRKGEOMETRY_ALIGNABLETRACKINGVOLUME_H
+inline int AlignableTrackingVolume::identify() const {
+  return m_sampleID;
+}
 
+inline const BinnedMaterial* AlignableTrackingVolume::binnedMaterial() const {
+  return m_binnedMaterial.get();
+}
 
+inline bool AlignableTrackingVolume::isAlignable() const {
+  return true;
+}
+}  // namespace Trk
+
+#endif  // TRKGEOMETRY_ALIGNABLETRACKINGVOLUME_H
 

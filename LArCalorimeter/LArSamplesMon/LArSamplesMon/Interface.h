@@ -55,6 +55,7 @@ namespace LArSamples {
       const RunData* runData(unsigned int i) const { return accessor().runData(i); }
       
       unsigned int historySize(unsigned int i) const { return accessor().historySize(i); }
+      unsigned int historySizeSC(unsigned int i) const { return accessor().historySizeSC(i); }
 
       HistoryIterator begin(unsigned int pos = 0, double eMin = -1, double adcMaxMin = -1) const;
       unsigned int end() const { return nChannels(); }

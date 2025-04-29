@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -88,7 +88,8 @@ namespace xAOD {
    void TAuxManager::reset() {
 
       // Clear the store if it's a container store:
-      if( m_storePtr->structMode() == TAuxStore::kContainerStore ) {
+      if( m_storePtr->structMode() ==
+          TAuxStore::EStructMode::kContainerStore ) {
          m_storePtr->resize( 0 );
          m_storePtr->reset();
       }

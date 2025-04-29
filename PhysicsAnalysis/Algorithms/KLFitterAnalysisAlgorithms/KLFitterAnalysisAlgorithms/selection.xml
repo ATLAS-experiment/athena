@@ -1,0 +1,11 @@
+<lcgdict>
+
+  <class name="EventReco::RunKLFitterAlg" />
+  <class name="EventReco::KLFitterResult" />
+  <class name="xAOD::KLFitterResult" />
+  <class name="DataVector<xAOD::KLFitterResult>" />
+  <class name="EventReco::KLFitterResultContainer" />
+  <class name="EventReco::KLFitterResultAuxContainer" />
+  <class name="EventReco::KLFitterFinalizeOutputAlg" />
+
+</lcgdict>

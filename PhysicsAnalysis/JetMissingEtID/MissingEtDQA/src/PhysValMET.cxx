@@ -565,7 +565,7 @@ namespace MissingEtDQA {
 
   StatusCode PhysValMET::fillHistograms()
   {
-    ATH_MSG_INFO ("Filling hists " << name() << "...");
+    ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 
     //If we're running over new AODs without MET containers, don't do anything!
     if(!m_inputIsDAOD && !m_doMETRefPlots)

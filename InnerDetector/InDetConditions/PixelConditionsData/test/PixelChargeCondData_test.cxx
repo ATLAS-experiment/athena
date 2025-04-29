@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     BOOST_CHECK_THROW(calib.getThresholds(type,moduleHash,frontEndIdxTooBig), std::out_of_range);
 
     //
-    PixelChargeCalib::LegacyFitParameters oneFit{1.f, 2.f, 3.f};
+    PixelChargeCalib::LegacyFitParameters oneFit{1.f, 2.f, 3.f, 32.f};
     std::vector< PixelChargeCalib::LegacyFitParameters > allParameters(4, oneFit);
     BOOST_CHECK_NO_THROW(calib.setLegacyFitParameters(type,moduleHash, allParameters));
     BOOST_CHECK_THROW(calib.setLegacyFitParameters(type,hashTooBig, allParameters), std::out_of_range);
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     const PixelChargeCalib::Thresholds thr{1,1,1,1};
     calib.setThresholds(type,moduleHash, std::vector<PixelChargeCalib::Thresholds>(2, thr));
     
-    PixelChargeCalib::LegacyFitParameters oneFit{1.f, 2.f, 3.f};
+    PixelChargeCalib::LegacyFitParameters oneFit{1.f, 2.f, 3.f, 32.f};
     std::vector< PixelChargeCalib::LegacyFitParameters > allParameters(4, oneFit);
     calib.setLegacyFitParameters(type,moduleHash, allParameters);
     

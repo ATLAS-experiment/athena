@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatCandidateTool.h"
@@ -31,21 +31,16 @@
 
 namespace Muon {
 
-    MuPatCandidateTool::MuPatCandidateTool(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
+    MuPatCandidateTool::MuPatCandidateTool(const std::string& t, const std::string& n, const IInterface* p) : 
+        AthAlgTool(t, n, p) {
         declareInterface<MuPatCandidateTool>(this);
     }
 
     StatusCode MuPatCandidateTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_mdtRotCreator.retrieve());
-        if (!m_cscRotCreator.empty()) {
-            if (!m_idHelperSvc->hasCSC())
-                ATH_MSG_WARNING(
-                    "The current layout does not have any CSC chamber but you gave a CscRotCreator, ignoring it, but double-check "
-                    "configuration");
-            else
-                ATH_CHECK(m_cscRotCreator.retrieve());
-        }
+        ATH_CHECK(m_cscRotCreator.retrieve(EnableTool{m_idHelperSvc->hasCSC()}));
+
         ATH_CHECK(m_compClusterCreator.retrieve());
         ATH_CHECK(m_hitHandler.retrieve());
         ATH_CHECK(m_edmHelperSvc.retrieve());
@@ -148,8 +143,7 @@ namespace Muon {
         Trk::MagneticFieldProperties magProps;
 
         // vector to store trigger hits in case we have special treatment for them
-        std::vector<const MuonClusterOnTrack*> triggerHitsPhi;
-        std::vector<const MuonClusterOnTrack*> triggerHitsEta;
+        std::vector<const MuonClusterOnTrack*> triggerHitsPhi{}, triggerHitsEta{};
 
         // loop over hits
         bool is_first_meas = true;
@@ -181,20 +175,19 @@ namespace Muon {
             if (isMdt) {
                 // if in MDT recreation mode, recreate MDT using ROT creator. Store the pointer as we have to delete it ourselfs.
                 if (recreateMDT) {
-                    if ( !m_doMdtRecreation) {
+                    if (!m_doMdtRecreation) {
                         ATH_MSG_WARNING(
                             " recreation of MDTs requiered although not configured via jobO, ignoring request. Please check jobO ");
                     } else {
-                        const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(meas);
+                        const auto* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(meas);
                         if (!mdt) {
                             ATH_MSG_WARNING(" found MdtDriftCircleOnTrack without MDT identifier " << m_idHelperSvc->toString(id));
                             continue;
                         }
                         ATH_MSG_DEBUG(" recreating MdtDriftCircleOnTrack ");
-                        std::unique_ptr<const MdtDriftCircleOnTrack> newMdt{
-                            m_mdtRotCreator->createRIO_OnTrack(*mdt->prepRawData(), mdt->globalPosition())};
-                        meas = newMdt.get();
-                        entry.addToTrash(std::move(newMdt));
+                        meas = entry.addToTrash
+                          (std::unique_ptr<const MdtDriftCircleOnTrack>
+                           (m_mdtRotCreator->createRIO_OnTrack(*mdt->prepRawData(), mdt->globalPosition())));
                     }
                 }
 
@@ -225,15 +218,15 @@ namespace Muon {
                 ncscHitsPhi+= (measuresPhi && isCsc);
                 ncscHitsEta+= (!measuresPhi && isCsc);             
                 if (isCsc && recreateCSC) {
-                    const CscClusterOnTrack* csc = dynamic_cast<const CscClusterOnTrack*>(meas);
+                    const auto* csc = dynamic_cast<const CscClusterOnTrack*>(meas);
                     if (!csc) {
                         ATH_MSG_WARNING(" found CscClusterOnTrack without CSC identifier " << m_idHelperSvc->toString(id));
                         continue;
                     }
                     ATH_MSG_DEBUG(" recreating CscClusterOnTrack ");
-                    std::unique_ptr<const MuonClusterOnTrack> newCsc{m_cscRotCreator->createRIO_OnTrack(*csc->prepRawData(), csc->globalPosition())};
-                    meas = newCsc.get();
-                    entry.addToTrash(std::move(newCsc));                    
+                    meas = entry.addToTrash
+                      (std::unique_ptr<const MuonClusterOnTrack>
+                       (m_cscRotCreator->createRIO_OnTrack(*csc->prepRawData(), csc->globalPosition())));
                 }  
                 
 
@@ -271,16 +264,20 @@ namespace Muon {
         entry.nrpcHitsPhi = nrpcHitsPhi;
         entry.ntgcHitsEta = ntgcHitsEta;
         entry.ntgcHitsPhi = ntgcHitsPhi;
-        if (!triggerHitsEta.empty() && etaHits.empty()) ATH_MSG_WARNING("did not find any eta hits");
+        if (!triggerHitsEta.empty() && etaHits.empty()) {
+            ATH_MSG_WARNING("did not find any eta hits");
+        }
         entry.setEtaHits(etaHits);
-        if (!triggerHitsPhi.empty() && phiHits.empty()) ATH_MSG_WARNING("did not find any phi hits");
+        if (!triggerHitsPhi.empty() && phiHits.empty()) {
+            ATH_MSG_WARNING("did not find any phi hits");
+        }
         entry.setPhiHits(phiHits);
         entry.setFakePhiHits(fakePhiHits);
         entry.setAllHits(allHits);
         entry.hasEndcap(hasEndcap);
         entry.hasSmallChamber(hasSmall);
         entry.hasLargeChamber(hasLarge);
-        entry.hasSLOverlap(hassloverlap);
+        entry.hasSLOverlap(hassloverlap);       
     }
 
     void MuPatCandidateTool::addCluster(const Trk::MeasurementBase& meas, std::vector<const MuonClusterOnTrack*>& rots) const {

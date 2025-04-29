@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -39,16 +39,14 @@ class IOVMetaDataContainer;
  **    - EndEvent:<pre>        End event number</pre>
  **/
 
-class IIOVDbMetaDataTool : virtual public IMetaDataTool,
+class IIOVDbMetaDataTool : virtual public extend_interfaces<IMetaDataTool>,
                            virtual public ILockableTool
 {
 
 public:
   
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID() { 
-        static const InterfaceID IID_IIOVDbMetaDataTool("IIOVDbMetadataTool", 1 , 0); 
-        return IID_IIOVDbMetaDataTool; }
+    /// Declare interface ID
+    DeclareInterfaceID(IIOVDbMetaDataTool, 1, 0);
 
     /// Register folder in the IOV Db MetaData
     virtual StatusCode  registerFolder(const std::string& folderName, 

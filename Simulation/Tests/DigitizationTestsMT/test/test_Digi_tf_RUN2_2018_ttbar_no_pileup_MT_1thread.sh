@@ -18,14 +18,17 @@ HSHITSFILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/va
 MTDigiOutputFile="mc20_nopileup_ttbar.MT.RDO.pool.root"
 STDigiOutputFile="mc20_nopileup_ttbar.ST.RDO.pool.root"
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_MC)")
+
 Digi_tf.py \
     --CA \
     --multithreaded \
     --inputHITSFile ${HSHITSFILE} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --digiSeedOffset1 170 \
     --digiSeedOffset2 170 \
-    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --DataRunNumber 310000 \
     --outputRDOFile ${MTDigiOutputFile} \
     --preInclude 'HITtoRDO:Campaigns.MC20NoPileUp' \
@@ -42,10 +45,10 @@ mv log.HITtoRDO log.HITtoRDO_MT
 Digi_tf.py \
     --CA \
     --inputHITSFile ${HSHITSFILE} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --digiSeedOffset1 170 \
     --digiSeedOffset2 170 \
-    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --DataRunNumber 310000 \
     --outputRDOFile ${STDigiOutputFile} \
     --preInclude 'HITtoRDO:Campaigns.MC20NoPileUp' \

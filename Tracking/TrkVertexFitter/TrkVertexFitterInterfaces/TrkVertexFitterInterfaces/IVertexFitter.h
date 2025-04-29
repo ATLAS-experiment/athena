@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define TRKVERTEXFITTERINTERFACE_IVERTEXFITTER_H
 
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkParameters/TrackParameters.h"
 #include <vector>

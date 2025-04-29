@@ -35,32 +35,32 @@ namespace ActsTrk {
 
     auto monitor_pt = Monitored::Collection("track_param_pt", *trackParams,
 					    [] (const auto* param) -> double
-					    { return param->transverseMomentum(); });
+					    { return param == nullptr ? std::numeric_limits<double>::quiet_NaN() : param->transverseMomentum(); });
     auto monitor_eta = Monitored::Collection("track_param_eta", *trackParams,
 					     [] (const auto* param) -> double
-					     { return -std::log( std::tan(0.5 * param->parameters()[Acts::eBoundTheta]) ); });
+					     { return param == nullptr ? std::numeric_limits<double>::quiet_NaN() : -std::log( std::tan(0.5 * param->parameters()[Acts::eBoundTheta]) ); });
     auto monitor_loc0 = Monitored::Collection("track_param_loc0", *trackParams,
 					      [] (const auto* param) -> double
-					      { return param->parameters()[Acts::eBoundLoc0]; });
+					      { return param == nullptr ? std::numeric_limits<double>::quiet_NaN() : param->parameters()[Acts::eBoundLoc0]; });
     auto monitor_loc1 = Monitored::Collection("track_param_loc1", *trackParams,
 					      [] (const auto* param) -> double
-					      { return param->parameters()[Acts::eBoundLoc1]; });
+					      { return param == nullptr ? std::numeric_limits<double>::quiet_NaN() : param->parameters()[Acts::eBoundLoc1]; });
     auto monitor_phi = Monitored::Collection("track_param_phi", *trackParams,
 					     [] (const auto* param) -> double
-					     { return param->parameters()[Acts::eBoundPhi]; });
+					     { return param == nullptr ? std::numeric_limits<double>::quiet_NaN() : param->parameters()[Acts::eBoundPhi]; });
     auto monitor_theta = Monitored::Collection("track_param_theta", *trackParams,
 					       [] (const auto* param) -> double 
-					       { return  param->parameters()[Acts::eBoundTheta]; });
+					       { return param == nullptr ? std::numeric_limits<double>::quiet_NaN() : param->parameters()[Acts::eBoundTheta]; });
     auto monitor_qOverP = Monitored::Collection("track_param_qoverp", *trackParams,
 						[] (const auto* param) -> double
-						{ return param->parameters()[Acts::eBoundQOverP]; });
+						{ return param == nullptr ? std::numeric_limits<double>::quiet_NaN() : param->parameters()[Acts::eBoundQOverP]; });
     auto monitor_time = Monitored::Collection("track_param_time", *trackParams,
 					      [] (const auto* param) -> double
-					      { return  param->parameters()[Acts::eBoundTime]; });
+					      { return  param == nullptr ? std::numeric_limits<double>::quiet_NaN() : param->parameters()[Acts::eBoundTime]; });
 
     auto monitor_charge = Monitored::Collection("track_param_charge", *trackParams,
 						[] (const auto* param) -> int
-						{ return param->charge(); });
+						{ return param == nullptr ? 0 : param->charge(); });
 
     fill(m_monGroupName.value(),
 	 monitor_pt, monitor_eta,

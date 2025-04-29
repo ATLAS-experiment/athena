@@ -1,104 +1,90 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-
-// ROOT include(s):
-#include <TError.h>
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s):
-#include "xAODRootAccess/RAuxStore.h"
-#include "xAODRootAccess/tools/Message.h"
 #include "xAODRootAccess/tools/RAuxManager.h"
+
+#include "xAODRootAccess/RAuxStore.h"
+
 
 namespace xAOD {
 
-   RAuxManager::RAuxManager( RAuxStore* store, ::Bool_t sharedOwner )
-       : m_store(), m_storePtr( store ) {
+RAuxManager::RAuxManager(RAuxStore* store, ::Long64_t& entry,
+                         ::Bool_t sharedOwner)
+    : m_store(), m_storePtr(store), m_entry(entry) {
 
-      if( sharedOwner ) {
-         m_store.reset( store );
-      }
-   }
+  if (sharedOwner) {
+    m_store.reset(store);
+  }
+}
 
-   RAuxManager::RAuxManager( const RAuxManager& parent )
-       : m_store( parent.m_store ), m_storePtr( parent.m_storePtr ) {}
+::Int_t RAuxManager::getEntry(::Int_t getall) {
 
-   RAuxManager& RAuxManager::operator=( const RAuxManager& rhs ) {
+  if (m_storePtr->getEntry(m_entry.get(), getall).isFailure()) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
 
-      // Check if anything needs to be done:
-      if( this == &rhs ) {
-         return *this;
-      }
+const void* RAuxManager::object() const {
 
-      // Do the assignment:
-      m_store = rhs.m_store;
-      m_storePtr = rhs.m_storePtr;
+  return m_storePtr;
+}
 
-      return *this;
-   }
+void* RAuxManager::object() {
 
-   ::Int_t RAuxManager::getEntry( ::Int_t getall ) {
+  return m_storePtr;
+}
 
-      return m_storePtr->getEntry( getall );
-   }
+void RAuxManager::setObject(void* ptr) {
 
-   const void* RAuxManager::object() const {
+  if (m_store.get()) {
+    m_store.reset(reinterpret_cast<RAuxStore*>(ptr));
+  }
+  m_storePtr = reinterpret_cast<RAuxStore*>(ptr);
 
-      return m_storePtr;
-   }
+  return;
+}
 
-   void* RAuxManager::object() {
+/// There is no need for a default object.
+///
+::Bool_t RAuxManager::create() {
 
-      return m_storePtr;
-   }
+  return kTRUE;
+}
 
-   void RAuxManager::setObject( void* ptr ) {
+/// The state of a RAuxStore object is always "set". So this
+/// interface unfortunately doesn't make much sense for this
+/// manager class...
+///
+::Bool_t RAuxManager::isSet() const {
 
-      if( m_store.get() ) {
-         m_store.reset( reinterpret_cast< RAuxStore* >( ptr ) );
-      }
-      m_storePtr = reinterpret_cast< RAuxStore* >( ptr );
+  return kTRUE;
+}
 
-      return;
-   }
+/// Resetting an auxiliary store needs to be done in a smart way.
+/// Container stores need to be emptied, while object stores don't need
+/// to be touched.
+///
+void RAuxManager::reset() {
 
-   /// There is no need for a default object.
-   ///
-   ::Bool_t RAuxManager::create() {
+  // Clear the store if it's a container store:
+  if (m_storePtr->structMode() == RAuxStore::EStructMode::kContainerStore) {
+    m_storePtr->resize(0);
+    m_storePtr->reset();
+  }
 
-      return kTRUE;
-   }
+  return;
+}
 
-   /// The state of a RAuxStore object is always "set". So this
-   /// interface unfortunately doesn't make much sense for this
-   /// manager class...
-   ///
-   ::Bool_t RAuxManager::isSet() const {
+RAuxStore* RAuxManager::getStore() {
 
-      return kTRUE;
-   }
+  return m_storePtr;
+}
 
-   /// Resetting an auxiliary store needs to be done in a smart way.
-   /// Container stores need to be emptied, while object stores don't need
-   /// to be touched.
-   ///
-   void RAuxManager::reset() {
+const SG::IConstAuxStore* RAuxManager::getConstStore() const {
 
-      // Clear the store if it's a container store:
-      if( m_storePtr->structMode() == RAuxStore::kContainerStore ) {
-         m_storePtr->resize( 0 );
-         m_storePtr->reset();
-      }
-
-      return;
-   }
-
-   RAuxStore* RAuxManager::getStore() {
-
-      return m_storePtr;
-   }
-
-   const SG::IConstAuxStore* RAuxManager::getConstStore() const {
-
-      return m_storePtr;
-   }
+  return m_storePtr;
+}
 
 }  // namespace xAOD

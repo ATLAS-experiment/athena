@@ -1,17 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
 
 //Standalone compilation:
 //g++ -g -o mergetest.exe `root-config --libs --cflags` -L InstallArea/i686-slc5-gcc43-opt/lib/ -l DataQualityUtils LArHistMerge.version2.cxx
-
-// This file uses thread-unsafe classes from DataQualityUtils.
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "TSystem.h"
 #include "TH1.h"
@@ -25,10 +17,12 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <vector>
 #include <fstream>
 
+#include "CxxUtils/checker_macros.h"
 #include "DataQualityUtils/MonitoringFile.h" 
 
-#define MAXSKIPPEDFILES 10
-#define MAXSKIPPEDFILESFRACTION 0.1
+const int MAXSKIPPEDFILES = 10;
+const float MAXSKIPPEDFILESFRACTION = 0.1;
+
 
 TFile* openWithRetry(const char* path, const unsigned nTrys=3) {
   TFile* f=nullptr;
@@ -212,7 +206,7 @@ void lowerLB ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
    return;
 }
 
-void identical(TObject* a, const TObject* b) {
+void identical ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
    TH1* a1=(dynamic_cast<TH1*>(a));
    const TH1* b1=dynamic_cast<const TH1*>(b);
    TH2* c1=(dynamic_cast<TH2*>(a));

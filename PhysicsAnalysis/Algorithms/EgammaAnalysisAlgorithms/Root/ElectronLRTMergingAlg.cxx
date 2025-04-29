@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,11 +15,13 @@
 #include "EgammaAnalysisAlgorithms/ElectronLRTMergingAlg.h"
 #include "xAODEgamma/ElectronAuxContainer.h"
 #include "AsgTools/AsgToolConfig.h"
+#include "xAODBase/IParticleHelpers.h"
+#include <AsgDataHandles/WriteDecorHandle.h>
 
 namespace CP
 {
     ElectronLRTMergingAlg::ElectronLRTMergingAlg(const std::string &name, ISvcLocator *svcLoc)
-        : EL::AnaAlgorithm(name, svcLoc)
+        : EL::AnaReentrantAlgorithm(name, svcLoc)
     {
     }
 
@@ -31,6 +33,8 @@ namespace CP
         ATH_CHECK(m_promptElectronLocation.initialize());
         ATH_CHECK(m_lrtElectronLocation.initialize());
         ATH_CHECK(m_outElectronLocation.initialize());
+        ATH_CHECK(m_lrtIsLRTKey.initialize());
+        ATH_CHECK(m_promptIsLRTKey.initialize());
 
         /// if the tool is not user-set, configure the automatic instance via our overlap flag
         if (m_overlapRemovalTool.empty())
@@ -49,10 +53,8 @@ namespace CP
     }
 
 
-    StatusCode ElectronLRTMergingAlg::execute()
+    StatusCode ElectronLRTMergingAlg::execute(const EventContext &ctx) const
     {
-
-        const EventContext &ctx = Gaudi::Hive::currentContext();
 
         // Setup containers for output, to avoid const conversions setup two different kind of containers
         std::unique_ptr<ConstDataVector<xAOD::ElectronContainer>> transientContainer = std::make_unique<ConstDataVector<xAOD::ElectronContainer>>(SG::VIEW_ELEMENTS);
@@ -89,11 +91,13 @@ namespace CP
         ATH_MSG_DEBUG("Size of overlapping electrons to remove: " << ElectronsToRemove.size());
 
         // Decorate the electrons with their track type
-        static const SG::AuxElement::Decorator<char> isLRT("isLRT"); // false if prompt, true if LRT
+        // 0 if prompt, 1 if LRT
+        SG::WriteDecorHandle<xAOD::ElectronContainer, char> promptIsLRT(m_promptIsLRTKey, ctx);
+        SG::WriteDecorHandle<xAOD::ElectronContainer, char> lrtIsLRT(m_lrtIsLRTKey, ctx);
         for (const xAOD::Electron *el : *promptCol)
-            isLRT(*el) = 0;
+            promptIsLRT(*el) = 0;
         for (const xAOD::Electron *el : *lrtCol)
-            isLRT(*el) = 1;
+            lrtIsLRT(*el) = 1;
 
         // merging loop over containers
         if (m_createViewCollection)
@@ -111,6 +115,7 @@ namespace CP
             mergeElectron(*lrtCol, outputCol.get(), ElectronsToRemove);
         }
 
+        //write
         SG::WriteHandle<xAOD::ElectronContainer> h_write(m_outElectronLocation, ctx);
         if (m_createViewCollection)
         {
@@ -129,6 +134,7 @@ namespace CP
     ///////////////////////////////////////////////////////////////////
     // Merge electron collections and remove duplicates, for copy
     ///////////////////////////////////////////////////////////////////
+    
     void ElectronLRTMergingAlg::mergeElectron(const xAOD::ElectronContainer &electronCol,
                                               xAOD::ElectronContainer *outputCol,
                                               const std::set<const xAOD::Electron *> &ElectronsToRemove) const
@@ -152,8 +158,12 @@ namespace CP
                     ElementLink<xAOD::ElectronContainer> eLink;
                     eLink.toIndexedElement(electronCol, electron->index());
                     originalElectronLink(*newElectron) = eLink;
-
+                    setOriginalObjectLink(*electron, *newElectron);
+                    static const SG::AuxElement::Accessor<char> isLRT("isLRT");
+                    isLRT(*newElectron) = isLRT(*electron);
                     outputCol->push_back(std::move(newElectron));
+
+
                 }
             }
             ATH_MSG_DEBUG("Size of merged output electron collection " << outputCol->size());

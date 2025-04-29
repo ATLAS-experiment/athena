@@ -22,7 +22,7 @@
 namespace DerivationFramework {
 
 
-  class JetMSVAugmentation : public AthAlgTool, public IAugmentationTool {
+  class JetMSVAugmentation : public extends<AthAlgTool, IAugmentationTool> {
 
 
   public:

@@ -3,7 +3,7 @@
 
 # art-description: art job for ellrt_selsel
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: valid1.516757.MGPy8EG_A14NNPDF23LO_SelSelLLP_100_0_1ns.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42135009_00
 # art-input-nfiles: 4
@@ -30,7 +30,7 @@
 # art-output: *.dat 
 
 
-Slices  = ['L2electronLRT']
+Slices  = ['electronLRT']
 Events  = 8000 
 Threads = 8 
 Slots   = 8

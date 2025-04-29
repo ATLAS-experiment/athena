@@ -8,7 +8,7 @@
 /*
   author: Dirk Duschinger
   mail: dirk.duschinger@cern.ch
-  documentation in: https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst
+  documentation in: https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst
 */
 
 // Framework include(s):

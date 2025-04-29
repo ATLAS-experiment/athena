@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ namespace CP
         Gaudi::Property<bool> m_vetoFSR {this, "vetoFSR", false, "boolean to revert FSR logic to rather veto FSR electrons or photons"};
 
         /// Decorator for electron or photon working point - used to add additional el/ph
-        std::unique_ptr<SG::AuxElement::Decorator<uint32_t> > m_wpDec;
+        std::unique_ptr<SG::AuxElement::Decorator<char> > m_wpDec;
 
     };
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,7 +10,7 @@
 
 /// header file for this class.
 #include "SCT_ByteStreamErrorsTool.h"
-#include "SCT_DetectorElementStatus.h"
+#include "SCT_ReadoutGeometry/SCT_DetectorElementStatus.h"
 
 ///Athena includes
 #include "InDetIdentifier/SCT_ID.h"
@@ -128,6 +128,7 @@ SCT_ByteStreamErrorsTool::isGood(const IdentifierHash& elementIdHash, const Even
       ATH_MSG_VERBOSE("SCT_ByteStreamErrorsTool Bad Error " << errorCode  << " for ID " << elementIdHash);
       return false;
     }
+
   } // end of cache operations protection via m_cacheMutex, following code has own protection
   
   // If all 6 chips of a link issue ABCD errors or are bad chips or temporarily masked chips, the link is treated as bad one. 

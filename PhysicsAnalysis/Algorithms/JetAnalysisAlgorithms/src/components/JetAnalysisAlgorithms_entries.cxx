@@ -2,6 +2,7 @@
 
 #include <JetAnalysisAlgorithms/JetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/BJetCalibrationAlg.h>
+#include <JetAnalysisAlgorithms/JetFFSmearingAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
 #include <JetAnalysisAlgorithms/JetModifierAlg.h>
@@ -12,9 +13,11 @@
 #include <JetAnalysisAlgorithms/JetDecoratorAlg.h>
 #include <JetAnalysisAlgorithms/JetTruthTagAlg.h>
 #include <JetAnalysisAlgorithms/JetReclusteringAlg.h>
+#include <JetAnalysisAlgorithms/ReclusteredJetCalibrationAlg.h>
 
 DECLARE_COMPONENT (CP::JetCalibrationAlg)
 DECLARE_COMPONENT (CP::BJetCalibrationAlg)
+DECLARE_COMPONENT (CP::JetFFSmearingAlg)
 DECLARE_COMPONENT (CP::JetGhostMuonAssociationAlg)
 DECLARE_COMPONENT (CP::JetGhostMergingAlg)
 DECLARE_COMPONENT (CP::JetModifierAlg)
@@ -25,3 +28,4 @@ DECLARE_COMPONENT (CP::JvtUpdateAlg)
 DECLARE_COMPONENT (CP::JetDecoratorAlg)
 DECLARE_COMPONENT (CP::JetTruthTagAlg)
 DECLARE_COMPONENT (CP::JetReclusteringAlg)
+DECLARE_COMPONENT (CP::ReclusteredJetCalibrationAlg)

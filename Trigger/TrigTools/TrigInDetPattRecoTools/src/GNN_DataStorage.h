@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_GNN_DATA_STORAGE_H
@@ -9,18 +9,15 @@
 #include<map>
 #include<algorithm>
 #include<array>
-
+#include<limits>
 #define MAX_SEG_PER_NODE 1000 //was 30
 #define N_SEG_CONNS  6 //was 6
 
-#include "TrkSpacePoint/SpacePoint.h"
-
 class TrigFTF_GNN_Geometry;
-
 
 struct TrigFTF_GNN_Node {
 
-  TrigFTF_GNN_Node(unsigned short l) : m_x(0), m_y(0), m_z(0), m_r(0), m_phi(0), m_layer(l), m_pSP(nullptr) {};
+  TrigFTF_GNN_Node(unsigned short l) : m_x(0), m_y(0), m_z(0), m_r(0), m_phi(0), m_layer(l), m_pcw(0) {};
 
   inline float x() const {return m_x;}
   inline float y() const {return m_y;}
@@ -29,13 +26,14 @@ struct TrigFTF_GNN_Node {
   inline float z() const {return m_z;}
   inline float r() const {return m_r;}
   inline unsigned short layer() const {return m_layer;}
+  inline float pixelClusterWidth() const {return m_pcw;}
   
-  inline const Trk::SpacePoint* sp() const {return m_pSP;}
+  inline int sp_idx() const {return m_idx;}
   
   float m_x, m_y, m_z, m_r, m_phi;
   unsigned short m_layer{10000};
-  const Trk::SpacePoint* m_pSP{nullptr};
-  
+  unsigned int m_idx{std::numeric_limits<unsigned int>::max()};
+  float m_pcw;
 };
 
 
@@ -110,8 +108,8 @@ public:
 
   struct CompareLevel {
   public:
-    bool operator()(const TrigFTF_GNN_Edge* pS1, const TrigFTF_GNN_Edge* pS2) {
-      return pS1->m_level > pS2->m_level;
+    bool operator()(const TrigFTF_GNN_Edge* pE1, const TrigFTF_GNN_Edge* pE2) {
+      return pE1->m_level > pE2->m_level;
     }
   };
   
@@ -137,3 +135,4 @@ public:
 };
 
 #endif
+

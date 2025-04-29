@@ -19,23 +19,12 @@ find_package( nlohmann_json )
 # source files, depend on the build
 set(FTDSource
   Root/BTagJetAugmenter.cxx
-  Root/BTagTrackIpAccessor.cxx
   Root/BTagAugmenterTool.cxx
   Root/BTagMuonAugmenter.cxx
   Root/BTagMuonAugmenterTool.cxx
   Root/DL2.cxx
   Root/DL2HighLevel.cxx
   Root/DL2Tool.cxx
-  Root/DataPrepUtilities.cxx
-  Root/OnnxUtil.cxx
-  Root/OnnxOutput.cxx
-  Root/GNN.cxx
-  Root/GNNOptions.cxx
-  Root/GNNTool.cxx
-  Root/GNNToolifiers.cxx
-  Root/NNSharingSvc.cxx
-  Root/FlipTagEnums.cxx
-  Root/AssociationEnums.cxx
   Root/VRJetOverlapDecorator.cxx
   Root/VRJetOverlapDecoratorTool.cxx
   Root/HbbTag.cxx
@@ -43,22 +32,8 @@ set(FTDSource
   Root/HbbTagConfig.cxx
   Root/HbbGraphConfig.cxx
   Root/VRJetOverlapDecorator.cxx
-  Root/FTagDataDependencyNames.cxx
   Root/TrackClassifier.cxx
-  Root/ConstituentsLoader.cxx
-  Root/TracksLoader.cxx
-  Root/IParticlesLoader.cxx
-  Root/HitsLoader.cxx
-  Root/CustomGetterUtils.cxx
-  Root/StringUtils.cxx
 )
-if (NOT XAOD_STANDALONE)
-  list(
-    APPEND FTDSource
-    Root/MultifoldGNN.cxx
-    Root/MultifoldGNNTool.cxx
-    )
-endif()
 
 # Build a shared library:
 atlas_add_library( FlavorTagDiscriminants
@@ -76,6 +51,7 @@ atlas_add_library( FlavorTagDiscriminants
     xAODEventInfo
     xAODJet
     xAODTracking
+    FlavorTagInference
     InDetTrackSystematicsToolsLib
     xAODMuon
     xAODEgamma
@@ -93,8 +69,6 @@ set_target_properties( FlavorTagDiscriminants
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( FlavorTagDiscriminantsLib
-    src/BTagDecoratorAlg.cxx
-    src/JetTagDecoratorAlg.cxx
     src/BTagToJetLinkerAlg.cxx
     src/JetToBTagLinkerAlg.cxx
     src/BTagTrackLinkCopyAlg.cxx
@@ -102,8 +76,6 @@ if (NOT XAOD_STANDALONE)
     src/PoorMansIpAugmenterAlg.cxx
     src/HitDecoratorAlg.cxx
     src/JetHitAssociationAlg.cxx
-    src/BTagConditionalDecoratorAlg.cxx
-    src/JetTagConditionalDecoratorAlg.cxx
     src/TruthDecoratorHelpers.cxx
     src/TrackLeptonDecoratorAlg.cxx
     src/TruthParticleDecoratorAlg.cxx

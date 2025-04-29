@@ -50,7 +50,6 @@ class MetaCont: public MetaContBase {
   typedef T Payload_t;
   friend SG::ReadMetaHandle<T>;
 
-  // cppcheck-suppress syntaxError
   MetaCont() {};
   ~MetaCont();
 

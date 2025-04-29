@@ -186,7 +186,7 @@ HepMC::IO_GenEvent-END_EVENT_LISTING
 EOF
 
 mkdir -p 100000
-cat <<EOF > 100000/mc.HepMC_test.py
+cat <<EOF > 100000/mc.HepMCAscii_art_test.py
 evgenConfig.description = "Simple test JO for Rivet ART"
 evgenConfig.keywords = ["Z","SM"]
 evgenConfig.generators += ["HepMCAscii"]

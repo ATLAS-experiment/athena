@@ -10,6 +10,8 @@
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 #include "ParticleJetTools/JetPileupLabelingTool.h"
 
+#include "../TruthParentDecoratorAlg.h"
+
 using namespace Analysis;
 
 
@@ -25,3 +27,4 @@ DECLARE_COMPONENT( JetParticleShrinkingConeAssociation )
 DECLARE_COMPONENT( JetParticleCenterOfMassAssociation )
 DECLARE_COMPONENT( JetTruthLabelingTool )
 DECLARE_COMPONENT( JetPileupLabelingTool )
+DECLARE_COMPONENT( TruthParentDecoratorAlg )

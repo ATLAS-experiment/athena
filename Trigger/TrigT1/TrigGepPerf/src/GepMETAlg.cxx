@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "./GepMETAlg.h"
@@ -42,7 +42,7 @@ StatusCode GepMETAlg::execute(const EventContext& context) const {
   float Ey = 0.;
   float totalEt =0.; 
 
-  for ( const auto& cluster : caloClusters ) {
+  for ( const auto cluster : caloClusters ) {
     float et = cluster->et();
     float phi = cluster->phi();
 

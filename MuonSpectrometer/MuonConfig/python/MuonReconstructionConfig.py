@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Core configuration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -47,21 +47,6 @@ def StandaloneMuonOutputCfg(flags):
         # Truth Segment Container
         aod_items += ["xAOD::MuonSegmentContainer#MuonTruthSegments"]
         aod_items += ["xAOD::MuonSegmentAuxContainer#MuonTruthSegmentsAux."]
-
-    if flags.Muon.prdToxAOD:
-        aod_items += ["xAOD::TrackMeasurementValidationContainer#MDT_DriftCircles"]
-        aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#MDT_DriftCirclesAux."]
-        aod_items += ["xAOD::TrackMeasurementValidationContainer#RPC_Measurements"]
-        aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#RPC_MeasurementsAux."]
-        aod_items += ["xAOD::TrackMeasurementValidationContainer#TGC_MeasurementsAllBCs"]
-        aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#TGC_MeasurementsAllBCsAux."]
-        if flags.Detector.EnableCSC:
-            aod_items += ["xAOD::TrackMeasurementValidationContainer#CSC_Clusters"]
-            aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#CSC_ClustersAux."]
-
-    if flags.Muon.rpcRawToxAOD:
-        aod_items += ["xAOD::TrackMeasurementValidationContainer#RPC_RDO_Measurements"]
-        aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#RPC_RDO_MeasurementsAux."]
 
     # ESD list includes all AOD items
     esd_items = []
@@ -201,12 +186,21 @@ def MuonReconstructionCfg(flags):
 
         # Check if we're making PRDs
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.
-        if flags.Muon.makePRDs:
-            from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
-            result.merge(MuonPRD_MultiTruthMakerCfg(flags))
-
-            from MuonConfig.MuonTruthAlgsConfig import MuonTruthDecorationAlgCfg
-            result.merge(MuonTruthDecorationAlgCfg(flags))
+        if flags.Muon.makePRDs and flags.Input.isMC:
+            if not flags.Muon.usePhaseIIGeoSetup:
+                from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
+                result.merge(MuonPRD_MultiTruthMakerCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg
+                result.merge(TruthMuonMakerAlgCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
+                result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthHitCountsAlgCfg
+                result.merge(MuonTruthHitCountsAlgCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthSegmentCreationAlgCfg
+                result.merge(MuonTruthSegmentCreationAlgCfg(flags))
+            else:
+                from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
+                result.merge(MuonTruthAlgsCfg(flags))
 
     if flags.Muon.doMSVertex:
         msvertexrecotool = CompFactory.Muon.MSVertexRecoTool(
@@ -273,6 +267,56 @@ def MuonReconstructionConfigTest(flags=None):
         if not sc.isSuccess():
             import sys
             sys.exit("Execution failed")
+
+
+
+def MuonNCBTrackCfg(flags, cfg):
+   """ 
+        This config (made for r24.0 in Nov 2024) is used to:
+        1] Switch setup of the segment making in the NSW to loosen constrain on the IP
+        2] Adapt and switch off various criteria in TrackSteering/building to be able to reconstruct track from the non-standards (non-collision background) segments 
+   """
+
+    #Adapting NCB alg setup for the standard segment maker alg
+   cfg.getEventAlgo("MuonSegmentMaker").NSWSegmentMaker.SeedMMStereos=False
+   cfg.getEventAlgo("MuonSegmentMaker").NSWSegmentMaker.IPConstraint=False
+
+
+   #Most of the setup below is to suppress background which now we want to reconstruct
+   cfg.getEventAlgo("MuonCreatorAlg").MuonCreatorTool.RequireMSOEforSA=False
+   cfg.getEventAlgo("MuonCreatorAlg").MuonCreatorTool.RequireCaloForSA=False
+
+   cfg.getEventAlgo("MuonCombinedMuonCandidateAlg").MuonCandidateTool.ExtrapolationStrategy=1
+
+   #Loosen up segment criteria
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.SegSeedQCut = -2
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.Seg2ndQCut  = -2
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.SegOtherQCut  = -2 #by default already -2
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.UseTightSegmentMatching  = False
+
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.DoTrackSegmentMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.MooBuilderTool.CandidateMatchingTool.DoTrackSegmentMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.DoTrackSegmentMatching = False
+   #MuPatTrackBuilder.MuonTrackSteering.MooCandidateMatchingTool
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.CandidateMatchingTool.DoTrackSegmentMatching = False
+   #MuPatTrackBuilder.MuonTrackSteering.MooTrackBuilderTemplate.MooCandidateMatchingTool
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackRefinementTool.CandidateMatchingTool.DoTrackSegmentMatching = False
+
+   #MuPatTrackBuilder.MuonTrackSteering.MooCandidateMatchingTool.MuonSegmentMatchingTool
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.CandidateMatchingTool.SegmentMatchingTool.UseEndcapExtrapolationMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.CandidateMatchingTool.SegmentMatchingTool.doThetaMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.CandidateMatchingTool.SegmentMatchingTool.doPhiMatching   = False
+
+   #MuPatTrackBuilder.MuonTrackSteering.MooMuonTrackBuilder.MuSt_MooCandidateMatchingTool.MuSt_MuonSegmentMatchingTool
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.SegmentMatchingTool.UseEndcapExtrapolationMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.SegmentMatchingTool.doThetaMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.SegmentMatchingTool.doPhiMatching   = False
+
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.MooBuilderTool.CandidateMatchingTool.SegmentMatchingTool.UseEndcapExtrapolationMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.MooBuilderTool.CandidateMatchingTool.SegmentMatchingTool.doThetaMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.MooBuilderTool.CandidateMatchingTool.SegmentMatchingTool.doPhiMatching   = False
+
+
 
 if __name__ == "__main__":
     MuonReconstructionConfigTest()

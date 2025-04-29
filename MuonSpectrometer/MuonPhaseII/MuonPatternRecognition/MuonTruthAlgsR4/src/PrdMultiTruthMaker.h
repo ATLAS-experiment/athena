@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRUTHALGSR4_PRDMULTITRUTHMAKER_H
 #define MUONTRUTHALGSR4_PRDMULTITRUTHMAKER_H
@@ -16,6 +16,10 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 namespace MuonR4{
+    /** @brief The PrdMultiTruthMaker translates the UncalibratedMeasurementContainers of
+     *         a given MS technology to PRD_MultiTruthCollections, which are later needed for
+     *         a TruthParticle <-> SDO matching. The HepMCParticleLinks of the associated SDO
+     *         hits are directly translated into a PRD_MultiTruthCollection object. */
     class PrdMultiTruthMaker : public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;

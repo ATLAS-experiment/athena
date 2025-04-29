@@ -28,7 +28,7 @@ Overlay_tf.py \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --outputRDOFile MC_plus_MC.MT.RDO.pool.root \
 --maxEvents 10 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
---conditionsTag OFLCOND-MC23-SDR-RUN3-01  \
+--conditionsTag OFLCOND-MC23-SDR-RUN3-08  \
 --geometryVersion ATLAS-R3S-2021-03-02-00 \
 --preInclude 'all:Campaigns.MC23a' \
 --imf False
@@ -49,7 +49,7 @@ then
     --inputRDO_BKGFile ${RDO_BKG_File} \
     --outputRDOFile MC_plus_MC.ST.RDO.pool.root \
     --maxEvents 10 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
-    --conditionsTag OFLCOND-MC23-SDR-RUN3-01  \
+    --conditionsTag OFLCOND-MC23-SDR-RUN3-08  \
     --geometryVersion ATLAS-R3S-2021-03-02-00 \
     --preInclude 'all:Campaigns.MC23a' \
     --imf False
@@ -61,7 +61,7 @@ echo  "art-result: $rc2 overlayST"
 rc3=-9999
 if [ $rc2 -eq 0 ]
 then
-    acmd.py diff-root MC_plus_MC.ST.RDO.pool.root MC_plus_MC.MT.RDO.pool.root --error-mode resilient --mode=semi-detailed --order-trees
+    acmd.py diff-root MC_plus_MC.ST.RDO.pool.root MC_plus_MC.MT.RDO.pool.root --nan-equal --error-mode resilient --mode=semi-detailed --order-trees
     rc3=$?
     status=$rc3
 fi

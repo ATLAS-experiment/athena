@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   */
 
 #include <array>
 #include <vector>
@@ -11,11 +11,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "TH1.h"
 
-FPGATrackSimSpacePointsTool::FPGATrackSimSpacePointsTool(const std::string &algname, const std::string &name, const IInterface *ifc)
-    : base_class(algname, name, ifc)
-{
-    declareInterface<FPGATrackSimSpacePointsToolI>(this);
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimSpacePointsTool::initialize()
@@ -110,7 +105,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
         std::vector<FPGATrackSimHit>& hits_outer = entry.second.second;
 
         for (auto hit_in : hits_inner) {
-	    int startsize =  spacepoints.size();
+            int startsize =  spacepoints.size();
             bool foundPair = searchForMatch(hit_in,hits_outer,tower,spacepoints);
 
             if (!foundPair && !m_sameModulesOnly) {
@@ -154,7 +149,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 else {
                     tower.addHit(hit_in); // add unpaired hit_in
                     ATH_MSG_DEBUG("Unpaired hit z = " << hit_in.getZ() << ", r = " << hit_in.getR() << ", phi = " << hit_in.getGPhi() << ", phi module = " << hit_in.getPhiModule() << ", eta module = " << hit_in.getEtaModule());
-              }
+                }
             }
 
             m_spacepts_per_hit->Fill(spacepoints.size()-startsize);
@@ -245,11 +240,11 @@ bool FPGATrackSimSpacePointsTool::searchForMatch(FPGATrackSimHit& hit_in,std::ve
     bool foundPair = false;
     for (const FPGATrackSimHit& hit_out : hits_outer)
     {
-	// Too far apart to be from same track
+        // Too far apart to be from same track
         if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
-	  addSpacePoints(hit_in,hit_out,tower,spacepoints);
-	  foundPair=true;
-	}
+            addSpacePoints(hit_in,hit_out,tower,spacepoints);
+            foundPair=true;
+        }
     }
     return foundPair;
 }
@@ -292,31 +287,26 @@ void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATra
     // local coordinates for later retrieval.
     // Maybe it should return a new FPGATrackSimHit rather than modifying in place.
     hit_in.makeSpacepoint(x, y, z, phi_window, hit_out, new_truth);
+    hit_in.setCluster2ID(hit_out.getCluster1ID());
 
     if (m_reduceCoordPrecision)
-      reduceGlobalCoordPrecision(hit_in);
+        reduceGlobalCoordPrecision(hit_in);
 
     // abusing hit type 'guessed' to be able to indentify it as spacepoint later on
     // Guessed is ambiguous with an actual guessed hit-- there is a spacepoint type which
     // should be used instead.
-//    hit_in.setHitType(HitType::guessed);
-//    hit_in.setHitType(HitType::spacepoint);
+    //    hit_in.setHitType(HitType::guessed);
+    //    hit_in.setHitType(HitType::spacepoint);
     tower.addHit(hit_in);
 
     if (m_duplicate) {
-//      hit_out.setX(x);
-//      hit_out.setY(y);
-//      hit_out.setZ(z);
-//      hit_out.setTruth(new_truth);
-//      hit_out.setPairedHit(hit_in);
-//      hit_out.setHitType(HitType::guessed);
-//      hit_out.setHitType(HitType::spacepoint);
-      hit_out.makeSpacepoint(x, y, z, phi_window, hit_in, new_truth);
+        hit_out.makeSpacepoint(x, y, z, phi_window, hit_in, new_truth);
+        hit_out.setCluster2ID(hit_in.getCluster1ID());
 
-      if (m_reduceCoordPrecision)
-        reduceGlobalCoordPrecision(hit_out);
+        if (m_reduceCoordPrecision)
+            reduceGlobalCoordPrecision(hit_out);
 
-      tower.addHit(hit_out);
+        tower.addHit(hit_out);
     }
 
     // push back a copy for monitoring
@@ -381,13 +371,13 @@ void FPGATrackSimSpacePointsTool::calcPosition(FPGATrackSimHit &hit_in, FPGATrac
 }
 
 void FPGATrackSimSpacePointsTool::reduceGlobalCoordPrecision(FPGATrackSimHit &hit) const {
-  float pos[3] = { hit.getR(), hit.getGPhi(), hit.getZ() };
+    float pos[3] = { hit.getR(), hit.getGPhi(), hit.getZ() };
 
-  pos[0] = std::trunc(pos[0] / m_coordRPrecision) * m_coordRPrecision;
-  pos[1] = std::trunc(pos[1] / m_coordPhiPrecision) * m_coordPhiPrecision;
-  pos[2] = std::trunc(pos[2] / m_coordZPrecision) * m_coordZPrecision;
+    pos[0] = std::trunc(pos[0] / m_coordRPrecision) * m_coordRPrecision;
+    pos[1] = std::trunc(pos[1] / m_coordPhiPrecision) * m_coordPhiPrecision;
+    pos[2] = std::trunc(pos[2] / m_coordZPrecision) * m_coordZPrecision;
 
-  hit.setX(pos[0] * std::cos(pos[1]));
-  hit.setY(pos[0] * std::sin(pos[1]));
-  hit.setZ(pos[2]);
+    hit.setX(pos[0] * std::cos(pos[1]));
+    hit.setY(pos[0] * std::sin(pos[1]));
+    hit.setZ(pos[2]);
 }

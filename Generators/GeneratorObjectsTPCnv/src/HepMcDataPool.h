@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcDataPool.h
@@ -104,32 +104,32 @@ namespace HepMC {
     // to the pool.  (And that way, we don't maintain allocated memory
     // from free objects in the pool.)
 
-    static void clearEvent (HepMC::GenEvent* evt)
+    struct ClearGenEvent
     {
-      evt->clear();
-    }
-    ::DataPool<HepMC::GenEvent, clearEvent> evt;
+      static void clear (HepMC::GenEvent* evt) { evt->clear(); }
+    };
+    ::DataPool<HepMC::GenEvent, ClearGenEvent> evt;
     HepMC::GenEvent* getGenEvent()
     {
       return evt.nextElementPtr();
     }
 
-    static void clearVertex (HepMC::GenVertex* vtx)
+    struct ClearGenVertex
     {
-      *vtx = HepMC::GenVertex();
-    }
-    ::DataPool<HepMC::GenVertex, clearVertex> vtx;
+      static void clear (HepMC::GenVertex* vtx) { *vtx = HepMC::GenVertex(); }
+    };
+    ::DataPool<HepMC::GenVertex, ClearGenVertex> vtx;
     HepMC::GenVertexPtr getGenVertex()
     {
       return HepMC::GenVertexPtr (vtx.nextElementPtr(), [](HepMC::GenVertex*){});
     }
 
 
-    static void clearParticle (HepMC::GenParticle* part)
+    struct ClearGenParticle
     {
-      *part = HepMC::GenParticle();
-    }
-    ::DataPool<HepMC::GenParticle, clearParticle> part;
+      static void clear (HepMC::GenParticle* part) { *part = HepMC::GenParticle(); }
+    };
+    ::DataPool<HepMC::GenParticle, ClearGenParticle> part;
     HepMC::GenParticlePtr getGenParticle()
     {
       return HepMC::GenParticlePtr (part.nextElementPtr(), [](HepMC::GenParticle*){});

@@ -1,6 +1,7 @@
 <lcgdict>
 
    <class name="CP::JetCalibrationAlg" />
+   <class name="CP::JetFFSmearingAlg" />
    <class name="CP::JetGhostMuonAssociationAlg" />
    <class name="CP::JetGhostMergingAlg" />
    <class name="CP::JetModifierAlg" />
@@ -12,5 +13,6 @@
    <class name="CP::JetTruthTagAlg" />
    <class name="CP::JetReclusteringAlg" />
    <class name="CP::BJetCalibrationAlg" />
+   <class name="CP::ReclusteredJetCalibrationAlg" />
 
 </lcgdict>

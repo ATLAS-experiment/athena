@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtRdoToMdtDigit.h"
-
-MdtRdoToMdtDigit::MdtRdoToMdtDigit(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MdtRdoToMdtDigit::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -16,12 +14,8 @@ StatusCode MdtRdoToMdtDigit::initialize() {
 
 StatusCode MdtRdoToMdtDigit::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("in execute()");
-    SG::ReadHandle<MdtCsmContainer> rdoRH(m_mdtRdoKey, ctx);
-    if (!rdoRH.isValid()) {
-        ATH_MSG_WARNING("No MDT RDO container found!");
-        return StatusCode::SUCCESS;
-    }
-    const MdtCsmContainer* rdoContainer = rdoRH.cptr();
+    SG::ReadHandle rdoContainer{m_mdtRdoKey, ctx};
+    ATH_CHECK(rdoContainer.isPresent());
     ATH_MSG_DEBUG("Retrieved " << rdoContainer->size() << " MDT RDOs.");
 
     SG::WriteHandle<MdtDigitContainer> wh_mdtDigit(m_mdtDigitKey, ctx);

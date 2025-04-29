@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: DataLink.h 783590 2016-11-11 00:38:09Z ssnyder $
 /**
  * @file AthLinks/DataLink.h
  * @author scott snyder <snyder@bnl.gov>
@@ -20,7 +18,7 @@
 #include "AthLinks/DataLinkBase.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "AthenaKernel/DefaultKey.h"
-#include "GaudiKernel/EventContext.h"
+class EventContext;
 class IProxyDict;
 
 

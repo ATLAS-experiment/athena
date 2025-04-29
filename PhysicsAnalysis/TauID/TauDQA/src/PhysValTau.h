@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef TAUDQA_PHYSVALTAU_H
 #define TAUDQA_PHYSVALTAU_H
@@ -13,6 +13,7 @@
 // FrameWork includes
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
@@ -21,7 +22,6 @@
 
 // Local includes
 #include "TauValidationPlots.h"
-#include "RecoTypes.h"
 
 class PhysValTau
   : public ManagedMonitorToolBase
@@ -41,28 +41,20 @@ public:
 
 
 private: 
-  // Containers
-  std::string m_TauJetContainerName; 
-  std::string m_TruthParticleContainerName; 
-
-  bool m_isMC;           //!< Are we running over MC data?
-    
-  //Variable Definitions
-    
-  /*keeps track of matched tau jets*/    
-  std::vector<size_t> m_matched_itr;
+  // properties
+  Gaudi::Property<std::string> m_TauJetContainerName{this, "TauContainerName", "TauJets"};
+  Gaudi::Property<std::string> m_TruthParticleContainerName{this, "TruthParticleContainerName", "TruthParticles"}; 
+  Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
   // Tool used for truth-matching
-  ToolHandle<TauAnalysisTools::ITauTruthMatchingTool> m_truthTool;
+  ToolHandle<TauAnalysisTools::ITauTruthMatchingTool> m_truthTool{this, "TauTruthMatchingTool", "TauAnalysisTools::TauTruthMatchingTool/TauTruthMatchingTool"};
   // Tool used to select "primitive" and "nominal" taus
-  ToolHandle<TauAnalysisTools::ITauSelectionTool> m_primTauSel;
-  ToolHandle<TauAnalysisTools::ITauSelectionTool> m_nomiTauSel;
+  ToolHandle<TauAnalysisTools::ITauSelectionTool> m_primTauSel{this, "PrimitiveTauSelectionTool", "TauAnalysisTools::TauSelectionTool/PrimitiveTauSelectionTool"};
+  ToolHandle<TauAnalysisTools::ITauSelectionTool> m_nomiTauSel{this, "NominalTauSelectionTool", "TauAnalysisTools::TauSelectionTool/NominalTauSelectionTool"};
 
   //Histograms
   // general tau all prongs plots
   std::unique_ptr<TauValidationPlots> m_oTauValidationPlots;
-  // TauValidationPlots m_oTauValidationPlots;
-  bool matchTrueAndRecoTau (const xAOD::TauJetContainer *&taus, const xAOD::TruthParticle* trueTau, const xAOD::TauJet* &matchedRecoTau );
   
 }; 
 

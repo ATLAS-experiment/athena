@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
@@ -198,8 +198,8 @@ StatusCode JSSTaggerBase::initialize() {
 
   m_decWeightKey = m_containerName + "." + m_decorationName + "_" + m_weightDecorationName;
   m_decEfficiencyKey = m_containerName + "." + m_decorationName + "_" + m_decEfficiencyKey.key();
-  m_decEffSFKey = m_containerName + "." +m_decorationName + "_" + m_decEffSFKey.key();
-  m_decSigeffSFKey = m_containerName + "." +m_decorationName + "_" + m_decSigeffSFKey.key();
+  m_decEffSFKey = m_containerName + "." + m_decorationName + "_" + m_decEffSFKey.key();
+  m_decSigeffSFKey = m_containerName + "." + m_decorationName + "_" + m_decSigeffSFKey.key();
 
   ATH_CHECK( m_decWeightKey.initialize() );
   ATH_CHECK( m_decEfficiencyKey.initialize() );
@@ -210,6 +210,9 @@ StatusCode JSSTaggerBase::initialize() {
 
   m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
   ATH_CHECK( m_readTruthLabelKey.initialize() );
+
+  m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
+  ATH_CHECK( m_readNtrk500Key.initialize() );
 
 #ifndef XAOD_STANDALONE
   if (m_suppressOutputDependence) {
@@ -280,10 +283,11 @@ StatusCode JSSTaggerBase::getConfigReader() {
   std::string configPath;
 
   if ( m_calibArea.compare("Local") == 0 ) {
-    configPath = PathResolverFindCalibFile(("$WorkDir_DIR/data/BoostedJetTaggers/"+m_configFile).c_str());
+    configPath = PathResolverFindCalibFile(m_configFile);
   }
   else if ( m_calibArea.find("eos") != std::string::npos) {
     configPath = PathResolverFindCalibFile((m_calibArea+"/"+m_configFile).c_str());
+    configPath = (m_calibArea+"/"+m_configFile).c_str();
   }
   else {
     configPath = PathResolverFindCalibFile(("BoostedJetTaggers/"+m_calibArea+"/"+m_configFile).c_str());

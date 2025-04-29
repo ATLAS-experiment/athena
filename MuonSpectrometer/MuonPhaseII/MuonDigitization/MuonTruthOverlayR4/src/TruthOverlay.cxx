@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthOverlay.h"
 
@@ -8,6 +8,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace MuonR4{
 
@@ -31,8 +32,8 @@ namespace MuonR4{
 
         /// Helper function to fill the hits to merge
         auto fillMap = [&overlayed, &ctx, this] (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key) -> StatusCode{
-            SG::ReadHandle hits{key, ctx};
-            ATH_CHECK(hits.isPresent());
+            const xAOD::MuonSimHitContainer* hits{nullptr};
+            ATH_CHECK(SG::get(hits, key, ctx));
             xAOD::ChamberViewer viewer{*hits, m_idHelperSvc.get()};
             do {
                 for (const xAOD::MuonSimHit* hit : viewer) {
@@ -73,10 +74,8 @@ namespace MuonR4{
                     }
                     if(mergeMe->globalTime() - primHit->globalTime() < m_mergeTime) {
                         /// If a background hit overlays with a signal hit, take the signal
-                        if (std::abs(mergeMe->pdgId()) == 13 || (mergeMe->genParticleLink() && !merged->genParticleLink())){
-                            const float eDep = merged->energyDeposit();
+                      if (MC::isMuon(mergeMe) || (mergeMe->genParticleLink() && !merged->genParticleLink())){
                             (*merged) =  (*mergeMe);
-                            merged->setEnergyDeposit(eDep);
                         }
                         merged->setEnergyDeposit(mergeMe->energyDeposit() + primHit->energyDeposit());
                     } else if (mergeMe->globalTime() - primHit->globalTime() < m_deadTime) {

@@ -19,11 +19,10 @@
 DerivationFramework::TruthClassificationDecorator::TruthClassificationDecorator(const std::string& t,
                                                                   const std::string& n,
                                                                   const IInterface* p ) :
-AthAlgTool(t,n,p),
+base_class(t,n,p),
 m_ntotpart(0),
 m_classifier("MCTruthClassifier/MCTruthClassifier")
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("MCTruthClassifier", m_classifier);
 }
 

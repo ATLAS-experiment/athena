@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackScoringTools package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -96,6 +96,17 @@ def InDetTRT_SeededScoringToolCfg(
 
     return InDetAmbiScoringToolBaseCfg(flags, name, **kwargs)
 
+def TrigAmbiScoringToolCfg(
+        flags, 
+        name='TrigAmbiguityScoringTool', **kwargs):
+    
+    if flags.Detector.GeometryITk:
+        tool = ITkTrigAmbiScoringToolCfg(flags, name, **kwargs)
+    else:
+        tool = InDetTrigAmbiScoringToolCfg(flags, name, **kwargs)
+        
+    return tool
+
 
 def InDetTrigAmbiScoringToolCfg(
         flags, 
@@ -142,9 +153,7 @@ def InDetTrigAmbiScoringToolCfg(
         kwargs.setdefault("minTRTPrecisionFraction", 0)
 
         
-    acc.setPrivateTools(ambiScoringFactory(
-        name=name+flags.Tracking.ActiveConfig.input_name, 
-        **kwargs))
+    acc.setPrivateTools(ambiScoringFactory(name=name, **kwargs))
     
     return acc
 
@@ -155,6 +164,7 @@ def InDetCosmicsScoringToolCfg(flags, name='InDetCosmicsScoringTool', **kwargs):
     kwargs.setdefault("nWeightedClustersMin",
                       flags.Tracking.ActiveConfig.nWeightedClustersMin)
     kwargs.setdefault("minTRTHits", 0)
+    kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
 
     acc.setPrivateTools(CompFactory.InDet.InDetCosmicScoringTool(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
@@ -321,6 +331,9 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
         name + flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
+def ITkTrigAmbiScoringToolCfg(flags, name='ITkTrigAmbiScoringTool', **kwargs):
+    kwargs.setdefault("InDetEtaDependentCutsSvc", None)    #TODO
+    return ITkAmbiScoringToolCfg(flags, name, **kwargs)
 
 def ITkCosmicsScoringToolCfg(flags, name='ITkCosmicsScoringTool', **kwargs):
     acc = ComponentAccumulator()
@@ -328,6 +341,7 @@ def ITkCosmicsScoringToolCfg(flags, name='ITkCosmicsScoringTool', **kwargs):
     kwargs.setdefault("nWeightedClustersMin",
                       flags.Tracking.ActiveConfig.nWeightedClustersMin)
     kwargs.setdefault("minTRTHits", 0)
+    kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
 
     acc.setPrivateTools(CompFactory.InDet.InDetCosmicScoringTool(
         name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs))

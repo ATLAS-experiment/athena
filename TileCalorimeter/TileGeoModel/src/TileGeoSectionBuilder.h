@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,9 +14,8 @@
 #define TILEGEOMODEL_TILEGEOSECTIONBUILDER_H
 
 #include "StoreGate/StoreGateSvc.h"
-#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "TileGeoModel/TileSwitches.h"
-#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoPhysVol.h" //PVLink typedef
 
 // Definition for regions
 #define TILE_REGION_CENTRAL 1
@@ -25,14 +24,13 @@
 #define TILE_REGION_MBSCIN 4
 
 class MsgStream;
-class GeoPhysVol;
 class TileDddbManager;
 class TileDetDescriptor;
 class TileDetDescrManager;
 class GeoMaterial;
 class GeoTrd;
 class GeoShape;
-
+class StoredMaterialManager;
 
 class TileGeoSectionBuilder
 {
@@ -57,7 +55,7 @@ class TileGeoSectionBuilder
       @param zlen_itc2  Length for ITC2 only
       @param neg        Used to apply extre transformation to cuts on EBC modules
   */
-  void fillSection(GeoPhysVol*&             mother,
+  void fillSection(PVLink&                  mother,
                    int                      sec_number,
                    double                   tile_rmax,
                    double                   rminb,
@@ -74,11 +72,11 @@ class TileGeoSectionBuilder
       @param delta_ph   Delta phi
       @param thickness  Thickness of Girder
   */
-  void fillGirder(GeoPhysVol*&             mother,
-                  double                   tile_rmax,
-                  double                   tilb_rmax,
-                  double                   tan_delta_phi_2,
-                  double                   thickness);
+  void fillGirder(PVLink&             mother,
+                  double              tile_rmax,
+                  double              tilb_rmax,
+                  double              tan_delta_phi_2,
+                  double              thickness);
 
   /** Finger parameters are the following:
       @param mother     Pointer to mother volume
@@ -88,8 +86,8 @@ class TileGeoSectionBuilder
       @param ModuleNcp  Module index
       @param corrected_dz  dZ correction
   */
-  void fillFinger(GeoPhysVol*&             mother,
-          int                      sec_number,
+  void fillFinger(PVLink&             mother,
+                  int                      sec_number,
                   double                   tile_rmax,
                   double                   tilb_rmax,
                   double                   delta_phi_not_used,
@@ -105,12 +103,12 @@ class TileGeoSectionBuilder
       @param period_type Type of period
 
   */
-  void fillPeriod(GeoPhysVol*&              mother,
+  void fillPeriod(PVLink&              mother,
                   double                    thickness,
                   double                    dzglue,
                   double                    tan_delta_phi_2,
                   int                       period_type,
-                  GeoTrd *                  period=0);
+                  GeoTrd *                  period=nullptr);
 
   /** Readout Descriptor parameters are the following:
       @param descriptor  Pointer to descriptor volume

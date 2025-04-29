@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef dqutilsMonitoringFile_h
@@ -28,6 +28,7 @@ namespace std {
 #include <string>
 #include <vector>
 #include <set>
+#include <optional>
 
 class TDirectory;
 class TGraph;
@@ -51,7 +52,10 @@ namespace dqutils {
   typedef std::map<std::string, std::vector<int> > keycyclemap;
   void populateKeyMapping(TDirectory*, keycyclemap&);
 
-  class ATLAS_NOT_THREAD_SAFE MonitoringFile: public TObject {
+  enum debugLevel_t { none = 0, DEBUG, VERBOSE };
+
+
+  class ATLAS_NOT_THREAD_SAFE MonitoringFile : public TObject {
   public:
     struct MetaData {
       inline MetaData(const std::string& name_, const std::string& interval_, const std::string& chain_,
@@ -85,6 +89,8 @@ namespace dqutils {
 
     virtual ~MonitoringFile();
 
+    
+
     typedef std::map< std::string, TDirectory* >  DirMap_t;
 
     static void getAllDirs(DirMap_t& dirmap, TDirectory* dir, const std::string& dirName);
@@ -96,14 +102,11 @@ namespace dqutils {
     //  enum MergeMethod_t { TH1Add = 0, effAsPerCent, weightedAverage, weightedEff, mergeRebinned, weightedAverage2D,
     // eventSample };
 
-    void mergeDirectory(TDirectory* outputDir, const std::vector<TFile*>& inputFiles, bool has_multiple_runs = false,
-                        std::map< TFile*, std::string >* prefixes = 0);
-
     static void fillMetaDataMap(std::map<std::string, dqutils::MonitoringFile::MetaData>& mdMap, TDirectory* dir);
 
-    void mergeFiles(const std::string& outFileName, const std::vector<std::string>& files);
+    int mergeFiles(const std::string & outFileName, const std::vector<std::string>& files);
 
-    void mergeFiles(const std::string& outFileName, const std::string& listFileName);
+    int mergeFiles(const std::string & outFileName, const std::string & listFileName);
 
     static void merge_effAsPerCent(TH2& a, const TH2& b);
 
@@ -322,9 +325,6 @@ namespace dqutils {
 
     virtual bool setFile(const std::string& fileName);
 
-
-    virtual void printDirectories();
-
     virtual void printStatistics();
 
 
@@ -418,41 +418,31 @@ namespace dqutils {
 
     TFile* m_file {};
 
-    /*   Methods for merging luminosity block intervals
-     */
   private:
-    enum debugLevel_t {
-      none = 0, DEBUG, VERBOSE
-    };
+    
+
+
+
+    debugLevel_t m_dbgLvl{none};
+
+
     typedef std::map<TDirectory*, std::vector<TDirectory*> > map_dir_vdir;
 
-    static void mergeObjsMultiCycles(const std::string&,
-                                     const std::vector<int>&,
-                                     TDirectory*, const std::string&,
-                                     std::unique_ptr<TObject>&);
-    static int mergeObjs(TObject*, TObject*, const std::string &, debugLevel_t debugLevel = none, const std::string& path="");
-    static int mergeLB_createListOfHistos(TDirectory*, TDirectory*, std::vector<std::string>&, debugLevel_t&);
-    static int mergeLB_recursiveDirCopy(TDirectory*, TDirectory*, TDirectory*, std::vector<std::string>&,
-                                        debugLevel_t&);
-    static int mergeLB_processLBinterval(std::vector<TDirectory*>&, TDirectory*, debugLevel_t&);
-    static void buildLBToIntervalMap(std::vector<TDirectory*>&, std::vector<TDirectory*>&, map_dir_vdir&,
-                                     debugLevel_t&);
-    static int mergeLB_processLB(std::vector<TDirectory*>&, std::vector<TDirectory*>&, debugLevel_t&);
-    static int mergeLB_processRun(TDirectory*, debugLevel_t&);
+    std::map<std::string, std::vector<std::string>> buildLBToIntervalMap(TDirectory* runDir);
+
+    
+    int mergeLB_processLBinterval(TFile* file, const std::vector<std::string> & inputDirNames, const std::string& outputDirName);
 
     static Int_t getNumBins(const TH1& hist);
-    std::regex* m_mergeMatchHistoRE {};
-    std::regex* m_mergeMatchDirRE {};
-    std::string m_mergeMatchHistoREString;
-    std::string m_mergeMatchDirREString;
-    bool m_useRE {};
-    static std::atomic<int> m_debugLevel;
+    std::optional<std::regex> m_mergeMatchHistoRE;
+    std::optional<std::regex> m_mergeMatchDirRE;
     static std::atomic<int> m_fileCompressionLevel;
     static bool m_doTiming;
     static std::unordered_map<std::string,std::clock_t> m_cpuPerHistogram;
+    static bool s_checkEquality;
 
   public:
-    static int mergeLBintervals(const std::string&, const std::string& debugLevel = "none");
+    int mergeLBintervals(const std::string& inFilename); 
     static int getDebugLevel();
     static void setDebugLevel(int level);
     static int getCompressionLevel() {return m_fileCompressionLevel;}
@@ -460,18 +450,13 @@ namespace dqutils {
     bool setHistogramRegEx(const std::string& re);
     bool setDirectoryRegEx(const std::string& re);
     void doTiming();
+    static void setCheckEquality(bool value);
     
     ClassDef(MonitoringFile, 0) // Provides functions to manipulate and analyze data-quality monitoring files
   };
 
   std::string getInputDirectory(const std::string& outputDirName, TFile* input, bool has_multiple_runs,
                                 std::map< TFile*, std::string >* prefixes);
-
-  std::string getOutputDirectory(const std::string& inputDirName, TFile* input, bool has_multiple_runs,
-                                 std::map< TFile*, std::string >* prefixes);
-
-  std::string getOutputDirectory(TKey* key, TFile* input, bool has_multiple_runs, std::map< TFile*,
-                                                                                            std::string >* prefixes);
 
   template <class T>
   void MonitoringFile::PostProcessorFileWrapper::get(const char* namecycle, T*& ptr, TDirectory* baseDir,

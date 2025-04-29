@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -155,7 +155,7 @@ dqm_algorithms::MDTTDCOfflineSpectrum::execute(	const std::string &  name,
     result->status_ = dqm_core::Result::Red;
   }
 
-  result->tags_ = tags;
+  result->tags_ = std::move(tags);
  
   return result;
   

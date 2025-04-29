@@ -19,7 +19,7 @@
 #include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
 #include "AthContainers/tools/AuxTypeVectorFactory.h"
 #ifndef XAOD_STANDALONE
-#include "AthenaKernel/IInputRename.h"
+#include "AthenaKernel/InputRenameMap.h"
 #include "AthenaKernel/IStringPool.h"
 #endif
 #include <cstddef>
@@ -497,7 +497,7 @@ public:
    * of auxiliary variables and makes that information available via
    * @c inputRename.
    */
-  void setInputRenameMap (const Athena::IInputRename::InputRenameMap_t* map,
+  void setInputRenameMap (const Athena::InputRenameMap_t* map,
                           const IStringPool& pool);
 #endif
 

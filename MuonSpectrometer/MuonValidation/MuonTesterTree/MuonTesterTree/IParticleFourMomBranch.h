@@ -124,8 +124,9 @@ namespace MuonVal {
     
         private:
             MuonTesterTree& m_parent;
-            std::string m_name;
+            std::string m_name{};
             bool m_init{false};
+            bool m_updated{false};
             VectorBranch<float> m_pt{m_parent.tree(), m_name +"_pt"};
             VectorBranch<float> m_eta{m_parent.tree(), m_name + "_eta"};
             VectorBranch<float> m_phi{m_parent.tree(), m_name + "_phi"};

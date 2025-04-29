@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -118,34 +119,43 @@ namespace Trk
       ToolHandle<Trk::IExtrapolator> m_atlasExtrapolator {this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
 
 
-      double                            m_sigmaD0;                    //!< Sigma of distribution for D0
-      double                            m_sigmaZ0;                    //!< Sigma of distribution for Z0
-      double                            m_minPhi;                     //!< Minimal phi value
-      double                            m_maxPhi;                     //!< Maximal phi value
-      double                            m_minEta;                     //!< Minimal eta value
-      double                            m_maxEta;                     //!< Maximal eta value
-      double                            m_minPt;                      //!< Minimal p value 
-      double                            m_maxPt;                      //!< Maximal p value
+      DoubleProperty m_sigmaD0
+	{this, "StartPerigeeSigmaD0", 17.*Gaudi::Units::micrometer};
+      DoubleProperty m_sigmaZ0
+	{this, "StartPerigeeSigmaZ0", 50.*Gaudi::Units::micrometer};
+      DoubleProperty m_minPhi{this, "StartPerigeeMinPhi", -M_PI};
+      DoubleProperty m_maxPhi{this, "StartPerigeeMaxPhi", M_PI};
+      DoubleProperty m_minEta{this, "StartPerigeeMinEta", -3.};
+      DoubleProperty m_maxEta{this, "StartPerigeeMaxEta", 3.};
+      DoubleProperty m_minPt
+	{this, "StartPerigeeMinPt", 0.5*Gaudi::Units::GeV};
+      DoubleProperty m_maxPt
+	{this, "StartPerigeeMaxPt", 50000*Gaudi::Units::GeV};
                                         
-      int                               m_particleType;               //!< the particle typre for the extrap.
+      IntegerProperty m_particleType
+	{this, "ParticleType", 2, "the particle type for the extrap."};
 
       /** member variables for algorithm properties: */
-      unsigned int                                     m_referenceSurfaces;
+      unsigned int m_referenceSurfaces = 0;
 
-      std::vector<double>                              m_referenceSurfaceRadius;
-      std::vector<double>                              m_referenceSurfaceHalflength;
+      DoubleArrayProperty m_referenceSurfaceRadius
+	{this, "ReferenceSurfaceRadius", {}};
+      DoubleArrayProperty m_referenceSurfaceHalflength
+	{this, "ReferenceSurfaceHalfZ", {}};
       
-      std::vector<double>                              m_referenceSurfaceNegativeBoundary;
-      std::vector<double>                              m_referenceSurfacePositiveBoundary;
+      std::vector<double> m_referenceSurfaceNegativeBoundary;
+      std::vector<double> m_referenceSurfacePositiveBoundary;
       
       std::vector< std::vector<const Trk::Surface*> >  m_atlasReferenceSurfaceTriples;
       std::vector< std::vector< std::shared_ptr<const Acts::Surface> > > m_actsReferenceSurfaceTriples;
       
-      int m_eventsPerExecute;
+      IntegerProperty m_eventsPerExecute{this, "EventsPerExecute", 1};
       
-      ServiceHandle<PropResultRootWriterSvc> m_atlasPropResultWriterSvc;
-      ServiceHandle<PropResultRootWriterSvc> m_actsPropResultWriterSvc;
-      ServiceHandle<IAthRNGSvc> m_rndmSvc;
+      ServiceHandle<PropResultRootWriterSvc> m_atlasPropResultWriterSvc
+	{this, "ATLASPropResultRootWriter", "ATLASPropResultRootWriterSvc"};
+      ServiceHandle<PropResultRootWriterSvc> m_actsPropResultWriterSvc
+	{this, "ACTSPropResultRootWriter", "ACTSPropResultRootWriterSvc"};
+      ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
       ATHRNG::RNGWrapper* m_randomEngine = nullptr;
     }; 
 } // end of namespace

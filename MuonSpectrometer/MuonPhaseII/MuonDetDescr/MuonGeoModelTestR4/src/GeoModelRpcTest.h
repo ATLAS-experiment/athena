@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELRPCTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELRPCTEST_H
 
 #include <AthenaBaseComps/AthHistogramAlgorithm.h>
 #include <set>
+#include <StoreGate/ReadHandleKey.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonTesterTree/MuonTesterTree.h>
@@ -19,7 +20,7 @@ namespace MuonGMR4{
 
 class GeoModelRpcTest : public AthHistogramAlgorithm{
     public:
-        GeoModelRpcTest(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
         ~GeoModelRpcTest() = default;
 
@@ -77,15 +78,6 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
       MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
 
-      
-      /// Alignment parameters
-      MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineTransT{m_tree.newScalar<float>("ALineTransT", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineTransZ{m_tree.newScalar<float>("ALineTransZ", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineRotS{m_tree.newScalar<float>("ALineRotS", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineRotT{m_tree.newScalar<float>("ALineRotT", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineRotZ{m_tree.newScalar<float>("ALineRotZ", 0.)};
-      
       /// Rotation matrix of the respective layers
       MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};      
       MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};

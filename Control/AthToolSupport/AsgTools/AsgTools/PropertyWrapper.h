@@ -10,7 +10,11 @@
 #define ASG_TOOLS__PROPERTY_WRAPPER_H
 
 
-#ifdef XAOD_STANDALONE
+#ifndef XAOD_STANDALONE
+
+#include <GaudiKernel/PropertyHolder.h>
+
+#else
 
 #include <AsgTools/PropertyMgr.h>
 #include <iosfwd>

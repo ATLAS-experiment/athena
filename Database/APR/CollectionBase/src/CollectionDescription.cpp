@@ -4,7 +4,6 @@
 
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/CollectionColumn.h"
-#include "CollectionBase/CollectionIndex.h"
 #include "CollectionBase/CollectionBaseNames.h"
 
 #include "POOLCore/Exception.h"
@@ -43,8 +42,7 @@ CollectionDescription( const pool::ICollectionDescription& rhs )
 // Real copy constructor
 pool::CollectionDescription::
 CollectionDescription( const pool::CollectionDescription& rhs )
-      : ICollectionDescription(),
-	ICollectionSchemaEditor()
+      : ICollectionDescription()
 {
    CollectionDescription::copyFrom( rhs );
 }
@@ -80,12 +78,6 @@ copyFrom( const pool::ICollectionDescription& rhs )
                   column.maxSize(), column.sizeIsFixed());
      setColumnId(column.name(), column.id(), "CollectionDescription");
    }
-
-   /*  MN: FIXME  - implement 
-   for( int idx_id = 0; inx_id < rhs.numberOfIndices(); idx_id++ ) {
-      m_indices.push_back( new CollectionIndex( rhs.index(idx_id) ) );
-   }
-   */
 }
 
 
@@ -106,12 +98,6 @@ pool::CollectionDescription::clearAll()
    m_attributeColumnForColumnName.clear();
    m_attributeColumns.clear();
    m_columnIdForColumnName.clear();
-
-   for( std::vector< pool::CollectionIndex* >::iterator iIndex = m_indices.begin();
-	iIndex != m_indices.end(); ++iIndex )  {
-      delete *iIndex;
-   }
-   m_indices.resize( 0 );
 }
 
 
@@ -219,16 +205,6 @@ pool::CollectionDescription::operator==( const pool::CollectionDescription& rhs 
         rhs.m_attributeColumnForColumnName.end(); ++iColumnRhs, ++iAttributeColumn )
   {
     if ( ( iAttributeColumn->first !=  iColumnRhs->first ) || ( *(iAttributeColumn->second) != *(iColumnRhs->second) ) )
-    {
-      return false;
-    }
-  }
-
-  std::vector< pool::CollectionIndex* >::const_iterator iIndex = m_indices.begin();
-  for ( std::vector< pool::CollectionIndex* >::const_iterator iIndexRhs = rhs.m_indices.begin(); 
-        iIndexRhs != rhs.m_indices.end(); ++iIndexRhs, ++iIndex )
-  {
-    if ( **iIndex != **iIndexRhs )
     {
       return false;
     }
@@ -395,25 +371,6 @@ pool::CollectionDescription::dropColumn( const std::string& columnName )
    // Check if description for column already exists and whether it is of type Token or Attribute.
    bool _isTokenColumn = isTokenColumn( columnName, "dropColumn" );
   
-   // Check if column is involved in a multi-column index.
-   for( std::vector< pool::CollectionIndex* >::const_iterator iIndex = m_indices.begin(); 
-        iIndex != m_indices.end(); ++iIndex )
-   {
-      const pool::CollectionIndex* index = *iIndex;
-      if ( index->columnNames().size() == 1 ) continue;
-      for ( std::vector<std::string>::const_iterator iName = index->columnNames().begin();
-            iName != index->columnNames().end(); ++iName ) 
-      {
-         if ( *iName == columnName )
-         {
-            std::string errorMsg = "Cannot drop column with name `" + columnName
-               + "' because it is involved in a multi-column index.";
-            throw pool::Exception( errorMsg, "CollectionDescription::dropColumn",
-                                   "CollectionBase" );
-         }
-      }
-   }
-
    // Delete descripton object for column and update vectors and maps.
    if( _isTokenColumn )	{
       for( std::vector< pool::CollectionColumn* >::iterator iColumn = m_tokenColumns.begin(); 
@@ -439,17 +396,6 @@ pool::CollectionDescription::dropColumn( const std::string& columnName )
             break;
 	      }
 	   }
-   }
-
-   // Drop description objects of all associated indices.
-   for( std::vector< pool::CollectionIndex* >::iterator iIndex = m_indices.begin(); 
-        iIndex != m_indices.end(); ++iIndex ) {
-      pool::CollectionIndex* index = *iIndex;
-      if( index->columnNames().size() == 1 && index->columnNames()[0] == columnName ) {
-         delete index;
-         m_indices.erase( iIndex );
-         break;
-      }
    }
 }
 
@@ -484,27 +430,6 @@ pool::CollectionDescription::renameColumn( const std::string& oldName, const std
    if( oldName == eventReferenceColumnName() )  {
         m_eventReferenceColumnName = newName;
    }
-
-  // Rename all indices that were created on renamed column.
-  for( std::vector< pool::CollectionIndex* >::iterator iIndex = m_indices.begin(); iIndex != m_indices.end(); ++iIndex )
-  {
-     pool::CollectionIndex* index = *iIndex;
-     std::vector< std::string > columnNames = index->columnNames();
-     std::string newIndexName = m_name;
-     bool columnFound = false;
-     for ( std::vector< std::string >::iterator iName = columnNames.begin(); iName != columnNames.end(); ++iName ) {
-         if( *iName == oldName ) {
-            columnFound = true;
-            *iName = newName;
-         }
-         newIndexName += "_" + *iName;
-     }
-     if( columnFound ) {
-         newIndexName += "_IDX";
-         index->setName( newIndexName );
-     }
-  }
-
 }
 
 
@@ -567,89 +492,6 @@ pool::CollectionDescription::changeColumnType( const std::string& columnName,
 		     coral::AttributeSpecification::typeNameForId( newType ),
 		     maxSize,
 		     sizeIsFixed );
-}
-
-
-void 
-pool::CollectionDescription::createIndex( std::string indexName, const std::string& columnName, bool isUnique )
-{
-   createIndex( indexName, std::vector<std::string>( 1, columnName ), isUnique );
-}
-
-
-void 
-pool::CollectionDescription::createIndex( std::string indexName, const std::vector<std::string>& columnNames, bool isUnique  )
-{
-   const std::string methodName("createIndex");
-  // Check that all columns specified as input exist
-  for( std::vector<std::string>::const_iterator iName = columnNames.begin(); iName != columnNames.end(); ++iName )   {
-     column( *iName, methodName );
-  }
-
-  // Check if index already exists for input columns.
-  for ( std::vector< pool::CollectionIndex* >::const_iterator iIndex = m_indices.begin(); 
-        iIndex != m_indices.end(); ++iIndex ) 
-  {
-    const pool::CollectionIndex& index = **iIndex;
-
-    if ( index.columnNames().size() == columnNames.size() &&  std::equal( index.columnNames().begin(),
-                                                                          index.columnNames().end(),
-                                                                          columnNames.begin() ) )
-    {
-      std::string errorMsg = "Index `" + index.name() + "' already exists for input columns.";
-      throw pool::Exception( errorMsg,
-                             "CollectionDescription::createIndex",
-                             "CollectionBase" );
-    }
-  }
-
-  // Generate unique name for index.
-  if( !indexName.size() ) {
-     indexName = m_name;
-     for (const std::string& name : columnNames) {
-	indexName += "_" + name; 
-     }
-     indexName += "_IDX";
-  }
-  // Create description object for new index.
-  m_indices.push_back( new pool::CollectionIndex( indexName, columnNames, isUnique ) );
-}
-
-
-
-void
-pool::CollectionDescription::dropIndex( const std::string& columnName )
-{
-  this->dropIndex( std::vector<std::string>( 1, columnName ) );
-}
-
-
-
-void 
-pool::CollectionDescription::dropIndex( const std::vector<std::string>& columnNames )
-{
-   const std::string& methodName("dropIndex");
-  // Check if index already exists for input columns.
-  for ( std::vector< pool::CollectionIndex* >::iterator iIndex = m_indices.begin(); iIndex != m_indices.end();  ) 
-  {
-    const pool::CollectionIndex& index = **iIndex;
-
-    if ( index.columnNames().size() == columnNames.size() && std::equal( index.columnNames().begin(),
-                                                                         index.columnNames().end(),
-                                                                         columnNames.begin() ) )
-    {
-      // Drop the index from the collection description.
-      delete *iIndex;
-      iIndex = m_indices.erase( iIndex );
-    }
-    else
-    {
-      std::string errorMsg = "Index does not exist for column names provided as input.";
-      throw pool::Exception( errorMsg,
-                             "CollectionDescription::dropIndex",
-                             "CollectionBase" );
-    }
-  }
 }
 
 
@@ -840,61 +682,6 @@ pool::CollectionDescription::attributeColumn( int columnId ) const
 }
 
 
-int 
-pool::CollectionDescription::numberOfIndices() const
-{
-   return (int) m_indices.size();
-}
-
-
-const pool::ICollectionIndex&
-pool::CollectionDescription::index( const std::string& columnName ) const
-{
-   return index( std::vector< std::string >( 1 , columnName ) );
-}
-
-
-const pool::ICollectionIndex&
-pool::CollectionDescription::index( const std::vector< std::string >& columnNames ) const
-{
-  for ( std::vector< pool::CollectionIndex* >::const_iterator iIndex = m_indices.begin();
-        iIndex != m_indices.end(); ++iIndex )
-  {
-    pool::CollectionIndex& index = **iIndex;
-    if ( index.columnNames().size() == columnNames.size() && std::equal( index.columnNames().begin(),
-                                                                         index.columnNames().end(),
-                                                                         columnNames.begin() ) )
-    {
-      return index;
-    }
-  }
-
-  // Index not found.
-  std::string errorMsg = "Index does not exist.";
-  throw pool::Exception( errorMsg,
-                         "CollectionDescription::index(columnName)",
-                         "CollectionBase" );
-}
-
-
-const pool::ICollectionIndex&
-pool::CollectionDescription::index( int indexId ) const
-{
-  if ( indexId >= 0 && indexId < static_cast<int>( m_indices.size() ) )  {
-    return *( m_indices[ indexId ] );
-  }
-  else  {
-    std::ostringstream strm;
-    strm << indexId;
-    std::string errorMsg = "Index with ID " + strm.str() + " does not exist.";
-    throw pool::Exception( errorMsg,
-                           "CollectionDescription::index",
-                           "CollectionBase" );
-
-  }
-}
-
-
 void
 pool::CollectionDescription::checkNewColumnName( const std::string& name, const std::string& method ) const
 {
@@ -939,11 +726,5 @@ pool::CollectionDescription::printOut( ) const
            << ", type=" <<  column.type()
            << ", annotation=" << column.annotation() << endl;
    }
-
-   /*  MN: FIXME  - implement 
-   for( int idx_id = 0; inx_id < rhs.numberOfIndices(); idx_id++ ) {
-      m_indices.push_back( new CollectionIndex( rhs.index(idx_id) ) );
-   }
-   */
    cout << endl;
 }

@@ -53,7 +53,7 @@ def SolveCfg(flags, **kwargs):
                                    "CondAttrListCollection#/Indet/AlignL2/SCT",
                                    "AlignableTransformContainer#/Indet/AlignL3"])
                 tagList.extend(["IndetL1Test", "IndetL2PIXTest", "IndetL2SCTTest",
-                                flags.InDetAlign.tagSi])
+                                flags.InDet.Align.tagSi])
             else:
                 objectList.extend(["AlignableTransformContainer#/Indet/Align"])
                 tagList.extend([flags.InDet.Align.tagSi])
@@ -77,8 +77,8 @@ def SolveCfg(flags, **kwargs):
         from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
         cfg.merge(OutputConditionsAlgCfg(
             flags, 
-            outputFile = flags.InDet.Align.outputConditionFile,
-            ObjectList = objectList, IOVTagList = tagList))
+            outputFile = f"{flags.InDet.Align.baseDir}/Solve/{flags.InDet.Align.outputConditionFile}",
+            ObjectList = objectList, IOVTagList = tagList, WriteIOV = False)) ##TODO: Set this to false to avoid errors
 
     cfg.addEventAlgo(CompFactory.Trk.AlignTrackCollSplitter())
     return cfg

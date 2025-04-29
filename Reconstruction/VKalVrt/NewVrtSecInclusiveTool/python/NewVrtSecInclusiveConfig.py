@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Author: Vadim Kostyukhin vadim.kostyukhin@cern.ch
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
 from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
  
 from AthenaCommon.Logging import logging
@@ -21,6 +22,7 @@ def SoftBFinderToolCfg(flags, name="SoftBFinderTool", **myargs):
 
     myargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
     myargs.setdefault("ExtrapolatorName", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
     myargs.setdefault("CutPt" , 500.)
     myargs.setdefault("CutBLayHits" , 1 )
     myargs.setdefault("CutPixelHits" , 3 )
@@ -55,6 +57,7 @@ def InclusiveBFinderToolCfg(flags, name="InclusiveBFinderTool", **myargs):
 
     myargs.setdefault("VertexFitterTool" ,  acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
     myargs.setdefault("ExtrapolatorName" ,  acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
     myargs.setdefault("CutPt"        , 500.)
     myargs.setdefault("CutBLayHits"  , 0)
     myargs.setdefault("CutPixelHits" , 2)
@@ -89,6 +92,7 @@ def HighPtBFinderToolCfg(flags, name="HighPtBFinderTool", **myargs):
 
     myargs.setdefault("VertexFitterTool" , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
     myargs.setdefault("ExtrapolatorName" , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
     myargs.setdefault("CutPt"        , 1000.)
     myargs.setdefault("CutBLayHits"  , 0)
     myargs.setdefault("CutPixelHits" , 2)
@@ -123,6 +127,7 @@ def MaterialSVFinderToolCfg(flags, name="MaterialSVFinderTool", **myargs):
 
     myargs.setdefault("VertexFitterTool" , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
     myargs.setdefault("ExtrapolatorName" , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
     myargs.setdefault("CutPt"        , 500.)
     myargs.setdefault("CutBLayHits"  , 0)
     myargs.setdefault("CutPixelHits" , 1)
@@ -158,11 +163,12 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
 
     myargs.setdefault("VertexFitterTool" , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
     myargs.setdefault("ExtrapolatorName" , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
     myargs.setdefault("CutPt"        , 1000.)
     myargs.setdefault("CutBLayHits"  , 0)
     myargs.setdefault("CutPixelHits" , 0)
     myargs.setdefault("CutSiHits"    , 7)
-    myargs.setdefault("CutTRTHits"   , 15)
+    myargs.setdefault("CutTRTHits"   , 0)
     myargs.setdefault("useVertexCleaning"  , False)
     myargs.setdefault("MultiWithOneTrkVrt" , False)
     myargs.setdefault("removeTrkMatSignif" , -1.)    # No additional material rejection
@@ -179,7 +185,10 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
     myargs.setdefault("MaxSVRadiusCut" , 350.)
     myargs.setdefault("CutD0Max"       , 1000.)   # Maximal track impact parameter
     myargs.setdefault("CutD0Min"       , 0.)      # Minimal track impact parameter
-    myargs.setdefault("CutZVrt"        , 100.)
+    myargs.setdefault("MaxZVrt"        , 100.)
+    myargs.setdefault("MinZVrt"        , 0.)
+    myargs.setdefault("TwoTrkVtxFormingD0Cut", 1.0) # 2-track forming cut
+    myargs.setdefault("do2TrkIBLChecks", False)   # Do not explicitly require IBL/BL hits
 
     DVFinder = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
     acc.setPrivateTools(DVFinder)
@@ -199,6 +208,7 @@ def V2TCalibrationToolCfg(flags, name="V2TCalibrationTool", **myargs):
 
     myargs.setdefault("VertexFitterTool" , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
     myargs.setdefault("ExtrapolatorName" , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
     myargs.setdefault("FillHist"     , True)
     myargs.setdefault("CutPt"        , 400.)
     myargs.setdefault("CutBLayHits"  , 0)
@@ -220,7 +230,7 @@ def V2TCalibrationToolCfg(flags, name="V2TCalibrationTool", **myargs):
     myargs.setdefault("MaxSVRadiusCut" ,  140.)
     myargs.setdefault("CutD0Max"       ,  100.)   # Maximal track impact parameter
     myargs.setdefault("CutD0Min"       ,  0.)     # Minimal track impact parameter
-    myargs.setdefault("CutZVrt"        ,  100.)
+    myargs.setdefault("MaxZVrt"        ,  100.)
 
 
     V2TCalibration = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)

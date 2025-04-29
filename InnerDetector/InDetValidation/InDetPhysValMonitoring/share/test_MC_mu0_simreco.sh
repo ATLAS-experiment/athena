@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART jobs with MC Sim+Reco mu=0 config
 
@@ -38,8 +38,8 @@ art_dcube=$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py
 
 lastref_dir=last_results
 
-geotag=ATLAS-R3S-2021-03-02-00
-conditionsTag=OFLCOND-MC23-SDR-RUN3-07
+geotag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
 # MC23a simulation config, based on s4162
  run Sim_tf.py \
@@ -69,6 +69,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    -c ${dcubecfg_sim} \
    -r ${dcuberef_sim} \
    ${dcubemon_sim}
+ echo "art-result: $? dcube_sim"
  
  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
    -p -x ${dcube_sim_lastref} \

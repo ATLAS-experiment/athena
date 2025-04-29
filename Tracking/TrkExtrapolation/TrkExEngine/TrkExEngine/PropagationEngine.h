@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -67,8 +67,9 @@ namespace Trk {
        
     protected:
       ToolHandle<IPropagator>     m_propagator{this, "Propagator", "Trk::RungeKuttaPropagator/AtlasRungeKuttaPropagator"};
-      double                              m_pathLimitTolerance;
-
+      DoubleProperty m_pathLimitTolerance{this, "PathLimitTolerance", 0.01};
+      StringProperty m_sopPrefix_prop{this, "OutputPrefix", ""};
+      StringProperty m_sopPostfix_prop{this, "OutputPostfix", ""};
 
   };
       

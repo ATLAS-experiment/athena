@@ -17,7 +17,7 @@ namespace GeneratorPhysVal
     TH1* prod_x = nullptr;
     TH1* prod_y = nullptr;
     TH1* prod_z = nullptr;
-    GeneratorProductionVertexPlots(PlotBase* pParent, std::string sDir, std::string sType = ""): PlotBase(pParent, sDir), m_sType(sType)
+    GeneratorProductionVertexPlots(PlotBase* pParent, const std::string& sDir, const std::string& sType = ""): PlotBase(pParent, sDir), m_sType(sType)
     {
       prod_r = Book1D("prod_r", "prod_r" + m_sType + ";r;Entries", 600, -300., 300.);
       prod_x = Book1D("prod_x", "prod_x" + m_sType + ";x;Entries", 100, -50., 50.);

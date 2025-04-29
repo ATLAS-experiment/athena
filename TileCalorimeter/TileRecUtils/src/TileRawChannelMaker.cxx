@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -27,6 +27,7 @@ TileRawChannelMaker::TileRawChannelMaker(const std::string& name,
     : AthAlgorithm(name, pSvcLocator)
     , m_fitOverflow(false)      
     , m_tileInfo(0)
+    , m_ADCmaxMinusEps(0)
 {
   declareProperty("FitOverflow", m_fitOverflow, "Fit or not overflows");
   declareProperty("TileInfoName", m_infoName = "TileInfo");

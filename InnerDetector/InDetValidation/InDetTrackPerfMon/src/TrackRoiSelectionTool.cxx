@@ -21,6 +21,7 @@
 
 /// STD includes
 #include <cmath> // std::fabs
+#include <algorithm> // for std::find
 
 
 ///----------------------------------------
@@ -38,7 +39,7 @@ StatusCode IDTPM::TrackRoiSelectionTool::initialize() {
 
   ATH_CHECK( asg::AsgTool::initialize() );
 
-  ATH_MSG_INFO( "Initializing " << name() );
+  ATH_MSG_DEBUG( "Initializing " << name() );
 
   ATH_CHECK( m_triggerTrkParticleName.initialize( 
       not m_triggerTrkParticleName.key().empty() ) );
@@ -152,7 +153,7 @@ float IDTPM::TrackRoiSelectionTool::getOuterPhi(
 ///----------------------------
 ///------- getExitPoint -------
 ///----------------------------
-exitPoint_t IDTPM::TrackRoiSelectionTool::getExitPoint( 
+IDTPM::exitPoint_t IDTPM::TrackRoiSelectionTool::getExitPoint( 
     float tz0, float teta ) const {
 
   exitPoint_t exitPoint;
@@ -228,18 +229,30 @@ IDTPM::TrackRoiSelectionTool::getTracks< xAOD::TruthParticle >(
 ///------- getTrigTracks -------
 ///-----------------------------
 std::vector< const xAOD::TrackParticle* >
-IDTPM::TrackRoiSelectionTool::getTrigTracks( 
-    const SG::ReadHandleKey< xAOD::TrackParticleContainer >& handleKey,
-    const ElementLink< TrigRoiDescriptorCollection >& roiLink ) const {
+IDTPM::TrackRoiSelectionTool::getTrigTracks(
+    const std::vector< const xAOD::TrackParticle* >& tvec,
+    const ElementLink< TrigRoiDescriptorCollection >& roiLink ) const
+{
+  /// Getting trigger track collection handle
+  SG::ReadHandle< xAOD::TrackParticleContainer > handle( m_triggerTrkParticleName );
 
-  SG::ReadHandle<xAOD::TrackParticleContainer> handle( handleKey );
-
-  
+  /// Retrieving ALL trigger tracks within the RoI
   std::pair< xAOD::TrackParticleContainer::const_iterator,
-             xAOD::TrackParticleContainer::const_iterator > selTrigTrkItrPair =
+             xAOD::TrackParticleContainer::const_iterator > trigTrkItrPair =
                  m_trigDecTool->associateToEventView( handle, roiLink );
-  std::vector< const xAOD::TrackParticle* > selectedTrigTracks
-    (selTrigTrkItrPair.first, selTrigTrkItrPair.second);
+
+  /// Getting SELECTED trigger tracks within the RoI
+  std::vector< const xAOD::TrackParticle* > selectedTrigTracks;
+  xAOD::TrackParticleContainer::const_iterator trkItr;
+  for( trkItr = trigTrkItrPair.first ; trkItr != trigTrkItrPair.second ; ++trkItr ) {
+    /// Check if in-RoI track is also in the selected (full-scan) trigger track vector
+    /// i.e. if it passes the quality selection (if any)
+    if( std::find( tvec.begin(), tvec.end(), *trkItr ) == tvec.end() ) {
+      ATH_MSG_DEBUG( "Trigger track does not pass quality selection. Skipping." );
+      continue;
+    }
+    selectedTrigTracks.push_back( *trkItr );
+  }
 
   return selectedTrigTracks;
 }
@@ -256,15 +269,21 @@ StatusCode IDTPM::TrackRoiSelectionTool::selectTracksInRoI(
 
   /// retrieving TrkAnaDefSvc
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  SmartIF<ITrackAnalysisDefinitionSvc> trkAnaDefSvc( svcLoc->service( "TrkAnaDefSvc"+trkAnaColls.anaTag() ) );
+  SmartIF< ITrackAnalysisDefinitionSvc > trkAnaDefSvc(
+      svcLoc->service( "TrkAnaDefSvc"+trkAnaColls.anaTag() ) );
   ATH_CHECK( trkAnaDefSvc.isValid() );
 
   const TrigRoiDescriptor* const* roi = roiLink.cptr();
 
   /// Trigger tracks RoI selection
-  ATH_CHECK( trkAnaColls.fillTrigTrackVec(
-      getTrigTracks( m_triggerTrkParticleName, roiLink ),
-      TrackAnalysisCollections::InRoI ) );
+  /// Filled only if trigger vertex collection is not empty
+  if( not m_triggerTrkParticleName.key().empty() ) {
+    ATH_CHECK( trkAnaColls.fillTrigTrackVec(
+        getTrigTracks(
+            trkAnaColls.trigTrackVec( TrackAnalysisCollections::FS ),
+            roiLink ),
+        TrackAnalysisCollections::InRoI ) );
+  }
 
   /// Offline tracks RoI selection
   if( trkAnaDefSvc->useOffline() ) {

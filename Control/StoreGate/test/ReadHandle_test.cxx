@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ReadHandle_test.cxx
@@ -91,6 +91,20 @@ void test1()
     k7.initialize().ignore();
     EXPECT_EXCEPTION (SG::ExcUninitKey, SG::ReadHandle<MyObj> h7 (k7, ctx5));
   }
+
+  SG::ReadHandle<MyObj> h8 ("foo", ctx5);
+  assert (h8.clid() == MyCLID);
+  assert (h8.key() == "foo");
+  assert (h8.storeHandle().name() == "StoreGateSvc");
+  assert (h8.mode() == Gaudi::DataHandle::Reader);
+  assert (h8.store() == "TestStore");
+
+  SG::ReadHandle<MyObj> h9 ("foo", "OtherStore", ctx5);
+  assert (h9.clid() == MyCLID);
+  assert (h9.key() == "foo");
+  assert (h9.storeHandle().name() == "OtherStore");
+  assert (h9.mode() == Gaudi::DataHandle::Reader);
+  assert (h9.store() == "OtherStore_Impl");
 }
 
 
@@ -288,7 +302,7 @@ void test5()
   SG::WriteHandleKey<MyObj> h2 ("foo3", "FooSvc");
   assert (h1.alias (h2).isSuccess());
   assert (testStore.proxy (MyCLID, "foo3") == prox1);
-  assert (prox1->alias().count ("foo3") == 1);
+  assert (prox1->hasAlias("foo3"));
   #if 0
 
   // Making symlink.
@@ -334,6 +348,37 @@ void test6()
   assert (testStore.m_boundHandles == std::vector<IResetable*>{});
 }
 
+
+// SG::get
+void test7(ISvcLocator* svcloc)
+{
+  std::cout << "test7\n";
+
+  SmartIF<StoreGateSvc> sg{svcloc->service ("StoreGateSvc")};
+  assert (sg.isValid());
+  assert (sg->record (std::make_unique<MyObj> (42), "MyObj", false).isSuccess());
+  EventContext ctx;
+  ctx.setExtension( Atlas::ExtendedEventContext(sg->hiveProxyDict()) );
+
+  const MyObj* obj{nullptr};
+
+  SG::ReadHandleKey<MyObj> k1 ("MyObj");
+  assert (k1.initialize().isSuccess());
+  assert (SG::get(k1, ctx) != nullptr );
+  assert (SG::get(obj, k1, ctx).isSuccess());
+  assert (obj != nullptr);
+
+  SG::ReadHandleKey<MyObj> k2;  // empty key
+  assert (SG::get(k2, ctx) == nullptr );
+  assert (SG::get(obj, k2, ctx).isSuccess());
+  assert (obj == nullptr);
+
+  SG::ReadHandleKey<MyObj> k3 ("nonExistent");
+  assert (k3.initialize().isSuccess());
+  assert (SG::get(k3, ctx) == nullptr );
+  assert (SG::get(obj, k3, ctx).isFailure());
+  assert (obj == nullptr);
+}
 
 //************************************************************************
 
@@ -394,5 +439,6 @@ int main (int argc, char** argv)
   test4();
   test5();
   test6();
+  test7(svcloc);
   return 0;
 }

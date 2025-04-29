@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/DataVector.icc
@@ -24,11 +24,11 @@
 // VirtBases
 //
 
-ENTER_ROOT_SELECTION_NS
-namespace DataVector_detail {
-template <class B1, class B2, class B3> class VirtBases;
-}
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+  namespace DataVector_detail {
+    template <class B1, class B2, class B3> class VirtBases;
+  }
+}}} // ROOT namespace
 
 
 namespace DataVector_detail {
@@ -129,7 +129,7 @@ protected:
 
 private:
   typedef typename
-  ROOT_SELECTION_NS::
+  ROOT::Meta::Selection::
     DataVector_detail::VirtBases<B1,
                                  DataModel_detail::NoBase,
                                  DataModel_detail::NoBase>::self self;
@@ -213,7 +213,7 @@ protected:
 
 private:
   typedef typename
-  ROOT_SELECTION_NS::
+  ROOT::Meta::Selection::
     DataVector_detail::VirtBases<B1, B2,
                                  DataModel_detail::NoBase>::self self;
 };
@@ -305,7 +305,7 @@ protected:
 
 private:
   typedef typename
-  ROOT_SELECTION_NS::DataVector_detail::VirtBases<B1, B2, B3>::self
+  ROOT::Meta::Selection::DataVector_detail::VirtBases<B1, B2, B3>::self
   self;
 };
 
@@ -313,7 +313,7 @@ private:
 } // namespace DataVector_detail
 
 
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 namespace DataVector_detail {
 
 template< class B1, class B2, class B3 >
@@ -327,7 +327,7 @@ public:
 };
 
 }
-EXIT_ROOT_SELECTION_NS
+}}}  // ROOT namespace
 
 
 //****************************************************************************

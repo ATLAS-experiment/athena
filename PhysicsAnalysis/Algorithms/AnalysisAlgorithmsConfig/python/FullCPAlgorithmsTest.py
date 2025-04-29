@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -10,43 +10,41 @@ from AthenaCommon.SystemOfUnits	import GeV
 
 # Config:
 triggerChainsPerYear = {
-    '2015': ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40', 'HLT_2g20_tight'],
-    '2016': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50', 'HLT_g35_loose_g25_loose'],
-    '2017': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
-    '2018': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
-    '2022': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
-    '2023': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
+    2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40', 'HLT_2g20_tight'],
+    2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50', 'HLT_g35_loose_g25_loose'],
+    2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
+    2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
+    # '2022': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
+    # '2023': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
 }
-triggerChains = [
-    'HLT_2mu14',
-    'HLT_mu20_mu8noL1',
-    'HLT_2e17_lhvloose_nod0'
-]
+triggerMatchingChainsPerYear = {
+    2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40'],
+    2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50'],
+    2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu50'],
+    2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium'],
+}
 tauTriggerChainsSF = {
-    '2015': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
-    '2016': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
-    '2017': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
-    '2018': ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
+    2015: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    2016: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    2017: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    2018: ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
 }
 
 # Example cuts used for event selection algorithm test
 exampleSelectionCuts = {
-  'SUBcommon': """
-JET_N_BTAG >= 2
+  'SUBcommon': """JET_N_BTAG >= 2
 JET_N 25000 >= 4
 MET >= 20000
 SAVE
 """,
-  'ejets': """
-IMPORT SUBcommon
+  'ejets': """IMPORT SUBcommon
 EL_N 5000 == 1
 MU_N 3000 == 0
 MWT < 170000
 MET+MWT > 40000
 SAVE
 """,
-  'mujets': """
-IMPORT SUBcommon
+  'mujets': """IMPORT SUBcommon
 EL_N 5000 == 0
 MU_N medium 25000 > 0
 SAVE
@@ -54,24 +52,14 @@ SAVE
 }
 
 electronMinPt = 10*GeV
-electronMaxEta = None
 photonMinPt = 10*GeV
-photonMaxEta = None
-muonMinPt = None
-muonMaxEta = None
-tauMinPt = None
-tauMaxEta = None
-jetMinPt = None
-jetMaxEta = None
 
 
-def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
+def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                         geometry=None, autoconfigFromFlags=None, noSystematics=None,
                         onlyNominalOR=False,  forceEGammaFullSimConfig=False,
-                        returnConfigSeq=False) :
-
-    vars = []
-    metVars = []
+                        returnConfigSeq=False,
+                        bleedingEdge=False) :
 
     largeRJets = True
 
@@ -88,6 +76,12 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
                         'jet_': 'OutJets',
                         'met_': 'AnaMET',
                         ''    : 'EventInfo'}
+    outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
+                             'truth_el_' : 'OutTruthElectrons',
+                             'truth_ph_' : 'OutTruthPhotons',
+                             'truth_tau_': 'OutTruthTaus',
+                             'truth_jet_': 'OutTruthJets',
+                             'truth_met_': 'TruthMET'}
 
     # create factory object to build block configurations
     from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
@@ -95,8 +89,6 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     configSeq += config.makeConfig('CommonServices')
     configSeq.setOptionValue('.systematicsHistogram', 'systematicsList')
-    if forCompare:
-        configSeq.setOptionValue('.filterSystematics', "^(?:(?!PseudoData).)*$")
 
     configSeq += config.makeConfig('PileupReweighting')
 
@@ -105,14 +97,30 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq += config.makeConfig ('EventCleaning')
     configSeq.setOptionValue ('.runEventCleaning', True)
 
+    # disabling comparisons for triggers, because the config blocks do a
+    # lot more than the sequences. Also disabling for Run 3+4, as there is no SF yet
+    if geometry is LHCPeriod.Run2:
+        # Include, and then set up the trigger analysis sequence:
+        configSeq += config.makeConfig( 'Trigger' )
+        configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )
+        configSeq.setOptionValue ('.noFilter', True )
+        configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose' )
+        configSeq.setOptionValue ('.photons', 'AnaPhotons.tight' )
+        configSeq.setOptionValue ('.muons', 'AnaMuons.medium' )
+        configSeq.setOptionValue ('.taus', 'AnaTauJets.tight' )
+        configSeq.setOptionValue ('.electronID', 'Tight' )
+        configSeq.setOptionValue ('.electronIsol', 'Tight_VarRad')
+        configSeq.setOptionValue ('.photonIsol', 'TightCaloOnly')
+        configSeq.setOptionValue ('.muonID', 'Tight')
+        configSeq.setOptionValue ('.triggerMatchingChainsPerYear', triggerMatchingChainsPerYear)
+
     # Include, and then set up the jet analysis algorithm sequence:
     configSeq += config.makeConfig( 'Jets',
         containerName='AnaJets',
         jetCollection='AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', False )
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
-    if not forCompare :
-        configSeq.setOptionValue ('.recalibratePhyslite', False)
+    configSeq.setOptionValue ('.recalibratePhyslite', False)
 
     configSeq += config.makeConfig( 'Jets.JVT',
         containerName='AnaJets' )
@@ -126,83 +134,66 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq += config.makeConfig( 'Jets.FlavourTagging',
                                         containerName='AnaJets',
                                         selectionName='ftag' )
-        configSeq.setOptionValue ('.noEffSF', True)
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)
+        configSeq.setOptionValue ('.saveScores', 'All')
 
-        if not forCompare:
-            btagWP = "Continuous"
-            configSeq += config.makeConfig( 'Jets.FlavourTagging',
-                                            containerName='AnaJets')
-            configSeq.setOptionValue ('.btagger', btagger)
-            configSeq.setOptionValue ('.btagWP', btagWP)
-            configSeq.setOptionValue ('.saveScores', 'All')
-
-            configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
-                                            containerName='AnaJets.baselineJvt')
-            configSeq.setOptionValue ('.btagger', btagger)
-            configSeq.setOptionValue ('.btagWP', btagWP)
-
-    configSeq += config.makeConfig ('Jets.PtEtaSelection',
-        containerName='AnaJets')
-    configSeq.setOptionValue ('.minPt', jetMinPt)
-    configSeq.setOptionValue ('.maxEta', jetMaxEta)
+        configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
+                                        containerName='AnaJets.baselineJvt')
+        configSeq.setOptionValue ('.btagger', btagger)
 
     if largeRJets :
         configSeq += config.makeConfig( 'Jets',
             containerName='AnaLargeRJets',
             jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' )
         outputContainers['larger_jet_'] = 'OutLargeRJets'
-        if not forCompare :
-            configSeq.setOptionValue ('.recalibratePhyslite', False)
-
-        configSeq += config.makeConfig ('Jets.PtEtaSelection',
-            containerName='AnaLargeRJets')
-        configSeq.setOptionValue ('.minPt', jetMinPt)
-        configSeq.setOptionValue ('.maxEta', jetMaxEta)
+        configSeq.setOptionValue ('.recalibratePhyslite', False)
 
 
     # Include, and then set up the electron analysis algorithm sequence:
     likelihood = True
     configSeq += config.makeConfig ('Electrons',
         containerName='AnaElectrons' )
+    configSeq.setOptionValue ('.decorateTruth', True)
+    configSeq.setOptionValue ('.decorateCaloClusterEta', True)
+    configSeq.setOptionValue ('.writeTrackD0Z0', True)
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
-    if not forCompare :
-        configSeq.setOptionValue ('.recalibratePhyslite', False)
+    configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Electrons.WorkingPoint',
         containerName='AnaElectrons',
         selectionName='loose')
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
-    if forCompare :
-        configSeq.setOptionValue ('.noEffSF', True)
-    else:
-        configSeq.setOptionValue ('.noEffSF', geometry is LHCPeriod.Run2)
+    configSeq.setOptionValue ('.noEffSF', geometry is LHCPeriod.Run2)
     if likelihood:
         configSeq.setOptionValue ('.identificationWP', 'LooseBLayerLH')
     else:
         configSeq.setOptionValue ('.identificationWP', 'LooseDNN')
     configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
-    configSeq.setOptionValue ('.writeTrackD0Z0', True)
+
+    configSeq += config.makeConfig ('Electrons.IFFClassification',
+        containerName='AnaElectrons')
+    configSeq += config.makeConfig ('Electrons.MCTCClassification',
+        containerName='AnaElectrons')
+    configSeq.setOptionValue ('.prefix', 'truth_')
 
     configSeq += config.makeConfig ('Electrons.PtEtaSelection',
         containerName='AnaElectrons')
     configSeq.setOptionValue ('.minPt', electronMinPt)
-    configSeq.setOptionValue ('.maxEta', electronMaxEta)
 
 
     # Include, and then set up the photon analysis algorithm sequence:
     configSeq += config.makeConfig ('Photons',
         containerName='AnaPhotons' )
-    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
+    configSeq.setOptionValue ('.decorateTruth', True)
+    configSeq.setOptionValue ('.forceFullSimConfigForP4', forceEGammaFullSimConfig)
+    configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recomputeIsEM', False)
-    if not forCompare :
-        configSeq.setOptionValue ('.recalibratePhyslite', False)
+    configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Photons.WorkingPoint',
         containerName='AnaPhotons',
         selectionName='tight')
-    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
-    if forCompare :
-        configSeq.setOptionValue ('.noEffSF', True)
+    configSeq.setOptionValue ('.forceFullSimConfigForID', forceEGammaFullSimConfig)
+    configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.qualityWP', 'Tight')
     configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
     configSeq.setOptionValue ('.recomputeIsEM', False)
@@ -210,51 +201,49 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq += config.makeConfig ('Photons.PtEtaSelection',
         containerName='AnaPhotons')
     configSeq.setOptionValue ('.minPt', photonMinPt)
-    configSeq.setOptionValue ('.maxEta', photonMaxEta)
 
 
     # set up the muon analysis algorithm sequence:
     configSeq += config.makeConfig ('Muons',
         containerName='AnaMuons')
-    if not forCompare :
-        configSeq.setOptionValue ('.recalibratePhyslite', False)
+    configSeq.setOptionValue ('.decorateTruth', True)
+    configSeq.setOptionValue ('.writeTrackD0Z0', True)
+    configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Muons.WorkingPoint',
         containerName='AnaMuons',
         selectionName='medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
-    if forCompare :
-        configSeq.setOptionValue ('.onlyRecoEffSF', True)
-    configSeq.setOptionValue ('.writeTrackD0Z0', True)
+
+    configSeq += config.makeConfig ('Muons.IFFClassification',
+        containerName='AnaMuons')
+    configSeq += config.makeConfig ('Muons.MCTCClassification',
+        containerName='AnaMuons')
+    configSeq.setOptionValue ('.prefix', 'truth_')
+
 
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
     # configSeq += config.makeConfig ('Muons.Selection', 'AnaMuons.tight')
     # configSeq.setOptionValue ('.quality', 'Tight')
     # configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
 
-    configSeq += config.makeConfig ('Muons.PtEtaSelection',
-        containerName='AnaMuons')
-    configSeq.setOptionValue ('.minPt', muonMinPt)
-    configSeq.setOptionValue ('.maxEta', muonMaxEta)
-
     # Include, and then set up the tau analysis algorithm sequence:
     configSeq += config.makeConfig ('TauJets',
         containerName='AnaTauJets')
+    configSeq.setOptionValue ('.decorateTruth', True)
     configSeq += config.makeConfig ('TauJets.WorkingPoint',
         containerName='AnaTauJets',
         selectionName='tight')
     configSeq.setOptionValue ('.quality', 'Tight')
 
-    if not forCompare:
-        configSeq += config.makeConfig('TauJets.TriggerSF')
-        configSeq.setOptionValue('.containerName', 'AnaTauJets')
-        configSeq.setOptionValue('.tauID', 'Tight')
-        configSeq.setOptionValue('.triggerChainsPerYear', tauTriggerChainsSF)
+    configSeq += config.makeConfig('TauJets.TriggerSF')
+    configSeq.setOptionValue('.containerName', 'AnaTauJets')
+    configSeq.setOptionValue('.tauID', 'Tight')
+    configSeq.setOptionValue('.triggerChainsPerYear', tauTriggerChainsSF)
 
-    configSeq += config.makeConfig ('TauJets.PtEtaSelection',
+    configSeq += config.makeConfig ('TauJets.MCTCClassification',
         containerName='AnaTauJets')
-    configSeq.setOptionValue ('.minPt', tauMinPt)
-    configSeq.setOptionValue ('.maxEta', tauMaxEta)
+    configSeq.setOptionValue ('.prefix', 'truth_')
 
 
     # Add systematic object links
@@ -267,12 +256,71 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq += config.makeConfig('SystObjectLink', containerName='AnaTauJets')
 
 
+    # Particle-level objects
+    configSeq += config.makeConfig ('PL_Electrons',
+        containerName='TruthElectrons')
+    configSeq += config.makeConfig ('PL_Electrons.MCTCClassification',
+        containerName='TruthElectrons')
+    configSeq.setOptionValue ('.prefix', '')
+    configSeq += config.makeConfig ('PL_Electrons.PtEtaSelection',
+        containerName='TruthElectrons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.useDressedProperties', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_Muons',
+        containerName='TruthMuons')
+    configSeq += config.makeConfig ('PL_Muons.MCTCClassification',
+        containerName='TruthMuons')
+    configSeq.setOptionValue ('.prefix', '')
+    configSeq += config.makeConfig ('PL_Muons.PtEtaSelection',
+        containerName='TruthMuons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.useDressedProperties', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_Neutrinos')
+    configSeq.setOptionValue ('.skipOnData', True)
+
+    configSeq += config.makeConfig ('PL_Jets',
+        containerName='AntiKt4TruthDressedWZJets')
+    configSeq += config.makeConfig ('PL_Jets.PtEtaSelection',
+        containerName='AntiKt4TruthDressedWZJets')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_Taus',
+        containerName='TruthTaus')
+    configSeq += config.makeConfig ('PL_Taus.MCTCClassification',
+        containerName='TruthTaus')
+    configSeq.setOptionValue ('.prefix', '')
+    configSeq += config.makeConfig ('PL_Taus.PtEtaSelection',
+        containerName='TruthTaus')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_Photons',
+        containerName='TruthPhotons')
+    configSeq += config.makeConfig ('PL_Photons.PtEtaSelection',
+        containerName='TruthPhotons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_MissingET')
+    configSeq.setOptionValue ('.skipOnData', True)
+
+    configSeq += config.makeConfig ('PL_OverlapRemoval')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.electrons', 'TruthElectrons')
+    configSeq.setOptionValue ('.muons', 'TruthMuons')
+    configSeq.setOptionValue ('.photons', 'TruthPhotons')
+    configSeq.setOptionValue ('.jets', 'AntiKt4TruthDressedWZJets')
+    configSeq.setOptionValue ('.useRapidityForDeltaR', False)
+
+
     if dataType is not DataType.Data :
         # Include, and then set up the generator analysis sequence:
         configSeq += config.makeConfig( 'GeneratorLevelAnalysis')
-        configSeq.setOptionValue ('.saveCutBookkeepers', True)
-        configSeq.setOptionValue ('.runNumber', 284500)
-        configSeq.setOptionValue ('.cutBookkeepersSystematics', True)
 
 
     # Include, and then set up the met analysis algorithm config:
@@ -300,29 +348,11 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
     # configSeq.setOptionValue ('.muons',       'AnaMuons.medium||tight')
     configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
-    configSeq.setOptionValue ('.jets',        'AnaJets')
+    configSeq.setOptionValue ('.jets',        'AnaJets.baselineJvt')
     configSeq.setOptionValue ('.taus',        'AnaTauJets.tight')
     configSeq.setOptionValue ('.inputLabel',  'preselectOR')
     configSeq.setOptionValue ('.outputLabel', 'passesOR' )
     configSeq.setOptionValue ('.nominalOnly', onlyNominalOR )
-    if not forCompare :
-        # ask to be added to the baseline selection for all objects, and to
-        # provide a preselection for the objects in subsequent algorithms
-        configSeq.setOptionValue ('.addToAllSelections', True)
-        configSeq.setOptionValue ('.addPreselection', True)
-
-    # Include and set up a basic run of the event selection algorithm config:
-    if not forCompare and geometry is not LHCPeriod.Run4:
-        # configSeq += config.makeConfig( 'EventSelection', None )
-        # configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
-        # configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
-        # configSeq.setOptionValue ('.jets',        'AnaJets')
-        # configSeq.setOptionValue ('.met',         'AnaMET')
-        # configSeq.setOptionValue ('.selectionCutsDict', exampleSelectionCuts)
-        from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
-        makeMultipleEventSelectionConfigs(configSeq, electrons = 'AnaElectrons.loose', muons = 'AnaMuons.medium', jets = 'AnaJets',
-                                          met = 'AnaMET', btagDecoration = 'ftag_select_ftag',
-                                          selectionCutsDict = exampleSelectionCuts, noFilter = True)
 
 
     # ObjectCutFlow blocks
@@ -342,6 +372,32 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         containerName='AnaTauJets',
         selectionName='tight')
 
+
+    # Include and set up a basic run of the event selection algorithm config:
+    if geometry is not LHCPeriod.Run4:
+        # configSeq += config.makeConfig( 'EventSelection', None )
+        # configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
+        # configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
+        # configSeq.setOptionValue ('.jets',        'AnaJets')
+        # configSeq.setOptionValue ('.met',         'AnaMET')
+        # configSeq.setOptionValue ('.selectionCutsDict', exampleSelectionCuts)
+        from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
+        makeMultipleEventSelectionConfigs(configSeq, electrons = 'AnaElectrons.loose', muons = 'AnaMuons.medium', jets = 'AnaJets.baselineJvt',
+                                          met = 'AnaMET', btagDecoration = 'ftag_select_ftag',
+                                          selectionCutsDict = exampleSelectionCuts, noFilter = True,
+                                          cutFlowHistograms = True)
+
+    configSeq += config.makeConfig ('Bootstraps')
+    configSeq.setOptionValue ('.nReplicas', 2000 )
+    configSeq.setOptionValue ('.skipOnMC', False)
+
+    # per-event lepton SF
+    configSeq += config.makeConfig ('LeptonSF')
+    if geometry is not LHCPeriod.Run2:
+        configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
+    configSeq.setOptionValue ('.muons', 'AnaMuons.medium')
+    configSeq.setOptionValue ('.photons', 'AnaPhotons.tight')
+    configSeq.setOptionValue ('.lepton_postfix', 'nominal')
 
     # Thinning blocks
     configSeq += config.makeConfig ('Thinning',
@@ -367,53 +423,46 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq += config.makeConfig ('Thinning',
             containerName='AnaLargeRJets')
         configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
-
-    # disabling comparisons for triggers, because the config blocks do a
-    # lot more than the sequences. Also disabling for Run 3+4, as there is no SF yet
-    if not forCompare and geometry is LHCPeriod.Run2:
-        # Include, and then set up the trigger analysis sequence:
-        configSeq += config.makeConfig( 'Trigger' )
-        configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )
-        configSeq.setOptionValue ('.noFilter', True )
-        configSeq.setOptionValue ('.electronID', 'Tight' )
-        configSeq.setOptionValue ('.electronIsol', 'Tight_VarRad')
-        configSeq.setOptionValue ('.photonIsol', 'TightCaloOnly')
-        configSeq.setOptionValue ('.muonID', 'Tight')
-        configSeq.setOptionValue ('.electrons', 'AnaElectrons' )
-        configSeq.setOptionValue ('.photons', 'AnaPhotons' )
-        configSeq.setOptionValue ('.muons', 'AnaMuons' )
-        configSeq.setOptionValue ('.taus', 'AnaTauJets' )
-        configSeq.setOptionValue ('.triggerMatchingChainsPerYear', triggerChainsPerYear)
-
-    if not forCompare:
-        configSeq += config.makeConfig ('Bootstraps')
-        configSeq.setOptionValue ('.nReplicas', 2000 )
-        configSeq.setOptionValue ('.skipOnMC', False)
-
-    # per-event lepton SF
-    if not forCompare:
-        configSeq += config.makeConfig ('LeptonSF')
-        if geometry is not LHCPeriod.Run2:
-            configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
-        configSeq.setOptionValue ('.muons', 'AnaMuons.medium')
-        configSeq.setOptionValue ('.photons', 'AnaPhotons.tight')
-        configSeq.setOptionValue ('.lepton_postfix', 'nominal')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='TruthElectrons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.outputName', 'OutTruthElectrons')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='TruthPhotons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.outputName', 'OutTruthPhotons')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='TruthMuons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.outputName', 'OutTruthMuons')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='TruthTaus')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.outputName', 'OutTruthTaus')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='AntiKt4TruthDressedWZJets')
+    configSeq.setOptionValue ('.outputName', 'OutTruthJets')
+    configSeq.setOptionValue ('.skipOnData', True)
 
     configSeq += config.makeConfig ('Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
-    configSeq.setOptionValue ('.vars', vars)
-    configSeq.setOptionValue ('.metVars', metVars)
+    configSeq.setOptionValue ('.vars', [
+        'EventInfo.actualInteractionsPerCrossing -> actualMuScaled',
+    ])
+    configSeq.setOptionValue ('.metVars', [
+        'AnaMET_%SYS%.met -> met_%SYS%',
+    ])
+    configSeq.setOptionValue ('.truthMetVars', [
+        'TruthMET_NOSYS.met -> truth_met',
+    ])
     configSeq.setOptionValue ('.containers', outputContainers)
-    disable_commands = []
-    if forCompare:
-        disable_commands += [
-            'disable jet_select_baselineJvt.*',
-            'disable mu_select_medium.*',
-            'disable el_select_loose.*',
-            'disable ph_select_tight.*',
-            'disable tau_select_tight.*',
-        ]
-    configSeq.setOptionValue ('.commands', disable_commands)
+    configSeq.setOptionValue ('.containersOnlyForMC', outputContainersForMC)
+    configSeq.setOptionValue ('.commands', [
+        'disable actualInteractionsPerCrossing',
+    ])
+
+    # save the tool configuration to a txt file
+    configSeq += config.makeConfig ('PrintConfiguration')
 
     # return configSeq for unit test
     if returnConfigSeq:
@@ -449,36 +498,24 @@ def printSequenceAlgs (sequence) :
         print (sequence)
 
 
-def makeSequence (dataType, forCompare, noSystematics,
+def makeSequence (dataType, noSystematics,
         yamlPath=None,
-        hardCuts = False, isPhyslite = False, geometry = None,
+        isPhyslite = False, geometry = None,
         autoconfigFromFlags = None, onlyNominalOR = False,
-        forceEGammaFullSimConfig = False) :
-
-    # do some harder cuts on all object types, this is mostly used for
-    # benchmarking
-    if hardCuts :
-        global electronMinPt
-        electronMinPt = 27*GeV
-        global photonMinPt
-        photonMinPt = 27*GeV
-        global muonMinPt
-        muonMinPt = 27*GeV
-        global tauMinPt
-        tauMinPt = 27*GeV
-        global jetMinPt
-        jetMinPt = 45*GeV
+        forceEGammaFullSimConfig = False,
+        bleedingEdge = False) :
 
     algSeq = AlgSequence('AnalysisSequence')
 
     ca = None
     if not yamlPath:
-        ca = makeTestSequenceBlocks (dataType, algSeq, forCompare=forCompare,
+        ca = makeTestSequenceBlocks (dataType, algSeq,
                                  isPhyslite=isPhyslite,
                                  geometry=geometry, onlyNominalOR=onlyNominalOR,
                                  autoconfigFromFlags=autoconfigFromFlags,
                                  noSystematics=noSystematics,
-                                 forceEGammaFullSimConfig=forceEGammaFullSimConfig)
+                                 forceEGammaFullSimConfig=forceEGammaFullSimConfig,
+                                 bleedingEdge=bleedingEdge)
     else:
         from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText
         ca = makeSequenceText(yamlPath, dataType, algSeq, geometry=geometry,

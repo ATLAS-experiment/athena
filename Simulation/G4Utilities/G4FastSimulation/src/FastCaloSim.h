@@ -17,6 +17,9 @@
 #include "ISF_FastCaloSimParametrization/IFastCaloSimCaloTransportation.h"
 // Geant4 transportation tool interface
 #include "G4AtlasInterfaces/IG4CaloTransportTool.h"
+// Geant4 Punchthrough G4 Tool
+#include "G4AtlasInterfaces/IPunchThroughSimWrapper.h"
+
 // Random generator service interface
 #include "AthenaKernel/IAthRNGSvc.h"
 // FastCaloSim tool
@@ -37,17 +40,21 @@ class FastCaloSim: public G4VFastSimulationModel
               const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,
               const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
               const PublicToolHandle<IG4CaloTransportTool>& G4CaloTransportTool,
+              const PublicToolHandle<IPunchThroughSimWrapper>& PunchThroughSimWrapper,
               const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
               const Gaudi::Property<std::string>& CaloCellContainerSDName,
               const Gaudi::Property<bool>& doG4Transport,
               const Gaudi::Property<bool>& doPhotons,
               const Gaudi::Property<bool>& doElectrons,
               const Gaudi::Property<bool>& doHadrons,
-              const Gaudi::Property<float>& EtaLow,
-              const Gaudi::Property<float>& EtaHigh,
-              const Gaudi::Property<float>& EkinLow,
-              const Gaudi::Property<float>& EkinHigh,
+              const Gaudi::Property<float>& AbsEtaMin,
+              const Gaudi::Property<float>& AbsEtaMax,
+              const Gaudi::Property<float>& EkinMinPhotons,
+              const Gaudi::Property<float>& EkinMaxPhotons,
+              const Gaudi::Property<float>& EkinMinElectrons,
+              const Gaudi::Property<float>& EkinMaxElectrons,
               const Gaudi::Property<bool>& doEMECFCS,
+              const Gaudi::Property<bool>& doPunchThrough,
               FastCaloSimTool * FastCaloSimTool);
   ~FastCaloSim() {}
 
@@ -80,7 +87,8 @@ class FastCaloSim: public G4VFastSimulationModel
   PublicToolHandle<IFastCaloSimCaloExtrapolation> m_FastCaloSimCaloExtrapolation;
   // Geant4 transportation tool
   PublicToolHandle<IG4CaloTransportTool> m_G4CaloTransportTool;
-
+  // Geant4 Punchthrough G4 Tool
+  PublicToolHandle<IPunchThroughSimWrapper> m_PunchThroughSimWrapper;
 
   // Main FastCaloSim service
   ServiceHandle<ISF::IFastCaloSimParamSvc> m_FastCaloSimSvc;
@@ -95,9 +103,14 @@ class FastCaloSim: public G4VFastSimulationModel
   Gaudi::Property<bool> m_doHadrons;
   Gaudi::Property<float> m_AbsEtaMin;
   Gaudi::Property<float> m_AbsEtaMax;
-  Gaudi::Property<float> m_EkinMin;
-  Gaudi::Property<float> m_EkinMax;
+  Gaudi::Property<float> m_EkinMinPhotons;
+  Gaudi::Property<float> m_EkinMaxPhotons;
+  Gaudi::Property<float> m_EkinMinElectrons;
+  Gaudi::Property<float> m_EkinMaxElectrons;
   Gaudi::Property<float> m_doEMECFCS;
+
+  //For PunchThrough
+  Gaudi::Property<bool> m_doPunchThrough;
 
   // Fast simulation FastCaloSimTool 
   FastCaloSimTool * m_FastCaloSimTool;

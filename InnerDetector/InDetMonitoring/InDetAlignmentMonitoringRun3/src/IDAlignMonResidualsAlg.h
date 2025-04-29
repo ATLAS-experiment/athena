@@ -54,9 +54,9 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 
  private:
-  void fillTRTHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool isTubeHit, float trketa) const;
+  void fillTRTHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool isTubeHit, float trketa, float qpT) const;
   void fillTRTBarrelHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa) const;
-  void fillTRTEndcapHistograms(int barrel_ec, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa) const;
+  void fillTRTEndcapHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa, float qpT) const;
   StatusCode setupTools();
 	
   StatusCode getSiResiduals(const Trk::Track*, const Trk::TrackStateOnSurface*, bool, double*) const;
@@ -84,7 +84,7 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
 
   std::string m_Pixel_Manager;
   std::string m_SCT_Manager;
-  bool m_extendedPlots;
+  bool m_extendedPlots{};
   bool m_doHitQuality{false};
   int  m_checkrate {};
   bool m_doPulls {};
@@ -144,6 +144,7 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   std::vector<int> m_trtECResVsEta;
   std::vector<int> m_trtECResVsPhiSec;
   std::vector<int> m_trtECLRVsPhiSec;
+  std::vector<int> m_trtECResVsPt_2DProf; 
 };
 
 #endif

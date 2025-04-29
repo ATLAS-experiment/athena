@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Abused from Geant4 version of Pythai6.hh from extended examples
@@ -17,11 +17,12 @@
 #include "Pythia8_i/Pythia8_i.h"
 // For unique_ptr
 #include <memory>
+#include "CxxUtils/checker_macros.h"
 
 class G4DynamicParticle;
 class G4ParticleDefinition;
 
-class Pythia8ForDecays
+class ATLAS_NOT_THREAD_SAFE Pythia8ForDecays
 {
   public:
    Pythia8ForDecays();

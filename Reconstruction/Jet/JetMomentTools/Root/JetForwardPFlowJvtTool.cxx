@@ -22,6 +22,7 @@
 
 // Jet
 #include "JetRec/JetFromPseudojet.h"
+#include "JetRec/JetClusterer.h"
 
   ///////////////////////////////////////////////////////////////////
   // Public methods:
@@ -68,6 +69,7 @@
     ATH_CHECK(m_orKey.initialize( m_FEKey.empty() && !m_orKey.key().empty() ));
     ATH_CHECK(m_FEKey.initialize( !m_FEKey.empty() ));
     ATH_CHECK(m_orFEKey.initialize( !m_FEKey.empty() && !m_orFEKey.key().empty() ));
+    ATH_CHECK(m_eventInfoKey.initialize());
 
     m_fjvtKey = m_jetContainerName + "." + m_fjvtKey.key();
     m_fjvtRawKey = m_jetContainerName + "." + m_fjvtRawKey.key();
@@ -256,9 +258,20 @@
     TString newname = m_jetsName.value();
     newname += vx.index();
 
+    // Use run/event number as random number seeds.
+    std::vector<int> seeds;
+    auto evtInfoHandle = SG::makeHandle(m_eventInfoKey);
+    if (!evtInfoHandle.isValid())
+    {
+      ATH_MSG_ERROR("Unable to retrieve event info");
+      return pu_jets;
+    }
+    JetClustererHelper::seedsFromEventInfo(evtInfoHandle.cptr(), seeds);
+
     fastjet::JetDefinition jet_def(fastjet::antikt_algorithm,0.4);
     fastjet::AreaDefinition area_def(fastjet::active_area_explicit_ghosts,
                                      fastjet::GhostedAreaSpec(fastjet::SelectorAbsRapMax(m_maxRap)));
+    area_def = area_def.with_fixed_seed(seeds);
     fastjet::ClusterSequenceArea clust_pfo(input_pfo,jet_def,area_def);
     std::vector<fastjet::PseudoJet> inclusive_jets = sorted_by_pt(clust_pfo.inclusive_jets(5000.));
 

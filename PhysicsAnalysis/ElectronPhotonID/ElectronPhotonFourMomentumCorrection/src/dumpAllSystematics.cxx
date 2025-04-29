@@ -277,9 +277,10 @@ StatusCode DumpAllSystematics::do_truth(const xAOD::Egamma& particle)
     m_truth_E = true_particle->e();
     m_truth_pdgId = true_particle->pdgId();
 
-    const xAOD::TruthParticle* true_parent = true_particle->parent();
-    if (true_parent) { m_truth_parent_pdgId= true_parent->pdgId(); }
-    else { m_truth_parent_pdgId = -999; }
+    m_truth_parent_pdgId = -999;
+    for (size_t p = 0; p < true_particle->nParents(); ++p) {
+      if (true_particle->parent(p)) { m_truth_parent_pdgId = true_particle->parent(p)->pdgId();  break; }
+    }
 
     if (m_particle_type == ParticleType::PHOTON) {
       m_truth_isConv = xAOD::EgammaHelpers::isTrueConvertedPhoton(true_particle);

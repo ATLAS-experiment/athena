@@ -39,7 +39,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         alg.scaleFactorOutputDecoration = 'jvt_effSF_%SYS%'
         alg.particles = config.readName (self.containerName)
 
-        config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_jvt_effSF')
+        config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_jvt_effSF' + postfix)
 
         if self.enableFJvt:
             alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'ForwardJvtEventScaleFactorAlg' )
@@ -49,20 +49,5 @@ class JetJvtAnalysisConfig (ConfigBlock) :
             alg.scaleFactorOutputDecoration = 'fjvt_effSF_%SYS%'
             alg.particles = config.readName (self.containerName)
 
-            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_fjvt_effSF')
+            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_fjvt_effSF' + postfix)
 
-
-def makeJetJvtAnalysisConfig( seq, containerName,
-                              postfix = None,
-                              enableFJvt = None ):
-    """Create a jet JVT analysis algorithm config
-
-    Keyword arguments:
-      enableFJvt -- Whether to enable forward JVT calculations
-    """
-
-    config = JetJvtAnalysisConfig (containerName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('enableFJvt', enableFJvt)
-
-    seq.append (config)

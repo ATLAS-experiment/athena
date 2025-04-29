@@ -17,7 +17,7 @@ void xAOD::HGTDCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
     for (std::size_t i(0); i < rdos.size(); ++i) {
         rdos[i] = rdoList[i].get_compact();
     }
-    rdoListAcc(*this) = rdos;
+    rdoListAcc(*this) = std::move(rdos);
 }
 
 const std::vector<Identifier> xAOD::HGTDCluster_v1::rdoList() const {

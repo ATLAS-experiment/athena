@@ -2638,122 +2638,107 @@
 
 <h id="sigma_vs_eta_d0" type="TProfile" title="#sigma(d_{0}) vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma(d_{0}) [mm}" lo="-10.0" hi="10.0"/>
+  <y title="#sigma(d_{0}) [mm}" lo="0." hi="&D0RES;"/>
 </h>
 
 <h id="sigma_vs_eta_z0" type="TProfile" title="#sigma(z_{0}) vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma(z_{0}) [mm]" lo="-20.0" hi="20.0"/>
+  <y title="#sigma(z_{0}) [mm]" lo="0." hi="&Z0RES;"/>
 </h>
 
 <h id="sigma_vs_eta_qoverp" type="TProfile" title="#sigma_{qoverp} vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma_{qoverp} [GeV^{-1}] " lo="-5.0" hi="5.0"/>
+  <y title="#sigma_{qoverp} [GeV^{-1}] " lo="0." hi="&QOPRES;"/>
 </h>
 
 <h id="sigma_vs_eta_ptqopt" type="TProfile" title="p_{T} #times #sigma(q/p_{T}) vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="p_{T} #times #sigma(q/p_{T})" lo="-2.0" hi="2.0"/>
-</h>
-
-<h id="sigma_vs_eta_pt" type="TProfile" title="#sigma_{pt} vs #eta">
-  <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma_{pt}" lo="-100.0" hi="100"/>
+  <y title="p_{T} #times #sigma(q/p_{T})" lo="0." hi="&PTQOPTRES;"/>
 </h>
 
 <h id="sigma_vs_eta_theta" type="TProfile" title="#sigma(#theta) vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma(#theta)" lo="-0.1" hi="0.1"/>
+  <y title="#sigma(#theta)" lo="0." hi="&THETARES;"/>
 </h>
 
 <h id="sigma_vs_eta_phi" type="TProfile" title="#sigma(#phi) vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma(#phi) [rads]" lo="-0.2" hi="0.2"/>
+  <y title="#sigma(#phi) [rads]" lo="0." hi="&PHIRES;"/>
 </h>
 
 <h id="sigma_vs_eta_z0sin" type="TProfile" title="#sigma(z_{0} #times sin) vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma(z_{0} #times sin)" lo="-10.0" hi="10.0"/>
+  <y title="#sigma(z_{0} #times sin)" lo="0." hi="&Z0SINRES;"/>
 </h>
 
 <h id="sigma_vs_pt_d0" type="TProfile" title="#sigma(d_{0}) vs p_{T}">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
-  <y title="#sigma(d_{0}) [mm]" lo="-10.0" hi="10.0"/>
+  <y title="#sigma(d_{0}) [mm]" lo="0." hi="&D0RES;"/>
 </h>
 
 <h id="sigma_vs_pt_z0" type="TProfile" title="#sigma(z_{0}) vs p_{T}">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
-  <y title="#sigma(z_{0}) [mm]" lo="-20.0" hi="20.0"/>
+  <y title="#sigma(z_{0}) [mm]" lo="0." hi="&Z0RES;"/>
 </h>
 
 <h id="sigma_vs_pt_qoverp" type="TProfile" title="#sigma_{qoverp} vs pT">
   <x title="p_{T} [GeV]"  n="&NETA;" lo="0.0" hi="100"/>
-  <y title="#sigma_{qoverp} [GeV^{-1}]" lo="-5.0" hi="5.0"/>
+  <y title="#sigma_{qoverp} [GeV^{-1}]" lo="0." hi="&QOPRES;"/>
 </h>
 
 <h id="sigma_vs_pt_ptqopt" type="TProfile" title="p_{T} #times #sigma(q/p_{T}} vs p_{T}">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
-  <y title="p_{T} #times #sigma(q/p_{T})" lo="-2.0" hi="2.0"/>
-</h>
-
-<h id="sigma_vs_pt_pt" type="TProfile" title="#sigma_{pt} vs pT">
-  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
-  <y title="#sigma_{pt}" lo="-100.0" hi="100.0"/>
+  <y title="p_{T} #times #sigma(q/p_{T})" lo="0." hi="&PTQOPTRES;"/>
 </h>
 
 <h id="sigma_vs_pt_theta" type="TProfile" title="#sigma(#theta) vs p_{T}">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
-  <y title="#sigma(#theta) [rads]" lo="-0.1" hi="0.1" />
+  <y title="#sigma(#theta) [rads]" lo="0." hi="&THETARES;" />
 </h>
 
 <h id="sigma_vs_pt_phi" type="TProfile" title="#sigma(phi) vs p_{T}">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
-  <y title="#sigma(#phi) [rads]" lo="-0.2" hi="0.2"/>
+  <y title="#sigma(#phi) [rads]" lo="0." hi="&PHIRES;"/>
 </h>
 
 <h id="sigma_vs_pt_z0sin" type="TProfile" title="#sigma(z_{0} #times sin) vs p_{T}">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
-  <y title="#sigma(z_{0} #times sin)" lo="-10.0" hi="10.0"/>
+  <y title="#sigma(z_{0} #times sin)" lo="0." hi="&Z0SINRES;"/>
 </h>
 
 <h id="sigma_vs_lowpt_d0" type="TProfile" title="#sigma(d_{0}) vs p_{T}, low pt">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
-  <y title="#sigma(d_{0}) [mm]" lo="-10.0" hi="10.0"/>
+  <y title="#sigma(d_{0}) [mm]" lo="0." hi="&D0RES;"/>
 </h>
 
 <h id="sigma_vs_lowpt_z0" type="TProfile" title="#sigma(z_{0}) vs p_{T}, low pt">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
-  <y title="#sigma(z_{0}) [mm]" lo="-20.0" hi="20.0"/>
+  <y title="#sigma(z_{0}) [mm]" lo="0." hi="&Z0RES;"/>
 </h>
 
 <h id="sigma_vs_lowpt_qoverp" type="TProfile" title="#sigma_{qoverp} vs pT, low pt">
   <x title="p_{T} [GeV]"  n="&NETA;" lo="0.0" hi="1"/>
-  <y title="#sigma_{qoverp} [GeV^{-1}] " lo="-5.0" hi="5.0"/>
+  <y title="#sigma_{qoverp} [GeV^{-1}] " lo="0." hi="&QOPRES;"/>
 </h>
 
 <h id="sigma_vs_lowpt_ptqopt" type="TProfile" title="p_{T} #times #sigma(q/p_{T}} vs p_{T}, low pt">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
-  <y title="p_{T} #times #sigma(q/p_{T})" lo="-2.0" hi="2.0"/>
-</h>
-
-<h id="sigma_vs_lowpt_pt" type="TProfile" title="#sigma_{pt} vs pT, low pt">
-  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
-  <y title="#sigma_{pt}" lo="-100.0" hi="100.0"/>
+  <y title="p_{T} #times #sigma(q/p_{T})" lo="0." hi="&PTQOPTRES;"/>
 </h>
 
 <h id="sigma_vs_lowpt_theta" type="TProfile" title="#sigma(#theta) vs p_{T}, low pt">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
-  <y title="#sigma(#theta) [rads]" lo="-0.1" hi="0.1" />
+  <y title="#sigma(#theta) [rads]" lo="0." hi="&THETARES;" />
 </h>
 
 <h id="sigma_vs_lowpt_phi" type="TProfile" title="#sigma(phi) vs p_{T}, low pt">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
-  <y title="#sigma(#phi) [rads]" lo="-0.2" hi="0.2"/>
+  <y title="#sigma(#phi) [rads]" lo="0." hi="&PHIRES;"/>
 </h>
 
 <h id="sigma_vs_lowpt_z0sin" type="TProfile" title="#sigma(z_{0} #times sin) vs p_{T}, low pt">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
-  <y title="#sigma(z_{0} #times sin)" lo="-10.0" hi="10.0"/>
+  <y title="#sigma(z_{0} #times sin)" lo="0." hi="&Z0SINRES;"/>
 </h>
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,7 +37,7 @@ class VP1AODSystem : public IVP13DSystemSimple {
 
 public:
 
-  VP1AODSystem(QString name="Analysis");
+  VP1AODSystem(const QString& name="Analysis");
   virtual ~VP1AODSystem();
 
   void systemcreate(StoreGateSvc* detstore);
@@ -54,7 +54,7 @@ public:
   void userPickedNode(SoNode* pickedNode, SoPath *pickedPath);
   void userSelectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*);//SINGLE
   void userDeselectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*);//SINGLE
-  void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);//TOGGLE/SHIFT
+  void userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*> &, QSet<SoPath*>);//TOGGLE/SHIFT
   void userClickedOnBgd();  
 
 public Q_SLOTS:

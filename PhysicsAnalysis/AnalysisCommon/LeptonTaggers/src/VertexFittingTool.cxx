@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,10 +20,7 @@ using namespace std;
 //=============================================================================
 Prompt::VertexFittingTool::VertexFittingTool(
   const std::string& t, const std::string &name, const IInterface* p
-): AthAlgTool(t, name, p),
-  m_countNumberOfFits       (0),
-  m_countNumberOfFitsFailed (0),
-  m_countNumberOfFitsInvalid(0)
+): AthAlgTool(t, name, p)
 {
   declareInterface<Prompt::IVertexFittingTool>(this);
 }

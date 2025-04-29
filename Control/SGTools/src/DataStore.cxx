@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SGTools/DataStore.h"
 #include "SGTools/DataProxy.h"
 #include "SGTools/exceptions.h"
 #include "AthenaKernel/IStringPool.h"
+#include "AthenaKernel/ISGAudSvc.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "SGAudCore/ISGAudSvc.h"
 #include "CxxUtils/ConcurrentPtrSet.h"
 #include "CxxUtils/SimpleUpdater.h"
 #include "CxxUtils/checker_macros.h"
@@ -72,11 +72,12 @@ void DataStore::clearStore(bool force, bool hard, MsgStream* /*pmlog*/)
 
   /// Rather than dealing with erasures in m_keyMap, we first do the
   /// removals just from m_storeMap, remembering along the way the
-  /// set of reset-only proxies.  Then we run through the entries
+  /// set of proxies to be removed (not reset-ony).  Then if there were any
+  /// such proxies, we run through the entries
   /// in m_keyMap and copy all that match one of the reset-only proxies
   /// to a new map and then swap.  (We can't ask the proxy itself if it's
   /// reset-only at this point because if it isn't, it'll have been deleted.)
-  std::unordered_set<DataProxy*> saved;
+  std::unordered_set<DataProxy*> removed;
   
   /// Go through the list of unique proxies, and run requestRelease()
   /// on each.  If that returns true, then we're meant to remove this
@@ -86,27 +87,29 @@ void DataStore::clearStore(bool force, bool hard, MsgStream* /*pmlog*/)
   for (size_t i = 0; i < m_proxies.size(); ) {
     SG::DataProxy* dp = m_proxies[i];
     if (ATH_UNLIKELY (dp->requestRelease (force, hard))) {
+      removed.insert (dp);
       if (removeProxyImpl (dp, i).isFailure()) {
         ++i;
       }
     }
     else {
-      saved.insert (dp);
       ++i;
     }
   }
 
-  KeyMap_t newMap (KeyMap_t::Updater_t(), m_keyMap.capacity());
-  {
-    auto lock = newMap.lock();
-    auto ctx = KeyMap_t::Updater_t::defaultContext();
-    for (auto p : m_keyMap) {
-      if (saved.count (p.second)) {
-        newMap.emplace (lock, p.first, p.second, ctx);
+  if (!removed.empty()) {
+    KeyMap_t newMap (KeyMap_t::Updater_t(), m_keyMap.capacity());
+    {
+      auto lock = newMap.lock();
+      auto ctx = KeyMap_t::Updater_t::defaultContext();
+      for (auto p : m_keyMap) {
+        if (removed.count (p.second) == 0) {
+          newMap.emplace (lock, p.first, p.second, ctx);
+        }
       }
     }
+    m_keyMap.swap (newMap);
   }
-  m_keyMap.swap (newMap);
 
   // clear T2PMap
   m_t2p.clear();
@@ -276,7 +279,6 @@ DataStore::removeProxyImpl (DataProxy* proxy, int index)
     ProxyMap& pmap = storeIter->second;
 
     // first remove the alias key:
-    SG::DataProxy::AliasCont_t alias_set = proxy->alias();
     for (const std::string& alias : alias_set) {
       if (1 == pmap.erase(alias)) proxy->release();
     }

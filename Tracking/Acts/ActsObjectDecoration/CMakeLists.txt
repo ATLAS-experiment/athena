@@ -7,7 +7,7 @@ atlas_subdir(ActsObjectDecoration)
 find_package(Acts COMPONENTS Core)
 
 atlas_add_component( ActsObjectDecoration
-   src/*.h src/*.cxx
+   src/*.h src/*.cxx src/detail/*.h src/detail/*.cxx
    src/components/*.cxx
    LINK_LIBRARIES
    ActsCore
@@ -17,4 +17,7 @@ atlas_add_component( ActsObjectDecoration
    xAODMeasurementBase
    InDetReadoutGeometry
    TrkTruthData
+   InDetSimData
+   InDetSimEvent
+   PixelReadoutGeometryLib
 )

@@ -10,7 +10,7 @@ atlas_subdir( MuonSpacePointFormation )
 atlas_add_component( MuonSpacePointFormation
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib AthenaBaseComps GaudiKernel MuonReadoutGeometryR4
-                                    xAODMuonPrepData CxxUtils MuonSpacePoint xAODMuonViews)
+                                    xAODMuonPrepData CxxUtils MuonSpacePoint xAODMuonViews MuonAlignmentDataR4)
 
 
 # Install files from the package:

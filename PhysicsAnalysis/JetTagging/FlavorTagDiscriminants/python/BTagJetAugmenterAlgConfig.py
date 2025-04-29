@@ -18,7 +18,7 @@ def BTagJetAugmenterAlgCfg(ConfigFlags, BTagCollection, Associator,  TrackCollec
         useIpxd=useIpxd,
     )
 
-    decorAlg = CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg(
+    decorAlg = CompFactory.FlavorTagInference.BTagDecoratorAlg(
         name=f'{name}_alg',
         container=BTagCollection,
         constituentContainer=TrackCollection,

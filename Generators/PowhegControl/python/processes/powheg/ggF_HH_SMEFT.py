@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 import os
-import glob
 from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 
@@ -26,19 +25,6 @@ class ggF_HH_SMEFT(PowhegV2):
 
         # Add grid file creation function
         self.validation_functions.append("create_grid_file")
-
-        # This process uses a python script which uses .grid files searched for in $PYTHONPATH
-        # By appending the folder that they live in to PYTHONPATH it is able to find them
-        # At the moment these files are stored or linked locally, so we use ${PWD}
-        # but we may use self.executable.replace("pwhg_main", "Virtual") instead at some point
-        os.environ["PYTHONPATH"] += ":" + os.environ["PWD"]
-
-        # need to use libraries compatible with the environment used at compilation (so centos7)
-        # would need to use ${LHAPDF_INSTAL_PATH}/lib/python3.9/site-packages when/if the process compiles in alma9 eventually
-        lhapdf_python_path = "/cvmfs/sft.cern.ch/lcg/releases/LCG_101/MCGenerators/lhapdf/6.3.0/x86_64-centos7-gcc8-opt/lib/python3.9/site-packages"
-        os.environ["PYTHONPATH"] += ":" + lhapdf_python_path
-
-        logger.info('PYTHONPATH is now:\n{}'.format(os.environ["PYTHONPATH"]))
 
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("alphas_from_lhapdf")
@@ -122,7 +108,7 @@ class ggF_HH_SMEFT(PowhegV2):
         self.add_keyword("mintupbratlim")
         self.add_keyword("mintupbxless")
         self.add_keyword("mtdep", 3)
-        self.add_keyword("multiple-insertion", 1)
+        self.add_keyword("SMEFTtruncation", 1)
         self.add_keyword("ncall1", 200000)
         self.add_keyword("ncall1rm")
         self.add_keyword("ncall2", 150000)
@@ -183,41 +169,33 @@ class ggF_HH_SMEFT(PowhegV2):
 
         logger.info('Now attempting to link locally the files needed by this Powheg process')
         try:
-            os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/events.cdf events.cdf")
-            os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/creategrid.py creategrid.py")
-            os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/shell/warmup_smeft.py warmup_smeft.py")
-            os.system("for grid in " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/Virt_full_*E*.grid; do ln -s $grid ${grid##*/}; done")
+            processpythondir = os.path.join(os.environ["POWHEGPATH"], "POWHEG-BOX-V2", "ggHH_SMEFT", 'python')
+            if os.path.isdir(processpythondir):
+                for filename in os.listdir(processpythondir):
+                    source_path = os.path.join(processpythondir, filename)
+                    if os.path.isfile(source_path):
+                        link_name = os.path.join(os.getcwd(), filename)
+                        try:
+                            os.symlink(source_path, link_name)
+                            print(f"Created link: {link_name} -> {source_path}")
+                        except FileExistsError:
+                            print(f"Link already exists: {link_name}")
+            else:
+                os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/events.cdf events.cdf")
+                os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/creategrid.py creategrid.py")
+                os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/shell/warmup_smeft.py warmup_smeft.py")
+                os.system("for grid in " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/Virt_full_*E*.grid; do ln -s $grid ${grid##*/}; done")
         except RuntimeError:
             logger.error('Impossible to link the needed files locally')
             raise
 
-         # need to override lhapdf python path while the powheg process has been compiled in a different platform
-        py_path_save = os.environ["PYTHONPATH"]
-        base_path = os.environ["LHAPDF_INSTAL_PATH"]
-
-        # Search for the Python version in the lib folder
-        python_lib_path = glob.glob(os.path.join(base_path, "lib", "python*"))
-
-        # Ensure at least one matching path is found
-        if python_lib_path:
-            python_lib_path = python_lib_path[0]
-        else:
-            raise ValueError("No Python version found in lib folder")
-
-        # Build the temporary path
-        py_path_temp = python_lib_path + "/site-packages" + ":" + py_path_save
-        os.environ["PYTHONPATH"] = py_path_temp
-        logger.debug(f'Temporarily setting PYTHONPATH to:\n{py_path_temp}')
-
         # handling the parameters of this process
         # these parameters need to be parsed in a specific format
         usesmeft_str = str(list(self.parameters_by_keyword("usesmeft"))[0].value)
-        #EFTcount_str = ""
         if usesmeft_str == "0":
             EFTcount = 3
         else:
-            EFTcount = list(self.parameters_by_keyword("multiple-insertion"))[0].value
-        EFTcount_str = f'{EFTcount:+n}'
+            EFTcount = list(self.parameters_by_keyword("SMEFTtruncation"))[0].value
         # need to handle the case where we have different scales or pdfs in the joboption, provided as a list, or just one value
         renfact = list(self.parameters_by_keyword("renscfact"))[0].value
         renfac_str = f'{renfact[0]:+.2f}' if type(renfact) is list else f'{renfact:+.2f}'
@@ -234,11 +212,11 @@ class ggF_HH_SMEFT(PowhegV2):
             CHG_str = f'{list(self.parameters_by_keyword("CHG"))[0].value:+.4E}'
 
             logger.info('Now trying to use warmup_smeft.py to create the Virt_full_*.grid file')
-            logger.info(f'Parameters are: GF={GF_str}, Lambda={Lambda_str}, CHbox={CHbox_str}, CHD={CHD_str}, CH={CH_str}, CuH={CuH_str}, CHG={CHG_str}, EFTcount={EFTcount_str}, usesmeft={usesmeft_str}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
+            logger.info(f'Parameters are: GF={GF_str}, Lambda={Lambda_str}, CHbox={CHbox_str}, CHD={CHD_str}, CH={CH_str}, CuH={CuH_str}, CHG={CHG_str}, EFTcount={EFTcount}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
             try:
                 #import creategrid as cg
                 #cg.combinegrids(grid_file_name, chhh_str, ct_str, ctt_str, cggh_str, cgghh_str)
-                pythoncmd=f"import warmup_smeft as ws; ws.combinegrids_smeft({Lambda_str}, {CHbox_str}, {CHD_str}, {CH_str}, {CuH_str}, {CHG_str}, {GF_str}, {EFTcount_str}, {usesmeft_str}, {lhapdfid_str}, {renfac_str})"
+                pythoncmd=f"import warmup_smeft as ws; ws.combinegrids_SMEFT({Lambda_str}, {CHbox_str}, {CHD_str}, {CH_str}, {CuH_str}, {CHG_str}, {GF_str}, {EFTcount}, {lhapdfid_str}, {renfac_str})"
                 os.system("python3 -c \""+pythoncmd+"\"")
             except RuntimeError:
                 logger.error('Impossible to use warmup_smeft.py to create the Virt_full_*.grid file')
@@ -250,23 +228,19 @@ class ggF_HH_SMEFT(PowhegV2):
             ctt_str  = f'{list(self.parameters_by_keyword("ctt"))[0].value:+.4E}'
             cggh_str   = f'{list(self.parameters_by_keyword("cggh"))[0].value:+.4E}'
             cgghh_str  = f'{list(self.parameters_by_keyword("cgghh"))[0].value:+.4E}'
-            grid_file_name = f'Virt_full_{chhh_str}_{ct_str}_{ctt_str}_{cggh_str}_{cgghh_str}-HEFT{EFTcount_str}.grid'
+            grid_file_name = f'Virt_full-HEFT{EFTcount}_{chhh_str}_{ct_str}_{ctt_str}_{cggh_str}_{cgghh_str}.grid'
 
             logger.info('Now trying to use creategrid.py to create the Virt_full_*.grid file')
             logger.info(f'File name: {grid_file_name}')
-            logger.info(f'Parameters are: chhh={chhh_str}, ct={ct_str}, ctt={ctt_str}, cggh={cggh_str}, cgghh={cgghh_str}, EFTcount={EFTcount_str}, usesmeft={usesmeft_str}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
+            logger.info(f'Parameters are: chhh={chhh_str}, ct={ct_str}, ctt={ctt_str}, cggh={cggh_str}, cgghh={cgghh_str}, EFTcount={EFTcount}, usesmeft={usesmeft_str}')
             try:
                 #import creategrid as cg
                 #cg.combinegrids(grid_file_name, chhh_str, ct_str, ctt_str, cggh_str, cgghh_str)
-                pythoncmd=f"import creategrid as cg; cg.combinegrids('{grid_file_name}', {chhh_str}, {ct_str}, {ctt_str}, {cggh_str}, {cgghh_str}, {EFTcount_str}, {lhapdfid_str}, {renfac_str})"
+                pythoncmd=f"import creategrid as cg; cg.combinegrids('{grid_file_name}', {chhh_str}, {ct_str}, {ctt_str}, {cggh_str}, {cgghh_str}, {EFTcount})"
                 os.system("python3 -c \""+pythoncmd+"\"")
             except RuntimeError:
                 logger.error('Impossible to use creategrid.py to create the Virt_full_*.grid file')
                 raise
-
-        # setting PYTHONPATH back to its original value
-        os.environ["PYTHONPATH"] = py_path_save
-        logger.debug(f'Setting PYTHONPATH back to:\n{py_path_save}')
 
         logger.info('Although the produced Virt_full_*.grid file now exists in the local directory, Powheg will later try to find it in all directories contained in $PYTHONPATH. This will produce several "not found" info messages which can safely be ignored.')
 

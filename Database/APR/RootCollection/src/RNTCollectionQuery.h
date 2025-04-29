@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTCOLLECTIONQUERY_H
 #define RNTCOLLECTIONQUERY_H
 
 #include "CoralBase/AttributeList.h"
+
+#include "AthenaBaseComps/AthMessaging.h"
 
 #include "CollectionBase/TokenList.h"
 #include "CollectionBase/ICollectionQuery.h"
@@ -23,11 +25,11 @@ namespace pool::RootCollection {
     *
     * An interface used to query an RNTuple collection.
     */
-   class RNTCollectionQuery : public ICollectionQuery
+   class RNTCollectionQuery : public ICollectionQuery, public AthMessaging
    {
    public:
       /// Constructor
-      RNTCollectionQuery( const pool::ICollectionDescription& description, RNTupleReader *reader );
+      RNTCollectionQuery( const pool::ICollectionDescription& description, ROOT::RNTupleReader *reader );
     
       /// Destructor
       virtual ~RNTCollectionQuery();
@@ -96,8 +98,8 @@ namespace pool::RootCollection {
       void                addToAttributeOutputList( const std::string& columnName );
         
         
-      const ICollectionDescription    &m_description;
-      RNTupleReader                  *m_reader {nullptr};   // owned by the Collection
+      const ICollectionDescription   &m_description;
+      ROOT::RNTupleReader            *m_reader {nullptr};   // owned by the Collection
 
       RNTCollectionCursor            *m_cursor {nullptr};
 

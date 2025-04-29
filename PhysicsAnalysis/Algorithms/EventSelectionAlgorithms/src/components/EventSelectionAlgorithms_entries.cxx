@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -15,7 +15,7 @@
 #include <EventSelectionAlgorithms/NObjectMassSelectorAlg.h>
 #include <EventSelectionAlgorithms/NLargeRJetMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h>
-#include <EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h>
+#include <EventSelectionAlgorithms/SumNLeptonPtSelectorAlg.h>
 #include <EventSelectionAlgorithms/JetNGhostSelectorAlg.h>
 #include <EventSelectionAlgorithms/RunNumberSelectorAlg.h>
 
@@ -30,6 +30,6 @@ DECLARE_COMPONENT (CP::NObjectPtSelectorAlg)
 DECLARE_COMPONENT (CP::NObjectMassSelectorAlg)
 DECLARE_COMPONENT (CP::NLargeRJetMassWindowSelectorAlg)
 DECLARE_COMPONENT (CP::DileptonOSSFInvariantMassWindowSelectorAlg)
-DECLARE_COMPONENT (CP::SumNElNMuPtSelectorAlg)
+DECLARE_COMPONENT (CP::SumNLeptonPtSelectorAlg)
 DECLARE_COMPONENT (CP::JetNGhostSelectorAlg)
 DECLARE_COMPONENT (CP::RunNumberSelectorAlg)

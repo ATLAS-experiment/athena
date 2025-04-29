@@ -54,21 +54,21 @@ class IdDictRange;
  */
 
 
-class IdDictFieldImplementation { 
+class IdDictFieldImplementation 
+{ 
 public: 
 
     typedef Identifier::value_type  value_type;
     typedef Identifier::size_type   size_type;
 
     typedef enum
-    // cppcheck-suppress syntaxError
     { 
         NBITS   = sizeof(value_type) * 8, // bits per byte
         MAX_BIT = (static_cast<value_type>(1) << (NBITS - 1)),
         ALL_BITS  = ~(static_cast<value_type>(0))
     } bit_defs; 
 
-    IdDictFieldImplementation() = default;
+    IdDictFieldImplementation();
 
     /// Identifier manipulation methods
     int         unpack        (Identifier id) const;  // access to field value
@@ -105,18 +105,35 @@ private:
     // Initialize derived fields
     void  initialize(); 
     
-    const IdDictRange*  m_range{}; 
+    const IdDictRange*  m_range; 
     Range::field        m_field; 
     Range::field        m_ored_field; 
-    size_type           m_bits{}; 
-    size_type           m_bits_offset{}; 
-    size_type           m_mask{}; 
-    value_type          m_zeroing_mask{}; 
-    size_type           m_shift{}; 
-    bool                m_decode_index{};
+    size_type           m_bits; 
+    size_type           m_bits_offset; 
+    size_type           m_mask; 
+    value_type          m_zeroing_mask; 
+    size_type           m_shift; 
+    bool                m_decode_index;
     
 }; 
  
+
+//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
+
+//-----------------------------------------------------------------
+inline IdDictFieldImplementation::IdDictFieldImplementation () 
+//-----------------------------------------------------------------
+    :
+    m_range(0), 
+    m_field(0), 
+    m_ored_field(0), 
+    m_bits(0), 
+    m_bits_offset(0), 
+    m_mask(0), 
+    m_zeroing_mask(0), 
+    m_shift(0), 
+    m_decode_index(0)
+{}
 
 
 /** 
@@ -127,8 +144,9 @@ private:
  **  from the compact 
  */
 //-----------------------------------------------------------------
-inline int 
-IdDictFieldImplementation::unpack (Identifier id) const{
+inline int IdDictFieldImplementation::unpack (Identifier id) const
+//-----------------------------------------------------------------
+{
     // Unpack field
     size_type index = id.extract(m_shift, m_mask);
     int field = index;
@@ -143,16 +161,18 @@ IdDictFieldImplementation::unpack (Identifier id) const{
  **  than simply 0 to N-1.
  */
 //-----------------------------------------------------------------
-inline Identifier::size_type   
-IdDictFieldImplementation::unpackToIndex (Identifier id) const{
+inline Identifier::size_type   IdDictFieldImplementation::unpackToIndex (Identifier id) const
+//-----------------------------------------------------------------
+{
     // Unpack field
     size_type index = id.extract(m_shift, m_mask);
     return (index);
 }
 
 //-----------------------------------------------------------------
-inline void 
-IdDictFieldImplementation::pack (int value, Identifier& id) const{
+inline void IdDictFieldImplementation::pack (int value, Identifier& id) const
+//-----------------------------------------------------------------
+{
     // Pack value into this field
     size_type index = (size_type)value;
     if (m_decode_index) index = m_ored_field.get_value_index (value); 
@@ -160,47 +180,62 @@ IdDictFieldImplementation::pack (int value, Identifier& id) const{
 }
 
 //-----------------------------------------------------------------
-inline void 
-IdDictFieldImplementation::reset (Identifier& id) const{
+inline void IdDictFieldImplementation::reset (Identifier& id) const
+//-----------------------------------------------------------------
+{
     // Reset field to 0
     id &= m_zeroing_mask;
 }
 
 //-----------------------------------------------------------------
-inline const Range::field&  
-IdDictFieldImplementation::field() const { return (m_field); } 
+inline const Range::field&  IdDictFieldImplementation::field() const
+//-----------------------------------------------------------------
+{ return (m_field); } 
 
 //-----------------------------------------------------------------
-inline const Range::field&  
-IdDictFieldImplementation::ored_field() const { return (m_ored_field); } 
-
+inline const Range::field&  IdDictFieldImplementation::ored_field() const
 //-----------------------------------------------------------------
-inline IdDictFieldImplementation::size_type     
-IdDictFieldImplementation::bits() const{ return (m_bits); } 
-
-//-----------------------------------------------------------------
-inline IdDictFieldImplementation::size_type     
-IdDictFieldImplementation::bits_offset() const{ return (m_bits_offset); } 
+{ return (m_ored_field); } 
 
 //-----------------------------------------------------------------
 inline IdDictFieldImplementation::size_type     
-IdDictFieldImplementation::mask() const{ return (m_mask); } 
+IdDictFieldImplementation::bits() const
+//-----------------------------------------------------------------
+{ return (m_bits); } 
+
+//-----------------------------------------------------------------
+inline IdDictFieldImplementation::size_type     
+IdDictFieldImplementation::bits_offset() const
+//-----------------------------------------------------------------
+{ return (m_bits_offset); } 
+
+//-----------------------------------------------------------------
+inline IdDictFieldImplementation::size_type     
+IdDictFieldImplementation::mask() const
+//-----------------------------------------------------------------
+{ return (m_mask); } 
 
 //-----------------------------------------------------------------
 inline IdDictFieldImplementation::value_type    
-IdDictFieldImplementation::zeroing_mask() const{ return (m_zeroing_mask); } 
+IdDictFieldImplementation::zeroing_mask() const
+//-----------------------------------------------------------------
+{ return (m_zeroing_mask); } 
 
 //-----------------------------------------------------------------
 inline IdDictFieldImplementation::size_type     
-IdDictFieldImplementation::shift() const { return (m_shift); } 
+IdDictFieldImplementation::shift() const
+//-----------------------------------------------------------------
+{ return (m_shift); } 
 
 //-----------------------------------------------------------------
-inline bool          
-IdDictFieldImplementation::decode_index() const { return (m_decode_index); }
+inline bool          IdDictFieldImplementation::decode_index() const
+//-----------------------------------------------------------------
+{ return (m_decode_index); }
 
 //-----------------------------------------------------------------
-inline void  
-IdDictFieldImplementation::initialize(){
+inline void  IdDictFieldImplementation::initialize()
+//-----------------------------------------------------------------
+{
     // Initialize masks and shift 
     m_mask = (static_cast<size_type>(1) << m_bits) - 1;
     m_shift = IdDictFieldImplementation::NBITS - m_bits - m_bits_offset;
@@ -213,15 +248,17 @@ IdDictFieldImplementation::initialize(){
 }
 
 //-----------------------------------------------------------------
-inline void  
-IdDictFieldImplementation::set_field (const Range::field&  field){
+inline void  IdDictFieldImplementation::set_field        (const Range::field&  field)
+//-----------------------------------------------------------------
+{
     m_field = field;
 }
 
 
 //-----------------------------------------------------------------
-inline void  
-IdDictFieldImplementation::set_ored_field   (const Range::field& ored_field){
+inline void  IdDictFieldImplementation::set_ored_field   (const Range::field& ored_field)
+//-----------------------------------------------------------------
+{
     // Set ored field and bits, and init
     m_ored_field = ored_field;
     m_bits       = m_ored_field.get_bits();
@@ -229,16 +266,18 @@ IdDictFieldImplementation::set_ored_field   (const Range::field& ored_field){
 }
 
 //-----------------------------------------------------------------
-inline void  
-IdDictFieldImplementation::set_bits_offset  (size_type bits_offset){
+inline void  IdDictFieldImplementation::set_bits_offset  (size_type bits_offset)
+//-----------------------------------------------------------------
+{
     // Set offset and init
     m_bits_offset = bits_offset;
     initialize();
 }
 
 //-----------------------------------------------------------------
-inline void  
-IdDictFieldImplementation::set_bits(size_type bits, size_type bits_offset){
+inline void  IdDictFieldImplementation::set_bits         (size_type bits, size_type bits_offset)
+//-----------------------------------------------------------------
+{
     // Set bits, offset and init
     m_bits        = bits;
     m_bits_offset = bits_offset;
@@ -246,13 +285,14 @@ IdDictFieldImplementation::set_bits(size_type bits, size_type bits_offset){
 }
 
 //-----------------------------------------------------------------
-inline void  
-IdDictFieldImplementation::set_decode_index (bool decode_index){
+inline void  IdDictFieldImplementation::set_decode_index (bool decode_index)
+//-----------------------------------------------------------------
+{
     m_decode_index = decode_index;
 }
 
-inline void  
-IdDictFieldImplementation::optimize         (void){
+inline void  IdDictFieldImplementation::optimize         (void)
+{
     m_ored_field.optimize(); // optimize for decoding
 }
 

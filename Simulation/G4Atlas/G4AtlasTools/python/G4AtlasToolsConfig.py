@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
@@ -84,6 +84,56 @@ def G4CaloTransportToolCfg(flags, name='G4CaloTransportTool', **kwargs):
         kwargs.setdefault('MaxSteps', 5000)
     
     result.setPrivateTools(CompFactory.G4CaloTransportTool(name, **kwargs))
+    return result
+
+def PunchThroughG4ClassifierCfg(flags, name="PunchThroughG4Classifier", **kwargs):
+    # declare component accumulator
+    result = ComponentAccumulator()
+    # other arguments
+    kwargs.setdefault("ScalerConfigFileName"        , "FastCaloSim/MC23/TFCSparam_mpt_classScaler_v04.xml" )
+    kwargs.setdefault("NetworkConfigFileName"       , "FastCaloSim/MC23/TFCSparam_mpt_classNet_v04.json" )
+    kwargs.setdefault("CalibratorConfigFileName"    , "FastCaloSim/MC23/TFCSparam_mpt_classCalib_v04.xml")
+    # set as private tool
+    result.setPrivateTools(CompFactory.PunchThroughG4Classifier(name, **kwargs))
+    return result
+
+def PunchThroughG4ToolCfg(flags, name='PunchThroughG4Tool', **kwargs):
+    # get the envelope config
+    from SubDetectorEnvelopes.SubDetectorEnvelopesConfig import EnvelopeDefSvcCfg
+    # declare component accumulator
+    result = ComponentAccumulator()
+    # other arguments
+    kwargs.setdefault("FilenameLookupTable"     , "FastCaloSim/MC23/TFCSparam_mpt_v07.root")
+    kwargs.setdefault("FilenameInverseCdf"      , "FastCaloSim/MC23/TFCSparam_mpt_inverseCdf_v07.xml")
+    kwargs.setdefault("FilenameInversePca"      , "FastCaloSim/MC23/TFCSparam_mpt_inversePca_v07.xml")
+    kwargs.setdefault("EnergyFactor"            , [ 0.98,  0.831, 0.896, 0.652, 0.717, 1., 0.877, 0.858, 0.919 ]    )
+    kwargs.setdefault("DoAntiParticles"         , [ 0,   1,    0,     1,     1,     0,   0,    0,    0 ]    )
+    kwargs.setdefault("PunchThroughInitiators"  , [ 211, 321, 311, 310, 130, 2212, 2112]        )
+    kwargs.setdefault("InitiatorsMinEnergy"     , [ 65536, 65536, 65536, 65536, 65536, 65536, 65536]                                         )
+    kwargs.setdefault("InitiatorsEtaRange"      , [ -3.2,   3.2 ]                               )
+    kwargs.setdefault("PunchThroughParticles"   , [ 2212,   211,    22,     11,     13,     2112,   321,    310,    130 ]    )
+    kwargs.setdefault("CorrelatedParticle"      , []    )
+    kwargs.setdefault("FullCorrelationEnergy"   , [ 100000., 100000., 100000., 100000.,      0., 100000., 100000., 100000., 100000.]    )
+    kwargs.setdefault("MinEnergy"               , [   938.3,   135.6,     50.,     50.,   105.7,   939.6, 493.7,   497.6,   497.6 ]    )
+    kwargs.setdefault("MaxNumParticles"         , [      -1,      -1,      -1,      -1,      -1,    -1,     -1,     -1,     -1 ]    )
+    kwargs.setdefault("EnvelopeDefSvc",         result.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)).name)
+    kwargs.setdefault("BeamPipeRadius", 500.)
+    # set as private tool
+    result.setPrivateTools(CompFactory.PunchThroughG4Tool(name, **kwargs))
+    return result
+    
+def PunchThroughSimWrapperCfg(flags, name='PunchThroughSimWrapper', **kwargs):
+    result = ComponentAccumulator()
+
+    # Set the PunchThroughG4Classifier
+    if "PunchThroughG4Classifier" not in kwargs:
+        kwargs.setdefault("PunchThroughG4Classifier", result.addPublicTool(result.popToolsAndMerge(PunchThroughG4ClassifierCfg(flags))))
+    
+    # Set the PunchThroughG4Tool
+    if "PunchThroughG4Tool" not in kwargs:
+        kwargs.setdefault("PunchThroughG4Tool", result.addPublicTool(result.popToolsAndMerge(PunchThroughG4ToolCfg(flags))))
+
+    result.setPrivateTools(CompFactory.PunchThroughSimWrapper(name, **kwargs))
     return result
 
 def FwdSensitiveDetectorListCfg(flags):
@@ -254,34 +304,75 @@ def SimHitContainerListCfg(flags):
             from MuonG4SD.MuonG4SDConfig import SimHitContainerListCfg
             writtenContainers += SimHitContainerListCfg(flags)
     if flags.Detector.GeometryLAr:
-        if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('CALO', True)) or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             writtenContainers += [("LArHitContainer", "LArHitEMB_G4")]
             writtenContainers += [("LArHitContainer", "LArHitEMEC_G4")]
             writtenContainers += [("LArHitContainer", "LArHitFCAL_G4")]
             writtenContainers += [("LArHitContainer", "LArHitHEC_G4")]
+            if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+                writtenContainers += [("LArHitContainer" , "LArHitHEC_FastCaloSim")]
+                writtenContainers += [("LArHitContainer" , "LArHitFCAL_FastCaloSim")]
+                writtenContainers += [("LArHitContainer" , "LArHitEMEC_FastCaloSim")]
+                writtenContainers += [("LArHitContainer" , "LArHitEMB_FastCaloSim")]
         else:
             writtenContainers += [("LArHitContainer", "LArHitEMB")]
             writtenContainers += [("LArHitContainer", "LArHitEMEC")]
             writtenContainers += [("LArHitContainer", "LArHitFCAL")]
             writtenContainers += [("LArHitContainer", "LArHitHEC")]
     if flags.Detector.GeometryTile:
-        if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('CALO', True)) or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             writtenContainers += [("TileHitVector", "MBTSHits_G4")]
             writtenContainers += [("TileHitVector", "TileHitVec_G4")]
+            if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+                writtenContainers += [("TileHitVector" , "TileHitVec_FastCaloSim")]
+                writtenContainers += [("TileHitVector" , "MBTSHits_FastCaloSim")]
         else:
             writtenContainers += [("TileHitVector", "MBTSHits")]
             writtenContainers += [("TileHitVector", "TileHitVec")]
     if flags.Detector.GeometryTRT:
-         writtenContainers += [("TRTUncompressedHitCollection", "TRTUncompressedHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
+            writtenContainers += [("TRTUncompressedHitCollection", "TRTUncompressedHits_G4")]
+        else:
+            writtenContainers += [("TRTUncompressedHitCollection", "TRTUncompressedHits")]
     if flags.Detector.EnableBCM:
-       writtenContainers += [("SiHitCollection", "BCMHits")]
-       writtenContainers += [("SiHitCollection", "BLMHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
+            writtenContainers += [("SiHitCollection", "BCMHits_G4")]
+            writtenContainers += [("SiHitCollection", "BLMHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "BCMHits")]
+            writtenContainers += [("SiHitCollection", "BLMHits")]
     if flags.Detector.EnablePixel:
-       writtenContainers += [("SiHitCollection", "PixelHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
+            writtenContainers += [("SiHitCollection", "PixelHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "PixelHits")]
     if flags.Detector.EnableSCT:
-       writtenContainers += [("SiHitCollection", "SCT_Hits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
+           writtenContainers += [("SiHitCollection", "SCT_Hits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "SCT_Hits")]
+    if flags.Detector.EnableITkPixel:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+            writtenContainers += [("SiHitCollection", "ITkPixelHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "ITkPixelHits")]
+    if flags.Detector.EnableITkStrip:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+           writtenContainers += [("SiHitCollection", "ITkStripHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "ITkStripHits")]
+    if flags.Detector.EnablePLR:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+            writtenContainers += [("SiHitCollection", "PLR_Hits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "PLR_Hits")]
+    if flags.Detector.EnableHGTD:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+            writtenContainers += [("SiHitCollection", "HGTDHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "HGTDHits")]
     from SimulationConfig.SimEnums import CalibrationRun
-    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
         # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
         writtenContainers += [
             ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ),
@@ -290,6 +381,7 @@ def SimHitContainerListCfg(flags):
         ]
 
     return writtenContainers
+
 
 def InputContainerListCfg(flags):
     dependencies = []

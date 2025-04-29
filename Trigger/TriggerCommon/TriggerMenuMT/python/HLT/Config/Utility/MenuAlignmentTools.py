@@ -10,34 +10,16 @@ log = logging.getLogger( __name__ )
 # it needs to change in ALL of them
 # They should all group using the same dictionary
 
-# The ordering here is VERY important - a set made from the keys will define the order the
-# chains will run in! 
-# have to use OrderedDict because ordering is not preserved in a standard dictionary!
-the_signature_grouping = OrderedDict([
-    ('Electron', 'AllTag'),
-    ('Photon' , 'AllTag'),
-    ('Muon' , 'AllTag'),
-    ('Bphysics', 'AllTag'),
-    ('Tau','AllTag'),
-    ('Jet','JetMET'),
-    ('MET','JetMET'),
-    ('UnconventionalTracking','JetMET'),
-    ('Bjet','JetMET'),
-    ('MinBias', 'MinBias'),
-    ('Beamspot', 'Beamspot'),
-    ('MuonnoL1', 'MuonnoL1'),
-    ('Electronprobe', 'AllProbe'),
-    ('Photonprobe' , 'AllProbe'),
-    ('Tauprobe', 'AllProbe'),
-    ('Muonprobe' , 'AllProbe'),
-    ('HeavyIon' , 'MinBias'),
-])
 
+# this defines the order of the signatures groups to align. The map to the signatures is in the TriggerMenuMT.HLT.Menu.SignatureDicts
+grouping_order = ['AllTag', 'JetMET', 'MinBias', 'Beamspot', 'MuonnoL1', 'AllProbe']
+
+from TriggerMenuMT.HLT.Menu.SignatureDicts import getSignatureGroupingDict
+the_signature_grouping = getSignatureGroupingDict()
 
 def get_alignment_group_ordering():
-    seen = set()
-    return [v for v in the_signature_grouping.values() if not (v in seen or seen.add(v))]
-
+    return grouping_order 
+    
 def get_alignment_group_from_pattern(signature, extra):
 
     signature_for_alignment = signature + extra

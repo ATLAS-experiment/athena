@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MuonDetectorFactoryLite.h"
@@ -63,24 +63,24 @@ namespace MuonGM {
 
     // Iterate using iterator in for loop
     for (const auto& [key, pV] : mapFPV) {
-      int /*index1=key[3]-'0',*/ eta=key[5]-'0', ml=key[7]-'0', phi=key[12]-'0';
+      if (key.starts_with ("sMD") || key.starts_with ("sTG")) {
+        int /*index1=key[3]-'0',*/ eta=key[5]-'0', ml=key[7]-'0', phi=key[12]-'0';
       
-      char AC=key[13];
-      int ec = AC=='C' ? -1 : 1;
-      std::string vName = pV->getLogVol()->getName();
-      if (key.substr(0,3)=="sMD") {
-	      std::string sName = vName.substr(4,4);
-	      std::unique_ptr<MuonGM::MMReadoutElement> re = std::make_unique<MuonGM::MMReadoutElement>(pV, sName, ec*eta,phi,ml,m_manager,nullptr);
-	      re->initDesign();
-	      re->fillCache();
-	      m_manager->addMMReadoutElement(std::move(re));
-      }
-      else if (key.substr(0,3)=="sTG") {
-	      std::string sName = vName.substr(7,4);
-	      std::unique_ptr<sTgcReadoutElement> re = std::make_unique<sTgcReadoutElement>(pV, sName, ec*eta, phi, ml, m_manager);
-	      re->initDesign(2.6);
-	      re->fillCache();
-	      m_manager->addsTgcReadoutElement(std::move(re));
+        char AC=key[13];
+        int ec = AC=='C' ? -1 : 1;
+        std::string vName = pV->getLogVol()->getName();
+        if (key.starts_with("sMD")) {
+          std::string sName = vName.substr(4,4);
+          std::unique_ptr<MuonGM::MMReadoutElement> re = std::make_unique<MuonGM::MMReadoutElement>(pV, sName, ec*eta,phi,ml,m_manager,nullptr);
+          re->initDesign();
+          m_manager->addMMReadoutElement(std::move(re));
+        }
+        else if (key.starts_with("sTG")) {
+          std::string sName = vName.substr(7,4);
+          std::unique_ptr<sTgcReadoutElement> re = std::make_unique<sTgcReadoutElement>(pV, sName, ec*eta, phi, ml, m_manager);
+          re->initDesign(2.6);
+          m_manager->addsTgcReadoutElement(std::move(re));
+        }
       }
     }
 

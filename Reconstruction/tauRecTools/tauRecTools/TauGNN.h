@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUGNN_H
@@ -10,7 +10,7 @@
 
 #include "AsgMessaging/AsgMessaging.h"
 
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagInference/SaltModel.h"
 
 #include <memory>
 #include <string>
@@ -20,12 +20,12 @@ namespace TauGNNUtils {
     class GNNVarCalc;
 }
 
-namespace FlavorTagDiscriminants{
-    class OnnxUtil;
+namespace FlavorTagInference{
+    class SaltModel;
 }
 
 /**
- * @brief Wrapper around ONNXUtil to compute the output score of a model
+ * @brief Wrapper around SaltModel to compute the output score of a model
  *
  *   Configures the network and computes the network outputs given the input
  *   objects. Retrieval of input variables is handled internally.
@@ -43,12 +43,12 @@ public:
         std::string output_node_tau;
         std::string output_node_jet;
     };
-    std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil;
+    std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel;
 public:
     TauGNN(const std::string &nnFile, const Config &config);
     ~TauGNN();
 
-    // Output the OnnxUtil tuple 
+    // Output the SaltModel tuple 
     std::tuple<
         std::map<std::string, float>,
         std::map<std::string, std::vector<char>>,
@@ -70,10 +70,10 @@ public:
     }
 
     //Make the output config transparent to external tools
-    FlavorTagDiscriminants::OnnxUtil::OutputConfig gnn_output_config;
+    FlavorTagInference::SaltModel::OutputConfig gnn_output_config;
 
 private:
-    using Inputs = FlavorTagDiscriminants::Inputs;
+    using Inputs = FlavorTagInference::Inputs;
     // Abbreviations for lwtnn
     using VariableMap = std::map<std::string, double>;
     using VectorMap = std::map<std::string, std::vector<double>>;

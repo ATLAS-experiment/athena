@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
@@ -103,7 +103,10 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
 
   // This was removed in https://github.com/acts-project/acts/pull/3029
   // To be reimplemented using new geometry model instead of explicit TrackingVolume content
+  (void)gctx;  // suppress compiler warning
   throw std::runtime_error{"Calo building for ACTS currently disabled"};
+
+  /***** TODO START *****
   std::shared_ptr<Acts::TrackingVolume> calo;
       // = Acts::TrackingVolume::create(Acts::Transform3::Identity(),
                                      // caloVolBounds,
@@ -267,7 +270,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   std::vector<float> posNegBoundaries
    = {float(caloRMin), float(caloRMax)};
   auto binUtilityPosNeg = std::make_unique<const Acts::BinUtility>(posNegBoundaries,
-      Acts::open, Acts::BinningValue::binR);
+      Acts::open, Acts::AxisDirection::AxisR);
 
   auto tVolArrPosNeg
       = std::make_shared<const Acts::BinnedArrayXD<Acts::TrackingVolumePtr>>(
@@ -309,7 +312,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   auto binUtilityCtr
    = std::make_unique<const Acts::BinUtility>(
       ctrBoundaries,
-      Acts::open, Acts::BinningValue::binR);
+      Acts::open, Acts::AxisDirection::AxisR);
 
   auto tVolArrCtr
       = std::make_shared<const Acts::BinnedArrayXD<Acts::TrackingVolumePtr>>(
@@ -335,7 +338,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
       caloRMin, caloRMax, caloDZ1),
       nullptr, nullptr,
       tvac.trackingVolumeArray(gctx, {negContainer, ctrContainer, posContainer},
-      Acts::BinningValue::binZ),
+      Acts::AxisDirection::AxisZ),
       Acts::MutableTrackingVolumeVector{}
       );
 
@@ -343,6 +346,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   ATH_MSG_VERBOSE("Built main container: " << *mainContainer);
 
   return mainContainer;
+  ***** TODO END *****/
 }
 
 std::shared_ptr<Acts::CutoutCylinderVolumeBounds>

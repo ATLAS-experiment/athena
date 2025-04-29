@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -11,12 +11,15 @@
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/IClassIDSvc.h"
+#include "GaudiKernel/IIncidentSvc.h"
+#include "GaudiKernel/ConcurrencyFlags.h"
 #include "AthenaKernel/errorcheck.h"
 #include "EventInfo/EventInfo.h"
 #include "EventInfo/EventID.h"
 #include "EventInfo/EventType.h"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "AthenaInterprocess/Incidents.h"
 #include "IOVDbDataModel/IOVMetaDataContainer.h"
 #include "IOVDbDataModel/IOVPayloadContainer.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -49,6 +52,12 @@ StatusCode CountHepMC::initialize()
     if(!m_mcWeightsKey.empty()) ATH_CHECK(m_mcWeightsKey.initialize());
   }
 
+  if(Gaudi::Concurrency::ConcurrencyFlags::numProcs()>0) {
+    ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc",name());
+    ATH_CHECK(incidentSvc.retrieve());
+    incidentSvc->addListener(this, AthenaInterprocess::UpdateAfterFork::type());
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -57,7 +66,7 @@ StatusCode CountHepMC::execute() {
   /// @todo Replace the old event ?
   m_nPass++;
   ATH_MSG_DEBUG("Current count = " << m_nPass);
-  ATH_MSG_INFO("Options for HepMC event number, EvtID event number, EvtID run number = " << m_corHepMC << m_corEvtID << m_corRunNumber );
+  ATH_MSG_DEBUG("Options for HepMC event number, EvtID event number, EvtID run number = " << m_corHepMC << ", " << m_corEvtID << ", " << m_corRunNumber );
   // Fix the event number
   long long int newnum = m_nPass + m_firstEv - 1;
   if (newnum<=0){
@@ -107,6 +116,12 @@ StatusCode CountHepMC::execute() {
 
     outputEvtInfo = outputEvtInfoHandle.ptr();
     *outputEvtInfo = *inputEvtInfoHandle;
+
+    // This is sometimes marked as a decoration in the source, meaning
+    // it won't get copied by the assignment above.  Make sure it
+    // gets copied.
+    outputEvtInfo->setMCEventWeights (inputEvtInfoHandle->mcEventWeights());
+
     inpRunNumber = inputEvtInfoHandle->runNumber();
     if(!m_mcWeightsKey.empty()) {
       SG::ReadDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey);
@@ -260,12 +275,19 @@ StatusCode CountHepMC::execute() {
 
   if (m_nPass == m_nCount) {
     ATH_MSG_INFO("Stopping the event processing...." << m_nPass << "/" << m_nCount);
-    SmartIF<IEventProcessor> apm(serviceLocator()->service("AthenaEventLoopMgr", /*createIf*/false));
-    if (apm) {
+    // Try the MP ELM first
+    SmartIF<IEventProcessor> apm(serviceLocator()->service("AthMpEvtLoopMgr", /*createIf*/false));
+    if(apm) {
       ATH_CHECK(apm->stopRun());
     }
     else {
-      ATH_MSG_WARNING("No EventLoop Manager found ");
+      apm = serviceLocator()->service("AthenaEventLoopMgr", /*createIf*/false);
+      if (apm) {
+        ATH_CHECK(apm->stopRun());
+      }
+      else {
+        ATH_MSG_WARNING("No EventLoop Manager found ");
+      }
     }
   }
 
@@ -276,6 +298,23 @@ StatusCode CountHepMC::execute() {
 StatusCode CountHepMC::finalize() {
   ATH_MSG_INFO("Events passing all checks and written = " << m_nPass);
   return StatusCode::SUCCESS;
+}
+
+void CountHepMC::handle(const Incident& inc) {
+  using AfterForkInc = AthenaInterprocess::UpdateAfterFork;
+  if(inc.type()==AfterForkInc::type()) {
+    int nProcs= Gaudi::Concurrency::ConcurrencyFlags::numProcs();
+    const AfterForkInc* afInc = dynamic_cast<const AfterForkInc*>(&inc);
+    if(afInc) {
+      int rem = m_nCount%nProcs;
+      m_nCount = m_nCount/nProcs
+	+ (afInc->workerID() <= rem-1 ? 1 : 0);
+    }
+    else {
+      ATH_MSG_ERROR("Failed to dyn-cast the incident to UpdateAfterFork!");
+      throw std::runtime_error("Wrong incident type handled by CountHepMC");
+    }
+  }
 }
 
 #endif

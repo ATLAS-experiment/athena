@@ -1,192 +1,137 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <list>
-#include <functional>
+#define BOOST_TEST_MODULE HistogramFillerVec1DTestSuite
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 #include <memory>
 
-#include "TestTools/initGaudi.h"
-#include "TestTools/expect.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "AthenaKernel/getMessageSvc.h"
-
-#include "TH1.h"
+#include "TH1D.h"
 
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
-#include "../src/HistogramFiller/VecHistogramFiller1D.h"
+#include "TestTools/initGaudi.h"
 
+#include "../src/HistogramFiller/VecHistogramFiller1D.h"
 #include "mocks/MockHistogramProvider.h"
 
-using namespace std;
 using namespace Monitored;
 
-#define REGISTER_TEST_CASE(TEST_CASE_NAME, KVECUO) registerTestCase(&HistogramFillerVec1DTestSuite::TEST_CASE_NAME, #TEST_CASE_NAME, KVECUO)
 
-class HistogramFillerVec1DTestSuite {
-  // ==================== All registered test cases ====================
-  private:
-    list<function<void(void)>> registeredTestCases() {
-      return {
-        REGISTER_TEST_CASE(test_fillWithVector, false),
-        REGISTER_TEST_CASE(test_fillWithShortVector, false),
-        REGISTER_TEST_CASE(test_fillWithVectorUO, true),
-        REGISTER_TEST_CASE(test_fillWithShortVectorUO, true)
-      };
+/// Test fixture (run before each test)
+struct TestFixture {
+  TestFixture(bool kVecUO = false) {
+    m_histogramDef.type = "TH1F";
+    m_histogramDef.xbins = 1;
+    if (kVecUO) {
+      m_histogramDef.kVecUO = true;
+    } else {
+      m_histogramDef.kVec = true;
     }
-
-  // ==================== Test code ====================
-  private:
-    void beforeEach(bool kVecUO) {
-        m_histogramDef.type = "TH1F";
-        m_histogramDef.xbins = 1;
-        if (kVecUO) {
-            m_histogramDef.kVecUO = true;
-        } else {
-            m_histogramDef.kVec = true;
-        }
-        m_histogramProvider.reset(new MockHistogramProvider());
-        m_histogram.reset(new TH1D("MockHistogram", "Mock Histogram", 5, 0.0, 5.0));
-        m_testObj.reset(new VecHistogramFiller1D(m_histogramDef, m_histogramProvider));
-
-        m_histogramProvider->mock_histogram = [this]() { return m_histogram.get(); };
-    }
-
-    void afterEach() {
-    }
-
-    void test_fillWithVector() {
-
-      using Coll = vector<double>;
-      Coll values({1., 2., 3., 4., 5.});
-      auto var = Monitored::Collection("values", values);
-
-      HistogramFiller::VariablesPack vars({&var});
-
-      VALUE(m_histogram->GetXaxis()->GetNbins()) EXPECTED(5);
-      VALUE(m_histogram->GetXaxis()->GetXmin()) EXPECTED(0.0);
-      VALUE(m_histogram->GetXaxis()->GetXmax()) EXPECTED(5.0);
-
-      m_testObj->fill(vars);
-
-      for (unsigned i: {0, 6}) {
-          VALUE(m_histogram->GetBinContent(i)) EXPECTED(0.0);
-      }
-      for (unsigned i = 0; i != values.size(); ++ i) {
-        VALUE(m_histogram->GetBinContent(i+1)) EXPECTED(values[i]);
-      }
-    }
-
-    void test_fillWithShortVector() {
-
-      using Coll = vector<double>;
-      Coll values({1., 2., 3.});
-      auto var = Monitored::Collection("values", values);
-
-      HistogramFiller::VariablesPack vars({&var});
-
-      VALUE(m_histogram->GetXaxis()->GetNbins()) EXPECTED(5);
-      VALUE(m_histogram->GetXaxis()->GetXmin()) EXPECTED(0.0);
-      VALUE(m_histogram->GetXaxis()->GetXmax()) EXPECTED(5.0);
-
-      unsigned entriesAdded = m_testObj->fill(vars);
-      VALUE(entriesAdded) EXPECTED(0);
-
-      for (unsigned i = 0; i != values.size(); ++ i) {
-        VALUE(m_histogram->GetBinContent(i+1)) EXPECTED(0);
-      }
-    }
-
-    void test_fillWithVectorUO() {
-
-      using Coll = vector<double>;
-      Coll values({1., 2., 3., 4., 5., 6., 7.});
-      auto var = Monitored::Collection("values", values);
-
-      HistogramFiller::VariablesPack vars({&var});
-
-      VALUE(m_histogram->GetXaxis()->GetNbins()) EXPECTED(5);
-      VALUE(m_histogram->GetXaxis()->GetXmin()) EXPECTED(0.0);
-      VALUE(m_histogram->GetXaxis()->GetXmax()) EXPECTED(5.0);
-
-      m_testObj->fill(vars);
-
-      for (unsigned i = 0; i != values.size(); ++ i) {
-        VALUE(m_histogram->GetBinContent(i)) EXPECTED(values[i]);
-      }
-    }
-
-    void test_fillWithShortVectorUO() {
-
-      using Coll = vector<double>;
-      Coll values({1., 1., 2., 3., 4., 5., 12.});
-      auto var = Monitored::Collection("values", values);
-
-      HistogramFiller::VariablesPack vars({&var});
-
-      VALUE(m_histogram->GetXaxis()->GetNbins()) EXPECTED(5);
-      VALUE(m_histogram->GetXaxis()->GetXmin()) EXPECTED(0.0);
-      VALUE(m_histogram->GetXaxis()->GetXmax()) EXPECTED(5.0);
-
-      m_testObj->fill(vars);
-      // underflow
-      VALUE(m_histogram->GetBinContent(0)) EXPECTED(1.0);
-      // overflow
-      VALUE(m_histogram->GetBinContent(7)) EXPECTED(12.0);
-
-      for (unsigned i = 0; i != values.size(); ++ i) {
-        VALUE(m_histogram->GetBinContent(i)) EXPECTED(values[i]);
-      }
-    }
-
-  // ==================== Helper methods ====================
-  private:
-
-  // ==================== Initialization & run ====================
-  public:
-    HistogramFillerVec1DTestSuite()
-      : m_log(Athena::getMessageSvc(), "HistogramFillerVec1DTestSuite") {
-    }
-
-    void run() {
-      for (function<void(void)> testCase : registeredTestCases()) {
-        testCase();
-      }
-    }
-
-  // ==================== Test case registration ====================
-  private:
-    typedef void (HistogramFillerVec1DTestSuite::*TestCase)(void);
-
-    function<void(void)> registerTestCase(TestCase testCase, const string& testCaseName, bool kVecUO) {
-      return [this, testCase, testCaseName, kVecUO]() {
-        m_log << MSG::INFO << "Current test case: " << testCaseName << endmsg;
-        beforeEach(kVecUO);
-        invoke(testCase, this);
-        afterEach();
-      };
-    }
-
-  // ==================== Properties ====================
-  private:
-    MsgStream m_log;
-
-    HistogramDef m_histogramDef;
-    shared_ptr<MockHistogramProvider> m_histogramProvider;
-    shared_ptr<TH1D> m_histogram;
-
-    shared_ptr<VecHistogramFiller1D> m_testObj;
-};
-
-int main() {
-  ISvcLocator* pSvcLoc;
-
-  if (!Athena_test::initGaudi("GenericMonMinimal.txt", pSvcLoc)) {
-    throw runtime_error("This test can not be run: GenericMonMinimal.txt is missing");
+    m_histogramProvider.reset(new MockHistogramProvider());
+    m_histogram.reset(new TH1D("MockHistogram", "Mock Histogram", 5, 0.0, 5.0));
+    m_testObj.reset(new VecHistogramFiller1D(m_histogramDef, m_histogramProvider));
+    m_histogramProvider->mock_histogram = [this]() { return m_histogram.get(); };
   }
 
-  HistogramFillerVec1DTestSuite().run();
+  HistogramDef m_histogramDef;
+  std::shared_ptr<MockHistogramProvider> m_histogramProvider;
+  std::shared_ptr<TH1D> m_histogram;
+  std::shared_ptr<VecHistogramFiller1D> m_testObj;
+};
 
-  return 0;
+struct TestFixtureVecUO : TestFixture {
+  TestFixtureVecUO() : TestFixture(true) {}
+};
+
+
+// Create test suite with global fixture
+BOOST_AUTO_TEST_SUITE( HistogramFillerVec1DTestSuite,
+                       * boost::unit_test::fixture<Athena_test::InitGaudi>(std::string("GenericMonMinimal.txt")) )
+
+
+BOOST_FIXTURE_TEST_CASE( test_fillWithVector, TestFixture ) {
+
+  using Coll = std::vector<double>;
+  Coll values({1., 2., 3., 4., 5.});
+  auto var = Monitored::Collection("values", values);
+
+  HistogramFiller::VariablesPack vars({&var});
+
+  BOOST_TEST( m_histogram->GetXaxis()->GetNbins() == 5 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmin() == 0.0 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmax() == 5.0 );
+
+  m_testObj->fill(vars);
+
+  for (unsigned i: {0, 6}) {
+    BOOST_TEST( m_histogram->GetBinContent(i) == 0.0 );
+  }
+  for (unsigned i = 0; i != values.size(); ++ i) {
+    BOOST_TEST( m_histogram->GetBinContent(i+1) == values[i] );
+  }
 }
+
+BOOST_FIXTURE_TEST_CASE( test_fillWithShortVector, TestFixture ) {
+
+  using Coll = std::vector<double>;
+  Coll values({1., 2., 3.});
+  auto var = Monitored::Collection("values", values);
+
+  HistogramFiller::VariablesPack vars({&var});
+
+  BOOST_TEST( m_histogram->GetXaxis()->GetNbins() == 5 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmin() == 0.0 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmax() == 5.0 );
+
+  unsigned entriesAdded = m_testObj->fill(vars);
+  BOOST_TEST( entriesAdded == 0 );
+
+  for (unsigned i = 0; i != values.size(); ++ i) {
+    BOOST_TEST( m_histogram->GetBinContent(i+1) == 0 );
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE( test_fillWithVectorUO, TestFixtureVecUO ) {
+
+  using Coll = std::vector<double>;
+  Coll values({1., 2., 3., 4., 5., 6., 7.});
+  auto var = Monitored::Collection("values", values);
+
+  HistogramFiller::VariablesPack vars({&var});
+
+  BOOST_TEST( m_histogram->GetXaxis()->GetNbins() == 5 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmin() == 0.0 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmax() == 5.0 );
+
+  m_testObj->fill(vars);
+
+  for (unsigned i = 0; i != values.size(); ++ i) {
+    BOOST_TEST( m_histogram->GetBinContent(i) == values[i] );
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE( test_fillWithShortVectorUO, TestFixtureVecUO ) {
+
+  using Coll = std::vector<double>;
+  Coll values({1., 1., 2., 3., 4., 5., 12.});
+  auto var = Monitored::Collection("values", values);
+
+  HistogramFiller::VariablesPack vars({&var});
+
+  BOOST_TEST( m_histogram->GetXaxis()->GetNbins() == 5 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmin() == 0.0 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmax() == 5.0 );
+
+  m_testObj->fill(vars);
+  // underflow
+  BOOST_TEST( m_histogram->GetBinContent(0) == 1.0 );
+  // overflow
+  BOOST_TEST( m_histogram->GetBinContent(7) == 12.0 );
+
+  for (unsigned i = 0; i != values.size(); ++ i) {
+    BOOST_TEST( m_histogram->GetBinContent(i) == values[i] );
+  }
+}
+
+BOOST_AUTO_TEST_SUITE_END()

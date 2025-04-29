@@ -46,20 +46,28 @@ int GPUHelpers::getNumberOfGPUs() {
 }
 
 int GPUHelpers::getNumberOfCores(int major, int minor) {
-    
-    int ncores = 0;
-    
-    if ((major == 7) && (minor == 5)) {
-       ncores = 64;//Turing
-    }
-    if ((minor == 1) || (minor == 2)) ncores = 128;
-    else if (minor == 0) ncores = 64;
-    else if ((major == 8) && (minor == 6) ){
-       ncores = 32;
-    }
 
-    if(ncores == 0) {
-       std::cout<<"Cannot determine the number of cores: unknown device type, major="<<major<<" minor="<<minor<<std::endl;
-    }
-    return ncores;
+  int ncores = 0;
+
+  if ((major == 7) && (minor == 5)) {
+    ncores = 64;//Turing
+  }
+  if ((minor == 1) || (minor == 2)) {
+    ncores = 128;
+  }
+  else if (minor == 0) {
+    ncores = 64;
+  }
+  else if ((major == 8) && (minor == 6)) {
+    ncores = 32;
+  }
+  else if ((major == 8) && (minor == 9)) {
+    ncores = 128; //Ada, see https://images.nvidia.com/aem-dam/en-zz/Solutions/technologies/NVIDIA-ADA-GPU-PROVIZ-Architecture-Whitepaper_1.1.pdf
+  }
+
+  if(ncores == 0) {
+    std::cout<<"Cannot determine the number of cores: unknown device type, major="<<major<<" minor="<<minor<<std::endl;
+  }
+  return ncores;
 }
+

@@ -1,32 +1,24 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
 
 
-
-//
-// includes
-//
-
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 
-#include <CxxUtils/fpcompare.h>
+#include <SystematicsHandles/CopyHelpers.h>
 #include <xAODCore/AuxContainerBase.h>
-#include <xAODEgamma/PhotonContainer.h>
 #include <xAODEgamma/ElectronContainer.h>
+#include <xAODEgamma/PhotonContainer.h>
 #include <xAODJet/JetContainer.h>
+#include <xAODMissingET/MissingETContainer.h>
 #include <xAODMuon/MuonContainer.h>
-#include <xAODTau/TauJetContainer.h>
 #include <xAODTau/DiTauJetContainer.h>
+#include <xAODTau/TauJetContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTruth/TruthParticleContainer.h>
-#include <SystematicsHandles/CopyHelpers.h>
 
-//
-// method implementations
-//
 
 namespace CP
 {
@@ -47,12 +39,14 @@ namespace CP
 
 
 
-
   StatusCode AsgShallowCopyAlg ::
   executeFindType (const CP::SystematicSet& sys)
   {
     const xAOD::IParticleContainer *input = nullptr;
-    ANA_CHECK (m_inputHandle.retrieve (input, sys));
+    if (evtStore()->contains<xAOD::IParticleContainer>(m_inputHandle.getName(sys)))
+      {
+        ANA_CHECK (m_inputHandle.retrieve (input, sys));
+      }
 
     if (dynamic_cast<const xAOD::ElectronContainer*> (input))
     {
@@ -92,6 +86,11 @@ namespace CP
     {
       m_function =
         &AsgShallowCopyAlg::executeTemplate<xAOD::TruthParticleContainer>;
+    }
+    else if (evtStore()->contains<xAOD::MissingETContainer>(m_inputHandle.getName(sys)))
+    {
+      m_function =
+        &AsgShallowCopyAlg::executeTemplate<xAOD::MissingETContainer>;
     }
     else
     {

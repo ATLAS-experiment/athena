@@ -9,6 +9,9 @@ n_events=5
 #  1) use the --preExec option: flags.Acts.fitFromPRD=True (in addition to all the other ones needed)
 #  2) in addition to only use the --postInclude option:  ActsConfig.ActsTrackFittingConfig.forceITkActsReFitterAlgCfg
 
+# Ignore specific error messages from Acts GX2F
+ignore_pattern="ActsReFitterAlg.+ERROR.+No start volume resolved"
+
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
    --preExec "flags.Exec.FPE=-1;" \
@@ -18,3 +21,5 @@ Reco_tf.py \
    --outputESDFile ESD.pool.root \
    --outputAODFile AOD.pool.root \
    --maxEvents ${n_events} \
+   --multithreaded \
+   --ignorePatterns "${ignore_pattern}"

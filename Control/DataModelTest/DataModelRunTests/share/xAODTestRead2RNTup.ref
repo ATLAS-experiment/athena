@@ -32,7 +32,6 @@ Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
 ClassIDSvc           INFO getRegistryEntries: read 356 CLIDRegistry entries for module ALL
 MetaDataSvc          INFO Initializing MetaDataSvc
 MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray([])
-EventSelector        INFO EventSelection with query 
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 DbSession            INFO     Open     DbSession    
 Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 20DF6091-99D3-70EF-3FAB-0FF0FF0FF0FF

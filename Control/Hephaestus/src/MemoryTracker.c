@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Hephaestus/Hephaestus.h"
@@ -124,7 +124,9 @@ static void hhh_NameSet_Add( struct hhh_NameSet *nameset, const char *name ) {
 
    unsigned int len = strlen( name );
    name_cp = (char*)malloc( len + 1 );
-   strcpy( name_cp, name );
+   if (name_cp){
+     strcpy( name_cp, name );
+   }
    nameset->lens[ nameset->size ] = len;
    nameset->names[ nameset->size++ ] = name_cp;
 }
@@ -191,6 +193,7 @@ static void hhh_report( void ) {
 
    /* report actual leaks with traceback only once */
       uniq = (struct hhh_LeakSummary*)malloc( sizeof(struct hhh_LeakSummary) * gTraceInfo->nentries );
+      if (!uniq) return;
       iuniq = 0;
       for ( i = 0; i < gTraceInfo->size; i++ ) {
          cell = gTraceInfo->table[i];
@@ -234,8 +237,10 @@ static void hhh_report( void ) {
          ignore = 0;
          if ( pos ) {
            sub = (char*)malloc( pos-first + 1 );
-            strncpy( sub, first, pos-first );
-            sub[ pos-first ] = '\0';
+            if (sub){
+              strncpy( sub, first, pos-first );
+              sub[ pos-first ] = '\0';
+            }
          } else {
             sub = (char*)first;
          }
@@ -1040,26 +1045,30 @@ static PyObject* hep_symbname( PyObject* unused, PyObject* args ) {
       free( gSymbolFileName );
 
    gSymbolFileName = (char*)malloc( strlen( name )+1 );
-   strcpy( gSymbolFileName, name );
-
+   if (gSymbolFileName){
+     strcpy( gSymbolFileName, name );
+   }
    Py_INCREF( Py_None );
    return Py_None;
 }
 
 /* _________________________________________________________________________ */
-static PyObject* hep_freestat_start() {
+static PyObject* hep_freestat_start(PyObject* a [[maybe_unused]],
+                                    PyObject* b [[maybe_unused]]) {
    gFlags |= FREESTAT;
    return PyLong_FromLong( gFlags );
 }
 
 /* _________________________________________________________________________ */
-static PyObject* hep_freestat_stop() {
+static PyObject* hep_freestat_stop(PyObject* a [[maybe_unused]],
+                                   PyObject* b [[maybe_unused]]) {
    gFlags &= gFlags ^ FREESTAT;
    return PyLong_FromLong( gFlags );
 }
 
 /* _________________________________________________________________________ */
-static PyObject* hep_freestat_reset() {
+static PyObject* hep_freestat_reset(PyObject* a [[maybe_unused]],
+                                    PyObject* b [[maybe_unused]]) {
    gFreeStatistics.total     = 0.;
    gFreeStatistics.untracked = 0;
 
@@ -1068,7 +1077,8 @@ static PyObject* hep_freestat_reset() {
 }
 
 /* _________________________________________________________________________ */
-static PyObject* hep_freestat_stat() {
+static PyObject* hep_freestat_stat(PyObject* a [[maybe_unused]],
+                                   PyObject* b [[maybe_unused]]) {
    PyObject *stat = 0;
 
    stat = PyTuple_New( 2 );

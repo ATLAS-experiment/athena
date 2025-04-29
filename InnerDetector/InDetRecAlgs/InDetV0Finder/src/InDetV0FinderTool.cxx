@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -112,6 +112,22 @@ StatusCode InDetV0FinderTool::initialize()
   ATH_CHECK( m_mDecor_gmasserr.initialize());
   ATH_CHECK( m_mDecor_gprob.initialize());
 
+  m_v0_BDTScore = m_v0Key + ".BDTScore";
+
+  ATH_MSG_DEBUG("m_v0_BDTScore = " << m_v0_BDTScore.key());
+  ATH_CHECK( m_v0_BDTScore.initialize());
+
+
+  if (m_useBDT){
+    std::string BDTPathName = "InDetV0FinderTool/BDT/v1/" + m_BDTFile;
+    std::string fullPathToFile = PathResolverFindCalibFile(BDTPathName);
+    ATH_MSG_DEBUG("Using BDT File: " << fullPathToFile);
+    std::unique_ptr<TFile> rootFile(TFile::Open(fullPathToFile.c_str(), "READ"));
+    std::string strBDTName = "xgboost";
+    std::unique_ptr<TTree> training( (TTree*)rootFile->Get(strBDTName.c_str()) );
+    m_BDT = std::make_unique<MVAUtils::BDT>(training.get());
+  }
+
   ATH_CHECK( m_eventInfo_key.initialize(!m_useBeamSpotCond));
   ATH_CHECK( m_beamSpotKey  .initialize( m_useBeamSpotCond));
   if(!m_useBeamSpotCond){
@@ -185,6 +201,14 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
 
   m_events_processed ++;
 
+  //Retrieve vertices for overlap removal
+  SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey, ctx };
+  if (!vertices.isValid())
+  {
+    ATH_MSG_WARNING("Primary vertex container with key " << m_vertexKey.key() << " not found");
+    return StatusCode::SUCCESS;
+  }
+
 // Retrieve track particles from StoreGate
   SG::ReadHandle<xAOD::TrackParticleContainer> TPC( m_trackParticleKey, ctx );
   if ( !TPC.isValid() )
@@ -220,8 +244,45 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
       const xAOD::TrackParticle* TP = (*tpIt);
       double charge = TP->charge();
 
-      if (m_trkSelector->decision(*TP, vx))
+      if (m_trkSelector->decision(*TP, vx) || (!m_useTrkSel))
       {
+        //PV Track Overlap Selections
+        const xAOD::Vertex* foundVertex { nullptr };
+        if (m_useorigin)
+        {
+          for (const auto *const vx : *vertices)
+          {
+	          for (const auto& tpLink : vx->trackParticleLinks())
+	          {
+	            if (*tpLink == TP)
+	            {
+	              foundVertex = vx;
+	              break;
+	            }
+	          }
+	        if (foundVertex) break;
+          }
+        }
+        bool useTrack = false;
+        if (!m_useorigin) useTrack = true;
+        if (m_useorigin && foundVertex == nullptr) useTrack = true;
+        if (!useTrack) continue;
+
+
+        //d0 Selections
+        bool d0wrtVertex = true;
+        if (m_use_vertColl) {
+          if ( !d0Pass(TP,vertColl, ctx) ) d0wrtVertex = false;
+        }
+        if (!m_use_vertColl && m_pv) {
+          if (primaryVertex) {
+            if ( !d0Pass(TP,primaryVertex, ctx) ) d0wrtVertex = false;
+          } else {
+            if ( !d0Pass(TP,beamspot, ctx) ) d0wrtVertex = false;
+          }
+        }
+        if (!d0wrtVertex) continue;
+
         if (m_samesign) {
           posTracks.push_back(TP);
           negTracks.push_back(TP);
@@ -239,12 +300,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
 
   if (!posTracks.empty() && !negTracks.empty())
   {
-  SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey, ctx };
-  if (!vertices.isValid())
-  {
-    ATH_MSG_WARNING("Primary vertex container with key " << m_vertexKey.key() << " not found");
-    return StatusCode::SUCCESS;
-  }
+
 
   SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0LinksDecorks(m_v0LinksDecorkeyks, ctx);
   SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0LinksDecorlb(m_v0LinksDecorkeylb, ctx);
@@ -256,6 +312,8 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
   SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gmass(m_mDecor_gmass, ctx);
   SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gmasserr(m_mDecor_gmasserr, ctx);
   SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gprob(m_mDecor_gprob, ctx);
+
+  SG::WriteDecorHandle<xAOD::VertexContainer, float> v0_BDTScore(m_v0_BDTScore, ctx);
 
   std::vector<const xAOD::TrackParticle*>::const_iterator tpIt1;
   std::vector<const xAOD::TrackParticle*>::const_iterator tpIt2;
@@ -269,22 +327,6 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
     if ( TP1->summaryValue( temp1 , xAOD::numberOfSCTHits)   ) nclus1 += temp1; 
     double pt1 = TP1->pt();
 
-    const xAOD::Vertex* foundVertex1 { nullptr };
-    if (m_useorigin)
-    {
-      for (const auto *const vx : *vertices)
-      {
-	for (const auto& tpLink : vx->trackParticleLinks())
-	{
-	  if (*tpLink == TP1)
-	  {
-	    foundVertex1 = vx;
-	    break;
-	  }
-	}
-	if (foundVertex1) break;
-      }
-    }
     unsigned int i2 = 0;
     for (tpIt2 = negTracks.begin(); tpIt2 != negTracks.end(); ++tpIt2)
     {
@@ -302,27 +344,6 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
       if (!m_useTRTplusSi && (nclus1 == 0 || nclus2 == 0)) continue;
 
       double pt2 = TP2->pt();
-
-      const xAOD::Vertex* foundVertex2 { nullptr };
-      if (m_useorigin)
-      {
-	for (const auto *const vx : *vertices)
-	{
-	  for (const auto& tpLink : vx->trackParticleLinks())
-	  {
-	    if (*tpLink == TP2)
-	    {
-	      foundVertex2 = vx;
-	      break;
-	    }
-	  }
-	  if (foundVertex2) break;
-	}
-      }
-      bool usepair = false;
-      if (!m_useorigin) usepair = true;
-      if (m_useorigin && foundVertex1 == nullptr && foundVertex2 == nullptr) usepair = true;
-      if (!usepair) continue;
 
       bool trk_cut1 = false;
       bool trk_cut2 = false;
@@ -344,16 +365,10 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
       if (errorcode == 0 || errorcode == 5 || errorcode == 6 || errorcode == 8) errorCode = true;
       if (!errorCode) continue;
 
+      //re-do d0 selection if using m_use_vertColl to ensure both tracks pass for the SAME vertex
       bool d0wrtVertex = true;
       if (m_use_vertColl) {
         if ( !d0Pass(TP1,TP2,vertColl, ctx) ) d0wrtVertex = false;
-      }
-      if (!m_use_vertColl && m_pv) {
-        if (primaryVertex) {
-          if ( !d0Pass(TP1,TP2,primaryVertex, ctx) ) d0wrtVertex = false;
-        } else {
-          if ( !d0Pass(TP1,TP2,beamspot, ctx) ) d0wrtVertex = false;
-        }
       }
       if (!d0wrtVertex) continue;
 
@@ -379,7 +394,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
               if (myVxCandidate)
               {
                 myVxCandidate->setVertexType(xAOD::VxType::V0Vtx);
-                if ( m_V0Tools->vertexProbability(myVxCandidate.get()) >= m_minVertProb )
+                if ( (m_V0Tools->vertexProbability(myVxCandidate.get()) >= m_minVertProb) || (m_useBDT) ) // If using BDT selections, it makes VertProb Selections
                 {
                   bool doKshortFit = false;
                   doKshortFit = doMassFit(myVxCandidate.get(),310);
@@ -387,14 +402,15 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                   doLambdaFit = doMassFit(myVxCandidate.get(),3122);
                   bool doLambdabarFit = false;
                   doLambdabarFit = doMassFit(myVxCandidate.get(),-3122);
+                  float score = 0; // BDT score variable
                   if (doKshortFit || doLambdaFit || doLambdabarFit)
                   {
                     bool pointAtVert = true;
                     if (m_use_vertColl) {
-                      if ( !pointAtVertexColl(myVxCandidate.get(),vertColl) ) pointAtVert = false;
+                      if ( !pointAtVertexColl(myVxCandidate.get(),vertColl,score) ) pointAtVert = false;
                     }
                     if (!m_use_vertColl && m_pv && primaryVertex) {
-                      if ( !pointAtVertex(myVxCandidate.get(),primaryVertex) ) pointAtVert = false;
+                      if ( !pointAtVertex(myVxCandidate.get(),primaryVertex,score) ) pointAtVert = false;
                     }
                     if (m_doSimpleV0) pointAtVert = true;
                     if (pointAtVert)
@@ -457,6 +473,8 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                         myVxCandidate->addTrackAtVertex(newLink1);
                         myVxCandidate->addTrackAtVertex(newLink2);
                         v0Container->push_back(myVxCandidate.release());
+
+                        v0_BDTScore( *(v0Container->back()) ) = score;// decorate w/ bdt score
 
                         if (foundKshort && !m_doSimpleV0) {
                           m_Kshort_stored++;
@@ -616,6 +634,15 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
 {
   bool pass = false;
   int count = 0;
+  bool hasInnerPixHit1 = true;
+  bool hasInnerPixHit2 = true;
+  if (m_use_innerPixHits){
+    SG::AuxElement::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
+    uint8_t  nInnerHits1 = numberOfInnermostPixelLayerHits(*track1);
+    if (nInnerHits1 == 0) hasInnerPixHit1 = false;
+    uint8_t  nInnerHits2 = numberOfInnermostPixelLayerHits(*track2);
+    if (nInnerHits2 == 0) hasInnerPixHit2 = false;
+  }
   for (auto vItr=vertColl->begin(); vItr!=vertColl->end(); ++vItr )
   {
     const xAOD::Vertex* PV = (*vItr);
@@ -625,69 +652,129 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
     if (per2 == nullptr) continue;
     double d0_1 = per1->parameters()[Trk::d0];
     double sig_d0_1 = sqrt((*per1->covariance())(0,0));
+    double delta_z0_1 = track1->z0() + track1->vz() - PV->z();
     double d0_2 = per2->parameters()[Trk::d0];
     double sig_d0_2 = sqrt((*per2->covariance())(0,0));
-    if (std::abs(d0_1/sig_d0_1) > m_d0_cut &&
-	std::abs(d0_2/sig_d0_2) > m_d0_cut) return true;
+    double delta_z0_2 = track2->z0() + track2->vz() - PV->z();
+    bool IP_check1 = (std::abs(d0_1/sig_d0_1) > m_d0_cut) || !hasInnerPixHit1;
+    IP_check1 &= std::abs(d0_1) < m_max_d0_cut;
+    IP_check1 &= std::abs(delta_z0_1) < m_max_z0_cut;
+    bool IP_check2 = (std::abs(d0_2/sig_d0_2) > m_d0_cut) || !hasInnerPixHit2;
+    IP_check2 &= std::abs(d0_2) < m_max_d0_cut;
+    IP_check2 &= std::abs(delta_z0_2) < m_max_z0_cut;
+    if (IP_check1 && IP_check2) return true;
     if (++count >= m_maxPV) break;
   }
   return pass;
 }
 
-bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::Vertex* PV, const EventContext& ctx) const
+bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::VertexContainer * vertColl, const EventContext& ctx) const
 {
   bool pass = false;
+  int count = 0;
+  bool hasInnerPixHit1 = true;
+  if (m_use_innerPixHits){
+    SG::AuxElement::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
+    uint8_t  nInnerHits1 = numberOfInnermostPixelLayerHits(*track1);
+    if (nInnerHits1 == 0) hasInnerPixHit1 = false;
+  }
+  for (auto vItr=vertColl->begin(); vItr!=vertColl->end(); ++vItr )
+  {
+    const xAOD::Vertex* PV = (*vItr);
+    auto per1 = m_trackToVertexTool->perigeeAtVertex(ctx, *track1, PV->position() );
+    if (per1 == nullptr) continue;
+    double d0_1 = per1->parameters()[Trk::d0];
+    double sig_d0_1 = sqrt((*per1->covariance())(0,0));
+    double delta_z0_1 = track1->z0() + track1->vz() - PV->z();
+    if (((std::abs(d0_1/sig_d0_1) > m_d0_cut) ||
+         (!hasInnerPixHit1)) &&
+        (std::abs(d0_1) < m_max_d0_cut) &&
+        (std::abs(delta_z0_1) < m_max_z0_cut)) return true;
+    if (++count >= m_maxPV) break;
+  }
+  return pass;
+}
+
+bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Vertex* PV, const EventContext& ctx) const
+{
+  bool pass = false;
+  bool hasInnerPixHit1 = true;
+  if (m_use_innerPixHits){
+    SG::AuxElement::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
+    uint8_t  nInnerHits1 = numberOfInnermostPixelLayerHits(*track1);
+    if (nInnerHits1 == 0) hasInnerPixHit1 = false;
+  }
   auto per1 = m_trackToVertexTool->perigeeAtVertex(ctx, *track1, PV->position() );
   if (per1 == nullptr) return pass;
-  auto per2 = m_trackToVertexTool->perigeeAtVertex(ctx, *track2, PV->position() );
-  if (per2 == nullptr) {
-    return pass;
-  }
   double d0_1 = per1->parameters()[Trk::d0];
   double sig_d0_1 = sqrt((*per1->covariance())(0,0));
-  double d0_2 = per2->parameters()[Trk::d0];
-  double sig_d0_2 = sqrt((*per2->covariance())(0,0));
-  if (std::abs(d0_1/sig_d0_1) > m_d0_cut &&
-      std::abs(d0_2/sig_d0_2) > m_d0_cut) pass = true;
+  double delta_z0_1 = track1->z0() + track1->vz() - PV->z();
+  if (((std::abs(d0_1/sig_d0_1) > m_d0_cut) ||
+       (!hasInnerPixHit1)) && 
+      (std::abs(d0_1) < m_max_d0_cut) &&
+      (std::abs(delta_z0_1) < m_max_z0_cut)) pass = true;
   return pass;
 }
 
-bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const Amg::Vector3D& PV, const EventContext& ctx) const
+bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const Amg::Vector3D& PV, const EventContext& ctx) const
 {
   bool pass = false;
+  bool hasInnerPixHit1 = true;
+  if (m_use_innerPixHits){
+    SG::AuxElement::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
+    uint8_t  nInnerHits1 = numberOfInnermostPixelLayerHits(*track1);
+    if (nInnerHits1 == 0) hasInnerPixHit1 = false;
+  }
   auto per1 = m_trackToVertexTool->perigeeAtVertex(ctx, *track1, PV );
   if (per1 == nullptr) return pass;
-  auto per2 = m_trackToVertexTool->perigeeAtVertex(ctx, *track2, PV );
-  if (per2 == nullptr) {
-    return pass;
-  }
   double d0_1 = per1->parameters()[Trk::d0];
   double sig_d0_1 = sqrt((*per1->covariance())(0,0));
-  double d0_2 = per2->parameters()[Trk::d0];
-  double sig_d0_2 = sqrt((*per2->covariance())(0,0));
-  if (std::abs(d0_1/sig_d0_1) > m_d0_cut && std::abs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
+  double delta_z0_1 = track1->z0() + track1->vz() - PV.z();
+  if (((std::abs(d0_1/sig_d0_1) > m_d0_cut) ||
+       (!hasInnerPixHit1)) && 
+      (std::abs(d0_1) < m_max_d0_cut) &&
+      (std::abs(delta_z0_1) < m_max_z0_cut)) pass = true;
   return pass;
 }
 
-bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex* PV) const
+bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex* PV,  float &score) const
 {
   bool pass = false;
-  double v0lxy = m_V0Tools->lxy(v0,PV);
-  double v0lxyError = m_V0Tools->lxyError(v0,PV);
-  double cos = m_V0Tools->cosTheta(v0,PV);
-  double v0a0xy = m_V0Tools->a0xy(v0,PV);
-  double v0a0z = m_V0Tools->a0z(v0,PV);
-  if (v0lxy/v0lxyError > m_vert_lxy_sig && cos > 0. &&
+  float v0lxy = m_V0Tools->lxy(v0,PV);
+  float v0lxyError = m_V0Tools->lxyError(v0,PV);
+  float cos = m_V0Tools->cosTheta(v0,PV);
+  float v0a0xy = m_V0Tools->a0xy(v0,PV);
+  float v0a0z = m_V0Tools->a0z(v0,PV);
+  if (m_useBDT){
+    float prob = m_V0Tools->vertexProbability(v0);
+    float nLogProb = 999999;
+    if (prob>0) nLogProb = -1*log10f(prob); //bdt model uses the log, not the raw value
+    std::vector<float> bdt_vars = {
+                                    nLogProb,
+                                    std::abs(v0a0xy),
+                                    std::abs(v0a0z),
+                                    v0lxy,
+                                    v0lxy/v0lxyError,
+                                    cos};
+      float this_Score=m_BDT->GetClassification(bdt_vars);
+      if (this_Score > score) {
+        score = this_Score;
+      }
+      if (score > m_BDTCut){
+        pass = true;
+      }
+  }
+  else if (v0lxy/v0lxyError > m_vert_lxy_sig && cos > m_vert_cos_cut &&
       std::abs(v0a0xy) < m_vert_a0xy_cut && std::abs(v0a0z) < m_vert_a0z_cut &&
       v0lxy < m_vert_lxy_cut) pass = true;
   return pass;
 }
 
-bool InDetV0FinderTool::pointAtVertexColl(xAOD::Vertex* v0, const xAOD::VertexContainer * vertColl) const
+bool InDetV0FinderTool::pointAtVertexColl(xAOD::Vertex* v0, const xAOD::VertexContainer * vertColl,  float &score) const
 {
   bool pass = false;
   xAOD::VertexContainer::const_iterator vItr = vertColl->begin();
-  for ( vItr=vertColl->begin(); vItr!=vertColl->end(); ++vItr ) { if (pointAtVertex(v0,(*vItr))) return true; }
+  for ( vItr=vertColl->begin(); vItr!=vertColl->end(); ++vItr ) { if (pointAtVertex(v0,(*vItr),score)) pass = true; }
   return pass;
 }
 

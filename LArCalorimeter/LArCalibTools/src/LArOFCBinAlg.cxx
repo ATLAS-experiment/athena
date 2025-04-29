@@ -70,15 +70,16 @@ StatusCode LArOFCBinAlg::execute() {
        //std::cout <<std::hex<< fid <<std::dec<< " " << offset << std::endl;
     }
   } else if (m_perFeb) {
-   while (rein.good()) {
-    unsigned chidint;
-    float offset[3];
-       rein >> std::hex>>chidint >>std::dec>> offset[0] >>offset[1] >>offset[2];
-       if(rein.good()){
-          const HWIdentifier fid(chidint);
-          for(unsigned i=0; i<3; ++i) offsetMap[i][fid]=offset[i];
-       }
-       //std::cout <<std::hex<< fid <<std::dec<< " " << offset << std::endl;
+    while (rein.good()) {
+      unsigned chidint;
+      float offset[3];
+      rein >> std::hex>>chidint >>std::dec>> offset[0] >>offset[1] >>offset[2];
+      // cppcheck-suppress identicalInnerCondition; false positive
+      if(rein.good()){
+        const HWIdentifier fid(chidint);
+        for(unsigned i=0; i<3; ++i) offsetMap[i][fid]=offset[i];
+      }
+      //std::cout <<std::hex<< fid <<std::dec<< " " << offset << std::endl;
     }
 
   }

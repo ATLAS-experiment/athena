@@ -27,16 +27,6 @@ using InputSequenceMap = std::map<std::string, VectorMap>;
 TauDecayModeNNClassifier::TauDecayModeNNClassifier(const std::string &name)
     : TauRecToolBase(name)
 {
-  declareProperty("OutputName", m_outputName = "NNDecayMode");
-  declareProperty("ProbPrefix", m_probPrefix = "NNDecayModeProb_");
-  declareProperty("WeightFile", m_weightFile = "");
-  declareProperty("MaxTauTracks", m_maxTauTracks = 3);
-  declareProperty("MaxNeutralPFOs", m_maxNeutralPFOs = 8);
-  declareProperty("MaxShotPFOs", m_maxShotPFOs = 6);
-  declareProperty("MaxConvTracks", m_maxConvTracks = 4);
-  declareProperty("NeutralPFOPtCut", m_neutralPFOPtCut = 1.5);
-  declareProperty("EnsureTrackConsistency", m_ensureTrackConsistency = true);
-  declareProperty("DecorateProb", m_decorateProb = true);
 }
 
 TauDecayModeNNClassifier::~TauDecayModeNNClassifier()
@@ -384,18 +374,6 @@ namespace tauRecTools
       throw std::runtime_error("Can not retrieve PFO attribute! enum = " + std::to_string(static_cast<unsigned>(attr)));
     }
     return val;
-  }
-
-  float TauDecayModeNNVariable::ptSubRatio(const PFOPtr pfo)
-  {
-    float clus0pt = pfo->cluster(0)->pt();
-    return clus0pt > 0.0f ? (clus0pt - pfo->pt()) / clus0pt : 0.0f;
-  }
-
-  float TauDecayModeNNVariable::energyFracEM2(const PFOPtr pfo, float energy_em2)
-  {
-    float clus0e = pfo->cluster(0)->e();
-    return clus0e > 0.0f ? energy_em2 / clus0e : 0.0f;
   }
 
   float TauDecayModeNNHelper::Log10Robust(const float val, const float min_val)

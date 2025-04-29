@@ -21,7 +21,6 @@
 
 // Forward declarations
 class TH1F;
-namespace CP { class ShowerDepthTool; }
 
 namespace CP {
 

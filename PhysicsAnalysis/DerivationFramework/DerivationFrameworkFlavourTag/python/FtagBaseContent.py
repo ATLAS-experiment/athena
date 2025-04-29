@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 FtagBaseContent.py
 This module contains common configuration used by PHYSVAL, FTAG1 and FTAG2.
@@ -8,6 +8,10 @@ smart slimming lists, whhich are defined in BTaggingContent.py. New variables
 should be added there, not here.
 """
 
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
+    ParentDecoratorCfg
+)
+from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_SmartCollections = [
@@ -112,6 +116,8 @@ def trigger_setup(SlimmingHelper, option=''):
     SlimmingHelper.IncludeBJetTriggerContent = False
     SlimmingHelper.IncludeBPhysTriggerContent = False
     SlimmingHelper.IncludeMinBiasTriggerContent = False
+    if option == 'FTAG1':
+        SlimmingHelper.IncludeJetTriggerContent = True
     if option == 'FTAG2':
         SlimmingHelper.IncludeTriggerNavigation = True
         SlimmingHelper.IncludeMuonTriggerContent = True
@@ -150,4 +156,56 @@ def add_baseline_slimming_smartcollections(SlimmingHelper):
 
 def add_baseline_slimming_allvariables(SlimmingHelper):
     SlimmingHelper.AllVariables += PHYSVAL_FTAG1_FTAG2_AllVariables
-    
+
+
+def _int_labels(flags):
+    if not flags.Input.isMC:
+        return []
+    algs = ['HadronConeExcl', 'HadronGhost']
+    types = ['Extended', '']
+    return [f'{a}{e}TruthLabelID' for a in algs for e in types]
+
+
+def _match_vars(flags, source):
+    labels = _int_labels(flags)
+    allvars = [f'{l}From{source}' for l in labels]
+    allvars += [f'delta{v}To{source}' for v in ['R', 'Pt']]
+    return allvars
+
+
+def addCommonAugmentation(flags, cfg, helper):
+    """add content common to all ftag derivations"""
+
+    target = "AntiKt4EMPFlowJets"
+
+    cfg.merge(
+        JetMatchingCfg(
+            flags,
+            target=target,
+            ints_to_copy=_int_labels(flags),
+        )
+    )
+    helper.ExtraVariables +=  [
+        '.'.join(['AntiKt4EMPFlowJets'] + _match_vars(flags, target))
+    ]
+
+    if not flags.Input.isMC:
+        return
+
+    # match jets to the parent particles
+    cfg.merge(
+        ParentDecoratorCfg(
+            flags,
+            targetContainer=target,
+            prefix="PFlow",
+            matchDeltaR=0.3
+        )
+    )
+    # todo add large-R jets
+    truth_labels = [
+        *[f"nTopTo{p}Children" for p in "BW"],
+        *[f"parent{p}ParentsMask" for p in ["Higgs", "Z", "Scalar", "Top"]],
+    ]
+
+    helper.ExtraVariables += ['.'.join(['AntiKt4EMPFlowJets'] + truth_labels)]
+

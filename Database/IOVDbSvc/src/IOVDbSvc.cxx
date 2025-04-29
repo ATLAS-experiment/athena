@@ -26,6 +26,7 @@
 #include "IOVDbParser.h"
 #include "IOVDbFolder.h"
 #include "IOVDbSvc.h"
+#include "CoralCrestManager.h"
 
 #include <algorithm>
 #include <list>
@@ -935,9 +936,8 @@ StatusCode IOVDbSvc::setupFolders() {
 
   // getting the pairs: folder name - CREST tag name:
   if (m_par_source == "CREST"){
-    IOVDbNamespace::CrestFunctions cfunctions(m_par_crestServer);
     m_cresttagmap.clear();
-    m_cresttagmap = cfunctions.getGlobalTagMap(m_par_globalTag);
+    m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_crestServer,m_par_globalTag);
   }
   
   //1. Loop through folders
@@ -1006,6 +1006,7 @@ StatusCode IOVDbSvc::setupFolders() {
 
   //4.Set up folder map with cleaned folder list
 
+  bool hasError=false;
   for (const auto& folderdata : allFolderdata) {
     // find the connection specification first - db or dbConnection
     // default is to use the 'default' connection
@@ -1044,6 +1045,12 @@ StatusCode IOVDbSvc::setupFolders() {
     std::string crestTag = "";
     if (m_par_source == "CREST"){
       crestTag = m_cresttagmap[folderdata.folderName()];
+      if(crestTag.size()==0 && folderdata.folderName().compare("/TagInfo")!=0){
+               ATH_MSG_FATAL( "Global Tag "<<m_par_globalTag<<" hasn't folder: " << folderdata.folderName() <<
+          " in Global Tag Map." );
+	       hasError=true;
+	       continue;
+      }
     }
     
     IOVDbFolder* folder=new IOVDbFolder(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
@@ -1061,6 +1068,8 @@ StatusCode IOVDbSvc::setupFolders() {
     }
   }// end loop over folders
   // check for folders to be written to metadata
+  if(hasError)
+    return StatusCode::FAILURE;
   for (const auto & folderToWrite : m_par_foldersToWrite) {
     // match wildcard * at end of string only (i.e. /A/* matches /A/B, /A/C/D)
     std::string_view match=folderToWrite;

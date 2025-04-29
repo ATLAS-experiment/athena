@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBphysMonitorAlgorithm.h"
@@ -22,12 +22,7 @@ TrigBphysMonitorAlgorithm::~TrigBphysMonitorAlgorithm() {}
 
 StatusCode TrigBphysMonitorAlgorithm::initialize() {
   
-  for(const auto& MonitoredContainerName : m_ContainerNames) {
-    SG::ReadHandleKey<xAOD::TrigBphysContainer> BphysContainerKey(MonitoredContainerName);
-    ATH_CHECK( BphysContainerKey.initialize() );
-    m_TrigBphysContainerKeys.push_back(BphysContainerKey);
-  }
-  
+  ATH_CHECK( m_TrigBphysContainerKeys.initialize() );
   ATH_CHECK( m_offlineMuonCollectionKey.initialize() );
   ATH_CHECK( m_offlineIDTrackCollectionKey.initialize() );
   ATH_CHECK( m_offlinePvCollectionKey.initialize() );

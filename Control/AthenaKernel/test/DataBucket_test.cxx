@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
 
 #include "AthenaKernel/DataBucket.h"
+#include "AthenaKernel/DataObjectSharedPtr.h"
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/ILockable.h"
 #include "AthenaKernel/CLASS_DEF.h"
@@ -42,11 +43,6 @@ public:
   GaudiDataObj(int i): DataObject(), m_val(i) { ++count; };
   virtual ~GaudiDataObj(){ --count; };
 
-  static const CLID& classID() {
-    static const CLID ID = 8010;
-    return ID; }
-  virtual const CLID& clID() const { return classID(); }
-
   void val(int i) { m_val = i; }
   int val() const { return m_val; }
 
@@ -54,6 +50,7 @@ private:
   int m_val;
 };
 std::atomic<int> GaudiDataObj::count;
+CLASS_DEF(GaudiDataObj, 8010, 0)
 
 class WrongType {};
 
@@ -65,12 +62,9 @@ public:
 
 class AbstractDataObj : public DataObject {
 public:
-  static const CLID& classID() {
-    static const CLID ID = 8011;
-    return ID; }
-  virtual const CLID& clID() const { return classID(); }
   virtual void abstractMethod()=0;
 };
+CLASS_DEF(AbstractDataObj, 8019, 0)
 
 class MyDataObj {
  
@@ -262,7 +256,7 @@ int main () {
   std::cerr << "GaudiDataObj has_classID " <<  gdobjBucket.clID() << " and " 
             << (ClassID_traits<GaudiDataObj>::s_isDataObject ? "does" : "does not")
             << " inherit from DataObject" <<std::endl;
-  assert(gdobjBucket.clID() == GaudiDataObj::classID());
+  assert(gdobjBucket.clID() == ClassID_traits<GaudiDataObj>::ID());
   assert(ClassID_traits<GaudiDataObj>::s_isDataObject);
 
   SG::DataBucket<MyDataObj> dobjBucket(0);
@@ -274,7 +268,7 @@ int main () {
 
   SG::DataBucket<AbstractDataObj> absdobjBucket(0);
   std::cerr << "AbstractDataObj has_classID " <<  absdobjBucket.clID() <<std::endl;
-  assert(absdobjBucket.clID() == AbstractDataObj::classID());
+  assert(absdobjBucket.clID() == ClassID_traits<AbstractDataObj>::ID());
   assert(ClassID_traits<AbstractDataObj>::s_isDataObject);
 
   SG::DataBucket<AbstractType> absBucket(0);
@@ -413,7 +407,7 @@ int main () {
   {
     SG::DataObjectSharedPtr<GaudiDataObj> ptr (new GaudiDataObj);
     assert (ptr->refCount() == 1);
-    DataBucketBase* b5 = new SG::DataBucket<GaudiDataObj> (ptr);
+    DataBucketBase* b5 = new SG::DataBucket<GaudiDataObj> (ptr.get());
     assert (ptr->refCount() == 2);
     assert (b5->object() == ptr.get());
     delete b5;

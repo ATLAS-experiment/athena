@@ -13,7 +13,7 @@ standardghosts =  ["Track","MuonSegment","Truth","Tower"]
 
 flavourghosts = [ "BHadronsInitial", "BHadronsFinal", "BQuarksFinal",
                   "CHadronsInitial", "CHadronsFinal", "CQuarksFinal",
-                  "TausFinal",
+                  "TausFinal", 
                   "WBosons", "ZBosons", "HBosons", "TQuarksFinal",
                   "Partons",]
 
@@ -57,7 +57,6 @@ clustermods      = ("ECPSFrac","ClusterMoments",)
 truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
 pflowmods        = ()
 
-
 # ********************************************************
 # Standard track jet definition
 # ********************************************************
@@ -84,7 +83,7 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 

@@ -1,16 +1,22 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_DetTool.h"
 #include "ZDC_DetFactory.h" 
-#include "ZDC_DetManager.h" 
+#include "ZDC_ZDCModule.h" 
+#include "ZDC_RPDModule.h" 
+#include "ZDC_BRANModule.h"
+#include "ZDC_DetManager.h"
+#include "ZdcConditions/ZdcGeometryDB.h" 
 #include "GeoModelUtilities/GeoModelExperiment.h"
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GeoModelInterfaces/IGeoDbTagSvc.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include <GeoModelKernel/GeoDefinitions.h>
+#include <memory>
 
 ZDC_DetTool::ZDC_DetTool(const std::string& type, const std::string& name, const IInterface* parent)
   : GeoModelTool(type, name, parent)
@@ -35,28 +41,81 @@ ZDC_DetTool::~ZDC_DetTool()
 
 StatusCode ZDC_DetTool::create()
 { 
-
+  if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " Building ZDC geometry " << endmsg;
+  
   // Locate the top level experiment node  
   GeoModelExperiment* theExpt = nullptr;
+  if (StatusCode::SUCCESS != detStore()->retrieve(theExpt, "ATLAS")) {
+    if (msgLevel(MSG::ERROR)) msg(MSG::ERROR) << " Could not find GeoModelExperiment ATLAS " << endmsg; 
+    return (StatusCode::FAILURE); 
+  } 
   
-  ATH_CHECK( detStore()->retrieve(theExpt, "ATLAS") );
-
+  // Create the ZDC Detector Factory
   ZDC_DetFactory theZDCFactory(detStore().operator->());
 
-  ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc", name());
-  ATH_CHECK( geoDbTag.retrieve() );
+  //Retrieve the ZDC geometry from the database
 
-  GeoModel::GeoConfig geoConfig = geoDbTag->geoConfig();
+  const IZdcGeometryDB *theZdcGeoDB = ZdcGeoDBGeometryDB::getInstance();  
+  const nlohmann::json& zdcGeo = theZdcGeoDB->getDB();
   
-  //Set the geometry configuration
-  if(geoConfig==GeoModel::GEO_RUN2){ 
-    ATH_MSG_INFO("Initializing ZDC geometry for PbPb2015");
-    theZDCFactory.initializePbPb2015();
-  }else if(geoConfig==GeoModel::GEO_RUN3){ 
-    ATH_MSG_INFO("Initializing ZDC geometry for PbPb2023");
-    theZDCFactory.initializePbPb2023();
-  }else if(geoConfig==GeoModel::GEO_RUN4){
-    ATH_MSG_ERROR("No ZDC geometry defined for RUN4");
+  /*************************************************
+  * Get the TAN/TAXN slots and hold onto the transform
+  **************************************************/
+  std::array<GeoTrf::Transform3D, 2> tanTrf;
+  for (auto slot : zdcGeo["TAN/TAXN"].items()) {
+    // Retrieve all of the values from the json file
+    int side = slot.value()["side"].get<int>();
+    int iside = side == -1 ? 0 : 1;
+    double x = slot.value()["x"].get<double>();
+    double y = slot.value()["y"].get<double>();
+    double z = slot.value()["z"].get<double>();
+    double height = slot.value()["height"].get<double>();
+    double width = slot.value()["width"].get<double>();
+    double depth = slot.value()["depth"].get<double>();
+    std::string name = slot.value()["name"].get<std::string>();
+    tanTrf.at(iside) = GeoTrf::Translate3D(x * Gaudi::Units::mm, y * Gaudi::Units::mm, z * Gaudi::Units::mm);
+
+    // Add the TAN/TAXN slot to the factory
+    theZDCFactory.setTANSlot(iside, width, height, depth, tanTrf.at(iside), name);
+  }
+
+  /*************************************************
+  * Add the ZDC/RPD/BRAN modules to the factory
+  **************************************************/
+  for (auto det : zdcGeo["Detector"].items()) {
+    std::unique_ptr<ZDC_ModuleBase> pDet;
+
+    std::string name = det.value()["name"].get<std::string>();
+    int side = det.value()["side"].get<int>();
+    int iside = side == -1 ? 0 : 1;
+    int module = det.value()["module"].get<int>();
+    double x = det.value()["x"].get<double>();
+    double y = det.value()["y"].get<double>();
+    double z = det.value()["z"].get<double>();
+    double q = det.value()["q"].get<double>();
+    double i = det.value()["i"].get<double>();
+    double j = det.value()["j"].get<double>();
+    double k = det.value()["k"].get<double>();
+
+    if (std::string(det.key()).find("ZDC") != std::string::npos) {
+      pDet = std::make_unique<ZDC_ZDCModule>( name, side, module, det.value()["type"].get<int>() );
+
+    }else if (std::string(det.key()).find("RPD") != std::string::npos) {
+      pDet = std::make_unique<ZDC_RPDModule>( name, side, module );
+
+    }else if (std::string(det.key()).find("BRAN") != std::string::npos) {
+      pDet = std::make_unique<ZDC_BRANModule>( name, side, module );
+
+    }else {
+      if (msgLevel(MSG::ERROR)) msg(MSG::ERROR) << "Unknown detector type " << det.key() << endmsg;
+      return StatusCode::FAILURE;
+    }
+
+    // Set the transform and subtract the TAN translation for this side since that's the mother volume of the detector
+    pDet->setTransform(GeoTrf::Translate3D(x - tanTrf.at(iside).translation().x(), y - tanTrf.at(iside).translation().y(), z - tanTrf.at(iside).translation().z()) * GeoTrf::Rotation3D(q, i, j, k) );
+
+    // Add the module to the factory
+    theZDCFactory.addModule(std::move(pDet));
   }
 
   if (nullptr == m_detector) { // Create the ZDCDetectorNode instance
@@ -68,14 +127,18 @@ StatusCode ZDC_DetTool::create()
     } 
     catch (const std::bad_alloc&) {
       
-      ATH_MSG_FATAL("Could not create new ZDC DetectorNode!");
+      if (msgLevel(MSG::FATAL)) msg(MSG::FATAL) << "Could not create new ZDC DetectorNode!" << endmsg;
       return StatusCode::FAILURE; 
     }
     
     // Register the ZDC DetectorNode instance with the Transient Detector Store
     theExpt->addManager(theZDCFactory.getDetectorManager());
-    ATH_CHECK( detStore()->record(theZDCFactory.getDetectorManager(),theZDCFactory.getDetectorManager()->getName()) );
+    if(detStore()->record(theZDCFactory.getDetectorManager(),theZDCFactory.getDetectorManager()->getName())==StatusCode::SUCCESS){
+      return StatusCode::SUCCESS;}
+    else{
+      msg(MSG::FATAL) << "Could not register ZDC detector manager" << endmsg;}
+
   }
   
-  return StatusCode::SUCCESS;
+  return StatusCode::FAILURE;
 }

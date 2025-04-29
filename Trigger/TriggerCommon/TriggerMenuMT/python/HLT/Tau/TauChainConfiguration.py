@@ -1,12 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #
 # SliceDef file for tau chains
 #
 #########################################################################
-
-from typing import List
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info(f'Importing {__name__}')
@@ -84,7 +82,7 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getFTFCoreEmpty(self, flags):
         stepName = 'FTFCoreEmpty_tau'
-        return self.getEmptyStep(2, stepName)
+        return self.getEmptyStep(stepName)
 
 
     #--------------------------------------------------
@@ -96,7 +94,7 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getFTFIsoEmpty(self, flags):
         stepName = 'FTFIsoEmpty_tau'
-        return self.getEmptyStep(3, stepName)
+        return self.getEmptyStep(stepName)
 
 
     #--------------------------------------------------
@@ -112,7 +110,7 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getPrecTrackEmpty(self, flags):
         stepName = 'PrecTrkEmpty_tau'
-        return self.getEmptyStep(4, stepName)
+        return self.getEmptyStep(stepName)
 
 
     #--------------------------------------------------
@@ -142,4 +140,4 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getPrecisionEmpty(self, flags):
         stepName = 'PrecisionEmpty_tau'
-        return self.getEmptyStep(5, stepName)
+        return self.getEmptyStep(stepName)

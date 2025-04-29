@@ -516,19 +516,6 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
     {
         return result.deltaTheta <= 0.150;
     }
-    // Phi-sector overlap
-    else if (result.phiSector_a != result.phiSector_b)
-    {
-        unsigned nChambers_a = m_edmHelperSvc->chamberIds(seg1).size();
-        unsigned nChambers_b = m_edmHelperSvc->chamberIds(seg2).size();
-        if (nChambers_a < 2 && nChambers_b < 2) {
-            return false;
-        } else if (result.deltaTheta > 0.150) {
-            return false;
-        } else {
-            return true;
-        }
-    }
     // Barrel inner to middle station
     else if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BM)
     {

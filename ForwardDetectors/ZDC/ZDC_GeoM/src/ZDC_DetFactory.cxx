@@ -3,10 +3,8 @@
 */
 
 #include "ZDC_DetFactory.h"
-#include "ZDC_ZDCModule.h"
-#include "ZDC_RPDModule.h"
 #include "ZdcIdentifier/ZdcID.h"
-#include "ZDC_BRANModule.h"
+#include "ZDC_ModuleBase.h"
 
 
 #include "GeoModelInterfaces/StoredMaterialManager.h"
@@ -16,7 +14,6 @@
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
 #include "GeoModelKernel/Units.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -26,7 +23,7 @@
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelUtilities/GeoExtendedMaterial.h"
 #include "AthenaKernel/getMessageSvc.h"
-#include "CLHEP/Geometry/Transform3D.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
 
 // Author Chad Lantz
 // chad.stephen.lantz@cern.ch
@@ -45,7 +42,11 @@
 ZDC_DetFactory::ZDC_DetFactory(StoreGateSvc *detStore) :
     AthMessaging("ZDC_DetFactory"),
     m_detectorManager(NULL),
-    m_detectorStore(detStore)
+    m_detectorStore(detStore),
+    m_tanSlotTransform{ GeoTrf::Transform3D(),  GeoTrf::Transform3D()},
+    m_tanW{0.0, 0.0},
+    m_tanH{0.0, 0.0},
+    m_tanD{0.0, 0.0}
 {
     if (m_detectorStore->retrieve( m_zdcID ).isFailure() ) {
         MsgStream LogStream(Athena::getMessageSvc(), "ZDC_DetectorFactory::ZDC_DetFactory");
@@ -55,28 +56,12 @@ ZDC_DetFactory::ZDC_DetFactory(StoreGateSvc *detStore) :
 
 ZDC_DetFactory::~ZDC_DetFactory() {}
 
-void ZDC_DetFactory::initializePbPb2015(){
-    m_RPDs_On = false; //Flag for both RPD modules
-    m_zdcOn = {{true, true, true, true}, //If the given ZDC is on
-               {true, true, true, true}};
-    m_zdcPos = {{-397.0, -27.0, 153.0, 303.0}, //Positions of the ZDC modules
-                {-397.0, -27.0, 153.0, 303.0}};
-    m_zdcModType = {{3,2,1,1}, //Module types of the ZDC modules
-                    {1,2,1,1}};
-}
-
-void ZDC_DetFactory::initializePbPb2023(){
-    m_RPDs_On = true; //Flag for both RPD modules
-    m_BRANs_On = true; //Flag for both BRAN modules
-    m_zdcOn = {{true, true, true, true}, //If the given ZDC is on
-               {true, true, true, true}};
-    m_zdcPos = {{-344, 52.15, 220.8, 375.8},
-                {-325.5, 20.15, 188.8, 343.8}};
-    m_zdcModType = {{3,2,1,1}, //Module types of the ZDC modules
-                    {1,2,1,1}};
-    m_rpdPos = {new GeoAlignableTransform(GeoTrf::Translate3D(2.012 * Gaudi::Units::mm, 21.388 * Gaudi::Units::mm, -178.0 * Gaudi::Units::mm)),
-                new GeoAlignableTransform(GeoTrf::Translate3D(1.774 * Gaudi::Units::mm, 21.344 * Gaudi::Units::mm, -210.0 * Gaudi::Units::mm))};
-    m_branPos = {-89.5, -121.5};
+void ZDC_DetFactory::setTANSlot(uint iside, double width, double height, double depth, const GeoTrf::Transform3D trf, const std::string& name){
+    m_tanW.at(iside) = width;
+    m_tanH.at(iside) = height;
+    m_tanD.at(iside) = depth;
+    m_tanSlotName.at(iside) = name;
+    m_tanSlotTransform.at(iside) = trf;
 }
 
 void ZDC_DetFactory::create(GeoPhysVol *world)
@@ -93,53 +78,41 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
 
     buildMaterials(theMaterialManager);
 
-    //Create the TAN/TAXN slot
-    const GeoMaterial *Air = theMaterialManager->getMaterial("std::Air");
-    GeoBox *Envelope_Box = new GeoBox(91 * Gaudi::Units::mm * 0.5, 181 * Gaudi::Units::mm * 0.5, 94.3 * Gaudi::Units::cm * 0.5);
-    GeoLogVol *Envelope_Logical = new GeoLogVol("Envelope_Logical", Envelope_Box, Air);
+    /*************************************************
+    * Create TAN/TAXN slots
+    **************************************************/
+    std::array<GeoFullPhysVol*, 2> Envelope_Physical;
+    for(uint side : {0,1}){
+        const GeoMaterial *Air = theMaterialManager->getMaterial("std::Air");
+        GeoBox *Envelope_Box = new GeoBox(m_tanW.at(side) * Gaudi::Units::mm * 0.5, m_tanH.at(side) * Gaudi::Units::mm * 0.5, m_tanD.at(side) * Gaudi::Units::mm * 0.5);
+        GeoLogVol *Envelope_Logical = new GeoLogVol("Envelope_Logical", Envelope_Box, Air);
+        Envelope_Physical.at(side) = new GeoFullPhysVol(Envelope_Logical);
 
-    char volName[256];
+        LogStream << MSG::INFO << "Creating " << m_tanSlotName.at(side) << " with dimensions (x,y,z) (" << m_tanW.at(side) << ", " << m_tanH.at(side) << ", " << m_tanD.at(side) << ") at ATLAS coordinates (x,y,z) (" << m_tanSlotTransform.at(side).translation().x() << ", " << m_tanSlotTransform.at(side).translation().y() << ", " << m_tanSlotTransform.at(side).translation().z() << ")" << endmsg;
+    }
+
+    /*************************************************
+    * Place Detectors in TAN/TAXN slots
+    **************************************************/
+    for(auto&& module : m_modules){
+        int side = (module->getSide() > 0) ? 1 : 0;
+        LogStream << MSG::INFO << "Creating " << module->getName() << " at TAN coordinates (x,y,z): (" << module->getTransform().translation().x() << ", " << module->getTransform().translation().y() << ", " << module->getTransform().translation().z() << ")" << endmsg;
+        module->create(Envelope_Physical.at(side), theMaterialManager, m_zdcID);
+    }
+
+    /*************************************************
+    * Place TAN/TAXN slots
+    **************************************************/
     for(int side : {0, 1}){
         int sideSign = (side == 0) ? -1 : 1;
-        GeoFullPhysVol *Envelope_Physical = new GeoFullPhysVol(Envelope_Logical);
-
-        /*************************************************
-         * Place ZDC modules
-         **************************************************/
-        for(int module = 0; module < 4; ++module){
-            if(!m_zdcOn[side][module]) continue;
-            ZDC_ZDCModule *zdcMod = new ZDC_ZDCModule(m_detectorStore, sideSign ,module, m_zdcID, m_zdcModType[side][module]);
-            zdcMod->create(Envelope_Physical, new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_zdcPos[side][module] * Gaudi::Units::mm)));
-        }
-
-        /*************************************************
-         * Place RPD
-         **************************************************/
-        if(m_RPDs_On){
-            ZDC_RPDModule *rpdMod = new ZDC_RPDModule(m_detectorStore, sideSign, 4, m_zdcID);
-            rpdMod->create(Envelope_Physical, m_rpdPos[side]);
-        }
-
-        /*************************************************
-         * Place BRAN
-         **************************************************/
-        if(m_BRANs_On){
-            ZDC_BRANModule *branMod = new ZDC_BRANModule(m_detectorStore, sideSign, 5, m_zdcID);
-            branMod->create(Envelope_Physical, new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_branPos[side] * Gaudi::Units::mm)));
-        }
-
-        /*************************************************
-         * Place TAN/TAXN slot
-         **************************************************/
-        sprintf(volName, "Zdc::ZDC_Air_Envelope %c", (side == 0) ? 'C' : 'A');
-        world->add(new GeoNameTag(volName));
+        world->add(new GeoNameTag(m_tanSlotName.at(side)));
         world->add(new GeoIdentifierTag(m_zdcID->channel_id(sideSign, 0, ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR).get_identifier32().get_compact()));
-        world->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(sideSign*141.580 * CLHEP::m)));
-        if(side == 0) world->add(new GeoAlignableTransform(GeoTrf::RotateY3D(180 * Gaudi::Units::deg)));
-        world->add(Envelope_Physical);
+        world->add(new GeoAlignableTransform(m_tanSlotTransform.at(side)));
+        world->add(Envelope_Physical.at(side));
 
-        m_detectorManager->addTreeTop(Envelope_Physical);
+        m_detectorManager->addTreeTop(Envelope_Physical.at(side));
     }
+
 }
 
 void ZDC_DetFactory::buildMaterials(StoredMaterialManager *materialManager){
@@ -201,10 +174,13 @@ void ZDC_DetFactory::buildMaterials(StoredMaterialManager *materialManager){
 
     // Absorption length index of fused silica derrived from 
     // https://www.heraeus.com/media/media/hca/doc_hca/products_and_solutions_8/optics/Data_and_Properties_Optics_fused_silica_EN.pdf
-    double silica_ABSL[nEntries];
-    for(int i=0; i<nEntries-2; ++i)
-        silica_ABSL[i] = 302.163 * cm;
-    silica_ABSL[nEntries - 1] = silica_ABSL[nEntries - 2] = 204.542 * cm;
+    double silica_ABSL[] = {1.786e+04 * cm, 1.556e+04 * cm, 1.982e+04 * cm, 2.369e+04 * cm, 2.046e+04 * cm, 1.595e+04 * cm, 1.582e+04 * cm,
+        1.420e+04 * cm, 1.279e+04 * cm, 1.545e+04 * cm, 1.498e+04 * cm, 1.358e+04 * cm, 1.824e+04 * cm, 2.320e+04 * cm,
+        3.736e+04 * cm, 2.155e+04 * cm, 1.718e+04 * cm, 1.871e+04 * cm, 2.286e+04 * cm, 3.597e+04 * cm, 4.358e+04 * cm,
+        2.751e+04 * cm, 1.967e+04 * cm, 1.743e+04 * cm, 1.425e+04 * cm, 1.198e+04 * cm, 1.371e+04 * cm, 1.911e+04 * cm,
+        4.413e+04 * cm, 4.002e+04 * cm, 2.621e+04 * cm, 1.420e+04 * cm, 1.085e+04 * cm, 1.020e+04 * cm, 1.090e+04 * cm,
+        1.267e+04 * cm, 1.369e+04 * cm, 1.427e+04 * cm, 1.484e+04 * cm, 1.480e+04 * cm, 1.443e+04 * cm, 1.274e+04 * cm,
+        1.242e+04 * cm, 1.212e+04 * cm, 1.232e+04 * cm, 1.251e+04 * cm, 1.168e+04 * cm, 1.052e+04 * cm, 1.197e+04 * cm, 8.355e+03 * cm};
 
     GeoMaterialPropertiesTable *silicaCoreMPT = new GeoMaterialPropertiesTable();
     silicaCoreMPT->AddProperty("RINDEX"   , photonEnergy, silica_RIND, nEntries); // index of refraction

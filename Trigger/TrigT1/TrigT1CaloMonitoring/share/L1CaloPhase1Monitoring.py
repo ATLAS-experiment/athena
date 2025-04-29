@@ -1,5 +1,5 @@
 #!/usr/bin/env athena
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## Script for Running the L1Calo Athena Simulation and/or Monitoring for Phase1
 ## can be run offline on raw or POOL files (for rerunning simulation)
@@ -8,11 +8,17 @@
 ##    online:  athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py
 ## Author: Will Buttinger
 
+from AthenaCommon.Logging import logging
+from AthenaCommon.Logging import log as topLog
+topLog.setLevel(logging.WARNING) # default to suppressing all info logging except our own
+log = logging.getLogger('L1CaloPhase1Monitoring.py')
+log.setLevel(logging.INFO)
+
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod,Format
 from AthenaCommon import Constants
-import os,sys
+import os
 import ispy
 import re
 partition = ispy.IPCPartition(os.getenv("TDAQ_PARTITION","ATLAS"))
@@ -25,7 +31,7 @@ flags.Input.Files = [] # so that when no files given we can detect that
 
 
 flags.Exec.OutputLevel = Constants.WARNING # by default make everything output at WARNING level
-flags.Exec.InfoMessageComponents = ["AthenaEventLoopMgr","THistSvc","PerfMonMTSvc","ApplicationMgr"] # Re-enable some info messaging though
+flags.Exec.InfoMessageComponents = ["AthenaEventLoopMgr","THistSvc","PerfMonMTSvc","ApplicationMgr","AvalancheSchedulerSvc"] # Re-enable some info messaging though
 flags.Exec.PrintAlgsSequence = True # print the alg sequence at the start of the job (helpful to see what is scheduled)
 # flags.Exec.FPE = -2 # disable FPE auditing ... set to 0 to re-enable
 
@@ -43,6 +49,7 @@ flags.Trigger.enableL1CaloPhase1 = True # used by this script to turn on/off the
 flags.Trigger.L1.doeFex = True
 flags.Trigger.L1.dojFex = True
 flags.Trigger.L1.dogFex = True
+flags.Trigger.L1.doTopo = True
 # if running online, override these with autoconfig values
 # will set things like the GlobalTag automatically
 if partition.isValid():
@@ -68,6 +75,7 @@ Extra flags are specified after a " -- " and the following are most relevant boo
   Trigger.L1.doeFex          : controls efex simulation and monitoring [default: True]
   Trigger.L1.dojFex          : controls jfex simulation and monitoring [default: True]
   Trigger.L1.dogFex          : controls gfex simulation and monitoring [default: True]
+  Trigger.L1.doTopo          : controls topo simulation and monitoring [default: True] (from 2023 Onwards)
   DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not  [default: False]
   PerfMon.doFullMonMT        : print info about execution time of algorithms and memory use etc [default: False]
 
@@ -87,7 +95,7 @@ parser.add_argument('--lumiBlock',default=None,help="specify to select a lumiBlo
 parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify to select an evtNumber")
 parser.add_argument('--stream',default="*",help="stream to lookup files in")
 parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
-parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath>, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
+parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath> or <folder>:<tag>[=<dbPath>] to override a tag, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
 parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
 args = flags.fillFromArgs(parser=parser)
 if args.runNumber is not None:
@@ -98,26 +106,30 @@ if args.runNumber is not None:
   # gives a filename (last part): data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0975._SFO-13._0001.data
   from glob import glob
   if args.lumiBlock is None: args.lumiBlock="*"
-  print("Looking up files in atlastier0 for run",args.runNumber,"lb =",args.lumiBlock)
+  log.info(" ".join(("Looking up files in atlastier0 for run",args.runNumber,"lb =",args.lumiBlock)))
   flags.Input.Files = []
   for lb in args.lumiBlock.split(","):
     if lb=="*":
       tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb*.*"
     else:
       tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb{int(lb):04}.*"
-    print("Trying",tryStr)
+    log.info(" ".join(("Trying",tryStr)))
     flags.Input.Files += glob(tryStr)
-  print("Found",len(flags.Input.Files),"files")
+  log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
 
 standalone = False
-# require at least 1 input file if running offline
+# require at least 1 input file if running offline, unless running config-generating mode ....
 if not partition.isValid() and len(flags.Input.Files)==0:
-  print("FATAL: Running in offline mode but no input files provided")
-  sys.exit(1)
+  if flags.Exec.MaxEvents==0:
+    # this test file is used for generating the han config file
+    flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"]
+  else:
+    log.fatal("Running in offline mode but no input files provided")
+    exit(1)
 elif partition.isValid():
-  print("Running Online with Partition:",partition.name())
+  log.info("Running Online with Partition:",partition.name())
   standalone = (partition.name()!="ATLAS")
-  if standalone : print("Using local menu because partition is not ATLAS")
+  if standalone : log.info("Using local menu because partition is not ATLAS")
 
 # if running on an input file, change the DQ environment, which will allow debug tree creation from monitoring algs
 if len(flags.Input.Files)>0:
@@ -130,6 +142,10 @@ if len(flags.Input.Files)>0:
   elif flags.Trigger.triggerConfig=='INFILE':
     # this happens with AOD data files, but this is incompatible with the setup of the LVL1ConfigSvc
     flags.Trigger.triggerConfig="DB" # so force onto DB usage
+  # legacy monitoring doesn't work with MC, so disable that if running on mc
+  if flags.Input.isMC and flags.Trigger.L1.doCalo:
+    log.info("Disabling legacy monitoring because it doesn't work with MC")
+    flags.Trigger.L1.doCalo=False
 
 if standalone :
   flags.Trigger.triggerConfig='FILE' #Uses generated L1Menu In online on input files
@@ -142,6 +158,7 @@ if flags.Exec.MaxEvents == 0:
   flags.Trigger.L1.doeFex=True
   flags.Trigger.L1.dojFex=True
   flags.Trigger.L1.dogFex=True
+  flags.Trigger.L1.doTopo=True
   flags.DQ.useTrigger=True # enables JetEfficiency algorithms
   flags.Exec.OutputLevel = Constants.INFO
 
@@ -150,20 +167,25 @@ if flags.GeoModel.AtlasVersion is None:
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
   flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
 
+if (flags.Input.Format == Format.POOL): flags.Trigger.L1.doTopo = False #Deactivating L1Topo if Format is POOL
+if not flags.Trigger.L1.doTopo: flags.Trigger.L1.doMuon = False # don't do muons if not doing topo
+
 if flags.Trigger.enableL1CaloPhase1:
   # add detector conditions flags required for rerunning simulation
   # needs input files declared if offline, hence doing after parsing
   from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-  setupDetectorsFromList(flags,['LAr','Tile','MBTS'],True)
+  setupDetectorsFromList(flags,['LAr','Tile','MBTS'] + (['RPC','TGC','MDT'] if flags.Trigger.L1.doMuon else []),True)
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 cfg = MainServicesCfg(flags)
 
+log.setLevel(logging.INFO)
 
 flags.lock()
 if flags.Exec.MaxEvents == 0: flags.dump(evaluate=True)
 
 if partition.isValid() and len(flags.Input.Files)==0:
+  flags.dump(evaluate=True)
   from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
   cfg.merge(EmonByteStreamCfg(flags)) # setup EmonSvc
   bsSvc = cfg.getService("ByteStreamInputSvc")
@@ -186,10 +208,11 @@ if partition.isValid() and len(flags.Input.Files)==0:
   bsSvc.LVL1Names = [] # name of L1 items to select
   bsSvc.LVL1Logic = "Ignore" # one of: Ignore, Or, And
 elif flags.Input.Format == Format.POOL:
+  log.info(f"Running Offline on {len(flags.Input.Files)} POOL files")
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
   cfg.merge(PoolReadCfg(flags))
 else:
-  print("Running Offline on", len(flags.Input.Files)," bytestream files")
+  log.info(f"Running Offline on {len(flags.Input.Files)} bytestream files")
   #from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
   #TODO: Figure out why the above line causes CA conflict @ P1 if try to run on a RAW file there
   from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
@@ -207,10 +230,10 @@ if flags.Trigger.triggerConfig=="FILE":
   createL1PrescalesFileFromMenu(flags)
   menuFilename = getL1MenuFileName(flags)
   if os.path.exists(menuFilename):
-    print("Using L1Menu:",menuFilename)
+    log.info(f"Using L1Menu: {menuFilename}")
   else:
-    print("L1Menu file does not exist:",menuFilename)
-    sys.exit(1)
+    log.fatal(f"L1Menu file does not exist: {menuFilename}")
+    exit(1)
 cfg.merge(L1ConfigSvcCfg(flags))
 
 # -------- CHANGES GO BELOW ------------
@@ -224,6 +247,12 @@ if partition.isValid() or (flags.Input.Format != Format.POOL and not flags.Input
   if flags.Trigger.L1.dojFex: decoderTools += [cfg.popToolsAndMerge(jFexRoiByteStreamToolCfg(flags=flags,name="jFexBSDecoderTool",writeBS=False))]
   if flags.Trigger.L1.dogFex: decoderTools += [cfg.popToolsAndMerge(gFexByteStreamToolCfg(flags=flags,name="gFexBSDecoderTool",writeBS=False))]
 
+  if flags.Trigger.L1.doMuon:
+    from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
+    cfg.merge(RpcBytestreamDecodeCfg(flags))
+    cfg.merge(TgcBytestreamDecodeCfg(flags))
+    from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuonRoIByteStreamToolCfg
+    decoderTools += [cfg.popToolsAndMerge(MuonRoIByteStreamToolCfg(flags, name="L1MuonBSDecoderTool", writeBS=False))]
 
 
   if flags.Trigger.L1.doCaloInputs:
@@ -240,7 +269,7 @@ if partition.isValid() or (flags.Input.Format != Format.POOL and not flags.Input
         MaybeMissingROBs= [id for tool in decoderTools for id in tool.ROBIDs ] if partition.name()!="ATLAS" or not partition.isValid() else [], # allow missing ROBs away from online ATLAS partition
         MonTool= cfg.popToolsAndMerge(L1TriggerByteStreamDecoderMonitoringCfg(flags,"L1TriggerByteStreamDecoder", decoderTools))
       ),sequenceName='AthAlgSeq'
-    )
+      )
 
 # rerun sim if required
 if flags.Trigger.enableL1CaloPhase1:
@@ -249,6 +278,19 @@ if flags.Trigger.enableL1CaloPhase1:
   #   from SGComps.AddressRemappingConfig import InputRenameCfg
   #   acc.merge(InputRenameCfg('xAOD::TriggerTowerContainer', 'xAODTriggerTowers_rerun', 'xAODTriggerTowers'))
   cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL else ""))
+
+  # print the algoVersions of the eFex from menu:
+  from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
+  L1_menu = getL1MenuAccess(flags)
+  L1_menu.printSummary()
+  em_algoVersion = L1_menu.thresholdExtraInfo("eEM").get("algoVersion", 0)
+  tau_algoVersion = L1_menu.thresholdExtraInfo("eTAU").get("algoVersion", 0)
+  log.info(f"algoVersions: eEM: {em_algoVersion}, eTAU: {tau_algoVersion}")
+
+  # scheduling simulation of topo
+  if flags.Trigger.L1.doTopo:
+    from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
+    cfg.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False)) # monitoring scheduled separately below
 
   # do otf masking:
   # from IOVDbSvc.IOVDbSvcConfig import addFolders,addOverride
@@ -314,6 +356,10 @@ if flags.DQ.doMonitoring:
       from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
       cfg.merge(JetEfficiencyMonitoringConfig(flags))
 
+  if flags.Trigger.L1.doTopo:
+    from L1TopoOnlineMonitoring.L1TopoOnlineMonitoringConfig import Phase1TopoMonitoringCfg
+    cfg.merge(Phase1TopoMonitoringCfg(flags))
+
   # input data monitoring
   if flags.Trigger.L1.doCaloInputs and not flags.Input.isMC:
     from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import EfexInputMonitoringConfig
@@ -352,7 +398,25 @@ cfg.merge( PerfMonMTSvcCfg(flags) )
 from AthenaConfiguration.Utils import setupLoggingLevels
 setupLoggingLevels(flags,cfg)
 
-if cfg.getService("AthenaEventLoopMgr"): cfg.getService("AthenaEventLoopMgr").IntervalInSeconds = 30
+if any([s.name=="AthenaEventLoopMgr" for s in cfg.getServices()]): cfg.getService("AthenaEventLoopMgr").IntervalInSeconds = 30
+if any([s.name=="AvalancheSchedulerSvc" for s in cfg.getServices()]):
+  cfg.getService("AvalancheSchedulerSvc").ShowDataDependencies=True
+
+# need to override a folder tag for LAr while testing v6 firmware...
+if not flags.Input.isMC:
+  from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+  if partition.isValid() and len(flags.Input.Files)==0:
+    # wait here for 2 minutes, to give LAr time to put fw info in the database
+    import time
+    log.info("Waiting 2 minutes for LATOME to get their databases in order")
+    time.sleep(120)
+  runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+  if runinfo.FWversion()==6:
+    # need a dbOverride ... add it
+    if args.dbOverrides is None: args.dbOverrides = []
+    args.dbOverrides += ["/LAR/Identifier/LatomeMapping:LARIdentifierLatomeMapping-fw6"]
+
+
 
 if type(args.dbOverrides)==list:
   from IOVDbSvc.IOVDbSvcConfig import addOverride
@@ -360,15 +424,23 @@ if type(args.dbOverrides)==list:
   #cfg.merge( addOverride(flags, folder="/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib", db="sqlite://;schema=mytest.db;dbname=CONDBR2",tag="" ) )
   #cfg.merge( addOverride(flags, folder="/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts", db="sqlite://;schema=/afs/cern.ch/user/w/will/calib.sqlite;dbname=L1CALO",tag="" ) )
   for override in args.dbOverrides:
-    print(override)
-    folderName,dbPath = override.split("=",1)
+    folderName,dbPath = override.split("=",1) if "=" in override else (override,"")
     if folderName == "": raise ValueError("Cannot parse dbOverride: " + override)
-    if ";dbname=" not in dbPath: dbPath += ";dbname=CONDBR2"
-    dbPath,dbInst = dbPath.split(";dbname=")
-    if not os.path.exists(dbPath): raise ValueError("dbOverride file doesn't exist: " + dbPath)
+    db = ""
+    if dbPath != "":
+      if ";dbname=" not in dbPath: dbPath += ";dbname=CONDBR2"
+      dbPath,dbInst = dbPath.split(";dbname=")
+      if not os.path.exists(dbPath): raise ValueError("dbOverride file doesn't exist: " + dbPath)
+      db = f"sqlite://;schema={dbPath};dbname={dbInst}"
+    tag = ""
+    if ":" in folderName:
+      folderName,tag = folderName.split(":",1)
     if folderName[0] != "/": folderName = "/TRIGGER/L1Calo/V1/Calibration/" + folderName
-    print("Overriding COOL folder:",folderName,dbPath,dbInst)
-    cfg.merge( addOverride(flags,folder=folderName,db=f"sqlite://;schema={dbPath};dbname={dbInst}",tag=""))
+    log.info(" ".join(("Overriding COOL folder=",folderName,"db=",db,"tag=",tag)))
+    if db=="":
+      cfg.merge( addOverride(flags,folder=folderName,tag=tag))
+    else:
+      cfg.merge( addOverride(flags,folder=folderName,db=db,tag=tag))
 
 
 # configure output AOD if requested
@@ -443,6 +515,10 @@ if flags.Output.AODFileName != "":
 # ensure reloading OTF masking every event if running online monitoring
 if "MaskedSCCondAlg" in cfg.getCondAlgos(): cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
 
+if flags.Trigger.L1.doeFex and (args.evtNumber is not None):
+  # when debugging individual events, add the eFex event dumper to the job
+  cfg.addEventAlgo(CompFactory.LVL1.eFexEventDumper(TowersKey="L1_eFexDataTowers",EMRoIKey="L1_eEMRoI",TauRoIKey="L1_eTauRoI"))
+
 # example of adding user algorithm
 # cfg.addEventAlgo(CompFactory.AnotherPackageAlg(),sequenceName="AthAlgSeq")
 
@@ -450,18 +526,24 @@ for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
   propName,propVal=propNameAndVal.split("=",1)
   applied = False
+  from collections import defaultdict
+  availableComps = defaultdict(list)
   for comp in [c for c in cfg._allComponents()]+cfg.getServices():
-    if comp.name==compName:
+    availableComps[comp.getType()] += [comp.getName()]
+    if comp.getName()==compName or comp.getType()==compName or comp.toStringProperty()==compName:
       applied = True
       exec(f"comp.{propNameAndVal}")
       break
   if not applied:
-    raise ValueError(f"postConfig {conf} had no effect ... typo?")
+    print("Available comps:")
+    for k,v in availableComps.items():
+      print(k,":",*v,sep="\n\t")
+    raise ValueError(f"postConfig {conf} had no effect ... typo? See list above of available components")
 
 # -------- CHANGES GO ABOVE ------------
 
 if flags.Exec.MaxEvents==0: cfg.printConfig(summariseProps=True)
-print("Configured Services:",*[svc.name for svc in cfg.getServices()])
+log.info( " ".join(("Configured Services:",*[svc.name for svc in cfg.getServices()])) )
 #print("Configured EventAlgos:",*[alg.name for alg in cfg.getEventAlgos()])
 #print("Configured CondAlgos:",*[alg.name for alg in cfg.getCondAlgos()])
 
@@ -479,11 +561,11 @@ if cfg.getService("DetectorStore").Dump:
 if flags.Exec.MaxEvents==0:
   # create a han config file if running in config-only mode
   # command used to generate official config:
-  #   athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data --evtMax 0 -- DQ.useTrigger=True
+  #   athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --evtMax 0
   from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
   L1CaloMonitorCfgHelper.printHanConfig()
-  sys.exit(0)
+  cfg._wasMerged = True # prevents spurious error message showing up about cfg that wasn't used
+  exit(0)
 
 if cfg.run().isFailure():
-  import sys
-  sys.exit(1)
+  exit(1)

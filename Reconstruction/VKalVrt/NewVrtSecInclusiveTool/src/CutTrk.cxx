@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///   @author   V.Kostykhin <Vadim.Kostyukhin@cern.ch>
@@ -72,7 +72,8 @@ namespace Rec{
             h.m_hb_trkD0->Fill( impactD0, m_w_1);
             h.m_hb_trkZ ->Fill( impactZ, m_w_1);
           }
-          if(std::abs(impactZ)*std::sin((*i_ntrk)->theta())>m_cutZVrt) continue;
+          if(std::abs(impactZ)*std::sin((*i_ntrk)->theta())>m_maxZVrt && m_maxZVrt > 0.) continue;
+          if(std::abs(impactZ)*std::sin((*i_ntrk)->theta())<m_minZVrt && m_minZVrt > 0.) continue;
           if(impactD0>m_cutD0Max)        continue;
           if(impactD0<m_cutD0Min)        continue;
           if(m_fillHist){

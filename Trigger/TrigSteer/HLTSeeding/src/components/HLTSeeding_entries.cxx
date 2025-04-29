@@ -20,6 +20,7 @@
 #include "../RoIsUnpackingToolBase.h"
 #include "../RoIsUnpackingToolPhase1.h"
 #include "../RoIsUnpackingEmulationTool.h"
+#include "../MURoIThresholdsTool.h"
 #include "../MURoIsUnpackingTool.h"
 #include "../PrescalingTool.h"
 #include "../PrescalingEmulationTool.h"
@@ -43,6 +44,7 @@ DECLARE_COMPONENT( CTPUnpackingTool )
 DECLARE_COMPONENT( CTPUnpackingEmulationTool )
 
 // Seeding tools: Muon
+DECLARE_COMPONENT( MURoIThresholdsTool ) // Run-4+
 DECLARE_COMPONENT( MURoIsUnpackingTool ) // legacy
 DECLARE_COMPONENT( MuonRoIsUnpackingTool ) // phase-1
 

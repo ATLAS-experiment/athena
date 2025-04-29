@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTau/TauThinningTool.h"
@@ -82,18 +82,14 @@ StatusCode DerivationFramework::TauThinningTool::doThinning() const
     for (size_t i=0; i<nTaus; ++i) tausToKeep.push_back(taus->at(i));
   }
 
-
-  if(tausToKeep.size() >0) {
-    for(size_t i=0; i < tausToKeep.size()-1; i++){ 
-      for (size_t j=i+1; j < tausToKeep.size(); j++){
-        if( (tausToKeep.at(i)->p4().DeltaR(tausToKeep.at(j)->p4())) < 0.01){
-          ATH_MSG_WARNING("Found duplicated tau with eta " << tausToKeep.at(j)->eta() << " phi " << tausToKeep.at(j)->phi() << " pt " << tausToKeep.at(j)->pt() << ". Removing it  ...");
-	  tausToKeep.erase( tausToKeep.begin()+j);
-        } 
-      } 
-    } 
-  }    
-
+  // protection against duplicate taus -- built from different seed jets, but end up having same (eta,phi)
+  if( tausToKeep.size() > 0){
+    for(size_t i=0; i < tausToKeep.size()-1; i++){
+      const auto* aTau=tausToKeep[i];
+      auto it = std::remove_if(tausToKeep.begin()+i+1,tausToKeep.end(),[aTau](const xAOD::TauJet* bTau) {return aTau->p4().DeltaR(bTau->p4()) < 0.01;});
+      tausToKeep.erase (it, tausToKeep.end());
+    }
+  }   
 
   // keep the various tau-related objects for taus passing the selection
   for (const auto* tau : tausToKeep) {

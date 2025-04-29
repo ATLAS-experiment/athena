@@ -1,5 +1,10 @@
-/*  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+/*  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#if defined(FLATTEN) && defined(__GNUC__)
+// Avoid warning in dbg build
+#pragma GCC optimize "-fno-var-tracking-assignments"
+#endif
 
 #include "src/SeedingTool.h"
 
@@ -11,6 +16,7 @@
 #include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Seeding/SeedConfirmationRangeConfig.hpp"
+#include "CxxUtils/inline_hints.h"
 
 using namespace Acts::HashedStringLiteral;
 
@@ -202,6 +208,7 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
+ATH_FLATTEN
   StatusCode
   SeedingTool::createSeeds(const EventContext& /*ctx*/,
 			   const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
@@ -281,6 +288,16 @@ namespace ActsTrk {
     
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
     typename decltype(m_finder)::SeedingState state;
+
+    // Already reserve the state vectors here.
+    
+    state.topSpVec.reserve(m_stateVectorReserveSize);
+    state.curvatures.reserve(m_stateVectorReserveSize);
+    state.impactParameters.reserve(m_stateVectorReserveSize);
+    state.linCircleTop.reserve(m_stateVectorReserveSize);
+    state.compatBottomSP.reserve(m_stateVectorReserveSize);
+    state.compatTopSP.reserve(m_stateVectorReserveSize);
+        
     state.spacePointMutableData.resize(std::distance(spBegin, spEnd));
 
     for (const auto [bottom, middle, top] : spacePointsGrouping) {
@@ -468,7 +485,7 @@ namespace ActsTrk {
     m_gridCfg = m_gridCfg.toInternalUnits();
 
     // Seed Finder
-    m_finder = {m_finderCfg, logger().cloneWithSuffix("Finder")};
+    m_finder = decltype(m_finder){m_finderCfg, logger().cloneWithSuffix("Finder")};
  
     return StatusCode::SUCCESS;
   }

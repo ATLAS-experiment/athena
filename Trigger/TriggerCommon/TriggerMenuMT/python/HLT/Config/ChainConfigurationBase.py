@@ -47,7 +47,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         log.debug("Configuring step %s with %d chainParts", stepName, len(self.dict['chainParts']))
         
         # do not generate Menu Sequences, just store the functions that can do that
-        seqArray = [functools.partial(gen, flags, **stepArgs) for gen in sequenceCfgArray]          
+        seqArray = [functools.partial(gen, flags, **stepArgs) for gen in sequenceCfgArray]
 
         if (len(seqArray)>0):                                
             if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                
@@ -62,10 +62,9 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         # if not returned any step
         raise RuntimeError("[getStep] No sequences generated for step %s!", stepName)
 
-    def getEmptyStep(self, stepID, stepPartName):
-        stepName = 'Step%s'%str(stepID) + '_' + stepPartName
-        log.debug("Configuring empty step %s", stepName)
-        return ChainStep(stepName, chainDicts=[self.dict], isEmpty = True)
+    def getEmptyStep(self, stepName):
+        log.debug('Configuring empty step %s', stepName)
+        return ChainStep(stepName, chainDicts=[self.dict], isEmpty=True)
  
     def buildChain(self, chainSteps):
     

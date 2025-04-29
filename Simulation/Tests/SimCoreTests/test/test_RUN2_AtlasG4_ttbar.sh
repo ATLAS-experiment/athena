@@ -11,13 +11,16 @@
 # art-output: *.pool.root
 # art-output: Config*.pkl
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2_BEST_KNOWLEDGE)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 AtlasG4_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationNoIoV' \
     --DataRunNumber '284500' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.HITS.pool.root" \
     --maxEvents 50 \

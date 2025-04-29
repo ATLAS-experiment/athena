@@ -5,8 +5,7 @@
 # Declare the package name:
 atlas_subdir( RDOAnalysis )
 
-# External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Core Tree Hist )
 
 # tag ROOTBasicLibs was not recognized in automatic conversion in cmt2cmake
 
@@ -22,3 +21,11 @@ atlas_add_component( RDOAnalysis
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_runtime( tools/RunRDOAnalysis.py )
+
+
+#### Standard geometry dumping test R3 (MC)
+atlas_add_test( testR3Geometry
+                SCRIPT python -m RDOAnalysis.RDOAnalysisConfig --nEvents 1 
+                PROPERTIES TIMEOUT 1200
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKINGGEOMETRY_MUONSTATIONTYPEBUILDER_H
@@ -10,7 +10,6 @@
 #include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
 #include "TrkDetDescrGeoModelCnv/VolumeConverter.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"  //in tool handle template
-#include "TrkDetDescrUtils/SharedObject.h"  //see the typedef for LayTr
 #include "TrkGeometry/TrackingVolume.h"     //also for LayerArray typedef
 
 // Gaudi
@@ -78,14 +77,14 @@ class MuonStationTypeBuilder : public AthAlgTool {
     /** Interface methode */
     static const InterfaceID& interfaceID();
     /** steering routine */
-    std::unique_ptr<Trk::TrackingVolumeArray> processBoxStationComponents(const GeoVPhysVol* cv, 
+    std::unique_ptr<Trk::TrackingVolumeArray> processBoxStationComponents(const GeoVPhysVol* cv,
                                                                           const Trk::CuboidVolumeBounds& envBounds,
                                                                           Cache&) const;
-    std::vector<std::unique_ptr<Trk::Layer>> processBoxComponentsArbitrary(const GeoVPhysVol* mv, 
+    std::vector<std::unique_ptr<Trk::Layer>> processBoxComponentsArbitrary(const GeoVPhysVol* mv,
                                                                            const Trk::CuboidVolumeBounds& envBounds,
                                                                            Cache& cache) const;
 
-    std::unique_ptr<Trk::TrackingVolumeArray> processTrdStationComponents(const GeoVPhysVol* cv, 
+    std::unique_ptr<Trk::TrackingVolumeArray> processTrdStationComponents(const GeoVPhysVol* cv,
                                                                           const Trk::TrapezoidVolumeBounds& envBounds,
                                                                           Cache&) const;
 
@@ -96,7 +95,7 @@ class MuonStationTypeBuilder : public AthAlgTool {
     std::unique_ptr<Trk::TrackingVolume> processTgcStation(const GeoVPhysVol* cv, Cache&) const;
 
     std::unique_ptr<Trk::DetachedTrackingVolume> process_sTGC(const Identifier& id,
-                                                              const GeoVPhysVol* gv, 
+                                                              const GeoVPhysVol* gv,
                                                               const Amg::Transform3D& transf) const;
 
     std::unique_ptr<Trk::DetachedTrackingVolume> process_MM(const Identifier& id,
@@ -104,12 +103,12 @@ class MuonStationTypeBuilder : public AthAlgTool {
                                                             const Amg::Transform3D& transf) const;
 
     /** components */
-    std::unique_ptr<Trk::TrackingVolume> processMdtBox(const Trk::Volume& trkVol, 
+    std::unique_ptr<Trk::TrackingVolume> processMdtBox(const Trk::Volume& trkVol,
                                                        const GeoVPhysVol*,
-                                                       const Amg::Transform3D&, 
+                                                       const Amg::Transform3D&,
                                                        double, Cache&) const;
 
-    std::unique_ptr<Trk::TrackingVolume> processMdtTrd(const Trk::Volume& trkVol, 
+    std::unique_ptr<Trk::TrackingVolume> processMdtTrd(const Trk::Volume& trkVol,
                                                        const GeoVPhysVol*,
                                                        const Amg::Transform3D&, Cache&) const;
 
@@ -124,10 +123,10 @@ class MuonStationTypeBuilder : public AthAlgTool {
 
     std::unique_ptr<Trk::LayerArray> processCSCTrdComponent(const GeoVPhysVol*,
                                                             const Trk::TrapezoidVolumeBounds&,
-                                                            const Amg::Transform3D& , 
+                                                            const Amg::Transform3D& ,
                                                             Cache&) const;
 
-    std::unique_ptr<Trk::LayerArray> processCSCDiamondComponent(const GeoVPhysVol*, 
+    std::unique_ptr<Trk::LayerArray> processCSCDiamondComponent(const GeoVPhysVol*,
                                                                const Trk::DoubleTrapezoidVolumeBounds&,
                                                                const Amg::Transform3D&, Cache&) const;
 
@@ -135,7 +134,7 @@ class MuonStationTypeBuilder : public AthAlgTool {
                                                          const Trk::TrapezoidVolumeBounds&,
                                                          const Amg::Transform3D&, Cache&) const;
 
-    std::pair<std::unique_ptr<Trk::Layer>, 
+    std::pair<std::unique_ptr<Trk::Layer>,
               std::vector<std::unique_ptr<Trk::Layer>>> createLayerRepresentation(Trk::TrackingVolume& trVol) const;
 
 
@@ -144,33 +143,32 @@ class MuonStationTypeBuilder : public AthAlgTool {
     // used to be private ..
     double get_x_size(const GeoVPhysVol*) const;
     double decodeX(const GeoShape*) const;
-    double envelopeThickness(const Trk::VolumeBounds& vb) const;
+    static double envelopeThickness(const Trk::VolumeBounds& vb) ;
     Trk::MaterialProperties getAveragedLayerMaterial(const GeoVPhysVol*, double,
                                                      double) const;
     Trk::MaterialProperties collectStationMaterial(const Trk::TrackingVolume& trVol, double) const;
 
    private:
-    void printVolumeBounds(std::string comment,
+    void printVolumeBounds(const std::string & comment,
                            const Trk::VolumeBounds& vb) const;
 
     // derive layer bounds from the station envelope
-    std::unique_ptr<Trk::SurfaceBounds> getLayerBoundsFromEnvelope(const Trk::Volume& envelope) const;
+    static std::unique_ptr<Trk::SurfaceBounds> getLayerBoundsFromEnvelope(const Trk::Volume& envelope) ;
 
     // calculate area defined by (planar) surface bounds
-    double area(const Trk::SurfaceBounds& sb) const;
+    static double area(const Trk::SurfaceBounds& sb) ;
 
 
     Gaudi::Property<bool> m_multilayerRepresentation{this, "BuildMultilayerRepresentation", true};
     Gaudi::Property<bool> m_resolveSpacer{this, "ResolveSpacerBeams", false};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    
+
     // Helper tool to create TrackingVolume Arrays
     ToolHandle<Trk::ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator{this, "TrackingVolumeArrayCreator",
-                                                            "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"};  
+                                                            "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"};
 
     std::unique_ptr<const Trk::Material> m_muonMaterial;  //!< the material
-    Trk::GeoMaterialConverter m_materialConverter;
     Trk::GeoShapeConverter m_geoShapeConverter;
     Trk::VolumeConverter m_volumeConverter;
 };

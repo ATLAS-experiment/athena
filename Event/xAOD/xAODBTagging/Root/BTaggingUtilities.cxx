@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -49,6 +49,7 @@ namespace xAOD::BTaggingUtilities {
    const ElementLink< xAOD::BTaggingContainer >&
    getBTaggingLink( const SG::AuxElement& part ) {
 
+     // cppcheck-suppress returnTempReference; false positive
      return DEFAULT_ACC( part );
    }
 

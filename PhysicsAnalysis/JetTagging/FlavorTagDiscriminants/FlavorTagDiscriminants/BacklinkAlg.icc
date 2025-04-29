@@ -14,14 +14,6 @@
 namespace FlavorTagDiscriminants {
 
   template <typename OLD, typename NEW>
-  BacklinkAlg<OLD,NEW>::BacklinkAlg(
-    const std::string& name, ISvcLocator* svcloc):
-    AthReentrantAlgorithm(name, svcloc)
-  {
-  }
-
-
-  template <typename OLD, typename NEW>
   StatusCode BacklinkAlg<OLD,NEW>::initialize() {
     ATH_CHECK(m_oldLink.initialize());
     ATH_CHECK(m_newLink.initialize());

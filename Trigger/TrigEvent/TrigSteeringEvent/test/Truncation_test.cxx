@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef XAOD_STANDALON
@@ -50,13 +50,13 @@ int test_Truncation (HLTResult &res, int payload_size, unsigned expected_size, u
 
 
   if ( back.getNavigationResult().size()  != expected_nav_size ) { 
-    log << MSG::INFO << "deserialzied navigation size distinct from expected, got: " << back.getNavigationResult().size() << " expected: " << expected_nav_size << endmsg;
+    log << MSG::INFO << "deserialized navigation size distinct from expected, got: " << back.getNavigationResult().size() << " expected: " << expected_nav_size << endmsg;
     return -1;
   }
 
 
   if ( back.getExtras().size()  != expected_extras_size ) { 
-    log << MSG::INFO << "deserialzied extras size distinct from expected, got: " << back.getExtras().size() << " expected: " << expected_extras_size << endmsg;
+    log << MSG::INFO << "deserialized extras size distinct from expected, got: " << back.getExtras().size() << " expected: " << expected_extras_size << endmsg;
     return -1;
   }
   delete p1;

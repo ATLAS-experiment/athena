@@ -7,6 +7,7 @@ class SeedingStrategy(FlagEnum):
     Default = "Default"
     Orthogonal = "Orthogonal"
     Gbts = "Gbts"
+    Gbts2 = "Gbts2"
 
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
@@ -38,10 +39,9 @@ def createActsConfigFlags():
     actscf = AthConfigFlags()
     
     # General Flags
-    actscf.addFlag('Acts.EDM.PersistifyClusters', False)
+    actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints)
     actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
     actscf.addFlag('Acts.EDM.PersistifyTracks', False)
-    actscf.addFlag('Acts.EDM.PersistifyTrackParticles',False)
     actscf.addFlag('Acts.useCache', False)
     
     # Scheduling
@@ -57,12 +57,34 @@ def createActsConfigFlags():
     # 'None'    : no material map is provided
     actscf.addFlag('Acts.TrackingGeometry.MaterialSource', 'Default')
     actscf.addFlag('Acts.TrackingGeometry.MaterialCalibrationFolder', 'ACTS/MaterialMaps/ITk')
+    actscf.addFlag('Acts.TrackingGeometry.MaterialFileExtension', '')
+
+    ## Enable Tracking geometry with additional passive layers
+    actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerRadii', [70.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerHalflengthZ', [240.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerThickness', [1.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerRadii', [195., 260.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerHalflengthZ', [370., 370.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerThickness', [1., 1.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerRadii', [480., 665., 880.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerHalflengthZ', [1370., 1370., 1370.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerThickness', [1., 1., 1.])
 
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)
+    actscf.addFlag('Acts.doAnalysisNtuples', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.Clusters.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.SpacePoints.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.Seeds.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.Tracks.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.storeTrackStateInfo', False)
 
+    # Cluster
+    actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)
+    
     # SpacePoint
     actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy
 
@@ -74,22 +96,31 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
-    actscf.addFlag('Acts.trackFindingTrackSelectorConfig', 1) # 0=no selection, 1=default track selection (chi2<25,25), 2=Athena chi2 cut (chi2<9,25), 3=no looser cuts in branch stopper, 4=no pix hit/pix hole/str hole cuts
     actscf.addFlag('Acts.doTwoWayCKF', True) # run CKF twice, first with forward propagation with smoothing, then with backward propagation
     actscf.addFlag('Acts.useStripSeedsFirst', False) # switch order of seed collections
-    actscf.addFlag('Acts.reverseTrackFindingForStrips', False) # track finding starts going inward for strip seeds
+    actscf.addFlag('Acts.autoReverseSearchCKF', False) # track finding starts going inward first if we are outside the defined RZ boundary
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
 
+    # Calibrations
+    actscf.addFlag('Acts.OnTrackCalibration.performCovarianceCalibration', True) # perform calibration of covariance during on track analogue cluster calibration
+    
     # Track fitting
     actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections
     actscf.addFlag('Acts.fitFromPRD', False) # Acts.writeTrackCollection needs to be True for either cases. If Acts.fitFromPRD is False, fit from ROT; else, fit from PRD
     actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, type=TrackFitterType) # Define Tracking algorithm for refitting
 
-    actscf.addFlag("Acts.useActsGsfInEgamma", False)
+    # GSF specific flags
+    actscf.addFlag("Acts.GsfRefitLegacyTrk", False) # Refit Legacy tracks using ACTS GSF
+    actscf.addFlag("Acts.GsfRefitActs", False) # Refit ACTS tracks using ACTS GSF
+    actscf.addFlag("Acts.GsfMaxComponents", 12)
+    actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
+    actscf.addFlag("Acts.GsfDirectNavigation", False)
+    actscf.addFlag("Acts.GsfOutlierChi2Cut", 1e4) # Effectively no cut. Compatible with legacy
 
-    actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False) # if True, uses no outlier chi2 cut as before (chi2<25,inf)
-
+    # Decorations
+    actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)
+    
     return actscf

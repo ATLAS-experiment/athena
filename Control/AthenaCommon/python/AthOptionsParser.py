@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file AthenaCommon.AthOptionsParser
 # @purpose the central module to parse command line options of athena.py
@@ -209,7 +209,7 @@ def getArgumentParser(legacy_args=False, **kwargs):
 
     g.add_argument('-d', '--debug', metavar='STAGE', nargs='?', const='init',
                    choices=['conf', 'init', 'exec', 'fini'],
-                   help='attach debugger at stage: %(choices)s [%(const)s]')
+                   help='attach debugger at stage: %(choices)s [%(const)s] (gdb or $ATLAS_DEBUGGER if set)')
 
     g.add_argument('--debugWorker', action='store_true', dest='debug_worker',
                    help='pause AthenaMP workers at bootstrap until SIGUSR1 signal received')
@@ -314,20 +314,29 @@ def parse(legacy_args=False):
     # i.e. this allows the following to work:
     #   athena MyScript.py --help
     # to reveal the help messaging determined by MyScript.py
-    if "-h" in args or "--help" in args:
-        if "-h" in args: args.remove("-h")
-        if "--help" in args: args.remove("--help")
-        # need to unrequire any required arguments in order to do a "pre parse"
+    doHelp = any(a in ('-h', '--help') or a.startswith('--help=') for a in args)
+    if doHelp:
+        # need to unrequire any required arguments in order to do a "pre-parse"
         unrequiredActions = []
         for a in parser._actions:
             if a.required:
                 unrequiredActions.append(a)
                 a.required = False
+
+        # remove the help actions for the "pre-parse"
+        helpActions = {'-h' : parser._option_string_actions.pop('-h'),
+                       '--help' : parser._option_string_actions.pop('--help')}
+
+        # parse with the modified parser
         opts, leftover = parser.parse_known_args(args)
-        for a in unrequiredActions: a.required=True
+
+        # restore original settings
+        parser._option_string_actions.update(helpActions)
+        for a in unrequiredActions:
+            a.required = True
+
+        # no script, just run argparsing as normal
         if not opts.scripts:
-            # no script, just run argparsing as normal, with --help as for: athena --help
-            args += ["--help"]
             opts, leftover = parser.parse_known_args(args)
     else:
         opts, leftover = parser.parse_known_args(args)

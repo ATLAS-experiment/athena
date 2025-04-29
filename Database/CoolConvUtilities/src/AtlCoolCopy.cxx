@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AtlCoolCopy.cxx
@@ -2490,7 +2490,7 @@ int AtlCoolCopy::setOpts(int argc, const char* argv[]) {
 	   m_excludechans.begin();itr!=m_excludechans.end();++itr) 
       std::cout << "Channel " << *itr << " will be excluded" << std::endl;
   }
-  if (m_hitag) std::cout << "All hierachical tags connecting to referenced tags will be copied" << std::endl;
+  if (m_hitag) std::cout << "All hierarchical tags connecting to referenced tags will be copied" << std::endl;
   if (m_nohitag) std::cout << "Hierarchical tag relations will not be copied"
 			   << std::endl;
   return 0;

@@ -11,5 +11,5 @@ atlas_subdir( MuonTruthHelpers )
 atlas_add_library( MuonTruthHelpers
                    src/*.cxx
                    PUBLIC_HEADERS MuonTruthHelpers
-                   LINK_LIBRARIES xAODMuonPrepData xAODMuonSimHit xAODMuon GeoPrimitives
+                   LINK_LIBRARIES xAODMuonPrepData xAODMuonSimHit xAODMuon xAODTruth GeoPrimitives
                    PRIVATE_LINK_LIBRARIES MuonSpacePoint MuonPatternEvent)

@@ -1,22 +1,11 @@
 
 """Define methods to construct configured sTGC overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-
-def sTGC_DataOverlayExtraCfg(flags, **kwargs):
-    """Return a ComponentAccumulator with sTGC data overlay specifics"""
-    acc = ComponentAccumulator()
-
-    # We need to convert BS to RDO for data overlay
-    from MuonConfig.MuonBytestreamDecodeConfig import sTgcBytestreamDecodeCfg
-    acc.merge(sTgcBytestreamDecodeCfg(flags))
-
-    return acc
 
 
 def sTGC_OverlayAlgCfg(flags, name="STGC_Overlay", **kwargs):
@@ -51,7 +40,7 @@ def sTGC_TruthOverlayCfg(flags, name="STGC_TruthOverlay", **kwargs):
     acc = ComponentAccumulator()
 
     # We do not need background TGC SDOs
-    if flags.Overlay.DataOverlay:
+    if not flags.Input.isMC:
         kwargs.setdefault("BkgInputKey", "")
     else:
         kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}sTGC_SDO")
@@ -86,21 +75,25 @@ def sTGC_OverlayCfg(flags):
     """Configure and return a ComponentAccumulator for sTGC overlay"""
     acc = ComponentAccumulator()
 
-    # Add data overlay specifics
-    if flags.Overlay.DataOverlay:
-        acc.merge(sTGC_DataOverlayExtraCfg(flags))
-
     # Add sTGC RDO to digit config
     from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
     acc.merge(STGC_RdoToDigitCfg(flags))
+
     # Add sTGC overlay digitization algorithm
     from MuonConfig.sTGC_DigitizationConfig import sTGC_OverlayDigitizationBasicCfg
     acc.merge(sTGC_OverlayDigitizationBasicCfg(flags))
+
     # Add sTGC overlay algorithm
     acc.merge(sTGC_OverlayAlgCfg(flags))
+
     # Add sTGC truth overlay
     if flags.Digitization.EnableTruth:
-        acc.merge(sTGC_TruthOverlayCfg(flags))
+        if flags.Muon.usePhaseIIGeoSetup:
+            from MuonTruthOverlayR4.TruthOverlayConfig import TruthOverlayCfg
+            acc.merge(TruthOverlayCfg(flags, name="sTgcTruthOverlay", WriteKey="sTGC_SDO", deadTime = 100.))
+        else:
+            acc.merge(sTGC_TruthOverlayCfg(flags))
+
     # Add sTGC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import STGC_DigitToRDOCfg
     acc.merge(STGC_DigitToRDOCfg(flags))

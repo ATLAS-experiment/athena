@@ -14,14 +14,10 @@
 }
 StatusCode NswAsBuiltCondAlg::initialize() {
     ATH_CHECK(m_readMmAsBuiltParamsKey.initialize(m_MmJsonPath.value().empty() && !m_readMmAsBuiltParamsKey.empty()));
-    ATH_CHECK(m_readSTgcAsBuiltParamsKey.initialize(m_StgcJsonPath.value().empty() && !m_readSTgcAsBuiltParamsKey.empty()));
     ATH_CHECK(m_writeNswAsBuiltKey.initialize());
     if (!m_MmJsonPath.value().empty()) ATH_MSG_INFO("Load MicroMega as-built from external JSON "<< m_MmJsonPath);
     else if (!m_readMmAsBuiltParamsKey.empty()) ATH_MSG_INFO("Load MicroMega as-built from COOL <"<<m_readMmAsBuiltParamsKey.key()<<">");
     else ATH_MSG_INFO("MicroMega as-built is deactiviated");
-    if (!m_StgcJsonPath.value().empty()) ATH_MSG_INFO("Load sTGC as-built from external JSON "<<m_StgcJsonPath);
-    else if (!m_readSTgcAsBuiltParamsKey.empty()) ATH_MSG_INFO("Load sTGC as-built from COOL <"<<m_readSTgcAsBuiltParamsKey.key()<<">");
-    else ATH_MSG_INFO("sTGC as-built is deactiviated");
     return StatusCode::SUCCESS;
 }
 
@@ -73,42 +69,7 @@ StatusCode NswAsBuiltCondAlg::execute(const EventContext& ctx) const {
         writeCdo->microMegaData->parseJSON(buffer.str());       
     }
 
-    if (!m_readSTgcAsBuiltParamsKey.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readSTgcAsBuiltParamsKey, ctx};
-        if (!readHandle.isValid()) {
-            ATH_MSG_ERROR("Null pointer to the read STGC/ASBUILTPARAMS conditions object");
-            return StatusCode::FAILURE;
-        }
-        writeHandle.addDependency(readHandle);
-        ATH_MSG_INFO("Size of STGC/ASBUILTPARAMS CondAttrListCollection " << readHandle.fullKey()
-                                                                     << " ->size()= " << readHandle->size());
-        unsigned int nLines{0};
-        for( CondAttrListCollection::const_iterator itr = readHandle->begin(); itr != readHandle->end(); ++itr) {
-            const coral::AttributeList& atr = itr->second;
-            const std::string data{*(static_cast<const std::string*>((atr["data"]).addressOfData()))};
-            ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" data load is " << data << " FINISHED HERE ");
-            writeCdo->sTgcData = std::make_unique<NswAsBuilt::StgcStripCalculator>();
-            writeCdo->sTgcData->parseJSON(data);          
-            ++nLines;
-        }
-        if(nLines>1) {
-            ATH_MSG_FATAL(nLines << " data objects were loaded for STGC/ASBUILTPARAMS! Expected only one for this validity range!");
-            return StatusCode::FAILURE;
-        }
-    }
-    if (!m_StgcJsonPath.value().empty()){
-        ATH_MSG_INFO("Load micromega as-built constants from a JSON file");
-        std::ifstream thefile{PathResolverFindCalibFile(m_StgcJsonPath)};
-        if (!thefile.good()) {
-            ATH_MSG_FATAL("No such file or directory "<<m_StgcJsonPath);
-            return StatusCode::FAILURE;
-        }
-        std::stringstream buffer;
-        buffer << thefile.rdbuf();
-        writeCdo->sTgcData = std::make_unique<NswAsBuilt::StgcStripCalculator>();
-        writeCdo->sTgcData->parseJSON(buffer.str());            
-    }
-    if (!writeCdo->sTgcData && !writeCdo->microMegaData) {
+    if (!writeCdo->microMegaData) {
         ATH_MSG_ERROR("No AsBuilt constants were loaded. Please check the algorithm configucration");
         return StatusCode::FAILURE;
     }

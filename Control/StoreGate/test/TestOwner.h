@@ -27,6 +27,8 @@ class TestOwnerBase
   : virtual public extend_interfaces<IProperty, INamedInterface, IDataHandleHolder>
 {
 public:
+  TestOwnerBase& operator= (TestOwnerBase&&) = delete;
+
   virtual const std::string& name() const override { return m_name; }
 
   virtual std::vector<Gaudi::DataHandle*> inputHandles() const  override { std::abort(); }

@@ -6,6 +6,8 @@
 
 #include "EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h"
 
+using ROOT::Math::PtEtaPhiEVector;
+
 namespace CP {
 
     DileptonOSSFInvariantMassWindowSelectorAlg::DileptonOSSFInvariantMassWindowSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator)
@@ -31,6 +33,12 @@ namespace CP {
   }
 
   StatusCode DileptonOSSFInvariantMassWindowSelectorAlg::execute() {
+    // accessors
+    static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
+    static const SG::AuxElement::ConstAccessor<float> acc_eta_dressed("eta_dressed");
+    static const SG::AuxElement::ConstAccessor<float> acc_phi_dressed("phi_dressed");
+    static const SG::AuxElement::ConstAccessor<float> acc_e_dressed("e_dressed");
+
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
@@ -107,7 +115,21 @@ namespace CP {
 		const xAOD::TruthParticle* secondElectron = (*truthElectrons)[j];
 		if (!m_electronTruthSelection || m_electronTruthSelection.getBool(*secondElectron, sys)) {
 		  if (firstElectron->charge() != secondElectron->charge()){
-		    float mll = (firstElectron->p4() + secondElectron->p4()).M();
+		    float mll = -1.;
+            if (m_useDressedProperties) {
+              PtEtaPhiEVector el0, el1;
+              el0.SetCoordinates(acc_pt_dressed(*firstElectron),
+                                 acc_eta_dressed(*firstElectron),
+                                 acc_phi_dressed(*firstElectron),
+                                 acc_e_dressed(*firstElectron));
+              el1.SetCoordinates(acc_pt_dressed(*secondElectron),
+                                 acc_eta_dressed(*secondElectron),
+                                 acc_phi_dressed(*secondElectron),
+                                 acc_e_dressed(*secondElectron));
+              mll = (el0+el1).M();
+            } else {
+              mll = (firstElectron->p4() + secondElectron->p4()).M();
+            }
 		    decision |= (mll < m_mll_upper && mll > m_mll_lower);
 		  }
 		}
@@ -125,7 +147,21 @@ namespace CP {
 		const xAOD::TruthParticle* secondMuon = (*truthMuons)[j];
 		if (!m_muonTruthSelection || m_muonTruthSelection.getBool(*secondMuon, sys)) {
 		  if (firstMuon->charge() != secondMuon->charge()){
-		    float mll = (firstMuon->p4() + secondMuon->p4()).M();
+            float mll = -1.;
+            if (m_useDressedProperties) {
+              PtEtaPhiEVector mu0, mu1;
+              mu0.SetCoordinates(acc_pt_dressed(*firstMuon),
+                                 acc_eta_dressed(*firstMuon),
+                                 acc_phi_dressed(*firstMuon),
+                                 acc_e_dressed(*firstMuon));
+              mu1.SetCoordinates(acc_pt_dressed(*secondMuon),
+                                 acc_eta_dressed(*secondMuon),
+                                 acc_phi_dressed(*secondMuon),
+                                 acc_e_dressed(*secondMuon));
+              mll = (mu0+mu1).M();
+            } else {
+              mll = (firstMuon->p4() + secondMuon->p4()).M();
+            }
 		    decision |= (mll < m_mll_upper && mll > m_mll_lower);
 		  }
 		}

@@ -33,44 +33,45 @@ namespace InDet {
       InDet::TrackSystematicMap.at(TRK_EFF_TIGHT_IBL),
       InDet::TrackSystematicMap.at(TRK_EFF_TIGHT_PP0),
       InDet::TrackSystematicMap.at(TRK_EFF_TIGHT_PHYSMODEL),
-      InDet::TrackSystematicMap.at(TRK_FAKE_RATE_LOOSE_ROBUST),
-      InDet::TrackSystematicMap.at(TRK_EFF_LARGED0_GLOBAL),
-      InDet::TrackSystematicMap.at(TRK_EFF_LARGED0_IBL),
-      InDet::TrackSystematicMap.at(TRK_EFF_LARGED0_PP0),
-      InDet::TrackSystematicMap.at(TRK_EFF_LARGED0_PHYSMODEL),
+      InDet::TrackSystematicMap.at(TRK_EFF_LOOSE_COMBINED), //combined systematics are to be used in downstream objects such as secondary vertexing ONLY
+      InDet::TrackSystematicMap.at(TRK_EFF_TIGHT_COMBINED), //they are not an "additional" systematic, but rather a replacement for the standard efficiencies where four variations are prohibitive
     };
 
   InDetTrackTruthFilterTool::InDetTrackTruthFilterTool(const std::string& name) :
-    InDetTrackSystematicsTool(name),
-    m_trackOriginTool("InDet::InDetTrackTruthOriginTool", this)
+    InDetTrackSystematicsTool(name)
   {
 
 #ifndef XAOD_STANDALONE
     declareInterface<IInDetTrackTruthFilterTool>(this);
 #endif
 
-    declareProperty("trackOriginTool", m_trackOriginTool);
-
-    declareProperty("Seed", m_seed);
-
-    declareProperty("fPrim", m_fPrim);
-    declareProperty("fSec", m_fSec);
-    declareProperty("fFakeLoose", m_fFakeLoose);
-    declareProperty("fFakeTight", m_fFakeTight);
-    declareProperty("fPU", m_fPU);
-    declareProperty("fFrag", m_fFrag);
-    declareProperty("fFromC", m_fFromC);
-    declareProperty("fFromB", m_fFromB);
-    declareProperty("trkEffSystScale", m_trkEffSystScale);
-    declareProperty("doLRTSystematics", m_doLRTSystematics);
-
-    declareProperty("calibFileNomEff", m_calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root");
-    declareProperty("calibFileLRTEff", m_calibFileLRTEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root");
   }
 
   StatusCode InDetTrackTruthFilterTool::initialize() {
 
+    ATH_CHECK ( m_trackOriginTool.retrieve() );
+
     m_rnd = std::make_unique<TRandom3>(m_seed);
+
+    bool anyEffSystActive = isActive(TRK_EFF_LOOSE_GLOBAL) || isActive(TRK_EFF_LOOSE_IBL) || isActive(TRK_EFF_LOOSE_PP0) || 
+                isActive(TRK_EFF_LOOSE_PHYSMODEL) || isActive(TRK_EFF_TIGHT_GLOBAL) || isActive(TRK_EFF_TIGHT_IBL) || 
+                isActive(TRK_EFF_TIGHT_PP0) || isActive(TRK_EFF_TIGHT_PHYSMODEL ) || isActive(TRK_EFF_LOOSE_COMBINED) || isActive(TRK_EFF_TIGHT_COMBINED);
+
+    bool anyFakeRateActive = isActive(TRK_FAKE_RATE_LOOSE) || isActive(TRK_FAKE_RATE_TIGHT);
+
+    if (anyEffSystActive) {
+      if (m_calibFileNomEff.empty()) {
+      ATH_MSG_ERROR("No calibration file for requested track efficiency set. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
+      return StatusCode::FAILURE;
+      }
+    }
+
+    if (anyFakeRateActive) {
+      if (m_fFakeLoose == -1.0 && m_fFakeTight == -1.0) {
+      ATH_MSG_ERROR("Requested fake rate is unavailable. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
+      return StatusCode::FAILURE;
+      }
+    }
 
     ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
            m_trkEffHistLooseGlobal,
@@ -107,27 +108,16 @@ namespace InDet {
 
     ATH_MSG_INFO( "Using for nominal track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileNomEff) );
 
-    if(m_doLRTSystematics) {
-      ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
-             m_trkEffHistLRTGlobal,
-             m_calibFileLRTEff,
-             "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp5Overall_LRT") );
-      ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
-             m_trkEffHistLRTIBL,
-             m_calibFileLRTEff,
-             "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp10IBL_LRT") );
-      ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
-             m_trkEffHistLRTPP0,
-             m_calibFileLRTEff,
-             "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp25PP0_LRT") );
-      ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
-             m_trkEffHistLRTPhysModel,
-             m_calibFileLRTEff,
-             "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSQGSP_LRT") );
-      ATH_MSG_INFO( "Using for LRT track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileLRTEff) );
-    }
-
-    ATH_CHECK ( m_trackOriginTool.retrieve() );
+     m_histMap = {
+      {"TRK_EFF_LOOSE_GLOBAL", m_trkEffHistLooseGlobal},
+      {"TRK_EFF_LOOSE_IBL", m_trkEffHistLooseIBL},
+      {"TRK_EFF_LOOSE_PP0", m_trkEffHistLoosePP0},
+      {"TRK_EFF_LOOSE_PHYSMODEL", m_trkEffHistLoosePhysModel},
+      {"TRK_EFF_TIGHT_GLOBAL", m_trkEffHistTightGlobal},
+      {"TRK_EFF_TIGHT_IBL", m_trkEffHistTightIBL},
+      {"TRK_EFF_TIGHT_PP0", m_trkEffHistTightPP0},
+      {"TRK_EFF_TIGHT_PHYSMODEL", m_trkEffHistTightPhysModel}
+    };
 
     ATH_CHECK ( InDetTrackSystematicsTool::initialize() );
 
@@ -137,13 +127,6 @@ namespace InDet {
 
   InDetTrackTruthFilterTool::~InDetTrackTruthFilterTool() {
 
-    delete m_fPrimHistogram;
-    delete m_fSecHistogram;
-    //delete m_fFakeHistogram;
-    delete m_fPUHistogram;
-    delete m_fFragHistogram;
-    delete m_fFromCHistogram;
-    delete m_fFromBHistogram;
     delete m_trkEffHistLooseGlobal;
     delete m_trkEffHistLooseIBL;
     delete m_trkEffHistLoosePP0;
@@ -152,20 +135,7 @@ namespace InDet {
     delete m_trkEffHistTightIBL;
     delete m_trkEffHistTightPP0;
     delete m_trkEffHistTightPhysModel;
-    if(m_doLRTSystematics) {
-      delete m_trkEffHistLRTGlobal;
-      delete m_trkEffHistLRTIBL;
-      delete m_trkEffHistLRTPP0;
-      delete m_trkEffHistLRTPhysModel;
-    }
-
-    m_fPrimHistogram = nullptr;
-    m_fSecHistogram = nullptr;
-    // m_fFakeHistogram = nullptr;
-    m_fPUHistogram = nullptr;
-    m_fFragHistogram = nullptr;
-    m_fFromCHistogram = nullptr;
-    m_fFromBHistogram = nullptr;
+    
     m_trkEffHistLooseGlobal = nullptr;
     m_trkEffHistLooseIBL = nullptr;
     m_trkEffHistLoosePP0 = nullptr;
@@ -174,28 +144,6 @@ namespace InDet {
     m_trkEffHistTightIBL = nullptr;
     m_trkEffHistTightPP0 = nullptr;
     m_trkEffHistTightPhysModel = nullptr;
-    m_trkEffHistLRTGlobal = nullptr;
-    m_trkEffHistLRTIBL = nullptr;
-    m_trkEffHistLRTPP0 = nullptr;
-    m_trkEffHistLRTPhysModel = nullptr;
-  }
-
-  bool InDetTrackTruthFilterTool::accept(const xAOD::TrackParticle* track, float mu) const {
-
-    // this is only really useful if you are using the "robust" systematic version, otherwise the mu set can't do anything
-    if(isActive( TRK_FAKE_RATE_LOOSE_ROBUST )){
-
-      // calcuate probability for this to be a fake, and then roll random numbers to decide if it is one, and if it should not be accepted
-      float fakeProb = pseudoFakeProbability(track,mu);
-      if(dropPseudoFake(fakeProb)) return false;
-
-      // otherwise, pass the track
-      return true;
-
-    } else {
-      ATH_MSG_ERROR("User-specified mu value cannot be applied due to using wrong systematic version - select TRK_FAKE_RATE_LOOSE_ROBUST is you want to use this");
-      return true; // if you're not using the robust version, do nothing
-    }
   }
 
   bool InDetTrackTruthFilterTool::accept(const xAOD::TrackParticle* track) const {
@@ -203,34 +151,7 @@ namespace InDet {
     float pt = track->pt();
     float eta = track->eta();
 
-    // Do robust version without using truth first if selected, as this is relatively decoupled from the rest
-    if(isActive( TRK_FAKE_RATE_LOOSE_ROBUST )) {
-      const xAOD::EventInfo* ei = 0;
-      float mu = 20; // sensible mu default
-      if ( ! evtStore()->retrieve( ei , "EventInfo" ).isSuccess() ) { // this will check data vs. MC and run number.
-        throw std::runtime_error("Error in InDetTrackTruthFilterTool::accept - failed to retrieve EventInfo.");
-      }
-      mu = ei->averageInteractionsPerCrossing();
-
-      if (not accept(track,mu)) return false;
-    }
-    // now, back to using truth...
-
     int origin = m_trackOriginTool->getTrackOrigin(track);
-
-    // we unimplemented histograms for these, so only flat defaults will be used.
-    float fPrim = getFractionDropped(m_fPrim, m_fPrimHistogram, pt, eta);
-    if(InDet::TrkOrigin::isPrimary(origin) && m_rnd->Uniform(0, 1) > fPrim) return false;
-    float fSec = getFractionDropped(m_fSec, m_fSecHistogram, pt, eta);
-    if(InDet::TrkOrigin::isSecondary(origin) && m_rnd->Uniform(0, 1) > fSec) return false;
-    float fPU = getFractionDropped(m_fPU, m_fPUHistogram, pt, eta);
-    if(InDet::TrkOrigin::isPileup(origin) && m_rnd->Uniform(0, 1) > fPU) return false;
-    float fFrag = getFractionDropped(m_fFrag, m_fFragHistogram, pt, eta);
-    if(InDet::TrkOrigin::isFragmentation(origin) && m_rnd->Uniform(0, 1) > fFrag) return false;
-    float fFromC = getFractionDropped(m_fFromC, m_fFromCHistogram, pt, eta);
-    if(InDet::TrkOrigin::isFromD(origin) && m_rnd->Uniform(0, 1) > fFromC) return false;
-    float fFromB = getFractionDropped(m_fFromB, m_fFromBHistogram, pt, eta);
-    if(InDet::TrkOrigin::isFromB(origin) && m_rnd->Uniform(0, 1) > fFromB) return false;
 
     if ( InDet::TrkOrigin::isFake(origin) ) {
       bool isActiveLoose = isActive( TRK_FAKE_RATE_LOOSE );
@@ -239,7 +160,7 @@ namespace InDet {
        throw std::runtime_error( "Both Loose and TightPrimary versions of fake rate systematic are set." );
       }
       if ( isActiveLoose ) {
-        //float fFake = getFractionDropped(m_fFake, m_fFakeHistogram, pt, eta); // there is no fake-rate histogram - just a flat uncertainty
+        // there is no fake-rate histogram - just a flat uncertainty
         if(m_rnd->Uniform(0, 1) < m_fFakeLoose) return false;
       }
       if ( isActiveTight ) {
@@ -280,44 +201,21 @@ namespace InDet {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistTightPhysModel, pt, eta);
         if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
       }
-    }
 
-    if(m_doLRTSystematics) {
-      static const SG::ConstAccessor<ElementLink< xAOD::TruthParticleContainer > >
-        truthParticleLinkAcc ("truthParticleLink");
-      const ElementLink< xAOD::TruthParticleContainer > &truthParticleLink =
-        truthParticleLinkAcc (*track);
-      if(truthParticleLink.isValid()) {
-        const xAOD::TruthParticle *truthParticle = *truthParticleLink;
-        double eta = truthParticle->eta();
-
-        static const SG::ConstAccessor<ElementLink< xAOD::TruthVertexContainer > >
-          prodVtxLinkAcc ("prodVtxLink");
-        const ElementLink< xAOD::TruthVertexContainer > &truthVertexLink =
-          prodVtxLinkAcc (*truthParticle);
-        if(truthVertexLink.isValid()) {
-          const xAOD::TruthVertex *truthVertex = *truthVertexLink;
-          double prodR = truthVertex->perp();
-          if ( isActive( TRK_EFF_LARGED0_GLOBAL ) ) {
-            float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTGlobal, eta, prodR, false);
-            if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
-          }
-
-          if ( isActive( TRK_EFF_LARGED0_IBL ) ) {
-            float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTIBL, eta, prodR, false);
-            if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
-          }
-
-          if ( isActive( TRK_EFF_LARGED0_PP0 ) ) {
-            float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTPP0, eta, prodR, false);
-            if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
-          }
-
-          if ( isActive( TRK_EFF_LARGED0_PHYSMODEL ) ) {
-            float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTPhysModel, eta, prodR, false);
-            if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
-          }
-        }
+      // combined systematics represent the sum in quadrature of the individual systematics
+      if ( isActive( TRK_EFF_LOOSE_COMBINED ) ) {
+        float fTrkEffSyst = sqrt( pow(getFractionDropped(1, m_trkEffHistLooseGlobal, pt, eta), 2) +
+                                  pow(getFractionDropped(1, m_trkEffHistLooseIBL, pt, eta), 2) +
+                                  pow(getFractionDropped(1, m_trkEffHistLoosePP0, pt, eta), 2) +
+                                  pow(getFractionDropped(1, m_trkEffHistLoosePhysModel, pt, eta), 2) );
+        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+      }
+      if ( isActive( TRK_EFF_TIGHT_COMBINED ) ) {
+        float fTrkEffSyst = sqrt( pow(getFractionDropped(1, m_trkEffHistTightGlobal, pt, eta), 2) +
+                                  pow(getFractionDropped(1, m_trkEffHistTightIBL, pt, eta), 2) +
+                                  pow(getFractionDropped(1, m_trkEffHistTightPP0, pt, eta), 2) +
+                                  pow(getFractionDropped(1, m_trkEffHistTightPhysModel, pt, eta), 2) );
+        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
       }
     }
 
@@ -369,60 +267,26 @@ namespace InDet {
     return frac;
   }
 
-  // this is where the calculation of the fake probability is done if you are not using truth info to determine whether a track is fake
+  float InDetTrackTruthFilterTool::getTrackUncertainty(const xAOD::TrackParticle* track, const std::string& systName) const {
 
-  float InDetTrackTruthFilterTool::pseudoFakeProbability(const xAOD::TrackParticle* track, float mu) const {
-
-    float pt = track->pt();
-    float d0 = track->d0();   
-
-    // make a function to determine which tracks we will classify as fake, parameters determined from fit to full-truth MC16e ttbar
-    float fakeProb = 0.01;
-    // this is the mu dependence part
-    if(mu>20) {
-      float p0 = 0.008645;
-      float p1 = 0.0001114;
-      float p2 = 9.299e-6;
-      fakeProb = p0 + (p1*mu) + (p2*mu*mu);
+    auto it = m_histMap.find(systName);
+    if (it == m_histMap.end()) {
+      ATH_MSG_ERROR( "getTrackUncertainty: Standard track systematic name " << systName << " is not recognized. Returning 0." );
+      return 0.;
     }
 
-    // now we add the pT term
-    float pTcorr = 0.02;
-    if(pt<50000) {
-      float p0 = 0.02;
-      float p1 = -3.564;
-      float p2 = -0.0005982;
-      float param = p1 + (p2 * pt);
-      pTcorr = p0 + std::exp(param);
+    TH2* hist = it->second;
+    if (hist == nullptr) {
+      ATH_MSG_ERROR( "Standard tracking efficiency histogram for " << systName << " is not properly initialized!" );
+      return 0.;
     }
 
-    fakeProb*=pTcorr;
+    //convert pt to GeV
+    float pt = track->pt() * 1.e-3;
 
-    float d0corr = 1;
-    d0corr = std::tanh(std::abs(d0));
-
-    fakeProb*=d0corr;
-
-    // multiply by empirical ad hoc rescaling factor 
-    // to give correct overall probability
-    fakeProb*=309.602;
-
-    return fakeProb;
-
-  }
-
-  bool InDetTrackTruthFilterTool::dropPseudoFake(float prob) const {
-
-    bool isFake = false;
-    if(m_rnd->Uniform(0, 1) < prob) isFake=true;
-
-    // Now, if we've decided if this is a fake, we apply the uncertainty
-    if(isFake){
-      if(m_rnd->Uniform(0, 1) < m_fFakeLoose) return true; // drop this track
-    }
-
-    return false;
-
+    //check that track pt does not go beyond range
+    if( pt >= hist->GetXaxis()->GetXmax() ) pt = hist->GetXaxis()->GetXmax() - 0.001;
+    return hist->GetBinContent(hist->FindBin(pt, track->eta()));
   }
 
   bool InDetTrackTruthFilterTool::isAffectedBySystematic( const CP::SystematicVariation& syst ) const

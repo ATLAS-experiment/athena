@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
 
@@ -161,7 +161,7 @@ namespace Athena_test {
 #endif
 
     //.....add new vertex with geantino
-    ge.add_vertex(genVertex);
+    ge.add_vertex(std::move(genVertex));
     HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
   }
 }

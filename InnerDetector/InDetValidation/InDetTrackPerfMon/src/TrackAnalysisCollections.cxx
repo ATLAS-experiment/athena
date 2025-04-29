@@ -22,7 +22,7 @@
 IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( 
   const std::string& anaTag ) :
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
-    m_anaTag( anaTag )
+    m_anaTag( anaTag ), m_newChain( true ), m_newRoi( true )
 {
   /// tracks
   m_truthPartVec.resize( NStages );
@@ -831,6 +831,45 @@ IDTPM::TrackAnalysisCollections::refTrackVec(
   return m_nullTrackVec;
 }
 
+/// ------------------------
+/// --- Get track counts ---
+/// ------------------------
+/// TEST
+std::vector< size_t >
+IDTPM::TrackAnalysisCollections::testTrackCounts()
+{
+  std::vector< size_t > counts( NCOUNTERS, 0 );
+  counts[ ALL ] = m_trkAnaDefSvc->isTestTruth() ?
+      testTruthVec( FULL ).size() :
+      testTrackVec( FULL ).size();
+  counts[ SELECTED ] = m_trkAnaDefSvc->isTestTruth() ?
+      testTruthVec( FS ).size() :
+      testTrackVec( FS ).size();
+  counts[ INROI ] = m_trkAnaDefSvc->isTestTruth() ?
+      testTruthVec( InRoI ).size() :
+      testTrackVec( InRoI ).size();
+  counts[ MATCHED ] = matches().getNmatches();
+  return counts;
+}
+
+/// REFERENCE
+std::vector< size_t >
+IDTPM::TrackAnalysisCollections::refTrackCounts()
+{
+  std::vector< size_t > counts( NCOUNTERS, 0 );
+  counts[ ALL ] = m_trkAnaDefSvc->isReferenceTruth() ?
+      refTruthVec( FULL ).size() :
+      refTrackVec( FULL ).size();
+  counts[ SELECTED ] = m_trkAnaDefSvc->isReferenceTruth() ?
+      refTruthVec( FS ).size() :
+      refTrackVec( FS ).size();
+  counts[ INROI ] = m_trkAnaDefSvc->isReferenceTruth() ?
+      refTruthVec( InRoI ).size() :
+      refTrackVec( InRoI ).size();
+  counts[ MATCHED ] = matches().getNmatches( true );
+  return counts;
+}
+
 /// ----------------------------------
 /// --- Get FULL Vertex containers ---
 /// ----------------------------------
@@ -947,6 +986,45 @@ IDTPM::TrackAnalysisCollections::refRecoVertexVec(
 
   ATH_MSG_DEBUG( "No Test reco vertex vector found" );
   return m_nullRecoVertVec;
+}
+
+/// -------------------------
+/// --- Get vertex counts ---
+/// -------------------------
+/// TEST
+std::vector< size_t >
+IDTPM::TrackAnalysisCollections::testVertexCounts()
+{
+  std::vector< size_t > counts( NCOUNTERS, 0 );
+  counts[ ALL ] = m_trkAnaDefSvc->isTestTruth() ?
+      testTruthVertexVec( FULL ).size() :
+      testRecoVertexVec( FULL ).size();
+  counts[ SELECTED ] = m_trkAnaDefSvc->isTestTruth() ?
+      testTruthVertexVec( FS ).size() :
+      testRecoVertexVec( FS ).size();
+  counts[ INROI ] = m_trkAnaDefSvc->isTestTruth() ?
+      testTruthVertexVec( InRoI ).size() :
+      testRecoVertexVec( InRoI ).size();
+  counts[ MATCHED ] = 0; /// TODO: add matched vertex count
+  return counts;
+}
+
+/// REFERENCE
+std::vector< size_t >
+IDTPM::TrackAnalysisCollections::refVertexCounts()
+{
+  std::vector< size_t > counts( NCOUNTERS, 0 );
+  counts[ ALL ] = m_trkAnaDefSvc->isReferenceTruth() ?
+      refTruthVertexVec( FULL ).size() :
+      refRecoVertexVec( FULL ).size();
+  counts[ SELECTED ] = m_trkAnaDefSvc->isReferenceTruth() ?
+      refTruthVertexVec( FS ).size() :
+      refRecoVertexVec( FS ).size();
+  counts[ INROI ] = m_trkAnaDefSvc->isReferenceTruth() ?
+      refTruthVertexVec( InRoI ).size() :
+      refRecoVertexVec( InRoI ).size();
+  counts[ MATCHED ] = 0; /// TODO: add matched vertex count
+  return counts;
 }
 
 /// -----------------------------------------

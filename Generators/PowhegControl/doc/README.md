@@ -334,8 +334,14 @@ which also allows features such as PDF reweighting.
 Contact the experts in case your desired process is not available in V2, a request might need to be made to the process authors.
 
 **Powheg Box SVN revisions for the processes used in each
-`External/Powheg` tag are listed [HERE](https://docs.google.com/spreadsheets/d/16XvI5k2I2On4TkkIWJC9MXr0fMaRU2SvOkgBucRPzs0)
-in a Google doc.**
+`External/Powheg` tag are given in the following files
+
+  - [ATLASOTF-07-09](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-09/Install.sh)
+  - [ATLASOTF-07-08](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-08/Install.sh)
+  - [ATLASOTF-07-07](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-07/Install.sh)
+  - [ATLASOTF-07-06](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-06/Install.sh)
+  - [older](https://docs.google.com/spreadsheets/d/16XvI5k2I2On4TkkIWJC9MXr0fMaRU2SvOkgBucRPzs0)
+.**
 
 
 
@@ -423,6 +429,21 @@ collect the file `integration_grids.tar.gz` that will be produced at the end.
 Make sure you have measures in place to allow the job to take the required CPU cores and time, e.g.
 when running for a prolonged time on lxplus your jobs may just get killed.
 
+When running locally, you may speed up the process by running in multicore mode - see the [Running in multicore mode](#running-in-multicore-mode) section below.
+
+Futhermore, it is pointless to produce events with alternative scale and PDF weights,
+when running with the sole purpose of producing the integration grids.
+Therefore it may be usefull to temporarily modify the joboption as follows, to deactivate the computation of such weights:
+```python
+PowhegConfig.PDF = 93300 # replace by the lhapdf ID of your nominal PDF
+PowhegConfig.mu_F = 1.0
+PowhegConfig.mu_R = 1.0
+```
+Don't forget to put back the original settings afterwards, when launching the actual event production!
+
+Finally, in order to be reused in further event generation jobs,
+the file `integration_grids.tar.gz` must be renamed following the naming convention
+mentioned in [this twiki page](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware#Production_transforms_and_job_op), i.e. something like `mc_13TeV.[physicsShort].GRID.tar.gz`.
 
 
 ### Event weights: Born-level suppression and negative weights
@@ -583,6 +604,8 @@ to the desired number of cores to use, e.g.:
 ```bash
 export ATHENA_CORE_NUMBER=8
 ```
+
+For AthGeneration releases older than 23.6.40, the environment variable is `ATHENA_PROC_NUMBER`.
 
 
 

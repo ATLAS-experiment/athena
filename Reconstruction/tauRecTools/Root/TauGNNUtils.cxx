@@ -116,7 +116,7 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     auto calc = std::make_unique<GNNVarCalc>();
 
     // Scalar variable calculator functions
-    calc->insert("absEta", Variables::absEta, scalar_vars);
+    //calc->insert("absEta", Variables::absEta, scalar_vars);
     calc->insert("isolFrac", Variables::isolFrac, scalar_vars);
     calc->insert("centFrac", Variables::centFrac, scalar_vars);
     calc->insert("etOverPtLeadTrk", Variables::etOverPtLeadTrk, scalar_vars);
@@ -131,11 +131,11 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("trFlightPathSig", Variables::trFlightPathSig, scalar_vars);
     calc->insert("massTrkSys", Variables::massTrkSys, scalar_vars);
     calc->insert("pt", Variables::pt, scalar_vars);
-    calc->insert("pt_tau_log", Variables::pt_tau_log, scalar_vars);
-    calc->insert("ptDetectorAxis", Variables::ptDetectorAxis, scalar_vars);
-    calc->insert("ptIntermediateAxis", Variables::ptIntermediateAxis, scalar_vars);
+    //calc->insert("pt_tau_log", Variables::pt_tau_log, scalar_vars);
+    //calc->insert("ptDetectorAxis", Variables::ptDetectorAxis, scalar_vars);
+    //calc->insert("ptIntermediateAxis", Variables::ptIntermediateAxis, scalar_vars);
     //---added for the eVeto
-    calc->insert("ptJetSeed_log",              Variables::ptJetSeed_log, scalar_vars);
+    /*calc->insert("ptJetSeed_log",              Variables::ptJetSeed_log, scalar_vars);
     calc->insert("absleadTrackEta",            Variables::absleadTrackEta, scalar_vars);
     calc->insert("leadTrackDeltaEta",          Variables::leadTrackDeltaEta, scalar_vars);
     calc->insert("leadTrackDeltaPhi",          Variables::leadTrackDeltaPhi, scalar_vars);
@@ -147,14 +147,15 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("ClustersMeanCenterLambda",   Variables::ClustersMeanCenterLambda, scalar_vars);
     calc->insert("ClustersMeanFirstEngDens",   Variables::ClustersMeanFirstEngDens, scalar_vars);
     calc->insert("ClustersMeanPresamplerFrac", Variables::ClustersMeanPresamplerFrac, scalar_vars);
+    */
 
     // Track variable calculator functions
     calc->insert("pt_log", Variables::Track::pt_log, track_vars);
     calc->insert("trackPt", Variables::Track::trackPt, track_vars);
     calc->insert("trackEta", Variables::Track::trackEta, track_vars);
     calc->insert("trackPhi", Variables::Track::trackPhi, track_vars);
-    calc->insert("pt_tau_log", Variables::Track::pt_tau_log, track_vars);
-    calc->insert("pt_jetseed_log", Variables::Track::pt_jetseed_log, track_vars);
+    //calc->insert("pt_tau_log", Variables::Track::pt_tau_log, track_vars);
+    //calc->insert("pt_jetseed_log", Variables::Track::pt_jetseed_log, track_vars);
     calc->insert("d0_abs_log", Variables::Track::d0_abs_log, track_vars);
     calc->insert("z0sinThetaTJVA_abs_log", Variables::Track::z0sinThetaTJVA_abs_log, track_vars);
     calc->insert("z0sinthetaTJVA", Variables::Track::z0sinthetaTJVA, track_vars);
@@ -167,19 +168,23 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("dPhiJetSeedAxis", Variables::Track::dPhiJetSeedAxis, track_vars);
     calc->insert("nInnermostPixelHits", Variables::Track::nInnermostPixelHits, track_vars);
     calc->insert("nPixelHits", Variables::Track::nPixelHits, track_vars);
-    calc->insert("nSCTHits", Variables::Track::nSCTHits, track_vars);
-    calc->insert("nIBLHitsAndExp", Variables::Track::nIBLHitsAndExp, track_vars);
+    //calc->insert("nSCTHits", Variables::Track::nSCTHits, track_vars);
+    //calc->insert("nIBLHitsAndExp", Variables::Track::nIBLHitsAndExp, track_vars);
     calc->insert("nPixelHitsPlusDeadSensors", Variables::Track::nPixelHitsPlusDeadSensors, track_vars);
     calc->insert("nSCTHitsPlusDeadSensors", Variables::Track::nSCTHitsPlusDeadSensors, track_vars);
-    calc->insert("eProbabilityHT", Variables::Track::eProbabilityHT, track_vars);
-    calc->insert("eProbabilityNN", Variables::Track::eProbabilityNN, track_vars);
-    calc->insert("eProbabilityNNorHT", Variables::Track::eProbabilityNNorHT, track_vars);
-    calc->insert("chargedScoreRNN", Variables::Track::chargedScoreRNN, track_vars);
-    calc->insert("isolationScoreRNN", Variables::Track::isolationScoreRNN, track_vars);
-    calc->insert("conversionScoreRNN", Variables::Track::conversionScoreRNN, track_vars);
-    calc->insert("fakeScoreRNN", Variables::Track::fakeScoreRNN, track_vars);
+    /* Development variables 
+    //calc->insert("eProbabilityHT", Variables::Track::eProbabilityHT, track_vars);
+    //calc->insert("eProbabilityNN", Variables::Track::eProbabilityNN, track_vars);
+    //calc->insert("eProbabilityNNorHT", Variables::Track::eProbabilityNNorHT, track_vars);
+    //calc->insert("chargedScoreRNN", Variables::Track::chargedScoreRNN, track_vars);
+    //calc->insert("isolationScoreRNN", Variables::Track::isolationScoreRNN, track_vars);
+    //calc->insert("conversionScoreRNN", Variables::Track::conversionScoreRNN, track_vars);
+    //calc->insert("fakeScoreRNN", Variables::Track::fakeScoreRNN, track_vars);
+    */
+
     //Extension - variables for GNTau
     calc->insert("numberOfInnermostPixelLayerHits", Variables::Track::numberOfInnermostPixelLayerHits, track_vars);
+    /* Development variables
     calc->insert("numberOfPixelHits", Variables::Track::numberOfPixelHits, track_vars);
     calc->insert("numberOfPixelSharedHits", Variables::Track::numberOfPixelSharedHits, track_vars);
     calc->insert("numberOfPixelDeadSensors", Variables::Track::numberOfPixelDeadSensors, track_vars);
@@ -203,27 +208,32 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("log_sumpt2_TV", Variables::Track::log_sumpt2_TV, track_vars);
     calc->insert("log_sumpt_PV0", Variables::Track::log_sumpt_PV0, track_vars);
     calc->insert("log_sumpt2_PV0", Variables::Track::log_sumpt2_PV0, track_vars);
+    */
 
     // Cluster variable calculator functions
-    calc->insert("et_log", Variables::Cluster::et_log, cluster_vars);
-    calc->insert("pt_tau_log", Variables::Cluster::pt_tau_log, cluster_vars);
-    calc->insert("pt_jetseed_log", Variables::Cluster::pt_jetseed_log, cluster_vars);
+    //calc->insert("et_log", Variables::Cluster::et_log, cluster_vars);
+    //calc->insert("pt_tau_log", Variables::Cluster::pt_tau_log, cluster_vars);
+    //calc->insert("pt_jetseed_log", Variables::Cluster::pt_jetseed_log, cluster_vars);
     calc->insert("dEta", Variables::Cluster::dEta, cluster_vars);
     calc->insert("dPhi", Variables::Cluster::dPhi, cluster_vars);
     calc->insert("SECOND_R", Variables::Cluster::SECOND_R, cluster_vars);
     calc->insert("SECOND_LAMBDA", Variables::Cluster::SECOND_LAMBDA, cluster_vars);
     calc->insert("CENTER_LAMBDA", Variables::Cluster::CENTER_LAMBDA, cluster_vars);
-    //---added for the eVeto
+    /*---added for the eVeto
     calc->insert("SECOND_LAMBDAOverClustersMeanSecondLambda", Variables::Cluster::SECOND_LAMBDAOverClustersMeanSecondLambda, cluster_vars);
     calc->insert("CENTER_LAMBDAOverClustersMeanCenterLambda", Variables::Cluster::CENTER_LAMBDAOverClustersMeanCenterLambda, cluster_vars);
     calc->insert("FirstEngDensOverClustersMeanFirstEngDens" , Variables::Cluster::FirstEngDensOverClustersMeanFirstEngDens, cluster_vars);
+    */
 
     //Extension - Variables for GNTau
-    calc->insert("e", Variables::Cluster::e, cluster_vars);
+    //calc->insert("e", Variables::Cluster::e, cluster_vars);
     calc->insert("et", Variables::Cluster::et, cluster_vars);
+    
+    /*Development variables
     calc->insert("FIRST_ENG_DENS", Variables::Cluster::FIRST_ENG_DENS, cluster_vars);
     calc->insert("EM_PROBABILITY", Variables::Cluster::EM_PROBABILITY, cluster_vars);
     calc->insert("CENTER_MAG", Variables::Cluster::CENTER_MAG, cluster_vars);
+    */ 
     return calc;
 }
 

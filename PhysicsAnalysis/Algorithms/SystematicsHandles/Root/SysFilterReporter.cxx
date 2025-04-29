@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -43,7 +43,13 @@ namespace CP
     else
       m_combiner.m_passedAll = false;
     // decorate event info
-    m_combiner.m_params.m_eventDecisionOutputDecoration.set (*m_eventInfo, m_passed, m_sys);
+    // Don't let exceptions escape from destructors.
+    try {
+      m_combiner.m_params.m_eventDecisionOutputDecoration.set (*m_eventInfo, m_passed, m_sys);
+    }
+    catch (...) {
+      ANA_MSG_DEBUG ("exception in ~SysFilterReporter for " << m_sys.name());
+    }
 
     // only recording nominal event selection for now
     if (m_passed && m_sys.empty())

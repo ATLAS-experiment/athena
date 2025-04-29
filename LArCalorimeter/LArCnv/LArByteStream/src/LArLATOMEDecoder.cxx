@@ -672,28 +672,27 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
     int nsc = 0;
     unsigned int oldipacket = 0;
     for (unsigned int itimeslot = 0; itimeslot < 6; ++itimeslot) {
-
-      unsigned int l_bcid = (bswap_32(p[s])) >> 16;
-      if (itimeslot != 0) {
-        if (l_bcid != bcid) {
-          ATH_MSG_WARNING("ERROR: inconsistent BCID between time slots");
-        }
-      } else {
-        if (bcid != s_nBunches) {  /// start of packet, bcid still unvalid
-          //// should increase by one but take care of rotation at s_nBunches;
-          unsigned int bcid_c = bcid + 1;
-          if (bcid_c == s_nBunches) {
-            bcid = 0;
-            bcid_c = 0;
-          }
-          if (bcid_c != l_bcid) {
-            ATH_MSG_WARNING("ERROR: BCID not increasing properly between samples, L1ID is: "
-                            << m_l1ID << ", BCID is from payload: " << l_bcid << ", expected BCID is: " << bcid_c << ", LATOME channel is: " << nsc);
-          }
-        }
-        m_BCIDsInEvent[iBC] = l_bcid;
+      unsigned int l_bcid = (bswap_32(p[s]))>>16;
+      if(itimeslot!=0){
+	if(l_bcid!=bcid){
+	  ATH_MSG_WARNING( "ERROR: inconsistent BCID between time slots" );
+	}
       }
-      bcid = l_bcid;
+      else{
+	if(bcid!=s_nBunches){ /// start of packet, bcid still unvalid
+	  //// should increase by one but take care of rotation at s_nBunches;
+	  unsigned int bcid_c = bcid+1;
+	  if(bcid_c==s_nBunches){
+            bcid=0;
+	    bcid_c = 0;
+	  }
+	  if(bcid_c != l_bcid){
+	   ATH_MSG_WARNING( "ERROR: BCID not increasing properly between samples, sourceId: " << m_nthLATOME << " L1ID is: " << m_l1ID << ", BCID is from payload: " << l_bcid << ", expected BCID is: " << bcid_c << ", LATOME channel is: " << nsc );
+	  }
+	}
+	m_BCIDsInEvent[iBC] = l_bcid;
+      }
+      bcid=l_bcid;
 
       unsigned int mux = ((bswap_32(p[s])) >> 8) & 0xff;
       increaseWordShift(s);
@@ -1005,11 +1004,13 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
         // if it's HEC
         if (slot == 1) {
           if (channel >= 16 && channel <= 31) {  // eta 1.65 bin
-            DAC_value = DAC_value / 1.363;
-            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 1/1.363" << endmsg;
+            //DAC_value = DAC_value / 1.363; // measured value
+            DAC_value = DAC_value / 1.2;   // computed from geometry
+            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 1/1.2" << endmsg;
           } else if (channel >= 32 && channel <= 47) {  // eta 1.75 bin
-            DAC_value = DAC_value / 1.206;
-            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 1/1.206" << endmsg;
+            //DAC_value = DAC_value / 1.206; // measured value
+            DAC_value = DAC_value * 7. / 8.; // computed from geometry
+            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 7./8." << endmsg;
           }
         }
       }

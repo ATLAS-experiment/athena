@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_DITAUSMEARINGTOOL_H
@@ -17,6 +17,7 @@
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
 #include "TauAnalysisTools/IDiTauSmearingTool.h"
@@ -59,8 +60,10 @@ public:
 private:
   asg::AnaToolHandle<IDiTauSmearingTool> m_tCommonDiTauSmearingTool;
   std::string m_sInputFilePath;
-  std::string m_sRecommendationTag;
-  bool m_bSkipTruthMatchCheck;
+
+  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2019-winter"};
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
+
 
 }; // class DiTauSmearingTool
 

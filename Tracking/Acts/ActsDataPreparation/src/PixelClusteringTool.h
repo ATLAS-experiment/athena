@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_PIXEL_CLUSTERING_TOOL_H
@@ -15,34 +15,10 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
-
-namespace InDet {
-
-// Helper functions for use with ACTS clusterization
-// Put these in the InDet namespace so that ACTS can find them
-// via ADL.
-//
-inline int getCellRow(const InDet::UnpackedPixelRDO& cell)
-{
-    return cell.ROW;
-}
-    
-inline int getCellColumn(const InDet::UnpackedPixelRDO& cell)
-{
-    return cell.COL;
-}
-
-inline int& getCellLabel(InDet::UnpackedPixelRDO& cell)
-{
-    return cell.NCL;
-}
-
-
-} // namespace InDet
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
 
 
 namespace ActsTrk {
-
 
 class PixelClusteringTool : public extends<AthAlgTool,IPixelClusteringTool> {
 public:
@@ -50,11 +26,8 @@ public:
     using Cell = InDet::UnpackedPixelRDO;
     using CellCollection = std::vector<Cell>;
 
-
-
-
     struct Cluster {
-	std::vector<Identifier> ids;
+        std::vector<Identifier::value_type> ids;
 	std::vector<int> tots;
 	int lvl1min = std::numeric_limits<int>::max();
     };
@@ -75,14 +48,19 @@ public:
 
 private:
     // N.B. the cluster is added to the container
+    // and the tots and charges vectors will be moved to the xAOD object
+  
   StatusCode makeCluster(const EventContext& ctx,
-			 const PixelClusteringTool::Cluster &cluster,
+			 PixelClusteringTool::Cluster &cluster,
 			 const PixelID& pixelID,
 			 const InDetDD::SiDetectorElement* element,
+			 const InDetDD::PixelModuleDesign& design,
+			 const PixelChargeCalibCondData *calibData,
+			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 			 xAOD::PixelCluster& container) const;
 
 private:  
-  ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "ITkPixelReadoutManager",
+  ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "InDetDD::ITk::PixelReadoutManager",
       "Pixel readout manager" };
   
   ToolHandle< InDet::PixelRDOTool > m_pixelRDOTool {this, "PixelRDOTool", "", "The Pixel RDO tool"};
@@ -92,7 +70,7 @@ private:
     "Pixel charge calibration data"};
   
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};
-  Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", true};
+  Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false};
   Gaudi::Property<bool> m_broadErrors {this, "UseBroadErrors", false};
 };
   

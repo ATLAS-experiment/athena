@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CxxUtils/src/FloatPacker.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -12,6 +10,7 @@
 
 #include "CxxUtils/FloatPacker.h"
 #include "CxxUtils/ones.h"
+#include "CxxUtils/trapping_fp.h"
 #include <limits>
 #include <string>
 #include <sstream>
@@ -222,13 +221,13 @@ FloatPacker::FloatPacker (int nbits,
 {
   // scale==0 means not to scale.
   // Use that instead of 1 since it's faster to test for 0.
-  if (scale == 1)
-    scale = 0;
-
-  if (scale == 0)
+  if (scale == 1 || scale == 0)
     m_invscale = 0;
-  else
+  else {
+    // Avoid spurious div-zero FPEs with clang.
+    CXXUTILS_TRAPPING_FP;
     m_invscale = 1. / m_scale;
+  }
 
   // Set up other cached values.
   m_npack = m_nmantissa;

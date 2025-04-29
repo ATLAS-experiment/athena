@@ -1,10 +1,11 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <IsolationSelection/IsoVariableHelper.h>
 #include <xAODBase/IParticleHelpers.h>
 #include <xAODPrimitives/IsolationHelpers.h>
+#include <CxxUtils/checker_macros.h>
 namespace CP {
 
     //######################################################################################################
@@ -89,5 +90,14 @@ namespace CP {
     }
     IsoType IsoVariableHelper::isotype() const { return m_isoType; }
     std::string IsoVariableHelper::name() const { return std::string(xAOD::Iso::toCString(isotype())); }
+
+    void IsoVariableHelper::lockDecorations(const SG::AuxVectorData& parts) const
+    {
+      SG::AuxVectorData& parts_nc ATLAS_THREAD_SAFE =
+        const_cast<SG::AuxVectorData&> (parts);
+      parts_nc.lockDecoration (m_dec_IsoIsBackup.auxid());
+      parts_nc.lockDecoration (m_dec_iso_variable.auxid());
+      parts_nc.lockDecoration (m_dec_iso_backup.auxid());
+    }
 
 }  // namespace CP

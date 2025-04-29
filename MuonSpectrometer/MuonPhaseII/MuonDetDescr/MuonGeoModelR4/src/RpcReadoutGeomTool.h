@@ -19,8 +19,7 @@ namespace MuonGMR4 {
 class RpcReadoutGeomTool : public extends<AthAlgTool,IMuonReadoutGeomTool> {
    public:
     // Constructor
-    RpcReadoutGeomTool(const std::string &type, const std::string &name,
-                       const IInterface *parent);
+    using base_class::base_class;
 
     StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
 

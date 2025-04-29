@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamEventStorageInputSvc.h"
@@ -410,10 +410,10 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     std::unique_ptr<DataHeader> dataHeader = std::make_unique<DataHeader>();
     // Declare header primary
     dataHeader->setStatus(DataHeader::Input);
-    //add the data header element self reference to the object vector
-    dataHeader->insert(*std::move(dataHeaderElement));
     // Set processTag
     dataHeader->setProcessTag(dataHeaderElement->getKey());
+    //add the data header element self reference to the object vector
+    dataHeader->insert(*std::move(dataHeaderElement));
 
     // Clean up EventInfo from the previous event
     key = m_eventInfoKey.value();
@@ -665,12 +665,11 @@ ByteStreamEventStorageInputSvc::currentEventStatus() const
 std::unique_ptr<DataHeaderElement>
 ByteStreamEventStorageInputSvc::makeBSProvenance() const
 {
-    std::unique_ptr<Token> token = std::make_unique<Token>();
-    token->setDb(m_fileGUID);
-    token->setTechnology(0x00001000);
-    token->setOid(Token::OID_t(0LL, m_evtFileOffset));
+    Token token;
+    token.setDb(m_fileGUID);
+    token.setTechnology(0x00001000);
+    token.setOid(Token::OID_t(0LL, m_evtFileOffset));
 
-    // note: passing ownership of token to DataHeaderElement
     return std::make_unique<DataHeaderElement>(ClassID_traits<DataHeader>::ID(),
-        "StreamRAW", token.release());
+        "StreamRAW", std::move(token));
 }

@@ -152,33 +152,33 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   }
 
   // configure the Smearer
-  m_mySmearer = (void *) new FakeTrackSmearer(smearerName, m_RandomSeed, msgLvl (MSG::DEBUG));
-  ((FakeTrackSmearer *) m_mySmearer)->SetInputTracksPtCut(m_inputTracksPtCut);
-  ((FakeTrackSmearer *) m_mySmearer)->SetOutputTracksPtCut(m_outputTracksPtCut);
-  ((FakeTrackSmearer *) m_mySmearer)->SetTrackingEfficiency(m_smearedTrackEfficiency);
-  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency(m_parameterizedTrackEfficiency);
-  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency_LRT(m_parameterizedTrackEfficiency_LRT); 
-  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency_highd0_LRT(m_smearedTrackEfficiency_d0high_LRT); 
-  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency_lowd0_LRT(m_smearedTrackEfficiency_d0low_LRT); 
+  m_mySmearer = std::make_unique<FakeTrackSmearer>(smearerName, m_RandomSeed, msgLvl (MSG::DEBUG));
+  m_mySmearer->SetInputTracksPtCut(m_inputTracksPtCut);
+  m_mySmearer->SetOutputTracksPtCut(m_outputTracksPtCut);
+  m_mySmearer->SetTrackingEfficiency(m_smearedTrackEfficiency);
+  m_mySmearer->SetParameterizedEfficiency(m_parameterizedTrackEfficiency);
+  m_mySmearer->SetParameterizedEfficiency_LRT(m_parameterizedTrackEfficiency_LRT);
+  m_mySmearer->SetParameterizedEfficiency_highd0_LRT(m_smearedTrackEfficiency_d0high_LRT);
+  m_mySmearer->SetParameterizedEfficiency_lowd0_LRT(m_smearedTrackEfficiency_d0low_LRT);
   
-  ((FakeTrackSmearer *) m_mySmearer)->SetSigmaScaleFactor(m_SigmaScaleFactor.value());
-  ((FakeTrackSmearer *) m_mySmearer)->UseResolutionPtCutOff(m_UseResolutionPtCutOff.value());
-  ((FakeTrackSmearer *) m_mySmearer)->SetResolutionPtCutOff(m_SetResolutionPtCutOff.value());
+  m_mySmearer->SetSigmaScaleFactor(m_SigmaScaleFactor.value());
+  m_mySmearer->UseResolutionPtCutOff(m_UseResolutionPtCutOff.value());
+  m_mySmearer->SetResolutionPtCutOff(m_SetResolutionPtCutOff.value());
 
-  ((FakeTrackSmearer *) m_mySmearer)->EnableFakes(m_EnableFakes.value());
-  ((FakeTrackSmearer *) m_mySmearer)->UseCoinToss(m_UseCoinToss.value());
-  ((FakeTrackSmearer *) m_mySmearer)->FakeKillerEnable(m_FakeKillerEnable.value());
-  ((FakeTrackSmearer *) m_mySmearer)->IncludeFakesInResolutionCalculation(m_IncludeFakesInResolutionCalculation.value());
+  m_mySmearer->EnableFakes(m_EnableFakes.value());
+  m_mySmearer->UseCoinToss(m_UseCoinToss.value());
+  m_mySmearer->FakeKillerEnable(m_FakeKillerEnable.value());
+  m_mySmearer->IncludeFakesInResolutionCalculation(m_IncludeFakesInResolutionCalculation.value());
 
   if (m_enableMonitoring) {
     // store the smearing functions
-    TF1 *d0res_eta = ((FakeTrackSmearer *) m_mySmearer)->d0res_eta;
-    TF1 *z0res_eta = ((FakeTrackSmearer *) m_mySmearer)->z0res_eta;
-    TF1 *curvres_eta = ((FakeTrackSmearer *) m_mySmearer)->curvres_eta;
-    TF1 *d0res_pt  = ((FakeTrackSmearer *) m_mySmearer)->d0res_pt;
-    TF1 *z0res_pt  = ((FakeTrackSmearer *) m_mySmearer)->z0res_pt;
-    TF1 *curvres_pt  = ((FakeTrackSmearer *) m_mySmearer)->curvres_pt;
-    TF1 *effLRT_d0  = ((FakeTrackSmearer *) m_mySmearer)->effLRT_d0;
+    TF1 *d0res_eta = m_mySmearer->d0res_eta;
+    TF1 *z0res_eta = m_mySmearer->z0res_eta;
+    TF1 *curvres_eta = m_mySmearer->curvres_eta;
+    TF1 *d0res_pt  = m_mySmearer->d0res_pt;
+    TF1 *z0res_pt  = m_mySmearer->z0res_pt;
+    TF1 *curvres_pt  = m_mySmearer->curvres_pt;
+    TF1 *effLRT_d0  = m_mySmearer->effLRT_d0;
 
     CHECK(book(new TH1F("d0res_function_vs_eta","#eta of track (p_{T}=10GeV);#eta",100, 0.0,4.0)));
     CHECK(book(new TH1F("z0res_function_vs_eta","#eta of track (p_{T}=10GeV);#eta",100, 0.0,4.0)));
@@ -201,14 +201,7 @@ StatusCode EFTrackingSmearingAlg::initialize() {
 }
 
 
-StatusCode EFTrackingSmearingAlg::finalize() {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
-  delete((FakeTrackSmearer *)m_mySmearer);
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) { 
+StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
   
   SG::ReadHandle<xAOD::TruthParticleContainer> inputTruth_handle( m_inputTruthParticleKey, ctx );
   const xAOD::TruthParticleContainer* inputTruth = inputTruth_handle.cptr();
@@ -227,8 +220,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
    
 
   // clear the smearear
-  FakeTrackSmearer *mySmearer=static_cast<FakeTrackSmearer *>(m_mySmearer);
-  mySmearer->Clear();
+  m_mySmearer->Clear();
 
   static const SG::ConstAccessor<float> ptAcc("pt");
   static const SG::ConstAccessor<float> d0Acc("d0");
@@ -261,7 +253,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" PDGID=" << part->pdgId()
                       <<" status=" << part->status()                       
                       );        
-      if (part->parent()) ATH_MSG_DEBUG (" parent status=" << part->parent()->pdgId());
+      if (part->parent(0)) ATH_MSG_DEBUG (" parent status=" << part->parent(0)->pdgId());
       
       if (std::abs(pt)/1000. > m_inputTracksPtCut) //GeV cut
       	{
@@ -274,12 +266,12 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
       	    hist("track_input_z0" )->Fill(z0);
       	    hist("track_input_d0" )->Fill(d0);      	    
           }
-      	  double qoverPt = part->charge()*1000./pt; //this must be in GeV
-          mySmearer->AddTrack(d0,z0,qoverPt,eta,phi);  // smearing here                  
-      	  n_output_tracks += mySmearer->GetNTracks();
+          double qoverPt = part->charge()*1000./pt; //this must be in GeV
+          m_mySmearer->AddTrack(d0,z0,qoverPt,eta,phi);  // smearing here
+          n_output_tracks += m_mySmearer->GetNTracks();
       	  
-      	  ATH_MSG_DEBUG ("Looping on output tracks #"<< mySmearer->GetNTracks());
-          for (const auto& otrack : mySmearer->Tracks)       	  
+          ATH_MSG_DEBUG ("Looping on output tracks #"<< m_mySmearer->GetNTracks());
+          for (const auto& otrack : m_mySmearer->Tracks)
       	    {                                                         
                 xAOD::TruthParticle * newtrk = new xAOD::TruthParticle(*part);
                 outputTruth->push_back(newtrk); 
@@ -305,7 +297,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" PDGID=" << newtrk->pdgId()
                       <<" status=" << newtrk->status()                      
                   );
-                if (newtrk->parent()) ATH_MSG_DEBUG (" parent status=" << newtrk->parent()->pdgId());
+                if (newtrk->parent(0)) ATH_MSG_DEBUG (" parent status=" << newtrk->parent(0)->pdgId());
                 
                 if (m_enableMonitoring) {
                   hist("track_output_eta")->Fill(otrack.eta());
@@ -331,7 +323,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                 }                         	                
       	    } // end of loop                      
 	      }
-      mySmearer->Clear(); // clear the smearer after each input track
+      m_mySmearer->Clear(); // clear the smearer after each input track
     }
 
   ATH_MSG_DEBUG ("End of loop track #"<<n_input_tracks<<" ---> "<<" "<< n_output_tracks
@@ -366,8 +358,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
   auto outputTracks = outputTracks_handle.ptr();
   
   // clear the smearear
-  FakeTrackSmearer *mySmearer=(FakeTrackSmearer *) m_mySmearer;
-  mySmearer->Clear();
+  m_mySmearer->Clear();
 
   //int trackno=0;
   int n_input_tracks=0;
@@ -418,11 +409,11 @@ StatusCode EFTrackingSmearingAlg::execute() {
           // get Cov matrix of input track          
           auto trkcovvec = trk->definingParametersCovMatrixVec();  
           double qoverPt = trk->charge()*1000./pt; //this must be in GeV
-          mySmearer->AddTrack(trk->d0(),trk->z0(),qoverPt,trk->eta(),trk->phi0());                    
-      	  n_output_tracks += mySmearer->GetNTracks();
+          m_mySmearer->AddTrack(trk->d0(),trk->z0(),qoverPt,trk->eta(),trk->phi0());
+          n_output_tracks += m_mySmearer->GetNTracks();
       	  
-      	  ATH_MSG_DEBUG ("Looping on output tracks #"<< mySmearer->GetNTracks());
-          for (const auto& otrack : mySmearer->Tracks) 
+          ATH_MSG_DEBUG ("Looping on output tracks #"<< m_mySmearer->GetNTracks());
+          for (const auto& otrack : m_mySmearer->Tracks)
             {      	  
       	      xAOD::TrackParticle * newtrk = new xAOD::TrackParticle(*trk);
               outputTracks->push_back(newtrk);  
@@ -533,7 +524,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
       	    }
             
 	      }
-        mySmearer->Clear(); // clear teh smearer after each input track
+        m_mySmearer->Clear(); // clear teh smearer after each input track
         //trackno++;
       }
 

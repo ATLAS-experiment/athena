@@ -65,7 +65,7 @@ namespace MuonGM {
         int etasign{0};
         int isLargeSector{0};
         double sectorOpeningAngle{0.};
-
+        bool isConvertedFromPhaseII{false};
         static constexpr double largeSectorOpeningAngle{28.0};
         static constexpr double smallSectorOpeningAngle{17.0};
 

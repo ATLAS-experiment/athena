@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Original Author: Anthony Morley  (15Jan2007)
@@ -256,9 +256,8 @@ AlSpaMat&  AlSpaMat::operator=(const AlMat& m)
 //______________________________________________________________________________
 AlSpaMat&  AlSpaMat::operator=(const double& d)
 {
-  mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
-    pos->second = d;
+  for (datamap::value_type& p : m_ptr_map)
+    p.second = d;
 
   return *this;
 }
@@ -271,9 +270,8 @@ AlSpaMat AlSpaMat::operator+(const AlSpaMat& m) const
   }
 
   AlSpaMat b(m);
-  const_mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
-    b.m_ptr_map[pos->first] += pos->second;
+  for (const datamap::value_type& p : m_ptr_map)
+    b.m_ptr_map[p.first] += p.second;
   b.m_nele = b.m_ptr_map.size();
 
   return b;
@@ -286,9 +284,8 @@ AlSpaMat&  AlSpaMat::operator+=(const AlSpaMat& m)
     throw std::range_error( "AlSpaMat::operator+=: size do not match!" );
   }
 
-  const_mapiterator pos;
-  for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); ++pos)
-    (*this).m_ptr_map[pos->first] += pos->second;
+  for (const datamap::value_type& p : m.m_ptr_map)
+    (*this).m_ptr_map[p.first] += p.second;
   m_nele = m_ptr_map.size();
 
   return *this;
@@ -302,9 +299,8 @@ AlSpaMat AlSpaMat::operator-(const AlSpaMat& m) const
   }
 
   AlSpaMat b(m);
-  const_mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
-    b.m_ptr_map[pos->first] -= pos->second;
+  for (const datamap::value_type& p : m_ptr_map)
+    b.m_ptr_map[p.first] -= p.second;
   b.m_nele = b.m_ptr_map.size();
 
   return b;
@@ -317,9 +313,8 @@ AlSpaMat&  AlSpaMat::operator-=(const AlSpaMat& m)
     throw std::range_error(  "AlSpaMat::operator-=: size do not match!" );
   }
 
-  const_mapiterator pos;
-  for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); ++pos)
-    (*this).m_ptr_map[pos->first] -= pos->second;
+  for (const datamap::value_type& p : m.m_ptr_map)
+    (*this).m_ptr_map[p.first] -= p.second;
   m_nele = m_ptr_map.size();
 
   return *this;
@@ -381,9 +376,8 @@ AlVec AlSpaMat::operator*(const AlVec& v) const
 //______________________________________________________________________________
 AlSpaMat&  AlSpaMat::operator*=(const double& d)
 {
-  mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
-    pos->second *= d;
+  for (datamap::value_type& p : m_ptr_map)
+    p.second *= d;
 
   return *this;
 }
@@ -392,9 +386,8 @@ AlSpaMat&  AlSpaMat::operator*=(const double& d)
 AlSpaMat  AlSpaMat::operator*(const double& d) const
 {
   AlSpaMat a(size());
-  const_mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
-    a.m_ptr_map.insert(std::make_pair(pos->first, (pos->second)*d));
+  for (const datamap::value_type& p : m_ptr_map)
+    a.m_ptr_map.emplace(p.first, p.second*d);
 
   return a;
 }
@@ -422,11 +415,10 @@ int AlSpaMat::SolveWithEigen(AlVec& RHS){
   std::vector<Triplet> tripletList;
   tripletList.reserve(m_nele);
   long int      i, j;
-  mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos){
-    elem(pos->first, i, j);
-    tripletList.emplace_back(i,j,pos->second);
-    if(i!=j) tripletList.emplace_back(j,i,pos->second);
+  for (const datamap::value_type& p : m_ptr_map) {
+    elem(p.first, i, j);
+    tripletList.emplace_back(i,j,p.second);
+    if(i!=j) tripletList.emplace_back(j,i,p.second);
   }
   eigenBigMatrix.setFromTriplets(tripletList.begin(), tripletList.end());
 
@@ -634,11 +626,10 @@ void AlSpaMat::reSize(long int n)
     m_ptr_map.clear();
     m_size = n;
     long int i, j;
-    mapiterator pos;
-    for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); ++pos) {
-      m.elem(pos->first, i, j);
+    for (const datamap::value_type& p : m.m_ptr_map) {
+      m.elem(p.first, i, j);
       if( i<n && j<n )
-        m_ptr_map.insert(*pos);
+        m_ptr_map.insert(p);
     }
   }
 
@@ -694,10 +685,9 @@ StatusCode AlSpaMat::Write(const std::string &filename, bool binary,
   long int ii, jj;
   int32_t i, j;
 
-  mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos) {
-    melem = pos->second;
-    elem(pos->first, ii, jj);   i=ii;  j=jj;     // just a type conversion
+  for (const datamap::value_type& p : m_ptr_map) {
+    melem = p.second;
+    elem(p.first, ii, jj);   i=ii;  j=jj;     // just a type conversion
     if(binary) {
       outmat.write((char*)&(i), sizeof (i));
       outmat.write((char*)&(j), sizeof (j));
@@ -871,11 +861,10 @@ TMatrixDSparse* AlSpaMat::makeTMatrix()
 
   long int      i, j;
   long int counter(0);
-  const_mapiterator pos = m_ptr_map.begin();
-  for(pos=m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos){
-    i = pos->first.first;
-    j = pos->first.second;
-    *(val+counter)=pos->second;
+  for (const datamap::value_type& p : m_ptr_map) {
+    i = p.first.first;
+    j = p.first.second;
+    *(val+counter)=p.second;
     *(irow+counter)= i;
     *(icol+counter)= j;
      counter++;

@@ -26,9 +26,8 @@ namespace DerivationFramework {
 
   PseudoTrackSelector::PseudoTrackSelector(const std::string& t,
                                            const std::string& n,
-                                           const IInterface* p) : AthAlgTool(t,n,p)
+                                           const IInterface* p) : base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     // The default goal of this selector is to create a track collection from a subset of pseudo tracks
     declareProperty("RecoTrackParticleLocation",            m_in_recoTrackParticleLocation);       /** Reco track collection.   */
     declareProperty("PseudoTrackParticleLocation",          m_in_pseudoTrackParticleLocation);     /** Pseudo track collection. */

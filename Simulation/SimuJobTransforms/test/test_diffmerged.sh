@@ -6,10 +6,9 @@
 # art-include: main/Athena
 
 # MC23 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
 export TRF_ECHO=1
-export GEOMETRY=ATLAS-R3S-2021-03-02-00
-export CONDITIONS=OFLCOND-MC23-SDR-RUN3-01
+export GEOMETRY=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+export CONDITIONS=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
 Sim_tf.py \
     --CA \

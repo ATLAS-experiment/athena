@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "IsoCloseByCorrectionAlg.h"
 
@@ -12,6 +12,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "AsgTools/CurrentContext.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace CP {
 
@@ -50,20 +51,15 @@ namespace CP {
         // There may be more than one container for each.
         // Then apply selections of objects, decorating with "isoSelIsOK" for the IsoCloseByTool, and then pass the ConstDataVectors to the tool.
 
-        // Use isLRT decoration for LLP particles to avoid looking for tracks from the primary vertex in the closeBy tool
-        SG::AuxElement::Decorator<char> isLRT("isLRT");
-
-
         ConstDataVector<xAOD::MuonContainer>     muons{SG::VIEW_ELEMENTS};
         ConstDataVector<xAOD::ElectronContainer> electrons{SG::VIEW_ELEMENTS};
         ConstDataVector<xAOD::PhotonContainer>   photons{SG::VIEW_ELEMENTS};
         
+        const SG::Decorator<char> isOK(m_quality_name);
+
         for (const SG::ReadHandleKey<xAOD::IParticleContainer>& contKey : m_contKeys) {
             SG::ReadHandle<xAOD::IParticleContainer> parts (contKey, ctx);
             for ( const xAOD::IParticle* part : *parts ) {
-
-                // flag LLP particles
-                isLRT(*part) = (contKey.key().find("LRT")  != std::string::npos);
 
                 // Check type of container and apply selection as appropriate
                 if (part->type() == xAOD::Type::Muon) {
@@ -87,9 +83,9 @@ namespace CP {
         ATH_MSG_DEBUG("execute: apply selections " );
 
         /// Apply selection to muons, electrons and photons - setting selection decorator
-        ATH_CHECK(selectLeptonsAndPhotons(ctx, muons));
-        ATH_CHECK(selectLeptonsAndPhotons(ctx, electrons));
-        ATH_CHECK(selectLeptonsAndPhotons(ctx, photons));
+        ATH_CHECK(selectLeptonsAndPhotons(ctx, muons, isOK));
+        ATH_CHECK(selectLeptonsAndPhotons(ctx, electrons, isOK));
+        ATH_CHECK(selectLeptonsAndPhotons(ctx, photons, isOK));
 
         ATH_MSG_DEBUG("execute: apply closeBy correction " );
 
@@ -99,6 +95,22 @@ namespace CP {
             return StatusCode::FAILURE;
         }
 
+        // Make sure the isoSelIsOK decorations get locked.
+        // Unfortunately, we can't use decoration handles because we may
+        // be configured with view containers as input.
+        UnorderedContainerSet conts;
+        for (const SG::ReadHandleKey<xAOD::IParticleContainer>& contKey : m_contKeys) {
+          SG::ReadHandle<xAOD::IParticleContainer> parts (contKey, ctx);
+          for ( const xAOD::IParticle* part : *parts ) {
+            const SG::AuxVectorData* c = part->container();
+            if (conts.insert(c).second) {
+              SG::AuxVectorData* c_nc ATLAS_THREAD_SAFE =
+                const_cast<SG::AuxVectorData*> (c);
+              c_nc->lockDecoration (isOK.auxid());
+            }
+          }
+        }
+
         ATH_MSG_DEBUG("execute: after closeBy correction " );
 
         return StatusCode::SUCCESS;
@@ -106,21 +118,23 @@ namespace CP {
 
     template <class CONT_TYPE>
     StatusCode IsoCloseByCorrectionAlg::selectLeptonsAndPhotons(const EventContext& ctx, 
-                                                                CONT_TYPE particles) const {
+                                                                CONT_TYPE particles,
+                                                                const SG::Decorator<char>& isOK) const
+    {
 
         ATH_MSG_DEBUG("selectLeptonsAndPhotons: entering" );
 
         for ( auto particle : particles ) {
             ATH_MSG_DEBUG("selectLeptonsAndPhotons: pt, eta, ph " << particle->pt()/1000. << ", " <<  particle->eta() << ", " <<  particle->phi() );
-            ATH_CHECK(applySelection(ctx, particle));
+            ATH_CHECK(applySelection(ctx, particle, isOK));
         }
         return StatusCode::SUCCESS;
     } 
 
-    StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx, const xAOD::Muon* muon) const {
-
-        // outgoing selection decorator
-        SG::AuxElement::Decorator<char> isOK("isoSelIsOK");
+    StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx,
+                                                       const xAOD::Muon* muon,
+                                                       const SG::Decorator<char>& isOK) const
+    {
 
         // Check incoming selection decorator
         if (!m_muonSelKey.empty()) {
@@ -153,10 +167,10 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx, const xAOD::Electron* elec) const {
-
-        // outgoing selection decorator
-        SG::AuxElement::Decorator<char> isOK("isoSelIsOK");
+    StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx,
+                                                       const xAOD::Electron* elec,
+                                                       const SG::Decorator<char>& isOK) const
+    {
 
         // Check incoming selection decorator
         if (!m_elecSelKey.empty()) {
@@ -188,10 +202,10 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx, const xAOD::Photon* phot) const {
-
-        // outgoing selection decorator
-        SG::AuxElement::Decorator<char> isOK("isoSelIsOK");
+    StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx,
+                                                       const xAOD::Photon* phot,
+                                                       const SG::Decorator<char>& isOK) const
+    {
 
         // Check incoming selection decorator
         if (!m_photSelKey.empty()) {

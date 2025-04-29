@@ -5,11 +5,12 @@
 
 #include "ZDC_SimuDigitization/ZDC_PileUpTool.h"
 #include "xAODForward/ZdcModuleToString.h"
-#include <algorithm>
-#include "ZDC_SimEvent/ZDC_SimFiberHit_Collection.h"
-#include "ZDC_SimEvent/ZDC_SimFiberHit.h"
+#include "ZdcIdentifier/ZdcID.h"
+
 #include "ZdcUtils/ZDCWaveformFermiExp.h"
 #include "ZdcUtils/ZDCWaveformLTLinStep.h"
+#include "ZdcUtils/ZDCWaveformSampler.h"
+
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthContainers/Accessor.h"
@@ -18,6 +19,7 @@
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussQ.h"
 #include "CLHEP/Random/RandPoissonQ.h"
+#include <algorithm>
 
 ZDC_PileUpTool::ZDC_PileUpTool(const std::string& type,
              const std::string& name,
@@ -164,7 +166,7 @@ StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx){
   sumsContainer->setStore( sumsAuxContainer.get() );
 
   static const SG::Accessor<uint16_t> LucrodTriggerSideAmpAcc ("LucrodTriggerSideAmp");
-  for (int iside : {-1, 1}){
+  for (int iside : {-1, 0, 1}){
     xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
     sumsContainer->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
     new_sum->setZdcSide(iside);

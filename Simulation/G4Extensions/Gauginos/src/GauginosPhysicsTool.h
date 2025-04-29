@@ -6,9 +6,11 @@
 #define GAUGINOS_GauginosPhysicsTool_H
 
 // Include files
+#include <G4ParticleDefinition.hh>
+
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/IPhysicsOptionTool.h"
-#include "G4VPhysicsConstructor.hh"
+#include "G4AtlasInterfaces/IPhysicsConstructor.h"
 
 /** @class GauginosPhysicsTool GauginosPhysicsTool.h "G4AtlasInfrstructure/GauginosPhysicsTool.h"
  *
@@ -17,8 +19,8 @@
  *  @author Edoardo Farina
  *  @date   15-05-2015
  */
-class GauginosPhysicsTool :  public G4VPhysicsConstructor, public extends<AthAlgTool, IPhysicsOptionTool>  {
-public:
+class GauginosPhysicsTool : public extends<AthAlgTool, IPhysicsOptionTool> {
+ public:
   /// Standard constructor
   GauginosPhysicsTool( const std::string& type , const std::string& name,
                        const IInterface* parent ) ;
@@ -26,27 +28,32 @@ public:
   virtual ~GauginosPhysicsTool( ); ///< Destructor
 
   /// Initialize method
-  virtual StatusCode initialize( ) override final;
-  virtual void ConstructParticle() override final;
-  virtual void ConstructProcess()  override final;
-
+  virtual StatusCode initialize() override final;
 
   /** Implements
    */
 
-  virtual GauginosPhysicsTool* GetPhysicsOption() override final;
+  virtual UPPhysicsConstructor GetPhysicsOption() override final;
 
+  class PhysicsConstructor : public IPhysicsContructor {
+   public:
+    PhysicsConstructor(const std::string& name, MSG::Level level,
+                       GauginosPhysicsTool const& gauginosPhysicsTool)
+        : IPhysicsContructor(name, level),
+          m_GravitinoParams(gauginosPhysicsTool.m_GravitinoParams),
+          m_NeutralinoParams(gauginosPhysicsTool.m_NeutralinoParams) {}
+
+    virtual void ConstructParticle() override;
+    virtual void ConstructProcess() override;
+
+   private:
+    ParticleDefinitionParams const& m_GravitinoParams;
+    ParticleDefinitionParams const& m_NeutralinoParams;
+  };
 
 protected:
-
-  G4double m_GravitinoMass, m_GravitinoWidth, m_GravitinoLifetime, m_GravitinoCharge, m_NeutralinoPDGCode;
-  G4double m_NeutralinoMass, m_NeutralinoWidth,  m_NeutralinoLifetime, m_NeutralinoCharge, m_GravitinoPDGCode;
-
-  G4bool m_NeutralinoStable, m_NeutralinoShortlived;
-  G4bool m_GravitinoStable, m_GravitinoShortlived;
-
+ ParticleDefinitionParams m_GravitinoParams;
+ ParticleDefinitionParams m_NeutralinoParams;
 };
-
-
 
 #endif //GAUGINOS_GauginosPhysicsTool_H

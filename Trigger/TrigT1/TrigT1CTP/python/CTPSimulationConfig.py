@@ -28,9 +28,9 @@ def CTPSimulationCfg(flags):
                                                         ForceBunchGroupPattern = False if flags.Beam.Type is BeamType.Cosmics else True #to allow simulation of cosmics triggers in MC
                                                         ))
     log.info("Not all part of CTP simulation are enabled yet")
-    if flags.Trigger.enableL1CaloLegacy:
-        roib = CompFactory.ROIB.RoIBuilder("RoIBuilder",
-                                            DoCalo = flags.Trigger.enableL1CaloLegacy,
-                                            DoMuon = False)   # not needed for L1MuonPhase1
-        acc.addEventAlgo(roib)
+    #Still needed for HLTSeeding, see ATR-29954
+    roib = CompFactory.ROIB.RoIBuilder("RoIBuilder",
+                                        DoCalo = flags.Trigger.enableL1CaloLegacy,
+                                        DoMuon = False)   # not needed for L1MuonPhase1
+    acc.addEventAlgo(roib)
     return acc

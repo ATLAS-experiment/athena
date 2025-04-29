@@ -6,7 +6,7 @@
 atlas_subdir( MdtCalibData )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Hist Core Tree MathCore RIO pthread Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Hist Core Graf Gpad )
 
 # Component(s) in the package:
 atlas_add_library( MdtCalibData

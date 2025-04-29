@@ -12,7 +12,6 @@
 
 #include "TileDetectorFactoryLite.h"
 #include "TileGeoSectionBuilder.h"
-#include "TileDetDescr/TileDetDescrManager.h"
 #include "TileDetDescr/TileDddbManager.h"
 #include "TileDetDescr/TileDetDescriptor.h"
 
@@ -29,6 +28,7 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -70,7 +70,7 @@ void TileDetectorFactoryLite::create(GeoPhysVol *world)
   TileDddbManager* dbManager = m_detectorManager->getDbManager();
 
   // -------- -------- SECTION BUILDER  -------- ----------
-  TileGeoSectionBuilder* sectionBuilder = new TileGeoSectionBuilder(theMaterialManager,dbManager,m_switches,m_log);
+  auto sectionBuilder = std::make_unique<TileGeoSectionBuilder>(theMaterialManager,dbManager,m_switches,m_log);
 
 
   // --- Get data from SQLite

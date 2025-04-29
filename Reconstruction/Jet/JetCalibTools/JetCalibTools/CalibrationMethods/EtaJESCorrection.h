@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_ETAJESCORRECTION_H
@@ -77,9 +77,8 @@ class EtaJESCorrection
   double m_JES_MinPt_Slopes[s_nEtaBins]={};
   double m_JES_MinPt_E[s_nEtaBins]={};
   double m_JES_MinPt_R[s_nEtaBins]={};
-  //double m_JES_MinPt_Rmin[s_nEtaBins];
   double m_JES_MinPt_Param1[s_nEtaBins]={};
-  double m_JES_MinPt_Param2[s_nEtaBins];
+  double m_JES_MinPt_Param2[s_nEtaBins]{};
   double m_etaCorrFactors[s_nEtaBins][s_nParMax]={};
   double m_JMSFactors[s_nEtaBins][s_nParMax]={};
   double m_energyFreezeJES[s_nEtaBins]={};

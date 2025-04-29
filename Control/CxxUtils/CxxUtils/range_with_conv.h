@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/range_with_conv.h
@@ -23,9 +23,6 @@ namespace CxxUtils {
 
 /**
  * @brief Add to a range class conversions to containers.
- *
- * Many standard range objects allow operator[] but do not implement at().
- * Use this to add at() methods to a random_access_range class.
  */
 template <class RANGE>
 class range_with_conv

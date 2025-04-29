@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #========================================================================
 # TRIG9.py
 # This defines DAOD_TRIG9, a DAOD format for Run 3.
@@ -88,7 +87,7 @@ def TRIG9KernelCfg(flags, name='TRIG9Kernel', **kwargs):
     #MuTrig: (pT(mu)>18 && pT(tau)>18), EleTrig: (pT(el)>22 && pT(tau)>18)
     e22   = '(count( Electrons.pt > 22.0*GeV && abs(Electrons.eta) < 2.5 && Electrons.DFCommonElectronsLHLoose) >= 1)'
     mu18  = '(count( Muons.pt > 18.0*GeV && abs(Muons.eta) < 2.5 && Muons.DFCommonMuonPassPreselection) >= 1)'
-    tau20 = '(count( TauJets.pt > 20.0*GeV && abs(TauJets.eta) < 2.5 && '+tauProngs13+' && TauJets.DFTauLoose ) >= 1)'
+    tau20 = '(count( TauJets.pt > 20.0*GeV && abs(TauJets.eta) < 2.5 && '+tauProngs13+' && TauJets.DFTauRNNLoose ) >= 1)'
     mutau = '('+mu18+' && '+tau20+')'
     etau  = '('+e22+' && '+tau20+')'
     skim_expression = '('+mutau+') || ('+etau+')'

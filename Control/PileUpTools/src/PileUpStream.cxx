@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PileUpTools/PileUpStream.h"
 
-#include <cassert>
 #include <stdexcept>
 #include <string>
 
@@ -17,36 +16,28 @@
 
 #include "SGTools/DataProxy.h"
 
-
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include "PileUpTools/PileUpMergeSvc.h"
+
 
 class IOpaqueAddress;
 
 /// Structors
 PileUpStream::PileUpStream():
   AthMessaging ("PileUpStream"),
-  m_name("INVALID"), p_svcLoc(0), m_sel(0), m_SG(0), p_iter(0),
-  m_ownEvtIterator(false),
-  m_neverLoaded(true), m_ownStore(false),
-  m_used(false), m_hasRing(false), m_iOriginalRing(0)
-{ 
+  m_name("INVALID"),
+  m_mergeSvc("PileUpMergeSvc", m_name)
+{
 }
 
 PileUpStream::PileUpStream(PileUpStream&& rhs):
-  AthMessaging (rhs.m_name),
-  m_name(rhs.m_name), p_svcLoc(rhs.p_svcLoc), m_sel(rhs.m_sel),
-  m_SG(rhs.m_SG), p_iter(rhs.p_iter), m_mergeSvc(rhs.m_mergeSvc), m_ownEvtIterator(rhs.m_ownEvtIterator),
-  m_neverLoaded(rhs.m_neverLoaded), m_ownStore(rhs.m_ownStore),
-  m_used(rhs.m_used), m_hasRing(rhs.m_hasRing), m_iOriginalRing(rhs.m_iOriginalRing)
-{ 
-  //transferred ownership
-  rhs.m_ownEvtIterator=false;
-  rhs.m_ownStore=false;
+  PileUpStream()
+{
+  *this = std::move(rhs);
 }
 
 PileUpStream&
-PileUpStream::operator=(PileUpStream&& rhs) {
+PileUpStream::operator=(PileUpStream&& rhs)
+{
   if (this != &rhs) {
     m_name=rhs.m_name;
     p_svcLoc=rhs.p_svcLoc;
@@ -55,29 +46,27 @@ PileUpStream::operator=(PileUpStream&& rhs) {
     p_iter=rhs.p_iter;
     m_mergeSvc = rhs.m_mergeSvc;
     m_ownEvtIterator=rhs.m_ownEvtIterator;
-    rhs.m_ownEvtIterator=false;
     m_neverLoaded=rhs.m_neverLoaded;
     m_ownStore=rhs.m_ownStore;
-    rhs.m_ownStore=false;
     m_used=rhs.m_used;
     m_hasRing=rhs.m_hasRing;
     m_iOriginalRing=rhs.m_iOriginalRing;
-  }  
+    //transferred ownership
+    rhs.m_ownEvtIterator=false;
+    rhs.m_ownStore=false;
+  }
   return *this;
 }
- 
-PileUpStream::PileUpStream(const std::string& name, 
+
+PileUpStream::PileUpStream(const std::string& name,
 			   ISvcLocator* svcLoc,
 			   IEvtSelector* sel):
   AthMessaging (name),
-  m_name(name), p_svcLoc(svcLoc), m_sel(sel), m_SG(0), p_iter(0),
-  m_ownEvtIterator(false), 
-  m_neverLoaded(true), m_ownStore(false),
-  m_used(false), m_hasRing(false), m_iOriginalRing(0)
-{ 
-  assert(m_sel);
-  assert(p_svcLoc);
-  m_mergeSvc = serviceLocator()->service<PileUpMergeSvc>("PileUpMergeSvc");
+  m_name(name),
+  p_svcLoc(svcLoc),
+  m_sel(sel),
+  m_mergeSvc("PileUpMergeSvc", name)
+{
   if( !( m_sel->createContext(p_iter).isSuccess() && m_mergeSvc.isValid() ) ) {
     const std::string errMsg("PileUpStream:: can not create stream");
     ATH_MSG_ERROR ( errMsg );
@@ -89,15 +78,11 @@ PileUpStream::PileUpStream(const std::string& name,
 			   ISvcLocator* svcLoc,
 			   const std::string& selecName):
   AthMessaging (name),
-  m_name(name), p_svcLoc(svcLoc), m_sel(0), m_SG(0), p_iter(0),
-  m_ownEvtIterator(false), 
-  m_neverLoaded(true), m_ownStore(false),
-  m_used(false), m_hasRing(false), m_iOriginalRing(0)
-
+  m_name(name),
+  p_svcLoc(svcLoc),
+  m_mergeSvc("PileUpMergeSvc", name)
 {
-  assert(p_svcLoc);
   m_sel = serviceLocator()->service<IEvtSelector>(selecName);
-  m_mergeSvc = serviceLocator()->service<PileUpMergeSvc>("PileUpMergeSvc");
   if ( !(m_sel.isValid() && m_mergeSvc.isValid() &&
          m_sel->createContext(p_iter).isSuccess()) ) {
     const std::string errMsg("PileUpStream: can not create stream");
@@ -112,8 +97,6 @@ PileUpStream::~PileUpStream()
 
 bool PileUpStream::setupStore() 
 {
-  assert( p_iter );
-  assert( m_sel );
   bool rc(true);
   std::string storeName(name() + "_SG");
 
@@ -192,12 +175,6 @@ StatusCode PileUpStream::nextRecordPre()
     StatusCode::SUCCESS :
     StatusCode::FAILURE;
 }
-
-// bool PileUpStream::isNotEmpty() const
-// {
-//   //  std::cout << "isNotEmpty " << (0 != iterator() && *(iterator()) != *(selector().end()) ) << std::endl;
-//   return (0 != iterator() && *(iterator()) != *(selector()->end()) );
-// }
 
 bool PileUpStream::loadStore()
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -10,11 +10,12 @@
 //
 // Basic Jpsi->mu mu derivation example
 
-#include "DerivationFrameworkBPhys/Select_onia2mumu.h"
+#include "Select_onia2mumu.h"
 
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "xAODTracking/VertexContainer.h"
+#include "CxxUtils/checker_macros.h"
 #include <vector>
 #include <string>
 
@@ -23,10 +24,9 @@ namespace DerivationFramework {
   Select_onia2mumu::Select_onia2mumu(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_v0Tools("Trk::V0Tools")
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     // Declare tools    
     declareProperty("V0Tools", m_v0Tools);
@@ -131,6 +131,7 @@ namespace DerivationFramework {
   {
     
     SG::ReadHandle<xAOD::VertexContainer> oniaContainer(m_inputVtxContainerName);
+    SG::auxid_set_t decor_auxids;
 
     bool doPt   = (m_DoVertexType & 1) != 0;
     bool doA0   = (m_DoVertexType & 2) != 0;
@@ -140,7 +141,7 @@ namespace DerivationFramework {
     xAOD::VertexContainer::const_iterator oniaItr = oniaContainer->begin();
     for(; oniaItr!=oniaContainer->end(); ++oniaItr) {
       // create BPhysHypoHelper
-      xAOD::BPhysHypoHelper onia(m_hypoName, *oniaItr);
+      xAOD::BPhysHypoHelper onia(m_hypoName, *oniaItr, &decor_auxids);
       if((*oniaItr)->nTrackParticles() != m_trkMasses.size())
           ATH_MSG_WARNING("Vertex has " << (*oniaItr)->nTrackParticles() << " while provided masses " << m_trkMasses.size());
       //----------------------------------------------------
@@ -186,6 +187,13 @@ namespace DerivationFramework {
       }
 
     } // end of loop over onia candidates
+
+    // Lock the decorations we just produced.
+    xAOD::VertexContainer* onia_nc ATLAS_THREAD_SAFE =
+      const_cast<xAOD::VertexContainer*> (oniaContainer.cptr());
+    for (SG::auxid_t auxid : decor_auxids) {
+      onia_nc->lockDecoration (auxid);
+    }
     
     // all OK
     return StatusCode::SUCCESS;

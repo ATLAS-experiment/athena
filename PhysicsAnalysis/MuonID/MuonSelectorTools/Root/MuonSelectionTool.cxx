@@ -11,7 +11,6 @@
 
 namespace {
     static constexpr double const MeVtoGeV = 1. / 1000.;
-
     // This function defines the order of chamber indices for the low-pT MVA,
     // i.e. defining the meaning of "the first two segments", which are used in the BDT
     std::vector<int> initializeChamberIdxOrder() {
@@ -19,27 +18,29 @@ namespace {
         // except for the CSCs, which appear first. Since the order is not strictly innermost-to-outermost,
         // a reordering could be considered for a rel. 22 retuning, which can then easily be achieved by
         // swapping around the elements in the below initialization.
-        const std::vector<int> chamberIndicesOrdered = {
-            Muon::MuonStationIndex::CSS, Muon::MuonStationIndex::CSL, Muon::MuonStationIndex::BIS, Muon::MuonStationIndex::BIL,
-            Muon::MuonStationIndex::BMS, Muon::MuonStationIndex::BML, Muon::MuonStationIndex::BOS, Muon::MuonStationIndex::BOL,
-            Muon::MuonStationIndex::BEE, Muon::MuonStationIndex::EIS, Muon::MuonStationIndex::EIL, Muon::MuonStationIndex::EMS,
-            Muon::MuonStationIndex::EML, Muon::MuonStationIndex::EOS, Muon::MuonStationIndex::EOL, Muon::MuonStationIndex::EES,
-            Muon::MuonStationIndex::EEL};
+        using ChIdx = Muon::MuonStationIndex::ChIndex;
+        const std::vector<ChIdx> orderedChIndices{
+            ChIdx::CSS, ChIdx::CSL, ChIdx::BIS, ChIdx::BIL,
+            ChIdx::BMS, ChIdx::BML, ChIdx::BOS, ChIdx::BOL,
+            ChIdx::BEE, ChIdx::EIS, ChIdx::EIL, ChIdx::EMS,
+            ChIdx::EML, ChIdx::EOS, ChIdx::EOL, ChIdx::EES,
+            ChIdx::EEL};
 
         // This vector will hold the equivalent information in a form that can be efficiently accessed in the
         // below function "chamberIndexCompare", using the chamber index as the vector index
-        std::vector<int> chamberIndexOrder(Muon::MuonStationIndex::ChIndexMax);
+        std::vector<int> chamberIndexOrder(orderedChIndices.size());
 
-        for (unsigned int i = 0; i < chamberIndicesOrdered.size(); i++) chamberIndexOrder[chamberIndicesOrdered[i]] = i;
-
+        for (unsigned int i = 0; i < orderedChIndices.size(); i++) {
+            chamberIndexOrder[static_cast<int>(orderedChIndices[i])] = i;
+        }
         return chamberIndexOrder;
     }
 
     // This is the comparison function for the sorting of segments according to the chamber index
     bool chamberIndexCompare(const xAOD::MuonSegment* first, const xAOD::MuonSegment* second) {
         static const std::vector<int> chamberIndexOrder = initializeChamberIdxOrder();
-
-        return (chamberIndexOrder[first->chamberIndex()] < chamberIndexOrder[second->chamberIndex()]);
+        return (chamberIndexOrder[static_cast<int>(first->chamberIndex())] < 
+                chamberIndexOrder[static_cast<int>(second->chamberIndex())]);
     }
 
     static const SG::AuxElement::Accessor<float> mePt_acc("MuonSpectrometerPt");

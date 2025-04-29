@@ -1,6 +1,5 @@
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 test_basic
 [5.5.1.0.0.0.0.0] hex(5600000000000000)
 [5.6.1.1.10.2.0.0] hex(5a0d400000000000)

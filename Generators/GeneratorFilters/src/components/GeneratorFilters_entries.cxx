@@ -37,6 +37,7 @@
 #include "GeneratorFilters/xAODVBFForwardJetsFilter.h"
 #include "GeneratorFilters/xAODVBFMjjIntervalFilter.h"
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
+#include "GeneratorFilters/xAODSplitPhotonFilter.h"
 
 // slimmers for 22.6
 #include "GeneratorFilters/PileupTruthParticleSlimmer.h"
@@ -75,6 +76,7 @@
 #include "GeneratorFilters/ParentTwoChildrenFilter.h"
 #include "GeneratorFilters/PhotonFilter.h"
 #include "GeneratorFilters/SameParticleHardScatteringFilter.h"
+#include "GeneratorFilters/SplitPhotonFilter.h"
 #include "GeneratorFilters/TauFilter.h"
 #include "GeneratorFilters/TTbarWToLeptonFilter.h"
 #include "GeneratorFilters/TTbarWithJpsimumuFilter.h"
@@ -143,7 +145,7 @@ DECLARE_COMPONENT( xAODTTbarWToLeptonFilter )
 DECLARE_COMPONENT( xAODVBFForwardJetsFilter )
 DECLARE_COMPONENT( xAODVBFMjjIntervalFilter )
 DECLARE_COMPONENT( xAODXtoVVDecayFilterExtended )
-
+DECLARE_COMPONENT( xAODSplitPhotonFilter )
 //slimmers accepted for 22.6
 DECLARE_COMPONENT( PileupTruthParticleSlimmer )
 DECLARE_COMPONENT( xAODTruthParticleSlimmerElectron )
@@ -152,7 +154,7 @@ DECLARE_COMPONENT( xAODTruthParticleSlimmerLightLepton )
 DECLARE_COMPONENT( xAODTruthParticleSlimmerMET)
 DECLARE_COMPONENT( xAODTruthParticleSlimmerMuon )
 DECLARE_COMPONENT( xAODTruthParticleSlimmerPhoton)
-DECLARE_COMPONENT( xAODTruthParticleSlimmerTau )
+DECLARE_COMPONENT( xAODTruthParticleSlimmerTau)
 
 // old format of filters accepted for 22.6
 DECLARE_COMPONENT( BSignalFilter )
@@ -184,6 +186,7 @@ DECLARE_COMPONENT( ParticleDecayFilter )
 DECLARE_COMPONENT( ParticleFilter )
 DECLARE_COMPONENT( PhotonFilter ) 
 DECLARE_COMPONENT( SameParticleHardScatteringFilter )
+DECLARE_COMPONENT( SplitPhotonFilter )
 DECLARE_COMPONENT( TauFilter )
 DECLARE_COMPONENT( TTbarWToLeptonFilter )
 DECLARE_COMPONENT( TTbarWithJpsimumuFilter )
@@ -209,3 +212,4 @@ DECLARE_COMPONENT( TrimuMassRangeFilter )
 DECLARE_COMPONENT( TruthJetFilter )
 DECLARE_COMPONENT( VBFHbbEtaSortingFilter )
 DECLARE_COMPONENT( ZtoLeptonFilter )
+

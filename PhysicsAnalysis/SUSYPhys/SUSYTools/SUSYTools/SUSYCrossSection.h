@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __SUSYCROSSSECTION__
@@ -72,7 +72,7 @@ public:
   public:
     Key(): m_sample_id(0), m_proc_id(0) {}
     Key(int _sample_id, int _proc_id): m_sample_id(_sample_id), m_proc_id(_proc_id) {}
-    Key(int _sample_id, std::string name): m_sample_id(_sample_id) {
+    Key(int _sample_id, const std::string& name): m_sample_id(_sample_id) {
       m_proc_id = atoi(name.c_str());
     }
     bool operator<(const Key & k) const {

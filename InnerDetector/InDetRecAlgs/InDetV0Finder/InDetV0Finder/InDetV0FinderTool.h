@@ -34,6 +34,10 @@
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
+#include "MVAUtils/BDT.h"
+#include <TTree.h>
+#include <TFile.h>
+#include "PathResolver/PathResolver.h"
 
 /**
    The InDetV0FinderTool reads in the TrackParticle container from StoreGate,
@@ -151,7 +155,10 @@ namespace InDet
     BooleanProperty m_useTRTplusTRT{this, "useTRTplusTRT", false};      //!< = use TRT+TRT pairs (true)
     BooleanProperty m_useTRTplusSi{this, "useTRTplusSi", false};        //!< = use TRT+Si pairs (true)
     BooleanProperty m_useV0Fitter{this, "useV0Fitter", false};          //!< = true if using TrkV0Fitter, = false if using VKalVert (true)
-
+    BooleanProperty m_use_innerPixHits{this, "use_innerPixHits", false}; //!< = true select allows tracks with no innermost pixel layer hits to always pass d0 significance cut (false)
+    BooleanProperty m_useBDT{this, "useBDT", false};                     //!< = true uses BDT selections in place of rectangular pointAtVertex + minVertProb
+    BooleanProperty m_useTrkSel{this, "use_TrackSelector", true};      //!< = true uses TrackSelectorTool
+    
     IntegerProperty m_masses{this, "masses", 1};                        //!< = 1 if using PDG values, = 2 if user set (1)
     DoubleProperty m_masspi{this, "masspi", 139.57};                    //!< pion mass (139.57 MeV)
     DoubleProperty m_massp{this, "massp", 938.272};                     //!< proton mass (938.272 MeV)
@@ -172,10 +179,17 @@ namespace InDet
     DoubleProperty m_minVertProb{this, "minVertProb", 0.0001};          //!< Minimum vertex probability (0.0001)
     DoubleProperty m_minConstrVertProb{this, "minConstrVertProb", 0.0001}; //!< Minimum vertex probability for constrained fit (0.0001)
     DoubleProperty m_d0_cut{this, "d0_cut", 2.};                        //!< track d0 significance wrt a vertex (>2.)
+    DoubleProperty m_max_d0_cut{this, "max_d0_cut", 999999.};           //!< track |d0| wrt a vertex (<999999.)
+    DoubleProperty m_max_z0_cut{this, "max_z0_cut", 999999.};           //!< track |z0| wrt a vertex (<999999.)    
     DoubleProperty m_vert_lxy_sig{this, "vert_lxy_sig", 2.};            //!< V0 lxy significance wrt a vertex (>2.)
     DoubleProperty m_vert_lxy_cut{this, "vert_lxy_cut", 500.};          //!< V0 lxy V0 lxy  (<500.)
     DoubleProperty m_vert_a0xy_cut{this, "vert_a0xy_cut", 3.};          //!< V0 |a0xy| wrt a vertex (<3.)
     DoubleProperty m_vert_a0z_cut{this, "vert_a0z_cut", 15.};           //!< V0 |a0z| wrt a vertex (<15.)
+    DoubleProperty m_vert_cos_cut{this, "vert_cos_cut", 0.};            //!< V0 cos(theta) angle between displacement and momentum (>0.)
+    DoubleProperty m_BDTCut{this, "BDTCut", -1};                        //!< BDT Score threshold
+
+    StringProperty m_BDTFile{this, "BDTFile", "XGBModelBetterVertex.root"};    //!< Filename of mvaUtils model file, located in /InDetV0FinderTool/BDT/v1/
+
 
     mutable std::atomic<unsigned int>  m_events_processed{};
     mutable std::atomic<unsigned int>  m_V0s_stored{};
@@ -192,11 +206,12 @@ namespace InDet
     bool doFit(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, Amg::Vector3D &startingPoint, const EventContext& ctx) const;
 
     bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::VertexContainer * vertColl, const EventContext& ctx) const;
-    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::Vertex * vertex, const EventContext& ctx) const;
-    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const Amg::Vector3D& vertex, const EventContext& ctx) const;
+    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::VertexContainer * vertColl, const EventContext& ctx) const;
+    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::Vertex * vertex, const EventContext& ctx) const;
+    bool d0Pass(const xAOD::TrackParticle* track1, const Amg::Vector3D& vertex, const EventContext& ctx) const;
 
-    bool pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex* PV) const;
-    bool pointAtVertexColl(xAOD::Vertex* v0, const xAOD::VertexContainer * vertColl) const;
+    bool pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex* PV, float &score) const;
+    bool pointAtVertexColl(xAOD::Vertex* v0, const xAOD::VertexContainer * vertColl, float &score) const;
 
     bool doMassFit(xAOD::Vertex* vxCandidate, int pdgID) const;
 
@@ -217,6 +232,10 @@ namespace InDet
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_gmass;
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_gmasserr;
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_gprob;
+
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_v0_BDTScore;
+
+    std::unique_ptr<MVAUtils::BDT> m_BDT;
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };

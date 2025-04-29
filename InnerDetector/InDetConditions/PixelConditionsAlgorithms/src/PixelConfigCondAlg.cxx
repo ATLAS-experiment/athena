@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConfigCondAlg.h"
@@ -110,6 +110,10 @@ PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
     int runNumber = 0;
     std::string subfilename;
     indata >> runNumber;
+    if (runNumber<0 or runNumber>1'000'000) {
+      ATH_MSG_ERROR("Run number outside sensible range: "<<runNumber);
+      return "";
+    }
     while (currentRunNumber>=runNumber) {
       indata >> subfilename;
       if (indata.eof()) { break; }

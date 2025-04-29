@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSISPACEPOINT_H
@@ -21,11 +21,6 @@ public:
     TrigSiSpacePointBase(layer, r, phi, z, dr, dz), 
     m_clusters(cluster1, 0),
     m_dphi(dphi),
-    m_locT(0.), m_locL(0.),
-    m_original_r(0.),
-    m_original_phi(0.),
-    m_original_x(0.),
-    m_original_y(0.),
     m_elementId(elementId) {};
 
   // Constructor from two clusters using cylindrical co-ordinates, no. errors  
@@ -37,10 +32,6 @@ public:
     TrigSiSpacePointBase(layer, r, phi, z, dr, dz), 
     m_clusters(cluster1, cluster2),
     m_dphi(dphi),
-    m_original_r(0.),
-    m_original_phi(0.),
-    m_original_x(0.),
-    m_original_y(0.),
     m_elementId(elementId) {};
     
  // Destructor
@@ -69,13 +60,13 @@ public:
 private:
 
   std::pair<const InDet::SiCluster*, const InDet::SiCluster*> m_clusters;
-  double	m_dphi;
-  double	m_locT;
-  double	m_locL;
-  double  m_original_r; 
-  double  m_original_phi; 
-  double  m_original_x;
-  double  m_original_y;
+  double	m_dphi{};
+  double	m_locT{};
+  double	m_locL{};
+  double  m_original_r{};
+  double  m_original_phi{};
+  double  m_original_x{};
+  double  m_original_y{};
 
   const Identifier m_elementId;
 };

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ATHEXHIVE_ASCIICONDDBSVC_H
-#define ATHEXHIVE_ASCIICONDDBSVC_H 1
+#ifndef ATHEXHIVE_CONDEX_ASCIICONDDBSVC_H
+#define ATHEXHIVE_CONDEX_ASCIICONDDBSVC_H
 
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/EventIDBase.h"
@@ -21,19 +21,21 @@ class ASCIICondDbSvc: public extends<AthService, IASCIICondDbSvc> {
 public:
 
   ASCIICondDbSvc(const std::string& name, ISvcLocator* svc);
-  ~ASCIICondDbSvc();
+  ~ASCIICondDbSvc() = default;
 
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
 
   // from IASCIICondDbSvc
 public:
 
-  virtual StatusCode getRange(const std::string&, const EventContext&, EventIDRange&, 
-                              IASCIICondDbSvc::dbData_t&) const;
+  virtual StatusCode getRange(const std::string&
+			      , const EventContext&
+			      , EventIDRange&, 
+                              IASCIICondDbSvc::dbData_t&) const override;
 
-  virtual void dump() const;
-  virtual void dump(std::ostringstream&) const;
+  virtual void dump() const override;
+  void dump(std::ostringstream&) const;
 
 private:
 

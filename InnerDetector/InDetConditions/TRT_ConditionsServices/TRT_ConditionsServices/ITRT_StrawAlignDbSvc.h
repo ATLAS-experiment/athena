@@ -20,9 +20,6 @@ namespace TRTCond {
   class StrawDxContainer;
 }
 class  IAthenaOutputStreamTool ;
-namespace InDetDD {
-  class TRT_DetectorManager ;
-}
 
 /** @class ITRT_StrawAlignDbSvc
   abstract interface to TRT straw alignment constants

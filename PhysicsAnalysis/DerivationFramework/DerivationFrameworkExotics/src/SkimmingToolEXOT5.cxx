@@ -27,12 +27,11 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 DerivationFramework::SkimmingToolEXOT5::SkimmingToolEXOT5(const std::string& t,
                                                             const std::string& n,
                                                             const IInterface* p) :
-  AthAlgTool(t, n, p),
+  base_class(t, n, p),
   m_ntot(0),
   m_npass(0)
 {
 
-  declareInterface<DerivationFramework::ISkimmingTool>(this);
 
   declareProperty("JetContainer",          m_jetSGKey = "AntiKt4EMTopoJets");
 

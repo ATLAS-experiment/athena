@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanTool.cxx
@@ -7,6 +7,7 @@
  * @brief See header file.
  */
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
@@ -19,6 +20,13 @@
 #include <sstream>
 #include <cmath>
 #include <algorithm>
+
+
+#include <nlohmann/json.hpp>
+
+#include "TH1.h"
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Debug Print Tools
@@ -46,16 +54,6 @@ std::ostream& operator<<(std::ostream &os, const FPGATrackSimGenScanTool::Stored
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimGenScanTool::FPGATrackSimGenScanTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-  declareInterface<IFPGATrackSimRoadFinderTool>(this);
-}
-
-
 StatusCode FPGATrackSimGenScanTool::initialize()
 {
   // Dump the configuration to make sure it propagated through right
@@ -69,13 +67,23 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   // Retrieve info
   ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(getSubRegion())->getNLogiLayers();
   ATH_MSG_INFO("Map specifies :" << m_nLayers);
   ATH_CHECK(m_monitoring.retrieve());
   ATH_MSG_INFO("Monitoring Dir :" << m_monitoring->dir());
+  ATH_CHECK(m_binning.retrieve());
+
+  // Setup layer configuration
+  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(getSubRegion())->getNLogiLayers();
+
+  // This is the layers they get paired with previous layers
+  for (unsigned lyr = 0; lyr < m_nLayers; ++lyr) m_pairingLayers.push_back(lyr);
+  if (m_reversePairDir) {
+    std::reverse(m_pairingLayers.begin(),m_pairingLayers.end());
+  }
+  ATH_MSG_INFO("Pairing Layers: " << m_pairingLayers);
   
   // Check inputs
- bool ok = false;
+  bool ok = false;
   if (m_pairFilterDeltaPhiCut.size() != m_nLayers - 1)
     ATH_MSG_FATAL("initialize() pairFilterDeltaPhiCut must have size nLayers-1=" << m_nLayers - 1 << " found " << m_pairFilterDeltaPhiCut.size());
   else if (m_pairFilterDeltaEtaCut.size() != m_nLayers - 1)
@@ -94,25 +102,6 @@ StatusCode FPGATrackSimGenScanTool::initialize()
     return StatusCode::FAILURE;
 
 
-  // Build Binning Object
-  if (m_parSet == "StdTrkPars")
-  {
-    m_binning = new FPGATrackSimGenScanStdTrkBinning();
-  }
-  else if (m_parSet == "KeyLyrPars")
-  {
-    m_binning = new FPGATrackSimGenScanKeyLyrBinning(m_rin, m_rout);
-  }
-  else if (m_parSet == "PhiSlicedKeyLyrPars")
-  {
-    m_binning = new FPGATrackSimGenScanPhiSlicedKeyLyrBinning(m_rin, m_rout);
-  }
-  else
-  {
-    ATH_MSG_FATAL("Unknown binning: " << m_parSet);
-    return StatusCode::FAILURE;
-  }
-  
   // Dump Binning
   for (unsigned par : m_binning->slicePars()) { ATH_MSG_INFO("Slice Par: " << m_binning->parNames(par)); }
   for (unsigned par : m_binning->scanPars()) { ATH_MSG_INFO("Scan Par: " << m_binning->parNames(par)); }
@@ -144,10 +133,18 @@ StatusCode FPGATrackSimGenScanTool::initialize()
 
   // Compute which bins correspond to track parameters that are in the region
   // i.e. the pT, eta, phi, z0 and d0 bounds
-  computeValidBins();
-
+  // list of valid bins is extracted from the layer map if its loaded
+  initValidBins();
+  if (m_lyrmapFile.size()==0)
+  {
+    computeValidBins();
+  } else {
+    readLayerMap(m_lyrmapFile);
+  }
+  printValidBin(); // also dumps firmware constants
+  
   // register histograms
-  ATH_CHECK(m_monitoring->registerHistograms(m_nLayers, m_binning, m_rout, m_rin));
+  ATH_CHECK(m_monitoring->registerHistograms(m_nLayers, m_binning.get(), m_rin, m_rout));
 
   return StatusCode::SUCCESS;
 }
@@ -182,6 +179,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
 
   roads.clear();
   m_roads.clear();
+  m_monitoring->resetDataFlowCounters();
   
   // Currently assume that if less than 100 hits its a single track MC
   m_monitoring->parseTruthInfo(getTruthTracks(),(hits.size() < 100),m_validBin);
@@ -194,17 +192,28 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
   {
     // apply threshold
     if (bin.data().lyrCnt() < m_threshold) continue;
-    ATH_MSG_DEBUG("newRoad " << bin.data().lyrCnt() << " " << bin.idx());
+    ATH_MSG_DEBUG("Bin passes threshold " << bin.data().lyrCnt() << " " << bin.idx());
 
+    // Monitor contents of bins passing threshold
+    m_monitoring->fillBinLevelOutput(bin.idx(), bin.data());
+    if (m_binningOnly) continue;
+      
     // pass hits for bin to filterRoad and get back pairs of hits grouped into pairsets
     std::vector<HitPairSet> pairsets;
-    ATH_CHECK(filterRoad(bin.data(), bin.idx(), pairsets));
+    if (m_binFilter=="PairThenGroup") {
+      ATH_CHECK(pairThenGroupFilter(bin.data(), pairsets));
+    } else if (m_binFilter=="IncrementalBuild") {
+      ATH_CHECK(incrementalBuildFilter(bin.data(), pairsets));
+    } else {
+      ATH_MSG_FATAL("Unknown bin filter" << m_binFilter);
+    }
     ATH_MSG_DEBUG("grouped PairSets " << pairsets.size());
 
     // convert the group pairsets to FPGATrackSimRoads
     for (const FPGATrackSimGenScanTool::HitPairSet& pairset: pairsets)
       {      
         addRoad(pairset.hitlist, bin.idx());
+        ATH_MSG_DEBUG("Output road size=" <<pairset.hitlist.size());
 
         // debug statement if more than one road found in bin
         // not necessarily a problem
@@ -212,7 +221,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
           std::string s = "";
           for (const FPGATrackSimGenScanTool::StoredHit* const hit : pairset.hitlist)
           {
-            s += "(" + std::to_string(hit->hitptr->getLayer()) + "," + std::to_string(hit->hitptr->getR()) + "), ";
+            s += "(" + std::to_string(hit->layer) + "," + std::to_string(hit->hitptr->getR()) + "), ";
           }        
           ATH_MSG_DEBUG("Duplicate Group " << s);
         }
@@ -221,7 +230,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
 
   // copy roads to output vector
   roads.reserve(m_roads.size());  
-  for (FPGATrackSimRoad & r : m_roads) roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+  for (auto & r : m_roads) roads.push_back(std::move(r));
   ATH_MSG_DEBUG("Roads = " << roads.size());
   m_monitoring->fillOutputSummary(m_validSlice, m_validSliceAndScan);
 
@@ -251,7 +260,7 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
     // according to the m_binning class
 
     // this will contain current bin idx as it is built from slices and scans
-    FPGATrackSimGenScanBinningBase::IdxSet idx;    
+    FPGATrackSimGenScanBinningBase::IdxSet idx;
 
     // iterate over slices
     for (FPGATrackSimGenScanArray<int>::Iterator slicebin : m_validSlice)
@@ -260,15 +269,15 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
       if (!slicebin.data()) continue; 
 
       // set the slice bins in the current bin idx object
-      ATH_CHECK(m_binning->setIdxSubVec(idx, m_binning->slicePars(), slicebin.idx()));
-
-      // if hit is not in slice skip slice (continue)
+      m_binning->setIdxSubVec(idx, m_binning->slicePars(), slicebin.idx());
+                                   
+      // if hit is not in slice skip slice (contiue)
       if (!m_binning->hitInSlice(idx, hit.get()))
       {
         m_monitoring->sliceCheck(slicebin.idx());
         continue;
       }
-
+    
       m_monitoring->incrementInputPerSlice(slicebin.idx());
 
       // iterate over scan bins
@@ -278,7 +287,7 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
         if (!scanbin.data()) continue; // scan bin not valid
 
         // set the scan bins in the current bin idx object
-        ATH_CHECK(m_binning->setIdxSubVec(idx, m_binning->scanPars(), scanbin.idx()));
+        m_binning->setIdxSubVec(idx, m_binning->scanPars(), scanbin.idx());
 
         // Find the min/max bins for hit in the row
         std::pair<unsigned, unsigned> rowRange = m_binning->idxsetToRowParBinRange(idx, hit.get());
@@ -298,25 +307,37 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
           s_hit.layer = hit->getLayer(); 
           s_hit.phiShift = m_binning->phiShift(idx, hit.get());
           s_hit.etaShift = m_binning->etaShift(idx, hit.get());
+
+          // replace the hit layer with the layer map and only add if its in the map
+          if (m_mod_to_lyr_map.size() != 0) {
+            if (m_mod_to_lyr_map[idx].contains(hit->getIdentifierHash())) {              
+              s_hit.layer = m_mod_to_lyr_map[idx][hit->getIdentifierHash()];
+              m_image[idx].addHit(s_hit);
+            } else {
+              if (m_monitoring->isTruthBin(idx))
+                  ATH_MSG_DEBUG("Hit missed layer map bin=" << idx << " hash=" << hit->getIdentifierHash());
+            }
+          } else {
+            // add hit to the BinEntry for the bin
+            m_image[idx].addHit(std::move(s_hit));
+          }
           
-          // add hit to the BinEntry for the bin
-          m_image[idx].addHit(s_hit);
         }
       }
     }
   }
 
+  
   m_monitoring->fillInputSummary(hits, m_validSlice, m_validSliceAndScan);
 
   return StatusCode::SUCCESS;
 }
 
-// Filter the bins above threshold (=roads) into pairsets which output roads
-StatusCode FPGATrackSimGenScanTool::filterRoad(const BinEntry &bindata,
-                                    const FPGATrackSimGenScanBinningBase::IdxSet &idx,
+// Filter the bins above threshold into pairsets which output roads
+StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
                                     std::vector<HitPairSet> &output_pairsets)
 {
-  ATH_MSG_VERBOSE("In filterRoad");
+  ATH_MSG_VERBOSE("In pairThenGroupFilter");
 
   // Organize Hits by Layer
   std::vector<std::vector<const StoredHit *>> hitsByLayer(m_nLayers);
@@ -324,7 +345,7 @@ StatusCode FPGATrackSimGenScanTool::filterRoad(const BinEntry &bindata,
   
   // This is monitoring for each bin over threshold
   // It's here so it can get the hitsByLayer
-  m_monitoring->fillBinLevelOutput(idx, bindata, hitsByLayer);
+  m_monitoring->fillHitsByLayer(hitsByLayer);
 
   // Make Pairs
   HitPairSet pairs;
@@ -333,7 +354,6 @@ StatusCode FPGATrackSimGenScanTool::filterRoad(const BinEntry &bindata,
   // Filter Pairs
   HitPairSet filteredpairs;
   ATH_CHECK(filterPairs(pairs, filteredpairs));
-  m_monitoring->fillPairFilterCuts(pairs);
 
   // Require road is still over threshold
   bool passedPairFilter = (filteredpairs.lyrCnt() >= m_threshold);
@@ -373,6 +393,116 @@ StatusCode FPGATrackSimGenScanTool::filterRoad(const BinEntry &bindata,
   return StatusCode::SUCCESS;
 }
 
+
+void FPGATrackSimGenScanTool::updateState(const IntermediateState &inputstate,
+                                          IntermediateState &outputstate,
+                                          unsigned lyridx,
+                                          const std::vector<const StoredHit *>& newhits)
+{
+  unsigned int allowed_missed_hits = m_nLayers - m_threshold;
+
+  std::vector<bool> pairset_used(inputstate.pairsets.size(),false);
+  
+  for (auto &newhit : newhits) {
+
+    // don't make new pairs with hits that the new hit is already paired with in a group
+    std::set<const StoredHit *> vetoList;
+
+    // try adding hit to existing pair sets
+    for (auto &pairset : inputstate.pairsets) {
+      HitPair nextpair(pairset.lastpair().second, newhit, m_reversePairDir);
+      if (pairMatchesPairSet(pairset, nextpair, false) || (m_applyPairSetFilter==false)) {
+        HitPairSet newset(pairset);
+        newset.addPair(nextpair);
+        outputstate.pairsets.push_back(newset);
+        // put inpair hits in list of hits not to pair again with the new hits
+        for (auto vetohit : pairset.hitlist) {
+          vetoList.insert(vetohit);
+        }
+      }
+    }
+
+    // make new pairsets with unpaired hits
+    for (auto prevhit : inputstate.unpairedHits) {
+      if (vetoList.count(prevhit) == 0) {
+        HitPair newpair(prevhit, newhit, m_reversePairDir);
+        if (pairPassesFilter(newpair) || (m_applyPairFilter == false)) {
+          HitPairSet newset;
+          newset.addPair(newpair);
+          outputstate.pairsets.push_back(newset);
+        }
+      }
+    }
+
+    // if this can be the start of a the start of a track  and still
+    // have enough hits to make a track, add it to the unpaired hits list
+    if (lyridx <= allowed_missed_hits) {
+      outputstate.unpairedHits.push_back(newhit);
+    }
+  }
+
+  // Add groups to output without new hit if they have enough hits to skip
+  // this layer. Note expected hits at this point is lyridx+1, since we start
+  // counting lyridx from zero. Logic is then keep the pairset if
+  // expected hits <= hits in set + allows misses
+  for (auto &pairset : inputstate.pairsets) {
+    if (lyridx < (pairset.hitlist.size() + allowed_missed_hits)) {
+      outputstate.pairsets.push_back(pairset);
+    }
+  }
+
+  // Add hits to unpaired list if hits are still allowed to start a track
+  // ---------------------------------------------------------------------
+  // If you start a new track with a pair whose second element is
+  // layer N (layer numbering starting from zero), then you'll have missed N-1
+  // layers Minus 1 because the first hit was one of the N layers already
+  // passed.
+  //
+  // The next pass will be layer N=lyridx+1 where lyridx is the current value
+  // at this point in the code. You will have then missed lyridx layers, so...
+  // E.g. if you allow one missed layer then this stops putting hits in the
+  // unpairedHits list if lyridx>1, so tracks must start with layer 0 or 1,
+  // which makes sense
+  if (lyridx > allowed_missed_hits) {
+    // make no new track starts
+    outputstate.unpairedHits.clear();
+  } else {
+    // copy in any previous unpairedHits as well
+    for (auto prevhit : inputstate.unpairedHits) {
+      outputstate.unpairedHits.push_back(prevhit);
+    }
+  }
+}
+
+// Filter the bins above threshold into pairsets which output roads
+StatusCode FPGATrackSimGenScanTool::incrementalBuildFilter(const BinEntry &bindata,
+                                    std::vector<HitPairSet> &output_pairsets)
+{
+  ATH_MSG_VERBOSE("In buildGroupsWithPairs");
+
+  // Organize Hits by Layer
+  std::vector<std::vector<const StoredHit *>> hitsByLayer(m_nLayers);
+  ATH_CHECK(sortHitsByLayer(bindata, hitsByLayer));
+  
+  // This is monitoring for each bin over threshold
+  // It's here so it can get the hitsByLayer
+  m_monitoring->fillHitsByLayer(hitsByLayer);
+
+  std::vector<IntermediateState> states{m_nLayers+1};
+  for (unsigned lyridx = 0; lyridx < m_nLayers; lyridx++) {
+    unsigned lyr = m_pairingLayers[lyridx];
+    updateState(states[lyridx] , states[lyridx+1], lyridx, hitsByLayer[lyr]);
+  }
+
+  // this is a little ugly because it requires copying the output pairsets right now
+  output_pairsets=states[m_nLayers].pairsets;
+
+  m_monitoring->fillBuildGroupsWithPairs(states,m_nLayers-m_threshold);
+  
+  return StatusCode::SUCCESS;
+}
+
+
 // 1st step of filter: sort hits by layer
 StatusCode FPGATrackSimGenScanTool::sortHitsByLayer(const BinEntry &bindata,
                                          std::vector<std::vector<const StoredHit *>>& hitsByLayer)
@@ -381,11 +511,14 @@ StatusCode FPGATrackSimGenScanTool::sortHitsByLayer(const BinEntry &bindata,
 
   for (const FPGATrackSimGenScanTool::StoredHit& hit : bindata.hits)
   {
-    hitsByLayer[hit.hitptr->getLayer()].push_back(&hit);    
+    hitsByLayer[hit.layer].push_back(&hit);    
   }
 
   return StatusCode::SUCCESS;
 }
+
+
+
 
 
 // 2nd step of filter: make pairs of hits from adjacent and next-to-adjacent layers
@@ -394,53 +527,56 @@ StatusCode FPGATrackSimGenScanTool::makePairs(const std::vector<std::vector<cons
 {
   ATH_MSG_VERBOSE("In makePairs");
 
-
+  std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *  lastlyr = 0;
   std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *  lastlastlyr = 0;
-  std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *  lastlyr = &hitsByLayer[0];
 
   // order here is designed so lower radius hits come first
-  for (unsigned lyr = 1; lyr < m_nLayers; lyr++)
-  {
-    for (const FPGATrackSimGenScanTool::StoredHit* const & ptr1 : hitsByLayer[lyr])
-    {
-      for (const FPGATrackSimGenScanTool::StoredHit* const & ptr2 : *lastlyr)
-      {
-        pairs.addPair(HitPair(ptr2, ptr1));
-      }
-      // Add Pairs that skip one layer
-      if (lastlastlyr)
-      {
-        for (const FPGATrackSimGenScanTool::StoredHit* const & ptr2 : *lastlastlyr)
-        {
-          pairs.addPair(HitPair(ptr2, ptr1));
+  for (unsigned lyr : m_pairingLayers) {
+    for (const FPGATrackSimGenScanTool::StoredHit *const &ptr1 :
+         hitsByLayer[lyr]) {
+      if (lastlyr) {
+        for (const FPGATrackSimGenScanTool::StoredHit *const &ptr2 : *lastlyr) {
+          pairs.addPair(HitPair(ptr2, ptr1,m_reversePairDir));
+        }
+        // Add Pairs that skip one layer
+        if (lastlastlyr) {
+          for (const FPGATrackSimGenScanTool::StoredHit *const &ptr2 : *lastlastlyr) {
+            pairs.addPair(HitPair(ptr2, ptr1,m_reversePairDir));
+          }
         }
       }
     }
     lastlastlyr = lastlyr;
-    lastlyr = &hitsByLayer[lyr];
+    lastlyr = &hitsByLayer[lyr];    
+    m_monitoring->fillPairingHits(lastlyr,lastlastlyr);
   }
-  
+
   return StatusCode::SUCCESS;
 }
 
-// 3rd step of filter: make cuts on the pairs to ensure that are consisten with the bin they are in
-StatusCode FPGATrackSimGenScanTool::filterPairs(HitPairSet &pairs, HitPairSet &filteredpairs)
-{
-  ATH_MSG_VERBOSE("In filterPairs");
+// 3rd step of filter: make cuts on the pairs to ensure that are consisten with
+// the bin they are in
 
-  for (const FPGATrackSimGenScanTool::HitPair & pair : pairs.pairList)
-  {
-    int lyr = pair.first->hitptr->getLayer();
-    if ((std::abs(pair.dPhi()) < m_pairFilterDeltaPhiCut[lyr]) &&
+bool FPGATrackSimGenScanTool::pairPassesFilter(const HitPair &pair) {
+  m_monitoring->fillPairFilterCuts(pair);
+  int lyr = std::min(pair.first->layer,pair.second->layer);
+  return (std::abs(pair.dPhi()) < m_pairFilterDeltaPhiCut[lyr]) &&
         (std::abs(pair.dEta()) < m_pairFilterDeltaEtaCut[lyr]) &&
         (std::abs(pair.PhiInExtrap(m_rin)) < m_pairFilterPhiExtrapCut[0]) &&
         (std::abs(pair.PhiOutExtrap(m_rout)) < m_pairFilterPhiExtrapCut[1]) &&
         (std::abs(pair.EtaInExtrap(m_rin)) < m_pairFilterEtaExtrapCut[0]) &&
-        (std::abs(pair.EtaOutExtrap(m_rout)) < m_pairFilterEtaExtrapCut[1])) {
+        (std::abs(pair.EtaOutExtrap(m_rout)) < m_pairFilterEtaExtrapCut[1]);
+}
+
+StatusCode FPGATrackSimGenScanTool::filterPairs(HitPairSet &pairs, HitPairSet &filteredpairs)
+{
+  ATH_MSG_VERBOSE("In filterPairs");
+
+  for (const FPGATrackSimGenScanTool::HitPair &pair : pairs.pairList) {
+    if (pairPassesFilter(pair)) {
       filteredpairs.addPair(pair);
     }
   }
-
   return StatusCode::SUCCESS;
 }
 
@@ -457,7 +593,8 @@ StatusCode FPGATrackSimGenScanTool::groupPairs(HitPairSet &filteredpairs,
     for (FPGATrackSimGenScanTool::HitPairSet &pairset : pairsets)
     {      
       // Only add skip pairs if skipped layer is not already hit
-      if ((pair.second->layer > pair.first->layer + 1) && (pairset.hasLayer(pair.first->layer + 1)))
+      if ((std::abs(pair.second->layer - pair.first->layer) > 1) // gives if is a skip pair
+          && (pairset.hasLayer(std::min(pair.first->layer,pair.second->layer) + 1))) // gives true if skipped layer already in set
       {
         // if it matches mark as added so it doesn't start a new pairset
         // false here is so it doesn't plot these either
@@ -493,8 +630,9 @@ StatusCode FPGATrackSimGenScanTool::groupPairs(HitPairSet &filteredpairs,
 }
 
 // used to determine if a pair is consistend with a pairset
-bool FPGATrackSimGenScanTool::pairMatchesPairSet(const HitPairSet& pairset, const HitPair& pair, bool verbose)
-{  
+bool FPGATrackSimGenScanTool::pairMatchesPairSet(const HitPairSet &pairset,
+                                                 const HitPair &pair,
+                                                 bool verbose) {
   // In order to make it easy to have a long list of possible cuts,
   // a vector of cutvar structs is used to represent each cut
   // then apply the AND of all the cuts is done with a std::count_if function
@@ -582,29 +720,28 @@ bool FPGATrackSimGenScanTool::pairMatchesPairSet(const HitPairSet& pairset, cons
 void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimGenScanBinningBase::IdxSet &idx)
 {
   layer_bitmask_t hitLayers = 0;
-  std::vector<std::shared_ptr<const FPGATrackSimHit>> outhits;
+  std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>
+      sorted_hits(m_nLayers,std::vector<std::shared_ptr<const FPGATrackSimHit>>());
   for (const FPGATrackSimGenScanTool::StoredHit* hit : hits)
   {
-    hitLayers |= 1 << hit->hitptr->getLayer();
-    outhits.push_back(hit->hitptr);
+    hitLayers |= 1 << hit->layer;
+    sorted_hits[hit->layer].push_back(hit->hitptr);
   }
 
-  std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>  sorted_hits = ::sortByLayer(outhits);
-  sorted_hits.resize(m_nLayers); // If no hits in last layer, return from sortByLayer will be too short
+  m_roads.emplace_back(std::make_unique<FPGATrackSimRoad>());
+  FPGATrackSimRoad *r = m_roads.back().get();
 
-  m_roads.emplace_back();
-  FPGATrackSimRoad &r = m_roads.back();
-
-  r.setRoadID(m_roads.size() - 1);
+  r->setRoadID(m_roads.size() - 1);
   //    r.setPID(y * m_imageSize_y + x);
-  r.setHits(std::move(sorted_hits));
+  r->setHits(std::move(sorted_hits));
+  
   FPGATrackSimTrackPars trackpars = m_binning->parSetToTrackPars(m_binning->binCenter(idx));
-  r.setX(trackpars[FPGATrackSimTrackPars::IPHI]);
-  r.setY(trackpars[FPGATrackSimTrackPars::IHIP]);
-  r.setXBin(idx[3]);
-  r.setYBin(idx[4]);
-  r.setHitLayers(hitLayers);
-  r.setSubRegion(0);
+  r->setX(trackpars[FPGATrackSimTrackPars::IPHI]);
+  r->setY(trackpars[FPGATrackSimTrackPars::IHIP]);
+  r->setXBin(idx[3]);
+  r->setYBin(idx[4]);
+  r->setHitLayers(hitLayers);
+  r->setSubRegion(0);
 }
 
 
@@ -631,8 +768,8 @@ int FPGATrackSimGenScanTool::HitPairSet::addPair(const HitPair &pair)
 
   pairList.push_back(pair);
 
-  hitLayers |= (0x1 << pair.first->hitptr->getLayer());
-  hitLayers |= (0x1 << pair.second->hitptr->getLayer());
+  hitLayers |= (0x1 << pair.first->layer);
+  hitLayers |= (0x1 << pair.second->layer);
   if (!hasHit(pair.first))
     hitlist.push_back(pair.first);
   if (!hasHit(pair.second))
@@ -669,8 +806,8 @@ double FPGATrackSimGenScanTool::HitPairSet::MatchEta(const HitPair &pair) const
   return lastpairextrap - newpairextrap;
 }
 
-double FPGATrackSimGenScanTool::HitPairSet::DeltaDeltaPhi(const HitPair &pair) const
-{
+double
+FPGATrackSimGenScanTool::HitPairSet::DeltaDeltaPhi(const HitPair &pair) const {
   return (pair.dPhi() * lastpair().dR() - lastpair().dPhi() * pair.dR()) / (lastpair().dR() * pair.dR());
 }
 
@@ -697,13 +834,27 @@ double FPGATrackSimGenScanTool::HitPairSet::DeltaEtaCurvature(const HitPair &pai
 }
 double FPGATrackSimGenScanTool::HitPairSet::PhiInExtrapCurved(const HitPair &pair, double r_in) const
 {
-  double r = lastpair().first->hitptr->getR();
+  double r = std::min(lastpair().first->hitptr->getR(),lastpair().second->hitptr->getR());
   return lastpair().PhiInExtrap(r_in) + 0.5 * PhiCurvature(pair) * (r_in - r) * (r_in - r);
 }
 double FPGATrackSimGenScanTool::HitPairSet::PhiOutExtrapCurved(const HitPair &pair, double r_out) const
 {
-  double r = pair.second->hitptr->getR();
+  double r = std::max(lastpair().first->hitptr->getR(),lastpair().second->hitptr->getR());
   return pair.PhiOutExtrap(r_out) + 0.5 * PhiCurvature(pair) * (r_out - r) * (r_out - r);
+}
+
+void FPGATrackSimGenScanTool::setValidBin(std::vector<unsigned> idx) {
+  m_validBin[idx] = true;
+  m_validSlice[m_binning->sliceIdx(idx)] = true;
+  m_validScan[m_binning->scanIdx(idx)] = true;
+  m_validSliceAndScan[m_binning->sliceAndScanIdx(idx)] = true;
+}
+
+void FPGATrackSimGenScanTool::initValidBins() {
+  m_validBin.setsize(m_binning->m_parBins,false);
+  m_validSlice.setsize(m_binning->sliceBins(),false);
+  m_validScan.setsize(m_binning->scanBins(),false);
+  m_validSliceAndScan.setsize(m_binning->sliceAndScanBins(),false);
 }
 
 
@@ -712,11 +863,7 @@ double FPGATrackSimGenScanTool::HitPairSet::PhiOutExtrapCurved(const HitPair &pa
 // i.e. the pT, eta, phi, z0 and d0 bounds
 void FPGATrackSimGenScanTool::computeValidBins() {
   // determine which bins are valid
-  m_validBin.setsize(m_binning->m_parBins,false);
-  m_validSlice.setsize(m_binning->sliceBins(),false);
-  m_validScan.setsize(m_binning->scanBins(),false);
-  m_validSliceAndScan.setsize(m_binning->sliceAndScanBins(),false);
-
+  
   FPGATrackSimTrackPars min_padded;
   FPGATrackSimTrackPars max_padded;
   FPGATrackSimTrackPars padding;
@@ -760,10 +907,7 @@ void FPGATrackSimGenScanTool::computeValidBins() {
     }
     if (inRange)
     {
-      bin.data() = true;
-      m_validSlice[m_binning->sliceIdx(bin.idx())] = true;
-      m_validScan[m_binning->scanIdx(bin.idx())] = true;
-      m_validSliceAndScan[m_binning->sliceAndScanIdx(bin.idx())] = true;
+      setValidBin(bin.idx()); 
     }
 
     if (bin.data() == false)
@@ -772,21 +916,65 @@ void FPGATrackSimGenScanTool::computeValidBins() {
       << " minvals: " << minvals << " maxvals: " << maxvals );
     }
   }
-
-  // count valid bins
-  int validBins = 0;
-  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validBin) { if(bin.data()) validBins++;}
-
-  int validSlices = 0;
-  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validSlice) { if(bin.data()) validSlices++;}
-
-  int validScans = 0;
-  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validScan) { if(bin.data()) validScans++;}
-
-  ATH_MSG_INFO("Valid Bins: " << validBins
-                              << " valid slices: " << validSlices
-                              << " valid scans: " << validScans);
 }
 
 
 
+
+void FPGATrackSimGenScanTool::readLayerMap(const std::string& filename) {
+  std::ifstream f(filename);
+  nlohmann::json data = nlohmann::json::parse(f);
+
+  m_lyr_to_mod_map.setsize(m_validBin.dims(),
+                   std::vector <std::set<unsigned> >(5,std::set<unsigned>()));
+  m_mod_to_lyr_map.setsize(m_validBin.dims(),
+                   std::map <unsigned,unsigned>());
+  
+  for (auto &binelem : data) {
+    std::vector<unsigned> bin;
+    binelem.at("bin").get_to(bin);
+    auto& lyrmap = binelem["lyrmap"];
+    ATH_MSG_DEBUG("bin = " << bin);
+    ATH_MSG_DEBUG("lyrmap = " << lyrmap);
+    for (auto &lyrelem : lyrmap) {
+      unsigned lyr;
+      lyrelem.at("lyr").get_to(lyr);
+      lyrelem.at("mods").get_to(m_lyr_to_mod_map[bin][lyr]);
+      ATH_MSG_DEBUG("lyr = " << lyr);
+      ATH_MSG_DEBUG("mods = " << m_lyr_to_mod_map[bin][lyr]);
+      for (auto &mod : m_lyr_to_mod_map[bin][lyr]) {
+        m_mod_to_lyr_map[bin][mod]=lyr;
+      }
+      // set valid bins
+      setValidBin(bin);     
+    }
+  }
+}
+
+void FPGATrackSimGenScanTool::printValidBin() {
+  // count valid bins
+  int validBins = 0;
+  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validBin) {
+    if (bin.data())
+      validBins++;
+  }
+
+  int validSlices = 0;
+  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validSlice) {
+    if (bin.data())
+      validSlices++;
+  }
+
+  int validScans = 0;
+  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validScan) {
+    if (bin.data())
+      validScans++;
+  }
+
+  // Dump FW constants
+  m_binning->writeScanConsts(m_validScan);
+  m_binning->writeSliceConsts(m_validSlice);
+
+  ATH_MSG_INFO("Valid Bins: " << validBins << " valid slices: " << validSlices
+                              << " valid scans: " << validScans);
+}

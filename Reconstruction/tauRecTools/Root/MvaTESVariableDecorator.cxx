@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -8,6 +8,7 @@
 
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
+#include "CxxUtils/trapping_fp.h"
 
 #define GeV 1000
 
@@ -15,9 +16,7 @@
 
 MvaTESVariableDecorator::MvaTESVariableDecorator(const std::string& name) 
   : TauRecToolBase(name) {
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
 }
-
 
 
 StatusCode MvaTESVariableDecorator::initialize() {
@@ -32,6 +31,8 @@ StatusCode MvaTESVariableDecorator::initialize() {
 
 
 StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
+  // Tell clang to optimize assuming that FP operations may trap.
+  CXXUTILS_TRAPPING_FP;
 
   int mu = 0;
   SG::ReadDecorHandle<xAOD::EventInfo, float> eventInfoDecorHandle( m_aveIntPerXKey );

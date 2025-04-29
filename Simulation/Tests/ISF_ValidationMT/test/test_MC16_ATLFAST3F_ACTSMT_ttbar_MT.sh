@@ -11,20 +11,21 @@
 # art-output: Config*
 
 # RUN2 setup
-# ATLAS-R2-2016-01-00-01 and OFLCOND-MC23-SDR-RUN3-01
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
 export ATHENA_CORE_NUMBER=8
 Sim_tf.py \
     --CA \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --simulator 'ATLFAST3F_ACTSMT' \
     --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationNoIoV' \
     --preExec "flags.Acts.TrackingGeometry.MaterialCalibrationFolder='./ACTS'; flags.Acts.TrackingGeometry.MaterialSource='material-maps-ATLAS-R2-2016-00-00-00_v1.json'" \
     --DataRunNumber 284500 \
-    --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.MT.CA.HITS.pool.root" \
     --maxEvents 3 \

@@ -1,0 +1,5 @@
+testalg.testool                                      INFO RHKey    : 'StoreGateSvc+myrcont'
+testalg.testool                                      INFO RDecorKey: 'StoreGateSvc+myrcont.myrdecor' 'StoreGateSvc+myrcont'
+testalg.testool                                      INFO WHKey    : 'StoreGateSvc+mywcont'
+testalg.testool                                      INFO WDecorKey: 'StoreGateSvc+mywcont.mywdecor' 'StoreGateSvc+mywcont'
+testalg.testool                                      INFO WDecorKey2: 'StoreGateSvc+myrcont.mywdecor2' 'StoreGateSvc+myrcont'

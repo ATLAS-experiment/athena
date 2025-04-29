@@ -18,10 +18,7 @@
 // Framework includes
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/SmartIF.h"
-#include "GaudiKernel/SystemOfUnits.h"
-#include "GaudiKernel/PhysicalConstants.h"
 #include "GaudiKernel/EventContext.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthContainers/DataVector.h"
@@ -31,6 +28,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthLinks/ElementLink.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+#include "GoogleTestTools/InitGaudiGoogleTest.h"
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
@@ -73,86 +71,22 @@ DummyEL dummyEL;
 
 namespace ViewTesting {
 
-// Gaudi Test fixture that provides a clean Gaudi environment for
-// each individual test case
-class GaudiFixture {
-
-protected:
-  GaudiFixture() {
-    SetUpGaudi();
-  }
-
-  ~GaudiFixture() {
-    TearDownGaudi();
-  }
-
-  void SetUpGaudi() {
-    m_appMgr = Gaudi::createApplicationMgr();
-    ASSERT_TRUE( m_appMgr!=nullptr );
-
-    m_svcLoc = m_appMgr;
-    ASSERT_TRUE( m_svcLoc.isValid() );
-
-    m_svcMgr = m_appMgr;
-    ASSERT_TRUE( m_svcMgr.isValid() );
-
-    m_propMgr = m_appMgr;
-    ASSERT_TRUE( m_propMgr.isValid() );
-    ASSERT_TRUE( m_propMgr->setProperty( "EvtSel",         "NONE" ).isSuccess() );
-    ASSERT_TRUE( m_propMgr->setProperty( "JobOptionsType", "FILE" ).isSuccess() );
-    ASSERT_TRUE( m_propMgr->setProperty( "JobOptionsPath", "ViewCollectionMerge_test.txt" ).isSuccess() );
-
-    m_toolSvc = m_svcLoc->service("ToolSvc");
-    ASSERT_TRUE( m_toolSvc.isValid() );
-
-    ASSERT_TRUE( m_appMgr->configure().isSuccess() );
-    ASSERT_TRUE( m_appMgr->initialize().isSuccess() );
-
-    m_sg = m_svcLoc->service("StoreGateSvc");
-    ASSERT_TRUE( m_sg.isValid() );
-  }
-
-  void TearDownGaudi() {
-    ASSERT_TRUE( m_svcMgr->finalize().isSuccess() );
-    ASSERT_TRUE( m_appMgr->finalize().isSuccess() );
-    ASSERT_TRUE( m_appMgr->terminate().isSuccess() );
-    m_svcLoc->release();
-    m_svcMgr->release();
-    Gaudi::setInstance( static_cast<IAppMgrUI*>(nullptr) );
-  }
-
-  StoreGateSvc* evtStore()
-  {
-    return m_sg;
-  }
-
-  // protected member variables for Core Gaudi components
-  IAppMgrUI*               m_appMgr = nullptr;
-  SmartIF<ISvcLocator>     m_svcLoc;
-  SmartIF<ISvcManager>     m_svcMgr;
-  SmartIF<IToolSvc>        m_toolSvc;
-  SmartIF<IProperty>       m_propMgr;
-  SmartIF<StoreGateSvc>    m_sg;
-};
-
-
 // Test fixture specifically for this environment
-class ViewCollectionMerge_test: public ::testing::Test, public GaudiFixture {
-
-protected:
-  virtual void SetUp() override {
+class ViewCollectionMerge_test: public Athena_test::InitGaudiGoogleTest {
+public:
+  ViewCollectionMerge_test() :
+    Athena_test::InitGaudiGoogleTest("ViewCollectionMerge_test.txt"),
+    evtStore(svcLoc->service("StoreGateSvc"))
+  {
+    EXPECT_TRUE( evtStore.isValid() );
   }
 
-  virtual void TearDown() override {
-    // Let the Gaudi ServiceManager finalize all services
-    ASSERT_TRUE( m_svcMgr->finalize().isSuccess() );
+  SmartIF<StoreGateSvc> evtStore;
 
-  }
 };  // ViewCollectionMerge_test fixture
 
 
 // Just read and write with handles - basic
-// cppcheck-suppress syntaxError
 TEST_F( ViewCollectionMerge_test, testBasicReadWrite ) {
 
   // Make a view vector
@@ -415,7 +349,7 @@ TEST_F( ViewCollectionMerge_test, elementLinkRemapTest ) {
   ASSERT_TRUE( outputDataHandle2.isValid() );
 
   // Declare remapping
-  evtStore()->remap( ClassID_traits< DataVector< int > >::ID(), DATA_NAME, DATA_NAME + "2", 0 );
+  evtStore->remap( ClassID_traits< DataVector< int > >::ID(), DATA_NAME, DATA_NAME + "2", 0 );
 
   // Test the link again - should not have changed
   ASSERT_TRUE( dataLink.isValid() );
@@ -468,7 +402,7 @@ TEST_F( ViewCollectionMerge_test, elementLinkViewRemapTest ) {
   ASSERT_TRUE( outputDataHandle2.isValid() );
 
   // Declare remapping - pretty hacky, have to specify view object names explicitly
-  evtStore()->remap( ClassID_traits< DataVector< int > >::ID(), "_testView_" + DATA_NAME, "_testView_" + DATA_NAME + "2", 0 );
+  evtStore->remap( ClassID_traits< DataVector< int > >::ID(), "_testView_" + DATA_NAME, "_testView_" + DATA_NAME + "2", 0 );
 
   // Test the link again - should not have changed
   ASSERT_TRUE( dataLink.isValid() );
@@ -557,8 +491,8 @@ TEST_F( ViewCollectionMerge_test, elementLinkMergeRemapTest ) {
   ASSERT_TRUE( outputDataHandle.isValid() );
 
   // Declare remapping - pretty hacky, have to specify view object names explicitly
-  evtStore()->remap( ClassID_traits< DataVector< int > >::ID(), "_testView_1_" + DATA_NAME, DATA_NAME, 0 );
-  evtStore()->remap( ClassID_traits< DataVector< int > >::ID(), "_testView_2_" + DATA_NAME, DATA_NAME, 1 );
+  evtStore->remap( ClassID_traits< DataVector< int > >::ID(), "_testView_1_" + DATA_NAME, DATA_NAME, 0 );
+  evtStore->remap( ClassID_traits< DataVector< int > >::ID(), "_testView_2_" + DATA_NAME, DATA_NAME, 1 );
 
   // Element link should still be pointing to view container
   ASSERT_TRUE( dataLink.isValid() );
@@ -656,8 +590,8 @@ TEST_F( ViewCollectionMerge_test, elementLinkMergeRemapBookkeepTest ) {
   ASSERT_TRUE( auxHandle.isValid() );
 
   // Declare remapping - pretty hacky, have to specify view object names explicitly
-  evtStore()->remap( ClassID_traits< DataVector< DummyData > >::ID(), "_testView_1_" + DATA_NAME, DATA_NAME, 0 );
-  evtStore()->remap( ClassID_traits< DataVector< DummyData > >::ID(), "_testView_2_" + DATA_NAME, DATA_NAME, 1 );
+  evtStore->remap( ClassID_traits< DataVector< DummyData > >::ID(), "_testView_1_" + DATA_NAME, DATA_NAME, 0 );
+  evtStore->remap( ClassID_traits< DataVector< DummyData > >::ID(), "_testView_2_" + DATA_NAME, DATA_NAME, 1 );
 
   // Element link should still be pointing to view container
   ASSERT_TRUE( dataLink.isValid() );
@@ -684,7 +618,7 @@ TEST_F( ViewCollectionMerge_test, mergeHelperTest ) {
 
   // Make a dummy event context
   EventContext dummyContext( 0, 0 );
-  Atlas::setExtendedEventContext (dummyContext, Atlas::ExtendedEventContext( evtStore(), 0 ) );
+  Atlas::setExtendedEventContext (dummyContext, Atlas::ExtendedEventContext( evtStore, 0 ) );
 
   // Parcel the view data
   auto viewData = std::vector< DataVector< DummyData > >( 2 );
@@ -723,7 +657,7 @@ TEST_F( ViewCollectionMerge_test, mergeHelperTest ) {
   ASSERT_TRUE( inputDataHandleKey.initialize().isSuccess() );
   
   MsgStream log(Athena::getMessageSvc(), "ViewCollectionMerge_test");
-  ViewHelper::ViewMerger merger( evtStore(),  log);
+  ViewHelper::ViewMerger merger( evtStore,  log);
   ASSERT_TRUE( merger.mergeViewCollection( *inputViewsHandle, inputDataHandleKey, dummyContext, *mergedData ).isSuccess() );
 
   // Verify merging

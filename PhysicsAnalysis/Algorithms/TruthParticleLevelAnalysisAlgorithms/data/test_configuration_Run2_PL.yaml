@@ -1,0 +1,43 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+GeneratorLevelAnalysis: {}
+
+PL_Electrons:
+  containerName: TruthElectrons
+  PtEtaSelection:
+    useDressedProperties: true
+    minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
+PL_Photons:
+  containerName: TruthPhotons
+  PtEtaSelection:
+    minPt: 20000.0
+PL_Muons:
+  containerName: TruthMuons
+  PtEtaSelection:
+    useDressedProperties: true
+    minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
+PL_Taus:
+  containerName: TruthTaus
+  PtEtaSelection:
+    minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
+PL_Jets:
+  containerName: AntiKt4TruthDressedWZJets
+  PtEtaSelection:
+    minPt: 20000.0
+PL_Neutrinos: {}
+PL_MissingET: {}
+PL_OverlapRemoval:
+  electrons: TruthElectrons
+  muons: TruthMuons
+  photons: TruthPhotons
+  jets: AntiKt4TruthDressedWZJets
+  useRapidityForDeltaR: False
+
+PrintConfiguration: {}

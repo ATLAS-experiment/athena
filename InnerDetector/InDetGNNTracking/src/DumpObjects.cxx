@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DumpObjects.h"
@@ -56,9 +56,8 @@ int InDet::compute_overlap_SP_flag(const int& eta_module_cl1,const int& phi_modu
 //-------------------------------------------------------------------------
 InDet::DumpObjects::DumpObjects(const std::string &name, ISvcLocator *pSvcLocator)
     //-------------------------------------------------------------------------
-    : AthAlgorithm(name, pSvcLocator), m_pixelID(nullptr), m_SCT_ID(nullptr), m_pixelManager(nullptr),
-      m_SCT_Manager(nullptr), m_event(0), m_selected(0), m_particlePropSvc("PartPropSvc", name),
-      m_particleDataTable(0), m_offset(0) {
+    : AthAlgorithm(name, pSvcLocator),
+      m_particlePropSvc("PartPropSvc", name) {
   declareProperty("Offset", m_offset);
   declareProperty("FileName", m_name = "");
   //
@@ -550,7 +549,7 @@ StatusCode InDet::DumpObjects::execute() {
     }
     sdoCollection = sdoCollectionHandle.cptr();
 
-    for (const auto &clusterCollection : *PixelClusterContainer) {
+    for (const auto clusterCollection : *PixelClusterContainer) {
       // skip empty collections
       if (clusterCollection->empty())
         continue;
@@ -575,7 +574,7 @@ StatusCode InDet::DumpObjects::execute() {
       }
 
       // loop over collection
-      for (const auto &cluster : *clusterCollection) {
+      for (const auto cluster : *clusterCollection) {
         Identifier clusterId = cluster->identify();
         if (!clusterId.is_valid()) {
           ATH_MSG_WARNING("Pixel cluster identifier is not valid");
@@ -739,7 +738,7 @@ StatusCode InDet::DumpObjects::execute() {
     }
     sdoCollection = sdoCollectionHandle.cptr();
 
-    for (const auto &clusterCollection : *SCT_ClusterContainer) {
+    for (const auto clusterCollection : *SCT_ClusterContainer) {
       // skip empty collections
       if (clusterCollection->empty())
         continue;
@@ -758,7 +757,7 @@ StatusCode InDet::DumpObjects::execute() {
       float norm_z = fabs(my_normal.z()) > 1e-5 ? my_normal.z() : 0.;
 
       // loop over collection
-      for (const auto &cluster : *clusterCollection) {
+      for (const auto cluster : *clusterCollection) {
         Identifier clusterId = cluster->identify();
         if (!clusterId.is_valid()) {
           ATH_MSG_WARNING("SCT cluster identifier is not valid");
@@ -962,7 +961,7 @@ StatusCode InDet::DumpObjects::execute() {
   m_nSP     = 0;
   
   if (xAODPixelSPContainer && xAODPixelSPContainer->size() > 0) {
-    for (const auto &sp : *xAODPixelSPContainer) {
+    for (const auto sp : *xAODPixelSPContainer) {
 
       if (not linkAcc.isAvailable(*sp)) 
 	ATH_MSG_FATAL("no pixel SpacePoint link for xAOD::SpacePoint");
@@ -996,7 +995,7 @@ StatusCode InDet::DumpObjects::execute() {
   if (xAODStripSPContainer && xAODStripSPContainer->size() > 0) {
     
     //loop over collection
-    for (const auto &sp : *xAODStripSPContainer) {
+    for (const auto sp : *xAODStripSPContainer) {
 
       ATH_CHECK(striplinkAcc.isAvailable(*sp));
       
@@ -1057,7 +1056,7 @@ StatusCode InDet::DumpObjects::execute() {
   if (xAODStripSPOverlapContainer && xAODStripSPOverlapContainer->size() > 0) {
     
     //loop over collection
-    for (const auto &sp : *xAODStripSPOverlapContainer) {
+    for (const auto sp : *xAODStripSPOverlapContainer) {
       
       ATH_CHECK(stripOverlaplinkAcc.isAvailable(*sp));
       
@@ -1082,7 +1081,7 @@ StatusCode InDet::DumpObjects::execute() {
 					   m_CLeta_module[clusterIDMapIdx[cl_2->identify()]],
 					   m_CLphi_module[clusterIDMapIdx[cl_2->identify()]]);
 	
-	if ( flag<1 || flag > 2 )
+	if ( flag<1 || flag > 3 )
 	  ATH_MSG_WARNING("Unexpected overlap SP flag: "<<flag);
 	
 	

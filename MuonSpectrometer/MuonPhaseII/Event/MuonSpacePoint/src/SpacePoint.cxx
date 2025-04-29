@@ -101,7 +101,7 @@ namespace MuonR4{
             uvcov = xAOD::toEigen(primaryMeas->localCovariance<2>());
             m_secondaryMeas = m_primaryMeas;
         }
-        m_measCovariance = Jac.inverse() * uvcov * Jac;
+        m_measCovariance = Jac * uvcov * Jac.inverse();
     }
             
     const xAOD::UncalibratedMeasurement* SpacePoint::primaryMeasurement() const {

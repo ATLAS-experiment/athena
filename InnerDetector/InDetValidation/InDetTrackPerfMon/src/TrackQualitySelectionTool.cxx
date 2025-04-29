@@ -31,7 +31,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::initialize() {
 
   ATH_CHECK( asg::AsgTool::initialize() );
 
-  ATH_MSG_INFO( "Initializing " << name() );
+  ATH_MSG_DEBUG( "Initializing " << name() );
 
   ATH_CHECK( m_offlineSelectionTool.retrieve( EnableTool{ m_doOfflSelection.value() } ) );
   ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool{ m_doTruthSelection.value() } ) );
@@ -50,23 +50,28 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
   ATH_MSG_DEBUG( "Initially copying collections to FullScan vectors" );
 
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  SmartIF<ITrackAnalysisDefinitionSvc> trkAnaDefSvc( svcLoc->service( "TrkAnaDefSvc" + trkAnaColls.anaTag() ) );
+  SmartIF< ITrackAnalysisDefinitionSvc > trkAnaDefSvc(
+      svcLoc->service( "TrkAnaDefSvc" + trkAnaColls.anaTag() ) );
   ATH_CHECK( trkAnaDefSvc.isValid() );
 
   /// First copy the full collections vectors to the selected vectors (Full-Scan)
   if( trkAnaDefSvc->useOffline() ) {
+    /// Offline tracks copy
     ATH_CHECK( trkAnaColls.fillOfflTrackVec(
         trkAnaColls.offlTrackVec( TrackAnalysisCollections::FULL ),
         TrackAnalysisCollections::FS ) );
   }
 
-  if( trkAnaDefSvc->useEFTrigger() ) {
+  if( trkAnaDefSvc->useTrigger() or trkAnaDefSvc->useEFTrigger() ) {
+    /// Trigger tracks (or EFTrigger, i.e. Trigger tracks without
+    /// the trigger navigation / offline-like) copy
     ATH_CHECK( trkAnaColls.fillTrigTrackVec(
         trkAnaColls.trigTrackVec( TrackAnalysisCollections::FULL ),
         TrackAnalysisCollections::FS ) );
   }
 
   if( trkAnaDefSvc->useTruth() ) {
+    /// Truth particles copy
     ATH_CHECK( trkAnaColls.fillTruthPartVec(
         trkAnaColls.truthPartVec( TrackAnalysisCollections::FULL ),
         TrackAnalysisCollections::FS ) );
@@ -85,6 +90,8 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
   if( trkAnaDefSvc->useTruth() and m_doTruthSelection.value() ) {
     ATH_CHECK( m_truthSelectionTool->selectTracks( trkAnaColls ) );
   }
+
+  /// TODO: Do Trigger track selection (?)
 
   /// Select offline tracks matched to offline objects
   if( trkAnaDefSvc->useOffline() and m_doObjSelection.value() ) {

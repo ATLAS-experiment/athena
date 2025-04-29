@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "Run2toRun3ConvertersL1.h"
 #include <numeric>
@@ -255,9 +255,9 @@ convertRun2L1MenuToRun3(const TrigConf::CTPConfig* ctpConfig, const TXC::L1TopoM
                {"offset", iso.offset()}, {"priority", iso.priority()}, {"slope", iso.slope()}, {"upperlimit", iso.upperlimit()} };
          isoEMforTAU["Parametrization"] += p;
       }
-      thresholds["legacyCalo"]["EM"]["isolation"]["HAIsoForEMthr"] = isoHAforEM;
-      thresholds["legacyCalo"]["EM"]["isolation"]["EMIsoForEMthr"] = isoEMforEM;
-      thresholds["legacyCalo"]["TAU"]["isolation"]["EMIsoForTAUthr"] = isoEMforTAU;
+      thresholds["legacyCalo"]["EM"]["isolation"]["HAIsoForEMthr"] =  std::move(isoHAforEM);
+      thresholds["legacyCalo"]["EM"]["isolation"]["EMIsoForEMthr"] =  std::move(isoEMforEM);
+      thresholds["legacyCalo"]["TAU"]["isolation"]["EMIsoForTAUthr"] =  std::move(isoEMforTAU);
    }
    const TrigConf::METSigParam &xs = ci.metSigParam();
    thresholds["legacyCalo"]["XS"]["significance"] = json::object_t{
@@ -379,11 +379,11 @@ convertRun2L1MenuToRun3(const TrigConf::CTPConfig* ctpConfig, const TXC::L1TopoM
       if(alg.isSortAlg()) {
          jAlg["input"] = alg.getInputNames()[0];
          jAlg["output"] = alg.output();
-         sortAlgos[alg.name()] = jAlg;
+         sortAlgos[alg.name()] =  std::move(jAlg);
       } else if(alg.isDecAlg()) {
          jAlg["input"] = alg.getInputNames();
          jAlg["output"] = alg.getOutputNames();
-         decAlgos[alg.name()] = jAlg;
+         decAlgos[alg.name()] =  std::move(jAlg);
       }
    }
    json topo = json::object_t{};
@@ -413,12 +413,12 @@ convertRun2L1MenuToRun3(const TrigConf::CTPConfig* ctpConfig, const TXC::L1TopoM
    menu["filetype"] = "l1menu";
    menu["run"] = run;
    menu["name"] = ctpConfig->name();
-   menu["items"] = items;
-   menu["thresholds"] = thresholds;
-   menu["topoAlgorithms"] = topo;
-   menu["boards"] = boards;
-   menu["connectors"] = connectors;
-   menu["ctp"] = ctp;
+   menu["items"] =  std::move(items);
+   menu["thresholds"] =  std::move(thresholds);
+   menu["topoAlgorithms"] =  std::move(topo);
+   menu["boards"] =  std::move(boards);
+   menu["connectors"] =  std::move(connectors);
+   menu["ctp"] =  std::move(ctp);
 
 
    if(writeTmpFile) {
@@ -493,11 +493,11 @@ convertRun2BunchGroupsToRun3(const TrigConf::CTPConfig* ctpConfig, const std::st
       for ( auto [start, end] : ranges) {
          jBCIDS += json{{"first", start}, {"length", 1+end-start}};
       }
-      jGroup["bcids"] = jBCIDS;
+      jGroup["bcids"] =  std::move(jBCIDS);
 
-      jGroups[std::string("BGRP")+std::to_string(group.internalNumber())] = jGroup;
+      jGroups[std::string("BGRP")+std::to_string(group.internalNumber())] = std::move(jGroup);
    }
-   bgset["bunchGroups"] = jGroups;
+   bgset["bunchGroups"] = std::move(jGroups);
 
    if(writeTmpFile) {
       std::ofstream outfile("tmp" + filename);
@@ -537,10 +537,10 @@ convertRun2L1PrescalesToRun3(const TrigConf::CTPConfig* ctpConfig, const std::st
          jCut["enabled"] = cut > 0;
          double ps = static_cast<double>(0xFFFFFF) / ( 0x1000000 - cut );
          jCut["info"] = "prescale: "+std::to_string(ps);
-         jCuts[itemPtr->name()] = jCut;
+         jCuts[itemPtr->name()] = std::move(jCut);
       }
    }
-   psset["cutValues"] = jCuts;
+   psset["cutValues"] = std::move(jCuts);
 
    if(writeTmpFile) {
       std::ofstream outfile("tmp" + filename);

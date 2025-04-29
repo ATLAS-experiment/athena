@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtDigitizationTool.h"
 #include "StoreGate/WriteHandle.h"
 #include "MDT_Digitization/MdtDigiToolInput.h"
 #include "MdtCalibInterfaces/IMdtCalibrationTool.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 namespace{
     constexpr double timeToTdcCnv = 1. / IMdtCalibrationTool::tdcBinSize;
@@ -35,11 +36,11 @@ namespace MuonR4 {
         using DigitSDOPair = std::pair<std::unique_ptr<MdtDigit>, TimedHit>;
         /// Fetch the needed conditions 
         const MuonCalib::MdtCalibDataContainer* calibData{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_calibDbKey, calibData));
+        ATH_CHECK(SG::get(calibData, m_calibDbKey, ctx));
         const MdtCondDbData* badTubes{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_badTubeKey, badTubes));
+        ATH_CHECK(SG::get(badTubes, m_badTubeKey, ctx));
         const Muon::TwinTubeMap* twinTubes{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_twinTubeKey, twinTubes));
+        ATH_CHECK(SG::get(twinTubes, m_twinTubeKey, ctx));
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         
         DigiCache digitCache{};
@@ -57,9 +58,14 @@ namespace MuonR4 {
                     ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitId)<<" is rejected due to masking in DB.");
                     continue;
                 }
+                ATH_MSG_VERBOSE("Process sim hit "<<m_idHelperSvc->toString(hitId) <<", pdgId: "<<simHit->pdgId()<<", "
+                            <<Amg::toString(xAOD::toEigen(simHit->localPosition()))<<" + "<<Amg::toString(xAOD::toEigen(simHit->localDirection()))
+                            <<", time: "<<simHit->globalTime()<<", energy: "<<simHit->kineticEnergy() / Gaudi::Units::GeV
+                            <<" [GeV], mass: "<<simHit->mass()<<", deposited energy: "<<simHit->energyDeposit() / Gaudi::Units::eV
+                            <<" [eV], genLink: "<<simHit->genParticleLink());
                 const MuonGMR4::MdtReadoutElement* readOutEle = m_detMgr->getMdtReadoutElement(hitId);
                 const IdentifierHash measHash{readOutEle->measurementHash(hitId)};
-                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
+                if (m_digitizeMuonOnly && !MC::isMuon(simHit)) {
                     ATH_MSG_VERBOSE("Hit is not from a muon");
                     continue;
                 }
@@ -82,7 +88,7 @@ namespace MuonR4 {
 
                 const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& tubeCalib{*tubeConstants->tubeCalib->getCalib(hitId)};
             
-                const double sigPropTime = tubeCalib.inversePropSpeed*distRO;
+                const double sigPropTime = calibData->inversePropSpeed()*distRO;
                 ATH_MSG_VERBOSE(m_idHelperSvc->toString(hitId)<<" "<<Amg::toString(locPos)<<" distance to readout: "<<distRO<<" --> "<<sigPropTime);
                 /// Total tdc time is the sum of the drift time, the time of flight of the muon, the propgation along the wire
                 /// and finally the constant t0 tube offset
@@ -128,7 +134,7 @@ namespace MuonR4 {
                               <<", twin distance: "<<twinDist);
                 const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& twinCalib{*tubeConstants->tubeCalib->getCalib(twinId)};
             
-                const double twinPropTime = tubeCalib.inversePropSpeed*twinDist;
+                const double twinPropTime = calibData->inversePropSpeed()*twinDist;
                 /// Total tdc time is the sum of the drift time, the time of flight of the muon, the propgation along the wire
                 /// and finally the constant t0 tube offset
                 const double twinTdcTime = digiOutput.driftTime() + arrivalTime + twinPropTime 
@@ -157,7 +163,7 @@ namespace MuonR4 {
                 /// Find the next digit which is either another tube or beyond the dead time
                 saveMe = std::find_if(saveMe +1, digitsInChamber.end(),
                                       [deadInterval, saved](const DigitSDOPair& digitized) {
-                                         return saved->identify() != digitized.first->identify() || deadInterval < saved->tdc();
+                                         return saved->identify() != digitized.first->identify() || deadInterval < digitized.first->tdc();
                                       });
             }
         } while (viewer.next());

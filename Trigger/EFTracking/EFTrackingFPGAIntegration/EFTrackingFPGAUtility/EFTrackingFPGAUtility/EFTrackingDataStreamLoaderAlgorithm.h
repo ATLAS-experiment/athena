@@ -1,0 +1,57 @@
+/*
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ */
+
+#ifndef EFTRACKING_DATA_STREAM_LOADER_ALGORITHM
+#define EFTRACKING_DATA_STREAM_LOADER_ALGORITHM
+
+#include <mutex>
+
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "TestVectorTool.h"
+
+class EFTrackingDataStreamLoaderAlgorithm : public AthReentrantAlgorithm
+{
+  Gaudi::Property<std::string> m_inputCsvPath{
+    this,
+    "inputCsvPath", 
+    "", 
+    "Path to input csv container."
+  };
+
+  SG::WriteHandleKey<std::vector<unsigned long>> m_inputDataStreamKey{
+    this,
+    "inputDataStream",
+    "",
+    "Key to access encoded 64bit words following the EFTracking specification, read as input."
+  };
+
+  Gaudi::Property<std::size_t> m_bufferSize {
+    this,
+    "bufferSize",
+    8192,
+    "Capacity of std::vector."
+  };
+
+  ToolHandle<TestVectorTool> m_testVectorTool{
+    this, 
+    "TestVectorTool", 
+    "TestVectorTool", 
+    "Tool to prepare test vector"
+  };  
+
+  // Hack to track progress through the test vector across multiple calls to 
+  // execute. The performance impact is not important as this algorithm is only 
+  // used in small tests.
+  mutable std::size_t m_eventNumber ATLAS_THREAD_SAFE {0};
+  mutable std::mutex m_mutex ATLAS_THREAD_SAFE;
+
+ public:
+  EFTrackingDataStreamLoaderAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
+  StatusCode initialize() override final;
+  StatusCode execute(const EventContext& ctx) const override final;
+};
+
+#endif
+

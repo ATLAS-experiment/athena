@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/features.h
@@ -12,11 +12,9 @@
 #ifndef CXXUTILS_FEATURES_H
 #define CXXUTILS_FEATURES_H
 
-// cppcheck-suppress preprocessorErrorDirective
 #if __has_include( <features.h> )
 # include <features.h>
 #endif
-// cppcheck-suppress preprocessorErrorDirective
 #if __has_include( <version> )
 # include <version>
 #endif

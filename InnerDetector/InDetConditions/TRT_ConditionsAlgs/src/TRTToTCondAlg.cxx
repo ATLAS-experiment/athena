@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTToTCondAlg.h"
@@ -129,7 +129,7 @@ StatusCode TRTToTCondAlg::update1( TRTDedxcorrection& Dedxcorrection, const Cond
     }
     currentArrayValues.push_back(channel->second["array_value"].data<float>());             
   }
-  resultDict[dictNames[channelIndex]] = currentArrayValues;
+  resultDict[dictNames[channelIndex]] = std::move(currentArrayValues);
 
   // update dEdx corrections from dictionary depending on the DB version
   if(dataBaseType==kNewDB or dataBaseType==kNewDBOccCorr) {              

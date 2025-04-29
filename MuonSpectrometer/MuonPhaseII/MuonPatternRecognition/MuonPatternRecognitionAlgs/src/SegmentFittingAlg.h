@@ -16,8 +16,8 @@
 #include "MuonPatternHelpers/SegmentAmbiSolver.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 
@@ -39,11 +39,6 @@ namespace MuonR4{
 
         private:
             using Parameters = SegmentFit::Parameters;
-            /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-            /// Failure is returned in cases, of non-empty keys and failed retrieval
-            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                                        const ContainerType* & contToPush) const;
             /** @brief Executes the segment fit with start parameters. The returned fit result
              *         indicates whether the fit was a success and all relevant output parameters
              *  @brief ctx: Event context needed to access the calibration constants of the hits
@@ -111,11 +106,9 @@ namespace MuonR4{
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", "" };
             /// Pattern visualization tool
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
-            
-            /// Toggle the fitter
-            Gaudi::Property<bool> m_useMinuit{this, "useMinuit", false};
 
             Gaudi::Property<bool> m_doT0Fit{this, "fitSegmentT0", true};
+            Gaudi::Property<bool> m_recalibInFit{this, "recalibInFit" , false};
             /// Add beamline constraint
             Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
             Gaudi::Property<double> m_beamSpotR{this, "BeamSpotRadius", 30.* Gaudi::Units::cm};
@@ -133,6 +126,8 @@ namespace MuonR4{
             /** Cut on the segment chi2 / nDoF to launch the outlier removal */
             Gaudi::Property<double> m_outlierRemovalCut{this, "OutlierRemoval", 5.};
             Gaudi::Property<double> m_recoveryPull{this, "RecoveryPull", 5.};
+            /** @brief Minimum number of precision hits to accept the segment */
+            Gaudi::Property<unsigned> m_precHitCut{this, "PrecHitCut" , 3};
 
             std::unique_ptr<SegmentAmbiSolver> m_ambiSolver{};
 

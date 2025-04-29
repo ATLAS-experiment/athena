@@ -13,9 +13,7 @@
 namespace Muon {
 
   MuonLayerHashProviderTool::MuonLayerHashProviderTool(const std::string& type, const std::string& name, const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_ntechnologies(4)
-  {
+    AthAlgTool(type,name,parent) {
     declareInterface<MuonLayerHashProviderTool>(this);
 
   }
@@ -23,6 +21,7 @@ namespace Muon {
   StatusCode MuonLayerHashProviderTool::initialize() {
 
     ATH_CHECK(m_idHelperSvc.retrieve());
+    ATH_CHECK(m_detMgrKey.initialize());
 
     if( !initializeSectorMapping() ){
       ATH_MSG_ERROR("Failed to initialize sector mapping");
@@ -33,11 +32,11 @@ namespace Muon {
   }
 
 
-  void MuonLayerHashProviderTool::insertHash( const IdentifierHash& hash, const Identifier& id ) {
+  void MuonLayerHashProviderTool::insertHash( const IdentifierHash& hash, const Identifier& id ) const{
     insertHash(m_idHelperSvc->sector(id),hash,id);
   }
 
-  void MuonLayerHashProviderTool::insertHash( int sector, const IdentifierHash& hash, const Identifier& id ) {
+  void MuonLayerHashProviderTool::insertHash( int sector, const IdentifierHash& hash, const Identifier& id ) const {
     MuonStationIndex::TechnologyIndex techIndex = m_idHelperSvc->technologyIndex(id);
     int sectorLayerHash = MuonStationIndex::sectorLayerHash(m_idHelperSvc->regionIndex(id),m_idHelperSvc->layerIndex(id));
     m_regionHashesPerSector[sector-1].technologyRegionHashVecs[techIndex][sectorLayerHash].push_back(hash);
@@ -56,15 +55,12 @@ namespace Muon {
 
   }
 
-  bool MuonLayerHashProviderTool::insertTgcs(){
-    
+  void MuonLayerHashProviderTool::insertTgcs() const {
+    std::lock_guard guard{m_tgcHash};
+    if (m_hashLoaded) return;
     // the tgc's can be in multiple sectors so we need to do something special here
-    const MuonGM::MuonDetectorManager* detMgr = nullptr;
-    if( detStore()->retrieve( detMgr ).isFailure() || !detMgr ){
-      ATH_MSG_ERROR("Failed to initialize detector manager" );
-      return false;
-    }
-
+    SG::ReadCondHandle detMgr{m_detMgrKey};
+  
     MuonSectorMapping sectorMapping;
 
     // loop over all available TGC collection identifiers and order them per sector
@@ -100,14 +96,12 @@ namespace Muon {
         insertHash(*sit,hash,*it);
       }
     }
-    
-    return true;
+    m_hashLoaded = true;
   }
 
   // all chambers are mapped onto a layer and sector map
   bool MuonLayerHashProviderTool::initializeSectorMapping() {
 
-    m_ntechnologies = m_idHelperSvc->mdtIdHelper().technologyNameIndexMax()+1;
     m_regionHashesPerSector.resize(MuonStationIndex::numberOfSectors());
     // set sector numbers
     unsigned int nsectorHashMax = MuonStationIndex::sectorLayerHashMax();
@@ -119,7 +113,7 @@ namespace Muon {
       }
     }
     ATH_MSG_DEBUG("Initializing hashes: number of sectors " << MuonStationIndex::numberOfSectors() 
-                  << " technologies " << m_ntechnologies << " sectorLayers " << MuonStationIndex::sectorLayerHashMax() );
+                 << " sectorLayers " << MuonStationIndex::sectorLayerHashMax() );
 
     // add technologies
     if (m_idHelperSvc->hasMDT()) insertTechnology(m_idHelperSvc->mdtIdHelper());
@@ -127,37 +121,6 @@ namespace Muon {
     if (m_idHelperSvc->hasCSC()) insertTechnology(m_idHelperSvc->cscIdHelper());
     if (m_idHelperSvc->hasMM()) insertTechnology(m_idHelperSvc->mmIdHelper());
     if (m_idHelperSvc->hasSTGC()) insertTechnology(m_idHelperSvc->stgcIdHelper());
-
-    if( !insertTgcs() ) return false;
-
-    if( msgLvl(MSG::DEBUG) ) msg(MSG::DEBUG) << " Printing collections per sector, number of technologies " << m_ntechnologies;
-    for( int sector = 1; sector<=16; ++sector ){
-      MuonStationIndex::DetectorRegionIndex currentRegion = MuonStationIndex::DetectorRegionUnknown;
-      if( msgLvl(MSG::DEBUG) ) msg(MSG::DEBUG) << " sector " << sector;
-      TechnologyRegionHashVec& vec = m_regionHashesPerSector[sector-1].technologyRegionHashVecs;
-      for( unsigned int hash = 0; hash < nsectorHashMax; ++hash ){
-        std::pair<MuonStationIndex::DetectorRegionIndex,MuonStationIndex::LayerIndex> regionLayer = MuonStationIndex::decomposeSectorLayerHash(hash);
-        if( msgLvl(MSG::DEBUG) ) if( regionLayer.first != currentRegion ) msg(MSG::DEBUG) << std::endl << "  " << MuonStationIndex::regionName(regionLayer.first);
-        bool first = true;
-        currentRegion = regionLayer.first;
-        for( unsigned int tech=0; tech<m_ntechnologies;++tech ){
-          std::stable_sort(vec[tech][hash].begin(),vec[tech][hash].end());
-          if( !vec[tech][hash].empty() ) {
-            if( msgLvl(MSG::DEBUG) ) {
-              if( first ) {
-                msg(MSG::DEBUG) << "  " << std::setw(7) << MuonStationIndex::layerName(regionLayer.second);
-                first = false;
-              }
-              msg(MSG::DEBUG) << " " << std::setw(4) << MuonStationIndex::technologyName(static_cast<MuonStationIndex::TechnologyIndex>(tech)) 
-                              << " " << std::setw(4) << vec[tech][hash].size(); 
-            }
-          }
-        }
-      }
-      if( msgLvl(MSG::DEBUG) ) msg(MSG::DEBUG) << std::endl;
-    }
-    if( msgLvl(MSG::DEBUG) ) msg(MSG::DEBUG) << endmsg;
-
     return true;
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------
@@ -10,41 +10,55 @@
 #include "GaudiKernel/System.h"
 
 
-#define DATAPOOL_T template <typename VALUE, DataPoolClearFuncPtr_t<VALUE> clear>
-DATAPOOL_T
-const typename DataPool<VALUE, clear>::alloc_t::Params DataPool<VALUE, clear>::s_params
-  = DataPool<VALUE, clear>::initParams();
+namespace SG {
 
 
-#if __GNUC__ >= 12
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Waddress"
-#endif
+/// Find the address of the function to clear an element,
+/// or nullptr if it hasn't been set explicitly.
+template <class VALUE, class CLEAR>
+class DataPoolClearAddr
+{
+public:
+  // Generic version --- a function that will call CLEAR::operator(),
+  // casting the argument appropriately.
+  static void callClear (SG::ArenaAllocatorBase::pointer p)
+  {
+    CLEAR::clear (reinterpret_cast<VALUE*> (p));
+  }
+  static SG::ArenaAllocatorBase::func_t* addr() { return callClear; }
+};
+template <class VALUE>
+class DataPoolClearAddr<VALUE, SG::DataPoolNullClear<VALUE> >
+{
+public:
+  // Specialized version of the default DataPoolNullClear.
+  // Just return nullptr.
+  static SG::ArenaAllocatorBase::func_t* addr() { return nullptr; }
+};
+
+
+} // namespace SG
+
+
+#define DATAPOOL_T template <typename VALUE, typename CLEAR>
 DATAPOOL_T
-typename DataPool<VALUE, clear>::alloc_t::Params DataPool<VALUE, clear>::initParams()
+const typename DataPool<VALUE, CLEAR>::alloc_t::Params DataPool<VALUE, CLEAR>::s_params
+  = DataPool<VALUE, CLEAR>::initParams();
+
+
+DATAPOOL_T
+typename DataPool<VALUE, CLEAR>::alloc_t::Params DataPool<VALUE, CLEAR>::initParams()
 {
   typename alloc_t::Params params = alloc_t::initParams<VALUE> (s_minRefCount);
-  if (clear != nullptr) {
-    params.clear = callClear;
-  }
+  params.clear = SG::DataPoolClearAddr<VALUE, CLEAR>::addr();
   return params;
-}
-#if __GNUC__ >= 12
-# pragma GCC diagnostic pop
-#endif
-
-
-DATAPOOL_T
-void DataPool<VALUE, clear>::callClear (SG::ArenaAllocatorBase::pointer p)
-{
-  clear (reinterpret_cast<VALUE*> (p));
 }
 
 
 //-----------------------------------------------------------
 
 DATAPOOL_T
-DataPool<VALUE, clear>::DataPool(size_type n /*= 0*/)
+DataPool<VALUE, CLEAR>::DataPool(size_type n /*= 0*/)
   : m_handle (&s_params)
 {
   if (n > 0)
@@ -52,7 +66,7 @@ DataPool<VALUE, clear>::DataPool(size_type n /*= 0*/)
 }
 
 DATAPOOL_T
-DataPool<VALUE, clear>::DataPool(const EventContext& ctx,
+DataPool<VALUE, CLEAR>::DataPool(const EventContext& ctx,
                                  size_type n /*= 0*/)
   : m_handle (static_cast<SG::ArenaHeader*>(nullptr), ctx, &s_params)
 {
@@ -61,7 +75,7 @@ DataPool<VALUE, clear>::DataPool(const EventContext& ctx,
 }
 
 DATAPOOL_T
-DataPool<VALUE, clear>::DataPool(SG::Arena* arena,
+DataPool<VALUE, CLEAR>::DataPool(SG::Arena* arena,
                                  size_type n /*= 0*/)
   : m_handle (arena, &s_params)
 {
@@ -72,14 +86,14 @@ DataPool<VALUE, clear>::DataPool(SG::Arena* arena,
 //-----------------------------------------------------------
 /// release all elements in the pool.
 DATAPOOL_T
-void DataPool<VALUE, clear>::reset()
+void DataPool<VALUE, CLEAR>::reset()
 {
   m_handle.reset();
 }
 
 /// free all memory in the pool.
 DATAPOOL_T
-void DataPool<VALUE, clear>::erase()
+void DataPool<VALUE, CLEAR>::erase()
 {
   m_handle.erase();
 }
@@ -88,14 +102,14 @@ void DataPool<VALUE, clear>::erase()
 // allocated elements will not be deleted.
 
 DATAPOOL_T
-void DataPool<VALUE, clear>::reserve(unsigned int size)
+void DataPool<VALUE, CLEAR>::reserve(unsigned int size)
 {
   m_handle.reserve (size);
 }
 
 
 DATAPOOL_T
-void DataPool<VALUE, clear>::prepareToAdd(unsigned int size)
+void DataPool<VALUE, CLEAR>::prepareToAdd(unsigned int size)
 {
   if (this->capacity() - this->allocated() < size) {
     this->reserve(this->allocated() + size);
@@ -103,13 +117,13 @@ void DataPool<VALUE, clear>::prepareToAdd(unsigned int size)
 }
 
 DATAPOOL_T
-unsigned int DataPool<VALUE, clear>::capacity()
+unsigned int DataPool<VALUE, CLEAR>::capacity()
 {
   return m_handle.stats().elts.total;
 }
 
 DATAPOOL_T
-unsigned int DataPool<VALUE, clear>::allocated()
+unsigned int DataPool<VALUE, CLEAR>::allocated()
 {
   return m_handle.stats().elts.inuse;
 }
@@ -118,13 +132,13 @@ unsigned int DataPool<VALUE, clear>::allocated()
 //-----------------------------------------------------------
 /// begin iterators over pool
 DATAPOOL_T
-typename DataPool<VALUE, clear>::iterator DataPool<VALUE, clear>::begin()
+typename DataPool<VALUE, CLEAR>::iterator DataPool<VALUE, CLEAR>::begin()
 {
   return iterator (m_handle.begin());
 }
 
 DATAPOOL_T
-typename DataPool<VALUE, clear>::const_iterator DataPool<VALUE, clear>::begin() const
+typename DataPool<VALUE, CLEAR>::const_iterator DataPool<VALUE, CLEAR>::begin() const
 {
   return const_Iterator (m_handle.begin());
 }
@@ -134,20 +148,20 @@ typename DataPool<VALUE, clear>::const_iterator DataPool<VALUE, clear>::begin() 
 /// and not over ALL elements of the pool
 
 DATAPOOL_T
-typename DataPool<VALUE, clear>::iterator DataPool<VALUE, clear>::end()
+typename DataPool<VALUE, CLEAR>::iterator DataPool<VALUE, CLEAR>::end()
 {
   return iterator (m_handle.end());
 }
 
 DATAPOOL_T
-typename DataPool<VALUE, clear>::const_iterator DataPool<VALUE, clear>::end() const {
+typename DataPool<VALUE, CLEAR>::const_iterator DataPool<VALUE, CLEAR>::end() const {
   return const_iterator (m_handle.end());
 }
 
 //-----------------------------------------------------------
 /// typename of pool
 DATAPOOL_T
-const std::string& DataPool<VALUE, clear>::typeName() {
+const std::string& DataPool<VALUE, CLEAR>::typeName() {
   static std::string name = System::typeinfoName (typeid (VALUE));
   return name;
 }
@@ -157,7 +171,7 @@ const std::string& DataPool<VALUE, clear>::typeName() {
 /// pool is resized if reached its limit
 DATAPOOL_T
 inline
-typename DataPool<VALUE, clear>::pointer DataPool<VALUE, clear>::nextElementPtr()
+typename DataPool<VALUE, CLEAR>::pointer DataPool<VALUE, CLEAR>::nextElementPtr()
 {
   return m_handle.allocate();
 }

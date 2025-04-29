@@ -28,14 +28,7 @@ DiTauEfficiencyCorrectionsTool::DiTauEfficiencyCorrectionsTool( const std::strin
   , m_bIsData(false)
   , m_bIsConfigured(false)
 {
-  declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );
-  declareProperty( "InputFilePathJetIDHadTau",     m_sInputFilePathJetIDHadTau     = "" );
-  declareProperty( "VarNameJetIDHadTau",           m_sVarNameJetIDHadTau           = "" );
-  declareProperty( "RecommendationTag",            m_sRecommendationTag            = "2017-moriond" );
-  declareProperty( "JetIDLevel",                   m_iJetIDLevel                   = (int)JETIDBDTTIGHT );
-  declareProperty( "SkipTruthMatchCheck",          m_bSkipTruthMatchCheck          = false );
 }
-
 
 //______________________________________________________________________________
 DiTauEfficiencyCorrectionsTool::~DiTauEfficiencyCorrectionsTool()
@@ -53,11 +46,6 @@ StatusCode DiTauEfficiencyCorrectionsTool::initialize()
 
   if (m_bSkipTruthMatchCheck)
     ATH_MSG_WARNING("Truth match check will be skipped. This is ONLY FOR TESTING PURPOSE!");
-
-  // configure default set of variations if not set by the constructor using TauSelectionTool or the user
-  if ((m_sRecommendationTag== "2017-moriond") and m_vEfficiencyCorrectionTypes.empty())
-    m_vEfficiencyCorrectionTypes = {SFJetIDHadTau
-                                   };
 
   if (m_sRecommendationTag == "2017-moriond")
     ATH_CHECK(initializeTools_2017_moriond());

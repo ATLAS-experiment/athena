@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CPBTAGGINGEFFICIENCYTOOL_H
@@ -8,16 +8,7 @@
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 #include "PATInterfaces/ISystematicsTool.h"
-
 #include "xAODBTagging/BTagging.h"
-
-#include <fstream>
-#include <string>
-#include <set>
-#include <vector>
-#include <map>
-//#include <memory>
-
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AnaToolHandle.h"
 
@@ -25,7 +16,14 @@
 #include "CalibrationDataInterface/CalibrationDataInterfaceROOT.h"
 
 // for the onnxtool
-#include "xAODBTaggingEfficiency/OnnxUtil.h"
+#include "xAODBTaggingEfficiency/SaltModel.h"
+//
+#include <fstream>
+#include <string>
+#include <set>
+#include <vector>
+#include <map>
+#include <memory>
 
 
 class BTaggingEfficiencyTool: public asg::AsgTool,
@@ -182,13 +180,13 @@ class BTaggingEfficiencyTool: public asg::AsgTool,
   const std::map<CP::SystematicVariation, std::vector<std::string> > listSystematics() const;
 
   /// Retrieve the name of the tagger (as specified in the calibration file)
-  std::string getTaggerName() const { return m_taggerName;}
+  const std::string & getTaggerName() const { return m_taggerName;}
 
   /// Retrieve the operating point (as specified in the calibration file)
-  std::string getOperatingPoint() const { return m_OP;}
+  const std::string & getOperatingPoint() const { return m_OP;}
 
   /// Retrieve the jet collection name (as specified in the calibration file) for which this tool was setup
-  std::string getJetAuthor() const { return m_jetAuthor;}
+  const std::string & getJetAuthor() const { return m_jetAuthor;}
 
   // /// Returns false if the tool isn't initialised yet (it has to be initialised before processing jets)
   // bool isInitialized() const { return m_initialised;}
@@ -295,7 +293,7 @@ private:
   //Analysis::CalibrationDataInterfaceROOT*  m_CDI = nullptr;
    std::shared_ptr<Analysis::CalibrationDataInterfaceROOT> m_CDI;
    /// pointer to the onnx tool
-  std::unique_ptr<OnnxUtil> m_onnxUtil;
+  std::unique_ptr<SaltModel> m_saltModel;
 
   /// @name core configuration properties (set at initalization time and not modified afterwards)
   /// @{

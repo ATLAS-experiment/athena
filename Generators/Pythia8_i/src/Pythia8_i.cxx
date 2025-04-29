@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "Pythia8_i/Pythia8_i.h"
 #include "Pythia8_i/UserProcessFactory.h"
@@ -77,6 +77,7 @@ Pythia8_i::Pythia8_i(const std::string &name, ISvcLocator *pSvcLocator)
   m_particleIDs["MUON"]        = MUON;
   m_particleIDs["ANTIMUON"]    = ANTIMUON;
   m_particleIDs["LEAD"]        = LEAD;
+  m_particleIDs["OXYGEN"]      = OXYGEN;
 
 }
 
@@ -220,7 +221,6 @@ StatusCode Pythia8_i::genInitialize() {
     ATH_MSG_INFO(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 
     m_atlasRndmEngine = std::make_shared<customRndm>();
-
     CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(s_pythia_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
     m_atlasRndmEngine->init(rndmEngine);
 #if PYTHIA_VERSION_INTEGER >= 8310
@@ -356,8 +356,7 @@ StatusCode Pythia8_i::genInitialize() {
 StatusCode Pythia8_i::callGenerator(){
 
   ATH_MSG_DEBUG(">>> Pythia8_i from callGenerator");
-
-  if(m_useRndmGenSvc){
+  if(m_useRndmGenSvc && m_useReseed){
     //Re-seed the random number stream
     long seeds[7];
     const EventContext& ctx = Gaudi::Hive::currentContext();
@@ -579,8 +578,8 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
   // to make clear that it should not be used in analyses, save it always with a -10 factor (so that its goal is clear even if not checking its name)
   if (m_lheFile!="") 
   {
-       fWeights["AUX_bare_not_for_analyses"]=(-10.0)*m_pythia->info.eventWeightLHEF;
-       if(m_internal_event_number == 1)  m_weightIDs.push_back("AUX_bare_not_for_analyses");
+       fWeights["EXTRA_bare_LHE_weight"]=(-10.0)*m_pythia->info.eventWeightLHEF;
+       if(m_internal_event_number == 1)  m_weightIDs.push_back("EXTRA_bare_LHE_weight");
   }
 
   // Sad, but needed: create a string vector with acceptable order of weight names
@@ -609,7 +608,7 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
   }
   evt->run_info()->set_weight_names(m_weightNames);
 
-  // for the first event, weight AUX_bare_not_for_analyses is not present in evt->weights(), so we need to book a place for it by hand
+  // for the first event, weight EXTRA_bare_LHE_weight is not present in evt->weights(), so we need to book a place for it by hand
   if (m_internal_event_number == 1 && evt->run_info()->weight_names().size() == evt->weights().size()+1 ) {
      evt->weights().push_back(1.0);
   }
@@ -631,7 +630,7 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
 
 #else
   evt->weights().clear();
-  for (auto w: m_weightNames ) {evt->weights()[w]=fWeights[w];}
+  for (const auto& w: m_weightNames ) {evt->weights()[w]=fWeights[w];}
   auto beams=evt->beam_particles();
   ATH_MSG_DEBUG( " Energy of the beams " << beams.first->momentum().e() );
 
@@ -678,7 +677,7 @@ StatusCode Pythia8_i::genFinalize(){
 
   if(m_doLHE3Weights || m_weightIDs.size()>1 ){
     std::cout<<"MetaData: weights = ";
-    for (auto w : m_weightNames ) std::cout<< w <<" | ";
+    for (const auto& w : m_weightNames ) std::cout<< w <<" | ";
     std::cout<<std::endl;
   }
 
@@ -686,7 +685,12 @@ StatusCode Pythia8_i::genFinalize(){
         if (info.nTried()>0) ATH_MSG_INFO("Pythia8 efficiency (nAccepted/nTried %) = " << info.nAccepted()*100./info.nTried());
         else ATH_MSG_INFO("Pythia8 efficiency cannot be computed, nTried <=0");
   }
-      
+
+if(m_useRndmGenSvc){
+  ATH_MSG_INFO("Number of random numbers produced  " << m_atlasRndmEngine->getRNCalls());
+  if (m_useReseed) ATH_MSG_INFO("Each event was reseeded ");
+  else  ATH_MSG_INFO("Events were not reseeded ");
+}      
 
   return StatusCode::SUCCESS;
 }

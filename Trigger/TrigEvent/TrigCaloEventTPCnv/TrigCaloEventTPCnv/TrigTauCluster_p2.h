@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -27,46 +27,35 @@ class TrigTauCluster_p2
 {
  public:
   
-  TrigTauCluster_p2() :
-    m_EMenergy(0.0),
-    m_HADenergy(0.0),
-    m_eCalib(0.0),
-    m_EMRadius2(0.0),
-    m_CaloRadius(0.0),
-    m_IsoFrac(0.0),
-    m_numStripCells(0),
-    m_numTotCells(0),
-    m_stripWidth(0.0),
-    m_stripWidthOffline(0.0),
-    m_valid(false)
-      {}
+  TrigTauCluster_p2() = default;
+
   friend class TrigTauClusterCnv_p2;
   
  private:
   
 	/**  EM Energy */
-        float m_EMenergy;
+        float m_EMenergy{};
 	/**  HAD Energy */
-        float m_HADenergy;
+        float m_HADenergy{};
 	/**  Calibrated Energy */
-        float m_eCalib;
+        float m_eCalib{};
 	/**  EM Radius */
-	float m_EMRadius2;
+	float m_EMRadius2{};
 	/**  Total Calo Radius */
-	float m_CaloRadius;
+	float m_CaloRadius{};
 	/**  Isolation Fraction */
-	float m_IsoFrac;
+	float m_IsoFrac{};
 	/**  Number of fired strips */
-	int  m_numStripCells;
+	int  m_numStripCells{};
 	/**  Total number of cells in the cluster */
-	int  m_numTotCells;
+	int  m_numTotCells{};
 	/**  Width in the strip sampling */
-        float m_stripWidth;
+        float m_stripWidth{};
 	/**  Width as in Offline */
-        float m_stripWidthOffline;
+        float m_stripWidthOffline{};
 	
         // Unused, but shouldn't delete it since it's part of the persistent data.
-        bool ATH_UNUSED_MEMBER(m_valid);
+        bool ATH_UNUSED_MEMBER(m_valid){};
 	/** ElementLink to TrigTauClusterDetailsContainer **/
 	ElementLinkInt_p1 m_details;
   

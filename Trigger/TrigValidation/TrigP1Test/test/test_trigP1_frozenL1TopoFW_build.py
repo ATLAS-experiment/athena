@@ -3,7 +3,7 @@
 
 # art-description: Frozen L1Topo Firmware test -- generates the L1 menu and then checks for changes implying L1Topo FW changes
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
@@ -33,6 +33,7 @@ class DiffL1MenuStep(CheckSteps.RefComparisonStep):
         super(DiffL1MenuStep, self).__init__(name)
         self.executable = 'topoconverterph1/diffL1Menu.py'
         self.input_file = None
+        self.auto_report_result = True
 
     def configure(self, test):
         if self.reference is None:

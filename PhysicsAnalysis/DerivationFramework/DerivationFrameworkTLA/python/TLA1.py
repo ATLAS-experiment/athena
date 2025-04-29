@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #====================================================================
 # Slimmed DAOD_PHYSLITE.py for Run 3 trigger-object level analyses (TLAs)
 # It contains minimal variables needed for the Run 3 ISR+DiJet TLA searches

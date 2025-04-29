@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimEventSelectionCfg
 
 def FPGATrackSimConstsGenCfg(flags, **kwargs):
 
@@ -27,12 +28,8 @@ def FPGATrackSimConstsGenCfg(flags, **kwargs):
     theFPGATrackSimConstGenAlg = CompFactory.FPGATrackSimConstGenAlgo(**kwargs)
     theFPGATrackSimConstGenAlg.FPGATrackSimMappingSvc = FPGATrackSimMapping 
 
-    eventSelector = CompFactory.FPGATrackSimEventSelectionSvc()
-    eventSelector.regions = "HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
-    eventSelector.regionID = 0
-    eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
-    eventSelector.withPU = False
-    acc.addService(eventSelector, create=True, primary=True)
+    # We need the "full" event selection service to be set up.
+    theFPGATrackSimConstGenAlg.FPGATrackSimEventSelectionSvc = acc.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
 
     acc.addEventAlgo(theFPGATrackSimConstGenAlg)
     return acc

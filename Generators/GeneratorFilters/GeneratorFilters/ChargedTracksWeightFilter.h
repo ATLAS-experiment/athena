@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_CHARGEDTRACKSWEIGHTFILTER_H
@@ -27,8 +27,8 @@ public:
 
      struct Point {
         /// Single point and slope to next point
-        Point(double _x, double _y, double _slope) :
-           x(_x), y(_y), slope(_slope) {};
+        Point(double x_, double y_, double slope_) :
+           x(x_), y(y_), slope(slope_) {};
 
         double x;
         double y;

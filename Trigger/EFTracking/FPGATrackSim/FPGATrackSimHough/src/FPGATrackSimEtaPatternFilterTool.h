@@ -35,11 +35,8 @@ class FPGATrackSimHit;
 class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSimRoadFilterTool>
 {
     public:
-
-        ///////////////////////////////////////////////////////////////////////
-        // AthAlgTool
-
-        FPGATrackSimEtaPatternFilterTool(const std::string&, const std::string&, const IInterface*);
+        /// Constructor
+        using base_class::base_class;
 
         virtual StatusCode initialize() override;
         virtual StatusCode finalize() override;

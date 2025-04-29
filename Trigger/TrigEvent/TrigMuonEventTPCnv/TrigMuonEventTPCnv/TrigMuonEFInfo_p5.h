@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -28,10 +28,9 @@ class TrigMuonEFInfo_p5
 
 public:
 
-	TrigMuonEFInfo_p5() : m_etaPreviousLevel(0.0), m_phiPreviousLevel(0.0) {}
-	virtual ~TrigMuonEFInfo_p5(){}
+	TrigMuonEFInfo_p5() = default;
+	virtual ~TrigMuonEFInfo_p5() = default;
 
-        //private:
     // unsigned short int m_roi;
     // unsigned short int m_nSegments;
     // unsigned short int m_nMdtHits;
@@ -39,10 +38,10 @@ public:
     // unsigned short int m_nTgcHits;
     // unsigned short int m_nCscHits;
 	// this array holds all the unsigned ints from above. in that order.
-    unsigned short int m_allTheInts[6];
+    unsigned short int m_allTheInts[6]{};
     
-	float m_etaPreviousLevel;
-	float m_phiPreviousLevel;
+	float m_etaPreviousLevel{};
+	float m_phiPreviousLevel{};
     // 
     // TPObjRef m_spectrometerTrack; // probably not needed
     // TPObjRef m_extrapolatedTrack; // probably not needed

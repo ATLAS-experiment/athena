@@ -33,6 +33,7 @@ namespace AthONNX {
     /// Function executing the tool for a single event                                                           
     virtual double retrieveConstituentsScore(std::vector<TH2D> Images) const = 0;
     virtual double retrieveConstituentsScore(std::vector<std::vector<float>> constituents) const = 0;
+    virtual double retrieveConstituentsScore(std::vector<std::vector<float>> constituents, std::vector<std::vector<std::vector<float>>> interactions) const = 0;
     virtual double retrieveHighLevelScore(std::map<std::string, double> JSSVars) const = 0;
 
     virtual StatusCode SetScaler(std::map<std::string, std::vector<double>> scaler) = 0;

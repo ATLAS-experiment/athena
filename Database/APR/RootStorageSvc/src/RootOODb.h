@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -56,6 +56,9 @@ namespace pool  {
     IDbDatabase* createDatabase();
     /// Create Root Container object
     IDbContainer* createContainer(const DbType& typ);
+  private:
+    /// Non-owning cache for the domain pointer
+    IDbDomain* m_domainCache;
   };
 
   class RootOOKey : public RootOODb {

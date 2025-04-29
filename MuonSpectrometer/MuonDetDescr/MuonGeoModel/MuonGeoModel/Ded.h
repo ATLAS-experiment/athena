@@ -7,8 +7,8 @@
 
 #include "MuonGeoModel/DedComponent.h"
 #include "MuonGeoModel/DetectorElement.h"
+#include "GeoModelKernel/GeoVPhysVol.h"
 
-class GeoVPhysVol;
 
 namespace MuonGM {
 
@@ -24,12 +24,10 @@ namespace MuonGM {
         double longWidth{0.}; // for trapezoidal layers
 
         Ded(const MYSQL& mysql, Component *s);
-        GeoVPhysVol *build(StoredMaterialManager& matManager,
-                           const MYSQL& mysql);
-        GeoVPhysVol *build(StoredMaterialManager& matManager,
-                           const MYSQL& mysql,
-                           int cutoutson,
-                           const std::vector<Cutout *>&);
+        PVLink build(StoredMaterialManager& matManager, const MYSQL& mysql);
+        PVLink build(StoredMaterialManager& matManager,
+                     const MYSQL& mysql, int cutoutson,
+                     const std::vector<Cutout *>&);
         virtual void print() const override;
 
       private:

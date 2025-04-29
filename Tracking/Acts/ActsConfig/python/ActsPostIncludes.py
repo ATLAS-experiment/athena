@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -74,12 +74,12 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                        f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
 
     # add track particles created by the Acts TrackToTrackParticleCnvAlg to the AOD
-    trackCnvPrefixes = ["ActsCombined"]
+    trackCnvPrefixes = ["Acts"]
     trackparticles_shortlist = [] if flags.Acts.EDM.PersistifyTracks else ['-actsTrack']
     trackparticles_variables = ".".join(trackparticles_shortlist)
     for prefix in trackCnvPrefixes:
-        toAOD += [f"xAOD::TrackParticleContainer#{prefix}TracksParticlesAlt",
-                  f"xAOD::TrackParticleAuxContainer#{prefix}TracksParticlesAltAux." + trackparticles_variables]
+        toAOD += [f"xAOD::TrackParticleContainer#InDet{prefix}TrackParticles",
+                  f"xAOD::TrackParticleAuxContainer#InDet{prefix}TrackParticlesAux." + trackparticles_variables]
 
     # If there is nothing to persistify, returns an empty CA
     if len(toAOD) == 0:
@@ -87,4 +87,30 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
     acc.merge(addToAOD(flags, toAOD))
+    return acc
+
+def ACTSClusterPostInclude(flags):
+
+    flags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")
+    
+    from InDetConfig.ITkActsDataPreparationConfig import ITkActsDataPreparationCfg
+    acc = ITkActsDataPreparationCfg(flags)
+
+    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+    acc.merge( ITkActsPrepDataToxAODCfg( flags,
+                    PixelMeasurementContainer = "ITkPixelMeasurements_offl",
+                    StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
+
+    ## write out measurements containers in any case
+    toAOD = [
+        'xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl',
+        'xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
+        'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl',
+        'xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.'
+    ]
+    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    acc.merge( addToAOD( flags, toAOD ) )
+
     return acc

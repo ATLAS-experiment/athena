@@ -18,10 +18,7 @@ EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 TileHWID             INFO initialize_from_dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileTBID             INFO initialize_from_dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 
 Test TileDCSState
 

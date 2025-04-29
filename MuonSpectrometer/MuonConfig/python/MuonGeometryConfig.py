@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -99,18 +99,21 @@ def MuonDetectorToolCfg(flags, name = "MuonDetectorTool", **kwargs):
 
 def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     acc = ComponentAccumulator()
+
     # here define if I-lines (CSC internal alignment) are enabled
     acc.merge(CscILineCondAlgCfg(flags))
     # here define if As-Built (MDT chamber alignment) are enabled
     if flags.Muon.Align.UseAsBuilt:
         acc.merge(MdtAsBuiltCondAlgCfg(flags))
         acc.merge(NswAsBuiltCondAlgCfg(flags))
+        if(flags.Muon.Align.UsesTGCAsBuild):
+            acc.merge(sTGCAsBuiltCondAlgCfg(flags))
 
     if not flags.Muon.Align.UseALines and not flags.Muon.Align.UseBLines:
         return acc
     from IOVDbSvc.IOVDbSvcConfig import addFolders    
     
-    onl = "/Onl" if flags.Common.isOnline and not flags.Input.isMC else ""
+    onl = "/Onl" if ((flags.Common.isOnline or flags.IOVDb.GlobalTag.startswith("CONDBR2-HLTP")) and not flags.Input.isMC) else ""
     ParlineFolders = [f"/MUONALIGN{onl}/MDT/BARREL", 
                       f"/MUONALIGN{onl}/MDT/ENDCAP/SIDEA",
                       f"/MUONALIGN{onl}/MDT/ENDCAP/SIDEC", 
@@ -121,8 +124,8 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     if len(onl):
         ParlineFolders = [ x[ :x.find(onl)] + x[x.find(onl) + len(onl): ] for x in ParlineFolders]
 
-    kwargs.setdefault("LoadALines",flags.Muon.Align.UseALines)
-    kwargs.setdefault("LoadBLines",flags.Muon.Align.UseBLines)
+    kwargs.setdefault("LoadALines", flags.Muon.Align.UseALines)
+    kwargs.setdefault("LoadBLines", flags.Muon.Align.UseBLines)
     
     kwargs.setdefault("ParlineFolders", ParlineFolders)
     MuonAlign = CompFactory.MuonAlignmentCondAlg(name, **kwargs)
@@ -143,34 +146,28 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
     if flags.GeoModel.Run < LHCPeriod.Run3:
         return result
     kwargs.setdefault("MicroMegaJSON","")
-    kwargs.setdefault("sTgcJSON","")
 
     kwargs.setdefault("ReadMmAsBuiltParamsKey","/MUONALIGN/ASBUILTPARAMS/MM")
-    #kwargs.setdefault("ReadSTgcAsBuiltParamsKey","/MUONALIGN/ASBUILTPARAMS/STGC") # This is the folder that sould be used once the as builts are validated, so keep it here but commented out
-    kwargs.setdefault("ReadSTgcAsBuiltParamsKey","") # for now diable the reading of sTGC as build from the conditions database
-    
+
     ##TODO: remove hard-coded tag once the global tag is ready
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if(not (kwargs["MicroMegaJSON"] or not kwargs["ReadMmAsBuiltParamsKey"]) ) : # no need to add the folder if we are reading a json file anyhow
-        result.merge(addFolders( flags, kwargs["ReadMmAsBuiltParamsKey"]  , 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
-    ### Disable the STGC as-built parameters (Keep the path if we want to add later fully validated As-built)
-    if(not (kwargs["sTgcJSON"] or not kwargs["ReadSTgcAsBuiltParamsKey"])): # no need to add the folder if we are reading a json file anyhow
-        result.merge(addFolders( flags, kwargs["ReadSTgcAsBuiltParamsKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
+        result.merge(addFolders( flags, kwargs["ReadMmAsBuiltParamsKey"]  , 'MUONALIGN_OFL', className='CondAttrListCollection'))
     the_alg = CompFactory.NswAsBuiltCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)     
     return result
 
-def sTGCAsBuiltCondAlg2Cfg(flags, name = "sTGCAsBuiltCondAlg2", **kwargs):
+def sTGCAsBuiltCondAlgCfg(flags, name = "sTGCAsBuiltCondAlg", **kwargs):
     result = ComponentAccumulator()
     #### Do not apply the as-built correction if not activated
-    if flags.GeoModel.Run < LHCPeriod.Run3 or not flags.Muon.Align.UsesTGCAsBuild2:
+    if flags.GeoModel.Run < LHCPeriod.Run3 or not flags.Muon.Align.UsesTGCAsBuild:
         return result
     kwargs.setdefault("readFromJSON","")
-    if not kwargs["readFromJSON"] and False: # for now only allow reading from json since there is no database content available
-        kwargs.setdefault("ReadKey","/MUONALIGN/ASBUILTPARAMS/STGC") # This is the folder that sould be used once the as builts are validated, so keep it here but commented out
+    if not kwargs["readFromJSON"]:
+        kwargs.setdefault("ReadKey","/MUONALIGN/ASBUILTPARAMS/STGC")
         from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag=''))
-    the_alg = CompFactory.sTGCAsBuiltCondAlg2(name,**kwargs)
+        result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag = 'MUONALIGN_STG_IntAl_alCons_noQL3_v01'))
+    the_alg = CompFactory.sTGCAsBuiltCondAlg(name,**kwargs)
     result.addCondAlgo(the_alg, primary=True)
     return result
         
@@ -217,7 +214,7 @@ def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
     kwargs.setdefault("applyBLines", flags.Muon.Align.UseBLines)
     kwargs.setdefault("applyILines", flags.Muon.Align.UseILines)
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
-    kwargs.setdefault("applysTGCAsBuilt2", len([alg for alg in result.getCondAlgos() if alg.name == "sTGCAsBuiltCondAlg2"])>0)
+    kwargs.setdefault("applysTGCAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "sTGCAsBuiltCondAlg"])>0)
     kwargs.setdefault("applyMdtAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "MdtAsBuiltCondAlg"])>0)
 
    

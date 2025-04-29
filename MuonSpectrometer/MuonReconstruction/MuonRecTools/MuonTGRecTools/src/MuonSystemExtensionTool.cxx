@@ -10,7 +10,6 @@
 #include "MuonCombinedEvent/InDetCandidate.h"
 #include "MuonCombinedEvent/TagBase.h"
 #include "MuonDetDescrUtils/MuonChamberLayerDescription.h"
-#include "MuonIdHelpers/MuonStationIndexHelpers.h"
 #include "MuonLayerEvent/MuonSystemExtension.h"
 #include "MuonLayerEvent/MuonSystemExtensionCollection.h"
 #include "TrkSurfaces/DiscSurface.h"
@@ -111,7 +110,7 @@ namespace Muon {
 
         for (unsigned int stationLayer = MuonStationIndex::BI; stationLayer <= MuonStationIndex::BE; ++stationLayer) {
             // skip BEE if in small sectors, not installed
-            if (stationLayer == MuonStationIndex::BE && MuonStationIndexHelpers::isSmall(sector)) continue;
+            if (stationLayer == MuonStationIndex::BE && m_sectorMapping.isSmall(sector)) continue;
 
             // calculate reference position from radial position of the laeyr
             MuonStationIndex::LayerIndex layer = MuonStationIndex::toLayerIndex((MuonStationIndex::StIndex)(stationLayer));

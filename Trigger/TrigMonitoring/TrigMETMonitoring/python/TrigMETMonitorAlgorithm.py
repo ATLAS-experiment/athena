@@ -259,8 +259,10 @@ def TrigMETMonConfig(inputFlags):
     muonPtCut = 30.0
     electronEtaCut = 2.5
     muonEtaCut = 2.5
-    LArNoiseBurstVetoAlgs = ["pfopufit",
-                     "cell"]
+    LArNoiseBurstVetoAlgs = [
+      "pfopufit",
+      "cell",
+    ]
     signalLepAlgs = ["pfopufit",
                      "cell",
                      "tcpufit"]
@@ -611,6 +613,11 @@ def TrigMETMonConfig(inputFlags):
                              weight='{}_LArNoiseBurstVeto_Et'.format(alg),
                              path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
                              xbins=eta_bins_2d,xmin=eta_min,xmax=eta_max,ybins=phi_bins_2d,ymin=phi_min,ymax=phi_max)
+      metGroup.defineHistogram('{0}_LArNoiseBurstVeto_phi;{0}_LArNoiseBurstVeto_phi_etweight'.format(alg),
+                             title='{} #phi (etweighted);#phi;Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             weight='{}_LArNoiseBurstVeto_Et'.format(alg),
+                             xbins=phi_bins,xmin=phi_min,xmax=phi_max)
     # for alg in signalLepAlgs:
     for alg in signalLepAlgs:
       metGroup.defineHistogram('{}_SigEl_Ex'.format(alg),

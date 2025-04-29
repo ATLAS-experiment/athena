@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -88,7 +88,7 @@ StatusCode InDetGlobalLRTMonAlg::fillHistograms( const EventContext& ctx ) const
   
   uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
 
-  for (const auto& trackPart: *LRT_trackParticles) {
+  for (const auto trackPart: *LRT_trackParticles) {
     const Trk::Track * track = trackPart->track();
     if ( !track )
       {

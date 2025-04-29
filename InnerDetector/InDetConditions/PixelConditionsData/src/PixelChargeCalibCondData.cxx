@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
@@ -75,7 +75,7 @@ PixelChargeCalibCondData::setAllFromConfigData(unsigned int moduleHash, const Pi
       configData->getDefaultAnalogThresholdNoise(barrel_ec, layer), configData->getDefaultInTimeThreshold(barrel_ec, layer)};
     setThresholds(t, moduleHash, std::vector<Thresholds>(numFE, thresholds));
     //
-    const LegacyFitParameters defaultParams{configData->getDefaultQ2TotA(), configData->getDefaultQ2TotE(), configData->getDefaultQ2TotC()};
+    const LegacyFitParameters defaultParams{configData->getDefaultQ2TotA(), configData->getDefaultQ2TotE(), configData->getDefaultQ2TotC(), LegacyFitParameters::defaultOverflow};
     setLegacyFitParameters(t, moduleHash, std::vector<LegacyFitParameters>(numFE, defaultParams));
     //
     const auto zeroLinFit = PixelChargeCalib::LinearFitParameters();
@@ -188,6 +188,37 @@ PixelChargeCalibCondData::getToT(InDetDD::PixelDiodeType type, unsigned int modu
   return tot;
 }
 
+
+float 
+PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type,
+				    const CalibrationStrategy calibStrategy,
+				    unsigned int moduleHash,
+				    unsigned int FE,
+				    float ToT) const{
+
+  if (calibStrategy == CalibrationStrategy::LUTFEI4) {
+    return getChargeLUTFEI4(moduleHash, FE, ToT);
+  }
+  
+  if (type == InDetDD::PixelDiodeType::NONE) return 0.f;
+  const LegacyFitParameters & legacy = getLegacyFitParameters(type, moduleHash, FE);
+  float charge = legacy.Q(ToT);
+  // Protection for small charge
+  const auto & thresholds = getThresholds(type,moduleHash,FE);
+  const auto  analogueThreshold = thresholds.value;
+  if (charge<analogueThreshold && calibStrategy==CalibrationStrategy::RUN3PIX) { charge=analogueThreshold; }
+  // Protection for large charge
+  float exth = 1e5f;    // the calibration function is analytically connected at threshold exth.
+  if (charge>exth && calibStrategy==CalibrationStrategy::RUN3PIX) {
+    const LinearFitParameters & lin  = getLinearFitParameters(type, moduleHash, FE);
+    if (float charge1 = lin.Q(ToT); charge1 != 0.f) return charge1;
+  }
+  
+  return charge;
+
+}
+
+
 float 
 PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE, float ToT) const{
   if (getCalibrationStrategy(moduleHash) == CalibrationStrategy::LUTFEI4) {
@@ -253,7 +284,6 @@ PixelChargeCalibCondData::getChargeLUTFEI4(unsigned int moduleHash, unsigned int
   if (ToT < 1 || ToT > IBLCalibrationSize) {
     throw generateError(__func__, moduleHash,FE, ToT);
   }
-
   const IBLCalibration &charges = getTot2Charges(moduleHash,FE);
   return charges[ToT - 1];
 }

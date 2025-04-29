@@ -23,10 +23,10 @@
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Surfaces/Surface.hpp"
-#include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
+#include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
 #include "ActsEvent/TrackContainer.h"
@@ -37,6 +37,8 @@
 #include "ActsInterop/TableUtils.h"
 #include "src/detail/AtlasMeasurementSelector.h"
 #include "src/detail/OnTrackCalibrator.h"
+#include "src/detail/TrackFindingMeasurements.h"
+#include "src/detail/MeasurementIndex.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 
 // STL
@@ -85,10 +87,6 @@ namespace ActsTrk{
     // Using the CKF propagator as extrapolator
     detail::Extrapolator extrapolator = propagator;
 
-    // most trivial measurement selector
-    Acts::MeasurementSelectorCuts measurementSelectorCuts({-4.0, 4.0});
-    Acts::MeasurementSelector measurementSelector(measurementSelectorCuts);
-
 
     // update once shared code for configuring this is available
     Acts::TrackSelector::EtaBinnedConfig trackSelectorCfg(std::vector<double>({0, 4}));
@@ -102,10 +100,9 @@ namespace ActsTrk{
 
     detail::CKF_config ckfConfig{
         std::move(extrapolator),
-        {std::move(propagator), m_logger->cloneWithSuffix("CKF")},
-        measurementSelector,
+        detail::CKF{std::move(propagator), m_logger->cloneWithSuffix("CKF")},
         {},
-        trackSelectorCfg};
+        Acts::TrackSelector{trackSelectorCfg}};
 
     m_ckfConfig = std::make_unique<detail::CKF_config>(std::move(ckfConfig));
     return StatusCode::SUCCESS;
@@ -135,24 +132,37 @@ namespace ActsTrk{
        acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
     ATH_CHECK( acts_tracking_geometry != nullptr);
 
-    detail::TrackFindingMeasurements measurements = collectMeasurements(context, **detectorElementToGeometryIdMap);
+    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
+    ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
+    // potential TODO: filtering only certain layers
+    detail::TrackFindingMeasurements measurements(1ul /* number of measurement containers*/);
+    measurements.addMeasurements(0, *pixelClustersHandle, **detectorElementToGeometryIdMap);
+    std::optional<detail::MeasurementIndex> measurementIndex;
+    if (m_trackStatePrinter.isSet()) {
+      measurementIndex.emplace(1ul);
+      measurementIndex->addMeasurements(*pixelClustersHandle);
+    }
+
+    using DefaultTrackStateCreator = Acts::TrackStateCreator<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator,detail::RecoTrackContainer>;
 
     ActsTrk::detail::UncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
-    Acts::SourceLinkAccessorDelegate<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
+    DefaultTrackStateCreator::SourceLinkAccessor slAccessorDelegate;
     slAccessorDelegate.connect<&ActsTrk::detail::UncalibSourceLinkAccessor::range>(&slAccessor);
 
     Acts::PropagatorPlainOptions plainOptions(tgContext, mfContext);
     plainOptions.maxSteps = 1000;
-    plainOptions.direction= m_propagateForward ? Acts::Direction::Forward : Acts::Direction::Backward;
+    plainOptions.direction= m_propagateForward ? Acts::Direction::Forward() : Acts::Direction::Backward();
+
 
 
     TrackExtensionAlg::CKFOptions options(tgContext,
                       mfContext,
                       m_calibrationContext,
-                      slAccessorDelegate,
                       m_ckfConfig->ckfExtensions,
                       plainOptions,
                       perigeeSurface.get());
+
+    options.targetSurface = perigeeSurface.get();                  
 
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
        *acts_tracking_geometry,
@@ -160,8 +170,13 @@ namespace ActsTrk{
        m_pixelCalibTool,
        m_stripCalibTool,
        m_hgtdCalibTool);
-    options.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
+    DefaultTrackStateCreator defaultTrackStateCreator{};
+    defaultTrackStateCreator.sourceLinkAccessor = slAccessorDelegate;
+    defaultTrackStateCreator.calibrator.template connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
 
+    options.extensions.createTrackStates.template connect<
+       &DefaultTrackStateCreator
+       ::createTrackStates>(&defaultTrackStateCreator);
     if ( not m_truthParticlesKey.empty() ) {
       auto truthHandle = SG::ReadHandle(m_truthParticlesKey, context);
       for ( auto truthParticle: *truthHandle ) {
@@ -208,7 +223,7 @@ namespace ActsTrk{
         ATH_MSG_DEBUG("Reco MTJ size " << trackStateBackend.size() );
         for ( size_t stateIndex=0; stateIndex < trackStateBackend.size(); ++stateIndex) {
           auto state = trackStateBackend.getTrackState(stateIndex);
-          if (m_trackStatePrinter.isSet()) m_trackStatePrinter->printTrackState(tgContext, state, measurements.measurementContainerOffsets(), false);
+          if (m_trackStatePrinter.isSet()) m_trackStatePrinter->printTrackState(tgContext, state, *measurementIndex, false);
         }
         ATH_MSG_DEBUG("Track has: " << tempTrackProxy.nMeasurements() << " measurements ");
         ATH_MSG_DEBUG("track: eta: " <<  -1 * log(tan( tempTrackProxy.theta() * 0.5)) << " phi: " << tempTrackProxy.phi() << " pt:" << abs(1./tempTrackProxy.qOverP() * sin(protoTrack.parameters->theta())));
@@ -228,16 +243,4 @@ namespace ActsTrk{
     return StatusCode::SUCCESS;
   }
 
-
-  detail::TrackFindingMeasurements TrackExtensionAlg::collectMeasurements(
-       const EventContext& context,
-       const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const {
-    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
-
-    detail::TrackFindingMeasurements measurements(1u /* only one measurement collection: pixel clusters*/);
-    ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
-    // potential TODO: filtering only certain layers
-    measurements.addMeasurements(0, *pixelClustersHandle, detectorElementToGeometryIdMap);
-    return measurements;
-  }
 } // EOF namespace

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -441,7 +441,8 @@ class TileTBAANtuple: public AthAlgorithm {
     int m_commonPU{};
 
     // Adder items
-    int** m_adder{};
+    std::vector<int*> m_adder;
+    std::vector<int> m_adderPayload;
     std::array<float, 16> m_eneAdd{};
     std::array<float, 16> m_timeAdd{};
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SEMILEPTONICCORR_SEMILCORR_H
@@ -34,20 +34,20 @@ private:
 
   bool m_Debug;
 
-  float getResponse(float pt, float eta, std::vector<TH1F*> h);  
-  float getSemilCorrToIncl(TLorentzVector jet, TLorentzVector mu,
-			   std::vector<TH1F*> histos);
-  std::vector<int> getHistoIndeces(semilCorr::Systematics syst);
+  float getResponse(float pt, float eta, const std::vector<TH1F*>& h);  
+  float getSemilCorrToIncl(const TLorentzVector& jet, const TLorentzVector& mu,
+			   const std::vector<TH1F*>& histos);
+  std::vector<int> getHistoIndices(semilCorr::Systematics syst);
 
 
 public:
-  semilCorr(TString fIn, std::string suffix = "", bool DebugIn = false);
+  semilCorr(const TString& fIn, const std::string& suffix = "", bool DebugIn = false);
   ~semilCorr(); 
 
-  float getSemilCorrToIncl(TLorentzVector jet, TLorentzVector mu);
-  float getBjetCorrToIncl(TLorentzVector jet, TLorentzVector mu);
+  float getSemilCorrToIncl(const TLorentzVector& jet, const TLorentzVector& mu);
+  float getBjetCorrToIncl(const TLorentzVector& jet, const TLorentzVector& mu);
 
-  float getSemilCorrToInclSyst(TLorentzVector jet, TLorentzVector mu, 
+  float getSemilCorrToInclSyst(const TLorentzVector& jet, const TLorentzVector& mu, 
 			       semilCorr::Systematics syst = semilCorr::ALL);
 
 };

@@ -67,17 +67,20 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
 
     # This should be activated only if both Legacy and Acts-based tracking
     # are executed at the same time during reconstruction
-    if flags.Acts.EDM.PersistifyTrackParticles:
-        toAOD += [
-            "xAOD::TrackParticleContainer#ActsInDetTrackParticles",
-            f"xAOD::TrackParticleAuxContainer#ActsInDetTrackParticlesAux.{excludedAuxData}"]
+    toAOD += [
+        "xAOD::TrackParticleContainer#ActsInDetTrackParticles",
+        f"xAOD::TrackParticleAuxContainer#ActsInDetTrackParticlesAux.{excludedAuxData}"]
 
     if flags.Tracking.writeExtendedSi_PRDInfo:
+        # Different convention wrt Run 3 for TrackMeasurementValidationContainer
+        # from ITkPixelClusters to ITkPixelMeasurements
+        # This is to avoid clashes with the xAOD::ClusterContainer names, which was not
+        # an issue for Run 3 since they were not xAOD back then
         toAOD += [
-            "xAOD::TrackMeasurementValidationContainer#ITkPixelClusters",
-            "xAOD::TrackMeasurementValidationAuxContainer#ITkPixelClustersAux.",
-            "xAOD::TrackMeasurementValidationContainer#ITkStripClusters",
-            "xAOD::TrackMeasurementValidationAuxContainer#ITkStripClustersAux.",
+            "xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements",
+            "xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurementsAux.",
+            "xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements",
+            "xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurementsAux.",
             "xAOD::TrackStateValidationContainer#ITkPixelMSOSs",
             "xAOD::TrackStateValidationAuxContainer#ITkPixelMSOSsAux.",
             "xAOD::TrackStateValidationContainer#ITkStripMSOSs",

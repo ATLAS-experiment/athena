@@ -12,15 +12,22 @@ log = logging.getLogger(__name__)
 # we split the reconstruction according to the primary ID algorithm to be used, to avoid running unnecesary long inferences
 # The configuration for each TauID algorithm is contained in the flags.Trigger.Offline.Tau.<TauID> subdirectory
 
-def getPrecisionSequenceTauIDs(precision_sequence: str) -> list[str]:
+def getPrecisionSequenceTauIDs(flags, precision_sequence: str) -> list[str]:
     '''Get the list of TauIDs for each HLT tau trigger sequence'''
     tau_ids = {
-        'MVA': ['DeepSet', 'MesonCuts'],
+        'MVA': ['DeepSet', 'GNTau', 'MesonCuts'],
         'LLP': ['RNNLLP'],
         'LRT': ['RNNLLP'],
     }
 
-    return tau_ids[precision_sequence]
+    # Additional Tau ID algorithms to run ONLY if we're using the Dev menu
+    dev_tau_ids = {
+    }
+
+    ret = tau_ids[precision_sequence]
+    if 'Dev_' in flags.Trigger.triggerMenuSetup and precision_sequence in dev_tau_ids: ret += dev_tau_ids[precision_sequence]
+    return ret
+
 
 #####################################################################
 # This file contains helper functions for the Tau Trigger signature

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to trigger
@@ -48,30 +48,28 @@ bool SUSYObjDef_xAOD::IsMETTrigPassed(unsigned int runnumber, bool j400_OR) cons
   else if(year == 2016 && rn >= 296939 && rn <= 302872 ) return IsMETTrigPassed("HLT_xe90_mht_L1XE50",j400_OR); //2016 A-D3
   else if(year == 2016 && rn >= 302919 && rn <= 303892 ) return IsMETTrigPassed("HLT_xe100_mht_L1XE50",j400_OR); //2016 D4-F1
   else if(year == 2016 && rn >= 303943)                  return IsMETTrigPassed("HLT_xe110_mht_L1XE50",j400_OR); //2016 F2-(open) 
-  else if(year == 2017 && rn >= 325713 && rn <= 331975 ) return IsMETTrigPassed("HLT_xe110_pufit_L1XE55", false); // 2017 B1-D5
+  else if(year == 2017 && rn >= 325713 && rn <= 331975 ) return IsMETTrigPassed("HLT_xe110_pufit_L1XE55", false,"L1_XE55"); // 2017 B1-D5
   else if(year == 2017 && rn >= 332303 )                 return IsMETTrigPassed("HLT_xe110_pufit_L1XE50", false); // 2017 D6-(open)
   else if(year == 2018 && rn >= 348885 && rn <= 350013 ) return IsMETTrigPassed("HLT_xe110_pufit_xe70_L1XE50", false); // 2018 B-C5
   else if(year == 2018 && rn >= 350067 )                 return IsMETTrigPassed("HLT_xe110_pufit_xe65_L1XE50", false); // 2018 C5-(open)
   else if(year == 2022)                                  return IsMETTrigPassed("HLT_xe65_cell_xe90_pfopufit_L1XE50",false); // 2022
   else if(year == 2023)                                  return IsMETTrigPassed("HLT_xe65_cell_xe90_pfopufit_L1XE50",false); // 2023
-  else if(year == 2024)                                  return IsMETTrigPassed("HLT_xe65_cell_xe105_nn_L1jXE100",false); // 2024
+  else if(year == 2024)                                  return IsMETTrigPassed("HLT_xe65_cell_xe105_nn_L1jXE100",false,"L1_jXE100"); // 2024
 
   return false; 
 }
 
 // Can't be const because of the lazy init of the map - JBurr: Now fixed
-bool SUSYObjDef_xAOD::IsMETTrigPassed(const std::string& triggerName, bool j400_OR) const {
+bool SUSYObjDef_xAOD::IsMETTrigPassed(const std::string& triggerName, bool j400_OR, const std::string& L1_name) const {
   // NB - this now applies to the entire function...
-  //std::string L1item = "L1_XE50"; For now, I'll assume all the triggers use L1_XE50 - might need changing in the future.
 
   // First check if we're affected by the L1_XE50 bug
-  bool L1_XE50 = m_trigDecTool->isPassed("L1_XE50");
-  bool L1_XE55 = m_trigDecTool->isPassed("L1_XE55");
+  bool L1_pass = m_trigDecTool->isPassed(L1_name);
   bool HLT_noalg_L1J400 = m_trigDecTool->isPassed("HLT_noalg_L1J400");
-  if (!L1_XE50 && j400_OR && HLT_noalg_L1J400) {
+  if (!L1_pass && j400_OR && HLT_noalg_L1J400) {
     return emulateHLT(triggerName);
   }
-  else if (L1_XE50 || L1_XE55) {
+  else if (L1_pass) {
     // See if the TDT knows about this
     {
       std::scoped_lock lock (m_triggerCacheMutex);
@@ -281,14 +279,14 @@ void SUSYObjDef_xAOD::TrigMatch(const std::initializer_list<const xAOD::IParticl
 
 
 void SUSYObjDef_xAOD::TrigMatch(const xAOD::IParticleContainer* v, const std::vector<std::string>& items) {
-  for(const auto& p : *v) {
+  for(const auto p : *v) {
     this->TrigMatch(p, items);
   }
 }
 
 
 void SUSYObjDef_xAOD::TrigMatch(const xAOD::IParticleContainer* v, const std::initializer_list<std::string>& items) {
-  for(const auto& p : *v) {
+  for(const auto p : *v) {
     this->TrigMatch(p, items);
   }
 }

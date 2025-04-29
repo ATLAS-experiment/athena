@@ -7,14 +7,16 @@
 # art-output: dcube*
 # art-output: hist_physlite_latest.root
 # art-output: generated_csv_files.tar.gz
+# art-output: physlite_disksize.tar.gz
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 Reco_tf.py \
   --AMI q454 \
   --outputAODFile myAOD.pool.root \
   --preExec 'flags.Exec.FPE=10' \
-  --conditionsTag "OFLCOND-MC23-SDR-RUN3-05" \
+  --conditionsTag "${conditions}" \
   --runNumber=601229 \
   --DataRunNumber=450000 \
   --maxEvents 1000
@@ -22,7 +24,7 @@ Reco_tf.py \
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_q454_phys_physlite_mt_mp" 
 
-Derivation_tf.py \
+stdbuf -i0 -o0 -e0 Derivation_tf.py \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \
@@ -70,7 +72,7 @@ echo "art-result: ${rc4} xAODHistSize"
 
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q454/v10/hist_physlite_25019.root"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q454/v12/hist_physlite_25026.root"
 dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q454/v0/dcube_config_hist_physlite_24024.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
@@ -84,8 +86,12 @@ echo "art-result: ${rc5} dcube_physlite"
 # Run trf_getVariables.py to extract variables from DAOD_PHYSLITE.art.pool.root
 echo "============ trf_getVariables.py"
 get_files trf_getVariables.py
-source /cvmfs/sft.cern.ch/lcg/releases/LCG_106/uproot/5.3.7/`arch`-el9-gcc13-opt/uproot-env.sh
+source /cvmfs/sft.cern.ch/lcg/releases/LCG_107a/uproot/5.3.11/`arch`-el9-gcc13-opt/uproot-env.sh
 trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
 rccsv=$?
 tar czf generated_csv_files.tar.gz generated_csv_files/
 echo "art-result: ${rccsv} trf_getVariables.py"
+get_files trf_disksize_get_metrics.py
+python trf_disksize_get_metrics.py --inputFile DAOD_PHYSLITE.art.pool.root --isuproot=True
+tar czf physlite_disksize.tar.gz physlite_disksize/
+echo "art-result: physlite_disksize.tar.gz"

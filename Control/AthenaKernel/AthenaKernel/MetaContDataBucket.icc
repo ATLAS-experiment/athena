@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/MetaContDataBucket.icc
@@ -94,10 +94,7 @@ void* MetaContDataBucket<T>::cast (CLID clid,
 template <class T>
 const SourceID MetaContDataBucket<T>::getSID() const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  const IProxyDict* store = 
-    Atlas::getExtendedEventContext(ctx).proxy();
-  return store->sourceID();
+  return Atlas::sourceIDFromEventContext();
 }
 
 

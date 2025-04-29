@@ -44,7 +44,7 @@ run "Reconstruction" \
     --outputAODFile AOD.pool.root \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --postInclude "InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsSeedingConfig.ActsPixelSeedingAlgCfg,ActsConfig.ActsAnalysisConfig.ActsPixelSeedAnalysisAlgCfg,ActsConfig.ActsAnalysisConfig.ActsPixelEstimatedTrackParamsAnalysisAlgCfg" \
+    --postInclude "InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsSeedingConfig.ActsPixelSeedingAlgCfg,ActsConfig.ActsAnalysisConfig.ActsPixelSeedsToTrackParamsAlgCfg,ActsConfig.ActsAnalysisConfig.ActsPixelSeedAnalysisAlgCfg,ActsConfig.ActsAnalysisConfig.ActsPixelEstimatedTrackParamsAnalysisAlgCfg" \
     --preExec "flags.Tracking.doITkFastTracking=True; \
                flags.Tracking.doTruth=False; \
                flags.DQ.useTrigger=False; \

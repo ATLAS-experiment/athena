@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM11.py
 # This defines DAOD_EGAM11, a skimmed DAOD format for Run 3.
@@ -207,10 +207,10 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     acc = ComponentAccumulator()
 
     # Schedule extra jets collections
-    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMTopo
+    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track
     from JetRecConfig.JetRecConfig import JetRecCfg
 
-    jetList = [AntiKt4PV0Track, AntiKt4EMTopo]
+    jetList = [AntiKt4PV0Track]
     for jd in jetList:
         acc.merge(JetRecCfg(flags, jd))
 
@@ -245,17 +245,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     # - do event cleaning
     # but taus are missing in HI derivations so need to do differently
 
-    # Decorate if jet passed JVT criteria
-    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
-
-    algName = "DFJet_EventCleaning_passJvtAlg"
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(flags, "AntiKt4EMTopo"))
-    passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
-    acc.addEventAlgo(
-        CompFactory.JetDecorationAlg(
-            algName, JetContainer="AntiKt4EMTopoJets", Decorators=[passJvtTool]
-        )
-    )
+    # NO JVT criteria in HI data (see pp config for details)
 
     # Decorate if jet passes OR and save decoration DFCommonJets_passOR
     # Use modified OR that does not check overlaps with tauls
@@ -274,57 +264,12 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
         "OverlapRemovalGenUseAlg",
         OverlapLabel=outputLabel,
         OverlapRemovalTool=orTool,
+        JetKey = 'AntiKt4HIJets',
         TauKey=tauKey,
         TauLabel=tauLabel,
         BJetLabel=bJetLabel,
     )
     acc.addEventAlgo(algOR)
-
-    # Do the cleaning
-    from JetSelectorTools.JetSelectorToolsConfig import (
-        EventCleaningToolCfg,
-        JetCleaningToolCfg,
-    )
-
-    workingPoints = ["Loose"]
-    prefix = "DFCommonJets_"
-
-    for wp in workingPoints:
-        cleaningLevel = wp + "Bad"
-        # LLP WPs have a slightly different name format
-        if "LLP" in wp:
-            cleaningLevel = wp.replace("LLP", "BadLLP")
-
-        jetCleaningTool = acc.popToolsAndMerge(
-            JetCleaningToolCfg(
-                flags,
-                "JetCleaningTool_" + cleaningLevel,
-                "AntiKt4EMTopoJets",
-                cleaningLevel,
-                False,
-            )
-        )
-        acc.addPublicTool(jetCleaningTool)
-
-        ecTool = acc.popToolsAndMerge(
-            EventCleaningToolCfg(flags, "EventCleaningTool_" + wp, cleaningLevel)
-        )
-        ecTool.JetCleanPrefix = prefix
-        ecTool.JetContainer = "AntiKt4EMTopoJets"
-        ecTool.JetCleaningTool = jetCleaningTool
-        acc.addPublicTool(ecTool)
-
-        # Alg to calculate event-level and jet-level cleaning variables
-        # Only store event-level flags for Loose* WPs
-        eventCleanAlg = CompFactory.EventCleaningTestAlg(
-            "EventCleaningTestAlg_" + wp,
-            EventCleaningTool=ecTool,
-            JetCollectionName="AntiKt4EMTopoJets",
-            EventCleanPrefix=prefix,
-            CleaningLevel=cleaningLevel,
-            doEvent=("Loose" in wp),
-        )
-        acc.addEventAlgo(eventCleanAlg)
 
     # EGAM11 augmentations
     augmentationTools = []
@@ -467,7 +412,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
         thinning_expression = " && ".join(
             [
                 "(InDetTrackParticles.DFCommonTightPrimary)",
-                "(abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3mm)",
+                "(abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3*mm)",
                 "(InDetTrackParticles.pt>10*GeV)",
             ]
         )
@@ -495,7 +440,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
             StreamName=streamName,
             SGKey="Electrons",
             SelectionString="Electrons.pt>4*GeV",
-            TopoClCollectionSGKey="CaloCalTopoClusters",
+            TopoClCollectionSGKey="SubtractedCaloCalTopoClusters",
             ConeSize=0.5,
         )
     )
@@ -518,9 +463,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
             ["(abs(TruthParticles.pdgId) == 22)", "(TruthParticles.pt > 1*GeV)"]
         )
         # stable particles
-        truth_cond_finalState = " && ".join(
-            ["(TruthParticles.status == 1)", "(TruthParticles.barcode < 200000)"]
-        )
+        truth_cond_finalState = "(TruthParticles.isGenStable)"
         truth_expression = (
             "( "
             + truth_cond_WZH
@@ -601,8 +544,9 @@ def EGAM11Cfg(flags):
         "Electrons",
         "GSFTrackParticles",
         "egammaClusters",
-        "CaloCalTopoClusters",
-    ]
+        "AntiKt4HIJets",
+        "BTagging_AntiKt4HI"
+     ]
 
     # on MC we also add:
     if flags.Input.isMC:
@@ -622,13 +566,10 @@ def EGAM11Cfg(flags):
     # the XXXCPContent.py files also bring in some extra variables
     # for other collections
     EGAM11SlimmingHelper.SmartCollections = [
-        "Electrons",
         "Photons",
         "Muons",
-        "TauJets",
         "PrimaryVertices",
-        "InDetTrackParticles",
-        "AntiKt4EMTopoJets",
+        "InDetTrackParticles"
     ]
     if flags.Input.isMC:
         EGAM11SlimmingHelper.SmartCollections += [
@@ -657,12 +598,6 @@ def EGAM11Cfg(flags):
         "AntiKt4PV0TrackJets.pt.eta.phi.e.m.btaggingLink.constituentLinks"
     ]
 
-    # energy density
-    EGAM11SlimmingHelper.ExtraVariables += [
-        "TopoClusterIsoCentralEventShape.Density",
-        "TopoClusterIsoForwardEventShape.Density",
-    ]
-
     # photons: detailed shower shape variables
     EGAM11SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
@@ -686,11 +621,7 @@ def EGAM11Cfg(flags):
     EGAM11SlimmingHelper.AllVariables += ["HIEventShape"]
     EGAM11SlimmingHelper.AllVariables += ["CaloSums"]
 
-    # Add full CellContainer
-    EGAM11SlimmingHelper.StaticContent = [
-        "CaloCellContainer#AllCalo",
-        "CaloClusterCellLinkContainer#egammaClusters_links",
-    ]
+    # Full CellContainers not added in HI data (CaloCellContainer#AllCalo and CaloClusterCellLinkContainer#egammaClusters_links)
 
     EGAM11ItemList = EGAM11SlimmingHelper.GetItemList()
     acc.merge(

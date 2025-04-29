@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, get_standard_performance_checks, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import DerivationTest, GenerationTest, OverlayTest, PileUpTest, QTest, SimulationTest
+from WorkflowTestRunner.StandardTests import DataOverlayPreparationTest, DerivationTest, GenerationTest, OverlayTest, PileUpTest, QTest, SimulationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -39,7 +39,7 @@ def main():
             tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.HitsFilter, ["FilterHitTf"], setup, options.extra_args))
     elif options.overlay:
         if not options.workflow or options.workflow is WorkflowType.MCOverlay:
-            tests_to_run.append(OverlayTest("d1759", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229 --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-05'"))
+            tests_to_run.append(OverlayTest("d1759", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229 --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08'"))
     elif options.pileup:
         if setup.parallel_execution:
             log.error("Parallel execution not supported for pile-up workflow")
@@ -49,6 +49,9 @@ def main():
             tests_to_run.append(PileUpTest(ami_tag, run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q455", run, WorkflowType.MCPileUpReco, ["Overlay", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
+        if options.workflow is WorkflowType.MinbiasPreprocessing:
+            ami_tag = "d2008" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(DataOverlayPreparationTest(ami_tag, run, WorkflowType.MinbiasPreprocessing, ["BStoRDO"], setup, options.extra_args))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"

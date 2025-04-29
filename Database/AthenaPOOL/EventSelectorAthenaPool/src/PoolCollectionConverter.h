@@ -31,13 +31,11 @@ public:
    /// @param collectionType [IN] type of the collection
    /// ("ExplicitROOT", "ExplicitMySQL", "ExplicitMySQLlt" or "ImplicitROOT").
    /// @param inputCollection [IN] name of the collection.
-   /// @param query [IN] query string.
    /// @param svc [IN] pointer to the PoolSvc.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    PoolCollectionConverter(const std::string& collectionType,
 		   const std::string& inputCollection,
 		   unsigned int contextId,
-		   const std::string& query,
 		   const IPoolSvc* svc);
 
    /// Destructor
@@ -55,10 +53,6 @@ public:
    /// @return ICollectionCursor over all entries
    pool::ICollectionCursor& selectAll();
 
-   /// Query the collection
-   /// @return ICollectionCursor over the results of the query
-   pool::ICollectionCursor& executeQuery();
-
    /// @param it [IN] collection iterator.
    /// @param refName [IN] attribute name.
    std::string retrieveToken(const pool::ICollectionCursor* cursor, const std::string& refName) const;
@@ -68,7 +62,6 @@ private: // data
    std::string m_connection;
    std::string m_inputCollection;
    unsigned int m_contextId;
-   std::string m_query;
    const IPoolSvc* m_poolSvc;
    pool::ICollection* m_poolCollection;
    pool::ICollectionQuery* m_collectionQuery;

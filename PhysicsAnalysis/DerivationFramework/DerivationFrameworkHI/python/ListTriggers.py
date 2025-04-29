@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # ListTriggers.py - List of triggers for skimming from athena 21.2 [HION4,HION12] 
 
 #################################################################################
@@ -391,7 +390,10 @@ def HION4SkimmingTriggers2018Support():
 def HION4SkimmingTriggers2023():
     #primary and backup triggers
     triggers  = []
+    triggers += ["HLT_mu3_L1MU3V_VTE50"]
+    triggers += ["HLT_mu3_hi_FgapAC5_L1MU3V_VTE50"]
     triggers += ["HLT_mu4_L1MU3V_VTE50"]
+    triggers += ["HLT_mu4_hi_FgapAC5_L1MU3V_VTE50"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_25dphiCC_L12TAU1_VTE200"]    
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU1_TE4_VTE200"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L12TAU1_VTE200"]
@@ -406,9 +408,50 @@ def HION4SkimmingTriggers2023():
     triggers += ["HLT_mb_excl_1trk5_pt1_L1TAU1_TE4_VTE200"]
     triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L12TAU1_VTE200"]
     triggers += ["HLT_mb_sptrk_hi_FgapAC5_L12TAU1_VTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU2_VZDC_A_VZDC_C_VTE100"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU2_ZDC_XOR4_VTE100"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU1_TRT_VTE50"]
     triggers += ["HLT_mb_sp_vpix15_hi_FgapAC5_L1TAU1_TE4_VTE200_EMPTY"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU1_TE4_VTE200_EMPTY"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU8_VTE200_EMPTY"]
+
+    return triggers
+
+def HION4SkimmingTriggers2024():
+    #primary and backup triggers
+    triggers  = []
+    triggers += ["HLT_mu3_hi_FgapAC5_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu3_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu4_hi_FgapAC5_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu4_L1MU3V_VjTE50"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eTAU1_TRT_VZDC_A_VZDC_C_VjTE100"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_sptrk_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_hi_FgapAC5_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_1XOR5_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L12eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_L12eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt2_L1eEM1_VTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L12eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L12eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI_2eEM1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI_2eEM1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM5_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM9_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI_2eEM1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L12eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eTAU1_TRT_VjTE200_EMPTY"]
 
     return triggers
 
@@ -418,7 +461,8 @@ def HION4SkimmingTriggersALL():
     triggers += HION4SkimmingTriggers2018Primary()
     triggers += HION4SkimmingTriggers2018Support()
     triggers += HION4SkimmingTriggers2023()
-    
+    triggers += HION4SkimmingTriggers2024()
+
     return triggers
 
 def HION4SkimmingTriggersVM():
@@ -426,6 +470,72 @@ def HION4SkimmingTriggersVM():
     VMtrigger = ["HLT_mb_sptrk_exclusiveloose_vetosp1500_L1VTE20"]
     
     return VMtrigger
+
+#################################################################################
+#HION5
+
+def HION5SkimmingTriggers():
+    triggers  = []
+    triggers += ["HLT_e15_lhloose_nod0"]
+    triggers += ["HLT_mu15"]
+    triggers += ["HLT_g10_loose"]
+    triggers += ["HLT_g15_loose"]
+    triggers += ["HLT_g20_loose"]
+    triggers += ["HLT_g25_loose"]
+    triggers += ["HLT_g30_loose"]
+    triggers += ["HLT_g35_loose"]
+
+
+    #2023 HI
+    triggers += ["HLT_e15_lhloose_nogsf_ion_L1EM12"]
+    triggers += ["HLT_e15_loose_nogsf_ion_L1EM12"]
+    triggers += ["HLT_e15_lhmedium_nogsf_ion_L1EM12"]
+    triggers += ["HLT_e15_medium_nogsf_ion_L1EM12"]
+    triggers += ["HLT_e18_lhloose_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e18_loose_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e18_lhmedium_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e18_medium_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e20_lhloose_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e20_lhmedium_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e20_loose_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e20_medium_nogsf_ion_L1EM15"]
+    triggers += ["HLT_mu10_L1MU8F"] #also 2024
+    triggers += ["HLT_mu10_L1MU5VF"] #also 2024
+
+    #2024 HI
+
+    triggers += ["HLT_e15_lhloose_nogsf_ion_L1eEM15"]
+    triggers += ["HLT_e15_loose_nogsf_ion_L1eEM15"]
+    triggers += ["HLT_e15_lhmedium_nogsf_ion_L1eEM15"]
+    triggers += ["HLT_e15_medium_nogsf_ion_L1eEM15"]
+    triggers += ["HLT_e20_lhloose_nogsf_ion_L1eEM18"]
+    triggers += ["HLT_e20_lhmedium_nogsf_ion_L1eEM18"]
+    triggers += ["HLT_e20_loose_nogsf_ion_L1eEM18"]
+    triggers += ["HLT_e20_loose_nogsf_ion_L1eEM18L"]
+    triggers += ["HLT_e20_medium_nogsf_ion_L1eEM18"]
+
+    #2024 pp ref
+    triggers += ["HLT_e14_lhvloose_L1eEM12L"]
+    triggers += ["HLT_e15_lhloose_L1eEM15"]
+    triggers += ["HLT_e15_loose_L1eEM15"]
+    triggers += ["HLT_e15_lhmedium_L1eEM15"]
+    triggers += ["HLT_e15_medium_L1eEM15"]
+    triggers += ["HLT_e20_lhloose_L1eEM18"]
+    triggers += ["HLT_e20_lhmedium_L1eEM18"]
+    triggers += ["HLT_e20_loose_L1eEM18"]
+    triggers += ["HLT_e20_loose_L1eEM18L"]
+    triggers += ["HLT_e20_medium_L1eEM18"]
+    triggers += ["HLT_e30_lhloose_L1eEM18"]
+    triggers += ["HLT_e30_lhmedium_L1eEM18"]
+    triggers += ["HLT_e30_loose_L1eEM18"]
+    triggers += ["HLT_e30_medium_L1eEM18"]
+    triggers += ["HLT_mu12_L1MU8F"]
+    triggers += ["HLT_mu15_L1MU8F"]
+    triggers += ["HLT_mu15_L1MU14FCH"]
+    triggers += ["HLT_mu4noL1_L1MBTS_1"]
+
+    
+    return triggers
 
 #################################################################################
 #HION12

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRUTHALGSR4_PREPDATATOSIMHITASSOCALG_H
 #define MUONTRUTHALGSR4_PREPDATATOSIMHITASSOCALG_H
@@ -26,15 +26,7 @@ namespace MuonR4{
             StatusCode initialize() override final;
             StatusCode execute(const EventContext & ctx) const override final;
         private:
-          /** @brief Helper method to retrieve any kind of container from a ReadHandleKey. If the 
-           *         key is empty, it's assumed that it shall be the case and the parsed point is to nullptr
-           * @param ctx: EventContext to access the data in the event
-           * @param key: Refrence to the initialized ReadHandleKey from which the object shall be retrieved
-           * @param contToPush: Reference to a pointer ot which eventually points to the retrieved container */
-           template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                       const SG::ReadHandleKey<ContainerType>& key,
-                                                                       const ContainerType* & contToPush) const;
-            /** @brief Key to the associated simHit container */
+           /** @brief Key to the associated simHit container */
             SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_simHitsKey{this, "SimHits" , ""};
             /** @brief Key to the uncalibrated measurements to decorate */
             SG::ReadHandleKey<xAOD::UncalibratedMeasurementContainer> m_prdHitKey{this, "Measurements", "Measurements"};

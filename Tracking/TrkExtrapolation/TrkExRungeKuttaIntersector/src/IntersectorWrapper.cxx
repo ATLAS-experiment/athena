@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 
 #include "TrkExRungeKuttaIntersector/IntersectorWrapper.h"
 #include "GaudiKernel/SystemOfUnits.h"
-#include "TrkExInterfaces/IIntersector.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkParameters/TrackParameters.h"
@@ -32,13 +31,9 @@ namespace Trk
 IntersectorWrapper::IntersectorWrapper	(const std::string& type,
                                          const std::string& name,
                                          const IInterface* parent)
-  :AthAlgTool		(type, name, parent),
-  m_intersector		("Trk::RungeKuttaIntersector/RungeKuttaIntersector"),
-  m_linePropagator	("")
+  :AthAlgTool		(type, name, parent)
   {
     declareInterface<Trk::IPropagator>(this);
-    declareProperty("Intersector",	m_intersector);
-    declareProperty("LinePropagator",	m_linePropagator);
   }
 
 IntersectorWrapper::~IntersectorWrapper	(void)

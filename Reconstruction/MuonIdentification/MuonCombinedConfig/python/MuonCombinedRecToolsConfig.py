@@ -163,6 +163,7 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
         RungeKuttaPropagatorCfg(flags)))
     kwargs.setdefault("MuonDressingTool", result.popToolsAndMerge(
         MuonDressingToolCfg(flags)))
+    kwargs.setdefault("AddMDTExtrasMuGirlLowBeta", flags.MuonCombined.addMDTExtrasMuGirlLowBeta)
     # Not explicitly setting up MomentumBalanceTool nor ScatteringAngleTool
     # Not explicitly setting up MeanMDTdADCTool (but probably should FIXME)
 
@@ -1094,6 +1095,7 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     kwargs.setdefault("DoSummary", flags.Muon.printSummary)
     kwargs.setdefault("ConsideredPDGs", [13, -13, 1000015, -1000015])
     kwargs.setdefault("DoTruth", flags.Input.isMC)
+    kwargs.setdefault("AddMDTExtrasMuGirlLowBeta", flags.MuonCombined.addMDTExtrasMuGirlLowBeta)
 
     result = ComponentAccumulator() 
     result.merge(MuonLayerHoughAlgCfg(flags))

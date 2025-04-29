@@ -33,7 +33,7 @@
 
 namespace DerivationFramework {
 
-  class ZeeVertexRefittingTool : public ExpressionParserUser<AthAlgTool>, public IAugmentationTool {
+  class ZeeVertexRefittingTool : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
     public: 
       ZeeVertexRefittingTool(const std::string& t, const std::string& n, const IInterface* p);
 

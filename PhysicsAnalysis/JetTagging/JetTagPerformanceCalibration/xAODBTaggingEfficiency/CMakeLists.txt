@@ -103,6 +103,9 @@ if( XAOD_ANALYSIS )
 endif()
 
 if( XAOD_STANDALONE )
+  atlas_add_test( ut_BTaggingJsonToolsTest
+    SCRIPT BTaggingJsonToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6491/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8514_e8528_s4162_s4114_r15540_r15516_p6491/DAOD_PHYS.41633384._000880.pool.root.1 /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13And13p6TeV/MC20And23_2025-03-17_GN2Xv01-noSF_v1.json GN2Xv01 FlatMassQCDEff_0p25
+  )
   atlas_add_test( ut_BTaggingToolsTest 
     SCRIPT BTaggingToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6491/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8514_e8528_s4162_s4114_r15540_r15516_p6491/DAOD_PHYS.41633384._000880.pool.root.1 xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root GN2v01 Continuous 
   )

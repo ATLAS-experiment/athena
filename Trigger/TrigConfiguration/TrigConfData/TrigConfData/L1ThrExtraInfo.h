@@ -176,6 +176,7 @@ namespace TrigConf {
       unsigned int ptMinToTopoCounts() const { return energyInCounts( m_ptMinToTopoMeV, resolutionMeV() ); }
       const WorkingPoints_eEM & isolation(TrigConf::Selection::WP wp, int eta) const { return m_isolation.at(wp).at(eta); }
       const ValueWithEtaDependence<WorkingPoints_eEM> & isolation(TrigConf::Selection::WP wp) const { return m_isolation.at(wp); }
+      unsigned int algoVersion() const { return m_algoVersion; }
    private:
       /** Update the internal members */
       void load();
@@ -183,6 +184,7 @@ namespace TrigConf {
       unsigned int m_ptMinToTopoMeV{0};
       unsigned int m_maxEt { 0 };
       std::map<TrigConf::Selection::WP, ValueWithEtaDependence<WorkingPoints_eEM>> m_isolation{};
+      unsigned int m_algoVersion { 0 };
    };
    std::ostream & operator<<(std::ostream & os, const TrigConf::L1ThrExtraInfo_eEM::WorkingPoints_eEM & iso);
 

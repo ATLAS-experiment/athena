@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ namespace CP
         ATH_CHECK(m_egammaContKey.initialize(m_systematicsList));
         ATH_CHECK(m_muonContKey.initialize(m_systematicsList));
         ANA_CHECK (m_systematicsList.initialize());
-        m_wpDec = std::make_unique<SG::AuxElement::Decorator<uint32_t> > (m_selectionName.value());
+        m_wpDec = std::make_unique<SG::AuxElement::Decorator<char> > (m_selectionName.value());
 
         if (!m_vetoFSR) {
             ATH_MSG_INFO("Reading container " << m_egammaContKey.getNamePattern() << " for FSR search for muons from " <<  m_muonContKey.getNamePattern() << ". Those passing " << m_selectionName.value() << " are also accepted.");
@@ -55,8 +55,6 @@ namespace CP
 
     StatusCode EgammaFSRForMuonsCollectorAlg::execute()
     {
-
-        // const EventContext &ctx = Gaudi::Hive::currentContext();
 
         auto selDec   = std::make_unique<SG::AuxElement::Decorator<uint32_t> > ("selectEta");
         auto oqDec    = std::make_unique<SG::AuxElement::Decorator<uint32_t> > ("goodOQ");
@@ -80,7 +78,7 @@ namespace CP
             for ( auto eg : *egammaCont ) {
                 if (!m_vetoFSR) {
                     // Standard logic - If passes std WP, accept
-                    if ((*m_wpDec)(*eg) == selectionAccept()) {
+                    if ((*m_wpDec)(*eg) == 1) {
                         ATH_MSG_DEBUG("Eg passed WP - pt, eta: " << eg->type() << ", " << eg->pt()/1000. << ", " << eg->eta() << ", " << (*m_wpDec)(*eg)  );
                         continue; // ok, skip to next el/ph
                     }
@@ -88,7 +86,7 @@ namespace CP
                 }
                 else {
                     // Inverted logic - If passes std WP, continue with the FSR search
-                    if ((*m_wpDec)(*eg) == selectionAccept()) {
+                    if ((*m_wpDec)(*eg) == 1) {
                         ATH_MSG_DEBUG("Veto FSR: Eg passed WP - pt, eta: " << eg->type() << ", " << eg->pt()/1000. << ", " << eg->eta() << ", " << (*m_wpDec)(*eg)  );
 
                     }
@@ -129,7 +127,7 @@ namespace CP
                             else                  ATH_MSG_DEBUG( "track match NOT OK");
                         }
                         if (elmutrackmatchOK) {
-                            (*m_wpDec)(*eg) = (m_vetoFSR) ? selectionReject() : selectionAccept();
+                            (*m_wpDec)(*eg) = (m_vetoFSR) ? 0 : 1;
                             ATH_MSG_DEBUG( "dR OK - wp " << (*m_wpDec)(*eg) );
 
                             if (selDec->isAvailable(*eg))   ATH_MSG_DEBUG( "selectEta: " << (*selDec)(*eg) );

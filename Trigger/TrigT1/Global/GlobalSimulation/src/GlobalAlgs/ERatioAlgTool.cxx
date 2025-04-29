@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ERatioAlgTool.h"
@@ -49,7 +49,7 @@ namespace GlobalSim {
 
     // check for the presence of a pi0 candidate in each neighborhood.
     std::size_t inbhd{0};
-    for (const auto& nbhd : *in) {
+    for (const auto nbhd : *in) {
       bool result{false};
       CHECK(alg.run(*nbhd, result));
       found.at(inbhd++) = result;

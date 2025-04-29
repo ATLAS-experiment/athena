@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 // $Id: RecEmTauRoI.h 782811 2016-11-07 17:20:40Z smh $
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                          RecEmTauRoI.h  -  description
@@ -99,7 +99,7 @@ namespace LVL1 {
 
       /** returns the CoordinateRange. This is worked out from the RoIWord's hardware coords
           (i.e. crate number, CPM number etc.) by the RoIDecoder class.  */
-      CoordinateRange coord() const;
+      const CoordinateRange& coord() const;
 
       /** returns a vector of thresholds passed. */
       std::vector< unsigned int >* thresholdsPassed() const;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -16,39 +16,10 @@ PURPOSE:  Apply necessary finalising operation to CaloCellContainer
 
 #include "CaloCellContainerFinalizerTool.h"
 
-#include "GaudiKernel/Service.h"
-#include "GaudiKernel/MsgStream.h"
-#include "Gaudi/Property.h"
-#include "GaudiKernel/TypeNameString.h"
-
-#include "StoreGate/StoreGateSvc.h"
-
-
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloEvent/CaloConstCellContainer.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 
-
-/////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-CaloCellContainerFinalizerTool::CaloCellContainerFinalizerTool(
-			     const std::string& type, 
-			     const std::string& name, 
-			     const IInterface* parent)
-  :base_class (type, name, parent),
-   m_theCaloCCIDM (nullptr)
-{
-}
-
-
-
-/////////////////////////////////////////////////////////////////////
-// DESTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-//CaloCellContainerFinalizerTool::~CaloCellContainerFinalizerTool()
-//{  }
 
 /////////////////////////////////////////////////////////////////////
 // INITIALIZE:

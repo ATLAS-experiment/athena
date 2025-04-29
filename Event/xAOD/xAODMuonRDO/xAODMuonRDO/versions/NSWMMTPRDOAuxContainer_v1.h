@@ -52,6 +52,8 @@ namespace xAOD {
 	std::vector< std::vector<uint16_t>> art_channel{};
 
 	//trigger data
+	std::vector< std::vector<uint16_t>> trig_globalX{};
+	std::vector< std::vector<uint16_t>> trig_globalU{};
 	std::vector< std::vector<uint16_t>> trig_BCID{};
 	std::vector< std::vector<uint8_t>>  trig_dTheta{};
 	std::vector< std::vector<uint8_t>>  trig_ROI_rID{};

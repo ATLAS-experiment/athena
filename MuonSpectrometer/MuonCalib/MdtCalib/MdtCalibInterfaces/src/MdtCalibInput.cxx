@@ -107,7 +107,11 @@ void MdtCalibInput::setClosestApproach(const Amg::Vector3D& approach) {
    m_approach = approach;
 }
 const Amg::Vector3D& MdtCalibInput::trackDirection() const { return m_trackDir; }
-void MdtCalibInput::setTrackDirection(const Amg::Vector3D& trackDir) { m_trackDir = trackDir; }
+void MdtCalibInput::setTrackDirection(const Amg::Vector3D& trackDir, bool hasPhi) { 
+   m_trackDir = trackDir;
+   m_trackHasPhi = hasPhi;
+}
+bool MdtCalibInput::trackDirHasPhi() const { return m_trackHasPhi; }
 double MdtCalibInput::timeOfFlight() const { return m_ToF; }
 void MdtCalibInput::setTimeOfFlight(const double toF) { m_ToF = toF; }
 

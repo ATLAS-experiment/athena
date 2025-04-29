@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SegmentFittingAlg.h"
@@ -9,10 +9,10 @@
 
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
-#include <MuonPatternHelpers/CalibSegmentChi2Minimizer.h>
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
-
-#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
+#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
+#include "xAODMuonPrepData/RpcStripContainer.h"
+#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 #include <MuonSpacePoint/UtilFunctions.h>
 
 #include <xAODMuonPrepData/RpcMeasurement.h>
@@ -25,13 +25,12 @@
 
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
+#include <format>
+
 namespace MuonR4 {
     using namespace SegmentFit;
     using namespace MuonValR4;
 
-    constexpr double inv_c = 1./ Gaudi::Units::c_light;
-    
-  
     MuonR4::SegmentFitResult::HitVec copy(const MuonR4::SegmentFitResult::HitVec& hits) {
         MuonR4::SegmentFitResult::HitVec copied{};
         copied.reserve(hits.size());
@@ -72,18 +71,18 @@ namespace MuonR4 {
         return StatusCode::SUCCESS;
     }
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
-    
         const ActsGeometryContext* gctx{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         const SegmentSeedContainer* segmentSeeds=nullptr; 
-        ATH_CHECK(retrieveContainer(ctx, m_seedKey, segmentSeeds));
+        ATH_CHECK(SG::get(segmentSeeds, m_seedKey, ctx));
     
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
+
         std::vector<std::unique_ptr<Segment>> allSegments{};
         for (const SegmentSeed* seed : *segmentSeeds) {
             std::vector<std::unique_ptr<Segment>> segments = fitSegmentSeed(ctx, *gctx, seed);
-            if (m_visionTool.isEnabled() && segments.size() > 1) {
+             if (m_visionTool.isEnabled() && segments.size() > 1) {
                 auto drawFinalReco = [this, &segments, &gctx, &ctx,&seed](const std::string& nameTag) {
                     PrimitiveVec segmentLines{};
                     double yLegend{0.85};
@@ -115,6 +114,11 @@ namespace MuonR4 {
                 if (nBeforeAmbi != segments.size()) {
                     drawFinalReco("post ambiguity");
                 }
+            } else  if (m_visionTool.isEnabled() && segments.empty() &&
+                      std::ranges::count_if(seed->getHitsInMax(),[this](const SpacePoint* hit){
+                            return  m_visionTool->isLabeled(*hit);
+                      })) {
+                m_visionTool->visualizeSeed(ctx, *seed, "Failed fit");
             }
             allSegments.insert(allSegments.end(), std::make_move_iterator(segments.begin()),
                                                   std::make_move_iterator(segments.end()));
@@ -126,21 +130,6 @@ namespace MuonR4 {
         ATH_MSG_VERBOSE("Found in total "<<writeSegments->size()<<" segments. ");
         return StatusCode::SUCCESS; 
     }
-
-    template <class ContainerType>
-        StatusCode SegmentFittingAlg::retrieveContainer(const EventContext& ctx, 
-                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                        const ContainerType*& contToPush) const {
-            contToPush = nullptr;
-            if (key.empty()) {
-                ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-                return StatusCode::SUCCESS;
-            }
-            SG::ReadHandle readHandle{key, ctx};
-            ATH_CHECK(readHandle.isPresent());
-            contToPush = readHandle.cptr();
-            return StatusCode::SUCCESS;
-        }
 
     SegmentFitResult SegmentFittingAlg::fitSegmentHits(const EventContext& ctx,
                                                        const ActsGeometryContext& gctx,
@@ -179,90 +168,13 @@ namespace MuonR4 {
 
         const Amg::Transform3D& locToGlob{calibHits[0]->spacePoint()->msSector()->localToGlobalTrans(gctx)};
 
-        if (!m_useMinuit) {
-            MdtSegmentFitter::Config fitCfg{};
-            fitCfg.calibrator = m_calibTool.get();
-            fitCfg.doTimeFit = m_doT0Fit;
+        MdtSegmentFitter::Config fitCfg{};
+        fitCfg.calibrator = m_calibTool.get();
+        fitCfg.doTimeFit = m_doT0Fit;
+        fitCfg.reCalibrate = m_recalibInFit;
 
-            MdtSegmentFitter fitter{name(), std::move(fitCfg)};
-            return fitter.fitSegment(ctx, std::move(calibHits), startPars, locToGlob);
-        }
-
-        data.segmentPars = startPars;
-
-        CalibSegmentChi2Minimizer c2f{name(), ctx, locToGlob, copy(calibHits), m_calibTool.get(), m_doT0Fit};
-        data.hasPhi = c2f.hasPhiMeas();
-        data.timeFit = c2f.doTimeFit();
-        data.nDoF = c2f.nDoF();
-        if (data.nDoF <= 0) {
-            ATH_MSG_DEBUG("Reject fit due to 0 degrees of freedom");
-            return data;
-        }
-        ROOT::Minuit2::Minuit2Minimizer minimizer((name() + std::to_string(ctx.eventID().event_number())).c_str());
-        /** Configure the minimizer */
-        minimizer.SetMaxFunctionCalls(100000);
-        minimizer.SetTolerance(0.0001);
-        minimizer.SetPrintLevel(-1);
-        minimizer.SetStrategy(1);
-
-        minimizer.SetVariable(toInt(ParamDefs::y0), "y0", startPars[toInt(ParamDefs::y0)], 1.e-5);
-        minimizer.SetVariable(toInt(ParamDefs::theta), "theta", startPars[toInt(ParamDefs::theta)], 1.e-5);
-        minimizer.SetVariableLimits(toInt(ParamDefs::y0), 
-                                    startPars[toInt(ParamDefs::y0)] - 60. *Gaudi::Units::cm, 
-                                    startPars[toInt(ParamDefs::y0)] + 60. *Gaudi::Units::cm);
-        minimizer.SetVariableLimits(toInt(ParamDefs::theta),
-                                    startPars[toInt(ParamDefs::theta)] - 0.6, 
-                                    startPars[toInt(ParamDefs::theta)] + 0.6);
-        
-        if (data.hasPhi) {
-            minimizer.SetVariable(toInt(ParamDefs::x0), "x0", startPars[toInt(ParamDefs::x0)], 1.e-5);
-            minimizer.SetVariable(toInt(ParamDefs::phi), "phi", startPars[toInt(ParamDefs::phi)], 1.e-5);
-            minimizer.SetVariableLimits(toInt(ParamDefs::x0), 
-                                        startPars[toInt(ParamDefs::x0)] - 600, 
-                                        startPars[toInt(ParamDefs::x0)] + 600);
-            minimizer.SetVariableLimits(toInt(ParamDefs::phi), 
-                                        startPars[toInt(ParamDefs::phi)] - 0.6, 
-                                        startPars[toInt(ParamDefs::phi)] + 0.6);
-        } else {
-            minimizer.SetFixedVariable(toInt(ParamDefs::x0), "x0", 0.);
-            minimizer.SetFixedVariable(toInt(ParamDefs::phi), "phi", 90.*Gaudi::Units::deg);
-        }
-        /// Assumption that the particle travels at the speed of light
-        if (data.timeFit) {
-            minimizer.SetVariable(toInt(ParamDefs::time), "t0", startPars[toInt(ParamDefs::time)] , 1.);
-            minimizer.SetVariableLimits(toInt(ParamDefs::time), 
-                                        startPars[toInt(ParamDefs::time)] - 50,
-                                        startPars[toInt(ParamDefs::time)] + 50);
-        } else{
-            minimizer.SetFixedVariable(toInt(ParamDefs::time), "t0", 0.);
-        }
-        minimizer.SetFunction(c2f);
-        /// Execute fit
-        if (!minimizer.Minimize() || !minimizer.Hesse()) {
-            data.calibMeasurements = std::move(calibHits);
-        } else {
-            const double* xs = minimizer.X();
-            const double* errs = minimizer.Errors();
-
-            for (unsigned int p = 0; p < toInt(ParamDefs::nPars); ++p) {
-                data.segmentPars[p] = xs[p];
-                data.segmentParErrs(p,p) = errs[p];
-            }
-            std::optional<double> ToF{std::nullopt};
-            const auto [locPos, locDir] = data.makeLine();
-            if (data.timeFit) {
-                ToF = std::make_optional<double>((locToGlob*locPos).mag() * inv_c);
-            }
-            data.nIter = minimizer.NCalls();
-            data.calibMeasurements = c2f.release(xs);
-
-            data.chi2 = std::accumulate(data.calibMeasurements.begin(),data.calibMeasurements.end(),0.,
-                                         [this,&locPos,&locDir, &ToF, &xs]( double chi2, const auto& hit) {
-                                            return SegmentFitHelpers::chiSqTerm(locPos, locDir, xs[toInt(ParamDefs::time)], ToF, *hit, msg()) + chi2;
-                                         });
-            data.converged = true;
-        }
-        return data;
+        MdtSegmentFitter fitter{name(), std::move(fitCfg)};
+        return fitter.fitSegment(ctx, std::move(calibHits), startPars, locToGlob);
     }
     std::vector<std::unique_ptr<Segment>>
          SegmentFittingAlg::fitSegmentSeed(const EventContext& ctx,
@@ -283,7 +195,7 @@ namespace MuonR4 {
         /// At very high inclanation angles, the muon may traverse 3 hits in the same layer (E.g. BEE)
         genCfg.busyLayerLimit = 2 + 2*(patternSeed->parameters()[toInt(ParamDefs::theta)] > 50 * Gaudi::Units::deg);
         /** Draw the pattern with all possible seeds */
-        if (m_visionTool.isEnabled()) { 
+         if (m_visionTool.isEnabled()) { 
             PrimitiveVec seedLines{};
             MdtSegmentSeedGenerator drawMe{name(), patternSeed, genCfg};
             while(auto s = drawMe.nextSeed(ctx)) {
@@ -291,7 +203,6 @@ namespace MuonR4 {
             }
             seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.2, 0.85, 14));
             m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern", std::move(seedLines));
-
         }
 
         MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
@@ -300,13 +211,13 @@ namespace MuonR4 {
             data.segmentPars = seed->parameters;
             data.calibMeasurements = std::move(seed->measurements);            
             /// Draw the prefit
-            if (m_visionTool.isEnabled()) {
+             if (m_visionTool.isEnabled()) {
                 auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Pre fit {:d}", seedGen.numGenerated()));
             } 
             data = fitSegmentHits(ctx, gctx, seed->parameters, std::move(data.calibMeasurements));
             data.nIter +=  seed->nIter;
-            if (m_visionTool.isEnabled() && data.converged) {
+             if (m_visionTool.isEnabled() && data.converged) {
                 auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Intermediate fit {:d}", seedGen.numGenerated()));
             }
@@ -316,7 +227,7 @@ namespace MuonR4 {
             if (!plugHoles(ctx, gctx, *patternSeed, data)) {
                 continue;
             }
-            if (m_visionTool.isEnabled()) {
+             if (m_visionTool.isEnabled()) {
                 auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Final fit {:d}", seedGen.numGenerated()));
             }
@@ -349,7 +260,7 @@ namespace MuonR4 {
                                            SegmentFitResult& data) const {
         
         /** If no degree of freedom is in the segment fit then try to plug the holes  */
-        if (data.nDoF<=0 || data.calibMeasurements.empty()) {
+        if (data.nDoF<=0 || data.calibMeasurements.empty() || data.nPrecMeas < m_precHitCut) {
             ATH_MSG_VERBOSE("No degree of freedom available. What shall be removed?!. nDoF: "
                             <<data.nDoF<<", n-meas: "<<data.calibMeasurements);
             return false;
@@ -372,7 +283,7 @@ namespace MuonR4 {
         }
 
         /** Next sort the measurements by chi2 */
-        std::sort(data.calibMeasurements.begin(), data.calibMeasurements.end(),
+        std::ranges::sort(data.calibMeasurements,
                   [&, this](const HitVec::value_type& a, const HitVec::value_type& b){
                     return SegmentFitHelpers::chiSqTerm(segPos, segDir, data.segmentPars[toInt(ParamDefs::time)], std::nullopt, *a, msgStream()) <
                            SegmentFitHelpers::chiSqTerm(segPos, segDir, data.segmentPars[toInt(ParamDefs::time)], std::nullopt, *b, msgStream());
@@ -395,7 +306,7 @@ namespace MuonR4 {
         if (newAttempt.converged) {
             newAttempt.nIter+=data.nIter;
             data = std::move(newAttempt);
-            if (m_visionTool.isEnabled()) {
+             if (m_visionTool.isEnabled()) {
                 auto seedCopy = convertToSegment(seed.msSector()->localToGlobalTrans(gctx), &seed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, "Bad fit recovery");
             }
@@ -420,7 +331,7 @@ namespace MuonR4 {
         }
 
         HitVec candidateHits{};
-        SpacePointPerLayerSorter hitLayers{*seed.parentBucket()};
+        SpacePointPerLayerSplitter hitLayers{*seed.parentBucket()};
         bool hasCandidate{false};
         const auto [locPos, locDir] = beforeRecov.makeLine();
         for (const std::vector<HoughHitType>& mdtLayer : hitLayers.mdtHits()) {

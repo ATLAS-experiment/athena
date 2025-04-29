@@ -14,7 +14,6 @@ EfexSimMonitorAlgorithm::EfexSimMonitorAlgorithm( const std::string& name, ISvcL
 StatusCode EfexSimMonitorAlgorithm::initialize() {
 
   ATH_MSG_DEBUG("EfexSimMonitorAlgorith::initialize");
-  ATH_MSG_DEBUG("Package Name "<< m_packageName);
   ATH_MSG_DEBUG("m_eFexEmContainer"<< m_eFexEmContainerKey); 
   ATH_MSG_DEBUG("m_eFexEmSimContainer"<< m_eFexEmSimContainerKey); 
   ATH_MSG_DEBUG("m_eFexTauContainer"<< m_eFexTauContainerKey);
@@ -25,8 +24,10 @@ StatusCode EfexSimMonitorAlgorithm::initialize() {
   ATH_CHECK( m_eFexEmSimContainerKey.initialize() );
   ATH_CHECK( m_eFexTauContainerKey.initialize() );
   ATH_CHECK( m_eFexTauSimContainerKey.initialize() );
-  //m_decorKey = "EventInfo.eTowerMakerFromEfexTowers_usedSecondary";
-  //ATH_CHECK( m_decorKey.initialize() );
+    ATH_CHECK( m_eFexEmxContainerKey.initialize(SG::AllowEmpty) );
+    ATH_CHECK( m_eFexEmxSimContainerKey.initialize(SG::AllowEmpty) );
+    ATH_CHECK( m_eFexTauxContainerKey.initialize(SG::AllowEmpty) );
+    ATH_CHECK( m_eFexTauxSimContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_eFexTowerContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_bcContKey.initialize() );
   
@@ -37,6 +38,8 @@ StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     fillHistos(m_eFexEmSimContainerKey,m_eFexEmContainerKey,ctx,"eEM");
     fillHistos(m_eFexTauSimContainerKey,m_eFexTauContainerKey,ctx,"eTAU");
+    if(!m_eFexEmxContainerKey.empty()) fillHistos(m_eFexEmxSimContainerKey,m_eFexEmxContainerKey,ctx,"eEMx");
+    if(!m_eFexTauxContainerKey.empty()) fillHistos(m_eFexTauxSimContainerKey,m_eFexTauxContainerKey,ctx,"eTAUx");
     return StatusCode::SUCCESS;
 }
 
@@ -155,8 +158,19 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
         }
 
         tobMismatched=100;
-        fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
-        fill("mismatches_count",lbn,signature,simReady,evtType);
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
+        ATH_MSG_WARNING(signa << " mismatch in lbn " << lbn << " evtNumber " << evtNumber);
+        if(msgLvl(MSG::DEBUG)) {
+            std::stringstream s;
+            s << "Data: " << std::hex;
+            for(auto w : dword0s) s << w << " ";
+            ATH_MSG_DEBUG(s.str());
+            s.str("");
+            s << "Simu: " << std::hex;
+            for(auto w : sword0s) s << w << " ";
+            ATH_MSG_DEBUG(s.str());
+        }
+        fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
     } else {
         tobMismatched=0;
         fill("mismatches",tobMismatched,lbn,signature,simReady,evtType);

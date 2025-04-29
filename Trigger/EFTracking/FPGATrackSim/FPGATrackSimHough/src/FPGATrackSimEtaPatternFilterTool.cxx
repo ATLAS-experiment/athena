@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimEtaPatternFilterTool.cxx
@@ -20,6 +20,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <bit>
 
 
 
@@ -28,16 +29,6 @@ inline bool operator <(const FPGATrackSimEtaPatternFilterTool::ModuleId& lhs, co
     if (lhs.siTech != rhs.siTech) return lhs.siTech < rhs.siTech;
     if (lhs.zone != rhs.zone) return lhs.zone < rhs.zone;
     return lhs.etaModule < rhs.etaModule;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimEtaPatternFilterTool::FPGATrackSimEtaPatternFilterTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-    declareInterface<IFPGATrackSimRoadFilterTool>(this);
 }
 
 
@@ -67,7 +58,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::initialize()
 
 void FPGATrackSimEtaPatternFilterTool::readPatterns(std::string const & filepath)
 {
-  
+
     // Open the file
     std::ifstream fin(PathResolverFindCalibFile(filepath));
     if (!fin.is_open())
@@ -143,7 +134,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(std::vector<std::shared
     {
         // reset all maps
         resetCounters();
-	
+
 
         // put hits in module objects
         addHitsToMap(road);
@@ -160,7 +151,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(std::vector<std::shared
         {
             for (auto & patt_bitmask : m_patternmap)
             {
-                unsigned nLayers = __builtin_popcount(patt_bitmask.second);
+                unsigned nLayers = std::popcount(patt_bitmask.second);
                 if (nLayers >= working_threshold)
                 {
                     // create subpattern from layers that actually have hits
@@ -218,13 +209,18 @@ void FPGATrackSimEtaPatternFilterTool::addHitsToMap(const std::shared_ptr<const 
             {
                 ModuleId mod = { hit->getDetType(), hit->getDetectorZone(), (int)(hit->getEtaModule()) };
                 auto itr = m_moduleHits[lyr].find(mod);
-                if (itr != m_moduleHits[lyr].end())
+                if (itr != m_moduleHits[lyr].end()) {
+                    ATH_MSG_VERBOSE("Adding hit to map");
                     itr->second.addHit(hit);
-                else {
-                    ATH_MSG_ERROR("Module not in map: " << hit->getDetType() << " " << hit->getDetectorZone() << " " <<  static_cast<int>(hit->getEtaModule()) << " type: " << hit->getHitType() << " layer: " << lyr);
-                    for (auto & itr2 : m_moduleHits[lyr])
-                    {
-                        ATH_MSG_ERROR("   " << itr2.first.siTech << " " << itr2.first.zone << " " << itr2.first.etaModule);
+                } else {
+                    // If this is an outermost spacepoint this is, technically, okay, provided
+                    // we're only out of bounds byt a single etamod-- could check that.
+                    if (!((hit->getHitType() == HitType::spacepoint) && (hit->getSide() == 1))) {
+                        ATH_MSG_ERROR("Module not in map: " << hit->getDetType() << " " << hit->getDetectorZone() << " " <<  static_cast<int>(hit->getEtaModule()) << " type: " << hit->getHitType() << " layer: " << lyr);
+                        for (auto & itr2 : m_moduleHits[lyr])
+                        {
+                            ATH_MSG_ERROR("   " << itr2.first.siTech << " " << itr2.first.zone << " " << itr2.first.etaModule);
+                        }
                     }
                 }
             }

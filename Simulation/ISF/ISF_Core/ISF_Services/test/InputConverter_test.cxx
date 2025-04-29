@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -49,13 +49,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 namespace ISFTesting {
 
 // Athena Tool to emulate a GenParticleFilter
-class MockFilterTool : public AthAlgTool,
-                       public ISF::IGenParticleFilter {
+class MockFilterTool : public extends<AthAlgTool, ISF::IGenParticleFilter> {
 
  public:
-  MockFilterTool(const std::string& type, const std::string& name, const IInterface* parent)
-    : AthAlgTool(type,name,parent)
-  { declareInterface<ISF::IGenParticleFilter>(this); };
+  using base_class::base_class;
 
   virtual ~MockFilterTool() {};
 
@@ -63,7 +60,6 @@ class MockFilterTool : public AthAlgTool,
 #ifdef HEPMC3
   MOCK_CONST_METHOD1(pass, bool(const HepMC::ConstGenParticlePtr&));
 #else
-  // cppcheck-suppress unknownMacro
   MOCK_CONST_METHOD1(pass, bool(const HepMC::GenParticle&));
 #endif
 };
@@ -109,7 +105,6 @@ protected:
 };  // InputConverter_test fixture
 
 
-// cppcheck-suppress syntaxError
 TEST_F(InputConverter_test, initialize_empty) {
   ASSERT_TRUE( m_svc->initialize().isSuccess() );
 }

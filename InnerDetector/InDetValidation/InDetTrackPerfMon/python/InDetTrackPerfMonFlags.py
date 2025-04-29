@@ -33,6 +33,7 @@ def __createIDTPMTrkAnaConfigFlags():
     # Test-Reference collections properties
     icf.addFlag( "TestType", "Offline" )
     icf.addFlag( "RefType", "Truth" )
+    icf.addFlag( "doTrigNavigation", False )
     icf.addFlag( "TrigTrkKey"    , "" )
     icf.addFlag( "OfflineTrkKey" , "InDetTrackParticles" )
     icf.addFlag( "TruthPartKey"  , "TruthParticles" )
@@ -57,6 +58,7 @@ def __createIDTPMTrkAnaConfigFlags():
     # Offline tracks selection properties
     icf.addFlag( "SelectOfflineObject", "" )
     icf.addFlag( "OfflineQualityWP"   , "", help="Apply track quality selection cuts to the reconstructed tracks, if blank no selections is done" )
+    icf.addFlag( "CustomOfflSel"   , "", help="Apply additional track quality selection cuts to the reconstructed tracks, if blank no selections is done" )
     icf.addFlag( "DoOfflineSelection", False )
     icf.addFlag( "offlMaxZ0SinTheta",               -9999. )
     icf.addFlag( "offlMinNInnermostLayerHits",      -9999. )
@@ -95,7 +97,12 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "offlMaxAbsZ0"   , -9999. )
     icf.addFlag( "offlMinAbsQoPT" , -9999. )
     icf.addFlag( "offlMaxAbsQoPT" , -9999. )
-    icf.addFlag( "offlMinProb",                     -9999. )
+    icf.addFlag( "offlEtaBins"  , [] )
+    icf.addFlag( "offlMinHitsVector" , [] )
+    icf.addFlag( "offlMinPtVector" , [] )
+    icf.addFlag( "offlMaxD0Vector" , [] )
+    icf.addFlag( "offlMaxZ0Vector" , [] )
+    icf.addFlag( "offlMinProb"        ,  -9999. )
     icf.addFlag( "ObjectQuality"      , "Medium" )
     icf.addFlag( "TauType"            , "RNN" )
     icf.addFlag( "TauNprongs"         , 1 )
@@ -125,13 +132,12 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "truthMinAbsQoPT" , -9999., help="Apply minimum |q/pt| cut to truth particle" )
     icf.addFlag( "truthMaxAbsQoPT" , -9999., help="Apply maximum |q/pt| cut to truth particle" )
     icf.addFlag( "truthPdgId"   , -9999., help="Apply pdgId selection to truth particle" )
-    icf.addFlag( "truthIsHadron", False, help="Select hadrons" )
-    icf.addFlag( "truthIsPion", False, help="Select pions" )
     # Histogram properties
     icf.addFlag( "plotTrackParameters"      , True )
     icf.addFlag( "plotTrackMultiplicities"  , True )
     icf.addFlag( "plotEfficiencies"         , True )
     icf.addFlag( "plotTechnicalEfficiencies", False )
+    icf.addFlag( "useActsSiMeasurements"    , False )
     icf.addFlag( "plotResolutions"          , True )
     icf.addFlag( "plotFakeRates"            , True )
     icf.addFlag( "unlinkedAsFakes"          , True )
@@ -185,10 +191,20 @@ def initializeIDTPMTrkAnaConfigFlags(flags):
 
             # set flags from values in trkAnaDict
             for fname, fvalue in trkAnaDict.items():
+                ## skipping comments
                 if fname.startswith( "_comment" ): continue
+                ## updating flags from json items
                 setattr( flags.PhysVal.IDTPM, 
                         trkAnaName+"."+fname, fvalue )
 
+            ## overwrite doTrigNavigation flag if test or reference
+            ## is "Trigger" (not "EFTrigger")
+            types = [ getattr( flags.PhysVal.IDTPM, trkAnaName+".TestType" ),
+                      getattr( flags.PhysVal.IDTPM, trkAnaName+".RefType" ) ]
+            if "Trigger" in types :
+                setattr( flags.PhysVal.IDTPM, trkAnaName+".doTrigNavigation", True )
+
     if trkAnaNames:
         flags.PhysVal.IDTPM.trkAnaNames = trkAnaNames
+
     return flags

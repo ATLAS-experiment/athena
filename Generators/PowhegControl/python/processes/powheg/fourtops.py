@@ -40,14 +40,6 @@ class fourtops(PowhegV2):
         """
         super(fourtops, self).__init__(base_directory, "fourtops", **kwargs)
 
-        import os
-
-        # hack in place to help powheg executable find all dynamic libraries
-        logger.warning("Applying manual, hard-coded fixes for library paths")
-        OLPath = os.path.dirname(self.executable)+"/obj-gfortran"
-        os.environ['OpenLoopsPath'] = OLPath
-        logger.info("OpenLoopsPath defined as = {0}".format(os.getenv('OpenLoopsPath')))
-
         # Add algorithms to the sequence
         self.add_algorithm(ExternalMadSpin(process="generate p p > t t~ t t~ [QCD]"))
 

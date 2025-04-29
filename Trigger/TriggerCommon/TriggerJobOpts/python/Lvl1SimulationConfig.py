@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @brief this function sets up the top L1 simulation sequence
 ##
@@ -27,8 +27,11 @@ def Lvl1SimulationCfg(flags, seqName = None):
         from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
         acc.merge(L1CaloFEXSimCfg(flags), sequenceName = 'L1CaloSimSeq')
 
-
-    if flags.Trigger.enableL1MuonPhase1:
+    if flags.Trigger.enableL0Muon:
+        acc.addSequence(seqAND('L0MuonSimSeq'), parentName='L1SimSeq')
+        from TriggerJobOpts.L0MuonSimulationConfig import L0MuonSimulationCfg
+        acc.merge(L0MuonSimulationCfg(flags), sequenceName='L0MuonSimSeq')
+    elif flags.Trigger.enableL1MuonPhase1:
         acc.addSequence(seqAND('L1MuonSimSeq'), parentName='L1SimSeq')
         from TriggerJobOpts.Lvl1MuonSimulationConfig import Lvl1MuonSimulationCfg
         acc.merge(Lvl1MuonSimulationCfg(flags), sequenceName='L1MuonSimSeq')
@@ -65,6 +68,10 @@ def Lvl1SimulationCfg(flags, seqName = None):
 if __name__ == '__main__':
     import sys
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+    # The HLS code will trip an assertion is this doesn't exist...
+    import os
+    os.makedirs ('tb_data', exist_ok = True)
 
     flags = initConfigFlags()
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171421_00/RDO.34171421._000011.pool.root.1']

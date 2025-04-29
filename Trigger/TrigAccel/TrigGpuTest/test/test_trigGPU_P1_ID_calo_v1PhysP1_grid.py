@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
+# art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log
@@ -25,9 +26,11 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
-ex.threads = 4
-ex.concurrent_events = 1
-ex.flags = ['Trigger.InDetTracking.doGPU=True', 'CaloRecGPU.GlobalFlags.UseCaloRecGPU=True', 'Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"',
+ex.threads = 8
+ex.concurrent_events = 8
+ex.flags = ['Trigger.InDetTracking.doGPU=True',
+            'CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
+            'Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"',
             'Trigger.doLVL1=True']
 
 test = Test.Test()

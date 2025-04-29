@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/ReadHandleKey.h
@@ -47,6 +47,7 @@ public:
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
+  explicit
   ReadHandleKey (const std::string& key = "",
                  const std::string& storeName = StoreID::storeName(StoreID::EVENT_STORE));
 

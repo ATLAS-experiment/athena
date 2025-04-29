@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -8,13 +8,9 @@
 ClusterFinder::ClusterFinder(const std::string& type,
 		       const std::string& name,
 		       const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_ClusterContainerName("CaloCalTopoClusters"),
-  m_Rsubjet(0.2)
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("ClusterContainer", m_ClusterContainerName);
-  declareProperty("Rsubjet", m_Rsubjet);
 }
 
 

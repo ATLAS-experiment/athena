@@ -18,9 +18,11 @@ HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN
 LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4149_s4151/*"
 DigiOutFileName="RUN4_ttbar.puTruth.RDO.pool.root"
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 Digi_tf.py \
 --CA \
---conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
+--conditionsTag default:${conditions} \
 --preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp1' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --runNumber="601229" \

@@ -1460,7 +1460,9 @@ def MuonTrackConfig(flags, **kwargs):
     myGroup.defineHistogram('JpsiMass,JpsiEta2D;m_Jpsi_M_Eta_region', 
             title='m_Jpsi_M_Eta_region;mass;eta', 
             type='TH2F', path='MuonTrkPhys/Jpsi', 
-            xbins=50, xmin=2.6, xmax=3.6, ybins=27, ymin=-2.7, ymax=2.7, opt='kAlwaysCreate')
+            xbins=50, xmin=2.6, xmax=3.6, ybins=27, ymin=-2.7, ymax=2.7, opt='kAlwaysCreate',
+            merge="merge")
+                
 
     # MuonTrkPhys/Z
     myGroup.defineHistogram('ZMass;m_Z_Mass', 
@@ -1470,7 +1472,7 @@ def MuonTrackConfig(flags, **kwargs):
     myGroup.defineHistogram('ZEta2D;m_Z_2occupancy', 
             title='m_Z_2occupancy;#etaRegionPermutations[+#mu,-#mu];N_{#mu}', 
             type='TH1F', path='MuonTrkPhys/Z', 
-            xbins=16, xmin=-0.5, xmax=15.5, opt='kAlwaysCreate')
+            xbins=16, xmin=-0.5, xmax=15.5, opt='kAlwaysCreate', merge="merge")
     myGroup.defineHistogram('ZMass_BA_BA;m_Z_M_BA_BA', 
             title='m_Z_M_BA_BA;M_{#mu#mu};Entries', 
             type='TH1F', path='MuonTrkPhys/Z', 
@@ -1550,7 +1552,8 @@ def MuonTrackConfig(flags, **kwargs):
     myGroup.defineHistogram('ZMass,ZEta2D;m_Z_M_Eta_region', 
             title='m_Z_M_Eta_region;mass;eta', 
             type='TH2F', path='MuonTrkPhys/Z', 
-            xbins=27, xmin=76., xmax=106., ybins=27, ymin=-2.7, ymax=2.7, opt='kAlwaysCreate')
+            xbins=27, xmin=76., xmax=106., ybins=27, ymin=-2.7, ymax=2.7, opt='kAlwaysCreate',
+            merge="merge")
 
 
 ###########################################################

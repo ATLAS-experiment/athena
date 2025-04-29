@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PMGTOOLS_PMGCROSSSECTIONTOOL_H
@@ -40,7 +40,7 @@ namespace PMGTools {
     StatusCode  initialize();
     
     /// read infos from file, store them in the structure and make a vector that keeps all of them                                                                                   
-    bool readInfosFromFiles(std::vector<std::string>);
+    bool readInfosFromFiles(const std::vector<std::string> &);
     
     /// read infos from all files in dir                                                                                                                                               
     bool readInfosFromDir(const std::string& inputDir);

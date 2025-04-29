@@ -136,6 +136,7 @@ void test4()
   auto v = Vec::make_unique();
   v->push_back (v->allocate (10));
   std::unique_ptr<const DataVector<const int> > v2 = std::move (v);
+  //cppcheck-suppress accessMoved
   assert (!v);
   assert (v2->size() == 1);
   assert (*(*v2)[0] == 10);

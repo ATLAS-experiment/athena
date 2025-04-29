@@ -7,9 +7,9 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.Enums import LHCPeriod
+from AthenaKernel.EventIdOverrideConfig import IOVDbMetaDataToolWithRunNumberOverrideCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from DigitizationConfig.DigitizationParametersConfig import writeDigitizationParameters
-
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \
     CopyTrackRecordCollectionsCfg
@@ -31,18 +31,21 @@ def OverlayMainContentCfg(configFlags):
 
     acc = writeDigitizationParameters(configFlags)
 
+    if not configFlags.Overlay.ByteStream:
+        acc.merge(IOVDbMetaDataToolWithRunNumberOverrideCfg(configFlags))
+
     # Add event info overlay
-    if not configFlags.Overlay.FastChain:
+    if not configFlags.Sim.DoFullChain:
         acc.merge(EventInfoOverlayCfg(configFlags))
 
     # Add truth overlay (needed downstream)
-    if not configFlags.Overlay.FastChain and (getEnabledDetectors(configFlags) or configFlags.Digitization.EnableTruth):
+    if not configFlags.Sim.DoFullChain and (getEnabledDetectors(configFlags) or configFlags.Digitization.EnableTruth):
         acc.merge(CopyMcEventCollectionCfg(configFlags))
     if configFlags.Digitization.EnableTruth:
         acc.merge(CopyJetTruthInfoCfg(configFlags))
         acc.merge(CopyPileupParticleTruthInfoCfg(configFlags))
         acc.merge(CopyCaloCalibrationHitContainersCfg(configFlags))
-        if not configFlags.Overlay.FastChain:
+        if not configFlags.Sim.DoFullChain:
             acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
 
     # Beam spot reweighting

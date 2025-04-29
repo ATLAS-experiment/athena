@@ -61,7 +61,7 @@ private:
 
   SG::ReadCondHandleKey<LArBadFebCont> m_badFebKey{this,"KonwnBadFebKey","LArKnownBadFEBs","Key of known Bad-Feb object"};
   SG::ReadCondHandleKey<LArBadFebCont> m_MNBFebKey{this,"KonwnMNBFebKey","LArKnownMNBFEBs","Key of known MNB-Feb object"};
-  SG::ReadCondHandleKey<LArHVIdMapping> m_hvMapKey {this, "HVMapKey", "LArHVIdMap", "key to read OnOff mapping"};
+  SG::ReadCondHandleKey<LArHVIdMapping> m_hvMapKey {this, "HVMapKey", "", "key to read OnOff mapping"};
 
   //To get the data-dependency right ... 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"};

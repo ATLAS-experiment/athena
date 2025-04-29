@@ -90,26 +90,26 @@ private:
 
   ServiceHandle<IByteStreamEventAccess> m_ByteStreamEventAccess;
   ServiceHandle<IROBDataProviderSvc> m_rdpSvc;
-  EventID m_lastEventID;
-  eformat::SubDetector m_subdet_id;
+  EventID m_lastEventID{};
+  eformat::SubDetector m_subdet_id{};
   std::vector<uint32_t> m_rodBlock; //For reading only : data fragment
-  const LArOnlineID* m_onlineHelper;
+  const LArOnlineID* m_onlineHelper{};
   
   // event fragments for writing
-  std::vector<uint32_t> * m_theRodBlock;
-  OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment * m_theROB;
+  std::vector<uint32_t> * m_theRodBlock{};
+  OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment * m_theROB{};
 
-  bool m_H6run;
-  bool m_H8run;
-  bool m_force_Hchoice;
-  bool m_dump;
+  bool m_H6run{};
+  bool m_H8run{};
+  bool m_force_Hchoice{};
+  bool m_dump{};
   std::vector<std::string> m_keys;
-  int m_subdet_key;
+  int m_subdet_key{};
 
   // H6 SubFragment navigation :
-  int m_subfrag_id;
-  int m_subfrag_size;
-  int m_subfrag_firstdata;
+  int m_subfrag_id{};
+  int m_subfrag_size{};
+  int m_subfrag_firstdata{};
 
   bool NextSubFrag(){
     m_subfrag_firstdata+=m_subfrag_size;
@@ -124,17 +124,17 @@ private:
     {this, "CalibLineKey", "LArCalibLineMap", "SG calib line key"};
 
   // pointers to raw objects :
-  TBTDC * m_tbtdc;
-  TBTDCRawCont* m_tdcrawCont;
-  TBADCRawCont* m_adcrawCont;
-  TBBPCRawCont * m_bpcrawCont;
-  TBMWPCRawCont * m_mwpcrawCont;
-  TBTriggerPatternUnit * m_trigpat;
-  TBScintillatorRawCont * m_scintrawCont;
-  TBTailCatcherRaw * m_tailcatchraw;
-  TBEventInfo * m_eventinfo;
-  TBLArDigitContainer * m_tblardigitcont[4];
-  TBLArCalibDigitContainer * m_tblarcalibdigitcont[4];
+  TBTDC * m_tbtdc{};
+  TBTDCRawCont* m_tdcrawCont{};
+  TBADCRawCont* m_adcrawCont{};
+  TBBPCRawCont * m_bpcrawCont{};
+  TBMWPCRawCont * m_mwpcrawCont{};
+  TBTriggerPatternUnit * m_trigpat{};
+  TBScintillatorRawCont * m_scintrawCont{};
+  TBTailCatcherRaw * m_tailcatchraw{};
+  TBEventInfo * m_eventinfo{};
+  TBLArDigitContainer * m_tblardigitcont[4]{};
+  TBLArCalibDigitContainer * m_tblarcalibdigitcont[4]{};
   
 
   // MiniROD members
@@ -144,7 +144,7 @@ private:
   std::vector<int> m_febgain;
   std::vector<int> m_firstsamples;
   std::vector<short> m_arrayofsample[128][4]; // 128 channels, 4 possible gain mode
-  CaloGain::CaloGain m_arrayofgain[128][4];  // 128 channels. 
+  CaloGain::CaloGain m_arrayofgain[128][4]{};  // 128 channels. 
 
 
   CaloGain::CaloGain getCaloGain(int gain){
@@ -163,28 +163,28 @@ private:
 
 
   // Calibration runs :
-  bool m_isCalib;
-  unsigned char m_calib_pattern[16];
-  uint16_t m_calib_dac;
-  uint16_t m_calib_delay;
-  bool m_calib_error; //m_calib_isPulsed;
+  bool m_isCalib{};
+  unsigned char m_calib_pattern[16]{};
+  uint16_t m_calib_dac{};
+  uint16_t m_calib_delay{};
+  bool m_calib_error{}; //m_calib_isPulsed{};
 
 
   // Run - Event Info : 
   
-  int m_ev_number;
-  unsigned int m_run_num;
-  float m_beam_moment;
+  int m_ev_number{};
+  unsigned int m_run_num{};
+  float m_beam_moment{};
   std::string m_beam_part;
-  float m_cryoX;
-  float m_cryoAngle;
-  float m_tableY;
+  float m_cryoX{};
+  float m_cryoAngle{};
+  float m_tableY{};
   std::string m_summary_path;
 
 
 
   // H8 trigger word
-  unsigned int m_h8_triggword;
+  unsigned int m_h8_triggword{};
 
   // Word manipulation :
   unsigned short firstword(unsigned int w){

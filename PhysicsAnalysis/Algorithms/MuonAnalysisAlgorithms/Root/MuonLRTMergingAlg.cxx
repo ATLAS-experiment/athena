@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,13 +13,14 @@
 ///////////////////////////////////////////////////////////////////
 #include "MuonAnalysisAlgorithms/MuonLRTMergingAlg.h"
 #include "xAODMuon/MuonAuxContainer.h"
-#include <AsgTools/CurrentContext.h>
 #include <AthContainers/ConstDataVector.h>
 #include <AsgTools/AsgToolConfig.h>
+#include <AsgDataHandles/WriteDecorHandle.h>
+#include "xAODBase/IParticleHelpers.h"
 
 namespace CP{
     MuonLRTMergingAlg::MuonLRTMergingAlg( const std::string& name, ISvcLocator* svcLoc )
-    : EL::AnaAlgorithm( name, svcLoc ){
+    : EL::AnaReentrantAlgorithm( name, svcLoc ){
         //nothing to do here
     }
 
@@ -32,6 +33,8 @@ namespace CP{
         ATH_CHECK( m_promptMuonLocation.initialize() );
         ATH_CHECK( m_lrtMuonLocation.initialize() );
         ATH_CHECK( m_outMuonLocation.initialize() );
+        ATH_CHECK( m_promptIsLRTKey.initialize() );
+        ATH_CHECK( m_lrtIsLRTKey.initialize() );
 
         /// if the tool is not user-set, configure the automatic instance via our overlap flag
         if (m_overlapRemovalTool.empty()){
@@ -47,9 +50,7 @@ namespace CP{
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonLRTMergingAlg::execute()  {
-
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    StatusCode MuonLRTMergingAlg::execute(const EventContext &ctx) const {
 
         // Setup containers for output, to avoid const conversions setup two different kind of containers
         auto outputViewCol = std::make_unique<ConstDataVector<xAOD::MuonContainer>>(SG::VIEW_ELEMENTS);
@@ -79,9 +80,11 @@ namespace CP{
         m_overlapRemovalTool->checkOverlap(*promptCol, *lrtCol, writePromptMuon, writeLRTMuon);
 
         // Decorate the muons with their locations.
-        static const SG::AuxElement::Decorator<char> isLRT("isLRT"); //0 if prompt, 1 if LRT
-        for (const xAOD::Muon* mu : *promptCol) isLRT(*mu) = 0;
-        for (const xAOD::Muon* mu : *lrtCol) isLRT(*mu) = 1;
+        // 0 if prompt, 1 if LRT
+        SG::WriteDecorHandle<xAOD::MuonContainer, char> promptIsLRT(m_promptIsLRTKey, ctx);
+        SG::WriteDecorHandle<xAOD::MuonContainer, char> lrtIsLRT(m_lrtIsLRTKey, ctx);
+        for (const xAOD::Muon* mu : *promptCol) promptIsLRT(*mu) = 0;
+        for (const xAOD::Muon* mu : *lrtCol) lrtIsLRT(*mu) = 1;
 
         // and merge
         if (m_createViewCollection) {
@@ -139,6 +142,9 @@ namespace CP{
               ElementLink<xAOD::MuonContainer> myLink;
               myLink.toIndexedElement(muonCol, muon->index());
               originalMuonLink(*newMuon) = myLink;
+              setOriginalObjectLink(*muon, *newMuon);
+              static const SG::AuxElement::Accessor <char> isLRT("isLRT");
+              isLRT(*newMuon) = isLRT(*muon);
               outputCol->push_back(newMuon);
             }
         }

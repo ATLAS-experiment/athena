@@ -1,12 +1,11 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/Constants.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
 
 """Useful/conventional constants."""
 
-__all__ = [ 'ALL', 'VERBOSE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL',
-            'TRUE', 'FALSE' ]
+__all__ = [ 'ALL', 'VERBOSE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL' ]
 
 
 ### message levels -----------------------------------------------------------
@@ -17,7 +16,3 @@ INFO    = 3
 WARNING = 4
 ERROR   = 5
 FATAL   = 6
-
-### for job options legacy (TODO: get rid of these!) -------------------------
-TRUE    = True
-FALSE   = False

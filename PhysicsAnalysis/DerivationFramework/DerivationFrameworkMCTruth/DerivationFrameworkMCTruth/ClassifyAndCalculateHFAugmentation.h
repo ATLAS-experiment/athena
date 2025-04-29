@@ -57,7 +57,7 @@ namespace DerivationFramework {
 
   // Declare the class that adds the HF classifier in the output derivation file.
 
-  class ClassifyAndCalculateHFAugmentation : public AthAlgTool, public IAugmentationTool {
+  class ClassifyAndCalculateHFAugmentation : public extends<AthAlgTool, IAugmentationTool> {
 
     /*
     -------------------------------------------------------------------------------------------------------------------------------------

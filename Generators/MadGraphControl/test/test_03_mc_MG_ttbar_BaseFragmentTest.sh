@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# art-include: 21.6/AthGeneration
 # art-include: main/Athena
 # art-include: main/AthGeneration
 # art-description: MadGraph Event Generation Test - ttbar base fragment LHE generation

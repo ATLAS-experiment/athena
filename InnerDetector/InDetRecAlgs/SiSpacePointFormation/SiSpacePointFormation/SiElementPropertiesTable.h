@@ -28,7 +28,8 @@ public:
     
     SiElementPropertiesTable(const SCT_ID&					idHelper,
 			     const InDetDD::SiDetectorElementCollection&	elements, 
-			     float						epsilonWidth); 
+			     float						epsilonWidth,
+                 const bool doEndcapEtaNeighbours=false); 
     ~SiElementPropertiesTable() = default;
 
     const std::vector<IdentifierHash>*	neighbours(const IdentifierHash& waferID) const;

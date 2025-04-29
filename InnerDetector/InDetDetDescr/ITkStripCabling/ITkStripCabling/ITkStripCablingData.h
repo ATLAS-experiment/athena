@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ITkStripCablingData_h
 #define ITkStripCablingData_h
@@ -13,6 +13,7 @@
 #include "ITkStripCabling/ITkStripOnlineId.h"
 
 // Athena includes
+#include "Identifier/IdentifierHash.h"
 #include "Identifier/Identifier.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
@@ -29,9 +30,23 @@ public:
   bool empty() const;
   std::size_t size() const;
   ITkStripOnlineId onlineId(const Identifier & id) const;
+
+  /// Get a vector of all RODs
+  void getRods(std::vector<std::uint32_t>& usersVector) const;
+
+  /// Get ITkStripOnlineId from IdentifierHash
+  ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash) const;
+
+  enum {NUMBER_OF_HASHES=49536}; // In ITk, we have 49536 sensors.
   
 private:
   std::unordered_map<Identifier, ITkStripOnlineId> m_offline2OnlineMap;
+  std::set<std::uint32_t> m_rodIdSet; //!< Set of robIds
+  std::array<ITkStripOnlineId, NUMBER_OF_HASHES> m_hash2OnlineIdArray; //!< Array for hash to onlineId; hash goes from 0-49536
+
+  static const IdentifierHash s_invalidHash; //!< Invalid IdentifierHash
+  static const ITkStripOnlineId s_invalidId; //!< Invalid SCT_OnlineId  
+  
 };
 // Magic "CLassID" for storage/retrieval in StoreGate
 // These values produced using clid script.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -25,28 +25,24 @@
 using namespace std;
 
 xAODTruthParticleSlimmerTau::xAODTruthParticleSlimmerTau(const string &name, ISvcLocator *svcLoc)
-    : AthAlgorithm(name, svcLoc), m_classifier("MCTruthClassifier/MCTruthClassifier")
+    : AthAlgorithm(name, svcLoc)
 {
-  declareProperty("xAODTruthParticleContainerName", m_xaodTruthParticleContainerName = "TruthParticles");
-  declareProperty("xAODTruthTauParticleContainerName", m_xaodTruthTauParticleContainerName = "TruthTaus");
-  declareProperty("ForceRerun", m_forceRerun = false);
-  declareProperty("tau_pt_selection", m_tau_pt_selection = 0.001 * Gaudi::Units::GeV); //User provides units in MeV!
-  declareProperty("abseta_selection", m_abseta_selection = 10.);
 }
 
 StatusCode xAODTruthParticleSlimmerTau::initialize()
 {
   ATH_CHECK(m_classifier.retrieve());
-
-  ATH_MSG_INFO("xAOD input TruthParticleContainer name = " << m_xaodTruthParticleContainerName);
-  ATH_MSG_INFO("xAOD output TruthTauParticleContainer name = " << m_xaodTruthTauParticleContainerName);
+  ATH_CHECK(m_xaodTruthParticleContainerName.initialize());
+  ATH_MSG_INFO("xAOD input TruthParticleContainer name = " << m_xaodTruthParticleContainerName.key());
+  ATH_CHECK(m_xaodTruthTauParticleContainerName.initialize());
+  ATH_MSG_INFO("xAOD output TruthTauParticleContainer name = " << m_xaodTruthTauParticleContainerName.key());
   return StatusCode::SUCCESS;
 }
 
 CLHEP::HepLorentzVector xAODTruthParticleSlimmerTau::sumDaughterNeutrinos(const xAOD::TruthParticle *part)
 {
   CLHEP::HepLorentzVector nu(0, 0, 0, 0);
-  if (((std::abs(part->pdgId()) == 12) || (std::abs(part->pdgId()) == 14) || (std::abs(part->pdgId()) == 16)) && MC::isPhysical(part))
+  if (MC::isSMNeutrino(part) && MC::isPhysical(part))
   {
     nu.setPx(part->px());
     nu.setPy(part->py());
@@ -68,28 +64,24 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
   CLHEP::HepLorentzVector nutau;
 
   // If the containers already exists then assume that nothing needs to be done
-  if (evtStore()->contains<xAOD::TruthParticleContainer>(m_xaodTruthTauParticleContainerName) &&
-      !m_forceRerun)
+  if (evtStore()->contains<xAOD::TruthParticleContainer>(m_xaodTruthTauParticleContainerName.key()))
   {
     ATH_MSG_WARNING("xAOD Tau Truth Particles are already available in the event");
     return StatusCode::SUCCESS;
   }
 
   // Create new output container
-  xAOD::TruthParticleContainer *xTruthTauParticleContainer = new xAOD::TruthParticleContainer();
-  CHECK(evtStore()->record(xTruthTauParticleContainer, m_xaodTruthTauParticleContainerName));
-  xAOD::TruthParticleAuxContainer *xTruthTauParticleAuxContainer = new xAOD::TruthParticleAuxContainer();
-  CHECK(evtStore()->record(xTruthTauParticleAuxContainer, m_xaodTruthTauParticleContainerName + "Aux."));
-  xTruthTauParticleContainer->setStore(xTruthTauParticleAuxContainer);
-  ATH_MSG_INFO("Recorded TruthTauParticleContainer with key: " << m_xaodTruthTauParticleContainerName);
+  SG::WriteHandle<xAOD::TruthParticleContainer> xTruthTauParticleContainer(m_xaodTruthTauParticleContainerName);
+  ATH_CHECK(xTruthTauParticleContainer.record(std::make_unique<xAOD::TruthParticleContainer>(), std::make_unique<xAOD::TruthParticleAuxContainer>()));
+  ATH_MSG_INFO("Recorded TruthTauParticleContainer with key: " << m_xaodTruthTauParticleContainerName.key());
 
   // Retrieve full TruthParticle container
-  const xAOD::TruthParticleContainer *xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, m_xaodTruthParticleContainerName).isFailure())
-  {
-    ATH_MSG_ERROR("No TruthParticle collection with name " << m_xaodTruthParticleContainerName << " found in StoreGate!");
-    return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_xaodTruthParticleContainerName};
+  if ( !xTruthParticleContainer.isValid() )
+    {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << m_xaodTruthParticleContainerName.key() << " found in StoreGate!");
+      return StatusCode::FAILURE;
+    }
 
   // Set up decorators
 
@@ -152,9 +144,9 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
       int tauType = 0;
       for (size_t n = 0; n < tau->nChildren(); ++n)
       {
-        if (tau->child(n)->absPdgId() == 12)
+        if (tau->child(n)->absPdgId() == MC::NU_E)
           tauType = 1; //Tau decays into an electron
-        else if (tau->child(n)->absPdgId() == 14)
+        else if (tau->child(n)->absPdgId() == MC::NU_MU)
           tauType = 2; //Tau decays into a muon
         else if (MC::isTau(tau->child(n)))
           tauType = 11; //Tau radiates a particle and decays into another tau

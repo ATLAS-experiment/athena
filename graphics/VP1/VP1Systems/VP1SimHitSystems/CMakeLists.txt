@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1SimHitSystems )
@@ -22,5 +22,8 @@ atlas_add_library( VP1SimHitSystems VP1SimHitSystems/*.h src/*.h src/*.cxx src/*
                    PUBLIC_HEADERS VP1SimHitSystems
                    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
                    LINK_LIBRARIES VP1Base Qt5::Core Qt5::Widgets GL StoreGateLib
-                   PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${EIGEN_LIBRARIES} GeoAdaptors GeoPrimitives ForwardRegion_SimEv InDetSimEvent MuonSimEvent TileDetDescr TileSimEvent VP1Utils VP1UtilsCoinSoQt CaloDetDescrUtils)
+		   PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${EIGEN_LIBRARIES} GeoAdaptors GeoPrimitives ForwardRegion_SimEv InDetSimEvent MuonSimEvent TileDetDescr TileSimEvent VP1Utils VP1UtilsCoinSoQt CaloDetDescrUtils TRT_ReadoutGeometry)
 
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1SimHitSystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

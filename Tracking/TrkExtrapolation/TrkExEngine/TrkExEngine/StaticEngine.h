@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -128,6 +128,9 @@ namespace Trk {
         ToolHandle<IPropagationEngine>     m_propagationEngine{this, "PropagationEngine", "Trk::PropagationEngine/AtlasStaticPropagation"};        //!< the used propagation engine
         ToolHandle<INavigationEngine>      m_navigationEngine{this, "NavigationEngine", "Trk::StaticNavigationEngine/AtlasStaticNavigation"};         //!< the navigation engine to resolve the boundary
         ToolHandle<IMaterialEffectsEngine> m_materialEffectsEngine{this, "MaterialEffectsEngine", "Trk::MaterialEffectsEngine/AtlasStaticNavigationMaterialEffects"};    //!< the material effects updated
+
+        StringProperty m_sopPrefix_prop{this, "OutputPrefix", ""};
+        StringProperty m_sopPostfix_prop{this, "OutputPostfix", ""};
             
     };
 

@@ -6,12 +6,11 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
 from BTagging.JetBTagginglessConfig import JetBTagginglessAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
+from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
-from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
-from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
-from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
 from AthenaConfiguration.Enums import LHCPeriod
+import ParticleJetTools.ParentDecoratorConfig as pdc
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
@@ -58,7 +57,7 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
 
     # decorate tracks with detailed truth info and reco lepton info
     acc.merge(trackTruthDecorator(cfgFlags))
-    acc.merge(trackLeptonDecorator(cfgFlags))
+    acc.merge(TrackLeptonDecorationCfg(cfgFlags))
 
     # Treat large-R jets as a special case
     largeRJetCollection = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
@@ -119,13 +118,16 @@ def BTagLargeRDecoration(cfgFlags, jet_col):
     for nnFile in nnFiles:
         # ugly string parsing to get the tagger name
         tagger_name = nnFile.split('/')[-3]
-
+        # separate calse for JetCalibTools models
+        if nnFile.split('/')[0] == "JetCalibTools":
+            # not technically a tagger, but works in this code
+            tagger_name = nnFile.split('_')[-2]
         acc.addEventAlgo(
-            CompFactory.FlavorTagDiscriminants.JetTagDecoratorAlg(
+            CompFactory.FlavorTagInference.JetTagDecoratorAlg(
                 f'{jet_col}{tagger_name}JetTagAlg',
                 container=jet_col,
                 constituentContainer=trackContainer,
-                decorator=CompFactory.FlavorTagDiscriminants.GNNTool(
+                decorator=CompFactory.FlavorTagInference.GNNTool(
                     tagger_name,
                     nnFile=nnFile,
                     variableRemapping=variableRemapping,
@@ -158,35 +160,16 @@ def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
     ))
 
     # schedule tagging algorithms for this jet collection
-    acc.merge(BTagAlgsCfg(
-        inputFlags=cfgFlags,
-        JetCollection=jet_col_name_without_Jets,
-        nnList=GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets),
-        trackCollection=track_collection,
-        primaryVertices=pv_col,
-        muons=input_muons,
-        AddedJetSuffix='Jets',
-    ))
-
-    return acc
-
-
-def trackLeptonDecorator(cfgFlags) -> ComponentAccumulator:
-    """Decorate tracks with information about reconstructed leptons"""
-    acc = ComponentAccumulator()
-
-    electronID_tool = acc.popToolsAndMerge(
-        AsgElectronLikelihoodToolCfg(cfgFlags, name="ftagElectronID", quality=LikeEnum.VeryLoose)
-    )
-    muonID_tool = acc.popToolsAndMerge( # loose quality selection
-        MuonSelectionToolCfg(cfgFlags, name="ftagMuonID", MuQuality=2, MaxEta=2.5) 
-    )
-    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackLeptonDecoratorAlg(
-        'TrackLeptonDecoratorAlg',
-        trackContainer=_getTrackCollection(cfgFlags),
-        electronSelectionTool=electronID_tool,
-        muonSelectionTool=muonID_tool,
-    ))
+    if cfgFlags.BTagging.EnableLegacyBTagging:
+        acc.merge(BTagAlgsCfg(
+            inputFlags=cfgFlags,
+            JetCollection=jet_col_name_without_Jets,
+            nnList=GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets),
+            trackCollection=track_collection,
+            primaryVertices=pv_col,
+            muons=input_muons,
+            AddedJetSuffix='Jets',
+        ))
 
     return acc
 
@@ -219,6 +202,19 @@ def _getTrackCollection(cfgFlags):
     if cfgFlags.BTagging.Pseudotrack:
         return 'InDetPseudoTrackParticles'
     return 'InDetTrackParticles'
+
+
+def ParentDecoratorCfg(flags, prefix="", **kwargs):
+    cfg = ComponentAccumulator()
+    cfg.merge(pdc.HiggsParentDecoratorCfg(
+        flags, name=prefix + "HiggsParentDecoratorAlg", **kwargs))
+    cfg.merge(pdc.ZParentDecoratorCfg(
+        flags, name=prefix + "ZParentDecoratorAlg", **kwargs))
+    cfg.merge(pdc.ScalarParentDecoratorCfg(
+        flags, name=prefix + "ScalarParentDecoratorAlg", **kwargs))
+    cfg.merge(pdc.TopParentDecoratorCfg(
+        flags, name=prefix + "TopParentDecoratorAlg", **kwargs))
+    return cfg
 
 
 # Valerio's magic hacks for emtopo

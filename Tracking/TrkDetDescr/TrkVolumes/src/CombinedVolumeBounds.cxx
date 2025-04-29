@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ Trk::CombinedVolumeBounds::operator=(const Trk::CombinedVolumeBounds& bobo)
 
 const std::vector<const Trk::Surface*>*
   Trk::CombinedVolumeBounds::decomposeToSurfaces
-  (const Amg::Transform3D& transf) 
+  (const Amg::Transform3D& transf)
 {
   std::vector<const Trk::Surface*>* retsf =
     new std::vector<const Trk::Surface*>;
@@ -152,7 +152,7 @@ const std::vector<const Trk::Surface*>*
 
     if (sclo || splo) {
       bool shared = false;
-      SharedObject<Trk::AreaExcluder> vEx;
+      std::shared_ptr<Trk::AreaExcluder> vEx;
       if (splo) {
         vEx = splo->subtractedVolume();
         shared = splo->shared();
@@ -261,7 +261,7 @@ const std::vector<const Trk::Surface*>*
       (*secondSurfaces)[in]->transform().inverse() * transf, m_first);
     if (scli || spli) {
       bool shared = false;
-      Trk::SharedObject<Trk::AreaExcluder> vEx;
+      std::shared_ptr<Trk::AreaExcluder> vEx;
       if (spli) {
         vEx = spli->subtractedVolume();
         shared = spli->shared();
@@ -372,7 +372,7 @@ Trk::CombinedVolumeBounds::dump(std::ostream& sl) const
 Trk::Volume*
 Trk::CombinedVolumeBounds::createSubtractedVolume(
   const Amg::Transform3D& transf,
-  Trk::Volume* subtrVol) 
+  Trk::Volume* subtrVol)
 {
   Trk::Volume* subVol = nullptr;
   if (!subtrVol)

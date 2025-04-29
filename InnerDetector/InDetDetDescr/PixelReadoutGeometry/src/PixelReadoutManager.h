@@ -25,6 +25,8 @@ public:
 
   virtual PixelModuleType getModuleType(Identifier id) const override final;
   virtual PixelDiodeType  getDiodeType(Identifier id) const override final;
+  virtual PixelDiodeType  getDiodeType(Identifier id,
+				       const SiDetectorElement* element) const override final;
 
   virtual Identifier getPixelIdfromHash(IdentifierHash offlineIdHash,
                                         uint32_t FE,
@@ -37,8 +39,14 @@ public:
 
   virtual uint32_t getFE(Identifier diodeId,
                          Identifier offlineId) const override final;
+  
+  virtual uint32_t getFE(Identifier diodeId,
+			 Identifier offlineId,
+			 const SiDetectorElement* element) const override final;
+  
   virtual uint32_t getColumn(Identifier diodeId,
                              Identifier offlineId) const override final;
+			 
   virtual uint32_t getRow(Identifier diodeId,
                           Identifier offlineId) const override final;
 

@@ -72,14 +72,14 @@ public:
   ActsPropagationOutput
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
-                   Acts::Direction navDir = Acts::Direction::Forward,
+                   Acts::Direction navDir = Acts::Direction::Forward(),
                    double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
-  std::optional<const Acts::CurvilinearTrackParameters>
+  std::optional<const Acts::BoundTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
-            Acts::Direction navDir = Acts::Direction::Forward,
+            Acts::Direction navDir = Acts::Direction::Forward(),
             double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
@@ -87,7 +87,7 @@ public:
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
-                   Acts::Direction navDir = Acts::Direction::Forward,
+                   Acts::Direction navDir = Acts::Direction::Forward(),
                    double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
@@ -95,7 +95,7 @@ public:
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,
-            Acts::Direction navDir = Acts::Direction::Forward,
+            Acts::Direction navDir = Acts::Direction::Forward(),
             double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
@@ -132,6 +132,14 @@ private:
   Gaudi::Property<bool> m_interactionMultiScatering{this, "InteractionMultiScatering", false, "Whether to consider multiple scattering in the interactor"};
   Gaudi::Property<bool> m_interactionEloss{this, "InteractionEloss", false, "Whether to consider energy loss in the interactor"};
   Gaudi::Property<bool> m_interactionRecord{this, "InteractionRecord", false, "Whether to record all material interactions"};
+
+  template<typename OptionsType>
+  OptionsType 
+  prepareOptions( const Acts::GeometryContext& gctx,
+                  const Acts::MagneticFieldContext& mctx,
+                  const Acts::BoundTrackParameters& startParameters,
+                  Acts::Direction navDir, 
+                  double pathLimit) const;
 };
 
 #endif

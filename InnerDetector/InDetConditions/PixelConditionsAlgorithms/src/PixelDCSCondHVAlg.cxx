@@ -61,28 +61,20 @@ StatusCode PixelDCSCondHVAlg::execute(const EventContext& ctx) const {
 
     // Read HV info
     std::string param("HV");
+    writeCdo -> defaultVoltage(modData->getDefaultBiasVoltage());
     for (const auto & attrList : *readCdo) {
       const CondAttrListCollection::ChanNum &channelNumber = attrList.first;
       const CondAttrListCollection::AttributeList &payload = attrList.second;
       if (payload.exists(param) and not payload[param].isNull()) {
         float val = payload[param].data<float>();
-        if (val>1000.0 || val<-1000.0) {
-          writeCdo -> setBiasVoltage((int)channelNumber, modData->getDefaultBiasVoltage());
-        }
-        else {
-          writeCdo -> setBiasVoltage((int)channelNumber, val);
-        }
-      } 
-      else {
+        writeCdo -> setBiasVoltage((int)channelNumber, val);
+      } else {
         ATH_MSG_WARNING(param << " does not exist for ChanNum " << channelNumber);
-        writeCdo -> setBiasVoltage((int)channelNumber, modData->getDefaultBiasVoltage());
+        writeCdo -> setChannelToDefault((int)channelNumber);
       }
     }
-  }
-  else {
-    for (int i=0; i<(int)m_pixelID->wafer_hash_max(); i++) {
-      writeCdo -> setBiasVoltage(i, modData->getDefaultBiasVoltage());
-    }
+  } else {
+      writeCdo -> useDefault(true);
   }
 
   if (writeHandle.record(rangeW, std::move(writeCdo)).isFailure()) {

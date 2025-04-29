@@ -40,6 +40,9 @@ namespace MuonCalib{
         bool storeData(const Identifier& mlID, TubeContainerPtr tubeContainer, MsgStream& msg);
   
         RegionGranularity granularity() const;
+
+        void setInversePropSpeed(const float speed);
+        float inversePropSpeed() const;
     private:
         std::optional<unsigned int> containerIndex(const Identifier& measId,
                                                    MsgStream& msg) const;
@@ -48,6 +51,7 @@ namespace MuonCalib{
         const RegionGranularity m_granularity{RegionGranularity::OneRt};
         const MdtIdHelper& m_idHelper{m_idHelperSvc->mdtIdHelper()};
         std::vector<MdtFullCalibData> m_dataCache{};
+        float m_invPropSpeed{0.f};
     
     };
 

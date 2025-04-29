@@ -10,9 +10,10 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_MC)")
 Reco_tf.py --CA "all:True" "RDOtoRDOTrigger:False" \
   --AMI q443 \
-  --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-12' \
+  --conditionsTag "${conditions}" \
   --steering doRDO_TRIG doTRIGtoALL \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
@@ -29,7 +30,7 @@ echo "art-result: ${rc1} Reco_tf_q443_phys_physlite_mt_mp"
 if [ "$rc1" -ne "0" ]; then
 Reco_tf.py \
   --AMI q443 \
-  --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-12' \
+  --conditionsTag "${conditions}" \
   --steering doRAWtoALL \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
@@ -41,7 +42,7 @@ Reco_tf.py \
   echo "art-result: ${rcfail} Reco_tf_q443_phys_physlite_mt_mp_fail"
 fi
 
-Derivation_tf.py \
+stdbuf -i0 -o0 -e0 Derivation_tf.py \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \
@@ -89,7 +90,7 @@ echo "art-result: ${rc4} xAODHistSize"
 
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v10/hist_physlite_25019.root"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v12/hist_physlite_25026.root"
 dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v4/dcube_config_hist_physlite_2402.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
@@ -103,7 +104,7 @@ echo "art-result: ${rc5} dcube_physlite"
 # Run trf_getVariables.py to extract variables from DAOD_PHYSLITE.art.pool.root
 echo "============ trf_getVariables.py"
 get_files trf_getVariables.py
-source /cvmfs/sft.cern.ch/lcg/releases/LCG_106/uproot/5.3.7/`arch`-el9-gcc13-opt/uproot-env.sh
+source /cvmfs/sft.cern.ch/lcg/releases/LCG_107a/uproot/5.3.11/`arch`-el9-gcc13-opt/uproot-env.sh
 trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
 rccsv=$?
 tar czf generated_csv_files.tar.gz generated_csv_files/

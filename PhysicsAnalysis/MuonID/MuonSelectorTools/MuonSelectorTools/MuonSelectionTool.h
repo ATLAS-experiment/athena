@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSELECTORTOOLS_MUONSELECTIONTOOL_H
@@ -107,6 +107,53 @@ namespace CP {
         /// Returns an integer corresponding to categorization of muons with different resolutions
         virtual int getResolutionCategory(const xAOD::Muon&) const override;
         /// @}
+        
+        /// Returns a vector of the muon's segments, sorted according to chamber index
+        std::vector<const xAOD::MuonSegment*> getSegmentsSorted(const xAOD::Muon& mu) const;
+        
+        /// Check if muon eta/phi falls in BIS7/8 chambers
+        bool isBIS78(const float eta, const float phi) const;
+        /// Check if muon eta/phi falls in BEE chambers
+        bool isBEE(const float eta, const float phi) const;
+        /// Check if muon eta/phi falls in BMG chambers
+        bool isBMG(const float eta, const float phi) const;
+        
+        /// Returns q/p significance of the muon (see definition in https://cds.cern.ch/record/2665711 )
+        float qOverPsignificance(const xAOD::Muon& muon) const;
+        /// Returns rhoPrime of the muon (see definition in https://cds.cern.ch/record/2665711 )
+        float rhoPrime(const xAOD::Muon& muon) const;
+        
+        /// struct to handle easily number of hits in different parts of the MS
+        struct hitSummary {
+            uint8_t nprecisionLayers{0};
+            uint8_t nprecisionHoleLayers{0};
+            uint8_t nGoodPrecLayers{0};
+            uint8_t innerSmallHits{0};
+            uint8_t innerLargeHits{0};
+            uint8_t middleSmallHits{0};
+            uint8_t middleLargeHits{0};
+            uint8_t outerSmallHits{0};
+            uint8_t outerLargeHits{0};
+            uint8_t extendedSmallHits{0};
+            uint8_t extendedLargeHits{0};
+            uint8_t extendedSmallHoles{0};
+            uint8_t isSmallGoodSectors{0};
+            uint8_t cscUnspoiledEtaHits{0};
+            uint8_t etaLayer1STGCHits{0};
+            uint8_t etaLayer2STGCHits{0};
+            uint8_t MMHits{0};
+        };
+        
+        /// helper function to retrieve a hitSummary value
+        template <class P, class T, class S> inline void retrieveSummaryValue(const P& muon, T& value, const S type, bool ignoreMissing = false) const {
+            if (!muon.summaryValue(value, type) && !ignoreMissing) {
+                ATH_MSG_FATAL(__FILE__ << ":" << __LINE__ << " Failed to retrieve summary value " << type);
+                throw std::runtime_error("MuonSelectorTool summary retrieval failed");
+            }
+        }
+        
+        /// functions that fills a hitSummary for a muon
+        void fillSummary(const xAOD::Muon& muon, hitSummary& summary) const;
 
     private:
         bool passedLowPtEfficiencyMVACut(const xAOD::Muon&) const;
@@ -117,9 +164,6 @@ namespace CP {
         /// Returns true if the muon passes a cut which mimics the effect of the combined error cut
         /// This is necessary only when the resolution is very optimistic in the MC such that a large smearing is applied
         bool passedBMVmimicCut(const xAOD::Muon&) const;
-
-        /// Returns a vector of the muon's segments, sorted according to chamber index
-        std::vector<const xAOD::MuonSegment*> getSegmentsSorted(const xAOD::Muon& mu) const;
 
         /// Store selection information.
         asg::AcceptInfo m_acceptInfo;
@@ -202,11 +246,6 @@ namespace CP {
         // from the pile-up reweighting tool is not needed.
         unsigned int getRunNumber(bool needOnlyCorrectYear = false) const;
 
-        // Check if muon eta/phi falls in BIS7/8, BEE, or BMG chambers
-        bool isBIS78(const float eta, const float phi) const;
-        bool isBEE(const float eta, const float phi) const;
-        bool isBMG(const float eta, const float phi) const;
-
         // TMVA readers for low-pT working point
         std::unique_ptr<TMVA::Reader> m_readerE_MUID{nullptr};
         std::unique_ptr<TMVA::Reader> m_readerO_MUID{nullptr};
@@ -219,43 +258,8 @@ namespace CP {
 
         // variables for the TMVA readers
         mutable std::mutex m_low_pt_mva_mutex;
-        
-        struct hitSummary {
-            uint8_t nprecisionLayers{0};
-            uint8_t nprecisionHoleLayers{0};
-            uint8_t nGoodPrecLayers{0};
-            uint8_t innerSmallHits{0};
-            uint8_t innerLargeHits{0};
-            uint8_t middleSmallHits{0};
-            uint8_t middleLargeHits{0};
-            uint8_t outerSmallHits{0};
-            uint8_t outerLargeHits{0};
-            uint8_t extendedSmallHits{0};
-            uint8_t extendedLargeHits{0};
-            uint8_t extendedSmallHoles{0};
-            uint8_t isSmallGoodSectors{0};
-            uint8_t cscUnspoiledEtaHits{0};
-            uint8_t etaLayer1STGCHits{0};
-            uint8_t etaLayer2STGCHits{0};
-            uint8_t MMHits{0};
-        };
 
-        template <class P, class T, class S> inline void retrieveSummaryValue(const P& muon, T& value, const S type, bool ignoreMissing = false) const {
-            if (!muon.summaryValue(value, type) && !ignoreMissing) {
-                ATH_MSG_FATAL(__FILE__ << ":" << __LINE__ << " Failed to retrieve summary value " << type);
-                throw std::runtime_error("MuonSelectorTool summary retrieval failed");
-            }
-        }
-
-        inline void fillSummary(const xAOD::Muon& muon, hitSummary& summary) const;
-
-        inline void retrieveParam(const xAOD::Muon& muon, float& value, const xAOD::Muon::ParamDef param) const;
-
-        inline float qOverPsignificance(const xAOD::Muon& muon) const;
-
-        inline float rhoPrime(const xAOD::Muon& muon) const;
-
-        inline void IdMsPt(const xAOD::Muon& muon, float& idPt, float& msPt) const;
+        void IdMsPt(const xAOD::Muon& muon, float& idPt, float& msPt) const;
         
         void checkSanity() const;
 
@@ -264,6 +268,8 @@ namespace CP {
           int rn = getRunNumber(true);
           return rn>=399999;
         }
+        
+        void retrieveParam(const xAOD::Muon& muon, float& value, const xAOD::Muon::ParamDef param) const;
     };  // class MuonSelectionTool
 
 }  // namespace CP

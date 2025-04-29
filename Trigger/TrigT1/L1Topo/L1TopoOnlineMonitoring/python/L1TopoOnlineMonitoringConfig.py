@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -36,11 +36,16 @@ def getL1TopoLabels(flags,connectors = {0: 'LegacyTopo0', 1: 'LegacyTopo1'}, bma
         else:
             for topo_trigline in topo_triglines_dict:
                 topo_trigline_name = topo_trigline['name']
+                topo_trigline_name= topo_trigline_name.replace("TOPO_","")
                 bit_id = topo_trigline['startbit']
                 fpga_id = topo_trigline['fpga']
                 clock_id = topo_trigline['clock']
                 topo_trigline_index = 64*connector_id + 32*fpga_id + 2*bit_id + clock_id
                 topo_trigline_labels[topo_trigline_index] = topo_trigline_name
+
+        for i in range(len(topo_trigline_labels)):
+            if ( topo_trigline_labels[i] == ""):
+                topo_trigline_labels[i] = "-- Unassigned Item --"
 
     return topo_trigline_labels
 
@@ -53,13 +58,16 @@ def getMultiplicityLabels(flags,topoModule):
         topo_trigline_name = topo_trigline['name']
         bit_id = topo_trigline['startbit']
         topo_trigline_labels[bit_id] = topo_trigline_name
+        if ( topo_trigline_labels[bit_id].find("SPARE") >= 0):
+                topo_trigline_labels[bit_id] = "-- Unassigned Item --"
     
     return topo_trigline_labels
 
+def Phase1TopoMonitoringCfg(flags):
+    IsData = not flags.Input.isMC
+    return getL1TopoPhase1DQMonitor(flags,"L1TopoInL1CaloDQMonitor",doHwMon=IsData,doComp=IsData, doMultComp=IsData)
 
 def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None, toolName="L1TopoMonitoringTool"):
-    # Placeholder for phase-1 implementation
-    #raise RuntimeError('L1Topo phase-1 online monitoring not yet implemented')
     alg = CompFactory.L1TopoOnlineMonitor(toolName,
                                           doHwMon = doHwMon,
                                           doHwErrorMon = False,
@@ -67,13 +75,147 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
                                           doHwMonCTP = doHwMonCtp,
                                           doComp = doComp,
                                           doMultComp = doMultComp,
-                                          forceCTPasHdw=forceCtp)
+                                          forceCTPasHdw=forceCtp,
+                                          MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
+                                          AlgorithmVetoList   =["jXE40delay"])
     if logLevel : alg.OutputLevel=logLevel
     alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
     configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp)
 
     return alg
+
+def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None, toolName="L1TopoMonitoringTool"):
+    from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+    helper = L1CaloMonitorCfgHelper(flags,CompFactory.L1TopoOnlineMonitor,toolName,
+                                          doHwMon = doHwMon,
+                                          doHwErrorMon = False,
+                                          doSimMon = doSimMon,
+                                          doHwMonCTP = doHwMonCtp,
+                                          doComp = doComp,
+                                          doMultComp = doMultComp,
+                                          MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
+                                          AlgorithmVetoList   =["jXE40delay"],
+                                          forceCTPasHdw=forceCtp)
+
+    #Define the Monitoring plots for L1Calo DQ
+    helper.defineDQAlgorithm("L1TopoMismatchRate",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.001","PublishBins":"1"}, # counts bins with value>0.001
+                             thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
+                             )
+
+    helper.defineDQAlgorithm("L1TopoMismatchCountVerticalRange",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.001","PublishBins":"1","yMax":"2"}, #,"IgnoreBins":"\"25:1,26:2,*:25,*:58,500:*\""}, # counts bins with value>0.001 for Bins in Y between 0 and 1.
+                             thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
+                             )
+
+    #Multiplicity mismatches between Sim and Hdw
+    ylabels = ['#splitline{Sim counts <}{Hdw counts}','#splitline{Sim counts >}{Hdw counts}','#splitline{Sim counts =}{Hdw counts}']
+    name = 'LBN,MultiplicityAllBoards,L1TopoMultiplicityMissMatchVsLumi;L1TopoMultiplicityMismatchRateVsLumi'
+    AllLabels = []
+    for cable in range(4):
+        topoName = 'Topo1Opt'+str(cable)
+        AllLabels+=getMultiplicityLabels(flags=flags,topoModule=topoName)
+
+    AllLabels = [x for x in AllLabels if x]
+
+    helper.defineHistogram(name,
+                           fillGroup="L1TopoDQ_mismatches",
+                           paths=['Expert/Sim'],
+                           hanConfig={"algorithm":"L1TopoMismatchRate","description":"Agreements and Mismatches between L1Topo Simulation and Hdw perLumi-Block","display":"SetPalette(87),Draw=COLZTEXT"},
+                           type='TProfile2D',
+                           title="L1Topo Multiplicities Sim/Hdw mismatch rate", xbins=32, ybins=len(AllLabels),
+                           xmin=0, xmax=32,
+                           ymin=0, ymax=len(AllLabels),
+                           ylabels = AllLabels,
+                           opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
+
+    for cable in range(4):
+
+        topoName = 'Topo1Opt'+str(cable)
+        name = 'MultiplicityTopo1Opt'+str(cable)+',MultiplicityMatchTopo1Opt'+str(cable)
+        name += f';{topoName}_mismatch'
+        title = f'Topo Optical Cable {cable} Miss/Matches Summary'
+        labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
+        xlabels = [x for x in labels if x]
+
+        helper.defineHistogram(name,
+                           fillGroup="L1TopoDQ_mismatches",
+                           paths=['Expert/Sim/detail/L1Topo/Multiplicities'],
+                           hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hdw per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
+                           type='TH2D',
+                           title=title, xbins=len(xlabels), ybins=3,
+                           xlabels=xlabels,ylabels=ylabels,
+                           xmin=0, xmax=len(xlabels),
+                           ymin=0, ymax=len(ylabels),
+                           opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
+
+    label_topo_all = []
+    for cable in range(2):
+        name = 'CableElec_'+str(cable+2)
+        name += ';Topo'+str(cable+2)+'El'
+        title = f'Topo Electric Cable {cable+2}'
+        labels = getL1TopoLabels(flags,{0: f'Topo{cable+2}El'},64)
+        label_topo_all += labels
+
+    #L1Topo Algorithms mismatches
+    #ylabels = ['#frac{HdwNotSim}{Hdw}','#frac{SimNotHdw}{Sim}','#frac{HdwAndSim}{HdwOrSim}','#frac{Hdw}{Sim}']
+    ylabels = ['#splitline{Sim counts <}{Hdw counts}','#splitline{Sim counts >}{Hdw counts}','#splitline{Sim counts =}{Hdw counts}']
+    nameLB = 'LBN,L1TopoAlgorithmAllBoards,L1TopoAlgorithmMissMatchVsLumi;L1TopoAlgoMismatchRateVsLB'
+
+    helper.defineHistogram(nameLB,
+                           fillGroup="L1TopoDQ_mismatches",
+                           paths=['Expert/Sim'],
+                           hanConfig={"algorithm":"L1TopoMismatchRate","description":"Mismatch Rate between L1Topo Simulation and Hardware vs Lumi-Block (x-axis)","display":"SetPalette(87),Draw=COLZTEXT"},
+                           type='TProfile2D',
+                           title="L1Topo Algorithms Sim/Hdw mismatch rate",xbins=32,ybins=128,
+                           #weight=f'Phase1TopoWeight_{topo[0]}',
+                           ylabels=label_topo_all,
+                           xmin=0, xmax=32,
+                           ymin=0, ymax=128,
+                           opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
+
+    for topo in [(0,'2a'),(1,'2b'),(2,'3a'),(3,'3b')]:
+        name   = f'Phase1TopoTrigger_{topo[0]},L1TopoAlgorithmMissMatch_{topo[0]};L1TopoAlgo_{topo[1]}'
+        title = f'L1Topo_Algo_{topo[1]} Miss/Matches Summary'
+        helper.defineHistogram(name,
+                               fillGroup="L1TopoDQ_mismatches",
+                               paths=['Expert/Sim/detail/L1Topo/Algos'],
+                               hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hardware per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
+                               type='TH2F',
+                               title=title,xbins=32,ybins=3,
+                               #weight=f'Phase1TopoWeight_{topo[0]}',
+                               xlabels=label_topo_all[topo[0]*32:(topo[0]+1)*32],
+                               ylabels=ylabels,
+                               xmin=0, xmax=32,
+                               ymin=0, ymax=len(ylabels),
+                               opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
+
+    '''
+    #Not Including Overflow plots for now
+    #L1Topo Algorithms Overflow mismatches
+    #ylabelsOF = ['#frac{HdwOFnotSimOF}{HdwOF}','#frac{SimOFnotHdwOF}{SimOF}','#frac{HdwOFandSimOF}{HdwOForSimOF}','#frac{HdwOF}{SimOF}']
+    ylabelsOF = ['#splitline{Sim counts <}{Hdw counts}','#splitline{Sim counts >}{Hdw counts}','#splitline{Sim counts =}{Hdw counts}']
+    for topo in [(0,'2a'),(1,'2b'),(2,'3a'),(3,'3b')]:
+        #name_OF = f'Phase1TopoTrigger_{topo[0]},Phase1TopoMissMatch_{topo[0]};Ph1Topo{topo[1]}_overflows'
+        name_OF = f'Phase1TopoTrigger_{topo[0]},L1TopoAlgorithmOverflowMissMatch_{topo[0]};L1TopoAlgo_OF{topo[1]}'
+        title_OF = f' L1Topo_Algo_{topo[1]} Overflow Miss/Matches Summary'
+        helper.defineHistogram(name_OF,
+                               fillGroup="L1TopoDQ_mismatches",
+                               paths=['Expert/Sim/detail/L1Topo/Algos/Overflows'],
+                               hanConfig={"description":"Agreements and Mismatches between L1Topo Simulation and Hardware per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},  type='TH2F',
+                               title=title_OF,xbins=32,ybins=3,
+                               #weight=f'Phase1TopoOFWeight_{topo[0]}',
+                               xlabels=label_topo_all[topo[0]*32:(topo[0]+1)*32],
+                               ylabels=ylabelsOF,
+                               xmin=0, xmax=32,
+                               ymin=0, ymax=len(ylabelsOF),
+                               opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
+    '''
+
+    helper.alg.MonTool = helper.fillGroups["L1TopoDQ_mismatches"]
+    return helper.result()
+
 
 def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
 

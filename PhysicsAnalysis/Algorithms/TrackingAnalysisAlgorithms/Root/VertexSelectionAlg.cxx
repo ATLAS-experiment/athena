@@ -30,12 +30,12 @@ namespace CP {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode VertexSelectionAlg::execute() {
+   StatusCode VertexSelectionAlg::execute(const EventContext &ctx) const {
 
-      FilterReporter filter (m_filterParams, false);
+      FilterReporter filter (m_filterParams, false, ctx);
 
       // Retrieve the vertex container:
-      SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexKey);
+      SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexKey, ctx);
 
       // The number of "good" vertices found:
       unsigned goodVertices = 0;

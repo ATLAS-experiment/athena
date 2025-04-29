@@ -27,21 +27,6 @@ PURPOSE:  check integrity of CaloCellContainer find and iterators
 
 using CLHEP::MeV;
 
-/////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-CaloCellContainerCheckerTool::CaloCellContainerCheckerTool(
-			     const std::string& type,
-			     const std::string& name,
-			     const IInterface* parent)
-  :base_class(type, name, parent)
-{
-  declareProperty ("EventsToCheck",m_eventsToCheck = 5);
-}
-
-
-
 
 /////////////////////////////////////////////////////////////////////
 // INITIALIZE:

@@ -13,7 +13,7 @@ RtChebyshev::RtChebyshev(const ParVec& vec) :
         THROW_EXCEPTION("RtChebyshev::_init() - Not enough parameters!");
     }
     if (tLower() >= tUpper()) {
-        THROW_EXCEPTION("Lower time boundary >= upper time boundary!");
+        THROW_EXCEPTION("Lower time boundary ("<<tLower()<<")>= upper time ("<<tUpper()<<") boundary!");
     }
 }  // end RtChebyshev::_init
 
@@ -37,7 +37,7 @@ double RtChebyshev::radius(double t) const {
     ////////////////////
     // CALCULATE r(t) //
     ////////////////////
-    for (unsigned int k = 0; k < nPar() - 2; k++) { 
+    for (unsigned int k = 0; k < nDoF(); k++) { 
         rad += par(k+2) * chebyshevPoly1st(k, x); 
     }
     return std::max(rad, 0.);
@@ -45,16 +45,15 @@ double RtChebyshev::radius(double t) const {
 
 //*****************************************************************************
 double RtChebyshev::driftVelocity(double t) const { 
-    return (radius(t + 1.0) - radius(t));
     // Set derivative to 0 outside of the bounds
     if (t < tLower() || t > tUpper()) return 0.0;
 
     // Argument of the Chebyshev polynomials
     const double x = getReducedTime(t);
     // Chain rule
-    const double dx_dt = 2. / (tUpper() - tLower());
+    const double dx_dt = dReducedTimeDt();
     double drdt{0.};
-    for (unsigned int k = 1; k < nPar() - 2; ++k) {
+    for (unsigned int k = 1; k < nDoF(); ++k) {
         // Calculate the contribution to dr/dt using k * U_{k-1}(x) * dx/dt
         drdt += par(k+2) *  chebyshevPoly1stPrime(k, x) * dx_dt;
     }
@@ -64,19 +63,16 @@ double RtChebyshev::driftAcceleration(double t) const {
     double acc{0.};
     // Argument of the Chebyshev polynomials
     const double x = getReducedTime(t);
-    const double dx_dt = std::pow(2. / (tUpper() - tLower()), 2);
-    for (unsigned int k = 2; k < nPar() - 2; ++k) {
+    const double dx_dt = std::pow(dReducedTimeDt(), 2);
+    for (unsigned int k = 2; k < nDoF(); ++k) {
         acc += par(k+2) *  chebyshevPoly1st2Prime(k, x) * dx_dt;
     }
     return acc * t;
 }
 double RtChebyshev::tLower() const { return par(0); }
 double RtChebyshev::tUpper() const { return par(1); }
-unsigned int RtChebyshev::numberOfRtParameters() const { return nPar() - 2; }
+unsigned RtChebyshev::nDoF() const { return nPar() -2; }
 
 std::vector<double> RtChebyshev::rtParameters() const {
     return std::vector<double>{parameters().begin() +2, parameters().end()};
-}
-double RtChebyshev::getReducedTime(const double  t) const {
-    return 2. * (t - 0.5 * (tUpper() + tLower())) / (tUpper() - tLower());
 }

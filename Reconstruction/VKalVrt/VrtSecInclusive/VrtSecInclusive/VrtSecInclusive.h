@@ -1,16 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // VKalVrt.h
 //
-#ifndef _VrtSecInclusive_VrtSecInclusive_H
-#define _VrtSecInclusive_VrtSecInclusive_H
+#ifndef VRTSECINCLUSIVE_VRTSECINCLUSIVE_H
+#define VRTSECINCLUSIVE_VRTSECINCLUSIVE_H
 
 
 #include "VrtSecInclusive/Constants.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthContainers/Decorator.h"
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
@@ -52,6 +53,7 @@
 #include <vector>
 #include <deque>
 #include <functional>
+#include <optional>
 
 
 /** Forward declarations **/
@@ -252,9 +254,9 @@ namespace VKalVrtAthena {
     // xAOD Accessors
     const xAOD::VertexContainer*  m_primaryVertices;
     const xAOD::Vertex*           m_thePV;
-    std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_selectedTracks;
-    std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_associatedTracks;
-    std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_leptonicTracks;
+    std::vector<const xAOD::TrackParticle*> m_selectedTracks;
+    std::vector<const xAOD::TrackParticle*> m_associatedTracks;
+    std::vector<const xAOD::TrackParticle*> m_leptonicTracks;
     std::vector<double>  m_BeamPosition;
 
     /////////////////////////////////////////////////////////
@@ -284,26 +286,20 @@ namespace VKalVrtAthena {
     std::map<std::string, PatternStrategyFunc> m_patternStrategyFuncs;
 
     // AuxElement decorators
-    std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_isSelected;
-    std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_isAssociated;
-    std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_is_svtrk_final;
-    std::map< unsigned, SG::AuxElement::Decorator<float> > m_trkDecors;
+    std::optional< SG::Decorator< char > > m_decor_isSelected;
+    std::optional< SG::Decorator< char > > m_decor_isAssociated;
+    std::optional< SG::Decorator< char > > m_decor_is_svtrk_final;
+    std::map< unsigned, SG::Decorator<float> > m_trkDecors;
 
     /** Read/Write Handle Keys **/
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey", "EventInfo", "EventInfo name"};
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_vertexingStatusKey;
 
     using IPDecoratorType = SG::AuxElement::Decorator< std::vector< std::vector<float> > >;
-    std::unique_ptr< IPDecoratorType > m_decor_d0_wrtSVs;
-    std::unique_ptr< IPDecoratorType > m_decor_z0_wrtSVs;
-    std::unique_ptr< IPDecoratorType > m_decor_pt_wrtSVs;
-    std::unique_ptr< IPDecoratorType > m_decor_eta_wrtSVs;
-    std::unique_ptr< IPDecoratorType > m_decor_phi_wrtSVs;
-    std::unique_ptr< IPDecoratorType > m_decor_d0err_wrtSVs;
-    std::unique_ptr< IPDecoratorType > m_decor_z0err_wrtSVs;
+    std::vector< IPDecoratorType > m_ipDecors;
 
     using VertexELType = SG::AuxElement::Decorator< std::vector<ElementLink< xAOD::VertexContainer > > >;
-    std::unique_ptr< VertexELType > m_decor_svLink;
+    std::optional< VertexELType > m_decor_svLink;
 
     //////////////////////////////////////////////////////////////////////////////////////
     //
@@ -511,7 +507,7 @@ namespace VKalVrtAthena {
       uint8_t numTrtHits;
     } track_summary;
 
-    /** cretrieve the track hit information */
+    /** retrieve the track hit information */
     static void fillTrackSummary( track_summary& summary, const xAOD::TrackParticle *trk );
 
     ExtrapolatedPattern* extrapolatedPattern( const xAOD::TrackParticle*, enum Trk::PropDirection );
@@ -571,6 +567,11 @@ namespace VKalVrtAthena {
     template<class LeptonFlavor>
     StatusCode augmentDVimpactParametersToLeptons( const std::string& containerName );
 
+    /** lock decorations at the end of the algorithm */
+    void lockTrackDecorations( const xAOD::TrackParticle* trk, bool onlySelection ) const;
+    void lockLeptonDecorations( const SG::AuxVectorData* cont ) const;
+    StatusCode lockTrackDecorations( bool onlySelection ) const;
+
   };
 
 } // end of namespace bracket
@@ -580,4 +581,4 @@ namespace VKalVrtAthena {
 #include "details/Utilities.h"
 
 
-#endif /* _VrtSecInclusive_VrtSecInclusive_H */
+#endif /* VRTSECINCLUSIVE_VRTSECINCLUSIVE_H */

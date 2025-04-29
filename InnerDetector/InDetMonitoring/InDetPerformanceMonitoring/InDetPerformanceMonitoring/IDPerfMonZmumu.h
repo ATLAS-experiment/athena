@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDPERFMON_ZMUMU_H
@@ -106,26 +106,26 @@ class IDPerfMonZmumu : public AthAlgorithm
   // The Z0 tagger.
   ZmumuEvent     m_xZmm;
   FourMuonEvent  m_4mu;
-  bool m_UseTrigger;
-  bool m_doIsoSelection;
-  bool m_doIPSelection;
-  bool m_doMCPSelection;
-  double m_MassWindowLow;
-  double m_MassWindowHigh;
-  double m_LeadingMuonPtCut;
-  double m_SecondMuonPtCut;
-  double m_OpeningAngleCut;
-  double m_Z0GapCut;
-  bool m_isMC;
-  bool m_doRefit;
-  bool m_useTrackSelectionTool;
-  bool m_doIP;
-  bool m_doFourMuAnalysis;
-  bool m_storeZmumuNtuple;
-  bool m_skipMS;
-  bool m_useCustomMuonSelector;
-  int  m_minGoodLumiBlock;
-  int  m_maxGoodLumiBlock;
+  bool m_UseTrigger{true};
+  bool m_doIsoSelection{true};
+  bool m_doIPSelection{true};
+  bool m_doMCPSelection{true};
+  double m_MassWindowLow{60.};
+  double m_MassWindowHigh{120.};
+  double m_LeadingMuonPtCut{20.};
+  double m_SecondMuonPtCut{15.};
+  double m_OpeningAngleCut{0.2};
+  double m_Z0GapCut{5.};
+  bool m_isMC{};
+  bool m_doRefit{};
+  bool m_useTrackSelectionTool{};
+  bool m_doIP{};
+  bool m_doFourMuAnalysis{};
+  bool m_storeZmumuNtuple{true};
+  bool m_skipMS{};
+  bool m_useCustomMuonSelector{};
+  int  m_minGoodLumiBlock{};
+  int  m_maxGoodLumiBlock{};
 
 
   /** @brief The track refitter */
@@ -220,7 +220,7 @@ class IDPerfMonZmumu : public AthAlgorithm
   std::string m_truthLinkVecName;   /// link vector to map HepMC onto xAOD truth
 
   // cut flow histogram
-  TH1F*                           m_h_cutflow;
+  TH1F*                           m_h_cutflow{};
 
   unsigned int  m_runNumber{};
   unsigned int  m_evtNumber{};

@@ -74,7 +74,7 @@ namespace xAOD{
    /// @return Integer number in the [1, 6] range
    ///
    int MuonRoI_v1::getThrNumber() const {
-     if (isRun4()) return 0;   // TBI
+     if (isRun4()) return static_cast<int>((roiExtraWord() >> THR_SHIFT) & THR_MASK);
      else if (isRun3()) return ( ( roiWord() >> RUN3_CAND_PT_SHIFT ) & RUN3_CAND_PT_MASK );
      else return ( ( roiWord() >> CAND_PT_SHIFT ) & CAND_PT_MASK );
    }

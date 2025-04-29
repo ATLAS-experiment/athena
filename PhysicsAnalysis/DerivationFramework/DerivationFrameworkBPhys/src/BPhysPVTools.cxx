@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 #include "xAODTracking/VertexContainer.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "xAODBPhys/BPhysHelper.h"

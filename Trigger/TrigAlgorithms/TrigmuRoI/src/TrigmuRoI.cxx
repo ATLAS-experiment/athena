@@ -22,14 +22,12 @@ TrigmuRoI::TrigmuRoI(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode TrigmuRoI::initialize()
 {
 
-  ATH_MSG_DEBUG("MinValueForOutOfTimeBC: "<<m_minValueForOutOfTimeBC);
-  ATH_MSG_DEBUG("MaxValueForOutOfTimeBC: "<<m_maxValueForOutOfTimeBC);
-
   // Retrieve the tools/services
-  ATH_CHECK(m_trigMuonRoITool.retrieve());
-  ATH_CHECK(m_recRPCRoiTool.retrieve());
-  ATH_CHECK(m_recTGCRoiTool.retrieve());
   ATH_CHECK(m_roisWriteHandleKey.initialize());
+  ATH_CHECK(m_L1OutOfTimeRoIBCm2Key.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_L1OutOfTimeRoIBCm1Key.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_L1OutOfTimeRoIBCp1Key.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_L1OutOfTimeRoIBCp2Key.initialize(SG::AllowEmpty));
 
   if (!m_monTool.empty()) {
     ATH_MSG_DEBUG("Retrieving monTool");
@@ -40,6 +38,7 @@ StatusCode TrigmuRoI::initialize()
 
   return StatusCode::SUCCESS;
 }
+
 
 // ================================================================================
 // ================================================================================
@@ -58,98 +57,103 @@ unsigned int TrigmuRoI::getBitMaskValue( const unsigned int uintValue, const uns
   return result;
 }
 
+
+// ================================================================================
+// ================================================================================
+
+StatusCode TrigmuRoI::readAndAppendTrigRoiDescriptors(const EventContext& ctx, TrigRoiDescriptorCollection* roiColl, const SG::ReadHandleKey<xAOD::MuonRoIContainer>& readHandleKey, int bc_shift, unsigned int& roi_id, std::vector<int>& RpcBCShift, std::vector<int>& TgcBCShift, std::vector<float>& RoIEta, std::vector<float>& RoIPhi) const 
+{
+
+  // check validity of the key
+  if (readHandleKey.empty()) {
+    ATH_MSG_VERBOSE("Empty ReadHandleKey for the out-of-time muon RoIs.");
+    return StatusCode::SUCCESS;
+  }
+
+  // create the read handle from the key
+  SG::ReadHandle<xAOD::MuonRoIContainer> rh_outOfTimeRoIs(readHandleKey, ctx);
+
+  // check validity of the read handle
+  ATH_CHECK(rh_outOfTimeRoIs.isPresent());
+  ATH_CHECK(rh_outOfTimeRoIs.isValid());
+
+  // loop over the RoIs
+  for (const xAOD::MuonRoI* roi : *rh_outOfTimeRoIs) {
+
+    // debug messages
+    ATH_MSG_DEBUG("====== (late-muon) RoI debug info for out-of-time RoI =====");
+    ATH_MSG_DEBUG("out-of-time bunch crossing shift : " << bc_shift);
+    ATH_MSG_DEBUG("RoI ID (within TrigmuRoI)        : " << roi_id);
+    ATH_MSG_DEBUG("RoI pT threshold                 : name: " << roi->thrName() << ", number: "<< roi->getThrNumber() << ", value: " << roi->thrValue());
+    ATH_MSG_DEBUG("RoI eta                          : " << roi->eta());
+    ATH_MSG_DEBUG("RoI phi                          : " << roi->phi());
+    ATH_MSG_DEBUG("RoI word                         : 0x" << MSG::hex << roi->roiWord() << MSG::dec);
+    ATH_MSG_DEBUG("Sector ID                        : " << roi->getSectorID());
+    ATH_MSG_DEBUG("Sector address                   : 0x" << MSG::hex << roi->getSectorAddress() << MSG::dec);
+    ATH_MSG_DEBUG("==========================================================");
+
+    // fill monitoring collections: monitor the roi's eta and phi
+    RoIEta.push_back(roi->eta());
+    RoIPhi.push_back(roi->phi());
+
+    // fill monitoring collections: construct the system ID
+    unsigned int temp_sysID = getBitMaskValue(roi->getSectorAddress(), LVL1::SysIDMask );
+    unsigned int sysID = 0;                // Barrel
+    if( temp_sysID & 0x2 ) sysID = 1;      // Endcap
+    else if( temp_sysID & 0x1 ) sysID = 2; // Forward
+
+    // fill monitoring collections: monitor the covered bunch crossing shift values for RPC and TGC
+    if ( sysID == 0 ) RpcBCShift.push_back(bc_shift);
+    else              TgcBCShift.push_back(bc_shift);
+    
+    // now create the new RoI descriptor and add it to the collection
+    roiColl->push_back(std::make_unique<TrigRoiDescriptor>(
+          roi->roiWord(), 0u, roi_id,
+          roi->eta(), roi->eta()-m_roiHalfWidthEta, roi->eta()+m_roiHalfWidthEta,
+          roi->phi(), CxxUtils::wrapToPi(roi->phi()-m_roiHalfWidthPhi), CxxUtils::wrapToPi(roi->phi()+m_roiHalfWidthPhi)
+        ));
+  
+    // bump up ID
+    roi_id += 1;
+  }
+    
+  // all done
+  return StatusCode::SUCCESS;
+
+}
+
 // ================================================================================
 // ================================================================================
 
 StatusCode TrigmuRoI::execute(const EventContext& ctx) const
 {
 
-  std::vector<int> outOfTimeRpc, outOfTimeTgc;
-  std::vector<float> etaRoI, phiRoI;
-  auto rpcOutOfTime = Monitored::Collection("RpcOutOfTime", outOfTimeRpc);
-  auto tgcOutOfTime = Monitored::Collection("TgcOutOfTime", outOfTimeTgc);
-  auto etaOutOfTimeRoI = Monitored::Collection("EtaOutOfTime", etaRoI);
-  auto phiOutOfTimeRoI = Monitored::Collection("PhiOutOfTime", phiRoI);
+  // set up monitoring
+  std::vector<int> RpcBCShift, TgcBCShift;
+  std::vector<float> RoIEta, RoIPhi;
+  auto Rpc_OutOfTimeBCShift = Monitored::Collection("Rpc_OutOfTimeBCShift", RpcBCShift);
+  auto Tgc_OutOfTimeBCShift = Monitored::Collection("Tgc_OutOfTimeBCShift", TgcBCShift);
+  auto OutOfTimeRoI_Eta = Monitored::Collection("OutOfTimeRoI_Eta", RoIEta);
+  auto OutOfTimeRoI_Phi = Monitored::Collection("OutOfTimeRoI_Phi", RoIPhi);
+  auto mon = Monitored::Group(m_monTool, Rpc_OutOfTimeBCShift, Tgc_OutOfTimeBCShift, OutOfTimeRoI_Eta, OutOfTimeRoI_Phi);
 
-  auto mon = Monitored::Group(m_monTool, rpcOutOfTime, tgcOutOfTime, etaOutOfTimeRoI, phiOutOfTimeRoI);
-
-  int roi_id = 0;
-
-  //--------------------------------------------------------------------------
-  // Gather the Muon RoIs out of time by the
-  //--------------------------------------------------------------------------
-      
+  // make an empty roi descriptor collection
   SG::WriteHandle<TrigRoiDescriptorCollection> wh_roiCollection(m_roisWriteHandleKey, ctx);
   ATH_CHECK(wh_roiCollection.record(std::make_unique<TrigRoiDescriptorCollection>()));
-  auto roiColl = wh_roiCollection.ptr();
+  TrigRoiDescriptorCollection* roiColl = wh_roiCollection.ptr();
 
-  //get rois and loop over out of time rois
-  auto roiVectors = m_trigMuonRoITool->decodeMuCTPi(ctx);
-  if(!roiVectors){
-    ATH_MSG_VERBOSE("No RoIs found");
-    return StatusCode::SUCCESS;
-  }
-  for(auto it : roiVectors->outOfTimeRois){
+  // set up an id counter
+  unsigned int roi_id = 0;
 
-    if (msgLvl(MSG::DEBUG)) {
-      ATH_MSG_DEBUG(" Difference(RoI(BCID) - Event(BCID)) = " << (it).second);
-      ATH_MSG_DEBUG(" ------------------------------------- ");
-      ATH_MSG_DEBUG("RoIB word               : 0x" << MSG::hex << ((it).first).roIWord() << MSG::dec);
-      ATH_MSG_DEBUG("Threshold               :  pt" << ((it).first).pt());
-      ATH_MSG_DEBUG("Sector ID               :  " << ((it).first).getSectorID());
-      ATH_MSG_DEBUG("Sector addr             :  0x" << MSG::hex << ((it).first).getSectorAddress() << MSG::dec);
-      ATH_MSG_DEBUG("Sector overflow         :  " << ((it).first).getSectorOverflow());
-      ATH_MSG_DEBUG("RoI overflow            :  " << ((it).first).getRoiOverflow());
-      ATH_MSG_DEBUG("RoI number              :  " << ((it).first).getRoiNumber());
-      ATH_MSG_DEBUG("IsHighestPt             :  " << ((it).first).getCandidateIsHighestPt());
-      ATH_MSG_DEBUG("=================================================");
-    }
-            
-    unsigned int temp_sysID = getBitMaskValue(((it).first).getSectorAddress(), LVL1::SysIDMask );
-    unsigned int sysID = 0;                // Barrel
-    if( temp_sysID & 0x2 ) sysID = 1;      // Endcap
-    else if( temp_sysID & 0x1 ) sysID = 2; // Forward
+  // construct the trigger RoI descriptors for the four out-of-time bunch crossings (they are then added to the roiColl)
+  ATH_CHECK(readAndAppendTrigRoiDescriptors(ctx, roiColl, m_L1OutOfTimeRoIBCm2Key, -2, roi_id, RpcBCShift, TgcBCShift, RoIEta, RoIPhi));
+  ATH_CHECK(readAndAppendTrigRoiDescriptors(ctx, roiColl, m_L1OutOfTimeRoIBCm1Key, -1, roi_id, RpcBCShift, TgcBCShift, RoIEta, RoIPhi));
+  ATH_CHECK(readAndAppendTrigRoiDescriptors(ctx, roiColl, m_L1OutOfTimeRoIBCp1Key, +1, roi_id, RpcBCShift, TgcBCShift, RoIEta, RoIPhi));
+  ATH_CHECK(readAndAppendTrigRoiDescriptors(ctx, roiColl, m_L1OutOfTimeRoIBCp2Key, +2, roi_id, RpcBCShift, TgcBCShift, RoIEta, RoIPhi));
 
-
-    if ( sysID == 0 ) outOfTimeRpc.push_back((it).second);
-    else              outOfTimeTgc.push_back((it).second);
-    
-    LVL1::TrigT1MuonRecRoiData roiData;
-    //std::string region = "";
-    if( sysID == 0 ) {
-      ATH_CHECK( m_recRPCRoiTool->roiData(((it).first).roIWord(),roiData) );
-      //region = "Barrel region";
-    } else if ( sysID == 1 ){
-      ATH_CHECK( m_recTGCRoiTool->roiData(((it).first).roIWord(),roiData) );
-      //region = "Endcap region";
-    } else {
-      ATH_CHECK( m_recTGCRoiTool->roiData(((it).first).roIWord(),roiData) );
-      //region = "Forward region";
-    }
-	   
-    // create new trigger element for this out of time RoI
-    double eta = roiData.eta();
-    double phi = roiData.phi();
-    etaRoI.push_back(eta);
-    phiRoI.push_back(phi);
-     
-    double etamin = eta - 0.2;
-    double etamax = eta + 0.2;
-    double phimin = CxxUtils::wrapToPi(phi - 0.2);
-    double phimax = CxxUtils::wrapToPi(phi + 0.2);
-
-    if ((it).second >= m_minValueForOutOfTimeBC &&
-	(it).second <= m_maxValueForOutOfTimeBC    ) {
-
-      // generic TrigRoiDescriptor
-      auto roiDescriptor = new TrigRoiDescriptor( ((it).first).roIWord(), 0, roi_id, eta, etamin, etamax, phi, phimin, phimax,0,-255,255);
-      roiColl->push_back(roiDescriptor);
-
-      ATH_MSG_DEBUG("Created RoI descriptor with id, eta, phi: "<<roi_id<<" "<<eta<<" "<<phi);
-    }
-    roi_id += 1;
-  }
-  
+  // all done
   return StatusCode::SUCCESS;
+
 }
+
 

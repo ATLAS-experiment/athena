@@ -22,10 +22,12 @@
 #include <unordered_map>
 
 // Forward declarations
-namespace ROOT { namespace Experimental {
-   class RNTupleReader;
-} }
-
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+namespace ROOT { class RNTupleReader; }
+#else
+namespace ROOT::Experimental { class RNTupleReader; }
+namespace ROOT { using RNTupleReader = ROOT::Experimental::RNTupleReader; }
+#endif
 
 class TFile;
 class TTree;
@@ -42,8 +44,6 @@ namespace RootStorageSvc {
  * POOL namespace declaration
  */
 namespace pool  {  
-   using ROOT::Experimental::RNTupleReader;
-
    class RootTreeContainer;
    
   /** @class RootDatabase RootDatabase.h src/RootDatabase.h
@@ -127,7 +127,7 @@ namespace pool  {
     std::recursive_mutex  m_iomutex;
 
     std::map<std::string, std::unique_ptr<RootStorageSvc::RNTupleWriterHelper> >  m_ntupleWriterMap;
-    std::map<std::string, std::unique_ptr<RNTupleReader> >                 m_ntupleReaderMap;
+    std::map<std::string, std::unique_ptr<ROOT::RNTupleReader> >                 m_ntupleReaderMap;
 
     using indexLookup_t = std::unordered_map<uint64_t, uint64_t>;
     std::map<void*, indexLookup_t>                                         m_ntupleIndexMap;
@@ -241,10 +241,10 @@ namespace pool  {
     virtual DbStatus    transAct(Transaction::Action action);
 
     /// return RNTupleReader for a given ntuple_name
-    RNTupleReader*        getNTupleReader(const std::string& ntuple_name);
+    ROOT::RNTupleReader* getNTupleReader(const std::string& ntuple_name);
 
     // translate index value to row# for a given RNTuple  
-    uint64_t            indexLookup(RNTupleReader *ps, uint64_t idx_val);
+    uint64_t            indexLookup(ROOT::RNTupleReader *ps, uint64_t idx_val);
 
     /// Return RNTupleWriterHelper for a given ntuple_name
     /// create a new one if needed when create==true

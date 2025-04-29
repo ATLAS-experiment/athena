@@ -3,6 +3,7 @@
 #include "FPGAConversionAlgorithm.h"
 #include "StoreGate/ReadHandle.h"
 #include <type_traits>
+#include <format>
 
 FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLocator* pSvcLocator ): 
   AthReentrantAlgorithm( name, pSvcLocator ){}
@@ -15,7 +16,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     ATH_CHECK(m_FPGAHitKey.initialize(m_doHits));
     ATH_CHECK(m_FPGARoadKey.initialize(m_doActsTrk));
     ATH_CHECK(m_FPGAHitInRoadsKey.initialize(m_doActsTrk));
-    ATH_CHECK(m_FPGATrackKey.initialize(m_doActsTrk));
+    ATH_CHECK(m_FPGATrackKey.initialize(m_doActsTrk && !m_useRoads));
     ATH_CHECK(m_xAODPixelClusterFromFPGAClusterKey.initialize(m_doClusters));
     ATH_CHECK(m_xAODStripClusterFromFPGAClusterKey.initialize(m_doClusters));
     ATH_CHECK(m_xAODPixelClusterFromFPGAHitKey.initialize(m_doHits));
@@ -64,7 +65,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     std::unique_ptr<ActsTrk::ProtoTrackCollection> ProtoTracksFromRoads = std::make_unique<ActsTrk::ProtoTrackCollection>();
     std::unique_ptr<ActsTrk::ProtoTrackCollection> ProtoTracksFromTracks = std::make_unique<ActsTrk::ProtoTrackCollection>();
 
-    
+    clock_type::time_point startTime, stopTime;
     if (m_doClusters) {
       
       SG::ReadHandle<FPGATrackSimClusterCollection> FPGAClustersHandle (m_FPGAClusterKey, ctx);
@@ -72,49 +73,55 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
         const FPGATrackSimClusterCollection *FPGAClusterColl = FPGAClustersHandle.cptr();
 
         // Convert to InDet clusters
-        ATH_MSG_DEBUG("InDet Clusters CONVERSION");
-        ATH_CHECK( m_ClusterConverter->convertClusters(*FPGAClusterColl, *PixelCollFromClusters, *SCTCollFromClusters) );
+        if (m_doIndet) {
+          ATH_MSG_DEBUG("InDet Clusters CONVERSION");
+          ATH_CHECK(m_ClusterConverter->convertClusters(*FPGAClusterColl, *PixelCollFromClusters, *SCTCollFromClusters));
+        }
 	  
         // Convert to xAOD clusters
-        ATH_MSG_DEBUG("xAOD Clusters CONVERSION");
+        ATH_MSG_INFO("xAOD Clusters CONVERSION");
+        startTime = clock_type::now();
         ATH_CHECK( m_ClusterConverter->convertClusters(*FPGAClusterColl, *PixelContFromClusters, *SCTContFromClusters) );
+        stopTime = clock_type::now();
+        m_totalClusterConversionTime += std::chrono::duration_cast<std::chrono::nanoseconds>(stopTime - startTime);
+
         if (m_doActsTrk) {
-          SG::ReadHandle<FPGATrackSimRoadCollection> FPGARoadsHandle (m_FPGARoadKey, ctx);
-          if (!FPGARoadsHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimRoadCollection");
-            return StatusCode::FAILURE;
+          if (m_useRoads) {
+            SG::ReadHandle<FPGATrackSimRoadCollection> FPGARoadsHandle(m_FPGARoadKey, ctx);
+            if (!FPGARoadsHandle.isValid()) {
+              ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimRoadCollection");
+              return StatusCode::FAILURE;
+            }
+            SG::ReadHandle<FPGATrackSimHitContainer> FPGAHitsInRoadsHandle(m_FPGAHitInRoadsKey, ctx);
+            if (!FPGAHitsInRoadsHandle.isValid()) {
+              ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimItInRoadCollection");
+              return StatusCode::FAILURE;
+            }
+            const FPGATrackSimHitContainer* FPGAHitsInRoadsCont = FPGAHitsInRoadsHandle.cptr();
+            const FPGATrackSimRoadCollection* FPGARoadColl = FPGARoadsHandle.cptr();
+            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromRoads, *FPGAHitsInRoadsCont, *FPGARoadColl));
           }
-
-          const FPGATrackSimRoadCollection *FPGARoadColl = FPGARoadsHandle.cptr();
-
-          SG::ReadHandle<FPGATrackSimHitContainer> FPGAHitsInRoadsHandle (m_FPGAHitInRoadsKey, ctx);
-          if (!FPGAHitsInRoadsHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimItInRoadCollection");
-            return StatusCode::FAILURE;
-          }
-          const FPGATrackSimHitContainer *FPGAHitsInRoadsCont = FPGAHitsInRoadsHandle.cptr();
-
-          SG::ReadHandle<FPGATrackSimTrackCollection> FPGATracksHandle (m_FPGATrackKey, ctx);
-          if (!FPGATracksHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimTrackCollection");
-            return StatusCode::FAILURE;
-          }
-          const FPGATrackSimTrackCollection *FPGATrackColl = FPGATracksHandle.cptr();
-
-          if (PixelContFromClusters->size()+SCTContFromClusters->size() > 0) {
-            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx,*PixelContFromClusters,*SCTContFromClusters,*ProtoTracksFromRoads, *FPGAHitsInRoadsCont, *FPGARoadColl ));
-            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx,*PixelContFromClusters,*SCTContFromClusters,*ProtoTracksFromTracks, *FPGATrackColl ));
+          else{
+            SG::ReadHandle<FPGATrackSimTrackCollection> FPGATracksHandle(m_FPGATrackKey, ctx);
+            if (!FPGATracksHandle.isValid()) {
+              ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimTrackCollection");
+              return StatusCode::FAILURE;
+            }
+            const FPGATrackSimTrackCollection* FPGATrackColl = FPGATracksHandle.cptr();
+            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
           }
         }
 
         if (m_doSP) {
+          ATH_MSG_INFO("Starting xAOD SpacePoint Conversion");
           SG::ReadHandle<FPGATrackSimClusterCollection> FPGASPHandle (m_FPGASPKey, ctx);
-          SG::ReadHandle<FPGATrackSimClusterCollection> FPGAClustersHandle (m_FPGAClusterKey, ctx);
 
           if (FPGASPHandle.isValid()) { // To avoid running over events that didn't pass truth tracks selections
             const FPGATrackSimClusterCollection *FPGASPColl = FPGASPHandle.cptr();
-            const FPGATrackSimClusterCollection *FPGAClustersColl = FPGAClustersHandle.cptr();
-            ATH_CHECK( m_ClusterConverter->convertSpacePoints(*FPGASPColl, *FPGAClustersColl, *StripSPCont, *PixelSPCont, *SCTContFromClusters, *PixelContFromClusters) );
+            startTime = clock_type::now();
+            ATH_CHECK( m_ClusterConverter->convertSpacePoints(*FPGASPColl, *StripSPCont, *PixelSPCont, *SCTContFromClusters, *PixelContFromClusters) );
+            stopTime = clock_type::now();
+            m_totalSpConversionTime += std::chrono::duration_cast<std::chrono::nanoseconds>(stopTime - startTime);
           }
           else {{ATH_MSG_WARNING("Failed to retrieve 1st stage FPGATrackSimSpacePointCollection. Will skip SP conversion ");}}
         }
@@ -142,9 +149,6 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       }
     }  
 
-
-
-
     if (m_doHits) {
 
       SG::ReadHandle<FPGATrackSimHitCollection> FPGAHitsHandle (m_FPGAHitKey, ctx);
@@ -153,8 +157,10 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
         const FPGATrackSimHitCollection *FPGAHitColl = FPGAHitsHandle.cptr();
 
         // Convert to InDet clusters
-        ATH_MSG_DEBUG("InDet Hits CONVERSION");
-        ATH_CHECK( m_ClusterConverter->convertHits(*FPGAHitColl, *PixelCollFromHits, *SCTCollFromHits) );
+        if (m_doIndet) {
+          ATH_MSG_DEBUG("InDet Hits CONVERSION");
+          ATH_CHECK(m_ClusterConverter->convertHits(*FPGAHitColl, *PixelCollFromHits, *SCTCollFromHits));
+        }
         ATH_MSG_DEBUG("xAOD Hits CONVERSION");
         ATH_CHECK( m_ClusterConverter->convertHits(*FPGAHitColl, *PixelContFromHits, *SCTContFromHits) );
       }
@@ -168,6 +174,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       ATH_CHECK( xAODStripClusterFromFPGAHitHandle.record (std::move(SCTContFromHits),std::move(SCTAuxContFromHits)));
     }
 
+    m_nEvents++;
     return StatusCode::SUCCESS;
   }
 
@@ -206,6 +213,25 @@ StatusCode FPGAConversionAlgorithm::convertCollectionToContainer(Trk::PrepRawDat
 		  << " into Event Store");
     return StatusCode::FAILURE;
   }
+
+  return StatusCode::SUCCESS;
+}
+
+
+StatusCode FPGAConversionAlgorithm::finalize()
+{
+  std::string printoutStats = std::format(
+    "\n|--------------------------------------------------|"
+    "\n|          Process        |   avg. time per event  |"
+    "\n|--------------------------------------------------|"
+    "\n| xAOD cluster conversion |  {:>17.3f} sec |"
+    "\n|      xAOD SP conversion |  {:>17.3f} sec |"
+    "\n|--------------------------------------------------|",
+    1e-9 * m_totalClusterConversionTime.count()/m_nEvents,
+    1e-9 * m_totalSpConversionTime.count()/m_nEvents
+  );
+
+  ATH_MSG_INFO("Runtime stats:" + printoutStats);
 
   return StatusCode::SUCCESS;
 }

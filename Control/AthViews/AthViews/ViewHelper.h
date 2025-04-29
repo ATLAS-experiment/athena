@@ -206,6 +206,12 @@ namespace ViewHelper
           }
         }
 
+        // Warn about unlocked decorations that won't get copied.
+        for ( SG::auxid_t decor : queryHandle->getDecorIDs() ) {
+          SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+          m_msg << MSG::WARNING << "mergeViewCollection: skipped unlocked decoration " << queryHandle.key() << "." << r.getName( decor ) << endmsg;
+        }
+
         //Merge the data
         for ( const auto inputObject : *queryHandle.cptr() )
         {

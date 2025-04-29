@@ -104,7 +104,6 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 
     if(!pDR->good()) {
       std::cout << "No events in file "<< fName << std::endl;
-      return 1;
     }
 
     //Print file summary

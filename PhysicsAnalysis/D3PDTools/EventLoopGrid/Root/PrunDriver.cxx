@@ -197,7 +197,7 @@ static Status::Enum submit(SH::Sample* const sample)
   TPython::Bind(dynamic_cast<TObject*>(sample), "ELG_SAMPLE"); 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
   std::any result;
-  TPython::Exec("_anyresult = ELG_prun(ELG_SAMPLE)", &result);
+  TPython::Exec("_anyresult = ROOT.std.make_any['int'](ELG_prun(ELG_SAMPLE))", &result);
   int ret = std::any_cast<int>(result);
 #else
   int ret = TPython::Eval("ELG_prun(ELG_SAMPLE)");
@@ -233,7 +233,7 @@ static Status::Enum checkPandaTask(SH::Sample* const sample)
   TPython::Bind(dynamic_cast<TObject*>(sample), "ELG_SAMPLE");
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
   std::any result;
-  TPython::Exec("_anyresult = ELG_jediState(ELG_SAMPLE)", &result);
+  TPython::Exec("_anyresult = ROOT.std.make_any['int'](ELG_jediState(ELG_SAMPLE))", &result);
   int ret = std::any_cast<int>(result);
 #else
   int ret =  TPython::Eval("ELG_jediState(ELG_SAMPLE)");

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootOutputStreamTool.h
@@ -39,50 +39,40 @@ public:
   virtual ~RootOutputStreamTool();
 
   /// Gaudi AlgTool Interface method implementations:
-  StatusCode initialize();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
 
   /// Specify which data store and conversion service to use
   /// and whether to extend provenence
   ///   Only use if one wants to override jobOptions
-  StatusCode connectServices(const std::string& dataStore, const std::string& cnvSvc, bool extendProvenenceRecord);
+  virtual StatusCode connectServices(const std::string& dataStore, const std::string& cnvSvc, bool extendProvenenceRecord) override;
 
   /// Connect to the output stream
   ///   Must connectOutput BEFORE streaming
   ///   Only specify "outputName" if one wants to override jobOptions
-  StatusCode connectOutput(const std::string& outputName);
+  virtual StatusCode connectOutput(const std::string& outputName) override;
 
   /// Commit the output stream after having streamed out objects
   ///   Must commitOutput AFTER streaming
-  StatusCode commitOutput(bool doCommit = false);
+  virtual StatusCode commitOutput(bool doCommit = false) override;
 
   /// Finalize the output stream after the last commit, e.g. in
   /// finalize
-  StatusCode finalizeOutput();
+  virtual StatusCode finalizeOutput() override;
 
   /// Stream out objects. Provide vector of typeName/key pairs.
   ///   If key is empty, assumes only one object and this
   ///   will fail if there is more than one
-  StatusCode streamObjects(const IAthenaOutputStreamTool::TypeKeyPairs& typeKeys, const std::string& outputName = "");
+  virtual StatusCode streamObjects(const IAthenaOutputStreamTool::TypeKeyPairs& typeKeys, const std::string& outputName = "") override;
 
   /// Stream out a vector of objects
   ///   Must convert to DataObject, e.g.
   ///   #include "AthenaKernel/StorableConversions.h"
   ///     T* obj = xxx;
   ///     DataObject* dataObject = SG::asStorable(obj);
-  StatusCode streamObjects(const IAthenaOutputStreamTool::DataObjectVec& dataObjects, const std::string& outputName = "");
+  virtual StatusCode streamObjects(const IAthenaOutputStreamTool::DataObjectVec& dataObjects, const std::string& outputName = "") override;
 
-  /// Fill refs of an object - done as second iteration over
-  /// objects, after streamObject
-  StatusCode fillObjectRefs(const IAthenaOutputStreamTool::DataObjectVec& dataObjects);
-
-  StatusCode getInputItemList(SG::IFolder* m_p2BWrittenFromTool);
-
-private:
-  /// Default constructor:
-  RootOutputStreamTool(); //< not implemented
-  RootOutputStreamTool(const RootOutputStreamTool&); //< not implemented
-  RootOutputStreamTool& operator=(const RootOutputStreamTool&); //< not implemented
+  virtual StatusCode getInputItemList(SG::IFolder* m_p2BWrittenFromTool) override;
 
 private:
   /// ServiceHandle to the data store service

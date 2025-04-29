@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/HelperFunctions.h"
@@ -11,26 +11,6 @@
 #include <vector>
 #include <sstream>
 #include <cmath>
-
-
-PanTau::TauConstituent* PanTau::HelperFunctions::getNeutralConstWithLargestAngle(const TLorentzVector& charged,
-										 const std::vector<PanTau::TauConstituent*>& neutral) {
-  if(neutral.empty()) return nullptr;
-  //loop through neutrals to find the one with largest angle
-  unsigned int    idx_Neutral = -1;
-  double          angle_Neutral  = -1.;
-  for(unsigned int iNeut=0; iNeut<neutral.size(); iNeut++) {
-    TLorentzVector tlv_CurNeut = neutral[iNeut]->p4();
-    double angle = charged.Angle(tlv_CurNeut.Vect());
-    if(angle > angle_Neutral) {
-      angle_Neutral = angle;
-      idx_Neutral = iNeut;
-    }
-  }//end loop neutrals
-    
-  return neutral[idx_Neutral];
-}
-
 
 std::string PanTau::HelperFunctions::convertNumberToString(double x) const {
   std::stringstream tmpStream;
@@ -64,13 +44,5 @@ double PanTau::HelperFunctions::stddev(double sumOfSquares, double sumOfValues, 
   double stdDev = a - b*b;
   if(stdDev < 0.) stdDev = 0;
   return std::sqrt(stdDev);
-}
-
-
-double PanTau::HelperFunctions::deltaRprime(const TVector3& vec1, const TVector3& vec2) const {
-  const double a = vec1.DeltaPhi(vec2);
-  const double b = vec1.Theta() - vec2.Theta();
-  double dRprime = std::sqrt(a*a + b*b);
-  return dRprime;
 }
 

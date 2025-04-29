@@ -13,9 +13,8 @@ namespace DerivationFramework {
 HITrackQualityAugmentationTool::HITrackQualityAugmentationTool(const std::string& t,
       const std::string& n,
       const IInterface* p) :
-    AthAlgTool(t,n,p)
+    base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("TrackSelectionTool_pp"      ,m_trkSelTool_pp      );
     declareProperty("TrackSelectionTool_hi_loose",m_trkSelTool_hi_loose);
     declareProperty("TrackSelectionTool_hi_tight",m_trkSelTool_hi_tight);

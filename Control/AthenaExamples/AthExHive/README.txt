@@ -1,8 +1,8 @@
                                                                             
                                                                             
                                                                             
-     Data Dependency Graph of AthExHiveOpts.py                   
-    ===========================================                             
+     Data Dependency Graph of AthExHiveConfig.py
+    =============================================
 
 capital letters correspond to the Algorithms HiveAlgA, HiveAlgB, etc.
 lowercase letters are the keys of the data objects.
@@ -31,7 +31,7 @@ lowercase letters are the keys of the data objects.
                                                                             
 
 additional information at
-https://twiki.cern.ch/twiki/bin/view/AtlasComputing/AthenaHiveTutorial201509
+https://twiki.cern.ch/twiki/bin/view/AtlasComputing/DevTutPract2025AthenaIntro
 
                                                                             
                                                                             

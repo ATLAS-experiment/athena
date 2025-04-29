@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -12,6 +12,8 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexAuxContainer.h"
+#include "StoreGate/WriteDecorHandle.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace Prompt {
 //======================================================================================================
@@ -30,8 +32,7 @@ StatusCode PrimaryVertexReFitter::initialize()
 
     ANA_MSG_DEBUG("DistToRefittedPriVtxName = " << m_distToRefittedPriVtxName);
     ANA_MSG_DEBUG("NormDistToRefittedPriVtxName = " << m_normDistToRefittedPriVtxName);
-    ANA_MSG_DEBUG("RefittedVtxLinkName = " << m_lepVtxLinkName);
-    ANA_MSG_DEBUG("RefittedVtxWithoutLeptonLinkName = " << m_lepRefittedVtxWithoutLeptonLinkName);
+    ANA_MSG_DEBUG("RefittedVtxWithoutLeptonLinkName = " << m_lepRefittedVtxWithoutLeptonLinkName.key());
 
     ATH_CHECK(m_inDetTracksKey.initialize());
 
@@ -48,9 +49,9 @@ StatusCode PrimaryVertexReFitter::initialize()
         return StatusCode::FAILURE;
     }
 
-    m_distToRefittedPriVtx = std::make_unique<decoratorFloat_t>  (m_distToRefittedPriVtxName);
-    m_normdistToRefittedPriVtx = std::make_unique<decoratorFloat_t>  (m_normDistToRefittedPriVtxName);
-    m_lepRefittedRMVtxLinkDec = std::make_unique<decoratorElemVtx_t>(m_lepRefittedVtxWithoutLeptonLinkName);
+    m_distToRefittedPriVtx.emplace (m_distToRefittedPriVtxName);
+    m_normdistToRefittedPriVtx.emplace (m_normDistToRefittedPriVtxName);
+    ATH_CHECK( m_lepRefittedVtxWithoutLeptonLinkName.initialize() );
 
     ATH_CHECK(m_vertexFitterTool.retrieve());
 
@@ -89,6 +90,8 @@ StatusCode PrimaryVertexReFitter::finalize()
 //=============================================================================
 StatusCode PrimaryVertexReFitter::execute()
 {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     //
     // Start execute timer
     //
@@ -97,7 +100,7 @@ StatusCode PrimaryVertexReFitter::execute()
     //
     // Find Inner Detector tracks
     //
-    SG::ReadHandle<xAOD::TrackParticleContainer> h_inDetTracks(m_inDetTracksKey);
+    SG::ReadHandle<xAOD::TrackParticleContainer> h_inDetTracks(m_inDetTracksKey, ctx);
     if (!h_inDetTracks.isValid()){
         ATH_MSG_FATAL("execute - failed to find the InDetTrackParticles");
         return StatusCode::FAILURE;
@@ -114,24 +117,22 @@ StatusCode PrimaryVertexReFitter::execute()
 
     refitVtxContainer->setStore(refitVtxContainerAux.get());
 
-    // Take reference BEFORE pointers moved to SG
-    xAOD::VertexContainer &refitVtxContainerRef = *refitVtxContainer;
-
-    SG::WriteHandle<xAOD::VertexContainer> h_refitVtxContainer (m_reFitPrimaryVertexKey);
+    SG::WriteHandle<xAOD::VertexContainer> h_refitVtxContainer (m_reFitPrimaryVertexKey, ctx);
     ATH_CHECK(h_refitVtxContainer.record(
         std::move(refitVtxContainer), std::move(refitVtxContainerAux)
     ));
+    xAOD::VertexContainer &refitVtxContainerRef = *h_refitVtxContainer;
 
     //
     // Retrieve containers from evtStore
     //
-    SG::ReadHandle<xAOD::IParticleContainer> h_leptonContainer(m_leptonContainerKey);
+    SG::ReadHandle<xAOD::IParticleContainer> h_leptonContainer(m_leptonContainerKey, ctx);
     if (!h_leptonContainer.isValid()){
         ATH_MSG_FATAL("execute - failed to find the lepton container");
         return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<xAOD::VertexContainer> h_vertices(m_primaryVertexContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> h_vertices(m_primaryVertexContainerKey, ctx);
     if (!h_vertices.isValid()){
         ATH_MSG_FATAL("execute - failed to find the vertices");
         return StatusCode::FAILURE;
@@ -195,6 +196,10 @@ StatusCode PrimaryVertexReFitter::execute()
             << "\n\t\t\t  Size of lepton container:    " << leptonContainer.size()
             << "\n-----------------------------------------------------------------");
 
+    SG::WriteDecorHandle<xAOD::IParticleContainer, ElementLink<xAOD::VertexContainer> >
+      lepRefittedRMVtxLinkDec (m_lepRefittedVtxWithoutLeptonLinkName, ctx);
+
+    DataLink<xAOD::VertexContainer> refitVtxContainerLink (refitVtxContainerRef, ctx);
     for(const xAOD::IParticle *lepton: leptonContainer) {
         const xAOD::TrackParticle *tracklep = 0;
         const xAOD::Electron *elec = dynamic_cast<const xAOD::Electron*>(lepton);
@@ -226,7 +231,10 @@ StatusCode PrimaryVertexReFitter::execute()
             continue;
         }
 
-        decorateLepWithReFitPrimaryVertex(fittingInput, tracklep, lepton, priVtx_tracks, refitVtxContainerRef);
+        if (decorateLepWithReFitPrimaryVertex(fittingInput, tracklep, priVtx_tracks, refitVtxContainerRef))
+        {
+          lepRefittedRMVtxLinkDec(*lepton) = ElementLink<xAOD::VertexContainer>(refitVtxContainerLink, refitVtxContainerRef.size()-1);
+        }
     }
 
     h_refitVtxContainer->push_back(std::move(refittedPriVtx));
@@ -243,7 +251,6 @@ StatusCode PrimaryVertexReFitter::execute()
 bool Prompt::PrimaryVertexReFitter::decorateLepWithReFitPrimaryVertex(
     const FittingInput &input,
     const xAOD::TrackParticle* tracklep,
-    const xAOD::IParticle *lep,
     const std::vector<const xAOD::TrackParticle*> &tracks,
     xAOD::VertexContainer &refitVtxContainer)
 {
@@ -274,42 +281,23 @@ bool Prompt::PrimaryVertexReFitter::decorateLepWithReFitPrimaryVertex(
         priVtx_tracks_pass.push_back(track);
     }
 
-    ElementLink<xAOD::VertexContainer> refittedRM_pv_link;
-
     if(!isRefit) {
         ATH_MSG_DEBUG("decorateLepWithReFitPrimaryVertex -- Skip the primary vertex without lepton track");
 
-        (*m_lepRefittedRMVtxLinkDec)(*lep) = refittedRM_pv_link;
         return false;
     }
 
     if(priVtx_tracks_pass.size() < 2) {
         ATH_MSG_DEBUG("decorateLepWithReFitPrimaryVertex -- Skip the primary vertex refitting: N tracks =" << priVtx_tracks_pass.size());
 
-        (*m_lepRefittedRMVtxLinkDec)(*lep) = refittedRM_pv_link;
         return false;
     }
 
-    // TODO: probably need to fix memory management here
-    // but I'm not sure what happens with the ElementLink later
-    // so didn't want the vertex to be deleted by accident
-    xAOD::Vertex* refittedVtxRMLep = m_vertexFitterTool->fitVertexWithSeed(
+    std::unique_ptr<xAOD::Vertex> refittedVtxRMLep = m_vertexFitterTool->fitVertexWithSeed(
         input, priVtx_tracks_pass, input.priVtx->position(),
-        Prompt::kRefittedPriVtxWithoutLep
-    ).release();
+        Prompt::kRefittedPriVtxWithoutLep);
 
     if(refittedVtxRMLep) {
-        //
-        // Record vertex with output container
-        //
-        refitVtxContainer.push_back(std::move(refittedVtxRMLep));
-
-        // TODO: I don't know if this is the correct use of an ElementLink
-        //
-        // Add refitted non-prompt vertex ElementLink to the lepton
-        //
-        refittedRM_pv_link.toContainedElement(refitVtxContainer, refittedVtxRMLep);
-
         ATH_MSG_DEBUG("decorateLepWithReFitPrimaryVertex -- save refitted non-prompt primary vertex with NTrack = " << refittedVtxRMLep->nTrackParticles());
 
         if(input.refittedPriVtx) {
@@ -321,10 +309,13 @@ bool Prompt::PrimaryVertexReFitter::decorateLepWithReFitPrimaryVertex(
                 msg(MSG::WARNING)
             );
         }
+        //
+        // Record vertex with output container
+        //
+        refitVtxContainer.push_back(std::move(refittedVtxRMLep));
+
+        return true;
     }
-
-    (*m_lepRefittedRMVtxLinkDec)(*lep) = refittedRM_pv_link;
-
-    return true;
+    return false;
 }
 }

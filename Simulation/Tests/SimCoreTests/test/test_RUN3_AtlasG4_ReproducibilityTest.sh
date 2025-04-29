@@ -13,13 +13,16 @@
 # art-output: hitsMerged.ttbar.pool.root
 # art-output: hitsFullMerged.ttbar.pool.root
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 # Run 10 events normally
 AtlasG4_tf.py \
     --CA \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --outputHITSFile 'hitsFull.ttbar.pool.root' \
     --maxEvents '10' \
     --skipEvents '0'
@@ -31,8 +34,8 @@ AtlasG4_tf.py \
     --CA \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --outputHITSFile 'hitsHalf1.ttbar.pool.root' \
     --maxEvents '5' \
     --skipEvents '0'
@@ -44,8 +47,8 @@ AtlasG4_tf.py \
     --CA \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --outputHITSFile 'hitsHalf2.ttbar.pool.root' \
     --maxEvents '5' \
     --skipEvents '5'

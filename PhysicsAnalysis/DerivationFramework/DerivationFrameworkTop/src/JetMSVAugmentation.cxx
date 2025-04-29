@@ -17,10 +17,9 @@ namespace DerivationFramework {
 
 
 JetMSVAugmentation::JetMSVAugmentation(const std::string& t, const std::string& n, const IInterface* p):
-  AthAlgTool(t,n,p)
+  base_class(t,n,p)
 {
 
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     declareProperty("JetCollectionName",m_jetCollectionName="AntiKt4EMTopoJets");
     declareProperty("vertexAlgName",m_vtxAlgName="MSV");

@@ -14,7 +14,6 @@
 #include "L1CaloFEXSim/eFEXtauBDTAlgo.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 #include "L1CaloFEXSim/eTower.h"
-#include "PathResolver/PathResolver.h"
 #include <stdio.h> /* defines FILENAME_MAX */
 
 // default constructor for persistency
@@ -28,15 +27,13 @@ LVL1::eFEXtauBDTAlgo::~eFEXtauBDTAlgo() {}
 
 StatusCode LVL1::eFEXtauBDTAlgo::initialize() {
   ATH_CHECK(m_eTowerContainerKey.initialize());
-  std::string configPath = PathResolver::find_file(
-      m_bdtJsonConfigPath, "DATAPATH", PathResolver::RecursiveSearch);
-  ATH_MSG_INFO("Using BDT config file " << configPath);
-  if (configPath.size() == 0) {
-    ATH_MSG_ERROR("Cannot locate BDT config file " << m_bdtJsonConfigPath);
-    return StatusCode::FAILURE;
+  if (m_bdtJsonConfigPath.size() == 0) {
+	  ATH_MSG_ERROR("eFEX tau BDT json config file path not set in configuration");
+	  return StatusCode::FAILURE;
   }
+  ATH_MSG_INFO("Using BDT config file " << m_bdtJsonConfigPath);
 
-  m_bdtAlgoImpl = std::make_unique<eFEXtauBDT>(this, configPath);
+  m_bdtAlgoImpl = std::make_unique<eFEXtauBDT>(this, m_bdtJsonConfigPath);
 
   try {
     setSCellPointers();

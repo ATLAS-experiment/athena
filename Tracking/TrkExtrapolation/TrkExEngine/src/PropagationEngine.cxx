@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,15 +17,9 @@
 
 // constructor
 Trk::PropagationEngine::PropagationEngine(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_pathLimitTolerance(0.01)
+: AthAlgTool(t,n,p)
 {
     declareInterface<Trk::IPropagationEngine>(this);
-    // steering of the screen outoput (SOP)
-    declareProperty("OutputPrefix"                          , m_sopPrefix);
-    declareProperty("OutputPostfix"                         , m_sopPostfix);
-    // the path limit tolerance
-    declareProperty("PathLimitTolerance"                    , m_pathLimitTolerance);
 }
 
 // destructor
@@ -36,6 +30,9 @@ Trk::PropagationEngine::~PropagationEngine()
 // the interface method initialize
 StatusCode Trk::PropagationEngine::initialize()
 {
+    m_sopPrefix = m_sopPrefix_prop;
+    m_sopPostfix = m_sopPostfix_prop;
+
     if (m_propagator.retrieve().isFailure()){
         EX_MSG_FATAL( "", "initialize", "", "failed to retrieve propagator '"<< m_propagator << "'. Aborting." );
         return StatusCode::FAILURE;

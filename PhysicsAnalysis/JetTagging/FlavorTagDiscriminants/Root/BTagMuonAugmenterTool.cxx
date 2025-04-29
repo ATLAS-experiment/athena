@@ -23,7 +23,7 @@ namespace FlavorTagDiscriminants {
                   m_muonAssociationName,
                   m_muonMaxDR,
                   m_muonMinpT,
-                  flipTagConfigFromString(m_flipTagConfig)));
+                  FlavorTagInference::flipTagConfigFromString(m_flipTagConfig)));
     return StatusCode::SUCCESS;
   }
 

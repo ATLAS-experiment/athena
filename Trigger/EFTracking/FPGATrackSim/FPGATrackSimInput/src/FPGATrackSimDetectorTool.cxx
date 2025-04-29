@@ -94,7 +94,7 @@ void FPGATrackSimDetectorTool::dumpGlobalToLocalModuleMap() {
 
   /* The modules are store by tower and by logical layer */
   unsigned int nregions(m_FPGATrackSimMapping->RegionMap_2nd()->getNRegions()); // get the number of towers
-  unsigned int nplanes(m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers());
+  unsigned int nplanes(m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers());
   std::set<unsigned int> **grouped_modules = new std::set<unsigned int>*[nregions];
   for (unsigned int ireg=0;ireg!=nregions;++ireg) grouped_modules[ireg] = new std::set<unsigned int>[nplanes];
 
@@ -102,7 +102,7 @@ void FPGATrackSimDetectorTool::dumpGlobalToLocalModuleMap() {
       // verify if accoring the current pmap this is module that has to be mapped
 
       // convert the FPGATrackSimHit representation in FPGATrackSimHit to interact with the PMAP
-      m_FPGATrackSimMapping->PlaneMap_2nd()->map(curmodrawhit);
+      m_FPGATrackSimMapping->PlaneMap_2nd(0)->map(curmodrawhit);
 
       bool hasOneRegion(false); // it will become true if at least 1 tower is associated with the module
       for (unsigned int ireg=0;ireg!=nregions;++ireg) { // loop over the regions

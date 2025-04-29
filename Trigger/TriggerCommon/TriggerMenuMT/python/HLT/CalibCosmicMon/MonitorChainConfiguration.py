@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -38,6 +38,32 @@ def timeBurnerCfg(flags):
     msca = MenuSequence(flags, selAcc,
                           HypoToolGen=TimeBurnerHypoToolGen)
     return msca
+
+
+#----------------------------------------------------------------
+def LArSuperCellMonitoringGenCfg(flags,appendName=""):
+   from LArMonitoring.LArSuperCellMonAlg import LArSuperCellMonConfigHLT
+   # Input maker - required by the framework, but inputs don't matter for LArSuperCell
+   inputMaker = CompFactory.InputMakerForRoI("IM_LArSuperCellMon"+appendName,
+                                             RoITool=CompFactory.ViewCreatorInitialROITool(),
+                                             RoIs="LArSuperCellMonRoIs"+appendName,
+   )
+   reco = InEventRecoCA('LArSuperCellMonitoring'+appendName,inputMaker=inputMaker)
+   reco.merge( LArSuperCellMonConfigHLT(flags,name="LArSuperCellMonConfigHLT"+appendName) )
+   # TimeBurner alg works as a reject-all hypo
+   selAcc = SelectionCA('LArSuperCellMonitoringSequence'+appendName)
+   selAcc.mergeReco(reco)
+   selAcc.addHypoAlgo(
+       TimeBurnerCfg(flags,
+                     name="LArSuperCellMonHypoConfig"+appendName,
+                     SleepTimeMillisec=0
+       )
+   )
+
+   # TimeBurnerHypo is never even called
+   msca = MenuSequence(flags, selAcc,
+                         HypoToolGen=TimeBurnerHypoToolGen)
+   return msca
 
 def L1TopoOnlineMonitorSequenceCfg(flags):
 
@@ -88,6 +114,26 @@ def MistimeMonSequenceCfg(flags):
         return MenuSequence(flags, selAcc,
                 HypoToolGen = TrigGenericHypoToolFromDict)
 
+def CaloClusterMonitorCfg(flags, suffix = ""):
+   from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusteringCfg
+   
+   reco = InEventRecoCA('CaloClusterMonitoring' + suffix)
+   
+   reco.merge( hltCaloTopoClusteringCfg(flags, namePrefix="CaloMon", nameSuffix="FS" + suffix, CellsName="CaloCellsFS" + suffix, monitorCells=False, clustersKey="HLT_MonitoringCaloClusters" + suffix) )
+      
+   selAcc = SelectionCA('CaloClusterMonitoringSequence' + suffix)
+   
+   selAcc.mergeReco(reco)
+   
+   selAcc.addHypoAlgo(
+       TimeBurnerCfg(flags,
+                     name="CaloClusterMonitoringHypoConfig" + suffix,
+                     SleepTimeMillisec=0
+       )
+   )
+
+   return MenuSequence(flags, selAcc, HypoToolGen=TimeBurnerHypoToolGen)
+                      
 
 #----------------------------------------------------------------
 # Class to configure chain
@@ -113,10 +159,14 @@ class MonitorChainConfiguration(ChainConfigurationBase):
 
         if monType == 'timeburner':
             chainSteps.append(self.getTimeBurnerStep(flags))
+        elif monType == 'larsupercellmon':
+            chainSteps.append(self.getLArSuperCellMonitoringGenCfg(flags))
         elif monType == 'l1topoPh1debug':
             chainSteps.append(self.getL1TopoOnlineMonitorStep(flags))
         elif monType == 'mistimemonj400':
             chainSteps.append(self.getMistimeMonStep(flags))
+        elif monType == 'caloclustermon':
+            chainSteps.append(self.getCaloClusterMonitorCfg(flags))
         else:
             raise RuntimeError('Unexpected monType '+monType+' in MonitorChainConfiguration')
 
@@ -127,6 +177,21 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getTimeBurnerStep(self, flags):
         return self.getStep(flags, 'TimeBurner',[timeBurnerCfg])
+
+    # --------------------
+    # LArSuperCellMon configuration
+    # --------------------
+    def getLArSuperCellMonitoringGenCfg(self, flags):
+        appendName=""
+        if ( "_FILLED" in self.chainL1Item ):
+             appendName="_filled"
+        elif ( "_EMPTY" in self.chainL1Item ):
+             appendName="_empty"
+        elif ( "_FIRSTEMPTY" in self.chainL1Item ):
+             appendName="_firstempty"
+        else :
+             appendName="_dummy"
+        return self.getStep(flags, 'larsupercellmon'+appendName,[LArSuperCellMonitoringGenCfg],appendName=appendName)
 
     # --------------------
     # L1TopoOnlineMonitor configuration
@@ -141,3 +206,17 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getMistimeMonStep(self, flags):
         return self.getStep(flags, 'MistimeMon',[MistimeMonSequenceCfg])
+        
+    # --------------------
+    # CaloClusterMonitor configuration
+    # --------------------
+    def getCaloClusterMonitorCfg(self, flags):
+        this_suffix = ""
+        if "_FILLED" in self.chainL1Item:
+             this_suffix = "_filled"
+        elif "_EMPTY" in self.chainL1Item:
+             this_suffix = "_empty"
+        elif "_FIRSTEMPTY" in self.chainL1Item:
+             this_suffix = "_firstempty"
+        return self.getStep(flags, 'caloclustermon' + this_suffix, [CaloClusterMonitorCfg], suffix = this_suffix)
+        

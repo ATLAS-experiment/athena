@@ -106,15 +106,20 @@ def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
         ITkPixelReadoutGeometryCfg)
     acc = ITkPixelReadoutGeometryCfg(flags)
 
-    if "PixelConditionsSummaryTool" not in kwargs:
-        from PixelConditionsTools.ITkPixelConditionsSummaryConfig import (
-            ITkPixelConditionsSummaryCfg)
-        kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(
-            ITkPixelConditionsSummaryCfg(flags)))
+    kwargs.setdefault("PixelConditionsSummaryTool", None) # PixelDetElStatus is used instead
+    if "PixelDetElStatus" not in kwargs :
+        if not flags.Trigger.doHLT :
+            from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
+                ITkPixelDetectorElementStatusAlgCfg)
+            acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("PixelDetElStatus", "ITkPixelDetectorElementStatus")
+
+    kwargs.setdefault("PixelReadoutManager","ITkPixelReadoutManager")
 
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("CheckGanged", False)
-
+    kwargs.setdefault("isITk", True)
+    
     acc.setPrivateTools(CompFactory.InDet.PixelRDOTool(name, **kwargs))
     return acc
 
@@ -377,6 +382,9 @@ def SCT_ClusteringToolCfg(
 
     kwargs.setdefault("SCTDetElStatus",
                       "SCTDetectorElementStatusWithoutFlagged")
+    # Simplification introduced in r25
+    kwargs.setdefault("doSimplePositionWidthCalculation",
+                      flags.InDet.doSCTSimpleWidth)
 
     if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
@@ -402,19 +410,22 @@ def SCT_ClusteringToolCfg(
     return acc
 
 
-def Trig_SCT_ClusteringToolCfg(flags, name="Trig_SCT_ClusteringTool"):
+def Trig_SCT_ClusteringToolCfg(flags, name="Trig_SCT_ClusteringTool", **kwargs):
     acc = ComponentAccumulator()
 
-    from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
-        SCT_ConditionsSummaryToolCfg)
-    conditionsTool = acc.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(
-        flags, withFlaggedCondTool=False, withTdaqTool=False))
+    if "conditionsTool" not in kwargs:
+        from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
+            SCT_ConditionsSummaryToolCfg)
+        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(
+            SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False, withTdaqTool=False)))
 
-    acc.setPrivateTools(acc.popToolsAndMerge(SCT_ClusteringToolCfg(
-        flags, name,
-        conditionsTool=conditionsTool,
-        SCTDetElStatus=""
-    )))
+    kwargs.setdefault("SCTDetElStatus", "")
+        
+    # Keep r24 config for now
+    kwargs.setdefault("doSimplePositionWidthCalculation", False)
+    
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        SCT_ClusteringToolCfg(flags, name, **kwargs)))
     return acc
 
 
@@ -426,13 +437,15 @@ def ITKStrip_SCT_ClusteringToolCfg(
     acc = ITkStripReadoutGeometryCfg(flags)
 
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("useRowInformation", True)  # ITk-specific clustering
+    kwargs.setdefault("doSimplePositionWidthCalculation", True)
 
-    if "conditionsTool" not in kwargs:
-        from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
-            ITkStripConditionsSummaryToolCfg)
-        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(
-            ITkStripConditionsSummaryToolCfg(flags)))
+    kwargs.setdefault("conditionsTool",None) # SCTDetElStatus is used instead
+    if "SCTDetElStatus" not in kwargs :
+        if not flags.Trigger.doHLT :
+            from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
+                ITkStripDetectorElementStatusAlgCfg)
+            acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("SCTDetElStatus","ITkStripDetectorElementStatus")
 
     if "LorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import (

@@ -47,10 +47,22 @@ int main(int, char**)
 
     string pmap_path="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/maps_9L/OtherFPGAPipelines/v0.20/eta0103phi0305.pmap";
     string rmap_path="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/maps_9L/OtherFPGAPipelines/v0.20/eta0103phi0305.rmap";
-    //string rmap_path="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-23-00-01.rmap";
+
+    std::ifstream finTest(pmap_path);
+    if (!finTest.is_open())
+    {
+        throw ("FPGATrackSimPlaneMap Couldn't open " + pmap_path);
+    }
+    vector<int> overrides;    
+    finTest.close();
+    finTest.open(pmap_path);
 
     std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  test_pmaps;
-    test_pmaps.push_back(std::unique_ptr< FPGATrackSimPlaneMap> (new FPGATrackSimPlaneMap(pmap_path, 0, 1))); 
+    for (int i = 0; i<6; i++)
+    {
+        test_pmaps.push_back(std::unique_ptr< FPGATrackSimPlaneMap> (new FPGATrackSimPlaneMap(finTest, 0, 1,overrides))); 
+    }
+
     FPGATrackSimRegionMap rmap(test_pmaps, rmap_path);
 
     test(rmap);

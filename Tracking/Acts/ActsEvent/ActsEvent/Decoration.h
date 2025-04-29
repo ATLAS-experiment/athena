@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_Decoration_h
 #define ActsEvent_Decoration_h
@@ -34,7 +34,14 @@ struct accepted_decoration_types {
   constexpr static bool value =
       std::is_same<T, float>::value or std::is_same<T, double>::value or
       std::is_same<T, short>::value or std::is_same<T, int>::value or
-      std::is_same<T, std::uint32_t>::value;
+      std::is_same<T, std::uint8_t>::value or
+      std::is_same<T, std::uint16_t>::value or
+      std::is_same<T, std::uint32_t>::value or
+      std::is_same<T, std::uint64_t>::value or
+      std::is_same<T, std::int8_t>::value or
+      std::is_same<T, std::int16_t>::value or
+      std::is_same<T, std::int32_t>::value or
+      std::is_same<T, std::int64_t>::value;
 };
 
 // getter that is good for non-mutable containers
@@ -59,7 +66,9 @@ const std::any decorationGetter(const SG::IAuxStore* container,
 template <typename T>
 std::any decorationSetter(SG::IAuxStore* container, ActsTrk::IndexType idx,
                           SG::auxid_t decorationId) {
-  void* data = container->getData(decorationId, idx + 1, idx + 1);
+  assert (idx < container->size());
+  // The size requested for the decoration must match the size of the container.
+  void* data = container->getData(decorationId, container->size(), container->size());
   return &(static_cast<T*>(data)[idx]);
 }
 
@@ -89,7 +98,7 @@ static Decoration decoration(std::string_view n, GetterType g, CopierType c,
 
 /**
 * @arg container - source container to look for decorations
-* @arg staticVaraibles - set of names of predefined variables for this container
+* @arg staticVariables - set of names of predefined variables for this container
 */
 std::vector<Decoration> restoreDecorations(
     const SG::IConstAuxStore* container,

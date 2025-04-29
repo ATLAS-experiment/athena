@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CustomParticle.h"
@@ -20,7 +20,4 @@ CustomParticle::CustomParticle(
                                G4DecayTable        *decaytable )
   : G4ParticleDefinition( aName,mass,width,charge,iSpin,iParity,
                           iConjugation,iIsospin,iIsospin3,gParity,pType,
-                          lepton,baryon,encoding,stable,lifetime,decaytable )
-  , m_cloud(0)
-  , m_spec(0)
-{}
+                          lepton,baryon,encoding,stable,lifetime,decaytable ) {}

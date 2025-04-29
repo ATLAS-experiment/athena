@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 #define MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
+
 #include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
+
 
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -23,7 +23,7 @@
 namespace MuonR4{
     class SpacePointMakerAlg: public AthReentrantAlgorithm {
         public:
-            SpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            using AthReentrantAlgorithm::AthReentrantAlgorithm; 
 
             ~SpacePointMakerAlg() = default;
 
@@ -120,11 +120,11 @@ namespace MuonR4{
              * @param hitsPerChamber: List of all premade space points which have to be sorted
              * @param finalContainer: Output SpacePoint bucket container.
              *  */
-            void distributePointsAndStore(const EventContext& ctx,
+            void distributePointsAndStore(
                                           SpacePointsPerChamber&& hitsPerChamber,
                                           SpacePointContainer& finalContainer) const;
 
-            void distributePointsAndStore(const EventContext& ctx,
+            void distributePointsAndStore(
                                           std::vector<SpacePoint>&& spacePoints,
                                           SpacePointBucketVec& splittedContainer) const;
 
@@ -161,7 +161,10 @@ namespace MuonR4{
             
             SG::WriteHandleKey<SpacePointContainer> m_writeKey{this, "WriteKey", "MuonSpacePoints"};
 
-            Gaudi::Property<double> m_spacePointWindow{this, "spacePointWindowSize", 2.*Gaudi::Units::m,
+            Gaudi::Property<double> m_spacePointWindow{this, "spacePointWindowSize", 0.8*Gaudi::Units::m,
+                                                       "Maximal distance between consecutive hits in a bucket"};
+
+            Gaudi::Property<double> m_maxBucketLength{this, "maxBucketLength", 2.*Gaudi::Units::m,
                                                        "Maximal size of a space point bucket"};
             
             Gaudi::Property<double> m_spacePointOverlap{this, "spacePointOverlap", 25.*Gaudi::Units::cm,

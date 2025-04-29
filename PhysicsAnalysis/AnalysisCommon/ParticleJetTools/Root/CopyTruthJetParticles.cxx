@@ -44,7 +44,7 @@ StatusCode CopyTruthJetParticles::initialize() {
 
 
 
-bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp, 
+bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
                                              std::vector<const xAOD::TruthParticle*>& promptLeptons,
                                              std::map<const xAOD::TruthParticle*,unsigned int>& tc_results) const {
 
@@ -81,13 +81,21 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   // -- added for dark jet clustering -- //
   // new classifiers to account for dark particles
   // for dark jets: ignore SM particles; include only "stable" dark hadrons
-  if (!m_includeSM && ((abs(tp->pdgId()) < 4.9e6) || (abs(tp->pdgId()) >= 5e6))) return false;
+  if (!m_includeSM && !MC::isHiddenValley(tp)) return false;
   if (m_includeDark) {
     if (abs(tp->pdgId()) <= 4900101) return false; // ignore Xd, qd, gd
-    if (tp->hasDecayVtx() && (abs(tp->child()->pdgId()) >= 4.9e6)) return false; // ignore "non-stable" dark hadrons (decaying to dark sector) -- "stable" if decaying to SM
+    if (tp->hasDecayVtx()) {
+       size_t good_hadrons = 0;
+       for (size_t p = 0; p < tp->end_vertex()->nOutgoingParticles(); ++p) {
+           if (!MC::isHiddenValley(tp->child(p))) {
+                good_hadrons++; 
+           }
+       }
+       if (good_hadrons == 0) return false; // ignore "non-stable" dark hadrons (decaying to dark sector) -- "stable" if decaying to SM
+    }
   }
   // for SM jets: ignore dark particles - probably unnecessary bc of status requirement above
-  if (!m_includeDark && (std::abs(tp->pdgId()) >= 4.9e6) && (std::abs(tp->pdgId()) < 5e6)) return false;
+  if (!m_includeDark && MC::isHiddenValley(tp)) return false;
   // ----------------------------------- //
 
   if (!m_includePromptPhotons && MC::isPhoton(pdgid) && tp->hasProdVtx()){
@@ -206,8 +214,7 @@ int CopyTruthJetParticles::execute() const {
         continue;
     // Cannot use the truth helper functions; they're written for HepMC
     // Last two switches only apply if the thing is a lepton and not a tau
-    int pdgid = tp->pdgId();
-    if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->hasProdVtx()){
+    if ((MC::isElectron(tp) || MC::isMuon(tp)) && tp->hasProdVtx()) {
       // If this is a prompt, generator stable lepton, then we can use it
       if(MC::isStable(tp) && !HepMC::is_simulation_particle(tp) && MCTruthPartClassifier::isPrompt(getTCresult(tp, tc_results))) {
         promptLeptons.push_back(tp);
@@ -221,7 +228,7 @@ int CopyTruthJetParticles::execute() const {
     if (tp->pt() < m_ptmin)
         continue;
 
-    if (classifyJetInput(tp, promptLeptons, tc_results)) { 
+    if (classifyJetInput(tp, promptLeptons, tc_results)) {
       ptruth->push_back(tp);
       numCopied += 1;
     }

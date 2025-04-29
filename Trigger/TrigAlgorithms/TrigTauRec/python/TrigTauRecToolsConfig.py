@@ -46,7 +46,6 @@ def trigTauTrackFinderCfg(flags, name='', TrackParticlesContainer=''):
         maxDeltaZ0wrtLeadTrk            = 0.75*mm,
         removeTracksOutsideZ0wrtLeadTrk = True,
         ParticleCaloExtensionTool       = ParticleCaloExtensionTool,
-        BypassSelector                  = False,
         BypassExtrapolator              = True,
         tauParticleCache                = "",
         TrackToVertexIPEstimator        = AtlasTrackToVertexIPEstimator,
@@ -140,6 +139,7 @@ def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
 
         # Decorated TauJet variable names:
         OutputVarname       = f'{tau_id}_Score',
+        OutputDiscriminant  = id_flags.OutputDiscriminant,
         OutputPTau          = f'{tau_id}_ProbTau',
         OutputPJet          = f'{tau_id}_ProbJet',
 

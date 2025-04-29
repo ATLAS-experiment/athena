@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Digitization/ALFA_PileUpTool.h"
@@ -18,17 +18,13 @@
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandPoissonQ.h"
 
-#include <algorithm>
 
-#include <map>
 
 #include "Identifier/Identifier.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
 // from now old part
 
-#include <cmath>
-#include <functional>
 
 //for truth particles
 #include "AtlasHepMC/GenParticle.h"
@@ -43,6 +39,11 @@
 #include "GaudiKernel/ITHistSvc.h"
 
 #include "PathResolver/PathResolver.h"
+#include <fstream> 
+#include <algorithm>
+#include <map>
+#include <cmath>
+#include <functional>
 
 // *********************************************************************************
 
@@ -672,49 +673,52 @@ StatusCode ALFA_PileUpTool::fill_OD_DigitCollection(CLHEP::HepRandomEngine* rndE
 }
 
 
-  StatusCode ALFA_PileUpTool::XTalk() 
-  {	
+StatusCode 
+ALFA_PileUpTool::XTalk() {	
+  std::ifstream fXTalk;  
+  std::stringstream ss;
+  std::string fname;
 	for (unsigned int j=0; j<8; j++){
 		
-		m_s.str("");
+		ss.str("");
 			
-		m_filename = "Xtalk_station";
-		m_s << j+1;
-		m_filename += m_s.str();
-		m_filename += ".txt";
+		fname = "Xtalk_station";
+		ss << j+1;
+		fname += ss.str();
+		fname += ".txt";
 		
-		ATH_MSG_DEBUG("file name " << m_filename.c_str() );
+		ATH_MSG_DEBUG("file name " << fname);
 		
-		std::string filePath = PathResolver::find_file(m_filename,"DATAPATH", PathResolver::RecursiveSearch);
+		std::string filePath = PathResolver::find_file(fname,"DATAPATH", PathResolver::RecursiveSearch);
 		
 		if(filePath.length() == 0)
 		{
-			ATH_MSG_FATAL(" XTalk file " <<  m_filename.c_str() << " not found in Datapath");
+			ATH_MSG_FATAL(" XTalk file " <<  fname<< " not found in Datapath");
 			throw std::runtime_error("FATAL: mapping MD maroc-mapmt not found in Datapath.");
 		}
 		
 		else
 		{
-			ATH_MSG_DEBUG("the XTALK file \"" <<  m_filename.c_str() << "\" found in Datapath");
-			ATH_MSG_DEBUG("filePath =  " << filePath.c_str() );
+			ATH_MSG_DEBUG("the XTALK file \"" <<  fname << "\" found in Datapath");
+			ATH_MSG_DEBUG("filePath =  " << filePath);
 		}
 
-		m_fXTalk.open(filePath.c_str());
+		fXTalk.open(filePath.c_str());
 		
-		if (m_fXTalk.is_open())
+		if (fXTalk.is_open())
 		{
 			for (unsigned int i=0;i<127;i++)
 			{				
-				m_fXTalk >> m_cross_talk[j][i];
+				fXTalk >> m_cross_talk[j][i];
 
 				ATH_MSG_DEBUG("cross_talk[" << j << "][" << i << "] = " << m_cross_talk[j][i]);
 
 			}
-			m_fXTalk.close();
+			fXTalk.close();
 		}
 		else
 		{
-			ATH_MSG_ERROR("the file " << m_filename.c_str() << " was not open");
+			ATH_MSG_ERROR("the file " << fname<< " was not open");
 		      return StatusCode::FAILURE;
 		}	
 	}		

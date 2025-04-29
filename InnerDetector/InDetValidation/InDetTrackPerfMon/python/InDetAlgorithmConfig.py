@@ -24,12 +24,25 @@ def TruthHitDecoratorAlgCfg( flags, name="InDetPhysValTruthDecoratorAlg", **kwar
     acc.addPublicTool( extrapolator )
     kwargs.setdefault( "Extrapolator", extrapolator )
 
+    PixelClusterContainerName = "PixelClusters"
+    SCTClusterContainerName   = "SCT_Clusters"
     if flags.Detector.GeometryITk :
-        kwargs.setdefault( "PixelClusterContainerName", "ITkPixelClusters" )
-        kwargs.setdefault( "SCTClusterContainerName",   "ITkStripClusters" )
+        if flags.PhysVal.IDTPM.currentTrkAna.useActsSiMeasurements :
+            PixelClusterContainerName = "ITkPixelMeasurements_offl"
+            SCTClusterContainerName   = "ITkStripMeasurements_offl"
+        else :
+            PixelClusterContainerName = "ITkPixelMeasurements"
+            SCTClusterContainerName   = "ITkStripMeasurements"
 
-    kwargs.setdefault( 'TruthParticleIndexDecoration', '' ) # FIXME - tech effs
-    #                   'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '' )
+    kwargs.setdefault( "PixelClusterContainerName", PixelClusterContainerName )
+    kwargs.setdefault( "SCTClusterContainerName",   SCTClusterContainerName )
+
+    doTechEff = False
+    for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames:
+        if getattr( flags.PhysVal.IDTPM, trkAnaName+".plotTechnicalEfficiencies" ):
+            doTechEff = True
+            break
+    kwargs.setdefault( 'TruthParticleIndexDecoration', 'origTruthIndex' if doTechEff else '' )
 
     ## To be eventually migrated to IDTPM if need be
     acc.addEventAlgo( CompFactory.InDetPhysValTruthDecoratorAlg( name, **kwargs ) )

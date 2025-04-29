@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanBinning.cxx
@@ -8,6 +8,11 @@
  */
 
 #include "FPGATrackSimGenScanMonitoring.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TTree.h"
+#include <bit>
 
 
 FPGATrackSimGenScanMonitoring::FPGATrackSimGenScanMonitoring(const std::string& algname, const std::string &name, const IInterface *ifc) :
@@ -27,6 +32,8 @@ StatusCode FPGATrackSimGenScanMonitoring::initialize()
 
   ATH_CHECK(m_tHistSvc.retrieve());
 
+  ATH_CHECK(bookTree());
+
   return StatusCode::SUCCESS;
 
 }
@@ -37,20 +44,23 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(
   m_nLayers = nLayers;
   m_binning = binning;
   m_rin=rin;
-  m_rout=rout;
-  double phiScale = m_binning->phiHistScale();
-  double etaScale = m_binning->phiHistScale();
-  double drScale = (rout-rin) / nLayers;
+  m_rout = rout;
 
+  // This is because if you change the binning class you can change what axis
+  // ranges you need for the plotting
+  double phiScale = m_binning->phiHistScale();
+  double etaScale = m_binning->etaHistScale();
+  double drScale = (rout-rin) / nLayers;
+  ATH_MSG_INFO("Hist scales phi: " << phiScale << "  eta: " << etaScale << "  dr:" << drScale);
+  
   allocateDataFlowCounters();
 
   // Truth Parameter distributions, bounds should cover 3x nominal range
   for (unsigned i = 0; i < FPGATrackSimGenScanBinningBase::NPars; i++) {
     ATH_CHECK(makeAndRegHist(
         m_truthpars_hists[i], ("truth" + m_binning->parNames(i)).c_str(),
-        (";" + m_binning->parNames(i) + ";").c_str(), 200,
-        2 * m_binning->m_parMin[i] - m_binning->m_parMax[i],
-        2 * m_binning->m_parMax[i] - m_binning->m_parMin[i]));
+        (";" + m_binning->parNames(i) + ";").c_str(), 20000,
+        m_binning->m_parMin[i], m_binning->m_parMax[i]));
   }
 
   // All Hit level histograms
@@ -81,11 +91,11 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(
   ATH_CHECK(makeAndRegHist(m_etaShift2D_road, "etaShift2D_road", ";Phi Shift; R", 
                           400, -etaScale, etaScale, 100, 0, 400));
 
-  ATH_CHECK(makeAndRegHist(m_hitsPerLayer_road , "HitsPerLayer_road" , "", m_nLayers, 0, m_nLayers, 20, 0, 20));
+  ATH_CHECK(makeAndRegHist(m_hitsPerLayer_road , "HitsPerLayer_road" , "; Layer; Hits", m_nLayers, 0, m_nLayers, 20, 0, 20));
 
 
   // Data flow hists
-  ATH_CHECK(makeAndRegHist(m_hitsLoadedPerLayer, "HitsLoadedPerLayer", "", m_nLayers, 0, m_nLayers));
+  ATH_CHECK(makeAndRegHist(m_hitsLoadedPerLayer, "HitsLoadedPerLayer", "; Layer; Hits", m_nLayers, 0, m_nLayers));
   ATH_CHECK(makeAndRegHist(m_inputHits, "InputHits",  ";Input Hits", 200, 0, 100000));
   ATH_CHECK(makeAndRegHist(m_inputHitsPerSlice, "InputHitsPerSlice",  ";Input Hits Per Slice", 1000, 0, 10000));
   ATH_CHECK(makeAndRegHist(m_inputHitsPerRow, "InputHitsPerRow",  ";Input Hits Per Row", 1000, 0, 10000));
@@ -108,8 +118,8 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(
     ";Phi In Extrap w/ Curve Limit", 2000, -phiScale, phiScale));
   ATH_CHECK(makeAndRegHist(m_etaOutExtrap, "EtaOutExtrap", ";Eta Out Extrap", 2000, -etaScale, etaScale));
   ATH_CHECK(makeAndRegHist(m_etaInExtrap, "EtaInExtrap", ";Eta In Extrap", 2000, -etaScale, etaScale));
-  ATH_CHECK(makeAndRegHist(m_deltaPhi, "DeltaPhi", ";Delta Phi [rad]", 2000, -phiScale, phiScale));
-  ATH_CHECK(makeAndRegHist(m_deltaEta, "DeltaEta", ";Delta Eta [rad]", 2000, -etaScale, etaScale));
+  ATH_CHECK(makeAndRegHist(m_deltaPhi, "DeltaPhi", ";Delta Phi [rad]", 2000, -1.0*phiScale, phiScale));
+  ATH_CHECK(makeAndRegHist(m_deltaEta, "DeltaEta", ";Delta Eta [rad]", 2000, -1.0*etaScale, etaScale));
   ATH_CHECK(makeAndRegHist(m_deltaPhiDR, "DeltaPhiDR", ";Delta Phi / Delta R", 2000, -0.1 * phiScale, 0.1 * phiScale));
   ATH_CHECK(makeAndRegHist(m_deltaEtaDR, "DeltaEtaDR", ";Delta Eta / Delta R", 2000, -0.1 * phiScale, 0.1 * phiScale));
   ATH_CHECK(makeAndRegHistVector(m_deltaPhiByLyr, m_nLayers, NULL, "DeltaPhiDR", ";Delta Phi / Delta R", 2000, -0.1 * phiScale, 0.1 * phiScale));
@@ -119,19 +129,19 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(
   ATH_CHECK(makeAndRegHistVector(
       m_pairSetMatchPhi, m_twoPairClasses.size(), &m_twoPairClasses,
       "PairSetMatchPhi", ";PairSet Match Phi [mm]", 500,
-      -phiScale / drScale, phiScale / drScale));
+      -1*phiScale / drScale, phiScale / drScale));
   ATH_CHECK(makeAndRegHistVector(
       m_pairSetMatchEta, m_twoPairClasses.size(), &m_twoPairClasses,
       "PairSetMatchEta", ";PairSet Match Eta [mm]", 500,
-      -etaScale / drScale, etaScale / drScale));
+      -1*etaScale / drScale, etaScale / drScale));
   ATH_CHECK(makeAndRegHistVector(
       m_deltaDeltaPhi, m_twoPairClasses.size(), &m_twoPairClasses,
-      "DeltaDeltaPhi", ";DeltaDelta   Phi [mm]", 500, -phiScale / drScale,
+      "DeltaDeltaPhi", ";DeltaDelta   Phi [mm]", 500, -1.0*phiScale / drScale,
       phiScale / drScale));
   ATH_CHECK(makeAndRegHistVector(
       m_deltaDeltaEta, m_twoPairClasses.size(), &m_twoPairClasses,
-      "DeltaDeltaEta", ";DeltaDelta   Eta [mm]", 500, -etaScale / drScale,
-      etaScale / drScale));
+      "DeltaDeltaEta", ";DeltaDelta   Eta [mm]", 500, -1.0 * etaScale / drScale,
+      1.0 * etaScale / drScale));
   ATH_CHECK(makeAndRegHistVector(m_phiCurvature, m_twoPairClasses.size(),
                                &m_twoPairClasses, "PhiCurvature",
                                ";Phi Curvature ", 500,
@@ -167,8 +177,48 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(
                          ";PairSet Match Eta vs dRin [mm]", 100, 0, 100, 500,
                          -100.0 * etaScale, 100.0 * etaScale));
 
+  ATH_CHECK(makeAndRegHist(m_unpairedHits, "UnpairedHits", "; Stage ; Unpaired Hits" , m_nLayers+1, 0, m_nLayers+1, 20, 0, 20));
+  ATH_CHECK(makeAndRegHist(m_pairsetsIncr, "PairSetsIncr", "; Stage ; Pairsets" , m_nLayers+1, 0, m_nLayers+1, 20, 0, 20));
+  ATH_CHECK(makeAndRegHist(m_pairsetsHits, "PairSetsHits", "; Stage ; Hits in Pairsets" , m_nLayers+1, 0, m_nLayers+1, 20, 0, 20));
+  ATH_CHECK(makeAndRegHist(m_totalInputIncr, "TotalInputIncr", "; Stage ; Pairsets+Unpaired" , m_nLayers+1, 0, m_nLayers+1, 20, 0, 20));
+  ATH_CHECK(makeAndRegHist(m_binStagesIncr, "BinStagesIncr", "; Stage ; Bins at this point" , m_nLayers+1, 0, m_nLayers+1, 20, 0, 20));
+
   return StatusCode::SUCCESS;
 }
+
+
+StatusCode FPGATrackSimGenScanMonitoring::bookTree() {
+  ATH_MSG_DEBUG("Booking Layers Study  Tree");
+  m_bin_module_tree = new TTree("LayerStudy","LayerStudy");
+  m_bin_module_tree->Branch("bin", &m_tree_bin);
+  m_bin_module_tree->Branch("r", &m_tree_r);
+  m_bin_module_tree->Branch("z", &m_tree_z);
+  m_bin_module_tree->Branch("id", &m_tree_id);
+  m_bin_module_tree->Branch("hash", &m_tree_hash);
+  m_bin_module_tree->Branch("layer", &m_tree_layer);
+  m_bin_module_tree->Branch("side", &m_tree_side);
+  m_bin_module_tree->Branch("etamod",  &m_tree_etamod);
+  m_bin_module_tree->Branch("phimod",  &m_tree_phimod);
+  m_bin_module_tree->Branch("dettype", &m_tree_dettype);
+  m_bin_module_tree->Branch("detzone",  &m_tree_detzone);
+
+  ATH_CHECK(m_tHistSvc->regTree(m_dir + m_bin_module_tree->GetName(), m_bin_module_tree));
+  return StatusCode::SUCCESS;
+}
+void FPGATrackSimGenScanMonitoring::ClearTreeVectors()
+{
+  m_tree_r.clear();
+  m_tree_z.clear();
+  m_tree_id.clear();
+  m_tree_hash.clear();
+  m_tree_layer.clear();
+  m_tree_side.clear();
+  m_tree_etamod.clear();
+  m_tree_phimod.clear();
+  m_tree_dettype.clear();
+  m_tree_detzone.clear();
+}
+
 
 void FPGATrackSimGenScanMonitoring::allocateDataFlowCounters() {
 
@@ -181,6 +231,19 @@ void FPGATrackSimGenScanMonitoring::allocateDataFlowCounters() {
   m_outputhitsperrow.setsize(m_binning->sliceAndScanBins(),0);
   m_outputroadsperrow.setsize(m_binning->sliceAndScanBins(),0);
 }
+
+void FPGATrackSimGenScanMonitoring::resetDataFlowCounters() {
+  for (auto& bin: m_hitsCntByLayer) { bin =0;}
+  for (auto& bin: m_inputhitsperslice) { bin.data() =0;}
+  for (auto& bin: m_inputhitsperrow) { bin.data() =0;}
+  for (auto& bin: m_outputhitsperslice) { bin.data() =0;}
+  for (auto& bin: m_outputhitsperrow) { bin.data() =0;}
+  for (auto &bin : m_outputroadsperrow) {
+    bin.data() = 0;
+  }
+}
+
+
 
 // This is done at the end of event execution to store any graphs that were created
 StatusCode FPGATrackSimGenScanMonitoring::registerGraphs() 
@@ -201,10 +264,8 @@ StatusCode FPGATrackSimGenScanMonitoring::registerGraphs()
 
 
 void FPGATrackSimGenScanMonitoring::fillBinLevelOutput(const FPGATrackSimGenScanBinningBase::IdxSet &idx,
-                                  const FPGATrackSimGenScanTool::BinEntry &data,                            
-                                  const std::vector<std::vector<const FPGATrackSimGenScanTool::StoredHit *> > & hitsByLayer)
+                                  const FPGATrackSimGenScanTool::BinEntry &data)
 {
-  
   setBinPlotsActive(idx);
 
   m_outputHitsPerBin->Fill(data.hits.size());
@@ -221,13 +282,43 @@ void FPGATrackSimGenScanMonitoring::fillBinLevelOutput(const FPGATrackSimGenScan
       m_phiShift2D_road->Fill(hit.phiShift, hit.hitptr->getR());
       m_etaShift2D_road->Fill(hit.etaShift, hit.hitptr->getR());
     }
-  }
 
+
+    // Module mapping and Layer definition studies
+    // first sort hits by r+z radii
+    std::vector<FPGATrackSimGenScanTool::StoredHit> sorted_hits = data.hits;
+    std::sort(sorted_hits.begin(), sorted_hits.end(),
+              [](const auto &hit1, const auto &hit2) {
+                return hit1.rzrad() < hit2.rzrad();
+              });
+
+    // Fill tree
+    m_tree_bin = std::vector<unsigned>(idx);
+    ClearTreeVectors();
+    for (auto &hit : sorted_hits) {
+      m_tree_r.push_back(hit.hitptr->getR());
+      m_tree_z.push_back(hit.hitptr->getZ());
+      m_tree_id.push_back(hit.hitptr->getIdentifier());
+      m_tree_hash.push_back(hit.hitptr->getIdentifierHash());
+      m_tree_layer.push_back(hit.hitptr->getLayerDisk());
+      m_tree_side.push_back(hit.hitptr->getSide());
+      m_tree_etamod.push_back(hit.hitptr->getEtaModule());
+      m_tree_phimod.push_back(hit.hitptr->getPhiModule());
+      m_tree_dettype.push_back((int)hit.hitptr->getDetType());
+      m_tree_detzone.push_back((int)hit.hitptr->getDetectorZone());
+    }
+    ATH_MSG_DEBUG("For tree, bin=" << idx << " mods=" << m_tree_hash);
+    m_bin_module_tree->Fill();
+  }
+}
+
+void FPGATrackSimGenScanMonitoring::fillHitsByLayer(                           
+      const std::vector<std::vector<const FPGATrackSimGenScanTool::StoredHit *> > & hitsByLayer)
+{
   for (unsigned lyr = 0; lyr < m_nLayers; lyr++)
   {
     m_hitsPerLayer_road->Fill(lyr, hitsByLayer[lyr].size());
   }
-
 }
 
 void  FPGATrackSimGenScanMonitoring::fillHitLevelInput(const FPGATrackSimHit* hit) {
@@ -247,7 +338,7 @@ void  FPGATrackSimGenScanMonitoring::fillHitLevelInput(const FPGATrackSimHit* hi
         m_phiTrueBinShift[m_nLayers]->Fill(m_binning->phiShift(m_truthbin,hit)); 
         m_phiTrueBinShift[hit->getLayer()]->Fill(m_binning->phiShift(m_truthbin,hit)); 
       }
-    }
+  }
 }
 
 void FPGATrackSimGenScanMonitoring::sliceCheck( const std::vector<unsigned>& sliceidx) {
@@ -263,6 +354,7 @@ void FPGATrackSimGenScanMonitoring::pairFilterCheck(
     bool passedPairFilter) {
 
   m_roadFilterFlow->Fill(0);
+  m_pairs->Fill(pairs.pairList.size());
   m_filteredpairs->Fill(filteredpairs.pairList.size());
 
   if (passedPairFilter) {
@@ -321,7 +413,6 @@ void FPGATrackSimGenScanMonitoring::fillInputSummary(
     m_hitsPerLayer->Fill(i, m_hitsCntByLayer[i]);
     m_hitsPerLayer2D->Fill(i, m_hitsCntByLayer[i]);
   }
-
 }
 
 void FPGATrackSimGenScanMonitoring::fillOutputSummary(
@@ -410,15 +501,30 @@ void FPGATrackSimGenScanMonitoring::parseTruthInfo(
 
     m_truthIsValid = true;
   }
+}
 
+void FPGATrackSimGenScanMonitoring::fillPairingHits(
+    std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlyr,
+    std::vector<const FPGATrackSimGenScanTool::StoredHit *> const
+        *lastlastlyr) {
 
+  auto size_if_nonzero_ptr =
+      [](std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *ptr) {
+        if (ptr) {
+          return int(ptr->size());
+        } else {
+          return 0;
+        }
+      };
+
+  m_pairinghits->Fill(size_if_nonzero_ptr(lastlyr) +
+                      size_if_nonzero_ptr(lastlastlyr));
 }
 
 void FPGATrackSimGenScanMonitoring::fillPairFilterCuts(
-    const FPGATrackSimGenScanTool::HitPairSet &pairs) {
-  m_pairs->Fill(pairs.pairList.size());
+    const FPGATrackSimGenScanTool::HitPair &pair) {
+ // m_pairs->Fill(pairs.pairList.size());
   if (m_binPlotsActive) {
-    for (const FPGATrackSimGenScanTool::HitPair& pair : pairs.pairList) {
       int lyr = pair.first->hitptr->getLayer();
       m_deltaPhi->Fill(pair.dPhi());
       m_deltaEta->Fill(pair.dEta());
@@ -430,9 +536,7 @@ void FPGATrackSimGenScanMonitoring::fillPairFilterCuts(
       m_phiOutExtrap->Fill(pair.PhiOutExtrap(m_rout));
       m_etaInExtrap->Fill(pair.EtaInExtrap(m_rin));
       m_etaOutExtrap->Fill(pair.EtaOutExtrap(m_rout));
-    }
   }
-
 }
 
 
@@ -454,7 +558,7 @@ unsigned FPGATrackSimGenScanMonitoring::pairpairCategory(
        (1 << pair.first->layer) | (1 << pair.second->layer));
   hitbits = hitbits >> minlyr;  // now bit list starts with lowest hit layer
 
-  int hitlyrs = __builtin_popcount(hitbits);
+  int hitlyrs = std::popcount(hitbits);
 
   assert(hitbits & 0x1);
 
@@ -479,7 +583,7 @@ unsigned FPGATrackSimGenScanMonitoring::pairpairCategory(
     retv = 5;
   }
 
-  ATH_MSG_DEBUG("pairpairCat "
+  ATH_MSG_VERBOSE("pairpairCat "
                 << m_twoPairClasses[retv] << " " << lastpair.first->layer << " "
                 << lastpair.second->layer << " " << pair.first->layer << " "
                 << pair.second->layer << " : " << minlyr << " "
@@ -491,15 +595,16 @@ unsigned FPGATrackSimGenScanMonitoring::pairpairCategory(
 void FPGATrackSimGenScanMonitoring::fillPairSetFilterCut(
     std::vector<TH1D *> &histset, double val,
     const FPGATrackSimGenScanTool::HitPair &pair,
-    const FPGATrackSimGenScanTool::HitPair &lastpair, bool nminus1) 
-{
+    const FPGATrackSimGenScanTool::HitPair &lastpair, bool nminus1) {
+  
   if (m_binPlotsActive) {
     unsigned ppcat = pairpairCategory(pair, lastpair);
-    histset[0]->Fill(val);      // 0 is "all"
-    histset[ppcat]->Fill(val);  // 0 is "all"
+    histset[0]->Fill(val); // 0 is "all"
+    histset[ppcat]->Fill(val); // 0 is "all"
     if (nminus1)
       histset[m_nminus1_idx]->Fill(val);
   }
+
 }
 
 void FPGATrackSimGenScanMonitoring::pairSetFilterCheck(
@@ -508,7 +613,7 @@ void FPGATrackSimGenScanMonitoring::pairSetFilterCheck(
     unsigned threshold) {
   m_pairsets->Fill(pairsets.size());
 
-  for (auto pairset : pairsets) {
+  for (const auto& pairset : pairsets) {
     // if over threshold add it to the output
     if (pairset.lyrCnt() >= threshold) {
       m_roadFilterFlow->Fill(3);
@@ -518,6 +623,23 @@ void FPGATrackSimGenScanMonitoring::pairSetFilterCheck(
     }
   }
 }
+
+void FPGATrackSimGenScanMonitoring::fillBuildGroupsWithPairs(
+    const std::vector<FPGATrackSimGenScanTool::IntermediateState> &states,
+    unsigned allowed_misses) {
+
+  for (unsigned i = 0; i < states.size(); i++) {
+    m_unpairedHits->Fill(i, states[i].unpairedHits.size());
+    m_pairsetsIncr->Fill(i, states[i].pairsets.size());
+    for (auto& pair : states[i].pairsets) {
+      m_pairsetsHits->Fill(i, pair.hitlist.size());
+    }
+    unsigned totalInput = states[i].pairsets.size() +states[i].unpairedHits.size();
+    m_totalInputIncr->Fill(i, totalInput);
+    m_binStagesIncr->Fill(i, (i <= allowed_misses)||(totalInput>0));
+  }
+}
+
 
 
 

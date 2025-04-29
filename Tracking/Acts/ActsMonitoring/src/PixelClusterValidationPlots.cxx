@@ -32,12 +32,21 @@ namespace ActsTrk {
 
     m_perp_barrel = Book1D("perp_barrel", "PixelCluster_perp_barrel;r [mm];Entries;", 100, 0, 320, false);
     m_perp_endcap = Book1D("perp_endcap", "PixelCluster_perp_endcap;r [mm];Entries;", 100, 0, 320, false);
+    
+    m_charge_barrel = Book1D("charge_barrel", "PixelCluster_charge_barrel;Charge; Entries;", 100, 0, 150000, false);
+    m_charge_endcap = Book1D("charge_endcap", "PixelCluster_charge_endcap;Charge; Entries;", 100, 0, 150000, false);
+    
+    m_total_charge_barrel = Book1D("total_charge_barrel", "PixelCluster_totalCharge_barrel;total charge;Entries;", 50, 0, 300000, false);
+    m_total_charge_endcap = Book1D("total_charge_endcap", "PixelCluster_totalCharge_endcap;total charge;Entries;", 50, 0, 300000, false);
 
-    m_total_charge_barrel = Book1D("total_charge_barrel", "PixelCluster_totalCharge_barrel;charge;Entries;", 50, 0, 300000, false);
-    m_total_charge_endcap = Book1D("total_charge_endcap", "PixelCluster_totalCharge_endcap;charge;Entries;", 50, 0, 300000, false);
+    m_tot_barrel = Book1D("tot_barrel", "PixelCluster_tot_barrel;tot;Entries;", 18, 0, 18, false);
+    m_tot_endcap = Book1D("tot_endcap", "PixelCluster_tot_endcap;tot;Entries;", 18, 0, 18, false);    
 
-    m_total_tot_barrel = Book1D("total_tot_barrel", "PixelCluster_totalTot_barrel;charge;Entries;", 50, 0, 5000, false);
-    m_total_tot_endcap = Book1D("total_tot_endcap", "PixelCluster_totalTot_endcap;charge;Entries;", 50, 0, 5000, false);
+    m_charge_vs_tot_barrel = Book2D("charge_vs_tot_barrel", "PixelCluster_charge_vs_tot_barrel;Charge;ToT;", 100, 0, 150000, 18, 0, 18, false);
+    m_charge_vs_tot_endcap = Book2D("charge_vs_tot_endcap", "PixelCluster_charge_vs_tot_endcap;Charge;ToT;", 100, 0, 150000, 18, 0, 18, false);
+    
+    m_total_tot_barrel = Book1D("total_tot_barrel", "PixelCluster_totalTot_barrel;total tot;Entries;", 50, 0, 5000, false);
+    m_total_tot_endcap = Book1D("total_tot_endcap", "PixelCluster_totalTot_endcap;total tot;Entries;", 50, 0, 5000, false);
 
     m_omega_x_barrel = Book1D("omega_x_barrel", "PixelCluster_omega_x_barrel;omega x;Entries;", 50, 0, 1, false);
     m_omega_x_endcap = Book1D("omega_x_endcap", "PixelCluster_omega_x_endcap;omega x;Entries;", 50, 0, 1, false);
@@ -83,6 +92,15 @@ namespace ActsTrk {
 
     m_global_zr_barrel = Book2D("global_zr_barrel", "PixelCluster_global_zr_barrel;z [mm];r [mm];", 100, -3000, 3000, 100, 0, 350, false);
     m_global_zr_endcap = Book2D("global_zr_endcap", "PixelCluster_global_zr_endcap;z [mm];r [mm];", 100, -3000, 3000, 100, 0, 350, false);
+
+    m_sizeX_vs_eta_barrel = Book2D("sizeX_vs_eta_barrel", "PixelCluster_sizeX_vs_eta_barrel;Eta;Size X;", 400, -5, 5, 400, 0, 400, false);
+    m_sizeX_vs_eta_endcap = Book2D("sizeX_vs_eta_endcap", "PixelCluster_sizeX_vs_eta_endcap;Eta;Size X;", 400, -5, 5, 400, 0, 400, false);
+
+    m_sizeY_vs_eta_barrel = Book2D("sizeY_vs_eta_barrel", "PixelCluster_sizeY_vs_eta_barrel;Eta;Size Y;", 400, -5, 5, 400, 0, 400, false);
+    m_sizeY_vs_eta_endcap = Book2D("sizeY_vs_eta_endcap", "PixelCluster_sizeY_vs_eta_endcap;Eta;Size Y;", 400, -5, 5, 400, 0, 400, false);
+
+    m_sizeX_vs_sizeY_barrel = Book2D("sizeX_vs_sizeY_barrel", "PixelCluster_sizeX_vs_sizeY_barrel;Size X;Size Y;", 400, 0, 400, 400, 0, 400, false);
+    m_sizeX_vs_sizeY_endcap = Book2D("sizeX_vs_sizeY_endcap", "PixelCluster_sizeX_vs_sizeY_endcap;Size X;Size Y;", 400, 0, 400, 400, 0, 400, false);
   }
 
   void PixelClusterValidationPlots:: fill(const xAOD::PixelCluster* cluster,
@@ -103,6 +121,12 @@ namespace ActsTrk {
     const auto& globalPos = cluster->globalPosition();
     Amg::Vector3D globalPosition(globalPos(0, 0), globalPos(1, 0), globalPos(2, 0));
 
+    const std::vector<float> charges = cluster->chargeList();
+    const std::vector<int> tots = cluster->totList();
+    if (charges.size() != tots.size()) {
+      throw std::runtime_error("Wrong sizes of charge and tot collections");
+    }
+    
     if (isBarrel) {
       m_layerDisk_barrel->Fill(pixLayerDisk, beamSpotWeight);
       m_phiModule_barrel->Fill(pixelID->phi_module(id), beamSpotWeight);
@@ -112,7 +136,7 @@ namespace ActsTrk {
 
       m_eta_barrel->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_barrel->Fill(globalPosition.perp(), beamSpotWeight);
-
+      
       m_total_charge_barrel->Fill(cluster->totalCharge(), beamSpotWeight);
       m_total_tot_barrel->Fill(cluster->totalToT(), beamSpotWeight);
 
@@ -138,6 +162,17 @@ namespace ActsTrk {
 
       m_global_xy_barrel->Fill(globalPos(0, 0), globalPos(1, 0), beamSpotWeight);
       m_global_zr_barrel->Fill(globalPos(2, 0), globalPosition.perp(), beamSpotWeight);
+
+      m_sizeX_vs_eta_barrel->Fill(globalPosition.eta(), cluster->channelsInPhi(), beamSpotWeight);
+      m_sizeY_vs_eta_barrel->Fill(globalPosition.eta(), cluster->channelsInEta(), beamSpotWeight);
+      m_sizeX_vs_sizeY_barrel->Fill(cluster->channelsInPhi(), cluster->channelsInEta(), beamSpotWeight);
+      
+      for (std::size_t i(0); i<charges.size(); ++i) {
+	m_charge_barrel->Fill(charges.at(i), beamSpotWeight);
+	m_tot_barrel->Fill(tots.at(i), beamSpotWeight);
+	m_charge_vs_tot_barrel->Fill(charges.at(i), tots.at(i), beamSpotWeight);
+      }
+      
     } else {
       m_layerDisk_endcap->Fill(pixLayerDisk, beamSpotWeight);
       m_phiModule_endcap->Fill(pixelID->phi_module(id), beamSpotWeight);
@@ -173,6 +208,16 @@ namespace ActsTrk {
 
       m_global_xy_endcap->Fill(globalPos(0, 0), globalPos(1, 0), beamSpotWeight);
       m_global_zr_endcap->Fill(globalPos(2, 0), globalPosition.perp(), beamSpotWeight);
+
+      m_sizeX_vs_eta_endcap->Fill(globalPosition.eta(), cluster->channelsInPhi(), beamSpotWeight);
+      m_sizeY_vs_eta_endcap->Fill(globalPosition.eta(), cluster->channelsInEta(), beamSpotWeight);
+      m_sizeX_vs_sizeY_endcap->Fill(cluster->channelsInPhi(), cluster->channelsInEta(), beamSpotWeight);
+      
+      for (std::size_t i(0); i<charges.size(); ++i) {
+        m_charge_endcap->Fill(charges.at(i), beamSpotWeight);
+        m_tot_endcap->Fill(tots.at(i), beamSpotWeight);
+        m_charge_vs_tot_endcap->Fill(charges.at(i), tots.at(i), beamSpotWeight);
+      }
     }
 
   }

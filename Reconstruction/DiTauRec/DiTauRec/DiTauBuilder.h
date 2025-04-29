@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_DITAUBUILDER_H
@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODTau/DiTauJetContainer.h"
@@ -32,12 +33,14 @@ class DiTauBuilder: public ::AthReentrantAlgorithm {
   // name for seed jet collection name
   SG::ReadHandleKey<xAOD::JetContainer> m_seedJetName
     { this, "SeedJetName", "AntiKt10LCTopoJets", "" };
-  float m_minPt;  // minimal jet seed pt
-  float m_maxEta;  // maximal jet seed eta
-  float m_Rjet;   // jet radius
-  float m_Rsubjet;  // subjet radius
-  float m_Rcore;  // core subjet radius
-  ToolHandleArray<DiTauToolBase> m_tools;
+
+  Gaudi::Property<float> m_minPt{this, "minPt", 10000};
+  Gaudi::Property<float> m_maxEta{this, "maxEta", 2.5};
+  Gaudi::Property<float> m_Rjet{this, "Rjet", 1.0};
+  Gaudi::Property<float> m_Rsubjet{this, "Rsubjet", 0.2};
+  Gaudi::Property<float> m_Rcore{this, "Rcore", 0.1};
+
+  ToolHandleArray<DiTauToolBase> m_tools{this, "Tools", {}};
 
 }; 
 

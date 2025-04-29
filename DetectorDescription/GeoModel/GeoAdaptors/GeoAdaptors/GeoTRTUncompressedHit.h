@@ -1,20 +1,18 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOADAPTORS_GEOTRTUNCOMPRESSEDHIT_H
 #define GEOADAPTORS_GEOTRTUNCOMPRESSEDHIT_H
-//----------------------------------------------------------//
-//                                                          //
-// An adaptor for TRT_UncompressedHits.                     //
-//                                                          //
-// Joe Boudreau Feb 04.                                     //
-//                                                          //
-// This adaptor class allows TRT_UncompressedHits to behave //
-// as if they knew which detector they were in.             //
-//                                                          //
-//                                                          //
-//----------------------------------------------------------//
+
+/**
+ * @file   GeoTRTUncompressedHit.h
+ * @class  GeoTRTUncompressedHit
+ * @author Joe Boudreau
+ * @brief  This adaptor class allows TRT_UncompressedHits to behave
+ *          as if they knew which detector they were in
+ */
+
 #include "CLHEP/Geometry/Point3D.h"
 class TRTUncompressedHit;
 
@@ -30,16 +28,13 @@ class GeoTRTUncompressedHit {
   GeoTRTUncompressedHit(const TRTUncompressedHit & h);
 
   // Get the absolute global position:
-  HepGeom::Point3D<double> getGlobalPosition() const;
+  HepGeom::Point3D<double> getGlobalPosition(const InDetDD::TRT_DetectorManager* mgr) const;
 
   // Is this hit OK? 
   operator bool () const { return true; }
 
  private:
-  static const InDetDD::TRT_DetectorManager* init();
-  const InDetDD::TRT_DetectorManager* mgr() const;
-
-  const TRTUncompressedHit                        *m_hit;
+  const TRTUncompressedHit* m_hit{nullptr};
 };
 
 #include "GeoAdaptors/GeoTRTUncompressedHit.icc"

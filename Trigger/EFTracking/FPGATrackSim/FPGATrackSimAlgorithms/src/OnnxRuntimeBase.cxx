@@ -1,4 +1,4 @@
-#include "OnnxRuntimeBase.h"
+#include "FPGATrackSimAlgorithms/OnnxRuntimeBase.h"
 
 #include <cassert>
 #include <stdexcept>
@@ -8,14 +8,14 @@
 
 OnnxRuntimeBase::OnnxRuntimeBase(TString fileName)
 {
-    initialize(fileName);
+    initialize(std::move(fileName));
 }
 
 OnnxRuntimeBase::OnnxRuntimeBase() {}
 
 void OnnxRuntimeBase::initialize(TString fileName) 
 {
-  m_fileName = fileName;
+  m_fileName = std::move(fileName);
   //load the onnx model to memory using the path m_path_to_onnx
   m_env = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "");
 
@@ -42,6 +42,7 @@ void OnnxRuntimeBase::initialize(TString fileName)
     // here we assume that all input nodes have the same dimensions
     Ort::TypeInfo inputTypeInfo = m_session->GetInputTypeInfo(i);
     auto tensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
+
     m_inputNodeDims = tensorInfo.GetShape();
   }
   // Get the names of the output nodes
@@ -91,7 +92,7 @@ std::vector<std::vector<float>> OnnxRuntimeBase::runONNXInference(NetworkBatchIn
     outputNodeDims[0] = batchSize;
   }
 
-  if(inputNodeDims[1]*inputNodeDims[2] != inputTensorValues.cols())
+  if(inputNodeDims[1]*inputNodeDims[2] != inputTensorValues.cols() && inputNodeDims[1] != inputTensorValues.cols())
   {
     throw std::runtime_error("runONNXInference: feature size doesn't match the input size: inputSize required: " + std::to_string(inputNodeDims[1]*inputNodeDims[2]) + " inputSize provided: " + std::to_string(inputTensorValues.cols()));
   }
@@ -212,7 +213,7 @@ std::map<int, Eigen::MatrixXf> OnnxRuntimeBase::runONNXInferenceMultilayerOutput
       }
       batchMatrix.row(j) = vec;
     } // batch
-    outputTensorMap[i] = batchMatrix;
+    outputTensorMap[i] = std::move(batchMatrix);
   } // output layers
   return outputTensorMap;
 }

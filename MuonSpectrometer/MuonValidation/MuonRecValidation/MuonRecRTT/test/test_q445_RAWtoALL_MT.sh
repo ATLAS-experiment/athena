@@ -22,6 +22,8 @@
 # art-output: log.RDOtoRDOTrigger_8thread
 # art-output: NSWPRDValAlg.reco.ntuple.root
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 # Run each Reco_tf in a seperate directory
 
 export ATHENA_CORE_NUMBER=1
@@ -32,8 +34,8 @@ cd 1thread
 # now run reconstruction with AthenaMT with 1 thread
 Reco_tf.py --CA 'all:True' \
            --AMI q445 \
-           --conditionsTag 'all:OFLCOND-MC21-SDR-RUN3-10' \
-           --postInclude "RAWtoALL:MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
+           --conditionsTag "all:${conditions}" \
+           --postInclude "RAWtoALL:MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg" \
            --imf False \
            --outputESDFile OUT_ESD_1thread.root
 exit_code=$?
@@ -58,6 +60,7 @@ cd 5thread
 # now run reconstruction with AthenaMT with 5 threads
 Reco_tf.py --CA 'all:True' \
            --AMI q445 \
+           --conditionsTag "all:${conditions}" \
            --imf False \
            --outputESDFile OUT_ESD_5thread.root
 exit_code=$?
@@ -81,6 +84,7 @@ cd 8thread
 # now run reconstruction with AthenaMT with 8 threads
 Reco_tf.py --CA 'all:True' \
            --AMI q445 \
+           --conditionsTag "all:${conditions}" \
            --imf False \
            --outputESDFile OUT_ESD_8thread.root
 exit_code=$?

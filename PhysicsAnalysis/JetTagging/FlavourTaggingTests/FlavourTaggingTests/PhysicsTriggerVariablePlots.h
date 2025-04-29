@@ -1,27 +1,21 @@
-//Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FTAGVALIDATION_PHYSICSTRIGGERVARIABLEPLOTS_H
 #define FTAGVALIDATION_PHYSICSTRIGGERVARIABLEPLOTS_H 1
 
-#include "FlavourTaggingTests/FTAGValidationAlgorithm.h"
 #include "FlavourTaggingTests/PhysicsVariablePlots.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/TrackParticleAuxContainer.h"
 
-#include "xAODTrigger/TrigComposite.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
-#include "GaudiKernel/ITHistSvc.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "map"
-#include "tuple"
+
+#include <vector>
 
 namespace FTAGValidation {
 
-  class PhysicsTriggerVariablePlots :
-    public PhysicsVariablePlots {
+  class 
+  PhysicsTriggerVariablePlots : public PhysicsVariablePlots {
 
   public:
     PhysicsTriggerVariablePlots( const std::string& name, ISvcLocator* pSvcLocator );
@@ -34,11 +28,11 @@ namespace FTAGValidation {
   private:
     PhysicsTriggerVariablePlots();
 
-    int m_nTotal_events;
-    int m_nTotal_noPV;
-    int m_nTotal_noMatchedOffJet;
-    int m_nTotal_otherFlavour;
-    int m_nTotal_qualityOnlineJets;
+    int m_nTotal_events{};
+    int m_nTotal_noPV{};
+    int m_nTotal_noMatchedOffJet{};
+    int m_nTotal_otherFlavour{};
+    int m_nTotal_qualityOnlineJets{};
 
   private:
     SG::ReadHandleKey< xAOD::VertexContainer > m_trigVertexKey { this, "TrigVertexCollectionKey", "",

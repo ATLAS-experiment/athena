@@ -23,8 +23,6 @@
 #include "MagFieldElements/AtlasFieldCache.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
-using CLHEP::GeV;
-using CLHEP::mm;
 
 /**
  * @file InDetDetailedTrackSelectorTool.h
@@ -100,14 +98,14 @@ namespace InDet
     bool preselectionBeforeExtrapolation(const Trk::Perigee & myPerigee) const;
     Amg::Vector3D getPosOrBeamSpot(const xAOD::Vertex*) const;
 
-    DoubleProperty m_pTMin{this, "pTMin", 1.*GeV, "min. pT: |pT|>pTMin"};
+    DoubleProperty m_pTMin{this, "pTMin", 1.*CLHEP::GeV, "min. pT: |pT|>pTMin"};
     DoubleProperty m_pMin{this, "pMin", 0., "min. p = pT/cos(theta): |p| > pMin"};
-    DoubleProperty m_IPd0Max{this, "IPd0Max", 2.*mm, "max. d0: |d0|<d0Max"};
-    DoubleProperty m_IPz0Max{this, "IPz0Max", 1.5*mm, "max. z0: |z0*sin(theta)|<z0Max"};
-    DoubleProperty m_z0Max{this, "z0Max", 9999.*mm, "max. z0: |z0|<z0Max"};
-    DoubleProperty m_sigIPd0Max{this, "sigIPd0Max", 999.*mm, "max d0 error"};
+    DoubleProperty m_IPd0Max{this, "IPd0Max", 2.*CLHEP::mm, "max. d0: |d0|<d0Max"};
+    DoubleProperty m_IPz0Max{this, "IPz0Max", 1.5*CLHEP::mm, "max. z0: |z0*sin(theta)|<z0Max"};
+    DoubleProperty m_z0Max{this, "z0Max", 9999.*CLHEP::mm, "max. z0: |z0|<z0Max"};
+    DoubleProperty m_sigIPd0Max{this, "sigIPd0Max", 999.*CLHEP::mm, "max d0 error"};
     DoubleProperty m_sigIPz0Max
-      {this, "sigIPz0Max", 999.*mm, "max (error only due to z0)*sin(theta)"};
+      {this, "sigIPz0Max", 999.*CLHEP::mm, "max (error only due to z0)*sin(theta)"};
     DoubleProperty m_d0significanceMax
       {this, "d0significanceMax", -1., "max IP significance d0 (-1 switches it off)"};
     DoubleProperty m_z0significanceMax

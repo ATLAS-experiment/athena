@@ -73,6 +73,7 @@
 + PhysicsAnalysis/AnalysisCommon/PileupReweighting
 + PhysicsAnalysis/AnalysisCommon/ReweightUtils
 + PhysicsAnalysis/AnalysisCommon/TruthClassification
++ PhysicsAnalysis/Columnar/.*
 + PhysicsAnalysis/D3PDTools/.*
 + PhysicsAnalysis/ElectronPhotonID/.*
 + PhysicsAnalysis/HeavyIonPhys/HIEventUtils
@@ -80,6 +81,7 @@
 + PhysicsAnalysis/Interfaces/.*
 + PhysicsAnalysis/JetMissingEtID/JetSelectorTools
 + PhysicsAnalysis/JetTagging/FlavorTagDiscriminants
++ PhysicsAnalysis/JetTagging/FlavorTagInference
 + PhysicsAnalysis/JetTagging/JetTagPerformanceCalibration/CalibrationDataInterface
 + PhysicsAnalysis/JetTagging/JetTagPerformanceCalibration/xAODBTaggingEfficiency
 + PhysicsAnalysis/JetTagging/FlavourTaggingTests

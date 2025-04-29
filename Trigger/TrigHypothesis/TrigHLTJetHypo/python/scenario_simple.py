@@ -7,7 +7,7 @@ from TrigHLTJetHypo.make_treevec import make_treevec
 
 
 # make a list of all possible cut items for the simple scenario
-all_elemental_keys = ('etaRange', 'jvt', 'smc',
+all_elemental_keys = ('etaRange', 'nnJvt', 'jvt', 'smc',
                       'threshold', 'momCuts', 'bsel', 'tausel',
                       'clrsel','pileuprm', 'timing', 'timeSig')
 
@@ -54,7 +54,26 @@ def get_condition_args_from_chainpart(cp):
             lo, hi = v.split(key)
             vals = defaults(key, lo=lo, hi=hi)
             condargs.append((key, vals))
-                
+
+        # Capitalisation to avoid clash with pure 'jvt' key
+        if k == 'nnJvt':
+            key    = 'nnJvt'
+            values = v.split(key)
+            assert values[0]=='','nnJvt condition takes only version post-argument'
+            assert values[1].startswith('v'),'nnJvt condition expects version as post-argument'
+
+            version_to_name = dict(
+                v1='NNJvtTrkAugV1',
+            )
+
+            vals = {
+                'min': '', #not used
+                'max': '', #not used
+                'nnJvtName': version_to_name[values[1]]
+            }
+
+            condargs.append((key, vals))
+
         if k == 'jvt':
             key    = 'jvt'
             values = v.split(key)
@@ -125,10 +144,10 @@ def get_condition_args_from_chainpart(cp):
                 #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
                 gn2x_WPs = {
                     '':   float('-inf'),
-                    '60': 3.1077,
-                    '70': 2.2998,
-                    '80': 1.2486,
-                    '90': -0.4298,
+                    '79': 3.1077,
+                    '86': 2.2998,
+                    '91': 1.2486,
+                    '96': -0.4298,
                 }
 
                 assert (values[0] in gn2x_WPs.keys()),f"The efficiency of the specified gn2x cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the dips WP dictionary."

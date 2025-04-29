@@ -1631,7 +1631,7 @@ bool TrackHandleBase::isIDTrack() const
 }
 
 //____________________________________________________________________
-QList<AssociatedObjectHandleBase*> TrackHandleBase::getAllAscObjHandles() const
+const QList<AssociatedObjectHandleBase*>& TrackHandleBase::getAllAscObjHandles() const
 {
   return m_d->associatedObjects;
 }

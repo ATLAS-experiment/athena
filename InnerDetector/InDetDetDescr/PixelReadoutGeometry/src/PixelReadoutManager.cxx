@@ -67,16 +67,21 @@ PixelModuleType PixelReadoutManager::getModuleType(Identifier id) const
   return PixelModuleType::NONE;
 }
 
-
-PixelDiodeType PixelReadoutManager::getDiodeType(Identifier id) const
-{
+PixelDiodeType PixelReadoutManager::getDiodeType(Identifier id) const {
+    
   const Identifier wafer_id = m_idHelper->wafer_id(id);
+  const SiDetectorElement *element = m_detManager->getDetectorElement(wafer_id);
+  return getDiodeType(id,element);
+}
+
+PixelDiodeType PixelReadoutManager::getDiodeType(Identifier id,
+						 const SiDetectorElement* element) const
+{
   Identifier diodeId = id;
   Identifier offlineId = m_idHelper->wafer_id(diodeId);
   int col = getColumn(diodeId, offlineId);
   int row = getRow(diodeId, offlineId);
 
-  const SiDetectorElement *element = m_detManager->getDetectorElement(wafer_id);
   const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
   if (p_design->getReadoutTechnology() == PixelReadoutTechnology::RD53) {
     ATH_MSG_ERROR("RD53 readout technologies not supported!");
@@ -241,9 +246,16 @@ Identifier PixelReadoutManager::getPixelId(Identifier offlineId,
 
 
 uint32_t PixelReadoutManager::getFE(Identifier diodeId,
-                                    Identifier offlineId) const
-{
+                                    Identifier offlineId) const {
+  
   const SiDetectorElement *element = m_detManager->getDetectorElement(offlineId);
+  return getFE(diodeId, offlineId, element);
+}
+
+uint32_t PixelReadoutManager::getFE(Identifier diodeId,
+                                    Identifier offlineId,
+				    const SiDetectorElement* element) const
+{
   const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
   if (p_design->getReadoutTechnology() == PixelReadoutTechnology::RD53) {
     ATH_MSG_ERROR("RD53 readout technologies not supported!");

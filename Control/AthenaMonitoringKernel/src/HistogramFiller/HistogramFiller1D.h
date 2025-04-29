@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFiller1D_h
@@ -10,6 +10,7 @@
 #include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "HistogramFillerUtils.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -21,7 +22,7 @@ namespace Monitored {
   class HistogramFiller1D : public HistogramFiller {
   public:
     HistogramFiller1D(const HistogramDef& definition, std::shared_ptr<IHistogramProvider> provider)
-      : HistogramFiller(definition, provider) {
+      : HistogramFiller(definition, std::move(provider)) {
     }
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars ) const override {
@@ -52,7 +53,7 @@ namespace Monitored {
       }
 
       if (not vars.cut) return HistogramFiller::fill<TH1>(detail::noWeight, detail::noCut, *vars.var[0]);
-      else                  return HistogramFiller::fill<TH1>(detail::noWeight, cutMaskAccessor, *vars.var[0]);      
+      else                  return HistogramFiller::fill<TH1>(detail::noWeight, std::move(cutMaskAccessor), *vars.var[0]);      
     }
   };
 }

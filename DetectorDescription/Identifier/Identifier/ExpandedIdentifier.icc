@@ -59,6 +59,9 @@ inline auto ExpandedIdentifier::operator <=>( const ExpandedIdentifier& other) c
     return std::lexicographical_compare_three_way(m_fields.begin(), m_fields.end(),
       other.m_fields.begin(), other.m_fields.end());
 }
+inline bool ExpandedIdentifier::isValid() const {
+  return m_fields.size();
+}
 
 
 inline bool

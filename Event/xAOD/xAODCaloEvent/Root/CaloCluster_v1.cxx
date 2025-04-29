@@ -492,14 +492,7 @@ namespace xAOD {
 
 
   float CaloCluster_v1::getSamplVarFromAcc(const Accessor< std::vector <float > >& acc , const CaloSample sampling, const float errorvalue) const {
-    const std::vector<float>& vec=acc(*this);
-    const unsigned idx=sampVarIdx(sampling);
-    if (idx<vec.size() ) {
-      return vec[idx];
-    }
-
-      //std::cout <<Sampling " << sampling << ", Pattern=" << std::hex <<m_samplingPattern << std::dec << ", index=" << idx << " size=" << vec.size() << std::endl;
-      return errorvalue;
+    return CaloClusterDetails::getSamplVar(sampling,m_samplingPattern,acc(*this),errorvalue);
   }
 
   bool CaloCluster_v1::setSamplVarFromAcc(const Accessor< std::vector <float > >& acc, const CaloSample sampling, const float value) {
@@ -628,53 +621,14 @@ namespace xAOD {
 
 
   float CaloCluster_v1::energyBE(const unsigned sample) const {
-    if (sample>3) return -999;
-    const CaloSample barrelSample=(CaloSample)(CaloSampling::PreSamplerB+sample);
-    const CaloSample endcapSample=(CaloSample)(CaloSampling::PreSamplerE+sample);
-    double energy=0;
-    if (this->hasSampling(barrelSample)) {
-      energy+=eSample(barrelSample); //Check for errorcode? Should not happen...
-    }
-    if (this->hasSampling(endcapSample)) {
-      energy+=eSample(endcapSample);
-    }
-    return energy;
+    static const Accessor< std::vector <float > > eAcc("e_sampl");
+    return CaloClusterDetails::energyBE(sample,m_samplingPattern,eAcc(*this));
   }
 
   float CaloCluster_v1::etaBE(const unsigned sample) const {
-    if (sample>3) {return -999;}
-    const CaloSample barrelSample=(CaloSample)(CaloSampling::PreSamplerB+sample);
-    const CaloSample endcapSample=(CaloSample)(CaloSampling::PreSamplerE+sample);
-    const bool haveBarrel=this->hasSampling(barrelSample);
-    const bool haveEndcap=this->hasSampling(endcapSample);
-    if (haveBarrel && haveEndcap) {
-      //cluster spans barren and endcap
-       float eBarrel=eSample(barrelSample);  //Check for errorcode? Should not happen...
-       float eEndcap=eSample(endcapSample);
-
-       float etaBarrel=etaSample(barrelSample);
-       float etaEndcap=etaSample(endcapSample);
-       float eSum=eBarrel + eEndcap;
-       if (eSum > 100 /*MeV*/) {
-	 //E-weighted average ...
-	 if ((eBarrel > 0 && eEndcap > 0) || (eBarrel < 0 && eEndcap < 0))
-	   return (eBarrel * etaBarrel + eEndcap * etaEndcap) / eSum;
-	 else if (eBarrel > 0)
-	   return etaBarrel;
-	 else
-	   return etaEndcap;
-       }//else eSum==0 case, should never happen
-       return (0.5 * (etaBarrel + etaEndcap));
-    }
-    if (haveBarrel) {
-      return etaSample(barrelSample);
-    }
-    if (haveEndcap) {
-      return etaSample(endcapSample);
-    }
-
-    //Should never reach this point ...
-    return -999;
+    static const Accessor< std::vector <float > > eAcc("e_sampl");
+    static const Accessor< std::vector <float > > etaAcc("eta_sampl");
+    return CaloClusterDetails::etaBE(sample,m_samplingPattern,eAcc(*this),etaAcc(*this));
   }
 
  float CaloCluster_v1::phiBE(const unsigned sample) const {

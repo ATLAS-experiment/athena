@@ -223,6 +223,21 @@
   <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
   <y title="# TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
 </h>
+<h id="nTRTHits_vs_etaphi" type="TProfile2D" title="TRT Hits vs Eta and Phi">
+  <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+  <z title="# TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
+</h>
+<h id="nTRTHitsXe_vs_etaphi" type="TProfile2D" title="TRT Hits vs Eta and Phi">
+  <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+  <z title="# TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
+</h>
+<h id="nTRTHitsAr_vs_etaphi" type="TProfile2D" title="TRT Hits vs Eta and Phi">
+  <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+  <z title="# TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
+</h>
 <h id="nTRTHits_vs_mu" type="TProfile" title="TRT Hits vs Mu">
   <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
   <y title="# TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
@@ -281,6 +296,21 @@
 <h id="nTRTHighThresholdHits_vs_phi" type="TProfile" title="High Threshold TRT Hits vs Phi">
   <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
   <y title="# High Tr TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
+</h>
+<h id="nTRTHighThresholdHits_vs_etaphi" type="TProfile2D" title="High Threshold TRT Hits vs Eta and Phi">
+  <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+  <z title="# TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
+</h>
+<h id="nTRTHighThresholdHitsXe_vs_etaphi" type="TProfile2D" title="High Threshold TRT Hits vs Eta and Phi">
+  <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+  <z title="# TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
+</h>
+<h id="nTRTHighThresholdHitsAr_vs_etaphi" type="TProfile2D" title="High Threshold TRT Hits vs Eta and Phi">
+  <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+  <z title="# TRT Hits" n="&TRTHIT;" lo="0." hi="&TRTHIT;"/>
 </h>
 <h id="nTRTHighThresholdHits_vs_mu" type="TProfile" title="High Threshold TRT Hits vs Mu">
   <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
@@ -376,8 +406,6 @@
   <y title="Fraction of TRT Extended Tracks" lo="0" hi="2.0"/>
 </h>
 
-
-
 <h id="fracTRTExtensions_matched_vs_eta" type="TEfficiency" title="Fraction of TRT Extended Matched Tracks">
   <x title="#eta" n="32" lo="-&ETA;" hi="&ETA;"/>
   <y title="Fraction of TRT Extended Matched Tracks" lo="0" hi="2.0"/>
@@ -386,6 +414,36 @@
 <h id="fracTRTExtensions_matched_vs_pt" type="TEfficiency" title="Fraction of TRT Extended Matched Tracks">
   <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
   <y title="Fraction of TRT Extended Matched Tracks" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_vs_eta" type="TEfficiency" title="Fraction of TRT Extended Tracks with TRT hits">
+  <x title="#eta" n="32" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Fraction of TRT Extended Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_vs_pt" type="TEfficiency" title="Fraction of TRT Extended Tracks with TRT hits">
+  <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
+  <y title="Fraction of TRT Extended Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_vs_nvertices" type="TEfficiency" title="Fraction of TRT Extended Tracks with TRT hits">
+  <x title="Number of Reconstucted Vertices" n="50" lo="0" hi="100"/>
+  <y title="Fraction of TRT Extended Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_vs_mu" type="TEfficiency" title="Fraction of TRT Extended Tracks with TRT hits">
+  <x title="#LT#mu#GT" n="50" lo="0" hi="100"/>
+  <y title="Fraction of TRT Extended Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_matched_vs_eta" type="TEfficiency" title="Fraction of TRT Extended Matched Tracks with TRT hits">
+  <x title="#eta" n="32" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Fraction of TRT Extended Matched Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_matched_vs_pt" type="TEfficiency" title="Fraction of TRT Extended Matched Tracks with TRT hits">
+  <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
+  <y title="Fraction of TRT Extended Matched Tracks with TRT hits" lo="0" hi="2.0"/>
 </h>
 
 <h id="chi2ndofTRTExtensions" type="TH1F" title="reco_{#chi^2/ndof}">

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUMIBLOCKCOMPS_LUMIBLOCKMETATOOL_H
@@ -25,9 +25,7 @@
 
 class StoreGateSvc;
 
-class LumiBlockMetaDataTool 
-     : public AthAlgTool
-     , virtual public IMetaDataTool {
+class LumiBlockMetaDataTool : public extends<AthAlgTool, IMetaDataTool> {
 
  public: 
    LumiBlockMetaDataTool(const std::string& type
@@ -38,7 +36,6 @@ class LumiBlockMetaDataTool
 
  public:
    virtual StatusCode initialize() override;
-   virtual StatusCode finalize() override;
 
    /// Function collecting the metadata from a new input file
    virtual StatusCode beginInputFile(const SG::SourceID&) override;
@@ -53,30 +50,30 @@ class LumiBlockMetaDataTool
    /// Fill metaDataStore and ntuples
    StatusCode finishUp();
 
-   typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
-   StoreGateSvc_t m_pMetaDataStore;
-   StoreGateSvc_t m_pInputStore;
+   Gaudi::Property<std::string>  m_LBColl_name{this, "LBCollName", "LumiBlocks"};
+   Gaudi::Property<std::string>  m_unfinishedLBColl_name{this, "unfinishedLBCollName", "IncompleteLumiBlocks"};
+   Gaudi::Property<std::string>  m_suspectLBColl_name{this, "suspectLBCollName", "SuspectLumiBlocks"};
+
+   bool m_fileCurrentlyOpened{false};
+   std::string m_CurrentFileName{"none"};
+
+   ServiceHandle<StoreGateSvc> m_pMetaDataStore;
+   ServiceHandle<StoreGateSvc> m_pInputStore;
 
    // The m_cacheInputRangeContainer stores the LumiBlockRange info for files that are open
    //   We need to keep suspect lumiblocks separated from complete and incomplete ones
    //   since something that comes in as suspect always stays suspect
-   xAOD::LumiBlockRangeContainer* m_cacheInputRangeContainer;
-   xAOD::LumiBlockRangeAuxContainer* m_cacheInputRangeAuxContainer;
-   xAOD::LumiBlockRangeContainer* m_cacheSuspectInputRangeContainer;
-   xAOD::LumiBlockRangeAuxContainer* m_cacheSuspectInputRangeAuxContainer;
+   xAOD::LumiBlockRangeContainer m_cacheInputRangeContainer;
+   xAOD::LumiBlockRangeAuxContainer m_cacheInputRangeAuxContainer;
+   xAOD::LumiBlockRangeContainer m_cacheSuspectInputRangeContainer;
+   xAOD::LumiBlockRangeAuxContainer m_cacheSuspectInputRangeAuxContainer;
 
    // The m_cacheOutputRangeContainer stores the LumiBlockRange info for files that have been read and closed
-   xAOD::LumiBlockRangeContainer* m_cacheOutputRangeContainer;
-   xAOD::LumiBlockRangeAuxContainer* m_cacheOutputRangeAuxContainer;
-   xAOD::LumiBlockRangeContainer* m_cacheSuspectOutputRangeContainer;
-   xAOD::LumiBlockRangeAuxContainer* m_cacheSuspectOutputRangeAuxContainer;
+   xAOD::LumiBlockRangeContainer m_cacheOutputRangeContainer;
+   xAOD::LumiBlockRangeAuxContainer m_cacheOutputRangeAuxContainer;
+   xAOD::LumiBlockRangeContainer m_cacheSuspectOutputRangeContainer;
+   xAOD::LumiBlockRangeAuxContainer m_cacheSuspectOutputRangeAuxContainer;
 
-   std::string  m_LBColl_name;
-   std::string  m_unfinishedLBColl_name;
-   std::string  m_suspectLBColl_name;
-
-   bool m_fileCurrentlyOpened;
-   std::string m_CurrentFileName;
 };
 
 

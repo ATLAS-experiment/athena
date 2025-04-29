@@ -93,11 +93,14 @@ def getLArFormatForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
 
 class LArDTRunInfo:
     "Wrapper class to hold LAr DT run configuration information"
-    def __init__(self,streamTypes, streamLengths, timing, adccalib):
+    def __init__(self,streamTypes, streamLengths, streamTypesPEB, streamLengthsPEB, timing, adccalib, fw):
         self._sTypes = streamTypes
         self._sLengths = streamLengths
+        self._sTypesPEB = streamTypesPEB
+        self._sLengthsPEB = streamLengthsPEB
         self._tim = timing
         self._adcc = adccalib
+        self._fwversion = fw
 
     def streamTypes(self):
            return self._sTypes
@@ -105,49 +108,26 @@ class LArDTRunInfo:
     def streamLengths(self):
            return self._sLengths
 
+    def streamTypesPEB(self):
+           return self._sTypesPEB
+
+    def streamLengthsPEB(self):
+           return self._sLengthsPEB
+
     def timing(self):
            return self._tim
 
     def ADCCalib(self):
            return self._adcc
 
-def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
-    from AthenaCommon.Logging import logging
-    mlog_LRF = logging.getLogger( 'getLArDTRunInfoForRun' )
-    mlog_LRF.info("Connecting to database %s", connstring)
+    def FWversion(self):
+           return self._fwversion
 
-    mlog_LRF.info("Found DT info for run %i",run)
-    runDB=indirectOpen(connstring)
-    if (runDB is None):
-        mlog_LRF.error("Cannot connect to database %s",connstring)
-        raise RuntimeError("getLArFormatForRun ERROR: Cannot connect to database %s",connstring)
+def parse_recipe(recipe,mux,mlog):
+    # parse recipe string of the type at0_bcX-at1_bcY...
     typesMap={0:"ADC", 1:"RawADC", 2:"Energy", 3:"SelectedEnergy",15:"Invalid"}
     sTypes=[]
     sLengths=[]    
-    timing="LAR"
-    adccalib=0
-    mux=[]
-    try:
-        folder=runDB.getFolder('/LAR/Configuration/RunLogDT')
-        runiov=run << 32
-        obj=folder.findObject(runiov,0)
-        payload=obj.payload()
-        timing=payload['timing_configuration']
-        recipe=payload['recipe_tdaq']
-        mux.append(ord(payload['mux_setting_0']))
-        mux.append(ord(payload['mux_setting_1']))
-        adccalib=payload['ADCCalibMode']
-    except Exception:
-        mlog_LRF.warning("No information in /LAR/Configuration/RunLogDT for run %i", run)
-        mlog_LRF.warning("Using defaults: MUX0: ADC MUX1: ET_ID receipe: at0_bc5-at1_bc1_ts1-q")
-        recipe="at0_bc5-at1_bc1_ts1-q"
-        mux.append(0)
-        mux.append(3)
-
-    runDB.closeDatabase()
-    mlog_LRF.info("Found DT info for run %d", run)
-    print(mux)
-    # parse recipe string of the type at0_bcX-at1_bcY...
     for s,m in ["at0_bc",0],["at1_bc",1]:
        pos=recipe.find(s)
        if pos >=0:
@@ -158,7 +138,7 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
              try:
                n=int(recipe[pos+6:pos+7])
              except Exception:
-               mlog_LRF.warning("could not decode %s",recipe[pos+6:])
+               mlog.warning("could not decode %s",recipe[pos+6:])
           if n>=0:
              sLengths.append(n)
              if mux[m] in typesMap.keys():
@@ -167,8 +147,49 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
                 sTypes.append(15)
           pass      
        pass
+    return (sTypes,sLengths) 
 
-    return  LArDTRunInfo(sTypes, sLengths, timing, adccalib)
+def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
+    from AthenaCommon.Logging import logging
+    mlog_LRF = logging.getLogger( 'getLArDTRunInfoForRun' )
+    mlog_LRF.info("Connecting to database %s", connstring)
+
+    runDB=indirectOpen(connstring)
+    if (runDB is None):
+        mlog_LRF.error("Cannot connect to database %s",connstring)
+        raise RuntimeError("getLArFormatForRun ERROR: Cannot connect to database %s",connstring)
+    mlog_LRF.info("Found DB")
+    timing="LAR"
+    adccalib=0
+    mux=[]
+    fw=0
+    try:
+        folder=runDB.getFolder('/LAR/Configuration/RunLogDT')
+        runiov=run << 32
+        obj=folder.findObject(runiov,0)
+        payload=obj.payload()
+        timing=payload['timing_configuration']
+        recipe=payload['recipe_tdaq_A']
+        recipePEB=payload['recipe_tdaq_B']
+        mux.append(ord(payload['mux_setting_0_tdaq']))
+        mux.append(ord(payload['mux_setting_1_tdaq']))
+        adccalib=payload['ADCCalibMode']
+        if run > 493743: # hardcoded, first run when this info was filled
+            fw=ord(payload['ttype_mask_A'])
+        mlog_LRF.info("Found DT info for run %i",run)
+    except Exception:
+        mlog_LRF.warning("No information in /LAR/Configuration/RunLogDT for run %i", run)
+        mlog_LRF.warning("Using defaults: MUX0: ADC MUX1: ET_ID receipe: at0_bc5-at1_bc1_ts1-q")
+        recipe="at0_bc5-at1_bc1_ts1-q"
+        recipePEB=''
+        mux.append(0)
+        mux.append(3)
+
+    runDB.closeDatabase()
+    print(mux,fw)
+    sTypes, sLengths = parse_recipe(recipe,mux,mlog_LRF)
+    sTypesPEB, sLengthsPEB = parse_recipe(recipePEB,mux,mlog_LRF)
+    return  LArDTRunInfo(sTypes, sLengths, sTypesPEB, sLengthsPEB, timing, adccalib, fw)
 
 # command line driver for convenience
 if __name__=='__main__':

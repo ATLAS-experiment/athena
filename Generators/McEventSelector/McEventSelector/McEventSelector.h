@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -29,6 +29,8 @@
 
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "CxxUtils/checker_macros.h"
+
+#include <cstdint>
 
 // Forward declarations
 class EventSource;
@@ -71,13 +73,13 @@ public:
 
 private:
     //  EventSource* p_eventSource;
-    Gaudi::CheckedProperty<unsigned>          m_runNo;
-    Gaudi::CheckedProperty<unsigned long long> m_firstEventNo;
-    Gaudi::CheckedProperty<unsigned long long> m_eventsPerRun;
-    Gaudi::CheckedProperty<unsigned>          m_firstLBNo;
-    Gaudi::CheckedProperty<unsigned>          m_eventsPerLB;
-    Gaudi::CheckedProperty<unsigned>          m_initTimeStamp;
-    Gaudi::Property<unsigned>          m_timeStampInterval;
+    Gaudi::CheckedProperty<uint32_t>          m_runNo;
+    Gaudi::CheckedProperty<uint64_t> m_firstEventNo;
+    Gaudi::CheckedProperty<uint64_t> m_eventsPerRun;
+    Gaudi::CheckedProperty<uint32_t>          m_firstLBNo;
+    Gaudi::CheckedProperty<uint32_t>          m_eventsPerLB;
+    Gaudi::CheckedProperty<uint32_t>          m_initTimeStamp;
+    Gaudi::Property<uint32_t>          m_timeStampInterval;
 
     /// Flags to indicate override of run/event/time
     ///  These are always true and are here for consistency

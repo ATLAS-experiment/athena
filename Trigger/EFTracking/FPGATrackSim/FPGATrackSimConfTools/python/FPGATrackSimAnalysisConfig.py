@@ -62,12 +62,11 @@ def FPGATrackSimBankSvcCfg(flags):
     FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_{layers}_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
     FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
     FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_{layers}_reg{flags.Trigger.FPGATrackSim.region}.root'
-    
+    FPGATrackSimBankSvc.phiShift = flags.Trigger.FPGATrackSim.phiShift
+
     # These should be configurable. The tag system needs updating though.
-    import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
-    bank_tag = FPGATrackSimTagConfig.getTags(stage='bank')['bank']
-    FPGATrackSimBankSvc.sectorQPtBins = bank_tag['sectorQPtBins']
-    FPGATrackSimBankSvc.qptAbsBinning = bank_tag['qptAbsBinning']
+    FPGATrackSimBankSvc.sectorQPtBins = [-0.001, -0.0005, 0, 0.0005, 0.001]
+    FPGATrackSimBankSvc.qptAbsBinning = False
 
     result.addService(FPGATrackSimBankSvc, create=True, primary=True)
     return result
@@ -81,18 +80,26 @@ def FPGATrackSimRoadUnionToolCfg(flags):
     xBufferBins = flags.Trigger.FPGATrackSim.ActiveConfig.xBufferBins
     yBins = flags.Trigger.FPGATrackSim.ActiveConfig.yBins
     yBufferBins = flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
+    yMin = flags.Trigger.FPGATrackSim.ActiveConfig.qptMin
+    yMax = flags.Trigger.FPGATrackSim.ActiveConfig.qptMax
     xMin = flags.Trigger.FPGATrackSim.ActiveConfig.phiMin
     xMax = flags.Trigger.FPGATrackSim.ActiveConfig.phiMax
+    if (not flags.Trigger.FPGATrackSim.oldRegionDefs): ### auto-configure this
+        phiRange = FPGATrackSimDataPrepConfig.getPhiRange(flags)
+        xMin = phiRange[0]
+        xMax = phiRange[1]
+
     xBuffer = (xMax - xMin) / xBins * xBufferBins
     xMin = xMin - xBuffer
     xMax = xMax +  xBuffer
-    yMin = flags.Trigger.FPGATrackSim.ActiveConfig.qptMin
-    yMax = flags.Trigger.FPGATrackSim.ActiveConfig.qptMax
     yBuffer = (yMax - yMin) / yBins * yBufferBins
     yMin -= yBuffer
     yMax += yBuffer
     tools = []
-    
+    houghType = flags.Trigger.FPGATrackSim.ActiveConfig.houghType
+    roadMerge = flags.Trigger.FPGATrackSim.ActiveConfig.roadMerge
+
+
     FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     for number in range(getNSubregions(FPGATrackSimMapping.subrmap)): 
         HoughTransform = CompFactory.FPGATrackSimHoughTransformTool("HoughTransform_0_" + str(number))
@@ -120,12 +127,29 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.traceHits = True
         HoughTransform.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
         HoughTransform.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+        HoughTransform.houghType = houghType
+        HoughTransform.roadMerge = roadMerge
+        if houghType=='LowResource': ##consider only case of LowResource version
+            HoughTransform.requirements = flags.Trigger.FPGATrackSim.ActiveConfig.requirements
+        if houghType=='Flexible': ##consider only case of Flexible version
+            HoughTransform.r_max=flags.Trigger.FPGATrackSim.ActiveConfig.r_max
+            HoughTransform.phi_coord_max=flags.Trigger.FPGATrackSim.ActiveConfig.phi_coord_max
+            HoughTransform.phi_range=flags.Trigger.FPGATrackSim.ActiveConfig.phi_range
+            HoughTransform.r_max_mm=flags.Trigger.FPGATrackSim.ActiveConfig.r_max_mm
+            HoughTransform.bitwise_qApt_conv=flags.Trigger.FPGATrackSim.ActiveConfig.bitwise_qApt_conv
+            HoughTransform.bitwise_phi0_conv=flags.Trigger.FPGATrackSim.ActiveConfig.bitwise_phi0_conv
+            HoughTransform.phi0_sectors=flags.Trigger.FPGATrackSim.ActiveConfig.phi0_sectors
+            HoughTransform.qApt_sectors=flags.Trigger.FPGATrackSim.ActiveConfig.qApt_sectors
+            HoughTransform.pipes_qApt=flags.Trigger.FPGATrackSim.ActiveConfig.pipes_qApt
+            HoughTransform.pipes_phi0=flags.Trigger.FPGATrackSim.ActiveConfig.pipes_phi0
 
         tools.append(HoughTransform)
 
     RF.tools = tools
     result.addPublicTool(RF, primary=True)
     return result
+
+
 
 def FPGATrackSimRoadUnionTool1DCfg(flags):
     result=ComponentAccumulator()
@@ -142,8 +166,14 @@ def FPGATrackSimRoadUnionTool1DCfg(flags):
         for iSlice in range(nSlice):
             tool = CompFactory.FPGATrackSimHough1DShiftTool("Hough1DShift" + str(iSlice)+(("_pt{}".format(ptstep))  if splitpt>1 else ""))
             tool.subRegion = iSlice if nSlice > 1 else -1
-            tool.phiMin = flags.Trigger.FPGATrackSim.Hough1D.phiMin
-            tool.phiMax = flags.Trigger.FPGATrackSim.Hough1D.phiMax
+            xMin = flags.Trigger.FPGATrackSim.Hough1D.phiMin
+            xMax = flags.Trigger.FPGATrackSim.Hough1D.phiMax
+            if (not flags.Trigger.FPGATrackSim.oldRegionDefs): ### auto-configure this
+                phiRange = FPGATrackSimDataPrepConfig.getPhiRange(flags)
+                xMin = phiRange[0]
+                xMax = phiRange[1]
+            tool.phiMin = xMin
+            tool.phiMax = xMax
             tool.qptMin = lowpt
             tool.qptMax = highpt
             tool.nBins = flags.Trigger.FPGATrackSim.Hough1D.xBins
@@ -172,7 +202,37 @@ def FPGATrackSimRoadUnionTool1DCfg(flags):
 
 def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     result=ComponentAccumulator()
-    
+
+    # read the cuts from a seperate python file specified by FPGATrackSim.GenScan.genScanCuts
+    cutset=None
+    if flags.Trigger.FPGATrackSim.oldRegionDefs:
+        toload=flags.Trigger.FPGATrackSim.GenScan.genScanCuts
+        if toload == 'FPGATrackSimGenScanCuts': # its on the newRegion default so it hasn't been set
+            toload = 'FPGATrackSimHough.FPGATrackSimGenScanCuts_incr'
+        cutset = importlib.import_module(toload).cuts[flags.Trigger.FPGATrackSim.region]
+    else:
+        cutFileName = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py"
+        print(f"Cut File = {cutFileName}")
+        # this allows the cut file defined in python to be loaded from the map directory
+        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts ,cutFileName)
+        print ("Spec = ", spec)
+        if spec is None:
+            print("Failed to find Cut File")
+        cutmodule = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cutmodule)
+        cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+
+    # make the binning class
+    Binning = None
+    if (cutset["parSet"]=="PhiSlicedKeyLyrPars") :
+        Binning = CompFactory.FPGATrackSimGenScanPhiSlicedKeyLyrBinning("GenScanBinning")
+        Binning.approxMath = False
+    else:
+        log.error("Unknown Binning") 
+    Binning.rin=cutset["rin"]
+    Binning.rout=cutset["rout"]
+    Binning.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+
     # make the monitoring class
     Monitor = CompFactory.FPGATrackSimGenScanMonitoring("GenScanMonitoring")
     Monitor.THistSvc = CompFactory.THistSvc()
@@ -184,11 +244,14 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     tool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
     tool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     tool.Monitoring = Monitor
+    tool.Binning = Binning
     tool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
 
     # configure which filers and thresholds to apply
-    tool.applyPairFilter=True
-    tool.applyPairSetFilter=True
+    tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
+    tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
+    tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
+    tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.threshold = 4
 
     # configure the padding around the nominal region
@@ -198,16 +261,108 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     tool.phiFractionalPadding =0.05
     tool.qOverPtFractionalPadding =0.05                
 
-    # read the cuts from a seperate python file specified by FPGATrackSim.GenScan.genScanCuts
-    cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts)
-    for (cut,val) in cutset.cuts[flags.Trigger.FPGATrackSim.region].items():
+    # set cuts
+    for (cut,val) in cutset.items():
         setattr(tool,cut,val)
+
+    # set layer map
+    if not flags.Trigger.FPGATrackSim.GenScan.layerStudy:
+        if flags.Trigger.FPGATrackSim.oldRegionDefs:
+            tool.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+        else:
+            # now assumed to be in the map directory with name = basename for region + _lyrmap.json
+            tool.layerMapFile = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json"
 
     # even though we are not actually doing a Union, we need the 
     # RoadUnionTool because mapping is now there
     RoadUnion = CompFactory.FPGATrackSimRoadUnionTool()
     RoadUnion.tools = [tool,]
     result.addPublicTool(RoadUnion, primary=True)
+
+    # special configuration for studing layer definitions
+    # pass through all hits, but turn off pairing because
+    # it won't be able to run
+    if flags.Trigger.FPGATrackSim.GenScan.layerStudy:
+        RoadUnion.noHitFilter=True
+        tool.binningOnly=True
+    return result
+
+def FPGATrackSimRoadUnionToolGNNCfg(flags):
+    result = ComponentAccumulator()
+    RF = CompFactory.FPGATrackSimRoadUnionTool()
+
+    patternRecoTool = CompFactory.FPGATrackSimGNNPatternRecoTool()
+    patternRecoTool.GNNGraphHitSelector = CompFactory.FPGATrackSimGNNGraphHitSelectorTool()
+    patternRecoTool.GNNGraphConstruction = result.popToolsAndMerge(FPGATrackSimGNNGraphConstructionToolCfg(flags))
+    patternRecoTool.GNNEdgeClassifier = result.popToolsAndMerge(FPGATrackSimGNNEdgeClassifierToolCfg(flags))
+    patternRecoTool.GNNRoadMaker = result.popToolsAndMerge(FPGATrackSimGNNRoadMakerToolCfg(flags))
+    patternRecoTool.GNNRootOutput = result.popToolsAndMerge(FPGATrackSimGNNRootOutputToolCfg(flags))
+    patternRecoTool.doGNNRootOutput = flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput
+    
+    RF.tools = [patternRecoTool]
+    result.addPublicTool(RF, primary=True)
+
+    return result
+
+def FPGATrackSimGNNGraphConstructionToolCfg(flags):
+    result = ComponentAccumulator()
+
+    GNNGraphConstructionTool = CompFactory.FPGATrackSimGNNGraphConstructionTool()
+    GNNGraphConstructionTool.graphTool = flags.Trigger.FPGATrackSim.GNN.graphTool.value
+
+    # Module Map Configuration
+    GNNGraphConstructionTool.moduleMapType=flags.Trigger.FPGATrackSim.GNN.moduleMapType.value
+    GNNGraphConstructionTool.moduleMapFunc=flags.Trigger.FPGATrackSim.GNN.moduleMapFunc.value
+    GNNGraphConstructionTool.moduleMapTol=flags.Trigger.FPGATrackSim.GNN.moduleMapTol
+    GNNGraphConstructionTool.moduleMapPath=PathResolver.FindCalibFile(flags.Trigger.FPGATrackSim.GNN.moduleMapPath)
+
+    # Metric Learning Configuration
+    GNNGraphConstructionTool.metricLearningR=flags.Trigger.FPGATrackSim.GNN.metricLearningR
+    GNNGraphConstructionTool.metricLearningMaxN=flags.Trigger.FPGATrackSim.GNN.metricLearningMaxN
+
+    from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+    from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
+
+    GNNGraphConstructionTool.MLInferenceTool = result.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(
+        flags, flags.Trigger.FPGATrackSim.GNN.MLModelPath, OnnxRuntimeType.CPU))
+
+    result.setPrivateTools(GNNGraphConstructionTool)
+
+    return result
+
+def FPGATrackSimGNNEdgeClassifierToolCfg(flags):
+    result = ComponentAccumulator()
+
+    from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+    from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
+
+    GNNEdgeClassifierTool = CompFactory.FPGATrackSimGNNEdgeClassifierTool()
+    GNNEdgeClassifierTool.GNNInferenceTool = result.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(
+       flags, flags.Trigger.FPGATrackSim.GNN.GNNModelPath, OnnxRuntimeType.CPU))
+
+    result.setPrivateTools(GNNEdgeClassifierTool)
+
+    return result
+
+def FPGATrackSimGNNRoadMakerToolCfg(flags):
+    result = ComponentAccumulator()
+
+    GNNRoadMakerTool = CompFactory.FPGATrackSimGNNRoadMakerTool()
+    GNNRoadMakerTool.roadMakerTool = flags.Trigger.FPGATrackSim.GNN.roadMakerTool.value
+    GNNRoadMakerTool.edgeScoreCut = flags.Trigger.FPGATrackSim.GNN.edgeScoreCut
+    GNNRoadMakerTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+
+    result.setPrivateTools(GNNRoadMakerTool)
+
+    return result
+    
+def FPGATrackSimGNNRootOutputToolCfg(flags):
+    result = ComponentAccumulator()
+
+    GNNRootOutputTool = CompFactory.FPGATrackSimGNNRootOutputTool()
+
+    result.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
+    result.setPrivateTools(GNNRootOutputTool)
 
     return result
 
@@ -249,10 +404,12 @@ def NNTrackToolCfg(flags):
     NNTrackTool.THistSvc = CompFactory.THistSvc()
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
-    NNTrackTool.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
-    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+    NNTrackTool.IdealGeoRoads = False
+    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan and not flags.Trigger.FPGATrackSim.ActiveConfig.GNN
     NNTrackTool.SPRoadFilterTool = getSPRoadFilterTool(flags)
-    
+    NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 9
+    NNTrackTool.useSectors = False
+    NNTrackTool.doGNNTracking = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
     result.setPrivateTools(NNTrackTool)
     return result
 
@@ -270,7 +427,7 @@ def FPGATrackSimTrackFitterToolCfg(flags):
     TF_1st.DoDeltaGPhis = flags.Trigger.FPGATrackSim.ActiveConfig.doDeltaGPhis
     TF_1st.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     TF_1st.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
-    TF_1st.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+    TF_1st.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
     TF_1st.SPRoadFilterTool = getSPRoadFilterTool(flags)
     result.addPublicTool(TF_1st, primary=True)
     return result
@@ -288,6 +445,9 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
         OR_1st.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
         OR_1st.localMaxWindowSize = flags.Trigger.FPGATrackSim.ActiveConfig.localMaxWindowSize
         OR_1st.roadSliceOR = flags.Trigger.FPGATrackSim.ActiveConfig.roadSliceOR
+
+    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimOverlapRemovalToolMonitoringCfg
+    OR_1st.MonTool = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolMonitoringCfg(flags))
     
     result.addPublicTool(OR_1st, primary=True)
     return result
@@ -322,28 +482,29 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
         result.merge(AthenaTrkClusterizationCfg(flags))
 
     theFPGATrackSimLogicalHitsProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
-    theFPGATrackSimLogicalHitsProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
+    theFPGATrackSimLogicalHitsProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
     theFPGATrackSimLogicalHitsProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
     theFPGATrackSimLogicalHitsProcessAlg.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemoval
     theFPGATrackSimLogicalHitsProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
-    theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
+    theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput1st = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput1st
     theFPGATrackSimLogicalHitsProcessAlg.NumOfHitPerGrouping = flags.Trigger.FPGATrackSim.ActiveConfig.NumOfHitPerGrouping
-    theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
-    theFPGATrackSimLogicalHitsProcessAlg.runOnRDO = not flags.Trigger.FPGATrackSim.wrapperFileName
+    theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack_1st = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
-
+    theFPGATrackSimLogicalHitsProcessAlg.passLowestChi2TrackOnly = flags.Trigger.FPGATrackSim.ActiveConfig.passLowestChi2TrackOnly
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
 
-    # If tracking is set to False, don't configure the bank service
-    if flags.Trigger.FPGATrackSim.tracking:
+    # If tracking is set to False or if we do the NN analysis, don't configure the bank service
+    if flags.Trigger.FPGATrackSim.tracking and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis:
         result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
         theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
     elif (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
         theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGenScanCfg(flags))
+    elif (flags.Trigger.FPGATrackSim.ActiveConfig.GNN):
+        theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGNNCfg(flags))
     else:
         theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
 
@@ -382,7 +543,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHitsProcessAlg.OverlapRemoval_1st = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
-    if flags.Trigger.FPGATrackSim.spacePoints:
+    if flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan:
         theFPGATrackSimLogicalHitsProcessAlg.SPRoadFilterTool = getSPRoadFilterTool(flags)
         theFPGATrackSimLogicalHitsProcessAlg.Spacepoints = True
 
@@ -400,7 +561,26 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
 
     return result
 
+def getChi2Cut(region):
+    #list of chi2 cuts for time being
+    chi2cut_l = [12, 16, 16, 16, 16, 18, 14, 16, 16, 16, 19, 15, 18, 12, 15, 15, 14, 14, 12, 15]
+    binSize = 0.2
+    side = (region >> 5) & 0x1
+    etaBin = (region >> 6) & 0x1F
+    etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
+    abs_etaRange = tuple(abs(val) for val in etaRange)
 
+    eta_to_chi2 = {
+        (0.0, 0.2): chi2cut_l[0], (0.2, 0.4): chi2cut_l[1], (0.4, 0.6): chi2cut_l[2],
+        (0.6, 0.8): chi2cut_l[3], (0.8, 1.0): chi2cut_l[4], (1.0, 1.2): chi2cut_l[5],
+        (1.2, 1.4): chi2cut_l[6], (1.4, 1.6): chi2cut_l[7], (1.6, 1.8): chi2cut_l[8],
+        (1.8, 2.0): chi2cut_l[9], (2.0, 2.2): chi2cut_l[10], (2.2, 2.4): chi2cut_l[11],
+        (2.4, 2.6): chi2cut_l[12], (2.6, 2.8): chi2cut_l[13], (2.8, 3.0): chi2cut_l[14],
+        (3.0, 3.2): chi2cut_l[15], (3.2, 3.4): chi2cut_l[16], (3.4, 3.6): chi2cut_l[17], 
+        (3.6, 3.8): chi2cut_l[18], (3.8, 4.0): chi2cut_l[19]
+    }
+
+    return eta_to_chi2.get(abs_etaRange, 9) #Set default chi2 if the region is not found
 
 
 if __name__ == "__main__":
@@ -409,15 +589,10 @@ if __name__ == "__main__":
     
 
     flags = initConfigFlags()
-
-    
-    
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     
     ############################################
     # Flags used in the prototrack chain
-    FinalProtoTrackChainxAODTracksKey="xAODFPGAProtoTracks"
+    FinalProtoTrackChainxAODTracksKey="FPGA"
     flags.Detector.EnableCalo = False
 
     # ensure that the xAOD SP and cluster containers are available
@@ -427,38 +602,23 @@ if __name__ == "__main__":
     flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
     flags.Acts.doRotCorrection = False
 
-    # IDTPM flags
-    from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
-    flags = initializeIDTPMConfigFlags(flags)
-    
-    flags.PhysVal.IDTPM.outputFilePrefix = "myIDTPM_CA"
-    flags.PhysVal.IDTPM.plotsDefFileList = "InDetTrackPerfMon/PlotsDefFileList_default.txt" # default value - not needed
-    flags.PhysVal.IDTPM.plotsCommonValuesFile = "InDetTrackPerfMon/PlotsDefCommonValues.json" # default value - not needed
-    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.HIST.root' # automatically set in IDTPM config - not needed
-    flags.Output.doWriteAOD_IDTPM = True
-    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.AOD_IDTPM.pool.root' # automatically set in IDTPM config - not needed
-    flags.PhysVal.IDTPM.trkAnaCfgFile = "InDetTrackPerfMon/EFTrkAnaConfig_example.json"
-    
-    flags = initializeIDTPMTrkAnaConfigFlags(flags)
-    ## override respective configurations from trkAnaCfgFile (in case something changes in the config file)
-    flags.PhysVal.IDTPM.TrkAnaEF.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
-    flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
-
-    flags.PhysVal.doExample = False
     ############################################
     flags.Concurrency.NumThreads=1
     #flags.Concurrency.NumProcs=0
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
+    flags.Debug.DumpEvtStore=False
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
+    
+    if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut: 
+        flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
 
-    assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-4'),"ERROR You are trying to run an F-4* pipeline! This is not yet supported!"
     assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-5'),"ERROR You are trying to run an F-5* pipeline! This is not yet supported!"
 
     if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')):
-        print("You are trying to run an F-!* pipeline! I am going to run the Data Prep chain for you and nothing else!")
+        print("You are trying to run an F-100 pipeline! I am going to run the Data Prep chain for you and nothing else!")
         FPGATrackSimDataPrepConfig.runDataPrepChain()
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-2')):
         print("You are trying to run an F-2* pipeline! I am auto-configuring the 1D bitshift for you, including eta pattern filters and phi road filters")
@@ -472,98 +632,121 @@ if __name__ == "__main__":
         flags.Trigger.FPGATrackSim.Hough.phiRoadFilter = False
         flags.Trigger.FPGATrackSim.Hough.hough1D = False
         flags.Trigger.FPGATrackSim.Hough.hough = True
+    elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-4')):
+        print("You are trying to run an F-4* pipeline! I am auto-configuring the GNN pattern recognition for you. Whether you wanted to or not")
+        flags.Trigger.FPGATrackSim.Hough.GNN = True
+        flags.Trigger.FPGATrackSim.Hough.chi2cut = 40 # All of the track candidates have chi2 values around 20 for some reason. Needs further investigation. For now move the default cut value to 40
+    elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
+        print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
+        flags.Trigger.FPGATrackSim.Hough.genScan=True
+        flags.Trigger.FPGATrackSim.spacePoints = flags.Trigger.FPGATrackSim.Hough.secondStage
     elif (flags.Trigger.FPGATrackSim.pipeline != ""):
         raise AssertionError("ERROR You are trying to run the pipeline " + flags.Trigger.FPGATrackSim.pipeline + " which is not yet supported!")
 
     if (not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')): ### if DP pipeline skip everything else!
-       
-       splitPipeline=flags.Trigger.FPGATrackSim.pipeline.split('-')
-       trackingOption=9999999
-       if (len(splitPipeline) > 1): trackingOption=int(splitPipeline[1])
-       if (trackingOption < 9999999):           
-           trackingOptionMod = (trackingOption % 100)
-           if (trackingOptionMod == 0):
-               print("You are trying to run the linearized chi2 fit as part of a pipeline! I am going to enable this for you whether you want to or not")
-               flags.Trigger.FPGATrackSim.tracking = True
-               flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = False
-           elif (trackingOptionMod == 10):
-               print("You are trying to run the NN fake rejection as part of a pipeline! I am going to enable this for you whether you want to or not")               
-               flags.Trigger.FPGATrackSim.tracking = True
-               flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = True
-           else:
-               raise AssertionError("ERROR Your tracking option for the pipeline = " + str(trackingOption) + " is not yet supported!")
-   
-       if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
-           log.info("wrapperFile is string, converting to list")
-           flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
-           flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
-   
-       flags.lock()
-       flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
-       acc=MainServicesCfg(flags)
-   
-       acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
-   
-       if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput):
-           acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
-   
-       acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
 
-       if (flags.Trigger.FPGATrackSim.Hough.genScan):
-           acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
-       
-       if not flags.Trigger.FPGATrackSim.wrapperFileName:
-           from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-           acc.merge(PoolReadCfg(flags))
-       
-           if flags.Input.isMC:
-               from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-               acc.merge(GEN_AOD2xAODCfg(flags))
-   
-               from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
-               acc.merge(addTruthPileupJetsToOutputCfg(flags))
-           
-           if flags.Detector.EnableCalo:
-               from CaloRec.CaloRecoConfig import CaloRecoCfg
-               acc.merge(CaloRecoCfg(flags))
-   
-           if flags.Tracking.recoChain:
-               from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-               acc.merge(InDetTrackRecoCfg(flags))
-   
-       # Configure both the dataprep and logical hits algorithms.
-       acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
-       acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
+        splitPipeline=flags.Trigger.FPGATrackSim.pipeline.split('-')
+        trackingOption=9999999
+        if (len(splitPipeline) > 1): trackingOption=int(splitPipeline[1])
+        if (trackingOption < 9999999):
+            trackingOptionMod = (trackingOption % 100)
+            if (trackingOptionMod == 0):
+                print("You are trying to run the linearized chi2 fit as part of a pipeline! I am going to enable this for you whether you want to or not")
+                flags.Trigger.FPGATrackSim.tracking = True
+                flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = False
+            elif (trackingOptionMod == 10):
+                print("You are trying to run the NN fake rejection as part of a pipeline! I am going to enable this for you whether you want to or not")
+                flags.Trigger.FPGATrackSim.tracking = True
+                flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = True
+                flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis2nd = flags.Trigger.FPGATrackSim.Hough.secondStage
+            else:
+                raise AssertionError("ERROR Your tracking option for the pipeline = " + str(trackingOption) + " is not yet supported!")
 
-       # If second stage is turned on, turn that algorithm on too.
-       if flags.Trigger.FPGATrackSim.Hough.secondStage:
-           acc.merge(FPGATrackSimSecondStageConfig.FPGATrackSimSecondStageAlgCfg(flags))
-   
-       if flags.Trigger.FPGATrackSim.doEDMConversion:
-           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True, doSP=flags.Trigger.FPGATrackSim.spacePoints))
-           from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
-           acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
-           acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
-           if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.runCKF:
-               from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
-               acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension", ProtoTracksLocation="ActsProtoTracks_1stFromFPGATrack")) # run CKF track extension on FPGA tracks
-   
-           if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags,
-                                                                                                     stage = '_1st',
-                                                                                                     finalTrackParticles=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
-           if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
-           if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
-           if flags.Trigger.FPGATrackSim.Hough.hitFiltering : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgFiltered_1st', stage = 'Filtered_1st', doHits = False)) # Default disabled, works if enabled
-   
-           # Reporting algorithm (used for debugging - can be disabled)
-           from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-           acc.merge(FPGATrackSimReportingCfg(flags,
-                                              perEventReports = (flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') )) # disable perEventReports for ttbar
-           # IDTPM running
-           from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
-           acc.merge( InDetTrackPerfMonCfg(flags) )
-       
-       acc.store(open('AnalysisConfig.pkl','wb'))
-   
-       statusCode = acc.run(flags.Exec.MaxEvents)
-       assert statusCode.isSuccess() is True, "Application execution did not succeed"
+        if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
+            log.info("wrapperFile is string, converting to list")
+            flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
+            flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+
+        flags.lock()
+        flags.dump()
+        flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
+        acc=MainServicesCfg(flags)
+
+        if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+            acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+
+            if (flags.Trigger.FPGATrackSim.doNNPathFinder):
+                acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUTNNPATHFINDER DATAFILE='NNPathfinder.root', OPT='RECREATE'"]))
+
+            if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput1st | flags.Trigger.FPGATrackSim.Hough.houghRootoutput2nd):
+                acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
+
+            if flags.Trigger.FPGATrackSim.Hough.writeTestOutput:
+                acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+
+            if (flags.Trigger.FPGATrackSim.Hough.genScan):
+                acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
+
+        if not flags.Trigger.FPGATrackSim.wrapperFileName:
+            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+            acc.merge(PoolReadCfg(flags))
+
+            if flags.Input.isMC:
+                from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+                acc.merge(GEN_AOD2xAODCfg(flags))
+
+                from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
+                acc.merge(addTruthPileupJetsToOutputCfg(flags))
+
+            if flags.Detector.EnableCalo:
+                from CaloRec.CaloRecoConfig import CaloRecoCfg
+                acc.merge(CaloRecoCfg(flags))
+
+            if flags.Tracking.recoChain:
+                from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+                acc.merge(InDetTrackRecoCfg(flags))
+
+        # Configure both the dataprep and logical hits algorithms.
+        acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
+        acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
+
+        # If second stage is turned on, turn that algorithm on too.
+        if flags.Trigger.FPGATrackSim.Hough.secondStage:
+            acc.merge(FPGATrackSimSecondStageConfig.FPGATrackSimSecondStageAlgCfg(flags))
+
+        if flags.Trigger.FPGATrackSim.doEDMConversion:
+            stage = "_2nd" if flags.Trigger.FPGATrackSim.Hough.secondStage else "_1st"
+            convertTracks = flags.Trigger.FPGATrackSim.tracking
+            acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = f"FPGAConversionAlg{stage}",
+                                                                        stage = f"{stage}",
+                                                                        doActsTrk=True,
+                                                                        doSP=flags.Trigger.FPGATrackSim.spacePoints,
+                                                                        useRoads=not flags.Trigger.FPGATrackSim.tracking))
+
+            from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
+            acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}",
+                                            useRoads=not flags.Trigger.FPGATrackSim.tracking)) # Run ACTS KF
+            acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage=f"{stage}")) # Run Truth Matching/Decoration chain
+            if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.runCKF:
+                from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
+                acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension",
+                                                    ProtoTracksLocation=f"ActsProtoTracks{stage}FromFPGATrack")) # run CKF track extension on FPGA tracks
+
+            if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags,
+                                                                                                        stage = f"{stage}",
+                                                                                                        finalTrackParticles=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
+
+            # Reporting algorithm (used for debugging - can be disabled)
+            from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+            acc.merge(FPGATrackSimReportingCfg(flags, stage=f"{stage}",
+                                                perEventReports = ((flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') and flags.Exec.MaxEvents<=10 ) )) # disable perEventReports for pileup samples or many events
+
+        acc.store(open('AnalysisConfig.pkl','wb'))
+
+        acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+        if flags.Trigger.FPGATrackSim.msgLimit!=-1:
+            acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
+            acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
+
+        statusCode = acc.run(flags.Exec.MaxEvents)
+        assert statusCode.isSuccess() is True, "Application execution did not succeed"

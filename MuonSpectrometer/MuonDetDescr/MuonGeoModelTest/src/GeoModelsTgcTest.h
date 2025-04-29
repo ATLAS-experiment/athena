@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELSTGCTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELSTGCTEST_H
@@ -20,7 +20,7 @@ namespace MuonGM {
 
 class GeoModelsTgcTest : public AthHistogramAlgorithm {
    public:
-    GeoModelsTgcTest(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
     StatusCode initialize() override;
     StatusCode execute() override;
@@ -46,7 +46,7 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm {
     /// <stationName><stationEta><A/C><stationPhi>
     Gaudi::Property<std::vector<std::string>> m_selectStat{
         this, "TestStations", {}, "Constrain the stations to be tested"};
-
+    Gaudi::Property<std::vector<std::string>> m_excludeStat{this, "ExcludeStations", {}};
     MuonVal::MuonTesterTree m_tree{"sTgcGeoModelTree", "GEOMODELTESTER"};
 
     /// Identifier of the readout element
@@ -72,6 +72,7 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm {
 
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
+    MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
 
     /// Rotation matrix of the respective strip layers
     MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};    

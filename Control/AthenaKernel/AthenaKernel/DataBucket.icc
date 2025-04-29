@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/IRegisterTransient.h"
@@ -13,6 +13,7 @@
 #include "CxxUtils/checker_macros.h"
 
 #include <type_traits>
+#include <concepts>
 
 
 // Some helper functions.
@@ -20,13 +21,14 @@ namespace SG {
 
 
 // If T is a DataObject, increment its reference count.
-// The second parameter tells whether or not T is a DataObject.
 template <class T>
-void db_maybe_ref (T*, std::false_type)
+requires (!std::derived_from<T, DataObject>)
+inline
+void db_maybe_ref (T*)
 {
 }
-template <class T>
-void db_maybe_ref (T* ptr, std::true_type)
+inline
+void db_maybe_ref (DataObject* ptr)
 {
   ptr->addRef();
 }
@@ -37,17 +39,17 @@ void db_maybe_ref (T* ptr, std::true_type)
 // otherwise, just delete it.
 // The second parameter tells whether or not T is a DataObject.
 template <class T>
-void db_free_ptr (T* ptr, std::false_type)
+requires (!std::derived_from<T, DataObject>)
+inline
+void db_free_ptr (T* ptr)
 {
-  //  std::cout << "db_free_ptr: deleting ptr @" << ptr << " of type " << ClassID_traits<T>::typeName() << std::endl;
   delete ptr;
 }
-template <class T>
-void db_free_ptr (T* ptr, std::true_type)
+inline
+void db_free_ptr (const DataObject* ptr)
 {
-  typedef typename std::remove_const<T>::type T_nc;
-  //  std::cout << "db_free_ptr: releasing ptr @" << ptr << " of type " << ClassID_traits<T>::typeName() << std::endl;
-  const_cast<T_nc*>(ptr)->release();
+  DataObject* ptr_nc ATLAS_THREAD_SAFE = const_cast<DataObject*>(ptr);
+  ptr_nc->release();
 }
 
 } // namespace SG
@@ -61,9 +63,8 @@ SG::DataBucket<T>::DataBucket(T* data)
   : m_ptr(data)
 {
   // If T is a DataObject, increase the refcount.
-  typedef typename ClassID_traits<T>::is_DataObject_tag tag;
   if (m_ptr)
-    SG::db_maybe_ref (m_ptr, tag());
+    SG::db_maybe_ref (m_ptr);
 }
 
 template <typename T>
@@ -79,11 +80,6 @@ SG::DataBucket<T>::DataBucket(std::unique_ptr<U> data)
 {
 }
 
-template <typename T>
-SG::DataBucket<T>::DataBucket(SG::DataObjectSharedPtr<T> data)
-  : m_ptr(data.detach())
-{
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // DATAOBJECT
@@ -251,9 +247,8 @@ DataBucket<T>::~DataBucket()
 
   // Either delete m_ptr or decrement the refcount,
   // depending on whether or not T is a DataObject.
-  typedef typename ClassID_traits<T>::is_DataObject_tag tag;
   if (m_ptr)
-    SG::db_free_ptr(m_ptr, tag());
+    SG::db_free_ptr(m_ptr);
 }
 
 } // namespace SG

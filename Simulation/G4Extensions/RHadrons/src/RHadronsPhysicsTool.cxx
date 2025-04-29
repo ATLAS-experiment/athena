@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -20,6 +20,7 @@
 #include "G4BaryonConstructor.hh"
 
 // STL headers
+#include <memory>
 #include <string>
 
 
@@ -53,27 +54,23 @@ RHadronsPhysicsTool::~RHadronsPhysicsTool()
 StatusCode RHadronsPhysicsTool::initialize( )
 {
   ATH_MSG_DEBUG("RHadronsPhysicsTool::initialize()");
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
-RHadronsPhysicsTool* RHadronsPhysicsTool::GetPhysicsOption()
-{
-  return this;
+auto RHadronsPhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<RHadronsPhysicsTool::PhysicsConstructor>(
+      name(), this->msgLevel(), m_standardpdgidtodecay.value());
 }
 
-
-void RHadronsPhysicsTool::ConstructParticle()
-{
+void RHadronsPhysicsTool::PhysicsConstructor::ConstructParticle() {
   ATH_MSG_DEBUG("RHadronsPhysicsTool::ConstructParticle() - start");
   CustomParticleFactory::loadCustomParticles();
   ATH_MSG_DEBUG("RHadronsPhysicsTool::ConstructParticle() - end");
 }
-void RHadronsPhysicsTool::ConstructProcess()
-{
+void RHadronsPhysicsTool::PhysicsConstructor::ConstructProcess() {
   ATH_MSG_DEBUG("RHadronsPhysicsTool::ConstructProcess() - start");
-  G4Decay* theDecayProcess = new G4Decay();
-  theDecayProcess->SetExtDecayer( new RHadronPythiaDecayer("RHadronPythiaDecayer") );
+  G4Decay* pythiaDecayProcess = new G4Decay();
+  pythiaDecayProcess->SetExtDecayer( new RHadronPythiaDecayer("RHadronPythiaDecayer") );
   G4ParticleTable::G4PTblDicIterator* particleIterator = G4ParticleTable::GetParticleTable()->GetIterator();
   particleIterator->reset();
 
@@ -82,7 +79,7 @@ void RHadronsPhysicsTool::ConstructProcess()
   G4BaryonConstructor::ConstructParticle();
   ATH_MSG_DEBUG("RHadronsPhysicsTool::ConstructProcess() - m_standardpdgidtodecay = " << m_standardpdgidtodecay);
   G4ProcessManager *templateProcessMgr = G4ParticleTable::GetParticleTable()->FindParticle(4122)->GetProcessManager();
-  for (const int pid : m_standardpdgidtodecay.value()) {
+  for (const int pid : m_standardpdgidtodecay) {
     ATH_MSG_VERBOSE ( "Adding decay for "<<pid );
     G4ParticleDefinition *particle = G4ParticleTable::GetParticleTable()->FindParticle( pid );
     if (particle) {
@@ -93,24 +90,32 @@ void RHadronsPhysicsTool::ConstructProcess()
         particle->SetProcessManager(new G4ProcessManager(*templateProcessMgr));
         processMgr = particle->GetProcessManager();
       }
-      G4ProcessVector *pros = processMgr->GetProcessList();
-      for (unsigned int pi=0; pi<pros->size(); ++pi) {
-        if ((*pros)[pi]->GetProcessType()==fDecay) {
+      // Look for native G4Decay process
+      G4ProcessVector *fullProcessList = processMgr->GetProcessList();  // NB G4ProcessVector does not support range-based for loops in G4 10.6....
+      std::vector< G4VProcess * > existingDecayProcesses; existingDecayProcesses.reserve(2);
+      for (unsigned int i=0; i<fullProcessList->size(); ++i) {
+        G4VProcess* process = (*fullProcessList)[i];
+        if (process->GetProcessType() == fDecay) {
           ATH_MSG_VERBOSE ( "Found a pre-existing decay process for " <<particle->GetParticleName() << " (" << pid << "). Will remove in favour of using RHadronPythiaDecayer." );
-          processMgr->RemoveProcess(pi);
-          break;
+          existingDecayProcesses.push_back(process);
         }
       }
-      for (unsigned int pi=0; pi<pros->size(); ++pi) {
-        if ((*pros)[pi]->GetProcessType()==fDecay) {
+      // Actually remove the existing decay processes
+      for (G4VProcess* process : existingDecayProcesses) {
+        processMgr->RemoveProcess(process);
+      }
+      // Cross-check
+      for (unsigned int i=0; i<fullProcessList->size(); ++i) {
+        G4VProcess* process = (*fullProcessList)[i];
+        if (process->GetProcessType() == fDecay) {
           ATH_MSG_WARNING ( "There is another decay process for " <<particle->GetParticleName() << " (" << pid << ") already defined!" );
-          processMgr ->DumpInfo();
+          processMgr->DumpInfo();
         }
       }
       ATH_MSG_VERBOSE ( "Adding decay process for " <<particle->GetParticleName() << " (" << pid << ") using RHadronPythiaDecayer." );
-      processMgr ->AddProcess(theDecayProcess);
-      processMgr ->SetProcessOrdering(theDecayProcess, idxPostStep); processMgr ->SetProcessOrdering(theDecayProcess, idxAtRest);
-      //processMgr ->DumpInfo();
+      processMgr->AddProcess(pythiaDecayProcess);
+      processMgr->SetProcessOrdering(pythiaDecayProcess, idxPostStep); processMgr->SetProcessOrdering(pythiaDecayProcess, idxAtRest);
+      //processMgr->DumpInfo();
     } else {
       ATH_MSG_WARNING ( "Particle with pdgid "<<pid<<" has no definition in G4?" );
     }
@@ -122,26 +127,49 @@ void RHadronsPhysicsTool::ConstructProcess()
   while ((*particleIterator)()) {
     G4ParticleDefinition *particle = particleIterator->value();
     if (CustomParticleFactory::isCustomParticle(particle)) {
-      if (find(handled.begin(),handled.end(),particle->GetPDGEncoding())==handled.end()) {
-        handled.push_back(particle->GetPDGEncoding());
+      const int pid = particle->GetPDGEncoding();
+      if (find(handled.begin(), handled.end(), pid) == handled.end()) {
+        handled.push_back(pid);
         ATH_MSG_VERBOSE ( particle->GetParticleName() << " (" << particle->GetPDGEncoding() << ") " << " is a Custom Particle. Attempting to add a decay process." );
         G4ProcessManager *processMgr = particle->GetProcessManager();
-        if (particle->GetParticleType()=="rhadron") {
+        // Look for native G4Decay process
+        G4ProcessVector *fullProcessList = processMgr->GetProcessList();  // NB G4ProcessVector does not support range-based for loops in G4 10.6....
+        std::vector< G4VProcess * > existingDecayProcesses; existingDecayProcesses.reserve(2);
+        for (unsigned int i=0; i<fullProcessList->size(); ++i) {
+          G4VProcess* process = (*fullProcessList)[i];
+          if (process->GetProcessType() == fDecay) {
+            ATH_MSG_VERBOSE ( "Found a pre-existing decay process for " <<particle->GetParticleName() << " (" << pid << "). Will remove in favour of using RHadronPythiaDecayer." );
+            existingDecayProcesses.push_back(process);
+          }
+        }
+        // Actually remove the existing decay process(es)
+        for (G4VProcess* process : existingDecayProcesses) {
+          processMgr->RemoveProcess(process);
+        }
+        // Cross-check
+        for (unsigned int i=0; i<fullProcessList->size(); ++i) {
+          G4VProcess* process = (*fullProcessList)[i];
+          if (process->GetProcessType() == fDecay) {
+            ATH_MSG_WARNING ( "There is another decay process for " <<particle->GetParticleName() << " (" << pid << ") already defined!" );
+            processMgr->DumpInfo();
+          }
+        }
+        if (particle->GetParticleType()=="rhadron" ) {
           processMgr->AddDiscreteProcess(new FullModelHadronicProcess());
-          if (theDecayProcess->IsApplicable(*particle)) {
+          if (pythiaDecayProcess->IsApplicable(*particle)) {
             ATH_MSG_VERBOSE ( "Adding decay..." );
-            processMgr ->AddProcess(theDecayProcess);
+            processMgr->AddProcess(pythiaDecayProcess);
             // set ordering for PostStepDoIt and AtRestDoIt
-            processMgr->SetProcessOrdering(theDecayProcess, idxPostStep);
-            processMgr->SetProcessOrdering(theDecayProcess, idxAtRest);
+            processMgr->SetProcessOrdering(pythiaDecayProcess, idxPostStep);
+            processMgr->SetProcessOrdering(pythiaDecayProcess, idxAtRest);
           } else {
             ATH_MSG_WARNING ( "No decay allowed for " << particle->GetParticleName() );
             if (!particle->GetPDGStable() && particle->GetPDGLifeTime()<0.1*CLHEP::ns) {
               ATH_MSG_WARNING ( "Gonna decay it anyway!!!" );
-              processMgr->AddProcess(theDecayProcess);
+              processMgr->AddProcess(pythiaDecayProcess);
               // set ordering for PostStepDoIt and AtRestDoIt
-              processMgr->SetProcessOrdering(theDecayProcess, idxPostStep);
-              processMgr->SetProcessOrdering(theDecayProcess, idxAtRest);
+              processMgr->SetProcessOrdering(pythiaDecayProcess, idxPostStep);
+              processMgr->SetProcessOrdering(pythiaDecayProcess, idxAtRest);
             }
           }
         }

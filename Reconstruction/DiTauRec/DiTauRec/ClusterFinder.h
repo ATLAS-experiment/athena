@@ -1,11 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_CLUSTERFINDER_H
 #define DITAUREC_CLUSTERFINDER_H
 
 #include "DiTauToolBase.h"
+
+#include "AsgTools/PropertyWrapper.h"
+
 #include "GaudiKernel/ToolHandle.h"
 
 
@@ -25,8 +28,8 @@ class ClusterFinder : public DiTauToolBase {
 
 
  private:
-  std::string m_ClusterContainerName;
-  float m_Rsubjet;
+
+  Gaudi::Property<float> m_Rsubjet{this, "Rsubjet", 0.2};
 
 };
 

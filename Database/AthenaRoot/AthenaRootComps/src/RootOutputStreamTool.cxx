@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootOutputStreamTool.cxx 
@@ -35,8 +35,6 @@ RootOutputStreamTool::RootOutputStreamTool(const std::string& type, const std::s
 	m_storeSvc("StoreGateSvc", name),
 	m_conversionSvc("Athena::RootCnvSvc/AthenaRootCnvSvc", name),
 	m_clidSvc("ClassIDSvc", name) {
-  // Declare IAthenaOutputStreamTool interface
-  declareInterface<IAthenaOutputStreamTool>(this);
   // Properties
   declareProperty("Store", m_storeSvc, "Store from which to stream out event data");
   declareProperty("TreeName", m_treeName = "CollectionTree", "Name of the output event tree");
@@ -48,10 +46,7 @@ RootOutputStreamTool::~RootOutputStreamTool() {
 
 StatusCode RootOutputStreamTool::initialize() {
   ATH_MSG_INFO("Initializing " << name());
-  if (!::AthAlgTool::initialize().isSuccess()) {
-    ATH_MSG_FATAL("Cannot initialize AlgTool base class.");
-    return StatusCode::FAILURE;
-  }
+
   // Get the ClassID service
   ATH_CHECK(m_clidSvc.retrieve());
   // Get the conversion service
@@ -74,7 +69,7 @@ StatusCode RootOutputStreamTool::finalize() {
   if (!m_clidSvc.release().isSuccess()) {
     ATH_MSG_WARNING("Cannot release ClassID service.");
   }
-  return ::AthAlgTool::finalize();
+  return StatusCode::SUCCESS;
 }
 
 StatusCode RootOutputStreamTool::connectServices(const std::string& dataStore, const std::string& cnvSvc, bool extendProvenenceRecord) {
@@ -217,11 +212,6 @@ StatusCode RootOutputStreamTool::streamObjects(const DataObjectVec& dataObjects,
       }
     }
   }
-  return StatusCode::SUCCESS;
-}
-
-StatusCode RootOutputStreamTool::fillObjectRefs(const DataObjectVec& /*dataObjects*/) {
-  ATH_MSG_VERBOSE("fillObjectRefs");
   return StatusCode::SUCCESS;
 }
 

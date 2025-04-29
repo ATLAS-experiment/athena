@@ -1,30 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/ClusterMomentPlots.h"
 
 namespace PFO {
 
-  ClusterMomentPlots::ClusterMomentPlots(PlotBase* pParent, std::string sDir, SG::ReadHandleKey<xAOD::CaloClusterContainer>& sClusterContainerName) : PlotBase(pParent, sDir), m_sClusterContainerName(sClusterContainerName){
-    m_LATERAL = nullptr;
-    m_LONGITUDINAL = nullptr;
-    m_SECOND_R = nullptr;
-    m_CENTER_LAMBDA = nullptr;
-    m_FIRST_ENG_DENS = nullptr;
-    m_ENG_FRAC_MAX = nullptr;
-    m_ISOLATION = nullptr;
-    m_ENG_BAD_CELLS = nullptr;
-    m_N_BAD_CELLS = nullptr;
-    m_BADLARQ_FRAC = nullptr;
-    m_ENG_POS = nullptr;
-    m_SIGNIFICANCE = nullptr;
-    m_AVG_LAR_Q = nullptr;
-    m_AVG_TILE_Q = nullptr;
-    m_CELL_SIG_SAMPLING = nullptr;
-    m_ENG_BAD_HV_CELLS = nullptr;
-    m_N_BAD_HV_CELLS = nullptr;
-    m_EM_PROBABILITY = nullptr;
+  ClusterMomentPlots::ClusterMomentPlots(PlotBase* pParent, const std::string & sDir, SG::ReadHandleKey<xAOD::CaloClusterContainer>& sClusterContainerName) : PlotBase(pParent, sDir), m_sClusterContainerName(sClusterContainerName){
+   
 
 }
 

@@ -2,10 +2,9 @@
 NEVENTS=${1}
 export TRF_ECHO=1;
 FullCPAlgorithmsTest_CA.py \
-        --block-config \
         --data-type data \
         --physlite \
-	--evtMax 100000 \
+	--evtMax ${NEVENTS} \
         --perfmon 'fullmonmt' \
         --input-file "/eos/atlas/atlascerngroupdisk/proj-spot/spot-job-inputs/cpanalysis/data-ttbar/DAOD_PHYSLITE.myOutput.pool.root" > log.CPAnalysis 2>&1;
 ecode=$?

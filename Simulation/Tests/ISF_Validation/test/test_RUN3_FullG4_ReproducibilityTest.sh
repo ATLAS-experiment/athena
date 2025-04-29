@@ -14,14 +14,17 @@
 # art-output: hitsMerged.ttbar.pool.root
 # art-output: hitsFullMerged.ttbar.pool.root
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 # Run 10 events normally
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
     --outputHITSFile 'hitsFull.ttbar.pool.root' \
     --maxEvents '10' \
@@ -34,11 +37,11 @@ echo "art-result: $rc unsplit-sim"
 # Run first 5 events
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
     --outputHITSFile 'hitsHalf1.ttbar.pool.root' \
     --maxEvents '5' \
@@ -54,11 +57,11 @@ echo "art-result: $rc2 split-sim1"
 # Run next 5 events
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
     --outputHITSFile 'hitsHalf2.ttbar.pool.root' \
     --maxEvents '5' \

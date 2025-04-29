@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
     
 #include "MuonCalibSegmentCreator/MuonSegmentReader.h"
@@ -124,20 +124,16 @@ StatusCode MuonSegmentReader::execute()
   m_trk_nTracks = muTrks->size() ;
   // if tracks were found, print MDT track hits
   for (unsigned int itrk = 0; itrk < muTrks->size(); ++itrk) {
-    
     const Trk::Track* trkSA = muTrks->at(itrk) ;
-
     ATH_MSG_DEBUG(m_printer->print(*trkSA));
     ATH_MSG_DEBUG("Track author : "<<m_printer->printPatRec(*trkSA));
     ATH_MSG_DEBUG("TrackHit measurements : "<<m_printer->printMeasurements(*trkSA));
-    //Trk::TrackInfo trkInfo = trkSA->info();
-    //ATH_MSG_DEBUG("Track Author = " << int(trkInfo.m_patternRecognition.test(Trk::TrackInfo::Moore)));   
     m_trk_author.push_back(208); // Hardcode 208 as Moore for MuonStandaloneTrack
-
     // get trackSummary
     const Trk::MuonTrackSummary* summary = nullptr;
     // check if the track already has a MuonTrackSummary, if not calculate it using the helper
     const Trk::TrackSummary* trkSummary = trkSA->trackSummary();
+    if (not trkSummary) continue;
     m_trk_nMdtHits.push_back(trkSummary->get(Trk::numberOfMdtHits));
     //!< number of measurements flaged as outliers in TSOS
     m_trk_nOutliersHits.push_back(trkSummary->get(Trk::numberOfOutliersOnTrack));
@@ -153,11 +149,10 @@ StatusCode MuonSegmentReader::execute()
                   << " TGC Phi Eta Hits "<<trkSummary->get(Trk::numberOfTgcPhiHits)<<" "<<trkSummary->get(Trk::numberOfTgcEtaHits)
                   << " RPC Phi Eta Hits "<<trkSummary->get(Trk::numberOfRpcPhiHits)<<" "<<trkSummary->get(Trk::numberOfRpcEtaHits));
 
-    if (trkSummary) summary = trkSummary->muonTrackSummary();
+    summary = trkSummary->muonTrackSummary();
     if (!summary) {
 	    ATH_MSG_WARNING("No muon summary is present");
-    }
-    else  {
+    } else  {
       ATH_MSG_DEBUG("print MuonSummary : "<<m_printer->print(*summary));
     }
 
@@ -279,7 +274,7 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
       // add the implement of calibrationTool, initialize global position by mrot 
       MdtCalibInput calibIn{*prd};
       calibIn.setClosestApproach(mrot->globalPosition());
-      calibIn.setTrackDirection(trackPars->momentum().unit());
+      calibIn.setTrackDirection(trackPars->momentum().unit(), true);
       const MdtCalibOutput calibResult{m_calibrationTool->calibrate(ctx, calibIn, false)};
       ATH_MSG_DEBUG("print "<<calibIn  << " calibResult : "<<calibResult);
       m_trkHit_tubeT0.push_back(calibResult.tubeT0());
@@ -309,6 +304,7 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
       const MuonGM::MdtReadoutElement* detEl = MuonDetMgr->getMdtReadoutElement(id);
       if( !detEl ) {
         ATH_MSG_WARNING( "getGlobalToStation failed to retrieve detEL byebye"  );
+        return;
       }
 
       // get the 2nd coordinator from the track hit measurement
@@ -342,7 +338,7 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
       // residual calculator  
       float residualBiased = -999.;
       float pullBiased = -999.;
-      if( trackPars ) {
+      {
         std::optional<Trk::ResidualPull> resPullBiased = m_pullCalculator->residualPull(measurement, trackPars, Trk::ResidualPull::Biased );
         if(resPullBiased.has_value()){
           residualBiased = resPullBiased.value().residual().front();

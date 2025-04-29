@@ -1,0 +1,106 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "src/detail/AtlasUncalibSourceLinkAccessor.h"
+
+#include <algorithm>
+
+namespace ActsTrk::detail {
+
+template <Acts::TrackContainerFrontend track_container_t>
+inline auto SharedHitCounter::computeSharedHits(typename track_container_t::TrackProxy &track,
+                                                track_container_t &tracks,
+                                                const MeasurementIndex &measurementIndex) -> ReturnSharedAndBad {
+  return computeSharedHits(track, tracks, measurementIndex.size(), [&measurementIndex](const xAOD::UncalibratedMeasurement &hit) -> std::size_t {
+    return measurementIndex.index(hit);
+  });
+}
+
+template <Acts::TrackContainerFrontend track_container_t>
+inline auto SharedHitCounter::computeSharedHitsDynamic(typename track_container_t::TrackProxy &track,
+                                                       track_container_t &tracks,
+                                                       MeasurementIndex &measurementIndex) -> ReturnSharedAndBad {
+  return computeSharedHits(track, tracks, measurementIndex.size(), [this, &measurementIndex](const xAOD::UncalibratedMeasurement &hit) -> std::size_t {
+    auto [index, newContainer] = measurementIndex.newMeasurementIndex(hit);
+    if (newContainer)
+      m_firstTrackStateOnTheHit.resize(measurementIndex.size(), s_noTrackState);
+    return index;
+  });
+}
+
+template <Acts::TrackContainerFrontend track_container_t, typename IndexFun>
+inline auto SharedHitCounter::computeSharedHits(typename track_container_t::TrackProxy &track,
+                                                track_container_t &tracks,
+                                                std::size_t indexSize,
+                                                IndexFun &&indexFun) -> ReturnSharedAndBad {
+  // Based on ActsExamples::TrackFindingAlgorithm::computeSharedHits().
+  // Finds shared hits in the reconstructed track and updates SharedHitFlag in both tracks.
+  // Uses measurementIndex to convert hit to hitIndex, and then m_firstTrackStateOnTheHit[] to convert hitIndex -> TrackStateIndex
+  // Returns stats: nShared and nBadTrackMeasurements
+
+  if (m_firstTrackStateOnTheHit.size() < indexSize)
+    m_firstTrackStateOnTheHit.resize(indexSize, s_noTrackState);
+
+  std::size_t nShared = 0;
+  std::size_t nBadTrackMeasurements = 0;
+  for (auto state : track.trackStatesReversed()) {
+    if (!state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag))
+      continue;
+
+    if (!state.hasUncalibratedSourceLink())
+      continue;
+
+    auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+    const xAOD::UncalibratedMeasurement& hit = getUncalibratedMeasurement(sl);
+    std::size_t hitIndex = indexFun(hit);
+    if (!(hitIndex < m_firstTrackStateOnTheHit.size())) {
+      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      // Save ATH_MSG_ERROR() for the caller, since for simplicity and efficiency this class doesn't have access to AthMsgStream.
+      // std::cout << "ERROR hit index " << hitIndex << " past end of " << m_firstTrackStateOnTheHit.size() << " hit indices\n";
+      ++nBadTrackMeasurements;
+      continue;
+    }
+
+    // Check if hit not already used
+    if (m_firstTrackStateOnTheHit[hitIndex].trackIndex == s_noTrackState.trackIndex) {
+      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      m_firstTrackStateOnTheHit[hitIndex] = {track.index(), state.index()};
+      continue;
+    }
+
+    // if already used, control if first track state has been marked as shared
+    const TrackStateIndex& indexFirstTrackState = m_firstTrackStateOnTheHit[hitIndex];
+    if (!(indexFirstTrackState.trackIndex < tracks.size())) {
+      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      // std::cout << "ERROR track index " << indexFirstTrackState.trackIndex << " past end of " << tracks.size() << " tracks in container\n";
+      ++nBadTrackMeasurements;
+      continue;
+    }
+
+    auto firstTrack = tracks.getTrack(indexFirstTrackState.trackIndex);
+    auto& firstStateContainer = firstTrack.container().trackStateContainer();
+    if (!(indexFirstTrackState.stateIndex < firstStateContainer.size())) {
+      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      // std::cout << "ERROR track state index " << indexFirstTrackState.stateIndex << " past end of " << firstStateContainer.size() << " track states in container\n";
+      ++nBadTrackMeasurements;
+      continue;
+    }
+
+    auto firstState = firstStateContainer.getTrackState(indexFirstTrackState.stateIndex);
+    if (!firstState.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag)) {
+      firstState.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
+      firstTrack.nSharedHits()++;
+      ++nShared;
+    }
+
+    // Decorate this track state
+    state.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
+    track.nSharedHits()++;
+    ++nShared;
+  }
+
+  return {nShared, nBadTrackMeasurements};
+}
+
+}  // namespace ActsTrk::detail

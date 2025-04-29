@@ -50,18 +50,18 @@ class ContainerConfig :
     This tracks the naming of all temporary containers, as well as all the
     selection decorations."""
 
-    def __init__ (self, name, sourceName, *, originalName = None, calibMode = None, noSysSuffix) :
+    def __init__ (self, name, sourceName, *, originalName = None, isMet = False, noSysSuffix) :
         self.name = name
         self.sourceName = sourceName
         self.originalName = originalName
-        self.calibMode = calibMode
         self.noSysSuffix = noSysSuffix
         self.index = 0
         self.maxIndex = None
         self.viewIndex = 1
-        self.isMet = False
+        self.isMet = isMet
         self.selections = []
         self.outputs = {}
+        self.meta = {}
 
     def currentName (self) :
         if self.index == 0 :
@@ -88,6 +88,7 @@ class ContainerConfig :
         self.viewIndex = 1
         self.selections = []
         self.outputs = {}
+        self.meta = {}
 
 
 
@@ -315,7 +316,7 @@ class ConfigAccumulator :
 
 
     def setSourceName (self, containerName, sourceName,
-                       *, originalName = None, calibMode = None) :
+                       *, originalName = None, isMet = False) :
         """set the (default) name of the source/original container
 
         This is essentially meant to allow using e.g. the muon
@@ -328,12 +329,9 @@ class ConfigAccumulator :
         is mostly/exclusively used for jet containers, so that
         subsequent configurations know which jet container they
         operate on.
-
-        CalibMode can also be configured to pass it down to some algs which use this
-        information to be configured, like the METSignificance
         """
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName, calibMode = calibMode)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName, isMet = isMet)
 
 
     def writeName (self, containerName, *, isMet=None) :
@@ -397,15 +395,31 @@ class ConfigAccumulator :
             raise Exception ("no original name for: " + containerName)
         return result
 
-    def calibMode (self, containerName) :
-        """get the calibration mode of the given container
+    def getContainerMeta (self, containerName, metaField, defaultValue=None, *, failOnMiss=False) :
+        """get the meta information for the given container
+
+        This is used to pass down meta-information from the
+        configuration to the algorithms.
         """
         if containerName not in self._containerConfig :
             raise Exception ("container unknown: " + containerName)
-        result = self._containerConfig[containerName].calibMode
-        if result is None :
-            raise Exception ("no calibration mode for: " + containerName)
-        return result
+        if metaField in self._containerConfig[containerName].meta :
+            return self._containerConfig[containerName].meta[metaField]
+        if failOnMiss :
+            raise Exception ('unknown meta-field' + metaField + ' on container ' + containerName)
+        return defaultValue
+
+    def setContainerMeta (self, containerName, metaField, value, *, allowOverwrite=False) :
+        """set the meta information for the given container
+
+        This is used to pass down meta-information from the
+        configuration to the algorithms.
+        """
+        if containerName not in self._containerConfig :
+            raise Exception ("container unknown: " + containerName)
+        if not allowOverwrite and metaField in self._containerConfig[containerName].meta :
+            raise Exception ('duplicate meta-field' + metaField + ' on container ' + containerName)
+        self._containerConfig[containerName].meta[metaField] = value
 
     def isMetContainer (self, containerName) :
         """whether the given container is registered as a MET container
@@ -609,6 +623,11 @@ class ConfigAccumulator :
         if outputContainerName in self._outputContainers :
             raise KeyError ("duplicate output container name: " + outputContainerName)
         self._outputContainers[outputContainerName] = containerName
+
+
+    def checkOutputContainer (self, containerName) :
+        """check whether a given container has been registered in outputs"""
+        return containerName in self._outputContainers.values()
 
 
     def getOutputContainerOrigin (self, outputContainerName) :

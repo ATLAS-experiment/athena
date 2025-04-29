@@ -18,8 +18,8 @@ namespace MuonR4{
         return StatusCode::SUCCESS;  
     }
     StatusCode RpcClusteringAlg::execute(const EventContext& ctx) const {
-        SG::ReadHandle inContainer{m_readKey, ctx};
-        ATH_CHECK(inContainer.isPresent());
+        const xAOD::RpcStripContainer* inContainer{nullptr};
+        ATH_CHECK(SG::get(inContainer, m_readKey, ctx));
 
         SG::WriteHandle outContainer{m_writeKey, ctx};
         ATH_CHECK(outContainer.record(std::make_unique<xAOD::RpcStripContainer>(), 

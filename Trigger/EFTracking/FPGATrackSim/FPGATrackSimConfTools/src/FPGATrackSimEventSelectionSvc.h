@@ -71,6 +71,7 @@ class FPGATrackSimEventSelectionSvc : public extends< AthService, IFPGATrackSimE
 
   // Gaudi parameters:
   Gaudi::Property<unsigned int> m_regionID     { this, "regionID", 0, "current region under processing"};  // Current region of interest
+  Gaudi::Property<unsigned int> m_skipRegionCheck     { this, "skipRegionCheck", false, "this should be set to true for DataPrep or in cases where region cuts don't matter"};
   Gaudi::Property<std::string> m_regions_path  { this, "regions", "", "path of the slices file"};         // path to slices file
   Gaudi::Property<std::string> m_sampleType    { this, "sampleType", "singleMuons", "type of sample under processing (skipTruth, singleElectrons, singleMuons, singlePions, or LLPs)"};           // type of sample ("skipTruth", "singleElectrons", "singleMuons", "singlePions")
   Gaudi::Property<bool> m_withPU           { this, "withPU",  false, "flag to say if there is pile-up or not"};              // flag to say if there is pile-up or not
@@ -78,7 +79,13 @@ class FPGATrackSimEventSelectionSvc : public extends< AthService, IFPGATrackSimE
   Gaudi::Property<float> m_minLRTpT        { this, "minLRTpT", 5., "Minimum pT to use in LRT selection, in GeV"};         // minimum pT, in GeV, to use in LRT selection
   Gaudi::Property<int> m_LRT_pdgID         { this, "lrt_truthMatchPDGID", 0, "If we are running an LLP sample but want only some PDGID of output in the truth selection, set this"};        // If we are running an LLP sample but want only some PDGID of output in the truth selection, set this
   Gaudi::Property<bool> m_allowHighBarcode { this, "allowHighBarcode", false, "Whether or not to allow barcodes over 200000 in truth matching"}; // whether or not to allow barcodes over 200000 in truth matching
-
+  Gaudi::Property<bool> m_oldRegionDefs {this, "oldRegionDefs", true, "If True, use old region definitions, otherwise new ones where eta-phi for a region is automatically calculated and the rest are passed on"};
+  Gaudi::Property<float> m_mind0 {this, "mind0", -2.0, "Min d0 for region selection"};
+  Gaudi::Property<float> m_minz0 {this, "minz0", -150, "Min z0 for region selection"};  
+  Gaudi::Property<float> m_minqOverPt {this, "minqOverPt", -0.001, "Min qOverPt for region selection (MeV)"};  
+  Gaudi::Property<float> m_maxd0 {this, "maxd0", 2.0, "Max d0 for region selection"};
+  Gaudi::Property<float> m_maxz0 {this, "maxz0", 150, "Max z0 for region selection"};  
+  Gaudi::Property<float> m_maxqOverPt {this, "maxqOverPt", 0.001, "Max qOverPt for region selection (MeV)"};  
 
   
   SampleType m_st = SampleType::skipTruth;           // internal value for faster comparisons in selectEvent()

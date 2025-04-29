@@ -908,5 +908,13 @@ KalmanFitterTool::fit(const EventContext& ctx,
   }
   return fit(ctx, sourceLinks, initialParams, tgContext, mfContext, calContext, detectorElementToGeometryIdMap, surfaces.front());
 }
+  StatusCode
+  KalmanFitterTool::fit(const EventContext& /*ctx*/,
+			const ActsTrk::TrackContainer::ConstTrackProxy& /*track*/,          
+			ActsTrk::MutableTrackContainer& /*trackContainer*/) const
+  {
+    ATH_MSG_ERROR("Track refit method not implemented in KalmanFitterTool yet");
+    return StatusCode::FAILURE;
+  }
   
 }

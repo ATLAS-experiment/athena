@@ -7,7 +7,7 @@ atlas_subdir( InDetGNNHardScatterSelection )
 atlas_add_library( InDetGNNHardScatterSelectionLib
     Root/*.cxx
     PUBLIC_HEADERS InDetGNNHardScatterSelection
-    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils
+    PRIVATE_LINK_LIBRARIES PathResolver CxxUtils
     LINK_LIBRARIES AthLinks 
     AsgDataHandlesLib 
     AsgTools 
@@ -17,6 +17,7 @@ atlas_add_library( InDetGNNHardScatterSelectionLib
     InDetTruthVertexValidationLib 
     xAODTracking 
     xAODJet 
+    FlavorTagInference
     FlavorTagDiscriminants
     FourMomUtils 
     AthenaBaseComps
@@ -32,7 +33,6 @@ atlas_add_library( InDetGNNHardScatterSelectionLib
     SystematicsHandlesLib
     FourMomUtils
     TruthUtils
-    FlavorTagDiscriminants
     InDetPhysValMonitoringLib
     TrackVertexAssociationToolLib
 )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkJetVxFitter )
@@ -12,7 +12,7 @@ atlas_add_library( TrkJetVxFitterLib
                    PUBLIC_HEADERS TrkJetVxFitter
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps GeoPrimitives EventPrimitives GaudiKernel MagFieldConditions StoreGateLib TrkParameters TrkTrackLink
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} MagFieldElements TrkNeutralParameters TrkTrack VxJetVertex VxVertex TrkVertexFitterInterfaces )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} MagFieldElements TrkNeutralParameters TrkTrack VxJetVertex VxVertex TrkVertexFitterInterfaces CxxUtils )
 
 atlas_add_component( TrkJetVxFitter
                      src/components/*.cxx

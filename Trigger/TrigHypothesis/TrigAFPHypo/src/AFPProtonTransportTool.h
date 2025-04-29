@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGAFPHYPO_AFPPROTONTRANSPORTTOOL_H
@@ -10,6 +10,7 @@
 #include "AFPProtonTransportParam.h"
 
 #include <string>
+#include <memory>
 
 /**
  * @brief Class for the tool that parameterizes proton transport 
@@ -55,7 +56,7 @@ public:
   /// Evaluates value of vertical slope equation. It takes as arguments the initial position, slope and nominal beam energy.
   double sy(double x0, double y0, double z0, double sx0, double sy0, double E) const {
    return m_y_slope->evaluate(x0 + m_xPositionInitIP, y0 + m_yPositionInitIP, z0 + m_zPositionInitIP, sx0 + m_xSlopeInitIP, sy0 + m_ySlopeInitIP, E);
-                                                                                                                                                 }
+  }
 
   /// Returns the detector position for which parametrization was performed.
   double parametrisationPosition() const {return m_parametrisationPosition;}
@@ -65,13 +66,13 @@ public:
 private:
 
   ///AFPProtonTransportParam object used for the x position evaluation
-  AFPProtonTransportParam* m_x_position = nullptr;
+  std::unique_ptr<AFPProtonTransportParam> m_x_position;
   ///AFPProtonTransportParam object used for the y position evaluation
-  AFPProtonTransportParam* m_y_position = nullptr;
+  std::unique_ptr<AFPProtonTransportParam> m_y_position;
   ///AFPProtonTransportParam object used for the x slope
-  AFPProtonTransportParam* m_x_slope = nullptr;
+  std::unique_ptr<AFPProtonTransportParam> m_x_slope;
   ///AFPProtonTransportParam object used for the y slope
-  AFPProtonTransportParam* m_y_slope = nullptr;
+  std::unique_ptr<AFPProtonTransportParam> m_y_slope;
 
   /// Beam crossing angle from x axis at the interaction point
   Gaudi::Property<double> m_xSlopeInitIP {this, "xSlopeInitIp", 0, "Initial x slope at IP"};

@@ -48,9 +48,9 @@ IDAlignMonGenericTracksAlg::IDAlignMonGenericTracksAlg( const std::string & name
    m_etaRange(3.0),
    m_NTracksRange(200),
    m_barrelEta(0.8), //Tracks between -0.8 & 0.8 are considered as Barrel Tracks, otherwise are End-Caps
-   m_trackSelection( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this)
+   m_trackSelection( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this),
+   m_hitQualityTool("")
 {
-  m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
   declareProperty("Pixel_Manager"        , m_Pixel_Manager);
   declareProperty("SCT_Manager"          , m_SCT_Manager);
   declareProperty("TRT_Manager"          , m_TRT_Manager);
@@ -179,7 +179,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   }
 
   const auto *vertexContainer = handle_vxContainer.cptr();
-  for(const auto & vtx : *vertexContainer) {
+  for(const auto vtx : *vertexContainer) {
     if ( !vtx ) continue;
     if ( !vtx->vxTrackAtVertexAvailable() ) continue;
     
@@ -648,7 +648,7 @@ bool IDAlignMonGenericTracksAlg::fillVertexInformation(std::map<const xAOD::Trac
 
   const auto *vertexContainer = handle_vxContainer.cptr();
     
-  for(const auto & vtx : *vertexContainer) {
+  for(const auto vtx : *vertexContainer) {
       auto tpLinks = vtx->trackParticleLinks();
       ATH_MSG_DEBUG("tpLinks size " << tpLinks.size());
 

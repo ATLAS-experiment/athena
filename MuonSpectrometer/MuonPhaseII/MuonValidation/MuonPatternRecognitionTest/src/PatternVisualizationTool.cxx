@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "PatternVisualizationTool.h"
 
@@ -16,13 +16,13 @@
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
 #include "xAODMuonPrepData/TgcStrip.h"
+#include "xAODMuonPrepData/MMCluster.h"
 
 #include <format>
 #include <sstream>
 #include <filesystem>
 
 
-#include "TCanvas.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TMarker.h"
@@ -56,8 +56,6 @@ namespace MuonValR4 {
     using namespace SegmentFit;
     using LabeledSegmentSet = PatternVisualizationTool::LabeledSegmentSet;
     std::mutex PatternVisualizationTool::s_mutex{};
-    PatternVisualizationTool::PatternVisualizationTool(const std::string& type, const std::string& name, const IInterface* parent):
-            base_class{type,name,parent} {}
 
     StatusCode PatternVisualizationTool::initialize(){        
         if (m_canvasLimit > 0) {
@@ -181,6 +179,7 @@ namespace MuonValR4 {
         /** Enter the lock phase */
         std::lock_guard guard{s_mutex};
         /** Check again in case multiple threads are simultaneously in the lock phase */
+        //cppcheck-suppress identicalConditionAfterEarlyExit
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
@@ -246,7 +245,30 @@ namespace MuonValR4 {
             closeSummaryCanvas();
         }
     }
-
+    void PatternVisualizationTool::paintSimHits(const EventContext& ctx,
+                                                const xAOD::MuonSegment& truthSeg,
+                                                PrimitiveVec& primitives,
+                                                const int view) const {
+        if (!m_paintTruthHits) {
+            return;
+        }
+        auto truthHits = getMatchingSimHits(truthSeg);
+        const ActsGeometryContext* geoCtx{nullptr};
+        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+            return;
+        }
+        for (const xAOD::MuonSimHit* simHit :  truthHits) {
+            const MuonGMR4::MuonReadoutElement* re = m_detMgr->getReadoutElement(simHit->identify());
+            const IdentifierHash hash = re->detectorType() == ActsTrk::DetectorType::Mdt ?
+                                        re->measurementHash(simHit->identify()) :
+                                        re->layerHash(simHit->identify());
+            const Amg::Transform3D trf = re->msSector()->globalToLocalTrans(*geoCtx) *
+                                         re->localToGlobalTrans(*geoCtx, hash);
+            const Amg::Vector3D locPos = trf * xAOD::toEigen(simHit->localPosition());
+            const Amg::Vector3D locDir = trf.linear() * xAOD::toEigen(simHit->localDirection());
+            primitives.push_back(drawArrow(locPos, locDir, truthColor, kDashed, view));
+        }
+    }
     void PatternVisualizationTool::visualizeSeed(const EventContext& ctx,
                                                  const MuonR4::SegmentSeed& seed,
                                                  const std::string& extraLabel) const {
@@ -265,6 +287,7 @@ namespace MuonValR4 {
         /** Enter the lock phase */
         std::lock_guard guard{s_mutex};
         /** Check again in case multiple threads are simultaneously in the lock phase */
+        //cppcheck-suppress identicalConditionAfterEarlyExit
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
@@ -287,10 +310,10 @@ namespace MuonValR4 {
             if (!drawHits(*seed.parentBucket(), seed.getHitsInMax(), primitives, canvasDim, view)) {
                 continue;
             }
-
             for (const xAOD::MuonSegment* segment : truthSegs) {
                 primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                                truthColor, kDotted, view));
+                paintSimHits(ctx,*segment, primitives, view);
             }
             primitives.push_back(drawLine(seed.parameters(), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                          parLineColor, kDashed, view));
@@ -341,6 +364,7 @@ namespace MuonValR4 {
         /** Enter the lock phase */
         std::lock_guard guard{s_mutex};
         /** Check again in case multiple threads are simultaneously in the lock phase */
+        //cppcheck-suppress identicalConditionAfterEarlyExit
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
@@ -368,6 +392,7 @@ namespace MuonValR4 {
                     primitives.push_back(drawLabel(std::format("true parameters: {:}",makeLabel(localSegmentPars(*segment))),0.2, 0.89));
                     drawnTrueLabel = true;
                 }
+                paintSimHits(ctx,*segment, primitives, view);
             }
             
             std::stringstream legendLabel{};
@@ -412,6 +437,7 @@ namespace MuonValR4 {
         /** Enter the lock phase */
         std::lock_guard guard{s_mutex};
         /** Check again in case multiple threads are simultaneously in the lock phase */
+        //cppcheck-suppress identicalConditionAfterEarlyExit
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
@@ -421,7 +447,10 @@ namespace MuonValR4 {
         }
         Parameters segPars{};
         {
-            SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
+            const ActsGeometryContext* geoCtx{nullptr};
+            if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+                return;
+            }
             const Amg::Transform3D trf{segment.msSector()->globalToLocalTrans(*geoCtx)};
             const Amg::Vector3D locPos = trf * segment.position();
             const Amg::Vector3D locDir = trf.linear() * segment.direction();
@@ -449,6 +478,7 @@ namespace MuonValR4 {
             for (const xAOD::MuonSegment* segment : truthSegs) {
                 primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                            truthColor, kDotted, view));
+                paintSimHits(ctx,*segment, primitives, view);
             }
             writeChi2(segPars, segment.measurements(), primitives);
 
@@ -546,7 +576,14 @@ namespace MuonValR4 {
                 primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
                                              boxColor, fillStyle));
                 break; 
-            } case xAOD::UncalibMeasType::Other :{
+            } case xAOD::UncalibMeasType::MMClusterType: {
+                const auto* meas{static_cast<const xAOD::MMCluster*>(underlyingSp->primaryMeasurement())};
+                const int boxColor = isLabeled(*meas) ? truthColor : kAquamarine;
+                const double boxWidth = 0.5*Gaudi::Units::mm;
+                primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 10.*Gaudi::Units::mm,
+                                             boxColor, fillStyle));
+                break; 
+            }  case xAOD::UncalibMeasType::Other :{
                 break;
             } default:
                 ATH_MSG_WARNING("Please implement proper drawings of the new small wheel.. "<<__FILE__<<":"<<__LINE__);    
@@ -578,6 +615,17 @@ namespace MuonValR4 {
                 drawHit(*hit, primitives, canvasDim, view, hollowFilling);
             } 
         }
+
+        // adapt the draw range to make sure any detector elements we wish to display 
+        // are included 
+        for (auto & prim : primitives){
+            TBox* theBox = dynamic_cast<TBox*>(prim.get()); 
+            if (theBox){
+                canvasDim[Edges::zLow] = std::min(canvasDim[Edges::zLow], theBox->GetY1()); 
+                canvasDim[Edges::zHigh] = std::max(canvasDim[Edges::zHigh], theBox->GetY2()); 
+            }
+        }
+
         double width =  (canvasDim[Edges::yHigh] - canvasDim[Edges::yLow])*m_canvasExtraScale;
         double height = (canvasDim[Edges::zHigh] - canvasDim[Edges::zLow])*m_canvasExtraScale;
         if (height > width) width = height; 
@@ -602,8 +650,10 @@ namespace MuonValR4 {
         for (const SpacePointType& hit : hits) { 
             const SpacePoint* underlyingSp{nullptr};
             double chi2{0.};
-            if constexpr( std::is_same_v<SpacePointType, Segment::MeasType>) {
+            bool displayChi2{true};
+            if constexpr(std::is_same_v<SpacePointType, Segment::MeasType>) {
                 underlyingSp = hit->spacePoint();
+                displayChi2 = (hit->fitState() == CalibratedSpacePoint::State::Valid );
                 chi2 = SegmentFitHelpers::chiSqTerm(locPos, locDir, pars[toInt(AxisDefs::t0)], 
                                                     std::nullopt, *hit, msgStream());
             } else {
@@ -612,61 +662,52 @@ namespace MuonValR4 {
             }
             
             const Identifier hitId =  underlyingSp ? underlyingSp->identify(): Identifier{};
-            std::stringstream legendstream{};
+            std::string legendstream{};
             switch(hit->type()) {
                 case xAOD::UncalibMeasType::MdtDriftCircleType: {
                     const int driftSign{SegmentFitHelpers::driftSign(locPos, locDir, *hit, msgStream())};
                     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
-                    legendstream<<", TL: "<<idHelper.tubeLayer(hitId);
-                    legendstream<<", T: "<<idHelper.tube(hitId);
-                    legendstream<<", "<<(driftSign == -1 ? "L" : "R");
+                    legendstream = std::format("ML: {:1d}, TL: {:1d}, T: {:3d}, {:}",
+                                                idHelper.multilayer(hitId), idHelper.tubeLayer(hitId),
+                                                idHelper.tube(hitId), driftSign == -1 ? "L" : "R");
                     break;
                 } case xAOD::UncalibMeasType::RpcStripType: {
                     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
-                    legendstream<<"DR: "<<idHelper.doubletR(hitId);
-                    legendstream<<" DZ: "<<idHelper.doubletZ(hitId);
-                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
-                    legendstream<<", #eta/#phi: "<<(hit->measuresEta() ? "si" : "nay") 
-                                << "/"<<(hit->measuresPhi() ? "si" : "nay");
+                    legendstream= std::format("DR: {:1d}, DZ: {:1d}, GAP: {:1d}, #eta/#phi: {:}/{:}",
+                                              idHelper.doubletR(hitId), idHelper.doubletZ(hitId), idHelper.gasGap(hitId),
+                                              hit->measuresEta() ? "si" : "nay", hit->measuresPhi() ? "si" : "nay");
                     break;
                 } case xAOD::UncalibMeasType::TgcStripType: {
                     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
-                    legendstream<<"ST: "<<m_idHelperSvc->stationNameString(hitId);
-                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
-                    legendstream<<", #eta/#phi: "<<(hit->measuresEta() ? "si" : "nay") 
-                                 << "/"<<(hit->measuresPhi() ? "si" : "nay");      
+                    legendstream = std::format("ST: {:}, GAP: {:1d}, #eta/#phi: {:}/{:}",
+                                               m_idHelperSvc->stationNameString(hitId), idHelper.gasGap(hitId),
+                                               hit->measuresEta() ? "si" : "nay", hit->measuresPhi() ? "si" : "nay");      
                     break;
                 } case xAOD::UncalibMeasType::MMClusterType: {
                     const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
-                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
-                    legendstream<<", stereo: "<<(idHelper.isStereo(hitId)? "si" : "nay");
+                    const auto* clus = static_cast<const xAOD::MMCluster*>(underlyingSp->primaryMeasurement());
+                    const MuonGMR4::StripDesign& design = clus->readoutElement()->stripLayer(clus->layerHash()).design();
+                    legendstream = std::format("ML: {:1d}, GAP: {:1d}, {:}", idHelper.multilayer(hitId), idHelper.gasGap(hitId),
+                                                !design.hasStereoAngle() ? "X"  : design.stereoAngle() > 0 ? "U" :"V");
                     break;
                 } case xAOD::UncalibMeasType::sTgcStripType: {
                     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
-                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
-                    switch (idHelper.channelType(hitId)) {
-                        case sTgcIdHelper::sTgcChannelTypes::Strip:
-                            legendstream<<", strip";
-                            break;
-                        case sTgcIdHelper::sTgcChannelTypes::Wire:
-                            legendstream<<", wire";
-                            break;
-                        case sTgcIdHelper::sTgcChannelTypes::Pad:
-                            legendstream<<", pad";
-                            break;
-                        default:
-                            break;
-                    }
+                    legendstream = std::format("ML: {:1d}, GAP: {:1d}, #eta/#phi: {:}/{:}", 
+                                               idHelper.multilayer(hitId), idHelper.gasGap(hitId),
+                                               hit->measuresEta() ? "si" : "nay", hit->measuresPhi() ? "si" : "nay");
                     break;
-                } 
+                }  case xAOD::UncalibMeasType::Other: {
+                    legendstream = "Ext. constaint";
+                }
                 default:
                     break;
             }
-            legendstream<<std::format(", #chi^{{2}}: {:.2f}", chi2);
-            primitives.push_back(drawLabel(legendstream.str(), legX, startLegY, 14));
+            if (displayChi2) {
+                legendstream+=std::format(", #chi^{{2}}: {:.2f}", chi2);
+            } else {
+                legendstream+=", #chi^{2}: ---";
+            }
+            primitives.push_back(drawLabel(legendstream, legX, startLegY, 14));
             startLegY -= 0.05;
             if (startLegY<= endLegY) {
                 break;

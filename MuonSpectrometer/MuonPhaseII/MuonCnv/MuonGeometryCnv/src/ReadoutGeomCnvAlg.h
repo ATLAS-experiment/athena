@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMETRYCNV_ReadoutGeomCnvAlg_H
 #define MUONGEOMETRYCNV_ReadoutGeomCnvAlg_H
@@ -31,7 +31,7 @@
 namespace MuonGMR4{
 class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
     public:
-        ReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
         ~ReadoutGeomCnvAlg() = default;
 
         StatusCode execute(const EventContext& ctx) const override;
@@ -50,11 +50,10 @@ class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                 std::set<PVConstLink> translatedStations{};
                 /** @brief Returns an identifier tag */
                 GeoIntrusivePtr<GeoIdentifierTag> newIdTag() {
-                    return make_intrusive<GeoIdentifierTag>(++m_id);
+                    return geoId(++m_id);
                 }
             private:
                 unsigned int m_id{0};
-
         };
         
         /** @brief builds a station object from readout element. The parent PhysVol of the readoutElement

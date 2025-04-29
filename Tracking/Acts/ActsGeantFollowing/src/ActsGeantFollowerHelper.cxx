@@ -221,7 +221,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
                                         mass, 
                                         Acts::AnyCharge{static_cast<float>(charge)}};
     m_actsParameterCache = Acts::GenericBoundTrackParameters<Acts::ParticleHypothesis>::create(
-        surface, gctx.context(), actsStart, dir, charge/(mom.mag()/1000), std::nullopt, hypothesis)
+        gctx.context(), surface, actsStart, dir, charge/(mom.mag()/1000), std::nullopt, hypothesis)
       .value();
   }
 
@@ -270,13 +270,13 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   std::optional<Acts::BoundTrackParameters> actsParameters = m_actsExtrapolator->propagate(ctx, 
 											   *m_actsParameterCache, 
 											   *destinationSurfaceActs, 
-											   Acts::Direction::Forward,
+											   Acts::Direction::Forward(),
 											   std::numeric_limits<double>::max());
 
   float X0Acts = m_actsExtrapolator->propagationSteps(ctx,
                                                        *m_actsParameterCache, 
                                                        *destinationSurfaceActs,
-                                                       Acts::Direction::Forward,
+                                                       Acts::Direction::Forward(),
                                                        std::numeric_limits<double>::max()).second.materialInX0;
                                                        
   if(not actsParameters.has_value()){

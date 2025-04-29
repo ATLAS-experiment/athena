@@ -1,23 +1,25 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the lowMu menu
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCBuildStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCBuildStep(
+    menu='PhysicsP1_pp_lowMu_run3_v1',
+    mc_campaign='Campaigns.MC23LowMu',
+)
 ex.input = 'minbias'
-ex.threads = 1
-ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"',
-            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
-            'Trigger.doRuntimeNaviVal=True']
+# the MC23LowMu campaign is based on MC23a, MC23eLowMu doesn't exist, need to override relevant settings
+ex.flags.extend(['Input.MCCampaign=Campaign.MC23e',
+                 'Input.ConditionsRunNumber=470000',
+                 'Trigger.doRuntimeNaviVal=True'])
 
 test = Test.Test()
 test.art_type = 'build'

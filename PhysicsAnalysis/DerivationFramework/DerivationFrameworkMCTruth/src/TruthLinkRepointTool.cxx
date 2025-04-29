@@ -24,8 +24,7 @@
 DerivationFramework::TruthLinkRepointTool::TruthLinkRepointTool(const std::string& t,
         const std::string& n,
         const IInterface* p ) :
-    AthAlgTool(t,n,p) {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
+    base_class(t,n,p) {
 }
 StatusCode DerivationFramework::TruthLinkRepointTool::initialize(){
   ATH_CHECK(m_recoKey.initialize());

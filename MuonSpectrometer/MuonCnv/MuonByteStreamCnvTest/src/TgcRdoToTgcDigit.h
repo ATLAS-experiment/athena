@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAMCNVTEST_TGCRDOTOTGCDIGIT_H
@@ -16,7 +16,7 @@
 
 class TgcRdoToTgcDigit : public AthReentrantAlgorithm {
 public:
-    TgcRdoToTgcDigit(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm; 
     virtual ~TgcRdoToTgcDigit() = default;
 
     virtual StatusCode initialize() override final;

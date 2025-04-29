@@ -6,8 +6,9 @@ from TrkConfig.TrackingPassFlags import printActiveConfig
 from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
-_extensions_list = [] # For caching
-_actsExtensions  = ['Acts', 'ActsFast', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt'] # Possible Acts Passes/Configurations
+_extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsFast', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt'] # Possible Acts Alone Passes/Configurations
+_outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags):
     global _flags_set
@@ -182,15 +183,15 @@ def ITkStoreTrackSeparateContainerCfg(flags,
         # The following few lines will disappear once we have imposed a proper nomenclature for our algorithms and collection
         prefix = flags.Tracking.ActiveConfig.extension
         result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedTrackToAltTrackParticleCnvAlg",
-                                                       ACTSTracksLocation=TrackContainer,
-                                                       TrackParticlesOutKey=f'{TrackContainer}ParticlesAlt'))
-
+                                                       ACTSTracksLocation=[TrackContainer],
+                                                       TrackParticlesOutKey=f'InDet{prefix}TrackParticles'))
+        
         if flags.Tracking.doTruth :
             from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
             result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags,
                                                                 name=f'{TrackContainer}ParticleTruthDecorationAlg',
                                                                 TrackToTruthAssociationMaps = [f'{TrackContainer}ToTruthParticleAssociation'],
-                                                                TrackParticleContainerName = f'{TrackContainer}ParticlesAlt'
+                                                                TrackParticleContainerName = f'InDet{prefix}TrackParticles'
                                                                 ))
     return result
 
@@ -292,7 +293,7 @@ def ITkTrackRecoPassCfg(flags,
 
 def ITkActsTrackFinalCfg(flags,
                          InputCombinedITkTracks: list[str] = None,
-                         ActsTrackContainerName="ActsInDetTrackParticles") -> ComponentAccumulator:
+                         ActsTrackContainerName="InDetActsTrackParticles") -> ComponentAccumulator:
     # Inputs must not be None
     assert InputCombinedITkTracks is not None and isinstance(InputCombinedITkTracks, list)
 
@@ -346,7 +347,10 @@ def ITkTrackFinalCfg(flags,
     if doTrackOverlay:
         #schedule merge to combine signal and background tracks
         InputCombinedITkTracks += [flags.Overlay.BkgPrefix + TrackContainer]
-
+    
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    doGNNWithoutAmbiReso = (TrackingComponent.GNNChain in flags.Tracking.recoChain and (not flags.Tracking.GNN.doAmbiResolution))
+    skipClusterMerge = doGNNWithoutAmbiReso or flags.Tracking.doITkFastTracking
     # This merges track collections
     from TrkConfig.TrkTrackCollectionMergerConfig import (
         ITkTrackCollectionMergerAlgCfg)
@@ -355,7 +359,7 @@ def ITkTrackFinalCfg(flags,
         InputCombinedTracks=InputCombinedITkTracks,
         OutputCombinedTracks=TrackContainer,
         AssociationMapName=(
-            "" if flags.Tracking.doITkFastTracking else
+            "" if skipClusterMerge else
             f"PRDtoTrackMapMerge_{TrackContainer}")))
 
     if flags.Tracking.doTruth:
@@ -378,23 +382,24 @@ def ITkTrackFinalCfg(flags,
     splitProbName = ITkClusterSplitProbabilityContainerName(flags)
 
     # This creates track particles
-    from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
-    result.merge(ITkTrackParticleCnvAlgCfg(
-        flags,
-        ClusterSplitProbabilityName=(
-            "" if flags.Tracking.doITkFastTracking else
-            splitProbName),
-        AssociationMapName=(
-            "" if flags.Tracking.doITkFastTracking else
-            f"PRDtoTrackMapMerge_{TrackContainer}"),
-        isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
-        'ActsValidateAmbiguityResolution' in splitProbName or \
-        'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
-        'ActsConversion' in splitProbName or \
-        'ActsLargeRadius' in splitProbName or \
-        'ActsLowPt' in splitProbName or \
-        ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
-
+    if flags.Tracking.perigeeExpression == "BeamLine":
+        from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
+        result.merge(ITkTrackParticleCnvAlgCfg(
+            flags,
+            ClusterSplitProbabilityName=(
+                "" if skipClusterMerge else
+                splitProbName),
+            AssociationMapName=(
+                "" if skipClusterMerge else
+                f"PRDtoTrackMapMerge_{TrackContainer}"),
+            isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
+            'ActsValidateAmbiguityResolution' in splitProbName or \
+            'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
+            'ActsConversion' in splitProbName or \
+            'ActsLargeRadius' in splitProbName or \
+            'ActsLowPt' in splitProbName or \
+            ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
+        
     return result
 
 
@@ -424,8 +429,8 @@ def ITkActsExtendedPRDInfoCfg(flags):
     result = ComponentAccumulator()
 
     #Add the truth origin to the truth particles
-    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPixelPrepDataToxAODCfg
-    result.merge(ITkActsPixelPrepDataToxAODCfg(flags))
+    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+    result.merge(ITkActsPrepDataToxAODCfg(flags))
 
     return result
 
@@ -483,6 +488,12 @@ def ITkExtendedPRDInfoCfg(flags):
 
 def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     """Configures complete ITk tracking """
+
+    from InDetConfig.ITkActsHelpers import primaryPassUsesActs
+    if primaryPassUsesActs(flags):
+        from InDetConfig.ITkActsTrackRecoConfig import ITkActsTrackRecoCfg
+        return ITkActsTrackRecoCfg(flags)
+
     result = ComponentAccumulator()
     
     if flags.Input.Format is Format.BS:
@@ -518,6 +529,9 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         extension = current_flags.Tracking.ActiveConfig.extension
         if extension not in _actsExtensions:
             _extensions_list.append(extension)
+
+        # Add the extension to the output job option
+        _outputExtensions.append(extension)
 
         # Data Preparation
         # According to the tracking pass we have different data preparation 
@@ -570,7 +584,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         # workflow has been executed, which we get by checking
         # the size of the track containers.
                 
-        ActsTrackContainerName = "InDetTrackParticles" if not InputCombinedITkTracks else "ActsInDetTrackParticles"
+        ActsTrackContainerName = "InDetTrackParticles" if not InputCombinedITkTracks else "InDetActsTrackParticles"
         ActsPrimaryVertices    = "PrimaryVertices" if not InputCombinedITkTracks else "ActsPrimaryVertices"
 
         result.merge(ITkActsTrackFinalCfg(flags,
@@ -650,7 +664,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
             
     # output
     from InDetConfig.ITkTrackOutputConfig import ITkTrackRecoOutputCfg
-    result.merge(ITkTrackRecoOutputCfg(flags, _extensions_list))
+    result.merge(ITkTrackRecoOutputCfg(flags, _outputExtensions))
     result.printConfig(withDetails = False, summariseProps = False)
     return result
 

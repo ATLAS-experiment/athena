@@ -152,6 +152,17 @@ unsigned int MultiTreeAccessor::historySize(unsigned int i) const
   return size;
 }
 
+unsigned int MultiTreeAccessor::historySizeSC(unsigned int i) const
+{
+  resetCache();
+  unsigned int size = 0;
+  for (const TreeAccessor* accessor : m_accessors) {
+    const HistoryContainer* cont = accessor->historyContainerSC(i);
+    if (cont) size += cont->nDataContainers();
+  }
+  return size;
+}
+
 
 const History* MultiTreeAccessor::getCellHistory(unsigned int i) const 
 { 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONPRDTESTR4_MUONHITTESTERALH_H
@@ -10,12 +10,18 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+
+namespace MuonPRDTest {
+    class ParticleVariables;
+    class SegmentVariables;
+}
+
 namespace MuonValR4 {
     class MuonHitTesterAlg: public AthHistogramAlgorithm{
         public:
-            MuonHitTesterAlg(const std::string& alg_name,
-                             ISvcLocator* pSvcLocator);
-            
+            using AthHistogramAlgorithm::AthHistogramAlgorithm;
+            virtual ~MuonHitTesterAlg();
             StatusCode initialize() override final;
             StatusCode finalize() override final;
             StatusCode execute() override final;
@@ -89,6 +95,23 @@ namespace MuonValR4 {
             Gaudi::Property<std::string> m_rpcPrdKey{this, "RpcPrdKey", "xRpcMeasurements"};
             Gaudi::Property<std::string> m_tgcPrdKey{this, "TgcPrdKey", "xTgcStrips"};
             Gaudi::Property<std::string> m_mmPrdKey{this, "MmPrdKey", "xAODMMClusters"};
-    };
+
+            
+            StatusCode setupTruth();
+            /** @brief Flag toggling whether the truth particle container shall be written  */
+            Gaudi::Property<bool> m_writeTruthMuon{this, "dumpTruthMuon", false};
+            /** @brief Name of the truth particle container */
+            Gaudi::Property<std::string> m_truthMuonCont{this, "TruthMuons", "MuonTruthParticles"};
+            /** @brief Flag toggling whether the truth segment container shall be written */
+            Gaudi::Property<bool> m_writeTruthSeg{this, "dumpTruthSegment", false};
+            /** @brief Name of the truth segment container */
+            Gaudi::Property<std::string> m_truthSegCont{this, "TruthSegments", "TruthSegmentsR4"};
+
+            std::shared_ptr<MuonPRDTest::ParticleVariables> m_truthParts;
+            std::shared_ptr<MuonPRDTest::SegmentVariables> m_truthSegs;
+
+            const MuonGMR4::MuonDetectorManager* m_detMgr{};
+            
+        };
 }
 #endif

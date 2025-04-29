@@ -1,49 +1,39 @@
-#include "DerivationFrameworkBPhys/Reco_Vertex.h"
-#include "DerivationFrameworkBPhys/Reco_4mu.h"
-#include "DerivationFrameworkBPhys/Select_onia2mumu.h"
-#include "DerivationFrameworkBPhys/Thin_vtxTrk.h"
-#include "DerivationFrameworkBPhys/Thin_vtxDuplicates.h"
-#include "DerivationFrameworkBPhys/AugOriginalCounts.h"
-#include "DerivationFrameworkBPhys/BPhysPVThinningTool.h"
-#include "DerivationFrameworkBPhys/VertexCaloIsolation.h"
-#include "DerivationFrameworkBPhys/VertexTrackIsolation.h"
-#include "DerivationFrameworkBPhys/BPhysMetadataBase.h"
-#include "DerivationFrameworkBPhys/Bmumu_metadata.h"
-#include "DerivationFrameworkBPhys/BdKstarMuMu_metadata.h"
-#include "DerivationFrameworkBPhys/MuPlusDpstCascade.h"
-#include "DerivationFrameworkBPhys/MuPlusDsCascade.h"
-//#include "DerivationFrameworkBPhys/CfAthAlgTool.h"
-#include "DerivationFrameworkBPhys/Bmumu_reco_mumu.h"
-#include "DerivationFrameworkBPhys/Reco_mumu.h"
-#include "DerivationFrameworkBPhys/FourMuonTool.h"
-#include "DerivationFrameworkBPhys/AnyVertexSkimmingTool.h"
-//#include "DerivationFrameworkBPhys/BPhysAddMuonBasedInvMass.h"
-//#include "DerivationFrameworkBPhys/BPhysVertexTrackBase.h"
-//#include "DerivationFrameworkBPhys/BVertexTrackIsoTool.h"
-//#include "DerivationFrameworkBPhys/BMuonTrackIsoTool.h"
-//#include "DerivationFrameworkBPhys/BVertexClosestTrackTool.h"
-#include "DerivationFrameworkBPhys/BTrackVertexMapLogger.h"
-//#include "DerivationFrameworkBPhys/Select_Bmumu.h"
-//#include "DerivationFrameworkBPhys/BPhysVarBlinder.h"
-//#include "DerivationFrameworkBPhys/BmumuThinningTool.h"
-#include "DerivationFrameworkBPhys/VertexPlus1TrackCascade.h"
-#include "DerivationFrameworkBPhys/TriggerCountToMetadata.h"
-#include "DerivationFrameworkBPhys/MuonExtrapolationTool.h"
+#include "../Reco_Vertex.h"
+#include "../Reco_4mu.h"
+#include "../Select_onia2mumu.h"
+#include "../Thin_vtxTrk.h"
+#include "../Thin_vtxDuplicates.h"
+#include "../AugOriginalCounts.h"
+#include "../BPhysPVThinningTool.h"
+#include "../VertexCaloIsolation.h"
+#include "../VertexTrackIsolation.h"
+#include "../BPhysMetadataBase.h"
+#include "../Bmumu_metadata.h"
+#include "../BdKstarMuMu_metadata.h"
+#include "../MuPlusDpstCascade.h"
+#include "../MuPlusDsCascade.h"
+#include "../Reco_mumu.h"
+#include "../FourMuonTool.h"
+#include "../AnyVertexSkimmingTool.h"
+#include "../BTrackVertexMapLogger.h"
+#include "../VertexPlus1TrackCascade.h"
+#include "../TriggerCountToMetadata.h"
+#include "../MuonExtrapolationTool.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "DerivationFrameworkBPhys/Reco_V0Finder.h"
-#include "DerivationFrameworkBPhys/JpsiPlusV0Cascade.h"
-#include "DerivationFrameworkBPhys/JpsiPlusDsCascade.h"
-#include "DerivationFrameworkBPhys/JpsiPlusDpstCascade.h"
-#include "DerivationFrameworkBPhys/JpsiPlusDs1Cascade.h"
-#include "DerivationFrameworkBPhys/JpsiPlusPsiCascade.h"
-#include "DerivationFrameworkBPhys/PsiPlusPsiCascade.h"
-#include "DerivationFrameworkBPhys/ReVertex.h"
-#include "DerivationFrameworkBPhys/BPhysConversionFinder.h"
-#include "DerivationFrameworkBPhys/Cascade3Plus1.h"
-#include "DerivationFrameworkBPhys/BPhysBGammaFinder.h"
-#include "DerivationFrameworkBPhys/PsiPlusPsiSingleVertex.h"
-#include "DerivationFrameworkBPhys/JpsiXPlusDisplaced.h"
-#include "DerivationFrameworkBPhys/JpsiXPlus2V0.h"
+#include "../Reco_V0Finder.h"
+#include "../JpsiPlusV0Cascade.h"
+#include "../JpsiPlusDsCascade.h"
+#include "../JpsiPlusDpstCascade.h"
+#include "../JpsiPlusDs1Cascade.h"
+#include "../JpsiPlusPsiCascade.h"
+#include "../PsiPlusPsiCascade.h"
+#include "../ReVertex.h"
+#include "../BPhysConversionFinder.h"
+#include "../Cascade3Plus1.h"
+#include "../BPhysBGammaFinder.h"
+#include "../PsiPlusPsiSingleVertex.h"
+#include "../JpsiXPlusDisplaced.h"
+#include "../JpsiXPlus2V0.h"
 
 using namespace DerivationFramework;
 
@@ -63,17 +53,8 @@ DECLARE_COMPONENT( BdKstarMuMu_metadata )
 DECLARE_COMPONENT( MuPlusDpstCascade )
 DECLARE_COMPONENT( MuPlusDsCascade )
 DECLARE_COMPONENT( AnyVertexSkimmingTool )
-//DECLARE_COMPONENT( CfAthAlgTool )
-//DECLARE_COMPONENT( Bmumu_reco_mumu )
 DECLARE_COMPONENT( FourMuonTool )
-//DECLARE_COMPONENT( BPhysAddMuonBasedInvMass )
-//DECLARE_COMPONENT( BPhysVertexTrackBase )
-//DECLARE_COMPONENT( BVertexTrackIsoTool )
-//DECLARE_COMPONENT( BMuonTrackIsoTool )
-//DECLARE_COMPONENT( BVertexClosestTrackTool )
 DECLARE_COMPONENT( BTrackVertexMapLogger )
-//DECLARE_COMPONENT( Select_Bmumu )
-//DECLARE_COMPONENT( BPhysVarBlinder )
 DECLARE_COMPONENT( PsiPlusPsiCascade )
 DECLARE_COMPONENT( VertexPlus1TrackCascade )
 DECLARE_COMPONENT( TriggerCountToMetadata )

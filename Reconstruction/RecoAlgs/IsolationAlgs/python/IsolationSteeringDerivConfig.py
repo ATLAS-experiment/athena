@@ -15,13 +15,14 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
 
     acc = ComponentAccumulator()
 
-    # Prepare densities
-    from IsolationAlgs.IsoDensityConfig import (
-        NFlowInputAlgCfg, DensityForIsoAlgCfg)
-    acc.merge(NFlowInputAlgCfg(flags,InputType = inType))
     suff = 'CSSK' if inType.find('CSSK') >= 0 else ''
-    acc.merge(DensityForIsoAlgCfg(flags,name='CentralDensityFor'+suff+'NFlowIso'))
-    acc.merge(DensityForIsoAlgCfg(flags,name='ForwardDensityFor'+suff+'NFlowIso'))
+    from IsolationAlgs.IsoDensityConfig import NFlowInputAlgCfg
+    acc.merge(NFlowInputAlgCfg(flags,InputType = inType))
+    # Prepare densities (not needed in HI, because no pu subtraction)
+    if not flags.HeavyIon.Egamma.doSubtractedClusters:
+        from IsolationAlgs.IsoDensityConfig import DensityForIsoAlgCfg
+        acc.merge(DensityForIsoAlgCfg(flags,name='CentralDensityFor'+suff+'NFlowIso'))
+        acc.merge(DensityForIsoAlgCfg(flags,name='ForwardDensityFor'+suff+'NFlowIso'))
 
     # Prepare CaloIsolationTool
     kwargs = dict()
@@ -40,7 +41,9 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
     # Prepare IsolationBuilder
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     isoType  = [ [ isoPar.neflowisol20, isoPar.neflowisol30, isoPar.neflowisol40 ] ]
-    isoCor   = [ [ isoPar.coreCone, isoPar.pileupCorrection ] ]
+    isoCor   = [ [ isoPar.coreCone ] ]
+    if not flags.HeavyIon.Egamma.doSubtractedClusters:
+        isoCor[0].append(isoPar.pileupCorrection)
     isoExCor = [ [ isoPar.coreConeSC ] ]
     kwargs['ElIsoTypes'] = isoType
     kwargs['ElCorTypes'] = isoCor

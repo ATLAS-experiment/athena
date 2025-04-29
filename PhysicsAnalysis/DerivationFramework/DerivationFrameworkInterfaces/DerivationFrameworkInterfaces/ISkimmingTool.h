@@ -13,8 +13,6 @@
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_ISkimmingTool("ISkimmingTool", 1, 0);
-   
   /**
    @class ISkimmingTool
        
@@ -22,15 +20,13 @@ namespace DerivationFramework {
     (based on ISF equivalent, J. Chapman)
    */
      
-  class ISkimmingTool : virtual public IAlgTool {
+  class ISkimmingTool : virtual public extend_interfaces<IAlgTool> {
      public:
-     
+       DeclareInterfaceID(ISkimmingTool, 1, 0);
+
        /** Virtual destructor */
        virtual ~ISkimmingTool(){}
 
-       /** AlgTool interface methods */
-       static const InterfaceID& interfaceID() { return IID_ISkimmingTool; }
-       
        /** Check that the current event passes this filter */
        virtual bool eventPassesFilter() const = 0;
   };

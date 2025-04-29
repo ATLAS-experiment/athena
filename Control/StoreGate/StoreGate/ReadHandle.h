@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ReadHandle.h 797637 2017-02-17 02:32:11Z ssnyder $
 /**
  * @file StoreGate/ReadHandle.h
  * @author S. Binet, P. Calafiura, scott snyder <snyder@bnl.gov>
@@ -89,12 +86,32 @@ public:
 
 
   /**
-   * @brief Constructor with full arguments.
+   * @brief Constructor specifying the key as a string.
    * @param sgkey StoreGate key of the referenced object.
    * @param storename Name of the referenced event store.
    */
   explicit ReadHandle(const std::string& sgkey, 
                       const std::string& storename = StoreID::storeName(StoreID::EVENT_STORE));
+
+
+  /**
+   * @brief Constructor specifying the key as a string, with context.
+   * @param sgkey StoreGate key of the referenced object.
+   * @param ctx The event context.
+   */
+  explicit ReadHandle(const std::string& sgkey,
+                      const EventContext& ctx);
+
+
+  /**
+   * @brief Constructor specifying the key as a string, with context.
+   * @param sgkey StoreGate key of the referenced object.
+   * @param storename Name of the referenced event store.
+   * @param ctx The event context.
+   */
+  explicit ReadHandle(const std::string& sgkey,
+                      const std::string& storename,
+                      const EventContext& ctx);
 
 
   /**
@@ -129,6 +146,12 @@ public:
    * This handle will be bound to the given proxy.
    */
   explicit ReadHandle (SG::DataProxy* proxy);
+
+
+  // Disallow initialization from a temporary Key object.
+  explicit ReadHandle (SG::ReadHandleKey<T>&& key) = delete; // Not allowed from a temporary.
+  explicit ReadHandle (SG::ReadHandleKey<T>&& key, 
+                       const EventContext& ctx) = delete; // Not allowed from a temporary.
 
 
   /**
@@ -296,6 +319,19 @@ template <class T>
 const T* get (const ReadHandleKey<T>& key,
               const EventContext& ctx);
 
+
+/**
+ * @brief Convenience function to retrieve an object given a @c ReadHandleKey.
+ * @param ptr Pointer to the retrieved object.
+ * @param key The key to retrieve.
+ *
+ * In case of error, sets @c ptr to nullptr and returns FAILURE. In case of an
+ * empty key, sets @c ptr to nullptr and returns SUCCESS.
+ */
+template <class T>
+StatusCode get (const T*& ptr,
+                const ReadHandleKey<T>& key,
+                const EventContext& ctx);
 
 } /* namespace SG */
 

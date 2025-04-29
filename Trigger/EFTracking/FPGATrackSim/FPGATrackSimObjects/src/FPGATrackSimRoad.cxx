@@ -112,10 +112,11 @@ FPGATrackSimMultiTruth FPGATrackSimRoad::getTruth() const
 
 std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> FPGATrackSimRoad::getHits_flat() const {
     std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> hits;
-    for (const auto& layerHits : m_hits_trans)
-        for (auto const& hit : layerHits)
+    for (const auto& layerHits : m_hits_trans) {
+      for (auto const& hit : layerHits) {
             hits.insert(hit);
-            // for (const auto& x : m_hits) hits.insert(x.begin(), x.end());
+      }
+    }
     return hits;
 }
 
@@ -132,14 +133,16 @@ void FPGATrackSimRoad::repopulateTransHits() {  // this is needed if trying to r
 void FPGATrackSimRoad::setHits(unsigned layer, std::vector<std::shared_ptr<const FPGATrackSimHit>> && hits) {
     m_hits_trans[layer] = std::move(hits);
     m_hits[layer].clear();
-    for (const auto& hit : m_hits_trans[layer])
-        m_hits[layer].push_back(*hit);
+    for (const auto& hit : m_hits_trans[layer]) {
+      m_hits[layer].push_back(*hit);
+    }
 } // ensure setNLayers is called first
 
 void FPGATrackSimRoad::setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &&hits){
     if (hits.size() != m_hits_trans.size()) setNLayers(hits.size());
-    for (unsigned i = 0;i < hits.size();++i)
+    for (unsigned i = 0;i < hits.size();++i) {
         setHits(i,std::move(hits[i]));
+    }
 }
 
 

@@ -15,8 +15,8 @@
 #include <cmath>
 using namespace IDPVM;
 
-InDetPerfPlot_TrackParameters::InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& sDir) :
-  InDetPlotBase(pParent, sDir){
+InDetPerfPlot_TrackParameters::InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& sDir, bool isITk) :
+  InDetPlotBase(pParent, sDir), m_isITk{isITk}{
   //nop
   //variable initialised at declaration
 }
@@ -37,8 +37,10 @@ InDetPerfPlot_TrackParameters::initializePlots() {
   book(m_reco_ndof,   "reco_ndof");
   book(m_reco_chi2Overndof, "reco_chi2Overndof");
   book(m_reco_author,  "reco_author");
-  book(m_reco_time,    "reco_time");
-  book(m_reco_hasValidTime_eff_vs_eta, "reco_hasValidTime_eff_vs_eta");
+  if(m_isITk){
+    book(m_reco_time,    "reco_time");
+    book(m_reco_hasValidTime_eff_vs_eta, "reco_hasValidTime_eff_vs_eta");
+  }
 
   book(m_truth_d0,     "truth_d0");
   book(m_truth_z0,     "truth_z0");
@@ -150,16 +152,18 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TrackParticle& particle, float w
     if(patternInfo.test(i)) fillHisto(m_reco_author, i, weight);
   }
 
-  static const SG::Accessor< uint8_t > accValidTime("hasValidTime");
-  static const SG::Accessor< float > accTime("time");
-  if( accValidTime.isAvailable(particle) && accTime.isAvailable(particle) ) {
-    if (particle.hasValidTime()) {
-      fillHisto(m_reco_time, particle.time(), weight);
+  if(m_isITk){
+    static const SG::Accessor< uint8_t > accValidTime("hasValidTime");
+    static const SG::Accessor< float > accTime("time");
+    if( accValidTime.isAvailable(particle) && accTime.isAvailable(particle) ) {
+      if (particle.hasValidTime()) {
+	fillHisto(m_reco_time, particle.time(), weight);
+      }
     }
-  }
 
-  if( accValidTime.isAvailable(particle) ) {
-    fillHisto(m_reco_hasValidTime_eff_vs_eta, eta, particle.hasValidTime(), weight);
+    if( accValidTime.isAvailable(particle) ) {
+      fillHisto(m_reco_hasValidTime_eff_vs_eta, eta, particle.hasValidTime(), weight);
+    }
   }
 
 }

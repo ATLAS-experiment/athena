@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #ifndef DERIVATIONFRAMEWORK_NTUPSTRINGSKIMMINGTOOL_H
 #define DERIVATIONFRAMEWORK_NTUPSTRINGSKIMMINGTOOL_H
 
+#include <memory>
 #include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -20,17 +21,16 @@ namespace ExpressionParsing {
 
 namespace DerivationFramework {
 
-  class NTUPStringSkimmingTool : public AthAlgTool, public ISkimmingTool {
+  class NTUPStringSkimmingTool : public extends<AthAlgTool, ISkimmingTool> {
     public: 
       NTUPStringSkimmingTool(const std::string& t, const std::string& n, const IInterface* p);
 
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual bool eventPassesFilter() const;
+      virtual StatusCode initialize() override;
+      virtual bool eventPassesFilter() const override;
 
     private:
       std::string m_expression;
-      ExpressionParsing::ExpressionParser *m_parser;
+      std::unique_ptr<ExpressionParsing::ExpressionParser> m_parser;
   }; 
 }
 

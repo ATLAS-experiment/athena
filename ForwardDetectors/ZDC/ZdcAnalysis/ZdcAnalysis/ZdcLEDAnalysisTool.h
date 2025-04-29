@@ -13,24 +13,23 @@
 #include "CxxUtils/checker_macros.h"
 
 #include "xAODForward/ZdcModuleContainer.h"
-#include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 
-#include "ZdcUtils/ZdcEventInfo.h"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "ZdcAnalysis/ZDCMsg.h"
 #include <TH1.h>
+#include <array>
 
 namespace ZDC
 {
 
 class ZDCLEDModuleResults
 {
-  unsigned int m_presampleADC;
-  int m_ADCsum;
-  int m_maxADC;
-  unsigned int m_maxSample;
-  float m_avgTime;
+  unsigned int m_presampleADC{};
+  int m_ADCsum{};
+  int m_maxADC{};
+  unsigned int m_maxSample{};
+  float m_avgTime{};
   
 public:
   ZDCLEDModuleResults(unsigned int presampleADC, unsigned int ADCsum, unsigned int maxADC, unsigned int maxSample, float avgTime) :
@@ -165,9 +164,9 @@ private:
   // Provide a historam that provides per-ADC channel correction factors for integral and differential
   //   non-linearities
   //
-  bool m_doFADCCorr;
-  unsigned int m_runNumber;
-  int m_forceCalibRun;
+  bool m_doFADCCorr{};
+  unsigned int m_runNumber{};
+  int m_forceCalibRun{};
   std::array< std::array<std::unique_ptr<const TH1>,4>,2> m_FADCCorrHG;
   std::array< std::array<std::unique_ptr<const TH1>,4>,2> m_FADCCorrLG;
   double getAmplitudeCorrection(int iside, int imod, bool highGain, float fitAmp);

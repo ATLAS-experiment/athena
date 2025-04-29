@@ -1,6 +1,6 @@
 """Define methods to construct a configured TRT R-t calibration algorithm
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -24,8 +24,9 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='', Hit
         kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
 
     if "TrackFitter" not in kwargs:
-        from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
-        kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(InDetTrackFitterCfg(flags))) 
+        from TrkConfig.CommonTrackFitterConfig import InDetStandaloneTrackFitterCfg
+        kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(
+            InDetStandaloneTrackFitterCfg(flags)))
 
     if "TrackSelectorTool" not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import TRT_InDetDetailedTrackSelectorToolCfg

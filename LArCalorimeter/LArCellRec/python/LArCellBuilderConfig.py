@@ -70,7 +70,6 @@ def LArDeadOTXCorrCfg(configFlags):
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
     acc.merge(LArOnOffIdMappingSCCfg(configFlags))
     from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
-    #acc.merge(LArBadChannelCfg(flags))
     acc.merge(LArBadChannelCfg(configFlags,isSC=True))
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     runinfo=getLArDTInfoForRun(configFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
@@ -79,6 +78,10 @@ def LArDeadOTXCorrCfg(configFlags):
        if runinfo.streamTypes()[i] ==  "SelectedEnergy":
           SCInput="SC_ET_ID"
 
+    #Schedule reading of Super-Cell info from ByteStream
+    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+    acc.merge(LArRawSCDataReadingCfg(configFlags))
+
     deadOTXTool=CompFactory.LArCelldeadOTXTool("LArCelldeadOTXTool",keyMF="LArBadFeb",
                                    keyCabling="LArOnOffIdMap", keySCCabling="LArOnOffIdMapSC",
                                    keySC=SCInput)
@@ -86,3 +89,16 @@ def LArDeadOTXCorrCfg(configFlags):
     return acc
 
 
+def LArDeadOTXAlgCfg(configFlags,keySC="SC_ET_ID_RoI"):
+    acc=ComponentAccumulator()
+    acc.merge(LArBadFebCfg(configFlags))
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+    acc.merge(LArOnOffIdMappingSCCfg(configFlags))
+    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
+    acc.merge(LArBadChannelCfg(configFlags,isSC=True))
+
+    deadOTXAlg=CompFactory.LArCelldeadOTXAlg(name="LArCelldeadOTXAlg",keyMF="LArBadFeb",
+                                   keyCabling="LArOnOffIdMap", keySCCabling="LArOnOffIdMapSC",
+                                   keySC=keySC,SCEneCut=0)
+    acc.addEventAlgo(deadOTXAlg)
+    return acc

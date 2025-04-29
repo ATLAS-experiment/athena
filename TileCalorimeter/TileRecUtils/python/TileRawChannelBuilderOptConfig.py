@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile raw channel builder tools using Optimal Filtering methods"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TileConfiguration.TileConfigFlags import TileRunType
+from TileConfiguration.TileConfigFlags import TileRunType, getRawChannelContainerOptATLAS
 
 def TileRawChannelBuilderOpt2FilterCfg(flags, method = 'Opt2', **kwargs):
     """Return component accumulator with configured private Tile raw channel builder tool (Opt2)
@@ -31,7 +31,7 @@ def TileRawChannelBuilderOpt2FilterCfg(flags, method = 'Opt2', **kwargs):
             from TileConditions.TileOFCConfig import TileCondToolOfcCfg
             kwargs['TileCondToolOfc'] = acc.popToolsAndMerge( TileCondToolOfcCfg(flags) )
 
-    outputContainer = flags.Tile.RawChannelContainer if method == 'OptATLAS' else 'TileRawChannel' + method
+    outputContainer = getRawChannelContainerOptATLAS(flags) if method == 'OptATLAS' else 'TileRawChannel' + method
     kwargs.setdefault('TileRawChannelContainer', outputContainer)
 
     maxIterations = 3 if flags.Tile.RunType is TileRunType.MONOCIS else 5

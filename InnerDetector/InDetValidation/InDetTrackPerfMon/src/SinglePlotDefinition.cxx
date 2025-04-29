@@ -25,12 +25,15 @@ IDTPM::SinglePlotDefinition::SinglePlotDefinition(
     const std::string& xTitle,
     unsigned int nBinsX, float xLow, float xHigh,
     bool doLogLinBinsX, const std::vector<float>& xBinsVec,
+    const std::vector< std::string >& xBinLabelsVec,
     const std::string& yTitle,
     unsigned int nBinsY, float yLow, float yHigh,
     bool doLogLinBinsY, const std::vector<float>& yBinsVec,
+    const std::vector< std::string >& yBinLabelsVec,
     const std::string& zTitle,
     unsigned int nBinsZ, float zLow, float zHigh,
     bool doLogLinBinsZ, const std::vector<float>& zBinsVec,
+    const std::vector< std::string >& zBinLabelsVec,
     const std::string& folder ) :
         m_name( name ), m_type( type ), m_title( title ),
         m_xTitle( xTitle ), m_yTitle( yTitle ), m_zTitle( zTitle ),
@@ -55,7 +58,14 @@ IDTPM::SinglePlotDefinition::SinglePlotDefinition(
                             std::numeric_limits<float>::quiet_NaN() );
 
   /// Recomputing limits and sizes (for variable bin sizes)
-  setxBinsVec( xBinsVec );  setyBinsVec( yBinsVec );  setzBinsVec( zBinsVec );
+  setxBinsVec( xBinsVec );
+  setyBinsVec( yBinsVec );
+  setzBinsVec( zBinsVec );
+
+  /// Setting bin labels
+  setxBinLabelsVec( xBinLabelsVec );
+  setyBinLabelsVec( yBinLabelsVec );
+  setzBinLabelsVec( zBinLabelsVec );
 
   /// Sanity check
   m_empty = not isValid();
@@ -102,9 +112,6 @@ bool IDTPM::SinglePlotDefinition::isValid() const
                                ( not std::isnan( m_zAxis.second ) ) and
                                ( m_zAxis.first != m_zAxis.second );
 
-  /// check if x- and y-axis have no title
-  sane = sane and ( not( m_xTitle.empty() or m_yTitle.empty() ) );
-
   /// sanity check for 1D, 2D and 3D plots
   sane = sane and sensibleXBins and sensibleXLimits;
 
@@ -114,7 +121,7 @@ bool IDTPM::SinglePlotDefinition::isValid() const
 
     /// sanity check for 3D plots
     if( m_is3D ) {
-      sane = sane and sensibleZBins and sensibleZLimits and ( not m_zTitle.empty() );
+      sane = sane and sensibleZBins and sensibleZLimits;
     }
   }
 

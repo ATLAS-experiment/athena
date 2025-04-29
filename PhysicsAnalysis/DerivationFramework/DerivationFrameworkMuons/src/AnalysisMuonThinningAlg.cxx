@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <DerivationFrameworkMuons/AnalysisMuonThinningAlg.h>
+#include "AnalysisMuonThinningAlg.h"
 #include <StoreGate/ThinningHandle.h>
 namespace {
     using TrkThinKey = SG::ThinningHandleKey<xAOD::TrackParticleContainer>;

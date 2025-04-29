@@ -7,9 +7,7 @@
 // CoraCoolDatabaseSvcFactory.h 
 // Singleton factory class for CoraCoolDatabaseSvc instances
 // Uses underlying COOL utilities to load CORAL libraries and instantiate
-// both COOL and CoraCool for use in standalone applications
-// For Example of use, see CoraCoolTest in 
-// AtlasTest/DatabaseTest/CoraCoolExample package
+// both COOL and CoraCool for use in standalone applications.
 //
 // Richard Hawkings, started 27/10/06
 

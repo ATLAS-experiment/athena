@@ -56,17 +56,17 @@ StatusCode PFLCCalibTool::execute(eflowCaloObjectContainer& theEflowCaloObjectCo
   } else {
     /* Collect all the clusters in a temporary container (with VIEW_ELEMENTS!) */
     std::unique_ptr<xAOD::CaloClusterContainer> tempClusterContainer = m_clusterCollectionTool->execute(theEflowCaloObjectContainer, true);
-
+    const EventContext& ctx=Gaudi::Hive::currentContext();
     /* Calibrate each cluster */
     for (auto thisCaloCluster : *tempClusterContainer){
       /* Subsequently apply all ClusterLocalCalibTools, print debug output at each stage, if DEBUG it set */
-      ATH_CHECK(apply(m_clusterLocalCalibTool, thisCaloCluster));
+      ATH_CHECK(apply(ctx,m_clusterLocalCalibTool, thisCaloCluster));
 
-      ATH_CHECK(apply(m_clusterLocalCalibOOCCTool, thisCaloCluster));
+      ATH_CHECK(apply(ctx,m_clusterLocalCalibOOCCTool, thisCaloCluster));
 
-      ATH_CHECK(apply(m_clusterLocalCalibOOCCPi0Tool, thisCaloCluster));
+      ATH_CHECK(apply(ctx,m_clusterLocalCalibOOCCPi0Tool, thisCaloCluster));
 
-      ATH_CHECK(apply(m_clusterLocalCalibDMTool, thisCaloCluster));
+      ATH_CHECK(apply(ctx,m_clusterLocalCalibDMTool, thisCaloCluster));
 
     }//loop on CaloCluster
   }//if not use local weight scheme
@@ -78,9 +78,9 @@ StatusCode PFLCCalibTool::finalize() {
 }
 
 
-StatusCode PFLCCalibTool::apply(ToolHandle<CaloClusterProcessor>& calibTool, xAOD::CaloCluster* cluster) {
+StatusCode PFLCCalibTool::apply(const EventContext& ctx, ToolHandle<CaloClusterProcessor>& calibTool, xAOD::CaloCluster* cluster) {
   if (m_useLocalWeight) ATH_MSG_WARNING("Applying recalculated weights, when configuration requested to use original weights");
-  ATH_CHECK(calibTool->execute(cluster));
+  ATH_CHECK(calibTool->execute(ctx,cluster));
   return StatusCode::SUCCESS;  
 }
 

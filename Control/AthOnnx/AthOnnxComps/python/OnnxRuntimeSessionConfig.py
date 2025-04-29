@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -17,6 +17,9 @@ def OnnxRuntimeSessionToolCfg(flags,
     execution_provider = flags.AthOnnx.ExecutionProvider if execution_provider is None else execution_provider
     name += execution_provider.name
 
+    if "OnnxRuntimeSvc" not in kwargs:
+        from AthOnnxComps.OnnxRuntimeSvcConfig import OnnxRuntimeSvcCfg
+        kwargs.setdefault("OnnxRuntimeSvc", acc.getPrimaryAndMerge(OnnxRuntimeSvcCfg(flags)))
     kwargs.setdefault("ModelFileName", model_fname)
     if execution_provider is OnnxRuntimeType.CPU:
         acc.setPrivateTools(CompFactory.AthOnnx.OnnxRuntimeSessionToolCPU(name, **kwargs))

@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file QueryTag.cxx
  *  @brief This file contains the implementation for the QueryTag class.
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
- *  $Id: QueryTag.cxx,v 1.5 2009-03-17 09:44:46 gemmeren Exp $
  **/
 
 #include "QueryTag.h"
@@ -15,11 +14,6 @@
 
 using namespace AthPoolEx;
 
-//___________________________________________________________________________
-QueryTag::QueryTag(const std::string& type, const std::string& name, const IInterface* parent) : 
-	AthAlgTool(type, name, parent), m_attrListKey() {
-   declareInterface<IAthenaSelectorTool>(this);
-}
 //___________________________________________________________________________
 QueryTag::~QueryTag() {
 }

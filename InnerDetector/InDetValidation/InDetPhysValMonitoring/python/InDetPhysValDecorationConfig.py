@@ -39,8 +39,8 @@ def InDetPhysHitDecoratorAlgCfg(
     if 'InDetTrackHoleSearchTool' not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
             InDetTrackHoleSearchToolCfg)
-        kwargs.setdefault("InDetTrackHoleSearchTool", acc.popToolsAndMerge(
-            acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags))))
+        kwargs.setdefault("InDetTrackHoleSearchTool",
+            acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags)))
 
     if 'Updator' not in kwargs:
         from TrkConfig.TrkMeasurementUpdatorConfig import InDetUpdatorCfg
@@ -85,6 +85,12 @@ def ITkPhysHitDecoratorAlgCfg(flags, name="ITkPhysHitDecoratorAlg", **kwargs):
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
             ITkPixelLorentzAngleToolCfg(flags)))
 
+    if 'ResidualPullCalculator' not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
+            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+
     acc.addEventAlgo(CompFactory.InDetPhysHitDecoratorAlg(name, **kwargs))
     return acc
 
@@ -112,8 +118,8 @@ def InDetPhysValTruthDecoratorAlgCfg(
     kwargs.setdefault("Extrapolator", extrapolator)
 
     if flags.Detector.GeometryITk:
-        kwargs.setdefault("PixelClusterContainerName", "ITkPixelClusters")
-        kwargs.setdefault("SCTClusterContainerName", "ITkStripClusters")
+        kwargs.setdefault("PixelClusterContainerName", "ITkPixelMeasurements")
+        kwargs.setdefault("SCTClusterContainerName", "ITkStripMeasurements")
 
     kwargs.setdefault('TruthParticleIndexDecoration',
                       'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '')

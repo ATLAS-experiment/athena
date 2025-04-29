@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/test/ReadDecorHandleKey_test.cxx
@@ -76,6 +76,14 @@ void test1()
   {
     TestOwner owner;
     SG::ReadHandleKey<MyObj> w ("xxx");
+    SG::ReadDecorHandleKey<MyObj> k (&owner, "CCCKey", w, "dec", "doc string");
+    w="ccc";
+    k.initialize().ignore();
+    check(owner, k);
+  }
+  {
+    TestOwner owner;
+    SG::ReadHandleKey<MyObj> w;  // empty key that gets changed later
     SG::ReadDecorHandleKey<MyObj> k (&owner, "CCCKey", w, "dec", "doc string");
     w="ccc";
     k.initialize().ignore();

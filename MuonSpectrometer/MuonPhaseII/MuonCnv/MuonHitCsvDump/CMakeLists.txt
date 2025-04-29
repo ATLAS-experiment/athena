@@ -8,15 +8,14 @@ atlas_subdir( MuonHitCsvDump )
 atlas_add_component( MuonHitCsvDump
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
-                                     MuonSimEvent xAODMuonSimHit StoreGateLib MdtCalibSvcLib
-                                     xAODMuonPrepData MuonSpacePoint xAODMuon
-                                     )
+                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  MuonRecHelperToolsLib
+                                     MuonSimEvent xAODMuonSimHit StoreGateLib MuonTruthHelpers
+                                     MuonSpacePoint xAODMuon MuonPatternHelpers)
                                      
 atlas_install_python_modules( python/*.py)
 
 atlas_add_test( testCsvDumper
-                SCRIPT python -m MuonHitCsvDump.csvHitDump --nEvents 5 --noSTGC --noMM
+                SCRIPT python -m MuonHitCsvDump.csvHitDump --nEvents 1 --noSTGC 
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)

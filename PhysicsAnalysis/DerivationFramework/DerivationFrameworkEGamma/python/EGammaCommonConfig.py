@@ -36,8 +36,8 @@ def EGammaCommonCfg(ConfigFlags):
 
     # ====================================================================
     # SHOWER SHAPE CORRECTIONS IN MC
-    # TUNE26: e/gamma FUDGE FACTORS RUN2 FULL DATA, derived with
-    # rel 22 (e) or 21.2 (gamma)
+    # TUNE27: e FUDGE FACTORS RUN2 FULL DATA, derived with rel 22.2
+    # TUNE25: gamma FUDGE FACTORS RUN2 FULL DATA, derived with or 21.2
     # ====================================================================
     isMC = ConfigFlags.Input.isMC
     isFullSim = False
@@ -187,7 +187,7 @@ def EGammaCommonCfg(ConfigFlags):
         AsgElectronSelectorToolCfg(
             ConfigFlags,
             name="ElectronDNNSelectorVeryLooseNoCF97",
-            WorkingPoint="VeryLooseDNNnoCF97Electron",
+            WorkingPoint="VeryLooseNoCF97DNNElectron",
         )
     )
     acc.addPublicTool(ElectronDNNSelectorVeryLooseNoCF97)
@@ -197,7 +197,7 @@ def EGammaCommonCfg(ConfigFlags):
         AsgElectronSelectorToolCfg(
             ConfigFlags,
             name="ElectronDNNSelectorLooseNoCF",
-            WorkingPoint="LooseDNNnoCFElectron",
+            WorkingPoint="LooseNoCFDNNElectron",
         )
     )
     acc.addPublicTool(ElectronDNNSelectorLooseNoCF)
@@ -207,7 +207,7 @@ def EGammaCommonCfg(ConfigFlags):
         AsgElectronSelectorToolCfg(
             ConfigFlags,
             name="ElectronDNNSelectorMediumNoCF",
-            WorkingPoint="MediumDNNnoCFElectron",
+            WorkingPoint="MediumNoCFDNNElectron",
         )
     )
     acc.addPublicTool(ElectronDNNSelectorMediumNoCF)
@@ -217,7 +217,7 @@ def EGammaCommonCfg(ConfigFlags):
         AsgElectronSelectorToolCfg(
             ConfigFlags,
             name="ElectronDNNSelectorTightNoCF",
-            WorkingPoint="TightDNNnoCFElectron",
+            WorkingPoint="TightNoCFDNNElectron",
         )
     )
     acc.addPublicTool(ElectronDNNSelectorTightNoCF)
@@ -690,27 +690,6 @@ def EGammaCommonCfg(ConfigFlags):
         )
     )
 
-    # decorate central electrons and photons with a flag to tell if the
-    # candidates are affected by the crack bug in mc16a and data 2015+2016
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGCrackVetoCleaningToolCfg
-
-    PhotonPassCrackVeto = acc.getPrimaryAndMerge(
-        EGCrackVetoCleaningToolCfg(
-            ConfigFlags,
-            name="PhotonPassCrackVeto",
-            StoreGateEntryName="DFCommonCrackVetoCleaning",
-            ContainerName="Photons",
-        )
-    )
-    ElectronPassCrackVeto = acc.getPrimaryAndMerge(
-        EGCrackVetoCleaningToolCfg(
-            ConfigFlags,
-            name="ElectronPassCrackVeto",
-            StoreGateEntryName="DFCommonCrackVetoCleaning",
-            ContainerName="Electrons",
-        )
-    )
-
     # decorate some electrons with an additional ambiguity flag
     # against internal and early material conversion
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronAmbiguityToolCfg
@@ -743,8 +722,6 @@ def EGammaCommonCfg(ConfigFlags):
         PhotonPassIsEMTight,
         PhotonPassIsEMTightPtIncl,
         PhotonPassCleaning,
-        PhotonPassCrackVeto,
-        ElectronPassCrackVeto,
         ElectronAmbiguity,
     ]
 

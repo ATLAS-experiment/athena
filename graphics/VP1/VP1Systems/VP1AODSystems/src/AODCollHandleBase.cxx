@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -127,7 +127,7 @@ void AODCollHandleBase::setupSettingsFromController(const AODSystemController* c
 
 
 //____________________________________________________________________
-QString AODCollHandleBase::name() const
+const QString& AODCollHandleBase::name() const
 {
   return m_dbase->name;
 }

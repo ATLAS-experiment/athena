@@ -94,6 +94,7 @@ if __name__=='__main__':
       NSamples = 4
       LArFormat = 1
       RunType = 2
+      LATOME_FW = 5
       #for splash test
       #ReadDigits = True
       #FirstSample = 6
@@ -110,6 +111,7 @@ if __name__=='__main__':
          NSamples = 4
          LArFormat = 1
          RunType = 2
+         LATOME_FW = 5
          #for splash test
          #ReadDigits = True
          #FirstSample = 6
@@ -122,6 +124,7 @@ if __name__=='__main__':
          FirstSample = x.firstSample
          NSamples = x.nbOfSamples   
          RunType = x.runType
+         LATOME_FW = x.ttype_mask_A
          print("RUN CONFIGURATION: format %i,run type %i"%(RunType,LArFormat))
          # Decide how to get cell energy: DSP or digits
          if LArFormat==0:
@@ -212,6 +215,9 @@ if __name__=='__main__':
    else:
       flags.DQ.enableLumiAccess=True
 
+   if 'PEB' in STREAM: # do not have HLT results
+      flags.Trigger.decodeHLT=False
+      flags.DQ.useTrigger = False
 
    flags.lock()
 
@@ -343,6 +349,10 @@ if __name__=='__main__':
            bytestream_input.StreamType = "monitoring"
        if  STREAM=="calibration":
            bytestream_input.StreamType = "calibration"
+       if  STREAM=="LArPEBDigitalTrigger":
+           bytestream_input.StreamType = "calibration"
+           bytestream_input.StreamNames = ['LArPEBDigitalTrigger']
+
 
            
        print("DEBUG: bytestream_input.StreamNames:",bytestream_input.StreamNames)
@@ -405,6 +415,13 @@ if __name__=='__main__':
    print("MaybeMissingROBs: ",l1bsdec.MaybeMissingROBs)
    l1bsdec.MaybeMissingROBs += [0x770001, 0x7500ac, 0x7500ad, 0x7300a8, 0x7300a9, 0x7300aa, 0x7300ab]
 
+   if LATOME_FW == 6:
+      print("LATOME FW VERSION IS 6 - USING CUSTOM MAPPING")
+      #if isFW6:
+      # Temporary fix for FW6 mapping. These two lines must be removed when we are not running with fw6                                                       print("ADDING FW6 MAPPING HACK")
+      from IOVDbSvc.IOVDbSvcConfig import addOverride
+      acc.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
+   
    print('CONFIG ',CONFIG)
    print('STREAM ',STREAM)
 
@@ -425,7 +442,7 @@ if __name__=='__main__':
    if RunType == 0 and CONFIG!="LArDTMon":
       acc.getEventAlgo("LArRawDataReadingAlg").LArRawChannelKey="" 
 
-   # example for blocking the folder not filled during cosmics
+   # example for blocking the folder not filled in time
    cil=acc.getCondAlgo('CondInputLoader')
    iovdbsvc=acc.getService('IOVDbSvc') 
    folder='/TRIGGER/LUMI/LBLB'

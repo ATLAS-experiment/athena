@@ -289,7 +289,7 @@ int MuTagAmbiguitySolverTool::ambiguousSegment(const EventContext& ctx, const Mu
 }
 
 std::vector<MuonCombined::MuonSegmentInfo> MuTagAmbiguitySolverTool::selectBestMuTaggedSegments(
-    const EventContext& ctx, std::vector<MuonCombined::MuonSegmentInfo> mtss) const {
+    const EventContext& ctx, const std::vector<MuonCombined::MuonSegmentInfo>& mtss) const {
     ATH_MSG_DEBUG("cleaning set of MTSs");
 
     std::vector<MuonCombined::MuonSegmentInfo> outputMTSs;

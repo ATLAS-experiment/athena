@@ -19,7 +19,7 @@
 
 namespace DerivationFramework {
 
-  class InDetTrackSelectionToolWrapper : public AthAlgTool, public IAugmentationTool {
+  class InDetTrackSelectionToolWrapper : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       InDetTrackSelectionToolWrapper(const std::string& t, const std::string& n, const IInterface* p);
 

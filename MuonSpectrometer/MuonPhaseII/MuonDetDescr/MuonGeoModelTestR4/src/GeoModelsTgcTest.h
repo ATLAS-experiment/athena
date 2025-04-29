@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELSTGCTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELSTGCTEST_H
 
 #include <AthenaBaseComps/AthHistogramAlgorithm.h>
 #include <set>
+#include <StoreGate/ReadHandleKey.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonTesterTree/MuonTesterTree.h>
@@ -18,7 +19,7 @@ namespace MuonGMR4{
 
 class GeoModelsTgcTest : public AthHistogramAlgorithm{
     public:
-        GeoModelsTgcTest(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
         StatusCode execute() override;
         
@@ -68,9 +69,6 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<float>& m_lGapLength{m_tree.newScalar<float>("lGapLength")}; //lStripWidth
       MuonVal::ScalarBranch<float>& m_gapHeight{m_tree.newScalar<float>("gapHeight")}; 
 
-      MuonVal::VectorBranch<float>& m_firstStripPitch{m_tree.newVector<float>("firstStripPitch")}; // firstStripWidth 1.6/3.2mm
-
-
       /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
       MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
       MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
@@ -118,8 +116,8 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
       MuonVal::VectorBranch<uint>& m_numPadPhi{m_tree.newVector<uint>("numPadPhi")}; //nPadPhi
       MuonVal::VectorBranch<float>& m_firstPadHeight{m_tree.newVector<float>("firstPadHeight")}; //firstPadH
       MuonVal::VectorBranch<float>& m_padHeight{m_tree.newVector<float>("padHeight")}; //PadH
+      MuonVal::VectorBranch<float>& m_firstPadPhiDiv{m_tree.newVector<float>("firstPadPhiDiv")}; //firstPadPhiDivision_A
       MuonVal::VectorBranch<float>& m_padPhiShift{m_tree.newVector<float>("padPhiShift")}; //PadPhiShift_A (defined float in R3)
-      MuonVal::VectorBranch<float>& m_firstPadPhiDiv{m_tree.newVector<float>("firstPadPhiDiv")}; //firstPadPhiDivision
       MuonVal::ScalarBranch<float>& m_anglePadPhi{m_tree.newScalar<float>("anglePadPhi")}; // anglePadPhi
       MuonVal::ScalarBranch<float>& m_beamlineRadius{m_tree.newScalar<float>("beamlineRadius")}; 
 

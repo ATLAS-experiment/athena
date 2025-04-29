@@ -7,12 +7,13 @@
 
 /*
   author: Dirk Duschinger
-  documentation: https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauTruthMatchingTool.rst
+  documentation: https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauTruthMatchingTool.rst
 */
 
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteHandleKey.h"
 
@@ -105,9 +106,16 @@ protected:
   TruthTausEvent m_truthTausEvent;
 
   // temporary, drop at the first occasion
-  bool m_bTruthTauAvailable;
+  bool m_bTruthTauAvailable{};
 
 private:
+
+  // properties
+  Gaudi::Property<bool> m_bWriteInvisibleFourMomentum{ this, "WriteInvisibleFourMomentum", false};
+  Gaudi::Property<bool> m_bWriteVisibleChargedFourMomentum{ this, "WriteVisibleChargedFourMomentum", false};
+  Gaudi::Property<bool> m_bWriteVisibleNeutralFourMomentum{ this, "WriteVisibleNeutralFourMomentum", false};
+  Gaudi::Property<bool> m_bWriteDecayModeVector{ this, "WriteDecayModeVector", true};
+  Gaudi::Property<bool> m_bWriteVertices{ this, "WriteVertices", true}; 
 
   // input containers
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthTauInputContainer { this, "TruthTauContainerName", "TruthTaus", "Truth tau input container name (truth matching mode)" };
@@ -119,11 +127,6 @@ private:
   SG::WriteHandleKey<xAOD::TruthParticleContainer> m_truthTauOutputContainer { this, "NewTruthTauContainerName", "TruthTaus", "Truth tau output container name" };
 
   bool m_truthMatchingMode = false;
-  bool m_bWriteInvisibleFourMomentum;
-  bool m_bWriteVisibleChargedFourMomentum;
-  bool m_bWriteVisibleNeutralFourMomentum;
-  bool m_bWriteDecayModeVector;
-  bool m_bWriteVertices;
 
   asg::AnaToolHandle<IMCTruthClassifier> m_tMCTruthClassifier;
 

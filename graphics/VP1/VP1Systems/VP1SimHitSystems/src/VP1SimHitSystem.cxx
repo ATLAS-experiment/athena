@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -21,6 +21,7 @@
 #include "GeoAdaptors/GeoTRTUncompressedHit.h"
 #include "GeoAdaptors/GeoSiHit.h"
 #include "GeoAdaptors/GeoMuonHits.h"
+#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 // Section of includes for global calo hits
 #include "CaloDetDescr/CaloDetDescrElement.h"
@@ -71,6 +72,7 @@ public:
 
   // Managers
   const TileDetDescrManager* tile_dd_man{nullptr};
+  const InDetDD::TRT_DetectorManager* trt_dd_man{nullptr};
   std::unique_ptr<CaloDetDescrManager> lar_dd_man;
 
   // ID helpers
@@ -159,7 +161,11 @@ void VP1SimHitSystem::systemcreate(StoreGateSvc* detstore)
       messageDebug("0 pointer to Tile ID Helper");
       return;
   }
-
+  status = detstore->retrieve(m_clockwork->trt_dd_man,"TRT");
+  if(status.isFailure() || m_clockwork->trt_dd_man==nullptr) {
+      messageDebug("Unable to retrieve TRT DD Manager");
+      return;
+  }
   m_clockwork->lar_dd_man = buildCaloDetDescrNoAlign(serviceLocator(),Athena::getMessageSvc());
 }
 
@@ -311,7 +317,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       {
         GeoTRTUncompressedHit ghit(hit);
         if(!ghit) continue;
-        Amg::Vector3D u = Amg::Hep3VectorToEigen(ghit.getGlobalPosition());
+        Amg::Vector3D u = Amg::Hep3VectorToEigen(ghit.getGlobalPosition(m_clockwork->trt_dd_man));
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(), u.z() );
       }
     }

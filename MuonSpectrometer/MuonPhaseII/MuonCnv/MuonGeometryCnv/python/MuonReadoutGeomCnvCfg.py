@@ -4,7 +4,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MuonReadoutGeometryCnvAlgCfg(flags,name="MuonDetectorManagerCondAlg", **kwargs):
+def MuonReadoutGeometryCnvAlgCfg(flags,name="MuonDetectorCondAlg", **kwargs):
     from MuonGeoModelR4.MuonGeoModelConfig import MuonAlignStoreCfg
     
     result = ComponentAccumulator()

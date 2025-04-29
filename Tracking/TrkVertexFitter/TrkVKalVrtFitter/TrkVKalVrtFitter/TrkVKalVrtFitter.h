@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrkVKalVrtFitter.h
@@ -43,7 +43,7 @@ namespace Trk{
     VertexID VRT;
     std::vector<int> trkInVrt;              // positions of participating tracks in common track list
     std::vector<VertexID> pseudoInVrt;      // VertexIDs of pseudos
-    double Mass;
+    double Mass{};
   };
 
   struct cascadeV{                        //  general description of vertex in cascade
@@ -53,7 +53,7 @@ namespace Trk{
     std::vector<VertexID> inPointingV;    //  which vertices points to it
     VertexID mergedTO;                    //  merged to another vertex (not separate anymore)
     std::vector<VertexID> mergedIN;       //  vertices attached to current
-    int indexInSimpleCascade;
+    int indexInSimpleCascade{};
     cascadeV(){ vID=-999; outPointingV=0; mergedTO=0; indexInSimpleCascade=0;};
    ~cascadeV() = default;
   };
@@ -325,6 +325,8 @@ namespace Trk{
         SimpleProperty<double> m_IterationPrecision;
         SimpleProperty<double> m_IDsizeR;
         SimpleProperty<double> m_IDsizeZ;
+        SimpleProperty<double> m_MSsizeR;
+        SimpleProperty<double> m_MSsizeZ;
         std::vector<double> m_c_VertexForConstraint;
         std::vector<double> m_c_CovVrtForConstraint;
         std::vector<double> m_c_MassInputParticles;
@@ -351,6 +353,7 @@ namespace Trk{
         bool m_usePassNear;
         bool m_usePassWithTrkErr;
 	bool m_frozenVersionForBTagging;
+        bool m_allowUltraDisplaced;
         void initCnstList();
 
         //  Track material effects control
@@ -393,10 +396,10 @@ namespace Trk{
         //
         // Arrays needed for fitting kernel
         //
-        double m_apar[NTrMaxVFit][5];  // used only for fit preparation
-        double m_awgt[NTrMaxVFit][15]; // used only for fit preparation
-        long int m_ich[NTrMaxVFit];
-        double m_parfs[NTrMaxVFit][3];
+        double m_apar[NTrMaxVFit][5]{};  // used only for fit preparation
+        double m_awgt[NTrMaxVFit][15]{}; // used only for fit preparation
+        long int m_ich[NTrMaxVFit]{};
+        double m_parfs[NTrMaxVFit][3]{};
 
         VKalAtlasMagFld m_fitField;
         VKalVrtControl m_vkalFitControl;
@@ -405,7 +408,7 @@ namespace Trk{
 
         const TrackParameters* m_globalFirstHit = nullptr;
 
-        double m_save_xyzfit[3]; //  Save vertex after successful fit
+        double m_save_xyzfit[3]{}; //  Save vertex after successful fit
 
         int m_FitStatus = 0; /* Fit Status flag*/
                              /* =0 - no fit. All "after fit" routines fail*/
@@ -427,6 +430,7 @@ namespace Trk{
         bool m_usePassNear = false;
         bool m_usePassWithTrkErr = false;
         bool m_frozenVersionForBTagging = false;
+        bool m_allowUltraDisplaced = false;
 
         std::vector<double> m_VertexForConstraint;
         std::vector<double> m_CovVrtForConstraint;
@@ -462,12 +466,12 @@ namespace Trk{
 //  Control variables
 //
 
-      double m_BMAG;       /* const magnetic field  if needed */
-      double m_CNVMAG;     /* Conversion constant */
+      double m_BMAG{};       /* const magnetic field  if needed */
+      double m_CNVMAG{};     /* Conversion constant */
 
 
-      VKalExtPropagator*     m_fitPropagator;
-      const IExtrapolator*   m_InDetExtrapolator;     //!< Pointer to Extrapolator AlgTool
+      VKalExtPropagator*     m_fitPropagator{};
+      const IExtrapolator*   m_InDetExtrapolator{};     //!< Pointer to Extrapolator AlgTool
 //
 //
 //

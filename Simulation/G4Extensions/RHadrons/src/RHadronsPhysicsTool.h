@@ -1,14 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RHADRONS_RHADRONSPHYSICSTOOL_H
 #define RHADRONS_RHADRONSPHYSICSTOOL_H
 
 // Include files
+#include <vector>
+
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 #include "G4AtlasInterfaces/IPhysicsOptionTool.h"
-#include "G4VPhysicsConstructor.hh"
+#include "G4AtlasInterfaces/IPhysicsConstructor.h"
 
 /** @class RHadronsPhysicsTool RHadronsPhysicsTool.h "RHadrons/RHadronsPhysicsTool.h"
  *
@@ -17,9 +20,9 @@
  *  @author Edoardo Farina
  *  @date  2015-05-14
  */
-class RHadronsPhysicsTool :  public G4VPhysicsConstructor, public extends<AthAlgTool, IPhysicsOptionTool>
-{
-public:
+class ATLAS_NOT_THREAD_SAFE RHadronsPhysicsTool
+    : public extends<AthAlgTool, IPhysicsOptionTool> {
+ public:
   /// Standard constructor
   RHadronsPhysicsTool( const std::string& type , const std::string& name,
                        const IInterface* parent ) ;
@@ -27,14 +30,25 @@ public:
   virtual ~RHadronsPhysicsTool( ); ///< Destructor
 
   /// Initialize method
-  virtual StatusCode initialize( ) ;
-  virtual void ConstructParticle();
-  virtual void ConstructProcess();
+  virtual StatusCode initialize();
 
   /** Implements
    */
 
-  virtual RHadronsPhysicsTool* GetPhysicsOption();
+  virtual UPPhysicsConstructor GetPhysicsOption();
+
+  class ATLAS_NOT_THREAD_SAFE PhysicsConstructor : public IPhysicsContructor {
+   public:
+    PhysicsConstructor(const std::string& name, MSG::Level level,
+                       const std::vector<int>& standardpdgidtodecay)
+        : IPhysicsContructor(name, level),
+          m_standardpdgidtodecay(standardpdgidtodecay) {}
+    virtual void ConstructParticle() override;
+    virtual void ConstructProcess() override;
+
+   private:
+    std::vector<int> m_standardpdgidtodecay;
+  };
 
 private:
   // 521   B+  5279.17 (MeV/c) meson B 0
@@ -86,9 +100,6 @@ private:
   //       // 423, -423, 433, -433, 513, -513, 523, -523, 551, -551
   //         },
   //     "Particles which are added to Geant4 by quasi-stable particle simulation."};
-
 };
-
-
 
 #endif

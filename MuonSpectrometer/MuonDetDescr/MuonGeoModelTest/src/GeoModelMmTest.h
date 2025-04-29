@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTEST_GEOMODELMMTEST_H
 #define MUONGEOMODELTEST_GEOMODELMMTEST_H
@@ -20,7 +20,7 @@ namespace MuonGM {
 
 class GeoModelMmTest : public AthHistogramAlgorithm {
    public:
-    GeoModelMmTest(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthHistogramAlgorithm::AthHistogramAlgorithm;
     
     StatusCode initialize() override;
     StatusCode execute() override;
@@ -49,7 +49,8 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
     /// Example string MML1A6 , MMS2C5
     Gaudi::Property<std::vector<std::string>> m_selectStat{
         this, "TestStations", {}, "Constrain the stations to be tested"};
-   
+    
+    Gaudi::Property<std::vector<std::string>> m_excludeStat{this, "ExcludeStations", {}};
     StatusCode dumpToTree(const EventContext& ctx, const MuonGM::MMReadoutElement* detEl);
 
     MuonVal::MuonTesterTree m_tree{"MmGeoModelTree", "GEOMODELTESTER"};
@@ -62,6 +63,9 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
 
     MuonVal::ScalarBranch<float>& m_stStripPitch{m_tree.newScalar<float>("stripPitch")};
 
+    MuonVal::ScalarBranch<float>& m_moduleHeight{m_tree.newScalar<float>("moduleHeight")};
+    MuonVal::ScalarBranch<float>& m_moduleWidthS{m_tree.newScalar<float>("moduleWidthS")};
+    MuonVal::ScalarBranch<float>& m_moduleWidthL{m_tree.newScalar<float>("moduleWidthL")};
     
     MuonVal::VectorBranch<bool>& m_isStereo{m_tree.newVector<bool>("isStereo")};
     MuonVal::VectorBranch<short>& m_gasGap{m_tree.newVector<short>("gasGap")};
@@ -84,13 +88,18 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
 
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
+    MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
+
 
     /// Rotation matrix of the respective strip layers
     MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};    
     MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
     MuonVal::TwoVectorBranch m_firstStripPos{m_tree, "firstStripPos"};
     MuonVal::VectorBranch<int>& m_readoutSide{m_tree.newVector<int>("stripReadoutSide")};
-    MuonVal::VectorBranch<unsigned>& m_readoutFirstStrip{m_tree.newVector<unsigned int>("stripFirstStrip")};
+
+    MuonVal::VectorBranch<unsigned>& m_firstStrip{m_tree.newVector<unsigned>("firstStrip")};
+    MuonVal::VectorBranch<unsigned>& m_nStrips{m_tree.newVector<unsigned>("nStrips")};
+
     
 };
 

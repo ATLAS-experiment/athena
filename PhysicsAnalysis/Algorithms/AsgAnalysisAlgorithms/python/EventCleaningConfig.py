@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -33,6 +33,8 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('GRLDict', {}, type=None)
         self.addOption ('noFilter', False, type=bool,
             info="do apply event decoration, but do not filter. The default is False, i.e. 'We decorate events but do not filter' ")
+        self.addOption ('useRandomRunNumber', False, type=bool,
+            info="use RandomRunNumber to compute GRL info. Only supported for MC. The default is False")
 
         if self.runGRL and self.userGRLFiles:
             raise ValueError("No userGRLFiles should be specified if runGRL=False")
@@ -60,21 +62,33 @@ class EventCleaningBlock (ConfigBlock):
     def makeAlgs (self, config) :
         
         # Apply GRL
-        if self.runGRL and config.dataType() is DataType.Data:
+        if self.runGRL and (config.dataType() is DataType.Data or self.useRandomRunNumber):
+            if config.dataType() is DataType.Data and self.useRandomRunNumber:
+                raise ValueError ("UseRandomRunNumber is only supported for MC!")
+
             if self.noFilter:
                 # here we only decorate the PHYSLITE events with a boolean and don't do any cleaning
                 # Set up the GRL Decoration
-                for GRLDecoratorName,GRLFile in (self.GRLDict).items():
-                    alg = config.createAlgorithm( 'GRLSelectorAlg', GRLDecoratorName )
-                    config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
-                    alg.Tool.GoodRunsListVec = GRLFile
+                if not self.GRLDict:
+                    raise ValueError ("No GRLDict specified for GRL decoration, please specify a GRLDict")
+
+                for GRLDecoratorName, GRLFileList in self.GRLDict.items():
+                    if isinstance(GRLFileList, str):
+                        GRLFileList = [GRLFileList]
+
+                    alg = config.createAlgorithm("GRLSelectorAlg", GRLDecoratorName)
+                    config.addPrivateTool("Tool", "GoodRunsListSelectionTool")
+                    alg.Tool.UseRandomRunNumber = self.useRandomRunNumber
+                    alg.Tool.GoodRunsListVec = GRLFileList
                     alg.noFilter = True
-                    alg.grlKey = "EventInfo." + GRLDecoratorName
-                    # Using WriteDecorHandle thus no need for addOutputVar
+                    alg.grlKey = f"EventInfo.{GRLDecoratorName}"
+
+                    config.addOutputVar("EventInfo", GRLDecoratorName, GRLDecoratorName, noSys=True)
             else:
                 # Set up the GRL selection:
                 alg = config.createAlgorithm( 'GRLSelectorAlg', 'GRLSelectorAlg' )
                 config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
+                alg.Tool.UseRandomRunNumber = self.useRandomRunNumber
                 if self.userGRLFiles:
                     alg.Tool.GoodRunsListVec = self.userGRLFiles
                 else:
@@ -83,7 +97,8 @@ class EventCleaningBlock (ConfigBlock):
         # Skip events with no primary vertex:
         if self.runPrimaryVertexSelection:
             alg = config.createAlgorithm( 'CP::VertexSelectionAlg',
-                                          'PrimaryVertexSelectorAlg' )
+                                          'PrimaryVertexSelectorAlg',
+                                           reentrant=True )
             alg.VertexContainer = 'PrimaryVertices'
             alg.MinVertices = 1
             alg.MinTracks = self.minTracksPerVertex
@@ -103,31 +118,3 @@ class EventCleaningBlock (ConfigBlock):
 
 
 
-
-def makeEventCleaningConfig( seq,
-                             runPrimaryVertexSelection = None,
-                             runEventCleaning = None,
-                             runGRL = None,
-                             userGRLFiles = None,
-                             GRLDict = None,
-                             noFilter = None,
-                             ):
-    """Create a basic event cleaning analysis algorithm sequence
-
-    Keyword arguments:
-      runPrimaryVertexSelection -- whether to run primary vertex selection
-      runEventCleaning -- whether to run event cleaning
-      runGRL -- whether to run GRL selection
-      userGRLFiles -- a list of GRL files to select data from
-      GRLDict -- a dictionary of GRL files to determine decoration names
-      noFilter -- whether to apply event decoration or not
-    """
-
-    config = EventCleaningBlock ()
-    config.setOptionValue ('runPrimaryVertexSelection', runPrimaryVertexSelection)
-    config.setOptionValue ('runEventCleaning', runEventCleaning)
-    config.setOptionValue ('runGRL', runGRL)
-    config.setOptionValue ('userGRLFiles', userGRLFiles)
-    config.setOptionValue ('GRLDict', GRLDict)
-    config.setOptionValue ('noFilter', noFilter)
-    seq.append (config)

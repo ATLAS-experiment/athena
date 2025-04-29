@@ -7,6 +7,7 @@
 
 #include "CollectionBase/ICollection.h"
 #include "CollectionBase/CollectionDescription.h"
+#include "CollectionBase/CollectionRowBuffer.h"
 
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/PluginService.h"
@@ -16,8 +17,6 @@ namespace pool {
   // forward declarations
    class ISession;
    class IContainer;
-   class ICollectionSchemaEditor;
-   class ICollectionDataEditor;
    class ICollectionQuery;
    class ICollectionIterator;
    class ImplicitCollectionIterator;
@@ -67,6 +66,9 @@ namespace pool {
                                         std::string secondaryQuery = "",
                                         std::string options = "" );
 
+    /// Adds a new row of data to the collection. Will always throw exception.
+    virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer );
+
     /// Commits the last changes made to the collection. Will always return true.
     void commit(bool reopen=false);
 
@@ -85,14 +87,6 @@ namespace pool {
 
     /// Returns an object used to describe the collection properties.
     virtual const ICollectionDescription& description() const;
-
-    /// Returns an object used to modify the collection schema.
-    /// will throw exception if called
-    virtual ICollectionSchemaEditor&         schemaEditor();
-
-    /// Returns an object used to add, update or delete rows of the collection.
-    /// will throw exception if called
-    virtual ICollectionDataEditor&         dataEditor();
 
     /// Returns an object used to query the collection.
     virtual ICollectionQuery*                 newQuery();

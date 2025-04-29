@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MuonIdHelper.h"
-
-#include "AthenaKernel/getMessageSvc.h"
 #include "Identifier/RangeIterator.h"
 
 const std::string MuonIdHelper::BAD_NAME = "UNKNOWN";
@@ -182,7 +180,6 @@ int MuonIdHelper::get_expanded_id_calc(const Identifier& compact_id, ExpandedIde
         size_t begin = (context) ? context->begin_index() : 0;
         size_t end = (context) ? context->end_index() : m_CHANNEL_INDEX;
         assert(end <= m_CHANNEL_INDEX);
-
         if (0 == end) {
             result = 0;
         } else if (0 == begin) {
@@ -193,6 +190,9 @@ int MuonIdHelper::get_expanded_id_calc(const Identifier& compact_id, ExpandedIde
             // the IdDet level
             result = m_dict->unpack(compact_id, context->prefix_id(), end, id);
         }
+    }
+    if (!id.isValid()) {
+        return EXIT_FAILURE;
     }
     return result;
 }

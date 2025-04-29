@@ -13,7 +13,6 @@
 namespace pool {
 
   class ICollectionColumn;
-  class ICollectionIndex;
   
   /** 
    * @class ICollectionDescription ICollectionDescription.h CollectionBase/ICollectionDescription.h
@@ -103,35 +102,6 @@ namespace pool {
      * @param columnId Position of column in associated collection fragment.
      */
     virtual const ICollectionColumn& attributeColumn( int columnId ) const = 0; 
-
-    /**
-     * Returns the number of indices used by the collection.
-     */
-    virtual int numberOfIndices() const = 0;
-
-    /**
-     * Returns a description object for an index of the collection, given the name of the column on which
-     * the index is applied.
-     *
-     * @param columnName Name of column on which index is applied.
-     */
-    virtual const ICollectionIndex& index( const std::string& columnName ) const = 0;
-
-    /**
-     * Returns a description object for an index of the collection, given the names of the columns on 
-     * which the index is applied.
-     *
-     * @param columnNames Names of columns on which index is applied.
-     */
-    virtual const ICollectionIndex& index( const std::vector<std::string>& columnNames ) const = 0;
-
-    /**
-     * Returns a description object for an index of the collection, given the ID number of 
-     * the index.
-     *
-     * @param indexId ID of index.
-     */
-    virtual const ICollectionIndex& index( int indexId ) const = 0;
 
     /**
      * Check if both Descriptions have the same columns

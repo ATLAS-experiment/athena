@@ -23,7 +23,7 @@ namespace DerivationFramework {
 
   class BoostedHadTopAndTopPairFilterTool;
   
-  class BoostedHadTopAndTopPairFilterAugmentation : public AthAlgTool, public IAugmentationTool {
+  class BoostedHadTopAndTopPairFilterAugmentation : public extends<AthAlgTool, IAugmentationTool> {
 
 
   public:

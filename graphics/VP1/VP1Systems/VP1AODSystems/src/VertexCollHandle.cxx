@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -190,6 +190,7 @@ void VertexCollHandle::resetCachedValuesCuts()
 const VertexCollectionSettingsButton& VertexCollHandle::collSettingsButton() const {
   if (!m_d->collSettingsButton){
     messageVerbose("No collSettingsButton set! Can't call init(), so crash is imminent...");
+    throw std::runtime_error("Vertex - No collSettingsButton set!");
   }
   return *m_d->collSettingsButton;
 }

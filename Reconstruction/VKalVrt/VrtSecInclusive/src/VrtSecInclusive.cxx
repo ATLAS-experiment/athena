@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -376,9 +376,9 @@ namespace VKalVrtAthena {
 
     
     // Later use elsewhere in the algorithm
-    m_selectedTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>  ( );
-    m_associatedTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>( );
-    m_leptonicTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>  ( );
+    m_selectedTracks.clear();
+    m_associatedTracks.clear();
+    m_leptonicTracks.clear();
 
     m_extrapolatedPatternBank.clear();
     
@@ -400,41 +400,31 @@ namespace VKalVrtAthena {
     }    
 
     // Perform track selection and store it to selectedBaseTracks
-    try {
-
-      for( auto alg : m_trackSelectionAlgs ) {
-        ATH_CHECK( (this->*alg)() );
-      }
-      
-    } catch( ... ) {
-      
-      ATH_MSG_WARNING( " > " << __FUNCTION__ << ": some other error is detected in the track selection scope."  );
-      
-      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
-      return StatusCode::SUCCESS;
-      
+    for( auto alg : m_trackSelectionAlgs ) {
+      ATH_CHECK( (this->*alg)() );
     }
-    
-    
+
     if( m_jp.FillNtuple )
-      m_ntupleVars->get<unsigned int>( "NumSelTrks" ) = static_cast<int>( m_selectedTracks->size() );
+      m_ntupleVars->get<unsigned int>( "NumSelTrks" ) = static_cast<int>( m_selectedTracks.size() );
     
     // fill information about selected tracks in AANT
     ATH_CHECK( fillAANT_SelectedBaseTracks() );
     
     //-------------------------------------------------------
     // Skip the event if the number of selected tracks is more than m_jp.SelTrkMaxCutoff
-    if( m_selectedTracks->size() < 2 ) {
+    if( m_selectedTracks.size() < 2 ) {
       ATH_MSG_DEBUG( "execute: Too few (<2) selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 1;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK( lockTrackDecorations( true ) );
       return StatusCode::SUCCESS;   
     }
       
-    if( m_selectedTracks->size() > m_jp.SelTrkMaxCutoff ) {
+    if( m_selectedTracks.size() > m_jp.SelTrkMaxCutoff ) {
       ATH_MSG_INFO( "execute: Too many selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 2;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK( lockTrackDecorations( true ) );
       return StatusCode::SUCCESS;   
     }
       
@@ -442,12 +432,12 @@ namespace VKalVrtAthena {
     // Core part of Vertexing
     //
     
-    try {
+    {
 
       m_vertexingAlgorithmStep = 0;
     
       // set of vertices created in the following while loop.
-      auto* workVerticesContainer = new std::vector<WrkVrt>;
+      std::vector<WrkVrt> workVerticesContainer;
     
       // the main sequence of the main vertexing algorithms
       // see initialize() what kind of algorithms exist.
@@ -458,7 +448,7 @@ namespace VKalVrtAthena {
       
         auto t_start = std::chrono::system_clock::now();
       
-        ATH_CHECK( (this->*alg)( workVerticesContainer ) );
+        ATH_CHECK( (this->*alg)( &workVerticesContainer ) );
       
         auto t_end = std::chrono::system_clock::now();
       
@@ -466,30 +456,17 @@ namespace VKalVrtAthena {
           auto sec = std::chrono::duration_cast<std::chrono::microseconds>( t_end - t_start ).count();
           m_hists["CPUTime"]->Fill( m_vertexingAlgorithmStep, sec/1.e6 );
         }
-      
-        auto end = std::remove_if( workVerticesContainer->begin(), workVerticesContainer->end(),
-                                   []( WrkVrt& wrkvrt ) {
-                                     return ( !wrkvrt.isGood || wrkvrt.nTracksTotal() < 2 ); }
-                                   );
-      
-        workVerticesContainer->erase( end, workVerticesContainer->end() );
 
-        ATH_CHECK( monitorVertexingAlgorithmStep( workVerticesContainer, name, std::next( itr ) == m_vertexingAlgorithms.end() ) );
+        std::erase_if( workVerticesContainer,
+                       []( WrkVrt& wrkvrt ) {
+                         return ( !wrkvrt.isGood || wrkvrt.nTracksTotal() < 2 ); }
+                       );
+
+        ATH_CHECK( monitorVertexingAlgorithmStep( &workVerticesContainer, name, std::next( itr ) == m_vertexingAlgorithms.end() ) );
       
         m_vertexingAlgorithmStep++;
       
       }
-    
-      delete workVerticesContainer;
-    
-    } catch(std::exception& e) {
-      
-      ATH_MSG_WARNING( " > " << __FUNCTION__ << ": exception detected in the vertexing scope: " << e.what() );
-      m_vertexingStatus = 4;
-            
-      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
-      return StatusCode::SUCCESS;
-      
     }
     
     m_vertexingStatus = 0;
@@ -501,6 +478,7 @@ namespace VKalVrtAthena {
       ATH_CHECK( clearNtupleVariables() );
     }
     
+    ATH_CHECK( lockTrackDecorations( false ) );
     
     ATH_MSG_VERBOSE( "execute: process done." );
     // end
@@ -508,4 +486,86 @@ namespace VKalVrtAthena {
     
   }
     
+  void VrtSecInclusive::lockTrackDecorations( const xAOD::TrackParticle* trk, bool onlySelection ) const {
+    SG::AuxVectorData* cont_nc ATLAS_THREAD_SAFE =
+      const_cast<SG::AuxVectorData*> (trk->container());
+    cont_nc->lockDecoration (m_decor_isSelected->auxid());
+
+    if (onlySelection) return;
+
+    if (m_decor_isAssociated && m_decor_isAssociated->isAvailable (*cont_nc)) {
+      cont_nc->lockDecoration (m_decor_isAssociated->auxid());
+    }
+    if (m_decor_is_svtrk_final && m_decor_is_svtrk_final->isAvailable (*cont_nc)) {
+      cont_nc->lockDecoration (m_decor_is_svtrk_final->auxid());
+    }
+
+    for (const auto& p : m_trkDecors) {
+      cont_nc->lockDecoration (p.second.auxid());
+    }
+  }
+
+void VrtSecInclusive::lockLeptonDecorations( const SG::AuxVectorData* cont ) const {
+    SG::AuxVectorData* cont_nc ATLAS_THREAD_SAFE =
+      const_cast<SG::AuxVectorData*> (cont);
+    for (const IPDecoratorType& dec : m_ipDecors) {
+      if (dec.isAvailable (*cont)) {
+        cont_nc->lockDecoration (dec.auxid());
+      }
+    }
+
+    if (m_decor_svLink) {
+      if (m_decor_svLink->isAvailable (*cont)) {
+        cont_nc->lockDecoration (m_decor_svLink->auxid());
+      }
+    }
+  }
+
+  StatusCode VrtSecInclusive::lockTrackDecorations( bool onlySelection ) const
+  {
+    const xAOD::TrackParticleContainer* trackParticleContainer ( nullptr );
+    ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_jp.TrackLocation) );
+    for( const xAOD::TrackParticle* trk : *trackParticleContainer ) {
+      lockTrackDecorations( trk, onlySelection );
+    }
+
+    const xAOD::MuonContainer* muons ( nullptr );
+    ATH_CHECK( evtStore()->retrieve( muons, m_jp.MuonLocation) );
+    if (muons->ownPolicy() != SG::VIEW_ELEMENTS) {
+      lockLeptonDecorations (muons);
+    }
+    for( const xAOD::Muon* muon : *muons ) {
+      if (muons->ownPolicy() == SG::VIEW_ELEMENTS) {
+        lockLeptonDecorations (muon->container());
+      }
+      if ( const xAOD::TrackParticle* trk = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle ) ) {
+        lockTrackDecorations( trk, onlySelection );
+      }
+    }
+
+    const xAOD::ElectronContainer *electrons( nullptr );
+    ATH_CHECK( evtStore()->retrieve( electrons, m_jp.ElectronLocation ) );
+    if (electrons->ownPolicy() != SG::VIEW_ELEMENTS) {
+      lockLeptonDecorations (electrons);
+    }
+    for( const xAOD::Electron* electron : *electrons ) {
+      if (electrons->ownPolicy() == SG::VIEW_ELEMENTS) {
+        lockLeptonDecorations (electron->container());
+      }
+      if( electron->nTrackParticles() > 0 ) {
+        if (const xAOD::TrackParticle* trk = electron->trackParticle(0)) {
+          lockTrackDecorations( trk, onlySelection );
+        }
+      }
+    }
+
+    const xAOD::TrackParticleContainer* IDtracks ( nullptr );
+    ATH_CHECK( evtStore()->retrieve( IDtracks, m_jp.TrackLocation) );
+    for( const auto *trk : *IDtracks ) {
+      lockTrackDecorations( trk, onlySelection );
+    }
+
+    return StatusCode::SUCCESS;
+  }
+
 } // end of namespace bracket

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -10,14 +10,8 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 
-xAODM4MuIntervalFilter::xAODM4MuIntervalFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name, pSvcLocator)
-{
-  
-}
-
 StatusCode xAODM4MuIntervalFilter::filterInitialize() {
-
+  CHECK(m_truthPartContKey.initialize());
   CHECK(m_rndmSvc.retrieve());
 
   ATH_MSG_DEBUG( "MaxEta           "  << m_maxEta);
@@ -28,10 +22,6 @@ StatusCode xAODM4MuIntervalFilter::filterInitialize() {
   ATH_MSG_DEBUG( "LowM4mu         "  << m_m4mulow);
   ATH_MSG_DEBUG( "HighM4mu         "  << m_m4muhigh);
   ATH_MSG_DEBUG( "ApplyReWeighting         "  << m_ApplyReWeighting);
-  return StatusCode::SUCCESS;
-}
-
-StatusCode xAODM4MuIntervalFilter::filterFinalize() {
   return StatusCode::SUCCESS;
 }
 
@@ -50,18 +40,12 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
   
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-           const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
 	   // muon
-	   if (std::abs((pitr)->pdgId()) == 13 && MC::isStable(pitr) &&
+	   if ( MC::isMuon(pitr) && MC::isStable(pitr) &&
 	      (pitr)->pt() >= m_minPt &&
 	       std::abs((pitr)->eta()) <= m_maxEta) {
            HepMC::FourVector tmp((pitr)->px(), (pitr)->py(), (pitr)->pz(), (pitr)->e());
@@ -97,7 +81,7 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
 
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
-    if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
+    if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::FAILURE;

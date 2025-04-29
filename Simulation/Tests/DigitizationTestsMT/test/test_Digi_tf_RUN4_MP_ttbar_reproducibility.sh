@@ -25,10 +25,11 @@ HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN
 LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4149_s4150/*"
 
 geotag="ATLAS-P2-RUN4-03-00-00"
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 Digi_tf.py \
 --CA \
---conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
+--conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:${geotag} \
@@ -61,7 +62,7 @@ echo "art-result: $rc1 RDOMerge_tf.py SP"
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 0 \
 --CA \
---conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
+--conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:${geotag} \
@@ -85,7 +86,7 @@ echo "art-result: $rc2 Digi_tf.py MP fork after 0"
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 1 \
 --CA \
---conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
+--conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:${geotag} \

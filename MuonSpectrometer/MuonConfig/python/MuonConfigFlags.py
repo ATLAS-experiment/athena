@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, ProductionStep, Project, FlagEnum
@@ -51,12 +51,11 @@ def createMuonConfigFlags():
                                                                           prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     # 1. Digitization
     mcf.addFlag("Muon.doDigitization",True)
-    mcf.addFlag("Muon.doFastMMDigitization",True)
+    mcf.addFlag("Muon.doFastMMDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+
+    
     # 2. Reco MuonRecFlags    
-    mcf.addFlag("Muon.doTGCClusterSegmentFinding", False) # Run cluster segment finding
-    mcf.addFlag("Muon.doRPCClusterSegmentFinding", False) # Run cluster segment finding
-    mcf.addFlag("Muon.prdToxAOD", False) # Run clusterization
-    mcf.addFlag("Muon.rpcRawToxAOD", False) # Add RPC RDO to xAOD
+
     mcf.addFlag("Muon.doMSVertex", True) # Run MS vertex (arXiv:1311.7070)
     mcf.addFlag("Muon.doSegmentT0Fit",lambda prevFlags : prevFlags.Beam.Type is not BeamType.Collisions) # Fit MDT segments using a variable t0. Used for cosmics and single beam to compensate for large errors on the trigger time.
     mcf.addFlag("Muon.enableErrorTuning",True) # turn on error tuning to account for misalignments
@@ -87,9 +86,14 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.applyMMPassivation", lambda prevFlags: prevFlags.Detector.EnableMM and not prevFlags.Common.isOnline and (prevFlags.Common.Project is not Project.AthSimulation \
                                                       and (prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or prevFlags.Overlay.DataOverlay)))
     # CalibFlags
+    mcf.addFlag("Muon.Calib.readMdtJSON", lambda prevFlags: prevFlags.GeoModel.Run > LHCPeriod.Run3 and prevFlags.Muon.usePhaseIIGeoSetup) # Toggle whether the calibration constants are read from the JSON format. Enabled by default for a Run4 geometry read by the muon phase II geometry setup 
+    mcf.addFlag("Muon.Calib.fitAnalyticRt", False) #Toggle whether the look-up  R-t tables shall undergo an intermediate polynomial fit
+
     mcf.addFlag("Muon.Calib.readMDTCalibFromBlob", True)  # Read mdt tube calibration from blob-folders
     mcf.addFlag("Muon.Calib.correctMdtRtForBField", lambda prevFlags : (prevFlags.Input.isMC is False and prevFlags.Beam.Type is BeamType.Collisions)) # Apply B-field correction to drift times only for collision data (as done in https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibFlags.py#0028)
     mcf.addFlag("Muon.Calib.correctMdtRtForTimeSlewing", lambda prevFlags : prevFlags.Input.isMC is False) # Apply time slewing correction to drift time only for data (as done in https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibFlags.py#0028)
+    #### Assign an extra uncertainty on the drift radii concerning the unknown coordinate along the wire
+    mcf.addFlag("Muon.Calib.applySigPropUncert", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup )
     mcf.addFlag("Muon.Calib.useMLRt", True) # use ML-RT functions from COOL
     mcf.addFlag("Muon.Calib.applyRtScaling", False) # TODO - apparently not needed, but currently used in MuonCalibConfig. Set false to match https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibFlags.py#0072
     mcf.addFlag("Muon.Calib.mdtCalibrationSource", "MDT") # Source for MDT t0s and rts
@@ -116,9 +120,10 @@ def createMuonConfigFlags():
     # 'rtAnalytic'   : do analytic rt calibration
     mcf.addFlag("Muon.Calib.mdtMode", "ntuple")
 
+
     # for now the T0 calibration in the NSW should be disabled by default until a final calibration is available. Introducing the flags anyhow to allow for studies of the calibration 
-    # do not apply NSW T0 calibration if we are running online or MC or a RUN4 geometry 
-    mcf.addFlag("Muon.Calib.applyMmT0Correction",   lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False)
+    # do not apply NSW T0 calibration if we are running online or MC or a RUN4 geometry, keep only for 23 or 24 
+    mcf.addFlag("Muon.Calib.applyMmT0Correction",   lambda prevFlags: prevFlags.GeoModel.Run==LHCPeriod.Run3 and prevFlags.Input.DataYear != 2022 and not prevFlags.Common.isOnline and not prevFlags.Input.isMC )
     mcf.addFlag("Muon.Calib.applysTgcT0Correction", lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False) 
     mcf.addFlag("Muon.Calib.applyMmBFieldCalib", True) 
     
@@ -131,11 +136,12 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.Align.UseAsBuilt", lambda prevFlags: (_muonAlignMode(prevFlags)) and not \
                                                            (prevFlags.IOVDb.DatabaseInstance == 'COMP200' or \
                                                             'HLT' in prevFlags.IOVDb.GlobalTag or prevFlags.Common.isOnline) )
+    mcf.addFlag("Muon.Align.UsesTGCAsBuild", lambda prevFlags: (_muonAlignMode(prevFlags)) and not prevFlags.Common.isOnline and prevFlags.GeoModel.Run == LHCPeriod.Run3)
 
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 
     mcf.addFlag("Muon.SAMuonTrigger", False) 
-    mcf.addFlag("Muon.disableNSWForL2SA", False) 
+    mcf.addFlag("Muon.disableNSWForL2SA", True)
 
     mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project is not Project.AthSimulation \
                                                       and (flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
@@ -149,8 +155,9 @@ def createMuonConfigFlags():
 
     mcf.addFlag("Muon.writeSDOs", lambda prevFlags : prevFlags.Output.doWriteESD and prevFlags.Input.isMC)
 
-    # configure the MM cluster reco method that is used in the cluster calibration step
-    mcf.addFlag("Muon.MMClusterCalibRecoTool",  lambda prevFlags : MMClusterBuilderEnum.ClusterTimeProjection if prevFlags.Input.isMC else MMClusterBuilderEnum.Centroid, type=MMClusterBuilderEnum)
+    # configure the MM cluster reco method that is used in the cluster calibration step 
+    #Use charge weighted only for trigger and 2022 where not sure if the t0 calibrations that we have are ok dor the commissioning phase of the NSW in 2022
+    mcf.addFlag("Muon.MMClusterCalibRecoTool", lambda prevFlags: MMClusterBuilderEnum.Centroid if (prevFlags.Common.isOnline or prevFlags.Input.DataYear == 2022 or prevFlags.Beam.Type is not BeamType.Collisions) else MMClusterBuilderEnum.ClusterTimeProjection, type=MMClusterBuilderEnum)
 
     mcf.addFlag("Muon.writexAODPRD", False) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
     # use the MDT DCS data to determine if a chamber is alive or not. This is used in the hole search and the region selector. Needs to be false if the job is running online or is the reconstruction of the MDT calib stream

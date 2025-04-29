@@ -5,13 +5,15 @@
 # art-type: grid
 # art-input: mc21_14TeV.900494.PG_single_epm_Pt10_etaFlatnp0_43.recon.RDO.e8481_s4038_r14365
 # art-input-nfiles: 45
-# art-cores: 4
+# art-cores: 8
 # art-include: main/Athena
 # art-output: *.hist.root
 # art-output: *.txt
 # art-output: *.png
 # art-output: log.*
 # art-output: dcube
+
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 echo "ArtProcess: $ArtProcess"
 
@@ -66,7 +68,7 @@ case $ArtProcess in
 	echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
 	unset  ATHENA_NUM_PROC
 
-	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=200 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC21-SDR-RUN4-02" --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
+	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=200 --autoConfiguration="everything" --conditionsTag="${conditions}" --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
 
 	echo  "art-result: $? reconstruction"
 

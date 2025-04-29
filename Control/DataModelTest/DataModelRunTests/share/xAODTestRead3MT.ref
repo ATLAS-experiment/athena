@@ -74,6 +74,7 @@ PrecedenceSvc                0    INFO PrecedenceSvc initialized successfully
 Avalan...edulerSvc           0    INFO Concurrency level information:
 Avalan...edulerSvc           0    INFO  o Number of events in flight: 1
 Avalan...edulerSvc           0    INFO  o TBB thread pool size:  'ThreadPoolSize':1
+Avalan...edulerSvc           0    INFO  o Fiber thread pool size:  'NumOffloadThreads':0
 Avalan...edulerSvc           0    INFO Task scheduling settings:
 Avalan...edulerSvc           0    INFO  o Avalanche generation mode: disabled
 Avalan...edulerSvc           0    INFO  o Preemptive scheduling of CPU-blocking tasks: disabled
@@ -88,7 +89,6 @@ PoolSvc                      0    INFO Setting up APR FileCatalog and Streams
 PoolSvc                      0    INFO POOL WriteCatalog is file:xAODTestRead3_catalog.xml
 DbSession                    0    INFO     Open     DbSession    
 Domain[ROOT_All]             0    INFO >   Access   DbDomain     READ      [ROOT_All] 
-EventSelector                0    INFO EventSelection with query 
 Domain[ROOT_All]             0    INFO ->  Access   DbDatabase   READ      [ROOT_All] 8B1CF15D-81A5-3B44-A186-68A392ED8CE2
 Domain[ROOT_All]             0    INFO                           xaoddata3.root
 RootDatabase.open            0    INFO xaoddata3.root File version:63204

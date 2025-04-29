@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #====================================================================
 # DAOD_FTAG1.py
 # This defines DAOD_FTAG1, an unskimmed DAOD format for Run 3.
@@ -15,6 +14,9 @@ from AthenaConfiguration.Enums import LHCPeriod
 
 from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
     ElectronsCPDetailedContent
+)
+from DerivationFrameworkFlavourTag.FtagBaseContent import (
+    addCommonAugmentation
 )
 
 
@@ -49,7 +51,7 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     return acc
 
 
-def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_AllVariables=None, trigger_option=''):
+def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_AllVariables=None, trigger_option='', TriggerListsHelper = None):
 
     if extra_SmartCollections is None: extra_SmartCollections = []
     if extra_AllVariables is None: extra_AllVariables = []
@@ -63,7 +65,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    
+
     FTAG1SlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     # Many of these are added to AllVariables below as well. We add
@@ -75,6 +77,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     FTAG1SlimmingHelper.SmartCollections = []
     FtagBaseContent.add_baseline_slimming_smartcollections(FTAG1SlimmingHelper)
+
+    addCommonAugmentation(flags, acc, FTAG1SlimmingHelper)
 
     FTAG1SlimmingHelper.SmartCollections += [
                                            "BTagging_AntiKt4UFOCSSK",
@@ -107,10 +111,12 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "GlobalNeutralParticleFlowObjects",
             "CHSGChargedParticleFlowObjects",
             "CHSGNeutralParticleFlowObjects",
-            "CSSKGChargedParticleFlowObjects",
-            "CSSKGNeutralParticleFlowObjects",
             "TruthParticles",
             "TruthVertices",
+            "JetAssociatedPixelClusters",
+            "JetAssociatedSCTClusters",
+            "PixelClusters",
+            "SCT_Clusters",
     ]
     
     if flags.GeoModel.Run >= LHCPeriod.Run4:
@@ -131,11 +137,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     if flags.BTagging.Pseudotrack:
         FTAG1SlimmingHelper.AllVariables += [ "InDetPseudoTrackParticles" ]
 
-    if flags.BTagging.Trackless:
-        FTAG1SlimmingHelper.AllVariables += [
-                "JetAssociatedPixelClusters",
-                "JetAssociatedSCTClusters",
-                ]
 
     # Add additional e/gamma variables
     FTAG1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
@@ -184,6 +185,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
    
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
+    FtagBaseContent.trigger_matching(FTAG1SlimmingHelper, TriggerListsHelper, flags)
 
     jetOutputList = ["AntiKt4UFOCSSKJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
@@ -214,7 +216,7 @@ def FTAG1Cfg(flags):
     # Common augmentations
     acc.merge(FTAG1KernelCfg(flags, name=FTAG1_name_tag + "Kernel", StreamName = 'StreamDAOD_'+FTAG1_name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
     # Content of FTAG1 
-    acc.merge(FTAG1CoreCfg(flags, FTAG1_name_tag))
+    acc.merge(FTAG1CoreCfg(flags, FTAG1_name_tag, trigger_option='FTAG1', TriggerListsHelper = FTAG1TriggerListsHelper))
 
     return acc
 

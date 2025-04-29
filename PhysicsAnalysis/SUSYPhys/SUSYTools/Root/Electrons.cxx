@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Electrons
@@ -194,18 +194,20 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
     }
   }
 
-  std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*electrons);
-  copy = shallowcopy.first;
-  copyaux = shallowcopy.second;
-  bool setLinks = xAOD::setOriginalObjectLink(*electrons, *copy);
-  if (!setLinks) {
-    ATH_MSG_WARNING("Failed to set original object links on " << elekey);
+  if (copy==nullptr) { // empty container provided
+    std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*electrons);
+    copy = shallowcopy.first;
+    copyaux = shallowcopy.second;
+    bool setLinks = xAOD::setOriginalObjectLink(*electrons, *copy);
+    if (!setLinks) {
+      ATH_MSG_WARNING("Failed to set original object links on " << elekey);
+    }
   } else { // use the user-supplied collection instead
     ATH_MSG_DEBUG("Not retrieving electron collection, using existing one provided by user");
-    electrons=copy;
+    electrons=copy; // this does nothing
   }
 
-  for (const auto& electron : *copy) {
+  for (const auto electron : *copy) {
     ATH_CHECK( this->FillElectron(*electron, m_eleBaselinePt, m_eleBaselineEta) );
     this->IsSignalElectron(*electron, m_elePt, m_eled0sig, m_elez0, m_eleEta);
   }
@@ -620,7 +622,7 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const 
 
 
 
-  float SUSYObjDef_xAOD::GetTotalElectronSF(const xAOD::ElectronContainer& electrons, const bool recoSF, const bool idSF, const bool triggerSF, const bool isoSF, const std::string& trigExpr, const bool ecidsSF, const bool cidSF) {
+float SUSYObjDef_xAOD::GetTotalElectronSF(const xAOD::ElectronContainer& electrons, const bool recoSF, const bool idSF, const bool triggerSF, const bool isoSF, const std::string& trigExpr, const bool ecidsSF, const bool cidSF) {
   float sf(1.);
 
   for (const xAOD::Electron* electron : electrons) {
@@ -637,34 +639,47 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const 
   float sf(1.);
 
   //Set the new systematic variation
-  StatusCode ret = m_elecEfficiencySFTool_reco->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (reco) for systematic var. " << systConfig.name() );
+  StatusCode ret(StatusCode::SUCCESS);
+  if(!m_elecEfficiencySFTool_reco.empty()){
+    ret = m_elecEfficiencySFTool_reco->applySystematicVariation(systConfig);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (reco) for systematic var. " << systConfig.name() );
+    }
   }
 
-  ret = m_elecEfficiencySFTool_id->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (id) for systematic var. " << systConfig.name() );
+  if(!m_elecEfficiencySFTool_id.empty()){
+    ret = m_elecEfficiencySFTool_id->applySystematicVariation(systConfig);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (id) for systematic var. " << systConfig.name() );
+    }
   }
 
-  ret = m_elecEfficiencySFTool_trig_singleLep->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (trigger) for systematic var. " << systConfig.name() );
+  if(!m_elecEfficiencySFTool_trig_singleLep.empty()){
+    ret = m_elecEfficiencySFTool_trig_singleLep->applySystematicVariation(systConfig);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (trigger) for systematic var. " << systConfig.name() );
+    }
   }
 
-  ret = m_elecEfficiencySFTool_iso->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso) for systematic var. " << systConfig.name() );
+  if(!m_elecEfficiencySFTool_iso.empty()){
+    ret = m_elecEfficiencySFTool_iso->applySystematicVariation(systConfig);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso) for systematic var. " << systConfig.name() );
+    }
   }
 
-  ret = m_elecEfficiencySFTool_isoHighPt->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso high-pt) for systematic var. " << systConfig.name() );
+  if(!m_elecEfficiencySFTool_isoHighPt.empty()){
+    ret = m_elecEfficiencySFTool_isoHighPt->applySystematicVariation(systConfig);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso high-pt) for systematic var. " << systConfig.name() );
+    }
   }
 
-  ret = m_elecChargeEffCorrTool->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure ElectronChargeEfficiencyCorrectionTool for systematic var. " << systConfig.name() );
+  if(!m_elecChargeEffCorrTool.empty()){
+    ret = m_elecChargeEffCorrTool->applySystematicVariation(systConfig);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure ElectronChargeEfficiencyCorrectionTool for systematic var. " << systConfig.name() );
+    }
   }
 
 
@@ -672,34 +687,46 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const 
   sf = GetTotalElectronSF(electrons, recoSF, idSF, triggerSF, isoSF, trigExpr, ecidsSF, cidSF);
 
   //Roll back to default
-  ret = m_elecEfficiencySFTool_reco->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (reco) back to default.");
+  if(!m_elecEfficiencySFTool_reco.empty()){
+    ret = m_elecEfficiencySFTool_reco->applySystematicVariation(m_currentSyst);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (reco) back to default.");
+    }
   }
 
-  ret = m_elecEfficiencySFTool_id->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (id) back to default.");
+  if(!m_elecEfficiencySFTool_id.empty()){
+    ret = m_elecEfficiencySFTool_id->applySystematicVariation(m_currentSyst);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (id) back to default.");
+    }
   }
 
-  ret = m_elecEfficiencySFTool_trig_singleLep->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (trigger) back to default.");
+  if(!m_elecEfficiencySFTool_trig_singleLep.empty()){
+    ret = m_elecEfficiencySFTool_trig_singleLep->applySystematicVariation(m_currentSyst);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (trigger) back to default.");
+    }
   }
 
-  ret = m_elecEfficiencySFTool_iso->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso) back to default.");
+  if(!m_elecEfficiencySFTool_iso.empty()){
+    ret = m_elecEfficiencySFTool_iso->applySystematicVariation(m_currentSyst);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso) back to default.");
+    }
   }
 
-  ret = m_elecEfficiencySFTool_isoHighPt->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso high-pt) back to default.");
+  if(!m_elecEfficiencySFTool_isoHighPt.empty()){
+    ret = m_elecEfficiencySFTool_isoHighPt->applySystematicVariation(m_currentSyst);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso high-pt) back to default.");
+    }
   }
 
-  ret = m_elecChargeEffCorrTool->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure ElectronChargeEfficiencyCorrectionTool back to default.");
+  if(!m_elecChargeEffCorrTool.empty()){
+    ret = m_elecChargeEffCorrTool->applySystematicVariation(m_currentSyst);
+    if (ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure ElectronChargeEfficiencyCorrectionTool back to default.");
+    }
   }
 
   return sf;

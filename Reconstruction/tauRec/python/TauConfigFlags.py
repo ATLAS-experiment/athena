@@ -154,26 +154,26 @@ def createTauEleRMConfigFlags():
     flags.TauFinalPi0s               = f"TauFinalPi0s{_output_suffix}"
 
     # Transient containers
-    flags.TauJets_tmp                = "TauJets_tmp_EleRM"
-    flags.TauCommonPi0Cells          = "TauCommonPi0Cells_EleRM"
-    flags.TauPi0Clusters_tmp         = "TauPi0Clusters_tmp_EleRM"
+    flags.TauJets_tmp                = f"TauJets_tmp{_output_suffix}"
+    flags.TauCommonPi0Cells          = f"TauCommonPi0Cells{_output_suffix}"
+    flags.TauPi0Clusters_tmp         = f"TauPi0Clusters_tmp{_output_suffix}"
     
     # Input containers
-    flags.TrackCollection            = "InDetTrackParticles_EleRM"
-    flags.SeedJetCollection          = "AntiKt4LCTopoJets_EleRM"
+    flags.TrackCollection            = f"InDetTrackParticles{_output_suffix}"
+    flags.SeedJetCollection          = f"AntiKt4LCTopoJets{_output_suffix}"
     flags.EventShapeCollection       = "EleRM_Kt4LCTopoOriginEventShape"
 
     # Electron-subtracted tau flags appearing in standard tau reconstruction
     flags.inTauEleRM                 = True
     flags.RemoveElectronCells        = True
-    flags.RemovedElectronClusters    = "RemovedClusters_EleRM"
+    flags.RemovedElectronClusters    = f"RemovedClusters{_output_suffix}"
 
     # Electron-subtracted tau specific flags
     flags.addFlag("EleRM_ElectronWorkingPoint", "Medium")
-    flags.addFlag("RemovedElectronTracks",      "RemovedTracks_EleRM")
-    flags.addFlag("CaloCalTopoClusters_EleRM",  "CaloCalTopoClusters_EleRM")
-    flags.addFlag("LCOriginTopoClusters_EleRM", "LCOriginTopoClusters_EleRM")
-    flags.addFlag("LCTopoOrigin_EleRM",         "LCTopoOrigin_EleRM")
+    flags.addFlag("RemovedElectronTracks",      f"RemovedTracks{_output_suffix}")
+    flags.addFlag("CaloCalTopoClusters_EleRM",  f"CaloCalTopoClusters{_output_suffix}")
+    flags.addFlag("LCOriginTopoClusters_EleRM", f"LCOriginTopoClusters{_output_suffix}")
+    flags.addFlag("LCTopoOrigin_EleRM",         f"LCTopoOrigin{_output_suffix}")
     flags.addFlag("EleRM_CheckingConeSize",     0.6)
 
     return flags

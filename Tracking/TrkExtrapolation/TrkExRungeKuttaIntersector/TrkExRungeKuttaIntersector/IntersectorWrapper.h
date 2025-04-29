@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -15,9 +15,9 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkExInterfaces/IPropagator.h"
+#include "TrkExInterfaces/IIntersector.h"
 
 namespace Trk {
-class IIntersector;
 class TrackSurfaceIntersection;
 
 class IntersectorWrapper final
@@ -256,8 +256,9 @@ private:
                         PropDirection dir = Trk::anyDirection) const;
 
   // helpers, managers, tools
-  ToolHandle<IIntersector> m_intersector;
-  ToolHandle<IPropagator> m_linePropagator;
+  ToolHandle<IIntersector> m_intersector{this, "Intersector",
+    "Trk::RungeKuttaIntersector/RungeKuttaIntersector"};
+  ToolHandle<IPropagator> m_linePropagator{this, "LinePropagator", ""};
 };
 
 } // end of namespace

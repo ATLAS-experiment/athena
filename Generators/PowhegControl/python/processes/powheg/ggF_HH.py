@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 import os
-import glob
 from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 
@@ -26,12 +25,6 @@ class ggF_HH(PowhegV2):
 
         # Add grid file creation function
         self.validation_functions.append("create_grid_file")
-
-        # This process uses a python script which uses .grid files searched for in $PYTHONPATH
-        # By appending the folder that they live in to PYTHONPATH it is able to find them
-        # At the moment these files are stored or linked locally, so we use ${PWD}
-        # but we may use self.executable.replace("pwhg_main", "Virtual") instead at some point
-        os.environ["PYTHONPATH"] += ":" + os.environ["PWD"]
 
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("alphas_from_lhapdf")
@@ -161,30 +154,24 @@ class ggF_HH(PowhegV2):
 
         logger.info('Now attempting to link locally the files needed by this Powheg process')
         try:
-            os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH/Virtual/events.cdf events.cdf")
-            os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH/Virtual/creategrid.py creategrid.py")
-            os.system("for grid in " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH/Virtual/Virt_full_*E*.grid; do ln -s $grid ${grid##*/}; done")
+            processpythondir = os.path.join(os.environ["POWHEGPATH"], "POWHEG-BOX-V2", "ggHH", 'python')
+            if os.path.isdir(processpythondir):
+                for filename in os.listdir(processpythondir):
+                    source_path = os.path.join(processpythondir, filename)
+                    if os.path.isfile(source_path):
+                        link_name = os.path.join(os.getcwd(), filename)
+                        try:
+                            os.symlink(source_path, link_name)
+                            print(f"Created link: {link_name} -> {source_path}")
+                        except FileExistsError:
+                            print(f"Link already exists: {link_name}")
+            else:
+                os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH/Virtual/events.cdf events.cdf")
+                os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH/Virtual/creategrid.py creategrid.py")
+                os.system("for grid in " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH/Virtual/Virt_full_*E*.grid; do ln -s $grid ${grid##*/}; done")
         except RuntimeError:
             logger.error('Impossible to link the needed files locally')
             raise
-
-        # need to override lhapdf python path while the powheg process has been compiled in a different platform
-        py_path_save = os.environ["PYTHONPATH"]
-        base_path = os.environ["LHAPDF_INSTAL_PATH"]
-
-        # Search for the Python version in the lib folder
-        python_lib_path = glob.glob(os.path.join(base_path, "lib", "python*"))
-
-        # Ensure at least one matching path is found
-        if python_lib_path:
-            python_lib_path = python_lib_path[0]
-        else:
-            raise ValueError("No Python version found in lib folder")
-
-        # Build the temporary path
-        py_path_temp = python_lib_path + "/site-packages" + ":" + py_path_save
-        os.environ["PYTHONPATH"] = py_path_temp
-        logger.debug(f'Temporarily setting PYTHONPATH to:\n{py_path_temp}')
 
         # handling the parameters of this process
         # these parameters need to be parsed in a specific format
@@ -206,9 +193,4 @@ class ggF_HH(PowhegV2):
         except RuntimeError:
             logger.error('Impossible to use creategrid.py to create the Virt_full_*.grid file')
             raise
-
-        # setting PYTHONPATH back to its original value
-        os.environ["PYTHONPATH"] = py_path_save
-        logger.debug(f'Setting PYTHONPATH back to:\n{py_path_save}')
-
         logger.info('Although the produced Virt_full_*.grid file now exists in the local directory, Powheg will later try to find it in all directories contained in $PYTHONPATH. This will produce several "not found" info messages which can safely be ignored.')

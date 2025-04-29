@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TAUCONSTITUENT_H
@@ -35,8 +35,8 @@ namespace PanTau {
      * t_Pi0Neut:   If a particle passes pi0 ID, use this flag
      * t_OutChrg:   Charged objects in 0.2 to 0.4
      * t_OutNeut:   Neutral objects in 0.2 to 0.4
-     * t_NeutLowA:  (Core) Neutrals with lower Et cut
-     * t_NeutLowB:  (Core) Neutrals with even lower Et cut
+     * t_NeutLowA:  (Core) Neutrals with lower Et cut -> removed
+     * t_NeutLowB:  (Core) Neutrals with even lower Et cut -> removed
      * t_nTypes:    Dont use this, just tell number of types
      */
     enum Type {
@@ -46,8 +46,8 @@ namespace PanTau {
         t_Pi0Neut   = 3,
         t_OutChrg   = 4,
         t_OutNeut   = 5,
-        t_NeutLowA  = 6,
-        t_NeutLowB  = 7,
+        //t_NeutLowA  = 6,
+        //t_NeutLowB  = 7,
         t_nTypes    = 8
     };
     
@@ -138,14 +138,14 @@ namespace PanTau {
     //Getter functions
     std::vector<std::string>                getTypeName() const;
     std::string                             getTypeNameString() const;
-    std::vector<int>                        getTypeFlags() const;
+    const std::vector<int>&                 getTypeFlags() const;
     bool                                    isOfType(TauConstituent::Type aType) const;
     double                                  getBDTValue() const;
     int                                     getCharge() const;
     const xAOD::PFO*                        getPFO() const;
     
     void                                    addShot(TauConstituent* shot);
-    std::vector<TauConstituent*>            getShots() const;
+    const std::vector<TauConstituent*>&     getShots() const;
     unsigned int                            getNShots() const;
     
     void                                    setNPhotonsInShot(int nPhotons);

@@ -67,17 +67,16 @@ namespace ActsTrk::detail {
 		      const Acts::Vector3& direction) const;
     
     
-    std::pair<float, float> getCentroid(const std::vector<Identifier>& rdos,
+    std::pair<float, float> getCentroid(const xAOD::PixelCluster& cluster,
 					const InDetDD::SiDetectorElement& element) const;
     
     const error_data_t* getErrorData() const;
     
     std::pair<std::optional<float>, std::optional<float>>
-    getCorrectedPosition(const std::vector<Identifier>& rdos,
+    getCorrectedPosition(const xAOD::PixelCluster& cluster,
 			 const error_data_t& errorData,
 			 const InDetDD::SiDetectorElement& element,
-			 const std::pair<float, float>& angles,
-			 const xAOD::PixelCluster& cluster) const;
+			 const std::pair<float, float>& angles) const;
     
     std::pair<std::optional<float>, std::optional<float>>
     getCorrectedError(const error_data_t& errorData,
@@ -100,6 +99,9 @@ namespace ActsTrk::detail {
     // in micrometers
     Gaudi::Property<int> m_thickness {this, "PixelThickness", 250};  
     Gaudi::Property<bool> m_postCalibration{this, "CalibrateAfterMeasurementSelection", false};
+    Gaudi::Property<bool> m_correctCovariance{this, "PerformCovarianceCalibration", true};
+    Gaudi::Property<double> m_calibratedCovarianceLowerBound {this, "CalibratedCovarianceLowerBound", 0.};
+    Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false}; // if pixel cluster use weighted local position
     
     const PixelID* m_pixelid {nullptr};
   };

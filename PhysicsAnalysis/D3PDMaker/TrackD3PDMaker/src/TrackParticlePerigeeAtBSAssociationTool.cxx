@@ -10,7 +10,6 @@
 
 #include "TrackParticlePerigeeAtBSAssociationTool.h"
 
-#include "Particle/TrackParticle.h"
 #include "AthenaKernel/errorcheck.h"
 
 namespace D3PD {
@@ -32,25 +31,6 @@ StatusCode TrackParticlePerigeeAtBSAssociationTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-/**
- * @brief Return the target object.
- * @param track The source object for the association.
- *
- * Return the target of the association, or 0.
- */
-const Trk::TrackParameters*
-TrackParticlePerigeeAtBSAssociationTool::get (const Rec::TrackParticle& track)
-{
-  // Protect against bad tracks.
-  if (track.measuredPerigee()->covariance() && track.measuredPerigee()->covariance()->rows()==0)
-    return 0;
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  /// Pick up the beamspot
-  Amg::Vector3D beamSpot(0,0,0);
-  beamSpot = beamSpotHandle->beamVtx().position();
-
-  return m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), track, beamSpot).release();
-}
 
 /**
  * @brief Return the target object.

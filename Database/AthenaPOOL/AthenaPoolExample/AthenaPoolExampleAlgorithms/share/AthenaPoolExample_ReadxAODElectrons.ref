@@ -36,13 +36,13 @@ MetaDataSvc                                          INFO Found MetaDataTools = 
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG Service base class initialized successfully
 EventSelector                                       DEBUG reinitialization...
-EventSelector                                        INFO EventSelection with query 
 EventSelector                                       DEBUG Try item: "SimplePoolFile_xAOD.root" from the collection list.
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile_xAOD.root, name=SimplePoolFile_xAOD.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile_xAOD.root, name=POOLContainer(DataHeader), contextID=0
 PersistencySvc::UserDB::fid()                       DEBUG lookupPFN: SimplePoolFile_xAOD.root returned FID: 'E8353C9A-1573-094C-8D68-B9F75DAECAFE' tech=ROOT_All
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] E8353C9A-1573-094C-8D68-B9F75DAECAFE
 Domain[ROOT_All]                                     INFO                           SimplePoolFile_xAOD.root
+SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -155,6 +155,7 @@ DbSession                                            INFO     Open     DbSession
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] E8353C9A-1573-094C-8D68-B9F75DAECAFE
 Domain[ROOT_All]                                     INFO                           SimplePoolFile_xAOD.root
+SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1

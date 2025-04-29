@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 """
 # Run event generation and produce an EVNT file.
@@ -16,7 +16,12 @@ from EvgenJobTransforms.evgenTrfArgs import addStdEvgenArgs
 
 ## Prodsys1 hack...
 # TODO: Remove!
-ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--argJSON', '--asetup', '--athena', '--athenaMPMergeTargetSize', '--athenaopts', '--attempt', '--checkEventCount', '--command', '--dumpJSON', '--dumpPickle', '--ecmEnergy', '--env', '--eventAcceptanceEfficiency', '--evgenJobOpts', '--execOnly', '--fileValidation', '--firstEvent', '--ignoreErrors', '--ignoreFiles', '--ignorePatterns', '--imf', '--inputEVNT_PreFile', '--inputFileValidation', '--inputGenConfFile', '--inputGeneratorFile', '--jobConfig', '--jobid', '--maxEvents', '--orphanKiller', '--outputEVNTFile', '--outputEVNT_PreFile', '--outputFileValidation', '--outputNTUP_TRUTHFile', '--outputTXTFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--wprintEvts', '--randomSeed', '--reportName', '--reportType', '--rivetAnas', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--steering', '--taskid', '--tcmalloc', '--valgrind', '--valgrindbasicopts', '--valgrindextraopts', '--lheOnly', '--localPath', '--cleanOut', '--saveList']
+ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--argJSON', '--asetup', '--athena', 
+'--athenaMPMergeTargetSize', '--athenaopts', '--attempt', '--checkEventCount', '--command', 
+'--dumpJSON', '--dumpPickle', '--ecmEnergy', '--env', '--eventAcceptanceEfficiency', 
+'--evgenJobOpts', '--execOnly', '--fileValidation', '--firstEvent', '--ignoreErrors', 
+'--ignoreFiles', '--ignorePatterns', '--imf', '--inputEVNT_PreFile', '--inputFileValidation', 
+'--inputGenConfFile', '--inputGeneratorFile', '--jobConfig', '--jobid', '--maxEvents', '--orphanKiller', '--outputEVNTFile', '--outputEVNT_PreFile', '--outputHEPMCFile', '--outputFileValidation', '--outputNTUP_TRUTHFile', '--outputTXTFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--wprintEvts', '--randomSeed', '--reportName', '--reportType', '--rivetAnas', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--steering', '--taskid', '--tcmalloc', '--valgrind', '--valgrindbasicopts', '--valgrindextraopts', '--lheOnly', '--localPath', '--cleanOut', '--saveList']
 
 class EvgenExecutor(athenaExecutor):
   "Specialised trf executor class for event generation jobs"
@@ -133,24 +138,28 @@ class EvgenExecutor(athenaExecutor):
         configFiles = [f for f in os.listdir(FIRST_DIR) if ( "GRID" in f)]
         confFile=None
         if len(configFiles) == 1:
-            confFile =  os.path.join(FIRST_DIR, configFiles[0])
+            msg.info("gridpack for only one energy available ")
         elif len(configFiles) >1:
             msg.info("more then one gridpack ! ")
-            if "--ecmEnergy" in str(sys.argv[1:]):
-                split_args=str(sys.argv[1:]).split("ecmEnergy=",1)[1]
-                ener_GeV=split_args.split(",")[0].strip("\'")
-                energy=str(float(ener_GeV)/1000.0).replace('.','p').strip(" =0\p']")
-                msg.info("Should be used gridpack for energy "+energy)
-            else:
-               energy="13"
-            for x in configFiles:
-                gridS="mc_"+energy+"TeV"
-                msg.info("Gridpack should start from "+gridS)
-                if x.startswith(gridS):
-                   confFile = os.path.join(FIRST_DIR, x)
-                   msg.info("using gridpack = "+confFile)
-            if confFile is None:
-               msg.error("No *GRID* config files, for requested energy = '%s'  please check = '%s'" %(energy,dsidparam))
+        if len(configFiles) >=1:
+          if "--ecmEnergy" in str(sys.argv[1:]):
+             split_args=str(sys.argv[1:]).split("ecmEnergy",1)[1]
+             split_args=split_args.lstrip("\',=")
+             ener_GeV=split_args.split(",")[0].strip(" ,\']")
+             energy=str(float(ener_GeV)/1000.0).replace('.','p').strip("=0\p']")
+             msg.info("Should be used gridpack for energy "+energy)
+          else:
+             msg.info("no ecm energy given, assuming 13.6 TeV ")
+             energy="13p6"
+          for x in configFiles:
+              gridS="mc_"+energy+"TeV"
+              msg.info("Gridpack should start from "+gridS)
+              if x.startswith(gridS):
+                 confFile = os.path.join(FIRST_DIR, x)
+                 msg.info("using gridpack = "+confFile)
+          if confFile is None:
+             msg.error("No *GRID* config files, for requested energy = '%s'  please check = '%s'" %(energy,dsidparam))
+             sys.exit(1)
 
         if confFile is not None:
            expand_if_archive(confFile)
@@ -197,12 +206,14 @@ def getTransform():
     elif "--outputTXTFile" in str(sys.argv[1:]):
        exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoTXT.py", inData=["inNULL"], outData=["TXT"]))
        msg.info("Output TXT file")
-    else:
+    elif "--outputHEPMCFile" not in str(sys.argv[1:]):
        msg.error("Output cannot be recognised")
 
     exeSet.add(EvgenExecutor(name="afterburn", skeleton="EvgenJobTransforms/skel.ABtoEVGEN.py", inData=["EVNT_Pre"], outData=["EVNT"]))
     exeSet.add(athenaExecutor(name = "AODtoDPD", skeletonFile = "PATJobTransforms/skeleton.AODtoDPD_tf.py",
                               substep = "a2d", inData = ["EVNT"], outData = ["NTUP_TRUTH"], perfMonFile = "ntuple_AODtoDPD.pmon.gz"))
+    exeSet.add(athenaExecutor(name = 'EVNTtoHEPMC', skeletonCA = 'EvgenJobTransforms.POOLtoHEPMC_Skeleton',
+                              substep = "a2d", perfMonFile = 'ntuple.pmon.gz', inData=['EVNT'], outData=['HEPMC']))
     trf = transform(executor=exeSet)
     addAthenaArguments(trf.parser, maxEventsDefaultSubstep='all')
     addStdEvgenArgs(trf.parser)

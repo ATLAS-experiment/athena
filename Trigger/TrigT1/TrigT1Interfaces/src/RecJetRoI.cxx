@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /***************************************************************************
                          RecJetRoI.cxx  -  description
@@ -92,10 +92,10 @@ void LVL1::RecJetRoI::constructRun1(const std::vector<TriggerThreshold *> *caloT
 
    m_thresholdMask = m_roiWord & 0xfff;
 
-   std::string jetTriggerType = L1DataDef::jetType();
+   std::string jetTriggerType = L1DataDef::typeAsString(L1DataDef::JET);
    if (this->isForwardJet())
       jetTriggerType =
-          ((this->eta() > 0) ? L1DataDef::jfType() : L1DataDef::jbType());
+          ((this->eta() > 0) ? L1DataDef::typeAsString(L1DataDef::JF) : L1DataDef::typeAsString(L1DataDef::JB));
 
    //
    // Copy the thresholds into a map - makes matching up the passed ones very
@@ -172,7 +172,7 @@ LVL1::RecJetRoI::constructRun2(const std::vector<TriggerThreshold *> *caloThresh
   for (std::vector<TriggerThreshold *>::const_iterator it =
            caloThresholds->begin();
        it != caloThresholds->end(); ++it) {
-    if ((*it)->type() == L1DataDef::jetType()) {
+    if ((*it)->type() == L1DataDef::typeAsString(L1DataDef::JET)) {
       // Does it satisfy this one?
       // Start by extracting threshold values
       TriggerThresholdValue *ttv = (*it)->triggerThresholdValue(ieta, iphi);
@@ -344,7 +344,7 @@ LVL1::RecJetRoI::passedFwdThreshold(unsigned int thresholdNumber) const {
 /** returns the CoordinateRange. This is worked out from the RoIWord's hardware
  *  coords (i.e. crate number, CPM number etc.) by the RoIDecoder class.
  **/
-LVL1::CoordinateRange
+const LVL1::CoordinateRange&
 LVL1::RecJetRoI::coord() const { return m_coordRange; }
 
 /** returns a vector of thresholds passed. */

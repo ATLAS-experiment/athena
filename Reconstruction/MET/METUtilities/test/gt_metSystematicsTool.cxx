@@ -69,7 +69,6 @@ namespace met {
 
   }; // METSystTest
 
-  // cppcheck-suppress syntaxError
   TEST_F( METSystTest,  TestDefaultHistosFilled ){
     ASSERT_TRUE(tool.initialize().isSuccess());
 

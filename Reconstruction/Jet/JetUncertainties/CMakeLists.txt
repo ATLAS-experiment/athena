@@ -49,12 +49,17 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODJet xAODEventInfo
       xAODRootAccess JetUncertaintiesLib ParticleJetToolsLib )
 
-   # TODO: cleanup
-   # atlas_add_executable( FFJetSmearingTool_MyExample
-   #    util/FFJetSmearingTool_MyExample.cxx
-   #    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   #    LINK_LIBRARIES ${ROOT_LIBRARIES} xAODJet xAODEventInfo xAODEventShape
-   #    xAODRootAccess JetUncertaintiesLib  )
+   atlas_add_executable( FFJetSmearingTool_MyExample
+      util/FFJetSmearingTool_MyExample.cxx
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODJet xAODEventInfo xAODEventShape
+      xAODRootAccess JetUncertaintiesLib JetCalibToolsLib ParticleJetToolsLib )
+
+   atlas_add_executable( JMR_MakeUncertaintyPlots
+      util/JMR_MakeUncertaintyPlots.cxx
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODJet xAODEventInfo
+      xAODRootAccess JetUncertaintiesLib ParticleJetToolsLib )
 endif()
 
 # Install files from the package:

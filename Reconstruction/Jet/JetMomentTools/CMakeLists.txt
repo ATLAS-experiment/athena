@@ -16,7 +16,7 @@ atlas_add_library( JetMomentToolsLib
    JetMomentTools/*.h Root/*.cxx
    PUBLIC_HEADERS JetMomentTools
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${FASTJET_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES}  TruthUtils AsgDataHandlesLib AsgTools InDetTrackSelectionToolLib JetCalibToolsLib JetEDM JetInterface JetRecLib JetUtils PFlowUtilsLib TrackVertexAssociationToolLib xAODCaloEvent xAODEventInfo xAODJet xAODMissingET xAODTracking xAODTruth
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES}  TruthUtils AsgDataHandlesLib AsgTools InDetTrackSelectionToolLib JetCalibToolsLib JetEDM JetInterface JetRecLib JetUtils PFlowUtilsLib TrackVertexAssociationToolLib xAODCaloEvent xAODEventInfo xAODJet xAODMissingET xAODTracking xAODTruth BoostedJetTaggersLib
    PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils xAODPFlow CxxUtils PathResolver nlohmann_json::nlohmann_json
    )
 
@@ -28,7 +28,7 @@ if( NOT XAOD_STANDALONE )
    atlas_add_component( JetMomentTools
       src/*.h src/*.cxx src/components/*.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${FASTJET_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${Boost_LIBRARIES} ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODCaloEvent xAODJet GaudiKernel JetCalibToolsLib JetEDM JetInterface JetRecLib JetUtils PFlowUtilsLib PathResolver JetMomentToolsLib FourMomUtils ${extra_libs} )
+      LINK_LIBRARIES ${Boost_LIBRARIES} ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODCaloEvent xAODJet GaudiKernel JetCalibToolsLib JetEDM JetInterface JetRecLib JetUtils PFlowUtilsLib PathResolver JetMomentToolsLib FourMomUtils ${extra_libs} BoostedJetTaggersLib )
 endif()
 
 atlas_add_dictionary( JetMomentToolsDict

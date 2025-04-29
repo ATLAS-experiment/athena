@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -46,6 +46,8 @@ namespace pool  {
     int m_defBufferSize;
     /// Offset table length for branches
     int	m_branchOffsetTabLen;
+    /// Default container DbType
+    int m_defContainerType;
     
   public:
     /// Standard Constuctor

@@ -24,10 +24,15 @@ find_package( PowhegEnvironment )
 
 if(NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
   find_package( ggvvamp )
+  find_package( qqvvamp )
 endif()
+find_package( FastJet )
 find_package( chaplin )
 find_package( cln )
 find_package( ginac )
-
+find_package( nlox )
+find_package( Lhapdf )
+find_package( Recola )
+find_package( OpenLoops )
 
 

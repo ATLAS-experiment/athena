@@ -1,0 +1,96 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Nils Krumnack
+
+
+#include <AsgMessaging/StatusCode.h>
+#include <ColumnarCore/ContainerId.h>
+#include <ColumnarCore/ObjectRange.h>
+#include <ColumnarInterfaces/ColumnInfo.h>
+#include <ColumnarInterfaces/IColumnarTool.h>
+#include <memory>
+
+namespace columnar
+{
+  struct ColumnAccessorDataArray;
+  struct ColumnarToolDataArray;
+
+  template<> class ColumnarTool<ColumnarModeArray> : public IColumnarTool
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static constexpr bool singleEvent = false;
+
+    ColumnarTool ();
+    explicit ColumnarTool (ColumnarTool<ColumnarModeArray>* val_parent);
+    ColumnarTool (const ColumnarTool<ColumnarModeArray>&) = delete;
+    ColumnarTool& operator = (const ColumnarTool<ColumnarModeArray>&) = delete;
+    virtual ~ColumnarTool ();
+
+
+    /// @brief initialize the columns/column handles
+    ///
+    /// This should be called at the end of initialize after all data handles
+    /// have been declared.
+    StatusCode initializeColumns ();
+
+
+    /// @brief add the given sub-tool
+    void addSubtool (ColumnarTool<ColumnarModeArray>& subtool);
+
+
+    /// @brief call the tool for the given event range
+    virtual void callEvents (ObjectRange<ContainerId::eventContext,ColumnarModeArray> events) const;
+
+
+
+    /// Inherited Members from IColumnarTool
+    /// ====================================
+  public:
+
+    void callVoid (void **data) const final;
+    std::vector<ColumnInfo> getColumnInfo () const final;
+    void renameColumn (const std::string& from, const std::string& to) final;
+    void setColumnIndex (const std::string& name, std::size_t index) final;
+
+
+
+    /// Internal/Detail Members
+    /// =======================
+    ///
+    /// These are technically public members, but are not intended for
+    /// the user to call, and are only public because they need to be
+    /// for other parts of the prototype to call.
+  public:
+
+    void setContainerName (ContainerId container, const std::string& name);
+
+    void addColumn (const std::string& name, ColumnAccessorDataArray *accessorData, ColumnInfo&& info);
+
+
+
+    /// Mode-Specific Public Members
+    /// ============================
+  public:
+
+    const std::string& objectName (ContainerId objectType) const;
+
+
+
+    /// Private Members
+    /// ===============
+  private:
+
+    // most of our data is stored in a pimpl structure
+    std::shared_ptr<ColumnarToolDataArray> m_data;
+
+    // we may have to access the event offset column, so hard-coding
+    // that here
+    unsigned m_eventsIndex = 0u;
+    std::unique_ptr<ColumnAccessorDataArray> m_eventsData;
+  };
+}

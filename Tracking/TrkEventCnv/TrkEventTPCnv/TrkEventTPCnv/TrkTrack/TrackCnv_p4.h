@@ -1,15 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_CNV_P4_H
 #define TRACK_CNV_P4_H
 
-//-----------------------------------------------------------------------------
-//
-// file:   TrakcCnv_p3.cxx
-//
-//-----------------------------------------------------------------------------
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolTPConverter.h"
 
@@ -53,7 +48,7 @@ public:
 
   MultiStateOSVectorCnv_p1 m_multiStateVectorCnv;
 
-  AthenaPoolTopLevelTPCnvBase *m_topCnv;
+  AthenaPoolTopLevelTPCnvBase *m_topCnv{};
 };
 
 #endif // TRACK_CNV_P3_H

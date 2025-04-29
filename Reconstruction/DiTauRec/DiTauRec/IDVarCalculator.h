@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_IDVARCALCULATOR_H
 #define DITAUREC_IDVARCALCULATOR_H
 
 #include "DiTauToolBase.h"
+
+#include "AsgTools/PropertyWrapper.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -29,10 +31,6 @@ class IDVarCalculator : public DiTauToolBase {
 
   virtual StatusCode execute(DiTauCandidateData * data,
 			     const EventContext& ctx) const override;
-
-
- private:
-  bool m_useCells;
 
 };
 

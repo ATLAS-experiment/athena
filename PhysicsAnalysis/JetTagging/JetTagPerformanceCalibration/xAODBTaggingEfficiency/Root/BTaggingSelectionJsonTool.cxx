@@ -28,51 +28,69 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
   m_json_config = json::parse(jsonFile);
   jsonFile.close();
 
-  if (m_taggerName=="" || !m_json_config.contains(m_taggerName)){
-    ATH_MSG_ERROR( " Tagger " + m_taggerName + " not found in JSON file: " + m_json_config_path );
+  if (m_taggerName.empty() || !m_json_config.contains(m_taggerName)){
+    ATH_MSG_ERROR( "Tagger " + m_taggerName + " not found in JSON file: " + m_json_config_path );
     return StatusCode::FAILURE;
   }
 
-  if (m_jetAuthor=="" || !m_json_config[m_taggerName].contains(m_jetAuthor)){
+  if (m_jetAuthor.empty() || !m_json_config[m_taggerName].contains(m_jetAuthor)){
     ATH_MSG_ERROR( "Tagger: " +m_taggerName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_json_config_path );
     return StatusCode::FAILURE;
   }
 
-  if (m_OP=="" || !m_json_config[m_taggerName][m_jetAuthor].contains(m_OP)){
+  if (m_OP.empty() || !m_json_config[m_taggerName][m_jetAuthor].contains(m_OP)){
     ATH_MSG_ERROR( "OP " +m_OP+ " not available for " +m_taggerName+ " tagger.");
     return StatusCode::FAILURE;
   }
 
-  m_target = m_json_config[m_taggerName][m_jetAuthor]["meta"]["TaggingTarget"];
+  const auto& meta = m_json_config[m_taggerName][m_jetAuthor]["meta"];
+  m_target = meta["TaggingTarget"];
 
   // pre-load fraction values
-  m_fractionAccessors.clear();
-  for (const auto& outclass : m_json_config[m_taggerName][m_jetAuthor]["meta"]["categories"]) {
+  for (const auto& outclass : meta["categories"]) {
     std::string outclassStr = std::string(outclass);
-    float fraction = m_json_config[m_taggerName][m_jetAuthor]["meta"]["fraction_" + outclassStr].get<float>();
+    float fraction = meta["fraction_" + outclassStr].get<float>();
     SG::AuxElement::ConstAccessor<float> accessor(m_taggerName + "_p" + outclassStr);
     bool isTarget = (outclassStr == m_target);
     m_fractionAccessors.emplace_back(fraction, accessor, isTarget);
-  } 
-
-  // pre-load cut values
-  m_OPCutValues.clear();
-  m_pTbins.clear();
-  m_massbins.clear();
-  auto& pT_mass_2d_cutvalue = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
-
-  for (const auto& pt : pT_mass_2d_cutvalue["pTbins"]) {
-    m_pTbins.push_back(BTaggingToolUtil::getExtendedFloat(pt));
   }
 
-  for (const auto& item : pT_mass_2d_cutvalue.items()) {
-    std::string pT_key = item.key();
-    if ( pT_key == "pTbins" ) continue;
-    std::vector<float> mass_values = pT_mass_2d_cutvalue[pT_key]["mass"].get<std::vector<float>>();
-    std::vector<float> cut_values = pT_mass_2d_cutvalue[pT_key]["cutvalues"].get<std::vector<float>>();
-    m_massbins.push_back(mass_values);
-    m_OPCutValues.push_back(cut_values);
-  }   
+  // pre-load cut values
+  auto& pT_mass_2d_cutvalue = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
+
+  // Loop over the pT bins values 
+  // pTbins is a list of floats or "inf" for the highest bin value 
+  for (unsigned int ipT = 0; ipT < pT_mass_2d_cutvalue["pTbins"].size(); ++ipT){
+    // Get pT information 
+    const auto &pt = pT_mass_2d_cutvalue["pTbins"][ipT];
+    // retrieve pT value as a float 
+    m_pTbins.push_back(BTaggingToolUtil::getExtendedFloat(pt));
+
+    // Retrieve corresponding pT bin i.e. "pT_lowerEdge_upperEdge"
+    // and related mass bin values and efficiency cut values 
+    if (ipT != pT_mass_2d_cutvalue["pTbins"].size()-1){
+      // Retrieve upper edge pT value 
+      const auto &ptUp = pT_mass_2d_cutvalue["pTbins"][ipT+1];
+
+      // here get pT values as strings 
+      std::string pT_key = "pT_" + BTaggingToolUtil::getExtendedString(pt) + "_" + BTaggingToolUtil::getExtendedString(ptUp); 
+
+      // Make sure that the pT bin information can be found in the json file 
+      auto itr = pT_mass_2d_cutvalue.find(pT_key);
+      if (itr == pT_mass_2d_cutvalue.end()){
+        ATH_MSG_ERROR( "pT_key=" + pT_key + " not found in JSON file: " +m_json_config_path );
+        return StatusCode::FAILURE;
+      }
+
+      // Retrieve mass values and cut values 
+      std::vector<float> mass_values = itr->at("mass").get<std::vector<float>>();
+      std::vector<float> cut_values = itr->at("cutvalues").get<std::vector<float>>();
+
+      // Add the corresponding mass bins and OP cut values information 
+      m_massbins.push_back(mass_values);
+      m_OPCutValues.push_back(cut_values);
+    }
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -126,6 +144,7 @@ int BTaggingSelectionJsonTool::accept( double pt, double eta, double mass, doubl
   }
 
   float cutvalue = m_OPCutValues[pt_bin_index][mass_bin_index];
+  ATH_MSG_DEBUG ("Corresponding cut value: " << cutvalue );
   index = (tagger_discriminant > cutvalue) ? 1 : 0;
   return index;
 

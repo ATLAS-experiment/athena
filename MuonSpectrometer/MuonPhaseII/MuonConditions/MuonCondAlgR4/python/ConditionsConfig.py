@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -13,7 +13,6 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     kwargs.setdefault("applyMmPassivation", flags.Muon.applyMMPassivation)
     kwargs.setdefault("FillAlignCache", False)
     kwargs.setdefault("FillGeoAlignStore", False)
-    kwargs.setdefault("applyBLines", False)
     
 
     if kwargs["applyMmPassivation"]:
@@ -21,8 +20,8 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
         result.merge(NswPassivationDbAlgCfg(flags))
     if flags.Muon.enableAlignment:
         result.merge(MuonAlignmentCondAlgCfg(flags))
-    kwargs.setdefault("applyALines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
-    kwargs.setdefault("applyBLines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
+    kwargs.setdefault("applyALines", flags.Muon.Align.UseALines)
+    kwargs.setdefault("applyBLines", flags.Muon.Align.UseBLines)
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
     kwargs.setdefault("applyMdtAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "MdtAsBuiltCondAlg"])>0)
 
@@ -30,4 +29,15 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     result.addCondAlgo(the_alg)
     return result
 
+def MdtAnalyticRtCalibAlgCfg(flags, name="MdtAnalyticCalibDbAlg",
+                                    diagnosticsFile="RtDiagnositcs.root", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("OutStream", "MDTANALYTICRTS")
+    kwargs.setdefault("saveDiagnosticHist", True)
+    if kwargs["saveDiagnosticHist"]:
+        from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
+        result.merge(setupHistSvcCfg(flags, outFile=diagnosticsFile, outStream=kwargs["OutStream"]))
+    the_alg = CompFactory.MuonCalibR4.MdtAnalyticRtCalibAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
     

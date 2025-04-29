@@ -9,7 +9,7 @@ def TRTAlignCondAlgCfg(flags, name="TRTAlignCondAlg", **kwargs):
     """Return a ComponentAccumulator for TRTAlignCondAlg algorithm"""
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_GeoModelCfg
     acc = TRT_GeoModelCfg(flags)
-    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/DX", "/TRT/Calib/DX"))
+    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/DX", "/TRT/Calib/DX", className="TRTCond::StrawDxContainer"))
 
     if flags.GeoModel.Align.Dynamic:
         acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/AlignL1/TRT", "/TRT/AlignL1/TRT", className="CondAttrListCollection"))

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Tadej Novak
 
@@ -9,7 +9,7 @@ atlas_add_library( TriggerAnalysisAlgorithmsLib
    PUBLIC_HEADERS TriggerAnalysisAlgorithms
    LINK_LIBRARIES xAODEventInfo SelectionHelpersLib SystematicsHandlesLib
       AnaAlgorithmLib AsgTools AsgAnalysisInterfaces EventBookkeeperToolsLib TrigDecisionInterface
-      xAODEgamma xAODMuon TriggerAnalysisInterfaces TrigGlobalEfficiencyCorrectionLib TriggerMatchingToolLib
+      xAODEgamma xAODMuon TriggerAnalysisInterfaces TrigCompositeUtilsLib TrigGlobalEfficiencyCorrectionLib TriggerMatchingToolLib
    PRIVATE_LINK_LIBRARIES RootCoreUtils )
 
 atlas_add_dictionary( TriggerAnalysisAlgorithmsDict

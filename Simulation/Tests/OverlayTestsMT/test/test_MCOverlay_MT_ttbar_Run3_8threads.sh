@@ -12,7 +12,6 @@
 # art-output: mem.full.*
 # art-output: runargs.*
 # art-output: *.pkl
-# art-output: *Config.txt
 
 export ATHENA_CORE_NUMBER=8
 
@@ -28,10 +27,9 @@ Overlay_tf.py \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --outputRDOFile mcOverlayRDO.pool.root \
 --maxEvents 50 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
---conditionsTag OFLCOND-MC23-SDR-RUN3-01  \
+--conditionsTag OFLCOND-MC23-SDR-RUN3-08  \
 --geometryVersion ATLAS-R3S-2021-03-02-00 \
 --preInclude 'all:Campaigns.MC23a' \
---postInclude 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
 --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
 --imf False
 

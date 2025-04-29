@@ -11,7 +11,6 @@
 #include "MdtCalibData/IRtRelation.h"
 #include "MdtCalibData/IRtResolution.h"
 #include "MdtCalibData/MdtFullCalibData.h"
-#include "MdtCalibData/TrRelation.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 #include "MuonRIO_OnTrack/CscClusterOnTrack.h"
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
@@ -26,6 +25,7 @@
 #include "TrkDriftCircleMath/TransformToLine.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "AthContainers/ConstAccessor.h"
+#include "MuonClusterization/RpcHitClustering.h"
 
 namespace {
     constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458 inside calculateTof()/calculateBeta()
@@ -198,6 +198,7 @@ namespace MuonCombined {
                                                         << " layerDataVec size" << candidate->layerDataVec.size() << " hits size"
                                                         << candidate->hits.size());
 
+            float beta = candidate->betaFitResult.beta;
             // loop over layers and perform segment finding, collect segments per layer
             for (const auto& layerData : candidate->layerDataVec) {
                 // store segments in layer
@@ -206,7 +207,7 @@ namespace MuonCombined {
                 // loop over maxima
                 for (const auto& maximumData : layerData.maximumDataVec) {
                     // find segments for intersection
-                    findSegments(layerData.intersection, *maximumData, segments, m_muonPRDSelectionToolStau, m_segmentMaker);
+                    findSegments(layerData.intersection, *maximumData, segments, m_muonPRDSelectionToolStau, m_segmentMaker, beta);
                 }
 
                 // skip if no segment were found
@@ -345,11 +346,10 @@ namespace MuonCombined {
                     float errR = pars->covariance() ? Amg::error(*pars->covariance(), Trk::locR) : 0.3;
                     auto data = mdtCalibConstants->getCalibData(id, msgStream());
                     const auto& rtRelation = data->rtRelation;
-                    bool out_of_bound_flag = false;
                     float drdt = rtRelation->rt()->driftVelocity(driftTime);
                     float rres = rtRelation->rtRes()->resolution(driftTime);
                     float tres = rres / drdt;
-                    float TlocR = rtRelation->tr()->tFromR(std::abs(locR), out_of_bound_flag);
+                    float TlocR = rtRelation->tr()->driftTime(std::abs(locR)).value_or(0.);
                     float trackTimeRes = errR / drdt;
                     float tofShiftFromBeta = calculateTof(betaSeed, distance) - tof;
                     er = std::sqrt(tres * tres + trackTimeRes * trackTimeRes);
@@ -363,7 +363,7 @@ namespace MuonCombined {
                             m_updator->removeFromState(*pars, meas->localParameters(), meas->localCovariance()));
                         if (unbiasedPars) {
                             float locRu = unbiasedPars->parameters()[Trk::locR];
-                            float TlocRu = rtRelation->tr()->tFromR(std::abs(locRu), out_of_bound_flag);
+                            float TlocRu = rtRelation->tr()->driftTime(std::abs(locRu)).value_or(0.);
                             float errRu = unbiasedPars->covariance() ? Amg::error(*unbiasedPars->covariance(), Trk::locR) : 0.3;
                             float trackTimeResu = errRu / drdt;
                             sh = TlocR - TlocRu;
@@ -385,8 +385,14 @@ namespace MuonCombined {
                                                 << beta << " diff " << std::abs(beta - betaSeed));
                     if (std::abs(beta - betaSeed) > m_mdttBetaAssociationCut) continue;
 
-                    hits.push_back(Muon::TimePointBetaFitter::Hit(distance, time, er));
-                    candidate.stauHits.push_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
+                    hits.emplace_back(Muon::TimePointBetaFitter::Hit(distance, time, er));
+                    candidate.stauHits.emplace_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
+                    
+                    if (m_addMDTExtrasMuGirlLowBeta ) {
+                        float iadc = mdt->prepRawData()->adc();
+                        float irdrift = mdt->driftRadius();
+                        candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
+                    }
                 }
             } else if (m_idHelperSvc->isRpc(id)) {
                 // treat CompetingMuonClustersOnTrack differently than RpcClusterOnTrack
@@ -631,17 +637,19 @@ namespace MuonCombined {
                 float propTime = 0;
                 float tof = calculateTof(1, distance);
 
+                float iadc = mdt->prepRawData()->adc();
+                float irdrift = mdt->driftRadius();
+
                 // use inverted RT relation together with track prediction to get estimate of drift time
                 float driftTime = calibratedMdt->driftTime();  // we need to add beta seed as it was subtracted when calibrating the hits
                 float locR = rline;
                 float errR = dc.errorTrack();
                 auto data = mdtCalibConstants->getCalibData(id, msgStream());
                 const auto& rtRelation = data->rtRelation;
-                bool out_of_bound_flag = false;
                 float drdt = rtRelation->rt()->driftVelocity(driftTime);
                 float rres = rtRelation->rtRes()->resolution(driftTime);
                 float tres = rres / drdt;
-                float TlocR = rtRelation->tr()->tFromR(std::abs(locR), out_of_bound_flag);
+                float TlocR = rtRelation->tr()->driftTime(std::abs(locR)).value_or(0.);
                 float trackTimeRes = errR / drdt;
                 float tofShiftFromBeta = 0.;  // muonBetaCalculationUtils.calculateTof(betaSeed,distance)-tof;
                 er = std::sqrt(tres * tres + trackTimeRes * trackTimeRes);
@@ -670,6 +678,9 @@ namespace MuonCombined {
 
                 hits.emplace_back(distance, time, er);
                 candidate.stauHits.emplace_back(MuGirlNS::MDTT_STAU_HIT, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime);
+                if (m_addMDTExtrasMuGirlLowBeta) {
+                    candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
+                }
             }
         }
         // fit data
@@ -709,6 +720,11 @@ namespace MuonCombined {
         stauExtras->betaAll = candidate.betaFitResult.beta;
         stauExtras->betaAllt = candidate.finalBetaFitResult.beta;      
         stauExtras->hits = candidate.stauHits;
+        // TODO: ALEXIS ADD FLAG
+        if (m_addMDTExtrasMuGirlLowBeta) {
+            stauExtras->extraMDTHitInfo = candidate.stauMDTHitExtras;
+        }
+        
         tag->setStauExtras(std::move(stauExtras));
 
         // print results afer refineCandidate
@@ -1117,14 +1133,16 @@ namespace MuonCombined {
     void MuonStauRecoTool::findSegments(const Muon::MuonSystemExtension::Intersection& intersection, MaximumData& maximumData,
                                         std::vector<std::shared_ptr<const Muon::MuonSegment>>& segments,
                                         const ToolHandle<Muon::IMuonPRDSelectionTool>& muonPRDSelectionTool,
-                                        const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker) const {
+                                        const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker,
+                                        float beta) const {
         const MuonHough::MuonLayerHough::Maximum& maximum = *maximumData.maximum;
         const std::vector<std::shared_ptr<const Muon::MuonClusterOnTrack>>& phiClusterOnTracks = maximumData.phiClusterOnTracks;
 
         // lambda to handle calibration and selection of MDTs
         auto handleMdt = [intersection, muonPRDSelectionTool](const Muon::MdtPrepData& prd,
-                                                              std::vector<const Muon::MdtDriftCircleOnTrack*>& mdts) {
-            const Muon::MdtDriftCircleOnTrack* mdt = muonPRDSelectionTool->calibrateAndSelect(intersection, prd);
+                                                              std::vector<const Muon::MdtDriftCircleOnTrack*>& mdts,
+                                                              float beta) {
+            const Muon::MdtDriftCircleOnTrack* mdt = muonPRDSelectionTool->calibrateAndSelect(intersection, prd, beta);
             if (mdt) mdts.push_back(mdt);
         };
 
@@ -1156,7 +1174,7 @@ namespace MuonCombined {
             } else if ((*hit)->prd) {
                 Identifier id = (*hit)->prd->identify();
                 if (m_idHelperSvc->isMdt(id))
-                    handleMdt(static_cast<const Muon::MdtPrepData&>(*(*hit)->prd), mdts);
+                    handleMdt(static_cast<const Muon::MdtPrepData&>(*(*hit)->prd), mdts, beta);
                 else
                     handleCluster(static_cast<const Muon::MuonCluster&>(*(*hit)->prd), clusters);
             }
@@ -1175,7 +1193,7 @@ namespace MuonCombined {
             // run segment finder
             auto segColl = std::make_unique<Trk::SegmentCollection>(SG::VIEW_ELEMENTS);
             segmentMaker->find(intersection.trackParameters->position(), intersection.trackParameters->momentum(), mdts, clusters,
-                               !clusters.empty(), segColl.get(), intersection.trackParameters->momentum().mag());
+                               !clusters.empty(), segColl.get(), intersection.trackParameters->momentum().mag(), 0, beta);
             if (segColl) {
                 Trk::SegmentCollection::iterator sit = segColl->begin();
                 Trk::SegmentCollection::iterator sit_end = segColl->end();

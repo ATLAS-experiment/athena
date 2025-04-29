@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_GeneralParameters.h"
-#include "SCT_GeoModel/SCT_DataBase.h"
+#include "SCT_GeneralParameters.h"
+#include "SCT_DataBase.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "GaudiKernel/SystemOfUnits.h"

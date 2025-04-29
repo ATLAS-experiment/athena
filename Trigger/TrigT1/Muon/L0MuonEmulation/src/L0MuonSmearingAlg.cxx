@@ -133,9 +133,11 @@ StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
     // construct roiWord (23th bit is charge information.)
     uint32_t roiword = (ptword<<24) | ((otrack.invpt() > 0)<<23) | (phiword<<14) | etaword;
 
+    uint32_t extraword = (static_cast<uint32_t>(0x1)<<31) | (((ptword>>1) + 0x2) & 0xf);  // for the time being...
+
     std::string emu_thr_name = "L0_MUx";
-    float thrvalue = 0.0;
-    outputRoIs->back()->initialize(roiword, roi_eta, roi_phi, emu_thr_name, thrvalue, 0x1);   // TODO: roiExtraWord is 1 for the time being
+    float thrvalue = static_cast<float>(((ptword>>1) + 0x2) & 0xf);
+    outputRoIs->back()->initialize(roiword, roi_eta, roi_phi, emu_thr_name, thrvalue, extraword);
 
     ATH_MSG_DEBUG("L0MuonRoI: phi = " << roi_phi << " (0x" << std::hex << phiword << std::dec << "), "
                       << "eta = " << roi_eta << " (0x" << std::hex << etaword << std::dec << "), "

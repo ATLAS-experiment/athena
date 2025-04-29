@@ -1,15 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODXTOVVDECAYFILTEREXTENDED_H
 #define GENERATORFILTERS_XAODXTOVVDECAYFILTEREXTENDED_H
 
 #include "GeneratorModules/GenFilter.h"
-
-#include "xAODTruth/TruthEvent.h"
 #include "xAODTruth/TruthEventContainer.h"
-#include "xAODTruth/TruthParticle.h"
 
 ///  The main purpose of this EF is to specify the decay of V1/V2
 ///  in H->V1V2, V1->decay, V2->decay with VH production.
@@ -22,23 +19,24 @@
 /// Nikolaos Rompotis 15 January 2015
 class xAODXtoVVDecayFilterExtended : public GenFilter {
 public:
+  using GenFilter::GenFilter;
 
-  xAODXtoVVDecayFilterExtended(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterInitialize();
-  virtual StatusCode filterFinalize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterFinalize() override final;
+  virtual StatusCode filterEvent() override final;
 
 private:
 
-  int m_PDGGrandParent;
-  int m_PDGParent;
-  bool m_UseStatusParent;
-  int m_StatusParent;
-  std::vector<int> m_PDGChild1;
-  std::vector<int> m_PDGChild2;
+  Gaudi::Property<int> m_PDGGrandParent{this, "PDGGrandParent", 0};
+  Gaudi::Property<int> m_PDGParent{this, "PDGParent", 0};
+  Gaudi::Property<bool> m_UseStatusParent{this, "UseStatusParent", false};
+  Gaudi::Property<int> m_StatusParent{this, "StatusParent", 0};
+  Gaudi::Property<std::vector<int>> m_PDGChild1{this, "PDGChild1", {}};
+  Gaudi::Property<std::vector<int>> m_PDGChild2{this, "PDGChild2",{}};
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventKey{this, "TruthEventKey", "TruthEvents"};
 
-  int m_nHtoVV;
-  int m_nGoodHtoVV;
+  int m_nHtoVV{};
+  int m_nGoodHtoVV{};
 
   void FindAncestor(const xAOD::TruthVertex* searchvertex,
                     int targetPDGID, bool& okPDGChild1, bool& okPDGChild2);

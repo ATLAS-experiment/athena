@@ -37,7 +37,6 @@ do /Herwig/MatrixElements/Matchbox/Factory:Process p p -> e+ e-
 ## Matrix element library selection
 ##################################################
 
-# read Matchbox/MadGraph-GoSam.in
 # read Matchbox/MadGraph-MadGraph.in
 # read Matchbox/MadGraph-NJet.in
 # read Matchbox/MadGraph-OpenLoops.in

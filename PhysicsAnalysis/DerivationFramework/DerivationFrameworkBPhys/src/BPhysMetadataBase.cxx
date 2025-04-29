@@ -34,7 +34,7 @@
 //============================================================================
 //
 
-#include "DerivationFrameworkBPhys/BPhysMetadataBase.h"
+#include "BPhysMetadataBase.h"
 #include "xAODMetaData/FileMetaData.h"
 #include "xAODMetaData/FileMetaDataAuxInfo.h"
 #include "AthContainers/Accessor.h"
@@ -45,10 +45,9 @@ namespace DerivationFramework {
   BPhysMetadataBase::BPhysMetadataBase(const std::string& t,
 				       const std::string& n,
 				       const IInterface*  p)
-    : AthAlgTool(t,n,p),
+    : base_class(t,n,p),
       m_outputMetaStore("StoreGateSvc/MetaDataStore", n) {
     
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare derivation format name
     declareProperty("DerivationName", m_derivationName = "_NOSUCHFORMAT_");

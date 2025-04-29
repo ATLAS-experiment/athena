@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "sTgcFastDigiTool.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "xAODMuonViews/ChamberViewer.h"
@@ -41,16 +42,16 @@ namespace MuonR4 {
         DigiCache digitCache{};
         /// Fetch the conditions for efficiency calculations
         const Muon::DigitEffiData* efficiencyMap{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        ATH_CHECK(SG::get(efficiencyMap, m_effiDataKey, ctx));
         const NswErrorCalibData* nswUncertDB{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_uncertCalibKey, nswUncertDB));
+        ATH_CHECK(SG::get(nswUncertDB, m_uncertCalibKey, ctx));
         
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
         do {
             for (const TimedHit& simHit : viewer) {
                 /// ignore radiation for now
-                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13){
+                if (m_digitizeMuonOnly && !MC::isMuon(simHit)){
                     continue;
                 }
                 sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);

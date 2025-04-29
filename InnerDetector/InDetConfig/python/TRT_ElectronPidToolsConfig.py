@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -81,6 +81,10 @@ def TRT_dEdxToolCfg(flags, name="TRT_dEdxTool", **kwargs):
             InDetPrdAssociationToolCfg)
         kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
             InDetPrdAssociationToolCfg(flags)))
+
+    from AthenaConfiguration.Enums import ProductionStep
+    if flags.Common.ProductionStep in [ProductionStep.MinbiasPreprocessing]:
+        kwargs.setdefault("averageInteractionsPerCrossingKey", f"{flags.Overlay.BkgPrefix}EventInfo.averageInteractionsPerCrossing")
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         __TRT_dEdxToolBaseCfg(flags, name, **kwargs)))

@@ -37,13 +37,13 @@ MetaDataSvc                                          INFO Found MetaDataTools = 
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG Service base class initialized successfully
 EventSelector                                       DEBUG reinitialization...
-EventSelector                                        INFO EventSelection with query 
 EventSelector                                       DEBUG Try item: "SimplePoolFile5.root" from the collection list.
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile5.root, name=SimplePoolFile5.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile5.root, name=POOLContainer(DataHeader), contextID=0
 PersistencySvc::UserDB::fid()                       DEBUG lookupPFN: SimplePoolFile5.root returned FID: 'C949FD2E-3B8E-9343-AAE0-1E2306911C43' tech=ROOT_All
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] C949FD2E-3B8E-9343-AAE0-1E2306911C43
 Domain[ROOT_All]                                     INFO                           SimplePoolFile5.root
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -149,6 +149,7 @@ DbSession                                            INFO     Open     DbSession
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] C949FD2E-3B8E-9343-AAE0-1E2306911C43
 Domain[ROOT_All]                                     INFO                           SimplePoolFile5.root
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -633,7 +634,6 @@ ApplicationMgr                                       INFO Application Manager St
 ReadData                                             INFO in finalize()
 ReadData                                            DEBUG Calling destructor
 ToolSvc                                              INFO Removing all tools created by ToolSvc
-ToolSvc.AthPoolEx::ReadMeta                          INFO in finalize()
 AthenaPoolCnvSvc                                     INFO PerfStats ----------------------------------------
 AthenaPoolCnvSvc                                     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
 AthenaPoolCnvSvc                                     INFO PerfStats ----------------------------------------

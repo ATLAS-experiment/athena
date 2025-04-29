@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <algorithm>
 #ifndef ACTSUTILS_STAT_H
 #define ACTSUTILS_STAT_H 1
 #include <cmath>
@@ -152,13 +153,10 @@ public:
    std::string histogramToString() const {
       std::stringstream msg;
       if (m_histogram.size()>2) {
-         unsigned int max_val = 0;
-         for (const auto &count : m_histogram) {
-            max_val = std::max(max_val, count);
-         }
-         double bin_width=1./m_scale;
-         unsigned int w = static_cast<unsigned int>(log(1.*max_val) / log(10.))+1;
-         unsigned int wtitle = std::max(10u,w);;
+         const unsigned int max_val = *std::max_element(m_histogram.begin(), m_histogram.end());
+         const double bin_width = 1. / m_scale;
+         const unsigned int w = max_val > 0 ? static_cast<unsigned int>(log(1.*max_val) / log(10.))+1 : 1;
+         const unsigned int wtitle = std::max(10u, w);
          msg << (m_xmin+bin_width) << " .. " << ((m_histogram.size()-2)/m_scale + m_xmin+bin_width) << " : "
              << std::setw(wtitle) << "lower edge"  << " |";
          for (unsigned int i=1; i<m_histogram.size()-1; ++i) {
@@ -176,8 +174,8 @@ public:
       return msg.str();
    }
 
-   double m_xmin;
-   double m_scale;
+   double m_xmin{};
+   double m_scale{1.0};
    std::vector<unsigned int> m_histogram;
 };
 }

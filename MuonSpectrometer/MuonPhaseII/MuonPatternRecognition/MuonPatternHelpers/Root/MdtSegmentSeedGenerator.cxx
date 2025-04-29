@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
@@ -17,7 +17,7 @@
 namespace MuonR4{
     using namespace SegmentFit;
     using namespace SegmentFitHelpers;
-    using HitVec = SpacePointPerLayerSorter::HitVec;
+    using HitVec = SpacePointPerLayerSplitter::HitVec;
 
     double driftCov(const CalibratedSpacePoint& dcHit){
         return std::visit([](const auto& cov) ->double{
@@ -66,14 +66,14 @@ namespace MuonR4{
 
         if (msgLvl(MSG::VERBOSE)) {
             std::stringstream sstr{};
-            for (const auto& [layCount, layer] : Acts::enumerate(m_hitLayers.mdtHits())) { 
+            for (const auto [layCount, layer] : Acts::enumerate(m_hitLayers.mdtHits())) { 
                 sstr<<"Mdt-hits in layer "<<layCount<<": "<<layer.size()<<std::endl;
                 for (const HoughHitType& hit : layer) {
                     sstr<<"   **** "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" "
                         <<Amg::toString(hit->positionInChamber())<<", driftRadius: "<<hit->driftRadius()<<std::endl;
                 }
             }
-            for (const auto& [layCount, layer] : Acts::enumerate(m_hitLayers.stripHits())) { 
+            for (const auto [layCount, layer] : Acts::enumerate(m_hitLayers.stripHits())) { 
                 sstr<<"Hits in layer "<<layCount<<": "<<layer.size()<<std::endl;
                 for (const HoughHitType& hit : layer) {
                     sstr<<"   **** "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" "
@@ -81,7 +81,7 @@ namespace MuonR4{
                 }
             }
             ATH_MSG_VERBOSE("SeedGenerator - sorting of hits done. Mdt layers: "<<m_hitLayers.mdtHits().size()
-                            <<", strip layers: "<<m_hitLayers.stripHits().size()<<std::endl<<sstr.str());
+                            <<", strip layers: "<<m_hitLayers.stripHits().size()<<std::endl<<sstr.str()<<std::endl<<std::endl);
         }
     }
     
@@ -137,7 +137,10 @@ namespace MuonR4{
                                                               m_segmentSeed->positionInChamber(),
                                                               m_segmentSeed->directionInChamber(),0.);
             found->parentBucket = m_segmentSeed->parentBucket();
-            
+            found->nMdt = std::ranges::count_if(m_segmentSeed->getHitsInMax(),
+                                                [](const SpacePoint* hit){
+                                                    return hit->type() == xAOD::UncalibMeasType::MdtDriftCircleType;
+                                                });
             SeedSolution patternSeed{};
             patternSeed.seedHits.resize(2*m_hitLayers.mdtHits().size());
             patternSeed.solutionSigns.resize(2*m_hitLayers.mdtHits().size());
@@ -259,20 +262,18 @@ namespace MuonR4{
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Reject due to similarity");
             return std::nullopt;
         }
-        using CalibSpacePointPtr = ISpacePointCalibrator::CalibSpacePointPtr;
-        unsigned int nMdt{0};
         /** Collect all hits close to the seed line */
-        for (const auto& [layerNr,  hitsInLayer] : Acts::enumerate(m_hitLayers.mdtHits())) {
-            ATH_MSG_VERBOSE( hitsInLayer.size()<<" hits in layer "<<(layerNr +1));
+        for (const auto [layerNr,  hitsInLayer] : Acts::enumerate(m_hitLayers.mdtHits())) {
+            ATH_MSG_VERBOSE( __func__<<"() "<<__LINE__<<": "<<hitsInLayer.size()<<" hits in layer "<<(layerNr +1));
             bool hadGoodHit{false};
             for (const HoughHitType testMe : hitsInLayer){
                 const double pull = std::sqrt(SegmentFitHelpers::chiSqTermMdt(seedPos, seedDir, *testMe, msg()));            
-                ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Test hit "<<idHelperSvc->toString(testMe->identify())
                             <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);              
                 if (pull < m_cfg.hitPullCut) {
                     hadGoodHit = true;
                     solCandidate.seedHits.emplace_back(testMe);
-                    ++nMdt;
+                    ++candidateSeed.nMdt;
                 }/// what ever comes after is not matching onto the segment 
                 else if (hadGoodHit) {
                     break;
@@ -280,14 +281,17 @@ namespace MuonR4{
             }
         }
         /** Reject seeds with too litle Mdt hit association */
-        if (1.*nMdt < std::max(1.*m_cfg.nMdtHitCut, m_cfg.nMdtLayHitCut * m_hitLayers.mdtHits().size())) {
+        const unsigned hitCut = std::max(1.*m_cfg.nMdtHitCut, m_cfg.nMdtLayHitCut * m_hitLayers.mdtHits().size()); 
+
+        if (1.*candidateSeed.nMdt < hitCut) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Too few hits associated "<<candidateSeed.nMdt<<", expect: "<<hitCut<<" hits.");
             return std::nullopt;
         }
         /* Calculate the left-right signs of the used hits */
         if (m_cfg.overlapCorridor) {
             solCandidate.solutionSigns = driftSigns(seedPos, seedDir, solCandidate.seedHits, msg());
-            ATH_MSG_VERBOSE("Circle solutions for seed "<<idHelperSvc->toStringChamber(bottomHit->identify())<<" - "
-                           <<solCandidate);
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Circle solutions for seed "
+                          <<idHelperSvc->toStringChamber(bottomHit->identify())<<" - "<<solCandidate);
             /** Last check wheather another seed with the same left-right combination hasn't already been found */
             for (unsigned int a = m_cfg.startWithPattern; a< m_seenSolutions.size() ;++a) { 
                 const SeedSolution& accepted = m_seenSolutions[a];
@@ -308,9 +312,14 @@ namespace MuonR4{
         }
         /// Seed candidate is 
         for (const HoughHitType& hit : solCandidate.seedHits){
+            //calibBottom is nullptr after it has been moved, so...
+            //cppcheck-suppress accessMoved
             if (hit == bottomHit && calibBottom) {
                 candidateSeed.measurements.emplace_back(std::move(calibBottom));
-            } else if (hit == topHit && calibTop) {
+            } 
+            //calibTop is nullptr after it has been moved, so...
+            //cppcheck-suppress accessMoved
+            else if (hit == topHit && calibTop) {
                 candidateSeed.measurements.emplace_back(std::move(calibTop));
             } else {
                 candidateSeed.measurements.emplace_back(m_cfg.calibrator->calibrate(ctx, hit, seedPos, seedDir, 0.));
@@ -321,10 +330,10 @@ namespace MuonR4{
         /** If we found a long Mdt seed, then ensure that all
          *  subsequent seeds have at least the same amount of Mdt hits. */
         if (m_cfg.tightenHitCut) {
-            m_cfg.nMdtHitCut = std::max(m_cfg.nMdtHitCut, nMdt);
+            m_cfg.nMdtHitCut = std::max(m_cfg.nMdtHitCut, candidateSeed.nMdt);
         }
         ++m_nGenSeeds;        
-        ATH_MSG_VERBOSE("In event "<<ctx.eventID().event_number()<<" found new seed solution "<<toString(candidateSeed.parameters));
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": In event "<<ctx.eventID().event_number()<<" found new seed solution "<<toString(candidateSeed.parameters));
         if (m_cfg.fastSeedFit) {
             if (!m_cfg.fastSegFitWithT0) {
                 fitDriftCircles(candidateSeed);
@@ -349,7 +358,7 @@ namespace MuonR4{
                 for (const HoughHitType testMe : hitsInLayer){
                     const double pull = std::sqrt(SegmentFitHelpers::chiSqTermStrip(seedPos, seedDir, *testMe, msg())) 
                                       / testMe->dimension();
-                    ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Test hit "<<idHelperSvc->toString(testMe->identify())
                                 <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);
                     /// Add all hits with a pull better than the threshold
                     if (pull <= bestPull) {
@@ -394,7 +403,7 @@ namespace MuonR4{
         aux.covNorm = 1./ norm;
         aux.centerOfGrav *= aux.covNorm;
         /// Calculate the fit constants
-        for (const auto&[covIdx, hit] : Acts::enumerate(seed.measurements)) {
+        for (const auto [covIdx, hit] : Acts::enumerate(seed.measurements)) {
             const double& invCov = aux.invCovs[covIdx];
             const int& sign = aux.driftSigns[covIdx];
             const Amg::Vector3D pos = hit->positionInChamber() - aux.centerOfGrav;
@@ -416,10 +425,7 @@ namespace MuonR4{
         
         double theta = inSeed.parameters[toInt(ParamDefs::theta)];
         /// Now it's time to use the guestimate
-        const double thetaMin =  - (auxVars.T_zzyy  - auxVars.T_ry) / (4* auxVars.T_yz + auxVars.T_rz);
-        const double thetaDet =  std::pow(auxVars.T_zzyy -auxVars.T_ry,2) + 4*(auxVars.T_yz + auxVars.T_rz)*(2*auxVars.T_yz + 0.5*auxVars.T_rz);
-        const double thetaGuess =  thetaMin  + (theta > thetaMin ? 1. : -1.)*std::sqrt(thetaDet) / (4*auxVars.T_yz + auxVars.T_rz);
-        // const double thetaGuess = std::atan2( 2.*(T_yz - T_rz), T_zzyy) / 2.;
+        const double thetaGuess = std::atan2( 2.*(auxVars.T_yz - auxVars.T_rz), auxVars.T_zzyy) / 2.;
 
         ATH_MSG_VERBOSE("Start fast fit seed: "<<theta<<", guess: "<<thetaGuess
                     <<", y0: "<<inSeed.parameters[toInt(ParamDefs::y0)]
@@ -465,7 +471,7 @@ namespace MuonR4{
         MdtSegmentSeedGenerator::estimateAuxillaries(const EventContext& ctx,
                                                      const DriftCircleSeed& seed) const {
         SeedFitAuxWithT0 aux{estimateAuxillaries(seed)};
-        for (const auto& [idx, hit] : Acts::enumerate(seed.measurements)){
+        for (const auto [idx, hit] : Acts::enumerate(seed.measurements)){
             const double signedCov = aux.driftSigns[idx] * aux.invCovs[idx];
             const double weight = aux.covNorm * signedCov;
             const double velocity = m_cfg.calibrator->driftVelocity(ctx, *hit); 

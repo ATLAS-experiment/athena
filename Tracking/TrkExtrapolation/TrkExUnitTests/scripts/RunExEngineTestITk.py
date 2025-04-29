@@ -47,6 +47,10 @@ if(MisalignMode!=-1):
   tag=""
   BFile=""
   DBFile="MisalignmentSet"+str(MisalignMode)+".db"
+  flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+  flags.ITk.Geometry.stripAlignable=True
+  flags.ITk.Geometry.pixelAlignable=True
+
   if(MisalignMode==0):
     tag="InDetSi_MisalignmentMode_no Misalignment"
   elif(MisalignMode==1):
@@ -113,12 +117,5 @@ topoAcc=ExtrapolationEngineTestCfg(flags,
                                    )
 
 cfg.merge(topoAcc)
-
 cfg.printConfig()
-if(MisalignMode!=-1):
-  cfg.getService("GeoModelSvc").DetectorTools["ITk::PixelDetectorTool"].Alignable=True
-  print("Pixel manager alignability has been set to: "+ str(cfg.getService("GeoModelSvc").DetectorTools["ITk::PixelDetectorTool"].Alignable))
-  cfg.getService("GeoModelSvc").DetectorTools["ITk::StripDetectorTool"].Alignable=True
-  print("Strip manager alignability has been set to:"+str(cfg.getService("GeoModelSvc").DetectorTools["ITk::StripDetectorTool"].Alignable))
-
 cfg.run(10)

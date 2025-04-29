@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #====================================================================
 # DAOD_MUON1.py
 # This defines the component accumulator version of DAOD_MUON1 
@@ -195,11 +194,15 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
     from DerivationFrameworkMuons.MuonsToolsConfig import AnalysisMuonThinningAlgCfg
     MUON1ThinningTools = [] 
     if kwargs["scheduleThinning"]:
+        fwdTracks = "InDetForwardTrackParticles"
+        if fwdTracks not in flags.Input.Collections:
+          fwdTracks = ""
         acc.merge(AnalysisMuonThinningAlgCfg(flags,
                                              MuonPassFlags = ["{cont}.{passDecor}".format(cont = kwargs["MuonContainer"],
                                                                                           passDecor = passDecor) for passDecor in muonThinFlags],
                                              TrkPassFlags =["{cont}.{passDecor}".format(cont = kwargs["IdTrkContainer"],
                                                                                         passDecor = passDecor) for passDecor in trkThinFlags],
+                                             IdTrkFwdThinning=fwdTracks,
                                              StreamName = kwargs['StreamName']))
 
 

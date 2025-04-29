@@ -219,25 +219,26 @@ namespace InDet {
 	  auto clusterId2 = clusterList.second->identify();
 	  const InDetDD::SiDetectorElement *element1 = stripElements->getDetectorElement(m_stripID->wafer_hash(m_stripID->wafer_id(clusterId1)));
 	  const InDetDD::SiDetectorElement *element2 = stripElements->getDetectorElement(m_stripID->wafer_hash(m_stripID->wafer_id(clusterId2)));
-
-          if ( element1 == nullptr ) {
-            ATH_MSG_FATAL( "Invalid strip detector element for cluster (1) identifiers " << clusterId1 );
-            return StatusCode::FAILURE;
-          }
-          if ( element2 == nullptr ) {
-            ATH_MSG_FATAL( "Invalid strip detector element for cluster (2) identifiers " << clusterId2 );
-            return StatusCode::FAILURE;
-          }
-
+    if ( element1 == nullptr ) {
+      ATH_MSG_FATAL( "Invalid strip detector element for cluster (1) identifiers " << clusterId1 );
+      return StatusCode::FAILURE;
+    }
+    if ( element2 == nullptr ) {
+      ATH_MSG_FATAL( "Invalid strip detector element for cluster (2) identifiers " << clusterId2 );
+      return StatusCode::FAILURE;
+    }
+    //tries to insert an entry with key clusterId. Returns false and does nothing if the key already exists.
+    auto insertEntry = [&mapClusters, cluster_xaod_container](const auto & clusterId)-> bool{
+      const auto & [p,inserted] = mapClusters.try_emplace(clusterId, cluster_xaod_container->size());
+      return inserted;
+    };
 	  // if cluster is not there, add entry and add cluster to container
-	  if (not mapClusters.contains(clusterId1)) {
-	    mapClusters[clusterId1] = cluster_xaod_container->size();
+	  if (insertEntry(clusterId1)){
 	    xAOD::StripCluster * stripCl1 = new xAOD::StripCluster();
 	    cluster_xaod_container->push_back(stripCl1);
 	    ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster1, *element1, *stripCl1) );
 	  }
-	  if (mapClusters.find(clusterId2) == mapClusters.end()) {
-	    mapClusters[clusterId2] = cluster_xaod_container->size();
+	  if (insertEntry(clusterId2)) {
 	    xAOD::StripCluster * stripCl2 = new xAOD::StripCluster();
 	    cluster_xaod_container->push_back(stripCl2);
 	    ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster2, *element2, *stripCl2) );
@@ -322,19 +323,21 @@ namespace InDet {
 	  ATH_MSG_FATAL( "Invalid strip detector element for cluster (2) identifiers " << clusterId2 );
 	  return StatusCode::FAILURE;
 	}
-
-	if (mapClusters.find(clusterId1) == mapClusters.end()) {
-	  mapClusters[clusterId1] = cluster_xaod_container->size();
+  //tries to insert an entry with key clusterId. Returns false and does nothing if the key already exists.
+  auto insertEntry = [&mapClusters, cluster_xaod_container](const auto & clusterId)-> bool{
+    const auto & [p,inserted] = mapClusters.try_emplace(clusterId, cluster_xaod_container->size());
+    return inserted;
+  };
+	if (insertEntry(clusterId1)) {
 	  xAOD::StripCluster * stripCl1 = new xAOD::StripCluster();
 	  cluster_xaod_container->push_back(stripCl1);
 	  ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster1, *element1, *stripCl1) );
 	}
-	if (mapClusters.find(clusterId2) == mapClusters.end()) {
-	  mapClusters[clusterId2] = cluster_xaod_container->size();
+	if (insertEntry(clusterId2)) {
 	  xAOD::StripCluster * stripCl2 = new xAOD::StripCluster();
 	  cluster_xaod_container->push_back(stripCl2);
 	  ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster2, *element2, *stripCl2) );
-          }
+  }
 	
 	xAOD::StripCluster * stripCl1 = cluster_xaod_container->at(mapClusters[clusterId1]);
 	xAOD::StripCluster * stripCl2 = cluster_xaod_container->at(mapClusters[clusterId2]);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerUtils.h"
@@ -8,6 +8,29 @@
 bool DescendingPtSorterConstituents(const xAOD::JetConstituent p1, const xAOD::JetConstituent p2)
 {
   return CxxUtils::fpcompare::greater(p1.pt(), p2.pt());
+}
+
+float Clip(float in){
+  float out;
+  float low (1.e-36), high (1.e+30);
+
+  if(in < low) out = low;
+  else if(in > high) out = high;
+  else out = in;
+
+  return out;
+}
+
+int Sign(int in){
+
+  int out;
+
+  if(in<0) out = -1;
+  else if(in>0) out = 1;
+  else out = in;
+
+  return out;
+
 }
 
 JSSTaggerUtils::JSSTaggerUtils( const std::string& name ) :
@@ -31,6 +54,9 @@ StatusCode JSSTaggerUtils::initialize(){
 
   ATH_MSG_INFO( "Initializing JSSTaggerUtils tool" );
 
+  ATH_MSG_INFO( " m_calibArea : " << m_calibArea );
+  ATH_MSG_INFO( " m_configFile : " << m_configFile );
+
   if ( ! m_configFile.empty() ) {
 
     /// Get configReader
@@ -47,7 +73,16 @@ StatusCode JSSTaggerUtils::initialize(){
 
     if(m_UseConstTagger && m_MLBosonTagger.empty()){
       // init tool
-      std::string ModelPath = ("/data/BoostedJetTaggers/SmoothedWZTaggers/" + ConstTaggerFileName);
+      std::string ModelPath = "";
+      if ( m_calibArea.compare("Local") == 0 ) {
+        ModelPath = PathResolverFindCalibFile(ConstTaggerFileName);
+      }
+      else if ( m_calibArea.find("eos") != std::string::npos) {
+        ModelPath = (ConstTaggerFileName);    
+      }
+      else{
+        ModelPath = PathResolverFindCalibFile(("BoostedJetTaggers/" + m_calibArea + "/" + ConstTaggerFileName).c_str());
+      }
       ATH_MSG_INFO("JSSTaggerUtils::MLBosonTagger()" << "   + ModelPath " << ModelPath );
 
       asg::AsgToolConfig config ("AthONNX::JSSMLTool/MLBosonTagger");
@@ -78,10 +113,19 @@ StatusCode JSSTaggerUtils::initialize(){
     }
     if(m_UseHLTagger){
       // init tool
-      std::string ModelPath = ("/data/BoostedJetTaggers/SmoothedWZTaggers/" + HLTaggerFileName);
+      std::string ModelPath = "";
+      if ( m_calibArea.compare("Local") == 0 ) {
+        ModelPath = PathResolverFindCalibFile(HLTaggerFileName);
+      }
+      else if ( m_calibArea.find("eos") != std::string::npos) {
+        ModelPath = (HLTaggerFileName);    
+      }
+      else{
+        ModelPath = PathResolverFindCalibFile(("BoostedJetTaggers/" + m_calibArea + "/" + HLTaggerFileName).c_str());
+      }
       ATH_MSG_INFO("JSSTaggerUtils::MLBosonTagger()" << "   + ModelPath " << ModelPath );
 
-      asg::AsgToolConfig config ("AthONNX::JSSMLTool/MLBosonTagger_HL");
+      asg::AsgToolConfig config ("AthONNX::JSSMLTool/MLBosonTaggerHL");
       ATH_CHECK( config.setProperty("ModelPath", ModelPath));
       
       ATH_CHECK( config.makePrivateTool(m_MLBosonTagger_HL) );
@@ -97,76 +141,7 @@ StatusCode JSSTaggerUtils::initialize(){
 
   /// Initialize decorators
   ATH_MSG_INFO( "Decorators that will be attached to jet :" );
-
-  m_decTaggedKey = m_containerName + "." + m_decorationName + "_" + m_decTaggedKey.key();
-  m_decValidPtRangeHighKey = m_containerName + "." + m_decorationName + "_" + m_decValidPtRangeHighKey.key();
-  m_decValidPtRangeLowKey = m_containerName + "." + m_decorationName + "_" + m_decValidPtRangeLowKey.key();
-  m_decValidEtaRangeKey = m_containerName + "." + m_decorationName + "_" + m_decValidEtaRangeKey.key();
-  m_decValidKinRangeKey = m_containerName + "." + m_decorationName + "_" + m_decValidKinRangeKey.key();
-  m_decValidJetContentKey = m_containerName + "." + m_decorationName + "_" + m_decValidJetContentKey.key();
-  m_decValidEventContentKey = m_containerName + "." + m_decorationName + "_" + m_decValidEventContentKey.key();
-
-  m_decTau21WTAKey = m_containerName + "." + m_decTau21WTAKey.key();
-  m_decTau32WTAKey = m_containerName + "." + m_decTau32WTAKey.key();
-  m_decTau42WTAKey = m_containerName + "." + m_decTau42WTAKey.key();
-  m_decC2Key = m_containerName + "." + m_decC2Key.key();
-  m_decD2Key = m_containerName + "." + m_decD2Key.key();
-  m_decE3Key = m_containerName + "." + m_decE3Key.key();
-  m_decL2Key = m_containerName + "." + m_decL2Key.key();
-  m_decL3Key = m_containerName + "." + m_decL3Key.key();
-
-  m_readTau1WTAKey = m_containerName + "." + m_readTau1WTAKey.key();
-  m_readTau2WTAKey = m_containerName + "." + m_readTau2WTAKey.key();
-  m_readTau3WTAKey = m_containerName + "." + m_readTau3WTAKey.key();
-  m_readTau4WTAKey = m_containerName + "." + m_readTau4WTAKey.key();
-  m_readECF1Key = m_containerName + "." + m_readECF1Key.key();
-  m_readECF2Key = m_containerName + "." + m_readECF2Key.key();
-  m_readECF3Key = m_containerName + "." + m_readECF3Key.key();
-  m_readD2Key = m_containerName + "." + m_readD2Key.key();
-  m_readSplit12Key = m_containerName + "." + m_readSplit12Key.key();
-  m_readSplit23Key = m_containerName + "." + m_readSplit23Key.key();
-  m_readQwKey = m_containerName + "." + m_readQwKey.key();
-  m_readThrustMajKey = m_containerName + "." + m_readThrustMajKey.key();
-  m_readSphericityKey = m_containerName + "." + m_readSphericityKey.key();
-  m_readECFG331Key = m_containerName + "." + m_readECFG331Key.key();
-  m_readECFG311Key = m_containerName + "." + m_readECFG311Key.key();
-  m_readECFG212Key = m_containerName + "." + m_readECFG212Key.key();
-
-  m_readParentKey = m_containerName + "." + m_readParentKey.key();
-  m_decNtrk500Key = m_containerName + "." + m_decNtrk500Key.key();
-  m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
-
-  ATH_CHECK( m_decTau21WTAKey.initialize() );
-  ATH_CHECK( m_decTau32WTAKey.initialize() );
-  ATH_CHECK( m_decTau42WTAKey.initialize() );
-  ATH_CHECK( m_decC2Key.initialize() );
-  ATH_CHECK( m_decD2Key.initialize() );
-  ATH_CHECK( m_decE3Key.initialize() );
-  ATH_CHECK( m_decL2Key.initialize() );
-  ATH_CHECK( m_decL3Key.initialize() );
-
-  ATH_CHECK( m_readTau1WTAKey.initialize() );
-  ATH_CHECK( m_readTau2WTAKey.initialize() );
-  ATH_CHECK( m_readTau3WTAKey.initialize() );
-  ATH_CHECK( m_readTau4WTAKey.initialize() );
-  ATH_CHECK( m_readTau21WTAKey.initialize() );
-  ATH_CHECK( m_readTau32WTAKey.initialize() );
-  ATH_CHECK( m_readECF1Key.initialize() );
-  ATH_CHECK( m_readECF2Key.initialize() );
-  ATH_CHECK( m_readECF3Key.initialize() );
-  ATH_CHECK( m_readD2Key.initialize() );
-  ATH_CHECK( m_readSplit12Key.initialize() );
-  ATH_CHECK( m_readSplit23Key.initialize() );
-  ATH_CHECK( m_readQwKey.initialize() );
-  ATH_CHECK( m_readThrustMajKey.initialize() );
-  ATH_CHECK( m_readSphericityKey.initialize() );
-  ATH_CHECK( m_readECFG331Key.initialize() );
-  ATH_CHECK( m_readECFG311Key.initialize() );
-  ATH_CHECK( m_readECFG212Key.initialize() );
-
-  ATH_CHECK( m_readParentKey.initialize() );
-  ATH_CHECK( m_decNtrk500Key.initialize() );
-  ATH_CHECK( m_readNtrk500Key.initialize() );
+  ATH_CHECK(JSSTaggerBase::initialize());
 
   m_decNConstituentsKey = m_containerName + "." + m_decorationName + "_" + m_decNConstituentsKey.key();
   ATH_CHECK( m_decNConstituentsKey.initialize() );
@@ -175,6 +150,7 @@ StatusCode JSSTaggerUtils::initialize(){
 
   m_decConstScoreKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreKey.key();
   ATH_CHECK( m_decConstScoreKey.initialize() );
+
   m_readConstScoreKey = m_containerName + "." + m_decorationName + "_" + m_readConstScoreKey.key();
   ATH_CHECK( m_readConstScoreKey.initialize() );
 
@@ -193,157 +169,315 @@ StatusCode JSSTaggerUtils::tag( const xAOD::Jet& jet ) const {
 
 }
 
-StatusCode JSSTaggerUtils::GetImageScore(const xAOD::Jet& jet) const {
+StatusCode JSSTaggerUtils::GetImageScore(const xAOD::JetContainer& jets) const {
 
-  // init value
-  float score (-99.);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
 
-  // preliminary actions for constituents
-  // add a dedicated function for this?
+  for(const xAOD::Jet* jet : jets){
 
-  // get constituents
-  std::vector<xAOD::JetConstituent> constituents = jet.getConstituents().asSTLVector();
-  std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
+    // init value
+    float score (-99.);
 
-  int MaxConstituents (100);
-  std::vector<xAOD::JetConstituent> constituentsForModel;
+    // preliminary actions for constituents
+    // add a dedicated function for this?
 
-  if( constituents.size() > 100 )
-    constituentsForModel = std::vector<xAOD::JetConstituent> (constituents.begin(), constituents.begin() + MaxConstituents);
-  else 
-    constituentsForModel = constituents;
+    // get constituents
+    std::vector<xAOD::JetConstituent> constituents = jet -> getConstituents().asSTLVector();
+    std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
 
-  // constituents - charged
-  std::vector<xAOD::JetConstituent> csts_charged = constituentsForModel;
-  csts_charged.erase( std::remove_if( csts_charged.begin(), csts_charged.end(),
-				              [] (xAOD::JetConstituent constituent) -> bool {
-                        const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
-                        return ufo -> signalType() != xAOD::FlowElement::SignalType::Charged;
-				              }), csts_charged.end()) ;
+    int MaxConstituents (100);
+    std::vector<xAOD::JetConstituent> constituentsForModel;
 
-  // constituents - neutral
-  std::vector<xAOD::JetConstituent> csts_neutral = constituentsForModel;
-  csts_neutral.erase( std::remove_if( csts_neutral.begin(), csts_neutral.end(),
-				              [] (xAOD::JetConstituent constituent) -> bool {
-                        const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
-                        return ufo -> signalType() != xAOD::FlowElement::SignalType::Neutral;
-				              }), csts_neutral.end()) ;
+    if( constituents.size() > 100 )
+      constituentsForModel = std::vector<xAOD::JetConstituent> (constituents.begin(), constituents.begin() + MaxConstituents);
+    else 
+      constituentsForModel = constituents;
 
-  // constituents - combined
-  std::vector<xAOD::JetConstituent> csts_combined = constituentsForModel;
-  csts_combined.erase( std::remove_if( csts_combined.begin(), csts_combined.end(),
-				              [] (xAOD::JetConstituent constituent){
-                        const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
-                        return ufo -> signalType() != xAOD::FlowElement::SignalType::Combined;
-				              }), csts_combined.end()) ;
+    // constituents - charged
+    std::vector<xAOD::JetConstituent> csts_charged = constituentsForModel;
+    csts_charged.erase( std::remove_if( csts_charged.begin(), csts_charged.end(),
+                        [] (xAOD::JetConstituent constituent) -> bool {
+                          const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
+                          return ufo -> signalType() != xAOD::FlowElement::SignalType::Charged;
+                        }), csts_charged.end()) ;
 
-  // use ML tool on constituents
-  TH2D ImageCharged  = MakeJetImage("Charged" , &jet, csts_charged );
-  TH2D ImageNeutral  = MakeJetImage("Neutral" , &jet, csts_neutral );
-  TH2D ImageCombined = MakeJetImage("Combined", &jet, csts_combined);
+    // constituents - neutral
+    std::vector<xAOD::JetConstituent> csts_neutral = constituentsForModel;
+    csts_neutral.erase( std::remove_if( csts_neutral.begin(), csts_neutral.end(),
+                        [] (xAOD::JetConstituent constituent) -> bool {
+                          const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
+                          return ufo -> signalType() != xAOD::FlowElement::SignalType::Neutral;
+                        }), csts_neutral.end()) ;
 
-  std::vector<TH2D> Images = {ImageCharged, ImageNeutral, ImageCombined};
+    // constituents - combined
+    std::vector<xAOD::JetConstituent> csts_combined = constituentsForModel;
+    csts_combined.erase( std::remove_if( csts_combined.begin(), csts_combined.end(),
+                        [] (xAOD::JetConstituent constituent){
+                          const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
+                          return ufo -> signalType() != xAOD::FlowElement::SignalType::Combined;
+                        }), csts_combined.end()) ;
 
-  // evaluate the model
-  score = m_MLBosonTagger -> retrieveConstituentsScore(Images);
+    // use ML tool on constituents
+    TH2D ImageCharged  = MakeJetImage("Charged" , jet, csts_charged );
+    TH2D ImageNeutral  = MakeJetImage("Neutral" , jet, csts_neutral );
+    TH2D ImageCombined = MakeJetImage("Combined", jet, csts_combined);
 
-  // save decorator
-  SG::WriteDecorHandle<xAOD::Jet, float> decConstScore(m_decConstScoreKey);
-  decConstScore(jet) = score;
+    std::vector<TH2D> Images = {ImageCharged, ImageNeutral, ImageCombined};
+
+    // evaluate the model
+    score = m_MLBosonTagger -> retrieveConstituentsScore(Images);
+
+    // save decorator
+    decConstScore(*jet) = score;
+  }
 
   return StatusCode::SUCCESS;
 
 }
 
-StatusCode JSSTaggerUtils::GetConstScore(const xAOD::Jet& jet) const {
+StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
 
-  // init value
-  float score (-99.);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decNConstituents(m_decNConstituentsKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decNTopoTowers(m_decNTopoTowersKey);
 
-  // get constituents
-  std::vector<xAOD::JetConstituent> constituents = jet.getConstituents().asSTLVector();
-  std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
+  for(const xAOD::Jet *jet : jets){
 
-  int MaxConstituents (100);
-  std::vector<xAOD::JetConstituent> constituentsForModel;
+    // init value
+    float score (-99.);
 
-  if( constituents.size() > 100 )
-    constituentsForModel = std::vector<xAOD::JetConstituent> (constituents.begin(), constituents.begin() + MaxConstituents);
-  else 
-    constituentsForModel = constituents;
+    // get constituents
+    std::vector<xAOD::JetConstituent> constituents = jet -> getConstituents().asSTLVector();
+    std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
 
-  // get towers
-  std::vector<const xAOD::CaloCluster*> towers;
-  SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
-  if (towersAcc.isAvailable(jet)){
-    // Vector of towers linked to jets
-    std::vector<ElementLink<DataVector<xAOD::IParticle>>> towerLinks = towersAcc(jet);
-    for (auto link_itr : towerLinks){
-      if (!link_itr.isValid()) continue;
-      towers.push_back(dynamic_cast<const xAOD::CaloCluster *>(*link_itr));
+    int MaxConstituents (100);
+    std::vector<xAOD::JetConstituent> constituentsForModel;
+
+    if( constituents.size() > 100 )
+      constituentsForModel = std::vector<xAOD::JetConstituent> (constituents.begin(), constituents.begin() + MaxConstituents);
+    else 
+      constituentsForModel = constituents;
+
+    // get towers
+    std::vector<const xAOD::CaloCluster*> towers;
+    SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
+    if (towersAcc.isAvailable(*jet)){
+      // Vector of towers linked to jets
+      std::vector<ElementLink<DataVector<xAOD::IParticle>>> towerLinks = towersAcc(*jet);
+      for (auto link_itr : towerLinks){
+        if (!link_itr.isValid()) continue;
+        towers.push_back(dynamic_cast<const xAOD::CaloCluster *>(*link_itr));
+      }
     }
+    std::sort( towers.begin(), towers.end(), DescendingPtSorterConstituents);
+
+    // use ML tool on constituents
+    std::vector<float> m, pT, eta, phi, E;
+    for(auto cnst : constituents){
+      m.push_back( cnst -> m() );
+      pT.push_back( cnst -> pt() );
+      eta.push_back( cnst -> eta() );
+      phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
+    }
+    std::vector<std::vector<float>> constituents_packed = {m, pT, eta, phi};
+
+    m.clear(); pT.clear(); eta.clear(); phi.clear();
+    for(auto cnst : towers){
+      m.push_back( cnst -> m() );
+      pT.push_back( cnst -> pt() );
+      eta.push_back( cnst -> eta() );
+      phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
+    }
+    std::vector<std::vector<float>> towers_packed = {m, pT, eta, phi};
+
+    // pack for the ML tool
+    std::vector<std::vector<float>> inputs_packed = {
+      constituents_packed.at(0), constituents_packed.at(1), constituents_packed.at(2), constituents_packed.at(3),
+      towers_packed.at(0), towers_packed.at(1), towers_packed.at(2), towers_packed.at(3),
+    };
+
+    // evaluate the model
+    if( (constituents.size() + towers.size()) > 1 )
+      score = m_MLBosonTagger -> retrieveConstituentsScore(inputs_packed);
+
+    // save decorator
+    decConstScore(*jet) = score;
+
+    // and inputs as well
+    decNConstituents(*jet) = constituents.size();
+    decNTopoTowers(*jet) = towers.size();
+
   }
-  std::sort( towers.begin(), towers.end(), DescendingPtSorterConstituents) ;
-
-  // use ML tool on constituents
-  std::vector<float> m, pT, eta, phi;
-  for(auto cnst : constituents){
-    m.push_back( cnst -> m() );
-    pT.push_back( cnst -> pt() );
-    eta.push_back( cnst -> eta() );
-    phi.push_back( cnst -> phi() );
-  }
-  std::vector<std::vector<float>> constituents_packed = {m, pT, eta, phi};
-
-  m.clear(); pT.clear(); eta.clear(); phi.clear();
-  for(auto cnst : towers){
-    m.push_back( cnst -> m() );
-    pT.push_back( cnst -> pt() );
-    eta.push_back( cnst -> eta() );
-    phi.push_back( cnst -> phi() );
-  }
-  std::vector<std::vector<float>> towers_packed = {m, pT, eta, phi};
-
-  // pack for the ML tool
-  std::vector<std::vector<float>> inputs_packed = {
-    constituents_packed.at(0), constituents_packed.at(1), constituents_packed.at(2), constituents_packed.at(3),
-    towers_packed.at(0), towers_packed.at(1), towers_packed.at(2), towers_packed.at(3),
-  };
-
-  // evaluate the model
-  //if( constituents.size()>1 && towers.size()>0 )
-  if( constituents.size()>1 )
-    score = m_MLBosonTagger -> retrieveConstituentsScore(inputs_packed);
-
-  // save decorator
-  SG::WriteDecorHandle<xAOD::Jet, float> decConstScore(m_decConstScoreKey);
-  decConstScore(jet) = score;
-
-  // and inputs as well
-  SG::WriteDecorHandle<xAOD::Jet, float> decNConstituents(m_decNConstituentsKey);
-  decNConstituents(jet) = constituents.size();
-
-  SG::WriteDecorHandle<xAOD::Jet, float> decNTopoTowers(m_decNTopoTowersKey);
-  decNTopoTowers(jet) = towers.size();
 
   return StatusCode::SUCCESS;
 
 }
 
-StatusCode JSSTaggerUtils::GetHLScore(const xAOD::Jet& jet) const {
+StatusCode JSSTaggerUtils::GetQGConstScore(const xAOD::JetContainer& jets) const {
 
-  // init value
-  float score (-99.);
-  
-  // get input variables
-  std::map<std::string, double> JSSVars = GetJSSVars(jet);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
 
-  // evaluate the model
-  score = m_MLBosonTagger_HL -> retrieveHighLevelScore(JSSVars);
-  
-  // save decorator
-  SG::WriteDecorHandle<xAOD::Jet, float> decHLScore(m_decHLScoreKey);
-  decHLScore(jet) = score;
+  for(const xAOD::Jet *jet : jets){
+
+    // init value
+    float score (-99.);
+
+    // get constituents
+    std::vector<xAOD::JetConstituent> constituents = jet -> getConstituents().asSTLVector();
+    std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
+
+    // get towers
+    std::vector<const xAOD::CaloCluster*> towers;
+    SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
+    if (towersAcc.isAvailable(*jet)){
+      // Vector of towers linked to jets
+      std::vector<ElementLink<DataVector<xAOD::IParticle>>> towerLinks = towersAcc(*jet);
+      for (auto link_itr : towerLinks){
+        if (!link_itr.isValid()) continue;
+        towers.push_back(dynamic_cast<const xAOD::CaloCluster *>(*link_itr));
+      }
+    }
+    std::sort( towers.begin(), towers.end(), DescendingPtSorterConstituents) ;
+
+    // use ML tool on constituents
+    std::vector<float> m, pT, eta, phi, E, isTower, px, py, pz;
+    for(auto cnst : constituents){
+      m.push_back( cnst -> m() );
+      pT.push_back( cnst -> pt() );
+      eta.push_back( cnst -> eta() );
+      phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
+      isTower.push_back(0.);
+      px.push_back( cnst -> pt() * std::cos(cnst -> phi()) );
+      py.push_back( cnst -> pt() * std::sin(cnst -> phi()) );
+      pz.push_back( cnst -> pt() * std::sinh(cnst -> eta()) );
+    }
+
+    for(auto cnst : towers){
+      m.push_back( cnst -> m() );
+      pT.push_back( cnst -> pt() );
+      eta.push_back( cnst -> eta() );
+      phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
+      isTower.push_back(1.);
+      px.push_back( cnst -> pt() * std::cos(cnst -> phi()) );
+      py.push_back( cnst -> pt() * std::sin(cnst -> phi()) );
+      pz.push_back( cnst -> pt() * std::sinh(cnst -> eta()) );
+    }
+
+    // put together constituents + towers
+    std::vector<std::vector<float>> features_packed;
+
+    for(long unsigned int f=0; f<pT.size(); f++){
+      std::vector<float> features = { m.at(f), pT.at(f), eta.at(f), phi.at(f), E.at(f), isTower.at(f), px.at(f), py.at(f), pz.at(f) };
+      features_packed.push_back(features);
+    }
+
+    // sort them
+    std::sort(features_packed.begin(), features_packed.end(), [](const auto& i, const auto& j) { return i.at(1) > j.at(1); });
+
+    // global aux variables
+    float sum_features_px = std::accumulate(px.begin(), px.end(), 0);
+    float sum_features_py = std::accumulate(py.begin(), py.end(), 0);
+    float sum_features_pz = std::accumulate(pz.begin(), pz.end(), 0);
+
+    float sum_features_pT = sqrt( sum_features_px*sum_features_px + sum_features_py*sum_features_py);
+    float sum_features_eta = std::asinh( sum_features_pz / Clip(sum_features_pT) );
+    float sum_features_phi = std::atan2( sum_features_py, sum_features_px );
+
+    // build constituents and interaction variables
+    std::vector<std::vector<float>> const_vars;
+    std::vector<std::vector<std::vector<float>>> inter_vars;
+
+    for(auto const &feature_i : features_packed){
+
+      // calculate variables: constituents
+      float log_pT = log( Clip(feature_i.at(1) / sum_features_pT) );
+      float log_E = log( Clip(feature_i.at(4) / sum_features_pT) );
+      float eta = feature_i.at(2) - sum_features_eta;
+      float phi = feature_i.at(3) - sum_features_phi;
+      float DR = sqrt((feature_i.at(2) - sum_features_eta)*(feature_i.at(2) - sum_features_eta) + (feature_i.at(3) - sum_features_phi)*(feature_i.at(3) - sum_features_phi));
+      float log_m = log(Clip(feature_i.at(0)));
+      float type = feature_i.at(5);
+
+      std::vector<float> vars = {log_pT, log_E, eta, phi, DR, log_m, type};
+      const_vars.push_back(vars);
+
+      // calculate variables: interactions
+      std::vector<std::vector<float>> inter_vars_int;
+      for(auto const &feature_j : features_packed){
+
+        // preparing variables
+        float delta = sqrt((feature_i.at(2)-feature_j.at(2))*(feature_i.at(2)-feature_j.at(2)) + (feature_i.at(3)-feature_j.at(3))*(feature_i.at(3)-feature_j.at(3)));
+        float min = feature_i.at(1) != feature_j.at(1) ? std::min(feature_i.at(1), feature_j.at(1)): 0.;
+        float mass2 = (feature_i.at(4)/sum_features_pT + feature_j.at(4)/sum_features_pT) * (feature_i.at(4)/sum_features_pT + feature_j.at(4)/sum_features_pT);
+        mass2 -= (feature_i.at(6)/sum_features_pT + feature_j.at(6)/sum_features_pT) * (feature_i.at(6)/sum_features_pT + feature_j.at(6)/sum_features_pT);
+        mass2 -= (feature_i.at(7)/sum_features_pT + feature_j.at(7)/sum_features_pT) * (feature_i.at(7)/sum_features_pT + feature_j.at(7)/sum_features_pT);
+        mass2 -= (feature_i.at(8)/sum_features_pT + feature_j.at(8)/sum_features_pT) * (feature_i.at(8)/sum_features_pT + feature_j.at(8)/sum_features_pT);
+
+        // final values
+        float log_delta = log(Clip(delta));
+        float log_mindelta = log(Clip(min * delta  / sum_features_pT));
+        float min_over_pT = min / (feature_i.at(1) + feature_j.at(1));
+        float log_mass = log(Clip(mass2));
+
+        // set the diagonal to 0
+        if(feature_i==feature_j){
+          log_delta = 0;
+          log_mindelta = 0;
+          min_over_pT = 0;
+          log_mass = 0;
+        }
+
+        std::vector<float> vars = { log_delta,
+                                    log_mindelta,
+                                    min_over_pT,
+                                    log_mass
+                                  };
+        inter_vars_int.push_back(vars);
+
+      }
+
+      inter_vars.push_back(inter_vars_int);
+    }
+
+    // evaluate the model
+    if( (constituents.size() + towers.size()) > 1 ) 
+      score = m_MLBosonTagger -> retrieveConstituentsScore(const_vars, inter_vars);
+
+    // save decorator
+    decConstScore(*jet) = score;
+
+  }
+
+  return StatusCode::SUCCESS;
+
+}
+
+StatusCode JSSTaggerUtils::GetHLScore(const xAOD::JetContainer& jets) const {
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decHLScore(m_decHLScoreKey);
+
+  // make available JSS variables
+  decorateJSSRatios(jets);
+
+  for(const xAOD::Jet* jet : jets){
+
+    // init value
+    float score (-99.);
+    
+    // get input variables
+    std::map<std::string, double> JSSVars = GetJSSVars(*jet);
+
+    // evaluate the model
+    score = m_MLBosonTagger_HL -> retrieveHighLevelScore(JSSVars);
+    
+    // save decorator
+    decHLScore(*jet) = score;
+
+  }
 
   return StatusCode::SUCCESS;
 
@@ -353,26 +487,28 @@ std::map<std::string, double> JSSTaggerUtils::GetJSSVars(const xAOD::Jet& jet) c
 
   std::map<std::string, double> JSSVars;
 
-  // make available some missing JSS variables
-  calculateJSSRatios(jet);
-
-  int pv_location = findPV();
-  if(pv_location != -1)
-    GetUnGroomTracks(jet, pv_location);
+  // retrieve ungroomed tracks multiplicity
+  int nUngrTracks (-1);
+  SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
+  if(readNtrk500.isAvailable()){
+    nUngrTracks = readNtrk500(jet);
+  }
+  else{
+    int pv_location = findPV();
+    if(pv_location != -1)
+      nUngrTracks = GetUnGroomTracks(jet, pv_location);
+  }
 
   // store input variables
   JSSVars["pT"] = jet.pt();
-  SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
-  JSSVars["nTracks"] = readNtrk500(jet);
+  JSSVars["nTracks"] = nUngrTracks;
 
-  SG::ReadDecorHandle<xAOD::Jet, float> readConstScore(m_readConstScoreKey);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readConstScore(m_readConstScoreKey);
   JSSVars["CNN"] = readConstScore(jet);
 
   // define the decorator readers
   SG::ReadDecorHandle<xAOD::JetContainer, float> readSplit12(m_readSplit12Key);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readSplit23(m_readSplit23Key);
-
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readD2(m_readD2Key);
 
   SG::ReadDecorHandle<xAOD::JetContainer, float> readTau1_wta(m_readTau1WTAKey);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readTau2_wta(m_readTau2WTAKey);
@@ -392,13 +528,14 @@ std::map<std::string, double> JSSTaggerUtils::GetJSSVars(const xAOD::Jet& jet) c
   static const SG::ConstAccessor<float> AplanarityAcc("Aplanarity");
   static const SG::ConstAccessor<float> ZCut12Acc("ZCut12");
   static const SG::ConstAccessor<float> KtDRAcc("KtDR");
+  static const SG::ConstAccessor<float> D2Acc("D2");
 
   // split
   JSSVars["Split12"] = readSplit12(jet);
   JSSVars["Split23"] = readSplit23(jet);
 
   // Energy Correlation Functions
-  JSSVars["D2"] = readD2(jet);
+  JSSVars["D2"] = D2Acc(jet);
 
   // Tau123 WTA
   JSSVars["Tau1_wta"] = readTau1_wta(jet);
@@ -439,7 +576,7 @@ StatusCode JSSTaggerUtils::ReadScaler(){
   };
 
   // loop and read
-  for(std::string var : vars_list){
+  for(const std::string & var : vars_list){
     std::string s_mean = var + "_mean";
     std::string s_std  = var + "_std";
     double mean = m_configReader.GetValue(s_mean.c_str(), -99.);
@@ -505,8 +642,6 @@ StatusCode JSSTaggerUtils::ReadScaler(){
 
       if( eta>m_min_eta && eta<m_max_eta && phi>m_min_phi && phi<m_max_phi ) // avoid overflow pixels
 	      Image -> SetBinContent( x, y, current_z += z );
-
-        std::cout << " *** " << x << " " << y << " " << current_z << std::endl;
     }
 
     return *Image;

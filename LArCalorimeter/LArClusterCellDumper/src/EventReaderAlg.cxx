@@ -17,6 +17,14 @@
 #include "TruthUtils/MagicNumbers.h"
 
 #include <bitset>
+#include "CLHEP/Units/SystemOfUnits.h"
+#include "TTree.h"
+#include "xAODEgamma/EgammaxAODHelpers.h" //for getAssociatedTopoClusters
+
+
+using CLHEP::twopi;
+using CLHEP::GeV;
+using CLHEP::pi;
 
 EventReaderAlg::EventReaderAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
     EventReaderBaseAlg(name, pSvcLocator)

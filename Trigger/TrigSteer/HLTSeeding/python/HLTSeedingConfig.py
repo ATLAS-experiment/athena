@@ -262,6 +262,9 @@ def L1TriggerResultMakerCfg(flags):
         l1trMaker.MuRoIKey = "LVL1MuonRoIs"
         from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToolCfg
         l1trMaker.ThresholdPatternTools += [acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))]
+    elif flags.Trigger.L1.doMuon and flags.Trigger.enableL0Muon:   # Run-4+
+        l1trMaker.MuRoIKey = "LVL1MuonRoIs"
+        l1trMaker.ThresholdPatternTools += [CompFactory.MURoIThresholdsTool()]
 
     # L1Calo RoIs
     if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1:
@@ -315,7 +318,7 @@ def HLTSeedingCfg(flags, seqName = None):
 
     from HLTSeeding.HLTSeedingMonitoring import CTPUnpackingMonitoring, L1DataConsistencyMonitoring
     decoderAlg = CompFactory.HLTSeeding(
-        RoIBResult = "RoIBResult" if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1 else "",
+        RoIBResult = "RoIBResult", # Not yet ready to disable, see ATR-29954
         L1TriggerResult = "L1TriggerResult" if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 else "",
         HLTSeedingSummaryKey = "HLTSeedingSummary", # Transient, consumed by DecisionSummaryMakerAlg
         ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.forceEnableAllChains,
@@ -323,7 +326,7 @@ def HLTSeedingCfg(flags, seqName = None):
     )
 
     # Add L1DataConsistencyChecker unless we forceEnableAllChains which always results in missing TOBs
-    if not flags.Trigger.forceEnableAllChains:
+    if not (flags.Trigger.forceEnableAllChains or flags.Trigger.disableL1ConsistencyChecker):
         def checkConsistency(thrName):
             '''Filter out threshold types for which HLT doesn't read TOBs from L1 readout'''
             return thrName not in ['FSNOSEED','TE','XE','XS'] and not thrName.startswith('PROBE')

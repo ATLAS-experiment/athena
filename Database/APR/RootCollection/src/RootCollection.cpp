@@ -6,6 +6,11 @@
 #include "CollectionCommon.h"
 #include "RootCollectionQuery.h"
 
+#include "CoralBase/Attribute.h"
+#include "CoralBase/AttributeList.h"
+
+#include "RootCollection/AttributeListLayout.h"
+
 #include "PersistentDataModel/Token.h"
 #include "POOLCore/Exception.h"
 #include "RootUtils/APRDefaults.h"
@@ -29,6 +34,7 @@
 
 #include <map>
 #include <vector>
+#include <deque>
 #include <ctype.h>
 
 
@@ -54,9 +60,8 @@ namespace pool {
       m_session( 0 ),
       m_open( false ),
       m_readOnly( mode == ICollection::READ ? true : false ),
-      m_poolOut( "RootCollection"),
-      m_schemaEditor( 0 ),
-      m_dataEditor( 0 )
+      m_schemaWritten( true ),
+      m_poolOut( "RootCollection")
     {
        RootCollection::open();
     }
@@ -74,6 +79,52 @@ namespace pool {
      }
 
 
+     void RootCollection::addTreeBranch( const std::string& name, const std::string& type_name )
+     {
+        static const std::map< std::string, char > typeDict = {
+           // primitive types supported in ROOT (4.00.08) TTrees 
+           //  - C : a character string terminated by the 0 character
+           //  - B : an 8 bit signed integer (Char_t)
+           //  - b : an 8 bit unsigned integer (UChar_t)
+           //  - S : a 16 bit signed integer (Short_t)
+           //  - s : a 16 bit unsigned integer (UShort_t)
+           //  - I : a 32 bit signed integer (Int_t)
+           //  - i : a 32 bit unsigned integer (UInt_t)
+           //  - F : a 32 bit floating point (Float_t)
+           //  - D : a 64 bit floating point (Double_t)
+           //  - L : a 64 bit signed integer (Long64_t)
+           //  - l : a 64 bit unsigned integer (ULong64_t)
+           { "double", 'D' },
+           { "long double", 'D' },        // only 64 bit doubles are supported 
+           { "float", 'F' },
+           { "int", 'I' },
+           { "long", 'I' },
+           { "unsigned int", 'i' },
+           { "unsigned long", 'i' },
+           { "long long", 'L' },
+           { "unsigned long long", 'l' },
+           { "short", 'S' },
+           { "unsigned short", 's' },
+           { "char", 'B' },
+           { "unsigned char", 'b' },
+           { "bool", 'B' },
+           { "string", 'C' },
+           { "Token", 'C' },
+        };
+
+        std::string type = "/?";
+        auto it = typeDict.find (type_name);
+        if (it != typeDict.end()) {
+          type[1] = it->second;
+        }
+        std::string leaflist = name + type;
+        m_tree->Branch( name.c_str(), 0, leaflist.c_str() );
+     
+        m_schemaWritten = false;
+        m_poolOut << coral::Debug << "Created Branch " <<  name
+                  << ", Type=" <<  type_name << coral::MessageStream::endmsg;
+     }
+
      void  RootCollection::delayedFileOpen( const std::string& method )
      {
         if( m_open && !m_file && m_session && m_mode != ICollection::READ ) {
@@ -87,7 +138,13 @@ namespace pool {
            m_poolOut << coral::Info << "File " << m_fileName << " opened in " << method <<  coral::MessageStream::endmsg;
  
            m_tree->SetDirectory(m_file);
-           m_schemaEditor->writeSchema();
+           if( !m_schemaWritten ) {
+              m_tree->GetCurrentFile()->cd();
+              AttributeListLayout all( m_description );
+              m_poolOut << coral::Debug << "###### Writing schema...." << coral::MessageStream::endmsg;
+              all.Write( RootCollection::c_attributeListLayoutName, TObject::kOverwrite );
+              m_schemaWritten = true;
+           }
         }
      }
 
@@ -107,10 +164,41 @@ namespace pool {
         
         
      
+     void RootCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
+     {
+        if( m_mode == pool::ICollection::READ ) {
+           throw pool::Exception( "Cannot modify the data of a collection in READ open mode.", "RootCollection::insertRow", "RootCollection" );
+        }
+        std::map< std::string, TBranch* > branchByName;
+        const TObjArray* branches = m_tree->GetListOfBranches();
+        Int_t nbranches = branches->GetEntriesFast();
+        for(int i = 0; i < nbranches; ++i) {
+           TBranch* branch = (TBranch*)branches->UncheckedAt(i);
+           branchByName[ branch->GetName() ] = branch;
+        }
+        std::deque<std::string> stringBuffer;
+        for( pool::TokenList::const_iterator iToken = inputRowBuffer.tokenList().begin();
+              iToken != inputRowBuffer.tokenList().end(); ++iToken )  {
+           stringBuffer.push_back( iToken->toString() );
+           branchByName[ iToken.tokenName() ]->SetAddress( stringBuffer.back().data() );
+        }
+        coral::AttributeList attribs_nc = inputRowBuffer.attributeList();
+        for( coral::Attribute& att : attribs_nc ) {
+           if( att.specification().type() == typeid(std::string) ) {
+              std::string&       str = att.data<std::string>();
+              branchByName[ att.specification().name() ]->SetAddress( str.data() );
+           } else {
+              branchByName[ att.specification().name() ]->SetAddress( att.addressOfData() );
+           }
+        }
+	if( m_tree->Fill() <= 0 ) throw pool::Exception( "TTree::Fill() failed", "RootCollection::insertRow", "RootCollection" );
+     }
+        
+        
+     
      void RootCollection::commit( bool )
      {
         delayedFileOpen("commit");
-
         if( m_open ) {
 
 	  if (m_tree->GetCurrentFile() == 0) {
@@ -154,7 +242,13 @@ namespace pool {
              }
           }
           if( m_mode != ICollection::READ ) {
-             m_schemaEditor->writeSchema();
+             if( !m_schemaWritten ) {
+                m_tree->GetCurrentFile()->cd();
+                AttributeListLayout all( m_description );
+                m_poolOut << coral::Debug << "###### Writing schema...." << coral::MessageStream::endmsg;
+                all.Write( RootCollection::c_attributeListLayoutName, TObject::kOverwrite );
+                m_schemaWritten = true;
+             }
              // m_tree->Print();
              // m_file->Write( "0", TObject::kOverwrite );
           }
@@ -177,8 +271,6 @@ namespace pool {
        }
        m_tree = 0;
        m_open = false;
-       delete m_schemaEditor;   m_schemaEditor = 0;
-       delete m_dataEditor;   m_dataEditor = 0;
     }       
        
      
@@ -340,8 +432,41 @@ namespace pool {
                                    "RootCollection::open", 
                                    "RootCollection" );
          }
-         m_schemaEditor = new RootCollectionSchemaEditor( *this, m_description, m_tree );
-         m_schemaEditor->readSchema();
+
+         AttributeListLayout* all = dynamic_cast<AttributeListLayout*>( m_tree->GetCurrentFile()->Get(RootCollection::c_attributeListLayoutName) );
+         CollectionDescription desc( m_description.name(), m_description.type(), m_description.connection() );
+         // clear the description
+         m_description = desc;
+         if( all ) {
+            // Copy the specification to collection description
+            all->fillDescription( m_description );
+            delete all;
+         } else {
+            m_poolOut << coral::Warning << " Collection Description not found in file, reconstructing " <<  corENDL;
+            bool      foundToken = false;
+            for( int i = 0; i < m_tree->GetNbranches(); i++ ) {
+               TBranch* branch = (TBranch*)m_tree->GetListOfBranches()->UncheckedAt(i);
+               std::string column_name = branch->GetName();
+               std::string column_type = branch->GetTitle();
+               m_poolOut << coral::Debug << "  + adding column: " << column_name <<  corENDL;
+               m_poolOut << coral::Debug << "      column type: " << column_type <<  corENDL;
+               if( column_type.substr(0,5) != "Token" ) {
+                  m_description.insertColumn( column_name, column_type.substr(0, column_type.size() -2) );
+               } else {
+                  if( !foundToken ) {
+                     foundToken = true;
+                     m_description.setEventReferenceColumnName( column_name );
+                  } else {
+                     throw pool::Exception( "can't reconstruct Description if more than one Token column",
+                        "pool::RootCollection::readAttributeListSpecification",
+                        "RootCollection" );
+                  }
+               }
+            }
+            if( !foundToken ) {
+               m_description.setEventReferenceColumnName( "DummyRef" );
+            }
+         }
       }
 
       if( m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
@@ -354,14 +479,18 @@ namespace pool {
         }
         m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
         m_poolOut << coral::Debug << "Created Collection TTree. Collection file will be " << m_fileName << coral::MessageStream::endmsg;
-        m_schemaEditor = new RootCollectionSchemaEditor( *this, m_description, m_tree );
-        m_schemaEditor->createTreeBranches();
+        m_schemaWritten = false;
+        for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
+             std::string columnName = m_description.tokenColumn(col_id).name();
+             addTreeBranch( columnName, CollectionBaseNames::tokenTypeName );
+        }
+        for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
+             const ICollectionColumn& column = m_description.attributeColumn(col_id);
+             addTreeBranch( column.name(), column.type() );
+        }
       }
 
-      m_dataEditor = new RootCollectionDataEditor( m_description, m_tree, m_poolOut );
       m_poolOut << coral::Info <<  "Root collection opened, size = " << m_tree->GetEntries() << corENDL;
-      TTree::SetMaxTreeSize(TTREE_MAX_SIZE);
-      m_tree->SetAutoFlush(TTREE_AUTO_FLUSH);
 
       if( m_session && m_mode == ICollection::UPDATE ) {
         m_tree->SetDirectory(0);
@@ -464,31 +593,10 @@ namespace pool {
     }
 
      
-    ICollectionSchemaEditor& RootCollection::schemaEditor()
-    {
-      if ( m_mode == pool::ICollection::READ )   {
-        std::string errorMsg = "Cannot modify the schema of a collection in READ open mode.";
-        throw pool::Exception( errorMsg,
-          "RootCollection::schemaEditor",
-          "RootCollection" );
-      } 
-      return *m_schemaEditor; 
-    }
-
-     
-    ICollectionDataEditor& RootCollection::dataEditor()
-    {
-      if( m_mode == pool::ICollection::READ ) {
-        throw pool::Exception( "Cannot modify the data of a collection in READ open mode.", "RootCollection::dataEditor", "RootCollection" );
-      }
-      return *m_dataEditor;
-    }
-
-     
     ICollectionQuery* RootCollection::newQuery()
     {
        if( !isOpen() ) {
-          throw pool::Exception( "Attempt to query a closed collection.", "RootCollection::dataEditor", "RootCollection" );
+          throw pool::Exception( "Attempt to query a closed collection.", "RootCollection::newQuery", "RootCollection" );
        }
        return new RootCollectionQuery( m_description, m_tree );
     }

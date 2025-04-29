@@ -7,15 +7,18 @@
 ArtInFile=$1
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
+dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
 n_events=-1
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
+dcubeXmlTechEffAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXmlTechEff -print -quit 2>/dev/null)
 # Don't run if dcube config not found
 if [ -z "$dcubeXmlAbsPath" ]; then
     echo "art-result: 1 dcube-xml-config"
     exit 1
 fi
+condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 run () {
     name="${1}"
@@ -33,15 +36,16 @@ run () {
     return $rc
 }
 
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,Acts.+FindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+SurfaceError:1,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
+ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,Acts.+FindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+SurfaceError:1,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
 
 run "Reconstruction-ckf-electron" \
     Reco_tf.py \
     --preExec "flags.Exec.FPE=-1;" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsAloneWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.ckf.root \
+    --conditionsTag "default:${condition}" \
     --maxEvents ${n_events}
 
 reco_rc=$?
@@ -50,7 +54,6 @@ reco_rc=$?
 if [[ $reco_rc != 0 && $reco_rc != 68 ]]; then
     exit $reco_rc
 fi
-
 
 run "IDPVM-ckf-electron" \
     runIDPVM.py \
@@ -64,12 +67,45 @@ run "IDPVM-ckf-electron" \
 
 ckf_rc=$?
 
-if [ $ckf_rc != 0 ]; then
-    exit $ckf_rc
+# legacy athena ITk reconstruction
+run "Reconstruction-legacy-athena" \
+    Reco_tf.py \
+    --preExec "flags.Exec.FPE=-1;" \
+    --ignorePatterns "${ignore_pattern}" \
+    --inputRDOFile ${ArtInFile} \
+    --outputAODFile AOD.athena.ckf.root \
+    --conditionsTag "default:${condition}" \
+    --maxEvents ${n_events}
+
+reco_rc=$?
+
+# don't stop right away on an ERROR message ($?=68)
+if [[ $reco_rc != 0 && $reco_rc != 68 ]]; then
+    exit $reco_rc
 fi
 
+run "IDPVM-legacy-athena" \
+    runIDPVM.py \
+    --filesInput AOD.athena.ckf.root \
+    --outputFile idpvm.athena.ckf.root \
+    --doTightPrimary \
+    --doHitLevelPlots \
+    --HSFlag All \
+    --doExpertPlots
+
+ckf_legacy_rc=$?
+
+if [ $ckf_rc != 0 ]; then
+    exit_rc=$ckf_rc
+else
+    exit_rc=$ckf_legacy_rc
+fi
 
 echo "download latest result..."
+art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
+ls -la "$lastref_dir"
+
+echo "download latest legacy athena result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
@@ -81,5 +117,26 @@ if [ $ckf_rc == 0 ]; then
         -r ${lastref_dir}/idpvm.ckf.root \
         idpvm.ckf.root
 fi
-    
+
+if [ $ckf_legacy_rc == 0 ]; then
+    run "dcube-legacy-athena-ckf-last-electron" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        -p -x dcube_athena_shifter_last \
+        -c ${dcubeXmlAbsPath} \
+        -r ${lastref_dir}/idpvm.athena.ckf.root \
+        idpvm.athena.ckf.root
+fi
+
+if [ $ckf_rc == 0 ] && [ $ckf_legacy_rc == 0 ]; then
+    # Compare ACTS performance WRT legacy Athena
+    run "dcube-comparison-athena-acts" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        -p -x dcube_athena_acts_comparison \
+        -c ${dcubeXmlTechEffAbsPath} \
+        -r idpvm.athena.ckf.root \
+        -M "acts" \
+        -R "athena" \
+        idpvm.ckf.root
+fi
+
 exit $exit_rc

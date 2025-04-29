@@ -108,7 +108,7 @@ def decodeThreshold( threshold_btag ):
         log.debug("tagger = %s not amidst allowed taggers ",threshold_btag)
         raise RuntimeError("Can't recognize tagger during TrigBjetHypoTool configuration. Tagger = "+threshold_btag)
 
-    btagger = "GN120220813" # default tagger for boffperf chain monitoring
+    btagger = "GN220240122" # default tagger for boffperf chain monitoring
     bbtagger = "dl1dbb20230314"
 
     bbcut = bbTaggingWP.get(threshold_btag)

@@ -62,7 +62,7 @@ StatusCode StripDetectorTool::create()
   // The * converts a ConstPVLink to a ref to a GeoVPhysVol
   // The & takes the address of the GeoVPhysVol
   GeoPhysVol *world = &*theExpt->getPhysVol();
-  auto *manager = new InDetDD::SCT_DetectorManager(&*detStore(), m_detectorName);
+  auto *manager = new InDetDD::SCT_DetectorManager(&*detStore(), m_detectorName, m_doEndcapEtaNeighbour);
   manager->addFolder(m_alignmentFolderName);
 
   InDetDD::ITk::StripGmxInterface gmxInterface(manager, m_commonItems.get(), &m_waferTree);

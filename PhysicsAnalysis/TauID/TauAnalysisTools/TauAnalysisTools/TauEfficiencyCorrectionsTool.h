@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUEFFICIENCYCORRECTIONSTOOL_H
@@ -10,7 +10,7 @@
   maintainer: Guillermo Hamity
   mail: guillermo.nicolas.hamity@cern.ch
   documentation in: ../README.rst
-                    https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/TauID/TauAnalysisTools/README.rst
+                    https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/README.rst
 */
 
 // Framework include(s):
@@ -86,7 +86,8 @@ private:
   std::string GetTriggerSFMeasurementString() const;
 
   StatusCode initializeTools_2022_prerec();
-  
+  StatusCode initializeTools_2025_prerec(); 
+
   StatusCode readRandomRunNumber();
 
 private:
@@ -117,7 +118,7 @@ private:
   bool m_bReadRandomRunNumber;
   int m_iJetIDLevel;
   int m_iEleIDLevel;
-  std::string m_sMCCampaign;
+  std::string m_sCampaign;
   bool m_useFastSim;
   bool m_firstEvent = false;
   unsigned int m_iRunNumber;

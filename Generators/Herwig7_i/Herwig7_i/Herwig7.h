@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // -*- C++ -*-
 
@@ -39,10 +39,10 @@ public:
   Herwig::RunMode::Mode runMode() const { return(m_runMode); }
 
   /// Try to resume execution from an earlier interrupted run.
-  virtual bool resume() const { return(m_resume); }
+  virtual bool resume() const { return false; }
 
   /// Require verbose progress markers
-  virtual bool tics() const { return(m_tics); }
+  virtual bool tics() const { return false; }
 
 
   /// Repository name to operate on
@@ -50,7 +50,7 @@ public:
 
   /// Name of the file to be read
   virtual std::string inputfile() const { return(m_inputfile); }
-  void inputfile(const std::string inputfile) { m_inputfile = inputfile; }
+  void inputfile(const std::string& inputfile) { m_inputfile = inputfile; }
 
   /// Name of the setup file to be read, to modify the repository
   virtual std::string setupfile() const { return(m_setupfile); }
@@ -69,7 +69,7 @@ public:
   virtual const std::vector<std::string> & appendReadDirectories() const { return(m_appendReadDirectories); }
 
 
-  virtual long N() const { return(m_N); }      /// The number of events to generate
+  virtual long N() const { return 0; }      /// The number of events to generate
 
   virtual int seed() const { return(m_seed); } /// The seed to use
   void seed(int seed) { m_seed = seed; }
@@ -104,10 +104,7 @@ public:
 
 private:
 
-  Herwig::RunMode::Mode m_runMode;
-
-  bool m_resume;
-  bool m_tics;
+  Herwig::RunMode::Mode m_runMode{};
 
   std::string m_repository;
   std::string m_inputfile;
@@ -119,11 +116,10 @@ private:
   std::vector<std::string> m_prependReadDirectories;
   std::vector<std::string> m_appendReadDirectories;
 
-  long m_N;
-  int m_seed;
-  int m_jobs;
-  unsigned int m_jobsize;
-  unsigned int m_maxjobs;
+  int m_seed{};
+  int m_jobs{};
+  unsigned int m_jobsize{};
+  unsigned int m_maxjobs{};
 
 };
 

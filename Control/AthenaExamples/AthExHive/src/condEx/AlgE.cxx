@@ -1,26 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgE.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include <thread>
-#include <chrono>
-#include <memory>
-
-
 AlgE::AlgE( const std::string& name, 
             ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator )
 {
 }
-
-//---------------------------------------------------------------------------
-
-AlgE::~AlgE() {}
 
 //---------------------------------------------------------------------------
 
@@ -39,13 +29,6 @@ StatusCode AlgE::initialize() {
   ATH_MSG_INFO( "m_rch3 id: " << m_rch3.fullKey() );
   ATH_MSG_INFO( "m_rch4 id: " << m_rch4.fullKey() );
 
-  return StatusCode::SUCCESS;
-}
-
-//---------------------------------------------------------------------------
-
-StatusCode AlgE::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
   return StatusCode::SUCCESS;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_STRIP_CLUSTERING_TOOL_H
@@ -80,9 +80,13 @@ private:
     // N.B. the cluster is added to the container
     StatusCode makeCluster(const StripClusteringTool::Cluster &cluster,
 			   double LorentzShift,
+			   Eigen::Matrix<float,1,1>& localCov,
 			   const StripID& stripID,
 			   const InDetDD::SiDetectorElement* element,
+			   const InDetDD::SiDetectorDesign& design,
 			   xAOD::StripCluster& container) const;
+
+    const InDet::SiDetectorElementStatus *getStripDetElStatus(const EventContext& ctx) const;
 
     StringProperty m_timeBinStr{this, "timeBins", ""};
 
@@ -107,9 +111,6 @@ private:
       "SiDetectorElementCollection key for strip"};
 
     int m_timeBinBits[3]{-1, -1, -1};
-
-
-    
 
 };
 

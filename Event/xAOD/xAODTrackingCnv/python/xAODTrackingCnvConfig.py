@@ -141,7 +141,11 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
         kwargs.setdefault("AddTruthLink", False)
 
     if flags.Tracking.perigeeExpression == "Vertex":
-        kwargs.setdefault("PrimaryVerticesName", "PrimaryVertices")
+        from AthenaConfiguration.Enums import ProductionStep
+        if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
+            kwargs.setdefault("PrimaryVerticesName", f"{flags.Overlay.BkgPrefix}PrimaryVertices")
+        else:    
+            kwargs.setdefault("PrimaryVerticesName", "PrimaryVertices")
 
     result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
     return result
@@ -291,7 +295,9 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
     kwargs.setdefault("ConvertTrackParticles", False)
     kwargs.setdefault("TrackContainerName", "CombinedITkTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
-
+    if flags.Tracking.perigeeExpression == "Vertex":
+        kwargs.setdefault('PrimaryVerticesName', 'PrimaryVertices')
+    
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import ITkTrackParticleCreatorToolCfg
         kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(

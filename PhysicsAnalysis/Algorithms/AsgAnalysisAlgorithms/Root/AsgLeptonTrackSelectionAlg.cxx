@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -48,28 +48,6 @@ namespace CP
     if (m_nMinSCTHits != -1 || m_nMaxSCTHits != -1)
       m_accept.addCut ("numSCTHits", "Minimum and/or maxiumum SCT hits");
 
-    if(m_decorateTTVAVars){
-      if (m_d0sigDecoration.empty()){
-        ANA_MSG_ERROR ("No d0significance decoration name set");
-        return StatusCode::FAILURE;
-      } else {
-        m_d0sigDecorator = std::make_unique<SG::AuxElement::Decorator<float> > (m_d0sigDecoration);
-      }
-      if (m_z0sinthetaDecoration.empty()){
-        ANA_MSG_ERROR ("No z0sintheta decoration name set");
-        return StatusCode::FAILURE;
-      } else {
-        m_z0sinthetaDecorator = std::make_unique<SG::AuxElement::Decorator<float> > (m_z0sinthetaDecoration);
-      }
-    } else{
-      if (!m_d0sigDecoration.empty()){
-        ANA_MSG_WARNING ("d0significance decoration name set, please set decorateTTVVars to True if you want this to be written out");
-      }
-      if (!m_z0sinthetaDecoration.empty()){
-        ANA_MSG_WARNING ("z0sintheta decoration name set, please set decorateTTVVars to True if you want this to be written out");
-      }
-    }
-
     ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_particlesHandle, SG::AllowEmpty));
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_particlesHandle));
@@ -91,10 +69,10 @@ namespace CP
 
 
   StatusCode AsgLeptonTrackSelectionAlg ::
-  execute ()
+  execute (const EventContext &ctx) const
   {
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
-    SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey, ctx);
     const xAOD::Vertex *primaryVertex {nullptr};
 
     for (const xAOD::Vertex *vertex : *vertices)
@@ -182,10 +160,7 @@ namespace CP
             }
           }
         }
-        if(m_decorateTTVAVars){
-          (*m_z0sinthetaDecorator)(*particle) = deltaZ0SinTheta;
-          (*m_d0sigDecorator)(*particle) = d0sig;
-        }
+
         m_selectionHandle.setBits(*particle, selectionFromAccept (acceptData), sys);
       }
     }

@@ -16,6 +16,7 @@
 #include "Acts/Geometry/ILayerBuilder.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/BinningType.hpp"
+#include "Acts/Utilities/AxisDefinitions.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Definitions/Units.hpp"
 
@@ -73,11 +74,19 @@ public:
 					     2 * Acts::UnitConstants::mm};
     std::array<double, 2> barrelEnvelopeZ = {2 * Acts::UnitConstants::mm,
 					     2 * Acts::UnitConstants::mm};
+
+    /// the specifications for building additional
+    /// passive cylinders in the barrel region:
+    /// for each cylinder you want to specify
+    /// radius, half length in z and thickness
+    std::vector<float> passiveBarrelLayerRadii = {};
+    std::vector<float> passiveBarrelLayerHalflengthZ = {};
+    std::vector<float> passiveBarrelLayerThickness = {};
     
     std::pair<size_t, size_t> endcapMaterialBins = {20, 5};
     std::pair<size_t, size_t> barrelMaterialBins = {10, 10};
 
-    std::function<bool(const Acts::GeometryContext &, Acts::BinningValue,
+    std::function<bool(const Acts::GeometryContext &, Acts::AxisDirection,
                        const Acts::Surface *, const Acts::Surface *)>
         surfaceMatcher;
 

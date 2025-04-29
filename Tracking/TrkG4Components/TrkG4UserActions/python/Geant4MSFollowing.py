@@ -82,11 +82,10 @@ def ExtrapolationToolCfg(flags, args):
     acc.addPublicTool(LayerMaterialInspector)
 
     # the tracking volume displayer
-    from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags
     TrackingVolumeDisplayer = CompFactory.Trk.TrackingVolumeDisplayer("TrackingVolumeDisplayer",
-                                                                        TrackingVolumeOutputFile='TrackingVolumes-'+TrkDetFlags.MaterialMagicTag()+'.C',
-                                                                        LayerOutputFile='Layers-'+TrkDetFlags.MaterialMagicTag()+'.C',
-                                                                        SurfaceOutputFile='Surfaces-'+TrkDetFlags.MaterialMagicTag()+'.C')
+                                                                        TrackingVolumeOutputFile='TrackingVolumes.C',
+                                                                        LayerOutputFile='Layers.C',
+                                                                        SurfaceOutputFile='Surfaces.C')
     acc.addPublicTool(TrackingVolumeDisplayer)
 
     # PROPAGATOR DEFAULTS 

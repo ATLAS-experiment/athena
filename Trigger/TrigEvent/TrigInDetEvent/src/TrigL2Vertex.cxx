@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstring>
 #include "TrigInDetEvent/TrigL2Vertex.h"
 #include "TrkParameters/TrackParameters.h"
 
-TrigVertexFitInputTrack::TrigVertexFitInputTrack(const TrigInDetTrack* pT, double mass=0.0) : m_mass(mass)
+TrigVertexFitInputTrack::TrigVertexFitInputTrack(const TrigInDetTrack* pT, double mass=0.0) :
+  m_pTrigTrack(pT),
+  m_nTrackType(1),
+  m_mass(mass)
 {
-  m_nTrackType=1;m_active=true;
-  m_pTrigTrack=pT;m_pTrkTrack=NULL;
   double Ck[5][5];
   int i{0},j{0};
 
@@ -64,12 +65,12 @@ TrigVertexFitInputTrack::TrigVertexFitInputTrack(const TrigInDetTrack* pT, doubl
   m_Perigee[0]=m_u[0];m_Perigee[1]=m_u[1];m_Perigee[2]=m_q[0];m_Perigee[3]=m_q[1];m_Perigee[4]=m_q[2];
 }
 
-TrigVertexFitInputTrack::TrigVertexFitInputTrack(const Trk::Track* pT,double mass=0.0) : m_mass(mass)
+TrigVertexFitInputTrack::TrigVertexFitInputTrack(const Trk::Track* pT,double mass=0.0) :
+  m_pTrkTrack(pT),
+  m_nTrackType(2),
+  m_mass(mass)
 {
   double Ck[5][5];
-
-  m_nTrackType=2;m_active=true;
-  m_pTrkTrack=pT;m_pTrigTrack=NULL;
 
   const Trk::Perigee* pP= pT->perigeeParameters();
 

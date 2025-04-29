@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
  
  ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #include "NewVrtSecInclusiveTool/NewVrtSecInclusiveAlg.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "xAODEgamma/ElectronxAODHelpers.h"
 
 #include "TLorentzVector.h"
 #include "CxxUtils/sincos.h"
@@ -25,15 +26,16 @@ namespace Rec {
    static const SG::AuxElement::Decorator<float> mindRBTagSV("mindRBTagSV");
 
    NewVrtSecInclusiveAlg::NewVrtSecInclusiveAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-     AthReentrantAlgorithm( name, pSvcLocator ),
-     m_bvertextool("Rec::NewVrtSecInclusiveTool/SVTool",this)
+     AthReentrantAlgorithm( name, pSvcLocator )
    {
-     declareProperty("BVertexTool",m_bvertextool);
    }
 
    StatusCode NewVrtSecInclusiveAlg::initialize()
    {
      ATH_CHECK( m_tpContainerKey.initialize() );
+     ATH_CHECK( m_gsfContainerKey.initialize() );
+     ATH_CHECK( m_muonContainerKey.initialize() );
+     ATH_CHECK( m_electronContainerKey.initialize() );
      ATH_CHECK( m_pvContainerKey.initialize() );
      ATH_CHECK( m_jetContainerKey.initialize() );
      ATH_CHECK( m_btsvContainerKey.initialize() );
@@ -51,15 +53,14 @@ namespace Rec {
    {
 
      const xAOD::Vertex* pv = nullptr;
-     std::vector<const xAOD::TrackParticle*> trkparticles(0);
+     std::unordered_set<const xAOD::TrackParticle*> tp_set{};
+     if (m_addIDTracks) addInDetTracks(ctx, tp_set);
+     if (m_addMuonTracks) addMuonTracks(ctx, tp_set);
+     if (m_addGSFTracks) addGSFTracks(ctx, tp_set);
+     if (m_addElectronTracks) addElectronTracks(ctx, tp_set);
+     ATH_MSG_DEBUG("Found " << tp_set.size() << " useful tracks in this event" );
 
-     //-- Extract TrackParticles
-     SG::ReadHandle<xAOD::TrackParticleContainer> tp_cont(m_tpContainerKey, ctx);
-     if ( !tp_cont.isValid() ) {
-        ATH_MSG_WARNING( "No TrackParticle container found in TES" );
-     }else{
-        for(const auto *tp : (*tp_cont)) trkparticles.push_back(tp);
-     }
+     std::vector<const xAOD::TrackParticle*> trkparticles(tp_set.begin(), tp_set.end());
 
      //-- Extract Primary Vertex
      SG::ReadHandle<xAOD::VertexContainer> pv_cont(m_pvContainerKey, ctx);
@@ -89,7 +90,7 @@ namespace Rec {
      auto bVertexAuxContainer = std::make_unique<xAOD::VertexAuxContainer>();
      bVertexContainer->setStore(bVertexAuxContainer.get());
 
-     if( pv &&  trkparticles.size()>2 ){
+     if( pv &&  trkparticles.size()>1 ){
        std::unique_ptr<Trk::VxSecVertexInfo> foundVrts = m_bvertextool->findAllVertices(trkparticles,*pv);      
        if(foundVrts && !foundVrts->vertices().empty()){
          const std::vector<xAOD::Vertex*> vtmp=foundVrts->vertices();
@@ -98,7 +99,11 @@ namespace Rec {
            if( btsv_cont.isValid() ){
              for ( const auto *btsv : *btsv_cont ) mindRSVPV=std::min(Amg::deltaR(btsv->position()-pv->position(),iv->position()-pv->position()),mindRSVPV);
            }
-           bVertexContainer->push_back(iv);
+           if (m_removeNonLepVerts && vertexHasNoLep(ctx, iv)) {
+             delete iv;
+             continue;
+           }
+   	   bVertexContainer->push_back(iv);
            std::vector< Trk::VxTrackAtVertex > & vtrk = iv->vxTrackAtVertex();
            TLorentzVector VSUM(0.,0.,0.,0.);
            TLorentzVector tmp;
@@ -135,6 +140,7 @@ namespace Rec {
        std::vector< ElementLink< xAOD::TrackParticleContainer > > newLinkVec;
        for(auto &it : iv->trackParticleLinks()){
          ElementLink< xAOD::TrackParticleContainer > tmpLnk=it;
+         const xAOD::TrackParticleContainer* tp_cont = dynamic_cast<const xAOD:: TrackParticleContainer*>((*it)->container());
          tmpLnk.setStorableObject(*tp_cont);
          newLinkVec.push_back(tmpLnk);
        }
@@ -145,6 +151,103 @@ namespace Rec {
      ATH_CHECK( vrtInThisEvent.record (std::move(bVertexContainer),
                                        std::move(bVertexAuxContainer)) );
      return StatusCode::SUCCESS;
+   }
+
+   void NewVrtSecInclusiveAlg::addInDetTracks(const EventContext &ctx, std::unordered_set<const xAOD::TrackParticle*> &trkparticles) const {
+     //-- Extract IDTrackParticles
+     SG::ReadHandle<xAOD::TrackParticleContainer> tp_cont(m_tpContainerKey, ctx);
+     if ( !tp_cont.isValid() ) {
+       ATH_MSG_WARNING( "No TrackParticle container found in TES" );
+       return;
+     }
+     trkparticles.reserve(trkparticles.size() + tp_cont->size());
+
+     for (const auto *tp : (*tp_cont))  { trkparticles.insert(tp); }
+   }
+
+   void NewVrtSecInclusiveAlg::addMuonTracks(const EventContext &ctx, std::unordered_set<const xAOD::TrackParticle*> &trkparticles) const {
+     //-- Extract Muons
+     SG::ReadHandle<xAOD::MuonContainer> muon_cont(m_muonContainerKey, ctx);
+     if ( !muon_cont.isValid() ) {
+       ATH_MSG_WARNING( "No muon container found in TES" );
+       return;
+     }
+     trkparticles.reserve(trkparticles.size() + muon_cont->size());
+
+     for (const auto *muon : (*muon_cont)) {
+       const auto *tp = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+       if (!tp) { continue; }
+       trkparticles.insert(tp);
+     }
+   }
+
+   void NewVrtSecInclusiveAlg::addGSFTracks(const EventContext &ctx, std::unordered_set<const xAOD::TrackParticle*> &trkparticles) const {
+     //-- Extract GSFTrackParticles
+     SG::ReadHandle<xAOD::TrackParticleContainer> gsf_cont(m_gsfContainerKey, ctx);
+     if ( !gsf_cont.isValid() ) {
+       ATH_MSG_WARNING( "No GSF container found in TES" );
+       return;
+     }
+     trkparticles.reserve(trkparticles.size() + gsf_cont->size());
+
+     for (const auto *gsf : (*gsf_cont)) {
+       trkparticles.insert(gsf);
+       // remove the corresponding ID track from the list if it exists already.
+       trkparticles.erase(xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(gsf));
+     }
+   }
+
+   void NewVrtSecInclusiveAlg::addElectronTracks(const EventContext &ctx, std::unordered_set<const xAOD::TrackParticle*> &trkparticles) const {
+     //-- Extract Electrons
+     SG::ReadHandle<xAOD::ElectronContainer> electron_cont(m_electronContainerKey, ctx);
+     if ( !electron_cont.isValid() ) {
+       ATH_MSG_WARNING( "No electron container found in TES" );
+       return;
+     }
+     trkparticles.reserve(trkparticles.size() + electron_cont->size());
+
+     for(const auto *electron : (*electron_cont)) {
+       if( 0 == electron->nTrackParticles() ) continue;
+       // the 0th GSF TP is the best matched one.
+       const auto *gsf = electron->trackParticle(0);
+       if (!gsf) continue;
+       trkparticles.insert(gsf);
+       // remove the corresponding ID track from the list if it exists already.
+       trkparticles.erase(xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(gsf));
+     }
+   }
+
+   bool NewVrtSecInclusiveAlg::vertexHasNoLep(const EventContext &ctx, const xAOD::Vertex* vertex) const {
+     std::unordered_set<const xAOD::TrackParticle*> trkparts{};
+     trkparts.reserve(vertex->nTrackParticles());
+     for (const auto &trk : vertex->trackParticleLinks()) {
+       trkparts.insert(*trk);
+     }
+
+     //-- Extract Muons
+     SG::ReadHandle<xAOD::MuonContainer> muon_cont(m_muonContainerKey, ctx);
+     if ( muon_cont.isValid() ) {
+       for (const auto *muon : (*muon_cont)) {
+         const auto *tp = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+         if (!tp) { continue; }
+         if(trkparts.count(tp)) return false;
+       }
+     }
+
+     //-- Extract Electrons
+     SG::ReadHandle<xAOD::ElectronContainer> electron_cont(m_electronContainerKey, ctx);
+     if ( electron_cont.isValid() ) {
+       for(const auto *electron : (*electron_cont)) {
+         if( 0 == electron->nTrackParticles() ) continue;
+         // the 0th GSF TP is the best matched one.
+         const auto *gsf = electron->trackParticle(0);
+         if (!gsf) continue;
+         if(trkparts.count(gsf)) return false;
+         if(trkparts.count(xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(gsf))) return false;
+       }
+     }
+     // If both containers are missing, or no leptons are found in the vertex, return true.
+     return true;
    }
 }
 

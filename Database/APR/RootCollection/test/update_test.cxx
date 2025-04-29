@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdio> // For sprintf on gcc45
@@ -15,7 +15,6 @@
 #include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/ICollectionColumn.h"
-#include "CollectionBase/ICollectionDataEditor.h"
 #include "RootCollection/AttributeListLayout.h"
 
 #include "PersistentDataModel/Token.h"
@@ -89,7 +88,9 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
    }
 
    cout << "Adding 20 elements to the collection." << endl;
-   pool::CollectionRowBuffer rowBuffer = collection->dataEditor().rowBuffer();
+   // Create empty collection and data table row buffers
+   pool::CollectionRowBuffer rowBuffer;
+   collection->initNewRow( rowBuffer );
 
    for( unsigned int i=100; i<105; i++ )   {
       rowBuffer.attributeList()[ "attr1" ].data<int>() = i ;
@@ -107,7 +108,7 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
 
       t->setData( &*rowBuffer.tokenList().begin() );
 
-      collection->dataEditor().insertRow( rowBuffer );
+      collection->insertRow( rowBuffer );
       t->release();
    }
 
@@ -168,7 +169,9 @@ TestDriver::update ATLAS_NOT_THREAD_SAFE ()
    }   
 
    cout << "Adding new 10 elements to the collection." << endl;
-   pool::CollectionRowBuffer rowBuffer = collection->dataEditor().rowBuffer();
+   // Create empty collection and data table row buffers
+   pool::CollectionRowBuffer rowBuffer;
+   collection->initNewRow( rowBuffer );
    
    for( unsigned int i=120; i<130; i++ )   {
      rowBuffer.attributeList()[ "attr1" ].data<int>() = i ;
@@ -186,7 +189,7 @@ TestDriver::update ATLAS_NOT_THREAD_SAFE ()
 
       t->setData( &*rowBuffer.tokenList().begin() );
 
-      collection->dataEditor().insertRow( rowBuffer );
+      collection->insertRow( rowBuffer );
       t->release();
    }
 

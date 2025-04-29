@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -35,6 +35,8 @@ namespace LArSamples {
       virtual unsigned int nRuns() const  = 0;
 
       virtual unsigned int historySize(unsigned int i) const = 0;
+      virtual unsigned int historySizeSC(unsigned int i) const = 0;
+
       virtual bool writeToFile(const TString& fileName) const = 0;
       
     protected:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os
 pbeastDefaultServer = 'https://pc-atlas-www.cern.ch' if os.getenv('PBEAST_SERVER_HTTPS_PROXY', '').startswith('atlasgw') else 'https://atlasop.cern.ch'
@@ -7,14 +7,16 @@ pbeastServer = os.getenv('PBEAST_SERVER', pbeastDefaultServer)
 import libpbeastpy; pbeast = libpbeastpy.ServerProxy(pbeastServer)
 import logging; log = logging.getLogger("DCSCalculator2.variable")
 
-from itertools import chain, combinations
+from bisect import bisect
+from itertools import chain
+from types import GenericAlias
 
 from DQUtils.events import process_iovs
 from DQUtils.general import timer
 from DQUtils.sugar import IOVSet, RANGEIOV_VAL, RunLumi, TimestampType, define_iov_type, make_iov_type
 
 from DCSCalculator2 import config
-from DCSCalculator2.consts import RED, YELLOW
+from DCSCalculator2.consts import RED, YELLOW, GREEN, GREY, GOOD, BAD, EMPTY
 from DCSCalculator2.libcore import map_channels
 from DCSCalculator2.subdetector import DCSC_DefectTranslate_Subdetector
 from DCSCalculator2.variable import DefectIOV, GoodIOV, DCSC_Variable
@@ -266,6 +268,35 @@ class TDAQC_Array_Variable(TDAQC_Multi_Channel_Variable):
             giov.append(current)
         return giov
 
+SiT_LV_Current_Type = GenericAlias(tuple, (float,)*16)
+def load_sit_current() -> tuple[list[float],list[SiT_LV_Current_Type]]:
+    from datetime import datetime, timezone
+    from pkg_resources import resource_string
+    sit_current = resource_string('DCSCalculator2.subdetectors.data', 'afp_sit_current.dat').decode().strip().split('\n')
+    result = dict()
+    for line in sit_current:
+        line = line.strip()
+        if not line or line[0] == '#': continue
+        line = line.split()
+        current = tuple(float(x) for x in line[1:])
+        if len(current) != 16: 
+            log.warn(f"Wrong number of AFP SiT planes ({len(current)}) in the LV resource from {line[0]}. Setting thresholds to 0...")
+            current = [0] * 16
+        assert(len(current) == 16)
+        time = datetime.fromisoformat(line[0])
+        if time.tzinfo is None: time = time.replace(tzinfo=timezone.utc)
+        time = time.timestamp()
+        result[time] = current
+    keys, values = zip(*sorted(result.items()))
+    return (list(keys), list(values))
+
+SIT_LV_CURRENT_LOW_DATA:tuple[list[float],list[SiT_LV_Current_Type]] = load_sit_current()
+def get_sit_current(timestamp:float) -> SiT_LV_Current_Type:
+    timestamp = timestamp / 1e9
+    keys, values = SIT_LV_CURRENT_LOW_DATA
+    index = max(bisect(keys, timestamp) - 1, 0)
+    return values[index] if values else [0] * 16
+
 # DCS channels
 A_FAR_GARAGE, A_NEAR_GARAGE, C_FAR_GARAGE, C_NEAR_GARAGE = 101, 105, 109, 113
 A_FAR_SIT_HV, A_NEAR_SIT_HV, C_FAR_SIT_HV, C_NEAR_SIT_HV =   1,   5,   9,  13
@@ -302,10 +333,12 @@ TOF_DISABLED = [A_FAR_TOF_DISABLED,                      C_FAR_TOF_DISABLED]
 SIT_HV_DEAD_BAND = 0.05
 TOF_HV_DEAD_BAND = 0.90
 
-SIT_LV_CURRENT_LOW = [0.44, 0.40, 0.42, 0.46,
-                      0.38, 0.35, 0.38, 0.42,
-                      0.40, 0.39, 0.39, 0.38,
-                      0.41, 0.40, 0.43, 0.40]
+#SIT_LV_CURRENT_LOW = 0.4
+#SIT_LV_CURRENT_LOW = [0.44, 0.40, 0.42, 0.46,
+#                      0.38, 0.35, 0.38, 0.42,
+#                      0.40, 0.39, 0.39, 0.38,
+#                      0.41, 0.40, 0.43, 0.40]
+SIT_LV_CURRENT_LOW = get_sit_current
 SIT_LV_CURRENT_HIGH = 0.8
 TOF_HV_CURRENT_LOW  = 600
 TOF_LV_CURRENT_LOW  = 1.4
@@ -336,7 +369,9 @@ class AFP(DCSC_DefectTranslate_Subdetector):
         # AFP_(A|C)_(FAR|NEAR)_SIT_(PARTIALLY|NOT)_OPERATIONAL_LV
         DCSC_Variable_With_Mapping(
             'SIT/LV',
-            lambda iov: SIT_LV_CURRENT_LOW[iov.channel - SIT_LV[0]] <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
+            #lambda iov: SIT_LV_CURRENT_LOW <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
+            #lambda iov: SIT_LV_CURRENT_LOW[iov.channel - SIT_LV[0]] <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
+            lambda iov: SIT_LV_CURRENT_LOW(iov.since)[iov.channel - SIT_LV[0]] <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
             mapping = mapChannels(
                 ([ 9, 10, 11, 12], A_FAR_SIT_LV ),
                 ([13, 14, 15, 16], A_NEAR_SIT_LV),
@@ -435,94 +470,144 @@ class AFP(DCSC_DefectTranslate_Subdetector):
         # More simplistic way of doing the above, but cannot handle config vars:
         return min(state.good for state in states) if len(states) > 0 else None
 
+    def calculate_dead_fraction(self, since, until, output_channel, states, state_iovs):
+        """
+        Calculate the dead fraction and the resulting traffic light code.
+        """
+        
+        n_total    = len(states)
+        n_working  = states.count(GOOD)
+        n_bad      = states.count(BAD)
+        n_unfilled = states.count(EMPTY)
+        
+        assert n_total == len(self.mapping[output_channel])
+        assert n_total - n_working - n_bad - n_unfilled == 0
+        
+        n_config = n_total - n_unfilled
+        dead_fraction = 1. - n_working / n_total
+
+        code = GREEN
+        if dead_fraction > self.dead_fraction_caution:
+            code = YELLOW
+        if dead_fraction > self.dead_fraction_bad:
+            code = RED
+
+        if n_unfilled / n_total > self.dead_fraction_caution:
+            code = GREY
+        if n_unfilled and config.opts.mark_unfilled_grey:
+            code = GREY
+        
+        return code, dead_fraction, 0., n_config, n_working
+
     @staticmethod
-    def color_to_defect_translator(channel, defect_name, color, comment):
+    def defect_translator(channel, defect_name, selector, comment):
         def translator_core(iovs):
-            return [DefectIOV(iov.since, iov.until, defect_name, True,
-                            comment=comment(iov))
-                    for iov in iovs if iov.channel == channel
-                    and iov.Code == color]
+            return [DefectIOV(iov.since, iov.until, defect_name, True, comment=comment(iov))
+                    for iov in iovs if iov.channel == channel and not iov._is_empty and selector(iov)]
         return translator_core
     
     @staticmethod
-    def defect_combinator(channels, defect_name, code, comment):
+    def defect_combinator(channels, defect_name, selector, naffected, comment):
         def combinator_core(iovs):
             result = []
-            channel_diffs = [channels[0] - channel for channel in channels]
             channel_iovs = iovs.by_channel
             defect_iovs = [channel_iovs.get(channel) for channel in channels]
             for since, until, states in process_iovs(*defect_iovs):
-                matched = [state for state in states if state.Code == code]
+                matched = [(state, group) for state,group in zip(states,channels) if not state._is_empty and selector(state)]
                 if len(matched) < 2: continue # We need at least two defects
-                matched_diffs = [diff for state,diff in zip(states, channel_diffs) if state.Code == code]
-                bad_channels = [{iov.channel + diff for iov in state._orig_iovs if not iov.good} for state,diff in zip(matched,matched_diffs)]
-                if all(a.issubset(b) or a.issuperset(b) for a,b in combinations(bad_channels, 2)): continue # We need that the defects have different origin
+                bad_channels = {iov.channel - group for state,group in matched for iov in state._orig_iovs if not iov.good}
+                if len(bad_channels) < naffected: continue
                 result.append(DefectIOV(since, until, defect_name, True, comment=comment()))
             return result
         return combinator_core
+    
+    @staticmethod
+    def color_selector(color):
+        def selector_core(iov):
+            return iov.Code == color
+        return selector_core
+
+    @staticmethod
+    def nbad_selector(nbad):
+        if isinstance(nbad, int): nbad = [nbad]
+        def selector_core(iov):
+            return iov.NConfig - iov.NWorking in nbad
+        return selector_core
 
     def __init__(self, *args, **kwargs):
         super(AFP, self).__init__(*args, **kwargs)
         self.translators = [
-            AFP.color_to_defect_translator(*cdcc)
-            for cdcc in [
+            AFP.defect_translator(*cdsc)
+            for cdsc in [
                 ###############################################
                 # DCS Defects
                 ###############################################
-                (A_FAR_GARAGE,  'AFP_A_FAR_IN_GARAGE',  RED, AFP.comment_GARAGE),
-                (A_NEAR_GARAGE, 'AFP_A_NEAR_IN_GARAGE', RED, AFP.comment_GARAGE),
-                (C_FAR_GARAGE,  'AFP_C_FAR_IN_GARAGE',  RED, AFP.comment_GARAGE),
-                (C_NEAR_GARAGE, 'AFP_C_NEAR_IN_GARAGE', RED, AFP.comment_GARAGE),
+                (A_FAR_GARAGE,  'AFP_A_FAR_IN_GARAGE',  AFP.color_selector(RED), AFP.comment_GARAGE),
+                (A_NEAR_GARAGE, 'AFP_A_NEAR_IN_GARAGE', AFP.color_selector(RED), AFP.comment_GARAGE),
+                (C_FAR_GARAGE,  'AFP_C_FAR_IN_GARAGE',  AFP.color_selector(RED), AFP.comment_GARAGE),
+                (C_NEAR_GARAGE, 'AFP_C_NEAR_IN_GARAGE', AFP.color_selector(RED), AFP.comment_GARAGE),
 
-                (A_FAR_SIT_HV,  'AFP_A_FAR_SIT_PARTIALLY_OPERATIONAL_HV',  YELLOW, AFP.comment_SIT_HV),
-                (A_FAR_SIT_HV,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_HV',        RED,    AFP.comment_SIT_HV),
-                (A_NEAR_SIT_HV, 'AFP_A_NEAR_SIT_PARTIALLY_OPERATIONAL_HV', YELLOW, AFP.comment_SIT_HV),
-                (A_NEAR_SIT_HV, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_HV',       RED,    AFP.comment_SIT_HV),
-                (C_FAR_SIT_HV,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_HV',  YELLOW, AFP.comment_SIT_HV),
-                (C_FAR_SIT_HV,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_HV',        RED,    AFP.comment_SIT_HV),
-                (C_NEAR_SIT_HV, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_HV', YELLOW, AFP.comment_SIT_HV),
-                (C_NEAR_SIT_HV, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_HV',       RED,    AFP.comment_SIT_HV),
+                (A_FAR_SIT_HV,  'AFP_A_FAR_SIT_PARTIALLY_OPERATIONAL_HV',  AFP.nbad_selector([1]), AFP.comment_SIT_HV),
+                (A_NEAR_SIT_HV, 'AFP_A_NEAR_SIT_PARTIALLY_OPERATIONAL_HV', AFP.nbad_selector([1]), AFP.comment_SIT_HV),
+                (C_FAR_SIT_HV,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_HV',  AFP.nbad_selector([1]), AFP.comment_SIT_HV),
+                (C_NEAR_SIT_HV, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_HV', AFP.nbad_selector([1]), AFP.comment_SIT_HV),
+                (A_FAR_SIT_HV,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_HV',  AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_HV),
+                (A_NEAR_SIT_HV, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_HV', AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_HV),
+                (C_FAR_SIT_HV,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_HV',  AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_HV),
+                (C_NEAR_SIT_HV, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_HV', AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_HV),
 
-                (A_FAR_SIT_LV,  'AFP_A_FAR_SIT_PARTIALLY_OPERATIONAL_LV',  YELLOW, AFP.comment_SIT_LV),
-                (A_FAR_SIT_LV,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_LV',        RED,    AFP.comment_SIT_LV),
-                (A_NEAR_SIT_LV, 'AFP_A_NEAR_SIT_PARTIALLY_OPERATIONAL_LV', YELLOW, AFP.comment_SIT_LV),
-                (A_NEAR_SIT_LV, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_LV',       RED,    AFP.comment_SIT_LV),
-                (C_FAR_SIT_LV,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_LV',  YELLOW, AFP.comment_SIT_LV),
-                (C_FAR_SIT_LV,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_LV',        RED,    AFP.comment_SIT_LV),
-                (C_NEAR_SIT_LV, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_LV', YELLOW, AFP.comment_SIT_LV),
-                (C_NEAR_SIT_LV, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_LV',       RED,    AFP.comment_SIT_LV),
+                (A_FAR_SIT_LV,  'AFP_A_FAR_SIT_PARTIALLY_OPERATIONAL_LV',  AFP.nbad_selector([1]), AFP.comment_SIT_LV),
+                (A_NEAR_SIT_LV, 'AFP_A_NEAR_SIT_PARTIALLY_OPERATIONAL_LV', AFP.nbad_selector([1]), AFP.comment_SIT_LV),
+                (C_FAR_SIT_LV,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_LV',  AFP.nbad_selector([1]), AFP.comment_SIT_LV),
+                (C_NEAR_SIT_LV, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_LV', AFP.nbad_selector([1]), AFP.comment_SIT_LV),
+                (A_FAR_SIT_LV,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_LV',  AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_LV),
+                (A_NEAR_SIT_LV, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_LV', AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_LV),
+                (C_FAR_SIT_LV,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_LV',  AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_LV),
+                (C_NEAR_SIT_LV, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_LV', AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_LV),
+                (A_FAR_SIT_LV,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_LV_3PLANES',  AFP.nbad_selector([3, 4]), AFP.comment_SIT_LV),
+                (A_NEAR_SIT_LV, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_LV_3PLANES', AFP.nbad_selector([3, 4]), AFP.comment_SIT_LV),
+                (C_FAR_SIT_LV,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_LV_3PLANES',  AFP.nbad_selector([3, 4]), AFP.comment_SIT_LV),
+                (C_NEAR_SIT_LV, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_LV_3PLANES', AFP.nbad_selector([3, 4]), AFP.comment_SIT_LV),
 
-                (A_FAR_TOF_LV, 'AFP_A_FAR_TOF_NOT_OPERATIONAL_LV', RED, AFP.comment_TOF_LV),
-                (C_FAR_TOF_LV, 'AFP_C_FAR_TOF_NOT_OPERATIONAL_LV', RED, AFP.comment_TOF_LV),
+                (A_FAR_TOF_LV, 'AFP_A_FAR_TOF_NOT_OPERATIONAL_LV', AFP.color_selector(RED), AFP.comment_TOF_LV),
+                (C_FAR_TOF_LV, 'AFP_C_FAR_TOF_NOT_OPERATIONAL_LV', AFP.color_selector(RED), AFP.comment_TOF_LV),
 
-                (A_FAR_TOF_HV, 'AFP_A_FAR_TOF_NOT_OPERATIONAL_HV', RED, AFP.comment_TOF_HV),
-                (C_FAR_TOF_HV, 'AFP_C_FAR_TOF_NOT_OPERATIONAL_HV', RED, AFP.comment_TOF_HV),
+                (A_FAR_TOF_HV, 'AFP_A_FAR_TOF_NOT_OPERATIONAL_HV', AFP.color_selector(RED), AFP.comment_TOF_HV),
+                (C_FAR_TOF_HV, 'AFP_C_FAR_TOF_NOT_OPERATIONAL_HV', AFP.color_selector(RED), AFP.comment_TOF_HV),
 
                 ###############################################
                 # TDAQ Defects
                 ###############################################
-                (TTC_RESTART,        'AFP_TTC_RESTART',        RED, AFP.comment_TTC_RESTART),
-                (STOPLESSLY_REMOVED, 'AFP_STOPLESSLY_REMOVED', RED, AFP.comment_STOPLESSLY_REMOVED),
+                (TTC_RESTART,        'AFP_TTC_RESTART',        AFP.color_selector(RED), AFP.comment_TTC_RESTART),
+                (STOPLESSLY_REMOVED, 'AFP_STOPLESSLY_REMOVED', AFP.color_selector(RED), AFP.comment_STOPLESSLY_REMOVED),
 
-                (A_FAR_SIT_DISABLED,  'AFP_A_FAR_SIT_PARTIALLY_OPERATIONAL_TDAQ',  YELLOW, AFP.comment_SIT_DISABLED),
-                (A_FAR_SIT_DISABLED,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_TDAQ',        RED,    AFP.comment_SIT_DISABLED),
-                (A_NEAR_SIT_DISABLED, 'AFP_A_NEAR_SIT_PARTIALLY_OPERATIONAL_TDAQ', YELLOW, AFP.comment_SIT_DISABLED),
-                (A_NEAR_SIT_DISABLED, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_TDAQ',       RED,    AFP.comment_SIT_DISABLED),
-                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_TDAQ',  YELLOW, AFP.comment_SIT_DISABLED),
-                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_TDAQ',        RED,    AFP.comment_SIT_DISABLED),
-                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_TDAQ', YELLOW, AFP.comment_SIT_DISABLED),
-                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_TDAQ',       RED,    AFP.comment_SIT_DISABLED),
+                (A_FAR_SIT_DISABLED,  'AFP_A_FAR_SIT_PARTIALLY_OPERATIONAL_TDAQ',  AFP.nbad_selector([1]), AFP.comment_SIT_DISABLED),
+                (A_NEAR_SIT_DISABLED, 'AFP_A_NEAR_SIT_PARTIALLY_OPERATIONAL_TDAQ', AFP.nbad_selector([1]), AFP.comment_SIT_DISABLED),
+                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_TDAQ',  AFP.nbad_selector([1]), AFP.comment_SIT_DISABLED),
+                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_TDAQ', AFP.nbad_selector([1]), AFP.comment_SIT_DISABLED),
+                (A_FAR_SIT_DISABLED,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_TDAQ',  AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_DISABLED),
+                (A_NEAR_SIT_DISABLED, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_TDAQ', AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_DISABLED),
+                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_TDAQ',  AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_DISABLED),
+                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_TDAQ', AFP.nbad_selector([2, 3, 4]), AFP.comment_SIT_DISABLED),
+                (A_FAR_SIT_DISABLED,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_TDAQ_3PLANES',  AFP.nbad_selector([3, 4]), AFP.comment_SIT_DISABLED),
+                (A_NEAR_SIT_DISABLED, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_TDAQ_3PLANES', AFP.nbad_selector([3, 4]), AFP.comment_SIT_DISABLED),
+                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_TDAQ_3PLANES',  AFP.nbad_selector([3, 4]), AFP.comment_SIT_DISABLED),
+                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_TDAQ_3PLANES', AFP.nbad_selector([3, 4]), AFP.comment_SIT_DISABLED),
 
-                (A_FAR_TOF_DISABLED, 'AFP_A_FAR_TOF_NOT_OPERATIONAL_TDAQ', RED, AFP.comment_TOF_DISABLED),
-                (C_FAR_TOF_DISABLED, 'AFP_C_FAR_TOF_NOT_OPERATIONAL_TDAQ', RED, AFP.comment_TOF_DISABLED),
+                (A_FAR_TOF_DISABLED, 'AFP_A_FAR_TOF_NOT_OPERATIONAL_TDAQ', AFP.color_selector(RED), AFP.comment_TOF_DISABLED),
+                (C_FAR_TOF_DISABLED, 'AFP_C_FAR_TOF_NOT_OPERATIONAL_TDAQ', AFP.color_selector(RED), AFP.comment_TOF_DISABLED),
             ]
         ] + [
-            AFP.defect_combinator(*cdcc)
-            for cdcc in [
-                ([A_FAR_SIT_LV,  A_FAR_SIT_DISABLED],  'AFP_A_FAR_SIT_NOT_OPERATIONAL',  YELLOW, AFP.comment_SIT_COMBINATION),
-                ([A_NEAR_SIT_LV, A_NEAR_SIT_DISABLED], 'AFP_A_NEAR_SIT_NOT_OPERATIONAL', YELLOW, AFP.comment_SIT_COMBINATION),
-                ([C_FAR_SIT_LV,  C_FAR_SIT_DISABLED],  'AFP_C_FAR_SIT_NOT_OPERATIONAL',  YELLOW, AFP.comment_SIT_COMBINATION),
-                ([C_NEAR_SIT_LV, C_NEAR_SIT_DISABLED], 'AFP_C_NEAR_SIT_NOT_OPERATIONAL', YELLOW, AFP.comment_SIT_COMBINATION),
+            AFP.defect_combinator(*cdsac)
+            for cdsac in [
+                ([A_FAR_SIT_LV,  A_FAR_SIT_DISABLED],  'AFP_A_FAR_SIT_NOT_OPERATIONAL',  AFP.nbad_selector([1]), 2, AFP.comment_SIT_COMBINATION),
+                ([A_NEAR_SIT_LV, A_NEAR_SIT_DISABLED], 'AFP_A_NEAR_SIT_NOT_OPERATIONAL', AFP.nbad_selector([1]), 2, AFP.comment_SIT_COMBINATION),
+                ([C_FAR_SIT_LV,  C_FAR_SIT_DISABLED],  'AFP_C_FAR_SIT_NOT_OPERATIONAL',  AFP.nbad_selector([1]), 2, AFP.comment_SIT_COMBINATION),
+                ([C_NEAR_SIT_LV, C_NEAR_SIT_DISABLED], 'AFP_C_NEAR_SIT_NOT_OPERATIONAL', AFP.nbad_selector([1]), 2, AFP.comment_SIT_COMBINATION),
+                ([A_FAR_SIT_LV,  A_FAR_SIT_DISABLED],  'AFP_A_FAR_SIT_NOT_OPERATIONAL_3PLANES',  AFP.nbad_selector([1, 2]), 3, AFP.comment_SIT_COMBINATION),
+                ([A_NEAR_SIT_LV, A_NEAR_SIT_DISABLED], 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_3PLANES', AFP.nbad_selector([1, 2]), 3, AFP.comment_SIT_COMBINATION),
+                ([C_FAR_SIT_LV,  C_FAR_SIT_DISABLED],  'AFP_C_FAR_SIT_NOT_OPERATIONAL_3PLANES',  AFP.nbad_selector([1, 2]), 3, AFP.comment_SIT_COMBINATION),
+                ([C_NEAR_SIT_LV, C_NEAR_SIT_DISABLED], 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_3PLANES', AFP.nbad_selector([1, 2]), 3, AFP.comment_SIT_COMBINATION),
             ]
         ]
         

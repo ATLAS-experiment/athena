@@ -237,6 +237,22 @@ stdJetModifiers.update(
                                             "ghost:TausFinal"]
                                    ),
 
+    
+    JetDeltaRInitialLabel =   JetModifier("ParticleJetDeltaRLabelTool","jetdrlabelerinitial_jetptmin",
+                                          createfn=ParticleJetToolsConfig.getJetDeltaRInitialLabelTool,
+                                          prereqs=["ghost:BHadronsInitial",
+                                                   "ghost:CHadronsInitial",
+                                                   "ghost:TausFinal"]
+                                   ),
+
+    
+    JetGhostInitialLabel =    JetModifier("ParticleJetGhostLabelTool","jetghostinitiallabeler",
+                                          createfn=ParticleJetToolsConfig.getJetGhostInitialLabelTool,
+                                          prereqs=["ghost:BHadronsInitial",
+                                                   "ghost:CHadronsInitial",
+                                                   "ghost:TausFinal"]
+                                   ),
+
 
     JetTaggingTruthLabel = JetModifier("JetTaggingTruthLabel", "truthlabeler_{mods}",
                                        filterfn=isMC,
@@ -286,8 +302,19 @@ stdJetModifiers.update(
     qw = JetModifier( "QwTool", "qw"),
 
     softdropobs = JetModifier("SoftDropObservablesTool", "softdropobs"),
-
 )
+
+# Substructure tagger tools 
+try :
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update( 
+        qgtransformer = JetModifier("BoostedJetTaggerTool", "qgtransformer",
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerTool,
+                            JetContainer = _jetname),
+    )
+except ModuleNotFoundError:
+    # In some releases (AthGeneration) JetMomentTools is not existing
+    pass
 
 # VR track-jet decorations
 stdJetModifiers.update(

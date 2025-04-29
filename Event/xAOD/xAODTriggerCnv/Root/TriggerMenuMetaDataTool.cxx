@@ -277,7 +277,7 @@ namespace xAODMaker {
    {
 
       // The output may already have trigger configuration metadata in it.
-      // For instance from TrigConf::xAODMenuWriterMT or other instances of the
+      // For instance from TrigConf::xAODMenuWriter or other instances of the
       // TriggerMenuMetaDataTool in MP mode. Merge into the output
 
       // If we don't have an internal store then nothing to do

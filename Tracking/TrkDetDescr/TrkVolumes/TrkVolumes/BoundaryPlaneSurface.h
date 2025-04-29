@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -58,8 +58,8 @@ class BoundaryPlaneSurface final : virtual public BoundarySurface<Tvol>,
       : BoundarySurface<Tvol>(inside, outside), PlaneSurface(psf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundaryPlaneSurface(SharedObject<VolumeArray> insideArray,
-                       SharedObject<VolumeArray> outsideArray,
+  BoundaryPlaneSurface(std::shared_ptr<VolumeArray> insideArray,
+                       std::shared_ptr<VolumeArray> outsideArray,
                        const PlaneSurface& psf)
       : BoundarySurface<Tvol>(insideArray, outsideArray), PlaneSurface(psf) {}
 

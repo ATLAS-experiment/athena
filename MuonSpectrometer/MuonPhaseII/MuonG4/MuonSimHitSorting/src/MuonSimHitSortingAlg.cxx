@@ -1,10 +1,8 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonSimHitSortingAlg.h"
 
-
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
@@ -12,11 +10,8 @@
 #include <AthContainers/ConstDataVector.h>
 #include <GaudiKernel/SystemOfUnits.h>
 namespace {
-    constexpr double tolerance = 10. * Gaudi::Units::micrometer;
+    constexpr double tolerance = 1. * Gaudi::Units::micrometer;
 }
-
-MuonSimHitSortingAlg::MuonSimHitSortingAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode MuonSimHitSortingAlg::initialize() {
     if (m_readKeys.empty()) {
@@ -31,12 +26,10 @@ StatusCode MuonSimHitSortingAlg::initialize() {
 StatusCode MuonSimHitSortingAlg::execute(const EventContext& ctx) const {
     ConstDataVector<xAOD::MuonSimHitContainer> allSimHits{SG::VIEW_ELEMENTS};
     for (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& inKey : m_readKeys) {
-         SG::ReadHandle<xAOD::MuonSimHitContainer> readHandle{inKey, ctx};
-         if(!readHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve "<<inKey.fullKey());
-            return StatusCode::FAILURE;
-         }
-         std::copy(readHandle->begin(), readHandle->end(), std::back_inserter(allSimHits));
+        const xAOD::MuonSimHitContainer* hits{nullptr};
+        ATH_CHECK(SG::get(hits, inKey, ctx));
+
+        std::ranges::copy(*hits, std::back_inserter(allSimHits));
     }
     std::stable_sort(allSimHits.begin(), allSimHits.end(),
                     [this](const xAOD::MuonSimHit* a, const xAOD::MuonSimHit* b){
@@ -50,21 +43,23 @@ StatusCode MuonSimHitSortingAlg::execute(const EventContext& ctx) const {
                         if (a->identify() != b->identify()) {
                             return a->identify() < b->identify();
                         }
+                        /// In each, detector put the earliest hit first.
+                        const float dT = a->globalTime() - b->globalTime();
+                        if (std::abs(dT) >  0.1 * Gaudi::Units::picosecond) {
+                            return dT < 0.;
+                        }
                         /// Emitted brems electrons are sorted after the primary muons
                         if (std::abs(a->pdgId()) != std::abs(b->pdgId())){
                             return a->pdgId() > b->pdgId();
                         }
                         /// If Geant has undertaken multiple steps in the sensitive volume sort them
                         /// by barcode
-                        if (a->genParticleLink().barcode() != b->genParticleLink().barcode()) {
-                            return a->genParticleLink().barcode() < b->genParticleLink().barcode();
-                        }
-                        /// Finally put the earlier one first
-                        return a->globalTime() < b->globalTime(); 
+                        return a->genParticleLink().barcode() < b->genParticleLink().barcode();
                     });
     if (m_removeDuplicates) {
         std::vector<const xAOD::MuonSimHit*> dupFreeHits{};
-        std::copy_if(allSimHits.begin(), allSimHits.end(), std::back_inserter(dupFreeHits), 
+        dupFreeHits.reserve(allSimHits.size());
+        std::ranges::copy_if(allSimHits, std::back_inserter(dupFreeHits), 
             [&dupFreeHits, this] (const xAOD::MuonSimHit* hit) {
                 const int barcode = hit->genParticleLink().barcode();
                 const Identifier hitId = hit->identify();
@@ -73,7 +68,7 @@ StatusCode MuonSimHitSortingAlg::execute(const EventContext& ctx) const {
                 ATH_MSG_VERBOSE("Check sim hit "<<m_idHelperSvc->toString(hitId)<<", pdgId:"<<hit->pdgId()
                                 <<", barcode: "<<barcode
                                 <<" at "<<Amg::toString(lPos, 2)<<"direction: "<<Amg::toString(lDir, 2));
-                return std::find_if(dupFreeHits.begin(), dupFreeHits.end(), 
+                return std::ranges::find_if(dupFreeHits, 
                                     [&](const xAOD::MuonSimHit* selHit) {
                             if (selHit->identify() != hitId || 
                                 barcode != selHit->genParticleLink().barcode()) return false;
@@ -84,15 +79,14 @@ StatusCode MuonSimHitSortingAlg::execute(const EventContext& ctx) const {
                         }) == dupFreeHits.end();
             });
         allSimHits.clear();
-        std::copy(dupFreeHits.begin(), dupFreeHits.end(), std::back_inserter(allSimHits));
+        std::ranges::copy(dupFreeHits, std::back_inserter(allSimHits));
     }
-    SG::WriteHandle<xAOD::MuonSimHitContainer> writeHandle{m_writeKey, ctx};
+    SG::WriteHandle writeHandle{m_writeKey, ctx};
     if (m_writeDeepCopy) {
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::MuonSimHitContainer>(),
                                      std::make_unique<xAOD::MuonSimHitAuxContainer>()));
         for (const xAOD::MuonSimHit* copy_me : allSimHits) {
-            xAOD::MuonSimHit* newHit = new xAOD::MuonSimHit();
-            writeHandle->push_back(newHit);
+            xAOD::MuonSimHit* newHit = writeHandle->push_back(std::make_unique<xAOD::MuonSimHit>());
             (*newHit) = (*copy_me);
         }
     } else {

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TauDQA )
@@ -12,6 +12,6 @@ atlas_add_component( TauDQA
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthenaBaseComps
    AthenaMonitoringLib TauAnalysisToolsLib TrkValHistUtils xAODJet xAODEgamma
-   xAODTau xAODTruth xAODEventInfo AthContainers )
+   xAODTau xAODTruth xAODEventInfo TruthUtils AthContainers )
 atlas_install_python_modules( python/*.py )
 atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

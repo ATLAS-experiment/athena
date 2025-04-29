@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -65,14 +65,15 @@ namespace LVL1 {
     void setSeed();
     bool m_seed_UnD = false; 
     unsigned int m_seedID = 999;
-    int m_eFEXegAlgoTowerID[3][3];
-    int m_efexid;
-    int m_fpgaid;
-    int m_central_eta;
-    bool m_hasSeed;
+    int m_eFEXegAlgoTowerID[3][3]{};
+    int m_efexid{};
+    int m_fpgaid{};
+    int m_central_eta{};
+    bool m_hasSeed{};
 
     // Enable dead material corrections
     Gaudi::Property<bool> m_dmCorr  {this, "dmCorr", false, "Enable dead material correctionst"};
+    Gaudi::Property<int> m_algoVersion  {this, "algoVersion", 0, "AlgoVersion, part of the L1Menu spec"};
 
     // Key for input towers
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};

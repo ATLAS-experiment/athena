@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgA.h"
@@ -11,7 +11,7 @@ HiveAlgA::HiveAlgA( const std::string& name,
 {
 }
 
-HiveAlgA::~HiveAlgA() {}
+HiveAlgA::~HiveAlgA() = default;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -24,13 +24,6 @@ StatusCode HiveAlgA::initialize() {
 
   // make sure we initialize the base class
   return HiveAlgBase::initialize();
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode HiveAlgA::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
-  return StatusCode::SUCCESS;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

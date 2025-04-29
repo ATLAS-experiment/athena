@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
@@ -209,6 +209,10 @@ def fromRunArgs(runArgs):
 
     # To respect --athenaopts 
     flags.fillFromArgs()
+
+    # Disable event timeout if debugging has been requested.
+    if flags.Exec.DebugStage != '':
+        flags.Exec.EventTimeOut = 0
 
     # Lock flags
     flags.lock()

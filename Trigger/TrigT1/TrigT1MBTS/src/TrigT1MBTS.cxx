@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 #include "TrigT1MBTS.h"
@@ -51,7 +51,7 @@ LVL1::TrigT1MBTS::initialize()
       std::string connName = l1menu->connectorNameFromThreshold(thr->name());
       unsigned int startbit = l1menu->connector(connName).triggerLine(thr->name()).startbit();
       m_ThrVecSize12 = true; // TODO: check for (thresholds[0]->thresholdValueVector().size() == 12);
-      std::vector<float> hwThrValues; // TODO need to add configuration access in TrigConfData/Threshold.h
+      std::vector<float> hwThrValues(12, 0.0); // TODO need to add configuration access in TrigConfData/Threshold.h
       if(thr->name() == "MBTS_A") {
          m_cablestart_a = startbit;
          if(m_ThrVecSize12) {

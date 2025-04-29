@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RatesEmulationExample.h"
@@ -40,7 +40,7 @@ StatusCode RatesEmulationExample::ratesExecute() {
   const xAOD::ElectronContainer* electrons {nullptr};
   ATH_CHECK( evtStore()->retrieve(electrons, "Electrons") );
   std::set<double> electronpTs;
-  for (const auto& e : *electrons) electronpTs.insert(e->pt()/1000.);
+  for (const auto e : *electrons) electronpTs.insert(e->pt()/1000.);
   if (electronpTs.size() >= 1 && *electronpTs.rbegin() >= 10.) ATH_CHECK(setTriggerDesicison("OFF_E10", true ));
   if (electronpTs.size() >= 1) ATH_CHECK(setTriggerDesicison("OFF_Ex", *electronpTs.rbegin() ));
 
@@ -51,3 +51,4 @@ StatusCode RatesEmulationExample::ratesFinalize() {
   ATH_MSG_DEBUG("In ratesFinalize()");
   return StatusCode::SUCCESS;
 }
+

@@ -31,39 +31,119 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
     if (m_pmap_vector_1st.empty())
     {
         ATH_MSG_FATAL("Error using 1st stage plane map no elements of vector made: " << m_pmap_vector_1st);
+        return StatusCode::FAILURE;
     }
-    if (!m_numberOfPmaps)
+    if (!m_numberOfPmaps){
         ATH_MSG_FATAL("Error with declared number of plane maps: " << m_pmap_path);
-    if (m_numberOfPmaps != (m_pmap_vector_1st.size()))
+        return StatusCode::FAILURE;
+    }
+    if (m_numberOfPmaps != (m_pmap_vector_1st.size())){
         ATH_MSG_FATAL("Error using number of declared plane maps does not equal number of loaded plane maps: " << m_pmap_path<<"=/="<<m_pmap_vector_1st.size());
+        return StatusCode::FAILURE;
+    }
     for (size_t a = 0 ; a < m_pmap_vector_1st.size() ;a++)
     {
-        if(!m_pmap_vector_1st.at(a))
+        if(!m_pmap_vector_1st.at(a)){
             ATH_MSG_FATAL("Error using 1st stage plane map for slice: " << a <<" of "<< m_pmap_vector_1st.size());
+            return StatusCode::FAILURE;
+        }
     }
-    if (!m_pmap_2nd)
-        ATH_MSG_FATAL("Error using 2nd stage plane map: " << m_pmap_path);
-    if (!m_rmap_1st)
+    if (m_pmap_vector_2nd.empty())
+    {
+        ATH_MSG_FATAL("Error using 2nd stage plane map no elements of vector made: " << m_pmap_vector_2nd);
+        return StatusCode::FAILURE;
+    }
+    if (!m_numberOfPmaps){
+        ATH_MSG_FATAL("Error with declared number of plane maps: " << m_pmap_path);
+        return StatusCode::FAILURE;
+    }
+    if (m_numberOfPmaps != (m_pmap_vector_2nd.size())){
+        ATH_MSG_FATAL("Error using number of declared plane maps does not equal number of loaded plane maps: " << m_pmap_path<<"=/="<<m_pmap_vector_2nd.size());
+        return StatusCode::FAILURE;
+    }
+    for (size_t a = 0 ; a < m_pmap_vector_2nd.size() ;a++)
+    {
+        if(!m_pmap_vector_2nd.at(a)){
+            ATH_MSG_FATAL("Error using 1st stage plane map for slice: " << a <<" of "<< m_pmap_vector_2nd.size());
+            return StatusCode::FAILURE;
+        }
+    }
+    if (!m_rmap_1st){
         ATH_MSG_FATAL("Error creating region map for 1st stage from: " << m_rmap_path);
-    if (!m_rmap_2nd)
+        return StatusCode::FAILURE;
+    }
+    if (!m_rmap_2nd){
         ATH_MSG_FATAL("Error creating region map for 2nd stage from: " << m_rmap_path);
-    if (!m_subrmap)
+        return StatusCode::FAILURE;
+    }
+    if (!m_subrmap){
         ATH_MSG_FATAL("Error creating sub-region map from: " << m_subrmap_path);
-    if (!m_subrmap_2nd)
+        return StatusCode::FAILURE;
+    }
+    if (!m_subrmap_2nd){
         ATH_MSG_FATAL("Error creating second stage sub-region map from: " << m_subrmap_path);
-
+        return StatusCode::FAILURE;
+    }
     return StatusCode::SUCCESS;
 }
 
 
-std::string FPGATrackSimMappingSvc::getNNMapString() const {
-    if (m_NNmap != nullptr) {
-        return m_NNmap->getNNMap();
+std::string FPGATrackSimMappingSvc::getFakeNNMapString() const {
+    if (m_NNmap_fake != nullptr) {
+        return m_NNmap_fake->getNNMap();
     }
     else{
-        return ""; // Handle null case appropriately
+        return "";
     }
 }
+
+
+std::string FPGATrackSimMappingSvc::getFakeNNMap2ndString() const {
+    if (m_NNmap2nd_fake != nullptr) {
+        return m_NNmap2nd_fake->getNNMap();
+    }
+    else{
+        return "";
+    }
+}
+
+
+std::string FPGATrackSimMappingSvc::getExtensionNNVolMapString() const {
+    if (m_NNmap_extension_vol != nullptr) {
+        return m_NNmap_extension_vol->getNNMap();
+    }
+    else{
+        return "";
+    }
+}
+
+std::string FPGATrackSimMappingSvc::getExtensionNNHitMapString() const {
+    if (m_NNmap_extension_hit != nullptr) {
+        return m_NNmap_extension_hit->getNNMap();
+    }
+    else{
+        return "";
+    }
+}
+
+std::string FPGATrackSimMappingSvc::getParamNNMapString() const {
+    if (m_NNmap_param != nullptr) {
+        return m_NNmap_param->getNNMap();
+    }
+    else{
+        return "";
+    }
+}
+
+std::string FPGATrackSimMappingSvc::getParamNNMap2ndString() const {
+    if (m_NNmap2nd_param != nullptr) {
+        return m_NNmap2nd_param->getNNMap();
+    }
+    else{
+        return "";
+    }
+}
+
 
 
 int FPGATrackSimMappingSvc::countPmapSize(std::ifstream& fileIn)
@@ -112,15 +192,14 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         fin.close();
         fin.open(filepath);
         ATH_MSG_DEBUG("Creating the 2nd stage plane map");
-        m_pmap_2nd = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 2));
+        for (size_t i = 0; i<m_numberOfPmaps; i++)
+        {
+            m_pmap_vector_2nd.emplace_back(std::make_unique<FPGATrackSimPlaneMap>(fin, m_EvtSel->getRegionID(), 2, m_layerOverrides));
+        }
         fin.close();
 
         ATH_MSG_DEBUG("Creating the 1st stage region map");
         m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
-
-        fin.open(filepath);
-        m_pmap_vector_2nd.emplace_back(std::make_unique<FPGATrackSimPlaneMap>(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides));
-        fin.close();
 
         ATH_MSG_DEBUG("Creating the 2nd stage region map");
         m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_rmap_path.value())));
@@ -129,25 +208,64 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value())));
 
         ATH_MSG_DEBUG("Creating the 2nd stage sub-region map");
-        //The 2nd satge will have the full mutimap intergration in a future MR
-        m_subrmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value())));
+        m_subrmap_2nd = std::make_unique<FPGATrackSimRegionMap>(m_pmap_vector_2nd, PathResolverFindCalibFile(m_subrmap_path.value()));
 
         ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
         m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
         m_rmap_2nd->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
 
-        // We probably need two versions of this path for the second stage.
         ATH_MSG_DEBUG("Setting the average radius per logical layer for Region and Subregion Maps");
         m_rmap_1st->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
+        m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
         m_subrmap->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
-	
-	ATH_MSG_DEBUG("Creating NN weighting map");
-    ATH_MSG_INFO("MappingSVc using " << m_NNmap_path.value());
-	if ( ! m_NNmap_path.empty() ) {
-        m_NNmap = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path.value()));
-	} else {
-	    m_NNmap = nullptr;
-	}
+        m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
+        m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
+
+        ATH_MSG_DEBUG("Creating NN weighting map");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_fake.value() << " for fake track estimation");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_param.value() << " for track parameter estimation");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap2nd_path_fake.value() << " for 2nd stage fake track estimation");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap2nd_path_param.value() << " for 2nd stage track parameter estimation");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_extension_vol.value() << " for track extension");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_extension_hit.value() << " for track extension");
+
+        if ( ! m_NNmap_path_fake.empty() ) {
+            m_NNmap_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_fake.value()));
+        } else {
+            m_NNmap_fake = nullptr;
+        }
+
+        if ( ! m_NNmap2nd_path_fake.empty() ) {
+            m_NNmap2nd_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap2nd_path_fake.value()));
+        } else {
+            m_NNmap2nd_fake = nullptr;
+        }
+
+
+        if ( ! m_NNmap_path_extension_vol.empty() ) {
+            m_NNmap_extension_vol = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_extension_vol.value()));
+        } else {
+            m_NNmap_extension_vol = nullptr;
+        }
+
+        if ( ! m_NNmap_path_extension_hit.empty() ) {
+            m_NNmap_extension_hit = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_extension_hit.value()));
+        } else {
+            m_NNmap_extension_hit = nullptr;
+        }
+
+        if ( ! m_NNmap_path_param.empty() ) {
+            m_NNmap_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_param.value()));
+        } else {
+            m_NNmap_param = nullptr;
+        }
+
+        if ( ! m_NNmap2nd_path_param.empty() ) {
+            m_NNmap2nd_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap2nd_path_param.value()));
+        } else {
+            m_NNmap2nd_param = nullptr;
+        }
+
     }
     ATH_CHECK(checkAllocs());
     return StatusCode::SUCCESS;

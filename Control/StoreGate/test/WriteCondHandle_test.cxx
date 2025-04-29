@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -423,7 +423,7 @@ void test2( StoreGateSvc* cs )
     Gaudi::Hive::setCurrentContext(ctx);
     
     // can't record without a range
-    std::cout << "expected ERROR: ";
+    std::cout << "expected ERROR follows:" << std::endl;
     assert ( we1.record( std::make_unique<MyDObj>( MyDObj(0) ) ).isFailure() );
 
     SG::ReadCondHandle<MyObj>  rerr(rk1);
@@ -431,7 +431,7 @@ void test2( StoreGateSvc* cs )
     assert ( we1.getRange() == r1_1 );
     
     // can't record with a range, when dep already set
-    std::cout << "expected ERROR: ";
+    std::cout << "expected ERROR follows:" << std::endl;
     assert ( we1.record( r2_1, std::make_unique<MyDObj>( MyDObj(0) ) ).isFailure() );
   }
     
@@ -488,6 +488,26 @@ void test3( StoreGateSvc* cs )
     auto h2 = SG::makeHandle(k2);
   }
 
+  {
+    // Test SG::get helper
+    const MyObj* obj{nullptr};
+    SG::ReadCondHandleKey<MyObj>  k1 ("test3_1_mh");
+    assert ( k1.initialize().isSuccess() );
+    assert ( SG::get(k1, ctx) != nullptr );
+    assert ( SG::get(obj, k1, ctx).isSuccess() );
+    assert ( obj != nullptr );
+
+    SG::ReadCondHandleKey<MyObj> kempty("");
+    assert ( SG::get(kempty, ctx) == nullptr );
+    assert ( SG::get(obj, kempty, ctx).isSuccess() );
+    assert ( obj == nullptr );
+
+    SG::ReadCondHandleKey<MyObj> k2("nonExistent");
+    assert ( k2.initialize().isSuccess() );
+    assert ( SG::get(k2, ctx) == nullptr );
+    assert ( SG::get(obj, k2, ctx).isFailure() );
+    assert ( obj == nullptr );
+  }
 
   SG::ReadCondHandleKey<MyObj>  k1 ("test3_1");
   SG::ReadCondHandleKey<MyObj>  k2 ("test3_2");

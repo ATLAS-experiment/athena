@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #====================================================================
 # DAOD_PHYS.py
 # This defines DAOD_PHYS, an unskimmed DAOD format for Run 3.
@@ -18,6 +17,11 @@ logPHYS = logging.getLogger('PHYS')
 def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for PHYS"""
     acc = ComponentAccumulator()
+
+    from TrkConfig.VertexFindingFlags import VertexSortingSetup
+    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
+        from DerivationFrameworkPhys.GNNVertexConfig import GNNVertexCfg
+        acc.merge(GNNVertexCfg(flags))
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
@@ -74,7 +78,11 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_"+name_tag, isPhysLite = False, stream_name = StreamName))
+    acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, stream_name = StreamName))
+
+    ## IFF augmentation - Adding Lepton Taggers
+    from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg
+    acc.merge(DecoratePLITAlgsCfg(flags))
 
     #===================================================
     # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS
@@ -106,7 +114,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                            "TauJets_MuonRM",
                                            "DiTauJets",
                                            "DiTauJetsLowPt",
-                                           "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                           ]
@@ -126,7 +133,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
    
     # Extra content
     PHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
-                                              "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
+                                              "AntiKt4EMPFlowJets.QGTransformer_ConstScore.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
                                               "TruthPrimaryVertices.t.x.y.z",
                                               "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                               "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
@@ -137,20 +144,10 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
-    # FTAG Xbb extra content
-    extraList = []
-    for tagger in ["GN2Xv01", "GN2Xv02"]:
-        for score in ["phbb", "phcc", "ptop", "pqcd"]:
-            extraList.append(f"{tagger}_{score}")
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
+    # IFF extra content
+    from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
+    PHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
 
-    # Large-Radius jet regression extra content
-    extraListReg = []
-    modelName = "bJR10v00"
-    for score in ["mass", "pt"]:
-        extraListReg.append(f"{modelName}_{score}")
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraListReg)]
- 
     # Truth extra content
     if flags.Input.isMC:
 
@@ -169,7 +166,10 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
     setupHiggsSlimmingVariables(flags, PHYSSlimmingHelper)
-   
+
+    ## AFP content - SiT and ToF hits to then be used with AfpAnalysisToolbox reconstruction
+    PHYSSlimmingHelper.AllVariables += [ 'AFPSiHitContainer', 'AFPToFHitContainer' ]
+    
     # Trigger content
     PHYSSlimmingHelper.IncludeTriggerNavigation = False
     PHYSSlimmingHelper.IncludeJetTriggerContent = False

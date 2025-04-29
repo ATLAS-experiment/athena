@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // /***************************************************************************
@@ -103,8 +103,8 @@ StatusCode CPCMX::execute( )
 
   /** Create and initialise arrays for storing hit results */
   std::vector< std::string > triggerTypes;
-  triggerTypes.push_back(L1DataDef::emType());
-  triggerTypes.push_back(L1DataDef::tauType());
+  triggerTypes.push_back(L1DataDef::typeAsString(L1DataDef::EM));
+  triggerTypes.push_back(L1DataDef::typeAsString(L1DataDef::TAU));
   
   std::vector< std::vector< std::vector<int> > > crateHits;
   std::vector< std::vector<int> > Hits;
@@ -143,7 +143,8 @@ StatusCode CPCMX::execute( )
   std::vector<std::shared_ptr<TrigConf::L1Threshold>> allThresholds = l1Menu->thresholds();
   std::vector<std::shared_ptr<TrigConf::L1Threshold>> thresholds;
   for ( const auto& thresh : allThresholds  ) {
-    if ( thresh->type() == L1DataDef::emType() || thresh->type() == L1DataDef::tauType() ) 
+    if ( thresh->type() == L1DataDef::typeAsString(L1DataDef::EM) ||
+         thresh->type() == L1DataDef::typeAsString(L1DataDef::TAU) )
       thresholds.push_back( thresh );
   }
 

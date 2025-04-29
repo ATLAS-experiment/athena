@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUMONITORING_TRIGTAUMONITORSINGLEALGORITHM_H
@@ -22,17 +22,18 @@ private:
 
     // Require at least 1 offline Tau per event (will bias the variable distributions for background events)
     Gaudi::Property<bool> m_requireOfflineTaus{this, "RequireOfflineTaus", true, "Require at leat 1 offline tau per event"};
+    Gaudi::Property<unsigned int> m_offline_tau_id{this, "OfflineTauID", TauID::RNN, "Offline TauID (1: RNN, 2: GNTau)"};
     
     // Do offline taus variable distributions
     Gaudi::Property<bool> m_doOfflineTausDistributions{this, "DoOfflineTausDistributions", true};
 
     // HLT TauID score monitoring
     Gaudi::Property<std::map<std::string, std::map<std::string, std::pair<std::string, std::string>>>> m_monitoredHLTIdScores {this, "HLTTauIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each HLT TauID algorithm to be monitored, for each reconstruction sequence (type, e.g. tracktwoMVA, tracktwoLLP, etc...)"};
-    std::map<std::string, std::map<std::string, std::pair<SG::AuxElement::ConstAccessor<float>, SG::AuxElement::ConstAccessor<float>>>> m_monitoredHLTIdAccessors;
+    std::map<std::string, std::map<std::string, std::pair<SG::ConstAccessor<float>, SG::ConstAccessor<float>>>> m_monitoredHLTIdAccessors;
 
     // Offline TauID score monitoring
     Gaudi::Property<std::map<std::string, std::pair<std::string, std::string>>> m_monitoredOfflineIdScores {this, "OfflineTauIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each Offline TauID algorithm to be monitored"};
-    std::map<std::string, std::pair<SG::AuxElement::ConstAccessor<float>, SG::AuxElement::ConstAccessor<float>>> m_monitoredOfflineIdAccessors;
+    std::map<std::string, std::pair<SG::ConstAccessor<float>, SG::ConstAccessor<float>>> m_monitoredOfflineIdAccessors;
 
     virtual StatusCode processEvent(const EventContext& ctx) const override;
 

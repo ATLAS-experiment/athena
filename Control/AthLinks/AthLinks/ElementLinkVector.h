@@ -13,21 +13,21 @@
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/iterator_adaptors.hpp> 
+#include <RootMetaSelection.h>
 
 #include "AthLinks/ElementLinkVectorBase.h"
 #include "AthLinks/DataLink.h"
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/tools/SGELVRef.h"
-#include "AthLinks/tools/selection_ns.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
 
 // Forward declaration(s):
-ENTER_ROOT_SELECTION_NS
-template< class STORABLE >
-struct ElementLinkVector;
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+  template< class STORABLE >
+  struct ElementLinkVector;
+}}}
 
 // forward declarations of our friends
 template <typename DOBJ>
@@ -415,7 +415,7 @@ private:
 
   /// Needed for the simplified Reflex class name
   typedef typename
-  ROOT_SELECTION_NS::ElementLinkVector< DOBJ>::self DictSel;
+  ROOT::Meta::Selection::ElementLinkVector< DOBJ>::self DictSel;
 
 }; // class ElementLinkVector
 
@@ -431,18 +431,18 @@ template <typename DOBJ>
  * ROOT into reading this object's payload back into a different
  * ElementLink implementation in vanilla ROOT.
  */
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 
 template< class STORABLE >
 struct ElementLinkVector : public SelectNoInstance
 {
   typedef ElementLinkVector< STORABLE> self;
   /// Mark all transient members:
-  ROOT_SELECTION_NS::MemberAttributes< kTransient > m_shortRefs;
-  ROOT_SELECTION_NS::MemberAttributes< kTransient > m_hostDObjs;
+  ROOT::Meta::Selection::MemberAttributes< kTransient > m_shortRefs;
+  ROOT::Meta::Selection::MemberAttributes< kTransient > m_hostDObjs;
 };
 
-EXIT_ROOT_SELECTION_NS
+}}} // ROOT namespace
 
 // Hide the rest from the dictionary generator:
 #ifndef __GCCXML__

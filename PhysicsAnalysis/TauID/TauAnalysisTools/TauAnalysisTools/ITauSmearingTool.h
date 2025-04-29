@@ -10,7 +10,7 @@
   mail: dirk.duschinger@cern.ch
   documentation in: ../README.rst
                     or
-                    https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/TauID/TauAnalysisTools/README.rst
+                    https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/README.rst
 */
 
 // Framework include(s):

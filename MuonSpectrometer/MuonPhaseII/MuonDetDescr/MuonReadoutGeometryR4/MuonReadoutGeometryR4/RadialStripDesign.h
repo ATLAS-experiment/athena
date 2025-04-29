@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_RADIALSTRIPDESIGN_H
 #define MUONREADOUTGEOMETRYR4_RADIALSTRIPDESIGN_H
@@ -75,8 +75,8 @@ class RadialStripDesign: public StripDesign {
             ///             Measured from the top left panel corner.
             /// @param _parent: Instance of the constructing RadialStripDesign to fetch the trapezoid boundaries
             stripEdges(double dBot, double dTop, 
-                       const RadialStripDesign& _parent):
-                parent{_parent},
+                       const RadialStripDesign& parent_):
+                parent{parent_},
                 distOnBottom{dBot},
                 distOnTop{dTop} {}
 

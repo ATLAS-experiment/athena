@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,7 +22,7 @@ Authour: R.Goncalo - Thu Sep 20 18:01:20 BT 2005
 
 
 //the function triggers loading dictionaries for typedefs
-void dummyTriggerForTrigPartTypedefs(ElectronMuonTopoInfo a,
+void dummyTriggerForTrigPartTypedefs(ElectronMuonTopoInfo& a,
 				     DataVector<ElectronMuonTopoInfo> b
 				     ){
 

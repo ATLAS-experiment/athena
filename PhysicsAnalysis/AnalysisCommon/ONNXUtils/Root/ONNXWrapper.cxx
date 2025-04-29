@@ -94,7 +94,7 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
       for(auto i : out_dims){ length*=i; }
       std::vector<float> output(length,0);
       // std::vector<float> output(m_output_dims[i][1], 0.0);
-      outputs[p.first] = output;
+      outputs[p.first] = std::move(output);
       output_tensor.push_back(Ort::Value::CreateTensor<float>(memory_info,
                                                             outputs[p.first].data(),
                                                             outputs[p.first].size(),

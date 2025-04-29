@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODELECTRONFILTER_H
 #define GENERATORFILTERS_XAODELECTRONFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
+#include "xAODTruth/TruthParticleContainer.h"
 
 
 /// @brief  Filters and looks for electrons
@@ -19,14 +20,16 @@
 /// @author I Hinchliffe, December 2001
 class xAODElectronFilter : public GenFilter {
 public:
+  using GenFilter::GenFilter;
 
-  xAODElectronFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
 private:
 
-	double m_Ptmin;
-	double m_EtaRange;
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthElectrons"};
+  Gaudi::Property<double> m_Ptmin{this, "Ptcut", 10000.};
+  Gaudi::Property<double> m_EtaRange{this, "Etacut", 10.0};
 
 };
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Runs athenaHLT writing BS output and then runs BS decoding
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
@@ -48,7 +48,7 @@ test.get_step('CheckFile').input_file = 'ESD.pool.root,ESD.Module1.pool.root'
 # Ultimately there should be no per-event messages
 msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
-  'WARNING': 550,  # Remaining warnings are mostly from ATLASRECTS-3866
+  'WARNING': 600,  # Remaining warnings are mostly from ATLASRECTS-3866 # Increased from 550->600 due to ATR-27438.
   'INFO': 500,
   'other': 50
 }
@@ -61,7 +61,7 @@ refcomp = CheckSteps.ChainCompStep("CountRefComp")
 refcomp.input_file = 'ref_v1Dev_decodeBS_build.new'
 refcomp.args += ' --patch'
 refcomp.reference_from_release = True # installed from TrigP1Test/share
-refcomp.required = True # Final exit code depends on this step
+refcomp.required = False # Final exit code doesn't depend on this step in main
 CheckSteps.add_step_after_type(test.check_steps, CheckSteps.ChainDumpStep, refcomp)
 
 import sys

@@ -3,8 +3,6 @@
   <class name="pool::ICollection" />
   <class name="pool::ICollectionDescription" />
   <class name="pool::CollectionDescription" />
-  <class name="pool::ICollectionSchemaEditor" />
-  <class name="pool::ICollectionDataEditor" />
   <class name="pool::ICollectionColumn" />
   <class name="pool::ICollectionQuery" />
   <class name="pool::ICollectionCursor" />

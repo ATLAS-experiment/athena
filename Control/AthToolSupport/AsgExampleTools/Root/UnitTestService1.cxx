@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -11,13 +11,7 @@
 //
 
 #include <AsgExampleTools/UnitTestService1.h>
-
 #include <AsgMessaging/MessageCheck.h>
-#include <gtest/gtest.h>
-#include <map>
-
-#include <CxxUtils/checker_macros.h>
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
 
 //
 // method implementations
@@ -29,12 +23,6 @@ namespace asg
   UnitTestService1 (const std::string& name, ISvcLocator* pSvcLocator)
     : base_class (name, pSvcLocator)
   {
-    declareProperty ("propertyInt", m_propertyInt, "the integer property");
-    declareProperty ("propertyString", m_propertyString, "the string property");
-    declareProperty ("initializeFail", m_initializeFail, "whether initialize should fail");
-
-    ++ instance_counts (name);
-
     ANA_MSG_DEBUG ("create UnitTestService1 " << this);
   }
 
@@ -44,8 +32,6 @@ namespace asg
   ~UnitTestService1 ()
   {
     ANA_MSG_DEBUG ("destroy UnitTestService1 " << this);
-
-    -- instance_counts (name());
   }
 
 
@@ -103,16 +89,4 @@ namespace asg
     return m_isInitialized;
   }
 
-
-
-  int& UnitTestService1 ::
-  instance_counts (const std::string& name)
-  {
-    static std::map<std::string,int> counts;
-    auto iter = counts.find (name);
-    if (iter == counts.end())
-      iter = counts.insert (std::make_pair (name, 0)).first;
-    assert (iter != counts.end());
-    return iter->second;
-  }
 }

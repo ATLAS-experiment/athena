@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## Configuration Access to OFFLINE DB (COMP200)
 
@@ -215,7 +215,7 @@ def NswCalibDbAlgCfg(flags, **kwargs):
                        "/MDT/Onl/MM/TIME/SIDEC", "/MDT/Onl/MM/CHARGE/SIDEC"]
             result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') )
             if(kwargs['ReadKey_MM_T0']):
-                result.merge(addFolders(flags, [kwargs['ReadKey_MM_T0']], detDb=scheme, className='CondAttrListCollection' , tag="MmT0SideAc-Nov2023"))
+                result.merge(addFolders(flags, [kwargs['ReadKey_MM_T0']], detDb=scheme, className='CondAttrListCollection', tag="MmT0SideAc-Nov2023"))
 
         kwargs["ReadKey_MM_SIDEA_TDO"] = "/MDT/Onl/MM/TIME/SIDEA"
         kwargs["ReadKey_MM_SIDEC_TDO"] = "/MDT/Onl/MM/TIME/SIDEC"
@@ -246,6 +246,7 @@ def NswCalibDbAlgCfg(flags, **kwargs):
 
     elif flags.Input.isMC:
         kwargs['isData'] = False
+        kwargs.setdefault('processThresholds', False)
 
         ## MM folders
         scheme  = "MDT_OFL"
@@ -256,13 +257,17 @@ def NswCalibDbAlgCfg(flags, **kwargs):
             result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideC-Const-3p73") )
             result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideA-Const-9p0" ) )
             result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideC-Const-9p0" ) )
-            result.merge( addFolders(flags, ["/MDT/MM/THR/SIDEA"   ], detDb=scheme, className='CondAttrListCollection' , tag="MmThrSideA-Const-55p4") )
-            result.merge( addFolders(flags, ["/MDT/MM/THR/SIDEC"   ], detDb=scheme, className='CondAttrListCollection' , tag="MmThrSideC-Const-55p4") )
+            if kwargs['processThresholds']:
+                result.merge( addFolders(flags, ["/MDT/MM/THR/SIDEA"   ], detDb=scheme, className='CondAttrListCollection' , tag="MmThrSideA-Const-55p4") )
+                result.merge( addFolders(flags, ["/MDT/MM/THR/SIDEC"   ], detDb=scheme, className='CondAttrListCollection' , tag="MmThrSideC-Const-55p4") )
             if(kwargs['ReadKey_MM_T0']):
                 result.merge(addFolders(flags, [kwargs['ReadKey_MM_T0']], detDb=scheme, className='CondAttrListCollection' , tag="MmT0SideAc-Nov2023"))
         else:
-            folders = ["/MDT/MM/TIME/SIDEA" , "/MDT/MM/CHARGE/SIDEA" , "/MDT/MM/THR/SIDEA" , \
-                       "/MDT/MM/TIME/SIDEC" , "/MDT/MM/CHARGE/SIDEC" , "/MDT/MM/THR/SIDEC" ]
+            folders = ["/MDT/MM/TIME/SIDEA" , "/MDT/MM/CHARGE/SIDEA" , \
+                       "/MDT/MM/TIME/SIDEC" , "/MDT/MM/CHARGE/SIDEC" ]
+            if kwargs['processThresholds']:
+                folders.append("/MDT/MM/THR/SIDEA")
+                folders.append("/MDT/MM/THR/SIDEC")
             result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') )
             if(kwargs['ReadKey_MM_T0']):
                 result.merge(addFolders(flags, [kwargs['ReadKey_MM_T0']], detDb=scheme, className='CondAttrListCollection' , tag="MmT0SideAc-Nov2023"))
@@ -276,11 +281,15 @@ def NswCalibDbAlgCfg(flags, **kwargs):
             result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideC-Const-3p73"))
             result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideA-Const-0p78-icpt0"))
             result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideC-Const-0p78-icpt0"))
-            result.merge( addFolders(flags, [ "/TGC/NSW/THR/SIDEA"   ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcThrSideA-Const-15p0"))
-            result.merge( addFolders(flags, [ "/TGC/NSW/THR/SIDEC"   ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcThrSideC-Const-15p0"))
+            if kwargs['processThresholds']:
+                result.merge( addFolders(flags, [ "/TGC/NSW/THR/SIDEA"   ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcThrSideA-Const-15p0"))
+                result.merge( addFolders(flags, [ "/TGC/NSW/THR/SIDEC"   ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcThrSideC-Const-15p0"))
         else:
-            folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", "/TGC/NSW/THR/SIDEA", \
-                       "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC", "/TGC/NSW/THR/SIDEC"]
+            folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", \
+                       "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC"]
+            if kwargs['processThresholds']:
+                folders.append("/TGC/NSW/THR/SIDEA")
+                folders.append("/TGC/NSW/THR/SIDEC")
             result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
 
     ## offline
@@ -303,7 +312,7 @@ def NswCalibDbAlgCfg(flags, **kwargs):
                        "/MDT/MM/TIME/SIDEC", "/MDT/MM/CHARGE/SIDEC"]
             result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') ) 
             if(kwargs['ReadKey_MM_T0']):
-                result.merge(addFolders(flags, [kwargs['ReadKey_MM_T0']], detDb=scheme, className='CondAttrListCollection' , tag="MmT0SideAc-Nov2023"))
+                result.merge(addFolders(flags, [kwargs['ReadKey_MM_T0']], detDb=scheme, className='CondAttrListCollection'))
             
        
         ## sTGC folders
@@ -319,6 +328,9 @@ def NswCalibDbAlgCfg(flags, **kwargs):
             folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", \
                        "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC"]
             result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
+
+            if kwargs["ReadKey_STGC_T0"]:
+                result.merge(addFolders(flags, [kwargs["ReadKey_STGC_T0"]], detDb=scheme, className='CondAttrListCollection'))
     
     result.addCondAlgo(CompFactory.NswCalibDbAlg(**kwargs))
     return result
@@ -382,7 +394,7 @@ def MmDigitEffiCondAlgCfg(flags, **kwargs):
         kwargs["ReadKey"] = ""
     else:
         kwargs.setdefault("ReadKey","/MDT/MM/EFFMAP")
-        acc.merge(addFolders(flags, kwargs["ReadKey"]),"MDT_OFL", className="CondAttrListCollection", tag="MMEffMap_2024DataTillEndOfJuly")
+        acc.merge(addFolders(flags, kwargs["ReadKey"],"MDT_OFL", className="CondAttrListCollection", tag="MMEffMap_2024DataTillEndOfJuly"))
 
     alg = CompFactory.MmDigitEffiCondAlg("MmDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)
@@ -396,7 +408,7 @@ def sTgcDigitEffiCondAlgCfg(flags, **kwargs):
         kwargs["ReadKey"] = ""
     else:
         kwargs.setdefault("ReadKey","/TGC/NSW/EFFMAP")
-        acc.merge(addFolders(flags, kwargs["ReadKey"]),"TGC_OFL", className="CondAttrListCollection",tag="sTGCEffMap_2024DataTillEndOfJuly")
+        acc.merge(addFolders(flags, kwargs["ReadKey"],"TGC_OFL", className="CondAttrListCollection",tag="sTGCEffMap_2024DataTillEndOfJuly"))
 
     alg = CompFactory.sTgcDigitEffiCondAlg("sTgcDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)

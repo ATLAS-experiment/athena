@@ -8,6 +8,11 @@
 #include "GaudiKernel/Incident.h"
 #include "GaudiKernel/MsgStream.h"
 #include "xAODEventInfo/EventInfo.h"
+
+#include <iostream>
+#include <sys/types.h>
+#include <grp.h>
+
 #include <cstdlib>  // For std::rand() and std::srand()
 #include <sys/stat.h>  //mkdir
 #include <unistd.h>  //chown
@@ -234,9 +239,12 @@ void OnlineEventDisplaysSvc::createWriteableDir(const std::string& directory, gi
 
 gid_t OnlineEventDisplaysSvc::setOwnershipToZpGrpOrDefault(){
   gid_t zpgid;
-  struct group* zp_group = getgrnam("zp");
-  if (zp_group != nullptr) {
-    zpgid = zp_group->gr_gid;
+  struct group grp;
+  struct group* grp_result;
+  char buf[1024];  // sysconf(_SC_GETGR_R_SIZE_MAX)
+  (void)getgrnam_r("zp", &grp, buf, sizeof(buf), &grp_result);
+  if (grp_result != nullptr) {
+    zpgid = grp.gr_gid;
   } else {
     ATH_MSG_DEBUG("If running on private machine, zp group might not exist. Just set to the likely value 1307.");
     zpgid = 1307;

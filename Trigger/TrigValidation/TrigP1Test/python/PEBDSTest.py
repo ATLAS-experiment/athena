@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -40,19 +40,19 @@ def myMenu():
     chains = ChainStore()
     chains['Egamma'] = [
         # DS+PEB chain (special HLT result and subset of detector data saved)
-        ChainProp(name='HLT_e3_etcut_ElectronDSPEBTest_L1EM3', stream=['ElectronDSPEBTest'], groups=['RATE:Test','BW:Other']),
+        ChainProp(name='HLT_e3_etcut_ElectronDSPEBTest_L1eEM5', stream=['ElectronDSPEBTest'], groups=['RATE:Test','BW:Other']),
 
         # Pure DS chain (only special HLT result saved and no detector data saved)
-        ChainProp(name='HLT_e5_etcut_ElectronDSTest_L1EM3', stream=['ElectronDSTest'], groups=['RATE:Test','BW:Other']),
+        ChainProp(name='HLT_e5_etcut_ElectronDSTest_L1eEM5', stream=['ElectronDSTest'], groups=['RATE:Test','BW:Other']),
 
         # PEB chain (full HLT result and fixed subset of detector data saved)
-        ChainProp(name='HLT_e7_etcut_TestPEBOne_L1EM3', stream=['TestPEBOne'], groups=['RATE:Test','BW:Other']),
+        ChainProp(name='HLT_e7_etcut_TestPEBOne_L1eEM5', stream=['TestPEBOne'], groups=['RATE:Test','BW:Other']),
 
         # PEB chain (full HLT result and RoI-based subset of detector data saved)
-        ChainProp(name='HLT_e10_etcut_TestPEBThree_L1EM3', stream=['TestPEBThree'], groups=['RATE:Test','BW:Other']),
+        ChainProp(name='HLT_e10_etcut_TestPEBThree_L1eEM5', stream=['TestPEBThree'], groups=['RATE:Test','BW:Other']),
 
         # Standard chain (full HLT result and full detector data saved)
-        ChainProp(name='HLT_e12_etcut_L1EM3', stream=['Main'], groups=['RATE:SingleElectron', 'BW:Electron']),
+        ChainProp(name='HLT_e12_etcut_L1eEM5', stream=['Main'], groups=['RATE:SingleElectron', 'BW:Electron']),
     ]
 
     chains['Muon'] = [
@@ -181,5 +181,5 @@ def run(flags):
             ('xAOD::ElectronAuxContainer#HLT_egamma_Electrons_GSFAux.',            'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
         ]
     flags.lock()
-    acc = runHLT.runHLTCfg(flags)
+    acc = runHLT.runHLTCfg(flags, checkMT=False)  # athenaHLT is always MT-mode
     return acc

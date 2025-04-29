@@ -7,6 +7,7 @@
 
 // Local include(s):
 #include "AsgMessaging/StatusCode.h"
+#include "xAODRootAccess/TEvent.h"
 
 // Complain if we try using this header in Athena:
 #if !defined(XAOD_STANDALONE) && !defined(__CPPCHECK__)
@@ -53,6 +54,19 @@ namespace asg {
       /// Constructor with a type and an optional TEvent pointer
       SgTEventMeta( StoreType type, xAOD::TEvent* event = 0 );
 
+      /// Move constructor
+      SgTEventMeta(SgTEventMeta&& other) noexcept;
+
+      /// Move assignment operator
+      SgTEventMeta& operator=(SgTEventMeta&& other) noexcept;
+
+      /// Assignment operator to handle direct event pointer assignment
+      SgTEventMeta& operator=(xAOD::TEvent* event);
+
+      // Prevent copying
+      SgTEventMeta(const SgTEventMeta&) = delete;
+      SgTEventMeta& operator=(const SgTEventMeta&) = delete;
+
       /// @name Functions providing access to the metadata payload
       /// @{
 
@@ -93,7 +107,7 @@ namespace asg {
       /// Type of this store
       StoreType m_type;
       /// Pointer to the xAOD::TEvent object in use
-      mutable xAOD::TEvent* m_event;
+      mutable std::atomic<xAOD::TEvent*> m_event;
 
    }; // class SgTEventMeta
 

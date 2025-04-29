@@ -1,14 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
 // Implementation file for TRT_CablingSvc class
 //
 
-//#include <iostream>
 #include "TRT_CablingSvc.h"
-//#include <fstream>
 
 #include "eformat/SourceIdentifier.h"  // change to new eformat v3
 #include "PathResolver/PathResolver.h"
@@ -18,38 +16,14 @@
 
 using eformat::helper::SourceIdentifier; 
 
-
-  // Constructor
+// Constructor
 TRT_CablingSvc::TRT_CablingSvc( const std::string& name, 
 			      ISvcLocator * pSvcLocator)
-   : base_class( name, pSvcLocator ),
-     m_manager                    ( nullptr ), 
-     m_idHelper                   ( nullptr ),
-     m_cabling                    ( nullptr ),
-     m_cablingTool_SR1_ECC        ( nullptr ),
-     m_cablingTool_SR1            ( nullptr ),
-     m_cablingTool_TB             ( nullptr ),
-     m_cablingTool_DC1            ( nullptr ),
-     m_cablingTool_DC2            ( nullptr ),
-     m_cablingTool_DC3            ( nullptr ),
-     m_TRTLayout                  ( 0 ),
-     m_numberOfStrawsInROD        ( 0 ),
-     m_numberOfStrawsInBarrelROD  ( 0 ),
-     m_shiftForLeftEndCapStraws   ( 0 ),
-     m_shiftForLeftBarrelStraws   ( 0 ),
-     m_shiftForRightBarrelStraws  ( 0 ),
-     m_shiftForRightEndCapStraws  ( 0 )
+   : base_class( name, pSvcLocator )
 {
-  //  declareInterface< ITRT_CablingSvc >( this );   
 }
-	 
-  // Destructor
-TRT_CablingSvc::~TRT_CablingSvc()
-{}
 
-
-
-  // Initialisation
+// Initialisation
 StatusCode TRT_CablingSvc::initialize( )
 {
   StatusCode sc;
@@ -57,27 +31,8 @@ StatusCode TRT_CablingSvc::initialize( )
 
   // Retrieve Detector Store
   ServiceHandle<StoreGateSvc> detStore("DetectorStore",name());
-  if (detStore.retrieve().isFailure()) 
-  {
-    ATH_MSG_FATAL( "Detector service  not found !" );
-    return StatusCode::FAILURE;
-  }
-
-
-  // Retrieve detector manager
-  sc = detStore->retrieve(m_manager,"TRT"); 
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL( "Cannot retrieve TRT_DetectorManager!" );
-    return StatusCode::FAILURE;
-  } 
-
-  // Get the TRT Helper
-  if (detStore->retrieve(m_idHelper, "TRT_ID").isFailure()) 
-  {
-    ATH_MSG_FATAL( "Could not get TRT ID helper" );
-    return StatusCode::FAILURE;
-  }
-  m_cntx = m_idHelper->straw_layer_context();
+  ATH_CHECK(detStore.retrieve());
+  ATH_CHECK(detStore->retrieve(m_manager,"TRT"));
 
   // Get ToolSvc
   SmartIF<IToolSvc> toolSvc{service("ToolSvc")};
@@ -155,21 +110,10 @@ StatusCode TRT_CablingSvc::initialize( )
 
 std::vector<uint32_t> TRT_CablingSvc::getRobID(Identifier& id) const
 {
-
-    // TB Case
+  // TB Case
   if (m_TRTLayout == 1)
   {
     return m_cablingTool_TB->getRobID(id);
-  }
-    // DC1 Case
-  else if (m_TRTLayout == 2)
-  {
-    return m_cablingTool_DC1->getRobID(id);
-  }
-    // DC2
-  else if ( m_TRTLayout == 3 )
-  {
-     return m_cablingTool_DC2->getRobID(id);
   }
   // SR1 Barrel
   else if ( m_TRTLayout == 4 )
@@ -188,62 +132,21 @@ std::vector<uint32_t> TRT_CablingSvc::getRobID(Identifier& id) const
   }
   else
   {
-    //     std::vector<uint32_t> *vint = new std::vector<uint32_t>;
-    //     return *vint;
-
     std::vector<uint32_t> v;
     return v;
   }
 }
 
-Identifier TRT_CablingSvc::getIdentifier(const eformat::SubDetector& 
-  subdetector,const unsigned& rod, const int& bufferOffset, 
+Identifier TRT_CablingSvc::getIdentifier(const eformat::SubDetector&,
+  const unsigned& rod, const int& bufferOffset, 
   IdentifierHash& hashId) const
 {
   int intRod = (int) rod;
-  int shift;
 
-    // TB04, SR1 or DC3 Case 
-  if ( m_TRTLayout == 1 || m_TRTLayout == 4 || m_TRTLayout == 5 || m_TRTLayout == 6 )
-  {
-    hashId = m_cabling->get_identifierHashForAllStraws(intRod, bufferOffset);
-    return m_cabling->get_identifierForAllStraws(intRod, bufferOffset);
-  }
-
-    // DC1, DC2 Case
-  int straw = bufferOffset;
-  if (subdetector == eformat::TRT_ENDCAP_A_SIDE)
-  {
-    shift = m_shiftForLeftEndCapStraws +
-      intRod * m_numberOfStrawsInROD + straw; 
-    hashId = m_cabling->get_identifierHashForAllStraws(shift);
-    return m_cabling->get_identifierForAllStraws(shift);
-  }
-
-  if (subdetector == eformat::TRT_BARREL_A_SIDE)
-  {
-    shift = m_shiftForLeftBarrelStraws + 
-     intRod * m_numberOfStrawsInBarrelROD + straw; 
-    hashId = m_cabling->get_identifierHashForAllStraws(shift);
-    return m_cabling->get_identifierForAllStraws(shift);
-  }
-
-  if (subdetector == eformat::TRT_BARREL_C_SIDE)
-  {
-    shift = m_shiftForRightBarrelStraws +
-      intRod * m_numberOfStrawsInBarrelROD + straw;
-    hashId = m_cabling->get_identifierHashForAllStraws(shift);
-    return m_cabling->get_identifierForAllStraws(shift);
-  }
-
-  shift = m_shiftForRightEndCapStraws +
-    intRod * m_numberOfStrawsInROD + straw;
-  hashId = m_cabling->get_identifierHashForAllStraws(shift);
-  return m_cabling->get_identifierForAllStraws(shift);
-
+  // TB04, SR1 or DC3 Case 
+  hashId = m_cabling->get_identifierHashForAllStraws(intRod, bufferOffset);
+  return m_cabling->get_identifierForAllStraws(intRod, bufferOffset);
 }
-
-
 
 /*
  * getBufferOffset( strawId ) -
@@ -267,98 +170,7 @@ uint32_t TRT_CablingSvc::getBufferOffset( const Identifier &StrawId )
    return 0;
 }
 
-
 const std::vector<uint32_t>& TRT_CablingSvc::getAllRods() const
 {
   return m_cabling->get_allRods();
 }
-
-
-
-#ifdef DEPRECATED
-uint32_t TRT_CablingSvc::getRodID(Identifier& id) const
-{
-    // DC1 Case
-  if (m_TRTLayout == 2)
-  {
-    return m_cablingTool_DC1->getRodID(id);
-  }
-    // DC2 Case
-  else
-    return m_cablingTool_DC2->getRodID(id);
-}
-
-void TRT_CablingSvc::getStrawRodID(Identifier& id, uint32_t& rod_id, 
-  uint32_t& straw_number) const
-{
-    // DC1 Case
-  if (m_TRTLayout == 2)
-  {
-    m_cablingTool_DC1->getStrawRodID(id, rod_id, straw_number);
-  }
-   // DC2 Case
-  else
-    m_cablingTool_DC2->getStrawRodID(id, rod_id, straw_number);
-}
-
-
-
-const std::vector<IdentifierHash>& 
-  TRT_CablingSvc::getCollID(uint32_t rob_id)
-{
-   return m_cabling->get_collID( rob_id );
-}
-
-int TRT_CablingSvc::getNumStrawInROD(uint32_t /*rod_id*/) const //remove unused variable to avoid compiler warning
-{
-  return m_numberOfStrawsInROD;
-}
-
-
-void TRT_CablingSvc::set_parameters()
-{
-  int numberOfStrawsInROD;
-  int numberOfStrawsInBarrelROD;
-  int shiftForLeftEndCapStraws;
-  int shiftForLeftBarrelStraws;
-  int shiftForRightBarrelStraws;
-  int shiftForRightEndCapStraws;
-  int numberOfEndCapPhiSectors;
-  int numberOfIdentifierSectors;
-
-    // DC1 Case
-  if (m_TRTLayout == 2)
-  {  
-    m_cablingTool_DC1->get_parameters(numberOfStrawsInROD,
-      numberOfStrawsInBarrelROD,
-      shiftForLeftEndCapStraws,
-      shiftForLeftBarrelStraws,
-      shiftForRightBarrelStraws,
-      shiftForRightEndCapStraws,
-      numberOfEndCapPhiSectors,
-      numberOfIdentifierSectors);
-  }
-    // DC2 Case
-  else
-  {
-    m_cablingTool_DC2->get_parameters(numberOfStrawsInROD,
-      numberOfStrawsInBarrelROD,
-      shiftForLeftEndCapStraws,
-      shiftForLeftBarrelStraws,
-      shiftForRightBarrelStraws,
-      shiftForRightEndCapStraws,
-      numberOfEndCapPhiSectors,
-      numberOfIdentifierSectors);
-  }
-
-  m_numberOfStrawsInROD = numberOfStrawsInROD;
-  m_numberOfStrawsInBarrelROD = numberOfStrawsInBarrelROD;
-  m_shiftForLeftEndCapStraws = shiftForLeftEndCapStraws;
-  m_shiftForLeftBarrelStraws = shiftForLeftBarrelStraws;
-  m_shiftForRightBarrelStraws = shiftForRightBarrelStraws;
-  m_shiftForRightEndCapStraws = shiftForRightEndCapStraws;
-  m_numberOfEndCapPhiSectors = numberOfEndCapPhiSectors;
-  m_numberOfIdentifierSectors = numberOfIdentifierSectors;
-
-}
-#endif // DEPRACATED

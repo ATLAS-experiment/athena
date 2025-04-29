@@ -16,7 +16,7 @@ namespace PixelChargeCalib{
   //definition of stream insertion operators for the structs in the header
 
   std::ostream & operator << (std::ostream & out, const LegacyFitParameters & f){
-    out<<"("<<f.A<<", "<<f.E<<", "<<f.C<<")";
+    out<<"("<<f.A<<", "<<f.E<<", "<<f.C<<", "<<f.maxToT<<")";
     return out;
   }
   std::ostream & operator << (std::ostream & out, const LinearFitParameters & f){

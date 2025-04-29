@@ -15,6 +15,9 @@
 #include "ISF_FastCaloSimParametrization/IFastCaloSimCaloExtrapolation.h"
 /* Geant4 transportation tool */
 #include "G4AtlasInterfaces/IG4CaloTransportTool.h"
+// Geant4 Punchthrough G4 Tool
+#include "G4AtlasInterfaces/IPunchThroughSimWrapper.h"
+
 /* Random generator service include */
 #include "AthenaKernel/IAthRNGSvc.h"
 
@@ -48,6 +51,9 @@ protected:
   PublicToolHandle<IFastCaloSimCaloExtrapolation> m_FastCaloSimCaloExtrapolation{this, "FastCaloSimCaloExtrapolation", "FastCaloSimCaloExtrapolation", ""};
   // Geant4 transportation tool
   PublicToolHandle<IG4CaloTransportTool> m_G4CaloTransportTool{this, "G4CaloTransportTool", "G4CaloTransportTool", ""};
+  // Geant4 Punchthrough G4 Tool
+  PublicToolHandle<IPunchThroughSimWrapper> m_PunchThroughSimWrapper{this, "PunchThroughSimWrapper", "PunchThroughSimWrapper", ""};
+
   // Random generator service
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "RandomSvc", "AthRNGSvc", ""};
   // Random generator engine name
@@ -59,14 +65,17 @@ protected:
   /// @brief Optional flags that allow to further limit the usage of fast simulation beyond the default configuration
   /// Note: For fast simulation jobs, default values should be used. They are only useful in special cases
   /// where you want to further limit the usage of fast sim, e.g. if we want to replace certain parts of full simulation
-  Gaudi::Property<bool> m_doPhotons{this, "doPhotons", true, "Flag to enable FCS simulation for photons"};
-  Gaudi::Property<bool> m_doElectrons{this, "doElectrons", true, "Flag to enable FCS simulation for electrons and positrons"};
-  Gaudi::Property<bool> m_doHadrons{this, "doHadrons", true, "Flag to enable FCS simulation for pions and other hadrons"};
+  Gaudi::Property<bool>  m_doPhotons{this, "doPhotons", true, "Flag to enable FCS simulation for photons"};
+  Gaudi::Property<bool>  m_doElectrons{this, "doElectrons", true, "Flag to enable FCS simulation for electrons and positrons"};
+  Gaudi::Property<bool>  m_doHadrons{this, "doHadrons", true, "Flag to enable FCS simulation for pions and other hadrons"};
   Gaudi::Property<float> m_AbsEtaMin{this, "AbsEtaMin", 0, "Abs(Eta) lower bound for FastCaloSim"};
   Gaudi::Property<float> m_AbsEtaMax{this, "AbsEtaMax", 10, "Abs(Eta) upper bound for FastCaloSim"};
-  Gaudi::Property<float> m_EkinMin{this, "EkinMin", 0, "Kinetic energy lower bound for FastCaloSim"};
-  Gaudi::Property<float> m_EkinMax{this, "EkinMax", std::numeric_limits<float>::max(), "Kinetic energy upper bound for FastCaloSim"};
-  Gaudi::Property<bool> m_doEMECFCS{this, "doEMECFCS", false, "Run FCS in EMEC region while G4 in the rest region"};
+  Gaudi::Property<float> m_EkinMinPhotons{this, "EkinMinPhotons", 0, "Kinetic photon energy lower bound for FastCaloSim"};
+  Gaudi::Property<float> m_EkinMaxPhotons{this, "EkinMaxPhotons", std::numeric_limits<float>::max(), "Kinetic photon energy upper bound for FastCaloSim"};
+  Gaudi::Property<float> m_EkinMinElectrons{this, "EkinMinElectrons", 0, "Kinetic electron energy lower bound for FastCaloSim"};
+  Gaudi::Property<float> m_EkinMaxElectrons{this, "EkinMaxElectrons", std::numeric_limits<float>::max(), "Kinetic electron energy upper bound for FastCaloSim"};
+  Gaudi::Property<bool>  m_doEMECFCS{this, "doEMECFCS", false, "Run FCS in EMEC region while G4 in the rest region"};
+  Gaudi::Property<bool>  m_doPunchThrough{this, "doPunchThrough", true, "Run punchthrough simulation for particle entering Calo-MS boundary"};
 };
 
 #endif //G4FASTSIMULATION_FASTCALOSIMTOOL_H

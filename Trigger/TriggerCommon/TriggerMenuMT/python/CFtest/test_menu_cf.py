@@ -72,8 +72,13 @@ def makeMenu(flags, args):
     # from here generate the ControlFlow and the Dataflow
     # doing the same as menu.generateMT()
     chains = configure(flags, args)
+
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import makeHLTTree
     menuCA, cfseqlist = makeHLTTree(flags, chains)
+
+    from TriggerMenuMT.HLT.Config.Utility.MenuPrescaleSet import AutoPrescaleSetGen
+    AutoPrescaleSetGen().generate(flags, store=True)
+
     return menuCA
 
 def main():

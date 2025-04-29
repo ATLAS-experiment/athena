@@ -1,14 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CheckForFinalPartons.h"
-
-CheckForFinalPartons::CheckForFinalPartons(const std::string &type, const std::string &name, const IInterface *parent):
-AthAlgTool(type, name, parent), m_nFailures(0){
-  declareInterface<IPythia8Custom>(this);
-  declareProperty("MaxFailures", m_maxFailures=5);
-}
 
 
 StatusCode CheckForFinalPartons::ModifyPythiaEvent(Pythia8::Pythia &pythia) const {

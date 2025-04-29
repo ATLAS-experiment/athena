@@ -14,16 +14,18 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 Sim_tf.py \
     --CA \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:from IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"))' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc22_pre/valid2.900311.Epos_minbias_inelastic_lowjetphoton.evgen.EVNT.e8480/EVNT.30415957._001017.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 200 \

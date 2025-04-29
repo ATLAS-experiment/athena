@@ -550,6 +550,8 @@ namespace Rec {
 
         // append the spectrometer measurements
         for (const Trk::MeasurementBase* const in_meas : spectrometerMeasurements) {
+            //if the unique_ptr has been moved, it will be nullptr after
+            //cppcheck-suppress accessMoved 
             if (frontParameters) {
                 trackStateOnSurfaces->push_back(
                     new Trk::TrackStateOnSurface(in_meas->uniqueClone(), std::move(frontParameters), nullptr, typeP));
@@ -2387,6 +2389,7 @@ namespace Rec {
 
             // trapezoid precedes rotatedTrapezoid
             std::unique_ptr<const Trk::TrackStateOnSurface> TSOS(s->clone());
+            //cppcheck-suppress accessMoved
             if (previousTSOS) {
                 if (trapezoid && deltaZ < 1. * Gaudi::Units::mm) {
                     spectrometerTSOS.emplace_back(std::move(TSOS));

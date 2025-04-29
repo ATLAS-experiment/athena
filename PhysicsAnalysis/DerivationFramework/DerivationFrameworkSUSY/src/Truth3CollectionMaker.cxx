@@ -20,7 +20,7 @@
 DerivationFramework::Truth3CollectionMaker::Truth3CollectionMaker(const std::string& t,
                                                                   const std::string& n,
                                                                   const IInterface* p ) :
-ExpressionParserUser<AthAlgTool>(t,n,p),
+base_class(t,n,p),
 //m_ntotvtx(0),
 m_ntotpart(0),
 //m_npassvtx(0),
@@ -32,7 +32,6 @@ m_partString(""),
 m_classifier("MCTruthClassifier/MCTruthClassifier"),
 m_runClassifier(true)
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("ParticlesKey", m_particlesKey);
     //declareProperty("VerticesKey", m_verticesKey);
     declareProperty("NewCollectionName", m_collectionName);
@@ -139,24 +138,24 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 		else{
 		  const int parentPDGID = abs(theParticle->prodVtx()->incomingParticle(0)->pdgId());
 		  const double parentMass = theParticle->prodVtx()->incomingParticle(0)->p4().M()/1000.;
-		  if (parentPDGID==24 && parentMass < 20){ //semi-leptonic b-decays in Herwig++ where the off-shell W is saved
+		  if (MC::isW(parentPDGID) && parentMass < 20){ //semi-leptonic b-decays in Herwig++ where the off-shell W is saved
 		    drop = true;
 		  } 
-		  else if (parentPDGID!=24 && parentPDGID!=15){ //what about W decays in Sherpa?
+		  else if (!MC::isW(parentPDGID) && !MC::isTau(parentPDGID)){ //what about W decays in Sherpa?
 		    drop = true;
 		  }
-		  else if (parentPDGID==15){//check to make sure the tau came from a W
+		  else if (MC::isTau(parentPDGID)){//check to make sure the tau came from a W
 		    if (theParticle->prodVtx()->incomingParticle(0)->hasProdVtx()){
 		      const xAOD::TruthParticle * mother_hold = theParticle->prodVtx()->incomingParticle(0)->prodVtx()->incomingParticle(0);
 		      int mcount = 0;
-		      while (mother_hold->hasProdVtx() && abs(mother_hold->pdgId())==15){
+		      while (mother_hold->hasProdVtx() && MC::isTau(mother_hold)){
 			mcount++;
 			if (mcount > 10){ //should not ever come in here, but just in case there is a closed loop somewhere.
 			  break; 
 			}
 			mother_hold = mother_hold->prodVtx()->incomingParticle(0);
 		      }
-		      if (mcount > 10 || abs(mother_hold->pdgId())!=24){
+		      if (mcount > 10 || !MC::isW(mother_hold)){
 			drop = true;
 		      }
 		      else{
@@ -207,7 +206,7 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
           typeDecoratorMass(*xTruthParticle) = mothermass;
 	      
 	      //Check for tau decays
-	      if (abs(theParticle->pdgId()) == 15 && theParticle->hasDecayVtx()){
+          if ( MC::isTau(theParticle) && theParticle->hasDecayVtx() ) {
 		int nprong = 0;
 		int islep = 0;
 

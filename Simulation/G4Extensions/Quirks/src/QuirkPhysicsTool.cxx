@@ -25,9 +25,10 @@
 #include "G4hPairProduction.hh"
 
 // STL headers
-#include <iostream>
+#include <G4VPhysicsConstructor.hh>
 #include <fstream>
-
+#include <iostream>
+#include <memory>
 
 //-----------------------------------------------------------------------------
 // Implementation file for class : QuirksPhysicsTool
@@ -84,18 +85,16 @@ QuirksPhysicsTool::~QuirksPhysicsTool()
 StatusCode QuirksPhysicsTool::initialize( )
 {
   ATH_MSG_DEBUG("QuirksPhysicsTool initialize( )");
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
-
-QuirksPhysicsTool* QuirksPhysicsTool::GetPhysicsOption()
-{
-  return this;
+auto QuirksPhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<QuirksPhysicsTool::PhysicsConstructor>(
+      name(), this->msgLevel(), m_mass, m_charge, m_pdgid, m_stringForce,
+      m_firstStringLength, m_maxBoost, m_maxMergeT, m_maxMergeMag);
 }
 
-void QuirksPhysicsTool::ConstructParticle()
-{
+void QuirksPhysicsTool::PhysicsConstructor::ConstructParticle() {
   ATH_MSG_DEBUG("ConstructParticle for the Quirks being run");
 
     Quirk* q1 = new Quirk(
@@ -123,8 +122,7 @@ void QuirksPhysicsTool::ConstructParticle()
     s.SetMaxMergeMag(m_maxMergeMag);
 }
 
-void QuirksPhysicsTool::ConstructProcess()
-{
+void QuirksPhysicsTool::PhysicsConstructor::ConstructProcess() {
   ATH_MSG_DEBUG(" ConstructProcess for Quirks being run");
     PARTICLEITERATOR->reset();
     while( (*PARTICLEITERATOR)() ){

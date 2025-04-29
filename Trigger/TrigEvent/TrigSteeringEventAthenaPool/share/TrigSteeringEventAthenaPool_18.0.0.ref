@@ -69,7 +69,6 @@ PoolXMLFileCatalog Info Read-only filesystem
 EventSelector        INFO Initializing EventSelector - package version EventSelectorAthenaPool-00-19-03
 TagMetaDataStore     INFO Initializing TagMetaDataStore - package version StoreGate-03-06-19
 EventSelector        INFO reinitialization...
-EventSelector        INFO EventSelection with query 
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 RootCollection Info Opening Collection File /afs/cern.ch/atlas/maxidisk/d33/referencefiles/aod/AOD-18.0.0/AOD-18.0.0-full.pool.root in mode: READ
 TClass::Init:0: RuntimeWarning: no dictionary for class CosmicMuonCollection_tlp1 is available

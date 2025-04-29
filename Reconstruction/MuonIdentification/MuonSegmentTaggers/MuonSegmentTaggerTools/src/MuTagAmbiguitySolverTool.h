@@ -26,16 +26,16 @@ public:
     MuTagAmbiguitySolverTool(const std::string& t, const std::string& n, const IInterface* p);
     virtual ~MuTagAmbiguitySolverTool() = default;
 
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
 
-    std::vector<MuonCombined::MuonSegmentInfo> solveAmbiguities(const EventContext& ctx, std::vector<MuonCombined::MuonSegmentInfo> mtos) const;
+    virtual std::vector<MuonCombined::MuonSegmentInfo> solveAmbiguities(const EventContext& ctx, std::vector<MuonCombined::MuonSegmentInfo> mtos) const override;
 
-    std::vector<MuonCombined::MuonSegmentInfo> selectBestMuTaggedSegments(const EventContext& ctx, std::vector<MuonCombined::MuonSegmentInfo> mtss) const;
+    virtual std::vector<MuonCombined::MuonSegmentInfo> selectBestMuTaggedSegments(const EventContext& ctx, const std::vector<MuonCombined::MuonSegmentInfo>& mtss) const override;
 
 private:
     ///////////////////////////////////
     int ambiguousSegment(const EventContext& ctx, const Muon::MuonSegment& seg1, const Muon::MuonSegment& seg2) const;
-    double Rseg(unsigned int nseg) const;
+    virtual double Rseg(unsigned int nseg) const override;
 
     ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{
         this,

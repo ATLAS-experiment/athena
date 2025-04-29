@@ -12,7 +12,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.Enums import ProductionStep
-from AthenaCommon.SystemOfUnits import GeV, MeV, deg
+from AthenaCommon.SystemOfUnits import GeV, deg
 
 
 ########################################################################
@@ -221,43 +221,6 @@ def ElectronVetoVarsCfg(flags):
     return result
 
 #########################################################################
-# cell weight tool
-def CellWeightToolCfg(flags):
-    result = ComponentAccumulator()
-
-    # copied from CaloClusterCorrection/python/StandardCellWeightCalib
-    H1WeightToolCSC12Generic = CompFactory.H1WeightToolCSC12Generic  # CaloClusterCorrection
-    isMC = flags.Input.isMC 
-
-    finder = "Cone"
-    mainparam = 0.4
-    inputn = "Topo"
-    onlyCellWeight = False
-    from CaloClusterCorrection.StandardCellWeightCalib import H1Calibration, editParm
-    (key,folder,tag) = H1Calibration.getCalibDBParams(flags, finder, mainparam, inputn, onlyCellWeight, isMC)
-    # H1Calibration.loadCaloFolder(result, flags, folder, tag, isMC)
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    if isMC:
-        dbString="CALO_OFL"
-    else:
-        dbString="CALO"
-    if (folder,tag) not in H1Calibration.loaded_folder:
-        if H1Calibration.overrideFolder():
-            result.merge(addFolders(flags, folder+'<tag>'+tag+'</tag>', detDb=dbString, className='CaloRec::ToolConstants') )
-        else:
-            result.merge(addFolders(flags, folder, detDb=dbString, className='CaloRec::ToolConstants') )
-
-        H1Calibration.loaded_folder.append( (folder,tag) )
-
-    #-- configure tool
-    toolName = finder + editParm(mainparam) + inputn
-    cellcalibtool = H1WeightToolCSC12Generic("H1Weight"+toolName)
-    cellcalibtool.DBHandleKey = key
-    result.setPrivateTools(cellcalibtool)
-    # --
-    return result
-
-#########################################################################
 # Photon Shot Finder
 def TauShotFinderCfg(flags):
     result = ComponentAccumulator()
@@ -450,22 +413,6 @@ def TauCaloOOCPi0CalibCfg(flags):
     OOCPi0Calib.WeightingOfNegClusters = flags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute
 
     result.setPrivateTools(OOCPi0Calib)
-    return result
-
-def TauCaloClusterCellWeightCalibCfg(flags):
-    result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'CellWeights'
-
-    CaloClusterCellWeightCalib = CompFactory.getComp("CaloClusterCellWeightCalib")
-    CellWeights = CaloClusterCellWeightCalib(_name)
-    CellWeights.CellSignalWeightTool = result.popToolsAndMerge(CellWeightToolCfg(flags))
-    CellWeights.Direction = "AbsSignal" #-- use absolute cell energies for eta/phi calculation
-    CellWeights.BelowThresholdLikeAll = True #-- treat clusters below thresholds the same as all others
-    CellWeights.BelowThresholdDirection = "AbsSignal" #-- alternative direction calculation for below threshold clusters, ignored if BelowThresholdLikeAll = True
-    CellWeights.EnergyThreshold = 0.0*MeV #-- threshold for possible change of direction calculation
-    CellWeights.IgnoreGeoWeights = False #-- ignore geometrical cell signal weights if True
-
-    result.setPrivateTools(CellWeights)
     return result
 
 def TauCaloTopoClusterMakerCfg(flags):
@@ -688,10 +635,16 @@ def MvaTESVariableDecoratorCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'MvaTESVariableDecorator'
 
+    eventShapeCollection = flags.Tau.ActiveConfig.EventShapeCollection
+    if 'EMPFlow' in flags.Tau.ActiveConfig.SeedJetCollection:
+        eventShapeCollection = "Kt4EMPFlowEventShape"
+    elif 'EMTopo' in flags.Tau.ActiveConfig.SeedJetCollection:
+        eventShapeCollection ="Kt4EMTopoOriginEventShape"
+
     MvaTESVariableDecorator = CompFactory.getComp("MvaTESVariableDecorator")
     MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
                                                       Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
-                                                      EventShapeKey = flags.Tau.ActiveConfig.EventShapeCollection,
+                                                      EventShapeKey = eventShapeCollection,
                                                       VertexCorrection = flags.Tau.doVertexCorrection)
     result.setPrivateTools(MvaTESVariableDecorator)
     return result

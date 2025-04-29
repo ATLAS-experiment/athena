@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -144,7 +144,7 @@ StatusCode TBPhaseRec::execute()
      }
   }
   
-  TBTDCRawCont * tdcRawCont;
+  TBTDCRawCont * tdcRawCont = nullptr;
   StatusCode sc = evtStore()->retrieve(tdcRawCont, "TDCRawCont");
   if (sc.isFailure()) {
     ATH_MSG_ERROR ( "TBObjectReco: Retrieval of TDCRawCont failed" );

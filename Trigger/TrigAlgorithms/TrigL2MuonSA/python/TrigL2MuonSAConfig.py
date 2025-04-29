@@ -47,7 +47,8 @@ def MdtDataPreparatorCfg( flags ):
     # Set Mdt data preparator for MuFast data preparator
     from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg
     MdtDataPreparator = CompFactory.getComp("TrigL2MuonSA::MdtDataPreparator")(
-        RegSel_MDT = acc.popToolsAndMerge( regSelTool_MDT_Cfg( flags ) )
+        RegSel_MDT = acc.popToolsAndMerge( regSelTool_MDT_Cfg( flags ) ),
+        isPhase2 = flags.Muon.usePhaseIIGeoSetup
     )
     return acc, MdtDataPreparator
 

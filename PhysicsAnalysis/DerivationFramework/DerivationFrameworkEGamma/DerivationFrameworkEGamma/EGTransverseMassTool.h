@@ -24,9 +24,7 @@
 
 namespace DerivationFramework {
 
-class EGTransverseMassTool
-  : public ExpressionParserUser<AthAlgTool>
-  , public IAugmentationTool
+class EGTransverseMassTool : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool>
 {
 public:
   EGTransverseMassTool(

@@ -36,7 +36,19 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
     protected:
     std::unique_ptr<Acts::BoundTrackParameters> makeParams (const FPGATrackSimRoad &road) const;
     std::unique_ptr<Acts::BoundTrackParameters> makeParams (const FPGATrackSimTrack &track) const;
-
+    
+    std::vector<Identifier> getRdoIdList(const FPGATrackSimHit& hit) const;
+    template <typename XAOD_CLUSTER>
+    StatusCode matchTrackMeasurements(const EventContext& ctx,
+                                           const DataVector<XAOD_CLUSTER>& clusterContainer,
+                                           const std::vector<Identifier>& rdoIDs,
+                                           std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements) const;
+    
+    StatusCode findPrototrackMeasurements( const EventContext& ctx,
+                                           const xAOD::PixelClusterContainer &pixelClusterContainer,
+                                           const xAOD::StripClusterContainer &stripClusterContainer,
+                                           std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
+                                           const std::vector <FPGATrackSimHit>& hits) const;
     private:
     const PixelID* m_pixelId{nullptr};
     const SCT_ID* m_SCTId{nullptr};

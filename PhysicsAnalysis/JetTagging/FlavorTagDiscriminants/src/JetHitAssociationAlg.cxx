@@ -98,7 +98,7 @@ namespace FlavorTagDiscriminants {
       }
 
       // Decorate the ElementLinks of hits to jet
-      hitAssociation(*jet) = vectorEL;   
+      hitAssociation(*jet) = std::move(vectorEL);
     }
 
     return StatusCode::SUCCESS;

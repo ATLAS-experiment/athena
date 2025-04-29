@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCelldeadOTXTool.h"
@@ -40,6 +40,13 @@ StatusCode LArCelldeadOTXTool::process(CaloCellContainer* cellCollection, const 
     return StatusCode::FAILURE;
   }
 
+  if (!(cellCollection->hasCalo(CaloCell_ID::LAREM) ||
+	cellCollection->hasCalo(CaloCell_ID::LARHEC) ||
+	cellCollection->hasCalo(CaloCell_ID::LARFCAL))) {
+    ATH_MSG_VERBOSE("No LAr cell in CellContainer. Do nothing");
+    return StatusCode::SUCCESS;    
+  }
+
   StatusCode sc = StatusCode::SUCCESS;
   std::call_once(m_onceFlag, &LArCelldeadOTXTool::buildMap, this, ctx, m_scToDead, sc);
 
@@ -55,7 +62,10 @@ StatusCode LArCelldeadOTXTool::process(CaloCellContainer* cellCollection, const 
   // get SuperCellContainer
   SG::ReadHandle<LArRawSCContainer> scHdl(m_SCKey, ctx);
   if (!scHdl.isValid()) {
-    ATH_MSG_WARNING("Do not have SuperCell container no patching !!!!");
+    if (msgLvl(MSG::WARNING) &&  m_nWarnings < 5) { 
+      ATH_MSG_WARNING("Do not have SuperCell container no patching !!!!");
+      ++m_nWarnings;
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -165,7 +175,7 @@ void LArCelldeadOTXTool::buildMap(const EventContext& ctx, scToDeadCellMap_t& sc
     if (idBF.second.deadReadout()) {
       ++nDeadFebs;
       const HWIdentifier febid(idBF.first);
-      ATH_MSG_INFO("FEB " << m_onlineID->channel_name(febid) << " labelled as dead");
+      ATH_MSG_INFO("FEB " << m_onlineID->channel_name(febid) << " labelled as deadReadout");
       const unsigned nChans = m_onlineID->channelInSlotMax(febid);
       for (unsigned ch = 0; ch < nChans; ++ch) {
         const HWIdentifier chid = m_onlineID->channel_Id(febid, ch);
@@ -192,8 +202,8 @@ void LArCelldeadOTXTool::buildMap(const EventContext& ctx, scToDeadCellMap_t& sc
   }  // end loop over dead febs
 
   // bit of log-output ...
+  ATH_MSG_INFO("Number of deadReadout FEBs for this run: " << nDeadFebs);
   if (msgLvl(MSG::DEBUG)) {
-    ATH_MSG_INFO("Dead Febs for this run:" << nDeadFebs);
     for (const auto& p : scToHwidMap) {
       ATH_MSG_DEBUG("  SuperCell with id 0x" << std::hex << p.first.get_identifier32().get_compact() << std::dec << " connected to " << p.second.size()
                                              << " deadFEB channels.");

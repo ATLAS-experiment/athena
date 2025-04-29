@@ -103,6 +103,12 @@ LArHECNoise::LArHECNoise(const std::string& name,
     m_nt_trigger = new bool[m_TriggerLines.size()];
  }
 
+// An out-of-line dtor keeps cppcheck from warning about the memory
+// allocations in the ctor.
+LArHECNoise::~LArHECNoise()
+{
+}
+
 StatusCode LArHECNoise::initialize() {
 
   ATH_MSG_DEBUG ( "Initializing LArHECNoise" );

@@ -335,18 +335,12 @@ int RpcIdHelper::stationEtaMin(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext eta_context(expId, 0, m_ETA_INDEX);
     if (!get_expanded_id(id, expId, &eta_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
+        int result = 999;
+        for (const Range& range : m_full_module_range) {
             if (range.match(expId)) {
                 const Range::field& eta_field = range[m_ETA_INDEX];
                 if (not eta_field.empty()) {
-                    int etamin = eta_field.get_minimum();
-                    if (-999 == result) {
-                        result = etamin;
-                    } else {
-                        if (etamin < result) result = etamin;
-                    }
+                    result = std::min(eta_field.get_minimum(), result);
                 }
             }
         }
@@ -360,13 +354,11 @@ int RpcIdHelper::stationEtaMax(const Identifier& id) const {
     IdContext eta_context(expId, 0, m_ETA_INDEX);
     if (!get_expanded_id(id, expId, &eta_context)) {
         int result = -999;
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
+        for (const Range& range : m_full_module_range) {
             if (range.match(expId)) {
                 const Range::field& eta_field = range[m_ETA_INDEX];
                 if (not eta_field.empty()) {
-                    int etamax = eta_field.get_maximum();
-                    if (result < etamax) result = etamax;
+                    result = std::max(result, eta_field.get_maximum());
                 }
             }
         }

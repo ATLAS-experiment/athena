@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,10 +48,11 @@ namespace Trk
       /** member variables for algorithm properties: */
 
       // The key of the input track collection
-      SG::ReadHandleKey<TrackCollection>  m_collectionName;
+      SG::ReadHandleKey<TrackCollection> m_collectionName
+      {this, "CollectionName", "ResolvedTracks"};
 
       // The key that should be given to the alias 
-      SG::WriteHandleKey<TrackCollection> m_aliasName;
+      SG::WriteHandleKey<TrackCollection> m_aliasName{this, "AliasName", "Tracks"};
 
     };
 } // end of namespace

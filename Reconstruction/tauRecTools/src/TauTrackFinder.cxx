@@ -353,9 +353,7 @@ TauTrackFinder::TauTrackType TauTrackFinder::tauTrackType( const xAOD::TauJet& p
 
   if (dR > m_maxJetDr_wide) return NotTauTrack;
 
-  bool goodTrack = true;
-  if(!m_bypassSelector)
-    goodTrack = m_trackSelectorTool_tau->decision(trackParticle, primaryVertex);
+  bool goodTrack = m_trackSelectorTool_tau->decision(trackParticle, primaryVertex);
     
   if (goodTrack) {
     if (dR > m_maxJetDr_tau)
@@ -587,7 +585,7 @@ void TauTrackFinder::removeOffsideTracksWrtLeadTrk(std::vector<const xAOD::Track
 
     if ( std::abs(deltaZ0) < maxDeltaZ0 ) {++itr;}
     else {
-      if (m_storeInOtherTrks) otherTracks.push_back(*itr);
+      otherTracks.push_back(*itr);
       itr = tauTracks.erase(itr); //remove from core track collection
     }
   }
@@ -601,7 +599,7 @@ void TauTrackFinder::removeOffsideTracksWrtLeadTrk(std::vector<const xAOD::Track
 
     if ( std::abs(deltaZ0) < maxDeltaZ0 ) { ++itr; }
     else {
-      if (m_storeInOtherTrks) otherTracks.push_back(*itr);
+      otherTracks.push_back(*itr);
       itr = wideTracks.erase(itr); //remove from wide track collection
     }
   }

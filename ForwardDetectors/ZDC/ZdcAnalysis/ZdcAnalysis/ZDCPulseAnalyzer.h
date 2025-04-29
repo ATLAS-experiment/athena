@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCPulseAnalyzer_h
 #define ZDCANALYSIS_ZDCPulseAnalyzer_h
 
+#include "CxxUtils/checker_macros.h"
 #include "ZdcAnalysis/ZDCFitWrapper.h"
 #include "ZdcAnalysis/ZDCMsg.h"
 #include "TGraphErrors.h"
@@ -16,11 +17,8 @@
 #include <string>
 #include <memory>
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY; 
 
-
-class ZDCPulseAnalyzer
+class ATLAS_NOT_THREAD_SAFE ZDCPulseAnalyzer
 {
 public:
   enum {PulseBit              = 0,  //  &1
@@ -182,8 +180,8 @@ private:
   
   // Histogram used to perform the fits and function wrappers
   //
-  mutable std::unique_ptr<TH1> m_fitHist;
-  mutable std::unique_ptr<TH1> m_fitHistLGRefit;
+  std::unique_ptr<TH1> m_fitHist;
+  std::unique_ptr<TH1> m_fitHistLGRefit;
 
   bool m_initializedFits{false};
   std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapper;
@@ -202,8 +200,8 @@ private:
   bool  m_useFixedBaseline{};
   float m_delayedDeltaT{};
   float m_delayedPedestalDiff{};
-  mutable std::unique_ptr<TH1> m_delayedHist;
-  mutable std::unique_ptr<TH1> m_delayedHistLGRefit;
+  std::unique_ptr<TH1> m_delayedHist;
+  std::unique_ptr<TH1> m_delayedHistLGRefit;
 
   std::unique_ptr<TFitter> m_prePulseCombinedFitter;
   std::unique_ptr<TFitter> m_defaultCombinedFitter;
@@ -379,7 +377,7 @@ private:
   void prepareLGRefit(const std::vector<float>& samplesLG, const std::vector<float>& samplesSig,
 		      const std::vector<bool>& useSamples);
   
-  void FillHistogram(bool refitLG) const
+  void FillHistogram(bool refitLG)
   {
     if (!m_useDelayed) {
       if (!refitLG) {
@@ -680,7 +678,7 @@ public:
   float GetDelayedBaselineShiftFit() const {return m_delayedBaselineShift;}
   float GetDelayedBaselineCorr() const {return m_baselineCorr;}
 
-  const TH1* GetHistogramPtr(bool refitLG = false) const
+  const TH1* GetHistogramPtr(bool refitLG = false)
   {
     //
     // We defer filling the histogram if we don't have a pulse until the histogram is requested
@@ -692,8 +690,8 @@ public:
     return refitLG ? m_fitHistLGRefit.get() : m_fitHist.get();
   }
 
-  std::shared_ptr<TGraphErrors> GetCombinedGraph(bool forceLG = false) const;
-  std::shared_ptr<TGraphErrors> GetGraph(bool forceLG = false) const;
+  std::shared_ptr<TGraphErrors> GetCombinedGraph(bool forceLG = false);
+  std::shared_ptr<TGraphErrors> GetGraph(bool forceLG = false);
 
   std::vector<float> GetFitPulls(bool forceLG = false) const;
 

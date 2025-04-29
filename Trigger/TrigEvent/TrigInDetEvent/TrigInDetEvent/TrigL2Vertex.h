@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETEVENT_TRIGL2VERTEX_H
@@ -43,9 +43,9 @@ class TrigVertexFittingNode
   virtual void updateVertex(class TrigL2Vertex*) = 0;//!< abstract method
   virtual MsgStream& report( MsgStream& ) const = 0;   
  protected:
-  double m_resid[2];
-  double m_V[2][2];
-  double m_D[2][MAX_SIZE_VERT_COVM];
+  double m_resid[2]{};
+  double m_V[2][2]{};
+  double m_D[2][MAX_SIZE_VERT_COVM]{};
 };
 
 inline MsgStream& operator << ( MsgStream& msg, const TrigVertexFittingNode& node)
@@ -82,23 +82,23 @@ class TrigVertexFitInputTrack : public TrigVertexFittingNode
   const double* Perigee() const;//!< track parameters at the perigee
   double PerigeeCovariance(int,int) const;//!< covariance of track parameters at the perigee
  private:
-  const TrigInDetTrack* m_pTrigTrack;
-  const Trk::Track* m_pTrkTrack;
-  int m_nTrackType;
-  int m_index;
-  double m_mass;
-  double m_Vqq[3][3];
-  double m_Vuq[2][3];
-  double m_Vuu[2][2];
-  double m_u[2];
-  double m_q[3];
-  double m_Perigee[5];
-  double m_PerigeeCovariance[5][5];
-  double m_A[2][3];
-  double m_B[2][3];
-  double m_h[2];
+  const TrigInDetTrack* m_pTrigTrack{};
+  const Trk::Track* m_pTrkTrack{};
+  int m_nTrackType{};
+  int m_index{};
+  double m_mass{};
+  double m_Vqq[3][3]{};
+  double m_Vuq[2][3]{};
+  double m_Vuu[2][2]{};
+  double m_u[2]{};
+  double m_q[3]{};
+  double m_Perigee[5]{};
+  double m_PerigeeCovariance[5][5]{};
+  double m_A[2][3]{};
+  double m_B[2][3]{};
+  double m_h[2]{};
 
-  bool m_active;
+  bool m_active{true};
 };
 
 class TrigVertexFitConstraint : public TrigVertexFittingNode
@@ -179,20 +179,17 @@ class TrigL2Vertex
   void setMotherTrack(TrigInDetTrackFitPar*);//!< sets mother particle parameters after kinematical fitting
   const TrigInDetTrackFitPar* getMotherTrack();//!< returns mother particle parameters if  m_isMassEstimated() is true
   MsgStream& report( MsgStream& ) const;
-  double m_Gk[MAX_SIZE_VERT_COVM][MAX_SIZE_VERT_COVM];
+  double m_Gk[MAX_SIZE_VERT_COVM][MAX_SIZE_VERT_COVM]{};
 
  private:
   int m_nTracks,m_nDOF;
-  //int m_nTrackType;
-  //TrigVertexCovariance* m_Gk;
-  
+
   std::list<TrigVertexFitInputTrack*>* m_pvTracks;
   std::list<TrigVertexFitConstraint*>* m_pvConstraints;
   double m_mass,m_chiSquared;
   double m_massVar;
   int m_nStatus;
-  //double* m_Rk;
-  double m_Rk[MAX_SIZE_VERT_COVM];
+  double m_Rk[MAX_SIZE_VERT_COVM]{};
   TrigInDetTrackFitPar* m_P;
   bool m_ready;
 };

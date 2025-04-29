@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ClassID.h"
@@ -10,10 +10,10 @@
 #include "StoreGate/WriteHandle.h"
 
 #include "TestTools/initGaudi.h"
-#include "TestTools/expect.h"
-#include "TestTools/expect_exception.h"
 #include "AthViews/View.h"
 #include "AthViews/ViewHelper.h"
+
+#include "gtest/gtest.h"
 
 struct TestClass {
   int value = 0;
@@ -34,7 +34,7 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
     SG::WriteHandle<TestClass> wh( "test1" );
     wh.setProxyDict( parentView ).ignore();
     auto status = wh.record( std::move( t1 ) );
-    VALUE( status.isSuccess() ) EXPECTED( true );
+    EXPECT_TRUE( status.isSuccess() );
   }
 
   // Make child view
@@ -45,7 +45,7 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
     SG::WriteHandle<TestClass> wh( "test2" );
     wh.setProxyDict( childView ).ignore();
     auto status = wh.record( std::move( t2 ) );
-    VALUE( status.isSuccess() ) EXPECTED( true );
+    EXPECT_TRUE( status.isSuccess() );
   }
 
   // All prepared, will start testing if queries respond correctly
@@ -53,20 +53,20 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
     // Ask for an object that doesn't exist
     SG::ReadHandle<TestClass> rh( "test" );
     rh.setProxyDict( childView ).ignore();
-    VALUE( rh.isValid() ) EXPECTED( false );
+    EXPECT_FALSE( rh.isValid() );
   }
   {
     // Ask for object in the child view
     SG::ReadHandle<TestClass> rh( "test2" );
     rh.setProxyDict( childView ).ignore();
-    VALUE( rh.isValid() ) EXPECTED( true );
-    VALUE( rh->value ) EXPECTED( 2 );
+    EXPECT_TRUE( rh.isValid() );
+    EXPECT_EQ( rh->value, 2 );
   }
   {
     // Ask child view for object that only exists in the parent
     SG::ReadHandle<TestClass> rh( "test1" );
     rh.setProxyDict( childView ).ignore();
-    VALUE( rh.isValid() ) EXPECTED( false );
+    EXPECT_FALSE( rh.isValid() );
   }
   log << MSG::INFO << "Views that are not linked behave correctly" << endmsg;
 
@@ -76,15 +76,15 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
     // Is the original object still there?
     SG::ReadHandle<TestClass> rh( "test2" );
     rh.setProxyDict( childView ).ignore();
-    VALUE( rh.isValid() ) EXPECTED( true );
-    VALUE( rh->value ) EXPECTED( 2 );
+    EXPECT_TRUE( rh.isValid() );
+    EXPECT_EQ( rh->value, 2 );
   }
   {
     // Is the object from the parent now also visible?
     SG::ReadHandle<TestClass> rh( "test1" );
     rh.setProxyDict( childView ).ignore();
-    VALUE( rh.isValid() ) EXPECTED( true );
-    VALUE( rh->value ) EXPECTED( 1 );
+    EXPECT_TRUE( rh.isValid() );
+    EXPECT_EQ( rh->value, 1);
   }
   log << MSG::INFO << "Views that are linked behave correctly" << endmsg;
 
@@ -96,14 +96,14 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
     SG::WriteHandle<TestClass> wh( "test1" );
     wh.setProxyDict( childView ).ignore();
     auto status = wh.record( std::move( t3 ) );
-    VALUE( status.isSuccess() ) EXPECTED( true );
+    EXPECT_TRUE( status.isSuccess() );
   }
   {
     // Do we now see the child object in preference to the parent?
     SG::ReadHandle<TestClass> rh( "test1" );
     rh.setProxyDict( childView ).ignore();
-    VALUE( rh.isValid() ) EXPECTED( true );
-    VALUE( rh->value ) EXPECTED ( 3 );
+    EXPECT_TRUE( rh.isValid() );
+    EXPECT_EQ( rh->value, 3);
   }
   log << MSG::INFO << "Hiding works as expected" << endmsg;
 }
@@ -113,7 +113,7 @@ void testFallThrough( StoreGateSvc* sg , MsgStream& log) {
   SG::WriteHandle<TestClass> wh( "inStore" );
   wh.setProxyDict( sg ).ignore();
   auto status = wh.record( std::move( t ) );
-  VALUE( status.isSuccess() ) EXPECTED( true );
+  EXPECT_TRUE( status.isSuccess() );
 
   // the whole trick is that the read handle is pointed to the view,
   // but should read from the main store if the fall though
@@ -122,13 +122,13 @@ void testFallThrough( StoreGateSvc* sg , MsgStream& log) {
     auto opaqueView = new View( "OpaqueView", -1, false );
     SG::ReadHandle<TestClass> rh( "inStore" );
     rh.setProxyDict( opaqueView ).ignore();
-    VALUE( rh.isValid() ) EXPECTED( false );
+    EXPECT_FALSE( rh.isValid() );
   }
   {
     auto transparentView = new View( "TransparentView", -1 );
     SG::ReadHandle<TestClass> rh( "inStore" );
     rh.setProxyDict( transparentView ).ignore();
-    VALUE( rh.isValid() ) EXPECTED( true );
+    EXPECT_TRUE( rh.isValid() );
   }
   log << MSG::INFO << "Fall through works as expected" << endmsg;
 }
@@ -146,7 +146,7 @@ void testFallThroughLinks( StoreGateSvc* sg , MsgStream& log ) {
   SG::WriteHandle<TestContainer> wh( "inStore" );
   wh.setProxyDict( sg ).ignore();
   auto status = wh.record( std::move( t ) );
-  VALUE( status.isSuccess() ) EXPECTED( true );
+  EXPECT_TRUE( status.isSuccess() );
 
   // Make another container for testing parent/child links
   auto t2 = std::make_unique<TestContainer>();
@@ -160,15 +160,15 @@ void testFallThroughLinks( StoreGateSvc* sg , MsgStream& log ) {
   SG::WriteHandle<TestContainer> wh2( "inParent" );
   wh2.setProxyDict( parentView ).ignore();
   status = wh2.record( std::move( t2 ) );
-  VALUE( status.isSuccess() ) EXPECTED( true );
+  EXPECT_TRUE( status.isSuccess() );
 
   // Just test a straightforward element link to the parent
   {
     SG::ReadHandle<TestContainer> rh( "inParent" );
     auto link = ViewHelper::makeLink( parentView, rh, 0 );
-    VALUE( link.isValid() ) EXPECTED( true );
-    VALUE( ( *link )->value ) EXPECTED( 3 );
-    VALUE( link.proxy()->name() == "_parentView_inParent" ) EXPECTED( true );
+    EXPECT_TRUE( link.isValid() );
+    EXPECT_EQ( ( *link )->value, 3 );
+    EXPECT_EQ( link.proxy()->name(), "_parentView_inParent" );
   }
 
   // Element links need to point to the right object
@@ -179,17 +179,17 @@ void testFallThroughLinks( StoreGateSvc* sg , MsgStream& log ) {
     childView->linkParent( parentView );
     SG::ReadHandle<TestContainer> rh( "inParent" );
     auto link = ViewHelper::makeLink( childView, rh, 1 );
-    VALUE( link.isValid() ) EXPECTED( true );
-    VALUE( ( *link )->value ) EXPECTED( 2 );
-    VALUE( link.proxy()->name() == "_parentView_inParent" ) EXPECTED( true );
+    EXPECT_TRUE( link.isValid() );
+    EXPECT_EQ( ( *link )->value, 2 );
+    EXPECT_EQ( link.proxy()->name(), "_parentView_inParent" );
   }
   {
     // Parent to store
     SG::ReadHandle<TestContainer> rh( "inStore" );
     auto link = ViewHelper::makeLink( parentView, rh, 0 );
-    VALUE( link.isValid() ) EXPECTED( true );
-    VALUE( ( *link )->value ) EXPECTED( 5 );
-    VALUE( link.proxy()->name() == "inStore" ) EXPECTED( true );
+    EXPECT_TRUE( link.isValid() );
+    EXPECT_EQ( ( *link )->value, 5 );
+    EXPECT_EQ( link.proxy()->name(), "inStore" );
   }
   {
     // Child to store
@@ -197,9 +197,9 @@ void testFallThroughLinks( StoreGateSvc* sg , MsgStream& log ) {
     childView->linkParent( parentView );
     SG::ReadHandle<TestContainer> rh( "inStore" );
     auto link = ViewHelper::makeLink( childView, rh, 1 );
-    VALUE( link.isValid() ) EXPECTED( true );
-    VALUE( ( *link )->value ) EXPECTED( 4 );
-    VALUE( link.proxy()->name() == "inStore" ) EXPECTED( true );
+    EXPECT_TRUE( link.isValid() );
+    EXPECT_EQ( ( *link )->value, 4 );
+    EXPECT_EQ( link.proxy()->name(), "inStore" );
   }
   log << MSG::INFO << "Fall through works with links as expected" << endmsg;
 }

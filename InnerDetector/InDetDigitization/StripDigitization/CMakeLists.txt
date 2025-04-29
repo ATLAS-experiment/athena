@@ -10,7 +10,7 @@ find_package( Boost COMPONENTS unit_test_framework )
 
 # Component(s) in the package:
 atlas_add_component( StripDigitization
-                     SOURCES src/*.cxx src/components/*.cxx
+                     src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel PileUpToolsLib 
                      Identifier GaudiKernel SiDigitization InDetCondTools InDetRawData InDetSimEvent HitManagement 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file T_AthenaPoolCnvBase.icc
@@ -66,7 +66,7 @@ StatusCode T_AthenaPoolCnvBase<T>::DataObjectToPool(IOpaqueAddress* pAddr, DataO
       return(StatusCode::FAILURE);
    }
    Placement placement = setPlacement(pObj->name(), *pAddr->par());
-   Token* token = m_athenaPoolCnvSvc->registerForWrite(&placement, obj, m_classDesc);
+   std::unique_ptr<Token> token (m_athenaPoolCnvSvc->registerForWrite(&placement, obj, m_classDesc));
    // Null/empty token means ERROR
    if (token == nullptr || token->classID() == Guid::null()) {
       ATH_MSG_ERROR("failed to get Token for class (type/key) " << className << "/" << pObj->name());
@@ -75,9 +75,8 @@ StatusCode T_AthenaPoolCnvBase<T>::DataObjectToPool(IOpaqueAddress* pAddr, DataO
    // Update IOpaqueAddress for this object.
    TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddr);
    if (tokAddr != nullptr) {
-      tokAddr->setToken(token); token = nullptr;
+      tokAddr->setToken(std::move(token));
    } else {
-      delete token; token = nullptr;
       return(StatusCode::FAILURE);
    }
    return(StatusCode::SUCCESS);

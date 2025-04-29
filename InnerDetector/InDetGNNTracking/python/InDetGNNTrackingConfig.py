@@ -37,17 +37,29 @@ def GNNTrackFinderToolCfg(flags, name='GNNTrackFinderTool', **kwargs):
     kwargs.setdefault("knnVal", flags.Tracking.GNN.TrackFinder.knnVal)
     kwargs.setdefault("filterCut", flags.Tracking.GNN.TrackFinder.filterCut)
     kwargs.setdefault("inputMLModelDir", flags.Tracking.GNN.TrackFinder.inputMLModelDir)
+    kwargs.setdefault("ccCut", flags.Tracking.GNN.TrackFinder.ccCut)
+    kwargs.setdefault("walkMin", flags.Tracking.GNN.TrackFinder.walkMin)
+    kwargs.setdefault("walkMax", flags.Tracking.GNN.TrackFinder.walkMax)
+    kwargs.setdefault("EmbeddingFeatureNames", flags.Tracking.GNN.TrackFinder.EmbeddingFeatureNames)
+    kwargs.setdefault("EmbeddingFeatureScales", flags.Tracking.GNN.TrackFinder.EmbeddingFeatureScales)
+    kwargs.setdefault("FilterFeatureNames", flags.Tracking.GNN.TrackFinder.FilterFeatureNames)
+    kwargs.setdefault("FilterFeatureScales", flags.Tracking.GNN.TrackFinder.FilterFeatureScales)
+    kwargs.setdefault("GNNFeatureNames", flags.Tracking.GNN.TrackFinder.GNNFeatureNames)
+    kwargs.setdefault("GNNFeatureScales", flags.Tracking.GNN.TrackFinder.GNNFeatureScales)
 
     from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
     ort_exe_provider = flags.Tracking.GNN.TrackFinder.ORTExeProvider
     kwargs.setdefault("Embedding", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "embedding.onnx", ort_exe_provider)
+        OnnxRuntimeInferenceToolCfg(flags, str(Path(kwargs["inputMLModelDir"]) / "embedding.onnx"), 
+                                    ort_exe_provider, name="Embedding")
     ))
     kwargs.setdefault("Filtering", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "filtering.onnx", ort_exe_provider)
+        OnnxRuntimeInferenceToolCfg(flags, str(Path(kwargs["inputMLModelDir"]) / "filtering.onnx"), 
+                                    ort_exe_provider, name="Filtering")
     ))
     kwargs.setdefault("GNN", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "gnn.onnx", ort_exe_provider)
+        OnnxRuntimeInferenceToolCfg(flags, str(Path(kwargs["inputMLModelDir"]) / "gnn.onnx"), 
+                                    ort_exe_provider, name="GNN")
     ))
     
     acc.setPrivateTools(CompFactory.InDet.SiGNNTrackFinderTool(name, **kwargs))
@@ -85,11 +97,11 @@ def GNNTrackReaderToolCfg(flags, name='GNNTrackReaderTool', **kwargs):
 
 def GNNTrackMakerCfg(flags, name="GNNTrackMaker", **kwargs):
     """Sets up a GNNTrackMaker algorithm and returns it."""
-    
+
     if flags.Tracking.GNN.usePixelHitsOnly:
         return GNNSeedingTrackMakerCfg(flags, name, **kwargs)
-    else:
-        return GNNEndToEndTrackMaker(flags, name, **kwargs)
+    
+    return GNNEndToEndTrackMaker(flags, name, **kwargs)
 
 def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
     """Sets up a GNNTrackMaker algorithm and returns it."""
@@ -104,6 +116,13 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
     InDetTrackFitter = acc.popToolsAndMerge(ITkTrackFitterCfg(flags))
     kwargs.setdefault("TrackFitter", InDetTrackFitter)
 
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
+
+        kwargs.setdefault(
+            "TrackSummaryTool", acc.popToolsAndMerge(ITkTrackSummaryToolCfg(flags))
+        )
+
     if flags.Tracking.GNN.useTrackFinder:
         InDetGNNTrackFinderTool = acc.popToolsAndMerge(GNNTrackFinderToolCfg(flags))
         kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
@@ -114,6 +133,21 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
         kwargs.setdefault("GNNTrackFinderTool", None)
     else:
         raise RuntimeError("GNNTrackFinder or GNNTrackReader must be enabled!")
+
+    kwargs.setdefault("areInputClusters", flags.Tracking.GNN.useClusterTracks)
+    kwargs.setdefault("doRecoTrackCuts", flags.Tracking.GNN.doRecoTrackCuts)
+
+    # add eta dependent cut service
+    if "InDetEtaDependentCutSvc" not in kwargs:
+        from InDetConfig.InDetEtaDependentCutsConfig import ITkEtaDependentCutsSvcCfg
+        acc.merge(ITkEtaDependentCutsSvcCfg(flags))
+        kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService("ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
+
+    kwargs.setdefault("minClusters", flags.Tracking.GNN.minClusters)
+    kwargs.setdefault("pTmin", flags.Tracking.GNN.pTmin)
+    kwargs.setdefault("etamax", flags.Tracking.GNN.etamax)
+    kwargs.setdefault("minPixelClusters", flags.Tracking.GNN.minPixelClusters)
+    kwargs.setdefault("minStripClusters", flags.Tracking.GNN.minStripClusters)
 
     acc.addEventAlgo(CompFactory.InDet.SiSPGNNTrackMaker(name, **kwargs))
     return acc

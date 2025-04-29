@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run tests for FastCaloSimServices configuration
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     from ISF_FastCaloSimServices.ISF_FastCaloSimServicesTestHelpers import (
-        CommonTestArgumentParser, JobOptsDumperCfg, TestMessageSvcCfg,
+        CommonTestArgumentParser, TestMessageSvcCfg,
         defaultTestFlags, postprocessAndLockFlags, printAndRun
     )
 
@@ -84,7 +84,6 @@ if __name__ == '__main__':
 
     # Construct our accumulator to run
     acc = FastCaloSimServicesMainCfg(flags)
-    acc.merge(JobOptsDumperCfg(flags))
     acc.merge(TestMessageSvcCfg(flags))
 
     # Ignore checking compatibility of G4 simulation version and

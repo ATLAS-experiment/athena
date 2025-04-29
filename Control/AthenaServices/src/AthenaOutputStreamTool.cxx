@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaOutputStreamTool.cxx
@@ -26,6 +26,7 @@
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModel/TokenAddress.h"
 
+
 namespace {
 
 /// Check to see if a DataHeader has been marked as input
@@ -43,20 +44,9 @@ bool hasInputAlias (const SG::DataProxy& dp)
 AthenaOutputStreamTool::AthenaOutputStreamTool(const std::string& type,
 		const std::string& name,
 		const IInterface* parent) : base_class(type, name, parent),
-	m_store("DetectorStore", name),
 	m_conversionSvc("AthenaPoolCnvSvc", name),
 	m_clidSvc("ClassIDSvc", name),
-	m_decSvc("DecisionSvc/DecisionSvc", name),
-	m_dataHeader(nullptr),
-	m_connectionOpen(false),
-	m_extendProvenanceRecord(false) {
-   // Declare IAthenaOutputStreamTool interface
-   declareInterface<IAthenaOutputStreamTool>(this);
-
-   declareProperty("SaveDecisions",         m_extend = false, "Set to true to add streaming decisions to an attributeList");
-}
-//__________________________________________________________________________
-AthenaOutputStreamTool::~AthenaOutputStreamTool() {
+	m_decSvc("DecisionSvc/DecisionSvc", name) {
 }
 //__________________________________________________________________________
 StatusCode AthenaOutputStreamTool::initialize() {
@@ -125,17 +115,6 @@ StatusCode AthenaOutputStreamTool::initialize() {
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
-StatusCode AthenaOutputStreamTool::finalize() {
-   m_decSvc.release().ignore();
-   if (m_conversionSvc.release().isFailure()) {
-      ATH_MSG_WARNING("Cannot release AthenaPoolCnvSvc");
-   }
-   if (m_clidSvc.release().isFailure()) {
-      ATH_MSG_WARNING("Cannot release the CLIDSvc");
-   }
-   return(StatusCode::SUCCESS);
-}
-//__________________________________________________________________________
 StatusCode AthenaOutputStreamTool::connectServices(const std::string& dataStore,
 	const std::string& cnvSvc,
 	bool extendProvenenceRecord) {
@@ -157,6 +136,16 @@ StatusCode AthenaOutputStreamTool::connectServices(const std::string& dataStore,
       }
    }
    m_extendProvenanceRecord = extendProvenenceRecord;
+   auto pprop = dynamic_cast<const IProperty*>(parent());
+   if (not pprop){
+     ATH_MSG_ERROR("'parent' could not be cast to IProperty");
+     return(StatusCode::FAILURE);
+   }
+   auto keep = dynamic_cast<const StringProperty&>( pprop->getProperty("KeepProvenanceTagsRegEx") );
+   m_keepProvenancesStr = keep.value();
+   // create RegEx pattern from the property value, specify extended grammar
+   m_keepProvenancesRE = std::regex(m_keepProvenancesStr, std::regex::extended);
+
    return(connectServices());
 }
 //__________________________________________________________________________
@@ -182,10 +171,7 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
    }
    // Connect services if not already available
    if (m_store == 0 || m_conversionSvc == 0) {
-      if (connectServices().isFailure()) {
-         ATH_MSG_ERROR("Unable to connect services");
-         return(StatusCode::FAILURE);
-      }
+     ATH_CHECK( connectServices() );
    }
    // Connect the output file to the service
    if (m_conversionSvc->connectOutput(m_outputName.value()).isFailure()) {
@@ -224,35 +210,8 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
       if (m_store->retrieve(dh, dhKey).isFailure()) {
          ATH_MSG_DEBUG("Unable to retrieve the DataHeader with key " << dhKey);
       }
-      SG::DataProxy* dhProxy = m_store->proxy(dh);
-      if (dh->isInput() || hasInputAlias (*dhProxy) || primaryDH) {
-         // Add DataHeader token to new DataHeader
-         if (m_extendProvenanceRecord) {
-            std::string pTag;
-            SG::TransientAddress* dhTransAddr = 0;
-            for (const DataHeaderElement& dhe : *dh) {
-               if (dhe.getPrimaryClassID() == ClassID_traits<DataHeader>::ID()) {
-                  pTag = dhe.getKey();
-                  delete dhTransAddr; dhTransAddr = dhe.getAddress(0);
-               }
-            }
-            // Update dhTransAddr to handle fast merged files.
-            if (dhProxy != 0 && dhProxy->address() != 0) {
-              delete dhTransAddr; dhTransAddr = 0;
-              m_dataHeader->insertProvenance(DataHeaderElement(dhProxy,
-                                                               dhProxy->address(),
-                                                               pTag));
-            }
-            else if (dhTransAddr != nullptr) {
-              m_dataHeader->insertProvenance(DataHeaderElement(dhTransAddr,
-                                                               dhTransAddr->address(),
-                                                               pTag));
-              delete dhTransAddr; dhTransAddr = 0;
-            }
-         }
-         for(auto iter=dh->beginProvenance(), iEnd=dh->endProvenance(); iter != iEnd; ++iter) {
-            m_dataHeader->insertProvenance(*iter);
-         }
+      if (dh->isInput() || hasInputAlias(*m_store->proxy(dh)) || primaryDH) {
+         propagateProvenance( *dh );
       }
    }
 
@@ -321,6 +280,62 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
    m_connectionOpen = true;
    return(StatusCode::SUCCESS);
 }
+
+//__________________________________________________________________________
+void AthenaOutputStreamTool::propagateProvenance( const DataHeader& src_dh )
+{
+   // keep track of provenance entries inserted into the new DataHeader
+   std::set<std::string> insertedTags{};
+   // Add DataHeader token to the new DataHeader
+   if (m_extendProvenanceRecord) {
+      std::string pTag;
+      std::unique_ptr<SG::TransientAddress> dhTransAddr;
+      for (const DataHeaderElement& dhe : src_dh) {
+         if (dhe.getPrimaryClassID() == ClassID_traits<DataHeader>::ID()) {
+            pTag = dhe.getKey();
+            dhTransAddr.reset( dhe.getAddress(0) );
+         }
+      }
+      // Update dhTransAddr to handle fast merged files.
+      if( auto dhProxy=m_store->proxy(&src_dh); dhProxy && dhProxy->address() ) {
+         DataHeaderElement dhe(dhProxy, dhProxy->address(), pTag);
+         m_dataHeader->insertProvenance(dhe);
+         insertedTags.insert(pTag);
+      }
+      else if( dhTransAddr ) {
+         DataHeaderElement dhe(dhTransAddr.get(), dhTransAddr->address(), pTag);
+         m_dataHeader->insertProvenance(dhe);
+         insertedTags.insert(pTag);
+      }
+   }
+
+   // empty regexpr means do not keep any provenance
+   if( !m_keepProvenancesStr.empty() ) {
+      // Each stream tag is written only once in the provenance record
+      // In files where there are multiple entries per stream tag
+      // the record is in reverse, i.e., the latest appears first.
+      // Therefore, only keep the first entry if there are multiple
+      // matches so that we retain the latest one.
+      for(auto iter=src_dh.beginProvenance(), iEnd=src_dh.endProvenance(); iter != iEnd; ++iter) {
+         const auto & currentKey = (*iter).getKey();
+         if( insertedTags.insert(currentKey).second ) {
+            // first prov with that tag. Now check if we want to keep that tag
+            bool keep = false;
+            auto it =  m_keepProvenanceMatch.find( currentKey );
+            if( it != m_keepProvenanceMatch.end() ) {
+               keep = it->second;
+            } else {
+               keep = std::regex_search(currentKey, m_keepProvenancesRE);
+               m_keepProvenanceMatch[currentKey] = keep;
+            }
+            if( keep ) {
+               m_dataHeader->insertProvenance(*iter);
+            }
+         }
+      }
+   }
+}
+   
 //__________________________________________________________________________
 StatusCode AthenaOutputStreamTool::commitOutput(bool doCommit) {
    ATH_MSG_DEBUG("In commitOutput");

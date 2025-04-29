@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
 
 # Declare the package name:
 atlas_subdir( AsgMessaging )
+find_package( Boost )
 
 # Dependencies are taken based on what environment we are in:
 if( XAOD_STANDALONE )
@@ -21,9 +22,10 @@ endif()
 
 # Component(s) in the package:
 atlas_add_library( AsgMessagingLib
-   AsgMessaging/*.h AsgMessaging/*.icc ${sources}
+  AsgMessaging/*.h AsgMessaging/*.icc ${sources}
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    PUBLIC_HEADERS AsgMessaging
-   LINK_LIBRARIES CxxUtils ${extra_libs} )
+   LINK_LIBRARIES CxxUtils ${extra_libs} ${Boost_LIBRARIES} )
 
 # Select which xml files to use for dictionary generation
 

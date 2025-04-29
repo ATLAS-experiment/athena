@@ -1,20 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODMultiElecMuTauFilter.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-xAODMultiElecMuTauFilter::xAODMultiElecMuTauFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator)
+StatusCode xAODMultiElecMuTauFilter::filterInitialize()
 {
-declareProperty("MinPt",                             m_minPt                            = 5000. );
-declareProperty("MaxEta",                            m_maxEta                           = 10.0  );
-declareProperty("MinVisPtHadTau",                    m_minVisPtHadTau                   = 10000.);
-declareProperty("NLeptons",                          m_NLeptons                         = 4     );
-declareProperty("IncludeHadTaus",                    m_incHadTau                        = true  );
-declareProperty("TwoSameSignLightLeptonsOneHadTau",  m_TwoSameSignLightLeptonsOneHadTau = false );
+  CHECK(m_truthPartContKey.initialize());
+  return StatusCode::SUCCESS;
 }
 
 
@@ -30,17 +26,12 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event and build up the grid
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-       const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-       if (MC::isStable(pitr) && (std::abs(pitr->pdgId()) == 11 || std::abs(pitr->pdgId()) == 13)) {
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
+       if (MC::isStable(pitr) && (MC::isElectron(pitr) || MC::isMuon(pitr))) {
          if (pitr->pt() >= m_minPt && std::abs(pitr->eta()) <= m_maxEta) {
            ATH_MSG_DEBUG("Found lepton" << pitr);
             numLeptons++;
@@ -71,12 +62,12 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
                break;
            }
              // Ignore leptonic decays
-             if (std::abs(citr->pdgId()) == 13 || std::abs(citr->pdgId()) == 11) {
+             if (MC::isMuon(citr) || MC::isElectron(citr)) {
                tau = nullptr;
                break;
           }
             // Find tau decay nu
-            if (std::abs(citr->pdgId()) == 16) {
+             if (std::abs(citr->pdgId()) == MC::NU_TAU) {
                taunu = citr;
            }
          }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLESLBTOHPB_HH
@@ -8,21 +8,18 @@
 #include "MuonTGC_Cabling/TGCCable.h"
 
 #include <string>
+#include <memory>
+#include <array>
 
-
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
 class TGCDatabase;
   
 class TGCCableSLBToHPB : public TGCCable
 {
-public:
-
-  // Constructor & Destructor
+ public:
   TGCCableSLBToHPB(const std::string& filename);
-
-  virtual ~TGCCableSLBToHPB(void);
+  virtual ~TGCCableSLBToHPB() = default;
   
   virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
 				   bool orChannel=false) const;
@@ -32,7 +29,7 @@ public:
 				   TGCId::ModuleType moduleType,
 				   bool orChannel=false) const;
 
-private:
+ private:
   TGCCableSLBToHPB(void) {}
   virtual TGCChannelId* getChannelIn(const TGCChannelId* hpbin, 
 				     bool orChannel=false) const;
@@ -41,9 +38,9 @@ private:
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* hpb) const;
   virtual TGCModuleMap* getModuleInforHPB(const TGCModuleId* hpb, TGCId::ModuleType moduleType) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* slb) const;
-  TGCDatabase* m_database[TGCId::MaxRegionType][TGCId::MaxModuleType]{};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
 };
   
-} // end of namespace
+}  // end of namespace
  
 #endif

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -398,22 +398,22 @@ private:
 
 
 private:
-  unsigned                      m_slar;
+  unsigned                      m_slar{0};
 
-  bool                          m_two_sym_sides;
+  bool                          m_two_sym_sides{true};
 
   MultiRange                    m_full_region_range;
   MultiRange                    m_full_em_range;
 
-  size_type                     m_em_region_index;
-  size_type                     m_LAR_INDEX;
-  size_type                     m_EM_INDEX;
-  size_type                     m_BEC_INDEX;
-  size_type                     m_SAMPLING_INDEX;
-  size_type                     m_REGION_INDEX;
-  size_type                     m_ETA_INDEX;
-  size_type                     m_PHI_INDEX;
-  size_type                     m_SLAR_INDEX;
+  size_type                     m_em_region_index{0};
+  size_type                     m_LAR_INDEX{999};
+  size_type                     m_EM_INDEX{999};
+  size_type                     m_BEC_INDEX{999};
+  size_type                     m_SAMPLING_INDEX{999};
+  size_type                     m_REGION_INDEX{999};
+  size_type                     m_ETA_INDEX{999};
+  size_type                     m_PHI_INDEX{999};
+  size_type                     m_SLAR_INDEX{999};
 
   IdDictFieldImplementation     m_lar_impl;
   IdDictFieldImplementation  	m_em_impl;

@@ -10,7 +10,7 @@ find_package( nlohmann_json )
 atlas_add_library( ZdcConditions
                    src/*.cxx
                    PUBLIC_HEADERS ZdcConditions
-                   LINK_LIBRARIES Identifier ZdcIdentifier AsgMessagingLib nlohmann_json::nlohmann_json
-                   PRIVATE_LINK_LIBRARIES StoreGateLib PathResolver)
+                   LINK_LIBRARIES AthenaKernel Identifier ZdcIdentifier AsgMessagingLib nlohmann_json::nlohmann_json 
+                   PRIVATE_LINK_LIBRARIES GaudiKernel RDBAccessSvcLib GeoModelInterfaces GeoModelUtilities GeoPrimitives GeometryDBSvcLib StoreGateLib PathResolver)
 
 atlas_install_data( data/* )

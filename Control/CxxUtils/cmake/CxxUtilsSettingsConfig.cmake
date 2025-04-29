@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Additional CMake settings for the build. Used by Projects/.
 #
@@ -29,9 +29,6 @@ endif()
 set( ATLAS_GCC_CHECKERS_CONFIG ${_config}
    CACHE STRING "Configuration file(s) for the GCC checker plugins" FORCE )
 
-# CppCheck options:
-option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" ON )
-
 # User-defined cppcheck command line options:
 set( ATLAS_CPPCHECK_OPTIONS "--enable=warning,portability,performance"
    CACHE STRING "cppcheck user-defined command line options" )
@@ -42,10 +39,11 @@ set( CMAKE_CPPCHECK_DEFAULT
    "--quiet" "--inline-suppr" "--template=gcc"
    # allow conditionalizing code on cppcheck
    "-D__CPPCHECK__"
+   # Lock-free atomic pointers (required by CxxUtils/CachedPointer.h)
+   "-DATOMIC_POINTER_LOCK_FREE=2"
    # Commonly used libraries
    "--library=boost"
    "--library=googletest"
-   "--library=posix"
    "--library=python"
    # Athena-specific config and suppression file
    "--library=${_baseDir}/cppcheck_athena.cfg"

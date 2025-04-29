@@ -73,40 +73,43 @@ public:
     void setLayerDisk(unsigned v) { m_layer_disk = v; } // ITk layer number
     void setSide(unsigned v) { m_side = v; }
     void setPhysLayer(unsigned v); // Sets using the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
-    void setEtaModule(int v) { m_etaModule = v; }
+    void setEtaModule(int v) { m_etaModule_old = m_etaModule; m_etaModule = v; };
     void setPhiModule(unsigned v) { m_phiModule = v; }
     void setEtaWidth(unsigned v) { m_etaWidth = v; }
     void setPhiWidth(unsigned v) { m_phiWidth = v; }
     unsigned int getIdentifier() const { return m_identifier; } // 32 bit (short) module identifier
     unsigned getIdentifierHash() const { return m_identifierHash; } // TODO note this might break things in the same way as getSide() a few lines below. If so, recomment.
-    unsigned getLayerDisk() const { return m_layer_disk; } // ITk layer number
+    unsigned getLayerDisk(bool old=false) const { if (old && isRemapped()) return m_layer_disk_old; else return m_layer_disk;} // ITk layer number
     unsigned getSide() const { return m_side; } // strip side TODO note this has been uncommented on 4/20/21. If wrappers suddenly break, recomment this. Same for getIdentifierHash above.
-    unsigned getPhysLayer() const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
+    unsigned getPhysLayer(bool old=false) const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
     unsigned getEtaWidth() const { return m_etaWidth; }
     unsigned getPhiWidth() const { return m_phiWidth; }
-    int getEtaModule() const { return m_etaModule; }
+    int getEtaModule(bool old=false) const { if (old && isRemapped()) return m_etaModule_old; else return m_etaModule; }
     unsigned getPhiModule() const { return m_phiModule; }
 
     // --- Mapped Location ---
     // NB: isMapped() should return true to access these members
     void setLayer(unsigned v) { m_layer = v; } // This is the logical layer
     void setSection(unsigned v) { m_section = v; }
-    unsigned getLayer() const;
+    int getLayer() const;
     unsigned getSection() const;
     void setRoadID(int roadID) { m_roadID = roadID; }
 
     // --- Local Coordinates ---
     // The local coordinate is stored as an unsigned int, as in the hardware.
-    // To get the actual coordinate in units of sensor channels, use the float
-    // getCoord functions instead.
+    // To get the actual local coordinate, use the float getCoord functions instead.
     void setPhiIndex(unsigned v) { m_phiIndex = v; }
     void setEtaIndex(unsigned v) { m_etaIndex = v; }
-    void setPhiCoord(float v) { m_phiIndex = v; }
-    void setEtaCoord(float v) { m_etaIndex = v; }
+    void setCentroidPhiIndex(float v) { m_centroidPhiIndex = v; }
+    void setCentroidEtaIndex(float v) { m_centroidEtaIndex = v; }
+    void setPhiCoord(float v) { m_phiCoord = v; }
+    void setEtaCoord(float v) { m_etaCoord = v; }
     unsigned getPhiIndex() const { return m_phiIndex; }
     unsigned getEtaIndex() const { return m_etaIndex; }
-    float getPhiCoord() const { return m_phiIndex; }
-    float getEtaCoord() const { return m_etaIndex; }
+    float getCentroidPhiIndex() const { return m_centroidPhiIndex; }
+    float getCentroidEtaIndex() const { return m_centroidEtaIndex; }
+    float getPhiCoord() const { return m_phiCoord; }
+    float getEtaCoord() const { return m_etaCoord; }
 
     float getPhiWindow() const { return m_phiWindow; }
 
@@ -175,6 +178,20 @@ public:
     void setStripChipIDForITk(int v){ m_stripChipinITKEDM = v;}
     void setStripHitMapForITk(int v){ m_stripHitMapinITKEDM = v;}
 
+    int getCluster1ID() const {return m_clusterIndex1ForFPGA;}
+    void setCluster1ID(int v) {m_clusterIndex1ForFPGA = v;}
+
+    int getCluster2ID() const {return m_clusterIndex2ForFPGA;}
+    void setCluster2ID(int v) {m_clusterIndex2ForFPGA = v;}
+
+    // methods for hit cluster equiv
+    const std::vector<int>& getPhiIndexVec() const { return m_PhiIndexVec;}
+    const std::vector<int>& getEtaIndexVec() const { return m_EtaIndexVec;}  
+    const std::vector<unsigned>& getIDHashVec() const { return m_IDhashVec;}
+  
+    void addPhiIndexToVec(int phi) {m_PhiIndexVec.push_back(phi);}
+    void addEtaIndexToVec(int eta) {m_EtaIndexVec.push_back(eta);}
+    void addIDHashToVec(unsigned id) {m_IDhashVec.push_back(id);}
     ///////////////////////////////////////////////////////////////////////
     // Other Interface
 
@@ -195,8 +212,11 @@ protected:
     unsigned int m_identifier = 0; // Global module ID, from offline (32 bit variant)
     unsigned m_identifierHash = 0; // Global module ID hash, from ITk
     unsigned m_layer_disk = 0;     // ITk layer number
+    unsigned m_layer_disk_old = 0;     // ITk layer number
     unsigned m_side = 0;           // Side of the strip module
+    unsigned m_side_old = 0;           // Side of the strip module
     int m_etaModule = 0; // eta index of the module that the hit is located on
+    int m_etaModule_old = 0; // eta index of the module that the hit is located on
     unsigned m_phiModule = 0; // phi index of the module that the hit is located on
     unsigned m_etaWidth = 0;  // clustering width along eta
     unsigned m_phiWidth = 0;  // clustering width in phi direction
@@ -211,6 +231,10 @@ protected:
     // --- Local Coordinates ---
     int m_phiIndex = -1; // phi index for pixel, strip for strip
     int m_etaIndex = -1; // eta index for pixel, row for strip
+    float m_centroidPhiIndex = -1; // centroid's phi index for pixel, strip for strip
+    float m_centroidEtaIndex = -1; // centroid's eta index for pixel, row for strip
+    float m_phiCoord = -999; // local position along phi direction
+    float m_etaCoord = -999; // local position along eta direction
 
     // --- Global Coordinates ---
     float m_x = 0;  // Hit position in global coordinates
@@ -254,15 +278,21 @@ protected:
 
 
     // For ITk EDM encoding
+    int m_clusterIndex1ForFPGA = -1; // Index1 to keep a track of all the clusters used in track in FPGA
+    int m_clusterIndex2ForFPGA = -1; // Index2 to keep a track of all the clusters used in track in FPGA
 
     bool m_isValidForITK = false; // Should this hit be used for ITk EDM testing
     int m_stripRowinITKEDM = -1; // Strip hit row ID in ITk EDM format
     int m_stripChipinITKEDM = -1; // Strip chip ID in ITk EDM format
     int m_stripHitMapinITKEDM = -1; // Strip hit map in ITk EDM format
 
+
     int m_roadID = 0;
 
-    ClassDefNV(FPGATrackSimHit, 9);
+    std::vector<unsigned> m_IDhashVec; // for a cluster, when we get the equivalent hit info we want to store all the ID hash containing it
+    std::vector<int> m_PhiIndexVec; // for a cluster, all the phi indices in it
+    std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it
+    ClassDefNV(FPGATrackSimHit, 13);
 };
 
 // Container of <FPGATrackSimHit const *>

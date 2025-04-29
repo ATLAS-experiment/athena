@@ -17,7 +17,6 @@
 #include "CachedGetAssocTruth.h"
 
 #include "safeDecorator.h"
-// #include "TrackTruthLookup.h"
 //
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "xAODTracking/TrackParticle.h"
@@ -136,6 +135,20 @@ InDetPhysValMonitoringTool::initialize() {
 
   ATH_CHECK( m_trkParticleName.initialize() );
   ATH_CHECK( m_truthParticleName.initialize( (m_pileupSwitch == "HardScatter" or m_pileupSwitch == "All") and not m_truthParticleName.key().empty() ) );
+  if (not m_truthParticleName.key().empty()) {
+     // create decor handle keys for truth particle decorations which are needed by CachedGetAssocTruth
+     // The existence of the handles is good enough to ensure that data dependencies are propagated
+     // and that the decorations exist when this tool is being called. Albeit not very elegant
+     // there is no need to create decor handles for the keys and use those instead of static
+     // accessors. To keep changes minimal the original static accessors are not replaced.
+     std::vector<std::string> trk_decorations;
+     IDPVM::CachedGetAssocTruth::neededTrackParticleDecorations(trk_decorations);
+     IDPVM::addReadDecoratorHandleKeys(*this,
+                                       m_trkParticleName,
+                                       "" /* no configurable prefix*/,
+                                       trk_decorations,
+                                       m_linkTrkDecor);
+  }
   ATH_CHECK( m_vertexContainerName.initialize( not m_vertexContainerName.empty() ) );
   ATH_CHECK( m_truthVertexContainerName.initialize( not m_truthVertexContainerName.key().empty() ) );
   ATH_CHECK( m_eventInfoContainerName.initialize() );
@@ -149,7 +162,12 @@ InDetPhysValMonitoringTool::initialize() {
   std::vector<std::string> required_float_truth_decorations {"d0"};
   std::vector<std::string> required_int_truth_decorations {};
   std::vector<std::string> required_int_jet_decorations {"HadronConeExclTruthLabelID"};
-
+  // The CSV file is for storing event data  related to track overlay ML training purposes.
+  if (!m_setCSVName.empty()) {
+      m_datfile.open(m_setCSVName);
+      ATH_MSG_INFO("Accessing csv file with name " <<m_setCSVName<< "...");
+      m_datfile <<"EvtNumber,PdgID,Px,Py,Pz,E,Pt,Eta,Phi,Mass,numPU,numvtx,MatchProb"<<std::endl;
+  }
   std::string empty_prefix;
   IDPVM::addReadDecoratorHandleKeys(*this, m_trkParticleName, empty_prefix, required_float_track_decorations, m_floatTrkDecor);
   IDPVM::addReadDecoratorHandleKeys(*this, m_trkParticleName, empty_prefix, required_int_truth_decorations,   m_intTrkDecor);
@@ -202,6 +220,7 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
   rttConfig.doTrtExtensionPlots = m_doTRTExtensionPlots;
 
   rttConfig.doDuplicatePlots = m_doDuplicatePlots;
+  rttConfig.doTechEffPlots = m_fillTechnicalEfficiency;
 
   /// turn off truth if none is present
   if (m_truthParticleName.key().empty()){
@@ -336,7 +355,8 @@ InDetPhysValMonitoringTool::fillHistograms() {
   // Mark the truth particles in our vector as "selected". 
   // This is needed because we later access the truth matching via xAOD decorations, where we do not 'know' about membership to this vector.
   if (m_usingSpecialPileupSwitch) markSelectedByPileupSwitch(truthParticlesVec);
-
+  const xAOD::EventInfo *eventInfo = nullptr;
+  ATH_CHECK (evtStore()->retrieve (eventInfo, "EventInfo"));
   IDPVM::CachedGetAssocTruth getAsTruth; // only cache one way, track->truth, not truth->tracks 
 
   unsigned int truthMu = 0;
@@ -564,6 +584,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
     if (accept) {
       ++nSelectedTruthTracks; // total number of truth which pass cuts per event
       bool isEfficient(false); // weight for the trackeff histos
+      float matchingProbability{};
       m_monPlots->fill(*thisTruth, beamSpotWeight); // This is filling truth-only plots
 
       if(m_doDuplicatePlots){
@@ -585,11 +606,19 @@ InDetPhysValMonitoringTool::fillHistograms() {
         if (associatedTruth && associatedTruth == thisTruth) {
           float prob = getMatchingProbability(*thisTrack);
           if (not std::isnan(prob) && prob > m_lowProb) {
+            matchingProbability = prob;
             isEfficient = true;
             matchedTrack = thisTrack;
             break;
           }
         }
+      }
+      if (!m_setCSVName.empty()) {
+          m_datfile <<eventInfo->eventNumber()<<","<<thisTruth->pdgId()<<","<<thisTruth->px()/ Gaudi::Units::GeV<<","
+                <<thisTruth->py()/ Gaudi::Units::GeV<<","<<thisTruth->pz()/ Gaudi::Units::GeV<<","
+                <<thisTruth->e()/ Gaudi::Units::GeV<<","<<thisTruth->pt()/ Gaudi::Units::GeV<<","
+                <<thisTruth->eta()<<","<<thisTruth->phi()<<","<<thisTruth->m()/ Gaudi::Units::GeV<<","
+                <<puEvents<<","<<nVertices<<","<<matchingProbability<<std::endl;
       }
       if (!thisTruth){ 
         ATH_MSG_ERROR("An error occurred: Truth particle for tracking efficiency calculation is a nullptr");

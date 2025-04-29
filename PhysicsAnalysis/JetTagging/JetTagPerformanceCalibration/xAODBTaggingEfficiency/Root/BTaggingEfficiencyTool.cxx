@@ -13,7 +13,7 @@
 #include "xAODBTaggingEfficiency/ToolDefaults.h"
 
 // for the onnxtool
-#include "xAODBTaggingEfficiency/OnnxUtil.h"
+#include "xAODBTaggingEfficiency/SaltModel.h"
 
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
@@ -716,8 +716,8 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       ATH_MSG_ERROR("ONNX error: Model file doesn't exist! Please set the property 'pathToONNX' to a valid ONNX file");
       return StatusCode::FAILURE;
     }
-    m_onnxUtil = std::make_unique<OnnxUtil> (m_pathToONNX);
-    m_onnxUtil->initialize();
+    m_saltModel = std::make_unique<SaltModel> (m_pathToONNX);
+    m_saltModel->initialize();
   }
 
   m_initialised = true;
@@ -1104,7 +1104,7 @@ BTaggingEfficiencyTool::getMCEfficiency( int flavour, const Analysis::Calibratio
 CorrectionCode
 BTaggingEfficiencyTool::getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& effAllJet)
 {
-  m_onnxUtil->runInference(node_feat, effAllJet);
+  m_saltModel->runInference(node_feat, effAllJet);
   return CorrectionCode::Ok;
 }
 
@@ -1112,7 +1112,7 @@ BTaggingEfficiencyTool::getMCEfficiencyONNX( const std::vector<std::vector<float
 CorrectionCode
 BTaggingEfficiencyTool::getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<std::vector<float>>& effAllJetAllWp)
 {
-  m_onnxUtil->runInference(node_feat, effAllJetAllWp);
+  m_saltModel->runInference(node_feat, effAllJetAllWp);
   return CorrectionCode::Ok;
 }
 

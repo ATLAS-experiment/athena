@@ -1,0 +1,72 @@
+#!/bin/bash
+set -e
+
+TEST_LABEL="F600"
+xAODOutput="FPGATrackSim_${TEST_LABEL}_AOD.root"
+
+FWRD_ARGS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output)
+            xAODOutput="$2"
+            shift 2
+            ;;
+        *)
+            # Collect all other arguments to forward
+            FWRD_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
+
+run_InsideOut(){
+    python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
+        --evtMax=${RDO_EVT_ANALYSIS} \
+        --skipEvents=${SKIP_EVENTS} \
+        --filesInput=${RDO_ANALYSIS} \
+        Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
+        Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
+        Trigger.FPGATrackSim.runCKF=$RUN_CKF \
+        Trigger.FPGATrackSim.region=34 \
+        Trigger.FPGATrackSim.pipeline='F-600' \
+        Trigger.FPGATrackSim.tracking=True \
+        Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
+        Trigger.FPGATrackSim.doEDMConversion=True \
+        Trigger.FPGATrackSim.doOverlapRemoval=True \
+        Trigger.FPGATrackSim.Hough.secondStage=False \
+        Trigger.FPGATrackSim.writeToAOD=True \
+        Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
+        Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
+        Output.AODFileName=$xAODOutput
+}
+
+echo "... Running ${TEST_LABEL} analysis"
+run_InsideOut
+ls -l
+echo "... analysis on RDO, this part is done ..."
+
+
+
+
+if [ -z "$ArtJobType" ];then # skip file check for ART (this has already been done in CI)
+    echo "... analysis output verification"
+cat << EOF > checkHist.C
+{
+    _file0->cd("FPGATrackSimLogicalHitsProcessAlg");
+    TH1* h = (TH1*)gDirectory->Get("nroads_1st");
+    if ( h == nullptr )
+        throw std::runtime_error("oh dear, after all of this there is no roads histogram");
+    h->Print(); 
+    if ( h->GetEntries() == 0 ) {
+        throw std::runtime_error("oh dear, after all of this there are zero roads");
+    }
+}
+EOF
+
+    root -b -q monitoring.root checkHist.C
+    echo "... analysis output verification, this part is done ..."
+    ls -l
+    echo "... Inside-Out on RDO, this part is done now checking the xAOD"
+    checkxAOD.py $xAODOutput
+fi

@@ -49,7 +49,7 @@ if __name__=='__main__':
   parser.add_argument('--postExec', help='Code to execute after setup', default=None)
   parser.add_argument('--emulate', help='emulate the HLT e/g sequence', action='store_true')
   parser.add_argument('--debug', help='debug mode', action='store_true')
-
+  parser.add_argument('--onlyHLT',help='compute final HLT decision', action='store_true', dest='onlyHLT')
 
   if len(sys.argv)==1:
     parser.print_help()
@@ -106,7 +106,7 @@ if __name__=='__main__':
 
   # create the e/g monitoring tool and add into the component accumulator
   from TrigEgammaMonitoring.TrigEgammaMonitorAlgorithm import TrigEgammaMonConfig
-  trigEgammaMonitorAcc = TrigEgammaMonConfig(flags, emulator=emulator)
+  trigEgammaMonitorAcc = TrigEgammaMonConfig(flags, emulator=emulator, onlyHLT = args.onlyHLT)
   cfg.merge(trigEgammaMonitorAcc)
 
 

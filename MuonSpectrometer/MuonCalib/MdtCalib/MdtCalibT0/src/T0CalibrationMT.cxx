@@ -103,8 +103,9 @@ namespace MuonCalib {
         std::map<int, MdtTubeFitContainer::SingleTubeFit> full;
         std::map<int, MdtTubeFitContainer::SingleTubeCalib> st;
         std::map<int, std::string> fit_by;
-        if (m_settings->FitTime())
+        if (m_settings->FitTime()) {
             for (unsigned int i = 0; i < m_sort_by.size(); i++) { analyse_tdc(i, full, st, fit_by); }
+        }
         for (unsigned int i = 0; i < m_adc_sort_by.size(); i++) { analyse_adc(i, full, st); }
 
         for (auto & it : full) {
@@ -122,7 +123,7 @@ namespace MuonCalib {
             const Identifier tubeId = idHelper.channelID(fId.stationNameString(), 
                                                          fId.eta(), fId.phi(), nML, nL, nT);
                  
-            bool setInfo = m_result[sid]->setCalib(std::move(stc), tubeId, log);
+            bool setInfo = m_result[sid]->setCalib(std::make_unique<MdtTubeFitContainer::SingleTubeCalib>(stc), tubeId, log);
             if (!setInfo) {
                 log << MSG::WARNING << "T0CalibrationMT::PROBLEM! could not set SingleTubeCalib info" << endmsg;
             }

@@ -222,7 +222,6 @@ namespace MCTesting {
     std::unique_ptr<ISF::ISFTruthIncident> m_truthIncident{};
   };
 
-  // cppcheck-suppress syntaxError
   TEST_F(ISFTruthIncident_test, testGeoID) {
     ASSERT_EQ(test::origin.first, m_truthIncident->geoID());
   }

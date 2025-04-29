@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //#define ARTRU          // Choice of TR generator
@@ -78,7 +78,7 @@ TRTTransitionRadiation::~TRTTransitionRadiation() {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void TRTTransitionRadiation::AddRadiatorParameters(TRTRadiatorParameters p) {
+void TRTTransitionRadiation::AddRadiatorParameters(const TRTRadiatorParameters& p) {
 
   ATH_MSG_DEBUG(" New Radiator parameters being defined for TR process");
   ATH_MSG_DEBUG(" Volume " << p.GetLogicalVolume()->GetName());
@@ -167,6 +167,7 @@ void TRTTransitionRadiation::Initialize() {
       G4Material* g4Material{nullptr};
       if(materialMap.find(key)==materialMap.end()) {
         auto itNElements = materialComponentsMap.find(key);
+        if (itNElements==materialComponentsMap.end()) continue;
         g4Material = new G4Material(key
                                     ,material->getDouble("DENSITY")*(CLHEP::gram / CLHEP::cm3)
                                     ,itNElements->second);

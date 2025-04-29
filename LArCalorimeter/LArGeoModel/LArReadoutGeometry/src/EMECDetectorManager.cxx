@@ -138,25 +138,35 @@ void EMECDetectorManager::addTreeTop (const PVLink& treeTop)
 
 const EMECHVManager& EMECDetectorManager::getHVManager (EMECHVManager::IOType io) const
 {
-  if(!m_HVManager[io].get()) {
+  const EMECHVManager* out = m_HVManager[io].get();
+  if (!out) {
     //Support lazy initialization for testbeams
     ServiceHandle<StoreGateSvc> detStore ("DetectorStore", "HECHVManager");
     const LArHVManager *manager{nullptr};
     if (detStore->retrieve(manager)==StatusCode::SUCCESS) {
-      m_HVManager[io].set (&(manager->getEMECHVManager(io)));
+      out = &(manager->getEMECHVManager(io));
+      m_HVManager[io].set (out);
     }
   }
-  return *(m_HVManager[io].get());
+  if (!out) {
+    throw std::runtime_error ("EMECDetectorManager::getHVManager: Can't find LArHVManager in DetectorStore");
+  }
+  return *out;
 }
 
 const EMECPresamplerHVManager& EMECDetectorManager::getPresamplerHVManager () const
 {
-  if (!m_presamplerHVManager.get()) {
+  const EMECPresamplerHVManager* out = m_presamplerHVManager.get();
+  if (!out) {
     ServiceHandle<StoreGateSvc> detStore ("DetectorStore", "HECHVManager");
     const LArHVManager *manager{nullptr};
     if (detStore->retrieve(manager)==StatusCode::SUCCESS) {
-      m_presamplerHVManager.set (&(manager->getEMECPresamplerHVManager()));
+      out = &(manager->getEMECPresamplerHVManager());
+      m_presamplerHVManager.set (out);
     }
   }
-  return *m_presamplerHVManager.get();
+  if (!out) {
+    throw std::runtime_error ("EMECDetectorManager::getPresamplerHVManager: Can't find LArHVManager in DetectorStore");
+  }
+  return *out;
 }

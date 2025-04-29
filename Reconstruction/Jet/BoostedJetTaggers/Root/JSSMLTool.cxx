@@ -8,6 +8,7 @@
 
 // ROOT includes
 #include "TSystem.h"
+#include "TH2D.h"
 
 namespace AthONNX {
 
@@ -41,7 +42,7 @@ namespace AthONNX {
     std::vector<float> input_tensor_values(m_nvars);
 
     // apply features scaling
-    for(auto var : JSSVars){
+    for(const auto & var : JSSVars){
       double mean = m_scaler.find(var.first)->second[0];
       double std  = m_scaler.find(var.first)->second[1];
       JSSVars[var.first] = (var.second - mean) / std;
@@ -82,11 +83,8 @@ namespace AthONNX {
   StatusCode JSSMLTool::initialize( ) {
 
     // Access the service.    
-    // Find the model file.
-    std::string modelFileName = gSystem->Getenv("WorkDir_DIR");
-    modelFileName += "/" + m_modelFileName;
-    
-    ATH_MSG_INFO( "Using model file: " << modelFileName );
+    // Find the model file.    
+    ATH_MSG_INFO( "Using model file: " << m_modelFileName );
     
     // Set up the ONNX Runtime session.
     Ort::SessionOptions sessionOptions;
@@ -95,7 +93,7 @@ namespace AthONNX {
     Ort::AllocatorWithDefaultOptions allocator;
     m_env = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "");
     m_session = std::make_unique< Ort::Session >( *m_env,
-						  modelFileName.c_str(),
+						  m_modelFileName.c_str(),
 						  sessionOptions );
     
     ATH_MSG_INFO( "Created the ONNX Runtime session" );
@@ -248,7 +246,7 @@ namespace AthONNX {
     int max_index = 0;
     for (int i = 0; i < arrSize; i++){
       ATH_MSG_VERBOSE("Score for class "<<i<<" = "<<floatarr[i]<<std::endl);
-      std::cout << " +++ Score for class "<<i<<" = "<<floatarr[i]<<std::endl;
+      ATH_MSG_VERBOSE(" +++ Score for class "<<i<<" = "<<floatarr[i]<<std::endl);
       if (ConstScore<floatarr[i]){
         ConstScore = floatarr[i];
         max_index = i;
@@ -259,6 +257,88 @@ namespace AthONNX {
     return ConstScore;
 
   } // end retrieve constituents score ----
+
+  // constituents transformer based with const/inter variables
+  double JSSMLTool::retrieveConstituentsScore(std::vector<std::vector<float>> constituents, std::vector<std::vector<std::vector<float>>> interactions) const {
+        
+    // the format of the constituents/interaction variables is:
+    // constituents       ---> (nConstituents + nTowers, 7)
+    // interactions       ---> (i, j, 4), with i, j in {nConstituents + nTowers}
+    // the packing can be done for any kind of low level inputs
+    // i.e. PFO/UFO constituents, topo-towers, tracks, etc
+    // they can be concatened one after the other in case of multiple inputs
+
+    //*************************************************************************
+    // Score the model using sample data, and inspect values
+    // loading input data
+
+    std::vector<int> output_tensor_values_ = ReadOutputLabels();
+    
+    int testSample = 0;    
+    
+    //preparing container to hold output data
+    int output_tensor_values = output_tensor_values_[testSample]; 
+
+    // prepare the inputs
+    auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    std::vector<Ort::Value> input_tensors;
+
+    // unroll the inputs
+    std::vector<float> constituents_values; //(constituents.size()*7);
+    for (long unsigned int i=0; i<constituents.size(); i++) {
+      for (long unsigned int j=0; j<7; j++) {
+        constituents_values.push_back(constituents.at(i).at(j));
+      }
+    }
+
+    std::vector<float> interactions_values; //(interactions.size()*interactions.size()*4);
+    for (long unsigned int i=0; i<interactions.size(); i++) {
+      for (long unsigned int k=0; k<interactions.size(); k++) {
+        for (long unsigned int j=0; j<4; j++) {
+          interactions_values.push_back(interactions.at(i).at(k).at(j));
+        }
+      }
+    }
+
+    std::vector<int64_t> const_dim = {1, static_cast<int64_t>(constituents.size()), 7};
+    input_tensors.push_back(Ort::Value::CreateTensor<float>(
+      memory_info, 
+      constituents_values.data(), constituents_values.size(), const_dim.data(), const_dim.size()
+      )
+    );
+
+    std::vector<int64_t> inter_dim = {1, static_cast<int64_t>(constituents.size()), static_cast<int64_t>(constituents.size()), 4};
+    input_tensors.push_back(Ort::Value::CreateTensor<float>(
+      memory_info, 
+      interactions_values.data(), interactions_values.size(), inter_dim.data(), inter_dim.size()
+      )
+    );
+
+    auto output_tensors = m_session->Run(Ort::RunOptions{nullptr}, m_input_node_names.data(), input_tensors.data(), m_input_node_names.size(), m_output_node_names.data(), m_output_node_names.size());
+    assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
+    
+    // Get pointer to output tensor float values
+    float* floatarr = output_tensors.front().GetTensorMutableData<float>();
+    int arrSize = sizeof(*floatarr)/sizeof(floatarr[0]);
+
+    // show  true label for the test input
+    ATH_MSG_DEBUG("Label for the input test data  = "<<output_tensor_values);
+    float ConstScore = -999;
+    int max_index = 0;
+    for (int i = 0; i < arrSize; i++){
+      ATH_MSG_VERBOSE("Score for class "<<i<<" = "<<floatarr[i]<<std::endl);
+      ATH_MSG_VERBOSE(" +++ Score for class "<<i<<" = "<<floatarr[i]<<std::endl);
+      if (ConstScore<floatarr[i]){
+        ConstScore = floatarr[i];
+        max_index = i;
+      }
+    }
+    ATH_MSG_DEBUG("Class: "<<max_index<<" has the highest score: "<<floatarr[max_index]);
+    
+    return ConstScore;
+
+  } // end retrieve constituents score ----
+
 
   // dedicated DisCo/DNN method ---
   double JSSMLTool::retrieveHighLevelScore(std::map<std::string, double> JSSVars) const {
@@ -301,8 +381,6 @@ namespace AthONNX {
     input_tensor.emplace_back(
       Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), input_tensor_size, m_input_node_dims.data(), m_input_node_dims.size())
     );
-
-    assert(input_tensor.IsTensor());
         
     auto output_tensors = m_session->Run(Ort::RunOptions{nullptr}, m_input_node_names.data(), input_tensor.data(), m_input_node_names.size(), m_output_node_names.data(), m_output_node_names.size());
     assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());

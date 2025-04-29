@@ -285,7 +285,7 @@ class SlimmingHelper:
                                                 entry += element+"."
                                 if ('xAOD::TrackParticleContainer' in theDictionary[item] and auxEntries[item]==""):
                                         entry+=excludedAuxData
-                                if ('xAOD::JetAuxContainer' in theDictionary[item] and auxEntries[item]==""):
+                                if ('xAOD::JetAuxContainer' in theDictionary[item] and auxEntries[item]=="" and self.CheckDoubleTrigAuxInstruction(item)):
                                         entry+=excludedAuxData
                                 self.FinalItemList.append(entry)
 
@@ -487,6 +487,8 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent import AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent)
+                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingLargeRContent
+                        items.extend(BTaggingLargeRContent("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", self.flags))
                 elif collectionName=="AntiKtVR30Rmax4Rmin02PV0TrackJets":
                         from DerivationFrameworkJetEtMiss.AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent import AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent
                         items.extend(AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent)
@@ -689,3 +691,13 @@ class SlimmingHelper:
                 if ("xAOD::" in item and sep[1] in self.NamesAndTypes.keys()):
                         return "XAOD"
                 return "OK"
+
+        # Required to prevent:
+        # Mixing up negative and positive Aux selections is not supported: xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux. : {'-clusterAssociation.-PseudoJet', 'phi.eta.pt.m'}
+        # Where the negative rule comes from the above excludedAuxData loop, and the positive rule comes from the IncludeFullTriggerEDMLevel flag and "HLT_FULL_EDM" smart-collection.
+        # Results in all content being stored for this container (will write all attributes. Original selection was: {'', 'phi.m.eta.pt'}) which is OK as it does not have either of the above
+        # decorations which are not possible to include at the DAOD level. Current decorations: viewIndex, btaggingLink, JVFCorr, Jvt, SumPtTrkPt500
+        def CheckDoubleTrigAuxInstruction(self, aux):
+                if self.IncludeFullTriggerEDMLevel and 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux' in aux:
+                        return False
+                return True

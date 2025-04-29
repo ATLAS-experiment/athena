@@ -15,9 +15,16 @@ def ActsAnalogueClusteringToolCfg(flags,
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelOfflineCalibCondAlgCfg
     acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))
 
+    kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
     kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("PixelOfflineCalibData", "ITkPixelOfflineCalibData")
-        
+    kwargs.setdefault("PerformCovarianceCalibration", flags.Acts.OnTrackCalibration.performCovarianceCalibration)
+    
+    # For default configuration we set a lower cap on the calibrated covariance
+    # For FT we have inflated chi2 instead
+    if not flags.Tracking.doITkFastTracking:
+        kwargs.setdefault("CalibratedCovarianceLowerBound", 0.75)
+
     if 'PixelLorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))

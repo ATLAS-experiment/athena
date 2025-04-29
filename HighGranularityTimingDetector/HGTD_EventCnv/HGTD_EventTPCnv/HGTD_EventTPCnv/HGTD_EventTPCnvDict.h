@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/HGTD_EventTPCnvDict.h
  * @author Noemi Calace <noemi.calace@cern.ch>
@@ -14,6 +14,9 @@
 #include "HGTD_EventTPCnv/HGTD_RDO_p1.h"
 #include "HGTD_EventTPCnv/HGTD_RDO_Collection_p1.h"
 #include "HGTD_EventTPCnv/HGTD_RDO_Container_p1.h"
+#include "HGTD_EventTPCnv/HGTD_ALTIROC_RDO_p1.h"
+#include "HGTD_EventTPCnv/HGTD_ALTIROC_RDO_Collection_p1.h"
+#include "HGTD_EventTPCnv/HGTD_ALTIROC_RDO_Container_p1.h"
 #include "HGTD_EventTPCnv/HGTD_Cluster_p1.h"
 #include "HGTD_EventTPCnv/HGTD_PRD_Collection_p1.h"
 #include "HGTD_EventTPCnv/HGTD_ClusterContainer_p1.h"

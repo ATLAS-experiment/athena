@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -90,12 +90,8 @@ class TForwardElectronLikelihoodTool : public asg::AsgMessaging
 
 public:
   /// Standard constructor
-
   TForwardElectronLikelihoodTool(
     const char* name = "TForwardElectronLikelihoodTool");
-
-  /// Standard destructor
-  ~TForwardElectronLikelihoodTool();
 
 public:
   /// Initialize this class

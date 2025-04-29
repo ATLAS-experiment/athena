@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # This script converts the geometry.dat file output obtained from the run of RunPrintSiDetElements.py into a JSON file.

@@ -1,6 +1,6 @@
 """Define functions to configure Pixel conditions algorithms
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -216,7 +216,10 @@ def PixelDeadMapCondAlgCfg(flags, name="PixelDeadMapCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelDeadMapCondAlg"""
     acc = ComponentAccumulator()
     acc.merge(PixelConfigCondAlgCfg(flags))
-    if flags.GeoModel.Run is LHCPeriod.Run1:
+    if flags.InDet.JsonPathPixelModuleVeto:
+        kwargs.setdefault("ReadKey", "")
+        kwargs.setdefault("JsonPath", flags.InDet.JsonPathPixelModuleVeto)
+    elif flags.GeoModel.Run is LHCPeriod.Run1:
         kwargs.setdefault("ReadKey", "")
     else:
         kwargs.setdefault("ReadKey", "/PIXEL/PixelModuleFeMask")

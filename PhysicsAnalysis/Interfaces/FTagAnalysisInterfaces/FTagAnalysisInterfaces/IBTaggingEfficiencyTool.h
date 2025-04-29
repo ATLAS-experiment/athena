@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CPIBTAGGINGEFFICIENCYTOOL_H
@@ -13,12 +13,13 @@
 
 #include "xAODJet/Jet.h"
 
-#include <vector>
-#include <string>
-#include <set>
 
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 #include "CalibrationDataInterface/CalibrationDataInterfaceROOT.h"
+
+#include <vector>
+#include <string>
+#include <map>
 
 class IBTaggingEfficiencyTool : virtual public CP::ISystematicsTool {
 
@@ -63,11 +64,11 @@ class IBTaggingEfficiencyTool : virtual public CP::ISystematicsTool {
   // utility methods
   virtual const std::map<CP::SystematicVariation, std::vector<std::string> > listSystematics() const = 0;
   //
-  virtual std::string getTaggerName() const = 0;
+  virtual const std::string & getTaggerName() const = 0;
   //
-  virtual std::string getOperatingPoint() const = 0;
+  virtual const std::string & getOperatingPoint() const = 0;
   //
-  virtual std::string getJetAuthor() const = 0;
+  virtual const std::string & getJetAuthor() const = 0;
 
   // select an efficiency map for use in MC/MC and inefficiency scale factors, based on user specified selection of efficiency maps
   virtual bool setMapIndex(const std::string& flavour, unsigned int index) = 0;

@@ -39,6 +39,7 @@ public:
   virtual bool useEFTrigger() const = 0;
   virtual bool useTruth() const = 0;
   virtual bool useOffline() const = 0;
+  virtual bool doTrigNavigation() const = 0;
 
   virtual bool isTestTrigger() const = 0;
   virtual bool isTestEFTrigger() const = 0;

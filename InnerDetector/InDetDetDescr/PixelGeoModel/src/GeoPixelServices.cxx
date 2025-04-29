@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -226,7 +226,7 @@ void GeoPixelServices::initialize(const std::string & a)
 
   IRDBRecordset_ptr table = m_gmt_mgr->getPixelServiceRecordset(a);
 
-  InDetDD::ServiceVolumeMaker volMaker(label, table, schema, m_gmt_mgr->athenaComps());
+  InDetDD::ServiceVolumeMaker volMaker(label, std::move(table), schema, m_gmt_mgr->athenaComps());
   for (unsigned int i = 0; i < volMaker.numElements(); ++i) {
     m_services.push_back(volMaker.make(i));
   }

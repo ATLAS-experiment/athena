@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_BeamTrack.h"
@@ -24,28 +24,6 @@
 #include <iostream>
 #include <utility>
 
-//constructor
-ALFA_BeamTrack::ALFA_BeamTrack()
-{
-  
-	//initialisation with standart values
-
-	//declareProperty("ConfDir", m_ConfDir=  "./config");
-	/*m_ConfDir= ...
-  	m_AlfaTwiss = ...*/
-
-	m_AlfaTwiss=true;
-	m_ip     = 1;
-        m_Magver = 3;
-        m_Side = FPTracker::beam1;
-
-  
-}
-
-//destructor
-ALFA_BeamTrack::~ALFA_BeamTrack()
-{
-}
 
 int ALFA_BeamTrack::initialize(const FPConfig &ConfigValues){
      

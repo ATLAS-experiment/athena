@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -400,11 +400,11 @@ private:
     "Name of the Magnetic Field conditions object key"
   };
 
-  double m_dlt;          // accuracy parameter
-  double m_helixStep;    // max step whith helix model
-  double m_straightStep; // max step whith srtaight line model
-  bool m_usegradient;    // use magnetig field gradient into the error
-                         // propagation
+  DoubleProperty m_dlt{this, "AccuracyParameter", 0.0002};
+  DoubleProperty m_helixStep{this, "MaxHelixStep", 1.};
+  DoubleProperty m_straightStep{this, "MaxStraightLineStep", 0.01};
+  BooleanProperty m_usegradient{this, "IncludeBgradients", false,
+    "use magnetic field gradient into the error propagation"};
 };
 
 } // end namespace Trk

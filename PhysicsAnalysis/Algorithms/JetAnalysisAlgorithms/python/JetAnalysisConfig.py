@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 from __future__ import print_function
@@ -25,6 +25,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
+        self.addOption('outputTruthLabelIDs', False, type=bool,
+            info='Enable or disable HadronConeExclTruthLabelID and PartonTruthLabelID decorations')
         # TODO: add info string
         self.addOption ('runOriginalObjectLink', False, type=bool,
             info="")
@@ -49,7 +51,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
         # Relink original jets in case of b-tagging calibration
         if self.runOriginalObjectLink :
             alg = config.createAlgorithm( 'CP::AsgOriginalObjectLinkAlg',
-                                          'JetOriginalObjectLinkAlg'+self.containerName )
+                                          'JetOriginalObjectLinkAlg'+self.containerName,
+                                           reentrant=True )
             alg.baseContainerName = self.jetCollection
             alg.particles = config.readName (self.containerName)
             if config.wantCopy (self.containerName) :
@@ -91,6 +94,10 @@ class PreJetAnalysisConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, enabled=False)
+
+        if self.outputTruthLabelIDs and config.dataType() is not DataType.Data:
+            config.addOutputVar (self.containerName, 'HadronConeExclTruthLabelID', 'HadronConeExclTruthLabelID', noSys=True)
+            config.addOutputVar (self.containerName, 'PartonTruthLabelID', 'PartonTruthLabelID', noSys=True)
 
 
 
@@ -200,23 +207,40 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             config_file = self.uncertToolConfigPath
         else:
             if config.geometry() is LHCPeriod.Run2:
-                config_file = "rel22/Summer2023_PreRec/" + config_file
+                if config.dataType() is DataType.FastSim:
+                    config_file = "rel22/Fall2024_PreRec/" + config_file
+                else:
+                    if self.jetInput == "HI":
+                        config_file = "HIJetUncertainties/Spring2023/HI" + config_file
+                    else:
+                        config_file = "rel22/Summer2023_PreRec/" + config_file
             else:
-                config_file = "rel22/Summer2024_PreRec/" + config_file
+                if config.dataType() is DataType.FastSim:
+                    config_file = "rel22/Winter2025_AF3_PreRec/" + config_file
+                else:
+                    if self.jetInput == "HI":
+                        config_file = "HIJetUncertainties/Spring2023/HI" + config_file
+                    else:
+                        config_file = "rel22/Winter2025_PreRec/" + config_file
 
         # MC type:
         mc_type = None
         if self.uncertToolMCType is not None:
             mc_type = self.uncertToolMCType
         else:
-            if config.dataType() is DataType.FastSim and config.geometry() is LHCPeriod.Run2:
-                # not supported for Run 3 yet!
-                mc_type = "AF3"
-            else:
-                if config.geometry() is LHCPeriod.Run2:
-                    mc_type = "MC20"
+            if config.geometry() is LHCPeriod.Run2:
+                if config.dataType() is DataType.FastSim:
+                    mc_type = "AF3"
                 else:
-                    mc_type = "MC23"
+                    mc_type = "MC20"
+            else:
+                if config.dataType() is DataType.FastSim:
+                    mc_type = "MC23AF3"
+                else:
+                    if self.jetInput == "HI":
+                        mc_type = "MC16"
+                    else:
+                        mc_type = "MC23"
 
         return config_file, calib_area, mc_type
 
@@ -267,7 +291,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         if(self.jetCollection=="AnalysisLargeRJets") :
             jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
-        if self.jetInput not in ["EMTopo", "EMPFlow"]:
+        if self.jetInput not in ["EMTopo", "EMPFlow", "HI"]:
             raise ValueError(
                 "Unsupported input type '{0}' for R=0.4 jets!".format(self.jetInput) )
 
@@ -290,7 +314,13 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                     configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
                     alg.calibrationTool.CalibArea = "00-04-82"
                 elif config.geometry() >= LHCPeriod.Run3:
-                    configFile = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_240306_InSitu.config"
+                    configFile = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config"
+                    alg.calibrationTool.CalibArea = "00-04-83"
+            elif self.jetInput == "HI":
+                if config.geometry() is LHCPeriod.Run2:
+                    configFile = "JES_MC16_HI_Jan2021_5TeV.config"
+                if config.geometry() is LHCPeriod.Run3:
+                    configFile = "AntiKt4HI_JES_constants_11-05-2024_13p6TeVFinalConfiguration.config"
                     alg.calibrationTool.CalibArea = "00-04-83"
             else:
                 if config.dataType() is DataType.FastSim:
@@ -304,10 +334,18 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 configFile = self.calibToolConfigFile
             alg.calibrationTool.ConfigFile = configFile
             if config.dataType() is DataType.Data:
-                alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
+                if self.jetInput == "HI":
+                    if config.geometry() is LHCPeriod.Run2:
+                        alg.calibrationTool.CalibSequence = 'EtaJES_Insitu'
+                    if config.geometry() is LHCPeriod.Run3:
+                        alg.calibrationTool.CalibSequence = 'EtaJES'
+                else:
+                    alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
             else:
                 if self.jetInput == "EMPFlow":
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
+                elif self.jetInput == "HI":
+                    alg.calibrationTool.CalibSequence = 'EtaJES'
                 else:
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
             if self.calibToolCalibSeq is not None:
@@ -521,10 +559,10 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
             "derivations. The default is True.")
-        # TODO: add info string
-        self.addOption ('configFileOverride', None, type=str,
-            info="")
-        self.addOption ('systematicsModelJER', "Full", type=str) # this is the test for JER
+        self.addOption ('systematicsModelJER', "Full", type=str)
+        self.addOption ('systematicsModelJMS', "Full", type=str)
+        self.addOption ('systematicsModelJMR', "Full", type=str,
+            info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.")
         self.addOption ('runJERsystematicsOnData', False, type=bool,
             info="whether to run the All/Full JER model variations also on data samples. Expert option!")
         # Adding these options to override the jet uncertainty config file when we have new recommendations
@@ -554,43 +592,64 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
                 info="data type (str) to use for the jet uncertainty tool (e.g. "
                 "'AF3' or 'MC16'). Expert option to override JetETmiss "
                 "recommendations. The default is None.")
+        self.addOption ('minPt', 200.*GeV, type=float,
+            info="the minimum pt cut to apply to calibrated large-R jets. "
+            "The default is 200 GeV.")
+        self.addOption ('maxPt', 3000.*GeV, type=float,
+            info="the maximum pt cut to apply to calibrated large-R jets. "
+            "The default is 3000 GeV.")
+        self.addOption ('maxEta', 2., type=float,
+            info="the maximum |eta| cut to apply to calibrated large-R jets. "
+            "The default is 2.")
+        self.addOption ('minMass', 40.*GeV, type=float,
+            info="the minimum mass cut to apply to calibrated large-R jets. "
+            "The default is 40 GeV.")
+        self.addOption ('maxMass', 600.*GeV, type=float,
+            info="the maximum mass cut to apply to calibrated large-R jets. "
+            "The default is 600 GeV.")
 
     def getUncertaintyToolSettings(self, config):
         # Retrieve appropriate JES/JER recommendations for the JetUncertaintiesTool.
         # We do this separately from the tool declaration, as we may need to set uo
         # two such tools, but they have to be private.
 
+        log = logging.getLogger('LargeRJetAnalysisConfig')
+
         # Config file:
         config_file = None
-        if self.systematicsModelJER in ["Simple", "Full"]:
-            config_file = "R10_CategoryJES_{0}JER_FullJMS.config".format(self.systematicsModelJER)
+        if self.systematicsModelJER in ["Simple", "Full"] and self.systematicsModelJMS in ["Simple", "Full"]:
+            config_file = "R10_CategoryJES_{0}JER_{1}JMS.config".format(self.systematicsModelJER, self.systematicsModelJMS)
         else:
             raise ValueError(
-                "Invalid request for systematicsModelJER settings: "
-                "systematicsModelJER: {0}".format(self.systematicsModelJER) )
-
-        # Calibration area:
-        calib_area = None
-        if self.uncertToolCalibArea is not None:
-            calib_area = self.uncertToolCalibArea
-
-        # Expert override for config path:
+                "Invalid request for systematicsModelJER/JMS settings: "
+                "systematicsModelJER = '{0}', "
+                "systematicsModelJMS = '{1}'".format(self.systematicsModelJER, self.systematicsModelJMS) )
         if self.uncertToolConfigPath is not None:
+            # Expert override
             config_file = self.uncertToolConfigPath
         else:
             if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
                 config_file = "rel22/Winter2024_PreRec/" + config_file
             else:
-                log = logging.getLogger('LargeRJetAnalysisConfig')
                 log.warning("Uncertainties for UFO jets are not for Run 4!")
+
+        # Calibration area:
+        calib_area = None
+        if self.uncertToolCalibArea is not None:
+            calib_area = self.uncertToolCalibArea
                 
         # MC type:
         if self.uncertToolMCType is not None:
             mc_type = self.uncertToolMCType
         else:
-            if config.dataType() is DataType.FastSim and config.geometry() is LHCPeriod.Run2:
-                # not supported for Run 3 yet!
-                mc_type = "AF3"
+            if config.dataType() is DataType.FastSim:
+                # To be updated when FastSim recommendatiosn are released
+                log.warning("AF3 uncertainties for large-R jets are not yet released!")
+                log.warning("Using full-sim ones in the meantime!")
+                if config.geometry() is LHCPeriod.Run2:
+                    mc_type = "MC20"
+                else:
+                    mc_type = "MC23"
             else:
                 if config.geometry() is LHCPeriod.Run2:
                     mc_type = "MC20"
@@ -600,12 +659,13 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         return config_file, calib_area, mc_type
 
     def createUncertaintyTool(self, jetUncertaintiesAlg, config, jetCollectionName, doPseudoData=False):
+        '''
+        Create instance(s) of JetUncertaintiesTool following JetETmiss recommendations.
 
-        # Create an instance of JetUncertaintiesTool, following JetETmiss recommendations.
-        # To run Jet Energy Resolution (JER) uncertainties in the "Full" or "All" schemes,
-        # we need two sets of tools: one configured as normal (MC), the other with the
-        # exact same settings but pretending to run on data (pseudo-data).
-        # This is achieved by passing "isPseudoData=True" to the arguments.
+        JER uncertainties under the "Full" scheme must be run on MC samples twice:
+        1. Normal (MC) mode,
+        2. Pseudodata (PD) mode, as if the events are Data.
+        '''
 
         # Retrieve the common configuration settings
         configFile, calibArea, mcType = self.getUncertaintyToolSettings(config)
@@ -636,11 +696,48 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             jetUncertaintiesAlg.uncertaintiesToolPD.IsData = True
             jetUncertaintiesAlg.uncertaintiesToolPD.PseudoDataJERsmearingMode = True
 
-    def makeAlgs (self, config) :
+    def createFFSmearingTool(self, jetFFSmearingAlg, config):
+        # Retrieve appropriate large-R jet mass resolution recommendations for the FFJetSmearingTool.
 
         log = logging.getLogger('LargeRJetAnalysisConfig')
 
+        # Config file:
+        if self.systematicsModelJMR in ["Simple", "Full"]:
+            config_file = f"R10_{self.systematicsModelJMR}JMR.config"
+        else:
+            raise ValueError(
+                f"Invalid request for systematicsModelJMR settings: {self.systematicsModelJMR}"
+            )
+
+        # Expert override for config path:
+        if self.uncertToolConfigPath is not None:
+            config_file = self.uncertToolConfigPath
+        else:
+            if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
+                config_file = "rel22/Fall2024_PreRec/" + config_file
+            else:
+                log.warning("Uncertainties for UFO jets are not for Run 4!")
+
+        # MC type:
+        if config.geometry() is LHCPeriod.Run2:
+            if config.dataType() is DataType.FastSim:
+                mc_type = "MC20AF3"
+            else:
+                mc_type = "MC20"
+        elif config.geometry() is LHCPeriod.Run3:
+            mc_type = "MC23"
+
+        # Set up the FF smearing tool
+        config.addPrivateTool( 'FFSmearingTool', 'CP::FFJetSmearingTool')
+        jetFFSmearingAlg.FFSmearingTool.MassDef = "UFO"
+        jetFFSmearingAlg.FFSmearingTool.MCType = mc_type
+        jetFFSmearingAlg.FFSmearingTool.ConfigFile = config_file
+
+    def makeAlgs (self, config) :
+
         configFile = None
+        calibSeq = None
+        calibArea = None
 
         jetCollectionName=self.jetCollection
         if(self.jetCollection=="AnalysisJets") :
@@ -649,61 +746,64 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
         if self.largeRMass not in ["Comb", "Calo", "TA"]:
-            raise ValueError ("Invalid large-R mass defintion {0}!".format(self.largeRMass) )
+            raise ValueError("Invalid large-R mass defintion {0}!".format(self.largeRMass) )
 
         if self.jetInput not in ["LCTopo", "TrackCaloCluster", "UFO"]:
-            raise ValueError (
-                "Unsupported input type '{0}' for large-R jets!".format(self.jetInput) )
+            raise ValueError("Invalid input type '{0}' for large-R jets!".format(self.jetInput) )
 
         if self.jetInput == "TrackCaloCluster":
             # Only one mass defintion supported
             if self.largeRMass != "Calo":
-                raise ValueError(
-                    "Unsupported large-R TCC jet mass '{0}'!".format(self.largeRMass) )
+                raise ValueError("Invalid large-R TCC jet mass '{0}'!".format(self.largeRMass) )
             configFile = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config"
-
         if self.jetInput == "LCTopo":
             configFile = _largeLCTopoConfigFile(config, self)
-
         if self.jetInput == "UFO":
             configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_02Aug2024.config"
+        if self.calibToolConfigFile is not None:
+            configFile = self.calibToolConfigFile
+
+        if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() is DataType.FullSim:
+            calibSeq = "EtaJES_JMS"
+        elif config.dataType() is DataType.Data:
+            calibSeq = "EtaJES_JMS_Insitu"
+        if self.calibToolCalibSeq is not None:
+            calibSeq = self.calibToolCalibSeq
+
+        if self.calibToolCalibArea is not None:
+            calibArea = self.calibToolCalibArea
 
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Prepare the jet calibration algorithm
             alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+self.containerName )
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
+
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
-            if self.configFileOverride is not None:
-                configFile = self.configFileOverride
+
             if configFile is None:
-                raise ValueError(
-                    f'Unsupported: {self.jetInput=}, {config.dataType()=}')
+                raise ValueError(f'Unsupported: {self.jetInput=}, {config.dataType()=}')
             alg.calibrationTool.ConfigFile = configFile
-            if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() is DataType.FullSim:
-                alg.calibrationTool.CalibSequence = "EtaJES_JMS"
-            elif config.dataType() is DataType.Data:
-                alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu"
+
+            if calibSeq is None:
+                raise ValueError(f'Unsupported: {self.jetInput=}, {config.dataType()=}')
+            alg.calibrationTool.CalibSequence = calibSeq
+
+            if calibArea is not None:
+                alg.calibrationTool.CalibArea = calibArea
+
             alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
-            alg.jets = config.readName (self.containerName)
+            alg.jets = config.readName(self.containerName)
 
         # Jet uncertainties
-        if self.jetInput == "UFO" and config.dataType() is (DataType.FullSim or DataType.FastSim):
+        if self.jetInput == "UFO" and config.dataType() in [DataType.FullSim, DataType.FastSim]:
             alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
             self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
+
+            alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
+
             # R=1.0 jets have a validity range
             alg.outOfValidity = 2 # SILENT
             alg.outOfValidityDeco = 'outOfValidity'
-            alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
-            alg.uncertaintiesTool.ConfigFile = (
-                "rel22/Winter2024_PreRec/R10_CategoryJES_FullJER_FullJMS.config"
-            )
-
-            log.warning("Uncertainties for UFO jets are test only! This {0} is not for physics analysis! ".format(alg.uncertaintiesTool.ConfigFile))
-            if config.dataType() is DataType.FastSim:
-                log.warning("You are applying UFO FS uncertainty on AF3! This {0} is only for test purpose and not for physics analysis! ".format(alg.uncertaintiesTool.ConfigFile))
-
-            alg.uncertaintiesTool.MCType = "MC20"
-            alg.uncertaintiesTool.IsData = config.dataType() is DataType.Data
 
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
@@ -711,6 +811,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         if self.jetInput != "UFO":
             alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
+
             # R=1.0 jets have a validity range
             alg.outOfValidity = 2 # SILENT
             alg.outOfValidityDeco = 'outOfValidity'
@@ -727,6 +828,41 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', 'outOfValidity')
 
+        if self.jetInput == "UFO" and config.dataType() is not DataType.Data:
+            # set up the FF smearing algorithm
+            alg = config.createAlgorithm( 'CP::JetFFSmearingAlg', 'JetFFSmearingAlg'+self.containerName )
+            self.createFFSmearingTool(alg, config)
+            alg.outOfValidity = 2 # SILENT
+            alg.outOfValidityDeco = 'outOfValidityJMR'
+            alg.jets = config.readName (self.containerName)
+            alg.jetsOut = config.copyName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+
+        if self.minPt > 0 or self.maxPt > 0 or self.maxEta > 0:
+            # Set up the the pt-eta selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetPtEtaCutAlg'+self.containerName )
+            alg.selectionDecoration = 'selectPtEta,as_bits'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+            alg.selectionTool.minPt = self.minPt
+            alg.selectionTool.maxPt = self.maxPt
+            alg.selectionTool.maxEta = self.maxEta
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                 preselection=True)
+            
+        if self.minMass > 0 or self.maxMass > 0:
+            # Set up the the mass selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetMassCutAlg'+self.containerName )
+            alg.selectionDecoration = 'selectMass,as_bits'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgMassSelectionTool' )
+            alg.selectionTool.minM = self.minMass
+            alg.selectionTool.maxM = self.maxMass
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                 preselection=True)
+            
         config.addOutputVar (self.containerName, 'm', 'm')
 
 # These algorithms set up the jet recommendations as-of 04/02/2019.
@@ -758,24 +894,15 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection,
         jetCollection = jetCollection[:btIndex]
 
     jetCollectionName=jetCollection
+    # needed for PHYSLITE
     if(jetCollection=="AnalysisJets") :
         jetCollectionName="AntiKt4EMPFlowJets"
     if(jetCollection=="AnalysisLargeRJets") :
         jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
-    #AntiKt10UFO CSSKSoftDropBeta100Zcut10Jets
-
-    if jetCollectionName == 'AntiKtVR30Rmax4Rmin02PV0TrackJets' :
-        # don't to anything on track jets
-        config = PreJetAnalysisConfig (containerName, jetCollection)
-        config.setOptionValue ('runOriginalObjectLink', False)
-        config.setOptionValue ('runGhostMuonAssociation', False)
-        seq.append (config)
-        return
-
     # interpret the jet collection
     collection_pattern = re.compile(
-        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO|Track)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
+        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO|Track|HI)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
     match = collection_pattern.match(jetCollectionName)
     if not match:
         raise ValueError(
@@ -785,6 +912,13 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection,
         raise ValueError("Jet collection has an unsupported radius '{0}'!".format(radius) )
     jetInput = match.group(2)
 
+    if jetCollectionName == 'AntiKtVR30Rmax4Rmin02PV0TrackJets' :
+        # don't to anything on track jets
+        config = PreJetAnalysisConfig (containerName, jetCollection)
+        config.setOptionValue ('runOriginalObjectLink', False)
+        config.setOptionValue ('runGhostMuonAssociation', False)
+        seq.append (config)
+        return
 
     config = PreJetAnalysisConfig (containerName, jetCollection)
     config.runOriginalObjectLink = (btIndex != -1)
@@ -831,7 +965,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
         systematicsModelJER -- Which variant of the systematicsModelJES should be used (All, Full, Simple). Note that not all combinations of systematicsModelJES and systematicsModelJER are valid!
     """
 
-    if jetInput not in ["EMTopo", "EMPFlow"]:
+    if jetInput not in ["EMTopo", "EMPFlow", "HI"]:
         raise ValueError(
             "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
 

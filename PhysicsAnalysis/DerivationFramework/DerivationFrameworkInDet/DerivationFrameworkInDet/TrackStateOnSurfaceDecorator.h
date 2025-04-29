@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -28,11 +28,14 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackStateValidationContainer.h"
 #include "CommissionEvent/ComTime.h"
+
+#include "ExpressionEvaluation/ExpressionParserUser.h"
 
 #include "TrkEventUtils/PRDtoTrackMap.h"
 
@@ -48,7 +51,7 @@ namespace Trk {
 
 namespace DerivationFramework {
 
-  class TrackStateOnSurfaceDecorator : public AthAlgTool, public IAugmentationTool {
+  class TrackStateOnSurfaceDecorator : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
     public: 
       TrackStateOnSurfaceDecorator(const std::string& t, const std::string& n, const IInterface* p);
 
@@ -85,6 +88,8 @@ namespace DerivationFramework {
          { this, "ContainerName", "InDetTrackParticles", "" };
       SG::ReadHandleKey<ComTime> m_trtPhaseKey
          { this,"TRTPhaseKey","TRT_Phase", ""};
+      StringProperty m_selectionString
+	 { this, "SelectionString", "", "track selections"};
 
       SG::ReadHandleKey<std::vector<unsigned int> > m_pixelMapName
          { this, "PixelMapName", "PixelClustersOffsets" , ""};
@@ -96,7 +101,7 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::TrackMeasurementValidationContainer > m_pixelClustersName
          {this, "PixelClustersName", "PixelClusters" ,"" };
       SG::ReadHandleKey<xAOD::TrackMeasurementValidationContainer > m_sctClustersName
-        {this, "SctClustersName", "SCT_Clusters" ,"" };
+         {this, "SctClustersName", "SCT_Clusters" ,"" };
       SG::ReadHandleKey<xAOD::TrackMeasurementValidationContainer> m_trtDCName
          {this, "TrtDriftCirclesName", "TRT_DriftCircles" ,"" };
 
@@ -109,6 +114,7 @@ namespace DerivationFramework {
          { this, "SctMsosName", "SCT_MSOSs", "" };
       SG::WriteHandleKey<xAOD::TrackStateValidationContainer> m_trtMsosName
          { this, "TrtMsosName",  "TRT_MSOSs", ""};
+
 
       // --- Read Cond Handle Key
       // For P->T converter of SCT_Clusters

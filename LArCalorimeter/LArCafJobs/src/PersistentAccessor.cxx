@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCafJobs/PersistentAccessor.h"
@@ -23,12 +23,13 @@ using std::endl;
 using namespace LArSamples;
 
 
-PersistentAccessor::PersistentAccessor(TTree& cellTree, TTree& eventTree, TTree* runTree, TFile* file)
-  : m_cellTree(&cellTree), m_eventTree(&eventTree), m_runTree(runTree), m_file(file), 
-    m_historyCont(nullptr), m_eventData(nullptr), m_runData(nullptr)
+PersistentAccessor::PersistentAccessor(TTree& cellTree, TTree& SCTree, TTree& eventTree, TTree* runTree, TFile* file)
+  : m_cellTree(&cellTree), m_SCTree(&SCTree), m_eventTree(&eventTree), m_runTree(runTree), m_file(file), 
+    m_historyCont(nullptr), m_historyContSC(nullptr), m_eventData(nullptr), m_runData(nullptr)
 {
   ClassCounts::incrementInstanceCount("PersistentAccessor"); 
   m_cellTree->SetBranchAddress("history", &m_historyCont);
+  m_SCTree->SetBranchAddress("historySC", &m_historyContSC);
   m_eventTree->SetBranchAddress("event", &m_eventData);
   m_eventTree->LoadBaskets(); // loads the tree to memory
   if (m_eventTree->MemoryFull(0)) {
@@ -43,16 +44,18 @@ PersistentAccessor::PersistentAccessor(TTree& cellTree, TTree& eventTree, TTree*
 
 
 PersistentAccessor::PersistentAccessor(const TString& fileName)
-  : m_cellTree(nullptr), m_eventTree(nullptr), m_runTree(nullptr), m_file(nullptr), 
-    m_historyCont(nullptr), m_eventData(nullptr), m_runData(nullptr)
+  : m_cellTree(nullptr), m_SCTree(nullptr), m_eventTree(nullptr), m_runTree(nullptr), m_file(nullptr), 
+    m_historyCont(nullptr), m_historyContSC(nullptr), m_eventData(nullptr), m_runData(nullptr)
 {
   ClassCounts::incrementInstanceCount("PersistentAccessor"); 
   if (TString(fileName) != "") m_file = new TFile(fileName, "RECREATE");
   if (m_file && !m_file->IsOpen()) { delete m_file; m_file = nullptr; }
   m_cellTree = new TTree("cells", "");
+  m_SCTree = new TTree("SC", "");
   m_eventTree = new TTree("events", "");
   m_runTree = new TTree("runs", "");
   m_cellTree->Branch("history", &m_historyCont, 32000, 0);
+  m_SCTree->Branch("historySC", &m_historyContSC, 32000, 0);
   m_eventTree->Branch("event", &m_eventData, 32000, 0);
   m_runTree->Branch("run", &m_runData, 32000, 0);
   m_eventTree->SetAutoSave(0); // keep everything in memory
@@ -69,10 +72,12 @@ PersistentAccessor* PersistentAccessor::open(const TString& fileName)
   if (!file->IsOpen()) { delete file; return nullptr; }
   TTree* cellTree = (TTree*)file->Get("cells");
   if (!cellTree) return nullptr;
+  TTree* SCTree = (TTree*)file->Get("SC");
+  if (!SCTree) return nullptr;
   TTree* eventTree = (TTree*)file->Get("events");
   if (!eventTree) return nullptr;
   TTree* runTree = (TTree*)file->Get("runs");
-  PersistentAccessor* accessor = new PersistentAccessor(*cellTree, *eventTree, runTree, file);
+  PersistentAccessor* accessor = new PersistentAccessor(*cellTree, *SCTree, *eventTree, runTree, file);
   return accessor;
 }
 
@@ -87,10 +92,12 @@ PersistentAccessor::~PersistentAccessor()
     delete m_file;
   else {
     delete m_cellTree;
+    delete m_SCTree;
     delete m_eventTree;
     delete m_runTree;
   }
   if (m_historyCont) delete m_historyCont;
+  if (m_historyContSC) delete m_historyContSC;
   if (m_eventData) delete m_eventData;
   if (m_runData) delete m_runData;
 }
@@ -102,10 +109,22 @@ const HistoryContainer* PersistentAccessor::historyContainer(unsigned int i) con
   return m_historyCont;
 }
 
+const HistoryContainer* PersistentAccessor::historyContainerSC(unsigned int i) const
+{
+  m_SCTree->GetEntry(i);
+  return m_historyContSC;
+}
+
 
 unsigned int PersistentAccessor::historySize(unsigned int i) const
 {
   const HistoryContainer* cont = historyContainer(i);
+  return (cont ? cont->nDataContainers() : 0);
+}
+
+unsigned int PersistentAccessor::historySizeSC(unsigned int i) const
+{
+  const HistoryContainer* cont = historyContainerSC(i);
   return (cont ? cont->nDataContainers() : 0);
 }
 
@@ -145,6 +164,13 @@ void PersistentAccessor::add(HistoryContainer* cont)
   m_historyCont = nullptr;
 }
 
+void PersistentAccessor::addSC(HistoryContainer* cont)
+{
+  m_historyContSC = cont;
+  m_SCTree->Fill();
+  m_historyContSC = nullptr;
+}
+
 
 void PersistentAccessor::addEvent(EventData* eventData)
 {
@@ -172,6 +198,8 @@ bool PersistentAccessor::save() const
   m_eventTree->Write();
   cout << "Writing " << m_cellTree->GetEntries() << " cell(s)..." << endl;
   m_cellTree->Write();
+  cout << "Writing " << m_SCTree->GetEntries() << " SC(s)..." << endl;
+  m_SCTree->Write();
   m_file->Flush();
   cout << "Writing done!" << endl;
   return true;
@@ -235,6 +263,8 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
     }
   } 
   
+  
+  cout << "Merging cells" << endl;
   for (unsigned int i = 0; i < Definitions::nChannels; i++) {
     if (i % 10000 == 0) {
       cout << "Merging channel " << i << "/" << Definitions::nChannels << " (current size = " << size << ")" << endl;
@@ -257,14 +287,49 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
         newHistory->add(newDC);
         if (!info->shape(history->dataContainer(j)->gain())) {
          const ShapeInfo* shape = history->cellInfo()->shape(history->dataContainer(j)->gain());
-         if (!shape) 
-           cout << "Shape not filled for hash = " << i << ", index = " << j << ", gain = " << history->dataContainer(j)->gain() << endl;
+         //if (!shape) 
+         //  cout << "Shape not filled for hash = " << i << ", index = " << j << ", gain = " << history->dataContainer(j)->gain() << endl;
          info->setShape(history->dataContainer(j)->gain(), (shape ? new ShapeInfo(*shape) : nullptr));
         }
       }
     }
     if (newHistory) size += newHistory->nDataContainers();
     newAcc->add(newHistory);
+    delete newHistory;
+  }
+  
+
+  cout << "Merging SC" << endl;
+  for (unsigned int i = 0; i < Definitions::nChannelsSC; i++) {
+    if (i % 10000 == 0) {
+      cout << "Merging channel " << i << "/" << Definitions::nChannelsSC << " (current size = " << size << ")" << endl;
+      //ClassCounts::printCountsTable();
+    }
+    HistoryContainer* newHistory = nullptr;
+    for (const PersistentAccessor* accessor : accessors) {
+      const HistoryContainer* history = accessor->historyContainerSC(i);
+      if (!history || !history->isValid()) continue;
+      if (!newHistory) {
+        info = new CellInfo(*history->cellInfo());
+        newHistory = new HistoryContainer(info);
+      }
+      for (unsigned int j = 0; j < history->nDataContainers(); j++) {
+        DataContainer* newDC = new DataContainer(*history->dataContainer(j));
+        std::map<std::pair<const PersistentAccessor*, int>, int>::const_iterator newIndex 
+          = evtAccMap.find(std::make_pair(accessor, history->dataContainer(j)->eventIndex()));
+        if (newIndex == evtAccMap.end()) cout << "Event not found for cell " << i << ", data " << j << "." << endl;
+        newDC->setEventIndex(newIndex != evtAccMap.end() ? newIndex->second : -1);
+        newHistory->add(newDC);
+        if (!info->shape(history->dataContainer(j)->gain())) {
+         const ShapeInfo* shape = history->cellInfo()->shape(history->dataContainer(j)->gain());
+         //if (!shape) 
+         //  cout << "Shape not filled for hash = " << i << ", index = " << j << ", gain = " << history->dataContainer(j)->gain() << endl;
+         info->setShape(history->dataContainer(j)->gain(), (shape ? new ShapeInfo(*shape) : nullptr));
+        }
+      }
+    }
+    if (newHistory) size += newHistory->nDataContainers();
+    newAcc->addSC(newHistory);
     delete newHistory;
   }
 

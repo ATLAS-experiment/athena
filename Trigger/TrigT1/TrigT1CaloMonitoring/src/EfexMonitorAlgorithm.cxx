@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EfexMonitorAlgorithm.h"
@@ -23,10 +23,6 @@ StatusCode EfexMonitorAlgorithm::initialize() {
   // we initialise all the containers that we need
   ATH_CHECK( m_eFexEMTobKeyList.initialize() );
   ATH_CHECK( m_eFexTauTobKeyList.initialize() );
-
-  // TOBs may come from trigger bytestream - renounce from scheduler
-  renounceArray(m_eFexEMTobKeyList);
-  renounceArray(m_eFexTauTobKeyList);
 
   ATH_CHECK( AthMonitorAlgorithm::initialize() );
 
@@ -150,7 +146,7 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& groupName, 
       fill(groupName, TOBWstot_threshold);
       int iPhi = efexEmRoI->iPhi();
       if (iPhi>31) iPhi -= 64;
-      binNumber = (iPhi+32)*50 + 26 + efexEmRoI->iEta();
+      binNumber = (25 + efexEmRoI->iEta())*64 + iPhi+33;
       fill(groupName,binNumber,lbn);
     }
   }
@@ -212,7 +208,7 @@ StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& groupName,
       fill(groupName, tauTOBthree_threshold);
       int iPhi = efexTauRoI->iPhi();
       if (iPhi>31) iPhi -= 64;
-      binNumber = (iPhi+32)*50 + 26 + efexTauRoI->iEta();
+      binNumber = (25 + efexTauRoI->iEta())*64 + iPhi+33;
       fill(groupName,binNumber,lbn);
     }
   }

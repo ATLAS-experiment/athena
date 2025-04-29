@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOAttributePlots.h"
-#include <iostream>
 namespace PFO {
 
-  PFOAttributePlots::PFOAttributePlots(PlotBase* pParent, std::string sDir, std::string sFEContainerName) : PlotBase(pParent, sDir), 																	  
+  PFOAttributePlots::PFOAttributePlots(PlotBase* pParent, const std::string & sDir, const std::string & sFEContainerName) : PlotBase(pParent, sDir), 																	  
 																	  m_sFEContainerName(sFEContainerName) {    
-    m_FE_LAYER_ENERGY_Tile0 = nullptr;
-    m_FE_TIMING = nullptr;
+   
 }
 
   void PFOAttributePlots::initializePlots(){    

@@ -40,7 +40,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillLabel( const ToolHandle<GenericMoni
 // *********************************************************************************
 
 void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs,
-                                                           const TrigInfo& info ) const
+                                                           const TrigInfo& info, const bool onlyHLT ) const
 {
 
   std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >> pair_vec;
@@ -100,7 +100,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
     // Good pair to be measure
     { // Efficiency
         pair_vec.push_back(pairObj);
-        auto acceptData = setAccept( pairObj.second, info );
+        auto acceptData = setAccept( pairObj.second, info, onlyHLT );
         accept_vec.push_back(acceptData);
         static const SG::Decorator<bool> IsolatedDec("Isolated");
         if( IsolatedDec(*pairObj.first) ){
@@ -165,9 +165,10 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
     const std::string trigger = info.trigger;
     auto monGroup = getGroup( trigger + "_"+dirname+"_" + subgroup );
 
-    std::vector<float> et_vec, highet_vec, pt_vec, eta_vec, phi_vec, avgmu_vec, npvtx_vec,et_slice0_vec,et_slice1_vec,et_slice2_vec,et_slice3_vec, ptvarcone20rel_vec, z0_vec, d0_vec;
-    std::vector<float> match_et_vec, match_highet_vec, match_pt_vec, match_eta_vec, match_phi_vec, match_avgmu_vec, match_npvtx_vec, match_ptvarcone20rel_vec, match_z0_vec, match_d0_vec;
-    std::vector<bool> et_passed_vec, et_failed_vec, highet_passed_vec, highet_failed_vec, pt_passed_vec, eta_passed_vec, eta_failed_vec, phi_passed_vec, avgmu_passed_vec, npvtx_passed_vec, ptvarcone20rel_passed_vec, z0_passed_vec, d0_passed_vec;
+    std::vector<float> et_vec, highet_vec, pt_vec, eta_vec, phi_vec, avgmu_vec, npvtx_vec,et_slice0_vec,et_slice1_vec,et_slice2_vec,et_slice3_vec, ptvarcone20rel_vec, ptvarcone30rel_vec, z0_vec, d0_vec;
+    std::vector<float> match_et_vec, match_highet_vec, match_pt_vec, match_eta_vec, match_phi_vec, match_avgmu_vec, match_npvtx_vec, match_ptvarcone20rel_vec, match_ptvarcone30rel_vec, match_z0_vec, match_d0_vec;
+    std::vector<bool> et_passed_vec, et_failed_vec, highet_passed_vec, highet_failed_vec, pt_passed_vec, eta_passed_vec, eta_failed_vec, phi_passed_vec, avgmu_passed_vec, npvtx_passed_vec;
+    std::vector<bool> ptvarcone20rel_passed_vec, ptvarcone30rel_passed_vec, z0_passed_vec, d0_passed_vec;
     std::vector<bool> et_slice0_passed_vec,et_slice1_passed_vec,et_slice2_passed_vec,et_slice3_passed_vec;
 
     auto et_col     = Monitored::Collection( "et"     , et_vec );
@@ -178,6 +179,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
     auto avgmu_col  = Monitored::Collection( "avgmu"  , avgmu_vec );
     auto npvtx_col  = Monitored::Collection( "npvtx"  , npvtx_vec );
     auto ptvarcone20rel_col  = Monitored::Collection( "ptvarcone20rel"  , ptvarcone20rel_vec );
+    auto ptvarcone30rel_col  = Monitored::Collection( "ptvarcone30rel"  , ptvarcone30rel_vec );
+
     auto z0_col     = Monitored::Collection( "z0"  , z0_vec );
     auto d0_col     = Monitored::Collection( "d0"  , d0_vec );
     
@@ -189,6 +192,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
     auto match_avgmu_col  = Monitored::Collection( "match_avgmu"  , match_avgmu_vec );
     auto match_npvtx_col  = Monitored::Collection( "match_npvtx"  , match_npvtx_vec );
     auto match_ptvarcone20rel_col  = Monitored::Collection( "match_ptvarcone20rel"  , match_ptvarcone20rel_vec );
+    auto match_ptvarcone30rel_col  = Monitored::Collection( "match_ptvarcone30rel"  , match_ptvarcone30rel_vec );
+
     auto match_z0_col     = Monitored::Collection( "match_z0"     , match_z0_vec );
     auto match_d0_col     = Monitored::Collection( "match_d0"     , match_d0_vec );
 
@@ -203,6 +208,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
     auto avgmu_passed_col  = Monitored::Collection( "avgmu_passed"  , avgmu_passed_vec );
     auto npvtx_passed_col  = Monitored::Collection( "npvtx_passed"  , npvtx_passed_vec );
     auto ptvarcone20rel_passed_col  = Monitored::Collection( "ptvarcone20rel_passed"  , ptvarcone20rel_passed_vec );
+    auto ptvarcone30rel_passed_col  = Monitored::Collection( "ptvarcone30rel_passed"  , ptvarcone30rel_passed_vec );
+
     auto z0_passed_col     = Monitored::Collection( "z0_passed"     , z0_passed_vec );
     auto d0_passed_col     = Monitored::Collection( "d0_passed"     , d0_passed_vec );
 
@@ -226,6 +233,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
         bool isPassed = acceptObjs[iObj].getCutResult( level );
         float et=0.;
         float ptvarcone20rel = -99.0;
+        float ptvarcone30rel = -99.0;
         float z0 = -99.0;
         float d0 = -99.0;
         const auto *eg = pairObj.first;
@@ -238,6 +246,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
             et = getEt(el)/Gaudi::Units::GeV;
             if (el->pt() > 0) {
                 ptvarcone20rel = getIsolation_ptvarcone20(el)/el->pt();
+                ptvarcone30rel = getIsolation_ptvarcone30(el)/el->pt();
             }
             z0 = getTrack_z0(el);
             d0 = getTrack_d0(el);
@@ -263,6 +272,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                 avgmu_vec.push_back(avgmu);
                 npvtx_vec.push_back(npvtx);
                 ptvarcone20rel_vec.push_back(ptvarcone20rel);
+                ptvarcone30rel_vec.push_back(ptvarcone30rel);
                 z0_vec.push_back(z0);
                 d0_vec.push_back(d0);
             }
@@ -288,6 +298,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                     match_avgmu_vec.push_back(avgmu);
                     match_npvtx_vec.push_back(npvtx);
                     match_ptvarcone20rel_vec.push_back(ptvarcone20rel);
+                    match_ptvarcone30rel_vec.push_back(ptvarcone30rel);
                     match_z0_vec.push_back(z0);
                     match_d0_vec.push_back(d0);
                 }
@@ -315,6 +326,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                     avgmu_passed_vec.push_back( true ); 
                     npvtx_passed_vec.push_back( true ); 
                     ptvarcone20rel_passed_vec.push_back( true ); 
+                    ptvarcone30rel_passed_vec.push_back( true ); 
                     z0_passed_vec.push_back( true ); 
                     d0_passed_vec.push_back( true ); 
                 }
@@ -344,6 +356,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                     avgmu_passed_vec.push_back( false ); 
                     npvtx_passed_vec.push_back( false ); 
                     ptvarcone20rel_passed_vec.push_back( false );
+                    ptvarcone30rel_passed_vec.push_back( false );
                     z0_passed_vec.push_back( false ); 
                     d0_passed_vec.push_back( false ); 
                 }
@@ -353,9 +366,9 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
         iObj++;
     }
 
-    fill( monGroup, et_col, highet_col, pt_col, eta_col, phi_col, avgmu_col, npvtx_col, ptvarcone20rel_col, z0_col, d0_col,
-          match_et_col, match_highet_col, match_pt_col, match_eta_col, match_phi_col, match_avgmu_col, match_npvtx_col, match_ptvarcone20rel_col,match_z0_col,match_d0_col,
-          et_passed_col, et_failed_col, highet_passed_col, highet_failed_col, pt_passed_col, eta_passed_col, eta_failed_col, phi_passed_col, avgmu_passed_col, npvtx_passed_col, ptvarcone20rel_passed_col, z0_passed_col, d0_passed_col,  
+    fill( monGroup, et_col, highet_col, pt_col, eta_col, phi_col, avgmu_col, npvtx_col, ptvarcone20rel_col, ptvarcone30rel_col, z0_col, d0_col,
+          match_et_col, match_highet_col, match_pt_col, match_eta_col, match_phi_col, match_avgmu_col, match_npvtx_col, match_ptvarcone20rel_col, match_ptvarcone30rel_col,match_z0_col,match_d0_col,
+          et_passed_col, et_failed_col, highet_passed_col, highet_failed_col, pt_passed_col, eta_passed_col, eta_failed_col, phi_passed_col, avgmu_passed_col, npvtx_passed_col, ptvarcone20rel_passed_col, ptvarcone30rel_passed_col, z0_passed_col, d0_passed_col,  
           et_slice0_col,et_slice1_col,et_slice2_col,et_slice3_col,et_slice0_passed_col,et_slice1_passed_col,et_slice2_passed_col,et_slice3_passed_col);
 
 }
@@ -821,8 +834,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillTracking(const std::string &trigger
     auto monGroup = getGroup( trigger + ( online ? "_Distributions_HLT" : "_Distributions_Offline") );
     
     std::vector<float> deta1_vec, deta1_EMECA_vec, deta1_EMECC_vec, deta1_EMEBA_vec, deta1_EMEBC_vec, deta2_vec, dphi2_vec,
-      dphiresc_vec, eprobht_vec, npixhits_vec, nscthits_vec, charge_vec, ptcone20_vec, ptvarcone20_vec, z0_vec, d0_vec, d0sig_vec, 
-      pt_vec,pt_trk_vec, ptcone20_rel_vec, ptvarcone20_rel_vec, eta_vec, mu_vec;
+      dphiresc_vec, eprobht_vec, npixhits_vec, nscthits_vec, charge_vec, ptcone20_vec, ptvarcone20_vec, ptcone30_vec, ptvarcone30_vec, z0_vec, d0_vec, d0sig_vec, 
+      pt_vec,pt_trk_vec, ptcone20_rel_vec, ptvarcone20_rel_vec, ptcone30_rel_vec, ptvarcone30_rel_vec, eta_vec, mu_vec;
 
     auto deta1_col            = Monitored::Collection( "deta1"       , deta1_vec           );
     auto deta1_EMECA_col      = Monitored::Collection( "deta1_EMECA" , deta1_EMECA_vec     );
@@ -838,6 +851,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillTracking(const std::string &trigger
     auto charge_col           = Monitored::Collection( "charge"      , charge_vec          );
     auto ptcone20_col         = Monitored::Collection( "ptcone20"    , ptcone20_vec        );
     auto ptvarcone20_col      = Monitored::Collection( "ptvarcone20" , ptvarcone20_vec     );
+    auto ptcone30_col         = Monitored::Collection( "ptcone30"    , ptcone30_vec        );
+    auto ptvarcone30_col      = Monitored::Collection( "ptvarcone30" , ptvarcone30_vec     );
     auto z0_col               = Monitored::Collection( "z0"          , z0_vec              );
     auto d0_col               = Monitored::Collection( "d0"          , d0_vec              );
     auto d0sig_col            = Monitored::Collection( "d0sig"       , d0sig_vec           );
@@ -845,6 +860,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillTracking(const std::string &trigger
     auto pt_trk_col           = Monitored::Collection( "pt_track"    , pt_trk_vec          );
     auto ptcone20_rel_col     = Monitored::Collection( "ptcone20_rel", ptcone20_rel_vec    );
     auto ptvarcone20_rel_col  = Monitored::Collection( "ptvarcone20_rel" , ptvarcone20_rel_vec );
+    auto ptcone30_rel_col     = Monitored::Collection( "ptcone30_rel", ptcone30_rel_vec    );
+    auto ptvarcone30_rel_col  = Monitored::Collection( "ptvarcone30_rel" , ptvarcone30_rel_vec );
 
     auto eta_col              = Monitored::Collection( "eta"         , eta_vec             );
     auto mu_col               = Monitored::Collection( "mu"          , mu_vec              );
@@ -878,6 +895,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillTracking(const std::string &trigger
       charge_vec.push_back( eg->charge());
       ptcone20_vec.push_back( getIsolation_ptcone20(eg)/Gaudi::Units::GeV);
       ptvarcone20_vec.push_back( getIsolation_ptvarcone20(eg)/Gaudi::Units::GeV);
+      ptcone30_vec.push_back( getIsolation_ptcone30(eg)/Gaudi::Units::GeV);
+      ptvarcone30_vec.push_back( getIsolation_ptvarcone30(eg)/Gaudi::Units::GeV);
       
       // Quantities directly from tracks
       ATH_MSG_DEBUG("Get track Quantities");
@@ -894,14 +913,16 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillTracking(const std::string &trigger
       if (eg->pt() > 0) {
           ptcone20_rel_vec.push_back( getIsolation_ptcone20(eg)/eg->pt());
           ptvarcone20_rel_vec.push_back(  getIsolation_ptvarcone20(eg)/eg->pt());
+          ptcone30_rel_vec.push_back( getIsolation_ptcone30(eg)/eg->pt());
+          ptvarcone30_rel_vec.push_back(  getIsolation_ptvarcone30(eg)/eg->pt());
       }
 
     }
     
     
     fill( monGroup, deta1_col, deta1_EMECA_col, deta1_EMECC_col, deta1_EMEBA_col, deta1_EMEBC_col, deta2_col, dphi2_col,
-      dphiresc_col, eprobht_col, npixhits_col, nscthits_col, charge_col, ptcone20_col, ptvarcone20_col, z0_col, d0_col, d0sig_col,
-	  pt_col, ptcone20_rel_col, ptvarcone20_rel_col, eta_col, mu_col,pt_trk_col);
+      dphiresc_col, eprobht_col, npixhits_col, nscthits_col, charge_col, ptcone20_col, ptvarcone20_col, ptcone30_col, ptvarcone30_col, z0_col, d0_col, d0sig_col,
+	  pt_col, ptcone20_rel_col, ptvarcone20_rel_col, ptcone30_rel_col, ptvarcone30_rel_col, eta_col, mu_col,pt_trk_col);
 }
 
 

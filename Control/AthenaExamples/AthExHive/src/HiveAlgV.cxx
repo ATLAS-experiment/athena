@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgV.h"
 #include <vector>
 
 HiveAlgV::HiveAlgV( const std::string& name, 
-                      ISvcLocator* pSvcLocator ) : 
+		    ISvcLocator* pSvcLocator ) : 
   ::HiveAlgBase( name, pSvcLocator )
 {}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-HiveAlgV::~HiveAlgV() {}
+HiveAlgV::~HiveAlgV() = default;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 StatusCode HiveAlgV::initialize() {
@@ -25,12 +25,6 @@ StatusCode HiveAlgV::initialize() {
 
   // initialize base class
   return HiveAlgBase::initialize ();
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-StatusCode HiveAlgV::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
-  return StatusCode::SUCCESS;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

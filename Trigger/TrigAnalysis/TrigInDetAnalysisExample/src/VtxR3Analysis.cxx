@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sun  6 Feb 2022 21:53:46 CEST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -13,7 +13,32 @@
 #include "TrigInDetAnalysisUtils/VertexMatcher.h"
 
 
-VtxR3Analysis::VtxR3Analysis( const std::string& n ) : VertexAnalysis( n ), m_initialised(false) { } 
+VtxR3Analysis::VtxR3Analysis( const std::string& n ) :
+  VertexAnalysis( n ),
+  m_initialised(false),
+  m_monTool(nullptr),
+  m_hnvtx(nullptr),
+  m_hzed(nullptr),
+  m_hx(nullptr),
+  m_hy(nullptr),
+  m_hntrax(nullptr),
+  m_hnvtx_rec(nullptr),
+  m_hzed_rec(nullptr),
+  m_hx_rec(nullptr),
+  m_hy_rec(nullptr),
+  m_hntrax_rec(nullptr),
+  m_hzed_res(nullptr),
+  m_hx_res(nullptr),
+  m_hy_res(nullptr),
+  m_rdz_vs_zed(nullptr),
+  m_rdz_vs_ntrax(nullptr),
+  m_rdz_vs_nvtx(nullptr),
+  m_eff_zed(nullptr),
+  m_eff_ntrax(nullptr),
+  m_eff_nvtx(nullptr),
+  m_eff_mu(nullptr),
+  m_eff_lb(nullptr)
+{}
 
 
 void VtxR3Analysis::initialise() { 

@@ -53,7 +53,6 @@ namespace OverlayTesting {
   };   // TgcOverlay_test fixture
 
 
-  // cppcheck-suppress syntaxError
   TEST_F(TgcOverlay_test, set_properties) {
     EventContext ctx(0,0);
     ctx.setExtension( Atlas::ExtendedEventContext( m_sg, 0 ) );

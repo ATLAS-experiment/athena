@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/PackedLinkConversions.icc
@@ -96,6 +96,7 @@ PackedLinkConverter<CONT>::PackedLinkConverter (AuxVectorData& container,
     m_linkedVec (container, auxid),
     m_dlinks (*container.getDataSpan (linked_auxid))
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
@@ -149,7 +150,7 @@ template <class VALLOC, ElementLinkRange<CONT> RANGE>
 void PackedLinkConverter<CONT>::set (std::vector<PLink_t, VALLOC>& plv,
                                      const RANGE& r)
 {
-  if (!PLVH::template assignVElt (plv, *m_linkedVec, m_dlinks, r)) {
+  if (!PLVH::assignVElt (plv, *m_linkedVec, m_dlinks, r)) {
     m_container.clearCache (m_linkedVec->auxid());
   }
 }
@@ -167,7 +168,7 @@ void PackedLinkConverter<CONT>::insert (std::vector<PLink_t, VALLOC>& plv,
                                         size_t pos,
                                         const RANGE& r)
 {
-  if (!PLVH::template insertVElt (plv, pos, *m_linkedVec, m_dlinks, r)) {
+  if (!PLVH::insertVElt (plv, pos, *m_linkedVec, m_dlinks, r)) {
     m_container.clearCache (m_linkedVec->auxid());
   }
 }

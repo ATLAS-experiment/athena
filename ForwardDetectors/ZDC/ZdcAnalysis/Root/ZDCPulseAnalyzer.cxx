@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
@@ -17,9 +17,6 @@
 #include <iomanip>
 #include <stdexcept>
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
-extern int gErrorIgnoreLevel;
 
 bool ZDCPulseAnalyzer::s_quietFits         = true;
 bool ZDCPulseAnalyzer::s_saveFitFunc       = false;
@@ -1286,8 +1283,8 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
 					 static_cast<unsigned int>(m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 1));
 
     
-    for (int isample = postStartIdx; isample < (int) m_samplesDeriv2nd.size() - 1; isample++) {
-      if (!useSample[isample]) continue;
+    for (int isample = postStartIdx; isample < (int) nSamples - 1; isample++) {
+      if (!useSample.at(isample)) continue;
       
       // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       // BAC 12-01-2024
@@ -1317,11 +1314,11 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
       // add small 1e-3 in division to avoid floating overflow
       //
 
-      float deriv = m_samplesSub[isample + 1] - m_samplesSub[isample];
+      float deriv = m_samplesSub.at(isample + 1) - m_samplesSub.at(isample);
       float derivSig = deriv/(std::sqrt(2)*noiseSig);
-      float deriv2ndSig = -m_samplesDeriv2nd[isample] / (std::sqrt(6)*noiseSig);
+      float deriv2ndSig = -m_samplesDeriv2nd.at(isample) / (std::sqrt(6)*noiseSig);
 
-      float deriv2ndTest = m_samplesDeriv2nd[isample] / (-m_minDeriv2nd + 1.0e-3);
+      float deriv2ndTest = m_samplesDeriv2nd.at(isample) / (-m_minDeriv2nd + 1.0e-3);
 
       if (derivSig > 5) {
 	//
@@ -2046,7 +2043,7 @@ unsigned int ZDCPulseAnalyzer::GetStatusMask() const
   return statusMask;
 }
 
-std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph(bool LGRefit) const
+std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph(bool LGRefit)
 {
   //
   // We defer filling the histogram if we don't have a pulse until the histogram is requested
@@ -2091,7 +2088,7 @@ std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph(bool LGRefit) c
 }
 
 
-std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetGraph(bool forceLG) const
+std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetGraph(bool forceLG)
 {
   //
   // We defer filling the histogram if we don't have a pulse until the histogram is requested
@@ -2143,7 +2140,7 @@ std::vector<float> ZDCPulseAnalyzer::Calculate2ndDerivative(const std::vector <f
   unsigned int nSamples = inputData.size();
 
   // We start with two zero entries for which we can't calculate the double-step derivative
-  //   and woud pad with two zero entries at the end. Start by initializing 
+  //   and would pad with two zero entries at the end. Start by initializing 
   //
   unsigned int vecSize = 2*step + nSamples - step - 1;
   std::vector<float> results(vecSize, 0);

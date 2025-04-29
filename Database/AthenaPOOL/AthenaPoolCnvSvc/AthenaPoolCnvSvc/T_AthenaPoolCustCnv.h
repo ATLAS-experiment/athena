@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLCUSTCNV_H
@@ -69,7 +69,7 @@ protected:
    /// @param token [OUT] POOL token of the persistent representation.
    /// @param key [IN] StoreGate key (string) - placement hint to generate POOL container name
    template <class P>
-   StatusCode objectToPool(P* pObj, Token*& token, const std::string& key, const std::string& output);
+   StatusCode objectToPool(P* pObj, std::unique_ptr<Token>& token, const std::string& key, const std::string& output);
 
    /// Read an object from POOL.
    /// @param token [IN]  POOL token of the persistent representation.

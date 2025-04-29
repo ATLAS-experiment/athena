@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Riccardo.Maria.Bianchi@cern.ch, Apr 2017
@@ -9,11 +9,6 @@
 
 #include "VP1Gui/VP1Gui.h"
 #include "VP1UtilsBase/VP1FileUtilities.h"
-
-// #include "EventInfo/EventInfo.h"
-// #include "EventInfo/TriggerInfo.h"
-// #include "EventInfo/EventID.h"
-// #include "PathResolver/PathResolver.h"
 
 // C++ includes
 #include <vector>
@@ -105,9 +100,6 @@ bool VP1LightRun::execute()
     m_vp1gui->init();//Launch!
   }
 
-  // const EventInfo*  evt;
-  // StatusCode status = evtStore()->retrieve(evt);
-  // if(status.isSuccess()) {
   if(true) {
     // Get run/event number:
   	const uint64_t eventNumber = 0; //evt->event_ID()->event_number();
@@ -123,8 +115,6 @@ bool VP1LightRun::execute()
     std::cout << " Got timestamp = " << time << std::endl;
 
     // Get L1 trigger type
-    // TriggerInfo* _trig = evt->trigger_info();
-    // unsigned int trigType = _trig ? _trig->level1TriggerType() : 0;
     unsigned int trigType = 0; //_trig ? _trig->level1TriggerType() : 0;
 
     if (m_noGui||m_vp1gui->executeNewEvent(runNumber,eventNumber,trigType,time)) {
@@ -135,8 +125,6 @@ bool VP1LightRun::execute()
       return false; //StatusCode::FAILURE;
     }
   };
-
-  // msg(MSG::WARNING) << " Unable to retrieve EventInfo from StoreGate. Skipping" << endreq;
 
   std::cout << "VP1LightRun::execute() returns TRUE..." << std::endl;
   return true; //StatusCode::SUCCESS;

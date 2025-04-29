@@ -10,7 +10,7 @@
 
 #include "CxxUtils/atomic_fetch_minmax.h"
 #include "Identifier/Identifier.h"
-#include "MuonIdHelpers/MuonStationIndexHelpers.h"
+#include "MuonStationIndex/MuonStationIndex.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkEventPrimitives/TrkObjectCounter.h"
 #include "TrkMeasurementBase/MeasurementBase.h"

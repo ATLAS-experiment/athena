@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,6 +15,8 @@
 
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
+
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "TMath.h"
 
@@ -50,9 +52,8 @@ namespace DerivationFramework {
 EGElectronAmbiguityTool::EGElectronAmbiguityTool(const std::string& t,
                                                  const std::string& n,
                                                  const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 
   declareProperty("isMC", m_isMC);
 
@@ -317,7 +318,7 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
     const xAOD::TruthParticle* truthEl =
       xAOD::TruthHelpers::getTruthParticle(*ele);
     double tpvr = -1, tpvp = 9e9, tpvz = 9e9;
-    if (truthEl && std::abs(truthEl->pdgId()) == 11 &&
+    if (truthEl && MC::isElectron(truthEl) &&
         truthEl->prodVtx() != nullptr) {
       tpvr = truthEl->prodVtx()->perp();
       tpvp = truthEl->prodVtx()->phi();

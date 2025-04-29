@@ -1,7 +1,7 @@
 /** -*- c++ -*- */
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -23,26 +23,20 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 #include "InDetConditionsSummaryService/InDetHierarchy.h"
-#include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/WriteCondHandle.h"
 #include "RegistrationServices/IIOVRegistrationSvc.h"
 
 #include "CoralBase/AttributeListSpecification.h"
 
 // Gaudi includes
 #include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/ClassID.h"
 
 //STL
-#include <list>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <set>
 #include <string>
 
 //forward declarations
@@ -52,21 +46,16 @@ class SCT_ID;
 class IAthenaOutputStreamTool;
 
 /**
- ** Algorithm to test writing conditions data and reading them back.
+ ** Tool to test writing conditions data and reading them back.
  **/
 class SCTCalibWriteTool : public AthAlgTool {
 
    public:
       // Constructor
       SCTCalibWriteTool(const std::string& type, const std::string& name, const IInterface* parent);
-      // Destructor
-      virtual ~SCTCalibWriteTool();
 
       // overloading functions
-      virtual StatusCode initialize();
-      virtual StatusCode finalize();
-      static const InterfaceID& interfaceID();
-      virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvIF);
+      virtual StatusCode initialize() override;
 
       std::string
       addDefect(const std::string& defectlist,const int defectBeginChannel,const int defectEndChannel) const;
@@ -225,10 +214,5 @@ class SCTCalibWriteTool : public AthAlgTool {
       const SCT_ID*                m_pHelper{nullptr};
 
 };
-
-inline const InterfaceID& SCTCalibWriteTool::interfaceID() {
-   static const InterfaceID IID{"SCTCalibWriteTool", 1, 0};
-   return IID;
-}
 
 #endif // SCTCalibWriteTool.h

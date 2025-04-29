@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -325,7 +325,7 @@ StatusCode TileEventFillerTool::fill(const xAOD::EventInfo& p){
       const xAOD::MissingETContainer* missingEtContainer = nullptr;
       if(!evtStore()->retrieve(missingEtContainer, m_metContainer).isFailure()) {
 
-        const MissingET* finalClus = (*missingEtContainer)["FinalClus"]; 
+        const xAOD::MissingET* finalClus = (*missingEtContainer)["FinalClus"];
         if (!finalClus) {
           ATH_MSG_WARNING(  "No total MissingET object found in container with name FinalClus"); 
         } else {
@@ -334,7 +334,7 @@ StatusCode TileEventFillerTool::fill(const xAOD::EventInfo& p){
           *m_MET_Ref_FinalClus_EtSum = finalClus->sumet();
         }
 
-        const MissingET* finalTrk = (*missingEtContainer)["FinalTrk"]; 
+        const xAOD::MissingET* finalTrk = (*missingEtContainer)["FinalTrk"];
         if (!finalTrk) {
           ATH_MSG_WARNING(  "No total MissingET object found in container with name FinalTrk"); 
         } else {

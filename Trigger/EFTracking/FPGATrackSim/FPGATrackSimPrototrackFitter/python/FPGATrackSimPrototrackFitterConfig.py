@@ -43,10 +43,10 @@ def FPGAPrototrackFitAlgCfg(flags,
                      primary=True)
     return acc
 
-def FPGAProtoTrackFitCfg(flags,  name="FPGAPrototrackFitterConfig", stage = '', **kwargs):
+def FPGAProtoTrackFitCfg(flags,  name="FPGAPrototrackFitterConfig", stage = '', useRoads=False, **kwargs):
 
     ACTSProtoTrackChainTrackKey = "ACTSProtoTrackChainTestTracks"
-
+    FPGAPrototracks = f"ActsProtoTracks{stage}FromFPGARoad" if useRoads else f"ActsProtoTracks{stage}FromFPGATrack"
     acc = ComponentAccumulator()
     from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
     acc.merge(ITkTrackRecoCfg(flags))
@@ -55,7 +55,7 @@ def FPGAProtoTrackFitCfg(flags,  name="FPGAPrototrackFitterConfig", stage = '', 
     # ProtoTrackChain Track algo
     acc.merge(FPGAPrototrackFitAlgCfg(flags,"FPGATrackSimProtoTackFitAlg",
                                       ACTSTracksLocation=ACTSProtoTrackChainTrackKey,
-                                      FPGATrackSimActsProtoTracks=f"ActsProtoTracks{stage}FromFPGATrack",
+                                      FPGATrackSimActsProtoTracks=FPGAPrototracks,
                                       **kwargs))
     return acc
 
@@ -68,16 +68,16 @@ def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPro
     FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey
 
     acc = ComponentAccumulator()
-
+    truthLinkVector="xAODFPGATruthLinks" if flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching else "xAODTruthLinks"
     acc.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAPixelClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODFPGATruthLinks",
+                                                       InputTruthParticleLinks=truthLinkVector,
                                                        AssociationMapOut="ITkFPGAPixelClustersToTruthParticles",
                                                        Measurements=f"xAODPixelClusters{stage}FromFPGACluster")) 
     
     acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAStripClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODFPGATruthLinks",
+                                                       InputTruthParticleLinks=truthLinkVector,
                                                        AssociationMapOut="ITkFPGAStripClustersToTruthParticles",
                                                        Measurements=f"xAODStripClusters{stage}FromFPGACluster"))
     

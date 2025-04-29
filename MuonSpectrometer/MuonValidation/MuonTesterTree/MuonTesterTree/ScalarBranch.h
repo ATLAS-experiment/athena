@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSCALARBRANCH_H
 #define MUONTESTER_MUONSCALARBRANCH_H
@@ -30,8 +30,8 @@ public:
     ///  Setter methods. Either via assignment operator
     ///  E.g. my_branch = 1.
     ///  ot by
-    void operator=(const T& value);
-    void setValue(const T& value);
+    const T& operator=(const T& value);
+    const T& setValue(const T& value);
 
     bool isUpdated() const;
     void setDefault(const T& def);

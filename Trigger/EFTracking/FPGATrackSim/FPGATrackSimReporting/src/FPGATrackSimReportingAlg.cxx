@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "FPGATrackSimReportingAlg.h"
 
-
+#include <format>
 
 FPGATrackSim::FPGATrackSimReportingAlg::FPGATrackSimReportingAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {
 }
@@ -253,7 +253,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODSpacePoints(SG::ReadHandle
         "|        |       x      |       y      |       z      |                      |\n"
         "|----------------------------------------------------------------------------|\n";
     unsigned int counter = 0;
-    for (const auto& sp : *spContainer)
+    for (const auto sp : *spContainer)
     {
         ++counter;
         mainTable += std::format("| {:>6} | {:>12} | {:>12} | {:>12} | {:>9}, {:>9} |\n",
@@ -282,7 +282,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGASeeds(SG::ReadHandle<ActsT
         "|        | i      |       x      |       y      |       z      |                      |\n"
         "|-------------------------------------------------------------------------------------|\n";
     unsigned int counter = 0;
-    for (const auto& thisTrack : *seedContainer)
+    for (const auto thisTrack : *seedContainer)
     {
         auto spList = thisTrack->sp();
         ++counter;
@@ -317,7 +317,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGASeedsParam(SG::ReadHandle<
         "|      # |      QopT      |     Theta      |       Phi      |        d0      |        z0      |\n"
         "|---------------------------------------------------------------------------------------------|\n";
     unsigned int counter = 0;
-    for (const auto& paramSet : *seedContainer)
+    for (const auto paramSet : *seedContainer)
     {
         ++counter;
         auto parameters = paramSet->parameters();

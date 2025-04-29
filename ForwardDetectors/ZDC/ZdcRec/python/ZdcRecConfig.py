@@ -19,9 +19,39 @@ from ZdcNtuple.ZdcNtupleConfig import ZdcNtupleCfg
 from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 # added getRun3NavigationContainerFromInput as per Tim Martin's suggestions
 from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
+from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 
 zdcConfigMap = {}
 
+defaultGeometryZdcRun2 = "ATLAS-R2-2016-01-03-00"
+defaultGeometryZdc2023 = "ATLAS-R3S-2021-03-03-00"
+defaultGeometryZdc2024 = "ATLAS-R3S-2021-03-04-00"
+
+def zdcGeometry(flags):
+    projName = flags.Input.ProjectName
+    match projName:
+        case "data15_hi":
+            return defaultGeometryZdcRun2
+        case "data18_hi":
+            return defaultGeometryZdcRun2
+        case "data16_hi":
+            return defaultGeometryZdcRun2
+        case "data16_hip":
+            return defaultGeometryZdcRun2
+        case "data23_hi":
+            return defaultGeometryZdc2023
+        case "data24_hi":
+            return defaultGeometryZdc2024
+        case "data24_hicomm":
+            return defaultGeometryZdc2024
+        case _:
+            run = flags.GeoModel.Run
+            if (run == LHCPeriod.RUN2):
+                return defaultGeometryTags.RUN2
+            if (run == LHCPeriod.RUN3):
+                return defaultGeometryTags.RUN3
+            return ""
+        
 def GenerateConfigTagDict():
 
     zdcConfigMap['data15_hi'] = {}
@@ -101,9 +131,10 @@ def ZdcRecOutputCfg(flags):
     acc.merge(addToESD(flags,ZDC_ItemList))
     acc.merge(addToAOD(flags,ZDC_ItemList))
 
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))
-    
+    # In case running standalone (i.e. not within RecoSteering)
+    if flags.Output.doWriteAOD:
+        from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+        acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))
 
     return acc
 
@@ -250,8 +281,12 @@ def ZdcRecRun3Cfg(flags):
         elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = True
-            doFADCCorr = True
+            doFADCCorr = False
             doNonLinCorr = False
+
+    # No calibration required (or exists) for MC
+    if flags.Input.isMC:
+            doCalib = False
 
     doRPD = flags.Detector.EnableZDC_RPD
 
@@ -337,6 +372,7 @@ def ZdcNtupleRun3Cfg(flags,**kwargs):
                            lhcf2022 = False,
                            lhcf2022zdc = False,
                            lhcf2022afp = False,
+                           isMC = flags.Input.isMC,
                            enableTrigger = not flags.Input.isMC,
                            enableOutputSamples = True,
                            enableOutputTree = True,
@@ -396,7 +432,7 @@ def ZdcLEDRecCfg(flags):
         doFADCCorr = False
 
         if (flags.GeoModel.Run == LHCPeriod.Run3):
-            doFADCCorr = True
+            doFADCCorr = False
         
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
         acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
@@ -460,7 +496,6 @@ if __name__ == '__main__':
     """ This is selftest & ZDC calibration transform at the same time"""
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
 
     flags = initConfigFlags()
 
@@ -519,6 +554,7 @@ if __name__ == '__main__':
     if (flags.Input.isMC):
        print('ZdcRecConfig: Running over MC Samples')
        flags.Input.ProjectName = "data23_hi"
+       flags.Reco.EnableTrigger = False
  
     # supply missing metadata based on project name
     pn = flags.Input.ProjectName
@@ -528,7 +564,6 @@ if __name__ == '__main__':
     if (isInj or isLED or isInj or pn == 'data_test'):
         flags.Trigger.EDMVersion=3
         flags.GeoModel.Run = LHCPeriod.Run3
-        flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
         flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_DATA
     else:
         year = int(pn.split('_')[0].split('data')[1])
@@ -539,7 +574,6 @@ if __name__ == '__main__':
         elif (year > 20):
             flags.Trigger.EDMVersion=3
             flags.GeoModel.Run = LHCPeriod.Run3
-            flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
             flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_DATA
 
     if (flags.Input.isMC):
@@ -554,6 +588,8 @@ if __name__ == '__main__':
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: no trigger info available
         flags.DQ.useTrigger = False
         flags.DQ.triggerDataAvailable = False 
+
+    flags.GeoModel.AtlasVersion=zdcGeometry(flags)
 
     flags.lock()
     # flags.dump(evaluate=True) # uncomment this line if needed for testing
@@ -596,6 +632,7 @@ if __name__ == '__main__':
             # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # turn on DEBUG messages
             acc.merge(ZdcInjNtupleCfg(flags))            
     else:
+        acc.merge(ZdcRecCfg(flags))
         acc.merge(ZdcNtupleLocalCfg(flags))
 
     acc.printConfig(withDetails=True)

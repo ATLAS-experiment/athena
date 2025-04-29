@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  //***************************************************************************
@@ -16,7 +16,6 @@
   #include "AthenaKernel/CLASS_DEF.h"
 
 
-  #include <iostream>
   #ifndef  TRIGGERSPACE
   #include "TrigT1Interfaces/Coordinate.h"
   #else
@@ -36,13 +35,12 @@
     public:
 
     /** Constructors */
-    CPMHits();
+    CPMHits() = default;
     CPMHits(int crate, int module);
     CPMHits(int crate, int module, const std::vector<unsigned int>&  EMTauHits0, 
             const std::vector<unsigned int>&  EMTauHits1, int peak);
 
-    /** Destructor */
-    virtual ~CPMHits();
+  
 
     /** In multi-slice readout, need to specify which is peak slice */
     void setPeak(int peak);
@@ -63,11 +61,11 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_module;
-    int m_peak;
-    std::vector <unsigned int> m_Hits0;
-    std::vector <unsigned int> m_Hits1;
+    int m_crate{};
+    int m_module{};
+    int m_peak{};
+    std::vector <unsigned int> m_Hits0{0};
+    std::vector <unsigned int> m_Hits1{0};
     
     };
 

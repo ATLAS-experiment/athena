@@ -52,8 +52,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;
-  using CKFOptions = Acts::CombinatorialKalmanFilterOptions<
-    ActsTrk::detail::UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
+  using CKFOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
 
  private:
   SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusters{
@@ -96,11 +95,6 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
 
   std::unique_ptr<detail::CKF_config> m_ckfConfig;
   std::unique_ptr<const Acts::Logger> m_logger;
-
-  detail::TrackFindingMeasurements collectMeasurements(
-      const EventContext& context,
-      const ActsTrk::DetectorElementToActsGeometryIdMap&
-          detectorElementToGeometryIdMap) const;
 
   Acts::CalibrationContext
       m_calibrationContext;  // this will change in future to be updatable event

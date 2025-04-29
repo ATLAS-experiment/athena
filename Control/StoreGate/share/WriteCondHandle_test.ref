@@ -21,8 +21,10 @@ r1: {[0,t:0] - [0,t:3]} {[0,t:3] - [0,t:7]} {[0,t:7] - [0,t:10]}
 r2: {[0,t:0] - [0,t:5]} {[0,t:5] - [0,t:10]}
 r3: {[0,t:0] - [0,t:2]} {[0,t:2] - [0,t:6]} {[0,t:6] - [0,t:10]}
 ClassIDSvc           INFO getRegistryEntries: read 2393 CLIDRegistry entries for module ALL
-expected ERROR: WriteCondHandle     ERROR WriteCondHandle::record() : no range defined for key  ( 'MyDObj' , 'ConditionStore+MyObjD_err' ) 
-expected ERROR: WriteCondHandle     ERROR WriteCondHandle::record(EventIDRange, T*): for key  ( 'MyDObj' , 'ConditionStore+MyObjD_err' )  cannot use this method if range has already been set via dependencies
+expected ERROR follows:
+WriteCondHandle     ERROR WriteCondHandle::record() : no range defined for key  ( 'MyDObj' , 'ConditionStore+MyObjD_err' ) 
+expected ERROR follows:
+WriteCondHandle     ERROR WriteCondHandle::record(EventIDRange, T*): for key  ( 'MyDObj' , 'ConditionStore+MyObjD_err' )  cannot use this method if range has already been set via dependencies
 test EventID: [0,t:1]
 o1: 1  {[0,t:0] - [0,t:3]} {[0,t:0] - [0,t:3]}
 o2: 21  {[0,t:0] - [0,t:5]}
@@ -44,3 +46,7 @@ o2: 22  {[0,t:5] - [0,t:10]}
 o3: 133  {[0,t:6] - [0,t:10]}
 rD: {[0,t:7] - [0,t:10]}  ==  {[0,t:7] - [0,t:10]}
 test3
+ConditionStore    WARNING retrieve(non-const): No valid proxy for object nonExistent  of type CondContBase(CLID 34480459)
+ Try to use a const retrieve
+ConditionStore    WARNING retrieve(non-const): No valid proxy for object nonExistent  of type CondContBase(CLID 34480459)
+ Try to use a const retrieve

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Pre-config script to propagate variables to downstream projects
 #
@@ -29,6 +29,9 @@ set( ATLAS_FLAKE8 @ATLAS_FLAKE8@
 set( ATLAS_PYTHON_CHECKER @ATLAS_PYTHON_CHECKER@
    CACHE STRING "Python checker command to run during Python module compilation" )
 
+# CppCheck
+option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" @ATLAS_USE_CPPCHECK@ )
+
 # Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
 set( ATLAS_GEANT4_USE_LTO @ATLAS_GEANT4_USE_LTO@ CACHE BOOL
    "Use link-time-optimization in building AtlasGeant4" )
@@ -54,6 +57,7 @@ find_package( Qt5 ${_quietFlag} COMPONENTS Core OpenGL Gui PrintSupport Widgets
    Sql Network )
 find_package( GTest ${_quietFlag} )
 find_package( Geant4 ${_quietFlag} )
+find_package( Boost ${_quietFlag} COMPONENTS ALL )
 
 # Set the versions of the TDAQ projects:
 set( TDAQ_PROJECT_NAME "@TDAQ_PROJECT_NAME@" CACHE STRING

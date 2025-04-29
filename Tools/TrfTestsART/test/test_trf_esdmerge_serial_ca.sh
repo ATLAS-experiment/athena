@@ -5,11 +5,12 @@
 # art-include: main/Athena
 # art-include: 24.0/Athena
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
 ESDMerge_tf.py \
     --inputESDFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/DESDM_MCP.26614755._001203.pool.root.1,/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/DESDM_MCP.26614755._001208.pool.root.1 \
     --preExec 'flags.Exec.FPE=10' \
     --autoConfiguration="everything" \
-    --conditionsTag="all:CONDBR2-BLKPA-RUN2-11" \
+    --conditionsTag="${conditions}" \
     --geometryVersion="all:ATLAS-R2-2016-01-00-01" \
     --runNumber="358031" \
     --outputESD_MRGFile="DESDM_MCP.pool.root" \

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/DecorKeyHelpers.h
@@ -34,9 +34,10 @@ std::string contKeyFromKey (const std::string& key);
  * @brief Extract the decoration part of key.
  * @param key The decoration handle key.
  *
- * Given a key of the form CCC.DDD, returns the decoration part, DDD.
+ * Given a key of the form CCC.DDD, returns the decoration part, DDD or
+ * deflt if no decoration key is found.
  */
-std::string decorKeyFromKey (const std::string& key);
+std::string decorKeyFromKey (const std::string& key, const std::string& deflt = "");
 
 
 /**

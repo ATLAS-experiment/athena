@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Max Goblirsch
@@ -9,11 +9,10 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__MUON_LRT_MERGING_ALGORITHM__H
 #define ASG_ANALYSIS_ALGORITHMS__MUON_LRT_MERGING_ALGORITHM__H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <xAODMuon/MuonContainer.h>
 #include <xAODMuon/MuonAuxContainer.h>
 #include <MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h>
-#include <AsgTools/CurrentContext.h>
 #include <AsgTools/ToolHandle.h>
 
 #include <AsgTools/PropertyWrapper.h>
@@ -21,19 +20,20 @@
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
 
 namespace CP
 {
   /// \brief this wraps the MCP LRT collection merger in a CP algorithm
 
-  class MuonLRTMergingAlg final : public EL::AnaAlgorithm
+  class MuonLRTMergingAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
     MuonLRTMergingAlg (const std::string& name,
                              ISvcLocator* pSvcLocator);
     StatusCode initialize () override;
-    StatusCode execute ()  override;
+    StatusCode execute (const EventContext &ctx) const  override;
 
   private:
 
@@ -71,6 +71,10 @@ namespace CP
                            xAOD::MuonContainer* outputCol) const;
 
 
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_promptIsLRTKey
+      { this, "PromptIsLRTKey", m_promptMuonLocation, "isLRT" };
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_lrtIsLRTKey
+      { this, "LRTIsLRTKey", m_lrtMuonLocation, "isLRT" };
   };
 }
 

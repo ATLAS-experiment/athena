@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -285,12 +285,12 @@ StatusCode TRT_PrepDataToxAOD::execute()
       // Use the MultiTruth Collection to get a list of all true particle contributing to the DC
       if (m_useTruthInfo){
 	if(prdmtColl){
-	  std::vector<int> barcodes;
+	  std::vector<unsigned int> barcodes;
 	  auto range = prdmtColl->equal_range(surfaceID);
 	  for (auto i = range.first; i != range.second; ++i) {
 	    barcodes.push_back( i->second.barcode() );
 	  }
-	  AUXDATA(xprd,  std::vector<int> , truth_barcode) = barcodes;
+	  AUXDATA(xprd,  std::vector<unsigned int> , truth_barcode) = barcodes;
 	}
       }
       if (m_writeSDOs) {

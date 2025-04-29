@@ -551,6 +551,7 @@ namespace MuonCombined {
             static const SG::Accessor<std::vector<float> > errorAcc ("hitError");
             static const SG::Accessor<std::vector<float> > shiftAcc ("hitShift");
             static const SG::Accessor<std::vector<float> > propTimeAcc ("hitPropagationTime");
+
             std::vector<uint8_t>& eTechVec = eTechAcc(*slowMuon);
             std::vector<unsigned int>& idVec = idAcc(*slowMuon);
             std::vector<float>& mToFVec = mToFAcc(*slowMuon);
@@ -558,7 +559,6 @@ namespace MuonCombined {
             std::vector<float>& yVec = yAcc(*slowMuon);
             std::vector<float>& zVec = zAcc(*slowMuon);
             std::vector<float>& eVec = eAcc(*slowMuon);
-
             std::vector<float>& errorVec = errorAcc(*slowMuon);
             std::vector<float>& shiftVec = shiftAcc(*slowMuon);
             std::vector<float>& propagationTimeVec = propTimeAcc(*slowMuon);
@@ -575,6 +575,24 @@ namespace MuonCombined {
                 shiftVec.push_back(hit.shift);
                 propagationTimeVec.push_back(hit.propagationTime);
             }
+
+             // additional MDT hit info (optional)
+            if (m_addMDTExtrasMuGirlLowBeta) {
+                static const SG::Accessor<std::vector<int> > adcAcc ("hitAdc");
+                static const SG::Accessor<std::vector<float> > rdriftAcc ("hitDriftRadius");
+                
+                std::vector<int>& adcVec = adcAcc(*slowMuon);
+                std::vector<float>& rdriftVec = rdriftAcc(*slowMuon);
+
+                if (stauExtras->extraMDTHitInfo) { // check if extra MDT hit info added
+                    for (const auto& extraMDTinfo : *stauExtras->extraMDTHitInfo) {
+                        adcVec.push_back(extraMDTinfo.adc);
+                        rdriftVec.push_back(extraMDTinfo.rdrift);
+                    }
+                }
+            }
+            
+            
         }
 
         if (!muon.combinedTrackParticleLink().isValid() && tag->combinedTrack()) {

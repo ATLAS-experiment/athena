@@ -175,7 +175,7 @@ def tagInfoMetadataCheck(sigdict, pudict):
 
 def overlayMetadataCheck(flags):
     """Check overlay metadata"""
-    if flags.Overlay.DataOverlay:
+    if flags.Overlay.ByteStream:
         files = flags.Input.Files
         filesPileup = flags.Input.SecondaryFiles
     else:
@@ -186,7 +186,6 @@ def overlayMetadataCheck(flags):
         signalMetadata = GetFileMD(files, maxLevel="full")
         signalSimulationMetadata = signalMetadata.get("/Simulation/Parameters", {})
         signalTagInfoMetadata = signalMetadata.get("/TagInfo", {})
-        print(signalMetadata.metadata, signalSimulationMetadata, signalTagInfoMetadata)
         # signal check
         overlayInputMetadataCheck(flags, signalSimulationMetadata, signalTagInfoMetadata)
     else:
@@ -212,7 +211,7 @@ def overlayMetadataCheck(flags):
 
 def fastChainOverlayMetadataCheck(flags):
     """Check fastchain overlay metadata"""
-    if flags.Overlay.DataOverlay:
+    if flags.Overlay.ByteStream:
         filesPileup = flags.Input.SecondaryFiles
     else:
         filesPileup = flags.Input.Files

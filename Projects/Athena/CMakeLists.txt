@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.25 )
@@ -18,8 +18,19 @@ set( CMAKE_CUDA_STANDARD 20 CACHE STRING "CUDA C++ standard to use" )
 # Force the compilation of CUDA code for only compute capability 5.2 for now.
 # Mainly to get rid of warnings from 11.0 about not supporting older compute
 # capabilities anymore.
-set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
+set( CMAKE_CUDA_ARCHITECTURES "all-major" CACHE STRING
    "CUDA architectures to build code for" )
+
+set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" )
+
+# Turn on HIP as a compiler, if it's available.
+check_language( HIP )
+if( CMAKE_HIP_COMPILER )
+   enable_language( HIP )
+endif()
+# Use C++20 with HIP.
+set( CMAKE_HIP_STANDARD 20 CACHE STRING "HIP C++ standard to use" )
+
 
 # Set the versions of the TDAQ externals to pick up for the build:
 if( NOT LCG_NIGHTLY )
@@ -38,9 +49,9 @@ if( LCG_NIGHTLY )
     set( TDAQ_VERSION "99-00-00" CACHE STRING
        "The version of tdaq to use for the build" )
 else()
-    set( TDAQ-COMMON_VERSION "11-04-00" CACHE STRING
+    set( TDAQ-COMMON_VERSION "12-01-01" CACHE STRING
        "The version of tdaq-common to use for the build" )
-    set( TDAQ_VERSION "11-04-00" CACHE STRING
+    set( TDAQ_VERSION "12-01-01" CACHE STRING
        "The version of tdaq to use for the build" )
 endif()
 
@@ -70,6 +81,9 @@ set( CxxUtilsSettings_DIR
    "${CMAKE_SOURCE_DIR}/../../Control/CxxUtils/cmake" )
 find_package( CxxUtilsSettings )
 
+# Enable CppCheck:
+option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" ON )
+
 # Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
 include( CheckIPOSupported )
 check_ipo_supported( RESULT ATLAS_IPO_CHECK_RESULT )
@@ -88,26 +102,19 @@ find_package( Gaudi )
 find_package( tdaq-common )
 find_package( tdaq )
 
-# Turn on HIP as a compiler, if it's available.
-find_package( AtlasHIP )
-if( AtlasHIP_FOUND )
-   # It's pretty bad if we don't find the code even, but let's be ready for
-   # it... And now let's check whether HIP can be used as a compiler.
-   include( AtlasCheckLanguage )
-   atlas_check_language( HIP )
-   if( CMAKE_HIP_COMPILER )
-      # If so, let's enable it.
-      enable_language( HIP )
-   endif()
-endif()
-
 # Set up CppCheck.
 if( ATLAS_USE_CPPCHECK )
    find_package( Cppcheck 2.14 )
 
-   if( CPPCHECK_FOUND )
+   # Find ATLAS-specific wrapper:
+   find_program( CPPCHECK_ATLAS cppcheck_atlas
+      PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../../Control/CxxUtils/scripts" )
+   mark_as_advanced( CPPCHECK_ATLAS )
+
+   if( CPPCHECK_FOUND AND CPPCHECK_ATLAS )
       # Prepend cppcheck command to already defined command line options:
-      list( PREPEND CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" )
+      list( PREPEND CMAKE_CPPCHECK_DEFAULT ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/atlas_build_run.sh
+         "${CMAKE_CURRENT_SOURCE_DIR}/../../Control/CxxUtils/scripts/cppcheck_atlas" )
 
       # Ignore externals:
       foreach( ignored_path "${LCG_RELEASE_BASE}"

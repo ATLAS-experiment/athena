@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,19 +19,40 @@ def ActsTrackAnalysisAlgCfg(flags,
 
     monitoringGroup.defineHistogram('Ntracks', title='Number of Tracks;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=500, xmin=0, xmax=20000)
+
+    monitoringGroup.defineHistogram('NsharedPerLayer_pixelBarrel', title='Number of shared hits per layer - Pixel Barrel;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=5, xmin=0, xmax=5)    
+    monitoringGroup.defineHistogram('NsharedPerLayer_pixelEndCap', title='Number of shared hits per layer - Pixel EndCap;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=9, xmin=0, xmax=9)
+    monitoringGroup.defineHistogram('NsharedPerLayer_stripBarrel', title='Number of shared hits per layer - Strip Barrel;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=4, xmin=0, xmax=4)
+    monitoringGroup.defineHistogram('NsharedPerLayer_stripEndCap', title='Number of shared hits per layer - Strip EndCap;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=6, xmin=0, xmax=6)
+    
     import math
-    monitoringGroup.defineHistogram('theta', title='Track polar angle;#theta;Entries', type='TH1I', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('theta', title='Track polar angle;#theta;Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=0, xmax=math.pi)
-    monitoringGroup.defineHistogram('phi', title='Track azimuthal angle;#phi;Entries', type='TH1I', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('eta', title='Track eta;#eta;Entries', type='TH1F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4)
+    monitoringGroup.defineHistogram('pt', title='Track pR;p_{T};Entries', type='TH1F', path=kwargs['MonGroupName'],
+                                    xbins=200, xmin=0, xmax=200)
+    monitoringGroup.defineHistogram('phi', title='Track azimuthal angle;#phi;Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=-math.pi, xmax=math.pi)
-    monitoringGroup.defineHistogram('qoverp', title='track inverse momentum;q/p [1/GeV];Entries', type='TH1I', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('qoverp', title='track inverse momentum;q/p [1/GeV];Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=200, xmin=-1.2, xmax=1.2)
-    monitoringGroup.defineHistogram('chi2OverNdof', title='fit chi2 / ndof;#chi^{2}/nDoF;Entries', type='TH1I', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('chi2OverNdof', title='fit chi2 / ndof;#chi^{2}/nDoF;Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=100, xmin=0, xmax=20)
     monitoringGroup.defineHistogram('nStates', title='Number of states / track;# states;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=60, xmin=0, xmax=60)
     monitoringGroup.defineHistogram('nMeasurements', title='Number of measurements / track;# measurements;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=35, xmin=0, xmax=35)
+    monitoringGroup.defineHistogram('nShared', title='Number of shared hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=35, xmin=0, xmax=35)
+    monitoringGroup.defineHistogram('nOutliers', title='Number of outliers hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=35, xmin=0, xmax=35)
+    monitoringGroup.defineHistogram('nHoles', title='Number of holes hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=35, xmin=0, xmax=35)
+
     monitoringGroup.defineHistogram('nPixelHits', title='Number of pixel hits / track;# pixel hits;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=35, xmin=0, xmax=35)
     monitoringGroup.defineHistogram('nStripHits', title='Number of strip hits / track;# strip hits;Entries', type='TH1I', path=kwargs['MonGroupName'],
@@ -39,6 +60,21 @@ def ActsTrackAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('surfaceType', title='type of reference surface;type;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=35, xmin=0, xmax=35)
 
+
+    monitoringGroup.defineHistogram('eta,nMeasurements', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4,
+                                    ybins=35, ymin=0, ymax=35)
+    monitoringGroup.defineHistogram('eta,nShared', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4,
+                                    ybins=35, ymin=0, ymax=35)
+    monitoringGroup.defineHistogram('eta,nOutliers', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4,
+                                    ybins=35, ymin=0, ymax=35)
+    monitoringGroup.defineHistogram('eta,nHoles', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4,
+                                    ybins=35, ymin=0, ymax=35)
+    monitoringGroup.defineHistogram('eta,pt', title='Track pT vs eta;#eta;p_{T}', type='TProfile', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4)
 
     acc.merge(helper.result())
     return acc
@@ -130,9 +166,10 @@ def ActsHgtdClusterAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('globalZ,globalR;h_globalZR', title="h_globalZR; z [mm]; r [mm]", type="TH2F", path=path,
                                     xbins=100, xmin=-3600, xmax=3600,
                                     ybins=100, ymin=0, ymax=800)
-    monitoringGroup.defineTree('localX,localY,localT,localCovXX,localCovYY,localCovTT,globalX,globalY,globalZ,globalR,eta;HgtdClusters',
-                               path='ntuples',
-                               treedef='localX/vector<float>:localY/vector<float>:localT/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:localCovTT/vector<float>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:globalR/vector<float>:eta/vector<float>')
+    if flags.Acts.doAnalysisNtuples:
+      monitoringGroup.defineTree('localX,localY,localT,localCovXX,localCovYY,localCovTT,globalX,globalY,globalZ,globalR,eta;HgtdClusters',
+                                path='ntuples',
+                                treedef='localX/vector<float>:localY/vector<float>:localT/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:localCovTT/vector<float>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:globalR/vector<float>:eta/vector<float>')
     
     acc.merge(helper.result())
     return acc
@@ -163,9 +200,10 @@ def ActsPixelClusterAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('eta;h_etaCluster', title="h_etaCluster; cluster #eta", type="TH1F", path=path,
                                     xbins=100, xmin=-5, xmax=5)
     
-    monitoringGroup.defineTree('barrelEndcap,layerDisk,phiModule,etaModule,isInnermost,isNextToInnermost,eta,globalX,globalY,globalZ,perp,localX,localY,localCovXX,localCovYY,sizeX,sizeY,widthY;PixelClusters',
-                               path='ntuples',
-                               treedef='barrelEndcap/vector<int>:layerDisk/vector<int>:phiModule/vector<int>:etaModule/vector<int>:isInnermost/vector<int>:isNextToInnermost/vector<int>:eta/vector<double>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:perp/vector<float>:localX/vector<float>:localY/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:sizeX/vector<int>:sizeY/vector<int>:widthY/vector<float>')
+    if flags.Acts.doAnalysisNtuples:
+      monitoringGroup.defineTree('barrelEndcap,layerDisk,phiModule,etaModule,isInnermost,isNextToInnermost,eta,globalX,globalY,globalZ,perp,localX,localY,localCovXX,localCovYY,sizeX,sizeY,widthY;PixelClusters',
+                                path='ntuples',
+                                treedef='barrelEndcap/vector<int>:layerDisk/vector<int>:phiModule/vector<int>:etaModule/vector<int>:isInnermost/vector<int>:isNextToInnermost/vector<int>:eta/vector<double>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:perp/vector<float>:localX/vector<float>:localY/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:sizeX/vector<int>:sizeY/vector<int>:widthY/vector<float>')
 
     acc.merge(helper.result())
     return acc
@@ -197,9 +235,10 @@ def ActsStripClusterAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('eta;h_etaCluster', title="h_etaCluster; cluster #eta", type="TH1F", path=path,
                                     xbins=100, xmin=-5, xmax=5)
 
-    monitoringGroup.defineTree(f'barrelEndcap,layerDisk,phiModule,etaModule,sideModule,eta,globalX,globalY,globalZ,perp,localX,localCovXX,sizeX;{path}',
-                               path='ntuples', 
-                               treedef='barrelEndcap/vector<int>:layerDisk/vector<int>:phiModule/vector<int>:etaModule/vector<int>:sideModule/vector<int>:eta/vector<double>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:perp/vector<float>:localX/vector<float>:localCovXX/vector<float>:sizeX/vector<int>')
+    if flags.Acts.doAnalysisNtuples:
+      monitoringGroup.defineTree(f'barrelEndcap,layerDisk,phiModule,etaModule,sideModule,eta,globalX,globalY,globalZ,perp,localX,localCovXX,sizeX;{path}',
+                                path='ntuples', 
+                                treedef='barrelEndcap/vector<int>:layerDisk/vector<int>:phiModule/vector<int>:etaModule/vector<int>:sideModule/vector<int>:eta/vector<double>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:perp/vector<float>:localX/vector<float>:localCovXX/vector<float>:sizeX/vector<int>')
 
     acc.merge(helper.result())
     return acc
@@ -236,9 +275,10 @@ def ActsBaseSpacePointAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('eta;h_etaSpacePoint', title="h_etaSpacePoint; space point #eta", type="TH1F", path=f"{histoPath}",
                                     xbins=100, xmin=-5, xmax=5)
 
-    monitoringGroup.defineTree(f'barrelEndcap,layerDisk,phiModule,etaModule,sideModule,isInnermost,isNextToInnermost,isOverlap,eta,globalX,globalY,globalZ,perp,globalCovR,globalCovZ;{ntupleName}',
-                               path='ntuples',
-                               treedef='barrelEndcap/vector<int>:layerDisk/vector<int>:phiModule/vector<int>:etaModule/vector<int>:sideModule/vector<int>:isInnermost/vector<int>:isNextToInnermost/vector<int>:isOverlap/vector<int>:eta/vector<double>:globalX/vector<double>:globalY/vector<double>:globalZ/vector<double>:perp/vector<double>:globalCovR/vector<double>:globalCovZ/vector<double>')
+    if flags.Acts.doAnalysisNtuples:
+      monitoringGroup.defineTree(f'barrelEndcap,layerDisk,phiModule,etaModule,sideModule,isInnermost,isNextToInnermost,isOverlap,eta,globalX,globalY,globalZ,perp,globalCovR,globalCovZ;{ntupleName}',
+                                path='ntuples',
+                                treedef='barrelEndcap/vector<int>:layerDisk/vector<int>:phiModule/vector<int>:etaModule/vector<int>:sideModule/vector<int>:isInnermost/vector<int>:isNextToInnermost/vector<int>:isOverlap/vector<int>:eta/vector<double>:globalX/vector<double>:globalY/vector<double>:globalZ/vector<double>:perp/vector<double>:globalCovR/vector<double>:globalCovZ/vector<double>')
 
     acc.merge(helper.result())
     return acc
@@ -429,9 +469,10 @@ def ActsBaseSeedAnalysisAlgCfg(flags,
         list_variables += ",truth_barcode,truth_prob"
         tree_def += ":truth_barcode/vector<int>:truth_prob/vector<double>"
 
-    monitoringGroup.defineTree(f'{list_variables};{ntupleName}',
-                               path='ntuples',
-                               treedef=tree_def )
+    if flags.Acts.doAnalysisNtuples:
+      monitoringGroup.defineTree(f'{list_variables};{ntupleName}',
+                                path='ntuples',
+                                treedef=tree_def )
 
     acc.merge(helper.result())
     return acc
@@ -446,7 +487,7 @@ def ActsPixelSeedAnalysisAlgCfg(flags,
 
     if flags.Tracking.doTruth:
         kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
-        kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkPixel')
+        kwargs.setdefault('ITkClustersTruth', '') #PRD_MultiTruthITkPixel')
 
     return ActsBaseSeedAnalysisAlgCfg(flags,
                                       name,
@@ -465,7 +506,7 @@ def ActsStripSeedAnalysisAlgCfg(flags,
 
     if flags.Tracking.doTruth:
         kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
-        kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkStrip')
+        kwargs.setdefault('ITkClustersTruth', '') #PRD_MultiTruthITkStrip')
 
     return ActsBaseSeedAnalysisAlgCfg(flags,
                                       name,
@@ -492,9 +533,10 @@ def ActsBaseEstimatedTrackParamsAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('Nparams', title='Number of Estimated Parameters from Seeds;N;Entries', type='TH1I', path=f'{histoPath}',
                                     xbins=100, xmin=0, xmax=0)
 
-    monitoringGroup.defineTree(f"track_param_pt,track_param_eta,track_param_phi,track_param_loc0,track_param_loc1,track_param_theta,track_param_qoverp,track_param_time,track_param_charge;{ntupleName}",
-                               path="ntuples",
-                               treedef="track_param_pt/vector<double>:track_param_eta/vector<double>:track_param_phi/vector<double>:track_param_loc0/vector<double>:track_param_loc1/vector<double>:track_param_theta/vector<double>:track_param_qoverp/vector<double>:track_param_time/vector<double>:track_param_charge/vector<int>")
+    if flags.Acts.doAnalysisNtuples:
+      monitoringGroup.defineTree(f"track_param_pt,track_param_eta,track_param_phi,track_param_loc0,track_param_loc1,track_param_theta,track_param_qoverp,track_param_time,track_param_charge;{ntupleName}",
+                                path="ntuples",
+                                treedef="track_param_pt/vector<double>:track_param_eta/vector<double>:track_param_phi/vector<double>:track_param_loc0/vector<double>:track_param_loc1/vector<double>:track_param_theta/vector<double>:track_param_qoverp/vector<double>:track_param_time/vector<double>:track_param_charge/vector<int>")
 
     return helper.result()
 
@@ -555,11 +597,12 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
     helper = AthMonitorCfgHelper(flags, 'SeedingAlgorithmAnalysisAlgCfg')
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedingAlgorithmAnalysisAlg, name, **kwargs)
 
-    for groupName in MonitoringGroupNames:
-      monitoringGroup = helper.addGroup(monitoringAlgorithm, groupName, '/'+groupName+'/')
-      monitoringGroup.defineTree('eventNumber,stripSeedInitialisationTime,stripSeedProductionTime,pixelSeedInitialisationTime,pixelSeedProductionTime,numberPixelSpacePoints,numberStripSpacePoints,numberPixelSeeds,numberStripSeeds;seedInformation',
-                                 path='ntuples',
-                                 treedef='eventNumber/I:stripSeedInitialisationTime/F:stripSeedProductionTime/F:pixelSeedInitialisationTime/F:pixelSeedProductionTime/F:numberPixelSpacePoints/I:numberStripSpacePoints/I:numberPixelSeeds/I:numberStripSeeds/I')
+    if flags.Acts.doAnalysisNtuples:
+      for groupName in MonitoringGroupNames:
+        monitoringGroup = helper.addGroup(monitoringAlgorithm, groupName, '/'+groupName+'/')
+        monitoringGroup.defineTree('eventNumber,stripSeedInitialisationTime,stripSeedProductionTime,pixelSeedInitialisationTime,pixelSeedProductionTime,numberPixelSpacePoints,numberStripSpacePoints,numberPixelSeeds,numberStripSeeds;seedInformation',
+                                  path='ntuples',
+                                  treedef='eventNumber/I:stripSeedInitialisationTime/F:stripSeedProductionTime/F:pixelSeedInitialisationTime/F:pixelSeedProductionTime/F:numberPixelSpacePoints/I:numberStripSpacePoints/I:numberPixelSeeds/I:numberStripSeeds/I')
 
     acc.merge(helper.result())
     return acc
@@ -589,6 +632,61 @@ def ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags,
                                                       histoPath = extension.replace("Acts", "") + 'StripEstimatedTrackParams',
                                                       ntupleName = extension.replace("Acts", "") + 'StripEstimatedTrackParams',
                                                       **kwargs)
+
+
+def ActsBaseSeedsToTrackParamsAlgCfg(flags,
+                                     name: str = "",
+                                     **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if 'ExtrapolationTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault(
+            'ExtrapolationTool',
+            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
+        )
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            'TrackingGeometryTool',
+            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
+
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+    acc.addEventAlgo(CompFactory.ActsTrk.SeedsToTrackParamsAlg(name, **kwargs))
+    return acc
+
+def ActsPixelSeedsToTrackParamsAlgCfg(flags,
+                                      name: str = 'ActsPixelSeedsToTrackParamsAlg',
+                                      extension: str = "Acts",
+                                      **kwargs) -> ComponentAccumulator:
+    kwargs.setdefault('InputSeedContainerKey', 'ActsPixelSeeds')
+    kwargs.setdefault('DetectorElementsKey', 'ITkPixelDetectorElementCollection')
+    kwargs.setdefault('OutputTrackParamsCollectionKey', 'ActsPixelEstimatedTrackParams')
+    return ActsBaseSeedsToTrackParamsAlgCfg(flags,
+                                            name,
+                                            **kwargs)
+
+
+def ActsStripSeedsToTrackParamsAlgCfg(flags,
+                                      name: str = 'ActsStripSeedsToTrackParamsAlgCfg',
+                                      extension: str = "Acts",
+                                      **kwargs) -> ComponentAccumulator:
+    kwargs.setdefault('InputSeedContainerKey', 'ActsStripSeeds')
+    kwargs.setdefault('DetectorElementsKey', 'ITkStripDetectorElementCollection')
+    kwargs.setdefault('OutputTrackParamsCollectionKey', 'ActsStripEstimatedTrackParams')
+    return ActsBaseSeedsToTrackParamsAlgCfg(flags,
+                                            name,
+                                            **kwargs)
+
 
 def PhysValActsCfg(flags,
                    name: str = 'PhysValActs',
@@ -632,3 +730,99 @@ def ActsEstimatedTrackParamsAnalysisCfg(flags) -> ComponentAccumulator:
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags))
     return acc
+
+
+def ActsSeedsToTrackParamsCfg(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    if flags.Detector.EnableITkPixel:
+        acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(flags))
+    if flags.Detector.EnableITkStrip:
+        acc.merge(ActsStripSeedsToTrackParamsAlgCfg(flags))
+    return acc
+
+def ActsResidualAnalysisAlgCfg(flags,
+                               name : str = "ActsResidualAnalysisAlg",
+                               **kwargs) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+    
+    kwargs.setdefault('TrackParticles', 'InDetTrackParticles')
+    kwargs.setdefault("MonGroupName", kwargs['TrackParticles'])
+
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, kwargs['TrackParticles'] + 'AnalysisAlgCfg')
+
+    ResidualMonitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.ITkAlignMonResidualsAlg, name, **kwargs)
+    
+    layersPix = ['0', '1', '2', '3', '4']
+
+    path = f'/ActsAnalysis/{kwargs["TrackParticles"]}/Residuals'
+    residualXArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixResidualX', topPath = path)
+    residualYArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixResidualY', topPath = path)
+    pullXArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixPullX', topPath = path)
+    pullYArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixPullY', topPath = path)
+
+    layersStrip = ['0','1','2','3','4','5','6','7','8']
+    stripResidualXArray  = helper.addArray([len(layersStrip)], ResidualMonitoringAlgorithm, 'StripResidualX', topPath = path)
+    stripPullXArray  = helper.addArray([len(layersStrip)], ResidualMonitoringAlgorithm, 'StripPullX', topPath = path)
+    
+    
+    xminX  = -100
+    xmaxX  = 100
+    xminY  = -200
+    xmaxY  = 200
+    pullX  = 6    
+    
+    for postfix,tool in residualXArray.Tools.items():
+        layer = layersPix[int(postfix.split("_")[1])]
+        title = ('UnBiased X Residual Pixel Barrel %s' % layer)
+        name = 'm_pix_residualsx;pix_b' + layer + '_residualx'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = xminX, xmax = xmaxX) #in um
+
+        
+    for postfix,tool in residualYArray.Tools.items():
+        layer = layersPix[int(postfix.split("_")[1])]
+        title = ('UnBiased Y Residual Pixel Barrel %s' % layer)
+        name = 'm_pix_residualsy;pix_b' + layer + '_residualy'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = xminY, xmax = xmaxY) #in um
+
+
+    for postfix,tool in pullXArray.Tools.items():
+        
+        layer = layersPix[int(postfix.split("_")[1])]
+        title = ('UnBiased X Pull Pixel Barrel %s' % layer)
+        name = 'm_pix_pullsx;pix_b' + layer + '_pullx'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = -pullX, xmax = pullX) #in um
+
+        
+    for postfix,tool in pullYArray.Tools.items():
+        layer = layersPix[int(postfix.split("_")[1])]
+        title = ('UnBiased Y Pull Pixel Barrel %s' % layer)
+        name = 'm_pix_pullsy;pix_b' + layer + '_pully'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = -pullX, xmax = pullX) #in um
+
+
+
+    for postfix,tool in stripResidualXArray.Tools.items():
+        layer = layersStrip[int(postfix.split("_")[1])]
+        title = ('UnBiased X Residual Strip Barrel %s' % layer)
+        name = 'm_strip_residualsx;strip_b' + layer + '_residualx'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = xminX, xmax = xmaxX) #in um
+
+
+    for postfix,tool in stripPullXArray.Tools.items():
+        layer = layersStrip[int(postfix.split("_")[1])]
+        title = ('UnBiased X Pull Strip Barrel %s' % layer)
+        name = 'm_strip_pullsx;strip_b' + layer + '_pullx'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = -pullX, xmax = pullX) #in um
+        
+    acc.merge(helper.result())
+    return acc
+
+

@@ -36,7 +36,6 @@ namespace TrigConf {
  */
 class RatesAnalysisAlg: public ::AthAnalysisAlgorithm { 
  public: 
-  
   /**
    * Method by which the trigger pass/fail decision is calculated. Via manual or automated emulator or 
    * using the Trigger Decision Tool for a pre-existing item.
@@ -49,7 +48,6 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
 
   RatesAnalysisAlg( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~RatesAnalysisAlg(); 
-
   virtual StatusCode ratesInitialize() = 0; //!< To be implemented by the user. Register "triggers" to calculate the rate for 
   virtual StatusCode ratesExecute() = 0; //!<  To be implemented by the user. Supply pass/fail for all "triggers"
   virtual StatusCode ratesFinalize() = 0; //!< To be implemented by the user.
@@ -184,10 +182,16 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
    * @param f Exponential factor
    */
   void setExponentialMuScalingFactor(const double f) { m_expoScalingFactor = f; }
+ 
+ protected:
+  virtual StatusCode initialize(); //!< Get the trigger decision tool and set up global groups
+  double m_linearLumiFactor;
+  WeightingValuesSummary_t m_weightingValues; //!< Possible weighting & lumi extrapolation values for the current event
+  double m_ratesDenominator; //!< How much walltime is seen by the algorithm. This is what we need to normalise to.  
+  Gaudi::Property<bool> m_doHistograms{this, "DoHistograms", true, "Switch on histogram output of rate vs. mu and position in train."};
 
  private: 
 
-  virtual StatusCode initialize(); //!< Get the trigger decision tool and set up global groups
   virtual StatusCode execute(); //!< In first call - register all triggers. Then load event weighting parameters, fill trigger decisions, compute group rates.
   virtual StatusCode finalize(); //!< Print rates
 
@@ -262,7 +266,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
 
   ToolHandle<IEnhancedBiasWeighter> m_enhancedBiasRatesTool{this, "EnhancedBiasRatesTool", "EnhancedBiasWeighter/EnhancedBiasRatesTool"};
   ToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool"};
-  ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", ""};
+  ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", "TrigConf::xAODConfigSvc"};
 
   Gaudi::Property<double> m_expoScalingFactor{this, "ExpoScalingFactor", 0.1, "Optional. Exponential factor if using exponential-mu rates scaling."};
   Gaudi::Property<double> m_inelasticCrossSection{this, "InelasticCrossSection", 8e-26, "Inelastic cross section in units cm^2. Default 80 mb at 13 TeV."};
@@ -272,10 +276,8 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   Gaudi::Property<bool> m_doExpressRates{this, "DoExpressRates", false, "Calculate total rates for the express stream."};
   Gaudi::Property<bool> m_useBunchCrossingData{this, "UseBunchCrossingData", true, "BunchCrossing data requires CONDBR2 access. Can be disabled here if this is a problem."};
   Gaudi::Property<bool> m_currentEventIsUnbiased; //!< If the current event was triggered online by RDx or not. Random seeded HLT chains must only see these
-  Gaudi::Property<bool> m_doHistograms{this, "DoHistograms", true, "Switch on histogram output of rate vs. mu and position in train."};
   Gaudi::Property<bool> m_enableLumiExtrapolation{this, "EnableLumiExtrapolation", true, "If false then no extrapolation in L, N_bunch or <mu> will be performed.."};
   Gaudi::Property<uint32_t> m_vetoStartOfTrain{this, "VetoStartOfTrain", 0, "How many BCID to veto at the start of a bunch train."};
-  //Gaudi::Property<std::string> m_prescalesJSON{this, "PrescalesJSON", "",  "Optional JSON of prescales from the TrigMenuRuleBook to apply."};
   Gaudi::Property<std::map<std::string, std::map<std::string, double>>> m_prescalesJSON{this, "PrescalesJSON", {},  "Optional JSON of prescales from the TrigMenuRuleBook to apply."};
 
 
@@ -283,7 +285,6 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   double m_targetBunches; //!< How many bunches the prediction is targeting
   double m_targetLumi; //!< What instantaneous luminosity the prediction is targeting
   uint32_t m_runNumber; //!<What is the RunNumber
-  double m_ratesDenominator; //!< How much walltime is seen by the algorithm. This is what we need to normalise to.
   uint32_t m_eventCounter; //!< Count how many events processed
   double m_weightedEventCounter; //!< Count how many weighted events were processed
 
@@ -292,7 +293,6 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
 
   TTree* m_metadataTree; //!< Used to write out some metadata needed by post-processing (e.g. bunchgroup, lumi)
 
-  WeightingValuesSummary_t m_weightingValues; //!< Possible weighting & lumi extrapolation values for the current event 
 }; 
 
 #endif //> !RATESANALYSIS_RATESANALYSISALG_H

@@ -1,8 +1,23 @@
+Mon Feb  3 12:23:26 CET 2025
+Preloading tcmalloc_minimal.so
+Preloading libexcabort.so
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v38r0)
+                                          running on lxplus973.cern.ch on Mon Feb  3 12:23:29 2025
+====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
+Py:ComponentAccumulator    INFO Athena job with pid 3941195
+CoreDumpSvc                       INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 Athena...ntLoopMgr                INFO Initializing AthenaHiveEventLoopMgr
+ClassIDSvc                        INFO getRegistryEntries: read 3153 CLIDRegistry entries for module ALL
+ClassIDSvc                   0    INFO getRegistryEntries: read 1163 CLIDRegistry entries for module ALL
+ClassIDSvc                   0    INFO getRegistryEntries: read 1728 CLIDRegistry entries for module ALL
+ClassIDSvc                   0    INFO getRegistryEntries: read 6275 CLIDRegistry entries for module ALL
 EventInfoCnvAlg              0    INFO Initializing EventInfoCnvAlg
 EventI...foCnvTool           0    INFO Beam spot information not available
 EventI...foCnvTool           0    INFO Will not fill beam spot information into xAOD::EventInfo
+xAODTestAlg                  0 WARNING Implicit circular data dependency detected for id  ( 'SG::AuxElement' , 'StoreGateSvc+cinfo2' ) 
 ThreadPoolSvc                0    INFO no thread init tools attached
 Avalan...edulerSvc           0    INFO Activating scheduler in a separate thread
 Avalan...edulerSvc           0    INFO Found 13 algorithms
@@ -12,7 +27,7 @@ Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
   IncidentProcAlg1
       none
   SGInputLoader
-      none
+    o OUTPUT  ( 'EventInfo' , 'StoreGateSvc+McEventInfo' ) 
   EventInfoCnvAlg
     o INPUT   ( 'EventInfo' , 'StoreGateSvc+McEventInfo' ) 
     o OUTPUT  ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo' ) 
@@ -52,14 +67,13 @@ Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
       none
   IncidentProcAlg3
       none
-Avalan...edulerSvc           0    INFO Will attribute the following unmet INPUT dependencies to "SGInputLoader/SGInputLoader" Algorithm
-Avalan...edulerSvc           0    INFO    o  ( 'EventInfo' , 'StoreGateSvc+McEventInfo' )     required by Algorithm: 
-Avalan...edulerSvc           0    INFO        * EventInfoCnvAlg
+Avalan...edulerSvc           0    INFO No unmet INPUT data dependencies were found
 PrecedenceSvc                0    INFO Assembling CF and DF task precedence rules
 PrecedenceSvc                0    INFO PrecedenceSvc initialized successfully
 Avalan...edulerSvc           0    INFO Concurrency level information:
 Avalan...edulerSvc           0    INFO  o Number of events in flight: 1
 Avalan...edulerSvc           0    INFO  o TBB thread pool size:  'ThreadPoolSize':1
+Avalan...edulerSvc           0    INFO  o Fiber thread pool size:  'NumOffloadThreads':0
 Avalan...edulerSvc           0    INFO Task scheduling settings:
 Avalan...edulerSvc           0    INFO  o Avalanche generation mode: disabled
 Avalan...edulerSvc           0    INFO  o Preemptive scheduling of CPU-blocking tasks: disabled
@@ -69,50 +83,95 @@ Athena...ntLoopMgr           0    INFO Setup EventSelector service EventSelector
 ApplicationMgr               0    INFO Application Manager Initialized successfully
 ApplicationMgr               0    INFO Application Manager Started successfully
 Athena...ntLoopMgr           0    INFO Starting loop on events
-EventP...stencySvc     0     0    INFO Added successfully Conversion service:McCnvSvc
+EventP...stencySvc     0     0    INFO Added successfully Conversion service McCnvSvc
 Athena...ntLoopMgr     0     0    INFO   ===>>>  start of run 0    <<<===
 Athena...ntLoopMgr     0     0    INFO   ===>>>  start processing event #1, run #0 on slot 0,  0 events processed so far  <<<===
+ClassIDSvc             0     0    INFO getRegistryEntries: read 110 CLIDRegistry entries for module ALL
+xAODTe...mlinkTool     0     0    INFO From tool: C (as AuxElement): 2000; S 100
+xAODTe...adSymlink     0     0    INFO C (as AuxElement): 2000; S 100
 Athena...ntLoopMgr     0     0    INFO   ===>>>  done processing event #1, run #0 on slot 0,  1 events processed so far  <<<===
 Athena...ntLoopMgr     1     0    INFO   ===>>>  start processing event #2, run #0 on slot 0,  1 events processed so far  <<<===
+xAODTe...mlinkTool     1     0    INFO From tool: C (as AuxElement): 3000; S 200
+xAODTe...adSymlink     1     0    INFO C (as AuxElement): 3000; S 200
 Athena...ntLoopMgr     1     0    INFO   ===>>>  done processing event #2, run #0 on slot 0,  2 events processed so far  <<<===
 Athena...ntLoopMgr     2     0    INFO   ===>>>  start processing event #3, run #0 on slot 0,  2 events processed so far  <<<===
+xAODTe...mlinkTool     2     0    INFO From tool: C (as AuxElement): 4000; S 300
+xAODTe...adSymlink     2     0    INFO C (as AuxElement): 4000; S 300
 Athena...ntLoopMgr     2     0    INFO   ===>>>  done processing event #3, run #0 on slot 0,  3 events processed so far  <<<===
 Athena...ntLoopMgr     3     0    INFO   ===>>>  start processing event #4, run #0 on slot 0,  3 events processed so far  <<<===
+xAODTe...mlinkTool     3     0    INFO From tool: C (as AuxElement): 5000; S 400
+xAODTe...adSymlink     3     0    INFO C (as AuxElement): 5000; S 400
 Athena...ntLoopMgr     3     0    INFO   ===>>>  done processing event #4, run #0 on slot 0,  4 events processed so far  <<<===
 Athena...ntLoopMgr     4     0    INFO   ===>>>  start processing event #5, run #0 on slot 0,  4 events processed so far  <<<===
+xAODTe...mlinkTool     4     0    INFO From tool: C (as AuxElement): 6000; S 500
+xAODTe...adSymlink     4     0    INFO C (as AuxElement): 6000; S 500
 Athena...ntLoopMgr     4     0    INFO   ===>>>  done processing event #5, run #0 on slot 0,  5 events processed so far  <<<===
 Athena...ntLoopMgr     5     0    INFO   ===>>>  start processing event #6, run #0 on slot 0,  5 events processed so far  <<<===
+xAODTe...mlinkTool     5     0    INFO From tool: C (as AuxElement): 7000; S 600
+xAODTe...adSymlink     5     0    INFO C (as AuxElement): 7000; S 600
 Athena...ntLoopMgr     5     0    INFO   ===>>>  done processing event #6, run #0 on slot 0,  6 events processed so far  <<<===
 Athena...ntLoopMgr     6     0    INFO   ===>>>  start processing event #7, run #0 on slot 0,  6 events processed so far  <<<===
+xAODTe...mlinkTool     6     0    INFO From tool: C (as AuxElement): 8000; S 700
+xAODTe...adSymlink     6     0    INFO C (as AuxElement): 8000; S 700
 Athena...ntLoopMgr     6     0    INFO   ===>>>  done processing event #7, run #0 on slot 0,  7 events processed so far  <<<===
 Athena...ntLoopMgr     7     0    INFO   ===>>>  start processing event #8, run #0 on slot 0,  7 events processed so far  <<<===
+xAODTe...mlinkTool     7     0    INFO From tool: C (as AuxElement): 9000; S 800
+xAODTe...adSymlink     7     0    INFO C (as AuxElement): 9000; S 800
 Athena...ntLoopMgr     7     0    INFO   ===>>>  done processing event #8, run #0 on slot 0,  8 events processed so far  <<<===
 Athena...ntLoopMgr     8     0    INFO   ===>>>  start processing event #9, run #0 on slot 0,  8 events processed so far  <<<===
+xAODTe...mlinkTool     8     0    INFO From tool: C (as AuxElement): 10000; S 900
+xAODTe...adSymlink     8     0    INFO C (as AuxElement): 10000; S 900
 Athena...ntLoopMgr     8     0    INFO   ===>>>  done processing event #9, run #0 on slot 0,  9 events processed so far  <<<===
 Athena...ntLoopMgr     9     0    INFO   ===>>>  start processing event #10, run #0 on slot 0,  9 events processed so far  <<<===
+xAODTe...mlinkTool     9     0    INFO From tool: C (as AuxElement): 11000; S 1000
+xAODTe...adSymlink     9     0    INFO C (as AuxElement): 11000; S 1000
 Athena...ntLoopMgr     9     0    INFO   ===>>>  done processing event #10, run #0 on slot 0,  10 events processed so far  <<<===
 Athena...ntLoopMgr    10     0    INFO   ===>>>  start processing event #11, run #0 on slot 0,  10 events processed so far  <<<===
+xAODTe...mlinkTool    10     0    INFO From tool: C (as AuxElement): 12000; S 1100
+xAODTe...adSymlink    10     0    INFO C (as AuxElement): 12000; S 1100
 Athena...ntLoopMgr    10     0    INFO   ===>>>  done processing event #11, run #0 on slot 0,  11 events processed so far  <<<===
 Athena...ntLoopMgr    11     0    INFO   ===>>>  start processing event #12, run #0 on slot 0,  11 events processed so far  <<<===
+xAODTe...mlinkTool    11     0    INFO From tool: C (as AuxElement): 13000; S 1200
+xAODTe...adSymlink    11     0    INFO C (as AuxElement): 13000; S 1200
 Athena...ntLoopMgr    11     0    INFO   ===>>>  done processing event #12, run #0 on slot 0,  12 events processed so far  <<<===
 Athena...ntLoopMgr    12     0    INFO   ===>>>  start processing event #13, run #0 on slot 0,  12 events processed so far  <<<===
+xAODTe...mlinkTool    12     0    INFO From tool: C (as AuxElement): 14000; S 1300
+xAODTe...adSymlink    12     0    INFO C (as AuxElement): 14000; S 1300
 Athena...ntLoopMgr    12     0    INFO   ===>>>  done processing event #13, run #0 on slot 0,  13 events processed so far  <<<===
 Athena...ntLoopMgr    13     0    INFO   ===>>>  start processing event #14, run #0 on slot 0,  13 events processed so far  <<<===
+xAODTe...mlinkTool    13     0    INFO From tool: C (as AuxElement): 15000; S 1400
+xAODTe...adSymlink    13     0    INFO C (as AuxElement): 15000; S 1400
 Athena...ntLoopMgr    13     0    INFO   ===>>>  done processing event #14, run #0 on slot 0,  14 events processed so far  <<<===
 Athena...ntLoopMgr    14     0    INFO   ===>>>  start processing event #15, run #0 on slot 0,  14 events processed so far  <<<===
+xAODTe...mlinkTool    14     0    INFO From tool: C (as AuxElement): 16000; S 1500
+xAODTe...adSymlink    14     0    INFO C (as AuxElement): 16000; S 1500
 Athena...ntLoopMgr    14     0    INFO   ===>>>  done processing event #15, run #0 on slot 0,  15 events processed so far  <<<===
 Athena...ntLoopMgr    15     0    INFO   ===>>>  start processing event #16, run #0 on slot 0,  15 events processed so far  <<<===
+xAODTe...mlinkTool    15     0    INFO From tool: C (as AuxElement): 17000; S 1600
+xAODTe...adSymlink    15     0    INFO C (as AuxElement): 17000; S 1600
 Athena...ntLoopMgr    15     0    INFO   ===>>>  done processing event #16, run #0 on slot 0,  16 events processed so far  <<<===
 Athena...ntLoopMgr    16     0    INFO   ===>>>  start processing event #17, run #0 on slot 0,  16 events processed so far  <<<===
+xAODTe...mlinkTool    16     0    INFO From tool: C (as AuxElement): 18000; S 1700
+xAODTe...adSymlink    16     0    INFO C (as AuxElement): 18000; S 1700
 Athena...ntLoopMgr    16     0    INFO   ===>>>  done processing event #17, run #0 on slot 0,  17 events processed so far  <<<===
 Athena...ntLoopMgr    17     0    INFO   ===>>>  start processing event #18, run #0 on slot 0,  17 events processed so far  <<<===
+xAODTe...mlinkTool    17     0    INFO From tool: C (as AuxElement): 19000; S 1800
+xAODTe...adSymlink    17     0    INFO C (as AuxElement): 19000; S 1800
 Athena...ntLoopMgr    17     0    INFO   ===>>>  done processing event #18, run #0 on slot 0,  18 events processed so far  <<<===
 Athena...ntLoopMgr    18     0    INFO   ===>>>  start processing event #19, run #0 on slot 0,  18 events processed so far  <<<===
+xAODTe...mlinkTool    18     0    INFO From tool: C (as AuxElement): 20000; S 1900
+xAODTe...adSymlink    18     0    INFO C (as AuxElement): 20000; S 1900
 Athena...ntLoopMgr    18     0    INFO   ===>>>  done processing event #19, run #0 on slot 0,  19 events processed so far  <<<===
 Athena...ntLoopMgr    19     0    INFO   ===>>>  start processing event #20, run #0 on slot 0,  19 events processed so far  <<<===
+xAODTe...mlinkTool    19     0    INFO From tool: C (as AuxElement): 21000; S 2000
+xAODTe...adSymlink    19     0    INFO C (as AuxElement): 21000; S 2000
 Athena...ntLoopMgr    19     0    INFO   ===>>>  done processing event #20, run #0 on slot 0,  20 events processed so far  <<<===
+Athena...ntLoopMgr    19     0    INFO ---> Loop Finished (seconds): 0.00929497
 ApplicationMgr                    INFO Application Manager Stopped successfully
+SGInputLoader                     INFO Finalizing SGInputLoader...
+Avalan...edulerSvc                INFO Joining Scheduler thread
 ToolSvc                           INFO Removing all tools created by ToolSvc
+EventDataSvc                      INFO Finalizing EventDataSvc
 ApplicationMgr                    INFO Application Manager Finalized successfully
 ApplicationMgr                    INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"

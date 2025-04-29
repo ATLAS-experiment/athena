@@ -1,30 +1,30 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
 // CPW 17/8/06
 // Version using new model of services from A. Tricoli
 // 
-#include "SCT_GeoModel/SCT_Layer.h"
-#include "SCT_GeoModel/SCT_Identifier.h"
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_MaterialManager.h"
-#include "SCT_GeoModel/SCT_BarrelParameters.h"
-#include "SCT_GeoModel/SCT_GeneralParameters.h"
-#include "SCT_GeoModel/SCT_Bracket.h"
-#include "SCT_GeoModel/SCT_CoolingEnd.h"
-#include "SCT_GeoModel/SCT_Clamp.h"
-#include "SCT_GeoModel/SCT_Flange.h"
-#include "SCT_GeoModel/SCT_Harness.h"
-#include "SCT_GeoModel/SCT_Module.h"
-#include "SCT_GeoModel/SCT_Ski.h"
-#include "SCT_GeoModel/SCT_SkiAux.h"
-#include "SCT_GeoModel/SCT_SkiPowerTape.h"
-#include "SCT_GeoModel/SCT_SupportCyl.h"
-#include "SCT_GeoModel/SCT_FSIEndJewel.h"
-#include "SCT_GeoModel/SCT_FSIScorpion.h"
-#include "SCT_GeoModel/SCT_FSIFibreMask.h"
+#include "SCT_Layer.h"
+#include "SCT_Identifier.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_MaterialManager.h"
+#include "SCT_BarrelParameters.h"
+#include "SCT_GeneralParameters.h"
+#include "SCT_Bracket.h"
+#include "SCT_CoolingEnd.h"
+#include "SCT_Clamp.h"
+#include "SCT_Flange.h"
+#include "SCT_Harness.h"
+#include "SCT_Module.h"
+#include "SCT_Ski.h"
+#include "SCT_SkiAux.h"
+#include "SCT_SkiPowerTape.h"
+#include "SCT_SupportCyl.h"
+#include "SCT_FSIEndJewel.h"
+#include "SCT_FSIScorpion.h"
+#include "SCT_FSIFibreMask.h"
 
 #include "InDetGeoModelUtils/ExtraMaterial.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
@@ -401,31 +401,27 @@ SCT_Layer::activeEnvelopeExtent(double & rmin, double & rmax)
   // These are the coordinates of the corners of the ski envelope.
   // x is in the radial direction and x is in the phi direction.
 
-  //GeoTrf::Vector3D c0();
   GeoTrf::Vector3D c1(-(m_ski->env1RefPointVector()->x()) - 0.5*(m_ski->env1Thickness()),
                        -(m_ski->env1RefPointVector()->y()) + 0.5*(m_ski->env1Width()),
                        0.0);
   GeoTrf::Vector3D c2(-(m_ski->env2RefPointVector()->x()) - 0.5*(m_ski->env2Thickness()),
                        -(m_ski->env2RefPointVector()->y()) + 0.5*(m_ski->env2Width()),
                        0.0);
-  //GeoTrf::Vector3D c3();
   GeoTrf::Vector3D c4(-(m_ski->env1RefPointVector()->x()) + 0.5*(m_ski->env1Thickness()),
                        -(m_ski->env1RefPointVector()->y()) - 0.5*(m_ski->env1Width()),
   0.0);
 
-  //c0.rotateZ(m_tilt);
   c1 = GeoTrf::RotateZ3D(m_tilt)*c1;
   c2 = GeoTrf::RotateZ3D(m_tilt)*c2;
-  //c3.rotateZ(m_tilt);
   c4 = GeoTrf::RotateZ3D(m_tilt)*c4;
 
-  GeoTrf::Vector3D vxmax = c4;
+  GeoTrf::Vector3D vxmax = std::move(c4);
   GeoTrf::Vector3D vxmin;
   if (c1.x() < c2.x()) {
-    vxmin = c1;
+    vxmin = std::move(c1);
   }
   else {
-    vxmin = c2;
+    vxmin = std::move(c2);
   }
 
   double xmax = vxmax.x();

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
@@ -12,9 +12,14 @@ def PFFullCfg(inputFlags,runTauReco=False,**kwargs):
     StoreGateSvc=CompFactory.StoreGateSvc
     result.addService(StoreGateSvc("DetectorStore"))
 
-    #Alias calibrated topoclusters, if they exist already, such that overwrite won't fial
+    #Alias calibrated topoclusters, if they exist already, such that overwrite won't fail
     from SGComps.AddressRemappingConfig import InputRenameCfg
     result.merge(InputRenameCfg("xAOD::CaloClusterContainer","CaloCalTopoClusters",""))
+
+    #This is needed to ensure the convertor is correctly configured for each LHC period
+    #Otherwise a default convertor is provided that is not correctly configured for e.g Run4
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
+    result.merge(TrkEventCnvSuperToolCfg(inputFlags))
 
     #setup magnetic field service
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
@@ -162,7 +167,7 @@ def PFRun3ConfigTest(flags=None):
   
   from eflowRec.PFRun3Remaps import ListRemaps
 
-  list_remaps=ListRemaps()
+  list_remaps=ListRemaps(cfg, 'AOD' if flags.Output.doWriteAOD else [])
   for mapping in list_remaps:
       cfg.merge(mapping)    
 

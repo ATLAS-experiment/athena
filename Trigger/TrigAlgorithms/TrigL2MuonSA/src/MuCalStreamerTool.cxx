@@ -33,11 +33,6 @@ StatusCode TrigL2MuonSA::MuCalStreamerTool::initialize ()
    ATH_CHECK( m_regSel_MDT.retrieve() );
    ATH_CHECK( m_regSel_TGC.retrieve() );
 
-
-   m_localBuffer.clear();
-
-   m_localBufferSize = 0;
-
    ATH_CHECK(m_tgcRdoKey.initialize());
    ATH_CHECK(m_readKey.initialize());
    ATH_CHECK(m_eventInfoKey.initialize());
@@ -113,13 +108,10 @@ bool TrigL2MuonSA::MuCalStreamerTool::isStreamOpen() {return m_circ!=nullptr;}
  							      TrigL2MuonSA::MdtHits& mdtHits,
  							      TrigL2MuonSA::RpcHits& rpcHits,
  							      TrigL2MuonSA::TgcHits& tgcHits,
-							       // int calBufferSize,
-							       bool doDataScouting,
-							       bool &updateTriggerElement, const EventContext& ctx) const
+ 							      std::vector<uint32_t>& localBuffer,  // Add localBuffer parameter
+							      bool doDataScouting,
+							      const EventContext& ctx) const
  {
-
-   // create the fragment
-   // ( dummy input for now )
 
    ATH_MSG_DEBUG("Data scouting is set to"<<doDataScouting);
 
@@ -127,7 +119,6 @@ bool TrigL2MuonSA::MuCalStreamerTool::isStreamOpen() {return m_circ!=nullptr;}
    unsigned int totalHits = mdtHits.size()+rpcHits.size()+tgcHits.size();
    if (  totalHits > 500 ) {
      ATH_MSG_DEBUG("Too many hits: skip the RoI");
-     updateTriggerElement=false;
      return StatusCode::SUCCESS;
    }
 
@@ -232,6 +223,40 @@ bool TrigL2MuonSA::MuCalStreamerTool::isStreamOpen() {return m_circ!=nullptr;}
     m_circ->dumpToCirc (event);
   }
 
+  
+  if (doDataScouting) {
+    // Perform data scouting specific operations
+    uint16_t eventSize_ds = event.size();
+    if (eventSize_ds>1000) return StatusCode::SUCCESS;
+
+    std::unique_ptr<uint8_t[]> buff_ds = std::make_unique<uint8_t[]>(eventSize_ds);
+
+    // encode the event
+    uint16_t eventSize8bits = eventSize_ds;
+    uint16_t eventSize32bits = eventSize8bits/4;
+    event.dumpWords(buff_ds.get(),eventSize_ds);
+
+    // fill the local buffer 
+    // dump the words also in the local buffer     
+    // dump the encoded event to the screen
+    ATH_MSG_DEBUG("Size of the DATASCOUTING buffer in 32 bits words: " << eventSize32bits);
+    for ( uint16_t words = 0 ; words != eventSize32bits ; words++)  {                 
+      uint32_t byte1 = buff_ds[words*4];
+      uint32_t byte2 = buff_ds[words*4 + 1];
+      uint32_t byte3 = buff_ds[words*4 + 2];
+      uint32_t byte4 = buff_ds[words*4 + 3];
+
+      // encoding in big-endian for now ( revert order for little-endian )
+      uint32_t dataWord = (byte4 << 24) + (byte3 << 16) + (byte2 << 8) + byte1 ;
+      //	std::cout << "Number of data words: " << words << std::endl;
+      ATH_MSG_DEBUG("Data word " << words << " = " << std::hex << "0x" << dataWord << std::dec);
+      
+      localBuffer.push_back(dataWord);
+    }
+
+    ATH_MSG_DEBUG("Local buffer size = " << localBuffer.size());
+
+  }
    return StatusCode::SUCCESS;
  }
 

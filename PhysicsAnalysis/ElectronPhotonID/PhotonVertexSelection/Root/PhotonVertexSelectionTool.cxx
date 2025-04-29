@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -15,8 +15,8 @@
 
 // Framework includes
 #include "PathResolver/PathResolver.h"
-#include "egammaUtils/ShowerDepthTool.h"
 #include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 // ROOT includes
 #include "TMVA/Reader.h"
@@ -58,12 +58,12 @@ namespace CP {
     //  m_doSkipByZSigma = true, m_isTMVA = true
     // run 3 NN model:
     //  m_doSkipByZSigma = false, m_isTMVA = false
-  
+
     // default variables
     declareProperty("nVars",  m_nVars = 4);
     declareProperty("conversionPtCut", m_convPtCut = 2e3);
     declareProperty("DoSkipByZSigma",  m_doSkipByZSigma = false);
-    
+
     declareProperty("derivationPrefix", m_derivationPrefix = "");
 
     // boolean for TMVA, default true
@@ -86,48 +86,62 @@ namespace CP {
 
   //____________________________________________________________________________
   //new additions for ONNX
-  float PhotonVertexSelectionTool::getScore(int nVars, const std::vector<std::vector<float>>& input_data, const std::shared_ptr<Ort::Session> sessionHandle, std::vector<int64_t> input_node_dims, std::vector<const char*> input_node_names, std::vector<const char*> output_node_names) const{
-     //*************************************************************************
-     // score the model using sample data, and inspect values
-     // loading input data
-     std::vector<std::vector<float>> input_tensor_values_ = input_data;
+  float PhotonVertexSelectionTool::getScore(
+      int nVars, const std::vector<std::vector<float>>& input_data,
+      const std::shared_ptr<Ort::Session>& sessionHandle,
+      std::vector<int64_t> input_node_dims,
+      std::vector<const char*> input_node_names,
+      std::vector<const char*> output_node_names) const {
+    //*************************************************************************
+    // score the model using sample data, and inspect values
+    // loading input data
+    std::vector<std::vector<float>> input_tensor_values_ = input_data;
 
-     //preparing container to hold input data 
+     //preparing container to hold input data
      size_t input_tensor_size = nVars;
      std::vector<float> input_tensor_values(nVars);
      input_tensor_values = input_tensor_values_[0]; //0th element since only batch_size of 1, otherwise loop
 
-     // create input tensor object from data values
-     auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-     // create tensor using info from inputs
-     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), input_tensor_size, input_node_dims.data(), input_node_dims.size());
+    // create input tensor object from data values
+    auto memory_info =
+        Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    // create tensor using info from inputs
+    Ort::Value input_tensor = Ort::Value::CreateTensor<float>(
+        memory_info, input_tensor_values.data(), input_tensor_size,
+        input_node_dims.data(), input_node_dims.size());
 
-     // check if input is of type tensor
-     assert(input_tensor.IsTensor());
+    // check if input is of type tensor
+    assert(input_tensor.IsTensor());
 
-     // run the inference
-     auto output_tensors = sessionHandle->Run(Ort::RunOptions{nullptr}, input_node_names.data(), &input_tensor, input_node_names.size(), output_node_names.data(), output_node_names.size());
+    // run the inference
+    auto output_tensors =
+        sessionHandle->Run(Ort::RunOptions{nullptr}, input_node_names.data(),
+                           &input_tensor, input_node_names.size(),
+                           output_node_names.data(), output_node_names.size());
 
-     // check size of output tensor
-     assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
+    // check size of output tensor
+    assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
 
-     // get pointer to output tensor float values
-     //float* floatarr = output_tensors.front().GetTensorMutableData<float>();
-     float* floatarr = output_tensors[0].GetTensorMutableData<float>();
+    // get pointer to output tensor float values
+    // float* floatarr = output_tensors.front().GetTensorMutableData<float>();
+    float* floatarr = output_tensors[0].GetTensorMutableData<float>();
 
-     int arrSize = sizeof(*floatarr)/sizeof(floatarr[0]);
-     ATH_MSG_DEBUG("The size of the array is: " << arrSize);
-     ATH_MSG_DEBUG("floatarr[0] = " << floatarr[0]);
-     return floatarr[0];
+    int arrSize = sizeof(*floatarr) / sizeof(floatarr[0]);
+    ATH_MSG_DEBUG("The size of the array is: " << arrSize);
+    ATH_MSG_DEBUG("floatarr[0] = " << floatarr[0]);
+    return floatarr[0];
   }
 
-  //new additions for ONNX  
-  std::tuple<std::vector<int64_t>, std::vector<const char*>> PhotonVertexSelectionTool::getInputNodes(const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator){
+  //new additions for ONNX
+  std::tuple<std::vector<int64_t>, std::vector<const char*>>
+  PhotonVertexSelectionTool::getInputNodes(
+      const std::shared_ptr<Ort::Session>& sessionHandle,
+      Ort::AllocatorWithDefaultOptions& allocator) {
     // input nodes
     std::vector<int64_t> input_node_dims;
     size_t num_input_nodes = sessionHandle->GetInputCount();
     std::vector<const char*> input_node_names(num_input_nodes);
-      
+
     // Loop the input nodes
     for( std::size_t i = 0; i < num_input_nodes; i++ ) {
       // Print input node names
@@ -145,15 +159,18 @@ namespace CP {
       input_node_dims = tensor_info.GetShape();
       ATH_MSG_DEBUG("Input "<<i<<" : num_dims= "<<input_node_dims.size());
       for (std::size_t j = 0; j < input_node_dims.size(); j++){
-        if(input_node_dims[j]<0){input_node_dims[j] =1;}  
+        if(input_node_dims[j]<0){input_node_dims[j] =1;}
         ATH_MSG_DEBUG("Input"<<i<<" : dim "<<j<<"= "<<input_node_dims[j]);
-      }  
+      }
     }
     return std::make_tuple(input_node_dims, input_node_names);
   }
 
   //new additions for ONNX
-  std::tuple<std::vector<int64_t>, std::vector<const char*>> PhotonVertexSelectionTool::getOutputNodes(const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator){
+  std::tuple<std::vector<int64_t>, std::vector<const char*>>
+  PhotonVertexSelectionTool::getOutputNodes(
+      const std::shared_ptr<Ort::Session>& sessionHandle,
+      Ort::AllocatorWithDefaultOptions& allocator) {
     // output nodes
     std::vector<int64_t> output_node_dims;
     size_t num_output_nodes = sessionHandle->GetOutputCount();
@@ -165,7 +182,7 @@ namespace CP {
       char* output_name = sessionHandle->GetOutputNameAllocated(i, allocator).release();
       ATH_MSG_DEBUG("Output "<<i<<" : "<<" name= "<<output_name);
       output_node_names[i] = output_name;
- 
+
       Ort::TypeInfo type_info = sessionHandle->GetOutputTypeInfo(i);
       auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
       ONNXTensorElementDataType type = tensor_info.GetElementType();
@@ -177,13 +194,15 @@ namespace CP {
       for (std::size_t j = 0; j < output_node_dims.size(); j++){
         if(output_node_dims[j]<0){output_node_dims[j] =1;}
         ATH_MSG_DEBUG("Output"<<i<<" : dim "<<j<<"= "<<output_node_dims[j]);
-      }  
-    }        
-    return std::make_tuple(output_node_dims, output_node_names);    
+      }
+    }
+    return std::make_tuple(output_node_dims, output_node_names);
   }
 
   //new additions for ONNX
-  std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions> PhotonVertexSelectionTool::setONNXSession(Ort::Env& env, const std::string& modelFilePath){
+  std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions>
+  PhotonVertexSelectionTool::setONNXSession(Ort::Env& env,
+                                            const std::string& modelFilePath) {
     // Find the model file.
     const std::string modelFileName = PathResolverFindCalibFile( modelFilePath );
     ATH_MSG_INFO( "Using model file: " << modelFileName );
@@ -198,7 +217,7 @@ namespace CP {
     std::shared_ptr<Ort::Session> sessionHandle = std::make_shared<Ort::Session>( env, modelFileName.c_str(), sessionOptions );
 
     ATH_MSG_INFO( "Created the ONNX Runtime session for model file = " << modelFileName);
-    return std::make_tuple(sessionHandle, allocator); 
+    return std::make_tuple(sessionHandle, allocator);
   }
 
   //____________________________________________________________________________
@@ -211,15 +230,15 @@ namespace CP {
       m_TMVAModelFilePath1  = PathResolverFindCalibFile( m_TMVAModelFilePath1 );
       m_TMVAModelFilePath2  = PathResolverFindCalibFile( m_TMVAModelFilePath2 );
       // Setup MVAs
-      std::vector<std::string> var_names = { 
+      std::vector<std::string> var_names = {
         "deltaZ := TMath::Min(abs(PrimaryVerticesAuxDyn.z-zCommon)/zCommonError,20)",
         "deltaPhi := abs(deltaPhi(PrimaryVerticesAuxDyn.phi,egamma_phi))"           ,
         "logSumpt := log10(PrimaryVerticesAuxDyn.sumPt)"                            ,
-        "logSumpt2 := log10(PrimaryVerticesAuxDyn.sumPt2)" 
+        "logSumpt2 := log10(PrimaryVerticesAuxDyn.sumPt2)"
       };
-      auto mva1 = new TMVA::Reader(var_names, "!Silent:Color");
+      auto *mva1 = new TMVA::Reader(var_names, "!Silent:Color");
       mva1->BookMVA    ("MLP method", m_TMVAModelFilePath1 );
-      m_mva1 = std::unique_ptr<TMVA::Reader>( std::move(mva1) );
+      m_mva1 = std::unique_ptr<TMVA::Reader>( mva1 );
 
       auto mva2 = std::make_unique<TMVA::Reader>(var_names, "!Silent:Color");
       mva2->BookMVA    ("MLP method", m_TMVAModelFilePath2 );
@@ -227,8 +246,8 @@ namespace CP {
     }
     else{ // assume only ONNX for now
       // create onnx environment
-      Ort::Env env;  
-      // converted    
+      Ort::Env env;
+      // converted
       std::tie(m_sessionHandle1, m_allocator1) = setONNXSession(env, m_ONNXModelFilePath1);
       std::tie(m_input_node_dims1,  m_input_node_names1 ) = getInputNodes( m_sessionHandle1, m_allocator1);
       std::tie(m_output_node_dims1, m_output_node_names1) = getOutputNodes(m_sessionHandle1, m_allocator1);
@@ -238,10 +257,23 @@ namespace CP {
       std::tie(m_input_node_dims2,  m_input_node_names2 ) = getInputNodes( m_sessionHandle2, m_allocator2);
       std::tie(m_output_node_dims2, m_output_node_names2) = getOutputNodes(m_sessionHandle2, m_allocator2);
     }
-    
+
     // initialize the containers
     ATH_CHECK( m_eventInfo.initialize() );
     ATH_CHECK( m_vertexContainer.initialize() );
+
+    m_deltaPhiKey = m_derivationPrefix + SG::decorKeyFromKey (m_deltaPhiKey.key());
+    m_deltaZKey = m_derivationPrefix + SG::decorKeyFromKey (m_deltaZKey.key());
+    m_sumPt2Key = m_derivationPrefix + SG::decorKeyFromKey (m_sumPt2Key.key());
+    m_sumPtKey = m_derivationPrefix + SG::decorKeyFromKey (m_sumPtKey.key());
+    ATH_CHECK( m_deltaPhiKey.initialize() );
+    ATH_CHECK( m_deltaZKey.initialize() );
+    ATH_CHECK( m_sumPt2Key.initialize() );
+    ATH_CHECK( m_sumPtKey.initialize() );
+#ifndef XAOD_STANDALONE
+    renounce (m_sumPt2Key);
+    renounce (m_sumPtKey);
+#endif
 
     return StatusCode::SUCCESS;
   }
@@ -250,13 +282,14 @@ namespace CP {
   StatusCode PhotonVertexSelectionTool::decorateInputs(const xAOD::EgammaContainer &egammas, FailType* failType) const{
     auto fail = FailType::NoFail;
 
-    static const SG::AuxElement::Decorator<float> sumPt2(m_derivationPrefix + "sumPt2");
-    static const SG::AuxElement::Decorator<float> sumPt(m_derivationPrefix + "sumPt");
-    static const SG::AuxElement::Decorator<float> deltaPhi(m_derivationPrefix + "deltaPhi");
-    static const SG::AuxElement::Decorator<float> deltaZ(m_derivationPrefix + "deltaZ");
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> deltaPhi (m_deltaPhiKey, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> deltaZ (m_deltaZKey, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> sumPt2 (m_sumPt2Key, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> sumPt (m_sumPtKey, ctx);
 
     // Get the EventInfo
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo, ctx);
 
     // Find the common z-position from beam / photon pointing information
     std::pair<float, float> zCommon = xAOD::PVHelpers::getZCommonAndError(&*eventInfo, &egammas, m_convPtCut);
@@ -264,7 +297,10 @@ namespace CP {
     TLorentzVector vegamma = getEgammaVector(&egammas, fail);
 
     // Retrieve PV collection from TEvent
-    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainer);
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainer, ctx);
+
+    bool writeSumPt2 = !sumPt2.isAvailable();
+    bool writeSumPt = !sumPt.isAvailable();
 
     for (const xAOD::Vertex* vertex: *vertices) {
 
@@ -273,11 +309,11 @@ namespace CP {
         vertex->vertexType() == xAOD::VxType::VertexType::PileUp)) continue;
 
       // Set input variables
-      if (not sumPt.isAvailable(*vertex)) {
+      if (writeSumPt) {
         sumPt(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 1, false);
       }
 
-      if (not sumPt2.isAvailable(*vertex)) {
+      if (writeSumPt2) {
         sumPt2(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 2);
       }
 
@@ -296,9 +332,12 @@ namespace CP {
   }
 
   //____________________________________________________________________________
-  std::vector<std::pair<const xAOD::Vertex*, float> >
-  PhotonVertexSelectionTool::getVertex(const xAOD::EgammaContainer &egammas, bool ignoreConv, bool noDecorate, yyVtxType* vtxCasePtr, FailType* failTypePtr) const
-  {
+  std::vector<std::pair<const xAOD::Vertex*, float>>
+  PhotonVertexSelectionTool::getVertex(const xAOD::EgammaContainer& egammas,
+                                       bool ignoreConv,
+                                       bool noDecorate,
+                                       yyVtxType* vtxCasePtr,
+                                       FailType* failTypePtr) const {
     const xAOD::Vertex *vertex = nullptr;
     std::vector<std::pair<const xAOD::Vertex*, float> > vertexMLP;
     yyVtxType vtxCase = yyVtxType::Unknown;
@@ -325,12 +364,14 @@ namespace CP {
     return getVertexImp( egammas, prime_vertex, ignoreConv, false, vertexMLP, vtxcase, failType );
   }
 
-  StatusCode PhotonVertexSelectionTool::getVertexImp(const xAOD::EgammaContainer &egammas,
-                                                     const xAOD::Vertex* &prime_vertex,
-                                                     bool ignoreConv,
-                                                     bool noDecorate,
-                                                     std::vector<std::pair<const xAOD::Vertex*, float> >&  vertexMLP, yyVtxType& vtxCase, FailType& fail) const
-  {
+  StatusCode PhotonVertexSelectionTool::getVertexImp(
+      const xAOD::EgammaContainer& egammas,
+      const xAOD::Vertex*& prime_vertex,
+      bool ignoreConv,
+      bool noDecorate,
+      std::vector<std::pair<const xAOD::Vertex*, float>>& vertexMLP,
+      yyVtxType& vtxCase,
+      FailType& fail) const {
     // Set default vertex case and declare photon container
     vtxCase = yyVtxType::Unknown;
     const xAOD::PhotonContainer *photons = dynamic_cast<const xAOD::PhotonContainer*>(&egammas);
@@ -381,14 +422,14 @@ namespace CP {
         // find out if pass conversion selection criteria and tag as SiConvTrack case
         if (xAOD::PVHelpers::passConvSelection(photon, m_convPtCut))
         {
-          isConverted = true;          
+          isConverted = true;
           vtxCase = yyVtxType::SiConvTrack;
         }
       }
     }
 
     // if TMVA chosen, declare tmva_reader only once (before for looping vertex)
-    TMVA::Reader *tmva_reader = new TMVA::Reader();  
+    TMVA::Reader *tmva_reader = new TMVA::Reader();
     if(m_isTMVA){
       if(isConverted){
         // If there are any silicon conversions passing selection, use MVA1 (converted case)
@@ -397,7 +438,7 @@ namespace CP {
       // Otherwise, use MVA2 (unconverted case)
       if(!isConverted){
         tmva_reader = m_mva2.get();
-      }      
+      }
     }
     ATH_MSG_DEBUG("Vtx Case: " << vtxCase);
 
@@ -431,28 +472,28 @@ namespace CP {
       float sumPt, sumPt2, deltaPhi, deltaZ;
       float log10_sumPt, log10_sumPt2;
 
-      sumPt     = (sumPtA)(*vertex); 
-      sumPt2    = (sumPt2A)(*vertex); 
-      deltaPhi  = (deltaPhiA)(*vertex); 
-      deltaZ    = (deltaZA)(*vertex);       
+      sumPt     = (sumPtA)(*vertex);
+      sumPt2    = (sumPt2A)(*vertex);
+      deltaPhi  = (deltaPhiA)(*vertex);
+      deltaZ    = (deltaZA)(*vertex);
       ATH_MSG_VERBOSE("sumPt: "     << sumPt    <<
                       " sumPt2: "   << sumPt2   <<
                       " deltaPhi: " << deltaPhi <<
-                      " deltaZ: "   << deltaZ);                      
+                      " deltaZ: "   << deltaZ);
 
       // setup the vector of input features based on selected inference framework
       if(m_isTMVA){
         // Get likelihood probability from TMVA model
         TMVAMethod = "MLP method";
         log10_sumPt  = static_cast<float>(log10(sumPt));
-        log10_sumPt2 = static_cast<float>(log10(sumPt2)); 
+        log10_sumPt2 = static_cast<float>(log10(sumPt2));
         TMVAInputVector = {deltaZ,deltaPhi,log10_sumPt,log10_sumPt2};
       }
       else{ //assume ony ONNX for now
         // Get likelihood probability from onnx model
         // check if value is 0, assign small number like 1e-8 as dummy, as we will take log later (log(0) is nan)
         // note that the ordering here is a bit different, following the order used when training
-        ONNXInputVector = {sumPt2, sumPt, deltaPhi, deltaZ}; 
+        ONNXInputVector = {sumPt2, sumPt, deltaPhi, deltaZ};
         for (long unsigned int i = 0; i < ONNXInputVector.size(); i++) {
           // skip log for deltaPhi and take log for the rest
           if (i == 2) {
@@ -470,24 +511,24 @@ namespace CP {
 
       // Do the actual calculation of classifier score part
       if(m_isTMVA){
-        mlp = tmva_reader->EvaluateMVA(TMVAInputVector, TMVAMethod);          
+        mlp = tmva_reader->EvaluateMVA(TMVAInputVector, TMVAMethod);
         ATH_MSG_VERBOSE("TMVA output: "  << (tmva_reader == m_mva1.get() ? "MVA1 ": "MVA2 ")<< mlp);
       }
       else{ //assume ony ONNX for now
         if(isConverted){
-          mlp = getScore(m_nVars, onnx_input_tensor_values, 
-                         m_sessionHandle1, m_input_node_dims1, 
+          mlp = getScore(m_nVars, onnx_input_tensor_values,
+                         m_sessionHandle1, m_input_node_dims1,
                          m_input_node_names1, m_output_node_names1);
         }
         if(!isConverted){
-          mlp = getScore(m_nVars, onnx_input_tensor_values, 
-                         m_sessionHandle2, m_input_node_dims2, 
+          mlp = getScore(m_nVars, onnx_input_tensor_values,
+                         m_sessionHandle2, m_input_node_dims2,
                          m_input_node_names2, m_output_node_names2);
         }
         ATH_MSG_VERBOSE("log(abs(sumPt)): "     << sumPt    <<
                         " log(abs(sumPt2)): "   << sumPt2   <<
                         " deltaPhi: "           << deltaPhi <<
-                        " log(abs(deltaZ)): "   << deltaZ);      
+                        " log(abs(deltaZ)): "   << deltaZ);
         ATH_MSG_VERBOSE("ONNX output, isConverted = " << isConverted << ", mlp=" << mlp);
       }
 

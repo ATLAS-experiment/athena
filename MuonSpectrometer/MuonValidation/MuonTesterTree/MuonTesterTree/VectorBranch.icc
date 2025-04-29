@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSVECTORBRANCH_IXX
 #define MUONTESTER_MUONSVECTORBRANCH_IXX
@@ -8,6 +8,7 @@
 namespace MuonVal {
 template <class T> VectorBranch<T>::VectorBranch(TTree* tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 
+// cppcheck-suppress missingReturn; false positive
 template <class T> VectorBranch<T>::VectorBranch(MuonTesterTree& tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 template <class T> VectorBranch<T>::VectorBranch(TTree* tree, const std::string& name, const T& def) : VectorBranch<T>(tree, name) {
     VectorBranch<T>::setDefault(def);
@@ -19,10 +20,13 @@ VectorBranch<T>::VectorBranch(MuonTesterTree& tree, const std::string& name, con
 
 template <class T> bool VectorBranch<T>::fill(const EventContext&) {
     if (!initialized()) {
-        ATH_MSG_ERROR("init()  -- The branch " << name() << " is not initialized yet.");
+        ATH_MSG_ERROR("fill()  -- The branch " << name() << " is not initialized yet.");
         return false;
     }
-    if (!m_updated) m_variable.clear();
+    if (!m_updated) {
+        m_variable.clear();
+    }
+    ATH_MSG_VERBOSE("Fill "<<name()<< " with "<<m_variable<<", "<<m_variable.size()<<"  elements. ");
     m_updated = false;
     return true;
 }
@@ -40,6 +44,13 @@ template <class T> T& VectorBranch<T>::get(size_t idx) {
         m_updated = true;        
     }
     return m_variable[idx];
+}
+template <class T>
+const std::vector<T>& VectorBranch<T>::operator=(const std::vector<T>& values) {
+    if (!initialized()) { THROW_EXCEPTION(name() + " is not initialized yet"); }
+    m_variable = values;
+    m_updated = true;
+    return m_variable;
 }
 
 template <class T> void VectorBranch<T>::push_back(const T& value) {

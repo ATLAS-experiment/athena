@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelsTgcTest.h"
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
@@ -11,94 +11,71 @@
 using namespace ActsTrk;
 namespace MuonGMR4{
 
-GeoModelsTgcTest::GeoModelsTgcTest(const std::string& name, ISvcLocator* pSvcLocator):
-AthHistogramAlgorithm(name,pSvcLocator) {}
-
 StatusCode GeoModelsTgcTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_geoCtxKey.initialize());    
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
 
+    const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+    auto translateTokenList = [this, &idHelper](const std::vector<std::string>& chNames){
+ 
+        std::set<Identifier> transcriptedIds{};
+        for (const std::string& token : chNames) { 
+            if (token.size() != 6) {
+                ATH_MSG_WARNING("Wrong format given for "<<token<<". Expecting 6 characters");
+                continue;
+            }
+            /// Example string STL1A2
+            const std::string statName = token.substr(0, 3);
+            const unsigned statEta = std::atoi(token.substr(3, 1).c_str()) * (token[4] == 'A' ? 1 : -1);
+            const unsigned statPhi = std::atoi(token.substr(5, 1).c_str());
+            bool isValid{false};
+            const Identifier eleId = idHelper.elementID(statName, statEta, statPhi, isValid);
+            if (!isValid) {
+                ATH_MSG_WARNING("Failed to deduce a station name for " << token);
+                continue;
+            }
+            transcriptedIds.insert(eleId);
+            const Identifier secMlId = idHelper.multilayerID(eleId, 2, isValid);
+            if (isValid){
+                transcriptedIds.insert(secMlId);
+            }
+        }
+        return transcriptedIds;
+    };
+
+    std::vector <std::string>& selectedSt = m_selectStat.value();
+    const std::vector <std::string>& excludedSt = m_excludeStat.value();
+    selectedSt.erase(std::remove_if(selectedSt.begin(), selectedSt.end(),
+                     [&excludedSt](const std::string& token){
+                        return std::ranges::find(excludedSt, token) != excludedSt.end();
+                     }), selectedSt.end());
     
-    const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
-    for (const std::string& testCham : m_selectStat) {
-        /// Check that the station is not on the excluded list
-        if (std::find(m_excludeStat.begin(), m_excludeStat.end(), testCham) != m_excludeStat.end()) {
-            continue;
-        }
-        /// Check format
-        if (testCham.size() != 6) {
-            ATH_MSG_FATAL("Wrong format given " << testCham);
-            return StatusCode::FAILURE;
-        }
-        /// Example string STS3A3
-        std::string statName = testCham.substr(0, 3);
-        unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) *
-                               (testCham[4] == 'A' ? 1 : -1);
-        unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
-        bool is_valid{false};
-        const Identifier eleId = id_helper.elementID(statName, statEta, statPhi, is_valid);
-        if (!is_valid) {
-            ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
-            return StatusCode::FAILURE;
-        }
-        std::copy_if(id_helper.detectorElement_begin(), 
-                     id_helper.detectorElement_end(), 
-                     std::inserter(m_testStations, m_testStations.end()), 
-                        [&](const Identifier& id) {
-                            return id_helper.elementID(id) == eleId;
-                        });
-    }
-    /// Look at all stations for testing if nothing has been specified
-    if (m_testStations.empty()){
-        /// Construct list of excluded stations
-        std::set<Identifier> excludedStations{};
-        for (const std::string& testCham : m_excludeStat) {
-            /// Check format
-            if (testCham.size() != 6) {
-                ATH_MSG_FATAL("Wrong format given " << testCham);
-                return StatusCode::FAILURE;
-            }
-            /// Construct identifier; example string STS3A3
-            std::string statName = testCham.substr(0, 3);
-            unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) * (testCham[4] == 'A' ? 1 : -1);
-            unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
-            bool is_valid{false};
-            const Identifier eleId = id_helper.elementID(statName, statEta, statPhi, is_valid);
-            if (!is_valid) {
-                ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
-                return StatusCode::FAILURE;
-            }
-            /// Add station to excludedStations
-            std::copy_if(id_helper.detectorElement_begin(), 
-                         id_helper.detectorElement_end(), 
-                         std::inserter(excludedStations, excludedStations.end()), 
-                            [&](const Identifier& id) {
-                                return id_helper.elementID(id) == eleId;
-                            });
-        }
-        /// Add stations for testing
-        std::copy_if(id_helper.detectorElement_begin(), 
-                     id_helper.detectorElement_end(), 
-                     std::inserter(m_testStations, m_testStations.end()),
-                     [&](const Identifier& id) {
-                        return excludedStations.count(id) == 0;
-                     });
-        /// Report what stations are excluded
-        if (!excludedStations.empty()) {
-            std::stringstream excluded_report{};
-            for (const Identifier& id : excludedStations){
-                excluded_report << " *** " << m_idHelperSvc->toString(id) << std::endl;
-            }
-            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
-        }
-    } else {
+    if (selectedSt.size()) {
+        m_testStations = translateTokenList(selectedSt);
         std::stringstream sstr{};
-        for (const Identifier& id : m_testStations){
+        for (const Identifier& id : m_testStations) {
             sstr<<" *** "<<m_idHelperSvc->toString(id)<<std::endl;
         }
         ATH_MSG_INFO("Test only the following stations "<<std::endl<<sstr.str());
+    } else {
+        const std::set<Identifier> excluded = translateTokenList(excludedSt);
+        /// Add stations for testing
+        for(auto itr = idHelper.detectorElement_begin();
+                 itr!= idHelper.detectorElement_end();++itr){
+            if (!excluded.count(*itr)) {
+               m_testStations.insert(*itr);
+            }
+        }
+        /// Report what stations are excluded
+        if (!excluded.empty()) {
+            std::stringstream excluded_report{};
+            for (const Identifier& id : excluded){
+                excluded_report << " *** " << m_idHelperSvc->toStringDetEl(id) << std::endl;
+            }
+            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
+        }
     }
     ATH_CHECK(detStore()->retrieve(m_detMgr));
     return StatusCode::SUCCESS;
@@ -110,8 +87,8 @@ StatusCode GeoModelsTgcTest::finalize() {
 StatusCode GeoModelsTgcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
-    SG::ReadHandle<ActsGeometryContext> geoContextHandle{m_geoCtxKey, ctx};
-    ATH_CHECK(geoContextHandle.isPresent());
+    const ActsGeometryContext* geoContextHandle{nullptr};
+    ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
     const ActsGeometryContext& gctx{*geoContextHandle};
 
 
@@ -143,7 +120,6 @@ StatusCode GeoModelsTgcTest::execute() {
       const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
       for (unsigned int layer = 1; layer <= reElement->numLayers(); ++layer) {
         for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
-            unsigned int numChannel = 0;
             bool isValidLay{false};
             const Identifier layID = id_helper.channelID(reElement->identify(),
                                                         reElement->multilayer(),
@@ -151,19 +127,8 @@ StatusCode GeoModelsTgcTest::execute() {
             if (!isValidLay) {
                 continue;
             }
-            switch(chType) {
-                case sTgcIdHelper::sTgcChannelTypes::Pad:
-                    numChannel = reElement->numPads(layID);
-                break;
+            const unsigned int numChannel = reElement->numChannels(layID);
 
-                case sTgcIdHelper::sTgcChannelTypes::Strip:
-                    numChannel = reElement->numStrips(layID);
-                break;
-                
-                case sTgcIdHelper::sTgcChannelTypes::Wire:
-                    numChannel = reElement->numWireGroups(layer);
-                break;
-            }
             for (unsigned int channel = 1; channel < numChannel ; ++channel) {
                 bool isValidCh{false};
                 const Identifier chID = id_helper.channelID(reElement->identify(),
@@ -244,25 +209,24 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                 continue;
             }
             /// Gas Gap dimensions
-            m_sGapLength = reElement->sGapLength(layID);
-            m_lGapLength = reElement->lGapLength(layID);
-            m_sPadLength = reElement->sPadLength(layID);
-            m_lPadLength = reElement->lPadLength(layID);
-            m_gapHeight = reElement->gapHeight(layID);
-            m_yCutout = reElement->yCutout(layID);
+            
+            m_sGapLength = 2.*reElement->stripDesign(layID).shortHalfHeight();
+            m_lGapLength = 2.*reElement->stripDesign(layID).longHalfHeight();
+            m_sPadLength = 2.*reElement->padDesign(layID).shortHalfHeight();
+            m_lPadLength = 2.*reElement->padDesign(layID).longHalfHeight();
+            m_gapHeight =2.*reElement->stripDesign(layID).halfWidth();
+            m_yCutout = reElement->stripDesign(layID).yCutout();
 
             switch (chType) {
                 case sTgcIdHelper::sTgcChannelTypes::Pad:
-                    m_numPads.push_back(reElement->numPads(layID));
+                    m_numPads.push_back(reElement->numChannels(layID));
                     m_numPadEta.push_back(reElement->numPadEta(layID));
                     m_numPadPhi.push_back(reElement->numPadPhi(layID));
-                    m_firstPadHeight.push_back(reElement->firstPadHeight(layID));
-                    m_padHeight.push_back(reElement->padHeight(layID));
                     m_padPhiShift.push_back(reElement->padPhiShift(layID));
-                    m_firstPadPhiDiv.push_back(reElement->firstPadPhiDiv(layID));
+                    m_firstPadPhiDiv.push_back(reElement->padDesign(layID).firstPadPhiDiv());
                     m_anglePadPhi = reElement->anglePadPhi(layID);
                     m_beamlineRadius = reElement->beamlineRadius(layID);
-                    for (unsigned int pad = 1; pad <= reElement->numPads(layID); ++pad) {
+                    for (unsigned int pad = 1; pad <= reElement->numChannels(layID); ++pad) {
                         bool isValidPad{false};
                         const Identifier padID = id_helper.channelID(reElement->identify(), 
                                                                    reElement->multilayer(),
@@ -273,7 +237,12 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                                        <<" layer: "<<layer<<" pad: "<<pad<<" channelType: "<<chType);
                             continue;
                         }
-
+                        if (pad == 1) {
+                            m_firstPadHeight.push_back(reElement->padHeight(padID));                    
+                        }
+                        else if (pad == 2) {
+                            m_padHeight.push_back(reElement->padHeight(padID));
+                        }
                         Amg::Vector2D localPadPos(Amg::Vector2D::Zero());
                         std::array<Amg::Vector2D,4> localPadCorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
                         Amg::Vector3D globalPadPos(Amg::Vector3D::Zero());
@@ -315,15 +284,16 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                     }
                     break;
 
-                case sTgcIdHelper::sTgcChannelTypes::Strip:
-                    m_numStrips = reElement->numStrips(layID);
-                    m_stripPitch = reElement->stripPitch(layID);
-                    m_stripWidth = reElement->stripWidth(layID); 
-                    for (unsigned int strip = 1; strip <= reElement->numStrips(layID); ++strip) {
+                case sTgcIdHelper::sTgcChannelTypes::Strip:{
+                    const StripDesign& design{reElement->stripDesign(layID)};
+                    m_numStrips = design.numStrips();
+                    m_stripPitch = design.stripPitch();
+                    m_stripWidth = design.stripWidth(); 
+                    for (unsigned int strip = 1; strip <= reElement->numChannels(layID); ++strip) {
                         bool isValidStrip{false};
                         const Identifier stripID = id_helper.channelID(reElement->identify(), 
-                                                                   reElement->multilayer(),
-                                                                    layer, chType, strip, isValidStrip);
+                                                                       reElement->multilayer(),
+                                                                       layer, chType, strip, isValidStrip);
                         if (!isValidStrip) {
                             ATH_MSG_WARNING("Invalid Identifier detected for readout element "
                                         <<m_idHelperSvc->toStringDetEl(reElement->identify())
@@ -344,17 +314,16 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
 
                     }
                     break;
-                  
-                case sTgcIdHelper::sTgcChannelTypes::Wire:
-                    m_wireGroupWidth = reElement->wireGroupWidth(layer);
-                    numWireGroup = reElement->numWireGroups(layer);                    
-                    m_wirePitch = reElement->wirePitch(layID);
-                    m_wireWidth = reElement->wireWidth(layID);
-                    m_numWires.push_back(reElement->numWires(layer));
-                    m_firstWireGroupWidth.push_back(reElement->firstWireGroupWidth(layer));
+                } case sTgcIdHelper::sTgcChannelTypes::Wire: {
+                    const WireGroupDesign& design{reElement->wireDesign(layID)};
+                    m_wireGroupWidth = design.numWiresInGroup(2);
+                    numWireGroup = design.numStrips();                    
+                    m_wirePitch = design.stripPitch();
+                    m_wireWidth = design.stripWidth();
+                    m_numWires.push_back(design.nAllWires());
+                    m_firstWireGroupWidth.push_back(design.numWiresInGroup(1));
                     m_numWireGroups.push_back(numWireGroup);
-                    m_wireCutout.push_back(reElement->wireCutout(layer)); 
-                    std::cout << "The number of wire groups are:" << numWireGroup << std::endl;
+                    m_wireCutout.push_back(design.wireCutout()); 
                     for (unsigned int wireGroup = 1; wireGroup <= numWireGroup; ++wireGroup) {
                         bool isValidWire{false};
                         const Identifier wireGroupID = id_helper.channelID(reElement->identify(), 
@@ -378,6 +347,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                         m_wireGroupRotGasGap.push_back(layer);
                     }
                     break;
+                }
             }
         }
    }

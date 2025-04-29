@@ -33,7 +33,7 @@ StatusCode FPGATrackSimMatrixReductionAlgo::initialize()
   ATH_CHECK(m_tHistSvc.retrieve());
 
   m_pmap_1st = m_FPGATrackSimMapping->PlaneMap_1st(0);
-  m_pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd();
+  m_pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(0);
 
   // Setup the boundaries for the merge
   if (m_allregion)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <map>
@@ -303,8 +303,7 @@ void L1CPCMXTools::getHits(const TrigConf::L1Menu* l1menu, const xAOD::CMXCPTob 
   hit1.resize(timeslices);
 
   // Get thresholds from menu
-  L1DataDef def;
-  const std::string thrType = (type == 0) ? def.emType() : def.tauType();
+  const std::string thrType = (type == 0) ? L1DataDef::typeAsString(L1DataDef::EM) : L1DataDef::typeAsString(L1DataDef::TAU);
 
   // Get EM and TAU trigger thresholds
   std::vector<std::shared_ptr<TrigConf::L1Threshold>> allThresholds = l1menu->thresholds();

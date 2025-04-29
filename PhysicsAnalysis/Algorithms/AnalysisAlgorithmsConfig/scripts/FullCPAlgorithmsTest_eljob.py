@@ -7,7 +7,7 @@
 # Read the submission directory as a command line argument. You can
 # extend the list of arguments with your private ones later on.
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-
+import json
 import optparse
 parser = optparse.OptionParser()
 parser.add_option( '-d', '--data-type', dest = 'data_type',
@@ -43,18 +43,12 @@ parser.add_option( '--factory-preload', dest='factory_preload',
 parser.add_option( '--no-systematics', dest='no_systematics',
                    action = 'store_true', default = False,
                    help = 'Configure the job to with no systematics' )
-parser.add_option( '--hard-cuts', dest='hard_cuts',
-                   action = 'store_true', default = False,
-                   help = 'Configure the job with harder cuts' )
 parser.add_option( '--block-config', dest='block_config',
                    action = 'store_true', default = False,
                    help = 'Configure the job with block configuration' )
 parser.add_option( '--text-config', dest='text_config',
                    action = 'store', default = '',
                    help = 'Configure the job with the provided text configuration' )
-parser.add_option( '--for-compare', dest='for_compare',
-                   action = 'store_true', default = False,
-                   help = 'Configure the job for comparison of sequences vs blocks' )
 parser.add_option( '--physlite', dest='physlite',
                    action = 'store_true', default = False,
                    help = 'Configure the job for physlite' )
@@ -67,6 +61,9 @@ parser.add_option( '--force-mc', dest='forceMC',
 parser.add_option( '--only-nominal-or', dest='onlyNominalOR',
                    action = 'store_true', default = False,
                    help = 'Only run overlap removal for nominal (skip systematics)')
+parser.add_option('--seq-output-file', dest='seq_out_filename',
+                   action='store',type='str',default='',
+                   help = 'Save the sequence configuration output to the provided file')
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -82,7 +79,10 @@ ROOT.xAOD.TauJetContainer()
 dataType = DataType(options.data_type)
 blockConfig = options.block_config
 textConfig = options.text_config
-forCompare = options.for_compare
+
+if textConfig:
+    from PathResolver import PathResolver
+    textConfig = PathResolver.FindCalibFile(textConfig)
 
 print(f"Running on data type: {dataType.value}")
 
@@ -149,12 +149,20 @@ if options.factory_preload != '' :
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSequenceAlgs
 algSeq = makeSequence (dataType, yamlPath=textConfig,
-                       forCompare=forCompare,
                        noSystematics = options.no_systematics,
-                       hardCuts = options.hard_cuts, isPhyslite=options.physlite,
+                       isPhyslite=options.physlite,
                        autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR,
                        forceEGammaFullSimConfig=forceEGammaFullSimConfig)
-printSequenceAlgs( algSeq ) # For debugging
+
+if options.seq_out_filename:
+    from AnalysisAlgorithmsConfig.SaveConfigUtils import save_algs_from_sequence_ELjob
+    with(open(options.seq_out_filename, 'w', encoding='utf-8')) as seq_out_file:
+        output_dict = {}
+        save_algs_from_sequence_ELjob(algSeq, output_dict) # For debugging
+        json.dump(output_dict, seq_out_file, ensure_ascii=False, indent=4)
+else:
+    printSequenceAlgs( algSeq ) # For debugging
+    
 algSeq.addSelfToJob( job )
 
 # Make sure that both the ntuple and the xAOD dumper have a stream to write to.
@@ -185,3 +193,10 @@ if options.exec_driver :
 
 print ("submitting job now", flush=True)
 driver.submit( job, submitDir )
+
+if options.seq_out_filename:
+    from AnalysisAlgorithmsConfig.SaveConfigUtils import combine_tools_and_algorithms_ELjob
+    _ = combine_tools_and_algorithms_ELjob(True, text_file = 'tool_config.txt',
+                                           alg_file = options.seq_out_filename,
+                                           output_file = 'my_analysis_config.json')
+

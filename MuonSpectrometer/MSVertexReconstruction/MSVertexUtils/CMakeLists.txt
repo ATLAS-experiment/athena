@@ -6,7 +6,7 @@
 atlas_subdir( MSVertexUtils )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Core MathCore )
 
 # tag ROOTBasicLibs was not recognized in automatic conversion in cmt2cmake
 
@@ -17,6 +17,6 @@ atlas_add_library( MSVertexUtils
                    src/*.cxx
                    PUBLIC_HEADERS MSVertexUtils
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} GeoPrimitives EventPrimitives xAODTracking GaudiKernel
-                   PRIVATE_LINK_LIBRARIES MuonPrepRawData )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} GeoPrimitives EventPrimitives xAODTracking GaudiKernel MuonIdHelpersLib MuonPrepRawData
+                   PRIVATE_LINK_LIBRARIES )
 

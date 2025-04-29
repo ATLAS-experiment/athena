@@ -5,7 +5,7 @@
 #include "TestInputMaker.h"
 #include <xAODTrigger/TrigCompositeAuxContainer.h>
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
-#include <DecisionHandling/TrigCompositeUtils.h>
+#include <TrigCompositeUtils/TrigCompositeUtils.h>
 #include <vector>
 
 namespace HLTTest {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,11 +12,11 @@
 class MsgStream;
 
 #include "GeoPrimitives/GeoPrimitives.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/Layer.h"
 #include "TrkParameters/TrackParameters.h"
 
+#include <memory>
 namespace Trk {
 
 class Surface;
@@ -41,7 +41,7 @@ public:
   MaterialLayer(Surface& sf, const LayerMaterialProperties& mlprop);
 
   /** Constructor with new surface, as of a combined boundary surface */
-  MaterialLayer(const SharedObject<Surface>& sfso,
+  MaterialLayer(const std::shared_ptr<Surface>& sfso,
                 const LayerMaterialProperties& mlprop);
 
   /**Copy Constructor - */
@@ -75,7 +75,7 @@ public:
                                         double) override final {}
 
  protected:
-  SharedObject<Surface>
+  std::shared_ptr<Surface>
       m_surfaceRepresentation;  //!< for the navigation Volume the surface is
                                 //!< a private member */
 

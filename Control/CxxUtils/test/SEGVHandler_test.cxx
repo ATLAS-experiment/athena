@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -17,11 +17,9 @@
 #include "CxxUtils/cPtrAccessSEGVHandler.h"
 #include "CxxUtils/checker_macros.h"
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
 using namespace std;
 
-int main(void) {
+int main ATLAS_NOT_THREAD_SAFE (void) {
   cout << "*** SEGVHandler_test starts ***" <<endl;
   int rc=0;
   struct sigaction sa, stdSEGV;

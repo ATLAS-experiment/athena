@@ -1,11 +1,11 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from typing import Iterable, Union
 
-# AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
+from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
 
 
 def is_mc_from(config: ConfigAccumulator, campaign_list: Union[Campaign, Iterable[Campaign]]) -> bool:
@@ -23,6 +23,36 @@ def is_data_from(config, data_year_list: Union[int, Iterable[int]]) -> bool:
     """
     data_year_list = [data_year_list] if isinstance(data_year_list, int) else data_year_list
     return config.dataType() is DataType.Data and config.dataYear() in data_year_list
+
+
+def get_year_data(dictionary: dict, year: int | str) -> list:
+    """
+    Utility function to get the data for a specific year from a dictionary
+    """
+    return dictionary.get(int(year), dictionary.get(str(year), []))
+
+
+def get_input_years(config: ConfigAccumulator) -> list[int]:
+    """
+    Utility function to get the list of years that the input corresponds to
+    """
+    years = []
+    if config.campaign() is Campaign.MC20a:
+        years = [2015, 2016]
+    elif is_data_from(config, 2015):
+        years = [2015]
+    elif is_data_from(config, 2016):
+        years = [2016]
+    elif config.campaign() is Campaign.MC20d or is_data_from(config, 2017):
+        years = [2017]
+    elif config.campaign() is Campaign.MC20e or is_data_from(config, 2018):
+        years = [2018]
+    elif config.campaign() in [Campaign.MC21a, Campaign.MC23a] or is_data_from(config, 2022):
+        years = [2022]
+    elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023):
+        years = [2023]
+
+    return years
 
 
 class TriggerAnalysisSFBlock(ConfigBlock):
@@ -82,43 +112,12 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addOption ('triggerMatchingChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. The default is {} (empty dictionary).")
+        self.addOption("includeAllYears", False, type=bool,
+            info="if True, trigger matching will include all configured years "
+            "in all jobs. The default is False.")
         self.addOption ('postfix', '', type=str,
             info="a unique identifier for the trigger matching decorations. Only "
             "useful when defining multiple setups. The default is '' (empty string).")
-
-    
-
-    def makeTriggerDecisionTool(self, config: ConfigAccumulator):
-        # Might have already been added in TriggerAnalysisBlock
-        if "TrigDecisionTool" in config._algorithms:
-            return config._algorithms["TrigDecisionTool"]
-
-        # Create public trigger tools
-        xAODConfTool = config.createPublicTool( 'TrigConf::xAODConfigTool', 'xAODConfigTool' + self.postfix )
-        decisionTool = config.createPublicTool( 'Trig::TrigDecisionTool', 'TrigDecisionTool' + self.postfix )
-        decisionTool.ConfigTool = '%s/%s' % \
-            ( xAODConfTool.getType(), xAODConfTool.getName() )
-        if config.geometry() is LHCPeriod.Run3:
-            decisionTool.NavigationFormat = 'TrigComposite' # Read Run 3 navigation (options are "TrigComposite" for R3 or "TriggElement" for R2, R2 navigation is not kept in most DAODs)
-            decisionTool.HLTSummary = 'HLTNav_Summary_DAODSlimmed' # Name of R3 navigation container (if reading from AOD, then "HLTNav_Summary_AODSlimmed" instead)
-
-        return decisionTool
-
-    def makeTriggerMatchingTool(self, config: ConfigAccumulator, decisionTool):
-        # Create public trigger tools
-        drScoringTool = config.createPublicTool( 'Trig::DRScoringTool', 'DRScoringTool' + self.postfix )
-        if config.geometry() is LHCPeriod.Run3:
-            matchingTool = config.createPublicTool( 'Trig::R3MatchingTool', 'MatchingTool' + self.postfix )
-            matchingTool.ScoringTool = '%s/%s' % \
-                    ( drScoringTool.getType(), drScoringTool.getName() )
-            matchingTool.TrigDecisionTool = '%s/%s' % \
-                    ( decisionTool.getType(), decisionTool.getName() )
-        else:
-            matchingTool = config.createPublicTool( 'Trig::MatchFromCompositeTool', 'MatchingTool' + self.postfix )
-            if config.isPhyslite():
-                matchingTool.InputPrefix = "AnalysisTrigMatch_"
-
-        return matchingTool
 
     def makeTriggerGlobalEffCorrAlg(
         self,
@@ -129,10 +128,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
     ) -> None:
         alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' + triggerSuffix + self.postfix)
         if config.geometry() is LHCPeriod.Run3:
-            alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2022',[])]
-            alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2023',[])]
-            alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2024',[])]
-            alg.triggers_2025 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2025',[])]
+            alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2022)]
+            alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2023)]
+            alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2024)]
+            alg.triggers_2025 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2025)]
             if is_mc_from(config, [Campaign.MC21a, Campaign.MC23a]) or is_data_from(config, 2022):
                 if not alg.triggers_2022:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2022!')
@@ -140,10 +139,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
                 if not alg.triggers_2023:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2023!')
         else:
-            alg.triggers_2015 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2015',[])]
-            alg.triggers_2016 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2016',[])]
-            alg.triggers_2017 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2017',[])]
-            alg.triggers_2018 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2018',[])]
+            alg.triggers_2015 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2015)]
+            alg.triggers_2016 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2016)]
+            alg.triggers_2017 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2017)]
+            alg.triggers_2018 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2018)]
             if is_mc_from(config, Campaign.MC20a):
                 if not (alg.triggers_2015 and alg.triggers_2016):
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the years 2015 and 2016!')
@@ -187,55 +186,58 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         return
 
     def createTrigMatching(
-            self,
-            config: ConfigAccumulator,
-            matchingTool,
-            particles,
-            triggerSuffix: str = '',
-            trig_string: str = '',
-            trig_chains: list = ['']
+        self,
+        config: ConfigAccumulator,
+        matchingTool,
+        particles,
+        trig_string: str = "",
+        trig_chains: set = None,
+        trig_chains_dummy: set = None,
     ) -> None:
-        if particles and any(trig_string in trig for trig in trig_chains):
-            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', f'TrigMatchingAlg_{trig_string}{triggerSuffix}{self.postfix}' )
-            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
-            alg.matchingDecoration = 'trigMatched' + triggerSuffix + self.postfix
-            alg.trigSingleMatchingList = trig_chains
-            alg.particles, alg.particleSelection = config.readNameAndSelection(particles)
+        if not particles or (not trig_chains and not trig_chains_dummy):
+            return
 
-            for trig in alg.trigSingleMatchingList:
-                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
-                if trig_string in trig:
-                    config.addOutputVar(particles, f'trigMatched_{triggerSuffix}{self.postfix}{trig}', f'trigMatched_{triggerSuffix}{self.postfix}{trig}')
-        return
+        if not any(trig_string in trig for trig in trig_chains) \
+            and not any(trig_string in trig for trig in trig_chains_dummy):
+            return
+
+        alg = config.createAlgorithm("CP::TrigMatchingAlg", f"TrigMatchingAlg_{trig_string}{self.postfix}")
+        alg.matchingTool = f"{matchingTool.getType()}/{matchingTool.getName()}"
+        alg.matchingDecoration = f"trigMatched{self.postfix}"
+        alg.trigSingleMatchingList = [trig for trig in trig_chains if trig_string in trig]
+        alg.trigSingleMatchingListDummy = [trig for trig in trig_chains_dummy if trig_string in trig]
+        alg.particles, alg.particleSelection = config.readNameAndSelection(particles)
+
+        for trig in list(alg.trigSingleMatchingList) + list(alg.trigSingleMatchingListDummy):
+            trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
+            if trig_string in trig:
+                config.addOutputVar(particles.split(".")[0], f"trigMatched_{self.postfix}{trig}", f"trigMatched_{self.postfix}{trig}", noSys=True)
 
     def makeTrigMatchingAlg(
         self,
         config: ConfigAccumulator,
         matchingTool,
-        triggerSuffix: str = ''
     ) -> None:
-        years = []
-        if config.campaign() is Campaign.MC20a:     years = ['2015', '2016']
-        elif is_data_from(config, 2015):   years = ['2015']
-        elif is_data_from(config, 2016):   years = ['2016']
-        elif config.campaign() is Campaign.MC20d or is_data_from(config, 2017):   years = ['2017']
-        elif config.campaign() is Campaign.MC20e or is_data_from(config, 2018):   years = ['2018']
-        elif config.campaign() in [Campaign.MC21a, Campaign.MC23a] or is_data_from(config, 2022): years = ['2022']
-        elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023): years = ['2023']
+        years = get_input_years(config)
 
-        triggerMatchingChains = []
+        triggerMatchingChains = set()
+        triggerMatchingChainsDummy = set()
         for year in years:
-            for trig in self.triggerChainsPerYear.get(year,[]):
+            for trig in get_year_data(self.triggerMatchingChainsPerYear, year):
                 trig = trig.replace(' || ', '_OR_')
-                triggerMatchingChains += trig.split('_OR_')
+                triggerMatchingChains.update(trig.split('_OR_'))
+        if self.includeAllYears:
+            triggerMatchingChainsAll = set()
+            for year in self.triggerMatchingChainsPerYear:
+                for trig in get_year_data(self.triggerMatchingChainsPerYear, year):
+                    trig = trig.replace(' || ', '_OR_')
+                    triggerMatchingChainsAll.update(trig.split('_OR_'))
+            triggerMatchingChainsDummy = triggerMatchingChainsAll - triggerMatchingChains
 
-        # Remove duplicates
-        triggerMatchingChains = list(set(triggerMatchingChains))
-
-        self.createTrigMatching(config, matchingTool, self.electrons, triggerSuffix, 'HLT_e',   triggerMatchingChains)
-        self.createTrigMatching(config, matchingTool, self.muons,     triggerSuffix, 'HLT_mu',  triggerMatchingChains)
-        self.createTrigMatching(config, matchingTool, self.photons,   triggerSuffix, 'HLT_g',   triggerMatchingChains)
-        self.createTrigMatching(config, matchingTool, self.taus,      triggerSuffix, 'HLT_tau', triggerMatchingChains)
+        self.createTrigMatching(config, matchingTool, self.electrons, 'HLT_e',   triggerMatchingChains, triggerMatchingChainsDummy)
+        self.createTrigMatching(config, matchingTool, self.muons,     'HLT_mu',  triggerMatchingChains, triggerMatchingChainsDummy)
+        self.createTrigMatching(config, matchingTool, self.photons,   'HLT_g',   triggerMatchingChains, triggerMatchingChainsDummy)
+        self.createTrigMatching(config, matchingTool, self.taus,      'HLT_tau', triggerMatchingChains, triggerMatchingChainsDummy)
 
         return
 
@@ -251,17 +253,17 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             self.multiTriggerChainsPerYear = {'': self.triggerChainsPerYear}
 
         # Create the decision algorithm, keeping track of the decision tool for later
-        decisionTool = self.makeTriggerDecisionTool(config)
+        decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
 
         # Now pass it to the matching algorithm, keeping track of the matching tool for later
-        matchingTool = self.makeTriggerMatchingTool(config, decisionTool)
+        matchingTool = TriggerAnalysisBlock.makeTriggerMatchingTool(config, decisionTool)
 
         # Calculate multi-lepton (electron/muon/photon) trigger efficiencies and SFs
         if self.multiTriggerChainsPerYear and not self.noGlobalTriggerEff:
             for suffix, trigger_chains in self.multiTriggerChainsPerYear.items():
                 self.triggerChainsPerYear = trigger_chains
                 self.makeTriggerGlobalEffCorrAlg(config, matchingTool, self.noEffSF, suffix)
-                
+
         # Save trigger matching information (currently only single leg trigger are supported)
         if self.triggerMatchingChainsPerYear:
             self.makeTrigMatchingAlg(config, matchingTool)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -70,11 +70,16 @@ def ActsTrackingGeometrySvcCfg(flags,
   actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
                                                                 BuildSubDetectors=subDetectors,
                                                                 **kwargs)
+
   if flags.Acts.TrackingGeometry.MaterialSource == "Default":
     if flags.Detector.GeometryITk:
       extension = "ITk"
       if flags.Detector.GeometryHGTD:
         extension += "-HGTD"
+      if flags.Acts.TrackingGeometry.InsertITkPassiveMaterialLayers:
+        extension += "-passiveLayers"
+      if flags.Acts.TrackingGeometry.MaterialFileExtension:
+        extension += "-"+flags.Acts.TrackingGeometry.MaterialFileExtension
       actsTrackingGeometrySvc.UseMaterialMap = True
       actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
       actsTrackingGeometrySvc.MaterialMapInputFile = \
@@ -84,6 +89,17 @@ def ActsTrackingGeometrySvcCfg(flags,
     actsTrackingGeometrySvc.UseMaterialMap = True
     actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
     actsTrackingGeometrySvc.MaterialMapInputFile = flags.Acts.TrackingGeometry.MaterialSource
+
+  if flags.Acts.TrackingGeometry.InsertITkPassiveMaterialLayers:
+    actsTrackingGeometrySvc.PassiveITkInnerPixelBarrelLayerRadii = flags.Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerRadii
+    actsTrackingGeometrySvc.PassiveITkInnerPixelBarrelLayerHalflengthZ = flags.Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerHalflengthZ
+    actsTrackingGeometrySvc.PassiveITkInnerPixelBarrelLayerThickness = flags.Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerThickness
+    actsTrackingGeometrySvc.PassiveITkOuterPixelBarrelLayerRadii = flags.Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerRadii
+    actsTrackingGeometrySvc.PassiveITkOuterPixelBarrelLayerHalflengthZ = flags.Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerHalflengthZ
+    actsTrackingGeometrySvc.PassiveITkOuterPixelBarrelLayerThickness = flags.Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerThickness
+    actsTrackingGeometrySvc.PassiveITkStripBarrelLayerRadii = flags.Acts.TrackingGeometry.PassiveITkStripBarrelLayerRadii
+    actsTrackingGeometrySvc.PassiveITkStripBarrelLayerHalflengthZ = flags.Acts.TrackingGeometry.PassiveITkStripBarrelLayerHalflengthZ
+    actsTrackingGeometrySvc.PassiveITkStripBarrelLayerThickness = flags.Acts.TrackingGeometry.PassiveITkStripBarrelLayerThickness
 
   acc.addService(actsTrackingGeometrySvc, primary = True)
   return acc
@@ -264,4 +280,27 @@ def ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags,
     kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
     acc.addCondAlgo(CompFactory.ActsTrk.DetectorElementToActsGeometryIdMappingAlg(name, **kwargs))
+    return acc
+
+def ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags,
+                           name: str = "ActsVolumeIdToDetectorCollectionMappingAlgCfg",
+                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    if 'TrackingGeometryTool' not in kwargs :
+      kwargs.setdefault('TrackingGeometryTool',
+                        acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault('ActsVolumeIdToDetectorElementCollectionMap', 'VolumeIdToDetectorElementCollectionMap')
+
+    def filterCollections(flags, pixel_det_el, strip_det_el) :
+      ret=[]
+      if flags.Detector.GeometryITkPixel:
+        ret += [ pixel_det_el ]
+      if flags.Detector.GeometryITkStrip:
+        ret += [ strip_det_el ]
+      return ret
+    kwargs.setdefault('DetectorElementsKeys', filterCollections( flags,
+                                                                 'ITkPixelDetectorElementCollection',
+                                                                 'ITkStripDetectorElementCollection'))
+
+    acc.addCondAlgo(CompFactory.ActsTrk.ActsVolumeIdToDetectorElementCollectionMappingAlg(name, **kwargs))
     return acc

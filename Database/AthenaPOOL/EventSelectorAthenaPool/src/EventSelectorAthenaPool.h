@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTSELECTORATHENAPOOL_H
@@ -29,6 +29,7 @@
 
 #include <map>
 #include <atomic>
+#include <cstdint>
 
 // Forward declarations
 class IIncidentSvc;
@@ -188,8 +189,6 @@ private: // properties
    /// Connection, connection string.
    // TODO: check if really not used anywhere
    Gaudi::Property<std::string> m_connection{this, "Connection", "", ""};
-   /// RefName, attribute name.
-   Gaudi::Property<std::string> m_refName{this, "RefName", "", ""};
    /// AttributeList SG key
    Gaudi::Property<std::string> m_attrListKey{this, "AttributeListKey", "Input", ""};
 
@@ -199,9 +198,6 @@ private: // properties
    void inputCollectionsHandler(Gaudi::Details::PropertyBase&);
    /// flag to notify the EvSel that the inputs were changed and reinit() needs to be called ASAP
    mutable bool m_inputCollectionsChanged ATLAS_THREAD_SAFE;
-
-   /// Query string passed to APR when opening DataHeader container (kind of useless).
-   Gaudi::Property<std::string> m_query{this, "Query", "", ""};
 
    /// KeepInputFilesOpen, boolean flag to keep files open after PoolCollection reaches end: default = false.
    /// Needed for PilUp to run without PoolFileCatalog. Relies on POOL to close files when reaching DB_AGE_LIMIT.
@@ -217,18 +213,18 @@ private: // properties
    /// The following are included for compatibility with McEventSelector and are not really used.
    /// However runNo, oldRunNo and overrideRunNumberFromInput are used to reset run number for
    /// simulated events, needed to use condition
-   Gaudi::CheckedProperty<int> m_runNo{this, "RunNumber", 0, ""};
-   Gaudi::CheckedProperty<int> m_oldRunNo{this, "OldRunNumber", 0, ""};
+   Gaudi::CheckedProperty<uint32_t> m_runNo{this, "RunNumber", 0, ""};
+   Gaudi::CheckedProperty<uint32_t> m_oldRunNo{this, "OldRunNumber", 0, ""};
    Gaudi::Property<bool> m_overrideRunNumber{this, "OverrideRunNumber", false, ""};
    Gaudi::Property<bool> m_overrideRunNumberFromInput{this, "OverrideRunNumberFromInput", false, ""};
    // TODO: check if not really used
-   Gaudi::CheckedProperty<int> m_firstEventNo{this, "FirstEvent", 1, ""};
+   Gaudi::CheckedProperty<uint64_t> m_firstEventNo{this, "FirstEvent", 1, ""};
    // TODO: check if not really used
-   Gaudi::CheckedProperty<int> m_eventsPerRun{this, "EventsPerRun", 1000000, ""};
-   Gaudi::CheckedProperty<int> m_firstLBNo{this, "FirstLB", 0, ""};
-   Gaudi::CheckedProperty<int> m_eventsPerLB{this, "EventsPerLB", 1000, ""};
-   Gaudi::CheckedProperty<int> m_initTimeStamp{this, "InitialTimeStamp", 0, ""};
-   Gaudi::Property<int> m_timeStampInterval{this, "TimeStampInterval", 0, ""};
+   Gaudi::CheckedProperty<uint64_t> m_eventsPerRun{this, "EventsPerRun", 1000000, ""};
+   Gaudi::CheckedProperty<uint32_t> m_firstLBNo{this, "FirstLB", 0, ""};
+   Gaudi::CheckedProperty<uint32_t> m_eventsPerLB{this, "EventsPerLB", 1000, ""};
+   Gaudi::CheckedProperty<uint32_t> m_initTimeStamp{this, "InitialTimeStamp", 0, ""};
+   Gaudi::Property<uint32_t> m_timeStampInterval{this, "TimeStampInterval", 0, ""};
 
    mutable std::atomic_long m_curCollection{};
    mutable std::vector<int> m_numEvt ATLAS_THREAD_SAFE;

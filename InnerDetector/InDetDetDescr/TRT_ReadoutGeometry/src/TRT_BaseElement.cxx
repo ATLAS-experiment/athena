@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"
@@ -158,14 +158,14 @@ TRT_BaseElement::strawAxis(int straw) const
 }
 
 void
-TRT_BaseElement::createSurfaceCache(Identifier id) const
+TRT_BaseElement::createSurfaceCache(Identifier id, GeoAlignmentStore* alignStore) const
 {
   int straw = m_idHelper->straw(id);
 
   // convert neccessary parts to Amg
   if (!m_strawSurfacesCache[straw]) {
     // create the surface cache & fill it
-    m_strawSurfacesCache[straw].set(createSurfaceCacheHelper(straw));
+    m_strawSurfacesCache[straw].set(createSurfaceCacheHelper(straw,alignStore));
   }
   // creaete the surface only if needed (the links are still intact)
   if (!m_strawSurfaces[straw]) {
@@ -175,10 +175,10 @@ TRT_BaseElement::createSurfaceCache(Identifier id) const
 }
 
 std::unique_ptr<SurfaceCacheBase>
-TRT_BaseElement::createSurfaceCacheHelper(int straw) const
+TRT_BaseElement::createSurfaceCacheHelper(int straw, GeoAlignmentStore* alignStore) const
 {
   // get the StrawTransform from GeoModel
-  HepGeom::Transform3D cStrawTransform = calculateStrawTransform(straw);
+  HepGeom::Transform3D cStrawTransform = calculateStrawTransform(straw,alignStore);
   auto sTransform =
     Amg::Transform3D(Amg::CLHEPTransformToEigen(cStrawTransform));
   auto sCenter = Amg::Vector3D(sTransform.translation());
@@ -206,18 +206,18 @@ TRT_BaseElement::deleteCache()
 }
 
 void
-TRT_BaseElement::updateAllCaches()
+TRT_BaseElement::updateAllCaches(GeoAlignmentStore* alignStore)
 {
   // delete the caches first
   deleteCache();
   // Strawlayer caches
   if (!m_surfaceCache.isValid()){
-    createSurfaceCache();
+    createSurfaceCache(alignStore);
   }
   // Loop over all straws and request items that get cached.
   for (unsigned int iStraw = 0; iStraw < nStraws(); iStraw++) {
     Identifier strawId = m_idHelper->straw_id(identify(), iStraw);
-    createSurfaceCache(strawId);
+    createSurfaceCache(strawId,alignStore);
   }
 }
 

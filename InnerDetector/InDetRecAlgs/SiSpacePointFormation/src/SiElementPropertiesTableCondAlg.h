@@ -61,6 +61,7 @@ namespace InDet {
      */
     //@{
     FloatProperty m_epsWidth{this, "EpsWidth", 0.02, "Safety margin for half-widths, in cm"};
+    BooleanProperty m_doEndcapEtaNeighbour{this, "doEndcapEtaNeighbour", false, "Consider eta neighbour also in Strip endcaps" };
     //@}
 
     /**

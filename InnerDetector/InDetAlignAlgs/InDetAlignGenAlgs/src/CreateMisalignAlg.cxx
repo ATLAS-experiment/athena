@@ -82,6 +82,8 @@ namespace InDetAlignment
 	m_createFreshDB(true),
 	m_MisalignmentMode(0),
 	m_nEvents(0),
+	m_translation(true),
+	m_rotation(true),
 	m_Misalign_maxShift(1*CLHEP::mm),
     m_Misalign_maxShift_Inner(50*CLHEP::micrometer),
     m_ScalePixelIBL(1.),
@@ -103,6 +105,8 @@ namespace InDetAlignment
 		declareProperty("ASCIIFilenameBase"             ,     m_asciiFileNameBase);
 		declareProperty("SQLiteTag"                     ,     m_SQLiteTag);
 		declareProperty("MisalignMode"                  ,     m_MisalignmentMode);
+		declareProperty("Translation"                   ,     m_translation);
+		declareProperty("Rotation"                      ,     m_rotation);
 		declareProperty("MaxShift"                      ,     m_Misalign_maxShift);
         declareProperty("MaxShiftInner"                 ,     m_Misalign_maxShift_Inner);
 		declareProperty("CreateFreshDB"                 ,     m_createFreshDB);
@@ -638,19 +642,32 @@ namespace InDetAlignment
                 double randMisY = RandMisY();
                 double randMisZ = RandMisZ();
                 
-                HepGeom::Vector3D<double> shift(randMisX, randMisY, randMisZ);
                 double randMisaplha = RandMisalpha();
                 double randMisbeta = RandMisbeta();
                 double randMisgamma = RandMisgamma();
                 
                 CLHEP::HepRotation rot;
-				rot = CLHEP::HepRotationX(randMisaplha) * CLHEP::HepRotationY(randMisbeta) * CLHEP::HepRotationZ(randMisgamma);
+		HepGeom::Vector3D<double> shift;
 				
 
 				if (ScaleFactor == 0.0)  {
                                   parameterizedTrafo = HepGeom::Transform3D(); // initialized as identity transformation
                                 } else {
-                                  parameterizedTrafo = HepGeom::Transform3D(rot, shift);
+					if (m_translation && m_rotation) {
+						shift = HepGeom::Vector3D<double>(randMisX, randMisY, randMisZ);
+						rot = CLHEP::HepRotationX(randMisaplha) * CLHEP::HepRotationY(randMisbeta) * CLHEP::HepRotationZ(randMisgamma);
+						parameterizedTrafo = HepGeom::Transform3D(rot, shift);}
+					else if (!m_translation && m_rotation) {
+					        shift = HepGeom::Vector3D<double>(0, 0, 0);
+                                                rot = CLHEP::HepRotationX(randMisaplha) * CLHEP::HepRotationY(randMisbeta) * CLHEP::HepRotationZ(randMisgamma);
+                                                parameterizedTrafo = HepGeom::Transform3D(rot, shift);}
+					else if (m_translation && !m_rotation) {
+					        shift = HepGeom::Vector3D<double>(randMisX, randMisY, randMisZ);
+                                                rot = CLHEP::HepRotationX(0) * CLHEP::HepRotationY(0) * CLHEP::HepRotationZ(0);
+                                                parameterizedTrafo = HepGeom::Transform3D(rot, shift);}
+					else {	shift = HepGeom::Vector3D<double>(0, 0, 0);
+                                                rot = CLHEP::HepRotationX(0) * CLHEP::HepRotationY(0) * CLHEP::HepRotationZ(0);
+                                                parameterizedTrafo = HepGeom::Transform3D(rot, shift);}
                                 }
 
 			}

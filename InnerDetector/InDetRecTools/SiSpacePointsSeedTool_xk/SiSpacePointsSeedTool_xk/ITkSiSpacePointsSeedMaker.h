@@ -245,7 +245,7 @@ namespace ITk
     float m_ipt2{0.};
     float m_COF{134 * .05f * 9};
     float m_dzMaxFast   {200.};
-    float m_R2MaxFast   {2500.};        
+    float m_R2MaxFast   {2025}; // 45mm*45mm. Updated for ITK Layout 03-00-00
     float m_rmaxPPP     {140.};
     float m_dzmaxSSS    {900.};    
     float m_drminSeedConf{5.};

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileCellMonitorAlgorithm.py
@@ -47,7 +47,7 @@ def TileCellMonitoringConfig(flags, **kwargs):
     kwargs.setdefault('EnergyBalanceThreshold', 3)
     kwargs.setdefault('TimeBalanceThreshold', 25 * ns)
     kwargs.setdefault('EnergyThresholdForGapScintilator', 0 * MeV)
-    kwargs.setdefault('fillChannelTimeHistograms', True)
+    kwargs.setdefault('fillChannelTimeHistograms', False)
     kwargs.setdefault('fillTimeAndEnergyDiffHistograms', flags.Common.isOnline)
     kwargs.setdefault('fillGapScintilatorHistograms', False)
     kwargs.setdefault('EnergyLimitForTime', 750.0 * GeV)

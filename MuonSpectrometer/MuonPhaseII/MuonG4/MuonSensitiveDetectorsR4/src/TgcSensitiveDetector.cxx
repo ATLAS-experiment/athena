@@ -1,137 +1,50 @@
-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TgcSensitiveDetector.h"
 #include "MuonSensitiveDetectorsR4/Utils.h"
 
 #include "G4ThreeVector.hh"
-#include "G4Trd.hh"
-#include "G4Geantino.hh"
-#include "G4ChargedGeantino.hh"
 
 #include "MCTruth/TrackHelper.h"
 #include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
-#include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GeoModelKernel/throwExcept.h"
 
 using namespace ActsTrk;
 
-namespace {
-   constexpr double tolerance = 10. * Gaudi::Units::micrometer;
-}
 // construction/destruction
 namespace MuonG4R4 {
 
-TgcSensitiveDetector::TgcSensitiveDetector(const std::string& name, 
-                                           const std::string& output_key,
-                                           const std::string& trf_storeKey,
-                                           const MuonGMR4::MuonDetectorManager* detMgr):
-    G4VSensitiveDetector{name},
-    AthMessaging{name},
-    m_writeHandle{output_key},
-    m_trfCacheKey{trf_storeKey},
-    m_detMgr{detMgr} {
-    m_trfCacheKey.initialize().ignore();
-}
-
-void TgcSensitiveDetector::Initialize(G4HCofThisEvent*) {
-  if (m_writeHandle.isValid()) {
-      ATH_MSG_VERBOSE("Simulation hit container "<<m_writeHandle.fullKey()<<" is already written");
-      return;
-  }
-  if (!m_writeHandle.recordNonConst(std::make_unique<xAOD::MuonSimHitContainer>(),
-                                    std::make_unique<xAOD::MuonSimHitAuxContainer>()).isSuccess()) {
-      THROW_EXCEPTION("Failed to record "<<m_writeHandle.fullKey());
-  }
-  ATH_MSG_DEBUG("Output container "<<m_writeHandle.fullKey()<<" has been successfully created");
-}
-
 G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
 
-    G4Track* currentTrack = aStep->GetTrack();
-    
-    // TGC sensitive to charged particle only
-    if (currentTrack->GetDefinition()->GetPDGCharge() == 0.0) {
-      if (currentTrack->GetDefinition()!= G4Geantino::GeantinoDefinition()) return true;
-      else if (currentTrack->GetDefinition()==G4ChargedGeantino::ChargedGeantinoDefinition()) return true;
+    if (!processStep(aStep)) {
+      return true;
     }
-
-    /// Reject secondary particles
-    constexpr double velCutOff = 10.*Gaudi::Units::micrometer / Gaudi::Units::second;
-    if (currentTrack->GetVelocity() < velCutOff) return true;
-
-    const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(currentTrack->GetTouchable());
+    
+    const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
     
     const MuonGMR4::TgcReadoutElement* readOutEle = getReadoutElement(touchHist);
     if (!readOutEle) {
        return false;
     }
-    ActsGeometryContext gctx{};
-
-    SG::ReadHandle<DetectorAlignStore> trfStoreHandle{m_trfCacheKey};
-    if (!trfStoreHandle.isValid()) {
-      ATH_MSG_FATAL("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");
-      return false;
-    }
-    gctx.setStore(std::make_unique<DetectorAlignStore>(*trfStoreHandle));
+    const ActsGeometryContext gctx{getGeoContext()};
     
-    const Amg::Transform3D globalToLocal = getTransform(currentTrack->GetTouchable(), 0).inverse();
+    const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);
     ATH_MSG_VERBOSE(" Track is inside volume "
-                 <<currentTrack->GetTouchable()->GetHistory()->GetTopVolume()->GetName()
-                 <<" transformation: "<<Amg::toString(globalToLocal));
-    const Amg::Vector3D locPos{globalToLocal*Amg::Hep3VectorToEigen(currentTrack->GetPosition())};
-    const Amg::Vector3D locDir{globalToLocal.linear()*Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection())};
-    ATH_MSG_VERBOSE("Track is located in "<<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify())
-                  <<" at "<<Amg::toString(locPos)<<" pointing towards "<<Amg::toString(locDir, 3));
-
-    /// The x-axis of the gas gap coordinate system points to the outer big wheel -> extrapolate into the plane X = 0.
-    std::optional<double> travelDist = Amg::intersect<3>(locPos, locDir, Amg::Vector3D::UnitX(), 0);
-    if (!travelDist) {
-      ATH_MSG_VERBOSE("Hit cannot be extrapolated into the gas gap origin");
-      return true;
-    }
-    const Amg::Vector3D lPosAtGap = locPos + (*travelDist) * locDir;
-    ATH_MSG_VERBOSE("Extrpolated by "<<(*travelDist)<<" mm to the gasGap center "<<Amg::toString(lPosAtGap, 2));
-    
-    const Amg::Vector3D gapCenterCross = globalToLocal.inverse() * lPosAtGap;
-    const Identifier etaHitID = getIdentifier(gctx, readOutEle, gapCenterCross, false);
+                   <<touchHist->GetHistory()->GetTopVolume()->GetName()
+                   <<" transformation: "<<Amg::toString(localToGlobal));
+  
+    const Identifier etaHitID = getIdentifier(gctx, readOutEle, localToGlobal.translation(), false);
     if (!etaHitID.is_valid()) {
         ATH_MSG_VERBOSE("No valid hit found");
         return true;
     }
-    
-    const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
-    const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(gctx, etaHitID)};
-    const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
-    const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
-    
-    /// Final check that the hit is located at zero
-    if (std::abs(locHitPos.z()) > tolerance) {
-        ATH_MSG_FATAL("The hit "<<Amg::toString(locHitPos)<<" doest not match "<<m_detMgr->idHelperSvc()->toString(etaHitID));
-        throw std::runtime_error("Picked wrong gas gap");
-    }
-
-    /// At the very last clear the cache of the readout element
-    readOutEle->releaseUnAlignedTrfs();
-
-
-    xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
-    m_writeHandle->push_back(hit);  
-  
-    TrackHelper trHelp(aStep->GetTrack());
-    hit->setIdentifier(etaHitID); 
-    hit->setLocalPosition(xAOD::toStorage(locHitPos));  
-    hit->setLocalDirection(xAOD::toStorage(locHitDir));
-    hit->setMass(currentTrack->GetDefinition()->GetPDGMass());
-    hit->setGlobalTime(globalTime);
-    hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
-    hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
-    hit->setKineticEnergy(currentTrack->GetKineticEnergy());
-    hit->setGenParticleLink(trHelp.GenerateParticleLink());
+    /// Fetch the local -> global transformation  
+    const Amg::Transform3D toGasGap{readOutEle->globalToLocalTrans(gctx, etaHitID)};
+    propagateAndSaveStrip(etaHitID, toGasGap, aStep);   
     return true;
 }
 const MuonGMR4::TgcReadoutElement* TgcSensitiveDetector::getReadoutElement(const G4TouchableHistory* touchHist) const {

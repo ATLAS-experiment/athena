@@ -1177,45 +1177,9 @@ propagateRungeKuttaImpl(Cache& cache,
 /////////////////////////////////////////////////////////////////////////////////
 
 Trk::STEP_Propagator::STEP_Propagator(const std::string& p, const std::string& n, const IInterface* t)
-    : AthAlgTool(p, n, t),
-      m_tolerance(1e-5)  // Error tolerance of the propagator. A low tolerance gives a high accuracy.
-      ,m_materialEffects(true)  // Switches off all material effects if false. Does nothing when true.
-      ,m_includeBgradients(true)  // Include B-field gradients into the error propagation?
-      ,m_includeGgradient(false)  // Include dg/dlambda into the error propagation? Only relevant when energy loss is true.
-      ,m_momentumCutOff(50.)  // Minimum allowed momentum in MeV.
-      ,m_multipleScattering(true)  // Add multiple scattering to the covariance matrix?
-      ,m_energyLoss(true)  // Include energy loss?
-      ,m_detailedEloss(true)  // Provide the extended EnergyLoss object with MopIonization etc.
-      ,m_straggling(true)  // Add energy loss fluctuations (straggling) to the covariance matrix?
-      ,m_MPV(false)  // Use the most probable value of the energy loss, else use the mean energy loss.
-      ,m_stragglingScale(1.)  // Scale for adjusting the width of the energy loss fluctuations.
-      ,m_scatteringScale(1.)  // Scale for adjusting the multiple scattering contribution to the covariance matrix.
-      ,m_maxPath(100000.)  // Maximum propagation length in mm.
-      ,m_maxSteps(10000)  // Maximum number of allowed steps (to avoid infinite loops).
-      ,m_layXmax(1.)  // maximal layer thickness for multiple scattering calculations
-      ,m_simulation(false)  // flag for simulation mode
-      ,m_rndGenSvc("AthRNGSvc", n)
-      ,m_randomEngineName("FatrasRnd") {
+    : AthAlgTool(p, n, t)
+{
   declareInterface<Trk::IPropagator>(this);
-  declareProperty("Tolerance", m_tolerance);
-  declareProperty("MaterialEffects", m_materialEffects);
-  declareProperty("IncludeBgradients", m_includeBgradients);
-  declareProperty("IncludeGgradient", m_includeGgradient);
-  declareProperty("MomentumCutOff", m_momentumCutOff);
-  declareProperty("MultipleScattering", m_multipleScattering);
-  declareProperty("EnergyLoss", m_energyLoss);
-  declareProperty("Straggling", m_straggling);
-  declareProperty("MostProbableEnergyLoss", m_MPV);
-  declareProperty("StragglingScale", m_stragglingScale);
-  declareProperty("DetailedEloss", m_detailedEloss);
-  declareProperty("MultipleScatteringScale", m_scatteringScale);
-  declareProperty("MaxPath", m_maxPath);
-  declareProperty("MaxSteps", m_maxSteps);
-  declareProperty("MSstepMax", m_layXmax);
-  declareProperty("SimulationMode", m_simulation);
-  declareProperty("SimMatEffUpdator", m_simMatUpdator);
-  declareProperty("RandomNumberService", m_rndGenSvc, "Random number generator");
-  declareProperty("RandomStreamName", m_randomEngineName, "Name of the random number stream");
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -2251,7 +2215,7 @@ bool Trk::STEP_Propagator::propagateWithJacobian(Cache& cache, bool errorPropaga
         h = dist2next.second * propDir;
       }
       if (binIDMat)
-        cache.m_material = binIDMat->first;
+        cache.m_material = binIDMat->first.get();
     }
   }
 
@@ -2409,7 +2373,7 @@ bool Trk::STEP_Propagator::propagateWithJacobian(Cache& cache, bool errorPropaga
             if (cache.m_material) {
               updateMaterialEffects(cache, mom, sin(direction.theta()), sumPath + path - stepOver);
             }
-            cache.m_material = binIDMat->first;
+            cache.m_material = binIDMat->first.get();
           }
           // recalculate distance to next bin
           if (distanceToNextBin < h) {
@@ -2459,7 +2423,7 @@ bool Trk::STEP_Propagator::propagateWithJacobian(Cache& cache, bool errorPropaga
             if (binIDMat) {
               assert(cache.m_material);
               updateMaterialEffects(cache, mom, sin(direction.theta()), sumPath + path);
-              cache.m_material = binIDMat->first;
+              cache.m_material = binIDMat->first.get();
             }
           }
           // recalculate distance to next bin

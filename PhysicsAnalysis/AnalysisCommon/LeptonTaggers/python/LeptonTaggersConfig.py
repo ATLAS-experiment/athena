@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 lep_tag_log = logging.getLogger('LeptonTaggersConfig')
@@ -74,7 +74,6 @@ def DecorateReFitPrimaryVertexCfg(
 
     kwargs.setdefault("DistToRefittedPriVtxName", "distToRefittedPriVtx")
     kwargs.setdefault("NormDistToRefittedPriVtxName", "normDistToRefittedPriVtx")
-    kwargs.setdefault("RefittedVtxLinkName", "RefittedPriVtxLink")
     kwargs.setdefault("RefittedVtxWithoutLeptonLinkName",
                       f"RefittedPriVtxWithoutLepton_{lepton_type}")
 
@@ -282,7 +281,7 @@ def DecoratePLITCfg(
     """
     Configure the PLIT decorator.
     """
-    lep_tag_log.info("calling DecoratePLITCfg with BDT_name="+Tagger_name+" lepton_name="+lepton_name)
+    lep_tag_log.info("calling DecoratePLITCfg with name="+Tagger_name+" lepton_name="+lepton_name)
 
     acc = ComponentAccumulator()
 
@@ -290,26 +289,32 @@ def DecoratePLITCfg(
     # Prepare DecoratePromptLepton alg
     #
     kwargs.setdefault("LeptonContainerName", lepton_name)
-    kwargs.setdefault("TrackJetContainerKey", "AntiKtVR30Rmax4Rmin02PV0TrackJets")
     kwargs.setdefault("TracksContainerKey", "InDetTrackParticles")
     kwargs.setdefault("CaloClusterContainerKey", "egammaClusters")
-    kwargs.setdefault("ConfigFileVersion", '')
     kwargs.setdefault("TaggerName", Tagger_name)
 
-    # check if Run3 configs should be used
+    # check if Run3 (or beyond) configs should be used 
     isRun3 = (flags.GeoModel.Run >= LHCPeriod.Run3)
 
     # path on calib area (found by path resolver
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
-    kwargs["ConfigPath"] = "IsolationSelection/2024-08-02/PLIT/"
+
     if lepton_name == 'Electrons':
-        kwargs["ConfigFileVersion"] = 'network_PLITel_barrel.onnx'                                       
-        kwargs["ConfigFileVersion_endcap"] = 'network_PLITel_endcap.onnx'                                       
+        if isRun3:
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-03-24/")
+            kwargs.setdefault("ConfigFileVersion", 'network_electrons_barrel_run3.onnx')
+            kwargs.setdefault("ConfigFileVersion_endcap", 'network_electrons_endcap_run3.onnx')
+        else:
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-02-24/")
+            kwargs.setdefault("ConfigFileVersion", 'network_electrons_barrel_run2.onnx')
+            kwargs.setdefault("ConfigFileVersion_endcap", 'network_electrons_endcap_run2.onnx')
     elif lepton_name == 'Muons':
         if isRun3:
-            kwargs["ConfigFileVersion"] = 'network_run3_muons.onnx'
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-03-24/")
+            kwargs.setdefault("ConfigFileVersion", 'network_muons_run3.onnx')
         else:
-            kwargs["ConfigFileVersion"] = 'network_run2_muons.onnx'
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-02-24/")
+            kwargs.setdefault("ConfigFileVersion", 'network_muons_run2.onnx')
     else:
         raise ValueError(f'Decorate{Tagger_name} - unknown lepton type: "{lepton_name}"')
 
@@ -327,6 +332,7 @@ def DecoratePLITCfg(
 
 def DecoratePromptLeptonImprovedCfg(
     flags, BDT_name="", lepton_name="", track_jet_name="AntiKtVR30Rmax4Rmin02PV0TrackJets",
+    veto_BDT_name=None,
     **kwargs
 ) -> ComponentAccumulator:
     """
@@ -374,6 +380,12 @@ def DecoratePromptLeptonImprovedCfg(
     kwargs.setdefault("extraDecoratorShortVars", ['CandVertex_NPassVtx'])
     kwargs.setdefault("vetoDecoratorFloatVars", ['PromptLeptonRNN_prompt'])
     kwargs.setdefault("vetoDecoratorShortVars", [])
+
+    if veto_BDT_name:
+        kwargs['vetoDecoratorFloatVars'] += ['RawPt']
+        kwargs['vetoDecoratorFloatVars'] += getStringFloatVars(veto_BDT_name)
+        kwargs['vetoDecoratorShortVars'] += ['CandVertex_NPassVtx']
+        kwargs['vetoDecoratorShortVars'] += getStringIntVars(veto_BDT_name)
 
     kwargs.setdefault("leptonPtBinsVector", [10.0e3, 15.0e3, 20.0e3, 25.0e3, 32.0e3, 43.0e3, 100.0e3])
 
@@ -424,6 +436,7 @@ def DecorateImprovedPromptLeptonAlgsCfg(
         ))
         acc.merge(DecoratePromptLeptonImprovedCfg(
             ConfigFlags, BDT_name="PromptLeptonImprovedVetoECAP",
+            veto_BDT_name='PromptLeptonImprovedVetoBARR',
             lepton_name="Electrons", track_jet_name="AntiKtVR30Rmax4Rmin02PV0TrackJets"
         ))
 
@@ -461,6 +474,17 @@ def DecoratePLITAlgsCfg(
       
     if lepton_type in ["", "Muons"]:
         acc.merge(DecoratePLITCfg(ConfigFlags, Tagger_name="PLIT", lepton_name="Muons"))
+
+    # Both algorithms above will be writing to the same decorations.
+    # So we need to explicitly lock them.
+    # (This is not MT-compatible.)
+    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations
+                     ('LockPLITDecorations',
+                      Decorations = ['InDetTrackParticles.dr_lepton',
+                                     'InDetTrackParticles.electron_track',
+                                     'InDetTrackParticles.muon_track',
+                                     'InDetTrackParticles.dr_leptontrack',
+                                     ]))
   
     return acc
 
@@ -576,22 +600,42 @@ def GetExtraPLITVariablesForDxAOD(name=''):
 
 
 # Script to run for testing the config
-# from https://atlassoftwaredocs.web.cern.ch/guides/ca_configuration/ca/
+# from https://atlassoftwaredocs.web.cern.ch/athena/configuration/ca/
 if __name__ == "__main__":
-    # import the flags and set them
+    # argument parsing - not using flags.fillFromArgs() since this is just a test app
+    from argparse import ArgumentParser
+    parser = ArgumentParser(description="Test the LeptonTaggersConfig")
+    parser.add_argument("--toTest", type=str, choices=["DecorateImprovedPromptLeptonAlgs", "DecoratePLITAlgs"],
+                        default="DecoratePLITAlgs",
+                        help="The function to test")
+    parser.add_argument("--filesInput", type=str, default=None,
+                        help="The input files to use")
+    parser.add_argument("--evtMax", type=int, default=10,
+                        help="The number of events to process")
+    parser.add_argument("--skipEvents", type=int, default=0,
+                        help="The number of events to skip")
+    parser.add_argument("--run", type=int, choices=[2, 3], default=3,
+                        help="The LHC Run period")
+    args = parser.parse_args()
+
+    # import the flags and set them using the command line arguments
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     FLAGS = initConfigFlags()
 
     from AthenaConfiguration.Enums import ProductionStep
     FLAGS.Common.ProductionStep = ProductionStep.Derivation
 
-    FLAGS.Exec.MaxEvents = 10
+    FLAGS.Exec.MaxEvents = args.evtMax
+    FLAGS.Exec.SkipEvents = args.skipEvents
 
     # use one of the predefined files
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    FLAGS.Input.Files = defaultTestFiles.AOD_RUN3_MC
-    FLAGS.fillFromArgs() # make the job understand command line options
-    # lock the flags
+    FLAGS.Input.Files = args.filesInput.split(',') if args.filesInput else defaultTestFiles.AOD_RUN3_MC
+    
+    # set the run period
+    FLAGS.GeoModel.Run = LHCPeriod.Run3 if args.run == 3 else LHCPeriod.Run2
+
+    # # lock the flags
     FLAGS.lock()
 
     # create basic infrastructure
@@ -602,22 +646,18 @@ if __name__ == "__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     ACC.merge(PoolReadCfg(FLAGS))
 
-    # --------------------
-    # Common augmentations (needed for PLIV inputs)
-    # --------------------
+    # Common augmentations here 
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     trigger_lists_helper = TriggerListsHelper(FLAGS)
-
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     ACC.merge(PhysCommonAugmentationsCfg(FLAGS, TriggerListsHelper=trigger_lists_helper))
 
-    # from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    # FTagJetColl = ['AntiKtVR30Rmax4Rmin02TrackJets']
-    # ACC.merge(FtagJetCollectionsCfg(FLAGS,FTagJetColl))
-    # ACC.merge(METCommonCfg(FLAGS))
+    if args.toTest == "DecorateImprovedPromptLeptonAlgs":
+        ACC.merge(DecorateImprovedPromptLeptonAlgsCfg(FLAGS))
+    elif args.toTest == "DecoratePLITAlgs":
+        ACC.merge(DecoratePLITAlgsCfg(FLAGS))
 
-    # add the algorithm to the configuration
-    ACC.merge(DecorateImprovedPromptLeptonAlgsCfg(FLAGS))
+    
 
     # debug printout
     ACC.printConfig(withDetails=True, summariseProps=True)

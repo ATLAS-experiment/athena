@@ -17,6 +17,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKeyArray.h"
 
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
@@ -39,8 +40,8 @@ public:
 
 private:
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
-  SG::ReadHandleKey<ActsTrk::SeedContainer> m_seedContainerKey{this, "SeedContainerKey", {}, "Seed containers"};
-  SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_actsTrackParamsKey {this, "EstimatedTrackParametersKey", {}, "Track Parameters Key"};
+  SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKey{this, "SeedContainerKey", {}, "Seed containers"};
+  SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_actsTrackParamsKey {this, "EstimatedTrackParametersKey", {}, "Track Parameters Key"};
   SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
      {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
       "Map which associates detector elements to Acts Geometry IDs"};

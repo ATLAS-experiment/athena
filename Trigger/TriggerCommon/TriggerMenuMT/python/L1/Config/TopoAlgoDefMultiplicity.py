@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from collections import namedtuple
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 from ..Base.TopoAlgos import EMMultiplicityAlgo, TauMultiplicityAlgo, JetMultiplicityAlgo, XEMultiplicityAlgo, LArSaturationAlgo, ZeroBiasAlgo
 from ..Base.TopoAlgorithms import AlgType, AlgCategory
 
-class TopoAlgoDefMultiplicity(object):
+class TopoAlgoDefMultiplicity:
     """
     Defines the TopoAlgorithms that calculate multiplicities for L1Calo thresholds
     The thresholds have to be explicitly defined here.
@@ -25,8 +25,9 @@ class TopoAlgoDefMultiplicity(object):
         ]
         emVarThresholds_2bits = [
             'eEM24VM',  'eEM26',  'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M',
-            'eEM1', 'eEM2',
+            'eEM1', 'eEM2', 'eEM20M', 'eEM24M',
             'eEM40L',
+
             # spares
             'eEMSPARE1',
         ]
@@ -50,10 +51,9 @@ class TopoAlgoDefMultiplicity(object):
             tm.registerTopoAlgo(alg)
 
         emThresholds_2bits = [ 
-            'jEM20', 'jEM20M', 
-  
-            #spares
-            'jEMSPARE1', 
+            'jEM25', 'jEM20M',
+
+            'jEM35', # prospective Run 4 L1 item, ATR-30180
         ]
         for em in emThresholds_2bits:
             alg = EMMultiplicityAlgo( name = em,
@@ -62,32 +62,23 @@ class TopoAlgoDefMultiplicity(object):
             tm.registerTopoAlgo(alg)
                 
         etauThresholds_3bits = [ 
-            'eTAU1', 'eTAU12', 'eTAU20',
-
-            # spares
+            'eTAU1', 'eTAU12', 'eTAU20', 'eTAU70',
         ]
         jtauThresholds_3bits = [ 
             'jTAU20'
         ]        
         ctauThresholds_3bits = [ 
-            'cTAU12M', 'cTAU20M', 
-
-            #spares
-            'cTAUSPARE1',
+            'cTAU12M', 'cTAU20M', 'cTAUSPARE1',
         ]
         etauThresholds_2bits = [ 
             'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M', 'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
- 
-            #spares
-            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', #'eTAUSPARE6', 'eTAUSPARE7',
+            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', 
         ]
         jtauThresholds_2bits = [ 
-            'jTAU1', 'jTAU30', 'jTAU30M',
-
-            #spares
+            'jTAU1',
         ]
         ctauThresholds_2bits = [ 
-            'cTAU30M', 'cTAU35M',  
+            'cTAU30M', 'cTAU35M',  'cTAU50M', 
 
             # spares
             'cTAUSPARE2',
@@ -132,9 +123,6 @@ class TopoAlgoDefMultiplicity(object):
 
         jJThresholds_3bits = [ 
             'jJ5', 'jJ10', 'jJ20', 'jJ30', 'jJ30p0ETA25', 'jJ40', 'jJ40p0ETA25', 'jJ50', 'jJ55', 'jJ55p0ETA23', 'jJ60',
-
-            # spares
-            #'jJSPARE1', 'jJSPARE2',
         ]
         jJThresholds_2bits = [ 
             'jJ70p0ETA23', 'jJ80', 'jJ80p0ETA25', 'jJ85p0ETA21',
@@ -145,10 +133,9 @@ class TopoAlgoDefMultiplicity(object):
 
             'jJ50p0ETA25',
 
-            # spares
-            'jJSPARE1',
-            'jJSPARE2',
-            'jJSPARE3',
+            'jJ5p30ETA49', 'jJ10p30ETA49',
+
+            'jJ56p0ETA49', # prospective Run 4 L1 item, ATR-30180
 
         ]
 
@@ -178,8 +165,8 @@ class TopoAlgoDefMultiplicity(object):
                                        nbits = 2, classtype='jLJetMultiplicity')
             tm.registerTopoAlgo(alg)
 
-        gJThresholds_3bits = [ 'gJ20p0ETA25', 'gJ20p25ETA49', 'gJSPARE1',]
-        gJThresholds_2bits = [ 'gJ50p0ETA25', 'gJ100p0ETA25', 'gJ400p0ETA25']
+        gJThresholds_3bits = [ 'gJ20p0ETA25', 'gJ20p25ETA49', 'gJSPARE1', ]
+        gJThresholds_2bits = [ 'gJ50p0ETA25', 'gJ100p0ETA25', 'gJ400p0ETA25' ]
 
         for gJet in gJThresholds_3bits:
             alg = JetMultiplicityAlgo( name = gJet,
@@ -196,8 +183,10 @@ class TopoAlgoDefMultiplicity(object):
         gLJThresholds_2bits = [ 
             'gLJ80p0ETA25', 'gLJ100p0ETA25', 'gLJ140p0ETA25', 'gLJ160p0ETA25', 
 
+            'gLJ90p0ETA25', # prospective Run 4 L1 item, ATR-30180
+
             # spares
-            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3', 'gLJSPARE4',
+            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3',
         ]
 
         for gLJet in gLJThresholds_2bits:
@@ -216,7 +205,7 @@ class TopoAlgoDefMultiplicity(object):
             'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
             'gTE3', 'gTE5', 'gTE10', 'gTE200',
 
-            #additional jTE thresholds needed for 2023 heavy ion runs
+            # additional jTE thresholds needed for heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
             'jTE100', 'jTE600', 'jTE1500', 'jTE4000', 'jTE6500', 'jTE8300', 'jTE9000', 'jTE10000', 'jTE12000',
             'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5',
@@ -225,13 +214,8 @@ class TopoAlgoDefMultiplicity(object):
 
             'jXEPerf100',
 
-            #spares (for any energy thresholds)
-            #replace jXESPARE16 - jXESPARE27 with heavy ion jTE threhsolds
-            'jXESPARE1', #'jXESPARE2', 'jXESPARE3', 'jXESPARE4',
-            #'jXESPARE5', 'jXESPARE6', 'jXESPARE7', 'jXESPARE8', 'jXESPARE9',
-            #'jXESPARE10', 'jXESPARE11', 'jXESPARE12', 'jXESPARE13',
-            #'jXESPARE14',
-            #'jXESPARE15',
+            # spares (for any energy thresholds)
+            'jXESPARE1', 
 
         ]
 
@@ -246,59 +230,84 @@ class TopoAlgoDefMultiplicity(object):
         tm.registerTopoAlgo(ZeroBiasAlgo("ZeroBiasA"))
         tm.registerTopoAlgo(ZeroBiasAlgo("ZeroBiasB"))
 
+
     @staticmethod
     def checkMultAlgoFWconstraints(l1menu):
         """
-        List of the constraints in terms of multiplicity algorithms to make sure the menu fits
-        in the Topo1 FW
-        """
+        List of the constraints in terms of multiplicity algorithms, to make sure the menu fits
+        in the Topo1 FW.
 
-        multLimits = namedtuple('ML', "thrtype, conn, nbit, startbit, endbit")
+        The Phase-I L1Topo boards contain 2 FPGAs, with 2 output fibers each (connected to the CTP).
+        Up to 96 bits per fiber.
+        """
+        
+        # Any changes in this mapping intended for use in P1 require changes in the L1Topo firmware!
+
+        # If you include additional algorithms to the L1 MC Menu only for development and tests in Athena, 
+        # that will still require reserving additional space space in each fiber for the new thrsholds.
+        # Please add them to the end of each fiber, and label those lines.
+
+        # Thresholds containing "Perf" in the name are explicitly for development only within Athena,
+        # and don't require declaring dedicated bits (they're ignored by this check)
+
+        multLimits = namedtuple('ML', ['thrtype', 'conn', 'nbit', 'startbit', 'endbit'])
         multiplicities = [
-           multLimits( thrtype='eEM',  conn='Topo1Opt0', nbit=3, startbit=0,  endbit=11),
-           multLimits( thrtype='eEM',  conn='Topo1Opt0', nbit=2, startbit=24, endbit=43),
-           multLimits( thrtype='eEMV', conn='Topo1Opt0', nbit=2, startbit=44, endbit=63),
-           multLimits( thrtype='ZeroBiasA',   conn='Topo1Opt0', nbit=1, startbit=64, endbit=64),
-           multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=3, startbit=0,  endbit=8 ),
-           multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=2, startbit=12, endbit=31),
-           multLimits( thrtype='gLJ',  conn='Topo1Opt1', nbit=2, startbit=33, endbit=51),
-           multLimits( thrtype='gJ',   conn='Topo1Opt1', nbit=3, startbit=54, endbit=62),
-           multLimits( thrtype='gJ',   conn='Topo1Opt1', nbit=2, startbit=66, endbit=71),
-           multLimits( thrtype='eTAU',   conn='Topo1Opt1', nbit=2, startbit=72, endbit=80),
-           multLimits( thrtype='jJ',   conn='Topo1Opt2', nbit=3, startbit=0,  endbit=32),
-           multLimits( thrtype='jJ',   conn='Topo1Opt2', nbit=2, startbit=36, endbit=73),
-           multLimits( thrtype='jLJ',  conn='Topo1Opt2', nbit=2, startbit=78, endbit=93),
-           multLimits( thrtype='jTAU', conn='Topo1Opt3', nbit=3, startbit=0,  endbit=2 ),
-           multLimits( thrtype='jTAU', conn='Topo1Opt3', nbit=2, startbit=6,  endbit=11),
-           multLimits( thrtype='cTAU', conn='Topo1Opt3', nbit=3, startbit=14, endbit=19),
-           multLimits( thrtype='cTAU', conn='Topo1Opt3', nbit=2, startbit=23, endbit=28),
-           multLimits( thrtype='jEM',  conn='Topo1Opt3', nbit=2, startbit=31, endbit=36),
-           multLimits( thrtype='LArSaturation', conn='Topo1Opt3', nbit=1, startbit=37, endbit=37),
-           multLimits( thrtype='ZeroBiasB',   conn='Topo1Opt3', nbit=1, startbit=38, endbit=38),
-           multLimits( thrtype='EN',   conn='Topo1Opt3', nbit=1, startbit=39, endbit=86),
-           
+            # FPGA 0, Topo1 fiber 0
+            multLimits(thrtype='eEM',           conn='Topo1Opt0', nbit=3, startbit=0,  endbit=11),
+            multLimits(thrtype='eEM',           conn='Topo1Opt0', nbit=2, startbit=24, endbit=43),
+            multLimits(thrtype='eEMV',          conn='Topo1Opt0', nbit=2, startbit=44, endbit=63),
+            multLimits(thrtype='ZeroBiasA',     conn='Topo1Opt0', nbit=1, startbit=64, endbit=64),
+
+            # FPGA 0, Topo1 fiber 1
+            multLimits(thrtype='eTAU',          conn='Topo1Opt1', nbit=3, startbit=0,  endbit=8 ),
+            multLimits(thrtype='eTAU',          conn='Topo1Opt1', nbit=2, startbit=12, endbit=35),
+            multLimits(thrtype='gLJ',           conn='Topo1Opt1', nbit=2, startbit=40, endbit=55),
+            multLimits(thrtype='gJ',            conn='Topo1Opt1', nbit=3, startbit=58, endbit=66),
+            multLimits(thrtype='gJ',            conn='Topo1Opt1', nbit=2, startbit=70, endbit=75),
+            multLimits(thrtype='eTAU',          conn='Topo1Opt1', nbit=2, startbit=78, endbit=81), # L1 MC pp Menu only
+            
+            # FPGA 1, Topo1 fiber 2
+            multLimits(thrtype='jJ',            conn='Topo1Opt2', nbit=3, startbit=0,  endbit=32),
+            multLimits(thrtype='jJ',            conn='Topo1Opt2', nbit=2, startbit=36, endbit=73),
+            multLimits(thrtype='jLJ',           conn='Topo1Opt2', nbit=2, startbit=78, endbit=93),
+            
+            # FPGA 1, Topo1 fiber 3
+            multLimits(thrtype='jTAU',          conn='Topo1Opt3', nbit=3, startbit=0,  endbit=2 ),
+            multLimits(thrtype='jTAU',          conn='Topo1Opt3', nbit=2, startbit=6,  endbit=7 ),
+            multLimits(thrtype='cTAU',          conn='Topo1Opt3', nbit=3, startbit=14, endbit=22),
+            multLimits(thrtype='cTAU',          conn='Topo1Opt3', nbit=2, startbit=23, endbit=30),
+            multLimits(thrtype='jEM',           conn='Topo1Opt3', nbit=2, startbit=31, endbit=36),
+            multLimits(thrtype='LArSaturation', conn='Topo1Opt3', nbit=1, startbit=37, endbit=37),
+            multLimits(thrtype='ZeroBiasB',     conn='Topo1Opt3', nbit=1, startbit=38, endbit=38),
+            multLimits(thrtype='EN',            conn='Topo1Opt3', nbit=1, startbit=39, endbit=86),
         ]
 
         for conn in l1menu.connectors:
-            if 'Topo1' not in conn.name or conn.legacy:
-                continue
+            if 'Topo1' not in conn.name or conn.legacy: continue
+
             for tl in conn.triggerLines:
-                if 'Perf' in tl.name:
-                    continue
-                tl_name = 'Mult_'+tl.name
-                algo = l1menu.topoAlgos.topoAlgos[AlgCategory.MULTI][AlgType.MULT][tl_name]
-                goodAlgo = False
+                if 'Perf' in tl.name: continue
+
+                algo = l1menu.topoAlgos.topoAlgos[AlgCategory.MULTI][AlgType.MULT][f'Mult_{tl.name}']
+
+                thrtype = algo.input
+                if 'LArSaturation' in algo.name:
+                    thrtype = 'LArSaturation'
+                elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input:
+                    thrtype = 'EN'
+                elif 'eEmVar' in algo.classtype:
+                    thrtype = 'eEMV'
+
                 for ml in multiplicities:
-                    thrtype = algo.input
-                    if 'LArSaturation' in algo.name:
-                        thrtype = 'LArSaturation'
-                    elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input:
-                        thrtype = 'EN'
-                    if 'eEmVar' in algo.classtype:
-                        thrtype = 'eEMV'
-                    if conn.name==ml.conn and thrtype==ml.thrtype and algo.nbits==ml.nbit and tl.startbit>=ml.startbit and (tl.startbit+tl.nbits-1)<=ml.endbit:
-                        goodAlgo = True
-                if not goodAlgo:
-                    raise RuntimeError("The multiplicity algorithm %s with startbit %i does not fit with Topo1 and CTP FW. If this is intended, please correct the multiplicity constraints and communicate the new menu to the L1TOPO and CTP groups." % (algo.name, tl.startbit) )
+                    if conn.name == ml.conn and thrtype == ml.thrtype and algo.nbits == ml.nbit and tl.startbit >= ml.startbit and tl.endbit <= ml.endbit:
+                        break
+                else:
+                    raise RuntimeError(f'The multiplicity algorithm {algo.name} with startbit {tl.startbit} does not fit in the current Topo1 and CTP FWs. If this is intended, please correct the multiplicity constraints and communicate the new menu to the L1Topo and CTP groups.')
 
-
+            # To ensure the correct alignment, also check for the Empty and (Empty, nbits) instances in the L1 Menu input fibers
+            for etl in conn.emptyTriggerLines:
+                log.debug('Empty Multiplicity placeholder in bits %i-%i of %s', etl.startbit, etl.endbit, conn.name)
+                for ml in multiplicities:
+                    # We don't want to have any overlaps with the multiplicity declarations
+                    if conn.name == ml.conn and etl.startbit >= ml.startbit and etl.endbit <= ml.endbit:
+                        raise RuntimeError(f'One of the Empty or (Empty, nbits) Multiplicity algorithm placeholders in the L1 Menu is overlapping with the declared multiplicity algorithm bit ranges ({conn.name}, bits {etl.startbit}-{etl.endbit}). Check the bit mapping and algorithm alignments!')

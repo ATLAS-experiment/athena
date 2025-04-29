@@ -1,29 +1,26 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CONDALGS_ALGB_H
-#define CONDALGS_ALGB_H 1
+#ifndef ATHEXHIVE_CONDEX_ALGB_H
+#define ATHEXHIVE_CONDEX_ALGB_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "AthExHive/HiveDataObj.h"
 
-#include <string>
-
 class AlgB  :  public AthAlgorithm {
   
 public:
     
   AlgB (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~AlgB();
+  virtual ~AlgB() = default;
   
   virtual bool isClonable() const override { return true; }
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
-  virtual StatusCode finalize() override;
   
 private:
   

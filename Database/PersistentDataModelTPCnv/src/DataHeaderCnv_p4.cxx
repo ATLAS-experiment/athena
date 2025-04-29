@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p4.cxx
@@ -13,6 +13,7 @@
 
 #include <cstdio>
 #include <sstream>
+#include <algorithm>
 
 DataHeaderElementCnv_p4::DataHeaderElementCnv_p4() {}
 DataHeaderElementCnv_p4::~DataHeaderElementCnv_p4() {}
@@ -24,18 +25,15 @@ void DataHeaderElementCnv_p4::persToTrans(const DataHeaderElement_p4* pers,
    std::vector<unsigned int>::const_iterator intIter = pers->m_clids.begin();
    const std::vector<unsigned int>::const_iterator intLast = pers->m_clids.end();
    trans->m_pClid = *intIter; ++intIter;
-   trans->m_clids.clear();
-   for (std::set<CLID>::const_iterator lastClid = trans->m_clids.begin();
-		   intIter != intLast; ++intIter) {
-      lastClid = trans->m_clids.insert(lastClid, *intIter);
-   }
+   trans->m_clids.assign (intIter, intLast);
    std::vector<std::string>::const_iterator strIter = pers->m_alias.begin();
-   const std::vector<std::string>::const_iterator strLast = pers->m_alias.end();
    trans->m_key = *strIter; ++strIter;
-   trans->m_alias.clear();
-   for (std::set<std::string>::const_iterator lastAlias = trans->m_alias.begin();
-		   strIter != strLast; ++strIter) {
-      lastAlias = trans->m_alias.insert(lastAlias, *strIter);
+   trans->m_alias.assign (strIter, pers->m_alias.end());
+   if (!std::ranges::is_sorted (trans->m_alias)) {
+     // Should really be sorted, but just in case...
+     std::ranges::sort (trans->m_alias);
+     auto ret = std::ranges::unique (trans->m_alias);
+     trans->m_alias.erase (ret.begin(), ret.end());
    }
    trans->m_hashes.clear();
    trans->m_hashes.reserve(pers->m_hashes.size());
@@ -82,9 +80,7 @@ void DataHeaderElementCnv_p4::persToTrans(const DataHeaderElement_p4* pers,
       snprintf(text, length, "][TECH=%08X][OID=%08X-%08X]", pers->m_technology, pers->m_oid1, pers->m_oid2);
       tokenStr.append(text);
    }
-   Token* token = new Token;
-   token->fromString(tokenStr);
-   delete trans->m_token; trans->m_token = token;
+   trans->m_token.fromString(tokenStr);
 }
 //______________________________________________________________________________
 void DataHeaderElementCnv_p4::transToPers(const DataHeaderElement* /*trans*/,

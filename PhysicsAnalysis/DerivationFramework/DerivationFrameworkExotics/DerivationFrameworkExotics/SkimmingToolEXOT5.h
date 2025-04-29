@@ -19,7 +19,7 @@ class JetCalibrationTool;
 
 namespace DerivationFramework {
 
-  class SkimmingToolEXOT5 : public AthAlgTool, public ISkimmingTool {
+  class SkimmingToolEXOT5 : public extends<AthAlgTool, ISkimmingTool> {
 
     public: 
       SkimmingToolEXOT5( const std::string& t, const std::string& n, const IInterface* p );

@@ -70,15 +70,14 @@ def CaloRecoCfg(flags, clustersname=None):
         from TileRecAlgs.MBTSTimeDiffEventInfoAlgConfig import MBTSTimeDiffEventInfoAlgCfg
         result.merge(MBTSTimeDiffEventInfoAlgCfg(flags))
 
-
-    #Configure AOD Cell-Thinning based on samplings:
-    from CaloRec.CaloThinCellsBySamplingAlgConfig import CaloThinCellsBySamplingAlgCfg
-    result.merge(CaloThinCellsBySamplingAlgCfg(flags,'StreamAOD', ['TileGap3']))
-        
     # Optional: AOD Cell, rawCh, digits thinning, based on clusters, for XTalk studies
     if flags.Calo.TopoCluster.xtalkInfoDumper and not flags.Overlay.DataOverlay:
         from LArClusterCellDumper.CaloThinCellsInAODAlgConfig import CaloThinCellsInAODAlgCfg
         result.merge(CaloThinCellsInAODAlgCfg(flags))
+    if not flags.HeavyIon.Egamma.doSubtractedClusters:
+        #Configure AOD Cell-Thinning based on samplings:
+        from CaloRec.CaloThinCellsBySamplingAlgConfig import CaloThinCellsBySamplingAlgCfg
+        result.merge(CaloThinCellsBySamplingAlgCfg(flags,'StreamAOD', ['TileGap3']))
 
     return result
 

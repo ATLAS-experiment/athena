@@ -538,7 +538,6 @@
 #include "AthContainers/tools/ElementProxy.h"
 #include "AthContainers/tools/IsMostDerivedFlag.h"
 #include "AthContainers/DataVectorWithAllocFwd.h"
-#include "AthLinks/tools/selection_ns.h"
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <type_traits>
 #include <vector>
@@ -549,6 +548,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <initializer_list>
+#include <RootMetaSelection.h>
 
 
 
@@ -577,9 +577,9 @@
 
 
 // Forward declarations.
-ENTER_ROOT_SELECTION_NS
-template <class T, class BASE> class DataVector;
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+  template <class T, class BASE> class DataVector;
+}}}
 
 
 namespace DataVector_detail {
@@ -2039,7 +2039,7 @@ private:
 
 
   typedef typename
-    ROOT_SELECTION_NS::DataVector<T, DataVector_BASE>::self self;
+    ROOT::Meta::Selection::DataVector<T, DataVector_BASE>::self self;
 };
 
 
@@ -3356,7 +3356,7 @@ private:
 
 
   typedef typename
-    ROOT_SELECTION_NS::DataVector<T, DataVector_BASE>::self self;
+    ROOT::Meta::Selection::DataVector<T, DataVector_BASE>::self self;
 };
 
 template <class T>
@@ -3417,7 +3417,7 @@ template <class T>
 void swap (DataVector<T>& a, DataVector<T>& b);
 
 
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 
 template< class T, class BASE >
 class DataVector : KeepFirstTemplateArguments< 1 >, SelectNoInstance
@@ -3429,19 +3429,19 @@ public:
 #ifndef XAOD_STANDALONE
    /// Automatically generate dictionary for contained vector
     //MN: this causes massive dictionary duplication.  Disabling for now.
-   // ROOT_SELECTION_NS::MemberAttributes< kAutoSelected > m_pCont;
+   // ROOT::Meta::Selection::MemberAttributes< kAutoSelected > m_pCont;
 #endif  
    /// Declare the automatically created variable transient
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_isMostDerived;
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_deleter;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_isMostDerived;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_deleter;
 
    /// We do not want to save this.  The P->T converter should
    /// decide the ownership mode.
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_ownPolicy;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_ownPolicy;
 
 };
 
-EXIT_ROOT_SELECTION_NS
+}}} // namespace
 
 
 #include "AthContainers/ClassName.h"
@@ -3509,57 +3509,4 @@ struct TopBase<DataVector<T, DataModel_detail::NoBase> > {
 
 
 #include "AthContainers/DataVector.icc"
-
-
-#if 0
-//===================================================================
-// Code to try to make the DATAVECTOR_BASES definitions automatically
-// based on SG_BASES.  Still have to use one macro, DATAVECTOR_BASES_FROM_SG.
-// Currently missing the part that would declare the DataVector relations
-// to SG.  Not sure how useful this will be; don't bother trying to
-// finish it now.
-#include "boost/mpl/if.hpp"
-#include "boost/mpl/and.hpp"
-#include "boost/mpl/equal_to.hpp"
-#define if_  boost::mpl::if_
-#define and_ boost::mpl::and_
-#define equal_to boost::mpl::equal_to
-#define true_  boost::mpl::true_
-#define false_ boost::mpl::false_
-template <class U> struct not_virtual { typedef true_ type; };
-template <class U> struct not_virtual<SG::Virtual<U> > { typedef false_ type; };
-template <class U> struct clean_type { typedef U type; };
-template <> struct clean_type<SG::NoBase>
-{ typedef DataModel_detail::NoBase type; };
-template <class U> struct clean_type<SG::Virtual<U> >
-{ typedef typename clean_type<U>::type type; };
-template <class T>
-struct bases_from_sg
-{
-  typedef typename
-          if_<equal_to<typename SG::Bases<T>::Base1, SG::NoBase>,
-              DataModel_detail::NoBase,
-              if_<and_<equal_to<typename SG::Bases<T>::Base1, SG::NoBase>,
-                       not_virtual<typename SG::Bases<T>::Base2> >,
-                  typename SG::Bases<T>::Base1,
-                  DataVector_detail::VirtBases
-                    <clean_type<typename SG::Bases<T>::Base1>,
-                     clean_type<typename SG::Bases<T>::Base2>,
-                     clean_type<typename SG::Bases<T>::Base3>,
-                     clean_type<typename SG::Bases<T>::Base4> >
-                 > >::type type;
-};
-#undef if_
-#undef and_
-#undef equal_to
-#undef true_
-#undef false_
-
-#define DATAVECTOR_BASES_FROM_SG(T) \
-template <> struct DataVectorBase<T>                    \
-{ typedef bases_from_sg<T>::type Base; };
-//===================================================================
-#endif
-
-
 #endif // not ATHCONTAINERS_DATAVECTOR_H

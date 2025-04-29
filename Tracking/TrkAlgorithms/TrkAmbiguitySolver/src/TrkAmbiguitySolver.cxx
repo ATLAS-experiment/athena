@@ -7,17 +7,7 @@
 #include "TrkToolInterfaces/ITrackAmbiguityScoreProcessorTool.h"
 
 Trk::TrkAmbiguitySolver::TrkAmbiguitySolver(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm (name, pSvcLocator),
-  m_scoredTracksKey(""),
-  m_resolvedTracksKey("Tracks"),
-  m_ambiTool("Trk::SimpleAmbiguityProcessorTool/TrkAmbiguityProcessor", this),
-  m_trackInCount(0),
-  m_trackOutCount(0)
-{
-  declareProperty("TrackInput"        , m_scoredTracksKey);
-  declareProperty("TrackOutput"       , m_resolvedTracksKey);
-  declareProperty("AmbiguityProcessor", m_ambiTool);
-}
+  AthReentrantAlgorithm (name, pSvcLocator) {}
 
 //--------------------------------------------------------------------------
 Trk::TrkAmbiguitySolver::~TrkAmbiguitySolver(void)

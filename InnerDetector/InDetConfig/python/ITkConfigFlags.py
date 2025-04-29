@@ -37,6 +37,12 @@ def createITkConfigFlags():
                   prevFlags.ITk.Geometry.StripLocal or
                   prevFlags.ITk.Geometry.BCMPrimeLocal or
                   prevFlags.ITk.Geometry.PLRLocal)
+
+    itkcf.addFlag("ITk.Geometry.isAlignable",False)
+    itkcf.addFlag("ITk.Geometry.stripAlignable",lambda prevFlags: prevFlags.ITk.Geometry.isAlignable)
+    itkcf.addFlag("ITk.Geometry.pixelAlignable",lambda prevFlags: prevFlags.ITk.Geometry.isAlignable)
+    itkcf.addFlag("ITk.Geometry.alignmentFolder","/Indet/Align")
+    
     # The following flag is (3 Oct 2023) unused for now, the charge calibration
     # constants are hardcoded in the alg implementation
     # InnerDetector/InDetConditions/PixelConditionsAlgorithms/src/ITkPixChargeCalibAlg.cxx
@@ -81,5 +87,9 @@ def createITkConfigFlags():
     from InDetConfig.TrackingGeometryFlags import createITkTrackingGeometryFlags
     itkcf.addFlagsCategory("ITk.trackingGeometry",
                            createITkTrackingGeometryFlags, prefix=True)
+
+    # if we want to make eta overlap space points in strip endcaps
+    # need to search for neighbour elements in eta
+    itkcf.addFlag("ITk.doEndcapEtaNeighbour", False)
 
     return itkcf

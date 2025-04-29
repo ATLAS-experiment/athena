@@ -8,6 +8,7 @@ def PoolSvcCfg(flags, withCatalogs=False, **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("MaxFilesOpen", flags.PoolSvc.MaxFilesOpen)
+    kwargs.setdefault("DefaultContainerType", flags.PoolSvc.DefaultContainerType)
 
     if withCatalogs:
         catalogs = [
@@ -28,6 +29,9 @@ def PoolSvcCfg(flags, withCatalogs=False, **kwargs):
 
 def AthenaPoolCnvSvcCfg(flags, **kwargs):
     acc = PoolSvcCfg(flags)
+
+    if flags.PoolSvc.PersSvcPerInputType:
+        kwargs.setdefault("PersSvcPerInputType", "CollectionTree")
 
     service = CompFactory.AthenaPoolCnvSvc(**kwargs)
     acc.addService(service)

@@ -50,12 +50,13 @@ def defineMenu():
         'L1_MU3V_jJ50',
         'L1_MU3V_jJ60',        
 
-        'L1_eTAU12_EMPTY', 'L1_eTAU80', 
+        'L1_eTAU12_EMPTY', 'L1_eTAU80', 'L1_eTAU12', 'L1_eTAU140',
 
         # single jet 
         # new calo
         'L1_jJ500', 'L1_jJ500_LAR',
         'L1_jJ5', 'L1_jJ10',
+        'L1_jJ5p30ETA49', 'L1_jJ10p30ETA49',
         'L1_jJ20', 'L1_jJ30',
         'L1_jJ40', 'L1_jJ50', 'L1_jJ55', 'L1_jJ60', 'L1_jJ80', 'L1_jJ90',
         'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
@@ -63,7 +64,6 @@ def defineMenu():
 
         # gJ - ATR-28029
         "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25",
-        "L1_gTE3","L1_gTE5","L1_gTE10","L1_gTE200",
 
          # LAr saturation
         'L1_LArSaturation',
@@ -154,6 +154,7 @@ def defineMenu():
         'L1_1ZDC_A_1ZDC_C_VjTE200', 'L1_ZDC_1XOR5_VjTE200',
         'L1_ZDC_XOR_VjTE200', 'L1_VZDC_A_VZDC_C_VjTE200',
         'L1_ZDC_A_C_VjTE50',
+        'L1_ZDC_OR_VjTE50', 'L1_ZDC_XOR_VjTE50', 'L1_TRT_ZDC_OR_VjTE50', 'L1_TRT_ZDC_A_C_VjTE50', 'L1_TRT_ZDC_XOR_VjTE50',  # for O+O/p+O
         #UPC jet items
         'L1_VZDC_A_VZDC_C_jTE5_VjTE200','L1_ZDC_XOR_jTE5_VjTE200',
         'L1_1ZDC_NZDC_jTE5_VjTE200','L1_5ZDC_A_5ZDC_C_jTE5_VjTE200',
@@ -165,6 +166,11 @@ def defineMenu():
         'L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200',
         'L1_ZDC_XOR_jJ5_VjTE200', 'L1_1ZDC_NZDC_jJ5_VjTE200', 'L1_VZDC_A_VZDC_C_jJ5_VjTE200',
         'L1_ZDC_XOR_jJ10_VjTE200', 'L1_1ZDC_NZDC_jJ10_VjTE200', 'L1_VZDC_A_VZDC_C_jJ10_VjTE200',
+        # ATR-30727
+        'L1_2jJ5_VjTE200', 'L1_eTAU1_jJ5_VjTE200', 'L1_jJ5_TRT_VjTE200',
+        'L1_2jJ5_TRT_VjTE200', 'L1_eTAU1_jJ5_TRT_VjTE200',
+        'L1_jJ5p30ETA49_VjTE200', 'L1_jJ10p30ETA49_VjTE200',
+        'L1_2jJ5p30ETA49_VjTE200', 'L1_2jJ10p30ETA49_VjTE200',
 
         #UPC hmt trk15
         'L1_MBTS_1_VZDC_A_ZDC_C_VjTE200', 'L1_MBTS_1_1ZDC_NZDC_VjTE200',
@@ -256,14 +262,8 @@ def defineMenu():
         'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
         'L1_eEM9_AFP_A_OR_C','L1_eEM9_AFP_A_AND_C',
 
-        'L1_AFP_A_OR_C_J12', 'L1_AFP_A_AND_C_J12',
         'L1_AFP_A_OR_C_jJ20', 'L1_AFP_A_AND_C_jJ20',
         'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
-     
-        'L1_AFP_A_AND_C_TOF_J20', 'L1_AFP_A_AND_C_TOF_T0T1_J20', 
-        'L1_AFP_A_AND_C_TOF_J30', 'L1_AFP_A_AND_C_TOF_T0T1_J30',
-        'L1_AFP_A_AND_C_TOF_J50', 'L1_AFP_A_AND_C_TOF_T0T1_J50',
-        'L1_AFP_A_AND_C_TOF_J75', 'L1_AFP_A_AND_C_TOF_T0T1_J75',
 
         'L1_AFP_A_AND_C_TOF_jJ50', 'L1_AFP_A_AND_C_TOF_T0T1_jJ50', 
         'L1_AFP_A_AND_C_TOF_jJ60', 'L1_AFP_A_AND_C_TOF_T0T1_jJ60',

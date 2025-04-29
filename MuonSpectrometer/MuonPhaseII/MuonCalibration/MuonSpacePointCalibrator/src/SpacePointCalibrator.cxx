@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "SpacePointCalibrator.h"
 
@@ -23,10 +23,6 @@ namespace MuonR4{
      using CalibSpacePointPtr = ISpacePointCalibrator::CalibSpacePointPtr;
      using State = CalibratedSpacePoint::State;
      using namespace SegmentFit;
-
-
-    SpacePointCalibrator::SpacePointCalibrator(const std::string& type, const std::string &name, const IInterface* parent) :
-            base_class(type, name, parent) {}
 
     StatusCode SpacePointCalibrator::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
@@ -70,7 +66,10 @@ namespace MuonR4{
                                                        const Amg::Vector3D& dirInChamb,
                                                        const double timeOffset) const {
         
-        SG::ReadHandle gctx{m_geoCtxKey, ctx};
+        const ActsGeometryContext* gctx{nullptr};
+        if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
+            return nullptr;
+        }
         const Amg::Vector3D& spPos{spacePoint->positionInChamber()};
         const Amg::Transform3D& locToGlob{spacePoint->msSector()->localToGlobalTrans(*gctx)};
         Amg::Vector3D chDir{spacePoint->directionInChamber()};
@@ -96,11 +95,13 @@ namespace MuonR4{
                 if (spacePoint->dimension() == 1) {
                     auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
-                    calibInput.setTrackDirection(locToGlob.linear() * dirInChamb);
+                    calibInput.setTrackDirection(locToGlob.linear() * dirInChamb,
+                                                 dirInChamb.phi() || posInChamb[toInt(AxisDefs::phi)] );
                     calibInput.setTimeOfFlight(timeOfArrival);
                     calibInput.setClosestApproach(std::move(closestApproach));
                     ATH_MSG_VERBOSE("Parse hit calibration "<<m_idHelperSvc->toString(dc->identify())<<", "<<calibInput);
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(ctx, calibInput);
+                    ATH_MSG_VERBOSE("Returned calibration object "<<calibOutput);
                     State fitState{State::Valid};
                     AmgSymMatrix(2) diagCov{AmgSymMatrix(2)::Identity()};
                     diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()),2);
@@ -111,11 +112,7 @@ namespace MuonR4{
                         fitState =  State::FailedCalib;
                         diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
                     } else {
-                        double uncert = calibOutput.driftRadiusUncert();
-                        if(m_doMdtUncertFromProp) {
-                            uncert = std::hypot(uncert, calibOutput.driftUncertSigProp());
-                        }
-                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(m_mdtErrorScale * uncert, 2);
+                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(calibOutput.driftRadiusUncert(), 2);
                     }
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);
                     calibSP->setCovariance<2>(jac.inverse()*diagCov*jac);
@@ -143,7 +140,7 @@ namespace MuonR4{
                         diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()), 2);
                         fitState = State::FailedCalib;
                     } else {
-                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(m_mdtErrorScale * calibOutput.uncertPrimaryR(), 2);
+                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(calibOutput.uncertPrimaryR(), 2);
                         diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(calibOutput.sigmaZ(), 2);
                     }
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);
@@ -228,9 +225,8 @@ namespace MuonR4{
                                                const CalibratedSpacePoint& spacePoint) const {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
-            bool valid{false};
-            const double driftTime = calibConsts->rtRelation->tr()->tFromR(spacePoint.driftRadius(), valid);
-            return calibConsts->rtRelation->rt()->driftVelocity(driftTime);
+            const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
+            return calibConsts->rtRelation->rt()->driftVelocity(driftTime.value_or(0.));
         }
         return 0.;
     }
@@ -238,9 +234,8 @@ namespace MuonR4{
                                                    const CalibratedSpacePoint& spacePoint) const  {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
-            bool valid{false};
-            const double driftTime = calibConsts->rtRelation->tr()->tFromR(spacePoint.driftRadius(), valid);
-            return calibConsts->rtRelation->rt()->driftAcceleration(driftTime);
+            const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
+            return calibConsts->rtRelation->rt()->driftAcceleration(driftTime.value_or(0.));
         }
         return 0.;
     }

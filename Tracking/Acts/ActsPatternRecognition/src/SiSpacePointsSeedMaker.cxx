@@ -548,7 +548,7 @@ namespace ActsTrk {
     // -- no additional iteration is foreseen for fast tracking case
 
     bool isPixel = (m_fastTracking or data.iteration == 1) and m_pixel;
-    bool isStrip = not m_fastTracking and data.iteration == 0 and m_strip;
+    bool isStrip = not m_fastTracking and not m_GbtsSeeding and data.iteration == 0 and m_strip;
 
     // The Acts Seed tool requires beamspot information for the space points already here
     if (data.iteration == 0) 

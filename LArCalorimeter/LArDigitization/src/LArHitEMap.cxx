@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDigitization/LArHitEMap.h"
@@ -17,7 +17,6 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-LArHitEMap::~LArHitEMap() = default;
 
 //bool LArHitEMap::Initialize(std::vector<bool>& flags, bool windows, bool digit)
 LArHitEMap::LArHitEMap(const LArOnOffIdMapping* cabling, const CaloCell_ID* cellid, const CaloDetDescrManager* cddMgr, bool digit) :

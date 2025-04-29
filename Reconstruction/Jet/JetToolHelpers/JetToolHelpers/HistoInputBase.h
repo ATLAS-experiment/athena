@@ -5,13 +5,16 @@
 #ifndef JETTOOLHELPERS_HISTOINPUTBASE_H
 #define JETTOOLHELPERS_HISTOINPUTBASE_H
 
-#include <memory>
-#include "TH1.h"
-#include "TH2.h"
 
 #include "JetAnalysisInterfaces/IVarTool.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
+
+#include "TH1.h" //unique_ptr member, and d'tor defined here
+#include <string>
+#include <memory>
+
+class TAxis;
 
 namespace JetHelper {
 
@@ -31,7 +34,9 @@ class HistoInputBase :public asg::AsgTool, virtual public IVarTool
         std::string getFileName() const { return m_fileName; };
         /// Return the name of the histogram 
         std::string getHistName() const { return m_histName; };
-   
+	/// Returns the underlying histogram
+        TH1& getHistogram() { return *m_hist; };
+ 
     private:
         /// path to the file with histrograms
         Gaudi::Property< std::string > m_fileName { this, "inputfile", "JetUncertainties/CalibArea-08/rel21/Summer2019/R4_AllComponents.root", "File containing histograms" };
@@ -56,7 +61,7 @@ class HistoInputBase :public asg::AsgTool, virtual public IVarTool
             OnlyX,      // Interpolate only in the x dimension
             OnlyY       // Interpolate only in the y dimension
         };
-        InterpType m_interpNum;
+        InterpType m_interpNum{InterpType::UNKNOWN};
     
 };
 } // namespace JetHelper

@@ -16,6 +16,7 @@ from .MuonMenuSequences import (
     muCombSequenceGenCfg, muCombOvlpRmSequenceGenCfg, mul2mtCBOvlpRmSequenceGenCfg, 
     mul2IOOvlpRmSequenceGenCfg, muCombLRTSequenceGenCfg, muEFSASequenceGenCfg, 
     muEFSAFSSequenceGenCfg, efLateMuSequenceGenCfg, muEFCBSequenceGenCfg, 
+    muEFCBl2ioSequenceGenCfg, muEFCBl2mtSequenceGenCfg,
     muEFCBIDperfSequenceGenCfg, muEFCBLRTSequenceGenCfg, muEFCBLRTIDperfSequenceGenCfg, 
     muEFCBFSSequenceGenCfg, muEFIDtpSequenceGenCfg, muEFIsoSequenceGenCfg, 
     muEFMSIsoSequenceGenCfg, efLateMuRoISequenceGenCfg, muRoiClusterSequenceGenCfg )
@@ -142,7 +143,6 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     # --------------------
     def getmuEFCB(self, flags, is_probe_leg=False):
-
         if 'invm' in self.chainPart['invMassInfo']: # No T&P support, add if needed
             return self.getStep(flags, 'EFCB', [muEFCBSequenceGenCfg], comboTools=[TrigMuonEFInvMassHypoToolFromDict], is_probe_leg=is_probe_leg)
         elif "LRT" in self.chainPart['addInfo']:
@@ -155,7 +155,15 @@ class MuonChainConfiguration(ChainConfigurationBase):
         elif "idtp" in self.chainPart['addInfo']:
             return self.getStep(flags, 'EFIDTP', [muEFIDtpSequenceGenCfg], is_probe_leg=is_probe_leg)
         else:
-            return self.getStep(flags, 'EFCB', [muEFCBSequenceGenCfg], is_probe_leg=is_probe_leg)
+            if flags.Muon.enableTrigIDtrackReuse:
+                if "l2io" in self.chainPart['l2AlgInfo']:
+                    return self.getStep(flags, 'EFCBl2io', [muEFCBl2ioSequenceGenCfg], is_probe_leg=is_probe_leg)
+                elif "l2mt" in self.chainPart['l2AlgInfo']:
+                    return self.getStep(flags, 'EFCBl2mt', [muEFCBl2mtSequenceGenCfg], is_probe_leg=is_probe_leg)
+                else:
+                    return self.getStep(flags, 'EFCB', [muEFCBSequenceGenCfg], is_probe_leg=is_probe_leg)
+            else:
+                return self.getStep(flags, 'EFCB', [muEFCBSequenceGenCfg], is_probe_leg=is_probe_leg)
 
     # --------------------
     def getFSmuEFSA(self, flags, is_probe_leg=False):
@@ -181,20 +189,16 @@ class MuonChainConfiguration(ChainConfigurationBase):
         return self.getStep(flags, 'muEFMSIso',[ muEFMSIsoSequenceGenCfg], is_probe_leg=is_probe_leg)
 
     #--------------------
-    def getmuMSEmptyAll(self, flags, stepID): # No T&P info needed for empty step?
-        return self.getEmptyStep(stepID,'muMS_empty')
-
-    #--------------------
     def getmuMSEmpty(self, flags, is_probe_leg=False): # No T&P info needed for empty step?
-        return self.getmuMSEmptyAll(flags, 2)
+        return self.getEmptyStep('muMS_empty')
 
     #--------------------
     def getmuFastEmpty(self, flags, is_probe_leg=False): # No T&P info needed for empty step?
-        return self.getEmptyStep(1,'muFast_empty')
+        return self.getEmptyStep('muFast_empty')
 
     #--------------------
     def getEFCBEmpty(self, flags, is_probe_leg=False): # No T&P info needed for empty step?
-        return self.getEmptyStep(4,'muefCB_Empty')
+        return self.getEmptyStep('muefCB_Empty')
 
     #--------------------
     def getLateMuRoI(self, flags, is_probe_leg=False): # No T&P support, add if needed

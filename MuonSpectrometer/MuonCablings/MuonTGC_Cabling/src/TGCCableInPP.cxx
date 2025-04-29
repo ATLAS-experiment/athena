@@ -13,66 +13,48 @@ namespace MuonTGC_Cabling {
 
 // Constructor & Destructor
 TGCCableInPP::TGCCableInPP(const std::string& filename)
-  : TGCCable(TGCCable::InPP)
-{
-  m_database[TGCId::Endcap][TGCId::WD] = new TGCDatabaseInPP(filename,"EWD");
-  m_database[TGCId::Endcap][TGCId::WT] = new TGCDatabaseInPP(filename,"EWT");
-  m_database[TGCId::Endcap][TGCId::SD] = new TGCDatabaseInPP(filename,"ESD");
-  m_database[TGCId::Endcap][TGCId::ST] = new TGCDatabaseInPP(filename,"EST");
-  m_database[TGCId::Endcap][TGCId::WI] = new TGCDatabaseInPP(filename,"EWI");
-  m_database[TGCId::Endcap][TGCId::SI] = new TGCDatabaseInPP(filename,"ESI");
-  m_database[TGCId::Forward][TGCId::WD] = new TGCDatabaseInPP(filename,"FWD");
-  m_database[TGCId::Forward][TGCId::WT] = new TGCDatabaseInPP(filename,"FWT");
-  m_database[TGCId::Forward][TGCId::SD] = new TGCDatabaseInPP(filename,"FSD");
-  m_database[TGCId::Forward][TGCId::ST] = new TGCDatabaseInPP(filename,"FST");
-  m_database[TGCId::Forward][TGCId::WI] = new TGCDatabaseInPP(filename,"FWI");
-  m_database[TGCId::Forward][TGCId::SI] = new TGCDatabaseInPP(filename,"FSI");
+  : TGCCable(TGCCable::InPP) {
+  m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabaseInPP>(filename, "EWD");
+  m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabaseInPP>(filename, "EWT");
+  m_database[TGCId::Endcap][TGCId::SD] = std::make_unique<TGCDatabaseInPP>(filename, "ESD");
+  m_database[TGCId::Endcap][TGCId::ST] = std::make_unique<TGCDatabaseInPP>(filename, "EST");
+  m_database[TGCId::Endcap][TGCId::WI] = std::make_unique<TGCDatabaseInPP>(filename, "EWI");
+  m_database[TGCId::Endcap][TGCId::SI] = std::make_unique<TGCDatabaseInPP>(filename, "ESI");
+  m_database[TGCId::Forward][TGCId::WD] = std::make_unique<TGCDatabaseInPP>(filename, "FWD");
+  m_database[TGCId::Forward][TGCId::WT] = std::make_unique<TGCDatabaseInPP>(filename, "FWT");
+  m_database[TGCId::Forward][TGCId::SD] = std::make_unique<TGCDatabaseInPP>(filename, "FSD");
+  m_database[TGCId::Forward][TGCId::ST] = std::make_unique<TGCDatabaseInPP>(filename, "FST");
+  m_database[TGCId::Forward][TGCId::WI] = std::make_unique<TGCDatabaseInPP>(filename, "FWI");
+  m_database[TGCId::Forward][TGCId::SI] = std::make_unique<TGCDatabaseInPP>(filename, "FSI");
 }
   
-TGCCableInPP::~TGCCableInPP(void)
-{
-  delete m_database[TGCId::Endcap][TGCId::WD];
-  delete m_database[TGCId::Endcap][TGCId::WT];
-  delete m_database[TGCId::Endcap][TGCId::SD];
-  delete m_database[TGCId::Endcap][TGCId::ST];
-  delete m_database[TGCId::Endcap][TGCId::WI];
-  delete m_database[TGCId::Endcap][TGCId::SI];
-  delete m_database[TGCId::Forward][TGCId::WD];
-  delete m_database[TGCId::Forward][TGCId::WT];
-
-  delete m_database[TGCId::Forward][TGCId::SD];
-  delete m_database[TGCId::Forward][TGCId::ST];
-  delete m_database[TGCId::Forward][TGCId::WI];
-  delete m_database[TGCId::Forward][TGCId::SI];
-}
-
 
 TGCChannelId* TGCCableInPP::getChannel(const TGCChannelId* channelId,
-				       bool orChannel) const {
+                                       const bool orChannel) const {
   if(channelId){
     if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::PPIn)
-      return getChannelOut(channelId,orChannel);
+      return getChannelOut(channelId, orChannel);
     if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::PPOut)
-      return getChannelIn(channelId,orChannel);
+      return getChannelIn(channelId, orChannel);
   }
   return nullptr;
 }
   
 TGCChannelId* TGCCableInPP::getChannelIn(const TGCChannelId* ppout,
-					 bool orChannel) const {
+                                         const bool orChannel) const {
   if(ppout->isValid()==false) return nullptr;
-  
+
   TGCId::ModuleType moduleType = ppout->getModuleType();
-  
+
   int ndatabaseP = 1;
   TGCDatabase* databaseP[2];
-  databaseP[0] = m_database[ppout->getRegionType()][moduleType];
+  databaseP[0] = m_database[ppout->getRegionType()][moduleType].get();
   // EI/FI
   //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
   //  use the same SLB chip
   //  The SLB chip is treated as TGCId::WI in TGCCableSLBToSSW.cxx
   if(moduleType==TGCId::WI) {
-    databaseP[1] = m_database[ppout->getRegionType()][TGCId::SI];
+    databaseP[1] = m_database[ppout->getRegionType()][TGCId::SI].get();
     ndatabaseP = 2;
   }
   
@@ -104,10 +86,10 @@ TGCChannelId* TGCCableInPP::getChannelIn(const TGCChannelId* ppout,
     } else {
       // ored channel
       if(databaseP[idatabaseP]->getEntrySize(i)==9) {
-	id = databaseP[idatabaseP]->getEntry(i,6);
-	block = databaseP[idatabaseP]->getEntry(i,7);
-	channel = databaseP[idatabaseP]->getEntry(i,8);
-	found = true; 
+        id = databaseP[idatabaseP]->getEntry(i,6);
+        block = databaseP[idatabaseP]->getEntry(i,7);
+        channel = databaseP[idatabaseP]->getEntry(i,8);
+        found = true; 
       } 
     }
   } 
@@ -127,7 +109,7 @@ TGCChannelId* TGCCableInPP::getChannelIn(const TGCChannelId* ppout,
 }
 
 TGCChannelId* TGCCableInPP::getChannelOut(const TGCChannelId* ppin,
-					  bool orChannel) const {
+                                          const bool orChannel) const {
   if(ppin->isValid()==false) return nullptr;
 
   const int ppinChannel = ppin->getChannel();
@@ -135,7 +117,7 @@ TGCChannelId* TGCCableInPP::getChannelOut(const TGCChannelId* ppin,
   const int ppinId = ppin->getId();
 
   TGCDatabase* databaseP =
-    m_database[ppin->getRegionType()][ppin->getModuleType()];
+    m_database[ppin->getRegionType()][ppin->getModuleType()].get();
 
   TGCChannelPPOut* ppout = nullptr;
   const int MaxEntry = databaseP->getMaxEntry();

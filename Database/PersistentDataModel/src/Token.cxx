@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModel/Token.h"
@@ -51,6 +51,21 @@ Token::Token(const Token* source) : m_refCount(1),
    }
    s_numCount++;
 }
+
+/// Move constructor.
+Token::Token(Token&& source)
+  : m_refCount (1),
+    m_technology (source.m_technology),
+    m_dbID (std::move (source.m_dbID)),
+    m_cntID (std::move (source.m_cntID)),
+    m_classID (std::move (source.m_classID)),
+    m_oid (std::move (source.m_oid)),
+    m_type (source.m_type),
+    m_auxString (std::move (source.m_auxString))
+{
+   s_numCount++;
+}
+    
 
 Token::~Token() {
    s_numCount--;
@@ -194,5 +209,7 @@ const Token& Token::set(Token* pToken) const {
 const Token& Token::setData(Token* pToken) const {
    this->set(pToken);
    pToken->m_oid.second = m_oid.second;
+   pToken->m_type = m_type;
+   pToken->m_auxString = m_auxString;
    return *this;
 }

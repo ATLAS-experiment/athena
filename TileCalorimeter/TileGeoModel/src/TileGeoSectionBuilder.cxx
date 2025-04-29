@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileGeoSectionBuilder.h"
@@ -33,6 +33,7 @@
 #include "GeoGenericFunctions/Variable.h"
 #include "GeoModelKernel/GeoXF.h"
 #include "GeoModelKernel/GeoSerialTransformer.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -66,12 +67,10 @@ TileGeoSectionBuilder::TileGeoSectionBuilder(StoredMaterialManager* matManager,
 }
 
 
-TileGeoSectionBuilder::~TileGeoSectionBuilder()
-{
-}
+TileGeoSectionBuilder::~TileGeoSectionBuilder() = default;
 
 
-void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
+void TileGeoSectionBuilder::fillSection(PVLink&                  mother,
                                         int                      sec_number,
                                         double                   tile_rmax,
                                         double                   rminb,
@@ -91,7 +90,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
   const GeoMaterial* matAir = m_theMaterialManager->getMaterial("std::Air");
   const GeoMaterial* matIron = (m_switches.steel) ? m_theMaterialManager->getMaterial("tile::Steel")
       : m_theMaterialManager->getMaterial("std::Iron");
-  const GeoMaterial* matAluminium = 0;
+  const GeoMaterial* matAluminium{nullptr};
 
   // -----------------------------------------------------------------------------------------------------------------
   // Cut-outs
@@ -242,7 +241,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                                       heightGirderMother/2);
 
     GeoLogVol* lvGirderMother = new GeoLogVol("GirderMother",girderMother,matAir);
-    GeoPhysVol* pvGirderMother = new GeoPhysVol(lvGirderMother);
+    PVLink  pvGirderMother = new GeoPhysVol(lvGirderMother);
 
     fillGirder(pvGirderMother,
                tile_rmax,
@@ -250,7 +249,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                tan_delta_phi_2,
                thicknessGirderMother*(1./Gaudi::Units::cm));
 
-    GeoTransform* tfGirderMother = 0;
+    GeoTransform* tfGirderMother{nullptr};
 
     if (sec_number==3)
       tfGirderMother = new GeoTransform(GeoTrf::Translate3D((m_dbManager->TILBdzend()-m_dbManager->TILBdzend2())*Gaudi::Units::cm/2, 0.,
@@ -294,7 +293,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                                           heightFrontPlate/2);
 
         GeoLogVol* lvFrontPlateSh = new GeoLogVol("FrontPlateSh",frontPlateSh,matIron);
-        GeoPhysVol* pvFrontPlateSh = new GeoPhysVol(lvFrontPlateSh);
+        PVLink  pvFrontPlateSh = new GeoPhysVol(lvFrontPlateSh);
         GeoTransform* tfFrontPlateSh = new GeoTransform(GeoTrf::Translate3D(
                                                             -m_dbManager->TILBdzmodul()/2*Gaudi::Units::cm+thicknessFrontPlate/2, 0.,
                                                             (rminb - tile_rmax)/2*Gaudi::Units::cm));
@@ -341,7 +340,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
       */
 
       GeoLogVol* lvFrontPlate = new GeoLogVol("FrontPlate",frontPlate,matIron);
-      GeoPhysVol* pvFrontPlate = new GeoPhysVol(lvFrontPlate);
+      PVLink  pvFrontPlate = new GeoPhysVol(lvFrontPlate);
       GeoTransform* tfFrontPlate = new GeoTransform(GeoTrf::Translate3D(
                                                         (m_dbManager->TILBdzend1() - m_dbManager->TILBdzend2())/2*Gaudi::Units::cm+ dXCutB, 0.,
                                                         (m_dbManager->TILBrmin()-m_dbManager->TILBdrfront()/2-(tile_rmax + rminb)/2)*Gaudi::Units::cm));
@@ -366,7 +365,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                                       heightFrontPlate/2);
 
       GeoLogVol* lvFrontPlate = new GeoLogVol("FrontPlate",frontPlate,matIron);
-      GeoPhysVol* pvFrontPlate = new GeoPhysVol(lvFrontPlate);
+      PVLink  pvFrontPlate = new GeoPhysVol(lvFrontPlate);
       GeoTransform* tfFrontPlate = new GeoTransform(GeoTrf::Translate3D(
                                                         (m_dbManager->TILBdzend1() - m_dbManager->TILBdzend2())/2*Gaudi::Units::cm, 0.,
                                                         (m_dbManager->TILBrmin()-m_dbManager->TILBdrfront()/2-(tile_rmax + rminb)/2)*Gaudi::Units::cm));
@@ -405,7 +404,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                                       dy1EndPlate,
                                       dy2EndPlate,
                                       heightEndPlate/2);
-      GeoLogVol* lvEndPlateSh = 0;
+      GeoLogVol* lvEndPlateSh{nullptr};
 
       // if ( sec_number==2 && ( (ModuleNcp==37)||( ModuleNcp==60) ) )
       if (sec_number==2 && ((ModuleNcp>=35 && ModuleNcp<=37)||(ModuleNcp>=60 && ModuleNcp<=62)) ) { // Short endplate Cut-outs
@@ -479,7 +478,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
       // const GeoShape & endPlateShFinal = (endPlateSh->subtract( (*CutB)<<TransCutL ) );
       //subtract((*CutB)<<TransCutL);
 
-      GeoPhysVol* pvEndPlateSh = new GeoPhysVol(lvEndPlateSh);
+      PVLink  pvEndPlateSh = new GeoPhysVol(lvEndPlateSh);
 
       tfEndPlateSh = new GeoTransform(GeoTrf::Translate3D(
                                           specialModuleZShift +
@@ -506,7 +505,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                                      heightEndPlate/2);
 
       GeoLogVol* lvEndPlate1 = new GeoLogVol("EndPlate1",endPlate1,matIron);
-      GeoPhysVol* pvEndPlate1 = new GeoPhysVol(lvEndPlate1);
+      PVLink  pvEndPlate1 = new GeoPhysVol(lvEndPlate1);
 
       //Position air hole
       if (m_dbManager->TILBflangex() > 0.) {
@@ -517,7 +516,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                                       heightEPHole/2);
 
         GeoLogVol* lvEPHole1 = new GeoLogVol("EPHole1",epHole1,matAir);
-        GeoPhysVol* pvEPHole1 = new GeoPhysVol(lvEPHole1);
+        PVLink  pvEPHole1 = new GeoPhysVol(lvEPHole1);
         GeoTransform* tfEPHole1 = new GeoTransform(GeoTrf::Translate3D(0.,0.,
                                                                        (m_dbManager->TILBflangey()-(tile_rmax + rminb)/2)*Gaudi::Units::cm));
         pvEndPlate1->add(tfEPHole1);
@@ -548,7 +547,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
     heightEndPlate = (tile_rmax-rminb) * Gaudi::Units::cm;
 
 
-    GeoLogVol* lvEndPlate2 = 0;
+    GeoLogVol* lvEndPlate2{nullptr};
     GeoTrd* endPlate2 = new GeoTrd(thicknessEndPlate/2,
                                    thicknessEndPlate/2,
                                    dy1EndPlate,
@@ -620,7 +619,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
       lvEndPlate2 = new GeoLogVol("EndPlate2",endPlate2,matIron);
     }
 
-    GeoPhysVol* pvEndPlate2 = new GeoPhysVol(lvEndPlate2);
+    PVLink  pvEndPlate2 = new GeoPhysVol(lvEndPlate2);
 
     //Position air hole
     if (m_dbManager->TILBflangex() > 0) {
@@ -633,7 +632,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                                     heightEPHole/2);
 
       GeoLogVol* lvEPHole2 = new GeoLogVol("EPHole2",epHole2,matAir);
-      GeoPhysVol* pvEPHole2 = new GeoPhysVol(lvEPHole2);
+      PVLink  pvEPHole2 = new GeoPhysVol(lvEPHole2);
       GeoTransform* tfEPHole2 = new GeoTransform(GeoTrf::Translate3D(0.,0.,
                                                                      (m_dbManager->TILBflangey()-(tile_rmax + rminbT)/2)*Gaudi::Units::cm));
       pvEndPlate2->add(tfEPHole2);
@@ -664,8 +663,8 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
 
   GeoTrd *absorber{nullptr}, *absorber1{nullptr}, *absorber3{nullptr};
   GeoLogVol *lvAbsorber{nullptr}, *lvAbsorber1{nullptr}, *lvAbsorber3{nullptr};
-  GeoIntrusivePtr<GeoPhysVol> pvAbsorber{nullptr}, pvAbsorber1{nullptr}, pvAbsorber3{nullptr};
-  GeoPhysVol *pvTmp_Absorber1{nullptr}, *pvTmp_Absorber3{nullptr};
+  PVLink pvAbsorber{nullptr}, pvAbsorber1{nullptr}, pvAbsorber3{nullptr},
+         pvTmp_Absorber1{nullptr}, pvTmp_Absorber3{nullptr};
 
   // Perform different actions depending on sections
   switch (sec_number) {
@@ -751,16 +750,16 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
   double thicknessAbsorberChild;
   Variable periodInd;
 
-  GeoTrd* period = 0;
-  GeoLogVol* lvPeriod = 0;
-  GeoPhysVol* pvPeriod = 0;
-  GeoTransform* tfPeriod = 0;
-  GeoSerialTransformer* stPeriod = 0;
+  GeoTrd* period{nullptr};
+  GeoLogVol* lvPeriod{nullptr};
+  PVLink  pvPeriod{nullptr};
+  GeoTransform* tfPeriod{nullptr};
+  GeoSerialTransformer* stPeriod{nullptr};
 
-  GeoTrd* absorberChild = 0;
-  GeoLogVol* lvAbsorberChild = 0;
-  GeoPhysVol* pvAbsorberChild = 0;
-  GeoTransform* tfAbsorberChild = 0;
+  GeoTrd* absorberChild{nullptr};
+  GeoLogVol* lvAbsorberChild{nullptr};
+  PVLink  pvAbsorberChild{nullptr};
+  GeoTransform* tfAbsorberChild{nullptr};
 
   // Perform different actions depending on sections
   switch (sec_number) {
@@ -1348,7 +1347,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
 }
 
 
-void TileGeoSectionBuilder::fillGirder(GeoPhysVol*&             mother,
+void TileGeoSectionBuilder::fillGirder(PVLink &             mother,
                                        double                   tile_rmax,
                                        double                   tilb_rmax,
                                        double                   tan_delta_phi_2,
@@ -1364,10 +1363,10 @@ void TileGeoSectionBuilder::fillGirder(GeoPhysVol*&             mother,
 
   // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-  GeoTrd* girderElement = 0;
-  GeoLogVol* lvGirderElement = 0;
-  GeoPhysVol* pvGirderElement = 0;
-  GeoTransform* tfGirderElement = 0;
+  GeoTrd* girderElement{nullptr};
+  GeoLogVol* lvGirderElement{nullptr};
+  PVLink  pvGirderElement{nullptr};
+  GeoTransform* tfGirderElement{nullptr};
 
   int CurrentGird = 1;
   int j;
@@ -1432,7 +1431,7 @@ void TileGeoSectionBuilder::fillGirder(GeoPhysVol*&             mother,
 }
 
 
-void TileGeoSectionBuilder::fillFinger(GeoPhysVol*&             mother,
+void TileGeoSectionBuilder::fillFinger(PVLink &             mother,
                                        int                      sec_number,
                                        double                   tile_rmax,
                                        double                   tilb_rmax,
@@ -1490,17 +1489,17 @@ void TileGeoSectionBuilder::fillFinger(GeoPhysVol*&             mother,
 
   // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-  GeoTrd* fingerElementTrd = 0;
-  GeoTrap* fingerElementTrap = 0;
+  GeoTrd* fingerElementTrd{nullptr};
+  GeoTrap* fingerElementTrap{nullptr};
 
   GeoBox *fingerCablesL{nullptr}, *fingerCablesR{nullptr};
-  GeoPhysVol *pvFingerElement = 0, *pvFingerCablesL{nullptr}, *pvFingerCablesR{nullptr};
-  GeoLogVol *lvFingerElement = 0, *lvFingerCablesL{nullptr}, *lvFingerCablesR{nullptr};
-  GeoTransform* tfFingerElement = 0, *tfFingerCables{nullptr};
+  PVLink pvFingerElement{nullptr}, pvFingerCablesL{nullptr}, pvFingerCablesR{nullptr};
+  GeoLogVol *lvFingerElement{nullptr}, *lvFingerCablesL{nullptr}, *lvFingerCablesR{nullptr};
+  GeoTransform* tfFingerElement{nullptr}, *tfFingerCables{nullptr};
 
-  GeoTransform* ZrotateMod = 0;
-  GeoTransform* yrotateMod = 0;
-  GeoTransform* zrotateMod = 0;
+  GeoTransform* ZrotateMod{nullptr};
+  GeoTransform* yrotateMod{nullptr};
+  GeoTransform* zrotateMod{nullptr};
 
   const GeoMaterial *currentMaterial{nullptr}, *leftMaterial{nullptr}, *rightMaterial{nullptr};
   std::string currentName, leftName, rightName;
@@ -1756,7 +1755,7 @@ void TileGeoSectionBuilder::fillFinger(GeoPhysVol*&             mother,
 }
 
 
-void TileGeoSectionBuilder::fillPeriod(GeoPhysVol*&              mother,
+void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
                                        double                    thickness,
                                        double                    dzglue,
                                        double                    tan_delta_phi_2,
@@ -1765,25 +1764,25 @@ void TileGeoSectionBuilder::fillPeriod(GeoPhysVol*&              mother,
 {
   int j;
   int CurrentScin = 0;
-  const GeoShape* glue = 0;
-  GeoLogVol* lvGlue = 0;
-  GeoPhysVol* pvGlue = 0;
-  GeoTransform* tfGlue = 0;
+  const GeoShape* glue{nullptr};
+  GeoLogVol* lvGlue{nullptr};
+  PVLink  pvGlue{nullptr};
+  GeoTransform* tfGlue{nullptr};
 
   double scintiWrapInZ, scintiWrapInR, scintiThickness, scintiDeltaInPhi;
   double scintiHeight, scintiRC, scintiZPos, dy1Scintillator, dy2Scintillator;
-  const GeoShape* scintillator = 0;
-  GeoLogVol* lvScintillator = 0;
-  GeoPhysVol* pvScintillator = 0;
-  GeoTransform* tfScintillator = 0;
+  const GeoShape* scintillator{nullptr};
+  GeoLogVol* lvScintillator{nullptr};
+  PVLink  pvScintillator{nullptr};
+  GeoTransform* tfScintillator{nullptr};
 
   double thicknessWrapper, heightWrapper, dy1Wrapper, dy2Wrapper;
-  const GeoShape* wrapper = 0;
-  GeoLogVol* lvWrapper = 0;
-  GeoPhysVol* pvWrapper = 0;
-  GeoTransform* tfWrapper = 0;
+  const GeoShape* wrapper{nullptr};
+  GeoLogVol* lvWrapper{nullptr};
+  PVLink  pvWrapper{nullptr};
+  GeoTransform* tfWrapper{nullptr};
 
-  GeoIdentifierTag* idTag = 0;
+  GeoIdentifierTag* idTag{nullptr};
 
   (*m_log) << MSG::VERBOSE <<" TileGeoSectionBuilder::fillPeriod"<< endmsg;
 
@@ -3477,6 +3476,10 @@ void TileGeoSectionBuilder::setExtendedPeriodThickness(double val)
 
 void TileGeoSectionBuilder::checktransfunc(double absorber, double period, int np, double center)
 {
+  if (np<0){
+    (*m_log) << MSG::WARNING << "TileGeoSectionBuilder::checktransfunc: np is negative!"<<endmsg;
+    return;
+  } 
   (*m_log) << MSG::VERBOSE
            << std::setprecision (std::numeric_limits<double>::digits10 + 1)
            << " Absorber center = " << center

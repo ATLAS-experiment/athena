@@ -5,4 +5,3 @@ AuditorSvc.Auditors  += { "AlgContextAuditor"};
 StoreGateSvc.OutputLevel = 1;
 StoreGateSvc.ActivateHistory = false;
 ClassIDSvc.CLIDDBFiles = {};
-MessageSvc.useColors        = true;

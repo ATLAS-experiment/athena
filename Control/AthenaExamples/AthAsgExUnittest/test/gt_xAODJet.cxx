@@ -19,7 +19,6 @@ namespace Athena_test {
     xAOD::Jet jet;
   };
 
-  // cppcheck-suppress syntaxError
   TEST_F( xAODJetTest, jetpt ) {
     jet.setJetP4( xAOD::JetFourMom_t( 1.0, 1.0, 0.0, 3.0 ) );
     EXPECT_EQ( jet.pt(), 1.0 );

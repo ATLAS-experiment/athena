@@ -11,6 +11,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
+#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include <vector>
 
 
@@ -46,6 +47,7 @@ private:
   std::vector<int> m_towers;
   std::vector<FPGATrackSimHit> m_missing_hits;// vector to save hits not mapped, debugging only
   std::vector<int> m_missing_hit_codes; // for histograms used in debugging
+  const FPGATrackSimPlaneMap* m_pmap = nullptr;
 
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -306,8 +306,8 @@ TauSelectionCutGNTauScoreSigTrans::TauSelectionCutGNTauScoreSigTrans(TauSelectio
 //______________________________________________________________________________
 void TauSelectionCutGNTauScoreSigTrans::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
-  SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v1trunc");
-  hHist.Fill(acc(xTau));
+  static const SG::ConstAccessor<float> acc_GNTauScoreSigTrans("GNTauScoreSigTrans_v0prune");	
+  hHist.Fill(acc_GNTauScoreSigTrans(xTau));
 }
 //______________________________________________________________________________
 void TauSelectionCutGNTauScoreSigTrans::setAcceptInfo(asg::AcceptInfo& info) const
@@ -320,8 +320,8 @@ bool TauSelectionCutGNTauScoreSigTrans::accept(const xAOD::TauJet& xTau,
                                              asg::AcceptData& acceptData)
 {
   // check GNTau score, if tau has a GNTau score in one of the regions requiered then return true; false otherwise
-  SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v1trunc");
-  double dGNTauScoreSigTrans = acc(xTau); 
+  static const SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v0prune");
+  float dGNTauScoreSigTrans = acc(xTau); 
   unsigned int iNumGNTauSigTransRegion = m_tTST->m_vGNTauSigTransRegion.size()/2;
   for( unsigned int iGNTauSigTransRegion = 0; iGNTauSigTransRegion < iNumGNTauSigTransRegion; iGNTauSigTransRegion++ )
   {
@@ -367,11 +367,21 @@ TauSelectionCutJetIDWP::TauSelectionCutJetIDWP(TauSelectionTool* tTST)
 //______________________________________________________________________________
 void TauSelectionCutJetIDWP::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
-  // FIXME: should this be extended to gntau ID?
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)); 
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigLoose)+2);
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigMedium)+4);
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)+6);
+  if(m_tTST->m_useGNTau){ 
+     static const SG::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v0prune");
+     static const SG::ConstAccessor<char> acc_gnTauLoose("GNTauL_v0prune");
+     static const SG::ConstAccessor<char> acc_gnTauMedium("GNTauM_v0prune");
+     static const SG::ConstAccessor<char> acc_gnTauTight("GNTauT_v0prune");
+     hHist.Fill(acc_gnTauVeryLoose(xTau));
+     hHist.Fill(acc_gnTauLoose(xTau)+2);
+     hHist.Fill(acc_gnTauMedium(xTau)+4);
+     hHist.Fill(acc_gnTauTight(xTau)+6);
+  } else {
+     hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)); 
+     hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigLoose)+2);
+     hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigMedium)+4);
+     hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)+6);
+  }
 }
 
 //______________________________________________________________________________
@@ -407,22 +417,22 @@ bool TauSelectionCutJetIDWP::accept(const xAOD::TauJet& xTau,
     if (xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)) bPass = true;
     break;
   case JETIDGNTAUVERYLOOSE:
-    static const SG::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v1trunc");
+    static const SG::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v0prune");
     if (!acc_gnTauVeryLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau VeryLoose WP not available" << endmsg;
     else bPass = acc_gnTauVeryLoose(xTau);
     break;
   case JETIDGNTAULOOSE:
-    static const SG::ConstAccessor<char> acc_gnTauLoose("GNTauL_v1trunc");
+    static const SG::ConstAccessor<char> acc_gnTauLoose("GNTauL_v0prune");
     if (!acc_gnTauLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Loose WP not available" << endmsg;
     else bPass = acc_gnTauLoose(xTau);
     break;
   case JETIDGNTAUMEDIUM:
-    static const SG::ConstAccessor<char> acc_gnTauMedium("GNTauM_v1trunc");
+    static const SG::ConstAccessor<char> acc_gnTauMedium("GNTauM_v0prune");
     if (!acc_gnTauMedium.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Medium WP not available" << endmsg;
     else bPass = acc_gnTauMedium(xTau);
     break;
   case JETIDGNTAUTIGHT:
-    static const SG::ConstAccessor<char> acc_gnTauTight("GNTauT_v1trunc");
+    static const SG::ConstAccessor<char> acc_gnTauTight("GNTauT_v0prune");
     if (!acc_gnTauTight.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Tight WP not available" << endmsg;
     else bPass = acc_gnTauTight(xTau);
     break;
@@ -470,7 +480,7 @@ bool TauSelectionCutRNNEleScore::accept(const xAOD::TauJet& xTau,
                                      asg::AcceptData& acceptData)
 {
   SG::ConstAccessor<float> acc ("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
-  double fEleRNNScore = 0.;
+  float fEleRNNScore = 0.;
   if(m_tTST->m_iEleIDVersion!=0){
     fEleRNNScore = acc(xTau);
   }else{
@@ -576,7 +586,12 @@ bool TauSelectionCutEleIDWP::accept(const xAOD::TauJet& xTau,
     m_tTST->msg() << MSG::WARNING << "The electron ID working point with the enum " << m_tTST->m_iEleIDWP << " is not available" << endmsg;
     break;
   }
-    
+
+  // apply eVeto cut only for 1 prong tau 
+  if( xTau.nTracks() != 1){
+     bPass = true;
+  }
+
   if (bPass)
   {
     acceptData.setCutResult( "EleIDWP", true );

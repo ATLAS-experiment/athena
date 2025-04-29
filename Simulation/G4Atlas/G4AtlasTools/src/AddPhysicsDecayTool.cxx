@@ -7,6 +7,8 @@
 // local
 #include "G4AtlasTools/AddPhysicsDecayTool.h"
 
+#include <G4VPhysicsConstructor.hh>
+#include <memory>
 #include <sstream>
 
 // Geant4 physics lists
@@ -68,13 +70,12 @@ StatusCode AddPhysicsDecayTool::initialize( )
   return StatusCode::SUCCESS;
 }
 
-void AddPhysicsDecayTool::ConstructProcess()
-{
+void AddPhysicsDecayTool::PhysicsConstructor::ConstructProcess() {
   PARTICLEITERATOR->reset();
   while( (*PARTICLEITERATOR)() )
     {
       G4ParticleDefinition *particle = PARTICLEITERATOR->value();
-      if (m_ParticleName.value()== static_cast<const std::string&>(particle->GetParticleName()))
+      if (m_ParticleName== static_cast<const std::string&>(particle->GetParticleName()))
         {
 
           G4DecayTable *table = particle->GetDecayTable();
@@ -87,15 +88,15 @@ void AddPhysicsDecayTool::ConstructProcess()
 
           if (m_Daughters_vec.size()==2)
             {
-              mode_vec = new G4PhaseSpaceDecayChannel(m_ParticleName.value(),m_BR,2,m_Daughters_vec[0],m_Daughters_vec[1]);
+              mode_vec = new G4PhaseSpaceDecayChannel(m_ParticleName,m_BR,2,m_Daughters_vec[0],m_Daughters_vec[1]);
             }
           else if (m_Daughters_vec.size()==3)
             {
-              mode_vec = new G4PhaseSpaceDecayChannel(m_ParticleName.value(),m_BR,3,m_Daughters_vec[0],m_Daughters_vec[1],m_Daughters_vec[2]);
+              mode_vec = new G4PhaseSpaceDecayChannel(m_ParticleName,m_BR,3,m_Daughters_vec[0],m_Daughters_vec[1],m_Daughters_vec[2]);
             }
           else if (m_Daughters_vec.size()==4)
             {
-              mode_vec = new G4PhaseSpaceDecayChannel(m_ParticleName.value(),m_BR,4,m_Daughters_vec[0],m_Daughters_vec[1],m_Daughters_vec[2],m_Daughters_vec[3]);
+              mode_vec = new G4PhaseSpaceDecayChannel(m_ParticleName,m_BR,4,m_Daughters_vec[0],m_Daughters_vec[1],m_Daughters_vec[2],m_Daughters_vec[3]);
             }
           else
             {
@@ -116,22 +117,19 @@ void AddPhysicsDecayTool::ConstructProcess()
 
           table->Insert(mode_vec);
 
-          ATH_MSG_DEBUG( "Adding decay to "<<m_ParticleName.value() );
+          ATH_MSG_DEBUG( "Adding decay to "<<m_ParticleName);
           particle->SetDecayTable(table);
         }
     }
 }
 
+auto AddPhysicsDecayTool::GetPhysicsOption() -> UPPhysicsConstructor {
 
-AddPhysicsDecayTool* AddPhysicsDecayTool::GetPhysicsOption()
-{
-
-  return this;
+  return std::make_unique<AddPhysicsDecayTool::PhysicsConstructor>(
+      name(), this->msgLevel(), m_ParticleName.value(), m_BR.value(),
+      m_Daughters_vec);
 }
 
-
-
-void AddPhysicsDecayTool::ConstructParticle()
-{
+void AddPhysicsDecayTool::PhysicsConstructor::ConstructParticle() {
   //This should remain empty
 }

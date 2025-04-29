@@ -1,19 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_OuterSide.h"
+#include "SCT_OuterSide.h"
 
-#include "SCT_GeoModel/SCT_Identifier.h"
-#include "SCT_GeoModel/SCT_MaterialManager.h"
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_BarrelModuleParameters.h"
-#include "SCT_GeoModel/SCT_GeneralParameters.h"
+#include "SCT_Identifier.h"
+#include "SCT_MaterialManager.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_BarrelModuleParameters.h"
+#include "SCT_GeneralParameters.h"
 
 //  module parts.
-#include "SCT_GeoModel/SCT_Sensor.h"
-#include "SCT_GeoModel/SCT_Hybrid.h"
-#include "SCT_GeoModel/SCT_Pigtail.h"
+#include "SCT_Sensor.h"
+#include "SCT_Hybrid.h"
+#include "SCT_Pigtail.h"
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 

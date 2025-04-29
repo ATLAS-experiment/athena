@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthMpEvtLoopMgr.h"
@@ -320,6 +320,8 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
     if(sharedWriterWithFAFE && (*it)->name() == "AthMpEvtLoopMgr.SharedWriterTool") continue;
     (*it)->useFdsRegistry(registry);
     (*it)->setRandString(randStream.str());
+    (*it)->setMaxEvt(maxevt);
+    (*it)->setMPRunStop(this);
     if(it==m_tools.begin()) {
       incSvc->fireIncident(Incident(name(),"PreFork")); // Do it only once
     }
@@ -386,6 +388,7 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
 
 StatusCode AthMpEvtLoopMgr::stopRun()
 {
+  m_scheduledStop = true;
   return m_evtProcessor->stopRun();
 }
 

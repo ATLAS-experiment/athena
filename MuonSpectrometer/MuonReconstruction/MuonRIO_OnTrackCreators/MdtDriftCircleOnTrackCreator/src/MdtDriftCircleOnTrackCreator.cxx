@@ -9,7 +9,6 @@
 #include "MdtCalibData/IRtResolution.h"
 #include "MdtCalibData/MdtFullCalibData.h"
 #include "MdtCalibData/MdtRtRelation.h"
-#include "MdtCalibData/TrRelation.h"
 #include "MuonPrepRawData/MdtPrepData.h"
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
 #include "MuonRIO_OnTrack/MuonDriftCircleErrorStrategy.h"
@@ -114,7 +113,7 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
         msg(MSG::INFO) << ss.str() << endmsg;
     }
     if (m_isMC)
-        ATH_MSG_INFO("Using MC error tuning");
+        ATH_MSG_DEBUG("Using MC error tuning");
     ATH_MSG_VERBOSE("A correction is made if set to true: do_MDT = " << m_doMdt);
 
     if (m_timeCorrectionType == COSMICS_TOF) {
@@ -153,7 +152,7 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdt
 
     MdtCalibInput calibInput{mdtPrd};
     calibInput.setClosestApproach(GP);
-    if (GD) calibInput.setTrackDirection((*GD).unit());
+    if (GD) calibInput.setTrackDirection((*GD).unit(), true);
 
     switch (m_timeCorrectionType) {
         case ATLTIME:

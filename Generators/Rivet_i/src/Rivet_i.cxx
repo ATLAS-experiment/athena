@@ -34,6 +34,7 @@
 
 Rivet_i::Rivet_i(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
+  m_needsConversion(false),
   m_analysisHandler(0),
   m_init(false)
 {
@@ -77,54 +78,22 @@ StatusCode Rivet_i::initialize ATLAS_NOT_THREAD_SAFE () {
 
   // First set (overwrite, if necessary) the RIVET_ANALYSIS_PATH variable
   std::string env_rap(getenv_str("RIVET_ANALYSIS_PATH"));
-  if (m_anapath.size() > 0) {
+  if (!m_anapath.empty()) {
     ATH_MSG_INFO("Setting Rivet plugin analyses loader env path: " << m_anapath);
     if (!env_rap.empty()) ATH_MSG_INFO("Overwriting environment's RIVET_ANALYSIS_PATH = " << env_rap << "!");
     setenv("RIVET_ANALYSIS_PATH", m_anapath.c_str(), 1);
   }
 
-  // Now horrid runtime ATLAS env variable and CMT path mangling to work out the std analysis plugin search paths
-  std::vector<std::string> anapaths;
-  const std::string cmtpath = getenv_str("CMTPATH");
-  if (cmtpath.empty()) {
-    ATH_MSG_WARNING("$CMTPATH variable not set: finding the main analysis plugin directory will be difficult...");
-  } else {
-    std::vector<std::string> cmtpaths;
-    std::stringstream ss(cmtpath);
-    std::string item;
-    while (std::getline(ss, item, ':')) {
-      cmtpaths.push_back(std::move(item));
-    }
-    const std::string cmtconfig = getenv_str("CMTCONFIG");
-    if (cmtconfig.empty()) {
-      ATH_MSG_WARNING("$CMTCONFIG variable not set: finding the main analysis plugin directory will be difficult...");
-    }
-    else {
-      const std::string libpath = "/InstallArea/" + cmtconfig + "/lib";
-      for (const std::string& p : cmtpaths) {
-        const std::string cmtlibpath = p + libpath;
-        if (PathResolver::find_file_from_list("RivetMCAnalyses.so", cmtlibpath).empty()) continue;
-        ATH_MSG_INFO("Appending " + cmtlibpath + " to default Rivet analysis search path");
-        anapaths.push_back(cmtlibpath);
-        break;
-      }
-    }
-  }
-
-  // Then re-grab RIVET_ANALYSIS_PATH and append all the discovered std plugin paths to it
-  std::string anapathstr = getenv_str("RIVET_ANALYSIS_PATH");
-  for (const std::string& ap : anapaths) {
-    if (anapathstr.size() > 0) anapathstr += ":";
-    anapathstr += ap;
-  }
-  setenv("RIVET_ANALYSIS_PATH", anapathstr.c_str(), 1);
-
-  // Get the final form of RIVET_ANALYSIS_PATH and talk about it. Phew.
+  // Get the final form of RIVET_ANALYSIS_PATH and talk about it
   env_rap = getenv_str("RIVET_ANALYSIS_PATH");
   if (!env_rap.empty()) ATH_MSG_DEBUG("Loading Rivet plugin analyses from env path: " << env_rap);
 
   // Set up analysis handler
+  #if RIVET_VERSION_CODE >= 40100
+  m_analysisHandler = new Rivet::AnalysisHandler();
+  #else
   m_analysisHandler = new Rivet::AnalysisHandler(m_runname);
+  #endif
   assert(m_analysisHandler);
 
   #if RIVET_VERSION_CODE >= 40000

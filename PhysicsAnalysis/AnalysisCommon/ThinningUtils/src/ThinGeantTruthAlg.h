@@ -25,6 +25,7 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 class ThinGeantTruthAlg final: public AthReentrantAlgorithm
 {
@@ -55,6 +56,11 @@ private:
 
   Gaudi::Property<bool> m_keepMuons{ this, "keepMuons", true };
   Gaudi::Property<bool> m_keepEGamma{ this, "keepEGamma", true };
+
+  /** @brief Truth particle link decorations */
+  Gaudi::Property<std::string> m_truthLinkDecor{this, "TruthLinkDecor", "truthParticleLink"};
+  /** @brief Schedule the algorithm's dependency on the truth particle link */
+  SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_readDecorKeys{this, "DecorKeys", {}};
 
   Gaudi::Property<std::vector<int>> m_longlived{
     this,

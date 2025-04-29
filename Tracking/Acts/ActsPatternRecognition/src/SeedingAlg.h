@@ -13,7 +13,6 @@
 
 // Tools
 #include "ActsToolInterfaces/ISeedingTool.h"
-#include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
@@ -51,30 +50,23 @@ namespace ActsTrk {
   private:
     // Tool Handles
     ToolHandle< ActsTrk::ISeedingTool > m_seedsTool {this, "SeedTool", "","Seed Tool"};
-    ToolHandle< ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool {this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
-    PublicToolHandle< IActsTrackingGeometryTool > m_trackingGeometryTool {this, "TrackingGeometryTool", ""};
-    ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
 
     // Handle Keys
     SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
     SG::ReadCondHandleKey< AtlasFieldCacheCondObj > m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
         "Name of the Magnetic Field conditions object key"};
-    SG::ReadCondHandleKey< InDetDD::SiDetectorElementCollection > m_detEleCollKey {this, "DetectorElements", "", "Key of input SiDetectorElementCollection"};
 
     SG::ReadHandleKeyArray< xAOD::SpacePointContainer > m_spacePointKey {this,"InputSpacePoints",{},"Input Space Points"};
-    SG::WriteHandleKey< ActsTrk::SeedContainer > m_seedKey {this,"OutputSeeds","","Output Seeds"};    
-    SG::WriteHandleKey< ActsTrk::BoundTrackParametersContainer > m_actsTrackParamsKey {this, "OutputEstimatedTrackParameters", "", ""};
+    SG::WriteHandleKey< ActsTrk::SeedContainer > m_seedKey {this,"OutputSeeds","","Output Seeds"};
 
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
-    Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false, "Use top SP. By default, use bottom SP."};
     Gaudi::Property< bool > m_usePixel {this, "UsePixel", true};
     
   public:
     enum EStat {
        kNSpacepoints,
        kNSeeds,
-       kNSeedsWithoutParam,
        kNStat
     };
   private:

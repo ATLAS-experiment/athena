@@ -6,9 +6,10 @@
 #define G4ScoringProcessTool_H
 
 // Include files
+
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/IPhysicsOptionTool.h"
-#include "G4VPhysicsConstructor.hh"
+#include "G4AtlasInterfaces/IPhysicsConstructor.h"
 
 /** @class G4ScoringProcessTool G4ScoringProcessTool.h 
  *
@@ -17,8 +18,8 @@
  *  @author Edoardo Farina
  *  @date   20-10-2015
  */
-class G4ScoringProcessTool :  public G4VPhysicsConstructor, public extends<AthAlgTool, IPhysicsOptionTool>  {
-public:
+class G4ScoringProcessTool : public extends<AthAlgTool, IPhysicsOptionTool> {
+ public:
   /// Standard constructor
   G4ScoringProcessTool( const std::string& type , const std::string& name,
                        const IInterface* parent ) ;
@@ -26,24 +27,20 @@ public:
   virtual ~G4ScoringProcessTool( ); ///< Destructor
 
   /// Initialize method
-  virtual StatusCode initialize( ) override final;
-  virtual void ConstructParticle() override final;
-  virtual void ConstructProcess() override final;
-
-
+  virtual StatusCode initialize() override final;
 
   /** Implements
    */
 
+  virtual UPPhysicsConstructor GetPhysicsOption() override final;
 
-  virtual G4ScoringProcessTool* GetPhysicsOption() override final;
+  class PhysicsConstructor : public IPhysicsContructor {
+   public:
+    using IPhysicsContructor::IPhysicsContructor;
 
-
-protected:
-
-
+    virtual void ConstructParticle() override;
+    virtual void ConstructProcess() override;
+  };
 };
-
-
 
 #endif // G4ScoringProcessTool_H

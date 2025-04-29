@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
  
  
@@ -14,8 +14,6 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE TEST_ITkStripCabling
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <boost/test/unit_test.hpp>
 
 #include "ITkStripCabling/ITkStripCablingData.h"
@@ -39,7 +37,7 @@ BOOST_AUTO_TEST_SUITE(ITkStripCablingTest)
   
   BOOST_AUTO_TEST_CASE(ITkStripCablingDataFill){
     ITkStripCablingData c;
-    std::string inputString="0 0\n1 2\n3 5\n";
+    std::string inputString="0 0 0\n1 3 2\n4 5 6\n";
     std::istringstream s(inputString);
     s>>c;
     BOOST_CHECK(not c.empty());

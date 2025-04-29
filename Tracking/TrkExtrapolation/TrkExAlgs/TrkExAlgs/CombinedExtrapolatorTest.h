@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,13 +14,14 @@
 #include "GaudiKernel/IRndmGenSvc.h"
 #include "GaudiKernel/RndmGenerators.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include <string>
+
+#include "TrkExInterfaces/IExtrapolator.h"
 
 
 namespace Trk 
 {
-
-  class IExtrapolator;
   class Surface;
   class TrackingVolume;
   class TrackingGeometry;
@@ -51,24 +52,24 @@ namespace Trk
 
     private:
       /** The Extrapolator to be retrieved */
-      ToolHandle<IExtrapolator>         m_extrapolator;
+      ToolHandle<IExtrapolator> m_extrapolator
+      {this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
 
       /** Random Number setup */
-      Rndm::Numbers*                    m_gaussDist;
-      Rndm::Numbers*                    m_flatDist;
+      Rndm::Numbers* m_gaussDist = nullptr;
+      Rndm::Numbers* m_flatDist = nullptr;
 
-      double                   m_sigmaD0;                    //!< Sigma of distribution for D0
-      double                   m_minZ0;                      //!< min Z0
-      double                   m_maxZ0;                      //!< max Z0
-      double                   m_minEta;                     //!< Minimal eta value
-      double                   m_maxEta;                     //!< Maximal eta value
-      double                   m_minP;                       //!< Minimal p value 
-      double                   m_maxP;                       //!< Maximal p value
+      DoubleProperty m_sigmaD0{this, "StartPerigeeSigmaD0", 17.*Gaudi::Units::micrometer};
+      DoubleProperty m_minZ0{this, "StartPerigeeMinZ0", -25000.};
+      DoubleProperty m_maxZ0{this, "StartPerigeeMaxZ0", +25000.};
+      DoubleProperty m_minP{this, "StartPerigeeMinP", 0.5*Gaudi::Units::GeV};
+      DoubleProperty m_maxP{this, "StartPerigeeMaxP", 50000.*Gaudi::Units::GeV};
 
-      const Trk::TrackingVolume*       m_outerBoundary;
-      const Trk::TrackingGeometry*     m_trackingGeometry;
+      const Trk::TrackingVolume*   m_outerBoundary = nullptr;
+      const Trk::TrackingGeometry* m_trackingGeometry = nullptr;
 
-      int                      m_particleType;               //!< the particle typre for the extrap.
+      IntegerProperty m_particleType{this, "ParticleType", Trk::muon,
+	"the particle type for the extrap."};
 
       
     }; 

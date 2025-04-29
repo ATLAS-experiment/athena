@@ -11,24 +11,6 @@ namespace Tau{
 GeneralTauPlots::GeneralTauPlots(PlotBase* pParent, const std::string& sDir, const std::string& sTauJetContainerName):
    PlotBase(pParent, sDir),
    m_oParamPlots(this, "", sTauJetContainerName),
-   m_tauCharge(nullptr),
-   m_tauNChargedTracks(nullptr),
-   m_tauNIsolatedTracks(nullptr),
-   m_tauNCoreTracks(nullptr),
-   m_tauNWideTracks(nullptr),
-   m_ptHighPt(nullptr),
-   m_RNNEleScore(nullptr),
-   m_RNNEleScoreSigTrans(nullptr),
-   m_RNNJetScore(nullptr),
-   m_RNNJetScoreSigTrans(nullptr),
-   m_ptRNNVeryLoose(nullptr),
-   m_ptRNNLoose(nullptr),
-   m_ptRNNMedium(nullptr),
-   m_ptRNNTight(nullptr),
-   m_ptRNNVeryLooseHighPt(nullptr),
-   m_ptRNNLooseHighPt(nullptr),
-   m_ptRNNMediumHighPt(nullptr),
-   m_ptRNNTightHighPt(nullptr),
    m_sTauJetContainerName(sTauJetContainerName)
 {	
 }
@@ -49,6 +31,8 @@ void GeneralTauPlots::initializePlots(){
    m_RNNEleScoreSigTrans = Book1D("RNNEleScoreSigTrans", m_sTauJetContainerName+" RNNEleScoreSigTrans;RNNEleScoreSigTrans;"+"# Tau", 50,0.,1.);
    m_RNNJetScore = Book1D("RNNJetScore", m_sTauJetContainerName+" RNNJetScore;RNNJetScore;# Tau", 50,0.,1.);
    m_RNNJetScoreSigTrans = Book1D("RNNJetScoreSigTrans", m_sTauJetContainerName+" RNNJetScoreSigTrans;RNNJetScoreSigTrans;"+"# Tau", 50,0.,1.);
+   m_GNTauScore = Book1D("GNTauScore", m_sTauJetContainerName+" GNTauScore;GNTauScore;# Tau", 50,0.,1.);
+   m_GNTauScoreSigTrans = Book1D("GNTauScoreSigTrans", m_sTauJetContainerName+" GNTauScoreSigTrans;GNTauScoreSigTrans;"+"# Tau", 50,0.,1.);
    m_ptRNNVeryLoose = Book1D("ptRNNSigVeryLoose", m_sTauJetContainerName+" RNNSigVeryLoose; pt; # Taus",20, 0.0, 150.0);
    m_ptRNNVeryLooseHighPt = Book1D("ptRNNSigVeryLooseHighPt", m_sTauJetContainerName+" RNNSigVeryLooseHighPt"+"; pt; # Taus",20, 0.0, 1500.0);
    m_ptRNNLoose = Book1D("ptRNNSigLoose",m_sTauJetContainerName+" RNNSigLoose; pt; # Taus", 20, 0.0, 150.0);
@@ -57,6 +41,15 @@ void GeneralTauPlots::initializePlots(){
    m_ptRNNMediumHighPt = Book1D("ptRNNSigMediumHighPt", m_sTauJetContainerName+" RNNSigMediumHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
    m_ptRNNTight = Book1D("ptRNNSigTight",m_sTauJetContainerName+" RNNSigTight; pt; # Taus", 20, 0.0, 150.0);
    m_ptRNNTightHighPt = Book1D("ptRNNSigTightHighPt", m_sTauJetContainerName+" RNNSigTightHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
+   m_ptGNTauLoose = Book1D("ptGNTauSigLoose",m_sTauJetContainerName+" GNTauSigLoose; pt; # Taus", 20, 0.0, 150.0);
+   m_ptGNTauLooseHighPt = Book1D("ptGNTauSigLooseHighPt", m_sTauJetContainerName+" GNTauSigLooseHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
+   m_ptGNTauMedium = Book1D("ptGNTauSigMedium",m_sTauJetContainerName+" GNTauSigMedium; pt; # Taus", 20, 0.0, 150.0);
+   m_ptGNTauMediumHighPt = Book1D("ptGNTauSigMediumHighPt", m_sTauJetContainerName+" GNTauSigMediumHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
+   m_ptGNTauTight = Book1D("ptGNTauSigTight",m_sTauJetContainerName+" GNTauSigTight; pt; # Taus", 20, 0.0, 150.0);
+   m_ptGNTauTightHighPt = Book1D("ptGNTauSigTightHighPt", m_sTauJetContainerName+" GNTauSigTightHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
+
+
+
 }
   
 void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
@@ -88,6 +81,16 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
      float rnnScore = tau.discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
      m_RNNJetScoreSigTrans->Fill(rnnScore, weight);
   }
+  static const SG::ConstAccessor<float> acc_GNTauScore("GNTauScore_v0prune");
+  if ( acc_GNTauScore.isAvailable(tau) ) {
+     float gntauScore = acc_GNTauScore(tau);
+     if ( gntauScore > -2.0 ) m_GNTauScore->Fill(gntauScore, weight);
+  }
+  static const SG::ConstAccessor<float> acc_GNTauScoreSigTrans("GNTauScoreSigTrans_v0prune");
+  if ( acc_GNTauScoreSigTrans.isAvailable(tau) ) {
+     float gntauScoreSigTrans = acc_GNTauScoreSigTrans(tau);
+     if ( gntauScoreSigTrans > -2.0 ) m_GNTauScoreSigTrans->Fill(gntauScoreSigTrans, weight);
+  }
   if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose) ) {
      m_ptRNNVeryLoose      ->Fill(tau.pt()/1000, weight);
      m_ptRNNVeryLooseHighPt->Fill(tau.pt()/1000, weight);
@@ -105,6 +108,21 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
      m_ptRNNTightHighPt->Fill(tau.pt()/1000, weight);
   }
 
+  static const SG::ConstAccessor<char> acc_GNTauL("GNTauL_v0prune");
+  if( acc_GNTauL.isAvailable(tau) && acc_GNTauL(tau)) {
+     m_ptGNTauLoose      ->Fill(tau.pt()/1000, weight);
+     m_ptGNTauLooseHighPt->Fill(tau.pt()/1000, weight);
+  }
+  static const SG::ConstAccessor<char> acc_GNTauM("GNTauM_v0prune");
+  if( acc_GNTauM.isAvailable(tau) && acc_GNTauM(tau)) {
+     m_ptGNTauMedium      ->Fill(tau.pt()/1000, weight);
+     m_ptGNTauMediumHighPt->Fill(tau.pt()/1000, weight);
+  }
+  static const SG::ConstAccessor<char> acc_GNTauT("GNTauT_v0prune");
+  if( acc_GNTauT.isAvailable(tau) && acc_GNTauT(tau)) {
+     m_ptGNTauTight      ->Fill(tau.pt()/1000, weight);
+     m_ptGNTauTightHighPt->Fill(tau.pt()/1000, weight);
+  }
 }
 
 

@@ -7,11 +7,11 @@
 ///////////////////////////////////////////////////////////////////
 // Author: James Catmore <james.catmore@cern.ch>
 
-#include "DerivationFrameworkBPhys/Reco_4mu.h"
+#include "Reco_4mu.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "AthContainers/ConstAccessor.h"
 
@@ -20,12 +20,11 @@ namespace DerivationFramework {
     Reco_4mu::Reco_4mu(const std::string& t,
                        const std::string& n,
                        const IInterface* p) :
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_v0Tools("Trk::V0Tools"),
     m_fourMuonTool("DerivationFramework::FourMuonTool",this),
     m_pvRefitter("Analysis::PrimaryVertexRefitter",this)
     {
-        declareInterface<DerivationFramework::IAugmentationTool>(this);
         
         // Declare tools
         declareProperty("V0Tools"   , m_v0Tools);

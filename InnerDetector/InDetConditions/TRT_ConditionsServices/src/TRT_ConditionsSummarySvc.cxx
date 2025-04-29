@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -20,9 +20,7 @@
 // Constructor
 TRT_ConditionsSummarySvc::TRT_ConditionsSummarySvc( const std::string& name, ISvcLocator* pSvcLocator ) : 
   base_class(name, pSvcLocator),
-  m_svcCollection(name),
-  m_manager(nullptr),
-  m_trtid(nullptr)
+  m_svcCollection(name)
 {
   // Get properties from job options
   declareProperty( "ServiceList", m_svcCollection );
@@ -34,22 +32,14 @@ TRT_ConditionsSummarySvc::~TRT_ConditionsSummarySvc()= default;
 //Initialize
 StatusCode 
 TRT_ConditionsSummarySvc::initialize(){
-  if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "TRT_ConditionsSummarySvc::initialize." << endmsg;
-  StatusCode sc(StatusCode::SUCCESS);
+  ATH_MSG_DEBUG("TRT_ConditionsSummarySvc::initialize.");
 
   // Retrieve the services to be called.
   if ( m_svcCollection.empty() ) {
-    msg(MSG::WARNING) << "No services to be called!" << endmsg;
+    ATH_MSG_WARNING("No services to be called!");
   } else {
-    sc = m_svcCollection.retrieve();
-    if ( sc.isFailure() ) {
-      msg(MSG::ERROR) << "Couldn't retrieve services: "
-	   << m_svcCollection << endmsg;
-      return sc;
-    } else {
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Successfully retrieved services: "
-	   << m_svcCollection << endmsg;
-    }
+    ATH_CHECK(m_svcCollection.retrieve());
+    ATH_MSG_DEBUG("Successfully retrieved services: " << m_svcCollection);
   }
 
   // Get DetectorStore service
@@ -57,28 +47,11 @@ TRT_ConditionsSummarySvc::initialize(){
   ATH_CHECK( detStore.isValid() );
   
   // Retrieve TRT_DetectorManager
-  std::string managerName;
-  sc=detStore->retrieve(m_manager, managerName);
-  if (sc.isFailure() || !m_manager)
-    {
-      msg(MSG::FATAL) << "Could not find the Manager: "
-	    << managerName << " !" << endmsg;
-      return sc;
-    }
+  ATH_CHECK(detStore->retrieve(m_manager, "TRT"));
 
   // Retrieve TRT ID Helper
-  sc = detStore->retrieve(m_trtid,"TRT_ID");
-  if ( sc.isFailure() ) {
-    ATH_MSG_FATAL("Could not retrieve TRT ID Helper.");
-    return sc;
-  }
+  ATH_CHECK(detStore->retrieve(m_trtid,"TRT_ID"));
 
-  return sc;
-}
-
-//Finalize
-StatusCode
-TRT_ConditionsSummarySvc::finalize(){
   return StatusCode::SUCCESS;
 }
 
@@ -105,7 +78,7 @@ TRT_ConditionsSummarySvc::isActive(const Identifier & elementId, const InDetCond
       }
     }
   }else{
-    msg(MSG::FATAL)<<"Hierarchy Level "<<h<<" not yet implemented!!!"<<endmsg;
+    ATH_MSG_FATAL("Hierarchy Level "<<h<<" not yet implemented!!!");
     result=false;
   }
 
@@ -187,7 +160,7 @@ TRT_ConditionsSummarySvc::isGood(const Identifier & elementId, const InDetCondit
       }
     }
   }else{
-    msg(MSG::FATAL)<<"Hierarchy Level "<<h<<" not yet implemented!!!"<<endmsg;
+    ATH_MSG_FATAL("Hierarchy Level "<<h<<" not yet implemented!!!");
     result=false;
   }
 
@@ -246,8 +219,8 @@ TRT_ConditionsSummarySvc::goodFraction(const IdentifierHash & elementHash, const
   return result;
 }
 
-InDet::TRT_CondFlag TRT_ConditionsSummarySvc::condSummaryStatus(
-					         const Identifier &ident ) {
+InDet::TRT_CondFlag
+TRT_ConditionsSummarySvc::condSummaryStatus(const Identifier &ident ) {
 
   //  Identifier id=ident;
   InDet::TRT_CondFlag status = InDet::TRT_COND_GOOD;

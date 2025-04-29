@@ -1,12 +1,10 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
 #ifndef XAOD_STANDALONE
   #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
-  #include "EventInfo/EventInfo.h"
-  #include "EventInfo/EventType.h"
 #endif
 
 // Local include(s):
@@ -41,7 +39,7 @@ namespace PMGTools
     m_calibCache.initialize (std::move (affSysts),
                              [this] (const CP::SystematicSet& sys,
                                      std::size_t& idx) {
-                               ATH_MSG_WARNING("Mapping for " << sys.name() << " missing, setting to index 0.");
+                               if (!sys.name().empty()) ATH_MSG_WARNING("Mapping for " << sys.name() << " missing, setting to index 0.");
                                idx = 0;
                                return StatusCode::SUCCESS;
                              });

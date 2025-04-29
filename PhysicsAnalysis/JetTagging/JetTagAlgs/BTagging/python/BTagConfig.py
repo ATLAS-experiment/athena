@@ -17,15 +17,15 @@ from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from FlavorTagDiscriminants.BTagJetAugmenterAlgConfig import BTagJetAugmenterAlgCfg
 from FlavorTagDiscriminants.BTagMuonAugmenterAlgConfig import BTagMuonAugmenterAlgCfg
-from FlavorTagDiscriminants.FlavorTagNNConfig import (
+from FlavorTagInference.FlavorTagNNConfig import (
     FlavorTagNNCfg,
     MultifoldGNNCfg,
 )
+from FlavorTagDiscriminants.FlavorTagDLNNConfig import FlavorTagDLNNCfg
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
 from TrackHitAssignement.TrackHitAssignementAlgCfg import TrackHitAssignementAlg
-
 
 def GetTaggerTrainingMap(inputFlags, jet_col):
     """This function defines the networks used for the different jet collections."""
@@ -58,7 +58,10 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
             "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
-            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/MC20_bbJES_ak10csskufo_Sep24_calibFactors.onnx", # GN2X-based regression model
+            "BTagging/20250310/antikt10ufo/GN2XTauV00.onnx",
+            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/MC20_bbJES_ak10csskufo_Sep24_calibFactors.onnx", # bJR10v00
+            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
+            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
         ],
         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA": [
             "BTagging/20220314/dipsLoose/antikt4empflow/network.json",    # input to DL1dv01
@@ -178,11 +181,21 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
     if inputFlags.BTagging.savePixelHits:
         result.merge(JetHitAssociationCfg(inputFlags))
         result.merge(TrackHitAssignementAlg(inputFlags))
-        result.merge(addToAOD(inputFlags, _track_measurement_list("PixelClusters")))
+        result.merge(
+            addToAOD(
+              inputFlags,
+              _track_measurement_list(("ITk" if inputFlags.Detector.GeometryITk else "") + "PixelClusters")
+            )
+        )
     if inputFlags.BTagging.saveSCTHits:
         result.merge(JetHitAssociationCfg(inputFlags))
         result.merge(TrackHitAssignementAlg(inputFlags))
-        result.merge(addToAOD(inputFlags, _track_measurement_list("SCT_Clusters")))
+        result.merge(
+            addToAOD(
+              inputFlags,
+              _track_measurement_list("ITkStripClusters" if inputFlags.Detector.GeometryITk else "SCT_Clusters")
+            )
+        )
 
     return result
 
@@ -193,6 +206,9 @@ def _track_measurement_list(container_name):
         f'xAOD::TrackMeasurementValidationAuxContainer#{container_name}Aux.'
     ]
 
+def GNN_or_DL_cfg(nn_path):
+    """Use the correct configuration for the NN based on the path"""
+    return FlavorTagNNCfg if ('GN' in nn_path or 'gn' in nn_path) else FlavorTagDLNNCfg
 
 def BTagAlgsCfg(
     inputFlags,
@@ -343,6 +359,7 @@ def BTagAlgsCfg(
     # Add the final taggers based on neural networks
     for nn_path in nnList:
         # add standard (unflipped) taggers
+        NN_cfg_func = GNN_or_DL_cfg(nn_path)
         output_remapping={}
         if  '20240122trig' in nn_path:
             output_remapping={
@@ -353,7 +370,7 @@ def BTagAlgsCfg(
             }
 
         result.merge(
-            FlavorTagNNCfg(
+            NN_cfg_func(
                 inputFlags,
                 BTaggingCollection=BTagCollection,
                 TrackCollection=trackCollection,
@@ -364,7 +381,7 @@ def BTagAlgsCfg(
         if inputFlags.BTagging.RunFlipTaggers:
             for flip_config in _get_flip_config(nn_path):
                 result.merge(
-                    FlavorTagNNCfg(
+                    NN_cfg_func(
                         inputFlags,
                         BTaggingCollection=BTagCollection,
                         TrackCollection=trackCollection,
@@ -375,10 +392,14 @@ def BTagAlgsCfg(
 
     # multifold models, at the moment this is only supported via inputFlags
     for networks in inputFlags.BTagging.NNs.get(jetcol, []):
-        assert len(networks['folds']) > 1
+        assert isinstance(networks['folds'], list) 
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
+
+        # skip ghost association: not suppoted on the BTagging object
+        if not networks.get('cone_association'):
+            continue
 
         args = dict(
             flags=inputFlags,
@@ -388,6 +409,9 @@ def BTagAlgsCfg(
             remapping=networks.get('remapping', {}),
             JetCollection=jetcol,
         )
+        if foldHashName := networks.get('hash'):
+            args['foldHashName'] = foldHashName
+
 
         # disable GN2v01 if there are 0 tracks
         if '/GN2v01/' in dirname:
@@ -421,7 +445,7 @@ def _get_flip_config(nn_path):
         return ['FLIP_SIGN']
     if 'rnnip' in nn_path or 'dips' in nn_path:
         return ['NEGATIVE_IP_ONLY']
-    if 'gn1' in nn_path or 'gn2' in nn_path:
+    if 'gn1' in nn_path or 'gn2' in nn_path or 'gn3' in nn_path:
         return ['SIMPLE_FLIP']
     else:
         return []

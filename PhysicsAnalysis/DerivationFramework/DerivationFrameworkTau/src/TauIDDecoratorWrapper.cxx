@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTau/TauIDDecoratorWrapper.h"
@@ -10,9 +10,8 @@
 namespace DerivationFramework {
 
   TauIDDecoratorWrapper::TauIDDecoratorWrapper(const std::string& t, const std::string& n, const IInterface* p) : 
-    AthAlgTool(t,n,p)
+    base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
   }
 
   StatusCode TauIDDecoratorWrapper::initialize()
@@ -114,12 +113,12 @@ namespace DerivationFramework {
     }
     
     //Create accessors  
-    static const SG::AuxElement::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK");
-    static const SG::AuxElement::Accessor<float> acc_dz0_TV_PV0("dz0_TV_PV0");
-    static const SG::AuxElement::Accessor<float> acc_log_sumpt_TV("log_sumpt_TV");
-    static const SG::AuxElement::Accessor<float> acc_log_sumpt2_TV("log_sumpt2_TV");
-    static const SG::AuxElement::Accessor<float> acc_log_sumpt_PV0("log_sumpt_PV0");
-    static const SG::AuxElement::Accessor<float> acc_log_sumpt2_PV0("log_sumpt2_PV0");
+    static const SG::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK");
+    static const SG::Accessor<float> acc_dz0_TV_PV0("dz0_TV_PV0");
+    static const SG::Accessor<float> acc_log_sumpt_TV("log_sumpt_TV");
+    static const SG::Accessor<float> acc_log_sumpt2_TV("log_sumpt2_TV");
+    static const SG::Accessor<float> acc_log_sumpt_PV0("log_sumpt_PV0");
+    static const SG::Accessor<float> acc_log_sumpt2_PV0("log_sumpt2_PV0");
 
     std::vector<SG::WriteDecorHandle<xAOD::TauJetContainer, float> > scoreDecors;
     scoreDecors.reserve (m_scores.size());

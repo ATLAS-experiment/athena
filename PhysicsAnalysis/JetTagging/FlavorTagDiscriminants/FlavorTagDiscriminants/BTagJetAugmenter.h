@@ -5,7 +5,7 @@
 #ifndef BTAG_JET_AUGMENTER_HH
 #define BTAG_JET_AUGMENTER_HH
 
-#include "FlavorTagDiscriminants/FlipTagEnums.h"
+#include "FlavorTagInference/FlipTagEnums.h"
 
 // ATLAS things
 #include "xAODBTagging/BTagging.h"
@@ -15,7 +15,7 @@
 class BTagJetAugmenter
 {
 public:
-  typedef FlavorTagDiscriminants::FlipTagConfig FlipTagConfig;
+  typedef FlavorTagInference::FlipTagConfig FlipTagConfig;
 
   BTagJetAugmenter(const std::string& associator = "BTagTrackToJetAssociator",
                    FlipTagConfig flip = FlipTagConfig::STANDARD,

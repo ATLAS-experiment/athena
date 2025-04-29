@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINTCALIBRATOR_SPACEPOINTCALIBRATOR_H
 #define MUONSPACEPOINTCALIBRATOR_SPACEPOINTCALIBRATOR_H
@@ -23,9 +23,8 @@ namespace MuonR4{
     /*** @brief Implementation of the space point calibrator interface */
     class SpacePointCalibrator : public extends<AthAlgTool, ISpacePointCalibrator> {
         public:
-            SpacePointCalibrator(const std::string& type, 
-                                const std::string &name, 
-                                const IInterface* parent);
+            /** @brief Use the standard constructor */
+            using base_class::base_class;
 
             StatusCode initialize() override final;
 
@@ -79,11 +78,6 @@ namespace MuonR4{
             /*** Resolution of the rpc time measurement  */
             Gaudi::Property<double> m_rpcTimeResolution{this, "rpcTimeResolution", 0.6 * Gaudi::Units::nanosecond,
                                                           "Estimated time resolution of the strip readout"};
-
-            Gaudi::Property<double> m_mdtErrorScale{this, "mdtErrorScaleFactor", 1.0, "Scaling to apply to MDT errors for the pattern"}; 
-
-            Gaudi::Property<bool> m_doMdtUncertFromProp{this, "MdtPropagationTimeUncert", false};
-
     };
 
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternTools/MuonHoughPatternTool.h"
@@ -938,10 +938,11 @@ std::unique_ptr<MuonPrdPatternCollection> MuonHoughPatternTool::getEtaMuonPatter
 
             if (!etapatterns[i][j]->empty()) {
                 std::unique_ptr<Muon::MuonPrdPattern> muonpattern = houghPatternToEtaPattern(*etapatterns[i][j]);
-                etapatterncollection->push_back(std::move(muonpattern));
-
-                ATH_MSG_DEBUG(" Lift MuonEtaPattern size " << etapatterns[i][j]->size());
+                //use muonpattern *before* you move it
                 if (msgLvl(MSG::VERBOSE)) { printPattern(muonpattern.get()); }
+                etapatterncollection->push_back(std::move(muonpattern));
+                ATH_MSG_DEBUG(" Lift MuonEtaPattern size " << etapatterns[i][j]->size());
+                
             }
         }
     }

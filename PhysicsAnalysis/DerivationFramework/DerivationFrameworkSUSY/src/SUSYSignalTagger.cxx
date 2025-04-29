@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkSUSY/SUSYSignalTagger.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "PdgConditional.h"
 #include "utilityFunctions.h"
 #include <array>
@@ -21,8 +21,7 @@ namespace DerivationFramework {
   static const SG::AuxElement::Decorator<int> dec_pdgId2("SUSY_pid2");
     
   SUSYSignalTagger::SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p):
-    AthAlgTool(t,n,p){
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
+    base_class(t,n,p){
   }  
   
   StatusCode SUSYSignalTagger::addBranches() const{
@@ -42,7 +41,7 @@ namespace DerivationFramework {
     int pdgId2(0);
     bool found = FindSusyHardProc( truthPC, pdgId1, pdgId2);
     if (!found) {
-      ATH_MSG_WARNING("could not identify SUSY process! ");
+      ATH_MSG_DEBUG("could not identify SUSY process! ");
       dec_procID(*eventInfo) = 0;
       dec_pdgId1(*eventInfo) = -99;
       dec_pdgId2(*eventInfo) = -99;
@@ -69,14 +68,9 @@ namespace DerivationFramework {
       return false;
     }
     for (const auto tp : *truthP) {
-      //check ifSUSY particle
-      if ((std::abs(tp->pdgId()) > 1000000 && std::abs(tp->pdgId()) < 1000007) || // squarkL
-          (std::abs(tp->pdgId()) > 1000010 && std::abs(tp->pdgId()) < 1000017) || // sleptonL
-          (std::abs(tp->pdgId()) > 2000000 && std::abs(tp->pdgId()) < 2000007) || // squarkR
-          (std::abs(tp->pdgId()) > 2000010 && std::abs(tp->pdgId()) < 2000017) || // sleptonR
-          (std::abs(tp->pdgId()) > 1000020 && std::abs(tp->pdgId()) < 1000040)) { // gauginos
+      if (MC::isSquark(tp) || MC::isSlepton(tp) || MC::isGaugino(tp)) {
         if (tp->nParents() != 0) {
-          if ( tp->parent(0)->absPdgId()  < 1000000) {
+          if ( !MC::isSUSY(tp->parent(0))) {
             if (!firstsp) {
               firstsp = tp;
             } else if (!secondsp) {
@@ -120,8 +114,8 @@ namespace DerivationFramework {
         }
       }
     }
-    if (firstsp && abs(firstsp->pdgId()) > 1000000) pdgid1 = firstsp->pdgId();
-    if (secondsp && abs(secondsp->pdgId()) > 1000000) pdgid2 = secondsp->pdgId();
+    if (firstsp && abs(firstsp->pdgId()) > 1000000) pdgid1 = firstsp->pdgId();  // Replace with (firstsp && MC::isSUSY(firstsp)) ?
+    if (secondsp && abs(secondsp->pdgId()) > 1000000) pdgid2 = secondsp->pdgId(); // Replace with (secondsp && MC::isSUSY(secondsp)) ?
     // Return gracefully:
     return true;
   }

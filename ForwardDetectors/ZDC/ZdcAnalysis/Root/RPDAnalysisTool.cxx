@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AsgDataHandles/WriteDecorHandle.h>
@@ -42,39 +42,23 @@ StatusCode RPDAnalysisTool::initializeKey(std::string const& containerName, SG::
 StatusCode RPDAnalysisTool::initialize() {
   RPDConfig finalConfig {};
   std::array<std::vector<float>, 2> finalOutputCalibFactors;
-  // first initialize reconstruction parameters from config string
-  if (m_configuration == "default" || m_configuration == "pp2023" || m_configuration == "PbPb2023") {
-    finalConfig.nSamples = 24;
-    finalConfig.nBaselineSamples = 7;
-    finalConfig.endSignalSample = 23;
-    finalConfig.pulse2ndDerivThresh = -18;
-    finalConfig.postPulseFracThresh = 0.15;
-    finalConfig.goodPulseSampleStart = 8;
-    finalConfig.goodPulseSampleStop = 10;
-    finalConfig.nominalBaseline = 100;
-    finalConfig.pileupBaselineSumThresh = 53;
-    finalConfig.pileupBaselineStdDevThresh = 2;
-    finalConfig.nNegativesAllowed = 2;
-    finalConfig.ADCOverflow = 4095;
-    finalOutputCalibFactors.at(RPDUtils::sideC) = std::vector<float>(16, 1.0);
-    finalOutputCalibFactors.at(RPDUtils::sideA) = std::vector<float>(16, 1.0);
-  } else if (m_configuration == "pp2024" || m_configuration == "PbPb2024") {
-    finalConfig.nSamples = 24;
-    finalConfig.nBaselineSamples = 7;
-    finalConfig.endSignalSample = 23;
-    finalConfig.pulse2ndDerivThresh = -18;
-    finalConfig.postPulseFracThresh = 0.15;
-    finalConfig.goodPulseSampleStart = 8;
-    finalConfig.goodPulseSampleStop = 10;
-    finalConfig.nominalBaseline = 100;
-    finalConfig.pileupBaselineSumThresh = 53;
-    finalConfig.pileupBaselineStdDevThresh = 2;
-    finalConfig.nNegativesAllowed = 2;
-    finalConfig.ADCOverflow = 4095;
-    finalOutputCalibFactors.at(RPDUtils::sideC) = std::vector<float>(16, 1.0);
-    finalOutputCalibFactors.at(RPDUtils::sideA) = std::vector<float>(16, 1.0);
-  }
-  // then overwrite inidividual parameters from configuration if any were provided
+  // first initialize reconstruction parameters
+  finalConfig.nSamples = 24;
+  finalConfig.nBaselineSamples = 7;
+  finalConfig.endSignalSample = 23;
+  finalConfig.pulse2ndDerivThresh = -18;
+  finalConfig.postPulseFracThresh = 0.15;
+  finalConfig.goodPulseSampleStart = 8;
+  finalConfig.goodPulseSampleStop = 10;
+  finalConfig.nominalBaseline = 100;
+  finalConfig.pileupBaselineSumThresh = 53;
+  finalConfig.pileupBaselineStdDevThresh = 2;
+  finalConfig.nNegativesAllowed = 2;
+  finalConfig.ADCOverflow = 4095;
+  finalOutputCalibFactors.at(RPDUtils::sideC) = std::vector<float>(16, 1.0);
+  finalOutputCalibFactors.at(RPDUtils::sideA) = std::vector<float>(16, 1.0);
+
+  // then overwrite individual parameters from configuration if any were provided
   if (m_forceNSamples.has_value()) {
     finalConfig.nSamples = m_forceNSamples.value();
   }
@@ -187,7 +171,7 @@ void RPDAnalysisTool::reset() {
 
 void RPDAnalysisTool::readAOD(xAOD::ZdcModuleContainer const& moduleContainer) {
   // loop through ZDC modules to find those which are RPD channels
-  for (auto const& module : moduleContainer) {
+  for (auto const module : moduleContainer) {
     if (module->zdcType() != RPDUtils::ZDCModuleRPDType) {
       // this is not an RPD channel, so skip it
       continue;
@@ -233,7 +217,7 @@ void RPDAnalysisTool::writeAOD(xAOD::ZdcModuleContainer const& moduleContainer, 
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> chMaxSample(m_chMaxSampleKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> chStatus(m_chStatusKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> chPileupFrac(m_chPileupFracKey);
-  for (auto const& module : moduleContainer) {
+  for (auto const module : moduleContainer) {
     if (module->zdcType() != RPDUtils::ZDCModuleRPDType) {
       // this is not an RPD channel, so skip it
       continue;
@@ -258,7 +242,7 @@ void RPDAnalysisTool::writeAOD(xAOD::ZdcModuleContainer const& moduleContainer, 
 
   // write per-side decorations (in ZdcSums)
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> sideStatus(m_sideStatusKey);
-  for (auto const& sum: moduleSumContainer) {
+  for (auto const sum: moduleSumContainer) {
     if (sum->zdcSide() == RPDUtils::ZDCSumsGlobalZDCSide) {
       // skip global sum (it's like the side between sides)
       continue;

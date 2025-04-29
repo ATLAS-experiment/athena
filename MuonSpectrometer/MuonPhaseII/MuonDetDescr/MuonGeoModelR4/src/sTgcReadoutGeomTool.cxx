@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcReadoutGeomTool.h"
@@ -14,7 +14,6 @@
 #include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoSimplePolygonBrep.h>
 #include <ActsGeoUtils/SurfaceBoundSet.h>
-#include<CxxUtils/bitscan.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
@@ -123,7 +122,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         /// Strip Parameters
         double firstStripPos = -gapPars.halfHeight + paramBook.firstStripPitch[gasGap] - 0.5 * paramBook.stripPitch;
         define.firstStripPitch = paramBook.firstStripPitch;
-        ATH_MSG_DEBUG("FirstStripPos is: " << Amg::toString(firstStripPos, 2) << " and the half height is: " << gapPars.halfHeight);
+        ATH_MSG_DEBUG("FirstStripPos for stripPitch: " << paramBook.firstStripPitch[gasGap] << " is: " << Amg::toString(firstStripPos, 2) << " and the half height is: " << gapPars.halfHeight);
         
         /// wireGroup Parameters
         unsigned int numWireGroups = paramBook.numWireGroups[gasGap];
@@ -132,7 +131,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
 
         if(gapPars.yCutOut) {
             /// Diamond Strip Design       
-            stripDesign->defineDiamond(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight, paramBook.yCutoutCathode);
+            stripDesign->defineDiamond(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight + 0.001, paramBook.yCutoutCathode);
             ATH_MSG_VERBOSE("The yCutout of the active area is: " << gapPars.yCutOut);
             stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
                                         paramBook.stripPitch, paramBook.stripWidth, paramBook.numStrips);
@@ -153,7 +152,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         }
         else if (!gapPars.yCutOut) {
             /// Trapezoid Strip Design
-            stripDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight);
+            stripDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight + 0.01);
             stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
                                         paramBook.stripPitch, paramBook.stripWidth, paramBook.numStrips);
             ATH_MSG_VERBOSE("Created new strip design "<<(*stripDesign));

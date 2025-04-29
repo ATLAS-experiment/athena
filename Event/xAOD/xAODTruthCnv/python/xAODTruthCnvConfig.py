@@ -8,6 +8,11 @@ def GEN_EVNT2xAODCfg(flags, name="GEN_EVNT2xAOD", **kwargs):
     # which handles the output stream itself (to allow the expansion to AuxDyn and slimming)
     # nothing is done with the stream here - this is done in the DF job options
     acc = ComponentAccumulator()
+
+    # In case we find the special configuration setting, add the LHE particles
+    if flags.Input.SpecialConfiguration.get("HasLHERecord", "False") == "True":
+        kwargs.setdefault('xAODTruthLHEParticleContainerName', 'TruthLHEParticles')
+
     xAODTruthCnvAlg = CompFactory.xAODMaker.xAODTruthCnvAlg
     acc.addEventAlgo(xAODTruthCnvAlg(name,**kwargs))
     return acc

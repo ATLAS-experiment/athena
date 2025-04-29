@@ -1,0 +1,46 @@
+# Example specifying HistoReaderMC and HistoReaderData using a single HistoReader block
+Smear:
+  HistoReader:
+    histNameMC: "JER_Nominal_MC16_AntiKt4EMTopo"
+    histNameData: "JER_Nominal_data_AntiKt4EMTopo"
+    inputFile: "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
+    InterpType: "OnlyX"
+    varX: "pt"
+    varY: "abseta"
+  JSCStartingScale: "JetGSCScaleMomentum"
+  JSCOutScale: "JetSmearedMomentum"
+  SmearType: "FourVec"
+
+# Example specifying HistoReaderMC and HistoReaderData separately and explicitly setting varX/varY parameters
+SmearLong:
+  HistoReaderMC:
+    histName: "JER_Nominal_MC16_AntiKt4EMTopo"
+    inputFile: "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
+    InterpType: "OnlyX"
+    varX:
+      Name: "pt"
+      Scale: 0.001
+      isJetVar: True
+      Type: "float"
+    varY:
+      Name: "abseta"
+      Scale: 1.0
+      Type: "float"
+      isJetVar: True
+  HistoReaderData:
+    histName: "JER_Nominal_data_AntiKt4EMTopo"
+    inputFile: "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
+    InterpType: "OnlyX"
+    varX:
+      Name: "pt"
+      Scale: 0.001
+      Type: "float"
+      isJetVar: True
+    varY:
+      Name: "abseta"
+      Scale: 1.0
+      Type: "float"
+      isJetVar: True
+  JSCStartingScale: "JetGSCScaleMomentum"
+  JSCOutScale: "JetSmearedMomentum"
+  SmearType: "FourVec"

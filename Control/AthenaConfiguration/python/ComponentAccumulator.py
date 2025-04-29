@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
 from GaudiKernel.DataHandle import DataHandle
@@ -1187,31 +1187,38 @@ class ComponentAccumulator(AccumulatorCachable):
                 self._msg.error("Failure running application")
                 return sc
 
-        app.stop().ignore()
+        scStop=app.stop()
+        if not scStop.isSuccess():
+            self._msg.error("Failed to stop AppMgr")
+            return scStop
 
         if (self._debugStage.value == "fini"):
             hookDebugger()
-        app.finalize().ignore()
+            
+        scFin=app.finalize()
+        if not scFin.isSuccess():
+            self._msg.error("Failed to finalize AppMgr")
+            return scFin
 
         sc1 = app.terminate()
         return sc1
 
     def foreach_component(self, path):
-        """ Utility to set properties of components using wildcards
+        """Utility to set properties of components using wildcards.
 
         Example:
-        forcomps(ca, "*/HLTTop/*/*Hypo*").OutputLevel=VERBOSE
+          ca.foreach_component("*/HLTTop/*/*Hypo*").OutputLevel = VERBOSE
 
-        The components name & locations in the CF tree are translated into the unix like path.
-        Components of matching path are taken under consideration in setting the property.
-        If the property is set successfully an INFO message is printed. Else, a warning is printed.
+        The components name and location in the CF tree are translated into a UNIX-like path
+        and are matched using the `fnmatch` library. If the property is set successfully
+        an INFO message is printed else a WARNING.
 
-        The convention for path of nested components is as follows:
-        Sequencer - only the name is used in the path
-        Algorithm - full name - type/instance_name (aka full name) is used
-        PrivateTools - the name of the property + the type/instance_name are added
-        PublicTools - are located under ToolSvc/ and type/instance_name is used
-        Services - located under SvcMgr/ and type/instance_name is used
+        The convention for paths of nested components is as follows:
+          Sequence     : only the name is used in the path
+          Algorithm    : "type/name" is used
+          Private Tool : ToolHandle property name plus "type/name" is used
+          Public Tool  : located under "ToolSvc/" and "type/name" is used
+          Service      : located under "SvcMgr/" and "type/name" is used
         """
         from AthenaConfiguration.PropSetterProxy import PropSetterProxy
         return PropSetterProxy(self, path)

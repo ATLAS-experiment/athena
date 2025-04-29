@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/tools/DVLDataBucket.icc
@@ -94,6 +94,7 @@ DVLDataBucket<T>::DVLDataBucket (std::unique_ptr<U> data)
 {
   // cppcheck-suppress useInitializationList
   m_clid = DataBucket<T>::classID();
+  // cppcheck-suppress missingReturn; false positive
   m_ti = testViewVector (*this->ptr(), m_clid);
 }
 

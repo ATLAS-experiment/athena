@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TileTPCnv/test/TileRawChannelContainerCnv_p1_test.cxx
@@ -9,6 +9,11 @@
  */
 
 
+#include "Identifier/HWIdentifier.h"
+#include "TileEvent/TileRawChannel.h"
+#include "TileEvent/TileRawChannelCollection.h"
+#include "TileEvent/TileRawChannelContainer.h"
+#include <memory>
 #undef NDEBUG
 #include "TileTPCnv/TileRawChannelContainerCnv_p1.h"
 #include "TileConditions/TileCablingService.h"
@@ -178,11 +183,185 @@ void test1 ATLAS_NOT_THREAD_SAFE (const TileID& tileid)
 }
 
 
+std::unique_ptr<TileRawChannelCollection>
+getCollection(const TileHWID& tileHWID, unsigned int bcid, unsigned int frag, unsigned int mask)
+{
+  auto coll = std::make_unique<TileRawChannelCollection>(frag);
+  coll->setFragDSPBCID(bcid);
+  coll->setFragBCID(mask);
+  coll->setFragRODChipMask(~mask);
+  HWIdentifier hwid = tileHWID.adc_id(tileHWID.drawer_id(frag), 0, 0);
+  coll->push_back(std::make_unique<TileRawChannel>(hwid, std::vector<float>(1, frag),
+                                                   std::vector<float>(1, frag + 1000.0),
+                                                   std::vector<float>(1, frag + 2000.0)));
+  return coll;
+}
+
+
+std::unique_ptr<TileRawChannelContainer>
+getContainerDSP(const TileHWID& tileHWID)
+{
+  auto container = std::make_unique<TileRawChannelContainer>(false,
+                                                             TileFragHash::OptFilterDsp,
+                                                             TileRawChannelUnit::ADCcounts);
+
+  unsigned int goodBCID = 1234;
+  std::map<unsigned int, unsigned int> fragGoodMask{{0x100, 0}, {0x300, 0xC300}, {0x30E, 0xC301}};
+  for (const auto& fragAndMask : fragGoodMask) {
+    std::unique_ptr<TileRawChannelCollection> coll = getCollection(tileHWID, goodBCID, fragAndMask.first, fragAndMask.second);
+    int hash = container->hashFunc()(coll->identify());
+    container->addCollection(coll.release(), hash).ignore();
+  }
+
+  return container;
+}
+
+void checkGoodMetaData(const TileRawChannelContainer& container, unsigned int goodBCID, int exludeFrag = -1)
+{
+  for (const TileRawChannelCollection* coll : container) {
+    if (coll->identify() == exludeFrag) continue;
+    assert (coll->getFragDSPBCID() == goodBCID);
+    assert (coll->getFragGlobalCRC() == 0);
+    assert (coll->getFragBCID() == 0);
+    assert (coll->getFragMemoryPar() == 0);
+    assert (coll->getFragHeaderBit() == 0);
+    assert (coll->getFragHeaderPar() == 0);
+    assert (coll->getFragSampleBit() == 0);
+    assert (coll->getFragSamplePar() == 0);
+    assert (coll->getFragFEChipMask() == 0xFFFF);
+    assert (coll->getFragRODChipMask() == 0xFFFF);
+  }
+}
+
+void testCollectionMetaDataNotDSP ATLAS_NOT_THREAD_SAFE (const TileID& tileid)
+{
+  // Test the case when Tile raw channel container does not come from DSP
+  std::cout << "testCollectionMetaDataNotDSP\n";
+  Athena_test::Leakcheck check;
+
+  std::unique_ptr<const TileRawChannelContainer> trans1 = makecont(tileid);
+
+  MsgStream log (0, "test");
+  TileRawChannelContainerCnv_p1 cnv;
+
+  TileRawChannelContainer_p1 pers;
+  cnv.transToPers (trans1.get(), &pers, log);
+  // No collection metadata should be saved if Tile raw channel container does not come from DSP
+  // Only container metadata packed into the first element
+  assert(pers.getParam().size() == 1);
+}
+
+void testCollectionMetaDataGood ATLAS_NOT_THREAD_SAFE (const TileHWID& tileHWID)
+{
+  // Test the case when Tile raw channel container comes from DSP but there are no errors in collection metadata
+  std::cout << "testCollectionMetaDataGood\n";
+  Athena_test::Leakcheck check;
+
+  MsgStream log (0, "test");
+  TileRawChannelContainerCnv_p1 cnv;
+
+  std::unique_ptr<TileRawChannelContainer> container1 = getContainerDSP(tileHWID);
+  unsigned int goodBCID = (*(container1->begin()))->getFragDSPBCID();
+
+  TileRawChannelContainer_p1 pers;
+  cnv.transToPers(container1.get(), &pers, log);
+  // If Tile raw channel container comes from DSP
+  // and there are no errors in collection metadata only good BCID is saved
+  // in addition to container metadata packed into the first element
+  assert(pers.getParam().size() == 2);
+
+  TileRawChannelContainer container2;
+  cnv.persToTrans (&pers, &container2, log);
+
+  checkGoodMetaData(container2, goodBCID);
+
+  compare(*container1, container2);
+}
+
+
+void testCollectionMetaDataBad ATLAS_NOT_THREAD_SAFE (const TileHWID& tileHWID)
+{
+  // Test the case when Tile raw channel container comes from DSP but there are errors in one collection metadata
+  std::cout << "testCollectionMetaDataBad\n";
+  Athena_test::Leakcheck check;
+
+  MsgStream log (0, "test");
+  TileRawChannelContainerCnv_p1 cnv;
+
+  std::unique_ptr<TileRawChannelContainer> container1 = getContainerDSP(tileHWID);
+  unsigned int goodBCID = (*(container1->begin()))->getFragDSPBCID();
+
+  int frag = 0x200;
+  unsigned int wrongBCID = 4321;
+  std::unique_ptr<TileRawChannelCollection> coll1 = getCollection(tileHWID, wrongBCID, frag, 0x0);
+
+  unsigned int badCRC =                1;
+  unsigned int badBCID =        (1 << 1);
+  unsigned int badMemoryPar =   (1 << 2);
+  unsigned int badHeaderBit =   (1 << 3);
+  unsigned int badHeaderPar =   (1 << 4);
+  unsigned int badSampleBit =   (1 << 5);
+  unsigned int badSamplePar =   (1 << 6);
+  unsigned int badFEChipMask =  (1 << 7);
+  unsigned int badRODChipMask = (1 << 8);
+
+  coll1->setFragGlobalCRC(badCRC);
+  coll1->setFragBCID(badBCID);
+  coll1->setFragMemoryPar(badMemoryPar);
+  coll1->setFragHeaderBit(badHeaderBit);
+  coll1->setFragHeaderPar(badHeaderPar);
+  coll1->setFragSampleBit(badSampleBit);
+  coll1->setFragSamplePar(badSamplePar);
+  // The following two are inverted
+  coll1->setFragFEChipMask(badFEChipMask ^ 0xFFFF);
+  coll1->setFragRODChipMask(badRODChipMask ^ 0xFFFF);
+
+  int hash = container1->hashFunc()(coll1->identify());
+  container1->addCollection(coll1.release(), hash).ignore();
+
+  TileRawChannelContainer_p1 pers;
+  cnv.transToPers(container1.get(), &pers, log);
+  // If Tile raw channel container comes from DSP
+  // and there are errors only in one collection metadata
+  // good BCID and 5 elements for problematic collection are saved
+  // in addition to container metadata packed into the first element
+  assert(pers.getParam().size() == 7);
+
+  TileRawChannelContainer container2;
+  cnv.persToTrans (&pers, &container2, log);
+
+  checkGoodMetaData(container2, goodBCID, frag);
+
+  const TileRawChannelCollection* coll2 = container2.indexFindPtr(container2.hashFunc()(frag));
+  assert(coll2->getFragDSPBCID() == wrongBCID);
+  assert(coll2->getFragGlobalCRC() == badCRC);
+  assert(coll2->getFragBCID() == badBCID);
+  // All other errors should be packed into fragment memory parity
+  assert(coll2->getFragMemoryPar() == (badMemoryPar | badHeaderBit | badHeaderPar | badSampleBit | badSamplePar | badFEChipMask | badRODChipMask));
+  // All other checks should be good
+  assert(coll2->getFragHeaderBit() == 0);
+  assert(coll2->getFragHeaderPar() == 0);
+  assert(coll2->getFragSampleBit() == 0);
+  assert(coll2->getFragSamplePar() == 0);
+  // The following two are inverted
+  assert(coll2->getFragFEChipMask() == 0xFFFF);
+  assert(coll2->getFragRODChipMask() == 0xFFFF);
+
+  compare(*container1, container2);
+}
+
+
+
 int main ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "TileTPCnv/TileRawChannelContainerCnv_p1_test\n";
   IdDictParser parser;
   TileCablingSvc helpers(parser);
   test1 (helpers.tileid);
+
+  testCollectionMetaDataNotDSP(helpers.tileid);
+  testCollectionMetaDataGood(helpers.hwid);
+  testCollectionMetaDataBad(helpers.hwid);
+
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUDECAYMODENNCLASSIFIER_H
@@ -7,6 +7,8 @@
 
 // base class include(s)
 #include "tauRecTools/TauRecToolBase.h"
+
+#include "AsgTools/PropertyWrapper.h"
 
 // xAOD include(s)
 #include "xAODTau/TauJet.h"
@@ -42,16 +44,17 @@ public:
 
 private:
   /// properties of the tool
-  std::string m_outputName;      //!
-  std::string m_probPrefix;      //!
-  std::string m_weightFile;      //!
-  std::size_t m_maxTauTracks;  //!
-  std::size_t m_maxNeutralPFOs;  //!
-  std::size_t m_maxShotPFOs;     //!
-  std::size_t m_maxConvTracks;   //!
-  float m_neutralPFOPtCut;       //!
-  bool m_ensureTrackConsistency; //!
-  bool m_decorateProb;           //!
+  Gaudi::Property<std::string> m_outputName{this, "OutputName", "NNDecayMode"};
+  Gaudi::Property<std::string> m_probPrefix{this, "ProbPrefix", "NNDecayModeProb_"};
+  Gaudi::Property<std::string> m_weightFile{this, "WeightFile", ""};
+  Gaudi::Property<std::size_t> m_maxTauTracks{this, "MaxTauTracks", 3};
+  Gaudi::Property<std::size_t> m_maxNeutralPFOs{this, "MaxNeutralPFOs", 8};
+  Gaudi::Property<std::size_t> m_maxShotPFOs{this, "MaxShotPFOs", 6};
+  Gaudi::Property<std::size_t> m_maxConvTracks{this, "MaxConvTracks", 4};
+  Gaudi::Property<float> m_neutralPFOPtCut{this, "NeutralPFOPtCut", 1.5};
+  Gaudi::Property<bool> m_ensureTrackConsistency{this, "EnsureTrackConsistency", true};
+  Gaudi::Property<bool> m_decorateProb{this, "DecorateProb", true};
+
   /**
    * @brief retrieve the input variables from a TauJet
    * @param xTau a TauJet object
@@ -94,8 +97,6 @@ namespace tauRecTools
      */
     template <typename T>
     static T pfoAttr(const xAOD::PFO *pfo, const xAOD::PFODetails::PFOAttributes &attr);
-    static float ptSubRatio(const xAOD::PFO *pfo);
-    static float energyFracEM2(const xAOD::PFO *pfo, float energy_em2);
   };
 
   /**

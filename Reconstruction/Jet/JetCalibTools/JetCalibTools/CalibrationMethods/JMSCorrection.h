@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_JMSCORRECTION_H
@@ -76,7 +76,7 @@ class JMSCorrection
 
   // Control the binning using a private class enum
   enum class BinningParam { pt_mass_eta, e_LOGmOe_eta, e_LOGmOet_eta, e_LOGmOpt_eta, et_LOGmOet_eta };
-  BinningParam m_binParam;
+  BinningParam m_binParam = BinningParam::pt_mass_eta;
 
   // Check if we are reading 2D or 3D histograms
   // Defaults to false for backwards compatibility

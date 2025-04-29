@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELR4_MUONDETECTORDEFS_H
 #define MUONGEOMODELR4_MUONDETECTORDEFS_H
@@ -11,7 +11,6 @@
 
 #include <CxxUtils/ArrayHelper.h>
 #include <CxxUtils/StringUtils.h>
-#include <CxxUtils/bitscan.h>
 
 
 #include <Identifier/Identifier.h>

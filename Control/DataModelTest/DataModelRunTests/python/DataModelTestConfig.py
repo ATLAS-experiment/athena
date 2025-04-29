@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
 #
 #
 # File: DataModelRunTests/python/DataModelTestConfig.py
@@ -52,9 +52,8 @@ def DataModelTestFlags (infile = None, evtMax = 20, **kw):
         def to_rntup (s):
             return s.replace ('.root', '.rntup.root')
         flags.Input.Files = [to_rntup(f) for f in flags.Input.Files]
-        for k, v in flags.Output.asdict().items():
-            if k.endswith ('FileName'):
-                setattr (flags.Output, k, to_rntup (v))
+        for stream, outfile in kw.items():
+            setattr (flags.Output, stream+'FileName', to_rntup (outfile))
     
     return flags
 

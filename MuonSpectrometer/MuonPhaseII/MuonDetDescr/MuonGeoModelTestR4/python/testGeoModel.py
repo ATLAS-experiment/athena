@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -6,26 +6,23 @@ def geoModelFileDefault(useR4Layout = False):
     # If this is changed, remember to also test with other dependent tests 
     # e.g. run ctest with ActsEventCnv
     if useR4Layout: 
-        return  "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db"
-    return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v3.db"
+        return  "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db"
+    return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00.db"
 
 def SetupArgParser():
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
-    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R3S-2021-03-02-00",
-                                                                                                            "ATLAS-P2-RUN4-01-00-00"])
-    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-07", help="Conditions tag to use",
-                                                                         choices= ["OFLCOND-MC23-SDR-RUN3-07", "CONDBR2-BLKPA-2023-03", "OFLCOND-MC21-SDR-RUN4-01"])
     parser.add_argument("--inputFile", "-i", default=[
                                                       #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                                       "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
                                                       ], 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default = geoModelFileDefault(), help="GeoModel SqLite file containing the muon geometry.")
+    parser.add_argument("--defaultGeoFile", help="Use the  predefined GeoModel files on cvmfs", choices=["NONE", "RUN3", "RUN4" ], default="NONE")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
-    parser.add_argument("--excludedChambers", default=["none"], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
+    parser.add_argument("--excludedChambers", default=[], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
     parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--nEvents", help="Number of events to run", type = int ,default = 1)
     parser.add_argument("--skipEvents", help="Number of events to skip", type = int, default = 0)
@@ -100,6 +97,28 @@ def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def configureDefaultTagsCfg(flags):    
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('GeometryConfiguration')
+
+    if not flags.GeoModel.SQLiteDB:
+        raise ValueError("Default tag configuration only works for SQLite")
+    ### For dummy purposes configure the R2 geometry tag such that the job does not crash
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2    
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run == LHCPeriod.Run3:   
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC if flags.Input.isMC else defaultConditionsTags.RUN3_DATA
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    elif flags.GeoModel.Run == LHCPeriod.Run4:
+          flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+          flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+    else:
+        raise ValueError(f"Invalid run period {flags.GeoModel.Run}")
+    log.info(f"Setup {flags.GeoModel.AtlasVersion} geometry loading {flags.GeoModel.SQLiteDBFullPath}")
+    log.info(f"Use conditions tag {flags.IOVDb.GlobalTag}")
+    
+
 def setupGeoR4TestCfg(args,  flags = None):
     
     if flags is None:
@@ -109,15 +128,28 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Concurrency.NumConcurrentEvents = args.threads
     flags.Exec.MaxEvents = args.nEvents
     flags.Exec.SkipEvents = args.skipEvents
-    flags.Input.isMC = args.condTag.find("OFLCOND") != -1
     from os import path, system, listdir
-    inFiles = [x for x in args.inputFile if not path.isdir(x)] + \
-              [ "{dir}/{file}".format(dir=x, file=y)  for x in args.inputFile if path.isdir(x) for y in listdir(x) ]
-    flags.Input.Files = inFiles 
+    flags.Input.Files = []
+    ### Assemble all files in a directory or all files not having the suffix txt conf. 
+    ### The latter are interpreted as file lists
+    for fileArg in args.inputFile:
+        if path.isdir(fileArg):
+            flags.Input.Files += [ "{dir}/{file}".format(dir=fileArg, file=y) for y in listdir(fileArg) ]
+        else:
+            if fileArg[fileArg.rfind(".")+1 :]not in ["txt", "conf"]:
+                 flags.Input.Files+=[fileArg]
+            else:
+                with open(fileArg) as inStream:
+                   flags.Input.Files+=[ line.strip() for line in inStream if line[0]!='#'] 
+
     flags.Exec.FPE= 500
-    flags.Exec.EventPrintoutInterval = args.eventPrintoutLevel
+    flags.Exec.EventPrintoutInterval = 500
     
-    if args.geoModelFile.startswith("root://"):
+    if args.defaultGeoFile == "RUN3":
+          flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = False)
+    elif  args.defaultGeoFile == "RUN4":
+          flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = True)
+    elif args.geoModelFile.startswith("root://"):
         if not path.exists("Geometry/{geoTag}.db".format(geoTag=args.geoTag)):
             print ("Copy geometry file from EOS {source}".format(source = args.geoModelFile))
             system("mkdir Geometry/")
@@ -125,11 +157,11 @@ def setupGeoR4TestCfg(args,  flags = None):
                                                                 geoTag=args.geoTag))
                                 
         args.geoModelFile = "Geometry/{geoTag}.db".format(geoTag=args.geoTag)
-    print ("Use geometry file: {geoFile}".format(geoFile = args.geoModelFile))
-    flags.GeoModel.AtlasVersion = args.geoTag
-    flags.IOVDb.GlobalTag = args.condTag
+    else:
+        flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
+
     flags.GeoModel.SQLiteDB = True
-    flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
+    configureDefaultTagsCfg(flags)
     
     flags.Detector.GeometryBpipe = False
     ### Inner detector
@@ -172,17 +204,17 @@ def setupGeoR4TestCfg(args,  flags = None):
    
     flags.lock()
     flags.dump(evaluate = True)
-    if not flags.Muon.usePhaseIIGeoSetup:
-        print ("Please make sure that the file you're testing contains the Muon R4 geometry")
-        exit(1)
-
     cfg = setupServicesCfg(flags)
 
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     cfg.merge(MuonGeoModelCfg(flags))
 
-    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
-    cfg.merge(ActsGeometryContextAlgCfg(flags))
+
+    if not flags.Muon.usePhaseIIGeoSetup:
+        print ("WARNING: New Muon plugin is not part of the Geometry file {geoDBFile}".format(geoDBFile=args.geoModelFile))
+    else:
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        cfg.merge(ActsGeometryContextAlgCfg(flags))
 
     cfg.getService("MessageSvc").verboseLimit = 10000000
     cfg.getService("MessageSvc").debugLimit = 10000000
@@ -190,7 +222,6 @@ def setupGeoR4TestCfg(args,  flags = None):
     return flags, cfg
 
 def executeTest(cfg):
-    
     cfg.printConfig(withDetails=True, summariseProps=True)
     if not cfg.run().isSuccess(): exit(1)
 
@@ -199,40 +230,77 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)  
     cfg.merge(setupHistSvcCfg(flags, outFile = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
-    chambToExclude = [] if "none" in args.excludedChambers else args.excludedChambers
+    chambToExclude = args.excludedChambers
     
-    cfg.getCondAlgo("MuonDetectorManagerCondAlg").checkGeo = True
+    ### Ensure consistent translation of the geometry
+    if flags.Muon.usePhaseIIGeoSetup:
+        cfg.getCondAlgo("MuonDetectorCondAlg").checkGeo = True
+        from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
+        cfg.merge(TrackingGeometryCondAlgCfg(flags))
+    
+    
     cfg.getService("MessageSvc").setVerbose = []
 
-    
-    from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
-    cfg.merge(TrackingGeometryCondAlgCfg(flags))
     if flags.Detector.GeometryMDT:
-        cfg.merge(GeoModelMdtTestCfg(flags, 
-                                     TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
-                                     ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B" or ch[0] == "E"],
-                                     ReadoutSideXML="ReadoutSides.xml",
-                                     ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
+        if not flags.Muon.usePhaseIIGeoSetup:
+            from MuonGeoModelTest.testGeoModel import GeoModelMdtTestCfg as LegacyTestCfg
+            cfg.merge(LegacyTestCfg(flags,
+                                         TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
+                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B" or ch[0] == "E"]))
+        else:
+            cfg.merge(GeoModelMdtTestCfg(flags, 
+                                         TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
+                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B" or ch[0] == "E"],
+                                         ReadoutSideXML="ReadoutSides.xml",
+                                         ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryRPC: 
-        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"],
-                                             ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B"],
-                                             ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
+        if not flags.Muon.usePhaseIIGeoSetup:
+            from MuonGeoModelTest.testGeoModel import GeoModelRpcTestCfg as LegacyTestCfg
+            cfg.merge(LegacyTestCfg(flags,
+                                         TestStations = [ch for ch in chambToTest if ch[0] == "B"],
+                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B"]))
+        else:
+            cfg.merge(GeoModelRpcTestCfg(flags, 
+                                         TestStations = [ch for ch in chambToTest if ch[0] == "B"],
+                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B"],
+                                         ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
-    if flags.Detector.GeometryTGC: 
-        cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"],
-                                            ExcludeStations = [ch for ch in chambToExclude if ch[0] == "T"],
-                                            ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
+    if flags.Detector.GeometryTGC:
+        if not flags.Muon.usePhaseIIGeoSetup:
+            from MuonGeoModelTest.testGeoModel import GeoModelTgcTestCfg as LegacyTestCfg
+            cfg.merge(LegacyTestCfg(flags,
+                                         TestStations = [ch for ch in chambToTest if ch[0] == "T"],
+                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "T"]))
+        else:
+            cfg.merge(GeoModelTgcTestCfg(flags, 
+                                         TestStations = [ch for ch in chambToTest if ch[0] == "T"],
+                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "T"],
+                                         ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
-    if flags.Detector.GeometryMM: 
-        cfg.merge(NswGeoPlottingAlgCfg(flags))
-        cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"],
-                                           ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"],
-                                           ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
+    if flags.Detector.GeometryMM:
+        if not flags.Muon.usePhaseIIGeoSetup:
+            from MuonGeoModelTest.testGeoModel import GeoModelMmTestCfg as LegacyTestCfg
+            cfg.merge(LegacyTestCfg(flags,
+                                        TestStations = [ch for ch in chambToTest if ch[0] == "M"],
+                                        ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"])) 
+        else:
+
+            cfg.merge(GeoModelMmTestCfg(flags, 
+                                        TestStations = [ch for ch in chambToTest if ch[0] == "M"],
+                                        ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"],
+                                        ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
     
-    if flags.Detector.GeometrysTGC: 
-        cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"],
-                                             ExcludeStations = [ch for ch in chambToExclude if ch[0] == "S"],
-                                             ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
+    if flags.Detector.GeometrysTGC:
+        if not flags.Muon.usePhaseIIGeoSetup:
+            from MuonGeoModelTest.testGeoModel import GeoModelsTgcTestCfg as LegacyTestCfg
+            cfg.merge(LegacyTestCfg(flags,
+                                        TestStations = [ch for ch in chambToTest if ch[0] == "S"],
+                                        ExcludeStations = [ch for ch in chambToExclude if ch[0] == "S"]))  
+        else:
+            cfg.merge(GeoModelsTgcTestCfg(flags, 
+                                          TestStations = [ch for ch in chambToTest if ch[0] == "S"],
+                                          ExcludeStations = [ch for ch in chambToExclude if ch[0] == "S"],
+                                          ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
     
     executeTest(cfg)

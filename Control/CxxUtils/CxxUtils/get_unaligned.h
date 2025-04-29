@@ -31,16 +31,17 @@
 
 #include "CxxUtils/restrict.h"
 #include <cstring>
-#include <stdint.h>
+#include <cstdint>
+#include <bit>
 
 
 #ifdef __linux__
 # include <endian.h>
 #else
 namespace CxxUtils {
-  inline uint16_t htole16 (uint16_t x) { return x; }
-  inline uint32_t htole32 (uint32_t x) { return x; }
-  inline uint64_t htole64 (uint64_t x) { return x; }
+  inline uint16_t le16toh (uint16_t x) { return x; }
+  inline uint32_t le32toh (uint32_t x) { return x; }
+  inline uint64_t le64toh (uint64_t x) { return x; }
 }
 #endif
 
@@ -64,7 +65,7 @@ uint16_t get_unaligned16 (const uint8_t* ATH_RESTRICT &  p)
   uint16_t ret;
   memcpy (&ret, p, sizeof(ret));
   p += sizeof(ret);
-  return htole16 (ret);
+  return le16toh (ret);
 }
 
 
@@ -84,12 +85,12 @@ uint32_t get_unaligned32 (const uint8_t* ATH_RESTRICT &  p)
   uint32_t ret;
   memcpy (&ret, p, sizeof(ret));
   p += sizeof(ret);
-  return htole32 (ret);
+  return le32toh (ret);
 }
 
 
 /**
- * @brief Read a 8-byte little-endian value from a possibly unaligned pointer.
+ * @brief Read an 8-byte little-endian value from a possibly unaligned pointer.
  * @param p Pointer from which to read.  Advanced to the next value.
  *
  * Reads a little-endian value, regardless of the host byte ordering,
@@ -104,12 +105,12 @@ uint64_t get_unaligned64 (const uint8_t* ATH_RESTRICT &  p)
   uint64_t ret;
   memcpy (&ret, p, sizeof(ret));
   p += sizeof(ret);
-  return htole64 (ret);
+  return le64toh (ret);
 }
 
 
 /**
- * @brief Read little-endian float value from a possibly unaligned pointer.
+ * @brief Read a little-endian float value from a possibly unaligned pointer.
  * @param p Pointer from which to read.  Advanced to the next value.
  *
  * Reads a little-endian value, regardless of the host byte ordering,
@@ -121,17 +122,12 @@ uint64_t get_unaligned64 (const uint8_t* ATH_RESTRICT &  p)
 inline
 float get_unaligned_float (const uint8_t* ATH_RESTRICT &  p)
 {
-  union {
-    float f;
-    uint32_t i;
-  } cnv;
-  cnv.i = get_unaligned32 (p);
-  return cnv.f;
+  return std::bit_cast<float> (get_unaligned32 (p));
 }
 
 
 /**
- * @brief Read little-endian float value from a possibly unaligned pointer.
+ * @brief Read a little-endian double value from a possibly unaligned pointer.
  * @param p Pointer from which to read.  Advanced to the next value.
  *
  * Reads a little-endian value, regardless of the host byte ordering,
@@ -143,12 +139,7 @@ float get_unaligned_float (const uint8_t* ATH_RESTRICT &  p)
 inline
 double get_unaligned_double (const uint8_t* ATH_RESTRICT &  p)
 {
-  union {
-    double f;
-    uint64_t i;
-  } cnv;
-  cnv.i = get_unaligned64 (p);
-  return cnv.f;
+  return std::bit_cast<double> (get_unaligned64 (p));
 }
 
 

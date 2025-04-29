@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOUTILS_CALOCELLCORRECTION_H
@@ -38,11 +38,6 @@ class CaloCell;
 class CaloCellContainer;
 class EventContext;
 
-// Includes for Gaudi
-
-//#include "GaudiKernel/Algorithm.h"
-//#include "GaudiKernel/AlgTool.h"
-
 #include "AthenaBaseComps/AthAlgTool.h"
 
 static const InterfaceID IID_CaloCellCorrection("CaloCellCorrection", 1 , 0);
@@ -51,10 +46,11 @@ class CaloCellCorrection : public AthAlgTool
 {
 
 public:
+
+  using AthAlgTool::AthAlgTool;
   static const InterfaceID& interfaceID() { return IID_CaloCellCorrection;}
 
-  CaloCellCorrection(const std::string& type, const std::string& name,
-                     const IInterface* parent);
+  
   virtual ~CaloCellCorrection();
 
   // Main access method: Correct cells in cellCollection:

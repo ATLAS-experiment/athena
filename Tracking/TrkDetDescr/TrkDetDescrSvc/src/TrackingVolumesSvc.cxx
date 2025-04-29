@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,10 +25,9 @@ Trk::TrackingVolumesSvc::TrackingVolumesSvc(const std::string& a_name,ISvcLocato
     base_class(a_name,svc),
     m_pDetStore("DetectorStore",name())
 { 
-    m_volumes.reserve(Trk::ITrackingVolumesSvc::NumIdentifiers);
-    m_volumeNames.reserve(Trk::ITrackingVolumesSvc::NumIdentifiers);
     
     //set defaults
+    m_volumeNames.reserve(Trk::ITrackingVolumesSvc::NumIdentifiers);
     m_volumeNames.emplace_back("CalorimeterEntryLayer");
     m_volumeNames.emplace_back("MuonSpectrometerEntryLayer");
     m_volumeNames.emplace_back("MuonSpectrometerExitLayer");
@@ -37,6 +36,7 @@ Trk::TrackingVolumesSvc::TrackingVolumesSvc(const std::string& a_name,ISvcLocato
     // Adding values by hand - this should be changed (i.e. retrieved from a database?) 
     // EJWM
     
+    m_volumes.resize(Trk::ITrackingVolumesSvc::NumIdentifiers);
     m_volumes[Trk::ITrackingVolumesSvc::CalorimeterEntryLayer] 
         = new Trk::Volume(nullptr, new Trk::CylinderVolumeBounds(1100.0, 3200.0));
     m_volumes[Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer] 

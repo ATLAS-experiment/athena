@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETUNCERTAINTIES_PERJETFLAVOURUNCERTAINTYCOMPONENT_H
 #define JETUNCERTAINTIES_PERJETFLAVOURUNCERTAINTYCOMPONENT_H
 
 #include "JetUncertainties/UncertaintyComponent.h"
-#include "TF1.h"
+//#include "TF1.h"
+class TF1;
 
 namespace jet
 {
@@ -35,12 +36,12 @@ class PerJetFlavourUncertaintyComponent : public UncertaintyComponent
         PerJetFlavourUncertaintyComponent(const std::string& name = "");
 
         // Additional private members
-        const bool    m_absEta;
+        const bool    m_absEta{};
         const std::vector<int> m_labels;
-        const FlavourComp::TypeEnum m_flavourType;
-        const bool    m_constrainZresponse;
-        const TString    m_constrainZresponseFunc;
-        const TF1*    m_ZjetQuarkFrac;
+        const FlavourComp::TypeEnum m_flavourType{};
+        const bool    m_constrainZresponse{};
+        const TString    m_constrainZresponseFunc{};
+        const TF1*    m_ZjetQuarkFrac{};
 
         // Wrappers for special flavour histograms
         double getFlavourResponseUncertainty(const xAOD::Jet& jet, const xAOD::EventInfo& eInfo) const;

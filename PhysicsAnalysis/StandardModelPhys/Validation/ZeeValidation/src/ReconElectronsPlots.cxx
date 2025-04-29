@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZeeValidation/ReconElectronsPlots.h"
@@ -9,7 +9,7 @@ using CLHEP::GeV;
 
 namespace ZeeValidation{
   
-  ReconElectronsPlots::ReconElectronsPlots(PlotBase* pParent, std::string sDir, std::string sParticleType):
+  ReconElectronsPlots::ReconElectronsPlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType):
     PlotBase(pParent, sDir),
     m_sParticleType(sParticleType),
     h_electron_n(NULL), h_photon_n(NULL), 

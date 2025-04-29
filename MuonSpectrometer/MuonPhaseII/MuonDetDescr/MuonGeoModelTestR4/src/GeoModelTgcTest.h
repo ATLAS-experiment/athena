@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELTgcTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELTgcTEST_H
@@ -18,7 +18,7 @@ namespace MuonGMR4{
 
 class GeoModelTgcTest : public AthHistogramAlgorithm{
     public:
-        GeoModelTgcTest(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
         ~GeoModelTgcTest() = default;
 
@@ -64,15 +64,6 @@ class GeoModelTgcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<float>& m_longWidth{m_tree.newScalar<float>("ChamberWidthL")};
       MuonVal::ScalarBranch<float>& m_height{m_tree.newScalar<float>("ChamberHeight")};
       MuonVal::ScalarBranch<float>& m_thickness{m_tree.newScalar<float>("ChamberThickness")};
-
-      /// Alignment parameters
-      MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineTransT{m_tree.newScalar<float>("ALineTransT", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineTransZ{m_tree.newScalar<float>("ALineTransZ", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineRotS{m_tree.newScalar<float>("ALineRotS", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineRotT{m_tree.newScalar<float>("ALineRotT", 0.)};
-      MuonVal::ScalarBranch<float>& m_ALineRotZ{m_tree.newScalar<float>("ALineRotZ", 0.)};
-
     
       MuonVal::ThreeVectorBranch m_stripCenter{m_tree,"stripCenter"};
       MuonVal::ThreeVectorBranch m_stripBottom{m_tree,"stripBottom"};
@@ -84,10 +75,6 @@ class GeoModelTgcTest : public AthHistogramAlgorithm{
     
       MuonVal::VectorBranch<uint8_t>& m_stripGasGap{m_tree.newVector<uint8_t>("stripGasGap")};
       MuonVal::VectorBranch<unsigned int>& m_stripNum{m_tree.newVector<unsigned int>("stripNumber")};
-      MuonVal::VectorBranch<float>& m_stripShortWidth{m_tree.newVector<float>("stripShortWidth")};
-      MuonVal::VectorBranch<float>& m_stripLongWidth{m_tree.newVector<float>("stripLongWidth")};
-      MuonVal::VectorBranch<float>& m_stripPitch{m_tree.newVector<float>("stripPitch")};
-      MuonVal::VectorBranch<float>& m_stripLength{m_tree.newVector<float>("stripLength")};
       /// Wire gangs
       MuonVal::ThreeVectorBranch m_gangCenter{m_tree, "gangCenter"};
       MuonVal::TwoVectorBranch m_locGangPos{m_tree, "gangLocalPos"};

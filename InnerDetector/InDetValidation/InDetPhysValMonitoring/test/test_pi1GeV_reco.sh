@@ -3,7 +3,7 @@
 # art-type: grid
 # art-input: mc23_13p6TeV:mc23_13p6TeV.902082.PG_singlepi_Pt1_etaFlat0_2p5.recon.RDO.e8582_e8528_s4162_s4114_r15704
 # art-input-nfiles: 10
-# art-cores: 4
+# art-cores: 8
 # art-memory: 4096
 # art-include: main/Athena
 # art-include: 24.0/Athena
@@ -16,7 +16,7 @@
 #RDO is made at rel 22.0.73
 #reference plots are made at rel 22.0.73
 
-relname="r24.0.65"
+relname="r25.0.26"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_piplus1GeV_reco.root

@@ -269,6 +269,8 @@ namespace ActsTrk {
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};
 
     Gaudi::Property< bool > m_useExperimentCuts {this, "useExperimentCuts", false, ""};
+
+    Gaudi::Property< int > m_stateVectorReserveSize {this, "stateVectorReserveSize", 500, "Size of the initial Seeding State internal vectors"};
     
   private:
     std::unique_ptr< Acts::GridBinFinder< 3ul > > m_bottomBinFinder{nullptr};
@@ -281,6 +283,9 @@ namespace ActsTrk {
     /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger {nullptr};
 
+    // A conservative guess of the size of the vectors needed for seeding
+    
+    
     static constexpr float m_ExpCutrMin = 45.;
     
     static inline bool itkFastTrackingSPselect(const value_type& sp) {

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAOUTPUTSTREAM_H
@@ -92,6 +92,9 @@ protected:
    StringArrayProperty      m_metadataItemList{this,"MetadataItemList",{},"List of metadata items to write","OutputStreamItemList"};
    /// Vector of item names
    StringArrayProperty      m_excludeList{this,"ExcludeList",{},"List of metadata items to write","OrderedSet<std::string>"};
+
+   StringProperty           m_keepProvenances { this, "KeepProvenanceTagsRegEx", {".*"},
+                              "RegEx pattern to select processing tags for which DataHeader should retain provenances"};
    /// Vector of item names
    StringArrayProperty      m_compressionListHigh;
    /// Vector of item names

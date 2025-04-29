@@ -5,7 +5,6 @@
 #include "MuonInsideOutRecoTool.h"
 
 #include "MuonCombinedEvent/MuGirlTag.h"
-#include "MuonIdHelpers/MuonStationIndexHelpers.h"
 #include "MuonLayerEvent/MuonCandidate.h"
 #include "MuonLayerEvent/MuonLayerPrepRawData.h"
 #include "MuonLayerEvent/MuonSystemExtension.h"
@@ -286,8 +285,7 @@ namespace MuonCombined {
                                              IMuonCombinedInDetExtensionTool::MuonPrdData prdData) const {
         // get technologies in the given layer
         Muon::MuonStationIndex::StIndex stIndex = Muon::MuonStationIndex::toStationIndex(surf.regionIndex, surf.layerIndex);
-        std::vector<Muon::MuonStationIndex::TechnologyIndex> technologiesInStation =
-            Muon::MuonStationIndexHelpers::technologiesInStation(stIndex);
+        const std::set<Muon::MuonStationIndex::TechnologyIndex>& technologiesInStation = m_idHelperSvc->technologiesInStation(stIndex);
         if (msgLevel(MSG::DEBUG)) {
             std::string techString;
             for (const Muon::MuonStationIndex::TechnologyIndex& tech : technologiesInStation)

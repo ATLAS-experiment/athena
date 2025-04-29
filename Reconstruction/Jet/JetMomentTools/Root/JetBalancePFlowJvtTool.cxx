@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetBalancePFlowJvtTool.cxx
@@ -45,59 +45,24 @@
   StatusCode JetBalancePFlowJvtTool::initialize()
   {
     ATH_MSG_INFO ("Initializing " << name() << "...");
-    //WPs have not been calculated yet. Using holdover fJVT values here for now
-    if (m_tightOP) m_fjvtThresh = 0.53; //Closer to 1 ==> more likely to be PU
-    else m_fjvtThresh = 0.72;
 
-    ATH_CHECK( m_tvaKey.initialize() );
-
-    if(m_jetContainerName.empty()){
-      ATH_MSG_ERROR("JetBalancePFlowJvtTool needs to have its input jet container configured!");
+    if(m_FEKey.empty()){
+      ATH_MSG_ERROR("Flow Element container is empty");
       return StatusCode::FAILURE;
     }
 
-    if(!m_FEKey.empty()){
-      if(!m_orFEKey.key().empty()){
-        m_orFEKey = m_jetContainerName + "." + m_orFEKey.key();
-      }
-    }
-    else{
-      ATH_MSG_ERROR("Flow Element container is empty");
-    }
-
-    ATH_CHECK(m_FEKey.initialize( !m_FEKey.empty() ));
-    ATH_CHECK(m_orFEKey.initialize( !m_FEKey.empty() && !m_orFEKey.key().empty() ));
+    ATH_CHECK( JetForwardPFlowJvtTool::initialize() );
 
     m_bjvtKey = m_jetContainerName + "." + m_bjvtKey.key();
     m_bjvtRawKey = m_jetContainerName + "." + m_bjvtRawKey.key();
-    m_isHSKey = m_jetContainerName + "." + m_isHSKey.key();
     m_isQCDPUKey = m_jetContainerName + "." + m_isQCDPUKey.key();
     m_isStochPUKey = m_jetContainerName + "." + m_isStochPUKey.key();
-    m_passJvtKey = m_jetContainerName + "." + m_passJvtKey.key();
 
     ATH_CHECK(m_bjvtKey.initialize());
     ATH_CHECK(m_bjvtRawKey.initialize());
-    ATH_CHECK(m_isHSKey.initialize());
     ATH_CHECK(m_isQCDPUKey.initialize());
     ATH_CHECK(m_isStochPUKey.initialize());
-    ATH_CHECK(m_passJvtKey.initialize());
 
-    ATH_CHECK(m_vxContKey.initialize());
-
-    //These keys do nothing in this tool, but need to be initialised because of inheritance from JetForwardPFlowJvtTool
-    //This is probably a very hacky way of getting around the issue
-    m_orKey = m_jetContainerName + "." + m_orKey.key();;
-    m_PFOKey = m_jetContainerName + "." + m_PFOKey.key();
-    m_fjvtKey = m_jetContainerName + "." + m_fjvtKey.key();
-    m_fjvtRawKey = m_jetContainerName + "." + m_fjvtRawKey.key();
-    m_isPUKey = m_jetContainerName + "." + m_isPUKey.key();
-    
-    ATH_CHECK(m_orKey.initialize());
-    ATH_CHECK(m_PFOKey.initialize());
-    ATH_CHECK(m_fjvtKey.initialize());
-    ATH_CHECK(m_fjvtRawKey.initialize());
-    ATH_CHECK(m_isPUKey.initialize());
-    
     return StatusCode::SUCCESS;
   }
 

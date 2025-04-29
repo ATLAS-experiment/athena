@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,6 +10,7 @@
 
 #include <JetAnalysisAlgorithms/JetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/BJetCalibrationAlg.h>
+#include <JetAnalysisAlgorithms/JetFFSmearingAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
 #include <JetAnalysisAlgorithms/JetModifierAlg.h>
@@ -20,5 +21,6 @@
 #include <JetAnalysisAlgorithms/JetDecoratorAlg.h>
 #include <JetAnalysisAlgorithms/JetTruthTagAlg.h>
 #include <JetAnalysisAlgorithms/JetReclusteringAlg.h>
+#include <JetAnalysisAlgorithms/ReclusteredJetCalibrationAlg.h>
 
 #endif

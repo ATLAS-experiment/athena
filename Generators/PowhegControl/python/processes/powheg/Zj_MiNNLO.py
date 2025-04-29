@@ -27,7 +27,7 @@ class Zj_MiNNLO(PowhegV2):
         warnings = super(Zj_MiNNLO, self).hoppet_warning()
         infos = super(Zj_MiNNLO, self).hoppet_info()
 
-        super(Zj_MiNNLO, self).__init__(base_directory, os.path.join("Zj", "ZjMiNNLO"), powheg_executable="pwhg_main", warning_output=warnings, info_output=infos, **kwargs)
+        super(Zj_MiNNLO, self).__init__(base_directory, os.path.join("Zj", "ZjMiNNLO"), warning_output=warnings, info_output=infos, **kwargs)
 
         # Add algorithms to the sequence
 

@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
 
-from JetMonitoring.JetStandardHistoSpecs import knownHistos
 import math
 import re
 import copy
@@ -57,19 +56,12 @@ match_largeRL1_OfflineJets_List = ['AntiKt4EMPFlowJets', 'HLT_AntiKt10EMPFlowCSS
 match_HIL1_OfflineJets_List = ['AntiKt4HIJets', 'HLT_AntiKt4HIJets']
 
 L1JetCollections['pp'] = {
-
-  'LVL1JetRoIs'  : {
-    'MatchTo' : match_smallRL1_OfflineJets_List},
-  
   'L1_jFexSRJetRoI': {'MatchTo': match_smallRL1_OfflineJets_List},
-
   'L1_gFexSRJetRoI': {'MatchTo': match_smallRL1_OfflineJets_List},
-
   'L1_gFexLRJetRoI': {'MatchTo': match_largeRL1_OfflineJets_List},
 }
 
 L1JetCollections['HI'] = {
-  'LVL1JetRoIs'  : {'MatchTo' : match_HIL1_OfflineJets_List},
   'L1_jFexSRJetRoI': {'MatchTo': match_HIL1_OfflineJets_List},
   'L1_gFexSRJetRoI': {'MatchTo': match_HIL1_OfflineJets_List},
 }
@@ -99,7 +91,6 @@ for case in L1JetCollections.keys():
 # C++ component attribute.
 
 l1Coll2MatcherKey = {
-  'LVL1JetRoIs': 'L1JetContainerName1',
   'L1_jFexSRJetRoI': 'L1jFexSRJetRoIContainerName',
   'L1_gFexSRJetRoI': 'L1gFexJetRoIContainerName',
   'L1_gFexLRJetRoI': 'L1gFexJetRoIContainerName',
@@ -120,9 +111,6 @@ for case in L1JetCollections.keys():
 Chain2L1JetCollDict = dict()
 
 Chain2L1JetCollDict['pp'] = { # set L1 jet collection name for L1 jet chains
-  'L1_J15': ['LVL1JetRoIs'],
-  'L1_J20': ['LVL1JetRoIs'],
-  'L1_J100': ['LVL1JetRoIs'],
   
   'L1_jJ40': ['L1_jFexSRJetRoI'],
   'L1_jJ50': ['L1_jFexSRJetRoI'],
@@ -131,72 +119,27 @@ Chain2L1JetCollDict['pp'] = { # set L1 jet collection name for L1 jet chains
   'L1_3jJ70p0ETA23': ['L1_jFexSRJetRoI'],
   'L1_4jJ40': ['L1_jFexSRJetRoI'],
 
-  'L1_gJ20': ['L1_gFexSRJetRoI'],
-  'L1_gJ50': ['L1_gFexSRJetRoI'],
-  'L1_gJ100': ['L1_gFexSRJetRoI'],
 
-  'L1_gJ160': ['L1_gFexSRJetRoI'],
+  'L1_gJ20p0ETA25': ['L1_gFexSRJetRoI'],
+  'L1_gJ50p0ETA25': ['L1_gFexSRJetRoI'],
+  'L1_gJ100p0ETA25': ['L1_gFexSRJetRoI'],
+  'L1_gJ400p0ETA25': ['L1_gFexSRJetRoI'],
 
-  'L1_gLJ80': ['L1_gFexLRJetRoI'],
-  'L1_gLJ120': ['L1_gFexLRJetRoI'],
-  'L1_gLJ140': ['L1_gFexLRJetRoI'],
+  'L1_gLJ80p0ETA25': ['L1_gFexLRJetRoI'],
+  'L1_gLJ100p0ETA25': ['L1_gFexLRJetRoI'],
+  'L1_gLJ140p0ETA25': ['L1_gFexLRJetRoI'],
+  'L1_gLJ160p0ETA25': ['L1_gFexLRJetRoI'],
 
   'L1_SC111-CjJ40': ['L1_jFexSRJetRoI'],
   'L1_HT190-jJ40s5pETA21': ['L1_jFexSRJetRoI'],
 }
 
 Chain2L1JetCollDict['HI'] = { 
-  'L1_J15': ['LVL1JetRoIs'],
-  'L1_J20': ['LVL1JetRoIs'],
-  'L1_J100': ['LVL1JetRoIs'],
-
   'L1_jJ40': ['L1_jFexSRJetRoI'],
   'L1_jJ60': ['L1_jFexSRJetRoI'],
   'L1_jJ90': ['L1_jFexSRJetRoI'],
 
   'L1jJ40p30ETA49': ['L1_jFexSRJetRoI'],
-}
-
-
-Legacy2PhaseIjJThresholdDict = {
-  'J5'   : 'jJ20',
-  'J12'  : 'jJ30',
-  'J15'  : 'jJ40',
-  '4J15' : '4jJ40',
-  'J20'  : 'jJ50',
-  'J25'  : 'jJ55',
-  'J30'  : 'jJ60',
-  'J35'  : 'jJ70',
-  'J40'  : 'jJ80',
-  'J45'  : 'jJ85',
-  'J50'  : 'jJ90',
-  'J75'  : 'jJ125',
-  'J85'  : 'jJ140',
-  'J100' : 'jJ160',
-  'J120' : 'jJ180',
-  'J400' : 'jJ500',
-}
-Legacy2PhaseIgJThresholdDict = {
-  'J5'   : 'gJ20',
-  'J12'  : 'gJ30',
-  'J15'  : 'gJ40',
-  '4J15' : '4gJ40',
-  'J20'  : 'gJ50',
-  'J25'  : 'gJ55',
-  'J30'  : 'gJ60',
-  'J35'  : 'gJ70',
-  'J40'  : 'gJ80',
-  'J45'  : 'gJ85',
-  'J50'  : 'gJ90',
-  'J75'  : 'gJ125',
-  'J85'  : 'gJ140',
-  'J100' : 'gJ160',
-  'J120' : 'gJ180',
-  'J400' : 'gJ500',
-}
-
-Legacy2PhaseIgLJThresholdDict = {
-  'J100' : 'gLJ140'
 }
 
 ############################################
@@ -282,14 +225,6 @@ def getChains2Monitor(inputFlags, monMode):
         if 'gLJ' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf"
       else: continue
 
-    # only HLT_noalg get efficiency curves by default, so...
-    # these are additional hard-coded chains for efficiency monitoring
-    if Chains2Monitor['pp'].get('HLT_j420_L1J100'): Chains2Monitor['pp']['HLT_j420_L1J100'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})
-    if Chains2Monitor['pp'].get('HLT_3j200_L1J100'): Chains2Monitor['pp']['HLT_3j200_L1J100'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})    
-    if Chains2Monitor['pp'].get('HLT_4j120_L13J50'): Chains2Monitor['pp']['HLT_4j120_L13J50'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"}) 
-    if Chains2Monitor['pp'].get('HLT_5j80_pf_ftf_presel5j50_L14J15'): Chains2Monitor['pp']['HLT_5j80_pf_ftf_presel5j50_L14J15'].update({"RefChain": "HLT_j45_pf_ftf_preselj20_L1J15", "OfflineColl": "AntiKt4EMPFlowJets"})    
-    if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})    
-    if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_preselj225_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_preselj225_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})
 
     if Chains2Monitor['pp'].get('HLT_j420_L1jJ160'): Chains2Monitor['pp']['HLT_j420_L1jJ160'].update({"RefChain": "HLT_j85_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"})
     if Chains2Monitor['pp'].get('HLT_3j200_L1jJ160'): Chains2Monitor['pp']['HLT_3j200_L1jJ160'].update({"RefChain": "HLT_j85_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"})    
@@ -416,14 +351,6 @@ ExtraLargeROnlineHists = [
 
 ExtraOnlineNJetHists = [
   "njets",
-  "njetsEt20Eta0_32",
-  "njetsEt30Eta0_32", 
-  "njetsEt50Eta0_32",
-  "njetsEt80Eta0_32",
-  "njetsPt20Eta0_32",
-  "njetsPt30Eta0_32",
-  "njetsPt50Eta0_32",
-  "njetsPt80Eta0_32",
 ]
 
 # Kinematics at different scales for offline and small-R online jet collections
@@ -475,10 +402,8 @@ def getL1JetCopyAlg(injets,outjets):
       The template types are defined in JTMContainers.h.
     '''
     jcopy_alg = None
-    jcopy_alg_name = "l1jetcopy_alg_"+injets
-    if injets == "LVL1JetRoIs":
-        jcopy_alg = CompFactory.L1JetCopyAlgorithm_JTM_JetRoIContainer_(jcopy_alg_name)    
-    elif injets == "L1_jFexSRJetRoI":
+    jcopy_alg_name = "l1jetcopy_alg_"+injets  
+    if injets == "L1_jFexSRJetRoI":
         jcopy_alg = CompFactory.L1JetCopyAlgorithm_JTM_jFexSRJetRoIContainer_(jcopy_alg_name)    
     elif injets in ["L1_gFexSRJetRoI", "L1_gFexLRJetRoI"]:
         jcopy_alg = CompFactory.L1JetCopyAlgorithm_JTM_gFexJetRoIContainer_(jcopy_alg_name)    
@@ -640,10 +565,6 @@ def basicJetMonAlgSpec(jetcoll,isOnline):
   Conf = JetMonAlgSpec(jetcoll+"Mon",JetContainerName = jetcoll, defaultPath = path, topLevelDir=TopLevelDir, bottomLevelDir=jetcollFolder, failureOnMissingContainer=False)
 
   # Now start filling the histo spec list
-  knownHistos['phi_tight'] = HistoSpec('phi_tight',
-                                       (50,-math.pi,math.pi),
-                                       title='#phi;#phi;Entries',
-                                       xvar='phi')
   Conf.appendHistos(
     
     #See knownHistos in JetStandardHistoSpecs.py for the list of standard specification.
@@ -661,6 +582,7 @@ def basicJetMonAlgSpec(jetcoll,isOnline):
     #2D histos are usually refered to by concatenating vars with a ';' as in 'varx;vary' 
     #if the 'vax;vary' alias doesn't exist in knownHistos but 'varx' and 'vary'
     #do exist, then a spec fot 'vax;vary' will be automatically generated.
+    
 
     #Jet multiplicity histograms can be added by using an EventHistoSpec
     #Their specifications (pT cut, ET cut, eta cuts) must be defined in the knownEventVar dictionary within JetStandardHistoSpecs.py
@@ -695,7 +617,6 @@ def basicJetMonAlgSpec(jetcoll,isOnline):
     "m",
     "eta",
     "phi",
-    "phi_tight",
     "e",
     "et",
     
@@ -704,7 +625,6 @@ def basicJetMonAlgSpec(jetcoll,isOnline):
     "eta;phi", # phi vs eta
     "eta;e",   # energy vs eta
     "phi;e",   # energy vs phi
-    "phi_tight;e", # energy vs phi
 
     #Event selection
     SelectSpec( 'central', '|eta|<3.2', path, FillerTools = ["pt","et","m"] ),
@@ -733,10 +653,6 @@ def basicHIJetMonAlgSpec(jetcoll,isOnline):
   Conf = JetMonAlgSpec(jetcoll+"Mon",JetContainerName = jetcoll, defaultPath = path, topLevelDir=TopLevelDir, bottomLevelDir=jetcollFolder, failureOnMissingContainer=False)
 
   # Now start filling the histo spec list
-  knownHistos['phi_tight'] = HistoSpec('phi_tight',
-                                       (50,-math.pi,math.pi),
-                                       title='#phi;#phi;Entries',
-                                       xvar='phi')
   Conf.appendHistos(
     
     #See knownHistos in JetStandardHistoSpecs.py for the list of standard specification.
@@ -905,7 +821,6 @@ def jetMonitoringConfig(inputFlags,jetcoll,jetCollDict,monMode):
                                       InverseJetSel=True,
                                       FillerTools = ["pt",
                                                      "phi",
-                                                     "phi_tight",
                                                      "eta"])) #cleaning variables not applicable for large-R collections
      
          if 'PF' in jetcoll: # dedicated histograms for offline PFlow jets
@@ -1046,8 +961,6 @@ def jetChainMonitoringConfig(inputFlags,jetcoll,chain,onlyUsePassingJets=True):
            "eta",
            "et",
            "phi",
-           "phi_tight",
-     
    )
    for hist in ExtraOnlineNJetHists: trigConf.appendHistos(EventHistoSpec(hist, (20,0,25), title=hist+';'+hist+';Entries'))
    # Add NjetEt and NjetPt histograms for simple scenarios

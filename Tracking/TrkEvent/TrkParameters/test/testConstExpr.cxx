@@ -20,7 +20,7 @@ main()
   params.emplace_back(std::make_unique<Trk::AtaStraightLine>());
 
   for (const auto& i : params) {
-    std::cout << "Dimensions: " << i->dim << " isCharged: " << i->isCharged()
+    std::cout << "Dimensions: " << Trk::ParametersBase<5, Trk::Charged>::dim << " isCharged: " << i->isCharged()
               << " SurfaceType: " << static_cast<int>(i->surfaceType()) << '\n';
   }
 }

@@ -39,7 +39,7 @@ namespace MuonGM {
         int nMissedTopStereo{0};
         int nMissedBottomStereo{0};
         int totalStrips{0};      // total strips per MM module
-
+        bool isConvertedFromPhaseII{false};
         /// distance to readout 
         double distanceToReadout(const Amg::Vector2D& pos) const;
 
@@ -328,24 +328,19 @@ namespace MuonGM {
                     // last group: average the starting and ending x of the group
                     locX = 0.5 * (0.5 * m_maxYSize + firstX + (nGroups - 2) * groupWidth * inputPitch);
                 } else {
-                    locX = firstX + groupWidth * inputPitch * (st - 1.5);
+                    // For the R3 geometry converted from Phase II, we are redefining the center of the wiregroup
+                    // to be between the 10th and the 11th wire of the group, originally defined on the 10th wire.
+                    // Hence, we are defining an offset, wireOffset to be used in the defining the local x of the wiregroup center.
+                    double wireOffset{0.};
+                    if (isConvertedFromPhaseII) {
+                        wireOffset = 0.5 * inputPitch;
+                    }
+                    locX = firstX + wireOffset + groupWidth * inputPitch * (st - 1.5);
                 }
 
                 pos[0] = locX;
                 pos[1] = 0.;
 
-            } else {
-
-                /// Default case for phi wires
-                double dY   = 0.5 * (m_maxYSize - m_minYSize);
-                double locY = firstPos() + (st-1)*inputPitch;
-                double locX{0.};
-
-                if (std::abs(locY) > 0.5*m_minYSize) {
-                    locX = 0.5 * m_xSize *(1. - (0.5*m_maxYSize - std::abs(locY)) / dY);
-                }
-                pos[0] = locY;
-                pos[1] = locX;
             }
 
         } else if (detType == DetType::MM) {

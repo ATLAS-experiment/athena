@@ -226,8 +226,8 @@ def DigitizationTestingPostInclude(flags, acc):
     """Testing digitization post-include"""
     # dump config
     configName = "DigiPUConfigCA" if flags.Digitization.PileUp else "DigiConfigCA"
-    from AthenaConfiguration.JobOptsDumper import JobOptsDumperCfg
-    acc.merge(JobOptsDumperCfg(flags, FileName=f"{configName}.txt"))
+    from AthenaConfiguration.MainServicesConfig import JobOptionsDumpCfg
+    acc.merge(JobOptionsDumpCfg(flags, fileName=f"{configName}.txt"))
 
     # dump pickle
     with open(f"{configName}.pkl", "wb") as f:

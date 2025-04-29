@@ -10,9 +10,8 @@
 namespace pool {
 
   class ICollectionDescription;
-  class ICollectionSchemaEditor;
-  class ICollectionDataEditor;
   class ICollectionQuery;
+  class CollectionRowBuffer;
 
   /** 
    * @class ICollection ICollection.h CollectionBase/ICollection.h
@@ -35,6 +34,12 @@ namespace pool {
     /// Checks if the collection is open.
     virtual bool isOpen() const = 0;
 
+    /// Initialize a new RowBuffer by adding all Attributes adn Tokens of this collection to it
+    virtual void initNewRow( pool::CollectionRowBuffer& row ) const;
+
+    /// Adds a new row of data to the collection.
+    virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) = 0;
+
     /// Commits the latest changes made to the collection.
     virtual void commit( bool restartTransaction = true ) = 0;
 
@@ -44,17 +49,11 @@ namespace pool {
     /// Returns an object used to describe the collection properties.
     virtual const ICollectionDescription& description() const = 0;
 
-    /// Returns an object used to modify the collection schema.
-    virtual ICollectionSchemaEditor& 	schemaEditor() = 0;
-
-    /// Returns an object used to add, update or delete rows of the collection.
-    virtual ICollectionDataEditor& 	dataEditor() = 0;
-
     /// Returns an object used to query the collection.
     virtual ICollectionQuery* 		newQuery() = 0;
     
     /// Empty destructor.
-    virtual ~ICollection() {}
+    virtual ~ICollection() = default;
 
   };
 

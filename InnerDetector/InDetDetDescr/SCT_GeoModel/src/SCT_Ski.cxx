@@ -1,18 +1,18 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_Ski.h"
-#include "SCT_GeoModel/SCT_Identifier.h"
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_MaterialManager.h"
-#include "SCT_GeoModel/SCT_BarrelParameters.h"
-#include "SCT_GeoModel/SCT_GeneralParameters.h"
-#include "SCT_GeoModel/SCT_Module.h"
-#include "SCT_GeoModel/SCT_BaseBoard.h" 
-#include "SCT_GeoModel/SCT_Dogleg.h"
-#include "SCT_GeoModel/SCT_CoolingBlock.h"
-#include "SCT_GeoModel/SCT_CoolingPipe.h"
+#include "SCT_Ski.h"
+#include "SCT_Identifier.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_MaterialManager.h"
+#include "SCT_BarrelParameters.h"
+#include "SCT_GeneralParameters.h"
+#include "SCT_Module.h"
+#include "SCT_BaseBoard.h" 
+#include "SCT_Dogleg.h"
+#include "SCT_CoolingBlock.h"
+#include "SCT_CoolingPipe.h"
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 

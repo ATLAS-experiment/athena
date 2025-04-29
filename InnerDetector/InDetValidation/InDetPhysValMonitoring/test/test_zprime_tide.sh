@@ -15,7 +15,7 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r24.0.65"
+relname="r25.0.26"
 
 lastref_dir=last_results
 
@@ -33,9 +33,9 @@ fi
 
 rdo=physval.RDO.root
 aod=physval.AOD.root
-idtide=DAOD_TIDE.pool.root
+idtide=physval.DAOD_TIDE.root
 
-conditionsTag=OFLCOND-MC23-SDR-RUN3-07
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
 # Digi for MC23d HITS inputs
 run Digi_tf.py \

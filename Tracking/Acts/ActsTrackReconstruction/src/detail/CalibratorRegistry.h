@@ -5,6 +5,9 @@
 #define CALIBRATORREGISTRY_H
 
 #include "src/detail/MakeDerivedVariant.h"
+#include "Acts/Utilities/Delegate.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Utilities/CalibrationContext.hpp"
 
 // Helper class to store and retrieve calibrators for a certain measurement type and measurement dimension
 // this class only provides calibrators for types and associated dimension which are defined by the measurement container

@@ -41,6 +41,7 @@ StatusCode IDTPM::DuplicateRatePlots::bookPlots()
 {
   ATH_MSG_DEBUG( "Booking duplicate rate plots in " << getDirectory() ); 
 
+  ATH_CHECK( retrieveAndBook( m_duplrate_vs_incl, "duplrate_vs_"+m_trackType+"_inclusive" ) );
   ATH_CHECK( retrieveAndBook( m_duplrate_vs_pt,   "duplrate_vs_"+m_trackType+"_pt" ) );
   ATH_CHECK( retrieveAndBook( m_duplrate_vs_eta,  "duplrate_vs_"+m_trackType+"_eta" ) );
   ATH_CHECK( retrieveAndBook( m_duplrate_vs_phi,  "duplrate_vs_"+m_trackType+"_phi" ) );
@@ -94,6 +95,7 @@ StatusCode IDTPM::DuplicateRatePlots::fillPlots(
   float pz0   = z0( particle );
 
   /// Fill the histograms
+  ATH_CHECK( fill( m_duplrate_vs_incl,  1,  (nMatched>1), weight ) );
   ATH_CHECK( fill( m_duplrate_vs_pt,  ppt,  (nMatched>1), weight ) );
   ATH_CHECK( fill( m_duplrate_vs_eta, peta, (nMatched>1), weight ) );
   ATH_CHECK( fill( m_duplrate_vs_phi, pphi, (nMatched>1), weight ) );

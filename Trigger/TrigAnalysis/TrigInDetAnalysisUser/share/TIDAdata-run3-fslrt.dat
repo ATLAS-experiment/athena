@@ -13,7 +13,7 @@ refChain = "Truth";
 
 MinVertices = 0;
 
-
+#define LRT
 #include "TIDAdata-chains-run3.dat"
 
 

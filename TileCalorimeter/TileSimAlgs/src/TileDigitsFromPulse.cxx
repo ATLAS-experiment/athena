@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -48,10 +48,10 @@
 #include "TKey.h"
 #include "TF1.h"
 
+#include <cstdlib>
+
 //C++ STL includes
 #include <vector>
-
-
 using CLHEP::RandGaussQ;
 using CLHEP::RandFlat;
 
@@ -59,12 +59,8 @@ using CLHEP::RandFlat;
 // Constructor
 //
 TileDigitsFromPulse::TileDigitsFromPulse(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_tileHWID(0),
-  m_tileInfo(0)
+  AthAlgorithm(name, pSvcLocator)
 {
-	m_rChUnit = TileRawChannelUnit::ADCcounts;
-	m_rChType = TileFragHash::Default;
 
 	declareProperty("ImperfectionMean", m_imperfectionMean = 1.01);
 	declareProperty("ImperfectionRms", m_imperfectionRms = 0.02);
@@ -82,6 +78,7 @@ TileDigitsFromPulse::TileDigitsFromPulse(const std::string& name, ISvcLocator* p
 	declareProperty("UseInTimeAmpDist", m_useItADist = kFALSE);
 	declareProperty("UseOutOfTimeAmpDist", m_useOotADist = kFALSE);
 	declareProperty("InTimeAmpDistFileName", m_itADistFileName = "");
+	declareProperty("InTimeAmpPulseProb", m_itAPulseProb = 0);
 	declareProperty("OutOfTimeAmpDistFileName", m_ootADistFileName = "");
 	declareProperty("PileUpFraction", m_pileUpFraction = 1);
 	declareProperty("GaussianC2CPhaseVariation", m_gausC2C = 0);
@@ -100,12 +97,13 @@ TileDigitsFromPulse::TileDigitsFromPulse(const std::string& name, ISvcLocator* p
 	declareProperty("RandomSeed", m_seed = 4357);
 	declareProperty("BunchSpacing", m_BunchSpacing = 25.); // 25, 50 or 75
 	declareProperty("SimulateQIE", m_simQIE = kFALSE);
+	declareProperty("SimulatePulseChain",m_simPulseChain = kFALSE);
 
 	declareProperty("TileInfoName", m_infoName = "TileInfo");
 	declareProperty("TilePhaseII", m_PhaseII = kFALSE);
 	declareProperty("Bigain", m_bigain = kFALSE);
 	declareProperty("NSamples", m_nSamples = 7); 
-	declareProperty("nPulses", m_nPul = 21); 
+	declareProperty("NPulses", m_nPul = 21);
 
 	//Initialisations
 	m_ps[0] = new TilePulseShape(msgSvc(), "TilePulseShapeLo"); //Low Gain
@@ -167,6 +165,8 @@ StatusCode TileDigitsFromPulse::initialize() {
 	m_ps[0]->setPulseShape(m_tileInfo->digitsFullShapeLo());
 	m_ps[1]->setPulseShape(m_tileInfo->digitsFullShapeHi());
 
+	m_random = std::make_unique<TRandom3>(m_seed);
+
 	//Initialise distribution histograms if in use
 	if (m_useItADist) {
 		if (m_itADistFileName.size() == 0) {
@@ -186,7 +186,6 @@ StatusCode TileDigitsFromPulse::initialize() {
 
 		if (m_pileupAmpDistFileName.size() == 0) {
 			m_pileupAmpDistFileName = PathResolver::find_file("Distributions_MB_minbias_inelastic_lowjetphoton_e8314_e7400_s3508.root", "DATAPATH");
-			//m_pileupAmpDistFileName = PathResolver::find_file("Distributions_small_h2000_177531_ZeroBias.root", "DATAPATH");
 			if (m_pileupAmpDistFileName.size() == 0 ) {
 				ATH_MSG_FATAL("Could not find input file Distributions_MB_minbias_inelastic_lowjetphoton_e8314_e7400_s3508.root");
 				return StatusCode::FAILURE;
@@ -237,6 +236,30 @@ StatusCode TileDigitsFromPulse::initialize() {
 	if (m_chanNoise)
 		m_gaussNoise = kFALSE; //Make sure channel noise overrides gaussian noise.
 
+	m_PUAmp.clear();
+	m_PUAmp.resize(4);
+	for (int ros = 1; ros < 5; ++ros){
+	  m_PUAmp[ros-1].clear();
+	  m_PUAmp[ros-1].resize(64);
+
+	  for (int drawer = 0; drawer < 64; ++drawer){
+	    m_PUAmp[ros-1][drawer].clear();
+	    m_PUAmp[ros-1][drawer].resize(48);
+	    for (int channel = 0; channel < 48; channel++){
+	      m_PUAmp[ros-1][drawer][channel].clear();
+	      m_PUAmp[ros-1][drawer][channel].resize(m_nPul);
+	    }
+	  }
+	}
+
+	for (int ros = 1; ros < 5; ++ros) { // initialize the vector of PU amplitudes
+	  for (int drawer = 0; drawer < 64; ++drawer){
+	    for (int channel = 0; channel < 48; ++channel) {
+	      addPileUp(m_inTimeAmp, 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
+	    }
+	  }
+	}
+
 	ATH_MSG_DEBUG("initialize() successful");
 
 	return StatusCode::SUCCESS;
@@ -269,9 +292,7 @@ StatusCode TileDigitsFromPulse::execute() {
 
 	DataPool < TileDigits > tileDigitsPool(m_tileHWID->adc_hash_max());
 
-	TRandom3 *random = new TRandom3(m_seed); //Randomizer for pulse-shape imperfection
 	double tFit = 0, ped = 100; //Settings for simulation 
-	double mu = 0; //Interaction per bunch crossing for PU simulation
 
 	TF1 *pdf = new TF1();
 	TF1 *pdf_PhaseI = new TF1();
@@ -303,19 +324,17 @@ StatusCode TileDigitsFromPulse::execute() {
 	double Rndm[16]; // Can't use variable size array,
 	double Rndm_dG[1]; // uniform random number for the double gaussian
 
-	double amp_1;
-	double amp_2;
-
 	ATH_MSG_DEBUG("Starting loop");
 	int gain = 1;
 	double n_inTimeAmp = 0.0; //!< Local loop variable for amplitude of in-time pulse
+	float sample = 0.0;
 
 	for (int ros = 1; ros < 5; ++ros) {
 		for (int drawer = 0; drawer < 64; ++drawer) {
 			unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
 			for (int channel = 0; channel < 48; ++channel) {
 
-				if (!m_simQIE) { //3-in-1 is simulated below
+				if (!m_simQIE && !m_simPulseChain) { //3-in-1 or FENICS is simulated below
 
 					if(m_PhaseII){
 						ATH_MSG_VERBOSE("executing FENICS code");
@@ -328,87 +347,40 @@ StatusCode TileDigitsFromPulse::execute() {
 					bool isHGSaturated = false;
 
 					for (int igain = 1; igain >= 0; igain--) {
+
 						gain = igain;
+						if (m_chanPed){
+						  ped = m_tileToolNoiseSample->getPed(drawerIdx, channel, gain, TileRawChannelUnit::ADCcounts, ctx);
+						}
+						else{
+						  ped = (gain == 1) ? m_ped_HG : m_ped_LG;
+						}
+
 						if (gain == 1) {
 							n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
 
-							if (m_chanPed){
-							  	ped = m_tileToolNoiseSample->getPed(drawerIdx, channel, gain, TileRawChannelUnit::ADCcounts, ctx);
+							if (m_random->Rndm() >= m_pileUpFraction){
+							        m_ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
 							}
-							else{
-								ped = m_ped_HG;
-							}
-							if (random->Rndm() >= m_pileUpFraction)
-							  m_ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
-							tFit = random->Gaus(0., m_gausC2C); //C2C phase variation
-							double deformatedTime = random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
+							tFit = m_random->Gaus(0., m_gausC2C); //C2C phase variation
+							double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
 							m_ps[gain]->scalePulse(deformatedTime, deformatedTime); // Deformation of pulse shape by changing its width
 							//if(m_useOffsetHisto) m_ootOffset = m_ootOffsetDist->GetRandom();  //OLD Remove for 7 samples -> BunchSpacing
 
-							//Pileup samples
-							m_PUAmp.clear();
-							m_PUAmp.resize(m_nPul);
-
-							for (int i = 0; i <= m_nPul_eff; i++) {
-								if (((i * 25) % m_BunchSpacing) == 0) {
-									if(m_simPUwPoisson){
-										mu=random->Poisson(m_avgMuForPU);
-										ATH_MSG_VERBOSE("Effective pulse number " << i);
-										ATH_MSG_VERBOSE("Number of interactions for simulation: " << mu );
-										for (int imu = 0; imu<mu; imu++){
-
-											amp_1 = m_pileup_AmpDists[ros-1][channel]->GetRandom();
-											amp_2 = m_pileup_AmpDists[ros-1][channel]->GetRandom();
-
-											ATH_MSG_VERBOSE("Random amplitudes for PU: " << amp_1 << " " << amp_2);
-
-											if(i==0){
-												m_PUAmp.at(m_nPul_eff) += abs(amp_1);
-											}
-											else{
-												m_PUAmp.at(m_nPul_eff + i) += abs(amp_1);
-												m_PUAmp.at(m_nPul_eff - i) += abs(amp_2);
-											}
-										}
-
-										ATH_MSG_VERBOSE("Final amplitudes for pulse " << m_PUAmp.at(m_nPul_eff + i) << " " << m_PUAmp.at(m_nPul_eff - i));
-									}
-									else{
-										m_PUAmp.at(m_nPul_eff + i) = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
-										m_PUAmp.at(m_nPul_eff - i) = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
-									}
-								} else {
-									m_PUAmp.at(m_nPul_eff + i) = 0;
-									m_PUAmp.at(m_nPul_eff - i) = 0;
-								}
-							}
+							// Make sure m_PUAmp[ros-1][drawer][channel] has m_nPul elements, all zero
+							m_PUAmp[ros-1][drawer][channel].assign(m_nPul, 0.0);
 							
-						
+							// Fill amplitudes (including pile-up) for HG
+							addPileUp(n_inTimeAmp, gain, ros, drawer, channel);
+
 						} else {
-							if (m_chanPed)
-								ped = m_tileToolNoiseSample->getPed(drawerIdx, channel, gain, TileRawChannelUnit::ADCcounts, ctx);
-							double deformatedTime = random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
+							double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
 							m_ps[gain]->scalePulse(deformatedTime, deformatedTime); // Deformation of pulse shape by changing its width
 
-							if (m_chanPed)
-								ped = m_tileToolNoiseSample->getPed(drawerIdx, channel, gain, TileRawChannelUnit::ADCcounts, ctx);
-
-							else{
-								ped=m_ped_LG;
-							}
-							
-							if(!m_PhaseII){
-							  n_inTimeAmp /= 64;
-							  for (int i = 0; i <= m_nPul_eff; i++) {
-							    m_PUAmp.at(m_nPul_eff + i) /= 64;
-							    m_PUAmp.at(m_nPul_eff - i) /= 64;
-							  }
-							} else{
-							  n_inTimeAmp /= 40; 
-							  for (int i = 0; i <= m_nPul_eff; i++) {
-							    m_PUAmp.at(m_nPul_eff + i) /= 40;
-							    m_PUAmp.at(m_nPul_eff - i) /= 40;
-							  }
+							double scaleFactor = (m_PhaseII ? 40.0 : 64.0);
+							n_inTimeAmp /= scaleFactor;
+							for (auto &ampValue : m_PUAmp[ros-1][drawer][channel]) {
+							        ampValue /= scaleFactor;
 							}
 						}
 
@@ -420,8 +392,8 @@ StatusCode TileDigitsFromPulse::execute() {
 						}
 
 						m_tsg->setPulseShape(m_ps[gain]);
-						m_tsg->fillNSamples(tFit, ped, n_inTimeAmp, m_PUAmp, pdf, m_gaussNoise, m_itOffset, m_nSamples, m_nPul); // Sum of Intime + PU pulses			
-						
+						m_tsg->fillNSamples(tFit, ped, n_inTimeAmp, m_PUAmp[ros-1][drawer][channel], pdf, m_gaussNoise, m_itOffset, m_nSamples, m_nPul); // Sum of Intime + PU pulses
+
 						samples.clear();
 						samples.resize(m_nSamples);
 						m_buf->getValueVector(samples);
@@ -449,31 +421,47 @@ StatusCode TileDigitsFromPulse::execute() {
 							
 						}
 						
-						if(!m_bigain){
-						  if (!isHGSaturated)
-						    break;
+						if(!m_bigain && !isHGSaturated){
+						        break;
 						}
 						
-						if(m_bigain){
-						  ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
+						ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
 
-						  TileDigits * digit = tileDigitsPool.nextElementPtr();
-						  *digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain),
-								       std::move(samples));
+						TileDigits * digit = tileDigitsPool.nextElementPtr();
+						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain),
+								     std::move(samples));
 
-						  ATH_CHECK( digitsContainer->push_back(digit) ); 
+						ATH_CHECK( digitsContainer->push_back(digit) );
 						  
-						  auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
+						auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
 												     n_inTimeAmp,
 												     tFit,
 												     m_ootAmp,
 												     m_ootOffset);
 						  
-						  ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
-						}
+						ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
+
 					}
 
-				} else { //QIE is simulated here --------------------------------------------
+					if(!m_bigain){
+					        ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
+
+						TileDigits * digit = tileDigitsPool.nextElementPtr();
+						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain),
+								     std::move(samples));
+
+						ATH_CHECK( digitsContainer->push_back(digit) );
+
+						auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
+												     n_inTimeAmp,
+												     tFit,
+												     m_ootAmp,
+												     m_ootOffset);
+
+						ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
+					}
+
+				} else if (m_simQIE) { //QIE is simulated here --------------------------------------------
 
 					//ATH_MSG_DEBUG("executing QIE code");
 
@@ -491,10 +479,8 @@ StatusCode TileDigitsFromPulse::execute() {
 					for (int i = 0; i < 7; i++)
 						if ((((i - 3) * 25) % (int) m_BunchSpacing) == 0) {
 							if (i != 3) { //index 3 corresponds to the in-time pulse, the signal
-								//m_PUAmp.at(i) = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp; //out-of-time pulses
 								my_PUAmp[i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp; //out-of-time pulses
 							} else {
-								//m_PUAmp.at(i) = 0; //it-time pulse
 								my_PUAmp[i] = 0;
 							}
 						}
@@ -505,9 +491,6 @@ StatusCode TileDigitsFromPulse::execute() {
 					samples.clear();
 					samples.resize(m_nSamples);
 					m_buf->getValueVector(samples);
-				}
-
-				if(!m_bigain){
 
 					ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
 
@@ -525,6 +508,112 @@ StatusCode TileDigitsFromPulse::execute() {
 				
 					ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
 				}
+				else if (m_simPulseChain) {
+				        ATH_MSG_VERBOSE("executing chain-of-pulses code");
+
+					bool isHGSaturated = false;
+
+					for (int igain = 1; igain >= 0; --igain) {
+					          gain = igain;
+					          n_inTimeAmp = 0.0;
+					          m_ootAmp = 0.0;
+					          m_ootOffset = 0.0;
+
+						  if (m_random->Rndm() < m_itAPulseProb){
+						    n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+						  } else{
+						    n_inTimeAmp = 0;
+						  }
+
+						  // PDF logic for noise
+						  if (m_gaussNoise) {
+						    if (m_PhaseII) {
+						      pdf = (gain == 1) ? pdf_hi : pdf_lo;
+						    } else {
+						      pdf = pdf_PhaseI;
+						    }
+						  }
+
+						  if (gain == 1) {
+						    ped = m_chanPed
+						      ? m_tileToolNoiseSample->getPed(drawerIdx, channel, gain,
+										      TileRawChannelUnit::ADCcounts, ctx)
+						      : m_ped_HG;
+
+						    tFit = m_random->Gaus(0., m_gausC2C);
+						    double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms);
+						    m_ps[gain]->scalePulse(deformatedTime, deformatedTime);
+
+						    // Shift the stored pulses to simulate consecutive BC
+						    m_PUAmp[ros-1][drawer][channel].pop_back();
+						    m_PUAmp[ros-1][drawer][channel].insert(m_PUAmp[ros-1][drawer][channel].begin(), 0);
+
+						    // m_sample_tru is the amplitude for the central BC
+						    m_sample_tru = m_PUAmp[ros-1][drawer][channel][(m_nPul - 1) / 2];
+
+						    // Fill the new BC at the front
+						    addPileUpSample(gain, ros, drawer, channel);
+						    m_PUAmp[ros-1][drawer][channel].front() += n_inTimeAmp; // Add amplitude from in-time pulse to true-amp vector
+
+						    sample = m_tsg->fillSample(tFit, ped,
+									       m_PUAmp[ros-1][drawer][channel],
+									       pdf, m_gaussNoise,
+									       (int)m_PUAmp[ros-1][drawer][channel].size(),
+									       gain);
+						  } else {
+						    // Low gain
+						    ped = m_chanPed
+						      ? m_tileToolNoiseSample->getPed(drawerIdx, channel, gain,
+										      TileRawChannelUnit::ADCcounts, ctx)
+						      : m_ped_LG;
+
+						    sample = m_tsg->fillSample(tFit, ped,
+									       m_PUAmp[ros-1][drawer][channel],
+									       pdf, m_gaussNoise,
+									       (int)m_PUAmp[ros-1][drawer][channel].size(),
+									       gain);
+
+						    // Scale truth amplitude from HG to LG
+						    if (m_PhaseII) {
+						      m_sample_tru /= 40.0;
+						    } else {
+						      m_sample_tru /= 64.0;
+						    }
+						  }
+
+						  // Clip the sample
+						  if (sample < 0.0) {
+						    sample = 0.0;
+						  } else if (sample >= m_i_ADCmax) {
+						    isHGSaturated = true;
+						    if (m_bigain) sample = m_i_ADCmax;
+						  }
+
+						  samples.clear();
+						  samples.push_back(sample);
+
+						  ATH_MSG_VERBOSE("New chain ADC " << ros << "/" << drawer << "/" << channel << " - saving gain " << gain);
+
+						  TileDigits* digit = tileDigitsPool.nextElementPtr();
+						  *digit = TileDigits(m_tileHWID->adc_id(ros, drawer, channel, gain),
+								      std::move(samples));
+						  ATH_CHECK(digitsContainer->push_back(digit));
+
+						  // Use the “truth” amplitude for rawChannel
+						  auto rawChannel = std::make_unique<TileRawChannel>(
+												     digit->adc_HWID(),
+												     m_sample_tru,
+												     tFit,
+												     m_ootAmp,
+												     ped);
+						  ATH_CHECK(rawChannelContainer->push_back(std::move(rawChannel)));
+
+						  // If not bigain, break if HG didn't saturate
+						  if (!m_bigain && !isHGSaturated) {
+						    break;
+						  }
+					}
+				}
 			}
 		}
 	}
@@ -541,7 +630,6 @@ StatusCode TileDigitsFromPulse::execute() {
 		delete pdf_hi;
 		delete pdf_lo;
 	}
-	delete random;
 
 	ATH_MSG_DEBUG("Execution completed");
 
@@ -590,33 +678,154 @@ bool TileDigitsFromPulse::makeDist(TFile*& file, std::vector<std::vector<TH1F*>>
 
 	file = new TFile(fileName.c_str());
 	if (file->IsZombie()) {
-		ATH_MSG_FATAL("Error reading amplitude distributions from " << fileName << ".");
-		return kFALSE;
+	  ATH_MSG_FATAL("Error reading amplitude distributions from " << fileName << ".");
+	  return kFALSE;
 	}
 
 	for(int ros=0; ros<4; ros++){
 
-    	hists.push_back(std::vector<TH1F*>());
-    	for(int channel=0; channel<48; channel++){
+	  hists.push_back(std::vector<TH1F*>());
+	  for(int channel=0; channel<48; channel++){
 
-			histName = "ene_ros_" + std::to_string(ros+1) + "_channel_" + std::to_string(channel+1);
+	    histName = "ene_ros_" + std::to_string(ros+1) + "_channel_" + std::to_string(channel+1);
 
-			key = file->FindKey(histName.c_str());
-			if (key == 0) {
-				ATH_MSG_FATAL("Could not find histogram " << histName << " in file " << fileName << ".");
-				return kFALSE;
-			}
+	    key = file->FindKey(histName.c_str());
+	    if (key == 0) {
+	      ATH_MSG_FATAL("Could not find histogram " << histName << " in file " << fileName << ".");
+	      return kFALSE;
+	    }
 
-			hist = (TH1F*) file->Get(histName.c_str());
+	    hist = (TH1F*) file->Get(histName.c_str());
 
-			for (int i = 0; i < m_AmpDistLowLim; i++)
-			 	hist->SetBinContent(i, 0.); // Puts a cut on the amplitude distribution.
+	    for (int i = 0; i < m_AmpDistLowLim; i++)
+	      hist->SetBinContent(i, 0.); // Puts a cut on the amplitude distribution.
 
-        	hists[ros].push_back(hist);   
-			hist->Clear();
-    	}
+	    hists[ros].push_back(hist);
+	    hist->Clear();
+	  }
 	}
 
 	return kTRUE;
+}
 
+void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, int gain, int ros, int drawer, int channel) {
+        //Pileup samples
+        double amp_1;
+        double amp_2;
+        double mu = 0; //Interaction per bunch crossing for PU simulation
+        if(gain == 1){
+                for (int i = 0; i <= m_nPul_eff; i++) {
+                        if (((i * 25) % m_BunchSpacing) == 0) {
+                                if(m_simPUwPoisson){
+                                        mu=m_random->Poisson(m_avgMuForPU);
+                                        ATH_MSG_VERBOSE("Effective pulse number " << i);
+                                        ATH_MSG_VERBOSE("Number of interactions for simulation: " << mu );
+
+                                        for (int imu = 0; imu<mu; imu++){
+
+                                                if (m_random->Rndm() < m_pileUpFraction){
+                                                        amp_1 = m_pileup_AmpDists[ros-1][channel]->GetRandom();
+                                                }
+                                                else{
+                                                        amp_1 = 0;
+                                                }
+
+                                                if (m_random->Rndm() < m_pileUpFraction){
+                                                        amp_2 = m_pileup_AmpDists[ros-1][channel]->GetRandom();
+                                                }
+                                                else{
+                                                        amp_2 = 0;
+                                                }
+
+                                                ATH_MSG_VERBOSE("Random amplitudes for PU: " << amp_1 << " " << amp_2);
+                                                if(i==0){
+                                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff] += amp_1;
+                                                }
+                                                else{
+                                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] += amp_1;
+                                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] += amp_2;
+                                                }
+                                        }
+
+                                        if(m_PUAmp[ros-1][drawer][channel][m_nPul_eff] < 0) m_PUAmp[ros-1][drawer][channel][m_nPul_eff] = 0;
+                                        if(m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] < 0) m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = 0;
+                                        if(m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] < 0) m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = 0;
+
+                                        ATH_MSG_VERBOSE("Final amplitudes for pulse " << m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] << " " << m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i]);
+                                }
+                                else{
+                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
+                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
+                                }
+
+				if(m_simPulseChain){ // Special treatment for pulse-chain simulation, add in-time pulses when initializing true-amp vector
+				  if (m_random->Rndm() < m_itAPulseProb){
+				    amp_1 = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+				  } else{
+				    amp_1 = 0;
+				  }
+
+				  if (m_random->Rndm() < m_itAPulseProb){
+				    amp_2 = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+				  } else{
+				    amp_2 = 0;
+				  }
+
+				  if(i==0){
+				    m_PUAmp[ros-1][drawer][channel][m_nPul_eff] += amp_1;
+				  }
+				  else{
+				    m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] += amp_1;
+				    m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] += amp_2;
+				  }
+				}
+                        } else {
+                                m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = 0;
+                                m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = 0;
+                        }
+                }
+        }
+        else if (gain == 0)
+        {
+                double scaleFactor = m_PhaseII ? 40 : 64;
+                n_inTimeAmp /= scaleFactor;
+                for (int i = 0; i <= m_nPul_eff; i++) {
+                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] /= scaleFactor;
+                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] /= scaleFactor;
+                }
+        }
+}
+
+void TileDigitsFromPulse::addPileUpSample(int gain, int ros, int drawer, int channel) {
+
+	double amp = 0;
+	double mu = 0; //Interaction per bunch crossing for PU simulation
+
+	auto random = std::make_unique<TRandom3>(m_seed);
+
+	mu=random->Poisson(m_avgMuForPU);
+
+	if(gain == 1){
+		for (int imu = 0; imu<mu; imu++){
+			if (random->Rndm() < m_pileUpFraction){
+				amp = m_pileup_AmpDists[ros-1][channel]->GetRandom();
+			}
+			else{
+				amp = 0;
+			}
+
+			m_PUAmp[ros-1][drawer][channel].front() += amp;
+		}
+	}
+	else if (gain == 0)
+	{
+		if(!m_PhaseII){
+			m_PUAmp[ros-1][drawer][channel].front() /= 64;
+		}
+		else{
+			m_PUAmp[ros-1][drawer][channel].front() /= 40;
+		}
+	}
+
+	if(m_PUAmp[ros-1][drawer][channel].front() < 0) m_PUAmp[ros-1][drawer][channel].front() = 0;
 }

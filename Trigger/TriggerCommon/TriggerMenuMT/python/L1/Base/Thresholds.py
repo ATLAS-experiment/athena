@@ -797,7 +797,7 @@ class cTauThreshold( Threshold ):
         return self
 
     def setIsolation(self, isolation = "None"):
-        allowed = [ "None", "Loose", "Medium", "Tight", "Loose12", "Loose20", "Loose30", "Loose35", "Medium12", "Medium20", "Medium30", "Medium35", "Tight12", "Tight20", "Tight30", "Tight35"]
+        allowed = ['None'] + [f'{wp}{thr}' for wp in ('Loose', 'Medium', 'Tight') for thr in ('', 12, 20, 30, 35, 50, 55)]
         if isolation not in allowed:
             raise RuntimeError("Threshold %s of type %s: isolation wp %s not allowed for isolation, must be one of %s", self.name, self.ttype, isolation, ', '.join(allowed) )
         self.isolation = isolation

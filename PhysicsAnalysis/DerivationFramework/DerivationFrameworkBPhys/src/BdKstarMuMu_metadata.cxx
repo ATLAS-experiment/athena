@@ -7,14 +7,14 @@
  *  @author Pavel Reznicek <pavel.reznicek@cern.ch>
  */
 
-#include "DerivationFrameworkBPhys/BdKstarMuMu_metadata.h"
+#include "BdKstarMuMu_metadata.h"
 
 namespace DerivationFramework {
 
   BdKstarMuMu_metadata::BdKstarMuMu_metadata(const std::string& t,
                                              const std::string& n,
                                              const IInterface*  p):
-    AthAlgTool(t,n,p), BPhysMetadataBase(t,n,p) {
+    BPhysMetadataBase(t,n,p) {
 
       recordPropertyI("verbose"      , 0);          // verbose athena output
       recordPropertyB("isSimulation" , false);      // input data is MC simulation or real data

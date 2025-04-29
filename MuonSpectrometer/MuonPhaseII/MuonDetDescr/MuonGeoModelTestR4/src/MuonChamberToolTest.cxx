@@ -1,6 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#if defined(FLATTEN) && defined(__GNUC__)
+// Avoid warning in dbg build
+#pragma GCC optimize "-fno-var-tracking-assignments"
+#endif
 
 #include "MuonChamberToolTest.h"
 
@@ -21,8 +26,6 @@ namespace{
 }
 
 namespace MuonGMR4 {
-    MuonChamberToolTest::MuonChamberToolTest(const std::string& name, ISvcLocator* pSvcLocator):
-        AthReentrantAlgorithm{name, pSvcLocator} {}
 
     StatusCode MuonChamberToolTest::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -31,13 +34,24 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
     template <class EnvelopeType>
+#if defined(FLATTEN) && defined(__GNUC__)
+// We compile this function with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
     StatusCode MuonChamberToolTest::pointInside(const EnvelopeType& chamb,
                                                 const Acts::Volume& boundVol,
                                                 const Amg::Vector3D& point,
                                                 const std::string& descr,
                                                 const Identifier& channelId) const {
-    
-        if (boundVol.inside(point,tolerance)) {
+
+        // Explicitly inline Volume::inside here so that it gets
+        // flattened in debug builds.
+        Acts::Vector3 posInVolFrame((boundVol.transform().inverse()) * point);
+        if (boundVol.volumeBounds().inside(posInVolFrame,tolerance)) {
             ATH_MSG_VERBOSE("In channel "<<m_idHelperSvc->toString(channelId)
                             <<", point "<<descr <<" is inside of the chamber "<<std::endl<<chamb<<std::endl
                             <<"Local position:" <<Amg::toString(boundVol.itransform() * point));
@@ -137,11 +151,8 @@ namespace MuonGMR4 {
     }
 
     StatusCode MuonChamberToolTest::execute(const EventContext& ctx) const {
-        SG::ReadHandle gctx{m_geoCtxKey, ctx};
-        if (!gctx.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve the Acts alignment "<<m_geoCtxKey.fullKey());
-            return StatusCode::FAILURE;
-        }
+        const ActsGeometryContext* gctx{nullptr};
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         /** Check that all chambers covered by their sector envelopes */
         using SectorSet = MuonDetectorManager::MuonSectorSet;
         const SectorSet sectors = m_detMgr->getAllSectors();
@@ -274,19 +285,8 @@ namespace MuonGMR4 {
            
             for(unsigned int nch = 1; nch <= stgc.nChTypes(); ++nch){                
                 IdentifierHash gasGapHash = sTgcReadoutElement::createHash(gasGap, nch, 0, 0);
-                unsigned int nStrips = stgc.numStrips(stgc.measurementId(gasGapHash));
+                const unsigned int nStrips = stgc.numChannels(gasGapHash);
                 sTgcReadoutElement::ReadoutChannelType channelType = static_cast<sTgcReadoutElement::ReadoutChannelType>(nch);
-                switch (channelType){
-                case sTgcReadoutElement::ReadoutChannelType::Pad:
-                    nStrips = stgc.numPads(stgc.measurementId(gasGapHash));                  
-                    break;
-                case sTgcReadoutElement::ReadoutChannelType::Wire:
-                    nStrips = stgc.numWires(gasGap);                                       
-                    break;                
-                default: 
-                                  
-                    break;
-                }
                 
                 for(unsigned int strip = 1; strip <= nStrips; ++strip){
                     const Identifier stripId = idHelper.channelID(stgc.identify(), stgc.multilayer(), gasGap, nch, strip);

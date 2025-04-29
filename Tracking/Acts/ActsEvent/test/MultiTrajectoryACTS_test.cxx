@@ -9,6 +9,7 @@
 
 #include "CommonHelpers/GenerateParameters.hpp"
 #include "CommonHelpers/TestSourceLink.hpp"
+#include "ActsEvent/MultiTrajectory.h"
 
 #include "Acts/EventData/detail/MultiTrajectoryTestsCommon.hpp"
 
@@ -38,11 +39,28 @@ const GeometryContext gctx;
 std::default_random_engine rng(31415);
 
 struct Factory {
-  using trajectory_t = VectorMultiTrajectory;
-  using const_trajectory_t = ConstVectorMultiTrajectory;
+  using trajectory_t = ActsTrk::MutableMultiTrajectory;
+  using const_trajectory_t = ActsTrk::MultiTrajectory;
 
-  VectorMultiTrajectory create() { return {}; }
-  ConstVectorMultiTrajectory createConst() { return {}; }
+  ActsTrk::MutableMultiTrajectory create() { return {}; }
+  ActsTrk::MultiTrajectory createConst() { 
+    m_trackStatesAux = std::make_unique<xAOD::TrackStateAuxContainer>();
+    m_trackParametersAux = std::make_unique<xAOD::TrackParametersAuxContainer>();
+    m_trackJacobiansAux = std::make_unique<xAOD::TrackJacobianAuxContainer>();
+    m_trackMeasurementsAux = std::make_unique<xAOD::TrackMeasurementAuxContainer>();
+    m_surfacesBackendAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
+
+    return {m_trackStatesAux.get(), m_trackParametersAux.get(),
+          m_trackJacobiansAux.get(), m_trackMeasurementsAux.get(),
+          m_surfacesBackendAux.get()};
+  }
+
+ private:
+  std::unique_ptr<xAOD::TrackStateAuxContainer> m_trackStatesAux;
+  std::unique_ptr<xAOD::TrackParametersAuxContainer> m_trackParametersAux;
+  std::unique_ptr<xAOD::TrackJacobianAuxContainer> m_trackJacobiansAux;
+  std::unique_ptr<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
+  std::unique_ptr<xAOD::TrackSurfaceAuxContainer> m_surfacesBackendAux;
 };
 
 using CommonTests = MultiTrajectoryTestsCommon<Factory>;
@@ -65,7 +83,7 @@ BOOST_AUTO_TEST_CASE(ConstCorrectness) {
   {
     VectorMultiTrajectory::TrackStateProxy tsp = t.getTrackState(i0);
     static_cast<void>(tsp);
-    VectorMultiTrajectory::ConstTrackStateProxy ctsp = t.getTrackState(i0);
+    VectorMultiTrajectory::ConstTrackStateProxy ctsp{t.getTrackState(i0)};
     static_cast<void>(ctsp);
 
     tsp.predicted().setRandom();
@@ -75,7 +93,7 @@ BOOST_AUTO_TEST_CASE(ConstCorrectness) {
   }
 
   // is this something we actually want?
-  ConstVectorMultiTrajectory ct = t;
+  ConstVectorMultiTrajectory ct{t};
   BOOST_CHECK_EQUAL(ct.size(), t.size());
 
   ConstVectorMultiTrajectory ctm{std::move(t)};

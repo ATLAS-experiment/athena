@@ -9,25 +9,28 @@ find_package( CORAL COMPONENTS CoralBase RelationalAccess )
 find_package( ROOT COMPONENTS Core )
 find_package( Boost COMPONENTS unit_test_framework regex timer program_options thread)
 find_package( nlohmann_json )
+find_package( CrestApi COMPONENTS CrestApi)
 
 # Component(s) in the package:
 atlas_add_library( IOVDbSvcLib
    IOVDbSvc/*.h
    INTERFACE
    PUBLIC_HEADERS IOVDbSvc
-   INCLUDE_DIRS ${COOL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${COOL_LIBRARIES} GaudiKernel )
+   INCLUDE_DIRS ${COOL_INCLUDE_DIRS} 
+   LINK_LIBRARIES ${COOL_LIBRARIES} GaudiKernel)
+
 
 atlas_add_component( IOVDbSvc
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} 
-   ${Boost_INCLUDE_DIRS} CxxUtils
+   ${Boost_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS} CxxUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES}
    ${Boost_LIBRARIES} nlohmann_json::nlohmann_json GaudiKernel
    AthenaBaseComps AthenaKernel StoreGateLib FileCatalog AthenaPoolUtilities
    CoraCool IOVDbDataModel EventInfoUtils GeoModelInterfaces
    IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib 
-   CrestApiLib CxxUtils DBLock SGTools )
+   CxxUtils DBLock SGTools CrestApi::CrestApiLib )
+
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})
@@ -60,7 +63,7 @@ atlas_add_test( IOVDbConn_test
    SOURCES test/IOVDbConn_test.cxx src/IOVDbConn.cxx
    INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${COOL_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES}
-   GaudiKernel CxxUtils TestTools CoraCool CrestApiLib
+   GaudiKernel CxxUtils TestTools CoraCool CrestApi::CrestApiLib
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( IOVDbStringFunctions_test
@@ -92,7 +95,7 @@ atlas_add_test( IOVDbCoolFunctions_test
    src/IOVDbConn.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
-   GaudiKernel AthenaKernel CoraCool CrestApiLib
+   GaudiKernel AthenaKernel CoraCool CrestApi::CrestApiLib
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( ReadFromFileMetaData_test
@@ -112,13 +115,13 @@ atlas_add_test( IOVDbFolder_test
    src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
    src/Cool2Json.cxx src/Base64Codec.cxx src/Json2Cool.cxx 
    src/BasicFolder.cxx src/CrestFunctions.cxx src/IOVDbJsonStringFunctions.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
-   ${ROOT_INCLUDE_DIRS} 
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+   ${ROOT_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
    ${ROOT_LIBRARIES} nlohmann_json::nlohmann_json
    GaudiKernel AthenaKernel AthenaBaseComps StoreGateLib SGTools CxxUtils
    TestTools CoraCool AthenaPoolUtilities GeoModelInterfaces
-   IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApiLib 
+   IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApi::CrestApiLib 
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( IovStore_test
@@ -140,7 +143,7 @@ atlas_add_test( TagFunctions_test
 atlas_add_test( BasicFolder_test
    SOURCES test/BasicFolder_test.cxx src/BasicFolder.cxx src/IOVDbJsonStringFunctions.cxx src/FolderTypes.cxx src/IOVDbStringFunctions.cxx src/Base64Codec.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} CoralUtilities
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} AthenaPoolUtilities CrestApiLib
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} AthenaPoolUtilities CrestApi::CrestApiLib
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( Json2Cool_test
@@ -174,15 +177,16 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
       POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_executable( cool_crest_compare
-   test/CoolCrestCompare.cxx test/*.h src/*.h src/IOVDbFolder.cxx
+   test/CoolCrestCompare.cxx test/*.h src/*.h src/IOVDbFolder.cxx src/CoralCrestManager.cxx
    src/FolderTypes.cxx src/IOVDbStringFunctions.cxx src/IOVDbParser.cxx src/IOVDbConn.cxx
-   src/IOVDbFolder.cxx src/IovStore.cxx src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
+   src/IovStore.cxx src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
    src/Cool2Json.cxx src/Base64Codec.cxx src/Json2Cool.cxx src/BasicFolder.cxx src/CrestFunctions.cxx src/IOVDbJsonStringFunctions.cxx  #src/*.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} CoralUtilities
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} CoralUtilities ${CrestApi_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} nlohmann_json::nlohmann_json
    GaudiKernel AthenaKernel AthenaBaseComps StoreGateLib SGTools CxxUtils
    TestTools CoraCool AthenaPoolUtilities GeoModelInterfaces
-   IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApiLib
+   IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApi::CrestApiLib
    )
 
 endif()
+

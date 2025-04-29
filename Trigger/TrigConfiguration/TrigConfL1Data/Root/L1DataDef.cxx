@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/L1DataDef.h"
@@ -8,12 +8,12 @@
 #include <stdexcept>
 #include <iomanip>
 
-using namespace std;
 
-TrigConf::L1DataDef::TypeConfigMap_t TrigConf::L1DataDef::g_typeConfigs;
-TrigConf::L1DataDef::STypeTypeMap_t TrigConf::L1DataDef::g_sTypeType;
-std::vector<TrigConf::L1DataDef::TriggerType> TrigConf::L1DataDef::g_Types;
-unsigned int TrigConf::L1DataDef::g_l1Version = 0;
+#define registerTriggerType(TU, MAX) \
+   bool is##TU = TrigConf::L1DataDef::addConfig(TrigConf::L1DataDef::TU, #TU, MAX);
+
+#define registerInternalTriggerType(TU, MAX) \
+   bool is##TU = TrigConf::L1DataDef::addConfig(TrigConf::L1DataDef::TU, #TU, MAX, true);
 
 registerTriggerType(EM, 16)
 registerTriggerType(TAU, 8)
@@ -55,9 +55,9 @@ registerTriggerType(ALFA, 64)
 
 void
 TrigConf::L1DataDef::printMaxThresholds() {
-   cout << "L1 Version: " << g_l1Version << endl;
-   for(auto & x: g_typeConfigs) {
-      cout << "Maximum number of thresholds for type " << setw(6) << x.second.name << " : " << x.second.max << endl;
+   std::cout << "L1 Version: " << g_l1Version << std::endl;
+   for(const auto & x: g_typeConfigs) {
+      std::cout << "Maximum number of thresholds for type " << std::setw(6) << x.second.name << " : " << x.second.max << std::endl;
    }
 }
 
@@ -127,7 +127,7 @@ TrigConf::L1DataDef::setMaxThresholdsFromL1Version(unsigned int l1version) {
       typeConfig(TOPO).max   = 128;
       typeConfig(ALFA).max   =  64;
    } else {
-      cerr << "ERROR TrigConf::L1DataDef::setMaxThresholdsFromL1Version() L1Version not known:" << l1version << endl;
+      std::cerr << "ERROR TrigConf::L1DataDef::setMaxThresholdsFromL1Version() L1Version not known:" << l1version << std::endl;
       throw(std::runtime_error("Unknown L1 Version"));
    }
 
@@ -136,18 +136,12 @@ TrigConf::L1DataDef::setMaxThresholdsFromL1Version(unsigned int l1version) {
 }
 
 
-
-
-
-
-
 TrigConf::L1DataDef::TriggerTypeConfig&
 TrigConf::L1DataDef::typeConfig(TriggerType tt) { 
    TypeConfigMap_t::iterator c = g_typeConfigs.find(tt);
-   //   cout << "tt " << tt << endl;
    if( c==g_typeConfigs.end() ) {
-      cerr << "Trigger type " << tt << " is defined in L1DataDef.h but not registered in L1DataDef.cxx" << endl;
-      throw runtime_error("TriggerType not registered");
+      std::cerr << "Trigger type " << tt << " is defined in L1DataDef.h but not registered in L1DataDef.cxx" << std::endl;
+      throw std::runtime_error("TriggerType not registered");
    }
    return c->second;
 }

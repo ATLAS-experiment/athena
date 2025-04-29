@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CTP_CTPSIMULATION_H
 #define TRIGT1CTP_CTPSIMULATION_H
@@ -166,9 +166,6 @@ namespace LVL1CTP {
       Gaudi::Property<bool> m_muonRun2Format { this, "MuonMultiplicityRun2Format", false, "Interpret muon multiplicity in Run 2 format (bit 0 unused)" };
 
       SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bgKey{this, "L1BunchGroup", "L1BunchGroup", "L1BunchGroupSet key name"};
-      // to decode the L1 Run-2 hardware ROIs from data
-      LVL1::CPRoIDecoder * m_decoder { nullptr };
-      LVL1::JEPRoIDecoder * m_jetDecoder { nullptr };
    };
 
 }

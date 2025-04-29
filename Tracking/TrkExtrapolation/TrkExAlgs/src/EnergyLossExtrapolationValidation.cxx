@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,91 +23,12 @@
 #include "TTree.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/SystemOfUnits.h"
-// Framework
-#include "AthContainers/DataVector.h"
 
 
 //================ Constructor =================================================
 
 Trk::EnergyLossExtrapolationValidation::EnergyLossExtrapolationValidation(const std::string& name, ISvcLocator* pSvcLocator)
-: AthAlgorithm(name,pSvcLocator),
-  m_highestVolume(nullptr),
-  m_extrapolator("Trk::Extrapolator/AtlasExtrapolator"),
-  m_gaussDist(nullptr),
-  m_flatDist(nullptr),
-  m_materialCollectionValidation(false),
-  m_validationTree(nullptr),
-  m_validationRunTree(nullptr),
-  m_validationTreeFolder("/val/EventTreeTG"),
-  m_validationTreeName("EventTreeTG"),
-  m_validationTreeDescription("Event output of the EnergyLossExtrapolationValidation Algorithm"),
-  m_validationRunTreeFolder("/val/RunTreeTG"),
-  m_validationRunTreeName("RunTreeTG"),
-  m_validationRunTreeDescription("Run stats of the EnergyLossExtrapolationValidation Algorithm"),
-  m_maximumR(0.),
-  m_maximumZ(0.),
-  m_cylinders(6),
-  m_onion(true),
-  m_momentum(10.*Gaudi::Units::GeV),
-  m_usePt(true),
-  m_minEta(-3.),
-  m_maxEta(3.),
-  m_events(0),
-  m_totalRecordedLayers(0),
-  m_avgRecordedLayers(0.),
-  m_pdg(0),
-  m_particleType(2),
-  m_entries(0),
-  m_energy{},         
-	m_energyLoss{},     
-	m_parameterX0{},    
-	m_radius{},         
-	m_positionX{},      
-	m_positionY{},      
-	m_positionZ{},      
-	m_parameterPhi{},   
-	m_parameterEta{},   
-	m_parameterTheta{}, 
-	m_parameterQoverP{},
-	m_parameterP{},     
-	m_layer{},          
-  m_triesForward(0),
-  m_breaksForward(0),
-  m_triesBack(0),
-  m_breaksBack(0),
-  m_collectedLayerForward(0),
-  m_collectedLayerBack(0),
-  m_cylinderR{},
-  m_cylinderZ{},
-  m_theCylinders(nullptr),
-  m_theDiscs1(nullptr),
-  m_theDiscs2(nullptr)
-{
-    // used algorithms and alg tools
-    declareProperty("Extrapolator"              , m_extrapolator);
-    declareProperty("UseMaterialCollection"     , m_materialCollectionValidation);
-    // TTree handling
-    declareProperty("ValidationTreeName"        , m_validationTreeName);
-    declareProperty("ValidationRunTreeName"     , m_validationRunTreeName);
-    declareProperty("ValidationTreeDescription" , m_validationTreeDescription);
-    declareProperty("ValidationRunTreeDescription" , m_validationRunTreeDescription);
-    declareProperty("ValidationTreeFolder"      , m_validationTreeFolder);
-    declareProperty("ValidationRunTreeFolder"   , m_validationRunTreeFolder);
-
-    declareProperty("StartPerigeeMinEta"        , m_minEta);
-    declareProperty("StartPerigeeMaxEta"        , m_maxEta);
-    declareProperty("StartPerigeeUsePt"         , m_usePt);
-    declareProperty("StartPerigeeMomentum"      , m_momentum);
-
-    declareProperty("ValidationCylinders"       , m_cylinders);
-    declareProperty("ValidationCylinderR"       , m_cylinderVR);
-    declareProperty("ValidationCylinderZ"       , m_cylinderVZ);
-    declareProperty("StrictOnionMode"           , m_onion);
-
-    declareProperty("ParticleType"              , m_particleType);
-
-}
+  : AthAlgorithm(name,pSvcLocator) {}
 
 //================ Destructor =================================================
 
@@ -139,8 +60,10 @@ StatusCode Trk::EnergyLossExtrapolationValidation::initialize()
 	}
 
 	// create the new Trees
-	m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
-	m_validationRunTree = new TTree(m_validationRunTreeName.c_str(), m_validationRunTreeDescription.c_str());
+	m_validationTree = new TTree(m_validationTreeName.value().c_str(),
+				     m_validationTreeDescription.value().c_str());
+	m_validationRunTree = new TTree(m_validationRunTreeName.value().c_str(),
+					m_validationRunTreeDescription.value().c_str());
 
 	// the branches for the parameters
 	m_validationTree->Branch("Entries",    &m_entries,         "entries/i");
@@ -199,11 +122,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::initialize()
     for (size_t lay=0; lay<m_cylinders+1; ++lay) {
         m_cylinderR[lay] = m_cylinderVR[lay] > 0 ? m_cylinderVR[lay] : s_cylInitR[lay];
         m_cylinderZ[lay] = m_cylinderVZ[lay] > 0 ? m_cylinderVZ[lay] : s_cylInitZ[lay];
-		    // in "strict onion mode", constrain m_cylinders if the values don't make sense
-		    /** sroe; original line was:
-		        if (m_onion && lay>0 && (m_cylinderR[lay] < m_cylinderR[lay-1] || m_cylinderR[lay] < m_cylinderR[lay-1])) {
-        but the two sides of the 'or' are equal
-        **/
+        // in "strict onion mode", constrain m_cylinders if the values don't make sense
         if (m_onion && lay>0 && (m_cylinderR[lay] < m_cylinderR[lay-1])) {
             ATH_MSG_WARNING( "initialize() layer " << lay << "dimensions are smaller than those of layer " << lay-1 << " - constraining m_cylinders to " << lay-1 );
             ATH_MSG_INFO( "initialize() cutting off here :" );
@@ -211,7 +130,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::initialize()
             m_cylinders = lay-1;
             break;
         }
-		    ATH_MSG_INFO( "initialize() m_cylinderR[" << lay << "] = " << m_cylinderR[lay] << "\t ... m_cylinderZ[" << lay << "] = " << m_cylinderZ[lay] );
+	ATH_MSG_INFO( "initialize() m_cylinderR[" << lay << "] = " << m_cylinderR[lay] << "\t ... m_cylinderZ[" << lay << "] = " << m_cylinderZ[lay] );
     }
 
     // fill data vector with cylinders once (in order not to create them every time)
@@ -234,35 +153,35 @@ StatusCode Trk::EnergyLossExtrapolationValidation::initialize()
     else if (m_particleType==4) m_pdg = 321; // kaon+
     ATH_MSG_INFO( "initialize() ParticleType = " << m_particleType << " ... PDG = " << m_pdg );
 
-	ATH_MSG_INFO( "initialize() successful" );
-	return StatusCode::SUCCESS;
+    ATH_MSG_INFO( "initialize() successful" );
+    return StatusCode::SUCCESS;
 }
 
 //================ Finalisation =================================================
 
 StatusCode Trk::EnergyLossExtrapolationValidation::finalize()
 {
-	// Code entered here will be executed once at the end of the program run.
-	ATH_MSG_INFO( "finalize() ================== Output Statistics =========================" );
-	ATH_MSG_INFO( "finalize() = Navigation : " );
-	ATH_MSG_INFO( "finalize() =  - breaks fwd : " << double(m_breaksForward)/double(m_triesForward)
-			<< " (" << m_breaksForward << "/" << m_triesForward << ")" );
-	ATH_MSG_INFO( "finalize() =  - breaks bwd : " << double(m_breaksBack)/double(m_triesBack)
-			<< " (" << m_breaksBack << "/" << m_triesBack << ")" );
-	if (m_materialCollectionValidation){
-		ATH_MSG_INFO( "finalize() = Material collection : " );
-		ATH_MSG_INFO( "finalize() =  - layer collected fwd : " << m_collectedLayerForward );
-		ATH_MSG_INFO( "finalize() =  - layer collected bwd : " << m_collectedLayerBack  );
-	}
-	ATH_MSG_INFO( "finalize() ==============================================================" );
+  // Code entered here will be executed once at the end of the program run.
+  ATH_MSG_INFO( "finalize() ================== Output Statistics =========================" );
+  ATH_MSG_INFO( "finalize() = Navigation : " );
+  ATH_MSG_INFO( "finalize() =  - breaks fwd : " << static_cast<double>(m_breaksForward)/static_cast<double>(m_triesForward)
+		<< " (" << m_breaksForward << "/" << m_triesForward << ")" );
+  ATH_MSG_INFO( "finalize() =  - breaks bwd : " << static_cast<double>(m_breaksBack)/static_cast<double>(m_triesBack)
+		<< " (" << m_breaksBack << "/" << m_triesBack << ")" );
+  if (m_materialCollectionValidation){
+    ATH_MSG_INFO( "finalize() = Material collection : " );
+    ATH_MSG_INFO( "finalize() =  - layer collected fwd : " << m_collectedLayerForward );
+    ATH_MSG_INFO( "finalize() =  - layer collected bwd : " << m_collectedLayerBack  );
+  }
+  ATH_MSG_INFO( "finalize() ==============================================================" );
 
-    m_avgRecordedLayers = m_events ? (float)m_totalRecordedLayers / (float)m_events : 0;
-    ++m_cylinders;
-	if (m_validationRunTree)
-		m_validationRunTree->Fill();
-	--m_cylinders;
+  m_avgRecordedLayers = m_events ? static_cast<float>(m_totalRecordedLayers) / static_cast<float>(m_events) : 0;
+  ++m_cylinders;
+  if (m_validationRunTree)
+    m_validationRunTree->Fill();
+  --m_cylinders;
 
-	return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 //================ Execution ====================================================
@@ -282,9 +201,6 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
             ATH_MSG_WARNING( "execute() No highest TrackingVolume / no VolumeBounds ... pretty useless!" );
             return StatusCode::SUCCESS;
         }
-        // get the numbers
-        m_maximumR = cylBounds->outerRadius();
-        m_maximumZ = cylBounds->halflengthZ();
     }
 
 
@@ -303,7 +219,6 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
         m_parameterEta[par]      = 0.;
         m_parameterPhi[par]      = 0.;
         m_parameterTheta[par]    = 0.;
-//        m_parameterQoverP[par]   = 0.;
         m_layer[par]             = 0;
     }
 
@@ -340,7 +255,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
 
     // --------------- propagate to find an intersection ---------------------
 
-	// fill the TrackParameters vector with extrapolation from startParameters to dummy cylinder surface
+    // fill the TrackParameters vector with extrapolation from startParameters to dummy cylinder surface
     const Trk::TrackParameters* lastParameters = nullptr;
     const Trk::TrackParameters* newParameters = nullptr;
 
@@ -352,7 +267,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
           *(m_theCylinders->at(0)),
           Trk::alongMomentum,
           true,
-          (Trk::ParticleHypothesis)m_particleType).release();
+          static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
 
     } else { // material collection validation
 
@@ -364,7 +279,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
                                 *(m_theCylinders->at(0)),
                                 Trk::alongMomentum,
                                 true,
-                                (Trk::ParticleHypothesis)m_particleType);
+                                static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
         // get the last one and clone it
         if (collectedMaterial && !collectedMaterial->empty()) {
@@ -373,11 +288,9 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
             lastParameters = destinationState->trackParameters() ? destinationState->trackParameters()->clone() : nullptr;
             m_collectedLayerForward += collectedMaterial->size();
             // delete the layers / cleanup
-            std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIter    =  collectedMaterial->begin();
-            std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIterEnd =  collectedMaterial->end();
-            for ( ; tsosIter != tsosIterEnd; ++tsosIter) {
-                newX0 += (*tsosIter)->materialEffectsOnTrack() ? (*tsosIter)->materialEffectsOnTrack()->thicknessInX0() : 0;
-                delete(*tsosIter);
+            for (const auto* tsos : *collectedMaterial) {
+                newX0 += tsos->materialEffectsOnTrack() ? tsos->materialEffectsOnTrack()->thicknessInX0() : 0;
+                delete tsos;
             }
             ATH_MSG_VERBOSE( "execute() newX0 = " << newX0 );
         }
@@ -407,7 +320,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
               *(m_theCylinders->at(lay)),
               Trk::alongMomentum,
               true,
-              (Trk::ParticleHypothesis)m_particleType).release();
+              static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
 
         } else { // material collection validation
 
@@ -418,7 +331,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
                                                                *(m_theCylinders->at(lay)),
                                                                Trk::alongMomentum,
                                                                true,
-                                                               (Trk::ParticleHypothesis)m_particleType);
+                                                               static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
             // get the last one and clone it
             if (collectedMaterial && !collectedMaterial->empty()){
@@ -430,17 +343,15 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
                 else
                     m_collectedLayerForward  = collectedMaterial->size(); // TODO: shouldn't there be something else here?
                 // delete the layers / cleanup
-                std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIter    =  collectedMaterial->begin();
-                std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIterEnd =  collectedMaterial->end();
-                for ( ; tsosIter != tsosIterEnd; ++tsosIter) {
-                    newX0 += (*tsosIter)->materialEffectsOnTrack() ? (*tsosIter)->materialEffectsOnTrack()->thicknessInX0() : 0;
-                    delete(*tsosIter);
+                for (const auto* tsos : *collectedMaterial) {
+                    newX0 += tsos->materialEffectsOnTrack() ? tsos->materialEffectsOnTrack()->thicknessInX0() : 0;
+                    delete tsos;
                 }
                 ATH_MSG_VERBOSE( "execute() newX0 = " << newX0 );
             }
         }
 
-            // no intersection with cylinder barrel, now trying disc endcaps
+        // no intersection with cylinder barrel, now trying disc endcaps
         if (!newParameters) {
 
             if (!m_materialCollectionValidation) {
@@ -452,7 +363,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
                                         : *(m_theDiscs2->at(lay)),
                 Trk::alongMomentum,
                 true,
-                (Trk::ParticleHypothesis)m_particleType).release();
+                static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
 
             } else { // material collection validation
 
@@ -463,7 +374,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
                                                                    (m_parameterEta[0] < 0) ? *(m_theDiscs1->at(lay)) : *(m_theDiscs2->at(lay)),
                                                                    Trk::alongMomentum,
                                                                    true,
-                                                                   (Trk::ParticleHypothesis)m_particleType);
+                                                                   static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
                 // get the last one and clone it
                 if (collectedMaterial && !collectedMaterial->empty()){
@@ -475,11 +386,9 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
                     else
                         m_collectedLayerForward  = collectedMaterial->size(); // TODO: shouldn't there be something else here?
                     // delete the layers / cleanup
-                    std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIter    =  collectedMaterial->begin();
-                    std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIterEnd =  collectedMaterial->end();
-                    for ( ; tsosIter != tsosIterEnd; ++tsosIter) {
-                        newX0 += (*tsosIter)->materialEffectsOnTrack() ? (*tsosIter)->materialEffectsOnTrack()->thicknessInX0() : 0;
-                        delete(*tsosIter);
+                    for (const auto* tsos : *collectedMaterial) {
+                        newX0 += tsos->materialEffectsOnTrack() ? tsos->materialEffectsOnTrack()->thicknessInX0() : 0;
+                        delete tsos;
                     }
                     ATH_MSG_VERBOSE( "execute() newX0 = " << newX0 );
                 }
@@ -491,60 +400,60 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
             ATH_MSG_WARNING( "execute() Layer " << lay << " intersection did not work !" );
         }
 
-		else if (m_highestVolume && newParameters && !(m_highestVolume->inside(newParameters->position()))) {
-		    ATH_MSG_WARNING( "execute() Layer " << lay << " intersection is outside the known world !" );
-		}
+        else if (m_highestVolume && newParameters && !(m_highestVolume->inside(newParameters->position()))) {
+          ATH_MSG_WARNING( "execute() Layer " << lay << " intersection is outside the known world !" );
+        }
 
-		else {
+        else {
 
-		    // get the current surface intersection position
-		    const Amg::Vector3D& newPosition = newParameters->position();
-            ATH_MSG_VERBOSE( "execute() Track Parameters at layer " << lay << ": " << *newParameters );
-            ATH_MSG_DEBUG( "execute() Track Parameters at layer " << lay << ": [r,z] = [ " << newPosition.perp() << ", " << newPosition.z() );
+          // get the current surface intersection position
+          const Amg::Vector3D& newPosition = newParameters->position();
+          ATH_MSG_VERBOSE( "execute() Track Parameters at layer " << lay << ": " << *newParameters );
+          ATH_MSG_DEBUG( "execute() Track Parameters at layer " << lay << ": [r,z] = [ " << newPosition.perp() << ", " << newPosition.z() );
 
-		    // record the surface parameters
-		    ++m_triesForward;
-		    ++m_entries;
-		    m_parameterPhi[m_entries]    = newParameters->parameters()[Trk::phi];
-		    m_parameterEta[m_entries]    = newParameters->momentum().eta();
-		    m_parameterTheta[m_entries]  = newParameters->parameters()[Trk::theta];
-		    m_parameterP[m_entries]      = newParameters->momentum().mag();
-		    m_parameterX0[m_entries]     = (float)newX0;
-            ATH_MSG_DEBUG( "execute() Layer " << lay << ": cumulated X0 = " << m_parameterX0[m_entries] );
+          // record the surface parameters
+          ++m_triesForward;
+          ++m_entries;
+          m_parameterPhi[m_entries]    = newParameters->parameters()[Trk::phi];
+          m_parameterEta[m_entries]    = newParameters->momentum().eta();
+          m_parameterTheta[m_entries]  = newParameters->parameters()[Trk::theta];
+          m_parameterP[m_entries]      = newParameters->momentum().mag();
+          m_parameterX0[m_entries]     = (float)newX0;
+          ATH_MSG_DEBUG( "execute() Layer " << lay << ": cumulated X0 = " << m_parameterX0[m_entries] );
 
-		    // get the current energy and calculate energy loss
-		    m_energy[m_entries] = sqrt(m_parameterP[m_entries]*m_parameterP[m_entries] + mass*mass);
-		    m_energyLoss[m_entries]      = energy1-m_energy[m_entries];
-		    ATH_MSG_DEBUG( "execute() Layer " << lay << ": cumulated Energy Loss = " << m_energyLoss[m_entries] );
+          // get the current energy and calculate energy loss
+          m_energy[m_entries] = sqrt(m_parameterP[m_entries]*m_parameterP[m_entries] + mass*mass);
+          m_energyLoss[m_entries]      = energy1-m_energy[m_entries];
+          ATH_MSG_DEBUG( "execute() Layer " << lay << ": cumulated Energy Loss = " << m_energyLoss[m_entries] );
 
-		    // record the current layer ID
-		    m_layer[m_entries]           = lay;
-		    // record the current position
-		    m_radius[m_entries]          = newPosition.perp();
-		    m_positionX[m_entries]       = newPosition.x();
-		    m_positionY[m_entries]       = newPosition.y();
-		    m_positionZ[m_entries]       = newPosition.z();
+          // record the current layer ID
+          m_layer[m_entries]           = lay;
+          // record the current position
+          m_radius[m_entries]          = newPosition.perp();
+          m_positionX[m_entries]       = newPosition.x();
+          m_positionY[m_entries]       = newPosition.y();
+          m_positionZ[m_entries]       = newPosition.z();
 
-		}
+        }
 
         lastParameters = newParameters;
 
-	}
+    }
 
 
     m_totalRecordedLayers += m_entries;
     ++m_events;
-	// increase m_entries once more before the fill (to account for the "start layer" at index 0 with initial track parameters)
-	++m_entries;
+    // increase m_entries once more before the fill (to account for the "start layer" at index 0 with initial track parameters)
+    ++m_entries;
 
-	// fill the event tree
-	if (m_validationTree)
-	    m_validationTree->Fill();
+    // fill the event tree
+    if (m_validationTree)
+      m_validationTree->Fill();
 
-	// memory cleanup
-	ATH_MSG_DEBUG( "execute() deleting DataVector parameters ... " );
+    // memory cleanup
+    ATH_MSG_DEBUG( "execute() deleting DataVector parameters ... " );
 
-	return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 //============================================================================================

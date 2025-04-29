@@ -23,12 +23,11 @@
 DerivationFramework::SkimmingToolHIGG2::SkimmingToolHIGG2(const std::string& t,
 							  const std::string& n,
 							  const IInterface* p) : 
-  AthAlgTool(t, n, p),
+  base_class(t, n, p),
   m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool"),
   m_ntot(0),
   m_npass(0)
 {
-  declareInterface<DerivationFramework::ISkimmingTool>(this);
 
   declareProperty("SkipTriggerRequirement", m_skipTriggerRequirement=false);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODEL_DATAHEADER_H
@@ -11,6 +11,7 @@
  **/
 
 #include "GaudiKernel/ClassID.h"
+#include "GaudiKernel/DataObject.h"
 
 #include "PersistentDataModel/Token.h"
 #include "CxxUtils/sgkey_t.h"
@@ -56,7 +57,7 @@ public: // Constructor and Destructor
    /// @param classID [IN] Primary ClassID of the DataObject for which a DataHeaderElement is created.
    /// @param key [IN] SG Key of the DataObject for which a DataHeaderElement is created.
    /// @param token [IN] Token of the DataObject for which a DataHeaderElement is created.
-   DataHeaderElement(const CLID classID, const std::string& key, const Token* token);
+   DataHeaderElement(const CLID classID, const std::string& key, Token&& token);
    /// Destructor
    virtual ~DataHeaderElement();
 
@@ -70,8 +71,8 @@ public: // Non-static members
    const std::set<CLID> getClassIDs() const;
    /// @return StoreGate key string.
    const std::string& getKey() const;
-   /// @return StoreGate alias string set.
-   const std::set<std::string>& getAlias() const;
+   /// @return StoreGate alias string vector.
+   const std::vector<std::string>& getAlias() const;
    /// @return token by pointer (and give away ownership).
    const Token* getToken() const;
    /// @return StorageType needed to read the DataObject (depends on technology).
@@ -99,21 +100,20 @@ private:
    DataHeaderElement(CLID clid,
                      const std::string& name,
                      const std::vector<CLID>& tClids,
-                     std::set<std::string>&& alias,
+                     std::vector<std::string>&& alias,
                      IOpaqueAddress* tadAddress,
                      IOpaqueAddress* tokAddress, const std::string& pTag);
 
    /// primary ClassID.
    CLID m_pClid;
-   /// set of unsigned long to store ClassID's for symlinked container.
-   std::set<CLID> m_clids;
+   /// vector of unsigned long to store ClassID's for symlinked container.
+   std::vector<CLID> m_clids;
    /// string with StoreGate key.
    std::string m_key;
-   /// set of StoreGate alias string.
-   std::set<std::string> m_alias;
-   /// pointer to transient address
-   const Token* m_token;
-   bool m_ownToken;
+   /// vector of StoreGate alias string.
+   std::vector<std::string> m_alias;
+   /// Transient address token.
+   Token m_token;
    /// hash table for ElementLink host container keys.
    std::vector<sgkey_t> m_hashes;
 };
@@ -121,7 +121,9 @@ private:
 /** @class DataHeader
  *  @brief This class provides the layout for summary information stored for data written to POOL.
  **/
-class  DataHeader {
+class  DataHeader
+  : public DataObject // Derive from DataObject so that it can be recyclable.
+{
 public:
    enum statusFlag { Output, Input, Other };
 
@@ -183,13 +185,22 @@ public: // Non-static members
    /// Add new entry to hash map
    void addHash(IStringPool* pool);
 
+   /// Form token, to be able to tell when the form changes.
+   const std::string& dhFormToken() const;
+   void setDhFormToken(const std::string& formToken);
+
    void setAttributeList(const coral::AttributeList* attrList);
    const coral::AttributeList* getAttributeList();
    void setEvtRefTokenStr(const std::string& tokenStr);
    const std::string& getEvtRefTokenStr();
 
    void dump(std::ostream& ostr) const;
+
+protected:
+  /// Called before this object is recycled.
+  virtual void recycle();
   
+
 private:
    friend class DataHeaderCnv_p3;
    friend class DataHeaderCnv_p4;
@@ -209,6 +220,8 @@ private:
    const coral::AttributeList* m_attrList;
    /// Optional Token String for Event Reference to enable writing of TAG to Payload files.
    std::string m_evtRefTokenStr;
+   /// Token to the DH format object.
+   std::string m_dhFormToken;
 };
 
 #include "AthenaKernel/CLASS_DEF.h"

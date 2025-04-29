@@ -24,9 +24,6 @@ class bblvlv(PowhegRES):
         """
         super(bblvlv, self).__init__(base_directory, "b_bbar_4l", **kwargs)
 
-        # This is a hacky fix that's needed at the moment...
-        self.manually_set_openloops_paths()
-
         # Add parameter validation functions
         self.validation_functions.append("validate_decays")
 

@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType
+from Campaigns.Utils import Campaign
 from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
 
@@ -30,6 +31,12 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.ForceCoolVectorPayload", False)
     # Turn on SCT_ModuleVetoSvc, allowing it to be configured later
     icf.addFlag("InDet.doSCTModuleVeto", False)
+    # Turn on SCT simple width calculation in clustering tool
+    icf.addFlag("InDet.doSCTSimpleWidth", True)
+    # Path to the JSON file to mask the modules for Pixel.
+    # A non-empty string activates the veto automatically
+    icf.addFlag("InDet.JsonPathPixelModuleVeto", "")
+
     # Enable check for dead modules and FEs
     icf.addFlag("InDet.checkDeadElementsOnTrack", True)
     # Turn running of Event Info TRT Occupancy Filling Alg on and off (also whether it is used in TRT PID calculation)
@@ -40,8 +47,11 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.doTRTPhase", lambda prevFlags:
                 prevFlags.Beam.Type is BeamType.Cosmics and
                 prevFlags.Detector.EnableTRT)
-    # Disabled for data-taking up to 2024 included
-    icf.addFlag("InDet.doTRTArToTCorr", True)
+    # Disabled for data-taking up to 2024 included and MC campaigns up to MC23e included
+    icf.addFlag("InDet.doTRTArToTCorr", lambda prevFlags: (
+        (not prevFlags.Input.isMC and prevFlags.Input.DataYear >= 2025) or
+        (prevFlags.Input.isMC and prevFlags.Input.MCCampaign >= Campaign.MC23g)
+    ))
 
     # Save cluster information to Derivation
     icf.addFlag("InDet.DRAWZSelection", False)
@@ -57,6 +67,7 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.PixelDumpMode", 1)
     icf.addFlag("InDet.PixelConfig.version", 'PixelConditionsAlgorithms/v1/')
     icf.addFlag("InDet.PixelConfig.UserInputFileName", '')
+    icf.addFlag("InDet.doPixelFEcheckExpHits", False)
 
     # Save SiHitCollections to RDO
     icf.addFlag("InDet.savePixelSiHits", lambda prevFlags:
@@ -69,5 +80,9 @@ def createInDetConfigFlags():
     # SCT prescale flags
     icf.addFlag("InDet.SCTxAODPrescale", 
                 lambda prevFlags: 50 if prevFlags.Input.TriggerStream == 'express' else (10 if prevFlags.Input.TriggerStream == 'IDprescaledL1' else 1))
+
+    # SCT skimming flags
+    icf.addFlag("InDet.SCTxAODZmumuSkimming", False)
+    icf.addFlag("InDet.SCTxAODSaveOnlyAssociatedMSOS", False)
 
     return icf

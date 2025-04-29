@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -19,8 +19,8 @@ namespace {
         std::unique_ptr<Trk::Track> track{};
         unsigned int container_index{0};
         bool extp_succeed{false};
-        track_link(std::unique_ptr<Trk::Track> _trk, unsigned int _idx, bool _succeed) :
-            track{std::move(_trk)}, container_index{_idx}, extp_succeed{_succeed} {}
+        track_link(std::unique_ptr<Trk::Track> trk, unsigned int idx, bool succeed) :
+            track{std::move(trk)}, container_index{idx}, extp_succeed{succeed} {}
     };
 }  // namespace
 

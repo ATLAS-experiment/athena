@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -95,6 +95,20 @@ namespace Athena_test {
   {
     ModuleLoadedIncident inc2 ("", "");
   }
+
+
+  InitGaudi::InitGaudi(const std::string& jobOptsFile) {
+    ISvcLocator* pSvcLoc{};
+    if (!Athena_test::initGaudi(jobOptsFile, pSvcLoc)) {
+      throw std::runtime_error("Cannot initialize Gaudi");
+      }
+    svcLoc = pSvcLoc;
+  }
+
+  InitGaudi::~InitGaudi() {
+    auto appMgr = svcLoc.as<IAppMgrUI>();
+    appMgr->finalize().ignore();
+    appMgr->terminate().ignore();
+  }
+
 }
-
-

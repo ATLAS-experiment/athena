@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import AthenaCommon.SystemOfUnits as Units
 from AthenaConfiguration.Enums import FlagEnum
@@ -9,6 +9,7 @@ class VertexSortingSetup(FlagEnum):
     SumPt2Sorting = 'SumPt2Sorting'
     SumPtSorting = 'SumPtSorting'
     JetWeightedSorting = 'JetWeightedSorting'
+    GNNSorting = 'GNNSorting'
 
 
 class VertexSetup(FlagEnum):
@@ -17,6 +18,7 @@ class VertexSetup(FlagEnum):
     ActsGaussAMVF = 'ActsGaussAdaptiveMultiFinding'
     # Experimental setups, not to be used in production
     ExperimentalActsIVF = 'ExperimentalActsIterativeFinding'
+    ActsGridDensity = 'ActsGridDensity'
 
 
 def createPriVertexingFlags():
@@ -121,5 +123,13 @@ def createPriVertexingFlags():
         # despite the loop
         flags.addFlag(k, lambda pcf, a=idflags[k], b=itkflags[k]:
                       a if pcf.Detector.GeometryID else b)
+    
+    flags.addFlag("gridMainGridSize", 20)
+    flags.addFlag("gridTrkGridSize", 10)
+    flags.addFlag("gridUseHighestSumZPosition", False)
+    flags.addFlag("gridMaxD0Significance", 3.5)
+    flags.addFlag("gridMaxZ0Significance", 12.0)
 
     return flags
+
+    

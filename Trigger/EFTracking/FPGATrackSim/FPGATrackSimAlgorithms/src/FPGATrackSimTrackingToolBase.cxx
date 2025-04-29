@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrackSimTrackingToolBase.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackingToolBase.h"
 
 
 FPGATrackSimTrackingToolBase::FPGATrackSimTrackingToolBase(const std::string& type, const std::string& name, const IInterface* parent)
@@ -20,7 +20,6 @@ StatusCode FPGATrackSimTrackingToolBase::setRoadSectors(std::vector<std::shared_
         nonConstRoad->setSector(m_FPGATrackSimBank->SectorBank_2nd()->findSector(nonConstRoad->getAllHits()));
     }
     else if (m_idealGeoRoads) matchIdealGeoSector(*nonConstRoad);
-    std::cout << "Sector:"<< nonConstRoad->getSector() << std::endl;
   }
   // Spacepoint road filter tool. Needed when fitting to spacepoints.
   if (m_useSpacePoints)
@@ -56,6 +55,7 @@ void FPGATrackSimTrackingToolBase::matchIdealGeoSector(FPGATrackSimRoad & r)
     // estimate sectorbin
     int sectorbin = fpgatracksim::QPT_SECTOR_OFFSET * (bounds.first - qoverpt_bins.begin() - 1);
     sectorbin = std::clamp(sectorbin, 0, 10 * static_cast<int>(qoverpt_bins.size() - 2));
+    if (m_do2ndStage) sectorbin = 0;
 
     if (m_doRegionalMapping){
       int subregion = r.getSubRegion();
@@ -76,7 +76,7 @@ void FPGATrackSimTrackingToolBase::matchIdealGeoSector(FPGATrackSimRoad & r)
             if(! m_do2ndStage)
               wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(il));
             else
-              wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(il));
+              wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_2nd(0)->getDetType(il));
 
             // Now store wc hit in a "std::vector<std::shared_ptr<const FPGATrackSimHit>>" format.
             // We can probably avoid initializing an intermediate variable wcHits as we used to do

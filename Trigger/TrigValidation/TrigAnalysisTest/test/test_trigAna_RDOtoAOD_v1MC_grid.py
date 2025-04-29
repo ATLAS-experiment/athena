@@ -3,7 +3,7 @@
 #
 # art-description: Test of transform RDO->RDO_TRIG->AOD->DAOD with threads=8, MC_pp_run3_v1 and AODSLIM
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-output: *.txt
@@ -28,6 +28,9 @@ preExec = ';'.join([
   'flags.Trigger.AODEDMSet=\'AODSLIM\'',
 ])
 
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+conditions = defaultConditionsTags.RUN3_MC
+
 rdo2aod = ExecStep.ExecStep()
 rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar'
@@ -37,8 +40,8 @@ rdo2aod.concurrent_events = 8
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
-rdo2aod.args += ' --preInclude "all:Campaigns.MC23c"'
-rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
+rdo2aod.args += ' --preInclude "all:Campaigns.MC23e"'
+rdo2aod.args += ' --conditionsTag "default:' + conditions + '"'
 
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'

@@ -9,7 +9,7 @@ from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.BTagConfig import BTagAlgsCfg
 
 # fast btagging
-from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
+from FlavorTagInference.FlavorTagNNConfig import getStaticTrackVars
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
 def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
@@ -206,36 +206,27 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     # can ignore some of them.
     missingKeys = getStaticTrackVars(inputTracks)
 
-    # optionally avoid cases with zero tracks
-    nonzero_tracks = 'nonzeroTracks'
-    min_links = 1
-    ca.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.CountIParticleAlg(
-            f'CountTrackParticleAlg{jet_name}',
-            links=f'{jet_name}.{tracksOnJetDecoratorName}',
-            minimumLinks=min_links,
-            flag=f'{jet_name}.{nonzero_tracks}',
-        )
-    )
-
     for nnFile, variableRemapping in dl2_configs:
         nnAlgo = nnFile.replace('/','_').split('.')
         nnAlgoKey = nnAlgo[0]
         nnAlgoext = nnAlgo[1]
         toolDict = {
             "json": CompFactory.FlavorTagDiscriminants.DL2Tool,
-            "onnx": CompFactory.FlavorTagDiscriminants.GNNTool
+            "onnx": CompFactory.FlavorTagInference.GNNTool
         }
         tag_flags = {pass_flag}
 
         if nnAlgoext == 'onnx':
-            tag_flags.add(nonzero_tracks)
-            extra = dict(defaultOutputValues=_triggerDefaultsFromPath(nnFile))
+            defaults = _triggerDefaultsFromPath(nnFile)
+            extra = dict(
+                defaultOutputValues=defaults,
+                defaultZeroTracks=(True if defaults else False),
+            )
         else:
             extra = {}
 
         ca.addEventAlgo(
-            CompFactory.FlavorTagDiscriminants.JetTagConditionalDecoratorAlg(
+            CompFactory.FlavorTagInference.JetTagConditionalDecoratorAlg(
                 name='_'.join([
                     'simpleJetTagAlg',
                     jet_name,

@@ -5,7 +5,7 @@
 #define MUONR4_MUONPATTERNHELPERS_MDTSEGMENTSEEDGENERATOR_H
 
 #include <AthenaBaseComps/AthMessaging.h>
-#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
+#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 #include <MuonPatternEvent/SegmentSeed.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
@@ -23,7 +23,7 @@ namespace MuonR4 {
      *         within the parameter resolution are generated, then the latter one is skipped. */
     class MdtSegmentSeedGenerator: public AthMessaging {
         public:
-            using HitVec = SpacePointPerLayerSorter::HitVec;
+            using HitVec = SpacePointPerLayerSplitter::HitVec;
             
             /** @brief Configuration switches of the module  */
             struct Config{
@@ -73,6 +73,8 @@ namespace MuonR4 {
                 double chi2{0.};
                 /** @brief Pointer to the parent bucket */
                 const SpacePointBucket* parentBucket{nullptr};
+                /** @brief number of Mdt hits on the seed */
+                unsigned int nMdt{0};
             };
         
         /** @brief Standard constructor taking the segmentSeed to start with and then few
@@ -203,7 +205,7 @@ namespace MuonR4 {
             
 
             const SegmentSeed* m_segmentSeed{nullptr};
-            SpacePointPerLayerSorter m_hitLayers{m_segmentSeed->getHitsInMax()};
+            SpacePointPerLayerSplitter m_hitLayers{m_segmentSeed->getHitsInMax()};
             
             /** @brief Considered layer to pick the top drift circle from*/
             std::size_t m_upperLayer{0};

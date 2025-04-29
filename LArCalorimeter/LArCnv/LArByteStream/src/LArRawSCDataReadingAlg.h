@@ -16,12 +16,15 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "LArByteStream/LArLATOMEDecoder.h"
+// For LATOME while no Condition alg exists
+#include "LArLATOMEROBIDs.h"
 
 //Event classes
 class LArDigitContainer;
 class LArRawSCContainer;
 class LArLATOMEHeaderContainer;
 class LArOnlineID;
+class LArOnline_SuperCellID;
 class IROBDataProviderSvc;
 
 class LArRawSCDataReadingAlg : public  AthReentrantAlgorithm {
@@ -44,6 +47,8 @@ private:
 
   //Service providing the input data
   ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc{this, "ROBDataProviderSvc", "ROBDataProviderSvc"};
+  // RoI like behavior of the converter
+  Gaudi::Property<std::vector<uint32_t> > m_robList{this, "ROBList", LArByteStream::s_allROBIDs_LATOME , "ROB List to only unpack selected ROBs"};
   
   //Identifier helper
   const LArOnlineID* m_onlineId = nullptr;

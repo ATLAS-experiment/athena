@@ -11,14 +11,17 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2_BEST_KNOWLEDGE)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 AtlasG4_tf.py \
     --CA \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --physicsList 'FTFP_BERT' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationNoIoV' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --DataRunNumber '284500' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/J2_jetjet-pythia6-7000.evgen.pool.root' \
     --outputHITSFile "test.HITS.pool.root" \
     --maxEvents '10' \

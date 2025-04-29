@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: CaloClusterCollectionProcessor.h,v 1.3 2006-07-07 03:49:56 ssnyder Exp $
@@ -25,12 +25,13 @@
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
-static const InterfaceID IID_CaloClusterCollectionProcessor ("CaloClusterCollectionProcessor", 1 , 0);
 
 class CaloClusterCollectionProcessor
   : virtual public IAlgTool
 {
 public:
+  
+  DeclareInterfaceID(CaloClusterCollectionProcessor,1,0);
 
   /**
    * @brief Execute on an entire collection of clusters.
@@ -51,11 +52,6 @@ public:
     return execute (Gaudi::Hive::currentContext(), collection);
   }
 
-  
-  /**
-   * @brief Standard Gaudi interface ID method.
-   */
-  static const InterfaceID& interfaceID() {return IID_CaloClusterCollectionProcessor;}
 };
 
 

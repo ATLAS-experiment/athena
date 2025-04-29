@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,15 +18,15 @@ inline uint32_t ROIB::Header::headerMarker() const {
 }
 
 inline uint32_t ROIB::Header::headerSize() const {
-  return m_header.empty() ? 0 : m_header[ 1 ];
+  return m_header.size() <= 1 ? 0 : m_header[ 1 ];
 }
 
 inline uint32_t ROIB::Header::formatVersion() const {
-  return m_header.empty() ? 0 : m_header[ 2 ];
+  return m_header.size() <= 2 ? 0 : m_header[ 2 ];
 }
 
 inline uint32_t ROIB::Header::sourceID() const {
-  return m_header.empty() ? 0 : m_header[ 3 ];
+  return m_header.size() <= 3 ? 0 : m_header[ 3 ];
 }
 
 inline uint32_t ROIB::Header::runNumber() const {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,9 +16,6 @@ Trk::StaticEngine::StaticEngine(const std::string& t, const std::string& n, cons
 : AthAlgTool(t,n,p)
 {
     declareInterface<Trk::IExtrapolationEngine>(this);
-    // steering of the screen outoput (SOP)
-    declareProperty("OutputPrefix"                          , m_sopPrefix);
-    declareProperty("OutputPostfix"                         , m_sopPostfix);
 }
 
 // destructor
@@ -29,6 +26,9 @@ Trk::StaticEngine::~StaticEngine()
 // the interface method initialize
 StatusCode Trk::StaticEngine::initialize()
 {
+    m_sopPrefix = m_sopPrefix_prop;
+    m_sopPostfix = m_sopPostfix_prop;
+
     if (m_propagationEngine.retrieve().isFailure()){
         EX_MSG_FATAL("", "initialize", "", "failed to retrieve propagation engine '"<< m_propagationEngine << "'. Aborting." );
         return StatusCode::FAILURE;

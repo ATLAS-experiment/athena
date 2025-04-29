@@ -117,7 +117,7 @@ def CopyJetTruthInfoCfg(flags, **kwargs):
 
     # Detect the list of track record collections
     for container in allowedContainers:
-        if not flags.Overlay.DataOverlay and container in flags.Input.Collections:  # SecondaryCollections
+        if container in flags.Input.Collections:  # SecondaryCollections
             availableContainers.append(container)
     if allowedContainers[0] in availableContainers:
         acc.merge(CopyInTimeAntiKt4JetTruthInfoCfg(flags, **kwargs))
@@ -133,11 +133,13 @@ def CopyJetTruthInfoCfg(flags, **kwargs):
 def CopyPileupParticleTruthInfoCfg(flags, name="CopyPileupParticleTruthInfo", **kwargs):
     """Return a ComponentAccumulator for the in-time pile-up jets copying"""
     acc = ComponentAccumulator()
+    if flags.Overlay.DataOverlay:
+        return acc
 
     requiredContainer = f"{flags.Overlay.BkgPrefix}TruthPileupParticles"
 
     # Detect the list of track record collections
-    if not flags.Overlay.DataOverlay and requiredContainer in flags.Input.Collections:  # SecondaryCollections
+    if requiredContainer in flags.Input.Collections:  # SecondaryCollections
         kwargs.setdefault("BkgInputKey", requiredContainer)
         kwargs.setdefault("OutputKey", "TruthPileupParticles")
 
@@ -169,8 +171,10 @@ def CopyMcEventCollectionCfg(flags, name="CopyMcEventCollection", **kwargs):
     else:
         kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TruthEvent")
         inputs.append(f'McEventCollection#{kwargs["BkgInputKey"]}')
+
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}TruthEvent")
-    inputs.append(f'McEventCollection#{kwargs["SignalInputKey"]}')
+    if flags.Common.ProductionStep is not ProductionStep.FastChain:
+        inputs.append(f'McEventCollection#{kwargs["SignalInputKey"]}')
 
     if flags.Sim.DoFullChain and flags.Common.isOverlay:
         kwargs.setdefault("OutputKey", "BeamTruthEvent")
@@ -214,6 +218,10 @@ def CopyPixelClusterContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"PixelClusters")
     kwargs.setdefault("ExtraInputs", {('InDetDD::SiDetectorElementCollection', 'ConditionStore+PixelDetectorElementCollection')})
 
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::PixelClusterContainer#{kwargs["InputKey"]}']))
+
     alg = CompFactory.CopyPixelClusterContainer("CopyPixelClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
 
@@ -226,6 +234,10 @@ def CopyITkPixelClusterContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("InputKey", "ITkPixelClusters")
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"ITkPixelClusters")
     kwargs.setdefault("ExtraInputs", [('InDetDD::SiDetectorElementCollection', 'ConditionStore+ITkPixelDetectorElementCollection')])
+
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::PixelClusterContainer#{kwargs["InputKey"]}']))
 
     alg = CompFactory.CopyPixelClusterContainer("CopyPixelClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
@@ -240,6 +252,10 @@ def CopySCT_ClusterContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"SCT_Clusters")
     kwargs.setdefault("ExtraInputs", {('InDetDD::SiDetectorElementCollection', 'ConditionStore+SCT_DetectorElementCollection')})
 
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::SCT_ClusterContainer#{kwargs["InputKey"]}']))
+
     alg = CompFactory.CopySCT_ClusterContainer("CopySCT_ClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
 
@@ -253,6 +269,10 @@ def CopyITkStripClusterContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"ITkStripClusters")
     kwargs.setdefault("ExtraInputs", [('InDetDD::SiDetectorElementCollection', 'ConditionStore+ITkStripDetectorElementCollection')])
 
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::SCT_ClusterContainer#{kwargs["InputKey"]}']))
+
     alg = CompFactory.CopySCT_ClusterContainer("CopySCT_ClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
 
@@ -265,6 +285,10 @@ def CopyTRT_DriftCircleContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("InputKey", "TRT_DriftCircles")
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"TRT_DriftCircles")
     kwargs.setdefault("ExtraInputs", {('InDetDD::TRT_DetElementContainer' , 'ConditionStore+TRT_DetElementContainer')})
+
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::TRT_DriftCircleContainer#{kwargs["InputKey"]}']))
 
     alg = CompFactory.CopyTRT_DriftCircleContainer("CopyTRT_DriftCircleContainer", **kwargs)
     acc.addEventAlgo(alg)
@@ -291,6 +315,10 @@ def CopyTrackCollectionAlgCfg(flags, collectionName, **kwargs):
         extra_inputs.add(( 'InDetDD::SiDetectorElementCollection' , 'ConditionStore+ITkStripDetectorElementCollection' ))
 
     kwargs.setdefault("ExtraInputs", extra_inputs)
+
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'TrackCollection#{kwargs["InputKey"]}']))
 
     alg = CompFactory.CopyTrackCollection("CopyTrackCollection"+collectionName, **kwargs)
     acc.addEventAlgo(alg)
@@ -395,8 +423,8 @@ def CopyCaloCalibrationHitContainersCfg(flags, **kwargs):
 
     # Detect the list of calibration hit containers
     for container in allowedContainers:
-        if (flags.Overlay.DataOverlay and container in flags.Input.Collections) \
-                or (not flags.Overlay.DataOverlay and container in flags.Input.SecondaryCollections):
+        if (flags.Overlay.ByteStream and container in flags.Input.Collections) \
+                or (not flags.Overlay.ByteStream and container in flags.Input.SecondaryCollections):
             availableContainers.append(container)
 
     for container in availableContainers:
@@ -480,7 +508,7 @@ def CopyTrackRecordCollectionsCfg(flags, **kwargs):
     if flags.Common.ProductionStep == ProductionStep.FastChain:
         availableContainers = allowedContainers
     else:
-        hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+        hardScatterInputCollections = flags.Input.Collections if flags.Overlay.ByteStream else flags.Input.SecondaryCollections
         for container in allowedContainers:
             if container in hardScatterInputCollections:
                 availableContainers.append(container)

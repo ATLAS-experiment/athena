@@ -635,7 +635,7 @@ StatusCode CompactHardTruth::execute() {
       if (pvtx->particles_in().size() == 1) {
         // Incoming particle to parent vertex
         HepMC::GenParticlePtr pp = pvtx->particles_in().front();
-        if (std::abs(pp->pdg_id()) == 2212) iCase = -1;
+        if (std::abs(pp->pdg_id()) == MC::PROTON) iCase = -1;
       }
       // Case not found
       // Need test for 2->2 in underlying event
@@ -843,7 +843,7 @@ StatusCode CompactHardTruth::execute() {
         // Incoming particle to parent vertex
         HepMC::GenVertex::particles_in_const_iterator pitr = pvtx->particles_in_const_begin();
         HepMC::GenParticle* pp = *pitr;
-        if (std::abs(pp->pdg_id()) == 2212) iCase = -1;
+        if (std::abs(pp->pdg_id()) == MC::PROTON) iCase = -1;
       }
 
       // Case not found

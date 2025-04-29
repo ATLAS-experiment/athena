@@ -76,18 +76,6 @@ StatusCode GfexSimMonitorAlgorithm::initialize() {
 	// TOBs may come from trigger bytestream - renounce from scheduler
 
 
-	renounce ( m_data_gFexRho );
-	renounce ( m_data_gFexBlock );
-	renounce ( m_data_gFexJet );
-	renounce ( m_data_gScalarEJwoj );
-	renounce ( m_data_gMETComponentsJwoj );
-	renounce ( m_data_gMHTComponentsJwoj );
-	renounce ( m_data_gMSTComponentsJwoj );
-	renounce ( m_data_gMETComponentsNoiseCut );
-	renounce ( m_data_gMETComponentsRms );
-	renounce ( m_data_gScalarENoiseCut );
-	renounce ( m_data_gScalarERms );
-
 
 	return AthMonitorAlgorithm::initialize();
 }
@@ -202,8 +190,8 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 			std::cout << std::endl << std::dec;
 		}
         tobMismatched=100;
-		fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady,eventType);
-        fill("mismatches_count",lbn,Signature,simReady,eventType);
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
+		fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady,eventType);
 		if (label=="gJ" || label=="gLJ") {
             auto locIdx = Monitored::Scalar<std::string>("locIdx","");
             for(auto tob : mismatchedTOBs) {
@@ -297,8 +285,8 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 			std::cout << std::endl << std::dec;
 		}
         tobMismatched=100;
-		fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,tobMismatched,eventType);
-        fill("mismatches_count",lbn,Signature,eventType);
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",false/* global RoI not sim ready yet*/);
+        fill("mismatches",simReadyMismatch,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,tobMismatched,eventType);
 	} else {
         tobMismatched=0;
         fill("mismatches",lbn,Signature,tobMismatched,eventType);

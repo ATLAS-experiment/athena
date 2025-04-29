@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -67,9 +67,8 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.add_argument("--runTester", help="Choice on the tester to setup", default="SIM", choices=["SIM", "DIGI", "PILEUP"])
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"])
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
     parser.set_defaults(outRootFile="SimHitDumpNtuple.root")
-    parser.set_defaults(eventPrintoutLevel = 500)
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)

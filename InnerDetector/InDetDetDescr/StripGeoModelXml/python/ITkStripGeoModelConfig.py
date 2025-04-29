@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-def ITkStripGeoModelCfg(flags,setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align"):
+def ITkStripGeoModelCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(flags)
     geoModelSvc = acc.getPrimary()
@@ -8,8 +8,8 @@ def ITkStripGeoModelCfg(flags,setGeometryAlignable=False,setAlignmentFolderName=
     from AthenaConfiguration.ComponentFactory import CompFactory
     ITkStripDetectorTool = CompFactory.ITk.StripDetectorTool()
     # ITkStripDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic #Will we need to do dynamic alignment for ITk?
-    ITkStripDetectorTool.Alignable = setGeometryAlignable # make this a flag? Set true as soon as decided on folder structure
-    ITkStripDetectorTool.AlignmentFolderName = setAlignmentFolderName
+    ITkStripDetectorTool.Alignable = flags.ITk.Geometry.stripAlignable
+    ITkStripDetectorTool.AlignmentFolderName = flags.ITk.Geometry.alignmentFolder
     ITkStripDetectorTool.DetectorName = "ITkStrip"
     if flags.ITk.Geometry.StripLocal:
         # Setting this filename triggers reading from local file rather than DB
@@ -17,29 +17,33 @@ def ITkStripGeoModelCfg(flags,setGeometryAlignable=False,setAlignmentFolderName=
     if flags.ITk.Geometry.StripClobOutputName:
         ITkStripDetectorTool.ClobOutputName = flags.ITk.Geometry.StripClobOutputName
     geoModelSvc.DetectorTools += [ ITkStripDetectorTool ]
+
+    # If we want to make eta overlap space points in strip endcaps, we need first to search for neighbour elements
+    ITkStripDetectorTool.doEndcapEtaNeighbour = flags.ITk.doEndcapEtaNeighbour
+
     return acc
 
 
-def ITkStripAlignmentCfg(flags,setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align"):
+def ITkStripAlignmentCfg(flags):
     if flags.GeoModel.Align.LegacyConditionsAccess:  # revert to old style CondHandle in case of simulation
         from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
-        return addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", setAlignmentFolderName)
+        return addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder)
     else:
         from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripAlignCondAlgCfg
-        return ITkStripAlignCondAlgCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
+        return ITkStripAlignCondAlgCfg(flags)
 
 
-def ITkStripSimulationGeometryCfg(flags,setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align"):
+def ITkStripSimulationGeometryCfg(flags):
     # main GeoModel config
-    acc = ITkStripGeoModelCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
-    acc.merge(ITkStripAlignmentCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName))
+    acc = ITkStripGeoModelCfg(flags)
+    acc.merge(ITkStripAlignmentCfg(flags))
     return acc
 
 
-def ITkStripReadoutGeometryCfg(flags,setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align"):
+def ITkStripReadoutGeometryCfg(flags):
     # main GeoModel config
-    acc = ITkStripGeoModelCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
-    acc.merge(ITkStripAlignmentCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName))
+    acc = ITkStripGeoModelCfg(flags)
+    acc.merge(ITkStripAlignmentCfg(flags))
     from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementCondAlgCfg
-    acc.merge(ITkStripDetectorElementCondAlgCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName))
+    acc.merge(ITkStripDetectorElementCondAlgCfg(flags))
     return acc

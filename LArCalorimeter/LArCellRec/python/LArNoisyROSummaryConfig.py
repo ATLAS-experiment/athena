@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from LArBadChannelTool.LArBadFebsConfig import LArKnownBadFebCfg, LArKnownMNBFebCfg
+from LArCabling.LArHVCablingConfig import LArHVCablingCfg
 from AthenaConfiguration.Enums import ProductionStep
 
 def LArNoisyROSummaryCfg(configFlags, **kwargs):
@@ -14,12 +15,14 @@ def LArNoisyROSummaryCfg(configFlags, **kwargs):
    if not isMC:
       result.merge(LArKnownBadFebCfg(configFlags))
       result.merge(LArKnownMNBFebCfg(configFlags))
-      result.addEventAlgo(CompFactory.LArHVlineMapAlg(keyOutput="LArHVNcells"))
+      if not configFlags.Common.isOnline:
+         result.merge(LArHVCablingCfg(configFlags))
+         result.addEventAlgo(CompFactory.LArHVlineMapAlg(keyOutput="LArHVNcells"))
 
    # now configure the algorithm
    LArNoisyROAlg,LArNoisyROTool=CompFactory.getComps("LArNoisyROAlg","LArNoisyROTool")
-   if configFlags.Common.ProductionStep is ProductionStep.PileUpPretracking:
-        kwargs.setdefault('EventInfoKey', "Bkg_EventInfo") 
+   if configFlags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
+        kwargs.setdefault('EventInfoKey', f"{configFlags.Overlay.BkgPrefix}EventInfo") 
 
    theLArNoisyROTool=LArNoisyROTool(CellQualityCut=configFlags.LAr.NoisyRO.CellQuality,
                                     BadChanPerFEB=configFlags.LAr.NoisyRO.BadChanPerFEB, 
@@ -29,11 +32,12 @@ def LArNoisyROSummaryCfg(configFlags, **kwargs):
                                     MNBTight_PsVetoCut=configFlags.LAr.NoisyRO.MNBTight_PsVetoCut,
                                     BadHVCut=configFlags.LAr.NoisyRO.BadHVCut,
                                     BadChanFracPerHVline=configFlags.LAr.NoisyRO.BadHVlineFrac,
-                                    DoHVflag=not isMC
+                                    DoHVflag=not (isMC or configFlags.Common.isOnline) 
                                     )
 
-   theLArNoisyROAlg=LArNoisyROAlg(isMC=isMC,Tool=theLArNoisyROTool)
-   if not isMC:
+   theLArNoisyROAlg=LArNoisyROAlg(isMC=isMC,Tool=theLArNoisyROTool, **kwargs)
+   if not isMC and not configFlags.Common.isOnline:
+      theLArNoisyROAlg.LArHVIdMapping="LArHVIdMap"
       theLArNoisyROAlg.HVMapKey="LArHVNcells"
    result.addEventAlgo(theLArNoisyROAlg)
    

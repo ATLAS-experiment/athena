@@ -35,14 +35,6 @@ double crossProduct( const pvec& a, const pvec& b ) {
     return a[0]*b[1] - a[1]*b[0];
 }
 
-
-FPGATrackSimLLPDoubletHoughTransformTool::FPGATrackSimLLPDoubletHoughTransformTool(const std::string& algname, const std::string& name , const IInterface* ifc) 
-  : base_class(algname, name, ifc)
-{
-    declareInterface<IFPGATrackSimRoadFinderTool>(this);
-}
-
-
 StatusCode FPGATrackSimLLPDoubletHoughTransformTool::initialize() { 
     if (m_imageSize_y %2 == 1) {
         ATH_MSG_ERROR("Can not have odd number  " <<  m_imageSize_y << " of bins in q/pT - will result in division by 0");

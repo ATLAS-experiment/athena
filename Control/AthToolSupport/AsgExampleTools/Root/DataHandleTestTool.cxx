@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,9 +10,6 @@
 // includes
 //
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
 #include <AsgExampleTools/DataHandleTestTool.h>
 
 #include <AsgDataHandles/ReadHandle.h>
@@ -20,7 +17,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <AsgDataHandles/WriteDecorHandle.h>
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgTesting/UnitTest.h>
-#include <gtest/gtest.h>
 #include <map>
 
 #ifndef SIMULATIONBASE
@@ -73,7 +69,7 @@ namespace asg
 
 
   void DataHandleTestTool ::
-  runTest ATLAS_NOT_THREAD_SAFE ()
+  runTest ()
   {
 #ifndef SIMULATIONBASE
     const xAOD::MuonContainer *muonsStore {nullptr};

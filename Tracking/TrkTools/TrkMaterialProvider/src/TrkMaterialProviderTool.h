@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrkMaterialProviderTool_H
@@ -35,6 +35,8 @@
 #include "MuidInterfaces/IMuidCaloEnergyMeas.h"
 #include "MuidInterfaces/IMuidCaloEnergyParam.h"
 #include "MuidInterfaces/IMuidTrackIsolation.h"
+
+#include<memory>
 
 namespace Trk {
   class Surface;
@@ -191,7 +193,7 @@ namespace Trk{
     PublicToolHandle<Trk::IEnergyLossUpdator>           m_elossupdator
        {this,"EnergyLossUpdator","Trk::EnergyLossUpdator/AtlasEnergyLossUpdator",""};
     ServiceHandle<Trk::ITrackingVolumesSvc> m_trackingVolumesSvc
-      {this, "TrackingVolumeSvc", "TrackingVolumesSvc/TrackingVolumesSvc"};
+      {this, "TrackingVolumeSvc", "Trk::TrackingVolumesSvc/TrackingVolumesSvc"};
     ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc {this, "TrackingGeometrySvc", "", ""};
 
     SG::ReadCondHandleKey<TrackingGeometry>   m_trackingGeometryReadKey
@@ -211,8 +213,8 @@ namespace Trk{
 	"MuonCaloEnergyTool", ""};
 
     const AtlasDetectorID *m_DetID;
-    const Trk::Volume* m_calorimeterVolume;
-    const Trk::Volume* m_indetVolume;
+    std::unique_ptr<Trk::Volume> m_calorimeterVolume;
+    std::unique_ptr<Trk::Volume> m_indetVolume;
 
     // Read handle for conditions object to get the field cache
     SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",

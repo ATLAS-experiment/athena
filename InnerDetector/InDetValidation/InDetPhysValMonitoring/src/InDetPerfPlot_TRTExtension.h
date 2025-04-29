@@ -43,6 +43,14 @@ private:
   TEfficiency* m_fracTRTExtensions_matched_vs_eta;
   TEfficiency* m_fracTRTExtensions_matched_vs_pt;
 
+  TEfficiency* m_fracFindableTRTExtensions_vs_eta;
+  TEfficiency* m_fracFindableTRTExtensions_vs_pt;
+  TEfficiency* m_fracFindableTRTExtensions_vs_mu;
+  TEfficiency* m_fracFindableTRTExtensions_vs_nvertices;
+
+  TEfficiency* m_fracFindableTRTExtensions_matched_vs_eta;
+  TEfficiency* m_fracFindableTRTExtensions_matched_vs_pt;
+
   TH1* m_chi2ndofTRTExtensions;
   TH1* m_chi2ndofNoTRTExtensions;
 

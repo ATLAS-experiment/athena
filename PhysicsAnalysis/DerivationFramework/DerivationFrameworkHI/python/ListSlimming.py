@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # ListSlimming.py - List of collections for slimming from athena 21.2 HION4 and EGAM1ExtraContent.py
 
 #################################################################################
@@ -89,6 +88,7 @@ def HION4AllVariablesGeneral():
     variables += ["InDetPixelTrackParticles"]
     variables += ["Photons"]
     variables += ["Electrons"]
+    variables += ["ForwardElectrons"]
     variables += ["AntiKt4HIJets"]
     
     return variables
@@ -234,6 +234,123 @@ def HION4ExtraVariablesEventShape():
         variables += [shape + "EventShape.DensitySigma.Density.DensityArea"]
     
     return variables
+
+#################################################################################
+#HION5
+
+def HION5Extravariables():
+    variables  = []
+    variables += [
+        ".".join(["InDetTrackParticles", field]) for field in [
+            "truthMatchProbability.x.y.z.vx.vy.vz",
+            "numberOfInnermostPixelLayerSplitHits",
+            "numberOfNextToInnermostPixelLayerSplitHits",
+            "numberOfNextToInnermostPixelLayerSharedHits",
+            "numberOfPixelSplitHits",
+            "numberOfInnermostPixelLayerSharedHits",
+            "numberOfContribPixelLayers",
+            "hitPattern.radiusOfFirstHit",
+            "is_selected", "is_associated", "is_svtrk_final",
+            "pt_wrtSV", "eta_wrtSV", "phi_wrtSV", "d0_wrtSV", "z0_wrtSV",
+            "errP_wrtSV", "errd0_wrtSV", "errz0_wrtSV",
+            "chi2_toSV",
+            "eProbabilityHT", "eProbabilityComb", "deltaPoverP"
+        ]
+    ] 
+
+    variables += [
+        ".".join(["PrimaryVertices", field]) for field in [
+            "neutralWeights", "numberDoF", "sumPt2", "chiSquared",
+            "covariance", "trackWeights",
+            "x.y.trackParticleLinks.vertexType.neutralParticleLinks"
+        ]
+    ]
+
+    variables += ["ExtrapolatedMuonTrackParticles.vx.vy.vz"]
+    variables += ["MuonSpectrometerTrackParticles.vx.vy.vz"]
+    variables += ["CombinedMuonTrackParticles.vx.vy.vz"]
+
+    variables += [
+        ".".join(["Electrons", field]) for field in [
+            "DFCommonElectronsHILHLoose", "DFCommonElectronsHILHMedium",
+            "ptcone20", "ptcone30", "ptcone40",
+            "ptvarcone20", "ptvarcone30", "ptvarcone40",
+            "etcone20", "etcone30", "etcone40",
+            "topoetcone20", "topoetcone30", "topoetcone40",
+            "ptvarcone20_TightTTVA_pt500", "ptvarcone30_TightTTVA_pt500", "ptvarcone40_TightTTVA_pt500",
+            "ptvarcone20_TightTTVA_pt1000", "ptvarcone30_TightTTVA_pt1000", "ptvarcone40_TightTTVA_pt1000",
+            "ptvarcone20_TightTTVALooseCone_pt500", "ptvarcone30_TightTTVALooseCone_pt500", "ptvarcone40_TightTTVALooseCone_pt500",
+            "ptvarcone20_TightTTVALooseCone_pt1000", "ptvarcone30_TightTTVALooseCone_pt1000", "ptvarcone40_TightTTVALooseCone_pt1000",
+            "ptcone20_TightTTVA_pt500", "ptcone30_TightTTVA_pt500", "ptcone40_TightTTVA_pt500",
+            "ptcone20_TightTTVA_pt1000", "ptcone30_TightTTVA_pt1000", "ptcone40_TightTTVA_pt1000",
+            "ptcone20_TightTTVALooseCone_pt500", "ptcone30_TightTTVALooseCone_pt500", "ptcone40_TightTTVALooseCone_pt500",
+            "ptcone20_TightTTVALooseCone_pt1000", "ptcone30_TightTTVALooseCone_pt1000", "ptcone40_TightTTVALooseCone_pt1000",
+            "topoetcone20ptCorrection", "topoetcone30ptCorrection", "topoetcone40ptCorrection",
+            "deltaPoverP"
+        ]
+    ]
+
+    variables += [
+        ".".join(["Muons", field]) for field in [
+            "EnergyLoss.energyLossType",
+            "ptcone20", "ptcone30", "ptcone40",
+            "ptvarcone20", "ptvarcone30", "ptvarcone40",
+            "etcone20", "etcone30", "etcone40",
+            "topoetcone20", "topoetcone30", "topoetcone40",
+            "ptcone20_TightTTVA_pt500", "ptcone30_TightTTVA_pt500", "ptcone40_TightTTVA_pt500",
+            "ptcone20_TightTTVA_pt1000", "ptcone30_TightTTVA_pt1000", "ptcone40_TightTTVA_pt1000",
+            "ptvarcone20_TightTTVA_pt500", "ptvarcone30_TightTTVA_pt500", "ptvarcone40_TightTTVA_pt500",
+            "ptvarcone20_TightTTVA_pt1000", "ptvarcone30_TightTTVA_pt1000", "ptvarcone40_TightTTVA_pt1000",
+            "ptcone20_TightTTVALooseCone_pt500", "ptcone30_TightTTVALooseCone_pt500", "ptcone40_TightTTVALooseCone_pt500",
+            "ptcone20_TightTTVALooseCone_pt1000", "ptcone30_TightTTVALooseCone_pt1000", "ptcone40_TightTTVALooseCone_pt1000",
+            "ptvarcone20_TightTTVALooseCone_pt500", "ptvarcone30_TightTTVALooseCone_pt500", "ptvarcone40_TightTTVALooseCone_pt500",
+            "ptvarcone20_TightTTVALooseCone_pt1000", "ptvarcone30_TightTTVALooseCone_pt1000", "ptvarcone40_TightTTVALooseCone_pt1000"
+        ]
+    ]
+
+    variables += [
+        ".".join(["Photons", field]) for field in [
+            "etcone20.etcone30.etcone40.Loose"
+        ]
+    ]
+    
+
+    return variables
+
+def HION5AllVariables():
+    variables  = []
+    variables += ["AntiKt4HITrackJets"]
+    variables += ["AntiKt4HIJets"]
+    variables += ["HIEventShape"]
+    variables += ["ForwardElectrons"]
+    variables += ["ForwardElectronClusters"]
+    variables += ["EventInfo"]
+    variables += ["CaloSums"]
+    variables += ["ZdcModules"]
+    variables += ["ZdcSums"]
+    variables += ["ZdcTriggerTowers"]
+    variables += ["PeripheralCaloCalTopoClusters"]
+    
+    return variables
+
+def HION5SmartCollections():
+    variables  = []
+    variables += ["InDetTrackParticles"]
+    variables += ["PrimaryVertices"]
+    variables += ["Electrons"]
+    variables += ["Muons"]
+    variables += ["Photons"]
+    #variables += ["MET_Reference_AntiKt4EMTopo",]
+    variables += ["AntiKt4EMTopoJets"]
+    
+    return variables
+
+def HION5ExtraContainersTrigger():    
+    variables  = ["HLT_MuonsCB_RoI",
+                  "HLT_MuonsCB_RoIAux.",
+                  "HLT_egamma_Electrons",
+                  "HLT_egamma_ElectronsAux."]
+    return variables    
 
 #################################################################################
 #HION12
@@ -504,7 +621,7 @@ def HION14TruthVariablesGeneral():
 def HION14ContentTruthParticles():
     variables = []
     variables += ["TruthParticles.pdgId"]
-    variables += ["TruthParticles.barcode"]
+    variables += ["TruthParticles.barcode"] # FIXME barcode-based
     variables += ["TruthParticles.m"]
     variables += ["TruthParticles.e"]
     variables += ["TruthParticles.py"]
@@ -531,5 +648,16 @@ def HION14ExtraContentAllTruth():
     variables += HION14ExtraExtrapolatedMuonTrackParticlesTruth()
     variables += HION14ExtraMuonSpectrometerTrackParticlesTruth()
     variables += HION14ContentTruthParticles()
+
+    return variables
+
+#################################################################################
+#HIONHPOD
+
+def HIONHPODSmartCollections():
+    variables  = []
+    variables += ["Electrons"]
+    variables += ["Photons"]
+    variables += ["Muons"]
 
     return variables

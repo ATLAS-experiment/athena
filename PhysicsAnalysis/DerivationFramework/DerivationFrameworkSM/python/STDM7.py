@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # STDM7.py - derivation for exclusive dilepton analyses
 #            skimms dilepton (e or mu) events, contains InDetTracks and AFP information
 
@@ -17,8 +16,8 @@ def STDM7SkimmingToolCfg(flags):
     electronsRequirements = '(Electrons.pt > 11*GeV) && (abs(Electrons.eta) < 2.6)' \
                             '&& ((Electrons.DFCommonElectronsLHLoose) || ((Electrons.DFCommonElectronsDNNLoose) && (Electrons.pt > 15*GeV)))'
     
-    chargedParticleRequirements = '(TruthParticles.pt > 500) && (TruthParticles.barcode < 200000)' \
-                                  '&& (TruthParticles.status == 1) && (TruthParticles.charge != 0)' \
+    chargedParticleRequirements = '(TruthParticles.pt > 500) && (TruthParticles.isGenStable)' \
+                                  '&& (TruthParticles.charge != 0)' \
                                   '&& (TruthParticles.theta > 0.163803) && (TruthParticles.theta < 2.97778)' \
                                   '&& (TruthParticles.HSBool)' 
     # theta selection correspond to |eta|<2.5 (minus epsilon); avoids floating point exception if theta=0 or pi

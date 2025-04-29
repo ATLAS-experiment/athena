@@ -58,39 +58,39 @@ namespace IDTPM {
   private:
 
     std::string m_vertexType;
-    bool m_doTrackPlots;
-    bool m_doGlobalPlots;
-    bool m_doTruthMuPlots;
+    bool m_doTrackPlots{};
+    bool m_doGlobalPlots{};
+    bool m_doTruthMuPlots{};
 
     /// vertex parameters plots
-    TH1* m_vtx_x;
-    TH1* m_vtx_y;
-    TH1* m_vtx_z;
-    TH1* m_vtx_time;
-    TH1* m_vtx_x_err;
-    TH1* m_vtx_y_err;
-    TH1* m_vtx_z_err;
-    TH1* m_vtx_time_err;
-    TH1* m_vtx_chi2OverNdof;
-    TH1* m_vtx_type;
+    TH1* m_vtx_x{};
+    TH1* m_vtx_y{};
+    TH1* m_vtx_z{};
+    TH1* m_vtx_time{};
+    TH1* m_vtx_x_err{};
+    TH1* m_vtx_y_err{};
+    TH1* m_vtx_z_err{};
+    TH1* m_vtx_time_err{};
+    TH1* m_vtx_chi2OverNdof{};
+    TH1* m_vtx_type{};
 
     /// vertex-associated tracks plots
-    TH1* m_vtx_nTracks;
-    TH1* m_vtx_track_weight;
-    TH1* m_vtx_track_pt;
-    TH1* m_vtx_track_eta;
-    TH1* m_vtx_track_nSiHits;
-    TH1* m_vtx_track_nSiHoles;
-    TH1* m_vtx_track_d0;
-    TH1* m_vtx_track_z0;
-    TH1* m_vtx_track_d0_err;
-    TH1* m_vtx_track_z0_err;
+    TH1* m_vtx_nTracks{};
+    TH1* m_vtx_track_weight{};
+    TH1* m_vtx_track_pt{};
+    TH1* m_vtx_track_eta{};
+    TH1* m_vtx_track_nSiHits{};
+    TH1* m_vtx_track_nSiHoles{};
+    TH1* m_vtx_track_d0{};
+    TH1* m_vtx_track_z0{};
+    TH1* m_vtx_track_d0_err{};
+    TH1* m_vtx_track_z0_err{};
 
     /// vertex multiplicity vs pileup plots
-    TH2* m_nVtx_vs_truthMu_2D;
-    TH2* m_nVtx_vs_actualMu_2D;
-    TProfile* m_nVtx_vs_truthMu;
-    TProfile* m_nVtx_vs_actualMu;
+    TH2* m_nVtx_vs_truthMu_2D{};
+    TH2* m_nVtx_vs_actualMu_2D{};
+    TProfile* m_nVtx_vs_truthMu{};
+    TProfile* m_nVtx_vs_actualMu{};
 
   }; // class VertexParametersPlots
 

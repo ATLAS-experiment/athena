@@ -18,7 +18,7 @@ class IMCTruthClassifier;
 
 namespace DerivationFramework {
 
-  class TruthClassificationDecorator : public AthAlgTool, public IAugmentationTool {
+  class TruthClassificationDecorator : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthClassificationDecorator(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthClassificationDecorator();

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # All derivation framework formats must be listed here
 
 # Example formats
@@ -30,6 +30,8 @@ from DerivationFrameworkMCTruth.TRUTH3 import TRUTH3Cfg
 from DerivationFrameworkPhys.PHYS import PHYSCfg
 # PHYSLITE - calibrated physics analysis objects, reduced slimming list
 from DerivationFrameworkPhys.PHYSLITE import PHYSLITECfg
+# SKIM - format allowing skimming of PHYS/PHYSLITE via a command line string
+from DerivationFrameworkPhys.SKIM import SKIMCfg
 
 # Physics validation for run 3
 # PHYSVAL - large bulk of the variables from AOD plus PHYS augmentations
@@ -38,6 +40,10 @@ from DerivationFrameworkPhysicsValidation.PHYSVAL import PHYSVALCfg
 # Higgs derivations
 # HIGG1D1 Higgs->gammagamma derivation
 from DerivationFrameworkHiggs.HIGG1D1 import HIGG1D1Cfg
+# HIGG9D1 Higgs+Onia derivation
+from DerivationFrameworkHiggs.HIGG9D1 import HIGG9D1Cfg
+# HIGG1D1 Higgs->gammagamma* derivation
+from DerivationFrameworkHiggs.HIGG1D2 import HIGG1D2Cfg
 
 # LLP derivations
 from DerivationFrameworkLLP.LLP1 import LLP1Cfg
@@ -110,18 +116,10 @@ from DerivationFrameworkJetEtMiss.JETM3 import JETM3Cfg
 from DerivationFrameworkJetEtMiss.JETM4 import JETM4Cfg
 # JETM5: zero bias data - random cones
 from DerivationFrameworkJetEtMiss.JETM5 import JETM5Cfg
-# JETM6: tagging SFs
-from DerivationFrameworkJetEtMiss.JETM6 import JETM6Cfg
 # JETM7: by-vertex jet reconstruction
 from DerivationFrameworkJetEtMiss.JETM7 import JETM7Cfg
-# JETM10: MET trigger
-from DerivationFrameworkJetEtMiss.JETM10 import JETM10Cfg
-# JETM11: MET trigger (e + mu skimming)
-from DerivationFrameworkJetEtMiss.JETM11 import JETM11Cfg
 # JETM12: E/p studies in W to tau + v events
 from DerivationFrameworkJetEtMiss.JETM12 import JETM12Cfg
-# JETM14: MET trigger (single mu selection)
-from DerivationFrameworkJetEtMiss.JETM14 import JETM14Cfg
 # JETM42: MC only - Upgrade studies format
 from DerivationFrameworkJetEtMiss.JETM42 import JETM42Cfg
 
@@ -130,6 +128,8 @@ from DerivationFrameworkJetEtMiss.JETM42 import JETM42Cfg
 from DerivationFrameworkTrigger.TRIG8 import TRIG8Cfg
 # TRIG9: TauTrigger performance
 from DerivationFrameworkTrigger.TRIG9 import TRIG9Cfg
+# TRIG10: TauTrigger performance
+from DerivationFrameworkTrigger.TRIG10 import TRIG10Cfg
 
 # L1CALO1 derivation - runs primarily on RAWD
 from DerivationFrameworkL1Calo.L1CALO1 import L1CALO1Cfg
@@ -148,9 +148,11 @@ from DerivationFrameworkTLA.TLA2 import TLA2Cfg
 #Heavy Ion group derivations
 from DerivationFrameworkHI.HION2 import HION2Cfg
 from DerivationFrameworkHI.HION4 import HION4Cfg
+from DerivationFrameworkHI.HION5 import HION5Cfg
 from DerivationFrameworkHI.HION7 import HION7Cfg
 from DerivationFrameworkHI.HION12 import HION12Cfg
 from DerivationFrameworkHI.HION14 import HION14Cfg
+from DerivationFrameworkHI.HIONHPOD import HIONHPODCfg
 
 # NCB derivation running on AODs (for cosmic and BIB studies)
 from DerivationFrameworkNCB.NCB1 import NCB1Cfg
@@ -159,10 +161,10 @@ from DerivationFrameworkNCB.NCB1 import NCB1Cfg
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TEST7Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
-           'PHYSCfg','PHYSLITECfg',
+           'PHYSCfg','PHYSLITECfg','SKIMCfg',
            'PHYSVALCfg',
            'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg',
-           'HIGG1D1Cfg',
+           'HIGG1D1Cfg', 'HIGG9D1Cfg', 'HIGG1D2Cfg',
            'LLP1Cfg', 'LLJ1Cfg',
            'SUSY20Cfg',
            'IDTR2Cfg',
@@ -175,11 +177,10 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
-           'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg','JETM7Cfg',
-           'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg', 'JETM42Cfg',
-           'TRIG8Cfg',"TRIG9Cfg",'L1CALO1Cfg',
+           'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM7Cfg','JETM12Cfg','JETM42Cfg',
+           'TRIG8Cfg',"TRIG9Cfg","TRIG10Cfg",'L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg', 'TLA2Cfg',
-           'HION2Cfg','HION4Cfg','HION7Cfg','HION12Cfg','HION14Cfg',
+           'HION2Cfg','HION4Cfg','HION5Cfg','HION7Cfg','HION12Cfg','HION14Cfg','HIONHPODCfg',
            'NCB1Cfg'
            ]

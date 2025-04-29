@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: InDetAlignConfig/python/AccumulateConfig.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
@@ -6,20 +6,21 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-
 ##----- Setup of Tools for Trk::AlignAlg -----##
     
 def ConstrainedTrackProviderCfg(flags, name="ConstrainedTrackProvider", **kwargs):
     cfg = ComponentAccumulator()
 
     if "TrackFitter" not in kwargs:
-        from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
+        from TrkConfig.CommonTrackFitterConfig import InDetStandaloneTrackFitterCfg
         kwargs.setdefault("TrackFitter", cfg.addPublicTool(cfg.popToolsAndMerge(
-            InDetTrackFitterCfg(flags, FillDerivativeMatrix = True))))
+            InDetStandaloneTrackFitterCfg(flags, FillDerivativeMatrix = True))))
 
     kwargs.setdefault("MinPt", 0.)
-    from AthenaCommon.Utils.unixtools import find_datafile
-    kwargs.setdefault("MomentumConstraintFileName", find_datafile("InDetAlign/nullmap.root"))
+
+    from PathResolver import PathResolver
+
+    kwargs.setdefault("MomentumConstraintFileName", PathResolver.FindCalibFile("InDetAlign/nullmap.root"))
     kwargs.setdefault("MomentumConstraintHistName", "LambdaCorrectionVsEtaPhi")
     kwargs.setdefault("ScalePMapToGeV", True)
     kwargs.setdefault("ReduceConstraintUncertainty", 100.)
@@ -29,6 +30,8 @@ def ConstrainedTrackProviderCfg(flags, name="ConstrainedTrackProvider", **kwargs
     kwargs.setdefault("d0ConstraintHistName", "d0CorrectionVsEtaPhi")
     kwargs.setdefault("UseConstraintError", False)
     kwargs.setdefault("UseConstrainedTrkOnly", True)
+    kwargs.setdefault("InputTracksCollection", flags.ConstrainedTrackProvider.InputTracksCollection)
+                
                 
     cfg.setPrivateTools(CompFactory.Trk.ConstrainedTrackProvider(name, **kwargs))
     return cfg
@@ -87,8 +90,12 @@ def AlignAlgCfg(flags, name="AlignAlgAccumulate", **kwargs):
             GeometryManagerToolCfg(flags))))
 
     if "AlignTool" not in kwargs:
+        from InDetAlignConfig.IDAlignToolsConfig import GlobalChi2AlignToolCfg
+        kwargs.setdefault("AlignTool", cfg.popToolsAndMerge(GlobalChi2AlignToolCfg(flags)))
+
+    if "AlignDBTool" not in kwargs:
         from InDetAlignConfig.IDAlignToolsConfig import AlignDBToolCfg
-        kwargs.setdefault("AlignTool", cfg.popToolsAndMerge(AlignDBToolCfg(flags)))
+        kwargs.setdefault("AlignDBTool", cfg.popToolsAndMerge(AlignDBToolCfg(flags)))
 
     kwargs.setdefault("TrackCollectionProvider", cfg.popToolsAndMerge(
         ConstrainedTrackProviderCfg(flags)))
@@ -108,7 +115,8 @@ def AlignAlgCfg(flags, name="AlignAlgAccumulate", **kwargs):
     kwargs.setdefault("WriteNtuple", flags.InDet.Align.writeAlignNtuple)
     if kwargs["WriteNtuple"]:
         kwargs.setdefault("FillNtupleTool", cfg.popToolsAndMerge(SimpleIDNtupleToolCfg(flags)))
-        kwargs.setdefault("FileName", flags.InDet.Align.FileName)
+        kwargs.setdefault("FilePath", "{flags.InDet.Align.baseDir}/Accumulate")
+        kwargs.setdefault("FileName", "newIDalign.root")
 
     cfg.addEventAlgo(CompFactory.Trk.AlignAlg(name, **kwargs))
     return cfg

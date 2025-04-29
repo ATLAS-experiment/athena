@@ -86,6 +86,12 @@ def createJetContextFlags():
     if moduleExists("DerivationFrameworkHiggs"):
         from DerivationFrameworkHiggs.HIGG1D1CustomJetsConfig import addJetContextFlags
         addJetContextFlags(flags)
+
+    # ****************
+    # Add PHYS context :
+    if moduleExists("DerivationFrameworkPhys"):
+        from DerivationFrameworkPhys.GNNVertexConfig import addJetContextFlags
+        addJetContextFlags(flags)
         
     return flags
 

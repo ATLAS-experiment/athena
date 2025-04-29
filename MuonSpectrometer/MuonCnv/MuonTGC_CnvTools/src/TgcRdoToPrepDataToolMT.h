@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCRDOTOPREPDATATOOLMT_H
@@ -103,7 +103,7 @@ namespace Muon
       StatusCode setupState(const EventContext& ctx, State& state) const;
 
       struct CablingInfo {
-        SmartIF<MuonTGC_CablingSvc> m_tgcCabling;
+        ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling{"MuonTGC_CablingSvc", "TgcRdoToPrepDataToolMT"};
         /** Conversion from hash to onlineId */  
         std::vector<uint16_t> m_hashToOnlineId;
         int m_MAX_N_ROD = 0;

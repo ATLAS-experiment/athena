@@ -1,5 +1,5 @@
 #include "SUSYTools/SUSYObjDef_xAOD.h"
-#include "../SUSYToolsAlg.h"
+#include "SUSYTools/SUSYToolsAlg.h"
 
 DECLARE_COMPONENT(SUSYToolsAlg)
 DECLARE_COMPONENT(ST::SUSYObjDef_xAOD)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RootCollection )
@@ -30,17 +30,27 @@ atlas_add_library( RootCollectionComponents
                    NO_PUBLIC_HEADERS
                    LINK_LIBRARIES CollectionBase RootCollection )
 
-atlas_add_test( read_test
-                SOURCES
-                test/read_test.cxx
+atlas_add_test( ttree_coll_rw_test
+                SOURCES test/ttree_rw_test.cxx test/rw_test.cxx
                 LINK_LIBRARIES ${CORAL_LIBRARIES} CollectionBase PersistentDataModel RootCollection CxxUtils
                 LOG_IGNORE_PATTERN "POOLCollectionID.*Value=" )
 
-atlas_add_test( update_test
-                SOURCES
-                test/update_test.cxx
+atlas_add_test( rntuple_coll_rw_test
+                SOURCES test/rntuple_rw_test.cxx test/rw_test.cxx
                 LINK_LIBRARIES ${CORAL_LIBRARIES} CollectionBase PersistentDataModel RootCollection CxxUtils
-                DEPENDS read_test )
+                LOG_IGNORE_PATTERN "POOLCollectionID.*Value=" )
+
+# wait for the test collections to be created, then sort them
+atlas_add_test( sort_test
+                SCRIPT test/sort_test.py
+                DEPENDS ttree_coll_rw_test rntuple_coll_rw_test )
+
+# sort_test reads the same collection as update, so wait for it to finish
+atlas_add_test( update_test
+                SOURCES test/update_test.cxx
+                LINK_LIBRARIES ${CORAL_LIBRARIES} CollectionBase PersistentDataModel RootCollection CxxUtils
+                DEPENDS sort_test )
+
 
 # Component list generation:
 atlas_generate_componentslist( RootCollectionComponents )

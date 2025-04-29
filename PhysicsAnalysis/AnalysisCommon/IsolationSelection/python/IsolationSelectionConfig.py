@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -52,11 +52,9 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingA
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, **kwargs):
+def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, isoDecSuffix = "CloseByCorr", caloDecSuffix = "", hasLRT = False, **kwargs):
 
     result = ComponentAccumulator()
-    # Check for LLP1 to use different selection decorators
-    isLLP1 = suff == "_LLP1"
 
     # Configure the CloseBy isolation correction alg - only need two WPs each for all iso variables
     elIsoWPs   = [ "Loose_VarRad", "TightTrackOnly_FixedRad" ]
@@ -68,13 +66,13 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                     MuonWPVec     = muIsoWPs,
                                                                     PhotonWPVec   = phIsoWPs))
     # Set suffix for writing corrected isolation values
-    isoDecSuffix = "CloseByCorr"
-    selectionDecorator = "isoSelIsOK"
+    selectionDecorator = "isoSelIsOK" + suff
     kwargs.setdefault("IsoCloseByCorrectionTool", 
                        result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags, 
                                                                            IsolationSelectionTool = isoTool,
                                                                            SelectionDecorator     = selectionDecorator,
                                                                            IsoDecSuffix           = isoDecSuffix,
+                                                                           CaloDecSuffix = caloDecSuffix,
                                                                            EleContainers = [ x for x in containerNames if x.find("Ele") != -1],
                                                                            MuoContainers = [ x for x in containerNames if x.find("Muo") != -1],
                                                                            PhoContainers = [ x for x in containerNames if x.find("Pho") != -1])))  
@@ -85,15 +83,15 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                 MaxEta        = 2.7,
                                                                 DisablePtCuts = True,
                                                                 MuQuality     = 2, ### Select the loose working point
+                                                                UseLRT        = hasLRT,
                                                                 )))  
 
     # Define selectors for electron and photon - different for LLP1 as compared to PHYS and PHYSLITE
-    if isLLP1:
+    kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMLoose")
+    if hasLRT:
         kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLooseNoPix")
-        kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMMedium")
     else:
         kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLoose")
-        kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMLoose")
 
     # Set selection for muons, electrons and photons to contribute to overlap
     kwargs.setdefault("ParticleContainerKeys",    containerNames)
@@ -104,7 +102,9 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
     kwargs.setdefault("MinPhotPt", 0.)
 
       
-    the_alg = CompFactory.CP.IsoCloseByCorrectionAlg(name + suff, **kwargs)
+    the_alg = CompFactory.CP.IsoCloseByCorrectionAlg(name + suff,
+                                                     SelectionDecorator     = selectionDecorator,
+                                                     **kwargs)
     result.addEventAlgo(the_alg)
     return result
 
@@ -143,14 +143,14 @@ def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", suff = "", **kw
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False):
+def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False, isoDecSuffix = "CloseByCorr", caloDecSuffix = "", hasLRT = False):
 
     # Add in two ways to do IsoCloseBy correction:
     #   - use IsoCloseByCorrAlg to modify the <iso_value>s for close by lepton/photon. 
     #     These can be used directly reading a derivation.
     #   - Also add in extra information to run IsolationCloseByTool on the derivation
     # For closeByIso correction, only one way is needed. The other way can be a cross check.
-    # The second way will be eventually depricated and is not used for PhysLite to minimize the 
+    # The second way will be eventually deprecated and is not used for PhysLite to minimize the 
     # information on PhysLite.
     acc = ComponentAccumulator()
 
@@ -159,7 +159,7 @@ def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "
     # # Add additional information to derivation output to be able to run IsoCloseByCorrectionTool on it 
     # if not isPhysLite:
     #     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrSkimmingAlgCfg, IsoCloseByCaloDecorCfg
-    #     ### Add the tracks that potentially polute the isolation cones of others to the collection. 
+    #     ### Add the tracks that potentially pollute the isolation cones of others to the collection. 
     #     ### Question: Is the list of recommended TTVA working points used for isolation available somewhere?
     #     acc.merge(IsoCloseByCorrSkimmingAlgCfg(flags, suff = suff, ttva_wp = "Nonprompt_All_MaxWeight",
     #                                                         OutputStream = stream_name))
@@ -170,9 +170,7 @@ def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "
 
     # Setup the isolation close-by correction algorithm sequence to correct the isolation of near-by el, mu, ph
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrAlgCfg
-    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools))
-
-
+    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools, isoDecSuffix = isoDecSuffix, caloDecSuffix = caloDecSuffix, hasLRT = hasLRT))
     return acc
 
 def setupIsoCloseBySlimmingVariables(slimmingHelper, isLLP1 = False):

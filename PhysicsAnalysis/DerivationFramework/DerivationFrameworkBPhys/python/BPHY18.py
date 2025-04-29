@@ -30,9 +30,17 @@ def BPHY18Cfg(flags):
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
 
-    #BPHY18TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "BPHY18TriggerSkim",
-#                                                             TriggerListOR = triggerList,
-#                                                            TriggerListORHLTOnly = triggerList_unseeded )
+    BPHY18TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(
+        name = "BPHY18TriggerSkim",
+        TriggerListOR = [
+            "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary",
+            "HLT_2e5_bBeeM6000_L1BKeePrimary",
+            "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary",
+            "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled",
+            "HLT_2e5_bBeeM6000_L1BKeePrescaled",
+            "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled"
+        ]
+    )
     
     ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0", 
             primaryVertexContainer = "PrimaryVertices",
@@ -201,9 +209,8 @@ def BPHY18Cfg(flags):
 
     BPHY18SkimmingAND = CompFactory.DerivationFramework.FilterCombinationAND(
         "BPHY18SkimmingAND",
-        #FilterList = [BPHY18_SelectBeeKstEvent, BPHY18TriggerSkim])   # TODO: Need to update the trigger names
-        FilterList = [BPHY18_SelectBeeKstEvent])
-    extraTools += [BPHY18_SelectBeeKstEvent, BPHY18SkimmingAND]
+        FilterList = [BPHY18_SelectBeeKstEvent, BPHY18TriggerSkim])
+    extraTools += [BPHY18_SelectBeeKstEvent, BPHY18TriggerSkim, BPHY18SkimmingAND]
     BPHY18_thinningTool_Tracks = CompFactory.DerivationFramework.Thin_vtxTrk(
                                 name                       = "BPHY18_thinningTool_Tracks",
                                 TrackParticleContainerName = "InDetTrackParticles",
@@ -337,5 +344,5 @@ def BPHY18Cfg(flags):
     BPHY18ItemList = BPHY18SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY18", ItemList=BPHY18ItemList, AcceptAlgs=["BPHY18Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY18", AcceptAlgs=["BPHY18Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc

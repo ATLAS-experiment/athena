@@ -5,9 +5,11 @@
 #include "../InDetTrackPerfMonTool.h"
 #include "../TrackAnalysisDefinitionSvc.h"
 #include "../TrackQualitySelectionTool.h"
+#include "../VertexQualitySelectionTool.h"
 #include "../TruthQualitySelectionTool.h"
 #include "../RoiSelectionTool.h"
 #include "../TrackRoiSelectionTool.h"
+#include "../VertexRoiSelectionTool.h"
 #include "../OfflineElectronDecoratorAlg.h"
 #include "../OfflineMuonDecoratorAlg.h"
 #include "../OfflineTauDecoratorAlg.h"
@@ -27,9 +29,11 @@ DECLARE_COMPONENT( TrackAnalysisDefinitionSvc )
 DECLARE_COMPONENT( PlotsDefinitionSvc )
 DECLARE_COMPONENT( IDTPM::JsonPlotsDefReadTool )
 DECLARE_COMPONENT( IDTPM::TrackQualitySelectionTool )
+DECLARE_COMPONENT( IDTPM::VertexQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::TruthQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::RoiSelectionTool )
 DECLARE_COMPONENT( IDTPM::TrackRoiSelectionTool )
+DECLARE_COMPONENT( IDTPM::VertexRoiSelectionTool )
 DECLARE_COMPONENT( IDTPM::OfflineElectronDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::OfflineMuonDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::OfflineTauDecoratorAlg )

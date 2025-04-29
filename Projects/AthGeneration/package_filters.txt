@@ -45,8 +45,6 @@
 + Control/RngComps
 + Control/RootUtils
 + Control/SGComps
-+ Control/SGMon/SGAudCore
-+ Control/SGMon/SGAudSvc
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
@@ -80,7 +78,6 @@
 + Database/ConnectionManagement/DBReplicaSvc
 + Database/CoraCool
 + Database/DBLock
-+ Database/CrestApi
 + Database/IOVDbAthenaPool
 + Database/IOVDbDataModel
 + Database/IOVDbMetaDataTools
@@ -96,6 +93,7 @@
 #+ DataQuality/GoodRunsLists
 + DetectorDescription/AtlasDetDescr
 + DetectorDescription/GeoModel/AtlasGeoModel
++ DetectorDescription/GeoModel/DumpGeo
 + DetectorDescription/GeoModel/GeoModelInterfaces
 + DetectorDescription/GeoModel/GeoModelUtilities
 + DetectorDescription/GeoPrimitives
@@ -185,6 +183,7 @@
 + Simulation/Tools/AtlasCLHEP_RandomGenerators
 + Tools/ART
 + Tools/Campaigns
++ Tools/GdbUtils
 + Tools/PathResolver
 + Tools/PmbCxxUtils
 + Tools/PyJobTransforms

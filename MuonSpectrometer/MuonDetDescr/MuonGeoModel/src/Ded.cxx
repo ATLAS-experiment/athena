@@ -32,17 +32,15 @@ namespace MuonGM {
         m_component = s;
     }
 
-    GeoVPhysVol *Ded::build(StoredMaterialManager& matManager,
+    PVLink Ded::build(StoredMaterialManager& matManager,
                             const MYSQL& mysql) {
         std::vector<Cutout *> vcutdef;
         int cutoutson = 0;
         return build(matManager, mysql, cutoutson, vcutdef);
     }
 
-    GeoVPhysVol *Ded::build(StoredMaterialManager& matManager,
-                            const MYSQL& mysql,
-                            int cutoutson,
-                            const std::vector<Cutout *>& vcutdef) {
+    PVLink Ded::build(StoredMaterialManager& matManager, const MYSQL& mysql,
+                      int cutoutson, const std::vector<Cutout *>& vcutdef) {
         const DED *r = dynamic_cast<const DED*>(mysql.GetTechnology(name));
 
         double tckaluminum = r->AlThickness;
@@ -52,18 +50,18 @@ namespace MuonGM {
 
         const GeoMaterial *mded = matManager.getMaterial("std::Aluminium");
         GeoLogVol *lded = new GeoLogVol("DedModuleSkin", sded, mded);
-        GeoPhysVol *pded = new GeoPhysVol(lded);
+        PVLink pded = new GeoPhysVol(lded);
 
         // Place honeycomb inside aluminum to make aluminum skin
         const GeoMaterial *mhon = matManager.getMaterial("muo::RpcPapHonC");
         GeoLogVol *lhon = new GeoLogVol("DedModulehoneycomb", shon, mhon);
-        GeoPhysVol *phon = new GeoPhysVol(lhon);
+        PVLink phon = new GeoPhysVol(lhon);
         if (!skip_ded)
             pded->add(phon);
 
         // Apply cutouts
         if (cutoutson && !vcutdef.empty()) {
-            GeoPhysVol *tempPhys = nullptr;
+            GeoIntrusivePtr<GeoPhysVol> tempPhys{};
             Cutout *cut = nullptr;
             GeoShape *cutoutShape = nullptr;
             GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};

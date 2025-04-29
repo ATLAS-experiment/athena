@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -88,6 +88,13 @@ void filter (char* buf)
     }
 
     else if (buf[0] == '[') {
+      if (strncmp(buf, "[clone", 6) == 0) {
+        char* q = strchr (buf, ']');
+        if (q) {
+          buf = snip (buf, q+1);
+          continue;
+        }
+      }
       sl = buf;
       ++buf;
     }

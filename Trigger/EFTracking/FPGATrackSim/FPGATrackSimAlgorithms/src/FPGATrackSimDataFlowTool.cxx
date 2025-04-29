@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimDataFlowTool.h"
 
@@ -12,7 +12,7 @@
 
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
-#include "CxxUtils/bitscan.h"
+#include <bit>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 FPGATrackSimDataFlowTool::FPGATrackSimDataFlowTool(std::string const & algname, std::string const & name, IInterface const * ifc) :
@@ -55,8 +55,10 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
 
     info->nRoads_1st_total = roads_1st.size();
     for (const auto & r : roads_1st) {
-        if (CxxUtils::count_ones(r->getHitLayers()) == m_nLayers_1st - 1) info->nRoads_1st_7hits++;
-        if (CxxUtils::count_ones(r->getHitLayers()) == m_nLayers_1st)     info->nRoads_1st_8hits++;
+        if (std::popcount(r->getHitLayers()) == static_cast<int>(m_nLayers_1st) - 1)
+          info->nRoads_1st_7hits++;
+        if (std::popcount(r->getHitLayers()) == static_cast<int>(m_nLayers_1st))
+          info->nRoads_1st_8hits++;
     }
 
     std::unordered_map<int, size_t> pattID_nTracks_1st;
@@ -450,7 +452,7 @@ StatusCode FPGATrackSimDataFlowTool::printDataFlow(std::string const & key, int 
 
     // Replace all "<" by "$<$" in the key to make the type text for tex.
     // If there are other characters in the future, we can make a vector to store all of them.
-    std::string key_tex = str_key;
+    std::string key_tex = std::move(str_key);
     findAndReplaceAll(key_tex, "<", "$<$");
 
     m_dataFlowTeX << key_tex << " & " << str_stage << " & " << roundTo(mean,     m_nSigDigits)

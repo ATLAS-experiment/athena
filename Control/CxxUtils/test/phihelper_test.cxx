@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/phihelper_test.cxx
@@ -11,9 +11,6 @@
 #define BOOST_TEST_MODULE phihelper_test
 #include <boost/mpl/list.hpp>
 #include <boost/test/unit_test.hpp>
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "CxxUtils/phihelper.h"
 #include <cmath>

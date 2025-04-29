@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkDetDescrUtils/ObjectAccessor.h"
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/DetachedTrackingVolume.h"
 #include "TrkGeometry/GlueVolumesDescriptor.h"
@@ -66,8 +66,8 @@ template<class T>
 class ConstSharedPtrSpan
 {
 public:
-  ConstSharedPtrSpan(const std::vector<std::shared_ptr<T>>& m_var)
-    : m_span(&*(m_var.begin()), &*(m_var.end()))
+  ConstSharedPtrSpan(const std::vector<std::shared_ptr<T>>& var)
+    : m_span(var)
   {
   }
   // access the ptr
@@ -331,7 +331,7 @@ public:
   const std::string& volumeName() const;
 
   /** Method to return the BoundarySurfaces */
-  std::vector<SharedObject<BoundarySurface<TrackingVolume>>>&
+  std::vector<std::shared_ptr<BoundarySurface<TrackingVolume>>>&
   boundarySurfaces() ;
   ConstSharedPtrSpan<BoundarySurface<TrackingVolume>> boundarySurfaces() const;
   /** Returns the boundary surfaces ordered in probability to hit them based on
@@ -451,7 +451,7 @@ private:
   const TrackingVolume* m_motherVolume; //!< mother volume of this volume
 
   //!< boundary Surfaces
-  std::vector<SharedObject<BoundarySurface<TrackingVolume>>> m_boundarySurfaces{};
+  std::vector<std::shared_ptr<BoundarySurface<TrackingVolume>>> m_boundarySurfaces{};
   ////!< Array of Layers inside the Volume
   LayerArray* m_confinedLayers; 
   //!< Array of Volumes inside the Volume

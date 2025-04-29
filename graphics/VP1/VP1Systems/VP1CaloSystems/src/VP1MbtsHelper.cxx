@@ -151,7 +151,7 @@ void VP1MbtsHelper::systemcreate(StoreGateSvc* detstore)
     {
       scin1Exists = true;
       pvScin1 = child;
-      int copyNo=  cursor2.getId();
+      int copyNo=  cursor2.getId().value();
 
       aTransforms1[copyNo] = xfLArECA * xfMbtsMother * cursor2.getTransform();
       cTransforms1[copyNo] = xfLArECC * xfMbtsMother * cursor2.getTransform();
@@ -160,7 +160,7 @@ void VP1MbtsHelper::systemcreate(StoreGateSvc* detstore)
     {
       scin2Exists = true;
       pvScin2 = child;
-      int copyNo=  cursor2.getId();
+      int copyNo=  cursor2.getId().value();
 
       aTransforms2[copyNo] = xfLArECA * xfMbtsMother * cursor2.getTransform();
       cTransforms2[copyNo] = xfLArECC * xfMbtsMother * cursor2.getTransform();
@@ -171,10 +171,10 @@ void VP1MbtsHelper::systemcreate(StoreGateSvc* detstore)
   if(m_run2Geo) {                                                                                                     
     GeoVolumeCursor cursor2a(pvMbtsMother);                                                                      
     while(!cursor2a.atEnd()) {                                                                                    
-      PVConstLink pvAirEnv = cursor2a.getVolume();                                                               
+      PVConstLink pvAirEnv = cursor2a.getVolume();
       if(pvAirEnv->getLogVol()->getName().find("MBTSAirEnv")!=std::string::npos) {                                
-       int copyNo =  cursor2a.getId();                                                                           
-                                                                                                                   
+       int copyNo =  cursor2a.getId().value();
+
        // **** Find Aluminun Envelope ****                                                                         
        GeoVolumeCursor cursor3(pvAirEnv);                                                                        
        bool aluEnvExists(false);                                                                                   

@@ -1126,7 +1126,7 @@ void HltEventLoopMgr::outputThreadCallback() {
   if (m_schedulerSvc->freeSlots() == nslots) {
     if (m_loopStatus.eventsAvailable) {
       ATH_MSG_DEBUG("There are currently no events being processed by the Scheduler, returning from " << __FUNCTION__);
-    } else {
+    } else if (m_freeSlots == nslots) {
       ATH_MSG_DEBUG("No more events to process and scheduler is empty, stopping the event loop and output thread");
       if (!m_loopStatus.loopEnded && m_outputThread!=nullptr) {
         m_outputThread->stop();
@@ -1138,6 +1138,9 @@ void HltEventLoopMgr::outputThreadCallback() {
       // Notify the main thread that the loop ended - this is the only place able to do this!
       m_loopStatus.loopEnded = true;
       m_loopStatus.loopEndedCond.notify_all();
+    }
+    else{
+      ATH_MSG_DEBUG("No more events, but processing is still ongoing, returning from " << __FUNCTION__);
     }
     return;
   }
@@ -1320,6 +1323,7 @@ StatusCode HltEventLoopMgr::startNextEvent()
     ++m_freeSlots;
     if (!m_loopStatus.loopEnded && m_inputThread!=nullptr) {
       m_inputThread->cond().notify_all();
+      m_outputThread->cond().notify_all();
     }
     return StatusCode::SUCCESS;
   }

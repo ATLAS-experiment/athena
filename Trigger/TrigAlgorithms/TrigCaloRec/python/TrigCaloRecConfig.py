@@ -13,19 +13,18 @@ from TrigEDMConfig.TriggerEDM import recordable
 mlog = logging.getLogger ('TrigCaloRecConfig')
 
 
-def trigCaloClusterMonitoringTool(flags, doMonCells = False):
+def trigCaloClusterMonitoringTool(flags, doMonCells = False, isFullScan = None):
     """Monitoring tool for TrigCaloClusterMaker"""
 
     monTool = GenericMonitoringTool(flags, 'MonTool')
+    
+    if isFullScan is None:
+        isFullScan = doMonCells
 
-    maxNumberOfClusters = 1200 if doMonCells else 50
-    maxProcTime = 150000 if doMonCells else 4500
+    maxNumberOfClusters = 1200 if isFullScan else 50
 
     monTool.defineHistogram('container_size', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters)
     monTool.defineHistogram('container_size_by_mu', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters/60)
-    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title="Total Execution Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
-    monTool.defineHistogram('TIME_ClustMaker', path='EXPERT', type='TH1F', title="Cluster Maker Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
-    monTool.defineHistogram('TIME_ClustCorr', path='EXPERT', type='TH1F', title="Cluster Correction Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=100)
     monTool.defineHistogram('Et', path='EXPERT', type='TH1F',  title="Cluster E_T; E_T [ MeV ] ; Number of Clusters", xbins=135, xmin=-200.0, xmax=2500.0)
     monTool.defineHistogram('Eta', path='EXPERT', type='TH1F', title="Cluster #eta; #eta ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5)
     monTool.defineHistogram('Phi', path='EXPERT', type='TH1F', title="Cluster #phi; #phi ; Number of Clusters", xbins=64, xmin=-3.2, xmax=3.2)
@@ -50,7 +49,7 @@ def trigCaloClusterMonitoringTool(flags, doMonCells = False):
 
 
 @AccumulatorCache
-def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False):
+def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False,sequenceName=None):
     acc = ComponentAccumulator()
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
     acc.merge(trigCaloDataAccessSvcCfg(flags))
@@ -76,6 +75,9 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
         monTool.defineHistogram('Cells_phi', path='EXPERT', type='TH1F', title="Cells #phi; #phi ; Nclusters",
                                 xbins=128, xmin=-3.2, xmax=3.2)
 
+    if sequenceName is not None:
+        from AthenaCommon.CFElements import parOR
+        acc.merge(ComponentAccumulator(parOR(sequenceName)))
     cellMaker = CompFactory.HLTCaloCellMaker(name,
                                              CellsName = cells,
                                              TrigDataAccessMT = acc.getService('TrigCaloDataAccessSvc'),
@@ -84,7 +86,7 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
                                              monitorCells = monitorCells,
                                              MonTool = monTool,
                                              TileCellsInROI = False if not doTau else True)
-    acc.addEventAlgo(cellMaker, primary=True)
+    acc.addEventAlgo(cellMaker, primary=True,sequenceName=sequenceName)
     return acc
 
 @AccumulatorCache
@@ -99,14 +101,14 @@ def hltCaloCellCorrectorCfg(flags,name='HLTCaloCellCorrector', inputEDM='CellsCl
   
 
 @AccumulatorCache
-def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
+def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED',sequenceName=None):
     acc = ComponentAccumulator()
     hltCaloCellMakerAcc = hltCaloCellMakerCfg(flags, "CaloCellSeedLessFS",
                                                     roisKey = roisKey,
                                                     CellsName ="SeedLessFS", 
                                                     monitorCells=False)
 
-    acc.merge(hltCaloCellMakerAcc)
+    acc.merge(hltCaloCellMakerAcc,sequenceName=sequenceName)
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
@@ -130,14 +132,17 @@ def L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=True):
         nameContRinger='Ringer2sigGlobal'
     ringer = RingerReFexConfig(flags,name=nameTool,RingerKey='NOTNEEDED',
           ClustersName=nameContCalo,DoNoiseThrRings=DoNoiseThrRings)
+    from AthenaCommon.CFElements import parOR
+    accSeq = ComponentAccumulator(parOR("HLTBeginSeq"))
     L0CaloGlobalRoIBuilderAlg = CompFactory.CaloGlobalRoIBuilder(name=nameAlgo,
                       Cells ="SeedLessFS", ClustersName=nameContCalo,
                       RingerKey=nameContRinger,
                       RingerTool=ringer )
-    acc.addEventAlgo(L0CaloGlobalRoIBuilderAlg)
+    accSeq.addEventAlgo(L0CaloGlobalRoIBuilderAlg, sequenceName="HLTBeginSeq")
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
+    acc.merge(accSeq)
 
     return acc
 
@@ -156,9 +161,12 @@ def CaloL0RingerCfg(flags,DoNoiseThrRings=True):
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD,addToAOD
     extraContent=CaloL0RingerPrepareList(DoNoiseThrRings)
     acc = ComponentAccumulator()
+    from AthenaCommon.CFElements import parOR
     if (flags.Output.doWriteRDO):
-       acc.merge(hltCaloCellSeedlessMakerCfg(flags))
-       acc.merge(L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=DoNoiseThrRings))
+       accSeq = ComponentAccumulator(parOR("HLTBeginSeq"))
+       accSeq.merge(hltCaloCellSeedlessMakerCfg(flags, sequenceName="HLTBeginSeq"))
+       accSeq.merge(L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=DoNoiseThrRings))
+       acc.merge(accSeq)
 
     if (flags.Output.doWriteESD or flags.Output.doWriteAOD):
        if ( flags.Output.doWriteESD ):
@@ -215,8 +223,7 @@ def hltCaloDMCalib(flags, name = "TrigDMCalib" ):
 
 
 @AccumulatorCache
-def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
-                           cellsKey=None, doLC=False, separateMonitoring=False):
+def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS", cellsKey=None, doLC=False, suffix=''):
     acc = ComponentAccumulator()
     cellsFromName = 'CaloCellsFS' if "FS" in clustersKey else "CaloCells"
     cells = cellsFromName if cellsKey is None else cellsKey
@@ -284,38 +291,27 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
                                 'AVG_TILE_Q'
                                 ]
 
-    doMonCells = "FS" in name
+    clustermakername = name + suffix
+    doMonCells = "FS" in clustermakername
     
-    if separateMonitoring:
-      alg = CompFactory.CaloClusterMaker(
-            name,
-            ClustersOutputName=recordable(clustersKey),
-            ClusterCellLinkOutputName = clustersKey+"_links",
-            ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments],
-            ClusterCorrectionTools = listClusterCorrectionTools,
-            SaveUncalibratedSignalState = True,
-            WriteTriggerSpecificInfo = True)
-    else:
-      alg = CompFactory.TrigCaloClusterMaker(
-            name,
-            Cells=cells,
-            CaloClusters=recordable(clustersKey),
-            CellLinks = clustersKey+"_links",
-            ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments], # moments are missing yet
-            ClusterCorrectionTools = listClusterCorrectionTools,
-            MonCells = doMonCells,
-            MonTool = trigCaloClusterMonitoringTool(flags, doMonCells) )
+    alg = CompFactory.CaloClusterMaker(
+          clustermakername,
+          ClustersOutputName=clustersKey if "CaloMon" in clustermakername else recordable(clustersKey),
+          ClusterCellLinkOutputName = clustersKey+"_links",
+          ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments],
+          ClusterCorrectionTools = listClusterCorrectionTools,
+          SaveUncalibratedSignalState = True,
+          WriteTriggerSpecificInfo = True)
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
     acc.addEventAlgo(alg, primary=True)
-    if separateMonitoring:
-      monitor = CompFactory.TrigCaloClusterMonitor(name + 'Monitoring',
-                                                   CellsName = cells,
-                                                   ClustersName = clustersKey,
-                                                   MonitorCells = doMonCells,
-                                                   MonitoringTool = trigCaloClusterMonitoringTool(flags, doMonCells))
-      acc.addEventAlgo(monitor, primary=False)
+    monitor = CompFactory.TrigCaloClusterMonitor(name + 'Monitoring' + suffix,
+                                                 CellsName = cells,
+                                                 ClustersName = clustersKey,
+                                                 MonitorCells = doMonCells,
+                                                 MonitoringTool = trigCaloClusterMonitoringTool(flags, doMonCells))
+    acc.addEventAlgo(monitor, primary=False)
     return acc
 
 
@@ -380,8 +376,10 @@ def hltCaloTopoClusteringCfg(
     acc.merge(
         hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+nameSuffix, roisKey=roisKey, CellsName=CellsName, monitorCells=monitorCells, doTau = doTau)
     )
+
+    clustermakername_nosuffix = namePrefix + "HLTCaloClusterMaker"
     
-    clustermakername = namePrefix + "HLTCaloClusterMaker"+nameSuffix
+    clustermakername = clustermakername_nosuffix + nameSuffix
     
     # TODO - Don't use hasFlag here, use another concrete flag instead
     if flags.hasFlag("CaloRecGPU.GlobalFlags.UseCaloRecGPU") and flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU and not doTau and "FS" in clustermakername:
@@ -397,7 +395,7 @@ def hltCaloTopoClusteringCfg(
       gpuhyb = GPUCaloTopoClusterCfg(flags,
                                      True,
                                      CellsName,
-                                     clustersname = recordable(clusters),
+                                     clustersname = clusters if "CaloMon" in clustermakername else recordable(clusters),
                                      name = clustermakername,
                                      MonitorTool = trigCaloClusterMonitoringTool(flags, monitorCells),
                                      MonitorCells = monitorCells,
@@ -405,7 +403,7 @@ def hltCaloTopoClusteringCfg(
                                      
       acc.merge(gpuhyb)
     else : 
-       calt=hltTopoClusterMakerCfg(flags, clustermakername, cellsKey=CellsName, clustersKey=clusters, doLC=doTau)
+       calt=hltTopoClusterMakerCfg(flags, clustermakername_nosuffix, cellsKey=CellsName, clustersKey=clusters, doLC=doTau, suffix = nameSuffix)
        acc.merge(calt)
     if doLCFS:
         acc.merge( hltCaloTopoClusterCalibratorCfg(
@@ -584,6 +582,9 @@ if __name__ == "__main__":
     storeGateSvc.Dump=True
     theL0CaloGlobalRoIBuilderCfg = L0CaloGlobalRoIBuilderCfg(flags)
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+
+    from AthenaCommon.CFElements import parOR
+    cfg.addSequence(parOR("HLTBeginSeq"),parentName="AthMasterSeq")
     
     CAs = [hltCaloCellSeedlessMakerCfg(flags,roisKey=''),
            theL0CaloGlobalRoIBuilderCfg,

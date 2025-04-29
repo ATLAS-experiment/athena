@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SampleHandler )
@@ -34,7 +34,7 @@ atlas_add_root_dictionary( SampleHandler
 atlas_add_library( SampleHandler
    SampleHandler/*.h Root/*.cxx ${SampleHandlerDictSource}
    PUBLIC_HEADERS SampleHandler
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS}
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib RootCoreUtils CxxUtils)
 
 # Test(s) in the package:

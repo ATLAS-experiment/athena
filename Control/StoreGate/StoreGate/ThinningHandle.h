@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/ThinningHandle.h
@@ -116,6 +116,11 @@ public:
       ThinningHandleBase (key.decisionHandleKey(), key.key(), ctx)
   {
   }
+
+  // Disallow initialization from a temporary Key object.
+  explicit ThinningHandle (SG::ThinningHandleKey<T>&& key) = delete; // Not allowed from a temporary.
+  explicit ThinningHandle (SG::ThinningHandleKey<T>&& key, 
+                           const EventContext& ctx) = delete; // Not allowed from a temporary.
 };
 
 

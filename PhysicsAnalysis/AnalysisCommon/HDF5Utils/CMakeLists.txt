@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Set the project's name and version.
 atlas_subdir( HDF5Utils )
@@ -32,7 +32,6 @@ set( _exe_sources
   util/ttree2hdf5.cxx)
 
 atlas_add_executable(ttree2hdf5 ${_exe_sources}
-  DEFINITIONS ${HDF5_CXX_DEFINITIONS}
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} util ${Boost_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS}
   LINK_LIBRARIES HDF5Utils ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${HDF5_LIBRARIES} )
 
@@ -41,7 +40,6 @@ unset(_exe_sources)
 # add the merge utility
 atlas_add_executable( hdf5-merge
   util/hdf5-merge.cxx
-  DEFINITIONS ${HDF5_CXX_DEFINITIONS}
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS}
   LINK_LIBRARIES HDF5Utils ${Boost_LIBRARIES} ${HDF5_LIBRARIES} )
 

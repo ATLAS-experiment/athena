@@ -478,6 +478,10 @@ def analyseChainName(chainName, L1thresholds, L1item):
         # ---- check that all parts to be matched are not specified as defaults already ----
         overlaps = [x for x in parts if x in allDefaults]
         log.debug("parts that are also in defaults: %s ", overlaps)
+
+        # Suppress the warning until we fully decomission the old DeepSet tau triggers in a couple of months
+        if overlaps == ['tracktwoMVA']: overlaps = []
+
         if overlaps:
             #log.error("[analyseChainName] The following string(s) is/are already defined as defaults, please remove: %s", overlaps)
             #raise RuntimeError("[analyseChainname] Default config appearing in chain name, please remove: %s", overlaps)

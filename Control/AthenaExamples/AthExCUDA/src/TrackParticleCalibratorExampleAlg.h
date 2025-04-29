@@ -38,11 +38,7 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
   virtual StatusCode initialize() override;
 
   /// Function executing the algorithm
-  virtual StatusCode execute(const EventContext& ctx) const override
-#if (defined(__GNUC__) || defined(__clang__))
-      __attribute__((no_sanitize("vptr")))
-#endif
-      ;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
   /// @}
 

@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
-
 
 
 #ifndef ASG_ANALYSIS_ALGORITHMS__ASG_SHALLOW_COPY_ALG_H
@@ -14,7 +13,7 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <limits>
+
 
 namespace CP
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file T_AthenaPoolCoolMultChanCnv.icc
@@ -118,7 +118,7 @@ StatusCode
 T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::objectToAttrListColl ATLAS_NOT_THREAD_SAFE
   (COLL_T* obj, IOpaqueAddress*& pAddr,
    CondAttrListCollection*& attrListColl,
-   Token*& implToken)
+   std::unique_ptr<Token>& implToken)
 {
     ATH_MSG_DEBUG("Creating a CondAttrListCollection from a collection");
 
@@ -144,13 +144,13 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::objectToAttrListColl ATLAS_
     // Loop over objects in COLL_T*
     typename COLL_T::chan_const_iterator itChan = obj->chan_begin();
     typename COLL_T::iov_const_iterator  itIOV  = obj->iov_begin();
-    Token* token = 0;
     std::string token_str;
     std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
     for (unsigned int chan = 0; chan < obj->size(); ++chan, ++itChan) {
 	ELEM_T* elem = (*obj)[chan];
         // Allow for T/P separation, convert to persistent object
         ELEM_P* elem_p = this->createPersistent(elem);
+        std::unique_ptr<Token> token;
 	StatusCode sc = this->objectToPool(elem_p, token, "", *pAddr->par());
 	if (sc != StatusCode::SUCCESS || !token) {
 	    ATH_MSG_ERROR("Unable to write out object");
@@ -171,7 +171,6 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::objectToAttrListColl ATLAS_
 
 	// Save as well in implementation
 	impl->add(token_str);
-        delete token; token = 0;
     }
 
     // Print out tokens
@@ -213,7 +212,7 @@ StatusCode T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::createRep(DataOb
 	return(StatusCode::FAILURE);
     }
     CondAttrListCollection* coll = 0;
-    Token* token = 0;
+    std::unique_ptr<Token> token;
     // Ok, because it's just creating a new list.
     StatusCode sc ATLAS_THREAD_SAFE = objectToAttrListColl(obj, pAddr, coll, token);
     if (sc != StatusCode::SUCCESS || !token) {
@@ -226,7 +225,6 @@ StatusCode T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::createRep(DataOb
     addr->setAttrListColl(coll);
     delete pAddr; pAddr = addr;
     pAddr->addRef();
-    delete token; token = 0;
 
     ATH_MSG_DEBUG("End createRep");
     return(StatusCode::SUCCESS);

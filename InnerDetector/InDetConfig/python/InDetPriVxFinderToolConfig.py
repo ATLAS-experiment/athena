@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPriVxFinderTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -131,6 +131,10 @@ def VertexFinderToolCfg(flags, **kwargs):
             ActsIterativeFindingCfg)
         return ActsIterativeFindingCfg(flags, **kwargs)
 
+    elif flags.Tracking.PriVertex.setup == VertexSetup.ActsGridDensity:
+        from ActsConfig.ActsPriVxFinderConfig import ActsGridAdaptiveMultiFindingCfg
+        return ActsGridAdaptiveMultiFindingCfg(flags, **kwargs)
+
 
 def TrigVertexFinderToolCfg(flags, **kwargs):
     if flags.Tracking.ActiveConfig.adaptiveVertex:
@@ -139,3 +143,4 @@ def TrigVertexFinderToolCfg(flags, **kwargs):
         return TrigActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
     else:
         return TrigGaussIterativeFindingCfg(flags, **kwargs)
+

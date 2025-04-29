@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -19,40 +19,18 @@
 // Header for this module:-
 
 #include "GeneratorFilters/xAODLeptonPairFilter.h"
-
-// Framework Related Headers:-
-#include "GaudiKernel/MsgStream.h"
-
 // Other classes used by this class:-
 #include <math.h>
 #include <vector>
-#include <TLorentzVector.h>
-
+#include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
-
-//--------------------------------------------------------------------------
-xAODLeptonPairFilter::xAODLeptonPairFilter(const std::string& name, 
-      ISvcLocator* pSvcLocator): GenFilter(name,pSvcLocator) {
-}
-
-//--------------------------------------------------------------------------
- xAODLeptonPairFilter::~xAODLeptonPairFilter(){
-//--------------------------------------------------------------------------
-
-}
 
 //---------------------------------------------------------------------------
 StatusCode xAODLeptonPairFilter::filterInitialize() {
 //---------------------------------------------------------------------------
- return StatusCode::SUCCESS;
+  CHECK(m_truthPartContKey.initialize());
+  return StatusCode::SUCCESS;
 }
-
-//---------------------------------------------------------------------------
-StatusCode xAODLeptonPairFilter::filterFinalize() {
-//---------------------------------------------------------------------------
- return StatusCode::SUCCESS;
-}
-
 
 //---------------------------------------------------------------------------
 StatusCode xAODLeptonPairFilter::filterEvent() {
@@ -64,25 +42,19 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
   std::vector<double> vLeptonEta;
   std::vector<  std::vector < size_t > > vLeptonParentPDGIDs;
 
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
         if( !MC::isStable(pitr) ) continue;
         // check stable particles only
         // We do not place requirements on their origins (updated: optionally rejecting hadron decays)
         // save pdg ids of found leptons
         // do not consider taus
-        if( std::abs(pitr->pdgId()) !=  11  && std::abs(pitr->pdgId()) !=  13) continue;
+        if( !MC::isElectron(pitr) && !MC::isMuon(pitr) ) continue;
         //only consider leptons which satisfy  pt and eta requirements
         if( (pitr->pt() < m_Ptmin) || std::abs(pitr->eta()) > m_EtaRange) continue;
 			  if(m_onlyMassiveParents)
@@ -96,7 +68,7 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
 					  if(vxp->nIncomingParticles()!=1) break;
 					  p = vxp->incomingParticle(0);
 					  const int pdg = std::abs(p->pdgId());
-					  if(!((pdg>=11 && pdg<=16) || pdg==22))
+					  if(!(MC::isSMLepton(pdg) || MC::isPhoton(pdg)))
 					  {
 						  massiveParent = (p->m()>20000);
 						  break;

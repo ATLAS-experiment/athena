@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/Accessor.h
@@ -117,8 +117,7 @@ public:
    * @brief Fetch the variable for one element, as a non-const reference.
    * @param e The element for which to fetch the variable.
    */
-  template <class ELT>
-  ATH_REQUIRES( IsAuxElement<ELT> )
+  template <IsAuxElement ELT>
   reference_type operator() (ELT& e) const;
 
 
@@ -139,8 +138,7 @@ public:
    * @param e The element for which to fetch the variable.
    * @param x The variable value to set.
    */
-  template <class ELT>
-  ATH_REQUIRES( IsAuxElement<ELT> )
+  template <IsAuxElement ELT>
   void set (ELT& e, const element_type& x) const;
 
 
@@ -163,8 +161,7 @@ public:
    * @brief Test to see if this variable exists in the store and is writable.
    * @param e An element of the container in which to test the variable.
    */
-  template <class ELT>
-  ATH_REQUIRES( IsAuxElement<ELT> )
+  template <IsAuxElement ELT>
   bool isAvailableWritable (ELT& e) const;
     
 

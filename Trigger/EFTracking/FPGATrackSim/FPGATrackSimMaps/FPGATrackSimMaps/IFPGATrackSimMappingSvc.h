@@ -19,13 +19,19 @@ class IFPGATrackSimMappingSvc: virtual public IService
         DeclareInterfaceID(IFPGATrackSimMappingSvc, 1, 0);
   
         virtual const FPGATrackSimPlaneMap* PlaneMap_1st(int slice) const = 0;
-        virtual const FPGATrackSimPlaneMap* PlaneMap_2nd() const = 0;
+        virtual const FPGATrackSimPlaneMap* PlaneMap_2nd(int slice) const = 0;
+        virtual size_t GetPlaneMap_1stSliceSize() const = 0;
+        virtual size_t GetPlaneMap_2ndSliceSize() const = 0;
         virtual const FPGATrackSimRegionMap* RegionMap_1st() const = 0;
         virtual const FPGATrackSimRegionMap* RegionMap_2nd() const = 0;
         virtual const FPGATrackSimRegionMap* SubRegionMap() const = 0;
         virtual const FPGATrackSimRegionMap* SubRegionMap_2nd() const = 0;
-        virtual const FPGATrackSimNNMap* NNMap() const = 0;
-        virtual std::string getNNMapString() const = 0;
+        virtual std::string getFakeNNMapString() const = 0;
+        virtual std::string getParamNNMapString() const = 0;
+        virtual std::string getFakeNNMap2ndString() const = 0;
+        virtual std::string getParamNNMap2ndString() const = 0;
+        virtual std::string getExtensionNNHitMapString() const = 0;
+        virtual std::string getExtensionNNVolMapString() const = 0;
 
 };
 

@@ -12,28 +12,42 @@
 namespace Tau{
 
 class EfficiencyPtPlots: public PlotBase {
-  public:
-    EfficiencyPtPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-    virtual ~EfficiencyPtPlots();
+public:
+  EfficiencyPtPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
+  virtual ~EfficiencyPtPlots();
+  
+  void fill(const xAOD::TauJet& tau, float weight);
+  
+  TProfile* m_eff_pt_jetRNNloose;
+  TProfile* m_eff_pt_jetRNNmed;
+  TProfile* m_eff_pt_jetRNNtight;
+  TProfile* m_eff_pt_jetRNNlooseHighPt;
+  TProfile* m_eff_pt_jetRNNmedHighPt;
+  TProfile* m_eff_pt_jetRNNtightHighPt;
 
-    void fill(const xAOD::TauJet& tau, float weight);
+  TProfile* m_eff_jetRNNloose;
+  TProfile* m_eff_jetRNNmed;
+  TProfile* m_eff_jetRNNtight;
 
-    TProfile* m_eff_pt_jetRNNloose;
-    TProfile* m_eff_pt_jetRNNmed;
-    TProfile* m_eff_pt_jetRNNtight;
-    TProfile* m_eff_pt_jetRNNlooseHighPt = nullptr;
-    TProfile* m_eff_pt_jetRNNmedHighPt = nullptr;
-    TProfile* m_eff_pt_jetRNNtightHighPt = nullptr;
+  TProfile* m_eff_pt_jetGNTauloose;
+  TProfile* m_eff_pt_jetGNTaumed;
+  TProfile* m_eff_pt_jetGNTautight;
 
-    TProfile* m_eff_jetRNNloose;
-    TProfile* m_eff_jetRNNmed;
-    TProfile* m_eff_jetRNNtight;
+  TProfile* m_eff_pt_jetGNTaulooseHighPt;
+  TProfile* m_eff_pt_jetGNTaumedHighPt;
+  TProfile* m_eff_pt_jetGNTautightHighPt;
 
-  private:
-    void initializePlots();
-    std::string m_sTauJetContainerName;
+
+  TProfile* m_eff_jetGNTauloose;
+  TProfile* m_eff_jetGNTaumed;
+  TProfile* m_eff_jetGNTautight;
+  
+  
+private:
+  void initializePlots();
+  std::string m_sTauJetContainerName;
 };
-
+  
 }
 
 #endif

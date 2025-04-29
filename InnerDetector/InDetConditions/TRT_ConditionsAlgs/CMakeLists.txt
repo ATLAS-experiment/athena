@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TRT_ConditionsAlgs )
 
 # External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( COOL COMPONENTS CoolKernel CoolApplication )
+find_package( CORAL COMPONENTS CoralBase )
 
 # Component(s) in the package:
 atlas_add_component( TRT_ConditionsAlgs

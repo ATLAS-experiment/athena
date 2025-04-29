@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ------------------------------------------------------------
 # Definition of trigger EDM for Run 3
@@ -33,8 +33,8 @@ JetVarsToKeep = ['ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'Active
                  'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
                  'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
                  'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
-                 'Jvt', 'JVFCorr', 'JvtRpt', 'NumTrkPt500', 'NumTrkPt1000', 'SizeParameter', 'SumPtChargedPFOPt500', 'SumPtTrkPt500', 
-                 'SumPtTrkPt1000','Timing','TrackWidthPt1000'
+                 'Jvt', 'NumTrkPt1000', 'SizeParameter', 'SumPtChargedPFOPt500', 'SumPtTrkPt500', 
+                 'Timing','TrackWidthPt1000',
              ]
 JetVars = '.'.join(JetVarsToKeep)
 
@@ -43,7 +43,13 @@ JetCopyVarsToKeep = ['pt', 'eta', 'phi', 'm',
                      'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
                      'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
                      'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
-                     'Jvt', 'JvtRpt','Timing', 'TracksForMinimalJetTag']
+                     'Jvt', 'JvtRpt','Timing', 'TracksForMinimalJetTag',
+                     # additional variables also stored in TLA stream for jet cleaning studies
+                     # stored for calibrated HLT container in the same way as in the TLA streams
+                     "N90Constituents", "LArQuality", "FracSamplingMax", "NegativeE", "HECQuality", "AverageLArQF", "BchCorrCell",
+                     # NN JVT -- TrkAug version
+                     'NNJvt','NNJvtPass', 'RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000',
+                    ]
 
 FastFtagPFlowVarsToKeep = [f'dips20211116_p{x}' for x in 'cub']
 FastFtagPFlowVarsToKeep += [f'fastDIPS20211215_p{x}' for x in 'cub']
@@ -86,6 +92,7 @@ TLAJetVarsToKeep = [
                    'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
                    'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
                    'Jvt', 'JVFCorr', 'JvtRpt',
+                   'NNJvt','NNJvtPass',
                    'SumPtChargedPFOPt500', 'NumTrkPt1000', 'SumPtTrkPt500', 'TrackWidthPt1000', 'N90Constituents',
                    'LArQuality','FracSamplingMax',  'NegativeE', 'Timing', 'HECQuality','AverageLArQF', 'BchCorrCell',
                    ]
@@ -215,6 +222,7 @@ def getTauIDVars(name: str) -> list[str]:
     return [f'{name}_{sfx}' for sfx in ['Score', 'ScoreSigTrans', 'VeryLoose', 'Loose', 'Medium', 'Tight']]
 
 TauJet_vars = []
+TauJet_vars += getTauIDVars('GNTau')
 TauJet_vars_str = '.'.join(TauJet_vars)
 
 TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
@@ -236,9 +244,10 @@ MuRoiVars = '.'.join(MuRoiToKeep)
 varToRemoveFromAODSLIM = [
     ('GhostTrack_ftf', 'HLT_AntiKt4EMTopoJets_nojcalib_ftfAux', 'HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux', 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux'),
     ('TracksForMinimalJetTag', 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux'),
-    ('NumTrkPt500', 'HLT_AntiKt4EMTopoJets_nojcalib_ftfAux', 'HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux'),
-    ('SumPtTrkPt1000', 'HLT_AntiKt4EMTopoJets_nojcalib_ftfAux', 'HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux'),
     ]
+# Detailed NNJvt input variables
+for var in ['RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000']:
+    varToRemoveFromAODSLIM.append((var, 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux', 'HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux'))
 
 
 
@@ -517,10 +526,10 @@ TriggerHLTListRun3 = [
     # Muon
 
     # Id track particles
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Muon_FTF',                 'BS ESD AODFULL', 'Muon', [InViews('L2MuCombRecoViews'), InViews('EFMuCBReco_FSViews')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Muon_FTF',                 'BS ESD AODFULL', 'Muon', [InViews('L2MuCombRecoViews'), InViews('EFMuCBReco_FSViews'), InViews('EFLateMuRecoViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Muon_FTFAux.',          'BS ESD AODFULL', 'Muon'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Muon_IDTrig',                 'BS ESD AODFULL', 'Muon', [InViews('EFMuCBReco_RoIViews'), InViews('EFMuCBReco_FSViews')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Muon_IDTrig',                 'BS ESD AODFULL', 'Muon', [InViews('EFMuCBReco_RoIViews'), InViews('EFMuCBReco_FSViews'), InViews('EFLateMuRecoViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Muon_IDTrigAux.',          'BS ESD AODFULL', 'Muon'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_MuonLRT_IDTrig',                 'BS ESD AODFULL', 'Muon', [InViews('EFMuCBLRTRecoViews')]),
@@ -600,6 +609,9 @@ TriggerHLTListRun3 = [
 
     ('xAOD::MuonContainer#HLT_MuonsCB_FS',                                      'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuCBReco_FSViews')]),
     ('xAOD::MuonAuxContainer#HLT_MuonsCB_FSAux.',                               'BS ESD AODFULL AODSLIM', 'Muon'),
+
+    ('xAOD::MuonContainer#HLT_MuonsCBInsideOut_Late',                           'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFLateMuRecoViews')]),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCBInsideOut_LateAux.',                    'BS ESD AODFULL AODSLIM', 'Muon'),
 
     ('TrigRoiDescriptorCollection#MuonCandidates_FS_ROIs',                      'BS ESD AODFULL', 'Muon'),
 

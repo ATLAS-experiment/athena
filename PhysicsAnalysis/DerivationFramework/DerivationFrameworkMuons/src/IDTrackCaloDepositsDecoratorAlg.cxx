@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkMuons/IDTrackCaloDepositsDecoratorAlg.h"
+#include "IDTrackCaloDepositsDecoratorAlg.h"
 #include "DerivationFrameworkMuons/Utils.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "muonEvent/DepositInCalo.h"

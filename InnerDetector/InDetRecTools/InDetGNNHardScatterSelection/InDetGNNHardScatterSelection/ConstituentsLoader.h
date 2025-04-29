@@ -10,7 +10,7 @@
 #define INDET_CONSTITUENTS_LOADER_H
 
 // local includes
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagInference/SaltModel.h"
 
 // EDM includes
 #include "xAODTracking/Vertex.h"
@@ -39,32 +39,30 @@ namespace InDetGNNHardScatterSelection {
 
     struct InputVariableConfig {
         std::string name;
-        ConstituentsEDMType type;
+        ConstituentsEDMType type{ConstituentsEDMType::CHAR};
     };
 
     struct ConstituentsInputConfig {
         std::string name;
         std::string output_name;
         std::string link_name;
-        ConstituentsType type;
-        ConstituentsSortOrder order;
-        ConstituentsSelection selection;
+        ConstituentsType type{ConstituentsType::IPARTICLE};
+        ConstituentsSortOrder order{ConstituentsSortOrder::PT_DESCENDING};
+        ConstituentsSelection selection{ConstituentsSelection::ALL};
         std::vector<InputVariableConfig> inputs;
     };
 
     ConstituentsInputConfig createConstituentsLoaderConfig(
-      std::string name,
-      std::vector<std::string> input_variables
+      const std::string & name,
+      const std::vector<std::string> & input_variables
     );
 
     // Virtual class to represent loader of any type of constituents
     class IConstituentsLoader {
         public:
-            IConstituentsLoader(ConstituentsInputConfig cfg) {
-              m_config = cfg;
-            };
+            IConstituentsLoader(const ConstituentsInputConfig & cfg):m_config(cfg) { }
             virtual ~IConstituentsLoader() = default;
-            virtual std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> getData(
+            virtual std::tuple<std::string, FlavorTagInference::Inputs, std::vector<const xAOD::IParticle*>> getData(
                 const xAOD::Vertex& vertex) const = 0;
             virtual std::string getName() const = 0;
             virtual ConstituentsType getType() const = 0;

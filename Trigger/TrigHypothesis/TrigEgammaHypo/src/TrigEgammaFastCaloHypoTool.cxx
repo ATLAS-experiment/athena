@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
+#include <format>
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/Combinators.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -28,10 +29,8 @@ TrigEgammaFastCaloHypoTool::~TrigEgammaFastCaloHypoTool(){}
 StatusCode TrigEgammaFastCaloHypoTool::initialize()  {
 
 
-  ATH_MSG_DEBUG( "Name: " << name() << " UseRinger: " << m_useRinger);
-  
-
-  ATH_MSG_DEBUG( "AcceptAll      = " << ( m_acceptAll==true ? "True" : "False" ) ); 
+  ATH_MSG_DEBUG( "UseRinger      = " << m_useRinger);
+  ATH_MSG_DEBUG( "AcceptAll      = " << std::format("{}", m_acceptAll.value()) );
   ATH_MSG_DEBUG( "EtaBins        = " << m_etabin      );
   ATH_MSG_DEBUG( "ETthr          = " << m_eTthr    << "( lo )/" << m_eT2thr    << "( hi )" );  
   ATH_MSG_DEBUG( "HADETthr       = " << m_hadeTthr << "( lo )/" << m_hadeT2thr << "( hi )" );
@@ -43,34 +42,26 @@ StatusCode TrigEgammaFastCaloHypoTool::initialize()  {
   ATH_MSG_DEBUG( "WSTOTthr       = " << m_WSTOTthr    );
   ATH_MSG_DEBUG( "F3thr          = " << m_F3thr       );
   
-  if ( m_etabin.size() == 0 ) {
-    ATH_MSG_ERROR(  " There are no cuts set (EtaBins property is an empty list)" );
+  if ( m_etabin.empty() ) {
+    ATH_MSG_ERROR( "There are no cuts set (EtaBins property is an empty list)" );
     return StatusCode::FAILURE;
   }
 
-  unsigned int nEtaBin = m_etabin.size();
-  #define CHECK_SIZE( __n) if ( m_##__n.size() !=  (nEtaBin - 1) )		\
-      { ATH_MSG_DEBUG(" __n size is " << m_##__n.size() << " but needs to be " << (nEtaBin - 1) ); return StatusCode::FAILURE; }
-  
-    CHECK_SIZE( eTthr );
-    CHECK_SIZE( eT2thr );
-    CHECK_SIZE( hadeTthr );
-    CHECK_SIZE( hadeT2thr );
-    CHECK_SIZE( carcorethr );
-    CHECK_SIZE( caeratiothr );
-    CHECK_SIZE( WETA2thr );
-    CHECK_SIZE( WSTOTthr ); 
-    CHECK_SIZE( F3thr );
-  #undef CHECK_SIZE
+  ATH_CHECK( m_eTthr.size() == m_etabin.size()-1 );
+  ATH_CHECK( m_eT2thr.size() == m_etabin.size()-1 );
+  ATH_CHECK( m_hadeTthr.size() == m_etabin.size()-1 );
+  ATH_CHECK( m_hadeT2thr.size() == m_etabin.size()-1 );
+  ATH_CHECK( m_carcorethr.size() == m_etabin.size()-1 );
+  ATH_CHECK( m_caeratiothr.size() == m_etabin.size()-1 );
+  ATH_CHECK( m_WETA2thr.size() == m_etabin.size()-1 );
+  ATH_CHECK( m_WSTOTthr.size() == m_etabin.size()-1 );
+  ATH_CHECK( m_F3thr.size() == m_etabin.size()-1 );
 
   ATH_MSG_DEBUG( "Tool configured for chain/id: " << m_decisionId );
 
-  if ( not m_monTool.name().empty() ) 
+  if ( not m_monTool.name().empty() ) {
     CHECK( m_monTool.retrieve() );
-  
-
-
-  ATH_MSG_DEBUG( "Initialization completed successfully"   );   
+  }
 
   return StatusCode::SUCCESS;
 }

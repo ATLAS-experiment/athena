@@ -1,17 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDOTOPREPDATA_RPCRDOTOPREPDATATOOLMT_H
 #define MUONRDOTOPREPDATA_RPCRDOTOPREPDATATOOLMT_H
 
 #include <set>
-#include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "MuonCablingData/MuonNRPC_CablingMap.h"
+#include "MuonCablingData/RpcCablingMap.h"
 #include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
 #include "MuonCondData/RpcCondDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -25,7 +22,6 @@
 #include "MuonTrigCoinData/RpcCoinDataContainer.h"
 #include "RPC_CondCabling/RpcCablingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "xAODEventInfo/EventInfo.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
 #include "xAODMuonRDO/NRPCRDOContainer.h"
 namespace Muon {
@@ -35,9 +31,7 @@ namespace Muon {
 class RpcRdoToPrepDataToolMT
     : public extends<AthAlgTool, IMuonRdoToPrepDataTool> {
  public:
-  RpcRdoToPrepDataToolMT(const std::string&, const std::string&,
-                         const IInterface*);
-
+ using base_class::base_class;
   // setup/teardown functions, similar like those for Algorithm/Service
   virtual StatusCode initialize() override;
 
@@ -52,19 +46,19 @@ class RpcRdoToPrepDataToolMT
    struct State {
         State(const IMuonIdHelperSvc* idHelperSvc);
 
-        Muon::RpcPrepDataCollection* getPrepCollection(const Identifier& id);
-        Muon::RpcCoinDataCollection* getCoinCollection(const Identifier& id);
+        RpcPrepDataCollection* getPrepCollection(const Identifier& id);
+        RpcCoinDataCollection* getCoinCollection(const Identifier& id);
         
         
         const IMuonIdHelperSvc* m_idHelperSvc{nullptr};
 
-        std::vector<std::unique_ptr<Muon::RpcPrepDataCollection>> rpcPrepDataCollections{};
-        std::vector<std::unique_ptr<Muon::RpcCoinDataCollection>> rpcCoinDataCollections{};
+        std::vector<std::unique_ptr<RpcPrepDataCollection>> rpcPrepDataCollections{};
+        std::vector<std::unique_ptr<RpcCoinDataCollection>> rpcCoinDataCollections{};
 
         /// Pointer of the prep container stored in store gate
-        std::unique_ptr<Muon::RpcPrepDataContainer> prepDataCont{nullptr};
+        std::unique_ptr<RpcPrepDataContainer> prepDataCont{nullptr};
         /// Pointer of the coin container stored in store gate
-        std::unique_ptr<Muon::RpcCoinDataContainer> coinDataCont{nullptr};
+        std::unique_ptr<RpcCoinDataContainer> coinDataCont{nullptr};
 
 
         // keepTrackOfFullEventDecoding
@@ -91,8 +85,8 @@ class RpcRdoToPrepDataToolMT
   /// Load the hashes of the processed chambers
   StatusCode loadProcessedChambers(const EventContext& ctx, State& state) const;
 
-  void printMTPrepData(const Muon::RpcPrepDataContainer& prepData) const;
-  void printMTCoinData(const Muon::RpcCoinDataContainer& prepData) const;
+  void printMTPrepData(const RpcPrepDataContainer& prepData) const;
+  void printMTCoinData(const RpcCoinDataContainer& prepData) const;
 
   // decoding method
   StatusCode decodeImpl(const EventContext& ctx, State& state,
@@ -138,22 +132,22 @@ class RpcRdoToPrepDataToolMT
   Gaudi::Property<bool> m_decodeData{
       this, "DecodeData",
       true};  //!< toggle on/off the decoding of RPC RDO into RpcPerpData
-  Gaudi::Property<bool> m_RPCInfoFromDb{
-      this, "RPCInfoFromDb", false};  //!< correct time prd from cool db
-  // end of configurable options
+  Gaudi::Property<bool> m_RPCInfoFromDb{this, "RPCInfoFromDb", false};  //!< correct time prd from cool db
+
+  Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey{
       this, "DetectorManagerKey", "MuonDetectorManager",
       "Key of input MuonDetectorManager condition data"};
 
-  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
+  ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc{
       this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
   /// RpcPrepData containers
-  SG::WriteHandleKey<Muon::RpcPrepDataContainer> m_rpcPrepDataContainerKey{
+  SG::WriteHandleKey<RpcPrepDataContainer> m_rpcPrepDataContainerKey{
       this, "OutputCollection", "RPC_Measurements"};
   /// RpcCoinData containers
-  SG::WriteHandleKey<Muon::RpcCoinDataContainer> m_rpcCoinDataContainerKey{
+  SG::WriteHandleKey<RpcCoinDataContainer> m_rpcCoinDataContainerKey{
       this, "TriggerOutputCollection", "RPC_triggerHits"};
 
   SG::ReadHandleKey<RpcPadContainer> m_rdoContainerKey{this, "RDOContainer",
@@ -163,18 +157,15 @@ class RpcRdoToPrepDataToolMT
       this, "NrpcInputCollection", "NRPCRDO"};
 
   // Rob Data Provider handle
-  ToolHandle<Muon::IRPC_RDO_Decoder> m_rpcRdoDecoderTool{
+  ToolHandle<IRPC_RDO_Decoder> m_rpcRdoDecoderTool{
       this, "RdoDecoderTool", "Muon::RpcRDO_Decoder"};
 
   SG::ReadCondHandleKey<RpcCondDbData> m_readKey{
       this, "ReadKey", "RpcCondDbData", "Key of RpcCondDbData"};
   SG::ReadCondHandleKey<RpcCablingCondData> m_rpcReadKey{
       this, "RpcCablingKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
-  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName",
-                                                 "EventInfo", "event info key"};
-  SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_nRpcCablingKey{
-      this, "NrpcCablingKey", "MuonNRPC_CablingMap",
-      "Key of MuonNRPC_CablingMap"};
+  SG::ReadCondHandleKey<RpcCablingMap> m_nRpcCablingKey{this, "NrpcCablingKey","MuonNRPC_CablingMap",
+                                                         "Key of MuonNRPC_CablingMap"};
 
   /// This is the key for the cache for the MDT PRD containers, can be empty
   SG::UpdateHandleKey<RpcPrepDataCollection_Cache> m_prdContainerCacheKey{

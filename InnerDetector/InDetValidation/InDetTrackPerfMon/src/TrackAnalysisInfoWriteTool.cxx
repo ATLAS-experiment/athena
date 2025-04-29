@@ -33,7 +33,7 @@ IDTPM::TrackAnalysisInfoWriteTool::TrackAnalysisInfoWriteTool(
 ///--------------------------
 StatusCode IDTPM::TrackAnalysisInfoWriteTool::initialize()
 {
-  ATH_MSG_INFO( "Initializing " << name() );
+  ATH_MSG_DEBUG( "Initializing " << name() );
 
   ATH_CHECK( asg::AsgTool::initialize() );
 
@@ -76,7 +76,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
   wh->push_back( std::make_unique< SG::AuxElement >() );
 
   /// Filling Trigger navigation info
-  if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
+  if( m_trkAnaDefSvc->doTrigNavigation() ) {
     chainAcc( *(wh->back()) ) = chain;
     roiIdxAcc( *(wh->back()) ) = roiIdx;
     roiStrAcc( *(wh->back()) ) = roiStr;

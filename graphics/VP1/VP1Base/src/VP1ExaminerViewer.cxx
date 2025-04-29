@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -902,7 +902,7 @@ void VP1ExaminerViewer::restoreFromState(QByteArray ba_state)
 		state >> ba;
 		if (ba!=QByteArray()) {
 			if (!m_d->customtoureditor)
-				m_d->customtoureditorState = ba;
+				m_d->customtoureditorState = std::move(ba);
 			else
 				m_d->customtoureditor->setState(ba);
 		}

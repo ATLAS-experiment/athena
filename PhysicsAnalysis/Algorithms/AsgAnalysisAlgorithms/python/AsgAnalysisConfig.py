@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -409,6 +409,9 @@ class ObjectCutFlowBlock (ConfigBlock):
             "performed for every object within the container. Specifying a "
             "name (e.g. loose) generates the cutflow only for those object "
             "that also pass that selection.")
+        self.addOption ('forceCutSequence', False, type=bool,
+            info="whether to force the cut sequence and not accept objects "
+            "if previous cuts failed. The default is False.")
 
     def makeAlgs (self, config) :
 
@@ -417,6 +420,7 @@ class ObjectCutFlowBlock (ConfigBlock):
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
         alg.histTitle = "Object Cutflow: " + self.containerName + "." + self.selectionName
+        alg.forceCutSequence = self.forceCutSequence
 
 
 class EventCutFlowBlock (ConfigBlock):
@@ -512,6 +516,7 @@ class OutputThinningBlock (ConfigBlock):
             alg.preselection = selection
             alg.particles = config.readName (self.containerName)
             alg.selectionDecoration = 'outputSelect' + postfix
+            config.addSelection (self.containerName, alg.selectionDecoration, selection)
             selection = 'outputSelect' + postfix
 
         alg = config.createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'DeepCopyAlg' + self.containerName + postfix )
@@ -545,11 +550,10 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         self.addOption ('decoration', 'IFFClass_%SYS%', type=str,
             info="the name (str) of the decoration set by the IFF "
             "TruthClassificationTool. The default is 'IFFClass_%SYS%'.")
+        # Always skip on data
+        self.setOptionValue('skipOnData', True)
 
     def makeAlgs (self, config) :
-        # the classification is only for MC
-        if config.dataType() is DataType.Data: return
-
         particles = config.readName(self.containerName)
 
         alg = config.createAlgorithm( 'CP::AsgClassificationDecorationAlg', 'IFFClassifierAlg' + self.containerName )
@@ -562,6 +566,34 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 
         # write the decoration only once to the output
         config.addOutputVar(self.containerName, alg.decoration, alg.decoration.split("_%SYS%")[0], noSys=True)
+
+
+class MCTCLeptonDecorationBlock (ConfigBlock):
+
+    def __init__ (self, containerName="") :
+        super (MCTCLeptonDecorationBlock, self).__init__ ()
+
+        self.addOption ("containerName", containerName, type=str,
+                        noneAction='error',
+                        info="the input lepton container, with a possible selection, "
+                        "in the format container or container.selection.")
+        self.addOption ("prefix", 'MCTC_', type=str,
+                        info="the prefix (str) of the decorations based on the MCTC "
+                        "classification. The default is 'MCTC_'.")
+        # Always skip on data
+        self.setOptionValue('skipOnData', True)
+
+    def makeAlgs (self, config) :
+        particles, selection = config.readNameAndSelection(self.containerName)
+
+        alg = config.createAlgorithm ("CP::MCTCDecorationAlg", f"MCTCDecorationAlg{self.containerName}")
+        alg.particles = particles
+        alg.preselection = selection
+        alg.affectingSystematicsFilter = '.*'
+        config.addOutputVar (self.containerName, "MCTC_isPrompt", f"{self.prefix}isPrompt", noSys=True)
+        config.addOutputVar (self.containerName, "MCTC_fromHadron", f"{self.prefix}fromHadron", noSys=True)
+        config.addOutputVar (self.containerName, "MCTC_fromBSM", f"{self.prefix}fromBSM", noSys=True)
+        config.addOutputVar (self.containerName, "MCTC_fromTau", f"{self.prefix}fromTau", noSys=True)
 
 
 class PerEventSFBlock (ConfigBlock):
@@ -624,90 +656,18 @@ class SelectionDecorationBlock (ConfigBlock):
                 config.addOutputVar(
                     originContainerName, selectionDecoration, selectionName)
 
-
-def makeCommonServicesConfig( seq ):
-    """Create the common services config"""
-
-    seq.append (CommonServicesConfig ())
-
-
-
-def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfig=None, userLumicalcFiles=None, userPileupConfigs=None ):
-    """Create a PRW analysis config
-
-    Keyword arguments:
-    """
-    # TO DO: add explanation of the keyword arguments, left to experts
-
-    config = PileupReweightingBlock ()
-    config.setOptionValue ('campaign', campaign)
-    config.setOptionValue ('files', files)
-    config.setOptionValue ('useDefaultConfig', useDefaultConfig)
-    config.setOptionValue ('userLumicalcFiles', userLumicalcFiles)
-    config.setOptionValue ('userPileupConfigs', userPileupConfigs)
-    seq.append (config)
-
-
-
-def makeGeneratorAnalysisConfig( seq,
-                                 saveCutBookkeepers=None,
-                                 runNumber=None,
-                                 cutBookkeepersSystematics=None ):
-    """Create a generator analysis algorithm sequence
-
-    Keyword arguments:
-      saveCutBookkeepers -- save cut bokkeepers information into output file
-      runNumber -- MC run number
-      cutBookkeepersSystematics -- store CutBookkeepers systematics
-    """
-
-    config = GeneratorAnalysisBlock ()
-    config.setOptionValue ('saveCutBookkeepers', saveCutBookkeepers)
-    config.setOptionValue ('runNumber', runNumber)
-    config.setOptionValue ('cutBookkeepersSystematics', cutBookkeepersSystematics)
-    seq.append (config)
-
-
-
-def makeEventCutFlowConfig( seq, containerName,
-                              *, postfix = None, selectionName, customSelections = None):
+def makeEventCutFlowConfig(seq, containerName,
+                            *, postfix=None, selectionName, customSelections=None):
     """Create an event-level cutflow config
 
     Keyword arguments:
-      containerName -- name of the container
-      postfix -- a postfix to apply to decorations and algorithm names.
-      selectionName -- the name of the selection to do the cutflow for
-      customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
+    containerName -- name of the container
+    postfix -- a postfix to apply to decorations and algorithm names.
+    selectionName -- the name of the selection to do the cutflow for
+    customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
     """
 
-    config = EventCutFlowBlock (containerName, selectionName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('customSelections', customSelections)
-    seq.append (config)
-
-
-def makeOutputThinningConfig( seq, containerName,
-                              *, postfix = None, selection = None, selectionName = None, outputName = None, configName='Thinning'):
-    """Create an output thinning config
-
-    This will do a consistent selection of output containers (if there
-    is a preselection or a selection specified) and then creates a set
-    of view containers (or deep copies) based on that selection.
-
-    Keyword arguments:
-      containerName -- name of the container
-      postfix -- a postfix to apply to decorations and algorithm
-                 names.  this is mostly used/needed when using this
-                 sequence with multiple working points to ensure all
-                 names are unique.
-      selection -- the name of an optional selection decoration to use
-      outputName -- an optional name for the output container
-
-    """
-
-    config = OutputThinningBlock (containerName, configName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('selection', selection)
-    config.setOptionValue ('selectionName', selectionName)
-    config.setOptionValue ('outputName', outputName)
-    seq.append (config)
+    config = EventCutFlowBlock(containerName, selectionName)
+    config.setOptionValue('postfix', postfix)
+    config.setOptionValue('customSelections', customSelections)
+    seq.append(config)

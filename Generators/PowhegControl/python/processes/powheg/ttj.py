@@ -3,7 +3,6 @@
 from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 from ..external import ExternalMadSpin
-import os
 
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
@@ -40,12 +39,6 @@ class ttj(PowhegV2):
         @param kwargs          dictionary of arguments from Generate_tf.
         """
         super(ttj, self).__init__(base_directory, "ttbarj", **kwargs)
-
-        # hack in place to help powheg executable find all dynamic libraries
-        logger.warning("Applying manual, hard-coded fixes for library paths")
-        OLPath = os.path.dirname(self.executable)+"/obj-gnu"
-        os.environ['OpenLoopsPath'] = OLPath
-        logger.info("OpenLoopsPath defined as = {0}".format(os.getenv('OpenLoopsPath')))
 
         # Add algorithms to the sequence
         self.add_algorithm(ExternalMadSpin(process="generate p p > t t~ j [QCD]"))
@@ -189,6 +182,6 @@ class ttj(PowhegV2):
             self.externals["MadSpin"].parameters_by_keyword("MadSpin_nFlavours")[0].value = 5
 
         self.parameters_by_keyword("topdecaymode")[0].value = _decay_mode_lookup[self.decay_mode]
-        if self.decay_mode == "semileptonic":
+        if self.decay_mode == "t t~ > semileptonic":
             # Parameter semileptonic must be set to 1 to actually get semileptonic decays, because the topdecaymode=11111 also allows fully hadronic decays (with one up and one charm quark)
             self.parameters_by_keyword("semileptonic")[0].value = 1

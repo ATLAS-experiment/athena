@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -136,7 +136,7 @@ execute( const std::string& name, const TObject& data, const dqm_core::Algorithm
   }
   
   dqm_core::Result* result = new dqm_core::Result( status );
-  result->tags_ = tags;
+  result->tags_ = std::move(tags);
   if (!returnObjs->IsEmpty()) {
     result->object_.reset(returnObjs.release());
   }

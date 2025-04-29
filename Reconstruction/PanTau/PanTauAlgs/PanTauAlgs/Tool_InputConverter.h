@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_INPUTCONVERTER_H
@@ -11,6 +11,7 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "PanTauAlgs/ITool_InformationStore.h"
 #include "PanTauAlgs/ITool_InputConverter.h"
@@ -48,13 +49,12 @@ namespace PanTau {
     protected:
         
         //member variables 
-        ToolHandle<PanTau::ITool_InformationStore>   m_Tool_InformationStore;
-	std::string m_Tool_InformationStoreName;//optional
+        ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore","Link to tool with all information"};
+        Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "", "Optional Name for InformationStore instance in ABR"};
         
         virtual bool passesPreselectionEnergy(double energy) const;
         
         int     m_Config_UsePionMass = 0;
-        int     m_Config_TauConstituents_UseShrinkingCone = 0;
         
         double  m_Config_TauConstituents_Types_DeltaRCore = 0.0;
         double  m_Config_TauConstituents_PreselectionMinEnergy = 0.0;

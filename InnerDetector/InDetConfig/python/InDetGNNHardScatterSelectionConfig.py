@@ -5,6 +5,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+from TrkConfig.VertexFindingFlags import VertexSortingSetup
 # Overlap removal configurations
 
 def AsgPtEtaSelectionToolCfg(flags, name="AsgPtEtaSelectionTool", **kwargs):
@@ -59,7 +60,17 @@ def GNNHSOverlapRemovalToolCfg(flags, name="GNNHS_OverlapRemovalToolCfg", **kwar
     kwargs.setdefault("EleEleORT", CompFactory.ORUtils.EleEleOverlapTool(**subtool_kwargs))
     kwargs.setdefault("EleMuORT", CompFactory.ORUtils.EleMuSharedTrkOverlapTool(**subtool_kwargs))
     kwargs.setdefault("EleJetORT", CompFactory.ORUtils.EleJetOverlapTool(**subtool_kwargs))
-    kwargs.setdefault("MuJetORT", CompFactory.ORUtils.MuJetOverlapTool(**subtool_kwargs))
+    kwargs.setdefault(
+        "MuJetORT",
+        CompFactory.ORUtils.MuJetOverlapTool(
+            PVContainerName=(
+                "PrimaryVertices_initial" 
+                if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting 
+                else "PrimaryVertices"
+            ),
+            **subtool_kwargs
+        )
+    )
     kwargs.setdefault("PhoEleORT", CompFactory.ORUtils.DeltaROverlapTool(**subtool_kwargs))
     kwargs.setdefault("PhoMuORT", CompFactory.ORUtils.DeltaROverlapTool(**subtool_kwargs))
     kwargs.setdefault("PhoJetORT", CompFactory.ORUtils.DeltaROverlapTool(**subtool_kwargs))
@@ -111,9 +122,22 @@ def GNNHSVertexDecoratorAlgCfg(flags, name="GNNHS_VertexDecoratorAlg", **kwargs)
                        nnFile="InDetGNNHardScatterSelection/v0/HSGN2_export_090824.onnx")))
 
     if "TrackVertexAssociationTool" not in kwargs:
-       from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
-       kwargs.setdefault("TrackVertexAssociationTool", cfg.popToolsAndMerge(
-          TTVAToolCfg(flags, "TrackVertexAssociationTool_GNNHS")))
+        from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
+        kwargs.setdefault(
+            "TrackVertexAssociationTool",
+            cfg.popToolsAndMerge(
+                TTVAToolCfg(
+                    flags,
+                    "TrackVertexAssociationTool_GNNHS",
+                    VertexContName=(
+                        "PrimaryVertices_initial" 
+                        if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting 
+                        else "PrimaryVertices"
+                    ),
+                )
+            ),
+        )
+
 
     cfg.addEventAlgo(
         CompFactory.InDetGNNHardScatterSelection.VertexDecoratorAlg(name, **kwargs))
@@ -121,7 +145,7 @@ def GNNHSVertexDecoratorAlgCfg(flags, name="GNNHS_VertexDecoratorAlg", **kwargs)
         
 
 # Global Sequence
-def GNNSequenceCfg(flags):
+def GNNSequenceCfg(flags, **kwargs):
     cfg = ComponentAccumulator()
 
     sysSvc = CompFactory.CP.SystematicsSvc("SystematicsSvc")
@@ -130,7 +154,11 @@ def GNNSequenceCfg(flags):
     cfg.addService(selectionSvc)
 
     inputCollections = {
-        "jets": "AntiKt4EMTopoJets",
+        "jets": (
+            "AntiKt4EMTopoCustomVtxGNNJets" 
+            if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting 
+            else "AntiKt4EMTopoJets"
+        ),
         "electrons": "Electrons",
         "muons": "Muons",
         "photons": "Photons",
@@ -161,12 +189,20 @@ def GNNSequenceCfg(flags):
     cfg.merge(GNNHSOverlapRemovalAlgCfg(flags, overlapInputNames = inputCollections,
                                         overlapOutputNames = overlapOutputNames))
 
-    cfg.merge(GNNHSVertexDecoratorAlgCfg(
-        flags, 
-        electronsIn=overlapOutputNames["electrons"],
-        muonsIn=overlapOutputNames["muons"],
-        photonsIn=overlapOutputNames["photons"],
-        jetsIn=overlapOutputNames["jets"]))
+    cfg.merge(
+        GNNHSVertexDecoratorAlgCfg(
+            flags,
+            vertexIn=(
+                "PrimaryVertices_initial" 
+                if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting 
+                else "PrimaryVertices"
+            ),
+            electronsIn=overlapOutputNames["electrons"],
+            muonsIn=overlapOutputNames["muons"],
+            photonsIn=overlapOutputNames["photons"],
+            jetsIn=overlapOutputNames["jets"],
+        )
+    )
 
     return cfg
 

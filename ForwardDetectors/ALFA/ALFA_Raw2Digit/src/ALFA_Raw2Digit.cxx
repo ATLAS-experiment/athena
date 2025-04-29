@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Raw2Digit/ALFA_Raw2Digit.h"
@@ -10,12 +10,10 @@
 #include <stdexcept>
 
 ALFA_Raw2Digit::ALFA_Raw2Digit(const std::string& name, ISvcLocator* pSvcLocator) 
-: AthAlgorithm(name, pSvcLocator)
+  : AthAlgorithm(name, pSvcLocator),
+    m_key_DigitCollection("ALFA_DigitCollection"),
+    m_key_ODDigitCollection("ALFA_ODDigitCollection")
 {
-
-	m_key_DigitCollection  = "ALFA_DigitCollection";
-	m_key_ODDigitCollection  = "ALFA_ODDigitCollection";
-
 	declareProperty("ALFA_RawDataCollectionKey", m_ALFA_RawDataCollectionKey = "ALFA_RawData");
 
 	//allowed values (m_strMeasuredDataType="testbeam", "tunnel"), default value is "tunnel"
@@ -553,7 +551,7 @@ StatusCode ALFA_Raw2Digit::mapping()
 		msg(MSG::DEBUG) << "file name " << m_mapname.c_str() << endmsg;
 		
 		// ************
-		std::string filePath = PathResolver::find_file(m_mapname.c_str(),"DATAPATH", PathResolver::RecursiveSearch);
+		std::string filePath = PathResolver::find_file(m_mapname,"DATAPATH", PathResolver::RecursiveSearch);
 		if(filePath.length() == 0)
 		{
 			msg(MSG::FATAL) << " the mapping file MD maroc-mapmt \"" <<  m_mapname.c_str() << "\" not found in Datapath." << endmsg;
@@ -618,7 +616,7 @@ StatusCode ALFA_Raw2Digit::mapping()
 		msg(MSG::DEBUG) << "file name " << m_mapname.c_str() << endmsg;
 		
 		// ************
-		filePath = PathResolver::find_file(m_mapname.c_str(),"DATAPATH", PathResolver::RecursiveSearch);
+		filePath = PathResolver::find_file(m_mapname,"DATAPATH", PathResolver::RecursiveSearch);
 		if(filePath.length() == 0)
 		{
 			msg(MSG::FATAL) << " the mapping file PMF_LAYER_MD \"" <<  m_mapname.c_str() << "\" not found in Datapath." << endmsg;
@@ -664,7 +662,7 @@ StatusCode ALFA_Raw2Digit::mapping()
 		msg(MSG::DEBUG) << "file name " << m_mapname.c_str() << endmsg;
 
 		// ************
-		filePath = PathResolver::find_file(m_mapname.c_str(),"DATAPATH", PathResolver::RecursiveSearch);
+		filePath = PathResolver::find_file(m_mapname,"DATAPATH", PathResolver::RecursiveSearch);
 		if(filePath.length() == 0)
 		{
 			msg(MSG::FATAL) << " the mapping file OD_MAP \"" <<  m_mapname.c_str() << "\" not found in Datapath." << endmsg;

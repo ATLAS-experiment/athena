@@ -152,6 +152,12 @@ class GlobalChiSquareFitterTool
       const DetectorElementToActsGeometryIdMap& detectorElementToGeometryIdMap)
       const override;
 
+
+  virtual StatusCode fit(
+    const EventContext& ctx,
+        const ActsTrk::TrackContainer::ConstTrackProxy& track,          
+    ActsTrk::MutableTrackContainer& trackContainer) const override;
+
   ///////////////////////////////////////////////////////////////////
   // Private methods:
   ///////////////////////////////////////////////////////////////////

@@ -50,7 +50,6 @@ PoolSvc              INFO POOL WriteCatalog is xmlcatalog_file:PoolFileCatalog.x
 DbSession            INFO     Open     DbSession    
 Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
 MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray(['IOVDbMetaDataTool'])
-EventSelector        INFO EventSelection with query 
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 Warning in <TClass::Init>: no dictionary for class CosmicMuonCollection_tlp1 is available
 Warning in <TClass::Init>: no dictionary for class MdtTrackSegmentCollection_p2 is available
@@ -170,7 +169,6 @@ IdDictDetDescrCnv    INFO Dictionary LArHighVoltage       version fullAtlas     
 IdDictDetDescrCnv    INFO Dictionary MuonSpectrometer     version R.01                 DetDescr tag MuonIdentifier-02         file IdDictParser/IdDictMuonSpectrometer_R.01.xml
 IdDictDetDescrCnv    INFO Dictionary TileCalorimeter      version fullAtlasAndTestBeam DetDescr tag TileIdentifier-00         file IdDictParser/IdDictTileCalorimeter.xml
 PixelID              INFO Initialize from dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 indet 1 2,4,5,7,10,11,12,13 7 1fffffffffffffff 61 3 0 min/max 2 13 values  2 4 5 7 10 11 12 13 indexes  0 0 1 2 0 3 0 0 4 5 6 7 indices  8 prev  0 next  0 mode  enumerated  cont mode  none  
 pixel 1 1:3 3 e7ffffffffffffff 59 2 3 min/max 1 3 values  indexes  indices  3 prev  0 next  0 mode  both_bounded  cont mode  none  
 bec 1 -2,0,2 3 f9ffffffffffffff 57 2 5 min/max -2 2 values  -2 0 2 indexes  0 0 1 0 2 indices  3 prev  0 next  0 mode  enumerated  cont mode  none  
@@ -234,7 +232,6 @@ GeoModelSvc.SCT...   INFO Building SCT with Version Tag: ATLAS-R1-2012-03-02-00 
 GeoModelSvc.SCT...   INFO SCT Version: SCT-GEO-01  Package Version: SCT_GeoModel-00-00-00
 SCT_IDDetDescrCnv    INFO in createObj: creating a SCT_ID helper object in the detector store
 SCT_ID               INFO Initialize from dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 indet 1 2,4,5,7,10,11,12,13 7 1fffffffffffffff 61 3 0
 sct1 1:3 3 e7ffffffffffffff 59 2 3
 bec1 -2,0,2 3 f9ffffffffffffff 57 2 5
@@ -289,7 +286,6 @@ TRT_GeoModel      WARNING Tool setup will force to NOT to use ARGON. Ignore this
 TRT_GeoModel      WARNING Tool setup will force to NOT to use KRYPTON. Ignore this warning if you are running RECONSTRUCTION or DIGI, but cross-check if you are running SIMULATION
 TRT_IDDetDescrCnv    INFO in createObj: creating a TRT_ID helper object in the detector store
 TRT_ID               INFO Initialize from dictionary msgSvc 0x559497ccb9f8
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TRT_GeoModel         INFO In TRT Detector Factory (For DC2 and later geometries)
 TRT_GeoModel         INFO  Version: TRT-GEO-00, Name: DC3, Layout: Initial, Code Version: 4.01.01, Description: DC3 Geometry
 TRTDetectorManager   INFO Registering alignment channel with key /TRT/Align/TRT, level 3, with frame global.

@@ -10,6 +10,9 @@ MdtCalibDataContainer::MdtCalibDataContainer(const Muon::IMuonIdHelperSvc* idHel
         m_idHelperSvc{idHelperSvc},
         m_granularity{granularity} {
 }
+void MdtCalibDataContainer::setInversePropSpeed(const float speed) {m_invPropSpeed = speed; }
+float MdtCalibDataContainer::inversePropSpeed() const { return m_invPropSpeed; }
+
 MdtCalibDataContainer::RegionGranularity MdtCalibDataContainer::granularity() const { return m_granularity; }
 inline std::optional<unsigned int>  MdtCalibDataContainer::containerIndex(const Identifier& measId, MsgStream& msg) const {
      IdentifierHash hash{0};
@@ -50,15 +53,20 @@ bool MdtCalibDataContainer::storeData(const Identifier& mlID, CorrectionPtr corr
     /// Check for a valid index
     std::optional<unsigned int> index = containerIndex(mlID, msg);
     if (!index) return false;
+    if (!corrFuncSet) {
+        msg << MSG::ERROR<<__FILE__<<":"<<__LINE__<<" No correction functional set parsed for multilayer "
+            <<m_idHelperSvc->toString(mlID) << endmsg;
+        return false;
+    }
     /// Resize the container if neccessary
     if (m_dataCache.size() <= (*index)) m_dataCache.resize(*index + 1);
     MdtFullCalibData& cache = m_dataCache[*index];
-    if (cache.corrections) {
+    if (cache.corrections && cache.corrections != corrFuncSet) {
         msg << MSG::ERROR<<__FILE__<<":"<<__LINE__<<" There already exist a rt relation object for multilayer "
             <<m_idHelperSvc->toString(mlID) << endmsg;
         return false;
     }
-    cache.corrections = corrFuncSet;
+    cache.corrections = std::move(corrFuncSet);
     
     if (msg.level() <= MSG::DEBUG) {
          msg << MSG::DEBUG<<__FILE__<<":"<<__LINE__<<" Added successfully the rt corrections for "
@@ -70,15 +78,20 @@ bool MdtCalibDataContainer::storeData(const Identifier& mlID, RtRelationPtr rtRe
     /// Check for a valid index
     std::optional<unsigned int> index = containerIndex(mlID, msg);
     if (!index) return false;
+    if (!rtRelation) {
+        msg << MSG::ERROR<<__FILE__<<":"<<__LINE__<<" No rt relation parsed for multilayer "
+            <<m_idHelperSvc->toString(mlID) << endmsg;
+        return false;
+    }
     /// Resize the container if neccessary
     if (m_dataCache.size() <= (*index)) m_dataCache.resize(*index + 1);
     MdtFullCalibData& cache = m_dataCache[*index];
-    if (cache.rtRelation) {
+    if (cache.rtRelation && cache.rtRelation != rtRelation) {
         msg << MSG::ERROR<<__FILE__<<":"<<__LINE__<<" There already exist a rt relation object for multilayer "
             <<m_idHelperSvc->toString(mlID) << endmsg;
         return false;
     }
-    cache.rtRelation = rtRelation;
+    cache.rtRelation = std::move(rtRelation);
 
     if (msg.level() <= MSG::DEBUG) {
          msg << MSG::DEBUG<<__FILE__<<":"<<__LINE__<<" Added successfully the rt relations for "
@@ -90,10 +103,16 @@ bool MdtCalibDataContainer::storeData(const Identifier& mlID, TubeContainerPtr t
     /// Check for a valid index
     std::optional<unsigned int> index = containerIndex(mlID, msg);
     if (!index) return false;
+    if (!tubeContainer) {
+        msg << MSG::ERROR<<__FILE__<<":"<<__LINE__<<" No tube ontainer parsed for multilayer "
+            <<m_idHelperSvc->toString(mlID) << endmsg;
+        return false;
+    }
+
     /// Resize the container if neccessary
     if (m_dataCache.size() <= (*index)) m_dataCache.resize(*index + 1);
     MdtFullCalibData& cache = m_dataCache[*index];
-    if (cache.tubeCalib) {
+    if (cache.tubeCalib && cache.tubeCalib != tubeContainer) {
         msg << MSG::ERROR<<__FILE__<<":"<<__LINE__<<" There already exist a tube calibration container for multilayer "
             <<m_idHelperSvc->toString(mlID) << endmsg;
         return false;

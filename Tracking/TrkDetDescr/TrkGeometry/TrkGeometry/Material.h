@@ -17,6 +17,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <memory>
 
 namespace Trk {
 
@@ -219,7 +220,7 @@ class Material {
   }
 
   /** scaling method */
-  Material* scale(float sf) const;
+  std::unique_ptr<Material> scale(float sf) const;
 
   /** access to members */
   float zOverAtimesRho() const { return (*this).zOaTr; }
@@ -236,12 +237,12 @@ class Material {
   }
 };
 
-inline Material* Material::scale(float sf) const {
+inline std::unique_ptr<Material> Material::scale(float sf) const {
   // Tell clang to optimize assuming that FP exceptions can trap.
   // Otherwise, it can vectorize the division, which can lead to
   // spurious division-by-zero traps from unused vector lanes.
   CXXUTILS_TRAPPING_FP;
-  return new Material(X0 / sf, L0 / sf, sf * A, sf * Z, sf * rho);
+  return std::make_unique<Material>(X0 / sf, L0 / sf, sf * A, sf * Z, sf * rho);
 }
 
 }  // namespace Trk

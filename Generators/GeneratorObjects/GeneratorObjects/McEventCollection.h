@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOROBJECTSMCEVENTCOLLECTION_H
@@ -60,22 +60,23 @@ inline McEventCollection::McEventCollection(const McEventCollection& in) : DataV
 
 inline McEventCollection& McEventCollection::operator=(const McEventCollection& in)
 {
-  // Force a deep copy on the DataVector
-  //
-  for (const HepMC::GenEvent* ev : in)
-  {
-    HepMC::GenEvent* nev = new HepMC::GenEvent(*ev);
+  if (this != &in) {
+    // Force a deep copy on the DataVector
+    //
+    for (const HepMC::GenEvent* ev : in)
+    {
+      HepMC::GenEvent* nev = new HepMC::GenEvent(*ev);
 #ifdef HEPMC3
-    auto ri = ev->run_info();
-    if (ri) {
-      std::shared_ptr<HepMC3::GenRunInfo> nri =  std::make_shared<HepMC3::GenRunInfo>(*(ri.get()));
-      nev->set_run_info(nri);
-    }
-    // Fill barcodes attribute in copied GenEvent
-    HepMC::fillBarcodesAttribute(nev);
+      auto ri = ev->run_info();
+      if (ri) {
+        std::shared_ptr<HepMC3::GenRunInfo> nri =  std::make_shared<HepMC3::GenRunInfo>(*(ri.get()));
+        nev->set_run_info(nri);
+      }
+      // Fill barcodes attribute in copied GenEvent
+      HepMC::fillBarcodesAttribute(nev);
 #endif
-    DataVector<HepMC::GenEvent>::push_back(nev);
-    
+      DataVector<HepMC::GenEvent>::push_back(nev);
+    }
   }
 
   return *this;

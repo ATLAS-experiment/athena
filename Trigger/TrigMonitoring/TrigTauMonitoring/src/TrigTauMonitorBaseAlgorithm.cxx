@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ReadDecorHandle.h"
@@ -21,7 +21,6 @@ StatusCode TrigTauMonitorBaseAlgorithm::initialize() {
     ATH_CHECK( m_offlineTauJetKey.initialize() );
 
     if(m_L1_select_by_et_only) ATH_MSG_INFO("L1 RoI selection by Et cut only! No isolated L1 tau items are allowed!");
-    ATH_CHECK( m_legacyl1TauRoIKey.initialize() );
     ATH_CHECK( m_phase1l1eTauRoIKey.initialize() );
     ATH_CHECK( m_phase1l1eTauRoIThresholdPatternsKey.initialize(!m_L1_select_by_et_only) );
     ATH_CHECK( m_phase1l1jTauRoIKey.initialize() );
@@ -99,7 +98,7 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOfflineTausAll(
         // Consider only offline taus outside of the crack region
         if(std::abs(tau->eta()) > 1.37 && std::abs(tau->eta()) < 1.52) continue;
 
-        // Consider only offline taus which pass RNN medium WP 
+        // Consider only offline taus which pass RNN medium WP
         if(!tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
 
         // Consider only offline taus which pass thinning
@@ -116,9 +115,9 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOfflineTausAll(
 }
 
 
-std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::getOfflineTaus(const EventContext& ctx, const float threshold) const
+std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::getOfflineTaus(const EventContext& ctx, const float threshold, const TauID tau_id) const
 {
-    return classifyOfflineTaus(getOfflineTausAll(ctx, threshold), threshold);
+    return classifyOfflineTaus(getOfflineTausAll(ctx, threshold), threshold, tau_id);
 }
 
 
@@ -229,37 +228,6 @@ std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> TrigTau
     return roi_vec;
 }
 
-
-std::vector<const xAOD::EmTauRoI*> TrigTauMonitorBaseAlgorithm::getL1LegacyTAUs(const EventContext& ctx, const std::string& l1_item) const
-{
-    std::vector<const xAOD::EmTauRoI*> roi_vec;
-
-    SG::ReadHandle<xAOD::EmTauRoIContainer> rois(m_legacyl1TauRoIKey, ctx);
-    if(!rois.isValid()) {
-        ATH_MSG_WARNING("Failed to retrieve EmTauRoI ");
-        return roi_vec;
-    }
-
-    for(const xAOD::EmTauRoI* roi : *rois) {
-        for(const std::string& thr_item : roi->thrNames()) {
-            // check which threshold has passed based on the current L1 item under monitoring
-            // reference : https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/L1/Config/ItemDef.py
-            if((l1_item.find("TAU8") != std::string::npos && thr_item.find("HA8") != std::string::npos)
-                || (l1_item.find("TAU12IM") != std::string::npos && thr_item.find("HA12IM") != std::string::npos)
-                || (l1_item.find("TAU20IM") != std::string::npos && thr_item.find("HA20IM") != std::string::npos)
-                || (l1_item.find("TAU40")   != std::string::npos && thr_item.find("HA40")   != std::string::npos)
-                || (l1_item.find("TAU60")   != std::string::npos && thr_item.find("HA60")   != std::string::npos)
-                || (l1_item.find("TAU100")  != std::string::npos && thr_item.find("HA100")  != std::string::npos)) {
-                roi_vec.push_back(roi);
-                break;
-            }
-        }
-    }
-
-    return roi_vec;
-}
-
-
 const SG::ReadHandleKey<xAOD::TauJetContainer>& TrigTauMonitorBaseAlgorithm::getOnlineContainerKey(const std::string& trigger) const
 {
     const TrigTauInfo& info = getTrigInfo(trigger);
@@ -301,12 +269,20 @@ StatusCode TrigTauMonitorBaseAlgorithm::fillHistograms(const EventContext& ctx) 
 }
 
 
-std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold) const
+std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold, const TauID tau_id) const
 {
     std::vector<const xAOD::TauJet*> tau_vec;
 
     for(const xAOD::TauJet* tau : taus) {
         if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
+
+        // Consider only offline taus which pass RNN medium WP 
+        if(tau_id == TauID::RNN && !tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
+        else if(tau_id == TauID::GNTau) {
+            static const SG::ConstAccessor<char> tauid_medium("GNTauM_v0prune");
+            if(!tauid_medium(*tau)) continue;
+        }
+
         tau_vec.push_back(tau);
     }
 
@@ -318,9 +294,7 @@ std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, s
 {
     std::vector<const xAOD::TauJet*> tau_vec_0p, tau_vec_1p, tau_vec_mp;
 
-    for(const xAOD::TauJet* tau : taus) {
-        if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
-
+    for(const xAOD::TauJet* tau : classifyTausAll(taus, threshold, TauID::None)) {
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
 
@@ -333,13 +307,11 @@ std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, s
 }
 
 
-std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold) const
+std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold, const TauID tau_id) const
 {
     std::vector<const xAOD::TauJet*> tau_vec_1p, tau_vec_3p;
 
-    for(const xAOD::TauJet* const tau : taus) {
-        if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
-
+    for(const xAOD::TauJet* const tau : classifyTausAll(taus, threshold, tau_id)) {
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
 

@@ -9,12 +9,14 @@
 #include "../RpcToyCablingJsonDumpAlg.h"
 #include "../MdtToyCablingJsonDumpAlg.h"
 #include "../MdtToyTwinCablingDumpAlg.h"
+#include "../MdtCalibJsonDumpAlg.h"
 
 
 DECLARE_COMPONENT(MdtCablingJsonDumpAlg)
 DECLARE_COMPONENT(MuonABLineJsonDumpAlg)
 DECLARE_COMPONENT(MdtAsBuiltJsonDumpAlg)
 DECLARE_COMPONENT(MdtCondJsonDumpAlg)
-DECLARE_COMPONENT(RpcToyCablingJsonDumpAlg)
 DECLARE_COMPONENT(MdtToyCablingJsonDumpAlg)
 DECLARE_COMPONENT(MdtToyTwinCablingDumpAlg)
+DECLARE_COMPONENT(Muon::RpcToyCablingJsonDumpAlg)
+DECLARE_COMPONENT(Muon::MdtCalibJsonDumpAlg)

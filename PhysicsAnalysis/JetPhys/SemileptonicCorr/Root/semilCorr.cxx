@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SemileptonicCorr/semilCorr.h"
 
 using namespace std;
 
-semilCorr::semilCorr(TString fIn, string /*suffix*/, bool DebugIn){
+semilCorr::semilCorr(const TString& fIn, const string& /*suffix*/, bool DebugIn){
   m_Debug = DebugIn;
   m_f = TFile::Open(fIn);
   m_etas.push_back(0);
@@ -54,18 +54,21 @@ semilCorr::~semilCorr(){
   delete m_f;
 }
 
-float semilCorr::getSemilCorrToIncl(TLorentzVector jet, TLorentzVector mu)
+float semilCorr::getSemilCorrToIncl(const TLorentzVector& jet,
+                                    const TLorentzVector& mu)
 {
   return getSemilCorrToIncl(jet,mu,m_histos[0]);
 }
 
-float semilCorr::getBjetCorrToIncl(TLorentzVector jet, TLorentzVector mu)
+float semilCorr::getBjetCorrToIncl(const TLorentzVector& jet,
+                                   const TLorentzVector& mu)
 {
   return getSemilCorrToIncl(jet,mu,m_histos[8]);
 }
 
-float semilCorr::getSemilCorrToIncl(TLorentzVector jet, TLorentzVector mu,
-				    vector<TH1F*> histos)
+float semilCorr::getSemilCorrToIncl(const TLorentzVector& jet,
+                                    const TLorentzVector& mu,
+				    const vector<TH1F*>& histos)
 {
   TLorentzVector jetmu = jet+mu;
   //correction to get things to 1 (or to pttruth), not to reference
@@ -73,7 +76,7 @@ float semilCorr::getSemilCorrToIncl(TLorentzVector jet, TLorentzVector mu,
   return corr;
 }
 
-vector<int> semilCorr::getHistoIndeces(semilCorr::Systematics syst)
+vector<int> semilCorr::getHistoIndices(semilCorr::Systematics syst)
 {
   vector<int> indices;
   if(syst == semilCorr::ALL){
@@ -89,19 +92,20 @@ vector<int> semilCorr::getHistoIndeces(semilCorr::Systematics syst)
   return indices;
 }
 
-float semilCorr::getSemilCorrToInclSyst(TLorentzVector jet, TLorentzVector mu, 
+float semilCorr::getSemilCorrToInclSyst(const TLorentzVector& jet,
+                                        const TLorentzVector& mu, 
                                         semilCorr::Systematics syst)
 {
-  //vector<int> indeces = getHistoIndeces(up,syst);
-  vector<int> indeces1 = getHistoIndeces(syst);
+  //vector<int> indices = getHistoIndices(up,syst);
+  vector<int> indices1 = getHistoIndices(syst);
   float systr = 0;
-  for(unsigned int i = 0; i<indeces1.size(); i++){
-    systr += pow(getSemilCorrToIncl(jet,mu,m_histos[indeces1[i]]),2);
+  for(unsigned int i = 0; i<indices1.size(); i++){
+    systr += pow(getSemilCorrToIncl(jet,mu,m_histos[indices1[i]]),2);
   }
   return sqrt(systr);
 }
 
-float semilCorr::getResponse(float pt, float eta, vector<TH1F*> h)
+float semilCorr::getResponse(float pt, float eta, const vector<TH1F*>& h)
 {
   float usePt = pt;
   int histbin = -1;

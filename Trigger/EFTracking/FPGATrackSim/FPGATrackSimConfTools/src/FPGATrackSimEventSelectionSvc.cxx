@@ -290,7 +290,11 @@ void FPGATrackSimEventSelectionSvc::createRegions()
       ATH_MSG_INFO("Creating the slices object");
       MsgStream cmsg(msgSvc(), "FPGATrackSimRegionSlices");
       cmsg.setLevel(msg().level()); // cause AthMessaging is stupid and doesn't have this function
-      m_regions = new FPGATrackSimRegionSlices(PathResolverFindCalibFile(m_regions_path.value()));
+      if (m_oldRegionDefs.value())
+	m_regions = new FPGATrackSimRegionSlices(PathResolverFindCalibFile(m_regions_path.value()));
+      else 
+	m_regions = new FPGATrackSimRegionSlices(m_mind0.value(), m_minz0.value(), m_minqOverPt.value(),
+						 m_maxd0.value(), m_maxz0.value(), m_maxqOverPt.value());
     }
 }
 
@@ -299,7 +303,7 @@ bool FPGATrackSimEventSelectionSvc::checkTruthTracks(const std::vector<FPGATrack
 // find at least one track in the region
   bool good=false;
   for (const FPGATrackSimTruthTrack& track : truthTracks){
-    if(m_regions->inRegion(m_regionID, track)){      
+    if(m_regions->inRegion(m_regionID, track) || m_skipRegionCheck){      
       good=true;
       if (std::abs(track.getPDGCode()) != static_cast<int>(m_st)) {
 	      ATH_MSG_WARNING("selectEvent(): TruthTrack PDGCode != sampleType");

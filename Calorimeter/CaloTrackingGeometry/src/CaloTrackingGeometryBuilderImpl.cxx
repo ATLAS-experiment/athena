@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Calo
@@ -11,7 +11,6 @@
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/BinnedArray1D1D.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 //
 #include "TrkGeometry/AlignableTrackingVolume.h"
 #include "TrkGeometry/BinnedMaterial.h"
@@ -93,8 +92,9 @@ StatusCode Calo::CaloTrackingGeometryBuilderImpl::initialize() {
 }
 
 std::unique_ptr<Trk::TrackingGeometry>
-Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
-    Trk::TrackingVolume* innerVol, const CaloDetDescrManager* caloDDM) const {
+Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolume* innerVol
+							      , const CaloDetDescrManager* caloDDM
+							      , const GeoAlignmentStore* geoAlign) const {
 
   ATH_MSG_VERBOSE("Starting to build CaloTrackingGeometry ...");
 
@@ -293,7 +293,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
   // get the Tracking Volumes from the LAr Builder
   //
   const std::vector<Trk::TrackingVolume*>* lArVolumes =
-      m_lArVolumeBuilder->trackingVolumes(*caloDDM);
+    m_lArVolumeBuilder->trackingVolumes(*caloDDM,geoAlign);
 
   ATH_MSG_INFO(lArVolumes->size()
                << " volumes retrieved from " << m_lArVolumeBuilder.name());
@@ -323,7 +323,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
   // ===========================================================================================
   // get the Tracking Volumes from the Tile Builder
   std::vector<Trk::TrackingVolume*>* tileVolumes =
-      m_tileVolumeBuilder->trackingVolumes(*caloDDM);
+    m_tileVolumeBuilder->trackingVolumes(*caloDDM,geoAlign);
 
   ATH_MSG_INFO(tileVolumes->size()
                << " volumes retrieved from " << m_tileVolumeBuilder.name());
@@ -1033,44 +1033,42 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
   std::vector<Trk::IdentifiedMaterial> matCrack;
   // layer material can be adjusted here
   int baseID = Trk::GeometrySignature(Trk::Calo) * 1000 + 17;
-  matCrack.emplace_back(&m_Scint, baseID);
-  matCrack.emplace_back(&m_caloMaterial, -1);
-  matCrack.emplace_back(&m_Al, -1);
+  matCrack.emplace_back(std::make_shared<Trk::Material>(m_Scint), baseID);
+  matCrack.emplace_back(std::make_shared<Trk::Material>(m_caloMaterial), -1);
+  matCrack.emplace_back(std::make_shared<Trk::Material>(m_Al), -1);
   //
   double etadist;
   // if TileGap3 goes above 1.6 in eta - it's RUN3 geometry
   int nbins =
       (caloDDM->is_in(1.65, 0.0, CaloCell_ID::TileGap3, etadist)) ? 6 : 3;
-  Trk::BinUtility* bun =
-      new Trk::BinUtility(nbins, -1.8, -1.2, Trk::open, Trk::binEta);
-  Trk::BinUtility* bup =
-      new Trk::BinUtility(nbins, 1.2, 1.8, Trk::open, Trk::binEta);
+  auto bun = Trk::BinUtility(nbins, -1.8, -1.2, Trk::open, Trk::binEta);
+  auto bup = Trk::BinUtility(nbins, 1.2, 1.8, Trk::open, Trk::binEta);
   // array of indices
   std::vector<std::vector<size_t>> indexP;
   std::vector<std::vector<size_t>> indexN;
   // binned material for LAr : layer depth per eta bin
-  std::vector<Trk::BinUtility*> layDN(bun->bins());
-  std::vector<Trk::BinUtility*> layUP(bup->bins());
+  std::vector<Trk::BinUtility> layDN(bun.bins());
+  std::vector<Trk::BinUtility> layUP(bup.bins());
   double crackZ1 = 3532.;
   double crackZ2 = 3540.;
   // construct bin utilities
   std::vector<float> steps;
-  for (unsigned int i = 0; i < bup->bins(); i++) {
+  for (unsigned int i = 0; i < bup.bins(); i++) {
     steps.clear();
     std::vector<size_t> indx;
     indx.clear();
     steps.push_back(crackZ1);
-    indx.push_back(i < bup->bins() - 1 ? 0 : 1);
+    indx.push_back(i < bup.bins() - 1 ? 0 : 1);
     steps.push_back(crackZ2);
     indx.push_back(2);
     steps.push_back(keyDim.back().second);
-    Trk::BinUtility* zBU = new Trk::BinUtility(steps, Trk::open, Trk::binZ);
+    Trk::BinUtility zBU = Trk::BinUtility(steps, Trk::open, Trk::binZ);
     layUP[i] = zBU;
     indexP.push_back(indx);
   }
 
   const Trk::BinnedMaterial* crackBinPos =
-      new Trk::BinnedMaterial(&m_crackMaterial, bup, layUP, indexP, matCrack);
+      new Trk::BinnedMaterial(m_crackMaterial, bup, layUP, indexP, matCrack);
 
   Amg::Transform3D* align = nullptr;
 
@@ -1085,7 +1083,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
       crackPosTransform, align, crackBoundsPos, crackBinPos, 17,
       "Calo::Detectors::Tile::CrackPos");
 
-  for (unsigned int i = 0; i < bun->bins(); i++) {
+  for (unsigned int i = 0; i < bun.bins(); i++) {
     steps.clear();
     std::vector<size_t> indx;
     indx.clear();
@@ -1094,13 +1092,13 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
     steps.push_back(-crackZ2);
     indx.push_back(i > 0 ? 0 : 1);
     steps.push_back(-crackZ1);
-    Trk::BinUtility* zBU = new Trk::BinUtility(steps, Trk::open, Trk::binZ);
+    Trk::BinUtility zBU = Trk::BinUtility(steps, Trk::open, Trk::binZ);
     layDN[i] = zBU;
     indexN.push_back(indx);
   }
 
   Trk::BinnedMaterial* crackBinNeg =
-      new Trk::BinnedMaterial(&m_crackMaterial, bun, layDN, indexN, matCrack);
+      new Trk::BinnedMaterial(m_crackMaterial, bun, layDN, indexN, matCrack);
 
   align = nullptr;
 
@@ -1418,7 +1416,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
 
 void Calo::CaloTrackingGeometryBuilderImpl::registerInLayerIndexCaloSampleMap(
     Trk::LayerIndexSampleMap& licsMap,
-    std::vector<CaloCell_ID::CaloSample> ccid, const Trk::TrackingVolume& vol,
+    const std::vector<CaloCell_ID::CaloSample>& ccid, const Trk::TrackingVolume& vol,
     int side) const {
 
   ATH_MSG_VERBOSE("[+] Registering layers of TrackingVolume '"
@@ -1453,10 +1451,10 @@ void Calo::CaloTrackingGeometryBuilderImpl::registerInLayerIndexCaloSampleMap(
   // everything's fine for side > 0
   if (side > 0) {
     // match 1-to-1
-    std::vector<const Trk::Layer*>::iterator layerIt = materialLayers.begin();
-    std::vector<const Trk::Layer*>::iterator layerItEnd = materialLayers.end();
-    std::vector<CaloCell_ID::CaloSample>::iterator ccidIt = ccid.begin();
-    std::vector<CaloCell_ID::CaloSample>::iterator ccidItEnd = ccid.end();
+    std::vector<const Trk::Layer*>::const_iterator layerIt = materialLayers.begin();
+    std::vector<const Trk::Layer*>::const_iterator layerItEnd = materialLayers.end();
+    std::vector<CaloCell_ID::CaloSample>::const_iterator ccidIt = ccid.begin();
+    std::vector<CaloCell_ID::CaloSample>::const_iterator ccidItEnd = ccid.end();
 
     for (; layerIt != layerItEnd && ccidIt != ccidItEnd; ++layerIt, ++ccidIt)
       licsMap.insert(std::make_pair((*layerIt)->layerIndex(), int(*ccidIt)));
@@ -1465,8 +1463,8 @@ void Calo::CaloTrackingGeometryBuilderImpl::registerInLayerIndexCaloSampleMap(
     // the order needs to be reversed, because TG has z-ordering positive
     // defined
 
-    std::vector<CaloCell_ID::CaloSample>::iterator ccidIt = ccid.begin();
-    std::vector<CaloCell_ID::CaloSample>::iterator ccidItEnd = ccid.end();
+    std::vector<CaloCell_ID::CaloSample>::const_iterator ccidIt = ccid.begin();
+    std::vector<CaloCell_ID::CaloSample>::const_iterator ccidItEnd = ccid.end();
 
     for (; ccidIt != ccidItEnd; ++ccidIt, --matLaySize)
       licsMap.insert(std::make_pair(

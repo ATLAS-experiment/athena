@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOUND_SURFACE_CNV_P2_H
@@ -77,9 +77,15 @@ class BoundPlaneSurfaceCnv_p2
 class BoundConeSurfaceCnv_p2
    : public BoundSurfaceCnv_p2< Trk::ConeSurface, ConeBoundsCnv_p1 > {};
 
+// Special case for SaggedLineSurface: the detector elements we get back
+// are now StraightLineSurface's.
 class BoundSaggedLineSurfaceCnv_p2
-   : public BoundSurfaceCnv_p2< Trk::SaggedLineSurface, CylinderBoundsCnv_p1 > {};
-   
+   : public BoundSurfaceCnv_p2< Trk::StraightLineSurface, CylinderBoundsCnv_p1 > {
+public:
+  virtual const std::type_info& transientTInfo() const override
+  { return typeid (Trk::SaggedLineSurface); }
+};
+
 
 // PerigeeSurface is boundless.
 

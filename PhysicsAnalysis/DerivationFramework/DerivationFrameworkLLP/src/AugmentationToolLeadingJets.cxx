@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -10,6 +10,8 @@
 
 #include "DerivationFrameworkLLP/AugmentationToolLeadingJets.h"
 #include "xAODJet/JetContainer.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 #include <vector>
 #include <string>
 
@@ -18,20 +20,27 @@ namespace DerivationFramework {
   AugmentationToolLeadingJets::AugmentationToolLeadingJets(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p)
+    base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
+  }
+
+  StatusCode AugmentationToolLeadingJets::initialize()
+  {
+    ATH_CHECK( AthAlgTool::initialize() );
+    ATH_CHECK( m_jetKey.initialize() );
+    ATH_CHECK( m_decorationKey.initialize() );
+    return StatusCode::SUCCESS;
   }
 
   StatusCode AugmentationToolLeadingJets::addBranches() const
   {
 
-      // Set up the decorators 
-      SG::AuxElement::Decorator< bool > decorator("DFDecoratorLeadingJets"); 
+      // Set up the decorators
+      SG::WriteDecorHandle<xAOD::JetContainer, bool> decorator (m_decorationKey);
 
       // CALCULATION OF THE NEW VARIABLE
       // Get Primary vertex
-      const xAOD::JetContainer* jets =  evtStore()->retrieve< const xAOD::JetContainer >("AntiKt4EMTopoJets");
+      SG::ReadHandle<xAOD::JetContainer> jets (m_jetKey);
       int counter=0;
       for ( unsigned int i =0 ; i < jets->size() ; i++){
        auto jet = (*jets)[i] ;

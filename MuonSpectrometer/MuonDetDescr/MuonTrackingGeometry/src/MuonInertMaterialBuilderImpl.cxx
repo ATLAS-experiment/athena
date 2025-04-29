@@ -33,7 +33,7 @@ StatusCode Muon::MuonInertMaterialBuilderImpl::initialize() {
 }
 
 Muon::MuonInertMaterialBuilderImpl::DetachedVolVec
-    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumesImpl(const PVConstLink treeTop, bool blend) const {
+    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumesImpl(const PVConstLink& treeTop, bool blend) const {
     
     if (!treeTop) {
         throw std::runtime_error("No tree top has been parsed");
@@ -59,7 +59,7 @@ Muon::MuonInertMaterialBuilderImpl::DetachedVolVec
 
 
 Muon::MuonInertMaterialBuilderImpl::DetachedVolumeVecWithTrfs
-    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(const PVConstLink top, bool blend) const {
+    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(const PVConstLink& top, bool blend) const {
   
     DetachedVolumeVecWithTrfs objs{};
     /// link to top tree

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -26,7 +26,7 @@ namespace CP
   {
     if (m_prescaleDecoration.empty())
     {
-      ANA_MSG_ERROR ("The decoration should not be empty");
+      ANA_MSG_ERROR ("The prescale decoration should not be empty");
       return StatusCode::FAILURE;
     }
 
@@ -43,6 +43,12 @@ namespace CP
     }
 
     ANA_CHECK (m_pileupReweightingTool.retrieve());
+
+    if (!m_selectionDecoration.empty()) {
+      for (const std::string &chain : m_trigList) {
+        m_selectionAccessors.emplace(chain, m_selectionDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
+      }
+    }
 
     if (!m_trigFormula.empty())
     {
@@ -67,13 +73,22 @@ namespace CP
 
     for (const std::string &chain : m_trigListAll)
     {
-      m_prescaleAccessors.emplace_back(m_prescaleDecoration + "_" + RCU::substitute (chain, "-", "_"));
+      m_prescaleAccessors.emplace_back(m_prescaleDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
 
       // Generate helper functions
       if (std::find(m_trigList.begin(), m_trigList.end(), chain) != m_trigList.end())
       {
         m_prescaleFunctions.emplace_back([this](const xAOD::EventInfo *evtInfo, const std::string &trigger)
         {
+          auto it = m_selectionAccessors.find(trigger);
+          if (it != m_selectionAccessors.end())
+          {
+            if (!it->second(*evtInfo))
+            {
+              return invalidTriggerPrescale();
+            }
+          }
+
           if(m_prescaleMC) return m_pileupReweightingTool->getPrescaleWeight(*evtInfo, trigger, true);
           return m_pileupReweightingTool->getDataWeight (*evtInfo, trigger, true);
         });

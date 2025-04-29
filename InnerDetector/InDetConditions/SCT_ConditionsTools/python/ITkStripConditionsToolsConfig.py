@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import Format
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from IOVDbSvc.IOVDbSvcConfig import addFolders, addFoldersSplitOnline
 from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
@@ -21,6 +22,17 @@ def ITkStripConditionsSummaryToolCfg(flags, name="ITkStripConditionsSummaryTool"
         ConditionsTools += [ acc.popToolsAndMerge(ITkStripModuleVetoCfg(flags)) ]
 
     kwargs.setdefault("ConditionsTools", ConditionsTools)
+    kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
+    acc.setPrivateTools(CompFactory.SCT_ConditionsSummaryTool(name, **kwargs))
+    return acc
+
+
+def ITkStripDetectorElementStatusAddByteStreamErrorsToolCfg(flags, name="ITkStripDetectorElementStatusAddByteStreamErrorsTool", **kwargs):
+    acc = ComponentAccumulator()
+    if not flags.Input.isMC  and flags.Input.Format is Format.BS :
+        if "ConditionsTools" not in kwargs :
+            kwargs.setdefault("ConditionsTools", [ acc.popToolsAndMerge(ITkStripByteStreamErrorsToolCfg(flags)) ])
+
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
     acc.setPrivateTools(CompFactory.SCT_ConditionsSummaryTool(name, **kwargs))
     return acc
@@ -168,7 +180,7 @@ def ITkStripReadCalibDataToolCfg(flags, name="ITkStripReadCalibDataTool", cond_k
                                                          ReadKeyGain=cond_kwargs["GainFolder"],
                                                          ReadKeyNoise=cond_kwargs["NoiseFolder"]))
 
-    from SCT_Cabling.ITkStripCablingConfig import ITkStripCablingToolCfg
+    from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
     kwargs.setdefault("SCT_CablingTool", acc.popToolsAndMerge(ITkStripCablingToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.SCT_ReadCalibDataTool(name, **kwargs))
@@ -176,7 +188,7 @@ def ITkStripReadCalibDataToolCfg(flags, name="ITkStripReadCalibDataTool", cond_k
 
 
 def ITkStripReadoutToolCfg(flags, name="ITkStripReadoutTool", **kwargs):
-    from SCT_Cabling.ITkStripCablingConfig import ITkStripCablingToolCfg
+    from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
     acc = ITkStripCablingToolCfg(flags)
     kwargs.setdefault("SCT_CablingTool", acc.popPrivateTools())
     acc.setPrivateTools(CompFactory.SCT_ReadoutTool(name, **kwargs))
@@ -204,7 +216,7 @@ def ITkStripTdaqEnabledToolCfg(flags, name="ITkStripTdaqEnabledTool", **kwargs):
     acc.merge(addFolders(flags, [folder], detDb="TDAQ", className="CondAttrListCollection"))
 
     # Algorithm
-    from SCT_Cabling.ITkStripCablingConfig import ITkStripCablingToolCfg
+    from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
     kwargs.setdefault("SCT_CablingTool", acc.popToolsAndMerge(ITkStripCablingToolCfg(flags)))
     acc.addCondAlgo(CompFactory.SCT_TdaqEnabledCondAlg(**kwargs))
 

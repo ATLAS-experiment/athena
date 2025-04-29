@@ -9,7 +9,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
-#include "TrkTrack/TrackCollection.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
 
 /**
@@ -23,7 +23,7 @@ public:
     virtual ~ITrigTauFastTrackHypoTool() {}
 
     struct ToolInfo {
-        ToolInfo(TrigCompositeUtils::Decision* d, const TrigRoiDescriptor* r, const TrackCollection *c,
+        ToolInfo(TrigCompositeUtils::Decision* d, const TrigRoiDescriptor* r, const xAOD::TrackParticleContainer *c,
                  const TrigCompositeUtils::Decision* previousDecision)
             : decision(d),
               roi(r),
@@ -34,7 +34,7 @@ public:
       
         TrigCompositeUtils::Decision* decision;
         const TrigRoiDescriptor* roi;
-        const TrackCollection* trackCollection;
+        const xAOD::TrackParticleContainer* trackCollection;
         const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
     };
     

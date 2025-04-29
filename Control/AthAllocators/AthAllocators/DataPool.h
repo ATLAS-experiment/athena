@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHALLOCATORS_DATAPOOL_H
@@ -23,13 +23,13 @@
  * a block of code that creates two DataPool objects, and another code block
  * that creates DataPool objects for the same types but in the opposite order.
  *
- * You can optionally provide (as a template argument) a function to be called
+ * You can optionally provide (as a template argument) a functional to be called
  * on an object when it is returned to the pool.  This can be used to reset
- * the state, release memory, etc.  This must be a static function, not
- * a lambda, and since it's used as a template argument, it should not be
- * in an anonymous namespace (should have public linkage).  Also be aware
- * that @c clear argument will have an effect only for the first @c DataPool
- * object to be created for a given @c VALUE.
+ * the state, release memory, etc.  The functional should have
+ * a static method clear() which takes a pointer to the object to clean.
+ * [static operator() is only available as of C++23]
+ * Also be aware that the @c CLEAR argument will have an effect only
+ * for the first @c DataPool object to be created for a given @c VALUE.
  *
  * @author Srini Rajagopalan, scott snyder
  */
@@ -39,10 +39,26 @@
 #include <string>
 #include "boost/iterator/iterator_adaptor.hpp"
 
-template <typename VALUE>
-using DataPoolClearFuncPtr_t = void (*)(VALUE*);
 
-template <typename VALUE, DataPoolClearFuncPtr_t<VALUE> clear = nullptr>
+namespace SG {
+
+
+/**
+ * @brief Null cleanup functional --- does no actual cleanup.
+ *        Used as the default cleanup.
+ */
+template <class VALUE>
+class DataPoolNullClear
+{
+public:
+  static void clear (VALUE*) {}
+};
+
+
+} // namespace SG
+
+
+template <typename VALUE, typename CLEAR = SG::DataPoolNullClear<VALUE> >
 class DataPool
 {
 private:

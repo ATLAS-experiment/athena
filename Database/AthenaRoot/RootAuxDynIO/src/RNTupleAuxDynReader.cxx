@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
@@ -7,22 +7,30 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/error.h"
 #include "AthContainers/exceptions.h"
+#include "AthContainersRoot/getDynamicAuxID.h"
 #include "RootUtils/Type.h"
 
 #include "RNTupleAuxDynReader.h"
 #include "RNTupleAuxDynStore.h"
-#include "AthContainersRoot/getDynamicAuxID.h"
 
 #include "TClass.h"
 #include "TClassEdit.h"
 #include "TVirtualCollectionProxy.h"
-#include "TROOT.h"
 
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleReader.hxx"
 #include "ROOT/RField.hxx"
 
 using std::string;
+
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
+namespace ROOT {
+   using ROOT::Experimental::RNTupleDescriptor;
+   using ROOT::Experimental::RFieldDescriptor;
+   using ROOT::Experimental::DescriptorId_t;
+   using ROOT::Experimental::kInvalidDescriptorId;
+}
+#endif
 
 namespace {
 
@@ -87,7 +95,7 @@ getAuxElementType( bool standalone, std::string& elementTypeName, const std::str
 
 SG::auxid_t
 getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
-                     const ROOT::Experimental::RNTupleDescriptor& desc,
+                     const ROOT::RNTupleDescriptor& desc,
                      const std::string& field_prefix,
                      const std::string& attr_name,
                      const std::string& attr_type,
@@ -96,7 +104,7 @@ getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
 
 SG::auxid_t
 getLinkedAuxId (const SG::AuxTypeRegistry& r,
-                const ROOT::Experimental::RNTupleDescriptor& desc,
+                const ROOT::RNTupleDescriptor& desc,
                 const std::string& field_prefix,
                 const std::string& attr_name,
                 const std::string& attr_type,
@@ -104,14 +112,10 @@ getLinkedAuxId (const SG::AuxTypeRegistry& r,
 {
   SG::auxid_t linked_auxid = SG::null_auxid;
   if (SG::AuxTypeRegistry::classNameHasLink (attr_type)) {
-    using ROOT::Experimental::DescriptorId_t;
-    using ROOT::Experimental::RFieldDescriptor;
-    using ROOT::Experimental::RNTupleDescriptor;
-    using ROOT::Experimental::kInvalidDescriptorId;
     std::string linked_attr = SG::AuxTypeRegistry::linkedName (attr_name);
-    DescriptorId_t did = desc.FindFieldId (field_prefix + linked_attr);
-    if (did != kInvalidDescriptorId) {
-      const RFieldDescriptor& linked_f = desc.GetFieldDescriptor (did);
+    ROOT::DescriptorId_t did = desc.FindFieldId (field_prefix + linked_attr);
+    if (did != ROOT::kInvalidDescriptorId) {
+      const ROOT::RFieldDescriptor& linked_f = desc.GetFieldDescriptor (did);
       linked_auxid = getAuxIdForAttribute (r, desc, field_prefix,
                                            linked_attr, linked_f.GetTypeName(), standalone);
     }
@@ -127,7 +131,7 @@ getLinkedAuxId (const SG::AuxTypeRegistry& r,
 
 SG::auxid_t
 getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
-                     const ROOT::Experimental::RNTupleDescriptor& desc,
+                     const ROOT::RNTupleDescriptor& desc,
                      const std::string& field_prefix,
                      const std::string& attr_name,
                      const std::string& attr_type,
@@ -156,7 +160,7 @@ namespace RootAuxDynIO
    // stored in the Field 'field_name'
    RNTupleAuxDynReader::RNTupleAuxDynReader(const std::string& field_name,
                                             const std::string& field_type,
-                                            RNTupleReader* reader)
+                                            ROOT::RNTupleReader* reader)
       : AthMessaging( std::string("RNTupleAuxDynReader[")+field_name+"]" ),
         m_storeFieldName( field_name ),
         m_ntupleReader( reader )
@@ -204,7 +208,7 @@ namespace RootAuxDynIO
             // add AuxID to the list
             // May still be null if we don't have a dictionary for this field
             if( auxid != SG::null_auxid ) {
-               m_auxids.insert(auxid);
+               addAuxID(auxid);
                m_fieldInfos[auxid].fieldName = field_name;
                m_fieldInfos[auxid].view = m_ntupleReader->GetView<void>(field_name, nullptr);
             } else {

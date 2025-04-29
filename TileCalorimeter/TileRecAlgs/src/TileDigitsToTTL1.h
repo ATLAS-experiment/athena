@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -55,12 +55,12 @@ class TileDigitsToTTL1: public AthAlgorithm {
     TileDigitsToTTL1(const std::string& name, ISvcLocator* pSvcLocator);
 
     //Destructor 
-    virtual ~TileDigitsToTTL1();
+    virtual ~TileDigitsToTTL1() = default;
 
     //Gaudi Hooks
-    StatusCode initialize();
-    StatusCode execute();
-    StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
 
   private:
 
@@ -70,16 +70,14 @@ class TileDigitsToTTL1: public AthAlgorithm {
     SG::WriteHandleKey<TileTTL1Container> m_ttl1ContainerKey{this,"TileTTL1Container",
                                                             "TileTTL1Container","Output Tile TTL1 container key"};
 
-    std::string m_infoName;        // name of TileInfo object in TES
+    StringProperty m_infoName{this,"TileInfoName", "TileInfo","Name of TileInfo object in TES"}; 
 
-    TileFragHash::TYPE m_rChType;
+    const TileID* m_tileID{};
+    const TileHWID* m_tileHWID{};
+    const TileInfo* m_tileInfo{};
+    const CaloLVL1_ID* m_TT_ID{};
 
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
-    const TileInfo* m_tileInfo;
-    const CaloLVL1_ID* m_TT_ID;
-
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale; //!< main Tile Calibration tool
+    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,"TileCondToolEmscale","TileCondToolEmscale","Main Tile Calibration tool"};
 };
 
 #endif // TILERECALGS_TILEDIGITSTOTTL1_H

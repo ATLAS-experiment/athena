@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef OnnxRuntimeInferenceTool_H
 #define OnnxRuntimeInferenceTool_H
@@ -47,10 +47,11 @@ namespace AthOnnx {
         private:
         StatusCode getNodeInfo();
 
-        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{"AthOnnx::OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc"};
+        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc/OnnxRuntimeSvc", "The Onnx runtime service"};
         ToolHandle<IOnnxRuntimeSessionTool> m_onnxSessionTool{
             this, "ORTSessionTool", 
-            "AthOnnx::OnnxRuntimeSessionToolCPU"
+            "AthOnnx::OnnxRuntimeSessionToolCPU/OnnxRuntimeSessionTool",
+            "The Onnx session tool"
         };        
         std::vector<std::string> m_inputNodeNames;
         std::vector<std::string> m_outputNodeNames;

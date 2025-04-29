@@ -6,10 +6,13 @@
 #define ITKPIXEL_ENCODINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "InDetRawData/PixelRDO_Container.h"
+#include "ITkPixelRDO_Container.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "ITkPixelHitSortingTool.h"
+#include "ITkPixelEncodingTool.h"
+#include "ITkPixelDataPackingTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/WriteHandleKey.h"
 
 namespace InDetDD {
   class PixelDetectorManager;
@@ -25,15 +28,21 @@ class ITkPixelEncodingAlg : public AthReentrantAlgorithm
     ITkPixelEncodingAlg(const std::string &name, ISvcLocator *pSvcLocator);
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute (const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
 
-    SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this, "PixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
+    typedef std::vector< std::vector<uint32_t >> ITkPacketCollection;
+  
+    SG::ReadHandleKey<ITkPixelRDO_Container> m_pixelRDOKey{this, "PixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
+    SG::WriteHandleKey<std::vector<uint32_t>> m_EncodedStreamKey{this, "EncodedStreamKey", "ITkEncodedStream", "StoreGate Key for Encoded Stream"};
+
 
     static constexpr float s_pitch50x50=0.050;
 
     ToolHandle<ITkPixelHitSortingTool> m_hitSortingTool;
+    ToolHandle<ITkPixelEncodingTool> m_encodingTool;
+    ToolHandle<ITkPixelDataPackingTool> m_packingTool;
 
 
 };

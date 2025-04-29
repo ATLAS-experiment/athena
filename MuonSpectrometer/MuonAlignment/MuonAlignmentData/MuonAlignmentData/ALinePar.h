@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_ALINEPAR_H
@@ -35,8 +35,7 @@ public:
         return m_payload[static_cast<unsigned int>(p)]; 
     }
     /// Returns the final transformations of the A lines
-    HepGeom::Transform3D deltaTransform() const;    
-    Amg::Transform3D     delta () const;
+    Amg::Transform3D delta () const;
 
     /// @brief  Returns true if at least one of the payload parameters is set
     operator bool () const {

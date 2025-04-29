@@ -26,14 +26,11 @@ Interface definition for eFEXFormTOBs
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual uint32_t formTauTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
-    virtual std::vector<uint32_t> formTauxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
+    virtual uint32_t formTauTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
+    virtual std::vector<uint32_t> formTauxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
 
-    virtual uint32_t formTauBDTTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
-    virtual std::vector<uint32_t> formTauBDTxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
-
-    virtual uint32_t formEmTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
-    virtual std::vector<uint32_t> formEmxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
+    virtual uint32_t formEmTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
+    virtual std::vector<uint32_t> formEmxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const = 0;
 
   private:
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_IDENTIFIER_H
@@ -28,11 +28,9 @@ public:
     using diff_type = long long;
     using size_type = unsigned long long ;
 
-    enum bit_defs{
-        NBITS = sizeof(value_type) * 8, // bits per byte
-        MAX_BIT = (static_cast<value_type>(1) << (NBITS - 1)),
-        ALL_BITS = ~(static_cast<value_type>(0))
-    };
+    static constexpr unsigned int NBITS = sizeof(value_type) * 8; // bits per byte
+    static constexpr value_type MAX_BIT = (static_cast<value_type>(1) << (NBITS - 1));
+    static constexpr value_type ALL_BITS = ~(static_cast<value_type>(0));
 
     /// Default constructor
     Identifier() = default;

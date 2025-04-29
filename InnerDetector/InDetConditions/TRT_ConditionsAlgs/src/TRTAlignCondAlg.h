@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTCONDITIONSALGS_TRTALIGNCONDALG_H
@@ -14,7 +14,7 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "DetDescrConditions/AlignableTransformContainer.h"
 #include "GeoModelUtilities/GeoAlignmentStore.h"
-
+#include "TRT_ConditionsData/StrawDxContainer.h"
 
 namespace InDetDD {
   class TRT_DetectorManager;
@@ -33,10 +33,11 @@ class TRTAlignCondAlg : public AthAlgorithm
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDynamicGlobal{this, "ReadKeyDynamicGlobal","/TRT/AlignL1/TRT","Read handle for global alignment conditions"};
   SG::ReadCondHandleKey<AlignableTransformContainer> m_readKeyDynamicRegular{this, "ReadKeyDynamicRegular","/TRT/AlignL2","Read handle for Dynamic Alignable transform containers"};
   SG::ReadCondHandleKey<AlignableTransformContainer> m_readKeyRegular{this, "ReadKeyRegular","/TRT/Align","Read handle for Static Alignable transform containers"};
+  SG::ReadCondHandleKey<TRTCond::StrawDxContainer> m_readKeySpecial{this, "ReadKeySpecial", "/TRT/Calib/DX", "Read handle for fine TRT alignment"};
   SG::WriteCondHandleKey<GeoAlignmentStore>  m_writeKeyAlignStore{this,"WriteKeyAlignStore","TRT_AlignmentStore","Write handle key to store TRT GeoAlignmentStore constants"};
   SG::WriteCondHandleKey<InDetDD::TRT_DetElementContainer> m_writeKeyDetElCont{this, "WriteKeyDetElCont", "TRT_DetElementContainer", "Key of output to store detector element structures for TRT"};
 
-  const InDetDD::TRT_DetectorManager* m_detManager;
+  const InDetDD::TRT_DetectorManager* m_detManager{nullptr};
 
   Gaudi::Property<bool> m_useDynamicFolders{ this, "UseDynamicFolders", false, "Turn on-off use of Dynamic folders" };
 };

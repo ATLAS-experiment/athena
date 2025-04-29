@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -10,7 +10,6 @@
 
 #include <AthenaBaseComps/AthService.h>
 #include <PixelReadoutGeometry/IPixelReadoutManager.h>
-
 
 class PixelID;
 
@@ -29,8 +28,13 @@ public:
   virtual StatusCode initialize() override final;
 
   virtual PixelModuleType getModuleType(Identifier id) const override final;
+  // Avoid detector element search if already available
+  PixelModuleType getModuleType(Identifier id, const SiDetectorElement* element) const;
+  
   virtual PixelDiodeType getDiodeType(Identifier id) const override final;
-
+  // Avoid detector element search if already available
+  virtual PixelDiodeType getDiodeType(Identifier id, const SiDetectorElement* element) const override;
+  
   virtual Identifier getPixelIdfromHash(IdentifierHash offlineIdHash,
                                         uint32_t FE,
                                         uint32_t row,
@@ -42,11 +46,26 @@ public:
 
   virtual uint32_t getFE(Identifier diodeId,
                          Identifier offlineId) const override final;
+
+  virtual uint32_t getFE(Identifier diodeId,
+			 Identifier offlineId,
+			 const SiDetectorElement* element) const override final;
+  
   virtual uint32_t getColumn(Identifier diodeId,
                              Identifier offlineId) const override final;
+
+  uint32_t getColumn(Identifier diodeId,
+		     Identifier offlineId,
+		     const SiDetectorElement* element) const;
+  
   virtual uint32_t getRow(Identifier diodeId,
                           Identifier offlineId) const override final;
 
+  uint32_t getRow(Identifier diodeId,
+		  Identifier offlineId,
+		  const SiDetectorElement* element) const;
+		  
+  
 private:
   ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
 

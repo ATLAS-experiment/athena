@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #========================================================================
 # DAOD_SUSY20.py
 # This defines DAOD_SUSY20, a skimmed DAOD format for Run-2 and Run-3.
@@ -43,6 +42,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	acc.merge(VrtSecInclusiveCfg(
 		flags,
 		name                                   = "SUSY20_VrtSecInclusiveTool",
+		AugmentingVersionString                = "_SUSY20",
 		CutSctHits                             = 1,
 		TrkA0ErrCut                            = 200000,
 		TrkZErrCut                             = 200000,
@@ -55,8 +55,6 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 		TruthTrkLen                            = 1,
 		DoSAloneTRT                            = False,
 		DoTruth                                = flags.Input.isMC,
-		doAugmentDVimpactParametersToMuons     = True,
-		doAugmentDVimpactParametersToElectrons = True
 	))
 	
 	# Track isolation
@@ -155,21 +153,6 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	# add TightBad flags to EventInfo and AntiKt4EMTopoJets collections
 	from DerivationFrameworkSUSY.SUSYToolsConfig import SUSY20EventCleaningToolCfg
 	acc.merge(SUSY20EventCleaningToolCfg(flags, cleaningLevel = "TightBad"))
-
-	# CloseByIsolation correction augmentation
-	from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
-	contNames = ["Muons", "Electrons", "Photons"]
-	acc.merge(IsoCloseByAlgsCfg(flags, 
-		suff           = "_SUSY20", 
-		isPhysLite     = False, 
-		containerNames = contNames, 
-		useSelTools    = True, 
-		stream_name    = kwargs['StreamName']
-	))
-	
-	# Re-tag PFlow jets so they have b-tagging info
-	from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-	acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMPFlowJets']))
 	
 	# Track selection augmentation need for InDetTrackParticles thinning
 	from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
@@ -344,7 +327,7 @@ def SUSY20Cfg(flags):
 	## CloseByIsolation correction augmentation
 	## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
 	from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
-	acc.merge(IsoCloseByAlgsCfg(flags, suff = "_SUSY20", isPhysLite = False, stream_name = stream_name))
+	acc.merge(IsoCloseByAlgsCfg(flags, suff = "_SUSY20", isPhysLite = False, containerNames = ["Muons", "Electrons", "Photons"], useSelTools = True, stream_name = stream_name))
 
 	# =============================
 	# Define contents of the format
@@ -364,7 +347,7 @@ def SUSY20Cfg(flags):
 		"InDetTrackParticles",
 		"PrimaryVertices",
 		"TauJets",
-		"AntiKt4EMTopoJets",
+#		"AntiKt4EMTopoJets",
 		"AntiKt4EMPFlowJets",
 		"BTagging_AntiKt4EMPFlow",
 		"MET_Baseline_AntiKt4EMPFlow",
@@ -417,6 +400,7 @@ def SUSY20Cfg(flags):
 			'TruthTausWithDecayParticles',
 			'TruthTausWithDecayVertices',
 			'AntiKt4TruthJets',
+			'AntiKt4TruthDressedWZJets'
 		]
 		SUSY20SlimmingHelper.ExtraVariables += [
 			"Electrons.TruthLink",
@@ -448,11 +432,11 @@ def SUSY20Cfg(flags):
 
 	# VSI content
 	VSITrackVars = ["is_selected", "is_associated", "is_svtrk_final", "pt_wrtSV", "eta_wrtSV", "phi_wrtSV", "d0_wrtSV", "z0_wrtSV", "errP_wrtSV", "errd0_wrtSV", "errz0_wrtSV", "chi2_toSV"]
-	SUSY20SlimmingHelper.ExtraVariables += ["InDetTrackParticles." + ".".join( VSITrackVars )]
+	SUSY20SlimmingHelper.ExtraVariables += ["InDetTrackParticles." + ".".join( var + "_SUSY20" for var in VSITrackVars )]
 
 	StaticContent += [
-		'xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices',
-		'xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVerticesAux'
+		'xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices_SUSY20',
+		'xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices_SUSY20Aux'
 		+ '.-vxTrackAtVertex'
 		+ '.-vertexType'
 		+ '.-neutralParticleLinks'

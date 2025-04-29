@@ -1,6 +1,6 @@
 
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONMEASVIEWALGS_STGCMEASVIEWALG_H
 #define XAODMUONMEASVIEWALGS_STGCMEASVIEWALG_H
@@ -12,7 +12,7 @@
 #include <xAODMuonPrepData/sTgcPadContainer.h>
 #include <xAODMuonPrepData/sTgcMeasContainer.h>
 
-#include <StoreGate/ReadHandleKey.h>
+
 #include <StoreGate/WriteHandleKey.h>
 
 
@@ -25,20 +25,13 @@
 namespace MuonR4 {
     class sTgcMeasViewAlg : public AthReentrantAlgorithm {
         public:
-            sTgcMeasViewAlg(const std::string& name, ISvcLocator* pSvcLocator);
-
+            using AthReentrantAlgorithm::AthReentrantAlgorithm;
+            
             ~sTgcMeasViewAlg() = default;
 
             StatusCode execute(const EventContext& ctx) const override;
             StatusCode initialize() override;
         private:
-            /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-            /// Failure is returned in cases, of non-empty keys and failed retrieval
-            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                                        const ContainerType* & contToPush) const;
-
-
             SG::ReadHandleKey<xAOD::sTgcStripContainer> m_readKeyStrip{this, "StripKey", "xAODsTgcStrips", 
                                                                        "Name of the xAOD::sTgcStripContainer"};
 

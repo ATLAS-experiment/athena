@@ -75,7 +75,7 @@ def BPHY28Kernel(flags):
        assumeDiMuons               = True,
        invMassUpper                = 100000.0,
        invMassLower                = 0.0,
-       Chi2Cut                     = 200.,
+       Chi2Cut                     = 100.,
        oppChargesOnly              = True,
        combOnly                    = True,
        atLeastOneComb              = False,
@@ -111,7 +111,7 @@ def BPHY28Kernel(flags):
          VtxMassHypo           = 3096.916,
          MassMin               = 2000.0,
          MassMax               = 3600.0,
-         Chi2Max               = 200, Do3d = False,
+         Chi2Max               = 100, Do3d = False,
          DoVertexType          = 7)
    augList += [ BPHY28_Select_Jpsi2mumu ]
 
@@ -126,7 +126,7 @@ def BPHY28Kernel(flags):
          BMassLower                  = 4900.0,
          DiTrackMassUpper            = 1220,
          DiTrackMassLower            = 820,
-         Chi2Cut                     = 200.0, # this is chi2/ndf cut
+         Chi2Cut                     = 100.0, # this is chi2/ndf cut
          TrkQuadrupletMassUpper      = 6000.0,
          TrkQuadrupletMassLower      = 4800.0,
          JpsiContainerKey            = MuMuContainerName,
@@ -160,7 +160,7 @@ def BPHY28Kernel(flags):
                                  VtxMassHypo                = 5366.3,
                                  MassMin                    = 4900.0,
                                  MassMax                    = 5900.0, Do3d = False,
-                                 Chi2Max                    = 200)
+                                 Chi2Max                    = 100)
    augList += [ BPHY28_Select_Bs2KKMuMu ]
 
 
@@ -263,5 +263,5 @@ def BPHY28Cfg(flags):
    BPHY28ItemList = BPHY28SlimmingHelper.GetItemList()
    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY28", ItemList=BPHY28ItemList, AcceptAlgs=["BPHY28Kernel"]))
    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY28", AcceptAlgs=["BPHY28Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
-   acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+   acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
    return acc

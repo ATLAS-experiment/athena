@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,23 +12,24 @@
 #define ChargeCalibParameters_h
 #include <cmath>
 #include <iosfwd>
+#include <limits>
  
 namespace PixelChargeCalib{
   
   struct LegacyFitParameters{
+    static constexpr float defaultOverflow = std::numeric_limits<float>::max();
     float A = 0.f;
     float E = 0.f;
     float C = 0.f;
+    float maxToT = defaultOverflow;
     LegacyFitParameters() = default;
-    LegacyFitParameters(float a, float e, float c):A(a), E(e), C(c){
+    LegacyFitParameters(float a, float e, float c, float overflow ):A(a), E(e), C(c), maxToT(overflow){
       //nop
     }
-    bool operator == (const LegacyFitParameters & o){
+    bool operator == (const LegacyFitParameters & o) const{
       return ((o.A == A) and (o.E == E) and (o.C == C));
     }
-    bool operator != (const LegacyFitParameters & o){
-      return not operator == (o);
-    }
+    
     ///Return Time-over-threshold given charge Q
     float ToT(float Q) const{
       if ((C + Q) != 0.0f) {
@@ -38,6 +39,7 @@ namespace PixelChargeCalib{
     }
     //return Charge, given time-over-Threshold
     float Q(float tot) const{
+      if (tot >= maxToT)  return 1.81e5;    
       if (std::fabs(A) != 0.0f && std::fabs(tot / A - 1.f) != 0.0f) {
         return  (C * tot / A - E) / (1.f - tot / A);
       }

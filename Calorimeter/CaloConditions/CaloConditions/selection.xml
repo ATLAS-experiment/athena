@@ -5,9 +5,6 @@
   <class name="std::map<std::string, CaloRec::Arrayrep>" />
   <class name="std::pair<std::string, CaloRec::Arrayrep>" />
 
-
-  <class name="CaloRec::CaloCellFactor" id="F2906C3B-DB35-4026-8AA4-D57E4B41288D" />
-
   <class name="CaloRec::CaloCellPositionShift" id="3B3CCC72-7238-468E-B25E-6F85BA5C9D64" />
 
   <class name="CaloHadWeight" id="5E5F2C06-92C6-45F2-845C-382C41B55371" />

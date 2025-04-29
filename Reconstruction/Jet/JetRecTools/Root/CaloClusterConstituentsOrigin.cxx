@@ -29,6 +29,11 @@ StatusCode CaloClusterConstituentsOrigin::process_impl(xAOD::IParticleContainer*
 
    auto handle = SG::makeHandle(m_readVertexContainer_key);
    ATH_CHECK(handle.isValid());
+   //if(not handle.isValid()) {
+   //  // Exit silently if we did not find a designated primary vertex
+   //  // This leaves the clusters uncorrected, which is fine
+   //  return StatusCode::SUCCESS;
+   //}
    const auto *vertexContainer = handle.cptr();
        
    for(const xAOD::Vertex* pv : *vertexContainer) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -25,7 +25,7 @@
 IOVDbMetaDataTool::IOVDbMetaDataTool(const std::string& type, 
                                      const std::string& name, 
                                      const IInterface*  parent)
-  : AthAlgTool(type, name, parent)
+  : base_class(type, name, parent)
   , m_metaDataStore ("StoreGateSvc/MetaDataStore",      name)
   , m_inputStore    ("StoreGateSvc/InputMetaDataStore", name)
   , m_processedFirstInputFileIncident(false)
@@ -37,10 +37,6 @@ IOVDbMetaDataTool::IOVDbMetaDataTool(const std::string& type,
   , m_maxRunNumber(0)
   , m_modifyFolders(false)
 {
-  // Declare additional interface
-  declareInterface<IIOVDbMetaDataTool>(this);
-  declareInterface<IMetaDataTool>(this);
-
   // Declare properties
   declareProperty("MinMaxRunNumbers",  m_minMaxRunNumbers);
 

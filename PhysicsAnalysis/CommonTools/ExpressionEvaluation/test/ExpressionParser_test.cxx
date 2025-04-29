@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -218,17 +218,18 @@ public:
       }
    }
    void setVerbose(bool verbose) {m_verbose=verbose; }
-   const EventContext                        *m_event;
-   SG::HiveEventSlot                         *m_store;
-   const ExpressionParsing::ExpressionParser *m_parser;
-   const std::vector<int>                    *m_ref;
-   bool                                       m_refPassed;
+   const EventContext                        *m_event{};
+   SG::HiveEventSlot                         *m_store{};
+   const ExpressionParsing::ExpressionParser *m_parser{};
+   const std::vector<int>                    *m_ref{};
+   bool                                       m_refPassed{};
    bool                                       m_isBool=false;
-   bool                                       m_verbose;
+   bool                                       m_verbose{};
 };
 
 int main(int argc, char **argv)
 {
+  srand(1);
   bool verbose=false;
   unsigned int n_events=100;
   unsigned int n_threads=1;
@@ -420,7 +421,7 @@ int main(int argc, char **argv)
         muon_should_entries.push_back(std::vector<int>());
         muon_should_entries.back().reserve(muons->size());
         for (const xAOD::Muon *a_muon : *muons) {
-           muon_should_entries.back().push_back( ((a_muon->pt()>25e3 && abs(a_muon->eta())<2.5 && is_tight_muon(*a_muon) ) ? 1 : 0));
+           muon_should_entries.back().push_back( ((a_muon->pt()>25e3 && std::abs(a_muon->eta())<2.5 && is_tight_muon(*a_muon) ) ? 1 : 0));
         }
         muon_sum = std::accumulate(muon_should_entries.back().begin(), muon_should_entries.back().end(),
                                                static_cast<std::size_t>(0),

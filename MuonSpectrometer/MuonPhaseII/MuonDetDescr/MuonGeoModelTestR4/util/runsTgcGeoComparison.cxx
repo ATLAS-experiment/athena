@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @brief Helper macro to compare the output from the readout geometry dumps:
@@ -13,6 +13,7 @@
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
+#include <MuonIdHelpers/sTgcIdHelper.h>
 #include <string>
 #include <set>
 #include <vector>
@@ -35,12 +36,14 @@ struct sTgcChamber{
     sTgcChamber() = default;
 
     //// Identifier
-    std::string stationName{}; 
     int stationIndex{0};
     int stationEta{0};
     int stationPhi{0};
     int stationMultilayer{0};
     std::string design{};
+
+    /// Transformation of the underlying Alignable node
+    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
 
     /// Sorting operator to insert the object into std::set
     bool operator<(const sTgcChamber& other) const {
@@ -158,10 +161,14 @@ struct sTgcChamber{
     struct sTgcLayer {
         /// @brief Gas gap number of the layer
         unsigned int gasGap{0};
-        /// @ transformation
+        /// @brief channel type of the layer
+        using chType_t = sTgcIdHelper::sTgcChannelTypes;
+        chType_t chType{chType_t::Wire};
+        /// @ transformation 
         Amg::Transform3D transform{Amg::Transform3D::Identity()};
         /// @brief Ordering operator
         bool operator<(const sTgcLayer& other) const {
+            if (chType != other.chType) return chType < other.chType;
             return gasGap < other.gasGap;
         }       
     }; 
@@ -178,7 +185,8 @@ std::ostream& operator<<(std::ostream& ostr, const sTgcChamber& chamb) {
     static const std::map<int, std::string> stationDict{
         {57, "STS"}, {58, "STL"}
     };
-    ostr<<"sTgc chamber "<<stationDict.at(chamb.stationIndex)<<"("<<chamb.design<<") "<<chamb.stationName;
+    ostr<<"sTgc chamber "<<stationDict.at(chamb.stationIndex)<<", eta: "<<chamb.stationEta
+        <<", ml: "<<chamb.stationMultilayer;
     return ostr;
 }
 
@@ -211,9 +219,21 @@ std::ostream& operator<<(std::ostream& ostr,const sTgcChamber::sTgcPad & pad) {
 }
 
 std::ostream& operator<<(std::ostream& ostr,const sTgcChamber::sTgcLayer & layer) {
-    ostr<<"stgclayer (gasGap/channelType): ";
+    ostr<<"(gasGap/channelType): ";
     ostr<<layer.gasGap<<", ";
-    ostr<<"transform: "<<Amg::toString(layer.transform);
+    switch (layer.chType) {
+        case sTgcIdHelper::sTgcChannelTypes::Pad:
+            ostr<<"pad,   ";
+            break;
+        case sTgcIdHelper::sTgcChannelTypes::Wire:
+            ostr<<"wire,  ";
+            break;
+        case sTgcIdHelper::sTgcChannelTypes::Strip:
+            ostr<<"strip, ";
+            break;
+
+    };
+    //ostr<<"transform: "<<Amg::toString(layer.transform);
     return ostr;
 }
 
@@ -346,6 +366,10 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformX{treeReader, "GeoModelTransformX"};
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
+
+    TTreeReaderValue<std::vector<float>> alignableNodeX{treeReader, "AlignableNodeX"};
+    TTreeReaderValue<std::vector<float>> alignableNodeY{treeReader, "AlignableNodeY"};
+    TTreeReaderValue<std::vector<float>> alignableNodeZ{treeReader, "AlignableNodeZ"};
     /// Local to Global Strip Transformation
     TTreeReaderValue<std::vector<float>> stripRotCol1X{treeReader, "stripRotLinearCol1X"};
     TTreeReaderValue<std::vector<float>> stripRotCol1Y{treeReader, "stripRotLinearCol1Y"};
@@ -412,7 +436,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
         newchamber.stationPhi = (*stationPhi);
         newchamber.stationMultilayer = (*stationMultilayer);
         newchamber.design = (*chamberDesign);
-   
+
         //// Chamber Details
         newchamber.numLayers = (*numLayers);
         newchamber.yCutout = (*yCutout);
@@ -460,7 +484,12 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
         geoRot.col(1) = Amg::Vector3D((*geoModelTransformX)[2], (*geoModelTransformY)[2], (*geoModelTransformZ)[2]);
         geoRot.col(2) = Amg::Vector3D((*geoModelTransformX)[3], (*geoModelTransformY)[3], (*geoModelTransformZ)[3]);       
         newchamber.geoModelTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));       
-                
+        
+        geoRot.col(0) = Amg::Vector3D((*alignableNodeX)[1], (*alignableNodeY)[1], (*alignableNodeZ)[1]);
+        geoRot.col(1) = Amg::Vector3D((*alignableNodeX)[2], (*alignableNodeY)[2], (*alignableNodeZ)[2]);
+        geoRot.col(2) = Amg::Vector3D((*alignableNodeX)[3], (*alignableNodeY)[3], (*alignableNodeZ)[3]);
+        geoTrans = Amg::Vector3D{(*alignableNodeX)[0], (*alignableNodeY)[0], (*alignableNodeZ)[0]};
+        newchamber.alignableTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));
         //WireGroups
         for (size_t wg = 0; wg < globalWireGroupPosX->size(); ++wg){
             sTgcChamber::sTgcChannel newWireGroup{};
@@ -517,6 +546,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
 
         for (size_t l = 0; l < stripRotGasGap->size(); ++l){
             sTgcChamber::sTgcLayer stripLayer{};
+            stripLayer.chType = sTgcIdHelper::sTgcChannelTypes::Strip;
             stripLayer.gasGap = (*stripRotGasGap)[l];
             Amg::RotationMatrix3D stripRot{Amg::RotationMatrix3D::Identity()};
             stripRot.col(0) = Amg::Vector3D((*stripRotCol1X)[l],(*stripRotCol1Y)[l], (*stripRotCol1Z)[l]);
@@ -529,6 +559,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
         
         for (size_t l = 0; l < wireGroupRotGasGap->size(); ++l){
             sTgcChamber::sTgcLayer wireGroupLayer{};
+            wireGroupLayer.chType = sTgcIdHelper::sTgcChannelTypes::Wire;
             wireGroupLayer.gasGap = (*wireGroupRotGasGap)[l];
             Amg::RotationMatrix3D wireGroupRot{Amg::RotationMatrix3D::Identity()};
             wireGroupRot.col(0) = Amg::Vector3D((*wireGroupRotCol1X)[l],(*wireGroupRotCol1Y)[l], (*wireGroupRotCol1Z)[l]);
@@ -541,6 +572,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
 
         for (size_t l = 0; l < padRotGasGap->size(); ++l){
             sTgcChamber::sTgcLayer padLayer{};
+            padLayer.chType = sTgcIdHelper::sTgcChannelTypes::Pad;
             padLayer.gasGap = (*padRotGasGap)[l];
             Amg::RotationMatrix3D padRot{Amg::RotationMatrix3D::Identity()};
             padRot.col(0) = Amg::Vector3D((*padRotCol1X)[l],(*padRotCol1Y)[l], (*padRotCol1Z)[l]);
@@ -565,7 +597,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
 
 #define TEST_BASICPROP(attribute, propName) \
     if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {           \
-        std::cerr<<"sTgcGeoModelComparison() "<<__LINE__<<": The chamber "<<reference \
+        std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": The chamber "<<reference   \
                  <<" differs w.r.t "<<propName<<" "<< reference.attribute             \
                  <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;          \
         chamberOkay = false;                                                          \
@@ -618,6 +650,13 @@ int main( int argc, char** argv ) {
         }
         bool chamberOkay = true;
         const sTgcChamber& test = {*test_itr};
+
+        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
+            std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
+                     <<test<<". " <<Amg::toString(alignableDistort, true)<<std::endl;
+            chamberOkay = false;
+        }
         
         TEST_BASICPROP(numLayers, "number of gas gaps");
         TEST_BASICPROP(yCutout, "yCutout of the Chamber");
@@ -654,8 +693,22 @@ int main( int argc, char** argv ) {
                 continue;
             }
             const sTgcLayer& testLayer{*lay_itr};
-            const Amg::Transform3D layAlignment = testLayer.transform.inverse() *
-                                                  refLayer.transform;
+            const Amg::Transform3D layAlignment = refLayer.transform.inverse() *
+                                                  testLayer.transform;
+            ///Uncomment to dump the local to global layer transformation 
+            if (false)
+            std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                        << "The test layer transform for layer "<< c << " is: " << Amg::toString(testLayer.transform) 
+                        << " and the reference layer transform is: " << Amg::toString(refLayer.transform)
+                        <<"difference: "<<Amg::toString(layAlignment)<<std::endl;
+
+            if (!Amg::isIdentity(layAlignment)) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                            <<"the layer "<<testLayer<<" is misaligned w.r.t. reference by "
+                            <<Amg::toString(layAlignment)<<std::endl;
+                chamberOkay = false;
+                continue;
+            }
             /// Testing Wire Vectors
             TEST_BASICPROP(numWires[c], "number of wires in the layer "<< c + 1 << " are ");
             TEST_BASICPROP(firstWireGroupWidth[c], "number of wires in first wire group in the layer "<< c + 1 << " are ");
@@ -667,22 +720,9 @@ int main( int argc, char** argv ) {
             TEST_BASICPROP(padHeight[c], "height of pads in the rest of the rows in the layer "<< c + 1 << " are ");
             TEST_BASICPROP(padPhiShift[c], "shift of inner pad edges in phi direction in the layer "<< c + 1 << " are ");
             TEST_BASICPROP(firstPadPhiDiv[c], "angular position of the outer edge of the first pad in the layer "<< c + 1 << " are ");
-            ++c;
-            
-            ///Uncomment to dump the local to global layer transformation           
-            std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                      << "The test layer transform for layer "<< c << " is: " << Amg::toString(testLayer.transform) 
-                      << " and the reference layer transform is: " << Amg::toString(refLayer.transform) <<std::endl;
-
-            if (!Amg::doesNotDeform(layAlignment)) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                         <<"the layer "<<testLayer<<" is misaligned w.r.t. reference by "
-                         <<Amg::toString(layAlignment)<<std::endl;
-                chamberOkay = false;
-                continue;
-            }
+            c = (c+1)% 4;
         }
-            
+   
         using sTgcChannel = sTgcChamber::sTgcChannel;   
         for (const sTgcChannel& refChannel : reference.channels) {
             std::set<sTgcChannel>::const_iterator channel_itr = test.channels.find(refChannel);

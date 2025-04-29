@@ -262,6 +262,7 @@ void MissingEtCollHandle::resetCachedValuesCuts()
 const MissingEtCollectionSettingsButton& MissingEtCollHandle::collSettingsButton() const {
   if (!m_d->collSettingsButton){
     messageVerbose("MET - No collSettingsButton set! Can't call init(), so crash is imminent...");
+    throw std::runtime_error("MET - No collSettingsButton set!");
   }
   return *m_d->collSettingsButton;
 }

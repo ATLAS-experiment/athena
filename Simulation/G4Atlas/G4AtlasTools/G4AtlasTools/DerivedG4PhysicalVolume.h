@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4MyPhysicalVolume_h
@@ -57,7 +57,7 @@ public:
 
   EVolume VolumeType()const{ return fTypeOfVolume; }
 
-  G4int copyNo;
+  G4int copyNo{};
 
 private:
 

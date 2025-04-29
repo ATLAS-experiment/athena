@@ -24,14 +24,14 @@
       print 2005,a1
  1000 format(a1)
 *     
- 2001 format('Reading 1',a1)
- 2002 format('Reading 2',a1)
- 2003 format('Reading 3',a1)
- 2004 format('Reading 4',a1)
- 2005 format('Reading 5',a1)
+ 2001 format('F: Reading 1',a1)
+ 2002 format('F: Reading 2',a1)
+ 2003 format('F: Reading 3',a1)
+ 2004 format('F: Reading 4',a1)
+ 2005 format('F: Reading 5',a1)
 *     
- 3000 format('Before the Rewind')
- 3010 format('Before the backspace')
+ 3000 format('F: Before the Rewind')
+ 3010 format('F: Before the backspace')
 *     
       return
       end      

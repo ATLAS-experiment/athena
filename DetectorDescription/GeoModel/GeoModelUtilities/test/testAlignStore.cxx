@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
 */
 
 #include <cstdlib>
@@ -82,15 +82,15 @@ std::string timeToString(double time) {
 /** Helper class to partially fill the alignment store from the reference array 
  *  in a multi-threaded like environment  */
 struct StoreFiller{
-    StoreFiller(const AlignNodeArray& _transformNodes, 
-                const TransformArray& _deltas,
-                GeoAlignmentStore& _store, 
-                size_t _begin, size_t _end):
-        transformNodes{_transformNodes},
-        deltas{_deltas},
-        store{_store},
-        begin{_begin},
-        end{_end}{}
+    StoreFiller(const AlignNodeArray& transformNodes_, 
+                const TransformArray& deltas_,
+                GeoAlignmentStore& store_, 
+                size_t begin_, size_t end_):
+        transformNodes{transformNodes_},
+        deltas{deltas_},
+        store{store_},
+        begin{begin_},
+        end{end_}{}
     bool execute() {
         if (executed) return result;
         result = executed = true;
@@ -130,14 +130,14 @@ template <class MapType> bool measureAccessTime(const AlignNodeArray& transformN
     nThreads = std::min(nThreads, std::thread::hardware_concurrency());
  
     struct AccessPatternTest{
-        AccessPatternTest(const AlignNodeArray& _transformNodes,
-                          const TransformArray& _deltas,
-                          const MapType& _storeToTest,
-                          const AccessArray& _accessPattern):
-            transformNodes{_transformNodes},
-            deltas{_deltas},
-            storeToTest{_storeToTest},
-            accessPattern{_accessPattern} {
+        AccessPatternTest(const AlignNodeArray& transformNodes_,
+                          const TransformArray& deltas_,
+                          const MapType& storeToTest_,
+                          const AccessArray& accessPattern_):
+            transformNodes{transformNodes_},
+            deltas{deltas_},
+            storeToTest{storeToTest_},
+            accessPattern{accessPattern_} {
                 static_assert(std::is_same<RefStoreType, MapType>::value ||
                               std::is_same<GeoAlignmentStore, MapType>::value,
                               "Unsupported alignment store type");

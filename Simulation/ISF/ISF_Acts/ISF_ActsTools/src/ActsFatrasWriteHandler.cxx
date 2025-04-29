@@ -43,12 +43,9 @@ StatusCode ActsFatrasWriteHandler::WriteHits(std::vector<SiHitCollection>& HitCo
 {
     auto HitsWriteHandles = m_HitCollectionKeys.makeHandles(ctx);
     for(long unsigned int i=0;i<HitCollections.size();++i){
-      if (HitCollections[i].size()>0){
-        ATH_MSG_DEBUG(name() << " WriteHits: adding "<<m_HitCollectionNames[i]<< " "<<HitCollections[i].size()<<" hits");
-        ATH_CHECK(HitsWriteHandles[i].record(std::make_unique<SiHitCollection>(HitCollections[i])));
-        ATH_MSG_DEBUG(name() << " WriteHits: added "<<m_HitCollectionNames[i]<< " "<<HitCollections[i].size()<<" hits");
-      }
-      else ATH_MSG_VERBOSE(name() << " no "<<m_HitCollectionNames[i]<<" hits for this event" << ctx);
+      ATH_MSG_DEBUG(name() << " WriteHits: adding "<<m_HitCollectionNames[i]<< " "<<HitCollections[i].size()<<" hits");
+      ATH_CHECK(HitsWriteHandles[i].record(std::make_unique<SiHitCollection>(HitCollections[i])));
+      ATH_MSG_DEBUG(name() << " WriteHits: added "<<m_HitCollectionNames[i]<< " "<<HitCollections[i].size()<<" hits");
     }
     return StatusCode::SUCCESS;
 }

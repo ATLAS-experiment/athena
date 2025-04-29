@@ -7,13 +7,16 @@ from Herwig7_i.Herwig7ConfigLHEF import Hw7ConfigLHEF
 genSeq += Herwig7()
 Herwig7Config = Hw7ConfigLHEF(genSeq, runArgs)
 
+# Set Herwig7 for evgen
+evgenConfig.generators += ["Herwig7"]
+
 # handle compressed LHE files passed via runArgs.inputGeneratorFile
 import glob
 from AthenaCommon import Logging
 athMsgLog = Logging.logging.getLogger('Herwig7_i/Herwig7_LHEF.py')
 if ".tar.gz" in runArgs.inputGeneratorFile or ".tgz" in runArgs.inputGeneratorFile:
   athMsgLog.info("inputGeneratorFile '{}' is compressed - will look for uncompressed LHE file".format(runArgs.inputGeneratorFile))
-  lhe_files = glob.glob("*._*.ev*ts")
+  lhe_files = glob.glob("*_*.ev*ts")
   athMsgLog.info("Number of lhe files {}".format(len(lhe_files)))
   if len(lhe_files) == 0:
     raise RuntimeError("Could not find uncompressed LHE file")

@@ -1,6 +1,6 @@
 #!/bin/bash
 # art-description: Run 4 configuration, ITK only recontruction, 10 GeV Electrons, no pileup
-# art-input: mc15_14TeV:mc15_14TeV.900035.PG_singleel_Pt10_etaFlatnp0_43.evgen.EVNT.e8185
+# art-input: mc21_14TeV.900494.PG_single_epm_Pt10_etaFlatnp0_43.evgen.EVNT.e8481
 # art-input-nfiles: 1
 # art-type: grid
 # art-include: main/Athena
@@ -9,9 +9,13 @@
 # art-output: dcube*
 # art-html: dcube_last
 
-ref_21p9=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/900035_el10_ITk_21p9_v1.IDPVM.root  # Ref release = 21.9.26
+artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
+relname="r25.0.26"
+dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/HitValid_run4_ele10GeV_simreco.root
+dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/RDOAnalysis_run4_ele10GeV_simreco.root
+dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_run4_ele10GeV_simreco.root
 
 script=test_MC_Run4_mu0_simreco.sh
 echo "Executing script ${script}"
 echo " "
-"$script" ${ArtInFile} ${ref_21p9} 10000
+"$script" ${dcuberef_sim} ${dcuberef_rdo} ${dcuberef_rec} 10000

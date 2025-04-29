@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -11,9 +11,6 @@
  *
  * @author Andrew Hamilton  <Andrew.Hamilton@cern.ch>  - U. Geneva
  * @author Francesca Bucci  <F.Bucci@cern.ch>          - U. Geneva
- *
- * File and Version Information:
- * $Id: TrigL2Bphys_p3.h,v 1.2 2010-08-11 demelian Exp $
  **********************************************************************************/
 #ifndef TRIGPARTICLETPCNV_TRIGL2BPHYS_P3_H
 #define TRIGPARTICLETPCNV_TRIGL2BPHYS_P3_H
@@ -27,13 +24,11 @@ class TrigL2Bphys_p3
 
  public:
   
-  TrigL2Bphys_p3() {}
+  TrigL2Bphys_p3() = default;
   virtual ~TrigL2Bphys_p3() = default;
   
-  //private:
-
-  float m_allFloats[8];//m_eta,m_phi,m_mass,m_fitmass,m_fitchi2,m_fitx,m_fity,m_fitz
-  int m_allInts[3];//m_roiID,m_particleType,m_fitndof
+  float m_allFloats[8]{};//m_eta,m_phi,m_mass,m_fitmass,m_fitchi2,m_fitx,m_fity,m_fitz
+  int m_allInts[3]{};//m_roiID,m_particleType,m_fitndof
 
   ElementLinkIntVector_p1 m_trackVector;
   ElementLinkInt_p3 m_secondaryDecay;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNRECOGNITIONTEST_PATTERNVISUALIZATIONTOOL_H
 #define MUONR4_MUONPATTERNRECOGNITIONTEST_PATTERNVISUALIZATIONTOOL_H
@@ -29,7 +29,7 @@ namespace MuonValR4 {
     class PatternVisualizationTool : public extends<AthAlgTool, IPatternVisualizationTool> {
         public:
             
-            PatternVisualizationTool(const std::string& type, const std::string& name, const IInterface* parent);
+            using base_class::base_class;
 
             virtual StatusCode initialize() override final;
             virtual StatusCode finalize() override final;
@@ -164,6 +164,16 @@ namespace MuonValR4 {
              *  @param prmitives: Primitives to draw onto the Canvas */
             void drawPrimitives(const TCanvas& can,
                                 PrimitiveVec& primitives) const;
+            /** @brief Paints the truth sim hits associated with the segment.
+             *         Hits are drawn as orange arrows
+             *  @param ctx: EventContext to fetch the alignment constants
+             *  @param truthSeg: Segment made from truth sim hits
+             *  @param primitives: Drawing primitives to append the painted hits
+             *  @param view: Draw the hit either in the eta or phi view */
+            void paintSimHits(const EventContext& ctx,
+                              const xAOD::MuonSegment& truthSeg,
+                              PrimitiveVec& primitives,
+                              const int view) const;
             /** @brief Maximum canvases to draw */
             Gaudi::Property<unsigned int> m_canvasLimit{this, "CanvasLimits", 5000};
             /** @brief If set to true each canvas is saved into a dedicated pdf file */ 
@@ -186,6 +196,8 @@ namespace MuonValR4 {
             Gaudi::Property<bool> m_doEtaBucketViews{this,"doEtaBucketViews", true};
             /** @brief Switch to visualize the phi view of the bucket event */
             Gaudi::Property<bool> m_doPhiBucketViews{this,"doPhiBucketViews", true};
+            /** @brief Switch to visualize the truth hits  */
+            Gaudi::Property<bool> m_paintTruthHits{this, "paintTruthHits", false};
             /** @brief ATLAS label (Internal / Prelimnary / Simulation) */
             Gaudi::Property<std::string> m_AtlasLabel{this, "AtlasLabel", "Internal"};
             /** @brief Centre of mass energy label */

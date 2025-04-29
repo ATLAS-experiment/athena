@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of the RDOtoRDOTrigger transform with Dev menu
 # art-type: grid
 # art-include: main/Athena
+# art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log
@@ -13,7 +14,8 @@
 # art-output: *.log.tar.gz
 # art-output: *.new
 # art-output: *.json
-# art-output: *.root
+# art-output: expert-monitoring.root
+# art-output: rootcomp.root
 # art-output: *.pmon.gz
 # art-output: *perfmon*
 # art-output: prmon*
@@ -32,11 +34,11 @@ ex = ExecStep.ExecStep()
 ex.type = 'Reco_tf'
 ex.input = 'ttbar'
 ex.max_events = 500
-ex.threads = 4
-ex.concurrent_events = 4
+ex.threads = 8
+ex.concurrent_events = 8
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
-ex.args += ' --preInclude "all:Campaigns.MC23c"'
+ex.args += ' --preInclude "all:Campaigns.MC23e"'
 ex.args += ' --CA'
 ex.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
 

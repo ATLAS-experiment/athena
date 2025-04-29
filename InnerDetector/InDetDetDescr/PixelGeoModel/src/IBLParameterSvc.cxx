@@ -27,15 +27,12 @@ IBLParameterSvc::IBLParameterSvc(const std::string& name,ISvcLocator* svc)
     m_LayerFEsPerHalfModule_3d{},
     m_layout{},
     m_geoDbTagSvc("GeoDbTagSvc",name),
-    m_rdbAccessSvc("RDBAccessSvc",name),
     m_disablePixMapCondDB(false),
     m_disableSpecialPixels(false),
     m_disableAlignable(false),
     m_disableAllClusterSplitting(false),
-    m_disableDCS(true)
-{
+    m_disableDCS(true) {
 	declareProperty("GeoDbTagSvc",m_geoDbTagSvc);
-	declareProperty("RDBAccessSvc",m_rdbAccessSvc);
  	declareProperty("DisablePixMapCondDB",m_disablePixMapCondDB);
  	declareProperty("DisableSpecialPixels",m_disableSpecialPixels);
  	declareProperty("DisableAlignable",m_disableAlignable);
@@ -74,17 +71,22 @@ StatusCode IBLParameterSvc::initialize()
 
 //Determine if IBL is present and set appropriate parameters
 StatusCode IBLParameterSvc::setIblParameters() {
-  if (m_geoDbTagSvc.retrieve().isFailure()) {
-    msg(MSG::FATAL) << "Could not locate GeoDbTagSvc" << endmsg;
-    return (StatusCode::FAILURE);
-  } 
-  DecodeVersionKey versionKey(&*m_geoDbTagSvc, "Pixel");
+  ATH_CHECK(m_geoDbTagSvc.retrieve());
 
-  if (m_rdbAccessSvc.retrieve().isFailure()) {
-     msg(MSG::FATAL) << "Could not locate RDBAccessSvc" << endmsg;
-     return (StatusCode::FAILURE); 
+  
+  std::string versionTag{}, versionNode{};
+  if(!m_geoDbTagSvc->getSqliteReader()) {
+    DecodeVersionKey detectorKey{m_geoDbTagSvc.get(),"Pixel"};
+    versionTag = detectorKey.tag();
+    versionNode = detectorKey.node();
+  }
+
+  SmartIF<IRDBAccessSvc> rdbAccess{Gaudi::svcLocator()->service(m_geoDbTagSvc->getParamSvcName())};
+  if (!rdbAccess) {
+    ATH_MSG_FATAL("Could not locate RDBAccessSvc");
+     return StatusCode::FAILURE; 
   } 
-  IRDBRecordset_ptr switchSet = m_rdbAccessSvc->getRecordsetPtr("PixelSwitches", versionKey.tag(), versionKey.node());
+  IRDBRecordset_ptr switchSet = rdbAccess->getRecordsetPtr("PixelSwitches", versionTag, versionNode);
   const IRDBRecord    *switchTable   = (*switchSet)[0];
   std::string versionName("");
   if (!switchTable->isFieldNull("VERSIONNAME")) versionName=switchTable->getString("VERSIONNAME");
@@ -101,8 +103,8 @@ StatusCode IBLParameterSvc::setIblParameters() {
   m_LayerFEsPerHalfModule_3d = 0;
   m_LayerFEsPerHalfModule.clear();
   if (m_IBLpresent) {
-	IRDBRecordset_ptr PixelReadout = m_rdbAccessSvc->getRecordsetPtr("PixelReadout", versionKey.tag(), versionKey.node());
-	IRDBRecordset_ptr PixelStave = m_rdbAccessSvc->getRecordsetPtr("PixelStave", versionKey.tag(), versionKey.node());
+	IRDBRecordset_ptr PixelReadout = rdbAccess->getRecordsetPtr("PixelReadout", versionTag, versionNode);
+	IRDBRecordset_ptr PixelStave = rdbAccess->getRecordsetPtr("PixelStave", versionTag, versionNode);
 	const IRDBRecord *IBLreadout   = (*PixelReadout)[1];
 	if (!IBLreadout->isFieldNull("COLSPERCHIP")) m_LayerColumnsPerFE=IBLreadout->getInt("COLSPERCHIP");
 	if (!IBLreadout->isFieldNull("ROWSPERCHIP")) m_LayerRowsPerFE=IBLreadout->getInt("ROWSPERCHIP");

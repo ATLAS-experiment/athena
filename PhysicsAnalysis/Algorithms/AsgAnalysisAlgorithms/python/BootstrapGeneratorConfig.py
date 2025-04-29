@@ -30,19 +30,3 @@ class BootstrapGeneratorConfig(ConfigBlock):
         config.addOutputVar ('EventInfo', alg.decorationName, alg.decorationName.split("_%SYS%")[0], noSys=True)
 
         return
-
-def makeBootstrapGeneratorConfig(seq,
-                                 nReplicas = None,
-                                 decoration = None):
-    """
-    Setup a simple bootstrapping algorithm
-
-    Keyword arguments:
-      nReplicas -- the number of bootstrap replicas to generate
-      decoration -- the name of the output vector branch containing the bootstrapped weights
-    """
-
-    config = BootstrapGeneratorConfig()
-    config.setOptionValue ('nReplicas', nReplicas)
-    config.setOptionValue ('decoration', decoration)
-    seq.append (config)

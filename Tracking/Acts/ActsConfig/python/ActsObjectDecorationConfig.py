@@ -3,9 +3,33 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def ActsMeasurementToTrackParticleDecorationCfg(flags,
-                                                name: str = "ActsMeasurementToTrackParticleDecoration",
-                                                **kwargs) -> ComponentAccumulator:
+
+def ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
+                                           name: str = "ActsTrackStateOnSurfaceDecoratorAlg",
+                                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('TrackParticles', 'InDetTrackParticles')
+    kwargs.setdefault('PixelMeasurements', 'ITkPixelMeasurements')
+    kwargs.setdefault('StripMeasurements', 'ITkStripMeasurements')
+    kwargs.setdefault('PixelMSOSs', 'ITkPixelMSOSs')
+    kwargs.setdefault('StripMSOSs', 'ITkStripMSOSs')
+    acc.addEventAlgo(CompFactory.ActsTrk.ActsTrackStateOnSurfaceDecoratorAlg(name, **kwargs))
+
+    toAOD = []
+    toAOD += [f'xAOD::TrackStateValidationContainer#{kwargs["PixelMSOSs"]}',
+              f'xAOD::TrackStateValidationAuxContainer#{kwargs["PixelMSOSs"]}Aux.',
+              f'xAOD::TrackStateValidationContainer#{kwargs["StripMSOSs"]}',
+              f'xAOD::TrackStateValidationAuxContainer#{kwargs["StripMSOSs"]}Aux.']
+
+    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    acc.merge(addToAOD(flags, toAOD))
+    return acc
+
+
+def ActsMeasurementToTrackParticleDecorationAlgCfg(flags,
+                                                   name: str = "ActsMeasurementToTrackParticleDecorationAlg",
+                                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("TrackParticleKey", "InDetTrackParticles")
 
@@ -19,34 +43,82 @@ def ActsMeasurementToTrackParticleDecorationCfg(flags,
             acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
     
-
-    acc.addEventAlgo(CompFactory.ActsTrk.MeasurementToTrackParticleDecoration(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.MeasurementToTrackParticleDecorationAlg(name, **kwargs))
     return acc
 
 
-def ActsPixelClusterTruthDecorator(flags,
-                                   name: str = "ActsPixelClusterTruthDecorator",
-                                   **kwargs) -> ComponentAccumulator:
+def ActsPixelClusterTruthDecoratorAlgCfg(flags,
+                                         name: str = "ActsPixelClusterTruthDecoratorAlg",
+                                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("SiClusterContainer","ITkPixelClusters")
+    kwargs.setdefault("ClusterContainer","ITkPixelClusters")
     kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
+    kwargs.setdefault("MeasurementContainer","ITkPixelMeasurements")
+    kwargs.setdefault("UseTruthInfo", flags.Tracking.doTruth)
 
-    #Using the same name of the xAOD::SiCluster causes bunch of warnings
-    kwargs.setdefault("OutputClusterContainer","ITkPixelClusters")
+    if "LorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
+        
+    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecoratorAlg(name,**kwargs))
 
-
-    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecorator(name,**kwargs))
+    # add SDO and SiHit info
+    if flags.Acts.decoratePRD.sdoSiHit:
+        acc.merge(ActsPixelClusterSiHitDecoratorAlgCfg(flags))
+    
+    # Persistification
+    if flags.Tracking.writeExtendedSi_PRDInfo:
+        toAOD = [
+            f'xAOD::TrackMeasurementValidationContainer#{kwargs["MeasurementContainer"]}',
+            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["MeasurementContainer"]}Aux.'
+        ]        
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+        acc.merge(addToAOD(flags, toAOD))
+        
     return acc
 
 
-def ActsStripClusterTruthDecorator(flags,
-                                   name: str = "ActsStripClusterTruthDecorator",
-                                   **kwargs) -> ComponentAccumulator:
+def ActsStripClusterTruthDecoratorAlgCfg(flags,
+                                         name: str = "ActsStripClusterTruthDecoratorAlg",
+                                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("SiClusterContainer","ITkStripClusters")
+    kwargs.setdefault("ClusterContainer","ITkStripClusters")
     kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
-    kwargs.setdefault("OutputClusterContainer","ITkStripClusters")
+    kwargs.setdefault("MeasurementContainer","ITkStripMeasurements")
+    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecoratorAlg(name,**kwargs))
 
+    if flags.Acts.decoratePRD.sdoSiHit:
+        acc.merge(ActsStripClusterSiHitDecoratorAlgCfg(flags))
+        
+    # Persistification
+    if flags.Tracking.writeExtendedSi_PRDInfo:
+        toAOD = [
+            f'xAOD::TrackMeasurementValidationContainer#{kwargs["MeasurementContainer"]}',
+            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["MeasurementContainer"]}Aux.'
+        ]        
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+        acc.merge(addToAOD(flags, toAOD))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecorator(name,**kwargs))
+    return acc
+
+def ActsPixelClusterSiHitDecoratorAlgCfg(flags,
+                                         name: str = "ActsPixelClusterSiHitDecoratorAlg",
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('Measurements', 'ITkPixelMeasurements')
+    kwargs.setdefault('Clusters', 'ITkPixelClusters')
+    kwargs.setdefault('SDOs', 'ITkPixelSDO_Map')
+    kwargs.setdefault('SiHits', 'ITkPixelHits')
+    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterSiHitDecoratorAlg(name, **kwargs))
+    return acc
+
+def ActsStripClusterSiHitDecoratorAlgCfg(flags,
+                                         name: str = "ActsStripClusterSiHitDecoratorAlg",
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('Measurements', 'ITkStripMeasurements')
+    kwargs.setdefault('Clusters', 'ITkStripClusters')
+    kwargs.setdefault('SDOs', 'ITkStripSDO_Map')
+    kwargs.setdefault('SiHits', 'ITkStripHits')
+    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterSiHitDecoratorAlg(name, **kwargs))
     return acc

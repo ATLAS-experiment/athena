@@ -1,14 +1,24 @@
 #!/bin/bash
 set -e
 
-source FPGATrackSim_CommonEnv.sh
 TEST_LABEL="F210"
+xAODOutput="FPGATrackSim_${TEST_LABEL}_AOD.root"
 
-if [ -z $1 ]; then
-    xAODOutput="FPGATrackSim_${TEST_LABEL}_AOD.root"
-else # this is useful when using the same script for ART
-    xAODOutput=$1
-fi
+FWRD_ARGS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output)
+            xAODOutput="$2"
+            shift 2
+            ;;
+        *)
+            # Collect all other arguments to forward
+            FWRD_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
 
 echo "... Running ${TEST_LABEL} analysis"
 run_F210(){
@@ -25,7 +35,11 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.tracking=True \
     Trigger.FPGATrackSim.writeToAOD=True \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
-    Trigger.FPGATrackSim.NNonnxFile=$ONNX_INPUT \
+    Trigger.FPGATrackSim.FakeNNonnxFile=$ONNX_INPUT_FAKE \
+    Trigger.FPGATrackSim.ParamNNonnxFile=$ONNX_INPUT_PARAM \
+    Trigger.FPGATrackSim.ExtensionNNVolonnxFile=$ONNX_INPUT_VOL \
+    Trigger.FPGATrackSim.ExtensionNNHitonnxFile=$ONNX_INPUT_HIT \
+    Trigger.FPGATrackSim.doNNPathFinder=True \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring${TEST_LABEL}.root"
 }
 run_F210

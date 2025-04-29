@@ -77,9 +77,9 @@ def TrigInDetExtensionProcessorCfg(flags, name="InDetTrigMTExtensionProcessor", 
 
     if "ScoringTool" not in kwargs:
         from InDetConfig.InDetTrackScoringToolsConfig import (
-            InDetTrigAmbiScoringToolCfg)
+            TrigAmbiScoringToolCfg)
         InDetExtenScoringTool = acc.popToolsAndMerge(
-            InDetTrigAmbiScoringToolCfg(flags,
+            TrigAmbiScoringToolCfg(flags,
                                         name="TrigAmbiguityScoringTool"+flags.Tracking.ActiveConfig.input_name))
         acc.addPublicTool(InDetExtenScoringTool)
         kwargs.setdefault("ScoringTool", InDetExtenScoringTool)

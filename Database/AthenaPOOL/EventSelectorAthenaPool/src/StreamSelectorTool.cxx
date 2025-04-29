@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file StreamSelectorTool.cxx
@@ -18,12 +18,7 @@
 
 #include "PoolSvc/IPoolSvc.h"
 
-//___________________________________________________________________________
-StreamSelectorTool::StreamSelectorTool(const std::string& type, const std::string& name, const IInterface* parent) : 
-	AthAlgTool(type, name, parent)
-{
-   declareInterface<IAthenaSelectorTool>(this);
-}
+
 //___________________________________________________________________________
 StreamSelectorTool::~StreamSelectorTool() {
 }
@@ -47,12 +42,12 @@ StatusCode StreamSelectorTool::postNext() const {
       if (attrList->specification().exists("eventRef")) {
          // Recording Extension DataHeader
          const std::string tokenStr = (*attrList)["eventRef"].data<std::string>();
-         Token* token = new Token;
+         auto token = std::make_unique<Token>();
          token->fromString(tokenStr);
          token->setCont("POOLContainer_" + m_streamName.value() + "(DataHeader)");
-         IOpaqueAddress* iop = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", m_streamName.value(), IPoolSvc::kInputStream, token);
+         IOpaqueAddress* iop = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", m_streamName.value(), IPoolSvc::kInputStream, std::move(token));
          if (!evtStore()->recordAddress(iop).isSuccess()) {
-            ATH_MSG_ERROR("Failed to record AthenaAttribute, name = " << token->contID() << ", eventRef = " << tokenStr);
+            ATH_MSG_ERROR("Failed to record AthenaAttribute, container = " << m_streamName.value() << ", eventRef = " << tokenStr);
             return(StatusCode::FAILURE);
          }
       }

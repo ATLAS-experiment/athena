@@ -75,6 +75,7 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
 
     Gaudi::Property<bool> m_applyMasking{this,"ApplyMasking",true,"Apply masking of supercells based on provenance bits. Should be set to False for MC"};
 
+    Gaudi::Property<bool> m_v6Mapping{this,"UseLATOMEv6Mapping",false,"If true, will use the LATOME v6 mapping"};
 
 };
 

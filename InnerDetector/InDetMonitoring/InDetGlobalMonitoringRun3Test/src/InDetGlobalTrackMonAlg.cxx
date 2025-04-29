@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -83,7 +83,7 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
 
   uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
   
-  for (const auto& trackPart: *trackParticles) {
+  for (const auto trackPart: *trackParticles) {
     const Trk::Track * track = trackPart->track();
     if ( !track )
       {

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # Cosmic_run3_v1.py menu
@@ -12,14 +12,12 @@ from .Physics_pp_run3_v1 import (
     SingleJetGroup,
     SingleBjetGroup,
     SingleMuonGroup,
-    SingleTauGroup,
     MultiMuonGroup,
     EgammaMuonGroup,
     PrimaryLegGroup,
     PrimaryL1MuGroup,
     PrimaryPhIGroup,
     MinBiasGroup,
-    SupportLegGroup,
     JetStreamersGroup,
     METStreamersGroup,
     TauStreamersGroup,
@@ -61,10 +59,6 @@ def getCosmicSignatures():
         ChainProp(name='HLT_e5_etcut_L1eEM5',stream=['Main'], groups=['RATE:SingleElectron', 'BW:Egamma']),
     ]
 
-    chains['Tau'] = [
-        ChainProp(name='HLT_tau0_ptonly_L1eTAU12', l1SeedThresholds=['eTAU12'], stream=['Main'], groups=PrimaryPhIGroup+SingleTauGroup),
-    ]
-
     chains['Jet'] = [
         #phase-I
         ChainProp(name='HLT_j15_L1jJ60_EMPTY'   , l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+SingleJetGroup),
@@ -92,7 +86,7 @@ def getCosmicSignatures():
     ]
 
     chains['Streaming'] = [
-        ChainProp(name='HLT_noalg_L1TRT_EMPTY',  l1SeedThresholds=['FSNOSEED'], stream=['IDCosmic','express'],groups=['RATE:SeededStreamers','BW:Other']),
+        ChainProp(name='HLT_noalg_L1TRT_EMPTY',  l1SeedThresholds=['FSNOSEED'], stream=['IDCosmic','express'],groups=['RATE:SeededStreamers','BW:Other'],monGroups=['detMon'] ),
         ChainProp(name='HLT_noalg_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['IDCosmic'],groups=['RATE:SeededStreamers','BW:Other']),
 
         ChainProp(name='HLT_noalg_L1RD0_EMPTY',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup),

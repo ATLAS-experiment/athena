@@ -279,7 +279,6 @@ IParticleWriter::IParticleWriter(
   H5::Group& group,
   const IParticleWriterConfig& cfg)
 {
-  using input_type = In_t;
   using IPC = xAOD::IParticleContainer;
   using IP = xAOD::IParticle;
   Consumer_t c;

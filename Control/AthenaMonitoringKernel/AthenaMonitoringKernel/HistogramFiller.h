@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_h
@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include "CxxUtils/AthUnlikelyMacros.h"
 
@@ -49,7 +50,7 @@ namespace Monitored {
      */
     HistogramFiller(const HistogramDef& histDef, std::shared_ptr<IHistogramProvider> histogramProvider)
       : m_histDef(new HistogramDef(histDef)),
-        m_histogramProvider(histogramProvider) {}
+        m_histogramProvider(std::move(histogramProvider)) {}
     /**
      * @brief Copy constructor
      *
@@ -100,7 +101,7 @@ namespace Monitored {
       }
 
       /**
-       * @brief names of all varaibles stored
+       * @brief names of all variables stored
        */
       std::vector<std::string> names() const {
 	std::vector<std::string> r;

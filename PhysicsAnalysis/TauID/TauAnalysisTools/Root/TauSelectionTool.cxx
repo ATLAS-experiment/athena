@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -101,12 +101,13 @@ StatusCode TauSelectionTool::initialize()
     ATH_MSG_WARNING("Configured tool via setProperty and configuration file, which may lead to unexpected configuration.");
     ATH_MSG_WARNING("In doubt check the configuration that is printed when the tool is initialized and the message level is set to debug");
     ATH_MSG_WARNING("For further details please refer to the documentation:");
-    ATH_MSG_WARNING("https://gitlab.cern.ch/atlas/athena/blob/master/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst");
+    ATH_MSG_WARNING("https://gitlab.cern.ch/atlas/athena/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst");
   }
   if (!bConfigViaConfigFile and !bConfigViaProperties)
   {
     ATH_MSG_WARNING("No cut configuration provided, the tool will not do anything. For further details please refer to the documentation:");
-    ATH_MSG_WARNING("https://gitlab.cern.ch/atlas/athena/blob/master/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst");
+    ATH_MSG_WARNING("https://gitlab.cern.ch/atlas/athena/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst");
+    return StatusCode::SUCCESS;
   }
 
   if (bConfigViaConfigFile)
@@ -221,18 +222,27 @@ StatusCode TauSelectionTool::initialize()
         iSelectionCuts = iSelectionCuts | CutGNTauScoreSigTrans;
         if (m_vGNTauSigTransRegion.empty())
           TauAnalysisTools::split(rEnv,"GNTauSigTransRegion", ';', m_vGNTauSigTransRegion);
+
+	// check if using GNTau 
+        m_useGNTau = true; 
       }
       else if (sCut == "GNTauSigTransMin")
       {
         iSelectionCuts = iSelectionCuts | CutGNTauScoreSigTrans;
         if (m_dGNTauSigTransMin != m_dGNTauSigTransMin)
           m_dGNTauSigTransMin = rEnv.GetValue("GNTauSigTransMin",NAN);
+
+	// check if using GNTau 
+	m_useGNTau = true;
       }
       else if (sCut == "GNTauSigTransMax")
       {
         iSelectionCuts = iSelectionCuts | CutGNTauScoreSigTrans;
         if (m_dGNTauSigTransMax != m_dGNTauSigTransMax)
           m_dGNTauSigTransMax = rEnv.GetValue("GNTauSigTransMax",NAN);
+
+	// check if using GNTau 
+	m_useGNTau = true;
       }
       else if (sCut == "EleRNNRegion")
       {
@@ -289,16 +299,20 @@ StatusCode TauSelectionTool::initialize()
   m_sJetIDWP = convertJetIDWPToStr(m_iJetIDWP);
   m_sEleIDWP = convertEleIDWPToStr(m_iEleIDWP);
 
+  // check if using GNTau  
+  if(m_sJetIDWP.find("GNTAU") != std::string::npos)
+     m_useGNTau = true;	  
+
   // initialise the ReadHandleKey of the muon container when the muon veto is applied
   ATH_CHECK( m_muonContainerKey.initialize( m_iSelectionCuts & CutMuonOLR ) );
 
   ATH_CHECK( m_tauContainerKey.initialize() );
 
   // initialise the ReadDecorHandleKey if GNTau is applied
-  if (m_iSelectionCuts & CutJetIDWP) {
-    ATH_CHECK( m_GNTauDecorKey.assign(m_tauContainerKey.key()+".GNTauScoreSigTrans_v1trunc"));
+  if (m_useGNTau) {
+    ATH_CHECK( m_GNTauDecorKey.assign(m_tauContainerKey.key()+".GNTauScoreSigTrans_v0prune"));
   }
-  ATH_CHECK( m_GNTauDecorKey.initialize( m_iSelectionCuts & CutJetIDWP ) );
+  ATH_CHECK( m_GNTauDecorKey.initialize( m_useGNTau ) );
 
   // initialise the ReadDecorHandleKey if eVeto is applied
   if (m_iSelectionCuts & CutEleIDWP) {

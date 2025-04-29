@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/tools/DataProxyHolder.h
@@ -15,20 +15,21 @@
 #define ATHLINKS_DATAPROXYHOLDER_H
 
 
-#include "SGTools/CurrentEventStore.h"
-#include "SGTools/DataProxy.h"
-#include "AthenaKernel/IStringPool.h"
-#include "AthenaKernel/RCUObject.h"
-#include "AthenaKernel/IInputRename.h"
-#include "CxxUtils/checker_macros.h"
+#include "CxxUtils/sgkey_t.h"
+#include "GaudiKernel/ClassID.h"
 #include <string>
 #include <unordered_map>
+#include <cassert>
+
+
+class IProxyDict;
 
 
 namespace SG {
 
 
 class ThinningCache;
+class DataProxy;
 
 
 /**
@@ -61,21 +62,17 @@ class DataProxyHolder
 {
 public:
   /// Type of hashed keys.
-  typedef IStringPool::sgkey_t sgkey_t;
+  using sgkey_t = SG::sgkey_t;
 
   /// Type of string keys.
-  typedef std::string                ID_type;
+  using ID_type = std::string;
 
   /// Generic pointer type.
-  typedef void*                      pointer_t;
-  typedef const void*                const_pointer_t;
+  using pointer_t       = void*;
+  using const_pointer_t = const void*;
 
   /// Function casting from a @c SG::DataProxy to a pointer.
   typedef void* castfn_t (SG::DataProxy*);
-
-  /// Input renaming map.
-  typedef Athena::IInputRename::InputRenameMap_t InputRenameMap_t;
-  typedef Athena::IInputRename::InputRenameRCU_t InputRenameRCU_t;
 
 
   /**
@@ -377,13 +374,6 @@ public:
    * This will fill in parameters for the exception message from the proxy.
    */
   void throwInvalidLink (sgkey_t sgkey) const;
-
-
-  /**
-   * @brief Set map used for performing input renaming in toTransient.
-   * @param map The new map, or nullptr for no renmaing.
-   */
-  static void setInputRenameMap ATLAS_NOT_THREAD_SAFE (const InputRenameRCU_t* map);
 
 
 private:

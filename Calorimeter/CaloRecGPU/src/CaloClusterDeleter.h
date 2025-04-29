@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -19,12 +19,11 @@
  */
 
 class CaloClusterDeleter :
-  public AthAlgTool, virtual public CaloClusterCollectionProcessor
+  public extends<AthAlgTool, CaloClusterCollectionProcessor>
 {
  public:
+  using base_class::base_class;
 
-  CaloClusterDeleter(const std::string & type, const std::string & name, const IInterface * parent);
-  
   using CaloClusterCollectionProcessor::execute;
   
   virtual StatusCode execute (const EventContext& ctx, xAOD::CaloClusterContainer* cluster_collection) const override;

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 import sys
 from AthenaConfiguration.ComponentFactory import CompFactory
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
@@ -20,6 +20,7 @@ def main():
         )
         flags.addFlag(f"Output.doWrite{streamName}{i}", True)
 
+    flags.fillFromArgs()
     flags.lock()
 
     acc = EventFormatTestOutputCfg(

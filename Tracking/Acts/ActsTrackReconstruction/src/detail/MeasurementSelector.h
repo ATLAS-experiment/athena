@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   */
 #pragma once
 
@@ -17,7 +17,6 @@
 #include "Acts/Utilities/Delegate.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilterError.hpp"
-#include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/GeometryHierarchyMap.hpp"
 #include "Acts/EventData/Types.hpp"
@@ -69,10 +68,18 @@ struct MeasurementSelectorTraits
    using PredictedCovariance = typename Acts::detail_lt::FixedSizeTypes<N>::Covariance;
 
    // e.g. helper template to get the value_type from the container type
-   template <typename T_Container>
+   // e.g. helper template to get the value_type from the measurement range iterator type
+
+   template <typename T_MeasurementRangeIterator>
    struct MeasurementContainerTraits {
-      using value_type = typename T_Container::value_type;
+      using value_type = typename T_MeasurementRangeIterator::value_type;
    };
+
+   // abstract measurement range
+   // implements empty()
+   // and can be converted by the derived_t into an iterable range
+   // over measurements of concrete measurement container_type.
+   using abstract_measurement_range_t = std::ranges::iota_view<unsigned int, unsigned int>;
 
    // the trajectory type to which states for selected measurements are to be added
    using trajectory_t = typename derived_t::traj_t;
@@ -414,53 +421,28 @@ protected:
       bool             m_isOutLier;
    };
 
-   // simple adapter to support a range-based for loop
-   // the adapter creates iterators to directly iterate over the measurement range
-   // where the measurement range is extracted from the specific source link iterators
-   // which provide the start and end index of the measurements which define the contiguous
-   // measuremnt range.
-   // @TODO pass such an object instead of sourceLinkBegin, sourceLinkEnd
-   //    in selectMeasurementsCreateTrackStates ?
-   template <typename T>
-   struct MeasurementRange {
-   private:
-      const T *m_container{};
-      using const_iterator = typename T::const_iterator;
-      const_iterator m_begin;
-      const_iterator m_end;
-   public:
-      template <typename Iterator>
-      MeasurementRange( const T &container, const Iterator &begin_iter, const Iterator &end_iter)
-         : m_begin( container.begin() + begin_iter.m_iterator.index()),
-           m_end( container.begin() + end_iter.m_iterator.index())
-      {
-      }
-      const_iterator begin() const { return m_begin; }
-      const_iterator end() const  { return m_end; }
-   };
-
    // type and dimension specific function to select measurements from the range defined by the source link iterators.
    // will iterate over the contiguous measurement range defined by the source link iterators where the measurements
    // are contained in the given container. The selection lopp will get the measurement and covariance with the
    // help of a preCalibrator. select measurements based on smallest chi2 wrt. the prediction, then optionally
    // apply a full calibrator after the selection and finally create track states.
-   template <std::size_t DIM, typename source_link_iterator_t, typename T_Container>
+   template <std::size_t DIM, typename T_MeasurementRange>
    Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >
    selectMeasurementsCreateTrackStates(const Acts::GeometryContext& geometryContext,
                                        const Acts::CalibrationContext& calibrationContext,
                                        const Acts::Surface& surface,
                                        const T_BoundState& boundState,
-                                       const source_link_iterator_t& sourceLinkBegin,
-                                       const source_link_iterator_t& sourceLinkEnd,
+                                       T_MeasurementRange &&measurement_range,
                                        std::size_t prevTip,
                                        trajectory_t& trajectory,
                                        const Acts::Logger& logger,
                                        const std::size_t numMeasurementsCut,
-                                       const std::pair<float,float>& maxChi2Cut,
-                                       const T_Container &container) const {
+                                       const std::pair<float,float>& maxChi2Cut) const {
       Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >
          result = boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface>{};
-      using container_value_t  = typename MeasurementSelectorTraits<derived_t>::template MeasurementContainerTraits<T_Container>::value_type;
+
+      using iterator_t = decltype(measurement_range.begin());
+      using container_value_t  = typename MeasurementSelectorTraits<derived_t>::template MeasurementContainerTraits<iterator_t>::value_type;
       using BaseElementType = std::remove_cv_t<std::remove_pointer_t< container_value_t > >;
       // get calibrator
       using TheMatchingMeasurement = MatchingMeasurement<DIM, container_value_t >;
@@ -485,11 +467,11 @@ protected:
       auto preCalibrator = derived().template preCalibrator<DIM, BaseElementType>();
       TopCollection<NMeasMax, TheMatchingMeasurement > selected_measurements(numMeasurementsCut);
       {
-         for ( const auto &measurement : MeasurementRange<T_Container>(container, sourceLinkBegin, sourceLinkEnd) ) {
+         for ( const auto &measurement : measurement_range ) {
             TheMatchingMeasurement &matching_measurement=selected_measurements.slot();
             matching_measurement.m_measurement = preCalibrator(geometryContext,
                                                                calibrationContext,
-                                                               derived().template forwardToCalibrator(measurement),
+                                                               derived().forwardToCalibrator(measurement),
                                                                derived().boundParams(boundState));
             matching_measurement.m_chi2 = computeChi2(matching_measurement.m_measurement.first,
                                                       matching_measurement.m_measurement.second,
@@ -551,7 +533,7 @@ protected:
             // apply the calibration
             calibrated_measurement = postCalibrator(geometryContext,
                                                       calibrationContext,
-                                                      derived().template forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
+                                                      derived().forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
                                                       derived().boundParams(boundState));
             // update chi2 using calibrated measurement
             a_selected_measurement.m_chi2 = computeChi2(calibrated_measurement.first,
@@ -725,38 +707,36 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
       return MeasurementSelectorTraits<derived_t>::s_dimMax;
    }
 
-   template <typename source_link_iterator_t>
-   Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >
-   createSourceLinkTrackStates(const Acts::GeometryContext& geometryContext,
-                               const Acts::CalibrationContext& calibrationContext,
-                               const Acts::Surface& surface,
-                               const T_BoundState& boundState,
-                               source_link_iterator_t sourceLinkBegin,
-                               source_link_iterator_t sourceLinkEnd,
-                               typename TrackStateProxy::IndexType prevTip,
-                               [[maybe_unused]] trajectory_t& trajectory_buffer,
-                               [[maybe_unused]] std::vector<TrackStateProxy> &trackStateCandidates,
-                               trajectory_t& trajectory,
-                               const Acts::Logger& logger) const {
+  Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >
+  createTrackStates(const Acts::GeometryContext& geometryContext,
+                    const Acts::CalibrationContext& calibrationContext,
+                    const Acts::Surface& surface,
+                    const T_BoundState& boundState,
+                    typename TrackStateProxy::IndexType prevTip,
+                    [[maybe_unused]] std::vector<TrackStateProxy>& trackStateCandidates,
+                    trajectory_t& trajectory,
+                    const Acts::Logger& logger) const {
+
       Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >
          result = Acts::CombinatorialKalmanFilterError::MeasurementSelectionFailed;
-      if (sourceLinkBegin != sourceLinkEnd) {
+      // get associated measurement container and the relevant measurement range for the given surface.
+      auto [a_measurement_container_variant_ptr, range] = this->derived().containerAndRange(surface);
+      if (!this->derived().expectMeasurements( surface, a_measurement_container_variant_ptr, range)) {
+         result = result.failure(Acts::CombinatorialKalmanFilterError::NoMeasurementExpected);
+         return result;
+      }
+      if (!range.empty()) {
          auto [numMeasurementsCut, maxChi2Cut] = this->getCuts(surface,boundState, logger);
          // numMeasurementsCut is == 0 in case getCuts failed
          // anyway cannot select anything if numMeasurementsCut==0;
          if (numMeasurementsCut>0) {
-            const std::vector<measurement_container_variant_t> &
-               measurementContainer = sourceLinkBegin.m_iterator.measurementContainerList();
 
-            assert( sourceLinkBegin.m_iterator.containerIndex() == sourceLinkEnd.m_iterator.containerIndex() );
-            const measurement_container_variant_t &a_measurement_container_variant = measurementContainer.at(sourceLinkBegin.m_iterator.containerIndex());
             result = std::visit( [this,
                                   &geometryContext,
                                   &calibrationContext,
                                   &surface,
                                   &boundState,
-                                  &sourceLinkBegin,
-                                  &sourceLinkEnd,
+                                  &range,
                                   prevTip,
                                   &trajectory,
                                   &logger,
@@ -764,21 +744,25 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
                                   &maxChi2Cut] (const auto &measurement_container_with_dimension) {
                using ArgType = std::remove_cv_t<std::remove_reference_t< decltype(measurement_container_with_dimension) > >;
                constexpr std::size_t DIM = ArgType::dimension();
-               return this->template selectMeasurementsCreateTrackStates<DIM>(geometryContext,
-                                                                             calibrationContext,
-                                                                             surface,
-                                                                             boundState,
-                                                                             sourceLinkBegin,
-                                                                             sourceLinkEnd,
-                                                                             prevTip,
-                                                                             trajectory,
-                                                                             logger,
-                                                                             numMeasurementsCut,
-                                                                             maxChi2Cut,
-                                                                             measurement_container_with_dimension.container());
+               auto measurement_range = this->derived().rangeForContainer(measurement_container_with_dimension,range);
+               return
+                  this->template
+                  selectMeasurementsCreateTrackStates<DIM, decltype(measurement_range)>(geometryContext,
+                                                           calibrationContext,
+                                                           surface,
+                                                           boundState,
+                                                           std::move(measurement_range),
+                                                           prevTip,
+                                                           trajectory,
+                                                           logger,
+                                                           numMeasurementsCut,
+                                                           maxChi2Cut);
             },
-                                  a_measurement_container_variant);
+            *a_measurement_container_variant_ptr);
          }
+      }
+      else {
+         result = Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >::success({});
       }
       return result;
    }
@@ -789,6 +773,7 @@ template <std::size_t NMeasMax,
           typename measurement_container_variant_t>
 struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMeasMax, derived_t, measurement_container_variant_t> {
    using T_BoundState = MeasurementSelectorTraits<derived_t>::BoundState;
+   using abstract_measurement_range_t = MeasurementSelectorTraits<derived_t>::abstract_measurement_range_t;
 
    // get the bound parameters and covariance of the bound state
    static const MeasurementSelectorTraits<derived_t>::BoundTrackParameters &boundParams(const T_BoundState &boundState)  {
@@ -822,6 +807,7 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
          return *a;
       }
    }
+
 
    // get mapping between bound state parameters and coordinates in the measurement domain
    // in most cases this is just the identity operation e.g. loc0 -> coord0 and loc1 -> coord1
@@ -871,4 +857,27 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
    const PreCalibrator<DIM, measurement_t> &
    preCalibrator() const; // not implemented
 
+
+   /// Get container and index range for measurements on the given surface
+   /// @return tuple of container, begin index and end index
+   /// @note return a tuple containing a measurement container variant for the given surface and the index range for measurements
+   ///       on that surface. The index range may be empty.
+   std::tuple<const measurement_container_variant_t &, abstract_measurement_range_t>
+   containerAndRange(const Acts::Surface &surface) const; // not implemented
+
+   /// @param surface a surface
+   /// @param container_variant_ptr abstract measurement container as returned by @ref containerAndRange
+   /// @param abstract_range the range as returned by @ref containerAndRange for the given surface
+   /// @return true if measurements are expected, false if the surface is not supposed to have valid measurements.
+   bool expectMeasurements([[maybe_unused]] const Acts::Surface &surface,
+                           [[maybe_unused]] const measurement_container_variant_t *container_variant_ptr,
+                           const abstract_measurement_range_t &abstract_range) const;
+
+   /// Create a range over elements of the given container from an abstract range
+   /// @tparam measurement_container_t a concrete container type which is one of one of the possible types of measurement_container_variant_t
+   /// @param abstract_range the range as returned by @ref containerAndRange
+   /// @return an itrerable range over elements of the given specified by the abstract range.
+   template <typename measurement_container_t>
+   static auto
+   rangeForContainer(const measurement_container_t &concrete_container, const abstract_measurement_range_t &abstract_range);
 };

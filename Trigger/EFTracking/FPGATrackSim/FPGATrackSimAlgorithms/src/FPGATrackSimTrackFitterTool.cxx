@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrackSimTrackFitterTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 
@@ -42,7 +42,7 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
     else {
       nominalbank = m_FPGATrackSimBank->FitConstantBank_2nd();
       if (!m_guessHits) {
-        for (unsigned int iplane = 0; iplane < m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers(); iplane++) {
+        for (unsigned int iplane = 0; iplane < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); iplane++) {
           const FPGATrackSimFitConstantBank* bank = m_FPGATrackSimBank->FitConstantBank_2nd(iplane);
           bankvec.push_back(bank);
         }
@@ -57,7 +57,7 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
       m_tfpobj->setPlaneMap(m_FPGATrackSimMapping->PlaneMap_1st(0));
       m_tfpobj->setRegionMap(m_FPGATrackSimMapping->RegionMap_1st());
     } else {
-      m_tfpobj->setPlaneMap(m_FPGATrackSimMapping->PlaneMap_2nd());
+      m_tfpobj->setPlaneMap(m_FPGATrackSimMapping->PlaneMap_2nd(0));
       m_tfpobj->setRegionMap(m_FPGATrackSimMapping->RegionMap_2nd());
     }
 

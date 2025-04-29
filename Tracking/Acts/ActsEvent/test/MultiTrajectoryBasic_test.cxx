@@ -64,8 +64,8 @@ struct TestTrackState {
         pathLength(
             std::uniform_real_distribution<double>(1_mm, 10_mm)(rng)) {
     // set a random geometry identifier to uniquely identify each surface
-    auto geoId =
-        std::uniform_int_distribution<GeometryIdentifier::Value>()(rng);
+    GeometryIdentifier geoId{
+        std::uniform_int_distribution<GeometryIdentifier::Value>()(rng)};
     surface->assignGeometryId(geoId);
 
     // create source link w/ inline 1d or 2d measurement data
@@ -107,7 +107,6 @@ struct EmptyTrackStatesAux {
   ActsTrk::MutableMultiTrajectory m;
 };
 
-// cppcheck-suppress syntaxError
 BOOST_FIXTURE_TEST_CASE(AllMtjStaticxAODVariablesAreKnown, EmptyTrackStatesAux) {
     for (auto id : m.trackStatesAux()->getStore()->getAuxIDs()) {
         const std::string name = SG::AuxTypeRegistry::instance().getName(id);
@@ -171,9 +170,9 @@ std::default_random_engine rng(31415);
 BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectory)
 
 struct EmptyMTJ {  // setup empty MTJ
-  EmptyMTJ() {
-    mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>();
-  }
+  EmptyMTJ() :
+    mtj(std::make_unique<ActsTrk::MutableMultiTrajectory>())
+  {}
 
   std::unique_ptr<ActsTrk::MutableMultiTrajectory> mtj;
   ActsTrk::MultiTrajectory* ro_mtj() {
@@ -196,7 +195,6 @@ BOOST_AUTO_TEST_CASE(OwningMTJ) {
   ActsTrk::MutableMultiTrajectory mtj;
 }
 
-// cppcheck-suppress syntaxError
 BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
   BOOST_CHECK(mtj->has_backends());
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
@@ -315,6 +313,28 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
              boost::test_tools::tolerance(0.01));
   BOOST_TEST((ro_ts2.component<float, "mcprob"_hash>()) == 0.0,
              boost::test_tools::tolerance(0.01));
+
+  auto dest_mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>();
+  dest_mtj->addColumn<short>("author");
+  dest_mtj->addColumn<float>("mcprob");
+  using namespace Acts::HashedStringLiteral;
+
+  auto dest_i0 = dest_mtj->addTrackState(kMask);
+  auto dest_ts0 = dest_mtj->getTrackState(dest_i0);
+  dest_ts0.copyFrom(ts0);
+
+  BOOST_CHECK_EQUAL((ro_ts0.component<short, "author"_hash>()),
+                    (dest_ts0.component<short, "author"_hash>()));
+
+  BOOST_CHECK_EQUAL((ro_ts0.component<float, "mcprob"_hash>()),
+                    (dest_ts0.component<float, "mcprob"_hash>()));
+
+
+  // make completely new r/o MTJ
+  auto fresh_ro_mtj = std::make_unique<ActsTrk::MultiTrajectory>(*mtj.get());
+
+
+  BOOST_CHECK_EQUAL(fresh_ro_mtj->size(), mtj->size());
 }
 
 // FIXME - test below should use ACTS::MTJ api once available in needed shape
@@ -474,7 +494,7 @@ BOOST_FIXTURE_TEST_CASE(AddTrackStateWithBitMask, EmptyMTJ) {
   BOOST_CHECK(ts.hasPredicted());
   BOOST_CHECK(ts.hasFiltered());
   BOOST_CHECK(ts.hasSmoothed());
-  BOOST_CHECK(ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasCalibrated());
   BOOST_CHECK(ts.hasProjector());
   BOOST_CHECK(ts.hasJacobian());
   alwaysPresent(ts);
@@ -519,7 +539,7 @@ BOOST_FIXTURE_TEST_CASE(AddTrackStateWithBitMask, EmptyMTJ) {
   BOOST_CHECK(!ts.hasPredicted());
   BOOST_CHECK(!ts.hasFiltered());
   BOOST_CHECK(!ts.hasSmoothed());
-  BOOST_CHECK(ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasCalibrated());
   BOOST_CHECK(ts.hasProjector());
   BOOST_CHECK(!ts.hasJacobian());
 
@@ -690,7 +710,7 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   // TODO we create a trackState already with "calibrated" and
   // allocateCalibrated not implemented
 
-  BOOST_CHECK(tsall.has<"calibrated"_hash>());
+  BOOST_CHECK(!tsall.has<"calibrated"_hash>());
   BOOST_CHECK(tsall.has<"projector"_hash>());
   // TODO referenceSurface not implemented
 

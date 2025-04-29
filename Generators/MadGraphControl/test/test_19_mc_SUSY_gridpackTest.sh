@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# art-include: 21.6/AthGeneration
 # art-include: main/AthGeneration
 # art-description: MadGraph Event Generation Test - SUSY LO gridpack
 # art-type: grid

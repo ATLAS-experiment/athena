@@ -70,10 +70,7 @@ namespace IOVDbNamespace{
         std::cout<<e.what()<<std::endl; //typically a parsing error
       }
       m_sharedSpec = parsePayloadSpec(specString);
-      const auto & payload=j["data"];//payload is an object in any case, of form {"0":["datastring"]}
-      //keep these lines for reference: iov handling is not yet implemented, but should be
-      //const auto & iovFromFile=j["iov"];//iov is a two-element array
-      //const std::pair<cool::ValidityKey, cool::ValidityKey> iov(iovFromFile[0], iovFromFile[1]);
+      const auto & payload=(j.contains("data")) ? j["data"] : j;
       if(iov) {
 	m_basicFolder.setIov(*iov);
       }

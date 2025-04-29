@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ const std::vector<const Trk::Surface*>*
       (*outerSurfaces)[out]->transform().inverse() * transf, m_inner);
 
     if (splo || sclo) { // multiple subtraction
-      SharedObject<Trk::AreaExcluder> vEx;
+      std::shared_ptr<Trk::AreaExcluder> vEx;
       bool shared = false;
       if (splo) {
         vEx = splo->subtractedVolume();
@@ -236,7 +236,7 @@ const std::vector<const Trk::Surface*>*
 
     if (spli || scli) {
       bool shared = false;
-      SharedObject<Trk::AreaExcluder> vEx;
+      std::shared_ptr<Trk::AreaExcluder> vEx;
       if (spli) {
         vEx = spli->subtractedVolume();
         shared = spli->shared();
@@ -330,7 +330,7 @@ Trk::SubtractedVolumeBounds::dump(std::ostream& sl) const
 Trk::Volume*
 Trk::SubtractedVolumeBounds::createSubtractedVolume(
   const Amg::Transform3D& transf,
-  Trk::Volume* subtrVol) 
+  Trk::Volume* subtrVol)
 {
   Trk::Volume* subVol = nullptr;
   if (!subtrVol)

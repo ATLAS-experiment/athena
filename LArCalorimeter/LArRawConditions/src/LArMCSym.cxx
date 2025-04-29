@@ -15,8 +15,8 @@
  * @brief onlHashtoSymOnl Symmetric HWID corresponding to each online hash.
  * @brief symIds List of all symmetric HWIDs.  MUST BE SORTED.
  */
-LArMCSym::LArMCSym(const LArOnlineID* onlId, 
-		   const CaloCell_ID* caloId,
+LArMCSym::LArMCSym(const LArOnlineID_Base* onlId, 
+		   const CaloCell_Base_ID* caloId,
 		   std::vector<HWIdentifier>&& oflHashtoSymOnl,
 		   std::vector<HWIdentifier>&& onlHashtoSymOnl,
 		   std::vector<HWIdentifier>&& symIds) :

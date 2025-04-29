@@ -87,7 +87,7 @@ def get_parser():
                         nargs='+',
                         default=[
                             'TrigSteer_HLT/NInitialRoIsPerEvent',
-                            'HLTFramework/HLTSeeding/RoIs_EM/count'],
+                            'HLTFramework/HLTSeeding/RoIs_eEM/count'],
                         help='Histograms to use for total events. First existing '
                              'histogram from the list is used, default = %(default)s')
     parser.add_argument('--histDict',

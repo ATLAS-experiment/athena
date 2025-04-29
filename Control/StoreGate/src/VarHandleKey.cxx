@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -74,6 +74,10 @@ VarHandleKey::VarHandleKey (CLID clid,
 VarHandleKey& VarHandleKey::operator= (const std::string& sgkey)
 {
   parseKey (sgkey, m_storeHandle.name());
+
+  // Update the hashed key if initialize was already called.
+  if (m_hashedKey > 0) m_hashedKey = m_storeHandle->stringToKey (m_sgKey, clid());
+
   return *this;
 }
 
@@ -99,6 +103,10 @@ StatusCode VarHandleKey::assign (const std::string& sgkey)
   } catch (...) {
     return StatusCode::FAILURE;
   }
+
+  // Update the hashed key if initialize was already called.
+  if (m_hashedKey > 0) m_hashedKey = m_storeHandle->stringToKey (m_sgKey, clid());
+
   return StatusCode::SUCCESS;
 }
 
@@ -217,8 +225,6 @@ void VarHandleKey::updateKey(std::string /*key*/)
 void VarHandleKey::parseKey (const std::string& key,
                              const std::string& storeName)
 {
-  m_hashedKey = 0;
-
   std::string sn;
   // test if storeName has classname
   std::string::size_type sp = storeName.find('/');
@@ -232,6 +238,7 @@ void VarHandleKey::parseKey (const std::string& key,
     this->updateHandle(sn);
     Gaudi::DataHandle::updateKey("");
     m_sgKey.clear();
+    m_hashedKey = 0;
     return;
   }
 
@@ -270,6 +277,7 @@ void VarHandleKey::parseKey (const std::string& key,
 	  && m_sgKey.size() == 1) {
         // Replace '\' with blank key
         m_sgKey.clear();
+        m_hashedKey = 0;
       } else if ( sp == m_sgKey.length()-1) {
         throw SG::ExcBadHandleKey("key \"" + key 
                                   + "\": must not end with a \"/\"");

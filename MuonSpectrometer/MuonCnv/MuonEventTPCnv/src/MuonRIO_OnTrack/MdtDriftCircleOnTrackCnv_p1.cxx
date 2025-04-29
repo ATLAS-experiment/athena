@@ -25,9 +25,6 @@ persToTrans( const Muon::MdtDriftCircleOnTrack_p1 *persObj,
    if (persObj->m_rotCreationParameters&0x40)  errorStrategy.setParameter(Muon::MuonDriftCircleErrorStrategy::ErrorAtPredictedPosition, true); 
    if (persObj->m_rotCreationParameters&0x80)  errorStrategy.setParameter(Muon::MuonDriftCircleErrorStrategy::PropCorrection, true); 
    if (persObj->m_rotCreationParameters&0x100) errorStrategy.setParameter(Muon::MuonDriftCircleErrorStrategy::MagFieldCorrection, true); 
-   if (persObj->m_rotCreationParameters&0x200) errorStrategy.setParameter(Muon::MuonDriftCircleErrorStrategy::WireSagGeomCorrection, true); 
-   if (persObj->m_rotCreationParameters&0x200) errorStrategy.setParameter(Muon::MuonDriftCircleErrorStrategy::WireSagTimeCorrection, true); 
-
    ElementLinkToIDC_MDT_Container rio;
    m_elCnv.persToTrans(&persObj->m_prdLink, &rio, log);  
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 '''
 @file FPGATrackSimBankGenConfig.py
 @author Riley Xu - rixu@cern.ch
@@ -6,12 +6,10 @@
 @brief This file declares functions to configure components in FPGATrackSimBankGen
 '''
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg,FPGATrackSimRoadUnionToolGenScanCfg
-from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimRawLogicCfg, FPGATrackSimMappingCfg
+from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimRawLogicCfg, FPGATrackSimMappingCfg, FPGATrackSimEventSelectionCfg
 from AthenaCommon.SystemOfUnits import GeV
 
 
@@ -69,11 +67,24 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
     theFPGATrackSimMatrixGenAlg.SpacePointTool = acc.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
     theFPGATrackSimMatrixGenAlg.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
 
+    theFPGATrackSimMatrixGenAlg.FPGATrackSimEventSelectionSvc = acc.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
     theFPGATrackSimMatrixGenAlg.FPGATrackSimMappingSvc = acc.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
 
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.secondStage):
+        from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimTrackFitterToolCfg,FPGATrackSimOverlapRemovalToolCfg
+        from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import FPGATrackSimWindowExtensionToolCfg
+        theFPGATrackSimMatrixGenAlg.TrackFitter_1st = acc.getPrimaryAndMerge(FPGATrackSimTrackFitterToolCfg(flags))
+        theFPGATrackSimMatrixGenAlg.OverlapRemoval_1st = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
+        theFPGATrackSimMatrixGenAlg.TrackExtensionTool = acc.getPrimaryAndMerge(FPGATrackSimWindowExtensionToolCfg(flags))
+        theFPGATrackSimMatrixGenAlg.SecondStage = True
+    else:
+        theFPGATrackSimMatrixGenAlg.SecondStage = False
+
+    
     # Override this. It gets set somewhere from bank_tag.
     theFPGATrackSimMatrixGenAlg.WCmax = 2
- 
+    theFPGATrackSimMatrixGenAlg.dropHitsAndFill = flags.dropHitsAndFill
+    
     theFPGATrackSimMatrixGenAlg.FPGATrackSimRawToLogicalHitsTool = acc.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
     if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
         theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGenScanCfg(flags))
@@ -88,11 +99,8 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
     theFPGATrackSimMatrixGenAlg.FPGATrackSimSGToRawHitsTool = acc.popToolsAndMerge(FPGATrackSimSGToRawHitsToolCfg(flags))
     theFPGATrackSimMatrixGenAlg.FPGATrackSimClusteringFTKTool = CompFactory.FPGATrackSimClusteringTool()
 
-    # Do we really want to use the tag system for this? I think so but unsure if modernization needed.
-    import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
-    bank_tag = FPGATrackSimTagConfig.getTags(stage='bank')['bank']
-    theFPGATrackSimMatrixGenAlg.sectorQPtBins = bank_tag['sectorQPtBins']
-    theFPGATrackSimMatrixGenAlg.qptAbsBinning = bank_tag['qptAbsBinning']
+    theFPGATrackSimMatrixGenAlg.sectorQPtBins = [-0.001, -0.0005, 0, 0.0005, 0.001] ### hard-code this for now
+    theFPGATrackSimMatrixGenAlg.qptAbsBinning = False
 
     acc.addEventAlgo(theFPGATrackSimMatrixGenAlg)
 
@@ -103,6 +111,8 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     flags = initConfigFlags()
+    flags.addFlag('dropHitsAndFill', False)
+
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
 
@@ -124,6 +134,11 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.Utils import setupLoggingLevels
     setupLoggingLevels(flags, acc)
+
+    acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    if flags.Trigger.FPGATrackSim.msgLimit!=-1:
+        acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
+        acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
 
     MatrixFileName="matrix.root"
     acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimMATRIXOUT DATAFILE='"+MatrixFileName+"', OPT='RECREATE'"]))

@@ -12,15 +12,17 @@
 Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1"
 Output="test.HITS.pool.root"
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # RUN4 setup
-# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC21-SDR-RUN4-02
 Sim_tf.py \
 --CA \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
+--conditionsTag "default:${conditions}" \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
---geometryVersion 'default:ATLAS-P2-RUN4-03-00-00' \
+--geometryVersion "default:${geometry}" \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \
 --maxEvents 5 \

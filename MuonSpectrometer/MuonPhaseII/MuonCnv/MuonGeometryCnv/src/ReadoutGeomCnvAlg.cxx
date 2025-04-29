@@ -63,8 +63,6 @@ namespace {
 }
 
 namespace MuonGMR4{
-ReadoutGeomCnvAlg::ReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode ReadoutGeomCnvAlg::initialize()  {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -159,18 +157,18 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     
     /// Retrieve the full phyiscal volume
     const GeoVFullPhysVol* readOutVol = copyMe->getMaterialGeom();
-    PVConstLink parentVolume = readOutVol->getParent();
+    PVConstLink parentVolume = readOutVol->getParent();   // This is the physical volume that contains the readOutVol as a child. This is a const link to an existing physical volume
     cacheObj.translatedStations.insert(parentVolume);
     /// Copy the full physical volume of the muon station
-    PVLink parentPhysVol{make_intrusive<GeoFullPhysVol>(parentVolume->getLogVol())};
+    PVLink parentPhysVol{make_intrusive<GeoFullPhysVol>(parentVolume->getLogVol())};  // This is a mutable pointer. This creates a new physical volume using the same logical structure (shapes and materials but not position).
 
     /// Make sure to copy all the children from the original tree that're not FullPhysVols -> represent
     /// They represent the passive material inside the station and are needed for the TrackinGeometry building
-    const std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(parentVolume, false);
+    const std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(parentVolume, false);    // we get the list of child nodes attached to the parent volume
     double minX{1.e9}, maxX{-1.e9}, minY1{1.e9}, maxY1{-1.e9}, minY2{1.e9}, maxY2{-1.e9}, minZ{1.e9}, maxZ{-1.e9};
     for (const GeoChildNodeWithTrf& child : children) {
-        std::vector<Amg::Vector3D> edges = getPolyShapeEdges(child.volume->getLogVol()->getShape(),
-                                                             readOutVol->getX().inverse() * child.transform);
+        std::vector<Amg::Vector3D> edges = getPolyShapeEdges(child.volume->getLogVol()->getShape(),                     //we are getting corner points of the edges
+                                                             readOutVol->getX().inverse() * child.transform);           //getX() returns the transformation from readout physical volume ref to parent physical volume ref. We take the inverse and we chain it with child.transform, which is from child ref to parent ref
         for (const Amg::Vector3D& edge : edges) {
             minX = std::min(minX, edge.x());
             maxX = std::max(maxX, edge.x());
@@ -191,8 +189,6 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     const double longS  = (maxY2 - minY2);
     const double lengthR = (maxX - minX);
     const double lengthZ = (maxZ - minZ);
-
-
     
     const GeoAlignableTransform* alignTrf{copyMe->alignableTransform()};
     /// Transformation to reach from the alignable point to the Muon station
@@ -228,6 +224,9 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     cacheObj.world->add(cacheObj.newIdTag());
     GeoIntrusivePtr<GeoAlignableTransform> trf = make_intrusive<GeoAlignableTransform>(alignedTransform);
     newStation->setTransform(trf);
+    
+    newStation->setNominalAmdbLRSToGlobal( trf->getTransform()); 
+    
     cacheObj.detMgr->addMuonStation(std::move(newStation));
 
     cacheObj.world->add(trf);   
@@ -297,14 +296,15 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, Construc
         newElement->setDoubletZ(copyMe->doubletZ());
         newElement->setIdentifier(reId);
         newElement->setParentMuonStation(station);
+        station->addMuonReadoutElementWithAlTransf(newElement.get(), nullptr, station->nMuonReadoutElements());
 
         /// Define the dimensions
-        newElement->setLongRsize(pars.halfLength);
-        newElement->setLongSsize(pars.halfWidth);
-        newElement->setLongZsize(pars.halfThickness);
-        newElement->setRsize(pars.halfLength);
-        newElement->setSsize(pars.halfWidth);
-        newElement->setZsize(pars.halfThickness);
+        newElement->setLongZsize(2.*pars.halfLength);
+        newElement->setLongSsize(2.*pars.halfWidth);
+        newElement->setLongRsize(2.*pars.halfThickness);
+        newElement->setZsize(2.*pars.halfLength);
+        newElement->setSsize(2.*pars.halfWidth);
+        newElement->setRsize(2.*pars.halfThickness);
 
         newElement->m_nlayers = copyMe->nGasGaps();
         newElement->m_phistripwidth = copyMe->stripPhiWidth();
@@ -445,12 +445,12 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
             const Amg::Vector3D translation{copyMe->globalToLocalTrans(gctx) * copyMe->center(gctx, layHash)};            
             newRE->setPlaneZ(translation.x(), gasGap);
         }
-        newRE->setSsize(copyMe->moduleHeight());
-        newRE->setRsize(copyMe->moduleWidthS());
+        newRE->setRsize(copyMe->moduleHeight());
+        newRE->setSsize(copyMe->moduleWidthS());
         newRE->setZsize(copyMe->moduleThickness());
 
-        newRE->setLongSsize(copyMe->moduleHeight());
-        newRE->setLongRsize(copyMe->moduleWidthL());
+        newRE->setLongRsize(copyMe->moduleHeight());
+        newRE->setLongSsize(copyMe->moduleWidthL());
         newRE->setLongZsize(copyMe->moduleThickness());
 
         newRE->setReadOutParams(readOutPars);
@@ -539,6 +539,7 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
 
     for (const MuonGMR4::sTgcReadoutElement* copyMe : sTgcReadOuts) {
         const Identifier reId = copyMe->identify();
+        ATH_MSG_DEBUG("Translate readout element "<<m_idHelperSvc->toStringDetEl(reId)<<".");
         GeoIntrusivePtr<GeoVFullPhysVol> physVol{cloneNswWedge(gctx, copyMe, cacheObj)};
 
         auto newRE = std::make_unique<MuonGM::sTgcReadoutElement>(physVol, 
@@ -555,10 +556,12 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
             using channelType = MuonGMR4::sTgcReadoutElement::ReadoutChannelType;
             using ChannelDesign =  MuonGM::MuonChannelDesign;
             const IdentifierHash layerHash = MuonGMR4::sTgcReadoutElement::createHash(layer,channelType::Strip,0);
-            newRE->m_Xlg[layer -1] =  Amg::getTranslate3D(copyMe->globalToLocalTrans(gctx) *
-                                                          copyMe->center(gctx, layerHash));
-
-            const MuonGMR4::StripDesign& copyEtaDesign{copyMe->stripDesign(layerHash)}; 
+            
+            const MuonGMR4::StripLayer& stripLayer{copyMe->stripLayer(layerHash)};
+            newRE->m_Xlg[layer -1] =  stripLayer.toOrigin() * Amg::getRotateY3D(90. * Gaudi::Units::deg) * Amg::getTranslateX3D( layer%2 ? - 0.01 : 0.01 ); 
+           
+            const MuonGMR4::StripDesign& copyEtaDesign{stripLayer.design()}; 
+            ATH_MSG_VERBOSE("Layer: "<<layer<<" "<<copyEtaDesign);
             /// Initialize the eta design
             ChannelDesign& etaDesign{newRE->m_etaDesign[layer-1]};
             etaDesign.type =  ChannelDesign::ChannelType::etaStrip;
@@ -572,11 +575,14 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
                 etaDesign.defineTrapezoid(copyEtaDesign.shortHalfHeight(),
                                           copyEtaDesign.longHalfHeight(),
                                           copyEtaDesign.halfWidth());
+
             }
+            etaDesign.firstPitch  = copyEtaDesign.firstStripPos().x() + 0.5*copyEtaDesign.stripPitch() + copyEtaDesign.halfWidth();
             etaDesign.inputPitch  = copyEtaDesign.stripPitch();
             etaDesign.inputWidth  = copyEtaDesign.stripWidth();
             etaDesign.nch = copyEtaDesign.numStrips();
-            etaDesign.setFirstPos(copyEtaDesign.firstStripPos().x());
+            ATH_MSG_VERBOSE(m_idHelperSvc->toStringDetEl(copyMe->identify())<<", layer: "<<layer<<", eta-design: "<< copyEtaDesign);
+            etaDesign.setFirstPos(copyEtaDesign.firstStripPos().x() + 0.5*copyEtaDesign.stripPitch());
             /// Initialize the phi design
 
             const MuonGMR4::WireGroupDesign& copyPhiDesign{copyMe->wireDesign(layerHash)};
@@ -596,12 +602,14 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
             }
             phiDesign.inputPitch  = copyPhiDesign.stripPitch();
             phiDesign.inputWidth  = copyPhiDesign.stripWidth();
+            ATH_MSG_VERBOSE(m_idHelperSvc->toStringDetEl(copyMe->identify())<<", layer: "<<layer<<", phi-design: "<< copyPhiDesign);
             phiDesign.setFirstPos(copyPhiDesign.firstStripPos().x()); // Position of 1st wire, accounts for staggering
             phiDesign.firstPitch = copyPhiDesign.numWiresInGroup(1);  // Number of Wires in 1st group, group staggering
             phiDesign.groupWidth  = copyPhiDesign.numWiresInGroup(2);                // Number of Wires normal group
             phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
             phiDesign.wireCutout = copyPhiDesign.wireCutout();                       // Size of "active" wire region for digits
             phiDesign.nch = copyPhiDesign.nAllWires();
+            phiDesign.isConvertedFromPhaseII = true;
 
             const MuonGMR4::PadDesign& copyPadDesign{copyMe->padDesign(layerHash)};
             MuonGM::MuonPadDesign& padDesign{newRE->m_padDesign[layer-1]};
@@ -612,8 +620,11 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
             padDesign.ysFrame = copyMe->sFrameWidth();
             padDesign.ylFrame = copyMe->lFrameWidth();
             padDesign.thickness = copyMe->thickness();
-            padDesign.yCutout = copyPadDesign.yCutout();
-            padDesign.setR(copyPadDesign.beamlineRadius());
+            /// To circumvent the yCutout calculations in padCorner function in MuonPadDesign
+            if (copyPadDesign.yCutout()) {
+                padDesign.yCutout = copyPadDesign.halfWidth();
+            }
+            padDesign.setR(copyPadDesign.beamlineRadius());   
             padDesign.sPadWidth = 2.*copyPadDesign.shortHalfHeight(); 
             padDesign.lPadWidth = 2.*copyPadDesign.longHalfHeight(); 
             padDesign.nPadColumns = copyPadDesign.numPadPhi();
@@ -625,10 +636,12 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
             padDesign.firstRowPos   = copyPadDesign.firstPadHeight();     
             padDesign.inputRowPitch = copyPadDesign.padHeight();          
             padDesign.sectorOpeningAngle = copyPadDesign.sectorAngle();
+            padDesign.isConvertedFromPhaseII = true;
         }     
         newRE->fillCache();
         ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newRE));
         cacheObj.detMgr->addsTgcReadoutElement(std::move(newRE));
+
     }
     return StatusCode::SUCCESS;
 }
@@ -647,7 +660,24 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, Construc
         GeoIntrusivePtr<GeoVFullPhysVol> physVol{};
         MuonGM::MuonStation* station{nullptr};
         ATH_CHECK(cloneReadoutVolume(gctx,reId, cacheObj, physVol, station));
+        if (copyMe->multilayer() == 1) {
+            const MuonGMR4::MdtReadoutElement* otherRE = copyMe->complementaryRE();
+            const double height = std::max(copyMe->moduleHeight(), otherRE->moduleHeight()) - 
+                                          (copyMe->tubePitch() - 2. * copyMe->tubeRadius());
 
+            const double modHalTHickO{0.5*otherRE->moduleThickness()},
+                         modHalfThick{-0.5*copyMe->moduleThickness()};
+
+            const double thickness = ( (otherRE->asBuiltRefFrame()*(modHalTHickO* Amg::Vector3D::UnitX())) -
+                                        (copyMe->asBuiltRefFrame()*(modHalfThick* Amg::Vector3D::UnitX()))).z();
+            if (copyMe->isBarrel()) {
+                station->setMdtZsize(height);
+                station->setMdtRsize(thickness);
+            } else {
+                station->setMdtRsize(height);
+                station->setMdtZsize(thickness);
+            }
+        }
         const MuonGMR4::MdtReadoutElement::parameterBook& pars{copyMe->getParameters()};
         auto newElement = std::make_unique<MuonGM::MdtReadoutElement>(physVol, 
                                                                       m_idHelperSvc->stationNameString(reId), 
@@ -657,14 +687,14 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, Construc
         newElement->setNMdtInStation(m_idHelperSvc->mdtIdHelper().multilayerMax(reId));
         // cppcheck-suppress invalidLifetime; ok: mgr took ownership.
         newElement->setParentMuonStation(station);
-        /// Define the dimensions
-        newElement->setLongRsize(2*pars.halfY);
+
         /// 1 cm is added as safety margin to the Mdt multilayer envelope
         newElement->setLongSsize(2*pars.longHalfX - 1.*Gaudi::Units::cm);
-        newElement->setLongZsize(2*pars.halfHeight);
-        newElement->setRsize(2*pars.halfY);
         newElement->setSsize(2*pars.shortHalfX - 1.*Gaudi::Units::cm);
+        newElement->setLongRsize(2*pars.halfY);
+        newElement->setRsize(2*pars.halfY);
         newElement->setZsize(2*pars.halfHeight);
+        newElement->setLongZsize(2*pars.halfHeight);
 
         newElement->m_nlayers = copyMe->numLayers();
         newElement->m_ntubesperlayer = copyMe->numTubesInLay();
@@ -720,8 +750,8 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, Construc
         newElement->geoInitDone();
         newElement->setBLinePar(distort.bLine);
         newElement->fillCache();
-        /// Add the readout element to the manager
         ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newElement));
+        /// Add the readout element to the detector manager
         cacheObj.detMgr->addMdtReadoutElement(std::move(newElement));
     }
     return StatusCode::SUCCESS;
@@ -762,7 +792,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
         
         const Amg::Transform3D& refTrf{refEle.localToGlobalTrans(gctx, gapId)};
         const Amg::Transform3D& testTrf{testEle.transform(gapId)};
-        if (!Amg::doesNotDeform(refTrf.inverse()*testTrf)) {
+        if (!Amg::isIdentity(refTrf.inverse()*testTrf)) {
             ATH_MSG_FATAL("The layer "<<m_idHelperSvc->toStringGasGap(gapId)<<" does not transform equally"
                          <<GeoTrf::toString(refTrf, true) <<" vs. "<<GeoTrf::toString(testTrf, true));
             return StatusCode::FAILURE;
@@ -874,7 +904,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                     
                     const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
-                    if (strip == 1 && !Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
+                    if (strip == 1 && !Amg::isIdentity(refTrans.inverse()*testTrans)) {
                         ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<" - "<<refEle.identHash()<<std::endl
                             <<" *** ref:  "<<GeoTrf::toString(refTrans)<<std::endl
                             <<" *** test: "<<GeoTrf::toString(testTrans)<<std::endl
@@ -985,7 +1015,6 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
 StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                              const MuonGMR4::sTgcReadoutElement& refEle,
                                              const MuonGM::sTgcReadoutElement& testEle) const {
-    
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
     }
@@ -996,77 +1025,99 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                 <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     for (unsigned int gasGap = 1; gasGap <= refEle.numLayers(); ++gasGap) {
-        for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
-            unsigned int numChannel = 0;
+        for (int chType : {sTgcIdHelper::sTgcChannelTypes::Pad , sTgcIdHelper::sTgcChannelTypes::Strip, sTgcIdHelper::sTgcChannelTypes::Wire}) {
             const Identifier layID = idHelper.channelID(refEle.identify(),
                                                     refEle.multilayer(),
                                                     gasGap, chType, 1);
-            switch(chType) {
-                case sTgcIdHelper::sTgcChannelTypes::Pad:
-                    numChannel = refEle.numPads(layID);
-                break;
-
-                case sTgcIdHelper::sTgcChannelTypes::Strip:
-                    numChannel = refEle.numStrips(layID);
-                break;
-                
-                case sTgcIdHelper::sTgcChannelTypes::Wire:
-                    numChannel = refEle.numWireGroups(gasGap);
-                break;
-            }
-            for (unsigned int channel = 1; channel < numChannel ; ++channel) {
+            const unsigned int numChannel = refEle.numChannels(layID);
+            constexpr unsigned firstCh = 1;
+            for (unsigned int channel = firstCh; channel < numChannel ; ++channel) {
                 const Identifier chID = idHelper.channelID(refEle.identify(),
-                                                                refEle.multilayer(),
-                                                                gasGap, chType, channel);
+                                                           refEle.multilayer(),
+                                                           gasGap, chType, channel);
             
                 const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, chID)};
                 const Amg::Transform3D& testTrans{testEle.transform(chID)};
-                if (channel == 1 && Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
-                    ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(chID)<<std::endl
+                if (channel == firstCh && (!Amg::doesNotDeform(testTrans.inverse()*refTrans)
+                                        || (testTrans.inverse()*refTrans).translation().perp() > std::numeric_limits<float>::epsilon() ) ) {
+                    ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Transformation for "<<m_idHelperSvc->toString(chID)<<std::endl
                         <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
                         <<" *** test: "<<GeoTrf::toString(testTrans, true));
                         return StatusCode::FAILURE;
                 }
                 if (chType == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                    /// R4 Geometry function accepts the channelID as input identifier, whereas, R3 geometry needs to be provided
+                    /// padID explicitly.
+                    bool isValid = false;
+                    const int padEta = refEle.padEta(chID);
+                    const int padPhi = refEle.padPhi(chID);
+                    const Identifier padID = idHelper.padID(refEle.identify(),
+                                                            refEle.multilayer(),
+                                                            gasGap, chType, padEta, padPhi, isValid);
+                    if(!isValid) {
+                        ATH_MSG_WARNING("The following pad ID is not valid: " << padID);
+                    }    
+                    const Amg::Transform3D& testPadTrans{testEle.transform(padID)};
                     const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
                     Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
-                    testEle.stripGlobalPosition(chID, testChannelPos);
+                    testEle.stripGlobalPosition(padID, testChannelPos);
                     
                     const std::array<Amg::Vector3D,4> refPadCorners = refEle.globalPadCorners(gctx, chID);
                     std::array<Amg::Vector3D,4> testPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
-                    testEle.padGlobalCorners(chID, testPadCorners);
+                    testEle.padGlobalCorners(padID, testPadCorners);              
                     for (unsigned int cornerIdx = 0; cornerIdx < refPadCorners.size(); ++cornerIdx) {
-                        if ((refPadCorners[cornerIdx] - testPadCorners[cornerIdx]).mag() > 10. * Gaudi::Units::micrometer){
-                            ATH_MSG_ERROR("Mismatch in pad Corner "<<m_idHelperSvc->toString(chID)
+                        const double padCornerDiff = (refPadCorners[cornerIdx] - testPadCorners[cornerIdx]).mag();
+                        if (padCornerDiff - 25. > 1. * Gaudi::Units::micrometer){
+                            ATH_MSG_ERROR("Mismatch in pad Corner " << cornerIdx << ": " <<m_idHelperSvc->toString(padID)
                                     <<" ref: "<<Amg::toString(refPadCorners[cornerIdx])<<" test: "<<Amg::toString(testPadCorners[cornerIdx])
-                                    <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refPadCorners[cornerIdx])
-                                    <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testPadCorners[cornerIdx]));
+                                    <<" difference: " << padCornerDiff
+                                    <<" local coordinates -- ref: "<<Amg::toString(refTrans.inverse()*refPadCorners[cornerIdx])
+                                    <<" test: "<<Amg::toString(testPadTrans.inverse()*testPadCorners[cornerIdx]));
                             return StatusCode::FAILURE;
                         }   
                     }
-                    if ((refChannelPos - testChannelPos).mag() > 10. * Gaudi::Units::micrometer){
-                        ATH_MSG_ERROR("Mismatch in channel positions "<<m_idHelperSvc->toString(chID)
+                    const double padChannelDiff = (refChannelPos - testChannelPos).mag();
+                    if (padChannelDiff - 25. > 1. * Gaudi::Units::micrometer){
+                        ATH_MSG_ERROR("Mismatch in pad positions "<<m_idHelperSvc->toString(padID)
                                 <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
-                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refChannelPos)
-                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testChannelPos));
+                                <<" difference: " << padChannelDiff
+                                <<" local coordinates -- ref: "<<Amg::toString(refTrans.inverse()*refChannelPos)
+                                <<" test: "<<Amg::toString(testPadTrans.inverse()*testChannelPos));
                         return StatusCode::FAILURE;
                     }
-                    ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
+                    ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(padID)
                                     <<" channel position "<<Amg::toString(refChannelPos));
                 }
-                else {
+                else if (chType == sTgcIdHelper::sTgcChannelTypes::Strip){
                     const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
-                    Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
+                    Amg::Vector3D testChannelPos{Amg::Vector3D::Zero()}; 
                     testEle.stripGlobalPosition(chID, testChannelPos);
-                    if ((refChannelPos - testChannelPos).mag() > 10. * Gaudi::Units::micrometer){
-                        ATH_MSG_ERROR("Mismatch in channel positions "<<m_idHelperSvc->toString(chID)
+                    if ((refChannelPos - testChannelPos).mag() > 1. * Gaudi::Units::micrometer){
+                        ATH_MSG_ERROR("Mismatch in strip positions "<<m_idHelperSvc->toString(chID)
                                 <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
-                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refChannelPos)
-                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testChannelPos));
+                                <<" local coordinates -- ref: "<<Amg::toString(testTrans.inverse()*refChannelPos)
+                                <<" test: "<<Amg::toString(testTrans.inverse()*testChannelPos));
                         return StatusCode::FAILURE;
                     }
                     ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
                                     <<" channel position "<<Amg::toString(refChannelPos));
+                } else { // wire
+                    const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
+                    Amg::Vector3D testChannelPos{Amg::Vector3D::Zero()}; 
+                    testEle.stripGlobalPosition(chID, testChannelPos);
+                    Amg::Vector3D localRefPos {testTrans.inverse()*refChannelPos};
+                    Amg::Vector3D localTestPos{testTrans.inverse()*testChannelPos};
+                    /// wireGroup center is defined to be half a wire pitch off in R4 compared to R3 convention
+                    if((std::abs(localRefPos.x() -localTestPos.x()) > 1.* Gaudi::Units::micrometer)
+                        || (std::abs(refChannelPos.z() -testChannelPos.z()) > 15.* Gaudi::Units::micrometer)){
+                            ATH_MSG_ERROR("Mismatch in wire positions "<<m_idHelperSvc->toString(chID)
+                            <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
+                            <<" local coordinates -- ref: "<<Amg::toString(testTrans.inverse()*refChannelPos)
+                            <<" test: "<<Amg::toString(testTrans.inverse()*testChannelPos)
+                            <<"delta X: "<<std::abs(localRefPos.x() -localTestPos.x())
+                            <<", delta Z: "<<std::abs(localRefPos.z() -localTestPos.z()));
+                        return StatusCode::FAILURE;  
+                    }
                 }
             }
         }

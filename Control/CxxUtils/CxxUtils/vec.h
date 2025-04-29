@@ -163,7 +163,7 @@ struct vec_typedef {
 #if HAVE_VECTOR_SIZE_ATTRIBUTE
   using type __attribute__((vector_size(N * sizeof(T)))) = T;
 #else
-  using type vec_fb<T, N>;
+  using type = vec_fb<T, N>;
 #endif
 };
 

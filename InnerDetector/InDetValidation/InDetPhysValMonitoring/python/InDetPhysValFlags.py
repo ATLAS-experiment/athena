@@ -32,6 +32,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("jetsNameForHardScatter", 'AntiKt4EMTopoJets' ) # when building jets, what types of jets are built (used for hardScatterStrategy == 2)
     icf.addFlag("validateExtraTrackCollections", [] ) # List of extra track collection names to be validated in addition to Tracks.
     icf.addFlag("ancestorIDs", [] )
+    icf.addFlag("requireCharged", 1)
     icf.addFlag("selectedCharge", 0)
     icf.addFlag("requiredSiHits", 0)
     icf.addFlag("maxProdVertRadius", 300)
@@ -49,5 +50,6 @@ def createIDPVMConfigFlags():
     icf.addFlag("jetCollection", "AntiKt4EMPflowJets")
     icf.addFlag('JetPtMin', 100.*Units.GeV)
     icf.addFlag('JetPtMax', 5000.*Units.GeV)
+    icf.addFlag('setCSVName', "")
     return icf
 

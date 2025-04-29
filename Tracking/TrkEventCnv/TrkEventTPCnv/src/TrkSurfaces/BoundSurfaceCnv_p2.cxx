@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -12,10 +12,10 @@
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkSurfaces/CylinderSurface.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkSurfaces/NoBounds.h"
 #include "TrkEventTPCnv/TrkSurfaces/BoundSurfaceCnv_p2.h"
 #include <typeinfo>
+#include <memory>
 
 template< class SURFACE, class BOUNDS_CNV >
 void
@@ -31,7 +31,7 @@ BoundSurfaceCnv_p2< SURFACE, BOUNDS_CNV >::createTransient( const Trk::BoundSurf
 {
    SURFACE*  transObj = m_surfaceCnv.createTransient( persObj, log );
    typename BOUNDS_CNV::Trans_t* bounds = this->createTransFromPStore( &m_boundsCnv, persObj->m_bounds, log );
-   transObj->m_bounds = Trk::SharedObject<typename BOUNDS_CNV::Trans_t>(bounds);
+   transObj->m_bounds = std::shared_ptr<typename BOUNDS_CNV::Trans_t>(bounds);
    return transObj;
 }
 
@@ -59,13 +59,13 @@ persToTrans( const Trk::BoundSurface_p2 * /**persObj*/, SURFACE * /**transObj*/,
 }
 
 template < class SURFACE >
-SURFACE* 
+SURFACE*
 BoundSurfaceCnv_p2< SURFACE >::createTransient( const Trk::BoundSurface_p2 * persObj, MsgStream& log)
 {
    SURFACE*  transObj = m_surfaceCnv.createTransient( persObj, log );
 
    Trk::SurfaceBounds* bounds = this->createTransFromPStore( (TPCnvForSurfBnds**)nullptr, persObj->m_bounds, log );
-   transObj->m_bounds = Trk::SharedObject<const Trk::SurfaceBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<const Trk::SurfaceBounds>(bounds);
    return transObj;
 }
 
@@ -77,13 +77,12 @@ transToPers( const SURFACE *transObj, Trk::BoundSurface_p2 *persObj, MsgStream &
 {
    m_surfaceCnv.transToPers( transObj, persObj, log );
    if ((transObj->m_bounds).get() && !dynamic_cast<const Trk::NoBounds*>((transObj->m_bounds).get()))
-       persObj->m_bounds = this->toPersistent( (TPCnvForSurfBnds**)nullptr, (transObj->m_bounds).get(), log );       
+       persObj->m_bounds = this->toPersistent( (TPCnvForSurfBnds**)nullptr, (transObj->m_bounds).get(), log );
 }
 
 
 template class BoundSurfaceCnv_p2< Trk::DiscSurface, DiscBoundsCnv_p1 >;
 template class BoundSurfaceCnv_p2< Trk::CylinderSurface, CylinderBoundsCnv_p1 >;
 template class BoundSurfaceCnv_p2< Trk::StraightLineSurface, CylinderBoundsCnv_p1 >;
-template class BoundSurfaceCnv_p2< Trk::SaggedLineSurface, CylinderBoundsCnv_p1 >;
 template class BoundSurfaceCnv_p2< Trk::PlaneSurface >;
 template class BoundSurfaceCnv_p2< Trk::ConeSurface,  ConeBoundsCnv_p1>;

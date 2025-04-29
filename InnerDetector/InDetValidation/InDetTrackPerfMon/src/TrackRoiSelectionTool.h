@@ -13,34 +13,34 @@
 **/
 
 /// Athena include(s)
+#include "AsgTools/IAsgTool.h"
 #include "AsgTools/AsgTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
-
-/// Local include(s)
-#include "InDetTrackPerfMon/ITrackSelectionTool.h"
+#include "AthLinks/ElementLink.h"
 
 /// STD includes
 #include <string>
 #include <vector>
 
-class TrigRoiDescriptor;
-
-typedef struct {
-  float z;
-  float r;
-  float tantheta;
-} exitPoint_t;
-
+class TrigRoiDescriptorCollection;
 
 namespace IDTPM {
 
+  class TrackAnalysisCollections;
+
+  typedef struct {
+    float z;
+    float r;
+    float tantheta;
+  } exitPoint_t;
+
   class TrackRoiSelectionTool :
-      public virtual ITrackSelectionTool,
+      public virtual asg::IAsgTool,
       public asg::AsgTool {
 
   public:
 
-    ASG_TOOL_CLASS( TrackRoiSelectionTool, ITrackSelectionTool );
+    ASG_TOOL_CLASS( TrackRoiSelectionTool, IAsgTool );
 
     /// Constructor
     TrackRoiSelectionTool( const std::string& name );
@@ -52,16 +52,9 @@ namespace IDTPM {
     virtual StatusCode initialize() override;
 
     /// Main Track selection method
-    virtual StatusCode selectTracksInRoI(
+    StatusCode selectTracksInRoI(
         TrackAnalysisCollections& trkAnaColls,
-        const ElementLink< TrigRoiDescriptorCollection >& roiLink ) override;
-
-    /// Dummy method - Disabled
-    virtual StatusCode selectTracks(
-        TrackAnalysisCollections& ) override {
-      ATH_MSG_WARNING( "selectTracks method is disabled" );
-      return StatusCode::SUCCESS;
-    }
+        const ElementLink< TrigRoiDescriptorCollection >& roiLink );
   
     /// geometric RoI filters - for non-trigger tracks (e.g. offline, truth, etc.)
     template< class T >
@@ -75,7 +68,7 @@ namespace IDTPM {
 
     /// TrigDecTool- and EventView-based getter function for trigger tracks
     std::vector< const xAOD::TrackParticle* > getTrigTracks( 
-        const SG::ReadHandleKey< xAOD::TrackParticleContainer >& handleKey,
+        const std::vector< const xAOD::TrackParticle* >& tvec,
         const ElementLink< TrigRoiDescriptorCollection >& roiLink ) const;
 
   private:
@@ -87,7 +80,7 @@ namespace IDTPM {
 
     /// Trigger TrackParticleContainer's name
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_triggerTrkParticleName {
-        this, "TriggerTrkParticleContainerName", "HLT_IDTrack_Electron_IDTrig", "Name of container of trigger tracks" };
+        this, "TriggerTrkParticleContainerName", "", "Name of container of trigger tracks" };
 
     /// TrigDecTool
     PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool {

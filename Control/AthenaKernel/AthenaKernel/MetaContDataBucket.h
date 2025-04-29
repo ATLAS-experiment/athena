@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/MetaContDataBucket.h
@@ -16,10 +16,11 @@
 
 #include "AthenaKernel/DataBucket.h"
 #include "AthenaKernel/BaseInfo.h"
-#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "AthenaKernel/SourceID.h"
-#include "GaudiKernel/ThreadLocalContext.h"
-#include "GaudiKernel/EventContext.h"
+
+
+class EventContext;
 
 
 namespace SG {

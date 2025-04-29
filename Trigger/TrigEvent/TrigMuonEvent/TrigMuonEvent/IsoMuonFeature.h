@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -159,46 +159,46 @@ private:
   friend class IsoMuonFeatureCnv_p3;
 
   /** Calo based isolation */
-  float m_sumet01;
-  float m_sumet02;
-  float m_sumet03;
-  float m_sumet04;
+  float m_sumet01{};
+  float m_sumet02{};
+  float m_sumet03{};
+  float m_sumet04{};
 
   /** Track based isolation */
-  float m_sumpt01;
-  float m_sumpt02;
-  float m_sumpt03;
-  float m_sumpt04;
+  float m_sumpt01{};
+  float m_sumpt02{};
+  float m_sumpt03{};
+  float m_sumpt04{};
 
   /** Pt of charged track associated to the muon. */
-  float m_PtMuID;
+  float m_PtMuID{};
   /** pt of highest pt track in cone (excluded the one associated to the muon) */
-  float m_MaxPtID;
+  float m_MaxPtID{};
 
-  int   m_flag;
+  int   m_flag{};
 
   // Muon info 
   /** ROI ID */
-  int   m_RoiIdMu;
+  int   m_RoiIdMu{};
   /** Muon Pt */
-  float m_PtMu;
+  float m_PtMu{};
   /** Muon Charge */
-  float m_QMu;
+  float m_QMu{};
   /** Muon Eta */
-  float m_EtaMu;
+  float m_EtaMu{};
   /** Muon Phi */
-  float m_PhiMu;
+  float m_PhiMu{};
 
   //obsolete
-  float m_EtInnerConeEC;
-  float m_EtOuterConeEC;
-  float m_EtInnerConeHC;
-  float m_EtOuterConeHC;
-  int   m_NTracksCone;
-  float m_SumPtTracksCone;
-  float m_PtMuTracksCone;
-  float m_LAr_w;
-  float m_Tile_w;
+  float m_EtInnerConeEC{};
+  float m_EtOuterConeEC{};
+  float m_EtInnerConeHC{};
+  float m_EtOuterConeHC{};
+  int   m_NTracksCone{};
+  float m_SumPtTracksCone{};
+  float m_PtMuTracksCone{};
+  float m_LAr_w{};
+  float m_Tile_w{};
         
 };
 

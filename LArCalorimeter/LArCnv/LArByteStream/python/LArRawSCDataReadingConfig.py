@@ -1,23 +1,33 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-def LArRawSCDataReadingCfg(configFlags, **kwargs):
+def LArRawSCDataReadingCfg(configFlags, ROBList=None, name="LArRawSCDataReadingAlg", **kwargs):
     acc=ComponentAccumulator()
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     acc.merge(LArGMCfg(configFlags))
-    acc.merge(ByteStreamReadCfg(configFlags))
     from LArCabling.LArCablingConfig import LArLATOMEMappingCfg
     acc.merge(LArLATOMEMappingCfg(configFlags))
 
-    acc.addEventAlgo(CompFactory.LArRawSCDataReadingAlg("LArRawSCDataReadingAlg",
+    if ( not (ROBList is None) ):
+       acc.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(name,
+                     LATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",ProtectSourceId = True), 
+                     ROBList=ROBList,
+                     **kwargs)
+                    )
+    else : 
+       acc.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(name,
                      LATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",ProtectSourceId = True), 
                      **kwargs)
                     )
+
     return acc
+
+def LArRawSCDataReadingInRoICfg(configFlags,name="LArRawSCDataReadingInRoI",etIdCollKey="SC_ET_ID_RoI",ROBList=[]):
+    return LArRawSCDataReadingCfg(configFlags,name=name,adcCollKey="",adcBasCollKey="",etCollKey="",LArLATOMEHeaderKey="",etIdCollKey=etIdCollKey,ROBList=ROBList)
 
 
 if __name__=="__main__":
@@ -35,6 +45,7 @@ if __name__=="__main__":
     flags.lock()
 
     acc = MainServicesCfg( flags )
+    acc.merge(ByteStreamReadCfg(flags))
     acc.merge(LArRawSCDataReadingCfg(flags))
     
     acc.run(2)

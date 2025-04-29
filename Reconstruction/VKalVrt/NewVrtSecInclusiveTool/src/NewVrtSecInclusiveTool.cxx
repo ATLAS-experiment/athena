@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///  @author  Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -9,7 +9,6 @@
 // Header include
 #include "NewVrtSecInclusiveTool/NewVrtSecInclusiveTool.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "PathResolver/PathResolver.h"
 #include "CxxUtils/checker_macros.h"
  
@@ -20,8 +19,8 @@
 #include "TTree.h"
 #include "TMath.h"
 #include "TFile.h"
-#include "MVAUtils/BDT.h" 
-//
+#include "MVAUtils/BDT.h"
+#include "xAODEgamma/ElectronxAODHelpers.h"
 
 
 namespace Rec {
@@ -32,101 +31,30 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
                                            const std::string& name,
                                            const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_cutSctHits(4),
-    m_cutPixelHits(2),
-    m_cutTRTHits(10),
-    m_cutSiHits(8),
-    m_cutBLayHits(0),
-    m_cutSharedHits(1),
-    m_cutPt(500.),
-    m_cutZVrt(15.),
-    m_cutD0Max(10.),
-    m_cutD0Min(0.),
-    m_cutChi2(5.),
-    m_sel2VrtProbCut(0.02),
-    m_globVrtProbCut(0.005),
-    m_maxSVRadiusCut(140.),
-    m_selVrtSigCut(3.0),
-    m_trkSigCut(2.0),
-    m_vrtMassLimit(5500.),
-    m_vrt2TrMassLimit(4000.),
-    m_vrt2TrPtLimit(5.e5),
-    m_antiPileupSigRCut(2.0),
-    m_dRdZRatioCut(0.25),
-    m_v2tIniBDTCut(-0.6),
-    m_v2tFinBDTCut(0.),
-    m_vertexMergeCut(4.),
-    m_beampipeR(24.3),
-    m_firstPixelLayerR(32.0),
-    m_removeTrkMatSignif(0.),
-    m_fastZSVCut(15.),
-    m_cosSVPVCut(0.),
-    m_fillHist(false),
-    m_useVertexCleaning(true),
-    m_multiWithOneTrkVrt(true),
-    m_calibFileName("Fake2TrVertexReject.MVA.v02.root"),
     m_SV2T_BDT(nullptr),
-    m_fitSvc("Trk::TrkVKalVrtFitter/VertexFitterTool",this)
+    m_instanceName(name),
+    m_is_selected("is_selected"),
+    m_is_svtrk_final("is_svtrk_final"),
+    m_pt_wrtSV("pt_wrtSV"),
+    m_eta_wrtSV("eta_wrtSV"),
+    m_phi_wrtSV("phi_wrtSV"),
+    m_d0_wrtSV("d0_wrtSV"),
+    m_z0_wrtSV("z0_wrtSV"),
+    m_errP_wrtSV("errP_wrtSV"),
+    m_errd0_wrtSV("errd0_wrtSV"),
+    m_errz0_wrtSV("errz0_wrtSV"),
+    m_chi2_toSV("chi2_toSV")
    {
 //
 // Declare additional interface
 //
     declareInterface< IVrtInclusive >(this);
-// Properties
-//
-//
-    declareProperty("CutSctHits",    m_cutSctHits ,  "Remove track is it has less SCT hits" );
-    declareProperty("CutPixelHits",  m_cutPixelHits, "Remove track is it has less Pixel hits");
-    declareProperty("CutTRTHits",    m_cutTRTHits,   "Remove track is it has less TRT hits");
-    declareProperty("CutSiHits",     m_cutSiHits,    "Remove track is it has less Pixel+SCT hits"  );
-    declareProperty("CutBLayHits",   m_cutBLayHits,  "Remove track is it has less B-layer hits"   );
-    declareProperty("CutSharedHits", m_cutSharedHits,"Reject final 2tr vertices if tracks have shared hits" );
-
-    declareProperty("CutPt",         m_cutPt,     "Track Pt selection cut"  );
-    declareProperty("CutD0Min",      m_cutD0Min,  "Track minimal D0 selection cut"  );
-    declareProperty("CutD0Max",      m_cutD0Max,  "Track maximal D0 selection cut"  );
-    declareProperty("CutZVrt",       m_cutZVrt,   "Track Z impact selection cut");
-    declareProperty("CutChi2",       m_cutChi2,   "Track Chi2 selection cut" );
-    declareProperty("TrkSigCut",     m_trkSigCut, "Track 3D impact significance w/r primary vertex. Should be >=AntiPileupSigRCut" );
-
-    declareProperty("VrtMassLimit",   m_vrtMassLimit,   "Maximal allowed mass for found vertices" );
-    declareProperty("Vrt2TrMassLimit",m_vrt2TrMassLimit,"Maximal allowed mass for 2-track vertices" );
-    declareProperty("Vrt2TrPtLimit",  m_vrt2TrPtLimit,  "Maximal allowed Pt for 2-track vertices. Calibration limit" );
-
-    declareProperty("Sel2VrtProbCut",    m_sel2VrtProbCut, "Cut on probability of 2-track vertex for initial selection"  );
-    declareProperty("GlobVrtProbCut",    m_globVrtProbCut, "Cut on probability of any vertex for final selection"  );
-    declareProperty("MaxSVRadiusCut",    m_maxSVRadiusCut, "Cut on maximal radius of SV (def = Pixel detector size)"  );
-    declareProperty("SelVrtSigCut",      m_selVrtSigCut,  "Cut on significance of 3D distance between vertex and PV"  );
-    declareProperty("AntiPileupSigRCut", m_antiPileupSigRCut,  "Upper cut on significance of 2D distance between beam and perigee"  );
-    declareProperty("dRdZRatioCut",      m_dRdZRatioCut,  "Cut on dR/dZ ratio to remove pileup tracks"  );
-    declareProperty("v2tIniBDTCut",      m_v2tIniBDTCut,  "Initial BDT cut for 2track vertices selection "  );
-    declareProperty("v2tFinBDTCut",      m_v2tFinBDTCut,  "Final BDT cut for 2track vertices selection "  );
-    declareProperty("FastZSVCut",        m_fastZSVCut,  "Cut to remove SV candidates based on fast SV estimation. To save full fit CPU."  );
-    declareProperty("cosSVPVCut",        m_cosSVPVCut,  "Cut on cos of angle between SV-PV and full vertex momentum"  );
-
-    declareProperty("FillHist",   m_fillHist, "Fill technical histograms"  );
-
-
-    declareProperty("useVertexCleaning",  m_useVertexCleaning,    "Clean vertices by requiring pixel hit presence according to vertex position" );
-
-    declareProperty("MultiWithOneTrkVrt", m_multiWithOneTrkVrt,"Allow one-track-vertex addition to already found secondary vertices");
-
-    declareProperty("VertexMergeCut",	  m_vertexMergeCut, "To allow vertex merging for MultiVertex Finder" );
-
-    declareProperty("BeampipeR",	  m_beampipeR, "Radius of the beampipe material for aggressive material rejection" );
-    declareProperty("FirstPixelLayerR",	  m_firstPixelLayerR, "Radius of the first Pixel layer" );
-    declareProperty("removeTrkMatSignif", m_removeTrkMatSignif, "Significance of Vertex-TrackingMaterial distance for removal. No removal if <=0." );
-
-    declareProperty("calibFileName", m_calibFileName, " MVA calibration file for 2-track fake vertices removal" );
-
-    declareProperty("VertexFitterTool",    m_fitSvc, "Name of the Vertex Fitter tool");
 //
     m_massPi  =  Trk::ParticleMasses::mass[Trk::pion];
     m_massP   =  Trk::ParticleMasses::mass[Trk::proton];
     m_massE   =  Trk::ParticleMasses::mass[Trk::electron];
     m_massK0  =  Trk::ParticleMasses::mass[Trk::k0];
     m_massLam =  1115.683  ;
-    m_instanceName=name;
 
    }
 
@@ -139,9 +67,22 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
    StatusCode NewVrtSecInclusiveTool::initialize(){
      ATH_MSG_DEBUG( "Initialising NewVrtSecInclusiveTool" );
      ATH_CHECK( m_extrapolator.retrieve() );
+     ATH_CHECK( m_trackToVertexTool.retrieve() );
      ATH_CHECK(m_beamSpotKey.initialize());
      ATH_CHECK( m_fitSvc.retrieve() );
      ATH_MSG_DEBUG("NewVrtSecInclusiveTool TrkVKalVrtFitter found");
+
+     m_is_selected = SG::AuxElement::Decorator<char>("is_selected"+m_augString);
+     m_is_svtrk_final = SG::AuxElement::Decorator<char>("is_svtrk_final"+m_augString);
+     m_pt_wrtSV = SG::AuxElement::Decorator<float>("pt_wrtSV"+m_augString);
+     m_eta_wrtSV = SG::AuxElement::Decorator<float>("eta_wrtSV"+m_augString);
+     m_phi_wrtSV = SG::AuxElement::Decorator<float>("phi_wrtSV"+m_augString);
+     m_d0_wrtSV = SG::AuxElement::Decorator<float>("d0_wrtSV"+m_augString);
+     m_z0_wrtSV = SG::AuxElement::Decorator<float>("z0_wrtSV"+m_augString);
+     m_errP_wrtSV = SG::AuxElement::Decorator<float>("errP_wrtSV"+m_augString);
+     m_errd0_wrtSV = SG::AuxElement::Decorator<float>("errd0_wrtSV"+m_augString);
+     m_errz0_wrtSV = SG::AuxElement::Decorator<float>("errz0_wrtSV"+m_augString);
+     m_chi2_toSV = SG::AuxElement::Decorator<float>("chi2_toSV"+m_augString);
 
 //------------------------------------------       
 //
@@ -312,7 +253,6 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     ATH_MSG_DEBUG("NewVrtSecInclusiveTool finalize()");
     return StatusCode::SUCCESS; 
   }
-  
 
 
 
@@ -341,11 +281,50 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
 
     compatibilityGraph_t compatibilityGraph;
     listVrtSec = getVrtSecMulti(tmpVectxAOD,primVrt,compatibilityGraph);
+
+    for (const auto trk : tmpVectxAOD->listSelTracks) {
+      // Mark the track as selected
+      m_is_selected(*trk) = true;
+      if (trk->trackFitter() == xAOD::GaussianSumFilter) m_is_selected(*xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(trk)) = true;
+    }
     delete tmpVectxAOD;
 
+    for (const auto &vrt : listVrtSec) {
+      for (const auto &trk : vrt->trackParticleLinks()) {
 
+        // Mark the track as a final track
+        m_is_svtrk_final(**trk) = true;
 
-    std::vector<const xAOD::IParticle*>  iparTrkV0(0); 
+        // Get the perigee of the track at the vertex
+        ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": > Track index " << (*trk)->index() << ": Get the perigee of the track at the vertex." );
+        auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), **trk, vrt->position() );
+        if( !sv_perigee ) {
+          ATH_MSG_WARNING(" > " << __FUNCTION__ << ": > Track index " << (*trk)->index() << ": Failed in obtaining the SV perigee!" );
+        }
+
+        float qOverP_wrtSV    = sv_perigee ? sv_perigee->parameters() [Trk::qOverP] : -FLT_MAX;
+        float theta_wrtSV     = sv_perigee ? sv_perigee->parameters() [Trk::theta] : -FLT_MAX;
+        float p_wrtSV         = sv_perigee ? 1.0 / std::abs( qOverP_wrtSV ) : -FLT_MAX;
+        float pt_wrtSV        = sv_perigee ? p_wrtSV * sin( theta_wrtSV ) : -FLT_MAX;
+        float eta_wrtSV       = sv_perigee ? -log( tan( theta_wrtSV/2. ) ) : -FLT_MAX;
+        float phi_wrtSV       = sv_perigee ? sv_perigee->parameters() [Trk::phi] : -FLT_MAX;
+        float d0_wrtSV        = sv_perigee ? sv_perigee->parameters() [Trk::d0] : -FLT_MAX;
+        float z0_wrtSV        = sv_perigee ? sv_perigee->parameters() [Trk::z0] : -FLT_MAX;
+        float errd0_wrtSV     = sv_perigee ? std::sqrt((*sv_perigee->covariance())( Trk::d0, Trk::d0 )) : -FLT_MAX;
+        float errz0_wrtSV     = sv_perigee ? std::sqrt((*sv_perigee->covariance())( Trk::z0, Trk::z0 )) : -FLT_MAX;
+        float errP_wrtSV      = sv_perigee ? std::sqrt((*sv_perigee->covariance())( Trk::qOverP, Trk::qOverP )) : -FLT_MAX;
+
+        m_pt_wrtSV(**trk) = pt_wrtSV;
+        m_eta_wrtSV(**trk) = eta_wrtSV;
+        m_phi_wrtSV(**trk) = phi_wrtSV;
+        m_d0_wrtSV(**trk) = d0_wrtSV;
+        m_z0_wrtSV(**trk) = z0_wrtSV;
+        m_errP_wrtSV(**trk) = errP_wrtSV;
+        m_errd0_wrtSV(**trk) = errd0_wrtSV;
+        m_errz0_wrtSV(**trk) = errz0_wrtSV;
+      }
+    }
+
     std::unique_ptr<Trk::VxSecVertexInfo> res = std::make_unique<Trk::VxSecVertexInfo>(Trk::VxSecVertexInfo(listVrtSec));
 
     if(m_fillHist){
@@ -353,8 +332,41 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
       h.m_tuple->Fill();
     };
 
+    lockDecorations (inpTrk);
+
     return res;
  }
+
+
+  void NewVrtSecInclusiveTool::lockDecorations (const std::vector<const xAOD::TrackParticle*> & inpTrk) const
+  {
+    // We may have track from several containers.  Use this to keep track
+    // of which ones we've processed.  We only expect a few distinct ones,
+    // so just use a vector.
+    std::vector<const SG::AuxVectorData*> containers;
+    containers.reserve (16);
+
+    for (const xAOD::TrackParticle* t : inpTrk) {
+      const SG::AuxVectorData* c = t->container();
+      if (c && std::find (containers.begin(), containers.end(), c) == containers.end())
+      {
+        containers.push_back (c);
+        // Ok because we just made these decorations.
+        SG::AuxVectorData* c_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*> (c);
+        c_nc->lockDecoration (m_is_selected.auxid());
+        c_nc->lockDecoration (m_is_svtrk_final.auxid());
+        c_nc->lockDecoration (m_pt_wrtSV.auxid());
+        c_nc->lockDecoration (m_eta_wrtSV.auxid());
+        c_nc->lockDecoration (m_phi_wrtSV.auxid());
+        c_nc->lockDecoration (m_d0_wrtSV.auxid());
+        c_nc->lockDecoration (m_z0_wrtSV.auxid());
+        c_nc->lockDecoration (m_errP_wrtSV.auxid());
+        c_nc->lockDecoration (m_errd0_wrtSV.auxid());
+        c_nc->lockDecoration (m_errz0_wrtSV.auxid());
+        c_nc->lockDecoration (m_chi2_toSV.auxid());
+      }
+    }
+  }
 
 
   NewVrtSecInclusiveTool::Hists&

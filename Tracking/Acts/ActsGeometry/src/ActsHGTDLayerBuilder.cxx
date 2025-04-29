@@ -28,6 +28,7 @@
 #include "Acts/Visualization/GeometryView3D.hpp"
 #include "Acts/Visualization/ObjVisualization3D.hpp"
 
+#include <Acts/Utilities/AxisDefinitions.hpp>
 #include <iterator>
 #include <unordered_map>
 
@@ -70,6 +71,7 @@ ActsHGTDLayerBuilder::positiveLayers(const Acts::GeometryContext &gctx) const {
 void ActsHGTDLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
                                    Acts::LayerVector &layersOutput, int type) const
 {
+  using enum Acts::AxisDirection;
 
   ACTS_VERBOSE("Build layers: " << (type < 0 ? "NEGATIVE" : "POSITIVE")
                                 << " ENDCAP");
@@ -109,16 +111,16 @@ void ActsHGTDLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
   for (const auto &[key, surfaces] : initialLayers) {
     auto &pl = protoLayers.emplace_back(gctx, surfaces);
-    pl.envelope[Acts::BinningValue::binR] = m_cfg.endcapEnvelopeR;
-    pl.envelope[Acts::BinningValue::binZ] = m_cfg.endcapEnvelopeZ;
+    pl.envelope[AxisR] = m_cfg.endcapEnvelopeR;
+    pl.envelope[AxisZ] = m_cfg.endcapEnvelopeZ;
   }
 
 
   // sort proto layers by their medium z position
   std::sort(protoLayers.begin(), protoLayers.end(),
             [type](const Acts::ProtoLayer &a, const Acts::ProtoLayer &b) {
-              double midA = (a.min(Acts::BinningValue::binZ) + a.max(Acts::BinningValue::binZ)) / 2.0;
-              double midB = (b.min(Acts::BinningValue::binZ) + b.max(Acts::BinningValue::binZ)) / 2.0;
+              double midA = (a.min(AxisZ) + a.max(AxisZ)) / 2.0;
+              double midB = (b.min(AxisZ) + b.max(AxisZ)) / 2.0;
               if (type < 0) {
                 return midA < midB;
               } else {
@@ -132,8 +134,8 @@ void ActsHGTDLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     std::unique_ptr<Acts::ApproachDescriptor> approachDescriptor = nullptr;
     std::shared_ptr<const Acts::ProtoSurfaceMaterial> materialProxy = nullptr;
 
-    double layerZ = pl.medium(Acts::BinningValue::binZ);
-    double layerHalfZ = 0.5 * pl.range(Acts::BinningValue::binZ);
+    double layerZ = pl.medium(AxisZ);
+    double layerHalfZ = 0.5 * pl.range(AxisZ);
 
     double layerZInner = layerZ - layerHalfZ;
     double layerZOuter = layerZ + layerHalfZ;
@@ -149,27 +151,27 @@ void ActsHGTDLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
     std::shared_ptr<Acts::DiscSurface> innerBoundary =
       Acts::Surface::makeShared<Acts::DiscSurface>(
-        transformInner, pl.min(Acts::BinningValue::binR), pl.max(Acts::BinningValue::binR));
+        transformInner, pl.min(AxisR), pl.max(AxisR));
     aSurfaces.push_back(innerBoundary);
 
     std::shared_ptr<Acts::DiscSurface> nominalSurface =
       Acts::Surface::makeShared<Acts::DiscSurface>(
-        transformNominal, pl.min(Acts::BinningValue::binR), pl.max(Acts::BinningValue::binR));
+        transformNominal, pl.min(AxisR), pl.max(AxisR));
     aSurfaces.push_back(nominalSurface);
 
     std::shared_ptr<Acts::DiscSurface> outerBoundary =
       Acts::Surface::makeShared<Acts::DiscSurface>(
-        transformOuter, pl.min(Acts::BinningValue::binR), pl.max(Acts::BinningValue::binR));
+        transformOuter, pl.min(AxisR), pl.max(AxisR));
     aSurfaces.push_back(outerBoundary);
 
     size_t matBinsPhi = m_cfg.endcapMaterialBins.first;
     size_t matBinsR = m_cfg.endcapMaterialBins.second;
 
     Acts::BinUtility materialBinUtil(matBinsPhi, -M_PI, M_PI, Acts::closed,
-                                     Acts::BinningValue::binPhi);
+                                     AxisPhi);
     materialBinUtil +=
-        Acts::BinUtility(matBinsR, pl.min(Acts::BinningValue::binR), pl.max(Acts::BinningValue::binR),
-                         Acts::open, Acts::BinningValue::binR, transformNominal);
+        Acts::BinUtility(matBinsR, pl.min(AxisR), pl.max(AxisR),
+                         Acts::open, AxisR, transformNominal);
 
     materialProxy =
         std::make_shared<const Acts::ProtoSurfaceMaterial>(materialBinUtil);

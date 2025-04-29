@@ -25,8 +25,8 @@ std::vector<float> FPGATrackSimTrack::getCoords(unsigned ilayer) const
 
   if (m_trackCorrType == TrackCorrType::None)
   {
-    coords.push_back(m_hits[ilayer].getEtaCoord());
-    coords.push_back(m_hits[ilayer].getPhiCoord());
+    coords.push_back(m_hits[ilayer].getEtaIndex());
+    coords.push_back(m_hits[ilayer].getPhiIndex());
   }
   else
   {
@@ -66,7 +66,6 @@ float FPGATrackSimTrack::getEtaCoord(int ilayer) const {
 
 float FPGATrackSimTrack::getPhiCoord(int ilayer) const {
   auto coords = getCoords(ilayer);
-
   // If this is a spacepoint, and if this is the "outer" hit on a strip module
   // (side = 1) then we actually return the z/eta coord.
   // Since spacepoints are duplicated, this avoids using the same phi coord

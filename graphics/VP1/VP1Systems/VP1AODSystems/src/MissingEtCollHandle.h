@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ protected:
 
 
   // getters
-  QList<VP1Interval> getCutAllowedPhi() {return m_cut_allowedPhi; };
+  const QList<VP1Interval>& getCutAllowedPhi() {return m_cut_allowedPhi; };
   bool getPhiAllowall() {return m_cut_phi_allowall; };
 
 

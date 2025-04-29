@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AsgTools )
@@ -53,5 +53,8 @@ if( XAOD_STANDALONE )
       SCRIPT $<TARGET_FILE:asg_tools_test_init> "asg::AsgTool"
       POST_EXEC_SCRIPT nopost.sh )
    atlas_add_test( AsgComponentConfig_dictionary
-      SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/test/AsgComponentConfig_dictionary_test.py" )
+      SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/test/AsgComponentConfig_dictionary_test.py"
+      # Formatting of some hadd messages changed in newer ROOT versions.
+      LOG_IGNORE_PATTERN "hadd.*[tT]arget file|hadd.*compression setting"
+ )
 endif()

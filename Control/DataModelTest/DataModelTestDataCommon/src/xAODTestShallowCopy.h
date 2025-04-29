@@ -75,7 +75,16 @@ private:
   SG::WriteDecorHandleKey<DMTest::C> m_cinfoAnInt10Key
   { this, "CInfoAnInt10Key", "scopy_cinfo.anInt10", "Key for cinfo anInt10 decoration" };
   SG::ShallowCopyDecorDeps<DMTest::C> m_cinfoDecorDeps
-  { this, "CInfoDecorHelper", { "dInt1" } };
+    { this, "CInfoDecorHelper", { "dInt1" } };
+  
+  // one of the decorations (dInt1Base) is a decoration on the SG::AuxElement base class
+  // so to propagate this we need handles for that type too
+  SG::ReadHandleKey<SG::AuxElement> m_cinfoReadKeyBase
+  { this, "CInfoReadKeyBase", "cinfo", "Key for cinfo object read from SG" };
+  SG::WriteHandleKey<SG::AuxElement> m_cinfoWriteKeyBase
+  { this, "CInfoWriteKeyBase", "scopy_cinfo", "Key for cinfo object written to SG" };
+  SG::ShallowCopyDecorDeps<SG::AuxElement> m_cinfoDecorDepsBase
+    { this, "CInfoDecorHelperBase", { "dInt1Base" } };
 
   SG::ReadHandleKey<DMTest::CVec> m_ctrigReadKey
   { this, "CTrigReadKey", "ctrig", "Key for ctrig object read from SG" };
@@ -84,7 +93,7 @@ private:
   SG::WriteDecorHandleKey<DMTest::CVec> m_ctrigAnInt10Key
   { this, "CTrigAnInt10Key", "scopy_ctrig.anInt10", "Key for ctrig anInt10 decoration" };
   SG::ShallowCopyDecorDeps<DMTest::CVec> m_ctrigDecorDeps
-  { this, "CTrigDecorHelper", { "dInt1" } };
+    { this, "CTrigDecorHelper", { "dInt1" } };
 
 };
 

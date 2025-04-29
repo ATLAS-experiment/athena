@@ -10,8 +10,8 @@
 //
 // Basic Jpsi->mu mu derivation example
 
-#include "DerivationFrameworkBPhys/Reco_Vertex.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "Reco_Vertex.h"
+#include "BPhysPVTools.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
@@ -21,12 +21,11 @@ namespace DerivationFramework {
   Reco_Vertex::Reco_Vertex(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_v0Tools("Trk::V0Tools", this),
     m_SearchTool("",this),
     m_pvRefitter("Analysis::PrimaryVertexRefitter", this)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare tools    
     declareProperty("V0Tools"   , m_v0Tools);

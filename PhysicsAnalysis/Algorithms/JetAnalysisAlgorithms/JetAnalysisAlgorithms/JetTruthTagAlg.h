@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETANALYSISALGORITHMS_JETTRUTHTAGALG_H
 #define JETANALYSISALGORITHMS_JETTRUTHTAGALG_H
 
-#include "AnaAlgorithm/AnaAlgorithm.h"
+#include "AnaAlgorithm/AnaReentrantAlgorithm.h"
 #include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
-#include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "SystematicsHandles/SysReadHandle.h"
 #include "SystematicsHandles/SysListHandle.h"
 #include "xAODJet/JetContainer.h"
@@ -17,13 +16,13 @@
 
 namespace CP {
     /// @brief An algorithm for tagging reco-jets if they are close enough to a truth jet
-    class JetTruthTagAlg final : public EL::AnaAlgorithm {
+    class JetTruthTagAlg final : public EL::AnaReentrantAlgorithm {
     public:
-        using EL::AnaAlgorithm::AnaAlgorithm;
+        using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
         virtual ~JetTruthTagAlg() override = default;
 
         virtual StatusCode initialize() override;
-        virtual StatusCode execute() override;
+        virtual StatusCode execute(const EventContext &ctx) const override;
 
     private:
         SysListHandle m_systematicsList {this};

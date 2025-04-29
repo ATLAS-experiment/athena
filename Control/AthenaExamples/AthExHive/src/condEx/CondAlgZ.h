@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CONDALGS_CONDALGZ_H
-#define CONDALGS_CONDALGZ_H 1
+#ifndef ATHEXHIVE_CONDEX_CONDALGZ_H
+#define ATHEXHIVE_CONDEX_CONDALGZ_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/ReadHandle.h"
@@ -13,18 +13,15 @@
 #include "AthExHive/CondDataObj.h"
 #include "AthExHive/CondDataObjY.h"
 #include "AthExHive/CondDataObjZ.h"
-#include "AthExHive/IASCIICondDbSvc.h"
 
 #include "xAODEventInfo/EventInfo.h"
-
-#include <string>
 
 class CondAlgZ  :  public AthAlgorithm {
   
 public:
     
   CondAlgZ (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~CondAlgZ();
+  virtual ~CondAlgZ() = default;
   
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;

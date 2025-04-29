@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -135,7 +135,9 @@ namespace VKalVrtAthena {
   //____________________________________________________________________________________________________
   void VrtSecInclusive::selectTrack( const xAOD::TrackParticle* trk ) {
     
-    if( !m_decor_isSelected ) m_decor_isSelected = std::make_unique< SG::AuxElement::Decorator< char > >( "is_selected" + m_jp.augVerString );
+    if( !m_decor_isSelected ) {
+      m_decor_isSelected.emplace( "is_selected" + m_jp.augVerString );
+    }
     
     // Setup cut functions
     if( m_trackSelectionFuncs.empty() && !m_jp.passThroughTrackSelection ) {
@@ -158,12 +160,12 @@ namespace VKalVrtAthena {
       
     }
     
-    if(  std::find( m_selectedTracks->begin(), m_selectedTracks->end(), trk ) != m_selectedTracks->end() ) return;
+    if(  std::find( m_selectedTracks.begin(), m_selectedTracks.end(), trk ) != m_selectedTracks.end() ) return;
     
     std::vector<bool> cutBits;
     
     cutBits.reserve(m_trackSelectionFuncs.size());
-for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( trk ) );
+    for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( trk ) );
       
     if( m_jp.FillHist ) {
       m_hists["trkSelCuts"]->Fill( 0 );
@@ -205,7 +207,7 @@ for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( tr
         (*m_decor_isSelected)( *id_tr ) = true; }
     }
       
-      m_selectedTracks->emplace_back( trk );
+      m_selectedTracks.emplace_back( trk );
       
       if( m_jp.FillNtuple ) m_ntupleVars->get< vector<int> >( "SelTrk_barcode" ).emplace_back(barcode); // will need this later // FIXME barcode-based
       
@@ -243,7 +245,7 @@ for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( tr
     for( const auto *trk : *trackParticleContainer ) { selectTrack( trk ); }
     
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of total ID tracks   = " << trackParticleContainer->size() );
-    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks->size() );
+    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks.size() );
     
     return StatusCode::SUCCESS;
   }
@@ -269,7 +271,7 @@ for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( tr
     }
     
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of total muons       = " << muons->size() );
-    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks->size() );
+    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks.size() );
     
     return StatusCode::SUCCESS;
   }
@@ -292,7 +294,7 @@ for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( tr
     }
     
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of total electrons   = " << electrons->size() );
-    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks->size() );
+    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks.size() );
     
     return StatusCode::SUCCESS;
   }
@@ -324,7 +326,7 @@ for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( tr
       // The first track is the best-matched GSF track
       const auto* el_trk = electron->trackParticle(0);
       selectTrack( el_trk );
-      m_leptonicTracks->emplace_back(el_trk);
+      m_leptonicTracks.emplace_back(el_trk);
       IDTrksFromEls.emplace_back(xAOD::EgammaHelpers::getOriginalTrackParticle(electron));
     }
 
@@ -340,12 +342,12 @@ for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( tr
       if (m_jp.doRemoveCaloTaggedMuons && muon->muonType() == xAOD::Muon::CaloTagged) { continue; }
       const auto* mu_trk = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
       if(!mu_trk) { continue; }
-      m_leptonicTracks->emplace_back(mu_trk);
+      m_leptonicTracks.emplace_back(mu_trk);
     }
 
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of total ID tracks   = " << IDtracks->size() );
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of total electrons   = " << electrons->size() );
-    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks->size() );    
+    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks.size() );
     
     return StatusCode::SUCCESS;
   }

@@ -7,6 +7,13 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
+def InDetExtraDataObjectsFromDataPrep(flags, dataObjects) :
+  if flags.Detector.GeometryITk:
+    if flags.Detector.EnableITkPixel:
+      dataObjects.append( ('InDet::SiDetectorElementStatus' , 'StoreGateSvc+ITkPixelDetectorElementStatus' ))
+    if flags.Detector.EnableITkStrip:
+      dataObjects.append( ('InDet::SiDetectorElementStatus' , 'StoreGateSvc+ITkStripDetectorElementStatus' ))
+
 
 def InDetIDCCacheCreatorCfg(flags):
   #Create IdentifiableCaches

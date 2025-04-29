@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Geo2G4SolidFactory.h"
@@ -149,7 +149,7 @@ Geo2G4SolidFactory::Geo2G4SolidFactory() :
 {
 }
 
-G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoShape, std::string name)
+G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoShape, const std::string & name)
 {
   G4VSolid* theSolid(nullptr);
 
@@ -161,10 +161,7 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
   // ------- Variables for boolean operations
   G4VSolid* solidA(nullptr);
   G4VSolid* solidB(nullptr);
-  // ------- Variables for Pcon and Pgon
-  int nPlanes;
-
-  std::string n = std::move(name);
+  auto n = name;
 
   //
   // The Box
@@ -250,31 +247,13 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
     {
       const GeoPcon* thePcon = dynamic_cast<const GeoPcon*>(geoShape);
       if (nullptr==thePcon) throw std::runtime_error("TypeID did not match cast for pcon");
-      if (n.empty()) n="G4Polycone";
-      nPlanes = static_cast<int>(thePcon->getNPlanes());
-      // NB G4Polycone copies the contents of these arrays rather than taking ownership.
-      auto zPlane = std::make_unique<double[]>(nPlanes);
-      auto rInner = std::make_unique<double[]>(nPlanes);
-      auto rOuter = std::make_unique<double[]>(nPlanes);
-      for (unsigned int index=0; index<static_cast<unsigned int>(nPlanes); index++)
-        {
-          zPlane[index] = thePcon->getZPlane(index);
-          rInner[index] = thePcon->getRMinPlane(index);
-          rOuter[index] = thePcon->getRMaxPlane(index);
-          if (rInner[index]<0.){ ATH_MSG_WARNING("PCon " << n << " has an inner radius of " << rInner[index] << " for slice " << index << " of " << nPlanes);}
-          if (rOuter[index]<=0.){
-            ATH_MSG_WARNING("PCon " << n << " has an outer radius of " << rOuter[index] << " for slice " << index << " of " << nPlanes << " - using std::abs.");
-            rOuter[index] = std::abs(rOuter[index]);
-          }
-        }
-
-      theSolid = new G4Polycone(n,
+      theSolid = new G4Polycone(n.empty()?"G4Polycone":std::move(n),
                                 thePcon->getSPhi(),
                                 thePcon->getDPhi(),
-                                nPlanes,
-                                zPlane.get(),
-                                rInner.get(),
-                                rOuter.get());
+                                thePcon->getNPlanes(),
+                                thePcon->getZPlaneBuff(),
+                                thePcon->getRMinBuff(),
+                                thePcon->getRMaxBuff());
     }
   //
   // GeoCons
@@ -326,31 +305,23 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
     {
       const GeoPgon* thePgon = dynamic_cast<const GeoPgon*>(geoShape);
       if (nullptr==thePgon) throw std::runtime_error("TypeID did not match cast for pgon");
-      if (n.empty()) n="G4Polyhedra";
-      nPlanes = static_cast<int>(thePgon->getNPlanes());
+
       // NB G4Polyhedra copies the contents of these arrays rather than taking ownership.
-      auto zPlane = std::make_unique<double[]>(nPlanes);
+      unsigned nPlanes = thePgon->getNPlanes();
       auto rInner = std::make_unique<double[]>(nPlanes);
       auto rOuter = std::make_unique<double[]>(nPlanes);
       double alpha = thePgon->getDPhi()/(2*thePgon->getNSides());  // 1/2 openning angle
-      for (unsigned int index=0; index<static_cast<unsigned int>(nPlanes); index++)
-        {
-          zPlane[index] = thePgon->getZPlane(index);
-          rInner[index] = thePgon->getRMinPlane(index)*cos(alpha);
-          rOuter[index] = thePgon->getRMaxPlane(index)*cos(alpha);
-          if (rInner[index]<0.){ ATH_MSG_WARNING("Pgon " << n << " has an inner radius of " << rInner[index] << " for slice " << index << " of " << nPlanes);}
-          if (rOuter[index]<=0.){
-            ATH_MSG_WARNING("Pgon " << n << " has an outer radius of " << rOuter[index] << " for slice " << index << " of " << nPlanes << " - using std::abs.");
-            rOuter[index] = std::abs(rOuter[index]);
-          }
-        }
+      for (unsigned int index=0; index<static_cast<unsigned int>(nPlanes); index++) {
+	rInner[index] = thePgon->getRMinPlane(index)*cos(alpha);
+	rOuter[index] = thePgon->getRMaxPlane(index)*cos(alpha);
+      }
 
-      theSolid = new G4Polyhedra(n,
+      theSolid = new G4Polyhedra(n.empty()?"G4Polyhedra":std::move(n),
                                  thePgon->getSPhi(),
                                  thePgon->getDPhi(),
                                  thePgon->getNSides(),
                                  nPlanes,
-                                 zPlane.get(),
+                                 thePgon->getZPlaneBuff(),
                                  rInner.get(),
                                  rOuter.get());
     }

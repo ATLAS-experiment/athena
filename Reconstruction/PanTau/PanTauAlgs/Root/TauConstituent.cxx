@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/TauConstituent.h"
@@ -162,8 +162,6 @@ std::string  PanTau::TauConstituent::getTypeName(PanTau::TauConstituent::Type aT
   case PanTau::TauConstituent::t_Pi0Neut: return "Pi0Neut";
   case PanTau::TauConstituent::t_OutChrg: return "OuterChrg";
   case PanTau::TauConstituent::t_OutNeut: return "OuterNeut";
-  case PanTau::TauConstituent::t_NeutLowA: return "NeutLowA";
-  case PanTau::TauConstituent::t_NeutLowB: return "NeutLowB";
   case PanTau::TauConstituent::t_NoType: return "All";
   default: return "UnkownType";
   }
@@ -176,8 +174,6 @@ bool PanTau::TauConstituent::isNeutralType(int tauConstituentType) {
   case PanTau::TauConstituent::t_Neutral: return true;
   case PanTau::TauConstituent::t_Pi0Neut: return true;
   case PanTau::TauConstituent::t_OutNeut: return true;
-  case PanTau::TauConstituent::t_NeutLowA: return true;
-  case PanTau::TauConstituent::t_NeutLowB: return true;
   default: return false;
   }
   return false;
@@ -212,7 +208,7 @@ double PanTau::TauConstituent::getBDTValue() const {
 }
 
 
-std::vector<int> PanTau::TauConstituent::getTypeFlags() const {
+const std::vector<int>& PanTau::TauConstituent::getTypeFlags() const {
   return m_TypeFlags;
 }
 
@@ -241,7 +237,7 @@ void PanTau::TauConstituent::addShot(TauConstituent* shot) {
 }
 
 
-std::vector<PanTau::TauConstituent*> PanTau::TauConstituent::getShots() const {
+const std::vector<PanTau::TauConstituent*>& PanTau::TauConstituent::getShots() const {
   return m_Shots;
 }
 

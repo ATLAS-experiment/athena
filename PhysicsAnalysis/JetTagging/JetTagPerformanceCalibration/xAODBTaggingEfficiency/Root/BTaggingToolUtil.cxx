@@ -11,3 +11,13 @@ float BTaggingToolUtil::getExtendedFloat(const nlohmann::json& pt) {
     return pt.get<float>();
   }
 }
+
+std::string BTaggingToolUtil::getExtendedString(const nlohmann::json& pt) {
+  if (pt.is_string()){
+    return pt.get<std::string>();
+  }
+  else{ 
+    return pt.dump();
+  }
+}
+

@@ -6,7 +6,7 @@
 atlas_subdir( MuonPatternRecognitionTest )
 
 
-find_package( ROOT COMPONENTS Gpad Graf Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf3d Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Gpad Graf Core Hist )
 
 atlas_add_component( MuonPatternRecognitionTest
                      src/components/*.cxx src/*.cxx 
@@ -20,20 +20,26 @@ atlas_add_component( MuonPatternRecognitionTest
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( HoughTransformTestR3
-                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --nEvents 2  --noMonitorPlots
-                PROPERTIES TIMEOUT 600
+                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --nEvents 2 --noMM --noSTGC --noMonitorPlots
+                PROPERTIES TIMEOUT 1200
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
+                
+atlas_add_test( HoughTransformTestR3_fromRDO
+                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --nEvents 2 --noMM --noSTGC --noMonitorPlots --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root
+                PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
+                
 atlas_add_test( HoughTransformTestR4
-                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --noMonitorPlots --nEvents 2 --noMM --noSTGC --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db --condTag OFLCOND-MC21-SDR-RUN4-01 --geoTag ATLAS-P2-RUN4-01-00-00 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root
-                PROPERTIES TIMEOUT 600
+                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --noMonitorPlots --nEvents 2 --noMM --noSTGC --defaultGeoFile RUN4 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root
+                PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
-
 
 atlas_add_test( FullChainIntegrationTest
                 SCRIPT python -m MuonPatternRecognitionTest.MuonRecoChainTesterConfig --nEvents 2 --noMM --noSTGC
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)

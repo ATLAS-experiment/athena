@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONEVENTATHENAPOOL_CSCSTRIPPREPDATACONTAINERCNV_H
@@ -38,11 +38,7 @@ public:
     virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
         
 private:
-    //CscStripPrepDataCollVec              m_prdCollVec;
-    StoreGateSvc*                   m_storeGate;
-    
-    // Not bothering with being able to read 'old' PRDs yet. Ed
-    //CscStripPrepDataContainerCnv_p1   m_converter_p1;
+    StoreGateSvc*                   m_storeGate{};
     CscStripPrepDataContainerCnv_tlp1    m_TPConverter;
     
 };

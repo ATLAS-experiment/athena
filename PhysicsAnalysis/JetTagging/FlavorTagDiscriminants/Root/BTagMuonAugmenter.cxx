@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/BTagMuonAugmenter.h"
-#include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "xAODBTagging/BTaggingUtilities.h"
 #include "xAODMuon/Muon.h"
 #include "xAODMuon/MuonContainer.h"
@@ -221,6 +221,7 @@ namespace FlavorTagDiscriminants {
     std::set<std::string> keys;
     for (const auto& auxid : {
              m_dec_muon_isDefaults.auxid(),
+             m_dec_nAssocMuons.auxid(),
              m_dec_muon_dR.auxid(),
              m_dec_muon_qOverPratio.auxid(),
              m_dec_muon_pTrel.auxid(),
@@ -232,6 +233,12 @@ namespace FlavorTagDiscriminants {
              m_dec_muon_ip3d_sigma_z0.auxid(),
              m_dec_muon_link.auxid()}) {
       keys.insert(type_registry.getName(auxid));
+    }
+    for (const std::string& s : m_float_IO_variables) {
+      keys.insert ("softMuon_" + s);
+    }
+    for (const std::string& s : m_unsigned_char_IO_variables) {
+      keys.insert ("softMuon_" + s);
     }
     return keys;
   }

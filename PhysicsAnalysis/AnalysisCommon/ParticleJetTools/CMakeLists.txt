@@ -8,7 +8,7 @@ find_package( ROOT )
 # Component(s) in the package:
 if( XAOD_STANDALONE )
    atlas_add_library( ParticleJetToolsLib
-      ParticleJetTools/*.h Root/*.cxx src/*.cxx
+      ParticleJetTools/*.h Root/*.cxx
       PUBLIC_HEADERS ParticleJetTools
       LINK_LIBRARIES AsgTools EventPrimitives xAODJet xAODTracking xAODTruth
       JetInterface MCTruthClassifierLib JetRecLib AsgDataHandlesLib
@@ -24,9 +24,10 @@ else()
 endif()
 
 if( NOT XAOD_STANDALONE )
-   atlas_add_component( ParticleJetTools
-      src/components/*.cxx
-      LINK_LIBRARIES ParticleJetToolsLib )
+  atlas_add_component( ParticleJetTools
+    src/TruthParentDecoratorAlg.cxx
+    src/components/*.cxx
+    LINK_LIBRARIES ParticleJetToolsLib )
 endif()
 
 atlas_add_dictionary( ParticleJetToolsDict

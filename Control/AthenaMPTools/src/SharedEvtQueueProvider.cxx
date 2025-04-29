@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedEvtQueueProvider.h"
@@ -11,6 +11,7 @@
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "AthenaKernel/IEventShare.h"
+#include "CxxUtils/xmalloc.h"
 
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
@@ -27,24 +28,8 @@
 SharedEvtQueueProvider::SharedEvtQueueProvider(const std::string& type
 					       , const std::string& name
 					       , const IInterface* parent)
-  : AthenaMPToolBase(type,name,parent)
-  , m_nprocesses(-1)
-  , m_useSharedReader(false)
-  , m_nEventsBeforeFork(0)
-  , m_nChunkSize(1)
-  , m_nChunkStart(0)
-  , m_nPositionInChunk(0)
-  , m_nEvtRequested(-1)
-  , m_nEvtCounted(0)
-  , m_sharedEventQueue(0)
-  , m_evtShare(0)
+  : base_class(type,name,parent)
 {
-  declareInterface<IAthenaMPTool>(this);
-
-  declareProperty("UseSharedReader",m_useSharedReader);
-  declareProperty("EventsBeforeFork",m_nEventsBeforeFork);
-  declareProperty("ChunkSize",m_nChunkSize);
-
   m_subprocDirPrefix = "evt_counter";
 }
 
@@ -78,18 +63,14 @@ int SharedEvtQueueProvider::makePool(int maxevt, int nprocs, const std::string& 
 
   // Create event queue
   ATH_MSG_DEBUG( "Event queue name " << "AthenaMPEventQueue_" << m_randStr );
-  StatusCode sc = detStore()->retrieve(m_sharedEventQueue,"AthenaMPEventQueue_"+m_randStr);
-  if(sc.isFailure()) {
-    ATH_MSG_ERROR( "Unable to retrieve the pointer to Shared Event Queue" );
-    return -1;
-  }
+  ATH_CHECK( detStore()->retrieve(m_sharedEventQueue,"AthenaMPEventQueue_"+m_randStr), -1);
 
   // Create the process group and map_async bootstrap
   m_processGroup = new AthenaInterprocess::ProcessGroup(1);
   ATH_MSG_INFO( "Event Counter process created" );
   if(mapAsyncFlag(AthenaMPToolBase::FUNC_BOOTSTRAP))
     return -1;
-  ATH_MSG_INFO( "Event Counter bootstraped" ); 
+  ATH_MSG_INFO( "Event Counter bootstrapped" ); 
 
   return 1;
 }
@@ -129,7 +110,7 @@ AthenaMP::AllWorkerOutputs_ptr SharedEvtQueueProvider::generateOutputReport()
 std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::bootstrap_func()
 {
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -332,7 +313,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::exec_
 
 
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -347,7 +328,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::fin_f
 {
   // Dummy
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 0; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
   return outwork;

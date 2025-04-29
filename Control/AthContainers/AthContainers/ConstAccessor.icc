@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/ConstAccessor.icc
@@ -58,6 +58,7 @@ inline
 ConstAccessor<T, ALLOC>::ConstAccessor (const SG::auxid_t auxid)
   : ConstAccessor (auxid, SG::AuxVarFlags::None)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
@@ -92,6 +93,7 @@ ConstAccessor<T, ALLOC>::ConstAccessor (const SG::auxid_t auxid,
                                         const SG::AuxVarFlags flags)
   : m_auxid (auxid)
 {
+  //cppcheck-suppress missingReturn
   SG::AuxTypeRegistry::instance().checkAuxID<T, ALLOC> (auxid, flags);
 }
 
@@ -101,8 +103,7 @@ ConstAccessor<T, ALLOC>::ConstAccessor (const SG::auxid_t auxid,
  * @param e The element for which to fetch the variable.
  */
 template <class T, class ALLOC>
-template <class ELT>
-ATH_REQUIRES( IsConstAuxElement<ELT> )
+template <IsConstAuxElement ELT>
 inline
 typename ConstAccessor<T, ALLOC>::const_reference_type
 ConstAccessor<T, ALLOC>::operator() (const ELT& e) const
@@ -141,8 +142,7 @@ ConstAccessor<T, ALLOC>::operator()
  * If this variable is not available, then return @c deflt instead.
  */
 template <class T, class ALLOC>
-template <class ELT>
-ATH_REQUIRES( IsConstAuxElement<ELT> )
+template <IsConstAuxElement ELT>
 inline
 typename ConstAccessor<T, ALLOC>::const_reference_type
 ConstAccessor<T, ALLOC>::withDefault (const ELT& e, const T& deflt) const
@@ -210,8 +210,7 @@ ConstAccessor<T, ALLOC>::getDataSpan (const AuxVectorData& container) const
  * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
-template <class ELT>
-ATH_REQUIRES( IsConstAuxElement<ELT> )
+template <IsConstAuxElement ELT>
 inline
 bool
 ConstAccessor<T, ALLOC>::isAvailable (const ELT& e) const

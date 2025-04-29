@@ -60,14 +60,12 @@ namespace MuonCalib {
         virtual double tUpper() const override final;
 
         virtual double tBinWidth() const override final;
-        //!< get the number of parameters used to describe the r(t) relationship
-        unsigned int numberOfRtParameters() const;
+
+        virtual unsigned nDoF() const override final;
 
         //!< get the coefficients of the r(t) polynomial
         std::vector<double> rtParameters() const;
 
-        //!< get the reduced time which is the argument of the Chebyshev polynomial
-        double getReducedTime(const double  t) const;
     };
 }  // namespace MuonCalib
 

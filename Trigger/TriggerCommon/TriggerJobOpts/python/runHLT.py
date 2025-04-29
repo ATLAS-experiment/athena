@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 CA module to configure the (standalone) HLT for athena and athenaHLT.
 There is a separate entry point for each application to tailor some
@@ -13,6 +13,7 @@ Usage:
 """
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from PyJobTransforms.TransformUtils import processPreExec, processPostExec, processPreInclude, processPostInclude
 
 def lock_and_restrict(flags):
    """Deny access to a few flags and lock"""
@@ -33,7 +34,6 @@ def set_flags(flags):
    from AthenaConfiguration.Enums import BeamType
 
    flags.Trigger.doHLT = True    # needs to be set early as other flags depend on it
-   flags.Trigger.EDMVersion = 3  # Run-3 EDM
    flags.Beam.Type = BeamType.Collisions
    flags.InDet.useDCS = False    # DCS is in general not available online
    flags.Muon.MuonTrigger = True # Setup muon reconstruction for trigger
@@ -50,13 +50,22 @@ def set_flags(flags):
    flags.Scheduler.AutoLoadUnmetDependencies = False
 
 
-def runHLTCfg(flags):
-   """Main function to configure the HLT in athena and athenaHLT"""
+def runHLTCfg(flags, checkMT=True):
+   """Main function to configure the HLT in athena and athenaHLT.
+
+   checkMT: perform sanity check if we are running in MT mode
+   """
+
    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
    from AthenaCommon.Logging import logging
 
    log = logging.getLogger('runHLT')
    cfg = ComponentAccumulator()
+
+   # This needs to be conditional on checkMT because for the HLT use-case, we trapped the
+   # Concurrency flags and they cannot be accessed at this point anymore.
+   if checkMT and flags.Concurrency.NumThreads == 0:
+      raise RuntimeError("Trigger jobs must be run in multi-threaded mode. Use --threads=1 (or greater).")
 
    # Load these objects from StoreGate
    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
@@ -127,8 +136,8 @@ def athenaHLTCfg(flags):
    # Lock flags
    lock_and_restrict(flags)
 
-   # Configure HLT
-   cfg = runHLTCfg(flags)
+   # Configure HLT (always runs in MT mode)
+   cfg = runHLTCfg(flags, checkMT=False)
    return cfg
 
 
@@ -145,8 +154,14 @@ def athenaCfg(flags, parser=None):
    # Add options to command line parser
    if not parser:
       parser = flags.getArgumentParser()
-   parser.add_argument('--postExec', metavar='CMD',
+   parser.add_argument('--preExec', metavar='CMD', nargs='+', 
+                       help='Commands executed before Python configuration')
+   parser.add_argument('--postExec', metavar='CMD', nargs='+',
                        help='Commands executed after Python configuration')
+   parser.add_argument('--preInclude', metavar='CMD', nargs='+',
+                       help='Module to execute before Python configuration')
+   parser.add_argument('--postInclude', metavar='CMD', nargs='+',
+                       help='Module to execute after Python configuration')
 
    # Fill flags from command line
    args = flags.fillFromArgs(parser=parser)
@@ -164,9 +179,15 @@ def athenaCfg(flags, parser=None):
       flags.Scheduler.ShowControlFlow = True
       flags.Scheduler.ShowDataDeps = True
 
+   processPreInclude(args, flags)
+   processPreExec(args, flags)
+   
    # Configure main services
    _allflags = flags.clone()   # copy including Concurrency flags
    _allflags.lock()
+   if _allflags.Concurrency.NumThreads == 0:
+      raise RuntimeError("Trigger jobs must be run in multi-threaded mode. Use --threads=1 (or greater).")
+
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    cfg = MainServicesCfg(_allflags)
    del _allflags
@@ -182,11 +203,14 @@ def athenaCfg(flags, parser=None):
        cfg.merge(PoolReadCfg(flags))
 
    # Configure HLT
-   cfg.merge(runHLTCfg(flags))
+   cfg.merge(runHLTCfg(flags, checkMT=False))  # MT check already done above
 
-   if args.postExec:
-      exec(args.postExec)
+   # Post-include
+   processPostInclude(args, flags, cfg)
 
+   # Post-exec
+   processPostExec(args, flags, cfg)
+  
    # Apply flags.Exec.XXXMessageComponents logic to configured job
    from AthenaConfiguration.Utils import setupLoggingLevels
    setupLoggingLevels(flags, cfg)

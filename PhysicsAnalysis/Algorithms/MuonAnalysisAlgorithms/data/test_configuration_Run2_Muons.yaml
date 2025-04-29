@@ -1,0 +1,48 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+Muons:
+- containerName: AnaMuons
+  recalibratePhyslite: False
+  decorateTruth: true
+  writeTrackD0Z0: True
+  WorkingPoint:
+  - selectionName: medium
+    quality: Medium
+    isolation: Loose_VarRad
+  IFFClassification: {}
+  MCTCClassification:
+    prefix: truth_
+  TriggerSF:
+    triggerChainsPerYear:
+      '2015':
+      - 'HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose'
+      - 'HLT_mu20_iloose_L1MU15 || HLT_mu40'
+      - 'HLT_2g20_tight'
+      '2016':
+      - 'HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0'
+      - 'HLT_mu26_ivarmedium || HLT_mu50'
+      - 'HLT_g35_loose_g25_loose'
+      '2017':
+      - 'HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0'
+      - 'HLT_2g22_tight_L12EM15VHI'
+      - 'HLT_mu50'
+      '2018':
+      - 'HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0'
+      - 'HLT_g35_medium_g25_medium_L12EM20VH'
+      - 'HLT_mu26_ivarmedium'
+      - 'HLT_2mu14'
+      '2022':
+      - 'HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'
+      '2023':
+      - 'HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'
+    muonID: 'Tight'
+
+GeneratorLevelAnalysis: {}
+
+PrintConfiguration: {}

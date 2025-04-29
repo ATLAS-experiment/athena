@@ -1,25 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODDirectPhotonFilter.h"
 #include <algorithm>
+#include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
-
-xAODDirectPhotonFilter::xAODDirectPhotonFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name, pSvcLocator)
-{
-  declareProperty("NPhotons", m_NPhotons = 1);
-  declareProperty("OrderPhotons",m_OrderPhotons = true);
-  declareProperty("Ptmin",m_Ptmin = std::vector<double>(m_NPhotons, 10000.));
-  declareProperty("Ptmax",m_Ptmax = std::vector<double>(m_NPhotons, std::numeric_limits<double>::max()));
-  declareProperty("Etacut", m_EtaRange = 2.50);
-  declareProperty("AllowSUSYDecay",m_AllowSUSYDecay = false);
-
-}
 
 StatusCode xAODDirectPhotonFilter::filterInitialize() {
 
+  CHECK(m_truthPartContKey.initialize());
 
   ATH_MSG_INFO("Initialising DirectPhoton filter with OrderPhotons="<<m_OrderPhotons);
 
@@ -37,14 +27,14 @@ StatusCode xAODDirectPhotonFilter::filterInitialize() {
   // for backward compatibility
   if (m_Ptmin.size()<m_NPhotons) {
     size_t origsize = m_Ptmin.size();
-    double lastPt = m_Ptmin.back();
-    m_Ptmin.resize(m_NPhotons);
+    double lastPt = m_Ptmin.value().back();
+    m_Ptmin.value().resize(m_NPhotons);
     for (size_t i=origsize; i<m_NPhotons; ++i) m_Ptmin[i]=lastPt;
   }
   if (m_Ptmax.size()<m_NPhotons) {
     size_t origsize = m_Ptmax.size();
-    double lastPt = m_Ptmax.back();
-    m_Ptmax.resize(m_NPhotons);
+    double lastPt = m_Ptmax.value().back();
+    m_Ptmax.value().resize(m_NPhotons);
     for (size_t i=origsize; i<m_NPhotons; ++i) m_Ptmax[i]=lastPt;
   }
   return StatusCode::SUCCESS;
@@ -59,19 +49,13 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
   std::vector<const xAOD::TruthParticle*> promptPhotonsInEta;
 
   int phot = 0;
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
- // Loop over all particles in the event and find photons in given eta range
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-
+  // Loop over all particles in the event and find photons in given eta range
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
       if (MC::isPhoton(pitr) &&
           MC::isStable(pitr) &&
           std::abs(pitr->eta()) <= m_EtaRange) {

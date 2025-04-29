@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -28,7 +28,9 @@ VP1BanksChannel::VP1BanksChannel()
 
 //_________________________________________________________
 void VP1BanksChannel::init()
-{
+{ 
+  //Ownership transferred to IVP1ChannelWidget
+  //cppcheck-suppress publicAllocationError
   m_bankssystem = new VP1BanksSystem();
   registerSystem(m_bankssystem);
 

@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUDQA_GENERALTAUPLOTS_H
 #define TAUDQA_GENERALTAUPLOTS_H
 
-#include "TrkValHistUtils/PlotBase.h"
-#include "ParamPlots.h"
-#include "xAODTau/TauJet.h"
+#include "TrkValHistUtils/PlotBase.h" //inheritance
+#include "ParamPlots.h" //member
+#include "xAODTau/TauJet.h" //typedef
 
 namespace Tau{
 
@@ -19,26 +19,34 @@ class GeneralTauPlots: public PlotBase {
       void fill(const xAOD::TauJet& tau, float weight);
 
       Tau::ParamPlots m_oParamPlots;
-      TH1* m_tauCharge;
-      TH1* m_tauNChargedTracks;
-      TH1* m_tauNIsolatedTracks;
-      TH1* m_tauNCoreTracks;
-      TH1* m_tauNWideTracks;
-      TH1* m_ptHighPt;
+      TH1* m_tauCharge{};
+      TH1* m_tauNChargedTracks{};
+      TH1* m_tauNIsolatedTracks{};
+      TH1* m_tauNCoreTracks{};
+      TH1* m_tauNWideTracks{};
+      TH1* m_ptHighPt{};
 
       // RNN
-      TH1* m_RNNEleScore;
-      TH1* m_RNNEleScoreSigTrans;
-      TH1* m_RNNJetScore;
-      TH1* m_RNNJetScoreSigTrans;
-      TH1* m_ptRNNVeryLoose;
-      TH1* m_ptRNNLoose;
-      TH1* m_ptRNNMedium;
-      TH1* m_ptRNNTight;
-      TH1* m_ptRNNVeryLooseHighPt;
-      TH1* m_ptRNNLooseHighPt;
-      TH1* m_ptRNNMediumHighPt;
-      TH1* m_ptRNNTightHighPt;
+      TH1* m_RNNEleScore{};
+      TH1* m_RNNEleScoreSigTrans{};
+      TH1* m_RNNJetScore{};
+      TH1* m_RNNJetScoreSigTrans{};
+      TH1* m_GNTauScore{};
+      TH1* m_GNTauScoreSigTrans{};
+      TH1* m_ptRNNVeryLoose{};
+      TH1* m_ptRNNLoose{};
+      TH1* m_ptRNNMedium{};
+      TH1* m_ptRNNTight{};
+      TH1* m_ptRNNVeryLooseHighPt{};
+      TH1* m_ptRNNLooseHighPt{};
+      TH1* m_ptRNNMediumHighPt{};
+      TH1* m_ptRNNTightHighPt{};
+      TH1* m_ptGNTauLoose{};
+      TH1* m_ptGNTauMedium{};
+      TH1* m_ptGNTauTight{};
+      TH1* m_ptGNTauLooseHighPt{};
+      TH1* m_ptGNTauMediumHighPt{};
+      TH1* m_ptGNTauTightHighPt{};
 
    private:
       void initializePlots();

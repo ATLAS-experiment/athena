@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,15 +14,9 @@
 
 // constructor
 Trk::ExtrapolationEngine::ExtrapolationEngine(const std::string& t, const std::string& n, const IInterface* p)
-: AthCheckedComponent<AthAlgTool>(t,n,p),   
-  m_forceSearchInit(false)
+: AthCheckedComponent<AthAlgTool>(t,n,p)
 {
     declareInterface<Trk::IExtrapolationEngine>(this);
-    // steering of the screen outoput (SOP)
-    declareProperty("OutputPrefix"                          , m_sopPrefix);
-    declareProperty("OutputPostfix"                         , m_sopPostfix);
-    // the properties to be given 
-    declareProperty("ForceSearchAtInit"                     , m_forceSearchInit);
 }
 
 // destructor
@@ -33,8 +27,11 @@ Trk::ExtrapolationEngine::~ExtrapolationEngine()
 // the interface method initialize
 StatusCode Trk::ExtrapolationEngine::initialize()
 {
-            
     EX_MSG_DEBUG( "", "initialize", "", "starting initialize()" );
+
+    m_sopPrefix = m_sopPrefix_prop;
+    m_sopPostfix = m_sopPostfix_prop;
+
     // get the TrackingGeometrySvc
     ATH_CHECK( m_trackingGeometryReadKey.initialize(!m_trackingGeometryReadKey.key().empty()) );
 

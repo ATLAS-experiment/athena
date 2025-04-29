@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PROMPT_DECORATEPLIT_H
@@ -12,13 +12,14 @@
 
 // Tools
 #include "PathResolver/PathResolver.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagInference/SaltModel.h"
 
 // Athena
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
+#include "AthContainers/Decorator.h"
 
 // xAOD
 #include "xAODEgamma/ElectronContainer.h"
@@ -39,38 +40,36 @@ namespace Prompt {
     virtual StatusCode execute (const EventContext&) const override;
 
   private:
-    std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil{};
-    std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil_endcap{};
+    std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel{};
+    std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel_endcap{};
 
-    int m_num_lepton_features;
-    int m_num_track_features;
+    int m_num_lepton_features{};
+    int m_num_track_features{};
 
     StatusCode initializeAccessors();
 
     StatusCode predictElec(const xAOD::Electron &electron,
-                           const xAOD::JetContainer &trackjets,
                            const xAOD::TrackParticleContainer &tracks,
                            const xAOD::CaloClusterContainer &caloclusters,
                            std::vector<SG::WriteDecorHandle<xAOD::ElectronContainer, float>> &dec_el_plit_output,
                            const EventContext& ctx) const;
+
     StatusCode predictMuon(const xAOD::Muon &muon,
-                           const xAOD::JetContainer &trackjets,
                            const xAOD::TrackParticleContainer &tracks,
                            std::vector<SG::WriteDecorHandle<xAOD::MuonContainer, float>> &dec_mu_plit_output,
                            const EventContext& ctx) const;
 
-    const xAOD::Jet* findClosestTrackJet(const xAOD::IParticle &part, const xAOD::JetContainer &jets) const;
     bool passed_r22tracking_cuts(const xAOD::TrackParticle &tp, const EventContext& ctx) const;
+  
     StatusCode decorateTrack(const xAOD::TrackParticle& track,
                            float dr_lepton,
                            bool isUsedForElectron,
                            bool isUsedForMuon,
-                           const xAOD::Jet* trackJet,
                            const xAOD::TrackParticle* trackLep) const;
+
     StatusCode fillParticles(std::vector<const xAOD::IParticle *> &parts,
                            const xAOD::IParticle &lepton,
                            const xAOD::TrackParticle *trackLep,
-                           const xAOD::Jet *trackJet,
                            const xAOD::TrackParticleContainer &trackContainer,
                            const EventContext& ctx) const;
 
@@ -83,8 +82,6 @@ namespace Prompt {
     Gaudi::Property<std::string> m_configFileVersion {this, "ConfigFileVersion", "", "Vector of tagger score files"};
     Gaudi::Property<std::string> m_configFileVersion_endcap {this, "ConfigFileVersion_endcap", "", "Vector of tagger score files for endcap"};
     Gaudi::Property<std::string> m_TaggerName {this, "TaggerName", "", "Tagger name"};
-    Gaudi::Property<float> m_maxLepTrackJetdR{
-      this, "maxLepTrackJetdR", 0.4, "Maximum distance between lepton and trackjet"};
     Gaudi::Property<float> m_maxLepTrackdR{
       this, "maxLepTrackdR", 0.4, "Maximum distance between lepton and track"};
     Gaudi::Property<float> m_lepCalErelConeSize{
@@ -121,9 +118,8 @@ namespace Prompt {
     SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_acc_el_ptvarcone30 {this,"acc_el_ptvarcone30",m_electronsKey, "ptvarcone30"};
     SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_acc_el_topoetcone30 {this,"acc_el_topoetcone30",m_electronsKey, "topoetcone30"};
 
-    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_ptfrac {this,"acc_trk_ptfrac",m_tracksKey, "ptfrac"};
-    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_dr_trackjet {this,"acc_trk_dr_trackjet", m_tracksKey, "dr_trackjet"};
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_dr_lepton {this, "acc_trk_dr_lepton",m_tracksKey, "dr_lepton"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_dr_leptontrack {this, "acc_trk_dr_leptontrack",m_tracksKey, "dr_leptontrack"};
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_d0 {this,"acc_trk_d0", m_tracksKey, m_btagIp_prefix + "d0"};
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_z0SinTheta {this, "acc_trk_z0SinTheta", m_tracksKey, m_btagIp_prefix + "z0SinTheta"};
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_d0Uncertainty {this, "acc_trk_d0Uncertainty", m_tracksKey, m_btagIp_prefix + "d0Uncertainty"};
@@ -134,6 +130,10 @@ namespace Prompt {
     SG::WriteDecorHandleKeyArray<xAOD::ElectronContainer>  m_dec_el_plit_output{this, "PLITelOutput", {}};
     SG::WriteDecorHandleKeyArray<xAOD::MuonContainer> m_dec_mu_plit_output{this, "PLITmuOutput", {}};
 
+    const SG::Decorator<float> m_dec_trk_dr_lepton{"dr_lepton"};
+    const SG::Decorator<char> m_dec_trk_electron_track{"electron_track"};
+    const SG::Decorator<char> m_dec_trk_muon_track{"muon_track"};
+    const SG::Decorator<float> m_dec_trk_dr_leptontrack{"dr_leptontrack"};
   };
 }
 

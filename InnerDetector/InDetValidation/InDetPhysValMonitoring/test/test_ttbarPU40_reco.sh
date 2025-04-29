@@ -17,12 +17,13 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r24.0.65"
+relname="r25.0.26"
 
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_lrt=IDPVMPlots_lrt.xml                                                                                                                                                
-dcubeRef_lrt=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_lrt_ttbarPU40_reco.root
+dcubeRef_lrt=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_ttbarPU40_reco.root
+
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_lrt -print -quit 2>/dev/null)
@@ -32,13 +33,16 @@ if [ -z "$dcubeXmlAbsPath" ]; then
     exit 1
 fi
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
+
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 run Reco_tf.py \
   --CA \
   --runNumber="801271" \
   --AMITag="r14519" \
   --autoConfiguration="everything" \
-  --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-07' \
+  --conditionsTag "default:${conditions}" \
   --inputRDOFile     ${ArtInFile} \
   --outputAODFile   physval.AOD.root \
   --steering        doRAWtoALL \
@@ -64,6 +68,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
     -c ${dcubeXmlAbsPath} \
     -r ${dcubeRef_lrt} \
     physval_lrt.ntuple.root
+  echo "art-result: $? shifter_plots_lrt"
   
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \

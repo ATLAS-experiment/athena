@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
-#include "PixelConditionsData/ITkPixelClusterErrorData.h"
+#include "PixelConditionsData/ITkPixelClusterErrorData.h" //for ITk::PixelClusterErrorData
 #include <memory>
 
 /** @class ITk::PixelOfflineCalibData

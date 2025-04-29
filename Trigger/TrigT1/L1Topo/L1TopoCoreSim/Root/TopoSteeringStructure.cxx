@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "L1TopoCoreSim/TopoSteeringStructure.h"
 
@@ -21,11 +21,12 @@
 #include "L1TopoCoreSim/CountingConnector.h"
 
 #include "L1TopoHardware/L1TopoHardware.h"
-
 #include "TrigConfData/L1Menu.h"
 
 #include <set>
+#include <iostream>
 #include <iomanip>
+#include <memory>
 #include <boost/lexical_cast.hpp>
 
 using namespace std;
@@ -89,13 +90,13 @@ TCS::TopoSteeringStructure::print(std::ostream & o) const {
      << "-----------------------" << endl;
 
    o << "Output summary:" << endl;
-   for(auto conn: outputConnectors() ) {
+   for(const auto & conn: outputConnectors() ) {
       o << "  " << *conn.second << endl;
    }
 
    o << endl 
      << "Algorithm detail:" << endl;
-   for(auto nc: outputConnectors() ) {
+   for(const auto & nc: outputConnectors() ) {
       DecisionConnector * conn = nc.second;
       unsigned int firstBit          = conn->decision().firstBit();
       unsigned int lastBit           = conn->numberOutputBits() + firstBit - 1;
@@ -211,7 +212,7 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
 	                confAlgorithms.push_back({algo.name(), algo.category()});
 
 	              } else { // Connector already exists: look for it and add the trigger line
-	                for(auto out : algo.outputs()){
+	                for(const auto & out : algo.outputs()){
 		                auto c = m_outputLookup.find(out);
 		                if (c != m_outputLookup.end()){
 		                  auto conn = c->second;
@@ -277,7 +278,7 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
   
    if(debug)
      cout << "... building input connectors" << endl;
-   for(auto sortConn : m_sortedLookup) {
+   for(const auto & sortConn : m_sortedLookup) {
      const string & in = sortConn.second->inputNames()[0]; // name of input
      
      if( m_inputLookup.count(in) > 0 ) continue; // InputConnector already exists
@@ -288,7 +289,7 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
      if(debug)
        cout << "Adding input connector " << "[" << *conn << "]" << endl;
    }
-   for(auto countConn : m_countLookup) {
+   for(const auto & countConn : m_countLookup) {
      const string & in = countConn.second->inputNames()[0]; // name of input
 
      if( m_inputLookup.count(in) > 0 ) continue; // InputConnector already exists
@@ -324,11 +325,11 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
          cout << "TopoSteeringStructure: Parameters for algorithm with name " << l1algoName << " going to be configured." << endl;
       ConfigurableAlg * alg = AlgFactory::mutable_instance().algorithm(l1algoName);
      
-      if(alg->isDecisionAlg())
-         ( dynamic_cast<DecisionAlg *>(alg) )->setNumberOutputBits(l1algo.outputs().size());
-
+      if(alg->isDecisionAlg()){
+         ( static_cast<DecisionAlg *>(alg) )->setNumberOutputBits(l1algo.outputs().size());
+      }
       // create ParameterSpace for this algorithm
-      ParameterSpace * ps = new ParameterSpace(alg->name());
+      auto ps = std::make_unique<ParameterSpace>(alg->name());
 
       for(auto & pe : l1algo.parameters()) {
 	 
@@ -385,7 +386,9 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
       // Get L1Threshold object and pass it to CountingAlg, from where it will be propagated to and decoded in each algorithm
       // The output of each algorithm and the threshold name is the same - use output name to retrieve L1Threshold object
       auto & l1thr = l1menu.threshold( l1algo.outputs().at(0) );
-      ( dynamic_cast<CountingAlg *>(alg) )->setThreshold(l1thr);
+      auto pCountAlg = dynamic_cast<CountingAlg *>(alg);
+      if (not pCountAlg) continue;
+      pCountAlg->setThreshold(l1thr);
 
    } // Set thresholds for multiplicity algorithms
    

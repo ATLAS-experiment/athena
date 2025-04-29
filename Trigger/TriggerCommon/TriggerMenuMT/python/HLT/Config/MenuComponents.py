@@ -18,11 +18,13 @@ from collections.abc import MutableSequence
 import functools
 import inspect
 import re
+import types
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
 # Pool of mutable ComboHypo instances (FIXME: ATR-29181)
 _ComboHypoPool = dict()
+_CustomComboHypoAllowed = set()
 
 class Node(object):
     """base class representing one Alg + inputs + outputs, to be used to connect """
@@ -363,12 +365,18 @@ class EmptyMenuSequence:
         return "MenuSequence::%s \n Hypo::%s \n Maker::%s \n Sequence::%s \n HypoTool::%s\n"\
             %(self.name, "Empty", self.maker.Alg.getName(), self.sequence.Alg.getName(), "None")
 
-def EmptyMenuSequenceCfg(flags, name):
-    """Function to create a EmptyMenuSequence (used in the functools.partial)"""
-    return EmptyMenuSequence(name)
+def createEmptyMenuSequenceCfg(flags, name):
+    """ creates the generator function named as the empty sequence"""
+    def create_sequence(flags, name):  
+        return EmptyMenuSequence(name)
+    # this allows to create the function with the same name as the sequence   
+    create_sequence.__name__ = name
+    globals()[name] = create_sequence
+    return globals()[name]
+
 
 def isEmptySequenceCfg(o):
-    return o.func.__name__ == "EmptyMenuSequenceCfg"
+    return 'Empty' in o.func.__name__
 
 class MenuSequence:
     """Class to group reco sequences with the Hypo.
@@ -526,6 +534,15 @@ class Chain(object):
                 elif re.search('^Step[0-9]{2}_', step_name):
                     step_name = step_name[7:]   
                 step.name = 'Step%d_'%(stepID+1)+step_name
+                # also modify the empty sequence names to follow the step name change
+                for iseq, seq in enumerate(step.sequenceGens):
+                    if isEmptySequenceCfg(seq): 
+                        name = seq.func.__name__ 
+                        if re.search('Seq[0-9]_',name):
+                            newname = re.sub('Seq[0-9]_', 'Seq%d_'%(stepID+1), name)
+                            #replace the empty sequence        
+                            thisEmpty = createEmptyMenuSequenceCfg(flags=None, name=newname)                
+                            step.sequenceGens[iseq]=functools.partial(thisEmpty, flags=None, name=newname)
         return
 
 
@@ -569,7 +586,7 @@ class Chain(object):
         for stepID in range(1,n_new_steps+1):
             new_step_name =  prev_step_name+'_'+empty_step_name+'%d_'%stepID+next_step_name
 
-            log.debug("Configuring empty step %s", new_step_name)
+            log.debug("Adding empty step %s", new_step_name)
             steps_to_add += [ChainStep(new_step_name, chainDicts=prev_chain_dict, comboHypoCfg=ComboHypoCfg, isEmpty=True)]
         
         self.steps = chain_steps_pre_split + steps_to_add + chain_steps_post_split
@@ -602,6 +619,10 @@ class Chain(object):
         stepname = "last step" if step=="last" else step.name
         log.debug("Adding topo configurator %s for %s to %s", topoPair[0].__qualname__, topoPair[1], "step " + stepname)
         self.topoMap[step] = topoPair
+
+    def __str__(self):
+        return "\n-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s "%(\
+                    self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups)     
 
     def __repr__(self):
         return "\n-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s \n + Steps: \n %s \n"%(\
@@ -672,7 +693,7 @@ class ChainStep(object):
     def createSequences(self):
         """ creation of this step sequences with instantiation of the CAs"""
         log.debug("creating sequences for step %s", self.name)
-        for seq in self.sequenceGens:                        
+        for seq in self.sequenceGens:
             self.sequences.append(seq()) # create the sequences         
         
     def relabelLegIdsForJets(self):
@@ -754,7 +775,8 @@ class ChainStep(object):
         self.comboToolConfs.append(tool)
 
     def getComboHypoFncName(self):
-        return self.comboHypoCfg.func.__name__ if isinstance(self.comboHypoCfg, functools.partial) else self.comboHypoCfg
+        return self.comboHypoCfg.__name__ if isinstance(self.comboHypoCfg, types.FunctionType) else self.comboHypoCfg        
+
 
     def makeCombo(self):
         """ Configure the Combo Hypo Alg and generate the corresponding function, without instantiation which is done in createSequences() """ 
@@ -765,20 +787,18 @@ class ChainStep(object):
         funcName = self.getComboHypoFncName() # name of the function generator
         key = hash((comboNameFromStep, funcName))
         if key not in _ComboHypoPool:            
-            tmpCombo = ComboHypoNode(comboNameFromStep, self.comboHypoCfg)                
+            tmpCombo = ComboHypoNode(comboNameFromStep, self.comboHypoCfg) 
+            CHname = tmpCombo.name[:-4]   # remove 'Node'
             # exceptions for BLS chains that re-use the same custom CH in differnt steps
-            # this breaks the run one CH per step, but the BLS CH are able to handle decisions internally
-            if comboNameFromStep+"Node" != tmpCombo.name:
-                log.info("WARNING Created ComboHypo with name %s, expected from the step is instead %s. This is accepted only for allowed custom ComboHypos", tmpCombo.name, comboNameFromStep)
-                key = hash((tmpCombo.name, funcName))
+            # this breaks the run-one-CH-per-step, but the BLS CH are able to handle decisions internally
+            if comboNameFromStep != CHname:
+                log.debug("Created ComboHypo with name %s, expected from the step is instead %s. This is accepted only for allowed custom ComboHypos", CHname, comboNameFromStep)
+                _CustomComboHypoAllowed.add(CHname)
+                key = hash((CHname, funcName))
             _ComboHypoPool[key] = tmpCombo
         self.combo = _ComboHypoPool[key] 
         log.debug("Created combo %s with name %s, step comboName %s, key %s", funcName, self.combo.name, comboNameFromStep,key)
 
-        
-
-        
-                       
 
     def createComboHypoTools(self, flags, chainName):
         chainDict = HLTMenuConfig.getChainDictFromChainName(chainName)

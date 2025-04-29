@@ -16,10 +16,6 @@ def createGNNTrackingConfigFlags():
     icf.addFlag("Tracking.GNN.DumpObjects.NtupleTreeName", "GNN4ITk")
 
     # GNN Track finder tool
-    icf.addFlag("Tracking.GNN.TrackFinder.embeddingDim", 8)
-    icf.addFlag("Tracking.GNN.TrackFinder.rVal", 1.7)
-    icf.addFlag("Tracking.GNN.TrackFinder.knnVal", 500)
-    icf.addFlag("Tracking.GNN.TrackFinder.filterCut", 0.21)
     icf.addFlag("Tracking.GNN.TrackFinder.inputMLModelDir", "TrainedMLModels4ITk")
     icf.addFlag("Tracking.GNN.TrackFinder.ORTExeProvider", OnnxRuntimeType.CPU)
     
@@ -27,5 +23,26 @@ def createGNNTrackingConfigFlags():
     icf.addFlag("Tracking.GNN.TrackReader.inputTracksDir", "gnntracks")
     icf.addFlag("Tracking.GNN.TrackReader.csvPrefix", "track")
 
+    icf.addFlag("Tracking.GNN.useClusterTracks", False)
+    
+    # the following cuts are applied to the tracks before the track fitting
+    icf.addFlag("Tracking.GNN.minPixelClusters", 1)
+    icf.addFlag("Tracking.GNN.minStripClusters", 0)
+    icf.addFlag("Tracking.GNN.minClusters", 6)
+
+    # the following cuts are applied to the tracks after the track fitting
+    icf.addFlag("Tracking.GNN.etamax", 4.0)
+    import AthenaCommon.SystemOfUnits as Units
+    icf.addFlag("Tracking.GNN.pTmin", 400. * Units.MeV)
+
+    # this option applies eta dependent track selection to the output tracks
+    icf.addFlag("Tracking.GNN.doRecoTrackCuts", True)
+
+    # this option turns on the recovery attempts for failed track fits
+    icf.addFlag("Tracking.GNN.doRecoverFailedFits", True)
+
+    # this option turns on the ambiguity resolution, False by default
+    icf.addFlag("Tracking.GNN.doAmbiResolution", False)
 
     return icf
+

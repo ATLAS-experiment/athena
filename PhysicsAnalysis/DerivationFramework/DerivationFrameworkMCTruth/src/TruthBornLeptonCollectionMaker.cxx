@@ -27,10 +27,9 @@
 DerivationFramework::TruthBornLeptonCollectionMaker::TruthBornLeptonCollectionMaker(const std::string& t,
                                 const std::string& n,
                                 const IInterface* p)
-  : AthAlgTool(t,n,p)
+  : base_class(t,n,p)
   , m_metaStore( "MetaDataStore", n )
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty( "MetaDataStore", m_metaStore );
 }
 
@@ -131,62 +130,64 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
   static const SG::ConstAccessor<unsigned int> ClassificationAcc("Classification");
 
   // add relevant particles to new collection
-  int sherpLepParentUniqueID = HepMC::UNDEFINED_ID;
   for (unsigned int i=0; i<truthParticles->size(); ++i) {
     // Grab the particle
     const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
     if (!theParticle) continue; // Protection against null pointers
     if (!theParticle->isLepton()) continue; // Only include leptons!
 
-    if (is_sherpa > 0) {
+    if (is_sherpa) {
       // For Sherpa, skip is not status 11
       if (MC::isPhysical(theParticle)) continue;
       // Sherpa may have two sets of status == 11 leptons. Here we take the first set.
       // To do so, we check the first status == 11 leptons, 
       //   check that it has a child a parent barecode corresponding the the lepton's uniqueID
       // If so, then save this parent uniqueID and skip all status 11 leptons with this parent uniqueID.
-
-      if (sherpLepParentUniqueID == HepMC::UNDEFINED_ID) {
-        const xAOD::TruthParticle* thePartchild = theParticle->child();
-        if (thePartchild) {
-          int cparentUniqueID = (thePartchild->parent()) ? HepMC::uniqueID(thePartchild->parent()) : HepMC::UNDEFINED_ID;
-          if (cparentUniqueID == HepMC::uniqueID(theParticle)) {
-            sherpLepParentUniqueID = cparentUniqueID;
-          }
-        }
+      bool has_parent_of_same_flavour = false;
+      if (theParticle->prodVtx())
+      for (size_t p = 0; p < theParticle->prodVtx()->nIncomingParticles(); ++p){
+          if (theParticle->parent(p)->pdg_id() == theParticle->pdg_id()) has_parent_of_same_flavour = true;
       }
-      int puniqueID = (theParticle->parent()) ? HepMC::uniqueID(theParticle->parent()) : HepMC::UNDEFINED_ID;
-      if (sherpLepParentUniqueID > 0 && sherpLepParentUniqueID == puniqueID) continue;
-    } else if (is_sherpa == 0) {
+      if (has_parent_of_same_flavour) continue;
+    } else {
       // Some generators, look for leptons  coming from vertices with other leptons
-      bool physical=false,has_V=false;
-      if (!MC::isPhysical(theParticle)){
-        // Look for other leptons in the production vertex... carefully
-        if (theParticle->hasProdVtx()){
-          const xAOD::TruthVertex * prod = theParticle->prodVtx();
-          for (size_t p=0;p<prod->nOutgoingParticles();++p){
-            if (prod->outgoingParticle(p) &&
-              prod->outgoingParticle(p)->isLepton()){
-              physical = physical || MC::isPhysical(prod->outgoingParticle(p));
-            }
-          } // Loop over particles from the same production vertex
-          for (size_t p=0;p<prod->nIncomingParticles();++p){
-            // See if there was a boson going *into* the vertex
-            if (prod->incomingParticle(p) &&
-              (prod->incomingParticle(p)->isZ() || prod->incomingParticle(p)->isW() || prod->incomingParticle(p)->isHiggs()) ){
-              has_V=true;
+      bool physical = false, has_V = false;
+      if (!MC::isPhysical(theParticle) && theParticle->hasProdVtx()){
+        const xAOD::TruthVertex * prod = theParticle->prodVtx();
+        // Look for other leptons in the production vertex and check if those are physical
+        for (size_t p = 0; p < prod->nOutgoingParticles(); ++p){
+          if (prod->outgoingParticle(p) && prod->outgoingParticle(p)->isLepton() && MC::isPhysical(prod->outgoingParticle(p))){
+              physical = true; 
               break;
-            } // Found a vector boson
-          } // Loop over particles going into the same production vertex
-        } // Doesn't have a production vertex
+            }
+          }
+          // See if there was a boson going *into* the vertex
+        for (size_t p = 0; p < prod->nIncomingParticles(); ++p){
+          if (prod->incomingParticle(p) && (prod->incomingParticle(p)->isZ() || prod->incomingParticle(p)->isW() || prod->incomingParticle(p)->isHiggs()) ){
+            has_V = true;  // Found a vector boson
+            break;
+          }
+        } 
       }
 
       // Now we have all the information for the special case of V->l(born) l(bare) l(born) l(bare)
+      // AV: The comment above, most likely is related to the case when the event is passed to PHOTOS with an option to keep 
+      // the "documentation" particles, i.e. particles before the photon emission. 
+      // These particles in PHOTOS are attached to the same vertex, but have different status, e.g. 3. 
+      // The momentum conservation, is, of course, violated.  
       if ( !(physical && has_V && !MC::isPhysical(theParticle)) && !MC::Pythia8::isConditionB(theParticle)){
-        // If not a special case, deal with the standard: has a boson parent, is a lepton, and has a descendent that is a bare lepton
-        if (!theParticle->parent()) continue;
-        if (!theParticle->parent()->isZ() && !theParticle->parent()->isW() && !theParticle->parent()->isHiggs()) continue;
+        // Skip if it has no boson parent, or has no descendent that is a bare lepton
         if (!hasBareDescendent( theParticle ) ) continue;
+        const xAOD::TruthVertex * prod = theParticle->prodVtx();
+        if (!prod) continue;
+        if (prod->nIncomingParticles() < 1) continue;
+        size_t bad_parent = 0;
+        for (size_t p = 0; p < prod->nIncomingParticles(); ++p){
+          if (!theParticle->parent(p)) { bad_parent++; continue;}
+          if (!theParticle->parent(p)->isZ() && !theParticle->parent(p)->isW() && !theParticle->parent(p)->isHiggs()) bad_parent++;
+        }
+        if (bad_parent != 0) continue;
+
       }
     } // End of treatment for generators that are not Sherpa
 
@@ -200,7 +201,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
     originDecorator(*xTruthParticle) = classifierParticleOriginAcc.withDefault(*theParticle, 0);
     outcomeDecorator(*xTruthParticle) = classifierParticleOutComeAcc.withDefault(*theParticle, 0);
     classificationDecorator(*xTruthParticle) = ClassificationAcc.withDefault(*theParticle, 0);
-  } // Loop over alll particles
+  } // Loop over all particles
 
   return StatusCode::SUCCESS;
 }

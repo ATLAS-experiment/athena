@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
 
 #include<iostream>
 #include<cmath>
 #include<cstring>
 
-#include "GNN_TrackingFilter.h"
-
 #include<algorithm>
 #include<list>
 
+#include "GNN_TrackingFilter.h"
 
 void TrigFTF_GNN_EdgeState::initialize(TrigFTF_GNN_Edge* pS) {
 
@@ -59,7 +59,7 @@ void TrigFTF_GNN_EdgeState::initialize(TrigFTF_GNN_Edge* pS) {
 
 }
 
-void TrigFTF_GNN_EdgeState::clone(const TrigFTF_GNN_EDGE_STATE& st) {
+void TrigFTF_GNN_EdgeState::clone(const TrigFTF_GNN_EdgeState& st) {
 
   memcpy(&m_X[0], &st.m_X[0], sizeof(m_X));
   memcpy(&m_Y[0], &st.m_Y[0], sizeof(m_Y));
@@ -79,7 +79,7 @@ void TrigFTF_GNN_EdgeState::clone(const TrigFTF_GNN_EDGE_STATE& st) {
 
 TrigFTF_GNN_TrackingFilter::TrigFTF_GNN_TrackingFilter(const std::vector<TrigInDetSiLayer>& g, std::vector<TrigFTF_GNN_Edge>& sb) : m_geo(g), m_segStore(sb) { }
 
-void TrigFTF_GNN_TrackingFilter::followTrack(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_STATE& output) {
+void TrigFTF_GNN_TrackingFilter::followTrack(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EdgeState& output) {
 
   
   if(pS->m_level == -1) return;//already collected
@@ -88,7 +88,7 @@ void TrigFTF_GNN_TrackingFilter::followTrack(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_E
 
   //create track state
 
-  TrigFTF_GNN_EDGE_STATE* pInitState = &m_stateStore[m_globalStateCounter++];
+  TrigFTF_GNN_EdgeState* pInitState = &m_stateStore[m_globalStateCounter++];
   
   pInitState->initialize(pS);
   
@@ -101,24 +101,23 @@ void TrigFTF_GNN_TrackingFilter::followTrack(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_E
 
   if(m_stateVec.empty()) return;
 
-  std::sort(m_stateVec.begin(), m_stateVec.end(), TrigFTF_GNN_EDGE_STATE::Compare());
+  std::sort(m_stateVec.begin(), m_stateVec.end(), typename TrigFTF_GNN_EdgeState::Compare());
 
-  TrigFTF_GNN_EDGE_STATE* best = (*m_stateVec.begin());
+  TrigFTF_GNN_EdgeState* best = (*m_stateVec.begin());
 
 
   output.clone(*best);
   
   m_globalStateCounter = 0;
- 
 }
 
-void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_STATE& ts) {
+void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EdgeState& ts) {
 
   if(m_globalStateCounter >= MAX_EDGE_STATE) return;
   
-  TrigFTF_GNN_EDGE_STATE* p_new_ts = &m_stateStore[m_globalStateCounter++];
+  TrigFTF_GNN_EdgeState* p_new_ts = &m_stateStore[m_globalStateCounter++];
   
-  TrigFTF_GNN_EDGE_STATE& new_ts = *p_new_ts;
+  TrigFTF_GNN_EdgeState& new_ts = *p_new_ts;
   new_ts.clone(ts);
 
   new_ts.m_vs.push_back(pS);
@@ -150,14 +149,14 @@ void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDG
     if(m_globalStateCounter < MAX_EDGE_STATE) {
 
       if(m_stateVec.empty()) {//add the first segment state
-        TrigFTF_GNN_EDGE_STATE* p = &m_stateStore[m_globalStateCounter++];
+        TrigFTF_GNN_EdgeState* p = &m_stateStore[m_globalStateCounter++];
         p->clone(new_ts);
         m_stateVec.push_back(p);
       }
       else {//compare with the best and add
         float best_so_far = (*m_stateVec.begin())->m_J;
         if(new_ts.m_J > best_so_far) {
-          TrigFTF_GNN_EDGE_STATE* p = &m_stateStore[m_globalStateCounter++];
+          TrigFTF_GNN_EdgeState* p = &m_stateStore[m_globalStateCounter++];
           p->clone(new_ts);
           m_stateVec.push_back(p);
         }
@@ -166,13 +165,13 @@ void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDG
   } 
   else {//branching
     int nBranches = 0;
-    for(std::list<TrigFTF_GNN_Edge*>::iterator sIt = lCont.begin();sIt!=lCont.end();++sIt, nBranches++) {
+    for(auto sIt = lCont.begin();sIt!=lCont.end();++sIt, nBranches++) {
       propagate((*sIt), new_ts);//recursive call
     }
   }
 }
 
-bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_STATE& ts) {
+bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EdgeState& ts) {
 
   const float sigma_t = 0.0003;
   const float sigma_w = 0.00009;
@@ -318,3 +317,4 @@ bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_S
 int TrigFTF_GNN_TrackingFilter::getLayerType(int l) {
   return m_geo.at(l).m_type;
 }
+

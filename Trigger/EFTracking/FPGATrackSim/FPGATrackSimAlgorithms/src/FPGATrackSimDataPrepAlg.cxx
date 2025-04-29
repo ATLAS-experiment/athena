@@ -10,9 +10,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 
-#include "FPGATrackSimNNTrackTool.h"
-#include "FPGATrackSimOverlapRemovalTool.h"
-#include "FPGATrackSimTrackFitterTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimNNTrackTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
 
 #include "FPGATrackSimConfTools/FPGATrackSimRegionSlices.h"
 
@@ -23,19 +23,13 @@
 
 #include "GaudiKernel/IEventProcessor.h"
 
+
+constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_LOGICALHITSALG
-#define TIME(name) \
-    t_1 = std::chrono::steady_clock::now(); \
-    (name) += std::chrono::duration_cast<std::chrono::microseconds>(t_1 - t_0).count(); \
-    t_0 = t_1;
-
-size_t m_tread = 0;
-size_t m_tprocess = 0;
-size_t m_tfin = 0;
+    true;
 #else
-#define TIME(name)
+    false;
 #endif
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize
@@ -75,6 +69,7 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), true);
+    m_logicEventHeader_cluster = m_writeOutputTool->addInputBranch(m_clusterBranch.value(), true);
     m_logicEventHeader = m_writeOutputTool->addInputBranch(m_postClusterBranch.value(), true);
     
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -87,11 +82,12 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
     ATH_CHECK( m_FPGAHitKey.initialize() );
     ATH_CHECK( m_FPGASpacePointsKey.initialize() );
     ATH_CHECK( m_FPGAHitUnmappedKey.initialize() );
-    ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_runOnRDO) );
+    ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_useInternalTruthTracks) );
     ATH_CHECK( m_truthLinkContainerKey.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
 
+    ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
 
     
@@ -105,11 +101,6 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
 StatusCode FPGATrackSimDataPrepAlg::execute()
 {
-#ifdef BENCHMARK_LOGICALHITSALG
-    std::chrono::time_point<std::chrono::steady_clock> t_0, t_1;
-    t_0 = std::chrono::steady_clock::now();
-#endif
-
     const EventContext& ctx = getContext();
 
     // Read inputs
@@ -125,10 +116,8 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
       return appMgr->stopRun();
     }
 
-    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey.at(0), ctx);
-    ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
-    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_2nd (m_FPGAHitKey.at(1), ctx);
-    ATH_CHECK( FPGAHits_2nd.record (std::make_unique<FPGATrackSimHitCollection>()));
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits (m_FPGAHitKey, ctx);
+    ATH_CHECK( FPGAHits.record (std::make_unique<FPGATrackSimHitCollection>()));
 
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitUnmapped (m_FPGAHitUnmappedKey, ctx);
     ATH_CHECK( FPGAHitUnmapped.record (std::make_unique<FPGATrackSimHitCollection>()));
@@ -151,7 +140,8 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     SG::WriteHandle<FPGATrackSimOfflineTrackCollection> FPGAOfflineTracks (m_FPGAOfflineTrackKey);
     ATH_CHECK(FPGAOfflineTracks.record(std::make_unique<FPGATrackSimOfflineTrackCollection>()));
 
-    // Apply truth track cuts    
+    // Apply truth track cuts  
+    if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: EventSelection");
     if ( m_doEvtSel ){
         if (!m_evtSel->selectEvent(&m_eventHeader))
         {
@@ -161,7 +151,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
         else {
             ATH_MSG_DEBUG("Event accepted by: " << m_evtSel->name());
             // Make a new truth link vector based on FPGATrackSim selections 
-            if (m_runOnRDO) {
+            if (m_useInternalTruthTracks) {
                 SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainer(m_inputTruthParticleContainerKey, ctx); // Read offline TruthParticles
                 if (!truthParticleContainer.isValid()) {
                     ATH_MSG_ERROR("No valid truth particle container with key " << truthParticleContainer.key());
@@ -174,9 +164,9 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
                 {
                     for (const FPGATrackSimTruthTrack& fpgaTruthTrack : truthtracks) // loop over FPGA truth tracks
                     {
-                        if (fpgaTruthTrack.getBarcode() == static_cast<HepMcParticleLink::barcode_type>(truthParticle->barcode()))
+                        if (fpgaTruthTrack.getBarcode() == static_cast<HepMcParticleLink::barcode_type>(HepMC::barcode(truthParticle)))
                         {
-                            truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(truthParticle->barcode(), 0,
+                            truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(HepMC::barcode(truthParticle), 0,
                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), eltp));
                             ATH_MSG_VERBOSE("Truth link added");
                             break;
@@ -196,23 +186,27 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     } else {
         ATH_MSG_DEBUG("No Event Selection applied");
     }
-    TIME(m_tread);
-
+    
     // Event passes cuts, count it
     m_evt++;
-    
+    if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: EventSelection");
+    if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: processInputs");
     // Map, cluster, and filter hits
     ATH_CHECK(processInputs(FPGAHitUnmapped, FPGAClusters, FPGAClustersFiltered, FPGASpacePoints));
-    
+    if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: processInputs");
+
+    if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: get truth/offline tracks");
     // Now that this is done, push truth tracks back to storegate.
     for (const auto& truthtrack : m_logicEventHeader->optional().getTruthTracks()) {
         FPGATruthTracks->push_back(truthtrack);
     }
-
+    
     // Need to do the same for offline tracks.
     for (const auto& offlineTrack : m_logicEventHeader->optional().getOfflineTracks()) {
         FPGAOfflineTracks->push_back(offlineTrack);
     }
+    
+    if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: get truth/offline tracks");
 
     // Get reference to hits
     unsigned regionID = m_evtSel->getRegionID();
@@ -220,41 +214,30 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     auto mon_regionID = Monitored::Scalar<unsigned>("regionID", regionID);
     Monitored::Group(m_monTool, mon_regionID);
 
-    TIME(m_tprocess);
-
-    // If and when we set up code to run over more than one region/tower at a time this will need to be updated
-    std::vector<FPGATrackSimHit> const & hits = m_logicEventHeader->towers().at(0).hits();
-
-    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
-    phits.reserve(hits.size());
-    for (FPGATrackSimHit const& h : hits) {
-        if (h.isReal()) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(h));
-    }
-
-    // Split the hits here by first stage vs second stage.
-    const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
-    for (const auto & hit : phits) {
-        // If the hit falls within the boundaries of ANY subregion in the first stage, it's 1st stage.
-        if (rmap_1st->getRegions(*hit).size() > 0) {
-            FPGAHits_1st->push_back(*hit);
-        } else {
-            FPGAHits_2nd->push_back(*hit);
+    std::vector<FPGATrackSimHit> const& hits = m_logicEventHeader->towers().at(0).hits();
+    if (m_recordHits) {
+        if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: record hits");
+        // If and when we set up code to run over more than one region/tower at a time this will need to be updated
+        FPGAHits->reserve(hits.size());
+        for (const auto& hit : hits) {
+            if (hit.isReal()) FPGAHits->push_back(hit);
         }
+        if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: record hits");
     }
- 
+
     auto mon_nhits = Monitored::Scalar<unsigned>("nHits", hits.size());
     auto mon_nhits_unmapped = Monitored::Scalar<unsigned>("nHits_unmapped", m_hits_miss.size());
     Monitored::Group(m_monTool, mon_nhits, mon_nhits_unmapped);
-
+    
     // Write the output and reset
-    ATH_CHECK(m_writeOutputTool->writeData());
+    if (m_writeOutputData)
+        ATH_CHECK(m_writeOutputTool->writeData());
 
     // Reset data pointers
     m_eventHeader.reset();
     m_logicEventHeader->reset();
-    m_logicEventHeader_precluster->reset()
-
-    TIME(m_tfin);
+    m_logicEventHeader_precluster->reset();
+    m_logicEventHeader_cluster->reset();
     
     return StatusCode::SUCCESS;
 }
@@ -310,7 +293,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
                                                             SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClustersFiltered,
                                                             SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints)
 {
-    m_clusters.clear();
+    m_clusters->clear();
     m_spacepoints.clear();
     m_hits_miss.clear();
 
@@ -318,10 +301,10 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     ATH_MSG_DEBUG("Running hits conversion");
     m_logicEventHeader->reset();
     m_logicEventHeader_precluster->reset();
+    m_logicEventHeader_cluster->reset();
     ATH_CHECK(m_hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader));
 
     for (const FPGATrackSimHit& hit : m_hits_miss) FPGAHitUnmapped->push_back(hit);
-
 
 
     ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << m_hits_miss.size());
@@ -332,18 +315,32 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     }
 
     // At this stage, copy the logicEventHeader.
-    *m_logicEventHeader_precluster = *m_logicEventHeader;
+    if(m_writeOutputData) *m_logicEventHeader_precluster = *m_logicEventHeader;
 
     // Clustering
     for (int ic = 0; ic < m_clustering; ic++) {
-      ATH_MSG_DEBUG("Running clustering");
-      ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader, m_clusters));
-      m_clusters_original = m_clusters;
-      
-      // I think I also want to pass m_clusters to random removal (but won't work currently)
-      if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
-      for (const FPGATrackSimCluster& cluster : m_clusters_original) FPGAClusters->push_back(cluster);      
+        ATH_MSG_DEBUG("Running clustering");
+        ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader, *m_clusters));
+        // I think I also want to pass m_clusters to random removal (but won't work currently)
+        if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
+        unsigned npix(0), nstrip(0);
+        for (const FPGATrackSimCluster& cluster : *m_clusters) {
+            if (cluster.getClusterEquiv().isPixel()) npix++;
+            else nstrip++;
+        }
+        m_nPixClusters += npix;
+        m_nStripClusters += nstrip;
+        if (npix > m_nMaxPixClusters) m_nMaxPixClusters = npix;
+        if (nstrip > m_nMaxStripClusters) m_nMaxStripClusters = nstrip;
+        if (m_clusters->size() > m_nMaxClusters) m_nMaxClusters = m_clusters->size();
     }
+    FPGAClusters->insert(
+        FPGAClusters->end(),
+        std::make_move_iterator(m_clusters->begin()),
+        std::make_move_iterator(m_clusters->end()));
+    
+    // At this stage, copy the logicEventHeader.
+    if(m_writeOutputData) *m_logicEventHeader_cluster = *m_logicEventHeader;
     
     // Filter hits/clusters (untested for hits, ie with m_clustering = false)
     if (m_doHitFiltering)
@@ -356,17 +353,19 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
         //Currntly the maps generated that can use diffrent logical layers for the same phys layers only use the pixles
         //This code will be updated in the future when maps are made with strips that can use the diffrent logical layers 
         ATH_CHECK(m_hitFilteringTool->GetPairedStripPhysLayers(planeMap, filter_strip_physLayers));
-        m_clusters.clear();
-        ATH_CHECK(m_hitFilteringTool->DoHitFiltering(*m_logicEventHeader, filter_pixel_physLayers, filter_strip_physLayers, m_clusters));
-        for (const FPGATrackSimCluster &cluster : m_clusters) FPGAClustersFiltered->push_back(cluster);
- 
+        ATH_CHECK(m_hitFilteringTool->DoHitFiltering(*m_logicEventHeader, filter_pixel_physLayers, filter_strip_physLayers, *m_clusters));
+        FPGAClustersFiltered->insert(
+            FPGAClustersFiltered->end(),
+            std::make_move_iterator(m_clusters->begin()),
+            std::make_move_iterator(m_clusters->end()));
     }
-
+    
     // Space points
     if (m_doSpacepoints) {
         ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_logicEventHeader, m_spacepoints));
         for (const FPGATrackSimCluster& cluster : m_spacepoints) FPGASpacePoints->push_back(cluster);
     }
+
 
     return StatusCode::SUCCESS;
 }
@@ -376,15 +375,13 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
 
 StatusCode FPGATrackSimDataPrepAlg::finalize()
 {
-#ifdef BENCHMARK_LOGICALHITSALG
-    ATH_MSG_INFO("Timings:" <<
-            "\nread input:   " << std::setw(10) << m_tread <<
-            "\nprocess hits: " << std::setw(10) << m_tprocess <<
-            "\nfin:          " << std::setw(10) << m_tfin
-    );
-#endif
-
-    // TODO print out some data prep alg related stats here.s
-    
+    ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE DATAPREP STATS");
+    ATH_MSG_INFO("========================================================================================");
+    ATH_MSG_INFO("Number of pixel clusters/event = " << m_nPixClusters/m_evt);
+    ATH_MSG_INFO("Number of strip clusters/event = " << m_nStripClusters/m_evt);    
+    ATH_MSG_INFO("Max number of pixel clusters in an event = " << m_nMaxPixClusters);
+    ATH_MSG_INFO("Max number of strip clusters in an event = " << m_nMaxStripClusters);
+    ATH_MSG_INFO("Max number of clusters in an event = " << m_nMaxClusters);
+        
     return StatusCode::SUCCESS;
 }

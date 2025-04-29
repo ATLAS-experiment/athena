@@ -11,6 +11,9 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
+#include "AthenaKernel/RecyclableDataObject.h"
+#include "CxxUtils/checker_macros.h"
+
 class DataHeader;
 class DataHeader_p6;
 class DataHeaderForm_p6;
@@ -23,24 +26,28 @@ class DataHeaderCnv_p6 {
 public:
    DataHeaderCnv_p6() {}
 
-   DataHeader* createTransient(const DataHeader_p6* persObj, const DataHeaderForm_p6& form, const Token* dhToken);
-   DataHeader_p6* createPersistent(const DataHeader* transObj, DataHeaderForm_p6& form);
+   DataHeader* createTransient(const DataHeader_p6* persObj, const DataHeaderForm_p6& form, const Token* dhToken) const;
+   DataHeader_p6* createPersistent(const DataHeader* transObj, DataHeaderForm_p6& form) const;
 
    /// convert single DH element to persistent represenation
-   void elemToPers(const DataHeaderElement* trans, DataHeader_p6* pers, DataHeaderForm_p6& form);
+   void elemToPers(const DataHeaderElement* trans, DataHeader_p6* pers, DataHeaderForm_p6& form) const;
 
    /// restore single DH element from persistent represenation
    /// return false if p_idx is out of bounds for the Form
    bool persToElem(const DataHeader_p6* pers, unsigned p_idx, DataHeaderElement* trans,
-                   const DataHeaderForm_p6& form );
+                   const DataHeaderForm_p6& form,
+                   bool sameForm ) const;
 
   /// insert DH self reference as one of the DHElements. Contains the stream Key
   void insertDHRef( DataHeader_p6* pers_dh, const std::string& key, const std::string& dh_tokstr,
-                    DataHeaderForm_p6& dh_form );
+                    DataHeaderForm_p6& dh_form ) const;
 
    void setSGAliasFiltering( bool doFiltering ) { m_SGAliasFiltering = doFiltering; }
 
    bool m_SGAliasFiltering { true };
+
+private:
+  mutable Athena::RecyclableDataQueue<DataHeader> m_dhQueue ATLAS_THREAD_SAFE;
 };
 
 #endif

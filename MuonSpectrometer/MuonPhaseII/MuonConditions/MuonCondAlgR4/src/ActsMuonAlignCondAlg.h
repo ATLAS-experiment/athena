@@ -17,6 +17,8 @@
 #include <MuonAlignmentDataR4/MmAlignmentStore.h>
 #include <MuonAlignmentDataR4/sTgcAlignmentStore.h>
 
+#include <MuonAlignmentData/sTGCAsBuiltData.h>
+
 #include <map>
 #include <set>
 #include <unordered_map>
@@ -75,6 +77,8 @@ private:
                                                     "Key of output muon alignment MDT/AsBuilt condition data"};
     SG::ReadCondHandleKey<NswAsBuiltDbData> m_readNswAsBuiltKey{this, "ReadNswAsBuiltKey", "NswAsBuiltDbData", 
                                                     "Key of NswAsBuiltDbData object containing conditions data for NSW as-built params!"};
+    SG::ReadCondHandleKey<sTGCAsBuiltData> m_readsTgcAsBuiltKey{this, "ReadsTgcAsBuiltKey", "", 
+                                                    "Key of sTGCAsBuiltDbData object containing conditions data for sTgc as-built params!"};
     SG::ReadCondHandleKey<NswPassivationDbData> m_readNswPassivKey {this, "dMmPassivationKey", "NswPassivationDbData", 
                                                     "Key of NswPassivationDbData object containing passivation data for MMs"};
 

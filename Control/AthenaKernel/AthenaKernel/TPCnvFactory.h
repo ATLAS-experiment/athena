@@ -1,10 +1,9 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TPCnvFactory.h 707243 2015-11-11 18:53:26Z ssnyder $
 
 /**
  * @file  AthenaKernel/TPCnvFactory.h
@@ -49,17 +48,6 @@
  *                       Athena::TPCnvVers::Old)
  @endcode
  *
- * Sometimes you need to use a different converter class for AthenaROOTAccess.
- * In that case, also use @c DECLARE_ARATPCNV_FACTORY:
- *
- *@code
- * #include "FooTPCnv/FooARACnv_p2.h"
- * DECLARE_ARATPCNV_FACTORY(FooARACnv_p2,
- *                          Foo,
- *                          Foo_p2,
- *                          Athena::TPCnvVers::Current)
- @endcode
- *
  * There is a separate macro @c DECLARE_TRIGTPCNV_FACTORY to allow declaring
  * separate converters to use for the trigger.
  *
@@ -71,14 +59,13 @@
  *@code
  * #include "FooTPCnv/BarCnv_p2.h"
  * // BarCnv_p2 is actually a typedef.
- * DECLARE_NAMED_ARATPCNV_FACTORY(BarCnv_p2,
- *                                BarCnv_p2,
- *                                Bar,
- *                                Bar_p2,
- *                                Athena::TPCnvVers::Current)
+ * DECLARE_NAMED_TPCNV_FACTORY(BarCnv_p2,
+ *                             BarCnv_p2,
+ *                             Bar,
+ *                             Bar_p2,
+ *                             Athena::TPCnvVers::Current)
  @endcode
  *
- * There is also a @c DECLARE_NAMED_ARATPCNV_FACTORY.
  *
  * Implementation
  * ==============
@@ -86,13 +73,12 @@
  * The implementation is very simple.  Let the converter, transient,
  * and persistent types be C, T, and P, respectively.  We always make
  * plugin entries for C and _PERS_P.  If the converter is current,
- * we also make an entry for _TRANS_T.  If the converter is for ARA,
- * we add _ARA t the front of the pers and trans names; and similarly
- * _TRIG for trigger-specific conversions.
+ * we also make an entry for _TRANS_T.  If the converter is for _TRIG,
+ * we add _TRIG to the front of the pers and trans names.
  *
  * Thus, to find the correct converter for a transient class, we look up
- * _TRANS_T; and for a persistent class we look up _PERS_P.  For ARA,
- * we first try the look up with _ARA in front of those names.
+ * _TRANS_T; and for a persistent class we look up _PERS_P. For TRIG,
+ * we first try the look up with _TRIG in front of those names.
  * To get the transient class name corresponding to a persistent class,
  * we create an instance of the converter and use the @c transientTInfo
  * interface.  No registry is needed beyond the existing Gaudi plugin registry.
@@ -121,7 +107,7 @@ namespace Athena {
   struct TPCnvType {
     enum Value {
       Athena = 0,
-      ARA  = 1,
+      // ARA  = 1,  // not supported anymore
       Trigger = 2
     };
   };
@@ -144,9 +130,7 @@ namespace Athena {
       {                                                                      \
         using ::Gaudi::PluginService::DeclareFactory;                        \
         std::string prefix; \
-        if (cnv_type == Athena::TPCnvType::ARA) \
-          prefix = "_ARA"; \
-        else if (cnv_type == Athena::TPCnvType::Trigger)   \
+        if (cnv_type == Athena::TPCnvType::Trigger)   \
           prefix = "_TRIG"; \
         DeclareFactory<type> normal{};                                       \
         if (is_last_version == Athena::TPCnvVers::Current) \
@@ -164,15 +148,11 @@ namespace Athena {
 
 #define ATHTPCNV_PLUGINSVC_FACTORY(type, trans_type, pers_type, is_last_version, signature) \
   DO_ATHTPCNV_PLUGINSVC_FACTORY(type, trans_type, pers_type, is_last_version, Athena::TPCnvType::Athena, signature, __LINE__)
-#define ARATPCNV_PLUGINSVC_FACTORY(type, trans_type, pers_type, is_last_version, signature) \
-  DO_ATHTPCNV_PLUGINSVC_FACTORY(type, trans_type, pers_type, is_last_version, Athena::TPCnvType::ARA, signature, __LINE__)
 #define TRIGTPCNV_PLUGINSVC_FACTORY(type, trans_type, pers_type, is_last_version, signature) \
   DO_ATHTPCNV_PLUGINSVC_FACTORY(type, trans_type, pers_type, is_last_version, Athena::TPCnvType::Trigger, signature, __LINE__)
 
 #define ATHTPCNV_PLUGINSVC_FACTORY_WITH_ID(type, id, trans_type, pers_type, is_last_version, signature) \
   DO_ATHTPCNV_PLUGINSVC_FACTORY_WITH_ID(type, id, trans_type, pers_type, is_last_version, Athena::TPCnvType::Athena, signature, __LINE__)
-#define ARATPCNV_PLUGINSVC_FACTORY_WITH_ID(type, id, trans_type, pers_type, is_last_version, signature) \
-  DO_ATHTPCNV_PLUGINSVC_FACTORY_WITH_ID(type, id, trans_type, pers_type, is_last_version, Athena::TPCnvType::ARA, signature, __LINE__)
 #define TRIGTPCNV_PLUGINSVC_FACTORY_WITH_ID(type, id, trans_type, pers_type, is_last_version, signature) \
   DO_ATHTPCNV_PLUGINSVC_FACTORY_WITH_ID(type, id, trans_type, pers_type, is_last_version, Athena::TPCnvType::Trigger, signature, __LINE__)
 
@@ -185,17 +165,11 @@ namespace Athena {
 #define DECLARE_TPCNV_FACTORY(x,trans_type,pers_type,is_last_version)   \
   ATHTPCNV_PLUGINSVC_FACTORY(x,trans_type,pers_type,is_last_version,ITPCnvBase*())
 
-#define DECLARE_ARATPCNV_FACTORY(x,trans_type,pers_type,is_last_version)   \
-  ARATPCNV_PLUGINSVC_FACTORY(x,trans_type,pers_type,is_last_version,ITPCnvBase*())
-
 #define DECLARE_TRIGTPCNV_FACTORY(x,trans_type,pers_type,is_last_version)   \
   TRIGTPCNV_PLUGINSVC_FACTORY(x,trans_type,pers_type,is_last_version,ITPCnvBase*())
 
 #define DECLARE_NAMED_TPCNV_FACTORY(x,n,trans_type,pers_type,is_last_version) \
   ATHTPCNV_PLUGINSVC_FACTORY_WITH_ID(x,std::string(#n), trans_type,pers_type, is_last_version, ITPCnvBase*())
-
-#define DECLARE_NAMED_ARATPCNV_FACTORY(x,n,trans_type,pers_type,is_last_version) \
-  ARATPCNV_PLUGINSVC_FACTORY_WITH_ID(x,std::string(#n), trans_type,pers_type, is_last_version, ITPCnvBase*())
 
 #define DECLARE_NAMED_TRIGTPCNV_FACTORY(x,n,trans_type,pers_type,is_last_version) \
   TRIGTPCNV_PLUGINSVC_FACTORY_WITH_ID(x,std::string(#n), trans_type,pers_type, is_last_version, ITPCnvBase*())

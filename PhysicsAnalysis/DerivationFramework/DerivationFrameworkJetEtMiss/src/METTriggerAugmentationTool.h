@@ -15,7 +15,7 @@
 
 namespace DerivationFramework {
 
-  class METTriggerAugmentationTool : public AthAlgTool, public IAugmentationTool {
+  class METTriggerAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       METTriggerAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
       virtual StatusCode initialize();

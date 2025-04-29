@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "../NSWPRDValAlg.h"
+#include "../HitValAlg.h"
 #include "../NswOccupancyAlg.h"
-#include "../MuonTPMetaDataAlg.h"
+#include "../MetaDataAlg.h"
 
-DECLARE_COMPONENT( NSWPRDValAlg )
+DECLARE_COMPONENT( MuonVal::HitValAlg )
 DECLARE_COMPONENT( NswOccupancyAlg)
-DECLARE_COMPONENT( MuonVal::MuonTPMetaDataAlg )
+DECLARE_COMPONENT( MuonVal::MetaDataAlg )

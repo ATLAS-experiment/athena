@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -109,9 +109,9 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
     assert ((*pers1)[i] == trans1[i]);
 
   testsvc.m_pers2 = pers1;
-  Token* token = new Token;
+  auto token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v2_guid));
-  TokenAddress taddr (0, 0, "xyz", "key", 0, token);
+  TokenAddress taddr (0, 0, "xyz", "key", 0, std::move(token));
 
   DataObject* pObj = nullptr;
   assert (cnv.createObj (&taddr, pObj).isSuccess());
@@ -128,7 +128,9 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   for (size_t i=0; i < N; i++)
     pers_old.push_back (new Y_v1(i));
   testsvc.m_pers1 = &pers_old;
+  token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v1_guid));
+  taddr.setToken (std::move (token));
   pObj = nullptr;
   assert (cnv.createObj (&taddr, pObj).isSuccess());
   auto* trans3 = SG::Storable_cast<DataVector<Y_v2> > (pObj);
@@ -138,7 +140,9 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   assert (trans3->getConstStoreLink().dataID() == "keyAux.");
   delete pObj;
 
+  token = std::make_unique<Token>();
   token->setClassID (Guid ("8ACD1C53-D3C7-4FE5-9BC0-E388701DB8FA"));
+  taddr.setToken (std::move (token));
   pObj = nullptr;
   assert (cnv.createObj (&taddr, pObj).isFailure());
 }

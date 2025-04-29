@@ -1,12 +1,13 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART jobs with Data Reco config
 
-dcubeRef=$1
-conditions=$2
-geotag=$3
+inputBS=$1
+dcubeRef=$2
+conditions=$3
+geotag=$4
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_data_baseline.xml

@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
 
 #include <algorithm>
+#include <optional>
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "xAODTracking/TrackParticle.h"
@@ -37,7 +38,7 @@ namespace MuGirlNS {
     }
 
     struct StauHit {
-        StauHitTechnology eTech;
+        StauHitTechnology eTech{};
         double mToF{-1.};
         double x{0.};
         double y{0.};
@@ -50,21 +51,35 @@ namespace MuGirlNS {
         double propagationTime{0.};
 
         StauHit() = default;
-        StauHit(StauHitTechnology tech, double tof, double ix, double iy, double iz, Identifier iid, double ie, double er = -1,
-                double sh = 0, bool isEta = false, double propTime = 0) :
+        StauHit(StauHitTechnology tech, double tof, double ix, double iy, double iz, Identifier iid, double ie, double er = -1., 
+            double sh = 0., bool isEta = false, double propTime = 0.):
             eTech(tech),
             mToF(tof),
             x(ix),
             y(iy),
             z(iz),
             id(iid),
-            e(ie),
+            e(ie),            
             error(er),
             shift(sh),
             measuresEta(isEta),
-            propagationTime(propTime) {}
+            propagationTime(propTime) {} 
     };
+
+    // conditional decoration of SlowMuon container with MDT ADC counts and drift radii
+    // enabled by flag MuonCombined.addMDTExtrasMuGirlLowBeta 
+    struct StauMDTHitExtra {
+        int adc{-1};
+        float rdrift{-1.};
+
+        StauMDTHitExtra() = default;
+        StauMDTHitExtra(int iadc, float irdrift):
+            adc(iadc),
+            rdrift(irdrift) {}
+    };
+
     using StauHits =  std::vector<StauHit>;
+    using StauMDTHitExtras = std::vector<StauMDTHitExtra>;
 
     struct StauExtras {
         double ann{0.};
@@ -86,8 +101,11 @@ namespace MuGirlNS {
         double caloBetaChi2{0.};
         int caloBetaDof{0};
         StauHits hits;
+        std::optional<StauMDTHitExtras> extraMDTHitInfo;
+    
 
         void addHits(StauHits stauHits) { std::copy(stauHits.begin(), stauHits.end(), std::back_inserter(hits)); }
+        void addMDTHitExtras(StauMDTHitExtras stauMDTHitExtras) { std::copy(stauMDTHitExtras.begin(), stauMDTHitExtras.end(), std::back_inserter(*extraMDTHitInfo)); }
     };
 
 }  // namespace MuGirlNS

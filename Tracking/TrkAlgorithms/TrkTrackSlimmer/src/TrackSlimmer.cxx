@@ -8,17 +8,10 @@
 
 #include "TrkTrackSlimmer/TrackSlimmer.h"
 #include "AthContainers/ConstDataVector.h"
-#include "TrkToolInterfaces/ITrackSlimmingTool.h"
 
 Trk::TrackSlimmer::TrackSlimmer(const std::string& name,
                                 ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_slimTool("Trk::TrkTrackSlimmingTool/TrkTrackSlimmingTool")
-  , m_trackLocation{ "ConvertedMooreTracks" }
-{
-  declareProperty("TrackSlimmingTool", m_slimTool);
-  declareProperty("TrackLocation", m_trackLocation);
-}
+  : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 Trk::TrackSlimmer::~TrackSlimmer() = default;
 

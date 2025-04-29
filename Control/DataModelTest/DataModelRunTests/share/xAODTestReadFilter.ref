@@ -7,7 +7,6 @@ AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 MetaDataSvc          INFO Initializing MetaDataSvc
-EventSelector        INFO EventSelection with query 
 StreamStream1        INFO Data output: xaoddata_filt.root
 StreamStream1        INFO ../O reinitialization...
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector

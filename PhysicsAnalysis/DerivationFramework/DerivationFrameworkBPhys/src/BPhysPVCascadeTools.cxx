@@ -2,11 +2,11 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "TVector3.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include <boost/container/static_vector.hpp>
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"

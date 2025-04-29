@@ -5,15 +5,13 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
-    #parser.set_defaults(noMM=True)
+    parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
-    parser.set_defaults(outRootFile="HoughTransformTester.root")
-    #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
+    parser.set_defaults(outRootFile="RecoChainTester.root")
     parser.set_defaults(inputFile=[
-                                   "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"
-                                    #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
+                                   "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
+                                    # "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                     ])
-    parser.set_defaults(eventPrintoutLevel = 500)
     parser.add_argument("--monitorPlots", action='store_true', default=False, 
                         help="Setup monitoring plots of the pattern recognition")
     parser.add_argument("--runVtune", 
@@ -23,11 +21,8 @@ if __name__=="__main__":
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Muon.Align.UseAsBuilt = False
-    flags.Muon.Align.UseBLines = False
-
-   
     # flags.PerfMon.doFullMonMT = True
+
     flags, cfg = setupGeoR4TestCfg(args,flags)
     
 
@@ -54,29 +49,29 @@ if __name__=="__main__":
     ### What happens if you parse the R4 patterns to the legacy chain?
     cfg.merge(MuonR4SegmentRecoChainCfg(flags))
 
+    from MuonPatternRecognitionTest.PatternTestConfig import TrackTruthMatchCfg
+    cfg.merge(TrackTruthMatchCfg(flags))
+
     from MuonPatternRecognitionTest.PatternTestConfig import MuonRecoChainTesterCfg
     cfg.merge(MuonRecoChainTesterCfg(flags))
     if args.runVtune: 
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
-
+    
+    ## cfg.getService("MessageSvc").setVerbose = ["TrackBuildingFromR4Segments", "TrackBuildingFromHoughR4", "MuonR4SegmentCnvAlg" ]
     if args.monitorPlots:
         from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="EtaHoughPlotValid",
-                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots",
-                                                                                                TruthSegDecors=["HabemusZ"],
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots", doPhiBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="PhiHoughPlotValid",
-                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",
-                                                                                                TruthSegDecors=["HabemusZ"],
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",doEtaBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="SegmentPlotValid",
-                                                                                                AllCanvasName="AllSegmentFitPlots",
-                                                                                                TruthSegDecors=["HabemusZ"],
-                                                                                                displayTruthOnly = True,
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= False)) 
+                                                                                                AllCanvasName="AllSegmentFitPlots", doPhiBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= False))
     executeTest(cfg)
     

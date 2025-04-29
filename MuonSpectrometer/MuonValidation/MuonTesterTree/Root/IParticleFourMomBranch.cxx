@@ -1,9 +1,10 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/IParticleFourMomBranch.h>
 #include <xAODTracking/TrackParticle.h>
+#include <xAODTruth/TruthParticle.h>
 namespace {
     constexpr size_t dummyIdx = -1;
     constexpr float MeVtoGeV = 1.e-3;
@@ -25,7 +26,7 @@ namespace MuonVal{
         return m_cached_particles;
     }
 
-    size_t IParticleFourMomBranch::size() const { return m_pt.size(); }
+    size_t IParticleFourMomBranch::size() const { return m_updated ? m_cached_particles.size() : 0; }
     std::string IParticleFourMomBranch::name() const { return m_name; }
     const TTree* IParticleFourMomBranch::tree() const { return m_pt.tree(); }
     TTree* IParticleFourMomBranch::tree() { return m_pt.tree(); }
@@ -33,9 +34,16 @@ namespace MuonVal{
     void IParticleFourMomBranch::operator+=(const xAOD::IParticle& p) {push_back(p); }
     void IParticleFourMomBranch::push_back(const xAOD::IParticle& p) { push_back(&p); }
     void IParticleFourMomBranch::push_back(const xAOD::IParticle* p) {
+        if (!m_updated) {
+            m_cached_particles.clear();
+            m_updated = true;
+        }
         /// Avoid that the particle is added twice to the tree
-        if (!p || find(p) < size())
+        if (!p || find(p) < size()){
+            if (p) ATH_MSG_VERBOSE("Rejected particle ("<<p<<") "<<p->pt()<<", "<<p->eta()<<", "<<p->phi()<<". Size: "<<size());
             return;
+        }
+
         m_cached_particles.push_back(p);
         m_pt.push_back(p->pt() * MeVtoGeV);
         m_eta.push_back(p->eta());
@@ -46,7 +54,11 @@ namespace MuonVal{
             q = acc_charge(*p);
         } else if (p->type() == xAOD::Type::ObjectType::TrackParticle){
             q = static_cast<const xAOD::TrackParticle*>(p)->charge();
+        } else if (p->type() == xAOD::Type::ObjectType::TruthParticle) {
+            q = static_cast<const xAOD::TruthParticle*>(p)->charge();
         }
+        ATH_MSG_VERBOSE("New particle ("<<p<<") "<<p->pt()<<", "<<p->eta()<<", "<<p->phi()<<", q: "<<q<<". Size: "<<size());
+
         m_q.push_back(q);
         for (const auto& var : m_variables) {
             var->push_back(p);
@@ -60,10 +72,15 @@ namespace MuonVal{
         if (!p) {
             return dummyIdx;
         }
-        return find([p](const xAOD::IParticle* cached) { return p == cached; });
+        return find([p](const xAOD::IParticle* cached) { 
+            return p == cached; 
+        });
     }
     size_t IParticleFourMomBranch::find(std::function<bool(const xAOD::IParticle*)> func) const {
-        size_t j = 0;
+        if (!m_updated) {
+            return dummyIdx;
+        }
+        size_t j{0};
         for (const xAOD::IParticle* p : m_cached_particles) {
             if (func(p)) {
                 return j;
@@ -73,6 +90,9 @@ namespace MuonVal{
         return dummyIdx;
     }
     bool IParticleFourMomBranch::fill(const EventContext& ctx) {
+        if (!m_updated) {
+            m_cached_particles.clear();
+        }
         if (!m_pt.fill(ctx) || !m_eta.fill(ctx) || !m_phi.fill(ctx) || !m_e.fill(ctx) || !m_q.fill(ctx)){
             return false;
         }
@@ -82,7 +102,7 @@ namespace MuonVal{
             }
         }
         m_init = true;
-        m_cached_particles.clear();
+        m_updated = false;
         return true;
     }
     bool IParticleFourMomBranch::initialized() const {

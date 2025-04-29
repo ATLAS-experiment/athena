@@ -1,0 +1,28 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+Photons:
+- containerName: AnaPhotons
+  recomputeIsEM: False
+  forceFullSimConfigForP4: True
+  forceFullSimConfigForIso: True
+  recalibratePhyslite: False
+  decorateTruth: true
+  WorkingPoint:
+  - selectionName: tight
+    forceFullSimConfigForID: True
+    forceFullSimConfigForIso: True
+    qualityWP: Tight
+    isolationWP: FixedCutTight
+    recomputeIsEM: False
+  PtEtaSelection:
+    minPt: 10000.0
+  ExtraVariables: {}
+
+GeneratorLevelAnalysis: {}
+
+PrintConfiguration: {}

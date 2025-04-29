@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  //***************************************************************************
@@ -16,7 +16,6 @@
   #include "AthenaKernel/CLASS_DEF.h"
 
 
-  #include <iostream>
   #ifndef  TRIGGERSPACE
   #include "TrigT1Interfaces/Coordinate.h"
   #else
@@ -27,7 +26,7 @@
     class JEMEtSums  {
     public:
       
-    JEMEtSums();
+    JEMEtSums() = default;
     JEMEtSums(int crate, int module);
     JEMEtSums(int crate, int module, 
               const std::vector<unsigned int>&  Et, 
@@ -35,7 +34,6 @@
 	      const std::vector<unsigned int>&  Ey,
 	      int peak);
   
-    virtual ~JEMEtSums();
 
     void setPeak(int peak);
     void addEt(const std::vector<unsigned int>&  Et);
@@ -55,12 +53,12 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_module;
-    int m_peak;
-    std::vector <unsigned int> m_Et;
-    std::vector <unsigned int> m_Ex;
-    std::vector <unsigned int> m_Ey;
+    int m_crate{};
+    int m_module{};
+    int m_peak{};
+    std::vector <unsigned int> m_Et{0};
+    std::vector <unsigned int> m_Ex{0};
+    std::vector <unsigned int> m_Ey{0};
     
     };
   } // end of namespace

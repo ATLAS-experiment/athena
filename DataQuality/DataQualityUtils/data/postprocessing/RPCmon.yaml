@@ -1,88 +1,92 @@
-# Separate blocks with ---
----
-Input : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/evtLB', 
-         'Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/Run']
-Output : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/NEvent_VS_Lumi']
-Function: RpcRawDataMonitoring.RPCPostProcessing.make_evt_lumi
-Description: RPC X_Lumi__Y_NEvent
+# All post-processing functions have been taken out due to issue ATLASDQ-1223 and ATLASDQ-1226
+# as a temporary solution. A permanent rewrite of the RPC monitoring post processing
+# is already planned for the near future.
 
----
-# HitMultiplicity, hit cluster
-Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/HitMultiplicity_Panels', 
-         'Muon/MuonRawDataMonitoring/RPC/TrackMatch/ClusterSize_Panels']
-Output : [
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/hitMultiplicity_per_sectors_per_layers_etaAndPhiPanels',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/hitMultiplicity_per_panel_etaAndPhiView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/hitMultiplicity_per_panel_etaView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/hitMultiplicity_per_panel_phiView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/averageClusterSize_per_sectors_per_layers_etaAndPhiPanels',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/averageClusterSize_per_panel_etaAndPhiView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/averageClusterSize_per_panel_etaView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/averageClusterSize_per_panel_phiView',
-]
-Function: RpcRawDataMonitoring.RPCPostProcessing.make_hitMulti
-Description: RPC HitMultiplicity, average cluster
+# # Separate blocks with ---
+# ---
+# Input : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/evtLB', 
+#          'Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/Run']
+# Output : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/NEvent_VS_Lumi']
+# Function: RpcRawDataMonitoring.RPCPostProcessing.make_evt_lumi
+# Description: RPC X_Lumi__Y_NEvent
 
----
-# outtime-time (on-track hits) fration
-Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/OuttimeHitFraction_PRDHit',
-         'Muon/MuonRawDataMonitoring/RPC/TrackMatch/OuttimeHitFraction_PRDHit_onTrack']
-Output : [
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_per_sectors_per_layers_etaAndPhiPanels',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_per_panel_etaAndPhiView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_per_panel_etaView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_per_panel_phiView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_onTrack_per_sectors_per_layers_etaAndPhiPanels',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_onTrack_per_panel_etaAndPhiView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_onTrack_per_panel_etaView',
-  'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_onTrack_per_panel_phiView'
-]
-Function: RpcRawDataMonitoring.RPCPostProcessing.make_hitFrac
-Description: RPC outtime-time (on-track hits) fration
+# ---
+# # HitMultiplicity, hit cluster
+# Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/HitMultiplicity_Panels', 
+#          'Muon/MuonRawDataMonitoring/RPC/TrackMatch/ClusterSize_Panels']
+# Output : [
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/hitMultiplicity_per_sectors_per_layers_etaAndPhiPanels',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/hitMultiplicity_per_panel_etaAndPhiView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/hitMultiplicity_per_panel_etaView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/hitMultiplicity_per_panel_phiView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/averageClusterSize_per_sectors_per_layers_etaAndPhiPanels',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/averageClusterSize_per_panel_etaAndPhiView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/averageClusterSize_per_panel_etaView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/averageClusterSize_per_panel_phiView',
+# ]
+# Function: RpcRawDataMonitoring.RPCPostProcessing.make_hitMulti
+# Description: RPC HitMultiplicity, average cluster
 
----
-# detection efficiency
-Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Detection_Efficiency_MuonFromZ']
-VariableOutput : True
-OutputDOF : [
-  ]
-Function: RpcRawDataMonitoring.RPCPostProcessing.make_detection_eff
-Description: RPC detection efficiency
+# ---
+# # outtime-time (on-track hits) fration
+# Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/OuttimeHitFraction_PRDHit',
+#          'Muon/MuonRawDataMonitoring/RPC/TrackMatch/OuttimeHitFraction_PRDHit_onTrack']
+# Output : [
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_per_sectors_per_layers_etaAndPhiPanels',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_per_panel_etaAndPhiView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_per_panel_etaView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_per_panel_phiView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_onTrack_per_sectors_per_layers_etaAndPhiPanels',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_onTrack_per_panel_etaAndPhiView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_onTrack_per_panel_etaView',
+#   'Muon/MuonRawDataMonitoring/RPC/TrackMatch/outTimeHitFrac_onTrack_per_panel_phiView'
+# ]
+# Function: RpcRawDataMonitoring.RPCPostProcessing.make_hitFrac
+# Description: RPC outtime-time (on-track hits) fration
 
----
-# Hit rate
-Input : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/NPRDHit_Panels_All', 
-         'Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/evtLB', 
-         'Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/Run']
-VariableOutput : True
-OutputDOF : [
-]
-Function: RpcRawDataMonitoring.RPCPostProcessing.make_hit_rate
-Description: RPC HitRate
+# ---
+# # detection efficiency
+# Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Detection_Efficiency_MuonFromZ']
+# VariableOutput : True
+# OutputDOF : [
+#   ]
+# Function: RpcRawDataMonitoring.RPCPostProcessing.make_detection_eff
+# Description: RPC detection efficiency
 
----
-# 2D Hit
-Input : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/NPRDHit_Panels_All']
-VariableOutput : True
-OutputDOF : [
-]
-Function: RpcRawDataMonitoring.RPCPostProcessing.make_2dhits
-Description: RPC 1DMuonHit
+# ---
+# # Hit rate
+# Input : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/NPRDHit_Panels_All', 
+#          'Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/evtLB', 
+#          'Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/Run']
+# VariableOutput : True
+# OutputDOF : [
+# ]
+# Function: RpcRawDataMonitoring.RPCPostProcessing.make_hit_rate
+# Description: RPC HitRate
 
----
-# 2D Nmuons decayed from Z
-Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Detection_Efficiency_MuonFromZ']
-VariableOutput : True
-OutputDOF : [
-]
-Function: RpcRawDataMonitoring.RPCPostProcessing.make_2d_nmuons_Z
-Description: RPC Nmuons for muons from Z
+# ---
+# # 2D Hit
+# Input : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/NPRDHit_Panels_All']
+# VariableOutput : True
+# OutputDOF : [
+# ]
+# Function: RpcRawDataMonitoring.RPCPostProcessing.make_2dhits
+# Description: RPC 1DMuonHit
 
----
-# 2D Nmuons in all events
-Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Detection_Efficiency_AllMuons']
-VariableOutput : True
-OutputDOF : [
-]
-Function: RpcRawDataMonitoring.RPCPostProcessing.make_2d_nmuons_all
-Description: RPC Nmuons for muons in all events
+# ---
+# # 2D Nmuons decayed from Z
+# Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Detection_Efficiency_MuonFromZ']
+# VariableOutput : True
+# OutputDOF : [
+# ]
+# Function: RpcRawDataMonitoring.RPCPostProcessing.make_2d_nmuons_Z
+# Description: RPC Nmuons for muons from Z
+
+# ---
+# # 2D Nmuons in all events
+# Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Detection_Efficiency_AllMuons']
+# VariableOutput : True
+# OutputDOF : [
+# ]
+# Function: RpcRawDataMonitoring.RPCPostProcessing.make_2d_nmuons_all
+# Description: RPC Nmuons for muons in all eventss

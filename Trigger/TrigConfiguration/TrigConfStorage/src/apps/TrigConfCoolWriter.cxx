@@ -643,7 +643,7 @@ TrigConf::TrigConfCoolWriter::writeL1MonPayload( const RunRangeVec& runRanges,
                   mults[index]=strMult.str();
                   starts[index]=strStart.str();
                   ends[index]=strEnd.str();
-                  actives[index]=active;
+                  actives[index]=std::move(active);
                   counterType[index]=(*mc)->counterType();
                   bgId[index]=(*mc)->bunchGroupId();
                   // not possible yet

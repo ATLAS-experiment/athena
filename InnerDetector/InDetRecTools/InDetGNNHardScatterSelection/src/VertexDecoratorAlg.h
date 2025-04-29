@@ -58,6 +58,27 @@ private:
     SG::ReadHandleKey<xAOD::PhotonContainer> m_photonsInKey{
         this, "photonsIn", "Photons", "containerName to read"};
 
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_ntrk {
+      this, "decor_ntrkKey", "ntrk", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_sumPt {
+      this, "decor_sumPtKey", "sumPt", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_chi2Over_ndf {
+      this, "decor_chi2Over_ndfKey", "chi2Over_ndf", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_z_asym {
+      this, "decor_z_asymmetryKey", "z_asymmetry", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_weighted_z_asym {
+      this, "decor_weighted_z_asym", "weighted_z_asymmetry", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_weighted_z_kurt {
+      this, "decor_weighted_z_kurt", "z_kurtosis", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_z_skew {
+      this, "decor_z_skew", "z_skewness", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_photon_deltaz {
+      this, "decor_photon_deltaz", "photon_deltaz", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_photon_deltaPhi {
+      this, "decor_photon_deltaPhi", "photon_deltaPhi", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_actualInterPerXing {
+      this, "decor_actualInterPerXing", "actualIntPerXing", ""};
+
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_photonLinksKey{
       this, "photonLinks", "", "" };
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_jetLinksKey{

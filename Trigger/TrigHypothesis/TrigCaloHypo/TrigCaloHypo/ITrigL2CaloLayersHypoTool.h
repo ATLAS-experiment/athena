@@ -7,7 +7,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "DecisionHandling/HLTIdentifier.h"
-#include "DecisionHandling/TrigCompositeUtils.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 
 

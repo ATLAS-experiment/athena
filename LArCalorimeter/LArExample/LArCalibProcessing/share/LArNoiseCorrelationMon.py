@@ -33,9 +33,6 @@ if __name__=='__main__':
   parser.add_argument('-b','--barrel_ec', dest='be', default=[], nargs="+", help='subdet to read out (-1 means both), can give multiple arguments (space separated) Default %(default)s.', type=int,choices=range(-1,2))
 
   args = parser.parse_args()
-  if args.help:
-     parser.print_help()
-     sys.exit(0)
 
   for _, value in args._get_kwargs():
      if value is not None:
@@ -49,7 +46,9 @@ if __name__=='__main__':
   flags.addFlagsCategory("LArMon", addLArMonFlags)
   addLArCalibFlags(flags)
 
-
+  flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
+  flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-03'
+  
   if len(args.infile) > 0:
      flags.Input.Files = [args.infile]
   elif len(args.inppatt) > 0:
@@ -60,7 +59,7 @@ if __name__=='__main__':
      flags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
 
   if args.run != 0:
-     flags.Input.RunNumber = [args.run]
+     flags.Input.RunNumbers = [args.run]
 
   if len(args.febs) > 0:
      flags.LArMon.customFEBsToMonitor = args.febs 

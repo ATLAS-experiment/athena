@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanConfig.h"
@@ -93,7 +93,7 @@ namespace {
 
 void
 HanConfig::
-AssembleAndSave( std::string infileName, std::string outfileName, std::string connectionString, long runNumber, bool bulk)
+AssembleAndSave( const std::string & infileName, const std::string & outfileName, const std::string & connectionString, long runNumber, bool bulk)
 {
   std::unique_ptr< TFile > outfile( TFile::Open( outfileName.c_str(),
                                                  "RECREATE" ) );
@@ -108,7 +108,7 @@ AssembleAndSave( std::string infileName, std::string outfileName, std::string co
   RefVisitor refvisitor( outfile.get(), directories, &refsourcedata );
   refconfig.SendVisitor( refvisitor );
 
-  DatabaseConfig databaseConfig(std::move(connectionString), runNumber);
+  DatabaseConfig databaseConfig(connectionString, runNumber);
   RefWriter refwriter(databaseConfig, bulk);
   refconfig.SendWriter( refwriter );
   databaseConfig.Disconnect();
@@ -145,7 +145,7 @@ AssembleAndSave( std::string infileName, std::string outfileName, std::string co
 
   MiniConfig metadataconfig;
   metadataconfig.AddKeyword("metadata");
-  metadataconfig.ReadFile(std::move(infileName));
+  metadataconfig.ReadFile(infileName);
   MetadataVisitor metadatavisitor(outfile.get(), metadataconfig);
   metadataconfig.SendVisitor(metadatavisitor);
 
@@ -232,7 +232,7 @@ BuildMonitorsNewRoot( std::string configName, HanInputRootFile& input, dqm_core:
 
 void
 HanConfig::
-BuildConfigOutput( std::string configName, TFile* inputFile, std::string path,
+BuildConfigOutput( std::string configName, TFile* inputFile, const std::string & path,
                    HanOutput::DQOutputMap_t* outputMap, TSeqCollection* outputList )
 {
   bool isInitialized = Initialize( configName );
@@ -246,8 +246,7 @@ BuildConfigOutput( std::string configName, TFile* inputFile, std::string path,
 
   TDirectory* basedir(0);
   if( path != "" ) {
-    std::string pathForSearch = path;
-    pathForSearch += "/dummyName";
+    std::string pathForSearch = path + "/dummyName";
     basedir = ChangeInputDir( inputFile, std::move(pathForSearch) );
   }
 
@@ -477,7 +476,7 @@ GetROOTFile( std::string& fname )
 
 void
 HanConfig::AssessmentVisitorBase::
-PopulateKeyCache(const std::string& fname, std::shared_ptr<TFile> file) {
+PopulateKeyCache(const std::string& fname, std::shared_ptr<TFile> & file) {
   auto& vec = m_keycache[fname];
   dolsr(file.get(), vec);
 }

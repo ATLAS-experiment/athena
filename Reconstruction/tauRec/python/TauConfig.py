@@ -103,9 +103,6 @@ def TauCaloAlgCfg(flags):
     CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterBadChannelCfg(flags))]
     CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterMomentsMakerCfg(flags))]
 
-    if flags.Calo.TopoCluster.doCellWeightCalib:
-        CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterCellWeightCalibCfg(flags))]
-
     if flags.Calo.TopoCluster.doTopoClusterLocalCalib:
         CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterLocalCalibCfg(flags)),
                                                         result.popToolsAndMerge(tauTools.TauCaloOOCCalibCfg(flags)),
@@ -144,7 +141,7 @@ def TauRunnerAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
 
     if flags.Tau.doPanTau:
-        import PanTauAlgs.JobOptions_Main_PanTau_New as pantau
+        import PanTauAlgs.JobOptions_Main_PanTau as pantau
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
 
     tools.append(result.popToolsAndMerge(tauTools.TauCombinedTESCfg(flags)) )
@@ -186,39 +183,38 @@ def TauOutputCfg(flags):
 
     # common to AOD and ESD
     TauAODList = []
-    TauAODList += [ "xAOD::TauJetContainer#{}"             .format(flags.Tau.ActiveConfig.TauJets) ]
-    TauAODList += [ "xAOD::TauTrackContainer#{}"           .format(flags.Tau.ActiveConfig.TauTracks) ]
-    TauAODList += [ "xAOD::TauTrackAuxContainer#{}Aux."    .format(flags.Tau.ActiveConfig.TauTracks) ]
-    TauAODList += [ "xAOD::VertexContainer#{}"             .format(flags.Tau.ActiveConfig.TauSecondaryVertices) ]
-    TauAODList += [ "xAOD::VertexAuxContainer#{}Aux.-vxTrackAtVertex".format(flags.Tau.ActiveConfig.TauSecondaryVertices) ]
-    TauAODList += [ "xAOD::CaloClusterContainer#{}"        .format(flags.Tau.ActiveConfig.TauPi0Clusters) ]
-    TauAODList += [ "xAOD::CaloClusterAuxContainer#{}Aux." .format(flags.Tau.ActiveConfig.TauPi0Clusters) ]
-    TauAODList += [ "CaloClusterCellLinkContainer#{}_links".format(flags.Tau.ActiveConfig.TauPi0Clusters) ]
-    TauAODList += [ "xAOD::CaloClusterContainer#{}"        .format(flags.Tau.ActiveConfig.TauShotClusters)]
-    TauAODList += [ "xAOD::CaloClusterAuxContainer#{}Aux." .format(flags.Tau.ActiveConfig.TauShotClusters)]
-    TauAODList += [ "CaloClusterCellLinkContainer#{}_links".format(flags.Tau.ActiveConfig.TauShotClusters) ]
-    TauAODList += [ "xAOD::ParticleContainer#{}"           .format(flags.Tau.ActiveConfig.TauFinalPi0s) ]
-    TauAODList += [ "xAOD::ParticleAuxContainer#{}Aux."    .format(flags.Tau.ActiveConfig.TauFinalPi0s) ]
-    TauAODList += [ "xAOD::PFOContainer#{}"                .format(flags.Tau.ActiveConfig.TauShotPFOs) ]
-    TauAODList += [ "xAOD::PFOAuxContainer#{}Aux."         .format(flags.Tau.ActiveConfig.TauShotPFOs) ]
-    TauAODList += [ "xAOD::PFOContainer#{}"                .format(flags.Tau.ActiveConfig.TauNeutralPFOs) ]
-    TauAODList += [ "xAOD::PFOAuxContainer#{}Aux."         .format(flags.Tau.ActiveConfig.TauNeutralPFOs) ]
-    TauAODList += [ "xAOD::PFOContainer#{}"                .format(flags.Tau.ActiveConfig.TauHadronicPFOs) ]
-    TauAODList += [ "xAOD::PFOAuxContainer#{}Aux."         .format(flags.Tau.ActiveConfig.TauHadronicPFOs) ]
+    TauAODList += [ f"xAOD::TauJetContainer#{flags.Tau.ActiveConfig.TauJets}" ]
+    TauAODList += [ f"xAOD::TauTrackContainer#{flags.Tau.ActiveConfig.TauTracks}" ]
+    TauAODList += [ f"xAOD::TauTrackAuxContainer#{flags.Tau.ActiveConfig.TauTracks}Aux." ]
+    TauAODList += [ f"xAOD::VertexContainer#{flags.Tau.ActiveConfig.TauSecondaryVertices}" ]
+    TauAODList += [ f"xAOD::VertexAuxContainer#{flags.Tau.ActiveConfig.TauSecondaryVertices}Aux.-vxTrackAtVertex" ]
+    TauAODList += [ f"xAOD::CaloClusterContainer#{flags.Tau.ActiveConfig.TauPi0Clusters}" ]
+    TauAODList += [ f"xAOD::CaloClusterAuxContainer#{flags.Tau.ActiveConfig.TauPi0Clusters}Aux." ]
+    TauAODList += [ f"CaloClusterCellLinkContainer#{flags.Tau.ActiveConfig.TauPi0Clusters}_links" ]
+    TauAODList += [ f"xAOD::CaloClusterContainer#{flags.Tau.ActiveConfig.TauShotClusters}" ]
+    TauAODList += [ f"xAOD::CaloClusterAuxContainer#{flags.Tau.ActiveConfig.TauShotClusters}Aux." ]
+    TauAODList += [ f"CaloClusterCellLinkContainer#{flags.Tau.ActiveConfig.TauShotClusters}_links" ]
+    TauAODList += [ f"xAOD::ParticleContainer#{flags.Tau.ActiveConfig.TauFinalPi0s}" ]
+    TauAODList += [ f"xAOD::ParticleAuxContainer#{flags.Tau.ActiveConfig.TauFinalPi0s}Aux." ]
+    TauAODList += [ f"xAOD::PFOContainer#{flags.Tau.ActiveConfig.TauShotPFOs}" ]
+    TauAODList += [ f"xAOD::PFOAuxContainer#{flags.Tau.ActiveConfig.TauShotPFOs}Aux." ]
+    TauAODList += [ f"xAOD::PFOContainer#{flags.Tau.ActiveConfig.TauNeutralPFOs}" ]
+    TauAODList += [ f"xAOD::PFOAuxContainer#{flags.Tau.ActiveConfig.TauNeutralPFOs}Aux." ]
+    TauAODList += [ f"xAOD::PFOContainer#{flags.Tau.ActiveConfig.TauHadronicPFOs}" ]
+    TauAODList += [ f"xAOD::PFOAuxContainer#{flags.Tau.ActiveConfig.TauHadronicPFOs}Aux." ]
 
     # Set common to ESD too
     TauESDList = list(TauAODList)
 
     # add AOD specific
     #Also remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
-    TauAODList += [ "xAOD::TauJetAuxContainer#{}Aux.-VertexedClusters.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
-                    .format(flags.Tau.ActiveConfig.TauJets) ]
+    TauAODList += [ f"xAOD::TauJetAuxContainer#{flags.Tau.ActiveConfig.TauJets}Aux.-VertexedClusters.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks" ]
 
-    # addEOD specific
+    # addESD specific
     #Also remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
-    TauESDList += [ "xAOD::TauJetAuxContainer#{}Aux.-VertexedClusters.-chargedGlobalFELinks.-neutralGlobalFELinks".format(flags.Tau.ActiveConfig.TauJets) ]
-    TauESDList += [ "xAOD::PFOContainer#{}"        .format(flags.Tau.ActiveConfig.TauChargedPFOs) ]
-    TauESDList += [ "xAOD::PFOAuxContainer#{}Aux." .format(flags.Tau.ActiveConfig.TauChargedPFOs) ]
+    TauESDList += [ f"xAOD::TauJetAuxContainer#{flags.Tau.ActiveConfig.TauJets}Aux.-VertexedClusters.-chargedGlobalFELinks.-neutralGlobalFELinks" ]
+    TauESDList += [ f"xAOD::PFOContainer#{flags.Tau.ActiveConfig.TauChargedPFOs}" ]
+    TauESDList += [ f"xAOD::PFOAuxContainer#{flags.Tau.ActiveConfig.TauChargedPFOs}Aux." ]
 
     result.merge(addToESD(flags,TauESDList))
     result.merge(addToAOD(flags,TauAODList))
@@ -355,54 +351,33 @@ def TauConfigTest(flags=None):
 
     if flags is None:
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
+       
         flags = initConfigFlags()
 
-        # Needs to be fixed to use latest ESDs, see ATLASRECTS-8112
-        #from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
-        #flags.Input.Files = defaultTestFiles.LATEST_ESD_MC
-        #flags.IOVDb.GlobalTag = defaultConditionsTags.LATEST_MC
+        flags.Input.Files = defaultTestFiles.RDO_RUN3
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
 
-        flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.421450.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep_fct.recon.ESD.e8445_e8447_s3822_r13565/ESD.28877240._000046.pool.root.1"]
-        flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-10"
-
-        flags.Output.ESDFileName = "ESD.pool.root"
         flags.Output.AODFileName = "AOD.pool.root"
-        flags.Exec.MaxEvents = 10
+        flags.Exec.MaxEvents = 50
 
         flags.Scheduler.ShowDataDeps = True
         flags.Scheduler.ShowDataFlow = True
         flags.Scheduler.ShowControlFlow = True
 
-        #TODO Update once new jet flags are available
-        # from JetRec.JetRecFlags import jetFlags
-        # if not jetFlags.useTracks():
-        #     flags.Tau.doTJVA = False  # switch off TJVA
-
-        flags.fillFromArgs()
-
         flags.Concurrency.NumThreads = 1
         flags.Concurrency.NumConcurrentEvents = 1
 
+        from tauRec.ConfigurationHelpers import StandaloneTauRecoFlags
+        StandaloneTauRecoFlags(flags)
+
         flags.lock()
+   
+    from RecJobTransforms.RecoSteering import RecoSteering
+    cfg = RecoSteering(flags)
 
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(flags)
-
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(flags))
-
-    # this delcares to the scheduler that EventInfo object comes from the input
-    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                  ( 'AthenaAttributeList' , 'StoreGateSvc+Input' ),
-                  ( 'CaloCellContainer' , 'StoreGateSvc+AllCalo' )]
-    cfg.addEventAlgo(CompFactory.SGInputLoader(Load=loadFromSG), sequenceName="AthAlgSeq")
-
-    cfg.merge(TauReconstructionCfg(flags))
-
-    from SGComps.AddressRemappingConfig import AddressRemappingCfg
-    rename_maps = [ '%s#%s->%s' % ("xAOD::TauJetContainer", "TauJets", "old_TauJets"),
-                    '%s#%s->%s' % ("xAOD::TauJetAuxContainer", "TauJetsAux.", "old_TauJetsAux.")]
-    cfg.merge( AddressRemappingCfg(rename_maps) )
+    from RecJobTransforms.RecoConfigFlags import printRecoFlags
+    printRecoFlags(flags)
 
     cfg.run()
 

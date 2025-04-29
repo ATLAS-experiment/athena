@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableSLBToSSW.h"
@@ -10,60 +10,25 @@
 
 namespace MuonTGC_Cabling {
 
-// Constructor & Destructor
 TGCCableSLBToSSW::TGCCableSLBToSSW(const std::string& filename)
   : TGCCable(TGCCable::SLBToSSW)
 {
-  m_database[TGCId::Endcap][TGCId::WT] =
-    new TGCDatabaseSLBToROD(filename,"SLB EWT");
-  m_database[TGCId::Endcap][TGCId::WD] =
-    new TGCDatabaseSLBToROD(filename,"SLB EWD");
-  m_database[TGCId::Endcap][TGCId::ST] =
-    new TGCDatabaseSLBToROD(filename,"SLB EST");
-  m_database[TGCId::Endcap][TGCId::SD] =
-    new TGCDatabaseSLBToROD(filename,"SLB ESD");
-  m_database[TGCId::Endcap][TGCId::WI] =
-    new TGCDatabaseSLBToROD(filename,"SLB EWI");
-  m_database[TGCId::Endcap][TGCId::SI] =
-    new TGCDatabaseSLBToROD(filename,"SLB ESI");
-  m_database[TGCId::Endcap][SL] =
-    new TGCDatabaseSLBToROD(filename,"SLB ESL");
+  m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EWT");
+  m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EWD");
+  m_database[TGCId::Endcap][TGCId::ST] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EST");
+  m_database[TGCId::Endcap][TGCId::SD] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB ESD");
+  m_database[TGCId::Endcap][TGCId::WI] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EWI");
+  m_database[TGCId::Endcap][TGCId::SI] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB ESI");
+  m_database[TGCId::Endcap][SL] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB ESL");
 
-  m_database[TGCId::Forward][TGCId::WT] =
-    new TGCDatabaseSLBToROD(filename,"SLB FWT");
-  m_database[TGCId::Forward][TGCId::WD] =
-    new TGCDatabaseSLBToROD(filename,"SLB FWD");
-  m_database[TGCId::Forward][TGCId::ST] =
-    new TGCDatabaseSLBToROD(filename,"SLB FST");
-  m_database[TGCId::Forward][TGCId::SD] =
-    new TGCDatabaseSLBToROD(filename,"SLB FSD");
-  m_database[TGCId::Forward][TGCId::WI] =
-    new TGCDatabaseSLBToROD(filename,"SLB FWI");
-  m_database[TGCId::Forward][TGCId::SI] =
-    new TGCDatabaseSLBToROD(filename,"SLB FSI");
-  m_database[TGCId::Forward][SL] =
-    new TGCDatabaseSLBToROD(filename,"SLB FSL");
+  m_database[TGCId::Forward][TGCId::WT] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FWT");
+  m_database[TGCId::Forward][TGCId::WD] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FWD");
+  m_database[TGCId::Forward][TGCId::ST] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FST");
+  m_database[TGCId::Forward][TGCId::SD] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FSD");
+  m_database[TGCId::Forward][TGCId::WI] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FWI");
+  m_database[TGCId::Forward][TGCId::SI] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FSI");
+  m_database[TGCId::Forward][SL] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FSL");
 }
-
-TGCCableSLBToSSW::~TGCCableSLBToSSW(void)
-{
-  delete m_database[TGCId::Endcap][TGCId::WT];
-  delete m_database[TGCId::Endcap][TGCId::WD];
-  delete m_database[TGCId::Endcap][TGCId::ST];
-  delete m_database[TGCId::Endcap][TGCId::SD];
-  delete m_database[TGCId::Endcap][TGCId::WI];
-  delete m_database[TGCId::Endcap][TGCId::SI];
-  delete m_database[TGCId::Endcap][SL];
-
-  delete m_database[TGCId::Forward][TGCId::WT];
-  delete m_database[TGCId::Forward][TGCId::WD];
-  delete m_database[TGCId::Forward][TGCId::ST];
-  delete m_database[TGCId::Forward][TGCId::SD];
-  delete m_database[TGCId::Forward][TGCId::WI];
-  delete m_database[TGCId::Forward][TGCId::SI];
-  delete m_database[TGCId::Forward][SL];
-}
-  
 
 TGCModuleMap* TGCCableSLBToSSW::getModule(const TGCModuleId* moduleId) const {
   if(moduleId){
@@ -85,7 +50,7 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleIn(const TGCModuleId* ssw) const {
   TGCId::RegionType region[TGCId::MaxRegionType * MaxModuleType];
   for(int i=0; i<TGCId::MaxRegionType; i++){
     for(int j=0; j< MaxModuleType; j++){
-      databaseP[i*MaxModuleType + j] = m_database[i][j];
+      databaseP[i*MaxModuleType + j] = m_database[i][j].get();
       region[i*MaxModuleType + j] = static_cast<TGCId::RegionType>(i);
       module[i*MaxModuleType + j] = static_cast<TGCId::ModuleType>(j);
     }
@@ -178,7 +143,7 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleOut(const TGCModuleId* slb) const {
   
   TGCModuleMap* mapId = nullptr;
 
-  TGCDatabase* databaseP =m_database[slb->getRegionType()][slb->getModuleType()];
+  TGCDatabase* databaseP =m_database[slb->getRegionType()][slb->getModuleType()].get();
   const int MaxEntry = databaseP->getMaxEntry();
   if(slb->getModuleType() == TGCId::WI ||
      slb->getModuleType() == TGCId::SI) {

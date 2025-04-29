@@ -136,6 +136,8 @@ def createITkTrackingPassFlags():
     icf.addFlag("doZBoundary"               , True)
     icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
+    icf.addFlag("useTIDE_Ambi", lambda pcf: pcf.Tracking.doTIDE_Ambi)
+
     # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
     icf.addFlag("etaBins"                   , [-1.0, 2.0, 2.6, 9999.0])
     icf.addFlag("maxEta"                    , 4.0)
@@ -230,6 +232,7 @@ def createITkTrackingPassFlags():
 
     # --- flags for ACTS tracking
     icf.addFlag("isSecondaryPass", False)
+
     return icf
 
 

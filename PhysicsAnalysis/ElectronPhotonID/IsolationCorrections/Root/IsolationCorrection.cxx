@@ -69,9 +69,7 @@ namespace CP {
 
     setEtaBins();
     setIsolCorr();
-    m_shower = new CP::ShowerDepthTool();
-    m_shower->initialize();
-
+    m_shower = new CP::ShowerDepthUtil();
     return StatusCode::SUCCESS;
   }
 

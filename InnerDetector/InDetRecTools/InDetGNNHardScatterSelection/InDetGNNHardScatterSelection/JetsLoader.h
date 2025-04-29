@@ -31,8 +31,8 @@ namespace InDetGNNHardScatterSelection {
     // Subclass for Jets loader inherited from abstract IConstituentsLoader class
     class JetsLoader : public IConstituentsLoader {
       public:
-        JetsLoader(ConstituentsInputConfig);
-        std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> getData(
+        JetsLoader(const ConstituentsInputConfig &);
+        std::tuple<std::string, FlavorTagInference::Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Vertex& vertex) const override ;
         std::string getName() const override;
         ConstituentsType getType() const override;

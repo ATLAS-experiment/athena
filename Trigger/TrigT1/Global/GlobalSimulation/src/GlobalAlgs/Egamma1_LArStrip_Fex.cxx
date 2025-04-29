@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -170,9 +170,7 @@ namespace GlobalSim {
     }
 
     // container for strips close to RoI in eta
-    auto close =
-      std::vector<std::vector<const CaloCell*>>(3,
-						std::vector<const CaloCell*>());
+    auto close = std::vector<std::vector<const CaloCell*>>(3);
     for (auto& v :close) {v.reserve(100);}
     
     
@@ -231,11 +229,8 @@ namespace GlobalSim {
 
     // set up Cell containers for the neighborhood. One container
     // per adjacent RoI phi indices.
-    auto neigh_cells =
-      std::vector<std::vector<const CaloCell*>>(3,
-						std::vector<const CaloCell*>());
-    
-    
+    auto neigh_cells = std::vector<std::vector<const CaloCell*>>(3);
+
     const CaloCell* max_cell{*it};
     const auto  max_cell_eta = max_cell->eta();
     
@@ -305,7 +300,7 @@ namespace GlobalSim {
 	<< eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)
 	<< " weight " << eventInfo.mcEventWeight() << '\n';
 
-    for (const auto& nbhd : neighborhoods) {
+    for (const auto nbhd : neighborhoods) {
       out << *nbhd << '\n';
     }
     
@@ -354,7 +349,7 @@ namespace GlobalSim {
 	<< eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)
 	<< " weight " << eventInfo.mcEventWeight() << '\n';	
 
-    for (const auto& n : neighborhoods) {dump_n(n, out);}
+    for (const auto n : neighborhoods) {dump_n(n, out);}
     
     
     out.close();

@@ -1,10 +1,9 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "PrdMultiTruthMaker.h"
 
-#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
 #include "xAODMuonPrepData/UtilFunctions.h"
@@ -31,12 +30,9 @@ namespace MuonR4 {
       ATH_CHECK(prdTruth.record(std::make_unique<PRD_MultiTruthCollection>()));
         
       for (const xAODPrdKey_t& key : m_xAODPrdKeys) {
-         SG::ReadHandle readHandle{key, ctx};
-         if (!readHandle.isPresent()) {
-            ATH_MSG_FATAL("Failed to load container "<<key.fullKey());
-            return StatusCode::FAILURE;
-         }
-         for (const xAOD::UncalibratedMeasurement* meas : *readHandle) {
+         const xAODPrdCont_t* unCalibMeasCont{nullptr};
+         ATH_CHECK(SG::get(unCalibMeasCont, key, ctx));
+         for (const xAOD::UncalibratedMeasurement* meas : *unCalibMeasCont) {
             const xAOD::MuonSimHit* truthHit{getTruthMatchedHit(*meas)};
             if (!truthHit || !truthHit->genParticleLink().isValid()){
                continue;

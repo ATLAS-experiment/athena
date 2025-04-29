@@ -22,10 +22,9 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
-#include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
-
 
 // Handle Keys
 #include <memory>
@@ -43,6 +42,7 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
                                    ISvcLocator *pSvcLocator);
 
   virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   virtual StatusCode execute(const EventContext &ctx) const override;
 
  private:
@@ -68,37 +68,35 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
       "Maximum number of shared tracks per measurement."};
   Gaudi::Property<std::size_t> m_maxShared{
       this, "MaxShared", 5, "Maximum number of shared hit per track."};
+  Gaudi::Property<std::size_t> m_minUnshared{
+      this, "MinUnshared", 5, "Minimum number of unshared hits per track."};
 
-  Gaudi::Property<double> m_pTMin{this, "PTMin", 0 * Acts::UnitConstants::GeV,
-                                  "Minimum transverse momentum."};
-  Gaudi::Property<double> m_pTMax{this, "PTMax", 1e5 * Acts::UnitConstants::GeV,
-                                  "Maximum transverse momentum."};
-
-  Gaudi::Property<double> m_phiMin{this, "PhiMin",
-                                   -M_PI *Acts::UnitConstants::rad,
-                                   "Minimum azimuthal angle."};
-  Gaudi::Property<double> m_phiMax{this, "PhiMax",
-                                   M_PI *Acts::UnitConstants::rad,
-                                   "Maximum azimuthal angle."};
-
-  Gaudi::Property<double> m_etaMin{this, "EtaMin", -5,
-                                   "Minimum pseudorapidity."};
-  Gaudi::Property<double> m_etaMax{this, "EtaMax", 5,
-                                   "Maximum pseudorapidity."};
-
-  Gaudi::Property<bool> m_useAmbiguityFunction{
-      this, "UseAmbiguityFunction", false,
+  Gaudi::Property<bool> m_useAmbiguityScoring{
+      this, "UseAmbiguityScoring", false,
       "Flag to enable/disable ambiguity function."};
 
   Gaudi::Property<std::string> m_jsonFileName{
       this, "jsonFileName", "ScoreBasedAmbiguity_Config.json",
       "Name of the JSON file that contains the config file."};
 
+  Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
+
   std::unique_ptr<Acts::ScoreBasedAmbiguityResolution> m_ambi{nullptr};
 
   /** ITk eta-dependent cuts*/
   ServiceHandle<InDet::IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc{
       this, "InDetEtaDependentCutsSvc", ""};
+
+  public:
+    enum EStat {
+      kNInputTracks,
+      kNResolvedTracks,
+      kNSharedHits,
+      kNStat
+    };
+
+  private:
+    mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE{};
 };
 
 }  // namespace ActsTrk

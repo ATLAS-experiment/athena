@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ICscStripFitter_H
 #define ICscStripFitter_H
@@ -42,10 +42,10 @@ public:  // Embedded class.
         double charge_beforeGainCorr{0.};  // Time (ns) of the peak. without t0 correction
         double charge_beforeBPCorr{0.};    // Time (ns) of the peak. without t0 correction
         Muon::CscTimeStatus timeStatus{Muon::CscTimeStatusUndefined};
-        Result(Muon::CscStripStatus sstat = Muon::CscStrStatUndefined, Muon::CscTimeStatus tstat = Muon::CscTimeStatusUndefined) {
-            stripStatus = sstat;
-            timeStatus = tstat;
-        }
+        Result(Muon::CscStripStatus sstat = Muon::CscStrStatUndefined, Muon::CscTimeStatus tstat = Muon::CscTimeStatusUndefined) :
+          stripStatus(sstat),
+          timeStatus(tstat)
+        {}
         Result(const Result&) = default;
         ~Result() = default;
     };

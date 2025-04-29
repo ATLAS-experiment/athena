@@ -7,22 +7,17 @@ def CsvSpacePointDumpCfg(flags, name="CsvDriftCircleDumper", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
     result.merge(MuonSpacePointFormationCfg(flags))
+    spCont = []
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        spCont+=["MuonSpacePoints"]
+    if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
+        spCont+=["NswSpacePoints"]
+    
+    kwargs.setdefault("SpacePointKeys", spCont)
     the_alg = CompFactory.MuonR4.SpacePointCsvDumperAlg(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def CsvMuonSimHitDumpCfg(flags, name="CsvMuonSimHitDumper", **kwargs):
-    result = ComponentAccumulator()
-    truthContainers = []
-    if flags.Detector.GeometryMDT: truthContainers += ["xMdtSimHits"]
-    if flags.Detector.GeometryRPC: truthContainers += ["xMdtSimHits"] 
-    if flags.Detector.GeometryTGC: truthContainers += ["xTgcSimHits"]
-    if flags.Detector.GeometrysTGC: truthContainers += ["xStgcSimHits"]       
-    if flags.Detector.GeometryMM: truthContainers += ["xMmSimHits"] 
-    kwargs.setdefault("MuonSimHitKey", truthContainers)
-    the_alg = CompFactory.MuonR4.SimHitCsvDumperAlg(name = name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
 
 def CsvMuonTruthSegmentDumpCfg(flags, name="CsvMuonTruthSegmentDumper", **kwargs):
     result = ComponentAccumulator()

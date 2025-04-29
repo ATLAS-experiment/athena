@@ -71,7 +71,7 @@ namespace InDet {
     Gaudi::Property<float> m_trkEffSystScale{this, "trkEffSystScale", 1.0, "Option to scale the effect of the systematic (default 1)"};
 
     // Property: path to the root file containing the LRT efficiency histogram (note: uses PathResolver)
-    Gaudi::Property<std::string> m_calibFileLRTEff{this, "calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_24.0_2023-v00/LargeD0TrackingRecommendations_20230824.root", "File containing the efficiency histogram (expert only)"};
+    Gaudi::Property<std::string> m_calibFileLRTEff{this, "calibFileLRTEff", "", "File containing the efficiency histogram (expert only)"};
 
     // Property: name of the efficiency histogram in m_calibFileLRTEff
     Gaudi::Property<std::string> m_calibHistLRTEff{this, "calibHistLRTEff", "OneMinusRatioEfficiencyVSRadiusOfFirstHitEta_Nominal", "Name of the efficiency histogram (expert only)"};

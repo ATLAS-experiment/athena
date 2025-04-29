@@ -37,7 +37,7 @@ def addMBTS(flags):
     acc = ComponentAccumulator()
     if not _inRecoOrLater(flags):
         return acc
-    
+
     acc.merge(addToAOD(flags, mbtsBitsKeys))
     acc.merge(addToESD(flags, mbtsBitsKeys))
 
@@ -58,4 +58,21 @@ def addDetailedCaloClusterInfo(flags):
 
     acc.merge(addToAOD(flags, clusterDetails))
     acc.merge(addToESD(flags, clusterDetails))
+    return acc
+
+def addCaloClustersInPeripherals(flags):
+    """
+    Add CaloClusters for peripheral events analysis
+    """
+    acc = ComponentAccumulator()
+    if not _inRecoOrLater(flags):
+        return acc
+
+    # Add the output container to AOD
+    containersToRecord = ["xAOD::CaloClusterContainer#PeripheralCaloCalTopoClusters", "xAOD::CaloClusterAuxContainer#PeripheralCaloCalTopoClustersAux."]
+    acc.merge(addToAOD(flags, containersToRecord))
+    acc.merge(addToESD(flags, containersToRecord))
+
+    copier = CompFactory.CaloClustersCopier()
+    acc.addEventAlgo(copier)
     return acc

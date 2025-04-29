@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Joseph Lambert
 
@@ -57,7 +57,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # CommonServices
     config.addBlock('CommonServices')
     config.setOptions(systematicsHistogram='systematicsList')
-    config.setOptions(filterSystematics="^(?:(?!PseudoData).)*$")
 
     # PileupReweighting
     config.addBlock('PileupReweighting')
@@ -72,31 +71,35 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (jetCollection='AntiKt4EMPFlowJets')
     config.setOptions (runJvtUpdate=False)
     config.setOptions (runNNJvtUpdate=True)
+    config.setOptions (recalibratePhyslite=False)
     # Jets.FlavourTagging
     config.addBlock( 'Jets.FlavourTagging')
     config.setOptions (containerName='AnaJets')
     config.setOptions (selectionName='ftag')
-    config.setOptions (noEffSF=True)
     config.setOptions (btagger='GN2v01')
     config.setOptions (btagWP='FixedCutBEff_65')
+    config.setOptions (saveScores='All')
+    # Jets.FlavourTaggingEventSF
+    config.addBlock( 'Jets.FlavourTaggingEventSF')
+    config.setOptions (containerName='AnaJets.baselineJvt')
+    config.setOptions (btagger='GN2v01')
     # Jets.JVT
     config.addBlock('Jets.JVT', containerName='AnaJets')
-    # Jets.PtEtaSelection
-    config.addBlock ('Jets.PtEtaSelection')
-    config.setOptions (containerName='AnaJets')
 
     # Large-R jets
     config.addBlock('Jets')
     config.setOptions (containerName='AnaLargeRJets')
     config.setOptions (jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
-    # Jets.PtEtaSelection
-    config.addBlock ('Jets.PtEtaSelection')
-    config.setOptions (containerName='AnaLargeRJets')
+    config.setOptions (recalibratePhyslite=False)
 
     # Electrons
     config.addBlock ('Electrons')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (forceFullSimConfig=True)
+    config.setOptions (recalibratePhyslite=False)
+    config.setOptions (decorateTruth=True)
+    config.setOptions (decorateCaloClusterEta=True)
+    config.setOptions (writeTrackD0Z0=True)
     # Electrons.WorkingPoint
     config.addBlock ('Electrons.WorkingPoint')
     config.setOptions (containerName='AnaElectrons')
@@ -105,22 +108,31 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (noEffSF=True)
     config.setOptions (identificationWP='LooseBLayerLH')
     config.setOptions (isolationWP='Loose_VarRad')
-    config.setOptions (writeTrackD0Z0=True)
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (minPt=10000.0)
+    # Electrons.IFFClassification
+    config.addBlock ('Electrons.IFFClassification')
+    config.setOptions (containerName='AnaElectrons')
+    # Electrons.MCTCClassification
+    config.addBlock ('Electrons.MCTCClassification')
+    config.setOptions (containerName='AnaElectrons')
+    config.setOptions (prefix='truth_')
 
     # Photons
     config.addBlock ('Photons', containerName='AnaPhotons')
-    config.setOptions (forceFullSimConfig=True)
+    config.setOptions (forceFullSimConfigForP4=True)
+    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (recomputeIsEM=False)
+    config.setOptions (recalibratePhyslite=False)
+    config.setOptions (decorateTruth=True)
     # Photons.WorkingPoint
     config.addBlock ('Photons.WorkingPoint')
     config.setOptions (containerName='AnaPhotons')
     config.setOptions (selectionName='tight')
-    config.setOptions (forceFullSimConfig=True)
-    config.setOptions (noEffSF=True)
+    config.setOptions (forceFullSimConfigForID=True)
+    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (qualityWP='Tight')
     config.setOptions (isolationWP='FixedCutTight')
     config.setOptions (recomputeIsEM=False)
@@ -131,28 +143,46 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
 
     # Muons
     config.addBlock ('Muons', containerName='AnaMuons')
+    config.setOptions (recalibratePhyslite=False)
+    config.setOptions (decorateTruth=True)
+    config.setOptions (writeTrackD0Z0=True)
     # Muons.WorkingPoint
     config.addBlock ('Muons.WorkingPoint')
     config.setOptions (containerName='AnaMuons')
     config.setOptions (selectionName='medium')
     config.setOptions (quality='Medium')
     config.setOptions (isolation='Loose_VarRad')
-    config.setOptions (onlyRecoEffSF=True)
-    config.setOptions (writeTrackD0Z0=True)
-    # Muons.PtEtaSelection
-    config.addBlock ('Muons.PtEtaSelection')
+    # Muons.IFFClassification
+    config.addBlock ('Muons.IFFClassification')
     config.setOptions (containerName='AnaMuons')
+    # Muons.MCTCClassification
+    config.addBlock ('Muons.MCTCClassification')
+    config.setOptions (containerName='AnaMuons')
+    config.setOptions (prefix='truth_')
 
     # TauJets
     config.addBlock ('TauJets', containerName='AnaTauJets')
+    config.setOptions (decorateTruth=True)
     # TauJets.WorkingPoint
     config.addBlock ('TauJets.WorkingPoint')
     config.setOptions (containerName='AnaTauJets')
     config.setOptions (selectionName='tight')
     config.setOptions (quality='Tight')
-    # TauJets.PtEtaSelection
-    config.addBlock ('TauJets.PtEtaSelection')
+    # TauJets.TriggerSF
+    tauTriggerChainsSF = {
+        2015: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+        2016: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+        2017: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+        2018: ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
+    }
+    config.addBlock ('TauJets.TriggerSF')
     config.setOptions (containerName='AnaTauJets')
+    config.setOptions (tauID='Tight')
+    config.setOptions (triggerChainsPerYear=tauTriggerChainsSF)
+    # TauJets.MCTCClassification
+    config.addBlock ('TauJets.MCTCClassification')
+    config.setOptions (containerName='AnaTauJets')
+    config.setOptions (prefix='truth_')
 
     config.addBlock ('SystObjectLink')
     config.setOptions (containerName='AnaJets')
@@ -185,9 +215,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
 
     # GeneratorLevelAnalysis
     config.addBlock( 'GeneratorLevelAnalysis')
-    config.setOptions (saveCutBookkeepers=True)
-    config.setOptions (runNumber=284500)
-    config.setOptions (cutBookkeepersSystematics=True)
 
     # MissingET
     config.addBlock ('MissingET')
@@ -202,11 +229,71 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock( 'OverlapRemoval' )
     config.setOptions (inputLabel='preselectOR')
     config.setOptions (outputLabel='passesOR' )
-    config.setOptions (jets='AnaJets')
+    config.setOptions (jets='AnaJets.baselineJvt')
     config.setOptions (taus='AnaTauJets.tight')
     config.setOptions (electrons='AnaElectrons.loose')
     config.setOptions (photons='AnaPhotons.tight')
     config.setOptions (muons='AnaMuons.medium')
+
+    # Particle-level objects
+    config.addBlock ('PL_Electrons')
+    config.setOptions (containerName='TruthElectrons')
+    config.addBlock ('PL_Electrons.PtEtaSelection')
+    config.setOptions (containerName='TruthElectrons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (useDressedProperties=True)
+    config.setOptions (minPt=20e3)
+    config.addBlock ('PL_Electrons.MCTCClassification')
+    config.setOptions (containerName='TruthElectrons')
+    config.setOptions (prefix='')
+
+    config.addBlock ('PL_Photons')
+    config.setOptions (containerName='TruthPhotons')
+    config.addBlock ('PL_Photons.PtEtaSelection')
+    config.setOptions (containerName='TruthPhotons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (minPt=20e3)
+
+    config.addBlock ('PL_Muons')
+    config.setOptions (containerName='TruthMuons')
+    config.addBlock ('PL_Muons.PtEtaSelection')
+    config.setOptions (containerName='TruthMuons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (useDressedProperties=True)
+    config.setOptions (minPt=20e3)
+    config.addBlock ('PL_Muons.MCTCClassification')
+    config.setOptions (containerName='TruthMuons')
+    config.setOptions (prefix='')
+
+    config.addBlock ('PL_Taus')
+    config.setOptions (containerName='TruthTaus')
+    config.addBlock ('PL_Taus.PtEtaSelection')
+    config.setOptions (containerName='TruthTaus')
+    config.setOptions (skipOnData=True)
+    config.setOptions (minPt=20e3)
+    config.addBlock ('PL_Taus.MCTCClassification')
+    config.setOptions (containerName='TruthTaus')
+    config.setOptions (prefix='')
+
+    config.addBlock ('PL_Jets')
+    config.setOptions (containerName='AntiKt4TruthDressedWZJets')
+    config.addBlock ('PL_Jets.PtEtaSelection')
+    config.setOptions (containerName='AntiKt4TruthDressedWZJets')
+    config.setOptions (skipOnData=True)
+    config.setOptions (minPt=20e3)
+
+    config.addBlock ('PL_Neutrinos')
+    config.setOptions (skipOnData=True)
+    config.addBlock ('PL_MissingET')
+    config.setOptions (skipOnData=True)
+
+    config.addBlock ('PL_OverlapRemoval')
+    config.setOptions (skipOnData=True)
+    config.setOptions (electrons='TruthElectrons')
+    config.setOptions (muons='TruthMuons')
+    config.setOptions (photons='TruthPhotons')
+    config.setOptions (jets='AntiKt4TruthDressedWZJets')
+    config.setOptions (useRapidityForDeltaR=False)
 
     # Thinning
     config.addBlock ('Thinning')
@@ -231,11 +318,96 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Thinning')
     config.setOptions (containerName='AnaLargeRJets')
     config.setOptions (outputName='OutLargeRJets')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='TruthElectrons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (outputName='OutTruthElectrons')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='TruthPhotons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (outputName='OutTruthPhotons')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='TruthMuons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (outputName='OutTruthMuons')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='TruthTaus')
+    config.setOptions (skipOnData=True)
+    config.setOptions (outputName='OutTruthTaus')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='AntiKt4TruthDressedWZJets')
+    config.setOptions (outputName='OutTruthJets')
+    config.setOptions (skipOnData=True)
 
-    config.addBlock ('Output')
-    config.setOptions (treeName='analysis')
-    config.setOptions (vars=[])
-    config.setOptions (metVars=[])
+    # Trigger
+    triggerChainsPerYear = {
+        2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40', 'HLT_2g20_tight'],
+        2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50', 'HLT_g35_loose_g25_loose'],
+        2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
+        2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
+    }
+    triggerMatchingChainsPerYear = {
+        2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40'],
+        2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50'],
+        2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu50'],
+        2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium'],
+    }
+    config.addBlock ('Trigger')
+    config.setOptions (triggerChainsPerYear=triggerChainsPerYear)
+    config.setOptions (noFilter=True)
+    config.setOptions (electrons='AnaElectrons.loose')
+    config.setOptions (photons='AnaPhotons.tight')
+    config.setOptions (muons='AnaMuons.medium')
+    config.setOptions (taus='AnaTauJets.tight')
+    config.setOptions (electronID='Tight')
+    config.setOptions (electronIsol='Tight_VarRad')
+    config.setOptions (photonIsol='TightCaloOnly')
+    config.setOptions (muonID='Tight')
+    config.setOptions (triggerMatchingChainsPerYear=triggerMatchingChainsPerYear)
+
+    # EventSelection
+    # Example cuts used for event selection algorithm test
+    exampleSelectionCuts = {
+        'SUBcommon': """JET_N_BTAG >= 2
+JET_N 25000 >= 4
+MET >= 20000
+SAVE
+""",
+        'ejets': """IMPORT SUBcommon
+EL_N 5000 == 1
+MU_N 3000 == 0
+MWT < 170000
+MET+MWT > 40000
+SAVE
+""",
+        'mujets': """IMPORT SUBcommon
+EL_N 5000 == 0
+MU_N medium 25000 > 0
+SAVE
+"""
+    }
+    config.addBlock ('EventSelection')
+    config.setOptions (electrons='AnaElectrons.loose')
+    config.setOptions (muons='AnaMuons.medium')
+    config.setOptions (jets='AnaJets.baselineJvt')
+    config.setOptions (met='AnaMET')
+    config.setOptions (btagDecoration='ftag_select_ftag')
+    config.setOptions (noFilter=True)
+    config.setOptions (cutFlowHistograms=True)
+    config.setOptions (selectionCutsDict=exampleSelectionCuts)
+
+    # Bootstraps
+    config.addBlock ('Bootstraps')
+    config.setOptions (nReplicas=2000)
+    config.setOptions (skipOnMC=False)
+
+    # LeptonSF
+    config.addBlock ('LeptonSF')
+    config.setOptions (muons='AnaMuons.medium')
+    config.setOptions (photons='AnaPhotons.tight')
+    config.setOptions (lepton_postfix='nominal')
+
+    # Output
     outputContainers = {
         'mu_': 'OutMuons',
         'el_': 'OutElectrons',
@@ -245,15 +417,31 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
         'larger_jet_': 'OutLargeRJets',
         'met_': 'AnaMET',
         '': 'EventInfo'}
+    outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
+                             'truth_el_' : 'OutTruthElectrons',
+                             'truth_ph_' : 'OutTruthPhotons',
+                             'truth_tau_': 'OutTruthTaus',
+                             'truth_jet_': 'OutTruthJets',
+                             'truth_met_': 'TruthMET'}
+    config.addBlock ('Output')
+    config.setOptions (treeName='analysis')
+    config.setOptions (vars=[
+        'EventInfo.actualInteractionsPerCrossing -> actualMuScaled',
+    ])
+    config.setOptions (metVars=[
+        'AnaMET_%SYS%.met -> met_%SYS%',
+    ])
+    config.setOptions (truthMetVars=[
+        'TruthMET_NOSYS.met -> truth_met',
+    ])
     config.setOptions (containers=outputContainers)
-    disable_commands = [
-        'disable jet_select_baselineJvt.*',
-        'disable mu_select_medium.*',
-        'disable el_select_loose.*',
-        'disable ph_select_tight.*',
-        'disable tau_select_tight.*',
-    ]
-    config.setOptions (commands=disable_commands)
+    config.setOptions (containersOnlyForMC=outputContainersForMC)
+    config.setOptions (commands=[
+        "disable actualInteractionsPerCrossing",
+    ])
+
+    # save the tool configuration to a txt file
+    config.addBlock ('PrintConfiguration')
 
     # configure ConfigSequence
     configSeq = config.configure()
@@ -273,10 +461,12 @@ def compareBlockConfig(yamlPath='', *, checkOrder=False) :
 
     Will raise an exception if configSequences differ
     """
+    from AthenaConfiguration.Enums import LHCPeriod
     # create configSeq for block configuration
     from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeTestSequenceBlocks
     configSeq = makeTestSequenceBlocks(dataType='fullsim', algSeq=None,
-            forCompare=True, isPhyslite=False, forceEGammaFullSimConfig=True,
+            geometry=LHCPeriod.Run2,
+            isPhyslite=False, forceEGammaFullSimConfig=True,
             returnConfigSeq=True)
 
     # create text config object to build text configurations
@@ -309,6 +499,9 @@ if __name__ == '__main__':
     compareBlock = options.compare_block
     compareBuilder = options.compare_builder
     checkOrder = options.check_order
+
+    from PathResolver import PathResolver
+    textConfig = PathResolver.FindCalibFile(textConfig)
 
     if not os.path.isfile(textConfig):
         raise FileNotFoundError(f"{textConfig} is not a file")

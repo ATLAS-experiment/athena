@@ -4,48 +4,60 @@ __doc__ = """
           Tool configuration to instantiate MCTruthClassifier
           with default configurations."""
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod, Project
 
-def MCTruthClassifierCfg(flags, **kwargs):
+
+def MCTruthClassifierCfg(flags, name="MCTruthClassifier", **kwargs):
     """
     This is the default configuration allowing all options.
     By default, it does not do calo truth matching.
     """
-    kwargs.setdefault("ParticleCaloExtensionTool", "")
-    kwargs.setdefault("CaloDetDescrManager", "")
-    return MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs)
+    if flags.Common.Project not in [Project.AthGeneration, Project.AnalysisBase]:
+        kwargs.setdefault("ParticleCaloExtensionTool", "")
+        kwargs.setdefault("CaloDetDescrManager", "")
+    return MCTruthClassifierCaloTruthMatchCfg(flags, name, **kwargs)
 
 
-def MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs):
+def MCTruthClassifierCaloTruthMatchCfg(flags, name="MCTruthClassifier", **kwargs):
     """
     This is the default configuration allowing all options.
     By default, it does calo truth matching using a
     dedicated instance of the ParticleCaloExtensionTool
     """
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.Enums import LHCPeriod
-
     acc = ComponentAccumulator()
 
-    if "ParticleCaloExtensionTool" not in kwargs:
+    if flags.Common.Project not in [Project.AthGeneration, Project.AnalysisBase]:
+        if "ParticleCaloExtensionTool" not in kwargs:
 
-        from TrkConfig.AtlasExtrapolatorConfig import (
-            MCTruthClassifierExtrapolatorCfg)
-        extrapolator = acc.popToolsAndMerge(
-            MCTruthClassifierExtrapolatorCfg(flags))
+            from TrkConfig.AtlasExtrapolatorConfig import (
+                MCTruthClassifierExtrapolatorCfg)
+            extrapolator = acc.popToolsAndMerge(
+                MCTruthClassifierExtrapolatorCfg(flags))
 
-        from TrackToCalo.TrackToCaloConfig import (
-            EMParticleCaloExtensionToolCfg)
-        extension = EMParticleCaloExtensionToolCfg(
-            flags, Extrapolator=extrapolator)
-        kwargs["ParticleCaloExtensionTool"] = acc.popToolsAndMerge(extension)
+            from TrackToCalo.TrackToCaloConfig import (
+                EMParticleCaloExtensionToolCfg)
+            extension = EMParticleCaloExtensionToolCfg(
+                flags, Extrapolator=extrapolator)
+            kwargs["ParticleCaloExtensionTool"] = acc.popToolsAndMerge(extension)
 
-    kwargs.setdefault("CaloDetDescrManager", "CaloDetDescrManager")
+        kwargs.setdefault("CaloDetDescrManager", "CaloDetDescrManager")
 
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        kwargs.setdefault("FwdElectronUseG4Sel", False)
+        if flags.Input.Files and set(['StreamEVGEN', 'StreamEVNT']).isdisjoint(set(flags.Input.ProcessingTags)):
+            # Skip if running with no input file or running on EVNT files
+            if flags.GeoModel.Run >= LHCPeriod.Run4:
+                kwargs.setdefault("FwdElectronUseG4Sel", False)
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
     acc.setPrivateTools(CompFactory.MCTruthClassifier(**kwargs))
+    return acc
+
+
+def DFCommonMCTruthClassifierCfg(flags):
+    """Configure the MCTruthClassifier tool"""
+    acc = ComponentAccumulator()
+    acc.addPublicTool(acc.popToolsAndMerge(MCTruthClassifierCfg(flags, name = "DFCommonTruthClassifier")),
+                      primary = True)
     return acc
 
 
@@ -55,8 +67,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import logging
 
-    from AthenaConfiguration.ComponentAccumulator import (
-        ComponentAccumulator, printProperties)
+    from AthenaConfiguration.ComponentAccumulator import printProperties
 
     flags = initConfigFlags()
     flags.Input.isMC = True

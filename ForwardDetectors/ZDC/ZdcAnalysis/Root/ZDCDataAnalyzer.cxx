@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <ZdcAnalysis/ZDCDataAnalyzer.h>
@@ -9,8 +9,7 @@
 #include <utility>
 
 #include "CxxUtils/trapping_fp.h"
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 
 ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSample, float deltaTSample, size_t preSampleIdx, std::string fitFunction,
                                  const ZDCModuleIntArray& peak2ndDerivMinSamples,

@@ -30,6 +30,8 @@
 
 #include "TTree.h"
 
+#include "GaudiKernel/ToolHandle.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 class IFPGATrackSimMappingSvc;
 class IFPGATrackSimEventSelectionSvc;
@@ -46,7 +48,8 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         FPGATrackSimHoughRootOutputTool(const std::string&, const std::string&, const IInterface*);
 
         virtual StatusCode initialize() override;
-        StatusCode fillTree(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const float minChi2, const int maxOverlappingHits);
+        StatusCode fillTree(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const float minChi2, const int maxOverlappingHits, const bool roadsAreSecondStage);
+        StatusCode fillTree(const std::vector<FPGATrackSimTrack> &track_cands, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const bool roadsAreSecondStage);
 
 
 
@@ -66,6 +69,7 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         const FPGATrackSimRegionMap* m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap();
         TrackCorrType m_IdealCoordFitType = TrackCorrType::None;
 
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
         TTree *m_tree = nullptr; // output tree
         std::vector<float> m_x; // x position of hit in road
@@ -145,11 +149,13 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         std::vector<std::vector<bool>> m_track_hit_isStrip;
         std::vector<std::vector<bool>> m_track_hit_isClustered;
         std::vector<std::vector<bool>> m_track_hit_isSpacepoint;
+        std::vector<std::vector<bool>> m_track_hit_isMapped;
         std::vector<std::vector<int>> m_track_hit_barcode;
         std::vector<std::vector<float>> m_track_hit_barcodefrac;
         std::vector<std::vector<float>> m_track_hit_zIdeal;
         std::vector<std::vector<float>> m_track_hit_gphiIdeal;
         std::vector<std::vector<long>> m_track_hit_fineID;
+        std::vector<std::vector<int>> m_track_hit_volumeID;
 
         // And now the offline information
         TTree *m_offlinetree = nullptr;

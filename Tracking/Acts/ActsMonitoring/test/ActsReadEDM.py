@@ -38,7 +38,7 @@ if __name__ == "__main__":
     flags.addFlag("readTracks", False)
     flags.addFlag("tracks", "")
     flags.addFlag("readTrackParticles", False)
-    flags.addFlag("trackParticles", "ActsCombinedTracksParticlesAlt")
+    flags.addFlag("trackParticles", "InDetActsTrackParticles")
     flags.addFlag("redoAmbiguity", False)
     flags.fillFromArgs()
     

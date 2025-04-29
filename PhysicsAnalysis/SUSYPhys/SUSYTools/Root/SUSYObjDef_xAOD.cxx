@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -323,6 +323,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_fatJets(""),
     //
     m_currentSyst(),
+    m_fatjetFFSmearingSyst(),
     m_EG_corrModel(""),
     m_EG_corrFNList(""),
     m_applyJVTCut(true),
@@ -333,6 +334,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_jetUncertaintiesTool(""),
     m_jetUncertaintiesPDSmearTool(""),
     m_fatjetUncertaintiesTool(""),
+    m_fatjetUncertaintiesPDSmearTool(""),
+    m_fatjetFFSmearingTool(""),
     m_jetCleaningTool(""),
     m_jetPileupLabelingTool(""),
     m_jetJvtMomentTool(""),
@@ -584,7 +587,9 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "MuonForceNoId", m_force_noMuId );
   declareProperty( "MuonTTVASF", m_doTTVAsf );
   declareProperty( "MuonCalibrationMode", m_muCalibrationMode);
-
+  //MUONS TRIGGER SCALE FACTOR
+  declareProperty( "MuonTriggerSFCalibRelease",   m_muTriggerSFCalibRelease  );
+  declareProperty( "MuonTriggerSFCalibFilename",  m_muTriggerSFCalibFilename );
   //PHOTONS
   declareProperty( "PhotonBaselinePt", m_photonBaselinePt);
   declareProperty( "PhotonPt", m_photonPt);
@@ -680,6 +685,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_jetUncertaintiesTool.declarePropertyFor( this, "JetUncertaintiesTool", "The JetUncertaintiesTool" );
   m_jetUncertaintiesPDSmearTool.declarePropertyFor( this, "JetPDSmearUncertaintiesTool", "The JetPDSmearUncertaintiesTool" );
   m_fatjetUncertaintiesTool.declarePropertyFor( this, "FatJetUncertaintiesTool", "The JetUncertaintiesTool for large-R jets" );
+  m_fatjetUncertaintiesPDSmearTool.declarePropertyFor( this, "FatJetPDSmearUncertaintiesTool", "The FatJetPDSmearUncertaintiesTool" );
+  m_fatjetFFSmearingTool.declarePropertyFor( this, "FatJetFFSmearingTool", "The FFSmearingTool for large-R jets" );
   m_WTagjetUncertaintiesTool.declarePropertyFor( this, "WJetUncertaintiesTool", "The JetUncertaintiesTool for large-R W-tagged jets" );
   m_ZTagjetUncertaintiesTool.declarePropertyFor( this, "ZJetUncertaintiesTool", "The JetUncertaintiesTool for large-R Z-tagged jets" );
   m_TopTagjetUncertaintiesTool.declarePropertyFor( this, "TopJetUncertaintiesTool", "The JetUncertaintiesTool for large-R Top-tagged jets" );
@@ -1040,8 +1047,8 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
       fmd->value(xAOD::FileMetaData::amiTag, amiTag);
       fmd->value(xAOD::FileMetaData::simFlavour, simFlavour);
 
-      if(simFlavour.find("ATLFASTII")==0) simType = "AFII";
-      else if(simFlavour.find("ATLFAST3")==0) simType = "AF3";
+      if(simFlavour.starts_with("ATLFASTII")) simType = "AFII";
+      else if(simFlavour.starts_with("ATLFAST3")) simType = "AF3";
       else simType = "FS";
 
       bool found = false;
@@ -1457,7 +1464,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_EG_corrModel, "Ele.EffNPcorrModel", rEnv, "TOTAL");
   configFromFile(m_EG_corrFNList, "Ele.EffCorrFNList", rEnv, "None");
   configFromFile(m_electronTriggerSFStringSingle, "Ele.TriggerSFStringSingle", rEnv, "SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0");
-  configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map4.txt");
+  configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2024_Consolidated_Prerecom_v1/map1.txt");
   configFromFile(m_eleAllowRun3TrigSFFallback, "Ele.AllowRun3TrigSFFallback", rEnv, false);
   configFromFile(m_eleForceFullSimCalib, "Ele.ForceFullSimCalib", rEnv, false);
   
@@ -1504,6 +1511,9 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_muHighPtExtraSmear, "Muon.HighPtExtraSmear", rEnv, false);
   configFromFile(m_muEffCorrForce1D, "Muon.EffCorrForce1D", rEnv, false);
   //
+  configFromFile(m_muTriggerSFCalibRelease,   "Muon.TriggerSFCalibRelease" ,rEnv, "None");
+  configFromFile(m_muTriggerSFCalibFilename,  "Muon.TriggerSFCalibFilename",rEnv, "None");
+  //
   configFromFile(m_muCosmicz0, "MuonCosmic.z0", rEnv, 1.);
   configFromFile(m_muCosmicd0, "MuonCosmic.d0", rEnv, 0.2);
   //
@@ -1546,26 +1556,27 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
   configFromFile(m_JvtConfigRun2, "Jet.JvtConfigRun2", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
   configFromFile(m_JvtConfigRun3, "Jet.JvtConfigRun3", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root", true); // empty string means dummy SF
-  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, m_isRun3 ? "rel22/Summer2024_PreRec/R4_CategoryReduction_FullJER.config" : "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
+  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, getDefaultJetUncConfig() ); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
   configFromFile(m_jetUncertaintiesMCType, "Jet.UncertMCType", rEnv, "", true); // empty string means the MCType is guessed
-  configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, false); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
+  configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, true); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
   configFromFile(m_fatJets, "Jet.LargeRcollection", rEnv, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"); // set to "None" to turn off large jets
-  configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, ""); // waiting for rec
+  configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, "rel22/Fall2024_PreRec/R10_CategoryJES_FullJER_FullJMS.config");
+  configFromFile(m_fatJetUncertaintiesPDsmearing, "Jet.LargeRUncertPDsmearing", rEnv, true); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
   configFromFile(m_fatJetUncVars, "Jet.LargeRuncVars", rEnv, "default"); // do all if not specified
   configFromFile(m_WtagConfig, "Jet.WtaggerConfig", rEnv, "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
   configFromFile(m_ZtagConfig, "Jet.ZtaggerConfig", rEnv, "SmoothedContainedZTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
   configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/SmoothedWZTaggers/");
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
   configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
-  configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/JSSWTopTaggerDNN/");
-  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, m_isRun3 ? "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_240306_InSitu.config" : "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
-  configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, m_isRun3 ? "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_240306_InSitu.config" : "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config");
+  configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/JSSWTopTaggerDNN/"); 
+  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, m_isRun3 ? "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config" : "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
+  configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, m_isRun3 ? "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config" : "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config");
   configFromFile(m_jesConfigJMS, "Jet.JESConfigJMS", rEnv, "JES_JMS_MC16Recommendation_Consolidated_MC_only_EMTopo_July2019_Rel21.config");
   configFromFile(m_jesConfigJMSData, "Jet.JESConfigJMSData", rEnv, "JES_JMS_MC16Recommendation_Consolidated_data_only_EMTopo_Sep2019_Rel21.config");
-  configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config");
-  configFromFile(m_jesConfigFatData, "Jet.JESConfigFatData", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config");
+  configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.config");
+  configFromFile(m_jesConfigFatData, "Jet.JESConfigFatData", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.config");
   configFromFile(m_jesCalibSeq, "Jet.CalibSeq", rEnv, "JetArea_Residual_EtaJES_GSC_Insitu");
   configFromFile(m_jesCalibSeqJMS, "Jet.CalibSeqJMS", rEnv, "JetArea_Residual_EtaJES_GSC");
   configFromFile(m_jesCalibSeqFat, "Jet.CalibSeqFat", rEnv, "EtaJES_JMS");
@@ -1807,6 +1818,13 @@ const std::vector<std::string> SUSYObjDef_xAOD::split(const std::string& s, cons
     retval.emplace_back(s.substr(last));
 
   return retval;
+}
+
+std::string SUSYObjDef_xAOD::getDefaultJetUncConfig() {
+  if (m_isRun3)
+    return isAtlfast() ? "rel22/Winter2025_AF3_PreRec/R4_CategoryReduction_FullJER.config" : "rel22/Winter2025_PreRec/R4_CategoryReduction_FullJER.config";
+  else
+    return isAtlfast() ? "rel22/Fall2024_PreRec/R4_CategoryReduction_FullJER.config" : "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config";  
 }
 
 void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector<float>& pT_window, std::vector<float>& eta_window, bool &eleOLR, bool &muVeto, bool &muOLR) const {
@@ -2128,8 +2146,7 @@ StatusCode SUSYObjDef_xAOD::applySystematicVariation( const CP::SystematicSet& s
   m_currentSyst = systConfig;
 
   // NB: SystematicSet typically has only one component (see SUSYToolsTester macro)
-  // The PDSmear systematics have been initialised as the second component of the JET_JER systematic, here we'll catch the uncertainties which are to use the PDSmear initialised tool.
-  if (!m_jetUncertaintiesTool.empty() && systConfig.name().find("__2") == std::string::npos) {
+  if (!m_jetUncertaintiesTool.empty() && systConfig.name().find("PseudoData") == std::string::npos) {
     StatusCode ret = m_jetUncertaintiesTool->applySystematicVariation(systConfig);
     if ( ret != StatusCode::SUCCESS) {
       ATH_MSG_VERBOSE("Cannot configure JetUncertaintiesTool for systematic var. " << systConfig.name() );
@@ -2137,7 +2154,7 @@ StatusCode SUSYObjDef_xAOD::applySystematicVariation( const CP::SystematicSet& s
       ATH_MSG_VERBOSE("Configured JetUncertaintiesTool for systematic var. " << systConfig.name() );
     }
   }
-  if (!m_jetUncertaintiesPDSmearTool.empty() && systConfig.name().find("__2") != std::string::npos ) {
+  if (!m_jetUncertaintiesPDSmearTool.empty() && systConfig.name().find("PseudoData") != std::string::npos) {
     StatusCode ret = m_jetUncertaintiesPDSmearTool->applySystematicVariation(systConfig);
     if ( ret != StatusCode::SUCCESS) {
       ATH_MSG_VERBOSE("Cannot configure JetUncertaintiesPDSmearTool for systematic var. " << systConfig.name() );
@@ -2170,12 +2187,28 @@ StatusCode SUSYObjDef_xAOD::applySystematicVariation( const CP::SystematicSet& s
       ATH_MSG_VERBOSE("Configured (Fat)JetUncertaintiesTool (TopTag) for systematic var. " << systConfig.name() );
     }
   }
-  if (!m_fatjetUncertaintiesTool.empty()) {
+  if (!m_fatjetUncertaintiesTool.empty() && systConfig.name().find("PseudoData") == std::string::npos) {
     StatusCode ret = m_fatjetUncertaintiesTool->applySystematicVariation(systConfig);
     if ( ret != StatusCode::SUCCESS) {
       ATH_MSG_VERBOSE("Cannot configure (Fat)JetUncertaintiesTool (main) for systematic var. " << systConfig.name() );
     } else {
       ATH_MSG_VERBOSE("Configured (Fat)JetUncertaintiesTool (main) for systematic var. " << systConfig.name() );
+    }
+  }
+  if (!m_fatjetUncertaintiesPDSmearTool.empty() && systConfig.name().find("PseudoData") != std::string::npos) {
+    StatusCode ret = m_fatjetUncertaintiesPDSmearTool->applySystematicVariation(systConfig);
+    if ( ret != StatusCode::SUCCESS) {
+      ATH_MSG_VERBOSE("Cannot configure FatJetUncertaintiesPDSmearTool for systematic var. " << systConfig.name() );
+    } else {
+      ATH_MSG_VERBOSE("Configured FatJetUncertaintiesPDSmearTool for systematic var. " << systConfig.name() );
+    }
+  }
+  if (!m_fatjetFFSmearingTool.empty() && std::find(m_fatjetFFSmearingSyst.begin(), m_fatjetFFSmearingSyst.end(), systConfig) != m_fatjetFFSmearingSyst.end()) {
+    StatusCode ret = m_fatjetFFSmearingTool->applySystematicVariation(systConfig);
+    if ( ret != StatusCode::SUCCESS) {
+      ATH_MSG_VERBOSE("Cannot configure (Fat)JetFFSmearingTool (main) for systematic var. " << systConfig.name() );
+    } else {
+      ATH_MSG_VERBOSE("Configured (Fat)JetFFSmearingTool (main) for systematic var. " << systConfig.name() );
     }
   }
   if (!m_jetNNJvtEfficiencyTool.empty()) {
@@ -2521,16 +2554,8 @@ std::vector<ST::SystInfo> SUSYObjDef_xAOD::getSystInfoList() const {
   // add all recommended systematics
   for (const auto& systSet : CP::make_systematics_vector(recommendedSystematics)) {
     for (const auto& sys : systSet) {
-	sysInfoList.push_back(getSystInfo(sys));
-	if (sys.basename().find("JET_JER") != std::string::npos && m_jetUncertaintiesPDsmearing == true) {
-	  // Add the additional PDSmear JET_JER systematics to the systematics registry if we're using the PDSmear. Otherwise they don't need to be added.
-	  std::string JER_systematicName = sys.name();
-	  JER_systematicName = std::regex_replace(JER_systematicName, std::regex("__1"), "__2");
-	  CP::SystematicVariation sys_JER(JER_systematicName);
-	  sysInfoList.push_back(getSystInfo(sys_JER));
-	}
+      sysInfoList.push_back(getSystInfo(sys));
     }
-
   }
 
   ATH_MSG_INFO("Returning list of " << sysInfoList.size() << " systematic variations");
@@ -2561,29 +2586,41 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
     }
   }
 
-  if (sys.name().find("__2") == std::string::npos) {
-    if (!m_jetUncertaintiesTool.empty()) {
-      if ( m_jetUncertaintiesTool->isAffectedBySystematic( CP::SystematicVariation(sys.basename(), CP::SystematicVariation::CONTINUOUS) ) ) {
-	sysInfo.affectsKinematics = true;
-	sysInfo.affectsType = SystObjType::Jet;
-      }
-    }
-  }
-  if (sys.name().find("__2") != std::string::npos) {
-    if (!m_jetUncertaintiesPDSmearTool.empty()) {
-      if ( m_jetUncertaintiesPDSmearTool->isAffectedBySystematic( CP::SystematicVariation(sys.basename(), CP::SystematicVariation::CONTINUOUS) ) ) {
-	sysInfo.affectsKinematics = true;
-	sysInfo.affectsType = SystObjType::Jet;
-      }
-    }
-  }
-
-  if (!m_fatjetUncertaintiesTool.empty()) {
-    if ( m_fatjetUncertaintiesTool->isAffectedBySystematic( CP::SystematicVariation(sys.basename(), CP::SystematicVariation::CONTINUOUS) ) ) {
+  if (!m_jetUncertaintiesTool.empty()) {
+    if ( m_jetUncertaintiesTool->isAffectedBySystematic( sys ) ) {
       sysInfo.affectsKinematics = true;
       sysInfo.affectsType = SystObjType::Jet;
     }
   }
+  if (!m_jetUncertaintiesPDSmearTool.empty()) {
+    if ( m_jetUncertaintiesPDSmearTool->isAffectedBySystematic( sys ) ) {
+      sysInfo.affectsKinematics = true;
+      sysInfo.affectsType = SystObjType::Jet;
+    }
+  }
+
+  if (!m_fatjetUncertaintiesTool.empty()) {
+    if ( m_fatjetUncertaintiesTool->isAffectedBySystematic( sys ) ) {
+      sysInfo.affectsKinematics = true;
+      sysInfo.affectsType = SystObjType::Jet;
+    }
+  }
+  if (!m_fatjetUncertaintiesPDSmearTool.empty()) {
+    if ( m_fatjetUncertaintiesPDSmearTool->isAffectedBySystematic( sys ) ) {
+      sysInfo.affectsKinematics = true;
+      sysInfo.affectsType = SystObjType::Jet;
+    }
+  }
+
+  if (!m_fatjetFFSmearingTool.empty()) {
+    CP::SystematicSet dummy;
+    dummy.insert(sys);
+    if ( std::find(m_fatjetFFSmearingSyst.begin(), m_fatjetFFSmearingSyst.end(), dummy) != m_fatjetFFSmearingSyst.end() ) {
+      sysInfo.affectsKinematics = true;
+      sysInfo.affectsType = SystObjType::Jet;
+    }
+  }
+
   if (!m_WTagjetUncertaintiesTool.empty()) {
     if ( m_WTagjetUncertaintiesTool->isAffectedBySystematic( CP::SystematicVariation(sys.basename(), CP::SystematicVariation::CONTINUOUS) ) ) {
       sysInfo.affectsKinematics = true;
@@ -2877,7 +2914,7 @@ float SUSYObjDef_xAOD::getSherpaVjetsNjetsWeight(const std::string& jetContainer
 const xAOD::Vertex* SUSYObjDef_xAOD::GetPrimVtx() const {
   const xAOD::VertexContainer* vertices = nullptr;
   if ( evtStore()->retrieve( vertices, "PrimaryVertices" ).isSuccess() ) {
-    for ( const auto& vx : *vertices ) {
+    for ( const auto vx : *vertices ) {
       if (vx->vertexType() == xAOD::VxType::PriVtx) {
         ATH_MSG_DEBUG("PrimaryVertex found with z=" << vx->z());
         return vx;
@@ -3052,6 +3089,9 @@ const xAOD::TrackParticleContainer& SUSYObjDef_xAOD::GetInDetLargeD0GSFTracks(co
 }
 
 StatusCode SUSYObjDef_xAOD::ApplyLRTUncertainty(){
+
+  // Don't apply variations for data
+  if (isData()) return StatusCode::SUCCESS;
   
   const EventContext& ctx = Gaudi::Hive::currentContext();
 

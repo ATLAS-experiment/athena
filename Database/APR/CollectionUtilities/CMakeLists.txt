@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CollectionUtilities )
@@ -14,10 +14,7 @@ atlas_add_library( CollectionUtilities
   src/CmdLineArgs2.cpp
   src/Args2Container.cpp
   src/CatalogInfo.cpp
-  src/CollectionPool.cpp
-  src/CollSplitByGUIDBase.cpp
   src/Progress.cpp
-  src/CollAppendBase.cpp
   src/UtilityFuncs.cpp
   src/MaxEventsInfo.cpp
   src/QueryInfo.cpp
@@ -38,12 +35,10 @@ endmacro( collection_utility )
 
 # Declare the utilities of the package:
 collection_utility( coll_insertGuidToCatalog )
-collection_utility( CollAppend )
 collection_utility( CollListAttrib )
 collection_utility( CollListPFN )
 collection_utility( CollListToken )
 collection_utility( CollQuery )
-collection_utility( CollSplitByGUID )
 
 # Install files from the package:
 atlas_install_scripts( scripts/*.exe scripts/*.py )

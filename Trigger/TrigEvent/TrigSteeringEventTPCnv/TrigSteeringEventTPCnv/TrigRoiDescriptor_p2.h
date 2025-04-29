@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -8,10 +8,6 @@
  * @class  : TrigRoiDescriptor_p2
  *
  * @brief persistent partner for TrigRoiDescriptor
- *
- *
- * File and Version Information:
- * $Id: 
  **********************************************************************************/
 #ifndef TRIGSTEERINGEVENTTPCNV_TRIGROIDESCRIPTOR_P2_H
 #define TRIGSTEERINGEVENTTPCNV_TRIGROIDESCRIPTOR_P2_H
@@ -25,7 +21,7 @@ class TrigRoiDescriptor_p2
   friend class TrigRoiDescriptorCnv_p2;
   
  private:
-  float geom[8];
+  float geom[8]{};
 
 /*   float m_phi0;                  */
 /*   float m_eta0;    */
@@ -36,7 +32,7 @@ class TrigRoiDescriptor_p2
 /*   float m_etaPlus; */
 /*   float m_etaMinus; */
 
-  unsigned int ids[2];
+  unsigned int ids[2]{};
 
 /*   unsigned int m_roiId;          */
 /*   unsigned int m_roiWord;        */

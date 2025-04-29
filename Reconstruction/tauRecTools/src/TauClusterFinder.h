@@ -36,8 +36,6 @@ class TauClusterFinder : public TauRecToolBase {
   private:
     
     std::vector<const xAOD::CaloCluster*> getClusterList(const xAOD::Jet& jet) const;
-    
-    Gaudi::Property<bool> m_skipNegativeEnergy {this, "SkipNegativeEnergy", true, "whether to skip negative energy clusters"};
 
     Gaudi::Property<bool> m_useOrigCluster {this, "UseOriginalCluster", true, 
 	"Use original cluster object if jet constituent is a shallow copy"};

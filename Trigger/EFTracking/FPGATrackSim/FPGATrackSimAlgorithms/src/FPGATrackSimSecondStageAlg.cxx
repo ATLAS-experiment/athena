@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /* Second stage alg needs to:
  *  retrieve Tracks_1st and Hits_2nd from storegate
@@ -17,9 +17,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 
-#include "FPGATrackSimNNTrackTool.h"
-#include "FPGATrackSimOverlapRemovalTool.h"
-#include "FPGATrackSimTrackFitterTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimNNTrackTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
 
 #include "FPGATrackSimConfTools/FPGATrackSimRegionSlices.h"
 
@@ -30,17 +30,12 @@
 
 #include "GaudiKernel/IEventProcessor.h"
 
+constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_LOGICALHITSALG
-#define TIME(name) \
-    t_1 = std::chrono::steady_clock::now(); \
-    (name) += std::chrono::duration_cast<std::chrono::microseconds>(t_1 - t_0).count(); \
-    t_0 = t_1;
-
-size_t m_troads = 0, m_troad_filter = 0, m_tlrt = 0, m_ttracks = 0, m_tOR = 0, m_tmon = 0, m_tfin = 0;
+    true;
 #else
-#define TIME(name)
+    false;
 #endif
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize
@@ -62,8 +57,8 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
         }
     }
 
-    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput}));
-    ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
+    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput2nd}));
+    ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack_2nd}));
     if (m_doSpacepoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
 
     ATH_CHECK(m_trackFitterTool.retrieve(EnableTool{m_doTracking}));
@@ -74,8 +69,12 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
 
-    // This file should only need to generate one output tool!
+    // This file should only need to generate one input and output branch.
+    m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
+
+    // Connect the sliced hit tool accordingly.
+    ATH_CHECK(m_trackExtensionTool->setupSlices(m_slicedHitHeader));
 
     ATH_MSG_DEBUG("initialize() Setting branch");
 
@@ -90,6 +89,7 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
 
+    ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
 
     return StatusCode::SUCCESS;
@@ -102,13 +102,7 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
 
 StatusCode FPGATrackSimSecondStageAlg::execute()
 {
-#ifdef BENCHMARK_LOGICALHITSALG
-    std::chrono::time_point<std::chrono::steady_clock> t_0, t_1;
-    t_0 = std::chrono::steady_clock::now();
-#endif
-
     const EventContext& ctx = getContext();
-
     // Get reference to hits from StoreGate.
     // Hits have been procesed by the DataPrep algorithm. Now, we need to read them.
     // If they aren't passed, assume this means we are done.
@@ -124,7 +118,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         }
         return appMgr->stopRun();
     }
-
+    
     SG::ReadHandle<FPGATrackSimTrackCollection> FPGAInputTracks (m_FPGAInputTrackKey, ctx);
     if (!FPGAInputTracks.isValid()) {
         SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
@@ -144,7 +138,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     SG::WriteHandle<FPGATrackSimTrackCollection> FPGATracks_2ndHandle (m_FPGATrackKey, ctx);
     ATH_CHECK(FPGATracks_2ndHandle.record (std::make_unique<FPGATrackSimTrackCollection>()));
-
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: EventSelection");
     // Query the event selection service to make sure this event passed cuts.
     if (!m_evtSel->getSelectedEvent()) {
         ATH_MSG_DEBUG("Event skipped by: " << m_evtSel->name());
@@ -153,6 +147,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: EventSelection");
 
     // If we get here, FPGAHits_2nd is valid, copy it over.
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
@@ -184,8 +179,9 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     // Get second stage roads from tracks.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads = prefilter_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads = std::move(prefilter_roads);
 
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: TrackExtension");
     // Use the track extension tool to actually produce a new set of roads.
     ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, tracks_1st, roads));
 
@@ -200,70 +196,126 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         FPGAHitsInRoads_2nd->push_back(road_hits);
         FPGARoads_2nd->push_back(*road);
     }
-
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: TrackExtension");
     auto mon_nroads = Monitored::Scalar<unsigned>("nroads_2nd", roads.size());
+    unsigned bitmask_best(0);
+    unsigned nhit_best(0);
     for (auto const &road : roads) {
-      unsigned bitmask = road->getHitLayers();
-      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers(); l++) {
-        if (bitmask & (1 << l)) {
-            auto mon_layerIDs = Monitored::Scalar<unsigned>("layerIDs_2nd",l);
-            Monitored::Group(m_monTool,mon_layerIDs);
+        unsigned bitmask = road->getHitLayers();
+        if (road->getNHitLayers() > nhit_best) {
+            nhit_best = road->getNHitLayers();
+            bitmask_best = bitmask;
         }
-      }
+        for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
+            if (bitmask & (1 << l)) {
+                auto mon_layerIDs = Monitored::Scalar<unsigned>("layerIDs_2nd",l);
+                Monitored::Group(m_monTool,mon_layerIDs);
+            }
+        }
+    }
+
+    for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
+        if (bitmask_best & (1 << l)) {
+            auto mon_layerIDs_best = Monitored::Scalar<unsigned>("layerIDs_2nd_best",l);
+            Monitored::Group(m_monTool,mon_layerIDs_best);
+        }
     }
     Monitored::Group(m_monTool, mon_nroads);
-
-    TIME(m_troads);
 
     // NOTE: for now we don't support road filtering again in the second stage,
     // except for the special case of the spacepoint road filter tool. In principle filters
     // could be added here.
 
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Road Filtering");
     // Spacepoint road filter tool. Needed when fitting to spacepoints.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> post_spfilter_roads;
-    if (m_doSpacepoints) {
+    if (m_doSpacepoints && !m_doNNPathFinder) {
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads, post_spfilter_roads));
-        roads = post_spfilter_roads;
+        roads = std::move(post_spfilter_roads);
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Road Filtering");
     auto mon_nroads_postfilter = Monitored::Scalar<unsigned>("nroads_2nd_postfilter", roads.size());
     Monitored::Group(m_monTool, mon_nroads_postfilter);
 
-    TIME(m_troad_filter);
-
     // Get tracks, again, after extrapolation.
     // All of this code is effectively copied from LogicalHitsProcessAlg, except we use 2nd stage now.
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Track Extraction");
     std::vector<FPGATrackSimTrack> tracks;
     if (m_doTracking) {
-        if (m_doNNTrack) {
+        if (m_doNNTrack_2nd) {
             ATH_MSG_DEBUG("Performing NN tracking");
-            ATH_CHECK(m_NNTrackTool->getTracks(roads, tracks));
-        }
-        else {
-            ATH_CHECK(m_trackFitterTool->getTracks(roads, tracks));
-            float bestchi2 = 1.e15;
-            for (const FPGATrackSimTrack& track : tracks) {
-                float chi2 = track.getChi2ndof();
-                if (chi2 < bestchi2) bestchi2 = chi2;
-                auto mon_chi2 = Monitored::Scalar<float>("chi2_2nd_all", chi2);
-                Monitored::Group(m_monTool, mon_chi2);
+            ATH_CHECK(m_NNTrackTool->getTracks_2nd(roads, tracks));
+        } else {
+            ATH_MSG_DEBUG("Performing Linear tracking");
+
+            if (m_passLowestChi2TrackOnly) { // Pass only the lowest chi2 track per road
+                std::vector<FPGATrackSimTrack> filteredTracks;
+
+                for (const auto& road : roads) {
+                    // Collect tracks for the current road
+                    std::vector<FPGATrackSimTrack> tracksForCurrentRoad;
+                    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadVec = {road};
+                    ATH_CHECK(m_trackFitterTool->getTracks(roadVec, tracksForCurrentRoad));
+
+                    // Find and keep the best track (lowest chi2) for this road
+                    if (!tracksForCurrentRoad.empty()) {
+                        auto bestTrackIter = std::min_element(
+                            tracksForCurrentRoad.begin(), tracksForCurrentRoad.end(),
+                            [](const FPGATrackSimTrack& a, const FPGATrackSimTrack& b) {
+                                return a.getChi2ndof() < b.getChi2ndof();
+                            });
+
+                        if (bestTrackIter != tracksForCurrentRoad.end() && bestTrackIter->getChi2ndof() < 1.e15) {
+                            filteredTracks.push_back(*bestTrackIter);
+
+                            // Monitor chi2 of the best track
+                            auto mon_chi2 = Monitored::Scalar<float>("chi2_2nd_all", bestTrackIter->getChi2ndof());
+                            Monitored::Group(m_monTool, mon_chi2);
+                        }
+                    }
+                }
+
+                // Update tracks with filtered tracks
+                tracks = std::move(filteredTracks);
+
+                // Monitor the best chi2 across all roads
+                if (!tracks.empty()) {
+                    float bestChi2Overall = std::min_element(
+                        tracks.begin(), tracks.end(),
+                        [](const FPGATrackSimTrack& a, const FPGATrackSimTrack& b) {
+                            return a.getChi2ndof() < b.getChi2ndof();
+                        })->getChi2ndof();
+
+                    auto mon_best_chi2 = Monitored::Scalar<float>("best_chi2_2nd", bestChi2Overall);
+                    Monitored::Group(m_monTool, mon_best_chi2);
+                }
+            } else { // Pass all tracks with chi2 < 1e15
+                ATH_CHECK(m_trackFitterTool->getTracks(roads, tracks));
+                float bestchi2 = 1.e15;
+                for (const FPGATrackSimTrack& track : tracks) {
+                    float chi2 = track.getChi2ndof();
+                    if (chi2 < bestchi2) bestchi2 = chi2;
+                    auto mon_chi2 = Monitored::Scalar<float>("chi2_2nd_all", chi2);
+                    Monitored::Group(m_monTool, mon_chi2);
+                }
+                auto mon_best_chi2 = Monitored::Scalar<float>("best_chi2_2nd", bestchi2);
+                Monitored::Group(m_monTool, mon_best_chi2);
             }
-            auto mon_best_chi2 = Monitored::Scalar<float>("best_chi2_2nd",bestchi2);
-            Monitored::Group(m_monTool,mon_best_chi2);
         }
-    }
-    else { // we are not doing tracking so get the number of combinations for monitoring
+    } else {
+        // No tracking; collect dummy tracks for monitoring
         int ntrackDummy = 0;
-        for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads) {
+        for (const auto& road : roads) {
             ntrackDummy += road->getNHitCombos();
         }
-        tracks.resize(ntrackDummy); // just filled with dummy tracks for monitoring
+        tracks.resize(ntrackDummy); // Dummy tracks for monitoring
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Track Extraction");
     auto mon_ntracks = Monitored::Scalar<unsigned>("ntrack_2nd", tracks.size());
     Monitored::Group(m_monTool,mon_ntracks);
 
-    TIME(m_ttracks);
-
     // Overlap removal
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Overlap Removal");
     ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks));
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks) {
@@ -280,6 +332,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
             }
         }
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Overlap Removal");
     auto mon_ntracks_olr = Monitored::Scalar<unsigned>("ntrack_2nd_afterOLR", ntrackOLRChi2);
     Monitored::Group(m_monTool,mon_ntracks_olr);
 
@@ -293,36 +346,40 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         m_evt_truth++;
         auto passroad = Monitored::Scalar<bool>("eff_road_2nd",(roads.size() > 0));
         auto passtrack = Monitored::Scalar<bool>("eff_track_2nd",(tracks.size() > 0));
-        auto truthpT_zoom = Monitored::Scalar<float>("pT_zoom_2nd",truthtracks.front().getPt()*0.001);
-        auto truthpT = Monitored::Scalar<float>("pT_2nd",truthtracks.front().getPt()*0.001);
-        auto trutheta = Monitored::Scalar<float>("eta_2nd",truthtracks.front().getEta());
-        auto truthphi= Monitored::Scalar<float>("phi_2nd",truthtracks.front().getPhi());
-        auto truthd0= Monitored::Scalar<float>("d0_2nd",truthtracks.front().getD0());
-        auto truthz0= Monitored::Scalar<float>("z0_2nd",truthtracks.front().getZ0());
+        auto truthpT_zoom = Monitored::Scalar<float>("pT_zoom",truthtracks.front().getPt()*0.001);
+        auto truthpT = Monitored::Scalar<float>("pT",truthtracks.front().getPt()*0.001);
+        auto trutheta = Monitored::Scalar<float>("eta",truthtracks.front().getEta());
+        auto truthphi= Monitored::Scalar<float>("phi",truthtracks.front().getPhi());
+        auto truthd0= Monitored::Scalar<float>("d0",truthtracks.front().getD0());
+        auto truthz0= Monitored::Scalar<float>("z0",truthtracks.front().getZ0());
         if (roads.size() > 0) m_nRoadsFound++;
-        bool passchi2 = false;
-        bool passchi2OLR = false;
+	if (roads.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads.size();
+
+	unsigned npasschi2(0);
+	unsigned npasschi2OLR(0);
+
         if (tracks.size() > 0) {
             m_nTracksFound++;
+	    if (tracks.size() > m_maxNTracksTot) m_maxNTracksTot = tracks.size();
             for (const auto& track : tracks) {
-                if (track.getChi2ndof() < 10) {
-                    passchi2 = true;
+                if (track.getChi2ndof() < m_trackScoreCut) {
+		    npasschi2++;
                     if (track.passedOR()) {
-                        passchi2OLR = true;
-                        break;
+		      npasschi2OLR++;
                     }
                 }
             }
         }
-        if (passchi2) m_nTracksChi2Found++;
-        if (passchi2OLR) m_nTracksChi2OLRFound++;
-        auto passtrackchi2 = Monitored::Scalar<bool>("eff_track_chi2_2nd",passchi2);
+	if (npasschi2 > m_maxNTracksChi2Tot) m_maxNTracksChi2Tot = npasschi2;
+	if (npasschi2OLR > m_maxNTracksChi2OLRTot) m_maxNTracksChi2OLRTot = npasschi2OLR;
+        if (npasschi2 > 0) m_nTracksChi2Found++;
+        if (npasschi2OLR > 0) m_nTracksChi2OLRFound++;
+
+        auto passtrackchi2 = Monitored::Scalar<bool>("eff_track_chi2_2nd",(npasschi2 > 0));
         Monitored::Group(m_monTool,passroad,passtrack,truthpT_zoom,truthpT,trutheta,truthphi,truthd0,truthz0,passtrackchi2);
     }
 
     for (const FPGATrackSimTrack& track : tracks) FPGATracks_2ndHandle->push_back(track);
-
-    TIME(m_tOR);
 
     // Write the output and reset
     if (m_writeOutputData)  {
@@ -330,15 +387,15 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         ATH_CHECK(writeOutputData(roads, tracks, dataFlowInfo.get()));
     }
 
-    // This one we can do-- by passing in truth and offline tracks via storegate above.
-    if (m_doHoughRootOutput) {
-      ATH_CHECK(m_houghRootOutputTool->fillTree(roads, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping));
+
+    if (m_doHoughRootOutput2nd) {
+        ATH_MSG_DEBUG("Running HoughRootOutputTool in 2nd stage.");
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping, true));
     }
 
     // Reset data pointers
+    m_slicedHitHeader->reset();
     m_logicEventOutputHeader->reset();
-
-    TIME(m_tfin);
 
     return StatusCode::SUCCESS;
 }
@@ -376,19 +433,9 @@ StatusCode FPGATrackSimSecondStageAlg::writeOutputData( const std::vector<std::s
 
 StatusCode FPGATrackSimSecondStageAlg::finalize()
 {
-#ifdef BENCHMARK_LOGICALHITSALG
-    ATH_MSG_INFO("Timings:" <<
-            "\nroads (2nd):       " << std::setw(10) << m_troads <<
-            "\nroad filter (2nd): " << std::setw(10) << m_troad_filter <<
-            "\ntracks (2nd):      " << std::setw(10) << m_ttracks <<
-            "\nOR (2nd):          " << std::setw(10) << m_tOR <<
-            "\nmon (2nd):         " << std::setw(10) << m_tmon <<
-            "\nfin (@nd):         " << std::setw(10) << m_tfin
-    );
-#endif
-
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS: SECOND STAGE");
     ATH_MSG_INFO("========================================================================================");
+    ATH_MSG_INFO("Ran on events = " << m_evt);
     ATH_MSG_INFO("Inclusive efficiency to find a road = " << m_nRoadsFound/(float)m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track = " << m_nTracksFound/(float)m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << m_nTracksChi2Found/(float)m_evt_truth);
@@ -401,5 +448,10 @@ StatusCode FPGATrackSimSecondStageAlg::finalize()
     ATH_MSG_INFO("Number of 2nd stage tracks passing chi2 and OLR/event = " << m_nTracksChi2OLRTot/(float)m_evt);
     ATH_MSG_INFO("========================================================================================");
 
+    ATH_MSG_INFO("Max number of 2nd stage roads in an event = " << m_maxNRoadsFound);
+    ATH_MSG_INFO("Max number of 2nd stage track combinations in an event = " << m_maxNTracksTot);
+    ATH_MSG_INFO("Max number of 2nd stage tracks passing chi2 in an event = " << m_maxNTracksChi2Tot);
+    ATH_MSG_INFO("Max number of 2nd stage tracks passing chi2 and OLR in an event = " << m_maxNTracksChi2OLRTot);
+    ATH_MSG_INFO("========================================================================================");
     return StatusCode::SUCCESS;
 }

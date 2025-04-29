@@ -12,6 +12,8 @@
 #----------------------------------------------
 
 import sys
+import logging
+logger = logging.getLogger(__name__)
 
 """
 MN: NOTE about xAOD containers in ROOT5 
@@ -33,7 +35,7 @@ def update_streamerinfos(objects, updated_objects):
   SIG = StreamerInfoGenerator.StreamerInfoGenerator()
   from collections import defaultdict
   streamerChecksums = defaultdict(set)
-  print("Reading streamerinfos from", bs_filename)
+  logger.info("Reading streamerinfos from %s", bs_filename)
   file = TFile(bs_filename, 'UPDATE')
   streamer_n = 0
   if  file.GetStreamerInfoList():
@@ -41,25 +43,23 @@ def update_streamerinfos(objects, updated_objects):
       if i.GetName() != 'listOfRules':
         streamerChecksums[i.GetName()].add( i.GetCheckSum() )
         streamer_n += 1
-  print("Read", streamer_n, 'streamers for', len(streamerChecksums), 'types')
-  print("")
+  logger.info("Read %i streamers for %i types\n", streamer_n, len(streamerChecksums))
 
   if doEDM:
     from TrigEDMConfig.TriggerEDM import getRawTriggerEDMList
     from TrigEDMConfig.DataScoutingInfo import getAllDataScoutingIdentifiers
     BS_destinations = ["BS"] + getAllDataScoutingIdentifiers()
-    print("BS_destinations = {}".format(BS_destinations))
+    logger.info("BS_destinations = {}".format(BS_destinations))
     for item in getRawTriggerEDMList(flags=None, runVersion=3):
       if any(bs in item[1].split() for bs in BS_destinations):
         objects.append(item[0].split("#")[0])
 
   for pers in objects:
     SIG.inspect(pers)
-    print("")
 
   fulllist = SIG.classlist
-  print(fulllist)
-  print('*******************************')
+  logger.info(fulllist)
+  logger.info('*******************************')
 
   from CLIDComps.clidGenerator import clidGenerator
   cgen = clidGenerator("")
@@ -70,46 +70,46 @@ def update_streamerinfos(objects, updated_objects):
   fulllist = list(set(fulllist))
   for item in fulllist:
     if doxAODonly and 'xAOD' not in item: continue # current issues seen because of missing xAOD libs not being loaded
-    print("Trying to fill item", item, "to root file")
+    logger.info("Trying to fill item %s to root file", item)
     c_clid = cgen.genClidFromName(item)
     c_typeinfo = cgen.getTidFromClid(c_clid)
-    print("CLID", c_clid)
-    print("TypeInfo", c_typeinfo)
+    logger.info("CLID %s", c_clid)
+    logger.info("TypeInfo %s", c_typeinfo)
     try:
       cls = ROOT.gROOT.GetClass(item)
     except Exception:
       cls = ROOT.gROOT.GetClass(c_typeinfo)
-    print(cls)
+    logger.info(cls)
 
     if cls is not None:
       streamerinfo = cls.GetStreamerInfo()
       if streamerinfo.GetCheckSum() == 0:
         # try to patch missing checksum in DataVectors
-        print('Warning: no checksum in streamerinfo for type: ', cls.GetName())
-        print('Attempting to fix with 0x%x' %  cls.GetCheckSum())
+        logger.warning('Warning: no checksum in streamerinfo for type: %s', cls.GetName())
+        logger.warning('Attempting to fix with 0x%x', cls.GetCheckSum())
         streamerinfo.SetCheckSum( cls.GetCheckSum() )
 
       chksum = streamerinfo.GetCheckSum()
       if chksum not in streamerChecksums[cls.GetName()]:
-        print('Writing: %s  streamer size=%d, checksum=0x%x' %(cls.GetName(), streamerinfo.Sizeof(), chksum))
+        logger.info('Writing: %s  streamer size=%d, checksum=0x%x', cls.GetName(), streamerinfo.Sizeof(), chksum)
         obj = cls.New()
         file.WriteObjectAny(obj, cls, cls.GetName())
         types_new += 1
         updated_objects.append( (cls.GetName(), chksum) )
       else:
-        print('Skipping {} streamer checksum 0x{:x} - already in the file'.format(cls.GetName(), chksum))
+        logger.info('Skipping {} streamer checksum 0x{:x} - already in the file'.format(cls.GetName(), chksum))
         types_exist += 1
     else:
-      print('skipping ', item)
+      logger.info('skipping %s', item)
       types_bad += 1
       #sys.exit()
-    print('----')
+    logger.info('----')
 
-  print('Wrote', types_new, 'types')
-  print('Skipped', types_exist, ' existing types')
-  print('Problems with', types_bad + len(SIG.problemclasses), ' types')
+  logger.info('Wrote %i types', types_new)
+  logger.info('Skipped %i existing types', types_exist)
+  logger.info('Problems with %i types', types_bad + len(SIG.problemclasses))
   for t in SIG.problemclasses:
-    print('    ', t)
+    logger.info('    {}'.format(t))
 
   return 0
 

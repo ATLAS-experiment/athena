@@ -31,7 +31,7 @@ def TauDQANominalTauSelectionToolCfg(flags, **kwargs):
     kwargs.setdefault("SelectionCuts", int(selectioncuts.CutPt | selectioncuts.CutAbsEta | selectioncuts.CutAbsCharge | selectioncuts.CutNTrack))
     kwargs.setdefault("PtMin", 20.0)
     kwargs.setdefault("JetIDWP", TauAnalysisTools.JETIDNONE)
-    kwargs.setdefault("NTracks", (0, 1, 2, 3, 4, 5))
+    kwargs.setdefault("NTracks", (0, 1, 2, 3))
     kwargs.setdefault("AbsCharges", (0, 1, 2, 3))
     kwargs.setdefault("AbsEtaRegion", (0.0, 1.37, 1.52, flags.Tau.SeedMaxEta))
     from TauAnalysisTools.TauAnalysisToolsConfig import TauSelectionToolCfg

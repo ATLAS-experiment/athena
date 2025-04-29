@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUSUBSTRUCTUREVARIABLES_H
 #define TAURECTOOLS_TAUSUBSTRUCTUREVARIABLES_H
 
 #include "tauRecTools/TauRecToolBase.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include <string>
 
@@ -33,7 +34,8 @@ public:
 
 private:
 
-  bool m_doVertexCorrection;
+  Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true}; 
+
 };
 
 #endif // TAURECTOOLS_TAUSUBSTRUCTUREVARIABLES_H

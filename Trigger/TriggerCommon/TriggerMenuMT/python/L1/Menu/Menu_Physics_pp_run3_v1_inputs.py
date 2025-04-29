@@ -27,14 +27,13 @@ def remapThresholds(L1MenuFlags):
                                 thresholdsToRemove.append(thrIndex) 
                     for i in reversed(thresholdsToRemove):
                         del c["thresholds"][i]
-        
+
 
 def defineInputsMenu():
-    
+
     ctpinBoards = odict() # Ctpin/Slot9 (CTPCAL, NIM1, NIM2)
     topoBoards = odict()  # Topo1, Topo2, Topo3
     muctpiBoard = odict() # MuCTPi
-
 
     #-----------------------------------
     # SLOT 9 / CON 1 (CTPCal, NIM1,NIM2)
@@ -115,19 +114,19 @@ def defineInputsMenu():
             (None,3), (None,3), (None,3), (None,3), 
 
             'eEM12L', 'eEM15', 'eEM18', 'eEM18L', 'eEM18M',
-            'eEM22M', 'eEM24L', 
+            'eEM22M', 'eEM24L',
             #beam splashes
-            'eEM22A', 'eEM22C',                    
+            'eEM22A', 'eEM22C',
             #ATR-26333, adding eEM12, potentially more efficient than eEM12L in central HI collisions
             'eEM12',
             # variable eEM  thresholds
             'eEM24VM', 'eEM26', 'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M', 'eEM40L',
             #ATR-26979, eEMSPARE1 was replaced by eEM1, eEMSPARE2 was replaced by eEM2, decrement other eEMSPARE thresholds
             'eEM1', 'eEM2',
-            
-            # eEM thresholds for production      
-            'eEMSPARE1', 
-            
+
+            # eEM thresholds for production
+            'eEMSPARE1',
+
             ('ZeroBiasA', 1)
         ],
 
@@ -140,36 +139,37 @@ def defineInputsMenu():
         "type" : "optical",
         "fpga" : 0,
         "legacy" : False,
-        "thresholds" : [ # Topo1A: eFex EM, eFex TAU, gJ, gLJ
-            # eTAU thresholds for commissioning
-            ('eTAU12',3), ('eTAU20',3), ('eTAU1',3),
+        "thresholds" : [ # Topo1A: eFex EM, eFex TAU, gFEX gJ, gFEX gLJ
+            # eTAU thresholds for production
+            ('eTAU70',3), ('eTAU12',3), ('eTAU20',3),
 
-            (None,3),
+            (None, 3),
 
             'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M',
-            'eTAU35', 'eTAU35M', 'eTAU40HM','eTAU60', 'eTAU80', 'eTAU140',
-        
-            # eTAU thresholds for production
-            #'eTAUSPARE6', 'eTAUSPARE7', 
-            
+            'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU40HT',
+            'eTAU60', 'eTAU60HM', 'eTAU80', 'eTAU140',
+
             None, None,
-            
-            # gLJ thresholds for commissioning
+        
+            # gLJ thresholds for production
             'gLJ80p0ETA25', 'gLJ100p0ETA25', 'gLJ140p0ETA25', 'gLJ160p0ETA25',
 
-            # gLJ thresholds for production
-            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3', 'gLJSPARE4',
+             # prospective Run 4 L1 item, ATR-30180
+            'gLJ90p0ETA25',
 
-            None, 
+            # gLJ thresholds for commissioning
+            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3',
 
-            # gJ thresholds for commissioning
+            None,
+
+            # gJ thresholds for production
             ('gJ20p0ETA25',3), ('gJ20p25ETA49',3), ('gJSPARE1',3),
 
             (None,3),
 
-            'gJ50p0ETA25', 'gJ100p0ETA25', 
-            'gJ400p0ETA25',
-            
+            'gJ50p0ETA25', 'gJ100p0ETA25', 'gJ400p0ETA25',
+
+            None,
         ]
     })
 
@@ -194,9 +194,13 @@ def defineInputsMenu():
             #'jJ15p30ETA49','jJ20p30ETA49',
             'jJ40p30ETA49', 'jJ50p30ETA49', 'jJ60p30ETA49', 'jJ90p30ETA49', 'jJ125p30ETA49',
 
+            'jJ5p30ETA49', 'jJ10p30ETA49',
             # jJ thresholds for production
-            'jJSPARE1', 'jJSPARE2','jJSPARE3',
             'jJ50p0ETA25',
+
+            # prospective Run 4 L1 item, ATR-30180
+            'jJ56p0ETA49',
+
             None, None,
 
             # jLJ thresholds for commissioning
@@ -216,38 +220,30 @@ def defineInputsMenu():
         "fpga" : 1,
         "legacy" : False,
         "thresholds" : [ # Topo1B: jFex small-R jet, jFex large-R jet, combined eFex/jFex TAU, gFex+jFex EX, gFex+jFex SumET, jFex TAU
-            # jTAU thresholds for commissioning
+            # jTAU thresholds
             ('jTAU20',3), 
-
             (None,3),
 
-            'jTAU30', 'jTAU30M',
-            # jTAU thresholds for production
             'jTAU1',
+            None, None, None,
 
-            None, 
+            # cTAU thresholds
+            ('cTAU12M',3), ('cTAU20M',3), ('cTAUSPARE1',3), 
 
-            # cTAU thresholds for commissioning
-            ('cTAU12M',3), ('cTAU20M',3),# ('cTAUSPARE1',3), 
-            (None,3),
-
-            'cTAU30M', 'cTAU35M', 
-            # cTAU thresholds for production
+            'cTAU30M', 'cTAU35M', 'cTAU50M',
             'cTAUSPARE2',
 
-            None,
-
             # jEM thresholds for commissioning
-            'jEM20', 'jEM20M', 
+            'jEM25', 'jEM20M', 
             # jEM thresholds for production
-            'jEMSPARE1',
+
+            # prospective Run 4 L1 item, ATR-30180
+            'jEM35',
     
             # LAr saturation for Phase-I
             ('LArSaturation',1),
             # ZeroBias Topo Algo
             ('ZeroBiasB', 1),
-
-         #   (None,1),
 
             # energy thresholds
             # commissioning
@@ -273,12 +269,6 @@ def defineInputsMenu():
 
             # spare energy thresholds for commissioning
             ('jXESPARE1',1),
-
-            # production
-            # decrement jXESPARE for additional heavy ion jTE thresholds
-            #('jXESPARE2',1), ('jXESPARE3',1), ('jXESPARE4',1), ('jXESPARE5',1),
-            # ('jXESPARE6',1), ('jXESPARE7',1), ('jXESPARE8',1),('jXESPARE9',1), ('jXESPARE10',1), ('jXESPARE11',1),
-            # ('jXESPARE12',1), ('jXESPARE13',1), ('jXESPARE14',1),
 
         ]
     })
@@ -308,8 +298,8 @@ def defineInputsMenu():
                     TopoMenuDef( 'LATE-MU10s1',                          outputbits = 10 ),
                     TopoMenuDef( 'INVM_DR_2MU3VFab',                     outputbits = (11,12), outputlines = ['2INVM9-0DR15-2MU3VFab',
                                                                                                               '7INVM11-25DR99-2MU3VFab'] ), #BLS, ATR-21566
-                ]
-            },            
+        ]
+            },
 
             {
                 "fpga" : 0,
@@ -317,15 +307,17 @@ def defineInputsMenu():
                 "algorithms" : [
                     TopoMenuDef( '0INVM10-3MU3Vab',                          outputbits = 0 ), # BLS
                     TopoMenuDef( '0DR04-MU3Vab-CjJ40ab',                     outputbits = 1 ), # Bjet, TODO: not a primary
-                    TopoMenuDef( '0DR04-MU5VFab-CjJ80ab',                    outputbits = 2 ), # Bjet, TODO: not a primary
-                    TopoMenuDef( '2DISAMB_jJ55ab_DR_eTAU_eTAU',              outputbits = (3,4), outputlines = [ '2DISAMB-jJ55ab-0DR25-eTAU30ab-eTAU20ab', 
-                                                                                                                 '2DISAMB-jJ55ab-0DR28-eTAU30ab-eTAU20ab'  ]),
-                    TopoMenuDef( 'DR_eTAU30ab_eTAU20ab',                     outputbits = (5,6), outputlines = [ '0DR25-eTAU30ab-eTAU20ab', 
-                                                                                                                 '0DR28-eTAU30ab-eTAU20ab'  ]),
-                    TopoMenuDef( '2DISAMB-jJ55ab-0DR28-eTAU30abm-eTAU20abm', outputbits = 7 ),
-                    TopoMenuDef( '0DR28-eTAU30abm-eTAU20abm',                outputbits = 8 ), 
-                    TopoMenuDef( '0INVM10-3MU3VFab',                         outputbits = 9 ), # BLS
-                    TopoMenuDef( '2DISAMB-jJ40ab-0DR10-eTAU20ab-eTAU12ab',    outputbits = 10),
+                    TopoMenuDef( '0DR04-MU3VFab-CjJ40ab'                 , outputbits = 2),
+                    TopoMenuDef( '0DR04-MU5VFab-CjJ40ab'                 , outputbits = 3),
+                    TopoMenuDef( '0DR04-MU5VFab-CjJ80ab',                    outputbits = 4 ), # Bjet, TODO: not a primary
+                    TopoMenuDef( '0INVM10-3MU3VFab',                         outputbits = 5 ), # BLS
+                    TopoMenuDef( '2DISAMB-jJ55ab-0DR28-eTAU30abl-eTAU20abl', outputbits = 6 ),
+                    TopoMenuDef( '2DISAMB-jJ40ab-0DR10-eTAU20ab-eTAU12ab',   outputbits = 7 ),
+                    TopoMenuDef( '2DISAMB_jJ55ab_DR_eTAU_eTAU',              outputbits = (8), outputlines = [ '2DISAMB-jJ55ab-0DR28-eTAU30ab-eTAU20ab']),
+                    TopoMenuDef( 'DR_eTAU30ab_eTAU20ab',                     outputbits = (9), outputlines = [ '0DR28-eTAU30ab-eTAU20ab'  ]),
+                    TopoMenuDef( 'ADVAE2A-jJ0s-eTAU0s-MU0s-jXE0s',           outputbits = (10,11), outputlines = [ 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight',
+                                                                                                                   'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose' ] ), # VAE AD
+                    TopoMenuDef( '0DR28-eTAU30abl-eTAU20abl',                outputbits = 12 ),
                 ]
             },
             
@@ -366,7 +358,8 @@ def defineInputsMenu():
                                                                                                                    '400INVM-0DPHI24-AjJ60s6-AjJ50s6',
                                                                                                                    '400INVM-0DPHI22-AjJ60s6-AjJ50s6',
                                                                                                                    '400INVM-0DPHI20-AjJ60s6-AjJ50s6'] ),
-                    TopoMenuDef( '0DPHI10-jXE40delay-jJ40s',        outputbits = 12),
+                    TopoMenuDef( 'DPHI_jXE40delay_jJ40s',                    outputbits = (12, 13), outputlines = ['0DPHI10-jXE40delay-jJ40s',
+                                                                                                                   '0DPHI99-jXE40delay-jJ40s'] ),
                 ]
             }
         ]
@@ -391,7 +384,7 @@ def defineInputsMenu():
                                                                                                                 '700INVM-jJ60s6-AjJ50s6',] ), # TODO: needed? 
                     TopoMenuDef( 'HT150-jJ50s5pETA32',                       outputbits = 5 ),
                     TopoMenuDef( '400INVM-AjJ60s6pETA32-AjJ50s6p30ETA49',    outputbits = 6 ),
-                    TopoMenuDef( 'SC111-CjJ40abpETA26',                      outputbits = 7 ),
+                    TopoMenuDef( 'SC175-SCjJ10abpETA26',                     outputbits = 7 ),
                     TopoMenuDef( '0DETA20-jJ90s1-jJs2',                      outputbits = 8 ),
                     TopoMenuDef( '100RATIO-0MATCH-eTAU40si2-eEMall',         outputbits = 9 ),
                     TopoMenuDef( 'NOT-0MATCH-eTAU40si1-eEMall',              outputbits = 10),
@@ -414,10 +407,12 @@ def defineInputsMenu():
                                                                                                        'KF-jXE60-AjJall',
                                                                                                        'KF-jXE65-AjJall',
                                                                                                        'KF-jXE75-AjJall'] ),
-                    TopoMenuDef( 'ZAFB_DPHI',                      outputbits = (6,7), outputlines = [ '60INVM-04DPHI32-eEM18abm-jEM20s625ETA49',
-                                                                                                       '60INVM-25DPHI32-eEM18abm-jEM20s625ETA49'] ),
+                    TopoMenuDef( 'ZAFB_DPHI',                      outputbits = (6,7), outputlines = [ '60INVM-04DPHI32-eEM18abm-jEM25s625ETA49',
+                                                                                                       '60INVM-25DPHI32-eEM18abm-jEM25s625ETA49'] ),
                     TopoMenuDef( 'CEP_CjJ',                        outputbits = (8,9), outputlines = [ 'CEP-CjJ90s6',
                                                                                                        'CEP-CjJ100s6'] ),
+                    TopoMenuDef( 'ZAFB_DPHIM',                    outputbits = (10,11), outputlines = [ '60INVM-04DPHI32-eEM18abm-jEM20sm625ETA49',
+                                                                                                         '60INVM-25DPHI32-eEM18abm-jEM20sm625ETA49'] ),
                 ]
             },
 
@@ -435,17 +430,20 @@ def defineInputsMenu():
                 "fpga" : 1,
                 "clock" : 1,
                 "algorithms" : [
-                    TopoMenuDef( '7INVM14-MU5VFab-MU3VFab',              outputbits = 0 ), #BLS, ATR-22782
-                    TopoMenuDef( '7INVM14-2MU3Vab',                      outputbits = 1 ), #BLS, ATR-22782
-                    TopoMenuDef( 'INVM_2MU3VFab',                        outputbits = (2,3), outputlines = ['7INVM14-2MU3VFab', 
-                                                                                                            '7INVM22-2MU3VFab' ] ), #BLS, ATR-21566
-                    TopoMenuDef( '7INVM22-MU5VFab-MU3VFab',              outputbits = 4 ), #BLS, ATR-21566
-                    TopoMenuDef ( '7INVM22_DR_2MU3Vab',                  outputbits = (5,6), outputlines = ['7INVM22-0DR20-2MU3Vab',
-                                                                                                            '7INVM22-0DR12-2MU3Vab']),
-                    TopoMenuDef( '2INVM9-0DR15-C-MU5VFab-MU3Vab',        outputbits = 7 ), #BLS, test
-                    TopoMenuDef( '0INVM10C-3MU3Vab',                     outputbits = 8), #BLS, test
-                    TopoMenuDef( '7INVM14-0DR25-MU5VFab-MU3VFab',        outputbits = 9), #BLS 
-                    TopoMenuDef( '7INVM22-0DR20-2MU3VFab',               outputbits = 10), #BLS, ATR-21566
+                    TopoMenuDef('7INVM14-MU5VFab-MU3VFab',              outputbits=0), #BLS, ATR-22782
+                    TopoMenuDef('7INVM14-2MU3Vab',                      outputbits=1), #BLS, ATR-22782
+                    TopoMenuDef('INVM_2MU3VFab',                        outputbits=(2,3), outputlines = ['7INVM14-2MU3VFab', 
+                                                                                                          '7INVM22-2MU3VFab' ] ), #BLS, ATR-21566
+                    TopoMenuDef('7INVM22-MU5VFab-MU3VFab',              outputbits=4), #BLS, ATR-21566
+                    TopoMenuDef('7INVM22_DR_2MU3Vab',                   outputbits=(5,6), outputlines = ['7INVM22-0DR20-2MU3Vab',
+                                                                                                          '7INVM22-0DR12-2MU3Vab']),
+                    TopoMenuDef('2INVM9-0DR15-C-MU5VFab-MU3Vab',        outputbits=7), #BLS, test
+                    TopoMenuDef('0INVM10C-3MU3Vab',                     outputbits=8), #BLS, test
+                    TopoMenuDef('7INVM14-0DR25-MU5VFab-MU3VFab',        outputbits=9), #BLS 
+                    TopoMenuDef('7INVM22-0DR20-2MU3VFab',               outputbits=10), #BLS, ATR-21566
+
+                    TopoMenuDef('30DPHI32-2eTAU50s',                    outputbits=11), # g-2 trigger
+                    TopoMenuDef('3DR35-MU8Fab-eTAU30ab',                outputbits = 12), #ATR-30656
                 ]
             }
         ]
@@ -514,6 +512,5 @@ def defineInputsMenu():
     L1MenuFlags.boards().update( ctpinBoards )  # CTPIN/Slot9 NIM1, NIM2, CALREQ
 
     #----------------------------------------------
-
 
     remapThresholds(L1MenuFlags)

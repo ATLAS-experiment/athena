@@ -20,7 +20,7 @@ def TRT_CalDbToolCfg(flags, name="TRT_CalDbTool", **kwags):
     return acc
 
 
-def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", forceLegacyAccess=False, **kwargs):
+def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", **kwargs):
     """Return a ComponentAccumulator for TRT_StrawStatusSummaryTool"""
     acc = ComponentAccumulator()
 
@@ -34,10 +34,11 @@ def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", forc
         acc.merge(TRTStrawStatusCondAlgCfg(flags))
 
     
-    kwargs.setdefault("isGEANT4", flags.GeoModel.Align.LegacyConditionsAccess or forceLegacyAccess)
+    kwargs.setdefault("isGEANT4", flags.GeoModel.Align.LegacyConditionsAccess)
 
     acc.setPrivateTools(CompFactory.TRT_StrawStatusSummaryTool(name, **kwargs))
     return acc
+
 
 def TRT_StrawNeighbourSvcCfg(flags, name="TRT_StrawNeighbourSvc", **kwargs):
     acc = ComponentAccumulator()
@@ -47,7 +48,12 @@ def TRT_StrawNeighbourSvcCfg(flags, name="TRT_StrawNeighbourSvc", **kwargs):
 
 def TRT_MCCalDbToolCfg(flags, name="TRT_CalDbTool2", **kwargs):
     """Return a ComponentAccumulator for TRT_CalDbTool configured for MC in case of data overlay."""
-    # TODO: conditions (DataOverlay)
+    acc = ComponentAccumulator()
+    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/MC/RT", "/TRT/Calib/MC/RT", className="TRTCond::RtRelationMultChanContainer"))
+    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/MC/T0", "/TRT/Calib/MC/T0", className='TRTCond::StrawT0MultChanContainer'))
+
     kwargs.setdefault("RtFolderName", "/TRT/Calib/MC/RT")
     kwargs.setdefault("T0FolderName", "/TRT/Calib/MC/T0")
-    return TRT_CalDbToolCfg(flags, name, **kwargs)
+    acc.setPrivateTools(acc.popToolsAndMerge(TRT_CalDbToolCfg(flags, name, **kwargs)))
+
+    return acc

@@ -10,6 +10,10 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsInterop/Logger.h"
 
+// ACTS
+#include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Propagator/SympyStepper.hpp"
+
 namespace ActsTrk {
   
   class TrackParamsEstimationTool :
@@ -21,25 +25,26 @@ namespace ActsTrk {
     virtual ~TrackParamsEstimationTool() = default;
     
     virtual StatusCode initialize() override;
-    
-    // Interface
-    virtual 
-      std::optional<Acts::BoundTrackParameters>
-      estimateTrackParameters(const EventContext& ctx,
-			      const ActsTrk::Seed& seed,
-			      const Acts::GeometryContext& geoContext,
-			      const Acts::MagneticFieldContext& magFieldContext,
-			      std::function<const Acts::Surface&(const ActsTrk::Seed&)> retrieveSurface) const override;
 
     virtual
       std::optional<Acts::BoundTrackParameters>
-      estimateTrackParameters(const EventContext& ctx,
+      estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
+			      bool useTopSp,
 			      const Acts::GeometryContext& geoContext,
+			      const Acts::MagneticFieldContext& magFieldContext,
+			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const override;
+
+    virtual
+      std::optional<Acts::BoundTrackParameters>
+      estimateTrackParameters(
+			      const ActsTrk::Seed& seed,
+			      bool useTopSp,
+			      const Acts::GeometryContext& geoContext,
+			      const Acts::MagneticFieldContext& magFieldContext,
 			      const Acts::Surface& surface,
 			      const Acts::Vector3& bField) const override;
-    
-    // *********************************************************************
+
     // *********************************************************************
 
   private:
@@ -60,14 +65,21 @@ namespace ActsTrk {
         "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate tracks"};
-    Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false,
-        "Use top SP. By default, use bottom SP."};
+
+    using Stepper = Acts::SympyStepper;
+    using Navigator = Acts::VoidNavigator;
+    using Extrapolator = Acts::Propagator<Stepper>;
+
+    std::optional<Extrapolator> m_extrapolator;
 
     /// Private access to the logger
-    const Acts::Logger &logger() const { return *m_logger; }
-    /// logging instance
-    std::unique_ptr<const Acts::Logger> m_logger {nullptr};
+    const Acts::Logger &logger() const
+    {
+      return *m_logger;
+    }
 
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger;
   };
   
 } // namespace

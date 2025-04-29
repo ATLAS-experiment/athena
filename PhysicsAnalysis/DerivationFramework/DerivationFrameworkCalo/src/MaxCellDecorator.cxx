@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -18,9 +18,8 @@ namespace {}
 DerivationFramework::MaxCellDecorator::MaxCellDecorator(const std::string& t,
                                                         const std::string& n,
                                                         const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 }
 
 // Destructor
@@ -348,7 +347,7 @@ DerivationFramework::MaxCellDecorator::decorateObject(
 
   if (cluster) {
     if (!cluster->getCellLinks()) {
-      ATH_MSG_WARNING("CellLinks not found");
+      ATH_MSG_DEBUG("CellLinks not found");
       return result;
     }
 

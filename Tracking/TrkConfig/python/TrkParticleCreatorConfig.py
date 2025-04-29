@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkParticleCreator package
 # Creating xAOD::TrackParticles starting from
 # input Trk::Tracks
@@ -164,11 +164,18 @@ def InDetTrigParticleCreatorToolFTFCfg(flags,
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import (
-            InDetTrigFastTrackSummaryToolCfg)
-        TrackSummaryTool = result.popToolsAndMerge(
-            InDetTrigFastTrackSummaryToolCfg(flags))
+            InDetTrigFastTrackSummaryToolCfg, InDetTrigTrackSummaryToolCfg)
+        if flags.Tracking.ActiveConfig.holeSearch_FTF:
+            TrackSummaryTool = result.popToolsAndMerge(
+                InDetTrigTrackSummaryToolCfg(flags))
+            kwargs.setdefault("PerigeeExpression", "Origin")
+        else:
+            TrackSummaryTool = result.popToolsAndMerge(
+                InDetTrigFastTrackSummaryToolCfg(flags))
+            
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
+    
     # 2023fix
     # if 'TestPixelLayerTool' not in kwargs:
     #     from InDetConfig.InDetTestPixelLayerConfig import InDetTrigTestPixelLayerToolInnerCfg
@@ -181,7 +188,8 @@ def InDetTrigParticleCreatorToolFTFCfg(flags,
     kwargs.setdefault("DoSharedSiHits", kwargs["AssociationMapName"] != "")
 
     result.setPrivateTools(
-        CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
+        CompFactory.Trk.TrackParticleCreatorTool(f"{name}_{flags.Tracking.ActiveConfig.input_name}", **kwargs))
+
     return result
 
 
@@ -367,7 +375,6 @@ def MuonCombinedParticleCreatorCfg(flags,
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
 
-    kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
@@ -397,8 +404,6 @@ def MuonCaloParticleCreatorCfg(flags, name="MuonCaloParticleCreator", **kwargs):
     kwargs.setdefault("PerigeeExpression", "Origin")
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
-
-    kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
 
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))

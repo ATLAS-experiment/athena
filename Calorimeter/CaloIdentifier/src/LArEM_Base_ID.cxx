@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/src/LArEM_Base_ID.cxx
@@ -23,16 +23,6 @@ LArEM_Base_ID::LArEM_Base_ID (const std::string& name, bool supercell)
   : CaloIDHelper (name),
     m_slar (supercell ? 1 : 0)
 {
-  m_REGION_INDEX = 999;
-  m_ETA_INDEX = 999;
-  m_PHI_INDEX = 999;
-  m_SLAR_INDEX = 999;
-  m_LAR_INDEX = 999;
-  m_EM_INDEX = 999;
-  m_BEC_INDEX = 999;
-  m_SAMPLING_INDEX = 999;
-  m_em_region_index = 0;
-  m_two_sym_sides = 1;
 }
 
 

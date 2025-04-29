@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_SMOOTHEDTOPTAGGER_H_
@@ -25,7 +25,7 @@ class SmoothedTopTagger :
     private:
 
       // number of variables used by cut-based tagger
-      int m_numTaggerVars;
+      int m_numTaggerVars{};
 
       // cut functions from smooth fits
       std::vector<std::string> m_varCutExprs;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL
@@ -193,17 +193,17 @@ StatusCode LVL1TGCTrigger::execute()
       
       // Use TileMu only if BC_CURRENT
       if (doTileMu && bc == m_CurrentBunchTag) {
-        ATH_CHECK(m_system->getTMDB()->retrieve(m_keyTileMu));
+        ATH_CHECK(m_system->getTMDB()->retrieve(m_keyTileMu, ctx));
       }
 
       // Use NSW trigger output 
       if(doNSW && bc==m_CurrentBunchTag){  // To implement BC-calculation
-	ATH_CHECK(m_system->getNSW()->retrieve(m_keyNSWTrigOut));
+        ATH_CHECK(m_system->getNSW()->retrieve(m_keyNSWTrigOut, ctx));
       }
 
       // Use RPC BIS78 trigger output
       if(doBIS78 && bc == m_CurrentBunchTag){  // Todo: implement BC-calculation
-	ATH_CHECK(m_system->getBIS78()->retrieve(m_keyBIS78TrigOut));
+        ATH_CHECK(m_system->getBIS78()->retrieve(m_keyBIS78TrigOut, ctx));
       }
 
       if (m_ProcessAllBunches || bc == m_CurrentBunchTag) {
@@ -1051,7 +1051,7 @@ StatusCode LVL1TGCTrigger::getMaskedChannel()
     
     std::ifstream fin(fullName.c_str());
     if (!fin) {
-      ATH_MSG_FATAL("Cannot open file " << fullName);
+      ATH_MSG_FATAL("Cannot open file " << (fullName.empty() ? fname : fullName));
       return StatusCode::FAILURE;
     } else {
       ATH_MSG_INFO("Use mask file : " << fullName);

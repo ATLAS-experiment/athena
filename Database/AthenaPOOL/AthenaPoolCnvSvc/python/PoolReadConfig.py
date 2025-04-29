@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -31,24 +31,24 @@ def EventSelectorAthenaPoolCfg(flags):
             assert DataRunNumber >= 0, (
                 "flags.Input.OverrideRunNumber was True, but provided DataRunNumber (%d) is negative. "
                 "Use a real run number from data." % DataRunNumber)
-            evSel.OverrideRunNumber = flags.Input.OverrideRunNumber
+            evSel.OverrideRunNumber = True
             evSel.RunNumber = DataRunNumber
             evSel.FirstLB = FirstLB
             evSel.InitialTimeStamp = InitialTimeStamp # Necessary to avoid a crash
             if hasattr(evSel, "OverrideRunNumberFromInput"):
-                evSel.OverrideRunNumberFromInput = flags.Input.OverrideRunNumber
+                evSel.OverrideRunNumberFromInput = True
             if OldRunNumber > 0:
                 evSel.OldRunNumber = OldRunNumber
         elif flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain]:
             # Behaviour for Simulation and FastChain jobs using RunAndLumiOverrideList
             from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers, getFirstLumiBlock
             minMax = getMinMaxRunNumbers(flags)
-            evSel.OverrideRunNumber = flags.Input.OverrideRunNumber
+            evSel.OverrideRunNumber = True
             evSel.RunNumber = minMax[0]
             evSel.FirstLB = getFirstLumiBlock(flags, minMax[0])
             evSel.InitialTimeStamp = flags.IOVDb.RunToTimestampDict.get(minMax[0], 1) # TODO fix repeated configuration
             if hasattr(evSel, "OverrideRunNumberFromInput"):
-                evSel.OverrideRunNumberFromInput = flags.Input.OverrideRunNumber
+                evSel.OverrideRunNumberFromInput = True
         else:
             # Behaviour for Digitization jobs using RunAndLumiOverrideList
             pass
@@ -87,11 +87,11 @@ def PoolReadCfg(flags):
         evSel = CompFactory.DoubleEventSelectorAthenaPool("EventSelector",
                                                           InputCollections=flags.Input.Files)
 
-        if flags.Overlay.DataOverlay:
+        if flags.Overlay.ByteStream:
             # In case of data overlay HITS are primary input
             evSel.SkipEvents = skipEventsPrimary
 
-            # We have to check if we're running data overlay - BS is needed in this case
+            # We have to check if we're running overlay with ByteStream input
             from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
             result.merge(ByteStreamReadCfg(flags))
 

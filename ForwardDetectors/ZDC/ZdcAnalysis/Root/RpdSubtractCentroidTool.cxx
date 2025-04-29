@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <numbers>
@@ -44,26 +44,16 @@ StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerNa
 }
 
 StatusCode RpdSubtractCentroidTool::initialize() {
-  // first initialize reconstruction parameters from config string
-  if (m_configuration == "default" || m_configuration == "pp2023" || m_configuration == "PbPb2023") {
-    m_minZDCEnergy = {-1.0, -1.0};
-    m_maxZDCEnergy = {-1.0, -1.0};
-    m_minEMEnergy = {-1.0, -1.0};
-    m_maxEMEnergy = {-1.0, -1.0};
-    m_pileupMaxFrac = {1.0, 1.0};
-    m_maximumNegativeSubtrAmpFrac = {1.0, 1.0};
-    m_useRPDSumAdc = true;
-    m_useCalibDecorations = true;
-  } else if (m_configuration == "pp2024" || m_configuration == "PbPb2024") {
-    m_minZDCEnergy = {-1.0, -1.0};
-    m_maxZDCEnergy = {-1.0, -1.0};
-    m_minEMEnergy = {-1.0, -1.0};
-    m_maxEMEnergy = {-1.0, -1.0};
-    m_pileupMaxFrac = {1.0, 1.0};
-    m_maximumNegativeSubtrAmpFrac = {1.0, 1.0};
-    m_useRPDSumAdc = true;
-    m_useCalibDecorations = true;
-  }
+  // first initialize reconstruction parameters
+  m_minZDCEnergy = {-1.0, -1.0};
+  m_maxZDCEnergy = {-1.0, -1.0};
+  m_minEMEnergy = {-1.0, -1.0};
+  m_maxEMEnergy = {-1.0, -1.0};
+  m_pileupMaxFrac = {1.0, 1.0};
+  m_maximumNegativeSubtrAmpFrac = {1.0, 1.0};
+  m_useRPDSumAdc = true;
+  m_useCalibDecorations = true;
+
   // then overwrite inidividual parameters from configuration if any were provided
   if (m_forceMinZDCEnergy.has_value()) {
     m_minZDCEnergy = m_forceMinZDCEnergy.value();

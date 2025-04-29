@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -70,7 +70,8 @@ public:
 
   /** TrackingVolumeBuilder interface method - returns vector of Volumes */
   virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(
-    const CaloDetDescrManager& caloDDM) const override final;
+    const CaloDetDescrManager& caloDDM
+    , const GeoAlignmentStore* geoAlign) const override final;
 
 private:
   static void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) ;
@@ -95,8 +96,6 @@ private:
 
   bool m_forceSymmetry; //!< forces volume symmetry between negative/positive part
 
-  mutable std::mutex m_garbageMutex;
-  mutable std::vector<std::unique_ptr<Trk::Material>> m_garbage ATLAS_THREAD_SAFE;
 };
 
 } // end of namespace

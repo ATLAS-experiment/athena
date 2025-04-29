@@ -10,11 +10,7 @@
 #include "GaudiKernel/IIncidentListener.h"
 #include "StoreGate/ReadHandle.h"
 #include "xAODEventInfo/EventInfo.h"
-#include <iostream>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <grp.h>
+
 
 
 class OnlineEventDisplaysSvc : public extends<AthService,
@@ -48,8 +44,8 @@ private:
   std::string m_FileNamePrefix = "JiveXML";
   std::string m_outputStreamDir = ".Unknown";
   std::string m_entireOutputStr = ".";
-  int m_runNumber;
-  long m_eventNumber;
+  int m_runNumber{};
+  long m_eventNumber{};
 
 };
 

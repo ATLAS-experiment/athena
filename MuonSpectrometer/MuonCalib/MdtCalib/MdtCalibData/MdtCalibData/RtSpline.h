@@ -1,17 +1,6 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// 23.03.2005, AUTHOR: OLIVER KORTNER
-// Modified: 31.05.2006 by O. Kortner: major redesign:
-//                                     driftVelocity implemented,
-//                                     resolution has been removed,
-//                                     set-method have been removed
-//           04.06.2006 by O. Kortner: bug in constructor fixed,
-//                                     doxygen entry updated.
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 #ifndef MUONCALIB_RtSpline_H
 #define MUONCALIB_RtSpline_H
 
@@ -82,6 +71,8 @@ namespace MuonCalib {
         virtual double tUpper() const override final;
         //!< get the upper drift-time bound
         virtual double tBinWidth() const override final;
+
+        virtual unsigned nDoF() const override final;
     };
 }  // namespace MuonCalib
 

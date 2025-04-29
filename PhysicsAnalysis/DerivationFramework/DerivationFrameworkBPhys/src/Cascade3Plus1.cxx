@@ -4,16 +4,16 @@
 /////////////////////////////////////////////////////////////////
 // Cascade3Plus1.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/Cascade3Plus1.h"
+#include "Cascade3Plus1.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "Math/Vector4D.h"
 
@@ -42,7 +42,7 @@ GenVecFourMom_t SumVector(const std::array<GenVecFourMom_t, N> &vectors) {
     return total;
 }
 
-Cascade3Plus1::Cascade3Plus1(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p),
+Cascade3Plus1::Cascade3Plus1(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
     m_trkSelector("InDet::TrackSelectorTool"),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_V0Tools("Trk::V0Tools"),

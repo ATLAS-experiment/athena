@@ -1,6 +1,6 @@
 //Dear emcas this is -*-c++-*--
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDIGITIZATION_LARHITEMAP_H
@@ -34,7 +34,7 @@ private:
 public:
   LArHitEMap() = delete;
   LArHitEMap(const LArOnOffIdMapping* cabling, const CaloCell_ID* cellid, const CaloDetDescrManager* cddMgr, bool digit=false);
-  ~LArHitEMap(void);
+  ~LArHitEMap() = default;
   bool AddEnergy(const IdentifierHash index, const float energy, const float time);
   bool AddEnergy(const Identifier cellid, const float energy, const float time);
   bool BuildWindows(const McEventCollection* mcCollptr,

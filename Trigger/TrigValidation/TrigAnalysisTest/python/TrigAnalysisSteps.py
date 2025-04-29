@@ -42,9 +42,10 @@ class CheckFileTrigSizeStep(CheckFileStep):
     '''
     Execute checkFileTrigSize.py for POOL files.
     '''
+    # TODO: Avoid rerunning checkFile.py even when *checkFile output already produced.
     def __init__(self, name='CheckFileTrigSize'):
         super(CheckFileTrigSizeStep, self).__init__(name)
-        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root'
+        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root,DAOD_TLA.pool.root,DAOD_TLAFTAGPEB.pool.root'
         self.executable = 'checkFileTrigSize.py'
 
 

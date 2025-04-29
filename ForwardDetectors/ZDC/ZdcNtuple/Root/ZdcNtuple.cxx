@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TSystem.h>
@@ -217,6 +217,8 @@ StatusCode ZdcNtuple :: initialize ()
 	  m_outputTree->Branch("zdc_ZdcTruthParticlePy",&t_ZdcTruthParticlePy);
 	  m_outputTree->Branch("zdc_ZdcTruthParticlePz",&t_ZdcTruthParticlePz);
 	  m_outputTree->Branch("zdc_ZdcTruthParticleEnergy",&t_ZdcTruthParticleEnergy);
+	  m_outputTree->Branch("zdc_ZdcTruthParticlePid",&t_ZdcTruthParticlePid);
+	  m_outputTree->Branch("zdc_ZdcTruthParticleStatus",&t_ZdcTruthParticleStatus);
 	}
       }
     if (enableRPD)
@@ -835,8 +837,11 @@ void ZdcNtuple::processZdcNtupleFromModules()
     }
     if (!globalSum) {
       ANA_MSG_ERROR("unable to locate global ZdcSum (side = 0)");
+      t_centroidDecorationsAvailable = false;
     }
-    t_centroidDecorationsAvailable = centroidStatusAcc.isAvailable(*globalSum);
+    else {
+      t_centroidDecorationsAvailable = centroidStatusAcc.isAvailable(*globalSum);
+    }
   }
 
   if (rpdErr||zdcErr) ANA_MSG_WARNING( "Decoding errors ZDC=" << zdcErr << " RPD=" << rpdErr );
@@ -1094,6 +1099,8 @@ void ZdcNtuple::processMCEventCollection(){
   t_ZdcTruthParticlePy.clear();
   t_ZdcTruthParticlePz.clear();
   t_ZdcTruthParticleEnergy.clear();
+  t_ZdcTruthParticlePid.clear();
+  t_ZdcTruthParticleStatus.clear();
 
   /******************************************
    * Sort the particles into sides and add
@@ -1119,6 +1126,8 @@ void ZdcNtuple::processMCEventCollection(){
         t_ZdcTruthParticlePy.push_back(particle->momentum().y());
         t_ZdcTruthParticlePz.push_back(particle->momentum().z());
         t_ZdcTruthParticleEnergy.push_back(particle->momentum().e());
+        t_ZdcTruthParticlePid.push_back(particle->pdg_id());
+        t_ZdcTruthParticleStatus.push_back(particle->status());
       } // end loop over particles
     }// end loop over vertices
   }// end loop over HepMC events

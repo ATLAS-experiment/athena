@@ -32,19 +32,19 @@ def LArDTMonitoringConfig(flags,STREAM):
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     mlog.info("Run number: "+str(flags.Input.RunNumbers[0]))
 
-    #if 'PEB' in STREAM:
     try:
         runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
-        streams=runinfo.streamTypes()
-        nsamples=int(runinfo.streamLengths()[0])
+        if 'PEB' in STREAM:
+           streams=runinfo.streamTypesPEB()
+           nsamples=int(runinfo.streamLengthsPEB()[0])
+        else:    
+           streams=runinfo.streamTypes()
+           nsamples=int(runinfo.streamLengths()[0])
     except Exception as e:
         mlog.warning("Could not get DT run info")
         mlog(e)
-        streams=[]
+        streams=["ADC","SelectedEnergy"]
         nsamples=32
-    #else:       
-    #    streams=["ADC","SelectedEnergy"]
-    #    nsamples=2
 
 
     from LArMonitoring.LArDigitalTriggMonAlg import LArDigitalTriggMonConfig

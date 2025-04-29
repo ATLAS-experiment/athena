@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file 
@@ -230,7 +230,7 @@ dqm_algorithms::OccupancyHoleFinder::execute(	const std::string & name,
   }
   else result->status_ = dqm_core::Result::Green;
   
-  result->tags_ = tags;
+  result->tags_ = std::move(tags);
   return result;
   
 }

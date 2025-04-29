@@ -1,5 +1,5 @@
 # 
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -57,7 +57,6 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     AFPSiGroup.defineHistogram('eventsPerStation', title='Number of events per stations; station; events', type='TH1I', path='SiT/Aux/', xbins=16, xmin=-0.5, xmax=15.5, xlabels=xLabelsForEventsPerStation )
     AFPSiGroup.defineHistogram('clustersInPlanes', title='Number of clusters per planes; plane; clusters', type='TH1I', path='SiT/Aux/', xbins=16, xmin=-0.5, xmax=15.5, xlabels=xLabelsStationsPlanes )
     AFPSiGroup.defineHistogram('lb,muPerBX', title='<mu>;lumiBlock;<mu>', type='TProfile', path='SiT/', xbins=2000, xmin=0.5, xmax=2000.5)
-    AFPSiGroup.defineHistogram('planeHitsAll', title='Number of hits per plane;plane; hits', type='TH1I', path='SiT/HitsPerPlanes/', xbins=16, xmin=-0.5, xmax=15.5, xlabels=xLabelsStationsPlanes )
     AFPSiGroup.defineHistogram('planeHitsAllMU', title='Number of hits per plane divided by <mu>;plane; hits/<mu>', type='TH1F', path='SiT/HitsPerPlanes/', xbins=16, xmin=-0.5, xmax=15.5, weight = 'weightAllPlanes', xlabels=xLabelsStationsPlanes )
     AFPSiGroup.defineHistogram('numberOfHitsPerStation', title='Number of hits per station; station; hits', type='TH1I', path='SiT/Aux/', xbins=4, xmin=-0.5, xmax=3.5, xlabels=xLabelsStations)
     AFPSiGroup.defineHistogram('lbEvents;NumberOfEventsPerLumiblock',title='Number of events per lumiblock; lumiblock; events', type='TH1I', path='SiT/Aux/', xbins=2000, xmin=0.5, xmax=2000.5)
@@ -183,52 +182,28 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     array.defineHistogram('pixelRowIDChip,pixelColIDChip', title='Hitmap for station {0}, layer {1};RowID;ColID', type='TH2I', path='pixelColRow2D/{0}', xbins=336, xmin=0.5, xmax=336.5, ybins=80, ymin=0.5, ymax=80.5)
     array.defineHistogram('timeOverThreshold', type='TH1I', title='Time over threshold for station {0}, layer {1};timeOverThreshold; entries', path='SiTimeOverThreshold/{0}', xbins=16, xmin=0.5, xmax=16.5)
     
-    array.defineHistogram('clusterY,clusterX', title='Cluster position in station {0} Layer {1};x [mm];y [mm]', type='TH2F', path='Cluster/{0}', xbins=336, xmin=0.0, xmax=17.0, ybins=80, ymin=0.0, ymax=20.0)
-    array.defineHistogram('lb,clustersPerPlane', title='Number of clusters per event divided by <mu> in station {0}, layer {1};lumiblock; clusters per event / <mu>', type='TH2F', path='clustersPerPlane/{0}', xbins=2000, xmin=0.5, xmax=2000.5, ybins=1000, ymin=-0.2, ymax=1.0)
-    array.defineHistogram('lb,clustersPerPlaneFront', title='(Front BCID) Number of clusters per event divided by <mu> in station {0}, layer {1};lumiblock; clusters per event / <mu>', type='TH2F', path='clustersPerPlaneFront/{0}', xbins=2000, xmin=0.5, xmax=2000.5, ybins=1000, ymin=-0.2, ymax=1.0)
-    array.defineHistogram('lb,clustersPerPlaneEnd', title='(End BCID) Number of clusters per event divided by <mu> in station {0}, layer {1};lumiblock; clusters per event / <mu>', type='TH2F', path='clustersPerPlaneEnd/{0}', xbins=2000, xmin=0.5, xmax=2000.5, ybins=1000, ymin=-0.2, ymax=1.0)
-    array.defineHistogram('lb,clustersPerPlaneMiddle', title='(Middle BCID) Number of clusters per event divided by <mu> in station {0}, layer {1};lumiblock; clusters per event / <mu>', type='TH2F', path='clustersPerPlaneMiddle/{0}', xbins=2000, xmin=0.5, xmax=2000.5, ybins=1000, ymin=-0.2, ymax=1.0)
-    
-    array.defineHistogram('lb,hitsCounterPlanesTProfile', title='Number of hits divided by number of events per lumiblock, station {0} plane {1};lumiblock; hits/events', type='TProfile', path='HitsCounterPlanes/', xbins=2000, xmin=0.5, xmax=2000.5)
-    
-    array.defineHistogram('lbClustersPerPlanes', title='(All) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu>;lumiblock;clusters/<mu> per event', type='TH1F', path='ClustersPerPlanesPP/', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightClustersByMU')
-    array.defineHistogram('clustersPerPlaneFrontPP', title='(Front) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu>;lumiblock; clusters/<mu> per event', type='TH1F', path='ClustersPerPlanesPP/Front/', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightClustersPerPlaneFrontPP')
-    array.defineHistogram('clustersPerPlaneMiddlePP', title='(Middle) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu>; lumiblock;clusters/<mu> per event', type='TH1F', path='ClustersPerPlanesPP/Middle/', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightClustersPerPlaneMiddlePP')
-    array.defineHistogram('clustersPerPlaneEndPP', title='(End) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu>; lumiblock;clusters/<mu> per event', type='TH1F', path='ClustersPerPlanesPP/End/', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightClustersPerPlaneEndPP')
-    
-    array.defineHistogram('lbClustersPerPlanes_full', title='(All) Number of clusters in station {0}, plane {1} per lumiblock;lumiblock;clusters', type='TH1I', path='ClustersPerPlanesPP_full/', xbins=2000, xmin=0.5, xmax=2000.5)
-    #array.defineHistogram('clustersPerPlaneFrontPP_full', title='(Front) Number of clusters in station {0}, plane {1} per lumiblock;lumiblock; clusters', type='TH1I', path='ClustersPerPlanesPP_full/Front/', xbins=2000, xmin=0.5, xmax=2000.5)
-    #array.defineHistogram('clustersPerPlaneMiddlePP_full', title='(Middle) Number of clusters in station {0}, plane {1} per lumiblock; lumiblock;clusters', type='TH1I', path='ClustersPerPlanesPP_full/Middle/', xbins=2000, xmin=0.5, xmax=2000.5)
-    #array.defineHistogram('clustersPerPlaneEndPP_full', title='(End) Number of clusters in station {0}, plane {1} per lumiblock; lumiblock;clusters', type='TH1I', path='ClustersPerPlanesPP_full/End/', xbins=2000, xmin=0.5, xmax=2000.5)
-    
-    array.defineHistogram('lbHitsPerPlanes', title='Number of hits in station {0}, plane {1} per lumiblock divided by <mu>;lumiblock; hits/<mu> per event', type='TH1F', path='HitsPerPlanesVsLb/', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightHitsByMU')
-    array.defineHistogram('lbHitsPerPlanes_full', title='Number of hits in station {0}, plane {1} per lumiblock;lumiblock; hits per event', type='TH1F', path='HitsPerPlanesVsLb_full/', xbins=2000, xmin=0.5, xmax=2000.5)
-    
-    array.defineHistogram('clusterToT', title='Sum of all hits\' ToT in each cluster, station {0}, layer {1};Cluster ToT; Counts', type='TH1I', path='ClusterToT/', xbins=18, xmin=0.5, xmax=18.5)
+    array.defineHistogram('clusterY,clusterX', title='Cluster position in station {0} Layer {1};x [mm];y [mm]', type='TH2F', path='Cluster/{0}', xbins=336, xmin=0.0, xmax=17.0, ybins=80, ymin=0.0, ymax=20.0)        
+    array.defineHistogram('sit_plane_eff_passed, sit_plane_eff_triedY, sit_plane_eff_triedX ;Efficiency', title='Efficiency for station {0} Layer {1};x [mm];y [mm]', type='TEfficiency', path='Efficiency/{0}', xbins=336, xmin=0.0, xmax=17.0, ybins=80, ymin=0.0, ymax=20.0)
+    #Sync clusters
+    array.defineHistogram('lbClustersPerPlanesAll,clustersPerPlaneAllPP', title='(All) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu> per event;lumiblock;clusters/<mu> per event', type='TProfile', path='Synchronization/Clusters/', xbins=2000, xmin=0.5, xmax=2000.5)
+    array.defineHistogram('lbClustersPerPlanesFront,clustersPerPlaneFrontPP', title='(Front) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu> per event;lumiblock; clusters/<mu> per event', type='TProfile', path='Synchronization/Clusters/Front/', xbins=2000, xmin=0.5, xmax=2000.5)
+    array.defineHistogram('lbClustersPerPlanesMiddle,clustersPerPlaneMiddlePP', title='(Middle) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu> per event; lumiblock;clusters/<mu> per event', type='TProfile', path='Synchronization/Clusters/Middle/', xbins=2000, xmin=0.5, xmax=2000.5)
+    array.defineHistogram('lbClustersPerPlanesEnd,clustersPerPlaneEndPP', title='(End) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu> per event; lumiblock;clusters/<mu> per event', type='TProfile', path='Synchronization/Clusters/End/', xbins=2000, xmin=0.5, xmax=2000.5)
 
+    array.defineHistogram('lbhitsPerPlaneProfile, hitsPerPlaneProfile', title='Number of hits in station {0}, plane {1} per lumiblock per event divided by <mu>;lumiblock; hits/<mu> per event', type='TProfile', path='HitsPerPlanesVsLb/', xbins=2000, xmin=0.5, xmax=2000.5)
+    array.defineHistogram('clusterToT', title='Sum of all hits\' ToT in each cluster, station {0}, layer {1};Cluster ToT; Counts', type='TH1I', path='ClusterToT/', xbins=18, xmin=0.5, xmax=18.5)
 
     array = helper.addArray([stationList], afpSiLayerAlgorithm, 'AFPSiLayerTool', topPath='AFP/SiT/')
     
     array.defineHistogram('planeHits', type='TH1I', title='Number of hits per plane, station {0};plane; hits', path='HitsPerPlanes', xbins=4, xmin=-0.5, xmax=3.5)
-    array.defineHistogram('trackY,trackX', title='Number of tracks in AFP station {0};x [mm];y [mm]', type='TH2F', path='Track', xbins=336, xmin=0.0, xmax=17.0, ybins=80, ymin=0.0, ymax=20.0)
-    array.defineHistogram('lb,clustersPerStation', title ='Number of clusters per event divided by <mu> in station {0};lumiblock; clustersPerStation', type='TH2F', path='clustersPerStation', xbins=2000, xmin=0.5, xmax=2000.5, ybins=1000, ymin=-0.2, ymax=1.0)
-    array.defineHistogram('lb,clustersPerStationFront', title ='(Front) Number of clusters per event divided by <mu> in station {0};lumiblock; clustersPerStation', type='TH2F', path='clustersPerStation', xbins=2000, xmin=0.5, xmax=2000.5, ybins=1000, ymin=-0.2, ymax=1.0)
-    array.defineHistogram('lb,clustersPerStationEnd', title ='(End) Number of clusters per event divided by <mu> in station {0};lumiblock; clustersPerStation', type='TH2F', path='clustersPerStation', xbins=2000, xmin=0.5, xmax=2000.5, ybins=1000, ymin=-0.2, ymax=1.0)
-    array.defineHistogram('lb,clustersPerStationMiddle', title ='(Middle) Number of clusters per event divided by <mu> in station {0};lumiblock; clustersPerStation', type='TH2F', path='clustersPerStation', xbins=2000, xmin=0.5, xmax=2000.5, ybins=1000, ymin=-0.2, ymax=1.0)
-    
-    array.defineHistogram('lb,hitsCounterStationsTProfile', title='Number of hits divided by number of events per lumiblock, station {0};lumiblock; hits/events', type='TProfile', path='HitsCounterPlanes/', xbins=2000, xmin=0.5, xmax=2000.5)
+    array.defineHistogram('trackY,trackX', title='Number of tracks in AFP station {0};x [mm];y [mm]', type='TH2F', path='Track', xbins=336, xmin=0.0, xmax=17.0, ybins=80, ymin=0.0, ymax=20.0)    
     array.defineHistogram('lbEventsStations', title='Number of events per lumiblock, station {0};lumiblock; events', type='TH1I', path='StationEvents/', xbins=2000, xmin=0.5, xmax=2000.5)
     
-    array.defineHistogram('lbTracksAll', title = '(All) Tracks vs lumiblock divided by <mu>, station {0};lumiblock;tracks/<mu> per event', type='TH1F', path='TracksVsLb', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightTracksAll')
-    array.defineHistogram('lbTracksFront', title = '(Front) Tracks vs lumiblock divided by <mu>, station {0}; lumiblock;tracks/<mu> per event', type='TH1F', path='TracksVsLb/Front', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightTracksFront')
-    array.defineHistogram('lbTracksMiddle', title = '(Middle) Tracks vs lumiblock divided by <mu>, station {0}; lumiblock;tracks/<mu> per event', type='TH1F', path='TracksVsLb/Middle', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightTracksMiddle')
-    array.defineHistogram('lbTracksEnd', title = '(End) Tracks vs lumiblock divided by <mu>, station {0}; lumiblock;tracks/<mu> per event', type='TH1F', path='TracksVsLb/End', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightTracksEnd')
-    
-    array.defineHistogram('lbTracksAll_full', title = '(All) Tracks vs lumiblock, station {0};lumiblock;tracks', type='TH1I', path='TracksVsLb_full', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightTracksAll_full')
-    array.defineHistogram('lbTracksFront_full', title = '(Front) Tracks vs lumiblock, station {0}; lumiblock;tracks', type='TH1I', path='TracksVsLb_full/Front', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightTracksFront_full')
-    array.defineHistogram('lbTracksMiddle_full', title = '(Middle) Tracks vs lumiblock, station {0}; lumiblock;tracks', type='TH1I', path='TracksVsLb_full/Middle', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightTracksMiddle_full')
-    array.defineHistogram('lbTracksEnd_full', title = '(End) Tracks vs lumiblock, station {0}; lumiblock;tracks', type='TH1I', path='TracksVsLb_full/End', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'weightTracksEnd_full')
-
+    #Sync tracks
+    array.defineHistogram('lbTracksAll,Total_tracks_All_profile', title = '(All) Tracks vs lumiblock divided by <mu> per event, station {0};lumiblock;tracks/<mu> per event', type='TProfile', path='Synchronization/Tracks', xbins=2000, xmin=0.5, xmax=2000.5)
+    array.defineHistogram('lbTracksFront,Total_tracks_Front_profile', title = '(Front) Tracks vs lumiblock divided by <mu> per event, station {0}; lumiblock;tracks/<mu> per event', type='TProfile', path='Synchronization/Tracks/Front', xbins=2000, xmin=0.5, xmax=2000.5)
+    array.defineHistogram('lbTracksMiddle,Total_tracks_Middle_profile', title = '(Middle) Tracks vs lumiblock divided by <mu> per event, station {0}; lumiblock;tracks/<mu> per event', type='TProfile', path='Synchronization/Tracks/Middle', xbins=2000, xmin=0.5, xmax=2000.5)
+    array.defineHistogram('lbTracksEnd,Total_tracks_End_profile', title = '(End) Tracks vs lumiblock divided by <mu> per event, station {0}; lumiblock;tracks/<mu> per event', type='TProfile', path='Synchronization/Tracks/End', xbins=2000, xmin=0.5, xmax=2000.5)
 
     arrayToF = helper.addArray([stationList], afpToFAlgorithm, 'AFPToFTool', topPath='AFP/ToF/')
     
@@ -259,10 +234,10 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    #flags.Input.Files = ['/eos/user/v/vlysenko/AOD_testing/AOD_data22_13p6TeV_DS_429142/data22_13p6TeV.00429142.physics_Main.merge.AOD.f1253_m2112._lb0521._0001.1']
-    flags.Input.Files = ['/eos/user/v/vlysenko/AOD_testing/AOD_data24_13p6TeV_473095/data24_13p6TeV.00473095.physics_Main.merge.AOD.f1444_m2248._lb0603._0003.1']
+    flags.Input.Files = ['/eos/user/v/vlysenko/DQ/testing/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
+    #flags.Input.Files = ['/eos/user/l/lvicenik/afp_data/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
     flags.Input.isMC = False
-    flags.Output.HISTFileName = 'AFPTest-10k-mon-3.root'
+    flags.Output.HISTFileName = 'dqm-AFPTest-24.root'
     
 
     flags.Concurrency.NumThreads=10
@@ -280,7 +255,7 @@ if __name__=='__main__':
     exampleMonitorAcc = Run3AFPExampleMonitoringConfig(flags)
     cfg.merge(exampleMonitorAcc)
 
-    cfg.run(10000)
+    cfg.run(1000000)
 
 
 

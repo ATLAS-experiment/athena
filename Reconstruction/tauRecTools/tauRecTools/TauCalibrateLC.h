@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUCALIBRATELC_H
@@ -7,6 +7,7 @@
 
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "tauRecTools/TauRecToolBase.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -39,13 +40,13 @@ class TauCalibrateLC : public TauRecToolBase {
 
     std::vector<std::vector<std::unique_ptr<TF1>>> m_calibFunc;
     std::vector<std::unique_ptr<TH1>> m_slopeNPVHist; 
-    std::unique_ptr<TH1> m_etaBinHist = nullptr; 
+    std::unique_ptr<TH1> m_etaBinHist = {};
 
     int    m_nEtaBins=0;
     double m_averageNPV=0;
 
-    std::string m_calibrationFile; // energy calibration file
-    bool m_doVertexCorrection; // switch for vertex correction
+    Gaudi::Property<std::string> m_calibrationFile{this, "calibrationFile", ""};
+    Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
 
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_aveIntPerXKey {this, 
         "averageInteractionsPerCrossingKey", 

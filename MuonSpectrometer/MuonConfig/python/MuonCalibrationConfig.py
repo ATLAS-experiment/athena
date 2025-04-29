@@ -86,6 +86,7 @@ def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
     kwargs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     kwargs.setdefault("DoTemperatureCorrection", flags.Muon.Calib.applyRtScaling)
     kwargs.setdefault("DoTofCorrection", flags.Beam.Type is BeamType.Collisions) # No TOF correction if not collisions
+    kwargs.setdefault("DoPropagationTimeUncert", flags.Muon.Calib.applySigPropUncert)
 
     if flags.Beam.Type is BeamType.Collisions:
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtCalibWindowNumber
@@ -97,19 +98,54 @@ def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
     result.setPrivateTools(mdt_calibration_tool)
     return result
 
+def MdtCalibDbAlgR4Cfg(flags, name="MdtCalibDbAlg",**kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("PropagationSpeedBeta", flags.Muon.Calib.mdtPropagationSpeedBeta)
+    kwargs.setdefault("CreateBFieldFunctions", flags.Muon.Calib.correctMdtRtForBField)
+    kwargs.setdefault("CreateSlewingFunctions", flags.Muon.Calib.correctMdtRtForTimeSlewing)
+    kwargs.setdefault("RtJSON","")
+    kwargs.setdefault("TubeT0JSON","")
+
+    if(kwargs["RtJSON"] or kwargs["TubeT0JSON"]):
+        kwargs.setdefault("ReadKeyRt","") 
+        kwargs.setdefault("ReadKeyTube","")
+        kwargs.setdefault("dbPayloadType","")
+
+    else:
+        kwargs.setdefault("ReadKeyRt","/MDT/RTJSONS") 
+        kwargs.setdefault("ReadKeyTube","/MDT/T0JSONS")
+        kwargs.setdefault("dbPayloadType","TTree")
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        result.merge(addFolders(flags,[kwargs["ReadKeyRt"]], className='CondAttrListCollection', detDb="MDT_OFL", tag="MDTRTTREE-RUN4-01"))
+        result.merge(addFolders(flags,[kwargs["ReadKeyTube"]], className='CondAttrListCollection', detDb="MDT_OFL", tag="MDTT0TREE-RUN4-01"))
+
+    alg = CompFactory.MuonCalibR4.MdtCalibDbAlg(name, **kwargs)
+    result.addCondAlgo (alg, primary = True)
+    return result
+
+
+
 def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     result = ComponentAccumulator()
     result.merge(MuonGeoModelCfg(flags))    
-    if flags.GeoModel.Run is LHCPeriod.Run4 and flags.Muon.usePhaseIIGeoSetup:
-        alg = CompFactory.MuonCalibR4.MdtCalibDbAlg(name)
-        result.addCondAlgo (alg, primary = True)
-        return result
-    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
-    result.merge(MdtCondDbAlgCfg(flags))
-
     # setup COOL folders
-    acc, mdt_folder_name_appendix = _setupMdtCondDB(flags)
-    result.merge(acc)
+    if not flags.Muon.Calib.readMdtJSON:
+        acc, mdt_folder_name_appendix = _setupMdtCondDB(flags)
+        result.merge(acc)
+    
+    if not flags.Muon.useMdtDcsData:
+        kwargs.setdefault("ReadKeyDCS", "" )
+    else:
+        from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+        result.merge(MdtCondDbAlgCfg(flags))
+    
+    if flags.Muon.Calib.fitAnalyticRt:        
+        from MuonCondAlgR4.ConditionsConfig import MdtAnalyticRtCalibAlgCfg
+        kwargs.setdefault("WriteKey", "LookUpMdtCalibDb")
+        result.merge(MdtAnalyticRtCalibAlgCfg(flags, ReadKey="LookUpMdtCalibDb"))
+    if flags.Muon.Calib.readMdtJSON:
+        result.merge(MdtCalibDbAlgR4Cfg(flags, name, **kwargs))
+        return result
 
     # set some default proper ties
     if flags.Common.isOnline and not flags.Input.isMC:
@@ -122,8 +158,7 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
         kwargs.setdefault("defaultT0", 40)
     else:
         kwargs.setdefault("defaultT0", 799)
-    if not flags.Muon.useMdtDcsData:
-        kwargs.setdefault("ReadKeyDCS", "" )
+    
     kwargs.setdefault("UseMLRt",  flags.Muon.Calib.useMLRt )
     kwargs.setdefault("TimeSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     kwargs.setdefault("MeanCorrectionVsR", [ -5.45973, -4.57559, -3.71995, -3.45051, -3.4505, -3.4834, -3.59509, -3.74869, -3.92066, -4.10799, -4.35237, -4.61329, -4.84111, -5.14524 ])
@@ -133,7 +168,7 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     kwargs.setdefault("CreateSlewingFunctions", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("AthRNGSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
-    
+
     kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
     alg = CompFactory.MdtCalibDbAlg (name, **kwargs)
     result.addCondAlgo (alg, primary = True)
@@ -198,5 +233,18 @@ def NswErrorCalibDbAlgCfg(flags, name = "NswErrorCalibDbAlg", **kwargs):
          
     kwargs.setdefault("ReadKeys", folderNames) 
     the_alg = CompFactory.NswUncertDbAlg(name = name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
+
+def MmCTPCondDbAlgCfg(flags, name = "MmCTPCondDbAlg", **kwargs):
+    result = ComponentAccumulator()
+    if "readFromJSON" in kwargs:
+      kwargs.setdefault("ReadKey", "")
+    else:
+      from IOVDbSvc.IOVDbSvcConfig import addFolders
+      kwargs.setdefault("ReadKey", "/MDT/MM/CTPSLOPE")
+      result.merge(addFolders(flags, kwargs["ReadKey"], className='CondAttrListCollection', detDb="MDT_OFL")) 
+
+    the_alg = CompFactory.MmCTPCondDbAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result

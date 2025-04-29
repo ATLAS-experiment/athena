@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRUTH_VERSIONS_TRUTHPARTICLE_V1_H
@@ -108,13 +108,13 @@ namespace xAOD {
       size_t nParents() const;
 
       /// Retrieve the i-th mother (TruthParticle) of this TruthParticle
-      const TruthParticle_v1* parent( size_t i = 0 ) const;
+      const TruthParticle_v1* parent( size_t i) const;
 
       /// Number of children of this particle
       size_t nChildren() const;
 
       /// Retrieve the i-th mother (TruthParticle) of this TruthParticle
-      const TruthParticle_v1* child( size_t i = 0 ) const;
+      const TruthParticle_v1* child( size_t i) const;
 
       /// @todo Add mappings of e.g. isPrimary, isDecayed, isPrompt,
       /// isFromDecay, hasHadronicDecay, hasLeptonicDecay,
@@ -307,6 +307,10 @@ namespace xAOD {
       bool isBSM() const;
       /// Check if this is generator stable particle
       bool isGenStable() const;
+      /// Check if this is a stable particle (generator or simulation produced)
+      bool isStable() const;
+      /// Check if this particle was produced during the simulation
+      bool isSimulationParticle() const;
 
       /// @}
 

@@ -8,8 +8,8 @@ import re
 from shutil import copyfile
 import ROOT
 
-
 log = logging.getLogger(__name__)
+logging.basicConfig(format = '%(message)s', level = logging.INFO)
 
 # Needed for generating TStreamerInfo of xAOD::TrigConfKeys
 ROOT.gInterpreter.ProcessLine('#include "xAODTrigger/TrigConfKeys.h"')
@@ -39,12 +39,15 @@ def append_versions(objects, cname):
         #objects.append(cname)
 
 if __name__ == '__main__':
+
+    is_main = os.getenv('AtlasBuildBranch') == 'main'
+
     objects = []
     if doTrigEDMOnly:
         from TrigEDMConfig.TriggerEDM import getRawTriggerEDMList
         from TrigEDMConfig.DataScoutingInfo import getAllDataScoutingIdentifiers
         BS_destinations = ["BS"] + getAllDataScoutingIdentifiers()
-        log.warning("BS_destinations = {}".format(BS_destinations))
+        log.info("BS_destinations = {}".format(BS_destinations))
         for item in getRawTriggerEDMList(flags=None, runVersion=3):
             if any(bs in item[1].split() for bs in BS_destinations):
                 objects.append(item[0].split("#")[0])
@@ -64,8 +67,8 @@ if __name__ == '__main__':
 
     objects = list(set(objects))
 
-    log.warning("Will extract TStreamerInfo for the following types:")
-    log.warning(objects)
+    log.info("Will extract TStreamerInfo for the following types:")
+    log.info(objects)
 
     copyfile(bs_filename, "original_" + bs_filename)
     
@@ -82,11 +85,15 @@ if __name__ == '__main__':
             log.warning("{}: 0x{:x}".format(item[0], item[1]))
         log.warning("Please ask the Trigger EDM coordinator to add them to bs-streamerinfos.root")
     else:
-        log.warning("No new objects detected")
+        log.info("No new objects detected")
 
     exit_code_err = len(new_objects)
     if exit_code_err:
-        log.error("New TStreamerInfos detected")
+        if is_main:
+            log.warning("New TStreamerInfos detected but ignoring this error for early Phase II commissioning period in main during P1 data taking.")
+            exit_code_err = 0 # ignore error for main
+        else:
+            log.error("New TStreamerInfos detected")
     else:
         log.info("No new TStreamerInfos detected")
 

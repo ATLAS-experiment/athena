@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/Identifier.h"
@@ -96,7 +96,7 @@ void  TRT_BarrelElement::setPreviousInR(const TRT_BarrelElement *element)
 
 
 
-HepGeom::Transform3D TRT_BarrelElement::calculateStrawTransform(int straw) const
+HepGeom::Transform3D TRT_BarrelElement::calculateStrawTransform(int straw, GeoAlignmentStore* alignStore) const
 {
   // NB The tranformation to a straw is reconstructed here precisely as
   // it was ... hopefully... in the factory.  One could eliminate this
@@ -110,7 +110,7 @@ HepGeom::Transform3D TRT_BarrelElement::calculateStrawTransform(int straw) const
     size_t offsetInto = m_descriptor->getStrawTransformOffset();
     double zPos = -m_descriptor->strawZPos();
     double zAng =  m_code.isPosZ() ? M_PI : 0;
-    return  Amg::EigenTransformToCLHEP(getMaterialGeom()->getAbsoluteTransform()*((*f)(straw+offsetInto)))
+    return  Amg::EigenTransformToCLHEP(getMaterialGeom()->getAbsoluteTransform(alignStore)*((*f)(straw+offsetInto)))
       * HepGeom::RotateY3D(zAng)*HepGeom::TranslateZ3D(zPos)
       * calculateLocalStrawTransform(straw);
     ////return  conditions()->solenoidFrame()
@@ -163,7 +163,7 @@ const Trk::Surface& TRT_BarrelElement::elementSurface() const
   return *m_surface;
 }
 
-void TRT_BarrelElement::createSurfaceCache() const
+void TRT_BarrelElement::createSurfaceCache(GeoAlignmentStore*) const
 {
  // create the surface cache
  if (!m_surfaceCache.isValid()) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkMaterialProviderTool.h"
@@ -39,8 +39,6 @@ void myLocal_resetTrack(Trk::Track& track )
 Trk::TrkMaterialProviderTool::TrkMaterialProviderTool(const std::string& t, const std::string& n, const IInterface* p)
   :	AthAlgTool(t,n,p),
 	m_DetID(nullptr),
-	m_calorimeterVolume(nullptr),
-	m_indetVolume(nullptr),
 	m_maxNTracksIso(2),
 	m_paramPtCut(15.0*Gaudi::Units::GeV),
 	m_useCaloEnergyMeasurement(true),
@@ -100,13 +98,13 @@ Trk::TrkMaterialProviderTool::initialize()
 
   ATH_CHECK(m_trackingVolumesSvc.retrieve());
 
-  m_calorimeterVolume = new Trk::Volume(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer));
+  m_calorimeterVolume = std::make_unique<Trk::Volume>(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer));
   if(!m_calorimeterVolume) {
     ATH_MSG_ERROR("Unable to retrieve MuonSpectrometerEntryLayer volume");
     return StatusCode::FAILURE;
   }
 
-  m_indetVolume = new Trk::Volume(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::CalorimeterEntryLayer));
+  m_indetVolume = std::make_unique<Trk::Volume>(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::CalorimeterEntryLayer));
   if(!m_indetVolume) {
     ATH_MSG_ERROR("Unable to retrieve CalorimeterEntryLayer volume");
     return StatusCode::FAILURE;
@@ -1801,12 +1799,9 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
         const Trk::TrackStateOnSurface* newTSOSFirst =
           new Trk::TrackStateOnSurface(
             nullptr, std::move(parsFirst), std::move(meotFirst), typePattern);
-        const Trk::TrackStateOnSurface* newTSOS =
-          (elossFlag != 0
-             ? new Trk::TrackStateOnSurface(
-                 nullptr, std::move(parsLast), std::move(meotLast), typePatternDeposit)
-             : new Trk::TrackStateOnSurface(
-                 nullptr, std::move(parsLast), std::move(meotLast), typePattern));
+        auto whichPattern = (elossFlag != 0) ? typePatternDeposit : typePattern;
+        const Trk::TrackStateOnSurface* newTSOS = new Trk::TrackStateOnSurface( nullptr, 
+            std::move(parsLast), std::move(meotLast), whichPattern);
         newTSOSvector->push_back(newTSOSFirst);
         newTSOSvector->push_back(newTSOS);
       } else {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -9,8 +9,6 @@
 
 MvaTESEvaluator::MvaTESEvaluator(const std::string& name)
   : TauRecToolBase(name) {
-  declareProperty("WeightFileName", m_sWeightFileName = "");
-  declareProperty("WeightFileName0p", m_sWeightFileName0p = "");
 }
 
 

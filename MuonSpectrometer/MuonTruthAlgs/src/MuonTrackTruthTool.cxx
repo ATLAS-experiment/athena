@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthAlgs/MuonTrackTruthTool.h"
@@ -22,13 +22,8 @@
 
 namespace Muon {
 
-    MuonTrackTruthTool::MuonTrackTruthTool(const std::string& ty, const std::string& na, const IInterface* pa) :
-        AthAlgTool(ty, na, pa), m_detMgr(nullptr) {
-        declareInterface<IMuonTrackTruthTool>(this);
-    }
 
     StatusCode MuonTrackTruthTool::initialize() {
-        ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_truthTrajectoryBuilder.retrieve());
@@ -298,19 +293,8 @@ namespace Muon {
                 }
 
                 if (m_idHelperSvc->isMdt(id)) {
-                    if (m_detMgr && !m_detMgr->getMdtReadoutElement(id)) {
-                        ATH_MSG_VERBOSE(" discarding: no detEl "
-                                        << "  " << m_idHelperSvc->toString(id) << "   barcode " << barcode);
-                        continue;
-                    }
                     eit->second.mdtHits.insert(*it);
                 } else if (m_idHelperSvc->isRpc(id)) {
-                    if (m_detMgr && !m_detMgr->getRpcReadoutElement(id)) {
-                        ATH_MSG_VERBOSE(" discarding: no detEl "
-                                        << "  " << m_idHelperSvc->toString(id) << "   barcode " << barcode);
-                        continue;
-                    }
-
                     if (m_idHelperSvc->stationIndex(id) == MuonStationIndex::BO && m_idHelperSvc->rpcIdHelper().doubletR(id) == 2) {
                         ATH_MSG_VERBOSE(" Discarding non existing RPC hit " << m_idHelperSvc->toString(id));
                         continue;
@@ -318,25 +302,10 @@ namespace Muon {
 
                     eit->second.rpcHits.insert(*it);
                 } else if (m_idHelperSvc->isTgc(id)) {
-                    if (m_detMgr && !m_detMgr->getTgcReadoutElement(id)) {
-                        ATH_MSG_VERBOSE(" discarding: no detEl "
-                                        << "  " << m_idHelperSvc->toString(id) << "   barcode " << barcode);
-                        continue;
-                    }
                     eit->second.tgcHits.insert(*it);
                 } else if (m_idHelperSvc->issTgc(id)) {
-                    if (m_detMgr && !m_detMgr->getsTgcReadoutElement(id)) {
-                        ATH_MSG_VERBOSE(" discarding: no detEl "
-                                        << "  " << m_idHelperSvc->toString(id) << "   barcode " << barcode);
-                        continue;
-                    }
                     eit->second.stgcHits.insert(*it);
                 } else if (m_idHelperSvc->isMM(id)) {
-                    if (m_detMgr && !m_detMgr->getMMReadoutElement(id)) {
-                        ATH_MSG_VERBOSE(" discarding: no detEl "
-                                        << "  " << m_idHelperSvc->toString(id) << "   barcode " << barcode);
-                        continue;
-                    }
                     eit->second.mmHits.insert(*it);
                 }
                 if (msgLvl(MSG::VERBOSE)) {

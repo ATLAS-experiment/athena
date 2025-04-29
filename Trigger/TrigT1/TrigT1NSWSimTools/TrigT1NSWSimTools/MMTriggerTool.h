@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMTRIGGERTOOL_H
@@ -7,62 +7,48 @@
 
 //basic includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "GaudiKernel/ConcurrencyFlags.h"
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/Property.h"
-#include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/IIncidentSvc.h"
 #include "MuonIdHelpers/MmIdHelper.h"
 
 //local includes
 #include "TrigT1NSWSimTools/IMMTriggerTool.h"
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
-#include "TTree.h"
 
 #include "MuonDigitContainer/MmDigitContainer.h"
 #include "MuonDigitContainer/MmDigit.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "TrackRecord/TrackRecordCollection.h"
 
-namespace MuonGM {
-  class MuonDetectorManager;
-}
-
 
 // namespace for the NSW LVL1 related classes
 namespace NSWL1 {
 
-  class MMTriggerTool: virtual public IMMTriggerTool,
-    public AthAlgTool,
-    public IIncidentListener {
+  class MMTriggerTool : public extends<AthAlgTool, IMMTriggerTool> {
 
   public:
 
     MMTriggerTool(const std::string& type, const std::string& name, const IInterface* parent);
+    virtual ~MMTriggerTool() override = default;
 
-    virtual ~MMTriggerTool()=default;
-
-    virtual StatusCode initialize();
-
-    virtual void handle (const Incident& inc);
-
-    StatusCode runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const;
+    virtual StatusCode initialize() override;
+    StatusCode attachBranches(MuonVal::MuonTesterTree &tree) override;
+    StatusCode runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const override;
 
   private:
-
-    // needed Servives, Tools and Helpers
-    ServiceHandle< IIncidentSvc > m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};       //!< Athena/Gaudi incident Service
-
-    // read data handle
     SG::ReadHandleKey<McEventCollection> m_keyMcEventCollection{this,"McEventCollection","TruthEvent","Location of TruthEvent"};
     SG::ReadHandleKey<TrackRecordCollection> m_keyMuonEntryLayer{this,"MuonEntryLayer","MuonEntryLayer","Location of MuonEntryLayer"};
     SG::ReadHandleKey<MmDigitContainer> m_keyMmDigitContainer{this,"MmDigitContainer","MM_DIGITS","Location of MmDigitContainer"};
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of MuonDetectorManager condition data"};
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+
     Gaudi::Property<bool>  m_isMC            {this, "IsMC",         true, "This is MC"};
     Gaudi::Property<bool>  m_doTruth         {this, "DoTruth",     false, "Process truth information. Disabled by default"};
 
     // Parameters for Diamond Road algorithms
-    Gaudi::Property<bool>  m_trapShape            {this, "TrapezoidalShape",         true, "Consider the quadruplet as a trapezoid"};
     Gaudi::Property<int>   m_diamRoadSize         {this, "DiamondRoadSize",          8,    "Number of strips to create a road"};
     Gaudi::Property<bool>  m_uv                   {this, "DiamondUV",                true, "Include Stereo planes for tracking"};
     Gaudi::Property<int>   m_diamXthreshold       {this, "DiamondEtaThreshold",      3,    "Number of Eta planes for coincidences"};
@@ -85,82 +71,52 @@ namespace NSWL1 {
     Gaudi::Property<float>        m_dThetaMax       {this, "DThetaMax",  0.015,          "Maximum dTheta [rad]"};
     Gaudi::Property<int>          m_dThetaBits      {this, "DThetaBits", 5,              "Number of dTheta bits"};
 
-    std::shared_ptr<MMT_Parameters> m_par_large;
-    std::shared_ptr<MMT_Parameters> m_par_small;
-    const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
-    const MmIdHelper*                  m_MmIdHelper;        //!< MM offline Id helper
+    std::unique_ptr<MMT_Diamond> m_diamond;
 
-    //Histogram
-    StatusCode book_branches();                       //!< book the branches
-    void clear_ntuple_variables();                    //!< clear the variables used in the analysis ntuple
-    void fillNtuple(const histogramDigitVariables& histDigVars) const;
-
-    /* None of the TTree filling is thread-safe and should really be refactored.
-     * But we check in initialize() that this is only used in single-threaded mode.
-     */
-    TTree* m_tree ATLAS_THREAD_SAFE{nullptr};       //!< ntuple for analysis
-    std::vector<unsigned int>* m_trigger_diamond_ntrig ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_diamond_bc ATLAS_THREAD_SAFE{nullptr};
-    std::vector<char>* m_trigger_diamond_sector ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_diamond_stationPhi ATLAS_THREAD_SAFE{nullptr};
-    std::vector<unsigned int>* m_trigger_diamond_totalCount ATLAS_THREAD_SAFE{nullptr};
-    std::vector<unsigned int>* m_trigger_diamond_realCount ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_diamond_iX ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_diamond_iU ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_diamond_iV ATLAS_THREAD_SAFE{nullptr};
-    std::vector<unsigned int>* m_trigger_diamond_XbkgCount ATLAS_THREAD_SAFE{nullptr};
-    std::vector<unsigned int>* m_trigger_diamond_UVbkgCount ATLAS_THREAD_SAFE{nullptr};
-    std::vector<unsigned int>* m_trigger_diamond_XmuonCount ATLAS_THREAD_SAFE{nullptr};
-    std::vector<unsigned int>* m_trigger_diamond_UVmuonCount ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_diamond_age ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_mx ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_my ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_Uavg ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_Vavg ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_mxl ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_theta ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_eta ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_dtheta ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_phi ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_diamond_phiShf ATLAS_THREAD_SAFE{nullptr};
-    std::vector<uint8_t>* m_trigger_diamond_TP_phi_id ATLAS_THREAD_SAFE{nullptr};
-    std::vector<uint8_t>* m_trigger_diamond_TP_R_id ATLAS_THREAD_SAFE{nullptr};
-    std::vector<uint8_t>* m_trigger_diamond_TP_dTheta_id ATLAS_THREAD_SAFE{nullptr};
-
-    std::vector<double>* m_trigger_RZslopes ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_trueEtaRange ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_truePtRange ATLAS_THREAD_SAFE{nullptr};
-
-    std::vector<int>* m_trigger_VMM ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_plane ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_station ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int>* m_trigger_strip ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_slope ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_trueThe ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_truePhi ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_trueDth ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_trueEtaEnt ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_trueTheEnt ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_truePhiEnt ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_trueEtaPos ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_trueThePos ATLAS_THREAD_SAFE{nullptr};
-    std::vector<double>* m_trigger_truePhiPos ATLAS_THREAD_SAFE{nullptr};
-
-    std::vector<std::string> *m_NSWMM_dig_stationName ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int> *m_NSWMM_dig_stationEta ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int> *m_NSWMM_dig_stationPhi ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int> *m_NSWMM_dig_multiplet ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int> *m_NSWMM_dig_gas_gap ATLAS_THREAD_SAFE{nullptr};
-    std::vector<int> *m_NSWMM_dig_channel ATLAS_THREAD_SAFE{nullptr};
-
-    std::vector< std::vector<float> >  *m_NSWMM_dig_time ATLAS_THREAD_SAFE{nullptr};
-    std::vector< std::vector<float> >  *m_NSWMM_dig_charge ATLAS_THREAD_SAFE{nullptr};
-    std::vector< std::vector<int> >    *m_NSWMM_dig_stripPosition ATLAS_THREAD_SAFE{nullptr};
-    std::vector< std::vector<double> > *m_NSWMM_dig_stripLposX ATLAS_THREAD_SAFE{nullptr};
-    std::vector< std::vector<double> > *m_NSWMM_dig_stripLposY ATLAS_THREAD_SAFE{nullptr};
-    std::vector< std::vector<double> > *m_NSWMM_dig_stripGposX ATLAS_THREAD_SAFE{nullptr};
-    std::vector< std::vector<double> > *m_NSWMM_dig_stripGposY ATLAS_THREAD_SAFE{nullptr};
-    std::vector< std::vector<double> > *m_NSWMM_dig_stripGposZ ATLAS_THREAD_SAFE{nullptr};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_ntrig ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_bc ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<char> > m_trigger_diamond_sector ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_sectorPhi ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_totalCount ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_realCount ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_iX ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_iU ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_iV ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_XbkgCount ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_UVbkgCount ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_XmuonCount ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_UVmuonCount ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_age ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_mx ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_my ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_Uavg ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_Vavg ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_mxl ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_theta ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_eta ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_dtheta ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_phi ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_phiShf ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<uint8_t> > m_trigger_diamond_TP_phi_id ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<uint8_t> > m_trigger_diamond_TP_R_id ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<uint8_t> > m_trigger_diamond_TP_dTheta_id ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_RZslopes ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_trueEtaRange ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_truePtRange ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_VMM ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_plane ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_station ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_strip ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_slope ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_trueThe ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_truePhi ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_trueDth ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_trueEtaEnt ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_trueTheEnt ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_truePhiEnt ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_trueEtaPos ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_trueThePos ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_truePhiPos ATLAS_THREAD_SAFE {};
   };  // end of MMTriggerTool class
 } // namespace NSWL1
 #endif

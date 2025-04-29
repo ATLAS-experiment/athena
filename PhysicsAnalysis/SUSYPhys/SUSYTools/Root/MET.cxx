@@ -257,43 +257,4 @@ StatusCode SUSYObjDef_xAOD::GetMETSig(xAOD::MissingETContainer &met,
   return StatusCode::SUCCESS;
 }
 
-// Crack region cleaning for PFlow jets: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/HowToCleanJetsR21#EGamma_Crack_Electron_topocluste 
-bool SUSYObjDef_xAOD::IsPFlowCrackVetoCleaning(	const xAOD::ElectronContainer* elec, 
-						const xAOD::PhotonContainer* gamma ) const {
-
-  if (m_jetInputType != xAOD::JetInput::EMPFlow) {
-    return true;
-  }
-
-  bool passPFlowCVCleaning = true;
-
-  if (elec) {
-    for (const xAOD::Electron* el : *elec) {
-      if (acc_passCrackVetoCleaning.isAvailable(*el)) {
-	if (!acc_passCrackVetoCleaning(*el)) {
-	  passPFlowCVCleaning = false;
-	  break;
-	}
-      } else {
-	ATH_MSG_WARNING("DFCommonCrackVetoCleaning variable is not available! Use p3830 onwards for PFlow jets!");
-      }
-    }
-  }
-
-  if (passPFlowCVCleaning && gamma) {
-    for (const xAOD::Photon* ph : *gamma) {
-      if (acc_passCrackVetoCleaning.isAvailable(*ph)) {
-	if (!acc_passCrackVetoCleaning(*ph)) {
-	  passPFlowCVCleaning = false;
-	  break;
-	}
-      } else {
-	ATH_MSG_WARNING("DFCommonCrackVetoCleaning variable is not available! Use p3830 onwards for PFlow jets!");
-      }
-    }
-  }
-
-  return passPFlowCVCleaning;
-}
-
 }

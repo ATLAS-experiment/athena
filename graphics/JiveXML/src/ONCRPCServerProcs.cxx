@@ -48,10 +48,17 @@ namespace JiveXML {
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
+#if defined(__clang__) && __clang_major__ >= 19
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
     if (!svc_sendreply(transp, (xdrproc_t)xdr_void, 0))
       //check global errno variable on result
       checkResult(errno,"dispatch thread sending reply to NULLPROC call",ServerSvc);
   }
+#if defined(__clang__) && __clang_major__ >= 19
+# pragma clang diagnostic pop
+#endif
 #if __GNUC__ >= 8
 # pragma GCC diagnostic pop
 #endif

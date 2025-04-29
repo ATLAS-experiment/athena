@@ -3,27 +3,13 @@
 # art-type: grid
 # art-include: main/Athena
 # art-memory: 8192
-# art-input-nfiles: 2
 # art-output: *.txt
 # art-output: *.root
 set -e
 
+source FPGATrackSim_CommonEnv.sh
 
-RDO=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
-
-RDO_EVT=500
-if [ -z $ArtJobType ]
-then
-    RDO=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root
-    RDO_EVT=-1
-fi
-
-echo "Running over " $RDO_EVT " events"
-
-
-GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-BANKS_VERSION="v0.20" # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
-COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_9L/${BANKS_VERSION}/combined_matrix.root"
+echo "Running over ${RDO_EVT} events"
 
 # make wrapper file
 echo "... RDO to AOD with sim"
@@ -32,54 +18,68 @@ Reco_tf.py --CA \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName='wrapper.root'" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --postInclude "FPGATrackSimSGInput.FPGATrackSimSGInputConfig.FPGATrackSimSGInputCfg" \
-    --inputRDOFile ${RDO} \
+    --inputRDOFile "${RDO_SINGLE_MUON}" \
     --outputAODFile AOD.pool.root \
-    --maxEvents ${RDO_EVT}
+    --maxEvents -1
 ls -l
 echo "... RDO to AOD with sim, this part is done ..."
 
 # generate maps
 echo "... Maps Making"
 python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
---filesInput=wrapper.root \
-OutFileName="MyMaps_" \
-Trigger.FPGATrackSim.region=0 \
-GeoModel.AtlasVersion=${GEO_TAG}
+    --filesInput=wrapper.root \
+    OutFileName="MyMaps_" \
+    doInsideOut=True \
+    nSlices=1 \
+    Trigger.FPGATrackSim.region=34 \
+    Trigger.FPGATrackSim.spacePoints=False \
+    Trigger.FPGATrackSim.Hough.secondStage=False \
+    GeoModel.AtlasVersion="${GEO_TAG}"
 ls -l
 echo "... Maps Making, this part is done ..."
 
 mkdir -p maps
-mv MyMaps_region0.rmap maps/eta0103phi0305.rmap
-mv *.rmap maps/eta0103phi0305.subrmap
-mv MyMaps_region0.pmap maps/eta0103phi0305.pmap
-mv *_MeanRadii.txt maps/eta0103phi0305_radii.txt
+mv MyMaps_region*.rmap maps/region34.rmap
+mv MyMaps_region*.subrmap maps/region34.subrmap
+mv MyMaps_region*.pmap maps/region34.pmap
+mv MyMaps_region*.patt maps/region34.patt
+mv *radii.txt maps/region34_radii.txt
+cp /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${MAPS_5L}/region34_lyrmap.json maps/region34_lyrmap.json
+cp /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${MAPS_5L}/*.py maps/
 touch maps/moduleidmap
 
 echo "... Banks generation"
 python -m FPGATrackSimBankGen.FPGATrackSimBankGenConfig \
-    --filesInput=${RDO} \
-    --evtMax=${RDO_EVT} \
-    Trigger.FPGATrackSim.mapsDir=maps
+    --filesInput="${RDO_SINGLE_MUON}" \
+    --evtMax=-1 \
+    Trigger.FPGATrackSim.Hough.genScan=True \
+    Trigger.FPGATrackSim.GenScan.noCuts=False \
+    Trigger.FPGATrackSim.Hough.secondStage=False \
+    Trigger.FPGATrackSim.mapsDir="maps/"
 ls -l
 echo "... Banks generation, this part is done ..."
 
 echo "... const generation on combined matrix file"
 python -m FPGATrackSimBankGen.FPGATrackSimBankConstGenConfig \
-    Trigger.FPGATrackSim.FPGATrackSimMatrixFileRegEx=${COMBINED_MATRIX} \
-    Trigger.FPGATrackSim.mapsDir=./maps/ \
+    Trigger.FPGATrackSim.FPGATrackSimMatrixFileRegEx="${COMBINED_MATRIX}" \
+    Trigger.FPGATrackSim.Hough.genScan=True \
+    Trigger.FPGATrackSim.Hough.secondStage=False \
+    Trigger.FPGATrackSim.mapsDir="maps/" \
     --evtMax=1
 ls -l
 echo "... const generation on combined matrix file, this part is done ..."
 
 mkdir -p banks 
-mv sectors* slices* corr* const.root combined_matrix.root banks
+mv sectors* corr* banks
 
 echo "... analysis on wrapper"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
-Trigger.FPGATrackSim.wrapperFileName="wrapper.root" \
-Trigger.FPGATrackSim.mapsDir=./maps \
-Trigger.FPGATrackSim.tracking=True \
-Trigger.FPGATrackSim.bankDir=./banks/
+    Trigger.FPGATrackSim.wrapperFileName="wrapper.root" \
+    Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
+    Trigger.FPGATrackSim.pipeline='F-600' \
+    Trigger.FPGATrackSim.tracking=True \
+    Trigger.FPGATrackSim.Hough.secondStage=False \
+    Trigger.FPGATrackSim.bankDir=${BANKS_5L}
 ls -l
 echo "... analysis on wrapper, this part is done ..."
 
@@ -104,17 +104,18 @@ echo "... wrapper analysis output verification, this part is done ..."
 
 echo "... analysis on RDO"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
---filesInput=${RDO} \
---evtMax=${RDO_EVT} \
-Trigger.FPGATrackSim.mapsDir=./maps \
-Trigger.FPGATrackSim.tracking=True \
-Trigger.FPGATrackSim.sampleType='singleMuons' \
-Trigger.FPGATrackSim.bankDir=./banks/ \
-Trigger.FPGATrackSim.doEDMConversion=True \
-Trigger.FPGATrackSim.writeToAOD=True \
-Output.AODFileName="FPGATrackSimCITestAOD.root"
-
-
+        --evtMax=${RDO_EVT} \
+        --filesInput=${RDO_SINGLE_MUON} \
+        Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
+        Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
+        Trigger.FPGATrackSim.pipeline='F-600' \
+        Trigger.FPGATrackSim.tracking=True \
+        Trigger.FPGATrackSim.sampleType=${SAMPLE_TYPE} \
+        Trigger.FPGATrackSim.doEDMConversion=True \
+        Trigger.FPGATrackSim.doOverlapRemoval=True \
+        Trigger.FPGATrackSim.Hough.secondStage=False \
+        Trigger.FPGATrackSim.writeToAOD=True \
+        Output.AODFileName="FPGATrackSimCITestAOD.root"
 ls -l
 echo "... analysis on RDO, this part is done ..."
  
@@ -146,4 +147,9 @@ echo "... verification of FPGATrackSim --> xAOD conversion"
 python3 checkConvertedClusters.py
 
 echo "...verification of FPGATrackSim --> xAOD conversion, this part is done ..."
+
+echo "Running F-100 for a few ttbar events"
+FPGATrackSim_F100.sh -t -n 2
+ls -ltr
+echo "done running F-100"
 echo "... all done ..."

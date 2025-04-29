@@ -12,6 +12,7 @@
 
 #include "AthContainers/tools/copyAuxStoreThinned.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/tools/error.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include "AthContainersInterfaces/IAuxStore.h"
 #include "AthContainersInterfaces/IAuxStoreIO.h"
@@ -19,6 +20,7 @@
 #include "CxxUtils/no_sanitize_undefined.h"
 #include "CxxUtils/FloatCompressor.h"
 #include <vector>
+#include <typeinfo>
 
 
 namespace {
@@ -79,6 +81,7 @@ void copyAuxStoreThinned NO_SANITIZE_UNDEFINED
 
   // The auxiliary IDs that the original container has:
   SG::auxid_set_t auxids = orig.getAuxIDs();
+  SG::auxid_set_t decors = orig.getDecorIDs();
 
   SG::auxid_set_t dyn_auxids;
   SG::auxid_set_t sel_auxids;
@@ -124,6 +127,16 @@ void copyAuxStoreThinned NO_SANITIZE_UNDEFINED
     const void* src = orig.getData (auxid);
 
     if (!src) continue;
+
+    // Warn if this is a decoration --- decorations should have been locked
+    // by now, except for mcEventWeights, for which this is expected.
+    if (decors.test (auxid) && r.getName (auxid) != "mcEventWeights") {
+      std::ostringstream ss;
+      ss << "unlocked decoration " << r.getName(auxid)
+         << " (" << auxid << ") in object of type "
+         << AthContainers_detail::typeinfoName (typeid (orig));
+      ATHCONTAINERS_WARNING("copyAuxStoreThinned", ss.str());
+    }
 
     // FIXME: Do this via proper interfaces.
     if (const IAuxStoreIO* iio = dynamic_cast<const IAuxStoreIO*> (&orig))

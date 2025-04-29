@@ -44,6 +44,13 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag );
   ATH_CHECK( m_trkAnaDefSvc.isValid() );
 
+  /// Summary plots
+  if( m_trkAnaDefSvc->plotTrackMultiplicities() ) {
+    m_plots_summary = std::make_unique< SummaryPlots >(
+        this, "Tracks/Multiplicities", m_anaTag,
+        m_trkAnaDefSvc->doTrigNavigation() );
+  }
+
   /// Track parameters plots
   if( m_trkAnaDefSvc->plotTrackParameters() ) {
     m_plots_trkParam_vsTest = std::make_unique< TrackParametersPlots >(
@@ -56,17 +63,17 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotTrackMultiplicities() ) {
     m_plots_nTracks_vsTest = std::make_unique< NtracksPlots >(
         this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->testTag(),
-        m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger(),
+        m_trkAnaDefSvc->doTrigNavigation(),
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
     m_plots_nTracks_vsRef = std::make_unique< NtracksPlots >(
         this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->referenceTag(),
-        m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() );
+        m_trkAnaDefSvc->doTrigNavigation() );
   }
 
   /// Efficiency plots
   if( m_trkAnaDefSvc->plotEfficiencies() ) {
     m_plots_eff_vsTest = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->testTag() );
+        this, "Tracks/Efficiencies/Purities", m_anaTag, m_trkAnaDefSvc->testTag() );
     m_plots_eff_vsRef = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag(),
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
@@ -79,7 +86,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Technical efficiency plots
   if( m_trkAnaDefSvc->plotTechnicalEfficiencies()) {
     m_plots_tech_eff_vsTest = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->testTag());
+        this, "Tracks/Efficiencies/Technical/Purities", m_anaTag, m_trkAnaDefSvc->testTag());
     m_plots_tech_eff_vsRef = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->referenceTag(),
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
@@ -244,37 +251,29 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
         truthMu, actualMu, weight ) );
   }
 
-  /// Track multiplicity plots
-  if( m_plots_nTracks_vsTest ) {
-    std::vector< unsigned int > countsTest( NtracksPlots::NCOUNTERS, 0 );
-    countsTest[ NtracksPlots::ALL ] = m_trkAnaDefSvc->isTestTruth() ?
-          trkAnaColls.testTruthVec( TrackAnalysisCollections::FULL ).size() :
-          trkAnaColls.testTrackVec( TrackAnalysisCollections::FULL ).size();
-    countsTest[ NtracksPlots::FS ] = m_trkAnaDefSvc->isTestTruth() ?
-          trkAnaColls.testTruthVec( TrackAnalysisCollections::FS ).size() :
-          trkAnaColls.testTrackVec( TrackAnalysisCollections::FS ).size();
-    countsTest[ NtracksPlots::INROI ] = m_trkAnaDefSvc->isTestTruth() ?
-          trkAnaColls.testTruthVec( TrackAnalysisCollections::InRoI ).size() :
-          trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ).size();
-    countsTest[ NtracksPlots::MATCHED ] = trkAnaColls.matches().getNmatches();
+  /// Track and vertex multiplicity plots
+  std::vector< size_t > testTrackCounts = trkAnaColls.testTrackCounts();
+  std::vector< size_t > refTrackCounts = trkAnaColls.refTrackCounts();
 
-    ATH_CHECK( m_plots_nTracks_vsTest->fillPlots( countsTest, truthMu, actualMu, weight ) );
+  std::vector< size_t > testVertexCounts = trkAnaColls.testVertexCounts();
+  std::vector< size_t > refVertexCounts = trkAnaColls.refVertexCounts();
+
+  if( m_plots_summary ) {
+    ATH_CHECK( m_plots_summary->fillPlots(
+        testTrackCounts, refTrackCounts,
+        trkAnaColls.isNewRoI(), weight ) );
+  }
+
+  if( m_plots_nTracks_vsTest ) {
+    ATH_CHECK( m_plots_nTracks_vsTest->fillPlots(
+        testTrackCounts, testVertexCounts,
+        truthMu, actualMu, weight ) );
   }
 
   if( m_plots_nTracks_vsRef ) {
-    std::vector< unsigned int > countsRef( NtracksPlots::NCOUNTERS, 0 );
-    countsRef[ NtracksPlots::ALL ] = m_trkAnaDefSvc->isReferenceTruth() ?
-          trkAnaColls.refTruthVec( TrackAnalysisCollections::FULL ).size() :
-          trkAnaColls.refTrackVec( TrackAnalysisCollections::FULL ).size();
-    countsRef[ NtracksPlots::FS ] = m_trkAnaDefSvc->isReferenceTruth() ?
-          trkAnaColls.refTruthVec( TrackAnalysisCollections::FS ).size() :
-          trkAnaColls.refTrackVec( TrackAnalysisCollections::FS ).size();
-    countsRef[ NtracksPlots::INROI ] = m_trkAnaDefSvc->isReferenceTruth() ?
-          trkAnaColls.refTruthVec( TrackAnalysisCollections::InRoI ).size() :
-          trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ).size();
-    countsRef[ NtracksPlots::MATCHED ] = trkAnaColls.matches().getNmatches( true );
-
-    ATH_CHECK( m_plots_nTracks_vsRef->fillPlots( countsRef, truthMu, actualMu, weight ) );
+    ATH_CHECK( m_plots_nTracks_vsRef->fillPlots(
+        refTrackCounts, refVertexCounts,
+        truthMu, actualMu, weight ) );
   }
 
   return StatusCode::SUCCESS;
@@ -314,7 +313,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     /// technical efficiency plots 
     if( m_plots_tech_eff_vsTest ) {
       if (  m_trkAnaDefSvc->isTestTruth() and
-            isReconstructable( *particle,
+            nHitsSelVec( *particle,
                                m_trkAnaDefSvc->minSilHits(),
                                m_trkAnaDefSvc->etaBins() ) ) {
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
@@ -322,7 +321,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
       }
       else if (  m_trkAnaDefSvc->isReferenceTruth() ) {
         bool isTechMatched = isMatched ?
-            isReconstructable( *(matches.getMatchedRefTruth( *particle )),
+            nHitsSelVec( *(matches.getMatchedRefTruth( *particle )),
                                m_trkAnaDefSvc->minSilHits(),
                                m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
@@ -332,7 +331,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
         const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
           *particle, m_trkAnaDefSvc->truthProbCut() );
         bool isTechMatched = isMatched ? 
-            isReconstructable( *linkedTruth,
+            nHitsSelVec( *linkedTruth,
                                m_trkAnaDefSvc->minSilHits(),
                                m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
@@ -367,10 +366,10 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
 
     /// fake rate plots (and hits on fake plots)
     bool isUnlinked = isUnlinkedTruth( *particle );
-    bool notTruthMatched = getTruthMatchProb( *particle ) < 0.5;
+    bool isFakeTruth = getTruthMatchProb( *particle ) < m_trkAnaDefSvc->truthProbCut();
     if ( isUnlinked ) {
       if( m_plots_missingTruth ) {
-        ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, notTruthMatched, truthMu, actualMu, weight ) );
+        ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, isFakeTruth, truthMu, actualMu, weight ) );
       }
       if( m_plots_hitsOnUnlinkedTrk ) {
         ATH_CHECK( m_plots_hitsOnUnlinkedTrk->fillPlots( *particle, truthMu, actualMu, weight ) ); 
@@ -379,10 +378,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
 
     bool doFakes = m_trkAnaDefSvc->unlinkedAsFakes() ? true : not isUnlinked;
     if( doFakes and m_plots_fakeRate ) {
-      bool isFake = isFakeTruth( *particle, m_trkAnaDefSvc->truthProbCut(),
-                                 m_trkAnaDefSvc->unlinkedAsFakes() );
-      ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, truthMu, actualMu, weight ) );
-      if( m_plots_hitsOnFakeTrk and isFake ) {
+      ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFakeTruth, truthMu, actualMu, weight ) );
+      if( m_plots_hitsOnFakeTrk and isFakeTruth ) {
         ATH_CHECK( m_plots_hitsOnFakeTrk->fillPlots( *particle, truthMu, actualMu, weight ) );
       }
     }
@@ -484,7 +481,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     /// technical efficiency plots 
     if( m_plots_tech_eff_vsRef ) {
       if( m_trkAnaDefSvc->isReferenceTruth() and 
-          isReconstructable( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) )
+          nHitsSelVec( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) )
       {
         ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
             *particle, isMatched, truthMu, actualMu, weight ) );
@@ -495,7 +492,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
 
         if (isMatched) {
           for ( const xAOD::TruthParticle *thisTruth : (matches.getMatchedTestTruths( *particle ))) {
-            if ( isReconstructable( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) ) {
+            if ( nHitsSelVec( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) ) {
               isTechMatched = true;
               break;
             }
@@ -509,7 +506,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
         const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
           *particle, m_trkAnaDefSvc->truthProbCut() );
         bool isTechMatched = isMatched ? 
-            isReconstructable( *linkedTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
+            nHitsSelVec( *linkedTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
             *particle, isTechMatched, truthMu, actualMu, weight ) );
       }
@@ -645,7 +642,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
 
       /// technical efficiency plots (for EFTruthMatch only)
       if( m_plots_tech_eff_vsTruth ) {
-        if (isReconstructable( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
+        if (nHitsSelVec( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
             ATH_CHECK( m_plots_tech_eff_vsTruth->fillPlots(
             *thisTruth, isMatched , truthMu, actualMu, weight ) );
         }

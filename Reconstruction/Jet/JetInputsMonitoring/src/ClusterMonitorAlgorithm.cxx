@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ClusterMonitorAlgorithm.h"
@@ -82,6 +82,10 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     auto EMThreshold2 = Monitored::Scalar<bool>("EMThreshold2",false);
     auto EMThreshold3 = Monitored::Scalar<bool>("EMThreshold3",false);
     auto EMThreshold4 = Monitored::Scalar<bool>("EMThreshold4",false);
+
+    // Declare cutmasks for plots with specific phi selection
+    auto PhiRegion1 = Monitored::Scalar<bool>("PhiRegion1",false);
+    auto PhiRegion2 = Monitored::Scalar<bool>("PhiRegion2",false);
     
     // Access the Clusters via StoreGate
     SG::ReadHandle<xAOD::CaloClusterContainer> clusters(m_CaloClusterContainerKey, ctx);
@@ -107,7 +111,7 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     nEMClusters = emclusters->size(); 
     fill("ClusterMonitorAllEMClusters", nEMClusters);
 
-    for (const auto& cluster : *clusters) {
+    for (const auto cluster : *clusters) {
       eta = cluster->eta();
       phi = cluster->phi();
       E   = cluster->e()/GeV;
@@ -130,6 +134,11 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       fill("ClusterMonitorAllClusters", eta, phi, E, ET);
       fill("ClusterMonitorExpertPlots", nCells, ClusTime, nBadCells, EBadCells, HotRat, HighHotRat, Isolation, BadLARQFrac, EngPos, AveLARQ, AveTileQ, E, eta, phi);
 
+      // NCB specific histograms:
+      PhiRegion1 = std::abs(phi) <= 0.3 || std::abs(phi) >= 2.7;
+      PhiRegion2 = std::abs(phi) > 0.3 && std::abs(phi) < 2.7;
+      fill("ClusterMonitorNCBPlots", eta, ClusTime, PhiRegion1, PhiRegion2);
+
       // cutmasks for cluster energy thresholds
       Threshold1 = E>m_lowEthresh;
       Threshold2 = E>m_medEthresh;
@@ -148,7 +157,7 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     }
 
     // Repeat for EM clusters - Set monitored variables for this event
-    for (const auto& emcluster : *emclusters) {
+    for (const auto emcluster : *emclusters) {
       emeta = emcluster->eta();
       emphi = emcluster->phi();
       emE   = emcluster->e()/GeV;

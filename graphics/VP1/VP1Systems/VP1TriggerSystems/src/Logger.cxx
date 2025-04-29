@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -62,7 +62,7 @@ std::string VP1Trig::Logger::prefix(std::string str)
 {
   //15 character prefix standard
   if(int(str.size())>15) {
-    str=str.substr(0,15);
+    str.resize(15);
     str=str+std::string("...   ");
     return str;
   }

@@ -19,7 +19,6 @@ namespace PileUpTesting
 
 class PileUpHashHelper_test : public ::testing::Test {};
 
-// cppcheck-suppress syntaxError
 TEST_F(PileUpHashHelper_test, empty_mixture) {
   unsigned long long reference = 0;
   xAOD::EventInfo::PileUpMixtureID test{};

@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
 import AthenaCommon.SystemOfUnits as Units
+from Campaigns.Utils import Campaign
+
 
 class PrimaryPassConfig(FlagEnum):
     VtxLumi = 'VtxLumi'
@@ -21,6 +23,9 @@ class ITkPrimaryPassConfig(FlagEnum):
     FTF = 'ITkFTF'
     FastTracking = 'ITkFast'
     HeavyIon = 'ITkHeavyIon'
+    Acts = 'ITkActs'
+    ActsFast = 'ITkActsFast'
+    ActsHeavyIon = 'ITkActsHeavyIon'
     Default = 'ITkMain'
 
 class TrackFitterType(FlagEnum):
@@ -101,9 +106,6 @@ def createTrackingConfigFlags():
     # Switch for running TIDE Ambi
     icf.addFlag("Tracking.doTIDE_Ambi", lambda prevFlags:
                 not (prevFlags.Beam.Type is BeamType.Cosmics))
-    # Switch to use truth-based pixel cluster splitting emulation
-    icf.addFlag("Tracking.doPixelTruthSplit", lambda prevFlags:
-                prevFlags.GeoModel.Run >= LHCPeriod.Run4)
     # Use simple position and error estimate for on-track pixel cluster
     icf.addFlag("Tracking.doPixelDigitalClustering", False)
     # Try to split pixel clusters
@@ -133,8 +135,14 @@ def createTrackingConfigFlags():
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
                 "Vertex" if (prevFlags.Tracking.PrimaryPassConfig in [
-                             PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon])
+                             PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon] or
+                             prevFlags.Tracking.ITkPrimaryPassConfig in [
+                                 ITkPrimaryPassConfig.HeavyIon, ITkPrimaryPassConfig.ActsHeavyIon]
+                )
                 else "BeamLine")
+
+    # to make eta overlap space points in endcap (aligned with search eta neighbour in strip endcaps)
+    icf.addFlag("Tracking.doEndcapEtaOverlapSpacePoint", lambda prevFlags: prevFlags.ITk.doEndcapEtaNeighbour)
 
     # Tracking passes/configurations scheduled
 
@@ -303,7 +311,11 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)
     icf.addFlag("Tracking.TRTStandalone.minTRT", 15)
 
-    icf.addFlag("Tracking.TRTStandalone.startArOriginalPerigee", False)
+    # Disabled for data-taking up to 2024 included and MC campaigns up to MC23e included
+    icf.addFlag("Tracking.TRTStandalone.startAtOriginalPerigee",
+                lambda prevFlags: (
+                    (not prevFlags.Input.isMC and prevFlags.Input.DataYear >= 2025) or
+                    (prevFlags.Input.isMC and prevFlags.Input.MCCampaign >= Campaign.MC23g)))
 
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)
@@ -526,6 +538,12 @@ def createTrackingConfigFlags():
     def itkPrimaryPass(flags):
         if flags.Tracking.useITkFTF:
             return ITkPrimaryPassConfig.FTF
+        elif TrackingComponent.ActsChain in flags.Tracking.recoChain:
+            return ITkPrimaryPassConfig.Acts
+        elif TrackingComponent.ActsFastChain in flags.Tracking.recoChain:
+            return ITkPrimaryPassConfig.ActsFast
+        elif TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
+            return ITkPrimaryPassConfig.ActsHeavyIon
         elif flags.Tracking.doITkFastTracking:
             return ITkPrimaryPassConfig.FastTracking
         elif flags.Reco.EnableHI:

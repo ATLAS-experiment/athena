@@ -23,6 +23,7 @@
 #include "DerivationFrameworkInDet/TauJets_LepRMParticleThinning.h"
 #include "DerivationFrameworkInDet/UFOTrackParticleThinning.h"
 #include "DerivationFrameworkInDet/IsolationTrackDecorator.h"
+#include "DerivationFrameworkInDet/TagAndProbeTrackParticleThinning.h"
 
 using namespace DerivationFramework;
 
@@ -51,5 +52,5 @@ DECLARE_COMPONENT( PseudoTrackSelector )
 DECLARE_COMPONENT( TauJets_LepRMParticleThinning )
 DECLARE_COMPONENT( UFOTrackParticleThinning )
 DECLARE_COMPONENT( IsolationTrackDecorator )
-
+DECLARE_COMPONENT( TagAndProbeTrackParticleThinning )
 

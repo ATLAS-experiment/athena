@@ -336,11 +336,25 @@ DbStatus DbDatabaseObj::open()   {
         DbDatabase dbH(this);
         const Guid& guid = m_string_t->shapeID();
 
+        // If we're reading, try to deduce the correct type of the POOL internal containers
+        auto containerType = type();
+        if (mode() == pool::READ) {
+          DbContainer testCont;
+          int majorTypeValue = containerType.majorType() >> 8;
+          for(int minorTypeValue = 0; minorTypeValue < pool::DbType::MINOR_MASK; ++minorTypeValue) {
+            DbType testType = pool::makeTechnology(majorTypeValue, minorTypeValue);
+            if(testCont.checkAccess(dbH,"##Shapes",testType).isSuccess()) {
+              containerType = testType;
+              break;
+            }
+          }
+        }
+
         // Add link to "##Shapes" container
         std::unique_ptr<DbToken> l1(new DbToken());
         l1->setDb(name());
         l1->setCont("##Shapes");
-        l1->setTechnology(type().type());
+        l1->setTechnology(containerType.type());
         l1->setClassID(guid);
         l1->oid().first  = m_linkVec.size();
         l1->oid().second = INVALID;
@@ -366,7 +380,7 @@ DbStatus DbDatabaseObj::open()   {
         m_indexMap.insert( IndexMap::value_type(l2->oid().first, m_linkVec.size()));
         m_linkVec.push_back( l2.release() );
 
-        if ( m_shapes.open(dbH,"##Shapes",m_string_t,type(),mode()).isSuccess() )    {
+        if ( m_shapes.open(dbH,"##Shapes",m_string_t,containerType,mode()).isSuccess() )    {
           DbIter<DbString> it;
           for ( it.scan(m_shapes, m_string_t); it.next().isSuccess(); ) {
             //log << DbPrint::Always << "Oid=" << (*it).oid().first << (*it).oid().second << " " << **it << DbPrint::endmsg;
@@ -395,7 +409,7 @@ DbStatus DbDatabaseObj::open()   {
           }
         }
 
-        if ( m_links.open(dbH,"##Links",m_string_t,type(),mode()).isSuccess() )  {
+        if ( m_links.open(dbH,"##Links",m_string_t,containerType,mode()).isSuccess() )  {
           DbIter<DbString> it;
           for ( it.scan(m_links, m_string_t); it.next().isSuccess(); )   {
             std::unique_ptr<DbToken> link(new DbToken());
@@ -422,7 +436,7 @@ DbStatus DbDatabaseObj::open()   {
           }
         }
         
-        if ( m_params.open(dbH,"##Params",m_string_t,type(),mode()).isSuccess() )    {
+        if ( m_params.open(dbH,"##Params",m_string_t,containerType,mode()).isSuccess() )    {
 	  std::vector<std::string> fids;
           DbIter<DbString> it;
           //it.scan(m_params, m_string_t);

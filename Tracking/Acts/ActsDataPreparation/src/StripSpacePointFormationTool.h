@@ -123,7 +123,8 @@ namespace ActsTrk {
         /// @brief The following are parameters to build the space points.
         Gaudi::Property< float > m_stripLengthTolerance{this, "StripLengthTolerance", 0.01};
         Gaudi::Property< float > m_stripGapParameter{this, "StripGapParameter", 0.0015, "Recommend 0.001 - 0.0015 for ITK geometry"};
-        //@}
+        Gaudi::Property< bool > m_useSCTLayerDep_OverlapCuts{this,"useSCTLayerDep_OverlapCuts", true};
+      //@}
 
   };
 

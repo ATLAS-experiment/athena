@@ -128,11 +128,32 @@ namespace ActsTrk
 
   StatusCode TrackToTrackParticleCnvAlg::initialize()
   {
+     std::vector<std::string> supportedStrategies {"BeamLine", "Vertex"};
+     bool isAllowedStrategy = false;
+     for (const std::string& strategy : supportedStrategies) {
+       if (m_perigeeExpression != strategy) continue;
+       isAllowedStrategy = true;
+       break;
+     }
+     ATH_MSG_DEBUG("- perigeeExpression: " << m_perigeeExpression.value());
+     if (not isAllowedStrategy) {
+       ATH_MSG_ERROR("Wrong configuration of the Track to Track Particle Cnv algorithm: perigeeExpression is not supported");
+       return StatusCode::FAILURE;
+     }
+
+     if (m_perigeeExpression == "BeamLine") m_expression_strategy = expressionStrategy::BeamLine;
+     else if (m_perigeeExpression == "Vertex") m_expression_strategy = expressionStrategy::Vertex;
+     else return StatusCode::FAILURE;
+    
      ATH_CHECK( m_tracksContainerKey.initialize() );
      ATH_CHECK( m_trackParticlesOutKey.initialize() );
-     ATH_CHECK( m_beamSpotKey.initialize() );
+     ATH_CHECK( m_beamSpotKey.initialize(m_expression_strategy == expressionStrategy::BeamLine) );
+     ATH_CHECK( m_vertexHandle.initialize(m_expression_strategy == expressionStrategy::Vertex) );
      ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
 
+     m_decorator_actsTracks = m_trackParticlesOutKey.key() + "." + m_decorator_actsTracks.key();
+     ATH_CHECK(m_decorator_actsTracks.initialize());
+     
      ATH_CHECK( m_extrapolationTool.retrieve() ); // for extrapolation to beamline
 
      // propagator for conversion to curvilnear parameters
@@ -170,7 +191,7 @@ namespace ActsTrk
      }
 
      initParticleHypothesisMap();
-
+     
      return StatusCode::SUCCESS;
   }
 
@@ -183,11 +204,41 @@ namespace ActsTrk
        return StatusCode::FAILURE;
     }
 
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> trackLink(m_decorator_actsTracks, ctx);
+
     xAOD::TrackParticleContainer *track_particles = wh_track_particles.ptr();
 
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, ctx );
-    ATH_CHECK(beamSpotHandle.isValid());
-    const InDet::BeamSpotData *beamspot_data = beamSpotHandle.cptr();
+    const InDet::BeamSpotData *beamspot_data {nullptr};
+    const xAOD::VertexContainer *vertexContainer {nullptr};
+    const xAOD::Vertex* primaryVertex {nullptr};
+
+    if (m_expression_strategy == expressionStrategy::BeamLine) {
+      SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, ctx );
+      ATH_CHECK(beamSpotHandle.isValid());
+      beamspot_data = beamSpotHandle.cptr();
+    } 
+
+    if (m_expression_strategy == expressionStrategy::Vertex) {
+      SG::ReadHandle<xAOD::VertexContainer> vertexHandle = SG::makeHandle( m_vertexHandle, ctx );
+      ATH_CHECK( vertexHandle.isValid() );
+      vertexContainer = vertexHandle.cptr();
+      if (vertexContainer->size() == 0) {
+	ATH_MSG_ERROR("Retrieved an empty vertex container. This is totally wrong!");
+	return StatusCode::FAILURE;
+      }
+      
+      for(const xAOD::Vertex* vtx : *vertexContainer) {
+         if(vtx->vertexType() == xAOD::VxType::PriVtx) {
+	   primaryVertex = vtx;
+           break;
+         }
+      }
+
+      if (not primaryVertex) {
+	ATH_MSG_WARNING("Requested to compute track particles wrt primary vertex, but no primary vertex is found. Using dummy vertex");
+	primaryVertex = vertexContainer->front();
+      }
+    }
 
     std::size_t nTracks = 0ul;
     std::vector<const ActsTrk::TrackContainer *> trackContainers;
@@ -205,7 +256,12 @@ namespace ActsTrk
     field_cond_data->getInitializedCache(fieldCache);
 
     const ActsGeometryContext &gctx = m_extrapolationTool->trackingGeometryTool()->getNominalGeometryContext();
-    std::shared_ptr<Acts::PerigeeSurface> perigee_surface = makePerigeeSurface(beamspot_data);    
+    std::shared_ptr<Acts::PerigeeSurface> perigee_surface {nullptr};
+    if (m_expression_strategy == expressionStrategy::BeamLine) {
+      perigee_surface = makePerigeeSurface(beamspot_data);
+    } else if (m_expression_strategy == expressionStrategy::Vertex) {
+      perigee_surface = makePerigeeSurface(*primaryVertex);
+    }
     track_particles->reserve( nTracks );
 
     std::array<const InDetDD::SiDetectorElementCollection *,ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl {};
@@ -230,8 +286,6 @@ namespace ActsTrk
 
     unsigned int converted_track_states=0;
 
-    static const SG::AuxElement::Decorator<ElementLink<ActsTrk::TrackContainer> > trackLink("actsTrack");
-    
     using namespace Acts::UnitLiterals;
     for (const ActsTrk::TrackContainer *tracksContainer : trackContainers) {
       for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
@@ -240,7 +294,7 @@ namespace ActsTrk
 	
 	// convert defining parameters
 	// @TODO add support for other modes available in the legacy converter : wrt a vertex, origin, beamspot ?
-	Acts::BoundTrackParameters perigeeParam = parametersAtBeamLine(ctx, track, *perigee_surface);
+	Acts::BoundTrackParameters perigeeParam = parametersAtPerigee(ctx, track, *perigee_surface);
 	track_particle->setDefiningParameters(perigeeParam.parameters()[Acts::eBoundLoc0],
 					      perigeeParam.parameters()[Acts::eBoundLoc1],
 					      perigeeParam.parameters()[Acts::eBoundPhi],
@@ -345,6 +399,16 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::PixelClusterType)][ActsTrk::detail::HitCategory::Hole],
 			xAOD::numberOfPixelHoles);
+	setSummaryValue(*track_particle,
+			hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
+			xAOD::numberOfInnermostPixelLayerSharedEndcapHits);
+	setSummaryValue(*track_particle,
+			hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 1)
+			+hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2),
+			xAOD::numberOfNextToInnermostPixelLayerSharedEndcapHits);
+	setSummaryValue(*track_particle,
+			hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::pixelTotal),
+			xAOD::numberOfPixelSharedHits);
 	// do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
 	std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
 							       || hitInfo.contributingLayers(ActsTrk::detail::HitSummaryData::pixelTotal))
@@ -373,6 +437,12 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,1)),
 			xAOD::numberOfNextToInnermostPixelLayerOutliers);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,0)),
+			xAOD::numberOfInnermostPixelLayerSharedHits);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,1)),
+			xAOD::numberOfNextToInnermostPixelLayerSharedHits);
 	
 	// Strip summaries
 	setSummaryValue(*track_particle,
@@ -381,6 +451,9 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			hitInfo.contributingOutlierHits( ActsTrk::detail::HitSummaryData::stripTotal ),
 			xAOD::numberOfSCTOutliers);
+	setSummaryValue(*track_particle,
+			hitInfo.contributingSharedHits( ActsTrk::detail::HitSummaryData::stripTotal ),
+			xAOD::numberOfSCTSharedHits);
 	setSummaryValue(*track_particle,
 			specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::StripClusterType)][ActsTrk::detail::HitCategory::Hole],
 			xAOD::numberOfSCTHoles);
@@ -504,22 +577,30 @@ namespace ActsTrk
      return Acts::Surface::makeShared<Acts::PerigeeSurface>(transform);
   }
 
-  Acts::BoundTrackParameters TrackToTrackParticleCnvAlg::parametersAtBeamLine(const EventContext &ctx,
+  std::shared_ptr<Acts::PerigeeSurface> TrackToTrackParticleCnvAlg::makePerigeeSurface(const xAOD::Vertex& vertex) {
+    Acts::Translation3 translation(Acts::Vector3(vertex.position()));
+    Acts::Transform3 transform( translation * Acts::RotationMatrix3::Identity() );
+    return Acts::Surface::makeShared<Acts::PerigeeSurface>(transform);    
+  }
+  
+  Acts::BoundTrackParameters TrackToTrackParticleCnvAlg::parametersAtPerigee(const EventContext &ctx,
                                                         const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
                                                         const Acts::PerigeeSurface &perigee_surface) const {
-     Acts::BoundTrackParameters trackParam = track.createParametersAtReference();
+     const Acts::BoundTrackParameters trackParam = track.createParametersAtReference();
 
      std::optional<const Acts::BoundTrackParameters>
         perigeeParam = m_extrapolationTool->propagate(ctx,
                                                       trackParam,
                                                       perigee_surface,
-                                                      Acts::Direction::Backward, // @TODO try forward if backward fails ?
+                                                      Acts::Direction::Backward(), // @TODO try forward if backward fails ?
                                                       m_paramExtrapolationParLimit.value());
      if (!perigeeParam.has_value()) {
-        ATH_MSG_WARNING( "Failed to extrapolate to perigee");
+        ATH_MSG_WARNING( "Failed to extrapolate to perigee, started from \n" << trackParam << " " << trackParam.referenceSurface().name() );
+
         return trackParam;
      }
      else {
+        ATH_MSG_DEBUG( "Succeeded to extrapolate to perigee ");
         return perigeeParam.value();
      }
   }

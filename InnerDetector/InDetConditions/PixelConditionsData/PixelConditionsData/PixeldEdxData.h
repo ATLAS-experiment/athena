@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsData/PixeldEdxData.h
@@ -61,10 +61,10 @@ class PixeldEdxData {
     static constexpr double m_pMass  = 0.93827;
 
     std::unordered_map<uint32_t,std::vector<double>> m_par;
-    bool m_posneg;
+    bool m_posneg{};
     std::string m_fun;
     std::string m_bb;
-    double m_mindedxformass;
+    double m_mindedxformass{};
 
 };
 

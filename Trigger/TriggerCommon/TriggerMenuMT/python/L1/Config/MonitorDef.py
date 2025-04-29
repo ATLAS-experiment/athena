@@ -126,7 +126,7 @@ class MonitorDef:
                 "L1_eEM24L_3eEM12L", "L1_eEM40L_2eEM18L",
                 "L1_eTAU20M", "L1_eTAU30",
                 "L1_eTAU60", "L1_eTAU80", "L1_eTAU140",
-                "L1_jTAU20", "L1_jTAU30", "L1_jTAU30M",
+                "L1_jTAU20",
                 "L1_cTAU20M", "L1_cTAU35M",
                 "L1_cTAU30M_2cTAU20M",
                 "L1_jJ30", "L1_jJ40", "L1_jJ50",
@@ -137,7 +137,7 @@ class MonitorDef:
                 "L1_3jJ90", "L1_4jJ40", "L1_4jJ50",
                 "L1_3jJ70p0ETA23", "L1_4jJ40p0ETA25", "L1_5jJ40p0ETA25",
                 "L1_jJ140_3jJ60", "L1_jJ85p0ETA21_3jJ40p0ETA25",
-                "L1_jXE60", "L1_jXE70", "L1_jXE80", "L1_jXE90", "L1_jXE100",
+                "L1_jXE60", "L1_jXE70", "L1_jXE80", "L1_jXE90", "L1_jXE100", "L1_eTAU12",
                 "L1_jXE110", "L1_jXE120", "L1_jXE500",
                 "L1_jXEC100",
                 "L1_jTE200",
@@ -158,7 +158,7 @@ class MonitorDef:
                 "L1_BPH-0M9-eEM9-eEM7",  "L1_BPH-0M10-3MU3V", "L1_BPH-0M10-3MU3VF",
                 "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
                 "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ80",
-                "L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M",
+                "L1_cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L",
                 "L1_jMJJ-700",
                 "L1_DY-BOX-2MU3VF", "L1_DY-BOX-MU5VFMU3V",
                 "L1_LAR-ZEE-eEM",  "L1_LFV-MU5VF",
@@ -168,7 +168,7 @@ class MonitorDef:
             topo3_monitems = [
                 "L1_HT190-jJ40s5pETA21",  "L1_jMJJ-500-NFF",
                 "L1_LLP-RO-eEM",  "L1_LLP-NOMATCH-eEM",
-                "L1_SC111-CjJ40",
+                "L1_SC175-SCjJ10",
                 "L1_ZAFB-25DPHI-eEM18M",
                 "L1_jMJJ-300-NFF",
                 "L1_LFV-eEM10L-MU8VF", "L1_LFV-eEM15L-MU5VF",
@@ -219,7 +219,7 @@ class MonitorDef:
                     "L1_jJ70p0ETA23", "L1_jJ55p0ETA23",
                     "L1_jJ80p0ETA25", "L1_jJ85p0ETA21",
                     "L1_jLJ180",
-                    "L1_jEM20", "L1_jEM20M",
+                    "L1_jEM25", "L1_jEM20M",
                     #
                     "L1_eEM7", "L1_eEM10L", "L1_eEM15",
                     "L1_eEM18", "L1_eEM22M", "L1_eEM24VM",
@@ -301,15 +301,6 @@ class MonitorDef:
                     # AFP
                     "L1_AFP_A_OR_C", "L1_AFP_A_AND_C",
                     # AFP combined
-                    "L1_AFP_A_AND_C_J12",
-                    "L1_AFP_A_AND_C_TOF_J20",
-                    "L1_AFP_A_AND_C_TOF_J30",
-                    "L1_AFP_A_AND_C_TOF_J50",
-                    "L1_AFP_A_AND_C_TOF_J75",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J20",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J30",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J50",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J75",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ125",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ50",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ60",
@@ -320,7 +311,6 @@ class MonitorDef:
                     "L1_AFP_A_AND_C_TOF_jJ90",
                     "L1_AFP_A_AND_C_jJ20",
                     "L1_AFP_A_AND_C_jJ30",
-                    "L1_AFP_A_OR_C_J12",
                     "L1_AFP_A_OR_C_jJ20",
                     "L1_AFP_A_OR_C_jJ30",
                     # ZDC
@@ -388,6 +378,7 @@ class MonitorDef:
                     "L1_eEM1_TRT_ZDC_XOR4_VjTE100", "L1_eTAU1_TRT_ZDC_XOR4_VjTE100",
                     #
                     "L1_jJ5", "L1_jJ10",
+                    "L1_jJ5p30ETA49","L1_jJ10p30ETA49",
                     #
                     "L1_jTE3", "L1_jTE4", "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
                     "L1_jTE100", "L1_jTE600", "L1_jTE1500", "L1_jTE6500", "L1_jTE8300",
@@ -425,8 +416,6 @@ class MonitorDef:
                     #
                     "L1_ZDC_XOR_jJ5_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
                     "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
-                    #
-                    "L1_gTE3", "L1_gTE5",
                     #
                     "L1_ZDC_HELT15_jTE4000", "L1_ZDC_HELT20_jTE4000", "L1_ZDC_HELT25_jTE4000",
                     "L1_ZDC_HELT35_jTE4000", "L1_ZDC_HELT50_jTE4000",

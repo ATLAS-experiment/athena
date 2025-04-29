@@ -111,7 +111,7 @@ StatusCode EFTrackingSmearMonAlg::execute() {
                       <<" PDGID=" << part->pdgId()
                       <<" status=" << part->status()                                        
                       ); 
-      if (part->parent()) ATH_MSG_DEBUG (" parent pdgId=" << part->parent()->pdgId()); 
+      if (part->parent(0)) ATH_MSG_DEBUG (" parent pdgId=" << part->parent(0)->pdgId()); 
     }
 
     ///////////////////////////
@@ -137,7 +137,7 @@ StatusCode EFTrackingSmearMonAlg::execute() {
                       <<" PDGID=" << part->pdgId()
                       <<" status=" << part->status()                                        
                       ); 
-      if (part->parent()) ATH_MSG_DEBUG (" parent pdgId=" << part->parent()->pdgId()); 
+      if (part->parent(0)) ATH_MSG_DEBUG (" parent pdgId=" << part->parent(0)->pdgId()); 
     }
 
   return StatusCode::SUCCESS;

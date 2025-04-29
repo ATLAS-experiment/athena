@@ -70,17 +70,6 @@ def setup_path_protection():
         return
 
 
-def config_only_check():
-    try:
-        from __main__ import opts
-        if opts.config_only:
-            mglog.info('Athena running on config only mode: not executing MadGraph')
-            return True
-    except ImportError:
-        pass
-    return False
-
-
 def generate_prep(process_dir):
     global MADGRAPH_COMMAND_STACK
     if not os.access('Cards_bkup',os.R_OK):
@@ -225,13 +214,6 @@ def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs
     Optionally request JPEGs to be kept and request for PMG settings to be used in the param card
     Return the name of the process directory.
     """
-    if config_only_check():
-        # Give some directories to work on
-        try:
-            os.makedirs('dummy_proc/Cards')
-        except os.error:
-            pass
-        return 'dummy_proc'
 
     # Don't run if generating events from gridpack
     if is_gen_from_gridpack():
@@ -331,7 +313,7 @@ def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs
     in_config.close()
     for o in needed_options:
         if o not in option_paths:
-            mglog.warning('Path for option '+o+' not found in original config')
+            mglog.info('Path for option '+o+' not found in original config')
 
     mglog.info('Modifying config paths to avoid use of afs:')
     mglog.info(option_paths)
@@ -360,17 +342,6 @@ def get_default_runcard(process_dir=MADGRAPH_GRIDPACK_LOCATION):
     """ Copy the default runcard from one of several locations
     to a local file with name run_card.tmp.dat"""
     output_name = 'run_card.tmp.dat'
-    if config_only_check():
-        mglog.info('Athena running on config only mode: grabbing run card the old way, as there will be no proc dir')
-        mglog.info('Fetching default LO run_card.dat')
-        if os.access(os.environ['MADPATH']+'/Template/LO/Cards/run_card.dat',os.R_OK):
-            shutil.copy(os.environ['MADPATH']+'/Template/LO/Cards/run_card.dat',output_name)
-            return 'run_card.dat'
-        elif os.access(os.environ['MADPATH']+'/Template/Cards/run_card.dat',os.R_OK):
-            shutil.copy(os.environ['MADPATH']+'/Template/Cards/run_card.dat',output_name)
-            return output_name
-        else:
-            raise RuntimeError('Cannot find default LO run_card.dat!')
 
     # Get the run card from the installation
     run_card=process_dir+'/Cards/run_card.dat'
@@ -389,8 +360,6 @@ def get_default_runcard(process_dir=MADGRAPH_GRIDPACK_LOCATION):
 
 
 def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False, extlhapath=None, required_accuracy=0.01, runArgs=None, bias_module=None, requirePMGSettings=False):
-    if config_only_check():
-        return
 
     # Just in case
     setup_path_protection()
@@ -435,6 +404,8 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
             raise RuntimeError('Could not find f2py, needed for reweighting')
         check_reweight_card(process_dir)
 
+    global MADGRAPH_COMMAND_STACK
+
     if grid_pack:
         #Running in gridpack mode
         mglog.info('Started generating gridpack at '+str(time.asctime()))
@@ -445,6 +416,12 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         if isNLO:
             my_settings['req_acc']=str(required_accuracy)
         else:
+            # At LO, no events are generated. That means we need to move the MS card aside and back.
+            LO_has_madspin = False
+            if os.access(f'{process_dir}/Cards/madspin_card.dat',os.R_OK):
+                MADGRAPH_COMMAND_STACK += [f'mv {process_dir}/Cards/madspin_card.dat {process_dir}/Cards/madspin_card.tmp.dat']
+                os.rename(f'{process_dir}/Cards/madspin_card.dat',f'{process_dir}/Cards/madspin_card.tmp.dat')
+                LO_has_madspin = True
             my_settings = {'gridpack':'true'}
         modify_run_card(process_dir=process_dir,settings=my_settings,skipBaseFragment=True)
 
@@ -485,9 +462,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     currdir=os.getcwd()
     os.chdir(process_dir)
     # Record the change
-    global MADGRAPH_COMMAND_STACK
     MADGRAPH_COMMAND_STACK += [ 'cd ${MGaMC_PROCESS_DIR}' ]
-
 
     # Check the run card
     run_card_consistency_check(isNLO=isNLO)
@@ -541,6 +516,11 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         mglog.info('Tidying up gridpack '+gridpack_name)
 
         if not isNLO:
+            # At LO, no events are generated. That means we need to move the MS card aside and back.
+            if LO_has_madspin:
+                MADGRAPH_COMMAND_STACK += [f'mv {process_dir}/Cards/madspin_card.tmp.dat {process_dir}/Cards/madspin_card.dat']
+                os.rename(f'{process_dir}/Cards/madspin_card.tmp.dat',f'{process_dir}/Cards/madspin_card.dat')
+
             ### LO RUN - names with and without madspin ###
             MADGRAPH_COMMAND_STACK += ['cp '+glob.glob(process_dir+'/'+MADGRAPH_RUN_NAME+'_*gridpack.tar.gz')[0]+' '+gridpack_name]
             shutil.copy(glob.glob(process_dir+'/'+MADGRAPH_RUN_NAME+'_*gridpack.tar.gz')[0],gridpack_name)
@@ -567,7 +547,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
                 mglog.info('remove old tarball')
                 os.unlink('../'+gridpack_name)
                 mglog.info('Package up new tarball')
-                tar = stack_subprocess(['tar','cvzf','../'+gridpack_name,'--exclude=SubProcesses/P*/G*/*_results.dat','--exclude=SubProcesses/P*/G*/*.log','--exclude=SubProcesses/P*/G*/*.txt','.'])
+                tar = stack_subprocess(['tar','--exclude=SubProcesses/P*/G*/*_results.dat','--exclude=SubProcesses/P*/G*/*.log','--exclude=SubProcesses/P*/G*/*.txt','-cvsf','../'+gridpack_name,'.'])
                 tar.wait()
                 MADGRAPH_COMMAND_STACK += ['cd ..','rm -r tmp%i/'%os.getpid()]
                 os.chdir('../')
@@ -581,7 +561,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
             mglog.info('Package up process_dir')
             MADGRAPH_COMMAND_STACK += ['mv '+process_dir+' '+MADGRAPH_GRIDPACK_LOCATION]
             os.rename(process_dir,MADGRAPH_GRIDPACK_LOCATION)
-            tar = stack_subprocess(['tar','czf',gridpack_name,MADGRAPH_GRIDPACK_LOCATION,'--exclude=Events/*/*events*gz','--exclude=SubProcesses/P*/G*/log*txt','--exclude=SubProcesses/P*/G*/events.lhe*','--exclude=*/*.o','--exclude=*/*/*.o','--exclude=*/*/*/*.o','--exclude=*/*/*/*/*.o'])
+            tar = stack_subprocess(['tar','--exclude=Events/*/*events*gz','--exclude=SubProcesses/P*/G*/log*txt','--exclude=SubProcesses/P*/G*/events.lhe*','--exclude=*/*.o','--exclude=*/*/*.o','--exclude=*/*/*/*.o','--exclude=*/*/*/*/*.o','-czf',gridpack_name,MADGRAPH_GRIDPACK_LOCATION])
             tar.wait()
             MADGRAPH_COMMAND_STACK += ['mv '+MADGRAPH_GRIDPACK_LOCATION+' '+process_dir]
             os.rename(MADGRAPH_GRIDPACK_LOCATION,process_dir)
@@ -1008,8 +988,6 @@ def add_lifetimes(process_dir,threshold=None):
     """ Add lifetimes to the generated LHE file.  Should be
     called after generate_events is called.
     """
-    if config_only_check():
-        return
 
     me_exec=get_mg5_executable()
 
@@ -1054,8 +1032,6 @@ def add_madspin(madspin_card=None,process_dir=MADGRAPH_GRIDPACK_LOCATION):
     Only requires a simplified process with the same model that you are
     interested in (needed to set up a process directory for MG5_aMC)
     """
-    if config_only_check():
-        return
 
     me_exec=get_mg5_executable()
 
@@ -1175,7 +1151,7 @@ def madspin_on_lhe(input_LHE,madspin_card,runArgs=None,keep_original=False):
     if runArgs is None:
         raise RuntimeError('Must provide runArgs to madspin_on_lhe')
 
-    outputDS = runArgs.outputTXTFile if hasattr(runArgs,'outputTXTFile') else 'tmp_LHE_events'
+    outputDS = runArgs.outputTXTFile if hasattr(runArgs,'outputTXTFile') else 'tmp_LHE_events.tar.gz'
 
     mglog.info('Moving file over to '+outputDS.split('.tar.gz')[0]+'.events')
     shutil.move(os.getcwd()+'/events.lhe',outputDS.split('.tar.gz')[0]+'.events')
@@ -1194,8 +1170,6 @@ def madspin_on_lhe(input_LHE,madspin_card,runArgs=None,keep_original=False):
 
 
 def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveProcDir=False,runArgs=None,fixEventWeightsForBridgeMode=False):
-    if config_only_check():
-        return
 
     # NLO is not *really* the question here, we need to know if we should look for weighted or
     #  unweighted events in the output directory.  MadSpin (above) only seems to give weighted
@@ -1392,7 +1366,7 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
                 elif '>' not in newline[ newline.find('#'): ]:
                     newline=newline
                 else:
-                    mglog.warning('Found bad LHE line with an XML mark in a comment: "'+newline.strip()+'"')
+                    mglog.info('Found bad LHE line with an XML mark in a comment: "'+newline.strip()+'"')
                     newline=newline[:newline.find('#')]+'#'+ (newline[newline.find('#'):].replace('>','-'))
                 # check for weightnames that should exist, simplify nominal weight names
                 if initrwgt is False:
@@ -1443,7 +1417,7 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
     if hasattr(runArgs,'outputTXTFile'):
         outputDS = runArgs.outputTXTFile
     else:
-        outputDS = 'tmp_LHE_events'
+        outputDS = 'tmp_LHE_events.tar.gz'
 
     mglog.info('Moving file over to '+outputDS.split('.tar.gz')[0]+'.events')
 
@@ -2052,9 +2026,6 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
     This function can get a fresh runcard from DATAPATH or start from the process directory.
     Settings is a dictionary of keys (no spaces needed) and values to replace.
     """
-    if config_only_check():
-        mglog.info('Running config-only. No proc card, so not operating on the run card.')
-        return
 
     # Operate on lower case settings, and choose the capitalization MG5 has as the default (or all lower case)
     settings_lower = {}
@@ -2142,7 +2113,7 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
             continue
         if settings_lower[asetting] is None:
             continue
-        mglog.warning('Option '+asetting+' was not in the default run_card.  Adding by hand a setting to '+str(settings_lower[asetting]) )
+        mglog.info('Option '+asetting+' was not in the default run_card (normal for hidden options).  Adding by hand a setting to '+str(settings_lower[asetting]) )
         newCard.write( ' '+str(settings_lower[asetting])+'   = '+str(asetting)+'\n')
     # close files
     oldCard.close()
@@ -2272,11 +2243,6 @@ def is_gen_from_gridpack():
 
 
 def get_default_config_card(process_dir=MADGRAPH_GRIDPACK_LOCATION):
-    if config_only_check():
-        mglog.info('Athena running on config only mode: grabbing config card the old way, as there will be no proc dir')
-        if os.access(os.environ['MADPATH']+'/input/mg5_configuration.txt',os.R_OK):
-            shutil.copy(os.environ['MADPATH']+'/input/mg5_configuration.txt','local_mg5_configuration.txt')
-            return 'local_mg5_configuration.txt'
 
     lo_config_card=process_dir+'/Cards/me5_configuration.txt'
     nlo_config_card=process_dir+'/Cards/amcatnlo_configuration.txt'
@@ -2305,8 +2271,6 @@ def get_cluster_type(process_dir=MADGRAPH_GRIDPACK_LOCATION):
 
 def is_NLO_run(process_dir=MADGRAPH_GRIDPACK_LOCATION):
     # Very simple check based on the above config card grabbing
-    if config_only_check():
-        return False
     return get_default_config_card(process_dir=process_dir)==process_dir+'/Cards/amcatnlo_configuration.txt'
 
 
@@ -2377,14 +2341,33 @@ def run_card_consistency_check(isNLO=False,process_dir='.'):
 
     # consistency check of 4/5 flavour shceme settings
     FS_updates={}
+    proton_5flav = False
+    jet_5flav = False
     with open(process_dir+'/Cards/proc_card_mg5.dat', 'r') as file:
         content = file.readlines()
-        for line in content:
-            if line.startswith("define p") or line.startswith("define j"):
-                if "b" in line and "b~" in line:
-                    FS_updates['asrwgtflavor'] = 5
-                else:
-                    FS_updates['asrwgtflavor'] = 4
+        for rawline in content:
+            line = rawline.split('#')[0]
+            if line.startswith("define p"):
+                if ('b' in line.split() and 'b~' in line.split()) or ('5' in line.split() and '-5' in line.split()):
+                    proton_5flav = True
+                if 'j' in line.split() and jet_5flav:
+                    proton_5flav = True
+            if line.startswith("define j"):
+                if ('b' in line.split() and 'b~' in line.split()) or ('5' in line.split() and '-5' in line.split()):
+                    jet_5flav = True
+                if 'p' in line.split() and proton_5flav:
+                    jet_5flav = True
+    if proton_5flav or jet_5flav:
+        FS_updates['asrwgtflavor'] = 5
+        if not proton_5flav:
+            mglog.warning('Found 5-flavour jets but 4-flavour proton. This is inconsistent - please pick one.')
+            mglog.warning('Will proceed assuming 5-flavour scheme.')
+        if not jet_5flav:
+            mglog.warning('Found 5-flavour protons but 4-flavour jets. This is inconsistent - please pick one.')
+            mglog.warning('Will proceed assuming 5-flavour scheme.')
+    else:
+        FS_updates['asrwgtflavor'] = 4
+
     if len(FS_updates)==0:
         mglog.warning(f'Could not identify 4- or 5-flavor scheme from process card {process_dir}/Cards/proc_card_mg5.dat')
 

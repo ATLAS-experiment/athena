@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "ParticleCaloExtensionTool.h"
@@ -59,24 +59,16 @@ ParticleCaloExtensionTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode
-ParticleCaloExtensionTool::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-
 std::unique_ptr<Trk::CaloExtension>
 ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
                                          const xAOD::IParticle& particle) const
 {
   if (particle.type() == xAOD::Type::TrackParticle) {
-    const xAOD::TrackParticle* trackParticle =
-      static_cast<const xAOD::TrackParticle*>(&particle);
+    const xAOD::TrackParticle* trackParticle = static_cast<const xAOD::TrackParticle*>(&particle);
     return caloExtension(ctx, *trackParticle);
   }
   if (particle.type() == xAOD::Type::TruthParticle) {
-    const xAOD::TruthParticle* truthParticle =
-      static_cast<const xAOD::TruthParticle*>(&particle);
+    const xAOD::TruthParticle* truthParticle = static_cast<const xAOD::TruthParticle*>(&particle);
     return caloExtension(ctx, *truthParticle);
   } else if (particle.type() == xAOD::Type::Electron) {
     const xAOD::Electron* el = static_cast<const xAOD::Electron*>(&particle);
@@ -89,8 +81,7 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
       return caloExtension(ctx, *(muon->primaryTrackParticle()));
     }
   } else if (particle.type() == xAOD::Type::NeutralParticle) {
-    const xAOD::NeutralParticle* neutralParticle =
-      static_cast<const xAOD::NeutralParticle*>(&particle);
+    const xAOD::NeutralParticle* neutralParticle = static_cast<const xAOD::NeutralParticle*>(&particle);
     return caloExtension(ctx, *neutralParticle);
   }
   ATH_MSG_WARNING("Unsupported IParticle type");
@@ -158,12 +149,7 @@ ParticleCaloExtensionTool::caloExtension(
   const EventContext& ctx,
   const xAOD::TruthParticle& particle) const
 {
-  ParticleHypothesis particleType = muon;
-  if (abs(particle.pdgId()) == 11) {
-    particleType = muon;
-  } else if (abs(particle.pdgId()) == 13) {
-    particleType = muon;
-  }
+  ParticleHypothesis particleType = m_particleStrategy;
   // get start parameters
   const xAOD::TruthVertex* pvtx = particle.prodVtx();
   if (pvtx == nullptr) {
@@ -188,6 +174,7 @@ ParticleCaloExtensionTool::caloExtension(
   const EventContext& ctx,
   const xAOD::NeutralParticle& particle) const
 {
+  ParticleHypothesis particleType = m_particleStrategy;
   // create start parameters
   const Trk::NeutralPerigee& perigee = particle.perigeeParameters();
   double charge = 1.;
@@ -198,7 +185,7 @@ ParticleCaloExtensionTool::caloExtension(
   mom *= 1e10;
   Trk::CurvilinearParameters startPars(pos, mom, charge);
   // get extension
-  return caloExtension(ctx, startPars, alongMomentum, muon);
+  return caloExtension(ctx, startPars, alongMomentum, particleType);
 }
 
 std::unique_ptr<Trk::CaloExtension>
@@ -206,13 +193,6 @@ ParticleCaloExtensionTool::caloExtension(
   const EventContext& ctx,
   const xAOD::TrackParticle& particle) const
 {
-  /*
-   * The following are tuned mainly for
-   * the strategy we want to follow for muons.
-   * But should also work well as a generic
-   * strategy.
-   */
-
   // Start with what the user opted as strategy
   ParticleHypothesis particleType = m_particleStrategy;
 
@@ -284,55 +264,32 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
                 << startPars.position().z() << " momentum "
                 << startPars.momentum().mag());
 
-  // pointers to hold results and go
-  std::vector<const TrackStateOnSurface*>* material = nullptr;
-
   auto extrapolation_timer = Monitored::Timer<std::chrono::microseconds>( "TIME_extrapolation" );
   auto group = Monitored::Group(m_monTool, extrapolation_timer);
   // Start monitoring timer
   extrapolation_timer.start();
-
   /* The last argument to the extrapolate  overload
    * corresponds  to a GeometrySignature value from
    * TrkDetDescrUtils/GeometrySignature.h
    * The extrapolation stop at the indicated subdetector exit
    */
-  std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-    caloParameters = m_extrapolator->collectIntersections(
-      ctx, startPars, propDir, particleType, material, m_extrapolDetectorID);
+  std::unique_ptr<
+      std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
+      caloParameters = m_extrapolator->collectIntersections(
+          ctx, startPars, propDir, particleType, m_extrapolDetectorID);
 
   // Stop monitoring timer
   extrapolation_timer.stop();
 
-  if (material) {
-    ATH_MSG_DEBUG("Got material " << material->size());
-    for (auto& m : *material) {
-      ATH_MSG_DEBUG(
-        " layer "
-        << " param " << m->trackParameters() << " pos: r "
-        << (m->trackParameters() ? m->trackParameters()->position().perp()
-                                 : -999)
-        << " z "
-        << (m->trackParameters() ? m->trackParameters()->position().z() : -999)
-        << " pt "
-        << (m->trackParameters() ? m->trackParameters()->momentum().perp()
-                                 : -999)
-        << " mat "
-        << (m->materialEffectsOnTrack()
-              ? m->materialEffectsOnTrack()->thicknessInX0()
-              : -999));
-      delete m;
-    }
-    delete material;
-  }
   if (!caloParameters) {
     return nullptr;
   }
+
   TrackParametersIdHelper parsIdHelper;
 
   // create final object
-  const TrackParameters* caloEntry = nullptr;
-  const TrackParameters* muonEntry = nullptr;
+  std::unique_ptr<TrackParameters> caloEntry = nullptr;
+  std::unique_ptr<TrackParameters> muonEntry = nullptr;
   std::vector<CurvilinearParameters> caloLayers;
   caloLayers.reserve(caloParameters->size() - 1);
   ATH_MSG_DEBUG(" Found calo parameters: " << caloParameters->size()
@@ -346,13 +303,13 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
     // assign parameters
     // calo aentry muon entry and the crossed calo layers
     if (p.second == 1 && propDir == Trk::alongMomentum) {
-      caloEntry = p.first.release();
+      caloEntry = std::move(p.first);
     } else if (p.second == 3 && propDir == Trk::oppositeMomentum) {
-      caloEntry = p.first.release();
+      caloEntry = std::move(p.first);
     } else if (p.second == 3 && propDir == Trk::alongMomentum) {
-      muonEntry = p.first.release();
+      muonEntry = std::move(p.first);
     } else if (p.second == 4 && propDir == Trk::oppositeMomentum) {
-      muonEntry = p.first.release();
+      muonEntry = std::move(p.first);
     } else {
       bool isEntry = p.second > 0;
       TrackParametersIdentifier id = parsIdHelper.encode(
@@ -362,10 +319,7 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
       /*
        * We construct curvilinear parameters which we push
        * back to the caloLayers.
-       * We need to check if the parameters are already
        * curvillinear.
-       * And if they are we need to clone the
-       * covariance matrix
        */
       if (p.first->type() != Trk::Curvilinear) {
         caloLayers.emplace_back(p.first->position(),
@@ -390,11 +344,11 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
   if (!muonEntry && propDir == Trk::oppositeMomentum &&
       std::abs(startPars.position().perp() - 4255.) < 1.) {
     // muonEntry is right at the startPars position
-    muonEntry = startPars.clone();
+    muonEntry = startPars.uniqueClone();
   }
 
   return std::make_unique<Trk::CaloExtension>(
-    caloEntry, muonEntry, std::move(caloLayers));
+      std::move(caloEntry), std::move(muonEntry), std::move(caloLayers));
 }
 
 std::vector<std::unique_ptr<Trk::Surface>>

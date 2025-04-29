@@ -1,11 +1,38 @@
+/*
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ */
+
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
+#include <stdexcept>
+
+#include <AsgMessaging/MessageCheck.h>
+using namespace asg::msgUserCode;
 
 // EPSILON for hit position float comparisons
 constexpr float EPSILON = 1e-5;
 
-StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo)
+StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> monTool)
 {
+  ANA_MSG_DEBUG("Beginning runOverlapRemoval()");
+  ANA_MSG_DEBUG("Tracks in event: " << tracks.size());
+
+  std::vector<int> flags_OR;
+  flags_OR.clear();
+
+  // Debug variables 
+  int ntrack_passOR = 0;
+  int ntrack = 0;
+  std::vector<int> track_passOR_counter;
+  std::vector<int> track_passOR_barcodefrac;
+  track_passOR_counter.clear();
+  track_passOR_barcodefrac.clear();
+  int track_barcodefrac_num;
+  int track_barcodefrac_den;
+  float track_barcodefrac = -999;
+  int ntrack_passOR_total = 0;
+  int trackMuon_gt0pt5_passOR = 0;
+  float tmp_TrueTrack_BCF = -999;
 
   // Create tracks to hold and compare
   FPGATrackSimTrack fit1, fit2;
@@ -23,8 +50,8 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
     // Create vector for holding duplicate track list
     std::vector<int> duplicates(1,i);
 
-    // Loop through the remaning tracks
-    for(unsigned int j=i+1; j<tracks.size(); j++)
+    // Loop through the rest of the tracks
+    for(unsigned int j=0; j<tracks.size(); j++)
     {
       if(i!=j)
       {
@@ -63,9 +90,52 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
         }
       }
     }
+    findMinChi2MaxHit(duplicates, tracks, flags_OR, minChi2);
 
-    findMinChi2MaxHit(duplicates, tracks);
+    // Monitoring 
+    ntrack++;
+    track_passOR_counter.push_back(ntrack);
+    track_barcodefrac_num = 0;
+    for(auto& hit : tracks.at(i).getFPGATrackSimHits())
+      {
+	      if(hit.getBarcode() == 10001) track_barcodefrac_num++;
+      }
+    track_barcodefrac_den = tracks.at(i).getFPGATrackSimHits().size();
+    if (track_barcodefrac_den > 0){
+      track_barcodefrac = (float)track_barcodefrac_num/(float)track_barcodefrac_den;
+    }
+    fit1.setBarcodeFrac(track_barcodefrac);
+    track_passOR_barcodefrac.push_back(track_barcodefrac);
+    if(fit1.getBarcodeFrac() > 0.5 && tracks.at(i).passedOR()) {
+      trackMuon_gt0pt5_passOR++;
+      if(trackMuon_gt0pt5_passOR == 1) { 
+        tmp_TrueTrack_BCF = fit1.getBarcodeFrac(); 
+      }
+      if(trackMuon_gt0pt5_passOR > 1) { 
+        if (fit1.getBarcodeFrac() > tmp_TrueTrack_BCF) {
+          tmp_TrueTrack_BCF = fit1.getBarcodeFrac();
+        }
+      }
+    }
+
   }
+
+  // Monitoring histograms
+  ANA_MSG_DEBUG("List of tracks passing OR:: ");
+  for(unsigned int i=0; i<tracks.size();i++){
+    if(tracks.at(i).passedOR()) {
+        ntrack_passOR++;
+        ANA_MSG_DEBUG("track# = " << track_passOR_counter[i] << ": chi2 = " << tracks.at(i).getChi2ndof() << " barcodefrac = " << track_passOR_barcodefrac[i]);
+    }
+  }
+  ntrack_passOR_total += ntrack_passOR;
+  auto mon_ntrack_passOR = Monitored::Scalar<int>("ntrack_passOR", ntrack_passOR);
+  auto mon_barcodeFrac_passOR = Monitored::Scalar<int>("barcodeFrac_passOR", tmp_TrueTrack_BCF);
+  Monitored::Group(monTool, mon_ntrack_passOR);
+  Monitored::Group(monTool, mon_barcodeFrac_passOR);
+  ANA_MSG_DEBUG("Number of tracks passing OR (total) = " << ntrack_passOR_total);
+
+  
   return StatusCode::SUCCESS;
 }
 
@@ -102,8 +172,7 @@ int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
         continue;
       }
     }
-    else if(hit1.getPhiCoord() != hit1.getPhiCoord()
-            || hit1.getEtaCoord() != hit1.getEtaCoord())
+    else if (std::abs(hit1.getGPhi()-hit2.getGPhi())>0.001 && std::abs(hit1.getZ()-hit2.getZ())>0.001 && std::abs(hit1.getR()-hit2.getR())>0.001) 
     {
       nonOverlapHits++;
     }
@@ -116,54 +185,76 @@ int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
 }
 
 
-void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrackSimTrack>& RMtracks)
+void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrackSimTrack>& RMtracks, std::vector<int> flags_OR, const float minChi2)
 {
-  
-  float minChi2=100000.;
-  int   prevID =-1;
-  int   maxHitLayers=0;
+  int ntr_belowMinChi2 = 0;
+  std::vector<int> track_counter;
+  std::vector<int> track_counter_minChi2;
+
+  for(unsigned int i=0; i<RMtracks.size();i++)
+  {
+    if(RMtracks.at(i).getChi2ndof() >  minChi2) {
+      track_counter.push_back(0);
+      flags_OR.push_back(-1);
+      continue;
+    }
+    ntr_belowMinChi2++;    
+    track_counter.push_back(ntr_belowMinChi2);
+    track_counter_minChi2.push_back(ntr_belowMinChi2);
+    flags_OR.push_back(1);
+  }
+
+  int dup_counter = 0;
+  int head_track = 1;
+  float head_chi2 = 0.;
+  int head_nhits = 0;
+
   for(auto dup: duplicates)
   {
     float t_chi2 = RMtracks.at(dup).getChi2ndof();
-    int t_nhitlayers = RMtracks.at(dup).getFPGATrackSimHits().size();
+    int t_nhitlayers = RMtracks.at(dup).getFPGATrackSimHits().size(); 
     for(auto& hit : RMtracks.at(dup).getFPGATrackSimHits())
     {
+      ANA_MSG_DEBUG("Real hit info = " << hit);
+      ANA_MSG_DEBUG("Real hit info (global) = Gphi= " << hit.getGPhi() << " Z=" << hit.getZ() << " R=" << hit.getR() << " chi2=" << t_chi2);
+
       if(!hit.isReal())
       {
         t_nhitlayers--;
       }
     }
-
-    if(t_nhitlayers>maxHitLayers)
-    {
-      if(prevID!=-1)
-      {
-        RMtracks.at(prevID).setPassedOR(0);
-      }
-      prevID=dup;
-      maxHitLayers=t_nhitlayers;
-      minChi2=t_chi2;
+    if (dup_counter == 0) {
+      head_track = dup;
+      head_chi2 = RMtracks.at(head_track).getChi2ndof();
+      head_nhits = t_nhitlayers; 
     }
-    else if(t_nhitlayers==maxHitLayers)
-    {
-      if(t_chi2<minChi2)
+    if (dup_counter > 0){
+     if(t_nhitlayers>head_nhits)
       {
-        if(prevID!=-1)
-        {
-          RMtracks.at(prevID).setPassedOR(0);
-        }
-        prevID=dup;
-        minChi2=t_chi2;
+        RMtracks.at(head_track).setPassedOR(0); 
       }
-      else
+      else if(t_nhitlayers==head_nhits)
       {
-        RMtracks.at(dup).setPassedOR(0);
+        if(t_chi2<head_chi2)
+          {
+            RMtracks.at(head_track).setPassedOR(0);
+          }
+        if(std::abs(t_chi2-head_chi2)<0.000001)
+          {
+            if(track_counter[head_track] < track_counter[dup]) {
+              RMtracks.at(dup).setPassedOR(0); 
+            }
+            if(track_counter[head_track] > track_counter[dup]) { 
+              RMtracks.at(head_track).setPassedOR(0);
+            }
+          }
       }
     }
-    else
-    {
-      RMtracks.at(dup).setPassedOR(0);
-    }
+    
+    if(!RMtracks.at(head_track).passedOR()) flags_OR[head_track] = 0;
+    if(RMtracks.at(head_track).passedOR()) flags_OR[head_track] = 1;
+    dup_counter++;
+    
   }
 }
 
@@ -204,7 +295,7 @@ int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Tr
       }
     }
     // If both hits aren't spacepoints, we should be able to do this comparison.
-    else if (hit1.getPhiCoord() == hit2.getPhiCoord() && hit1.getEtaCoord() == hit2.getEtaCoord()) {
+    else if (std::abs(hit1.getGPhi()-hit2.getGPhi())<0.001 && std::abs(hit1.getZ()-hit2.getZ())<0.001 && std::abs(hit1.getR()-hit2.getR())<0.001) {
       nCommHits++;
     }
     else
@@ -217,7 +308,7 @@ int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Tr
 
 
 // Given road, populates the supplied variables with info on which layers missed hits
-void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPixel, bool & missStrip, layer_bitmask_t & missing_mask, layer_bitmask_t & norecovery_mask, const ServiceHandle<IFPGATrackSimMappingSvc> FPGATrackSimMapping, const TrackCorrType idealCoordFitType)
+void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPixel, bool & missStrip, layer_bitmask_t & missing_mask, layer_bitmask_t & norecovery_mask, const ServiceHandle<IFPGATrackSimMappingSvc> &FPGATrackSimMapping, const TrackCorrType idealCoordFitType)
 {
     int subregion = road.getSubRegion();
     nMissing = FPGATrackSimMapping->PlaneMap_1st(subregion)->getNCoords(); // init with nCoords and decrement as we find misses
@@ -277,17 +368,22 @@ void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPi
  *
  * NB: If the number of combinations becomes large and memory is a concern,
  * it may be worth turning this function into a sort of iterator
- * over `combs`, return a single track each call. 
+ * over `combs`, return a single track each call.
  */
-void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack>& track_cands, const ServiceHandle<IFPGATrackSimMappingSvc> FPGATrackSimMapping)
+void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack>& track_cands, const ServiceHandle<IFPGATrackSimMappingSvc> & FPGATrackSimMapping)
 {
     int idbase = 0;           // offset for new track ids
     int subregion = road.getSubRegion();
+    auto pmap = FPGATrackSimMapping->PlaneMap_2nd(subregion);
+
+    if (temp.getTrackStage() == TrackStage::FIRST) {
+      pmap = FPGATrackSimMapping->PlaneMap_1st(subregion);
+    }
 
     std::vector<std::vector<int>> combs = ::getComboIndices(road.getNHits_layer());
     track_cands.resize(combs.size(), temp);
 
-    const FPGATrackSimRegionMap* SUBREGIONMAP = FPGATrackSimMapping->SubRegionMap();
+    const FPGATrackSimRegionMap* SUBREGIONMAP = FPGATrackSimMapping->SubRegionMap_2nd();
     //
     //get the WC hits:
     layer_bitmask_t wcbits= road.getWCLayers();
@@ -296,28 +392,28 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
     {
       //Need to set the ID and the hits size of this track
       track_cands[icomb].setTrackID(idbase + icomb);
-      track_cands[icomb].setNLayers(FPGATrackSimMapping->PlaneMap_1st(subregion)->getNLogiLayers());
+      track_cands[icomb].setNLayers(pmap->getNLogiLayers());
 
       // If this is an idealized coordinate fit; keep references to the idealized radii.
-      track_cands[icomb].setIdealRadii(SUBREGIONMAP->getAvgRadii(0));
+      track_cands[icomb].setIdealRadii(SUBREGIONMAP->getAvgRadii(subregion));
       track_cands[icomb].setPassedOR(1);
 
         std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
-        for (unsigned layer = 0; layer < FPGATrackSimMapping->PlaneMap_1st(subregion)->getNLogiLayers(); layer++)
+        for (unsigned layer = 0; layer < pmap->getNLogiLayers(); layer++)
         {
             if (hit_indices[layer] < 0) // Set a dummy hit if road has no hits in this layer
             {
                 FPGATrackSimHit newhit=FPGATrackSimHit();
                 newhit.setLayer(layer);
                 newhit.setSection(0);
-                if (FPGATrackSimMapping->PlaneMap_1st(subregion)->getDim(layer) == 2) newhit.setDetType(SiliconTech::pixel);
+                if (pmap->getDim(layer) == 2) newhit.setDetType(SiliconTech::pixel);
 	            else newhit.setDetType(SiliconTech::strip);
 
                 if (wcbits & (1 << layer ) ) {
                     newhit.setHitType(HitType::wildcard);
-		    newhit.setLayer(layer);
-		}
-                
+                    newhit.setLayer(layer);
+                }
+
                 track_cands[icomb].setFPGATrackSimHit(layer, newhit);
             }
             else
@@ -327,13 +423,14 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes
                 // of arrays computed above.
-                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1) {
-                    const FPGATrackSimHit inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);
+                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer(true) % 2) == 1) {
+                    if (layer == 0) throw (std::out_of_range("makeTrackCandidates: Attempt to access vector at element -1"));
+                    const FPGATrackSimHit & inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);
                     if ((abs(hit->getX() - inner_hit.getX()) > EPSILON) || (abs(hit->getY() - inner_hit.getY()) > EPSILON) || (abs(hit->getZ() - inner_hit.getZ()) > EPSILON)) {
                         track_cands[icomb].setValidCand(false);
                     }
                 }
-                track_cands[icomb].setFPGATrackSimHit(layer, *hit);               
+                track_cands[icomb].setFPGATrackSimHit(layer, *hit);
             }
         }
     }
@@ -342,7 +439,7 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
 }
 
 
-long getVolumeID(std::shared_ptr<const FPGATrackSimHit> hit)
+long getVolumeID(const FPGATrackSimHit & hit)
 {
   // Custom labelling for the detector volumes
   // to be used in NN training.
@@ -364,29 +461,29 @@ long getVolumeID(std::shared_ptr<const FPGATrackSimHit> hit)
 
   long volumeID = -1;
 
-  if (hit->getR() == 0.0) {
+  if (hit.getR() == 0.0) {
     return -999; //hit not in any physical layer
   }
 
-  if(hit->isBarrel()) {
-    if (hit->isPixel()) {
+  if(hit.isBarrel()) {
+    if (hit.isPixel()) {
       volumeID = 0;
     }
-    if (hit->isStrip()) {
+    if (hit.isStrip()) {
       volumeID = 10;
     }
   }
   else {
-    if (hit->isPixel()) {
-      if (hit->getZ() >= 0.) {
+    if (hit.isPixel()) {
+      if (hit.getZ() >= 0.) {
         volumeID = 2;
       }
       else {
         volumeID = -2;
       }
     }
-    else if (hit->isStrip()) {
-      if (hit->getZ() >= 0.) {
+    else if (hit.isStrip()) {
+      if (hit.getZ() >= 0.) {
         volumeID = 12;
       }
       else {
@@ -397,7 +494,7 @@ long getVolumeID(std::shared_ptr<const FPGATrackSimHit> hit)
   return volumeID;
 }
 
-long getCoarseID(std::shared_ptr<const FPGATrackSimHit> hit)
+long getCoarseID(const FPGATrackSimHit & hit)
 {
   // Custom labelling for the detector layers
   // to be used in NN training.
@@ -411,7 +508,7 @@ long getCoarseID(std::shared_ptr<const FPGATrackSimHit> hit)
   // returns large negative value if no layer
 
   long volumeID = getVolumeID(hit);
-  unsigned layerID = hit->getLayerDisk();
+  unsigned layerID = hit.getLayerDisk(true);
 
   long offset = -10000;
 
@@ -424,7 +521,17 @@ long getCoarseID(std::shared_ptr<const FPGATrackSimHit> hit)
   return offset + layerID;
 }
 
-long getFineID(std::shared_ptr<const FPGATrackSimHit> hit)
+bool isFineIDInStrip(long ID)
+{
+  return (ID < 16);
+}
+
+bool isFineIDInPixel(long ID)
+{
+  return !isFineIDInStrip(ID);
+}
+
+long getFineID(const FPGATrackSimHit & hit)
 {
   // Custom labelling for the detector layers
   // to be used in NN training.
@@ -433,8 +540,8 @@ long getFineID(std::shared_ptr<const FPGATrackSimHit> hit)
   // Otherwise return convention defined in getCoarseID.
 
   long volumeID = getVolumeID(hit);
-  unsigned layerID = hit->getLayerDisk();
-  int etaID = hit->getEtaModule();
+  unsigned layerID = hit.getLayerDisk(true);
+  int etaID = hit.getEtaModule(true);
 
   long offset = -1000;
 

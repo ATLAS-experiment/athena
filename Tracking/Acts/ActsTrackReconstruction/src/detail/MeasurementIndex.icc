@@ -1,0 +1,74 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include <algorithm>
+
+namespace ActsTrk::detail {
+
+inline MeasurementIndex::MeasurementIndex(std::size_t nMeasurementContainerMax) {
+  m_measurementContainerOffsets.reserve(nMeasurementContainerMax);
+}
+
+inline std::size_t MeasurementIndex::nMeasurements() const {
+  return m_nMeasurements;
+}
+
+inline std::size_t MeasurementIndex::size() const {
+  return m_size;
+}
+
+inline bool MeasurementIndex::addMeasurement(const xAOD::UncalibratedMeasurement &hit) {
+  ++m_nMeasurements;
+  auto container = hit.container();  // owning container, which might be different from clusterContainer
+  if (container == m_lastContainer) return false;
+  if (std::any_of(m_measurementContainerOffsets.begin(),
+                  m_measurementContainerOffsets.end(),
+                  [container](const auto& c) { return c.first == container; }))
+    return false;
+  m_measurementContainerOffsets.emplace_back(container, m_size);
+  m_lastContainerOffset = m_size;
+  m_lastContainerSize = container->size_v();
+  m_size += m_lastContainerSize;
+  m_lastContainer = container;
+  return true;
+}
+
+inline void MeasurementIndex::addMeasurements(const xAOD::UncalibratedMeasurementContainer& clusterContainer) {
+  for (const xAOD::UncalibratedMeasurement* hit : clusterContainer) {
+    addMeasurement(*hit);
+  }
+}
+
+inline std::size_t MeasurementIndex::index(const xAOD::UncalibratedMeasurement& hit) const {
+  const auto* container = hit.container();
+  if (container != m_lastContainer) {
+    auto it =
+        std::find_if(m_measurementContainerOffsets.begin(),
+                     m_measurementContainerOffsets.end(),
+                     [container](const auto& c) {
+                       return c.first == container;
+                     });
+    if (it == m_measurementContainerOffsets.end())
+      return m_size;
+    m_lastContainer = container;
+    m_lastContainerOffset = it->second;
+
+    // check our local index is less than the saved size of the container
+    ++it;
+    std::size_t nextOffset = (it != m_measurementContainerOffsets.end()) ? it->second : m_size;
+    m_lastContainerSize = nextOffset - m_lastContainerOffset;
+  }
+  std::size_t ind = hit.index();
+  if (m_lastContainer == nullptr || !(ind < m_lastContainerSize))
+    return m_size;
+
+  return m_lastContainerOffset + ind;
+}
+
+inline std::pair<std::size_t,bool> MeasurementIndex::newMeasurementIndex(const xAOD::UncalibratedMeasurement& hit) {
+  bool newContainer = addMeasurement(hit);
+  return {index(hit), newContainer};
+}
+
+}  // namespace ActsTrk::detail

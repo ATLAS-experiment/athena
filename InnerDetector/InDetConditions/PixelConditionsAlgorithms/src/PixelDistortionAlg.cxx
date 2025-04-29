@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelDistortionAlg.h"
@@ -96,12 +96,16 @@ StatusCode PixelDistortionAlg::execute() {
     else distosize = 441;
 
     while (!input.eof()) {
-      unsigned int idmod;
-      unsigned int hashID = 0;
-      float data;
+      unsigned int idmod{};
+      unsigned int hashID {};
+      float data{};
 
       if (m_distortionVersion == 1) {
         input >> idmod;
+        if (idmod>std::numeric_limits<IdentifierHash::value_type>::max()){
+          ATH_MSG_ERROR("idmod out of range: "<<idmod);
+          return StatusCode::FAILURE;
+        }
         hashID = idmod;
       } else {
         input >> std::hex >> idmod >> std::dec;

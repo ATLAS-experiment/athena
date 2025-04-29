@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -8,6 +8,7 @@
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 // Pt  High --> Low
@@ -20,42 +21,15 @@ public:
     }
 };
 
-xAODVBFMjjIntervalFilter::xAODVBFMjjIntervalFilter(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator),
-      m_norm(1.) //< @todo Scalefactor always set to 1.0! Remove?
-{
-    declareProperty("RapidityAcceptance", m_yMax = 5.0);
-    declareProperty("MinSecondJetPT", m_pTavgMin = 15.0 * Gaudi::Units::GeV);
-    declareProperty("MinOverlapPT", m_olapPt = 15.0 * Gaudi::Units::GeV);
-    declareProperty("TruthJetContainerName", m_TruthJetContainerName = "AntiKt4TruthJets");
-    // declareProperty("DoShape", m_doShape = true);
-    declareProperty("NoJetProbability", m_prob0 = 0.0002);
-    declareProperty("OneJetProbability", m_prob1 = 0.001);
-    declareProperty("LowMjjProbability", m_prob2low = 0.005);
-    declareProperty("HighMjjProbability", m_prob2high = 1.0);
-    declareProperty("LowMjj", m_mjjlow = 100.0 * Gaudi::Units::GeV);
-    declareProperty("TruncateAtLowMjj", m_truncatelowmjj = false);
-    declareProperty("HighMjj", m_mjjhigh = 800.0 * Gaudi::Units::GeV);
-    declareProperty("TruncateAtHighMjj", m_truncatehighmjj = false);
-    declareProperty("PhotonJetOverlapRemoval", m_photonjetoverlap = false);
-    declareProperty("ElectronJetOverlapRemoval", m_electronjetoverlap = true);
-    declareProperty("TauJetOverlapRemoval", m_taujetoverlap = false);
-    declareProperty("Alpha", m_alpha = log(m_prob2low / m_prob2high) / log(m_mjjlow / m_mjjhigh));
-    declareProperty("ApplyNjet", m_ApplyNjet = false);
-    declareProperty("Njets", m_NJetsMin = 2);
-    declareProperty("NjetsMax", m_NJetsMax = -1);
-    declareProperty("ApplyWeighting", m_ApplyWeighting = true);
-    declareProperty("ApplyDphi", m_applyDphi = false);
-    declareProperty("dphijjMax", m_dphijj = 2.5);
-}
-
 StatusCode xAODVBFMjjIntervalFilter::filterInitialize()
 {
-    ATH_MSG_INFO("Configured for jets in " << m_TruthJetContainerName << " inside |y|<" << m_yMax);
+    CHECK(m_TruthJetContainerName.initialize());
+    CHECK(m_truthPartContKey.initialize());
+    ATH_MSG_INFO("Configured for jets in " << m_TruthJetContainerName.key() << " inside |y|<" << m_yMax);
 
     CHECK(m_rndmSvc.retrieve());
 
-    m_alpha = log(m_prob2low / m_prob2high) / log(m_mjjlow / m_mjjhigh);
+    m_alpha = log(m_prob2low / m_prob2high) / log(m_mjjlow / m_mjjhigh); // This calculation overrides anything read in from the configuration...
     ATH_MSG_INFO("m_alpha set to" << m_alpha);
     return StatusCode::SUCCESS;
 }
@@ -69,27 +43,17 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
     {
         ATH_MSG_ERROR("Failed to retrieve random number engine xAODVBFMjjIntervalFilter");
         setFilterPassed(false);
-        return StatusCode::SUCCESS;
+        return StatusCode::FAILURE;
     }
 
     // Retrieve jet container
-    const xAOD::JetContainer* truthJetCollection = 0;
-    if (!evtStore()->contains<xAOD::JetContainer>(m_TruthJetContainerName) ||
-        evtStore()->retrieve(truthJetCollection, m_TruthJetContainerName).isFailure() ||
-        !truthJetCollection)
-    {
-        ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
-        setFilterPassed(false);
-        return StatusCode::SUCCESS;
-    }
+    SG::ReadHandle<xAOD::JetContainer>  truthJetCollection{m_TruthJetContainerName};
+    CHECK(truthJetCollection.isValid());
 
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+    // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+    // duplicated barcode ones
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    CHECK(xTruthParticleContainer.isValid());
 
 
     // Find overlap objects
@@ -97,11 +61,8 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
     std::vector<const xAOD::TruthParticle *> MCTruthElectronList;
     std::vector<TLorentzVector> MCTruthTauList;
 
-  // Loop over all particles in the event
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-
+    // Loop over all particles in the event
+    for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
       if (m_photonjetoverlap == true)
           {
          // photon - copied from VBFForwardJetsFilter.cxx
@@ -134,11 +95,11 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
                         auto child = tau->decayVtx()->outgoingParticle(thisChild_id);
                         if (child->prodVtx() != tau->decayVtx())
                             continue;
-                        if (std::abs(child->pdgId()) == 12)
+                        if (std::abs(child->pdgId()) == MC::NU_E)
                             leptonic = 1;
-                        if (std::abs(child->pdgId()) == 14)
+                        else if (std::abs(child->pdgId()) == MC::NU_MU)
                             leptonic = 2;
-                        if (std::abs(child->pdgId()) == 15)
+                        else if (std::abs(child->pdgId()) == MC::TAU)
                             leptonic = 11;
                     }
 
@@ -161,9 +122,9 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
 
     // Filter based on rapidity acceptance and sort
     ConstDataVector<xAOD::JetContainer> filteredJets(SG::VIEW_ELEMENTS);
-    for (xAOD::JetContainer::const_iterator jitr = truthJetCollection->begin(); jitr != truthJetCollection->end(); ++jitr)
+    for (const xAOD::Jet* truthJet : *truthJetCollection)
     {
-        if (std::abs((*jitr)->rapidity()) < m_yMax && (*jitr)->pt() >= m_olapPt)
+        if (std::abs(truthJet->rapidity()) < m_yMax && truthJet->pt() >= m_olapPt)
         {
             bool JetOverlapsWithPhoton = false;
             bool JetOverlapsWithElectron = false;
@@ -171,20 +132,20 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
 
             if (m_photonjetoverlap == true)
             {
-                JetOverlapsWithPhoton = checkOverlap((*jitr)->rapidity(), (*jitr)->phi(), MCTruthPhotonList);
+                JetOverlapsWithPhoton = checkOverlap(truthJet->rapidity(), truthJet->phi(), MCTruthPhotonList);
             }
             if (m_electronjetoverlap == true)
             {
-                JetOverlapsWithElectron = checkOverlap((*jitr)->rapidity(), (*jitr)->phi(), MCTruthElectronList);
+                JetOverlapsWithElectron = checkOverlap(truthJet->rapidity(), truthJet->phi(), MCTruthElectronList);
             }
             if (m_taujetoverlap == true)
             {
-                JetOverlapsWithTau = checkOverlap((*jitr)->rapidity(), (*jitr)->phi(), MCTruthTauList);
+                JetOverlapsWithTau = checkOverlap(truthJet->rapidity(), truthJet->phi(), MCTruthTauList);
             }
 
             if (!JetOverlapsWithPhoton && !JetOverlapsWithElectron && !JetOverlapsWithTau)
             {
-                filteredJets.push_back(*jitr);
+                filteredJets.push_back(truthJet);
             }
         }
     }
@@ -205,7 +166,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
 
         // Get MC event collection for setting weight
         const McEventCollection* mecc = 0;
-        if (evtStore()->retrieve(mecc).isFailure() || !mecc)
+        if (evtStore()->retrieve(mecc).isFailure() || !mecc) // FIXME keyless retrieve
         {
             setFilterPassed(false);
             ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
@@ -392,7 +353,7 @@ TLorentzVector xAODVBFMjjIntervalFilter::sumDaughterNeutrinos(const xAOD::TruthP
 {
     TLorentzVector nu(0, 0, 0, 0);
 
-    if ((std::abs(part->pdgId()) == 12) || (std::abs(part->pdgId()) == 14) || (std::abs(part->pdgId()) == 16))
+    if (MC::isSMNeutrino(part))
     {
         nu.SetPx(part->px());
         nu.SetPy(part->py());

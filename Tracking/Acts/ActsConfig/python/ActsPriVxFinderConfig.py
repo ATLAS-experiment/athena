@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -90,6 +90,18 @@ def ActsIterativeFindingCfg(flags,
     kwargs.setdefault("doMaxTracksCut", flags.Tracking.PriVertex.doMaxTracksCut)
     kwargs.setdefault("maxTracks", flags.Tracking.PriVertex.maxTracks)
 
-    acc.setPrivateTools(
-        CompFactory.ActsTrk.IterativePriVtxFinderTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.IterativePriVtxFinderTool(name, **kwargs))
     return acc
+
+
+def ActsGridAdaptiveMultiFindingCfg(flags,
+                                    name="ActsAdaptiveMultiPriVtxFinderTool",
+                                    **kwargs) -> ComponentAccumulator:
+    kwargs.setdefault("seederType", "Grid")
+    kwargs.setdefault("GridMainGridSize", flags.Tracking.PriVertex.gridMainGridSize)
+    kwargs.setdefault("GridTrkGridSize", flags.Tracking.PriVertex.gridTrkGridSize)
+    kwargs.setdefault("GridUseHighestSumZPosition", flags.Tracking.PriVertex.gridUseHighestSumZPosition)
+    kwargs.setdefault("gridMaxD0Significance", flags.Tracking.PriVertex.gridMaxD0Significance)
+    kwargs.setdefault("gridMaxZ0Significance", flags.Tracking.PriVertex.gridMaxZ0Significance)
+
+    return ActsGaussAdaptiveMultiFindingCfg(flags, name, **kwargs)

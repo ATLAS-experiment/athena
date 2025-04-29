@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger test for Run4 with single muon
 # art-type: build
-# art-include: main/Athena
-# art-include: 24.0/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -14,17 +13,16 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 run = ExecStep.ExecStep()
 run.type = 'athena'
 run.threads = 1
-run.input = 'Single_mu_Run4'
+#run.input = 'ttbar_pu200_Run4'
+run.input = 'Single_mu_Run4'                                     #need simpler dataset until egamma run-time completely sorted out
 run.job_options = 'TriggerJobOpts/runHLT.py'
 
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
-run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
-             'Trigger.enabledSignatures=["Muon","Egamma","Jet","Bjet"]',  #need to skip Tau temporarily and disabled does not work
+run.flags = ['Trigger.enabledSignatures=["Muon","Egamma","Jet","Bjet","Tau"]',  #list signatures temporarily 
              'Trigger.useActsTracking=True',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
-             'Trigger.enableL1CaloPhase1=False',
              f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}',
              ]
 

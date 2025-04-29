@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CONDALGS_CONDALGY_H
-#define CONDALGS_CONDALGY_H 1
+#ifndef ATHEXHIVE_CONDEX_CONDALGY_H
+#define ATHEXHIVE_CONDEX_CONDALGY_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/ReadHandle.h"
@@ -12,14 +12,12 @@
 #include "AthExHive/CondDataObjY.h"
 #include "AthExHive/IASCIICondDbSvc.h"
 
-#include <string>
-
 class CondAlgY  :  public AthAlgorithm {
 
 public:
     
   CondAlgY (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~CondAlgY();
+  virtual ~CondAlgY() = default;
   
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
@@ -32,7 +30,7 @@ private:
   Gaudi::Property<std::string> m_dbk1 {this, "Key_DB1", "Y1", "explicit dbKey for cond handle 1"};
   Gaudi::Property<std::string> m_dbk2 {this, "Key_DB2", "Y2", "explicit dbKey for cond handle 2"};
 
-  ServiceHandle<IASCIICondDbSvc> m_cds;
+  ServiceHandle<IASCIICondDbSvc> m_cds{this, "ASCIICondDbSvc", "ASCIICondDbSvc", "Handle to the ASCII CondDb service"};
 
 };
 

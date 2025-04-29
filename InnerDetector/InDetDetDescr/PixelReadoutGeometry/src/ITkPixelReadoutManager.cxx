@@ -5,7 +5,6 @@
 #include "ITkPixelReadoutManager.h"
 
 #include <InDetIdentifier/PixelID.h>
-#include <InDetReadoutGeometry/SiDetectorElement.h>
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include <PixelReadoutGeometry/PixelDetectorManager.h>
 
@@ -26,11 +25,16 @@ namespace InDetDD{
       ATH_CHECK(m_detStore->retrieve(m_idHelper, m_pixelIDName.value()));
       return StatusCode::SUCCESS;
     }
-  
-  
-    PixelModuleType PixelReadoutManager::getModuleType(Identifier id) const{
+
+    PixelModuleType PixelReadoutManager::getModuleType(Identifier id) const {
       const Identifier wafer_id = m_idHelper->wafer_id(id);
       const SiDetectorElement *element = m_detManager->getDetectorElement(wafer_id);
+      return getModuleType(id,element);
+    }
+        
+    PixelModuleType PixelReadoutManager::getModuleType(Identifier id,
+						       const SiDetectorElement* element) const {
+      
       const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
       if (p_design->getReadoutTechnology() != PixelReadoutTechnology::RD53) {
         ATH_MSG_ERROR("Non-RD53 readout technologies not supported!");
@@ -47,31 +51,41 @@ namespace InDetDD{
     
       return PixelModuleType::NONE;
     }
-  
-  
+
     PixelDiodeType 
     PixelReadoutManager::getDiodeType(Identifier id) const{
       const Identifier wafer_id = m_idHelper->wafer_id(id);
       const SiDetectorElement *element = m_detManager->getDetectorElement(wafer_id);
+      
+      return getDiodeType(id, element);
+      
+    }
+    
+    PixelDiodeType PixelReadoutManager::getDiodeType(Identifier diodeId,
+						     const SiDetectorElement* element) const {
+
+      const Identifier wafer_id = element->identify();
+            
       const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
       if (p_design->getReadoutTechnology() != PixelReadoutTechnology::RD53) {
         ATH_MSG_ERROR("Non-RD53 readout technologies not supported!");
         return PixelDiodeType::NONE;
       }
-    
-      Identifier diodeId = id;
-      uint32_t col = getColumn(diodeId, wafer_id);
-      uint32_t row = getRow(diodeId, wafer_id);
+      
+      uint32_t col = getColumn(diodeId, wafer_id, element);
+      uint32_t row = getRow(diodeId, wafer_id, element);
+
       if (col == invalidColumn or row == invalidRow){
         return PixelDiodeType::NONE;
       }
+
       // ---------------------
       // Get the pixel type
       // ---------------------
       unsigned int FEs = p_design->numberOfCircuits();
       unsigned int rowsPerFE =  p_design->rowsPerCircuit();
       unsigned int columnsPerFE = p_design->columnsPerCircuit();
-    
+
       if (FEs == 4) {
         // long pixel row and columns
         // 2 per row/column side
@@ -92,14 +106,13 @@ namespace InDetDD{
       }
       return PixelDiodeType::NORMAL;
     }
-  
-  
+        
     Identifier PixelReadoutManager::getPixelIdfromHash(IdentifierHash offlineIdHash,
       uint32_t FE,uint32_t row,uint32_t column) const{
       return getPixelId(m_idHelper->wafer_id(offlineIdHash), FE, row, column);
     }
-  
-  
+    
+    
     Identifier 
     PixelReadoutManager::getPixelId(Identifier offlineId,uint32_t FE, uint32_t row, uint32_t column) const{
       const SiDetectorElement *element = m_detManager->getDetectorElement(offlineId);
@@ -136,7 +149,7 @@ namespace InDetDD{
       }
     
       // Identify the module type
-      PixelModuleType moduleType = getModuleType(offlineId);
+      PixelModuleType moduleType = getModuleType(offlineId, element);
       if (moduleType == PixelModuleType::PIX_ENDCAP) {
         // Swap phi_index for even endcap modules
         int module_phi = m_idHelper->phi_module(offlineId);
@@ -147,11 +160,18 @@ namespace InDetDD{
       }
       return m_idHelper->pixel_id(offlineId, phi_index, eta_index);
     }
-  
-  
+
     uint32_t 
-    PixelReadoutManager::getFE(Identifier diodeId,Identifier offlineId) const{
+    PixelReadoutManager::getFE(Identifier diodeId, Identifier offlineId) const{
       const SiDetectorElement *element = m_detManager->getDetectorElement(offlineId);
+      return getFE(diodeId, offlineId, element);
+    }
+    
+    
+    uint32_t 
+    PixelReadoutManager::getFE(Identifier diodeId,
+			       Identifier offlineId,
+			       const SiDetectorElement* element) const{
       const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
       if (p_design->getReadoutTechnology() != PixelReadoutTechnology::RD53) {
         ATH_MSG_WARNING("Non-RD53 readout technologies not supported!");
@@ -165,7 +185,7 @@ namespace InDetDD{
       // ---------------------
       unsigned int phi_index = m_idHelper->phi_index(diodeId);
       unsigned int eta_index = m_idHelper->eta_index(diodeId);
-      PixelModuleType moduleType = getModuleType(offlineId);
+      PixelModuleType moduleType = getModuleType(offlineId, element);
       if (moduleType == PixelModuleType::PIX_ENDCAP) {
         // Swap phi_index for even endcap modules
         int module_phi = m_idHelper->phi_module(offlineId);
@@ -186,10 +206,19 @@ namespace InDetDD{
       }
     }
     
+    uint32_t
+    PixelReadoutManager::getColumn(Identifier diodeId,
+				   Identifier offlineId) const {
+      
+      const SiDetectorElement *element = m_detManager->getDetectorElement(offlineId);
+      return getColumn(diodeId, offlineId, element);
+    }
     
     uint32_t 
-    PixelReadoutManager::getColumn(Identifier diodeId,Identifier offlineId) const{
-      const SiDetectorElement *element = m_detManager->getDetectorElement(offlineId);
+    PixelReadoutManager::getColumn(Identifier diodeId,
+				   Identifier offlineId,
+				   const SiDetectorElement *element) const {
+      
       const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
       if (p_design->getReadoutTechnology() != PixelReadoutTechnology::RD53) {
         ATH_MSG_ERROR("Non-RD53 readout technologies not supported!");
@@ -212,17 +241,25 @@ namespace InDetDD{
       if (column >= columnsPerFE) {
         ATH_MSG_WARNING("Computed column number exceeds maximum value: col = " << column << " (max = " << columnsPerFE << ")");
         ATH_MSG_INFO("diodeId = "<<diodeId<<", offlineId= "<<offlineId);
-        ATH_MSG_INFO("ModuleType: "<<PixelModuleTypeName(getModuleType(offlineId)));
-        ATH_MSG_INFO("DiodeType: "<<PixelDiodeTypeName(getDiodeType(offlineId)));
+        ATH_MSG_INFO("ModuleType: "<<PixelModuleTypeName(getModuleType(offlineId,element)));
+        ATH_MSG_INFO("DiodeType: "<<PixelDiodeTypeName(getDiodeType(offlineId,element)));
         return invalidColumn;
       }
       return column;
     }
+
+    uint32_t
+    PixelReadoutManager::getRow(Identifier diodeId, Identifier offlineId) const {
+      const SiDetectorElement *element = m_detManager->getDetectorElement(offlineId);
+      return getRow(diodeId, offlineId, element);
+    }
     
     
     uint32_t 
-    PixelReadoutManager::getRow(Identifier diodeId,Identifier offlineId) const{
-      const SiDetectorElement *element = m_detManager->getDetectorElement(offlineId);
+    PixelReadoutManager::getRow(Identifier diodeId,
+				Identifier offlineId,
+				const SiDetectorElement *element) const {
+      
       const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
       if (p_design->getReadoutTechnology() != PixelReadoutTechnology::RD53) {
         ATH_MSG_WARNING("Non-RD53 readout technologies not supported!");
@@ -232,7 +269,7 @@ namespace InDetDD{
       unsigned int rowsPerFE =  p_design->rowsPerCircuit();
       unsigned int phi_index = m_idHelper->phi_index(diodeId);
       // Identify the module type
-      PixelModuleType moduleType = getModuleType(offlineId);
+      PixelModuleType moduleType = getModuleType(offlineId, element);
       if (moduleType == PixelModuleType::PIX_ENDCAP) {
         // Swap phi_index for even endcap modules
         int module_phi = m_idHelper->phi_module(offlineId);

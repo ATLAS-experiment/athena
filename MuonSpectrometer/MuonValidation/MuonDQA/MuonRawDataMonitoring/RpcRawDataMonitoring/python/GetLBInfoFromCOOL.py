@@ -1,29 +1,10 @@
 #
-#Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration                                                                                           
+#Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration                                                                                           
 #
 
 from PyCool import cool
-# from PyCool import coral
+from CoolConvUtilities.AtlCoolLib import indirectOpen
 
-#==================================================================================================================
-class Folder:
-    def __init__(self, dbconnect, name):
-
-        self.name = name
-        readonly  = True
-
-        try:
-            self.db = cool.DatabaseSvcFactory.databaseService().openDatabase(dbconnect, readonly)
-        except Exception as e:
-            print ('ERROR::Can not open DB or get chain folder because of exception: %s' ,e)
-            raise Exception(e)
-
-        if not self.db.existsFolder(name):
-            raise Exception('Folder does not exist: "%s"' ,name)
-
-        self.folder = self.db.getFolder(name)
- 
-#==================================================================================================================
 class LumiBlock:
     def __init__(self, cool_obj):
 
@@ -130,14 +111,13 @@ def getRunLBFromObj(obj):
     return (run, lb)
 
 #==================================================================================================================
-def getRunLB(beg_run, end_run):
+def getRunLB(beg_run, end_run,dbObj):
     print('INFO::getRunLB - will search for ATLAS runs in the following range:')
     print('INFO::   beg run: ' ,(beg_run))
     print('INFO::   end run: ' ,(end_run))
 
-    f = Folder('COOLONL_TRIGGER/CONDBR2', '/TRIGGER/LUMI/LBLB')
-
-    fit = f.folder.browseObjects(beg_run << 32, end_run << 32, cool.ChannelSelection.all())
+    f=dbObj.getFolder('/TRIGGER/LUMI/LBLB')
+    fit = f.browseObjects(beg_run << 32, end_run << 32, cool.ChannelSelection.all())
 
     runs = {}
 
@@ -156,16 +136,16 @@ def getRunLB(beg_run, end_run):
     return runs
 
 #==================================================================================================================
-def getRunOnlineLumi(runs):
+def getRunOnlineLumi(runs,dbObj):
 
     print('INFO::getRunOnlineLumi - will read online luminosity for ', len(runs), ' ATLAS runs')
 
-    f = Folder('COOLONL_TRIGGER/CONDBR2', '/TRIGGER/LUMI/OnlPrefLumi')
+    f= dbObj.getFolder('/TRIGGER/LUMI/OnlPrefLumi')
     icount = 0
 
     for run_, lbs in runs.items():
         
-        fit = f.folder.browseObjects(run_ << 32, (run_ << 32) + 100000, cool.ChannelSelection(0))
+        fit = f.browseObjects(run_ << 32, (run_ << 32) + 100000, cool.ChannelSelection(0))
 
         while fit.goToNext():
             obj = fit.currentRef()
@@ -191,18 +171,24 @@ def getRunOnlineLumi(runs):
             
 #==================================================================================================================
 def GetLumiInfoDic(beg_run, end_run):
-    collect_runs = getRunLB(beg_run, end_run)
+    dbInst=indirectOpen("COOLONL_TRIGGER/CONDBR2")
+    
+    collect_runs = getRunLB(beg_run, end_run,dbInst)
     physics_runs = []
 
-    getRunOnlineLumi(collect_runs)
+    getRunOnlineLumi(collect_runs,dbInst)
     physics_runs = [Run(run, lbs.values()) for run,lbs in collect_runs.items()]
 
+    dbInst.closeDatabase()
+    
     if len(physics_runs) == 0:
         print('WARNING::Found 0 physics runs')
         return
 
     physics_runs.sort(key = lambda x: x.run_number)
 
+    oflDb=indirectOpen('COOLOFL_TRIGGER/CONDBR2')
+    
     RunsLumiDic = {}
     for run in physics_runs:
         LumiDic = {}
@@ -210,11 +196,11 @@ def GetLumiInfoDic(beg_run, end_run):
         key_since = run.GetRunStartTime() - 100000
         key_until = run.GetRunEndTime()   + 100000
         
-        f = Folder('COOLOFL_TRIGGER/CONDBR2', '/TRIGGER/OFLLUMI/LumiAccounting')
-        taglist=f.folder.listTags()
+        f = oflDb.getFolder('/TRIGGER/OFLLUMI/LumiAccounting')
+        taglist=f.listTags()
         filledTags = {}
         for tag in taglist:
-            objs = f.folder.browseObjects(key_since, key_until, cool.ChannelSelection.all(), tag)
+            objs = f.browseObjects(key_since, key_until, cool.ChannelSelection.all(), tag)
             if len(objs) != 0:
                 filledTags[tag] = len(objs)
 
@@ -225,7 +211,7 @@ def GetLumiInfoDic(beg_run, end_run):
             print ("WARNING: the number filled tags is more than 1")
        
         filledTags = sorted(filledTags.items(),key=lambda x:x[1],reverse=True)
-        objs       = f.folder.browseObjects(key_since, key_until, cool.ChannelSelection.all(), filledTags[0][0])
+        objs       = f.browseObjects(key_since, key_until, cool.ChannelSelection.all(), filledTags[0][0])
         icount     = 0
         for obj in objs:
             crun = obj.payload()['Run']        
@@ -257,6 +243,7 @@ def GetLumiInfoDic(beg_run, end_run):
         
         RunsLumiDic = LumiDic
 
+    oflDb.closeDatabase()
     return RunsLumiDic
 
 #==================================================================================================================

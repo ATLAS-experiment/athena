@@ -2,10 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
-from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
-from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
 
 class FTagConfig (ConfigBlock):
     """the ConfigBlock for the flavor tagging config"""
@@ -26,42 +23,8 @@ class FTagConfig (ConfigBlock):
         self.addOption ('btagger', "GN2v01", type=str,
             info="the flavour tagging algorithm: DL1dv01, GN2v01. The default "
             "is GN2v01.")
-        self.addOption ('generator', "autoconfig", type=str,
-            info="MC generator setup, for MC/MC SFs. The default is 'autoconfig'"
-            " (relies on the sample metadata).")
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
-            "Experimental! only useful to test a new WP for which scale factors "
-            "are not available. The default is False.")
         self.addOption ('bTagCalibFile', None, type=str,
             info="calibration file for CDI")
-        self.addOption ('systematicsStrategy', 'SFEigen', type=str,
-            info="name of systematics model; presently choose between 'SFEigen' "
-            "and 'Envelope'")
-        self.addOption ('eigenvectorReductionB', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
-        self.addOption ('eigenvectorReductionC', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
-        self.addOption ('eigenvectorReductionLight', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
-        self.addOption ('excludeFromEigenVectorTreatment', '', type=str,
-            info="(semicolon-separated) names of uncertainties to be excluded from "
-            "all eigenvector decompositions (if used)")
-        self.addOption ('excludeFromEigenVectorBTreatment', '', type=str,
-            info="(semicolon-separated) names of uncertainties to be excluded from "
-            "b-jet eigenvector decompositions (if used)")
-        self.addOption ('excludeFromEigenVectorCTreatment', '', type=str,
-            info="(semicolon-separated) names of uncertainties to be excluded from "
-            "c-jet eigenvector decompositions (if used)")
-        self.addOption ('excludeFromEigenVectorLightTreatment', '', type=str,
-            info="(semicolon-separated) names of uncertainties to be excluded from "
-            "light-flavour-jet eigenvector decompositions (if used)")
-        self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=str,
-            info="whether or not to add recommended lists to the user specified "
-            "eigenvector decomposition exclusion lists")
         self.addOption ('saveScores', '', type=str,
             info="whether or not to save the scores from the tagger. Set to 'True' "
             "to save only the overall score, or to 'All' to save also the per-flavour"
@@ -88,13 +51,6 @@ class FTagConfig (ConfigBlock):
         else:
             bTagCalibFile = getRecommendedBTagCalib(config.geometry())
 
-        DSID = "default"
-        if config.dataType() is not DataType.Data:
-            # Check if the right CDI is used for the MC campaign
-            check_CDI_campaign(config.campaign(), bTagCalibFile)
-            # MC/MC efficiency map for the generator 
-            DSID = MCMC_dsid_map(config.geometry(), config.generatorInfo(), self.generator, self.btagger)
-
         # Set up the ftag selection algorithm(s):
         if 'Continuous' in self.btagWP:
             alg = config.createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' + postfix )
@@ -119,45 +75,6 @@ class FTagConfig (ConfigBlock):
             config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
             config.addSelection (self.containerName, selectionName, alg.selectionDecoration)
 
-        if not self.noEffSF and config.dataType() is not DataType.Data:
-            if 'FixedCutBEff' in self.btagWP:
-                raise ValueError('FTAG calibration is only available for Continuous WP. '
-                                 'Please configure the Continuous btagWP in addition to the FixedCutBEff one to retrieve scale factors')
-
-            # Set up the efficiency calculation algorithm:
-            alg = config.createAlgorithm( 'CP::BTaggingEfficiencyAlg',
-                                          'FTagEfficiencyScaleFactorAlg' + postfix )
-            config.addPrivateTool( 'efficiencyTool', 'BTaggingEfficiencyTool' )
-            alg.efficiencyTool.TaggerName = self.btagger
-            alg.efficiencyTool.OperatingPoint = self.btagWP
-            alg.efficiencyTool.JetAuthor = jetCollection
-            alg.efficiencyTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
-            alg.efficiencyTool.EfficiencyFileName = bTagCalibFile
-            alg.efficiencyTool.ScaleFactorFileName = bTagCalibFile
-            alg.efficiencyTool.SystematicsStrategy = self.systematicsStrategy
-            if self.systematicsStrategy == "SFEigen":
-                alg.efficiencyTool.EigenvectorReductionB = self.eigenvectorReductionB
-                alg.efficiencyTool.EigenvectorReductionC = self.eigenvectorReductionC
-                alg.efficiencyTool.EigenvectorReductionLight = self.eigenvectorReductionLight
-                alg.efficiencyTool.ExcludeFromEigenVectorTreatment = self.excludeFromEigenVectorTreatment
-                alg.efficiencyTool.ExcludeFromEigenVectorBTreatment = self.excludeFromEigenVectorBTreatment
-                alg.efficiencyTool.ExcludeFromEigenVectorCTreatment = self.excludeFromEigenVectorCTreatment
-                alg.efficiencyTool.ExcludeFromEigenVectorLightTreatment = self.excludeFromEigenVectorLightTreatment
-                alg.efficiencyTool.ExcludeRecommendedFromEigenVectorTreatment = self.excludeRecommendedFromEigenVectorTreatment
-            if DSID != "default":
-                alg.efficiencyTool.EfficiencyBCalibrations = DSID
-                alg.efficiencyTool.EfficiencyTCalibrations = DSID
-                alg.efficiencyTool.EfficiencyCCalibrations = DSID
-                alg.efficiencyTool.EfficiencyLightCalibrations = DSID
-            alg.scaleFactorDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
-            alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
-            alg.onlyEfficiency = 'Continuous' in self.btagWP
-            alg.outOfValidity = 2  # continue silently, but decorate jet with outOfValidityDeco
-            alg.outOfValidityDeco = 'no_ftag_' + selectionName + ',as_char'
-            alg.preselection = config.getPreselection (self.containerName, selectionName)
-            alg.jets = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, selectionName + '_eff')
-
         # Save the b-tagging score
         if self.saveScores in ['True', 'All']:
             # Save the b-tagger weight
@@ -176,7 +93,9 @@ class FTagConfig (ConfigBlock):
 
         # Save the per-flavour probabilities or additional custom variables
         if self.saveScores == 'All' or self.saveCustomVariables:
-            alg = config.createAlgorithm('CP::BTaggingScoresAlg', 'BTagScoringAlg_' + self.btagger)
+            alg = config.createAlgorithm('CP::BTaggingScoresAlg',
+                                         'BTagScoringAlg_' + self.btagger,
+                                         reentrant=True)
             alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
             alg.taggerName = self.btagger
 
@@ -186,25 +105,3 @@ class FTagConfig (ConfigBlock):
             alg.vars = variables
             for var in variables:
                 config.addOutputVar(self.containerName, var, var, noSys=True)
-
-def makeFTagAnalysisConfig( seq, containerName,
-                            selectionName,
-                            btagWP = None,
-                            btagger = None,
-                            generator = None,
-                            noEffSF = None ):
-    """Create a ftag analysis algorithm config
-
-    Keyword arguments:
-      btagWP -- Flavour tagging working point
-      btagger -- Flavour tagger
-      generator -- Generator for MC/MC scale factors
-      noEffSF -- Disables efficiency and scale factor calculations
-    """
-
-    config = FTagConfig (containerName, selectionName)
-    config.setOptionValue ('btagWP', btagWP)
-    config.setOptionValue ('btagger', btagger)
-    config.setOptionValue ('generator', generator)
-    config.setOptionValue ('noEffSF', noEffSF)
-    seq.append (config)

@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODTTbarWToLeptonFilter.h"
+#include "xAODTruth/TruthVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 
-xAODTTbarWToLeptonFilter::xAODTTbarWToLeptonFilter(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator)
+StatusCode xAODTTbarWToLeptonFilter::filterInitialize()
 {
-    declareProperty("Ptcut", m_Ptmin = 200000.);
-    declareProperty("NumLeptons", m_numLeptons = -1);            // Negative for >0, positive integers for the specific number
-    declareProperty("fourTopsFilter", m_fourTopsFilter = false); // four top filter or not
-    declareProperty("SSMLFilter", m_SSMLFilter = false);         // Same sign multilepton filter or not
+  CHECK(m_truthPartContKey.initialize());
+  return StatusCode::SUCCESS;
 }
 
 StatusCode xAODTTbarWToLeptonFilter::filterEvent()
@@ -18,11 +17,8 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
     int N_quark_t = 0;
     int N_quark_tbar = 0;
@@ -38,14 +34,12 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
         count_found_leptons = 2; // In four tops, one can have the same charged lepton flavour twice
 
   // Loop over all particles in the event 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-            if (std::abs(pitr->pdgId()) != 6)
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
+            if (!MC::isTop(pitr))
                 continue;
-            if (pitr->pdgId() == 6)
+            if (pitr->pdgId() == MC::TQUARK)
                 N_quark_t_all++;
-            if (pitr->pdgId() == -6)
+            if (pitr->pdgId() == -MC::TQUARK)
                 N_quark_tbar_all++;
             auto decayVtx = pitr->decayVtx();
             // Verify if we got a valid pointer and retrieve the number of daughters
@@ -59,11 +53,11 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
             {
                 auto child_mcpart = pitr->decayVtx()->outgoingParticle(thisChild_id);
                 //  Implicitly assume that tops always decay to W X
-                if (std::abs(child_mcpart->pdgId()) != 24)
+                if (!MC::isW(child_mcpart))
                     continue;
-                if (pitr->pdgId() == 6)
+                if (pitr->pdgId() == MC::TQUARK)
                     N_quark_t++;
-                if (pitr->pdgId() == -6)
+                if (pitr->pdgId() == -MC::TQUARK)
                     N_quark_tbar++;
 
                 bool useNextVertex = false;
@@ -78,7 +72,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                         int grandchild_pid = grandchild_mcpart->pdgId();
                         ATH_MSG_DEBUG("W (t/tbar) has " << w_decayVtx->nOutgoingParticles() << " children and the pdgId of the next is " << grandchild_pid);
                         // Check if the W's child is W again. If yes, then move to its next decay vertex in a decay tree
-                        if (std::abs(grandchild_pid) == 24)
+                        if (MC::isW(grandchild_pid))
                         {
                             w_decayVtx = grandchild_mcpart->decayVtx();
                             // If something wrong comes from truth...
@@ -92,7 +86,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                         }
 
                         // use brute force to use only leptons that have not been found already
-                        if (grandchild_pid == -11 && foundlepton[0] < count_found_leptons)
+                        if (grandchild_pid == MC::POSITRON && foundlepton[0] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -101,7 +95,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_minus++;
                             }
                         }
-                        if (grandchild_pid == 11 && foundlepton[1] < count_found_leptons)
+                        if (grandchild_pid == MC::ELECTRON && foundlepton[1] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -110,7 +104,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_plus++;
                             }
                         }
-                        if (grandchild_pid == -13 && foundlepton[2] < count_found_leptons)
+                        if (grandchild_pid == -MC::MUON && foundlepton[2] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -119,7 +113,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_minus++;
                             }
                         }
-                        if (grandchild_pid == 13 && foundlepton[3] < count_found_leptons)
+                        if (grandchild_pid == MC::MUON && foundlepton[3] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -128,7 +122,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_plus++;
                             }
                         }
-                        if (grandchild_pid == -15 && foundlepton[4] < count_found_leptons)
+                        if (grandchild_pid == -MC::TAU && foundlepton[4] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -137,7 +131,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_minus++;
                             }
                         }
-                        if (grandchild_pid == 15 && foundlepton[5] < count_found_leptons)
+                        if (grandchild_pid == MC::TAU && foundlepton[5] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -178,9 +172,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
         ATH_MSG_ERROR("No t or tbar quarks were found decaying to W in a (presumably) ttbar event! Event is rejected. Event dump follows.");
         int part = 0;
      // Loop over all particles in the event and build up the grid
-        unsigned int nPart = xTruthParticleContainer->size();
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-                const xAOD::TruthParticle *mcpart =  (*xTruthParticleContainer)[iPart];
+        for (const xAOD::TruthParticle* mcpart : *xTruthParticleContainer) {
                 part++;
                 int pid = mcpart->pdgId();
                 ATH_MSG_ERROR("Particle number " << part << " has pdgId = " << pid);

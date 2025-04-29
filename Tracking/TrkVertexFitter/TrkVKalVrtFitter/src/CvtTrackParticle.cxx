@@ -51,8 +51,8 @@ namespace Trk {
        mPer = &(*i_ntrk)->perigeeParameters();
        if( mPer==nullptr ) continue; // No perigee!!!
        perGlobalPos =  mPer->position();    //Global position of perigee point
-       if(fabs(perGlobalPos.z())   > m_IDsizeZ)return StatusCode::FAILURE;   // Crazy user protection
-       if(     perGlobalPos.perp() > m_IDsizeR)return StatusCode::FAILURE;
+       if(!(state.m_allowUltraDisplaced) && std::abs(perGlobalPos.z())   > m_IDsizeZ)return StatusCode::FAILURE;   // Crazy user protection
+       if(!(state.m_allowUltraDisplaced) && perGlobalPos.perp() > m_IDsizeR)return StatusCode::FAILURE;
        tmp_refFrameX += perGlobalPos.x() ;	// Reference system calculation
        tmp_refFrameY += perGlobalPos.y() ;	// Use hit position itself to get more precise
        tmp_refFrameZ += perGlobalPos.z() ;	// magnetic field

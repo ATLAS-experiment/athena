@@ -37,7 +37,7 @@ run () {
 
 # Run ACTS Reco
 export ATHENA_CORE_NUMBER=8
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
+ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
 
 run "Reconstruction-acts" \
     Reco_tf.py --CA \
@@ -106,6 +106,7 @@ ls -la "$lastref_dir"
 run "dcube-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_shifter_last \
+    --plotopts=ratio \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
     idpvm.acts.root
@@ -113,6 +114,7 @@ run "dcube-last" \
 run "dcube-trk" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_trk \
+    --plotopts=ratio \
     -c ${dcubeXmlAbsPath} \
     -r idpvm.athena.root \
     -M "acts" \

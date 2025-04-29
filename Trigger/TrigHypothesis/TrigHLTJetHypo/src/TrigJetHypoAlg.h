@@ -1,18 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TrigHLTJetHypo_TrigJetHypoAlg_H
 #define TrigHLTJetHypo_TrigJetHypoAlg_H
 
-#include <string>
 
-#include "TrigJetHypoAlg.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODJet/JetContainer.h"
-
 #include "DecisionHandling/HypoBase.h"
-
 #include "TrigJetHypoTool.h"
+#include <string>
 
 /**
  * @class TrigJetHypoAlg

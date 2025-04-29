@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'duel-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -16,7 +16,7 @@ find_package( onnxruntime )
 atlas_add_library( ONNXUtils Root/*cxx ONNXUtils/*h
   PUBLIC_HEADERS ONNXUtils
   INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils
+  PRIVATE_LINK_LIBRARIES PathResolver CxxUtils
   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} PathResolver
   )
 

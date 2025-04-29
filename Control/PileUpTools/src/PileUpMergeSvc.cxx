@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PileUpTools/PileUpMergeSvc.h"
@@ -237,12 +237,13 @@ const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const s
          // the lifetime connection between the pointer and the unique_ptr.
          xAODEventInfo = std::launder(pxAODEventInfo.get());
          // Record the xAOD object(s):
+         const auto ptrVal = pxAODEventInfo.get();//for use in dbg message
          if( ! sg->record( std::move( pxAODEventAuxInfo ), "EventInfoAux." ).isSuccess() //MN: FIX? key
              || ! sg->record( std::move( pxAODEventInfo ), "EventInfo" ).isSuccess() ) {
             ATH_MSG_ERROR("Failed to record the new xAOD::EventInfo in SG");
             xAODEventInfo = nullptr;
          }
-         ATH_MSG_DEBUG("Record the new xAOD::EventInfo "<<pxAODEventInfo.get()<<" in SG="<<sg);
+         ATH_MSG_DEBUG("Record the new xAOD::EventInfo "<<ptrVal<<" in SG="<<sg);
       }
    }
 
@@ -252,32 +253,6 @@ const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const s
    return xAODEventInfo;
 }
 
-
-const InterfaceID& 
-PileUpMergeSvc::interfaceID() {
-  static const InterfaceID IID_IPileUpMergeSvc(9991, 1, 0); //FIXME
-  return IID_IPileUpMergeSvc; 
-} 
-
-  // Query the interfaces.
-  //   Input: riid, Requested interface ID
-  //          ppvInterface, Pointer to requested interface
-  //   Return: StatusCode indicating SUCCESS or FAILURE.
-  // N.B. Don't forget to release the interface after use!!!
-StatusCode 
-PileUpMergeSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  //FIXME
-  if ( interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (PileUpMergeSvc*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
 
 bool
 PileUpMergeSvc::isLive(CLID id, const string& dataKey, int iXing) {

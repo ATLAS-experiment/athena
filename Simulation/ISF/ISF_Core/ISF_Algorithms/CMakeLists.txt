@@ -44,7 +44,7 @@ atlas_add_test( SimKernelMT_test
                 ${GMOCK_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthenaBaseComps AtlasDetDescr AtlasHepMCLib
                 CxxUtils GaudiKernel GeneratorObjects GeoPrimitives HepMC_InterfacesLib ISF_Event ISF_InterfacesLib
-                StoreGateLib TrackRecordLib TruthUtils
+                StoreGateLib TrackRecordLib TruthUtils GoogleTestTools
                 POST_EXEC_SCRIPT nopost.sh
                 ENVIRONMENT
                 "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"

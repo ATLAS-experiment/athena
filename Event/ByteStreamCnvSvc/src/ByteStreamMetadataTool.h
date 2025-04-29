@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMMETADATATOOL_H
@@ -9,7 +9,6 @@
  *  @brief This file contains the class definition for the ByteStreamMetadataTool class.
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  *  @author Frank Berghaus <fberghaus@anl.gov>
- *  $Id: $
  **/
 
 #include "GaudiKernel/ServiceHandle.h"
@@ -27,37 +26,27 @@ class StoreGateSvc;
  *  @brief This class provides the MetaDataTool for ByteStreamMetadata objects
  **/
 class ByteStreamMetadataTool
-:         public ::AthAlgTool,
-  virtual public IMetaDataTool
+:         public extends<::AthAlgTool, IMetaDataTool>
 {
 public: 
   /// Standard Service Constructor
   ByteStreamMetadataTool(const std::string& type, const std::string& name,
       const IInterface* parent);
 
-
   /// Destructor
   virtual ~ByteStreamMetadataTool();
 
-
   /// Gaudi Service Interface method implementations:
-  StatusCode initialize();
-  StatusCode finalize  ();
-
+  virtual StatusCode initialize() override;
 
   /// Incident service handle listening for BeginInputFile and EndInputFile.
-  virtual StatusCode beginInputFile();
-  virtual StatusCode beginInputFile(const SG::SourceID&);
-  virtual StatusCode metaDataStop  ();
-  virtual StatusCode metaDataStop  (const SG::SourceID&);
-  virtual StatusCode endInputFile  ();
-  virtual StatusCode endInputFile  (const SG::SourceID&);
-
+  virtual StatusCode beginInputFile(const SG::SourceID&) override;
+  virtual StatusCode metaDataStop() override;
+  virtual StatusCode endInputFile(const SG::SourceID&) override;
 
 private:
-  typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
-  StoreGateSvc_t m_metadataStore;
-  StoreGateSvc_t m_inputStore;
+  ServiceHandle<StoreGateSvc> m_metadataStore;
+  ServiceHandle<StoreGateSvc> m_inputStore;
 
   std::set<std::string> keysFromInput() const;
 };

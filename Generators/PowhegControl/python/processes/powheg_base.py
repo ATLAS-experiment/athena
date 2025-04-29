@@ -55,88 +55,6 @@ class PowhegBase(Configurable):
         '''
         return ["[POWHEG-BOX+OpenLoops] Process not found!"]
 
-    def manually_set_openloops_paths(self):
-        '''
-        Manual fix for OpenLoops libraries path, avoiding issues when /afs not available
-        This is NOT a viable long-term solution and should be made obsolete after the migration
-        away from AFS is more advanced.
-        '''
-        import os
-        logger.warning("Applying manual, hard-coded fixes for OpenLoops library paths")
-        logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-        OLPath = os.path.dirname(self.executable)+"/obj-gfortran"
-        os.environ['OpenLoopsPath'] = OLPath
-        ldpath = os.getenv('LD_LIBRARY_PATH')
-        ldpath_new = OLPath+ ":" + OLPath + "/proclib:" + ldpath
-        os.environ['LD_LIBRARY_PATH'] = ldpath_new
-        logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-
-    def manually_set_openloops_gnu_paths(self):
-        '''
-        Manual fix for OpenLoops libraries path, avoiding issues when /afs not available
-        This is NOT a viable long-term solution and should be made obsolete after the migration
-        away from AFS is more advanced.
-        '''
-        import os
-        logger.warning("Applying manual, hard-coded fixes for OpenLoops library paths")
-        logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-        OLPath = os.path.dirname(self.executable)+"/obj-gnu"
-        os.environ['OpenLoopsPath'] = OLPath
-        ldpath = os.getenv('LD_LIBRARY_PATH')
-        ldpath_new = OLPath+ ":" + OLPath + "/proclib:" + ldpath
-        os.environ['LD_LIBRARY_PATH'] = ldpath_new
-        logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-
-    def link_madloop_libraries(self):
-        '''
-        Manual fix for MadLoop libraries, avoiding issues when /afs not available
-        This is NOT a viable long-term solution and should be made obsolete after the migration
-        The trick consists in making a symbolic link of some directory in the installation
-        which contains some files needed by MadLoop
-        '''
-        import os
-        logger.warning("Applying manual, hard-coded fixes for MadLoop library paths")
-        MadLoop_virtual = os.path.dirname(self.executable)+"/virtual"
-        logger.info("Trying to link directory {} locally".format(MadLoop_virtual))
-        if not os.access(MadLoop_virtual,os.R_OK):
-            logger.fatal("Impossible to access directory {} needed for this process which uses MadLoop".format(MadLoop_virtual))
-        if os.access("virtual",os.R_OK):# checking if link already exists
-            logger.info("Found \"virtual\" probably from previous run - deleting it to recreate it with correct path")
-            try:
-                os.remove("virtual")
-            except Exception:
-                logger.fatal("Impossible to remove \"virtual\" symbolic link - exiting...")
-                raise
-        os.symlink(MadLoop_virtual, "virtual")
-        link = os.readlink("virtual")
-        if link != MadLoop_virtual:
-            logger.fatal("Symbolic link \"virtual\" points to {0} while it should point to {1} - linking probably didn't work. Exiting...".format(link,MadLoop_virtual))
-            raise
-        else:
-            logger.info("Local directory \"virtual\" now points to {}".format(MadLoop_virtual))
-
-    def link_external_powheg_libraries(self, librarypath):
-        '''
-        Manual fix for external libraries path.
-        This library is expected to be installed in the POWHEGPATH folder.
-        Needs to be adjusted if the version of the library changes.
-        '''
-        logger.warning("Applying manual fixes for library paths:" + librarypath)
-        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-        ldpath = os.getenv('LD_LIBRARY_PATH')
-        powhegpath = os.getenv('POWHEGPATH')
-        librarypath = glob.glob(powhegpath+librarypath)
-        if (len(librarypath)>0):
-          ldpath_new = ldpath+ ":" + librarypath[0]
-        else:
-          ldpath_new = ldpath
-        os.environ['LD_LIBRARY_PATH'] = ldpath_new
-        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-
     def __init__(self, base_directory, version, executable_name, cores, powheg_executable="pwhg_main", is_reweightable=True, warning_output = [], info_output = [], error_output = [], **kwargs):
         """! Constructor.
 
@@ -152,6 +70,29 @@ class PowhegBase(Configurable):
 
         ## Powheg executable that will be used
         self.executable = os.path.join(base_directory, version, executable_name, powheg_executable)
+
+        ## Add to Python path "python" directory on POWHEG process directory
+        os.environ["PYTHONPATH"] = os.path.join(base_directory, version, executable_name, "python") + ":" + os.environ.get("PYTHONPATH", "")
+
+        ## Add other locations of the libraries
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "amplitudes", "obj-gnu") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "QCDLoop-1.95", "ff", "obj-gnu") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "Virtuals", "obj-gnu") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "obj-gfortran") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "obj-gfortran", "proclib") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "obj-gnu") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "obj-gnu", "proclib") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+
+
+        ##OpenLoops
+        directories = ['obj-gfortran', 'OpenLoops2', 'obj-gnu']
+        logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
+        for directory in directories:
+          if os.path.isdir(os.path.join(base_directory, version, executable_name, directory, 'proclib')):
+             OLPath = os.path.join(base_directory, version, executable_name, directory)
+             os.environ['OpenLoopsPath'] = OLPath
+             logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
+             break
 
         ## SVN revision of process code
         self.process_revision = check_svn_revision(os.path.dirname(self.executable))

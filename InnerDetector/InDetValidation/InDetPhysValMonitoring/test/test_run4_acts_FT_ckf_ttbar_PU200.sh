@@ -5,8 +5,8 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_ckf_shifter_last
-# art-athena-mt: 4
+# art-html: dcube_athena_acts
+# art-athena-mt: 8
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
@@ -14,7 +14,6 @@ dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 # dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
 n_events=-1
 rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
-ref_idpvm_athena=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_run4_ttbar200_reco_r25.root
 
 
 # search in $DATAPATH for matching file
@@ -35,43 +34,65 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect this test to succeed
-    [ "${name}" = "dcube-ckf-athena" ] && [ $rc -ne 255 ] && rc=0
+    [ "${name}" = "dcube-athena-acts" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
 
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,Acts.+FindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+SurfaceError:1,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
+ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,Acts.+FindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+SurfaceError:1,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
 
 export ATHENA_CORE_NUMBER=4
 
-# Run with Athena ambi. resolution
-run "Reconstruction-ckf" \
-    Reco_tf.py --CA \
-    --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
-    --preExec 'all:ConfigFlags.Tracking.doITkFastTracking=True' 'flags.Acts.doMonitoring=True;' \
-    --ignorePatterns "${ignore_pattern}" \
+run "Reconstruction-athena" \
+    Reco_tf.py \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --preExec "flags.Tracking.doITkFastTracking=True;" \
     --inputRDOFile ${rdo} \
-    --outputAODFile AOD.root \
+    --outputAODFile AOD.athena.root \
     --maxEvents ${n_events} \
     --multithreaded
 
 reco_rc=$?
-
-mv log.RAWtoALL log.RAWtoALL
-
-# don't stop right away on an ERROR message ($?=68)
 if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
     exit $reco_rc
 fi
 
-run "IDPVM-ckf" \
+run "IDPVM-athena" \
     runIDPVM.py \
-    --filesInput AOD.root \
-    --outputFile idpvm.root \
+    --filesInput AOD.athena.root \
+    --outputFile idpvm.athena.root \
     --doTightPrimary \
     --doHitLevelPlots \
     --HSFlag All \
+    --doExpertPlots \
+    --OnlyTrackingPreInclude
+
+reco_rc=$?
+if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
+    exit $reco_rc
+fi
+
+# Run with Athena ambi. resolution
+run "Reconstruction-acts" \
+    Reco_tf.py \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsFastWorkflowFlags" \
+    --ignorePatterns "${ignore_pattern}" \
+    --inputRDOFile ${rdo} \
+    --outputAODFile AOD.acts.root \
+    --maxEvents ${n_events} \
+    --multithreaded
+
+reco_rc=$?
+if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
+    exit $reco_rc
+fi
+
+run "IDPVM-acts" \
+    runIDPVM.py \
+    --filesInput AOD.acts.root \
+    --outputFile idpvm.acts.root \
+    --doTightPrimary \
+    --doHitLevelPlots \
     --doExpertPlots \
     --OnlyTrackingPreInclude
 
@@ -84,21 +105,29 @@ echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
-run "dcube-ckf-last" \
+run "dcube-athena-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_shifter_last \
+    -p -x dcube_athena_shifter_last \
     -c ${dcubeXmlAbsPath} \
-    -r ${lastref_dir}/idpvm.root \
-    idpvm.root
+    -r ${lastref_dir}/idpvm.athena.root \
+    idpvm.athena.root
+    # -c ${dcubeXmlTechEffAbsPath} \
+
+run "dcube-acts-last" \
+    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_acts_shifter_last \
+    -c ${dcubeXmlAbsPath} \
+    -r ${lastref_dir}/idpvm.acts.root \
+    idpvm.acts.root
     # -c ${dcubeXmlTechEffAbsPath} \
 
 # Compare performance WRT legacy Athena
-run "dcube-ckf-athena" \
+run "dcube-athena-acts" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_athena \
+    -p -x dcube_athena_acts \
     -c ${dcubeXmlAbsPath} \
-    -r ${ref_idpvm_athena} \
+    -r idpvm.athena.root \
     -M "acts" \
     -R "athena" \
-    idpvm.root
+    idpvm.acts.root
     # -c ${dcubeXmlTechEffAbsPath} \

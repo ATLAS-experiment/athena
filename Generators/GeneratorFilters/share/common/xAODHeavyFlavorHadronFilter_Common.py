@@ -12,6 +12,7 @@ xAODHeavyFlavorHadronFilter = xAODHeavyFlavorHadronFilter("xAODHeavyFlavorHadron
 filtSeq += xAODHeavyFlavorHadronFilter
 
 # to modiify cuts put into JOs e.g.:
+from AthenaCommon.SystemOfUnits import GeV
 #filtSeq.xAODHeavyFlavorHadronFilter.CharmPtMin = 2.0 *GeV
 #filtSeq.xAODHeavyFlavorHadronFilter.BottomPtMin = 5.0 * GeV
 #filtSeq.xAODHeavyFlavorHadronFilter.CharmEtaMax = 3.0

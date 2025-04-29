@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOIDENTIFIER_LARFCAL_BASE_ID_H
@@ -197,18 +197,18 @@ private:
 
 
 private:
-  unsigned                      m_slar;
+  unsigned                      m_slar{0};
 
-  bool                          m_two_sym_sides;
+  bool                          m_two_sym_sides{1};
 
-  size_type                     m_fcal_region_index;
-  size_type                     m_LAR_INDEX;
-  size_type                     m_SLAR_INDEX;
-  size_type                     m_FCAL_INDEX;
-  size_type                     m_POSNEG_INDEX;
-  size_type                     m_MODULE_INDEX;
-  size_type                     m_ETA_INDEX;
-  size_type                     m_PHI_INDEX;
+  size_type                     m_fcal_region_index{0};
+  size_type                     m_LAR_INDEX{999};
+  size_type                     m_SLAR_INDEX{999};
+  size_type                     m_FCAL_INDEX{999};
+  size_type                     m_POSNEG_INDEX{999};
+  size_type                     m_MODULE_INDEX{999};
+  size_type                     m_ETA_INDEX{999};
+  size_type                     m_PHI_INDEX{999};
 
   MultiRange                    m_full_channel_range;
   MultiRange                    m_full_module_range;

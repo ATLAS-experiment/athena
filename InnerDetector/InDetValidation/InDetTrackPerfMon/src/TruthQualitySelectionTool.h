@@ -5,9 +5,10 @@
 #define INDETTRACKPERFMON_TRUTHQUALITYSELECTIONTOOL_H
 
 // Package includes
-#include "InDetTrackPerfMon/ITrackSelectionTool.h"
+#include "ITrackSelectionTool.h"
 #include "TrkTruthTrackInterfaces/IAthSelectionTool.h"
 #include "TrackAnalysisCollections.h"
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
 
 // Framework includes
 #include "AsgTools/AsgTool.h"
@@ -20,11 +21,15 @@
  * @class TruthQualitySelectionTool
  * @brief
  **/
-namespace IDTPM{
+
+namespace IDTPM {
+
 class TruthQualitySelectionTool :  
       public virtual IDTPM::ITrackSelectionTool,  
       public asg::AsgTool {
+
 public:
+
   ASG_TOOL_CLASS( TruthQualitySelectionTool, ITrackSelectionTool );
    
   TruthQualitySelectionTool( const std::string& name );
@@ -34,20 +39,13 @@ public:
   virtual StatusCode selectTracks(
       TrackAnalysisCollections& trkAnaColls ) override;
 
-  /// Dummy method - unused
-  virtual StatusCode selectTracksInRoI(
-      TrackAnalysisCollections& ,
-      const ElementLink< TrigRoiDescriptorCollection >& ) override {
-    ATH_MSG_ERROR( "selectTracksInRoI method is disabled" );
-    return StatusCode::SUCCESS;
-  }
-
   bool accept(const xAOD::TruthParticle* truth);
 
-
-
 private:
-  ToolHandle<IAthSelectionTool> m_truthTool{this, "truthTool", {}, "Truth selection tool to use, has to be setup" };
+
+  ToolHandle< IAthSelectionTool > m_truthTool { this, "truthTool", {}, "Main truth selection tool" };
+  ToolHandle< InDet::IInDetTrackTruthOriginTool > m_trackTruthOriginTool {
+    this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", "truth track origin tool" };
 
   FloatProperty   m_minAbsEta   { this, "minAbsEta", -9999., "Lower cut on |eta| for truth particles" };
   FloatProperty   m_minAbsPhi   { this, "minAbsPhi", -9999., "Lower cut on |phi| for truth particles" };
@@ -68,9 +66,15 @@ private:
   FloatProperty   m_maxZ0       { this, "maxZ0", -9999., "Higher cut on z0 for truth particles" };
   FloatProperty   m_minQoPT     { this, "minQoPT", -9999., "Lower cut on q/pt for truth particles" };
   FloatProperty   m_maxQoPT     { this, "maxQoPT", -9999., "Higher cut on q/pt for truth particles" };
-  BooleanProperty m_isHadron    { this, "isHadron",false, "Select hadrons" };
-  BooleanProperty m_isPion      { this, "isPion",false, "Select pions" };
+  BooleanProperty m_isHadron    { this, "isHadron", false, "Select hadrons" };
+  BooleanProperty m_isPion      { this, "isPion",   false, "Select pions" };
+  BooleanProperty m_isFromB     { this, "isFromB",  false, "Select particles from B hadron decay" };
+  BooleanProperty m_isFromC     { this, "isFromC",  false, "Select particles from C hadron decay" };
+  BooleanProperty m_isFromHeavyFlav { this, "isFromHeavyFlav",  false, "Select particles from heavy-flvour (B or C) hadron decay" };
+  BooleanProperty m_isFromLightFlav { this, "isFromLightFlav",  false, "Select particles from light-flvour hadron decay" };
   
 };
-}
+
+} // namespace IDTPM
+
 #endif // INDETTRACKPERFMON_TRUTHQUALITYSELECTIONTOOL_H

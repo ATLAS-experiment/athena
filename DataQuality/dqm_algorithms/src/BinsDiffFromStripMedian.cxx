@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  BinsDiffFromStripMedian.cxx is to pick out the problematic bins in 2D histogram assuming that y-axis(the phi direction) be symmetric. 
@@ -100,7 +100,7 @@ dqm_algorithms::BinsDiffFromStripMedian::execute(const std::string &  name,
       }
     }
     stripsAvg.push_back(stripSum/onestrip.size());
-    FindStripMedian(onestrip,stripsMedian);
+    FindStripMedian(std::move(onestrip),stripsMedian);
   }
   for ( int i = range[0]; i <= range[1]; ++i ) {
    float sumdiff2=0;

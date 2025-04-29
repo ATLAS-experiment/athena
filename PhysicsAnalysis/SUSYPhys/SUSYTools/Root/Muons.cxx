@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Muons
@@ -161,8 +161,8 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
 
   const xAOD::MuonContainer* muons = nullptr;
   if (bool(m_muLRT) && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
-      ATH_MSG_DEBUG("Using container: " << m_outMuonLocation.key());
-      ATH_CHECK( evtStore()->retrieve(muons, m_outMuonLocation.key())); 
+    ATH_MSG_DEBUG("Using container: " << m_outMuonLocation.key());
+    ATH_CHECK( evtStore()->retrieve(muons, m_outMuonLocation.key())); 
   }
   else { 
     if (copy==nullptr) { // empty container provided
@@ -178,18 +178,20 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
     }
   }
 
-  std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
-  copy = shallowcopy.first;
-  copyaux = shallowcopy.second;
-  bool setLinks = xAOD::setOriginalObjectLink(*muons, *copy);
-  if (!setLinks) {
-    ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
+  if (copy==nullptr) { // empty container provided
+    std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
+    copy = shallowcopy.first;
+    copyaux = shallowcopy.second;
+    bool setLinks = xAOD::setOriginalObjectLink(*muons, *copy);
+    if (!setLinks) {
+      ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
+    }
   } else { // use the user-supplied collection instead 
-      ATH_MSG_DEBUG("Not retrieving muon collection, using existing one provided by user");
-      muons=copy;
+    ATH_MSG_DEBUG("Not retrieving muon collection, using existing one provided by user");
+    muons=copy; // this does nothing
   }
 
-  for (const auto& muon : *copy) {
+  for (const auto muon : *copy) {
     ATH_CHECK( this->FillMuon(*muon, m_muBaselinePt, m_muBaselineEta) );
     this->IsSignalMuon(*muon, m_muPt, m_mud0sig, m_muz0, m_muEta);
     this->IsCosmicMuon(*muon, m_muCosmicz0, m_muCosmicd0);

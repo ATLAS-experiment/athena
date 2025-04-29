@@ -148,6 +148,7 @@ def defaultITkTrigTrackingFlags() -> AthConfigFlags:
   flags.doCaloSeededBremSi  = False
   flags.doCaloSeededAmbiSi  = False
   flags.DoubletDR_Max       = 150.0
+  flags.useTIDE_Ambi        = False  
   
   return flags
 
@@ -207,7 +208,7 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     category = "Trigger.ActsTracking"
     defaults = defaultITkTrigTrackingFlags
   else:                                       
-    log.error("Acts not supported yet")       
+    log.error("Unsupported reconstruction mode %s", mode)       
                                             
      
   class categoryGeneratorWrapper():
@@ -846,6 +847,7 @@ def addGlobalFlags(flags: AthConfigFlags, category : str):
   flags.addFlag(f'{category}.PixBSErrCacheKey',        "PixBSErrCache")
   flags.addFlag(f'{category}.TRTRDOCacheKey',          "TrtRDOCache")
   flags.addFlag(f'{category}.TRT_DriftCircleCacheKey', "TRT_DriftCircleCache")
+  flags.addFlag(f'{category}.ClusterAmbiguitiesMap',   "TrigPixelClusterAmbiguitiesMap")
 
   
 import unittest

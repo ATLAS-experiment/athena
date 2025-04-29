@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -59,24 +59,27 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
   auto mon_etaBin         = Monitored::Scalar( "EtaBin", -1. );
   auto mon_Eta            = Monitored::Scalar( "Eta", -99. );
   auto mon_Phi            = Monitored::Scalar( "Phi", -99. );
-  auto PassedCuts         = Monitored::Scalar<int>( "CutCounter", -1 );
+  auto cutCounter         = Monitored::Scalar<int>( "CutCounter", -1 );
   auto mon_lhval          = Monitored::Scalar("LikelihoodRatio",   -99.);
   auto mon_mu             = Monitored::Scalar("mu",   -1.);
   auto mon_ptvarcone20    = Monitored::Scalar("ptvarcone20",   -99.);
   auto mon_relptvarcone20 = Monitored::Scalar("relptvarcone20",   -99.);
+  auto mon_ptvarcone30    = Monitored::Scalar("ptvarcone30",   -99.);
+  auto mon_relptvarcone30 = Monitored::Scalar("relptvarcone30",   -99.);
   auto mon_ptcone20       = Monitored::Scalar("ptcone20",   -99.);
   auto mon_relptcone20    = Monitored::Scalar("relptcone20",   -99.);
+  auto mon_ptcone30       = Monitored::Scalar("ptcone30",   -99.);
+  auto mon_relptcone30    = Monitored::Scalar("relptcone30",   -99.);
   auto mon_trk_d0         = Monitored::Scalar("trk_d0",   -1.);
   auto monitorIt          = Monitored::Group( m_monTool, mon_ET, mon_dEta, mon_dPhi, 
                                         mon_etaBin, mon_Eta,
-                                        mon_Phi,PassedCuts,mon_lhval,mon_mu, 
+                                        mon_Phi,cutCounter,mon_lhval,mon_mu, 
                                         mon_ptvarcone20, mon_relptvarcone20,
-                                        mon_ptcone20, mon_relptcone20, mon_trk_d0);
+                                        mon_ptcone20, mon_relptcone20, mon_ptcone30, mon_relptcone30, mon_ptvarcone30, mon_relptvarcone30, mon_trk_d0);
 
   float ET(0), dEta(0), dPhi(0), eta(0), phi(0), lhval(0), mu(0), trk_d0(0);
 
   // when leaving scope it will ship data to monTool
-  PassedCuts = PassedCuts + 1; //got called (data in place)
 
   auto roiDescriptor = input.roi;
 
@@ -85,7 +88,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
       ATH_MSG_DEBUG( "REJECT The electron had eta coordinates beyond the EM fiducial volume : " << roiDescriptor->eta() << "; stop the chain now" );       
       return false;
   } 
-
+  cutCounter++;
   ATH_MSG_DEBUG( "; RoI ID = " << roiDescriptor->roiId()
   		 << ": Eta = " << roiDescriptor->eta()
   		 << ", Phi = " << roiDescriptor->phi() );
@@ -134,7 +137,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      }
      mon_Eta = eta;
      mon_dEta = dEta; 
-     PassedCuts = PassedCuts + 1; //Deta
+     cutCounter++; //Deta
   
      // DeltaPhi( clus-ROI )
      ATH_MSG_DEBUG( ": phi="  << pClus->phi()
@@ -147,7 +150,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      }
      mon_Phi = phi; 
      mon_dPhi = dPhi;
-     PassedCuts = PassedCuts + 1; //DPhi
+     cutCounter++; //DPhi
 
      // eta range
      if ( cutIndex == -1 ) {  // VD
@@ -157,7 +160,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
        ATH_MSG_DEBUG( "eta bin used for cuts " << cutIndex );
      }
      mon_etaBin = m_etabin[cutIndex]; 
-     PassedCuts = PassedCuts + 1; // passed eta cut
+     cutCounter++; // passed eta cut
   
      // ET_em
      ATH_MSG_DEBUG( "Electron: ET_em=" << ET << " cut: >"  << m_eTthr[cutIndex] );
@@ -166,7 +169,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
        return pass;
      }
      mon_ET = ET; 
-     PassedCuts = PassedCuts + 1; // ET_em
+     cutCounter++; // ET_em
      
      if(m_doNoPid){
        pass = true;
@@ -180,7 +183,6 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
          ATH_MSG_DEBUG("REJECT d0 cut failed");
          return pass;
        }
-       PassedCuts = PassedCuts + 1; // d0
      }
      mon_trk_d0 = trk_d0; 
  
@@ -195,11 +197,16 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
         Eratio(0), DeltaE(0), f1(0), weta1c(0), wtot(0), fracm(0);
 
      float ptvarcone20(999), ptvarcone30(999), ptcone20(999), ptcone30(999), ptcone40(999), etcone20(999), etcone30(999),
-        etcone40(999), topoetcone20(999), topoetcone30(999), topoetcone40(999), relptcone20(999), relptvarcone20(999);
+        etcone40(999), topoetcone20(999), topoetcone30(999), topoetcone40(999), relptcone20(999), relptvarcone20(999),relptcone30(999), relptvarcone30(999);
 
      bool ispt20 = input.electron->isolationValue(ptvarcone20, xAOD::Iso::ptvarcone20);
      if (!ispt20) {
        ATH_MSG_WARNING("ptvarcone20 not available. Will not cut on isolation");
+     }
+
+     bool ispt30 = input.electron->isolationValue(ptvarcone30, xAOD::Iso::ptvarcone30);
+     if (!ispt30) {
+       ATH_MSG_WARNING("ptvarcone30 not available. Will not cut on isolation");
      }
 
      // variables based on HCAL
@@ -281,13 +288,21 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      ATH_MSG_DEBUG( " topoetcone40 " << topoetcone40 ) ;
      // Monitor showershapes
      
-     relptcone20 = ptcone20/input.electron->pt();
-     relptvarcone20 = ptvarcone20/input.electron->pt();
-
+     if (input.electron->pt() >0){
+        relptcone20 = ptcone20/input.electron->pt();
+        relptvarcone20 = ptvarcone20/input.electron->pt();
+        relptcone30 = ptcone30/input.electron->pt();
+        relptvarcone30 = ptvarcone30/input.electron->pt();
+     } 
      mon_ptvarcone20 = ptvarcone20; 
      mon_relptvarcone20 = relptvarcone20; 
      mon_ptcone20 = ptcone20; 
      mon_relptcone20 = relptcone20;  
+
+     mon_ptvarcone30 = ptvarcone30; 
+     mon_relptvarcone30 = relptvarcone30; 
+     mon_ptcone30 = ptcone30; 
+     mon_relptcone30 = relptcone30;  
 
      ATH_MSG_DEBUG("relptvarcone20 = " << relptvarcone20  );
      ATH_MSG_DEBUG("relptcone20 = " << relptcone20  );
@@ -310,6 +325,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
        return pass;
      } else {
       ATH_MSG_DEBUG("ACCEPT Likelihood passed");
+      cutCounter++;
      }
 
      // Check if need to apply isolation
@@ -320,8 +336,29 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
        ATH_MSG_DEBUG("TAccept = " << pass);
        return pass;
      }
-     // Then, It will pass if relptcone20 is less than cut:
-     pass = (relptvarcone20 < m_RelPtConeCut);
+
+     if (m_isoValidation){
+      pass = (relptvarcone30 < m_RelPtConeCut);
+      ATH_MSG_DEBUG("reptvarcon30_rel cut is: " << m_RelPtConeCut);
+      if (!pass){
+        ATH_MSG_DEBUG(" ACCEPT Isolation ptvarcon30_rel cut failed");
+        return pass;
+      }else{
+        ATH_MSG_DEBUG(" ACCEPT Isolation ptvarcon30_rel cut passed");
+        cutCounter++;
+      }
+     }else{
+      // Then, It will pass if relptcone20 is less than cut:
+      pass = (relptvarcone20 < m_RelPtConeCut);
+      ATH_MSG_DEBUG("reptvarcon20_rel cut is: " << m_RelPtConeCut);
+      if (!pass){
+        ATH_MSG_DEBUG(" ACCEPT Isolation ptvarcon20_rel  cut failed");
+        return pass;
+      }else{
+        ATH_MSG_DEBUG(" ACCEPT Isolation ptvarcon20_rel  cut passed");
+        cutCounter++;
+      }
+    }
 
   }  // end of if(!m_acceptAll) 
   ATH_MSG_DEBUG( "pass = " << pass );

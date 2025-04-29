@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -21,7 +21,6 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <string>
 #include <stdio.h> 
 
 namespace LVL1 {
@@ -185,11 +184,11 @@ StatusCode gFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         scSumEtEncoded = gFEXCompression::compress( tmpSCellEt );
 
         // Decorating the tower with the corresponding information
-        gTowerSCellEt       (*gTower) = scEt;
-        gTowerSCellEta      (*gTower) = scEta;
-        gTowerSCellPhi      (*gTower) = scPhi;
-        gTowerSCellID       (*gTower) = scID;
-        gTowerSCellSample   (*gTower) = scSample;
+        gTowerSCellEt       (*gTower) = std::move(scEt);
+        gTowerSCellEta      (*gTower) = std::move(scEta);
+        gTowerSCellPhi      (*gTower) = std::move(scPhi);
+        gTowerSCellID       (*gTower) = std::move(scID);
+        gTowerSCellSample   (*gTower) = std::move(scSample);
         gTowerEtMeV         (*gTower) = gFexEt * 200;
         gTowerSCEtEncoded   (*gTower) = scSumEtEncoded;
 
@@ -229,10 +228,10 @@ StatusCode gFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         
         
         // Decorating the tower with the corresponding information
-        gTowerTileEt        (*gTower) = TileEt;
-        gTowerTileID        (*gTower) = TileID;
-        gTowerTileEta       (*gTower) = TileEta;
-        gTowerTilePhi       (*gTower) = TilePhi;
+        gTowerTileEt        (*gTower) = std::move(TileEt);
+        gTowerTileID        (*gTower) = std::move(TileID);
+        gTowerTileEta       (*gTower) = std::move(TileEta);
+        gTowerTilePhi       (*gTower) = std::move(TilePhi);
     }
 
     // Return gracefully
@@ -292,7 +291,7 @@ StatusCode  gFexTower2SCellDecorator::ReadSCfromFile(const std::string& fileName
             }
         }        
         
-        m_map_TTower2SCells[TTID] = SCellvector;
+        m_map_TTower2SCells[TTID] = std::move(SCellvector);
         
     }
     myfile.close();
@@ -353,7 +352,7 @@ StatusCode  gFexTower2SCellDecorator::ReadTilefromFile(const std::string& fileNa
             }
         }
         
-        m_map_TTower2Tile[gTowerID] = Tilevector;
+        m_map_TTower2Tile[gTowerID] = std::move(Tilevector);
         
     }
     myfile.close();

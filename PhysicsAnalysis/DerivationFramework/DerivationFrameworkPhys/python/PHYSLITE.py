@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYSLITE.py
 # This defines DAOD_PHYSLITE, an unskimmed DAOD format for Run 3.
@@ -76,6 +75,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
+    subConfig.setOptionValue ('.decorateSamplingPattern', True)
+    subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisElectrons',
                                     selectionName='loose')
@@ -98,6 +99,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.postfix', 'SiHit')
+    subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisSiHitElectrons', selectionName='SiHits')
     subConfig.setOptionValue ('.trackSelection', False)
@@ -119,9 +121,11 @@ def CPAlgorithmsCfg(flags):
     logPLCPAlgCfg.info('Do Photons')
 
     subConfig = factory.makeConfig ('Photons', containerName='AnalysisPhotons')
-    subConfig.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
+    subConfig.setOptionValue ('.forceFullSimConfigForP4', forceEGammaFullSimConfig)
+    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)
+    subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Photons.WorkingPoint', containerName='AnalysisPhotons',
         selectionName='loose')
@@ -129,7 +133,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.recomputeIsEM', False)
-    subConfig.setOptionValue ('.noEffSF', True)
+    subConfig.setOptionValue ('.noEffSFForID', True)
+    subConfig.setOptionValue ('.noEffSFForIso', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisPhotons')
     subConfig.setOptionValue ('.selectionName', 'loose')
@@ -173,6 +178,12 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Jets', containerName='AnalysisLargeRJets',
         jetCollection=largeRjetContainer)
     subConfig.setOptionValue ('.runGhostMuonAssociation', False)
+    # Disable kinematic selections on large-R jets
+    subConfig.setOptionValue ('.minPt', 0.)
+    subConfig.setOptionValue ('.maxPt', 0.)
+    subConfig.setOptionValue ('.maxEta', 0.)
+    subConfig.setOptionValue ('.minMass', 0.)
+    subConfig.setOptionValue ('.maxMass', 0.)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisLargeRJets')
     subConfig.setOptionValue ('.deepCopy', True)
@@ -388,7 +399,6 @@ def PHYSLITECfg(flags):
         'AnalysisTauJets':'xAOD::TauJetContainer', 'AnalysisTauJetsAux':'xAOD::TauJetAuxContainer',
         'MET_Core_AnalysisMET':'xAOD::MissingETContainer', 'MET_Core_AnalysisMETAux':'xAOD::MissingETAuxContainer',
         'METAssoc_AnalysisMET':'xAOD::MissingETAssociationMap', 'METAssoc_AnalysisMETAux':'xAOD::MissingETAuxAssociationMap',
-        'AntiKt10TruthTrimmedPtFrac5SmallR20Jets':'xAOD::JetContainer', 'AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux':'xAOD::JetAuxContainer',
         'AnalysisLargeRJets':'xAOD::JetContainer','AnalysisLargeRJetsAux':'xAOD::AuxContainerBase'
     })
 
@@ -414,18 +424,18 @@ def PHYSLITECfg(flags):
     btag_variables = [f'GN2v01_p{x}' for x in ['b', 'c', 'u', 'tau']]
     btag_variables += [f'DL1dv01_p{x}' for x in ['b', 'c', 'u']]
     PHYSLITESlimmingHelper.ExtraVariables += [ 
-        'AnalysisElectrons.trackParticleLinks.f1.pt.eta.phi.m.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsDNNLoose.DFCommonElectronsDNNMedium.DFCommonElectronsDNNTight.DFCommonElectronsDNNVeryLooseNoCF97.DFCommonElectronsDNNMediumNoCF.DFCommonElectronsDNNTightNoCF.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.topoetcone20ptCorrection.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.caloClusterLinks.ambiguityLink.TruthLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ.Eadded_Lr2.Eadded_Lr3',
-        'AnalysisSiHitElectrons.pt.eta.phi.m.charge.author.topoetcone20_CloseByCorr.DFCommonElectronsLHVeryLoose.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.OQ.truthOrigin.truthType.firstEgMotherTruthType.firstEgMotherTruthOrigin.z0stheta.d0Normalized.nInnerExpPix.clEta.clPhi',
-        'AnalysisPhotons.f1.pt.eta.phi.m.author.OQ.DFCommonPhotonsIsEMLoose.DFCommonPhotonsIsEMMedium.DFCommonPhotonsIsEMTight.DFCommonPhotonsIsEMTightIsEMValue.DFCommonPhotonsCleaning.DFCommonPhotonsCleaningNoTime.ptcone20.topoetcone20.topoetcone40.topoetcone20ptCorrection.topoetcone40ptCorrection.topoetcone20_CloseByCorr.topoetcone40_CloseByCorr.ptcone20_CloseByCorr.caloClusterLinks.vertexLinks.ambiguityLink.TruthLink.truthOrigin.truthType.Eadded_Lr2.Eadded_Lr3',
+        'AnalysisElectrons.trackParticleLinks.f1.pt.eta.phi.m.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsDNNLoose.DFCommonElectronsDNNMedium.DFCommonElectronsDNNTight.DFCommonElectronsDNNVeryLooseNoCF97.DFCommonElectronsDNNMediumNoCF.DFCommonElectronsDNNTightNoCF.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.topoetcone20ptCorrection.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.caloClusterLinks.ambiguityLink.TruthLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ.Eadded_Lr2.Eadded_Lr3.E_mva_only',
+        'AnalysisSiHitElectrons.pt.eta.phi.m.charge.author.topoetcone20_CloseByCorr.DFCommonElectronsLHVeryLoose.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.OQ.truthOrigin.truthType.firstEgMotherTruthType.firstEgMotherTruthOrigin.z0stheta.d0Normalized.nInnerExpPix.clEta.clPhi.E_mva_only',
+        'AnalysisPhotons.f1.pt.eta.phi.m.author.OQ.DFCommonPhotonsIsEMLoose.DFCommonPhotonsIsEMMedium.DFCommonPhotonsIsEMTight.DFCommonPhotonsIsEMTightIsEMValue.DFCommonPhotonsCleaning.DFCommonPhotonsCleaningNoTime.ptcone20.topoetcone20.topoetcone40.topoetcone20ptCorrection.topoetcone40ptCorrection.topoetcone20_CloseByCorr.topoetcone40_CloseByCorr.ptcone20_CloseByCorr.caloClusterLinks.vertexLinks.ambiguityLink.TruthLink.truthOrigin.truthType.Eadded_Lr2.Eadded_Lr3.E_mva_only',
         'GSFTrackParticles.chiSquared.phi.d0.theta.qOverP.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.z0.vz.charge.vertexLink.numberOfPixelHits.numberOfSCTHits.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits.originalTrackParticle',
         'GSFConversionVertices.trackParticleLinks.x.y.z.px.py.pz.pt1.pt2.neutralParticleLinks.minRfirstHit',
-        'egammaClusters.calE.calEta.calPhi.calM.e_sampl.eta_sampl.ETACALOFRAME.PHICALOFRAME.ETA2CALOFRAME.PHI2CALOFRAME.constituentClusterLinks',
+        'egammaClusters.calE.calEta.calPhi.calM.e_sampl.eta_sampl.ETACALOFRAME.PHICALOFRAME.ETA2CALOFRAME.PHI2CALOFRAME.constituentClusterLinks.samplingPattern',
         "AnalysisMuons.{var_string}".format(var_string = ".".join(MuonVariablesCfg(flags))),
         'CombinedMuonTrackParticles.qOverP.d0.z0.vz.phi.theta.truthOrigin.truthType.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.numberOfPixelDeadSensors.numberOfPixelHits.numberOfPixelHoles.numberOfSCTDeadSensors.numberOfSCTHits.numberOfSCTHoles.numberOfTRTHits.numberOfTRTOutliers.chiSquared.numberDoF',
         'ExtrapolatedMuonTrackParticles.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.truthOrigin.truthType.qOverP.theta.phi',
         'MuonSpectrometerTrackParticles.phi.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.vertexLink.theta.qOverP',
         'InDetForwardTrackParticles.vz.truthType.truthOrigin.numberDoF.numberOfTRTHits.numberOfSCTHoles.theta.numberOfTRTOutliers.numberOfPrecisionLayers.numberOfSCTDeadSensors.numberOfPixelHoles.numberOfSCTHits.numberOfPrecisionHoleLayers.numberOfPixelDeadSensors.phi.numberOfPixelHits.z0.d0.qOverP.chiSquared.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag',
-        'AnalysisTauJets.pt.eta.phi.m.ptFinalCalib.etaFinalCalib.ptTauEnergyScale.etaTauEnergyScale.charge.isTauFlags.PanTau_DecayMode.NNDecayMode.RNNJetScore.RNNJetScoreSigTrans.RNNEleScore.RNNEleScoreSigTrans_v1.EleRNNLoose_v1.EleRNNMedium_v1.EleRNNTight_v1.passTATTauMuonOLR.tauTrackLinks.vertexLink.truthParticleLink.truthJetLink.IsTruthMatched.truthOrigin.truthType',
+        'AnalysisTauJets.pt.eta.phi.m.ptFinalCalib.etaFinalCalib.ptTauEnergyScale.etaTauEnergyScale.charge.isTauFlags.PanTau_DecayMode.NNDecayMode.RNNJetScoreSigTrans.GNTauScoreSigTrans_v0prune.GNTauVL_v0prune.GNTauL_v0prune.GNTauM_v0prune.GNTauT_v0prune.RNNEleScoreSigTrans_v1.EleRNNLoose_v1.EleRNNMedium_v1.EleRNNTight_v1.passTATTauMuonOLR.tauTrackLinks.vertexLink.truthParticleLink.truthJetLink.IsTruthMatched.truthOrigin.truthType',
         'AnalysisJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.DetectorEta.JVFCorr.NNJvtPass.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad.Timing.btagging.btaggingLink.GhostTrack.DFCommonJets_fJvt.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PSFrac.JetAccessorMap.EMFrac.Width.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.EnergyPerSampling.SumPtChargedPFOPt500.isJvtHS',
         '.'.join(['BTagging_AntiKt4EMPFlow'] + btag_variables),
         'TruthPrimaryVertices.t.x.y.z',

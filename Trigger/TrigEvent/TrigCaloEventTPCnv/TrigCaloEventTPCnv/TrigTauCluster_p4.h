@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -28,16 +28,15 @@ class TrigTauCluster_p4 {
 	friend class TrigTauClusterCnv_p4;
 
 public:
-	TrigTauCluster_p4() : m_valid(false) {}
-	~TrigTauCluster_p4() {}
+    TrigTauCluster_p4() = default;
+    ~TrigTauCluster_p4() = default;
 
 private:
-	float m_allTheFloats[11];
-//	float m_allTheFloats[9];
-	int m_allTheInts[2];
+    float m_allTheFloats[11]{};
+    int m_allTheInts[2]{};
 
-        // Unused, but shouldn't delete it since it's part of the persistent data.
-        bool ATH_UNUSED_MEMBER(m_valid);
+    // Unused, but shouldn't delete it since it's part of the persistent data.
+    bool ATH_UNUSED_MEMBER(m_valid){};
 	/** ElementLink to TrigTauClusterDetailsContainer **/
 	ElementLinkInt_p3 m_details;
 	TrigCaloCluster_p2 m_trigCaloCluster;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ class MsgStream;
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/Intersection.h"
 #include "TrkDetDescrUtils/LayerIndex.h"
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/OverlapDescriptor.h"
 #include "TrkNeutralParameters/NeutralParameters.h"

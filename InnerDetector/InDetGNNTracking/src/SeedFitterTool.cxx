@@ -101,7 +101,7 @@ std::unique_ptr<const Trk::TrackParameters> InDet::SeedFitterTool::fit(
     }
   }
   if (any_nan){
-      ATH_MSG_WARNING("Seed parameters contain NaN elements - skipping this track ");
+      ATH_MSG_DEBUG("Seed parameters contain NaN elements - skipping this track ");
       return nullptr; 
   }
 
@@ -109,7 +109,7 @@ std::unique_ptr<const Trk::TrackParameters> InDet::SeedFitterTool::fit(
     pla->createUniqueTrackParameters(track_paras[0],track_paras[1],track_paras[2],track_paras[3],track_paras[4],std::nullopt));
   
   if (!trkParameters) {
-    ATH_MSG_WARNING("Failed to create track parameters");
+    ATH_MSG_DEBUG("Failed to create track parameters");
     return nullptr;
   }
 

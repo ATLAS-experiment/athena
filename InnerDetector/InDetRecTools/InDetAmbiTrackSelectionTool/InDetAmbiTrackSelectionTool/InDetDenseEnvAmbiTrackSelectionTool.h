@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@ namespace InDet
  
     struct TSoS_Details
     {
-      unsigned int        m_nTSoS;
+      unsigned int        m_nTSoS{};
       std::vector<int>    m_type;                                   // The type of TSOS 
       std::vector<int>    m_detType;                                // The Detector type 1== Pixel, 11 = b-layer, 2 SCT, 3 TRT
       std::vector<int>    m_hitIsShared;                            // Number of tracks the hit is shared with
@@ -298,13 +298,13 @@ namespace InDet
       //  1 pixel hit is 1 module
       //  a double sided SCT hit (2 SCT hits) is 1 module
       //  so count by 2s for shared pixel hits and 1 per SCT (single sided hit) hit
-      int m_maxSharedModules; 
+      int m_maxSharedModules{}; 
       // Min number of unique hits that are not already used on any other track
       // but split hits can be used on multiple tracks and be considered unique
       //  - can change in ROI
-      int m_minNotShared;
+      int m_minNotShared{};
       // Min number of hits before we allow split sharing of hits -- can change if we are in ROI
-      int m_minSiHits;    
+      int m_minSiHits{};    
 
       std::vector<double> m_hadF;
       std::vector<double> m_hadE;

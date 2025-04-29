@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // Dear emacs, this is -*-c++-*-
@@ -80,11 +80,7 @@ class TElectronLikelihoodTool : public asg::AsgMessaging
 
 public:
   /// Standard constructor
-
   TElectronLikelihoodTool(const char* name = "TElectronLikelihoodTool");
-
-  /// Standard destructor
-  ~TElectronLikelihoodTool();
 
   // Main methods
 public:
@@ -341,11 +337,10 @@ private:
   static const std::string s_fVariables[s_fnVariables];
 
   static unsigned int getIpBin(double ip) ;
-  static void getBinName(char* buffer,
-                  int etbin,
-                  int etabin,
-                  int ipbin,
-                  const std::string& iptype) ;
+  static std::string getBinName(int etbin,
+                                int etabin,
+                                int ipbin,
+                                const std::string& iptype) ;
 };
 
 } // End: namespace Root

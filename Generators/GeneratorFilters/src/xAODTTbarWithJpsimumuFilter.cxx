@@ -1,32 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/xAODTTbarWithJpsimumuFilter.h"
-
-#include "GaudiKernel/MsgStream.h"
-
-//--------------------------------------------------------------------------
-xAODTTbarWithJpsimumuFilter::xAODTTbarWithJpsimumuFilter(const std::string &fname,
-                                                         ISvcLocator *pSvcLocator)
-    : GenFilter(fname, pSvcLocator)
-
-{
-    declareProperty("SelectJpsi", m_selectJpsi = true);
-    declareProperty("JpsipTMinCut", m_JpsiPtMinCut = 0.); /// MeV
-    declareProperty("JpsietaMaxCut", m_JpsiEtaMaxCut = 5.);
-}
-
-//--------------------------------------------------------------------------
-xAODTTbarWithJpsimumuFilter::~xAODTTbarWithJpsimumuFilter()
-{
-    /////
-}
+#include "xAODTruth/TruthVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 //---------------------------------------------------------------------------
 StatusCode xAODTTbarWithJpsimumuFilter::filterInitialize()
 {
-    ATH_MSG_INFO("Initialized");
-    return StatusCode::SUCCESS;
+   CHECK(m_truthPartContKey.initialize());
+   ATH_MSG_INFO("Initialized");
+   return StatusCode::SUCCESS;
 }
 
 //---------------------------------------------------------------------------
@@ -45,19 +29,14 @@ StatusCode xAODTTbarWithJpsimumuFilter::filterEvent()
     bool isjpsi = false;
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;  
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
-        
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
+
   // Loop over all truth particles in the container
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-            if (std::abs(pitr->pdgId())!=443) continue;
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
+            if (std::abs(pitr->pdgId())!=MC::JPSI) continue;
             if (HepMC::is_simulation_particle(pitr)) continue;
-            if(!isLeptonDecay(pitr, 13)) continue;
+            if(!isLeptonDecay(pitr, MC::MUON)) continue;
             if (!passJpsiSelection(pitr)) continue;
             isjpsi = true;
 

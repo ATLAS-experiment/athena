@@ -64,16 +64,7 @@ class FPGATrackSimPlaneMap
         ///////////////////////////////////////////////////////////////////////
         // Constructor/Destructor
         ///////////////////////////////////////////////////////////////////////
-        
         // See doc on m_layerOverrides for info on argument layerOverrides
-        //TODO KILL OLD METHOD AFTER 2nd Stage is fully converted  
-        //2nd stage does not currently work update this when 2nd stage works or is discarded
-        //2nd stage still uses loading logic of old mapping style 
-        //old 
-        FPGATrackSimPlaneMap(const std::string & filepath, unsigned region, unsigned stage,
-                std::vector<int> layerOverrides = std::vector<int>());
-
-        //New
         FPGATrackSimPlaneMap(std::ifstream& fin, unsigned region, unsigned stage,
                 std::vector<int> layerOverrides = std::vector<int>());
         ///////////////////////////////////////////////////////////////////////
@@ -148,7 +139,7 @@ class FPGATrackSimPlaneMap
         ///////////////////////////////////////////////////////////////////////
         // Mapping Hits
         ///////////////////////////////////////////////////////////////////////
-
+        void doRemap(FPGATrackSimHit & hit) const;
         void map(FPGATrackSimHit & hit) const ;
 
     private:

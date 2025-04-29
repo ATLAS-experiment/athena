@@ -16,7 +16,11 @@
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 namespace MuonR4{
-    class MeasurementMarkerAlg: public AthReentrantAlgorithm{
+  /** @brief Algorithm that marks the uncalibrated measurements making up a segment, where the segment
+   *          passes an arbitrary selection requirement. The requirement needs to be decorated by an algorithm
+   *          upstream with a <bool> decorator. The same decoration is then copied to the measurements.
+   *          If "SegmentLinkKey" is not empty, the algorithm additionally decorates a link to the segment. */  
+  class MeasurementMarkerAlg: public AthReentrantAlgorithm{
        public:
          using AthReentrantAlgorithm::AthReentrantAlgorithm;
          ~MeasurementMarkerAlg() = default;

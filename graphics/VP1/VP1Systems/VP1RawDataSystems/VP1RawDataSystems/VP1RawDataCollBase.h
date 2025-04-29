@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -49,6 +49,9 @@ public Q_SLOTS:
 //Nb: RawDataHandleBase needs eta() and phi() method.
 
 protected:
+  //An interface change to return const ref. would require all derived classes to behave
+  //similarly, which is not the case
+  //cppcheck-suppress returnByReference
   QString provideText() const;
 
 //For use in load() reimplementations:

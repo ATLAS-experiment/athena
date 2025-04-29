@@ -65,7 +65,7 @@ namespace CP
         CP::SysWriteDecorHandle<float>  m_clPhi{this, "clPhi", "clPhi", "the decoration for phi of the electron cluster"};
 
         /// Decorator for SiHit electron for event requirement on a pair of leptons
-        CP::SysWriteDecorHandle<uint32_t> m_evtOKDec{this, "selectionName", "", "the decoration for the combined WP and FSR selection"};
+        CP::SysWriteDecorHandle<char> m_evtOKDec{this, "selectionName", "", "the decoration for the combined WP and FSR selection"};
 
     };
 }

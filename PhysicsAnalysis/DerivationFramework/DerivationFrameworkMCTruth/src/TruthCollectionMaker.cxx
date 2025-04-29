@@ -29,12 +29,11 @@
 DerivationFramework::TruthCollectionMaker::TruthCollectionMaker(const std::string& t,
                                                                 const std::string& n,
                                                                 const IInterface* p)
-  : ExpressionParserUser<AthAlgTool>(t,n,p)
+  : base_class(t,n,p)
   , m_ntotpart(0)
   , m_npasspart(0)
   , m_metaStore( "MetaDataStore", n )
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("MetaDataStore", m_metaStore );
 }
 
@@ -233,8 +232,8 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                                 // W boson
                                 pdg_id=24*(boson[0]->pdgId()+boson[1]->pdgId());
                             }
-                            if ( (SherpaW && std::abs(pdg_id)==24) ||
-                                 (SherpaZ && pdg_id==23) ){
+                            if ( (SherpaW && MC::isW(pdg_id)) ||
+                                 (SherpaZ && MC::isZ(pdg_id)) ){
                                 // Make a Z or a W
                                 xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
                                 newParticlesWriteHandle->push_back( xTruthParticle );

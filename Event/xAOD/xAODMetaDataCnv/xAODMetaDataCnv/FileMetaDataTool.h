@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMETADATACNV_FILEMETADATATOOL_H
 #define XAODMETADATACNV_FILEMETADATATOOL_H
@@ -15,6 +15,9 @@
 # include "GaudiKernel/ServiceHandle.h"
 # include "AthenaKernel/IAthMetaDataSvc.h"
 # include "AthenaKernel/IMetaDataTool.h"
+#else
+#include <AsgTools/Interfaces.h>
+#include <AsgTools/PropertyWrapper.h>
 #endif
 
 #include "xAODMetaData/FileMetaData.h"
@@ -33,12 +36,12 @@ namespace xAODMaker {
 ///
 class FileMetaDataTool
 #ifdef XAOD_STANDALONE
-    : public asg::AsgMetadataTool {
+    : public extends<asg::AsgMetadataTool> {
 #else
-    : public asg::AsgMetadataTool, virtual public IMetaDataTool {
+    : public extends<asg::AsgMetadataTool, IMetaDataTool> {
 #endif
  public:
-  //using extends::extends;
+  using extends::extends;
   ASG_TOOL_CLASS0(FileMetaDataTool)
 
   /// Regular AsgTool constructor
@@ -70,9 +73,11 @@ class FileMetaDataTool
   /// @}
 
  private:
-  /// (optional) list of keys to propagate from input to output.
-  /// Leaving this empty means the tool will copy all keys. Default: empty
-  std::vector< std::string > m_keys;
+  Gaudi::Property<std::vector<std::string> > m_keys{
+    this,
+    "Keys",
+    {},
+    "(optional) List of keys to copy. Copy all keys if empty"};
 
 #ifndef XAOD_STANDALONE
   /// Get a handle on the metadata store for the job

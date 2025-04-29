@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
@@ -6,7 +6,7 @@ def addStdEvgenArgs(parser):
     parser.defineArgGroup("Evgen", "Event generator options")
 
     parser.add_argument("--ecmEnergy", "--EcmEnergy", group="Evgen",
-                        default=trfArgClasses.argFloat(13000, runarg=True),
+                        default=trfArgClasses.argFloat(13600, runarg=True),
                         help="centre-of-mass energy parameter in GeV",
                         type=trfArgClasses.argFactory(trfArgClasses.argFloat, runarg=True))
 
@@ -63,6 +63,10 @@ def addStdEvgenArgs(parser):
                         help="Name of YODA file for Rivet histo output",
                         type=trfArgClasses.argFactory(trfArgClasses.argYODAFile, type='yoda', io='output', runarg=True))
 
+    parser.add_argument("--outputHEPMCFile", group="Evgen",
+                        help="Name of HepMC output file",
+                        type=trfArgClasses.argFactory(trfArgClasses.argHepEvtAsciiFile, type='hepmc', io='output', runarg=True))
+
     parser.add_argument("--rivetAnas", group="Evgen",
                         help="a comma-separated list of Rivet analyses to run on the resulting events",
                         type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True))
@@ -113,3 +117,10 @@ def addStdEvgenArgs(parser):
                         help = 'ignore Blacklist - allows to run a test in a blacklisted release',
                         type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                         default=trfArgClasses.argBool('False'))
+ 
+    parser.add_argument('--allowOldFilter', '--allowOldFilter', group='Evgen',
+                        help = 'useOldFilter - allows to use old (not xAOD based) filters',
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
+                        default=trfArgClasses.argBool('False'))
+
+

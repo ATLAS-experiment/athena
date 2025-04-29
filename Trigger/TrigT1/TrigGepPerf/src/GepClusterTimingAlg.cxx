@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "./GepClusterTimingAlg.h"
@@ -52,7 +52,7 @@ StatusCode GepClusterTimingAlg::execute(const EventContext& ctx) const{
   const static SG::AuxElement::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
 
   // select clusters
-  for ( const auto& cluster : *h_inCaloClusters) {
+  for ( const auto cluster : *h_inCaloClusters) {
         
     float time = cluster->time(); 
     float quality = acc_larq(*cluster)/65535; 

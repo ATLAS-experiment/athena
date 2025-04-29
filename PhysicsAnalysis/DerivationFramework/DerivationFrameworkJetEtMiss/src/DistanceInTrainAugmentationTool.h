@@ -21,7 +21,7 @@
 
 namespace DerivationFramework {
 
-  class DistanceInTrainAugmentationTool : public AthAlgTool, public IAugmentationTool {
+  class DistanceInTrainAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
 
     public: 
       DistanceInTrainAugmentationTool( const std::string& t, const std::string& n, const IInterface* p );

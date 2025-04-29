@@ -21,6 +21,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "TGraph.h"
+class TH1D;
+class TH2D;
 
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
@@ -28,7 +30,6 @@
 
 #include "FPGATrackSimGenScanBinning.h"
 #include "FPGATrackSimGenScanTool.h"
-
 
 
  class FPGATrackSimGenScanMonitoring : public AthAlgTool
@@ -47,6 +48,7 @@
     StatusCode registerHistograms(unsigned nLayers,const FPGATrackSimGenScanBinningBase  *binning,
                                  double rin, double rout);
     void allocateDataFlowCounters();
+    void resetDataFlowCounters();
 
     // This is done at the end of event execution to store any graphs that were created
     StatusCode registerGraphs();
@@ -62,21 +64,29 @@
     
     // Fill methods
     void fillHitLevelInput(const FPGATrackSimHit* hit);
-    void fillBinLevelOutput(const FPGATrackSimGenScanBinningBase::IdxSet &idx,
-                                  const FPGATrackSimGenScanTool::BinEntry &data,                            
-                                  const std::vector<std::vector<const FPGATrackSimGenScanTool::StoredHit *> >&  hitsByLayer);
-    void fillPairFilterCuts(const FPGATrackSimGenScanTool::HitPairSet &pairs);
+    void fillBinLevelOutput(
+        const FPGATrackSimGenScanBinningBase::IdxSet &idx,
+        const FPGATrackSimGenScanTool::BinEntry &data);
+    void fillHitsByLayer(const std::vector<
+            std::vector<const FPGATrackSimGenScanTool::StoredHit *>>
+            &hitsByLayer);
+    void fillPairingHits(std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlyr,
+                         std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlastlyr);
+    void fillPairFilterCuts(const FPGATrackSimGenScanTool::HitPair &pair);
     void fillPairSetFilterCut(std::vector<TH1D *> &histset, double val,
                                     const FPGATrackSimGenScanTool::HitPair &pair,
                                     const FPGATrackSimGenScanTool::HitPair &lastpair, 
                                     bool nminus1);
 
+    
     void fillInputSummary(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
                                 const FPGATrackSimGenScanArray<int> &validSlice,
                                 const FPGATrackSimGenScanArray<int> &validScan);
     void fillOutputSummary(const FPGATrackSimGenScanArray<int>& validSlice,
                                  const FPGATrackSimGenScanArray<int>& validSliceAndScan);
 
+    void fillBuildGroupsWithPairs(const std::vector<FPGATrackSimGenScanTool::IntermediateState>& states, unsigned allowed_misses);
+    
     // Counter Increments
     void incrementInputPerSlice(const std::vector<unsigned>& sliceidx) { m_inputhitsperslice[sliceidx]++; }
     void incrementInputPerScan(const FPGATrackSimGenScanBinningBase::IdxSet& idx, 
@@ -91,6 +101,10 @@
         const FPGATrackSimGenScanTool::HitPairSet &filteredpairs,
         const std::vector<FPGATrackSimGenScanTool::HitPairSet> &pairsets,
         unsigned threshold);
+
+    bool isTruthBin(FPGATrackSimGenScanBinningBase::IdxSet idx) const {
+      return idx==m_truthbin;
+    }
 
    private:
     ///////////////////////////////////////////////////////////////////////
@@ -169,6 +183,13 @@
     TH1D *m_pairs = 0;
     TH1D *m_filteredpairs = 0;
     TH1D *m_pairsets = 0;
+
+    // Build Pairs with Groups
+    TH2D* m_unpairedHits = 0;
+    TH2D* m_pairsetsIncr = 0;
+    TH2D* m_pairsetsHits = 0;
+    TH2D* m_binStagesIncr = 0;
+    TH2D* m_totalInputIncr = 0;
 
     TH1D *m_pairinghits = 0;
 
@@ -257,6 +278,22 @@
     eventDispSet m_passPairFilterGraph{std::string("passpairfilter"), 10};
     eventDispSet m_lostPairSetFilterGraph{std::string("lostpairsetfilter"), 10};
     eventDispSet m_passPairSetFilterGraph{std::string("passpairsetfilter"), 10};
+
+    // TTree for layer definitions studies
+    StatusCode bookTree();
+    void ClearTreeVectors();
+    TTree *m_bin_module_tree = nullptr; // output tree
+    std::vector<unsigned> m_tree_bin; // 5 tracks parameter bin
+    std::vector<float> m_tree_r;
+    std::vector<float> m_tree_z;
+    std::vector<int> m_tree_id;
+    std::vector<int> m_tree_hash;
+    std::vector<int> m_tree_layer;
+    std::vector<int> m_tree_side;
+    std::vector<int> m_tree_etamod;
+    std::vector<int> m_tree_phimod;
+    std::vector<int> m_tree_dettype;
+    std::vector<int> m_tree_detzone;
 
     //////////////////////////////////////////////////////////////////////
     // make and register histogram or vector of histograms in one line...

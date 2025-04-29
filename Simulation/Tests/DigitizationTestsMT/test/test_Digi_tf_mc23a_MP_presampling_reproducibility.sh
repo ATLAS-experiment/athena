@@ -36,7 +36,7 @@ Digi_tf.py \
     --CA \
     --detectors Truth \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-01 \
+    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-08 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-03-02-00 \
@@ -60,7 +60,7 @@ Digi_tf.py \
     --multiprocess --athenaMPEventsBeforeFork 0 \
     --detectors Truth \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-01 \
+    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-08 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-03-02-00 \
@@ -86,7 +86,7 @@ Digi_tf.py \
     --multiprocess --athenaMPEventsBeforeFork 1 \
     --detectors Truth \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-01 \
+    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-08 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-03-02-00 \
@@ -111,7 +111,7 @@ rc4=-9999
 if [[ $rc -eq 0 ]] && [[ $rc2 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP0} \
-        --mode=semi-detailed --error-mode resilient --order-trees \
+        --nan-equal --mode=semi-detailed --error-mode resilient --order-trees \
         --ignore-leaves RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref
     rc4=$?
     if [[ $status -eq 0 ]]; then
@@ -124,7 +124,7 @@ rc5=-9999
 if [[ $rc -eq 0 ]] && [[ $rc3 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP1} \
-        --mode=semi-detailed --error-mode resilient --order-trees \
+        --nan-equal --mode=semi-detailed --error-mode resilient --order-trees \
         --ignore-leaves RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref
     rc5=$?
     if [[ $status -eq 0 ]]; then

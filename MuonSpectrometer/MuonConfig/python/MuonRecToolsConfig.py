@@ -321,6 +321,13 @@ def ClusterTimeProjectionMMClusterBuilderToolCfg(flags, name = "ClusterTimeProje
     result = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
     result.merge(NswErrorCalibDbAlgCfg(flags))  
+
+    #Turn on effective drift velocity calibration for data by default
+    from MuonConfig.MuonConfigFlags import MMClusterBuilderEnum
+    if not flags.Input.isMC and flags.Muon.MMClusterCalibRecoTool == MMClusterBuilderEnum.ClusterTimeProjection:
+      from MuonConfig.MuonCalibrationConfig import MmCTPCondDbAlgCfg
+      result.merge(MmCTPCondDbAlgCfg(flags))
+
     the_tool = CompFactory.Muon.ClusterTimeProjectionMMClusterBuilderTool(name,**kwargs)
     result.setPrivateTools(the_tool)   
     return result

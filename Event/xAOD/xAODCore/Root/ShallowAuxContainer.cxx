@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -614,7 +614,7 @@ namespace xAOD {
      if( m_parentLink.isValid() ) {
        ids.insert (m_parentLink->getDecorIDs());
      }
-     m_decorids = decors;
+     m_decorids = std::move(decors);
 
      m_auxidsValid = true;
    }

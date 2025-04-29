@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,7 +13,7 @@
 
 
 #ifndef ATHEXHIVE_BASEALG_H
-#define ATHEXHIVE_BASEALG_H 1
+#define ATHEXHIVE_BASEALG_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaKernel/IAthRNGSvc.h"
@@ -41,13 +41,13 @@ protected:
   unsigned int sleep();
 
   // Handle to HiveExSvc, which accumulates how much time each Alg sleeps
-  ServiceHandle<IHiveExSvc> m_hes;
+  ServiceHandle<IHiveExSvc> m_hes{this,"HiveExSvc","HiveExSvc","Handle to HiveExSvc"};
 
   // Handle to CPUCrunchSvc, which burns CPU time
-  ServiceHandle<ICPUCrunchSvc> m_ccs;
+  ServiceHandle<ICPUCrunchSvc> m_ccs{this,"CPUCrunchSvc","CPUCrunchSvc","Handle to CPUCrunchSvc"};
 
   // Handle to random number service
-  ServiceHandle<IAthRNGSvc> m_rngSvc;
+  ServiceHandle<IAthRNGSvc> m_rngSvc{this,"AthRNGSvc","AthRNGSvc","Handle to random number service"};
 
 private:
 

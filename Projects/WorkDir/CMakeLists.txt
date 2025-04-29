@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -13,8 +13,11 @@ project( WorkDir )
 # Force the compilation of CUDA code for only compute capability 5.2 for now.
 # To get rid of warnings from 11.0 about not supporting older compute
 # capabilities anymore.
-set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
+set( CMAKE_CUDA_ARCHITECTURES "all-major" CACHE STRING
    "CUDA architectures to build code for" )
+
+set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" CACHE STRING
+   "CUDA switch off deprecated architecture compilation warning" )
 
 # Enable the CI tests in the CITest package in case the user wants to
 # run them locally:
@@ -81,13 +84,9 @@ check_language( CUDA )
 if( CMAKE_CUDA_COMPILER )
    enable_language( CUDA )
 endif()
-find_package( AtlasHIP QUIET )
-if( AtlasHIP_FOUND )
-   include( AtlasCheckLanguage )
-   atlas_check_language( HIP )
-   if( CMAKE_HIP_COMPILER )
-      enable_language( HIP )
-   endif()
+check_language( HIP )
+if( CMAKE_HIP_COMPILER )
+   enable_language( HIP )
 endif()
 
 # Set up where to find the AthenaPoolUtilitiesTest CMake code.
@@ -123,9 +122,14 @@ set( ATLAS_ALWAYS_CHECK_WILDCARDS TRUE CACHE BOOL
 if( ATLAS_USE_CPPCHECK )
    find_package( Cppcheck 2.14 )
 
-   if( CPPCHECK_FOUND )
+   # Find ATLAS-specific wrapper:
+   find_program( CPPCHECK_ATLAS cppcheck_atlas
+      PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../../Control/CxxUtils/scripts" )
+   mark_as_advanced( CPPCHECK_ATLAS )
+
+   if( CPPCHECK_FOUND AND CPPCHECK_ATLAS )
       # Prepend cppcheck command to already defined command line options:
-      list( PREPEND CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" )
+      list( PREPEND CMAKE_CPPCHECK_DEFAULT ${CPPCHECK_ATLAS} )
 
       # Ignore externals:
       foreach( ignored_path "${LCG_RELEASE_BASE}"

@@ -45,28 +45,28 @@ namespace IDTPM {
 
     std::string m_trackType;
 
-    TH1* m_pt;
-    TH1* m_eta;
-    TH1* m_phi;
-    TH1* m_d0;
-    TH1* m_z0;
-    TH1* m_z0sin;
-    TH1* m_theta;
-    TH1* m_qoverp;
-    TH1* m_prodR;
-    TH1* m_prodZ;
-    TH1* m_nSiHits;
-    TH2* m_nSiHits_vs_eta;
-    TH1* m_chi2;
-    TH1* m_ndof;
-    TH1* m_chi2OverNdof;
-    TH1* m_author;
-    TH1* m_time;
-    TEfficiency* m_hasValidTime_eff_vs_eta;
-    TH2* m_eta_vs_pt;
-    TH2* m_eta_vs_phi;
-    TH2* m_z0_vs_d0;
-    TH2* m_z0sin_vs_d0;
+    TH1* m_pt{};
+    TH1* m_eta{};
+    TH1* m_phi{};
+    TH1* m_d0{};
+    TH1* m_z0{};
+    TH1* m_z0sin{};
+    TH1* m_theta{};
+    TH1* m_qoverp{};
+    TH1* m_prodR{};
+    TH1* m_prodZ{};
+    TH1* m_nSiHits{};
+    TH2* m_nSiHits_vs_eta{};
+    TH1* m_chi2{};
+    TH1* m_ndof{};
+    TH1* m_chi2OverNdof{};
+    TH1* m_author{};
+    TH1* m_time{};
+    TEfficiency* m_hasValidTime_eff_vs_eta{};
+    TH2* m_eta_vs_pt{};
+    TH2* m_eta_vs_phi{};
+    TH2* m_z0_vs_d0{};
+    TH2* m_z0sin_vs_d0{};
 
   }; // class TrackParametersPlots
 

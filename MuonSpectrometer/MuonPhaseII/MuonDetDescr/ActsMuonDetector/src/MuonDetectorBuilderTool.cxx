@@ -42,6 +42,7 @@
 #include <GeoModelKernel/GeoTrd.h>
 #include "GeoModelHelpers/getChildNodesWithTrf.h"
 #include "ActsGeometryInterfaces/GeometryDefs.h"
+#include <Acts/Utilities/AxisDefinitions.hpp>
 #include <set>
 #include <climits>
 #include <format>
@@ -107,7 +108,7 @@ namespace ActsTrk {
                                                                                             Acts::Experimental::tryAllSubVolumes(), 
                                                                                             Acts::Experimental::tryAllPortalsAndSurfaces());
 
-            detectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.setLayer(numChambers--));
+            detectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.withLayer(numChambers--));
             if(m_dumpDetectorVolumes){
                 //If we want to view each volume independently                
                 Acts::ObjVisualization3D helper;
@@ -163,7 +164,7 @@ namespace ActsTrk {
                     Acts::Transform3::Identity(), std::move(msBounds), surfaces, 
                     detectorVolumeBoundingVolumes, Acts::Experimental::tryAllSubVolumes(), 
                     Acts::Experimental::tryAllPortalsAndSurfaces());
-        msDetectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(15));
+        msDetectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(15));
 
         if (m_dumpDetector) {
             ATH_MSG_VERBOSE("Writing detector.obj");
@@ -210,7 +211,7 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
                         const IdentifierHash measHash{mdtReadoutEle->measurementHash(lay,tube)};
                         if (!mdtReadoutEle->isValid(measHash)) continue;         
                         surfacePtr surface = mdtReadoutEle->surfacePtr(measHash);  
-                        surface->assignGeometryId(Acts::GeometryIdentifier{}.setLayer(chId.first).setVolume(chId.second).setBoundary(mdtId).setSensitive(++surfId));
+                        surface->assignGeometryId(Acts::GeometryIdentifier{}.withLayer(chId.first).withVolume(chId.second).withBoundary(mdtId).withSensitive(++surfId));
                         surfaces.push_back(surface);
                     }
                 }
@@ -225,19 +226,20 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
                 mlCfg.transform = mdtTransform;      
                 auto mdtBounds = std::make_unique<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, parameters.longHalfX, parameters.halfY, parameters.halfHeight);
                 using BoundsV = Acts::TrapezoidVolumeBounds::BoundValues;
-                mlCfg.mlBounds= mdtBounds->values();
-                mlCfg.mlBinning = {Acts::Experimental::ProtoBinning(Acts::BinningValue::binY, Acts::AxisBoundaryType::Bound,                   
-                                                                    -mdtBounds->get(BoundsV::eHalfLengthXnegY), 
-                                                                     mdtBounds->get(BoundsV::eHalfLengthXposY), 
-                                                                     std::lround(2*mdtBounds->get(BoundsV::eHalfLengthXposY)/parameters.tubePitch), 0u), 
-                                    Acts::Experimental::ProtoBinning(Acts::BinningValue::binZ, Acts::AxisBoundaryType::Bound,                   
-                                                                    -mdtBounds->get(BoundsV::eHalfLengthY), 
-                                                                     mdtBounds->get(BoundsV::eHalfLengthY), 
-                                                                     std::lround(2*mdtBounds->get(BoundsV::eHalfLengthY)/parameters.tubePitch), 0u)};
+                mlCfg.mlBounds= mdtBounds->values();              
+
+                mlCfg.mlBinning = {{{Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,                   
+                                     -mdtBounds->get(BoundsV::eHalfLengthY), 
+                                     mdtBounds->get(BoundsV::eHalfLengthY), 
+                                     static_cast<std::size_t>(std::lround(2*mdtBounds->get(BoundsV::eHalfLengthY)/parameters.tubePitch))}, 2u}, 
+                                   {{Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound,                   
+                                     -mdtBounds->get(BoundsV::eHalfLengthZ), 
+                                     mdtBounds->get(BoundsV::eHalfLengthZ), 
+                                     static_cast<std::size_t>(std::lround(2*mdtBounds->get(BoundsV::eHalfLengthZ)/parameters.tubePitch))}, 1u}};
 
                 Acts::Experimental::MultiWireStructureBuilder mdtBuilder(mlCfg);
                 volumePtr mdtVolume = mdtBuilder.construct(gctx.context()).volumes[0];
-                mdtVolume->assignGeometryId(Acts::GeometryIdentifier{}.setLayer(chId.first).setVolume(chId.second).setBoundary(mdtId++));
+                mdtVolume->assignGeometryId(Acts::GeometryIdentifier{}.withLayer(chId.first).withVolume(chId.second).withBoundary(mdtId++));
                 readoutDetectorVolumes.push_back(mdtVolume); 
                 break;
             } case DetectorType::Rpc: 
@@ -247,7 +249,7 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
                 ATH_MSG_VERBOSE("Building plane surfaces "<<m_idHelperSvc->toStringDetEl(ele->identify()));
                 std::vector<surfacePtr> detSurfaces = ele->getSurfaces();
                 for (surfacePtr& surf : detSurfaces) {
-                    surf->assignGeometryId(Acts::GeometryIdentifier{}.setLayer(chId.first).setVolume(chId.second).setSensitive(++surfId));
+                    surf->assignGeometryId(Acts::GeometryIdentifier{}.withLayer(chId.first).withVolume(chId.second).withSensitive(++surfId));
                     readoutSurfaces.push_back(std::move(surf));
                 } 
                 break;          
@@ -274,7 +276,7 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
         Acts::MaterialSlab slab{aMat, thickness};
         std::shared_ptr<Acts::HomogeneousSurfaceMaterial> material = std::make_shared<Acts::HomogeneousSurfaceMaterial>(slab);
         surface->assignSurfaceMaterial(material);
-        surface->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(29).setSensitive(totalMaterials));
+        surface->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(29).withSensitive(totalMaterials));
         return surface;
     }
 
@@ -345,7 +347,7 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
         std::shared_ptr<Acts::HomogeneousVolumeMaterial> material = std::make_shared<Acts::HomogeneousVolumeMaterial>(aMat);
         ATH_MSG_DEBUG("FINAL TRANSFORM " << GeoTrf::toString(transform));
         volumePtr volume = Acts::GeoModel::convertDetectorVolume(gctx.context(), *shape, name + "_" + std::to_string(passiveVolumes.size()), transform, {});
-        volume->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(30).setSensitive(passiveVolumes.size()));
+        volume->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(30).withSensitive(passiveVolumes.size()));
         volume->assignVolumeMaterial(material);
         passiveVolumes.push_back(volume);
     }

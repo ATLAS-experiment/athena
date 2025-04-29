@@ -27,13 +27,17 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         virtual StatusCode initialize() override;
 
         virtual const FPGATrackSimPlaneMap* PlaneMap_1st(int slice) const override { return m_pmap_vector_1st.at(slice).get(); }
-        virtual const FPGATrackSimPlaneMap* PlaneMap_2nd()          const override { return m_pmap_2nd.get(); }
+        virtual const FPGATrackSimPlaneMap* PlaneMap_2nd(int slice) const override { return m_pmap_vector_2nd.at(slice).get(); }
         virtual const FPGATrackSimRegionMap* RegionMap_1st()        const override { return m_rmap_1st.get(); }
         virtual const FPGATrackSimRegionMap* RegionMap_2nd()        const override { return m_rmap_2nd.get(); }
         virtual const FPGATrackSimRegionMap* SubRegionMap()         const override { return m_subrmap.get();  }
         virtual const FPGATrackSimRegionMap* SubRegionMap_2nd()     const override { return m_subrmap_2nd.get(); }
-        virtual const FPGATrackSimNNMap* NNMap()                    const override { return m_NNmap.get();    }
-        virtual std::string getNNMapString() const override;
+        virtual std::string getFakeNNMapString() const override;
+        virtual std::string getFakeNNMap2ndString() const override;
+        virtual std::string getExtensionNNHitMapString() const override;
+        virtual std::string getExtensionNNVolMapString() const override;
+        virtual std::string getParamNNMapString() const override;
+        virtual std::string getParamNNMap2ndString() const override;
 
     private:
 
@@ -47,20 +51,31 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         Gaudi::Property<std::string> m_subrmap_path {this, "subrmap", "", "path of the region-map file for subregions"};
         Gaudi::Property<std::string> m_pmap_path {this, "pmap", "", "path of the PMAP file"};
         Gaudi::Property<std::string> m_modulelut_path {this, "modulemap", "", "path of the ModuleLUT file"};
-        Gaudi::Property<std::string> m_NNmap_path {this, "NNonnx", "", "path of the NN weighting file"};
+        Gaudi::Property<std::string> m_NNmap_path_fake {this, "FakeNNonnx1st", "", "path of the NN weighting file for 1st stage"};
+        Gaudi::Property<std::string> m_NNmap2nd_path_fake {this, "FakeNNonnx2nd", "", "path of the NN weighting file for 2nd stage"};
+        Gaudi::Property<std::string> m_NNmap_path_extension_vol {this, "ExtensionNNVolonnx", "", "path of the NN weighting file"};
+        Gaudi::Property<std::string> m_NNmap_path_extension_hit {this, "ExtensionNNHitonnx", "", "path of the NN weighting file"};
+        Gaudi::Property<std::string> m_NNmap_path_param {this, "ParamNNonnx1st", "", "path of the NN weighting file for 1st stage"};
+        Gaudi::Property<std::string> m_NNmap2nd_path_param {this, "ParamNNonnx2nd", "", "path of the NN weighting file for 2nd stage"};
         Gaudi::Property<std::string> m_radii_path {this, "radiiFile", "", "path of the average radius file" };
         Gaudi::Property<std::vector <int> > m_layerOverrides {this, "layerOverride", {}, "Overrides the selection of the 1st stage logical layers in the plane map. Each entry declares a detector layer to use as a logical layer. Specify a detector layer with { SiliconTech * 1000 + DetectorZone * 100 + PhysicalLayer }"};
 
             // Map unique pointers
         //vector of pmaps
         std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_1st; //  pointer to the pmap object for 1st stage
-        std::unique_ptr<FPGATrackSimPlaneMap>  m_pmap_2nd = nullptr; //  pointer to the pmap object for 2nd stage
-        std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_2nd; //  pointer to the pmap object for 1st stage
+        std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_2nd; //  pointer to the pmap object for 2nd stage
+        virtual size_t GetPlaneMap_1stSliceSize() const override {return m_pmap_vector_1st.size();}
+        virtual size_t GetPlaneMap_2ndSliceSize() const override {return m_pmap_vector_2nd.size();}
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_1st = nullptr; //  pointer to the RMAP object using 1st stage plane map
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_2nd = nullptr; //  pointer to the RMAP object using 2nd stage plane map
         std::unique_ptr<FPGATrackSimRegionMap> m_subrmap = nullptr;
         std::unique_ptr<FPGATrackSimRegionMap> m_subrmap_2nd = nullptr;
-        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap_fake = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap_param = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap2nd_fake = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap2nd_param = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap_extension_vol = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap_extension_hit = nullptr;
 
         size_t m_numberOfPmaps = 0;
         // Helpers

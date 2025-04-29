@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # TRUTH1.py - format containing extended common ATLAS truth record
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

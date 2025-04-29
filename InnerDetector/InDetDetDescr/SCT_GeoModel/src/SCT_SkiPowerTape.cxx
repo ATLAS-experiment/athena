@@ -1,21 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
 // 1st Feb 2005 D.Naito modified.
 // 28th Mar 2005 S.Mima modified.
 //
-#include "SCT_GeoModel/SCT_SkiPowerTape.h"
+#include "SCT_SkiPowerTape.h"
 
-#include "SCT_GeoModel/SCT_MaterialManager.h"
+#include "SCT_MaterialManager.h"
 
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_BarrelParameters.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_BarrelParameters.h"
 
-#include "SCT_GeoModel/SCT_Ski.h"
-#include "SCT_GeoModel/SCT_PowerTape.h"
-#include "SCT_GeoModel/SCT_Module.h"
+#include "SCT_Ski.h"
+#include "SCT_PowerTape.h"
+#include "SCT_Module.h"
 
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoLogVol.h"

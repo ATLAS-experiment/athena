@@ -11,6 +11,14 @@ def MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlg", **kwar
     result.addEventAlgo(theAlg, primary=True)
     return result
 
+
+def MuonNSWPhiSeedFinderAlgCfg(flags, name = "MuonNswPhiSeedFinderAlg", **kwargs):
+    result = ComponentAccumulator()
+    theAlg = CompFactory.MuonR4.CombinatorialNSWSeedFinderAlg(name, **kwargs)
+    result.addEventAlgo(theAlg, primary=True)
+    return result
+    
+
 def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("downWeightPrdMultiplicity", True)
@@ -21,11 +29,11 @@ def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwar
 def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
-    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags, mdtErrorScaleFactor=2.0, MdtPropagationTimeUncert=True)))
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("ResoSeedHitAssoc", 5. )
     kwargs.setdefault("RecoveryPull", 3.)
-    kwargs.setdefault("useMinuit", False)
     kwargs.setdefault("fitSegmentT0", False)
+    kwargs.setdefault("recalibInFit", True)
     kwargs.setdefault("SeedRefine", False)
     kwargs.setdefault("doBeamspotConstraint", True)
     
@@ -37,6 +45,19 @@ def MuonPatternRecognitionCfg(flags):
     result = ComponentAccumulator()
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
-    result.merge(MuonEtaHoughTransformAlgCfg(flags))
-    result.merge(MuonPhiHoughTransformAlgCfg(flags))
+    if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
+        result.merge(MuonEtaHoughTransformAlgCfg(flags,name="NswEtaHoughTransformAlg", EtaHoughMaxContainer = "MuonHoughNswMaxima", SpacePointContainer = "NswSpacePoints"))
+        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="NswPhiSeedFinderAlg", CombinatorialPhiWriteKey = "MuonHoughNswSegmentSeeds", CombinatorialReadKey = "MuonHoughNswMaxima"))
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        result.merge(MuonEtaHoughTransformAlgCfg(flags))
+        result.merge(MuonPhiHoughTransformAlgCfg(flags))
+        result.merge(MuonSegmentFittingAlgCfg(flags))
+        from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
+        result.merge(xAODSegmentCnvAlgCfg(flags))
+        if flags.Input.isMC:
+           from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
+           result.merge(RecoSegmentTruthAssocCfg(flags,
+                                                 name="MuonSegmentsFromR4TruthMatching",
+                                                 SegmentKey="MuonSegmentsFromR4"))
+
     return result

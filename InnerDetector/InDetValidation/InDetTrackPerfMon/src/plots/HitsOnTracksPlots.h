@@ -74,10 +74,10 @@ namespace IDTPM {
 
     std::string m_testType;
     std::string m_refType;
-    bool m_isITk;
-    bool m_doGlobalPlots;
-    bool m_doTruthMuPlots;
-    bool m_do1D;
+    bool m_isITk{};
+    bool m_doGlobalPlots{};
+    bool m_doTruthMuPlots{};
+    bool m_do1D{};
 
     enum HitParam {
         NInnerMostPixelHits,
@@ -180,24 +180,24 @@ namespace IDTPM {
     std::string m_paramMuName[ NPARAMSMU ] = { "truthMu", "actualMu" };
 
     /// 1D plots
-    TH1* m_hits[ NHITPARAMSTOT ];
-    TH1* m_hitsRun3[ NRUN3HITPARAMSTOT ];
+    TH1* m_hits[ NHITPARAMSTOT ]{};
+    TH1* m_hitsRun3[ NRUN3HITPARAMSTOT ]{};
 
     /// TProfile plots vs NPARAMS
-    TProfile* m_hits_vs[ NHITPARAMSTOT ][ NPARAMS ];
-    TProfile* m_hitsRun3_vs[ NRUN3HITPARAMSTOT ][ NPARAMS ];
+    TProfile* m_hits_vs[ NHITPARAMSTOT ][ NPARAMS ]{};
+    TProfile* m_hitsRun3_vs[ NRUN3HITPARAMSTOT ][ NPARAMS ]{};
 
     /// TProfile2D plots vs NPARAMS vs NPARAMS
-    TProfile2D* m_hits_vs2D[ NHITPARAMSTOT ][ NPARAMS ][ NPARAMS ];
-    TProfile2D* m_hitsRun3_vs2D[ NRUN3HITPARAMSTOT ][ NPARAMS ][ NPARAMS ];
+    TProfile2D* m_hits_vs2D[ NHITPARAMSTOT ][ NPARAMS ][ NPARAMS ]{};
+    TProfile2D* m_hitsRun3_vs2D[ NRUN3HITPARAMSTOT ][ NPARAMS ][ NPARAMS ]{};
 
     /// TProfile plots vs mu (truth and actual)
-    TProfile* m_hits_vsMu[ NHITPARAMSTOT ][ NPARAMSMU ];
-    TProfile* m_hitsRun3_vsMu[ NRUN3HITPARAMSTOT ][ NPARAMSMU ];
+    TProfile* m_hits_vsMu[ NHITPARAMSTOT ][ NPARAMSMU ]{};
+    TProfile* m_hitsRun3_vsMu[ NRUN3HITPARAMSTOT ][ NPARAMSMU ]{};
 
     /// TProfile2D plots vs mu (truth and actual) vs NPARAMS
-    TProfile2D* m_hits_vsMu_vs[ NHITPARAMSTOT ][ NPARAMSMU ][ NPARAMS ];
-    TProfile2D* m_hitsRun3_vsMu_vs[ NRUN3HITPARAMSTOT ][ NPARAMSMU ][ NPARAMS ];
+    TProfile2D* m_hits_vsMu_vs[ NHITPARAMSTOT ][ NPARAMSMU ][ NPARAMS ]{};
+    TProfile2D* m_hitsRun3_vsMu_vs[ NRUN3HITPARAMSTOT ][ NPARAMSMU ][ NPARAMS ]{};
 
   }; // class HitsOnTracksPlots
 

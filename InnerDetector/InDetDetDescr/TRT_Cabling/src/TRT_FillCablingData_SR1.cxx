@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -1007,8 +1007,8 @@ std::vector<uint32_t> TRT_FillCablingData_SR1::getRobID(Identifier id) const
 
   const auto& it = m_phi_to_source.find (id_phi_module);
   if (it != m_phi_to_source.end()) {
-    for (u_int32_t id : it->second) {
-      eformat::helper::SourceIdentifier sid( id );
+    for (u_int32_t thisId : it->second) {
+      eformat::helper::SourceIdentifier sid( thisId );
       v.push_back(sid.code());
     }
   }

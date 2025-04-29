@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ScoreBasedAmbiguityResolutionAlg.h"
@@ -23,6 +23,9 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
+#include "ActsInterop/TableUtils.h"
+#include "src/detail/MeasurementIndex.h"
+#include "src/detail/SharedHitCounter.h"
 
 namespace {
 std::size_t sourceLinkHash(const Acts::SourceLink &slink) {
@@ -77,13 +80,8 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::initialize() {
     cfg.minScoreSharedTracks = m_minScoreSharedTracks;
     cfg.maxSharedTracksPerMeasurement = m_maxSharedTracksPerMeasurement;
     cfg.maxShared = m_maxShared;
-    cfg.pTMin = m_pTMin;
-    cfg.pTMax = m_pTMax;
-    cfg.phiMin = m_phiMin;
-    cfg.phiMax = m_phiMax;
-    cfg.etaMin = m_etaMin;
-    cfg.etaMax = m_etaMax;
-    cfg.useAmbiguityFunction = m_useAmbiguityFunction;
+    cfg.minUnshared = m_minUnshared;
+    cfg.useAmbiguityScoring = m_useAmbiguityScoring;
 
     m_ambi = std::make_unique<Acts::ScoreBasedAmbiguityResolution>(
         std::move(cfg), makeActsAthenaLogger(this, "Acts"));
@@ -101,6 +99,16 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
+StatusCode ScoreBasedAmbiguityResolutionAlg::finalize() {
+  ATH_MSG_INFO("Score-based Ambiguity Resolution statistics" << std::endl
+               << makeTable(m_stat,
+                            std::array<std::string, kNStat>{
+                                "Input tracks",
+                                "Resolved tracks",
+                                "Total shared hits"}).columnWidth(10));
+  return StatusCode::SUCCESS;
+}
+
 StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
     const EventContext &ctx) const {
   auto timer = Monitored::Timer<std::chrono::milliseconds>("TIME_execute");
@@ -109,6 +117,7 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
   SG::ReadHandle<ActsTrk::TrackContainer> trackHandle =
       SG::makeHandle(m_tracksKey, ctx);
   ATH_CHECK(trackHandle.isValid());
+  m_stat[kNInputTracks] += trackHandle->size();
 
   // creates mutable tracks from the input tracks to add summary information
   // NOTE: this operation likely needs to moved outside ambiguity resolution
@@ -116,46 +125,56 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
       ScoreBasedSolverCutsImpl::addSummaryInformation(*trackHandle);
 
   // create the optional cuts for the ambiguity resolution
-  Acts::ScoreBasedAmbiguityResolution::OptionalCuts<
+  Acts::ScoreBasedAmbiguityResolution::Optionals<
       ActsTrk::MutableTrackContainer::ConstTrackProxy>
-      optionalCuts;
+      Optionals;
 
   using TrackProxyType = Acts::TrackProxy<ActsTrk::MutableTrackSummaryContainer,
                                           ActsTrk::MutableMultiTrajectory,
                                           Acts::detail::ValueHolder, true>;
 
-  // Eta based optional cuts is added as a lambda function inorder to access the
-  // m_etaDependentCutsSvc private variable
-  optionalCuts.cuts.push_back([this](const TrackProxyType &track) {
-    // Access m_etaDependentCutsSvc through this
-    return ScoreBasedSolverCutsImpl::etaDependentCuts(
-        track, this->m_etaDependentCutsSvc);
-  });
+  // Adding optional cuts
+  Optionals.cuts.push_back(ScoreBasedSolverCutsImpl::etaDependentCuts);
 
-  // Add other optional cuts and scores
-  optionalCuts.cuts.push_back(ScoreBasedSolverCutsImpl::doubleHolesFilter);
-  optionalCuts.scores.push_back(
+  // Adding optional Score Modifiers
+  Optionals.scores.push_back(ScoreBasedSolverCutsImpl::doubleHolesScore);
+  Optionals.scores.push_back(ScoreBasedSolverCutsImpl::nSCTPixelHitsScore);
+  Optionals.scores.push_back(
       ScoreBasedSolverCutsImpl::innermostPixelLayerHitsScore);
-  optionalCuts.scores.push_back(
-      ScoreBasedSolverCutsImpl::ContribPixelLayersScore);
-  optionalCuts.hitSelections.push_back(
-      ScoreBasedSolverCutsImpl::patternTrackHitSelection);
+  Optionals.scores.push_back(ScoreBasedSolverCutsImpl::ContribPixelLayersScore);
 
   // Call the ambiguity resolution algorithm with the optional cuts on the
   // updated tracks
   std::vector<int> goodTracks = m_ambi->solveAmbiguity(
-      updatedTracks, &sourceLinkHash, &sourceLinkEquality, optionalCuts);
+      updatedTracks, &sourceLinkHash, &sourceLinkEquality, Optionals);
 
   ATH_MSG_DEBUG("Resolved to " << goodTracks.size() << " tracks from "
-                               << updatedTracks.size());
+                              << updatedTracks.size());
+  m_stat[kNResolvedTracks] += goodTracks.size();
 
   ActsTrk::MutableTrackContainer solvedTracks;
   solvedTracks.ensureDynamicColumns(updatedTracks);
 
+  detail::MeasurementIndex measurementIndex;
+  detail::SharedHitCounter sharedHits;
+
+  std::size_t totalShared = 0;
   for (auto iTrack : goodTracks) {
     auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
     destProxy.copyFrom(updatedTracks.getTrack(iTrack));
+    if (m_countSharedHits) {
+      auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, solvedTracks, measurementIndex);
+      if (nBadTrackMeasurements > 0) {
+        ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
+      }
+      totalShared += nShared;
+    }
   }
+  if (m_countSharedHits) {
+    ATH_MSG_DEBUG("total number of shared hits = " << totalShared);
+    m_stat[kNSharedHits] += totalShared;
+  }
+
   std::unique_ptr<ActsTrk::TrackContainer> outputTracks =
       m_resolvedTracksBackendHandles.moveToConst(
           std::move(solvedTracks),

@@ -14,7 +14,7 @@ namespace CP {
         static const std::vector<stringpair> ToReplace { stringpair("-","minus"), stringpair(".","p")};
         
     }
-    EffiCollection::EffiCollection(const MuonEfficiencyScaleFactors& ref_tool) :
+    EffiCollection::EffiCollection(MuonEfficiencyScaleFactors& ref_tool) :
             m_ref_tool(ref_tool),
             m_central_eff(),
             m_calo_eff(),
@@ -25,21 +25,28 @@ namespace CP {
             m_lrt_lowpt_central_eff(),
             m_syst_set(std::make_unique<SystematicSet>()){
 
+        ref_tool.addSubtool (*this);
+
         m_central_eff = std::make_shared<CollectionContainer>(m_ref_tool, CollectionType::Central);
+        m_central_eff->addSubtoolsTo(*this);
         if (m_ref_tool.filename_Calo() != m_ref_tool.filename_Central()){
             m_calo_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::Calo);
+            m_calo_eff->addSubtoolsTo(*this);
         } else m_calo_eff = m_central_eff;
         
         if (m_ref_tool.filename_HighEta() != m_ref_tool.filename_Central()){
             m_forward_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::Forward);
+            m_forward_eff->addSubtoolsTo(*this);
         } else m_forward_eff = m_central_eff;
         
         if (m_ref_tool.lowPtTransition() > 0  && m_ref_tool.filename_LowPt() != m_ref_tool.filename_Central()){
             m_lowpt_central_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::CentralLowPt);
+            m_lowpt_central_eff->addSubtoolsTo(*this);
         } else m_lowpt_central_eff = m_central_eff;
        
          if (m_ref_tool.lowPtTransition() > 0  && m_ref_tool.filename_LowPtCalo() != m_ref_tool.filename_Central()){
             m_lowpt_calo_eff = std::make_shared<CollectionContainer>(m_ref_tool, CollectionType::CaloLowPt);
+            m_lowpt_calo_eff->addSubtoolsTo(*this);
         } else m_lowpt_calo_eff = m_central_eff;
 
         if(m_ref_tool.use_lrt()) {
@@ -66,7 +73,7 @@ namespace CP {
         }
     }
     
-    EffiCollection::EffiCollection(const EffiCollection* Nominal, const MuonEfficiencyScaleFactors& ref_tool, const std::string& syst, int syst_bit_map, bool is_up):
+    EffiCollection::EffiCollection(const EffiCollection* Nominal, MuonEfficiencyScaleFactors& ref_tool, const std::string& syst, int syst_bit_map, bool is_up):
             m_ref_tool(ref_tool),
             m_central_eff(),
             m_calo_eff(),
@@ -76,7 +83,9 @@ namespace CP {
             m_lrt_central_eff(),
             m_lrt_lowpt_central_eff(),
             m_syst_set() {
-    
+
+        ref_tool.addSubtool (*this);
+
         if (is_up) syst_bit_map |= EffiCollection::UpVariation;
         /// Use a lambda function to assign the maps easily
         std::function< std::shared_ptr<CollectionContainer>(CollectionType)>  make_variation = [this,&ref_tool, Nominal, syst_bit_map, syst](CollectionType type){
@@ -89,16 +98,20 @@ namespace CP {
                 return Nominal->retrieveContainer(type);
             };
         m_central_eff = make_variation(CollectionType::Central);
+        m_central_eff->addSubtoolsTo (*this);
         m_forward_eff = make_variation(CollectionType::Forward);
+        m_forward_eff->addSubtoolsTo (*this);
         m_calo_eff = make_variation(CollectionType::Calo);
+        m_calo_eff->addSubtoolsTo (*this);
         m_lowpt_central_eff = make_variation(CollectionType::CentralLowPt);
+        m_lowpt_central_eff->addSubtoolsTo (*this);
         m_lowpt_calo_eff = make_variation(CollectionType::CaloLowPt);
+        m_lowpt_calo_eff->addSubtoolsTo (*this);
+
         if (m_ref_tool.use_lrt()) {
             m_lrt_central_eff = make_variation(CollectionType::Central);
             m_lrt_lowpt_central_eff = make_variation(CollectionType::CentralLowPt);
         }
-        
-        
     }
     
     std::shared_ptr<CollectionContainer> EffiCollection::retrieveContainer(CollectionType Type) const {
@@ -191,15 +204,14 @@ namespace CP {
         return true;
     }
 
-    CollectionContainer* EffiCollection::FindContainer(const xAOD::Muon& mu) const {
+    CollectionContainer* EffiCollection::FindContainer(columnar::MuonId mu) const {
         if (m_ref_tool.use_lrt()) {
-            static const SG::AuxElement::Accessor<char> isLRTmuon("isLRT");
             if (isLRTmuon.isAvailable(mu)) {
                 if (isLRTmuon(mu)) return FindLRTContainer(mu);
             }
             else { /// If the isLRT decor is not available, try to see if patternRecoInfo is available for the corresponding ID track.
                 static const SG::AuxElement::Accessor<uint64_t> patternAcc("patternRecoInfo");
-                const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+                const xAOD::TrackParticle* idtrack = mu.getXAODObject().trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
                 if(idtrack) { /// All LRT muons should have ID tracks. The muons without ID tracks have to come from the standard muon container.
                     if(!patternAcc.isAvailable(*idtrack)) {
                         Error("CollectionContainer", "No information available to tell if the muon is LRT or standard. Either run MuonLRTMergingAlg to decorate with `isLRT` flag, or supply the patternRecoInfo for the original ID track.");
@@ -209,18 +221,18 @@ namespace CP {
                 }
             }
         }
-        if (mu.pt() <  m_ref_tool.lowPtTransition()) {
-            if (std::abs(mu.eta()) >= 2.5) {
+        if (ptAcc(mu) <  m_ref_tool.lowPtTransition()) {
+            if (std::abs(etaAcc(mu)) >= 2.5) {
                 return m_forward_eff.get();
             }
-            if (mu.muonType() == xAOD::Muon::CaloTagged) {
+            if (muonTypeAcc(mu) == xAOD::Muon::CaloTagged) {
                 return m_lowpt_calo_eff.get();
             }
             return m_lowpt_central_eff.get();
         }
-        if (mu.muonType() == xAOD::Muon::CaloTagged) {
+        if (muonTypeAcc(mu) == xAOD::Muon::CaloTagged) {
             return m_calo_eff.get();
-        } else if (std::abs(mu.eta()) < 2.5) {
+        } else if (std::abs(etaAcc(mu)) < 2.5) {
             return m_central_eff.get();
         } else {
             return m_forward_eff.get();
@@ -238,11 +250,14 @@ namespace CP {
         }
         return nullptr;
     }
-    CollectionContainer* EffiCollection::FindLRTContainer(const xAOD::Muon& mu) const {
-        if (mu.pt() <  m_ref_tool.lowPtTransition()) return m_lrt_lowpt_central_eff.get();
+    CollectionContainer* EffiCollection::FindLRTContainer(columnar::MuonId mu) const {
+        if (ptAcc(mu) <  m_ref_tool.lowPtTransition()) return m_lrt_lowpt_central_eff.get();
         else return m_lrt_central_eff.get();
     }
     EfficiencyScaleFactor* EffiCollection::retrieveSF(const xAOD::Muon& mu, unsigned int RunNumber) const {
+        return retrieveSF (columnar::MuonId (mu), RunNumber);
+    }
+    EfficiencyScaleFactor* EffiCollection::retrieveSF(columnar::MuonId mu, unsigned int RunNumber) const {
         CollectionContainer* Cont = FindContainer(mu);
         if (Cont != nullptr) return Cont->retrieve(RunNumber);
         Warning("EffiCollection::retrieveSF()", "Invalid muon");
@@ -494,5 +509,8 @@ namespace CP {
         if (m_SF.empty()) return "UNKNOWN SYST";
         return (*m_SF.begin())->sysname(false);
     }
-    
+    void CollectionContainer::addSubtoolsTo (columnar::ColumnarTool<>& parentTool){
+        for (auto& SF : m_SF)
+            parentTool.addSubtool(*SF);
+    }
 }

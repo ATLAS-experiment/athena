@@ -18,8 +18,19 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-RB_PATH_SCRIPTS=TrigMenuRulebook/scripts
-RB_PATH_PYTHON=TrigMenuRulebook/python
+TEST_DIR=${PWD}
+BUILD_DIR=${TEST_DIR}/build_rb_test/
+
+mkdir ${BUILD_DIR}
+cd ${BUILD_DIR}
+cmake ../TrigMenuRulebook
+make
+source */setup.sh
+# Return to test working dir
+cd ${TEST_DIR}
+
+# input file path, menu, release
+update_inputs.sh ${TEST_DIR} ${AtlasVersion} PhysicsP1_pp_run3_v1
 
 totalL1PhysP1json=`ls L1*_PhysicsP1_pp_run3_v1_*.json | wc -l`
 totalHLTPhysP1json=`ls HLT*_PhysicsP1_pp_run3_v1_*.json | wc -l`
@@ -31,13 +42,5 @@ elif [ $totalL1PhysP1json -lt 2 ] || [ $totalHLTPhysP1json -lt 3 ]; then
     echo "ERROR Less JSON files than needed"
     exit 1
 fi
-
-# Move to RB scripts dir to set up links
-TEST_DIR=${PWD}
-cd ${RB_PATH_SCRIPTS}
-# input file path, menu, release
-./update_inputs.sh ${TEST_DIR} ${AtlasVersion} PhysicsP1_pp_run3_v1
-# Return to test working dir
-cd ${TEST_DIR}
 
 exit 0

@@ -57,7 +57,7 @@ namespace CP {
       };
 
       /// \brief the operator version of the comparison (>, <, etc)
-      SignEnum::ComparisonOperator m_signEnum;
+      SignEnum::ComparisonOperator m_signEnum{};
 
       /// \brief the systematics list
       CP::SysListHandle m_systematicsList {this};

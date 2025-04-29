@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanBinning.cxx
@@ -8,6 +8,7 @@
  */
 
 #include "FPGATrackSimGenScanBinning.h"
+
 
 //--------------------------------------------------------------------------------------------------
 //
@@ -84,21 +85,25 @@ std::vector<unsigned> FPGATrackSimGenScanBinningBase::subVec(const std::vector<u
     return retv;
 }
 
-StatusCode FPGATrackSimGenScanBinningBase::setIdxSubVec(IdxSet &idx, const std::vector<unsigned>& subvecelems, const std::vector<unsigned>& subvecidx) const
-{
-    if (subvecelems.size()!=subvecidx.size()) {
-        return StatusCode::FAILURE;
-    }
-    for (unsigned i = 0; i < subvecelems.size(); i++)
-    {        
-        if (subvecelems[i] >= idx.size()) {
-            return StatusCode::FAILURE;
-        }
-        idx[subvecelems[i]] = subvecidx[i];
-    }
-    return StatusCode::SUCCESS;
-}
+void FPGATrackSimGenScanBinningBase::setIdxSubVec(
+    IdxSet &idx, const std::vector<unsigned> &subvecelems,
+    const std::vector<unsigned> &subvecidx) const {
+  
+  if (subvecelems.size() != subvecidx.size()) {
+    throw std::invalid_argument(
+        "Setting FPGATrackSimGenScanBinningBase::setIdxSubVec with mismatched "
+        "sizes");
+  }
 
+  for (unsigned i = 0; i < subvecelems.size(); i++) {
+    if (subvecelems[i] >= idx.size()) {
+      throw std::invalid_argument(
+          "FPGATrackSimGenScanBinningBase::setIdxSubVec input out of range");
+    }
+    idx[subvecelems[i]] = subvecidx[i];
+  }
+
+}
 
 // This gives a list tracks parameters for the corners of bin of dimensions scanpars.size()
 std::vector<FPGATrackSimGenScanBinningBase::ParSet> FPGATrackSimGenScanBinningBase::makeVariationSet(const std::vector<unsigned> &scanpars, const IdxSet &idx) const
@@ -165,7 +170,26 @@ std::pair<unsigned, unsigned> FPGATrackSimGenScanBinningBase::idxsetToRowParBinR
 double FPGATrackSimGenScanBinningBase::sliceVar([[maybe_unused]] FPGATrackSimHit const *hit) const { return 0.0; };
 double FPGATrackSimGenScanBinningBase::sliceVarExpected([[maybe_unused]] const ParSet &pars, [[maybe_unused]] FPGATrackSimHit const *hit) const {return 0.0; };
 double FPGATrackSimGenScanBinningBase::rowPar([[maybe_unused]] const ParSet &pars, [[maybe_unused]] FPGATrackSimHit const *hit) const {return 0.0; };
-    
+
+// FW constants writer
+std::ostream &operator<<(std::ostream &os, const std::vector<unsigned>& idx) {
+  bool first = true;
+  for (auto &val : idx) {
+    if (!first)
+      os << ",";
+    os << val;
+    first = false;
+  }
+  return os;
+}
+template <typename T> void FPGATrackSimGenScanBinningBase::StreamManager::writeVar(const std::string &var, T val) {
+  auto emplace_result = m_map.try_emplace(
+      var, m_setname + "_" + var + "_const.txt", std::ios_base::out);
+  if (!emplace_result.second) {
+    emplace_result.first->second << ",\n";
+  }
+  emplace_result.first->second << val;
+}
 
 //--------------------------------------------------------------------------------------------------
 //

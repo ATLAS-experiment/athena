@@ -21,9 +21,8 @@ namespace DerivationFramework {
   LArCollisionTimeDecorator::LArCollisionTimeDecorator(const std::string& type,
       const std::string& name,
       const IInterface* parent) :
-    AthAlgTool(type,name,parent)
+    base_class(type,name,parent)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
   }
 
   StatusCode LArCollisionTimeDecorator::initialize()

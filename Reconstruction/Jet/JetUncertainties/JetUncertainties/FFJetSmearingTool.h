@@ -172,7 +172,7 @@ namespace CP {
             std::string m_HistogramsFilePath;
 
             //Response matrix
-            bool m_doGaussianSmearing;
+            bool m_doGaussianSmearing{};
             std::unique_ptr<TH2> m_CALO_ResponseMap;
             std::unique_ptr<TH2> m_TA_ResponseMap;
             std::unique_ptr<TH2> m_UFO_ResponseMap;
@@ -183,7 +183,7 @@ namespace CP {
 
 
             //The list of systemaics
-            CP::SystematicSet  m_SysList;
+            CP::SystematicSet  m_SysList{};
 
             //Maps that relates the systematic name with some of its caracteristics
             std::map<std::string,std::string> m_Syst_MassDefAffected_map;

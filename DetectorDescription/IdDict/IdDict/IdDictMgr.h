@@ -16,7 +16,7 @@ public:
     typedef std::map<std::string, IdDictDictionary*> dictionary_map; 
     typedef std::map<std::string, std::string>       metadata_map; 
 
-    IdDictMgr() = default;
+    IdDictMgr();
     ~IdDictMgr();
  
     /// Version tag
@@ -69,10 +69,10 @@ private:
     dictionary_map        m_dictionaries; 
     metadata_map          m_metadata;
     std::set<std::string> m_subdictionary_names; 
-    bool                  m_resolved_references{};
-    bool                  m_generated_implementation{};
-    bool                  m_do_checks{};
-    bool                  m_do_neighbours{true};
+    bool                  m_resolved_references;
+    bool                  m_generated_implementation;
+    bool                  m_do_checks;
+    bool                  m_do_neighbours;
 }; 
 
 #endif 

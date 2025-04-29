@@ -45,6 +45,7 @@ namespace LArSamples {
       const RunData* runData(unsigned int i) const;
       
       unsigned int historySize(unsigned int i) const;
+      unsigned int historySizeSC(unsigned int i) const;
           
       bool writeToFile(const TString& fileName) const;
 

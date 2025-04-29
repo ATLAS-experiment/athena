@@ -3,7 +3,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def setupTestOutputCfg(flags,**kwargs):
 
-    kwargs.setdefault("streamName","MuonSimTestStream")
     kwargs.setdefault("AcceptAlgs",[])
   
     result = ComponentAccumulator()
@@ -14,25 +13,13 @@ def setupTestOutputCfg(flags,**kwargs):
     from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import OutputSimContainersCfg
     container_items = ["xAOD::TruthParticleContainer#",
                        "xAOD::TruthParticleAuxContainer#",
-                       "McEventCollection#"] + OutputSimContainersCfg(flags)
+                       "xAOD::TruthEventContainer#",
+                       "xAOD::TruthEventAuxContainer#",
+                       "McEventCollection#TruthEvent"] + OutputSimContainersCfg(flags)
 
-   
-   
-    from xAODMetaDataCnv.InfileMetaDataConfig import propagateMetaData, MetaDataHelperLists
-    from AthenaConfiguration.Enums import MetadataCategory
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    result.merge(SetupMetaDataForStreamCfg(flags, kwargs["streamName"]))
 
-    mdLists = MetaDataHelperLists()
-    for mdCategory in (MetadataCategory.FileMetaData, MetadataCategory.EventStreamInfo):
-        lists, caConfig = propagateMetaData(flags, kwargs["streamName"], mdCategory)
-        mdLists += lists
-        result.merge(caConfig)
-    kwargs.setdefault("MetadataItemList" , mdLists.mdItems)
-    kwargs.setdefault("HelperTools", mdLists.helperTools)
-    from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-
-    result.merge(MetaDataSvcCfg(flags, 
-                                tools=mdLists.mdTools, 
-                                toolNames=mdLists.mdToolNames))
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))
@@ -41,6 +28,8 @@ def setupTestOutputCfg(flags,**kwargs):
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
+    parser.add_argument("--saveTestNtuple", help="Schedule the SimHits tester n-tuple", action='store_true',
+                         default=False)
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="SimHits.pool.root")
 
@@ -53,7 +42,9 @@ if __name__=="__main__":
 
     from SimulationConfig.SimEnums import SimulationFlavour
     flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
-    flags.addFlag("Output.MuonSimTestStreamFileName", args.outRootFile)
+    streamName = "MuonSimTestStream"
+    flags.addFlag(f"Output.{streamName}FileName", args.outRootFile)
+    flags.addFlag(f"Output.doWrite{streamName}", True)
 
     flags, cfg = setupGeoR4TestCfg(args, flags)
     
@@ -72,6 +63,9 @@ if __name__=="__main__":
     from xAODTruthCnv.xAODTruthCnvConfig import GEN_EVNT2xAODCfg
     cfg.merge(GEN_EVNT2xAODCfg(flags,name="GEN_EVNT2xAOD",AODContainerName="TruthEvent"))
 
-    cfg.merge(setupTestOutputCfg(flags))
+    cfg.merge(setupTestOutputCfg(flags, streamName=streamName))
+    if args.saveTestNtuple:
+        from MuonPRDTestR4.MuonHitTestConfig import MuonHitTesterCfg
+        cfg.merge(MuonHitTesterCfg(flags))
     executeTest(cfg)
   

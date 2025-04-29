@@ -22,13 +22,27 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
 
     # Add e/gamma tracking algorithms
     if flags.Egamma.doTracking:
-        from egammaAlgs.egammaSelectedTrackCopyConfig import (
-            egammaSelectedTrackCopyCfg)
-        acc.merge(egammaSelectedTrackCopyCfg(flags))
-
-        from egammaAlgs.EMBremCollectionBuilderConfig import (
-            EMBremCollectionBuilderCfg)
-        acc.merge(EMBremCollectionBuilderCfg(flags))
+        
+        if flags.Acts.GsfRefitActs:
+            
+            # === TODO === : Acts EM extrapolator is missing.
+            
+            # from egammaAlgs.egammaSelectedTrackCopyConfig import (
+            #     egammaSelectedTrackCopyCfg)
+            # acc.merge(egammaSelectedTrackCopyCfg(flags))
+            
+            from egammaAlgs.ActsEMBremCollectionBuilderConfig import (
+                ActsEMBremCollectionBuilderCfg)
+            acc.merge(ActsEMBremCollectionBuilderCfg(flags))
+            
+        else:
+            from egammaAlgs.egammaSelectedTrackCopyConfig import (
+                egammaSelectedTrackCopyCfg)
+            acc.merge(egammaSelectedTrackCopyCfg(flags))
+            
+            from egammaAlgs.EMBremCollectionBuilderConfig import (
+                EMBremCollectionBuilderCfg)
+            acc.merge(EMBremCollectionBuilderCfg(flags))
 
         if (flags.Tracking.writeExtendedSi_PRDInfo or
             flags.Tracking.writeExtendedTRT_PRDInfo):

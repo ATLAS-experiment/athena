@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -54,10 +54,10 @@ private:
             "Maximum number of events to print out"};
     /// Counters
     //not sure if these need to be atomic but just in case this will run in MT
-    mutable std::atomic<int> m_evtCount;
-    mutable std::atomic<int> m_badSuggest;
-    int m_noProdVtx;
-    int m_badBeams;
+    mutable std::atomic<int> m_evtCount{};
+    mutable std::atomic<int> m_badSuggest{};
+    int m_noProdVtx{};
+    int m_badBeams{};
 
 }; 
 

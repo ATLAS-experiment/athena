@@ -25,9 +25,7 @@
 
 namespace DerivationFramework {
 
-  class EGammaClusterCoreCellRecovery
-    : public AthAlgTool
-    , public IAugmentationTool
+  class EGammaClusterCoreCellRecovery : public extends<AthAlgTool, IAugmentationTool>
   {
   public:
     EGammaClusterCoreCellRecovery(const std::string& t,

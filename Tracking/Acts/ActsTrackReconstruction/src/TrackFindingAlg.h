@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
@@ -15,14 +15,18 @@
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "src/TrackStatePrinterTool.h"
+#include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 // ACTS
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/EventData/ProxyAccessor.hpp"
+#include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
 #include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackParametersContainer.h"
 #include "ActsEvent/TrackContainer.h"
@@ -31,12 +35,17 @@
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 #include "IMeasurementSelector.h"
+#include "src/detail/AtlasUncalibSourceLinkAccessor.h"
+#include "src/detail/OnTrackCalibrator.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "InDetReadoutGeometry/SiDetectorElementStatus.h"
+#include "ActsGeometry/ActsVolumeIdToDetectorElementCollectionMap.h"
 
 // STL
 #include <limits>
@@ -44,6 +53,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 // Handle Keys
 #include "StoreGate/CondHandleKeyArray.h"
@@ -51,10 +61,16 @@
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "src/detail/Definitions.h"
 #include "src/detail/DuplicateSeedDetector.h"
-#include "src/detail/TrackFindingMeasurements.h"
 
 namespace ActsTrk
 {
+  using AtlUncalibSourceLinkAccessor = detail::UncalibSourceLinkAccessor;
+  using DefaultTrackStateCreator = Acts::TrackStateCreator<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator,detail::RecoTrackContainer>;
+
+  namespace detail {
+    class TrackFindingMeasurements;
+    class SharedHitCounter;
+  }
 
   class TrackFindingAlg : public AthReentrantAlgorithm
   {
@@ -76,6 +92,8 @@ namespace ActsTrk
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
+    ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    ToolHandle< ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{
       this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
@@ -87,12 +105,19 @@ namespace ActsTrk
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKeys{this, "SeedContainerKeys", {}, "Seed containers"};
-    SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_estimatedTrackParametersKeys{this, "EstimatedTrackParametersKeys", {}, "containers of estimated track parameters from seeding"};
+    SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementsKeys", {}, "Keys of input SiDetectorElementCollection"};
     // Measurement collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
     SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
        {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
         "Map which associates detector elements to Acts Geometry IDs"};
+    SG::ReadCondHandleKey<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap> m_volumeIdToDetectorElementCollMapKey
+       {this, "ActsVolumeIdToDetectorElementCollectionMapKey", "ActsVolumeIdToDetectorElementCollectionMap",
+        "Map which associates Acts geometry volume IDs to detector element collections."};
+
+    SG::ReadHandleKeyArray<InDet::SiDetectorElementStatus> m_detElStatus
+       {this, "DetElStatus", {}, "Keys for detector element status conditions data."};
+
 
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
     ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
@@ -110,9 +135,11 @@ namespace ActsTrk
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
     Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};
     Gaudi::Property<bool> m_doTwoWay{this, "doTwoWay", true, "run CKF twice, first with forward propagation with smoothing, then with backward propagation"};
-    Gaudi::Property<std::vector<bool>> m_reverseSearch {this, "reverseSearch", {}, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), specified separately for each seed collection"};
+    Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), automatically determined by the param estimation tool"};
+    Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/Z boundary for using the top space point in the track parameter estimation"};
     Gaudi::Property<double> m_branchStopperPtMinFactor{this, "branchStopperPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMaxExtra{this, "branchStopperAbsEtaMaxExtra", 0.0, "increase absEtaMax cut when used in the branch stopper"};
+    Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
@@ -148,7 +175,12 @@ namespace ActsTrk
     Gaudi::Property<std::vector<std::string>> m_seedLabels{this, "SeedLabels", {}, "One label per seed key used in outputs"};
     Gaudi::Property<bool> m_dumpAllStatEtaBins{this, "DumpEtaBinsForAll", false, "Dump eta bins of all statistics counter."};
 
-    Gaudi::Property<bool> m_useDefaultMeasurementSelector{this, "UseDefaultActsMeasurementSelector", true, ""};
+    Gaudi::Property<std::vector<std::uint32_t>> m_endOfWorldVolumeIds {this, "EndOfTheWorldVolumeIds", {}, ""};
+    
+    struct MeasurementSelectorConfig {
+       std::vector<std::pair<float, float> > m_chi2CutOffOutlier;
+       std::vector<float>                    m_etaBins;
+    } m_measurementSelectorConfig;
 
     enum EStat : std::size_t
     {
@@ -157,6 +189,7 @@ namespace ActsTrk
       kNUsedSeeds,
       kNoTrack,
       kNDuplicateSeeds,
+      kNNoEstimatedParams,
       kNOutputTracks,
       kNRejectedRefinedSeeds,
       kNSelectedTracks,
@@ -165,43 +198,187 @@ namespace ActsTrk
       kNoSecond,
       kNStoppedTracksMinPt,
       kNStoppedTracksMaxEta,
+      kNTotalSharedHits,
       kNStat
     };
+
     using EventStats = std::vector<std::array<unsigned int, kNStat>>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
+
+    struct DetectorContextHolder {
+      Acts::GeometryContext geometry;
+      Acts::MagneticFieldContext magField;
+      Acts::CalibrationContext calib;
+    };
+
+    struct TrackFindingDefaultOptions {
+      TrackFinderOptions options;
+      TrackFinderOptions secondOptions;
+      std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector;
+    };
 
     // initialize measurement selector to be called during initialize
     StatusCode initializeMeasurementSelector();
+
+    StatusCode propagateDetectorElementStatusToMeasurements(const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volume_id_to_det_el_coll,
+                                                            const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
+                                                            detail::TrackFindingMeasurements &measurements) const;
+
+    bool shouldReverseSearch(const ActsTrk::Seed& seed) const;
+
+    /**
+     * @brief Take the array of handle keys and for each key retrieve containers, then append them to the output vector.
+     *
+     * @tparam HandleArrayKeyType Type of the list of handle keys
+     * @tparam ContainerType Type of the output container
+     * @param ctx Event context
+     * @param handleKeyArray List of handle keys
+     * @param outputContainers Vector of output containers
+     * @param sum Number of total elements in all retrieved containers
+     * @return Status code
+     */
+    template <class HandleArrayKeyType, class ContainerType>
+    StatusCode getContainersFromKeys(
+        const EventContext &ctx,
+        HandleArrayKeyType &handleKeyArray,
+        std::vector<const ContainerType *> &outputContainers,
+        std::size_t &sum) const;
+
+    /**
+     * @brief Get CKF options for first and second pass + pointer to MeasurementSelector
+     *
+     * @param detContext Object holding detector-related context
+     * @param measurements <easurements container used in MeasurementSelector
+     * @param pSurface Raw pointer to perigee surface
+     */
+    TrackFindingDefaultOptions getDefaultOptions(const DetectorContextHolder &detContext,
+                                                 const detail::TrackFindingMeasurements &measurements,
+                                                 const Acts::PerigeeSurface* pSurface) const;
+
+    using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
+
+    /**
+     * @brief Branch stopper
+     *
+     * @param track Track proxy object
+     * @param trackState Track state proxy object
+     * @param trackSelectorCfg Track selector configuration
+     * @param tgContext Geometry context
+     * @param measurementIndex Measurement index
+     * @param typeIndex Type index
+     * @param event_stat_category_i Event statistics for current category
+     * @return BranchStopperResult
+     */
+    BranchStopperResult stopBranch(
+        const detail::RecoTrackContainer::TrackProxy &track,
+        const detail::RecoTrackContainer::TrackStateProxy &trackState,
+        const Acts::TrackSelector::EtaBinnedConfig &trackSelectorCfg,
+        const Acts::GeometryContext &tgContext,
+        const detail::MeasurementIndex &measurementIndex,
+        const std::size_t typeIndex,
+        EventStats::value_type &event_stat_category_i) const;
+
+    /**
+     * @brief Setup and attach measurement selector to KF options
+     *
+     * Common code with TrackExtendAlg – to be moved to the base class
+     *
+     * @param measurements measurements container used in MeasurementSelector
+     * @param options Kalman filter options
+     * @return unique_ptr to MeasurementSelector
+     */
+    [[nodiscard]] std::unique_ptr<ActsTrk::IMeasurementSelector> setMeasurementSelector(
+        const detail::TrackFindingMeasurements &measurements,
+        TrackFinderOptions &options) const;
+
+    /**
+     * @brief Perform Kalman Filter fit and update given initialParameters
+     *
+     * @tparam MeasurementSource Type of measurement source: ActsTrk::Seed or (in future) ActsTrk::ProtoTrack
+     * @param ctx Event context
+     * @param measurement Measurement source for KF
+     * @param initialParameters Parameters to use in KF
+     * @param detContext Struct holding geometry, magnetic field and calibration contexts
+     * @param detectorElementToGeoId map Trk detector element to Acts Geometry id
+     * @param paramsAtOutermostSurface Flag for searching in reverse direction
+     *
+     * @return Unique pointer to updated parameters
+     */
+    template <class MeasurementSource>
+    std::unique_ptr<Acts::BoundTrackParameters> doRefit(
+        const EventContext &ctx,
+        const MeasurementSource &measurement,
+        const Acts::BoundTrackParameters &initialParameters,
+        const DetectorContextHolder &detContext,
+        const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+        const bool paramsAtOutermostSurface) const;
+
+    using TrkProxy = Acts::TrackProxy<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::RefHolder, false>;
+
+    /**
+     * @brief Perform two-way track finding
+     *
+     * @param addTrack Function or lambda which adds newly found track to container
+     * @param trackProxy Track proxy object
+     * @param tracksContainerTemp Track proxy container
+     * @param options Fit options
+     * @param tgContext Geometry context
+     * @param reverseSearch Flag for searching in reverse direction
+     * @param seedType Seed type (only used for warnings/debug printouts)
+     * @param iseed Seed number (only used for warnings/debug printouts)
+     * @param itrack Track number (only used for warnings/debug printouts)
+     *
+     * @return Number of found tracks
+     */
+    std::size_t doTwoWayTrackFinding(
+        std::function<void(detail::RecoTrackContainerProxy &)> addTrack,
+        TrkProxy &trackProxy,
+        detail::RecoTrackContainer &tracksContainerTemp,
+        const TrackFinderOptions &options,
+        Acts::GeometryContext &tgContext,
+        const bool reverseSearch) const;
 
     /**
      * @brief invoke track finding procedure
      *
      * @param ctx - event context
-     * @param measurements - measurements container
-     * @param estimatedTrackParameters - estimates
+     * @param detectorElementToGeoId - map Trk detector element to Acts Geometry id
+     * @param measurements - measurements container used in MeasurementSelector
+     * @param sharedHits - measurements container used for shared hit counting
+     * @param duplicateSeedDetector - duplicate seed detector
      * @param seeds - spacepoint triplet seeds
+     * @param detElements - Trk detector elements
      * @param tracksContainer - output tracks
-     * @param tracksCollection - auxiliary output for downstream tools compatibility (to be removed in the future)
-     * @param seedCollectionIndex - index of seeds in measurements
-     * @param seedType name of type of seeds (strip or pixel) - only used for messages
+     * @param seedCollectionIndex - index of this collection of seeds
+     * @param seedType - name of type of seeds (strip or pixel) - only used for messages
+     * @param event_stat - stats, just for this event
      */
     StatusCode
     findTracks(const EventContext &ctx,
-               const Acts::TrackingGeometry &trackingGeometry,
                const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                const detail::TrackFindingMeasurements &measurements,
+               const detail::MeasurementIndex &measurementIndex,
+               detail::SharedHitCounter &sharedHits,
                detail::DuplicateSeedDetector &duplicateSeedDetector,
-               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-               const ActsTrk::SeedContainer *seeds,
+               const ActsTrk::SeedContainer &seeds,
+               const InDetDD::SiDetectorElementCollection& detElements,
                ActsTrk::MutableTrackContainer &tracksContainer,
-               size_t seedCollectionIndex,
+               std::size_t seedCollectionIndex,
                const char *seedType,
                EventStats &event_stat) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
-
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
                        const detail::RecoTrackContainerProxy &track,
-                       detail::DuplicateSeedDetector &duplicateSeedDetector) const;
+                       detail::DuplicateSeedDetector &duplicateSeedDetector,
+                       const detail::MeasurementIndex &measurementIndex) const;
+
+    /**
+     * @brief Retrieves track selector configuration for given eta value
+     *
+     * @param eta track candidate eta value
+     */
+    const Acts::TrackSelector::Config & getCuts (double eta) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.
@@ -210,7 +387,6 @@ namespace ActsTrk
     CKF_pimpl &trackFinder();
     const CKF_pimpl &trackFinder() const;
 
-    std::unique_ptr<ActsTrk::IMeasurementSelector> m_measurementSelector;
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
     static xAOD::UncalibMeasType measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState);
@@ -266,5 +442,7 @@ namespace ActsTrk
   };
 
 } // namespace
+
+#include "src/TrackFindingAlg.icc"
 
 #endif

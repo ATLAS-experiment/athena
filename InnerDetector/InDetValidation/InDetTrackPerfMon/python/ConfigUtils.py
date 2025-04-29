@@ -200,12 +200,17 @@ def getPlotsDefList( flags ):
     refLabel  = getLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType )
     trkLabels = [ testLabel, refLabel ]
 
+    testAllLabel = getAllTruthLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType )
+    refAllLabel  = getAllTruthLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType )
+
+
     if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "EFTruthMatch":
         trkLabels.append( getLabel( flags, "Truth" ) )
 
     ## First loop to replace track tags and labels
     plotsDefStrList = []
     for plotsDefStr in plotsDefStrList_v2 :
+        plotsDefStr = plotsDefStr.replace( "$TESTALL", testAllLabel ).replace( "$REFALL", refAllLabel )
         plotsDefStr = plotsDefStr.replace( "$TESTTYPE", testLabel[1] ).replace( "$TESTTAG", testLabel[0] )
         plotsDefStr = plotsDefStr.replace( "$REFTYPE", refLabel[1] ).replace( "$REFTAG", refLabel[0] )
         if ( "$TRKTAG" not in plotsDefStr ) and ( "$TRKTYPE" not in plotsDefStr ) :
@@ -315,3 +320,15 @@ def updateResolutionPlots( myPlotsDefDict ) :
                     outDict.update( { pName : pDict } )
 
     return outDict
+
+
+def getAllTruthLabel( flags, key ) :
+    ## replace All label to All HS/PU depending
+    ## pileupSwitch, for truth particles
+    if key != "Truth":
+        return "All"
+    if flags.PhysVal.IDTPM.currentTrkAna.pileupSwitch == "HardScatter" :
+        return "All HS"
+    if flags.PhysVal.IDTPM.currentTrkAna.pileupSwitch == "PileUp" :
+        return "All PU"
+    return "All"

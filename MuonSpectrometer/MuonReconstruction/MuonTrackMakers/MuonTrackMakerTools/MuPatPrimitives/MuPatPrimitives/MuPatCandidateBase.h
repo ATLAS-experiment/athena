@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUPATCANDIDATEBASE_H
@@ -114,7 +114,7 @@ namespace Muon {
         bool shareChambers(const MuPatCandidateBase& entry) const;
 
         /** @brief adds the measurement to the garbage container. */
-        void addToTrash(std::unique_ptr<const Trk::MeasurementBase> meas);
+        const Trk::MeasurementBase* addToTrash(std::unique_ptr<const Trk::MeasurementBase> meas);
         void addToTrash(const std::vector<std::shared_ptr<const Trk::MeasurementBase>>& measurements);
         const std::vector<std::shared_ptr<const Trk::MeasurementBase>>& garbage() const;
     protected:

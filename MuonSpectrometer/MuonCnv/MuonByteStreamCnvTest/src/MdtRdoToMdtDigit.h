@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAMCNVTEST_MDTRDOTOMDTDIGIT_H
@@ -15,7 +15,7 @@
 
 class MdtRdoToMdtDigit : public AthReentrantAlgorithm {
 public:
-    MdtRdoToMdtDigit(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual ~MdtRdoToMdtDigit() = default;
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;

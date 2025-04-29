@@ -107,9 +107,7 @@ private:
     Gaudi::Property<double> m_maxJetDr_wide {this, "MaxJetDrWide", 0.4};
     Gaudi::Property<bool> m_applyZ0cut {this, "removeTracksOutsideZ0wrtLeadTrk", false};
     Gaudi::Property<float> m_z0maxDelta {this, "maxDeltaZ0wrtLeadTrk", 1000.};
-    Gaudi::Property<bool> m_storeInOtherTrks {this, "StoreRemovedCoreWideTracksInOtherTracks", true};
     Gaudi::Property<bool> m_removeDuplicateCoreTracks {this, "removeDuplicateCoreTracks", true};
-    Gaudi::Property<bool> m_bypassSelector {this, "BypassSelector", false};
     Gaudi::Property<bool> m_bypassExtrapolator {this, "BypassExtrapolator", false};
     Gaudi::Property<bool> m_useGhostTracks {this, "useGhostTracks", false};
     Gaudi::Property<double> m_ghostTrackDR {this, "ghostTrackDR", 0.25};

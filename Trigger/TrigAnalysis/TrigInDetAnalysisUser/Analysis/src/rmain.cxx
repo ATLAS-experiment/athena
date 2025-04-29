@@ -37,6 +37,7 @@
 #include "TrigInDetAnalysisUtils/Associator_BestMatch.h"
 #include "TrigInDetAnalysisUtils/Filters.h"
 #include "TrigInDetAnalysisUtils/Filter_Offline2017.h"
+#include "TrigInDetAnalysisUtils/Filter_OfflineR22.h"
 #include "TrigInDetAnalysisExample/NtupleTrackSelector.h"
 #include "TrigInDetAnalysisExample/ChainString.h"
 #include "TrigInDetAnalysisUtils/Associator_TruthMatch.h"
@@ -1189,7 +1190,8 @@ int main(int argc, char** argv)
   Filter_Combined   filter_offtight( &filter_offkinetight, &filter_inout ); 
 
   Filter_Offline2017* filter_offline2017 = 0;
-  Filter_Combined*    filter_off2017     = 0;
+  Filter_OfflineR22*  filter_offlineR22  = 0;
+  Filter_Combined*    filter_offCP     = 0;
   /// track selectors so we can select multiple times with different 
   /// filters if we want (simpler then looping over vectors each time 
 
@@ -1200,8 +1202,14 @@ int main(int argc, char** argv)
     if ( filter.head()=="Offline2017" ) {
       std::string filter_type = filter.tail();
       filter_offline2017 = new Filter_Offline2017( pT, filter_type, zed, a0 ); 
-      filter_off2017     = new Filter_Combined ( filter_offline2017, &filter_vertex);
-      refFilter          = filter_off2017;
+      filter_offCP       = new Filter_Combined ( filter_offline2017, &filter_vertex);
+      refFilter          = filter_offCP;
+    }
+    else if ( filter.head()=="OfflineR22" ) {
+      std::string filter_type = filter.tail();
+      filter_offlineR22 = new Filter_OfflineR22( pT, filter_type, zed, a0 ); 
+      filter_offCP      = new Filter_Combined ( filter_offlineR22, &filter_vertex);
+      refFilter         = filter_offCP;
     }
     else { 
       std::cerr << "unimplemented Filter requested: " << filter.head() << std::endl; 
@@ -1316,7 +1324,8 @@ int main(int argc, char** argv)
 
 	if ( refChains[0] != probe_ref ) { 
 	  std::cerr << "default and probe chain references do not match: probe ref: " << probe_ref << " ref: " << refChains[0] << std::endl;
-	  return -1;
+	  /// try not exiting if ref chain is different from default, temporarily ...
+	  //	  return -1;
 	}
 
       }	

@@ -1,27 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODDiLeptonMassFilter.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-xAODDiLeptonMassFilter::xAODDiLeptonMassFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator)
-  , m_AthenaCalls(0)
-{
-  declareProperty("MinPt",            m_minPt           = 5000.);
-  declareProperty("MaxEta",           m_maxEta          = 5.0);
-  declareProperty("MinMass",          m_minMass         = 1000);      // To avoid fsr etc
-  declareProperty("MaxMass",          m_maxMass         = 14000000);
-  declareProperty("MinDilepPt",       m_minDilepPt      = -1.);
-  declareProperty("AllowElecMu",      m_allowElecMu     = false);
-  declareProperty("AllowSameCharge",  m_allowSameCharge = true);
-}
-
-
 StatusCode xAODDiLeptonMassFilter::filterInitialize() {
   m_AthenaCalls = 0;
+  CHECK(m_truthPartContKey.initialize());
   ATH_MSG_DEBUG("MinPt           " << m_minPt);
   ATH_MSG_DEBUG("MaxEta          " << m_maxEta);
   ATH_MSG_DEBUG("MinMass         " << m_minMass);
@@ -61,12 +48,8 @@ StatusCode xAODDiLeptonMassFilter::filterFinalize() {
 
 StatusCode xAODDiLeptonMassFilter::filterEvent() {
   // Retrieve TruthLightLepton container from xAOD LightLepton slimmer, contains (electrons and muons ) particles
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthLightLeptons").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthLightLepton" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
-
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   unsigned int nParticles = xTruthParticleContainer->size();
   //loop over all particles
@@ -76,7 +59,7 @@ StatusCode xAODDiLeptonMassFilter::filterEvent() {
     if (!MC::isStable(lightLeptonParticle)) continue;
 
     // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
-      if (std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13) {
+    if (MC::isElectron(lightLeptonParticle) || MC::isMuon(lightLeptonParticle)) {
         if (lightLeptonParticle->pt() >= m_minPt && std::abs(lightLeptonParticle->eta()) <= m_maxEta){
         //loop over all remaining particles in the event
 
@@ -88,7 +71,7 @@ StatusCode xAODDiLeptonMassFilter::filterEvent() {
             // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
             // If m_allowSameChagrge is not true only pick those with opposite charge to the first particle
             // If m_allowElecMu is true allow also Z -> emu compinations (with charge requirements as above)
-            if ((m_allowSameCharge  && (std::abs(pdgId2) == std::abs(pdgId1) || (m_allowElecMu && (std::abs(pdgId2) == 11 || std::abs(pdgId2) == 13) ) ) ) ||
+            if ((m_allowSameCharge  && (std::abs(pdgId2) == std::abs(pdgId1) || (m_allowElecMu && (MC::isElectron(lightLeptonParticle2) || MC::isMuon(lightLeptonParticle2)) ) ) ) ||
                 (!m_allowSameCharge && (pdgId2 == -1*pdgId1 || (m_allowElecMu && (pdgId2 == (pdgId1 < 0 ? 1 : -1) * 11 || (pdgId1 < 0 ? 1 : -1) * pdgId2 == 13) ) ) ) ) {
               if (lightLeptonParticle2->pt() >= m_minPt && std::abs(lightLeptonParticle2->eta()) <= m_maxEta){
                 // Calculate invariant mass and apply cut

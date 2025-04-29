@@ -4,14 +4,14 @@
 
 #include "egammaUtils/egPhotonWrtPoint.h"
 
-#include "egammaUtils/ShowerDepthTool.h"
+#include "egammaUtils/ShowerDepthUtil.h"
 #include "xAODEgamma/Egamma.h"
 
 photonWrtPoint::PtEtaPhi photonWrtPoint::PtEtaPhiWrtZ(const xAOD::Egamma& ph,
                                                       double z) {
   std::pair<double, float> RZ1 = {0., 0.};
   float etaBE1 = ph.caloCluster()->etaBE(1);
-  if(std::abs(etaBE1) < 10) RZ1 = CP::ShowerDepthTool::getRZ(etaBE1, 1);
+  if(std::abs(etaBE1) < 10) RZ1 = CP::ShowerDepthUtil::getRZ(etaBE1, 1);
 
   double rCalo = RZ1.first;
   double zCalo = RZ1.second;

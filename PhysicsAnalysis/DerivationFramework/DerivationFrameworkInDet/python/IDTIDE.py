@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # ====================================================================
 # IDTIDE.py
@@ -382,10 +382,10 @@ def IDTIDECfg(flags):
         })
     if flags.Detector.GeometryITk:
         IDTIDESlimmingHelper.AppendToDictionary.update({
-            "ITkPixelClusters": "xAOD::TrackMeasurementValidationContainer",
-            "ITkPixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
-            "ITkStripClusters": "xAOD::TrackMeasurementValidationContainer",
-            "ITkStripClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"
+            "ITkPixelMeasurements": "xAOD::TrackMeasurementValidationContainer",
+            "ITkPixelMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer",
+            "ITkStripMeasurements": "xAOD::TrackMeasurementValidationContainer",
+            "ITkStripMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer"
         })
 
     SmartCollections += ["Muons", "Electrons", "Photons"]
@@ -407,7 +407,7 @@ def IDTIDECfg(flags):
     if flags.Detector.GeometryID:
         AllVariables += ["PixelClusters", "SCT_Clusters"]
     if flags.Detector.GeometryITk:
-        AllVariables += ["ITkPixelClusters", "ITkStripClusters"]
+        AllVariables += ["ITkPixelMeasurements", "ITkStripMeasurements"]
 
     IDTIDESlimmingHelper.AppendToDictionary.update({
         "Kt4EMPFlowEventShape": "xAOD::EventShape",
@@ -468,6 +468,8 @@ def IDTIDECfg(flags):
         IDTIDESlimmingHelper.AppendToDictionary.update({
             "AntiKt4TruthJets": "xAOD::JetContainer",
             "AntiKt4TruthJetsAux": "xAOD::JetAuxContainer",
+            "InTimeAntiKt4TruthJets": "xAOD::JetContainer",
+            "InTimeAntiKt4TruthJetsAux": "xAOD::JetAuxContainer",
             "JetInputTruthParticles": "xAOD::TruthParticleContainer",
             "JetInputTruthParticlesNoWZ": "xAOD::TruthParticleContainer",
             "TruthEvents": "xAOD::TruthEventContainer",
@@ -484,6 +486,7 @@ def IDTIDECfg(flags):
             "TruthVerticesAux": "xAOD::TruthVertexAuxContainer"})
 
         AllVariables += ["AntiKt4TruthJets",
+                         "InTimeAntiKt4TruthJets",
                          "JetInputTruthParticles",
                          "JetInputTruthParticlesNoWZ",
                          "TruthEvents",

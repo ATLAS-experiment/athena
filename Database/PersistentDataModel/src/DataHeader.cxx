@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeader.cxx
@@ -13,21 +13,18 @@
 #include "SGTools/TransientAddress.h"
 #include "SGTools/DataProxy.h"
 #include "AthenaKernel/IStringPool.h"
+#include "CxxUtils/ranges.h"
 
 //______________________________________________________________________________
-DataHeaderElement::DataHeaderElement() : m_pClid(0), m_clids(), m_key(), m_alias(), m_token(0), m_ownToken(false), m_hashes() {
+DataHeaderElement::DataHeaderElement() : m_pClid(0), m_clids(), m_key(), m_alias(), m_hashes() {
 }
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement(const DataHeaderElement& rhs) : m_pClid(rhs.m_pClid),
 	m_clids(rhs.m_clids),
 	m_key(rhs.m_key),
 	m_alias(rhs.m_alias),
-	m_token(0),
-	m_ownToken(false),
+        m_token(rhs.getToken()),
 	m_hashes(rhs.m_hashes) {
-   if (rhs.getToken() != 0) {
-      m_token = new Token(rhs.getToken()); m_ownToken = true;
-   }
 }
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement(const SG::TransientAddress* sgAddress, IOpaqueAddress* tokAddress,
@@ -35,7 +32,7 @@ DataHeaderElement::DataHeaderElement(const SG::TransientAddress* sgAddress, IOpa
   : DataHeaderElement (sgAddress->clID(),
                        sgAddress->name(),
                        sgAddress->transientID(),
-                       SG::DataProxy::AliasCont_t (sgAddress->alias()),
+                       std::vector<std::string>(sgAddress->alias()),
                        sgAddress->address(),
                        tokAddress, pTag)
 {
@@ -55,43 +52,41 @@ DataHeaderElement::DataHeaderElement(const SG::DataProxy* proxy, IOpaqueAddress*
 DataHeaderElement::DataHeaderElement(CLID clid,
                                      const std::string& name,
                                      const std::vector<CLID>& tClids,
-                                     std::set<std::string>&& alias,
+                                     std::vector<std::string>&& alias,
                                      IOpaqueAddress* tadAddress,
                                      IOpaqueAddress* tokAddress,
                                      const std::string& pTag)
   : m_pClid(clid),
-    m_clids(tClids.begin(), tClids.end()),
+    m_clids(tClids),
     m_key((pTag.empty()) ? name : pTag),
     m_alias(std::move(alias)),
-    m_token(0), m_ownToken(false), m_hashes()
+    m_hashes()
 {
-  m_clids.erase(m_pClid);
+  std::ranges::sort (m_clids);
+  const auto ret = std::ranges::unique (m_clids);
+  m_clids.erase (ret.begin(), ret.end());
+  std::erase (m_clids, m_pClid);
   TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(tokAddress);
   if (tokAddr != 0 && tokAddr->getToken() != 0) {
-    m_token = new Token(tokAddr->getToken()); m_ownToken = true;
+    tokAddr->getToken()->setData (&m_token);
   } else {
     tokAddr = dynamic_cast<TokenAddress*>(tadAddress);
     if (tokAddr != 0 && tokAddr->getToken() != 0) {
-      m_token = tokAddr->getToken();
+      tokAddr->getToken()->setData (&m_token);
     } else if (tokAddress != 0) {
-      Token* token = new Token;
-      m_token = token; m_ownToken = true;
-      token->fromString(*(tokAddress->par()));
+      m_token.fromString(*(tokAddress->par()));
     } else if (tadAddress != 0) {
-      Token* token = new Token;
-      m_token = token; m_ownToken = true;
-      token->fromString(*(tadAddress->par()));
+      m_token.fromString(*(tadAddress->par()));
     }
   }
 }
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement(const CLID classID,
-	const std::string& key, const Token* token)
-	: m_pClid(classID), m_clids(), m_key(key), m_alias(), m_token(token), m_ownToken(true), m_hashes() {
+	const std::string& key, Token&& token)
+	: m_pClid(classID), m_clids(), m_key(key), m_alias(), m_token(std::move(token)), m_hashes() {
 }
 //______________________________________________________________________________
 DataHeaderElement::~DataHeaderElement() {
-   if (m_ownToken) { delete m_token; m_token = 0; }
 }
 //______________________________________________________________________________
 DataHeaderElement& DataHeaderElement::operator=(const DataHeaderElement& rhs) {
@@ -100,12 +95,7 @@ DataHeaderElement& DataHeaderElement::operator=(const DataHeaderElement& rhs) {
       m_clids = rhs.m_clids;
       m_key = rhs.m_key;
       m_alias = rhs.m_alias;
-      if (m_ownToken) { delete m_token; m_token = 0; m_ownToken = false; }
-      if (rhs.getToken() != 0) {
-         Token* newtok = new Token;
-         m_token = newtok; m_ownToken = true;
-         rhs.getToken()->setData(newtok);
-      }
+      rhs.getToken()->setData(&m_token);
       m_hashes = rhs.m_hashes;
    }
    return(*this);
@@ -115,11 +105,11 @@ CLID DataHeaderElement::getPrimaryClassID() const {
    if (m_pClid > 0) {
       return(m_pClid);
    }
-   return(*(m_clids.begin()));
+   return(m_clids.front());
 }
 //______________________________________________________________________________
 const std::set<CLID> DataHeaderElement::getClassIDs() const {
-  std::set<CLID> allClids (m_clids);
+  std::set<CLID> allClids (m_clids.begin(), m_clids.end());
   allClids.insert(m_pClid);
   return(allClids);
 }
@@ -128,12 +118,12 @@ const std::string& DataHeaderElement::getKey() const {
    return(m_key);
 }
 //______________________________________________________________________________
-const std::set<std::string>& DataHeaderElement::getAlias() const {
+const std::vector<std::string>& DataHeaderElement::getAlias() const {
    return(m_alias);
 }
 //_____________________________________________________________________________
 const Token* DataHeaderElement::getToken() const {
-   return(m_token);
+   return(&m_token);
 }
 //_____________________________________________________________________________
 long DataHeaderElement::getStorageType() const {
@@ -162,13 +152,8 @@ SG::TransientAddress* DataHeaderElement::getAddress(unsigned long contextId) con
 SG::TransientAddress* DataHeaderElement::getAddress(const std::string& key,
 	unsigned long contextId) const {
    CLID primaryClID = getPrimaryClassID();
-   Token* token = new Token(m_token);
-   TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , token);
-   SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd);
-   for (std::set<CLID>::const_iterator iter = m_clids.begin(), last = m_clids.end();
-	   iter != last; ++iter) {
-      sgAddress->setTransientID(*iter);
-   }
+   TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , &m_token);
+   SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd, m_clids);
    sgAddress->setAlias(m_alias);
    return(sgAddress);
 }
@@ -185,14 +170,10 @@ void DataHeaderElement::dump(std::ostream& ostr) const
    ostr << std::endl;
    if( getAlias().size() > 0 ) {
       ostr << "Alias: ";
-      for( auto& a : getAlias() ) ostr << " " << a;
+      for( const std::string& a : getAlias() ) ostr << " " << a;
       ostr << endl;
    }
-   if( m_token ) {
-      ostr << "Token: " << m_token->toString();
-      if( m_ownToken ) ostr << " owned";
-      ostr << endl;
-   }
+   ostr << "Token: " << m_token.toString() << endl;
    if( m_hashes.size() ) {
       ostr << "Hashes:";
       for( auto h : m_hashes ) ostr <<  " " << h;
@@ -210,7 +191,9 @@ DataHeader::DataHeader() : m_dataHeader(),
 	m_evtRefTokenStr() {
 }
 //______________________________________________________________________________
-DataHeader::DataHeader(const DataHeader& rhs) : m_dataHeader(rhs.m_dataHeader),
+DataHeader::DataHeader(const DataHeader& rhs) :
+        DataObject (rhs),
+        m_dataHeader(rhs.m_dataHeader),
 	m_inputDataHeader(rhs.m_inputDataHeader),
 	m_status(rhs.m_status),
 	m_processTag(rhs.m_processTag),
@@ -305,6 +288,16 @@ void DataHeader::addHash(IStringPool* pool) {
    }
 }
 //______________________________________________________________________________
+const std::string& DataHeader::dhFormToken() const
+{
+  return m_dhFormToken;
+}
+//______________________________________________________________________________
+void DataHeader::setDhFormToken(const std::string& formToken)
+{
+  m_dhFormToken = formToken;
+}
+//______________________________________________________________________________
 void DataHeader::setAttributeList(const coral::AttributeList* attrList) {
    m_attrList = attrList;
 }
@@ -340,4 +333,8 @@ void DataHeader::dump(std::ostream& ostr) const
    ostr << "attrListPtr: " << m_attrList << endl;
    if( m_attrList ) ostr << "attrListSize: " << m_attrList->size() << endl;
    ostr << "--- DataHeader End ---" << endl;   
+}
+//______________________________________________________________________________
+void DataHeader::recycle()
+{
 }

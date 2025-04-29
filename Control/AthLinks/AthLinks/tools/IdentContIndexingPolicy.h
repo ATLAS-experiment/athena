@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/tools/IdentContIndexingPolicy.h
  * @author RD Schaffer
@@ -17,9 +14,7 @@
 #include "AthLinks/tools/IdentContIndex.h"
 #include "AthLinks/exceptions.h"
 #include "AthenaKernel/tools/type_tools.h"
-#include "AthenaKernel/getMessageSvc.h"
-#include "GaudiKernel/MsgStream.h"
-#include <boost/concept_check.hpp>
+#include <concepts>
 #include <cassert>
 #include <stdexcept>
 

@@ -38,17 +38,15 @@ namespace MuonGM {
 
     RpcLayer::RpcLayer(const std::string& s, Rpc *t) : DetectorElement(s) { m = t; }
 
-    GeoVPhysVol *RpcLayer::build(StoredMaterialManager& matManager,
+    PVLink RpcLayer::build(StoredMaterialManager& matManager,
                                  const MYSQL& mysql) {
         std::vector<Cutout *> vcutdef;
         int cutoutson = 0;
         return build(matManager, mysql, cutoutson, vcutdef);
     }
 
-    GeoVPhysVol *RpcLayer::build(StoredMaterialManager& matManager,
-                                 const MYSQL& mysql,
-                                 int cutoutson,
-                                 const std::vector<Cutout *>& vcutdef) {
+    PVLink RpcLayer::build(StoredMaterialManager& matManager, const MYSQL& mysql,
+                           int cutoutson, const std::vector<Cutout *>& vcutdef) {
         MsgStream log(Athena::getMessageSvc(), "MuGM::GeoVPhysVol::build");
 
         double eps = 0.000001;
@@ -72,7 +70,7 @@ namespace MuonGM {
         const GeoShape *srpcl = new GeoTrd(thickness / 2, thickness / 2, width / 2, width / 2, length / 2);
         const GeoMaterial *mrpcl = matManager.getMaterial("std::Air");
         GeoLogVol *lrpcl = new GeoLogVol("Rpclayer", srpcl, mrpcl);
-        GeoPhysVol *prpcl = new GeoPhysVol(lrpcl);
+        PVLink prpcl = new GeoPhysVol(lrpcl);
 
         double newpos = -thickness / 2.;
 
@@ -281,7 +279,7 @@ namespace MuonGM {
 
         // Apply cutouts
         if (cutoutson && !vcutdef.empty()) {
-            GeoPhysVol *tempPhys = nullptr;
+            PVLink tempPhys = nullptr;
             Cutout *cut = nullptr;
             GeoShape *cutoutShape = nullptr;
             GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};
@@ -291,7 +289,7 @@ namespace MuonGM {
                 cutoutShape = new GeoTrd(thickness / 2. + 1., thickness / 2. + 1., cut->widthXs / 2. + 0.5, cut->widthXl / 2. + 0.5, cut->lengthY / 2. + tol);
                 cutTrans = GeoTrf::Translate3D(0.0, cut->dx, -length / 2 + cut->dy + cut->lengthY / 2.);
 
-                GeoIntrusivePtr<GeoVPhysVol> volToCut{prpcl};
+                PVLink  volToCut{prpcl};
                 GeoCutVolAction cutAction(*cutoutShape, cutTrans);
                 volToCut->apply(&cutAction);
                 tempPhys = cutAction.getPV();

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef OnnxRuntimeSessionToolCUDA_H
 #define OnnxRuntimeSessionToolCUDA_H
@@ -43,7 +43,7 @@ namespace AthOnnx {
         Gaudi::Property<bool> m_enableMemoryShrinkage{this, "EnableMemoryShrinkage", false, "Enable automatic memory shrinkage"};
 
         /// runtime service
-        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{"AthOnnx::OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc"};
+        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc/OnnxRuntimeSvc", "The Onnx runtime service"};
         std::unique_ptr<Ort::Session> m_session;
     };
 }

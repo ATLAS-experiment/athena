@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SELECTION_HELPERS__SELECTION_EXPR_PARSER_H
@@ -102,9 +102,9 @@ class SelectionExprParser {
   // The lexer to generate symbols from.
   DetailSelectionExprParser::Lexer m_lexer;
   // The last extracted symbol
-  DetailSelectionExprParser::Lexer::Symbol m_symbol;
+  DetailSelectionExprParser::Lexer::Symbol m_symbol{};
   // Stores constructor parameter to be used in calls to makeSelectionAccessorVar.
-  bool m_defaultToChar;
+  bool m_defaultToChar{};
 };
 
 }  // namespace CP

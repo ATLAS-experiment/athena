@@ -26,8 +26,8 @@ def ActsStripSpacePointToolCfg(flags,
                                **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("useTopSp", flags.Acts.reverseTrackFindingForStrips)
-
+    kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
+    
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
@@ -43,7 +43,8 @@ def ActsCoreStripSpacePointToolCfg(flags,
     from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
     acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
     kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
-
+    kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
+    
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
@@ -227,7 +228,7 @@ def ActsMainSpacePointFormationCfg(flags,
                                                                   **extractChildKwargs(prefix='StripOverlapSpacePointPreparationAlg.', **kwargs)))
             
     # Analysis extensions
-    if flags.Acts.doAnalysis:
+    if flags.Acts.SpacePoints.doAnalysis:
         if kwargs['processPixels']:
             from ActsConfig.ActsAnalysisConfig import ActsPixelSpacePointAnalysisAlgCfg
             acc.merge(ActsPixelSpacePointAnalysisAlgCfg(flags, **extractChildKwargs(prefix='PixelSpacePointAnalysisAlg.', **kwargs)))
@@ -404,7 +405,7 @@ def ActsSpacePointFormationCfg(flags,
                 kwargs.setdefault('StripOverlapSpacePointPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
     # Analysis algo(s)
-    if flags.Acts.doAnalysis:
+    if flags.Acts.SpacePoints.doAnalysis:
         # Run analysis code on the resulting space point collection produced by this tracking pass        
         # This collection is the result of (3) if it ran, else the result of (2). We are sure at least one of them run
         if kwargs['processPixels']:
@@ -423,5 +424,40 @@ def ActsSpacePointFormationCfg(flags,
             kwargs.setdefault('StripOverlapSpacePointAnalysisAlg.SpacePointContainerKey', kwargs['StripOverlapSpacePointPreparationAlg.OutputCollection'] if kwargs['runPreparation'] else kwargs['StripSpacePointFormationAlg.StripOverlapSpacePoints'])
                 
     acc.merge(ActsMainSpacePointFormationCfg(flags, RoIs=roisName, **kwargs))
+
+
+    # Persistification
+    if flags.Acts.EDM.PersistifySpacePoints and kwargs['runReconstruction']:
+        toAOD = []
+        pixel_spacepoint_shortlist = ['-measurements']
+        strip_spacepoint_shortlist = ['topHalfStripLength', 
+                                      'bottomHalfStripLength', 
+                                      'topStripDirection',
+                                      'bottomStripDirection',
+                                      'stripCenterDistance',
+                                      'topStripCenter',
+                                      'measurementLink']
+
+        pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
+        strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
+
+        if kwargs['processPixels']:
+            pixelSpacePointCollection = kwargs['PixelSpacePointFormationAlg.PixelSpacePoints']
+            toAOD += [f'xAOD::SpacePointContainer#{pixelSpacePointCollection}',
+                      f"xAOD::SpacePointAuxContainer#{pixelSpacePointCollection}Aux.{pixel_spacepoint_variables}"]
+
+        if kwargs['processStrips']:
+            stripSpacePointCollection = kwargs['StripSpacePointFormationAlg.StripSpacePoints']
+            toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
+                      f"xAOD::SpacePointAuxContainer#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
+
+        if kwargs['processOverlapSpacePoints']:
+            stripSpacePointCollection = kwargs['StripSpacePointFormationAlg.StripOverlapSpacePoints']
+            toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
+                      f"xAOD::SpacePointAuxContainer#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
+
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+        acc.merge(addToAOD(flags, toAOD))
+
     return acc
 

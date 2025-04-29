@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,19 +14,9 @@
 
 // constructor
 Trk::MaterialEffectsEngine::MaterialEffectsEngine(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_eLossCorrection(true),
-  m_eLossMpv(true),
-  m_mscCorrection(true)
+: AthAlgTool(t,n,p)
 {
     declareInterface<Trk::IMaterialEffectsEngine>(this);
-    // steering of the screen outoput (SOP)
-    declareProperty("OutputPrefix"                          , m_sopPrefix);
-    declareProperty("OutputPostfix"                         , m_sopPostfix);
-    // steering of the material effects engine behaviour
-    declareProperty("EnergyLossCorrection"                  , m_eLossCorrection);
-    declareProperty("MostProbableEnergyLoss"                , m_eLossMpv);
-    declareProperty("MultipleScatteringCorrection"          , m_mscCorrection);
 }
 
 // destructor
@@ -37,6 +27,9 @@ Trk::MaterialEffectsEngine::~MaterialEffectsEngine()
 // the interface method initialize
 StatusCode Trk::MaterialEffectsEngine::initialize()
 {
+    m_sopPrefix = m_sopPrefix_prop;
+    m_sopPostfix = m_sopPostfix_prop;
+
     EX_MSG_DEBUG( "", "initialize","",  "successful" );
     return StatusCode::SUCCESS;
 }

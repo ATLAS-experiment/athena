@@ -107,8 +107,8 @@ namespace ITkPixEncoding{
     template<std::size_t Length>
     constexpr auto LutBTree = lut<Length>([](uint32_t i){
         uint32_t encoded;
-        encode(i, encoded);
-        return encoded;
+        uint64_t len = encode(i, encoded);
+        return encoded >> (30 - len);
     });
 
 

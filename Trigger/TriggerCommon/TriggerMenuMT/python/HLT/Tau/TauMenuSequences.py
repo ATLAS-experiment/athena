@@ -30,15 +30,18 @@ def tauCaloMVAMenuSequenceGenCfg(flags, is_probe_leg=False):
 
     # VDV with all the required collections/objects in the View
     # (the VDV checks are disabled unless running with -l DEBUG)
-    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
-        name=f'{recoAcc.name}RecoVDV',
-        DataObjects={
+    Objects={
             ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
             ('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
             ('SG::AuxElement', 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing'),
             ('SG::AuxElement', 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'),
-            ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage'),
-        }
+            ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage')
+    }
+    if ( not flags.Input.isMC ):
+        Objects.add( ('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' ) )
+    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name=f'{recoAcc.name}RecoVDV',
+        DataObjects=Objects
     ))
 
 
@@ -156,7 +159,8 @@ def _ftfCoreSeq(flags, name, is_probe_leg=False):
     recoAcc.mergeReco(trigInDetFastTrackingCfg(flags, roisKey=RoIs, signatureName=f'tau{name}'))
 
     # Create new RoIs for the next tracking steps (FTFIso and PrecTrack), based on the found tracks
-    TrackCollection = flags.Tracking.ActiveConfig.trkTracks_FTF
+    TrackCollection = flags.Tracking.ActiveConfig.tracks_FTF
+    
     if name == 'Core':
         from TrigTauRec.TrigTauRoIToolsConfig import tauTrackRoiUpdaterCfg
         recoAcc.mergeReco(tauTrackRoiUpdaterCfg(flags, inputRoIs=RoIs, tracks=TrackCollection))
@@ -245,11 +249,13 @@ def _ftfTauIsoSeq(flags, name, is_probe_leg=False):
 
     # VDV with all the required collections/objects in the View
     # (the VDV checks are disabled unless running with -l DEBUG)
+    inputTracks = flags.Trigger.ActsTracking.tauCore.trkTracks_FTF if flags.Trigger.useActsTracking \
+        else flags.Trigger.InDetTracking.tauCore.trkTracks_FTF
     recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
         name=f'{recoAcc.name}RecoVDV',
         DataObjects={
             ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
-            ('TrackCollection', f'StoreGateSvc+{flags.Trigger.InDetTracking.tauCore.trkTracks_FTF}'),
+            ('TrackCollection', f'StoreGateSvc+{inputTracks}' ),
         }
     ))
 
@@ -281,7 +287,7 @@ def _ftfTauIsoSeq(flags, name, is_probe_leg=False):
     # The hypothesis algorithm/tool does not perform any action (debug logging of number of tracks only)
     selAcc.addHypoAlgo(CompFactory.TrigTauFastTrackHypoAlg(
         f'TauFastTrackHypoAlg_PassBy{name}',
-        FastTracksKey=flags.Tracking.ActiveConfig.trkTracks_FTF,
+        FastTracksKey=flags.Tracking.ActiveConfig.tracks_FTF,
     ))
 
 
@@ -474,7 +480,7 @@ def tauPrecisionSequenceGenCfg(flags, seq_name, output_name=None, is_probe_leg=F
 
     from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getPrecisionSequenceTauIDs
 
-    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(seq_name), output_name=output_name, is_probe_leg=is_probe_leg)
+    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(flags, seq_name), output_name=output_name, is_probe_leg=is_probe_leg)
 
 
 @AccumulatorCache
@@ -484,4 +490,4 @@ def tauPrecisionLRTSequenceGenCfg(flags, seq_name, output_name=None, is_probe_le
 
     from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getPrecisionSequenceTauIDs
 
-    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(seq_name), output_name=output_name, is_probe_leg=is_probe_leg)
+    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(flags, seq_name), output_name=output_name, is_probe_leg=is_probe_leg)

@@ -58,7 +58,7 @@ AsgPhotonEfficiencyCorrectionTool::AsgPhotonEfficiencyCorrectionTool( const std:
   declareProperty( "CorrectionFileNameUnconv", m_corrFileNameUnconv="",
                    "File that stores the correction factors for simulation for unconverted photons");
 				   
-  declareProperty("MapFilePath", m_mapFile = "PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt",
+  declareProperty("MapFilePath", m_mapFile = "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt",
                   "Full path to the map file");  
 				  
   declareProperty( "ForceDataType", m_dataTypeOverwrite=-1,
@@ -146,19 +146,6 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
   // Forward the message level
   m_rootTool_con->msg().setLevel(this->msg().level());
   m_rootTool_unc->msg().setLevel(this->msg().level());
-
-  
-  // Check if ForceDataType is set up properly (should be 3 for AtlFast2)
-  if(TString(corrFileNameList[0]).Contains("AFII") && m_dataTypeOverwrite!=3)
-  {
-      ATH_MSG_ERROR("Property ForceDataType is set to "<< m_dataTypeOverwrite << ", while it should be 3 for FastSim");
-      return StatusCode::FAILURE;
-  }
-  if(!TString(corrFileNameList[0]).Contains("AFII") && m_dataTypeOverwrite!=1)
-  {
-      ATH_MSG_ERROR("Property ForceDataType is set to "<< m_dataTypeOverwrite << ", while it should be 1 for FullSim");
-      return StatusCode::FAILURE;
-  }  
 
   // We need to initialize the underlying ROOT TSelectorTool
   if ( (0 == m_rootTool_con->initialize()) || (0 == m_rootTool_unc->initialize()) )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // New SCT_DCSConditions Tool, based on existing tool in SCT_ConditionsAlgs
@@ -7,7 +7,7 @@
 
 #include "SCT_DCSConditionsTool.h"
 #include "InDetIdentifier/SCT_ID.h"
-#include "SCT_DetectorElementStatus.h"
+#include "SCT_ReadoutGeometry/SCT_DetectorElementStatus.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 #include "GaudiKernel/ThreadLocalContext.h"

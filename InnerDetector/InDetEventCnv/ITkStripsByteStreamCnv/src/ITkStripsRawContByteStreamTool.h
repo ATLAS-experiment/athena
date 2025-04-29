@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITkStripsRawDataByteStreamCnv_ITkStripsRawContByteStreamTool_h
@@ -13,7 +13,8 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "SCT_Cabling/ISCT_CablingTool.h" //also valid for ITk Strips
+
+#include "ITkStripCabling/IITkStripCablingTool.h"
 
 class IITkStripsRodEncoder;
 
@@ -63,7 +64,7 @@ ITkStripsRawContByteStreamTool : public extends<AthAlgTool, IITkStripsRawContByt
   ToolHandle<IITkStripsRodEncoder> m_encoder{this, "Encoder", "ITkStripsRodEncoder", "ITkStrips ROD Encoder for RDO to BS conversion"};
 
   /** Providing mappings of online and offline identifiers and also serial numbers. */ 
-  ToolHandle<ISCT_CablingTool> m_cabling{this, "ITkStripsCablingTool", "SCT_CablingTool", "Tool to retrieve ITk Strips Cabling"};
+  ToolHandle<IITkStripCablingTool> m_cabling{this, "ITkStripsCablingTool", "ITkStripCablingTool", "Tool to retrieve ITk Strips Cabling"};
 
   /** Identifier helper class for the SCT subdetector that creates compact Identifier objects and 
       IdentifierHash or hash IDs. Also allows decoding of these IDs. */ 

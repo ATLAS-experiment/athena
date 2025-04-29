@@ -47,8 +47,8 @@ namespace Trk{
       // Global position of perigee point
       Amg::Vector3D perGlobalPos =  mPer->position();
       // Crazy user protection
-      if(std::abs(perGlobalPos.z()) > m_IDsizeZ) return StatusCode::FAILURE;
-      if(perGlobalPos.perp() > m_IDsizeR) return StatusCode::FAILURE;
+      if(!(state.m_allowUltraDisplaced) && std::abs(perGlobalPos.z()) > m_IDsizeZ) return StatusCode::FAILURE;
+      if(!(state.m_allowUltraDisplaced) && perGlobalPos.perp() > m_IDsizeR) return StatusCode::FAILURE;
 
       // Reference system calculation
       // Use hit position itself to get more precise magnetic field

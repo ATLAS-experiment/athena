@@ -55,8 +55,6 @@
 + Control/RngComps
 + Control/RootUtils
 + Control/SGComps
-+ Control/SGMon/SGAudCore
-+ Control/SGMon/SGAudSvc
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
@@ -90,7 +88,6 @@
 + Database/ConnectionManagement/DBReplicaSvc
 + Database/CoraCool
 + Database/DBLock
-+ Database/CrestApi
 + Database/IOVDbAthenaPool
 + Database/IOVDbDataModel
 + Database/IOVDbMetaDataTools
@@ -115,6 +112,7 @@
 + DetectorDescription/DetDescrCond/DetDescrConditions
 + DetectorDescription/DetDescrDictionary
 + DetectorDescription/GeoModel/AtlasGeoModel
++ DetectorDescription/GeoModel/DumpGeo
 + DetectorDescription/GeoModel/GeoModelInterfaces
 + DetectorDescription/GeoModel/GeoModelSvc
 + DetectorDescription/GeoModel/GeoModelUtilities
@@ -251,7 +249,6 @@
 + LArCalorimeter/LArGeoModel/LArReadoutGeometry
 + LArCalorimeter/LArIdentifier
 + LArCalorimeter/LArSimEvent
-+ MagneticField/BFieldData
 + MagneticField/MagFieldConfig
 + MagneticField/MagFieldServices
 + MagneticField/MagFieldUtils
@@ -279,7 +276,6 @@
 + MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelR4
 + MuonSpectrometer/MuonPhaseII/MuonG4/MuonSensitiveDetectorsR4
 + MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHit
-+ Reconstruction/RecAlgs
 + Reconstruction/RecEvent
 + Reconstruction/RecEventAthenaPool
 + Reconstruction/RecEventTPCnv
@@ -362,6 +358,7 @@
 + Tools/ART
 + Tools/Campaigns
 + Tools/FilePeeker
++ Tools/GdbUtils
 + Tools/PathResolver
 + Tools/PmbCxxUtils
 + Tools/PROCTools

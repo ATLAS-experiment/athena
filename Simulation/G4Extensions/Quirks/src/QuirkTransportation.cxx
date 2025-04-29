@@ -78,10 +78,14 @@ class G4VSensitiveDetector;
 
 QuirkTransportation::QuirkTransportation( G4int verboseLevel )
   : G4VProcess( G4String("QuirkTransportation"), fTransportation ),
+    m_transportEndKineticEnergy( 0.0 ),
+    m_momentumChanged( false ),
     m_particleIsLooping( false ),
     m_currentTouchableHandle(),  // Points to (G4VTouchable*) 0
+    m_geometryLimitedStep( false ),
     m_previousSftOrigin (0.,0.,0.),
     m_previousSafety    ( 0.0 ),
+    m_endpointDistance( 0.0 ),
     m_threshold_Warning_Energy( 100 * CLHEP::MeV ),  
     m_threshold_Important_Energy( 250 * CLHEP::MeV ), 
     m_thresholdTrials( 10 ), 

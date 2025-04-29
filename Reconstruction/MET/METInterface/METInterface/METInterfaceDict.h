@@ -10,7 +10,6 @@
 #endif // __GCCXML__
 
 #include "METInterface/IMETMaker.h"
-#include "METInterface/IMETRebuilder.h"
 #include "METInterface/IMETSystematicsTool.h"
 #include "METInterface/IMETSignificance.h"
 

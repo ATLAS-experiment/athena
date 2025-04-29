@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -229,6 +229,61 @@ def RDOAnalysisCfg(flags):
     if flags.Detector.EnableTRT:
         acc.merge(TRT_RDOAnalysisCfg(flags))
 
+    if flags.Detector.EnableLAr:
+        acc.merge(LArRDOAnalysisCfg(flags))
+
+    if flags.Detector.EnableTile:
+        acc.merge(TileRDOAnalysisCfg(flags))
+
+    if flags.Detector.EnableMDT:
+        from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
+
+        if  "MDTCSM" in flags.Input.Collections:
+            acc.merge(MdtRdoToMdtDigitCfg(flags))
+        elif f"{flags.Overlay.BkgPrefix}MDTCSM" in flags.Input.Collections:
+            acc.merge(MdtRdoToMdtDigitCfg(flags, MdtRdoContainer =f"{flags.Overlay.BkgPrefix}MDTCSM",
+                                                 MdtDigitContainer=f"{flags.Overlay.BkgPrefix}MDT_DIGITS" ))
+
+        acc.merge(MDT_RDOAnalysisCfg(flags))
+
+    if flags.Detector.EnableRPC:
+        if "RPCPAD" in flags.Input.Collections or f"{flags.Overlay.BkgPrefix}RPCPAD" in flags.Input.Collections:
+            from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg
+            acc.merge(RpcRdoToRpcDigitCfg(flags))
+        acc.merge(RPC_RDOAnalysisCfg(flags))
+
+    if flags.Detector.EnableTGC:
+        from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
+        if "TGCRDO" in flags.Input.Collections:
+            acc.merge(TgcRdoToTgcDigitCfg(flags))
+        elif f"{flags.Overlay.BkgPrefix}TGCRDO" in flags.Input.Collections:
+            acc.merge(TgcRdoToTgcDigitCfg(flags,TgcRdoContainer = f"{flags.Overlay.BkgPrefix}TGCRDO",
+                                                TgcDigitContainer=f"{flags.Overlay.BkgPrefix}TGC_DIGITS"))
+        acc.merge(TGC_RDOAnalysisCfg(flags))
+
+    if flags.Detector.EnablesTGC:
+        from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
+        if "sTGCRDO" in flags.Input.Collections:
+            acc.merge(STGC_RdoToDigitCfg(flags))
+        elif f"{flags.Overlay.BkgPrefix}sTGCRDO" in flags.Input.Collections:
+            acc.merge(STGC_RdoToDigitCfg(flags,
+                                          sTgcRdoContainer=f"{flags.Overlay.BkgPrefix}sTGCRDO",
+                                          sTgcDigitContainer=f"{flags.Overlay.BkgPrefix}sTGC_DIGITS"))
+
+            
+    if flags.Detector.EnableMM:
+        from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
+        if "MMRDO" in flags.Input.Collections:
+            acc.merge(MM_RdoToDigitCfg(flags))
+        elif f"{flags.Overlay.BkgPrefix}MMRDO" in flags.Input.Collections:
+            acc.merge(MM_RdoToDigitCfg(flags,MmRdoContainer=f"{flags.Overlay.BkgPrefix}MMRDO",
+                                             MmDigitContainer=f"{flags.Overlay.BkgPrefix}MM_DIGITS"))
+            
+
+    if flags.Detector.EnableMuon:
+        from MuonPRDTest.MuonPRDTestCfg import AddHitValAlgCfg
+        acc.merge(AddHitValAlgCfg(flags, name = "MuonHitValAlg", outFile=flags.Output.HISTFileName, doSDOs = True, doDigits=True))
+
     if flags.Detector.EnableITkPixel:
         acc.merge(ITkPixelRDOAnalysisCfg(flags))
 
@@ -292,13 +347,19 @@ def TileRDOAnalysisCfg(flags, name="TileRDOAnalysis", **kwargs):
         kwargs.setdefault("InputTileTTL1Key", '') # Not in presampled RDO files
         kwargs.setdefault("InputL2Key", '') # Not in presampled RDO files
     kwargs.setdefault("InputRawChKey", 'TileRawChannelCnt')
-    kwargs.setdefault("InputMuRcvRawChKey", 'TileRawChannelCnt')
+    kwargs.setdefault("InputMuRcvRawChKey", 'MuRcvRawChCnt')
     kwargs.setdefault("InputMuRcvKey", 'TileMuRcvCnt')
-    kwargs.setdefault("InputMBTS_TTL1Key", 'TileTTL1MBTS')
+    if flags.Detector.EnableMBTS:
+        kwargs.setdefault("InputMBTS_TTL1Key", 'TileTTL1MBTS')
+    else:
+        kwargs.setdefault("InputMBTS_TTL1Key", "")
     kwargs.setdefault("InputTileTTL1Key", 'TileTTL1Cnt')
     kwargs.setdefault("InputL2Key", 'TileL2Cnt')
     kwargs.setdefault("InputDigitsMuRcvKey", f'{prefix}MuRcvDigitsCnt')
-    kwargs.setdefault("InputDigitsFltKey", f"{prefix}TileDigitsCnt")
+    if f"{prefix}TileDigitsCnt" in flags.Input.Collections:
+        kwargs.setdefault("InputDigitsFltKey", f"{prefix}TileDigitsCnt")
+    else:
+        kwargs.setdefault("InputDigitsFltKey", "TileDigitsFlt")
 
     result.addEventAlgo(CompFactory.TileRDOAnalysis(name, **kwargs))
 
@@ -389,3 +450,61 @@ def TGC_RDOAnalysisCfg(flags, name="TGC_RDOAnalysis", **kwargs):
     result.merge(RDOAnalysisOutputCfg(flags))
 
     return result
+
+
+def SetupArgParser():
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument("--threads", type=int, help="number of threads", default=1)
+    parser.add_argument("--inputFile", "-i", default=[
+                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/d1759/v5/myRDO.pool.root"
+                        ], 
+                        help="Input file to run on ", nargs="+")
+    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
+                                                                                     "ATLAS-R3S-2021-03-02-00"])
+    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-09", help="Conditions tag to use",
+                                                                         choices=["OFLCOND-MC16-SDR-RUN2-11",
+                                                                                  "OFLCOND-MC23-SDR-RUN3-09"])
+
+    parser.add_argument("--outFile", default="RDOAnalysis.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--nEvents", help="Number of events to run", type = int ,default = 1)
+    parser.add_argument("--skipEvents", help="Number of events to skip", type = int, default = 0)
+    parser.add_argument("--geoModelFile", default ="", help="GeoModel SqLite file containing the muon geometry.")
+ 
+   
+
+    return parser
+
+if __name__ == "__main__":
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    args = SetupArgParser().parse_args()
+    flags = initConfigFlags()
+    flags.Concurrency.NumThreads = args.threads
+    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
+    flags.Input.Files = args.inputFile 
+    flags.GeoModel.AtlasVersion = args.geoTag
+    flags.IOVDb.GlobalTag = args.condTag
+    flags.Scheduler.ShowDataDeps = True 
+    flags.Scheduler.ShowDataFlow = True
+    flags.Exec.FPE= 500
+    flags.Exec.MaxEvents = args.nEvents
+    flags.Exec.SkipEvents = args.skipEvents
+    flags.Output.HISTFileName = args.outFile
+    if len (args.geoModelFile) > 0:
+        flags.GeoModel.SQLiteDB = True
+        flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
+
+    flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
+    ### Setup the file reading
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
+
+    cfg.merge(RDOAnalysisCfg(flags))
+
+    cfg.printConfig(withDetails=True, summariseProps=True)
+    if not cfg.run().isSuccess(): exit(1)
+

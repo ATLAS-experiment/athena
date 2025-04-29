@@ -1,7 +1,6 @@
 #include "../LArNonLinearity.h"
 #include "../LArCellBuilderFromLArRawChannelTool.h"
 #include "../LArCellEmMiscalib.h"
-#include "../LArCellRescaler.h"
 #include "../LArCellMaskingTool.h"
 #include "../LArCellNoiseMaskingTool.h"
 #include "../LArBadFebMaskingTool.h"
@@ -15,12 +14,12 @@
 #include "../LArHVFraction.h"
 #include "../LArRAWtoSuperCell.h"
 #include "../LArCelldeadOTXTool.h"
+#include "../LArCelldeadOTXAlg.h"
 
 DECLARE_COMPONENT( LArNoisyROAlg )
 DECLARE_COMPONENT( LArNonLinearity )
 DECLARE_COMPONENT( LArCellBuilderFromLArRawChannelTool )
 DECLARE_COMPONENT( LArCellEmMiscalib )
-DECLARE_COMPONENT( LArCellRescaler )
 DECLARE_COMPONENT( LArCellMaskingTool )
 DECLARE_COMPONENT( LArCellNoiseMaskingTool )
 DECLARE_COMPONENT( LArBadFebMaskingTool )
@@ -33,3 +32,4 @@ DECLARE_COMPONENT( LArCellContHVCorrTool )
 DECLARE_COMPONENT( LArHVFraction )
 DECLARE_COMPONENT( LArRAWtoSuperCell )
 DECLARE_COMPONENT( LArCelldeadOTXTool )
+DECLARE_COMPONENT( LArCelldeadOTXAlg )

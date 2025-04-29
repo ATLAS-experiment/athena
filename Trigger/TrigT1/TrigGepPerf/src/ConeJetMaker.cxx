@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "./Jet.h"
@@ -63,7 +63,7 @@ Gep::ConeJetMaker::makeJets( const std::vector<Gep::Cluster> &clusters) const
 {
   std::vector<Gep::Jet> jets;
 
-  for (const auto& seed: m_seeds) {
+  for (const auto seed: m_seeds) {
 
     float seedEt = seed->et();
 

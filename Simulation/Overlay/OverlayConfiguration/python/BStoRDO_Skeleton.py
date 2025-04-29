@@ -22,17 +22,19 @@ def fromRunArgs(runArgs):
     log.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.addFlag("addVertex", True)
+
     commonRunArgsToFlags(runArgs, flags)
 
     flags.Common.ProductionStep = ProductionStep.MinbiasPreprocessing
+
     flags.Reco.EnableHI = True
     flags.Reco.HIMode = HIMode.HI
-    flags.Detector.EnableTRT = False
     flags.Tracking.doCaloSeededAmbi = False
     flags.Tracking.doCaloSeededBrem = False
+
     # This is for data overlay
     flags.Overlay.DataOverlay = True
+    flags.Overlay.ByteStream = True
 
     # Setting input/output files
     if hasattr(runArgs, 'inputBSFile'):
@@ -72,85 +74,103 @@ def fromRunArgs(runArgs):
     flags.lock()
 
     itemList = [] # items to store in RDO
+    acceptAlgs = [] # skimming algs
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
 
+    from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+    cfg.merge(CutFlowSvcCfg(flags))
+
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     cfg.merge(ByteStreamReadCfg(flags))
-
-    if flags.Detector.EnablePixel:
-        if not flags.addVertex: # no need configure it if reconstructions of vertex is requested
-            from InDetOverlay.PixelOverlayConfig import PixelDataOverlayExtraCfg
-            cfg.merge(PixelDataOverlayExtraCfg(flags))
-        itemList.append(f'PixelRDO_Container#{flags.Overlay.BkgPrefix}PixelRDOs')
-
-    if flags.Detector.EnableSCT:
-        if not flags.addVertex:
-            from InDetOverlay.SCTOverlayConfig import SCTDataOverlayExtraCfg
-            cfg.merge(SCTDataOverlayExtraCfg(flags))
-        itemList.append(f'SCT_RDO_Container#{flags.Overlay.BkgPrefix}SCT_RDOs')
-
-    if flags.Detector.EnableTRT:
-        from InDetOverlay.TRTOverlayConfig import TRTDataOverlayExtraCfg
-        cfg.merge(TRTDataOverlayExtraCfg(flags))
-        itemList.append(f'TRT_RDO_Container#{flags.Overlay.BkgPrefix}TRT_RDOs')
-
-    if flags.Detector.EnableLAr:
-        from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-        cfg.merge(LArRawDataReadingCfg(flags, LArRawChannelKey=f'{flags.Overlay.BkgPrefix}LArRawChannels'))
-        itemList.append(f'LArRawChannelContainer#{flags.Overlay.BkgPrefix}LArRawChannels')
-
-    if flags.Detector.EnableTile:
-        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
-        cfg.merge(TileRawDataReadingCfg(flags))
-        itemList.append(f'TileRawChannelContainer#{flags.Overlay.BkgPrefix}TileRawChannelCnt')
-
-    if flags.Detector.EnableCSC:
-        from MuonConfig.CSC_OverlayConfig import CSC_DataOverlayExtraCfg
-        cfg.merge(CSC_DataOverlayExtraCfg(flags))
-        itemList.append(f'CscRawDataContainer#{flags.Overlay.BkgPrefix}CSCRDO')
-
-    if flags.Detector.EnableMDT:
-        from MuonConfig.MDT_OverlayConfig import MDT_DataOverlayExtraCfg
-        cfg.merge(MDT_DataOverlayExtraCfg(flags))
-        itemList.append(f'MdtCsmContainer#{flags.Overlay.BkgPrefix}MDTCSM')
-
-    if flags.Detector.EnableRPC:
-        from MuonConfig.RPC_OverlayConfig import RPC_DataOverlayExtraCfg
-        cfg.merge(RPC_DataOverlayExtraCfg(flags))
-        itemList.append(f'RpcPadContainer#{flags.Overlay.BkgPrefix}RPCPAD')
-
-    if flags.Detector.EnableTGC:
-        from MuonConfig.TGC_OverlayConfig import TGC_DataOverlayExtraCfg
-        cfg.merge(TGC_DataOverlayExtraCfg(flags))
-        itemList.append(f'TgcRdoContainer#{flags.Overlay.BkgPrefix}TGCRDO')
-
-    if flags.Detector.EnablesTGC:
-        from MuonConfig.sTGC_OverlayConfig import sTGC_DataOverlayExtraCfg
-        cfg.merge(sTGC_DataOverlayExtraCfg(flags))
-        itemList.append(f'Muon::STGC_RawDataContainer#{flags.Overlay.BkgPrefix}sTGCRDO')
-    
-    if flags.Detector.EnableMM:
-        from MuonConfig.MM_OverlayConfig import MM_DataOverlayExtraCfg
-        cfg.merge(MM_DataOverlayExtraCfg(flags))
-        itemList.append(f'Muon::MM_RawDataContainer#{flags.Overlay.BkgPrefix}MMRDO')
 
     from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
     cfg.merge(LumiBlockMuWriterCfg(flags))
 
-    if flags.addVertex:
+    if flags.Detector.EnableBCM:
+        from InDetOverlay.BCMOverlayConfig import BCMRawDataProviderAlgCfg
+        cfg.merge(BCMRawDataProviderAlgCfg(flags))
+        itemList.append(f'BCM_RDO_Container#{flags.Overlay.BkgPrefix}BCM_RDOs')
+
+    if flags.Detector.EnablePixel:
+        from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import PixelRawDataProviderAlgCfg
+        cfg.merge(PixelRawDataProviderAlgCfg(flags))
+        itemList.append(f'PixelRDO_Container#{flags.Overlay.BkgPrefix}PixelRDOs')
+        itemList.append('IDCInDetBSErrContainer#PixelByteStreamErrs')
+
+    if flags.Detector.EnableSCT:
+        from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg, SCTEventFlagWriterCfg
+        cfg.merge(SCTRawDataProviderCfg(flags))
+        cfg.merge(SCTEventFlagWriterCfg(flags))
+        itemList.append(f'SCT_RDO_Container#{flags.Overlay.BkgPrefix}SCT_RDOs')
+        itemList.append('IDCInDetBSErrContainer#SCT_ByteStreamErrs')
+
+    if flags.Detector.EnableTRT:
+        from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
+        cfg.merge(TRTRawDataProviderCfg(flags))
+        itemList.append(f'TRT_RDO_Container#{flags.Overlay.BkgPrefix}TRT_RDOs')
+        itemList.append('TRT_BSErrContainer#TRT_ByteStreamErrs')
+
+    if flags.Detector.EnableLAr:
+        from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
+        cfg.merge(LArRawDataReadingCfg(flags))
+        itemList.append(f'LArDigitContainer#{flags.Overlay.BkgPrefix}LArDigitContainer_data')
+        itemList.append('LArFebHeaderContainer#LArFebHeader')
+
+    if flags.Detector.EnableTile:
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        cfg.merge(TileRawDataReadingCfg(flags, readMuRcv=False))
+        itemList.append(f'TileRawChannelContainer#{flags.Overlay.BkgPrefix}TileRawChannelCnt')
+        itemList.append(f'TileDigitsContainer#{flags.Overlay.BkgPrefix}TileDigitsCnt')
+
+    if flags.Detector.EnableCSC:
+        from MuonConfig.MuonBytestreamDecodeConfig import CscBytestreamDecodeCfg
+        cfg.merge(CscBytestreamDecodeCfg(flags))
+        itemList.append(f'CscRawDataContainer#{flags.Overlay.BkgPrefix}CSCRDO')
+
+    if flags.Detector.EnableMDT:
+        from MuonConfig.MuonBytestreamDecodeConfig import MdtBytestreamDecodeCfg
+        cfg.merge(MdtBytestreamDecodeCfg(flags))
+        itemList.append(f'MdtCsmContainer#{flags.Overlay.BkgPrefix}MDTCSM')
+
+    if flags.Detector.EnableRPC:
+        from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg
+        cfg.merge(RpcBytestreamDecodeCfg(flags))
+        itemList.append(f'RpcPadContainer#{flags.Overlay.BkgPrefix}RPCPAD')
+
+    if flags.Detector.EnableTGC:
+        from MuonConfig.MuonBytestreamDecodeConfig import TgcBytestreamDecodeCfg
+        cfg.merge(TgcBytestreamDecodeCfg(flags))
+        itemList.append(f'TgcRdoContainer#{flags.Overlay.BkgPrefix}TGCRDO')
+
+    if flags.Detector.EnablesTGC:
+        from MuonConfig.MuonBytestreamDecodeConfig import sTgcBytestreamDecodeCfg
+        cfg.merge(sTgcBytestreamDecodeCfg(flags))
+        itemList.append(f'Muon::STGC_RawDataContainer#{flags.Overlay.BkgPrefix}sTGCRDO')
+    
+    if flags.Detector.EnableMM:
+        from MuonConfig.MuonBytestreamDecodeConfig import MmBytestreamDecodeCfg
+        cfg.merge(MmBytestreamDecodeCfg(flags))
+        itemList.append(f'Muon::MM_RawDataContainer#{flags.Overlay.BkgPrefix}MMRDO')
+
+    if flags.Reco.EnableTracking:
         from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
         cfg.merge(InDetTrackRecoCfg(flags))
+        itemList.append(f'xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices')
+        itemList.append(f'xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z')
 
-        itemList.append(f"xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices")
-        itemList.append(f"xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z")
+        from OverlayUtilities.OverlayUtilitiesConfig import OverlayVertexSkimmingAlgCfg
+        cfg.merge(OverlayVertexSkimmingAlgCfg(flags))
+        acceptAlgs.append('OverlayVertexSkimmingAlg')
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'RDO', itemList))
+    cfg.merge(OutputStreamCfg(flags, 'RDO', itemList, AcceptAlgs=acceptAlgs))
 
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO', createMetadata=[MetadataCategory.IOVMetaData]))
+    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO', AcceptAlgs=acceptAlgs,
+                                        createMetadata=[MetadataCategory.IOVMetaData,
+                                                        MetadataCategory.CutFlowMetaData]))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

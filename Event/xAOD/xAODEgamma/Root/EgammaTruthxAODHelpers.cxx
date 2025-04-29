@@ -106,21 +106,26 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
   }
 
   //And has to be a photon or electron
-  const xAOD::TruthParticle* parent = truthel->parent();
-  if ( !MC::isPhoton(parent) && !MC::isElectron(parent) ) {
-    return vec;
+  const xAOD::TruthParticle* parent = nullptr;
+  for (size_t p = 0; p < truthel->nParents(); ++p) {
+    if ( !MC::isPhoton(truthel->parent(p)) && !MC::isElectron(truthel->parent(p)) )  return vec;
+    parent = truthel->parent(p); //AV: note, here is an ambiguity for the case of multiple parents.
   }
 
+  if (!parent)  return vec;
   vec.push_back(parent); //push in the parent as the second entry
 
   //Loop over the generations
   while (parent->nParents() &&
 	 (HepMC::is_simulation_particle(parent) || allTheWayBack)) {
     //Find the next parent
-    const xAOD::TruthParticle* tmp = parent->parent();
+    const xAOD::TruthParticle* tmp = nullptr; 
     //You want to see an electron or a photon
-    if (MC::isPhoton(tmp) || MC::isElectron(tmp)) {
-      parent=tmp;
+    for (size_t p = 0; p < parent->nParents(); ++p) {
+      if (MC::isPhoton(parent->parent(p)) || MC::isElectron(parent->parent(p))) tmp = parent->parent(p); //AV: note some ambiguity for multiple parents passing the selection
+    }
+    if (tmp) {
+      parent = tmp;
     } else { // if we do not see any more electron and photons we stop
       break;
     }
@@ -128,7 +133,6 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
   }
   return vec;
 }
-
 const xAOD::TruthParticle*
 xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::Electron* el,
 					  const bool allTheWayBack/*=true*/){
@@ -147,6 +151,7 @@ xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::TruthParticle* truthel,
   }
   return nullptr;
 }
+
 
 std::vector<const xAOD::TruthParticle*>
 xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::Electron* el,

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PyAthenaAud.h 
@@ -94,17 +94,6 @@ class ATLAS_NOT_THREAD_SAFE Aud : virtual public ::IPyComponent,
 
   virtual void after(CustomEventTypeRef, INamedInterface*, const StatusCode&) override;
   virtual void after(CustomEventTypeRef, const std::string&, const StatusCode&) override;
-
-  // ---> Obsolete methods
-  virtual void beforeInitialize(INamedInterface* ) override;
-  virtual void afterInitialize(INamedInterface* ) override;
-  virtual void beforeReinitialize(INamedInterface* ) override;
-  virtual void afterReinitialize(INamedInterface* ) override;
-  virtual void beforeExecute(INamedInterface* ) override;
-  virtual void afterExecute(INamedInterface*, const StatusCode& ) override;
-  virtual void beforeFinalize(INamedInterface* ) override;
-  virtual void afterFinalize(INamedInterface* ) override;
-  // <--- Obsolete methods
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -10,6 +10,9 @@
 #include "GeneratorModules/GenBase.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadDecorHandleKey.h"
+#include "GaudiKernel/IIncidentListener.h"
+
+#include <cstdint>
 
 /**
  * @brief Count the number of events to pass all algorithms/filters
@@ -19,7 +22,8 @@
  * when the requested number of events are produced.
  */
 
-class CountHepMC : public GenBase {
+class CountHepMC : public GenBase,
+                   public virtual IIncidentListener {
 public:
 
   CountHepMC(const std::string& name, ISvcLocator* pSvcLocator);
@@ -28,15 +32,17 @@ public:
   virtual StatusCode execute() override;
   virtual StatusCode finalize() override;
 
+  virtual void handle(const Incident& inc) override;
+
 private:
 
   ServiceHandle< StoreGateSvc > m_metaDataStore{
     "StoreGateSvc/MetaDataStore", name()};
-  int m_nPass{0};
-  int m_nCount;
+  uint64_t m_nPass{0};
+  uint64_t m_nCount;
 
-  long long int m_firstEv;
-  int m_newRunNumber;
+  uint64_t m_firstEv;
+  uint32_t m_newRunNumber;
 
   bool m_corHepMC;
   bool m_corEvtID;

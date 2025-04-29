@@ -440,6 +440,10 @@ def ITkGlobalChi2FitterBaseCfg(flags, name='ITkGlobalChi2FitterBase', **kwargs):
     kwargs.setdefault("MeasurementUpdateTool", acc.popToolsAndMerge(
         ITkUpdatorCfg(flags)))
 
+    from TrkConfig.TrkResidualPullCalculatorConfig import ResidualPullCalculatorCfg
+    kwargs.setdefault("ResidualPullCalculatorTool", acc.popToolsAndMerge(
+        ResidualPullCalculatorCfg(flags)))
+
     kwargs.setdefault("StraightLine", not flags.BField.solenoidOn)
     kwargs.setdefault("OutlierCut", 4)
     kwargs.setdefault("SignedDriftRadius", True)

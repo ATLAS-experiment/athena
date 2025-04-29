@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMmTest.h"
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
@@ -12,95 +12,74 @@ using namespace ActsTrk;
 
 namespace MuonGMR4{
 
-GeoModelMmTest::GeoModelMmTest(const std::string& name, ISvcLocator* pSvcLocator):
-    AthHistogramAlgorithm(name,pSvcLocator) {}
-
 StatusCode GeoModelMmTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_geoCtxKey.initialize());
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
+    
+    const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
 
-    const MmIdHelper& id_helper{m_idHelperSvc->mmIdHelper()};
-    for (const std::string& testCham : m_selectStat) {
-        /// Check that the station is not on the excluded list
-        if (std::find(m_excludeStat.begin(), m_excludeStat.end(), testCham) != m_excludeStat.end()) {
-            continue;
-        }
-        /// Check format
-        if (testCham.size() != 6) {
-            ATH_MSG_FATAL("Wrong format given " << testCham);
-            return StatusCode::FAILURE;
-        }
-        /// Example string MML1A6
-        std::string statName = testCham.substr(0, 3);
-        unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) *
-                               (testCham[4] == 'A' ? 1 : -1);
-        unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
-        bool is_valid{false};
-        const Identifier eleId = id_helper.elementID(statName, statEta, statPhi, is_valid);
-        if (!is_valid) {
-            ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
-            return StatusCode::FAILURE;
-        }
-        std::copy_if(id_helper.detectorElement_begin(), 
-                     id_helper.detectorElement_end(), 
-                     std::inserter(m_testStations, m_testStations.end()), 
-                        [&](const Identifier& id) {
-                            return id_helper.elementID(id) == eleId;
-                        });
-    }
-    /// Look at all stations for testing if nothing has been specified
-    if (m_testStations.empty()){
-        /// Construct list of excluded stations
-        std::set<Identifier> excludedStations{};
-        for (const std::string& testCham : m_excludeStat) {
-            /// Check format
-            if (testCham.size() != 6) {
-                ATH_MSG_FATAL("Wrong format given " << testCham);
-                return StatusCode::FAILURE;
+    auto translateTokenList = [this, &idHelper](const std::vector<std::string>& chNames){
+        
+        std::set<Identifier> transcriptedIds{};
+        for (const std::string& token : chNames) { 
+            if (token.size() != 6) {
+                ATH_MSG_WARNING("Wrong format given for "<<token<<". Expecting 6 characters");
+                continue;
             }
-            /// Construct identifier; example string MML1A6
-            std::string statName = testCham.substr(0, 3);
-            unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) * (testCham[4] == 'A' ? 1 : -1);
-            unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
-            bool is_valid{false};
-            const Identifier eleId = id_helper.elementID(statName, statEta, statPhi, is_valid);
-            if (!is_valid) {
-                ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
-                return StatusCode::FAILURE;
+            /// Example string MMS4A2
+            const std::string statName = token.substr(0, 3);
+            const unsigned statEta = std::atoi(token.substr(3, 1).c_str()) * (token[4] == 'A' ? 1 : -1);
+            const unsigned statPhi = std::atoi(token.substr(5, 1).c_str());
+            bool isValid{false};
+            const Identifier eleId = idHelper.elementID(statName, statEta, statPhi, isValid);
+            if (!isValid) {
+                ATH_MSG_WARNING("Failed to deduce a station name for " << token);
+                continue;
             }
-            /// Add station to excludedStations
-            std::copy_if(id_helper.detectorElement_begin(), 
-                         id_helper.detectorElement_end(), 
-                         std::inserter(excludedStations, excludedStations.end()), 
-                         [&](const Identifier& id) {
-                            return id_helper.elementID(id) == eleId;
-                         });
-        }
-        /// Add stations for testing
-        std::copy_if(id_helper.detectorElement_begin(), 
-                     id_helper.detectorElement_end(), 
-                     std::inserter(m_testStations, m_testStations.end()),
-                     [&](const Identifier& id) {
-                        return excludedStations.count(id) == 0;
-                     });
-        /// Report what stations are excluded
-        if (!excludedStations.empty()) {
-            std::stringstream excluded_report{};
-            for (const Identifier& id : excludedStations){
-                excluded_report << " *** " << m_idHelperSvc->toString(id) << std::endl;
+            transcriptedIds.insert(eleId);
+            const Identifier secMlId = idHelper.multilayerID(eleId, 2, isValid);
+            if (isValid){
+                transcriptedIds.insert(secMlId);
             }
-            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
         }
-    } else {
+        return transcriptedIds;
+    };
+
+    std::vector <std::string>& selectedSt = m_selectStat.value();
+    const std::vector <std::string>& excludedSt = m_excludeStat.value();
+    selectedSt.erase(std::remove_if(selectedSt.begin(), selectedSt.end(),
+                     [&excludedSt](const std::string& token){
+                        return std::ranges::find(excludedSt, token) != excludedSt.end();
+                     }), selectedSt.end());
+    
+    if (selectedSt.size()) {
+        m_testStations = translateTokenList(selectedSt);
         std::stringstream sstr{};
         for (const Identifier& id : m_testStations) {
             sstr<<" *** "<<m_idHelperSvc->toString(id)<<std::endl;
         }
         ATH_MSG_INFO("Test only the following stations "<<std::endl<<sstr.str());
+    } else {
+        const std::set<Identifier> excluded = translateTokenList(excludedSt);
+        /// Add stations for testing
+        for(auto itr = idHelper.detectorElement_begin();
+                 itr!= idHelper.detectorElement_end();++itr){
+            if (!excluded.count(*itr)) {
+               m_testStations.insert(*itr);
+            }
+        }
+        /// Report what stations are excluded
+        if (!excluded.empty()) {
+            std::stringstream excluded_report{};
+            for (const Identifier& id : excluded){
+                excluded_report << " *** " << m_idHelperSvc->toStringDetEl(id) << std::endl;
+            }
+            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
+        }
     }
-     ATH_CHECK(detStore()->retrieve(m_detMgr));
+    ATH_CHECK(detStore()->retrieve(m_detMgr));
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelMmTest::finalize() {
@@ -109,8 +88,8 @@ StatusCode GeoModelMmTest::finalize() {
 }
 StatusCode GeoModelMmTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
-    SG::ReadHandle<ActsGeometryContext> geoContextHandle{m_geoCtxKey, ctx};
-    ATH_CHECK(geoContextHandle.isPresent());
+    const ActsGeometryContext* geoContextHandle{nullptr};
+    ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
     const ActsGeometryContext& gctx{*geoContextHandle};
 
     for (const Identifier& test_me : m_testStations) {
@@ -140,7 +119,7 @@ StatusCode GeoModelMmTest::execute() {
             const int fStrip = reElement->firstStrip(layerHash);
             const int lStrip = fStrip+numStrips-1;
             
-            for (int strip = fStrip; strip <= lStrip; ++strip) {
+            for (int strip = fStrip; strip < lStrip; ++strip) {
                 bool isValid{false};
                 
                 const Identifier chId = id_helper.channelID(reElement->identify(),
@@ -208,8 +187,8 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
 
     ///
     m_moduleHeight = reElement->moduleHeight();
-    m_moduleWidthS = reElement->moduleWidthL();
-    m_moduleWidthL = reElement->moduleWidthS();
+    m_moduleWidthS = reElement->moduleWidthS();
+    m_moduleWidthL = reElement->moduleWidthL();
 
     const MmIdHelper& id_helper{m_idHelperSvc->mmIdHelper()};
     for (unsigned int layer = 1; layer <= reElement->nGasGaps(); ++layer) {
@@ -233,31 +212,35 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
             const IdentifierHash measHash{reElement->measurementHash(chId)};
 
             const MuonGMR4::StripDesign& design{reElement->stripLayer(measHash).design()};
-            m_locStripCenter.push_back(design.center(strip).value_or(Amg::Vector2D::Zero()));
+            if (strip == fStrip) {
+                const Amg::Transform3D stripLocalToGlob = reElement->localToGlobalTrans(gctx, chId);
+                ATH_MSG_VERBOSE(m_idHelperSvc->toStringGasGap(chId)<<" "<< "transform: " 
+                            << Amg::toString(stripLocalToGlob)<<", perp: "<<stripLocalToGlob.translation().perp());
+                m_stripRot.push_back(stripLocalToGlob);
+                m_stripRotGasGap.push_back(layer);
+                m_firstStripPos.push_back(design.firstStripPos());
+                m_readoutSide.push_back(reElement->readoutSide(measHash));
+
+                m_ActiveWidthS = reElement->gapLengthS(measHash);
+                m_ActiveWidthL = reElement->gapLengthL(measHash);
+                m_ActiveHeightR = reElement->gapHeight(measHash);
+                m_firstStrip.push_back(design.firstStripNumber());
+                m_nStrips.push_back(design.numStrips());
+            }
+            CheckVector2D center = design.center(strip);
+            if (!center) {
+                ATH_MSG_WARNING("Strip "<<m_idHelperSvc->toString(chId)<<" is outside bounds "<<design);
+                continue;
+            }
+            m_stripLength.push_back(reElement->stripLength(measHash));
+            m_locStripCenter.push_back(center.value());
             m_isStereo.push_back(design.hasStereoAngle());
             m_stripCenter.push_back(reElement->stripPosition(gctx, measHash));
             m_stripLeftEdge.push_back(reElement->leftStripEdge(gctx,measHash));
-            m_stripRightEdge.push_back(reElement->rightStripEdge(gctx,measHash));
-            m_stripLength.push_back(reElement->stripLength(measHash));
+            m_stripRightEdge.push_back(reElement->rightStripEdge(gctx,measHash));            
             m_gasGap.push_back(layer);
             m_channel.push_back(strip);
-
-            m_ActiveWidthS = reElement->gapLengthS(measHash);
-            m_ActiveWidthL = reElement->gapLengthL(measHash);
-            m_ActiveHeightR = reElement->gapHeight(measHash);
-
-            if (strip != fStrip) continue;
-            const Amg::Transform3D stripGlobToLoc = reElement->globalToLocalTrans(gctx, chId);
-            ATH_MSG_VERBOSE("The global to local transformation on layers is: " << Amg::toString(stripGlobToLoc));
-            ATH_MSG_VERBOSE("The local to global transformation on layers is: " << Amg::toString(reElement->localToGlobalTrans(gctx, chId)));
-            m_stripRot.push_back(stripGlobToLoc);
-            m_stripRotGasGap.push_back(layer);
-            m_firstStripPos.push_back(design.firstStripPos());
-            m_readoutFirstStrip.push_back(design.firstStripNumber());
-            m_readoutSide.push_back(reElement->readoutSide(measHash));
-            
         }
-
     }
     return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }

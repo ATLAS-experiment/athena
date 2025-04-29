@@ -1,40 +1,31 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 def EfexMonitoringConfig(inputFlags):
-    '''Function to configure LVL1 Efex algorithm in the monitoring system.'''
+    '''Function to configure LVL1 Efex monitoring algorithm'''
 
     # get the component factory - used for merging the algorithm results
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
-    # uncomment if you want to see all the flags
-    #inputFlags.dump() # print all the configs
-
-    # make the athena monitoring helper
-    from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'EfexMonitoringCfg')
-
     # add algorithm to the helper
-    EfexMonAlg = helper.addAlgorithm(CompFactory.EfexMonitorAlgorithm,'EfexMonAlg')
+    result.addEventAlgo( CompFactory.EfexMonitorAlgorithm('EfexMonAlg',
+                                                  PackageName='EfexMonitor',
+                                                  LowPtCut = 0.0,
+                                                  HiPtCut = 15000.0,
+                                                  eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI'],
+                                                  eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI']
+                                                  ) )
 
-    # add any steering
-    baseGroupName = 'EfexMonitor' # the monitoring group name is also used for the package name
-    EfexMonAlg.PackageName = baseGroupName
-    EfexMonAlg.LowPtCut = 0.0
-    EfexMonAlg.HiPtCut = 15000.0
-    EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI']
-    EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI']
-
-    acc = helper.result()
-    result.merge(acc)
     return result
 
 
 def EfexMonitoringHistConfig(flags, eFexAlg):
     """
-    The histogram binning depends on the algorithm settings, configure separately
+    Book the histograms for the efex monitoring. This is done in a separate method
+    to the algorithm creation (above) because the histograms are based on the list of container keys
+    given to the algorithm, which can be customized by the user before calling this method.
     """
     import math
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -52,12 +43,13 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
 
     # Some helpful variables for declaring the histograms
     # mainDir = 'L1Calo'
-    trigPath = 'Developer/Efex/' # Directory trigger path for output histos
+    trigPath = f'Developer/{eFexAlg.name}/' # Default Directory trigger path for output histos
     # Map from the key name to the output directory substructure.
     
-    def pathFromKey(key):
-        path=""
+    def pathFromKey(key,prefix="Nominal/"):
+        path=prefix
         if "DAODSim" in key: path = "DAODSim/"
+        elif "ReSim" in key: path = "ReSim/"
         elif "Sim" in key: path = "Sim/"
         if "_eEMx" in key: path += "eEMx"
         elif "_eEM" in key: path += "eEM"
@@ -79,29 +71,60 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
     for containerKey in (list(EfexMonAlg.eFexEMTobKeyList) + list(EfexMonAlg.eFexTauTobKeyList)):
         helper.defineHistogram(containerKey + '_nTOBs_nocut;h_n'+containerKey+'_nocut', title='Number of '+containerKey+';Number of '+containerKey+';Events',
                                fillGroup = baseGroupName,
+                               path=trigPath+pathFromKey(containerKey)+"NoCut",
                                type='TH1I', xbins=100,xmin=-0.5,xmax=99.5)
         if "Sim" not in containerKey:
             # don't make these expensive plots for simulation
-            helper.defineHistogram("LBN,locIdx,tobEt;h_"+containerKey+"_et_posLbnMap", title = "Average " + containerKey + " ET;LB;Position (Octant:Eta)",
-                                fillGroup = baseGroupName + "_" + containerKey,
-                                   path = ("Expert/Outputs/" if "x" not in containerKey else trigPath)+pathFromKey(containerKey),
-                                   hanConfig={"description":"Check for horizontal anomalies (hotspot/coldspot) or vertical anomalies (whole-system hot/cold)"},
-                                   type="TProfile2D",
-                                   xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
             helper.defineHistogram(f"LBN,{containerKey}_nTOBs_nocut;h_"+containerKey+"_nTOBs", title = "Average # of " + containerKey + " TOBs;LBN",
-                                   fillGroup = baseGroupName,
+                                   fillGroup = baseGroupName + "_" + containerKey,
+                                   path=trigPath+pathFromKey(containerKey)+"NoCut",
                                    type="TH2I",
                                    xbins=1,xmin=0,xmax=1,ybins=20,ymin=-0.5,ymax=19.5, opt=['kAddBinsDynamically'])
 
 
+    commonAlgConfig = {"libname":"libdqm_summaries.so",
+                       "name":"L1Calo_BinsDiffFromStripMedian",
+                       "PublishDetail":32}
+    hotCuts = {"ColdCut":-3.5,"WarmCut":9,"HotCut":20} # when looking at frequency of hot deposits, use these cuts
+
+    commonThresholdConfig = {
+        "NWrongKnown":[0,100], # warn of any corrections that are needed for the known anomalies lists
+        "NDead":[0,2], # warn on any new dead spots, error if more than a couple
+        "NHot":[0,2],  # warn on any new hot spots, error if more than a couple
+        "NCold":[0,2],  # warn on any new cold spots, error if more than a couple
+        "NWarm":[0,5],  # warn on any new warm spots, error if more than 5
+        "NDeadStrip":[0,0], # no dead strips - exception to this will be in cold hcal, where tile cannot be negative
+        "NConsecUnlikelyStrip":[2,5], # warn if more than 2 consecutive strips deemed unlikely
+    }
+
+    knownAnomalies_eEM = {
+        "KnownCold":"\"\"",
+        "KnownWarm":"\"\""
+    }
+    knownAnomalies_eTAU = {
+        "KnownCold":"\"\"",
+        "KnownWarm":"\"\""
+    }
+
     helper.defineDQAlgorithm("Efex_eEM_etaThiMapFilled",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
-                             thresholdConfig={"NBins":[1,64*50]}, # currently there is 1 known deadspot in eEM, so that is allowed, anything else is a warning. Error if fully empty
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eEM,
+                             thresholdConfig=commonThresholdConfig
                              )
     helper.defineDQAlgorithm("Efex_eTAU_etaThiMapFilled",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
-                             thresholdConfig={"NBins":[0,64*50]}, # everywhere should be filled, otherwise a warning (error if entirely empty)
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eTAU,
+                             thresholdConfig=commonThresholdConfig
                              )
+
+    helper.defineDQAlgorithm("Efex_eEM_etaPhiLBMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eEM|{"NBinsY":64,"LiveMode":1},
+                             thresholdConfig=commonThresholdConfig
+                             )
+
+    helper.defineDQAlgorithm("Efex_eTAU_etaPhiLBMapOutliers",
+                         hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eTAU|{"NBinsY":64,"LiveMode":1},
+                         thresholdConfig=commonThresholdConfig
+                         )
+
 
     # Now define the histograms with low/hi Pt cut
     for cut_name, cut_val in zip(cut_names, cut_vals):
@@ -109,104 +132,100 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
         # Em first
         for containerKey in EfexMonAlg.eFexEMTobKeyList:
             fillGroup = baseGroupName+'_'+containerKey+'_'+cut_name
-            tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
-            simStr = "Sim" if ('Sim' in containerKey) else ""
-            tobStr = tobTypeStr + simStr
+            tobStr = containerKey
             # histograms of eEM variables
-            helper.defineHistogram('nEMTOBs;h_nEmTOBs', title='Number of eFex EM '+tobStr+'s'+cut_title_addition+';EM '+tobStr+'s;Number of EM '+tobStr+'s',
+            helper.defineHistogram('nEMTOBs;h_nEmTOBs', title='Number of '+tobStr+'s'+cut_title_addition+';EM '+tobStr+'s;Number of EM '+tobStr+'s',
                                    fillGroup=fillGroup,
                                     type='TH1I', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=10,xmin=0,xmax=10)
 
-            helper.defineHistogram('TOBTransverseEnergy;h_TOBTransverseEnergy', title='eFex '+tobStr+' EM Transverse Energy [MeV]'+cut_title_addition,
+            helper.defineHistogram('TOBTransverseEnergy;h_TOBTransverseEnergy', title=tobStr+' ET [MeV]'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=100,xmin=0,xmax=50000)
 
-            helper.defineHistogram('TOBEta;h_TOBEta', title='eFex '+tobStr+' EM Eta'+cut_title_addition,
+            helper.defineHistogram('TOBEta;h_TOBEta', title=tobStr+' Eta'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=50,xmin=-2.5,xmax=2.5)
 
-            helper.defineHistogram('TOBPhi;h_TOBPhi', title='eFex '+tobStr+' EM Phi'+cut_title_addition,
+            helper.defineHistogram('TOBPhi;h_TOBPhi', title=tobStr+' Phi'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=64,xmin=-math.pi,xmax=math.pi)
 
-            helper.defineHistogram(f"TOBEta,TOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eEM '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
+            helper.defineHistogram(f"TOBEta,TOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title=tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                    fillGroup=fillGroup,
                                    hanConfig={"display":"SetPalette(55)",
                                        "description":f"Inspect for hot/cold spots - check help for list of known hot/coldspots, then check <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Warning if more than 1 deadspot, but could just be low stats","algorithm":"Efex_eEM_etaThiMapFilled"},
                                     type='TH2F',
-                                    path=(("Expert/Outputs/"+pathFromKey(containerKey)) if "Sim" not in containerKey and "x" not in containerKey else trigPath+pathFromKey(containerKey)+cut_name),
+                                    path=(("Expert/Outputs/"+pathFromKey(containerKey,"")) if "Sim" not in containerKey and "x" not in containerKey else trigPath+pathFromKey(containerKey)+cut_name),
                                     xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
             if "Sim" not in containerKey and "x" not in containerKey:
-                helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title='eEM '+tobStr+' Count'+cut_title_addition+';LB;50(y-1)+x',
+                helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title=tobStr+' Count'+cut_title_addition+';LB;64(x-1)+y',
                                    fillGroup=fillGroup,
-                                   hanConfig={"description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
+                                   hanConfig={"algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers","description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
                                    type='TH2I',
-                                   path="Expert/Outputs/"+pathFromKey(containerKey)+"/detail",
+                                   paths=["Expert/Outputs/"+pathFromKey(containerKey,"")+"/detail","Shifter/Outputs/"+pathFromKey(containerKey,"")],
                                    xbins=1,xmin=0,xmax=10,
                                    ybins=64*50,ymin=0.5,ymax=64*50+0.5,opt=['kAddBinsDynamically'])
 
-            helper.defineHistogram('TOBshelfNumber;h_TOBshelfNumber', title='eFex '+tobStr+' EM Shelf Number'+cut_title_addition,
+            helper.defineHistogram('TOBshelfNumber;h_TOBshelfNumber', title=tobStr+' EM Shelf Number'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=2,xmin=0,xmax=2)
 
-            helper.defineHistogram('TOBeFEXNumberSh0;h_TOBeFEXNumberShelf0', title='eFex '+tobStr+' EM Module Number Shelf 0'+cut_title_addition,
+            helper.defineHistogram('TOBeFEXNumberSh0;h_TOBeFEXNumberShelf0', title=tobStr+' EM Module Number Shelf 0'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=12,xmin=0,xmax=12)
 
-            helper.defineHistogram('TOBeFEXNumberSh1;h_TOBeFEXNumberShelf1', title='eFex '+tobStr+' EM Module Number Shelf 1'+cut_title_addition,
+            helper.defineHistogram('TOBeFEXNumberSh1;h_TOBeFEXNumberShelf1', title=tobStr+' EM Module Number Shelf 1'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=12,xmin=0,xmax=12)
 
-            helper.defineHistogram('TOBfpga;h_TOBfpga', title='eFex '+tobStr+' EM FPGA'+cut_title_addition,
+            helper.defineHistogram('TOBfpga;h_TOBfpga', title=tobStr+' EM FPGA'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4)
 
-            helper.defineHistogram('TOBReta;h_TOBReta', title='eFex '+tobStr+' EM Reta'+cut_title_addition,
+            helper.defineHistogram('TOBReta;h_TOBReta', title=tobStr+' EM Reta'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name,xbins=250,xmin=0,xmax=1)
 
-            helper.defineHistogram('TOBRhad;h_TOBRhad', title='eFex '+tobStr+' EM Rhad'+cut_title_addition,
+            helper.defineHistogram('TOBRhad;h_TOBRhad', title=tobStr+' EM Rhad'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=250,xmin=0,xmax=1)
 
-            helper.defineHistogram('TOBWstot;h_TOBWstot', title='eFex '+tobStr+' EM Wstot'+cut_title_addition,
+            helper.defineHistogram('TOBWstot;h_TOBWstot', title=tobStr+' EM Wstot'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=250,xmin=0,xmax=1)
 
             threshold_labels = ['fail','loose','medium','tight']
-            helper.defineHistogram('TOBReta_threshold;h_TOBReta_threshold', title='eFex '+tobStr+' EM Reta threshold'+cut_title_addition,
+            helper.defineHistogram('TOBReta_threshold;h_TOBReta_threshold', title=tobStr+' EM Reta threshold'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name,xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
 
-            helper.defineHistogram('TOBRhad_threshold;h_TOBRhad_threshold', title='eFex '+tobStr+' EM Rhad threshold'+cut_title_addition,
+            helper.defineHistogram('TOBRhad_threshold;h_TOBRhad_threshold', title=tobStr+' EM Rhad threshold'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
 
-            helper.defineHistogram('TOBWstot_threshold;h_TOBWstot_threshold', title='eFex '+tobStr+' EM Wstot threshold'+cut_title_addition,
+            helper.defineHistogram('TOBWstot_threshold;h_TOBWstot_threshold', title=tobStr+' EM Wstot threshold'+cut_title_addition,
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
 
         # Now Tau
         for containerKey in EfexMonAlg.eFexTauTobKeyList:
             fillGroup = baseGroupName+'_'+containerKey+'_'+cut_name
-            tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
-            simStr = "Sim" if ('Sim' in containerKey) else ""
-            tobStr = tobTypeStr + simStr
+            tobStr = containerKey
             # plotting of eTau variables
-            helper.defineHistogram('nTauTOBs;h_nTauTOBs', title='Number of eFex Tau '+tobStr+'s'+cut_title_addition+';Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
+            helper.defineHistogram('nTauTOBs;h_nTauTOBs', title='Number of '+tobStr+'s'+cut_title_addition+';Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
                                     fillGroup = fillGroup,
                                     type='TH1I', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=10,xmin=0,xmax=10)
 
-            helper.defineHistogram('tauTOBTransverseEnergy;h_tauTOBTransverseEnergy', title='eFex '+tobStr+' Tau Transverse Energy [MeV]'+cut_title_addition,
+            helper.defineHistogram('tauTOBTransverseEnergy;h_tauTOBTransverseEnergy', title=tobStr+' Tau Transverse Energy [MeV]'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=100,xmin=0,xmax=50000)
 
-            helper.defineHistogram('tauTOBEta;h_tauTOBEta', title='eFex '+tobStr+' Tau Eta'+cut_title_addition,
+            helper.defineHistogram('tauTOBEta;h_tauTOBEta', title=tobStr+' Tau Eta'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=60,xmin=-2.5,xmax=2.5)
 
-            helper.defineHistogram('tauTOBPhi;h_tauTOBPhi', title='eFex '+tobStr+' Tau Phi'+cut_title_addition,
+            helper.defineHistogram('tauTOBPhi;h_tauTOBPhi', title=tobStr+' Tau Phi'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=100,xmin=-math.pi,xmax=math.pi)
 
@@ -215,52 +234,52 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                    hanConfig={"display":"SetPalette(55)",
                                               "description":f"Inspect for hot/cold spots - check help for list of known hot/coldspots, then check <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Warning if any deadspots/empty, but could just be low stats","algorithm":"Efex_eTAU_etaThiMapFilled"},
                                    type='TH2F',
-                                   path=(("Expert/Outputs/"+pathFromKey(containerKey)) if "Sim" not in containerKey and "x" not in containerKey else (trigPath+pathFromKey(containerKey)+cut_name)),
+                                   path=(("Expert/Outputs/"+pathFromKey(containerKey,"")) if "Sim" not in containerKey and "x" not in containerKey else (trigPath+pathFromKey(containerKey)+cut_name)),
                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
             if "Sim" not in containerKey and "x" not in containerKey:
-                helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title='eTAU '+tobStr+' Count'+cut_title_addition+';LB;50(y-1)+x',
+                helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title='eTAU '+tobStr+' Count'+cut_title_addition+';LB;64(x-1)+y',
                                fillGroup=fillGroup,
-                               hanConfig={"description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
+                               hanConfig={"algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers","description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
                                type='TH2I',
-                               path="Expert/Outputs/"+pathFromKey(containerKey)+"/detail",
+                               paths=["Expert/Outputs/"+pathFromKey(containerKey,"")+"/detail","Shifter/Outputs/"+pathFromKey(containerKey,"")],
                                xbins=1,xmin=0,xmax=10,
                                ybins=64*50,ymin=0.5,ymax=64*50+0.5,opt=['kAddBinsDynamically'])
 
-            helper.defineHistogram('tauTOBshelfNumber;h_tauTOBshelfNumber', title='eFex '+tobStr+' Tau Shelf Number'+cut_title_addition,
+            helper.defineHistogram('tauTOBshelfNumber;h_tauTOBshelfNumber', title=tobStr+' Tau Shelf Number'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=2,xmin=0,xmax=2)
 
-            helper.defineHistogram('tauTOBeFEXNumberSh0;h_tauTOBeFEXNumberShelf0', title='eFex '+tobStr+' Tau Module Number Shelf 0'+cut_title_addition,
+            helper.defineHistogram('tauTOBeFEXNumberSh0;h_tauTOBeFEXNumberShelf0', title=tobStr+' Tau Module Number Shelf 0'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=12,xmin=0,xmax=12)
 
-            helper.defineHistogram('tauTOBeFEXNumberSh1;h_tauTOBeFEXNumberShelf1', title='eFex '+tobStr+' Tau Module Number Shelf 1'+cut_title_addition,
+            helper.defineHistogram('tauTOBeFEXNumberSh1;h_tauTOBeFEXNumberShelf1', title=tobStr+' Tau Module Number Shelf 1'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=12,xmin=0,xmax=12)
 
 
-            helper.defineHistogram('tauTOBfpga;h_tauTOBfpga', title='eFex '+tobStr+' Tau FPGA'+cut_title_addition,
+            helper.defineHistogram('tauTOBfpga;h_tauTOBfpga', title=tobStr+' Tau FPGA'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4)
 
-            helper.defineHistogram('tauTOBRcore;h_tauTOBRcore', title='eFex '+tobStr+' Tau rCore'+cut_title_addition,
+            helper.defineHistogram('tauTOBRcore;h_tauTOBRcore', title=tobStr+' Tau rCore'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=250,xmin=0,xmax=1)
 
-            helper.defineHistogram('tauTOBRhad;h_tauTOBRhad', title='eFex '+tobStr+' Tau rHad'+cut_title_addition,
+            helper.defineHistogram('tauTOBRhad;h_tauTOBRhad', title=tobStr+' Tau rHad'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=250,xmin=0,xmax=1)
 
-            helper.defineHistogram('tauTOBRcore_threshold;h_tauTOBRcore_threshold', title='eFex '+tobStr+' Tau rCore threshold'+cut_title_addition,
+            helper.defineHistogram('tauTOBRcore_threshold;h_tauTOBRcore_threshold', title=tobStr+' Tau rCore threshold'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
 
-            helper.defineHistogram('tauTOBRhad_threshold;h_tauTOBRhad_threshold', title='eFex '+tobStr+' Tau rHad threshold'+cut_title_addition,
+            helper.defineHistogram('tauTOBRhad_threshold;h_tauTOBRhad_threshold', title=tobStr+' Tau rHad threshold'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
 
-            helper.defineHistogram('tauTOBthree_threshold;h_tauTOBthree_threshold', title='eFex '+tobStr+' Tau 3 taus threshold'+cut_title_addition,
+            helper.defineHistogram('tauTOBthree_threshold;h_tauTOBthree_threshold', title=tobStr+' Tau 3 taus threshold'+cut_title_addition,
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
 

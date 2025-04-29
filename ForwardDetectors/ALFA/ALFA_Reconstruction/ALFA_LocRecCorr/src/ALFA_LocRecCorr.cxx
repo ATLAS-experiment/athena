@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRecCorr.h"
 #include "ALFA_Geometry/ALFA_GeometryReader.h"
 
 #include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadCondHandle.h"
 
 using namespace std;
 
@@ -181,21 +182,6 @@ StatusCode ALFA_LocRecCorr::initialize()
 	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_LocRecCorr::Initialize()");
 	ATH_MSG_DEBUG("begin ALFA_LocRecCorr::Initialize()");
 
-//	StatusCode sc;
-
-//	sc = service("StoreGateSvc",m_storeGate);
-//	if(sc.isFailure())
-//	{
-//		ATH_MSG_ERROR("reconstruction: unable to retrieve pointer to StoreGateSvc");
-//		return sc;
-//	}
-
-//	if (StatusCode::SUCCESS!=service("DetectorStore",m_pDetStore))
-//	{
-//		ATH_MSG_ERROR("Detector store not found");
-//		return StatusCode::FAILURE;
-//	}
-
 	//read ALFA_Geometry from StoreGate
 	if (!detStore()->contains<ALFA_GeometryReader>(m_strKeyGeometryForReco))
 	{
@@ -211,7 +197,7 @@ StatusCode ALFA_LocRecCorr::initialize()
 
 	if (m_Config.eRPMetrologyGeoType==EMT_SWCORRECTIONS)
 	{
-		CHECK(AddCOOLFolderCallback("/FWD/ALFA/position_calibration"));
+		CHECK(COOLUpdate());
 	}
 
 	if(m_Config.eRPMetrologyGeoType==EMT_NOMINAL)
@@ -230,7 +216,6 @@ StatusCode ALFA_LocRecCorr::initialize()
 
 StatusCode ALFA_LocRecCorr::execute()
 {
-	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_LocRecCorr::Execute()");
 	ATH_MSG_DEBUG("begin ALFA_LocRecCorr::Execute()");
 
 	StatusCode sc = StatusCode::SUCCESS;
@@ -320,19 +305,6 @@ StatusCode ALFA_LocRecCorr::execute()
 	ATH_MSG_DEBUG("end ALFA_LocRecCorr::execute()");
 	return StatusCode::SUCCESS;
 }
-
-StatusCode ALFA_LocRecCorr::finalize()
-{
-	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_LocRecCorr::finalize()");
-	ATH_MSG_DEBUG("begin ALFA_LocRecCorr::finalize()");
-
-	StatusCode sc = StatusCode::SUCCESS;
-
-	ATH_MSG_DEBUG("end ALFA_LocRecCorr::finalize()");
-
-	return sc;
-}
-
 
 
 HepGeom::Transform3D ALFA_LocRecCorr::UserTransform3DInStation(eRPotName eRPName)
@@ -586,79 +558,38 @@ StatusCode ALFA_LocRecCorr::RecordODCollection()
 	return sc;
 }
 
-StatusCode ALFA_LocRecCorr::AddCOOLFolderCallback(const string& szFolder)
+StatusCode ALFA_LocRecCorr::COOLUpdate()
 {
-	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_LocRecCorr::AddCOOLFolderCallback()");
-	ATH_MSG_DEBUG("begin ALFA_LocRecCorr::AddCOOLFolderCallback()");
-
-	StatusCode sc=StatusCode::FAILURE;
-
-	const DataHandle<CondAttrListCollection> DataPtr;
-	sc=detStore()->regFcn(&ALFA_LocRecCorr::COOLUpdate, this, DataPtr, szFolder, true);
-	if(sc!=StatusCode::SUCCESS)
-	{
-		ATH_MSG_ERROR("Cannot register COOL callback for folder '"<<szFolder<<"'");
-	}
-
-	ATH_MSG_DEBUG("end ALFA_LocRecCorr::AddCOOLFolderCallback()");
-
-	return sc;
-}
-
-StatusCode ALFA_LocRecCorr::COOLUpdate(IOVSVC_CALLBACK_ARGS_P(/*I*/, keys))
-{
-	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_LocRecCorr::COOLUpdate()");
 	ATH_MSG_DEBUG("begin ALFA_LocRecCorr::COOLUpdate()");
 
-	int iChannel;
-	StatusCode sc=StatusCode::SUCCESS;
-	list<string>::const_iterator iter;
-	const CondAttrListCollection* listAttrColl;
-	CondAttrListCollection::const_iterator iterAttr;
+    SG::ReadCondHandleKey<CondAttrListCollection> key("/FWD/ALFA/position_calibration");
+    SG::ReadCondHandle<CondAttrListCollection> listAttrColl(key);
+    ATH_CHECK( listAttrColl.isValid() );
 
-	for(iter=keys.begin();iter!=keys.end();++iter)
-	{
-		if((*iter)=="/FWD/ALFA/position_calibration")
-		{
-			ATH_MSG_DEBUG(" IOV/COOL Notification '"<<"/FWD/ALFA/position_calibration"<<"'");
+    for(CondAttrListCollection::const_iterator iterAttr=listAttrColl->begin();iterAttr!=listAttrColl->end();++iterAttr)
+    {
+        int iChannel=iterAttr->first; //RPot ID
+        m_Config.CfgRPosParams[iChannel].swcorr.fXOffset=((iterAttr->second)[0]).data<float>();
+        m_Config.CfgRPosParams[iChannel].swcorr.fTheta  =((iterAttr->second)[1]).data<float>();
+        m_Config.CfgRPosParams[iChannel].swcorr.fYOffset=((iterAttr->second)[2]).data<float>();
 
-			if(detStore()->retrieve(listAttrColl,"/FWD/ALFA/position_calibration")==StatusCode::SUCCESS)
-			{
-				for(iterAttr=listAttrColl->begin();iterAttr!=listAttrColl->end();++iterAttr)
-				{
-					 iChannel=iterAttr->first; //RPot ID
-					 m_Config.CfgRPosParams[iChannel].swcorr.fXOffset=((iterAttr->second)[0]).data<float>();
-					 m_Config.CfgRPosParams[iChannel].swcorr.fTheta  =((iterAttr->second)[1]).data<float>();
-					 m_Config.CfgRPosParams[iChannel].swcorr.fYOffset=((iterAttr->second)[2]).data<float>();
+        ATH_MSG_DEBUG("iChannel, fXOffset, fTheta, fYOffset = " << iChannel << ", " << m_Config.CfgRPosParams[iChannel].swcorr.fXOffset);
+        ATH_MSG_DEBUG(", " << m_Config.CfgRPosParams[iChannel].swcorr.fTheta << ", " << m_Config.CfgRPosParams[iChannel].swcorr.fYOffset);
+    }
 
-					 ATH_MSG_DEBUG("iChannel, fXOffset, fTheta, fYOffset = " << iChannel << ", " << m_Config.CfgRPosParams[iChannel].swcorr.fXOffset);
-					 ATH_MSG_DEBUG(", " << m_Config.CfgRPosParams[iChannel].swcorr.fTheta << ", " << m_Config.CfgRPosParams[iChannel].swcorr.fYOffset);
-				}
+    // update SW corrections - needs to be updated during the COOL DB check
+    if (UpdateGeometryAtlas())
+    {
+        ATH_MSG_DEBUG("Geometry for the SW corrections updated successfully");
+    }
+    else
+    {
+        ATH_MSG_FATAL("Unable to update a geometry of the SW corrections!");
+        ATH_MSG_DEBUG("end ALFA_LocRecCorr::COOLUpdate()");
+        return StatusCode::FAILURE;
+    }
 
-				// update SW corrections - needs to be updated during the COOL DB check
-				if (UpdateGeometryAtlas())
-				{
-					ATH_MSG_DEBUG("Geometry for the SW corrections updated successfully");
-				}
-				else
-				{
-					ATH_MSG_FATAL("Unable to update a geometry of the SW corrections!");
-					ATH_MSG_DEBUG("end ALFA_LocRecCorr::COOLUpdate()");
-					return StatusCode::FAILURE;
-				}
-			}
-			else
-			{
-				ATH_MSG_ERROR("The folder '"<<"/FWD/ALFA/position_calibration"<<"' not found");
-				ATH_MSG_DEBUG("end ALFA_LocRecCorr::COOLUpdate()");
-				return StatusCode::FAILURE;
-			}
-		}
-	}
-
-	ATH_MSG_DEBUG("end ALFA_LocRecCorr::COOLUpdate()");
-
-	return sc;
+	return StatusCode::SUCCESS;
 }
 
 bool ALFA_LocRecCorr::UpdateGeometryAtlas()

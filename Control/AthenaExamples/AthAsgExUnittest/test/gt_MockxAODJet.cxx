@@ -1,6 +1,6 @@
 
 //
-//  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 #include "xAODJet/Jet.h"
@@ -61,7 +61,6 @@ namespace Athena_test {
     xAOD::Jet* jet;
   };
 
-  // cppcheck-suppress syntaxError
   TEST_F( MockxAODJetTest, jetpt ) {
     ON_CALL( mockjet, pt() ).WillByDefault( Return( 1.0 ) );
     EXPECT_CALL( mockjet, pt() ).Times( 1 );

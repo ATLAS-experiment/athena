@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM12.py
 #====================================================================
@@ -17,21 +16,6 @@ def JETM12SkimmingToolCfg(flags):
     metTriggers = TriggerLists.MET_Trig(flags)
     elTriggers = TriggerLists.single_el_Trig(flags)
     muTriggers = TriggerLists.single_mu_Trig(flags)
-
-    addRun3METTriggers = ["HLT_xe55_cell_xe70_tcpufit_xe90_pfsum_vssk_L1XE50","HLT_xe55_cell_xe70_tcpufit_xe95_pfsum_cssk_L1XE50","HLT_xe60_cell_xe95_pfsum_cssk_L1XE50","HLT_xe65_cell_xe100_mhtpufit_pf_L1XE50","HLT_xe65_cell_xe105_mhtpufit_em_L1XE50","HLT_xe75_cell_xe65_tcpufit_xe90_trkmht_L1XE50","HLT_xe65_cell_xe90_pfopufit_L1XE50","HLT_xe80_cell_xe115_tcpufit_L1XE50"]
-
-    addRun3ElectronTriggers = ["HLT_e17_lhvloose_L1EM15VHI","HLT_e20_lhvloose_L1EM15VH", "HLT_e250_etcut_L1EM22VHI",
-                               "HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_e26_lhtight_ivarloose_L1eEM26M",
-                               "HLT_e60_lhmedium_L1EM22VHI","HLT_e60_lhmedium_L1eEM26M",
-                               "HLT_e140_lhloose_L1EM22VHI","HLT_e140_lhloose_L1eEM26M",
-                               "HLT_e300_etcut_L1EM22VHI","HLT_e300_etcut_L1eEM26M",
-                               "HLT_e140_lhloose_noringer_L1EM22VHI","HLT_e140_lhloose_noringer_L1eEM26M"]
-
-    addRund3MuonTriggers = ["HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_mu60_0eta105_msonly_L1MU14FCH","HLT_mu60_L1MU14FCH","HLT_mu80_msonly_3layersEC_L1MU14FCH"]
-
-    metTriggers = metTriggers+addRun3METTriggers
-    elTriggers = elTriggers+addRun3ElectronTriggers
-    muTriggers = muTriggers+addRund3MuonTriggers
 
     addTtbarEvents = True
     if not flags.Input.isMC:
@@ -126,11 +110,15 @@ def JETM12AugmentationToolsForSkimmingCfg(flags):
     acc.addPublicTool(TrackIsoTool)
 
     from xAODPrimitives.xAODIso import xAODIso as isoPar
-    Pt1000IsoTrackDecorator = CompFactory.DerivationFramework.trackIsolationDecorator(name = "Pt1000IsoTrackDecorator",
-                                                                                      TrackIsolationTool = TrackIsoTool,
-                                                                                      TargetContainer = "InDetTrackParticles",
-                                                                                      ptcones = [isoPar.ptcone40,isoPar.ptcone30,isoPar.ptcone20],
-                                                                                      Prefix = 'TrkIsoPt1000_')
+
+    from DerivationFrameworkInDet.InDetToolsConfig import IsolationTrackDecoratorCfg
+    Pt1000IsoTrackDecorator = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                name               = "Pt1000IsoTrackDecorator",
+                                                                                TrackIsolationTool = TrackIsoTool,
+                                                                                TargetContainer    = "InDetTrackParticles",
+                                                                                iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20],
+                                                                                isoSuffix          = ["ptcone40", "ptcone30", "ptcone20"],
+                                                                                Prefix             = "TrkIsoPt1000_"))
 
     acc.addPublicTool(Pt1000IsoTrackDecorator, primary=True)
 
@@ -155,11 +143,14 @@ def JETM12AugmentationToolsCfg(flags):
     acc.addPublicTool(TrackIsoTool)
 
     from xAODPrimitives.xAODIso import xAODIso as isoPar
-    Pt500IsoTrackDecorator = CompFactory.DerivationFramework.trackIsolationDecorator(name = "Pt500IsoTrackDecorator",
-                                                                                     TrackIsolationTool = TrackIsoTool,
-                                                                                     TargetContainer = "InDetTrackParticles",
-                                                                                     ptcones = [isoPar.ptcone40,isoPar.ptcone30,isoPar.ptcone20],
-                                                                                     Prefix = 'TrkIsoPt500_')
+    from DerivationFrameworkInDet.InDetToolsConfig import IsolationTrackDecoratorCfg
+    Pt500IsoTrackDecorator = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                               name               = "Pt500IsoTrackDecorator",
+                                                                               TrackIsolationTool = TrackIsoTool,
+                                                                               TargetContainer    = "InDetTrackParticles",
+                                                                               iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20],
+                                                                               isoSuffix          = ["ptcone40", "ptcone30", "ptcone20"],
+                                                                               Prefix             = "TrkIsoPt500_"))
 
     acc.addPublicTool(Pt500IsoTrackDecorator, primary=True)
     
@@ -250,8 +241,8 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
     thinningTools.append(JETM12CaloThinningTool)
 
     if flags.Input.isMC:
-        truth_cond_status    = "( (TruthParticles.status == 1) && (TruthParticles.barcode < 200000) && (TruthParticles.pt > 8*GeV) )"       # high pt pions for E/p
-        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && (TruthParticles.barcode < 200000))" # Leptons
+        truth_cond_status    = "( (TruthParticles.isGenStable) && (TruthParticles.pt > 8*GeV) )"       # high pt pions for E/p
+        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && !(TruthParticles.isSimulationParticle))" # Leptons
         truth_expression = '('+truth_cond_status+' || '+truth_cond_Lepton +')'
 
         JETM12TruthThinningTool = CompFactory.DerivationFramework.GenericTruthThinning(name = "JETM12TruthThinningTool",

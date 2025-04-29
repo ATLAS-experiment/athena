@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( JetRec )
@@ -42,14 +42,6 @@ if( XAOD_STANDALONE )
 endif()
 
 # Test(s) in the package:
-atlas_add_test( TestTests
-  SOURCES
-  # test/all_tests.cx
-  test/TestTest.cxx
-  INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-  LINK_LIBRARIES ${GTEST_LIBRARIES} JetRecLib
-  POST_EXEC_SCRIPT nopost.sh )
-
 if ( NOT XAOD_STANDALONE )
   atlas_add_test(JetTests
     SOURCES

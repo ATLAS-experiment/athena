@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_AUXELEMENTBRANCH_IXX
 #define MUONTESTER_AUXELEMENTBRANCH_IXX
 
-#include <MuonTesterTree/AuxElementBranch.h>
+
 //########################################################################################
 //                      AuxElementBranch
 //########################################################################################
 namespace MuonVal {
 template <class T> void AuxElementBranch<T>::setAccessor(const std::string& name) {
-    if (!initialized()) m_acc = SG::AuxElement::ConstAccessor<T>(name);
+    if (!initialized()) m_acc = SG::ConstAccessor<T>(name);
 }
 template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement* p) {
     if (p != nullptr) push_back(*p);
@@ -23,7 +23,7 @@ template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement& p) 
     else if (hasDefault()) {
         VectorBranch<T>::push_back(getDefault());
     } else {
-        throw std::runtime_error("Decoration is not available to fill " + name());
+        THROW_EXCEPTION("Decoration is not available to fill " + name());
     }
 }
 template <class T>
@@ -33,6 +33,22 @@ template <class T>
 AuxElementBranch<T>::AuxElementBranch(MuonTesterTree& t, const std::string& var_name, const std::string& acc) :
     VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc) {}
 
+//########################################################################################
+//                      GenericAuxDecorationBranch
+//########################################################################################
+template <class T>
+    GenericAuxDecorationBranch<T>::GenericAuxDecorationBranch(TTree* t, const std::string& var_name, const FuncType_t& func):
+        VectorBranch<T>(t, var_name),
+        m_func{func}{}
+template <class T>
+    GenericAuxDecorationBranch<T>::GenericAuxDecorationBranch(MuonTesterTree& t, const std::string& var_name, const FuncType_t& func):
+        VectorBranch<T>(t, var_name),
+        m_func{func}{}
+
+template <class T> void GenericAuxDecorationBranch<T>::push_back(const SG::AuxElement* p) { push_back(m_func(p)); }
+template <class T> void GenericAuxDecorationBranch<T>::push_back(const SG::AuxElement& p) { push_back(&p); }
+template <class T> void GenericAuxDecorationBranch<T>::operator+=(const SG::AuxElement* p) { push_back(p); }
+template <class T> void GenericAuxDecorationBranch<T>::operator+=(const SG::AuxElement& p) { push_back(p); }
 //########################################################################################
 //                      ParticleVariableBranch
 //########################################################################################

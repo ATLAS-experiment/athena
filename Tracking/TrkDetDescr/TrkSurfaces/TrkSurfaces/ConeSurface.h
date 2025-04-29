@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define TRKSURFACES_CONESURFACE_H
 
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkParametersBase/ParametersT.h"
 #include "TrkSurfaces/ConeBounds.h"
@@ -273,7 +273,7 @@ protected:
   template<class SURFACE, class BOUNDS_CNV>
   friend class ::BoundSurfaceCnv_p2;
   //!< bounds (shared)
-  SharedObject<const ConeBounds> m_bounds;
+  std::shared_ptr<const ConeBounds> m_bounds;
   //!< The global reference point (== a point on thesurface)
   CxxUtils::CachedUniquePtr<Amg::Vector3D> m_referencePoint;
   //!< The rotational symmetry axis

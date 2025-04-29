@@ -1,16 +1,8 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, setupHistSvcCfg
-    parser = SetupArgParser()
-    parser.set_defaults(nEvents = -1)
-    parser.set_defaults(outRootFile="MuonBucketDump_R3SimHits.root")
-    parser.set_defaults(inputFile=[
-                                   "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"
-                                    ])
-    parser.set_defaults(eventPrintoutLevel = 500)
-    args = parser.parse_args()
 
+def main(args):
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, executeTest, setupHistSvcCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True
@@ -32,6 +24,21 @@ if __name__=="__main__":
     cfg.merge(MuonSegmentFittingAlgCfg(flags))
 
     from MuonBucketDump.MuonBucketDumpConfig import MuonBucketDumpCfg
-    cfg.merge(MuonBucketDumpCfg(flags))
+    from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
+    cfg.merge(MuonBucketDumpCfg(flags,
+                                VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     executeTest(cfg)
+
+if __name__=="__main__":
+    from MuonGeoModelTestR4.testGeoModel import SetupArgParser
+    parser = SetupArgParser()
+    parser.set_defaults(nEvents = -1)
+    parser.set_defaults(outRootFile="MuonBucketDump_R3SimHits.root")
+    parser.set_defaults(inputFile=[
+                                   "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
+                                    ])
+    args = parser.parse_args()
+    main(args)
+
+    

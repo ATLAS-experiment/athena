@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG3.py
 # This defines DAOD_FTAG3, an unskimmed DAOD format for Run 3.
@@ -87,7 +86,7 @@ def FTAG3Cfg(flags, skimmingTools=None):
     extra_SmartCollections = [ "AntiKtVR30Rmax4Rmin02PV0TrackJets" ]
     extra_AllVariables = [ "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets" ]
     trigger_option = 'FTAG3'
-    acc.merge(FTAG1CoreCfg(flags, FTAG3_name_tag, extra_SmartCollections, extra_AllVariables, trigger_option))
+    acc.merge(FTAG1CoreCfg(flags, FTAG3_name_tag, extra_SmartCollections, extra_AllVariables, trigger_option, TriggerListsHelper = FTAG3TriggerListsHelper))
 
     return acc
 

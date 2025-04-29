@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TrigInDetConfig.InnerTrackerTrigSequence import InnerTrackerTrigSequence
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -53,6 +53,11 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                     ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),]
         acc.merge(SGInputLoaderCfg(self.flags, Load=sgil_load))
 
+    ViewDataVerifier.DataObjects |= {
+      ('InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
+      ('InDet::SiDetectorElementStatus' , 'StoreGateSvc+ITkStripDetectorElementStatus' ),
+    }
+
     acc.addEventAlgo(ViewDataVerifier)
     return acc
 
@@ -71,9 +76,18 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
     #Clusterisation
     from ActsConfig.ActsClusterizationConfig import ActsPixelClusterizationAlgCfg,ActsStripClusterizationAlgCfg,ActsPixelClusterPreparationAlgCfg,ActsStripClusterPreparationAlgCfg
 
-    acc.merge(ActsPixelClusterizationAlgCfg(self.flags, name="ActsPixelClusterizationAlg_"+self.signature,useCache=True, RoIs=self.rois,ClustersKey="ITkPixelClusters_"+self.signature))
-    acc.merge(ActsStripClusterizationAlgCfg(self.flags, name="ActsStripClusterizationAlg_"+self.signature,useCache=True, RoIs=self.rois,ClustersKey="ITkStripClusters_"+self.signature))
+    acc.merge(ActsPixelClusterizationAlgCfg(self.flags, 
+                                            name="ActsPixelClusterizationAlg_"+self.signature,
+                                            useCache=True, 
+                                            RoIs=self.rois,
+                                            ClustersKey="ITkPixelClusters_"+self.signature))
+    acc.merge(ActsStripClusterizationAlgCfg(self.flags, 
+                                            name="ActsStripClusterizationAlg_"+self.signature,
+                                            useCache=True, 
+                                            RoIs=self.rois,
+                                            ClustersKey="ITkStripClusters_"+self.signature))
 
+    
     if self.flags.Acts.useCache:
       acc.merge(ActsPixelClusterPreparationAlgCfg(self.flags, "ActsPixelClusterViewFiller_"+self.signature, True,OutputCollection="ITkPixelClusters_Cached", InputIDC="ActsPixelClustersCache", RoIs=self.rois))
       acc.merge(ActsStripClusterPreparationAlgCfg(self.flags, "ActsStripClusterViewFiller_"+self.signature, True,OutputCollection="ITkStripClusters_Cached", InputIDC="ActsStripClustersCache", RoIs=self.rois))
@@ -89,7 +103,9 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
             name = viewVerifier + "_" + self.signature,
             DataObjects = {
                 ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-                ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )
+                ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+                ( 'InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
+                ( 'InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkStripDetectorElementStatus' ),
             }
         )
 
@@ -119,8 +135,17 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
     acc.merge(ActsPixelSeedingAlgCfg(self.flags, name="ActsPixelSeedingAlg_"+self.signature, InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature], useFastTracking=True))
 
     from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
-
-    acc.merge(ActsMainTrackFindingAlgCfg(self.flags, name="ActsTrackFindingAlg_"+self.signature, ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,SeedLabels=["PPP"],SeedContainerKeys=["ActsPixelSeeds"],UncalibratedMeasurementContainerKeys=["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature ,"ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature],EstimatedTrackParametersKeys=["ActsPixelEstimatedTrackParams"]))
+    measurements = ["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature,
+                    "ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature]
+    
+    trackfinding = ActsMainTrackFindingAlgCfg(self.flags, 
+                                              name="ActsTrackFindingAlg_"+self.signature, 
+                                              ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,
+                                              SeedLabels=["PPP"],SeedContainerKeys=["ActsPixelSeeds"],
+                                              DetectorElementsKeys=['ITkPixelDetectorElementCollection'],
+                                              UncalibratedMeasurementContainerKeys=measurements)
+    
+    acc.merge(trackfinding)
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,name="ActsTrackParticleCreator_"+self.signature, ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_FTF], TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_FTF))
 
     return acc

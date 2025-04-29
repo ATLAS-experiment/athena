@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -88,8 +88,8 @@ void ForwardIndexingPolicy<CONT, VALUE_TYPE>::reverseLookup(const CONT& data,
                                                             ElementConstReference element,
                                                             index_type& index)
 {
-  //compiler checks we can compare elements
-  ::boost::function_requires<typename ::boost::EqualityComparableConcept<ElementType> >();
+  // compiler checks we can compare elements
+  static_assert (std::equality_comparable<ElementType>);
 
   // Note that reverse lookup redoes the lookup even if m_isValid is true.
   // Must ensure that we get correct index before persistency

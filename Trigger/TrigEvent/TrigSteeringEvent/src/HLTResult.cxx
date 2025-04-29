@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/HLTResult.h"
@@ -515,12 +515,11 @@ bool HLTResult::unpackFromStorable(const std::vector<uint32_t>& raw)
   }
   if ( raw.size() < HLTResult::IndNumOfFixedBit )
     return false;
-  m_headerResult.clear();
-  m_headerResult.reserve(HLTResult::IndNumOfFixedBit);
-  m_headerResult.insert(m_headerResult.end(), &raw[0], &raw[rawIndNumOfFixedBit]);
+  m_headerResult.assign(raw.begin(),
+                        raw.begin()+rawIndNumOfFixedBit);
 
   // fill up with zeros so use of HLTResult::IndNumOfFixedBit of other indices past the end doesn't break
-  m_headerResult.insert(m_headerResult.end(), HLTResult::IndNumOfFixedBit-rawIndNumOfFixedBit, 0);
+  m_headerResult.resize(HLTResult::IndNumOfFixedBit);
 
   if ( raw.size() ==  rawIndNumOfFixedBit )
     return true; // that's OK, we have just empty event, no processing started
@@ -539,9 +538,7 @@ bool HLTResult::unpackFromStorable(const std::vector<uint32_t>& raw)
   }
 
 
-  m_chainsResult.clear();
-  m_chainsResult.reserve( sizeOfChains );
-  m_chainsResult.insert( m_chainsResult.end(), &raw[offset], &raw[readEnd] );
+  m_chainsResult.assign(raw.begin()+offset, raw.begin()+readEnd);
   offset += sizeOfChains;
 
   if (truncation) {
@@ -554,7 +551,6 @@ bool HLTResult::unpackFromStorable(const std::vector<uint32_t>& raw)
   // navigation
   uint32_t sizeOfNavigation = raw[offset];
   offset++;
-  uint32_t trueSizeOfNavigation = sizeOfNavigation;
   // check if offset is not beyond size of raw result  
 
 
@@ -562,16 +558,14 @@ bool HLTResult::unpackFromStorable(const std::vector<uint32_t>& raw)
   if (readEnd > raw.size()) {
     readEnd = raw.size();
     truncation = true;
-    trueSizeOfNavigation = raw.size() - offset;
   }
 
 
   if ( offset > readEnd ) 
     return true;
 
-  m_navigationResult.clear();
-  m_navigationResult.reserve(trueSizeOfNavigation);
-  m_navigationResult.insert(m_navigationResult.end(), &raw[offset], &raw[readEnd]);
+  m_navigationResult.assign(raw.begin()+offset,
+                            raw.begin()+readEnd);
 
 
   if (truncation) {
@@ -584,8 +578,13 @@ bool HLTResult::unpackFromStorable(const std::vector<uint32_t>& raw)
 
   if (version >= 3) {
     // extras
-    uint32_t sizeOfExtras = raw[offset];
-    offset++;
+    uint32_t sizeOfExtras = 0;
+    if (offset < raw.size()) {
+      sizeOfExtras = raw[offset++];
+    }
+    else {
+      truncation = true;
+    }
 
     readEnd = offset + sizeOfExtras;
     if (readEnd > raw.size()) {
@@ -596,9 +595,8 @@ bool HLTResult::unpackFromStorable(const std::vector<uint32_t>& raw)
     if ( offset > readEnd )
       return true;
 
-    m_extras.clear();
-    m_extras.reserve(sizeOfExtras);
-    m_extras.insert(m_extras.end(),  &raw[offset], &raw[readEnd]);
+    m_extras.assign(raw.begin()+offset,
+                    raw.begin()+readEnd);
     if (truncation) {
       if ( isHLTResultTruncated() )
         return true;

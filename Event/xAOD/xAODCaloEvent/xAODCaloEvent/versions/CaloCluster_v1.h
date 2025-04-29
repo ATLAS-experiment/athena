@@ -42,6 +42,9 @@ typedef unsigned CaloRecoStatus;
 //Already include the DataVector specialization for this type
 #include "xAODCaloEvent/CaloClusterContainerFwd.h"
 
+// implementation of some accessor functions
+#include "xAODCaloEvent/CaloClusterDetails.h"
+
 class CaloClusterChangeSignalState;
 
 namespace xAOD {
@@ -705,7 +708,7 @@ namespace xAOD {
      unsigned sampVarIdx(const CaloSample) const;
 
      float getSamplVarFromAcc(const Accessor<std::vector<float > >& acc,
-			      const CaloSample sampling, const float errorvalue=-999) const; //FIXME find a better errorcode
+			      const CaloSample sampling, const float errorvalue=CaloClusterDetails::defaultErrorValue) const;
 
      bool setSamplVarFromAcc(const Accessor<std::vector<float> >& acc,
 			     const CaloSample sampling, const float value);
@@ -866,18 +869,7 @@ namespace xAOD {
   }
 
   inline unsigned CaloCluster_v1::sampVarIdx(const CaloCluster_v1::CaloSample s) const {
-    const uint32_t& pattern= m_samplingPattern;
-    //std::cout << "Pattern=" << std::hex << pattern << std::dec << ", Sampling=" << s << std::endl;
-    if ((pattern & (0x1U << s)) == 0) {
-      return CaloSampling::Unknown;
-    }
-    if (s == 0) {
-      return 0;
-    } // shifting a 32-bit int by 32 bits is undefined behavior!
-    return std::popcount(pattern << (32 - s));
-    // Explanation: Need to get the number of bit (=samples) before the sampling in question
-    // Shift to the left, so bits after the sampling in question fall off the 32bit integer
-    // Then use  popcount to count the numbers of 1 in the rest
+    return CaloClusterDetails::sampVarIdx(s,m_samplingPattern);
   }
 
 
@@ -888,9 +880,8 @@ namespace xAOD {
 
 
   inline bool CaloCluster_v1::hasSampling(const CaloSample s) const {
-   const unsigned pattern=samplingPattern();
-   return (pattern & (0x1U<<(uint32_t)s));
- }
+    return CaloClusterDetails::hasSampling(s,m_samplingPattern);
+  }
 
 
   inline bool CaloCluster_v1::inBarrel() const {

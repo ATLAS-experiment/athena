@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: PhysicsP1_pp_run3_v1 menu test only dumping options for SMK generation and running RuleBook to create prescales
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Step, Test, ExecStep, CheckSteps
@@ -20,7 +20,7 @@ menu.args = '-M --dump-config-exit'
 menu.perfmon = False  # Cannot use PerfMon with -M
 
 #====================================================================================================
-# Download and setup RuleBook and create prescales
+# Download and setup RuleBook
 
 rbsetup = ExecStep.ExecStep('SetupRulebook')
 rbsetup.type = 'other'
@@ -29,10 +29,13 @@ rbsetup.input = ''
 
 #====================================================================================================
 # Run RuleBook and create prescales
+#
+# Needs to source setup script as the environment is not propagated
+# from the setupTrigMenuRulebook script
 
 ps = ExecStep.ExecStep('RunRulebook')
 ps.type = 'other'
-ps.executable = '(cd TrigMenuRulebook/scripts && ./runRuleBook.py "PhysicsP1_pp_run3_v1_rules:runOptions.useDefaultBG=True:runOptions.downloadMenu=False:runOptions.BGRP=2515:runOptions.ignoreErrors=True" 20000 output_RB_ART && cd ../..)'
+ps.executable = '(source build_rb_test/*/setup.sh && runRuleBook.py PhysicsP1_pp_run3_v1_rules output_RB_ART -o useDefaultBG=True downloadMenu=False BGRP=2515 ignoreErrors=True -l 20000)'
 ps.input = ''
 
 #====================================================================================================

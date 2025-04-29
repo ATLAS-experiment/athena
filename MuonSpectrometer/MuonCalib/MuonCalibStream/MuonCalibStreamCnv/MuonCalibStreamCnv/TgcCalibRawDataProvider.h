@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAM_TGCCALIBRAWDATAPROVIDER_H
 #define MUONCALIBSTREAM_TGCCALIBRAWDATAPROVIDER_H
@@ -29,7 +29,6 @@ class StatusCode;
 
 #include <string>
 
-using namespace LVL2_MUON_CALIBRATION;
 
 class TgcCalibRawDataProvider : public AthReentrantAlgorithm {
     
@@ -52,7 +51,7 @@ class TgcCalibRawDataProvider : public AthReentrantAlgorithm {
         uint16_t bcTagCnv(uint16_t bcBitMap) const;
 
         // main decode function (ClaibEvent to TgcRdoContainer)
-        StatusCode decodeImpl(TgcRdoContainer *m_tgcRdoContainer, const CalibEvent *event) const ;
+        StatusCode decodeImpl(TgcRdoContainer *m_tgcRdoContainer, const LVL2_MUON_CALIBRATION::CalibEvent *event) const ;
 
 
         ServiceHandle<IMuonCalibStreamDataProviderSvc> m_dataProvider{this,"DataProviderSvc","MuonCalibStreamDataProviderSvc"};

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonGeoModelR4
@@ -10,13 +10,19 @@ atlas_subdir( MuonGeoModelR4 )
 # External dependencies:
 find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead GeoModelHelpers )
 
+set( extra_libs )
+if( NOT SIMULATIONBASE )
+    find_package(Acts CONFIG COMPONENTS PluginGeoModel)
+    set( extra_libs ActsPluginGeoModel )
+endif()
+
 # Component(s) in the package:
 atlas_add_library( MuonGeoModelR4Lib
                    MuonGeoModelR4/*.h
                    INTERFACE
                    PUBLIC_HEADERS MuonGeoModelR4
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel)
+                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel ${extra_libs})
 
 atlas_add_component( MuonGeoModelR4
                      src/*.cxx src/components/*.cxx

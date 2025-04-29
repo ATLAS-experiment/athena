@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -40,6 +40,9 @@ namespace SH
     /// \pre !val_path.empty()
   public:
     DiskWriterLocal (const std::string& val_path);
+
+    DiskWriterLocal (const DiskWriterLocal&) = delete;
+    DiskWriterLocal& operator= (const DiskWriterLocal&) = delete;
 
 
     /// \brief standard destructor

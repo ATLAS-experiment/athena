@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ void Trk::CylinderLayer::resizeLayer(const VolumeBounds& bounds,
     Trk::CylinderBounds* rCylinderBounds =
         new Trk::CylinderBounds(r, hLengthZ - envelope);
     Trk::CylinderSurface::m_bounds =
-        Trk::SharedObject<const Trk::CylinderBounds>(rCylinderBounds);
+        std::shared_ptr<const Trk::CylinderBounds>(rCylinderBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // rphi/z binning
     if (Trk::Layer::m_layerMaterialProperties) {

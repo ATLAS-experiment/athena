@@ -50,6 +50,8 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
+#include <cstdlib>//std::abort
+
 //undefine NDEBUG after EDM
 #undef NDEBUG
 // Google Test
@@ -109,7 +111,12 @@ namespace OverlayTesting {
     }
 
     ~GaudiFixture() {
-      TearDownGaudi();
+      try{
+        TearDownGaudi();
+      } catch (...){
+        std::cerr<<"TRTOverlay_test: An exception occurred in the d'tor of of the GaudiFixture; aborting."<<std::endl;
+        std::abort();
+      }
     }
 
     void SetUpGaudi() {
@@ -336,7 +343,6 @@ namespace OverlayTesting {
   };   // TRTOverlay_test fixture
 
 
-  // cppcheck-suppress syntaxError
   TEST_F(TRTOverlay_test, missing_inputs_alg_execute) {
     EventContext ctx = initEventContext(m_sg);
     ASSERT_TRUE( m_alg->initialize().isSuccess() );

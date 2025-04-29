@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 
 def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
+
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result=LArGMCfg(flags)
     
@@ -15,21 +16,32 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
     result.getCondAlgo("LArHVCondAlg").UndoOnlineHVCorr=False
     result.getCondAlgo("LArHVCondAlg").keyOutputCorr="NewLArHVScaleCorr"
 
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+    result.merge(LArOnOffIdMappingSCCfg(flags))
+    result.addEventAlgo(CompFactory.LArHVCorrToSCHVCorr(ContainerKey="NewLArHVScaleCorr",OutputKey="NewSCLArHVScaleCorr",
+                                                        OutputFolder="/LAR/ElecCalibFlatSC/HVScaleCorrNew",
+                                                        PhysicsWeights="TrigT1CaloCalibUtils/HVcorrPhysicsWeights.txt"))
 
     #The LArHVCorrMaker creates a flat blob in a CondAttrListCollection
     #Input: The HV Scale Correction computed by the LArHVCondAlg based on the DCS HV values
-    result.addEventAlgo(CompFactory.LArHVCorrMaker(LArHVScaleCorr="NewLArHVScaleCorr"))
+    result.addEventAlgo(CompFactory.LArHVCorrMaker(LArHVScaleCorr="NewLArHVScaleCorr",folderName="/LAR/ElecCalibFlat/HVScaleCorrNew"))
+    ##Also for SC:
+    #result.addEventAlgo(CompFactory.LArHVCorrMaker("LArHVCorrSCMaker",SuperCell=True,LArHVScaleCorr="NewLArHVScaleCorr",
+    #                                               folderName="/LAR/ElecCalibFlatSC/HVScaleCorr",CablingKey="LArOnOffIdMapSC"))
 
     #Ntuple writing ... 
     from LArCalibTools.LArCalib_HVScale2NtupleConfig import LArHVScaleCorr2NtupleCfg
-    result.merge(LArHVScaleCorr2NtupleCfg(flags,rootfile=outputName+'.root'))
-    result.getEventAlgo("LArHVScaleCorr2Ntuple").ContainerKey="NewLArHVScaleCorr"
+    result.merge(LArHVScaleCorr2NtupleCfg(flags,rootfile=outputName+'_ntuple.root',addSC=True))
+    result.getEventAlgo("LArHVScaleCorr2Ntuple").ContainerKey="NewLArHVScaleCorr" 
+    result.getEventAlgo("LArSCHVScaleCorr2Ntuple").ContainerKey="NewSCLArHVScaleCorr" 
+    result.getEventAlgo("LArSCHVScaleCorr2Ntuple").NtuplePath="/NTUPLES/FILE1/HVSCALESC"
 
     #sqlite writing ... 
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
     result.merge(OutputConditionsAlgCfg(flags,
                                         outputFile="dummy.root",
-                                        ObjectList=["CondAttrListCollection#/LAR/ElecCalibFlat/HVScaleCorr",],
+                                        ObjectList=["CondAttrListCollection#/LAR/ElecCalibFlat/HVScaleCorrNew#/LAR/ElecCalibFlat/HVScaleCorr",
+                                                    "CondAttrListCollection#/LAR/ElecCalibFlatSC/HVScaleCorrNew#/LAR/ElecCalibFlatSC/HVScaleCorr",],
                                         Run1=runOut,
                                         LB1=lbOut
                                     ))
@@ -58,6 +70,7 @@ if __name__=="__main__":
     parser.add_argument('LB',type=int, nargs='?', default=0,help="IOV start (run-number)")
     parser.add_argument('-g', '--globaltag', type=str, help="Geometry Tag ")
     parser.add_argument('-o', '--output',type=str,default="hvcorr",help="name stub for root and sqlite output files")
+    parser.add_argument('-l','--olevel',type=int, default=3,help="OutputLevel")
                         
     args = parser.parse_args()
     try:
@@ -105,7 +118,7 @@ if __name__=="__main__":
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+outputName+".sqlite;dbname=CONDBR2"
     ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
-    #ConfigFlags.Exec.OutputLevel=1
+    ConfigFlags.Exec.OutputLevel=args.olevel
     ConfigFlags.lock()
     cfg=MainEvgenServicesCfg(ConfigFlags)
     #First LB not set by McEventSelectorCfg, set it here:

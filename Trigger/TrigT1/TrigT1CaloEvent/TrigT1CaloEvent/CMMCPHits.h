@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //                           CMMCPHits.h  -  description
@@ -33,7 +33,7 @@
     enum DataIDs { REMOTE_0 = 15, REMOTE_1, REMOTE_2, LOCAL, TOTAL, MAXID };
 
     /** Constructors */
-    CMMCPHits();
+    CMMCPHits() =  default;
     CMMCPHits(int crate, int dataID);
     CMMCPHits(int crate, int dataID, const std::vector<unsigned int>& hits0,
                                      const std::vector<unsigned int>& hits1,
@@ -41,7 +41,6 @@
 				     const std::vector<int>& error1,
 				     int peak);
   
-    virtual ~CMMCPHits();
 
     /** For multi-slice readout, need to indicate position of triggered BC */
     void setPeak(int peak);
@@ -68,13 +67,13 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_dataID;
-    int m_peak;
-    std::vector<unsigned int> m_hits0;
-    std::vector<unsigned int> m_hits1;
-    std::vector<int> m_error0;
-    std::vector<int> m_error1;
+    int m_crate{};
+    int m_dataID{};
+    int m_peak{};
+    std::vector<unsigned int> m_hits0{0};
+    std::vector<unsigned int> m_hits1{0};
+    std::vector<int> m_error0{0};
+    std::vector<int> m_error1{0};
     
     };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -50,7 +50,7 @@ QString VP1QtUtils::expertSettingValue(const QString& type, const QString& name)
     QSettings expertSettings(QCoreApplication::applicationDirPath()+"/../vp1.ini", QSettings::NativeFormat);
     env = expertSettings.value(name).toString();
   }
-  QString val(env.isNull() ? "" : env);
+  QString val(env.isNull() ? "" : std::move(env));
   if (VP1Msg::verbose())
     VP1Msg::messageVerbose("VP1QtUtils::expertSettingValue called for variable '"+name+"'. Returning '"+ val+"'.");
   return val;
@@ -67,7 +67,7 @@ bool VP1QtUtils::expertSettingIsOn(const QString& type, const QString& name)
     QSettings expertSettings(QCoreApplication::applicationDirPath()+"/../vp1.ini", QSettings::NativeFormat);
     env = expertSettings.value(name).toString();
   }
-  QString val(env.isNull() ? "" : env );
+  QString val(env.isNull() ? "" : std::move(env) );
   bool ison = true;
   if (val==""||val=="0")
     ison = false;

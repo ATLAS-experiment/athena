@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the Dev_HI_run3_v1 menu
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-output: *.txt
@@ -20,20 +20,19 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCGridStep(
+    menu='Dev_HI_run3_v1_TriggerValidation_prescale',
+    mc_campaign='Campaigns.MC23HeavyIons2024',    
+)
 ex.input = 'ttbar' # TODO restore to 'pbpb' once it has supercells 
-ex.threads = 8
-ex.concurrent_events = 8
 ex.max_events = 500
-ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
-            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
-            'Trigger.doRuntimeNaviVal=True',
-            'Trigger.L1.Menu.doHeavyIonTobThresholds=True'            
-            ]
+ex.flags += [
+    'Trigger.doRuntimeNaviVal=True',
+    'Trigger.L1.Menu.doHeavyIonTobThresholds=True',
+]
 
 test = Test.Test()
 test.art_type = 'grid'

@@ -31,9 +31,6 @@ athArgsParser.add_argument("--data-type", action="store", dest="data_type",
 athArgsParser.add_argument('--text-config', dest='text_config',
                            action='store', default=None,
                            help='Configure the job with the provided text configuration')
-athArgsParser.add_argument('--for-compare', dest='for_compare',
-                           action='store_true', default=False,
-                           help='Configure the job for comparison of sequences vs blocks')
 athArgsParser.add_argument('--no-systematics', dest='no_systematics',
                            action='store_true', default=False,
                            help='Configure the job to with no systematics')
@@ -46,11 +43,17 @@ athArgsParser.add_argument('--run', action='store', dest='run',
 athArgsParser.add_argument('--only-nominal-or', dest='onlyNominalOR',
                            action='store_true', default=False,
                            help='Only run overlap removal for nominal (skip systematics)')
+athArgsParser.add_argument('--bleeding-edge', dest='bleeding_edge',
+                           action='store_true', default=False,
+                           help='Run on the latest bleeding edge input (usually from the CI output)')
 athArgs = flags.fillFromArgs(parser=athArgsParser)
 
 dataType = DataType(athArgs.data_type)
 textConfig = athArgs.text_config
-forCompare = athArgs.for_compare
+
+if textConfig:
+    from PathResolver import PathResolver
+    textConfig = PathResolver.FindCalibFile(textConfig)
 
 print(f"Running on data type: {dataType.value}")
 
@@ -95,11 +98,11 @@ cfg.merge(CutFlowSvcCfg(flags))
 
 # Setup the configuration
 cp_cfg = makeSequence(dataType, yamlPath=textConfig,
-                      forCompare=forCompare,
                       noSystematics=athArgs.no_systematics,
                       isPhyslite=athArgs.physlite,
                       autoconfigFromFlags=flags, onlyNominalOR=athArgs.onlyNominalOR,
-                      forceEGammaFullSimConfig=True)
+                      forceEGammaFullSimConfig=True,
+                      bleedingEdge=athArgs.bleeding_edge)
 # Add all algorithms from the sequence to the job.
 cfg.merge(cp_cfg)
 

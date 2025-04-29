@@ -14,7 +14,7 @@ namespace MuonPRDTest {
     }
     const Muon::IMuonIdHelperSvc* PrdTesterModule::idHelperSvc() const { return m_idHelperSvc.get(); }
     const MuonGM::MuonDetectorManager* PrdTesterModule::getDetMgr(const EventContext& ctx) const {
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> handle{m_detMgrKey, ctx};
+        SG::ReadCondHandle handle{m_detMgrKey, ctx};
         if (!handle.isValid()) {
             ATH_MSG_ERROR("Failed to retrieve MuonDetectorManager " << m_detMgrKey.fullKey());
             return nullptr;

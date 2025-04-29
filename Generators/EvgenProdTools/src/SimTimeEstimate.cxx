@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -10,10 +10,6 @@
 SimTimeEstimate::SimTimeEstimate(const std::string& name, ISvcLocator* pSvcLocator)
   : GenBase(name, pSvcLocator)
 {
-  declareProperty( "EtaLimit", m_etaMax = 6.0 );
-  m_total_Events = 0;
-  m_total_Energy = 0.;
-  m_pidsToSkip = {12, 13, 14, 16};
 }
 
 StatusCode SimTimeEstimate::execute() 
@@ -58,7 +54,7 @@ StatusCode SimTimeEstimate::execute()
         } // Loop over particles in the event
         
         //Report characterisitics of each event  
-        ATH_MSG_INFO("==> EVENT INFORMATION | event number: " << m_total_Events << "| event energy: " << m_eventEnergy); // << " | m_particleNumber: " << m_particleNumber << " | m_particleIDs: " << m_particleIDs << " | etas: " << m_particleEtas << " | energies: " << m_particleEnergies);
+        ATH_MSG_VERBOSE("==> EVENT INFORMATION | event number: " << m_total_Events << "| event energy: " << m_eventEnergy); // << " | m_particleNumber: " << m_particleNumber << " | m_particleIDs: " << m_particleIDs << " | etas: " << m_particleEtas << " | energies: " << m_particleEnergies);
     } // Loop over events in the event collection
     // One more event done!
     m_total_Events++;

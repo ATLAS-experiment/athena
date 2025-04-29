@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,9 +9,13 @@ from AthenaCommon.Logging import logging
 def outputStreamName(streamName):
    return f"Stream{streamName}"
 
+
+# keepProvenanceTagsRegEx - RexEx string to match processing tags in the Event provenance. Only matching tags will be copied
+#                           to the new DataHeader. Empty string rejects all tags. Direct provenance is not affected
+#                           (see extendProvenanceRecord)
 def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
                     disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
-                    extendProvenanceRecord=True, AcceptAlgs=[], HelperTools=[]):
+                    extendProvenanceRecord=True, keepProvenanceTagsRegEx=None, AcceptAlgs=[], HelperTools=[]):
    eventInfoKey = "EventInfo"
    if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
@@ -76,10 +80,13 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       # to True (default in C++ is False). This avoids CA merge
       # conflicts.
       outputStream.TakeItemsFromInput = True
-   if not extendProvenanceRecord or streamName in flags.Output.TemporaryStreams:
+   if not extendProvenanceRecord:
        # Treat this similar to takeItemsFromInput
        # (C++ default in this case is True)
        outputStream.ExtendProvenanceRecord = False
+   if keepProvenanceTagsRegEx is not None:
+      # C++ defaults to '.*' which means all. Overwrite only on request.
+      outputStream.KeepProvenanceTagsRegEx = keepProvenanceTagsRegEx
    outputStream.AcceptAlgs += AcceptAlgs
    outputStream.ExtraOutputs.add(("DataHeader", f"StoreGateSvc+{outputStreamName(streamName)}"))
    if flags.Scheduler.CheckOutputUsage and flags.Concurrency.NumThreads > 0:

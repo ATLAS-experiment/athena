@@ -38,10 +38,10 @@ def EfexSimMonitoringConfig(flags):
                             ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
                             opt=['kCanRebin','kAlwaysCreate'],merge="merge")
     helper.defineHistogram('LBN,Signature;h_mismatched_SimReady',
-                           fillGroup="mismatches_count",
+                           fillGroup="mismatches",
                            paths=['Shifter/Sim'],
                            hanConfig={"algorithm":"Histogram_Empty","description":"Number of events with a mismatch, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready","display":"SetPalette(55)"},
-                           type='TH2I', cutmask='SimulationReady',
+                           type='TH2I', cutmask='SimulationReadyMismatch',
                            title='Mismatched Simulation-Ready Events;LB;Signature;Events',
                            xbins=1,xmin=0,xmax=1,
                            ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],

@@ -1,3 +1,4 @@
+
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSim_SECONDSTAGEALG_H
@@ -15,7 +16,7 @@
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
 
-#include "IFPGATrackSimTrackExtensionTool.h"
+#include "FPGATrackSimAlgorithms/IFPGATrackSimTrackExtensionTool.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
@@ -36,6 +37,7 @@ class FPGATrackSimTrackFitterTool;
 
 class FPGATrackSimRoad;
 class FPGATrackSimLogicalEventOutputHeader;
+class FPGATrackSimLogicalEventInputHeader;
 class FPGATrackSimTrack;
 class FPGATrackSimDataFlowInfo;
 
@@ -71,17 +73,22 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
+        // chrono service
+        ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
         // Flags
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
-        Gaudi::Property<bool> m_doHoughRootOutput {this, "DoHoughRootOutput", false, "Dump output from the Hough Transform to flat ntuples"};
-        Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
+        Gaudi::Property<bool> m_doHoughRootOutput2nd {this, "DoHoughRootOutput2nd", false, "Dump output from the Hough Transform to flat ntuples"};
+        Gaudi::Property<bool> m_doNNTrack_2nd  {this, "DoNNTrack_2nd", false, "Run NN track filtering for 2nd Stage"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<float> m_trackScoreCut {this, "TrackScoreCut", 25.0, "Minimum track score (e.g. chi2 or NN)." };
         Gaudi::Property<bool> m_writeOutNonSPStripHits {this, "writeOutNonSPStripHits", true, "Write tracks to RootOutput if they have strip hits which are not SPs"};
         Gaudi::Property<int> m_NumOfHitPerGrouping { this, "NumOfHitPerGrouping", 5, "Number of minimum overlapping hits for a track candidate to be removed in the HoughRootOutputTool"};
+        Gaudi::Property<bool> m_passLowestChi2TrackOnly {this, "passLowestChi2TrackOnly", false};
+        Gaudi::Property<bool> m_doNNPathFinder {this, "doNNPathFinder", false};
+
 
 
         // Road filtering configuration, it isn't obvious to me if we want to allow these.
@@ -89,9 +96,11 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         Gaudi::Property<bool> m_filterRoads2  {this, "FilterRoads2", false,  "enable second road filter"};
 
         // Properties for the output header tool.
+        Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for slied hits in output ROOT file." };
         Gaudi::Property<std::string> m_outputBranch     {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
 
         // ROOT pointers
+        FPGATrackSimLogicalEventInputHeader*  m_slicedHitHeader = nullptr;
         FPGATrackSimLogicalEventOutputHeader* m_logicEventOutputHeader = nullptr;
 
         // Event storage. ??? do we need anything?
@@ -109,6 +118,11 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         long m_nTracksChi2Found = 0; // total number of those events with at least one track passing chi2
         long m_nTracksChi2OLRFound = 0; // total number of those events with at least one track passing chi2 and OLR
 
+        unsigned long m_maxNRoadsFound = 0; // max number of roads in an event
+        unsigned long m_maxNTracksTot = 0; // max number of tracks in an event
+        unsigned long m_maxNTracksChi2Tot = 0; // max number of tracks passing chi2 in an event
+        unsigned long m_maxNTracksChi2OLRTot = 0; // max number of tracks passing chi2 and OLR in an events
+  
         // TODO: what functions should we have here?
         StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd,
                                    std::vector<FPGATrackSimTrack> const & tracks_2nd,

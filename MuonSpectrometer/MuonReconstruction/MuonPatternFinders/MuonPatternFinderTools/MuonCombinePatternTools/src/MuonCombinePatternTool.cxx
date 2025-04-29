@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinePatternTools/MuonCombinePatternTool.h"
@@ -770,7 +770,8 @@ std::vector<PrdPatternPair> MuonCombinePatternTool::splitPatterns2D(
             etapattern2->addPrd(prd);
         }
     }
-    splitPatterns.emplace_back(std::move(phipattern1), std::move(etapattern1));
+    //clone: cant have two unique_ptrs to the same object in the container
+    splitPatterns.emplace_back(std::move(phipattern1), std::make_unique<Muon::MuonPrdPattern>(*etapattern1));
     splitPatterns.emplace_back(std::move(etapattern1), std::move(etapattern2));
     return splitPatterns;
 }
@@ -1666,6 +1667,7 @@ void MuonCombinePatternTool::cleanCandidates(std::vector<CandidatePatPair>& cand
         }
         hitsMap.insert(std::make_pair((*it1), std::make_pair(etahits, phihits)));
     }
+    // cppcheck-suppress invalidContainer; candidate.erase(it2) does not invalidate it1
     for (it1 = candidates.begin(); it1 != candidates.end(); ++it1) {
         std::pair<PrepDataSet, PrepDataSet>& hits1 = hitsMap[(*it1)];
         it2 = it1 + 1;

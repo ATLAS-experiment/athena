@@ -20,6 +20,7 @@ from .gg4l import gg4l
 from .ggF_H import ggF_H
 from .ggF_HH import ggF_HH
 from .ggF_HH_SMEFT import ggF_HH_SMEFT
+from .ggF_HH_quartic import ggF_HH_quartic
 from .ggF_HZ import ggF_HZ
 from .Hj import Hj
 from .Hj_MiNNLO import Hj_MiNNLO
@@ -40,10 +41,12 @@ from .ttbb import ttbb
 from .ttH import ttH
 from .ttj import ttj
 from .ttj_MiNNLO import ttj_MiNNLO
+from .ttll import ttll
 from .ttWm_EW import ttWm_EW
 from .ttWm_QCD import ttWm_QCD
 from .ttWp_EW import ttWp_EW
 from .ttWp_QCD import ttWp_QCD
+from .ttZ import ttZ
 from .VBF_H import VBF_H
 from .VBF_ZZ import VBF_ZZ
 from .VBF_osWW import VBF_osWW

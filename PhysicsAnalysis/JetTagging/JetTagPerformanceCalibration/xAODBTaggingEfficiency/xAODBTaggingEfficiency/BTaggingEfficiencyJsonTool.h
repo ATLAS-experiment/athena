@@ -9,26 +9,24 @@
 #include "AsgTools/AsgTool.h"
 #include "PATInterfaces/SystematicsCache.h"
 #include <nlohmann/json.hpp>
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 class BTaggingEfficiencyJsonTool: public asg::AsgTool,
                                   virtual public IBTaggingEfficiencyJsonTool 
 {
   // creates a proper constructor for athena
-  ASG_TOOL_CLASS3 (BTaggingEfficiencyJsonTool, IBTaggingEfficiencyJsonTool, ISystematicsTool, CP::IReentrantSystematicsTool )
+  ASG_TOOL_CLASS2 (BTaggingEfficiencyJsonTool, IBTaggingEfficiencyJsonTool, CP::IReentrantSystematicsTool )
 
   public:
   BTaggingEfficiencyJsonTool( const std::string& name );
   virtual ~BTaggingEfficiencyJsonTool();
   StatusCode initialize() override;
 
-  virtual CP::CorrectionCode getScaleFactor( const xAOD::Jet& jet, float& scalefactor ) const override;
+  virtual CP::CorrectionCode getScaleFactor( const xAOD::Jet& jet, float& scalefactor, const CP::SystematicSet& sys) const override;
 
   // systematic stuff
-  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const override;
   virtual CP::SystematicSet affectingSystematics() const override;
   virtual CP::SystematicSet recommendedSystematics() const override;
-  virtual StatusCode applySystematicVariation( const CP::SystematicSet& sysSet ) override;
 
   private:
   bool m_initialised;

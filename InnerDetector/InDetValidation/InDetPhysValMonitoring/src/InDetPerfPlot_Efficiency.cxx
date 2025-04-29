@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPerfPlot_Efficiency.h"
@@ -9,13 +9,19 @@
 #include "GaudiKernel/SystemOfUnits.h" //for Gaudi::Units
 using namespace IDPVM;
 
-InDetPerfPlot_Efficiency::InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& sDir) :
-  InDetPlotBase(pParent, sDir){
-  // nop
-}
+InDetPerfPlot_Efficiency::InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& sDir, bool doTechEff, bool isITk) :
+  InDetPlotBase(pParent, sDir),
+  m_doTechEff(doTechEff),
+  m_isITk(isITk) {}
 
 void
 InDetPerfPlot_Efficiency::initializePlots() {
+  // Drop eta bins larger than 2.5
+  if(!m_isITk){
+    m_eta_bins.erase(std::remove_if(m_eta_bins.begin(), m_eta_bins.end(),
+				    [](float eta) { return eta > 2.5; }),
+		     m_eta_bins.end());
+  }
 
   book(m_efficiency_vs_pteta, "efficiency_vs_pteta");
   book(m_efficiency_vs_ptTruthMu, "efficiency_vs_ptTruthMu");
@@ -58,14 +64,15 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_efficiency_vs_truthMu, "efficiency_vs_truthMu");
   book(m_efficiency_vs_actualMu, "efficiency_vs_actualMu");
 
-  book(m_technical_efficiency_vs_pteta, "technical_efficiency_vs_pteta");
-  book(m_technical_efficiency_vs_eta, "technical_efficiency_vs_eta");
-  book(m_technical_efficiency_vs_pt, "technical_efficiency_vs_pt");
-  book(m_technical_efficiency_vs_phi, "technical_efficiency_vs_phi");
-  book(m_technical_efficiency_vs_d0, "technical_efficiency_vs_d0");
-  book(m_technical_efficiency_vs_z0, "technical_efficiency_vs_z0");
-  book(m_technical_efficiency_vs_truthMu, "technical_efficiency_vs_truthMu");
-  book(m_technical_efficiency_vs_actualMu, "technical_efficiency_vs_actualMu");
+  if(m_doTechEff){
+    book(m_technical_efficiency_vs_eta, "technical_efficiency_vs_eta");
+    book(m_technical_efficiency_vs_pt, "technical_efficiency_vs_pt");
+    book(m_technical_efficiency_vs_phi, "technical_efficiency_vs_phi");
+    book(m_technical_efficiency_vs_d0, "technical_efficiency_vs_d0");
+    book(m_technical_efficiency_vs_z0, "technical_efficiency_vs_z0");
+    book(m_technical_efficiency_vs_truthMu, "technical_efficiency_vs_truthMu");
+    book(m_technical_efficiency_vs_actualMu, "technical_efficiency_vs_actualMu");
+  }
 
   book(m_extended_efficiency_vs_d0, "extended_efficiency_vs_d0");
   book(m_extended_efficiency_vs_d0_abs, "extended_efficiency_vs_d0_abs");
@@ -108,8 +115,12 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
 
   const auto pVal =  std::lower_bound(m_eta_bins.begin(), m_eta_bins.end(), std::abs(eta));
   const int bin = std::distance(m_eta_bins.begin(), pVal) - 1;
-  fillHisto(m_efficiency_vs_truthMu_eta_bin[bin], truthMu, isGood, weight);
-  fillHisto(m_efficiency_vs_actualMu_eta_bin[bin], actualMu, isGood, weight);
+  // Protect against overflow
+  // for LRT config in particular which keeps truth particles up to eta=3.0
+  if(bin<static_cast<int>(m_efficiency_vs_truthMu_eta_bin.size())){
+    fillHisto(m_efficiency_vs_truthMu_eta_bin[bin], truthMu, isGood, weight);
+    fillHisto(m_efficiency_vs_actualMu_eta_bin[bin], actualMu, isGood, weight);
+  }
 
   fillHisto(m_efficiency_vs_eta, eta, isGood, weight);
   fillHisto(m_efficiency_vs_pt, pt, isGood, weight);

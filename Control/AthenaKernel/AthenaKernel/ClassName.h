@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ClassName.h,v 1.1 2009-01-15 19:07:29 binet Exp $
 /**
  * @file  AthenaKernel/ClassName.h
  * @author scott snyder
@@ -18,6 +15,7 @@
 
 
 #include <string>
+#include <typeinfo>
 
 
 /**
@@ -45,6 +43,22 @@ public:
 #endif
     ;
 };
+
+
+namespace Athena {
+
+
+/**
+ * Convert a @c type_info to a demangled string.
+ * @param ti The type_info to convert.
+ *
+ * A wrapper around System::typeinfoName.  Moved out-of-line so that this
+ * header does not need to depend on System.h.
+ */
+std::string typeinfoName (const std::type_info& ti);
+
+
+} // namespace Athena
 
 
 #include "AthenaKernel/ClassName.icc"

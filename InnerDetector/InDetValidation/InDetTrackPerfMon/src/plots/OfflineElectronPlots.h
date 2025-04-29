@@ -50,14 +50,14 @@ namespace IDTPM {
 
   private:
 
-    bool m_doEfficiency;
+    bool m_doEfficiency{};
 
-    TH1* m_Et;
-    TH1* m_EtOverPt;
+    TH1* m_Et{};
+    TH1* m_EtOverPt{};
     /// TODO - include more plots
 
-    TEfficiency* m_eff_vs_Et;
-    TEfficiency* m_eff_vs_EtOverPt;
+    TEfficiency* m_eff_vs_Et{};
+    TEfficiency* m_eff_vs_EtOverPt{};
 
   }; // class OfflineElectronPlots
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_ETAHOUGHTRANSFORMALG__H
 #define MUONR4_MUONPATTERNRECOGNITIONALGS_ETAHOUGHTRANSFORMALG__H
@@ -7,9 +7,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
 
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
 #include <MuonPatternEvent/HoughEventData.h>
@@ -30,7 +28,8 @@ namespace MuonR4{
     /// for downstream use. 
     class EtaHoughTransformAlg: public AthReentrantAlgorithm{
         public:
-            EtaHoughTransformAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            using AthReentrantAlgorithm::AthReentrantAlgorithm;    
+
             virtual ~EtaHoughTransformAlg() = default;
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
@@ -38,12 +37,6 @@ namespace MuonR4{
         private:
             
             using HoughSetupForBucket = HoughEventData::HoughSetupForBucket;
-            /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-            /// Failure is returned in cases, of non-empty keys and failed retrieval
-            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                                        const ContainerType* & contToPush) const;
-
             /// @brief pre-processing method called once per event. 
             /// Populates the event data with the space points for each
             /// bucket and identifies the optimal search space in each bucket.
@@ -75,6 +68,9 @@ namespace MuonR4{
             /// @param SP: space point to fill from 
             void fillFromSpacePoint(HoughEventData & data, 
                                     const MuonR4::HoughHitType & SP) const; 
+
+            /// @brief apply quality cuts on a given maximum 
+            bool passSeedQuality (const HoughSetupForBucket& currentBucket, const MuonR4::ActsPeakFinderForMuon::Maximum & maximum) const; 
             
             /// @brief extend a maximum with all compatible (pure) phi hits. 
             /// @param hitList: list of hits to extend 
@@ -83,15 +79,15 @@ namespace MuonR4{
             /// @brief Returns whether the hit is a precision hit or not
             static bool isPrecisionHit(const HoughHitType& hit);
             // target resolution in the angle
-            DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.03};
+            DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.05};
             // target resolution in the y intercept
-            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 15.};
+            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
             // minimum search window half width, tan(theta) 
             // - in multiples of the target resolution
-            DoubleProperty m_minSigmasSearchTanTheta{this, "minSigmasSearchTanTheta", 1.0};
+            DoubleProperty m_minSigmasSearchTanTheta{this, "minSigmasSearchTanTheta", 2.0};
             // minimum search window half width, intercept 
             // - in multiples of the target resolution
-            DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 1.0};
+            DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 2.0};
             // Cut on the number of weighted hits on the maximum
             DoubleProperty m_peakThreshold{this, "peakThreshold", 2.5};
             // Minimum distance in tanTheta between two maxima
@@ -104,12 +100,14 @@ namespace MuonR4{
             UnsignedIntegerProperty m_nPrecHitCut{this, "nMinPrecHits", 3};
             
             // number of accumulator bins for the angle 
-            IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 5};
+            IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 7};
             // number of accumulator bins for the intercept 
-            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 10};
+            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 15};
             // Flag to steer whether space points shall be downweighted according to their instance
             // multiplicity of the phi measurement such that it effectively contributes with weight 1
             BooleanProperty m_downWeightMultiplePrd{this, "downWeightPrdMultiplicity", false};
+            /// Handle to the IdHelperSvc
+            ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
             // input space points from SG
             SG::ReadHandleKey<SpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};

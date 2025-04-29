@@ -91,7 +91,7 @@ class FPGATrackSimHoughTransform_d0phi0_Tool : public extends <AthAlgTool, IFPGA
         FPGATrackSimTrackPars m_parMax; // Only the two parameters chosen above are used
 
         unsigned m_nCombineLayers = 0U; // number of layers after combined
-        std::vector< std::vector<unsigned> > m_combineLayer2D; // 2d array of combined layers i.e. [[1,2,3],[0,4,5],[6,7]] will combine (L1, L2, L3), (L0, L4, L5), (L6, L7)
+        std::vector< std::vector<int> > m_combineLayer2D; // 2d array of combined layers i.e. [[1,2,3],[0,4,5],[6,7]] will combine (L1, L2, L3), (L0, L4, L5), (L6, L7)
 
         ///////////////////////////////////////////////////////////////////////
         // Convenience
@@ -129,7 +129,7 @@ class FPGATrackSimHoughTransform_d0phi0_Tool : public extends <AthAlgTool, IFPGA
         // Core
 
         // std::vector<FPGATrackSimHit const *> filterHits(std::vector<FPGATrackSimHit const *> const & hits) const;
-        Image createLayerImage(std::vector<unsigned> const & combine_layers, const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned const scale) const;
+        Image createLayerImage(std::vector<int> const & combine_layers, const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned const scale) const;
         Image createImage(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits) const;
         Image convolute(Image const & image) const;
 

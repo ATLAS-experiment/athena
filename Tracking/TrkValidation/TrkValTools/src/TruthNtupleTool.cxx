@@ -122,7 +122,7 @@ StatusCode Trk::TruthNtupleTool::initialize() {
 
 }
 
-StatusCode Trk::TruthNtupleTool::initBranches(const std::vector<const Trk::ITrackTruthClassifier*>& classifiers, bool fillJets,  const std::vector<std::string> trackCollectionNames) {
+StatusCode Trk::TruthNtupleTool::initBranches(const std::vector<const Trk::ITrackTruthClassifier*>& classifiers, bool fillJets,  const std::vector<std::string>& trackCollectionNames) {
     m_trackTruthClassifiers = classifiers;
     m_classifications.resize(classifiers.size(), 0);
     m_recoTrackCounts.resize(classifiers.size());

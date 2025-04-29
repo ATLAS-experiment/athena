@@ -24,13 +24,12 @@
 namespace DerivationFramework {
 
   MergedElectronDetailsDecorator::MergedElectronDetailsDecorator(const std::string& t, const std::string& n, const IInterface* p):
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_emExtrapolationTool("EMExtrapolationTools"),
     m_VertexFitter("Trk::TrkVkalVrtFitter"),
     m_V0Tools("Trk::V0Tools"),
     m_minET(5000)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("EMExtrapolationTool",m_emExtrapolationTool);
     declareProperty("VertexFitterTool",m_VertexFitter);
     declareProperty("V0Tools",m_V0Tools);

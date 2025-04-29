@@ -16,8 +16,8 @@ atlas_add_library( MuonEfficiencyCorrectionsLib
    MuonEfficiencyCorrections/*.h Root/*.cxx
    PUBLIC_HEADERS MuonEfficiencyCorrections
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${extra_libs} AsgTools xAODMuon xAODEventInfo MuonAnalysisInterfacesLib 
-                  PATInterfaces AsgDataHandlesLib
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${extra_libs} AsgTools ColumnarMuonLib ColumnarEventInfoLib MuonAnalysisInterfacesLib 
+                  PATInterfaces AsgDataHandlesLib ColumnarCoreLib
    PRIVATE_LINK_LIBRARIES FourMomUtils xAODTrigger PathResolver )
 
 if( NOT XAOD_STANDALONE )
@@ -44,6 +44,12 @@ if( XAOD_STANDALONE )
    _add_exec( MuonTriggerSFFilesTest )
    _add_exec( MuonTriggerSFConfGenerator )
 endif()
+
+atlas_add_test( gt_ColumnarToolTests
+                SOURCES test/gt_ColumnarToolTests.cxx
+                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib MuonEfficiencyCorrectionsLib
+                POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

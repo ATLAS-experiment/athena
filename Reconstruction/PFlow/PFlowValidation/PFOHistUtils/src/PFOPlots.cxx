@@ -1,27 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOPlots.h"
 
 namespace PFO {
 
-  PFOPlots::PFOPlots(PlotBase* pParent, std::string sDir, std::string sFEContainerName) : PlotBase(pParent, sDir), m_sFEContainerName(sFEContainerName){
-    m_FE_pt = nullptr;
-    m_FE_eta = nullptr;
-    m_FE_phi = nullptr;
-    m_FE_m = nullptr;
-    m_FE_charge = nullptr;
-
-    m_FE_pt_low = nullptr;
-    m_FE_pt_middle = nullptr;
-    m_FE_pt_high = nullptr;
-
-    m_FE_eta_posE = nullptr;
-
-    m_FE_pt_etaBinA = nullptr;
-    m_FE_pt_etaBinB = nullptr;
-    m_FE_pt_etaBinC = nullptr;
+  PFOPlots::PFOPlots(PlotBase* pParent, const std::string & sDir, const std::string & sFEContainerName) : PlotBase(pParent, sDir), m_sFEContainerName(sFEContainerName){
+   
   }
 
   void PFOPlots::initializePlots(){    

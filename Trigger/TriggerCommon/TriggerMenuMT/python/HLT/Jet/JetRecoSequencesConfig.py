@@ -121,7 +121,7 @@ def StandardJetBuildDataDeps(flags, **jetRecoDict):
         if is_pflow:
             jetDef.modifiers += ["CaloEnergiesClus"] # Needed for FlowElement GSC
     if use_FS_tracking:
-        jetDef.modifiers += ["TrackMoments", "JVF", "JVT"]
+        jetDef.modifiers += ["TrackMoments", "JVF", "JVT", "NNJVT_TrkAugV1"] # (NN)JVT not strictly needed for no-calib jets
     
     pj_name = JetRecConfig.getPJContName(jetDef.inputdef)
     if use_FS_tracking:
@@ -174,7 +174,7 @@ def StandardJetRecoDataDeps(flags, **jetRecoDict):
         
         jetDef.modifiers = getCalibMods(flags, jetRecoDict, rhoKey)
         if use_FS_tracking:
-            jetDef.modifiers += ["JVT"]
+            jetDef.modifiers += ["JVT", "NNJVT_TrkAugV1"]
 
         if jetRecoDict["recoAlg"] == "a4":
             jetDef.modifiers += ["CaloQuality"]

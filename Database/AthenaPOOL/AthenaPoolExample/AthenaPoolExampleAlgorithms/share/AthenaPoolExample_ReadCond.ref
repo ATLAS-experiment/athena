@@ -35,13 +35,13 @@ MetaDataSvc                                          INFO Found MetaDataTools = 
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG Service base class initialized successfully
 EventSelector                                       DEBUG reinitialization...
-EventSelector                                        INFO EventSelection with query 
 EventSelector                                       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile1.root, name=SimplePoolFile1.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile1.root, name=POOLContainer(DataHeader), contextID=0
 PersistencySvc::UserDB::fid()                       DEBUG lookupPFN: SimplePoolFile1.root returned FID: 'F2313678-C96A-964F-89E8-08BAB39F2DA7' tech=ROOT_All
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] F2313678-C96A-964F-89E8-08BAB39F2DA7
 Domain[ROOT_All]                                     INFO                           SimplePoolFile1.root
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -134,6 +134,7 @@ Domain[ROOT_All]                                     INFO >   Access   DbDomain 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] 298DE14D-49CF-674A-9171-CEBBD9BEC6F8
 Domain[ROOT_All]                                     INFO                           SimplePoolFile4.root
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
 ##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
@@ -191,6 +192,7 @@ DbSession                                            INFO     Open     DbSession
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] F2313678-C96A-964F-89E8-08BAB39F2DA7
 Domain[ROOT_All]                                     INFO                           SimplePoolFile1.root
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -354,6 +356,7 @@ CondProxyProvider                                   DEBUG The current File conta
 CondProxyProvider                                   DEBUG preLoadAddresses: DataObject address, clid = 9102, name = PedestalWriteData
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] 298DE14D-49CF-674A-9171-CEBBD9BEC6F8
 Domain[ROOT_All]                                     INFO                           SimplePoolFile4.root
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1

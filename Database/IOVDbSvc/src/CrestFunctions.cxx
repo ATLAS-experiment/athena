@@ -19,16 +19,18 @@
 
 namespace IOVDbNamespace{
 
+  using namespace Crest;
+
   CrestFunctions::CrestFunctions(const std::string & crest_path){
     setURLBase(crest_path);
 
     const std::string prefix1 = "http://";
     const std::string prefix2 = "https://";
     if (crest_path.starts_with(prefix1) || crest_path.starts_with(prefix2)){
-      m_crestCl = std::unique_ptr<Crest::CrestClient>(new Crest::CrestClient(getURLBase()));
+      m_crestCl = std::unique_ptr<Crest::CrestApi>(new Crest::CrestApi(getURLBase()));
     }
     else{
-      m_crestCl = std::unique_ptr<Crest::CrestFsClient>(new Crest::CrestFsClient(true,getURLBase()));
+      m_crestCl = std::unique_ptr<Crest::CrestApiFs>(new Crest::CrestApiFs(true,getURLBase()));
     }
   }
 
@@ -71,7 +73,7 @@ namespace IOVDbNamespace{
     try{
       IovSetDto dto = m_crestCl->selectIovs(tag, 0, -1, 0, 10000, 0, "id.since:ASC");
 
-      nlohmann::json iov_data = dto.to_json();
+      nlohmann::json iov_data = dto.toJson();
       nlohmann::json iov_list = getResources(iov_data);
       reply = iov_list.dump();
     } catch (std::exception & e){
@@ -118,50 +120,23 @@ namespace IOVDbNamespace{
   }  
 
 
-  std::string 
+  std::string
   CrestFunctions::folderDescriptionForTag(const std::string & tag){
-    
+
     std::string jsonReply = "";
-    
+
     TagMetaDto dto = m_crestCl->findTagMeta(tag);
-    jsonReply = dto.tagInfo.getFolderDescription();
+    TagInfoDto tag_info_dto = dto.getTagInfoDto();
+    jsonReply = tag_info_dto.getFolderDescription();
     return jsonReply;
   }
 
-  
-  std::map<std::string, std::string>
-  CrestFunctions::getGlobalTagMap(const std::string& globaltag){
-    std::map<std::string, std::string> tagmap;
-    try{
-      GlobalTagMapSetDto dto = m_crestCl->findGlobalTagMap(globaltag,"Trace");
-      nlohmann::json globaltag_map_data = dto.to_json();
-      nlohmann::json j = getResources(globaltag_map_data);
-      int n = j.size();
-      for (int i = 0; i < n; i++ ){
-	nlohmann::json j_item = j[i];
-        if (j_item.contains("label") && j_item.contains("tagName") ){
-          tagmap[j_item["label"]] = j_item["tagName"];
-        }
-      }
-    } catch (std::exception & e){
-      std::cerr<<__FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a global tag map for " << globaltag << std::endl;
-    }
-
-    return tagmap;
-  }
-
-
   nlohmann::json CrestFunctions::getTagInfo(const std::string & tag){
     try{
-      TagMetaDto dto = m_crestCl->findTagMeta(tag);     
-      nlohmann::json meta_info = dto.to_json();
-      
-      if (meta_info.contains("tagInfo")){
-	std::string metainf = meta_info["tagInfo"];
-	nlohmann::json js = nlohmann::json::parse(metainf);
-	return js;
-      }
-
+      TagMetaDto dto = m_crestCl->findTagMeta(tag);
+      TagInfoDto tag_info_dto = dto.getTagInfoDto();
+      nlohmann::json tag_info = tag_info_dto.toJson();
+      return tag_info;
     } catch (std::exception & e){
       std::cerr<<__FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a tag meta info " << tag << std::endl;
     }
@@ -172,7 +147,7 @@ namespace IOVDbNamespace{
   CrestFunctions::getTagProperties(const std::string & tag){
     try{
       TagDto dto = m_crestCl->findTag(tag);
-      return dto.to_json();
+      return dto.toJson();
     } catch (std::exception & e){
       std::cerr<<__FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a tag Properties of " << tag << std::endl;
     }
@@ -228,9 +203,9 @@ namespace IOVDbNamespace{
     std::vector<uint64_t> v;
     try{
       IovSetDto dto = m_crestCl->selectGroups(tag, 0, 10000, 0, "id.since:ASC");
-      const std::vector<IovDto> & res = dto.resources;
+      const std::vector<IovDto> & res = dto.getResources();
       for (const IovDto & item_iov: res){
-        v.emplace_back(item_iov.since);
+        v.emplace_back(item_iov.getSince());
       }
     } catch (std::exception & e){
       std::cerr<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the IOVs"<<std::endl;
@@ -305,10 +280,10 @@ namespace IOVDbNamespace{
           dto = m_crestCl->selectIovs(tag, s_time, u_time, 0, 10000, 0, "id.since:ASC");
 	      }
       }
-      std::vector<IovDto> res = dto.resources;
+      std::vector<IovDto> res = dto.getResources();
       std::map<uint64_t, std::string> hashmap;
       for (const IovDto & item: res) {
-        hashmap[item.since] = item.payloadHash;
+	hashmap[item.getSince()] = item.getPayloadHash();
       } 
       for (auto& t : hashmap){
         iovHashPairs.emplace_back(std::to_string(t.first),t.second);

@@ -14,7 +14,6 @@ def L0MuonSmearingCfg(flags, name = "L0MuonSmearingAlg", **kwargs):
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')
-    monTool.HistPath = 'L0MuonSmearing'
     monTool.defineHistogram('track_input_eta', path='EXPERT', type='TH1F', title=';#eta_{#mu}^{truth};Muons', xbins=50, xmin=-3, xmax=3)
     monTool.defineHistogram('track_input_phi', path='EXPERT', type='TH1F', title=';#phi_{#mu}^{truth};Muons', xbins=50, xmin=-4, xmax=4)
     monTool.defineHistogram('track_input_pt',  path='EXPERT', type='TH1F', title=';p_{T,#mu}^{truth} (GeV);Muons', xbins=50, xmin=0, xmax=250)
@@ -34,10 +33,10 @@ def L0MuonSmearingCfg(flags, name = "L0MuonSmearingAlg", **kwargs):
 
     alg.MonTool = monTool
 
-    histSvc = CompFactory.THistSvc(Output=["EXPERT DATAFILE='" + name + ".root' OPT='RECREATE'"])
+    from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
+    result.merge(TriggerHistSvcConfig(flags))
 
     result.addEventAlgo(alg)
-    result.addService(histSvc)
     return result
   
 

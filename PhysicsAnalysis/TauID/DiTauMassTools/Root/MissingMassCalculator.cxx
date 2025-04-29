@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=8 sw=2
@@ -39,8 +39,8 @@ using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 //______________________________constructor________________________________
 MissingMassCalculator::MissingMassCalculator(
-    MMCCalibrationSet::e aset, std::string m_paramFilePath)
-    : m_randomGen(), Prob(new MissingMassProb(aset, m_paramFilePath)) {
+    MMCCalibrationSet::e aset, std::string paramFilePath)
+    : m_randomGen(), Prob(new MissingMassProb(aset, paramFilePath)) {
   m_mmcCalibrationSet = aset;
   preparedInput.m_fUseVerbose = 0;
   preparedInput.m_beamEnergy = 6500.0; // for now LHC default is sqrt(S)=7 TeV
@@ -2018,6 +2018,7 @@ int MissingMassCalculator::TailCleanUp(const PtEtaPhiMVector &vis1,
     if (m_mmcCalibrationSet == MMCCalibrationSet::MMC2015HIGHMASS ||
 	m_mmcCalibrationSet == MMCCalibrationSet::MMC2016MC15C ||
         m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
+	m_mmcCalibrationSet == MMCCalibrationSet::MMC2024 ||
         m_mmcCalibrationSet == MMCCalibrationSet::UPGRADE)
       return pass_code; // don't use TailCleanup for 8 & 13 TeV data
 
@@ -2314,7 +2315,7 @@ void MissingMassCalculator::SpaceWalkerInit() {
 
   // precompute some quantities and store in m_ data members
   precomputeCache();
-  if (m_mmcCalibrationSet == MMCCalibrationSet::MMC2019) {
+  if (m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 || m_mmcCalibrationSet == MMCCalibrationSet::MMC2024) {
     if (Prob->GetUseMnuProbability() == true && (preparedInput.m_tauTypes == TauTypes::ll || preparedInput.m_tauTypes == TauTypes::lh) ) Prob->setParamNuMass();
     Prob->setParamAngle(m_tauVec1, 1, preparedInput.m_type_visTau1);
     Prob->setParamAngle(m_tauVec2, 2, preparedInput.m_type_visTau2);
@@ -2874,7 +2875,7 @@ void MissingMassCalculator::FinalizeSettings(const xAOD::IParticle *part1,
   // check that the calibration set has been chosen explicitly, otherwise abort
   if (m_mmcCalibrationSet == MMCCalibrationSet::MAXMMCCALIBRATIONSET) {
     Error("DiTauMassTools", "MMCCalibrationSet has not been set !. Please use "
-                            "fMMC.SetCalibrationSet(MMCCalibrationSet::MMC2019)"
+                            "fMMC.SetCalibrationSet(MMCCalibrationSet::MMC2019) or fMMC.SetCalibrationSet(MMCCalibrationSet::MMC2024)"
                             ". Abort now. ");
     std::abort();
   }
@@ -3002,7 +3003,8 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
       // T. Davidek: hack for lep-lep -- subtract lepton pT both for muon and
       //  electron
     if ((m_mmcCalibrationSet == MMCCalibrationSet::MMC2016MC15C ||
-	 m_mmcCalibrationSet == MMCCalibrationSet::MMC2019) &&
+	 m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
+	 m_mmcCalibrationSet == MMCCalibrationSet::MMC2024) &&
         preparedInput.m_vistau1.M() < 0.12 && preparedInput.m_vistau2.M() < 0.12) { // lep-lep channel
       if (preparedInput.m_SumEt > preparedInput.m_vistau1.Pt())
         preparedInput.m_SumEt -= preparedInput.m_vistau1.Pt();

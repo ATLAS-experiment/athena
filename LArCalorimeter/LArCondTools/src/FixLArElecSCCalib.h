@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FIXLARELECSCCALIB_H
@@ -11,13 +11,10 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
+#include "LArRawConditions/LArMCSym.h"
+
 #include <string>
 
-class  LArEM_ID ;
-class  LArHEC_ID;
-class  LArFCAL_ID;
-class  LArOnlineID_Base;
-class  LArOnlineID;
 class  LArOnline_SuperCellID;
 class  CaloCell_SuperCell_ID;
 
@@ -42,27 +39,25 @@ class FixLArElecSCCalib : public AthAlgorithm
 
   StatusCode fix1();  
   StatusCode fix2(const LArOnOffIdMapping *cabling, const LArCalibLineMapping *cl);  
+  StatusCode fix3(const LArOnOffIdMapping *cabling, const LArMCSym *sym);  
 
  private: 
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeySC{this,"SCCablingKey","LArOnOffIdMapSC","SG Key of SC LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<LArCalibLineMapping>  m_CLKeySC{this, "SCCalibLineKey", "LArCalibLineMapSC", "SG calib line key"};
+  SG::ReadCondHandleKey<LArMCSym> m_mcSymKey
+  { this, "MCSymKey", "LArMCSym", "SG Key of LArMCSym object" };
 
 
-  int  m_fixFlag ; 
-  double m_fixFactor = 0.0;
+  DoubleProperty   m_fixFactor{this, "FixFactor",  0.0, "which factor to apply"};
+  IntegerProperty  m_fixFlag{this, "FixFlag", 1, "which fix to run"} ; 
+  StringProperty   m_infile{this, "InputFile", "", "which file to read"}; 
 
-  std::string m_infile; 
-
-  const LArEM_ID* m_em_idhelper;
-  const LArHEC_ID* m_hec_idhelper;
-  const LArFCAL_ID* m_fcal_idhelper;
-  const LArOnlineID* m_online_idhelper;
-  const LArEM_SuperCell_ID* m_sem_idhelper;
-  const LArHEC_SuperCell_ID* m_shec_idhelper;
-  const LArFCAL_SuperCell_ID* m_sfcal_idhelper;
-  const LArOnline_SuperCellID* m_sonline_idhelper;
-  const CaloCell_SuperCell_ID* m_scell_idhelper;
+  const LArEM_SuperCell_ID* m_sem_idhelper{};
+  const LArHEC_SuperCell_ID* m_shec_idhelper{};
+  const LArFCAL_SuperCell_ID* m_sfcal_idhelper{};
+  const LArOnline_SuperCellID* m_sonline_idhelper{};
+  const CaloCell_SuperCell_ID* m_scell_idhelper{};
 };
 
 #endif // FixLArElecSCCalib

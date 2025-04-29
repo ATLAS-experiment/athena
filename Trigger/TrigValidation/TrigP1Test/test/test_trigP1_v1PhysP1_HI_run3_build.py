@@ -3,7 +3,7 @@
 
 # art-description: Test of HI data 2023 workflow, runs athenaHLT with PhysP1 HI menu
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 
 import sys

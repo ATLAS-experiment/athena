@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -9,6 +9,9 @@
 // Athena
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODTracking/VertexAuxContainer.h"
+#include "StoreGate/WriteDecorHandle.h"
+#include "StoreGate/DecorKeyHelpers.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 // C/C++
 #include <cmath>
@@ -54,16 +57,16 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::initialize()
 
   ATH_CHECK(m_svContainerName.initialize());
 
-  m_indexVectorDec           = std::make_unique<decoratorVecInt_t>    (m_decoratorNameIndexVector);
-  m_indexVectorDecDeepMerge  = std::make_unique<decoratorVecInt_t>    (m_decoratorNameIndexVector+"DeepMerge");
-
-  m_lepSVElementLinksDec           = std::make_unique<decoratorVecElemVtx_t>(m_decoratorNameSecVtxLinks);
-  m_lepDeepMergedSVElementLinksDec = std::make_unique<decoratorVecElemVtx_t>(m_decoratorNameDeepMergedSecVtxLinks);
+  m_decoratorNameIndexVectorDeepMerge = SG::decorKeyFromKey(m_decoratorNameIndexVector.key()) + "DeepMerge";
+  ATH_CHECK(m_decoratorNameIndexVector.initialize());
+  ATH_CHECK(m_decoratorNameIndexVectorDeepMerge.initialize());
+  ATH_CHECK(m_decoratorNameSecVtxLinks.initialize());
+  ATH_CHECK(m_decoratorNameDeepMergedSecVtxLinks.initialize());
 
   ATH_MSG_DEBUG("LeptonContainerName      = " << m_leptonContainerKey);
   ATH_MSG_DEBUG("ReFitPriVtxContainerName = " << m_refittedPriVtxContainerName);
   ATH_MSG_DEBUG("SVContainerName          = " << m_svContainerName);
-  ATH_MSG_DEBUG("IndexVectorName          = " << m_decoratorNameIndexVector);
+  ATH_MSG_DEBUG("IndexVectorName          = " << m_decoratorNameIndexVector.key());
 
   ATH_MSG_DEBUG("mergeMinVtxDist       = " << m_mergeMinVtxDist);
   ATH_MSG_DEBUG("mergeChi2OverDoF      = " << m_mergeChi2OverDoF);
@@ -108,12 +111,14 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
   //
   TimerScopeHelper timer(m_timerExec);
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   m_countEvents++;
 
   //
   // Find Inner Detector tracks save them class member variable for convenience.
   //
-  SG::ReadHandle<xAOD::TrackParticleContainer> h_inDetTracks(m_inDetTracksKey);
+  SG::ReadHandle<xAOD::TrackParticleContainer> h_inDetTracks(m_inDetTracksKey, ctx);
   if (!h_inDetTracks.isValid()){
     ATH_MSG_FATAL("execute - failed to find the InDetTrackParticles");
     return StatusCode::FAILURE;
@@ -126,7 +131,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
   //
   std::set< xAOD::Vertex* > svSet;
 
-  SG::WriteHandle<xAOD::VertexContainer> h_SVContainer (m_svContainerName);
+  SG::WriteHandle<xAOD::VertexContainer> h_SVContainer (m_svContainerName, ctx);
   ATH_CHECK(h_SVContainer.record(
     std::make_unique< xAOD::VertexContainer>(), std::make_unique< xAOD::VertexAuxContainer>()
   ));
@@ -135,9 +140,9 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
   //
   // Retrieve containers from evtStore
   //
-  SG::ReadHandle<xAOD::IParticleContainer> leptonContainer (m_leptonContainerKey);
-  SG::ReadHandle<xAOD::VertexContainer> vertices (m_primaryVertexContainerName);
-  SG::ReadHandle<xAOD::VertexContainer> refittedVertices(m_refittedPriVtxContainerName);
+  SG::ReadHandle<xAOD::IParticleContainer> leptonContainer (m_leptonContainerKey, ctx);
+  SG::ReadHandle<xAOD::VertexContainer> vertices (m_primaryVertexContainerName, ctx);
+  SG::ReadHandle<xAOD::VertexContainer> refittedVertices(m_refittedPriVtxContainerName, ctx);
 
   ATH_MSG_DEBUG ("NonPromptLeptonVertexingAlg::execute - Read " << vertices->size()          << " primary vertices");
   ATH_MSG_DEBUG ("NonPromptLeptonVertexingAlg::execute - Read " << refittedVertices->size()  << " refitted primary vertices");
@@ -182,6 +187,16 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
 
   SG::AuxElement::ConstAccessor<ElementLink<xAOD::VertexContainer> > priVtxWithoutLepAcc(m_linkNameRefittedPriVtxWithoutLepton);
 
+  using VecElemVtx_t = std::vector<ElementLink<xAOD::VertexContainer> >;
+  SG::WriteDecorHandle<xAOD::IParticleContainer, std::vector<int> >
+    indexVectorDec (m_decoratorNameIndexVector, ctx);
+  SG::WriteDecorHandle<xAOD::IParticleContainer, std::vector<int> >
+    indexVectorDecDeepMerge (m_decoratorNameIndexVectorDeepMerge, ctx);
+  SG::WriteDecorHandle<xAOD::IParticleContainer, VecElemVtx_t>
+    lepSVElementLinksDec (m_decoratorNameSecVtxLinks, ctx);
+  SG::WriteDecorHandle<xAOD::IParticleContainer, VecElemVtx_t>
+    lepDeepMergedSVElementLinksDec (m_decoratorNameDeepMergedSecVtxLinks, ctx);
+
   for(const xAOD::IParticle *lepton: *leptonContainer) {
     const xAOD::TrackParticle *tracklep = 0;
     const xAOD::Electron      *elec     = dynamic_cast<const xAOD::Electron*>(lepton);
@@ -210,10 +225,10 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
     }
 
     if(!tracklep) {
-      (*m_lepSVElementLinksDec)          (*lepton) = std::vector<ElementLink<xAOD::VertexContainer> >();
-      (*m_lepDeepMergedSVElementLinksDec)(*lepton) = std::vector<ElementLink<xAOD::VertexContainer> >();
-      (*m_indexVectorDec)                (*lepton) = std::vector<int>();
-      (*m_indexVectorDecDeepMerge)       (*lepton) = std::vector<int>();
+      lepSVElementLinksDec          (*lepton).clear();
+      lepDeepMergedSVElementLinksDec(*lepton).clear();
+      indexVectorDec                (*lepton).clear();
+      indexVectorDecDeepMerge       (*lepton).clear();
 
       ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute - cannot find muon->inDetTrackParticleLink() nor electron->trackParticle()");
       continue;
@@ -290,10 +305,10 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
     ATH_MSG_DEBUG ("NonPromptLeptonVertexingAlg::execute -- number of two-track   SV = " << twoTrkVertices.size());
     ATH_MSG_DEBUG ("NonPromptLeptonVertexingAlg::execute -- number of deep merged SV = " << deep_merged_result.vtxsNewMerged.size());
 
-    (*m_lepSVElementLinksDec)          (*lepton) = svLinks;
-    (*m_lepDeepMergedSVElementLinksDec)(*lepton) = deepmergeSVLinks;
-    (*m_indexVectorDec)                (*lepton) = indexVectorTwoTrk;
-    (*m_indexVectorDecDeepMerge)       (*lepton) = indexVectorDeepMerged;
+    lepSVElementLinksDec          (*lepton) = std::move(svLinks);
+    lepDeepMergedSVElementLinksDec(*lepton) = std::move(deepmergeSVLinks);
+    indexVectorDec                (*lepton) = std::move(indexVectorTwoTrk);
+    indexVectorDecDeepMerge       (*lepton) = std::move(indexVectorDeepMerged);
 
     ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg - done with lepton pT=" << tracklep->pt() << ", " << truthAsStr(*lepton) << endl
       << "___________________________________________________________________________");
@@ -460,115 +475,6 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
   }
 
   return twoTrkVertices;
-}
-
-//=============================================================================
-std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::prepLepWithMergedSVVec(
-  const FittingInput &input,
-  const xAOD::TrackParticle* tracklep,
-  std::vector<std::unique_ptr<xAOD::Vertex>> &twoTrkVertices
-)
-{
-  //
-  // Merge the two vertices if the distance between them with in 0.5 mm.
-  // Re-fit a three-track vertex using the input tracks from the vertices above.
-  //
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesPass;
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesPassFixed;
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesMerged;
-  std::vector<std::unique_ptr<xAOD::Vertex>> resultVertices;
-
-  if(!input.priVtx) {
-    ATH_MSG_WARNING("prepLepWithMergedSVVec -- invalid primary vertex: nothing to do");
-    return resultVertices;
-  }
-
-  for(std::unique_ptr<xAOD::Vertex> &vtx: twoTrkVertices) {
-    double chi2OverDoF = -99.;
-
-    if(vtx->numberDoF() > 0 && vtx->chiSquared() > 0) {
-      chi2OverDoF = vtx->chiSquared()/double(vtx->numberDoF());
-    }
-
-    if(chi2OverDoF >= 0.0 && chi2OverDoF < m_mergeChi2OverDoF) {
-      twoTrkVerticesPass      .push_back(std::move(vtx));
-      twoTrkVerticesPassFixed.push_back(std::move(vtx));
-    }
-  }
-
-  std::vector<std::unique_ptr<xAOD::Vertex>>::iterator curr_iter = twoTrkVerticesPass.begin();
-
-  while(curr_iter != twoTrkVerticesPass.end()) {
-    std::vector<std::unique_ptr<xAOD::Vertex>> clusterVtxs;
-    clusterVtxs.push_back(std::move(*curr_iter));
-
-    twoTrkVerticesPass.erase(curr_iter);
-
-    makeVertexCluster(clusterVtxs, twoTrkVerticesPass);
-
-    curr_iter = twoTrkVerticesPass.begin();
-
-    //
-    // Fit vertex cluster
-    //
-    std::vector<const xAOD::TrackParticle*> tracksForFit;
-
-    for(std::unique_ptr<xAOD::Vertex> &vtx: clusterVtxs) {
-      for(unsigned k = 0; k < vtx->nTrackParticles(); ++k) {
-        const xAOD::TrackParticle *track  = vtx->trackParticle(k);
-
-        if(track) {
-          tracksForFit.push_back(track);
-        }
-      }
-    }
-
-    //
-    // Ignore standalone vertexes
-    //
-    if(clusterVtxs.size() < 2) {
-      continue;
-    }
-
-    //
-    // Fit merged vertex
-    //
-    tracksForFit.push_back(tracklep);
-
-    std::unique_ptr<xAOD::Vertex> newSecondaryVertex = m_vertexFitterTool->fitVertexWithPrimarySeed(
-      input, tracksForFit, kSimpleMergedVtx
-    );
-
-    if(!newSecondaryVertex) {
-      ATH_MSG_DEBUG("DecorateLepWithMergedSVVec -- failed to fit merged vertex");
-      continue;
-    }
-
-    resultVertices.push_back(std::move(newSecondaryVertex));
-
-    for(std::unique_ptr<xAOD::Vertex> &vtx: clusterVtxs) {
-      twoTrkVerticesMerged.push_back(std::move(vtx));
-    }
-
-    ATH_MSG_DEBUG("DecorateLepWithMergedSVVec -- NTrack of merged vertex = " << newSecondaryVertex->nTrackParticles());
-  }
-
-  //
-  // Include passed 2-track vertexes that were NOT merged
-  //
-  for(std::unique_ptr<xAOD::Vertex> &vtx: twoTrkVerticesPassFixed) {
-    const std::vector<std::unique_ptr<xAOD::Vertex>>::const_iterator fit = std::find(
-      twoTrkVerticesMerged.begin(),
-      twoTrkVerticesMerged.end(),
-      vtx
-    );
-
-    if(fit == twoTrkVerticesMerged.end()) {
-      resultVertices.push_back(std::move(vtx));
-    }
-  }
-
-  return resultVertices;
 }
 
 //=============================================================================

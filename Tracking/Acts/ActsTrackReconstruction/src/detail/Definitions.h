@@ -12,7 +12,6 @@
 #include "Acts/Propagator/SympyStepper.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
-#include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/TrackSelector.hpp"
 
@@ -24,6 +23,7 @@ namespace ActsTrk::detail {
   using RecoTrackContainerProxy = RecoTrackContainer::TrackProxy;
   using RecoTrackStateContainer = Acts::VectorMultiTrajectory;
   using RecoTrackStateContainerProxy = RecoTrackStateContainer::TrackStateProxy;
+  using RecoConstTrackStateContainerProxy = RecoTrackStateContainer::ConstTrackStateProxy;
 
   /// Adapted from Acts Examples/Algorithms/TrackFinding/src/TrackFindingAlgorithmFunction.cpp
 
@@ -43,7 +43,6 @@ namespace ActsTrk::detail {
     // CKF algorithm
     CKF ckf;
     // CKF configuration
-    Acts::MeasurementSelector measurementSelector;
     Acts::CombinatorialKalmanFilterExtensions<RecoTrackContainer> ckfExtensions;
     // Track selection
     Acts::TrackSelector trackSelector;

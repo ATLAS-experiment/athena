@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ROOT include(s):
@@ -19,6 +19,7 @@
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PATInterfaces/SystematicVariation.h" 
 #include "PathResolver/PathResolver.h"
+#include "AthContainers/Decorator.h"
 
 #include <iostream>
 #include <fstream>
@@ -37,12 +38,13 @@ namespace CP {
   
   using namespace JTC;
 
-  static SG::AuxElement::Decorator<unsigned int> dec_status("TileStatus");
-  static SG::AuxElement::Decorator<float> dec_ptraw("Ptraw");
+  static const SG::Decorator<unsigned int> dec_status("TileStatus");
+  static const SG::Decorator<float> dec_ptraw("Ptraw");
   
 
   JetTileCorrectionTool :: JetTileCorrectionTool( const std::string& name )
     : asg::AsgMetadataTool( name ),
+      m_RJET(0),
       m_appliedSystematics(nullptr)
   {
     declareProperty("CorrectionFileName", m_rootFileName="JetTileCorrection/JetTile_pFile_010216.root", "Parametrization file");
@@ -248,7 +250,7 @@ namespace CP {
     if( itr == m_systFilter.end() ){
       
       // New systematic. We need to parse it.
-      static CP::SystematicSet affectingSys = affectingSystematics();
+      static const CP::SystematicSet affectingSys = affectingSystematics();
       CP::SystematicSet filteredSys;   
       if (!CP::SystematicSet::filterForAffectingSystematics(systConfig, affectingSys, filteredSys)){
 	ATH_MSG_ERROR("Unsupported combination of systematics passed to the tool!");

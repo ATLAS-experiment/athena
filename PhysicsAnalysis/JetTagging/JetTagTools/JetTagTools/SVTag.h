@@ -16,7 +16,6 @@
 #include "xAODTracking/Vertex.h"
 
 #include <vector>
-#include <map>
 
 namespace Analysis
 {  
@@ -37,47 +36,47 @@ namespace Analysis
                                 xAOD::BTagging& BTag,
                                 const std::string &jetName) const override;
       virtual void finalizeHistos() override {};
-      
-    private:      
-      
       //GP: calculate the 3d significance on the fly
       double get3DSignificance(const xAOD::Vertex& priVertex,
-                               std::vector<const xAOD::Vertex*>& secVertex,
-                               const Amg::Vector3D jetDirection) const;
+        std::vector<const xAOD::Vertex*>& secVertex,
+        const Amg::Vector3D jetDirection) const;
 
       double get3DSignificanceCorr(const xAOD::Vertex& priVertex,
-                               std::vector<const xAOD::Vertex*>& secVertex,
-                               const Amg::Vector3D jetDirection) const;
+        std::vector<const xAOD::Vertex*>& secVertex,
+        const Amg::Vector3D jetDirection) const;
+
+    private:      
+      
       
 
       ToolHandle< NewLikelihoodTool > m_likelihoodTool;
-      HistoHelperRoot* m_histoHelper;
+      HistoHelperRoot* m_histoHelper{};
       
-      double m_c_mom;
-      float  m_expos;
+      double m_c_mom{};
+      float  m_expos{};
       
       std::string m_runModus; 
       std::string m_refType;
       std::string m_SVmode;
-      float m_pTjetmin;
-      bool m_checkOverflows;
-      double m_purificationDeltaR;
+      float m_pTjetmin{};
+      bool m_checkOverflows{};
+      double m_purificationDeltaR{};
      
       /** just print some info at the beginning */
       void printParameterSettings();
 
       // for debugging:
-      mutable std::atomic<int> m_nbjet;
-      mutable std::atomic<int> m_ncjet;
-      mutable std::atomic<int> m_nljet;
+      mutable std::atomic<int> m_nbjet{};
+      mutable std::atomic<int> m_ncjet{};
+      mutable std::atomic<int> m_nljet{};
 
-      bool m_useCHypo;
-      bool m_usePtSV2;
+      bool m_useCHypo{};
+      bool m_usePtSV2{};
 
       std::vector<std::string> m_jetCollectionList;
       std::vector<std::string> m_hypotheses;
 
-      bool m_doForcedCalib;
+      bool m_doForcedCalib{};
       std::string m_ForcedCalibName;
       //name of the VKalVrt secondary vertex in Jet instance
       //(needed to retrieve the ISvxConstituent written 
@@ -86,9 +85,9 @@ namespace Analysis
       std::string m_xAODBaseName;
 
       // flag to turn ON/OFF the use of \DeltaR(jet,PV-SV) in the likelihood
-      bool m_useDRJPVSV;    
-      bool m_isFlipped; // true if tagger is configured in flipped mode. in that case adjusts DRJPVSV computation
-      bool m_save_probabilities;
+      bool m_useDRJPVSV{};    
+      bool m_isFlipped{}; // true if tagger is configured in flipped mode. in that case adjusts DRJPVSV computation
+      bool m_save_probabilities{};
 
     }; // End class
 

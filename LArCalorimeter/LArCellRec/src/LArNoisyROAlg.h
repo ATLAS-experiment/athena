@@ -56,9 +56,9 @@ class LArNoisyROAlg : public AthReentrantAlgorithm
   SG::WriteHandleKey<LArNoisyROSummary> m_outputKey {this, "OutputKey", "LArNoisyROSummary", "output object key"};
   SG::ReadCondHandleKey<LArBadFebCont> m_knownBadFEBsVecKey {this, "BadFEBsKey", "LArKnownBadFEBs", "key to read the known Bad FEBs"};
   SG::ReadCondHandleKey<LArBadFebCont> m_knownMNBFEBsVecKey {this, "MNBFEBsKey", "LArKnownMNBFEBs", "key to read the known MNB FEBs"};
-  SG::ReadCondHandleKey<LArHVNMap> m_hvMapKey {this, "HVMapKey", "LArHVNcells", "key to read HVline Ncells map"};
+  SG::ReadCondHandleKey<LArHVNMap> m_hvMapKey {this, "HVMapKey", "", "key to read HVline Ncells map"};
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
-  SG::ReadCondHandleKey<LArHVIdMapping> m_hvCablingKey {this, "LArHVIdMapping", "LArHVIdMap", "SG key for HV ID mapping"};
+  SG::ReadCondHandleKey<LArHVIdMapping> m_hvCablingKey {this, "LArHVIdMapping", "", "SG key for HV ID mapping"};
 
 };
 

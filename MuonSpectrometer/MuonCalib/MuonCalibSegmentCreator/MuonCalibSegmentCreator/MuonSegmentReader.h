@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,45 +9,32 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #ifndef MUONCALIB_MUONSEGMENTREADER_H
 #define MUONCALIB_MUONSEGMENTREADER_H
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
-//#include "xAODTracking/TrackParticleContainer.h"
 #include <xAODEventInfo/EventInfo.h>
-#include "MuonSegment/MuonSegment.h"
-#include "MuonPrepRawData/MuonPrepDataContainer.h"
 
-#include "TrkSegment/SegmentCollection.h"
 #include "TrkTrack/TrackCollection.h"
-#include "TrkTrack/TrackInfo.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkToolInterfaces/IResidualPullCalculator.h"
 
-#include "MuonCablingData/MuonMDT_CablingMap.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-// #include "MdtCalibSvc/MdtCalibrationTool.h"
 #include "MdtCalibInterfaces/IMdtCalibrationTool.h"
 #include "MuonCalibITools/IIdToFixedIdTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonTesterTree/MuonTesterTreeDict.h"
+#include "MuonTesterTree/MuonTesterTree.h" //for MuonVal::MuonTesterTree
+#include "MuonTesterTree/ThreeVectorBranch.h"
 #include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/WriteHandleKey.h"
-//#include "MuonTester/MuonTesterBranch.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
-
-#include "TTree.h"
 
 /** An example algorithm that reads and writes objects from the event store
 using handles.*/
 namespace Trk {
-    //class IExtrapolator;
-    class IResidualPullCalculator;
     class CompetingRIOsOnTrack;
     class RIO_OnTrack;
 }  // namespace Trk
 
-using namespace MuonVal ;
 namespace MuonCalib {
+using namespace MuonVal ;
 
 class MuonSegmentReader : public AthHistogramAlgorithm
    {

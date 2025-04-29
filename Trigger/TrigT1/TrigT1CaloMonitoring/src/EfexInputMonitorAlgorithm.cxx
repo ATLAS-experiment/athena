@@ -25,7 +25,7 @@ StatusCode EfexInputMonitorAlgorithm::initialize() {
     ATH_CHECK( m_bcContKey.initialize() );
 
 
-  // load the scid map
+    // load the scid map
     if (auto fileName = PathResolverFindCalibFile( "L1CaloFEXByteStream/2023-02-13/scToEfexTowers.root" ); !fileName.empty()) {
         std::unique_ptr<TFile> f( TFile::Open(fileName.c_str()) );
         if (f) {
@@ -139,6 +139,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     if(missingLAr) {
         Decision = "MissingSCells";
         fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+        ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
     }
 
 
@@ -161,11 +162,13 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         Decision="BadEMStatus";
         ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
         fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
+        ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
     }
       if(eTower->had_status()) {
           Decision="BadHadStatus";
           ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
           fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
+          ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
       }
       std::vector<uint16_t> counts=eTower->et_count();
       std::vector<uint16_t> refcounts;
@@ -184,6 +187,23 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               continue;
           }
           bool isLAr = !(i==10 && std::abs(Towereta)<=1.5);
+          if(counts[i]==1025) {
+              // 1025 is the code used by bytestream decoder if there is no input for that slot
+              if(isLAr) {
+                  if (auto itr = m_scMap.find(std::make_pair(coord, i)); itr != m_scMap.end()) {
+                      SlotSCID = itr->second.second;
+                  }
+                  Decision = "MissingLAr";
+                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
+              } else {
+                  Decision = "MissingTile";
+                  SlotSCID="";
+                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
+              }
+              continue;
+          }
           TowerSlot = i;
           TowerCount = counts[i];
           TowerRefCount = -1;
@@ -195,7 +215,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   TowerRefCount = refcounts.at(i);
                   if(isLAr) {
                       if(TowerCount==1022) {
-                          Decision = "LArInvalidCode";
+                          //Decision = "LArInvalidCode"; - not an error, or at least not one we (L1Calo) should be tracking for now
                           if(TowerRefCount!=1022) {
                               Decision = "LArInvalidCodeMismatched";
                           }
@@ -219,6 +239,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   }
                   ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
                   fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
               }
           }
           // since lar invalid codes will be treated as a 0 energy, don't fill into plot
@@ -230,7 +251,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   if(etaIdx>0) etaIdx--; // so goes from -25 to 24
                   int phiIdx = std::abs(TowerId % 100000)/1000;
                   if(phiIdx>31) phiIdx -= 64; // so goes from -32 to 31
-                  binNumber = (phiIdx+32)*50 + 26 + etaIdx; // = 50*(y-1)+x as displayed in standard histogram
+                  binNumber = (25 + etaIdx)*64 + phiIdx+33; // = 64*(x-1)+y as displayed in standard histogram
                   fill((i<10) ? "ecal" : "hcal",lbn,Towereta,Towerphi,TowerCount,AboveCut,BelowCut,binNumber);
               }
           }

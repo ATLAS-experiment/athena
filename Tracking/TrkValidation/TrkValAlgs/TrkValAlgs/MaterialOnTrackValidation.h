@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -55,21 +55,21 @@ class MaterialOnTrackValidation : public AthAlgorithm {
 
       /** booking the tree */
       void bookTree();
-      TTree*  m_Tree;
+      TTree*  m_Tree{};
 
       /** variables */
-      int     m_updates;                //!< number of updates, for max value MAXUPDATES in line 14
-      float   m_positionX[MAXUPDATES];  //!< x position of the update
-      float   m_positionY[MAXUPDATES];  //!< y position of the update
-      float   m_positionZ[MAXUPDATES];  //!< z position of the update
-      float   m_positionR[MAXUPDATES];  //!< r value of the material update
-      float   m_momentum[MAXUPDATES];   //!< momentum before the update is applied
-      float   m_momentumChange[MAXUPDATES];      //!< change of the momentum
-      float   m_traversedPathInX0[MAXUPDATES];   //!< accumulated traversed path in rlength
-      double  m_currentPathInX0;                 //!< accumulation variable
-      float   m_traversedStepInX0[MAXUPDATES];   //!< the step path in x0
-      double  m_eta[MAXUPDATES];                 //!< eta
-      double  m_stepInX0;                        //!< traversed thickness in radiation length
+      int     m_updates{};                //!< number of updates, for max value MAXUPDATES in line 14
+      float   m_positionX[MAXUPDATES]{};  //!< x position of the update
+      float   m_positionY[MAXUPDATES]{};  //!< y position of the update
+      float   m_positionZ[MAXUPDATES]{};  //!< z position of the update
+      float   m_positionR[MAXUPDATES]{};  //!< r value of the material update
+      float   m_momentum[MAXUPDATES]{};   //!< momentum before the update is applied
+      float   m_momentumChange[MAXUPDATES]{};      //!< change of the momentum
+      float   m_traversedPathInX0[MAXUPDATES]{};   //!< accumulated traversed path in rlength
+      double  m_currentPathInX0{};                 //!< accumulation variable
+      float   m_traversedStepInX0[MAXUPDATES]{};   //!< the step path in x0
+      double  m_eta[MAXUPDATES]{};                 //!< eta
+      double  m_stepInX0{};                        //!< traversed thickness in radiation length
 
 };
 

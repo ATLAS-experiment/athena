@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,9 +18,11 @@
 
 #include "L1CaloFEXToolInterfaces/IeFEXFPGATowerIdProvider.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 namespace LVL1 {
   /**
    * @class eFEXFPGATowerIdProvider
@@ -78,7 +80,7 @@ namespace LVL1 {
     bool ifhaveinputfile() const override;
 
   private:
-    bool m_hascsvfile; ///< if the csv file is valid
+    bool m_hascsvfile{false}; ///< if the csv file is valid
 
     /**
      * @brief rank the tower ids in an FPGA
@@ -96,10 +98,10 @@ namespace LVL1 {
     StatusCode rankTowerinFPGA(int FPGAindex) override;
 
     /// Ordered tower Ids in each FPGAs. The index is the index of the FPGA. @see getFPGAIndex
-    std::vector<std::vector<int>*> m_towerrankingcache;
+    std::vector<std::unique_ptr<std::vector<int>>> m_towerrankingcache;
 
     /// Unordered tower Ids in each FPGAs. The index is the index of the FPGA. @see getFPGAIndex
-    std::unordered_map<int, std::vector<towerinfo>* > m_alltowers;
+    std::unordered_map<int, std::unique_ptr<std::vector<towerinfo>> > m_alltowers;
 
     /// @brief check if an FPGA exists in the csv file
     bool hasFPGA(int) const override;

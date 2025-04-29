@@ -9,6 +9,7 @@
 
 #include <GaudiKernel/IInterface.h>
 #include <PixelReadoutDefinitions/PixelReadoutDefinitions.h>
+#include <InDetReadoutGeometry/SiDetectorElement.h>
 
 class Identifier;
 class IdentifierHash;
@@ -25,12 +26,17 @@ public:
   virtual ~IPixelReadoutManager() = default;
 
   virtual PixelModuleType getModuleType(Identifier id) const = 0;
+  
   virtual PixelDiodeType getDiodeType(Identifier id) const = 0;
+  
+  virtual PixelDiodeType getDiodeType(Identifier id,
+				      const SiDetectorElement* element) const = 0;
 
   virtual Identifier getPixelIdfromHash(IdentifierHash offlineIdHash,
                                         uint32_t FE,
                                         uint32_t row,
                                         uint32_t column) const = 0;
+  
   virtual Identifier getPixelId(Identifier offlineId,
                                 uint32_t FE,
                                 uint32_t row,
@@ -38,8 +44,14 @@ public:
 
   virtual uint32_t getFE(Identifier diodeId,
                          Identifier offlineId) const = 0;
+  
+  virtual uint32_t getFE(Identifier diodeId,
+			 Identifier offlineId,
+			 const SiDetectorElement* element) const = 0;
+  
   virtual uint32_t getColumn(Identifier diodeId,
                              Identifier offlineId) const = 0;
+  
   virtual uint32_t getRow(Identifier diodeId,
                           Identifier offlineId) const = 0;
 };

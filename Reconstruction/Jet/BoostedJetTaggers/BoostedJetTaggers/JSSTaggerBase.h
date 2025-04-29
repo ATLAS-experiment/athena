@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_JSSTAGGERBASE_H
@@ -76,6 +76,8 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassMassKey{this, "PassMassName", "PassMass", "SG key for PassMass"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassScoreKey{this, "PassScoreName", "PassScore", "SG key for PassScore"};
 
+    SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
+
     /// Maximum number of warnings
     const int m_nWarnMax = 10;
 
@@ -94,7 +96,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     /// TAGTYPE enum
     enum TAGCLASS{Unknown, WBoson, ZBoson, TopQuark};
-    TAGCLASS m_tagClass;
+    TAGCLASS m_tagClass{Unknown};
 
     /// Configurable members
 
@@ -126,9 +128,9 @@ class JSSTaggerBase :   public asg::AsgTool ,
     std::string m_tagType;
 
     /// Kinematic bounds for the jet - the units are controlled by m_ptGeV
-    float m_jetPtMin;
-    float m_jetPtMax;
-    float m_jetEtaMax;
+    float m_jetPtMin{};
+    float m_jetPtMax{};
+    float m_jetEtaMax{};
 
     /// Flags controlling whether generalized ECF moments or L-series ratios are needed
     /// TODO: Implement the functionality controlled by these
@@ -170,7 +172,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readParentKey{this, "ParentName", "Parent", "SG key for Parent"};
 
-    bool m_suppressOutputDependence;
+    bool m_suppressOutputDependence{};
 
     /// Strings for cut functions
     std::string m_strMassCutLow;
@@ -186,8 +188,8 @@ class JSSTaggerBase :   public asg::AsgTool ,
     std::string m_decorationName;
 
     /// Flag to calculate scale factor
-    bool m_calcSF;
-    bool m_isMC;
+    bool m_calcSF{};
+    bool m_isMC{};
 
     /// String for scale factor decoration names
     std::string m_weightDecorationName;
@@ -202,7 +204,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
     std::map<std::string, std::unique_ptr<TH2D>> m_efficiencyHistograms;
 
     /// Truth label options
-    bool m_truthLabelUseTRUTH3;
+    bool m_truthLabelUseTRUTH3{};
     std::string m_truthParticleContainerName;
     std::string m_truthBosonContainerName;
     std::string m_truthTopQuarkContainerName;

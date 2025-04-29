@@ -12,19 +12,19 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         dbName = 'RPC_OFL' if flags.Input.isMC else 'RPC'
         cablingFolder = "/RPC/NCABLING/JSON" if flags.Input.isMC else "/RPC/Onl/NCABLING/JSON"
-        cablingTag = "RpcNcablingJson-RUN3-04"
+        cablingTag = "RpcNcablingJson-RUN3-08"
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:  
             if flags.GeoModel.Run <= LHCPeriod.Run3:   
-                cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-2"
+                cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-5"
             else:
-                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-3"
+                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-5"
 
         result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
         kwargs.setdefault("MapFolders",  cablingFolder)
     
     ### Cabling algorithm setup
-    NRPCCablingAlg = CompFactory.MuonNRPC_CablingAlg(name, **kwargs)
+    NRPCCablingAlg = CompFactory.Muon.NRpcCablingAlg(name, **kwargs)
 
     result.addCondAlgo( NRPCCablingAlg, primary= True)
     return result
@@ -173,10 +173,10 @@ def CSCCablingConfigCfg(flags):
 
     return acc
 
-def NswCablingCfg(flags, name = "MuonNSW_CablingAlg", **kwargs):
+def MmCablingCfg(flags, name = "MuonMm_CablingAlg", **kwargs):
     result = ComponentAccumulator()
     #### Only setup the MM Cabling algorithm for data
-    if flags.Input.isMC or (not flags.Detector.GeometryMM and not flags.Detector.GeometrysTGC): 
+    if flags.Input.isMC or (not flags.Detector.GeometryMM): 
         return result
 
     from IOVDbSvc.IOVDbSvcConfig import addFolders
@@ -187,6 +187,25 @@ def NswCablingCfg(flags, name = "MuonNSW_CablingAlg", **kwargs):
     the_alg = CompFactory.MuonNSW_CablingAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
+
+def sTgcCablingCfg(flags, name = "MuonsTgc_CablingAlg", **kwargs):
+    result = ComponentAccumulator()
+    #### Only setup the MM Cabling algorithm for data
+    if flags.Input.isMC or (not flags.Detector.GeometrysTGC): 
+        return result
+
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    cablingFolder = ["/TGC/NSW/CABLING" if not flags.Common.isOnline else "/TGC/Onl/NSW/CABLING"]
+    kwargs.setdefault("CablingFolder",cablingFolder)
+    kwargs.setdefault("WriteKey",'stgcCablingMap')
+    result.merge(addFolders(flags, kwargs["CablingFolder"], detDb=("TGC_OFL" if not flags.Common.isOnline else "TGC_ONL"), className="CondAttrListCollection"))
+
+    the_alg = CompFactory.MuonNSW_CablingAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
+
+
+
 #All the cabling configs together (convenience function)
 def MuonCablingConfigCfg(flags):
     acc = ComponentAccumulator()
@@ -197,7 +216,8 @@ def MuonCablingConfigCfg(flags):
 
     acc.merge( CSCCablingConfigCfg(flags) )
 
-    acc.merge(NswCablingCfg(flags))
+    acc.merge(MmCablingCfg(flags))
+    acc.merge(sTgcCablingCfg(flags))
 
     return acc
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_MultiTrajectory_h
 #define ActsEvent_MultiTrajectory_h
@@ -20,17 +20,14 @@
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"
-#include "xAODTracking/TrackStateContainer.h" // TODO remove once decorations are fixed
+#include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 // #define DEBUG_MTJ
 #ifdef DEBUG_MTJ
-inline std::string_view name_only(const char* s) {
-  return std::string_view(s+std::string_view(s).rfind('/'));
-}
-#define INSPECTCALL(_INFO) {std::cout << name_only(__FILE__) <<":"<<__LINE__<<" "<<__PRETTY_FUNCTION__<<" "<<_INFO<<std::endl; }
+#define INSPECTCALL(_INFO) {std::cout << __FILE__ <<":"<<__LINE__<<" "<<__PRETTY_FUNCTION__<<" "<<_INFO<<std::endl; }
 #else
 #define INSPECTCALL(_INFO)
 #endif
@@ -71,11 +68,11 @@ using StoredSurface = std::variant<const Acts::Surface*, std::shared_ptr<const A
 
 /**
  * @brief Athena implementation of ACTS::MultiTrajectory (ReadWrite version)
- * The data is stored in 4 external backends. 
+ * The data is stored in 4 external backends.
  * Backends lifetime are not maintained by this class.
- * except when objects are default constructed (this functionality will be removed). 
+ * except when objects are default constructed (this functionality will be removed).
  * This class is meant to be used in track finding algorithms (e.g. CKF) and then converted
- * MultiTrajectory variant. These conversion is meant to be costless. 
+ * MultiTrajectory variant. These conversion is meant to be costless.
  */
 class MutableMultiTrajectory final
     : public Acts::MultiTrajectory<ActsTrk::MutableMultiTrajectory> {
@@ -200,7 +197,7 @@ class MutableMultiTrajectory final
     return typename ConstTrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};
   }
   typename TrackStateProxy::Covariance covariance_impl(ActsTrk::IndexType index) {
-    return typename TrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};    
+    return typename TrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};
   }
 
   /**
@@ -287,7 +284,7 @@ class MutableMultiTrajectory final
    * @return size_t
    */
 
-  inline Acts::TrackIndexType size_impl() const { 
+  inline Acts::TrackIndexType size_impl() const {
     return m_trackStatesSize;
   }
 
@@ -338,17 +335,20 @@ class MutableMultiTrajectory final
                                 std::shared_ptr<const Acts::Surface>);
   const Acts::Surface* referenceSurface_impl(IndexType ) const;
 
-
-  void copyDynamicFrom_impl (ActsTrk::IndexType /*itrack*/,
-                             Acts::HashedString /*key*/,
-                             const std::any& /*src_ptr*/) {
-      // @TODO: This is currently unimplemented
-  }
-
-  std::vector<Acts::HashedString> dynamicKeys_impl() const {
-      // @TODO: This currently does not do anything useful
-      return {};
-  }
+  /**
+   * @brief copy dynamic data from another MTJ
+   * @param istate - index of the track to be filled
+   * @param key - key of the dynamic data
+   * @param src_ptr - pointer to the source data
+   * @warning the type fetched from src and type of the destiantion decoration need to agree
+   */
+  void copyDynamicFrom_impl (ActsTrk::IndexType istate,
+                             Acts::HashedString key,
+                             const std::any& src_ptr);
+  /**
+   * @brief returns the keys of all the dynamic columns
+   */
+  std::vector<Acts::HashedString> dynamicKeys_impl() const;
 
   // access to some backends (for debugging purposes)
   // the receiver should not assume ownership or similar
@@ -401,13 +401,15 @@ class MutableMultiTrajectory final
   std::vector<StoredSurface> m_surfaces;
   ActsGeometryContext m_geoContext;
 
+  xAOD::TrackStateContainer m_trackStatesIface;
+
   // adjust preallocated size to actually used
   void trim();
 };
 
 /**
  * Read only version of MTJ
- * The implementation is separate as the details are significantly different 
+ * The implementation is separate as the details are significantly different
  * and in addition only const methods are ever needed
  */
 class MultiTrajectory
@@ -418,8 +420,10 @@ class MultiTrajectory
       DataLink<xAOD::TrackStateAuxContainer> trackStates,
       DataLink<xAOD::TrackParametersAuxContainer> trackParameters,
       DataLink<xAOD::TrackJacobianAuxContainer> trackJacobians,
-      DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements, 
+      DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements,
       DataLink<xAOD::TrackSurfaceAuxContainer> trackSurfaces);
+
+  MultiTrajectory(ActsTrk::MutableMultiTrajectory& other);
 
   bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
@@ -475,10 +479,7 @@ class MultiTrajectory
 
   void moveLinks(const ActsTrk::MutableMultiTrajectory* mtj);
 
-  std::vector<Acts::HashedString> dynamicKeys_impl() const {
-      // @TODO: This currently does not do anything useful
-      return {};
-  }
+  std::vector<Acts::HashedString> dynamicKeys_impl() const;
 
  private:
   const DataLink<xAOD::TrackStateAuxContainer> m_trackStatesAux;
@@ -488,7 +489,7 @@ class MultiTrajectory
   const DataLink<xAOD::TrackSurfaceAuxContainer> m_trackSurfacesAux;
   std::vector<ActsTrk::detail::Decoration> m_decorations;
 
-  // // TODO remove once tracking code switches to sourceLinks with EL
+  // TODO remove once tracking code switches to sourceLinks with EL
   std::vector<std::optional<Acts::SourceLink>> m_calibratedSourceLinks;
   // still need this to store SourceLinks with other payloads than
   // pointer to xAOD::UncalibratedMeasurement e.g. pointer to Trk::Measurements
@@ -496,6 +497,8 @@ class MultiTrajectory
   std::vector<std::optional<Acts::SourceLink>> m_uncalibratedSourceLinks;
 
   std::vector<StoredSurface> m_surfaces;
+
+  xAOD::TrackStateContainer m_trackStatesIface;
 };
 
 

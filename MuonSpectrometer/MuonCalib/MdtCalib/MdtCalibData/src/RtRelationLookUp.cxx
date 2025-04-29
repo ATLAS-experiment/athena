@@ -6,7 +6,7 @@
 #include <AthenaKernel/getMessageSvc.h>
 #include <GaudiKernel/MsgStream.h>
 namespace MuonCalib{
-    
+
     RtRelationLookUp::RtRelationLookUp(const ParVec &vec) : 
         IRtRelation(vec) {
         if (vec.size() < 4) {
@@ -23,6 +23,10 @@ namespace MuonCalib{
             }
         }
     }
+    unsigned RtRelationLookUp::nDoF() const{
+        return nPar() -2;
+    }
+
     inline int RtRelationLookUp::getBin(double t) const {
         double t_minus_tmin{t - m_t_min};
         double rel = t_minus_tmin / m_bin_size;
@@ -36,7 +40,7 @@ namespace MuonCalib{
         int bin = binInRtRange(t);
 
         // shift bin so we are using the last two bins for extrapolation
-        if (bin >= rtBins() - 1) bin = rtBins() - 2;
+        if (static_cast<unsigned>(bin) >= nDoF() - 1) bin = nDoF() - 2;
 
         double r1 = getRadius(bin);      // get bin value
         double r2 = getRadius(bin + 1);  // get value of next bin
@@ -55,7 +59,7 @@ namespace MuonCalib{
         int bin = binInRtRange(t);
 
         // shift bin so we are using the last two bins for extrapolation
-        if (bin >= rtBins() - 1) bin = rtBins() - 2;
+        if (static_cast<unsigned>(bin) >= nDoF() - 1) bin = nDoF() - 2;
 
         double r1 = getRadius(bin);      // get bin value
         double r2 = getRadius(bin + 1);  // get value of next bin
@@ -77,13 +81,13 @@ namespace MuonCalib{
         if (bin < 0) bin = 0;
 
         // if t corresponds to a bin outside the range of the lookup table return the last bin
-        if (bin >= rtBins()) bin = rtBins() - 1;
+        if (static_cast<unsigned>(bin) >= nDoF()) bin = nDoF() - 1;
 
         return bin;
     }
 
     double RtRelationLookUp::tLower() const { return m_t_min; }
-    double RtRelationLookUp::tUpper() const { return m_t_min + m_bin_size * rtBins(); }
+    double RtRelationLookUp::tUpper() const { return m_t_min + m_bin_size * nDoF(); }
     double RtRelationLookUp::tBinWidth() const {return m_bin_size; }
 }
 

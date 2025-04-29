@@ -53,9 +53,11 @@ def createDQConfigFlags():
     # for in-Athena histogram postprocessing
     acf.addFlag('DQ.doPostProcessing', False)
     acf.addFlag('DQ.postProcessingInterval', 100)
-    
+
     # steering ...
     for flag in _steeringFlags + _lowLevelSteeringFlags:
+        if flag == 'doLVL1CaloMon':
+            continue
         arg = True
         if flag in ['doJetTagMon', 'doMissingEtMon', 'doTauMon']:
             arg = lambda x: x.DQ.DataType is not DQDataType.Cosmics and x.Reco.HIMode is not HIMode.HI # noqa: E731
@@ -67,8 +69,12 @@ def createDQConfigFlags():
             arg = lambda x: x.Trigger.EDMVersion == 3 and x.DQ.Environment != 'AOD' # noqa: E731
         if flag == 'LVL1Calo.doValidation':
             arg = False
-            
+        if flag == 'doZDCMon':
+            arg= lambda x: (x.Reco.EnableZDC is True) # noqa: E731
         acf.addFlag('DQ.Steering.' + flag, arg)
+
+    # special protection for L1Calo monitoring : check L1Calo is indeed in
+    acf.addFlag('DQ.Steering.doLVL1CaloMon', _hasL1Calo)
 
     # HLT steering ...
     from PyUtils.moduleExists import moduleExists
@@ -124,6 +130,17 @@ def getEnvironment(flags):
             local_logger.warning('Unable to figure out environment for DQ; using "tier0ESD"')
             return 'tier0ESD'
 
+def _hasL1Calo(flags):
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    md = GetFileMD(flags.Input.Files)
+    import eformat
+    detMask = eformat.helper.DetectorMask(f'{md.get("detectorMask",[0x0])[0]:032x}')
+    isEnabled = any([
+        detMask.is_set(eformat.helper.SubDetector.TDAQ_CALO_PREPROC),
+        detMask.is_set(eformat.helper.SubDetector.TDAQ_CALO_TOPO_PROC),
+        detMask.is_set(eformat.helper.SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ),
+        detMask.is_set(eformat.helper.SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI)])
+    return isEnabled
 
 def allSteeringFlagsOff(flags):
     for flag in _steeringFlags:

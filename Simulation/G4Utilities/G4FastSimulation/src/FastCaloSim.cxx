@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -20,6 +20,12 @@
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
 
+//Geant4
+#include "G4ParticleTable.hh"
+
+// CLHEP
+#include "CLHEP/Random/RandFlat.h"
+
 // HepMCHelpers include
 #include "TruthUtils/HepMCHelpers.h"
 
@@ -29,14 +35,13 @@
 
 #undef FCS_DEBUG
 
-
-
 FastCaloSim::FastCaloSim(const std::string& name,
                          const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
                          const Gaudi::Property<std::string>& randomEngineName,
                          const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,
                          const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
                          const PublicToolHandle<IG4CaloTransportTool>& G4CaloTransportTool,
+                         const PublicToolHandle<IPunchThroughSimWrapper>& PunchThroughSimWrapper,
                          const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
                          const Gaudi::Property<std::string>& CaloCellContainerSDName,
                          const Gaudi::Property<bool>& doG4Transport,
@@ -45,9 +50,12 @@ FastCaloSim::FastCaloSim(const std::string& name,
                          const Gaudi::Property<bool>& doHadrons,
                          const Gaudi::Property<float>& AbsEtaMin,
                          const Gaudi::Property<float>& AbsEtaMax,
-                         const Gaudi::Property<float>& EkinMin,
-                         const Gaudi::Property<float>& EkinMax,
+                         const Gaudi::Property<float>& EkinMinPhotons,
+                         const Gaudi::Property<float>& EkinMaxPhotons,
+                         const Gaudi::Property<float>& EkinMinElectrons,
+                         const Gaudi::Property<float>& EkinMaxElectrons,
                          const Gaudi::Property<bool>& doEMECFCS,
+                         const Gaudi::Property<bool>& doPunchThrough,
                          FastCaloSimTool * FastCaloSimTool)
 
 : G4VFastSimulationModel(name),
@@ -55,6 +63,7 @@ FastCaloSim::FastCaloSim(const std::string& name,
   m_FastCaloSimCaloTransportation(FastCaloSimCaloTransportation), 
   m_FastCaloSimCaloExtrapolation(FastCaloSimCaloExtrapolation),
   m_G4CaloTransportTool(G4CaloTransportTool),
+  m_PunchThroughSimWrapper(PunchThroughSimWrapper),
   m_FastCaloSimSvc(FastCaloSimSvc),
   m_CaloCellContainerSDName(CaloCellContainerSDName),
   m_doG4Transport(doG4Transport),
@@ -63,11 +72,15 @@ FastCaloSim::FastCaloSim(const std::string& name,
   m_doHadrons(doHadrons),
   m_AbsEtaMin(AbsEtaMin),
   m_AbsEtaMax(AbsEtaMax),
-  m_EkinMin(EkinMin),
-  m_EkinMax(EkinMax),
+  m_EkinMinPhotons(EkinMinPhotons),
+  m_EkinMaxPhotons(EkinMaxPhotons),
+  m_EkinMinElectrons(EkinMinElectrons),
+  m_EkinMaxElectrons(EkinMaxElectrons),
   m_doEMECFCS(doEMECFCS),
+  m_doPunchThrough(doPunchThrough),
   m_FastCaloSimTool(FastCaloSimTool)
 {
+
 }
 
 void FastCaloSim::StartOfAthenaEvent(const EventContext& ctx ){
@@ -75,19 +88,17 @@ void FastCaloSim::StartOfAthenaEvent(const EventContext& ctx ){
   m_rngWrapper = m_rndmGenSvc->getEngine(m_FastCaloSimTool, m_randomEngineName);
   m_rngWrapper->setSeed( m_randomEngineName, ctx );
 
-
   return;
 }
 
 void FastCaloSim::EndOfAthenaEvent(const EventContext&){
-
 
   return;
 }
 
 
 G4bool FastCaloSim::IsApplicable(const G4ParticleDefinition& particleType)
-{   
+{
   // Check whether we can simulate the particle with FastCaloSim
   bool isPhoton   = &particleType == G4Gamma::GammaDefinition();
   bool isElectron = &particleType == G4Electron::ElectronDefinition();
@@ -142,9 +153,11 @@ G4bool FastCaloSim::ModelTrigger(const G4FastTrack& fastTrack)
 
   // Check if there is a configuration for this PID
   bool withinEtaRange = (std::abs(eta_pos) > m_AbsEtaMin) && (std::abs(eta_pos) < m_AbsEtaMax);
-  bool withinEkinRange = (Ekin > m_EkinMin) && (Ekin < m_EkinMax);
+  bool withinEkinRangePhotons = isPhoton && (Ekin > m_EkinMinPhotons) && (Ekin < m_EkinMaxPhotons);
+  bool withinEkinRangeElectrons = (isElectron || isPositron) && (Ekin > m_EkinMinElectrons) && (Ekin < m_EkinMaxElectrons);
+
   
-  if (!(withinEtaRange && withinEkinRange)) {
+  if (!(withinEtaRange && (withinEkinRangePhotons || withinEkinRangeElectrons))) {
     #ifdef FCS_DEBUG
       G4cout<<"[FastCaloSim::ModelTrigger] Model not triggered"<<G4endl;
     #endif
@@ -260,8 +273,6 @@ void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 
   // Extrapolate transported stepos to ID-Calo boundary and all layers of the calorimeter system
   m_FastCaloSimCaloExtrapolation->extrapolate(extrapolState, &truthState, caloSteps);
-
-
   
   // Do not simulate further if extrapolation to ID - Calo boundary fails
   if(extrapolState.IDCaloBoundary_eta() == -999){
@@ -278,6 +289,7 @@ void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
   }
 
   #ifdef FCS_DEBUG
+    G4cout<<"[FastCaloSim::DoIt] pdgID of G4PrimaryTrack: " << pdgID << G4endl;
     G4cout<<"[FastCaloSim::DoIt] Energy returned: " << simState.E() << G4endl;
     G4cout<<"[FastCaloSim::DoIt] Energy fraction for layer: " << G4endl;
     for (int s = 0; s < 24; s++) G4cout<<"[FastCaloSim::DoIt]   Sampling " << s << " energy " << simState.E(s) << G4endl;
@@ -288,14 +300,29 @@ void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
   // Record the cells 
   caloCellContainerSD->recordCells(simState);
 
-  // Clean up the auxiliar info from the simulation state
+  // Do punchthrough here (secondaries), after the main simulation
+  if (m_doPunchThrough){
+    // necessary for determining particle type and properties (mass etc)
+    G4ParticleTable *ptable = G4ParticleTable::GetParticleTable(); 
+    
+    // Get simulated energy
+    const double simE = simState.E();
+
+    // Get energy fraction in layers into vector
+    std::vector<double> simEfrac;
+    for (unsigned int i = 0; i < 24; i++){simEfrac.push_back(simState.Efrac(i));}
+
+    // run actual method (no return, it will do fastStep.CreateSecondaryTrack(...) under the hood)
+    m_PunchThroughSimWrapper->DoPunchThroughSim(*ptable, m_rngWrapper, simE, simEfrac, fastTrack, fastStep);
+  }
+
+  // Clean up the auxiliary info from the simulation state
   simState.DoAuxInfoCleanup();
 
-  // kill the primary track
+  // Finally kill the primary track after all simulation steps done
   fastStep.KillPrimaryTrack();
-  fastStep.SetPrimaryTrackPathLength(0.0);
+  fastStep.ProposePrimaryTrackPathLength(0.0);
 }
-
 
 CaloCellContainerSD * FastCaloSim::getCaloCellContainerSD(){
   

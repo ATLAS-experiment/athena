@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODCREATORALGS_REDOTRUTHLINKSALG_H
 #define XAODCREATORALGS_REDOTRUTHLINKSALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 
 #include "GeneratorObjects/xAODTruthParticleLink.h"
@@ -25,16 +25,15 @@ namespace xAODMaker {
   /// @author James Catmore <James.Catmore@cern.ch>
   /// @author Jovan Mitreski <Jovan.Mitreski@cern.ch>
   /// @author Andy Buckley <Andy.Buckley@cern.ch>
-  class RedoTruthLinksAlg : public AthAlgorithm {
+  class RedoTruthLinksAlg : public AthReentrantAlgorithm {
   public:
 
     /// Regular algorithm constructor
-    RedoTruthLinksAlg( const std::string& name, ISvcLocator* svcLoc );
-
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     /// Function initialising the algorithm
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     /// Function executing the algorithm
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
 
   private:

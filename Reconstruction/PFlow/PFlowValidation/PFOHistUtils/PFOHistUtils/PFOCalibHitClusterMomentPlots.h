@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PFOCALIBHITCLUSTERMOMENTPLOTS_H
@@ -9,6 +9,7 @@
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/FlowElement.h"
 #include "xAODEventInfo/EventInfo.h"
+class TH1;
 
 namespace PFO {
 
@@ -16,7 +17,7 @@ namespace PFO {
 
   public:
 
-    PFOCalibHitClusterMomentPlots(PlotBase *pParent, std::string sDir, std::string sPFOContainerName, std::string sFEContainerName);
+    PFOCalibHitClusterMomentPlots(PlotBase *pParent, const std::string & sDir, const std::string & sPFOContainerName, const std::string & sFEContainerName);
     
     void fill(const xAOD::PFO& PFO, const xAOD::EventInfo& eventInfo);    
     

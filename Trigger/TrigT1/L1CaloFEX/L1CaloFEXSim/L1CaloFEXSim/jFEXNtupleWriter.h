@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -96,7 +96,7 @@ private:
   std::vector<std::vector<int>> m_pileup_map_Et_values_Total_met;
 
 
-  TTree *m_myTree;
+  TTree *m_myTree{};
  
   StatusCode loadsmallRJetAlgoVariables(SG::ReadHandle<LVL1::jFEXOutputCollection>);
   StatusCode loadlargeRJetAlgoVariables(SG::ReadHandle<LVL1::jFEXOutputCollection>);

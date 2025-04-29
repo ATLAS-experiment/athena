@@ -12,7 +12,7 @@
   <class name="CP::NObjectMassSelectorAlg" />
   <class name="CP::NLargeRJetMassWindowSelectorAlg" />
   <class name="CP::DileptonOSSFInvariantMassWindowSelectorAlg" />
-  <class name="CP::SumNElNMuPtSelectorAlg" />
+  <class name="CP::SumNLeptonPtSelectorAlg" />
   <class name="CP::JetNGhostSelectorAlg" />
   <class name="CP::RunNumberSelectorAlg" />
 

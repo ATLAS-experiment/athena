@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -9,136 +9,81 @@
  * The main functionality of the rebinning is tested in the "1DTestSuite".
  */
 
-#undef NDEBUG
-#include <cassert>
-#include <iostream>
-#include <list>
-#include <functional>
+#define BOOST_TEST_MODULE HistogramFillerRebinable2D
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
 #include "TestTools/initGaudi.h"
-#include "TestTools/expect.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "AthenaKernel/getMessageSvc.h"
 
 #include "TH2D.h"
 #include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "AthenaMonitoringKernel/MonitoredScalar.h"
 #include "../src/HistogramFiller/HistogramFillerRebinable.h"
-
 #include "mocks/MockHistogramProvider.h"
 
-using namespace std;
 using namespace Monitored;
 
-#define REGISTER_TEST_CASE(TEST_CASE_NAME) registerTestCase(&HistogramFillerRebinable2DTestSuite::TEST_CASE_NAME, #TEST_CASE_NAME)
+/// Test fixture (run before each test)
+class TestFixture {
+public:
+  TestFixture() {
+    m_histogramDef.type = "TH1F";
+    m_histogramDef.xbins = 1;
+    m_histogramDef.kAddBinsDynamically = true;
+    m_histogramProvider.reset(new MockHistogramProvider());
+    m_histogram.reset(new TH2D("MockHistogram", "Mock Histogram", 8, 1.0, 3.0, 5, 1.0, 5.0));
+    m_testObj.reset(new HistogramFillerRebinable2D(m_histogramDef, m_histogramProvider));
 
-class HistogramFillerRebinable2DTestSuite {
-  // ==================== All registered test cases ====================
-  private:
-    list<function<void(void)>> registeredTestCases() {
-      return {
-        REGISTER_TEST_CASE(test_shouldKeepNumberOfBinsForValueInHistogramsRange),
-        REGISTER_TEST_CASE(test_shouldDoubleNumberOfBinsForValueOutsideRange),
-      };
-    }
-
-  // ==================== Test code ====================
-  private:
-    void beforeEach() {
-        m_histogramDef.type = "TH1F";
-        m_histogramDef.xbins = 1;
-        m_histogramDef.kAddBinsDynamically = true;
-        m_histogramProvider.reset(new MockHistogramProvider());
-        m_histogram.reset(new TH2D("MockHistogram", "Mock Histogram", 8, 1.0, 3.0, 5, 1.0, 5.0));
-        m_testObj.reset(new HistogramFillerRebinable2D(m_histogramDef, m_histogramProvider));
-
-        m_histogramProvider->mock_histogram = [this]() { return m_histogram.get(); };
-    }
-
-    void afterEach() {
-    }
-
-    void test_shouldKeepNumberOfBinsForValueInHistogramsRange() {
-      Monitored::Scalar<double> var1("var1", 2.9);
-      Monitored::Scalar<double> var2("var2", 4.9);
-      HistogramFiller::VariablesPack vars({&var1, &var2});
-
-      auto check = [&](){
-        VALUE(m_histogram->GetXaxis()->GetNbins()) EXPECTED(8);
-        VALUE(m_histogram->GetXaxis()->GetXmin()) EXPECTED(1.0);
-        VALUE(m_histogram->GetXaxis()->GetXmax()) EXPECTED(3.0);
-        VALUE(m_histogram->GetYaxis()->GetNbins()) EXPECTED(5);
-        VALUE(m_histogram->GetYaxis()->GetXmin()) EXPECTED(1.0);
-        VALUE(m_histogram->GetYaxis()->GetXmax()) EXPECTED(5.0);
-      };
-      check();
-      m_testObj->fill(vars);
-      check();
-      VALUE(m_histogram->GetBinContent(8,5)) EXPECTED(1.0);
-    }
-
-    void test_shouldDoubleNumberOfBinsForValueOutsideRange() {
-      Monitored::Scalar<double> var1("var1", 3.0);
-      Monitored::Scalar<double> var2("var2", 5.0);
-      HistogramFiller::VariablesPack vars({&var1, &var2});
-
-      m_testObj->fill(vars);
-
-      VALUE(m_histogram->GetXaxis()->GetNbins()) EXPECTED(16);
-      VALUE(m_histogram->GetXaxis()->GetXmin()) EXPECTED(1.0);
-      VALUE(m_histogram->GetXaxis()->GetXmax()) EXPECTED(5.0);
-      VALUE(m_histogram->GetYaxis()->GetNbins()) EXPECTED(10);
-      VALUE(m_histogram->GetYaxis()->GetXmin()) EXPECTED(1.0);
-      VALUE(m_histogram->GetYaxis()->GetXmax()) EXPECTED(9.0);
-      VALUE(m_histogram->GetBinContent(9,6)) EXPECTED(1.0);
-    }
-
-
-   // ==================== Initialization & run ====================
-  public:
-    HistogramFillerRebinable2DTestSuite()
-      : m_log(Athena::getMessageSvc(), "HistogramFillerRebinable2DTestSuite") {
-    }
-
-    void run() {
-      for (function<void(void)> testCase : registeredTestCases()) {
-        testCase();
-      }
-    }
-
-  // ==================== Test case registration ====================
-  private:
-    typedef void (HistogramFillerRebinable2DTestSuite::*TestCase)(void);
-
-    function<void(void)> registerTestCase(TestCase testCase, const string& testCaseName) {
-      return [this, testCase, testCaseName]() {
-        m_log << MSG::INFO << "Current test case: " << testCaseName << endmsg;
-        beforeEach();
-        invoke(testCase, this);
-        afterEach();
-      };
-    }
-
-  // ==================== Properties ====================
-  private:
-    MsgStream m_log;
-
-    HistogramDef m_histogramDef;
-    shared_ptr<MockHistogramProvider> m_histogramProvider;
-    shared_ptr<TH2D> m_histogram;
-
-    shared_ptr<HistogramFillerRebinable2D> m_testObj;
-};
-
-int main() {
-  ISvcLocator* pSvcLoc;
-
-  if (!Athena_test::initGaudi("GenericMonMinimal.txt", pSvcLoc)) {
-    throw runtime_error("This test can not be run: GenericMonMinimal.txt is missing");
+    m_histogramProvider->mock_histogram = [this]() { return m_histogram.get(); };
   }
 
-  HistogramFillerRebinable2DTestSuite().run();
+protected:
+  HistogramDef m_histogramDef;
+  std::shared_ptr<MockHistogramProvider> m_histogramProvider;
+  std::shared_ptr<TH2D> m_histogram;
+  std::shared_ptr<HistogramFillerRebinable2D> m_testObj;
+};
 
-  return 0;
+
+// Create test suite with per-test and global fixture
+BOOST_FIXTURE_TEST_SUITE( HistogramFillerRebinable2D,
+                          TestFixture,
+                          * boost::unit_test::fixture<Athena_test::InitGaudi>(std::string("GenericMonMinimal.txt")) )
+
+BOOST_AUTO_TEST_CASE( test_shouldKeepNumberOfBinsForValueInHistogramsRange ) {
+  Monitored::Scalar<double> var1("var1", 2.9);
+  Monitored::Scalar<double> var2("var2", 4.9);
+  HistogramFiller::VariablesPack vars({&var1, &var2});
+
+  auto check = [&](){
+    BOOST_TEST( m_histogram->GetXaxis()->GetNbins() == 8 );
+    BOOST_TEST( m_histogram->GetXaxis()->GetXmin() == 1.0 );
+    BOOST_TEST( m_histogram->GetXaxis()->GetXmax() == 3.0 );
+    BOOST_TEST( m_histogram->GetYaxis()->GetNbins() == 5 );
+    BOOST_TEST( m_histogram->GetYaxis()->GetXmin() == 1.0 );
+    BOOST_TEST( m_histogram->GetYaxis()->GetXmax() == 5.0 );
+  };
+  check();
+  m_testObj->fill(vars);
+  check();
+  BOOST_TEST( m_histogram->GetBinContent(8,5) == 1.0 );
 }
+
+BOOST_AUTO_TEST_CASE( test_shouldDoubleNumberOfBinsForValueOutsideRange ) {
+  Monitored::Scalar<double> var1("var1", 3.0);
+  Monitored::Scalar<double> var2("var2", 5.0);
+  HistogramFiller::VariablesPack vars({&var1, &var2});
+
+  m_testObj->fill(vars);
+
+  BOOST_TEST( m_histogram->GetXaxis()->GetNbins() == 16 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmin() == 1.0 );
+  BOOST_TEST( m_histogram->GetXaxis()->GetXmax() == 5.0 );
+  BOOST_TEST( m_histogram->GetYaxis()->GetNbins() == 10 );
+  BOOST_TEST( m_histogram->GetYaxis()->GetXmin() == 1.0 );
+  BOOST_TEST( m_histogram->GetYaxis()->GetXmax() == 9.0 );
+  BOOST_TEST( m_histogram->GetBinContent(9,6) == 1.0 );
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()

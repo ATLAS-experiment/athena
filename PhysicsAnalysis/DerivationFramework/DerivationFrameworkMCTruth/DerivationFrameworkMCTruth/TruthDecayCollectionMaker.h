@@ -23,7 +23,7 @@
 namespace DerivationFramework {
  
 
-  class TruthDecayCollectionMaker : public AthAlgTool, public IAugmentationTool {
+  class TruthDecayCollectionMaker : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthDecayCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthDecayCollectionMaker();

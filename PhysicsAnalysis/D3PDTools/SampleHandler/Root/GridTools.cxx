@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -255,7 +255,7 @@ namespace SH
     {
       if (!line.empty())
       {
-	if (line.find ("root:") != 0)
+	if (!line.starts_with ("root:"))
 	  RCU_THROW_MSG ("couldn't parse line: " + line);
 
 	std::string::size_type split1 = line.rfind (":");

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/ViewVector.h
@@ -298,7 +298,6 @@ template <class DV>
 struct ClassID_traits< ViewVector<DV> >
 {
   static const bool s_isDataObject = false;
-  typedef std::integral_constant<bool, s_isDataObject> is_DataObject_tag;
   typedef std::true_type has_classID_tag;
 
   static const CLID& ID() {

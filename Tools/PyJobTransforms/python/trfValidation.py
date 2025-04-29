@@ -269,17 +269,18 @@ class athenaLogFileReport(logFileReport):
         fullName = trfUtils.findFile(os.environ['DATAPATH'], knowledgefile)
         if not fullName:
             msg.warning('Knowledge file {0} could not be found in DATAPATH'.format(knowledgefile))
-        try:
-            with open(fullName) as knowledgeFileHandle:
-                msg.debug('Opened knowledge file {0} from here: {1}'.format(knowledgefile, fullName))
+        else:
+            try:
+                with open(fullName) as knowledgeFileHandle:
+                    msg.debug('Opened knowledge file {0} from here: {1}'.format(knowledgefile, fullName))
 
-                for line in knowledgeFileHandle:
-                    if line.startswith('#') or line == '' or line =='\n':
-                        continue
-                    line = line.rstrip('\n')
-                    linesList.append(line)
-        except OSError as e:
-            msg.warning('Failed to open knowledge file {0}: {1}'.format(fullName, e))
+                    for line in knowledgeFileHandle:
+                        if line.startswith('#') or line == '' or line =='\n':
+                            continue
+                        line = line.rstrip('\n')
+                        linesList.append(line)
+            except OSError as e:
+                msg.warning('Failed to open knowledge file {0}: {1}'.format(fullName, e))
         return linesList
 
     def scanLogFile(self, resetReport=False):

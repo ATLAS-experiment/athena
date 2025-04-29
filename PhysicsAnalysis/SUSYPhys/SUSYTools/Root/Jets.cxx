@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Jets
@@ -127,7 +127,7 @@ namespace ST {
     }
 
     // Calculate Jvt scores (required by METSignificance)
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       dec_jvt(*jet) = m_jetJvtMomentTool->updateJvt(*jet);
     }
 
@@ -135,11 +135,11 @@ namespace ST {
     if (m_applyJVTCut) ATH_CHECK(m_jetNNJvtMomentTool->decorate(*copy));
 
     // Update the jets
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       ATH_CHECK( this->FillJet(*jet) );
     }
 
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       // Update the JVT decorations if needed
       if( m_doFwdJVT){
         dec_passJvt(*jet) = acc_passFJvt(*jet) && acc_passJvt(*jet);
@@ -213,7 +213,7 @@ namespace ST {
     //disable - notfortrackjets? ATH_CHECK(m_jetCalibTool->applyCalibration(*copy));
 
     // Update the jets
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       ATH_CHECK( this->FillTrackJet(*jet) );
     }
 
@@ -299,7 +299,7 @@ namespace ST {
     }
 
 
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
 
       ATH_CHECK( this->FillJet(*jet, true, true, doLargeRdecorations) );
       //
@@ -352,11 +352,11 @@ namespace ST {
     met::addGhostMuonsToJets(*muons, *copy);
 
     // Update the jets
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       ATH_CHECK( this->FillJet(*jet, false) );
     }
 
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       // Update the JVT decorations if needed
       if( m_doFwdJVT){
         dec_passJvt(*jet) = acc_passFJvt(*jet) && acc_passJvt(*jet);
@@ -497,7 +497,7 @@ namespace ST {
           ATH_MSG_DEBUG( "No valid large-R Top-tagged fat jet uncertainty, but FillJet called with a fat jet. Skipping uncertainties." );
         }
 
-        if (!m_fatjetUncertaintiesTool.empty()) {
+        if (!m_fatjetUncertaintiesTool.empty() && m_currentSyst.name().find("PseudoData") == std::string::npos) {
           CP::CorrectionCode result = m_fatjetUncertaintiesTool->applyCorrection(input);
           switch (result) {
           case CP::CorrectionCode::Error:
@@ -513,6 +513,42 @@ namespace ST {
         } else {
           ATH_MSG_DEBUG( "No valid fat jet uncertainty, but FillJet called with a fat jet. Skipping uncertainties." );
         }
+
+        // Use the PDSmeared uncertainties tool on the systematic with PseudoData in the name
+        if (!m_fatjetUncertaintiesPDSmearTool.empty() && m_fatJetUncertaintiesPDsmearing && m_currentSyst.name().find("PseudoData")) {
+          CP::CorrectionCode result = m_fatjetUncertaintiesPDSmearTool->applyCorrection(input);
+          switch (result) {
+          case CP::CorrectionCode::Error:
+            ATH_MSG_ERROR( "Failed to apply largeR jet scale PD uncertainties.");
+            return StatusCode::FAILURE;
+            //break;
+          case CP::CorrectionCode::OutOfValidityRange:
+            ATH_MSG_VERBOSE( "No valid pt/eta/m range for largeR jet scale uncertainties. ");
+            break;
+          default:
+            break;
+          }
+        } else {
+          ATH_MSG_DEBUG( "No valid fat jet uncertainty, but FillJet called with a fat jet. Skipping uncertainties." );
+        }
+
+        if (!m_fatjetFFSmearingTool.empty() && std::find(m_fatjetFFSmearingSyst.begin(), m_fatjetFFSmearingSyst.end(), m_currentSyst) != m_fatjetFFSmearingSyst.end()) {
+          CP::CorrectionCode result = m_fatjetFFSmearingTool->applyCorrection(input);
+          switch (result) {
+          case CP::CorrectionCode::Error:
+            ATH_MSG_ERROR( "Failed to apply largeR jet scale uncertainties.");
+            return StatusCode::FAILURE;
+            //break;
+          case CP::CorrectionCode::OutOfValidityRange:
+            ATH_MSG_VERBOSE( "No valid pt/eta/m range for largeR jet scale uncertainties. ");
+            break;
+          default:
+            break;
+          }
+        } else {
+          ATH_MSG_DEBUG( "No valid fat jet uncertainty, but FillJet called with a fat jet. Skipping uncertainties." );
+        }
+
         ATH_MSG_VERBOSE(  "Large-R jet (pt,eta,phi) after calibration " << input.pt() << " " << input.eta() << " " << input.phi() );
 
         return StatusCode::SUCCESS;
@@ -530,7 +566,7 @@ namespace ST {
     }
 
    if ( (input.pt() > m_jetPt) || (input.pt() > 15e3) ) {
-     if(!isFat && m_currentSyst.name().find("__2") == std::string::npos) {
+     if(!isFat && m_currentSyst.name().find("PseudoData") == std::string::npos) {
        // Use the normal jet uncertainties tool for this systematic and do not use the PDSmeared initialised tool
        CP::CorrectionCode result = m_jetUncertaintiesTool->applyCorrection(input);
        switch (result) {
@@ -548,8 +584,8 @@ namespace ST {
 
    if (m_jetUncertaintiesPDsmearing) {
      if ( (input.pt() > m_jetPt) || (input.pt() > 15e3) ) {
-       if(!isFat && m_currentSyst.name().find("__2") != std::string::npos){
-         // Use the PDSmeared uncertainties tool on the systematic with PDsmear in the name
+       if(!isFat && m_currentSyst.name().find("PseudoData")){
+         // Use the PDSmeared uncertainties tool on the systematic with PseudoData in the name
          CP::CorrectionCode result = m_jetUncertaintiesPDSmearTool->applyCorrection(input);
          switch (result) {
            case CP::CorrectionCode::Error:

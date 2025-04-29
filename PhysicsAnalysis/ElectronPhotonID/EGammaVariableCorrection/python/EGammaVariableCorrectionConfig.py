@@ -7,7 +7,7 @@ def ElectronVariableCorrectionToolCfg(
     """Configure the e/gamma variable correction tool"""
     acc = ComponentAccumulator()
     # Can ultimately be configured differently between Run 2 and Run 3 configs
-    kwargs.setdefault("ConfigFile", "EGammaVariableCorrection/TUNE26/ElPhVariableNominalCorrection.conf")
+    kwargs.setdefault("ConfigFile", "EGammaVariableCorrection/TUNE27/ElVariableNominalCorrection.conf")
     acc.setPrivateTools(
         CompFactory.ElectronPhotonVariableCorrectionTool(name, **kwargs))
     return acc

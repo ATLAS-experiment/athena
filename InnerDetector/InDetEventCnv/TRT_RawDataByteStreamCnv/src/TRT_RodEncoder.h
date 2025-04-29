@@ -39,7 +39,7 @@ public:
   void set_trt_IdHelper ( const TRT_ID * trt_id) { m_trt_id = trt_id   ; }
 
   //! setCablingSvc
-  void set_trt_cabling ( ServiceHandle<ITRT_CablingSvc> trt_CablingSvc)
+  void set_trt_cabling ( const ServiceHandle<ITRT_CablingSvc> & trt_CablingSvc)
   { 
     m_CablingSvc = trt_CablingSvc;
   }
@@ -54,9 +54,9 @@ public:
   StatusCode fillROD3(std::vector<uint32_t>& v ) ; 
 
   private:
-    const TRT_ID * m_trt_id;
+    const TRT_ID * m_trt_id{};
     ServiceHandle<ITRT_CablingSvc> m_CablingSvc;
-    unsigned short m_RodBlockVersion;
+    unsigned short m_RodBlockVersion{};
     VRDO           m_RDOs;
 }; 
 

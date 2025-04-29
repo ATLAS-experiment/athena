@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@
 
 // constructor
 HGTD_TrackingGeometryBuilderCond::HGTD_TrackingGeometryBuilderCond(const std::string& t, const std::string& n, const IInterface* p) :
-  AthAlgTool(t,n,p),
+  base_class(t,n,p),
   m_enclosingEnvelopeSvc("AtlasEnvelopeDefSvc", n),
   m_trackingVolumeCreator("Trk::CylinderVolumeCreator/CylinderVolumeCreator"),
   m_indexStaticLayers(true),
@@ -38,7 +38,6 @@ HGTD_TrackingGeometryBuilderCond::HGTD_TrackingGeometryBuilderCond(const std::st
   m_layerBinningType(2),
   m_colorCodeConfig(3)
 {
-  declareInterface<Trk::IGeometryBuilderCond>(this);
   // envelope definition service
   declareProperty("EnvelopeDefinitionSvc",            m_enclosingEnvelopeSvc );
   declareProperty("LayerBuilder",                     m_layerBuilder);
@@ -70,13 +69,6 @@ StatusCode HGTD_TrackingGeometryBuilderCond::initialize()
   ATH_CHECK(m_trackingVolumeCreator.retrieve());
     
   ATH_MSG_INFO( "initialize() succesful" );    
-  return StatusCode::SUCCESS;
-}
-
-// finalize
-StatusCode HGTD_TrackingGeometryBuilderCond::finalize()
-{
-  ATH_MSG_INFO( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 

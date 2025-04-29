@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMmTest.h"
 
@@ -9,12 +9,11 @@
 
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "GeoModelKernel/GeoDefinitions.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 namespace MuonGM {
-
-GeoModelMmTest::GeoModelMmTest(const std::string& name, ISvcLocator* pSvcLocator):
-    AthHistogramAlgorithm{name, pSvcLocator} {}
 
 StatusCode GeoModelMmTest::finalize() {
     ATH_CHECK(m_tree.write());
@@ -25,49 +24,72 @@ StatusCode GeoModelMmTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_tree.init(this));
 
-    const MmIdHelper& id_helper{m_idHelperSvc->mmIdHelper()};
-
-
-    for (const std::string& testCham : m_selectStat) {
-        if (testCham.size() != 6) {
-            ATH_MSG_FATAL("Wrong format given " << testCham);
-            return StatusCode::FAILURE;
+        const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+    auto translateTokenList = [this, &idHelper](const std::vector<std::string>& chNames){
+        
+        std::set<Identifier> transcriptedIds{};
+        for (const std::string& token : chNames) { 
+            if (token.size() != 6) {
+                ATH_MSG_WARNING("Wrong format given for "<<token<<". Expecting 6 characters");
+                continue;
+            }
+            /// Example string MMS4A2
+            const std::string statName = token.substr(0, 3);
+            const unsigned statEta = std::atoi(token.substr(3, 1).c_str()) * (token[4] == 'A' ? 1 : -1);
+            const unsigned statPhi = std::atoi(token.substr(5, 1).c_str());
+            bool isValid{false};
+            const Identifier eleId = idHelper.elementID(statName, statEta, statPhi, isValid);
+            if (!isValid) {
+                ATH_MSG_WARNING("Failed to deduce a station name for " << token);
+                continue;
+            }
+            transcriptedIds.insert(eleId);
+            const Identifier secMlId = idHelper.multilayerID(eleId, 2, isValid);
+            if (isValid){
+                transcriptedIds.insert(secMlId);
+            }
         }
-        /// Example string MML1A6
-        std::string statName = testCham.substr(0, 3);
-        unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) *
-                               (testCham[4] == 'A' ? 1 : -1);
-        unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
-        bool is_valid{false};
-        const Identifier eleId = id_helper.elementID(statName, statEta, statPhi, is_valid);
-        if (!is_valid) {
-            ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
-            return StatusCode::FAILURE;
-        }
-        std::copy_if(id_helper.detectorElement_begin(), 
-                     id_helper.detectorElement_end(), 
-                     std::inserter(m_testStations, m_testStations.end()), 
-                        [&](const Identifier& id) {
-                            return id_helper.elementID(id) == eleId;
-                        });
-    }
-    /// Add all stations for testing if nothing has been specified
-    if (m_testStations.empty()) {
-        m_testStations.insert(id_helper.detectorElement_begin(),
-                              id_helper.detectorElement_end());
-    } else {
+        return transcriptedIds;
+    };
+
+    std::vector <std::string>& selectedSt = m_selectStat.value();
+    const std::vector <std::string>& excludedSt = m_excludeStat.value();
+    selectedSt.erase(std::remove_if(selectedSt.begin(), selectedSt.end(),
+                     [&excludedSt](const std::string& token){
+                        return std::ranges::find(excludedSt, token) != excludedSt.end();
+                     }), selectedSt.end());
+    
+    if (selectedSt.size()) {
+        m_testStations = translateTokenList(selectedSt);
         std::stringstream sstr{};
-        for (const Identifier& id : m_testStations){
+        for (const Identifier& id : m_testStations) {
             sstr<<" *** "<<m_idHelperSvc->toString(id)<<std::endl;
         }
         ATH_MSG_INFO("Test only the following stations "<<std::endl<<sstr.str());
+    } else {
+        const std::set<Identifier> excluded = translateTokenList(excludedSt);
+        /// Add stations for testing
+        for(auto itr = idHelper.detectorElement_begin();
+                 itr!= idHelper.detectorElement_end();++itr){
+            if (!excluded.count(*itr)) {
+               m_testStations.insert(*itr);
+            }
+        }
+        /// Report what stations are excluded
+        if (!excluded.empty()) {
+            std::stringstream excluded_report{};
+            for (const Identifier& id : excluded){
+                excluded_report << " *** " << m_idHelperSvc->toStringDetEl(id) << std::endl;
+            }
+            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
+        }
     }
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelMmTest::execute() {
 
     const EventContext& ctx{Gaudi::Hive::currentContext()};
-    SG::ReadCondHandle<MuonDetectorManager> detMgr{m_detMgrKey, ctx};
+    SG::ReadCondHandle detMgr{m_detMgrKey, ctx};
     if (!detMgr.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve MuonDetectorManager "
                       << m_detMgrKey.fullKey());
@@ -135,9 +157,13 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
     m_stationPhi = roEl->getStationPhi();
     m_stationName = id_helper.stationName(detElId);
     const int multilayer = id_helper.multilayer(detElId);
+    m_moduleHeight = roEl->getRsize();
+    m_moduleWidthS = roEl->getSsize();
+    m_moduleWidthL = roEl->getLongSsize();
     m_multilayer = multilayer;
     m_stStripPitch = roEl->getDesign(detElId)->inputPitch;
-
+    const Amg::Transform3D permute{GeoTrf::GeoRotation{90.*Gaudi::Units::deg,90.*Gaudi::Units::deg, 0.}};
+    m_alignableNode = roEl->AmdbLRSToGlobalTransform() * roEl->getDelta().inverse()*permute;
 
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ) 
 
@@ -170,9 +196,10 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
 
             const MuonGM::MuonChannelDesign& design{*roEl->getDesign(strip_id)};
 
-            design.leftEdge(channel, l_left);
-            design.center(channel, l_cen);
-            design.rightEdge(channel, l_right);
+            if (!design.leftEdge(channel, l_left) || !design.center(channel, l_cen) ||
+                !design.rightEdge(channel, l_right)){
+                continue;
+            }
 
             roEl->surface(strip_id).localToGlobal(l_left, Amg::Vector3D::Zero(), strip_leftEdge);
             roEl->surface(strip_id).localToGlobal(l_cen, Amg::Vector3D::Zero(), strip_center);
@@ -195,11 +222,13 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
             m_ActiveWidthS =  design.minYSize();
 
             if (channel != fStrip) continue;
-
+            ATH_MSG_VERBOSE(m_idHelperSvc->toStringGasGap(strip_id)<<" "<<Amg::toString(roEl->transform(strip_id).translation(), 4)
+                        <<", "<<roEl->transform(strip_id).translation().perp());
             m_stripRot.push_back(roEl->transform(strip_id));
             m_stripRotGasGap.push_back(gasgap);
             m_firstStripPos.push_back(design.firstPos() * Amg::Vector2D::UnitX()); 
-            m_readoutFirstStrip.push_back(design.numberOfMissingBottomStrips() + 1);
+            m_firstStrip.push_back(design.numberOfMissingBottomStrips() + 1);
+            m_nStrips.push_back(design.nch);
             m_readoutSide.push_back(roEl->getReadoutSide()[gasgap -1]);    
         }
     }

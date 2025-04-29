@@ -15,7 +15,7 @@ implement  ICaloCellMakerTool interface, and build LArCell from LArRawChannel.
 
 @section LArCellRec_LArCellCorrection LArCell Correction Tools
 
-LArCellEmMiscalib LArCellHVCorrection LArCellRescaler
+LArCellEmMiscalib LArCellHVCorrection
 implement CaloCellCorrection interface, and apply various modification to LArCells.
 
 Details on CaloCell Reconstruction

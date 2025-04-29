@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of common interface with various track fitters
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TrkConfig.TrkConfigFlags import TrackFitterType
@@ -17,6 +17,14 @@ def InDetTrackFitterCfg(flags, name='InDetTrackFitter', **kwargs) :
         TrackFitterType.GlobalChi2Fitter        : InDetGlobalChi2FitterCfg,
         TrackFitterType.GaussianSumFilter       : GaussianSumFitterCfg
     }[flags.Tracking.trackFitterType](flags, name, **kwargs)
+
+# Config to be called outside of loops over tracking passes in main reco
+# Will configure subtools based on MainPass
+def InDetStandaloneTrackFitterCfg(flags, name='InDetTrackFitter', **kwargs) :
+    primaryFlags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")
+    return InDetTrackFitterCfg(primaryFlags, name, **kwargs)
 
 def InDetTrackFitterHoleSearchCfg(flags, name='InDetTrackFitterHoleSearch', **kwargs) :
     acc = ComponentAccumulator()
@@ -133,6 +141,14 @@ def ITkTrackFitterCfg(flags, name='ITkTrackFitter', **kwargs) :
         TrackFitterType.GlobalChi2Fitter        : ITkGlobalChi2FitterCfg,
         TrackFitterType.GaussianSumFilter       : ITkGaussianSumFitterCfg
     }[flags.Tracking.trackFitterType](flags, name, **kwargs)
+
+# Config to be called outside of loops over tracking passes in main reco
+# Will configure subtools based on MainPass
+def ITkStandaloneTrackFitterCfg(flags, name='ITkTrackFitter', **kwargs) :
+    primaryFlags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")
+    return ITkTrackFitterCfg(primaryFlags, name, **kwargs)
 
 def ITkTrackFitterAmbiCfg(flags, name='ITkTrackFitterAmbi', **kwargs) :
     acc = ComponentAccumulator()

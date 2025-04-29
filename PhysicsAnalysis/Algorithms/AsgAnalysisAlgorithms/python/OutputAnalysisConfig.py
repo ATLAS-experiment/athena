@@ -26,6 +26,10 @@ class OutputAnalysisConfig (ConfigBlock):
             "and decorations to output branches. Specficially for MET "
             "variables, where only the final MET term is retained. "
             "The default is [] (empty list).")
+        self.addOption ('truthMetVars', [], type=None,
+            info="a list of mappings (list of strings) between containers "
+            "and decorations to output branches for truth MET. "
+            "The default is [] (empty list).")
         self.addOption ('containers', {}, type=None,
             info="a dictionary mapping prefixes (key) to container names "
             "(values) to be used when saving to the output tree. Branches "
@@ -44,6 +48,9 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('metTermName', 'Final', type=str,
             info="the name (string) of the MET term to save, turning the MET "
             "container into a single object. The default is 'Final'.")
+        self.addOption ('truthMetTermName', 'NonInt', type=str,
+            info="the name (string) of the truth MET term to save, turning the MET "
+            "container into a single object. The default is 'NonInt'.")
         # TODO: add info strng
         self.addOption ('storeSelectionFlags', True, type=bool,
             info="")
@@ -55,10 +62,29 @@ class OutputAnalysisConfig (ConfigBlock):
             "prefaced by the keywords enable or disable) to turn on/off the "
             "writing of branches to the output ntuple. The default is None "
             "(no modification to the scheduled output branches).")
+        self.addOption ('commandsOnlyForDSIDs', {}, type=None,
+            info="a dictionary with individual DSIDs as keys, and a list of strings "
+            "like for the 'commands' option as items. These 'commands' will only be run "
+            "for the corresponding DSID.")
         self.addOption ('alwaysAddNosys', False, type=bool,
             info="If set to True, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
 
+    @staticmethod
+    def branchSortOrder (rule):
+        return rule.split('->')[1].strip()
+
+    def createOutputAlgs (self, config, name, vars, isMet=False):
+        """A helper function to create output algorithm"""
+        alg = config.createAlgorithm('CP::AsgxAODMetNTupleMakerAlg' if isMet else 'CP::AsgxAODNTupleMakerAlg', name)
+        alg.TreeName = self.treeName
+        alg.RootStreamName = self.streamName
+        branchList = list(vars)
+        branchList.sort(key=self.branchSortOrder)
+        branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
+        branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
+        alg.Branches = branchList_nosys + branchList_sys
+        return alg
 
     def makeAlgs (self, config) :
 
@@ -66,6 +92,9 @@ class OutputAnalysisConfig (ConfigBlock):
 
         self.vars = set(self.vars)
         self.varsOnlyForMC = set(self.varsOnlyForMC)
+        self.metVars = set(self.metVars)
+        self.truthMetVars = set(self.truthMetVars)
+
         # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
         if config.dataType() is not DataType.Data:
             self.vars |= self.varsOnlyForMC
@@ -101,13 +130,16 @@ class OutputAnalysisConfig (ConfigBlock):
             outputDict = config.getOutputVars (containerName)
             for outputName in outputDict :
                 outputConfig = copy.deepcopy (outputDict[outputName])
-                if containerName == 'EventInfo' :
-                    outputConfig.outputContainerName = outputConfig.origContainerName
-                elif outputConfig.outputContainerName != outputConfig.origContainerName :
+                if containerName != outputConfig.origContainerName or config.checkOutputContainer(containerName):
                     outputConfig.outputContainerName = containerName + '_%SYS%'
-                else :
-                    outputConfig.outputContainerName = config.readName (containerName)
+                else:
+                    outputConfig.outputContainerName = config.readName(containerName)
                 outputConfigs[prefix + outputName] = outputConfig
+
+        # check for DSID-specific commands
+        for dsid, dsid_commands in self.commandsOnlyForDSIDs.items():
+            if filter_dsids([dsid], config):
+                self.commands += dsid_commands
 
         for command in self.commands :
             words = command.split (' ')
@@ -136,13 +168,17 @@ class OutputAnalysisConfig (ConfigBlock):
             else :
                 raise KeyError ('unknown command for "commands" option: ' + words[0])
 
-        autoVars = []
-        autoMetVars = []
+        autoVars = set()
+        autoMetVars = set()
+        autoTruthMetVars = set()
         for outputName in outputConfigs :
             outputConfig = outputConfigs[outputName]
             if outputConfig.enabled :
-                if config.isMetContainer (outputConfig.origContainerName) :
-                    myVars = autoMetVars
+                if config.isMetContainer (outputConfig.origContainerName):
+                    if "Truth" in outputConfig.origContainerName:
+                        myVars = autoTruthMetVars
+                    else:
+                        myVars = autoMetVars
                 else :
                     myVars = autoVars
                 if outputConfig.noSys :
@@ -152,7 +188,7 @@ class OutputAnalysisConfig (ConfigBlock):
                         outputName += "_NOSYS"
                 else :
                     outputName += '_%SYS%'
-                myVars += [outputConfig.outputContainerName + '.' + outputConfig.variableName + ' -> ' + outputName]
+                myVars.add(f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}")
 
         if self.postfix:
             postfix = self.postfix
@@ -160,34 +196,22 @@ class OutputAnalysisConfig (ConfigBlock):
             postfix = self.treeName
 
         # Add an ntuple dumper algorithm:
-        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' + postfix )
+        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', f'TreeMaker{postfix}' )
         treeMaker.TreeName = self.treeName
         treeMaker.RootStreamName = self.streamName
         # the auto-flush setting still needs to be figured out
         #treeMaker.TreeAutoFlush = 0
 
-        if len (self.vars) + len (autoVars) :
-            ntupleMaker = config.createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' + postfix )
-            ntupleMaker.TreeName = self.treeName
-            ntupleMaker.RootStreamName = self.streamName
-            branchList = list(self.vars | set(autoVars))
-            branchList.sort()
-            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
-            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
-            ntupleMaker.Branches = branchList_nosys + branchList_sys
-            # ntupleMaker.OutputLevel = 2  # For output validation
+        if self.vars or autoVars:
+            ntupleMaker = self.createOutputAlgs(config, f'NTupleMaker{postfix}', self.vars | autoVars)
 
-        if len (self.metVars) + len (autoMetVars) > 0:
-            ntupleMaker = config.createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' + postfix )
-            ntupleMaker.TreeName = self.treeName
-            ntupleMaker.RootStreamName = self.streamName
-            branchList = self.metVars + autoMetVars
-            branchList.sort()
-            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
-            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
-            ntupleMaker.Branches = branchList_nosys + branchList_sys
+        if self.metVars or autoMetVars:
+            ntupleMaker = self.createOutputAlgs(config, f'MetNTupleMaker{postfix}', self.metVars | autoMetVars, isMet=True)
             ntupleMaker.termName = self.metTermName
-            #ntupleMaker.OutputLevel = 2  # For output validation
+
+        if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
+            ntupleMaker = self.createOutputAlgs(config, f'TruthMetNTupleMaker{postfix}', self.truthMetVars | autoTruthMetVars, isMet=True)
+            ntupleMaker.termName = self.truthMetTermName
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
         treeFiller.TreeName = self.treeName

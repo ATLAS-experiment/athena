@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1CaloReadoutSystems )
@@ -23,3 +23,6 @@ atlas_add_library( VP1CaloReadoutSystems VP1CaloReadoutSystems/*.h src/*.h src/*
                    LINK_LIBRARIES VP1Base GL
                    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} LArHV LArReadoutGeometry VP1Utils LArRecConditions AthenaPoolUtilities )
 
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1CaloReadoutSystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

@@ -66,8 +66,6 @@ namespace LVL1 {
 
     ATH_CHECK( m_eFEXFPGATowerIdProviderTool.retrieve() );
 
-    ATH_CHECK( m_eFEXFPGATool.retrieve() );
-    
     ATH_CHECK(m_l1MenuKey.initialize());
 
     return StatusCode::SUCCESS;

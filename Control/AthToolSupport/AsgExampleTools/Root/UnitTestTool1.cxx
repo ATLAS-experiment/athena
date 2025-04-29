@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -12,11 +12,8 @@
 
 #include <AsgExampleTools/UnitTestTool1.h>
 
-#include <gtest/gtest.h>
 #include <map>
-
-#include <CxxUtils/checker_macros.h>
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
+#include <mutex>
 
 //
 // method implementations
@@ -28,11 +25,8 @@ namespace asg
   UnitTestTool1 (const std::string& val_name)
     : AsgTool (val_name)
   {
-    declareProperty ("propertyInt", m_propertyInt, "the integer property");
-    declareProperty ("propertyString", m_propertyString, "the string property");
-    declareProperty ("initializeFail", m_initializeFail, "whether initialize should fail");
-
-    ++ instance_counts (name());
+    std::scoped_lock lock(m_mutex);
+    ++ m_instances[name()];
 
     ANA_MSG_DEBUG ("create UnitTestTool1 " << this);
   }
@@ -44,7 +38,8 @@ namespace asg
   {
     ANA_MSG_DEBUG ("destroy UnitTestTool1 " << this);
 
-    -- instance_counts (name());
+    std::scoped_lock lock(m_mutex);
+    -- m_instances[name()];
   }
 
 
@@ -104,14 +99,12 @@ namespace asg
 
 
 
-  int& UnitTestTool1 ::
+  int UnitTestTool1 ::
   instance_counts (const std::string& name)
   {
-    static std::map<std::string,int> counts;
-    auto iter = counts.find (name);
-    if (iter == counts.end())
-      iter = counts.insert (std::make_pair (name, 0)).first;
-    assert (iter != counts.end());
+    std::scoped_lock lock(m_mutex);
+    auto iter = m_instances.find(name);
+    assert (iter != m_instances.end());
     return iter->second;
   }
 }

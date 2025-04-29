@@ -1,13 +1,15 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import importlib
-import string
+from typing import Optional
+import importlib, re, string
 
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+# _maxAllowedCustomCH: this variable keeps track of the number of custom ComboHypo that are named differently as expected from the ControlFlow rule (which sets one ComboHypo per step, both named the same). These violations are already investigated and allowed because the ComboHypos are able to handle the decisions internally. Any change of this parameter needs to be discussed with experts
+_maxAllowedCustomCH = 10
 
 def calibCosmicMonSignatures():
     return ['Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias']
@@ -32,17 +34,19 @@ def allSignatures():
 
 
 class FilterChainsToGenerate(object):
-    """
-    class to use filters for chains
-    """
-    def __init__(self,flags):
+    """Standard chain filter"""
+    def __init__(self, flags):
         self.enabledSignatures  = flags.Trigger.enabledSignatures  if flags.hasFlag("Trigger.enabledSignatures") else []
         self.disabledSignatures = flags.Trigger.disabledSignatures if flags.hasFlag("Trigger.disabledSignatures") else []
         self.selectChains       = flags.Trigger.selectChains       if flags.hasFlag("Trigger.selectChains") else []
         self.disableChains      = flags.Trigger.disableChains      if flags.hasFlag("Trigger.disableChains") else []          
+
     def __call__(self, signame, chain):            
         return ((signame in self.enabledSignatures and signame not in self.disabledSignatures) and \
             (not self.selectChains or chain in self.selectChains) and chain not in self.disableChains)
+
+    def __str__(self) -> str:
+        return f'FilterChainsToGenerate(enabledSignatures={self.enabledSignatures}, disabledSignatures={self.disabledSignatures}, selectChains={self.selectChains}, disableChains={self.disableChains})'
   
 
 class Singleton(type):
@@ -57,23 +61,10 @@ class Singleton(type):
 
 
 class GenerateMenuMT(metaclass=Singleton):
-    """Singleton class for trigger menu"""
-
-    # Define which signatures (folders) are required for each slice
-    def getRequiredSignatures(theslice):
-        allSigs = allSignatures()
-        signatureDeps = {sig:[sig] for sig in allSigs}
-        # Special cases
-        signatureDeps.update({
-            # Bjet always requires jet
-            'Bjet': ['Bjet','Jet'],
-            # Egamma contains two signatures
-            'Egamma': ['Electron','Photon'],
-            'Combined': combinedSignatures(),
-        })
-        return set(signatureDeps[theslice]+defaultSignatures()) # always allow streamers
-
+    """Singleton class for the Trigger Menu"""
     def __init__(self):
+        self.base_menu_name: str = ''
+
         self.chainsInMenu = {}  # signature : [chains]
 
         self.allChainsForAlignment = []
@@ -93,6 +84,22 @@ class GenerateMenuMT(metaclass=Singleton):
 
         self.chainDefModule = {}   # Generate[SIG]ChainDefs module for each SIGnature
 
+
+    # Define which signatures (folders) are required for each slice
+    def getRequiredSignatures(theslice):
+        allSigs = allSignatures()
+        signatureDeps = {sig:[sig] for sig in allSigs}
+        # Special cases
+        signatureDeps.update({
+            # Bjet always requires jet
+            'Bjet': ['Bjet','Jet'],
+            # Egamma contains two signatures
+            'Egamma': ['Electron','Photon'],
+            'Combined': combinedSignatures(),
+        })
+        return set(signatureDeps[theslice]+defaultSignatures()) # always allow streamers
+
+
     def setChainFilter(self, f):
         """Set chain filter for menu generation.
 
@@ -111,7 +118,7 @@ class GenerateMenuMT(metaclass=Singleton):
             log.error('%s is not a valid chain filter. Function/callable needs take two arguments '
                       'for signature and chain name and return a boolean', fname)
         else:
-            log.warning('Setting chain filter to %s', fname)
+            log.info('Setting chain filter to: %s', f)
             self.chainFilter = f
 
 
@@ -313,13 +320,21 @@ class GenerateMenuMT(metaclass=Singleton):
     def getChainsFromMenu(self, flags):
         """
         == Returns the list of chain names that are in the menu
-        """       
-        from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import MenuPrescaleConfig
+        """
 
-        # go over the slices and put together big list of signatures requested
-        (self.L1Prescales, self.HLTPrescales, self.chainsInMenu) = MenuPrescaleConfig(HLTMenuConfig, flags)
+        self.base_menu_name = re.match(r'\w*_v\d*', flags.Trigger.triggerMenuSetup).group(0)
+        log.info(f'Menu name: {flags.Trigger.triggerMenuSetup}')
+        log.debug('Base menu name: %s', self.base_menu_name)
+        
+        # Generate the list of chains from the basic menu (terminated in a version number)
+        try:
+            menu_module = importlib.import_module(f'TriggerMenuMT.HLT.Menu.{self.base_menu_name}')
+        except Exception as e:
+            log.fatal(f'Failed to import menu module "{self.base_menu_name}" inferred from menu "{flags.Trigger.triggerMenuSetup}"')
+            raise e
 
-        log.debug("Setup HLT menu with prescales: %s", self.HLTPrescales)
+        # Load Menu
+        self.chainsInMenu = menu_module.setupMenu()
 
         # Filter chains if requested
         if self.chainFilter is not None:
@@ -359,7 +374,7 @@ class GenerateMenuMT(metaclass=Singleton):
         """
 
         from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitInterSignatureChainDict
-        from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices
+        from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices, anomdetWPIndices
         from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
         from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences, TLABuildingSequences
 
@@ -441,7 +456,12 @@ class GenerateMenuMT(metaclass=Singleton):
                     theChainConfig = listOfChainConfigs[0]
                 
                 for topoID in range(len(mainChainDict['extraComboHypos'])):
-                    thetopo = mainChainDict['extraComboHypos'][topoID].strip(string.digits).rstrip(topoLegIndices)                    
+                    thetopo = mainChainDict['extraComboHypos'][topoID].strip(string.digits).rstrip(topoLegIndices)  
+                    
+                    
+                    if "anomdet" in thetopo:
+                        thetopo = thetopo.rstrip(anomdetWPIndices)
+                                      
                     theChainConfig.addTopo((comboConfigurator[thetopo],thetopo))
                                     
                 # Now we know where the topos should go, we can insert them in the right steps
@@ -511,48 +531,81 @@ class GenerateMenuMT(metaclass=Singleton):
             cc.steps = new_steps
 
         return chainConfigs 
+
+    def generatePrescales(self, flags, prescale_set: Optional[str] = '__auto__'):
+        '''Add prescales for disabling items (e.g. MC production)'''
+
+        menu_name = flags.Trigger.triggerMenuSetup
+        if prescale_set == '__auto__':
+            if menu_name.endswith('_prescale'):
+                # Get the prescale set name from the Menu
+                prescale_set = menu_name.removeprefix(f'{self.base_menu_name}_').removesuffix('_prescale')
+            else:
+                prescale_set = None
+
+        if prescale_set:
+            from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import menu_prescale_set_gens
+            if prescale_set not in menu_prescale_set_gens:
+                raise RuntimeError(f'Unknown menu prescale set for menu {flags.Trigger.triggerMenuSetup}')
+
+            gen = menu_prescale_set_gens[prescale_set]
+        else:
+            from TriggerMenuMT.HLT.Config.Utility.MenuPrescaleSet import AutoPrescaleSetGen
+            gen = AutoPrescaleSetGen()
+
+        # Generate prescale set
+        log.info(f'Generating automatic prescale set: {prescale_set}')
+        ps_set = gen.generate(flags, store=True)
+        self.L1Prescales = ps_set.l1_prescales
+        self.HLTPrescales = ps_set.hlt_prescales
+
  
 
 def generateMenuMT(flags): 
     """
-    == Main function to generates L1, L1Topo and HLT menu CA, using class GenerateMenuMT
+    == Main function to generate the L1, L1Topo and HLT menu configs and CA, using the GenerateMenuMT class
     """         
-    # generate L1 menu
-    # This probably will go to TriggerConfig.triggerRunCfg
-    from TrigConfigSvc.TrigConfigSvcCfg import generateL1Menu, createL1PrescalesFileFromMenu
-    from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import MenuPrescaleConfig
+    # Generate L1 menu
+    # The L1Menu json file is produced here
+    from TrigConfigSvc.TrigConfigSvcCfg import generateL1Menu
     generateL1Menu(flags)
-    createL1PrescalesFileFromMenu(flags)
 
-    # generate HLT menu
+
     menu = GenerateMenuMT()
 
-    chainsToGenerate = FilterChainsToGenerate(flags)
-    menu.setChainFilter(chainsToGenerate)
-    log.debug("Filtering chains = %d", (menu.chainFilter is not None))
+    # Apply generation filter (enable/disable chains and signatures)
+    chains_gen_filter = FilterChainsToGenerate(flags)
+    menu.setChainFilter(chains_gen_filter)
+    log.debug('Filtering chains: %d', menu.chainFilter is not None)
+
+    # Generate all chains configuration
     finalListOfChainConfigs = menu.generateAllChainConfigs(flags)
-    log.info("Length of FinalListOfChainConfigs %s", len(finalListOfChainConfigs))
 
-    # Add prescales for disabling items (e.g. MC production)
-    log.info("Applying HLT prescales")
+    log.info('Number of configured chains: %d', len(finalListOfChainConfigs))
+    from TriggerMenuMT.HLT.Config import MenuComponents
+    if len(MenuComponents._CustomComboHypoAllowed)> _maxAllowedCustomCH:
+        log.error(f'Found {len(MenuComponents._CustomComboHypoAllowed)} ComboHypo algorithms  violating the one-CH-per-step rule, only {_maxAllowedCustomCH} are allowed (which are BLS ComboHypos). This is the list of current violations: {MenuComponents._CustomComboHypoAllowed}. Please consolidate your choice of ComboHypo, by checking that it is able to handle decisions internally; if yes eventually increase the limit set by _maxAllowedCustomCH, after discussing with experts')
+    # Generate and apply the automatic prescale sets (e.g. for disabling items in an MC production)
+    menu.generatePrescales(flags)
     
-    (menu.L1Prescales, menu.HLTPrescales, menu.chainsInMenu) = MenuPrescaleConfig(HLTMenuConfig, flags)
-    from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import applyHLTPrescale
-    applyHLTPrescale(HLTMenuConfig, menu.HLTPrescales, menu.signaturesOverwritten)
 
-    # make sure that we didn't generate any steps that are fully empty in all chains
-    # if there are empty steps, remove them
+    # Remove any remaining steps that are fully empty in all chains
     finalListOfChainConfigs = menu.resolveEmptySteps(finalListOfChainConfigs)
+    log.debug("finalListOfChainConfig: %s", finalListOfChainConfigs)
 
-    log.debug("finalListOfChainConfig %s", finalListOfChainConfigs)
+    # Make the HLT configuration tree
+    # The HLTMenu json file is produced here.
     log.info("Making the HLT configuration tree")
     menuAcc, CFseq_list = makeHLTTree(flags, finalListOfChainConfigs)
+
     # Configure ChainFilters for ROBPrefetching
     from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
     if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
         from TrigGenericAlgs.TrigGenericAlgsConfig import prefetchingInitialRoIConfig
-        menuAcc.merge( prefetchingInitialRoIConfig(flags, CFseq_list), 'HLTBeginSeq')
+        menuAcc.merge(prefetchingInitialRoIConfig(flags, CFseq_list), 'HLTBeginSeq')
 
+
+    # Post-generation checks:
     log.info("Checking the L1HLTConsistency...")
     from TriggerMenuMT.HLT.Config.Validation.CheckL1HLTConsistency import checkL1HLTConsistency
     checkL1HLTConsistency(flags)
@@ -561,10 +614,12 @@ def generateMenuMT(flags):
     from TriggerMenuMT.HLT.Config.Validation.CheckCPSGroups import checkCPSGroups
     checkCPSGroups(HLTMenuConfig.dictsList())
 
+
     # Cleanup menu singletons to allow garbage collection (ATR-28855)
     GenerateMenuMT.clear()
     from TriggerMenuMT.HLT.Config import MenuComponents
     MenuComponents._ComboHypoPool.clear() 
+    MenuComponents._CustomComboHypoAllowed.clear()
 
     return menuAcc
     
@@ -605,15 +660,14 @@ def makeHLTTree(flags, chainConfigs):
                 log.debug(f"Tag leg does not match probe: '{vmname[:-6]}', will not use cached views")
 
     
-    # generate JSON representation of the config
+    # Generate JSON representation of the config
     from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON
     generateJSON(flags, HLTMenuConfig.dictsList(), menuAcc.getSequence("HLTAllSteps"))
 
-    from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generatePrescaleJSON
-    generatePrescaleJSON(flags, HLTMenuConfig.dictsList())
-
+    # Store the HLTMonitoring json file
     from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
     generateDefaultMonitoringJSON(flags, HLTMenuConfig.dictsList())
+
 
     from AthenaCommon.CFElements import checkSequenceConsistency 
     checkSequenceConsistency(steps)

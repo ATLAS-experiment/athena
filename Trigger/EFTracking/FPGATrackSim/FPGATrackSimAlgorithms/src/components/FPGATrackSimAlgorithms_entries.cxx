@@ -1,12 +1,14 @@
 #include "../FPGATrackSimLogicalHitsProcessAlg.h"
 #include "../FPGATrackSimMapMakerAlg.h"
-#include "../FPGATrackSimNNTrackTool.h"
-#include "../FPGATrackSimOverlapRemovalTool.h"
-#include "../FPGATrackSimTrackFitterTool.h"
 #include "../FPGATrackSimDataFlowTool.h"
 #include "../FPGATrackSimDataPrepAlg.h"
 #include "../FPGATrackSimSecondStageAlg.h"
-#include "../FPGATrackSimWindowExtensionTool.h"
+#include "../FPGATrackSimLayerStudyAlg.h"
+#include "../../FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
+#include "../../FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
+#include "../../FPGATrackSimAlgorithms/FPGATrackSimNNTrackTool.h"
+#include "../../FPGATrackSimAlgorithms/FPGATrackSimWindowExtensionTool.h"
+#include "../../FPGATrackSimAlgorithms/FPGATrackSimNNPathfinderExtensionTool.h"
 
 DECLARE_COMPONENT( FPGATrackSimLogicalHitsProcessAlg )
 DECLARE_COMPONENT( FPGATrackSimMapMakerAlg )
@@ -17,3 +19,5 @@ DECLARE_COMPONENT( FPGATrackSimDataFlowTool )
 DECLARE_COMPONENT( FPGATrackSimDataPrepAlg )
 DECLARE_COMPONENT( FPGATrackSimSecondStageAlg )
 DECLARE_COMPONENT( FPGATrackSimWindowExtensionTool )
+DECLARE_COMPONENT( FPGATrackSimNNPathfinderExtensionTool )
+DECLARE_COMPONENT( FPGATrackSimLayerStudyAlg )

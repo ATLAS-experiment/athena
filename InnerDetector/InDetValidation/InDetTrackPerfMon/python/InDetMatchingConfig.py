@@ -142,11 +142,16 @@ def TrackMatchingToolCfg( flags, **kwargs ):
 
     ## Matching track to track via truthParticleLink decorations
     if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "EFTruthMatch":
-        if "EFTrigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType and "Offline" in flags.PhysVal.IDTPM.currentTrkAna.RefType:
+        if not flags.Input.isMC:
+            log.error( "Matching EFTruthMatch not available for non-MC samples" )
+            return None
+
+        if ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType and
+             "Offline" in flags.PhysVal.IDTPM.currentTrkAna.RefType ):
             return EFTrackMatchingToolCfg(
                     flags, name="EFTrackMatchingTool" +
                         flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
-        log.warning( "EFTruthMatch via decorations configurable only with EFTrigger as Test Offline as Ref" )
+        log.warning( "EFTruthMatch via decorations configurable only with Trigger as Test Offline as Ref" )
         log.warning( "Matching will not be executed for TrkAnalysis %s",
                      flags.PhysVal.IDTPM.currentTrkAna.anaTag )
         return None

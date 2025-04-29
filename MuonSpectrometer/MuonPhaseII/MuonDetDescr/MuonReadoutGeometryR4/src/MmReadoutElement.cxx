@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 
@@ -74,6 +74,14 @@ Amg::Transform3D MmReadoutElement::fromGapToChamOrigin(const IdentifierHash& lay
 }
 
 
+#if defined(FLATTEN) && defined(__GNUC__)
+// We compile this function with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
 Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
@@ -85,6 +93,14 @@ Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, co
 }
 
 
+#if defined(FLATTEN) && defined(__GNUC__)
+// We compile this function with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
 Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
     const IdentifierHash lHash = layerHash(measHash);
     if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
@@ -95,6 +111,14 @@ Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, co
     return Amg::Vector3D::Zero();
 }
 
+#if defined(FLATTEN) && defined(__GNUC__)
+// We compile this function with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
 Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
     const IdentifierHash lHash = layerHash(measHash);
     if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {

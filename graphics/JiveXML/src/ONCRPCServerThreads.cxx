@@ -303,8 +303,15 @@ namespace JiveXML {
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
+#if defined(__clang__) && __clang_major__ >= 19
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
           struct timeval timeout; timeout.tv_sec = 1; timeout.tv_usec = 0;
           clnt_stat ret = clnt_call(client, NULLPROC, (xdrproc_t)xdr_void, NULL, (xdrproc_t)xdr_void, NULL, timeout);
+#if defined(__clang__) && __clang_major__ >= 19
+# pragma clang diagnostic pop
+#endif
 #if __GNUC__ >= 8
 # pragma GCC diagnostic pop
 #endif

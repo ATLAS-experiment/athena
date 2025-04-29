@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ public:
                             double tol2 = 0.) const override final;
 
   /**This method allows access to the subtracted part*/
-  SharedObject<AreaExcluder> subtractedVolume() const;
+  std::shared_ptr<AreaExcluder> subtractedVolume() const;
 
   /** Return properly formatted class name for screen output */
   virtual std::string name() const override final
@@ -74,7 +74,7 @@ public:
   }
 
 protected:
-  SharedObject<AreaExcluder> m_subtrVol;
+  std::shared_ptr<AreaExcluder> m_subtrVol;
   bool m_shared;
 };
 } // end of namespace

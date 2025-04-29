@@ -11,6 +11,11 @@
     <field name="m_constStoreLink" transient="true"/>
     <field name="m_mutex" transient="true"/>
   </class>
+  <class name="SG::AuxVectorData::Cache">
+    <field name="m_cache" transient="true"/>
+    <field name="m_cache_len" transient="true"/>
+    <field name="m_allcache" transient="true"/>
+  </class>
   <class name="SG::AuxElement">
     <field name="m_container" transient="true"/>
   </class>

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PileUpTools/PileUpMisc.h"
@@ -7,6 +7,7 @@
 
 #include "StoreGate/ActiveStoreSvc.h"
 #include "StoreGate/StoreGateSvc.h" /*to print name() */
+#include "AthContainers/ConstAccessor.h"
 #include "GaudiKernel/IEvtSelector.h"
 
 #include "xAODEventInfo/EventInfoContainer.h"
@@ -50,6 +51,12 @@ xAOD::EventInfo* addSubEvent( xAOD::EventInfo* targetEv,
    // add a EI copy to the EI container
    xAOD::EventInfo* newEv;
    eiContainer->push_back( newEv=new xAOD::EventInfo( *ev2add ) );
+   // Need to copy this explicitly as it may be marked as a decoration.
+   static const SG::ConstAccessor<std::vector<float> > mcEventWeightsAcc ("mcEventWeights");
+   if (mcEventWeightsAcc.isAvailable (*ev2add)) {
+     eiContainer->back()->setMCEventWeights(ev2add->mcEventWeights());
+   }
+
    if(newEv->evtStore()==nullptr && ev2add_store!=nullptr) newEv->setEvtStore(ev2add_store);
          
    // link to the fresh EI added to the container:

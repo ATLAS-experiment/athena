@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedWriterTool.h"
@@ -8,6 +8,7 @@
 #include "AthenaKernel/IEventShare.h"
 #include "AthenaKernel/IDataShare.h"
 #include "AthenaKernel/IAthenaSharedWriterSvc.h"
+#include "CxxUtils/xmalloc.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IIoComponentMgr.h"
@@ -97,7 +98,7 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
   ATH_MSG_INFO("Created shared writer process");
   if(mapAsyncFlag(AthenaMPToolBase::FUNC_BOOTSTRAP))
     return -1;
-  ATH_MSG_INFO("Shared writer process bootstraped");
+  ATH_MSG_INFO("Shared writer process bootstrapped");
   return 1;
 }
 
@@ -155,7 +156,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::bootstrap_f
   if(m_debug) waitForSignal();
 
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -270,7 +271,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::exec_func()
   }
 
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -285,7 +286,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::fin_func()
 {
   // Dummy
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 0; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
   return outwork;

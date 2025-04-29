@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -14,7 +14,7 @@
 #include <GeoModelKernel/GeoLogVol.h>
 #include <GeoModelKernel/GeoShape.h>
 #include <GeoModelKernel/GeoVFullPhysVol.h>
-#include <GeoModelKernel/GeoVPhysVol.h>
+#include <GeoModelKernel/GeoDefinitions.h>
 #include <cstdlib>
 
 #include <cmath>
@@ -25,6 +25,7 @@
 #include "GeoModelHelpers/getChildNodesWithTrf.h"
 #include "GeoModelHelpers/StringUtils.h"
 #include "GeoModelHelpers/GeoShapeUtils.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoShapeSubtraction.h"
@@ -45,7 +46,7 @@
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
 
-#define THROW_EXCEPTION(MSG)                                                                            \
+#define THROW_EXCEPTION_MM(MSG)                                                                            \
      {                                                                                                  \
         std::stringstream sstr{};                                                                       \
         sstr<<"MMReadoutElement - "<<idHelperSvc()->toStringDetEl(identify())<<" "<<__LINE__<<": ";   \
@@ -104,7 +105,7 @@ namespace MuonGM {
             }
             ++m_nlayers;
             if (m_nlayers > 4) {
-                THROW_EXCEPTION("number of MM layers > 4: increase transform array size" );
+                THROW_EXCEPTION_MM("number of MM layers > 4: increase transform array size" );
             }
             m_Xlg[m_nlayers - 1] =  child.transform;
             // save layer dimensions
@@ -126,7 +127,7 @@ namespace MuonGM {
         }
     
         if (!foundShape) {
-            THROW_EXCEPTION(" failed to initialize dimensions of this chamber " );
+            THROW_EXCEPTION_MM(" failed to initialize dimensions of this chamber " );
         }
     }
 
@@ -139,11 +140,11 @@ namespace MuonGM {
       
         SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
         if (!geoDbTag) {
-            THROW_EXCEPTION("Could not locate GeoDbTagSvc");
+            THROW_EXCEPTION_MM("Could not locate GeoDbTagSvc");
         }
         SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service(geoDbTag->getParamSvcName())};
         if (!accessSvc) {            
-            THROW_EXCEPTION("Could not locate " << geoDbTag->getParamSvcName() );
+            THROW_EXCEPTION_MM("Could not locate " << geoDbTag->getParamSvcName() );
         }
         const char sector_l = getStationName()[2];
         IRDBRecordset_ptr wmmRec = accessSvc->getRecordsetPtr("WMM","","");
@@ -180,12 +181,13 @@ namespace MuonGM {
             m_minHalfY      = activeBottomLength / 2;           // 0.5*bottom length (active area)
             m_maxHalfY      = activeTopLength / 2;              // 0.5*top length (active area)
             m_offset        = -0.5*(ylFrame - ysFrame);         // radial dist. of active area center w.r.t. chamber center
+            ATH_MSG_DEBUG(idHelperSvc()->toStringDetEl(identify())<<", ylFrame: "<<ylFrame<<", ysFrame: "<<ysFrame<<", offset: "<<m_offset);
             for (int il = 0; il < m_nlayers; il++) {
                 // identifier of the first channel to retrieve max number of strips
                 Identifier id = m_idHelper.channelID(identify(), m_ml, il + 1, 1);
                 int chMax = m_idHelper.channelMax(id);
                 if (chMax < 0) {
-                    THROW_EXCEPTION("MMReadoutElement -- Max number of strips not a valid value" );
+                    THROW_EXCEPTION_MM("MMReadoutElement -- Max number of strips not a valid value" );
                 }
                 MuonChannelDesign& design = m_etaDesign[il];
           
@@ -199,7 +201,7 @@ namespace MuonGM {
                 design.nMissedBottomStereo = nMissedBottomStereo;
                 design.totalStrips = totalStrips;   
                 /// The stereo angle is defined clock-wise from the y-axis
-                design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, -stereoAngle[il]);
+                design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, stereoAngle[il]);
                 /// Input width is defined as the distance between two channels
                 design.inputWidth = stripPitch * std::cos(design.stereoAngle());
           
@@ -210,9 +212,11 @@ namespace MuonGM {
                     design.nch = design.totalStrips - design.nMissedBottomStereo - design.nMissedTopStereo;
                     design.setFirstPos( -0.5 * design.xSize() + (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * stripPitch);
                 }
-                ATH_MSG_DEBUG("initDesign:" << getStationName() << " layer " << il 
+                ATH_MSG_DEBUG("initDesign:" <<idHelperSvc()->toStringDetEl(identify())<< " layer " << il 
                            << ", strip pitch " << design.inputPitch << ", nstrips " << design.nch 
-                           << " stereo " << design.stereoAngle() / Gaudi::Units::degree );
+                           << " stereo " << design.stereoAngle() / Gaudi::Units::degree
+                        <<", "<<design.xSize()<<", "<<design.maxYSize()<<" "<<design.minYSize()
+                        <<", firstPos: "<<design.firstPos()<<", first pitch: "<<design.firstPitch);
             }
         }
     }
@@ -220,13 +224,13 @@ namespace MuonGM {
     
     void MMReadoutElement::initDesign() {
         if (m_ml < 1 || m_ml > 2) {
-           THROW_EXCEPTION("MMReadoutElement -- Unexpected Multilayer: m_ml= " << m_ml );
+           THROW_EXCEPTION_MM("MMReadoutElement -- Unexpected Multilayer: m_ml= " << m_ml );
            return;
        }
        // Get the detector configuration.
        SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
        if (!geoDbTag) {
-            THROW_EXCEPTION("Could not locate GeoDbTagSvc");
+            THROW_EXCEPTION_MM("Could not locate GeoDbTagSvc");
        }
        if (geoDbTag->getSqliteReader()) {
             initDesignSqLite();
@@ -255,6 +259,7 @@ namespace MuonGM {
        m_minHalfY      = roParam.activeBottomLength / 2; // 0.5*bottom length (active area)
        m_maxHalfY      = roParam.activeTopLength / 2;    // 0.5*top length (active area)
        m_offset        = -0.5*(ylFrame - ysFrame);       // radial dist. of active area center w.r.t. chamber center
+       ATH_MSG_DEBUG(idHelperSvc()->toStringDetEl(identify())<<", ylFrame: "<<ylFrame<<", ysFrame: "<<ysFrame<<", offset: "<<m_offset);
        assign(roParam.readoutSide, m_readoutSide);
       
        for (int il = 0; il < m_nlayers; il++) {
@@ -262,7 +267,7 @@ namespace MuonGM {
             Identifier id = m_idHelper.channelID(identify(), m_ml, il + 1, 1);
             int chMax = m_idHelper.channelMax(id);
             if (chMax < 0) {
-                THROW_EXCEPTION("MMReadoutElement -- Max number of strips not a valid value" );
+                THROW_EXCEPTION_MM("MMReadoutElement -- Max number of strips not a valid value" );
             }
             MuonChannelDesign& design = m_etaDesign[il];
         
@@ -288,9 +293,11 @@ namespace MuonGM {
                 design.setFirstPos( -0.5 * design.xSize() + 
                                    (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * pitch);
             }
-        
-            ATH_MSG_DEBUG("initDesign:" << getStationName() << " layer " << il << ", strip pitch " << design.inputPitch
-                       << ", nstrips " << design.nch << " stereo " << design.stereoAngle() / Gaudi::Units::degree );
+            ATH_MSG_DEBUG("initDesign:" <<idHelperSvc()->toStringDetEl(identify())<< " layer " << il 
+            << ", strip pitch " << design.inputPitch << ", nstrips " << design.nch 
+            << " stereo " << design.stereoAngle() / Gaudi::Units::degree
+            <<", "<<design.xSize()<<", "<<design.maxYSize()<<" "<<design.minYSize()
+            <<", firstPos: "<<design.firstPos()<<", first pitch: "<<design.firstPitch);
         }
     }
 
@@ -335,7 +342,7 @@ namespace MuonGM {
         if (m_idHelper.stationEta(id) != getStationEta()) return false;
         if (m_idHelper.stationPhi(id) != getStationPhi()) return false;
 
-        if (m_idHelper.multilayerID(id) != m_ml) return false;
+        if (m_idHelper.multilayer(id) != m_ml) return false;
 
         int gasgap = m_idHelper.gasGap(id);
         if (gasgap < 1 || gasgap > m_nlayers) return false;
@@ -365,12 +372,14 @@ namespace MuonGM {
     void MMReadoutElement::setDelta(const ALinePar& aline) {
         // amdb frame (s, z, t) = chamber frame (y, z, x)
         if (aline) {
-            m_delta = aline.delta();
+            const Amg::Transform3D permute{GeoTrf::GeoRotation{90.*Gaudi::Units::deg,90.*Gaudi::Units::deg, 0.}};
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 
             // of m_delta so that it can be applied on chamber frame coordinates.
             m_ALinePar  = &aline;
-            m_delta     = Amg::getTranslateZ3D(m_offset)*m_delta*Amg::getTranslateZ3D(-m_offset);
+            m_delta     = Amg::getTranslateZ3D(m_offset)* permute*aline.delta()*
+                          permute.inverse()*Amg::getTranslateZ3D(-m_offset);
+            ATH_MSG_DEBUG(idHelperSvc()->toStringDetEl(identify())<<" setup new alignment: "<<GeoTrf::toString(m_delta,true));
             refreshCache();
         } else {  
             clearALinePar();

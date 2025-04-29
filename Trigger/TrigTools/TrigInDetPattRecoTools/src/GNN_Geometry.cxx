@@ -271,6 +271,7 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
 
 	     std::vector<int> v2(1, bin2_idx);
 	     m_binGroups.push_back(std::make_pair(bin1_idx, v2));
+	     lastBin1 = bin1_idx;
 
 	   }
 	   else {//extend the last group

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUMONITORING_TRIGTAUMONITORBASEALGORITHM_H
@@ -27,6 +27,12 @@ public:
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
+    enum TauID {
+        None = 0,
+        RNN = 1,
+        GNTau = 2,
+    };
+
 protected:
     // List of triggers from menu (before duplicate filtering)
     Gaudi::Property<std::vector<std::string>> m_triggers{this, "TriggerList", {}};
@@ -50,13 +56,12 @@ protected:
 
     // Get offline 1P and 3P TauJet objects that pass the quality selection cuts
     std::vector<const xAOD::TauJet*> getOfflineTausAll(const EventContext& ctx, const float threshold = 20.0) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOfflineTaus(const EventContext& ctx, const float threshold = 20.0) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOfflineTaus(const EventContext& ctx, const float threshold = 20.0, const TauID tau_id = TauID::RNN) const;
 
     // Get L1 RoIs
     std::vector<const xAOD::eFexTauRoI*> getL1eTAUs(const EventContext& ctx, const std::string& l1_item) const;
     std::vector<const xAOD::jFexTauRoI*> getL1jTAUs(const EventContext& ctx, const std::string& l1_item) const;
     std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> getL1cTAUs(const EventContext& ctx, const std::string& l1_item) const;
-    std::vector<const xAOD::EmTauRoI*> getL1LegacyTAUs(const EventContext& ctx, const std::string& l1_item) const;
 
     // Process event, after bad event cleaning
     virtual StatusCode processEvent(const EventContext& ctx) const = 0;
@@ -95,21 +100,21 @@ protected:
     template <typename T1 = xAOD::IParticle, typename T2 = xAOD::IParticle>
     inline bool matchTruthObjects(const T1* true_tau, const std::vector<const T2*>& tau_vec, float threshold) const
     {
-      static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_phivis("phi_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_mvis("mvis");
+      static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+      static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+      static const SG::ConstAccessor<double> acc_phivis("phi_vis");
+      static const SG::ConstAccessor<double> acc_mvis("mvis");
       TLorentzVector true_tau_p4;
       true_tau_p4.SetPtEtaPhiM(acc_ptvis(*true_tau), acc_etavis(*true_tau), acc_phivis(*true_tau), acc_mvis(*true_tau));
 
       for(auto tau : tau_vec) {
-	if(true_tau_p4.DeltaR(tau->p4()) < threshold) return true;
+	    if(true_tau_p4.DeltaR(tau->p4()) < threshold) return true;
       }
       return false;
     }
 
-    std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
+    std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::RNN) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::RNN) const;
     std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
 
    private:
@@ -121,7 +126,6 @@ protected:
 
     SG::ReadHandleKey<xAOD::TauJetContainer> m_offlineTauJetKey{this, "OfflineTauJetKey", "TauJets", "Offline taujet container key"};
 
-    SG::ReadHandleKey<xAOD::EmTauRoIContainer> m_legacyl1TauRoIKey{ this, "LegacyL1TauRoIKey", "LVL1EmTauRoIs", "Tau Legacy L1 RoI key"};
     SG::ReadHandleKey<xAOD::eFexTauRoIContainer>  m_phase1l1eTauRoIKey{this, "Phase1L1eTauRoIKey", "L1_eTauRoI", "eTau Phase1 L1 RoI key"};
     SG::ReadDecorHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1eTauRoIThresholdPatternsKey{this, "Phase1L1eTauRoIThresholdPatternsKey", "L1_eTauRoI.thresholdPatterns", "Decoration for the threshold patterns for the eTau RoIs"};
     SG::ReadHandleKey<xAOD::jFexTauRoIContainer>  m_phase1l1jTauRoIKey{this, "Phase1L1jTauRoIKey", "L1_jFexTauRoI", "jTau Phase1 L1 RoI key"};

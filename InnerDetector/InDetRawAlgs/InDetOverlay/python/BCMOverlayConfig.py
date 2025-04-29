@@ -1,6 +1,6 @@
 """Define methods to construct configured BCM overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -19,16 +19,6 @@ def BCMRawDataProviderAlgCfg(flags, name="BCMRawDataProvider", **kwargs):
     return acc
 
 
-def BCMDataOverlayExtraCfg(flags, **kwargs):
-    """Return a ComponentAccumulator with BCM data overlay specifics"""
-    acc = ComponentAccumulator()
-
-    # We need to convert BS to RDO for data overlay
-    acc.merge(BCMRawDataProviderAlgCfg(flags))
-
-    return acc
-
-
 def BCMOverlayAlgCfg(flags, name="BCMOverlay", **kwargs):
     """Return a ComponentAccumulator for BCMOverlay algorithm"""
     acc = ComponentAccumulator()
@@ -37,11 +27,14 @@ def BCMOverlayAlgCfg(flags, name="BCMOverlay", **kwargs):
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}BCM_RDOs")
     kwargs.setdefault("OutputKey", "BCM_RDOs")
 
-    if not flags.Overlay.DataOverlay:
+    kwargs.setdefault("isDataOverlay", not flags.Input.isMC)
+
+    # Input setup
+    if flags.Overlay.ByteStream:
+        acc.merge(BCMRawDataProviderAlgCfg(flags))
+    else:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'BCM_RDO_Container#{kwargs["BkgInputKey"]}']))
-
-    kwargs.setdefault("isDataOverlay", flags.Overlay.DataOverlay)
 
     # Do BCM overlay
     acc.addEventAlgo(CompFactory.BCMOverlay(name, **kwargs))
@@ -81,7 +74,7 @@ def BCMTruthOverlayCfg(flags, name="BCMSDOOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
             "InDetSimDataCollection#BCM_SDO_Map"
         ]))
-    
+
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
@@ -95,15 +88,13 @@ def BCMOverlayCfg(flags):
     """Configure and return a ComponentAccumulator for BCM overlay"""
     acc = ComponentAccumulator()
 
-    # Add data overlay specifics
-    if flags.Overlay.DataOverlay:
-        acc.merge(BCMDataOverlayExtraCfg(flags))
-
     # Add BCM overlay digitization algorithm
     from BCM_Digitization.BCM_DigitizationConfig import BCM_OverlayDigitizationBasicCfg
     acc.merge(BCM_OverlayDigitizationBasicCfg(flags))
+
     # Add BCM overlay algorithm
     acc.merge(BCMOverlayAlgCfg(flags))
+
     # Add BCM truth overlay
     if flags.Digitization.EnableTruth:
         acc.merge(BCMTruthOverlayCfg(flags))

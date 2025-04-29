@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025:$ CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -14,32 +14,32 @@
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/LayerMaterialMap.h"
 #include "TrkDetDescrUtils/LayerIndex.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrTPCnv/TrkGeometry/LayerMaterialMap_p1.h"
 #include "TrkDetDescrTPCnv/TrkGeometry/ElementTableCnv_p1.h"
 
+#include <memory>
 class MsgStream;
 
 class LayerMaterialMapCnv_p1 : public T_AthenaPoolTPCnvBase< Trk::LayerMaterialMap, Trk::LayerMaterialMap_p1 >
 {
   public:
-    
+
     /** Standard constructor */
     LayerMaterialMapCnv_p1(){}
 
     /** Destructor constructor */
     ~LayerMaterialMapCnv_p1(){}
-    
+
     /** persistent to transient */
     virtual void persToTrans(const Trk::LayerMaterialMap_p1* persMap, Trk::LayerMaterialMap* transMap, MsgStream &mlog) {
        transMap->clear();
-       
+
        // update the element table
        Trk::ElementTable* eTable = new Trk::ElementTable();
        m_eTableCnv.persToTrans((&persMap->elementTable), eTable, mlog);
-       Trk::SharedObject<const Trk::ElementTable> soeTable(eTable);
+       std::shared_ptr<const Trk::ElementTable> soeTable(eTable);
        transMap->updateElementTable(soeTable);
-       
+
        // convert vector entries one by one
        std::vector<TPObjRef>::const_iterator it   = persMap->lmVector.begin();
        std::vector<TPObjRef>::const_iterator iEnd = persMap->lmVector.end();
@@ -50,7 +50,7 @@ class LayerMaterialMapCnv_p1 : public T_AthenaPoolTPCnvBase< Trk::LayerMaterialM
            (*transMap)[Trk::LayerIndex(layIdex)] = tProperties;
        }
      }
-         
+
      /** transient to persistent */
      virtual void transToPers(const Trk::LayerMaterialMap* transMap, Trk::LayerMaterialMap_p1* persMap, MsgStream &mlog) {
        persMap->lmVector.clear();
@@ -58,7 +58,7 @@ class LayerMaterialMapCnv_p1 : public T_AthenaPoolTPCnvBase< Trk::LayerMaterialM
        persMap->idxVector.clear();
        persMap->idxVector.reserve( transMap->size() );
        // write out the ElementTable
-       if (transMap->elementTable())   
+       if (transMap->elementTable())
            m_eTableCnv.transToPers((transMap->elementTable()), &persMap->elementTable,mlog);
        // convert vector entries one by one
        for(auto& it : (*transMap) ) {
@@ -66,7 +66,7 @@ class LayerMaterialMapCnv_p1 : public T_AthenaPoolTPCnvBase< Trk::LayerMaterialM
            persMap->lmVector.push_back( toPersistent( (ITPConverterFor<Trk::LayerMaterialProperties>**)0, it.second, mlog )  );
        }
      }
-     
+
  protected:
    ElementTableCnv_p1     m_eTableCnv;
 

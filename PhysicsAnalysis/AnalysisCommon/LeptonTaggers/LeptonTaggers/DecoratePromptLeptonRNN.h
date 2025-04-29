@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DECORATELEPTONTAGGERRNN_H
@@ -36,6 +36,9 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticlexAODHelpers.h"
+#include "StoreGate/WriteDecorHandle.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
+#include <unordered_map>
 
 namespace Prompt
 {
@@ -60,15 +63,14 @@ namespace Prompt
     virtual StatusCode execute() override;
     virtual StatusCode finalize() override;
 
-    typedef SG::AuxElement::Decorator<float> decoratorFloat_t;
-    typedef std::map<std::string, std::unique_ptr<decoratorFloat_t> > decoratorFloatMap_t;
+    using decoratorFloatH_t = SG::WriteDecorHandle<xAOD::IParticleContainer, float>;
 
     const xAOD::TrackParticle* findMuonTrack(const xAOD::Muon *muon);
 
     const xAOD::Jet* findClosestTrackJet(const xAOD::TrackParticle *particle, const xAOD::JetContainer &trackJets);
 
     bool compDummy(const xAOD::IParticle &particle,
-       const std::string &prefix);
+                   std::vector<decoratorFloatH_t>& decors) const;
 
     bool prepTrackObject(Prompt::VarHolder         &p,
                          const xAOD::TrackParticle &track,
@@ -79,7 +81,7 @@ namespace Prompt
 
     bool compScore(const xAOD::IParticle                &particle,
                    const std::vector<Prompt::VarHolder> &tracks,
-                   const std::string                    &prefix);
+                   std::vector<decoratorFloatH_t>& decors);
 
     bool passTrack(Prompt::VarHolder &p);
 
@@ -135,11 +137,13 @@ namespace Prompt
     TStopwatch                                        m_timerEvent;
     int                                               m_countEvent;
 
-    decoratorFloatMap_t                               m_decoratorMap;
-
     std::map<std::string, TH1*>                       m_hists;
 
     std::unique_ptr<SG::AuxElement::ConstAccessor<unsigned char> > m_accessQuality;
+
+    SG::WriteDecorHandleKeyArray<xAOD::IParticleContainer> m_decorHandleKeys
+      { this, "DecorHandleKeys", {} };
+    std::unordered_map<std::string, size_t> m_decorNameMap;
   };
 }
 

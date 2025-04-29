@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -26,32 +26,7 @@ DATE:           V3.0 January 28th, 2008
 // "Distance" used by the comparison operator(s):
 static const double DELTA = 0.001;
 
-IsoMuonFeature::IsoMuonFeature() : P4PtEtaPhiMBase(), NavigableTerminalNode(),
-    m_sumet01(0.0),
-    m_sumet02(0.0),
-    m_sumet03(0.0),
-    m_sumet04(0.0),
-    m_sumpt01(0.0),
-    m_sumpt02(0.0),
-    m_sumpt03(0.0),
-    m_sumpt04(0.0),
-    m_PtMuID(0.0),
-    m_MaxPtID(0.0),
-    m_flag(0),
-    m_RoiIdMu(0),
-    m_PtMu(0.0),
-    m_QMu(0.0),
-    m_EtaMu(0.0),
-    m_PhiMu(0.0),
-    m_EtInnerConeEC(0.0),
-    m_EtOuterConeEC(0.0),
-    m_EtInnerConeHC(0.0),
-    m_EtOuterConeHC(0.0),
-    m_NTracksCone(0),
-    m_SumPtTracksCone(0.0),
-    m_PtMuTracksCone(0.0),
-    m_LAr_w(0.0),
-    m_Tile_w(0.0) {}
+IsoMuonFeature::IsoMuonFeature() : P4PtEtaPhiMBase(), NavigableTerminalNode() {}
 
 IsoMuonFeature::~IsoMuonFeature() {}
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGMESSAGING_CHECK_H
@@ -8,6 +8,7 @@
 // Local include(s):
 #include "AsgMessaging/MsgStreamMacros.h"
 
+#include "boost/preprocessor/facilities/overload.hpp"
 #include "CxxUtils/AthUnlikelyMacros.h"
 
 /// Helper macro for checking the status code returned by a function call
@@ -36,6 +37,9 @@
 ///
 /// The macro may only be used inside of member functions of dual-use tools.
 ///
+
+#ifndef __CPPCHECK__ // The varadic macros here confuse cppcheck.
+
 #define ASG_CHECK(...)  \
    BOOST_PP_OVERLOAD(ASG_CHECK_, __VA_ARGS__)(__VA_ARGS__)
 
@@ -56,6 +60,9 @@
          return RET;                                           \
       }                                                        \
    } while( 0 )
+
+#endif  // __CPPCHECK__
+
 
 /// Helper macro for checking the status code of a call outside of an ASG tool
 ///

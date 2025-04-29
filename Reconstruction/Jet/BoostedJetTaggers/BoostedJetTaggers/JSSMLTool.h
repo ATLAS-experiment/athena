@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #ifndef BOOSTEDJETTAGGERS_JSSMLTOOL_H
 #define BOOSTEDJETTAGGERS_JSSMLTOOL_H
 
@@ -9,20 +9,18 @@
 // ONNX Runtime include(s).
 #include <onnxruntime_cxx_api.h>
 
-// System include(s).
-#include <memory>
-#include <string>
-#include <iostream> 
-#include <fstream>
-#include <arpa/inet.h>
-#include <numeric>
-
-// root
-#include "TH2.h"
-
 // xAOD
 #include "xAODJet/JetContainer.h"
 #include "xAODPFlow/TrackCaloClusterContainer.h"
+// System include(s).
+#include <memory> //unique_ptr
+#include <string>
+#include <map>
+#include <vector>
+#include <cstdint>
+
+class TH2D; 
+
 
 namespace AthONNX {
 
@@ -58,6 +56,7 @@ class JSSMLTool
     /// Function executing the tool for a single event
     virtual double retrieveConstituentsScore(std::vector<TH2D> Images) const override;
     virtual double retrieveConstituentsScore(std::vector<std::vector<float>> constituents) const override;
+    virtual double retrieveConstituentsScore(std::vector<std::vector<float>> constituents, std::vector<std::vector<std::vector<float>>> interactions) const override;
     virtual double retrieveHighLevelScore(std::map<std::string, double> JSSVars) const override;
 
     // basic tool functions
@@ -84,18 +83,18 @@ class JSSMLTool
 
      // input node info
      std::vector<int64_t> m_input_node_dims;
-     size_t m_num_input_nodes;
+     size_t m_num_input_nodes{};
      std::vector<const char*> m_input_node_names;
 
      // output node info
      std::vector<int64_t> m_output_node_dims;
-     size_t m_num_output_nodes;
+     size_t m_num_output_nodes{};
      std::vector<const char*> m_output_node_names;
 
      // some configs
-      int m_nPixelsX, m_nPixelsY, m_nPixelsZ;
+      int m_nPixelsX{}, m_nPixelsY{}, m_nPixelsZ{};
 
-     int m_nvars;
+     int m_nvars{};
 
    }; // class JSSMLTool
 

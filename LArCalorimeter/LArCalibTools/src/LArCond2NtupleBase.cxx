@@ -81,7 +81,7 @@ StatusCode LArCond2NtupleBase::initialize() {
       return StatusCode::FAILURE;
     } else {
       m_onlineId = ll;
-      ATH_MSG_DEBUG("Found the LArOnlineID helper");
+      ATH_MSG_DEBUG("Found the LArOnline_SuperCellID helper");
     }
     m_caloId = calo_id_manager->getCaloCell_SuperCell_ID();
   } else { // m_isSC

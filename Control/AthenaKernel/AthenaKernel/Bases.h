@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaKernel/Bases.h
@@ -55,6 +55,11 @@ struct BaseType<Virtual<T> >
   typedef T type;
   typedef std::true_type is_virtual;
 };
+
+
+// _t version to reduce typing.
+template <class T>
+using BaseType_t = typename SG::BaseType<T>::type;
 
 
 /**

@@ -143,7 +143,7 @@ namespace JetTagDQA {
 
   StatusCode PhysValBTag::fillHistograms()
   {
-    ATH_MSG_INFO ("Filling hists " << name() << "...");
+    ATH_MSG_DEBUG ("Filling hists " << name() << "...");
     
     if (m_detailLevel < 10) return StatusCode::SUCCESS;
     
@@ -188,18 +188,22 @@ namespace JetTagDQA {
     xAOD::VertexContainer::const_iterator vtx_itr = vertices->begin();
     xAOD::VertexContainer::const_iterator vtx_end = vertices->end();
     int count = -1;
+    double PV_x = -999.;
+    double PV_y = -999.;
+    double PV_z = -999.;
+
     // loop over the vertices
     for (; vtx_itr != vtx_end; ++vtx_itr) {
       count++;
       if ((*vtx_itr)->nTrackParticles() >= 2) {
         npv++;
         if ((*vtx_itr)->vertexType() == 1) {
-          if (m_PV_x != -999.) ATH_MSG_WARNING( ".... second PV in the events ...!!!!!!");
+          if (has_pv) ATH_MSG_WARNING( ".... second PV in the events ...!!!!!!");
           indexPV = count;
           has_pv = true;
-          m_PV_x = (*vtx_itr)->x();
-          m_PV_y = (*vtx_itr)->y();
-          m_PV_z = (*vtx_itr)->z();
+          PV_x = (*vtx_itr)->x();
+          PV_y = (*vtx_itr)->y();
+          PV_z = (*vtx_itr)->z();
         }
       }
     }
@@ -313,7 +317,7 @@ namespace JetTagDQA {
       // fill multiplicities
       plot->fillMultiplicities(nJets_withCut, tracks->size(), npv, myVertex->nTrackParticles(), nJets_containing_moun, nJets_containing_SV, nJetsThatPassedWPCuts, event);
       // fill PV variables
-      plot->fillPVVariables(m_PV_x, m_PV_y, m_PV_z, event);
+      plot->fillPVVariables(PV_x, PV_y, PV_z, event);
 
     }
 

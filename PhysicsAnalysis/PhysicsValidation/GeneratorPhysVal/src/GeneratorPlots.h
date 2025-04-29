@@ -17,7 +17,7 @@ namespace GeneratorPhysVal
     TH1* eta = nullptr;
     TH1* phi = nullptr;
     
-    GeneratorPlots(PlotBase* pParent, std::string sDir, std::string sType = ""): PlotBase(pParent, sDir), m_sType(sType)
+    GeneratorPlots(PlotBase* pParent, const std::string& sDir, const std::string& sType = ""): PlotBase(pParent, sDir), m_sType(sType)
     {
       pT = Book1D("pT", "p_{T} of " + m_sType + ";pT(GeV);Entries", 15, 0., 15.);
       eta = Book1D("eta", "#eta of " + m_sType + ";#eta; Events ", 400, -10, 10.);

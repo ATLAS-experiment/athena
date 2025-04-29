@@ -3,7 +3,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/ConstituentsLoader.h"
-#include "FlavorTagDiscriminants/StringUtils.h"
+#include "FlavorTagInference/StringUtils.h"
 
 namespace {
   using namespace InDetGNNHardScatterSelection;
@@ -33,7 +33,7 @@ namespace {
     for (const auto& varname: input_variables) {
       InputVariableConfig input;
       input.name = varname;
-      input.type = FlavorTagDiscriminants::str::match_first(type_regexes, input.name,
+      input.type = FlavorTagInference::str::match_first(type_regexes, input.name,
                                 "iparticle type matching");
 
       config.inputs.push_back(input);
@@ -47,8 +47,8 @@ namespace InDetGNNHardScatterSelection {
     // Create a configuration for the constituents loaders
     //
     ConstituentsInputConfig createConstituentsLoaderConfig(
-      std::string name,
-      std::vector<std::string> input_variables
+      const std::string & name,
+      const std::vector<std::string> & input_variables
     ){
       ConstituentsInputConfig config;
 

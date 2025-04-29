@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "XMLCoreParser/XMLCoreParser.h" 
@@ -113,11 +113,7 @@ ExpatCoreParser::entity (void* /*userData*/,
   if (!publicId) publicId = "none";
   std::string temp = "none";
   if (value) {
-      char* t = (char*) malloc (value_length + 1);
-      strncpy (t, value, value_length);
-      t[value_length] = 0;
-      temp = (const char*) t;
-      free (t);
+      temp.assign (value, strnlen(value, value_length));
   }
   
   if (ExpatCoreParserDebugger::debug ()){
@@ -175,13 +171,10 @@ ExpatCoreParser::do_char_data (const XML_Char* s, int len){
   if (len == 0) return;
   while ((len > 0) && (s[len-1] == '\n')) len--;
   if (len == 0) return;
-  char* temp = (char*) malloc (len + 1);
-  strncpy (temp, s, len);
-  temp[len] = 0;
+  std::string temp (s, len);
   if (ExpatCoreParserDebugger::debug ()) {
     std::cout << "ExpatCoreParser::do_char_data> [" << temp << "]" << std::endl;
   }
-  free (temp);
 }
 
 void 
@@ -189,13 +182,10 @@ ExpatCoreParser::do_default_handler (const XML_Char* s, int len){
   if (len == 0) return;
   while ((len > 0) && (s[len-1] == '\n')) len--;
   if (len == 0) return;
-  char* temp = (char*) malloc (len + 1);
-  strncpy (temp, s, len);
-  temp[len] = 0;
+  std::string temp (s, len);
   if (ExpatCoreParserDebugger::debug ()) {
       std::cout << "ExpatCoreParser::do_default_handler> [" << temp << "]" << std::endl;
   }
-  free (temp);
 }
   
 void 

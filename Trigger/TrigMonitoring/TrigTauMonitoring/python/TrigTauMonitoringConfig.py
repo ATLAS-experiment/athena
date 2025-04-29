@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoring.DQConfigFlags import DQDataType
@@ -29,12 +29,14 @@ class TrigTauMonAlgBuilder:
   # This will bias the background events variable distributions of online objects, but will better represent the signal events (the events included in the efficiency numerators)
 
   do_duplicate_var_plots_without_offline_taus = True # Duplicate variable distribution plots without the requirement of at least 1 offline good-quality tau (regardless of p_T) on ALL events (except in the Truth monitoring).
+  do_duplicate_with_offline_gntau = True # Duplicate all plots with offline GNTaus (except in the Truth monitoring).
 
   #=============================================
   # TauID monitoring
   #=============================================
   hlt_tauid_scores = {
     'tracktwoMVA': {
+      'GNTau': ('GNTau_Score', 'GNTau_ScoreSigTrans'),
       'DeepSet': ('RNNJetScore', 'RNNJetScoreSigTrans'),
     },
     'tracktwoLLP': {
@@ -43,13 +45,16 @@ class TrigTauMonAlgBuilder:
     'trackLRT': {
       'RNNLLP': ('RNNJetScore', 'RNNJetScoreSigTrans'),
     },
+
     # Archive:
     'tracktwoMVABDT': { 'RNN': ('RNNJetScore', 'RNNJetScoreSigTrans') }, # Deprecated
   }
 
   offline_tauid_scores = {
     'RNN': ('RNNJetScore', 'RNNJetScoreSigTrans'),
+    'GNTau': ('GNTauScore_v0prune', 'GNTauScoreSigTrans_v0prune'),
   }
+  offline_taujets = 'TauJets'
 
   #=============================================
   # Setup for L1Calo monitoring
@@ -243,6 +248,7 @@ class TrigTauMonAlgBuilder:
     mon_alg = self.helper.addAlgorithm(algorithm_factory, name)
     mon_alg.L1Phase1Thresholds = self.L1_Phase1_thresholds
     mon_alg.L1Phase1ThresholdPatterns = self.L1_Phase1_threshold_mappings
+    mon_alg.OfflineTauJetKey = self.offline_taujets
     return mon_alg
 
 
@@ -294,6 +300,39 @@ class TrigTauMonAlgBuilder:
         self.bookIDInputTrack(self.mon_alg_single_no_offline, path, trigger, online=True)
         self.bookIDInputCluster(self.mon_alg_single_no_offline, path, trigger, online=True)
 
+    if self.do_duplicate_with_offline_gntau:
+      self.mon_alg_single_gntau = self._configureAlgorithm(CompFactory.TrigTauMonitorSingleAlgorithm, 'TrigTauMonAlgSingleGNTau')
+      self.mon_alg_single_gntau.TriggerList = self.HLT_single_items
+      self.mon_alg_single_gntau.DoTotalEfficiency = self.do_total_efficiency
+      self.mon_alg_single_gntau.RequireOfflineTaus = self.require_offline_taus
+      self.mon_alg_single_gntau.HLTTauIDScores = self.hlt_tauid_scores
+      self.mon_alg_single_gntau.OfflineTauIDScores = self.offline_tauid_scores
+      self.mon_alg_single_gntau.OfflineTauID = 2
+
+      self.logger.info('  |- Booking all histograms')
+      path = f'{self.base_path}/OfflineGNTau'
+      for trigger in self.HLT_single_items:
+        # Efficiencies
+        for p in ('1P', '3P'):
+            self.bookHLTEffHistograms(self.mon_alg_single_gntau, path, trigger, n_prong=p)
+
+        # Online distributions
+        for p in ('0P', '1P', 'MP'):
+          self.bookBasicVars(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
+          self.bookIDScores(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
+          self.bookIDInputScalar(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
+        self.bookIDInputTrack(self.mon_alg_single_gntau, path, trigger, online=True)
+        self.bookIDInputCluster(self.mon_alg_single_gntau, path, trigger, online=True)
+
+        # Offline distributions
+        for p in ('1P', '3P'):
+          self.bookBasicVars(self.mon_alg_single_gntau, path, trigger, p, online=False)
+          self.bookIDScores(self.mon_alg_single_gntau, path, trigger, p, online=False)
+          self.bookIDInputScalar(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=False)
+        self.bookIDInputTrack(self.mon_alg_single_gntau, path, trigger, online=False)
+        self.bookIDInputCluster(self.mon_alg_single_gntau, path, trigger, online=False)
+      
+
 
   def configureAlgorithmDiTau(self):
     self.mon_alg_ditau = self._configureAlgorithm(CompFactory.TrigTauMonitorDiTauAlgorithm, 'TrigTauMonAlgDiTau')
@@ -307,6 +346,20 @@ class TrigTauMonAlgBuilder:
       self.bookDiTauVars(self.mon_alg_ditau, self.base_path, trigger)
 
 
+    if self.do_duplicate_with_offline_gntau:
+      self.mon_alg_ditau_gntau = self._configureAlgorithm(CompFactory.TrigTauMonitorDiTauAlgorithm, 'TrigTauMonAlgDiTauGNTau')
+      self.mon_alg_ditau_gntau.TriggerList = self.HLT_ditau_items
+      self.mon_alg_ditau_gntau.DoTotalEfficiency = self.do_total_efficiency
+      self.mon_alg_ditau_gntau.RequireOfflineTaus = self.require_offline_taus
+      self.mon_alg_ditau_gntau.OfflineTauID = 2
+
+      self.logger.info('  |- Booking all histograms')
+      path = f'{self.base_path}/OfflineGNTau'
+      for trigger in self.HLT_ditau_items:
+        self.bookDiTauHLTEffHistograms(self.mon_alg_ditau_gntau, path, trigger)
+        self.bookDiTauVars(self.mon_alg_ditau_gntau, path, trigger)
+
+
   def configureAlgorithmTagAndProbe(self):
     self.mon_alg_tag_and_probe = self._configureAlgorithm(CompFactory.TrigTauMonitorTandPAlgorithm, 'TrigTauMonAlgTandP')
     self.mon_alg_tag_and_probe.TriggerList = self.HLT_tag_and_probe_items
@@ -316,6 +369,18 @@ class TrigTauMonAlgBuilder:
     for trigger in self.HLT_tag_and_probe_items:
       self.bookTAndPHLTEffHistograms(self.mon_alg_tag_and_probe, self.base_path, trigger)
       self.bookTAndPVars(self.mon_alg_tag_and_probe, self.base_path, trigger)
+
+
+    if self.do_duplicate_with_offline_gntau:
+      self.mon_alg_tag_and_probe_gntau = self._configureAlgorithm(CompFactory.TrigTauMonitorTandPAlgorithm, 'TrigTauMonAlgTandPGNTau')
+      self.mon_alg_tag_and_probe_gntau.TriggerList = self.HLT_tag_and_probe_items
+      self.mon_alg_tag_and_probe_gntau.RequireOfflineTaus = self.require_offline_taus
+
+      self.logger.info('  |- Booking all histograms')
+      path = f'{self.base_path}/OfflineGNTau'
+      for trigger in self.HLT_tag_and_probe_items:
+        self.bookTAndPHLTEffHistograms(self.mon_alg_tag_and_probe_gntau, path, trigger)
+        self.bookTAndPVars(self.mon_alg_tag_and_probe_gntau, path, trigger)
 
 
   def configureAlgorithmTruth(self):
@@ -375,6 +440,21 @@ class TrigTauMonAlgBuilder:
         for p in ('1P', '3P'):
           self.bookL1EffHistograms(self.mon_alg_L1_alt, path, trigger, n_prong=p)
         self.bookL1Vars(self.mon_alg_L1_alt, path, trigger)
+
+    if self.do_duplicate_with_offline_gntau:
+      self.mon_alg_L1_gntau = self._configureAlgorithm(CompFactory.TrigTauMonitorL1Algorithm, 'TrigTauMonAlgL1GNTau')
+      self.mon_alg_L1_gntau.TriggerList = self.L1_items
+      self.mon_alg_L1_gntau.RequireOfflineTaus = self.require_offline_taus
+      if not has_xtob_etau_rois:
+        self.logger.info('  |- No L1_eTauxRoI container is available: e/cTAU BDT scores will be set to 0')
+        self.mon_alg_L1_gntau.Phase1L1eTauxRoIKey = ''
+
+      self.logger.info('  |- Booking all histograms')
+      path = f'{self.base_path}/OfflineGNTau'
+      for trigger in self.L1_items:
+        for p in ('1P', '3P'):
+          self.bookL1EffHistograms(self.mon_alg_L1_gntau, path, trigger, n_prong=p)
+        self.bookL1Vars(self.mon_alg_L1_gntau, path, trigger)
 
 
   def bookHLTEffHistograms(self, mon_alg, base_path, trigger, n_prong):
@@ -495,11 +575,11 @@ class TrigTauMonAlgBuilder:
     mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
  
     for tau_id, (score, score_sig_trans) in variables.items():
-      if tau_id in ['RNN', 'DeepSet', 'RNNLLP']: xbins, xmax = 20, 1
-      else: xbins, xmax = 100, 5
+      if online and tau_id in ['RNN', 'DeepSet', 'RNNLLP', 'GNTau'] or not online and tau_id in ['RNN']: xbins, xmax = 20, 1
+      else: xbins, xmax = 100, 7
 
       mon_group.defineHistogram(f'{tau_id}_TauIDScore', title=f'{type_str} {tau_id} TauID score; TauID score; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')
-      mon_group.defineHistogram(f'{tau_id}_TauIDScoreSigTrans', title=f'{type_str} {tau_id} TauID score sig. transformed; TauID score sig. transformed; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')
+      mon_group.defineHistogram(f'{tau_id}_TauIDScoreSigTrans', title=f'{type_str} {tau_id} TauID score sig. transformed; TauID score sig. transformed; Events', xbins=xbins, xmin=0, xmax=1, opt='kAlwaysCreate')
 
 
   def bookBasicVars(self, mon_alg, base_path, trigger, n_prong, online):
@@ -567,7 +647,7 @@ class TrigTauMonAlgBuilder:
                               xbins=50, xmin=0, xmax=250, ybins=50, ymin=0, ymax=250, opt='kAlwaysCreate')
     mon_group.defineHistogram('leadHLTEta,subleadHLTEta', type='TH2F', title='#eta_{lead} vs #eta_{sublead}; #eta_{lead}; #eta_{sublead}',
                               xbins=26, xmin=-2.6, xmax=2.6, ybins=26, ymin=-2.6, ymax=2.6, opt='kAlwaysCreate')
-    mon_group.defineHistogram('leadHLTPhi,subleadHLTPhi', type='TH2F', title='#phi_{lead} vs #phi_{sublead}; #phi_{lead}; #phi{sublead}',
+    mon_group.defineHistogram('leadHLTPhi,subleadHLTPhi', type='TH2F', title='#phi_{lead} vs #phi_{sublead}; #phi_{lead}; #phi_{sublead}',
                               xbins=16, xmin=-3.2, xmax=3.2, ybins=16, ymin=-3.2, ymax=3.2, opt='kAlwaysCreate') 
     mon_group.defineHistogram('dR', title='#Delta R(#tau,#tau); #Delta R(#tau,#tau); Events', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
     mon_group.defineHistogram('dEta', title='#Delta#eta(#tau,#tau); #Delta#eta(#tau,#tau); Events', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
@@ -751,15 +831,6 @@ class TrigTauMonAlgBuilder:
 
     elif 'jTAU' in trigger:
         mon_group.defineHistogram('L1jFexRoIIso', title='L1 jTAU RoI Isolation; jTAU Isolation [GeV]; N RoI', xbins=25, xmin=0, xmax=50, opt='kAlwaysCreate')
-
-    else: # Legacy
-        mon_group.defineHistogram('L1RoIEMIsol', title='L1 Legacy RoI EM Isol; E_{T}^{EM Iso} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoIHadCore', title='L1 Legacy RoI Had Core; E_{T}^{Had} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoIHadIsol', title='L1 Legacy RoI Had Isol; E_{T}^{Had Iso} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoITauClus', title='L1 Legacy RoI E_{T}; E_{T} [GeV]; RoIs', xbins=260, xmin=0, xmax=130, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoITauClus,L1RoIEMIsol', type='TH2F', title='L1 RoI E_{T} vs EM Isol; E_{T} [GeV]; E_{T}^{EM Iso} [GeV]',
-                                  xbins=140, xmin=10, xmax=80, ybins=42, ymin=-1, ymax=20, opt='kAlwaysCreate')
-
 
   def getCustomPtBinning(self, trigger, fine=False):
     info = self.getTriggerInfo(trigger)

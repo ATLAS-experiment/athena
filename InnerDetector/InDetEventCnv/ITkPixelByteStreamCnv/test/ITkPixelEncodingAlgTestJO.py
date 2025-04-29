@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
+
 # # Example to add additional algorithms:
 # from AthenaConfiguration.ComponentFactory import CompFactory
 # def MyAlgCfg(flags, name='MyAlg', **kwargs):
@@ -19,7 +22,7 @@ if __name__=="__main__":
    # make logging more verbose
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
-   # log.setLevel(DEBUG)
+   log.setLevel(DEBUG)
    
    # --- set flags
    # the input file
@@ -42,10 +45,17 @@ if __name__=="__main__":
    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
    cfg.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
 
+
    # example runs pixel clusterization
    from ITkPixelByteStreamCnv.ITkPixelEncodingAlgConfig import ITkPixelEncodingAlgCfg
    cfg.merge( ITkPixelEncodingAlgCfg(flags) )
-   
+
    cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
+ 
+   #dump what's in SG
+   #sg = cfg.getService("StoreGateSvc")
+   #sg.Dump = True
+
    # loop over 10 events
    cfg.run(10)
+

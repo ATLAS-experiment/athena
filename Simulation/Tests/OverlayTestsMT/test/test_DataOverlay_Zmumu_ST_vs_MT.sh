@@ -25,7 +25,7 @@ Overlay_tf.py \
 --conditionsTag CONDBR2-BLKPA-RUN2-10 \
 --samplingFractionDbTag FTFP_BERT_BIRK \
 --preInclude 'Campaigns.DataOverlayPPTest' \
---postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
+--postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' \
 --imf False
 
 rc=$?
@@ -45,7 +45,7 @@ then
     --conditionsTag CONDBR2-BLKPA-RUN2-10 \
     --samplingFractionDbTag FTFP_BERT_BIRK \
     --preInclude 'Campaigns.DataOverlayPPTest' \
-    --postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
+    --postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' \
     --imf False
     rc2=$?
     status=$rc2

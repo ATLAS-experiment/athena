@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_OfflineHistogramProvider_h
@@ -40,7 +40,7 @@ namespace Monitored {
                              const HistogramDef& histDef)
     : IHistogramProvider()
     , m_gmTool(gmTool)
-    , m_factory(factory)
+    , m_factory(std::move(factory))
     , m_histDef(new HistogramDef(histDef))
     , m_objcache({0, 0, nullptr})
     {}

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/JaggedVecConversions.h
@@ -21,7 +21,6 @@
 #include "AthContainersInterfaces/AuxDataSpan.h"
 #include "AthContainersInterfaces/AuxTypes.h"
 #include "CxxUtils/range_with_conv.h"
-#include "CxxUtils/concepts.h"
 #include "CxxUtils/ranges.h"
 #include <variant>
 #include <cassert>

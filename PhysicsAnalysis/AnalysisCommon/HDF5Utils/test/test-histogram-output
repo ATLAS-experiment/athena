@@ -7,7 +7,7 @@ function check() {
     h5dump -o $TMP -y -d $1 hists.h5 > /dev/null
     local NUMBER=$(cat $TMP | xargs )
     if [[ $NUMBER == $2 ]]; then
-        echo "number in $1 is correct! ($NUMBER)"
+        true #echo "number in $1 is correct! ($NUMBER)"
     else
         echo "test magic number is incorrect ($NUMBER != $2)"
         return 1

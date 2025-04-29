@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 
@@ -228,11 +228,11 @@ namespace Trk{
          } // loop over j
        }   // if vx found partner in compatibility
 
-       ATH_MSG_DEBUG("Merged sumPt2 " << mAcc_sumPt2(*vx));
-
        // whether we merged or not, can add vx to the container
-       if (vx != nullptr)
+       if (vx != nullptr){
+	 ATH_MSG_DEBUG("Merged sumPt2 " << mAcc_sumPt2(*vx));
          NewContainer->push_back(vx);
+       }
      }
 
      return std::make_pair(NewContainer, auxNewContainer);

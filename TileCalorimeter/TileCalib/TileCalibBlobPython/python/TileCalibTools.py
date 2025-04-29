@@ -369,7 +369,7 @@ def getCoolValidityKey(pointInTime, isSince=True):
 def getFolderTag(db, folderPath, globalTag):
 
     tag=""
-    if globalTag.startswith("/") or globalTag.startswith("TileO"):
+    if globalTag.startswith("/") or globalTag.startswith("TileO") or globalTag.startswith("CALO"):
         tag = globalTag
         log.warning("Using tag as-is for folder %s", folderPath)
     elif '/TILE/ONL01' in folderPath:
@@ -380,22 +380,26 @@ def getFolderTag(db, folderPath, globalTag):
         tag = TileCalibUtils.getFullTag(folderPath, globalTag)
         log.warning("Using tag with empty suffix for folder %s", folderPath)
     else:
-        schema='COOLOFL_TILE/CONDBR2'
+        if folderPath.startswith('/CALO'):
+            dbname = 'COOLOFL_CALO' if folderPath.startswith('/CALO/Ofl') else 'COOLONL_CALO'
+        else:
+            dbname ='COOLOFL_TILE'
+        schema=dbname+'/CONDBR2'
         if isinstance(db, six.string_types):
             if 'OFLP200' in db or 'MC' in db:
-                schema='COOLOFL_TILE/OFLP200'
+                schema=dbname+'/OFLP200'
                 if not globalTag.startswith("OFLCOND"):
                     if globalTag.startswith("RUN"):
                         globalTag='OFLCOND-'+globalTag
                         log.info("Using Simulation global tag \'%s\'", globalTag)
             elif 'COMP200' in db or 'RUN1' in db:
-                schema='COOLOFL_TILE/COMP200'
+                schema=dbname+'/COMP200'
                 if globalTag!='UPD1' and globalTag!='UPD4' and ('UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag):
                     log.info("Using suffix \'%s\' as it is", globalTag)
                 else:
                     globalTag='COMCOND-BLKPA-RUN1-06'
                     log.info("Using RUN1 global tag \'%s\'", globalTag)
-        if schema == 'COOLOFL_TILE/CONDBR2':
+        if schema == dbname+'/CONDBR2':
             if globalTag=='CURRENT' or globalTag=='UPD4' or globalTag=='':
                 globalTag=getAliasFromFile('Current')
                 log.info("Resolved CURRENT globalTag to \'%s\'", globalTag)
@@ -411,6 +415,8 @@ def getFolderTag(db, folderPath, globalTag):
         globalTag=globalTag.replace('*','')
         if 'UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag:
             tag = TileCalibUtils.getFullTag(folderPath, globalTag)
+            if tag.startswith('Calo'):
+                tag='CALO'+tag[4:]
             log.info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
         else:
             if not isinstance(db, six.string_types):

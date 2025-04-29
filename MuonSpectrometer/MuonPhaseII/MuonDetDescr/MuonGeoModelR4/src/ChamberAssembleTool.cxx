@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 
@@ -37,9 +37,15 @@ namespace {
    ///   x-axis: Parallel to the eta channels
    ///   y-axis: Along the beam axis
    ///   z-axis: Towards the sky
-   const Amg::Transform3D axisRotation{Amg::getRotateZ3D(-90. * Gaudi::Units::deg) *
-                                       Amg::getRotateY3D(-90. * Gaudi::Units::deg)};
-
+   
+   
+   Amg::Transform3D axisRotation(ActsTrk::DetectorType t) {
+      if (t == ActsTrk::DetectorType::sTgc) {
+         return Amg::Transform3D::Identity();
+      }
+      return Amg::getRotateZ3D(-90. * Gaudi::Units::deg) *
+             Amg::getRotateY3D(-90. * Gaudi::Units::deg);
+   }
    
    using BoundEnum = Acts::TrapezoidVolumeBounds::BoundValues;
 
@@ -54,11 +60,6 @@ namespace {
 namespace MuonGMR4{
 
 using chamberArgs = Chamber::defineArgs;
-
-ChamberAssembleTool::ChamberAssembleTool(const std::string &type, const std::string &name,
-                                         const IInterface *parent):
-    base_class{type,name,parent}{}
-
 
 
 double ChamberAssembleTool::trapezoidEdgeDist(const Amg::Vector3D& linePos,
@@ -164,8 +165,8 @@ ChamberAssembleTool::BoundTrfPair
       Amg::Transform3D newCentreTrf{Amg::Transform3D::Identity()};
       for (const MuonReadoutElement* chambEle :  readoutEles) {
             Amg::Transform3D trf = newCentreTrf * toCenter * 
-                                         chambEle->localToGlobalTrans(gctx) * 
-                                         axisRotation.inverse();
+                                   chambEle->localToGlobalTrans(gctx) * 
+                                   axisRotation(chambEle->detectorType()).inverse();
             std::shared_ptr<BoundType> bounds = boundingBox(chambEle, boundSet);
             if (!envelopeBounds) {
                envelopeBounds = bounds;
@@ -173,11 +174,14 @@ ChamberAssembleTool::BoundTrfPair
                ATH_MSG_VERBOSE("Envelope "<<(*envelopeBounds)<<", transform: "<<Amg::toString(newCentreTrf));
                continue;
             }
-            /// Hack to cope with the RPCs which may be rotated by 180 degrees around the z-axis in cases,
+            /// Hack to cope with the RPCs which may be rotated by 180 degrees around the x or z-axis in cases,
             /// they're upside down.
             GeoTrf::CoordEulerAngles rotAngles = GeoTrf::getCoordRotationAngles(trf);
             if (std::abs(rotAngles.gamma - 180.*Gaudi::Units::deg)< std::numeric_limits<float>::epsilon()){
                trf = trf *Amg::getRotateZ3D(180.*Gaudi::Units::deg);
+            }
+            if (std::abs(rotAngles.alpha - 180.*Gaudi::Units::deg)< std::numeric_limits<float>::epsilon()){
+               trf = trf *Amg::getRotateX3D(180.*Gaudi::Units::deg);
             }
             /// Check whether the bounds are already embedded in the trapezoid
             const std::array<Amg::Vector3D, 8> corners = cornerPoints(trf, *bounds);
@@ -312,8 +316,9 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                             const MuonReadoutElement* refEle = args.detEles.front();
                             const Identifier refId = refEle->identify();
                             const Identifier testId = readOutEle->identify();
-                            /// Check that the two readout elements are on the same side
-                            if (sign(refEle->stationEta()) != sign(readOutEle->stationEta())) {
+                            /// Check that the two readout elements are on the same side.
+                            /// Exception BOG eta 0 -> attributes to positive sectors
+                            if (sign(refEle->stationEta()) * sign(readOutEle->stationEta()) <0) {
                                  return false;
                             }
                             /// The two readout elements shall be located in the same sector
@@ -327,7 +332,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                             }
                             /// Summarize all readout element in the same sector & layer
                             /// into a single chamber
-                            if (readOutEle->stationName() == refEle->stationName()) {
+                            if (readOutEle->chamberIndex() == refEle->chamberIndex()) {
                                  return true;
                             }
                             /// sTgcs && Micromegas should belong to the same chamber
@@ -342,7 +347,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                 stIndicesEIL.count(refEle->stationName())) {
                                  return true;    
                             }
-                            return false;// readOutEle->chamberIndex() == refEle->chamberIndex();
+                            return false;
                          });
       /// If no chamber has been found, then create a new one
       if (exist == envelopeCandidates.end()) {
@@ -360,7 +365,8 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
    ActsTrk::SurfaceBoundSet<BoundType> boundSet{};    
    for (chamberArgs& candidate : envelopeCandidates) {
          std::unordered_set<Identifier> reIds{};
-         const Amg::Transform3D toCenter = axisRotation * candidate.detEles.front()->globalToLocalTrans(gctx);
+         const MuonReadoutElement* refEle = candidate.detEles.front();
+         const Amg::Transform3D toCenter = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
          ATH_MSG_VERBOSE("New envelope candidate ");
          const auto [envelopeBox, envelopeCentre] = boundingBox(gctx, candidate.detEles, toCenter, boundSet);
        
@@ -378,8 +384,9 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             }
             /** Create the enclosing chamber volume */
             for (auto& [parent, detEles]: stationMap) {
-               const Amg::Transform3D toChambCentre = axisRotation * detEles.front()->globalToLocalTrans(gctx);
-               ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(detEles.front()->identify()));
+               const MuonReadoutElement* refEle = detEles.front();
+               const Amg::Transform3D toChambCentre = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
+               ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
                const auto[chamberBox, chamberCentre] = boundingBox(gctx, detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
                chamberArgs chambArgs{};
                chambArgs.detEles =std::move(detEles);
@@ -392,8 +399,9 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                }
             }
          } else {
-            const Amg::Transform3D toChambCentre = axisRotation * candidate.detEles.front()->globalToLocalTrans(gctx);
-            ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(candidate.detEles.front()->identify()));
+            const MuonReadoutElement* refEle = candidate.detEles.front();
+            const Amg::Transform3D toChambCentre = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
+            ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberBox, chamberCentre] = boundingBox(gctx, candidate.detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
             chamberArgs chambArgs{};
             chambArgs.detEles = candidate.detEles;
@@ -409,7 +417,19 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                                    const SpectrometerSector::ChamberPtr& b) {
                                                       return (*a) < (*b);
                                                    });
+         const Amg::Transform3D globalToSector = sectorArgs.locToGlobTrf.inverse(); 
 
+         /// now, build simplified 2D representations of the sorted chambers we collected. 
+         for (auto & chamber : sectorArgs.chambers){
+            // split by readout elements - MDT multilayers and trigger chambers 
+            for (auto & RE : chamber->readoutEles()){
+               // get the center of the element in the sector frame 
+               const Amg::Transform3D& chamberToGlobal{RE->localToGlobalTrans(gctx)}; 
+               const Amg::Vector3D origin = (globalToSector * chamberToGlobal).translation();
+               // and then add the bounds of the element - this is technology dependent 
+               sectorArgs.detectorLocs.emplace_back(origin, RE, boundingBox(RE, boundSet));
+            }
+         }
          auto newSector = std::make_unique<SpectrometerSector>(std::move(sectorArgs));
          
          for (const Identifier& chId : reIds) {

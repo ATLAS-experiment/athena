@@ -18,8 +18,8 @@ class TH1I;
 
 class FPGATrackSimSpacePointsTool : public extends<AthAlgTool, FPGATrackSimSpacePointsToolI> {
  public:
-    FPGATrackSimSpacePointsTool(const std::string &, const std::string &, const IInterface *);
-    virtual ~FPGATrackSimSpacePointsTool() {}
+    /// Constructor
+    using base_class::base_class;
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;

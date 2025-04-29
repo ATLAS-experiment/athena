@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_MMREADOUTELEMENT_H
@@ -140,7 +140,7 @@ namespace MuonGM {
       
         // Amdb local (szt) to global coord
         virtual Amg::Vector3D AmdbLRSToGlobalCoords(const Amg::Vector3D& x) const override final { return AmdbLRSToGlobalTransform()*x; }
-        virtual Amg::Transform3D AmdbLRSToGlobalTransform() const override final { return absTransform()*Amg::Translation3D(0, 0, m_offset)*getDelta(); }
+        virtual Amg::Transform3D AmdbLRSToGlobalTransform() const override final { return absTransform()*Amg::getTranslateZ3D(m_offset)*getDelta(); }
         // Global to Amdb local (szt) coord
         virtual Amg::Vector3D GlobalToAmdbLRSCoords(const Amg::Vector3D& x) const override final { return GlobalToAmdbLRSTransform()*x; }
         virtual Amg::Transform3D GlobalToAmdbLRSTransform() const override final { return AmdbLRSToGlobalTransform().inverse(); }

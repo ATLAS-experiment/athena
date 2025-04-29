@@ -43,8 +43,12 @@ def fromRunArgs(runArgs):
         # Set inputs for Overlay
         from OverlayConfiguration.OverlaySkeleton import setOverlayInputFiles
         setOverlayInputFiles(runArgs, flags, logFastChain)
-        flags.Overlay.FastChain = True
+        flags.Common.isOverlay = True
         flags.Digitization.PileUp = False
+
+        if flags.Overlay.DataOverlay and not flags.Overlay.ByteStream:
+            from SimulationConfig.SimEnums import VertexSource
+            flags.Sim.VertexSource = VertexSource.MatchingBkg
     else:
         # Setting input files for FastChain without overlay
         if hasattr(runArgs, 'inputEVNTFile'):
@@ -64,7 +68,7 @@ def fromRunArgs(runArgs):
     else:
         raise RuntimeError('No outputRDOFile defined')
 
-    if flags.Overlay.FastChain:
+    if flags.Common.isOverlay:
         if hasattr(runArgs, 'outputRDO_SGNLFile'):
             flags.Output.RDO_SGNLFileName = runArgs.outputRDO_SGNLFile
 
@@ -88,7 +92,7 @@ def fromRunArgs(runArgs):
     digitizationRunArgsToFlags(runArgs, flags)
 
     # Setup flags for pile-up
-    if not flags.Overlay.FastChain:
+    if not flags.Common.isOverlay:
         # Setup common digitization flags
         from DigitizationConfig.DigitizationConfigFlags import setupDigitizationFlags
         setupDigitizationFlags(runArgs, flags)
@@ -111,7 +115,7 @@ def fromRunArgs(runArgs):
     # Pre-exec
     processPreExec(runArgs, flags)
 
-    if not flags.Overlay.FastChain:
+    if not flags.Common.isOverlay:
         # Load pile-up stuff after pre-include/exec to ensure everything is up-to-date
         from DigitizationConfig.DigitizationConfigFlags import pileupRunArgsToFlags
         pileupRunArgsToFlags(runArgs, flags)
@@ -122,10 +126,10 @@ def fromRunArgs(runArgs):
             setupPileUpProfile(flags)
 
     flags.Sim.DoFullChain = True
-    # For jobs running (MC) Overlay we take the run number from the
-    # presampled RDOs, so we don't actually need to override the run
+    # For jobs running Overlay we take the run number from the
+    # background RDOs, so we don't actually need to override the run
     # number.
-    flags.Input.OverrideRunNumber = not flags.Overlay.FastChain
+    flags.Input.OverrideRunNumber = not flags.Common.isOverlay
     
     # To respect --athenaopts 
     flags.fillFromArgs()
@@ -133,7 +137,7 @@ def fromRunArgs(runArgs):
     # Moving here so that it is ahead of flags being locked. Need to
     # iterate on exact best position w.r.t. above calls
     # Handle metadata correctly
-    if flags.Overlay.FastChain:
+    if flags.Common.isOverlay:
         from OverlayConfiguration.OverlayMetadata import fastChainOverlayMetadataCheck
         fastChainOverlayMetadataCheck(flags)
 
@@ -152,13 +156,13 @@ def fromRunArgs(runArgs):
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     cfg.merge(BeamEffectsAlgCfg(flags))
 
-    if not flags.Digitization.PileUp and not flags.Overlay.FastChain:
+    if not flags.Digitization.PileUp and not flags.Common.isOverlay:
         # Make sure signal EventInfo is rebuilt from event context
         # TODO: this is probably not needed, but keeping it to be in sync with standard simulation
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
         cfg.merge(EventInfoUpdateFromContextAlgCfg(flags))
 
-    if flags.Overlay.FastChain:
+    if flags.Common.isOverlay:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
         cfg.merge(EventInfoOverlayCfg(flags))
         # CopyMcEventCollection should be before Kernel
@@ -170,7 +174,7 @@ def fromRunArgs(runArgs):
     cfg.merge(ISF_KernelCfg(flags))
 
     # Main Overlay Steering
-    if flags.Overlay.FastChain:
+    if flags.Common.isOverlay:
         from OverlayConfiguration.OverlaySteering import OverlayMainContentCfg
         cfg.merge(OverlayMainContentCfg(flags))
     else:

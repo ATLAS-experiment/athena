@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SGTools/exceptions.h
@@ -23,6 +23,9 @@
 
 
 namespace SG {
+
+
+class DataProxy;
 
 
 /**
@@ -60,11 +63,11 @@ private:
 
 /**
  * @brief Throw an ExcBadDataProxyCast exception.
- * @param id CLID of the DataProxy.
+ * @param proxy The proxy from which we're trying to cast.
  * @param tid Type to which we're trying to convert the object.
  */
 [[noreturn]]
-void throwExcBadDataProxyCast (CLID id, const std::type_info& tid);
+void throwExcBadDataProxyCast (const DataProxy& proxy, const std::type_info& tid);
 
 
 /**

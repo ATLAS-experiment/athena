@@ -1,5 +1,5 @@
 #!/bin/bash
-# art-description: Test running F100 pipeline
+# art-description: Test running F200 pipeline
 # art-type: grid
 # art-include: main/Athena
 # art-input-nfiles: 2
@@ -12,13 +12,13 @@
 
 set -e
 
+PREFIX="F200"
 lastref_dir=last_results
-INPUT_AOD_FILE="xAOD_F200.root"
+INPUT_AOD_FILE="xAOD_${PREFIX}.root"
 
 ATHENA_SOURCE="${ATLAS_RELEASE_BASE}/Athena/${Athena_VERSION}/InstallArea/${Athena_PLATFORM}/src/"
-IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/F100_singleMu_region0.json"
+IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/IDTPM_singleMu_region0.json"
 DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/dcube/config/FPGATrackSimIDTPMconfig.xml"
-IDTPM_PREFIX="IDTPM.F200"
 
 # Don't run if dcube config for nightly cmp is not found
 if [ -z "$DCUBE_CONFIG" ]; then
@@ -45,27 +45,28 @@ run () {
     return $rc
 }
 
-
-run "F200 pipeline" \
-    FPGATrackSim_F200.sh $INPUT_AOD_FILE
+run "${PREFIX} pipeline" \
+    FPGATrackSim_F200.sh -o $INPUT_AOD_FILE -m
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
-                --outputFilePrefix=$IDTPM_PREFIX \
+                --outputFilePrefix="IDTPM.${PREFIX}" \
                 --writeAOD_IDTPM \
-                --trkAnaCfgFile=$IDTPM_CONFIG \
-                --plotsDefFileList="InDetTrackPerfMon/PlotsDefFileList_default.txt" \
-                --plotsCommonValuesFile="InDetTrackPerfMon/PlotsDefCommonValues.json"
+                --trkAnaCfgFile=$IDTPM_CONFIG
 
+if [ -z $ArtJobType ]; then
+    echo "Not in ART environment. Stopping here..."
+    echo "IDTPM output: IDTPM.${PREFIX}.HIST.root"
+else
+    art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
 
-art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
-
-run "dcube-F200-latest" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x dcube_last \
-        --plotopts=ratio \
-        -c ${DCUBE_CONFIG} \
-        -M "F200" \
-        -R "F200-previous" \
-        -r ${lastref_dir}/${IDTPM_PREFIX}.HIST.root \
-        ${IDTPM_PREFIX}.HIST.root
+    run "dcube-${PREFIX}-latest" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+            -p -x dcube_last \
+            --plotopts=ratio \
+            -c ${DCUBE_CONFIG} \
+            -M "${PREFIX}" \
+            -R "${PREFIX}-previous" \
+            -r ${lastref_dir}/IDTPM.${PREFIX}.HIST.root \
+            IDTPM.${PREFIX}.HIST.root
+fi

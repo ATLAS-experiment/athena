@@ -78,7 +78,6 @@ BOOST_AUTO_TEST_CASE(TrackMeasurement_build) {
     }
 }
 
-// cppcheck-suppress syntaxError
 BOOST_AUTO_TEST_CASE(TrackMeasurementLinksToUncalibratedMeasurement){
     xAOD::TrackMeasurementContainer measurements;
     xAOD::TrackMeasurementAuxContainer aux;

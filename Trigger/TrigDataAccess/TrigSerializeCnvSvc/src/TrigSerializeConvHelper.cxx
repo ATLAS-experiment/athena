@@ -224,7 +224,7 @@ StatusCode TrigSerializeConvHelper::createRep(const std::string &clname,
   if (m_doTP and !isxAOD){
     std::string persclass("");
     pObj = m_TPTool->convertTP(clname,ptr, persclass);
-    cl = persclass;
+    cl = std::move(persclass);
   }
 
   ATH_MSG_DEBUG("convertTP: " << pObj << " of " << cl);

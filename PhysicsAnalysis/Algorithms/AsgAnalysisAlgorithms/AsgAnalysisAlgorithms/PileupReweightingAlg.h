@@ -18,6 +18,7 @@
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
 
 namespace CP
 {
@@ -59,31 +60,37 @@ namespace CP
 
     /// \brief the decoration for the corrected and scaled average interactions per crossing
   private:
-    Gaudi::Property<std::string> m_correctedScaledAverageMuDecoration {this, "correctedScaledAverageMuDecoration", "", "the decoration for the corrected and scaled average interactions per crossing"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedScaledAverageMuDecorator
+    { this, "correctedScaledAverageMuDecoration", m_baseEventInfoName, "",
+        "the decoration for the corrected and scaled average interactions per crossing" };
 
     /// \brief the decoration for the corrected actual interactions per crossing
   private:
-    Gaudi::Property<std::string> m_correctedActualMuDecoration {this, "correctedActualMuDecoration", "", "the decoration for the corrected actual interactions per crossing"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedActualMuDecorator
+    { this, "correctedActualMuDecoration", m_baseEventInfoName, "",
+        "the decoration for the corrected actual interactions per crossing" };
 
     /// \brief the decoration for the corrected and scaled actual interactions per crossing
   private:
-    Gaudi::Property<std::string> m_correctedScaledActualMuDecoration {this, "correctedScaledActualMuDecoration", "", "the decoration for the corrected and scaled actual interactions per crossing"};
-
-    /// \brief the accessor for \ref m_correctedScaledAverageMuDecoration
-  private:
-    std::unique_ptr<const SG::AuxElement::Decorator<float>> m_correctedScaledAverageMuDecorator;
-
-    /// \brief the accessor for \ref m_correctedActualMuDecoration
-  private:
-    std::unique_ptr<const SG::AuxElement::Decorator<float>> m_correctedActualMuDecorator;
-
-    /// \brief the accessor for \ref m_correctedScaledAverageMuDecoration
-  private:
-    std::unique_ptr<const SG::AuxElement::Decorator<float>> m_correctedScaledActualMuDecorator;
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedScaledActualMuDecorator
+    { this, "correctedScaledActualMuDecoration", m_baseEventInfoName, "",
+        "the decoration for the corrected and scaled actual interactions per crossing" };
 
     /// \brief the helper for OutOfValidity results
   private:
     OutOfValidityHelper m_outOfValidity {this};
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_decRRNKey
+    { this, "RandomRunNumberKey", m_baseEventInfoName, "RandomRunNumber",
+        "Name for the RandomRunNumber decoration" };
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_decRLBNKey
+    { this, "RandomLumiBlockNumberKey", m_baseEventInfoName, "RandomLumiBlockNumber",
+        "Name for the RandomLumiBlockNumber decoration" }; // unsigned int
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_decHashKey
+    { this, "PRWHashKey", m_baseEventInfoName, "PRWHash",
+        "Name for the PRWHash decoration" };  // uint64_t
   };
 }
 

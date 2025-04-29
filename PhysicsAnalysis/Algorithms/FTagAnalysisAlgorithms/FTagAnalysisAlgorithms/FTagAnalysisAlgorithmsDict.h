@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -9,7 +9,10 @@
 #define F_TAG_ANALYSIS_ALGORITHMS__F_TAG_ANALYSIS_ALGORITHMS_DICT_H
 
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
+#include <FTagAnalysisAlgorithms/BTaggingTriggerEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
+#include <FTagAnalysisAlgorithms/XbbEfficiencyAlg.h>
+#include <FTagAnalysisAlgorithms/XbbInformationDecoratorAlg.h>
 
 #endif

@@ -141,7 +141,7 @@ TrigConf::HLTSequenceLoader::loadSequences( HLTSequenceList& seqlist ) {
          alg_list.resize( alg_pos+1, "" );
 
       if(auto &algitem = alg_list[alg_pos]; algitem.empty()) {
-         algitem = alg_name;
+         algitem = std::move(alg_name);
       } else {
          if(algitem != alg_name) {
             cerr << "Two different algs in the same position " << alg_pos << endl;

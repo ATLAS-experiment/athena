@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -51,7 +51,7 @@ ArrayIteratorChooser<1>::const_iterator
 ArrayIteratorChooser<1>::make_iterator (const Arrayrep* rep,
                                         unsigned int offs)
 {
-  return rep ? &rep->m_data[offs] : 0;
+  return rep ? rep->m_data.data()+offs : 0;
 }
 
 
@@ -855,7 +855,7 @@ WritableArrayData<N>::WritableArrayData(const std::vector<unsigned int>& shape)
  * @param x[out] Result of the conversion.
  */
 template <class T>
-  ATH_REQUIRES(std::assignable_from<T&, float>)
+  requires std::assignable_from<T&, float>
 void fromArrayrep (const CaloRec::Arrayrep& rep, T& x)
 {
   x = rep.m_data[0];

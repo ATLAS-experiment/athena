@@ -68,17 +68,7 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
     kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
     kwargs.setdefault("InputEvgenCollection", "BeamTruthEvent")
     kwargs.setdefault("OutputTruthCollection", "TruthEvent")
-    from SimulationConfig.SimEnums import CalibrationRun
-    from G4AtlasTools.G4AtlasToolsConfig import SimHitContainerListCfg, InputContainerListCfg
-    ExtraOutputs = SimHitContainerListCfg(flags)
-    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
-        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
-        ExtraOutputs+=[
-            ( 'CaloCalibrationHitContainer', 'StoreGateSvc+LArCalibrationHitActive_DEAD' ),
-            ( 'CaloCalibrationHitContainer', 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ),
-            ( 'CaloCalibrationHitContainer', 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )
-        ]
-    kwargs.setdefault("ExtraOutputs", ExtraOutputs )
+    from G4AtlasTools.G4AtlasToolsConfig import InputContainerListCfg
     kwargs.setdefault("ExtraInputs" , InputContainerListCfg(flags))
     if flags.Sim.ISF.Simulator.isQuasiStable():
         if "QuasiStablePatcher" not in kwargs:

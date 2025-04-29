@@ -1,11 +1,14 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.CFElements import isSequence
 from AthenaCommon.Configurable import ConfigurableAlgTool
 from GaudiKernel.GaudiHandles import PrivateToolHandle, PrivateToolHandleArray
 
+import fnmatch
+
 msg = logging.getLogger('PropSetterProxy')
+
 
 class PropSetterProxy(object):
    __compPaths = {}
@@ -20,23 +23,26 @@ class PropSetterProxy(object):
          return super(PropSetterProxy, self).__setattr__(name, value)
 
       if name != "OutputLevel":
-         msg.error("The foreach_component is a debugging feature and should not be used in production jobs, remove it before committing to the repository, proceeding to set the properties now" )
-    
-      import fnmatch
+         msg.error("foreach_component is a debugging feature and should not be used in production jobs, remove it before committing to the repository, proceeding to set the properties now" )
+
+      matches = 0
       for component_path, component in PropSetterProxy.__compPaths.items():
          if fnmatch.fnmatch( component_path, self.__path ):
+            matches += 1
             if name in component._descriptors:
                try:
                   setattr( component, name, value )
-                  msg.info( "Set property: %s to value %s of component %s because it matched %s ",
-                            name, str(value), component_path, self.__path )
+                  msg.info( "Set property %s to %s for component %s because it matched '%s'",
+                            name, value, component_path, self.__path )
                except Exception as ex:
-                  msg.warning( "Failed to set property: %s to value %s of component %s because it matched %s, reason: %s",
-                               name, str(value), component_path, self.__path, str(ex) )
-                  pass
+                  msg.warning( "Failed to set property %s to value %s for component %s: %s",
+                               name, value, component_path, ex )
             else:
-               msg.warning( "No such property: %s in component %s, tried to set it because it matched %s",
-                            name, component_path, self.__path )
+               msg.warning( "Property %s does not exist for component %s",
+                            name, component_path )
+
+      if not matches:
+         msg.warning("No components found matching '%s'", self.__path)
 
 
    def __findComponents(self, ca):

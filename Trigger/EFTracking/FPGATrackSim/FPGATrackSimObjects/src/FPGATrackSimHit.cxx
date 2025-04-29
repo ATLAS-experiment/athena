@@ -56,28 +56,37 @@ void FPGATrackSimHit::setPhysLayer(unsigned v)
 {
     if (m_detType == SiliconTech::strip)
     {
+        m_layer_disk_old = m_layer_disk;
+        m_side_old = m_side;
         m_layer_disk = v / 2;
         m_side = v % 2;
     }
     else
     {
+        m_layer_disk_old = m_layer_disk;
         m_layer_disk = v;
     }
 }
 
 // Returns the physical layer index as defined by FPGATrackSimPlaneMap
-unsigned FPGATrackSimHit::getPhysLayer() const
+unsigned FPGATrackSimHit::getPhysLayer(bool old) const
 {
-    if (m_detType == SiliconTech::strip)
-        return 2 * m_layer_disk + m_side;
-    return m_layer_disk;
+    if (old && isRemapped()) {
+        if (m_detType == SiliconTech::strip)
+            return 2 * m_layer_disk_old + m_side_old;
+        return m_layer_disk_old;
+    }
+    else {
+        if (m_detType == SiliconTech::strip)
+            return 2 * m_layer_disk + m_side;
+        return m_layer_disk;
+    }
 }
 
 
-unsigned FPGATrackSimHit::getLayer() const
+int FPGATrackSimHit::getLayer() const
 {
-    if (isMapped()) return m_layer;
-    throw std::domain_error("FPGATrackSimHit::getLayer() called on a hit with invalid type: " + to_string(m_hitType));
+    return m_layer;
 }
 
 unsigned FPGATrackSimHit::getSection() const
@@ -110,11 +119,10 @@ void FPGATrackSimHit::makeSpacepoint(float x, float y, float z, float window, FP
         m_pairedSection = inner->getSection();
         m_pairedLayer = inner->getLayer();
     } 
-    
+    if ( m_hitType == HitType::spacepoint) m_layer = inner->getLayer();
     m_pairedDetZone = inner->getDetectorZone();
     m_pairedDetType = inner->getDetType();
-    m_pairedPhysLayer = inner->getPhysLayer();
-    
+    m_pairedPhysLayer = inner->getPhysLayer();    
 
     // Update the type.
     setHitType(HitType::spacepoint);

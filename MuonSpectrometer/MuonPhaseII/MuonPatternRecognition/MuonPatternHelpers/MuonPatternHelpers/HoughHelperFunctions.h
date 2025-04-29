@@ -10,6 +10,7 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
+#include "xAODMuonPrepData/MMClusterContainer.h"
 
 
 namespace MuonR4{

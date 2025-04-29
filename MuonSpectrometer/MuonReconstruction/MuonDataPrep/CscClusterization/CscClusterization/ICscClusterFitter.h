@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ICscClusterFitter.h
@@ -74,11 +74,11 @@ public:  // Embedded class.
 
         DataMap dataMap;  // Extra data
         Result(int stat = 0, Muon::CscClusterStatus cstat = Muon::CscStatusUndefined,
-               Muon::CscTimeStatus tstat = Muon::CscTimeStatusUndefined) {
-            fitStatus = stat;
-            clusterStatus = cstat;
-            timeStatus = tstat;
-        }
+               Muon::CscTimeStatus tstat = Muon::CscTimeStatusUndefined) :
+          fitStatus(stat),
+          clusterStatus(cstat),
+          timeStatus(tstat)
+        {}
         Result(const Result&) = default;
         ~Result() = default;
     };

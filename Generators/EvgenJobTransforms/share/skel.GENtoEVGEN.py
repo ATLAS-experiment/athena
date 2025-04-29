@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 """Functionality core of the Gen_tf transform"""
 
@@ -88,7 +88,7 @@ if not hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_P
 if not hasattr(runArgs, "ecmEnergy"):
     raise RuntimeError("No center of mass energy provided.")
 else:
-    evgenLog.info(' ecmEnergy = ' + str(runArgs.ecmEnergy) )
+    evgenLog.info('ecmEnergy = ' + str(runArgs.ecmEnergy) )
 if not hasattr(runArgs, "randomSeed"):
     raise RuntimeError("No random seed provided.")
     # TODO: or guess it from the JO name??
@@ -296,7 +296,7 @@ if len(evgenConfig.generators) > len(set(evgenConfig.generators)):
 ## Sort the list of generator names into standard form
 gennames = sorted(evgenConfig.generators, key=gen_sortkey)
 ## Check that the actual generators, tune, and main PDF are consistent with the JO name
-if joparts[0].startswith("MC"): #< if this is an "official" JO
+if joparts[0].startswith("Mc"): #< if this is an "official" JO
     genpart = jo_physshortparts[0]
     expectedgenpart = ''.join(gennames)
     ## We want to record that HERWIG was used in metadata, but in the JO naming we just use a "Herwig" label
@@ -305,10 +305,15 @@ if joparts[0].startswith("MC"): #< if this is an "official" JO
         # TODO: add EvtGen to this normalization for MC14?
         return s.replace("Photospp", "").replace("Photos", "").replace("TauolaPP", "").replace("Tauolapp", "").replace("Tauola", "")
     def _norm2(s):
-        return s.replace("Py", "Pythia").replace("MG","MadGraph").replace("Ph","Powheg").replace("Hpp","Herwigpp").replace("H7","Herwig7").replace("Sh","Sherpa").replace("Ag","Alpgen").replace("EG","EvtGen").replace("PG","ParticleGun").replace("Gva","Geneva")
-        
+        if "P8B" in s:
+           return s.replace("P8B","Pythia8B").replace("MG","MadGraph").replace("Ph","Powheg").replace("Ag","Alpgen").replace("EG","EvtGen")
+        else:
+           return s.replace("Py","Pythia").replace("MG","MadGraph").replace("Ph","Powheg").replace("H7","Herwig7").replace("Sh","Sherpa").replace("Ag","Alpgen").replace("EG","EvtGen").replace("PG","ParticleGun").replace("HepMC","HepMCAscii")
     def _short2(s):
-         return s.replace("Pythia","Py").replace("MadGraph","MG").replace("Powheg","Ph").replace("Herwigpp","Hpp").replace("Herwig7","H7").replace("Sherpa","Sh").replace("Alpgen","Ag").replace("EvtGen","EG").replace("PG","ParticleGun").replace("Geneva","Gva")
+        if "Pythia8B" in s:
+           return s.replace("Pythia8B","P8B").replace("MadGraph","MG").replace("Powheg","Ph").replace("Herwig7","H7").replace("Sherpa","Sh").replace("Alpgen","Ag").replace("EvtGen","EG").replace("PG","ParticleGun")
+        else:        
+           return s.replace("Pythia","Py").replace("MadGraph","MG").replace("Powheg","Ph").replace("Herwigpp","Hpp").replace("Sherpa","Sh").replace("Alpgen","Ag").replace("EvtGen","EG").replace("PG","ParticleGun").replace("HepMCAscii","HepMC")
      
     if genpart != _norm(expectedgenpart)  and _norm2(genpart) != _norm(expectedgenpart):
         evgenLog.error("Expected first part of JO name to be '%s' or '%s', but found '%s'" % (_norm(expectedgenpart), _norm(_short2(expectedgenpart)), genpart))
@@ -366,6 +371,12 @@ else:
            raise RuntimeError(msg)
     postSeq.CountHepMC.RequestedOutput = evgenConfig.nEventsPerJob if runArgs.maxEvents == -1  else runArgs.maxEvents
     evgenLog.info('Requested output events = '+str(postSeq.CountHepMC.RequestedOutput))
+
+    # Special case of N<100: adjust TestHepMC. We will allow _one_ event to fail the checks.
+    # This means the minimum efficiency is N/N+1 for N generated events. Note that if N<100,
+    # each failed event costs us more than 1% of efficiency.
+    if hasattr(testSeq, "TestHepMC") and postSeq.CountHepMC.RequestedOutput<100:
+        testSeq.TestHepMC.EffFailThreshold = postSeq.CountHepMC.RequestedOutput/(postSeq.CountHepMC.RequestedOutput+1) - 0.01
 
 ## Check that the keywords are in the list of allowed words (and exit if processing an official JO)
 if evgenConfig.keywords:
@@ -483,6 +494,12 @@ AMITagHelper.SetAMITag(runArgs=runArgs)
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_energy": str(int(runArgs.ecmEnergy*Units.GeV/2.0))})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_type": 'collisions'})
 
+## Propagete EventStreamInfo metadata
+from OutputStreamAthenaPool.OutputStreamAthenaPoolConf import CopyEventStreamInfo
+streamInfoTool = CopyEventStreamInfo( "StreamEVGEN_CopyEventStreamInfo" )
+ToolSvc += streamInfoTool
+svcMgr.MetaDataSvc.MetaDataTools += [ streamInfoTool ]
+
 ## Propagate energy argument to the generators
 # TODO: Standardise energy setting in the GenModule interface
 include("EvgenJobTransforms/Generate_ecmenergies.py")
@@ -495,6 +512,10 @@ if 'ParticleGun' in evgenConfig.generators:
 else:
 # Propagate DSID and seed to the generators
    include("EvgenJobTransforms/Generate_dsid_ranseed.py")
+
+## Purge unstable particle w/o end vertex occasionally produced by Hijing or Herwig
+if 'Hijing' in evgenConfig.generators or 'Herwig7' in evgenConfig.generators:
+    fixSeq.FixHepMC.PurgeUnstableWithoutEndVtx = True
 
 ## Propagate debug output level requirement to generators
 if (hasattr( runArgs, "VERBOSE") and runArgs.VERBOSE ) or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "DEBUG") or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "VERBOSE"):
@@ -838,6 +859,13 @@ excludedNames = ['AthSequencer', 'PyAthena::Alg', 'TestHepMC']
 filterNames = list(set(filterNames) - set(excludedNames))
 print ("MetaData: %s = %s" % ("genFilterNames", ", ".join(filterNames)))
 
+if (hasattr( runArgs, "allowOldFilter") and runArgs.allowOldFilter):
+  for alg in acas.iter_algseq(filtSeq):
+     filtName = alg.getType()
+     exceptName =['xAOD','Jet']
+     if filtName not in excludedNames:
+        if not any(ex in filtName for ex in exceptName):  
+           alg.AllowOldFilter=True
 
 ##==============================================================
 ## Dump evgenConfig so it can be recycled in post-run actions

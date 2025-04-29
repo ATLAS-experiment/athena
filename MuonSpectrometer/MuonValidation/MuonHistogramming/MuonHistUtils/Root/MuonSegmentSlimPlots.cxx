@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/MuonSegmentSlimPlots.h"
@@ -7,8 +7,12 @@
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
+
 namespace Muon{
-  
+
+using ChIdx = MuonStationIndex::ChIndex;
+constexpr int chIdxMax = static_cast<int>(ChIdx::ChIndexMax);
+
 MuonSegmentSlimPlots::MuonSegmentSlimPlots(PlotBase* pParent, const std::string& sDir): PlotBase(pParent, sDir) {  
 
   //booking histograms
@@ -36,14 +40,14 @@ MuonSegmentSlimPlots::MuonSegmentSlimPlots(PlotBase* pParent, const std::string&
   phidir = Book1D("phidir","Segment pointing direction phi;#phi_{dir};Entries",64,-3.2,3.2);
   etaphidir = Book2D("etaphidir","Segment pointing direction phi vs eta;#eta_{dir};#phi_{dir}",64,-3.2,3.2,64,-3.2,3.2);
 
-  chamberIndex = Book1D("chamberIndex","Chamber index; Chamber Index",Muon::MuonStationIndex::ChIndexMax,0,Muon::MuonStationIndex::ChIndexMax);
-  chamberIndex_perSector = Book2D("chamberIndex_perSector","Number of Segments per Chamber, normalized by solid angle; Sector; Chamber Index ", 33, -16.5, 16.5, Muon::MuonStationIndex::ChIndexMax,0,Muon::MuonStationIndex::ChIndexMax);
-  eff_chamberIndex_perSector_numerator = Book2D("eff_chamberIndex_perSector_numerator","Number of expected hits for Segments per Chamber; Sector; Chamber Index ", 33, -16.5, 16.5, Muon::MuonStationIndex::ChIndexMax,0,Muon::MuonStationIndex::ChIndexMax);
-  eff_chamberIndex_perSector_denominator = Book2D("eff_chamberIndex_perSector_denominator","Number of recorded precision hits for Segments per Chamber; Sector; Chamber Index ", 33, -16.5, 16.5, Muon::MuonStationIndex::ChIndexMax,0,Muon::MuonStationIndex::ChIndexMax);
-  eff_chamberIndex_perSector = Book2D("eff_chamberIndex_perSector","precision layer hit efficiency per chamber; Sector; Chamber Index ", 33, -16.5, 16.5, Muon::MuonStationIndex::ChIndexMax,0,Muon::MuonStationIndex::ChIndexMax);
-  //chamberIndex_dtheta = Book2D("chamberIndex_dtheta","Segment #Delta#theta between position and momentum; #Delta#theta; Chamber Index ", 180, -90.0, 90.0, Muon::MuonStationIndex::ChIndexMax,0,Muon::MuonStationIndex::ChIndexMax);
+  chamberIndex = Book1D("chamberIndex","Chamber index; Chamber Index",chIdxMax,0, chIdxMax);
+  chamberIndex_perSector = Book2D("chamberIndex_perSector","Number of Segments per Chamber, normalized by solid angle; Sector; Chamber Index ", 33, -16.5, 16.5, chIdxMax,0,chIdxMax);
+  eff_chamberIndex_perSector_numerator = Book2D("eff_chamberIndex_perSector_numerator","Number of expected hits for Segments per Chamber; Sector; Chamber Index ", 33, -16.5, 16.5, chIdxMax,0,chIdxMax);
+  eff_chamberIndex_perSector_denominator = Book2D("eff_chamberIndex_perSector_denominator","Number of recorded precision hits for Segments per Chamber; Sector; Chamber Index ", 33, -16.5, 16.5, chIdxMax,0,chIdxMax);
+  eff_chamberIndex_perSector = Book2D("eff_chamberIndex_perSector","precision layer hit efficiency per chamber; Sector; Chamber Index ", 33, -16.5, 16.5, chIdxMax,0,chIdxMax);
+  //chamberIndex_dtheta = Book2D("chamberIndex_dtheta","Segment #Delta#theta between position and momentum; #Delta#theta; Chamber Index ", 180, -90.0, 90.0, chIdxMax,0,chIdxMax);
   for (int i=1; i<=chamberIndex->GetXaxis()->GetNbins(); i++){
-    const char *temp_chambername = Muon::MuonStationIndex::chName((Muon::MuonStationIndex::ChIndex)chamberIndex->GetBinLowEdge(i)).c_str();
+    const char *temp_chambername = MuonStationIndex::chName(static_cast<Muon::MuonStationIndex::ChIndex>(chamberIndex->GetBinLowEdge(i))).c_str();
     chamberIndex->GetXaxis()->SetBinLabel(i, temp_chambername);
     chamberIndex_perSector->GetYaxis()->SetBinLabel(i, temp_chambername);
     eff_chamberIndex_perSector_numerator->GetYaxis()->SetBinLabel(i, temp_chambername);
@@ -85,7 +89,7 @@ MuonSegmentSlimPlots::~MuonSegmentSlimPlots()
   nPhiLayers->Fill(muSeg.nPhiLayers(), weight);
   nTrigEtaLayers->Fill(muSeg.nTrigEtaLayers(), weight);
 
-  int chIndex = muSeg.chamberIndex();
+  int chIndex = static_cast<int>(muSeg.chamberIndex());
   float chambernorm = 1/Chamberarea[chIndex];//weight of the segment using the chamber eta-phi area
   chamberIndex->Fill(chIndex, weight);
   int sectorIndex = muSeg.sector();

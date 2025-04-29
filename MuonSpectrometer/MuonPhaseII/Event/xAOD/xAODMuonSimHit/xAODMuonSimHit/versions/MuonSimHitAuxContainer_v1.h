@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONSIMHIT_VERSION_MUONSIMHITAUXCONTAINER_V1
 #define XAODMUONSIMHIT_VERSION_MUONSIMHITAUXCONTAINER_V1
@@ -30,10 +30,11 @@ class MuonSimHitAuxContainer_v1 : public AuxContainerBase {
     std::vector<Identifier::value_type> identifier{};
     std::vector<float> energyDeposit{};
     std::vector<float> kineticEnergy{};
+    std::vector<float> stepLength{};
     
     /// Information needed to save the HEPMC particle link
     std::vector<unsigned short> mcEventIndex{};
-    std::vector<unsigned int>  mcBarcode{};
+    std::vector<unsigned int>  uniqueID{};
     /// @}
 };
 }  // namespace xAOD

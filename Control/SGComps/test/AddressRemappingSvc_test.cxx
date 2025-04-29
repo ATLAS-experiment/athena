@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file SGComps/test/AddressRemappingSvc_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -236,8 +234,8 @@ void checkTADList (const IAddressProvider::tadList& tads,
       assert (tad->transientID() ==
               SG::TransientAddress::TransientClidSet { fooclid });
       assert (tad->alias() ==
-              (SG::TransientAddress::TransientAliasSet { "foo3.x1",
-                                                         "foo3.d2" }));
+              (SG::TransientAddress::TransientAliasSet { "foo3.d2",
+                                                         "foo3.x1" }));
     }
     else if (i == 3) {
       assert (tad->clID() == fooclid);
@@ -283,13 +281,13 @@ void test1 (Athena::IInputRename& svc,
     checkTADList (tads, addrs);
   }
 
-  Athena::RCURead<Athena::IInputRename::InputRenameMap_t> r
+  Athena::RCURead<Athena::InputRenameMap_t> r
     (*svc.inputRenameMap());
   assert (r->size() == 5);
 
   CLID fooclid = ClassID_traits<xAODFoo>::ID();
   SG::StringPool sp;
-  Athena::IInputRename::InputRenameMap_t::const_iterator it;
+  Athena::InputRenameMap_t::const_iterator it;
 
   it = r->find (sp.stringToKey ("foo1", fooclid));
   assert (it != r->end());

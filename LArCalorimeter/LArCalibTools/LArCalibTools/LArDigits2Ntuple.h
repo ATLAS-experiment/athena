@@ -31,6 +31,8 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   Gaudi::Property< unsigned int >  m_Nsamples{this, "NSamples", 32, "number of samples to store"};
   Gaudi::Property< std::vector<unsigned int> > m_FTlist{this, "FTlist", {}, "which FT to dump"};
   Gaudi::Property< std::vector<unsigned int> > m_Slotlist{this, "Slotlist", {}, "which Slot to dump"};
+  Gaudi::Property< std::vector<unsigned int> > m_Sidelist{this, "Sidelist", {}, "which side to dump"};
+  Gaudi::Property< std::vector<unsigned int> > m_BElist{this, "BElist", {}, "which B or E to dump"};
   Gaudi::Property< bool > m_fillEMB{this, "FillEMB", true, "if to fill EMB"};
   Gaudi::Property< bool > m_fillEndcap{this, "FillEndcap", true, "if to fill Eendcap"};
   Gaudi::Property< bool > m_fillBCID{this, "FillBCID", false, "if to fill BCID"};
@@ -56,9 +58,9 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   NTuple::Item<unsigned long long> m_IEventEvt;
   NTuple::Item<short> m_LB;
 
-  SG::ReadHandleKey<LArDigitContainer> m_contKey{this, "ContainerKey", "FREE", "key for LArDigitContainer"};
-  SG::ReadHandleKey<LArAccumulatedCalibDigitContainer> m_accCalibContKey{this, "AccCalibContainerKey", "HIGH", "key for LArAccumulatedCalibDigitDigitContainer"};
-  SG::ReadHandleKey<LArAccumulatedDigitContainer> m_accContKey{this, "AccContainerKey", "HIGH", "key for LArAccumulatedDigitDigitContainer"};
+  SG::ReadHandleKey<LArDigitContainer> m_contKey{this, "ContainerKey", "", "key for LArDigitContainer"};
+  SG::ReadHandleKey<LArAccumulatedCalibDigitContainer> m_accCalibContKey{this, "AccCalibContainerKey", "", "key for LArAccumulatedCalibDigitDigitContainer"};
+  SG::ReadHandleKey<LArAccumulatedDigitContainer> m_accContKey{this, "AccContainerKey", "", "key for LArAccumulatedDigitDigitContainer"};
   SG::ReadHandleKey<LArFebHeaderContainer> m_LArFebHeaderContainerKey { this, "LArFebHeaderKey", "LArFebHeader" };
 };
 

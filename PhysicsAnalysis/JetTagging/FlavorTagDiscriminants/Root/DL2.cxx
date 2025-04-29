@@ -3,7 +3,8 @@
 */
 
 #include "FlavorTagDiscriminants/DL2.h"
-#include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "lwtnn/LightweightGraph.hh"
 #include "lwtnn/NanReplacer.hh"
 
@@ -63,7 +64,8 @@ namespace FlavorTagDiscriminants {
     // Update dependencies and used remap from the tracks loaders.
     for (const auto& loader : m_tracksLoaders){
       m_dataDependencyNames += loader->getDependencies();
-      rd.merge(loader->getUsedRemap());
+      std::set<std::string> used_remap = loader->getUsedRemap();
+      rd.merge(used_remap);
     }
     // check that all remapping was used
     rd.merge(rc);

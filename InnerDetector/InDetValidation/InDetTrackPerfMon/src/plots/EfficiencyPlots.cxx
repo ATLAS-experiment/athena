@@ -41,6 +41,7 @@ StatusCode IDTPM::EfficiencyPlots::bookPlots()
 {
   ATH_MSG_DEBUG( "Booking efficiency plots in " << getDirectory() ); 
 
+  ATH_CHECK( retrieveAndBook( m_eff_vs_inclusive,  "eff_vs_"+m_trackType+"_inclusive" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_pt,  "eff_vs_"+m_trackType+"_pt" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_lowPt,  "eff_vs_"+m_trackType+"_lowPt" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_eta, "eff_vs_"+m_trackType+"_eta" ) );
@@ -83,6 +84,7 @@ StatusCode IDTPM::EfficiencyPlots::fillPlots(
   float pprodZ = prodZ( particle );
 
   /// Fill the histograms
+  ATH_CHECK( fill( m_eff_vs_inclusive,  1,  isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_pt,  ppt,  isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_lowPt,  ppt,  isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_eta, peta, isMatched, weight ) );

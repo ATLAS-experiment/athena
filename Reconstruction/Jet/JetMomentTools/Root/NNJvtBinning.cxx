@@ -70,7 +70,10 @@ namespace JetPileupTag {
         etaBin = std::distance(
                 etaEdges.begin(), std::lower_bound(etaEdges.begin(), etaEdges.end(), eta));
         // 0 => below the lowest bin edge, size() => above the highest bin edge
-        if (ptBin == 0 || ptBin == ptEdges.size())
+        // Use lowest pt bin for any jets with lower pt
+        if (ptBin == 0)
+            ptBin = 1;
+        if (ptBin == ptEdges.size())
             ptBin = SIZE_MAX;
         else
             ptBin -= 1;

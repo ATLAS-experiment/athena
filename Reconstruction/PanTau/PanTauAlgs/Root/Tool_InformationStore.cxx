@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_InformationStore.h"
@@ -11,21 +11,16 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
 
   // Boolean values
   MapInt m01 = {
-    {"UseDefaultCellBasedConfig",1},//is this one necessary
     {"TauConstituents_UsePionMass",1},
     {"FeatureExtractor_UseEmptySeeds",0},
-    {"TauConstituents_eflowRec_UseMomentumAsEnergy",0},
-    {"TauConstituents_UseShrinkingCone",0}
   };
   setMapInt(m01);
   
   // double values
   MapDouble m02 = {
-    {"eflowRec_Assoc_DeltaR",0.4},
     {"TauConstituents_Types_DeltaRCore",0.2},
     {"TauConstituents_MaxEta",9.9},
     {"TauConstituents_PreselectionMinEnergy",500.},
-    {"TauConstituents_eflowRec_BDTThreshold_Pi0Neut",-0.04},
     // PanTau BDT Cut values --- CellBased
     {"DecayModeDeterminator_BDTCutValue_R10X_CellBased",0.52},
     {"DecayModeDeterminator_BDTCutValue_R11X_CellBased",-0.33},
@@ -33,13 +28,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
     {"DecayModeDeterminator_BDTCutValue_R1XX_CellBased",-0.21},
     {"DecayModeDeterminator_BDTCutValue_R30X_CellBased",-0.13},
     {"DecayModeDeterminator_BDTCutValue_R3XX_CellBased",-0.08},
-    // PanTau BDT Cut values --- eflowRec
-    {"DecayModeDeterminator_BDTCutValue_R10X_eflowRec",-0.15},
-    {"DecayModeDeterminator_BDTCutValue_R11X_eflowRec",-0.60},
-    {"DecayModeDeterminator_BDTCutValue_R110_eflowRec",-0.08},
-    {"DecayModeDeterminator_BDTCutValue_R1XX_eflowRec",0.03},
-    {"DecayModeDeterminator_BDTCutValue_R30X_eflowRec",-0.25},
-    {"DecayModeDeterminator_BDTCutValue_R3XX_eflowRec",-0.23}
   };
   
   setMapDouble(m02);
@@ -47,10 +35,7 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
   // String values
   MapString m03 = {
     {"Name_TauRecContainer","TauJets"},
-    {"Name_eflowRecContainer","eflowObjects_tauMode"},
     {"Name_TrackParticleContainer","TrackParticleCandidate"},
-    {"Name_PanTauSeedsContainer","PanTau_OutputSeeds"},
-    {"ModeDiscriminator_ReaderOption","!Color:Silent"},
     {"ModeDiscriminator_TMVAMethod","BDTG"},
     {"FeatureExtractor_VarTypeName_varTypeName_Sum", "Sum"},
     {"FeatureExtractor_VarTypeName_varTypeName_Ratio", "Ratio"},
@@ -82,17 +67,10 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
     {"TauConstituents_Selection_Charged_EtaBinned_EtCut",{1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV}},
     {"TauConstituents_Selection_OutNeut_EtaBinned_EtCut",{1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV}},
     {"TauConstituents_Selection_OutChrg_EtaBinned_EtCut",{1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV}},
-    {"TauConstituents_Selection_NeutLowA_EtaBinned_EtCut",{1.85*GeV, 2.25*GeV, 2.35*GeV, 2.15*GeV, 1.65*GeV}},
-    {"TauConstituents_Selection_NeutLowB_EtaBinned_EtCut",{1.6*GeV, 2.0*GeV, 2.1*GeV, 1.9*GeV, 1.4*GeV}},
-    {"eflowRec_Selection_Pi0Neut_EtaBinned_EtCut_1prong",{2.5*GeV, 2.5*GeV, 1.9*GeV, 2.5*GeV, 2.3*GeV}},
-    {"eflowRec_Selection_Pi0Neut_EtaBinned_EtCut_3prong",{2.5*GeV, 2.5*GeV, 2.5*GeV, 2.5*GeV, 2.5*GeV}},
     // Eta Binned    P I 0 - B D T   C U T S
     {"CellBased_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
     {"CellBased_EtaBinned_Pi0MVACut_1prong",{0.46, 0.39, 0.51, 0.47, 0.54}},
     {"CellBased_EtaBinned_Pi0MVACut_3prong",{0.47, 0.52, 0.60, 0.55, 0.50}},
-    {"eflowRec_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
-    {"eflowRec_EtaBinned_Pi0MVACut_1prong",{0.09, 0.09, 0.09, 0.08, 0.05}},
-    {"eflowRec_EtaBinned_Pi0MVACut_3prong",{0.09, 0.09, 0.09, 0.09, 0.07}},
     // P T   B I N S
     {"ModeDiscriminator_BinEdges_Pt",{10*GeV, 100000*GeV}},
     {"ModeDiscriminator_BDTVariableDefaults_CellBased_1p0n_vs_1p1n", {-9.0,     -0.2,    -10.0,     -0.2,     -2.0}},
@@ -105,10 +83,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
   MapVecString m05 = {
     {"Names_InputAlgorithms",{"CellBased"}},
     {"Names_ModeCases",{"1p0n_vs_1p1n","1p1n_vs_1pXn","3p0n_vs_3pXn"}},
-    // ---> eflowRec BDT variables
-    {"ModeDiscriminator_BDTVariableNames_eflowRec_1p0n_vs_1p1n",{"Charged_Ratio_EtOverEtAllConsts","Basic_NPi0NeutConsts","Neutral_PID_BDTValues_EtSort_1","Combined_DeltaR1stNeutralTo1stCharged"}},
-    {"ModeDiscriminator_BDTVariableNames_eflowRec_1p1n_vs_1pXn",{"Neutral_PID_BDTValues_BDTSort_2","Neutral_Ratio_EtOverEtAllConsts","Basic_NNeutralConsts","Neutral_HLV_SumM"}},
-    {"ModeDiscriminator_BDTVariableNames_eflowRec_3p0n_vs_3pXn",{"Basic_NPi0NeutConsts","Neutral_PID_BDTValues_BDTSort_1","Charged_HLV_SumPt","Charged_Ratio_EtOverEtAllConsts","Neutral_Mean_DRToLeading_WrtEtAllConsts"}},
     // ---> CellBased BDT variables
     {"ModeDiscriminator_BDTVariableNames_CellBased_1p0n_vs_1p1n",{"Neutral_PID_BDTValues_BDTSort_1","Neutral_Ratio_1stBDTEtOverEtAllConsts","Combined_DeltaR1stNeutralTo1stCharged","Charged_JetMoment_EtDRxTotalEt","Neutral_Shots_NPhotonsInSeed"}},
     {"ModeDiscriminator_BDTVariableNames_CellBased_1p1n_vs_1pXn",{"Neutral_PID_BDTValues_BDTSort_2","Neutral_HLV_SumM","Neutral_Ratio_EtOverEtAllConsts","Basic_NNeutralConsts","Neutral_Shots_NPhotonsInSeed"}},

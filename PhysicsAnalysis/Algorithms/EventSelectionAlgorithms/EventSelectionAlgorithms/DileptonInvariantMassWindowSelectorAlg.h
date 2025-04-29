@@ -45,6 +45,11 @@ namespace CP {
       /// \brief whether to veto events instead of selecting them
       Gaudi::Property<bool> m_veto {this, "vetoMode", false, "switch to veto-mode"};
 
+      /// \brief use dressed kinematics
+      Gaudi::Property<bool> m_useDressedProperties{this, "useDressedProperties", false,
+        "whether to use dressed electron and muon kinematics rather than simple "
+        "P4 kinematics"};
+
       /// \brief the systematics
       CP::SysListHandle m_systematicsList {this};
 

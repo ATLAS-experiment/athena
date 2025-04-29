@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RHadronPythiaDecayer_H
@@ -10,10 +10,11 @@
 #include "G4VExtDecayer.hh"
 #include "G4Track.hh"
 #include <string>
+#include "CxxUtils/checker_macros.h"
 
 class G4DecayProducts;
 
-class RHadronPythiaDecayer: public G4VExtDecayer
+class ATLAS_NOT_THREAD_SAFE RHadronPythiaDecayer: public G4VExtDecayer
 {
   public:
    RHadronPythiaDecayer( const std::string& s );

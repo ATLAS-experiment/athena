@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -23,27 +23,16 @@ namespace DerivationFramework {
   NTUPStringSkimmingTool::NTUPStringSkimmingTool(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
-    m_expression("true"),
-    m_parser(nullptr)
+    base_class(t,n,p),
+    m_expression("true")
   {
-    declareInterface<DerivationFramework::ISkimmingTool>(this);
     declareProperty("expression", m_expression);
   }
 
   StatusCode NTUPStringSkimmingTool::initialize()
   {
-    m_parser = new ExpressionParsing::ExpressionParser(new ExpressionParsing::SGNTUPProxyLoader(evtStore()));
+    m_parser = std::make_unique<ExpressionParsing::ExpressionParser>(new ExpressionParsing::SGNTUPProxyLoader(evtStore()));
     m_parser->loadExpression(m_expression);
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode NTUPStringSkimmingTool::finalize()
-  {
-    if (m_parser) {
-      delete m_parser;
-      m_parser = nullptr;
-    }
     return StatusCode::SUCCESS;
   }
 

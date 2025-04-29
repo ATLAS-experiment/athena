@@ -80,6 +80,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     '''
     CA-based configuration for the TrackAnalysisDefinition Service
     '''
+    log = logging.getLogger( "TrkAnaDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag )
     acc = ComponentAccumulator()
 
     kwargs.setdefault( "DirName", flags.PhysVal.IDTPM.DirName )
@@ -89,6 +90,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
 
     kwargs.setdefault( "TestType", flags.PhysVal.IDTPM.currentTrkAna.TestType )
     kwargs.setdefault( "RefType",  flags.PhysVal.IDTPM.currentTrkAna.RefType )
+    kwargs.setdefault( "doTrigNavigation",  flags.PhysVal.IDTPM.currentTrkAna.doTrigNavigation )
 
     kwargs.setdefault( "pileupSwitch",  flags.PhysVal.IDTPM.currentTrkAna.pileupSwitch )
     kwargs.setdefault( "hasFullPileupTruth",
@@ -101,9 +103,11 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "MatchingType", flags.PhysVal.IDTPM.currentTrkAna.MatchingType )
     kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.truthProbCut )
 
-    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType and  "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.TestType) or
-         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType and "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
-        kwargs.setdefault( "ChainNames", flags.PhysVal.IDTPM.currentTrkAna.ChainNames )
+    kwargs.setdefault( "ChainNames", flags.PhysVal.IDTPM.currentTrkAna.ChainNames )
+    if ( flags.PhysVal.IDTPM.currentTrkAna.doTrigNavigation and
+         not flags.PhysVal.IDTPM.currentTrkAna.ChainNames ):
+        log.error( "Trying to set up Trigger navigation without specifying any trigger chain" )
+        return None
 
     kwargs.setdefault( "plotTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParameters )
     kwargs.setdefault( "plotTrackMultiplicities", flags.PhysVal.IDTPM.currentTrkAna.plotTrackMultiplicities )
@@ -135,20 +139,28 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     '''
     Main IDTPM tool instance CA-based configuration
     '''
+    log = logging.getLogger( "InDetTrackPerfMonTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag )
     acc = ComponentAccumulator()
-
-    kwargs.setdefault( "OfflineTrkParticleContainerName",
-                       flags.PhysVal.IDTPM.currentTrkAna.OfflineTrkKey )
-    kwargs.setdefault( "TruthParticleContainerName",
-                       flags.PhysVal.IDTPM.currentTrkAna.TruthPartKey )
-
-    kwargs.setdefault( "OfflineVertexContainerName",
-                       flags.PhysVal.IDTPM.currentTrkAna.OfflineVtxKey )
-    kwargs.setdefault( "TruthVertexContainerName",
-                       flags.PhysVal.IDTPM.currentTrkAna.TruthVtxKey )
 
     kwargs.setdefault( "AnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
 
+    ## Track and Vertex collections
+    kwargs.setdefault( "OfflineTrkParticleContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.OfflineTrkKey )
+    kwargs.setdefault( "OfflineVertexContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.OfflineVtxKey )
+
+    kwargs.setdefault( "TruthParticleContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.TruthPartKey )
+    kwargs.setdefault( "TruthVertexContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.TruthVtxKey )
+
+    kwargs.setdefault( "TriggerTrkParticleContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.TrigTrkKey )
+    kwargs.setdefault( "TriggerVertexContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.TrigVtxKey )
+
+    ## TrackAnalysisInfoWriteTool
     if flags.Output.doWriteAOD_IDTPM :
         kwargs.setdefault( "writeOut", True )
         kwargs.setdefault( "TrkAnaInfoKey",
@@ -171,6 +183,10 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     ## Truth-Hit decorator
     if ( ( "Truth" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) or
          ( "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) ):
+        if not flags.Input.isMC:
+            log.error( "Trying to use Truth collections with non-MC sample." )
+            return None
+
         from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg, TruthDecoratorAlgCfg
         acc.merge( TruthHitDecoratorAlgCfg( flags ) )
         acc.merge( TruthDecoratorAlgCfg( flags ) )
@@ -188,34 +204,36 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
             TrackQualitySelectionToolCfg( flags,
                 name="TrackQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) or
-         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
+    if "VertexQualitySelectionTool" not in kwargs:
+        from InDetTrackPerfMon.InDetSelectionConfig import VertexQualitySelectionToolCfg
+        kwargs.setdefault( "VertexQualitySelectionTool", acc.popToolsAndMerge(
+            VertexQualitySelectionToolCfg( flags,
+                name="VertexQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-        kwargs.setdefault( "TriggerTrkParticleContainerName",
-                           flags.PhysVal.IDTPM.currentTrkAna.TrigTrkKey )
+    if flags.PhysVal.IDTPM.currentTrkAna.doTrigNavigation:
 
-        kwargs.setdefault( "TriggerVertexContainerName",
-                           flags.PhysVal.IDTPM.currentTrkAna.TrigVtxKey )
+        if "TrigDecisionTool" not in kwargs:
+            from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+            kwargs.setdefault( "TrigDecisionTool",
+                               acc.getPrimaryAndMerge( TrigDecisionToolCfg( flags ) ) )
 
-        if ( "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.TestType and
-             "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.RefType ):
+        if "RoiSelectionTool" not in kwargs:
+            from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
+            kwargs.setdefault( "RoiSelectionTool", acc.popToolsAndMerge(
+                RoiSelectionToolCfg( flags,
+                    name="RoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-            if "TrigDecisionTool" not in kwargs:
-                from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-                kwargs.setdefault( "TrigDecisionTool", 
-                                acc.getPrimaryAndMerge( TrigDecisionToolCfg(flags) ) )
+        if "TrackRoiSelectionTool" not in kwargs:
+            from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
+            kwargs.setdefault( "TrackRoiSelectionTool", acc.popToolsAndMerge(
+                TrackRoiSelectionToolCfg( flags,
+                    name="TrackRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-            if "RoiSelectionTool" not in kwargs:
-                from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
-                kwargs.setdefault( "RoiSelectionTool", acc.popToolsAndMerge(
-                    RoiSelectionToolCfg( flags,
-                        name="RoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
-
-            if "TrackRoiSelectionTool" not in kwargs:
-                from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
-                kwargs.setdefault( "TrackRoiSelectionTool", acc.popToolsAndMerge(
-                    TrackRoiSelectionToolCfg( flags,
-                        name="TrackRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+        if "VertexRoiSelectionTool" not in kwargs:
+            from InDetTrackPerfMon.InDetSelectionConfig import VertexRoiSelectionToolCfg
+            kwargs.setdefault( "VertexRoiSelectionTool", acc.popToolsAndMerge(
+                VertexRoiSelectionToolCfg( flags,
+                    name="VertexRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     if "TrackMatchingTool" not in kwargs:
         from InDetTrackPerfMon.InDetMatchingConfig import TrackMatchingToolCfg

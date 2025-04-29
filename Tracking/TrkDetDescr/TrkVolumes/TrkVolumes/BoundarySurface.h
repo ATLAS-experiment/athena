@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
 
 // Trk
 #include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkVolumes/Volume.h"
@@ -66,8 +66,8 @@ class BoundarySurface {
         m_outsideVolumeArray() {}
 
   /** Constructor for a Boundary with exact two Volumes attached to it*/
-  BoundarySurface(SharedObject<VolumeArray> insideArray,
-                  SharedObject<VolumeArray> outsideArray)
+  BoundarySurface(std::shared_ptr<VolumeArray> insideArray,
+                  std::shared_ptr<VolumeArray> outsideArray)
       : m_insideVolume(),
         m_outsideVolume(),
         m_insideVolumeArray(insideArray),
@@ -109,16 +109,16 @@ class BoundarySurface {
   void setOutsideVolume(const Tvol*);
 
   /** getters/setters for inside/outside Volume arrays */
-  const SharedObject<VolumeArray>& insideVolumeArray() const;
-  void setInsideVolumeArray(const SharedObject<VolumeArray>&);
-  const SharedObject<VolumeArray>& outsideVolumeArray() const;
-  void setOutsideVolumeArray(const SharedObject<VolumeArray>&);
+  const std::shared_ptr<VolumeArray>& insideVolumeArray() const;
+  void setInsideVolumeArray(const std::shared_ptr<VolumeArray>&);
+  const std::shared_ptr<VolumeArray>& outsideVolumeArray() const;
+  void setOutsideVolumeArray(const std::shared_ptr<VolumeArray>&);
 
  protected:
   const Tvol* m_insideVolume;
   const Tvol* m_outsideVolume;
-  SharedObject<VolumeArray> m_insideVolumeArray;
-  SharedObject<VolumeArray> m_outsideVolumeArray;
+  std::shared_ptr<VolumeArray> m_insideVolumeArray;
+  std::shared_ptr<VolumeArray> m_outsideVolumeArray;
 };
 
 template <class Tvol>
@@ -140,24 +140,24 @@ void BoundarySurface<Tvol>::setOutsideVolume(const Tvol* vol) {
 }
 
 template <class Tvol>
-const SharedObject<BinnedArray<Tvol>>&
+const std::shared_ptr<BinnedArray<Tvol>>&
 BoundarySurface<Tvol>::insideVolumeArray() const {
   return m_insideVolumeArray;
 }
 template <class Tvol>
 void BoundarySurface<Tvol>::setInsideVolumeArray(
-    const SharedObject<BinnedArray<Tvol>>& volArray) {
+    const std::shared_ptr<BinnedArray<Tvol>>& volArray) {
   m_insideVolumeArray = volArray;
 }
 
 template <class Tvol>
-const SharedObject<BinnedArray<Tvol>>&
+const std::shared_ptr<BinnedArray<Tvol>>&
 BoundarySurface<Tvol>::outsideVolumeArray() const {
   return m_outsideVolumeArray;
 }
 template <class Tvol>
 void BoundarySurface<Tvol>::setOutsideVolumeArray(
-    const SharedObject<BinnedArray<Tvol>>& volArray) {
+    const std::shared_ptr<BinnedArray<Tvol>>& volArray) {
   m_outsideVolumeArray = volArray;
 }
 

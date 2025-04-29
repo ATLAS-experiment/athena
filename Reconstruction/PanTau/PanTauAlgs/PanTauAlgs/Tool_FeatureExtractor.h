@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_FEATUREEXTRACTOR_H
@@ -12,6 +12,7 @@
 //! ASG
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // PanTau
 #include "PanTauAlgs/HelperFunctions.h"
@@ -43,8 +44,8 @@ namespace PanTau {
         
         //handle to the helper function
         PanTau::HelperFunctions m_HelperFunctions;
-        ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore;
-	std::string m_Tool_InformationStoreName;
+        ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore","Tool handle to the information store tool"};
+        Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "", "Tool handle to the information store tool"};
         	
         //Function to calculate basic features
         StatusCode calculateBasicFeatures(PanTau::PanTauSeed* inSeed) const;
@@ -60,9 +61,6 @@ namespace PanTau {
         //Function to calculate features based on two sets of constituents
         StatusCode addCombinedFeatures(PanTau::PanTauSeed* inSeed,
 				       const std::map<std::string, double>& variants_SeedEt) const;
-        
-        //Function to add impact parameter features
-        StatusCode addImpactParameterFeatures(PanTau::PanTauSeed* inSeed) const;
         
         //Function to fill the variants_SeedEt member
         static void fillVariantsSeedEt(const std::vector<PanTau::TauConstituent*>& tauConstituents,

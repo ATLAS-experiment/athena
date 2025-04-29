@@ -10,7 +10,7 @@ atlas_add_library( MuonSegmentTaggerToolsLib
                    src/*.cxx
                    NO_PUBLIC_HEADERS
                    LINK_LIBRARIES GaudiKernel StoreGateLib MuonIdHelpersLib MuonRecHelperToolsLib TrkDetDescrInterfaces
-                   PRIVATE_LINK_LIBRARIES AthenaBaseComps Identifier EventPrimitives MuonReadoutGeometry MuonRIO_OnTrack MuonSegment MuonSegmentMakerUtils MuonCombinedEvent TrkGeometry TrkSurfaces TrkCompetingRIOsOnTrack TrkEventPrimitives TrkParameters TrkSegment TrkTrack TrkExInterfaces TrkToolInterfaces MuonSegmentTaggerToolInterfaces )
+                   PRIVATE_LINK_LIBRARIES AthenaBaseComps Identifier EventPrimitives MuonReadoutGeometry MuonRIO_OnTrack MuonSegment MuonSegmentMakerUtils MuonCombinedEvent TrkGeometry TrkSurfaces TrkCompetingRIOsOnTrack TrkEventPrimitives TrkParameters TrkSegment TrkTrack TrkExInterfaces TrkToolInterfaces MuonSegmentTaggerToolInterfaces MuonSegmentMakerToolInterfaces )
 
 atlas_add_component( MuonSegmentTaggerTools
                      src/components/*.cxx

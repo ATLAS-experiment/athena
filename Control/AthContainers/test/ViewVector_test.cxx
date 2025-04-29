@@ -113,6 +113,7 @@ void test1()
   vv2 = std::move(dv2);
   assert (dv2.size() == 0);
   checkit (vv2, dv);
+  //cppcheck-suppress accessMoved
   EXPECT_EXCEPTION (SG::ExcViewVectorNotView, vv2 = std::move(dv3));
 
   vv2 = {dv[0], dv[1]};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**   
@@ -34,18 +34,12 @@
 // Constructor
 ITkStripCablingAlg::ITkStripCablingAlg(const std::string& name, ISvcLocator* pSvcLocator):
   AthReentrantAlgorithm(name, pSvcLocator)
-{
-}
+{}
 
 //
 StatusCode
 ITkStripCablingAlg::initialize() {
-  m_source = PathResolver::find_file(m_source.value(), "DATAPATH");
-  if (m_source.empty()) {
-    ATH_MSG_FATAL("The ITkStrip data file for cabling, " << m_source.value() << ", was not found.");
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("Reading cabling from " << m_source.value());
+  ATH_MSG_INFO("Reading ITk Strip cabling file from " << m_source.value());
   // ITkStripID
   ATH_CHECK(detStore()->retrieve(m_idHelper, "SCT_ID"));
   // Write Cond Handle
@@ -75,6 +69,7 @@ ITkStripCablingAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
   inputFile>>*pCabling;
+  ATH_MSG_DEBUG("Cabling file size: " << pCabling->size());
   const int numEntries = pCabling->size();
   ATH_MSG_DEBUG(numEntries << " entries were made to the identifier map.");
 

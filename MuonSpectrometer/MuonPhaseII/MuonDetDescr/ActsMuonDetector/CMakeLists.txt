@@ -10,7 +10,7 @@ find_package(Acts CONFIG COMPONENTS PluginGeoModel)
 
 atlas_add_component( ActsMuonDetector
                      src/components/*.cxx src/*.cxx
-                     LINK_LIBRARIES AthenaKernel GeoModelUtilities ActsGeometryLib MuonIdHelpersLib
+                     LINK_LIBRARIES AthenaKernel GeoModelUtilities ActsGeometryLib MuonIdHelpersLib ActsGeoUtils
                                     GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities ActsPluginGeoModel)
 
 # Install files from the package:

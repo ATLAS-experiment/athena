@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RatesAnalysis )
@@ -9,10 +9,11 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 # Package library:
 atlas_add_library( RatesAnalysisLib
                    src/Rates*.cxx
+		   src/L1Topo*cxx
                    PUBLIC_HEADERS RatesAnalysis
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthAnalysisBaseCompsLib AthenaBaseComps TrigDecisionToolLib EnhancedBiasWeighterLib
-                   PRIVATE_LINK_LIBRARIES EventInfo TrigConfData TrigConfL1Data xAODEgamma xAODEventInfo )
+                   PRIVATE_LINK_LIBRARIES TrigConfData TrigConfL1Data xAODEgamma xAODEventInfo )
 
 # Suppress spurious warnings seen in the LTO build originating 
 # in the boost parser code.
@@ -31,4 +32,5 @@ atlas_add_test( RatesAnalysis_test
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_scripts( share/RatesAnalysisFullMenu.py share/RatesEmulationExample.py share/RatesAnalysisPostProcessing.py share/RatesAnalysisOnlineProcessing.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_data(share/triggers.json)
+atlas_install_scripts(share/L1TopoRatesCalculator_submatrix_plotter.py share/runL1TopoRates.py share/RatesAnalysisFullMenu.py share/RatesEmulationExample.py share/RatesAnalysisPostProcessing.py share/RatesAnalysisOnlineProcessing.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

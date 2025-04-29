@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -131,7 +131,7 @@ namespace VKalVrtAthena {
     if( wrkvrt.selectedTrackIndices.size() <= 2 ) return StatusCode::SUCCESS;
 
     for( auto& index : wrkvrt.selectedTrackIndices ) {
-      const xAOD::TrackParticle* trk = m_selectedTracks->at( index );
+      const xAOD::TrackParticle* trk = m_selectedTracks.at( index );
 
       ATH_MSG_VERBOSE(" >> disassembleVertex(): > track at vertex[" << iv << "]: "
           << "index = " << trk->index()
@@ -172,23 +172,23 @@ namespace VKalVrtAthena {
       const size_t this_trk_id     = wrkvrt.selectedTrackIndices[itrk];
       const size_t selected_trk_id = wrkvrt.selectedTrackIndices[maxChi2TrackIndex];
 
-      ATH_MSG_VERBOSE(" >> disassembleVertex(): > this_trk_id  = " << this_trk_id << ", selected_trk_id = " << selected_trk_id << ", alltrks_size = " << m_selectedTracks->size() );
-      if( this_trk_id >= m_selectedTracks->size() ) {
+      ATH_MSG_VERBOSE(" >> disassembleVertex(): > this_trk_id  = " << this_trk_id << ", selected_trk_id = " << selected_trk_id << ", alltrks_size = " << m_selectedTracks.size() );
+      if( this_trk_id >= m_selectedTracks.size() ) {
   ATH_MSG_VERBOSE(" >> disassembleVertex(): > this_trk_id is invalid. continue!" );
   continue;
       }
-      if( selected_trk_id >= m_selectedTracks->size() ) {
+      if( selected_trk_id >= m_selectedTracks.size() ) {
   ATH_MSG_VERBOSE(" >> disassembleVertex(): > selected_trk_id is invalid. continue!" );
   continue;
       }
 
       ATH_MSG_VERBOSE(" >> disassembleVertex(): > Storing tracks to ListBaseTracks" );
-      ATH_MSG_VERBOSE(" >> disassembleVertex(): > m_selectedTracks->at( this_trk_id ) = " << m_selectedTracks->at( this_trk_id     )->index() );
-      ATH_MSG_VERBOSE(" >> disassembleVertex(): > m_selectedTracks->at( this_trk_id ) = " << m_selectedTracks->at( selected_trk_id )->index() );
+      ATH_MSG_VERBOSE(" >> disassembleVertex(): > m_selectedTracks.at( this_trk_id ) = " << m_selectedTracks.at( this_trk_id     )->index() );
+      ATH_MSG_VERBOSE(" >> disassembleVertex(): > m_selectedTracks.at( this_trk_id ) = " << m_selectedTracks.at( selected_trk_id )->index() );
 
       vector<const xAOD::TrackParticle*>    ListBaseTracks;
-      ListBaseTracks.emplace_back( m_selectedTracks->at( this_trk_id     ) );
-      ListBaseTracks.emplace_back( m_selectedTracks->at( selected_trk_id ) );
+      ListBaseTracks.emplace_back( m_selectedTracks.at( this_trk_id     ) );
+      ListBaseTracks.emplace_back( m_selectedTracks.at( selected_trk_id ) );
 
       ATH_MSG_VERBOSE(" >> disassembleVertex(): > ListBaseTracks was stored." );
 
@@ -521,12 +521,12 @@ namespace VKalVrtAthena {
     workVertex.Chi2PerTrk.clear();
 
     for( const auto& index : workVertex.selectedTrackIndices ) {
-      ListBaseTracks.emplace_back( m_selectedTracks->at( index ) );
+      ListBaseTracks.emplace_back( m_selectedTracks.at( index ) );
       workVertex.Chi2PerTrk.emplace_back( AlgConsts::chi2PerTrackInitValue );
     }
 
     for( const auto& index : workVertex.associatedTrackIndices ) {
-      ListBaseTracks.emplace_back( m_associatedTracks->at( index ) );
+      ListBaseTracks.emplace_back( m_associatedTracks.at( index ) );
       workVertex.Chi2PerTrk.emplace_back( AlgConsts::chi2PerTrackInitValue );
     }
 
@@ -610,12 +610,12 @@ namespace VKalVrtAthena {
     workVertex.Chi2PerTrk.clear();
 
     for( const auto& index : workVertex.selectedTrackIndices ) {
-      ListBaseTracks.emplace_back( m_selectedTracks->at( index ) );
+      ListBaseTracks.emplace_back( m_selectedTracks.at( index ) );
       workVertex.Chi2PerTrk.emplace_back( AlgConsts::chi2PerTrackInitValue );
     }
 
     for( const auto& index : workVertex.associatedTrackIndices ) {
-      ListBaseTracks.emplace_back( m_associatedTracks->at( index ) );
+      ListBaseTracks.emplace_back( m_associatedTracks.at( index ) );
       workVertex.Chi2PerTrk.emplace_back( AlgConsts::chi2PerTrackInitValue );
     }
 
@@ -693,7 +693,7 @@ namespace VKalVrtAthena {
     declareProperty("PrimVrtLocation",                 m_jp.PrimVrtLocation                 = "PrimaryVertices"             );
     declareProperty("McParticleContainer",             m_jp.truthParticleContainerName      = "TruthParticles"              );
     declareProperty("MCEventContainer",                m_jp.mcEventContainerName            = "TruthEvents"                 );
-    declareProperty("AugmentingVersionString",         m_jp.augVerString                    = ""                            );
+    declareProperty("AugmentingVersionString",         m_jp.augVerString                    = "_VSI"                            );
     declareProperty("TruthParticleFilter",             m_jp.truthParticleFilter             = "Rhadron"                     ); // Either "", "Kshort", "Rhadron", "HNL", "HadInt", "Bhadron"
 
     declareProperty("All2trkVerticesContainerName",    m_jp.all2trksVerticesContainerName   = "All2TrksVertices"            );
@@ -1016,11 +1016,11 @@ namespace VKalVrtAthena {
 
       if( wrkvrt.nTracksTotal() < 2 ) continue;
 
-      std::string sels    = concatenateIndicesToString( wrkvrt.selectedTrackIndices,   *m_selectedTracks   );
-      std::string assocs  = concatenateIndicesToString( wrkvrt.associatedTrackIndices, *m_associatedTracks );
+      std::string sels    = concatenateIndicesToString( wrkvrt.selectedTrackIndices,   m_selectedTracks   );
+      std::string assocs  = concatenateIndicesToString( wrkvrt.associatedTrackIndices, m_associatedTracks );
 
-      for( const auto& index : wrkvrt.selectedTrackIndices )   { usedTracks.insert( m_selectedTracks->at(index) );   }
-      for( const auto& index : wrkvrt.associatedTrackIndices ) { usedTracks.insert( m_associatedTracks->at(index) ); }
+      for( const auto& index : wrkvrt.selectedTrackIndices )   { usedTracks.insert( m_selectedTracks.at(index) );   }
+      for( const auto& index : wrkvrt.associatedTrackIndices ) { usedTracks.insert( m_associatedTracks.at(index) ); }
 
       ATH_MSG_DEBUG( " >> " << __FUNCTION__ << ": " << name << " vertex [" <<  iv << "]: " << &wrkvrt
                      << ", isGood  = "           << (wrkvrt.isGood? "true" : "false")
@@ -2334,7 +2334,7 @@ namespace VKalVrtAthena {
 
     std::map< std::deque<long int>*, std::vector<const xAOD::TrackParticle*>& > indexMap
     {
-      { &(wrkvrt.selectedTrackIndices), *m_selectedTracks }, { &(wrkvrt.associatedTrackIndices), *m_associatedTracks }
+      { &(wrkvrt.selectedTrackIndices), m_selectedTracks }, { &(wrkvrt.associatedTrackIndices), m_associatedTracks }
     };
 
     for( auto& pair : indexMap ) {

@@ -240,3 +240,17 @@ def getPFlowbJVTTool(jetdef, modspec):
                                                   includePV = True)
 
     return bJVTTool
+
+def getBoostedJetTaggerTool(jetdef, modspec):
+
+    jssutils = CompFactory.JSSTaggerUtils("JSSTaggerUtils/MyTagger")
+
+    ### transformer quark/gluon tagger score
+    bjtTool = CompFactory.BoostedJetTaggerTool("BoostedJetTaggerTool",
+                                               MLTagger = jssutils,
+                                               DecorationName = "QGTransformer",
+                                               CalibArea = "QGConstituentTagger/Nov24",
+                                               ConfigFile = "QGTagger_AntiKt04PFlow_Transformer.dat"
+                                               )
+
+    return bjtTool

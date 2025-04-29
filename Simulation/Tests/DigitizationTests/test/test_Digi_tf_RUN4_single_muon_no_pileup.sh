@@ -16,9 +16,11 @@ Events=1000
 HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.simul.HITS.e8481_s4149/HITS.33605493._000075.pool.root.1"
 DigiOutFileName="RUN4_muons.RDO.pool.root"
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 Digi_tf.py \
 --CA \
---conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
+--conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --geometryVersion default:ATLAS-P2-RUN4-03-00-00 \
 --inputHITSFile ${HSHitsFile} \

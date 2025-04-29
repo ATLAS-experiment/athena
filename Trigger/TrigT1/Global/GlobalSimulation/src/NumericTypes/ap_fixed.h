@@ -1,25 +1,27 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_AP_FIXED_H
 #define GLOBALSIM_AP_FIXED_H
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // due to statics used for debugging
 
 #include <cstddef>
 #include <sstream>
 
 /*
  * representation of a fixed point number.
- * A fixed point number has a fiexed width and precision.
+ * A fixed point number has a fixed width and precision.
  * This implementation uses an C++ int type to store the bits.
  * so allowing fast integer arithmetic.
  */
 
 
 namespace GlobalSim {
+
+   
+  struct Round{};
+  struct Trunc{};
+  struct XilDef{};
   
   template<std::size_t width, typename T>
   constexpr T max_to_overflow() {
@@ -36,6 +38,7 @@ namespace GlobalSim {
 
   template <std::size_t width,
 	    std::size_t dp,
+	    typename S=XilDef,
 	    typename T=int16_t,
 	    typename WS=int32_t>
   struct ap_fixed  {
@@ -43,23 +46,25 @@ namespace GlobalSim {
     T m_value = T{0};
     static constexpr T m_overflow_mask = max_to_overflow<width, T>();
 
-    static inline bool s_check_overflow{false};
-    static inline bool s_print_value{false};
-    static inline bool s_debug{s_check_overflow or s_print_value};
-    
     bool m_ovflw{false};
     friend std::ostream& operator<<(std::ostream& os,
-				    const ap_fixed<width, dp, T, WS> ap) {
+				    const ap_fixed<width, dp, S,  T, WS> ap) {
       os << ap.m_value << ' ' << double(ap);
       return os;
     }
 
     ap_fixed() = default;
 
-    ap_fixed(const double d) {
-      m_value = T(d * double (1<< dp) + (d >= 0 ? 0.5 : -0.5));
+    ap_fixed(const double d) requires(std::is_same_v<S, Round>):
+        m_value(d * double (1<< dp) + (d >= 0 ? 0.5 : -0.5)){
       test_overflow();
     }
+
+    ap_fixed(const double d) requires(std::is_same_v<S, XilDef>):
+        m_value(d * double (1<< dp) + (d >= 0 ? 0. : -1.0)){
+      test_overflow();
+    }
+   
       
     operator double() const{
       return double(this->m_value) / double(1 << dp);

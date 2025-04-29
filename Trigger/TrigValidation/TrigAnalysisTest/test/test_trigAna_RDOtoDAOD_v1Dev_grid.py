@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of transform RDO->RDO_TRIG->AOD with threads=8 and AOD->DAOD with multiprocess
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-output: *.txt
@@ -28,6 +28,9 @@ preExec = ';'.join([
   'flags.Trigger.AODEDMSet=\'AODFULL\'',
 ])
 
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+conditions = defaultConditionsTags.RUN3_MC
+
 rdo2aod = ExecStep.ExecStep('RDOtoAOD')
 rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar'
@@ -37,8 +40,8 @@ rdo2aod.concurrent_events = 8
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
-rdo2aod.args += ' --preInclude "all:Campaigns.MC23c"'
-rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
+rdo2aod.args += ' --preInclude "all:Campaigns.MC23e"'
+rdo2aod.args += ' --conditionsTag "default:' + conditions + '"'
 
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'

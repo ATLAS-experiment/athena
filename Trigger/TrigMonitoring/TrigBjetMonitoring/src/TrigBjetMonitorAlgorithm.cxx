@@ -41,6 +41,21 @@ bool LLR(double pu, double pc, double pb, double &w)  {
   return ll; 
 }
 
+bool LLRW(float pqcd, float ptop, float phbb, float &w)  { // RJ 17/02/2025
+  w = -100.;
+  bool ll = false;
+  float denom;
+  float topfrac(0.25); 
+  if (phbb > 0.) {
+    denom = pqcd*(1.-topfrac)+ptop*topfrac;
+    if (denom > 0.) {
+      w = log(phbb/denom);
+      ll = true;
+    }
+  }
+  return ll; 
+}
+
 
 bool CalcRelPt (float muonPt, float muonEta, float muonPhi, float jetPt, float jetEta, float jetPhi, float &RelPt) {
 
@@ -133,7 +148,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   
   bool mujetChain(false);
   bool bjetChain(true);
-  
+  bool L2bjetChain(false);  
   
 
   for ( auto& trigName : m_allChains ) {
@@ -148,21 +163,25 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
       const bool expressPass = passBits & TrigDefs::Express_passed;
 
       ATH_MSG_DEBUG( " Express Stream Test: Chain: " << trigName<< " m_expressStreamFlag: " << m_expressStreamFlag << " expressPass: " << expressPass );
-
+      
       if ( !m_expressStreamFlag || (m_expressStreamFlag && expressPass) ) {
 	
 	
-	// bjet vs mujet
+	// bjet vs mujet vs L2bjetChain
 	mujetChain = false;
-	bjetChain = true;
+        L2bjetChain = false;
+	bjetChain = false;
 	std::size_t found = trigName.find("HLT_mu");
-	if (found!=std::string::npos) {
-	  mujetChain = true;
-	  bjetChain = false;
-	}// found
-	
+	if (found!=std::string::npos) mujetChain = true;
+	else {
+	  found = trigName.find("a10sd_cssk");
+	  if (found!=std::string::npos) L2bjetChain = true;
+	  else bjetChain = true;
+	}
       
-	ATH_MSG_DEBUG("  ===> Run 3 access to Trigger Item: " << trigName);
+	ATH_MSG_DEBUG("  ===> Run 3 access to Trigger Item: " << trigName );
+	ATH_MSG_DEBUG("       bjetChain: " << bjetChain << " mujetChain: " << mujetChain << " L2bjetChain: " << L2bjetChain );
+
 	
 	// online track container 
 	SG::ReadHandle<xAOD::TrackParticleContainer> theTracks(m_onlineTrackContainerKey, ctx);
@@ -232,6 +251,89 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  nPV_tr = nPV;
 	  fill("TrigBjetMonitor",nPV_tr);
 	} // if m_collisionRun
+
+        // L2bjetChain
+	
+	
+        if (L2bjetChain) {
+          std::vector< TrigCompositeUtils::LinkInfo<xAOD::JetContainer> > onlinejets = m_trigDecTool->features<xAOD::JetContainer>(trigName, TrigDefs::Physics);
+	  for(const auto& jetLinkInfo : onlinejets) {
+	    const xAOD::Jet* jet = *(jetLinkInfo.link);
+	    std::string nJetH = "LargeR_nJet_"+trigName;
+	    auto nJet = Monitored::Scalar<int>(nJetH,0.0);
+	    nJet = onlinejets.size();
+	    ATH_MSG_DEBUG("   nJet: " << nJet);
+	    fill("TrigBjetMonitor",nJet);
+	    if (nJet > 0) {
+
+	      bool theLLRW(false);
+
+	      std::string NameH = "GN2Xv01_pqcd_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN2Xv01_pqcd = Monitored::Scalar<float>(NameH,0.0);
+	      const SG::AuxElement::ConstAccessor<float> pqcd_accessor("GN2Xv01_pqcd"); // DG 03-03-2025
+	      GN2Xv01_pqcd = pqcd_accessor(*jet);  // DG 03-03-2025
+	      ATH_MSG_DEBUG("       GN2Xv01_pqcd: " << GN2Xv01_pqcd);
+	      fill("TrigBjetMonitor",GN2Xv01_pqcd);        
+	      
+	      NameH = "GN2Xv01_ptop_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN2Xv01_ptop = Monitored::Scalar<float>(NameH,0.0);
+	      const SG::AuxElement::ConstAccessor<float> ptop_accessor("GN2Xv01_ptop"); // DG 03-03-2025
+	      GN2Xv01_ptop = ptop_accessor(*jet);  // DG 03-03-2025
+	      ATH_MSG_DEBUG("       GN2Xv01_ptop: " << GN2Xv01_ptop);
+	      fill("TrigBjetMonitor",GN2Xv01_ptop);        
+	      
+	      NameH = "GN2Xv01_phbb_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN2Xv01_phbb = Monitored::Scalar<float>(NameH,0.0);
+	      const SG::AuxElement::ConstAccessor<float> phbb_accessor("GN2Xv01_phbb"); // DG 03-03-2025
+	      GN2Xv01_phbb = phbb_accessor(*jet);  // DG 03-03-2025
+	      ATH_MSG_DEBUG("       GN2Xv01_phbb: " << GN2Xv01_phbb);
+	      fill("TrigBjetMonitor",GN2Xv01_phbb);        
+	      
+	      NameH = "GN2Xv01_mv_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN2Xv01_mv = Monitored::Scalar<float>(NameH,0.0);
+	      ATH_MSG_DEBUG("  GN2Xv01_pqcd: " << GN2Xv01_pqcd << "  GN2Xv01_ptop: " << GN2Xv01_ptop << "  GN2Xv01_phbb: " << GN2Xv01_phbb );
+	      theLLRW = LLRW (GN2Xv01_pqcd, GN2Xv01_ptop, GN2Xv01_phbb, GN2Xv01_mv);
+	      ATH_MSG_DEBUG("        GN2Xv01_mv: " << GN2Xv01_mv << " LLRW: " << theLLRW); 
+	      if ( theLLRW ) fill("TrigBjetMonitor",GN2Xv01_mv);
+	      
+	      // jetPt
+	      NameH = "LargeR_jetPt_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto LargeR_jetPt = Monitored::Scalar<float>(NameH,0.0);
+	      LargeR_jetPt = (jet->pt())*1.e-3;
+	      ATH_MSG_DEBUG("        LargeR_jetPt: " << LargeR_jetPt);
+	      fill("TrigBjetMonitor",LargeR_jetPt);
+
+	      // jetEta
+	      NameH = "LargeR_jetEta_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto LargeR_jetEta = Monitored::Scalar<float>(NameH,0.0);
+	      LargeR_jetEta = jet->eta();
+
+	      // jetPhi
+	      NameH = "LargeR_jetPhi_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto LargeR_jetPhi = Monitored::Scalar<float>(NameH,0.0);
+	      LargeR_jetPhi = jet->phi();
+	      ATH_MSG_DEBUG("        LargeR_jetEta: " << LargeR_jetEta << " LargeR_jetPhi : " << LargeR_jetPhi);
+	      fill("TrigBjetMonitor",LargeR_jetEta,LargeR_jetPhi);
+	      
+	      // jetMass
+	      NameH = "LargeR_jetMass_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto LargeR_jetMass = Monitored::Scalar<float>(NameH,0.0);
+	      LargeR_jetMass = (jet->m())*1.e-3;
+	      ATH_MSG_DEBUG("        LargeR_jetMass: " << LargeR_jetMass);
+	      fill("TrigBjetMonitor",LargeR_jetMass);
+
+	    } // if (nJet > 0)
+	  } // for jetLinkInfo
+        } // if (L2bjetChain)
+
 	
 	if (mujetChain) {
 	  std::vector< TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> > onlinemuons = m_trigDecTool->features<xAOD::MuonContainer>(trigName, TrigDefs::Physics); // TM 2022-05-16

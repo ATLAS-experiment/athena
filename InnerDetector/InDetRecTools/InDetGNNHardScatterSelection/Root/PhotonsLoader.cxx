@@ -25,7 +25,7 @@ namespace InDetGNNHardScatterSelection {
     } // end of iparticle sort getter
 
     PhotonsLoader::PhotonsLoader(
-        ConstituentsInputConfig cfg
+        const ConstituentsInputConfig & cfg
     ):
         IConstituentsLoader(cfg),
         m_iparticleSortVar(PhotonsLoader::iparticleSortVar(cfg.order)),
@@ -62,7 +62,7 @@ namespace InDetGNNHardScatterSelection {
         return only_particles;
     }
 
-    std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> PhotonsLoader::getData(
+    std::tuple<std::string, FlavorTagInference::Inputs, std::vector<const xAOD::IParticle*>> PhotonsLoader::getData(
       const xAOD::Vertex& vertex) const {
         Photons sorted_particles = getPhotonsFromVertex(vertex);
         std::vector<const xAOD::IParticle*> sorted_particles_ip;

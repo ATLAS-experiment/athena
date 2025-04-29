@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PMGANALYSISINTERFACES_IPMGCROSSSECTIONTOOL_H
@@ -37,7 +37,7 @@ namespace PMGTools {
     public:
     
     /// read infos from file, store them in the structure and make a vector that keeps all of them 
-    virtual bool readInfosFromFiles(std::vector<std::string>) = 0;
+    virtual bool readInfosFromFiles(const std::vector<std::string> &) = 0;
     
     /// read infos from all files in dir 
     virtual bool readInfosFromDir(const std::string& inputDir) = 0;

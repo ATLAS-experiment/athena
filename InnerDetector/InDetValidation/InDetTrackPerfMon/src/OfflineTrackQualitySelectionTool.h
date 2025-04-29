@@ -1,16 +1,17 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef INDETTRACKPERFMON_IDTPM_OFFLINETRACKQUALITYSELECTIONTOOL_H
 #define INDETTRACKPERFMON_IDTPM_OFFLINETRACKQUALITYSELECTIONTOOL_H
 
-// Package includes
-#include "InDetTrackPerfMon/ITrackSelectionTool.h"
+// Local includes
+#include "ITrackSelectionTool.h"
 
 // Framework includes
 #include "AsgTools/AsgTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
-#include "AthLinks/ElementLink.h"
+
 // STL includes
 #include <string>
 
@@ -21,25 +22,27 @@ namespace IDTPM {
  * @brief Uses InDetTrackSelection tool and working points defined there for tracks quality selection
  * In future it is possible that the selection cuts & logic will be moved here
  **/
-class OfflineTrackQualitySelectionTool : public virtual IDTPM::ITrackSelectionTool, public asg::AsgTool {
+
+class OfflineTrackQualitySelectionTool :
+    public virtual IDTPM::ITrackSelectionTool, public asg::AsgTool {
+
 public:
+
   ASG_TOOL_CLASS( OfflineTrackQualitySelectionTool, ITrackSelectionTool );
-  OfflineTrackQualitySelectionTool(const std::string& name);
+
+  OfflineTrackQualitySelectionTool( const std::string& name );
 
   virtual StatusCode initialize() override;
 
   virtual StatusCode selectTracks(
       TrackAnalysisCollections& trkAnaColls ) override;
 
-  virtual StatusCode selectTracksInRoI(
-      TrackAnalysisCollections& trkAnaColls,
-      const ElementLink< TrigRoiDescriptorCollection >& roiLink ) override;
-
-
-  bool accept(const xAOD::TrackParticle* track);
+  bool accept( const xAOD::TrackParticle* track );
 
 private:
-  ToolHandle<InDet::IInDetTrackSelectionTool> m_offlineTool{this, "offlineTool", "", "Instance name of track selection tool"};
+
+  ToolHandle< InDet::IInDetTrackSelectionTool > m_offlineTool { this, "offlineTool", "", "Instance name of track selection tool" };
+
   FloatProperty   m_minAbsEta   { this, "minAbsEta", -9999., "Lower cut on |eta| for truth particles" };
   FloatProperty   m_minAbsPhi   { this, "minAbsPhi", -9999., "Lower cut on |phi| for truth particles" };
   FloatProperty   m_maxAbsPhi   { this, "maxAbsPhi", -9999., "Higher cut on |phi| for truth particles" };
@@ -58,6 +61,11 @@ private:
   FloatProperty   m_minZ0       { this, "minZ0", -9999., "Lower cut on z0 for truth particles" };
   FloatProperty   m_minQoPT     { this, "minQoPT", -9999., "Lower cut on q/pt for truth particles" };
   FloatProperty   m_maxQoPT     { this, "maxQoPT", -9999., "Higher cut on q/pt for truth particles" };
+  FloatArrayProperty m_etaBins  { this, "etaBins", {}, "Eta bins for reco tracks selections" };
+  UnsignedIntegerArrayProperty m_minHitsVec { this, "minHitsVec", {}, "Minimum number of Si hits for reco tracks selections" };
+  FloatArrayProperty m_minPtVec { this, "minPtVec", {}, "Minimum pt in eta bins for reco tracks selections" };
+  FloatArrayProperty m_maxD0Vec { this, "maxD0Vec", {}, "Maximum d0 in eta bins for reco tracks selections" };
+  FloatArrayProperty m_maxZ0Vec { this, "maxZ0Vec", {}, "Maximum z0 in eta bins for reco tracks selections" };
 
 };
 

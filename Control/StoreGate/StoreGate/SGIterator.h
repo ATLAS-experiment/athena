@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -16,6 +16,7 @@
 
 #include "StoreGate/exceptions.h"
 #include "SGTools/DataProxy.h"
+#include "SGTools/DataProxy_cast.h"
 #include "SGTools/ProxyMap.h"
 #include "AthenaKernel/IProxyDict.h"
 #include <boost/iterator/iterator_facade.hpp>

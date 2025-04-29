@@ -33,6 +33,7 @@ MultiAssociationTool<Types<T0>, TO_T>::MultiAssociationTool
       m_which(0),
       m_fromTypeinfo(0)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
@@ -160,22 +161,6 @@ MultiAssociationTool<Types<T0>, Types<U0> >::releaseElementUntyped (const void* 
 
 
 //**************************************************************************
-
-
-/**
- * @brief Standard Gaudi tool constructor.
- * @param type The name of the tool type.
- * @param name The tool name.
- * @param parent The tool's Gaudi parent.
- */
-template <class T0, class U0>
-MultiAssociationTool<Types<T0>, Types<U0> >::MultiAssociationTool
-  (const std::string& type,
-   const std::string& name,
-   const IInterface* parent)
-    : MultiAssociationTool<Types<T0>, U0> (type, name, parent)
-{
-}
 
 
 /**

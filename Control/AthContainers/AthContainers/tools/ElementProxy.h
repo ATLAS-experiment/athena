@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/ElementProxy.h
@@ -15,17 +15,16 @@
 
 
 #include "AthContainers/OwnershipPolicy.h"
-#include "AthLinks/tools/selection_ns.h"
-#include "CxxUtils/concepts.h"
 #include <memory>
+#include <RootMetaSelection.h>
 
 
 // Forward declarations.
-ENTER_ROOT_SELECTION_NS
-namespace DataModel_detail {
-template <class DVL> class ElementProxy;
-}
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+  namespace DataModel_detail {
+    template <class DVL> class ElementProxy;
+  }
+}}}
 
 
 namespace DataModel_detail {
@@ -93,7 +92,9 @@ public:
    */
   // Disable this method if the container must own its elements.
   // In that case, only the unique_ptr overload is relevant.
-  ATH_MEMBER_REQUIRES(!DVL::must_own, ElementProxy&)
+  template <bool = true>
+  requires(!DVL::must_own)
+  ElementProxy<DVL>&
   operator= (typename DVL::value_type rhs);
 
 
@@ -139,7 +140,7 @@ public:
 
 
   typedef typename
-    ROOT_SELECTION_NS::DataModel_detail::ElementProxy<DVL>::self
+    ROOT::Meta::Selection::DataModel_detail::ElementProxy<DVL>::self
   self;
 
 
@@ -155,7 +156,7 @@ private:
 } // namespace DataModel_detail
 
 
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 
 namespace DataModel_detail {
 
@@ -163,13 +164,12 @@ template <class DVL> class ElementProxy : public SelectNoInstance
 {
 public:
   typedef ElementProxy<DVL> self;
-  ROOT_SELECTION_NS::MemberAttributes< kTransient > m_proxied;
-  ROOT_SELECTION_NS::MemberAttributes< kTransient > m_container;
+  ROOT::Meta::Selection::MemberAttributes< kTransient > m_proxied;
+  ROOT::Meta::Selection::MemberAttributes< kTransient > m_container;
 };
 
 }
-
-EXIT_ROOT_SELECTION_NS
+}}} // ROOT namespace
 
 
 #include "AthContainers/tools/ElementProxy.icc"

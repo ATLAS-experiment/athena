@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 ////////////////////////////// 
 //
@@ -11,14 +11,13 @@
 **/
 
 
-#include "TRT_ConditionsAlgs/TRTStrawStatusWrite.h"
+#include "TRTStrawStatusWrite.h"
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <stdio.h>
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"
-#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 
 TRTStrawStatusWrite::TRTStrawStatusWrite( const std::string &name, ISvcLocator *pSvcLocator)  :  
@@ -148,11 +147,6 @@ StatusCode TRTStrawStatusWrite::readStatFromTextFile(const std::string& filename
   ATH_MSG_INFO( " ***************** TRTStrawStatusWrite ************************ ");
   ATH_MSG_INFO( " readStatFromTextFile called with file name " << filename );
   
-  const InDetDD::TRT_DetectorManager* TRTDetectorManager ;
-  if ((m_detStore->retrieve(TRTDetectorManager)).isFailure()) {
-    ATH_MSG_FATAL( "Problem retrieving TRT_DetectorManager" );
-  }
-
   int deadba0[32];
   int deadba1[32];
   int deadba2[32];
@@ -334,11 +328,6 @@ StatusCode TRTStrawStatusWrite::readStatHTFromTextFile(const std::string& filena
 
   std::ifstream ifsHT(filename.c_str()) ;
   if(ifsHT) {
-
-    const InDetDD::TRT_DetectorManager* TRTDetectorManager ;
-    if ((m_detStore->retrieve(TRTDetectorManager)).isFailure()) {
-      ATH_MSG_FATAL( "Problem retrieving TRT_DetectorManager");
-    }
 
   // initialize detector layers with Good like in rel21 (PH: Good and Xenon is treated as the same)
     int lineXe=0;

@@ -3,7 +3,7 @@
 */
 
 #include "InDetGNNHardScatterSelection/GNN.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagInference/SaltModel.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -19,15 +19,15 @@
 namespace InDetGNNHardScatterSelection {
 
   GNN::GNN(const std::string& nn_file):
-    m_onnxUtil(nullptr)
+    m_saltModel(nullptr)
   {
 
     // Load and initialize the neural network model from the given file path.
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
-    m_onnxUtil = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile);
+    m_saltModel = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile);
 
     // Extract metadata from the ONNX file, primarily about the model's inputs.
-    auto lwt_config = m_onnxUtil->getLwtConfig();
+    auto lwt_config = m_saltModel->getLwtConfig();
 
     // Create configuration objects for data preprocessing.
     auto [inputs, constituents_configs] = dataprep::createGetterConfig(lwt_config);
@@ -58,7 +58,7 @@ namespace InDetGNNHardScatterSelection {
     m_varsFromVertex = dataprep::createVertexVarGetters(inputs);
 
     // Retrieve the configuration for the model outputs.
-    FlavorTagDiscriminants::OnnxUtil::OutputConfig gnn_output_config = m_onnxUtil->getOutputConfig();
+    FlavorTagInference::SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
 
     for (const auto& outNode : gnn_output_config) {
       // the node's output name will be used to define the decoration name
@@ -77,7 +77,7 @@ namespace InDetGNNHardScatterSelection {
 
     // prepare input
     // -------------
-    std::map<std::string, FlavorTagDiscriminants::Inputs> gnn_input;
+    std::map<std::string, FlavorTagInference::Inputs> gnn_input;
 
     std::vector<float> vertex_feat;
     for (const auto& getter: m_varsFromVertex) {
@@ -85,7 +85,7 @@ namespace InDetGNNHardScatterSelection {
     }
     std::vector<int64_t> vertexfeat_dim = {1, static_cast<int64_t>(vertex_feat.size())};
 
-    FlavorTagDiscriminants::Inputs vertex_info (vertex_feat, vertexfeat_dim);
+    FlavorTagInference::Inputs vertex_info (vertex_feat, vertexfeat_dim);
     gnn_input.insert({"vertex_features", vertex_info});
 
     for (auto loader : m_constituentsLoaders){
@@ -95,7 +95,7 @@ namespace InDetGNNHardScatterSelection {
 
     // run inference
     // -------------
-    auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
+    auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_input);
 
     // decorate outputs
     // ----------------

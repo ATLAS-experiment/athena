@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALORINGERTOOLS_CALORINGERREADERUTILS_ICC
@@ -67,11 +67,11 @@ void BuildCaloRingsFctor<container_t>::operator() ( const particle_t *part )
 
   auto ringsELReader = xAOD::getCaloRingsReader();
   const xAOD::CaloRingsLinks *caloRingsLinks(nullptr);
-  
-  try { 
+
+  if (ringsELReader.isAvailable(*part)) {
     caloRingsLinks = &(ringsELReader(*part)); 
-  } catch ( const std::exception &e) { 
-    ATH_MSG_DEBUG("Couldn't retrieve CaloRingsELVec. Reason: " << e.what()); 
+  } else {
+    ATH_MSG_DEBUG("Couldn't retrieve CaloRingsELVec.");
   }
 
   incrementCounter(); displayLoopingMessage();

@@ -1,16 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
-#include <iterator>
-#include <map>
-#include <set>
 
+
+#include "PhysicsConfigurationHelper.h"
+#include "G4ParticleDefinition.hh"
 #include "CustomParticle.h"
 #include "CustomParticleFactory.h"
 
@@ -19,6 +14,14 @@
 #include "G4DecayTable.hh"
 #include "G4ParticleTable.hh"
 #include "G4PhaseSpaceDecayChannel.hh"
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <stdexcept>
+#include <sstream>
+#include <iterator>
+#include <map>
 
 bool CustomParticleFactory::isCustomParticle(G4ParticleDefinition *particle)
 {
@@ -34,9 +37,27 @@ void CustomParticleFactory::loadCustomParticles()
 
 std::set<G4ParticleDefinition *> CustomParticleFactory::load()
 {
+  // Reading decays from file
+  std::map< std::string, std::vector<std::vector<std::string>* > > decayMap;
+  std::ifstream decayFile("decays.txt");
+  std::string line;
+  while (getline(decayFile,line)) {
+    std::istringstream is(line);
+    std::vector<std::string>* txtvec = new std::vector<std::string>(std::istream_iterator<std::string>(is),std::istream_iterator<std::string>());
+    const std::string name = (*txtvec)[0];
+    try {
+      decayMap.at(name).push_back(txtvec);
+    }
+    catch (const::std::out_of_range& e) {
+      std::vector<std::vector<std::string>* > decays;
+      decays.push_back(txtvec);
+      decayMap[name] = std::move(decays);
+    }
+  }
+  decayFile.close();
+
   // the existing particle table
   G4ParticleTable *theParticleTable = G4ParticleTable::GetParticleTable();
-
 
   std::set<G4ParticleDefinition *> particles;
 
@@ -48,7 +69,11 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
   bool first = true;
   double mass;
   int pdgCode;
-  std::string name,line;
+  bool stable{true};
+  G4double lifetime{-1.0};
+  std::string name;
+  const PhysicsConfigurationHelper *parameters = PhysicsConfigurationHelper::Instance();
+
   // This should be compatible IMO to SLHA
   while (getline(configFile,line)) {
     G4cout << "-------------------------------------------------" << G4endl;
@@ -82,6 +107,9 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
       continue;
     }
 
+    stable = !(parameters->DoDecays() == 1 || (decayMap.contains(name) && name.find("cloud")>name.size() ));
+    lifetime = stable ? -1.0 : parameters->Lifetime();
+
     pType="custom";
     if (MC::isRHadron(pdgCode)) pType = "rhadron";
     if (MC::isSlepton(pdgCode)) pType = "sLepton";
@@ -92,40 +120,45 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
     G4ParticleDefinition* previousDefinition = theParticleTable->FindParticle(pdgCode);
     // if the particle has somehow already been added to the G4ParticleTable remove it
     if (previousDefinition) {
-      G4cout << "Found a previousDefinition for " << name << "(" << pdgCode << ") in G4ParticleTable. Assuming that we want the new definition, so removing previous defnition! May cause issues elsewhere though..." << G4endl;
+      G4cout << "Found an existing G4ParticleDefinition for " << name << "(" << pdgCode << ") in G4ParticleTable. Assuming that we want the new definition, so removing previous definition! May cause issues elsewhere though..." << G4endl;
       previousDefinition->DumpTable();
       theParticleTable->Remove(previousDefinition);
       delete previousDefinition;
     }
-
+    //    Arguments for constructor are as follows
+    //               name             mass          width         charge
+    //             2*spin           parity  C-conjugation
+    //          2*Isospin       2*Isospin3       G-parity
+    //               type    lepton number  baryon number   PDG encoding
+    //             stable         lifetime    decay table
+    //             shortlived      subType    anti_encoding
     CustomParticle *particle  = new CustomParticle(
                                                    name,           mass * CLHEP::GeV ,        0.0*CLHEP::MeV,       CLHEP::eplus * MC::charge(pdgCode),
                                                    MC::spin2(pdgCode),              +1,             0,
                                                    0,              0,             0,
                                                    pType,               0,            +1, pdgCode,
-                                                   true,            -1.0,          NULL );
+                                                   stable,            lifetime,          nullptr );
     if (pType=="custom") {
       spectatormass = mass;
-      spectator=particle;
-      particle->SetCloud(0);
-      particle->SetSpectator(0);
+      spectator = particle;
     }
     if (first) {
       first = false;
       spectatormass = mass;
-      spectator=particle;
-      particle->SetCloud(0);
-      particle->SetSpectator(0);
+      spectator = particle;
     } else {
       G4String cloudname = name+"cloud";
       G4String cloudtype = pType+"cloud";
       G4double cloudmass = mass-spectatormass;
-      CustomParticle *tmpParticle  = new CustomParticle(
-                                                        cloudname,           cloudmass * CLHEP::GeV ,        0.0*CLHEP::MeV,  0 ,
-                                                        0,              +1,             0,
-                                                        0,              0,             0,
-                                                        cloudtype,               0,            +1, 0,
-                                                        true,            -1.0,          NULL );
+      const bool cloudstable = !(parameters->DoDecays() == 1 || decayMap.contains(cloudname));
+      const G4double cloudlifetime = cloudstable ? -1.0 : parameters->Lifetime();
+
+      std::unique_ptr<G4ParticleDefinition> tmpParticle  = std::unique_ptr<CustomParticle>( new CustomParticle(
+                                                                                            cloudname,           cloudmass * CLHEP::GeV ,        0.0*CLHEP::MeV,  0 ,
+                                                                                            0,              +1,             0,
+                                                                                            0,              0,             0,
+                                                                                            cloudtype,               0,            +1, 0,
+                                                                                            cloudstable,         cloudlifetime,          nullptr ) );
       particle->SetCloud(tmpParticle);
       particle->SetSpectator(spectator);
 
@@ -142,32 +175,18 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
   configFile.close();
   G4cout << "-------------------------------------------------" << G4endl;
 
-  // Reading decays from file
-  std::vector<std::vector<std::string>* > decays;
-  std::ifstream decayFile("decays.txt");
-  while (getline(decayFile,line)) {
-    std::istringstream is(line);
-    std::vector<std::string>* txtvec = new std::vector<std::string>(std::istream_iterator<std::string>(is),std::istream_iterator<std::string>());
-    decays.push_back(txtvec);
-  }
-  decayFile.close();
-
   // Looping over custom particles to add decays
-  for (std::set<G4ParticleDefinition *>::iterator part=particles.begin();part!=particles.end();++part) {
-    name=(*part)->GetParticleName();
-    std::vector<std::vector<std::string> > mydecays;
-    for (unsigned int i = 0; i!= decays.size(); i++) {
-      if (name==(*(decays[i]))[0]) {
-        // Is this decay for me?
-        mydecays.push_back(*(decays[i]));
-      }
-    } // End of the for loop
-    if (mydecays.size()>0) { // Did I get any decays?
-      const int ndec=std::ssize(mydecays);
+  for (G4ParticleDefinition *part : particles) {
+    name=part->GetParticleName();
+    if ( decayMap.contains(name) ) {
+      std::vector<std::vector<std::string>* >& mydecays = decayMap.at(name);
+      // Did I get any decays?
+      if (mydecays.empty()) { continue; } // Should not happen.
+      int ndec=mydecays.size();
       G4DecayTable* table = new G4DecayTable();
       G4VDecayChannel** mode = new G4VDecayChannel*[ndec]{};
       for (int i=0;i!=ndec;i++) {
-        std::vector<std::string> thisdec=mydecays[i];//deliberate copy
+        std::vector<std::string> thisdec=*(mydecays[i]);//deliberate copy
         if (thisdec.empty()) continue;
         const double branch = std::stod(thisdec.back()); // Reading branching ratio
         thisdec.pop_back(); // Removing the number from the vector
@@ -182,8 +201,9 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
       }
       for (G4int index=0; index <ndec; index++ ) { table->Insert(mode[index]); }
       delete [] mode;
-      (*part)->SetDecayTable(table);
+      part->SetDecayTable(table);
     }
+    else { continue; }
   }
   return particles;
 }

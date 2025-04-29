@@ -259,6 +259,8 @@ private: // properties
    StringArrayProperty m_frontierRefresh{this,"FrontierRefreshSchema",{}};
    /// Use DBReplicaSvc to sort database connections, default = true.
    BooleanProperty m_sortReplicas{this,"SortReplicas",true};
+   /// Default ROOT container type
+   StringProperty  m_defaultROOTContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
 
 private: // internal helper functions
    // delete all APR::Persistency Services, Catalog, Mutexes and Indexes

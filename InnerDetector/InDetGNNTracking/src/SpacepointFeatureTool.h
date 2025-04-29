@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
@@ -41,8 +41,8 @@ namespace InDet{
     SpacepointFeatureTool(const SpacepointFeatureTool&) =delete;
     SpacepointFeatureTool &operator=(const SpacepointFeatureTool&) = delete;
 
-    const PixelID *m_pixelID;
-    const SCT_ID *m_SCT_ID;
+    const PixelID *m_pixelID{};
+    const SCT_ID *m_SCT_ID{};
 
     private:
     void cartesion_to_spherical(const Amg::Vector3D &xyzVec, float &eta_, float &phi_) const;

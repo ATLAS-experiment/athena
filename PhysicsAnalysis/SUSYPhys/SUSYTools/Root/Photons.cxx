@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Photons
@@ -62,7 +62,7 @@ StatusCode SUSYObjDef_xAOD::GetPhotons(xAOD::PhotonContainer*& copy, xAOD::Shall
     photons=copy;
   }  
 
-  for (const auto& photon : *copy) {
+  for (const auto photon : *copy) {
     ATH_CHECK( this->FillPhoton(*photon, m_photonBaselinePt, m_photonBaselineEta) );
     this->IsSignalPhoton(*photon, m_photonPt, m_photonEta);
   }

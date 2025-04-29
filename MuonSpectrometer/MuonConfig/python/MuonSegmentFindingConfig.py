@@ -1,10 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # This file configures the Muon segment finding. It is based on a few files in the old configuration system:
 # Tools, which are configured here: 
-# https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonRecTools.py
-# https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MooreTools.py
-# from https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/CscTools.py
+
 
 # Core
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -46,24 +44,6 @@ def MuonHoughPatternFinderToolCfg(flags, name = "MuonHoughPatternFinderTool", **
     the_tool = CompFactory.Muon.MuonHoughPatternFinderTool(name,**kwargs)
     result.setPrivateTools(the_tool)
     return result
-
-def MdtDriftCircleOnTrackCreatorAdjustableT0Cfg(flags,**kwargs):
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
-    kwargs.setdefault("TimingMode", 3)
-    kwargs.setdefault("DoTofCorrection", True)
-    kwargs.setdefault("TimeWindowSetting", MdtCalibWindowNumber('Collision_data'))
-    acc = MuonClusterOnTrackCreatorCfg(flags, **kwargs)  
-    return acc
-
-def AdjustableT0Tool(flags,**kwargs):
-    # NB: the following 'ifs' are the same as in the MdtDriftCircleOnTrackCreator, so that the ToF setting is the same
-    if flags.Beam.Type is BeamType.Cosmics:
-        kwargs.setdefault("DoTof", 0)
-    else: # collisions simulation final precise cuts
-        kwargs.setdefault("DoTof", 1)
-        
-    AdjT0__AdjustableT0Tool=CompFactory.getComp("AdjT0::AdjustableT0Tool")
-    return AdjT0__AdjustableT0Tool(**kwargs)
 
 def MdtMathSegmentFinderCfg(flags,name="MdtMathSegmentFinder", **kwargs):
     # beamType       = getattr(extraFlags,"beamType", beamFlags.beamType())
@@ -470,6 +450,7 @@ def MuonPatternCalibrationCfg(flags, name="MuonPatternCalibration", **kwargs):
 def MuonSegmentFinderNCBAlgCfg(flags, name="MuonSegmentMaker_NCB", **kwargs):
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
     result = ComponentAccumulator()
+    ### Only use the TGC measurements from the  current bunch crossing
     kwargs.setdefault("doStgcSegments", flags.Detector.EnablesTGC)
     kwargs.setdefault("doMMSegments", flags.Detector.EnableMM)
     kwargs.setdefault("doMdtSegments", False)
@@ -573,7 +554,7 @@ def MuonSegmentCnvAlgCfg(flags, name="MuonSegmentCnvAlg", **kwargs):
     return result
 
 
-def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
+def MuonSegmentFindingCfg(flags, setup_bytestream = True):
     """
     Returns a CA setting up Muon Segment Finding
     @param setup_bytestream if True and if Format.BS, sets up reading from bytestream. If False, disables setting up BS, even if Format.BS is True 
@@ -587,7 +568,7 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
     from MuonConfig.MuonRecToolsConfig import MuonEDMHelperSvcCfg
     result.merge(MuonEDMHelperSvcCfg(flags))    
 
-    if (setup_bytestream):
+    if setup_bytestream:
         # We need to be able to disable this when using MuonCalibStream, 
         # as the normal BS convertors clash with the special MCS converters.
         if flags.Input.Format is Format.BS:
@@ -598,6 +579,7 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
             from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
             result.merge( MuonRDOtoPRDConvertorsCfg(flags) )
   
+    
     # We need to add two algorithms - one for normal collisions, one for NCB
     result.merge(MuonLayerHoughAlgCfg(flags))
     result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker"))

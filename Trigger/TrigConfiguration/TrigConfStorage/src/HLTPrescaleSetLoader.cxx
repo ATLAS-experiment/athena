@@ -149,7 +149,7 @@ TrigConf::HLTPrescaleSetLoader::load( HLTPrescaleSet& hltpss ) {
                   .setPrescale(ps)
                   .setPassThrough(pt);
             } else {
-               std::string streamnametype(level);
+               std::string streamnametype(std::move(level));
                // sanity check: stream name and type are separated by ':'
                if(streamnametype.rfind(':')==std::string::npos)
                   streamnametype += ":" + streamnametype;

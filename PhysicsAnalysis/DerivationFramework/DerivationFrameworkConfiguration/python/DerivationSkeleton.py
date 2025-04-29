@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -34,10 +34,10 @@ def fromRunArgs(runArgs):
     setPerfmonFlagsFromRunArgs(flags, runArgs)
 
     # Input types
-    allowedInputTypes = [ 'AOD', 'DAOD_PHYS', 'EVNT' ]
+    allowedInputTypes = [ 'AOD', 'DAOD_PHYS', 'DAOD_PHYSLITE', 'EVNT' ]
     availableInputTypes = [ hasattr(runArgs, f'input{inputType}File') for inputType in allowedInputTypes ]
     if sum(availableInputTypes) != 1:
-        raise ValueError('Input must be exactly one of the following types: inputAODFile, inputEVNTFile, inputDAOD_PHYSFile')
+        raise ValueError('Input must be exactly one of the following types: '+','.join(map(str, availableInputTypes)))
     idx = availableInputTypes.index(True)
     flags.Input.Files = getattr(runArgs, f'input{allowedInputTypes[idx]}File')
 
@@ -67,6 +67,20 @@ def fromRunArgs(runArgs):
     else:
         logDerivation.error('Derivation job started, but with no output formats specified - aborting')
         raise ValueError('No derived formats specified')
+
+    # Command line skimming - limited to SKIM format and PHYS/PHYSLITE input
+    if hasattr(runArgs, 'skimmingExpression'):
+        if runArgs.skimmingExpression:
+            if not (len(formats)==1 and formats[0]=='SKIM'):
+                raise ValueError('Command-line skimming only available with SKIM format')
+            availableInputTypes = [ hasattr(runArgs, f'input{inputType}File') for inputType in [ 'DAOD_PHYS', 'DAOD_PHYSLITE' ] ]
+            if sum(availableInputTypes) != 1:
+                raise ValueError('Command-line skimming only available with input types '+','.join(map(str, availableInputTypes))) 
+            flags.Derivation.skimmingExpression = runArgs.skimmingExpression
+            if not hasattr(runArgs, 'skimmingContainers'):
+                logDerivation.warning('All containers used for skimming must be listed with the skimmingContainers option - job likely to fail')
+            else:
+                flags.Derivation.dynamicConsumers = runArgs.skimmingContainers
 
     # Output files
     for runArg in dir(runArgs):
@@ -112,9 +126,52 @@ def fromRunArgs(runArgs):
        from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
        cfg.merge(MetaDataSvcCfg(flags, ['IOVDbMetaDataTool']))
 
+    # Further workaround for issues with overlap removal.
+    # As further explained in JetCommonConfig.AddEventCleanFlagsCfg,
+    # we can schedule multiple overlap removal algorithms which overwrite
+    # each other's decorations.  To get the decorations locked, we put
+    # all the OR-related decoration algorithms in the EventCleanSeq
+    # sequence followed by decoration locking algorithms in EventCleanLockSeq.
+    # Each derivation format ensures that these sequences are in the
+    # correct place.  But we can still run into trouble when multiple
+    # formats are combined.  When we merge two CAs both of which
+    # contain the same sequence S, S will end up with the algorithms
+    # from both, but S will stay at its existing position in the
+    # first (destination) CA.  However, for these sequences, we need
+    # them to run at the sequence's position in the second (source) CA,
+    # i.e., the later of the two positions.  We accomplish this by
+    # munging the CAs before merging: remove the sequence from the
+    # destination CA and merge its algorithms to the source CA.
+    def premerge (cfg, newcfg, seqnam):
+        # Check if both CAs contain the requested sequence.
+        seq = cfg.getSequence(seqnam)
+        if not seq: return
+        newseq = newcfg.getSequence(seqnam)
+        if not newseq: return
+
+        # Make a temporary CA with the sequence to hold algorithms
+        # removed from CFG.
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        ca = ComponentAccumulator()
+        ca.addSequence (CompFactory.AthSequencer (seqnam, Sequential=True))
+
+        # Remove the sequence's algorithms from CFG and add to the temp CA.
+        for a in seq.Members:
+            ca.addEventAlgo (cfg.popEventAlgo (a.getName(), seqnam), seqnam)
+
+        # Remove the sequence itself (which should now by empty) from CFG.
+        cfg.getSequence('AthAlgSeq').Members.remove (seq)
+
+        # Add the moved algorithms to NEWCFG.
+        newcfg.merge (ca)
+        return
+
     for formatName in formats:
         derivationConfig = getattr(DerivationConfigList, f'{formatName}Cfg')
-        cfg.merge(derivationConfig(flags))
+        newcfg = derivationConfig(flags)
+        premerge (cfg, newcfg, 'EventCleanSeq')
+        premerge (cfg, newcfg, 'EventCleanLockSeq')
+        cfg.merge(newcfg)
 
     # Pass-through mode (ignore skimming and accept all events)
     if hasattr(runArgs, 'passThrough'):

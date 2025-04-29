@@ -230,7 +230,7 @@ class ElectronChainConfiguration(ChainConfigurationBase):
     def getFastElectron(self, flags, is_probe_leg=False):
         if self.chainPart['idperfInfo']:
             stepName = "fast_electron_empty"
-            return self.getEmptyStep(3,stepName)
+            return self.getEmptyStep(stepName)
         else:
             stepName = "fast_electron"
             return self.getStep(flags, stepName,[fastElectronSequenceGenCfg],is_probe_leg=is_probe_leg)
@@ -238,7 +238,7 @@ class ElectronChainConfiguration(ChainConfigurationBase):
     def getFastElectron_lrt(self, flags, is_probe_leg=False):
         if self.chainPart['idperfInfo']:
             stepName = "fast_electron_lrt_empty"
-            return self.getEmptyStep(3,stepName)
+            return self.getEmptyStep(stepName)
         else:
             stepName = "fast_electron_lrt"
             return self.getStep(flags, stepName,[fastElectron_LRTSequenceGenCfg],is_probe_leg=is_probe_leg)
@@ -338,6 +338,6 @@ class ElectronChainConfiguration(ChainConfigurationBase):
         return self.getStep(flags, stepName, [fastCalo_FWDSequenceGenCfg], name='Electron', is_probe_leg=is_probe_leg)
 
     def getEmptyRefitStep(self, flags,  is_probe_leg=False):
-        return self.getEmptyStep(6,'nonGSFEmptyRefit')
+        return self.getEmptyStep('nonGSFEmptyRefit')
 
 

@@ -41,6 +41,7 @@ StatusCode IDTPM::FakeRatePlots::bookPlots()
 {
   ATH_MSG_DEBUG( "Booking efficiency plots in " << getDirectory() ); 
 
+  ATH_CHECK( retrieveAndBook( m_fakerate_vs_incl, "fakerate_vs_"+m_trackType+"_inclusive" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_pt,   "fakerate_vs_"+m_trackType+"_pt" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_eta,  "fakerate_vs_"+m_trackType+"_eta" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_phi,  "fakerate_vs_"+m_trackType+"_phi" ) );
@@ -69,6 +70,7 @@ StatusCode IDTPM::FakeRatePlots::fillPlots(
   float pz0    = z0( particle );
 
   /// Fill the histograms
+  ATH_CHECK( fill( m_fakerate_vs_incl,  1,  isFake, weight ) );
   ATH_CHECK( fill( m_fakerate_vs_pt,  ppt,  isFake, weight ) );
   ATH_CHECK( fill( m_fakerate_vs_eta, peta, isFake, weight ) );
   ATH_CHECK( fill( m_fakerate_vs_phi, pphi, isFake, weight ) );

@@ -427,15 +427,14 @@ def getTrfConfigFromAMI(tag, suppressNonJobOptions = True):
 #        result = pyAMI.atlas.api.get_ami_tag(amiclient, tag)
         result = get_ami_tag(amiclient, tag, suppressNonJobOptions)
     except pyAMI.exception.Error as e:
-        msg.warning('An exception occured when connecting to primary AMI: {0}'.format(e))
+        msg.error('An exception occured when connecting to primary AMI: {0}'.format(e))
         msg.debug('Exception: {0}'.format(e))
-        if 'please login' in e.message or 'certificate expired' in e.message:
+        if 'please login' in str(e) or 'certificate expired' in str(e):
             raise TransformAMIException(AMIerrorCode, 'Getting tag info from AMI failed with credential problem. '
                                         'Please check your AMI account status.')
-        if 'Invalid amiTag' in e.message:
+        if 'Invalid amiTag' in str(e):
             raise TransformAMIException(AMIerrorCode, 'Invalid AMI tag ({0}).'.format(tag))
-            
-        msg.debug("Error may not be fatal - will try AMI replica catalog")
+        raise TransformAMIException(AMIerrorCode, 'Getting tag info from AMI failed. See logfile for exception details.')
 
     try:
         trf = TrfConfig()

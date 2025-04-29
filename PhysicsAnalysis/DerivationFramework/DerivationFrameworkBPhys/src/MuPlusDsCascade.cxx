@@ -4,9 +4,9 @@
 /////////////////////////////////////////////////////////////////
 // MuPlusDsCascade.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/MuPlusDsCascade.h"
+#include "MuPlusDsCascade.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
@@ -515,7 +515,7 @@ namespace DerivationFramework {
     }
 
 
-    MuPlusDsCascade::MuPlusDsCascade(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p),
+    MuPlusDsCascade::MuPlusDsCascade(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
     m_vertexDxContainerKey(""),
     m_cascadeOutputsKeys{ "MuPlusDsCascadeVtx1", "MuPlusDsCascadeVtx2" },
     m_VxPrimaryCandidateName("PrimaryVertices"),

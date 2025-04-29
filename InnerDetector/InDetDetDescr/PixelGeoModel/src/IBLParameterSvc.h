@@ -83,7 +83,6 @@ private:
   std::vector<int> m_LayerFEsPerHalfModule;
 
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
-  ServiceHandle< IRDBAccessSvc > m_rdbAccessSvc;  
   bool m_disablePixMapCondDB;
   bool m_disableSpecialPixels;
   bool m_disableAlignable;

@@ -49,7 +49,7 @@ public:
 
 private:
     void calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
-    float calculate_inverse_bin_width(float event_value, std::string variable_name, const std::vector<float>& bin_edges) const;
+    float calculate_inverse_bin_width(float event_value, const std::string& variable_name, const std::vector<float>& bin_edges) const;
     
     Gaudi::Property<unsigned int> m_runNumber {this, "RunNumber", 0, "Run number for current job"};
     ZdcInjPulserAmpMap::Token m_injMapRunToken{};

@@ -85,6 +85,9 @@ class EventSelectionConfig(ConfigBlock):
             info="whether to create an output branch for every single line "
             "of the selection cuts. The default is False (only saves the"
             " final decision).")
+        self.addOption('useDressedProperties', True, type=bool,
+            info="whether to use dressed truth electron and truth muon "
+            "kinematics rather than simple P4 kinematics.")
         self.step = 0
         self.currentDecoration = ''
         self.cutflow = []
@@ -118,6 +121,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NMU_selector(text, cfg)
         elif "SUM_EL_N_MU_N" in text.split():
             self.add_SUMNELNMU_selector(text, cfg)
+        elif "SUM_EL_N_MU_N_TAU_N" in text.split():
+            self.add_SUMNLEPTONS_selector(text, cfg)
         elif "JET_N_GHOST" in text.split():
             self.add_NJETGHOST_selector(text, cfg)
         elif "JET_N" in text.split():
@@ -132,6 +137,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NLJETGHOST_selector(text, cfg)
         elif "LJET_N" in text.split():
             self.add_NLJET_selector(text, cfg)
+        elif "OBJ_N" in text.split():
+            self.add_NOBJ_selector(text, cfg)
         elif "MET" in text.split():
             self.add_MET_selector(text, cfg)
         elif "MWT" in text.split():
@@ -287,6 +294,8 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NEL_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.electrons)
+        if "Truth" in self.electrons:
+            alg.useDressedProperties = self.useDressedProperties
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPt = self.check_float(items[1])
@@ -315,6 +324,8 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NMU_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.muons)
+        if "Truth" in self.muons:
+            alg.useDressedProperties = self.useDressedProperties
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPt = self.check_float(items[1])
@@ -341,9 +352,11 @@ class EventSelectionConfig(ConfigBlock):
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
         thisalg = f'{self.name}_SUMNELNMU_{self.step}'
-        alg = config.createAlgorithm('CP::SumNElNMuPtSelectorAlg', thisalg)
+        alg = config.createAlgorithm('CP::SumNLeptonPtSelectorAlg', thisalg)
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if "Truth" in self.electrons:
+            alg.useDressedProperties = self.useDressedProperties
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPtEl = self.check_float(items[1])
@@ -355,6 +368,37 @@ class EventSelectionConfig(ConfigBlock):
             alg.minPtMu = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+    
+    def add_SUMNLEPTONS_selector(self, text, config):
+        items = text.split()
+        if items[0] != "SUM_EL_N_MU_N_TAU_N":
+            self.raise_misconfig(text, "SUM_EL_N_MU_N_TAU_N")
+        if len(items) != 4 and len(items) != 6:
+            self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons and not self.taus:
+            self.raise_missinginput("electrons, muons or taus")
+        thisalg = f'{self.name}_SUMNLEPTONS_{self.step}'
+        alg = config.createAlgorithm('CP::SumNLeptonPtSelectorAlg', thisalg)
+        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        alg.taus, alg.tauSelection = config.readNameAndSelection(self.taus)
+        if "Truth" in self.electrons:
+            alg.useDressedProperties = self.useDressedProperties
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        if len(items) == 4:
+            alg.minPtEl = self.check_float(items[1])
+            alg.minPtMu = self.check_float(items[1])
+            alg.minPtTau = self.check_float(items[1])
+            alg.sign  = self.check_sign(items[2])
+            alg.count = self.check_int(items[3])
+        elif len(items) == 6:
+            alg.minPtEl = self.check_float(items[1])
+            alg.minPtMu = self.check_float(items[2])
+            alg.minPtTau = self.check_float(items[3])
+            alg.sign  = self.check_sign(items[4])
+            alg.count = self.check_int(items[5])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -541,13 +585,14 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NLJETMASSWINDOW_{self.step}'
         alg = config.createAlgorithm('CP::NLargeRJetMassWindowSelectorAlg', thisalg)
         alg.ljets, alg.ljetSelection = config.readNameAndSelection(self.largeRjets)
-        if len(items) == 5 or (len(items) == 6 and "veto" in items):
+        vetoMode = items[-1] == 'veto' or items[-1] == 'VETO'
+        if len(items) == 5 or (len(items) == 6 and vetoMode):
             alg.lowMass  = self.check_float(items[1])
             alg.highMass = self.check_float(items[2])
             alg.sign     = self.check_sign(items[3])
             alg.count    = self.check_int(items[4])
-            alg.vetoMode = (len(items) == 6 and self.check_string(items[5]) == "veto")
-        elif (len(items) == 6 and "veto" not in items) or len(items) == 7:
+            alg.vetoMode = vetoMode
+        elif (len(items) == 6 and not vetoMode) or len(items) == 7:
             extraSel = self.check_string(items[1])
             if alg.ljetSelection:
                 alg.ljetSelection += "&&" + config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
@@ -557,7 +602,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.highMass = self.check_float(items[3])
             alg.sign     = self.check_sign(items[4])
             alg.count    = self.check_int(items[5])
-            alg.vetoMode = (len(items) ==7 and self.check_string(items[6]) == "veto")
+            alg.vetoMode = vetoMode
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
@@ -610,6 +655,22 @@ class EventSelectionConfig(ConfigBlock):
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
+    def add_NOBJ_selector(self, text, config):
+        items = text.split()
+        if items[0] != "OBJ_N":
+            self.raise_misconfig(text, "OBJ_N")
+        if len(items) != 5:
+            self.raise_misconfig(text, "number of arguments")
+        thisalg = f'{self.name}_NOBJ_{self.step}'
+        alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
+        alg.particles, alg.objectSelection = config.readNameAndSelection(self.check_string(items[1]))
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        alg.minPt = self.check_float(items[2])
+        alg.sign  = self.check_sign(items[3])
+        alg.count = self.check_int(items[4])
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
     def add_MET_selector(self, text, config):
         items = text.split()
         if items[0] != "MET":
@@ -642,6 +703,8 @@ class EventSelectionConfig(ConfigBlock):
         alg.metTerm = self.metTerm
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if "Truth" in self.electrons or "Truth" in self.muons:
+            alg.useDressedProperties = self.useDressedProperties
         alg.sign = self.check_sign(items[1])
         alg.refMWT = self.check_float(items[2])
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -664,6 +727,8 @@ class EventSelectionConfig(ConfigBlock):
         alg.metTerm = self.metTerm
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if "Truth" in self.electrons or "Truth" in self.muons:
+            alg.useDressedProperties = self.useDressedProperties
         alg.sign = self.check_sign(items[1])
         alg.refMETMWT = self.check_float(items[2])
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -684,6 +749,8 @@ class EventSelectionConfig(ConfigBlock):
             alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         if self.muons:
             alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if "Truth" in self.electrons or "Truth" in self.muons:
+            alg.useDressedProperties = self.useDressedProperties
         alg.sign = self.check_sign(items[1])
         alg.refMLL = self.check_float(items[2])
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -704,9 +771,11 @@ class EventSelectionConfig(ConfigBlock):
             alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         if self.muons:
             alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if "Truth" in self.electrons or "Truth" in self.muons:
+            alg.useDressedProperties = self.useDressedProperties
         alg.lowMLL = self.check_float(items[1])
         alg.highMLL = self.check_float(items[2])
-        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
+        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]).lower() == "veto")
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
@@ -777,9 +846,11 @@ class EventSelectionConfig(ConfigBlock):
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if "Truth" in self.electrons or "Truth" in self.muons:
+            alg.useDressedProperties = self.useDressedProperties
         alg.lowMll = self.check_float(items[1])
         alg.highMll = self.check_float(items[2])
-        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
+        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]).lower() == "veto")
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return

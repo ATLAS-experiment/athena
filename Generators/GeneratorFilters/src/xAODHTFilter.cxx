@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -33,30 +33,14 @@
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 
 
-xAODHTFilter::xAODHTFilter(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator), m_total(0), m_passed(0), m_ptfailed(0)
-      , m_classif("MCTruthClassifier/DFCommonTruthClassifier")
-{
-  declareProperty("MinJetPt", m_MinJetPt = 0 * Gaudi::Units::GeV);
-  declareProperty("MaxJetEta", m_MaxJetEta = 10.0);
-  declareProperty("TruthJetContainer", m_TruthJetContainerName = "AntiKt4TruthWZJets");
-  declareProperty("MinHT", m_MinHT = 20. * Gaudi::Units::GeV);
-  declareProperty("MaxHT", m_MaxHT = 14000. * Gaudi::Units::GeV);
-  declareProperty("UseNeutrinosFromWZTau", m_UseNu = false, "Include neutrinos from W/Z/tau decays in the calculation of HT");
-  declareProperty("UseLeptonsFromWZTau", m_UseLep = false, "Include e/mu from W/Z/tau decays in the HT");
-  declareProperty("MinLeptonPt", m_MinLepPt = 0 * Gaudi::Units::GeV);
-  declareProperty("MaxLeptonEta", m_MaxLepEta = 10.0);
-  declareProperty("EventInfoName",m_eventInfoName="EventInfo");   
-}
-
-xAODHTFilter::~xAODHTFilter(){}
-
 StatusCode xAODHTFilter::filterInitialize()
 {
-  m_MinJetPt /= Gaudi::Units::GeV;
-  m_MinLepPt /= Gaudi::Units::GeV;
-  m_MinHT /= Gaudi::Units::GeV;
-  m_MaxHT /= Gaudi::Units::GeV;
+  CHECK(m_TruthJetContainerName.initialize());
+  CHECK(m_truthPartContKey.initialize());
+  m_MinJetPt.value() /= Gaudi::Units::GeV;
+  m_MinLepPt.value() /= Gaudi::Units::GeV;
+  m_MinHT.value() /= Gaudi::Units::GeV;
+  m_MaxHT.value() /= Gaudi::Units::GeV;
   if (m_MaxHT < 0)
     m_MaxHT = 9e9;
 
@@ -67,7 +51,7 @@ StatusCode xAODHTFilter::filterInitialize()
   if (m_UseLep)
     ATH_MSG_INFO(" including W/Z/tau leptons in range " << m_MinLepPt << "<p_T GeV and abs(eta)<" << m_MaxLepEta);
 
-  ATH_CHECK(m_mcFilterHTKey.initialize());
+  CHECK(m_mcFilterHTKey.initialize());
   ATH_CHECK(m_classif.retrieve());
 
   return StatusCode::SUCCESS;
@@ -85,11 +69,9 @@ StatusCode xAODHTFilter::filterEvent()
   m_total++; // Book keeping
 
   // Get jet container out
-  const xAOD::JetContainer *truthjetTES = 0;
-  if (!evtStore()->contains<xAOD::JetContainer>(m_TruthJetContainerName) ||
-      evtStore()->retrieve(truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES)
-  {
-    ATH_MSG_INFO("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
+  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+  if (!truthjetTES.isValid()) {
+    ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName.key());
 #ifdef HEPMC3
     setFilterPassed(m_MinHT < 1. || keepAll());
 #else
@@ -118,42 +100,31 @@ StatusCode xAODHTFilter::filterEvent()
   if (m_UseLep || m_UseNu)
   {
 
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+    // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+    // duplicated barcode ones
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    CHECK(xTruthParticleContainer.isValid());
 
     std::vector<const xAOD::TruthParticle *> WZleptons;
     WZleptons.reserve(10);
-    
+
     // Loop over full TruthParticle container
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-        const xAOD::TruthParticle* theParticle =  (*xTruthParticleContainer)[iPart];
-        if (!theParticle)
-          continue;
-        int pdgid = theParticle->pdgId();
-
-        if (m_UseNu && MC::isNeutrino(pdgid) && (theParticle->isGenStable()))
-        {
-          if (Common::prompt(theParticle,m_classif))
-          {
-            HT += theParticle->pt();
-          }
+    for (const xAOD::TruthParticle* theParticle : *xTruthParticleContainer) {
+      if (!theParticle) continue;
+      const int pdgid = theParticle->pdgId();
+      if (m_UseNu && MC::isNeutrino(pdgid) && (theParticle->isGenStable())) {
+        if (Common::prompt(theParticle,m_classif)) {
+          HT += theParticle->pt();
         }
+      }
 
-        // pick muons and electrons specifically -- isLepton selects both charged leptons and neutrinos
-        if ( m_UseLep && (std::abs(pdgid) == 11 || std::abs(pdgid) == 13) && theParticle->isGenStable() && (theParticle)->pt() > m_MinLepPt * Gaudi::Units::GeV && std::abs(theParticle->eta()) < m_MaxLepEta)
-        {
-          if (Common::prompt(theParticle,m_classif))
-          {
-            HT += theParticle->pt();
-          }
+      // pick muons and electrons specifically -- isLepton selects both charged leptons and neutrinos
+      if ( m_UseLep && (MC::isElectron(pdgid) || MC::isMuon(pdgid)) && theParticle->isGenStable() && (theParticle)->pt() > m_MinLepPt * Gaudi::Units::GeV && std::abs(theParticle->eta()) < m_MaxLepEta) {
+        if (Common::prompt(theParticle,m_classif)) {
+          HT += theParticle->pt();
         }
-      } // End loop over particles
+      }
+    } // End loop over particles
   }
 
   HT /= Gaudi::Units::GeV; // Make sure we're in GeV
@@ -163,8 +134,8 @@ StatusCode xAODHTFilter::filterEvent()
     // fill the HT value
     // Event passed.  Will add HT to xAOD::EventInfo
     // Get MC event collection for setting weight
-    const McEventCollection* mecc = 0;
-    if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
+  const McEventCollection* mecc = 0;
+    if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - might not work");
       return StatusCode::SUCCESS;

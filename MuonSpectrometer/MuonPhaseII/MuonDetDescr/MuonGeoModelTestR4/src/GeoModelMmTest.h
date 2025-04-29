@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELMmTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELMmTEST_H
@@ -18,7 +18,7 @@ namespace MuonGMR4{
 
 class GeoModelMmTest : public AthHistogramAlgorithm{
     public:
-        GeoModelMmTest(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
         ~GeoModelMmTest() = default;
 
@@ -68,7 +68,10 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
     MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
     MuonVal::TwoVectorBranch m_firstStripPos{m_tree, "firstStripPos"};
     MuonVal::VectorBranch<int>& m_readoutSide{m_tree.newVector<int>("stripReadoutSide")};
-    MuonVal::VectorBranch<unsigned>& m_readoutFirstStrip{m_tree.newVector<unsigned int>("stripFirstStrip")};
+
+    MuonVal::VectorBranch<unsigned>& m_firstStrip{m_tree.newVector<unsigned>("firstStrip")};
+    MuonVal::VectorBranch<unsigned>& m_nStrips{m_tree.newVector<unsigned>("nStrips")};
+
 
     //// Chamber Details
     MuonVal::VectorBranch<short>& m_gasGap{m_tree.newVector<short>("gasGap")}; // gas gap number
@@ -89,6 +92,8 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
     MuonVal::ScalarBranch<float>& m_ActiveHeightR{m_tree.newScalar<float>("ActiveHeightR")}; //active area's Height
     MuonVal::ScalarBranch<float>& m_ActiveWidthS{m_tree.newScalar<float>("ActiveWidthS")}; //active area's small width
     MuonVal::ScalarBranch<float>& m_ActiveWidthL{m_tree.newScalar<float>("ActiveWidthL")};   //active area's large width 
-};
+
+    
+  };
 }
 #endif
