@@ -18,6 +18,7 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
 
     # Allow the initial set of cuts to be read in via config flags, instead of the cuts file.
     # This effectively eliminates the need to make a "step 0" cut file.
+    # If not set then default to loading the cuts file.
     if flags.Trigger.FPGATrackSim.GenScan.initialLayerStudy:
         cutset = {"rin": flags.Trigger.FPGATrackSim.GenScan.rin,
                   "rout": flags.Trigger.FPGATrackSim.GenScan.rout,
@@ -28,20 +29,24 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
                   }
         log.info("Running initial layer study, taking FPGATrackSimBinning cuts from flags")
         log.info(cutset)
-    else:
+    elif flags.Trigger.FPGATrackSim.GenScan.layerStudyCutFile:
         if flags.Trigger.FPGATrackSim.oldRegionDefs:
-            cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts).cuts[flags.Trigger.FPGATrackSim.region]
+            cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.layerStudyCutFile).cuts[flags.Trigger.FPGATrackSim.region]
         else:
             # this allows the cut file defined in python to be loaded from the map directory
             # Updated to use python path resolver. It seems like we have to manually pass in CALIBPATH.
-            relpath = os.path.join(flags.Trigger.FPGATrackSim.mapsDir, flags.Trigger.FPGATrackSim.GenScan.genScanCuts + ".py")
+            relpath = os.path.join(flags.Trigger.FPGATrackSim.mapsDir, flags.Trigger.FPGATrackSim.GenScan.layerStudyCutFile + ".py")
             abspath = unixtools.find_datafile(relpath, pathlist=os.getenv("CALIBPATH").split(":"))
             spec=importlib.util.spec_from_file_location("FPGATrackSimGenScanCuts", abspath)
+            if spec is None:
+                log.fatal("Failed to load cuts file")
             cutmodule = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(cutmodule)
             cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
         log.info("Running layer study using configured cuts file")
         log.info(cutset)
+    else:
+        log.fatal("Must either set initialLayerStudy=True or set layerStudyCutFile to the name of a cut file!")
 
     # make the binned hits class
     BinnnedHits = CompFactory.FPGATrackSimBinnedHits("BinnedHits_LayerStudy")

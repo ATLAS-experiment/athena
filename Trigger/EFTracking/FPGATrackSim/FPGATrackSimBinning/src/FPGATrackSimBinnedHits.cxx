@@ -77,13 +77,14 @@ StatusCode FPGATrackSimBinnedHits::fill(
   for (const auto &step : m_bintool->steps()) {
 
     ATH_MSG_DEBUG("fill binning: step num " << stepnum << " " << step->stepName());
+    ATH_MSG_DEBUG("Number of valid bins (full) = " << step->validBinsFull().size());
     for (auto &bin : step->validBinsFull()) {
 
       // skip bin if it is invalid
       if (!bin.data())
         continue;
 
-      //ATH_MSG_DEBUG("valid bin");
+      ATH_MSG_VERBOSE("valid bin");
       if (stepnum == 0) {
 
         // first step, hits from input stream
@@ -97,12 +98,13 @@ StatusCode FPGATrackSimBinnedHits::fill(
 
       } else {        
         // subsequent steps, use hits from previous step
+        ATH_MSG_VERBOSE("Looping over previous hits of size = " << m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size());
         for (const auto &hit :
              m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits) {
           StoredHit storedhit(hit);
           if (m_bintool->binDesc()->hitInBin(*step.get(), bin.idx(),
                                              storedhit)) {
-            
+            ATH_MSG_VERBOSE("Hit found to be in bin, is it mapped? " << hit.hitptr->isMapped());
             // One last step, set layer based on layerMap or use default from pmap
             if (step.get() == m_bintool->lastStep()) {
               if (m_mod_to_lyr_map.size() != 0) {
@@ -166,7 +168,7 @@ void FPGATrackSimBinnedHits::readLayerMap(const std::string& filename) {
   nlohmann::json data = nlohmann::json::parse(f);
 
   m_lyr_to_mod_map.setsize(m_bintool->lastStep()->nBins(),
-                   std::vector <std::set<unsigned> >(5,std::set<unsigned>()));
+                   std::vector <std::set<unsigned> >(8,std::set<unsigned>()));
   m_mod_to_lyr_map.setsize(m_bintool->lastStep()->nBins(),
                    std::map <unsigned,unsigned>());
 

@@ -2,9 +2,15 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Logging import AthenaLogger
 from PathResolver import PathResolver
+import importlib
+import os
+import AthenaCommon.Utils.unixtools as unixtools
 
-#### Now inmport Data Prep config from other file
+log = AthenaLogger(__name__)
+
+#### Now import Data Prep config from other file
 from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
 from FPGATrackSimConfTools import FPGATrackSimAnalysisConfig
 
@@ -14,6 +20,81 @@ def getNSubregions(filePath):
         assert(fields.startswith('towers'))
         n = fields.split()[1]
         return int(n)
+
+def FPGATrackSimBinnedHitsToolCfg_2nd(flags):
+    # This can probably be imported in the future from the analysis config, but for now it's here.
+    result = ComponentAccumulator()
+
+    # The second stge, like layer study alg, technically doesn't need a cuts file.
+    # So for now allow the same override here I guess?
+    if flags.Trigger.FPGATrackSim.GenScan.initialLayerStudy:
+        cutset = {"rin": flags.Trigger.FPGATrackSim.GenScan.rin,
+                  "rout": flags.Trigger.FPGATrackSim.GenScan.rout,
+                  "parBins": flags.Trigger.FPGATrackSim.GenScan.parBins,
+                  "parMin": flags.Trigger.FPGATrackSim.GenScan.parMin,
+                  "parMax": flags.Trigger.FPGATrackSim.GenScan.parMax,
+                  "parSet": flags.Trigger.FPGATrackSim.GenScan.parSet
+                  }
+        log.info("Running initial layer study, taking FPGATrackSimBinning cuts from flags")
+        log.info(cutset)
+    else:
+        if flags.Trigger.FPGATrackSim.oldRegionDefs:
+            cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts).cuts[flags.Trigger.FPGATrackSim.region]
+        else:
+            # this allows the cut file defined in python to be loaded from the map directory
+            # Updated to use python path resolver. It seems like we have to manually pass in CALIBPATH.
+            relpath = os.path.join(flags.Trigger.FPGATrackSim.mapsDir, flags.Trigger.FPGATrackSim.GenScan.genScanCuts + ".py")
+            abspath = unixtools.find_datafile(relpath, pathlist=os.getenv("CALIBPATH").split(":"))
+            spec=importlib.util.spec_from_file_location("FPGATrackSimGenScanCuts", abspath)
+            cutmodule = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(cutmodule)
+            cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+        log.info("Running layer study using configured cuts file")
+        log.info(cutset)
+
+    # make the binned hits class
+    BinnnedHits = CompFactory.FPGATrackSimBinnedHits("FPGATrackSimBinnedHits_2nd")
+    BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+
+    # TODO: we need a new flag for this!
+    BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+
+    # make the bintool class
+    BinTool = CompFactory.FPGATrackSimBinTool("FPGATrackSimBinTool_2nd")
+
+    # Inputs for the BinTool
+    binsteps=[]
+    BinDesc=None
+    if (cutset["parSet"]=="PhiSlicedKeyLyrPars"):
+        BinDesc = CompFactory.FPGATrackSimKeyLayerBinDesc("FPGATrackSimKeyLayerBinDesc2nd")
+        BinDesc.rin=cutset["rin"]
+        BinDesc.rout=cutset["rout"]
+
+        # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
+        step1 = CompFactory.FPGATrackSimBinStep("FPGATrackSimPhiBinning_2nd")
+        step1.parBins = [1,1,cutset["parBins"][2],cutset["parBins"][3],cutset["parBins"][4]]
+        step2 = CompFactory.FPGATrackSimBinStep("FPGATrackSimFullBinning_2nd")
+        step2.parBins = cutset["parBins"]
+        binsteps = [step1,step2]
+    else:
+        log.fatal("Unknown Binning Setup: ",cutset["parSet"])
+
+    BinTool.BinDesc = BinDesc
+    BinTool.Steps = binsteps
+
+    # configure the padding around the nominal region
+    BinTool.d0FractionalPadding =0.05
+    BinTool.z0FractionalPadding =0.05
+    BinTool.etaFractionalPadding =0.05
+    BinTool.phiFractionalPadding =0.05
+    BinTool.qOverPtFractionalPadding =0.05
+    BinTool.parMin = cutset["parMin"]
+    BinTool.parMax = cutset["parMax"]
+    BinnnedHits.BinTool = BinTool
+
+    result.setPrivateTools(BinnnedHits)
+
+    return result
 
 def FPGATrackSimWindowExtensionToolCfg(flags):
     result = ComponentAccumulator()
@@ -30,6 +111,11 @@ def FPGATrackSimWindowExtensionToolCfg(flags):
     # in the second stage are actually used.
     FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84., 84.]
     FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045]
+
+    # If we're doing binning, i.e. genscan.
+    if flags.Trigger.FPGATrackSim.ActiveConfig.genScan:
+        FPGATrackSimWindowExtensionTool.doBinning = True
+        FPGATrackSimWindowExtensionTool.BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg_2nd(flags))
 
     # Other settings, shared with the first stage mostly. disable 2nd stage tracking for now.
     FPGATrackSimWindowExtensionTool.fieldCorrection =flags.Trigger.FPGATrackSim.ActiveConfig.fieldCorrection
@@ -157,7 +243,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
 
     theFPGATrackSimSecondStageAlg=CompFactory.FPGATrackSimSecondStageAlg()
     theFPGATrackSimSecondStageAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
-    theFPGATrackSimSecondStageAlg.tracking = flags.Trigger.FPGATrackSim.tracking
+    theFPGATrackSimSecondStageAlg.tracking = flags.Trigger.FPGATrackSim.secondTracking
     theFPGATrackSimSecondStageAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     theFPGATrackSimSecondStageAlg.DoHoughRootOutput2nd = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput2nd
     theFPGATrackSimSecondStageAlg.DoNNTrack_2nd = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd
