@@ -12,34 +12,35 @@ def TrigTauMonConfig(flags):
 
 
     # Schedule the offline GNTau inference
-    from tauRec.TauToolHolder import TauVertexedClusterDecoratorCfg, TauGNNEvaluatorCfg, TauWPDecoratorGNNCfg
-    tool_accs = [
-        TauVertexedClusterDecoratorCfg(flags),
-        TauGNNEvaluatorCfg(flags, 0),
-        TauWPDecoratorGNNCfg(flags, 0),
-    ]
+    if flags.Reco.EnableTau:
+        from tauRec.TauToolHolder import TauVertexedClusterDecoratorCfg, TauGNNEvaluatorCfg, TauWPDecoratorGNNCfg
+        tool_accs = [
+            TauVertexedClusterDecoratorCfg(flags),
+            TauGNNEvaluatorCfg(flags, 0),
+            TauWPDecoratorGNNCfg(flags, 0),
+        ]
 
-    tools = []
-    for tool_acc in tool_accs:
-        tools.append(tool_acc.popPrivateTools())
-        tools[-1].inAOD = True
-        acc.merge(tool_acc, seq_name)
-        acc.addPublicTool(tools[-1])
+        tools = []
+        for tool_acc in tool_accs:
+            tools.append(tool_acc.popPrivateTools())
+            tools[-1].inAOD = True
+            acc.merge(tool_acc, seq_name)
+            acc.addPublicTool(tools[-1])
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    acc.addEventAlgo(CompFactory.TauAODRunnerAlg(
-        name='TrigTauMonitoring_TauJets_TauIDDecorator',
-        Key_tauContainer='TauJets',
-        Key_pi0ClusterInputContainer='',
-        Key_tauOutputContainer='TTMTauJets',
-        Key_pi0OutputContainer='',
-        Key_neutralPFOOutputContainer='',
-        Key_chargedPFOOutputContainer='',
-        Key_hadronicPFOOutputContainer='',
-        Key_tauTrackOutputContainer='',
-        Key_vertexOutputContainer='',
-        officialTools=tools,
-    ), sequenceName=seq_name)
+            from AthenaConfiguration.ComponentFactory import CompFactory
+            acc.addEventAlgo(CompFactory.TauAODRunnerAlg(
+                name='TrigTauMonitoring_TauJets_TauIDDecorator',
+                Key_tauContainer='TauJets',
+                Key_pi0ClusterInputContainer='',
+                Key_tauOutputContainer='TTMTauJets',
+                Key_pi0OutputContainer='',
+                Key_neutralPFOOutputContainer='',
+                Key_chargedPFOOutputContainer='',
+                Key_hadronicPFOOutputContainer='',
+                Key_tauTrackOutputContainer='',
+                Key_vertexOutputContainer='',
+                officialTools=tools,
+            ), sequenceName=seq_name)
 
 
     # The following class will make a sequence, configure the base monitoring infrastructure

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolAddressProviderSvc.cxx
@@ -29,7 +29,7 @@
 //________________________________________________________________________________
 AthenaPoolAddressProviderSvc::AthenaPoolAddressProviderSvc(const std::string& name, ISvcLocator* pSvcLocator) :
 	base_class(name, pSvcLocator),
-	m_metaDataStore("MetaDataStore", name),
+	m_metaDataStore("StoreGateSvc/MetaDataStore", name),
 	m_clidSvc("ClassIDSvc", name),
 	m_guid() {
 }

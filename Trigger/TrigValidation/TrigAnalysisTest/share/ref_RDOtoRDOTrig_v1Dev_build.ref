@@ -170,6 +170,26 @@ HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetL_L1ADVAET:
     5: 6
     6: 6
     7: 36
+HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetL_L1All:
+  eventCount: 3
+  stepCounts:
+    0: 20
+    1: 20
+    2: 20
+    3: 20
+    4: 20
+    5: 20
+    6: 20
+    7: 3
+  stepFeatures:
+    0: 28
+    1: 21
+    2: 50
+    3: 20
+    4: 11
+    5: 11
+    6: 11
+    7: 123
 HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetM_L1ADVAEL:
   eventCount: 3
   stepCounts:
@@ -4259,9 +4279,13 @@ HLT_e20_lhtight_ivarloose_L12eEM9:
     4: 6
     5: 6
     6: 3
+HLT_e20_lhtight_ivarloose_L1ZAFB-04DPHIM-eEM18M:
+  eventCount: 0
 HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M:
   eventCount: 0
 HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHIM-eEM18M:
+  eventCount: 0
+HLT_e20_lhtight_ivarloose_L1eEM18M_jEM25:
   eventCount: 0
 HLT_e20_lhvloose_L1eEM18L:
   eventCount: 4
