@@ -11,19 +11,18 @@
 #ifndef PIXELDCSTEMPDATA_H
 #define PIXELDCSTEMPDATA_H
 
+#include "PixelConditionsData/SingleConditionsDatum.h"
+
 #include "AthenaKernel/CLASS_DEF.h"
-#include <unordered_map>
 
 #include "AthenaKernel/CondCont.h"
-
 class PixelDCSTempData {
   public:
-    void setTemperature(const int chanNum, const float value);
-    float getTemperature(const int chanNum) const;
-
+    void setTemperature(int chanNum, float value){m_impl.setValue(chanNum, value);}
+    float getTemperature(int chanNum) const{ return m_impl.getValue(chanNum);}
   private:
-    typedef std::unordered_map<int, float> FloatConditions;
-    FloatConditions  m_temperature;
+    //class template parameters: lo limit, hi limit, default, invalid
+    SingleConditionsDatum<float, -1000.f, 1000.f, -7.f, -7.f> m_impl;
 };
 
 CLASS_DEF( PixelDCSTempData , 345932822 , 1 )
