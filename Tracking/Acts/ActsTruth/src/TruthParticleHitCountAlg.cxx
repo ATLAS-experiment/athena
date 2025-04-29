@@ -62,6 +62,7 @@ namespace ActsTrk
      ATH_CHECK( m_trackingGeometryTool.retrieve() );
      ATH_CHECK( m_pixelClustersToTruth.initialize() );
      ATH_CHECK( m_stripClustersToTruth.initialize() );
+     ATH_CHECK( m_hgtdClustersToTruth.initialize() );
 
      ATH_CHECK( m_truthHitCountsOut.initialize() );
 
@@ -114,6 +115,10 @@ namespace ActsTrk
        ATH_MSG_ERROR("No strip clusterss for key " << m_stripClustersToTruth.key() );
        return StatusCode::FAILURE;
     }
+    SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> hgtdClustersToTruthAssociation = SG::makeHandle(m_hgtdClustersToTruth, ctx);
+    if(!hgtdClustersToTruthAssociation.isValid()) {
+       ATH_MSG_DEBUG("No HGTD clusterss for key " << m_hgtdClustersToTruth.key() );
+    }
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
@@ -121,6 +126,7 @@ namespace ActsTrk
        measurement_to_truth_association_maps{};
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();
+    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation.cptr();
     ATH_MSG_DEBUG("Measurement association entries: "
                   << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]->size()
                   << " + " << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]->size());
