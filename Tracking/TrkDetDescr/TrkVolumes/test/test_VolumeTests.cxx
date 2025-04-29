@@ -43,10 +43,8 @@ void   test_TrapezoidVolumeBounds() {
    Amg::Transform3D rotation( rotation_matrix);
    Amg::Transform3D transform = translation * rotation;
 
-   const std::vector<const Trk::Surface*>*
-      bound_surfaces=bounds.decomposeToSurfaces(transform);
-   BOOST_CHECK( bound_surfaces != nullptr);
-   BOOST_CHECK( bound_surfaces->size() == 6 );
+   std::vector<std::unique_ptr<Trk::Surface>> bound_surfaces=bounds.decomposeToSurfaces(transform);
+   BOOST_CHECK( bound_surfaces.size() == 6 );
    // reference
    double gamma = (bounds.alpha() - 0.5 * M_PI);
    double hy = bounds.halflengthY();
@@ -71,7 +69,7 @@ void   test_TrapezoidVolumeBounds() {
    BOOST_TEST_MESSAGE( "center-of-gravity "
                        << center_of_gravity[0] << " " << center_of_gravity[1] << " " << center_of_gravity[2]);
    unsigned int surf_i=0;
-   for(const Trk::Surface* a_surface : *bound_surfaces) {
+   for(const std::unique_ptr<Trk::Surface>& a_surface : bound_surfaces) {
       unsigned int counter=0;
       Amg::Vector3D surface_center=Amg::Vector3D::Zero();
       unsigned int corner_i=0;
@@ -307,23 +305,24 @@ void   test_volumeBounds(const T &volume_bounds, const Amg::RotationMatrix3D &ro
    Amg::Transform3D translation(center);
    Amg::Transform3D transform( translation * Amg::Transform3D(rotation));
 
-   Trk::Volume volume(std::make_unique<Amg::Transform3D>(transform).release(),
-                      std:: make_unique<T>(volume_bounds).release());
-   const std::vector<const Trk::Surface*>* surfaces =
+   Trk::Volume volume(std::make_unique<Amg::Transform3D>(transform),
+                      std::make_shared<T>(volume_bounds));
+
+   std::vector<std::unique_ptr<Trk::Surface>> surfaces =
       volume.volumeBounds().decomposeToSurfaces(volume.transform());
 
    AvVector vertex_sum=std::make_pair(Amg::Vector3D::Zero(), 0u);
    std::vector<std::pair<Amg::Vector3D, unsigned int> > surface_vertex_sum;
-   surface_vertex_sum.resize(surfaces->size());
+   surface_vertex_sum.resize(surfaces.size());
    std::fill(surface_vertex_sum.begin(),surface_vertex_sum.end(),vertex_sum);
 
    bool all_passed=true;
    // test that surfaces are contained in volume
    unsigned int surf_i=0;
    --surf_i;
-   for (const Trk::Surface* a_surface : *surfaces) {
+   for (const std::unique_ptr<Trk::Surface>& a_surface : surfaces) {
       ++surf_i;
-      bool passed = checkSurface(&volume, a_surface, &surface_vertex_sum.at(surf_i));
+      bool passed = checkSurface(&volume, a_surface.get(), &surface_vertex_sum.at(surf_i));
       vertex_sum.first += surface_vertex_sum.at(surf_i).first;
       vertex_sum.second += surface_vertex_sum.at(surf_i).second;
 
@@ -341,10 +340,10 @@ void   test_volumeBounds(const T &volume_bounds, const Amg::RotationMatrix3D &ro
    // test that normals point outwards
    surf_i=0u;
    --surf_i;
-   for (const Trk::Surface* a_surface : *surfaces) {
+   for (const std::unique_ptr<Trk::Surface>& a_surface : surfaces) {
       ++surf_i;
       if (!a_surface
-          || dynamic_cast<const Trk::CylinderSurface *>(a_surface)
+          || dynamic_cast<const Trk::CylinderSurface *>(a_surface.get())
           || surface_vertex_sum.at(surf_i).second==0u) continue;
 
       Amg::Vector3D surface_center = surface_vertex_sum.at(surf_i).first/surface_vertex_sum.at(surf_i).second;
@@ -358,8 +357,8 @@ void   test_volumeBounds(const T &volume_bounds, const Amg::RotationMatrix3D &ro
 
    if (!all_passed) {
       std::cout << volume << std::endl;
-      for (const Trk::Surface* a_surface : *surfaces) {
-         dumpSurface(a_surface, nullptr, &volume);
+      for (const std::unique_ptr<Trk::Surface>& a_surface : surfaces) {
+         dumpSurface(a_surface.get(), nullptr, &volume);
       }
    }
 }

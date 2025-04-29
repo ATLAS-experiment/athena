@@ -488,7 +488,7 @@ bool InDet::InDetTrackHoleSearchTool::getMapOfHits(const EventContext& ctx,
     ATH_MSG_DEBUG("Search for dead modules after the last Si measurement");
     if (m_extendedListOfHoles || m_cosmic) ATH_MSG_DEBUG("Search for extended list of holes");
 
-    Trk::CylinderVolumeBounds* cylinderBounds = new Trk::CylinderVolumeBounds(560, 2750);
+    auto cylinderBounds = std::make_shared<Trk::CylinderVolumeBounds>(560, 2750);
     // don't delete the cylinderBounds -> it's taken care of by Trk::VOlume (see Trk::SharedObject)
     Trk::Volume* boundaryVol = new Trk::Volume(nullptr, cylinderBounds);
     // extrapolate this parameter blindly to search for more Si hits (not very fast, I know)

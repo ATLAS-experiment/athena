@@ -300,15 +300,15 @@ bool TrackPropagationHelper::makePointsCharged( std::vector<Amg::Vector3D >& poi
     //get individual surfaces
 
     // TODO - optimise this!
-    const std::vector<const Trk::Surface*>* bsurfs =
+    const std::vector<std::unique_ptr<Trk::Surface>> bsurfs =
       const_cast<Trk::VolumeBounds&>(volume->volumeBounds())
         .decomposeToSurfaces(volume->transform());
 
-    if (bsurfs){
-      messageVerbose("Has this many surfaces:"+str(bsurfs->size()));
+    if (!bsurfs.empty()){
+      messageVerbose("Has this many surfaces:"+str(bsurfs.size()));
 
-      std::vector< const Trk::Surface * >::const_iterator bSurfsIt = bsurfs->begin();
-      for (;bSurfsIt!= bsurfs->end(); ++bSurfsIt){
+      auto bSurfsIt = bsurfs.begin();
+      for (;bSurfsIt!= bsurfs.end(); ++bSurfsIt){
 
         messageVerbose("Extrap value:"+str((extrapolator)));
         messageVerbose("trackParam:"+str((trackParam)));

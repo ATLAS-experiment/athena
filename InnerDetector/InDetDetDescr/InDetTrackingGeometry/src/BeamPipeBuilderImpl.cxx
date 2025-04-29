@@ -86,7 +86,7 @@ std::unique_ptr<const std::vector<Trk::CylinderLayer*> > InDet::BeamPipeBuilderI
                   <<  beamPipeTransform.translation().y() << ","
                   <<  beamPipeTransform.translation().y());
 
-  Trk::CylinderBounds* beamPipeBounds    = new Trk::CylinderBounds(beamPipeRadius, m_beamPipeHalflength);
+  auto beamPipeBounds    = std::make_shared<Trk::CylinderBounds>(beamPipeRadius, m_beamPipeHalflength);
   ATH_MSG_VERBOSE("BeamPipe bounds constructed as : " << (*beamPipeBounds) );
 
   // the material

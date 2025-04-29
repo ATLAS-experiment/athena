@@ -112,26 +112,20 @@ Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D& htrans)
 // construct rectangle module
 Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, double halephi, double haleta)
   : Trk::Surface(htrans)
-  , m_bounds(std::make_shared<Trk::RectangleBounds>(halephi, haleta))
+  , m_bounds(std::make_shared<const Trk::RectangleBounds>(halephi, haleta))
 {}
 
 // construct trapezoidal module with parameters
 Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, double minhalephi, double maxhalephi, double haleta)
   : Trk::Surface(htrans)
-  , m_bounds(std::make_shared<Trk::TrapezoidBounds>(minhalephi, maxhalephi, haleta))
-{}
-
-// construct with bounds
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, const Trk::SurfaceBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
+  , m_bounds(std::make_shared<const Trk::TrapezoidBounds>(minhalephi, maxhalephi, haleta))
 {}
 
 // construct module with shared boundaries
 Trk::PlaneSurface::PlaneSurface(
     const Amg::Transform3D & htrans,
-    const std::shared_ptr<const Trk::SurfaceBounds>& tbounds)
-    : Trk::Surface(htrans), m_bounds(tbounds) {}
+    std::shared_ptr<const Trk::SurfaceBounds> tbounds)
+    : Trk::Surface(htrans), m_bounds(std::move(tbounds)) {}
 
 bool
 Trk::PlaneSurface::operator==(const Trk::Surface& sf) const

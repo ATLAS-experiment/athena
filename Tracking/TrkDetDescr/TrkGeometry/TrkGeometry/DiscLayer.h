@@ -51,7 +51,7 @@ public:
 
   /**Constructor with DiscSurface components and MaterialProperties */
   DiscLayer(const Amg::Transform3D& transform,
-            DiscBounds* dbounds,
+            std::shared_ptr<DiscBounds> dbounds,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
             std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -67,7 +67,7 @@ public:
   /**Constructor with DiscSurface components and pointer to SurfaceArray
    * (passing ownership) */
   DiscLayer(const Amg::Transform3D& transform,
-            DiscBounds* dbounds,
+            std::shared_ptr<DiscBounds> dbounds,
             std::unique_ptr<SurfaceArray> surfaceArray,
             double isontolerance = 0.,
             std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -77,7 +77,7 @@ public:
   /**Constructor with DiscSurface components,
      MaterialProperties and pointer SurfaceArray (passing ownership) */
   DiscLayer(const Amg::Transform3D& transform,
-            DiscBounds* dbounds,
+            std::shared_ptr<DiscBounds> dbounds,
             std::unique_ptr<SurfaceArray> surfaceArray,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,

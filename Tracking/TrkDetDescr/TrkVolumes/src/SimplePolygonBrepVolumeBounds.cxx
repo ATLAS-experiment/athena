@@ -75,8 +75,8 @@ Trk::SimplePolygonBrepVolumeBounds::SimplePolygonBrepVolumeBounds(
     Amg::Translation3D(Amg::Vector3D(0.5 * (xmin + xmax), 0., 0.)) *
     Amg::Translation3D(Amg::Vector3D(0., 0.5 * (ymin + ymax), 0.)));
   m_envelope = new Trk::Volume(
-    new Amg::Transform3D(transXY),
-    new Trk::CuboidVolumeBounds(ehalfX, ehalfY, m_halfZ));
+    std::make_unique<Amg::Transform3D>(transXY),
+    std::make_shared<Trk::CuboidVolumeBounds>(ehalfX, ehalfY, m_halfZ));
 
   processSubVols();
 }
@@ -117,8 +117,8 @@ Trk::SimplePolygonBrepVolumeBounds::SimplePolygonBrepVolumeBounds(
     Amg::Translation3D(Amg::Vector3D(0.5 * (xmin + xmax), 0., 0.)) *
     Amg::Translation3D(Amg::Vector3D(0., 0.5 * (ymin + ymax), 0.)));
   m_envelope = new Trk::Volume(
-    new Amg::Transform3D(transXY),
-    new Trk::CuboidVolumeBounds(ehalfX, ehalfY, m_halfZ));
+    std::make_unique<Amg::Transform3D>(transXY),
+    std::make_shared<Trk::CuboidVolumeBounds>(ehalfX, ehalfY, m_halfZ));
 
   processSubVols();
 }
@@ -166,52 +166,50 @@ Trk::SimplePolygonBrepVolumeBounds::operator=(
   return *this;
 }
 
-const std::vector<const Trk::Surface*>*
+std::vector<std::unique_ptr<Trk::Surface>>
   Trk::SimplePolygonBrepVolumeBounds::decomposeToSurfaces
-  (const Amg::Transform3D& transform) 
+  (const Amg::Transform3D& transform)
 {
-  std::vector<const Trk::Surface*>* retsf =
-    new std::vector<const Trk::Surface*>;
+  auto retsf = std::vector<std::unique_ptr<Trk::Surface>>();
 
   // face surfaces xy
   //  (1) - at negative local z
   Trk::PlaneSurface xymPlane(
     Amg::Transform3D(
       transform * Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ))),
-    new Trk::RectangleBounds(m_halfX, m_halfY));
+      std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY));
   Trk::VolumeExcluder* volExcl = new Trk::VolumeExcluder(new Trk::Volume(
     *m_combinedVolume,
     Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ)))));
-  retsf->push_back(new Trk::SubtractedPlaneSurface(xymPlane, volExcl, true));
+  retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(xymPlane, volExcl, true));
   //  (2) - at positive local z
   Trk::PlaneSurface xyPlane(
-    Amg::Transform3D(
-      transform * Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ))),
-    new Trk::RectangleBounds(m_halfX, m_halfY));
+    Amg::Transform3D(transform * Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ))),
+    std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY));
   volExcl = new Trk::VolumeExcluder(new Trk::Volume(
     *m_combinedVolume,
     Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ)))));
-  retsf->push_back(new Trk::SubtractedPlaneSurface(xyPlane, volExcl, true));
+  retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(xyPlane, volExcl, true));
   // loop over xy vertices
   //  (3)
   for (unsigned int iv = 0; iv < m_xyVtx.size(); iv++) {
     if (iv != m_xyVtx.size() - 1)
-      retsf->push_back(sideSurf(transform, iv, iv + 1));
+      retsf.push_back(sideSurf(transform, iv, iv + 1));
     else
-      retsf->push_back(sideSurf(transform, iv, 0));
+      retsf.push_back(sideSurf(transform, iv, 0));
   }
 
   return retsf;
 }
 
 // faces in xy
-Trk::PlaneSurface*
+std::unique_ptr<Trk::PlaneSurface>
 Trk::SimplePolygonBrepVolumeBounds::sideSurf(
   const Amg::Transform3D& transform,
   unsigned int iv1,
   unsigned int iv2) const
 {
-  Trk::PlaneSurface* plane = nullptr;
+  std::unique_ptr<Trk::PlaneSurface> plane = nullptr;
 
   double xdif = m_xyVtx[iv2].first - m_xyVtx[iv1].first;
   double ydif = m_xyVtx[iv2].second - m_xyVtx[iv1].second;
@@ -236,8 +234,7 @@ Trk::SimplePolygonBrepVolumeBounds::sideSurf(
     transform * Amg::Translation3D(pos) *
     Amg::AngleAxis3D(phi, Amg::Vector3D(0., 0., 1.)) *
     Amg::AngleAxis3D(-ori * 90 * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.)));
-  plane =
-    new Trk::PlaneSurface(tr, new Trk::RectangleBounds(0.5 * xsize, m_halfZ));
+  plane = std::make_unique<Trk::PlaneSurface>(tr, std::make_shared<Trk::RectangleBounds>(0.5 * xsize, m_halfZ));
 
   // verify position of vertices - uncomment for debugging
   // if
@@ -277,10 +274,10 @@ Trk::SimplePolygonBrepVolumeBounds::processSubVols()
     vertices.push_back(triangles[i + 1]);
     vertices.push_back(triangles[i + 2]);
     Trk::Volume* newVol =
-      new Trk::Volume(nullptr, new Trk::PrismVolumeBounds(vertices, m_halfZ));
+      new Trk::Volume(nullptr, std::make_shared<Trk::PrismVolumeBounds>(vertices, m_halfZ));
     if (cVol)
       cVol = new Trk::Volume(
-        nullptr, new Trk::CombinedVolumeBounds(cVol, newVol, false));
+        nullptr, std::make_shared<Trk::CombinedVolumeBounds>(cVol, newVol, false));
     else
       cVol = newVol;
     vertices.clear();
@@ -323,7 +320,7 @@ Trk::SimplePolygonBrepVolumeBounds::dump(std::ostream& sl) const
 //////////////////////////////////////////////////////////////////////////
 
 bool
-Trk::SimplePolygonBrepVolumeBounds::Xor(bool x, bool y) 
+Trk::SimplePolygonBrepVolumeBounds::Xor(bool x, bool y)
 // XOR: Arguments are negated to ensure that they are 0/1. Then the bitwise Xor
 // operator may apply.
 {

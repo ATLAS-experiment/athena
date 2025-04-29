@@ -1039,14 +1039,14 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
             if (halfX1 == halfX2 && halfY1 == halfY2)
                 shape = "Box";
             if (shape == "Box") {
-                auto envBounds = std::make_unique<Trk::CuboidVolumeBounds>(halfX1, halfY1, halfZ);
+                auto envBounds = std::make_shared<Trk::CuboidVolumeBounds>(halfX1, halfY1, halfZ);
                 // station components
                 confinedVolumes = m_muonStationTypeBuilder->processBoxStationComponents(cv, *envBounds, cache);
                 if (!confinedVolumes) {
                     confinedLayers = m_muonStationTypeBuilder->processBoxComponentsArbitrary(cv, *envBounds, cache);
                 }
                 // enveloping volume
-                envelope = std::make_unique<Trk::Volume>(nullptr, envBounds.release());
+                envelope = std::make_unique<Trk::Volume>(nullptr, std::move(envBounds));
             } else if (shape == "Trd") {
                 std::unique_ptr<Trk::TrapezoidVolumeBounds> envBounds{};
                 Amg::Transform3D transf{Amg::Transform3D::Identity()};
@@ -1065,7 +1065,7 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
                     // station components
                     confinedVolumes = m_muonStationTypeBuilder->processTrdStationComponents(cv, *envBounds, cache);
                     // enveloping volume
-                    envelope = std::make_unique<Trk::Volume>(makeTransform(transf), envBounds.release());
+                    envelope = std::make_unique<Trk::Volume>(makeTransform(transf), std::move(envBounds));
                 }
             }
 

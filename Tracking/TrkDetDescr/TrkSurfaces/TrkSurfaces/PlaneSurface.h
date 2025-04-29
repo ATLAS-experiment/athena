@@ -121,13 +121,10 @@ public:
                double maxhalephi,
                double haleta);
 
-  /** Constructor for Planes with provided Bounds - ownership of bounds
-   * is passed*/
-  PlaneSurface(const Amg::Transform3D & htrans, const Trk::SurfaceBounds* rbounds);
 
   /** Constructor for Planes with shared object*/
   PlaneSurface(const Amg::Transform3D& htrans,
-               const std::shared_ptr<const Trk::SurfaceBounds>& sbounds);
+               std::shared_ptr<const Trk::SurfaceBounds> sbounds);
 
   /**Equality operator*/
   virtual bool operator==(const Surface& sf) const override;

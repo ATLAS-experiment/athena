@@ -525,9 +525,9 @@ TrackSystemController::TrackSystemController(IVP1System * sys)
   m_d->ui_int.checkBox_selsingle_printinfo->setChecked(true);
   
   // Since TrkVolumesSvc isn't working anymore, hardcode values. (Remove when we move to new extrapolator)
-  m_d->calorimeterEntryLayer      = new Trk::Volume(nullptr, new Trk::CylinderVolumeBounds(1100.0, 3200.0));
-  m_d->muonSpectrometerEntryLayer = new Trk::Volume(nullptr, new Trk::CylinderVolumeBounds(4250.0, 6779.0));
-  m_d->muonSpectrometerExitLayer  = new Trk::Volume(nullptr, new Trk::CylinderVolumeBounds(15000.0, 21000.0)); // FIXME! Put in correct values. EJWM
+  m_d->calorimeterEntryLayer      = new Trk::Volume(nullptr, std::make_shared<Trk::CylinderVolumeBounds>(1100.0, 3200.0));
+  m_d->muonSpectrometerEntryLayer = new Trk::Volume(nullptr, std::make_shared<Trk::CylinderVolumeBounds>(4250.0, 6779.0));
+  m_d->muonSpectrometerExitLayer  = new Trk::Volume(nullptr, std::make_shared<Trk::CylinderVolumeBounds>(15000.0, 21000.0)); // FIXME! Put in correct values. EJWM
   initLastVars();
 }
 

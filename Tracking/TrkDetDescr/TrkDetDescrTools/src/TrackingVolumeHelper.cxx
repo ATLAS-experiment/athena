@@ -432,7 +432,7 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
 
     // build volume envelope
     std::vector<std::shared_ptr<TrackingVolume>> vols;
-    std::unique_ptr<CylinderVolumeBounds> envBounds{};
+    std::shared_ptr<CylinderVolumeBounds> envBounds{};
     std::unique_ptr<Amg::Transform3D> envTransf{};
     std::unique_ptr<BinnedArray<TrackingVolume>>  subVols{};
     vols.push_back(firstVol);
@@ -440,7 +440,7 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
     std::vector<std::shared_ptr<TrackingVolume>> envGlueNegXY{}, envGluePosXY{}, envGlueOuter, envGlueInner{};
 
     if (firstFace==positiveFaceXY) {
-        envBounds =  std::make_unique<CylinderVolumeBounds>(cyl1->innerRadius(),
+        envBounds =  std::make_shared<CylinderVolumeBounds>(cyl1->innerRadius(),
                                                                  cyl1->outerRadius(),
                                                                  cyl1->halflengthZ() + cyl2->halflengthZ());
 
@@ -455,7 +455,7 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
         envGlueOuter = vols;
         envGlueInner = vols;
     } else if (firstFace==negativeFaceXY) {
-        envBounds =  std::make_unique<CylinderVolumeBounds>(cyl1->innerRadius(),
+        envBounds =  std::make_shared<CylinderVolumeBounds>(cyl1->innerRadius(),
                                                                  cyl1->outerRadius(),
                                                                  cyl1->halflengthZ()+cyl2->halflengthZ());
         const Amg::Vector3D center{firstVol->center()};
@@ -477,11 +477,11 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
         envGlueInner = vols;
     } else if (firstFace==tubeInnerCover) {
         if (secondFace==tubeOuterCover){
-            envBounds =  std::make_unique<CylinderVolumeBounds>(cyl2->innerRadius(),
+            envBounds =  std::make_shared<CylinderVolumeBounds>(cyl2->innerRadius(),
                                                                      cyl1->outerRadius(),
                                                                      cyl1->halflengthZ());
         } else {
-            envBounds =  std::make_unique<CylinderVolumeBounds>(cyl1->outerRadius(),
+            envBounds =  std::make_shared<CylinderVolumeBounds>(cyl1->outerRadius(),
                                                                      cyl1->halflengthZ());
         }
         if (!firstVol->transform().isApprox(Amg::Transform3D::Identity())) {
@@ -501,7 +501,7 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
         envGlueOuter.push_back(firstVol);
         envGlueInner.push_back(secondVol);
     } else {
-        envBounds =  std::make_unique<CylinderVolumeBounds>(cyl1->innerRadius(),
+        envBounds =  std::make_shared<CylinderVolumeBounds>(cyl1->innerRadius(),
                                                                  cyl2->outerRadius(),
                                                                  cyl1->halflengthZ());
         if(!firstVol->transform().isApprox(Amg::Transform3D::Identity())){
@@ -518,8 +518,8 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
     }
 
     // create the enveloping volume
-    enclosingVolume  =  std::make_unique<TrackingVolume>(envTransf.release(),
-                                                         envBounds.release(),
+    enclosingVolume  =  std::make_unique<TrackingVolume>(std::move(envTransf),
+                                                         envBounds,
                                                          *firstVol,
                                                          nullptr, subVols.release(), name);
 

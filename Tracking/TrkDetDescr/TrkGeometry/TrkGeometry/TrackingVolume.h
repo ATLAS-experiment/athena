@@ -56,7 +56,6 @@ class VolumeBounds;
 typedef BinnedArray<Layer> LayerArray;
 typedef BinnedArray<TrackingVolume> TrackingVolumeArray;
 
-// For local spans (typedef to make it easier for C++20 std:: one)
 template<class T>
 using ArraySpan = std::span<T>;
 
@@ -135,8 +134,8 @@ public:
 
   /** Constructor for a full equipped Tracking Volume
   - explicitely  ======> 1 a) static confinement */
-  TrackingVolume(Amg::Transform3D* htrans,
-                 VolumeBounds* volbounds,
+  TrackingVolume(std::unique_ptr<Amg::Transform3D> htrans,
+                 std::shared_ptr<VolumeBounds> volbounds,
                  LayerArray* subLayers = nullptr,
                  TrackingVolumeArray* subVolumes = nullptr,
                  const std::string& volumeName = "undefined");
@@ -151,8 +150,8 @@ public:
 
   /** Constructor for a full equipped Tracking Volume
     - mixed  ======> 3 a) static confinement */
-  TrackingVolume(Amg::Transform3D* htrans,
-                 VolumeBounds* volbounds,
+  TrackingVolume(std::unique_ptr<Amg::Transform3D> htrans,
+                 std::shared_ptr<VolumeBounds> volbounds,
                  const Material& matprop,
                  LayerArray* subLayers = nullptr,
                  TrackingVolumeArray* subVolumes = nullptr,
@@ -161,8 +160,8 @@ public:
   /** Constructor for a full equipped Tracking Volume with detached subvolumes
     -  mixed =======> 1 b) detached volumes */
   TrackingVolume(
-    Amg::Transform3D* htrans,
-    VolumeBounds* volbounds,
+    std::unique_ptr<Amg::Transform3D> htrans,
+    std::shared_ptr<VolumeBounds> volbounds,
     const Material& matprop,
     std::vector<DetachedTrackingVolume*>* detachedSubVolumes,
     const std::string& volumeName = "undefined");
@@ -177,8 +176,8 @@ public:
 
   /** Constructor for a full equipped Tracking Volume with unordered subvolumes
     - mixed =======> 1 d) unordered volumes  */
-  TrackingVolume(Amg::Transform3D* htrans,
-                 VolumeBounds* volbounds,
+  TrackingVolume(std::unique_ptr<Amg::Transform3D> htrans,
+                 std::shared_ptr<VolumeBounds> volbounds,
                  const Material& matprop,
                  const std::vector<TrackingVolume*>* unorderedSubVolumes,
                  const std::string& volumeName = "undefined");
@@ -192,8 +191,8 @@ public:
 
   /** Constructor for a full equipped Tracking Volume with arbitrary layers
     -  mixed =======> 1 c) arbitrarily oriented layers */
-  TrackingVolume(Amg::Transform3D* htrans,
-                 VolumeBounds* volbounds,
+  TrackingVolume(std::unique_ptr<Amg::Transform3D> htrans,
+                 std::shared_ptr<VolumeBounds> volbounds,
                  const Material& matprop,
                  const std::vector<Layer*>* arbitraryLayers,
                  const std::string& volumeName = "undefined");
@@ -208,8 +207,8 @@ public:
   /** Constructor for a full equipped Tracking Volume with arbitrary layers AND
     subVolumes -
     -  mixed =======> 1 e) unordered layers AND unordered subvolumes */
-  TrackingVolume(Amg::Transform3D* htrans,
-                 VolumeBounds* volbounds,
+  TrackingVolume(std::unique_ptr<Amg::Transform3D> htrans,
+                 std::shared_ptr<VolumeBounds> volbounds,
                  const std::vector<Layer*>* arbitraryLayers,
                  const std::vector<TrackingVolume*>* unorderedSubVolumes,
                  const Material& matprop,
@@ -300,7 +299,7 @@ public:
 
   /** Return the subLayer array */
   const LayerArray* confinedLayers() const;
-  
+
   /** Return the subLayer array */
   LayerArray* confinedLayers();
 
@@ -322,7 +321,7 @@ public:
  /** Return detached subVolumes - not the ownership */
   ArraySpan<DetachedTrackingVolume const * const>  confinedDetachedVolumes() const;
   ArraySpan<DetachedTrackingVolume * const>  confinedDetachedVolumes();
-  
+
   /** Return unordered subVolumes - not the ownership */
   ArraySpan<TrackingVolume const * const> confinedDenseVolumes() const;
   ArraySpan<TrackingVolume * const> confinedDenseVolumes();
@@ -453,15 +452,15 @@ private:
   //!< boundary Surfaces
   std::vector<std::shared_ptr<BoundarySurface<TrackingVolume>>> m_boundarySurfaces{};
   ////!< Array of Layers inside the Volume
-  LayerArray* m_confinedLayers; 
+  LayerArray* m_confinedLayers;
   //!< Array of Volumes inside the Volume
   TrackingVolumeArray* m_confinedVolumes;
   //!< Detached subvolumes
   const std::vector<DetachedTrackingVolume*>* m_confinedDetachedVolumes;
-  
-  
+
+
   //!< Additionally, Unordered subvolumes (we ownd them)
-  const std::vector<TrackingVolume*>* m_confinedDenseVolumes; 
+  const std::vector<TrackingVolume*>* m_confinedDenseVolumes;
   //(b)
   //!< Additionally, Unordered Layers inside the Volume (we own them)
   const std::vector<Layer*>* m_confinedArbitraryLayers;

@@ -885,7 +885,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
   // layer creation; deletes mergeBA in baseclass 'Layer' upon destruction
   Trk::DiscLayer* layer =
     new Trk::DiscLayer(transf,
-                       new Trk::DiscBounds(rsteps.front(), rsteps.back()),
+                       std::make_shared<Trk::DiscBounds>(rsteps.front(), rsteps.back()),
                        std::move(mergeBA),
                        // get the layer material from the first merged layer
                        *(inputDiscs[0]->layerMaterialProperties()),

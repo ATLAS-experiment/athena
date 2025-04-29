@@ -795,10 +795,10 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
 
     ATH_MSG_VERBOSE("                Surface: ");
     if (pbnd_trap) {
-        psrf = new Trk::PlaneSurface(xf, pbnd_trap);
+        psrf = new Trk::PlaneSurface(xf, std::shared_ptr<Trk::TrapezoidBounds> (pbnd_trap));
         ATH_MSG_VERBOSE("trapezoid");
     } else if (pbnd_rtrap) {
-        psrf = new Trk::PlaneSurface(xf, pbnd_rtrap);
+        psrf = new Trk::PlaneSurface(xf, std::shared_ptr<Trk::RotatedTrapezoidBounds>(pbnd_rtrap));
         ATH_MSG_VERBOSE("rotated trapezoid");
     } else {
         ATH_MSG_FATAL("  Invalid boundary: " << *pbnd);
@@ -1806,9 +1806,9 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
     xf.pretranslate(glop);
     Trk::PlaneSurface* psrf = nullptr;
     if (bnd_trap) {
-        psrf = new Trk::PlaneSurface(xf, bnd_trap);
+        psrf = new Trk::PlaneSurface(xf, std::shared_ptr<Trk::TrapezoidBounds>(bnd_trap));
     } else if (bnd_rtrap) {
-        psrf = new Trk::PlaneSurface(xf, bnd_rtrap);
+        psrf = new Trk::PlaneSurface(xf, std::shared_ptr<Trk::RotatedTrapezoidBounds>(bnd_rtrap));
     } else {
         ATH_MSG_WARNING(" no SurfaceBounds bounds for 4D segment found keep old bound ");
         psrf = new Trk::PlaneSurface(phisrf);

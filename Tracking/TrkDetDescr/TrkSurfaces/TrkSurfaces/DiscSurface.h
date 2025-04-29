@@ -94,17 +94,15 @@ public:
               double avephi,
               double stereo = 0.);
 
-  /**Constructor for Discs from HepGeom::Transform3D and DiscBounds
-     - ownership of bounds is passed */
-  DiscSurface(const Amg::Transform3D& htrans, DiscBounds* dbounds);
+  /**Constructor for Discs from Amg::Transform3D and DiscBounds*/
+  DiscSurface(const Amg::Transform3D& htrans, std::shared_ptr<const DiscBounds> dbounds);
 
-  /**Constructor for Discs from HepGeom::Transform3D and DiscTrapezoidalBounds
-     - ownership of bounds is passed */
-  DiscSurface(const Amg::Transform3D& htrans, DiscTrapezoidalBounds* dtbounds);
+  /**Constructor for Discs from Amg::Transform3D and DiscTrapezoidalBounds*/
+  DiscSurface(const Amg::Transform3D& htrans, std::shared_ptr<const DiscTrapezoidalBounds> dtbounds);
 
   /**Constructor for Discs from HepGeom::Transform3D and AnnulusBoundsPC
 	   - ownership of bounds is passed */
-  DiscSurface(const Amg::Transform3D& htrans, AnnulusBoundsPC* annpcbounds);
+  DiscSurface(const Amg::Transform3D& htrans, std::shared_ptr<const AnnulusBoundsPC> annpcbounds);
 
   /// @brief Constructor for Discs from Transform3D and AnnulusBoundsPC
   /// This will use the converting factory in @c AnnulusBoundsPC to
@@ -118,7 +116,8 @@ public:
   /// @note During testing, no conversion of the underlying detector element was implemented.
   ///       This polar coordinate surface will therefore link back to the cartesian detector
   ///       element.
-  DiscSurface(const Amg::Transform3D& htrans, std::unique_ptr<AnnulusBounds> annbounds, const TrkDetElementBase* detElem = nullptr);
+  DiscSurface(const Amg::Transform3D& htrans, const AnnulusBounds& annbounds,
+              const TrkDetElementBase* detElem = nullptr);
 
   /**Constructor for Discs from HepGeom::Transform3D by unique_ptr
    - bounds is not set */

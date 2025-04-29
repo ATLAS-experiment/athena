@@ -24,11 +24,12 @@ Trk::Volume::Volume()
   , m_volumeBounds()
 {}
 
-// constructor with HepGeom::Transform3D
-Trk::Volume::Volume(Amg::Transform3D* htrans, Trk::VolumeBounds* volbounds)
-  : m_transform(htrans)
+// constructor with Amg::Transform3D
+Trk::Volume::Volume(std::unique_ptr<Amg::Transform3D> htrans,
+                    std::shared_ptr<Trk::VolumeBounds> volbounds)
+  : m_transform(std::move(htrans))
   , m_center(nullptr)
-  , m_volumeBounds(volbounds)
+  , m_volumeBounds(std::move(volbounds))
 {}
 
 // copy constructor - will up to now not copy the sub structure!

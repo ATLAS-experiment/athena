@@ -17,12 +17,12 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
-                          Trk::ConeBounds* cbounds,
+                          std::shared_ptr<Trk::ConeBounds> cbounds,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
-  : ConeSurface(transform, cbounds)
+  : ConeSurface(transform, std::move(cbounds))
   , Layer(laymatprop, thickness, std::move(olap), laytyp)
 {}
 
@@ -36,23 +36,23 @@ Trk::ConeLayer::ConeLayer(Trk::ConeSurface* cyl,
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
-                          Trk::ConeBounds* cbounds,
+                          std::shared_ptr<Trk::ConeBounds> cbounds,
                           std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
-  : ConeSurface(transform, cbounds)
+  : ConeSurface(transform, std::move(cbounds))
   , Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
-                          Trk::ConeBounds* cbounds,
+                          std::shared_ptr<Trk::ConeBounds> cbounds,
                           std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
-  : ConeSurface(transform, cbounds)
+  : ConeSurface(transform, std::move(cbounds))
   , Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp)
 {}
 
