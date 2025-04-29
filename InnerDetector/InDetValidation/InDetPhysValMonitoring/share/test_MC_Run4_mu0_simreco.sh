@@ -127,7 +127,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
 
  runIDPVM.py \
     --filesInput $aod \
-    --outputFile idpvm.root \
+    --outputFile ${dcubemon_rec} \
     --doTightPrimary \
     --OnlyTrackingPreInclude \
     --doHitLevelPlots
