@@ -83,8 +83,9 @@ class TauCalibrationConfig (ConfigBlock):
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
+        alg.smearingTool.RecommendationTag = "2025-prerec"
         alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
-        alg.smearingTool.Campaign = "mc21" if config.geometry() is LHCPeriod.Run3 else "mc20"
+        alg.smearingTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -192,6 +193,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                                    'TauEfficiencyCorrectionsAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+            alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
             alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [0]
             alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
             alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
@@ -212,6 +214,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                                    'TauEfficiencyCorrectionsAlgID' + postfix )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+                alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
                 if self.quality=="Loose":
                     JetIDLevel = 7
@@ -243,13 +246,19 @@ class TauWorkingPointConfig (ConfigBlock) :
                                    'TauEfficiencyCorrectionsAlgEvetoFakeTau' + postfix )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
-
+                alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
                 # since all TauSelectionTool config files have loose eRNN, code only this option for now
                 alg.efficiencyCorrectionsTool.EleIDLevel = 2
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
                 alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                 alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
+                # for 2025-prerec, eVeto recommendations are given separately for Loose and Medium RNN 
+                if self.quality=="Loose":
+                    JetIDLevel = 7
+                elif self.quality=="Medium":
+                    JetIDLevel = 8
+                alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel 
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_EvetoFakeTau_eff' + selectionPostfix
                 alg.taus = config.readName (self.containerName)
@@ -264,7 +273,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                                    'TauEfficiencyCorrectionsAlgEvetoTrueTau' + postfix )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
-
+                alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [8]
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
                 alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
