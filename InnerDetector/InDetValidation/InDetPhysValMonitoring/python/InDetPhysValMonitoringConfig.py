@@ -154,6 +154,8 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("JetContainerName", '')
         kwargs.setdefault("FillTrackInJetPlots", False)
 
+    kwargs.setdefault("doPerAuthorPlots",
+                      flags.PhysVal.IDPVM.doPerAuthorPlots)
 
     if flags.Input.isMC and not flags.PhysVal.IDPVM.doRecoOnly:
         kwargs.setdefault("TruthParticleContainerName", "TruthParticles")
@@ -184,8 +186,6 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
                           flags.PhysVal.IDPVM.doTruthOriginPlots)
         kwargs.setdefault("doDuplicatePlots",
                           flags.PhysVal.IDPVM.doDuplicatePlots)
-        kwargs.setdefault("doPerAuthorPlots",
-                          flags.PhysVal.IDPVM.doPerAuthorPlots)
         kwargs.setdefault("doHitLevelPlots",
                           flags.PhysVal.IDPVM.doHitLevelPlots)
 
