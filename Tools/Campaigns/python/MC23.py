@@ -189,13 +189,13 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    from HIRecConfig.HIModeFlags import HIPmode
+    HIPmode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
     flags.Trigger.AODEDMSet = 'AODFULL'
-    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+    flags.Trigger.triggerMenuSetup = 'PhysicsP1_pp_lowMu_run3_v1_TriggerValidation_prescale'
 
 
 def MC23HeavyIons2024NoPileUp(flags): # FIXME This configuration is a placeholder
