@@ -104,7 +104,8 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   if in_view:
 
     verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetPrecision'+flags.Tracking.ActiveConfig.input_name,
-                                                      DataObjects= {('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+                                                      DataObjects= {( 'xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+                                                                    ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'),
                                                                     ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{rois}' ),
                                                                     ( 'TagInfo', 'DetectorStore+ProcessingTags' ), 
                                                                     ( 'TrackCollection', flags.Tracking.ActiveConfig.trkTracks_FTF )} )
