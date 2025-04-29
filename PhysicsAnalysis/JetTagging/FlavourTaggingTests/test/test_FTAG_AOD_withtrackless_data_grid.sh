@@ -10,10 +10,12 @@
 # art-output: *log.
 # art-athena-mt: 8
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA22)")
+
 ATHENA_CORE_NUMBER=4 Reco_tf.py \
 --multithreaded \
 --AMIConfig q449 \
---conditionsTag CONDBR2-BLKPA-2022-13 \
+--conditionsTag $conditions \
 --imf False \
 --CA all:True \
 --preExec="all:flags.BTagging.Trackless=True" \
