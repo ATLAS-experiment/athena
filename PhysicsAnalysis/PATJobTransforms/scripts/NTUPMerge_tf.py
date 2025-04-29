@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## MergeNTUP_tf.py - NTUPLE merger
 
@@ -16,7 +16,6 @@ from PyJobTransforms.trfArgs import addExtraDPDTypes
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from PATJobTransforms.PATTransformUtils import addNTUPMergeSubsteps, addPhysValidationMergeFiles
 
-
 @stdTrfExceptionHandler
 @sigUsrStackTrace
 def main():
@@ -29,15 +28,35 @@ def main():
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
+
     msg.info("%s stopped at %s, tf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
     sys.exit(trf.exitCode)
 
-
 def getTransform():
+    msg.debug("in getTransform...")
+
+    # get the default executor list
     executorSet = set()
-    addNTUPMergeSubsteps(executorSet)
-    trf = transform(executor = executorSet)
+    # instantiate a transform with no steps
+    trf = transform(executor = executorSet, description = 'ATLAS NTUPLE merge and post-processing transform')
+    
+    # add custom merge and post-processing 
+    # steering parameters and get the 'args'
     addPhysValidationMergeFiles(trf.parser)
+    args = trf.parser.parse_args()
+    msg.debug("args:", args)
+
+    # get the modified executor
+    mergeStepSet = set()
+
+    # check if the user used custom parameters
+    # add to the transform the merge and 
+    # post-processing steps conditionally 
+    # based on user's input
+    addNTUPMergeSubsteps(mergeStepSet, skip_post_processing = 'skipPostProcessing' in args)
+    trf.appendToExecutorSet(list(mergeStepSet))
+
+    # additional setup
     addExtraDPDTypes(trf.parser, transform=trf, NTUPMergerArgs = True)
     return trf
 

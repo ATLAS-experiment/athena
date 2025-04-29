@@ -11,35 +11,47 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 from PyJobTransforms.trfArgs import getExtraDPDList
 from PyJobTransforms.trfExe import  NTUPMergeExecutor, POOLMergeExecutor
 
-
+# TODO: it seems this method is not called at all in Athena, 
+# at least from what appears in LXR:
+# https://acode-browser1.usatlas.bnl.gov/lxr/search?%21v=head&_filestring=&_string=addPhysValidationFiles
 def addPhysValidationFiles(parser):
-    # Better to somehow auto-import this from PhysicsAnalysis/PhysicsValidation/PhysValMonitoring
-    parser.defineArgGroup('Validation Files', 'Physics validation file options')
+    # TODO: Better to somehow auto-import this from PhysicsAnalysis/PhysicsValidation/PhysValMonitoring
+    # Use arggroup to get these arguments in their own sub-section (of --help)
+    parser.defineArgGroup('PhysVal', 'Physics validation files and steering options')
     parser.add_argument('--outputNTUP_PHYSVALFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
                         help='Output physics validation file', group='Validation Files')
     
 def addPhysValidationMergeFiles(parser):
-    # Better to somehow auto-import this from PhysicsAnalysis/PhysicsValidation/PhysValMonitoring
-    parser.defineArgGroup('Validation Files', 'Physics validation file options')
+    # TODO: Better to somehow auto-import this from PhysicsAnalysis/PhysicsValidation/PhysValMonitoring
+    # Use arggroup to get these arguments in their own sub-section (of --help)
+    parser.defineArgGroup('Merge_tf', 'Physics Validation merge job specific options')
     parser.add_argument('--inputNTUP_PHYSVALFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='input'),
                         help='Input physics validation file', group='Validation Files', nargs='+')
     parser.add_argument('--outputNTUP_PHYSVAL_MRGFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
                         help='Output merged physics validation file', group='Validation Files')
+    parser.add_argument('--skipPostProcessing', 
+                        action='store_true', 
+                        help='If given, skip the post-processing step and just do the merging')
 
-def addNTUPMergeSubsteps(executorSet):
+def addNTUPMergeSubsteps(executorSet, skip_post_processing=False):
     # Ye olde NTUPs
     try:
-        # Physics Validation NTUP
-        executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVAL', exe='hadd', inData=['NTUP_PHYSVAL'], outData=['NTUP_PHYSVAL_MRG0'], exeArgs=[]))
-        #add post processing for some Pull histograms in ID track monitoring
-        executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVALPostProc', exe='postProcessIDPVMHistos', inData=['NTUP_PHYSVAL_MRG0'], outData=['NTUP_PHYSVAL_MRG'], exeArgs=[]))
+        if skip_post_processing:
+            msg.info("User requested to SKIP post-processing ('--skipPostProcessing' [%s]), so we'll skip running post-processing.", skip_post_processing)
+            out_data = ['NTUP_PHYSVAL_MRG']
+        else:
+            msg.info("We'll run merging and post-processing (currently implemented only for ID track monitoring).")
+            out_data = ['NTUP_PHYSVAL_MRG0']
+            executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVALPostProc', exe='postProcessIDPVMHistos', inData=['NTUP_PHYSVAL_MRG0'], outData=['NTUP_PHYSVAL_MRG'], exeArgs=[]))
+
+        executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVAL', exe='hadd', inData=['NTUP_PHYSVAL'], outData=out_data, exeArgs=[]))
         # Extra Tier-0 NTUPs
         extraNTUPs = getExtraDPDList(NTUPOnly = True)
         for ntup in extraNTUPs:
-            executorSet.add(NTUPMergeExecutor(name='NTUPLEMerge'+ntup.name.replace('_',''), exe='hadd', inData=[ntup.name], outData=[ntup.name+'_MRG'], exeArgs=[]))
+            executorSet.add(NTUPMergeExecutor(name='NTUPLEMerge'+ntup.name.replace('_',''), exe ='hadd', inData=[ntup.name], outData=[ntup.name+'_MRG'], exeArgs=[]))
     except ImportError as e:
         msg.warning("Failed to get D3PD lists - probably D3PDs are broken in this release: {0}".format(e))
 
