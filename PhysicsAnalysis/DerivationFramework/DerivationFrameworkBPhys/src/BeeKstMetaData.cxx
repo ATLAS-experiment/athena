@@ -137,9 +137,7 @@ namespace DerivationFramework {
     2: All legs in the vertex
     */
     recordPropertyI  ( "isoTargetLegTypes" , 2 ); 
-    recordPropertyVD ( "isoConeSizes"      , { 0.1, 0.15, 0.2, 0.25, 
-                                               0.3, 0.35, 0.4, 0.45,
-                                               0.5 } );
+    recordPropertyVD ( "isoConeSizes"      , { 0.1, 0.2, 0.3, 0.4, 0.5 } );
                                                
     // 0: NoVtx, 1: Primary, 2: Secondary, 3: Pileup, 4: Conversion
     // See: https://acode-browser.usatlas.bnl.gov/lxr/source/athena/Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/VertexType.h?v=21.2#0024
@@ -147,7 +145,7 @@ namespace DerivationFramework {
     recordPropertyVD ( "isoTTVALogChi2CutValues", { 5.0, 0. } );
     recordPropertyVI ( "isoTTVAChi2CutTypes"    , {   2, 0  } );
     recordPropertyVI ( "isoPVTypesForTTVA"      , {   1, 3  } ); 
-    recordPropertyI  ( "isoPVSVAssocType"       , 4           ); // 4 is minA0
+    recordPropertyI  ( "isoPVSVAssocType"       , 2           ); // 2 is minA0
     
     recordPropertyVI( 
       "isoTrackTypes", 
