@@ -812,7 +812,7 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
                     ATH_MSG_ERROR("Track parameters have no covariance attached.");
                 }
 
-                float loc_err = sqrt(Amg::error(trtCircle->localCovariance(), Trk::driftRadius));
+                float loc_err = Amg::error(trtCircle->localCovariance(), Trk::driftRadius);
                 float locR = aTrackParam->parameters()[Trk::driftRadius];
                 float loc = trtCircle->localParameters()[Trk::driftRadius];
 
@@ -827,9 +827,9 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
                 if (m_doShift && m_doStraws) {
                     bool pull_b_fill;
                     double pull_b = -999.;
-                    const double diff_loc_err = (loc_err * loc_err * loc_err * loc_err) - (locR_err * locR_err * locR_err * locR_err);
+                    const double diff_loc_err = std::abs(loc_err-locR_err);
                     if ( diff_loc_err > 0 ) {
-                        pull_b   = (loc - locR) / sqrt(diff_loc_err);
+                        pull_b   = (loc - locR) /diff_loc_err ;
                         pull_b_fill = true;
                     }
                     else pull_b_fill = false;
