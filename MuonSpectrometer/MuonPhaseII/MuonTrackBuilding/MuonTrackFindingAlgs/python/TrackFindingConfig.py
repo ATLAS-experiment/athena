@@ -18,10 +18,7 @@ def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
         segmentKeys+=["MuonSegmentsFromR4"]
     if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
         segmentKeys+=[]## Needs to be filled once the MM segments are ready
-    if not flags.Input.isMC:
-        from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-        result.merge(LegacyMuonRecoChainCfg(flags))
-        kwargs.setdefault("TruthSegkey", "MuonSegments")
+
     kwargs.setdefault("SegmentContainer", segmentKeys)
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     the_alg = CompFactory.MuonR4.MSTrackFindingAlg(name, **kwargs)
