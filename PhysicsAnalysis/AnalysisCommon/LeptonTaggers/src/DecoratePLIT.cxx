@@ -44,7 +44,7 @@ namespace Prompt {
         m_saltModel_endcap = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile_endcap);
 
         m_num_lepton_features = 6;
-        m_num_track_features = 18;
+        m_num_track_features = 17;
 
         // set up decorators using a dummy query of the onnx model
         std::map<std::string, FlavorTagInference::Inputs> gnn_input;
@@ -63,7 +63,10 @@ namespace Prompt {
 
         std::vector<std::string> output_names;
         for (auto& singlefloat : out_f){
-          output_names.push_back(m_electronsKey.key()+"." + m_TaggerName + "_" + singlefloat.first);
+	  ATH_MSG_DEBUG("Found Electron output: "+singlefloat.first);
+	  std::string outname = m_electronsKey.key()+"." + m_TaggerName + "_" + (singlefloat.first.find("elxpromp") != std::string::npos ? "PLITel_pelxpromp" : "PLITel_pnpxall" );
+	  ATH_MSG_DEBUG("Decorating as "+outname);
+          output_names.push_back(outname);
         }
         ATH_CHECK(m_dec_el_plit_output.assign(output_names));
         ATH_CHECK(m_dec_el_plit_output.initialize());
@@ -73,7 +76,7 @@ namespace Prompt {
         m_saltModel = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile);
 
         m_num_lepton_features = 6;
-        m_num_track_features = 19;
+        m_num_track_features = 17;
 
         // set up decorators using a dummy query of the onnx model
         std::map<std::string, FlavorTagInference::Inputs> gnn_input;
@@ -92,7 +95,10 @@ namespace Prompt {
 
         std::vector<std::string> output_names;
         for (auto& singlefloat : out_f){
-          output_names.push_back(m_muonsKey.key()+"." + m_TaggerName + "_" + singlefloat.first);
+	  ATH_MSG_DEBUG("Found Muon output: "+singlefloat.first);
+          std::string outname =	m_muonsKey.key()+"." + m_TaggerName + "_" + (singlefloat.first.find("muxpromp") != std::string::npos ? "TPLTmu_pmuxpromp" : "TPLTmu_pnpxall" );
+          ATH_MSG_DEBUG("Decorating as "+outname);
+          output_names.push_back(outname);
         }
         ATH_CHECK(m_dec_mu_plit_output.assign(output_names));
         ATH_CHECK(m_dec_mu_plit_output.initialize());
@@ -328,8 +334,8 @@ namespace Prompt {
       track_feat.push_back(qoverp);
       track_feat.push_back(d0);
       track_feat.push_back(z0SinTheta);
-      track_feat.push_back(d0Uncertainty);
-      track_feat.push_back(z0SinThetaUncertainty);
+      //track_feat.push_back(d0Uncertainty); // removed in the latest trainings, redundant
+      //track_feat.push_back(z0SinThetaUncertainty); // removed in the latest trainings, redundant
       track_feat.push_back(d0_significance);
       track_feat.push_back(z0SinTheta_significance);
       track_feat.push_back(pix_hits);
@@ -426,6 +432,7 @@ namespace Prompt {
     // collect electron features
     float elec_pt = electron.pt();
     float elec_eta = electron.eta();
+    float elec_phi = electron.phi();
     float elec_ptvarcone30Rel = acc_ptvarcone30(electron) / elec_pt;
     float elec_topoetcone30Rel = acc_topoetcone30(electron) / elec_pt;
 
@@ -454,19 +461,20 @@ namespace Prompt {
     if (bestmatchedGSFElTrack) {
       electronTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(bestmatchedGSFElTrack);
     }
-    float elec_pt_track = -99;
-    float elec_eta_track = -99;
-    float elec_phi_track = -99;
-    if (electronTrack) {
-      elec_pt_track = electronTrack->pt();
-      elec_eta_track = electronTrack->eta();
-      elec_phi_track = electronTrack->phi();
-    }
+
+    //float elec_pt_track = -99;
+    //float elec_eta_track = -99;
+    //float elec_phi_track = -99;
+    //if (electronTrack) {
+    //  elec_pt_track = electronTrack->pt();
+    //  elec_eta_track = electronTrack->eta();
+    //  elec_phi_track = electronTrack->phi();
+    //}
 
     std::vector<float> electron_feat = {
-      elec_pt_track, 
-      elec_eta_track, 
-      elec_phi_track, 
+      elec_pt, 
+      elec_eta, 
+      elec_phi, 
       elec_ptvarcone30Rel, 
       elec_topoetcone30Rel, 
       elec_caloClusterSumEtRel};
@@ -495,7 +503,7 @@ namespace Prompt {
       }
       
       // dr_lepton
-      float dr_lepton = acc_dr_lepton(*track);
+      // float dr_lepton = acc_dr_lepton(*track);
       // deta_lepton
       float deta_lepton = track->p4().Eta() - electron.eta();
       // dphi_lepton
@@ -572,7 +580,7 @@ namespace Prompt {
       char electron_track = acc_electron_track(*track);
 
 
-      track_feat.push_back(dr_lepton);
+      //track_feat.push_back(dr_lepton); // removed in the latest trainings, redundan
       track_feat.push_back(deta_lepton);
       track_feat.push_back(dphi_lepton);
       track_feat.push_back(qoverp);
