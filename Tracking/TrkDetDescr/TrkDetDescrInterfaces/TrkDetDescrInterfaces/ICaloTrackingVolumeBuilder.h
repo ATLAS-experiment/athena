@@ -34,10 +34,12 @@ public:
   /**Virtual destructor*/
   virtual ~ICaloTrackingVolumeBuilder() {}
 
-  /** TrackingVolumeBuilder interface method - returns vector of Volumes */
-  virtual std::vector<TrackingVolume*>* trackingVolumes(
-    const CaloDetDescrManager& caloDDM
-    , const GeoAlignmentStore* geoAlign) const = 0;
+  /** TrackingVolumeBuilder interface method - returns vector
+   * of ptr to Tracking Volumes. The caller assumes
+   * onwership of the ptr*/
+  virtual std::vector<TrackingVolume*> trackingVolumes(
+      const CaloDetDescrManager& caloDDM,
+      const GeoAlignmentStore* geoAlign) const = 0;
 };
 
 } // end of namespace

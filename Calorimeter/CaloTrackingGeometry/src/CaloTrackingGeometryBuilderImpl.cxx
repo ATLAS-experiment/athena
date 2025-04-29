@@ -292,58 +292,56 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
   // ===========================================================================================
   // get the Tracking Volumes from the LAr Builder
   //
-  const std::vector<Trk::TrackingVolume*>* lArVolumes =
+  const std::vector<Trk::TrackingVolume*> lArVolumes =
     m_lArVolumeBuilder->trackingVolumes(*caloDDM,geoAlign);
 
-  ATH_MSG_INFO(lArVolumes->size()
+  ATH_MSG_INFO(lArVolumes.size()
                << " volumes retrieved from " << m_lArVolumeBuilder.name());
 
   // LAr Barrel part
-  Trk::TrackingVolume* solenoid = (*lArVolumes)[0];
-  Trk::TrackingVolume* solenoidlArPresamplerGap = (*lArVolumes)[1];
-  Trk::TrackingVolume* lArBarrelPresampler = (*lArVolumes)[2];
-  Trk::TrackingVolume* lArBarrel = (*lArVolumes)[3];
+  Trk::TrackingVolume* solenoid = lArVolumes[0];
+  Trk::TrackingVolume* solenoidlArPresamplerGap = lArVolumes[1];
+  Trk::TrackingVolume* lArBarrelPresampler = lArVolumes[2];
+  Trk::TrackingVolume* lArBarrel = lArVolumes[3];
 
   // LAr Positive Endcap part
-  Trk::TrackingVolume* lArPositiveMBTS = (*lArVolumes)[4];
-  Trk::TrackingVolume* lArPositiveEndcap = (*lArVolumes)[5];
-  Trk::TrackingVolume* lArPositiveHec = (*lArVolumes)[6];
-  Trk::TrackingVolume* lArPositiveFcal = (*lArVolumes)[7];
-  Trk::TrackingVolume* lArPositiveHecFcalCover = (*lArVolumes)[8];
+  Trk::TrackingVolume* lArPositiveMBTS = lArVolumes[4];
+  Trk::TrackingVolume* lArPositiveEndcap = lArVolumes[5];
+  Trk::TrackingVolume* lArPositiveHec = lArVolumes[6];
+  Trk::TrackingVolume* lArPositiveFcal = lArVolumes[7];
+  Trk::TrackingVolume* lArPositiveHecFcalCover = lArVolumes[8];
   // LAr Negative Endcap part
-  Trk::TrackingVolume* lArNegativeMBTS = (*lArVolumes)[9];
-  Trk::TrackingVolume* lArNegativeEndcap = (*lArVolumes)[10];
-  Trk::TrackingVolume* lArNegativeHec = (*lArVolumes)[11];
-  Trk::TrackingVolume* lArNegativeFcal = (*lArVolumes)[12];
-  Trk::TrackingVolume* lArNegativeHecFcalCover = (*lArVolumes)[13];
-  Trk::TrackingVolume* lArPosECPresampler = (*lArVolumes)[14];
-  Trk::TrackingVolume* lArNegECPresampler = (*lArVolumes)[15];
+  Trk::TrackingVolume* lArNegativeMBTS = lArVolumes[9];
+  Trk::TrackingVolume* lArNegativeEndcap = lArVolumes[10];
+  Trk::TrackingVolume* lArNegativeHec = lArVolumes[11];
+  Trk::TrackingVolume* lArNegativeFcal = lArVolumes[12];
+  Trk::TrackingVolume* lArNegativeHecFcalCover = lArVolumes[13];
+  Trk::TrackingVolume* lArPosECPresampler = lArVolumes[14];
+  Trk::TrackingVolume* lArNegECPresampler = lArVolumes[15];
 
   // PART 2 : Tile Volumes
   // ===========================================================================================
   // get the Tracking Volumes from the Tile Builder
-  std::vector<Trk::TrackingVolume*>* tileVolumes =
+  std::vector<Trk::TrackingVolume*> tileVolumes =
     m_tileVolumeBuilder->trackingVolumes(*caloDDM,geoAlign);
 
-  ATH_MSG_INFO(tileVolumes->size()
+  ATH_MSG_INFO(tileVolumes.size()
                << " volumes retrieved from " << m_tileVolumeBuilder.name());
   if (msgLvl(MSG::INFO)) {
     ATH_MSG_INFO(
         "--------------- detailed output "
         "---------------------------------------------------------- ");
-    std::vector<Trk::TrackingVolume*>::const_iterator tileVolIter =
-        tileVolumes->begin();
-    std::vector<Trk::TrackingVolume*>::const_iterator tileVolIterEnd =
-        tileVolumes->end();
+    auto tileVolIter = tileVolumes.begin();
+    auto tileVolIterEnd = tileVolumes.end();
     for (; tileVolIter != tileVolIterEnd;
          (*tileVolIter)->screenDump(msg(MSG::VERBOSE)), ++tileVolIter)
       ;
   }
 
   // Tile Barrel part
-  Trk::TrackingVolume* tileCombined = (*tileVolumes)[0];
+  Trk::TrackingVolume* tileCombined = tileVolumes[0];
   // Tile Positive Extended Part
-  Trk::TrackingVolume* tilePositiveExtendedBarrel = (*tileVolumes)[1];
+  Trk::TrackingVolume* tilePositiveExtendedBarrel = tileVolumes[1];
 
   const Trk::CylinderVolumeBounds* ebBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
@@ -364,44 +362,51 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
   const Trk::CylinderVolumeBounds* solenoidBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(solenoid->volumeBounds()));
-  if (!solenoidBounds)
+  if (!solenoidBounds){
     std::abort();
+  }
   const Trk::CylinderVolumeBounds* lArBarrelBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(lArBarrel->volumeBounds()));
-  if (!lArBarrelBounds)
+  if (!lArBarrelBounds){
     std::abort();
+  }
   const Trk::CylinderVolumeBounds* lArPositiveEndcapBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(lArPositiveEndcap->volumeBounds()));
-  if (!lArPositiveEndcapBounds)
+  if (!lArPositiveEndcapBounds){
     std::abort();
+  }
   const Trk::CylinderVolumeBounds* lArNegativeEndcapBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(lArNegativeEndcap->volumeBounds()));
-  if (!lArNegativeEndcapBounds)
+  if (!lArNegativeEndcapBounds){
     std::abort();
+  }
   const Trk::CylinderVolumeBounds* lArPositiveHecBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(lArPositiveHec->volumeBounds()));
-  if (!lArPositiveHecBounds)
+  if (!lArPositiveHecBounds){
     std::abort();
+  }
   const Trk::CylinderVolumeBounds* lArPositiveFcalBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(lArPositiveFcal->volumeBounds()));
-  if (!lArPositiveFcalBounds)
+  if (!lArPositiveFcalBounds){
     std::abort();
+  }
   const Trk::CylinderVolumeBounds* lArNegativeFcalBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(lArNegativeFcal->volumeBounds()));
-  if (!lArNegativeFcalBounds)
+  if (!lArNegativeFcalBounds){
     std::abort();
-
+  }
   const Trk::CylinderVolumeBounds* tileCombinedBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(tileCombined->volumeBounds()));
-  if (!tileCombinedBounds)
+  if (!tileCombinedBounds){
     std::abort();
+  }
 
   // Create the gap volumes
   // ======================================================================
@@ -555,22 +560,19 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
   const Trk::CylinderVolumeBounds* ecpBounds =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
           &(lArPosECPresampler->volumeBounds()));
-  if (!ecpBounds)
+  if (!ecpBounds){
     std::abort();
+  }
 
   float ecpHz = ecpBounds->halflengthZ();
   float ecpRmin = ecpBounds->innerRadius();
   float ecpRmax = ecpBounds->outerRadius();
 
-  auto ecpPos =
-      std::make_unique<Amg::Transform3D>(lArPosECPresampler->transform());
-  auto ecpNeg =
-      std::make_unique<Amg::Transform3D>(lArNegECPresampler->transform());
+  auto ecpPos = std::make_unique<Amg::Transform3D>(lArPosECPresampler->transform());
+  auto ecpNeg = std::make_unique<Amg::Transform3D>(lArNegECPresampler->transform());
 
-  auto ecpUpBounds =
-      std::make_shared<Trk::CylinderVolumeBounds>(ecpRmax, keyDim.back().first, ecpHz);
-  auto ecpDownBounds =
-      std::make_shared<Trk::CylinderVolumeBounds>(rEndcapBP, ecpRmin, ecpHz);
+  auto ecpUpBounds = std::make_shared<Trk::CylinderVolumeBounds>(ecpRmax, keyDim.back().first, ecpHz);
+  auto ecpDownBounds = std::make_shared<Trk::CylinderVolumeBounds>(rEndcapBP, ecpRmin, ecpHz);
 
   Trk::TrackingVolume* ecPresamplerCoverPos = new Trk::TrackingVolume(
       std::make_unique<Amg::Transform3D>(*ecpPos), std::make_shared<Trk::CylinderVolumeBounds>(*ecpUpBounds),
@@ -812,8 +814,9 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
           volsHecPos, m_caloMaterial, "Calo::Container::PositiveHec"));
 
   std::vector<Trk::TrackingVolume*> volsHecNeg;
-  if (hecBP.second)
+  if (hecBP.second){
     volsHecNeg.push_back(hecBP.second);
+  }
   volsHecNeg.push_back(lArNegativeHecInnerGap);
   volsHecNeg.push_back(lArNegativeHec);
   volsHecNeg.push_back(lArNegativeHecOuterGap);
@@ -883,8 +886,9 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
   // glue Fcal sector with beam pipe volumes
 
   std::vector<Trk::TrackingVolume*> volsFcalPos;
-  if (fcalBP.first)
+  if (fcalBP.first){
     volsFcalPos.push_back(fcalBP.first);
+  }
   volsFcalPos.push_back(lArPositiveFcalInnerGap);
   volsFcalPos.push_back(lArPositiveFcal);
   volsFcalPos.push_back(lArPositiveHecFcalCover);
@@ -895,8 +899,9 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
           volsFcalPos, m_caloMaterial, "Calo::Container::PositiveFcal"));
 
   std::vector<Trk::TrackingVolume*> volsFcalNeg;
-  if (fcalBP.second)
+  if (fcalBP.second){
     volsFcalNeg.push_back(fcalBP.second);
+  }
   volsFcalNeg.push_back(lArNegativeFcalInnerGap);
   volsFcalNeg.push_back(lArNegativeFcal);
   volsFcalNeg.push_back(lArNegativeHecFcalCover);
@@ -966,8 +971,9 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
 
   // glue OuterGap with beam pipe volumes
   std::vector<Trk::TrackingVolume*> volsOuterGapP;
-  if (outBP.first)
+  if (outBP.first){
     volsOuterGapP.push_back(outBP.first);
+  }
   volsOuterGapP.push_back(lArPositiveSectorOuterGap0);
   volsOuterGapP.push_back(lArPositiveSectorOuterGap);
   std::unique_ptr<Trk::TrackingVolume> positiveOuterGap(
@@ -975,8 +981,9 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
           volsOuterGapP, m_caloMaterial, "Calo::Container::PositiveOuterGap"));
 
   std::vector<Trk::TrackingVolume*> volsOuterGapN;
-  if (outBP.second)
+  if (outBP.second){
     volsOuterGapN.push_back(outBP.second);
+  }
   volsOuterGapN.push_back(lArNegativeSectorOuterGap0);
   volsOuterGapN.push_back(lArNegativeSectorOuterGap);
   std::unique_ptr<Trk::TrackingVolume> negativeOuterGap(
@@ -1435,13 +1442,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
       "TrackingVolume 'Calorimeter' built successfully. Wrap it in "
       "TrackingGeometry.");
 
-  delete lArVolumes;
-  lArVolumes = nullptr;
-  delete tileVolumes;
-  tileVolumes = nullptr;
-
-  auto caloTrackingGeometry =
-      std::make_unique<Trk::TrackingGeometry>(calorimeter);
+  auto caloTrackingGeometry = std::make_unique<Trk::TrackingGeometry>(calorimeter);
 
   if (msgLvl(MSG::VERBOSE) && caloTrackingGeometry){
     caloTrackingGeometry->printVolumeHierarchy(msg(MSG::VERBOSE));
