@@ -69,6 +69,8 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('alwaysAddNosys', False, type=bool,
             info="If set to True, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
+        # helper to protect for second pass
+        self.validated = False
 
     @staticmethod
     def branchSortOrder (rule):
@@ -96,7 +98,7 @@ class OutputAnalysisConfig (ConfigBlock):
         self.truthMetVars = set(self.truthMetVars)
 
         # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
-        if config.dataType() is not DataType.Data:
+        if not self.validated and config.dataType() is not DataType.Data:
             self.vars |= self.varsOnlyForMC
 
             # protect 'containers' against being overwritten
@@ -112,14 +114,28 @@ class OutputAnalysisConfig (ConfigBlock):
             # clear the dictionary to avoid overlapping key error during the second pass
             self.containersOnlyForMC.clear()
 
-        # now filter the containers depending on DSIDs
-        for container,dsid_filters in self.containersOnlyForDSIDs.items():
-            if container not in self.containers:
-                log.warning(f"Skipping unrecognised container {container} for DSID-filtering in OutputAnalysisConfig...")
-                continue
-            if not filter_dsids (dsid_filters, config):
-                # if current DSID is not allowed for this container, remove it
-                self.containers.pop (container)
+            # now filter the containers depending on DSIDs
+            if self.containersOnlyForDSIDs:
+                for container, dsid_filters in self.containersOnlyForDSIDs.items():
+                    if container not in self.containers:
+                        log.warning("Skipping unrecognised container prefix '%s' for DSID-filtering in OutputAnalysisConfig...", container)
+                        continue
+                    if not filter_dsids (dsid_filters, config):
+                        # if current DSID is not allowed for this container, remove it
+                        log.info("Skipping container prefix '%s' due to DSID filtering...", container)
+                        # filter branches for validated containers
+                        for var in set(self.vars):  # make a copy of the list to avoid modifying it while iterating
+                            var_container = var.split('.')[0].replace('_NOSYS', '').replace('_%SYS%', '')
+                            if var_container == self.containers[container]:
+                                self.vars.remove(var)
+                                log.info("Skipping branch definition '%s' for excluded container %s...", var, var_container)
+                        # remove the container from the list at the end
+                        self.containers.pop (container)
+                # clear the dictionary to avoid warnings during the second pass
+                self.containersOnlyForDSIDs.clear()
+
+        # at this point we are OK
+        self.validated = True
 
         if self.storeSelectionFlags:
             self.createSelectionFlagBranches(config)
