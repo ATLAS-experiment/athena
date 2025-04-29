@@ -29,7 +29,7 @@ namespace Rec {
     public:
         using AthReentrantAlgorithm::AthReentrantAlgorithm;
         virtual ~MuSAVtxFitter();
-        virtual StatusCode initialize();
+        virtual StatusCode initialize() override;
         StatusCode fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>& workVerticesContainer,
                       xAOD::VertexContainer* MuSAVtxContainer,
                       xAOD::TrackParticleContainer* MuSAExtrapolatedTracksContainer,
