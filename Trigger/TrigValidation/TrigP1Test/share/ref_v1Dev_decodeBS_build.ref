@@ -8884,9 +8884,17 @@ HLT_j200_0eta290_020jvt_boffperf_pf_ftf_preselj140_L1jJ160:
   eventCount: 0
 HLT_j200_0eta290_nnJvtv1_boffperf_pf_ftf_preselj140_L1jJ160:
   eventCount: 0
+HLT_j200_2timing15_L1HT190-jJ40s5pETA21:
+  eventCount: 0
+HLT_j200_2timing15_L1eTAU140:
+  eventCount: 0
 HLT_j200_2timing15_L1jJ160:
   eventCount: 0
 HLT_j200_2timing_L1jJ160:
+  eventCount: 0
+HLT_j200_3timeSig15_L1HT190-jJ40s5pETA21:
+  eventCount: 0
+HLT_j200_3timeSig15_L1eTAU140:
   eventCount: 0
 HLT_j200_3timeSig15_L1jJ160:
   eventCount: 0
