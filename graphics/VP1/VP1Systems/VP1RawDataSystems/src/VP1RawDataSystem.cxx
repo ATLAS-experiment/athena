@@ -19,6 +19,7 @@
 #include "VP1RawDataSystems/VP1RawDataColl_TRT_RDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_MDT_RDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_MM_RDO.h"
+#include "VP1RawDataSystems/VP1RawDataColl_sTGC_RDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_BCM_RDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_LUCID.h"
 #include "VP1RawDataSystems/VP1RawDataCommonData.h"
@@ -60,6 +61,7 @@ public:
     l << createSpecificCollections<VP1RawDataColl_LUCID>();
     l << createSpecificCollections<VP1RawDataColl_MDT_RDO>();
     l << createSpecificCollections<VP1RawDataColl_MM_RDO>();
+    l << createSpecificCollections<VP1RawDataColl_sTGC_RDO>();
     return l;
   }
 

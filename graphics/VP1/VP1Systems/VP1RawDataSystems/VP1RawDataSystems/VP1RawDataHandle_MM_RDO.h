@@ -23,7 +23,7 @@
 
 class MmDigit;
 
-namespace InDetDD { class TRT_BaseElement; }
+// namespace InDetDD { class TRT_BaseElement; }
 
 class VP1RawDataHandle_MM_RDO : public VP1RawDataHandleBase {
 public:
