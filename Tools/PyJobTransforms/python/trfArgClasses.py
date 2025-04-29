@@ -1849,10 +1849,11 @@ class argHepEvtAsciiFile(argFile):
                 tar = tarfile.open(fname, "r:gz")
                 for untar in tar.getmembers():
                     fileTXT = tar.extractfile(untar)
-                    if fileTXT is not None :
-                        lines = fileTXT.read().decode("utf-8")
-                        # lines contains the entire file, so we just count the number of event markers
-                        eventCount = lines.count('E ')
+                    if fileTXT is not None:
+                        # Iterate line-by-line to avoid memory explosion
+                        for aline in fileTXT:
+                            if aline.startswith(b'E '):
+                                eventCount += 1
                 self._fileMetadata[fname]['nentries'] = eventCount
             except OSError as e:
                 msg.error('Event count for file {0} failed: {1!s}'.format(fname, e))
