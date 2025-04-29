@@ -11,6 +11,7 @@
 #include "FPGATrackSimKeyLayerBinDesc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
+#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 
 StatusCode FPGATrackSimKeyLayerBinDesc::initialize()
 {
@@ -62,8 +63,15 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         double width_z_in  = step.binWidth(0)/2.0;
         double width_z_out = step.binWidth(1)/2.0;
         double zrange = width_z_in + (width_z_out-width_z_in) * (hitr-r1)/(r2-r1);
-        
-        passesEta = std::abs(storedhit.etaShift) < zrange;
+
+        // pad for strip length or imprecise SP.
+        double padding = 0;
+        if (storedhit.hitptr->getDetType() == SiliconTech::strip) {
+          // 2.5 cm, length of short strip, half length of long strip
+          padding = 0.025;
+        }
+
+        passesEta = std::abs(storedhit.etaShift) < (zrange+padding);
 
     }
 

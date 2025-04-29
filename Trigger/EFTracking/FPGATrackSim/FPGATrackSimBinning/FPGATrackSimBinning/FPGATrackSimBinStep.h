@@ -72,7 +72,11 @@ public:
 
   // get bin value for a specific parameter value
   unsigned binIdx(unsigned par, double val) const {
-    return (val > m_parMin[par]) ? unsigned(floor((val - m_parMin[par]) / m_parStep[par])): 0; }
+    // Guard against both underflow and overflow.
+    if (val < m_parMin[par]) return 0;
+    else if (val > m_parMax[par]) return unsigned(floor((m_parMax[par] - m_parMin[par]) / m_parStep[par])) - 1;
+    else return unsigned(floor((val - m_parMin[par]) / m_parStep[par]));
+  }
 
   // convert parset (the binning parameters) to a 5-d bin
   IdxSet binIdx(const ParSet &pars) const;
@@ -92,7 +96,6 @@ public:
   void setValidBin(const std::vector<unsigned>& idx); // also sets SubBins
   void printValidBin() const; // dump an output to log for x-checks
   const FPGATrackSimBinArray<int>& validBinsFull() const { return m_validBinFull;}
-  const FPGATrackSimBinArray<int>& validBinsLocal() const { return m_validBinLocal;}
 
 private:
   Gaudi::Property<std::vector<unsigned>> m_parBinsConfig{this,"parBins",{},"Vector of number of bins for each parameter (expect 5)"};
@@ -104,7 +107,6 @@ private:
   // some bins may not be valid because they correspond to (pT,eta,phi,d0,z0)
   // that are being targeted for reconstruction
   FPGATrackSimBinArray<int> m_validBinFull; // this is the full binning
-  FPGATrackSimBinArray<int> m_validBinLocal; // this is for the pars used at this step
 
   // pointer to FPGATrackSimBinStep of previous step
   FPGATrackSimBinStep *m_prev{0};

@@ -71,7 +71,7 @@ class FPGATrackSimLayerStudyAlg : public AthAlgorithm
 
         // Flags
         Gaudi::Property<int> m_stage {this, "stage", 0, "0 for all hits; 1 for pmap-indicated first stage; 2 for pmap-indicated second stage"};
-        Gaudi::Property<int> m_threshold {this, "threshold", -1, "Threshold to apply for selecting bins with hits, defaults to not used (-1)"};
+        Gaudi::Property<unsigned> m_threshold {this, "threshold", 0, "Threshold to apply for selecting bins with hits, defaults to not used (0)"};
 
         // Event storage
         std::vector<FPGATrackSimTrack>   m_tracks_1st_guessedcheck, m_tracks_1st_nomiss, m_tracks_2nd_guessedcheck, m_tracks_2nd_nomiss;

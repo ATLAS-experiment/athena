@@ -71,8 +71,14 @@ public:
 
   // range of whole region
   double parRange(unsigned par) const { return m_parMax[par]-m_parMin[par];}
+  double parCenter(unsigned par) const { return (m_parMax[par]+m_parMin[par])/2.0;}
   double parMin(unsigned par) const { return m_parMin[par];}
   double parMax(unsigned par) const { return m_parMax[par];}
+  
+  // Getters for the entire ranges
+  const ParSet& parMin() const { return m_parMin;}
+  const ParSet& parMax() const { return m_parMax;}
+
 
   // check if 1-d or 5-d parameter is within the range of the binning
   bool inRange(unsigned par, double val) const { return ((val < m_parMax[par]) && (val > m_parMin[par])); }

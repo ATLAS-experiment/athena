@@ -63,8 +63,9 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
     theFPGATrackSimMatrixGenAlg.TRAIN_PDG = 13
     theFPGATrackSimMatrixGenAlg.NBanks = 1
 
-    theFPGATrackSimMatrixGenAlg.SpacePoints = True
-    theFPGATrackSimMatrixGenAlg.SpacePointTool = acc.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
+    theFPGATrackSimMatrixGenAlg.SpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+    if flags.Trigger.FPGATrackSim.spacePoints:
+        theFPGATrackSimMatrixGenAlg.SpacePointTool = acc.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
     theFPGATrackSimMatrixGenAlg.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
 
     theFPGATrackSimMatrixGenAlg.FPGATrackSimEventSelectionSvc = acc.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))

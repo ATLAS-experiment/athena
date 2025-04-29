@@ -34,6 +34,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('UseHitScaleFactor', False)
     cf.addFlag('missHitsConsts', False)
     cf.addFlag('tracking', False)
+    cf.addFlag('secondTracking', True)
     cf.addFlag('layerStudyStage', 0)
     cf.addFlag('doOverlapRemoval', True)
     cf.addFlag('clustering', 1)
@@ -202,6 +203,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doDeltaGPhis', False)
     cf.addFlag('chi2cut', 9)
     cf.addFlag('useVaryingChi2Cut', False)
+
     # second stage fitting
     cf.addFlag('secondStage', False)
     cf.addFlag('secondChi2Cut', 36)
@@ -332,11 +334,12 @@ def createGenScanFPGATrackSimConfigFlags():
     # These are used by the layer study, to avoid the need for Cuts_step0.
     # They are only used in the layer study if initialLayerStudy is set to True
     cf.addFlag('initialLayerStudy', False)
+    cf.addFlag('layerStudyCutFile', "")
     cf.addFlag('rin', 30)
     cf.addFlag('rout', 300)
     cf.addFlag('parBins', [20, 20, 5, 20, 3])
-    cf.addFlag('parMin', [-500, -500, 0.0, 0.0, -10])
-    cf.addFlag('parMax', [ 500,  500, 1.0, 1.0, 10])
+    cf.addFlag('parMin', [-1000, -1000, 0.0, 0.0, -10])
+    cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
 
     return cf

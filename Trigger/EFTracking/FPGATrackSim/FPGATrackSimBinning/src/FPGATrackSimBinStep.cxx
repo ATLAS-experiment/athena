@@ -127,13 +127,11 @@ const std::vector<unsigned> FPGATrackSimBinStep::stepBins() const {
 
 void FPGATrackSimBinStep::setValidBin(const std::vector<unsigned>& idx) {
   m_validBinFull[idx] = true;
-  m_validBinLocal[stepIdx(idx)] = true;
   if (m_prev) m_prev->setValidBin(convertToPrev(idx));
 }
 
 void FPGATrackSimBinStep::initValidBins() {
   m_validBinFull.setsize(m_parBins, false);
-  m_validBinLocal.setsize(stepBins(), false);
 }
 
 void FPGATrackSimBinStep::printValidBin() const {
@@ -146,13 +144,7 @@ void FPGATrackSimBinStep::printValidBin() const {
   }
   ATH_MSG_INFO("Step" << name() << "Valid Bins Full: " << validBinsFull);
 
-  // count valid bins
-  int validBinsLocal = 0;
-  for (FPGATrackSimBinArray<int>::ConstIterator bin : m_validBinLocal) {
-  if (bin.data())
-    validBinsLocal++;
-  }
-  ATH_MSG_INFO("Step" << name() <<  "Valid Bins Local: " << validBinsLocal);
+ 
   
 }
 

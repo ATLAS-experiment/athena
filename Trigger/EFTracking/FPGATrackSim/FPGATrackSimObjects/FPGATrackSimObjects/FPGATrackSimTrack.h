@@ -123,6 +123,17 @@ class FPGATrackSimTrack {
     setZ0(pars.z0);
   }
 
+  FPGATrackSimTrackPars getPars() const {
+    FPGATrackSimTrackPars pars;
+    pars.qOverPt = getQOverPt();
+    pars.eta = getEta();
+    pars.phi = getPhi();
+    pars.d0 = getD0();
+    pars.z0 = getZ0();
+
+    return pars;
+  }
+
   // Functions for overlap removal
   unsigned int passedOR() const { return m_ORcode; }
   void setPassedOR(unsigned int);

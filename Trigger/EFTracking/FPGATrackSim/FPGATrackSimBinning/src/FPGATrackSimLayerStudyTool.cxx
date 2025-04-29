@@ -15,6 +15,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TTree.h"
+#include <algorithm>
 #include <bit>
 
 FPGATrackSimLayerStudyTool::FPGATrackSimLayerStudyTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
@@ -34,7 +35,7 @@ StatusCode FPGATrackSimLayerStudyTool::initialize()
 
   ATH_CHECK(m_tHistSvc.retrieve());
 
-  ATH_CHECK(bookTree());
+  ATH_CHECK(bookTrees());
 
   return StatusCode::SUCCESS;
 
@@ -60,7 +61,7 @@ StatusCode FPGATrackSimLayerStudyTool::registerHistograms(const FPGATrackSimBinn
   for (unsigned i = 0; i < FPGATrackSimTrackPars::NPARS; i++) {
     ATH_CHECK(makeAndRegHist(
         m_truthpars_hists[i], ("truth" + bindesc->parNames(i)).c_str(),
-        (";" + m_binnedhits->getBinTool().binDesc()->parNames(i) + ";").c_str(), 200,
+        (";" + m_binnedhits->getBinTool().binDesc()->parNames(i) + ";").c_str(), 2000,
         -2 * m_binnedhits->getBinTool().parRange(i),
         2 * m_binnedhits->getBinTool().parRange(i)));
   }
@@ -73,6 +74,30 @@ StatusCode FPGATrackSimLayerStudyTool::registerHistograms(const FPGATrackSimBinn
   ATH_CHECK(makeAndRegHist(m_hitsPerLayer, "hitsPerLayer", "; Layer ; Hits ", nLyrs, 0, nLyrs));
   ATH_CHECK(makeAndRegHist(m_hitsPerLayer2D, "hitsPerLayer2D", "; Layer ; Hits ", nLyrs, 0, nLyrs, 20, 0, m_isSingleParticle ? 20 : 10000));
 
+  // All Hit level histograms
+  ATH_CHECK(makeAndRegHistVector(m_rZ_allhits, nLyrs + 1, NULL, "RZ_allhits",
+                                 "; Z [mm] ; R [mm] ", 500, -2000, 2000, 500, 0, 500));
+
+  ATH_CHECK(makeAndRegHistVector(m_phiResidual, nLyrs + 1, NULL, "phiResidual",
+                                 "phi residual [mm]", 1000, -10, 10));
+  ATH_CHECK(makeAndRegHistVector(m_etaResidual, nLyrs + 1, NULL, "etaResidual",
+                                 "eta residual [mm]", 1000, -10, 10));
+
+  ATH_CHECK(makeAndRegHistVector(m_phiResidual_v_r, m_N_ptplot, NULL, "phiResidual_v_r",
+                                  "; R[mm]; phi residual [mm]", 1200, 0, 1200, 1000, -100, 100));
+  ATH_CHECK(makeAndRegHistVector(m_etaResidual_v_r, m_N_ptplot, NULL, "etaResidual_v_r",
+                                  "; R[mm]; eta residual [mm]", 1200, 0, 1200, 1000, -100, 100));
+
+  ATH_CHECK(makeAndRegHistVector(m_phiScale_v_r, m_N_ptplot, NULL, "phiScale_v_r",
+                                    "; R[mm]; phi scale", 1200, 0, 1200, 1000, -2, 2.0));
+  ATH_CHECK(makeAndRegHistVector(m_etaScale_v_r, m_N_ptplot, NULL, "etaScale_v_r",
+                                    "; R[mm]; eta scale", 1200, 0, 1200, 1000, -2.0, 2.0));
+
+  ATH_CHECK(makeAndRegHistVector(m_phiTrueBinShift, nLyrs + 1, NULL,
+                                 "phiTrueBinShift", "phi TrueBinShift [mm]", 1000, -10, 10));
+  ATH_CHECK(makeAndRegHistVector(m_etaTrueBinShift, nLyrs + 1, NULL,
+                                 "etaTrueBinShift", "eta TrueBinShift [mm]",1000, -10, 10));
+
   // Road statistics
   ATH_CHECK(makeAndRegHist(m_phiShift_road, "phiShift_road", ";Phi Shift", 2000, -m_phiScale, m_phiScale));
   ATH_CHECK(makeAndRegHist(m_etaShift_road, "etaShift_road", ";Eta Shift", 2000, -m_etaScale, m_etaScale));
@@ -84,42 +109,55 @@ StatusCode FPGATrackSimLayerStudyTool::registerHistograms(const FPGATrackSimBinn
 }
 
 
-StatusCode FPGATrackSimLayerStudyTool::bookTree() {
+StatusCode FPGATrackSimLayerStudyTool::bookTrees() {
   ATH_MSG_DEBUG("Booking Layers Study  Tree");
-  m_bin_module_tree = new TTree("LayerStudy","LayerStudy");
-  m_bin_module_tree->Branch("bin", &m_tree_bin);
-  m_bin_module_tree->Branch("r", &m_tree_r);
-  m_bin_module_tree->Branch("z", &m_tree_z);
-  m_bin_module_tree->Branch("id", &m_tree_id);
-  m_bin_module_tree->Branch("hash", &m_tree_hash);
-  m_bin_module_tree->Branch("layer", &m_tree_layer);
-  m_bin_module_tree->Branch("side", &m_tree_side);
-  m_bin_module_tree->Branch("etamod",  &m_tree_etamod);
-  m_bin_module_tree->Branch("phimod",  &m_tree_phimod);
-  m_bin_module_tree->Branch("dettype", &m_tree_dettype);
-  m_bin_module_tree->Branch("detzone",  &m_tree_detzone);
+  m_bin_tree = new TTree("LayerStudy","LayerStudy");
+  m_bin_tree->Branch("bin", &m_bin_tree_bin);
+  m_bin_tree->Branch("r", &m_bin_tree_r);
+  m_bin_tree->Branch("z", &m_bin_tree_z);
+  m_bin_tree->Branch("id", &m_bin_tree_id);
+  m_bin_tree->Branch("hash", &m_bin_tree_hash);
+  m_bin_tree->Branch("layer", &m_bin_tree_layer);
+  m_bin_tree->Branch("side", &m_bin_tree_side);
+  m_bin_tree->Branch("etamod",  &m_bin_tree_etamod);
+  m_bin_tree->Branch("phimod",  &m_bin_tree_phimod);
+  m_bin_tree->Branch("dettype", &m_bin_tree_dettype);
+  m_bin_tree->Branch("detzone",  &m_bin_tree_detzone);
 
-  ATH_CHECK(m_tHistSvc->regTree(m_dir + m_bin_module_tree->GetName(), m_bin_module_tree));
+  m_truth_tree = new TTree("TruthTree", "TruthTree");
+  m_truth_tree->Branch("stdpars", &m_truth_tree_phi);
+  m_truth_tree->Branch("stdpars", &m_truth_tree_qOverPt);
+  m_truth_tree->Branch("stdpars", &m_truth_tree_eta);
+  m_truth_tree->Branch("stdpars", &m_truth_tree_d0);
+  m_truth_tree->Branch("stdpars", &m_truth_tree_z0);
+  m_truth_tree->Branch("parset", &m_truth_tree_parset);
+
+  ATH_CHECK(m_tHistSvc->regTree(m_dir + m_bin_tree->GetName(), m_bin_tree));
+  ATH_CHECK(m_tHistSvc->regTree(m_dir + m_truth_tree->GetName(), m_truth_tree));
   return StatusCode::SUCCESS;
 }
 void FPGATrackSimLayerStudyTool::ClearTreeVectors()
 {
-  m_tree_r.clear();
-  m_tree_z.clear();
-  m_tree_id.clear();
-  m_tree_hash.clear();
-  m_tree_layer.clear();
-  m_tree_side.clear();
-  m_tree_etamod.clear();
-  m_tree_phimod.clear();
-  m_tree_dettype.clear();
-  m_tree_detzone.clear();
+  m_bin_tree_r.clear();
+  m_bin_tree_z.clear();
+  m_bin_tree_id.clear();
+  m_bin_tree_hash.clear();
+  m_bin_tree_layer.clear();
+  m_bin_tree_side.clear();
+  m_bin_tree_etamod.clear();
+  m_bin_tree_phimod.clear();
+  m_bin_tree_dettype.clear();
+  m_bin_tree_detzone.clear();
+
+  m_truth_tree_parset.clear();
 }
 
 void FPGATrackSimLayerStudyTool::fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const FPGATrackSimBinUtil::IdxSet &idx,
                                   const FPGATrackSimBinnedHits::BinEntry &data)
 {
   setBinPlotsActive(idx);
+
+
 
   if (m_binPlotsActive) {
     for (auto& hit : data.hits) {
@@ -138,21 +176,22 @@ void FPGATrackSimLayerStudyTool::fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const 
               });
 
     // Fill tree
-    m_tree_bin = std::vector<unsigned>(idx);
+    m_bin_tree_bin = std::vector<unsigned>(idx);
     ClearTreeVectors();
     for (auto &hit : sorted_hits) {
-      m_tree_r.push_back(hit.hitptr->getR());
-      m_tree_z.push_back(hit.hitptr->getZ());
-      m_tree_id.push_back(hit.hitptr->getIdentifier());
-      m_tree_hash.push_back(hit.hitptr->getIdentifierHash());
-      m_tree_layer.push_back(hit.hitptr->getLayerDisk());
-      m_tree_side.push_back(hit.hitptr->getSide());
-      m_tree_etamod.push_back(hit.hitptr->getEtaModule());
-      m_tree_phimod.push_back(hit.hitptr->getPhiModule());
-      m_tree_dettype.push_back((int)hit.hitptr->getDetType());
-      m_tree_detzone.push_back((int)hit.hitptr->getDetectorZone());
+
+      m_bin_tree_r.push_back(hit.hitptr->getR());
+      m_bin_tree_z.push_back(hit.hitptr->getZ());
+      m_bin_tree_id.push_back(hit.hitptr->getIdentifier());
+      m_bin_tree_hash.push_back(hit.hitptr->getIdentifierHash());
+      m_bin_tree_layer.push_back(hit.hitptr->getLayerDisk());
+      m_bin_tree_side.push_back(hit.hitptr->getSide());
+      m_bin_tree_etamod.push_back(hit.hitptr->getEtaModule());
+      m_bin_tree_phimod.push_back(hit.hitptr->getPhiModule());
+      m_bin_tree_dettype.push_back((int)hit.hitptr->getDetType());
+      m_bin_tree_detzone.push_back((int)hit.hitptr->getDetectorZone());
     }
-    m_bin_module_tree->Fill();
+    m_bin_tree->Fill();
   }
 }
 
@@ -175,6 +214,39 @@ void FPGATrackSimLayerStudyTool::fillBinningSummary ATLAS_NOT_THREAD_SAFE(
   }
 }
 
+void FPGATrackSimLayerStudyTool::fillHitLevelInput(const FPGATrackSimHit *hit) {
+  const IFPGATrackSimBinDesc* bindesc = m_binnedhits->getBinTool().binDesc();
+  m_rZ_allhits[m_binnedhits->getNLayers()]->Fill(hit->getZ(), hit->getR());       // all layer plot
+  if (m_truthIsValid)
+    {
+      m_etaResidual[m_binnedhits->getNLayers()]->Fill(bindesc->etaResidual(m_truthparset, hit));
+      m_phiResidual[m_binnedhits->getNLayers()]->Fill(bindesc->phiResidual(m_truthparset, hit));
+
+      int ptbin =
+          floor((m_truthpars[FPGATrackSimTrackPars::IHIP] + 1.0) / 2.0 * m_N_ptplot);
+      ptbin = std::min(std::max(ptbin,0),4);
+      m_etaResidual_v_r[ptbin]->Fill(hit->getR(), bindesc->etaResidual(m_truthparset, hit));
+      m_phiResidual_v_r[ptbin]->Fill(hit->getR(), bindesc->phiResidual(m_truthparset, hit));
+
+      double center_to_hit_eta = bindesc->etaResidual(m_binnedhits->getBinTool().center(), hit);
+      double truth_to_hit_eta = bindesc->etaResidual(m_truthparset, hit);
+      double etascale = center_to_hit_eta / (center_to_hit_eta - truth_to_hit_eta);
+      double center_to_hit_phi = bindesc->phiResidual(m_binnedhits->getBinTool().center(), hit);
+      double truth_to_hit_phi = bindesc->phiResidual(m_truthparset, hit);
+      double phiscale = center_to_hit_phi / (center_to_hit_phi-truth_to_hit_phi);
+      m_etaScale_v_r[ptbin]->Fill(hit->getR(),etascale);
+      m_phiScale_v_r[ptbin]->Fill(hit->getR(), phiscale);
+
+
+      if (m_truthbin.back() != FPGATrackSimBinUtil::invalidBin) {
+        ParSet binCenter = m_binnedhits->getBinTool().lastStep()->binCenter(m_truthbin.back());
+        m_etaTrueBinShift[m_binnedhits->getNLayers()]->Fill(bindesc->etaResidual(binCenter, hit));
+        m_phiTrueBinShift[m_binnedhits->getNLayers()]->Fill(bindesc->phiResidual(binCenter, hit));
+      }
+  }
+}
+
+
 
 void FPGATrackSimLayerStudyTool::parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vector<FPGATrackSimTruthTrack> const & truthtracks) {
   ATH_MSG_DEBUG("In parseTruthInfo, truthtracks size = " << truthtracks.size());
@@ -189,6 +261,7 @@ void FPGATrackSimLayerStudyTool::parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vecto
   m_truthpars[FPGATrackSimTrackPars::IHIP] =
       m_truthpars[FPGATrackSimTrackPars::IHIP] * 1000;
   m_truthparset = bindesc->trackParsToParSet(m_truthpars);
+  m_truthbin.clear();
   for (auto &step : m_binnedhits->getBinTool().steps()) {
     m_truthbin.push_back(step->binIdx(m_truthparset));
   }
@@ -208,6 +281,14 @@ void FPGATrackSimLayerStudyTool::parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vecto
                           << " " << recovered[FPGATrackSimTrackPars::IETA] - m_truthpars[FPGATrackSimTrackPars::IETA]
                           << " " << recovered[FPGATrackSimTrackPars::IZ0] - m_truthpars[FPGATrackSimTrackPars::IZ0]);
 
+  m_truth_tree_phi = m_truthpars[FPGATrackSimTrackPars::IPHI];
+  m_truth_tree_qOverPt = m_truthpars[FPGATrackSimTrackPars::IHIP];
+  m_truth_tree_d0 = m_truthpars[FPGATrackSimTrackPars::ID0];
+  m_truth_tree_z0 = m_truthpars[FPGATrackSimTrackPars::IZ0];
+  m_truth_tree_eta = m_truthpars[FPGATrackSimTrackPars::IETA];
+  m_truth_tree_parset = std::vector<double>(m_truthparset);
+  m_truth_tree->Fill();
+
   // print if there are multiple tracks for debugging single track MC
   if (truthtracks.size() > 1) {
     for (unsigned i = 0; i < truthtracks.size(); i++) {
@@ -222,7 +303,7 @@ void FPGATrackSimLayerStudyTool::parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vecto
 
   // Check if the truth track falls in the binning range
   if (!m_binnedhits->getBinTool().inRange(m_truthparset)) {
-    ATH_MSG_INFO("Truth out of range");
+    ATH_MSG_INFO("Truth out of range because truth parset = " << m_truthparset << " wrt min = " << m_binnedhits->getBinTool().parMin() << ", max = " << m_binnedhits->getBinTool().parMax());
     return;
   }
 

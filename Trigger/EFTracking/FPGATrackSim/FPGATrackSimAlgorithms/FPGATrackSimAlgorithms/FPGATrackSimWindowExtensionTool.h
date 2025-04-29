@@ -26,6 +26,7 @@
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 #include "FPGATrackSimObjects/FPGATrackSimTowerInputHeader.h"
+#include "FPGATrackSimBinning/FPGATrackSimBinnedHits.h"
 #include "FPGATrackSimNNTrackTool.h"
 
 #include <vector>
@@ -44,12 +45,19 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
 
         // We don't have a "union" tool that sits in front of the extension tool, so this is needed here.
         virtual StatusCode setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) override {
-          m_slicedHitHeader = slicedHitHeader;
-          return StatusCode::SUCCESS;
+            m_slicedHitHeader = slicedHitHeader;
+            return StatusCode::SUCCESS;
         };
 
+        // Helper functions to extend a single track using different methods.
+        bool extendTrackSliced(std::shared_ptr<const FPGATrackSimTrack> track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
+                          std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& road_hits);
+        bool extendTrackBinned(std::shared_ptr<const FPGATrackSimTrack> track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
+                          std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& road_hits);
 
     private:
+
+        ToolHandle<FPGATrackSimBinnedHits> m_hitBinningTool {this, "BinningTool", "FPGATrackSimBinning/FPGATrackSimBinnedHits"};
 
         ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc {this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
@@ -60,6 +68,7 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         Gaudi::Property<std::vector<float>> m_zwindows {this, "zWindow", {}, "Default window settings for z, must be size nlayers."};
         Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};
         Gaudi::Property<bool> m_idealGeoRoads {this, "IdealGeoRoads", true, "Do sector assignment of second stage roads"};
+        Gaudi::Property<bool> m_doBinning {this, "doBinning", false, "Use second stage binning to sort hits, not the plane map"};
 
         // Options only needed for sector assignment.
         // The eta pattern option here should probably be dropped, because we're not using it
