@@ -59,6 +59,8 @@ namespace ActsTrk
         {this, "PixelClustersToTruthAssociationMap", "", "Association map from pixel measurements to generator particles." };
      SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_stripClustersToTruth
         {this, "StripClustersToTruthAssociationMap", "", "Association map from strip measurements to generator particles." };
+       SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_hgtdClustersToTruth
+        {this, "HgtdClustersToTruthAssociationMap", "", "Association map from HGTD measurements to generator particles." };
 
      SG::WriteHandleKey<TruthParticleHitCounts>  m_truthHitCountsOut
         {this, "TruthParticleHitCountsOut", "", "Map from truth particle to hit counts." };

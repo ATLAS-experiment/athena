@@ -47,6 +47,21 @@ def ActsStripClusterToTruthAssociationAlgCfg(flags,
     acc.addEventAlgo( CompFactory.ActsTrk.StripClusterToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
+def ActsHgtdClusterToTruthAssociationAlgCfg(flags,
+                                             name: str = 'ActsHgtdClusterToTruthAssociationAlg',
+                                             **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='HGTD_SDO_Map') )
+
+    kwargs.setdefault('InputTruthParticleLinks', 'xAODTruthLinks')
+    kwargs.setdefault('SimData', 'HGTD_SDO_Map')
+    kwargs.setdefault('DepositedEnergyMin', 600) # @TODO revise ? From PRD_MultiTruthBuilder.h; should be 1/10 of threshold
+    kwargs.setdefault('Measurements', 'HGTD_Clusters')
+    kwargs.setdefault('AssociationMapOut', 'HgtdClustersToTruthParticles')
+    
+    acc.addEventAlgo( CompFactory.ActsTrk.HgtdClusterToTruthAssociationAlg(name=name, **kwargs) )
+    return acc
+
 def ActsTrackToTruthAssociationAlgCfg(flags,
                                       name: str = 'ActsTracksToTruthAssociationAlg',
                                       **kwargs: dict) -> ComponentAccumulator:
@@ -56,6 +71,7 @@ def ActsTrackToTruthAssociationAlgCfg(flags,
     kwargs.setdefault('ACTSTracksLocation','ActsTracks')
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
+    kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
 
@@ -74,6 +90,7 @@ def ActsTruthParticleHitCountAlgCfg(flags,
 
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
+    kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
     kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
     kwargs.setdefault('NHitsMin',4)
@@ -95,7 +112,9 @@ def ActsTruthAssociationAlgCfg(flags,
         
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="StripClusterToTruthAssociationAlg.", **kwargs) ))
-        
+    
+    if flags.Detector.EnableHGTD and (flags.Acts.useHGTDClusterInTrackFinding or flags.HGTD.doActs):
+        acc.merge(ActsHgtdClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="HgtdClusterToTruthAssociationAlg.", **kwargs) ))
     return acc
 
 def setDefaultTruthMatchingArgs(kwargs) :
