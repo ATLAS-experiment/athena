@@ -80,7 +80,7 @@ Trk::AnnulusBoundsPC::AnnulusBoundsPC(double minR,
 }
 
 std::pair<Trk::AnnulusBoundsPC, double>
-Trk::AnnulusBoundsPC::fromCartesian(Trk::AnnulusBounds& annbo) //TODO: Removed const, check that this is OK
+Trk::AnnulusBoundsPC::fromCartesian(const Trk::AnnulusBounds& annbo)
 {
   auto [k_L, k_R, d_L, d_R] = annbo.getEdgeLines();
 
@@ -88,7 +88,7 @@ Trk::AnnulusBoundsPC::fromCartesian(Trk::AnnulusBounds& annbo) //TODO: Removed c
   double O_y = std::fma(O_x, k_L, d_L); // O_x * k_L + d_L
   Amg::Vector2D originStripXY(-O_x, -O_y);
 
-  auto bounds = annbo.getBoundsValues();
+  const auto& bounds = annbo.getBoundsValues();
 
   double minR = bounds[AnnulusBounds::bv_minR];
   double maxR = bounds[AnnulusBounds::bv_maxR];
@@ -504,7 +504,7 @@ Amg::Vector2D
 Trk::AnnulusBoundsPC::closestOnSegment(const Amg::Vector2D& a,
                                        const Amg::Vector2D& b,
                                        const Amg::Vector2D& p,
-                                       const Eigen::Matrix<double, 2, 2>& weight) 
+                                       const Eigen::Matrix<double, 2, 2>& weight)
 {
   // connecting vector
   auto     n       = b - a;
@@ -517,7 +517,7 @@ Trk::AnnulusBoundsPC::closestOnSegment(const Amg::Vector2D& a,
 }
 
 double
-Trk::AnnulusBoundsPC::squaredNorm(const Amg::Vector2D& v, const Eigen::Matrix<double, 2, 2>& weight) 
+Trk::AnnulusBoundsPC::squaredNorm(const Amg::Vector2D& v, const Eigen::Matrix<double, 2, 2>& weight)
 {
   return (v.transpose() * weight * v).value();
 }

@@ -42,12 +42,12 @@ HGTD_TrackingGeometryBuilderCond::HGTD_TrackingGeometryBuilderCond(const std::st
   declareProperty("EnvelopeDefinitionSvc",            m_enclosingEnvelopeSvc );
   declareProperty("LayerBuilder",                     m_layerBuilder);
   declareProperty("TrackingVolumeCreator",            m_trackingVolumeCreator);
-  
+
   declareProperty("IndexStaticLayers",                m_indexStaticLayers);
   declareProperty("BuildBoundaryLayers",              m_buildBoundaryLayers);
   declareProperty("ReplaceAllJointBoundaries",        m_replaceJointBoundaries);
   declareProperty("LayerBinningType",                 m_layerBinningType);
-  declareProperty("ColorCode",                        m_colorCodeConfig);  
+  declareProperty("ColorCode",                        m_colorCodeConfig);
 
 }
 
@@ -59,16 +59,16 @@ HGTD_TrackingGeometryBuilderCond::~HGTD_TrackingGeometryBuilderCond()
 // initialize
 StatusCode HGTD_TrackingGeometryBuilderCond::initialize()
 {
-  // retrieve envelope definition service 
+  // retrieve envelope definition service
   ATH_CHECK(m_enclosingEnvelopeSvc.retrieve());
-  
-  // retrieve the layer provider        
+
+  // retrieve the layer provider
   ATH_CHECK(m_layerBuilder.retrieve());
-  
-  // retrieve the volume creator 
+
+  // retrieve the volume creator
   ATH_CHECK(m_trackingVolumeCreator.retrieve());
-    
-  ATH_MSG_INFO( "initialize() succesful" );    
+
+  ATH_MSG_INFO( "initialize() succesful" );
   return StatusCode::SUCCESS;
 }
 
@@ -80,46 +80,46 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry(
 
 {
 
-  ATH_MSG_VERBOSE( "Starting to build HGTD_TrackingGeometry ..." );   
-  
+  ATH_MSG_VERBOSE( "Starting to build HGTD_TrackingGeometry ..." );
+
   // the enclosed input volume (ID)
   double enclosedInnerSectorHalflength = std::numeric_limits<float>::max();
   double enclosedOuterRadius = 0.;
   double enclosedInnerRadius = 0.;
-  
-  if (innerVol) {  
-    ATH_MSG_VERBOSE( "Got Inner Detector Volume: " << innerVol->volumeName() ); 
-    innerVol->screenDump(msg(MSG::VERBOSE)); 
+
+  if (innerVol) {
+    ATH_MSG_VERBOSE( "Got Inner Detector Volume: " << innerVol->volumeName() );
+    innerVol->screenDump(msg(MSG::VERBOSE));
 
     // retrieve dimensions
-    const Trk::CylinderVolumeBounds* innerDetectorBounds 
+    const Trk::CylinderVolumeBounds* innerDetectorBounds
       = dynamic_cast<const Trk::CylinderVolumeBounds*>(&(innerVol->volumeBounds()));
     if (!innerDetectorBounds) std::abort();
-    
+
     enclosedInnerSectorHalflength = innerDetectorBounds->halflengthZ();
     enclosedOuterRadius = innerDetectorBounds->outerRadius();
     enclosedInnerRadius = innerDetectorBounds->innerRadius();
-  }  
-  
+  }
+
   float enclosedOuterSectorHalflength = std::numeric_limits<float>::max();
   // for the HGTD we only need the first envelope definition
-  for (const auto & bounds : m_enclosingEnvelopeSvc->getCaloRZBoundary()) { 
+  for (const auto & bounds : m_enclosingEnvelopeSvc->getCaloRZBoundary()) {
     if (std::abs(bounds.second) < enclosedOuterSectorHalflength) {
       enclosedOuterSectorHalflength = std::abs(bounds.second);
     }
   }
-  
-  // in case you have no inner volume you need to find the 
+
+  // in case you have no inner volume you need to find the
   // envelope extensions --> beampipe and HGTD
   if (not innerVol) {
-    // from the beampipe envelope you get the inner z extension 
-    for (const auto & bounds : m_enclosingEnvelopeSvc->getBeamPipeRZBoundary()) { 
+    // from the beampipe envelope you get the inner z extension
+    for (const auto & bounds : m_enclosingEnvelopeSvc->getBeamPipeRZBoundary()) {
       if (std::abs(bounds.second) < enclosedInnerSectorHalflength) {
         enclosedInnerSectorHalflength = std::abs(bounds.second);
       }
-    }   
+    }
     // from the calo envelope you get the outer radius
-    for (const auto & bounds : m_enclosingEnvelopeSvc->getCaloRZBoundary()) { 
+    for (const auto & bounds : m_enclosingEnvelopeSvc->getCaloRZBoundary()) {
       if (std::abs(bounds.second) == enclosedOuterSectorHalflength) {
         if (bounds.first>enclosedOuterRadius)
           enclosedOuterRadius=bounds.first;
@@ -134,22 +134,22 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry(
 
   // prepare the layers
   std::vector<Trk::Layer*> negativeLayers;
-  std::vector<Trk::Layer*> positiveLayers;  
-  
+  std::vector<Trk::Layer*> positiveLayers;
+
   std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers = m_layerBuilder->discLayers(ctx, whandle);
-  
+
   float maxZ = -9999.;
   float minZ =  9999.;
   float thickness = -9999;
-  
+
   // loop and fill positive and negative Layers
   if (discLayers && !discLayers->empty()){
-    // loop over and push into the return/cache vector 
+    // loop over and push into the return/cache vector
     for (const auto & discLayer : (*discLayers) ){
-      // get the center posituion 
+      // get the center posituion
       float zpos = discLayer->surfaceRepresentation().center().z();
       if (zpos > 0) {
-        positiveLayers.push_back(discLayer);    
+        positiveLayers.push_back(discLayer);
         // only saving layer info for positive side
         // as the detector is simmetric
         maxZ = std::max(maxZ, zpos);
@@ -161,94 +161,94 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry(
       }
     }
   }
-  
+
   float envelope = thickness*0.5;
   float minZ_HGTD = minZ-envelope;
   float maxZ_HGTD = maxZ+envelope;
   float maxZ_HGTDEnclosure = enclosedOuterSectorHalflength;
-  
-  // dummy material property 
+
+  // dummy material property
   auto materialProperties = std::make_unique<Trk::Material>();
-  
+
   float zGapPos = 0.5*(minZ_HGTD+enclosedInnerSectorHalflength);
   float gapHalfLengthZ = 0.5*(minZ_HGTD-enclosedInnerSectorHalflength);
-  
+
   // create the gap between the ID and the HGTD endcap volumes
-  Amg::Transform3D* negativeInnerGapTrans = new Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0.,0.,-zGapPos)));
-  Trk::CylinderVolumeBounds* negativeInnerGapBounds = new Trk::CylinderVolumeBounds(enclosedInnerRadius,enclosedOuterRadius,gapHalfLengthZ);
-  
-  Trk::TrackingVolume * negativeInnerGapVolume = 
-      new Trk::TrackingVolume(negativeInnerGapTrans,
+  auto negativeInnerGapTrans = std::make_unique<Amg::Transform3D>(Amg::Translation3D(Amg::Vector3D(0.,0.,-zGapPos)));
+  auto negativeInnerGapBounds = std::make_shared<Trk::CylinderVolumeBounds>(enclosedInnerRadius,enclosedOuterRadius,gapHalfLengthZ);
+
+  Trk::TrackingVolume * negativeInnerGapVolume =
+      new Trk::TrackingVolume(std::move(negativeInnerGapTrans),
                               negativeInnerGapBounds,
                               *materialProperties,
                               nullptr, nullptr,
                               m_layerBuilder->identification()+"::NegativeInnerGap");
 
-  Amg::Transform3D* positiveInnerGapTrans = new Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0.,0.,zGapPos)));
-  Trk::CylinderVolumeBounds* positiveInnerGapBounds = new Trk::CylinderVolumeBounds(enclosedInnerRadius,enclosedOuterRadius,gapHalfLengthZ);
-  
-  Trk::TrackingVolume * positiveInnerGapVolume = 
-       new Trk::TrackingVolume(positiveInnerGapTrans,
-                               positiveInnerGapBounds,
+  auto positiveInnerGapTrans = std::make_unique<Amg::Transform3D>(Amg::Translation3D(Amg::Vector3D(0.,0.,zGapPos)));
+  auto positiveInnerGapBounds = std::make_shared<Trk::CylinderVolumeBounds>(enclosedInnerRadius,enclosedOuterRadius,gapHalfLengthZ);
+
+  Trk::TrackingVolume * positiveInnerGapVolume =
+       new Trk::TrackingVolume(std::move(positiveInnerGapTrans),
+                               std::move(positiveInnerGapBounds),
                                *materialProperties,
                                nullptr, nullptr,
                                m_layerBuilder->identification()+"::PositiveInnerGap");
-       
+
   // create dummy inner volume if not built already
   if (not innerVol) {
-    Trk::CylinderVolumeBounds* idBounds = new Trk::CylinderVolumeBounds(enclosedInnerRadius,
-                                                                        enclosedInnerSectorHalflength);
-    Amg::Transform3D* idTr = new Amg::Transform3D(Trk::s_idTransform);
+    auto idBounds = std::make_shared<Trk::CylinderVolumeBounds>(enclosedInnerRadius,
+                                                                enclosedInnerSectorHalflength);
+    auto idTr = std::make_unique<Amg::Transform3D>(Trk::s_idTransform);
     // dummy objects
     Trk::LayerArray* dummyLayers = nullptr;
     Trk::TrackingVolumeArray* dummyVolumes = nullptr;
-    
-    innerVol = new Trk::TrackingVolume(idTr, idBounds, *materialProperties,
+
+    innerVol = new Trk::TrackingVolume(std::move(idTr), std::move(idBounds), *materialProperties,
                                        dummyLayers, dummyVolumes,
                                        "HGTD::GapVolumes::DummyID");
   }
-  
+
   std::vector<Trk::TrackingVolume*> inBufferVolumes;
-  inBufferVolumes.push_back(negativeInnerGapVolume);  
-  inBufferVolumes.push_back(innerVol);     
-  inBufferVolumes.push_back(positiveInnerGapVolume);     
-   
-  Trk::TrackingVolume* inDetEnclosed = 
+  inBufferVolumes.push_back(negativeInnerGapVolume);
+  inBufferVolumes.push_back(innerVol);
+  inBufferVolumes.push_back(positiveInnerGapVolume);
+
+  Trk::TrackingVolume* inDetEnclosed =
     m_trackingVolumeCreator->createContainerTrackingVolume(inBufferVolumes,
                                                            *materialProperties,
-                                                           "HGTD::Container::EnclosedInnerDetector");    
-  
-  // create the tracking volumes 
+                                                           "HGTD::Container::EnclosedInnerDetector");
+
+  // create the tracking volumes
   // create the three volumes
-  Trk::TrackingVolume* negativeVolume = 
+  Trk::TrackingVolume* negativeVolume =
     m_trackingVolumeCreator->createTrackingVolume(negativeLayers,
                                                   *materialProperties,
                                                   enclosedInnerRadius, enclosedOuterRadius,
                                                   -maxZ_HGTD, -minZ_HGTD,
                                                   m_layerBuilder->identification()+"::NegativeEndcap",
                                                   (Trk::BinningType)m_layerBinningType);
-  
-  
-  Trk::TrackingVolume* positiveVolume = 
+
+
+  Trk::TrackingVolume* positiveVolume =
     m_trackingVolumeCreator->createTrackingVolume(positiveLayers,
                                                   *materialProperties,
                                                   enclosedInnerRadius, enclosedOuterRadius,
                                                   minZ_HGTD, maxZ_HGTD,
                                                   m_layerBuilder->identification()+"::PositiveEndcap",
                                                   (Trk::BinningType)m_layerBinningType);
-  
+
   // the base volumes have been created
   ATH_MSG_VERBOSE('\t' << '\t'<< "Volumes have been created, now pack them into a triple.");
-  negativeVolume->registerColorCode(m_colorCodeConfig);   
+  negativeVolume->registerColorCode(m_colorCodeConfig);
   inDetEnclosed->registerColorCode(m_colorCodeConfig);
   positiveVolume->registerColorCode(m_colorCodeConfig);
-                                                        
+
   // pack them together
   std::vector<Trk::TrackingVolume*> tripleVolumes;
   tripleVolumes.push_back(negativeVolume);
   tripleVolumes.push_back(inDetEnclosed);
   tripleVolumes.push_back(positiveVolume);
-  
+
   // create the tiple container
   Trk::TrackingVolume* tripleContainer =
     m_trackingVolumeCreator->createContainerTrackingVolume(tripleVolumes,
@@ -285,23 +285,23 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry(
   enclosedVolumes.push_back(negativeEnclosure);
   enclosedVolumes.push_back(tripleContainer);
   enclosedVolumes.push_back(positiveEnclosure);
-  
-   Trk::TrackingVolume* enclosedDetector = 
-      m_trackingVolumeCreator->createContainerTrackingVolume(enclosedVolumes,     
+
+   Trk::TrackingVolume* enclosedDetector =
+      m_trackingVolumeCreator->createContainerTrackingVolume(enclosedVolumes,
                                                              *materialProperties,
                                                              "HGTD::Detectors::"+m_layerBuilder->identification(),
                                                              m_buildBoundaryLayers,
                                                              m_replaceJointBoundaries);
-      
+
   ATH_MSG_VERBOSE( '\t' << '\t'<< "Created enclosed HGTD volume with bounds: " << enclosedDetector->volumeBounds() );
 
-  //  create the TrackingGeometry ------------------------------------------------------  
+  //  create the TrackingGeometry ------------------------------------------------------
   auto hgtdTrackingGeometry = std::make_unique<Trk::TrackingGeometry>(enclosedDetector);
-  
+
   if (m_indexStaticLayers and hgtdTrackingGeometry)
-   hgtdTrackingGeometry->indexStaticLayers( geometrySignature() );   
+   hgtdTrackingGeometry->indexStaticLayers( geometrySignature() );
   if (msgLvl(MSG::VERBOSE) && hgtdTrackingGeometry)
-    hgtdTrackingGeometry->printVolumeHierarchy(msg(MSG::VERBOSE)); 
+    hgtdTrackingGeometry->printVolumeHierarchy(msg(MSG::VERBOSE));
 
   return hgtdTrackingGeometry;
 }

@@ -13,8 +13,6 @@
 #include "GaudiKernel/MsgStream.h"
 //CxxUtils
 #include "CxxUtils/inline_hints.h"
-// STD
-#include <cassert>
 
 // default constructor
 Trk::ConeSurface::ConeSurface()
@@ -46,7 +44,7 @@ Trk::ConeSurface::ConeSurface(const Amg::Transform3D& htrans,
                               double alpha,
                               bool symmetric)
   : Trk::Surface(htrans)
-  , m_bounds(std::make_shared<Trk::ConeBounds>(alpha, symmetric))
+  , m_bounds(std::make_shared<const Trk::ConeBounds>(alpha, symmetric))
   , m_referencePoint(nullptr)
   , m_rotSymmetryAxis(nullptr)
 {}
@@ -58,20 +56,19 @@ Trk::ConeSurface::ConeSurface(const Amg::Transform3D& htrans,
                               double zmax,
                               double halfPhi)
   : Trk::Surface(htrans)
-  , m_bounds(std::make_shared<Trk::ConeBounds>(alpha, zmin, zmax, halfPhi))
+  , m_bounds(std::make_shared<const Trk::ConeBounds>(alpha, zmin, zmax, halfPhi))
   , m_referencePoint(nullptr)
   , m_rotSymmetryAxis(nullptr)
 {}
 
 // constructor by ConeBounds
 Trk::ConeSurface::ConeSurface(const Amg::Transform3D& htrans,
-                              Trk::ConeBounds* cbounds)
+                              std::shared_ptr<const Trk::ConeBounds> cbounds)
   : Trk::Surface(htrans)
-  , m_bounds(cbounds)
+  , m_bounds(std::move(cbounds))
   , m_referencePoint(nullptr)
   , m_rotSymmetryAxis(nullptr)
 {
-  assert(cbounds);
 }
 
 // constructor from transform, bounds not set.

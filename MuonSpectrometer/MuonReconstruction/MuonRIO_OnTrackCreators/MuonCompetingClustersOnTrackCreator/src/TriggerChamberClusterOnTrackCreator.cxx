@@ -370,21 +370,22 @@ TriggerChamberClusterOnTrackCreator::makeOverallParameters(
     if (rectbds)
     {
        shape = " RPC rectangle ";
-       surface = new Trk::PlaneSurface(Amg::Transform3D(rotation),rectbds->clone());
+       surface = new Trk::PlaneSurface(Amg::Transform3D(rotation),
+                                       std::shared_ptr<Trk::RectangleBounds>(rectbds->clone()));
     }
     else if (trapbds)
     {
        shape = " TGC trapezoid ";
        surface = new Trk::PlaneSurface(
            Amg::Transform3D(rotation),
-           trapbds->clone());
+           std::shared_ptr<Trk::TrapezoidBounds>(trapbds->clone()));
     }
     else if (rottrapbds)
     {
        shape = " TGC rotatedTrapezoid ";
        surface = new Trk::PlaneSurface(
            Amg::Transform3D(rotation),
-           rottrapbds->clone());
+           std::shared_ptr<Trk::RotatedTrapezoidBounds>(rottrapbds->clone()));
     }
 
     // debug

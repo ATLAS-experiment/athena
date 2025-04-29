@@ -21,12 +21,12 @@
 
 Trk::CylinderLayer::CylinderLayer(
   const Amg::Transform3D& transform,
-  Trk::CylinderBounds* cbounds,
+  std::shared_ptr<Trk::CylinderBounds> cbounds,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
   std::unique_ptr<Trk::OverlapDescriptor> olap,
   int laytyp)
-  : CylinderSurface(transform, cbounds)
+  : CylinderSurface(transform, std::move(cbounds))
   , Layer(laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(nullptr)
 {
@@ -46,14 +46,15 @@ Trk::CylinderLayer::CylinderLayer(
   CylinderSurface::associateLayer(*this);
 }
 
-Trk::CylinderLayer::CylinderLayer(const Amg::Transform3D& transform,
-                                  Trk::CylinderBounds* cbounds,
-                                  std::unique_ptr<Trk::SurfaceArray> surfaceArray,
-                                  double thickness,
-                                  std::unique_ptr<Trk::OverlapDescriptor> olap,
-                                  Trk::IApproachDescriptor* ades,
+Trk::CylinderLayer::CylinderLayer(
+  const Amg::Transform3D& transform,
+  std::shared_ptr<Trk::CylinderBounds> cbounds,
+  std::unique_ptr<Trk::SurfaceArray> surfaceArray,
+  double thickness,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
+  Trk::IApproachDescriptor* ades,
                                   int laytyp)
-  : CylinderSurface(transform, cbounds)
+  : CylinderSurface(transform, std::move(cbounds))
   , Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
@@ -67,14 +68,14 @@ Trk::CylinderLayer::CylinderLayer(const Amg::Transform3D& transform,
 
 Trk::CylinderLayer::CylinderLayer(
   const Amg::Transform3D& transform,
-  Trk::CylinderBounds* cbounds,
+  std::shared_ptr<Trk::CylinderBounds> cbounds,
   std::unique_ptr<Trk::SurfaceArray> surfaceArray,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
   std::unique_ptr<Trk::OverlapDescriptor> olap,
   Trk::IApproachDescriptor* ades,
   int laytyp)
-  : CylinderSurface(transform, cbounds)
+  : CylinderSurface(transform, std::move(cbounds))
   , Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
@@ -87,21 +88,24 @@ Trk::CylinderLayer::CylinderLayer(
 }
 
 Trk::CylinderLayer::CylinderLayer(
-    Trk::CylinderBounds* cbounds,
-    const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
-    : CylinderSurface(cbounds),
+    std::shared_ptr<Trk::CylinderBounds> cbounds,
+    const Trk::LayerMaterialProperties& laymatprop,
+    double thickness,
+    std::unique_ptr<Trk::OverlapDescriptor> olap,
+    int laytyp)
+    : CylinderSurface(std::move(cbounds)),
       Layer(laymatprop, thickness, std::move(olap), laytyp),
       m_approachDescriptor(nullptr) {
   CylinderSurface::associateLayer(*this);
 }
 
-Trk::CylinderLayer::CylinderLayer(Trk::CylinderBounds* cbounds,
-                                  std::unique_ptr<Trk::SurfaceArray> surfaceArray,
-                                  double thickness,
-                                  std::unique_ptr<Trk::OverlapDescriptor> olap,
-                                  Trk::IApproachDescriptor* ades, int laytyp)
-    : CylinderSurface(cbounds),
+Trk::CylinderLayer::CylinderLayer(
+  std::shared_ptr<Trk::CylinderBounds> cbounds,
+  std::unique_ptr<Trk::SurfaceArray> surfaceArray,
+  double thickness,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
+  Trk::IApproachDescriptor* ades, int laytyp)
+    : CylinderSurface(std::move(cbounds)),
       Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp),
       m_approachDescriptor(ades) {
   CylinderSurface::associateLayer(*this);
@@ -111,10 +115,13 @@ Trk::CylinderLayer::CylinderLayer(Trk::CylinderBounds* cbounds,
 }
 
 Trk::CylinderLayer::CylinderLayer(
-    Trk::CylinderBounds* cbounds, std::unique_ptr<Trk::SurfaceArray> surfaceArray,
-    const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    std::unique_ptr<Trk::OverlapDescriptor> olap, Trk::IApproachDescriptor* ades, int laytyp)
-    : CylinderSurface(cbounds),
+    std::shared_ptr<Trk::CylinderBounds> cbounds,
+    std::unique_ptr<Trk::SurfaceArray> surfaceArray,
+    const Trk::LayerMaterialProperties& laymatprop,
+    double thickness,
+    std::unique_ptr<Trk::OverlapDescriptor> olap,
+    Trk::IApproachDescriptor* ades, int laytyp)
+    : CylinderSurface(std::move(cbounds)),
       Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp),
       m_approachDescriptor(ades) {
   CylinderSurface::associateLayer(*this);
@@ -124,11 +131,13 @@ Trk::CylinderLayer::CylinderLayer(
 }
 
 Trk::CylinderLayer::CylinderLayer(const Trk::CylinderLayer& clay)
-    : CylinderSurface(clay), Layer(clay), m_approachDescriptor(nullptr) {
+    : CylinderSurface(clay),
+    Layer(clay),
+    m_approachDescriptor(nullptr) {
   CylinderSurface::associateLayer(*this);
   m_approachDescriptor.reset();
   if (m_surfaceArray)
-    buildApproachDescriptor();  //!< TODO use clone when exists
+    buildApproachDescriptor();
 }
 
 Trk::CylinderLayer::CylinderLayer(const Trk::CylinderLayer& clay,
@@ -136,7 +145,9 @@ Trk::CylinderLayer::CylinderLayer(const Trk::CylinderLayer& clay,
     : CylinderSurface(clay, transf),
       Layer(clay),
       m_approachDescriptor(nullptr) {
-  if (m_surfaceArray) buildApproachDescriptor();
+  if (m_surfaceArray) {
+    buildApproachDescriptor();
+  }
 }
 
 Trk::CylinderLayer& Trk::CylinderLayer::operator=(const CylinderLayer& clay) {
@@ -206,7 +217,7 @@ void Trk::CylinderLayer::resizeLayer(const VolumeBounds& bounds,
     Trk::CylinderBounds* rCylinderBounds =
         new Trk::CylinderBounds(r, hLengthZ - envelope);
     Trk::CylinderSurface::m_bounds =
-        std::shared_ptr<const Trk::CylinderBounds>(rCylinderBounds);
+        std::shared_ptr<Trk::CylinderBounds>(rCylinderBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // rphi/z binning
     if (Trk::Layer::m_layerMaterialProperties) {

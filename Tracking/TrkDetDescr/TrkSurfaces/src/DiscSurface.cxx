@@ -49,7 +49,7 @@ Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans,
                               double rmin,
                               double rmax)
   : Trk::Surface(htrans)
-  , m_bounds(std::make_shared<Trk::DiscBounds>(rmin, rmax))
+  , m_bounds(std::make_shared<const Trk::DiscBounds>(rmin, rmax))
   , m_referencePoint(nullptr)
 {}
 
@@ -82,27 +82,30 @@ Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans,
 
 // construct a disc with given bounds
 Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans,
-                              Trk::DiscBounds* dbounds)
+                              std::shared_ptr<const Trk::DiscBounds> dbounds)
   : Trk::Surface(htrans)
-  , m_bounds(dbounds)
+  , m_bounds(std::move(dbounds))
   , m_referencePoint(nullptr)
 {}
 
 // construct a disc with given bounds
 Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans,
-                              Trk::DiscTrapezoidalBounds* dbounds)
+                              std::shared_ptr<const Trk::DiscTrapezoidalBounds> dbounds)
   : Trk::Surface(htrans)
-  , m_bounds(dbounds)
+  , m_bounds(std::move(dbounds))
   , m_referencePoint(nullptr)
 {}
 
-Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans, Trk::AnnulusBoundsPC* annpcbounds)
+Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans,
+                              std::shared_ptr<const Trk::AnnulusBoundsPC> annpcbounds)
   : Trk::Surface(htrans),
-  m_bounds(annpcbounds),
+  m_bounds(std::move(annpcbounds)),
   m_referencePoint(nullptr)
 {}
 
-Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans, std::unique_ptr<Trk::AnnulusBounds> annbounds, const TrkDetElementBase* detElem)
+Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans,
+                              const Trk::AnnulusBounds& annbounds,
+                              const TrkDetElementBase* detElem)
   : Trk::Surface(htrans),
     m_referencePoint(nullptr)
 {
@@ -113,15 +116,13 @@ Trk::DiscSurface::DiscSurface(const Amg::Transform3D& htrans, std::unique_ptr<Tr
   }
 
   // build AnnulusBoundsPC from XY AnnulusBounds
-  std::pair<AnnulusBoundsPC, double> res = AnnulusBoundsPC::fromCartesian(*annbounds);
-  std::shared_ptr<AnnulusBoundsPC> annpcbounds(res.first.clone());
+  std::pair<AnnulusBoundsPC, double> res = AnnulusBoundsPC::fromCartesian(annbounds);
+  m_bounds = std::make_shared<AnnulusBoundsPC>(res.first);
   double phiShift = res.second;
-  m_bounds = annpcbounds; // this casts to SurfaceBounds
-
   // construct shifted transform
   // we get the necessary rotation from ::fromCartesian(), and we need to make
   // the local coordinate system to be rotated correctly here
-  Amg::Vector2D origin2D = annpcbounds->moduleOrigin();
+  Amg::Vector2D origin2D = res.first.moduleOrigin();
   Amg::Translation3D transl(Amg::Vector3D(origin2D.x(), origin2D.y(), 0));
   Amg::Rotation3D rot(Amg::AngleAxis3D(-phiShift, Amg::Vector3D::UnitZ()));
   Amg::Transform3D originTrf;
@@ -274,7 +275,7 @@ Trk::DiscSurface::straightLineIntersection(const Amg::Vector3D& pos,
   return Trk::Intersection(pos, 0., false);
 }
 
-#if defined(FLATTEN) 
+#if defined(FLATTEN)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,

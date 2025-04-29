@@ -204,7 +204,7 @@ namespace Trk {
     const IInterface * p
   ):
     base_class(t, n, p),
-    m_idVolume(nullptr, std::make_unique<Trk::CylinderVolumeBounds>(560, 2750).release())
+    m_idVolume(nullptr, std::make_shared<Trk::CylinderVolumeBounds>(560, 2750))
   {
   }
 

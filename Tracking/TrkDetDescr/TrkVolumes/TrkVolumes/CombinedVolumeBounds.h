@@ -64,7 +64,7 @@ class CombinedVolumeBounds final : public VolumeBounds {
   virtual bool inside(const Amg::Vector3D&, double tol = 0.) const override final;
 
   /** Method to decompose the Bounds into boundarySurfaces */
-  virtual const std::vector<const Trk::Surface*>* decomposeToSurfaces
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces
   (const Amg::Transform3D& transform) override final;
 
   /** Provide accessor for BoundarySurfaces */

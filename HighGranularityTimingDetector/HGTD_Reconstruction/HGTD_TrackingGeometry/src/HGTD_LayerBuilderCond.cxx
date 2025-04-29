@@ -281,7 +281,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
     Amg::Transform3D activeLayerTransform ;
     activeLayerTransform = Amg::Translation3D(0.,0.,thisDiscZpos);
 
-    Trk::DiscBounds* activeLayerBounds = new Trk::DiscBounds(minRmin, maxRmax);
+    auto activeLayerBounds = std::make_shared<Trk::DiscBounds>(minRmin, maxRmax);
 
     auto olDescriptor = std::make_unique<HGTD_OverlapDescriptor>(
         currentBinnedArray.get(), rBins, phiBins);

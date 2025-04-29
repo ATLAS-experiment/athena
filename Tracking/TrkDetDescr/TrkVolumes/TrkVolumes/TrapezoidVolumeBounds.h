@@ -84,7 +84,7 @@ class TrapezoidVolumeBounds final: public VolumeBounds {
   bool inside(const Amg::Vector3D&, double tol = 0.) const override final;
 
   /** Method to decompose the Bounds into Surfaces */
-  const std::vector<const Trk::Surface*>* decomposeToSurfaces
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces
   (const Amg::Transform3D& transform) override final;
 
   /** Provide accessor for BoundarySurfaces */
@@ -119,23 +119,23 @@ class TrapezoidVolumeBounds final: public VolumeBounds {
  private:
   /** This method returns the associated TrapezoidBounds of the face
    * PlaneSurface parallel to local xy plane */
-  TrapezoidBounds* faceXYTrapezoidBounds() const;
+  std::shared_ptr<TrapezoidBounds> faceXYTrapezoidBounds() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * attached to alpha (negative local x)*/
-  RectangleBounds* faceAlphaRectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceAlphaRectangleBounds() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * attached to beta (positive local x)*/
-  RectangleBounds* faceBetaRectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceBetaRectangleBounds() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * parallel to local zx plane, negative local y */
-  RectangleBounds* faceZXRectangleBoundsBottom() const;
+  std::shared_ptr<RectangleBounds> faceZXRectangleBoundsBottom() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * parallel to local zx plane, positive local y */
-  RectangleBounds* faceZXRectangleBoundsTop() const;
+  std::shared_ptr<RectangleBounds> faceZXRectangleBoundsTop() const;
 
   double m_minHalfX;  //!< minimal halflength in x
   double m_maxHalfX;  //!< maximal halflength in x

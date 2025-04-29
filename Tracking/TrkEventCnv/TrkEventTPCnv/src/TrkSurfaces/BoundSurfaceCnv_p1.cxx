@@ -24,7 +24,7 @@ persToTrans( const Trk::BoundSurface_p1 *persObj, SURFACE *transObj, MsgStream &
 {
    m_surfaceCnv.persToTrans( persObj, transObj, log );
    Trk::SurfaceBounds* bounds = this->createTransFromPStore( &m_boundsCnv, persObj->m_bounds, log );
-   transObj->m_bounds = std::shared_ptr<const Trk::SurfaceBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::SurfaceBounds>(bounds);
 }
 
 // Specialization for CylinderSurface (most surfaces have m_bound == SurfaceBounds*, but Cyl Surf is limited to having Cylinder Bounds.)
@@ -35,7 +35,7 @@ persToTrans( const Trk::BoundSurface_p1 *persObj, Trk::CylinderSurface *transObj
 {
    m_surfaceCnv.persToTrans( persObj, transObj, log );
    Trk::CylinderBounds* bounds = this->createTransFromPStore( &m_boundsCnv, persObj->m_bounds, log );
-   transObj->m_bounds = std::shared_ptr<const Trk::CylinderBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::CylinderBounds>(bounds);
 }
 
 // Specialization for StraightLineSurface (most surfaces have m_bound == SurfaceBounds*, but StraightLineSurface is limited to having Cylinder Bounds.)
@@ -46,7 +46,7 @@ persToTrans( const Trk::BoundSurface_p1 *persObj, Trk::StraightLineSurface *tran
 {
    m_surfaceCnv.persToTrans( persObj, transObj, log );
    Trk::CylinderBounds* bounds = this->createTransFromPStore( &m_boundsCnv, persObj->m_bounds, log );
-   transObj->m_bounds = std::shared_ptr<const Trk::CylinderBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::CylinderBounds>(bounds);
 }
 
 
@@ -73,7 +73,7 @@ persToTrans( const Trk::BoundSurface_p1 *persObj, SURFACE *transObj, MsgStream &
 {
    m_surfaceCnv.persToTrans( persObj, transObj, log );
    Trk::SurfaceBounds* bounds = this->createTransFromPStore( (TPCnvForSurfBnds**)nullptr, persObj->m_bounds, log );
-   transObj->m_bounds = std::shared_ptr<const Trk::SurfaceBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::SurfaceBounds>(bounds);
 }
 
 

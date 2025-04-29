@@ -89,12 +89,11 @@ Trk::DoubleTrapezoidVolumeBounds::operator=(
   return *this;
 }
 
-const std::vector<const Trk::Surface*>*
+std::vector<std::unique_ptr<Trk::Surface>>
   Trk::DoubleTrapezoidVolumeBounds::decomposeToSurfaces
-  (const Amg::Transform3D& transform) 
+  (const Amg::Transform3D& transform)
 {
-  std::vector<const Trk::Surface*>* retsf =
-    new std::vector<const Trk::Surface*>;
+  auto retsf = std::vector<std::unique_ptr<Trk::Surface>>();
 
   // face surfaces xy
   Amg::RotationMatrix3D diamondRotation(transform.rotation());
@@ -104,7 +103,7 @@ const std::vector<const Trk::Surface*>*
   Amg::Vector3D diamondCenter(transform.translation());
 
   //   (1) - at negative local z
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(0., 0., -this->halflengthZ())) *
@@ -112,7 +111,7 @@ const std::vector<const Trk::Surface*>*
       ),
     this->faceXYDiamondBounds()));
   //   (2) - at positive local z
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(0., 0., this->halflengthZ()))),
@@ -131,9 +130,9 @@ const std::vector<const Trk::Surface*>*
     alpha1ZRotation *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
-  RectangleBounds* faceAlpha1Bounds = this->faceAlpha1RectangleBounds();
+  std::shared_ptr<RectangleBounds> faceAlpha1Bounds = this->faceAlpha1RectangleBounds();
   const Amg::Vector3D& faceAlpha1Position(A);
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
    Amg::Transform3D(
     transform * Amg::Translation3D(faceAlpha1Position) * Amg::Transform3D(alpha1Rotation) ),
     faceAlpha1Bounds));
@@ -145,9 +144,9 @@ const std::vector<const Trk::Surface*>*
     beta1ZRotation *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
-  RectangleBounds* faceBeta1Bounds = this->faceBeta1RectangleBounds();
+  std::shared_ptr<RectangleBounds> faceBeta1Bounds = this->faceBeta1RectangleBounds();
   const Amg::Vector3D& faceBeta1Position(B);
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     transform * Amg::Translation3D(faceBeta1Position) * Amg::Transform3D(beta1Rotation) ,
     faceBeta1Bounds));
   // face surfaces yz
@@ -160,10 +159,10 @@ const std::vector<const Trk::Surface*>*
     alpha2ZRotation *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
-  RectangleBounds* faceAlpha2Bounds = this->faceAlpha2RectangleBounds();
+  std::shared_ptr<RectangleBounds> faceAlpha2Bounds = this->faceAlpha2RectangleBounds();
   const Amg::Vector3D& faceAlpha2Position(
     AA);
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
     transform * Amg::Translation3D(faceAlpha2Position) * Amg::Transform3D(alpha2Rotation)),
     faceAlpha2Bounds));
@@ -175,14 +174,14 @@ const std::vector<const Trk::Surface*>*
     beta2ZRotation *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
-  RectangleBounds* faceBeta2Bounds = this->faceBeta2RectangleBounds();
+  std::shared_ptr<RectangleBounds> faceBeta2Bounds = this->faceBeta2RectangleBounds();
   const Amg::Vector3D& faceBeta2Position(BB);
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     transform * Amg::Translation3D(faceBeta2Position) * Amg::Transform3D(beta2Rotation),
     faceBeta2Bounds));
   // face surfaces zx
   //   (7) - at negative local y
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(0., -2 * this->halflengthY1(), 0.)) *
@@ -191,7 +190,7 @@ const std::vector<const Trk::Surface*>*
       Amg::AngleAxis3D(-90. * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.))),
     this->faceZXRectangleBoundsBottom()));
   //   (8) - at positive local y
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(0., 2*this->halflengthY2(), 0.)) *
@@ -203,47 +202,47 @@ const std::vector<const Trk::Surface*>*
 }
 
 // faces in xy
-Trk::DiamondBounds*
+std::shared_ptr<Trk::DiamondBounds>
 Trk::DoubleTrapezoidVolumeBounds::faceXYDiamondBounds() const
 {
-  return new Trk::DiamondBounds(
+  return std::make_shared<Trk::DiamondBounds>(
     m_minHalfX, m_medHalfX, m_maxHalfX, m_halfY1, m_halfY2);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::DoubleTrapezoidVolumeBounds::faceAlpha1RectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfY1 / cos(m_alpha1), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_halfY1 / cos(m_alpha1), m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::DoubleTrapezoidVolumeBounds::faceAlpha2RectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfY2 / cos(m_alpha2), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_halfY2 / cos(m_alpha2), m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::DoubleTrapezoidVolumeBounds::faceBeta1RectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfY1 / cos(m_alpha1), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_halfY1 / cos(m_alpha1), m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::DoubleTrapezoidVolumeBounds::faceBeta2RectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfY2 / cos(m_alpha2), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_halfY2 / cos(m_alpha2), m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::DoubleTrapezoidVolumeBounds::faceZXRectangleBoundsBottom() const
 {
-  return new Trk::RectangleBounds(m_halfZ, m_minHalfX);
+  return std::make_shared<Trk::RectangleBounds>(m_halfZ, m_minHalfX);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::DoubleTrapezoidVolumeBounds::faceZXRectangleBoundsTop() const
 {
-  return new Trk::RectangleBounds(m_halfZ, m_maxHalfX);
+  return std::make_shared<Trk::RectangleBounds>(m_halfZ, m_maxHalfX);
 }
 
 // Trk::RectangleBounds*
@@ -264,10 +263,9 @@ Trk::DoubleTrapezoidVolumeBounds::inside(const Amg::Vector3D& pos, double tol)
     return false;
   if (pos.y() > 2 * m_halfY2 + tol)
     return false;
-  Trk::DiamondBounds* faceXYBounds = this->faceXYDiamondBounds();
+  std::shared_ptr<Trk::DiamondBounds> faceXYBounds = this->faceXYDiamondBounds();
   Amg::Vector2D locp(pos.x(), pos.y());
   bool inside(faceXYBounds->inside(locp, tol, tol));
-  delete faceXYBounds;
   return inside;
 }
 

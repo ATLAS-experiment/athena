@@ -10,7 +10,6 @@
 #define TRKSURFACES_CYLINDERSURFACE_H
 
 // Trk
-#include <memory>
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkParametersBase/ParametersT.h"
@@ -20,6 +19,7 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include <memory>
 class MsgStream;
 template<class SURFACE, class BOUNDS_CNV>
 class BoundSurfaceCnv_p1;
@@ -87,9 +87,8 @@ public:
                   double hphi,
                   double hlength);
 
-  /**Constructor from EigenTransform and CylinderBounds
-    - ownership of the bounds is passed */
-  CylinderSurface(const Amg::Transform3D& htrans, CylinderBounds* cbounds);
+  /**Constructor from EigenTransform and CylinderBounds*/
+  CylinderSurface(const Amg::Transform3D& htrans, std::shared_ptr<const CylinderBounds> cbounds);
 
   /**Constructor from EigenTransform from unique_ptr.
      - bounds is not set */
@@ -106,7 +105,7 @@ public:
   /**Constructor from EigenTransform and CylinderBounds
       - ownership of the bounds is passed
       - speed optimized fron concentric volumes */
-  CylinderSurface(CylinderBounds* cbounds);
+  CylinderSurface(std::shared_ptr<const CylinderBounds> cbounds);
 
    /**Copy constructor with shift */
   CylinderSurface(const CylinderSurface& csf, const Amg::Transform3D& transf);

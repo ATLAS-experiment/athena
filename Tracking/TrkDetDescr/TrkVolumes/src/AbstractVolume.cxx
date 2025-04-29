@@ -34,9 +34,9 @@ Trk::AbstractVolume::AbstractVolume()
 
 // constructor with Amg::Transform3D
 Trk::AbstractVolume::AbstractVolume(
-  Amg::Transform3D* htrans,
-  Trk::VolumeBounds* volbounds)
-  : Volume(htrans, volbounds)
+  std::unique_ptr<Amg::Transform3D> htrans,
+  std::shared_ptr<Trk::VolumeBounds> volbounds)
+  : Volume(std::move(htrans), std::move(volbounds))
   , m_boundarySurfaces(nullptr)
 {
   createBoundarySurfaces();
@@ -81,51 +81,43 @@ void Trk::AbstractVolume::createBoundarySurfaces()
   m_boundarySurfaces = new std::vector<
     std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>>;
   // transform Surfaces To BoundarySurfaces
-  const std::vector<const Trk::Surface*>* surfaces =
+  std::vector<std::unique_ptr<Trk::Surface>> surfaces =
     Trk::Volume::volumeBounds().decomposeToSurfaces(this->transform());
-  std::vector<const Trk::Surface*>::const_iterator surfIter = surfaces->begin();
+  auto surfIter = surfaces.begin();
 
   // counter to flip the inner/outer position for Cylinders
   int sfCounter = 0;
-  int sfNumber = surfaces->size();
+  int sfNumber = surfaces.size();
 
-  for (; surfIter != surfaces->end(); ++surfIter) {
+  for (; surfIter != surfaces.end(); ++surfIter) {
     sfCounter++;
-    const Trk::PlaneSurface* psf =
-      dynamic_cast<const Trk::PlaneSurface*>(*surfIter);
+    Trk::PlaneSurface* psf = dynamic_cast<Trk::PlaneSurface*>((*surfIter).get());
     if (psf) {
       m_boundarySurfaces->push_back(
-        std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
-          new Trk::BoundaryPlaneSurface<Trk::AbstractVolume>(
-            this, nullptr, *psf)));
-      delete psf;
+          std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
+              new Trk::BoundaryPlaneSurface<Trk::AbstractVolume>(this, nullptr,
+                                                                 *psf)));
       continue;
     }
-    const Trk::DiscSurface* dsf =
-      dynamic_cast<const Trk::DiscSurface*>(*surfIter);
+    Trk::DiscSurface* dsf = dynamic_cast<Trk::DiscSurface*>((*surfIter).get());
     if (dsf) {
       m_boundarySurfaces->push_back(
-        std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
-          new Trk::BoundaryDiscSurface<Trk::AbstractVolume>(
-            this, nullptr, *dsf)));
-      delete dsf;
+          std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
+              new Trk::BoundaryDiscSurface<Trk::AbstractVolume>(this, nullptr,
+                                                                *dsf)));
       continue;
     }
-    const Trk::CylinderSurface* csf =
-      dynamic_cast<const Trk::CylinderSurface*>(*surfIter);
+    Trk::CylinderSurface* csf = dynamic_cast<Trk::CylinderSurface*>((*surfIter).get());
     if (csf) {
       Trk::AbstractVolume* inner =
         (sfCounter == 3 && sfNumber > 3) ? nullptr : this;
       Trk::AbstractVolume* outer = (inner) ? nullptr : this;
       m_boundarySurfaces->push_back(
-        std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
-          new Trk::BoundaryCylinderSurface<Trk::AbstractVolume>(
-            inner, outer, *csf)));
-      delete csf;
+          std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
+              new Trk::BoundaryCylinderSurface<Trk::AbstractVolume>(
+                  inner, outer, *csf)));
       continue;
     }
   }
-
-  delete surfaces;
 }
 

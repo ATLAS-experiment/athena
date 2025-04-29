@@ -104,13 +104,13 @@ public:
 
   /**
    * @brief Returns the four corners of the bounds
-   * 
-   * Returns the module corners starting from the upper right (max R, pos locX) and proceding clock-wise, 
+   *
+   * Returns the module corners starting from the upper right (max R, pos locX) and proceding clock-wise,
    * i.e. (max R; pos locX), (min R; pos locX), (min R; neg loc X), (max R; neg locX).
-   * 
+   *
    * This method is only intended for debug purposes. If used for production code, this should be changed to a
    * return-by-reference. This will necessitate the vector being stored in the class.
-   * 
+   *
    * @return array of pairs of doubles giving the (R, x) of each corner clockwise from upper-right
    * */
   std::array<std::pair<double, double>, 4> corners() const;
@@ -175,15 +175,15 @@ public:
 
   /**
    * @brief Returns the gradient and y-intercept of the left and right module edges.
-   * 
+   *
    * This method is only intended for debug purposes. If used for production code, this should be changed to a
    * return-by-reference. This will necessitate the vector being stored in the class.
-   * 
-   * @return Vector with the gradients (m) and intercepts (c) of the left (_L) and right (_R) edges. [m_L, m_R, c_L, c_R] 
+   *
+   * @return Vector with the gradients (m) and intercepts (c) of the left (_L) and right (_R) edges. [m_L, m_R, c_L, c_R]
    */
   std::array<TDD_real_t,4> getEdgeLines() const;
 
-  const std::vector<TDD_real_t>& getBoundsValues();
+  const std::vector<TDD_real_t>& getBoundsValues() const;
 
 private:
   //      bool m_forceCovEllipse;
@@ -209,11 +209,11 @@ private:
                        const std::vector<TDD_real_t>& sL,
                        const std::vector<TDD_real_t>& sR) ;
 
-  /** 
-   * @brief Circle and line intersection. \n 
-   * 
+  /**
+   * @brief Circle and line intersection. \n
+   *
    * Circle is of radius R and centred at the origin. Line takes the form y = kx + d
-   * 
+   *
    * @param R Radius of the circle
    * @param k Gradient of the line
    * @param d Intercept of the line

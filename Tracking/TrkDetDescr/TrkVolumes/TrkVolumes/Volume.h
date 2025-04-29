@@ -31,6 +31,7 @@ namespace Trk {
     regarding the geometrical information.
 
     @author Andreas.Salzburger@cern.ch
+    @author Christos Anastopoulos (Athena MT modifications)
     */
     class Volume {
       public:
@@ -38,7 +39,8 @@ namespace Trk {
         Volume();
 
         /** Expizit constructor with arguments */
-        Volume(Amg::Transform3D* htrans, VolumeBounds* volBounds);
+        Volume(std::unique_ptr<Amg::Transform3D> htrans,
+               std::shared_ptr<VolumeBounds> volBounds);
 
         /** Copy Constructor */
         Volume(const Volume& vol);
@@ -75,7 +77,7 @@ namespace Trk {
       protected:
         std::unique_ptr<Amg::Transform3D>             m_transform;         //!< HepGeom::Transform3D
         CxxUtils::CachedUniquePtr<Amg::Vector3D>      m_center;            //!< center position of the surface
-        std::shared_ptr<VolumeBounds>                    m_volumeBounds;      //!< the volumeBounds
+        std::shared_ptr<VolumeBounds>                 m_volumeBounds;      //!< the volumeBounds
     };
 
     inline const Amg::Transform3D& Volume::transform() const

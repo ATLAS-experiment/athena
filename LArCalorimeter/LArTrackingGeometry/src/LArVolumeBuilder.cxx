@@ -128,8 +128,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   Trk::TrackingVolume* lArBarrelPresampler  = nullptr;
   Trk::TrackingVolume* lArBarrel            = nullptr;
 
-  Trk::CylinderVolumeBounds* solenoidBounds             = nullptr;
-  Trk::CylinderVolumeBounds* solenoidLArBarrelGapBounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> solenoidBounds             = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> solenoidLArBarrelGapBounds = nullptr;
 
   // dummy objects
   Trk::LayerArray* dummyLayers = nullptr;
@@ -151,8 +151,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   // -> The BARREL Section ---------------------------------------------------------
   ATH_MSG_DEBUG( "Building Barrel ... " );
 
-  Trk::CylinderVolumeBounds* lArBarrelPosBounds = nullptr;
-  Trk::CylinderVolumeBounds* lArBarrelNegBounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArBarrelPosBounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArBarrelNegBounds = nullptr;
 
   if(detStore()->contains<StoredPhysVol>("EMB_POS"))
     {
@@ -201,9 +201,9 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
     // dynamic cast to 'Tubs' shape
     const GeoPcon* lArBarrelPosPcon = dynamic_cast<const GeoPcon*>(lArBarrelPosShape);
-    lArBarrelPosBounds = (lArBarrelPosPcon) ? Trk::GeoShapeConverter::convert(lArBarrelPosPcon, zBoundaries).release() : nullptr;
+    lArBarrelPosBounds = (lArBarrelPosPcon) ? Trk::GeoShapeConverter::convert(lArBarrelPosPcon, zBoundaries) : nullptr;
     const GeoPcon* lArBarrelNegPcon = dynamic_cast<const GeoPcon*>(lArBarrelNegShape);
-    lArBarrelNegBounds = (lArBarrelNegPcon) ? Trk::GeoShapeConverter::convert(lArBarrelNegPcon, zBoundaries).release() : nullptr;
+    lArBarrelNegBounds = (lArBarrelNegPcon) ? Trk::GeoShapeConverter::convert(lArBarrelNegPcon, zBoundaries) : nullptr;
 
     if (lArBarrelPosBounds)
       ATH_MSG_VERBOSE( " -> Positive Barrel Bounds: " << *lArBarrelPosBounds );
@@ -221,16 +221,16 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     lArBarrelHalflength = zBoundaries[1];
 
     // create the static half-bounds
-    Trk::CylinderVolumeBounds* lArBarrelBoundsPos = new Trk::CylinderVolumeBounds( lArBarrelRmin,
-										   lArBarrelRmax,
-										   0.5*lArBarrelHalflength);
-    Trk::CylinderVolumeBounds* lArBarrelBoundsNeg = lArBarrelBoundsPos->clone();
+    auto lArBarrelBoundsPos = std::make_shared<Trk::CylinderVolumeBounds>(
+        lArBarrelRmin, lArBarrelRmax, 0.5 * lArBarrelHalflength);
+    auto lArBarrelBoundsNeg =
+        std::make_shared<Trk::CylinderVolumeBounds>(*lArBarrelBoundsPos);
 
     // position static half-volumes
     Amg::Vector3D lArBPos(0.,0.,0.5*lArBarrelHalflength);
     Amg::Vector3D lArBNeg(0.,0.,-0.5*lArBarrelHalflength);
-    Amg::Transform3D* lArBPosTransform = new Amg::Transform3D(Amg::Translation3D(lArBPos));
-    Amg::Transform3D* lArBNegTransform = new Amg::Transform3D(Amg::Translation3D(lArBNeg));
+    auto lArBPosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArBPos));
+    auto lArBNegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArBNeg));
 
     // layer entry/exit
 
@@ -303,22 +303,23 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
       indexP[bubp.bins()-1-i] = std::vector<size_t>(indx);
     }
 
-    const Trk::BinnedMaterial* lArBarrelMaterialBinPos = new Trk::BinnedMaterial(*lArBarrelMaterial,bubp,layBUP,indexP,matID);
-    const Trk::BinnedMaterial* lArBarrelMaterialBinNeg = new Trk::BinnedMaterial(*lArBarrelMaterial,bubn,layBUN,indexN,matID);
+    const Trk::BinnedMaterial lArBarrelMaterialBinPos(*lArBarrelMaterial,bubp,layBUP,indexP,matID);
+    const Trk::BinnedMaterial lArBarrelMaterialBinNeg(*lArBarrelMaterial,bubn,layBUN,indexN,matID);
 
-    Amg::Transform3D* align=nullptr;
 
-    Trk::AlignableTrackingVolume* lArBarrelPos = new Trk::AlignableTrackingVolume(lArBPosTransform,align,
-											lArBarrelBoundsPos,
-											lArBarrelMaterialBinPos,
-											1,
-											"Calo::Detectors::LAr::BarrelPos");
+    Trk::AlignableTrackingVolume* lArBarrelPos = new Trk::AlignableTrackingVolume(
+      std::move(lArBPosTransform),
+      std::move(lArBarrelBoundsPos),
+      lArBarrelMaterialBinPos,
+      1,
+      "Calo::Detectors::LAr::BarrelPos");
 
-    Trk::AlignableTrackingVolume* lArBarrelNeg = new Trk::AlignableTrackingVolume(lArBNegTransform,align,
-											lArBarrelBoundsNeg,
-											lArBarrelMaterialBinNeg,
-											1,
-											"Calo::Detectors::LAr::BarrelNeg");
+    Trk::AlignableTrackingVolume* lArBarrelNeg = new Trk::AlignableTrackingVolume(
+      std::move(lArBNegTransform),
+      std::move(lArBarrelBoundsNeg),
+      lArBarrelMaterialBinNeg,
+      1,
+      "Calo::Detectors::LAr::BarrelNeg");
 
     // glue barrel EM
     std::vector<Trk::TrackingVolume*> volsB;
@@ -329,9 +330,6 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 								       dummyMaterial,
 								       "Calo::Container::LAr::Barrel");
   }
-  // cleanup
-  delete lArBarrelPosBounds; lArBarrelPosBounds = nullptr;
-  delete lArBarrelNegBounds; lArBarrelNegBounds = nullptr;
 
   // (1) Build the Solenoid ------------------------------------------------------------
   ATH_MSG_DEBUG( "Building the Solenoid ... " );
@@ -359,7 +357,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     const GeoShape*    solenoidShape  = solenoidLogVol->getShape();
     // dynamic cast to 'Tubs' shape
     const GeoTubs* solenoidTubs = dynamic_cast<const GeoTubs*>(solenoidShape);
-    solenoidBounds = new Trk::CylinderVolumeBounds(solenoidTubs->getRMin(),solenoidTubs->getRMax(),lArBarrelHalflength);
+    solenoidBounds = std::make_shared<Trk::CylinderVolumeBounds>(solenoidTubs->getRMin(),solenoidTubs->getRMax(),lArBarrelHalflength);
     // assing the material
     const GeoMaterial* solenoidMaterialGM = solenoidLogVol->getMaterial();
     if (solenoidMaterialGM) {
@@ -372,7 +370,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     // output the bounds
     ATH_MSG_DEBUG( " -> Solenoid Bounds:      " << *solenoidBounds );
 
-    solenoid = new Trk::TrackingVolume(nullptr,
+    solenoid = new Trk::TrackingVolume(
+               nullptr,
 				       solenoidBounds,
 				       solenoidMaterial,
 				       dummyLayers, dummyVolumes,
@@ -383,8 +382,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   // (2) Build the Presampler ------------------------------------------------------------
   ATH_MSG_DEBUG( "Building Barrel Presampler ... " );
 
-  Trk::CylinderVolumeBounds* lArBarrelPresamplerPosBounds = nullptr;
-  Trk::CylinderVolumeBounds* lArBarrelPresamplerNegBounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArBarrelPresamplerPosBounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArBarrelPresamplerNegBounds = nullptr;
 
   if(detStore()->contains<StoredPhysVol>("PRESAMPLER_B_POS"))
     {
@@ -425,21 +424,21 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
     Amg::Vector3D lArBPos(0.,0.,0.5*lArBarrelHalflength);
     Amg::Vector3D lArBNeg(0.,0.,-0.5*lArBarrelHalflength);
-    Amg::Transform3D* lArPBPosTransform = new Amg::Transform3D(Amg::Translation3D(lArBPos));
-    Amg::Transform3D* lArPBNegTransform = new Amg::Transform3D(Amg::Translation3D(lArBNeg));
+    auto lArPBPosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArBPos));
+    auto lArPBNegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArBNeg));
 
     // and the shapes
     const GeoShape*    lArBarrelPresamplerPosShape  = lArBarrelPresamplerPosLogVol->getShape();
 
     // dynamic cast to 'Tubs' shape
     const GeoTubs* lArBarrelPresamplerPosTubs = dynamic_cast<const GeoTubs*>(lArBarrelPresamplerPosShape);
-    lArBarrelPresamplerPosBounds = new Trk::CylinderVolumeBounds(lArBarrelPresamplerPosTubs->getRMin(),
+    lArBarrelPresamplerPosBounds = std::make_shared<Trk::CylinderVolumeBounds>(lArBarrelPresamplerPosTubs->getRMin(),
 								 lArBarrelPresamplerPosTubs->getRMax(),
 								 0.5*lArBarrelHalflength);
 
 
     if (lArBarrelPresamplerPosBounds){
-      lArBarrelPresamplerNegBounds = lArBarrelPresamplerPosBounds->clone();
+      lArBarrelPresamplerNegBounds = std::make_shared<Trk::CylinderVolumeBounds>(*lArBarrelPresamplerPosBounds);
       ATH_MSG_VERBOSE( " -> Positive Barrel Presampler Bounds: "
 		       << *lArBarrelPresamplerPosBounds );
     }
@@ -450,7 +449,6 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
     // material needs averaging, don't use pure Ar
 
-    Amg::Transform3D* align=nullptr;
 
     // trivial binning
     std::vector<float> bpsteps{float(lArBarrelPresamplerPosBounds->innerRadius()),
@@ -465,17 +463,19 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     int baseID = Trk::GeometrySignature(Trk::Calo)*1000;
     matBP.emplace_back(lArBarrelPresamplerMaterial,baseID);
 
-    const Trk::BinnedMaterial* lArBarrelPresamplerMaterialBinPos = new Trk::BinnedMaterial(*lArBarrelPresamplerMaterial,rBU,dummylay,matBP);
-    const Trk::BinnedMaterial* lArBarrelPresamplerMaterialBinNeg = new Trk::BinnedMaterial(*lArBarrelPresamplerMaterial,rBUc,dummylay,matBP);
+    const Trk::BinnedMaterial lArBarrelPresamplerMaterialBinPos(*lArBarrelPresamplerMaterial,rBU,dummylay,matBP);
+    const Trk::BinnedMaterial lArBarrelPresamplerMaterialBinNeg(*lArBarrelPresamplerMaterial,rBUc,dummylay,matBP);
 
-    Trk::AlignableTrackingVolume* lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(lArPBPosTransform, align,
+    Trk::AlignableTrackingVolume* lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(
+                          std::move(lArPBPosTransform),
 											    lArBarrelPresamplerPosBounds,
 											    lArBarrelPresamplerMaterialBinPos,
 											    0,
 											    "Calo::Detectors::LAr::BarrelPresamplerPos");
 
-    Trk::AlignableTrackingVolume* lArBarrelPresamplerNeg = new Trk::AlignableTrackingVolume(lArPBNegTransform, align,
-											    lArBarrelPresamplerNegBounds,
+    Trk::AlignableTrackingVolume* lArBarrelPresamplerNeg = new Trk::AlignableTrackingVolume(
+                          std::move(lArPBNegTransform),
+											    std::move(lArBarrelPresamplerNegBounds),
 											    lArBarrelPresamplerMaterialBinNeg,
 											    0,
 											    "Calo::Detectors::LAr::BarrelPresamplerNeg");
@@ -493,7 +493,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   // (3) Build the solenoid gap ------------------------------------------------------------
 
   if (solenoidBounds && lArBarrelPresamplerPosBounds) {
-    solenoidLArBarrelGapBounds =  new Trk::CylinderVolumeBounds(solenoidBounds->outerRadius(),
+    solenoidLArBarrelGapBounds =  std::make_shared<Trk::CylinderVolumeBounds>(solenoidBounds->outerRadius(),
                                                                 lArBarrelPresamplerPosBounds->innerRadius(),
                                                                 lArBarrelHalflength);
 
@@ -502,7 +502,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     Trk::Material solenoidGapMaterial= Trk::Material(182.6, 1007., 22.9, 10.9, 0.0012);
 
     solenoidLArBarrelGap = new Trk::TrackingVolume(nullptr,
-                                                   solenoidLArBarrelGapBounds,
+                                                   std::move(solenoidLArBarrelGapBounds),
                                                    solenoidGapMaterial,
                                                    dummyLayers, dummyVolumes,
                                                    "Calo::GapVolumes::LAr::SolenoidPresamplerGap");
@@ -536,17 +536,17 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   Trk::TrackingVolume* lArNegECPresampler          = nullptr;
 
   // the smoothed ones
-  Trk::CylinderVolumeBounds* lArPositiveHecBounds            = nullptr;
-  Trk::CylinderVolumeBounds* lArPositiveHecFcalCoverBounds   = nullptr;
-  Trk::CylinderVolumeBounds* lArPositiveFcalBounds           = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveHecBounds            = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveHecFcalCoverBounds   = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveFcalBounds           = nullptr;
 
-  Trk::CylinderVolumeBounds* lArNegativeHecBounds            = nullptr;
-  Trk::CylinderVolumeBounds* lArNegativeHecFcalCoverBounds   = nullptr;
-  Trk::CylinderVolumeBounds* lArNegativeFcalBounds           = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeHecBounds            = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeHecFcalCoverBounds   = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeFcalBounds           = nullptr;
 
   // (1) now parse the EC
-  std::unique_ptr<Trk::CylinderVolumeBounds> lArPositiveEndcapBounds;
-  std::unique_ptr<Trk::CylinderVolumeBounds> lArNegativeEndcapBounds;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveEndcapBounds;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeEndcapBounds;
 
   if(detStore()->contains<StoredPhysVol>("EMEC_POS"))
     {
@@ -608,13 +608,13 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
      // dynamic cast to 'Tubs' shape
      const GeoPcon* lArPositiveEndcapPcon = dynamic_cast<const GeoPcon*>(lArPositiveEndcapShape);
      if (lArPositiveEndcapPcon)
-       lArPositiveEndcapBounds = std::unique_ptr<Trk::CylinderVolumeBounds>
+       lArPositiveEndcapBounds = std::shared_ptr<Trk::CylinderVolumeBounds>
          (Trk::GeoShapeConverter::convert(lArPositiveEndcapPcon,
                                          positiveEndcapZboundaries));
 
      const GeoPcon* lArNegativeEndcapPcon = dynamic_cast<const GeoPcon*>(lArNegativeEndcapShape);
      if (lArNegativeEndcapPcon)
-       lArNegativeEndcapBounds = std::unique_ptr<Trk::CylinderVolumeBounds>
+       lArNegativeEndcapBounds = std::shared_ptr<Trk::CylinderVolumeBounds>
          (Trk::GeoShapeConverter::convert(lArNegativeEndcapPcon,
                                          negativeEndcapZboundaries));
 
@@ -656,10 +656,9 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
     Amg::Vector3D lArEndcapPositionPos(0.,0.,lArEndcapZpos);
     Amg::Vector3D lArEndcapPositionNeg(0.,0.,-lArEndcapZpos);
-    Amg::Transform3D* lArPositiveEndcapTransform = new Amg::Transform3D(Amg::Translation3D(lArEndcapPositionPos));
-    Amg::Transform3D* lArNegativeEndcapTransform = new Amg::Transform3D(Amg::Translation3D(lArEndcapPositionNeg));
+    auto lArPositiveEndcapTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArEndcapPositionPos));
+    auto lArNegativeEndcapTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArEndcapPositionNeg));
 
-    Amg::Transform3D* align = nullptr;
     // binned material for LAr
     auto bup = Trk::BinUtility(37,1.35,3.2,Trk::open,Trk::binEta);
     auto bun = Trk::BinUtility(37,-3.2,-1.35,Trk::open,Trk::binEta);
@@ -812,18 +811,20 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
       layEUN[i] = zBU;
     }
 
-    const Trk::BinnedMaterial* lArEndcapMaterialBinnedPos = new Trk::BinnedMaterial(*lArEndcapMaterial,bup,layEUP,indexEP,matEID);
-    const Trk::BinnedMaterial* lArEndcapMaterialBinnedNeg = new Trk::BinnedMaterial(*lArEndcapMaterial,bun,layEUN,indexEN,matEID);
+    const Trk::BinnedMaterial lArEndcapMaterialBinnedPos(*lArEndcapMaterial,bup,layEUP,indexEP,matEID);
+    const Trk::BinnedMaterial lArEndcapMaterialBinnedNeg(*lArEndcapMaterial,bun,layEUN,indexEN,matEID);
 
-    lArPositiveEndcap = new Trk::AlignableTrackingVolume(lArPositiveEndcapTransform,align,
-							 lArPositiveEndcapBounds.release(),
+    lArPositiveEndcap = new Trk::AlignableTrackingVolume(
+               std::move(lArPositiveEndcapTransform),
+							 std::move(lArPositiveEndcapBounds),
 							 lArEndcapMaterialBinnedPos,
                                                          5,
 							 //lpEntries,
 							 "Calo::Detectors::LAr::PositiveEndcap");
 
-    lArNegativeEndcap = new Trk::AlignableTrackingVolume(lArNegativeEndcapTransform,align,
-							 lArNegativeEndcapBounds.release(),
+    lArNegativeEndcap = new Trk::AlignableTrackingVolume(
+               std::move(lArNegativeEndcapTransform),
+							 std::move(lArNegativeEndcapBounds),
 							 lArEndcapMaterialBinnedNeg,
 							 5,
 							 //lnEntries,
@@ -833,7 +834,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   // presampler
   ATH_MSG_DEBUG( "Building Endcap Presampler ... " );
 
-  Trk::CylinderVolumeBounds* lArECPresamplerBounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArECPresamplerBounds = nullptr;
 
   if(detStore()->contains<StoredPhysVol>("PRESAMPLER_EC_POS"))
     {
@@ -874,10 +875,10 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     float zec = lArECPresamplerTransform.translation().z()-ecd+d;
     Amg::Vector3D lArECPresamplerPos(0.,0.,zec);
     Amg::Vector3D lArECPresamplerNeg(0.,0.,-zec);
-    Amg::Transform3D* lArPosECPresamplerTransform = new Amg::Transform3D(Amg::Translation3D(lArECPresamplerPos));
-    Amg::Transform3D* lArNegECPresamplerTransform = new Amg::Transform3D(Amg::Translation3D(lArECPresamplerNeg));
+    auto lArPosECPresamplerTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArECPresamplerPos));
+    auto lArNegECPresamplerTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArECPresamplerNeg));
 
-    lArECPresamplerBounds = new Trk::CylinderVolumeBounds(psTubs->getRMin(),psTubs->getRMax(),ecd);
+    lArECPresamplerBounds = std::make_shared<Trk::CylinderVolumeBounds>(psTubs->getRMin(),psTubs->getRMax(),ecd);
 
     // layer binning in Z
     std::vector<float> ecp;
@@ -890,12 +891,12 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     std::vector<size_t> iep{0,1};
 
     // binned material
-    const Trk::BinnedMaterial* lArECPresamplerMaterialBinPos = new Trk::BinnedMaterial( *lArBarrelPresamplerMaterial,hecp,iep,matECP);
+    const Trk::BinnedMaterial lArECPresamplerMaterialBinPos(*lArBarrelPresamplerMaterial,hecp,iep,matECP);
 
-    Amg::Transform3D* align=nullptr;
 
-    lArPosECPresampler = new Trk::AlignableTrackingVolume(lArPosECPresamplerTransform, align,
-							  lArECPresamplerBounds,
+    lArPosECPresampler = new Trk::AlignableTrackingVolume(
+                std::move(lArPosECPresamplerTransform),
+							  std::make_shared<Trk::CylinderVolumeBounds>(*lArECPresamplerBounds),
 							  lArECPresamplerMaterialBinPos,
 							  4,
 							  "Calo::Detectors::LAr::PositiveECPresampler");
@@ -911,10 +912,11 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     std::vector<size_t> ien{1,0};
 
     // binned material
-    const Trk::BinnedMaterial* lArECPresamplerMaterialBinNeg = new Trk::BinnedMaterial( *lArBarrelPresamplerMaterial,hecpn,ien,matECP);
+    const Trk::BinnedMaterial lArECPresamplerMaterialBinNeg(*lArBarrelPresamplerMaterial,hecpn,ien,matECP);
 
-    lArNegECPresampler = new Trk::AlignableTrackingVolume(lArNegECPresamplerTransform, align,
-							  lArECPresamplerBounds->clone(),
+    lArNegECPresampler = new Trk::AlignableTrackingVolume(
+                std::move(lArNegECPresamplerTransform),
+							  std::move(lArECPresamplerBounds),
 							  lArECPresamplerMaterialBinNeg,
 							  4,
 							  "Calo::Detectors::LAr::NegativeECPresampler");
@@ -923,10 +925,10 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   }
 
   // (2) now parse the HEC
-  Trk::CylinderVolumeBounds* lArPositiveHec1Bounds = nullptr;
-  Trk::CylinderVolumeBounds* lArPositiveHec2Bounds = nullptr;
-  Trk::CylinderVolumeBounds* lArNegativeHec1Bounds = nullptr;
-  Trk::CylinderVolumeBounds* lArNegativeHec2Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveHec1Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveHec2Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeHec1Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeHec2Bounds = nullptr;
 
 
   if(detStore()->contains<StoredPhysVol>("HEC1_POS")){
@@ -1026,16 +1028,16 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     // dynamic cast to 'Pcon' shape
     const GeoPcon* lArPositiveHec1Pcon = dynamic_cast<const GeoPcon*>(lArPositiveHec1Shape);
     lArPositiveHec1Bounds = (lArPositiveHec1Pcon) ? Trk::GeoShapeConverter::convert(lArPositiveHec1Pcon,
-										   positiveEndcapZboundariesHec1).release() : nullptr;
+										   positiveEndcapZboundariesHec1) : nullptr;
     const GeoPcon* lArPositiveHec2Pcon = dynamic_cast<const GeoPcon*>(lArPositiveHec2Shape);
     lArPositiveHec2Bounds = (lArPositiveHec2Pcon) ? Trk::GeoShapeConverter::convert(lArPositiveHec2Pcon,
-										   positiveEndcapZboundariesHec2).release() : nullptr;
+										   positiveEndcapZboundariesHec2) : nullptr;
     const GeoPcon* lArNegativeHec1Pcon = dynamic_cast<const GeoPcon*>(lArNegativeHec1Shape);
     lArNegativeHec1Bounds = (lArNegativeHec1Pcon) ? Trk::GeoShapeConverter::convert(lArNegativeHec1Pcon,
-										   negativeEndcapZboundariesHec1).release() : nullptr;
+										   negativeEndcapZboundariesHec1) : nullptr;
     const GeoPcon* lArNegativeHec2Pcon = dynamic_cast<const GeoPcon*>(lArNegativeHec2Shape);
     lArNegativeHec2Bounds = (lArNegativeHec2Pcon) ? Trk::GeoShapeConverter::convert(lArNegativeHec2Pcon,
-										   negativeEndcapZboundariesHec2).release() : nullptr;
+										   negativeEndcapZboundariesHec2) : nullptr;
 
     if (lArPositiveHec1Bounds)
       ATH_MSG_VERBOSE( " -> Positive Hec1 Bounds: " << *lArPositiveHec1Bounds );
@@ -1068,73 +1070,73 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   //   FCAL1_POS, FCAL1_NEG
   //   FCAL2_POS, FCAL2_NEG
   //   FCAL3_POS, FCAL3_NEG
-  Trk::CylinderVolumeBounds* lArPositiveFcal1Bounds = nullptr;
-  Trk::CylinderVolumeBounds* lArPositiveFcal2Bounds = nullptr;
-  Trk::CylinderVolumeBounds* lArPositiveFcal3Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveFcal1Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveFcal2Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArPositiveFcal3Bounds = nullptr;
 
 
-  Trk::CylinderVolumeBounds* lArNegativeFcal1Bounds = nullptr;
-  Trk::CylinderVolumeBounds* lArNegativeFcal2Bounds = nullptr;
-  Trk::CylinderVolumeBounds* lArNegativeFcal3Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeFcal1Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeFcal2Bounds = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> lArNegativeFcal3Bounds = nullptr;
 
   if(detStore()->contains<StoredPhysVol>("FCAL1_POS"))
    {
      if(detStore()->retrieve(storedPV,"FCAL1_POS")==StatusCode::FAILURE)
-       {
-	 ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL1_POS" );
-	 storedPV = nullptr;
-       }
+     {
+       ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL1_POS" );
+       storedPV = nullptr;
+     }
    }
   GeoFullPhysVol* lArPositiveFcal1PhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
 
   if(detStore()->contains<StoredPhysVol>("FCAL2_POS"))
-    {
+  {
       if(detStore()->retrieve(storedPV,"FCAL2_POS")==StatusCode::FAILURE)
-	{
-	  ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL2_POS" );
-	  storedPV = nullptr;
-	}
-    }
+      {
+        ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL2_POS" );
+        storedPV = nullptr;
+      }
+  }
   GeoFullPhysVol* lArPositiveFcal2PhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
 
 
   if(detStore()->contains<StoredPhysVol>("FCAL3_POS"))
     {
       if(detStore()->retrieve(storedPV,"FCAL3_POS")==StatusCode::FAILURE)
-	{
-	  ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL3_POS" );
-	  storedPV = nullptr;
-	}
+      {
+        ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL3_POS" );
+        storedPV = nullptr;
+      }
     }
   GeoFullPhysVol* lArPositiveFcal3PhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
 
   if(detStore()->contains<StoredPhysVol>("FCAL1_NEG"))
     {
       if(detStore()->retrieve(storedPV,"FCAL1_NEG")==StatusCode::FAILURE)
-	{
-	  ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL1_NEG" );
-	  storedPV = nullptr;
-	}
+      {
+        ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL1_NEG" );
+        storedPV = nullptr;
+      }
     }
   GeoFullPhysVol* lArNegativeFcal1PhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
 
   if(detStore()->contains<StoredPhysVol>("FCAL2_NEG"))
     {
       if(detStore()->retrieve(storedPV,"FCAL2_NEG")==StatusCode::FAILURE)
-	{
-	  ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL2_NEG" );
-	  storedPV = nullptr;
-	}
+      {
+        ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL2_NEG" );
+        storedPV = nullptr;
+      }
     }
    GeoFullPhysVol* lArNegativeFcal2PhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
 
    if(detStore()->contains<StoredPhysVol>("FCAL3_NEG"))
      {
        if(detStore()->retrieve(storedPV,"FCAL3_NEG")==StatusCode::FAILURE)
-	 {
-	   ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL3_NEG" );
-	   storedPV = nullptr;
-	 }
+       {
+         ATH_MSG_DEBUG( "Unable to retrieve Stored PV FCAL3_NEG" );
+         storedPV = nullptr;
+       }
      }
    GeoFullPhysVol* lArNegativeFcal3PhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
 
@@ -1224,18 +1226,18 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
      // dynamic cast to 'Pcon' shape
      const GeoTubs* lArPositiveFcal1Tubs = dynamic_cast<const GeoTubs*>(lArPositiveFcal1Shape);
-     lArPositiveFcal1Bounds = (lArPositiveFcal1Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal1Tubs).release() : nullptr;
+     lArPositiveFcal1Bounds = (lArPositiveFcal1Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal1Tubs) : nullptr;
      const GeoTubs* lArPositiveFcal2Tubs = dynamic_cast<const GeoTubs*>(lArPositiveFcal2Shape);
-     lArPositiveFcal2Bounds = (lArPositiveFcal2Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal2Tubs).release() : nullptr;
+     lArPositiveFcal2Bounds = (lArPositiveFcal2Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal2Tubs) : nullptr;
      const GeoTubs* lArPositiveFcal3Tubs = dynamic_cast<const GeoTubs*>(lArPositiveFcal3Shape);
-     lArPositiveFcal3Bounds = (lArPositiveFcal3Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal3Tubs).release() : nullptr;
+     lArPositiveFcal3Bounds = (lArPositiveFcal3Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal3Tubs) : nullptr;
 
      const GeoTubs* lArNegativeFcal1Tubs = dynamic_cast<const GeoTubs*>(lArNegativeFcal1Shape);
-     lArNegativeFcal1Bounds = (lArNegativeFcal1Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal1Tubs).release() : nullptr;
+     lArNegativeFcal1Bounds = (lArNegativeFcal1Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal1Tubs) : nullptr;
      const GeoTubs* lArNegativeFcal2Tubs = dynamic_cast<const GeoTubs*>(lArNegativeFcal2Shape);
-     lArNegativeFcal2Bounds = (lArNegativeFcal2Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal2Tubs).release() : nullptr;
+     lArNegativeFcal2Bounds = (lArNegativeFcal2Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal2Tubs) : nullptr;
      const GeoTubs* lArNegativeFcal3Tubs = dynamic_cast<const GeoTubs*>(lArNegativeFcal3Shape);
-     lArNegativeFcal3Bounds = (lArNegativeFcal3Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal3Tubs).release() : nullptr;
+     lArNegativeFcal3Bounds = (lArNegativeFcal3Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal3Tubs) : nullptr;
 
      if (lArPositiveFcal1Bounds)
            ATH_MSG_VERBOSE( " -> Positive Fcal1 Bounds: " << *lArPositiveFcal1Bounds );
@@ -1327,17 +1329,13 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
    // -  fit one around the FCAL - and adopt to LAr Endcap outer radius
    if (lArPositiveFcal1Bounds && lArNegativeFcal1Bounds){
        // cleanup the HecBounds
-       delete lArPositiveHec1Bounds; lArPositiveHec1Bounds = nullptr;
-       delete lArPositiveHec2Bounds; lArPositiveHec2Bounds = nullptr;
-       delete lArNegativeHec1Bounds; lArNegativeHec1Bounds = nullptr;
-       delete lArNegativeHec2Bounds; lArNegativeHec2Bounds = nullptr;
 
        // adopt the boundaries
-       lArPositiveHecFcalCoverBounds = new Trk::CylinderVolumeBounds(lArPositiveFcal1Bounds->outerRadius(),
+       lArPositiveHecFcalCoverBounds = std::make_shared<Trk::CylinderVolumeBounds>(lArPositiveFcal1Bounds->outerRadius(),
                                                                      lArEndcapOuterRadius,
                                                                      hecFcalCoverHalflength);
 
-       lArNegativeHecFcalCoverBounds = lArPositiveHecFcalCoverBounds->clone();
+       lArNegativeHecFcalCoverBounds =  std::make_shared<Trk::CylinderVolumeBounds>(*lArPositiveHecFcalCoverBounds);
        // output
        ATH_MSG_DEBUG( "Smoothed LAr Hec (Fcal covering part) bounds : " << *lArPositiveHecFcalCoverBounds );
        ATH_MSG_DEBUG( "   -> at z-position: +/- " << hecFcalCoverZpos );
@@ -1345,11 +1343,9 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        // the new HepTransforms
        Amg::Vector3D lArPositiveHecFcalCoverPos(0.,0.,hecFcalCoverZpos);
        Amg::Vector3D lArPositiveHecFcalCoverNeg(0.,0.,-hecFcalCoverZpos);
-       Amg::Transform3D* lArPositiveHecFcalCoverTransform = new Amg::Transform3D(Amg::Translation3D(lArPositiveHecFcalCoverPos));
-       Amg::Transform3D* lArNegativeHecFcalCoverTransform = new Amg::Transform3D(Amg::Translation3D(lArPositiveHecFcalCoverNeg));
+       auto lArPositiveHecFcalCoverTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArPositiveHecFcalCoverPos));
+       auto lArNegativeHecFcalCoverTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArPositiveHecFcalCoverNeg));
 
-       // building dense volume here
-       Amg::Transform3D* align = nullptr;
 
        // layer binning in Z
        std::vector<float> spCover;
@@ -1364,10 +1360,11 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hfc{0,2,3,4};
 
        // binned material
-       const Trk::BinnedMaterial* lArHecFcalCoverMaterialBinPos = new Trk::BinnedMaterial( *lArHecFcalCoverMaterial,hfp,hfc,matHEC);
+       const Trk::BinnedMaterial lArHecFcalCoverMaterialBinPos(*lArHecFcalCoverMaterial,hfp,hfc,matHEC);
 
-       lArPositiveHecFcalCover = new Trk::AlignableTrackingVolume(lArPositiveHecFcalCoverTransform, align,
-								  lArPositiveHecFcalCoverBounds,
+       lArPositiveHecFcalCover = new Trk::AlignableTrackingVolume(
+                  std::move(lArPositiveHecFcalCoverTransform),
+								  std::move(lArPositiveHecFcalCoverBounds),
 								  lArHecFcalCoverMaterialBinPos,
 								  9,
 								  //hpEntries,
@@ -1385,10 +1382,11 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hfcn{4,3,2,0};
 
        // binned material
-       const Trk::BinnedMaterial* lArHecFcalCoverMaterialBinNeg = new Trk::BinnedMaterial( *lArHecFcalCoverMaterial,hfn,hfcn,matHEC);
+       const Trk::BinnedMaterial lArHecFcalCoverMaterialBinNeg(*lArHecFcalCoverMaterial,hfn,hfcn,matHEC);
 
-       lArNegativeHecFcalCover = new Trk::AlignableTrackingVolume(lArNegativeHecFcalCoverTransform, align,
-								  lArNegativeHecFcalCoverBounds,
+       lArNegativeHecFcalCover = new Trk::AlignableTrackingVolume(
+                  std::move(lArNegativeHecFcalCoverTransform),
+								  std::move(lArNegativeHecFcalCoverBounds),
 								  lArHecFcalCoverMaterialBinNeg,
 								  9,
 								  //hnEntries,
@@ -1405,8 +1403,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        double lArHecRmax          = lArEndcapOuterRadius;
        Amg::Vector3D lArHecZposition(0.,0.,lArHecZpos);
        // bounds
-       lArPositiveHecBounds = new Trk::CylinderVolumeBounds(lArHecRmin, lArHecRmax, lArHecHalflength);
-       lArNegativeHecBounds = lArPositiveHecBounds->clone();
+       lArPositiveHecBounds = std::make_shared<Trk::CylinderVolumeBounds>(lArHecRmin, lArHecRmax, lArHecHalflength);
+       lArNegativeHecBounds = std::make_shared<Trk::CylinderVolumeBounds>(*lArPositiveHecBounds);
        // output
        ATH_MSG_DEBUG( "Smoothed LAr Hec bounds : " << *lArPositiveHecBounds );
        ATH_MSG_DEBUG( "   -> at z-position: +/- " << lArHecZpos );
@@ -1414,11 +1412,9 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        // the new HepTransforms
        Amg::Vector3D lArPositiveHecPos(0.,0.,lArHecZpos);
        Amg::Vector3D lArPositiveHecNeg(0.,0.,-lArHecZpos);
-       Amg::Transform3D* lArPositiveHecTransform = new Amg::Transform3D(Amg::Translation3D(lArPositiveHecPos));
-       Amg::Transform3D* lArNegativeHecTransform = new Amg::Transform3D(Amg::Translation3D(lArPositiveHecNeg));
+       auto lArPositiveHecTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArPositiveHecPos));
+       auto lArNegativeHecTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArPositiveHecNeg));
 
-       // building dense volume here
-       Amg::Transform3D* align = nullptr;
 
        // layer binning in Z
        std::vector<float> sphec;
@@ -1431,10 +1427,11 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hf{0,1};
 
        // binned material
-       const Trk::BinnedMaterial* lArHecMaterialBinPos = new Trk::BinnedMaterial( *lArHecMaterial,hp,hf,matHEC);
+       const Trk::BinnedMaterial lArHecMaterialBinPos(*lArHecMaterial,hp,hf,matHEC);
 
-       lArPositiveHec = new Trk::AlignableTrackingVolume(lArPositiveHecTransform,align,
-							 lArPositiveHecBounds,
+       lArPositiveHec = new Trk::AlignableTrackingVolume(
+               std::move(lArPositiveHecTransform),
+							 std::move(lArPositiveHecBounds),
 							 lArHecMaterialBinPos,
 							 8,
 							 //hpEntries,
@@ -1451,10 +1448,11 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hfn{1,0};
 
        // binned material
-       const Trk::BinnedMaterial* lArHecMaterialBinNeg = new Trk::BinnedMaterial( *lArHecMaterial,hn,hfn,matHEC);
+       const Trk::BinnedMaterial lArHecMaterialBinNeg(*lArHecMaterial,hn,hfn,matHEC);
 
-       lArNegativeHec = new Trk::AlignableTrackingVolume(lArNegativeHecTransform,align,
-							 lArNegativeHecBounds,
+       lArNegativeHec = new Trk::AlignableTrackingVolume(
+               std::move(lArNegativeHecTransform),
+							 std::move(lArNegativeHecBounds),
 							 lArHecMaterialBinNeg,
 							 8,
 							 //hnEntries,
@@ -1483,8 +1481,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        double lArFcalRmin = lArPositiveFcal1Bounds->innerRadius();
        double lArFcalRmax = lArPositiveFcal1Bounds->outerRadius();
        // assign the bounds
-       lArPositiveFcalBounds = new Trk::CylinderVolumeBounds(lArFcalRmin, lArFcalRmax, lArFcalHalflength);
-       lArNegativeFcalBounds = lArPositiveFcalBounds->clone();
+       lArPositiveFcalBounds = std::make_shared<Trk::CylinderVolumeBounds>(lArFcalRmin, lArFcalRmax, lArFcalHalflength);
+       lArNegativeFcalBounds = std::make_shared<Trk::CylinderVolumeBounds>(*lArPositiveFcalBounds);
        // output
        ATH_MSG_DEBUG( "Smoothed LAr Fcal bounds : " << *lArPositiveFcalBounds );
        ATH_MSG_DEBUG( "   -> at z-position: +/- " << lArFcalZposition );
@@ -1492,15 +1490,6 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        // get min and max for the Layer Creation
        lArFcalZmin  = lArFcalZposition - lArFcalHalflength;
        lArFcalZmax  = lArFcalZposition + lArFcalHalflength;
-
-       // cleanup
-       delete lArPositiveFcal1Bounds; lArPositiveFcal1Bounds = nullptr;
-       delete lArPositiveFcal2Bounds; lArPositiveFcal2Bounds = nullptr;
-       delete lArPositiveFcal3Bounds; lArPositiveFcal3Bounds = nullptr;
-
-       delete lArNegativeFcal1Bounds; lArNegativeFcal1Bounds = nullptr;
-       delete lArNegativeFcal2Bounds; lArNegativeFcal2Bounds = nullptr;
-       delete lArNegativeFcal3Bounds; lArNegativeFcal3Bounds = nullptr;
 
        // layer binning in Z
        std::vector<float> spfc;
@@ -1515,7 +1504,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hf{0,1,2,3};
 
        // binned material
-       const Trk::BinnedMaterial* lArFcalMaterialBinPos = new Trk::BinnedMaterial( *lArFcalMaterial,fcp,hf,matFCAL);
+       const Trk::BinnedMaterial lArFcalMaterialBinPos(*lArFcalMaterial,fcp,hf,matFCAL);
 
        // layer binning in Z
        std::vector<float> snfc;
@@ -1530,26 +1519,26 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hfn{3,2,1,0};
 
        // binned material
-       const Trk::BinnedMaterial* lArFcalMaterialBinNeg = new Trk::BinnedMaterial( *lArFcalMaterial,fcn,hfn,matFCAL);
+       const Trk::BinnedMaterial lArFcalMaterialBinNeg(*lArFcalMaterial,fcn,hfn,matFCAL);
 
        // the new HepTransforms
        Amg::Vector3D lArPositiveFcalPos(0.,0.,lArFcalZposition);
        Amg::Vector3D lArPositiveFcalNeg(0.,0.,-lArFcalZposition);
-       Amg::Transform3D* lArPositiveFcalTransform = new Amg::Transform3D(Amg::Translation3D(lArPositiveFcalPos));
-       Amg::Transform3D* lArNegativeFcalTransform = new Amg::Transform3D(Amg::Translation3D(lArPositiveFcalNeg));
+       auto lArPositiveFcalTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArPositiveFcalPos));
+       auto lArNegativeFcalTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArPositiveFcalNeg));
 
-       // building dense volume here
-       Amg::Transform3D* align = nullptr;
 
-       lArPositiveFcal = new Trk::AlignableTrackingVolume(lArPositiveFcalTransform, align,
-							  lArPositiveFcalBounds,
+       lArPositiveFcal = new Trk::AlignableTrackingVolume(
+                std::move(lArPositiveFcalTransform),
+							  std::move(lArPositiveFcalBounds),
 							  lArFcalMaterialBinPos,
 							  21,
 							  //fcpEntries,
 							  "Calo::Detectors::LAr::PositiveFcal");
 
-       lArNegativeFcal = new Trk::AlignableTrackingVolume(lArNegativeFcalTransform, align,
-							  lArNegativeFcalBounds,
+       lArNegativeFcal = new Trk::AlignableTrackingVolume(
+                std::move(lArNegativeFcalTransform),
+							  std::move(lArNegativeFcalBounds),
 							  lArFcalMaterialBinNeg,
 							  21,
 							  //fcnEntries,
@@ -1595,7 +1584,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
   if (mbtsZ>0. && mbts_rmin>0. && mbts_rmax>0.){
     // create the dummy volume to pass on the MBTS position
-    Trk::CylinderVolumeBounds* lArNegativeMBTSBounds = new Trk::CylinderVolumeBounds(
+    auto lArNegativeMBTSBounds = std::make_shared<Trk::CylinderVolumeBounds>(
 								       mbts_rmin,
 								       mbts_rmax,
 								       10. );
@@ -1606,18 +1595,20 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
     Amg::Vector3D lArEndcapInnerGapPos(0.,0., mbtsZ);
     Amg::Vector3D lArEndcapInnerGapNeg(0.,0.,-mbtsZ);
-    Amg::Transform3D* lArPositiveMBTSTransform = new Amg::Transform3D(Amg::Translation3D(lArEndcapInnerGapPos));
-    Amg::Transform3D* lArNegativeMBTSTransform = new Amg::Transform3D(Amg::Translation3D(lArEndcapInnerGapNeg));
+    auto lArPositiveMBTSTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArEndcapInnerGapPos));
+    auto lArNegativeMBTSTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(lArEndcapInnerGapNeg));
 
     // building dense volume here
-    lArPositiveEndcapInnerGap = new Trk::TrackingVolume(lArPositiveMBTSTransform,
-							lArNegativeMBTSBounds->clone(),
+    lArPositiveEndcapInnerGap = new Trk::TrackingVolume(
+              std::move(lArPositiveMBTSTransform),
+							std::make_shared<Trk::CylinderVolumeBounds>(*lArNegativeMBTSBounds),
 							dummyMaterial,
 							dummyLayers, dummyVolumes,
 							"Calo::Detectors::MBTS");
 
-    lArNegativeEndcapInnerGap = new Trk::TrackingVolume(lArNegativeMBTSTransform,
-							lArNegativeMBTSBounds,
+    lArNegativeEndcapInnerGap = new Trk::TrackingVolume(
+              std::move(lArNegativeMBTSTransform),
+							std::move(lArNegativeMBTSBounds),
 							dummyMaterial,
 							dummyLayers, dummyVolumes,
 							"Calo::Detectors::MBTS");

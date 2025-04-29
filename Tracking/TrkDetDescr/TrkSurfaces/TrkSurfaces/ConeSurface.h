@@ -10,7 +10,6 @@
 #define TRKSURFACES_CONESURFACE_H
 
 // Trk
-#include <memory>
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkParametersBase/ParametersT.h"
 #include "TrkSurfaces/ConeBounds.h"
@@ -19,6 +18,7 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include <memory>
 class MsgStream;
 
 template<class SURFACE, class BOUNDS_CNV>
@@ -83,10 +83,8 @@ public:
               double locZmax,
               double halfPhi = M_PI);
 
-  /**Constructor from Transform and CylinderBounds
-    - ownership of the bounds is passed
-    */
-  ConeSurface(const Amg::Transform3D& htrans, ConeBounds* cbounds);
+  /**Constructor from Transform and CylinderBounds*/
+  ConeSurface(const Amg::Transform3D& htrans, std::shared_ptr<const ConeBounds> cbounds);
 
   /**Constructor from Amg Transform by ref.
      - bounds is not set. */

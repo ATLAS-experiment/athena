@@ -175,10 +175,11 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
         layerMaterial =new Trk::BinnedLayerMaterial(layerBinUtility2DRPhiZ);
       }
       // Barrel layers are centered around (0,0,0) by definition
-      barrelLayers->push_back(new Trk::CylinderLayer(new Trk::CylinderBounds(*layerRadiusIter,layerHalflength),
-                                                     *layerMaterial,
-                                                     m_layerThickness));
-      ATH_MSG_VERBOSE( " --> Creating a layer at radius : " << *layerRadiusIter );
+      barrelLayers->push_back(
+          new Trk::CylinderLayer(std::make_shared<Trk::CylinderBounds>(
+                                     *layerRadiusIter, layerHalflength),
+                                 *layerMaterial, m_layerThickness));
+      ATH_MSG_VERBOSE(" --> Creating a layer at radius : " << *layerRadiusIter);
       delete layerMaterial;
     }
   } else {
@@ -344,7 +345,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           ATH_MSG_VERBOSE( "--> Creating a straw          layer at radius  : " << layerRadius );
 
         // now order the plane layers to sit on cylindrical layers
-        Trk::CylinderBounds* barrelLayerBounds = new Trk::CylinderBounds(layerRadius, layerHalflength);
+        auto  barrelLayerBounds = std::make_shared<Trk::CylinderBounds>(layerRadius, layerHalflength);
 
         // ---- correct phi -------------------------------------------------------------------
         ATH_MSG_VERBOSE("    prepare approach description with " << nBarrelPhiSectors << " barrel sectors.");
@@ -372,10 +373,10 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
         auto aDescriptorBinnedArray = std::make_unique<Trk::BinnedArray2D<const Trk::ApproachSurfaces>> (layerApproachSurfaces, aDescriptorBinUtility);
 
         // build an approach surface
-        auto approachSurface = std::make_unique<Trk::CylinderSurface> (barrelLayerBounds->clone());
-        Trk::ApproachDescriptor* aDescritpor =
-          new Trk::ApproachDescriptor(std::move(aDescriptorBinnedArray),
-                                      std::move( approachSurface));
+        auto approachSurface = std::make_unique<Trk::CylinderSurface>(
+            std::make_shared<Trk::CylinderBounds>(*barrelLayerBounds));
+        Trk::ApproachDescriptor* aDescritpor = new Trk::ApproachDescriptor(
+            std::move(aDescriptorBinnedArray), std::move(approachSurface));
 
         // do not give every layer material properties
         if (assignMaterial) {
@@ -536,7 +537,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
         Amg::Transform3D zPosTrans =
           Amg::Transform3D(Amg::Translation3D(0., 0., (*zPosIter)));
         endcapLayers->push_back(new Trk::DiscLayer(zPosTrans,
-                                                   fullDiscBounds->clone(),
+                                                   std::make_shared<Trk::DiscBounds>(*fullDiscBounds),
                                                    *layerMaterial,
                                                    m_layerThickness));
       }
@@ -643,11 +644,11 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
               Amg::Transform3D  aspTransform = Amg::Transform3D(Amg::Translation3D(aspPosition));
               // order in an optimised way for collision direction
               if (discZ > 0.){
-                aSurfaces->push_back( new Trk::DiscSurface(asnTransform, fullDiscBounds->clone()) );
-                aSurfaces->push_back( new Trk::DiscSurface(aspTransform, fullDiscBounds->clone()) );
+                aSurfaces->push_back( new Trk::DiscSurface(asnTransform, std::make_shared<Trk::DiscBounds>(*fullDiscBounds)));
+                aSurfaces->push_back( new Trk::DiscSurface(aspTransform, std::make_shared<Trk::DiscBounds>(*fullDiscBounds)) );
               } else {
-                aSurfaces->push_back( new Trk::DiscSurface(aspTransform, fullDiscBounds->clone()) );
-                aSurfaces->push_back( new Trk::DiscSurface(asnTransform, fullDiscBounds->clone()) );
+                aSurfaces->push_back( new Trk::DiscSurface(aspTransform, std::make_shared<Trk::DiscBounds>(*fullDiscBounds)) );
+                aSurfaces->push_back( new Trk::DiscSurface(asnTransform, std::make_shared<Trk::DiscBounds>(*fullDiscBounds)) );
               }
               // approach descriptor
               Trk::ApproachDescriptor* aDescriptor = new Trk::ApproachDescriptor(std::move(aSurfaces),false);
@@ -655,7 +656,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
               // do not give every layer material properties
               if (assignMaterial)
                 currentLayer = new Trk::DiscLayer(fullDiscTransform,
-                                                  fullDiscBounds->clone(),
+                                                  std::make_shared<Trk::DiscBounds>(*fullDiscBounds),
                                                   std::move(strawArray),
                                                   *layerMaterial,
                                                   m_layerThickness,
@@ -663,7 +664,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                                                   aDescriptor);
               else if (!m_modelGeometry)
                 currentLayer = new Trk::DiscLayer(fullDiscTransform,
-                                                  fullDiscBounds->clone(),
+                                                  std::make_shared<Trk::DiscBounds>(*fullDiscBounds),
                                                   std::move(strawArray),
                                                   m_layerThickness,
                                                   std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),

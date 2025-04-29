@@ -15,27 +15,24 @@
 // CLHEP
 #include "GeoPrimitives/GeoPrimitives.h"
 
-Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
-                            const Trk::SurfaceBounds* tbounds,
-                            const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
-                            int laytyp)
-    : PlaneSurface(transform, tbounds),
+Trk::PlaneLayer::PlaneLayer(
+  const Amg::Transform3D & transform,
+  std::shared_ptr<Trk::SurfaceBounds> tbounds,
+  const Trk::LayerMaterialProperties& laymatprop,
+  double thickness,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
+  int laytyp)
+    : PlaneSurface(transform, std::move(tbounds)),
       Layer(laymatprop, thickness, std::move(olap), laytyp) {}
-
-Trk::PlaneLayer::PlaneLayer(Trk::PlaneSurface* plane,
-                            const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
-                            int laytyp)
-    : PlaneSurface(*plane), Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(
-    const Amg::Transform3D & transform,
-    const std::shared_ptr<const Trk::SurfaceBounds>& tbounds,
-    const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
-    : PlaneSurface(transform, tbounds),
-      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
+  Trk::PlaneSurface* plane,
+  const Trk::LayerMaterialProperties& laymatprop,
+  double thickness,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
+  int laytyp)
+    : PlaneSurface(*plane), Layer(laymatprop, thickness, std::move(olap), laytyp) {}
+
 
 Trk::PlaneLayer::PlaneLayer(const Trk::PlaneLayer& play) = default;
 

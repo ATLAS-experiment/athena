@@ -13,25 +13,11 @@
 #include "TrkVolumes/VolumeBounds.h"
 
 Trk::AlignableTrackingVolume::AlignableTrackingVolume(
-    Amg::Transform3D* htrans,
-    Amg::Transform3D* align,
-    VolumeBounds* volbounds,
-    const Trk::BinnedMaterial* matprop,
+    std::unique_ptr<Amg::Transform3D> htrans,
+    std::shared_ptr<VolumeBounds> volbounds,
+    const Trk::BinnedMaterial& matprop,
     int sampleID,
     const std::string& volumeName)
-    : Trk::TrackingVolume(htrans, volbounds, *matprop, nullptr, nullptr, volumeName),
-      m_alignment(align),
-      m_alignedTV(nullptr),
+    : Trk::TrackingVolume(std::move(htrans), std::move(volbounds), matprop, nullptr, nullptr, volumeName),
       m_binnedMaterial(matprop),
-      m_sampleID(sampleID){
-  if (m_alignment) {
-    m_alignedTV = std::unique_ptr<TrackingVolume>(this->cloneTV(*m_alignment));
-  }
-}
-
-const Trk::TrackingVolume* Trk::AlignableTrackingVolume::alignedTrackingVolume() const {
-  if (m_alignedTV) {
-    return m_alignedTV.get();
-  }
-  return this;
-}
+      m_sampleID(sampleID){}

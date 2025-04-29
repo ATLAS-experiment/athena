@@ -94,14 +94,13 @@ Trk::CylinderVolumeBounds::operator=(const Trk::CylinderVolumeBounds& cylbo)
   return *this;
 }
 
-const std::vector<const Trk::Surface*>*
+std::vector<std::unique_ptr<Trk::Surface>>
   Trk::CylinderVolumeBounds::decomposeToSurfaces
   (const Amg::Transform3D& transform)
 {
-  std::vector<const Trk::Surface*>* retsf =
-    new std::vector<const Trk::Surface*>;
+  auto retsf = std::vector<std::unique_ptr<Trk::Surface>>();
   // memory optimisation --- reserve the maximum
-  retsf->reserve(6);
+  retsf.reserve(6);
 
   // check if the transform is approximatively the identity
   bool isConcentric = transform.isApprox(Amg::Transform3D::Identity());
@@ -114,34 +113,34 @@ const std::vector<const Trk::Surface*>*
   bottomDiscRot.col(0) = discRot.col(1);
   bottomDiscRot.col(1) = discRot.col(0);
   bottomDiscRot.col(2) = -discRot.col(2);
-  retsf->push_back(new Trk::DiscSurface(
+  retsf.push_back(std::make_unique<Trk::DiscSurface>(
     Amg::Transform3D(
       transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
       Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
     bottomDiscBounds()));
   // top Disc (positive z)
-  retsf->push_back(new Trk::DiscSurface(
+  retsf.push_back(std::make_unique<Trk::DiscSurface>(
     Amg::Transform3D(transform* Amg::Translation3D( Amg::Vector3D(0, 0, halflengthZ()) )),
     topDiscBounds()));
   // outer Cylinder
   if (!isConcentric)
-    retsf->push_back(new Trk::CylinderSurface(
+    retsf.push_back(std::make_unique<Trk::CylinderSurface>(
       Amg::Transform3D(transform), outerCylinderBounds()));
   else
-    retsf->push_back(new Trk::CylinderSurface(outerCylinderBounds()));
+    retsf.push_back(std::make_unique<Trk::CylinderSurface>(outerCylinderBounds()));
 
   // innermost Cylinder
   if (innerRadius() > s_numericalStable) {
     if (!isConcentric)
-      retsf->push_back(new Trk::CylinderSurface(
+      retsf.push_back(std::make_unique<Trk::CylinderSurface>(
         Amg::Transform3D(transform), innerCylinderBounds()));
     else
-      retsf->push_back(new Trk::CylinderSurface(innerCylinderBounds()));
+      retsf.push_back(std::make_unique<Trk::CylinderSurface>(innerCylinderBounds()));
   }
 
   if (std::abs(halfPhiSector() - M_PI) > s_numericalStable) {
     // sectorPlane 1 (negative phi)
-    retsf->push_back(new Trk::PlaneSurface(
+    retsf.push_back(std::make_unique<Trk::PlaneSurface>(
       Amg::Transform3D(
         transform *
         Amg::AngleAxis3D(-halfPhiSector(), Amg::Vector3D(0., 0., 1.)) *
@@ -149,7 +148,7 @@ const std::vector<const Trk::Surface*>*
         Amg::AngleAxis3D(M_PI / 2, Amg::Vector3D(1., 0., 0.))),
       sectorPlaneBounds()));
     // sectorPlane 2 (positive phi)
-    retsf->push_back(new Trk::PlaneSurface(
+    retsf.push_back(std::make_unique<Trk::PlaneSurface>(
       Amg::Transform3D(
         transform *
         Amg::AngleAxis3D(halfPhiSector(), Amg::Vector3D(0., 0., 1.)) *
@@ -349,28 +348,28 @@ Trk::CylinderVolumeBounds::boundarySurfaceAccessor(
   return {m_boundaryAccessors.sectoralTubeAccessor(Trk::StandardSectoralTube)};
 }
 
-Trk::CylinderBounds*
+std::shared_ptr<Trk::CylinderBounds>
 Trk::CylinderVolumeBounds::innerCylinderBounds() const
 {
-  return new Trk::CylinderBounds(m_innerRadius, m_halfPhiSector, m_halfZ);
+  return std::make_shared<Trk::CylinderBounds>(m_innerRadius, m_halfPhiSector, m_halfZ);
 }
 
-Trk::CylinderBounds*
+std::shared_ptr<Trk::CylinderBounds>
 Trk::CylinderVolumeBounds::outerCylinderBounds() const
 {
-  return new Trk::CylinderBounds(m_outerRadius, m_halfPhiSector, m_halfZ);
+  return std::make_shared<Trk::CylinderBounds>(m_outerRadius, m_halfPhiSector, m_halfZ);
 }
 
-Trk::DiscBounds*
+std::shared_ptr<Trk::DiscBounds>
 Trk::CylinderVolumeBounds::bottomDiscBounds() const
 {
-  return new Trk::DiscBounds(m_innerRadius, m_outerRadius, m_halfPhiSector);
+  return std::make_shared<Trk::DiscBounds>(m_innerRadius, m_outerRadius, m_halfPhiSector);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::CylinderVolumeBounds::sectorPlaneBounds() const
 {
-  return new Trk::RectangleBounds(
+  return std::make_shared<Trk::RectangleBounds>(
     0.5 * (m_outerRadius - m_innerRadius), m_halfZ);
 }
 

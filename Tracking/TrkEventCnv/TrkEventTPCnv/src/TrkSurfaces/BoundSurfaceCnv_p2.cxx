@@ -65,7 +65,7 @@ BoundSurfaceCnv_p2< SURFACE >::createTransient( const Trk::BoundSurface_p2 * per
    SURFACE*  transObj = m_surfaceCnv.createTransient( persObj, log );
 
    Trk::SurfaceBounds* bounds = this->createTransFromPStore( (TPCnvForSurfBnds**)nullptr, persObj->m_bounds, log );
-   transObj->m_bounds = std::shared_ptr<const Trk::SurfaceBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::SurfaceBounds>(bounds);
    return transObj;
 }
 

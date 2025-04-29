@@ -71,7 +71,7 @@ class PrismVolumeBounds final: public VolumeBounds {
   bool inside(const Amg::Vector3D&, double tol = 0.) const override final;
 
   /** Method to decompose the Bounds into Surfaces */
-  const std::vector<const Trk::Surface*>* decomposeToSurfaces
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces
   (const Amg::Transform3D& transform) override final;
 
   /** Provide accessor for BoundarySurfaces */
@@ -93,8 +93,8 @@ class PrismVolumeBounds final: public VolumeBounds {
 
  private:
   /** method to construct side boundary planes */
-  Trk::PlaneSurface* sideSurf(const Amg::Transform3D&, unsigned int,
-                              unsigned int) const;
+  std::unique_ptr<Trk::PlaneSurface> sideSurf(const Amg::Transform3D&, unsigned int,
+                                              unsigned int) const;
 
   /** mirror the input vertices for down-side boundary */
   std::vector<std::pair<double, double> > mirror_xyVtx() const;

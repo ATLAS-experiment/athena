@@ -40,10 +40,9 @@ class AlignableTrackingVolume : public TrackingVolume {
   AlignableTrackingVolume() = default;
   virtual ~AlignableTrackingVolume() override = default;
   /**Constructor*/
-  AlignableTrackingVolume(Amg::Transform3D* htrans,
-                          Amg::Transform3D* align,
-                          VolumeBounds* volbounds,
-                          const BinnedMaterial* matprop,
+  AlignableTrackingVolume(std::unique_ptr<Amg::Transform3D> htrans,
+                          std::shared_ptr<VolumeBounds> volbounds,
+                          const BinnedMaterial& matprop,
                           int sampleID,
                           const std::string& volumeName = "undefined");
 
@@ -58,8 +57,7 @@ class AlignableTrackingVolume : public TrackingVolume {
 
  private:
   std::unique_ptr<Amg::Transform3D> m_alignment = nullptr;
-  std::unique_ptr<TrackingVolume> m_alignedTV = nullptr;
-  std::unique_ptr<const BinnedMaterial> m_binnedMaterial = nullptr;
+  const BinnedMaterial m_binnedMaterial{};
   int m_sampleID{};
 };
 
@@ -68,7 +66,7 @@ inline int AlignableTrackingVolume::identify() const {
 }
 
 inline const BinnedMaterial* AlignableTrackingVolume::binnedMaterial() const {
-  return m_binnedMaterial.get();
+  return &m_binnedMaterial;
 }
 
 inline bool AlignableTrackingVolume::isAlignable() const {
