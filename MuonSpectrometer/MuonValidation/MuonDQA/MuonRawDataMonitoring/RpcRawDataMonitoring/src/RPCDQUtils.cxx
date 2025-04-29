@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // C/C++
@@ -47,15 +47,15 @@ void RpcPanel::FillRpcId(Identifier id, const RpcIdHelper &rpcIdHelper) {
 
 //========================================================================================================
 RpcPanel::RpcPanel(const Muon::IMuonIdHelperSvc &idHelperSvc,
-                   const MuonGM::RpcReadoutElement *_readoutEl,
-                   const int _doubletZ, const int _doubletPhi,
-                   const int _gasgap, const int _measPhi)
-    : readoutEl(_readoutEl),
-      doubletR(_readoutEl->getDoubletR()),
-      doubletZ(_doubletZ),
-      doubletPhi(_doubletPhi),
-      gasGap(_gasgap),
-      measPhi(_measPhi) {
+                   const MuonGM::RpcReadoutElement *readoutEl_,
+                   const int doubletZ_, const int doubletPhi_,
+                   const int gasgap_, const int measPhi_)
+    : readoutEl(readoutEl_),
+      doubletR(readoutEl_->getDoubletR()),
+      doubletZ(doubletZ_),
+      doubletPhi(doubletPhi_),
+      gasGap(gasgap_),
+      measPhi(measPhi_) {
     const RpcIdHelper &rpcIdHelper = idHelperSvc.rpcIdHelper();
     const Identifier readEl_id = readoutEl->identify();
 
@@ -211,22 +211,22 @@ std::pair<int, int> RpcPanel::getSectorLayer() const {
 //========================================================================================================
 // strcuct ExResult
 //========================================================================================================
-ExResult::ExResult(const Identifier _gasgap_id,
-                   const Trk::PropDirection _direction)
-    : gasgap_id(_gasgap_id), direction(_direction) {}
+ExResult::ExResult(const Identifier gasgap_id_,
+                   const Trk::PropDirection direction_)
+    : gasgap_id(gasgap_id_), direction(direction_) {}
 
 //========================================================================================================
 // GasGapData
 //========================================================================================================
 GasGapData::GasGapData(const Muon::IMuonIdHelperSvc &idHelperSvc,
-                       const MuonGM::RpcReadoutElement *_readoutEl,
-                       const int _doubletZ, const int _doubletPhi,
-                       const unsigned _gasgap)
-    : readoutEl(_readoutEl),
-      doubletR(_readoutEl->getDoubletR()),
-      doubletZ(_doubletZ),
-      doubletPhi(_doubletPhi),
-      gasgap(_gasgap) {
+                       const MuonGM::RpcReadoutElement *readoutEl_,
+                       const int doubletZ_, const int doubletPhi_,
+                       const unsigned gasgap_)
+    : readoutEl(readoutEl_),
+      doubletR(readoutEl_->getDoubletR()),
+      doubletZ(doubletZ_),
+      doubletPhi(doubletPhi_),
+      gasgap(gasgap_) {
     const RpcIdHelper &rpcIdHelper = idHelperSvc.rpcIdHelper();
     const Identifier readEl_id = readoutEl->identify();
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // -*- c++ -*-
@@ -21,8 +21,8 @@ struct RpcPanel {
     RpcPanel() = default;
     RpcPanel(Identifier id, const RpcIdHelper &rpcIdHelper);
     RpcPanel(const Muon::IMuonIdHelperSvc &idHelperSvc,
-             const MuonGM::RpcReadoutElement *_readoutEl, const int _doubletZ,
-             const int _doubletPhi, const int _gasgap, const int _measPhi);
+             const MuonGM::RpcReadoutElement *readoutEl_, const int doubletZ_,
+             const int doubletPhi_, const int gasgap_, const int measPhi_);
 
     const MuonGM::RpcReadoutElement *readoutEl{nullptr};
 
@@ -80,7 +80,7 @@ struct MyMuon {
 
 //================================================================================================
 struct ExResult {
-    ExResult(const Identifier _gasgap_id, const Trk::PropDirection _direction);
+    ExResult(const Identifier gasgap_id_, const Trk::PropDirection direction_);
 
     const Identifier gasgap_id;
     const Trk::PropDirection direction;
@@ -97,8 +97,8 @@ struct ExResult {
 //================================================================================================
 struct GasGapData {
     GasGapData(const Muon::IMuonIdHelperSvc &idHelperSvc,
-               const MuonGM::RpcReadoutElement *_readoutEl, const int _doubletZ,
-               const int _doubletPhi, const unsigned _gasgap);
+               const MuonGM::RpcReadoutElement *readoutEl_, const int doubletZ_,
+               const int doubletPhi_, const unsigned gasgap_);
 
     void computeTrackDistanceToGasGap(ExResult &result,
                                       const xAOD::TrackParticle &track) const;
