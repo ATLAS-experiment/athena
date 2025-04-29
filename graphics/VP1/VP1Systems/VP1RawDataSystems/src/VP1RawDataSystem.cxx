@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,6 +9,8 @@
 //                                                            //
 //  Author: Thomas H. Kittelmann (Thomas.Kittelmann@cern.ch)  //
 //  Initial version: June 2008 (rewritten January 2009)       //
+//  Main updates:
+//  - 2025, 05 -- R.M.Bianchi, Adding Muon digits (RDOs)
 //                                                            //
 ////////////////////////////////////////////////////////////////
 

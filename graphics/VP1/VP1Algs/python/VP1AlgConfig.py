@@ -364,6 +364,10 @@ def SetupVP1():
     from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
     cfg.merge(MM_RdoToDigitCfg(flags))
     _logger.verbose("+ MM_RdoToDigitCfg added.")
+    # Add sTGC RDO to digit config
+    from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
+    cfg.merge(STGC_RdoToDigitCfg(flags))
+    _logger.verbose("+ STGC_RdoToDigitCfg added.")
     
     _logger.verbose("+ ...Done")
 
