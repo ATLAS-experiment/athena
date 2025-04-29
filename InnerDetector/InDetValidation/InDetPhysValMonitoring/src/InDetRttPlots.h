@@ -99,6 +99,7 @@ struct InDetRttPlotConfig{
   bool doFakesPerAuthor{false};
   bool doTrackParametersPerAuthor{false};
   bool doResolutionsPerAuthor{false};
+  bool doHitsRecoTracksPlotsPerAuthor{false};
   
   /// Ntuple functionality 
   bool doNtupleTruthToReco{false}; 
@@ -215,6 +216,12 @@ private:
   std::unique_ptr<InDetPerfPlot_Resolution> m_resTRTSeededTrackFinderPlots;
   std::unique_ptr<InDetPerfPlot_Resolution> m_resTRTStandalonePlots;
   std::unique_ptr<InDetPerfPlot_Resolution> m_resSiSpacePointsSeedMaker_LargeD0Plots;
+
+  std::unique_ptr<InDetPerfPlot_Hits> m_hitsSiSPSeededFinderPlots;
+  std::unique_ptr<InDetPerfPlot_Hits> m_hitsInDetExtensionProcessorPlots;
+  std::unique_ptr<InDetPerfPlot_Hits> m_hitsTRTSeededTrackFinderPlots;
+  std::unique_ptr<InDetPerfPlot_Hits> m_hitsTRTStandalonePlots;
+  std::unique_ptr<InDetPerfPlot_Hits> m_hitsSiSpacePointsSeedMaker_LargeD0Plots;
 };
 
 

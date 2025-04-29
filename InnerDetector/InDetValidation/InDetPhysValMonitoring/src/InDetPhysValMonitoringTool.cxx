@@ -212,6 +212,7 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
   rttConfig.doTrackParametersPerAuthor = m_doPerAuthorPlots;
   rttConfig.doEfficienciesPerAuthor = m_doPerAuthorPlots;
   rttConfig.doResolutionsPerAuthor = m_doPerAuthorPlots;
+  rttConfig.doHitsRecoTracksPlotsPerAuthor = m_doPerAuthorPlots;
 
   rttConfig.doTrtExtensionPlots = m_doTRTExtensionPlots;
 

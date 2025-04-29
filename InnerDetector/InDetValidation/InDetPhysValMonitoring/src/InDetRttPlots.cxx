@@ -74,6 +74,14 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
     m_resTRTStandalonePlots                     = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/TRTStandalone/Tracks/Resolution");
     m_resSiSpacePointsSeedMaker_LargeD0Plots    = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/SiSpacePointsSeedMaker_LargeD0/Tracks/Resolution");
   }
+
+  if (m_config.doHitsRecoTracksPlotsPerAuthor){
+    m_hitsSiSPSeededFinderPlots                  = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/SiSPSeededFinder/Tracks/Selected/HitsOnTracks");
+    m_hitsInDetExtensionProcessorPlots           = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/InDetExtensionProcessor/Tracks/Selected/HitsOnTracks");
+    m_hitsTRTSeededTrackFinderPlots              = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/TRTSeededTrackFinder/Tracks/Selected/HitsOnTracks");
+    m_hitsTRTStandalonePlots                     = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/TRTStandalone/Tracks/Selected/HitsOnTracks");
+    m_hitsSiSpacePointsSeedMaker_LargeD0Plots    = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/SiSpacePointsSeedMaker_LargeD0/Tracks/Selected/HitsOnTracks"); 
+  }
     
   if (m_config.doTrkInJetPlots)                m_trkInJetPlots = std::make_unique<InDetPerfPlot_TrkInJet>(this, "TracksInJets/Tracks");
   if (m_config.doTrkInJetPlots_matched)        m_trkInJetPlots_matched = std::make_unique<InDetPerfPlot_TrkInJet>(this, "TracksInJets/Matched",false);
@@ -173,6 +181,23 @@ InDetRttPlots::fill(const xAOD::TrackParticle& particle, const float mu, const u
 
   if (m_trtExtensionPlots) m_trtExtensionPlots->fill(particle, mu, nVtx, weight);
   if (m_hitsRecoTracksPlots) m_hitsRecoTracksPlots->fill(particle, mu, weight);
+
+  if(m_config.doHitsRecoTracksPlotsPerAuthor){
+    std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = particle.patternRecoInfo();
+
+    bool isSiSpSeededFinder = patternInfo.test(0);
+    bool isInDetExtensionProcessor = patternInfo.test(3);
+    bool isTRTSeededTrackFinder = patternInfo.test(4);
+    bool isTRTStandalone = patternInfo.test(20);
+    bool isSiSpacePointsSeedMaker_LargeD0 = patternInfo.test(49);
+
+    if(isSiSpSeededFinder and not isInDetExtensionProcessor) m_hitsSiSPSeededFinderPlots->fill(particle, mu, weight);
+    else if(isInDetExtensionProcessor and not (isTRTSeededTrackFinder or isSiSpacePointsSeedMaker_LargeD0)) m_hitsInDetExtensionProcessorPlots->fill(particle, mu, weight);
+    else if(isTRTSeededTrackFinder and not isTRTStandalone) m_hitsTRTSeededTrackFinderPlots->fill(particle, mu, weight);
+    else if(isTRTStandalone) m_hitsTRTStandalonePlots->fill(particle, mu, weight);
+    else if(isSiSpacePointsSeedMaker_LargeD0) m_hitsSiSpacePointsSeedMaker_LargeD0Plots->fill(particle, mu, weight);
+
+  }
 
 }
 
