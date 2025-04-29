@@ -4,6 +4,7 @@
 #include "MsTrackTester.h"
 
 #include "StoreGate/ReadHandle.h"
+#include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 
 using namespace MuonVal;
@@ -21,10 +22,22 @@ namespace MuonValR4 {
         ATH_CHECK(m_truthKey.initialize(m_isMC));
         ATH_CHECK(m_msTrkSeedKey.initialize());
         ATH_CHECK(m_recoSegmentKey.initialize());
+        ATH_CHECK(m_segSelector.retrieve());
 
         int evOpts{0};
 
         m_recoSegs = std::make_unique<SegmentVariables>(m_tree, m_recoSegmentKey.key(), "Segments", msgLevel());
+        m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
+            "Segments_passSeedQual",[this](const SG::AuxElement* aux){
+            const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
+            return m_segSelector->passSeedingQuality(Gaudi::Hive::currentContext(),
+                                                     *MuonR4::detailedSegment(*seg)); }));
+        m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
+                                "Segments_passTrackQual",[this](const SG::AuxElement* aux){
+            const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
+            return m_segSelector->passTrackQuality(Gaudi::Hive::currentContext(),
+                                                   *MuonR4::detailedSegment(*seg)); 
+        }));
         if (m_isMC) {
             evOpts |= EventInfoBranch::isMC;
             m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 

@@ -6,6 +6,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def MsTrackTesterCfg(flags, name = "MsTrackTester", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
+    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg
+    kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
