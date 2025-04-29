@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #define DETAIL_DUMP_ON false
@@ -519,7 +519,15 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   /// not we have the packet size from the first packet, check all packet headers before decoding
   /// we can decide later if we drop decoding if we have inconsistency
   for (unsigned int ip = 1; ip < m_nPackets; ++ip) {
+    if (offset > m_ROBFragSize) {
+      ATH_MSG_WARNING("Data corruption, offset found at pos 0 (" << offset << ") is larger than the ROB fragment size (" << m_ROBFragSize << "). Ignoring data.");
+      return;
+    }
     offset = decodeHeader(p, offset);
+    if (offset > m_ROBFragSize) {
+      ATH_MSG_WARNING("Data corruption, offset found at pos 0 (" << offset << ") is larger than the ROB fragment size (" << m_ROBFragSize << "). Ignoring data.");
+      return;
+    }
     m_packetEnd.push_back(offset);
     offset = decodeTrailer(p, offset);
   }
