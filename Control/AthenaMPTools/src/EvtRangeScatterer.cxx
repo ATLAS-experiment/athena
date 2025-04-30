@@ -284,7 +284,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     std::string strVal = keyValue.substr(colonPos+1);
     trimRangeStrings(strKey);
     trimRangeStrings(strVal);
-    eventRangeMap[strKey]=strVal;
+    eventRangeMap[strKey]=std::move(strVal);
 			 
     if(eventRangeMap.find("eventRangeID")==eventRangeMap.end()
        || eventRangeMap.find("startEvent")==eventRangeMap.end()
@@ -360,7 +360,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     procReportPending++;
 
     // Get PID from the request and Update m_pid2RangeID
-    m_pid2RangeID[workerPid] = rangeID;
+    m_pid2RangeID[workerPid] = std::move(rangeID);
     processorWaitRequest.clear();
 
     ATH_MSG_INFO("Sent response to the processor : " << message2ProcessorStr);

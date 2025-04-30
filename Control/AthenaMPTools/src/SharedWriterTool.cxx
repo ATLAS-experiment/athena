@@ -69,7 +69,7 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
   else {
     std::string propertyName = "ParallelCompression";
     bool parallelCompression(false);
-    BooleanProperty parallelCompressionProp(propertyName,parallelCompression);
+    BooleanProperty parallelCompressionProp(std::move(propertyName),parallelCompression);
     if(propertyServer->getProperty(&parallelCompressionProp).isFailure()) {
       ATH_MSG_INFO("Conversion service does not have ParallelCompression property");
     }
