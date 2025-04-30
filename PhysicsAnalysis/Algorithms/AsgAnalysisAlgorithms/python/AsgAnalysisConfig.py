@@ -48,7 +48,7 @@ class CommonServicesConfig (ConfigBlock) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
 
-        if self.runSystematics is not None :
+        if self.runSystematics is False :
             runSystematics = self.runSystematics
         elif config.noSystematics() is not None :
             # if option not set:
