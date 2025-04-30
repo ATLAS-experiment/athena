@@ -78,7 +78,7 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
         dataObjects += [
                          # verifier object needed by GSF
                          ( 'xAOD::TrackParticleContainer','StoreGateSvc+%s' % trackParticles),
-                         ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ), 
+                         ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
                          ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.AveIntPerXDecor' )]
 
         if flags.Detector.GeometryTRT:

@@ -43,14 +43,17 @@ def L1LegacyTopoSimulationCfg(flags):
     acc.addEventAlgo(topoSimAlg)
     return acc
 
-def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1TopoSimulation"):
+def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1TopoSimulation", DeactivateL1TopoMuons=False):
 
     acc = ComponentAccumulator()
+
+    decoderTools = []
+    maybeMissingRobs = []
 
     #Configure the MuonInputProvider
     muProvider=""
 
-    if flags.Trigger.L1.doMuon:
+    if flags.Trigger.L1.doMuon and not DeactivateL1TopoMuons:
         muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider")
 
         """
@@ -71,15 +74,13 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
         muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
         muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
 
+
     emtauProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
     jetProvider = CompFactory.LVL1.jFexInputProvider("jFexInputProvider")
     energyProvider = CompFactory.LVL1.gFexInputProvider("gFexInputProvider")
 
     controlHistSvc = CompFactory.LVL1.ControlHistSvc("ControlHistSvc")
     
-    decoderTools = []
-    maybeMissingRobs = []
-
     IsData = True
     if flags.Input.isMC:
         IsData = False

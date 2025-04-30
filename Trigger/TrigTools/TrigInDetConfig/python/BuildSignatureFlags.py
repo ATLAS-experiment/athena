@@ -847,8 +847,9 @@ def addGlobalFlags(flags: AthConfigFlags, category : str):
   flags.addFlag(f'{category}.PixBSErrCacheKey',        "PixBSErrCache")
   flags.addFlag(f'{category}.TRTRDOCacheKey',          "TrtRDOCache")
   flags.addFlag(f'{category}.TRT_DriftCircleCacheKey', "TRT_DriftCircleCache")
+  flags.addFlag(f'{category}.TRT_DriftCircleKey',      "TRT_TrigDriftCircles")
+  flags.addFlag(f'{category}.PixClustersAmbiMap',      "TrigPixelClusterAmbiguitiesMap")
   flags.addFlag(f'{category}.ClusterAmbiguitiesMap',   "TrigPixelClusterAmbiguitiesMap")
-
   
 import unittest
 

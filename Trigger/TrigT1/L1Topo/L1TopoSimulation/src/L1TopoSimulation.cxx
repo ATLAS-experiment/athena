@@ -58,18 +58,26 @@ L1TopoSimulation::initialize ATLAS_NOT_THREAD_SAFE () {
    ATH_MSG_DEBUG("retrieving " << m_histSvc);
    CHECK( m_histSvc.retrieve() );
 
-   ATH_MSG_DEBUG("retrieving " << m_emtauInputProvider);
-   CHECK( m_emtauInputProvider.retrieve() );
-
-   ATH_MSG_DEBUG("retrieving " << m_jetInputProvider);
-   CHECK( m_jetInputProvider.retrieve() );
-
-   ATH_MSG_DEBUG("retrieving " << m_energyInputProvider);
-   CHECK( m_energyInputProvider.retrieve() );
-
-   ATH_MSG_DEBUG("retrieving " << m_muonInputProvider);
-   CHECK( m_muonInputProvider.retrieve(DisableTool{m_isLegacyTopo}) );
-
+   if (m_emtauInputProvider.isEnabled()) {
+      ATH_MSG_DEBUG("retrieving " << m_emtauInputProvider);
+      CHECK( m_emtauInputProvider.retrieve() );
+   }
+   
+   if (m_jetInputProvider.isEnabled()) {
+      ATH_MSG_DEBUG("retrieving " << m_jetInputProvider);
+      CHECK( m_jetInputProvider.retrieve() );
+   }
+   
+   if (m_energyInputProvider.isEnabled()) {
+      ATH_MSG_DEBUG("retrieving " << m_energyInputProvider);
+      CHECK( m_energyInputProvider.retrieve() );
+   }
+   
+   if (m_muonInputProvider.isEnabled()) {
+      ATH_MSG_DEBUG("retrieving " << m_muonInputProvider);
+      CHECK( m_muonInputProvider.retrieve(DisableTool{m_isLegacyTopo}) );
+   }
+   
    ATH_MSG_DEBUG("retrieving " << m_ControlHistSvc);
    CHECK( m_ControlHistSvc.retrieve());
 
@@ -178,14 +186,17 @@ L1TopoSimulation::execute() {
                            ctx.eventID().bunch_crossing_id());
 
    // EM TAU
-   CHECK(m_emtauInputProvider->fillTopoInputEvent(inputEvent));
-
+   if (m_emtauInputProvider.isEnabled()) {
+      CHECK(m_emtauInputProvider->fillTopoInputEvent(inputEvent));
+   }
    // JET
-   CHECK(m_jetInputProvider->fillTopoInputEvent(inputEvent));
-
+   if (m_jetInputProvider.isEnabled()) {
+      CHECK(m_jetInputProvider->fillTopoInputEvent(inputEvent));
+   }
    // ET sum, ET miss
-   CHECK(m_energyInputProvider->fillTopoInputEvent(inputEvent));
-
+   if (m_energyInputProvider.isEnabled()) {
+      CHECK(m_energyInputProvider->fillTopoInputEvent(inputEvent));
+   }
    // Muon
    if (m_muonInputProvider.isEnabled()) {
       CHECK(m_muonInputProvider->fillTopoInputEvent(inputEvent));

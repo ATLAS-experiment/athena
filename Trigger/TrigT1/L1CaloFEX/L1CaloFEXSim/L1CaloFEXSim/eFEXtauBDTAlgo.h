@@ -55,7 +55,7 @@ public:
                              const std::vector<unsigned int> &bdtThreshold,
                              unsigned int etThreshold,
                              unsigned int etThresholdForRHad,
-			     unsigned int bdtMinEtThreshold) override;
+			     unsigned int bdtMinEtThreshold, unsigned int etThresholdForRHadFrac) override;
 
   // Seed is hard-coded to 1 to reduce eta asymmetry 
   // which is stronger when it's hard-coded to 0 and 
@@ -73,6 +73,7 @@ private:
   unsigned int m_bdtThresholds[3]{};
   unsigned int m_etThreshold{};
   unsigned int m_maxEtThreshold{};
+  unsigned int m_maxEtThresholdFrac{};
   unsigned int m_bdtMinEtThreshold{};
 
   unsigned int m_bdtScore{};

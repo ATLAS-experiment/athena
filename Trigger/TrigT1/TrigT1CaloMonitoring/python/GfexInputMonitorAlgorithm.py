@@ -104,11 +104,12 @@ def GfexInputMonitoringConfig(flags):
 #                           **eta_phi_bins)                           
 
     helper.defineHistogram('TowerEt;h_TowerEt', title='gFex Tower Et ; Et (count x 50 MeV)',
-                            fillGroup = "gTowers",
-                            type='TH1I',
-                            path='Developer/gFexInput',
-                            hanConfig={"description":""},
-                            xbins= 1000, xmin=-500.0, xmax=500.0)
+                        fillGroup = "gTowers",
+                        type='TH1I',
+                        path='Developer/gFexInput',
+                        hanConfig={"description":""},
+                        xbins= 100, xmin=-50.0, xmax=100.0)
+    
 
     helper.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='gFex Tower Saturation FLag',
                             fillGroup = "gTowers",

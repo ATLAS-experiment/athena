@@ -53,7 +53,6 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
                                ybins=1,ymin=0,ymax=1,
                                opt=['kAddBinsDynamically'])
 
-
     helper.defineTree('LBN,Signature,LBNString,EventNumber,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
                       "lbn/l:Signature/string:lbnString/string:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
                       title="mismatched;LBN;Signature",fillGroup="mismatches")
