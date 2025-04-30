@@ -24,7 +24,7 @@
 namespace {
     const SG::AuxElement::Decorator<int> dec_truthOrigin{"truthOrigin"};
     const SG::AuxElement::Decorator<int> dec_truthType{"truthType"};
-    const std::vector<float> emptyVec;
+    const SG::Accessor<ElementLink<xAOD::TruthParticleContainer>> dec_truthLink{"truthParticleLink"};
 
     // Only reject muons from light quark deays
     const std::set<int> bad_origins{
@@ -82,12 +82,8 @@ namespace Muon {
     // Execute method:
     StatusCode MuonTruthDecorationAlg::execute(const EventContext& ctx) const {
         // skip if no input data found
-        SG::ReadHandle<xAOD::TruthParticleContainer> truthContainer(m_truthParticleContainerName, ctx);
-        if (!truthContainer.isPresent()) return StatusCode::SUCCESS;
-        if (!truthContainer.isValid()) {
-            ATH_MSG_WARNING("truth container " << truthContainer.name() << " not valid");
-            return StatusCode::FAILURE;
-        }
+        const xAOD::TruthParticleContainer* truthContainer{nullptr};
+        ATH_CHECK(SG::get(truthContainer, m_truthParticleContainerName, ctx));
 
         // create output container
         SG::WriteHandle<xAOD::TruthParticleContainer> muonTruthContainer(m_muonTruthParticleContainerName, ctx);
@@ -116,6 +112,9 @@ namespace Muon {
             truthParticle->setE(truth->e());
             truthParticle->setM(truth->m());
             if (truth->hasProdVtx()) truthParticle->setProdVtxLink(truth->prodVtxLink());
+            dec_truthLink(*truthParticle) = ElementLink<xAOD::TruthParticleContainer>{*truthContainer, truth->index()};
+
+
             ElementLink<xAOD::TruthParticleContainer> truthLink(*muonTruthContainer, muonTruthContainer->size() - 1);
             truthLink.toPersistent();
             ATH_MSG_DEBUG("Found stable muon: " << truth->pt() << " eta " << truth->eta() << " phi " << truth->phi() << " mass "
@@ -357,7 +356,7 @@ namespace Muon {
             float& epx = truthParticle.auxdata<float>(r_name + "_px_extr");
             float& epy = truthParticle.auxdata<float>(r_name + "_py_extr");
             float& epz = truthParticle.auxdata<float>(r_name + "_pz_extr");
-            truthParticle.auxdata<std::vector<float> >(r_name + "_cov_extr") = emptyVec;
+            truthParticle.auxdata<std::vector<float> >(r_name + "_cov_extr") = std::vector<float>{};
             truthParticle.auxdata<bool>(r_name+"_is_extr") = false;
             ex = ey = ez = epx = epy = epz = dummy_val;
 

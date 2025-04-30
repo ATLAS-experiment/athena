@@ -923,6 +923,7 @@ MuonTruthParticlesAuxDyn.recoMuonLinkLRT
 MuonTruthParticlesAuxDyn.truthCscHits
 MuonTruthParticlesAuxDyn.truthMdtHits
 MuonTruthParticlesAuxDyn.truthOrigin
+MuonTruthParticlesAuxDyn.truthParticleLink
 MuonTruthParticlesAuxDyn.truthRpcHits
 MuonTruthParticlesAuxDyn.truthTgcHits
 MuonTruthParticlesAuxDyn.truthType
