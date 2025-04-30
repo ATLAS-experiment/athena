@@ -70,8 +70,6 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
     OutputClusterContainerName = TrigEgammaKeys.precisionElectronEMClusterContainer
     #useBremAssoc = True
 
-    from TrigInDetConfig.InDetTrigCollectionKeys import TrigTRTKeys, TrigPixelKeys
-
     cellsName = "CaloCells" if not ion else "CorrectedRoICaloCells"
     dataObjects = [( 'CaloCellContainer' , 'StoreGateSvc+%s' % cellsName ),
                    ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
@@ -80,9 +78,9 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
         dataObjects += [
                          # verifier object needed by GSF
                          ( 'xAOD::TrackParticleContainer','StoreGateSvc+%s' % trackParticles),
-                         ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ), 
-                         ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+%s' % TrigPixelKeys.PixelClusterAmbiguitiesMap ),
-                         ( 'InDet::TRT_DriftCircleContainer' , 'StoreGateSvc+%s' % TrigTRTKeys.DriftCircles ),
+                         ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
+                         ( 'InDet::PixelGangedClusterAmbiguities' , f'StoreGateSvc+{flags.Trigger.InDetTracking.PixClustersAmbiMap}'),
+                         ( 'InDet::TRT_DriftCircleContainer' , f'StoreGateSvc+{flags.Trigger.InDetTracking.TRT_DriftCircleKey}' ),
                          ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.AveIntPerXDecor' )]
 
         if flags.Input.isMC:

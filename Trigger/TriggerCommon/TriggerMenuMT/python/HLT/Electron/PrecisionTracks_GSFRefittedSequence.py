@@ -26,13 +26,12 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
 
     # precision Tracking related data dependencies
     trackParticles = TrigEgammaKeys.precisionTrackingContainer
-    from TrigInDetConfig.InDetTrigCollectionKeys import TrigTRTKeys, TrigPixelKeys
 
     dataObjects = [( 'xAOD::TrackParticleContainer','StoreGateSvc+%s' % trackParticles),
                    # verifier object needed by GSF
                    ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
-                   ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+%s' % TrigPixelKeys.PixelClusterAmbiguitiesMap ),
-                   ( 'InDet::TRT_DriftCircleContainer' , 'StoreGateSvc+%s' % TrigTRTKeys.DriftCircles ),
+                   ( 'InDet::PixelGangedClusterAmbiguities' , f'StoreGateSvc+{flags.Trigger.InDetTracking.PixClustersAmbiMap}'),
+                   ( 'InDet::TRT_DriftCircleContainer' , f'StoreGateSvc+{flags.Trigger.InDetTracking.TRT_DriftCircleKey}' ),
                    ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.AveIntPerXDecor' ),
                    ]
 
