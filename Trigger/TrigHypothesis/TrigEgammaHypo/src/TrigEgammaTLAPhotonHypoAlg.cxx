@@ -1,14 +1,11 @@
-#include <algorithm>
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "TrigEgammaTLAPhotonHypoAlg.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "AthViews/ViewHelper.h"
-//#include "xAODTrigger/TrigCompositeContainer.h"
-#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
-#include "TrigCompositeUtils/TrigCompositeUtils.h"
-#include "xAODBase/IParticleHelpers.h"
-#include "xAODTrigCalo/TrigEMClusterContainer.h"
-#include "xAODTrigCalo/TrigEMClusterAuxContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODEgamma/PhotonAuxContainer.h"
 
@@ -91,10 +88,7 @@ StatusCode TrigEgammaTLAPhotonHypoAlg::execute( const EventContext& ctx) const
         
 
         ATH_MSG_DEBUG("Copied photon with pT: " << copiedPhoton->pt() << " from decision " << nDecision);
-        
-
     }
-
 
 
   for (const auto& tool : m_hypoTools)

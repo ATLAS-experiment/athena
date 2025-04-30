@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_TRIGPHOTONCALOISOHYPOALG_PRECISION_H
 #define TRIGEGAMMAHYPO_TRIGPHOTONCALOISOHYPOALG_PRECISION_H 1
@@ -9,7 +9,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODEgamma/PhotonAuxContainer.h"
-#include "xAODEgamma/Photon.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "DecisionHandling/HypoBase.h"
 #include "ITrigEgammaPrecisionPhotonCaloIsoHypoTool.h"
