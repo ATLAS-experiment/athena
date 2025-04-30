@@ -39,13 +39,13 @@ def MMMonitoringConfig(inputFlags):
     
     # Configure histograms
     mmTriggerGroup=helper.addGroup(mmMonAlg, "mmTrigger", "Muon/MuonRawDataMonitoring/MM")
-    mmTriggerGroup.defineHistogram('lb_tri,trig_sector;trigger_sector_vs_lumiblock', type='TH2F', title='TriggerSector_vs_lumiblock; lb; sector', path='MMTrigger', xbins=100, xmin=-0.5, xmax=99.5, ybins=33, ymin=-16.5, ymax=16.5, opt='kAddBinsDynamically,kAlwaysCreate')
+    mmTriggerGroup.defineHistogram('lb_tri,trig_sector;trigger_sector_vs_lumiblock', type='TH2F', title='TriggerSector_vs_lumiblock; lb; sector', path='MMTrigger', xbins=100, xmin=-0.5, xmax=99.5, ybins=33, ymin=-16.5, ymax=16.5, opt='kAddBinsDynamically,kAlwaysCreate', merge='merge')
     mmTriggerGroup.defineHistogram('trig_sector,art_channel;art_channel_vs_sector', type='TH2F', title='ART_channels; sector; art_channel', path='MMTrigger', xbins=33, xmin=-16.5, xmax=16.5, ybins=8192, ymin=0, ymax=8192,opt='kAlwaysCreate')
     layerLabelx=getMMLabelY("x_layer_in_sector_tri")
     mmTriggerGroup.defineHistogram('art_sector_layer,art_channel;art_channel_vs_layer', type='TH2F', title='ART_channels_vs_layer; ; art_channel', path='MMTrigger', xbins=257, xmin=-128, xmax=129, ybins=8192, ymin=0, ymax=8192,  xlabels=layerLabelx,opt='kAlwaysCreate')
     mmTriggerGroup.defineHistogram('trig_sector,art_deltaBC;art_bcid_vs_sector', type='TH2F', title='ART_BCID_vs_sector; sector_layer; art_deltaBCID', path='MMTrigger', xbins=33, xmin=-16.5, xmax=16.5, ybins=40, ymin=-20, ymax=20,opt='kAlwaysCreate')
     mmTriggerGroup.defineHistogram('art_sector_layer,art_deltaBC;art_layer_vs_Dbcid', type='TH2F', title='ART_BCID_vs_layer; sector_layer; art_deltaBCID', path='MMTrigger', xbins=260, xmin=-130, xmax=130, ybins=40, ymin=-20, ymax=20, xlabels=layerLabelx,opt='kAlwaysCreate')
-    mmTriggerGroup.defineHistogram('lb_tri,art_sector_layer;art_layer_vs_lumiblock', type='TH2F', title='ART_layer_vs_lumiblock; lb; ', path='MMTrigger', xbins=100, xmin=-0.5, xmax=99.5, ybins=260, ymin=-130, ymax=130,opt='kAddBinsDynamically,kAlwaysCreate', ylabels=layerLabelx)
+    mmTriggerGroup.defineHistogram('lb_tri,art_sector_layer;art_layer_vs_lumiblock', type='TH2F', title='ART_layer_vs_lumiblock; lb; ', path='MMTrigger', xbins=100, xmin=-0.5, xmax=99.5, ybins=260, ymin=-130, ymax=130,opt='kAddBinsDynamically,kAlwaysCreate', ylabels=layerLabelx, merge='merge')
     mmTriggerGroup.defineHistogram('art_bc,bcid;art_bcid_vs_bc', type='TH2F', title='ART_BCID; art_bcid; BCID', path='MMTrigger', xbins=5000, xmin=0, xmax=5000, ybins=5000, ymin=0, ymax=5000,opt='kAlwaysCreate')
     mmTriggerGroup.defineHistogram('art_deltaBC,bcid;art_Dbcid_vs_bc', type='TH2F', title='ART_BCID; art_Dbcid; BCID', path='MMTrigger', xbins=5000, xmin=-2500, xmax=2500, ybins=5000, ymin=0, ymax=5000,opt='kAlwaysCreate')
 
@@ -58,7 +58,7 @@ def MMMonitoringConfig(inputFlags):
     mmTriggerGroup_roi.defineHistogram('eta_roi,eta_mu;etaroi_vs_etamu', type='TH2F', title='etaroi_vs_etamu; eta_roi; etamu ',  path='MMTrigger', xbins=100, xmin=-3., xmax=3., ybins=100, ymin=-3., ymax=3.,opt='kAlwaysCreate')
     mmTriggerGroup_roi.defineHistogram('x_roi_sideA,y_roi_sideA;roi_x_vs_y_sideA', type='TH2F', title='roix_vs_roiy_sideA; x_roi; y_roi ',  path='MMTrigger', xbins=200, xmin=-5000., xmax=5000., ybins=200, ymin=-5000., ymax=5000.,opt='kAlwaysCreate')
     mmTriggerGroup_roi.defineHistogram('x_roi_sideC,y_roi_sideC;roi_x_vs_y_sideC', type='TH2F', title='roix_vs_roiy_sideC; x_roi; y_roi ',  path='MMTrigger', xbins=200, xmin=-5000., xmax=5000., ybins=200, ymin=-5000., ymax=5000.,opt='kAlwaysCreate')
-    mmTriggerGroup_roi.defineHistogram('lb_tri,trig_sector;sector_roi_vs_lb', type='TH2F', title='sector_roi_vs_lb; lb; sector_roi  ',  path='MMTrigger', xbins=100, xmin=-0.5, xmax=99.5, ybins=33, ymin=-16.5, ymax=16.5, opt='kAddBinsDynamically,kAlwaysCreate')
+    mmTriggerGroup_roi.defineHistogram('lb_tri,trig_sector;sector_roi_vs_lb', type='TH2F', title='sector_roi_vs_lb; lb; sector_roi  ',  path='MMTrigger', xbins=100, xmin=-0.5, xmax=99.5, ybins=33, ymin=-16.5, ymax=16.5, opt='kAddBinsDynamically,kAlwaysCreate', merge='merge')
     mmTriggerGroup_roi.defineHistogram('trig_sector,deltaBC;deltaBC_vs_sector_roi', type='TH2F', title='deltaBC_vs_sector_ROI; sector; dBC_roi ',  path='MMTrigger', xbins=33, xmin=-16.5, xmax=16.5, ybins=40, ymin=-20, ymax=20,opt='kAlwaysCreate')
     mmTriggerGroup_roi.defineHistogram('trig_sector,nROIPerBC;nROIPerBC_vs_sector', type='TH2F', title='N ROI per BC per Sector; sector; nROIPerBC  ', path='MMTrigger', xbins=33, xmin=-16.5, xmax=16.5, ybins=10,  ymin=0, ymax=10, opt='kAlwaysCreate')
     
@@ -69,10 +69,10 @@ def MMMonitoringConfig(inputFlags):
             mmTriggerGroup_roi.defineHistogram(var, type='TH2F', title=title_ROI, path='MMTrigger/ROIPerSector', xbins=70, xmin=-35, xmax=35, ybins=255, ymin=0, ymax=255,opt='kAlwaysCreate')
             title_art_dbc=f'ART_DeltaBC vs lumiblock {iside} Sector {phi}; lb ; DeltaBC'
             var_dbc_art=f'lb_tri,art_deltaBC_{iside}_s{phi};art_DeltaBC_vs_lb_art_{iside}_Sector{phi}'
-            mmTriggerGroup.defineHistogram(var_dbc_art, type='TH2F', title=title_art_dbc, path='MMTrigger/BCvsLBPerSector', xbins=100, xmin=-0.5, xmax=99.5, ybins=40, ymin=-20, ymax=20, opt='kAddBinsDynamically,kAlwaysCreate')
+            mmTriggerGroup.defineHistogram(var_dbc_art, type='TH2F', title=title_art_dbc, path='MMTrigger/BCvsLBPerSector', xbins=100, xmin=-0.5, xmax=99.5, ybins=40, ymin=-20, ymax=20, opt='kAddBinsDynamically,kAlwaysCreate', merge='merge')
             title_roi_dbc=f'ROI DeltaBC vs lumiblock {iside} Sector {phi}; lb ; DeltaBC'
             var_dbc_roi=f'lb_tri,deltaBC_{iside}_s{phi};DeltaBC_vs_lb_ROI_{iside}_Sector{phi}'
-            mmTriggerGroup_roi.defineHistogram(var_dbc_roi, type='TH2F', title=title_roi_dbc, path='MMTrigger/BCvsLBPerSector', xbins=100, xmin=-0.5, xmax=99.5, ybins=40, ymin=-20, ymax=20, opt='kAddBinsDynamically,kAlwaysCreate')
+            mmTriggerGroup_roi.defineHistogram(var_dbc_roi, type='TH2F', title=title_roi_dbc, path='MMTrigger/BCvsLBPerSector', xbins=100, xmin=-0.5, xmax=99.5, ybins=40, ymin=-20, ymax=20, opt='kAddBinsDynamically,kAlwaysCreate', merge='merge')
 
     
     # Overview histogram
@@ -249,7 +249,7 @@ if __name__=='__main__':
     flags = initConfigFlags()
 
     flags.Input.Files =[
-        "/eos/atlas/atlastier0/rucio/data23_hi/express_express/00463414/data23_hi.00463414.express_express.recon.ESD.x798/data23_hi.00463414.express_express.recon.ESD.x798._lb0501._SFO-ALL._0001.1",
+        "/eos/atlas/atlasgroupdisk/det-muon/dq2/rucio/data24_13p6TeV/a7/e3/data24_13p6TeV.00484074.physics_Main.merge.DESDM_MCP.f1512_m2250._0200.1",
     ]
     flags.Output.HISTFileName = 'monitor.root'
 
@@ -273,4 +273,4 @@ if __name__=='__main__':
     cfg.merge(mmMonitorAcc)
     #cfg.printConfig(withDetails=True, summariseProps = True)
     # number of events selected in the ESD
-    cfg.run(1000)
+    cfg.run(100)
