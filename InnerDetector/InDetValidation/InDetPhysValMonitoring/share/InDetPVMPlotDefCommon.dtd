@@ -20,7 +20,7 @@
 <!ENTITY PIXHIT "10">
 <!ENTITY SCTHIT "20">
 <!ENTITY SIHIT "20">
-<!ENTITY TRTHIT "40">
+<!ENTITY TRTHIT "50">
 
 <!-- bins for resolutions -->
 <!ENTITY D0RES "10.00">
