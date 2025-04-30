@@ -35,7 +35,7 @@ cd 1thread
 Reco_tf.py --CA 'all:True' \
            --AMI q445 \
            --conditionsTag "all:${conditions}" \
-           --postInclude "RAWtoALL:MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
+           --postInclude "RAWtoALL:MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg" \
            --imf False \
            --outputESDFile OUT_ESD_1thread.root
 exit_code=$?
