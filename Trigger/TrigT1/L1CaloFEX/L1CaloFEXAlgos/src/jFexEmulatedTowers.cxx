@@ -137,7 +137,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         
             int Total_Et = 0;
             float Total_Et_float = 0;
-            bool invalid = m_apply_masking&&m_isDATA; // the isDATA is because still waiting for a decision from LAr on whether we should be masking invalid cells in mc or not
+            bool invalid = m_apply_masking&&m_isDATA; // the isDATA is because there is no concept of invalid supercell in MC (the provenance bit is actually used for BCID in MC), so can never have an invalid jTower. 
             bool masked = m_apply_masking;
             for (auto const& SCellID : it_TTower2SCells->second ) {
                 //check that the SCell Identifier exists in the map
@@ -151,7 +151,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 const CaloCell* myCell = it_ScellID2ptr->second;
                 int val =  std::round(myCell->energy()/(12.5*std::cosh(myCell->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
                 bool isMasked = m_apply_masking ? ((myCell)->provenance()&0x80) : false;
-                bool isInvalid = m_apply_masking ? ((myCell)->provenance()&0x40) : false;
+                bool isInvalid = (m_apply_masking&&m_isDATA) ? ((myCell)->provenance()&0x40) : false;
                 bool isSaturated = myCell->quality();
 
                 invalid &= isInvalid;
@@ -162,7 +162,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                     //if masked then Et = 0
                     val = 0;
                     //countMasked++;
-                } else if( isInvalid&&m_isDATA /* remove isDATA check when answer question above about MC treatment of invalid SCs*/ ) {
+                } else if( isInvalid ) {
                     val = 0;
                 }
                 

@@ -119,7 +119,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
     std::map<int,dqm_core::Result*> resultsByTimeBin;
     std::map<std::string,int> counts;
     dqm_core::Result* lastFilledResult = nullptr;
-
+    //if nBinsZ == 0, this loop executes *once* with t = -1
     for(int t=(nBinsZ>0 ? range[0] : -1) ; t <= (nBinsZ>0 ? range[1] : -1); t++) {
         int xmin = range[0], xmax = range[1];
         int ymin = range[2], ymax = range[3];
@@ -317,11 +317,13 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
                         int lbStart = histogram->GetXaxis()->GetBinLowEdge(t-v);
                         int lbEnd = histogram->GetXaxis()->GetBinLowEdge(t);
                         // in liveMode (for P1 monitoring), don't put the LBs in the result name, so that we get a consistent history plot
-                        if(liveMode) {
-                            result->tags_[k] = lastResult->tags_[k];
-                        } else {
-                            result->tags_[k +
-                                          TString::Format("_LB%d-%d", lbStart, lbEnd).Data()] = lastResult->tags_[k];
+                        if (lastResult){
+                          if(liveMode) {
+                              result->tags_[k] = lastResult->tags_[k];//lastResult must not be null 
+                          } else {
+                              result->tags_[k +
+                                            TString::Format("_LB%d-%d", lbStart, lbEnd).Data()] = lastResult->tags_[k];
+                          }
                         }
                         // increment appropriate counter
                         if(k.find("_DeadStrip")==0) {
