@@ -35,10 +35,10 @@ namespace TRTCond
   {
     const double precision = 0.0001 ;
     double t = 20 ;
-    double residual = fabs(r) - radius(t) ;
+    double residual = std::fabs(r) - radius(t) ;
     const unsigned char maxtries = 10 ;
     unsigned char ntries = 0 ;
-    while ( fabs(residual) > precision) {
+    while ( std::fabs(residual) > precision) {
       if ( drdt(t) == 0. ) t += 0.;
       else t += residual / drdt(t) ;
       residual = r - radius(t) ;

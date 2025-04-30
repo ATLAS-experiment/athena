@@ -42,8 +42,8 @@ std::pair<double,double> PixelClusterErrorData::getDelta(IdentifierHash idHash,
   double delta_y_slope = value[kDelta_y_slope];
   double delta_y_offset = value[kDelta_y_offset];
 
-  double delta_x = delta_x_slope * fabs(angle - period_phi*(sizePhi-2)) + delta_x_offset;
-  double delta_y = delta_y_slope * fabs(sinh(fabs(eta)) - period_sinheta*(sizeZ-2)) + delta_y_offset;
+  double delta_x = delta_x_slope * std::fabs(angle - period_phi*(sizePhi-2)) + delta_x_offset;
+  double delta_y = delta_y_slope * std::fabs(std::sinh(std::fabs(eta)) - period_sinheta*(sizeZ-2)) + delta_y_offset;
   return std::make_pair(delta_x,delta_y);
 
 }
