@@ -124,7 +124,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     // charge to ToT conversion
     double tot = calibData->getToT(type, moduleHash, FE, charge);
     double totsig = calibData->getTotRes(moduleHash, FE, tot);
-    int nToT = generateToT(rndmEngine, tot,totsig, std::make_pair(1,overflowToT));
+    int nToT = generateToT(rndmEngine, tot,totsig, std::make_pair(0,overflowToT));
 
     if (nToT <= moduleData->getToTThreshold(barrel_ec, layerIndex)) {
       SiHelper::belowThreshold(mapDiode, true, true);
