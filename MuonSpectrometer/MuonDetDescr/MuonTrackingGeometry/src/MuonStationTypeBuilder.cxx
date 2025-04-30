@@ -242,7 +242,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
     }  // loop over components
 
     // define enveloping volumes for each "technology"
-    std::vector<std::unique_ptr<Trk::TrackingVolume>> trkVols{};
+    std::vector<std::shared_ptr<Trk::TrackingVolume>> trkVols{};
     double envX = envelope.halflengthX();
     double envY = envelope.halflengthY();
     double envZ = envelope.halflengthZ();
@@ -449,10 +449,8 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         }
     }
     // create VolumeArray (1DX)
-    std::unique_ptr<Trk::TrackingVolumeArray> components{};
-
-    auto binUtility = std::make_unique<Trk::BinUtility>(volSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-    components.reset(m_trackingVolumeArrayCreator->cuboidVolumesArrayNav(Muon::release(trkVols), binUtility.release(), false));
+    Trk::BinUtility binUtility(volSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+    std::unique_ptr<Trk::TrackingVolumeArray> components(m_trackingVolumeArrayCreator->cuboidVolumesArrayNav(trkVols, binUtility));
 
 
     return components;
@@ -551,7 +549,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         }
     }  // loop over components
     // define enveloping volumes for each "technology"
-    std::vector<std::unique_ptr<Trk::TrackingVolume>> trkVols;
+    std::vector<std::shared_ptr<Trk::TrackingVolume>> trkVols;
     const double envX1{envelope.minHalflengthX()}, envX2{envelope.maxHalflengthX()},
                  envY{envelope.halflengthY()}, envZ{envelope.halflengthZ()};
     //
@@ -697,11 +695,9 @@ std::unique_ptr<Trk::TrackingVolumeArray>
     // create VolumeArray (1DX)
 
 
-    std::unique_ptr<Trk::BinUtility> binUtility = std::make_unique<Trk::BinUtility>(volSteps,
-                                                                                    Trk::BinningOption::open,
-                                                                                    Trk::BinningValue::binX);
-    std::unique_ptr<Trk::TrackingVolumeArray> components{m_trackingVolumeArrayCreator->trapezoidVolumesArrayNav(Muon::release(trkVols),
-                                                                                                                binUtility.release(), false)};
+    Trk::BinUtility binUtility(volSteps, Trk::BinningOption::open,Trk::BinningValue::binX);
+    std::unique_ptr<Trk::TrackingVolumeArray> components{m_trackingVolumeArrayCreator->trapezoidVolumesArrayNav(trkVols,
+                                                                                                                binUtility)};
     return components;
 }
 
@@ -853,11 +849,10 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processMdtBox
     }
     layers.clear();
 
-    auto binUtility = std::make_unique<Trk::BinUtility>(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-
+    Trk::BinUtility binUtility(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
     auto mdtLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder,
-                                                                             binUtility.release(),
-                                                                             makeTransform(Amg::Transform3D::Identity()).release());
+                                                                             binUtility,
+                                                                             Amg::Transform3D(Amg::Transform3D::Identity()));
 
     return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, mdtLayerArray.release(), nullptr, "MDT");
 
@@ -991,9 +986,9 @@ std::unique_ptr<Trk::TrackingVolume>
         }
         binSteps.push_back(transf.translation().x() + volBounds->halflengthZ());
     }
-    auto binUtility = std::make_unique<Trk::BinUtility>(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-    auto mdtLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility.release(),
-                                                                                makeTransform(Amg::Transform3D::Identity()).release());
+    Trk::BinUtility binUtility(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+    auto mdtLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility,
+                                                                              Amg::Transform3D(Amg::Transform3D::Identity()));
 
     return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, mdtLayerArray.release(), nullptr, "MDT");
 
@@ -1503,7 +1498,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
     double envY2 = y2;
     std::vector<float> volSteps;
     volSteps.push_back(-xTotal + xShift);
-    std::vector<std::unique_ptr<Trk::TrackingVolume>> components{};
+    std::vector<std::shared_ptr<Trk::TrackingVolume>> components{};
     if (!isDiamond) {
         xMax = xMed;
         y2 = 0.5 * zShift;
@@ -1521,7 +1516,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
             auto compBounds = std::make_unique<Trk::TrapezoidVolumeBounds>(xMin, xMax, y1, xSizes[ic]);
             std::unique_ptr<Trk::LayerArray> cscLayerArray = processCSCTrdComponent(compGeoVol[ic], *compBounds, compTr, cache);
             std::unique_ptr<Trk::Volume> compVol = std::make_unique<Trk::Volume>(makeTransform(compTr), std::move(compBounds));
-            auto compTV =  std::make_unique<Trk::TrackingVolume>(*compVol, *m_muonMaterial, cscLayerArray.release(), nullptr, compName[ic]);
+            auto compTV =  std::make_shared<Trk::TrackingVolume>(*compVol, *m_muonMaterial, cscLayerArray.release(), nullptr, compName[ic]);
             components.push_back(std::move(compTV));
             xCurr += xSizes[ic];
             volSteps.push_back(xCurr + xShift);
@@ -1547,7 +1542,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
             auto compBounds = std::make_shared<Trk::DoubleTrapezoidVolumeBounds>(xMin, envXMed, xMax, envY1, envY2, xSizes[ic]);
             std::unique_ptr<Trk::LayerArray> cscLayerArray{processCSCDiamondComponent(compGeoVol[ic], *compBounds, compTr, cache)};
             std::unique_ptr<Trk::Volume> compVol = std::make_unique<Trk::Volume>(makeTransform(compTr), std::move(compBounds));
-            auto compTV = std::make_unique<Trk::TrackingVolume>(*compVol, *m_muonMaterial,
+            auto compTV = std::make_shared<Trk::TrackingVolume>(*compVol, *m_muonMaterial,
                                                                 cscLayerArray.release(), nullptr, compName[ic]);
             components.push_back(std::move(compTV));
             xCurr += xSizes[ic];
@@ -1558,12 +1553,11 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
     // convert component volumes into array
     std::unique_ptr<Trk::BinnedArray<Trk::TrackingVolume>> compArray{};
     if (!components.empty() && isDiamond) {
-        auto binUtil = std::make_unique<Trk::BinUtility>(volSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-        compArray.reset(m_trackingVolumeArrayCreator->doubleTrapezoidVolumesArrayNav(Muon::release(components), binUtil.release(), false));
+        Trk::BinUtility binUtil(volSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+        compArray = m_trackingVolumeArrayCreator->doubleTrapezoidVolumesArrayNav(components, binUtil);
     } else  if (!components.empty() && !isDiamond) {
-
-        auto binUtil = std::make_unique<Trk::BinUtility>(volSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-        compArray.reset(m_trackingVolumeArrayCreator->trapezoidVolumesArrayNav(Muon::release(components), binUtil.release(), false));
+        Trk::BinUtility binUtil(volSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+        compArray = m_trackingVolumeArrayCreator->trapezoidVolumesArrayNav(components, binUtil);
 
     }
     // ready to build the station prototype
@@ -1660,9 +1654,9 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
         ATH_MSG_WARNING("rescale stgc binning:" << binSteps.back() << ">" << thickness);
     }
     binSteps.back() = thickness;
-    auto binUtility = std::make_unique<Trk::BinUtility>(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-    auto stgcLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility.release(),
-                                                                              makeTransform(Amg::Transform3D::Identity()).release());
+    Trk::BinUtility binUtility(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+    auto stgcLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility,
+                                                                              Amg::Transform3D(Amg::Transform3D::Identity()));
     // build tracking volume
     auto sTgc = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial,
                                                       stgcLayerArray.release(), nullptr, vName);
@@ -1727,9 +1721,9 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
         ATH_MSG_WARNING("rescale mm binning:" << binSteps.back() << ">" << thickness);
     }
     binSteps.back() = thickness;
-    auto binUtility = std::make_unique<Trk::BinUtility>(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-    auto mmLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility.release(),
-                                                                           makeTransform(Amg::Transform3D::Identity()).release());
+    Trk::BinUtility binUtility(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+    auto mmLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility,
+                                                                           Amg::Transform3D(Amg::Transform3D::Identity()));
     // build tracking volume
     auto mM = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, mmLayerArray.release(), nullptr, vName);
     // create layer representation
@@ -1898,9 +1892,9 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processCSCTrdComp
         binSteps.push_back(compBounds.halflengthZ() + xShift);
     }
 
-    auto binUtility = std::make_unique<Trk::BinUtility>(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-    return std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility.release(),
-                                                              makeTransform(Amg::Transform3D::Identity()).release());
+    Trk::BinUtility binUtility(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+    return std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility,
+                                                              Amg::Transform3D(Amg::Transform3D::Identity()));
 }
 
 std::unique_ptr<Trk::LayerArray>
@@ -2016,9 +2010,9 @@ std::unique_ptr<Trk::LayerArray>
         binSteps.push_back(compBounds.halflengthZ() + xShift);
     }
 
-   auto binUtility = std::make_unique<Trk::BinUtility>(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-   return std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility.release(),
-                                                               makeTransform(Amg::Transform3D::Identity()).release());
+   Trk::BinUtility binUtility (binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+   return std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility,
+                                                               Amg::Transform3D(Amg::Transform3D::Identity()));
 
 }
 
@@ -2123,9 +2117,9 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processTGCCompone
         layerOrder.push_back(std::move(layers.back()));
         binSteps.push_back(halfZ + xShift);
     }
-    auto binUtility = std::make_unique<Trk::BinUtility>(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
-    return std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility.release(),
-                                                               makeTransform(Amg::Transform3D::Identity()).release());
+    Trk::BinUtility binUtility(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+    return std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility,
+                                                               Amg::Transform3D(Amg::Transform3D::Identity()));
 
 }
 
