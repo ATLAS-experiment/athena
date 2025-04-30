@@ -30,6 +30,7 @@ def addPhysValidationMergeFiles(parser):
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='input'),
                         help='Input physics validation file', group='Validation Files', nargs='+')
     parser.add_argument('--outputNTUP_PHYSVAL_MRGFile', 
+                        allow_abbrev=False,
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
                         help='Output merged physics validation file', group='Validation Files')
     parser.add_argument('--skipPostProcessing', 
