@@ -10,9 +10,9 @@
 #include "TrkGeometry/BinnedLayerMaterial.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
-#include "TrkDetDescrUtils/BinnedArrayArray.h"
 #include "TrkDetDescrUtils/BinnedArray1D.h"
 #include "TrkDetDescrUtils/BinnedArray2D.h"
+#include "TrkDetDescrUtils/BinnedArrayArray2D.h"
 #include "TrkDetDescrUtils/SharedDoNoDelete.h"
 // GeoPrimitives
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
@@ -215,7 +215,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
         double layerPhiMax         = -10;
 
         // per phi sector we make a 2D binnin in phi-z
-        std::vector< std::pair<Trk::BinnedArray<Trk::Surface>*, Amg::Vector3D >  > layerSectorArrays;
+        std::vector< std::pair<Trk::BinnedArray2D<Trk::Surface>, Amg::Vector3D >  > layerSectorArrays;
         Amg::Vector3D layerSectorPosition(0.,0.,0.);
 
         // the sector approaching surfaces
@@ -326,10 +326,10 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           auto layerStrawPhiZUtility = Trk::BinUtility(sectorStraws/2,phiMin,phiMax,Trk::open, Trk::binPhi);
           layerStrawPhiZUtility  += Trk::BinUtility(2,-layerZmax, layerZmax, Trk::open, Trk::binZ);
           // create the 2D BinnedArray
-          Trk::BinnedArray2D<Trk::Surface>* layerStrawPhiSector = new Trk::BinnedArray2D<Trk::Surface>(strawsPerPhiSecLayer,layerStrawPhiZUtility);
+          Trk::BinnedArray2D<Trk::Surface> layerStrawPhiSector(strawsPerPhiSecLayer,layerStrawPhiZUtility);
           ATH_MSG_VERBOSE("---> Sector " << phisec << " - BinnedArray for straws prepared for " << strawsPerPhiSecLayer.size() << " straws.");
           // fill the array
-          layerSectorArrays.emplace_back(layerStrawPhiSector, layerSectorPosition);
+          layerSectorArrays.emplace_back(std::move(layerStrawPhiSector), layerSectorPosition);
           // ---------------- enf of phi sector ----------------------------------------------------
         } // loop over PhiSectors done
 
@@ -361,7 +361,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
 
         // the sector surfaces
         auto layerSectorBinUtility = Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
-        auto strawArray = std::make_unique<Trk::BinnedArrayArray<Trk::Surface>>(layerSectorArrays, layerSectorBinUtility );
+        auto strawArray = std::make_unique<Trk::BinnedArrayArray2D<Trk::Surface>>(std::move(layerSectorArrays), layerSectorBinUtility );
 
         ATH_MSG_VERBOSE("--> Layer " << layer << " has been built with " << strawArray->arrayObjects().size() << " straws.");
 
