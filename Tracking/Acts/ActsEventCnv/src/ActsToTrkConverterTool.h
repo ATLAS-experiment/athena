@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSEVENTCNV_ActsToTrkConverterTool_H
@@ -9,9 +9,7 @@
 
 // ATHENA
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "Gaudi/Property.h"
+
 #include "GaudiKernel/EventContext.h"
 #include "TrkParameters/TrackParameters.h" //typedef, cannot fwd declare
 #include "xAODTracking/TrackJacobianContainer.h"
@@ -25,6 +23,7 @@
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "Acts/EventData/TrackParameters.hpp"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 namespace ActsTrk {
 class ActsToTrkConverterTool : public extends<AthAlgTool, IActsToTrkConverterTool>
@@ -33,8 +32,8 @@ class ActsToTrkConverterTool : public extends<AthAlgTool, IActsToTrkConverterToo
 public:
   virtual StatusCode initialize() override;
 
-  ActsToTrkConverterTool(const std::string& type, const std::string& name,
-	           const IInterface* parent);
+  using base_class::base_class;
+
 
 
   /// Find the ATLAS surface corresponding to the Acts surface 
@@ -93,12 +92,13 @@ private:
      const Acts::BoundTrackParameters& actsParameter,
      const Trk::TrackParameters& tsos, const Acts::GeometryContext& gctx) const;
 
- ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
-     this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
- std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
- std::map<Identifier, const Acts::Surface*> m_actsSurfaceMap;
+  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", 
+                                                               "ActsTrackingGeometryTool"};
+  
+  std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry{};
+  std::unordered_map<Identifier, const Acts::Surface*> m_actsSurfaceMap{};
 
- Gaudi::Property<bool> m_visualDebugOutput{
+  Gaudi::Property<bool> m_visualDebugOutput{
      this, "VisualDebugOutput", false,
      "Print additional output for debug plots"};
 
@@ -107,7 +107,11 @@ private:
   Gaudi::Property<bool> m_extractMuonSurfaces{
      this, "ExtractMuonSurfaces", false,
      "If True, use the MuonDetectorManager to extract the Muon surfaces"};
+  
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+  
+  /** @brief Detector manager to fetch the legacy Trk surfaces */
+  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrKey{this, "MuonManagerKey", "MuonDetectorManager"};
 
 };
 

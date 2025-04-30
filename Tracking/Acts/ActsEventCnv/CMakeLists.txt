@@ -37,6 +37,7 @@ atlas_add_component(ActsEventCnv
     InDetPrepRawData
     InDetReadoutGeometry
     InDetRIO_OnTrack
+    MuonReadoutGeometry
     MuonReadoutGeometryR4
     StoreGateLib
     TrkEventPrimitives
