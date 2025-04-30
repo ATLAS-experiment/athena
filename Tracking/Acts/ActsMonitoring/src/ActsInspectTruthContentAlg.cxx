@@ -108,7 +108,7 @@ namespace ActsTrk {
     }
 
     ATH_CHECK( copyStatTable(clusterStat, m_clusterStat) );
-	
+    
     for (std::size_t i(0); i<m_seeds.size(); ++i) {
       ATH_MSG_DEBUG( "Retrieving seed collection with key: " << m_seeds.at(i).key() );
       SG::ReadHandle<ActsTrk::SeedContainer> seedHandle = SG::makeHandle( m_seeds.at(i), ctx );
