@@ -216,8 +216,14 @@ namespace LVL1 {
     /// Get global scales from configSvc
 
     auto l1Menu = SG::makeHandle( m_L1MenuKey );
-    m_cpLutScale = l1Menu->thrExtraInfo().EM().emScale();
-    m_jepLutScale = l1Menu->thrExtraInfo().JET().jetScale();
+    try {
+        m_cpLutScale = l1Menu->thrExtraInfo().EM().emScale();
+        m_jepLutScale = l1Menu->thrExtraInfo().JET().jetScale();
+    } catch(const std::out_of_range&) {
+        ATH_MSG_DEBUG("No Legacy triggers in menu, using default scales");
+        m_cpLutScale = 2;
+        m_jepLutScale = 1;
+    }
 
     ATH_MSG_INFO("REGTEST CP scale = " << m_cpLutScale << " count/GeV");
     ATH_MSG_INFO("REGTEST JEP scale = " << m_jepLutScale << " count/GeV");
