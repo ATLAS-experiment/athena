@@ -127,9 +127,14 @@ if not partition.isValid() and len(flags.Input.Files)==0:
     log.fatal("Running in offline mode but no input files provided")
     exit(1)
 elif partition.isValid():
-  log.info("Running Online with Partition:",partition.name())
+  log.info("Running Online with Partition: "+partition.name())
   standalone = (partition.name()!="ATLAS")
   if standalone : log.info("Using local menu because partition is not ATLAS")
+  elif len(flags.Input.Files)==0:
+    # wait here for 2 minutes, to give LAr time to put fw info in the database
+    import time
+    log.info("Waiting 2 minutes for LATOME to get their databases in order")
+    time.sleep(120)
 
 # if running on an input file, change the DQ environment, which will allow debug tree creation from monitoring algs
 if len(flags.Input.Files)>0:
@@ -405,11 +410,6 @@ if any([s.name=="AvalancheSchedulerSvc" for s in cfg.getServices()]):
 # need to override a folder tag for LAr while testing v6 firmware...
 if not flags.Input.isMC:
   from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
-  if partition.isValid() and len(flags.Input.Files)==0:
-    # wait here for 2 minutes, to give LAr time to put fw info in the database
-    import time
-    log.info("Waiting 2 minutes for LATOME to get their databases in order")
-    time.sleep(120)
   runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
   if runinfo.FWversion()==6:
     # need a dbOverride ... add it

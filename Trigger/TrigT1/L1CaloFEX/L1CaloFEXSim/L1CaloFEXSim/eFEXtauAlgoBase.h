@@ -45,7 +45,7 @@ public:
                 const std::vector<unsigned int> & /*bdtThreshold*/,
                 unsigned int /*etThreshold*/,
                 unsigned int /*etThresholdForRHad*/,
-		unsigned int /*bdtMinEtThreshold*/) override{};
+		unsigned int /*bdtMinEtThreshold*/, unsigned int /*etThresholdForRHadFrac*/) override{};
   virtual void getRCore(std::vector<unsigned int> &rCoreVec) const override;
   virtual unsigned int rCoreCore() const override { return 0; }
   virtual unsigned int rCoreEnv() const override { return 0; }
