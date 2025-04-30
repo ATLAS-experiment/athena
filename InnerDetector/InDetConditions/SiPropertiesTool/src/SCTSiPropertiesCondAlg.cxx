@@ -107,7 +107,7 @@ StatusCode SCTSiPropertiesCondAlg::execute(const EventContext& ctx) const {
     const InDetDD::SiDetectorElement* element{elements->getDetectorElement(elementHash)};
     double depletionDepth{element->thickness()};
     if (std::abs(biasVoltage)<std::abs(deplVoltage)) {
-      depletionDepth *= sqrt(std::abs(biasVoltage/deplVoltage));
+      depletionDepth *= std::sqrt(std::abs(biasVoltage/deplVoltage));
     }
     double meanElectricField{0.};
     if (depletionDepth>0.) {

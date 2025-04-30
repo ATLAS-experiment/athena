@@ -135,7 +135,7 @@ Amg::Vector2D PixelDistortionData::correction(uint32_t hashID, const Amg::Vector
   // shift should be applied.
   double invtanphi = direction.x()/direction.z();
   double invtaneta = direction.y()/direction.z();
-  if (sqrt(invtanphi*invtanphi+invtaneta*invtaneta)>100.0) { return nullCorrection; }
+  if (std::sqrt(invtanphi*invtanphi+invtaneta*invtaneta)>100.0) { return nullCorrection; }
 
   double localZ = 0;
   std::vector<float> map = getDistortionMap(hashID);
@@ -225,12 +225,12 @@ double PixelDistortionData::getSurveyZ(const double localeta, const double local
 
   double data0 = disto[0] / CLHEP::meter;           // curvature is in m-1
   double data1 = disto[1] / CLHEP::meter;           // curvature is in m-1
-  double data2 = tan(0.5 * disto[2] * CLHEP::degree);   // twist angle in degree
+  double data2 = std::tan(0.5 * disto[2] * CLHEP::degree);   // twist angle in degree
 
   double twist1 = -data2;
   double twist2 = data2;
-  double b1 = sqrt((1. + twist1*twist1) * (1. + twist1*twist1) * (1. + twist1*twist1));
-  double b2 = sqrt((1. + twist2*twist2) * (1. + twist2*twist2) * (1. + twist2*twist2));
+  double b1 = std::sqrt((1. + twist1*twist1) * (1. + twist1*twist1) * (1. + twist1*twist1));
+  double b2 = std::sqrt((1. + twist2*twist2) * (1. + twist2*twist2) * (1. + twist2*twist2));
   double z1 = localeta * twist1 - 0.5 * b1 * localeta*localeta * data1;
   double z2 = localeta * twist2 - 0.5 * b2 * localeta*localeta * data0;
   double zoff1 = (b1 * yFE*yFE * data1) / 24.;

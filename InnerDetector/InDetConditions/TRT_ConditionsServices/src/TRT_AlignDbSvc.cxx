@@ -831,7 +831,7 @@ StatusCode TRT_AlignDbSvc::setAlignTransformL3 (Identifier ident, Amg::Transform
     // For tracks coming from the interaction point this coorisponds to the sensitive coordinate
     ATH_MSG_INFO("Storing L3 Barrel constants, Only dx and rotz will be written to DB");
     float dx = trans.translation().x();
-    float rotz = atan2(trans.rotation()(0,1),trans.rotation()(0,0));
+    float rotz = std::atan2(trans.rotation()(0,1),trans.rotation()(0,0));
 
     // Need the length of the wires to translate the rotation to a translation.
     const InDetDD::TRT_BaseElement* strawElement =  m_trtman->getElement( ident );
@@ -840,8 +840,8 @@ StatusCode TRT_AlignDbSvc::setAlignTransformL3 (Identifier ident, Amg::Transform
     // The alignment frames are the same for straws on side A and side C (verrify this!!)
     // but variables stored in the db are not. We'll calculate the dispacement of each end 
     // in the alignment frame and in a second step, convert to the values in the DB. 
-    double delta_dx_atLargerZ = dx + strawLenthOver2 * sin(rotz);
-    double delta_dx_atSmallerZ = dx - strawLenthOver2 * sin(rotz);
+    double delta_dx_atLargerZ = dx + strawLenthOver2 * std::sin(rotz);
+    double delta_dx_atSmallerZ = dx - strawLenthOver2 * std::sin(rotz);
 	
     // For the definition of dx1 and dx2 see TRT_ConditionsData/StrawDx.h
     // Now we need to know the real meaning of dx1 and dx2. Alas, we
@@ -872,7 +872,7 @@ StatusCode TRT_AlignDbSvc::setAlignTransformL3 (Identifier ident, Amg::Transform
     //   - the y-axis is along global phi_hat direction determined by the other 2. 
     //          (clockwise C-side, counter clockwise A-Side)
     float dy = trans.translation().y();
-    float rotx = atan2(trans.rotation()(1,2),trans.rotation()(2,2));
+    float rotx = std::atan2(trans.rotation()(1,2),trans.rotation()(2,2));
 
     // Need the length of the wires to translate the rotation to a translation.
     const InDetDD::TRT_BaseElement* strawElement =  m_trtman->getElement( ident );
@@ -880,8 +880,8 @@ StatusCode TRT_AlignDbSvc::setAlignTransformL3 (Identifier ident, Amg::Transform
 
     // In the global frame, 'dx1' corresponds to the readout side and 'dx2'
     // to the side closest the beampipe.
-    double delta_dx_nearBeamPipe = dy + strawLenthOver2 * sin(rotx);
-    double delta_dx_nearReadOut = dy - strawLenthOver2 * sin(rotx);
+    double delta_dx_nearBeamPipe = dy + strawLenthOver2 * std::sin(rotx);
+    double delta_dx_nearReadOut = dy - strawLenthOver2 * std::sin(rotx);
     
     // Uncertianty on straw positions (Arbitrary for now)
     double dxErr = 0.001;
@@ -1067,26 +1067,26 @@ StatusCode TRT_AlignDbSvc::tweakAlignTransformL3 (Identifier ident, Amg::Transfo
     // both, so we need to know which one.
     bool sideA = m_trtid->barrel_ec(ident) == 1;
 
-    float rotz = atan2(trans.rotation()(0,2),trans.rotation()(0,0));
+    float rotz = std::atan2(trans.rotation()(0,2),trans.rotation()(0,0));
 
     // Need the length of the wires to translate the rotation to a translation.
     const InDetDD::TRT_BaseElement* strawElement =  m_trtman->getElement( ident );
     double strawLenthOver2 = 0.5* strawElement->strawLength();
 
     // Old way (buggy)
-    //double delta_dx_atLargerZ = dx + strawLenthOver2 * sin(rotz);
-    //double delta_dx_atSmallerZ = dx - strawLenthOver2 * sin(rotz);
+    //double delta_dx_atLargerZ = dx + strawLenthOver2 * std::sin(rotz);
+    //double delta_dx_atSmallerZ = dx - strawLenthOver2 * std::sin(rotz);
 
     // New way - The rotation is opposite for side A as compared to side C
     double delta_dx_atLargerZ;
     double delta_dx_atSmallerZ;
     if (sideA){
-      delta_dx_atLargerZ = dx - strawLenthOver2 * sin(rotz);
-      delta_dx_atSmallerZ = dx + strawLenthOver2 * sin(rotz);
+      delta_dx_atLargerZ = dx - strawLenthOver2 * std::sin(rotz);
+      delta_dx_atSmallerZ = dx + strawLenthOver2 * std::sin(rotz);
     }
     else{
-      delta_dx_atLargerZ = dx + strawLenthOver2 * sin(rotz);
-      delta_dx_atSmallerZ = dx - strawLenthOver2 * sin(rotz);
+      delta_dx_atLargerZ = dx + strawLenthOver2 * std::sin(rotz);
+      delta_dx_atSmallerZ = dx - strawLenthOver2 * std::sin(rotz);
     }
 
     // Straw position closest to the electronics 
@@ -1130,7 +1130,7 @@ StatusCode TRT_AlignDbSvc::tweakAlignTransformL3 (Identifier ident, Amg::Transfo
     //   - the y-axis is along global phi_hat direction determined by the other 2. 
     //          (clockwise C-side, counter clockwise A-Side)
     float dy = trans.translation().y();
-    float rotx = atan2(trans.rotation()(1,2),trans.rotation()(2,2));
+    float rotx = std::atan2(trans.rotation()(1,2),trans.rotation()(2,2));
 
     // Need the length of the wires to translate the rotation to a translation.
     const InDetDD::TRT_BaseElement* strawElement =  m_trtman->getElement( ident );
@@ -1138,8 +1138,8 @@ StatusCode TRT_AlignDbSvc::tweakAlignTransformL3 (Identifier ident, Amg::Transfo
 
     // In the global frame, 'dx1' corresponds to the readout side and 'dx2'
     // to the side closest the beampipe.
-    double delta_dx_nearBeamPipe = dy + strawLenthOver2 * sin(rotx);
-    double delta_dx_nearReadOut = dy - strawLenthOver2 * sin(rotx);
+    double delta_dx_nearBeamPipe = dy + strawLenthOver2 * std::sin(rotx);
+    double delta_dx_nearReadOut = dy - strawLenthOver2 * std::sin(rotx);
 
     // Uncertianty on straw positions
     double dxErr = 0.001;

@@ -51,7 +51,7 @@ double SCT_ElectricFieldTool::getElectricField(double positionZ,
     
     //------------ find depletion depth for model=0 and 1 -------------
     double depletionDepth{bulkDepth};
-    if (biasVoltage < std::abs(depletionVoltage)) depletionDepth = sqrt(biasVoltage/std::abs(depletionVoltage)) * bulkDepth;
+    if (biasVoltage < std::abs(depletionVoltage)) depletionDepth = std::sqrt(biasVoltage/std::abs(depletionVoltage)) * bulkDepth;
     if (y<=depletionDepth){
       //---------- case for uniform electric field ------------------------
       if( m_eFieldModel ==UNIFORM_FIELD ) {
