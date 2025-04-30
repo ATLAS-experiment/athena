@@ -1883,6 +1883,7 @@ MuonTruthParticlesAuxDyn.recoMuonLinkLRT
 MuonTruthParticlesAuxDyn.truthMMHits
 MuonTruthParticlesAuxDyn.truthMdtHits
 MuonTruthParticlesAuxDyn.truthOrigin
+MuonTruthParticlesAuxDyn.truthParticleLink
 MuonTruthParticlesAuxDyn.truthRpcHits
 MuonTruthParticlesAuxDyn.truthStgcHits
 MuonTruthParticlesAuxDyn.truthTgcHits
