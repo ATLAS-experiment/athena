@@ -125,12 +125,11 @@ StatusCode Tile::TileVolumeBuilder::initialize()
   return StatusCode::SUCCESS;
 }
 
-std::vector<Trk::TrackingVolume*>*
-Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
-					 , const GeoAlignmentStore* /*geoAlign*/) const
-{
+std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
+    const CaloDetDescrManager& caloDDM,
+    const GeoAlignmentStore* /*geoAlign*/) const {
   // the return vector
-  std::vector<Trk::TrackingVolume*>* tileTrackingVolumes = new std::vector<Trk::TrackingVolume*>;
+  auto tileTrackingVolumes = std::vector<Trk::TrackingVolume*>();
   // the converter helpers
   //Trk::GeoShapeConverter    geoShapeToVolumeBounds;
   //Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
@@ -408,11 +407,11 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        tileBarrelGirderBounds->outerRadius(),
        tileZ);
 
-    tileGirder =new Trk::TrackingVolume(nullptr,
-                                        std::move(tileGirderBounds),
-                                        girderProperties,
-                                        dummyLayers, dummyVolumes,
-                                        "Calo::Girder::TileCombined");
+    tileGirder = new Trk::TrackingVolume(nullptr,
+                                         std::move(tileGirderBounds),
+                                         girderProperties,
+                                         dummyLayers, dummyVolumes,
+                                         "Calo::Girder::TileCombined");
   }
 
   // build the gap volumes ( crack done by CaloTG )
@@ -735,8 +734,8 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
   ATH_MSG_DEBUG( "Combined Tile built " );
 
-  tileTrackingVolumes->push_back(tile);                  // [0]
-  tileTrackingVolumes->push_back(tilePositiveExtendedBarrel);                  // [1]
+  tileTrackingVolumes.push_back(tile);                  // [0]
+  tileTrackingVolumes.push_back(tilePositiveExtendedBarrel);// [1]
 
   if (msgLvl(MSG::INFO)) {
     ATH_MSG_DEBUG( "Checking the existence of all Tracking Volumes:" );
@@ -767,16 +766,15 @@ void Tile::TileVolumeBuilder::printCheckResult(MsgStream& log, const Trk::Tracki
   else     log << "... missing" << endmsg;
 }
 
-
-
-void Tile::TileVolumeBuilder::printInfo(const PVConstLink& pv) const
-{
+void Tile::TileVolumeBuilder::printInfo(const PVConstLink& pv) const {
   const GeoLogVol* lv = pv->getLogVol();
-  std::cout << "New Tile Object:"<<lv->getName()<<", made of"<<lv->getMaterial()->getName()<<","<<lv->getShape()->type()<<std::endl;
-  //m_geoShapeConverter->decodeShape(lv->getShape());
-  int igen=0;
-  Amg::Transform3D transf =  pv->getX();
-  printChildren(pv,igen,transf);
+  std::cout << "New Tile Object:" << lv->getName() << ", made of"
+            << lv->getMaterial()->getName() << "," << lv->getShape()->type()
+            << std::endl;
+  // m_geoShapeConverter->decodeShape(lv->getShape());
+  int igen = 0;
+  Amg::Transform3D transf = pv->getX();
+  printChildren(pv, igen, transf);
 }
 
 void Tile::TileVolumeBuilder::printChildren(
@@ -788,14 +786,6 @@ void Tile::TileVolumeBuilder::printChildren(
   for (unsigned int ic = 0; ic < nc; ic++) {
     Amg::Transform3D transf = trIn * pv->getXToChildVol(ic);
 
-    //
-    // std::cout << " dumping transform to subcomponent" << std::endl;
-    // std::cout << transf[0][0]<<"," <<transf[0][1]<<","
-    // <<transf[0][2]<<","<<transf[0][3] << std::endl; std::cout <<
-    // transf[1][0]<<"," <<transf[1][1]<<"," <<transf[1][2]<<","<<transf[1][3]
-    // << std::endl; std::cout << transf[2][0]<<"," <<transf[2][1]<<","
-    // <<transf[2][2]<<","<<transf[2][3] << std::endl;
-    //
     const PVConstLink cv = pv->getChildVol(ic);
     const GeoLogVol* clv = cv->getLogVol();
     std::cout << "  ";

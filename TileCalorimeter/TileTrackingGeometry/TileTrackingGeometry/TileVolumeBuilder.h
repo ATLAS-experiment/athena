@@ -68,12 +68,13 @@ public:
   /** AlgTool initialize method */
   virtual StatusCode initialize() override final;
 
-  /** TrackingVolumeBuilder interface method - returns vector of Volumes */
-  virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(
-    const CaloDetDescrManager& caloDDM
-    , const GeoAlignmentStore* geoAlign) const override final;
+  /** TrackingVolumeBuilder interface method - returns vector of ptrs
+   * to volumes. The caller assumes ownership of the pointers*/
+  virtual std::vector<Trk::TrackingVolume*> trackingVolumes(
+      const CaloDetDescrManager& caloDDM,
+      const GeoAlignmentStore* geoAlign) const override final;
 
-private:
+ private:
   static void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) ;
 
   void printInfo(const GeoPVConstLink& pv) const;

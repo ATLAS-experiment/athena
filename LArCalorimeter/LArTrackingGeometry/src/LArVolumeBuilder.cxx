@@ -54,8 +54,7 @@ LAr::LArVolumeBuilder::LArVolumeBuilder(const std::string& t, const std::string&
 }
 
 // destructor
-LAr::LArVolumeBuilder::~ LArVolumeBuilder()
-= default;
+LAr::LArVolumeBuilder::~ LArVolumeBuilder() = default;
 
 
 // Athena standard methods
@@ -86,21 +85,16 @@ StatusCode LAr::LArVolumeBuilder::finalize()
   return StatusCode::SUCCESS;
 }
 
-std::vector<Trk::TrackingVolume*>*
-LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
-				       , const GeoAlignmentStore* geoAlign) const
-{
-  // the converter helpers
-  //Trk::GeoShapeConverter    geoShapeToVolumeBounds;
-  //Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
+std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
+    const CaloDetDescrManager& caloDDM,
+    const GeoAlignmentStore* geoAlign) const {
 
   Trk::Material dummyMaterial;
-
   // get LAr Detector Description Manager
   const LArDetectorManager* lArMgr=nullptr;
   if (detStore()->retrieve(lArMgr, m_lArMgrLocation).isFailure()) {
     ATH_MSG_FATAL( "Could not get LArDetectorManager! Calo TrackingGeometry will not be built");
-    return nullptr;
+    return {};
   }
 
   // out of couriosity
@@ -154,27 +148,25 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   std::shared_ptr<Trk::CylinderVolumeBounds> lArBarrelPosBounds = nullptr;
   std::shared_ptr<Trk::CylinderVolumeBounds> lArBarrelNegBounds = nullptr;
 
-  if(detStore()->contains<StoredPhysVol>("EMB_POS"))
-    {
-      if(detStore()->retrieve(storedPV,"EMB_POS")==StatusCode::FAILURE)
-	{
-	  ATH_MSG_DEBUG( "Unable to retrieve Stored PV EMB_POS" );
-	  storedPV = nullptr;
-	}
+  if (detStore()->contains<StoredPhysVol>("EMB_POS")) {
+    if (detStore()->retrieve(storedPV, "EMB_POS") == StatusCode::FAILURE) {
+      ATH_MSG_DEBUG("Unable to retrieve Stored PV EMB_POS");
+      storedPV = nullptr;
     }
-  GeoFullPhysVol* lArBarrelPosPhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
+  }
+  GeoFullPhysVol* lArBarrelPosPhysVol =
+      storedPV ? storedPV->getPhysVol() : nullptr;
 
   //if (lArBarrelPosPhysVol) printInfo(lArBarrelPosPhysVol,geoAlign,2);
 
-  if(detStore()->contains<StoredPhysVol>("EMB_NEG"))
-    {
-      if(detStore()->retrieve(storedPV,"EMB_NEG")==StatusCode::FAILURE)
-	{
-	  ATH_MSG_DEBUG( "Unable to retrieve Stored PV EMB_NEG" );
-	  storedPV = nullptr;
-	}
+  if (detStore()->contains<StoredPhysVol>("EMB_NEG")) {
+    if (detStore()->retrieve(storedPV, "EMB_NEG") == StatusCode::FAILURE) {
+      ATH_MSG_DEBUG("Unable to retrieve Stored PV EMB_NEG");
+      storedPV = nullptr;
     }
-  GeoFullPhysVol* lArBarrelNegPhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
+  }
+  GeoFullPhysVol* lArBarrelNegPhysVol =
+      storedPV ? storedPV->getPhysVol() : nullptr;
 
   const GeoLogVol* lArBarrelPosLogVol = lArBarrelPosPhysVol ? lArBarrelPosPhysVol->getLogVol() : nullptr;
   const GeoLogVol* lArBarrelNegLogVol = lArBarrelNegPhysVol ? lArBarrelNegPhysVol->getLogVol() : nullptr;
@@ -307,14 +299,14 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     const Trk::BinnedMaterial lArBarrelMaterialBinNeg(*lArBarrelMaterial,bubn,layBUN,indexN,matID);
 
 
-    Trk::AlignableTrackingVolume* lArBarrelPos = new Trk::AlignableTrackingVolume(
+    auto lArBarrelPos = new Trk::AlignableTrackingVolume(
       std::move(lArBPosTransform),
       std::move(lArBarrelBoundsPos),
       lArBarrelMaterialBinPos,
       1,
       "Calo::Detectors::LAr::BarrelPos");
 
-    Trk::AlignableTrackingVolume* lArBarrelNeg = new Trk::AlignableTrackingVolume(
+    auto lArBarrelNeg = new Trk::AlignableTrackingVolume(
       std::move(lArBNegTransform),
       std::move(lArBarrelBoundsNeg),
       lArBarrelMaterialBinNeg,
@@ -466,14 +458,14 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     const Trk::BinnedMaterial lArBarrelPresamplerMaterialBinPos(*lArBarrelPresamplerMaterial,rBU,dummylay,matBP);
     const Trk::BinnedMaterial lArBarrelPresamplerMaterialBinNeg(*lArBarrelPresamplerMaterial,rBUc,dummylay,matBP);
 
-    Trk::AlignableTrackingVolume* lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(
+    auto lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(
                           std::move(lArPBPosTransform),
 											    lArBarrelPresamplerPosBounds,
 											    lArBarrelPresamplerMaterialBinPos,
 											    0,
 											    "Calo::Detectors::LAr::BarrelPresamplerPos");
 
-    Trk::AlignableTrackingVolume* lArBarrelPresamplerNeg = new Trk::AlignableTrackingVolume(
+    auto lArBarrelPresamplerNeg = new Trk::AlignableTrackingVolume(
                           std::move(lArPBNegTransform),
 											    std::move(lArBarrelPresamplerNegBounds),
 											    lArBarrelPresamplerMaterialBinNeg,
@@ -818,16 +810,14 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
                std::move(lArPositiveEndcapTransform),
 							 std::move(lArPositiveEndcapBounds),
 							 lArEndcapMaterialBinnedPos,
-                                                         5,
-							 //lpEntries,
+               5,//lpEntries
 							 "Calo::Detectors::LAr::PositiveEndcap");
 
     lArNegativeEndcap = new Trk::AlignableTrackingVolume(
                std::move(lArNegativeEndcapTransform),
 							 std::move(lArNegativeEndcapBounds),
 							 lArEndcapMaterialBinnedNeg,
-							 5,
-							 //lnEntries,
+							 5, //lnEntries
 							 "Calo::Detectors::LAr::NegativeEndcap");
   }
 
@@ -1655,7 +1645,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   } // end of detailed output
 
   // the return vector
-  std::vector<Trk::TrackingVolume*>* lArTrackingVolumes = new std::vector<Trk::TrackingVolume*>;
+  auto lArTrackingVolumes = std::vector<Trk::TrackingVolume*>();
 
   // check if everything went fine
   if (solenoid && solenoidLArBarrelGap && lArBarrelPresampler && lArBarrel &&
@@ -1665,37 +1655,37 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     // + register color code for displaying
 
     // Barrel Part
-    lArTrackingVolumes->push_back(solenoid);                        // 0
+    lArTrackingVolumes.push_back(solenoid);                        // 0
     solenoid->registerColorCode(6);
-    lArTrackingVolumes->push_back(solenoidLArBarrelGap);            // 1
+    lArTrackingVolumes.push_back(solenoidLArBarrelGap);            // 1
     solenoidLArBarrelGap->registerColorCode(21);
-    lArTrackingVolumes->push_back(lArBarrelPresampler);             // 2
+    lArTrackingVolumes.push_back(lArBarrelPresampler);             // 2
     lArBarrelPresampler->registerColorCode(7);
-    lArTrackingVolumes->push_back(lArBarrel);                       // 3
+    lArTrackingVolumes.push_back(lArBarrel);                       // 3
     lArBarrel->registerColorCode(3);
     // Positive Endcap Part
-    lArTrackingVolumes->push_back(lArPositiveEndcapInnerGap);       //4
-    lArTrackingVolumes->push_back(lArPositiveEndcap);               //5
+    lArTrackingVolumes.push_back(lArPositiveEndcapInnerGap);       //4
+    lArTrackingVolumes.push_back(lArPositiveEndcap);               //5
     lArPositiveEndcap->registerColorCode(3);
-    lArTrackingVolumes->push_back(lArPositiveHec);                  //6
+    lArTrackingVolumes.push_back(lArPositiveHec);                  //6
     lArPositiveHec->registerColorCode(9);
-    lArTrackingVolumes->push_back(lArPositiveFcal);                 //7
+    lArTrackingVolumes.push_back(lArPositiveFcal);                 //7
     lArPositiveFcal->registerColorCode(8);
-    lArTrackingVolumes->push_back(lArPositiveHecFcalCover);         //8
+    lArTrackingVolumes.push_back(lArPositiveHecFcalCover);         //8
     lArPositiveHecFcalCover->registerColorCode(9);
     // Positive Endcap Part
-    lArTrackingVolumes->push_back(lArNegativeEndcapInnerGap);       //9
-    lArTrackingVolumes->push_back(lArNegativeEndcap);               //10
+    lArTrackingVolumes.push_back(lArNegativeEndcapInnerGap);       //9
+    lArTrackingVolumes.push_back(lArNegativeEndcap);               //10
     lArNegativeEndcap->registerColorCode(3);
-    lArTrackingVolumes->push_back(lArNegativeHec);                  //11
+    lArTrackingVolumes.push_back(lArNegativeHec);                  //11
     lArNegativeHec->registerColorCode(9);
-    lArTrackingVolumes->push_back(lArNegativeFcal);                 //12
+    lArTrackingVolumes.push_back(lArNegativeFcal);                 //12
     lArNegativeFcal->registerColorCode(8);
-    lArTrackingVolumes->push_back(lArNegativeHecFcalCover);         //13
+    lArTrackingVolumes.push_back(lArNegativeHecFcalCover);         //13
     lArNegativeHecFcalCover->registerColorCode(9);
-    lArTrackingVolumes->push_back(lArPosECPresampler);              //14
+    lArTrackingVolumes.push_back(lArPosECPresampler);              //14
     lArPosECPresampler->registerColorCode(7);
-    lArTrackingVolumes->push_back(lArNegECPresampler);              //15
+    lArTrackingVolumes.push_back(lArNegECPresampler);              //15
     lArNegECPresampler->registerColorCode(7);
 
    }
