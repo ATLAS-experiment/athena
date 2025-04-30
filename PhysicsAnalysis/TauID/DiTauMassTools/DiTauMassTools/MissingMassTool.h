@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Asg wrapper around the MissingMassCalculator
@@ -9,6 +9,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 //Local include(s):
 #include "DiTauMassTools/IMissingMassTool.h"
@@ -78,24 +79,26 @@ class MissingMassTool : virtual public IMissingMassTool, virtual public asg::Asg
  private:
 
   MissingMassCalculator* m_MMC{};
-  double m_n_sigma_met{};
-  int m_tail_cleanup{};
-  int m_use_verbose{};
-  int m_use_tau_probability{};
-  int m_niter_fit_2{};
-  int m_niter_fit_3{};
-  int m_use_defaults{};
-  int m_use_efficiency_recovery{};
-  std::string m_calib_set;
-  std::string m_lfv_mode;
-  bool m_decorate{};
-  bool m_float_stop{};
-  bool m_use_mnu_probability{};
-  bool m_use_met_param_dphiLL{};
-  std::string m_param_file_path;
-  double m_beam_energy{};
-  bool m_lfv_leplep_refit{};
-  bool m_save_llh_histo{};
+
+  Gaudi::Property<bool> m_decorate{this, "Decorate", false};
+  Gaudi::Property<bool> m_float_stop{this, "FloatStoppingCrit", true};
+  Gaudi::Property<std::string> m_calib_set{this, "CalibSet", "2019"}; // Change to "2024" if the new MMC version is to be used.
+  // default negative. Only set parameter if positive
+  // so that the default are in MissingMassCalculator code
+  Gaudi::Property<double> m_n_sigma_met{this, "NsigmaMET", -1};
+  Gaudi::Property<int> m_tail_cleanup{this, "UseTailCleanup", -1};
+  Gaudi::Property<int> m_use_verbose{this, "UseVerbose", -1};
+  Gaudi::Property<int> m_niter_fit_2{this, "NiterFit2", -1};
+  Gaudi::Property<int> m_niter_fit_3{this, "NiterFit3", -1}; 
+  Gaudi::Property<int> m_use_tau_probability{this, "UseTauProbability", -1};
+  Gaudi::Property<bool> m_use_mnu_probability{this, "UseMnuProbability", false}; 
+  Gaudi::Property<int> m_use_defaults{this, "UseDefaults", -1};
+  Gaudi::Property<int> m_use_efficiency_recovery{this, "UseEfficiencyRecovery", -1};
+  Gaudi::Property<bool> m_use_met_param_dphiLL{this, "UseMETDphiLL", false};
+  Gaudi::Property<std::string> m_param_file_path{this, "ParamFilePath", "MMC_params_v1_fixed.root"}; // // Available parameterization files: MMC_params_v051224_angle_noLikelihoodFit.root and MMC_params_v051224_angle_likelihoodFit.root. More details on the differences between these two options can be found in the slides https://indico.cern.ch/event/1487242/contributions/6269201/attachments/2989313/5265428/HbbHtautau_MMCstudies_statusReport_181224_v2.pdf
+  Gaudi::Property<double> m_beam_energy{this, "BeamEnergy", 6500.0};
+  Gaudi::Property<bool> m_lfv_leplep_refit{this, "LFVLeplepRefit", true};
+  Gaudi::Property<bool> m_save_llh_histo{this, "SaveLlhHisto", false}; 
 
 };
 } // namespace DiTauMassTools  
