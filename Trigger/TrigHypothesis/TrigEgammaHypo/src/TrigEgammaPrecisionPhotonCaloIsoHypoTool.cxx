@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -22,7 +22,6 @@
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "xAODEgamma/Photon.h"
-#include "xAODEgamma/PhotonContainer.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include "TrigEgammaPrecisionPhotonCaloIsoHypoTool.h"
