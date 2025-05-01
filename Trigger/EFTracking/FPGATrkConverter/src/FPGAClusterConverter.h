@@ -84,7 +84,6 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     SG::ReadHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey","FPGAClusters","FPGATrackSim Clusters key"};
     SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{ this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
-    bool m_doShift = true; 
 
   private:
 
@@ -93,9 +92,11 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
     const InDetDD::SCT_DetectorManager* m_SCTManager{nullptr};
 
-    ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retrieve Lorentz angle of SCT"};
-
+    ToolHandle<ISiLorentzAngleTool> m_lorentzAngleToolPixel {this, "LorentzAngleToolPixel", "SiLorentzAngleTool/PixelLorentzAngleTool", "Tool to retrieve Lorentz angle of Pixel"};
+    ToolHandle<ISiLorentzAngleTool> m_lorentzAngleToolStrip {this, "LorentzAngleToolStrip", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retrieve Lorentz angle of SCT"};
+    
     Gaudi::Property<bool> m_skipStripSpacePointFormation {this, "skipStripSpFormation", true, "Should be enabled in case we want to test strip seeding"};
+    Gaudi::Property<bool> m_doShift {this, "doLorentzShift", true, "Apply Lorentz angle shift to the clusters"};
  };
 
 #endif
