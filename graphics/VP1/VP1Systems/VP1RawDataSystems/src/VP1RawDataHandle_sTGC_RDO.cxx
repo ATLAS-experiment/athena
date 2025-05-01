@@ -21,6 +21,8 @@
 #include "VP1Utils/VP1DetInfo.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
 
+#include "VP1Base/VP1Msg.h"
+
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 #include <Inventor/nodes/SoTransform.h>
@@ -53,7 +55,7 @@ QStringList VP1RawDataHandle_sTGC_RDO::clicked(bool verbose) const
 
   QStringList ll;
   ll << " ===> sTGC Digit data";
-  // ll << "   is a valid digit: "+ m_data->is_valid(idhelper);
+  ll << "   type: "+ QString::fromStdString(m_channelTypeStr);
   ll << "   is_valid(idhelper): " + QString::number(m_data->is_valid(idhelper));
   ll << "   charge: " + QString::number(m_data->charge());
   ll << "   charge_6bit: " + QString::number(m_data->charge_6bit());
@@ -70,14 +72,13 @@ QStringList VP1RawDataHandle_sTGC_RDO::clicked(bool verbose) const
          /// Returns whether the chamber is in the endcap
       // ll << "Is Endcap: " << QString::number(elem->endcap());
 
-
-      Amg::Vector3D globalPos; 
-         double length=0, angle=0;
-         int channel = idhelper->channel(id);
-         const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
-         elem->stripGlobalPosition(id, globalPos);
-         length = design->channelLength(channel);
-         angle = design->stereoAngle();
+      // Amg::Vector3D globalPos; 
+      //    double length=0, angle=0;
+      //    int channel = idhelper->channel(id);
+      //    const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
+      //    elem->stripGlobalPosition(id, globalPos);
+      //    length = design->channelLength(channel);
+      //    angle = design->stereoAngle();
 
          
       // ll << "strip position X :" << elem->tubePos(id).position[Amg::x];
@@ -109,25 +110,98 @@ QStringList VP1RawDataHandle_sTGC_RDO::clicked(bool verbose) const
 //____________________________________________________________________
 SoNode * VP1RawDataHandle_sTGC_RDO::buildShape()
 {
+
+  SoNode * node{nullptr};
+
+
   const MuonGM::sTgcReadoutElement * elem = element();
   Identifier id(m_data->identify());
 
   static const sTgcIdHelper * idhelper = VP1DetInfo::stgcIDHelper();
+  const int channel = idhelper->channel(id);
+  m_channelType = idhelper->channelType(id);
 
-Amg::Vector3D globalPos; 
-         double length=0, angle=0;
-         int channel = idhelper->channel(id);
-         const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
-         elem->stripGlobalPosition(id, globalPos);
-         length = design->channelLength(channel);
+  // Amg::Vector3D globalPos;
+  // double length = 0, angle = 0;
+  // const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
+  // elem->stripGlobalPosition(id, globalPos);
+  
+  // // length = design->channelLength(channel);
+  // length = 3*Gaudi::Units::m;
+  // // double tubeLength = elem->tubeLength(id);
+  // double tubeLength = length;
+  // // double strawlength = elem ? elem->strawLength() : 200.0;
+  
 
+  // element's local and global positions
+  Amg::Vector3D globalPos{Amg::Vector3D::Zero()}; 
+  Amg::Vector2D pos{Amg::Vector2D::Zero()}; 
+  elem->stripGlobalPosition(id, globalPos);
+  elem->stripPosition(id, pos);
+  
+  // sTGC element's geometry
+  double shortWidth=0, longWidth=0, length=0;
+  const Trk::PlaneSurface surface = elem->surface(id);
 
-  // double tubeLength = elem->tubeLength(id);
-  double tubeLength = length;
-  // double strawlength = elem ? elem->strawLength() : 200.0;
+  // PAD geometry
+  if (m_channelType == 0) {
+    m_channelTypeStr = "PAD";
+    length = elem->channelPitch(id);  // Height of a pad
+    std::array<Amg::Vector2D, 4> corners{
+        make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
+    elem->padCorners(id, corners);  // BotLeft, BotRight, TopLeft, TopRight
+    shortWidth = (corners.at(1) - corners.at(0)).norm();
+    longWidth = (corners.at(3) - corners.at(2)).norm();
+
+    node = common()->nodeManager()->getShapeNode_Pad(length,shortWidth,longWidth,10*Gaudi::Units::mm/*Dummy depth*/); 
+  }
+  // STRIP geometry
+  else if (m_channelType == 1) {
+    m_channelTypeStr = "STRIP";
+    const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
+    length = design->channelLength(channel);
+    shortWidth = elem->channelPitch(id);  // Full pitch of strips
+    longWidth = shortWidth;
+
+    node = common()->nodeManager()->getShapeNode_Strip(length,longWidth,10*Gaudi::Units::mm/*Dummy depth*/); 
+  }
+  // WIRE geometry
+  else {
+    m_channelTypeStr = "WIRE";
+    const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
+    if (!design) {
+      // VP1Msg::messageVerbose("No wire design for hit " + id.getString());
+      std::cout << "No wire design for hit " << id << std::endl;;
+      return node;
+    }
+
+    // recalculate length and globalPos for wires, because
+    // design->channelLength(channel) doesn't look sensible
+    double fulllength = design->xSize();
+    double locY = design->firstPos() +
+                  (channel - 1) * design->inputPitch * design->groupWidth;
+    if (std::abs(locY) > 0.5 * design->minYSize()) {  // triangle region
+      double dY = 0.5 * (design->maxYSize() - design->minYSize());
+      length = (0.5 * design->maxYSize() - std::abs(locY)) / dY * fulllength;
+      if (std::abs(locY) > 873) {  // trapezoid region in the outter most part
+                                   // of the large sector
+        length += 0.5 * fulllength;
+      }
+      elem->surface(id).localToGlobal(
+          Amg::Vector2D(pos.x(), pos.y() + 0.5 * (fulllength - length)),
+          Amg::Vector3D::Zero(), globalPos);
+    } else {  // rectangular region
+      length = fulllength;
+    }
+
+    shortWidth = elem->channelPitch(id);  // Width of a full wire group
+    longWidth = shortWidth;
+
+    node = common()->nodeManager()->getShapeNode_Wire(length,longWidth,10*Gaudi::Units::mm/*Dummy depth*/);
+  }
 
   // SoNode * node = common()->nodeManager()->getShapeNode_DriftTube(tubeLength/2, elem->innerTubeRadius());
-  SoNode * node = common()->nodeManager()->getShapeNode_Point();
+  // SoNode * node = common()->nodeManager()->getShapeNode_Point();
 
 
   // SoNode * node = common()->nodeManager()->getShapeNode_Wire(0.5,0.0/*0 radius for line*/);

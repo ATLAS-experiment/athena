@@ -43,6 +43,9 @@ protected:
   const MuonGM::sTgcReadoutElement * element() const;//null in case of errors
   // int strawID() const;//-1 in case of errors
 
+  int m_channelType{-1};
+  std::string m_channelTypeStr{""};
+
 };
 
 #endif
