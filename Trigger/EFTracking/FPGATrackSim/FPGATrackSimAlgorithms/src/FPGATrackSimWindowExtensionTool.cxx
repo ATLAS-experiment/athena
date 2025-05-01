@@ -134,7 +134,6 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
             const FPGATrackSimHit& hit = track->getFPGATrackSimHits().at(layer);
             road_hits[layer].push_back(std::make_shared<FPGATrackSimHit>(hit));
             if (hit.isReal()) {
-                nhit += 1;
                 hitLayers |= 1 << layer;
                 numHits[layer]++;
             }
