@@ -103,6 +103,7 @@ from DerivationFrameworkEGamma.EGAM12 import EGAM12Cfg
 from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
 from DerivationFrameworkFlavourTag.FTAG2 import FTAG2Cfg
 from DerivationFrameworkFlavourTag.FTAG3 import FTAG3Cfg
+from DerivationFrameworkFlavourTag.FTAG_XBB import FTAG_XBBCfg
 from DerivationFrameworkFlavourTag.FTAG4 import FTAG4Cfg
 
 # Jet/Etmiss derivations
@@ -163,7 +164,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
            'PHYSCfg','PHYSLITECfg','SKIMCfg',
            'PHYSVALCfg',
-           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg',
+           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg','FTAG_XBBCfg',
            'HIGG1D1Cfg', 'HIGG9D1Cfg', 'HIGG1D2Cfg',
            'LLP1Cfg', 'LLJ1Cfg',
            'SUSY20Cfg',
