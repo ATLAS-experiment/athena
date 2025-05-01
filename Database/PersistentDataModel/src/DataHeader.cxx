@@ -154,6 +154,22 @@ SG::TransientAddress* DataHeaderElement::getAddress(const std::string& key,
    CLID primaryClID = getPrimaryClassID();
    TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , &m_token);
    SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd, m_clids);
+   if (!m_hashes.empty()) {
+     // If we have the sgkey corresponding to the primary clid, record
+     // it in the address.  This will allow us to do lookups later by sgkey
+     // rather than by name.
+     // But be careful: the key for the primary clid is not necessarily
+     // the first one in m_hashes.  The keys in m_hashes correspond to
+     // all the CLIDs in ascending order.  m_clids holds all CLIDs
+     // _except_ for the primary one, in sorted order.
+     // So we want to find the index at which the primary CLID would
+     // be inserted into m_clids to keep it sorted.  We could do this
+     // using std::upper_bound.  However, in the common cases, we only
+     // have about 2 entries in m_clids.  In that case, it's faster
+     // to just do a linear search.
+     auto it = std::ranges::find_if (m_clids, std::bind_front(std::less<int>{}, primaryClID));
+     sgAddress->setSGKey (m_hashes[it - m_clids.begin()]);
+   }
    sgAddress->setAlias(m_alias);
    return(sgAddress);
 }
