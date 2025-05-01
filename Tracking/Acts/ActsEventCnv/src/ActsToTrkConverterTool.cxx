@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsToTrkConverterTool.h"
@@ -17,6 +17,7 @@
 #include "TrkSurfaces/Surface.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonReadoutGeometry/MuonReadoutElement.h"
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -66,15 +67,9 @@ static void ActsTrackParameterCheck(
 
 }  // namespace ActsTrk
 
-ActsTrk::ActsToTrkConverterTool::ActsToTrkConverterTool(
-    const std::string &type, const std::string &name, const IInterface *parent)
-    : base_class(type, name, parent) {}
 
 StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
   ATH_MSG_VERBOSE("Initializing ACTS to ATLAS converter tool");
-  if (m_extractMuonSurfaces){
-    ATH_CHECK(m_idHelperSvc.retrieve());
-  }
   if (!m_trackingGeometryTool.empty()) {
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
@@ -83,19 +78,18 @@ StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
       // find acts surface with the same detector element ID
       if (!surface)
         return;
-      const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
+      const auto *actsElement = dynamic_cast<const IDetectorElementBase*>(
           surface->associatedDetectorElement());
-      if (!actsElement)
+      if (!actsElement) {
         return;
+      }
       // Conversion from Acts to ATLAS surface impossible for the TRT so the TRT
       // surfaces are not stored in this map
-      bool isTRT = (dynamic_cast<const InDetDD::TRT_BaseElement *>(
-                        actsElement->upstreamDetectorElement()) != nullptr);
-      if (isTRT)
-        return;
+      if (actsElement->detectorType() == ActsTrk::DetectorType::Trt) {
+          return;
+      }
 
-      auto [it, ok] =
-          m_actsSurfaceMap.insert({actsElement->identify(), surface});
+      auto [it, ok] =  m_actsSurfaceMap.insert({actsElement->identify(), surface});
       if (!ok) {
         ATH_MSG_WARNING("ATLAS ID " << actsElement->identify()
                                     << " has two ACTS surfaces: "
@@ -104,8 +98,9 @@ StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
       }
     });
   }
-
+  ATH_CHECK(m_muonMgrKey.initialize(m_extractMuonSurfaces));
   if (m_extractMuonSurfaces){
+    ATH_CHECK(m_idHelperSvc.retrieve());
     const MuonGMR4::MuonDetectorManager* muonMgr{nullptr};    
     ATH_CHECK(detStore()->retrieve(muonMgr));
     unsigned int mapSize = m_actsSurfaceMap.size(); // For debugging message later
@@ -124,11 +119,38 @@ StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
 const Trk::Surface &ActsTrk::ActsToTrkConverterTool::actsSurfaceToTrkSurface(
     const Acts::Surface &actsSurface) const {
 
-  const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
-      actsSurface.associatedDetectorElement());
-  if (actsElement) {
-    return actsElement->atlasSurface();
+  const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.associatedDetectorElement());
+  if (!detEleBase) {
+    throw std::domain_error("No ATLAS surface corresponding to to the Acts one");
   }
+  switch (detEleBase->detectorType()) {
+      using enum DetectorType;
+      case Pixel:
+      case Sct:
+      case Hgtd:
+      case Trt: {
+        const auto actsElement = dynamic_cast<const ActsDetectorElement*>(detEleBase);
+        if (actsElement) {
+            return actsElement->atlasSurface();
+        }
+        break;
+      }
+      case Mdt:
+      case Rpc:
+      case Tgc:
+      case Csc:
+      case sTgc:
+      case Mm: {
+        const MuonGM::MuonDetectorManager* detMgr{nullptr};
+        if (!SG::get(detMgr, m_muonMgrKey, Gaudi::Hive::currentContext()).isSuccess() || !detMgr) {
+            THROW_EXCEPTION("Failed to retrieve the muon detector manager");
+        }
+        return detMgr->getReadoutElement(detEleBase->identify())->surface(detEleBase->identify());
+      
+      } default:
+        break;
+  }
+
   throw std::domain_error("No ATLAS surface corresponding to to the Acts one");
 }
 
@@ -576,12 +598,7 @@ bool ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
   // ATH_MSG_VERBOSE(parameters.referenceSurface().toString(gctx));
   // ATH_MSG_VERBOSE("GeometryId "<<parameters.referenceSurface().geometryId().value());  
 
-  if (std::fabs(actsPos.x() - trkparameters.position().x()) >
-          0.1 ||
-      std::fabs(actsPos.y() - trkparameters.position().y()) >
-          0.1 ||
-      std::fabs(actsPos.z() - trkparameters.position().z()) >
-          0.1) {
+  if ( (actsPos - trkparameters.position()).mag() > 0.1) {
     ATH_MSG_WARNING("Parameter position mismatch. Acts \n"
                     << actsPos << " vs Trk \n"
                     << trkparameters.position());
