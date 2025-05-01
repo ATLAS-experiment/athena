@@ -199,8 +199,15 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
 
 def FPGAClusterConverterCfg(flags):
     result=ComponentAccumulator()
+    FPGAClusterConverter = CompFactory.FPGAClusterConverter()
+    FPGAClusterConverter.doLorentzShift=True
+    
+    from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+    FPGAClusterConverter.LorentzAngleToolPixel = result.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags))
+    
     from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
-    FPGAClusterConverter = CompFactory.FPGAClusterConverter(LorentzAngleTool=result.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
+    FPGAClusterConverter.LorentzAngleToolStrip = result.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags))
+    
     result.setPrivateTools(FPGAClusterConverter)
 
     return result
