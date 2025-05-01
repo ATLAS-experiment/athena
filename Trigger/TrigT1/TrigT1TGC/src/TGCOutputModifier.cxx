@@ -9,6 +9,11 @@
 #include "TrigT1Interfaces/Lvl1MuSectorLogicConstantsPhase1.h"
 #include "TrigT1Interfaces/MuCTPIL1Topo.h"
 
+namespace {
+  using ChIdx = Muon::MuonStationIndex::ChIndex;
+  using TechIdx = Muon::MuonStationIndex::TechnologyIndex;
+}
+
 namespace LVL1TGCTrigger {
 
   TGCOutputModifier::TGCOutputModifier( const std::string& name, ISvcLocator* pSvcLocator )
@@ -17,9 +22,7 @@ namespace LVL1TGCTrigger {
   {
   }
   
-  TGCOutputModifier::~TGCOutputModifier()
-  {
-  }
+  TGCOutputModifier::~TGCOutputModifier() = default;
 
 
 
@@ -70,11 +73,9 @@ namespace LVL1TGCTrigger {
       }
       const xAOD::MuonSegmentContainer* muSegContainer = rh_museg.cptr();
       for(auto seg : *muSegContainer){
-	if(seg->chamberIndex() != Muon::MuonStationIndex::EIS &&
-	   seg->chamberIndex() != Muon::MuonStationIndex::EIL &&
-	   seg->chamberIndex() != Muon::MuonStationIndex::CSS &&
-	   seg->chamberIndex() != Muon::MuonStationIndex::CSL   )continue;
-	muSegDataColl.push_back(seg);
+	      if(seg->chamberIndex() != ChIdx::EIS && seg->chamberIndex() != ChIdx::EIL &&
+	         seg->chamberIndex() != ChIdx::CSS && seg->chamberIndex() != ChIdx::CSL ) continue;
+            muSegDataColl.push_back(seg);
       }
     }
 
@@ -198,9 +199,7 @@ namespace LVL1TGCTrigger {
 	float deltaEta = std::abs( segPos.Eta() - roiPos.Eta() );
 	float deltaPhi = std::abs( segPos.DeltaPhi( roiPos ) );
 	float deltaTheta = std::abs( segVec.Theta() - segPos.Theta() );
-	bool tmpmatched = (deltaEta < deltaEtaCut &&
-			   deltaPhi < deltaPhiCut &&
-			   deltaTheta < deltaThetaCut);
+	bool tmpmatched = (deltaEta < deltaEtaCut &&  deltaPhi < deltaPhiCut &&  deltaTheta < deltaThetaCut);
 	ATH_MSG_DEBUG(" matched=" << tmpmatched
 		      << " RoI pT=" << sldata.pt(icand)
 		      << " roiEta=" << roiPos.Eta()
@@ -213,7 +212,7 @@ namespace LVL1TGCTrigger {
 		      << " ndof=" << seg->numberDoF()
 		      << " sector=" << seg->sector()
 		      << " etaIndex=" << seg->etaIndex()
-		      << " technology=" << seg->technology()
+		      << " technology=" << Muon::MuonStationIndex::technologyName(seg->technology())
 		      << " nPrecisionHits=" << seg->nPrecisionHits()
 		      << " nPhiLayers=" << seg->nPhiLayers()
 		      << " nTrigEtaLayers=" << seg->nTrigEtaLayers()
