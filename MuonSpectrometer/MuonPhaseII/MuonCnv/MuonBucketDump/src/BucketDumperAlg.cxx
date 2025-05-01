@@ -82,7 +82,17 @@ namespace MuonR4{
 
             m_bucket_min      = bucket->coveredMin();
             m_bucket_max      = bucket->coveredMax();
+            m_bucket_truthHit = std::ranges::any_of(*bucket,[this](const SpacePointBucket::value_type & sp){
+                return m_visionTool->isLabeled(*sp);
+            });
+            const Amg::Vector3D bucketPos = bucket->msSector()->localToGlobalTrans(*gctx) * 
+                                            (0.5*(bucket->coveredMin() + bucket->coveredMax()) * Amg::Vector3D::UnitY());
+
+            m_bucket_posX = bucketPos.x();
+            m_bucket_posY = bucketPos.y();
+            m_bucket_posZ = bucketPos.z();
             m_bucket_segments = segmentMap[bucket].size();
+            m_bucket_chIdx = static_cast<uint8_t>(bucket->msSector()->chamberIndex());
 
             std::unordered_map<const SpacePoint*, std::vector<int16_t>> spacePointToSegment;
             
