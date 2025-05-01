@@ -13,7 +13,7 @@
 
 //////////////////////////
 // FrameWork includes
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKeyArray.h"
@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-class ThinInDetClustersAlg final : public ExpressionParserUser<::AthAlgorithm>
+class ThinInDetClustersAlg final : public ExpressionParserUser<::AthReentrantAlgorithm>
 {
  public:
   /// Constructor with parameters:
@@ -42,15 +42,15 @@ class ThinInDetClustersAlg final : public ExpressionParserUser<::AthAlgorithm>
   virtual StatusCode initialize() override;
 
   /// Athena algorithm's execute hook
-  virtual StatusCode execute() override; 
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
   /// Athena algorithm's finalize hook
   virtual StatusCode finalize() override;
 
  private:
   /// Counters and keys for xAOD::TrackParticle container
-  unsigned int m_ntot = 0;
-  unsigned int m_npass = 0;
+  mutable std::atomic<unsigned int> m_ntot{};
+  mutable std::atomic<unsigned int> m_npass{};
   /// Thinning logic 
   BooleanProperty m_thinPixelHitsOnTrack
   { this, "ThinPixelHitsOnTrack", false, ""};
@@ -74,33 +74,33 @@ class ThinInDetClustersAlg final : public ExpressionParserUser<::AthAlgorithm>
   { this, "InDetTrackParticlesKey", "InDetTrackParticles", "" };
 
   /// Counters and keys for xAOD::TrackStateValidation and xAOD::TrackMeasurementValidation containers
-  unsigned int m_ntot_pix_states = 0;
-  unsigned int m_npass_pix_states = 0;
+  mutable std::atomic<unsigned int> m_ntot_pix_states{};
+  mutable std::atomic<unsigned int> m_npass_pix_states{};
   SG::ThinningHandleKey<xAOD::TrackStateValidationContainer> m_statesPixSGKey
   { this, "InDetTrackStatesPixKey", "PixelMSOSs", "" }; // original
   
-  unsigned int m_ntot_pix_measurements = 0;
-  unsigned int m_npass_pix_measurements = 0;
+  mutable std::atomic<unsigned int> m_ntot_pix_measurements{};
+  mutable std::atomic<unsigned int> m_npass_pix_measurements{};
   SG::ThinningHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurementsPixSGKey
   { this, "InDetTrackMeasurementsPixKey", "PixelClusters", "" };
   
-  unsigned int m_ntot_sct_states = 0;
-  unsigned int m_npass_sct_states = 0;
+  mutable std::atomic<unsigned int> m_ntot_sct_states{};
+  mutable std::atomic<unsigned int> m_npass_sct_states{};
   SG::ThinningHandleKey<xAOD::TrackStateValidationContainer> m_statesSctSGKey
   { this, "InDetTrackStatesSctKey", "SCT_MSOSs", "" };
   
-  unsigned int m_ntot_sct_measurements = 0;
-  unsigned int m_npass_sct_measurements = 0;
+  mutable std::atomic<unsigned int> m_ntot_sct_measurements{};
+  mutable std::atomic<unsigned int> m_npass_sct_measurements{};
   SG::ThinningHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurementsSctSGKey
   { this, "InDetTrackMeasurementsSctKey", "SCT_Clusters", "" };
   
-  unsigned int m_ntot_trt_states = 0;
-  unsigned int m_npass_trt_states = 0;
+  mutable std::atomic<unsigned int> m_ntot_trt_states{};
+  mutable std::atomic<unsigned int> m_npass_trt_states{};
   SG::ThinningHandleKey<xAOD::TrackStateValidationContainer> m_statesTrtSGKey
   { this, "InDetTrackStatesTrtKey", "TRT_MSOSs", "" };
   
-  unsigned int m_ntot_trt_measurements = 0;
-  unsigned int m_npass_trt_measurements = 0;
+  mutable std::atomic<unsigned int> m_ntot_trt_measurements{};
+  mutable std::atomic<unsigned int> m_npass_trt_measurements{};
   SG::ThinningHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurementsTrtSGKey
   { this, "InDetTrackMeasurementsTrtKey", "TRT_DriftCircles", "" };
   
@@ -132,9 +132,10 @@ class ThinInDetClustersAlg final : public ExpressionParserUser<::AthAlgorithm>
 	 const std::vector<bool>& inputMask,
 	 const SG::ThinningHandleKey<xAOD::TrackStateValidationContainer>& statesKey,
 	 const SG::ThinningHandleKey<xAOD::TrackMeasurementValidationContainer>& measurementsKey,
-	 unsigned int& ntot_states,
-	 unsigned int& npass_states,
-	 unsigned int& npass_measurements) const;
+	 std::atomic<unsigned int>& ntot_states,
+	 std::atomic<unsigned int>& npass_states,
+	 std::atomic<unsigned int>& npass_measurements,
+	 const EventContext& ctx) const;
 }; 
 
 #endif //> !THINNINGUTILS_ThinInDetClustersAlg_H

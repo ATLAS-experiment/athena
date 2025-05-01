@@ -190,12 +190,12 @@ namespace LVL1 {
         } else {
 
             // see slide 4 of https://indico.cern.ch/event/1513502/contributions/6389265/attachments/3019474/5326755/Rate%20Reduction%20Methods%20Overview.pdf
-            // for updated definition of rhad sum (introduced for 2025)
+            // Update 29-Apr-2025: removing 4 corners of EM3 from sum
 
             // EM cluster depends on UnD flag
             int phi2 = (m_seed_UnD > 0 ? 2 : 0);
 
-            // 3x3 Towers Had + EM3; 1x2 L0
+            // 3x3 Towers Had + EM3 (excluding corners in EM3); 1x2 L0
             for (int i = 0; i < 3; ++i) { // phi
                 for (int j = 0; j <= 2; ++j) { // eta
                     if (((m_efexid % 3 == 0) && (m_fpgaid == 0) && (m_central_eta == 0) && (j == 0)) ||
@@ -203,7 +203,7 @@ namespace LVL1 {
                         continue;
                     } else {
                         const eTower *tTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[i][j]);
-                        hadsum += tTower->getLayerTotalET(4) + tTower->getLayerTotalET(3);
+                        hadsum += tTower->getLayerTotalET(4) + (((i==0&&j==0)||(i==2&&j==2)||(i==0&&j==2)||(i==2&&j==0)) ? 0 : tTower->getLayerTotalET(3));
                         // For PS add central tower + UnD phi neighbour
                         if (j == 1 && (i == 1 || i == phi2)) {
                             emsum += (tTower->getLayerTotalET(0));

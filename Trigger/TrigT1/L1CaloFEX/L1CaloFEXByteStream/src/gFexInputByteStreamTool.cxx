@@ -1279,7 +1279,6 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     // limit input to 12 bits to avoid accidental sign extension
     int din = (0x00000FFF &  datumPtr );
     // map all special cases to zero for now
-    if( din > 0x0FDD ) din = 0x4EE;
     // limit negative values
     if( (din > 0) && ( din < 962 )  ) din =  962;
     //zeroZero
@@ -1292,7 +1291,7 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int FPGA_CONVLIN_TH3 = 1773;
     int FPGA_CONVLIN_TH4 = 2541;
     int FPGA_CONVLIN_TH5 = 4029;
-    int FPGA_CONVLIN_TH6 = 4061;
+    int FPGA_CONVLIN_TH6 = 4062;
 
     int FPGA_CONVLIN_OF0 = -5072;
     int FPGA_CONVLIN_OF1 = -2012;
@@ -1382,7 +1381,7 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
 
     // divide by 2 to 50 MeV LSB
 
-    if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )   ) {
+    if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )   ) {
         dout = 0;
     } 
     else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
@@ -1399,9 +1398,12 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     }  
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 ) & (! oth6 ) ) {
         dout = r5conv >>1;
-    }  
-    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & (! oth6 )  ) {
+    } 
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & ( oth5 ) & (! oth6 ) ) {
         dout = r6conv >>1;
+    }  
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & ( oth6 )  ) {
+        dout = 0;
     } 
     else {
         dout = 0; 

@@ -7,7 +7,7 @@
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
 # art-include: 24.0/Athena
-# art-memory: 16000 
+# art-memory: 8000 
 
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 

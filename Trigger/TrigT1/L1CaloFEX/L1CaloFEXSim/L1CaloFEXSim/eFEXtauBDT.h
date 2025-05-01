@@ -40,6 +40,7 @@ public:
   void setPointerToBDTThresholdsParam(int index, unsigned int *bdtThresholds);
   void setPointerToETThresholdParam(unsigned int *etThreshold);
   void setPointerToMaxETParam(unsigned int *maxEtThreshold);
+  void setPointerToMaxETParamFrac(unsigned int *maxEtThreshold);
   void setPointerToBDTMinETParam(unsigned int *bdtMinEtThreshold);
 
   void buildBDTVariables();
@@ -111,6 +112,7 @@ private:
   unsigned int *m_bdtThresholds[3]{};
   unsigned int *m_etThreshold{};
   unsigned int *m_maxEtThreshold{};
+  unsigned int *m_maxEtThresholdFrac{};
   unsigned int *m_bdtMinEtThreshold{};
   unsigned int m_bdtScore = 0;
   unsigned int m_bdtScoreShifted = 0;

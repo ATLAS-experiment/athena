@@ -1790,7 +1790,7 @@ class TopoAlgoDef:
               "MinET2" : 0, # eTaus
               "MinET3" : 0, # muons
               "MinET4" : 0, # jXE
-              "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
+              "AnomalyScoreThresh" : [1329877, 899489], #corresponds to Tight and Loose WPs (1 kHz, 11 kHz est.)
         }
         class d:
             pass
