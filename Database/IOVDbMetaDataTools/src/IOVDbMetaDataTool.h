@@ -114,10 +114,6 @@ private:
     StoreGateSvc_t   m_metaDataStore;
     StoreGateSvc_t   m_inputStore;
 
-    // Has the FirstInputFileIncident fired? Used to skip the first
-    // BeginInputFile incident
-    bool             m_processedFirstInputFileIncident;
-
     // Flag to check whether we need to override run number for MC
     // events in incoming file meta data. This is needed for example
     // for incoming simulation or digitization parameters.
