@@ -19,6 +19,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('FPGATrackSimNBanks', 1)
     cf.addFlag('FPGATrackSimallBanks', False)
     cf.addFlag('region', 34)
+    cf.addFlag('regionList',"") # can take ranges, e.g. 30-52, exceptions e.g. !34-36 and regex e.g. 2*0 as comma separated list
     cf.addFlag('d0min', -2.0)
     cf.addFlag('d0max', +2.0)
     cf.addFlag('z0min', -150.0)

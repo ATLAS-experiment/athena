@@ -24,7 +24,7 @@ Reco_tf.py --CA \
 ls -l
 echo "... RDO to AOD with sim, this part is done ..."
 
-# generate maps
+
 echo "... Maps Making"
 python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
     --filesInput=wrapper.root \
@@ -74,6 +74,7 @@ mv sectors* corr* banks
 
 echo "... analysis on wrapper"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
+    --evtMax=${RDO_EVT} \
     Trigger.FPGATrackSim.wrapperFileName="wrapper.root" \
     Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
     Trigger.FPGATrackSim.pipeline='F-600' \
@@ -86,7 +87,7 @@ echo "... analysis on wrapper, this part is done ..."
 echo "... analysis output verification"
 cat << EOF > checkHist.C
 {
-    _file0->cd("FPGATrackSimLogicalHitsProcessAlg");
+    _file0->cd("FPGATrackSimLogicalHitsProcessAlg_reg34");
     TH1* h = (TH1*)gDirectory->Get("nroads_1st");
     if ( h == nullptr )
         throw std::runtime_error("oh dear, after all of this there is no roads histogram");

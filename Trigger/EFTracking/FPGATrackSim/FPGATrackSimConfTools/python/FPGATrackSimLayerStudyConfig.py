@@ -51,7 +51,7 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
     # make the binned hits class
     BinnnedHits = CompFactory.FPGATrackSimBinnedHits("BinnedHits_LayerStudy")
     BinnnedHits.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
-    BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
 
     # make the bintool class
     BinTool = CompFactory.FPGATrackSimBinTool("BinTool_LayerStudy")
@@ -119,7 +119,7 @@ def FPGATrackSimLayerStudyCfg(inputFlags):
     theFPGATrackSimLayerStudyAlg.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
     theFPGATrackSimLayerStudyAlg.stage = flags.Trigger.FPGATrackSim.layerStudyStage
 
-    theFPGATrackSimLayerStudyAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    theFPGATrackSimLayerStudyAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     theFPGATrackSimLayerStudyAlg.FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
 
     theFPGATrackSimLayerStudyAlg.BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg(flags))

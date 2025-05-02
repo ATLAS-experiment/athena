@@ -99,7 +99,7 @@ public:
 
 private:
   Gaudi::Property<std::string> m_lyrmapFile{this, "layerMapFile",{""}, "use externally defined layer map"};
-  ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
+  ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this, "FPGATrackSimEventSelectionSvc", ""};
     
   // Vector of BinEntry for each step
   std::vector<FPGATrackSimBinArray<BinEntry>> m_binnedHitsStep;

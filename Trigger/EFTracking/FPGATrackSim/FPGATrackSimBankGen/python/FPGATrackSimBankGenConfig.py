@@ -9,7 +9,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg,FPGATrackSimRoadUnionToolGenScanCfg
-from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimRawLogicCfg, FPGATrackSimMappingCfg, FPGATrackSimEventSelectionCfg
+from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimRawLogicCfg, FPGATrackSimMappingCfg, FPGATrackSimEventSelectionSvcCfg
 from AthenaCommon.SystemOfUnits import GeV
 
 
@@ -68,7 +68,7 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
         theFPGATrackSimMatrixGenAlg.SpacePointTool = acc.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
     theFPGATrackSimMatrixGenAlg.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
 
-    theFPGATrackSimMatrixGenAlg.FPGATrackSimEventSelectionSvc = acc.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
+    theFPGATrackSimMatrixGenAlg.FPGATrackSimEventSelectionSvc = acc.getPrimaryAndMerge(FPGATrackSimEventSelectionSvcCfg(flags))
     theFPGATrackSimMatrixGenAlg.FPGATrackSimMappingSvc = acc.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.secondStage):

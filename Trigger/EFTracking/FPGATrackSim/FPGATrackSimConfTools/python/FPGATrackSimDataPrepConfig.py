@@ -5,6 +5,10 @@ from AthenaCommon.Logging import AthenaLogger
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from math import pi
 
+def nameWithRegionSuffix(flags, basename):
+  return f"{basename}_reg{flags.Trigger.FPGATrackSim.region}"
+
+
 def getRegionNumber(nPiOver16Min, minAbsEta, isPositiveEta, verbosePrint=True):
         binSizePhi = pi/16
         binSizeEta = 0.2
@@ -125,16 +129,16 @@ def getEtaRange(flags):
 
 
 
-def FPGATrackSimRawLogicCfg(flags):
+def FPGATrackSimRawLogicCfg(flags,name="FPGATrackSimRawLogicTool"):
     result=ComponentAccumulator()
-    FPGATrackSimRawLogic = CompFactory.FPGATrackSimRawToLogicalHitsTool()
+    FPGATrackSimRawLogic = CompFactory.FPGATrackSimRawToLogicalHitsTool(nameWithRegionSuffix(flags,name))
     FPGATrackSimRawLogic.SaveOptional = 2
     if (flags.Trigger.FPGATrackSim.ActiveConfig.sampleType == 'skipTruth'):
         FPGATrackSimRawLogic.SaveOptional = 1
     FPGATrackSimRawLogic.TowersToMap = [0] # TODO TODO why is this hardcoded?
-    FPGATrackSimRawLogic.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
+    FPGATrackSimRawLogic.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimEventSelectionSvcCfg(flags))
     FPGATrackSimRawLogic.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
-    result.addPublicTool(FPGATrackSimRawLogic, primary=True)
+    result.addPublicTool(FPGATrackSimRawLogic,primary=True)
     return result
 
 def FPGATrackSimSpacePointsToolCfg(flags):
@@ -175,9 +179,9 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
 
     kwargs.setdefault("FPGATrackSimClusterKey", "FPGAClusters_1st")
     kwargs.setdefault("FPGATrackSimHitKey", "FPGAHits%s" %(stage))
-    kwargs.setdefault("FPGATrackSimHitInRoadsKey", "FPGAHitsInRoads%s" %(stage))
-    kwargs.setdefault("FPGATrackSimRoadKey", "FPGARoads%s" %(stage))
-    kwargs.setdefault("FPGATrackSimTrackKey", "FPGATracks%s" %(stage))
+    kwargs.setdefault("FPGATrackSimHitInRoadsKey", "FPGAHitsInRoads")
+    kwargs.setdefault("FPGATrackSimRoadKey", "FPGARoads")
+    kwargs.setdefault("FPGATrackSimTrackKey", "FPGATracks")
     kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClusters%sFromFPGACluster" %(stage))
     kwargs.setdefault("xAODStripClusterFromFPGAClusterKey", "xAODStripClusters%sFromFPGACluster" %(stage))
     kwargs.setdefault("xAODStripSpacePointFromFPGAKey", "xAODStripSpacePoints%sFromFPGA" %(stage))
@@ -186,7 +190,7 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     kwargs.setdefault("xAODStripClusterFromFPGAHitKey", "xAODStripClusters%sFromFPGAHit" %(stage))
     kwargs.setdefault("ActsProtoTrackFromFPGARoadKey", "ActsProtoTracks%sFromFPGARoad" %(stage))
     kwargs.setdefault("ActsProtoTrackFromFPGATrackKey", "ActsProtoTracks%sFromFPGATrack" %(stage))
-    kwargs.setdefault("doHits", True)
+    kwargs.setdefault("doHits", False)
     kwargs.setdefault("doClusters", True)
     kwargs.setdefault("doActsTrk", False)
     kwargs.setdefault("useRoads", False)
@@ -252,13 +256,14 @@ def WriteToAOD(flags, stage = '',finalTrackParticles = ''): #  store xAOD contai
     return result
 
 
-def FPGATrackSimEventSelectionCfg(flags):
+def FPGATrackSimEventSelectionSvcCfg(flags,name="FPGATrackSimEventSelectionSvc"):
+    
     result=ComponentAccumulator()
-    eventSelector = CompFactory.FPGATrackSimEventSelectionSvc()
+    eventSelector = CompFactory.FPGATrackSimEventSelectionSvc(nameWithRegionSuffix(flags,name))
     eventSelector.regions = flags.Trigger.FPGATrackSim.slicesFile
     eventSelector.regionID = flags.Trigger.FPGATrackSim.region
     eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
-    eventSelector.skipRegionCheck = flags.Trigger.FPGATrackSim.pipeline.startswith('F-1') # if set to True, it will essentially run for the whole detector
+    eventSelector.skipRegionCheck = flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')  # if set to True, it will essentially run for the whole detector
     eventSelector.withPU = False
     eventSelector.oldRegionDefs = flags.Trigger.FPGATrackSim.oldRegionDefs
 
@@ -273,10 +278,18 @@ def FPGATrackSimEventSelectionCfg(flags):
     result.addService(eventSelector, create=True, primary=True)
     return result
 
-def FPGATrackSimMappingCfg(flags):
+def FPGATrackSimEventSelectionToolCfg(flags,name="FPGATrackSimEventSelectionTool"):
     result=ComponentAccumulator()
+    eventSelectionTool=CompFactory.FPGATrackSim.FPGATrackSimEventSelectionTool(nameWithRegionSuffix(flags,name))
+    eventSelectionTool.evtSelectionService = result.getPrimaryAndMerge(FPGATrackSimEventSelectionSvcCfg(flags))
+    
+    result.addPublicTool(eventSelectionTool, primary=True)
+    return result
 
-    mappingSvc = CompFactory.FPGATrackSimMappingSvc()
+def FPGATrackSimMappingCfg(flags,name="FPGATrackSimMappingSvc"):
+    result=ComponentAccumulator()
+    mappingSvc = CompFactory.FPGATrackSimMappingSvc(nameWithRegionSuffix(flags,name))
+    mappingSvc.regionID = flags.Trigger.FPGATrackSim.region
     mappingSvc.mappingType = "FILE"
     mappingSvc.rmap = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".rmap" # we need more configurability here i.e. file choice should depend on some flag
     mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".subrmap" # presumably also here we want to be able to change the slices definition file
@@ -290,7 +303,6 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.ExtensionNNVolonnx = flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile
     mappingSvc.ExtensionNNHitonnx = flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile
     mappingSvc.layerOverride = []
-    mappingSvc.OutputLevel=2
     result.addService(mappingSvc, create=True, primary=True)
     return result
 
@@ -324,7 +336,6 @@ def FPGATrackSimHitFilteringToolCfg(flags):
     return result
 
 
-
 def FPGATrackSimDataPrepAlgCfg(inputFlags):
 
     flags = prepareFlagsForFPGATrackSimDataPrepAlg(inputFlags)
@@ -335,14 +346,20 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     theFPGATrackSimDataPrepAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimDataPrepAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
     theFPGATrackSimDataPrepAlg.Clustering = flags.Trigger.FPGATrackSim.clustering
-    theFPGATrackSimDataPrepAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
+    theFPGATrackSimDataPrepAlg.doEvtSel= False if flags.Trigger.FPGATrackSim.pipeline.startswith('F-1') or flags.Trigger.FPGATrackSim.sampleType == 'skipTruth' else True
     theFPGATrackSimDataPrepAlg.useInternalTruthTracks = flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching
     theFPGATrackSimDataPrepAlg.recordHits = not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')
     
-    FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
-    theFPGATrackSimDataPrepAlg.FPGATrackSimMapping = FPGATrackSimMaping
 
-    theFPGATrackSimDataPrepAlg.RawToLogicalHitsTool = result.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
+    theFPGATrackSimDataPrepAlg.RawToLogicalHitsTools = []
+    for region in flags.Trigger.FPGATrackSim.regionList:
+        flagsForEachRegion = inputFlags.clone()
+        flagsForEachRegion = flagsForEachRegion.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + inputFlags.Trigger.FPGATrackSim.algoTag,keepOriginal=True)
+        flagsForEachRegion.Trigger.FPGATrackSim.region = region
+        flagsForEachRegion.lock()
+        
+        theFPGATrackSimDataPrepAlg.RawToLogicalHitsTools.append(result.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flagsForEachRegion)))
+        theFPGATrackSimDataPrepAlg.eventSelectors.append(result.getPrimaryAndMerge(FPGATrackSimEventSelectionToolCfg(flagsForEachRegion)))
 
     if flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
         theFPGATrackSimDataPrepAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
@@ -390,6 +407,7 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwar
     flags.Tracking.ActiveConfig.extension=FinalTracks 
     flags.Tracking.writeExtendedSi_PRDInfo=True
     flags.lock()
+    
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass") # TODO: Check if it's really necessary 
     prefix=flags.Tracking.ActiveConfig.extension # prefix for the name of final tracks (this is what IDTPM reads)
     
@@ -409,7 +427,6 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwar
     # -- Truth Matching args -- 
     kwargs.setdefault('PixelClusterToTruthAssociationAlg.Measurements','ITkPixelClusters')
     kwargs.setdefault('StripClusterToTruthAssociationAlg.Measurements','ITkStripClusters')
-    print (kwargs)
     
     ################################################################################
     # ACTS Seeding
@@ -514,9 +531,14 @@ def runDataPrepChain():
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
     
+    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
+        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
+    else: # otherwise use the regionList (this overrides the region flag)
+        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
+    
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
-    flags.dump()
     
     acc=MainServicesCfg(flags)
     if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
