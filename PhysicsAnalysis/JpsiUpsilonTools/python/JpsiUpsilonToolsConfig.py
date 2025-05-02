@@ -28,7 +28,7 @@ def JpsiFinderCfg(flags,name="JpsiFinder", **kwargs):
         kwargs.setdefault("VertexPointEstimator", acc.addPublicTool(acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags))))
     if "PartPropSvc" not in kwargs:
         from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-        kwargs.setdefault("PartPropSvc", acc.getPrimaryAndMerge(PartPropSvcCfg(flags)).name)
+        kwargs.setdefault("PartPropSvc", acc.getPrimaryAndMerge(PartPropSvcCfg(flags)))
     acc.setPrivateTools(CompFactory.Analysis.JpsiFinder(name, **kwargs))
     return acc
 

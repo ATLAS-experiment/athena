@@ -19,7 +19,7 @@ def LocalHECGeometry(name="LocalHECGeometry", **kwargs):
 
 def HECWheelCalculatorCfg(flags, name="HECWheelCalculator", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(HECGeometryCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(HECGeometryCfg(flags)))
     result.addService(CompFactory.LArHECWheelCalculator(name, **kwargs), primary = True)
     return result
 

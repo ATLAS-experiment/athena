@@ -16,7 +16,7 @@ def TileGeoG4SDCfg(flags, name="TileGeoG4SD", **kwargs):
     kwargs.setdefault("LogicalVolumeNames", ["Tile::Scintillator"])
     kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
 
-    kwargs.setdefault("TileCalculator", result.getPrimaryAndMerge(TileGeoG4SDCalcCfg(flags)).name )
+    kwargs.setdefault("TileCalculator", result.getPrimaryAndMerge(TileGeoG4SDCalcCfg(flags)) )
 
     result.setPrivateTools(CompFactory.TileGeoG4SDTool(name, **kwargs))
     return result
@@ -27,7 +27,7 @@ def TileCTBGeoG4SDCfg(flags, name="TileCTBGeoG4SD", **kwargs):
     kwargs.setdefault("OutputCollectionNames", ["TileHitVec"])
 
     result = ComponentAccumulator()
-    kwargs.setdefault("TileCalculator", result.getPrimaryAndMerge(TileCTBGeoG4SDCalcCfg(flags)).name )
+    kwargs.setdefault("TileCalculator", result.getPrimaryAndMerge(TileCTBGeoG4SDCalcCfg(flags)) )
 
     result.setPrivateTools(CompFactory.TileGeoG4SDTool(name, **kwargs))
     return result

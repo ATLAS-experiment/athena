@@ -36,9 +36,9 @@ def G4GeometryNotifierSvcCfg(flags, name="G4GeometryNotifierSvc", **kwargs):
 def GeoDetectorToolCfg(flags, name='GeoDetectorTool', **kwargs):
     result = ComponentAccumulator()
     from Geo2G4.Geo2G4Config import Geo2G4SvcCfg
-    kwargs.setdefault("Geo2G4Svc", result.getPrimaryAndMerge(Geo2G4SvcCfg(flags)).name)
+    kwargs.setdefault("Geo2G4Svc", result.getPrimaryAndMerge(Geo2G4SvcCfg(flags)))
     #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
+    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)))
     result.setPrivateTools(CompFactory.GeoDetectorTool(name, **kwargs))
     return result
 

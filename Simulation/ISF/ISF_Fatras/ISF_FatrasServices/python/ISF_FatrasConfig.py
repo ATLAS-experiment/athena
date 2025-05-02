@@ -50,7 +50,7 @@ def fatrasHitCreatorPixelCfg(flags, name="ISF_FatrasHitCreatorPixel", **kwargs):
                                                        merger_input_property,
                                                        region)
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
     kwargs.setdefault("IdHelperName", 'PixelID')
     kwargs.setdefault("CollectionName", hits_collection_name)
@@ -78,7 +78,7 @@ def fatrasHitCreatorSCTCfg(flags, name="ISF_FatrasHitCreatorSCT", **kwargs):
                                                        merger_input_property,
                                                        region)
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
     kwargs.setdefault("IdHelperName", 'SCT_ID')
     kwargs.setdefault("CollectionName", hits_collection_name)
@@ -106,7 +106,7 @@ def fatrasHitCreatorTRTCfg(flags, name="ISF_FatrasHitCreatorTRT", **kwargs):
                                                        merger_input_property,
                                                        region)
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
     kwargs.setdefault("CollectionName", hits_collection_name)
 
@@ -235,7 +235,7 @@ def fatrasSimHitCreatorMSCfg(flags, name="ISF_FatrasSimHitCreatorMS", **kwargs):
                                                                  region)
         result.merge(mm_result)
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
 
     kwargs.setdefault("Extrapolator" , result.addPublicTool(result.popToolsAndMerge(fatrasExtrapolatorCfg(flags))))
@@ -289,7 +289,7 @@ def fatrasParticleDecayHelperCfg(flags, name="ISF_FatrasParticleDecayHelper", **
 
     seed = 'FatrasG4 OFFSET 0 23491234 23470291'
     result.merge(dSFMT(seed))
-    kwargs.setdefault("RandomNumberService", result.getService("AtDSFMTGenSvc").name)
+    kwargs.setdefault("RandomNumberService", result.getService("AtDSFMTGenSvc"))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
     kwargs.setdefault("G4RandomStreamName", flags.Sim.Fatras.G4RandomStreamName)
     kwargs.setdefault("ValidationMode", flags.Sim.ISF.ValidationMode)
@@ -297,10 +297,10 @@ def fatrasParticleDecayHelperCfg(flags, name="ISF_FatrasParticleDecayHelper", **
         kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)))
 
     if "TruthRecordSvc" not in kwargs:
-        kwargs.setdefault("ParticleTruthSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+        kwargs.setdefault("ParticleTruthSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
 
     kwargs.setdefault("PDGToG4ParticleConverter", result.addPublicTool(result.popToolsAndMerge(fatrasPdgG4ParticleCfg(flags))))
     kwargs.setdefault("G4RunManagerHelper", result.addPublicTool(result.popToolsAndMerge(G4RunManagerHelperCfg(flags))))
@@ -319,7 +319,7 @@ def fatrasEnergyLossUpdatorCfg(flags, name="ISF_FatrasEnergyLossUpdator", **kwar
 
     result = ComponentAccumulator()
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
 
     kwargs.setdefault("UsePDG_EnergyLossFormula", True)
@@ -339,19 +339,19 @@ def fatrasMaterialUpdatorCfg(flags, name="ISF_FatrasMaterialUpdator", **kwargs):
 
     result = ComponentAccumulator()
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)))
 
     if "TruthRecordSvc" not in kwargs:
-        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
 
     # @TODO retire once migration to TrackingGeometry conditions data is complete
     if not flags.Sim.ISF.UseTrackingGeometryCond:
         if 'TrackingGeometrySvc' not in kwargs:
             from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-            kwargs.setdefault("TrackingGeometrySvc", result.getPrimaryAndMerge(TrackingGeometrySvcCfg(flags)).name)
+            kwargs.setdefault("TrackingGeometrySvc", result.getPrimaryAndMerge(TrackingGeometrySvcCfg(flags)))
             kwargs.setdefault("TrackingGeometryReadKey", '')
     else:
         if 'TrackingGeometryReadKey' not in kwargs:
@@ -453,14 +453,14 @@ def fatrasConversionCreatorCfg(flags, name="ISF_FatrasConversionCreator", **kwar
 
     result = ComponentAccumulator()
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)))
 
     if "TruthRecordSvc" not in kwargs:
-        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
 
     if flags.Sim.ISF.ValidationMode:
         kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
@@ -478,14 +478,14 @@ def fatrasG4HadIntProcessorCfg(flags, name="ISF_FatrasG4HadIntProcessor", **kwar
 
     result = ComponentAccumulator()
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)))
 
     if "TruthRecordSvc" not in kwargs:
-        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
 
     kwargs.setdefault("MomentumCut", flags.Sim.Fatras.MomCutOffSec)
 
@@ -502,14 +502,14 @@ def fatrasParametricHadIntProcessorCfg(flags, name="ISF_FatrasParametricHadIntPr
 
     result = ComponentAccumulator()
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)))
 
     if "TruthRecordSvc" not in kwargs:
-        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
 
     kwargs.setdefault("HadronicInteractionScaleFactor", flags.Sim.Fatras.HadronIntProb)
     kwargs.setdefault("MinimumHadronicInitialEnergy", flags.Sim.Fatras.MomCutOffSec)
@@ -561,7 +561,7 @@ def fatrasTransportToolCfg(flags, name="ISF_FatrasSimTool", **kwargs):
     kwargs.setdefault("OutputLevel", flags.Exec.OutputLevel)
     kwargs.setdefault("ValidationOutput", flags.Sim.ISF.ValidationMode)
 
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)))
 
     result.setPrivateTools(CompFactory.iFatras.TransportTool(name=name, **kwargs))
     return result

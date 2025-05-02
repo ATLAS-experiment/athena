@@ -116,7 +116,7 @@ def PunchThroughG4ToolCfg(flags, name='PunchThroughG4Tool', **kwargs):
     kwargs.setdefault("FullCorrelationEnergy"   , [ 100000., 100000., 100000., 100000.,      0., 100000., 100000., 100000., 100000.]    )
     kwargs.setdefault("MinEnergy"               , [   938.3,   135.6,     50.,     50.,   105.7,   939.6, 493.7,   497.6,   497.6 ]    )
     kwargs.setdefault("MaxNumParticles"         , [      -1,      -1,      -1,      -1,      -1,    -1,     -1,     -1,     -1 ]    )
-    kwargs.setdefault("EnvelopeDefSvc",         result.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)).name)
+    kwargs.setdefault("EnvelopeDefSvc",         result.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)))
     kwargs.setdefault("BeamPipeRadius", 500.)
     # set as private tool
     result.setPrivateTools(CompFactory.PunchThroughG4Tool(name, **kwargs))

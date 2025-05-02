@@ -41,14 +41,14 @@ def ZDC_PileUpToolCfg(flags, name="ZDC_PileUpTool",**kwargs):
             kwargs.setdefault("LastXing", ZDC_LastXing() )
         else:
             intervals += [acc.popToolsAndMerge(ZDC_RangeCfg(flags))]
-        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
         #kwargs.setdefault("OnlyUseContainerName", True) # TODO in future MR
     else:
         kwargs.setdefault("mergeSvc", '')
         #kwargs.setdefault("OnlyUseContainerName", False) #TODO in future MR
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     config = "PbPb2023"
     from AthenaConfiguration.Enums import LHCPeriod

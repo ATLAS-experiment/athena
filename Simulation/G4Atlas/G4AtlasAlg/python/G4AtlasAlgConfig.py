@@ -23,7 +23,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
         from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import TruthPreselectionToolCfg
         kwargs.setdefault( "TruthPreselectionTool", result.popToolsAndMerge(TruthPreselectionToolCfg(flags)) )
 
-    kwargs.setdefault("DetGeoSvc", result.getPrimaryAndMerge(DetectorGeometrySvcCfg(flags)).name)
+    kwargs.setdefault("DetGeoSvc", result.getPrimaryAndMerge(DetectorGeometrySvcCfg(flags)))
 
     kwargs.setdefault("InputTruthCollection", "BeamTruthEvent") #tocheck -are these string inputs?
     kwargs.setdefault("OutputTruthCollection", "TruthEvent")
@@ -62,7 +62,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("AtRndmGenSvc",
-                      result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+                      result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     kwargs.setdefault("RandomGenerator", "athena")
 
@@ -72,14 +72,14 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     if is_hive:
         kwargs.setdefault('Cardinality', flags.Concurrency.NumThreads)
 
-    kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
-    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
+    kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
+    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
 
     #input converter
-    kwargs.setdefault("InputConverter", result.getPrimaryAndMerge(InputConverterCfg(flags)).name)
+    kwargs.setdefault("InputConverter", result.getPrimaryAndMerge(InputConverterCfg(flags)))
     if flags.Sim.ISF.Simulator.isQuasiStable():
         from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
-        kwargs.setdefault("QuasiStablePatcher", result.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)).name )
+        kwargs.setdefault("QuasiStablePatcher", result.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)) )
 
     #sensitive detector master tool
     kwargs.setdefault("SenDetMasterTool", result.addPublicTool(result.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))))
@@ -92,10 +92,10 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     result.merge(readSimulationParameters(flags))  # for FileMetaData creation
 
     #User action services (Slow...)
-    kwargs.setdefault("UserActionSvc", result.getPrimaryAndMerge(UserActionSvcCfg(flags)).name)
+    kwargs.setdefault("UserActionSvc", result.getPrimaryAndMerge(UserActionSvcCfg(flags)))
 
     #PhysicsListSvc
-    kwargs.setdefault("PhysicsListSvc", result.getPrimaryAndMerge(PhysicsListSvcCfg(flags)).name)
+    kwargs.setdefault("PhysicsListSvc", result.getPrimaryAndMerge(PhysicsListSvcCfg(flags)))
 
     ## G4AtlasAlg verbosities (available domains = Navigator, Propagator, Tracking, Stepping, Stacking, Event)
     ## Set stepper verbose = 1 if the Athena logging level is <= DEBUG

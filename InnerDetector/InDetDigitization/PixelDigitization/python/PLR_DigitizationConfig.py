@@ -114,7 +114,7 @@ def PLR_DigitizationBasicToolCfg(flags, name="PLR_DigitizationBasicTool", **kwar
         kwargs.setdefault("FirstXing", PLR_FirstXing(flags))
         kwargs.setdefault("LastXing", PLR_LastXing(flags))
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     acc.setPrivateTools(CompFactory.PixelDigitizationTool(name, **kwargs, ))
     return acc
@@ -127,7 +127,7 @@ def PLR_DigitizationToolCfg(flags, name="PLR_DigitizationTool", **kwargs):
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(PLR_RangeCfg(flags))]
-        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("PileUpMergeSvc", "")
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)

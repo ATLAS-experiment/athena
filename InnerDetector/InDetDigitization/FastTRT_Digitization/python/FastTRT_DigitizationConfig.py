@@ -37,7 +37,7 @@ def BasicTRTFastDigitizationToolCfg(flags, name, **kwargs):
         kwargs.setdefault("FirstXing", FastTRT_FirstXing())
         kwargs.setdefault("LastXing",  FastTRT_LastXing())
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     kwargs.setdefault("RandomStreamName", "FastTRTDigitization")
 
     if "TRT_DriftFunctionTool" not in kwargs:
@@ -56,7 +56,7 @@ def TRTFastDigitizationToolCfg(flags, name="TRTFastDigitizationTool",**kwargs):
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastTRTRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("trtDriftCircleContainer", "TRT_DriftCircles")
     kwargs.setdefault("trtPrdMultiTruthCollection", "PRD_MultiTruthTRT")
     kwargs.setdefault("HardScatterSplittingMode", 0)
@@ -69,7 +69,7 @@ def TRTFastDigitizationToolHS(flags, name="TRTFastDigitizationToolHS",**kwargs):
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastTRTRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("OnlyUseContainerName", True)
     kwargs.setdefault("trtDriftCircleContainer", "TRT_DriftCircles")
     kwargs.setdefault("trtPrdMultiTruthCollection", "PRD_MultiTruthTRT")
@@ -83,7 +83,7 @@ def TRTFastDigitizationToolPU(flags, name="TRTFastDigitizationToolPU",**kwargs):
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastTRTRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("trtDriftCircleContainer", "TRT_PU_DriftCircles")
     kwargs.setdefault("trtPrdMultiTruthCollection", "PRD_MultiTruthTRT_PU")
     kwargs.setdefault("HardScatterSplittingMode", 2)
@@ -96,7 +96,7 @@ def TRTFastDigitizationToolSplitNoMergePU(flags, name="TRTFastDigitizationToolSp
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastTRTRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("trtHitCollectionName", "PileupTRTUncompressedHits")
     kwargs.setdefault("trtDriftCircleContainer", "TRT_PU_DriftCircles")
     kwargs.setdefault("trtPrdMultiTruthCollection", "PRD_MultiTruthTRT_PU")

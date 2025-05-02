@@ -51,7 +51,7 @@ def FullG4TrackProcessorUserActionToolCfg(flags, name="FullG4TrackProcessorUserA
     else:
         tool = result.popToolsAndMerge(EntryLayerToolCfg(flags))
     kwargs.setdefault("EntryLayerTool", result.addPublicTool(tool))
-    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
+    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
     if flags.Detector.GeometryCavern:
         kwargs.setdefault("TruthVolumeLevel", 2)
     kwargs.setdefault("IsITkGeometry", flags.GeoModel.Run >= LHCPeriod.Run4)
@@ -67,7 +67,7 @@ def PhysicsValidationUserActionToolCfg(flags, name="ISFG4PhysicsValidationUserAc
 
 def MCTruthUserActionToolCfg(flags, name="ISFMCTruthUserActionTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+    kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
     result.setPrivateTools(CompFactory.G4UA.iGeant4.MCTruthUserActionTool(name, **kwargs))
     return result
 
@@ -75,8 +75,8 @@ def MCTruthUserActionToolCfg(flags, name="ISFMCTruthUserActionTool", **kwargs):
 def TrackProcessorUserActionToolCfg(flags, name="ISFG4TrackProcessorUserActionTool", **kwargs):
     result = ComponentAccumulator()
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ParticleBrokerSvcCfg(flags)).name)
-    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ParticleBrokerSvcCfg(flags)))
+    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
     result.setPrivateTools(CompFactory.G4UA.iGeant4.TrackProcessorUserActionPassBackTool(name, **kwargs))
     return result
 
@@ -92,8 +92,8 @@ def ATLFAST_G4TrackProcessorUserActionToolCfg(flags, name="ATLFAST_G4TrackProces
     if flags.Sim.ISF.Simulator in [SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFASTIIMT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
         kwargs.setdefault("ParticleBroker", "")
     elif flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFAST3F_G4MS]:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
-    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)))
+    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)))
     kwargs.setdefault("PassBackEkinThreshold", 0.05*MeV)
     kwargs.setdefault("KillBoundaryParticlesBelowThreshold", True)
     tool = result.popToolsAndMerge(PassBackG4TrackProcessorUserActionToolCfg(flags, name, **kwargs))

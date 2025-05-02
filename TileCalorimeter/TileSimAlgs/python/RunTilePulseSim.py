@@ -90,7 +90,7 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
     acc.merge( TileSampleNoiseCondAlgCfg(flags) )
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs['RndmSvc'] = acc.getPrimaryAndMerge( AthRNGSvcCfg(flags) ).name
+    kwargs['RndmSvc'] = acc.getPrimaryAndMerge( AthRNGSvcCfg(flags) )
 
     # Configure TileInfoLoader to set up number of samples
     nSamples = kwargs['NSamples'] if not PulseChain else 1

@@ -38,7 +38,7 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     acc = TRT_ReadoutGeometryCfg(flags)
     acc.merge(AtlasFieldCacheCondAlgCfg(flags))
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    kwargs.setdefault('PartPropSvc', acc.getPrimaryAndMerge(PartPropSvcCfg(flags)).name) # Property from GenBase
+    kwargs.setdefault('PartPropSvc', acc.getPrimaryAndMerge(PartPropSvcCfg(flags))) # Property from GenBase
     kwargs.setdefault("DigVersContainerKey", "")
     # default arguments
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
@@ -66,7 +66,7 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
         from AthenaCommon.SystemOfUnits import tesla
         kwargs.setdefault("Override_solenoidFieldStrength",  flags.BField.configuredSolenoidFieldScale * 2.0 * tesla)
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     TRTDigitizationTool = CompFactory.TRTDigitizationTool
     tool = TRTDigitizationTool(name, **kwargs)
     acc.setPrivateTools(tool)
@@ -80,7 +80,7 @@ def TRT_DigitizationToolCfg(flags, name="TRTDigitizationTool", **kwargs):
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(TRT_RangeCfg(flags))]
-        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
@@ -112,7 +112,7 @@ def TRT_DigitizationGeantinoTruthToolCfg(flags, name="TRT_GeantinoTruthDigitizat
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(TRT_RangeCfg(flags))]
-        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
@@ -126,7 +126,7 @@ def TRT_DigitizationHSToolCfg(flags, name="TRT_DigitizationToolHS", **kwargs):
     """Return ComponentAccumulator with Hard Scatter configured TRT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(TRT_RangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("OutputObjectName", "TRT_RDOs")
     kwargs.setdefault("OutputSDOName", "TRT_SDO_Map")
     kwargs.setdefault("HardScatterSplittingMode", 1)
@@ -139,7 +139,7 @@ def TRT_DigitizationPUToolCfg(flags, name="TRT_DigitizationToolPU", **kwargs):
     """Return ComponentAccumulator with Pile Up configured TRT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(TRT_RangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("OutputObjectName", "TRT_PU_RDOs")
     kwargs.setdefault("OutputSDOName", "TRT_PU_SDO_Map")
     kwargs.setdefault("HardScatterSplittingMode", 2)
@@ -151,7 +151,7 @@ def TRT_DigitizationSplitNoMergePUToolCfg(flags, name="TRT_DigitizationToolSplit
     """Return ComponentAccumulator with PileUpTRT_Hits configured TRT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(TRT_RangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("HardScatterSplittingMode", 0)
     kwargs.setdefault("DataObjectName", "PileupTRTUncompressedHits")
     kwargs.setdefault("OutputObjectName", "TRT_PU_RDOs")
