@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODELR4_RPCREAOUDGEOMTOOL_H
@@ -7,7 +7,6 @@
 
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
-#include <MuonReadoutGeometryR4/CutOutArea.h>
 
 #include <GeoModelInterfaces/IGeoDbTagSvc.h>
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
@@ -54,12 +53,10 @@ class RpcReadoutGeomTool : public extends<AthAlgTool,IMuonReadoutGeomTool> {
     struct FactoryCache {
        
       using ParamBookTable = std::map<std::string, wRPCTable>;
-      using CutOutTable = std::map<Identifier, std::vector<CutOutArea>>;
 
        std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
        std::set<StripLayerPtr, StripLayerSorter> stripLayers{};
        ParamBookTable parameterBook{};
-       CutOutTable cutOuts{};
        
     };
 

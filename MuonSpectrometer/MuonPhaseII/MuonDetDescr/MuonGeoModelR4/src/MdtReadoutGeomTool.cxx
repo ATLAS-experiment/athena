@@ -33,11 +33,6 @@ namespace MuonGMR4 {
 using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
 
 
-MdtReadoutGeomTool::MdtReadoutGeomTool(const std::string& type,
-                                       const std::string& name,
-                                       const IInterface* parent)
-    : base_class{type, name, parent} {}
-
 StatusCode MdtReadoutGeomTool::loadDimensions(FactoryCache& facCache, 
                                               MdtReadoutElement::defineArgs& define) const {
     

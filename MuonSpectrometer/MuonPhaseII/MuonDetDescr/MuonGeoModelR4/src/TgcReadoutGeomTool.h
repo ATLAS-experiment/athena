@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODELR4_TgcREAOUDGEOMTOOL_H
@@ -7,7 +7,6 @@
 
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
-#include <MuonReadoutGeometryR4/CutOutArea.h>
 
 #include <GeoModelInterfaces/IGeoDbTagSvc.h>
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
@@ -19,9 +18,7 @@ namespace MuonGMR4 {
 class TgcReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
    public:
     // Constructor
-    TgcReadoutGeomTool(const std::string &type, const std::string &name,
-                       const IInterface *parent);
-
+    using base_class::base_class;
 
     StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
 
