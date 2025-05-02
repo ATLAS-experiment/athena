@@ -31,6 +31,7 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/ParticleHypothesisEncoding.h"
 #include "InDetPrepRawData/PixelCluster.h"
 #include "InDetPrepRawData/SCT_Cluster.h"
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
@@ -211,7 +212,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
 std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
     const EventContext& ctx, const Trk::Track& inputTrack,
     const Trk::RunOutlierRemoval /*runOutlier*/,
-    const Trk::ParticleHypothesis /*prtHypothesis*/) const {
+    const Trk::ParticleHypothesis hypothesis) const {
   std::unique_ptr<Trk::Track> track = nullptr;
   ATH_MSG_VERBOSE(
       "--> enter GlobalChiSquareFitterTool::fit(Track,,) with Track from "
@@ -236,8 +237,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   }
 
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
   Acts::GeometryContext tgContext =
       m_trackingGeometryTool->getGeometryContext(ctx).context();
@@ -258,7 +258,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface), true, true);
+      pSurface.get(), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks =
       m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
@@ -271,16 +271,15 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
     return track;
   }
 
-  const auto& initialParams =
+  const auto initialParams =
       m_ATLASConverterTool->trkTrackParametersToActsParameters(
           (*inputTrack.perigeeParameters()), tgContext);
 
-  // @TODO: Synchronize with prtHypothesis
-  Acts::ParticleHypothesis hypothesis = Acts::ParticleHypothesis::pion();
-
+  
   const Acts::BoundTrackParameters initialParamsWithHypothesis(
       initialParams.referenceSurface().getSharedPtr(),
-      initialParams.parameters(), initialParams.covariance(), hypothesis);
+      initialParams.parameters(), initialParams.covariance(), 
+      ParticleHypothesis::convert(hypothesis));
 
   ActsTrk::MutableTrackContainer tracks;
 
@@ -311,8 +310,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   }
 
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
   Acts::GeometryContext tgContext =
       m_trackingGeometryTool->getGeometryContext(ctx).context();
@@ -333,7 +331,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface), true, true);
+      pSurface.get(), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
@@ -351,7 +349,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
     return track;
   }
 
-  const auto& initialParams =
+  const auto initialParams =
       m_ATLASConverterTool->trkTrackParametersToActsParameters(
           estimatedStartParameters, tgContext);
 
@@ -378,8 +376,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   std::unique_ptr<Trk::Track> track = nullptr;
 
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
   Acts::GeometryContext tgContext =
       m_trackingGeometryTool->getGeometryContext(ctx).context();
@@ -407,7 +404,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface), true, true);
+      pSurface.get(), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputPRDColl.size());
@@ -424,7 +421,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
     return track;
   }
 
-  const auto& initialParams =
+  const auto initialParams =
       m_ATLASConverterTool->trkTrackParametersToActsParameters(
           estimatedStartParameters, tgContext);
 
@@ -494,8 +491,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   std::unique_ptr<Trk::Track> track = nullptr;
 
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
   Acts::GeometryContext tgContext =
       m_trackingGeometryTool->getGeometryContext(ctx).context();
@@ -512,11 +508,11 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface), true, true);
+      pSurface.get(), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks =
       m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
-  const auto& initialParams =
+  const auto initialParams =
       m_ATLASConverterTool->trkTrackParametersToActsParameters(
           *(inputTrack.perigeeParameters()), tgContext);
 
@@ -560,7 +556,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
 std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
     const EventContext& ctx, const Trk::Track& intrk1, const Trk::Track& intrk2,
     const Trk::RunOutlierRemoval /*runOutlier*/,
-    const Trk::ParticleHypothesis /*matEffects*/) const {
+    const Trk::ParticleHypothesis  matEffects) const {
   ATH_MSG_VERBOSE("--> enter GlobalChiSquareFitterTool::fit(Track,Track,)");
   ATH_MSG_VERBOSE("    with Tracks from #1 = " << intrk1.info().dumpInfo()
                                                << " and #2 = "
@@ -589,8 +585,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   std::unique_ptr<Trk::Track> track = nullptr;
 
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
   Acts::GeometryContext tgContext =
       m_trackingGeometryTool->getGeometryContext(ctx).context();
@@ -607,7 +602,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface), true, true);
+      pSurface.get(), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks =
       m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1);
@@ -624,15 +619,15 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
     return track;
   }
 
-  const auto& initialParams =
+  const auto initialParams =
       m_ATLASConverterTool->trkTrackParametersToActsParameters(
           *(intrk1.perigeeParameters()), tgContext);
 
-  Acts::ParticleHypothesis hypothesis = Acts::ParticleHypothesis::pion();
 
   const Acts::BoundTrackParameters initialParamsWithHypothesis(
       initialParams.referenceSurface().getSharedPtr(),
-      initialParams.parameters(), initialParams.covariance(), hypothesis);
+      initialParams.parameters(), initialParams.covariance(), 
+      ParticleHypothesis::convert(matEffects));
 
   ActsTrk::MutableTrackContainer tracks;
   // Perform the fit
