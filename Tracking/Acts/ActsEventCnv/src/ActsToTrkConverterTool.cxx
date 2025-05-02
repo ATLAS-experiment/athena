@@ -26,6 +26,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsGeoUtils/SurfaceCache.h"
 #include "ActsInterop/IdentityHelper.h"
+#include "ActsEvent/ParticleHypothesisEncoding.h"
 
 // ACTS
 #include "Acts/Definitions/Units.hpp"
@@ -277,16 +278,8 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
     }
   }
 
-  // convert hypotheses
-  float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
-  Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(
-      static_cast<Acts::PdgParticle>(
-        m_pdgToParticleHypothesis.convert(hypothesis, atlasParameter.charge())));
-  Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, Acts::AnyCharge{std::abs(static_cast<float>(atlasParameter.charge()))}};
-
-  return Acts::BoundTrackParameters(actsSurface, params,
-                                    cov, actsHypothesis);
+  return Acts::BoundTrackParameters(actsSurface, params,cov, 
+                                    ParticleHypothesis::convert(hypothesis));
 }
 
 std::unique_ptr<Trk::TrackParameters>

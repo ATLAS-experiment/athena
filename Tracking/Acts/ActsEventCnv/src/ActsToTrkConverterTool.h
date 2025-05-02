@@ -16,7 +16,6 @@
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
-#include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 // PACKAGE
@@ -102,7 +101,6 @@ private:
      this, "VisualDebugOutput", false,
      "Print additional output for debug plots"};
 
-  Trk::PdgToParticleHypothesis m_pdgToParticleHypothesis;
 
   Gaudi::Property<bool> m_extractMuonSurfaces{
      this, "ExtractMuonSurfaces", false,
