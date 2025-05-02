@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_COMMONSMEARINGTOOL_H
@@ -14,6 +14,7 @@
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
@@ -98,13 +99,14 @@ protected:
 
   void generateSystematicSets();
 
-  std::string m_sInputFilePath;
+  Gaudi::Property<std::string> m_sInputFilePath{this, "InputFilePath", ""};
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
+  Gaudi::Property<bool> m_bApplyFading{this, "ApplyFading", true};
+  Gaudi::Property<bool> m_bMVATESQualityCheck{this, "MVATESQualityCheck", true};
+  Gaudi::Property<bool> m_bApplyInsituCorrection{this, "ApplyInsituCorrection", true};  
+
   bool m_bIsData;
   bool m_bIsConfigured;
-  bool m_bSkipTruthMatchCheck;
-  bool m_bApplyFading;
-  bool m_bMVATESQualityCheck;
-  bool m_bApplyInsituCorrection;
 
   asg::AnaToolHandle<ITauToolBase> m_tTauCombinedTES;
 
