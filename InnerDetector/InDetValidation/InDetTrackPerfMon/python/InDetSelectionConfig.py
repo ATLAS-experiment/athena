@@ -70,6 +70,25 @@ def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwarg
 def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     acc = ComponentAccumulator()
 
+    # Default configurations 
+    # ----------------------
+    minHitsVector = flags.PhysVal.IDTPM.currentTrkAna.offlMinHitsVector
+    minPtVector = flags.PhysVal.IDTPM.currentTrkAna.offlMinPtVector
+    maxD0Vector = flags.PhysVal.IDTPM.currentTrkAna.offlMaxD0Vector
+    maxZ0Vector = flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0Vector
+    etaBins = flags.PhysVal.IDTPM.currentTrkAna.offlEtaBins
+    qualityWP = flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP
+
+    #if flags.PhysVal.IDTPM.currentTrkAna.CustomOfflSel == "EFTracking": # Default selection for EFTracking studies
+    ## Selection Working Point common for EF Tracking studies
+    if qualityWP == "EFTracking" :
+        etaBins = [-1., 2., 2.6, 9999.]
+        minHitsVector = [9, 8, 7]
+        minPtVector = [1000., 400., 400.]
+        maxD0Vector = [2., 2., 10.]
+        maxZ0Vector = [150., 150., 150.]
+        qualityWP = "" # to avoid conflicts with InDetTrackSelectionTool options
+
     kwargs_InDetTrackSelectionTool = {}
 
     if flags.PhysVal.IDTPM.currentTrkAna.offlMinPt!=-9999.: 
@@ -112,23 +131,10 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
         kwargs_InDetTrackSelectionTool.setdefault( "maxChiSqperNdf", flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSqperNdf )
     if flags.PhysVal.IDTPM.currentTrkAna.offlMinProb!=-9999.: 
         kwargs_InDetTrackSelectionTool.setdefault( "minProb", flags.PhysVal.IDTPM.currentTrkAna.offlMinProb )
-    kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP )
+    kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", qualityWP )
 
     from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
     offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
-
-    minHitsVector = flags.PhysVal.IDTPM.currentTrkAna.offlMinHitsVector
-    minPtVector = flags.PhysVal.IDTPM.currentTrkAna.offlMinPtVector
-    maxD0Vector = flags.PhysVal.IDTPM.currentTrkAna.offlMaxD0Vector
-    maxZ0Vector = flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0Vector
-    etaBins = flags.PhysVal.IDTPM.currentTrkAna.offlEtaBins
-
-    if flags.PhysVal.IDTPM.currentTrkAna.CustomOfflSel == "EFTracking": # Default selection for EFTracking studies
-        etaBins = [-1., 2., 2.6, 9999.]
-        minHitsVector = [9, 8, 7]
-        minPtVector = [1000., 400., 400.]
-        maxD0Vector = [20., 20., 100.]
-        maxZ0Vector = [150., 150., 150.]
 
     kwargs.setdefault( "offlineTool", offlineSelectionTool )
     kwargs.setdefault( "maxPt", flags.PhysVal.IDTPM.currentTrkAna.offlMaxPt )

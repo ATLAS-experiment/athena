@@ -58,7 +58,6 @@ def __createIDTPMTrkAnaConfigFlags():
     # Offline tracks selection properties
     icf.addFlag( "SelectOfflineObject", "" )
     icf.addFlag( "OfflineQualityWP"   , "", help="Apply track quality selection cuts to the reconstructed tracks, if blank no selections is done" )
-    icf.addFlag( "CustomOfflSel"   , "", help="Apply additional track quality selection cuts to the reconstructed tracks, if blank no selections is done" )
     icf.addFlag( "DoOfflineSelection", False )
     icf.addFlag( "offlMaxZ0SinTheta",               -9999. )
     icf.addFlag( "offlMinNInnermostLayerHits",      -9999. )
