@@ -63,6 +63,13 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
         use_parallel_compression = jp.AthenaMPFlags.UseParallelCompression()
         unique_id = f"{str(os.getpid())}-{uuid.uuid4().hex}"
 
+        # For e.g. event generation, if we use SharedQueue the job does not complete correctly
+        if strategy == 'SharedQueue':
+            from AthenaCommon.AthenaCommonFlags import jobproperties as ajp
+            if (not ajp.AthenaCommonFlags.FilesInput.statusOn) or ajp.AthenaCommonFlags.FilesInput == []:
+                msg.info('MP strategy "SharedQueue" will not work without input files when maxEvents=-1. Switching to "RoundRobin" just in case')
+                strategy = 'RoundRobin'
+
         if strategy=='SharedQueue' or strategy=='RoundRobin':
             if use_shared_reader:
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
