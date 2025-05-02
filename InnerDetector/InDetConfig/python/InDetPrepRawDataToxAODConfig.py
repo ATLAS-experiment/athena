@@ -97,8 +97,11 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
+    kwargs.setdefault("PixelReadoutManager", acc.getPrimaryAndMerge(ITkPixelReadoutManagerCfg(flags)))
+
     kwargs.setdefault("WriteExtendedPRDinformation", True)
-    kwargs.setdefault("PixelReadoutManager", "ITkPixelReadoutManager")
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
     kwargs.setdefault("PixelDCSStateCondData", "ITkPixelDCSStateCondData")
     kwargs.setdefault("PixelDCSStatusCondData", "ITkPixelDCSStatusCondData")
