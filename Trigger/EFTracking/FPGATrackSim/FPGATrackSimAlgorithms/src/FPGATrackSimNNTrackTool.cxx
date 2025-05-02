@@ -226,7 +226,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
           if(hit->isPixel()) missingHits-= 2; // Each pixel counts as two hits so that strip counts half as much 
           else if(hit->isStrip()) missingHits-= 1; // Since two strip hits is a single spacepoints in the GNN algorithm
         }
-        
+
         // Need to rotate hits
         float x0 = hit->getX();
         float y0 = hit->getY();
@@ -309,16 +309,11 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
           track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
         }
       }
-      // Nominal chi2ndof cut is 40 and we want to use NN>0.0075 (or
-      // NN<(1-0.0075) Nominal chi2ndof cut is 40 and we want to use NN>0.001
-      // (or NN<(1-0.1)
-      // the 5 comes from the 5 dof we nominally get from a chi2
-      double scale = m_chi2_scalefactor * (track_cand.getNCoords() - track_cand.getNMissing() - 5);
-      double chi2 = scale * (1 - nn_val);
+
+      double chi2 = (1 - nn_val) * (track_cand.getNCoords() - track_cand.getNMissing() - 5);
       track_cand.setOrigChi2(chi2);
       track_cand.setChi2(chi2);
       tracks.push_back(track_cand);
-
 
       if (m_useParamNN_1st) {
         for (auto& track : tracks) {
@@ -505,17 +500,11 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
       for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
         track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
       }
-      // Nominal chi2ndof cut is 40 and we want to use NN>0.0075 (or
-      // NN<(1-0.0075) Nominal chi2ndof cut is 40 and we want to use NN>0.001
-      // (or NN<(1-0.1)
-      // the 5 comes from the 5 dof we nominally get from a chi2
-      double scale = m_chi2_scalefactor *
-                      (track_cand.getNCoords() - track_cand.getNMissing() - 5);
-      double chi2 = scale * (1 - nn_val);
+
+      double chi2 = (1 - nn_val) * (track_cand.getNCoords() - track_cand.getNMissing() - 5);
       track_cand.setOrigChi2(chi2);
       track_cand.setChi2(chi2);
       tracks.push_back(track_cand);
-
 
       if (m_useParamNN_2nd) {
         for (auto& track : tracks) {
