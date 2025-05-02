@@ -152,7 +152,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 int val =  std::round(myCell->energy()/(12.5*std::cosh(myCell->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
                 bool isMasked = m_apply_masking ? ((myCell)->provenance()&0x80) : false;
                 bool isInvalid = (m_apply_masking&&m_isDATA) ? ((myCell)->provenance()&0x40) : false;
-                bool isSaturated = myCell->quality();
+                bool isSaturated = (m_isDATA) ? myCell->quality() : false; // saturation algorithm not implemented in MC yet
 
                 invalid &= isInvalid;
                 masked &= isMasked;
