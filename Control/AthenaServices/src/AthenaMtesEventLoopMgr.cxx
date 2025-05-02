@@ -47,7 +47,6 @@
 #include <fstream>
 #include <iomanip>
 #include <cstdlib>
-#include <memory>
 #include <unistd.h>
 
 namespace {
@@ -1445,7 +1444,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
     std::string strVal = keyValue.substr(colonPos+1);
     trimRangeStrings(strKey);       
     trimRangeStrings(strVal);
-    eventRangeMap[strKey]=strVal;
+    eventRangeMap[strKey]=std::move(strVal);
     
     // Next iteration
     startpos = endpos+1;
@@ -1459,7 +1458,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
   std::string strVal = keyValue.substr(colonPos+1);
   trimRangeStrings(strKey);
   trimRangeStrings(strVal);
-  eventRangeMap[strKey]=strVal;
+  eventRangeMap[strKey]=std::move(strVal);
 
   // _____________________ Consistency check for range string _____________________________
   // Three checks are performed:
@@ -1497,7 +1496,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
 	else {
 	  std::string strInpuCol("InputCollections");
 	  std::vector<std::string> vectInpCol{eventRangeMap["PFN"],};
-	  StringArrayProperty inputFileList(strInpuCol, vectInpCol);
+	  StringArrayProperty inputFileList(std::move(strInpuCol), vectInpCol);
 	  if(propertyServer->setProperty(inputFileList).isFailure()) {
 	    errorStr = "ERR_ATHENAMP_PARSE \"" + range + "\": Unable to set input file name property to the Event Selector";
 	  }

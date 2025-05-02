@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaServices/src/DelayedConditionsCleanerSvc.cxx
@@ -356,7 +356,7 @@ DelayedConditionsCleanerSvc::getKeys(const Ring& runLBRing, const Ring& TSRing) 
   runLBKeys.insert (runLBKeys.end(), m_slotLBN.begin(), m_slotLBN.end());
   TSKeys.insert(TSKeys.end(), m_slotTimestamp.begin(), m_slotTimestamp.end());
 
-  twoKeys_t result{runLBKeys, TSKeys};
+  twoKeys_t result{std::move(runLBKeys), std::move(TSKeys)};
 
   /// Sort the key array and remove duplicates.
   /// We expect that the key array is probably `almost' sorted.

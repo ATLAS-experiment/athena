@@ -330,7 +330,7 @@ void MetaDataSvc::handle(const Incident& inc) {
       // Register open/close callback actions
      using namespace boost::placeholders;
       Io::bfcn_action_t boa = boost::bind(&MetaDataSvc::rootOpenAction, this, _1,_2);
-      if (m_fileMgr->regAction(boa, Io::OPEN).isFailure()) {
+      if (m_fileMgr->regAction(std::move(boa), Io::OPEN).isFailure()) {
          ATH_MSG_FATAL("Cannot register ROOT file open action with FileMgr.");
       }
       if (!initInputMetaDataStore(fileName).isSuccess()) {
@@ -474,7 +474,7 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
       m_streamKeys[keyName].insert(newName);
       keyName = std::move(newName);
    }
-   const std::string par[3] = { "SHM" , keyName , className };
+   const std::string par[3] = { "SHM" , keyName , std::move(className) };
    const unsigned long ipar[2] = { num , 0 };
    IOpaqueAddress* opqAddr = nullptr;
    SG::DataProxy* dp = m_inputDataStore->proxy(clid, keyName);

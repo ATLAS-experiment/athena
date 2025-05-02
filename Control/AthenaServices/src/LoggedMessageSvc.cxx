@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -606,7 +606,7 @@ void LoggedMessageSvc::reportMessage( const Message& msg )    {
 void LoggedMessageSvc::reportMessage (std::string source,
                                       int type,
                                       std::string message) {
-  Message msg( source, type, message);
+  Message msg( std::move(source), type, std::move(message));
   reportMessage( msg );
 }
 
