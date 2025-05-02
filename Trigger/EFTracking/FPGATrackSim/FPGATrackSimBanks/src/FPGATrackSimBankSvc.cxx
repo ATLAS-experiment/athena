@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 #include "FPGATrackSimBankSvc.h"
@@ -10,8 +10,7 @@
 
 
 FPGATrackSimBankSvc::FPGATrackSimBankSvc(const std::string& name, ISvcLocator*svc) :
-    base_class(name,svc),
-    m_FPGATrackSimMapping("FPGATrackSimMappingSvc", name)
+    base_class(name,svc)
 {
 }
 

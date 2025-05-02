@@ -19,7 +19,7 @@ atlas_add_component( FPGATrackSimConfTools
    LINK_LIBRARIES FPGATrackSimConfToolsLib )
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py )
+atlas_install_python_modules( python/*.py python/helperScripts/*.py )
 atlas_install_scripts( test/FPGATrackSimWorkflow/*.sh)
 atlas_install_scripts( test/test_FPGATrackSimWorkflow.sh)
 atlas_install_scripts( test/test_FPGATrackSimDataPrep.sh)
@@ -58,3 +58,16 @@ atlas_add_test( FPGATrackSim_F410_test
                 LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*|.*Found error reading file at line:.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
+
+atlas_add_test( FPGATrackSim_F610_test
+                PRIVATE_WORKING_DIRECTORY 
+                SCRIPT FPGATrackSim_F610.sh -m -n -1
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*|.* WARNING FPE.*FPGATrackSimProtoTackFitAlg.*"
+                POST_EXEC_SCRIPT noerror.sh 
+                PROPERTIES TIMEOUT 600 )
+
+atlas_add_test( FPGATrackSimHelperFunctions
+                PRIVATE_WORKING_DIRECTORY 
+                SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimHelperFunctions
+                POST_EXEC_SCRIPT noerror.sh 
+                PROPERTIES TIMEOUT 5 )

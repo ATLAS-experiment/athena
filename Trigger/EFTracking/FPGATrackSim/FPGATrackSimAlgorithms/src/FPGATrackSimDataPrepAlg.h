@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSim_DATAPREPALG_H
 #define FPGATrackSim_DATAPREPALG_H
@@ -15,7 +15,7 @@
 #include "FPGATrackSimMaps/IFPGATrackSimHitFilteringTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimClusteringToolI.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
-#include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
+#include "FPGATrackSimConfTools/FPGATrackSimEventSelectionTool.h"
 #include "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsTool.h"
 #include "FPGATrackSimInput/FPGATrackSimReadRawRandomHitsTool.h"
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
@@ -72,13 +72,12 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         ToolHandle<IFPGATrackSimInputTool>               m_hitSGInputTool {this, "SGInputTool", "", "Input tool from SG"};
         ToolHandle<IFPGATrackSimEventInputHeaderTool>    m_hitInputTool {this, "InputTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimSGToRawHitsTool", "Input Tool"};
         ToolHandle<FPGATrackSimReadRawRandomHitsTool>    m_hitInputTool2 {this, "InputTool2", "FPGATrackSimReadRawRandomHitsTool/FPGATrackSimReadRawRandomHitsTool", "Potential 2nd input Tool to load data from more than one source"};
-        ToolHandle<FPGATrackSimRawToLogicalHitsTool>     m_hitMapTool {this, "RawToLogicalHitsTool", "FPGATrackSim_RawToLogicalHitsTool/FPGATrackSim_RawToLogicalHitsTool", "Raw To Logical Tool"};
+        ToolHandleArray<FPGATrackSimRawToLogicalHitsTool>     m_hitMapTools {this, "RawToLogicalHitsTools", {}, "Raw To Logical Tools"};
         ToolHandle<IFPGATrackSimHitFilteringTool>        m_hitFilteringTool {this, "HitFilteringTool", "FPGATrackSimHitFilteringTool/FPGATrackSimHitFilteringTool", "Hit Filtering Tool"};
         ToolHandle<FPGATrackSimClusteringToolI>          m_clusteringTool {this, "ClusteringTool", "FPGATrackSimClusteringTool/FPGATrackSimClusteringTool", "Hit Clustering Tool"};
         ToolHandle<FPGATrackSimSpacePointsToolI>         m_spacepointsTool {this, "SpacePointTool", "FPGATrackSimSpacePointsTool/FPGATrackSimSpacePointsTool", "Space Points Tool"};
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
-        ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
-        ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
+        ToolHandleArray<FPGATrackSim::FPGATrackSimEventSelectionTool> m_eventSelectionTools {this, "eventSelectors", {}, "Event selection Tools"};
         // chrono service
         ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
@@ -89,7 +88,7 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         Gaudi::Property<int> m_clustering {this, "Clustering", 0, "int to enable the clustering and say how many times to run it"};
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
-        Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", true, "do event selection"};
+        Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", false, "do event selection"};
         Gaudi::Property<bool> m_useInternalTruthTracks {this,"useInternalTruthTracks", false, "case when runnin on RDO file (and not or wrapper)"};
         Gaudi::Property<bool> m_recordHits {this,"recordHits", true, "For F-100 this is not needed"};
 
@@ -123,14 +122,12 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         StatusCode readInputs(bool & done);
         StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
                                  SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters,
-                                 SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClustersFiltered,
                                  SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints);
 
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
         // NOTE: the clusters collection(s) contain ALL Clusters, not just "first stage" clusters.
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey",{"FPGAClusters_1st"},"FPGATrackSim Clusters key"};
-        SG::WriteHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterFilteredKey{this, "FPGATrackSimClusterFilteredKey","FPGAClustersFiltered","FPGATrackSim Filtered Clusters key"};
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey",{"FPGASpacePoints_1st","FPGASpacePoints_2nd"},"FPGATrackSim SpacePoints key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim Hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitUnmappedKey{this, "FPGATrackSimHitUnmappedKey","FPGAHitsUnmapped_1st","FPGATrackSim Unmapped Hits 1st stage key"};

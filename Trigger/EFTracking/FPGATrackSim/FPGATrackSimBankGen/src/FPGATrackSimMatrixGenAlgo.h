@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimMatrixGenAlgo_h
 #define FPGATrackSimMatrixGenAlgo_h
@@ -73,7 +73,7 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
         // Handles
 
         ServiceHandle<IFPGATrackSimMappingSvc>    m_FPGATrackSimMapping{this,"FPGATrackSimMappingSvc","FPGATrackSimMappingSvc"};
-        ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this,"FPGATrackSimEventSelectionSvc","FPGATrackSimEventSelectionSvc"};
+        ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this,"FPGATrackSimEventSelectionSvc",""};
         ServiceHandle<ITHistSvc>             m_tHistSvc{this,"THistSvc","THistSvc"};
 
         ToolHandle<IFPGATrackSimInputTool>       m_hitInputTool {this, "FPGATrackSimSGToRawHitsTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimSGToRawHits", "input handler"};

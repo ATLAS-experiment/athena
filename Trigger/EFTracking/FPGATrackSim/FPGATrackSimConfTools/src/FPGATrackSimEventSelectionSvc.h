@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimCONFTOOLS_FPGATrackSimEVENTSELECTIONSVC_H
@@ -59,14 +59,14 @@ class FPGATrackSimEventSelectionSvc : public extends< AthService, IFPGATrackSimE
   virtual bool passMatching(FPGATrackSimTrack const &) const override;
   virtual bool passMatching(FPGATrackSimTruthTrack const &) const override;
 
-  virtual bool selectEvent(FPGATrackSimEventInputHeader*) override;
+  virtual bool selectEvent(const FPGATrackSimEventInputHeader*) override;
   virtual bool selectEvent(FPGATrackSimLogicalEventInputHeader*) override;
 
   // Allow code to query whether or not an event was selected by the service.
   // If running over RDO part of this decision is made inside the dataprep algorithm, so it needs a setter.
   virtual bool getSelectedEvent() const override { return m_selectEvent; }
   virtual void setSelectedEvent(bool s) override { m_selectEvent =  s; }
-
+  
  private:
 
   // Gaudi parameters:

@@ -25,7 +25,7 @@
 #include "GaudiKernel/IEventProcessor.h"
 
 constexpr bool enableBenchmark = 
-#ifdef BENCHMARK_LOGICALHITSALG
+#ifdef BENCHMARK_FPGATRACKSIM
     true;
 #else
     false;
@@ -57,7 +57,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
     ATH_CHECK(m_roadFilterTool.retrieve(EnableTool{m_filterRoads}));
     ATH_CHECK(m_roadFilterTool2.retrieve(EnableTool{m_filterRoads2}));
-    if (m_doSpacepoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
+    ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_doSpacepoints}));
 
     ATH_CHECK(m_trackFitterTool_1st.retrieve(EnableTool{m_doTracking}));
     ATH_CHECK(m_overlapRemovalTool_1st.retrieve());
@@ -133,9 +133,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Query the event selection service to make sure this event passed cuts.
     if (!m_evtSel->getSelectedEvent()) {
-        ATH_MSG_DEBUG("Event skipped by: " << m_evtSel->name());
         return StatusCode::SUCCESS;
     }
+    ATH_MSG_INFO("Event accepted by: " << m_evtSel->name());
 
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
@@ -144,6 +144,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_1st, phits_2nd;
     const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
+    const FPGATrackSimRegionMap* rmap_2nd = m_FPGATrackSimMapping->SubRegionMap_2nd();
+    ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
     phits_1st.reserve(FPGAHits->size());
     phits_2nd.reserve(FPGAHits->size());
     for (const FPGATrackSimHit& hit : *(FPGAHits.cptr())) {
@@ -151,12 +153,15 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         if (rmap_1st->getRegions(hit).size() > 0) {
             phits_1st.emplace_back(&hit, [](const FPGATrackSimHit*){});
         }
-        // TODO: For now add all hits to 2nd stage until this is properly setup here
-        phits_2nd.emplace_back(&hit, [](const FPGATrackSimHit*){});
-        FPGAHits_2nd->push_back(hit);
+        if (rmap_2nd->getRegions(hit).size() > 0) {
+            // TODO: For now add all hits to 2nd stage until this is properly setup here
+            phits_2nd.emplace_back(&hit, [](const FPGATrackSimHit*) {});
+            FPGAHits_2nd->push_back(hit);
+        }
     }
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
-
+    ATH_MSG_DEBUG("1st stage hits: " << phits_1st.size() << "          2nd stage hits: " << phits_2nd.size() );
+    if (phits_1st.empty()) return StatusCode::SUCCESS;
     // Get truth tracks from DataPrep as well.
     SG::ReadHandle<FPGATrackSimTruthTrackCollection> FPGATruthTracks(m_FPGATruthTrackKey, ctx);
     if (!FPGATruthTracks.isValid()) {
@@ -170,13 +175,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_MSG_ERROR("Could not find FPGA Offline Track Collection with key " << FPGAOfflineTracks.key());
         return StatusCode::FAILURE;
     }
+    
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: GetRoads");
     // Get roads
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st =
-        std::move(prefilter_roads);
-    ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st, *FPGATruthTracks));
-    
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
+    ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st, *(FPGATruthTracks.cptr())));
+
+    ATH_MSG_DEBUG("Looping over " << roads_1st.size() << " roads");
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
     for (auto const &road : roads_1st) {
       unsigned bitmask = road->getHitLayers();
@@ -189,8 +194,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
     Monitored::Group(m_monTool, mon_nroads_1st);
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: GetRoads");
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: RoadFiltering");
+    
     // Standard road Filter
+    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: RoadFiltering");
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter_roads;
     if (m_filterRoads)
     {

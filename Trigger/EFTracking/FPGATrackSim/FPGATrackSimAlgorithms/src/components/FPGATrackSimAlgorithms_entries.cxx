@@ -4,6 +4,7 @@
 #include "../FPGATrackSimDataPrepAlg.h"
 #include "../FPGATrackSimSecondStageAlg.h"
 #include "../FPGATrackSimLayerStudyAlg.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimRegionMergingAlg.h"
 #include "../../FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
 #include "../../FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
 #include "../../FPGATrackSimAlgorithms/FPGATrackSimNNTrackTool.h"
@@ -21,3 +22,4 @@ DECLARE_COMPONENT( FPGATrackSimSecondStageAlg )
 DECLARE_COMPONENT( FPGATrackSimWindowExtensionTool )
 DECLARE_COMPONENT( FPGATrackSimNNPathfinderExtensionTool )
 DECLARE_COMPONENT( FPGATrackSimLayerStudyAlg )
+DECLARE_COMPONENT( FPGATrackSim::FPGATrackSimRegionMergingAlg )

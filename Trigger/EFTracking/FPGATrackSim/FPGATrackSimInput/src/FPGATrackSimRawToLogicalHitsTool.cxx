@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsTool.h"
@@ -66,12 +66,11 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
     FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);//default header, can eventually set eta/phi/deta/dphi
     logicEventHeader.addTower( tower);
   }
-  for (auto hit: eventHeader.hits()) { // hit loop
+  for (FPGATrackSimHit hit: eventHeader.hits()) { // hit loop
       // In the ITk geometry, some of the plane IDs are -1 if the layers are not yet being used.
       // This causes the code in this hit loop to crash. As a workaround for the moment, we currently
       // skip over hits in layers that are not included in the FPGATrackSim geometry, with plane = -1
 
-      ATH_CHECK(m_FPGATrackSimMapping.retrieve());
       pmap->doRemap(hit);
 
     for (unsigned int ireg = 0; ireg != m_towers.size(); ++ireg) {

@@ -91,7 +91,7 @@ protected:
     ///////////////////////////////////////////////////////////////////////
     // Handles
 
-    ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
+    ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this, "FPGATrackSimEventSelectionSvc", ""};
     ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc{this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};
     ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
     ToolHandle<FPGATrackSimGenScanMonitoring> m_monitoring {this, "Monitoring", "FPGATrackSimGenScanMonitoring", "Monitoring Tool"};

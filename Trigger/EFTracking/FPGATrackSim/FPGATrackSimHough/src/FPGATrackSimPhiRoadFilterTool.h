@@ -56,7 +56,7 @@ class FPGATrackSimPhiRoadFilterTool : public extends <AthAlgTool, IFPGATrackSimR
         ///////////////////////////////////////////////////////////////////////
         // Handles
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
-  	ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
+  	ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", ""};
   
         ///////////////////////////////////////////////////////////////////////
         // Properties

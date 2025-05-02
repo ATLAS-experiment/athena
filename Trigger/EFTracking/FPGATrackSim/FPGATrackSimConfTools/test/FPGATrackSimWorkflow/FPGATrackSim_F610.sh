@@ -27,11 +27,11 @@ run_F610(){
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \
-        Trigger.FPGATrackSim.region=34 \
+        Trigger.FPGATrackSim.regionList="34" \
         Trigger.FPGATrackSim.pipeline='F-610' \
         Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
         Trigger.FPGATrackSim.doEDMConversion=True \
-        Trigger.FPGATrackSim.doOverlapRemoval=False \
+        Trigger.FPGATrackSim.doOverlapRemoval=True \
         Trigger.FPGATrackSim.Hough.secondStage=False \
         Trigger.FPGATrackSim.writeToAOD=True \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
@@ -57,7 +57,7 @@ if [ -z "$ArtJobType" ];then # skip file check for ART (this has already been do
     echo "... analysis output verification"
 cat << EOF > checkHist.C
 {
-    _file0->cd("FPGATrackSimLogicalHitsProcessAlg");
+    _file0->cd("FPGATrackSimLogicalHitsProcessAlg_reg34");
     TH1* h = (TH1*)gDirectory->Get("nroads_1st");
     if ( h == nullptr )
         throw std::runtime_error("oh dear, after all of this there is no roads histogram");

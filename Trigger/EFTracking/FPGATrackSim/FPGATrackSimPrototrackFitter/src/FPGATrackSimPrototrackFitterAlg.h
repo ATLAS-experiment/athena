@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_FPGATRACKSIMPROTOTRACKFITTERALG_H
@@ -45,6 +45,8 @@ namespace FPGATrackSim{
          {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
           "Map which associates detector elements to Acts Geometry IDs"};
 
+      // chrono service
+      ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
     }; 
 
 }
