@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODELR4_STGCREAOUDGEOMTOOL_H
@@ -7,7 +7,6 @@
 
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
-#include <MuonReadoutGeometryR4/CutOutArea.h>
 
 #include <GeoModelInterfaces/IGeoDbTagSvc.h>
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
@@ -19,8 +18,8 @@ namespace MuonGMR4 {
 class sTgcReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
    public:
     // Constructor
-    sTgcReadoutGeomTool(const std::string &type, const std::string &name,
-                       const IInterface *parent);
+    using base_class::base_class;
+
 
 
     StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
@@ -74,14 +73,13 @@ class sTgcReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
     struct FactoryCache {
        
       using ParamBookTable = std::map<std::string, wSTGCTable>;
-      using CutOutTable = std::map<Identifier, std::vector<CutOutArea>>;
 
        std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
        std::set<WireDesignPtr, WireDesignSorter> wireGroupDesigns{};
        std::set<PadDesignPtr, PadDesignSorter> padDesigns{};
 
        ParamBookTable parameterBook{};
-       CutOutTable cutOuts{};
+
     };
 
     /// Helper struct to translate the GeoModelShape into the parameters 

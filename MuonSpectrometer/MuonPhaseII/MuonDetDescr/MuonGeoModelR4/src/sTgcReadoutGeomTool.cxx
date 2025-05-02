@@ -34,11 +34,6 @@ using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
 using defineArgs = sTgcReadoutElement::defineArgs;
 
 
-sTgcReadoutGeomTool::sTgcReadoutGeomTool(const std::string& type,
-                                       const std::string& name,
-                                       const IInterface* parent)
-    : base_class{type, name, parent} {}
-
 sTgcReadoutGeomTool::sTgcShape sTgcReadoutGeomTool::extractParameters(const GeoShape* shape) const {
     sTgcShape result{};
     if (shape->typeID() == GeoTrd::getClassTypeID()) {

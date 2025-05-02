@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcReadoutGeomTool.h"
@@ -36,10 +36,6 @@ using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
 using defineArgs = TgcReadoutElement::defineArgs;
 
 
-TgcReadoutGeomTool::TgcReadoutGeomTool(const std::string& type,
-                                       const std::string& name,
-                                       const IInterface* parent)
-    : base_class{type, name, parent} {}
 StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& define,
                                               FactoryCache& factoryCache) {
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)

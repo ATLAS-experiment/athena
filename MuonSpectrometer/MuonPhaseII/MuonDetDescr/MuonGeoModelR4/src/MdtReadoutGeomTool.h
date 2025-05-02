@@ -18,8 +18,7 @@ namespace MuonGMR4 {
 class MdtReadoutGeomTool : public extends<AthAlgTool,IMuonReadoutGeomTool> {
    public:
     // Constructor
-    MdtReadoutGeomTool(const std::string &type, const std::string &name,
-                       const IInterface *parent);
+    using base_class::base_class;
 
 
     StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
