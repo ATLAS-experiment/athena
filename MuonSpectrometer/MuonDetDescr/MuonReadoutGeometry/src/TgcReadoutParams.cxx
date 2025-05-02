@@ -1,20 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// ******************************************************************************
-// Atlas Muon Detector Description
-// -----------------------------------------
-// ******************************************************************************
-
 #include "MuonReadoutGeometry/TgcReadoutParams.h"
-
-#include <GaudiKernel/IMessageSvc.h>
 
 #include <utility>
 
-#include "AthenaKernel/getMessageSvc.h"
-#include "GaudiKernel/MsgStream.h"
 
 namespace MuonGM {
     TgcReadoutParams::TgcReadoutParams():
@@ -157,23 +147,23 @@ namespace MuonGM {
 
     double TgcReadoutParams::stripPositionOnLargeBase(int istrip) const {
         // all gas gaps have the same n. of strips (=> check the first one)
-        if (istrip > m_nStrips[0] + 1){
-          ATH_MSG_FATAL( "Input strip n. " << istrip
+        if (istrip > m_nStrips[0] + 1 || istrip < 1){
+          ATH_MSG_FATAL(__func__<<"() "<<__LINE__<<" - Input strip n. " << istrip
               << " out of range in TgcReadoutParams::stripPositionOnLargeBase for TgcReadoutParams of name/type " << m_chamberName << "/"
               << m_chamberType << "  - Nstrips = " << m_nStrips[0] << " MaxNStrips = " << MaxNStrips );
           throw std::out_of_range("invalid strip index");
         }
-        return m_stripPositionOnLargeBase[istrip - 1];;
+        return m_stripPositionOnLargeBase[istrip - 1];
     }
     double TgcReadoutParams::stripPositionOnShortBase(int istrip) const {
         // all gas gaps have the same n. of strips (=> check the first one)
-        if (istrip > m_nStrips[0] + 1){
-          ATH_MSG_FATAL( "Input strip n. " << istrip
+        if (istrip > m_nStrips[0] + 1 || istrip < 1) {
+          ATH_MSG_FATAL(__func__<<"() "<<__LINE__<<" - Input strip n. " << istrip
                   << " out of range in TgcReadoutParams::stripPositionOnShortBase for TgcReadoutParams of name/type " << m_chamberName << "/"
                   << m_chamberType << "  - Nstrips = " << m_nStrips[0] << " MaxNStrips = " << MaxNStrips );
           throw std::out_of_range("invalid strip index");
         }
-        return m_stripPositionOnShortBase[istrip - 1];;
+        return m_stripPositionOnShortBase[istrip - 1];
     }
     
     double TgcReadoutParams::stripCenter(int istrip) const {
@@ -182,7 +172,7 @@ namespace MuonGM {
               << " out of range in TgcReadoutParams::stripPositionOnLargeBase for TgcReadoutParams of name/type " << m_chamberName << "/"
               << m_chamberType << "  - Nstrips = " << m_nStrips[0] << " MaxNStrips = " << MaxNStrips );
           throw std::out_of_range("invalid strip index");
-         }
-        return m_stripPositionCenter[istrip -1];;
+        }
+        return m_stripPositionCenter[istrip -1];
     }
 }  // namespace MuonGM
