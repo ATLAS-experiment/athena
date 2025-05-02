@@ -32,17 +32,17 @@ public:
    virtual ~CopyEventStreamInfo();
 
    /// AthAlgTool Interface method implementations:
-   virtual StatusCode initialize() override;
+   virtual StatusCode initialize() override final;
 
    /// Function called when a new input file is opened
-   virtual StatusCode beginInputFile(const SG::SourceID& = "Serial") override;
+   virtual StatusCode beginInputFile(const SG::SourceID& = "Serial") override final;
  
    /// Function called when the currently open input file got completely
    /// processed
-   virtual StatusCode endInputFile(const SG::SourceID& = "Serial") override;
+   virtual StatusCode endInputFile(const SG::SourceID& = "Serial") override final;
 
    /// Function called when the tool should write out its metadata
-   virtual StatusCode metaDataStop() override;
+   virtual StatusCode metaDataStop() override final;
 
 private:
    /// (optional) list of keys to copy, all if empty, default: empty
