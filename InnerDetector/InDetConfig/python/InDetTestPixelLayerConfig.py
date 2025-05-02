@@ -108,7 +108,9 @@ def ITkTestPixelLayerToolCfg(flags, name="ITkTestPixelLayerTool", **kwargs):
             result.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
         kwargs.setdefault("PixelDetElStatus", "ITkPixelDetectorElementStatus")
 
-    kwargs.setdefault("PixelReadoutManager","ITkPixelReadoutManager")
+    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
+    kwargs.setdefault("PixelReadoutManager", result.getPrimaryAndMerge(
+        ITkPixelReadoutManagerCfg(flags)))
 
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg

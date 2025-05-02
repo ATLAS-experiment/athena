@@ -52,9 +52,9 @@ def ITkClusterMakerToolCfg(flags, name="ITkClusterMakerTool", **kwargs):
     # This directly needs the following Conditions data:
     # PixelModuleData & PixelChargeCalibCondData
     acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
-    acc.merge(ITkPixelReadoutManagerCfg(flags))
-    kwargs.setdefault("PixelReadoutManager", acc.getService(
-        "ITkPixelReadoutManager"))
+
+    kwargs.setdefault("PixelReadoutManager", acc.getPrimaryAndMerge(
+        ITkPixelReadoutManagerCfg(flags)))
 
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import (
@@ -114,7 +114,8 @@ def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
             acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
         kwargs.setdefault("PixelDetElStatus", "ITkPixelDetectorElementStatus")
 
-    kwargs.setdefault("PixelReadoutManager","ITkPixelReadoutManager")
+    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
+    kwargs.setdefault("PixelReadoutManager", acc.getPrimaryAndMerge(ITkPixelReadoutManagerCfg(flags)))
 
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("CheckGanged", False)
@@ -317,7 +318,7 @@ def ITkNnClusterizationFactoryCfg(flags, name="ITkNnClusterizationFactory", **kw
     kwargs.setdefault("NnCollectionWithTrackReadKey", "")
     kwargs.setdefault("NnCollectionJSONReadKey", "PixelClusterNNJSON")
 
-    kwargs.setdefault("PixelReadoutManager", "ITkPixelReadoutManager")
+    kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
 
     acc.setPrivateTools(
