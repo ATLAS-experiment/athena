@@ -110,14 +110,14 @@ namespace IDTPM {
 
   inline bool maxD0SelVec( const xAOD::TrackParticle& track,
                            const std::vector< float >& maxD0,
-                           const std::vector< float >& etaBins) { return d0(track) <= maxD0.at( getEtaBin( track, etaBins ) );};
+                           const std::vector< float >& etaBins) { return std::fabs( d0(track) ) <= maxD0.at( getEtaBin( track, etaBins ) );};
   inline bool maxD0SelVec( const xAOD::TruthParticle& ,
                            const std::vector< float >& ,
                            const std::vector< float >& ) { return false; }; // dummy - to avoid compilation errors;
 
   inline bool maxZ0SelVec( const xAOD::TrackParticle& track,
                            const std::vector< float >& maxZ0,
-                           const std::vector< float >& etaBins) { return z0(track) <= maxZ0.at( getEtaBin( track, etaBins ) );};
+                           const std::vector< float >& etaBins) { return std::fabs( z0(track) ) <= maxZ0.at( getEtaBin( track, etaBins ) );};
   inline bool maxZ0SelVec( const xAOD::TruthParticle& ,
                            const std::vector< float >& ,
                            const std::vector< float >& ) { return false; }; // dummy - to avoid compilation errors;

@@ -61,11 +61,13 @@ bool OfflineTrackQualitySelectionTool::accept( const xAOD::TrackParticle* track 
   if (m_minAbsZ0!=-9999.   and std::fabs(z0(*track)) < m_minAbsZ0 )         return false; 
   if (m_maxAbsZ0!=-9999.   and std::fabs(z0(*track)) > m_maxAbsZ0 )         return false; 
   if (m_minAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) < m_minAbsQoPT )  return false; 
-  if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) > m_maxAbsQoPT )  return false; 
-  if (!m_minHitsVec.empty() and !nHitsSelVec(*track, m_minHitsVec, m_etaBins))  return false; 
-  if (!m_minPtVec.empty() and !minPtSelVec(*track, m_minPtVec, m_etaBins))  return false; 
-  if (!m_maxD0Vec.empty() and !maxD0SelVec(*track, m_maxD0Vec, m_etaBins))  return false; 
-  if (!m_maxZ0Vec.empty() and !maxZ0SelVec(*track, m_maxZ0Vec, m_etaBins))  return false; 
+  if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) > m_maxAbsQoPT )  return false;
+  if ( !m_etaBins.empty() ) {
+    if (!m_minHitsVec.empty() and !nHitsSelVec(*track, m_minHitsVec, m_etaBins))  return false;
+    if (!m_minPtVec.empty() and !minPtSelVec(*track, m_minPtVec, m_etaBins))  return false;
+    if (!m_maxD0Vec.empty() and !maxD0SelVec(*track, m_maxD0Vec, m_etaBins))  return false;
+    if (!m_maxZ0Vec.empty() and !maxZ0SelVec(*track, m_maxZ0Vec, m_etaBins))  return false;
+  }
 
   return true;
 }
