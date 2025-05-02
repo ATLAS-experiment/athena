@@ -36,6 +36,7 @@
 /// STL includes
 #include <atomic>
 #include <string>
+#include <mutex>
 
 //class SpacePointContainer;
 namespace InDet {
@@ -112,6 +113,10 @@ namespace InDet {
     DoubleProperty m_deltaPhi{this, "dPhiCaloRoI", .25};
     DoubleProperty m_deltaZ{this, "dZCaloRoI", 300.};
     StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid"};
+    BooleanProperty m_doDumpGBTSTrainingData{this, "doDumpGBTSTrainingData", false, "write training data used to create GBTS connection table"};
+    BooleanProperty m_doDumpGBTSTrainingDataLRT{this, "doDumpGBTSTrainingDataLRT", false, "write LRT training data used to create GBTS connection table"};
+    BooleanProperty m_removeShortSegments{this, "removeShortSegments", false, "remove short segments from GBTS connection table"};
+    StringProperty m_GBTSTrainingDataFileName{this, "GBTSTrainingDataFileName", "layer_connection_table.csv", "file to write training data used to create GBTS connection table"};
     //@}
 
     /// @name Data members for new strategy reconstruction
@@ -166,6 +171,10 @@ namespace InDet {
     mutable std::atomic_int m_problemsTotal{0}; ///< Number events with number seeds > maxNumber
     mutable std::atomic_int m_problemsTotalV{0}; ///< Number events with number seeds > maxNumber
     //@}
+
+    mutable std::mutex m_GBTSTrainingDataMutex;
+    mutable std::map<int, std::map<int, unsigned long>> m_GBTSTrainingData ATLAS_THREAD_SAFE;
+    mutable std::atomic_ulong m_numGBTSTrainingData{0};
 
     ///////////////////////////////////////////////////////////////////
     // Protected methods
@@ -235,6 +244,9 @@ namespace InDet {
 			int nClusters,
 			int nFreeClusters,
 			int nPixels) const;
+
+    void collectGBTSTrainingData(const Trk::Track*) const;
+    void dumpGBTSTrainingData() const;
 
   };
 }

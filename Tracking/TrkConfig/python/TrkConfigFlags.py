@@ -642,4 +642,7 @@ def createTrackingConfigFlags():
     
     icf.addFlag('Tracking.TruthClusterSplittingEff', 0.9)
 
+    # Dump GBTS training data: 0=no dump, 1=standard tracking, 2=LRT
+    icf.addFlag("Tracking.dumpGBTSTrainingData", 0)
+
     return icf

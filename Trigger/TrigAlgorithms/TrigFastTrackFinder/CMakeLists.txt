@@ -12,3 +12,4 @@ atlas_add_component( TrigFastTrackFinder
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_runtime( share/*.lut share/*.txt )
+atlas_install_scripts( scripts/* )
