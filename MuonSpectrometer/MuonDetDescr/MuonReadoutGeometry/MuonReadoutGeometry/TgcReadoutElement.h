@@ -113,9 +113,15 @@ namespace MuonGM {
         double stripPitch(int gasGap, int strip) const;
         /// Returns the pitch of the given strip in gasGap i evaluated at a local positiion along the strip
         double stripPitch(int gasGap, int strip, double radialPos) const;
-        /// Returns the local X of the left edge of the strip at a given local radial position
+        /** @brief Returns the local X of the left edge of the strip at a given local radial position
+         *  @param gasGap: Tgc gas gap of interest [1-3]
+         *  @param strip: Tgc readout strip of interest [1-32]
+         *  @param radialPos: Radial position along the strip (origin at trapezoid centre) */ 
         double stripLowEdgeLocX(int gasGap, int strip, double radialPos) const;
-        /// Returns the local X of the right edge of the strip at a given local radial position
+        /** @brief Returns the local X of the right edge of the strip at a given local radial position
+         *  @param gasGap: Tgc gas gap of interest [1-3]
+         *  @param strip: Tgc readout strip of interest [1-32]
+         *  @param radialPos: Radial position along the strip (origin at trapezoid centre) */ 
         double stripHighEdgeLocX(int gasGap, int strip , double radialPos) const;
         /// Returns the local X of the strip center at a given local radial position
         double stripCenterLocX(int gasGap, int strip, double radialPos) const;

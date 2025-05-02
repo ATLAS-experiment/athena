@@ -131,7 +131,9 @@ namespace MuonGM {
 #ifndef NDEBUG
         if (!validStrip(gasGap, strip)) THROW_EXCEPT("Invalid gasGap "<<gasGap<<" & wire strip "<<strip<<" given.");
 #endif
-        const auto [flip, pickStrip] = stripNumberToFetch(gasGap, strip-1);
+        const auto [flip, pickStrip] = stripNumberToFetch(gasGap, strip);
+        ATH_MSG_VERBOSE(__func__<<"() "<<idHelperSvc()->toStringDetEl(identify())
+                      <<", gasGap: "<<gasGap<<", strip: "<<strip<<", pickStrip: "<<pickStrip);
         return flip * stripLocalX(pickStrip, z, 0.5*(stripPosOnLargeBase(pickStrip) + stripPosOnShortBase(pickStrip)));
     }
 
@@ -139,7 +141,11 @@ namespace MuonGM {
 #ifndef NDEBUG
         if (!validStrip(gasGap, strip)) THROW_EXCEPT("Invalid gasGap "<<gasGap<<" & strip "<<strip<<" given.");
 #endif
-        const auto [flip, pickStrip] = stripNumberToFetch(gasGap, strip+1);
+        const int nextStrip = strip +1;
+        auto [flip, pickStrip] = stripNumberToFetch(gasGap, nextStrip);
+        pickStrip += (nextStrip != pickStrip);
+        ATH_MSG_VERBOSE(__func__<<"() "<<idHelperSvc()->toStringDetEl(identify())
+                      <<", gasGap: "<<gasGap<<", strip: "<<strip<<", pickStrip: "<<pickStrip);
         return flip * stripLocalX(pickStrip, z, 0.5*(stripPosOnLargeBase(pickStrip) + stripPosOnShortBase(pickStrip)));
     }
 
