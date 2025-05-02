@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCalibrationTool.cxx 
@@ -19,18 +19,23 @@
 #include "JetCalibTools/CalibrationMethods/InsituDataCorrection.h"
 #include "JetCalibTools/CalibrationMethods/JMSCorrection.h"
 #include "JetCalibTools/CalibrationMethods/JetSmearingCorrection.h"
+#include "JetCalibTools/CalibrationMethods/Generic4VecCorrection.h"
 #include "JetCalibTools/CalibrationMethods/GlobalLargeRDNNCalibration.h"
 #include "PathResolver/PathResolver.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AthContainers/ConstAccessor.h"
 
+#include "AsgTools/AsgMetadataTool.h"
+#include <xAODMetaData/FileMetaData.h>
+
 JetCalibrationTool::JetCalibrationTool(const std::string& name)
-  : asg::AsgTool( name )
+  : asg::AsgMetadataTool( name )
 { 
   declareProperty( "JetCollection", m_jetAlgo = "AntiKt4LCTopo" );
   declareProperty( "ConfigFile", m_config = "" );
   declareProperty( "CalibSequence", m_calibSeq = "JetArea_Offset_AbsoluteEtaJES_Insitu" );
   declareProperty( "IsData", m_isData = true );
+  declareProperty( "ForceCampaign", m_forceCampaign = "");
   declareProperty( "ConfigDir", m_dir = "JetCalibTools/CalibrationConfigs/" );
   declareProperty( "EventInfoName", m_eInfoName = "EventInfo");
   declareProperty( "DEVmode", m_devMode = false);
@@ -38,6 +43,10 @@ JetCalibrationTool::JetCalibrationTool(const std::string& name)
   declareProperty( "CalibArea", m_calibAreaTag = "00-04-82");
   declareProperty( "GSCDepth", m_gscDepth);
   declareProperty( "useOriginVertex", m_useOriginVertex = false);
+  // Options to force files for metadata-dependent calibration in case metadata is not available
+  declareProperty( "ForceCalibFilePtResidual", m_forceCalibFile_PtResidual = "");
+  declareProperty( "ForceCalibFileFastSim",    m_forceCalibFile_FastSim = "");
+  declareProperty( "ForceCalibFileMC2MC",      m_forceCalibFile_MC2MC = "");
 }
 
 JetCalibrationTool::~JetCalibrationTool() {
@@ -75,9 +84,12 @@ StatusCode JetCalibrationTool::initialize() {
   else{dir.insert(14,calibPath);} // Obtaining the path of the configuration file
   std::string configPath=dir+m_config; // Full path
   TString fn =  PathResolverFindCalibFile(configPath);
-
-  ATH_MSG_INFO("Reading global JES settings from: " << m_config);
-  ATH_MSG_INFO("resolved in: " << fn);
+  if(fn=="") {
+    ATH_MSG_FATAL( "Couldn't find ConfigFile " << configPath ); return StatusCode::FAILURE;
+  } else {
+    ATH_MSG_INFO("Reading global JES settings from: " << configPath);
+    ATH_MSG_INFO("resolved in: " << fn);
+  }
   
   m_globalConfig = new TEnv();
   int status=m_globalConfig->ReadFile(fn ,EEnvLevel(0));
@@ -227,6 +239,52 @@ StatusCode JetCalibrationTool::initialize() {
 StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
   TString jetAlgo = m_jetAlgo;
   const TString calibPath = "CalibArea-" + m_calibAreaTag + "/";
+
+  // Metadata needed to configure some corrections
+  TString generatorsInfo{};
+  TString simFlavour{};
+  float mcDSID{-1.0}; 
+  TString mcCampaign{};
+  if ( inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData") ) {
+    const xAOD::FileMetaData *fmd = nullptr;
+    ATH_CHECK(inputMetaStore()->retrieve(fmd,"FileMetaData") );
+
+    if(m_isData){
+      UInt_t dataYear = 0;
+      fmd->value(xAOD::FileMetaData::dataYear, dataYear);
+      if (dataYear >= 2015 && dataYear <= 2018) {
+        mcCampaign = "MC20";
+      } else if (dataYear >= 2022 && dataYear <= 2024) {
+        mcCampaign = "MC23";
+      } else {
+        ATH_MSG_WARNING("Data year " << dataYear << " not recognized from file metadata. The corresponding mcCampaign will not be known.");
+      }
+
+    } else { // is MC
+      std::string str_generatorsInfo;
+      fmd->value(xAOD::FileMetaData::generatorsInfo, str_generatorsInfo);
+      generatorsInfo = str_generatorsInfo;
+
+      std::string str_simFlavour;
+      fmd->value(xAOD::FileMetaData::simFlavour, str_simFlavour);
+      simFlavour = str_simFlavour;
+
+      fmd->value(xAOD::FileMetaData::mcProcID, mcDSID);    
+
+      std::string str_mcCampaign;
+      fmd->value(xAOD::FileMetaData::mcCampaign, str_mcCampaign);
+      str_mcCampaign.resize(4); //Only keep top-level of campaign (e.g. mc20 or mc23)
+      mcCampaign = str_mcCampaign;
+      mcCampaign.ToUpper();
+
+      ATH_MSG_INFO("Have loaded metadata mcDSID:" << mcDSID << ", generatorsInfo: " << generatorsInfo << ", mcCampaign: " << mcCampaign << ", simFlavour: " << simFlavour);
+    }
+  }
+  // Force the MCCamapign (or data equivalent) for missing Metadata or tests
+  if( m_forceCampaign != "" ){
+    mcCampaign = m_forceCampaign;
+  }
+
   if ( calibration.EqualTo("Bcid") ){
     m_globalConfig->SetValue("PileupStartingScale","JetBcidScaleMomentum");
     std::unique_ptr<JetCalibrationStep> bcidCorr = std::make_unique<BcidOffsetCorrection>(this->name()+"_Bcid", m_globalConfig, jetAlgo, calibPath, m_isData);
@@ -261,6 +319,37 @@ StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
     gsc->msg().setLevel( this->msg().level() );
     ATH_CHECK(gsc->initialize());
     m_calibSteps.push_back(std::move(gsc)); 
+
+    // Set devMode paths for the following corrections
+    TString actualCalibPath;
+    if(m_devMode){
+      actualCalibPath = "JetCalibTools/";
+    } else {
+      actualCalibPath = "JetCalibTool/CalibArea-" + m_calibAreaTag + "/";
+    }
+    // Additional FastSim and PtResidual patches happen after GSC
+    bool do_FastSim = m_globalConfig->GetValue("JPS_FastSim.doCalibration", false) || (m_forceCalibFile_FastSim != "");
+    if(m_isData and do_FastSim){
+      ATH_MSG_WARNING("JPS_FastSim.doCalibration is set in JetCalibrationTool config but isData is set to true. Will turn off FastSim calibration.");
+      do_FastSim = false;
+    }
+    if(do_FastSim){
+      if ( (m_forceCalibFile_FastSim == "") && !inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData") ) {
+        ATH_MSG_FATAL("JPS_FastSim.doCalibration is set in JetCalibrationTool config but file has no FileMetaData. Please fix the sample or configuration.");
+        return StatusCode::FAILURE;
+      }
+      std::unique_ptr<JetCalibrationStep> JPS_FastSim = std::make_unique<Generic4VecCorrection>(this->name()+"_FastSim", m_globalConfig, jetAlgo, actualCalibPath, m_forceCalibFile_FastSim, Generic4VecCorrection::JET_CORRTYPE::FASTSIM, mcCampaign, simFlavour);
+      JPS_FastSim->msg().setLevel( this->msg().level() );
+      ATH_CHECK(JPS_FastSim->initialize());
+      m_calibSteps.push_back(std::move(JPS_FastSim)); 
+    }
+    bool do_PtResidual = m_globalConfig->GetValue("JPS_PtResidual.doCalibration", false) || (m_forceCalibFile_PtResidual != "");
+    if(do_PtResidual){
+      std::unique_ptr<JetCalibrationStep> JPS_PtResidual = std::make_unique<Generic4VecCorrection>(this->name()+"_PtResidual", m_globalConfig, jetAlgo, actualCalibPath, m_forceCalibFile_PtResidual, Generic4VecCorrection::JET_CORRTYPE::PTRESIDUAL, mcCampaign);
+      JPS_PtResidual->msg().setLevel( this->msg().level() );
+      ATH_CHECK(JPS_PtResidual->initialize());
+      m_calibSteps.push_back(std::move(JPS_PtResidual)); 
+    }
     return StatusCode::SUCCESS; 
   }
   else if ( calibration.EqualTo("GNNC") ) {
@@ -269,6 +358,24 @@ StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
     ATH_CHECK(gnnc->initialize());
     m_calibSteps.push_back(std::move(gnnc));
     return StatusCode::SUCCESS;
+  }
+  else if ( calibration.EqualTo("MC2MC") ) {
+    // Set devMode paths for this correction
+    TString actualCalibPath;
+    if(m_devMode){
+      actualCalibPath = "JetCalibTools/";
+    } else {
+      actualCalibPath = "JetCalibTool/CalibArea-" + m_calibAreaTag + "/";
+    }
+    if ( !inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData") && (m_forceCalibFile_MC2MC == "") ) {
+      ATH_MSG_FATAL("MC2MC step of jet calibration is requested but file has no FileMetaData. Please fix the sample or configuration.");
+      return StatusCode::FAILURE;
+    }
+    std::unique_ptr<JetCalibrationStep> JPS_MC2MC = std::make_unique<Generic4VecCorrection>(this->name()+"_MC2MC", m_globalConfig, jetAlgo, actualCalibPath, m_forceCalibFile_MC2MC, Generic4VecCorrection::JET_CORRTYPE::MC2MC, mcCampaign, simFlavour, (int) mcDSID, generatorsInfo);
+    JPS_MC2MC->msg().setLevel( this->msg().level() );
+    ATH_CHECK(JPS_MC2MC->initialize());
+    m_calibSteps.push_back(std::move(JPS_MC2MC)); 
+    return StatusCode::SUCCESS; 
   }
   else if ( calibration.EqualTo("JMS") ) {
     std::unique_ptr<JetCalibrationStep> jetMassCorr = std::make_unique<JMSCorrection>(this->name()+"_JMS", m_globalConfig, jetAlgo, calibPath, m_devMode);
