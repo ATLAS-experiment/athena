@@ -90,6 +90,7 @@ def createActsConfigFlags():
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, type=SeedingStrategy)  # Define Seeding Strategy
+    actscf.addFlag('Acts.GbtsConnectionTableVersion', 1)  # 0=01/09/2022, 1=10/04/2025, 2=test
 
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClusteringAfterSelection, type=PixelCalibrationStrategy)
