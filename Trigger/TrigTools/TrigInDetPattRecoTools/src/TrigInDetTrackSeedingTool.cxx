@@ -345,7 +345,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
         if(input_coll == nullptr) continue;
 
-        for(const auto& sp : *input_coll) {
+        for(const auto sp : *input_coll) {
 
           float cw = -1.0;
           

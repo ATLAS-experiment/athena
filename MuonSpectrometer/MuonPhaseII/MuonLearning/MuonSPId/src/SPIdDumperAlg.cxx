@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SPIdDumperAlg.h"
@@ -67,7 +67,7 @@ namespace MuonR4 {
             segmentMap[segment->parent()->parentBucket()].push_back(segment);
         }
 
-        for (const auto& bucket : *readHandle) {
+        for (const MuonR4::SpacePointBucket* bucket : *readHandle) {
 
             std::unordered_map<const SpacePoint*, std::vector<int16_t>> spacePointToSegment;
             auto match_itr = segmentMap.find(bucket);
