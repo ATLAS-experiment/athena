@@ -17,7 +17,7 @@
  **     @author  mark sutton
  **     @date    Fri 27 Jan 2012 11:39:47 GMT 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -36,8 +36,8 @@ public:
   BasicRandom(int shared=true, int seed=4357) 
     : m_shared(shared), m_random(0) { 
     if ( shared ) { 
-      static TRandom3 _r(seed);
-      m_random = &_r;
+      static TRandom3 r(seed);
+      m_random = &r;
     }
     else {
       m_random = new TRandom3(seed);
