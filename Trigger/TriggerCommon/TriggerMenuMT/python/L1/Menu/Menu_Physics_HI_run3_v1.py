@@ -214,6 +214,7 @@ def defineMenu():
 
 
         # VDM
+        'L1_TRT_BGRP11',
 
         # ZDC bits and comb for debugging
         'L1_ZDC_BIT2',
