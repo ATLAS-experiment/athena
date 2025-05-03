@@ -137,6 +137,7 @@ def AthenaMPCfg(flags):
                                                                 IsPileup=mpevtloop.IsPileup,
                                                                 EventsBeforeFork=mpevtloop.EventsBeforeFork,
                                                                 ChunkSize=chunk_size)
+            mpevtloop.Tools += [ queue_provider ]
 
         if flags.Concurrency.NumThreads > 0:
             if mpevtloop.IsPileup:
@@ -155,7 +156,7 @@ def AthenaMPCfg(flags):
                                                                 ReadEventOrders=flags.MP.ReadEventOrders,
                                                                 EventOrdersFile=flags.MP.EventOrdersFile,
                                                                 Debug=debug_worker)
-        mpevtloop.Tools += [ queue_provider, queue_consumer ]
+        mpevtloop.Tools += [ queue_consumer ]
 
         if use_shared_writer:
             shared_writer = CompFactory.SharedWriterTool(MotherProcess=(mpevtloop.EventsBeforeFork>0),
