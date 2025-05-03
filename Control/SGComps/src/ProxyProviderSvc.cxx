@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "SGTools/DataProxy.h"
+#include "SGTools/DataStore.h"
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaKernel/IProxyRegistry.h"
 #include "AthenaKernel/EventContextClid.h"
@@ -158,7 +159,8 @@ StatusCode ProxyProviderSvc::addAddresses(IProxyRegistry& store,
 					  TAdList& tList)
 {
   for (SG::TransientAddress* tad : tList) {
-    SG::DataProxy* proxy = store.proxy_exact(tad->clID(), tad->name());
+    SG::sgkey_t sgkey = tad->sgkey();
+    SG::DataProxy* proxy = sgkey ? store.proxy_exact(tad->sgkey()) : store.proxy_exact(tad->clID(), tad->name());
     /// if proxy exists, simply update the proxy with new TransientAddress, 
     /// else construct a new proxy
     if (0 != proxy) 
