@@ -230,7 +230,7 @@ def defineMenu():
         'L1_MBTS_1_A', 'L1_MBTS_1_C',
         'L1_MBTS_1_A_EMPTY', 'L1_MBTS_1_C_EMPTY',
         # For VdM
-        'L1_MBTS_2_BGRP11', 'L1_MBTS_1_1_BGRP11', 
+        'L1_MBTS_2_BGRP11', 'L1_MBTS_1_1_BGRP11', 'L1_TRT_BGRP11',
 
         # extra MBTS 
         # TODO: to be removed for high-mu pp        

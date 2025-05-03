@@ -1753,6 +1753,7 @@ class ItemDef:
         # VDM
         MenuItem('L1_ZDC_A_C_BGRP7'     ).setLogic( ZDC_A_C & bgrp7cond)
         MenuItem('L1_LUCID_BGRP7'       ).setLogic( (d.LUCID_A | d.LUCID_C) & bgrp7cond)
+        MenuItem('L1_TRT_BGRP11'        ).setLogic( d.NIMTRT & bgrp11cond )
 
         # LUCID
         MenuItem('L1_LUCID_A'           ).setLogic( d.LUCID_A             & physcond)
