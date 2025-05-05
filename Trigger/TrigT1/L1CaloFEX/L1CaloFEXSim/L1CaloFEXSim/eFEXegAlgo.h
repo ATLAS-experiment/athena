@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -71,6 +71,12 @@ namespace LVL1 {
     int m_central_eta{};
     bool m_hasSeed{};
 
+    mutable int m_corrections[3][25] ATLAS_THREAD_SAFE = {
+      {0,0,0,0,0,0,0,0x8,0,0,0xb,0x4,0x8,0x9,0x34,0x7e,0x7b,0x6b,0,0,0,0,0,0,0xc},
+      {0xe,0x12,0x12,0x12,0x12,0x13,0x18,0x17,0x42,0x40,0x38,0x3d,0x3b,0x4e,0x2d,0xc,0x10,0x4,0x27,0x19,0x19,0x16,0x12,0x10,0xc},
+      {0xb,0x8,0x8,0x8,0x8,0x8,0x7,0x9,0x8,0x8,0x8,0x7,0x8,0x8,0x21,0x2,0x2,0x4,0x6,0x8,0x8,0x8,0x9,0x10,0x12}
+    };
+
     // Enable dead material corrections
     Gaudi::Property<bool> m_dmCorr  {this, "dmCorr", false, "Enable dead material correctionst"};
     Gaudi::Property<int> m_algoVersion  {this, "algoVersion", 0, "AlgoVersion, part of the L1Menu spec"};
@@ -81,8 +87,6 @@ namespace LVL1 {
     // Key for reading dm corrections
     SG::ReadCondHandleKey<CondAttrListCollection> m_dmCorrectionsKey{this,"DMCorrectionsKey","",
                                                                  "Key to dead material corrections (AttrListCollection)"};
-    static thread_local bool s_dmCorrectionsLoaded;
-    std::mutex m_dmCorrectionsMutex; // used while loading dm corrections into static map
 
   };
   
