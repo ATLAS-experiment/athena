@@ -5,16 +5,17 @@
 #ifndef JETCALIBTOOLS_GENERIC4VECCORRECTION_H
 #define JETCALIBTOOLS_GENERIC4VECCORRECTION_H
 
-#include <memory>
-#include <vector>
+
 #include "TString.h"
-#include "TH2.h"
 
 #include "JetCalibTools/JetCalibrationStep.h"
 
 #include <nlohmann/json.hpp>
+#include <map>
 
 class TEnv;
+class TH2;
+
 class Generic4VecCorrection
     : virtual public JetCalibrationStep
 {
@@ -31,7 +32,10 @@ class Generic4VecCorrection
 
     // Constructor/destructor/init
     Generic4VecCorrection();
-    Generic4VecCorrection(const std::string& name, TEnv* config, TString jetAlgo, TString calibAreaTag, TString forceCalibFile, JET_CORRTYPE correctionType, TString mcCampaign="", TString simFlavour="", int mcDSID=-1, TString generatorsInfo="");
+    Generic4VecCorrection(const std::string& name, TEnv* config, const TString & jetAlgo, 
+      const TString & calibAreaTag, const TString & forceCalibFile, 
+      JET_CORRTYPE correctionType, const TString & mcCampaign="", const TString & simFlavour="", 
+      int mcDSID=-1, const TString & generatorsInfo="");
     virtual ~Generic4VecCorrection();
     virtual StatusCode initialize() override;
     virtual StatusCode calibrate(xAOD::Jet& jet, JetEventInfo&) const override;
@@ -57,13 +61,13 @@ class Generic4VecCorrection
     const TString m_simFlavour;
 
     // Variables for MC2MC Correction
-    int m_mcDSID;
+    int m_mcDSID{};
     const TString m_generatorsInfo;
     const TString m_mcCampaign;
     const TString m_forceCalibFile; 
 
     // Option to skip correction if input file does not conform to requested correction
-    bool m_skipCorrection;
+    bool m_skipCorrection{};
 
     // Input and output jet scales
     TString m_inJetScale;

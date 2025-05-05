@@ -6,13 +6,17 @@
 #include "PathResolver/PathResolver.h"
 #include "JetCalibTools/RootHelpers.h"
 
+#include "TH2.h"
 #include <TEnv.h>
 #include "TFile.h"
 #include "TObjString.h"
 #include <algorithm>
 #include <fstream>
 
-Generic4VecCorrection::Generic4VecCorrection(const std::string& name, TEnv* config, TString jetAlgo, TString calibAreaTag, TString forceCalibFile, JET_CORRTYPE correctionType, TString mcCampaign, TString simFlavour, int mcDSID, TString generatorsInfo)
+Generic4VecCorrection::Generic4VecCorrection(const std::string& name, TEnv* config, 
+   const TString &jetAlgo, const TString &calibAreaTag, const TString & forceCalibFile, 
+   JET_CORRTYPE correctionType, const TString & mcCampaign, const TString & simFlavour, int mcDSID, 
+   const TString &generatorsInfo)
   : JetCalibrationStep::JetCalibrationStep(name.c_str()),
   m_config(config), m_jetAlgo(jetAlgo), m_calibAreaTag(calibAreaTag), m_correctionType(correctionType),
   m_simFlavour(simFlavour), m_mcDSID(mcDSID), m_generatorsInfo(generatorsInfo), m_mcCampaign(mcCampaign), m_forceCalibFile(forceCalibFile), m_skipCorrection(false), m_correctionFilePath("")
