@@ -54,8 +54,6 @@ class CaloRescaleNoise : public AthAlgorithm {
 
   const CaloCell_ID*       m_calo_id;
 
-  SG::ReadCondHandleKey<CaloNoise> m_totalNoiseKey
-    { this, "TotalNoiseKey", "totalNoise", "SG key for total noise" };
   SG::ReadCondHandleKey<CaloNoise> m_elecNoiseKey
     { this, "ElecNoiseKey", "electronicNoise", "SG key for electronic noise" };
   SG::ReadCondHandleKey<CaloNoise> m_pileupNoiseKey
@@ -79,7 +77,6 @@ class CaloRescaleNoise : public AthAlgorithm {
   float m_phi;
   int m_layer;
   int m_Gain;
-  float m_noise;
   float m_elecNoise;
   float m_pileupNoise; 
   float m_elecNoiseRescaled;
