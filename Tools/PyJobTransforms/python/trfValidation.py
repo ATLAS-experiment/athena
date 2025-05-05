@@ -292,6 +292,10 @@ class athenaLogFileReport(logFileReport):
         for log in self._logfile:
             msg.debug('Now scanning logfile {0}'.format(log))
             seenNonStandardError = ''
+            customLogParser = None
+            if log == 'log.generate':
+                from EvgenProdTools.EvgenParserTool import evgenParserTool
+                customLogParser = evgenParserTool()
             # N.B. Use the generator so that lines can be grabbed by subroutines, e.g., core dump svc reporter
             try:
                 myGen = trfUtils.lineByLine(log, substepName=self._substepName)
@@ -302,6 +306,10 @@ class athenaLogFileReport(logFileReport):
                 self._errorDetails['ERROR'] = {'message': str(e), 'firstLine': 0, 'count': 1}
                 return
             for line, lineCounter in myGen:
+                # In case we have enabled a custom log parser, run the line through it first
+                if customLogParser is not None:
+                    customLogParser.processLine(line)
+                # Search for metadata strings
                 m = self._metaPat.search(line)
                 if m is not None:
                     key, value = m.groups()
@@ -415,7 +423,10 @@ class athenaLogFileReport(logFileReport):
                     a = re.match(r'(\D+)(?P<bytes>\d+)(\D+)(?P<time>\d+[.]?\d*)(\D+)', fields['message'])
                     self._dbbytes += int(a.group('bytes'))
                     self._dbtime  += float(a.group('time'))
-
+            # Finally, if we have a custom log parser, use it to update the metadata dictionary
+            if customLogParser is not None:
+                customLogParser.report()
+                self._metaData = customLogParser.updateMetadata( self._metaData )
 
     ## Return data volume and time spend to retrieve information from the database
     def dbMonitor(self):
