@@ -34,23 +34,25 @@ namespace TrigL2MuonSA {
       MDT_sector_overlap = 0;
       extFtfMiddleEta = 0;
       extFtfMiddlePhi = 0;
+      for (int i=0;i<3;i++){
+        scales[i]=1;
+      }
       for(int i=0; i<N_STATION; i++) {
-	scales[i] = 1;
-	for(int j=0; j<N_LAYER; j++) {	  
-	  rWidth[i][j] = 0; 
-	}
-	for(int j=0; j<N_SECTOR; j++) {	  
-	  aw[i][j]   = 0;
-	  bw[i][j]   = 0;
-	  aw_ftf[i][j]  = 0;
-	  bw_ftf[i][j]  = 0;
-	  phi_ftf[i][j] = 0;
-	  eta_ftf[i][j] = 0;
-	  r_ftf[i][j]   = 0;
-	  z_ftf[i][j]   = 0;
-	  phi[i][j]  = 0;
-          ext_ftf_flag[i][j] = 0;
-	}
+	      for(int j=0; j<N_LAYER; j++) {	  
+	        rWidth[i][j] = 0; 
+	      }
+        for(int j=0; j<N_SECTOR; j++) {	  
+          aw[i][j]   = 0;
+          bw[i][j]   = 0;
+          aw_ftf[i][j]  = 0;
+          bw_ftf[i][j]  = 0;
+          phi_ftf[i][j] = 0;
+          eta_ftf[i][j] = 0;
+          r_ftf[i][j]   = 0;
+          z_ftf[i][j]   = 0;
+          phi[i][j]  = 0;
+                ext_ftf_flag[i][j] = 0;
+        }
       }
       stationList.clear();
     };
@@ -82,7 +84,7 @@ namespace TrigL2MuonSA {
     double bw[N_STATION][N_SECTOR];
     double phi[N_STATION][N_SECTOR];
     double rWidth[N_STATION][N_LAYER];
-    double scales[N_STATION];
+    double scales[3];
     int    MDT_sector_trigger;
     int    MDT_sector_overlap;
 
