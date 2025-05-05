@@ -54,7 +54,7 @@ namespace MuonR4{
                 case xAOD::UncalibMeasType::sTgcStripType: {
 
                     const Identifier prdId{xAOD::identify(measurement)};
-                    const MuonGMR4::MuonReadoutElement* readOutEle = xAOD::readoutElement(measurement);
+                    const MuonGMR4::MuonReadoutElement* readOutEle = xAOD::muonReadoutElement(measurement);
                     const Amg::Transform3D& locToGlob{readOutEle->localToGlobalTrans(*gctx, readOutEle->layerHash(prdId))};
                     
                     const Identifier gasGapId = m_idHelperSvc->gasGapId(prdId);
