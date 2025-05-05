@@ -14,13 +14,18 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
-#include "PixelReadoutGeometry/PixelDetectorManager.h"
-#include "ITkPixelRDO_Container.h"
 #include "ITkPixLayout.h"
-#include "ITkPixelCabling/ITkPixelCablingData.h"
 #include "ITkPixelCabling/ITkPixelOnlineId.h"
+#include "InDetRawData/InDetRawDataCollection.h"
+#include "InDetRawData/InDetRawDataContainer.h"
+
 
 class PixelID;
+class ITkPixelCablingData;
+
+namespace InDetDD{
+    class PixelDetectorManager;
+}
 
 class ITkPixelHitSortingTool: public AthAlgTool {
     public:
@@ -31,18 +36,21 @@ class ITkPixelHitSortingTool: public AthAlgTool {
 
         StatusCode initialize();
 
-        std::map<ITkPixelOnlineId, HitMap> sortRDOHits(const ITkPixelRDO_Container* rdoContainer) const;
+        template<class ContainerType>
+        std::map<ITkPixelOnlineId, HitMap> sortRDOHits(const ContainerType* rdoContainer) const;
 
-        StatusCode createRDO(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, ITkPixelRDO_Container *rdoContainer) const;
+        template<class RDOType>
+        StatusCode createRDO(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, InDetRawDataContainer<InDetRawDataCollection<RDOType> > *rdoContainer) const;
 
 
     private:
 
-    ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "InDetDD::ITk::PixelReadoutManager", "Pixel readout manager" };
+    ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout;
+    
     const PixelID* m_pixIdHelper{};
+    
     const InDetDD::PixelDetectorManager* m_detManager{};
 
-    const ITkPixelCablingData m_cablingHelper;
 };
 
 
