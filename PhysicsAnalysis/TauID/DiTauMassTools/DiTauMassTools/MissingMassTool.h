@@ -81,7 +81,10 @@ class MissingMassTool : virtual public IMissingMassTool, virtual public asg::Asg
   MissingMassCalculator* m_MMC{};
 
   Gaudi::Property<bool> m_decorate{this, "Decorate", false};
-  Gaudi::Property<bool> m_float_stop{this, "FloatStoppingCrit", true};
+  Gaudi::Property<bool> m_float_stop{this, "FloatStoppingCrit", true, "Applying Floating Stopping Criterion to speed up MMC"};
+  Gaudi::Property<int>  m_float_stop_miniter{this, "FloatStoppingCritMinIter", 10000, "Minimum number of iteration to apply Floating Stopping Criterion"};
+  Gaudi::Property<int>  m_float_stop_checkfreq{this, "FloatStoppingCritCheckFreq", 1000, "Number of events frequency for Floating Stopping Criterion to be applied after minimum number of iteration"}; 
+  Gaudi::Property<double> m_float_stop_comp{this, "FloatStoppingCritCheckComp", 0.05, "Percentage to assess the sigma compatibilities in the Floating Stopping Criterion"};  
   Gaudi::Property<std::string> m_calib_set{this, "CalibSet", "2019"}; // Change to "2024" if the new MMC version is to be used.
   // default negative. Only set parameter if positive
   // so that the default are in MissingMassCalculator code
