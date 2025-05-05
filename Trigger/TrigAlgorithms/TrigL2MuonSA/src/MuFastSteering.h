@@ -67,15 +67,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
   virtual StatusCode execute(const EventContext& ctx) const override;
 
   /** findMuonSignature(), includes reconstract algorithms **/
-  /** this function can be called from both execute() **/
-  StatusCode findMuonSignature(const std::vector<const TrigRoiDescriptor*>&	roi,
-			       const std::vector<const LVL1::RecMuonRoI*>& 	muonRoIs,
-                               DataVector<xAOD::L2StandAloneMuon>& 		outputTracks,
-			       TrigRoiDescriptorCollection&	 		outputID,
-			       TrigRoiDescriptorCollection&	 		outputMS,
-			       const bool                                       dynamicDeltaRpc,
-			       const EventContext&                              ctx ) const;
-
   StatusCode findMuonSignature(const std::vector<const TrigRoiDescriptor*>&	roi,
 			       const std::vector<const xAOD::MuonRoI*>& 	muonRoIs,
 			       DataVector<xAOD::L2StandAloneMuon>& 		outputTracks,
@@ -88,14 +79,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
   /** findMuonSignatureIO(), includes reconstract algorithms for inside-out mode **/
   StatusCode findMuonSignatureIO(const xAOD::TrackParticleContainer&            idtracks,
 				 const std::vector<const TrigRoiDescriptor*>&    roids,
-				 const std::vector<const LVL1::RecMuonRoI*>&     muonRoIs,
-				 DataVector<xAOD::L2CombinedMuon>&              outputCBs,
-				 DataVector<xAOD::L2StandAloneMuon>&            outputSAs,
-				 const bool                                     dynamicDeltaRpc,
-				 const EventContext&                            ctx ) const;
-
-  StatusCode findMuonSignatureIO(const xAOD::TrackParticleContainer&            idtracks,
-				 const std::vector<const TrigRoiDescriptor*>&    roids,
 				 const std::vector<const xAOD::MuonRoI*>&        muonRoIs,
 				 DataVector<xAOD::L2CombinedMuon>&              outputCBs,
 				 DataVector<xAOD::L2StandAloneMuon>&            outputSAs,
@@ -103,12 +86,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
 				 const EventContext&                            ctx ) const;
 
   /** findMultiTrackSignature(), includes reconstract algorithms for multi-track mode **/
-  StatusCode findMultiTrackSignature(const std::vector<const TrigRoiDescriptor*>&	roi,
-			             const std::vector<const LVL1::RecMuonRoI*>& 	muonRoIs,
-                                     DataVector<xAOD::L2StandAloneMuon>& 		outputTracks,
-                                     const bool                                         dynamicDeltaRpc,
-                                     const EventContext&                                ctx) const;
-
   StatusCode findMultiTrackSignature(const std::vector<const TrigRoiDescriptor*>&	roi,
 			             const std::vector<const xAOD::MuonRoI*>& 	        muonRoIs,
                                      DataVector<xAOD::L2StandAloneMuon>& 		outputTracks,
@@ -125,24 +102,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
      Called at the end of the algorithm processing to set the steering
      navigation properly
   */
-  bool updateOutputObjects(const LVL1::RecMuonRoI*                        roi,
-                           const TrigRoiDescriptor*                       roids,
-                           const TrigL2MuonSA::MuonRoad&                  muonRoad,
-                           const TrigL2MuonSA::MdtRegion&                 mdtRegion,
-                           const TrigL2MuonSA::RpcHits&                   rpcHits,
-                           const TrigL2MuonSA::TgcHits&                   tgcHits,
-                           const TrigL2MuonSA::RpcFitResult&              rpcFitResult,
-                           const TrigL2MuonSA::TgcFitResult&              tgcFitResult,
-                           const TrigL2MuonSA::MdtHits&                   mdtHits,
-                           const TrigL2MuonSA::CscHits&                   cscHits,
-			   const TrigL2MuonSA::StgcHits&                  stgcHits,
-			   const TrigL2MuonSA::MmHits&                    mmHits,
-                           const std::vector<TrigL2MuonSA::TrackPattern>& trackPatterns,
-			   DataVector<xAOD::L2StandAloneMuon>&	          outputTracks,
-			   TrigRoiDescriptorCollection&  	          outputID,
-			   TrigRoiDescriptorCollection&   	          outputMS,
-			   const EventContext&                            ctx) const;
-
   bool updateOutputObjects(const xAOD::MuonRoI*                           roi,
                            const TrigRoiDescriptor*                       roids,
                            const TrigL2MuonSA::MuonRoad&                  muonRoad,
@@ -160,22 +119,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
 			   TrigRoiDescriptorCollection&  	          outputID,
 			   TrigRoiDescriptorCollection&   	          outputMS,
 			   const EventContext&                            ctx) const;
-
-  bool storeMuonSA(const LVL1::RecMuonRoI*             roi,
-                   const TrigRoiDescriptor*            roids,
-               	   const TrigL2MuonSA::MuonRoad&       muonRoad,
-               	   const TrigL2MuonSA::MdtRegion&      mdtRegion,
-               	   const TrigL2MuonSA::RpcHits&        rpcHits,
-               	   const TrigL2MuonSA::TgcHits&        tgcHits,
-               	   const TrigL2MuonSA::RpcFitResult&   rpcFitResult,
-               	   const TrigL2MuonSA::TgcFitResult&   tgcFitResult,
-               	   const TrigL2MuonSA::MdtHits&        mdtHits,
-               	   const TrigL2MuonSA::CscHits&        cscHits,
-		   const TrigL2MuonSA::StgcHits&       stgcHits,
-		   const TrigL2MuonSA::MmHits&         mmHits,
-               	   const TrigL2MuonSA::TrackPattern&   pattern,
-                   DataVector<xAOD::L2StandAloneMuon>& outputTracks,
-                   const EventContext&                 ctx) const;
 
   bool storeMuonSA(const xAOD::MuonRoI*                roi,
                    const TrigRoiDescriptor*            roids,
@@ -207,9 +150,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
   /**
      Update monitoring variables
   */
-  StatusCode updateMonitor(const LVL1::RecMuonRoI*                  roi,
-			   const TrigL2MuonSA::MdtHits&             mdtHits,
-                           std::vector<TrigL2MuonSA::TrackPattern>& trackPatterns ) const;
   StatusCode updateMonitor(const xAOD::MuonRoI*                     roi,
 			   const TrigL2MuonSA::MdtHits&             mdtHits,
                            std::vector<TrigL2MuonSA::TrackPattern>& trackPatterns ) const;

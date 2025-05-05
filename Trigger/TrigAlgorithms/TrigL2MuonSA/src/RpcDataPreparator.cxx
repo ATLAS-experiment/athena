@@ -58,176 +58,164 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
                                                         const ToolHandle<RpcPatFinder>*   rpcPatFinder,
                                                         const bool dynamicDeltaRpc) const
 {
-  // RPC data extraction referring TrigMuonEFStandaloneTrackTool and MuonHoughPatternFinderTool
-  rpcHits.clear();
+    // RPC data extraction referring TrigMuonEFStandaloneTrackTool and MuonHoughPatternFinderTool
+    rpcHits.clear();
 
-  if( m_emulateNoRpcHit )
-    return StatusCode::SUCCESS;
+    if( m_emulateNoRpcHit ) return StatusCode::SUCCESS;
 
-   const IRoiDescriptor* iroi = (IRoiDescriptor*) p_roids;
-
-   std::vector<const Muon::RpcPrepDataCollection*> rpcCols;
-   std::vector<IdentifierHash> rpcHashList;
-   std::vector<IdentifierHash> rpcHashListWithData;
-   std::vector<IdentifierHash> rpcHashList_cache;
-
-   if (m_use_RoIBasedDataAccess) {
-
-     ATH_MSG_DEBUG("Use RoI based data access");
-     
-     if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, rpcHashList);
-     else {
-       TrigRoiDescriptor fullscan_roi( true );
-       m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
-     }
-     ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
-
-     std::vector<uint32_t> rpcRobList;
-     m_regionSelector->lookup( Gaudi::Hive::currentContext() )->ROBIDList(*iroi, rpcRobList);
-   } else {
-     
-     ATH_MSG_DEBUG("Use full data access");
-     
-     TrigRoiDescriptor fullscan_roi( true );
-     m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
-     ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
-     
-     std::vector<uint32_t> rpcRobList;
-     m_regionSelector->lookup( Gaudi::Hive::currentContext() )->ROBIDList(fullscan_roi, rpcRobList);
-     
-   }
+    std::vector<const Muon::RpcPrepDataCollection*> rpcCols;
+    std::vector<IdentifierHash> rpcHashList;
    
-   if (!rpcHashList.empty()) {
+    if (m_use_RoIBasedDataAccess) {
+
+        ATH_MSG_DEBUG("Use RoI based data access");
+        
+        if (p_roids) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*p_roids, rpcHashList);
+        else {
+        TrigRoiDescriptor fullscan_roi( true );
+        m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
+        }
+        ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
+
+    } else {
      
-     // Get RPC container
-     const Muon::RpcPrepDataContainer* rpcPrds;
-     auto rpcPrepContainerHandle = SG::makeHandle(m_rpcPrepContainerKey);
-     rpcPrds = rpcPrepContainerHandle.cptr();
-     if (!rpcPrepContainerHandle.isValid()) {
-       ATH_MSG_ERROR("Cannot retrieve RPC PRD Container key: " << m_rpcPrepContainerKey.key());
-       return StatusCode::FAILURE;
-     } else {
-       ATH_MSG_DEBUG("RPC PRD Container retrieved with key: " << m_rpcPrepContainerKey.key());
-     }
+        ATH_MSG_DEBUG("Use full data access");
+        
+        TrigRoiDescriptor fullscan_roi( true );
+        m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
+        ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());     
+    }
+   
+    if (!rpcHashList.empty()) {
+        
+        // Get RPC container
+        auto rpcPrepContainerHandle = SG::makeHandle(m_rpcPrepContainerKey);
+        const Muon::RpcPrepDataContainer* rpcPrds = rpcPrepContainerHandle.cptr();
 
-     // Get RPC collections
-     for(const IdentifierHash& id : rpcHashList) {
-       auto RPCcoll = rpcPrds->indexFindPtr(id);
+        if (!rpcPrepContainerHandle.isValid()) {
+            ATH_MSG_ERROR("Cannot retrieve RPC PRD Container key: " << m_rpcPrepContainerKey.key());
+            return StatusCode::FAILURE;
+        } else {
+            ATH_MSG_DEBUG("RPC PRD Container retrieved with key: " << m_rpcPrepContainerKey.key());
+        }
 
-       if( RPCcoll == nullptr ) {
-         continue;
-       }
+        // Get RPC collections
+        for(const IdentifierHash& id : rpcHashList) {
+        auto RPCcoll = rpcPrds->indexFindPtr(id);
 
-       if( RPCcoll->size() == 0) {
-         ATH_MSG_DEBUG("Empty RPC list");
-         continue;
-       }
+        if( RPCcoll == nullptr ) {
+            continue;
+        }
 
-       rpcHashList_cache.push_back(id);
-       rpcCols.push_back(RPCcoll);
-     }
-   }
+        if( RPCcoll->size() == 0) {
+            ATH_MSG_DEBUG("Empty RPC list");
+            continue;
+        }
 
-   for( const Muon::RpcPrepDataCollection* rpc : rpcCols ){
+        rpcCols.push_back(RPCcoll);
+        }
+    }
 
-     rpcHits.reserve( rpcHits.size() + rpc->size() );
-     for( const Muon::RpcPrepData* prd : *rpc ) {
+    for( const Muon::RpcPrepDataCollection* rpc : rpcCols ){
 
-       const Identifier id = prd->identify();
+        rpcHits.reserve( rpcHits.size() + rpc->size() );
+        for( const Muon::RpcPrepData* prd : *rpc ) {
 
-       const int doubletR      = m_idHelperSvc->rpcIdHelper().doubletR(id);
-       const int doubletPhi    = m_idHelperSvc->rpcIdHelper().doubletPhi(id);
-       const int doubletZ      = m_idHelperSvc->rpcIdHelper().doubletZ(id);
-       const int gasGap        = m_idHelperSvc->rpcIdHelper().gasGap(id);
-       const bool measuresPhi  = m_idHelperSvc->rpcIdHelper().measuresPhi(id);
-       const int stationEta    = m_idHelperSvc->rpcIdHelper().stationEta(id);
-       std::string stationName = m_idHelperSvc->rpcIdHelper().stationNameString(m_idHelperSvc->rpcIdHelper().stationName(id));
+            const Identifier id = prd->identify();
 
-       int layer = 0;
-       // BO
-       if (stationName.substr(0,2)=="BO") layer = 4;
-       // doubletR
-       layer += 2*(doubletR-1);
-       // BML7 special chamber with 1 RPC doublet (doubletR=1 but RPC2) :
-       if (stationName.substr(0,3)=="BML"&&stationEta==7) layer+=2;
-       // gasGap
-       layer += gasGap - 1;
+            const int doubletR      = m_idHelperSvc->rpcIdHelper().doubletR(id);
+            const int doubletPhi    = m_idHelperSvc->rpcIdHelper().doubletPhi(id);
+            const int doubletZ      = m_idHelperSvc->rpcIdHelper().doubletZ(id);
+            const int gasGap        = m_idHelperSvc->rpcIdHelper().gasGap(id);
+            const bool measuresPhi  = m_idHelperSvc->rpcIdHelper().measuresPhi(id);
+            const int stationEta    = m_idHelperSvc->rpcIdHelper().stationEta(id);
+            std::string stationName = m_idHelperSvc->rpcIdHelper().stationNameString(m_idHelperSvc->rpcIdHelper().stationName(id));
 
-       const Amg::Vector3D globalpos = prd->globalPosition();
-       const double hitx=globalpos.x();
-       const double hity=globalpos.y();
-       const double hitz=globalpos.z();
+            int layer = 0;
+            // BO
+            if (stationName.substr(0,2)=="BO") layer = 4;
+            // doubletR
+            layer += 2*(doubletR-1);
+            // BML7 special chamber with 1 RPC doublet (doubletR=1 but RPC2) :
+            if (stationName.substr(0,3)=="BML"&&stationEta==7) layer+=2;
+            // gasGap
+            layer += gasGap - 1;
 
-       const double hittime = prd->time();
-       const MuonGM::RpcReadoutElement* detEl = prd->detectorElement();
-       const double distToPhiReadout = detEl->distanceToPhiReadout(globalpos);
-       const double distToEtaReadout = detEl->distanceToEtaReadout(globalpos);
+            const Amg::Vector3D globalpos = prd->globalPosition();
+            const double hitx=globalpos.x();
+            const double hity=globalpos.y();
+            const double hitz=globalpos.z();
 
-       ATH_MSG_DEBUG("Selected Rpc Collection: station name:" << stationName
-		     << " global positions x/y/z=" << hitx << "/" << hity << "/" << hitz
-		     << " doubletR: " << doubletR << " doubletZ: " << doubletZ << " doubletPhi " << doubletPhi
-		     << " gasGap " << gasGap << " layer " << layer << " time " << hittime
-		     << " distToEtaReadout " << distToEtaReadout << " distToPhiReadout " << distToPhiReadout);
-       
-       TrigL2MuonSA::RpcHitData lutDigit;
-       
-       lutDigit.x           = hitx;
-       lutDigit.y           = hity;
-       lutDigit.z           = hitz;
-       lutDigit.time        = hittime;
-       lutDigit.distToEtaReadout = distToEtaReadout;
-       lutDigit.distToPhiReadout = distToPhiReadout;
-       lutDigit.gasGap      = gasGap;
-       lutDigit.doubletR    = doubletR;
-       lutDigit.doubletPhi  = doubletPhi;
-       lutDigit.doubletZ    = doubletZ;
-       lutDigit.measuresPhi = measuresPhi;
-       lutDigit.stationName = stationName;
-       lutDigit.layer       = layer;
-       
-       const float r2 = hitx*hitx+hity*hity;
-       float phi = std::atan2(hity,hitx);
-       const float l = std::sqrt(hitz*hitz+r2);
-       const float tan = std::sqrt( (l-hitz)/(l+hitz) );
-       const float eta = -std::log(tan);
-       const float deta = std::abs(p_roids->eta() - eta);
-       const float dphi = std::abs(CxxUtils::wrapToPi(p_roids->phi() - phi));
+            const double hittime = prd->time();
+            const MuonGM::RpcReadoutElement* detEl = prd->detectorElement();
+            const double distToPhiReadout = detEl->distanceToPhiReadout(globalpos);
+            const double distToEtaReadout = detEl->distanceToEtaReadout(globalpos);
 
-       lutDigit.eta = eta;
-       lutDigit.phi = phi;
-       lutDigit.l = l;
-       rpcHits.push_back(lutDigit);
+            ATH_MSG_DEBUG("Selected Rpc Collection: station name:" << stationName
+                    << " global positions x/y/z=" << hitx << "/" << hity << "/" << hitz
+                    << " doubletR: " << doubletR << " doubletZ: " << doubletZ << " doubletPhi " << doubletPhi
+                    << " gasGap " << gasGap << " layer " << layer << " time " << hittime
+                    << " distToEtaReadout " << distToEtaReadout << " distToPhiReadout " << distToPhiReadout);
+            
+            TrigL2MuonSA::RpcHitData lutDigit;
+            
+            lutDigit.x           = hitx;
+            lutDigit.y           = hity;
+            lutDigit.z           = hitz;
+            lutDigit.time        = hittime;
+            lutDigit.distToEtaReadout = distToEtaReadout;
+            lutDigit.distToPhiReadout = distToPhiReadout;
+            lutDigit.gasGap      = gasGap;
+            lutDigit.doubletR    = doubletR;
+            lutDigit.doubletPhi  = doubletPhi;
+            lutDigit.doubletZ    = doubletZ;
+            lutDigit.measuresPhi = measuresPhi;
+            lutDigit.stationName = stationName;
+            lutDigit.layer       = layer;
+            
+            const float r2 = hitx*hitx+hity*hity;
+            float phi = std::atan2(hity,hitx);
+            const float l = std::sqrt(hitz*hitz+r2);
+            const float tan = std::sqrt( (l-hitz)/(l+hitz) );
+            const float eta = -std::log(tan);
+            const float deta = std::abs(p_roids->eta() - eta);
+            const float dphi = std::abs(CxxUtils::wrapToPi(p_roids->phi() - phi));
 
-       float deta_thr = 0.1;
-       float dphi_thr = 0.1;
-       float dynamic_add = 0.02;
+            lutDigit.eta = eta;
+            lutDigit.phi = phi;
+            lutDigit.l = l;
+            rpcHits.push_back(lutDigit);
 
-       //Determine deta, dphi threshold in case of dynamicDeltaRpcMode
-       if( dynamicDeltaRpc ){
-         ATH_MSG_DEBUG("Collected RPC hits by MultiMuonTriggerMode");
-         double RoiPhiMin(0);
-         double RoiPhiMax(0);
-         double RoiEtaMin(0);
-         double RoiEtaMax(0);
-         ATH_CHECK( m_recRPCRoiTool->RoIsize(p_roids->roiWord(), RoiEtaMin, RoiEtaMax, RoiPhiMin, RoiPhiMax) );
-         ATH_MSG_DEBUG( "RoI Phi min = " << RoiPhiMin << " RoI Phi max = " << RoiPhiMax << " RoI Eta min = " << RoiEtaMin << " RoI Eta max = " << RoiEtaMax );
-         deta_thr = std::abs( RoiEtaMax - RoiEtaMin )/2. + dynamic_add;
-         dphi_thr = std::abs( std::acos( std::cos( RoiPhiMax - RoiPhiMin ) ) )/2. + dynamic_add;
-         ATH_MSG_DEBUG( "deta threshold = " << deta_thr);
-         ATH_MSG_DEBUG( "dphi threshold = " << dphi_thr);
-       }
+            float deta_thr = 0.1;
+            float dphi_thr = 0.1;
+            float dynamic_add = 0.02;
 
-       if (m_use_RoIBasedDataAccess) {
-         if ( deta<deta_thr && dphi<dphi_thr)
-           (*rpcPatFinder)->addHit(stationName, stationEta, measuresPhi, gasGap, doubletR, hitx, hity, hitz, rpcLayerHits);
-       } else {
-         if ( deta<0.15 && dphi<0.1)
-           (*rpcPatFinder)->addHit(stationName, stationEta, measuresPhi, gasGap, doubletR, hitx, hity, hitz, rpcLayerHits);
-       }
-     }
-   }
+            //Determine deta, dphi threshold in case of dynamicDeltaRpcMode
+            if( dynamicDeltaRpc ){
+                ATH_MSG_DEBUG("Collected RPC hits by MultiMuonTriggerMode");
+                double RoiPhiMin(0);
+                double RoiPhiMax(0);
+                double RoiEtaMin(0);
+                double RoiEtaMax(0);
+                ATH_CHECK( m_recRPCRoiTool->RoIsize(p_roids->roiWord(), RoiEtaMin, RoiEtaMax, RoiPhiMin, RoiPhiMax) );
+                ATH_MSG_DEBUG( "RoI Phi min = " << RoiPhiMin << " RoI Phi max = " << RoiPhiMax << " RoI Eta min = " << RoiEtaMin << " RoI Eta max = " << RoiEtaMax );
+                deta_thr = std::abs( RoiEtaMax - RoiEtaMin )/2. + dynamic_add;
+                dphi_thr = std::abs( std::acos( std::cos( RoiPhiMax - RoiPhiMin ) ) )/2. + dynamic_add;
+                ATH_MSG_DEBUG( "deta threshold = " << deta_thr);
+                ATH_MSG_DEBUG( "dphi threshold = " << dphi_thr);
+            }
 
-  return StatusCode::SUCCESS;
+            if (m_use_RoIBasedDataAccess) {
+                if ( deta<deta_thr && dphi<dphi_thr)
+                (*rpcPatFinder)->addHit(stationName, stationEta, measuresPhi, gasGap, doubletR, hitx, hity, hitz, rpcLayerHits);
+            } else {
+                if ( deta<0.15 && dphi<0.1)
+                (*rpcPatFinder)->addHit(stationName, stationEta, measuresPhi, gasGap, doubletR, hitx, hity, hitz, rpcLayerHits);
+            }
+        }
+    }
+
+    return StatusCode::SUCCESS;
 }
 
 // --------------------------------------------------------------------------------
@@ -243,8 +231,6 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
   if( m_emulateNoRpcHit )
     return StatusCode::SUCCESS;
 
-   const IRoiDescriptor* iroi = (IRoiDescriptor*) p_roids;
-
    std::vector<const Muon::RpcPrepDataCollection*> rpcCols;
    std::vector<IdentifierHash> rpcHashList;
    std::vector<IdentifierHash> rpcHashList_cache;
@@ -253,7 +239,7 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
 
      ATH_MSG_DEBUG("Use RoI based data access");
      
-     if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, rpcHashList);
+     if (p_roids) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*p_roids, rpcHashList);
      else {
        TrigRoiDescriptor fullscan_roi( true );
        m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
