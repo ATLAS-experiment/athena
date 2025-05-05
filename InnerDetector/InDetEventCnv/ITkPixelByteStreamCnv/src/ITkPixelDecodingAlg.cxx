@@ -4,12 +4,13 @@
 
 #include "ITkPixelDecodingAlg.h"
 #include "StoreGate/ReadHandle.h"
+#include "eformat/ROBFragment.h"
 
 ITkPixelDecodingAlg::ITkPixelDecodingAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator),
   m_packingTool("ITkPixelDataPackingTool", this),
-  m_decodingTool("ITkPixelDecodingTool", this),
-  m_hitSortingTool("ITkPixelHitSortingTool", this)
+  m_decodingTool("ITkPixelDecodingTool", this)
+  //m_hitSortingTool("ITkPixelHitSortingTool", this) #commented out due to clang compilation warning, will be reintroduced in next MR
 {
   
 }
@@ -17,40 +18,41 @@ ITkPixelDecodingAlg::ITkPixelDecodingAlg(const std::string& name, ISvcLocator* p
 
 StatusCode ITkPixelDecodingAlg::initialize()
 {
+    ATH_CHECK(m_robDataProviderSvc.retrieve());
 
-  ATH_CHECK(m_EncodedStreamKey.initialize());
+    ATH_CHECK(m_decodingTool.retrieve());
 
-  ATH_CHECK(m_decodingTool.retrieve());
+    //ATH_CHECK(m_hitSortingTool.retrieve()); #commented out due to clang compilation warning, will be reintroduced in next MR
 
-  ATH_CHECK(m_hitSortingTool.retrieve());
+    ATH_CHECK(m_packingTool.retrieve());
 
-  ATH_CHECK(m_packingTool.retrieve());
-
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 
 StatusCode ITkPixelDecodingAlg::execute(const EventContext& ctx) const
 {
 
-  SG::ReadHandle<ITkPacketCollection> EncodedStreamCollection(m_EncodedStreamKey, ctx);
+    //Retrieve the ROB IDs from cabling - dummy as of now
+    //std::vector<uint32_t> ITkPixelSourceIDs = {0x2d27000};
+    std::vector<uint32_t> ITkPixelSourceIDs = {0x00140001, 0x00770001};
 
-  std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> EventHitMaps; 
-  for(auto encodedStream : *EncodedStreamCollection){
+    //Invoke ROBDataProviderService, fetch the concerned ROBs
+    std::vector<const eformat::ROBFragment<const uint32_t*>*> ROBs;
+    m_robDataProviderSvc->getROBData(ctx, ITkPixelSourceIDs, ROBs);
+    
+    ATH_MSG_INFO("Retrieved " << ROBs.size() << " fragments");
 
-    ITkPixelDataPackingTool::UnpackedStream unpackedStream = m_packingTool->unpack(&encodedStream);
-    EventHitMaps[unpackedStream.onlineID] = *m_decodingTool->decodeStream(&unpackedStream.dataStream);
+    //Get the payload
+    for (const auto& ROB : ROBs){
+        const uint32_t* payload = ROB->rod_data();
+        uint32_t  length  = ROB->rod_ndata();
+        ATH_MSG_DEBUG(std::hex << "Source ID: " << ROB->rob_source_id() << " L1 ID: " << ROB->rod_lvl1_id() << "\n");
+        ATH_MSG_DEBUG("Length = " << length << "\n");
 
-    // Add some tool to get into RDO form -- already exists?
+        for (uint32_t word = 0; word < length; word++) ATH_MSG_DEBUG("Word " << word << " = " << std::hex << "0x" << payload[word] << "\n");
 
-  }
+    }
 
-  std::shared_ptr<ITkPixelRDO_Container> pixelRDOContainer = std::make_shared<ITkPixelRDO_Container>(100); //dummy // will need to setup the container
-  ATH_CHECK(m_hitSortingTool->createRDO(EventHitMaps, pixelRDOContainer.get()));
-  
-  //store the filled RDO container to SG
-
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
-
-

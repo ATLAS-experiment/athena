@@ -11,10 +11,12 @@ if __name__=="__main__":
    # --- set flags
    # the input file
 
-   flags.Input.Files = ['test.bs']
+   flags.Input.Files = ['/afs/cern.ch/work/o/okovanda/ITk/DAQ/encoding_in_athena/run/data_test.00242000.Single_Stream.daq.RAW._lb0001._Athena._0001.data']
 
    from AthenaConfiguration.TestDefaults import defaultGeometryTags
    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+
+   flags.IOVDb.GlobalTag = 'OFLCOND-MC15c-SDR-14-05'
 
    flags.lock()
 
@@ -25,14 +27,14 @@ if __name__=="__main__":
    cfg = MainServicesCfg(flags)
 
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-   cfg.merge (ByteStreamReadCfg (flags, ['std::vector<std::vector<uint32_t>>/ITkEncodedStream']))
+   cfg.merge(ByteStreamReadCfg(flags))
 
+   from ITkPixelByteStreamCnv.ITkPixelDecodingAlgConfig import ITkPixelDecodingAlgCfg
+   cfg.merge( ITkPixelDecodingAlgCfg(flags) )
 
    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
    cfg.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
 
-   from ITkPixelByteStreamCnv.ITkPixelDecodingAlgConfig import ITkPixelDecodingAlgCfg
-   cfg.merge( ITkPixelDecodingAlgCfg(flags) )
    
    cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
  
