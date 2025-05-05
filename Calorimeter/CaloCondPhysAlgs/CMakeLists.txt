@@ -16,7 +16,7 @@ atlas_add_component( CaloCondPhysAlgs
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES} ${CLHEP_LIBRARIES} CaloCondBlobObjs CaloDetDescrLib CaloGeoHelpers 
 		             CaloIdentifier AthenaBaseComps AthenaKernel StoreGateLib GaudiKernel LArCablingLib LArElecCalib LArIdentifier TrigDecisionToolLib LArRawConditions LArRecConditions
-		             CaloConditions CaloEvent CaloInterfaceLib CaloUtilsLib AthenaPoolUtilities Identifier xAODEventInfo LArHV LArReadoutGeometry LArSimEvent CxxUtils)
+		             CaloConditions TileConditionsLib CaloEvent LArRecEvent TileEvent CaloInterfaceLib CaloUtilsLib AthenaPoolUtilities Identifier xAODEventInfo LArHV LArReadoutGeometry LArSimEvent CxxUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
