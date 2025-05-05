@@ -130,4 +130,4 @@ class MetAnalysisConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'met', 'met')
         config.addOutputVar (self.containerName, 'phi', 'phi')
         config.addOutputVar (self.containerName, 'sumet', 'sumet')
-
+        config.addOutputVar (self.containerName, 'name', 'name', noSys=True, enabled=False)

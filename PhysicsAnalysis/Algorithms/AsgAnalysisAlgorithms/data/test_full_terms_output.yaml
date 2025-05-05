@@ -1,0 +1,75 @@
+CommonServices:
+    runSystematics: False
+
+PileupReweighting: {}
+
+EventCleaning:
+    runEventCleaning: True
+
+Jets:
+  - containerName: 'AnaJets'
+    jetCollection: 'AntiKt4EMPFlowJets'
+    runJvtUpdate: False
+    runNNJvtUpdate: True
+    FlavourTagging:
+      - selectionName: 'ftag'
+        btagger: 'GN2v01'
+        btagWP: 'FixedCutBEff_65'
+    FlavourTaggingEventSF:
+      - containerName: 'AnaJets.baselineJvt'
+        btagger: 'GN2v01'
+    JVT: {}
+    PtEtaSelection: {}
+
+Electrons:
+  - containerName: 'AnaElectrons'
+    WorkingPoint:
+      - selectionName: 'loose'
+        identificationWP: 'LooseBLayerLH'
+        isolationWP: 'Loose_VarRad'
+    PtEtaSelection:
+        minPt: 10000.0
+
+Muons:
+  - containerName: 'AnaMuons'
+    WorkingPoint:
+      - selectionName: 'medium'
+        quality: 'Medium'
+        isolation: 'Loose_VarRad'
+    PtEtaSelection: {}
+
+# containerName and selectionName must be defined in their respective blocks
+MissingET:
+  - containerName: 'AnaMET'
+    # Format should follow Object: '<containerName>.<selectionName>'
+    jets: 'AnaJets'
+    electrons: 'AnaElectrons.loose'
+    muons: 'AnaMuons.medium'
+
+Thinning:
+  - containerName: 'AnaJets'
+    outputName: 'OutJets'
+  - containerName: 'AnaElectrons'
+    outputName: 'OutElectrons'
+    selectionName: 'loose'
+  - containerName: 'AnaMuons'
+    outputName: 'OutMuons'
+    selectionName: 'medium'
+
+
+# After configuring each container, many variables will be saved automatically.
+Output:
+    treeName: 'analysis'
+    vars: []
+    metVars: []
+    containers:
+        # Format should follow: '<suffix>:<output container>'
+        mu_: 'OutMuons'
+        el_: 'OutElectrons'
+        jet_: 'OutJets'
+        met_: 'AnaMET'
+        '': 'EventInfo'
+
+    containersFullMET:
+        # Format should follow: '<suffix>:<output container>'
+        fullMet_: 'AnaMET'
