@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=2 sw=2
@@ -54,8 +54,11 @@ StatusCode MissingMassTool::initialize()
 	}
 
 	m_MMC = new MissingMassCalculator(aset, m_param_file_path);
-  // set properties if non negative
   m_MMC->SetUseFloatStopping(m_float_stop);
+  m_MMC->SetFloatStoppingMinIter(m_float_stop_miniter);
+  m_MMC->SetFloatStoppingCheckFreq(m_float_stop_checkfreq);
+  m_MMC->SetFloatStoppingComp(m_float_stop_comp);
+	// set properties if non negative
   if (m_n_sigma_met>=0) m_MMC->SetNsigmaMETscan(m_n_sigma_met);
   if (m_tail_cleanup>=0) m_MMC->preparedInput.SetUseTailCleanup(m_tail_cleanup);
   if (m_use_verbose>=0) m_MMC->preparedInput.SetUseVerbose(m_use_verbose);
