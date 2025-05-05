@@ -21,6 +21,8 @@
 #include "VP1Utils/VP1DetInfo.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
 
+#include "VP1Base/VP1Msg.h"
+
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 #include <Inventor/nodes/SoTransform.h>
@@ -104,37 +106,38 @@ QStringList VP1RawDataHandle_MM_RDO::clicked(bool verbose) const
 //____________________________________________________________________
 SoNode * VP1RawDataHandle_MM_RDO::buildShape()
 {
-  const MuonGM::MMReadoutElement * elem = element();
+  const MuonGM::MMReadoutElement* elem = element();
   Identifier id(m_data->identify());
 
-  static const MmIdHelper * idhelper = VP1DetInfo::mmIDHelper();
-
-Amg::Vector3D globalPos; 
-         double length=0, angle=0;
-         int channel = idhelper->channel(id);
-         const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
-         elem->stripGlobalPosition(id, globalPos);
-         length = design->channelLength(channel);
-
-
-  // double tubeLength = elem->tubeLength(id);
-  double tubeLength = length;
-  // double strawlength = elem ? elem->strawLength() : 200.0;
-
-  // SoNode * node = common()->nodeManager()->getShapeNode_DriftTube(tubeLength/2, elem->innerTubeRadius());
-  SoNode * node = common()->nodeManager()->getShapeNode_Point();
-
-
-  // SoNode * node = common()->nodeManager()->getShapeNode_Wire(0.5,0.0/*0 radius for line*/);
-  // if (highThreshold() && static_cast<VP1RawDataColl_MM_RDO*>(coll())->useSpecialHTMat()) {
-  //   SoGroup * gr = new SoGroup;
-  //   gr->addChild(coll()->common()->controller()->trtHTMaterial());
-  //   gr->addChild(node);
-  //   return gr;
-  // } else {
-  //   return node;
-  // }
+  static const MmIdHelper* idhelper = VP1DetInfo::mmIDHelper();
+  if (!idhelper) {
+    VP1Msg::messageDebug(
+        "MM idhelper is null. Returning without building the shape for MM "
+        "digits...");
+    SoNode* node = common()->nodeManager()->getShapeNode_Point();
     return node;
+  }
+
+  VP1Msg::messageDebug("Building MM digit strip...");
+  const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
+
+  double striplength{0.}, stripWidth{0.};
+  int channel = idhelper->channel(id);
+
+  //  Amg::Vector3D globalPos;
+  //  elem->stripGlobalPosition(id, globalPos);
+
+  Amg::Vector2D locPos;
+  elem->stripPosition(id, locPos);
+
+  striplength = design->channelLength(channel);
+  stripWidth = design->inputWidth;
+
+  SoNode* node = common()->nodeManager()->getShapeNode_Strip(
+      striplength, std::min(10.0, stripWidth), 0.01);
+
+  // }
+  return node;
 }
 
 //____________________________________________________________________
@@ -144,8 +147,9 @@ SoTransform * VP1RawDataHandle_MM_RDO::buildTransform()
   if (!elem)
     return new SoTransform;//fixme
   Identifier id(m_data->identify());
+  
   Amg::Vector3D globalPos; 
-         elem->stripGlobalPosition(id, globalPos);
+  elem->stripGlobalPosition(id, globalPos);
 
   // return VP1LinAlgUtils::toSoTransform(elem->localToGlobalTransf(id));
   // return VP1LinAlgUtils::toSoTransform(globalPos[Amg::x], globalPos[Amg::y], globalPos[Amg::z]);
