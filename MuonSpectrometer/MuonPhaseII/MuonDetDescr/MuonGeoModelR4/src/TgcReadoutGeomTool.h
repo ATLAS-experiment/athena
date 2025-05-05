@@ -12,6 +12,7 @@
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
 #include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include <GeoModelHelpers/GeoDeDuplicator.h>
 
 namespace MuonGMR4 {
 
@@ -40,7 +41,8 @@ class TgcReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
         double wirePitch{0.};
         unsigned int gasGap{0};
     };
-    struct FactoryCache {       
+    struct FactoryCache {    
+        /** @brief  */   
        using ParamBookTable = std::map<std::string, wTgcTable>;
        ParamBookTable parameterBook{};
        
@@ -50,6 +52,8 @@ class TgcReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
 
        RadialStripDesignSet stripLayouts{};
        WireGroupDesignSet wireLayouts{};
+       /** @brief Helper object to turn Amg::Transforms into GeoModel tree transform nodes */
+       GeoDeDuplicator trfNodeMaker{};
     };
 
     /// Retrieves the auxillary tables from the database

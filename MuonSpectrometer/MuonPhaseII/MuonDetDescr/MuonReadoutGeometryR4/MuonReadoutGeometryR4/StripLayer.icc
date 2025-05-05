@@ -1,47 +1,43 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_STRIPLAYER_ICC
 #define MUONREADOUTGEOMETRYR4_STRIPLAYER_ICC
 
+#include "GaudiKernel/SystemOfUnits.h"
+
 namespace MuonGMR4{
-    inline const Amg::Transform3D& StripLayer::toOrigin() const { return m_transform; }
-    inline const StripDesign& StripLayer::design() const { return *m_design;}
-    inline const IdentifierHash StripLayer::hash() const { return m_hash;}
+    inline const Amg::Transform3D& StripLayer::toOrigin() const { return m_transform->getDefTransform(); }
+    inline bool StripLayer::hasPhiDesign() const { 
+        assert(m_phiDesign && m_etaDesign);
+        return m_phiDesign != m_etaDesign; 
+    }
+    inline const StripDesign& StripLayer::design(bool phiView) const { 
+        return phiView ? *m_phiDesign :*m_etaDesign;
+    }
+    inline const IdentifierHash StripLayer::hash() const { return m_hash; }
 
-    inline Amg::Vector3D StripLayer::localStripPos(unsigned int stripNum) const {
-      Amg::Vector3D stripPos{Amg::Vector3D::Zero()};
-      std::optional<Amg::Vector2D> planePos = m_design->center(stripNum);
-      if (!planePos) {
-        return stripPos;
-      }
-      stripPos.block<2,1>(0,0) = std::move(*planePos);
-      return stripPos;
+    inline Amg::Vector3D StripLayer::to3D(CheckVector2D&& vec, const bool phiView) const {
+        if (!vec) {
+            return Amg::Vector3D::Zero();
+        }
+        Amg::Vector3D pos{Amg::Vector3D::Zero()};
+        if (!phiView || !hasPhiDesign()) {
+            pos.block<2,1>(0, 0) = std::move(*vec);
+        } else {
+            const Eigen::Rotation2D rot{90.*Gaudi::Units::deg};
+            pos.block<2,1>(0,0) = rot * (*vec);
+        }
+        return pos;
     }
-             /// Returns the position of the left strip edge  (positive local y) expressed in the local frame
-    inline Amg::Vector3D StripLayer::localStripLeftEdge(unsigned int stripNum) const {
-      Amg::Vector3D edgePos{Amg::Vector3D::Zero()};
-      std::optional<Amg::Vector2D> planePos = m_design->leftEdge(stripNum);
-      if (!planePos) {
-        return edgePos;
-      }
-      edgePos.block<2,1>(0,0) = std::move(*planePos);
-      return edgePos;
+    inline Amg::Vector3D StripLayer::localStripPosition(unsigned int stripNum, bool phiView) const {
+        return to3D(design(phiView).center(stripNum), phiView);
     }
-          /// Returns the position of the right strip edge (negative local y) exoressed in the local frame
-    inline Amg::Vector3D StripLayer::localStripRightEdge(unsigned int stripNum) const {
-      Amg::Vector3D edgePos{Amg::Vector3D::Zero()};
-      std::optional<Amg::Vector2D> planePos = m_design->rightEdge(stripNum);
-      if (!planePos) {
-        return edgePos;
-      }
-      edgePos.block<2,1>(0,0) = std::move(*planePos);
-      return edgePos;
+    inline Amg::Vector3D StripLayer::localStripLeftEdge(unsigned int stripNum, bool phiView) const {
+        return to3D(design(phiView).leftEdge(stripNum), phiView);
     }
- 
-
-    inline Amg::Vector3D StripLayer::stripPosition(unsigned int stripNum) const {
-        return toOrigin() * localStripPos(stripNum);
+    inline Amg::Vector3D StripLayer::localStripRightEdge(unsigned int stripNum, bool phiView) const {
+        return to3D(design(phiView).rightEdge(stripNum), phiView);
     }
 }
 #endif

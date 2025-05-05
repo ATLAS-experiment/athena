@@ -12,6 +12,7 @@
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
 #include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include <GeoModelHelpers/GeoDeDuplicator.h>
 
 namespace MuonGMR4 {
 
@@ -79,6 +80,9 @@ class sTgcReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
        std::set<PadDesignPtr, PadDesignSorter> padDesigns{};
 
        ParamBookTable parameterBook{};
+       /** @brief Helper object to turn Amg::Transforms into GeoModel tree transform nodes */
+       GeoDeDuplicator trfNodeMaker{};
+ 
 
     };
 

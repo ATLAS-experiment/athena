@@ -19,6 +19,7 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
+
 #ifndef SIMULATIONBASE
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
 #endif
@@ -83,7 +84,6 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
     
     define.readoutSide = paramBook.readoutSide;
 
-
     for (std::size_t gap = 0; gap < allGasGaps.size(); ++gap) {
 
         auto& gapVol = allGasGaps[gap];
@@ -137,7 +137,8 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
 
 
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
-        auto stripLayer = std::make_unique<StripLayer>(stripLayerRotation, stripDesign, 
+        auto stripLayer = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(stripLayerRotation), 
+                                                       stripDesign, 
                                                        IdentifierHash{static_cast<unsigned int>(gap)});
         define.layers.push_back(*factoryCache.stripLayers.emplace(std::move(stripLayer)).first);
     } //end of gas gap loop

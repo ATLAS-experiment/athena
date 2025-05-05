@@ -81,7 +81,7 @@ Amg::Transform3D RpcReadoutElement::fromGapToChamOrigin(const IdentifierHash& ha
 #endif
 Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
    return localToGlobalTrans(ctx, layerHash(measHash)) * 
-           sensorLayout(measHash).localStripPos(stripNumber(measHash));
+           sensorLayout(measHash).localStripPosition(stripNumber(measHash));
 }
 #if defined(FLATTEN) && defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
@@ -109,7 +109,8 @@ Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, c
 }
 
 Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
-   return sensorLayout(measHash).stripPosition(stripNumber(measHash));
+    const StripLayer& layout{sensorLayout(measHash)};
+    return layout.toOrigin() * layout.localStripPosition(stripNumber(measHash));
 }
 
 double RpcReadoutElement::distanceToEdge(const IdentifierHash& layerHash, 

@@ -213,7 +213,8 @@ Amg::Vector3D sTgcReadoutElement::chamberStripPos(const IdentifierHash& measHash
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    if (layIdx < m_pars.stripLayers.size()) {
-      return  m_pars.stripLayers[layIdx].stripPosition(channelNumber(measHash));
+      const StripLayer& layout{m_pars.stripLayers[layIdx]};
+      return layout.toOrigin() * layout.localStripPosition(channelNumber(measHash));
    }
    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
                  <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
