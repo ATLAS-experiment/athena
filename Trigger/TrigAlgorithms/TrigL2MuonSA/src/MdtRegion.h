@@ -5,6 +5,7 @@
 #ifndef  TRIGL2MUONSA_MDTREGION_H
 #define  TRIGL2MUONSA_MDTREGION_H
 
+#include "src/MuonRoad.h"
 namespace TrigL2MuonSA {
 
 // --------------------------------------------------------------------------------
@@ -17,8 +18,8 @@ namespace TrigL2MuonSA {
     
     void Clear()
 	{
-	  for(int i=0; i<11; i++) {
-	    for(int j=0; j<2; j++) {
+	  for(int i=0; i<N_STATION; i++) {
+	    for(int j=0; j<N_SECTOR; j++) {
 	      zMin[i][j] = 0;
 	      zMax[i][j] = 0;
 	      rMin[i][j] = 0;
@@ -33,15 +34,15 @@ namespace TrigL2MuonSA {
 	};
       
   public:
-      double zMin[11][2];
-      double zMax[11][2];
-      double rMin[11][2];
-      double rMax[11][2];
-      double etaMin[11][2];
-      double etaMax[11][2];
-      double phiMin[11][2];
-      double phiMax[11][2];
-      int chamberType[11][2][2];
+      double zMin[N_STATION][N_SECTOR];
+      double zMax[N_STATION][N_SECTOR];
+      double rMin[N_STATION][N_SECTOR];
+      double rMax[N_STATION][N_SECTOR];
+      double etaMin[N_STATION][N_SECTOR];
+      double etaMax[N_STATION][N_SECTOR];
+      double phiMin[N_STATION][N_SECTOR];
+      double phiMax[N_STATION][N_SECTOR];
+      int chamberType[N_STATION][N_SECTOR][2];
   };
 
 // --------------------------------------------------------------------------------

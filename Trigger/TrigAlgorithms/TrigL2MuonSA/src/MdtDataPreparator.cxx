@@ -76,12 +76,12 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
                             const TrigL2MuonSA::RpcFitResult& rpcFitResult,
                             TrigL2MuonSA::MuonRoad&  muonRoad,
                             TrigL2MuonSA::MdtRegion& mdtRegion,
-                            TrigL2MuonSA::MdtHits&   mdtHits_normal) const
+                            TrigL2MuonSA::MdtHits&   mdtHits) const
 {
   // define regions
   ATH_CHECK( m_mdtRegionDefiner->getMdtRegions(p_roids, rpcFitResult, muonRoad, mdtRegion) );
 
-  ATH_CHECK( getMdtHits(p_roids, muonRoad, mdtHits_normal) );
+  ATH_CHECK( getMdtHits(p_roids, muonRoad, mdtHits) );
 
   return StatusCode::SUCCESS;
 }
@@ -94,12 +94,12 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
                             const TrigL2MuonSA::TgcFitResult& tgcFitResult,
                             TrigL2MuonSA::MuonRoad&           muonRoad,
                             TrigL2MuonSA::MdtRegion&          mdtRegion,
-                            TrigL2MuonSA::MdtHits&            mdtHits_normal) const
+                            TrigL2MuonSA::MdtHits&            mdtHits) const
 {
   // define regions
   ATH_CHECK( m_mdtRegionDefiner->getMdtRegions(p_roids, tgcFitResult, muonRoad, mdtRegion) );
 
-  ATH_CHECK( getMdtHits(p_roids, muonRoad, mdtHits_normal) );
+  ATH_CHECK( getMdtHits(p_roids, muonRoad, mdtHits) );
 
   return StatusCode::SUCCESS;
 }
@@ -111,11 +111,8 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
 StatusCode TrigL2MuonSA::MdtDataPreparator::getMdtHits(
                                 const TrigRoiDescriptor* p_roids,
                                 TrigL2MuonSA::MuonRoad& muonRoad,
-                                TrigL2MuonSA::MdtHits& mdtHits_normal) const
+                                TrigL2MuonSA::MdtHits& mdtHits) const
 {
-
-  // preload ROBs
-  std::vector<uint32_t> v_robIds;
   std::vector<IdentifierHash> mdtHashList;
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
@@ -123,12 +120,8 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::getMdtHits(
 
     ATH_MSG_DEBUG("Use RoI based data access");
 
-    const IRoiDescriptor* iroi = (IRoiDescriptor*) p_roids;
-
-    m_regionSelector->lookup( ctx )->HashIDList(*iroi, mdtHashList);
+    m_regionSelector->lookup( ctx )->HashIDList(*p_roids, mdtHashList);
     ATH_MSG_DEBUG("mdtHashList.size()=" << mdtHashList.size());
-
-    m_regionSelector->lookup( ctx )->ROBIDList(*iroi, v_robIds);
 
   } else {
 
@@ -138,10 +131,9 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::getMdtHits(
     m_regionSelector->lookup( ctx )->HashIDList(fullscan_roi, mdtHashList);
     ATH_MSG_DEBUG("mdtHashList.size()=" << mdtHashList.size());
 
-    m_regionSelector->lookup( ctx )->ROBIDList(fullscan_roi, v_robIds);
   }
 
-  ATH_CHECK( collectMdtHitsFromPrepData(ctx, mdtHashList, mdtHits_normal, muonRoad) );
+  ATH_CHECK( collectMdtHitsFromPrepData(ctx, mdtHashList, mdtHits, muonRoad) );
 
   return StatusCode::SUCCESS;
 }
@@ -163,166 +155,135 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const Eve
   SG::ReadHandle mdtPrds{m_mdtPrepContainerKey, ctx};
   ATH_CHECK(mdtPrds.isPresent());
 
-  // Get MDT collections
-  ///// Vectors of prep data collections
-  std::vector<const Muon::MdtPrepDataCollection*> mdtCols{};
-  mdtCols.reserve(v_idHash.size());
-
   for(const IdentifierHash& id : v_idHash) {
 
-    auto MDTcoll = mdtPrds->indexFindPtr(id);
+    // Get MDT collections
+    auto mdtCol = mdtPrds->indexFindPtr(id);
 
-    if( MDTcoll == nullptr ) {
-      ATH_MSG_DEBUG("MDT prep data collection not found in Hash ID" << (int)id);
-      continue;
+    if( mdtCol == nullptr ) {
+        ATH_MSG_DEBUG("MDT prep data collection not found in Hash ID" << (int)id);
+        continue;
     }
-
-    if( MDTcoll->size() == 0 ) {
-      ATH_MSG_DEBUG("MDT prep data collection is empty in Hash ID" << (int)id);
-      continue;
+    if( mdtCol->size() == 0 ) {
+        ATH_MSG_DEBUG("MDT prep data collection is empty in Hash ID" << (int)id);
+        continue;
     }
-
-    mdtCols.push_back(MDTcoll);
 
     ATH_MSG_DEBUG("Selected Mdt Collection: "
-          << m_idHelperSvc->toStringChamber(MDTcoll->identify())
-          << " with size " << MDTcoll->size()
+          << m_idHelperSvc->toStringChamber(mdtCol->identify())
+          << " with size " << mdtCol->size()
           << "in Hash ID" << (int)id);
-  }
-
-  for( const Muon::MdtPrepDataCollection* mdtCol : mdtCols ){
 
     mdtHits.reserve( mdtHits.size() + mdtCol->size() );
+
     for( const Muon::MdtPrepData* mdt : *mdtCol ) {
 
-      const MuonGM::MdtReadoutElement* mdtReadout = mdt->detectorElement();
+        Identifier id = mdt->identify();
 
-      const MuonGM::MuonStation* muonStation = mdtReadout->parentMuonStation();
-
-      int StationPhi = mdtReadout->getStationPhi();
-      int StationEta = mdtReadout->getStationEta();
-      int MultiLayer = mdtReadout->getMultilayer();
-      double cXmid{0.}, cYmid{0.}, cAmid{0.}, cPhip{0.};
-
-      Identifier id = mdt->identify();
-      int adc       = mdt->adc();
-      int drift     = mdt->tdc();
-
-      int TubeLayers = mdtReadout->getNLayers();
-      int TubeLayer = m_idHelperSvc->mdtIdHelper().tubeLayer(id);
-      if(TubeLayer > TubeLayers) TubeLayer -= TubeLayers;
-      int Layer = (MultiLayer-1)*TubeLayers + TubeLayer;
-      int Tube = m_idHelperSvc->mdtIdHelper().tube(id);
-
-      double OrtoRadialPos = mdtReadout->getStationS();
-      std::string chamberType = mdtReadout->getStationType();
-      char st = chamberType[1];
-
-      int chamber = 0;
-      if (chamberType[0]=='E') {
-        /// Endcap
-        if (st=='I') chamber = xAOD::L2MuonParameters::Chamber::EndcapInner;
-        if (st=='M') chamber = xAOD::L2MuonParameters::Chamber::EndcapMiddle;
-        if (st=='O') chamber = xAOD::L2MuonParameters::Chamber::EndcapOuter;
-        if (st=='E') chamber = xAOD::L2MuonParameters::Chamber::EndcapExtra;
-      } 
-      else {
-        /// Barrel
-        if (st=='I') chamber = xAOD::L2MuonParameters::Chamber::BarrelInner;
-        if (st=='M') chamber = xAOD::L2MuonParameters::Chamber::BarrelMiddle;
-        if (st=='O') chamber = xAOD::L2MuonParameters::Chamber::BarrelOuter;
-        if (st=='E' && chamberType[2]=='E') chamber = xAOD::L2MuonParameters::Chamber::BEE;
-        if (st=='M' && chamberType[2]=='E') chamber = xAOD::L2MuonParameters::Chamber::BME;
-        if (st=='M' && chamberType[2]=='G') chamber = xAOD::L2MuonParameters::Chamber::Backup;
-      }
-
-      double R = -99999., Z = -99999.;
-      if(m_idHelperSvc->mdtIdHelper().stationName(id) == m_BMGid && m_DeadChannels.count(id)) {
-        ATH_MSG_DEBUG("Skipping tube with identifier " << m_idHelperSvc->toString(id) );
-        continue;
-      }
-      R = mdtReadout->center(TubeLayer, Tube).perp();
-      Z = mdtReadout->center(TubeLayer, Tube).z();
-
-      Amg::Transform3D trans = muonStation->getNominalAmdbLRSToGlobal();
-      if(muonStation->endcap()==0){
-        cXmid = (trans.translation()).z();
-        double halfRadialThicknessOfMultilayer = muonStation->RsizeMdtStation()/2.;
-        cYmid = ((trans.translation()).perp()+halfRadialThicknessOfMultilayer);
-      }
-      else{
-        cXmid = (trans.translation()).perp();
-        double halfZThicknessOfMultilayer = muonStation->ZsizeMdtStation()/2.;
-        cYmid = (trans.translation()).z();
-        if(cYmid>0) cYmid += halfZThicknessOfMultilayer;
-        else cYmid -= halfZThicknessOfMultilayer;
-      }
-      cPhip = (trans.translation()).phi();
-
-      double dphi  = 0;
-      double cphi  = muonRoad.phi[chamber][0];
-      if( cPhip*cphi>0 ) {
-        dphi = std::abs(cPhip - cphi);
-      } 
-      else {
-        if(std::abs(cphi) > M_PI/2.) {
-          double phi1 = (cPhip>0.)? cPhip-M_PI : cPhip+M_PI;
-          double phi2 = (cphi >0.)? cphi -M_PI : cphi +M_PI;
-          dphi = std::abs(phi1) + std::abs(phi2);
+        if(m_idHelperSvc->mdtIdHelper().stationName(id) == m_BMGid && m_DeadChannels.count(id)) {
+            ATH_MSG_DEBUG("Skipping tube with identifier " << m_idHelperSvc->toString(id) );
+            continue;
         }
-        else {
-          dphi = std::abs(cPhip) + std::abs(cphi);
-        }
-      }
 
-      if(muonStation->endcap()==1) R = R *std::hypot(1, std::tan(dphi));
+        const MuonGM::MdtReadoutElement* mdtReadout = mdt->detectorElement();
+        const MuonGM::MuonStation* muonStation = mdtReadout->parentMuonStation();
 
-      Amg::Vector3D OrigOfMdtInAmdbFrame =  muonStation->getBlineFixedPointInAmdbLRS() ;
-      double Rmin =(trans*OrigOfMdtInAmdbFrame).perp();
-
-      float cInCo = 1./std::cos(std::abs(std::atan(OrtoRadialPos/Rmin)));
-      float cPhi0 = cPhip - std::atan(OrtoRadialPos/Rmin);
-      if(cPhi0 > M_PI) cPhip -= 2*M_PI;
-      if(cPhip<0. && (std::abs(M_PI+cPhip) < 0.05) ) cPhip = M_PI;
-
-      ATH_MSG_DEBUG(" ...MDT hit Z/R/chamber/MultiLater/TubeLayer/Tube/Layer/adc/tdc = "
-            << Z << "/" << R << "/" << chamber << "/" << MultiLayer << "/" << TubeLayer << "/"
-            << Tube << "/" << Layer << "/" << adc << "/" << drift);
-
-      // no residual check for the moment
-      // (residual check at pattern finder)
-      if(Layer!=0 && Tube !=0) {
-
-        // create the new digit
         TrigL2MuonSA::MdtHitData tmp;
-        tmp.name       = m_idHelperSvc->mdtIdHelper().stationName(id);
-        tmp.StationEta = StationEta;
-        tmp.StationPhi = StationPhi;
-        tmp.Multilayer = MultiLayer;
-        tmp.Layer      = Layer - 1;
-        tmp.TubeLayer  = TubeLayer;
-        tmp.Tube       = Tube;
-        tmp.cYmid      = cYmid;
-        tmp.cXmid      = cXmid;
-        tmp.cAmid      = cAmid;
-        tmp.cPhip      = cPhip;
-        tmp.cInCo      = cInCo;
-        tmp.cPhi0      = cPhi0;
-        for(unsigned int i=0; i<4; i++) { tmp.cType[i] = chamberType[i]; }
-        tmp.Z          = Z;
-        tmp.R          = R;
-        tmp.DriftTime  = drift;
-        tmp.Adc        = adc;
-        tmp.LeadingCoarseTime  = (drift>>5) & 0xfff;
-        tmp.LeadingFineTime    = drift & 0x1f;
-        tmp.Chamber = chamber;
-        tmp.readEle = mdtReadout;
         tmp.Id = id;
 
+        int TubeLayers = mdtReadout->getNLayers();
+        tmp.TubeLayer = m_idHelperSvc->mdtIdHelper().tubeLayer(id);
+        if(tmp.TubeLayer > TubeLayers) tmp.TubeLayer -= TubeLayers;
+        tmp.Tube = m_idHelperSvc->mdtIdHelper().tube(id);
+        tmp.Multilayer = mdtReadout->getMultilayer();
+        int Layer = (tmp.Multilayer-1)*TubeLayers + tmp.TubeLayer;
+        tmp.Layer = Layer - 1;   
+
+        if(Layer==0 or tmp.Tube ==0) continue;
+
+        int drift = mdt->tdc();
+        tmp.DriftTime = drift;
+        tmp.LeadingCoarseTime  = (drift>>5) & 0xfff;
+        tmp.LeadingFineTime    = drift & 0x1f;
+        tmp.Adc = mdt->adc();
+
+        tmp.name       = m_idHelperSvc->mdtIdHelper().stationName(id);
+        tmp.StationEta = mdtReadout->getStationEta();
+        tmp.StationPhi = mdtReadout->getStationPhi();
+        
+        std::string chamberType = mdtReadout->getStationType();
+        std::copy_n(chamberType.begin(), std::min<size_t>(4, chamberType.size()), tmp.cType.begin());
+        tmp.readEle = mdtReadout;
+
+        int& chamber {tmp.Chamber};
+        char st = chamberType[1];
+        if (chamberType[0]=='E') {
+            /// Endcap
+            if (st=='I') chamber = xAOD::L2MuonParameters::Chamber::EndcapInner;
+            if (st=='M') chamber = xAOD::L2MuonParameters::Chamber::EndcapMiddle;
+            if (st=='O') chamber = xAOD::L2MuonParameters::Chamber::EndcapOuter;
+            if (st=='E') chamber = xAOD::L2MuonParameters::Chamber::EndcapExtra;
+        } 
+        else {
+            /// Barrel
+            if (st=='I') chamber = xAOD::L2MuonParameters::Chamber::BarrelInner;
+            if (st=='M') chamber = xAOD::L2MuonParameters::Chamber::BarrelMiddle;
+            if (st=='O') chamber = xAOD::L2MuonParameters::Chamber::BarrelOuter;
+            if (st=='E' && chamberType[2]=='E') chamber = xAOD::L2MuonParameters::Chamber::BEE;
+            if (st=='M' && chamberType[2]=='E') chamber = xAOD::L2MuonParameters::Chamber::BME;
+            if (st=='M' && chamberType[2]=='G') chamber = xAOD::L2MuonParameters::Chamber::Backup;
+        }
+
+        double &cXmid{tmp.cXmid}, &cYmid{tmp.cYmid}, &cPhip{tmp.cPhip};   //tmp.cAmid remains zero
+        Amg::Transform3D trans = muonStation->getNominalAmdbLRSToGlobal();
+        if(!muonStation->endcap()){
+            cXmid = (trans.translation()).z();
+            cYmid = ((trans.translation()).perp() + muonStation->RsizeMdtStation()/2.);
+        }else{
+            cXmid = (trans.translation()).perp();
+            cYmid = (trans.translation()).z();
+            if(cYmid>0) cYmid += muonStation->RsizeMdtStation()/2.;
+            else cYmid -= muonStation->RsizeMdtStation()/2.;
+        }
+        cPhip = (trans.translation()).phi();
+
+        double &R {tmp.R}, &Z {tmp.Z};
+        R = -99999.; Z = -99999.;
+        R = mdtReadout->center(tmp.TubeLayer, tmp.Tube).perp();
+        Z = mdtReadout->center(tmp.TubeLayer, tmp.Tube).z();
+
+        double dphi  = 0;
+        double cphi  = muonRoad.phi[chamber][0];
+        if( cPhip*cphi>0 ) {
+            dphi = std::abs(cPhip - cphi);
+        } else {
+            if(std::abs(cphi) > M_PI/2.) {
+                double phi1 = (cPhip>0.)? cPhip-M_PI : cPhip+M_PI;
+                double phi2 = (cphi >0.)? cphi -M_PI : cphi +M_PI;
+                dphi = std::abs(phi1) + std::abs(phi2);
+            }
+            else {
+                dphi = std::abs(cPhip) + std::abs(cphi);
+            }
+        }
+
+        if(muonStation->endcap()==1) R = R *std::hypot(1, std::tan(dphi));
+
+        double Rmin = (trans * muonStation->getBlineFixedPointInAmdbLRS()).perp();
+        double OrtoRadialPos = mdtReadout->getStationS();
+        tmp.cInCo = 1./std::cos(std::abs(std::atan(OrtoRadialPos/Rmin)));
+        tmp.cPhi0 = cPhip - std::atan(OrtoRadialPos/Rmin);
+        if(tmp.cPhi0 > M_PI) cPhip -= 2*M_PI;
+        if(cPhip<0. && (std::abs(M_PI+cPhip) < 0.05) ) cPhip = M_PI;
+
+        ATH_MSG_DEBUG(" ...MDT hit Z/R/chamber/MultiLater/TubeLayer/Tube/Layer/adc/tdc = "
+            << Z << "/" << R << "/" << chamber << "/" << tmp.Multilayer << "/" << tmp.TubeLayer << "/"
+            << tmp.Tube << "/" << Layer << "/" << tmp.Adc << "/" << drift);
+
         mdtHits.push_back(std::move(tmp));
-      }
+        
     } // end of MdtPrepDataCollection loop
-  } // end of MdtPrepDataCollection vector loop
+  } // end of hashList loop
 
   return StatusCode::SUCCESS;
 }

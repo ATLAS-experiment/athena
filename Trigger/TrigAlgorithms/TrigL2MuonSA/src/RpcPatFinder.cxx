@@ -4,6 +4,10 @@
 
 #include "RpcPatFinder.h"
 
+#include <GaudiKernel/IMessageSvc.h>
+#include <array>
+#include <cstddef>
+#include <functional>
 #include <math.h>
 #include <bitset>
 #include <iostream>
@@ -11,16 +15,6 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
 // Original author: Massimo Corradi
-
-// --------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------
-
-TrigL2MuonSA::RpcPatFinder::RpcPatFinder(const std::string& type,
-					 const std::string& name,
-					 const IInterface*  parent):
-  AthAlgTool(type, name, parent)  
-{  
-}
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
@@ -61,246 +55,196 @@ void TrigL2MuonSA::RpcPatFinder::addHit(const std::string& stationName,
   }
 }
 
+// --------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------
+
+bool TrigL2MuonSA::RpcPatFinder::findPatternEta(
+            std::array<std::reference_wrapper<double>, 3>& result_aw, 
+            std::array<std::reference_wrapper<double>, 3>& result_bw, 
+            const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const{
+  
+    const std::vector<std::vector<double>>&  rpc_x {rpcLayerHits.hits_in_layer_eta};
+
+    int  layer_end {5};
+    if(rpc_x.at(6).size()+rpc_x.at(7).size() >0) layer_end = 7;//special "feet" towers
+
+    // reset parameters
+    std::bitset<8> result_pat{};
+    double result_dMM{9999}, result_dMO{9999};
+    int nHits_pat{0};
+    std::array<size_t, 8> result_index{};
+
+    // Loop on start layer
+    for (int l_start=0; l_start<layer_end; l_start++){
+        // Loop on hits of start layer, for each hit try a new pattern
+        for (size_t i_start = 0; i_start < rpc_x.at(l_start).size(); ++i_start){
+
+            // Initialize a new pattern
+            int nHits=1;
+            std::bitset<8> pat (1<<l_start); // bit pattern of hit layers
+            std::array<size_t, 8> index {};
+            index[l_start] = i_start;
+            double dMO{9999}; // lowest deltaX between two consecutive hits, when having at least one of the two hit in BO
+            double dMM{9999}; // lowest deltaX between two consecutive hits, when having both hits in BM, or both in BO (but different doublets)
+
+            int current_l = l_start;
+            double current_x = rpc_x.at(l_start).at(i_start); // set current_x to the starting hit
+
+            // ----- add compatible hits in other layers ----//
+            // loop on test layers:
+            for (int l_test=l_start+1; l_test<=layer_end; l_test++){
+                double min_delta {999};   // min deltaX in this test laeyr
+                const std::vector<double>& test_layer_hits {rpc_x.at(l_test)};
+
+                for (size_t i_test = 0; i_test < test_layer_hits.size(); ++i_test){
+                    double delta=-1;
+                    // check if within the road
+                    if (deltaOK(current_l,l_test,current_x, test_layer_hits.at(i_test),false,delta)){
+                        // if closest hit we keep it as best hit for this test layer
+                        if (delta < min_delta) {
+                            min_delta = delta;
+                            index[l_test] = i_test;
+                        }
+                    }
+                }
+                if (min_delta < 998){   //we found at least one hit in the window
+                    current_l = l_test;	
+                    current_x = test_layer_hits.at(index[l_test]);
+                    nHits+=1;
+                    pat.set(l_test);
+                    dMO = (l_start<4 and l_test>=4) ? std::min(dMO, min_delta) : dMO;
+                    dMM = (l_start<2 and l_test>=2 and l_test<4) or (l_start>=4 and l_start<5 and l_test>=6) ? std::min(dMM, min_delta) : dMM;
+                }
+            }//for l_test
+
+            // if longest pattern found, update result
+            if (nHits>nHits_pat) { 
+                nHits_pat=nHits;
+                result_pat=pat;
+                result_dMO=dMO; 
+                result_dMM=dMM; 
+                result_index=index;
+            }else if (nHits==nHits_pat) { 
+                // if same lenght but smallest dMM/dMO, update result
+                if (dMM<result_dMM or (dMM==result_dMM and dMO<result_dMO)){
+                    result_pat=pat;
+                    result_dMO=dMO;
+                    result_dMM=dMM;
+                    result_index=index;
+                }
+            }
+        }//for i_start
+    }//for l_start
+
+    if (nHits_pat>=2) {
+        abcal(result_pat, result_index, result_aw, result_bw, rpcLayerHits);
+        if(msgLevel(MSG::VERBOSE)){
+            std::ostringstream ossR, ossZ;
+            bool isFirst{true};
+            for (int i=0; i<8; ++i){
+                if(result_pat.test(i)){
+                    if (isFirst){
+                        ossR << rpcLayerHits.hits_in_layer_R.at(i).at(result_index[i]);
+                        ossZ << rpcLayerHits.hits_in_layer_Z.at(i).at(result_index[i]);
+                        isFirst=false;
+                    }else{
+                        ossR << "," << rpcLayerHits.hits_in_layer_R.at(i).at(result_index[i]);
+                        ossZ << "," << rpcLayerHits.hits_in_layer_Z.at(i).at(result_index[i]);
+                    }
+                }
+            }
+            std::ostringstream oss;
+            std::copy(result_index.begin(), result_index.end(), std::ostream_iterator<int>(oss, " "));
+            ATH_MSG_VERBOSE("patfinder: BEST pat= " << result_pat << " nHit: " << nHits_pat << " Idx: " << oss.str()
+                <<"  dMM= "<<result_dMM <<"  dMO= "<<result_dMO << " R_hits: " << ossR.str() << " Z_hits: " << ossZ.str()
+                <<" Slopes: " << result_aw[0] << "," << result_aw[1] << "," << result_aw[2] << " Offsets: " << result_bw[0] << "," << result_bw[1] << "," << result_bw[2]);
+        }
+        return true;
+    }
+    return false;
+}
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 bool TrigL2MuonSA::RpcPatFinder::findPatternPhi(double &phi_middle, 
                                                 double &phi_outer, 
-                                                unsigned int &pattern,
                                                 const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const{
-  double result_dMO;
-  bool found=false;
-  if (patfinder(true, pattern, phi_middle,phi_outer, result_dMO, rpcLayerHits)>=2) found=true;
-  return found;
-}
-// --------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------
-
-bool TrigL2MuonSA::RpcPatFinder::findPatternEta(double aw[], 
-                                                double bw[], 
-                                                unsigned int & pattern,
-                                                const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const{
-  double result_delta[3]={9999,9999,9999};
-  bool found=false;
-  if( patfinder_forEta(false, pattern,  aw, bw, result_delta, rpcLayerHits)>=2) found=true;
-  return found;
-}
-// --------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------
-
-int  TrigL2MuonSA::RpcPatFinder::patfinder_forEta(bool iphi,
-			     unsigned int &result_pat,
-			     double result_aw[],
-			     double result_bw[],
-			     double result_dist[],
-			     const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const {
-  
-  const std::vector<std::list<double>> *  rpc_x;
-  rpc_x = &rpcLayerHits.hits_in_layer_eta;
-  
-  int  layer_end;
-  if(rpc_x->at(6).size()+rpc_x->at(7).size() >0) layer_end = 7;//special "feet" towers
-  else                                           layer_end = 5;
-  
-  // reset parameters
-  result_pat=0;
-
-  int n_max=0;
-  size_t index[8]={};
-  size_t result_index[8]={};
-
-  // Loop on start layer
-  for (int l_start=0; l_start<layer_end; l_start++){
-    for(int i=0; i<8; i++) index[i]=0;
-
-    // Loop on hits of start layer, for each hit try a new pattern
-    for (std::list<double>::const_iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); ++i_start){
-      int n_hits=1;
-      unsigned int pat=(1<<l_start); // bit pattern of hit layers
-      double dMO=9999; // disstance middle-outer station
-      double dMM=9999; // distance RPC1-RPC2 on middle stations
-      double current_x =*i_start; // set current_x to the starting hit
-      int l_current = l_start;
-
-      index[0] = std::distance(rpc_x->at(l_start).begin(), i_start);//mod!
-  
-      ATH_MSG_DEBUG("patfinder: l_start = "<< l_start << " x= " << current_x
-		    << " pat= "    << (std::bitset<8>) pat); 
-
-      // ----- add compatible hits in other layers ----//
-      // loop on test layers:
-      for (int l_test=l_start+1; l_test<=layer_end; l_test++){
-	int n_layer=0;
-	double x_layer=0;
-	double delta_layer=999;
-	//  loop on hits of test layer and picks the one with smaller distance from current_x
-	for (std::list<double>::const_iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); ++i_test){
-	  double delta=-1;
-	  // check if within the road
-	  if (deltaOK(l_current,l_test,current_x,*i_test,iphi,delta)){
-	    n_layer++;
-	    // if closest hit update x_layer
-	    if (delta<delta_layer) {
-	      delta_layer=delta;
-	      x_layer=*i_test;	      
-	      index[l_test]       = std::distance(rpc_x->at(l_test).begin(), i_test);//mod!
-	    }
-	  }
-	}//for i_test
-	if (n_layer>0) {// compatible hit found in this layer increase n_hits
-	  n_hits+=1;
-	  current_x=x_layer;
-	  pat+=(1<<l_test);
-	  l_current=l_test;
-	  if (l_start<4&&l_test>=4&&delta_layer<dMO){
-	    dMO=delta_layer;
-	  }else if (l_start<2&&l_test>=2&&l_test<4&&delta_layer<dMM) {
-	    dMM=delta_layer;
-	  } else  if (l_start>=4&&l_start<5&&l_test>=6&&delta_layer<dMM) {
-	    dMM=delta_layer;
-	  }
-	}// if (n_layer)
-	
-	ATH_MSG_DEBUG("patfinder:  l_test = "<< l_test << " n_layer= "<< n_layer 
-		      << " x= " << current_x << " pat= " << (std::bitset<8>)pat);
-      }//for l_test
-
-      // if longest pattern found, update result
-      if (n_hits>n_max) { 
-	n_max=n_hits;
-	result_pat=pat;
-	result_dist[2]=dMO; 
-	result_dist[1]=dMM; 
-	for(int i=0; i<8; i++) result_index[i]=index[i];
-      }else if (n_hits==n_max) { 
-	// if same lenght but smallest dMM/dMO, update result
-	if (dMM<result_dist[1]||(dMM==result_dist[1]&&dMO<result_dist[2])){
-	  result_pat=pat;
-	  result_dist[2]=dMO;
-	  result_dist[1]=dMM;
-	  for(int i=0; i<8; i++) result_index[i]=index[i];
-	}
-      }
-    }//for i_start
-  }//for l_start
-
-  if (n_max>=2) {
-    abcal(result_pat, result_index, result_aw, result_bw, rpcLayerHits);
-    ATH_MSG_DEBUG("patfinder: BEST pat= " << (std::bitset<8>)result_pat
-		  <<"  dMM= "<<result_dist[1] <<"  dMO= "<<result_dist[2]);
-  
-  }//if(n_max>2)
-  
-  return n_max;
-}//patfinder_forEta()
-
-// --------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------
-
-int  TrigL2MuonSA::RpcPatFinder::patfinder(bool iphi,
-			     unsigned int &result_pat,
-			     double &result_x,
-			     double &result_x1,
-			     double &result_dMO, 
-			     const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const{
-  
   const int N_layers=8;
 
-  const std::vector<std::list<double>> *  rpc_x;
-  if (iphi){
-    rpc_x = &rpcLayerHits.hits_in_layer_phi;
-  } else {
-    rpc_x = &rpcLayerHits.hits_in_layer_eta;
-  }
+  const std::vector<std::vector<double>>& rpc_phi {rpcLayerHits.hits_in_layer_phi};
   
   int l_start_max=2; //max layer of first hit
-  if (rpc_x->at(6).size()+rpc_x->at(7).size()>0) l_start_max=5; // special "feet" towers
+  if (rpc_phi.at(6).size()+rpc_phi.at(7).size()>0) l_start_max=5; // special "feet" towers
 
   // reset parameters
-  result_x=0;
-  result_x1=0;
-  result_pat=0;
-  double result_dMM=9999;
-  result_dMO=9999;
-  int n_max=0;
-
+  phi_middle=0;
+  phi_outer=0;
+  double result_dMM{9999}, result_dMO{9999};
+  int nHits_pat=0;
 
   // Loop on start layer
   for (int l_start=0; l_start<=l_start_max; l_start++){
     // Loop on hits of start layer, for each hit try a new pattern
-    for (std::list<double>::const_iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); ++i_start){
-      int n_hits=1;
-      unsigned int pat=(1<<l_start); // bit pattern of hit layers
-      double dMO=9999; // disstance middle-outer station
-      double dMM=9999; // distance RPC1-RPC2 on middle stations
+    for (const double& phi_start : rpc_phi.at(l_start)){
+        // Initialize a new pattern
+        int nHits=1;
+        double dMO{9999}; // lowest deltaX between two consecutive hits, when having at least one of the two hit in BO
+        double dMM{9999}; // lowest deltaX between two consecutive hits, when having both hits in BM, or both in BO (but different doublets)
 
-      double current_x =*i_start; // set current_x to the starting hit
-      int l_current = l_start;
-      ATH_MSG_DEBUG("patfinder: l_start = "<< l_start << " x= " << current_x
-		    << " pat= "    << (std::bitset<8>) pat); 
+        int current_l = l_start;
+        double current_phi = phi_start; // set current_x to the starting hit
 
-      // ----- add compatible hits in other layers ----//
-      // loop on test layers:
-      for (int l_test=l_start+1; l_test<N_layers; l_test++){
-	int n_layer=0;
-	double x_layer=0;
-	double delta_layer=999;
-	//  loop on hits of test layer and picks the one with smaller distance from current_x
-	for (std::list<double>::const_iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); ++i_test){
-	  double delta=-1;
-	  // check if within the road
-	  if (deltaOK(l_current,l_test,current_x,*i_test,iphi,delta)){
-	    n_layer++;
-	    // if closest hit update x_layer
-	    if (delta<delta_layer) {
-	      delta_layer=delta;
-	      x_layer=*i_test;	      
-	    }
-	  }
-	}
-	if (n_layer>0) {// compatible hit found in this layer increase n_hits
-	  n_hits+=1;
-	  current_x=x_layer;
-	  pat+=(1<<l_test);
-	  l_current=l_test;
-	  if (l_start<4&&l_test>=4&&delta_layer<dMO){
-	    dMO=delta_layer;
-	  }else if (l_start<2&&l_test>=2&&l_test<4&&delta_layer<dMM) {
-	    dMM=delta_layer;
-	  } else  if (l_start>=4&&l_start<5&&l_test>=6&&delta_layer<dMM) {
-	    dMM=delta_layer;
-	  }
-	}
-	ATH_MSG_DEBUG("patfinder:  l_test = "<< l_test << " n_layer= "<< n_layer 
-		      << " x= " << current_x << " pat= " << (std::bitset<8>)pat);
-      }
-      // if longest pattern found, update result
-      if (n_hits>n_max) { 
-	n_max=n_hits;
-	result_x=*i_start;
-	result_pat=pat;
-	result_dMO=dMO; 
-	result_dMM=dMM; 
-	result_x1=current_x;
-      }else if (n_hits==n_max) { 
-	// if same lenght but smallest dMM/dMO, update result
-	if (dMM<result_dMM||(dMM==result_dMM&&dMO<result_dMO)){
-	  result_x=*i_start;
-	  result_pat=pat;
-	  result_dMO=dMO;
-	  result_dMM=dMM;
-	  result_x1=current_x;
-	}
-      }
+        // ----- add compatible hits in other layers ----//
+            // loop on test layers:
+            for (int l_test=l_start+1; l_test<N_layers; l_test++){
+                double min_delta {999};   // min deltaX in this test laeyr
+                double layer_phi {0.};
+
+                for (const double& phi_test : rpc_phi.at(l_test)){
+                    double delta=-1;
+                    // check if within the road
+                    if (deltaOK(current_l,l_test,current_phi, phi_test,true,delta)){
+                        // if closest hit we keep it as best hit for this test layer
+                        if (delta < min_delta) {
+                            min_delta = delta;
+                            layer_phi = phi_test;
+                        }
+                    }
+                }
+                if (min_delta < 998){   //we found at least one hit in the window
+                    current_l = l_test;	
+                    current_phi = layer_phi;
+                    nHits+=1;
+                    dMO = (l_start<4 and l_test>=4) ? std::min(dMO, min_delta) : dMO;
+                    dMM = (l_start<2 and l_test>=2 and l_test<4) or (l_start>=4 and l_start<5 and l_test>=6) ? std::min(dMM, min_delta) : dMM;
+                }
+            }
+
+            // if longest pattern found and the last hit is in a layer > BM doublet1, update result
+            if (nHits>nHits_pat and current_l > 1) { 
+                nHits_pat=nHits;
+                result_dMO=dMO; 
+                result_dMM=dMM; 
+                phi_middle=phi_start;
+                phi_outer=current_phi;
+            }else if (nHits==nHits_pat and current_l > 1) { 
+                // if same lenght but smallest dMM/dMO, update result
+                if (dMM<result_dMM or (dMM==result_dMM and dMO<result_dMO)){
+                    result_dMO=dMO;
+                    result_dMM=dMM;
+                    phi_middle=phi_start;
+                    phi_outer=current_phi;
+                }
+            }
+        }//for i_start
+    }//for l_start
+	
+    if (nHits_pat>2) {
+        ATH_MSG_DEBUG("patfinder: BEST phi path dMM= "<<result_dMM <<"  dMO= "<<result_dMO 
+                <<"  phi_middle= "<<phi_middle <<"  phi_outer= "<<phi_outer);
+        return true;
     }
-  }
-  if (n_max>2) {
-    ATH_MSG_DEBUG("patfinder: BEST pat= " << (std::bitset<8>)result_pat
-		  <<"  dMM= "<<result_dMM <<"  dMO= "<<result_dMO 
-		  <<"  x0= "<<result_x <<"  x1= "<<result_x1);
-  }
-  return n_max;
-  
+    return false;
 }
 
 // --------------------------------------------------------------------------------
@@ -408,141 +352,120 @@ double TrigL2MuonSA::RpcPatFinder::calibR(const std::string& stationName, double
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-void TrigL2MuonSA::RpcPatFinder::abcal(unsigned int result_pat, 
-                                       size_t index[], 
-                                       double aw[], 
-                                       double bw[],
+void TrigL2MuonSA::RpcPatFinder::abcal(const std::bitset<8>& result_pat, 
+                                       const std::array<size_t, 8>& index, 
+                                       std::array<std::reference_wrapper<double>, 3>& aw, 
+                                       std::array<std::reference_wrapper<double>, 3>& bw, 
                                        const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const{
-  const float ZERO_LIMIT = 1.e-5;
+    const float ZERO_LIMIT = 1.e-5;
+    const std::vector<std::vector<double>>& rpc_R {rpcLayerHits.hits_in_layer_R};
+    const std::vector<std::vector<double>>& rpc_Z {rpcLayerHits.hits_in_layer_Z};
 
-  const std::vector<std::vector<double> > * rpc_R;
-  const std::vector<std::vector<double> > * rpc_Z;
-  rpc_R = &rpcLayerHits.hits_in_layer_R;
-  rpc_Z = &rpcLayerHits.hits_in_layer_Z;
-  double R[8]={0,0,0,0,0,0,0,0};
-  double Z[8]={0,0,0,0,0,0,0,0};
-  unsigned int bit=1;
+    // doublet companion                                    
+    auto getCompanion = [](const int& l) -> int {
+        return (l%2==0) ? l+1 : l-1;
+    };
 
-  int hot_min[3]={999,999,999};
-  int hot_max[3]={-999,-999,-999};
-  
-  int out_counter=0;
-
-  for(int i=0; i<8; i++){
-    if(i != 0) bit = bit << 1;
-    if((result_pat & bit)==false) continue;
-    R[i] = rpc_R->at(i).at(index[i]);
-    Z[i] = rpc_Z->at(i).at(index[i]);
+    auto getAvgRZ= [&rpc_R, &rpc_Z, &result_pat, &index]
+                    (double& R, double& Z, const int& l, const int& companion) -> void {
     
-    if(i < hot_min[0])          hot_min[0] = i;
-    if(i < hot_min[1])          hot_min[1] = i;
-    if(1 < i && out_counter <1) hot_min[2] = i;
-    
-    if(i < 4){
-      hot_max[0] = i;
-      hot_max[1] = i;
-    }
-    if(hot_max[2] < i )         hot_max[2] = i;
-
-    if(1 < i) out_counter++;
-  }//for i 
- 
-  unsigned int inn_bit;
-  inn_bit=0x3;//00000011
-  if((result_pat & inn_bit)==inn_bit){
-    R[hot_min[0]] = (R[0]+R[1])/2.0;
-    Z[hot_min[0]] = (Z[0]+Z[1])/2.0;
-  }
-  inn_bit=0xC;//00001100
-  if((result_pat & inn_bit)==inn_bit){
-    R[hot_max[0]] = (R[2]+R[3])/2.0;
-    Z[hot_max[0]] = (Z[2]+Z[3])/2.0;
-  }
-    
-  unsigned int mid_bit;
-  mid_bit=0x3;//00000011
-  if((result_pat & mid_bit)==mid_bit){
-    R[hot_min[1]] = (R[0]+R[1])/2.0;
-    Z[hot_min[1]] = (Z[0]+Z[1])/2.0;
-  }
-  mid_bit=0xC;//00001100
-  if((result_pat & mid_bit)==mid_bit){
-    R[hot_max[1]] = (R[2]+R[3])/2.0;
-    Z[hot_max[1]] = (Z[2]+Z[3])/2.0;
-  }
-  
-  unsigned int out_bit;
-  out_bit=0xC;//00001100
-  if((result_pat & out_bit)==out_bit){
-    R[hot_min[2]] = (R[2]+R[3])/2.0;
-    Z[hot_min[2]] = (Z[2]+Z[3])/2.0;
-  }
-  
-  out_bit=0x30;//00110000
-  if((result_pat & out_bit)==out_bit){
-    R[hot_max[2]] = (R[4]+R[5])/2.0;
-    Z[hot_max[2]] = (Z[4]+Z[5])/2.0;
-  }
-
-  out_bit=0xC0;//11000000
-  if((result_pat & out_bit)==out_bit){
-    R[hot_max[2]] = (R[6]+R[7])/2.0;
-    Z[hot_max[2]] = (Z[6]+Z[7])/2.0;
-  }
-
-  inn_bit=0xF;//00001111
-  double theta_m,theta_t, theta_f;
-  if((result_pat & inn_bit)==inn_bit){
-    theta_m = std::atan2(R[hot_min[0]],Z[hot_min[0]]);
-    theta_t = std::atan2(R[hot_max[0]]-R[hot_min[0]],Z[hot_max[0]]-Z[hot_min[0]]);
-    theta_f = (theta_m+theta_t)/2.0;
-      
-    aw[0] = std::tan(theta_f);
-    bw[0] = R[hot_min[0]] - Z[hot_min[0]]*aw[0];
-    aw[0] = 1.0/aw[0];
-  }else{
-    if(hot_min[0]!=999){
-      aw[0] = Z[hot_min[0]] / R[hot_min[0]];
-      bw[0] = 0.0;
-    }else{
-      aw[0] = Z[hot_max[0]] / R[hot_max[0]];
-      bw[0] = 0.0;
-    }//else
-  }//else 
-
-  for(int i=1;i<3;i++){
-    if(hot_max[i]!=-999 && hot_min[i]!=999){
-      if(std::abs(Z[hot_max[i]] - Z[hot_min[i]]) > ZERO_LIMIT) {
-        aw[i] = (R[hot_max[i]]- R[hot_min[i]]) / (Z[hot_max[i]]-Z[hot_min[i]]);
-        bw[i] = R[hot_max[i]] - Z[hot_max[i]]*aw[i];
-        aw[i] = 1.0/aw[i];
-      }else if(i<2){
-        aw[i] = Z[hot_min[i]] / R[hot_min[i]];
-        bw[i] = 0.0;
-      } else{
-        aw[i] = Z[hot_max[i]] / R[hot_max[i]];
-        bw[i] = 0.0;
-      }
-    }else{
-      if(i <2){
-        if(hot_min[i]!=999){
-          aw[i] = Z[hot_min[i]] / R[hot_min[i]];
-          bw[i] = 0.0;
-        }else if(hot_max[i]!=-999){
-          aw[i] = Z[hot_max[i]] / R[hot_max[i]];
-          bw[i] = 0.0;
+        if (result_pat.test(companion)){
+            R = (rpc_R.at(l).at(index[l]) + rpc_R.at(companion).at(index[companion])) / 2.0;
+            Z = (rpc_Z.at(l).at(index[l]) + rpc_Z.at(companion).at(index[companion])) / 2.0;
+            return;
         }
-      }else{
-        if(hot_max[i]!=-999){
-          aw[i] = Z[hot_max[i]] / R[hot_max[i]];
-          bw[i] = 0.0;
-        }else if(hot_min[i]!=999){
-          aw[i] = Z[hot_min[i]] / R[hot_min[i]];
-          bw[i] = 0.0;
-        }
-      }    
+        R = rpc_R.at(l).at(index[l]);
+        Z = rpc_Z.at(l).at(index[l]);
+    };
+
+    /// Calculate inner and middle coefficients
+    int l1 {4}, l2 {0};
+    double R1{0}, R2{0}, Z1{0}, Z2{0};
+    for(int i=0; i<4; i++){
+        if(!result_pat.test(i)) continue;
+        l1 = std::min(l1, i);
+        l2 = std::max(l2, i);
     }
-  }
+    const int comp1{getCompanion(l1)}, comp2{getCompanion(l2)};
+    if (l1 != 4 and l1 != l2 and l2 != comp1){// we have two hits in BM and not in the same doublet 
+        
+        getAvgRZ(R1, Z1, l1, comp1);
+        getAvgRZ(R2, Z2, l2, comp2);
+
+        ///Inner
+        if(((result_pat & std::bitset<8>("00001111")).count() > 3) and std::abs(Z2-Z1) > ZERO_LIMIT){
+
+            double theta_m {std::atan2(R1, Z1)};
+            double theta_t {std::atan2(R2-R1, Z2-Z1)};
+            double theta_f {(theta_m+theta_t)/2.};
+
+            aw[0].get() = std::tan(theta_f);
+            bw[0].get() = R1 - Z1*aw[0].get();
+
+        }else{
+            aw[0].get() = R1/Z1;
+            bw[0].get() = 0.;
+        }
+        
+        ///Middle
+        if (std::abs(Z2-Z1) > ZERO_LIMIT){
+            aw[1].get() = (R2-R1)/(Z2-Z1);
+            bw[1].get() = R2 - Z2*aw[1].get();
+        }
+        else{// if hits have very close z, we use only the earlier hit
+            aw[1].get() = R1/Z1;
+            bw[1].get() = 0.;
+        }
+    }
+    else if (l1 != 4){// either we have two hits in the same doublet or only one hit
+        getAvgRZ(R1, Z1, l1, comp1);
+        aw[0].get() = R1/Z1;
+        bw[0].get() = 0.;
+        aw[1].get() = aw[0].get();
+        bw[1].get() = 0.;
+
+    }// if no hits in BM, we will extrapolate the inner and BM slope using the first hit in BO
+
+    /// Calculate outer coefficients
+    int l3 = 8, l4 = 0;
+    double R3{0}, R4{0}, Z3{0}, Z4{0};
+    for(int i=2; i<8; i++){
+        if(!result_pat.test(i)) continue;
+        l3 = std::min(l3, i);
+        l4 = std::max(l4, i);
+    }
+    const int comp3{getCompanion(l3)}, comp4{getCompanion(l4)};
+    if ( l3 != 8 and l3 != l4 and l4 != comp3){
+
+        getAvgRZ(R3, Z3, l3, comp3);
+        getAvgRZ(R4, Z4, l4, comp4);
+
+        if (std::abs(Z4-Z3) > ZERO_LIMIT){
+            aw[2].get() = (R4-R3)/(Z4-Z3);
+            bw[2].get() = R4 - Z4*aw[2].get();
+        }
+        else{// hits with very close Z, we use onl one hit.
+            aw[2].get() = R4/Z4;
+            bw[2].get() = 0.;
+        }
+    }
+    else if (l3 != 8){ // we have only one hit or they are in the same doublet
+        getAvgRZ(R3, Z3, l3, comp3);
+        aw[2].get() = R3/Z3;
+        bw[2].get() = 0.;
+    }// if no hits in outer layers, we will extrapolate the outer slope using the last hit in BM
+
+    if (std::abs(aw[0].get()) < ZERO_LIMIT){    // if no hits in BM, we use the first in in BO
+        getAvgRZ(R3, Z3, l3, comp3);
+        aw[0].get() =  R3/Z3;
+        aw[1].get() = aw[0].get();
+    }
+    if (std::abs(aw[2].get()) < ZERO_LIMIT){    // if no hits in outer layers, we use the last in BM
+        getAvgRZ(R2, Z2, l2, comp2);
+        aw[2].get() = R2/Z2;
+    }
+                                    
+
 }//abcal()
 
 // --------------------------------------------------------------------------------

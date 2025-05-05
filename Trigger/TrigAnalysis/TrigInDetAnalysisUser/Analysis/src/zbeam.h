@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Thu 30 Jul 2015 10:50:19 CEST 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -30,11 +30,11 @@ public:
     
     if ( refz.size()!=testz.size() || refz.size()==0 ) return;
 
-    double _min = refz.back().first;
-    double _max = refz[0].first;
+    double min_ = refz.back().first;
+    double max_ = refz[0].first;
 
-    for ( unsigned i=refz.size() ; i-- ; )     if ( refz[i].first>_max ) _max = refz[i].first;
-    for ( unsigned i=0 ; i<refz.size() ; i++ ) if ( refz[i].first<_min ) _min = refz[i].first;
+    for ( unsigned i=refz.size() ; i-- ; )     if ( refz[i].first>max_ ) max_ = refz[i].first;
+    for ( unsigned i=0 ; i<refz.size() ; i++ ) if ( refz[i].first<min_ ) min_ = refz[i].first;
   
     double minz = refz.back().second;
     double maxz = minz;
@@ -50,8 +50,8 @@ public:
     
     gStyle->SetOptStat(0);
 
-    TProfile* hr = new TProfile( "refz",  ";lumi block;z reference [mm]", _max-_min+1, _min-0.5, _max+0.5 );
-    TProfile* ht = new TProfile( "testz", ";lumi block;z reference [mm]", _max-_min+1, _min-0.5, _max+0.5 );
+    TProfile* hr = new TProfile( "refz",  ";lumi block;z reference [mm]", max_-min_+1, min_-0.5, max_+0.5 );
+    TProfile* ht = new TProfile( "testz", ";lumi block;z reference [mm]", max_-min_+1, min_-0.5, max_+0.5 );
 
     TH1D* h = new TH1D("zres", ";#Delta z [mm]", 100, -10, 10 ); 
 

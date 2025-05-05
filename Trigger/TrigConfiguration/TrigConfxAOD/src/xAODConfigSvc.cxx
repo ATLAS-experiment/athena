@@ -769,7 +769,7 @@ namespace TrigConf {
 
       if (firstEvent) {
 
-          REPORT_MESSAGE( MSG::WARNING )
+          REPORT_MESSAGE( MSG::DEBUG )
              << "L1 and HLT prescales will not be available via the TrigConf::xAODConfigSvc in the first "
              << "event when running with UseInFileMetadata=False" << endmsg;
              

@@ -38,9 +38,7 @@ namespace TrigL2MuonSA {
   {
   public:
 
-    MdtRegionDefiner(const std::string& type, 
-		     const std::string& name,
-		     const IInterface*  parent);
+    using AthAlgTool::AthAlgTool;
     
     virtual StatusCode initialize() override;
 
@@ -60,19 +58,14 @@ namespace TrigL2MuonSA {
     
   private:
     StatusCode prepareTgcPoints(const TrigL2MuonSA::TgcHits& tgcHits);
-    void find_barrel_road_dim(float max_road, float aw, float bw,
-			      float rMmin,float rMax,float *zMin,float *zMax) const;
-    void find_endcap_road_dim(float road,float aw, float bw, float zMin,
-			      float zMax,float *rMin,float *rMax) const;
+    void find_barrel_road_dim(const float max_road, const float aw, const float bw,
+			      const float rMmin, const float rMax, float& zMin, float& zMax) const;
+    void find_endcap_road_dim(const float road, const float aw, const float bw, const float zMin,
+			      const float zMax,float& rMin,float& rMax) const;
     void find_eta_min_max(float zMin, float rMin,
 			  float zMax, float rMax,
 			  float& etaMin, float& etaMax) const;
     void find_phi_min_max(float phiMiddle, float& phiMin, float& phiMax) const;
-
-    StatusCode computePhi(const TrigRoiDescriptor*          p_roids,
-			  const TrigL2MuonSA::RpcFitResult& rpcFitResult,
-			  const TrigL2MuonSA::MdtRegion&    mdtRegion,
-			  TrigL2MuonSA::MuonRoad&           muonRoad) const;
       
     StatusCode computePhi(const TrigRoiDescriptor*          p_roids,
 			  const TrigL2MuonSA::TgcFitResult& tgcFitResult,
