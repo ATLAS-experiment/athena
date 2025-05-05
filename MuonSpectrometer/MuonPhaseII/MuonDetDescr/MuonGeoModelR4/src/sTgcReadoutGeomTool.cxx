@@ -199,15 +199,17 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         ++gasGap;
         /// StripLayer
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first); 
-        StripLayer stripLayer(gapVol.transform * Amg::getRotateZ3D(-90. * Gaudi::Units::deg) 
-                                                * Amg::getRotateY3D(180* Gaudi::Units::deg), stripDesign, 
+        StripLayer stripLayer(factoryCache.trfNodeMaker.makeTransform(gapVol.transform
+                                                *  Amg::getRotateZ3D(-90. * Gaudi::Units::deg) 
+                                                * Amg::getRotateY3D(180* Gaudi::Units::deg)), stripDesign, 
                                                 sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0));
         ATH_MSG_VERBOSE("Added new diamond strip layer at "<< stripLayer);
         define.stripLayers.push_back(std::move(stripLayer));
 
         /// WireGroup Layer      
         wireGroupDesign = (*factoryCache.wireGroupDesigns.emplace(wireGroupDesign).first);
-        StripLayer wireGroupLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), 
+        StripLayer wireGroupLayer(factoryCache.trfNodeMaker.makeTransform(gapVol.transform 
+                                              * Amg::getRotateY3D(180* Gaudi::Units::deg)), 
                                                 wireGroupDesign, sTgcReadoutElement::createHash(gasGap, 
                                                 sTgcIdHelper::Wire, 0));
         ATH_MSG_VERBOSE("Added new diamond wireGroup layer at "<<wireGroupLayer);
@@ -215,7 +217,8 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
 
         /// Pad Layer
         padDesign = (*factoryCache.padDesigns.emplace(padDesign).first);
-        StripLayer padLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), 
+        StripLayer padLayer(factoryCache.trfNodeMaker.makeTransform(gapVol.transform 
+                                              * Amg::getRotateY3D(180* Gaudi::Units::deg)), 
                                                 padDesign, sTgcReadoutElement::createHash(gasGap, 
                                                 sTgcIdHelper::Pad, 0));
         ATH_MSG_VERBOSE("Added new diamond pad layer at "<<padLayer);

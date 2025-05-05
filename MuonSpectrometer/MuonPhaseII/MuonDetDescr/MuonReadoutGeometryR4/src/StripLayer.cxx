@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonReadoutGeometryR4/StripLayer.h>
-#include <GeoModelHelpers/TransformSorter.h>
 namespace MuonGMR4{
 
     std::ostream& operator<<(std::ostream& ostr, const StripLayer& lay) {
@@ -11,22 +10,29 @@ namespace MuonGMR4{
         ostr<<"Hash: "<<static_cast<unsigned int>(lay.hash());        
         return ostr;
     }
-    StripLayer::StripLayer(const Amg::Transform3D& layerTransform,
+    StripLayer::StripLayer(TransformPtr layerTransform,
                            StripDesignPtr design,
                            const IdentifierHash hash):
-         m_transform{layerTransform},
-         m_design{std::move(design)},
-         m_hash{hash} {        
+        StripLayer{std::move(layerTransform), design, design, hash} {}
+    
+    StripLayer::StripLayer(TransformPtr layerTransform,
+                           StripDesignPtr etaDesign, StripDesignPtr phiDesign,
+                           const IdentifierHash hash):
+         m_transform{std::move(layerTransform)},
+         m_etaDesign{std::move(etaDesign)},
+         m_phiDesign{std::move(phiDesign)},
+         m_hash{hash} {       
     }
     bool StripLayer::operator<(const StripLayer& other) const{
         if (hash() != other.hash()) {
             return hash() < other.hash();
         }
-        const GeoTrf::TransformSorter sorter{};
-        const int trf = sorter.compare(m_transform, other.m_transform);
-        if (trf) {
-            return trf <0;
+        if (m_etaDesign != other.m_etaDesign) {
+            return m_etaDesign < other.m_etaDesign;
         }
-        return (*m_design) < (*other.m_design);        
+        if (m_phiDesign != other.m_phiDesign) {
+            return m_phiDesign < other.m_phiDesign;
+        }
+        return m_transform < other.m_transform;        
     }
 }

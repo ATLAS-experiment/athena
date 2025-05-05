@@ -107,7 +107,8 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                                              * Amg::getRotateX3D(180.* Gaudi::Units::deg)};
                 /// Reserve the first bit for the isStrip property
                 const IdentifierHash hash{gasGap << 1};
-                wireLayout = std::make_unique<StripLayer>(trans, (*factoryCache.wireLayouts.insert(std::move(wireGrp)).first), hash);
+                wireLayout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
+                                                          (*factoryCache.wireLayouts.insert(std::move(wireGrp)).first), hash);
             }
             if (!stripLayout && table.bottomStripPos.size()) {
                 RadialStripDesignPtr radDesign = std::make_unique<RadialStripDesign>();
@@ -124,7 +125,8 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                 const Amg::Transform3D trans{pVolTrans.transform 
                                              * Amg::getRotateZ3D(90.* Gaudi::Units::deg)                                            
                                              * Amg::getRotateX3D(90.*Gaudi::Units::deg)};
-                stripLayout = std::make_unique<StripLayer>(trans, (*factoryCache.stripLayouts.insert(std::move(radDesign)).first), hash);                
+                stripLayout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
+                                                          (*factoryCache.stripLayouts.insert(std::move(radDesign)).first), hash);                
             }
         }
         ++gasGap;

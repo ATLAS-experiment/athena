@@ -8,16 +8,17 @@
 #include <RDBAccessSvc/IRDBAccessSvc.h>
 #include <RDBAccessSvc/IRDBRecordset.h>
 
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
+#include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
+
 #include <GeoModelKernel/GeoFullPhysVol.h>
 #include <GeoModelKernel/GeoPhysVol.h>
-#include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoBox.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
+
 
 #include <ActsGeoUtils/SurfaceBoundSet.h>
 #ifndef SIMULATIONBASE
@@ -162,7 +163,8 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
             define.layers.resize(etaIdx + 1);
         }
 
-        auto etaLayer = std::make_unique<StripLayer>(gapVol.transform, etaDesign, etaHash);
+        auto etaLayer = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform), 
+                                                     etaDesign, etaHash);
         define.layers[etaIdx] = (*factoryCache.stripLayers.emplace(std::move(etaLayer)).first);
         
         ATH_MSG_VERBOSE("Added new eta gap at "<<(*define.layers[etaIdx]));
@@ -187,7 +189,8 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         if (phiIdx >= define.layers.size()) {
             define.layers.resize(phiIdx + 1);
         }
-        auto phiLayer = std::make_unique<StripLayer>(gapVol.transform  * Amg::getRotateZ3D(90. * Gaudi::Units::deg),
+        auto phiLayer = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform  * 
+                                                        Amg::getRotateZ3D(90. * Gaudi::Units::deg)),
                                                      phiDesign, phiHash);
         define.layers[phiIdx] = (*factoryCache.stripLayers.emplace(std::move(phiLayer)).first);
         ATH_MSG_VERBOSE("Added new phi gap at "<<(*define.layers[phiIdx]));
