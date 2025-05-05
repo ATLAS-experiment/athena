@@ -282,14 +282,12 @@ class FeatureHandler:
         
         Variables_WithEnergyTypes = []
         Variables_WithEnergyTypes += ["EtOver"]
-        Variables_WithEnergyTypes += ["1stEtOver"]
         Variables_WithEnergyTypes += ["1stBDTEtOver"]
         for iVar in Variables_WithEnergyTypes:
             self.addToFeatures_AllTypes_AllEnergyVariants(iVar, self.m_VarTypeName_Ratio, "F")
         #end loop over variables with energy types
         
         Variables = []
-        Variables += ["1stEtOverTypeEt"]
         Variables += ["1stBDTEtOverTypeEt"]
         Variables += ["EFOsOverTotalEFOs"]
         for iVar in Variables:
