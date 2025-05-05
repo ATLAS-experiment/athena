@@ -63,7 +63,8 @@ VP1RawDataColl_sTGC_RDO::~VP1RawDataColl_sTGC_RDO()
 //____________________________________________________________________
 void VP1RawDataColl_sTGC_RDO::assignDefaultMaterial(SoMaterial*m) const
 {
-  VP1MaterialButton::setMaterialParametersFromRGB( m, 255, 136, 0, 0.1 );
+  // VP1MaterialButton::setMaterialParametersFromRGB( m, 255, 136, 0, 0.1 );
+  VP1MaterialButton::setMaterialParameters( m, 0.42, 0.96, 0.16, 0.1 );
 }
 
 //____________________________________________________________________
