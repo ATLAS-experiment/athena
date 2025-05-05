@@ -135,7 +135,7 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
     return acc
 
 
-def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow', 'AntiKt4EMPFlowByVertex']):
+def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow']):
     """
     Run flavour tagging algorithms during reconstruction (AOD or ESD production).
     """
