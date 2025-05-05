@@ -74,7 +74,7 @@ namespace MuonR4 {
             const xAOD::UncalibratedMeasurement* m_primaryMeas{nullptr};
             const xAOD::UncalibratedMeasurement* m_secondaryMeas{nullptr};
 
-            const MuonGMR4::Chamber* m_chamber{xAOD::readoutElement(m_primaryMeas)->chamber()};
+            const MuonGMR4::Chamber* m_chamber{xAOD::muonReadoutElement(m_primaryMeas)->chamber()};
             const MuonGMR4::SpectrometerSector* m_msSector{m_chamber->parent()};
             /** @brief Flag indicating that the measurement is an eta measurement */
             bool m_measEta{!m_msSector->idHelperSvc()->measuresPhi(identify())};
