@@ -41,7 +41,7 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
       // check if the vectors are not empty
       if(z0SinTheta_vec.empty()) continue;
       // index of vertex with min(z0)
-      int selectedVertexIndex = -1;
+      unsigned int selectedVertexIndex = -1;
       if (m_useMinZ0Vertex) {
         // Find the vertex with the minimum absolute value of z0SinTheta
         auto minAbsIt = std::min_element(z0SinTheta_vec.begin(), z0SinTheta_vec.end(), 
@@ -54,7 +54,7 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
         }
       }
       // loop through vertices
-      for (int iVtx=0; iVtx < z0SinTheta_vec.size(); iVtx++){
+      for (unsigned int iVtx=0; iVtx < z0SinTheta_vec.size(); iVtx++){
         // if we want to do exclusive, only use the vertex with the min(z0)
         if (m_useMinZ0Vertex && selectedVertexIndex!=iVtx) continue;
         // retrieve vertex link
