@@ -1,6 +1,6 @@
 """Define a function to configure PLR_ConditionsSummaryCfg
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -16,7 +16,7 @@ def PLR_ConditionsSummaryCfg(flags, name="PLR_ConditionsSummary", **kwargs):
     acc.merge(ITkPixelDCSCondStatusAlgCfg(flags))
     acc.merge(ITkPixelDeadMapCondAlgCfg(flags))
 
-    kwargs.setdefault("PixelReadoutManager", "PLR_ReadoutManager")
+    kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("PixelDetEleCollKey", "PLR_DetectorElementCollection")
     kwargs.setdefault("PixelDCSStateCondData", "ITkPixelDCSStateCondData")
     kwargs.setdefault("PixelDCSStatusCondData", "ITkPixelDCSStatusCondData")

@@ -30,37 +30,21 @@ namespace TrigL2MuonSA {
 class RpcRoadDefiner: public AthAlgTool
 {
  public:
-
-  RpcRoadDefiner(const std::string& type,
-                 const std::string& name,
-                 const IInterface*  parent);
+  using AthAlgTool::AthAlgTool;
 
   virtual StatusCode initialize() override;
 
  public:
-  StatusCode defineRoad(const LVL1::RecMuonRoI*             p_roi,
+  StatusCode defineRoad(const xAOD::MuonRoI*    p_roi,
 			const bool                          insideOut,
 			TrigL2MuonSA::MuonRoad&             muonRoad,
-			TrigL2MuonSA::RpcHits&              rpcHits,
-                        const TrigL2MuonSA::RpcLayerHits&   rpcLayerHits,
+      const TrigL2MuonSA::RpcLayerHits&   rpcLayerHits,
 			const ToolHandle<RpcPatFinder>*     rpcPatFinder,
 			TrigL2MuonSA::RpcFitResult&         rpcFitResult,
-			double                              roiEtaMinLow,
-			double                              roiEtaMaxLow,
-			double                              roiEtaMinHigh,
-			double                              roiEtaMaxHigh) const;
-
-  StatusCode defineRoad(const xAOD::MuonRoI*                p_roi,
-			const bool                          insideOut,
-			TrigL2MuonSA::MuonRoad&             muonRoad,
-			TrigL2MuonSA::RpcHits&              rpcHits,
-                        const TrigL2MuonSA::RpcLayerHits&   rpcLayerHits,
-			const ToolHandle<RpcPatFinder>*     rpcPatFinder,
-			TrigL2MuonSA::RpcFitResult&         rpcFitResult,
-			double                              roiEtaMinLow,
-			double                              roiEtaMaxLow,
-			double                              roiEtaMinHigh,
-			double                              roiEtaMaxHigh) const;
+			const double                        roiEtaMinLow,
+			const double                        roiEtaMaxLow,
+			const double                        roiEtaMinHigh,
+			const double                        roiEtaMaxHigh) const;
 
   void setRoadWidthForFailure(double rWidth_RPC_Failed){ m_rWidth_RPC_Failed = rWidth_RPC_Failed; };
   void setRpcGeometry(bool use_rpc){ m_use_rpc = use_rpc; };
