@@ -43,7 +43,7 @@ class SubtractedVolumeBounds final: public VolumeBounds {
   SubtractedVolumeBounds();
 
   /**Constructor - the box boundaries */
-  SubtractedVolumeBounds(Volume* outerVol, Volume* innerVol);
+  SubtractedVolumeBounds(std::unique_ptr<Volume> outerVol, std::unique_ptr<Volume> innerVol);
 
   /**Copy Constructor */
   SubtractedVolumeBounds(const SubtractedVolumeBounds& bobo);
@@ -91,14 +91,12 @@ class SubtractedVolumeBounds final: public VolumeBounds {
   static Trk::Volume* createSubtractedVolume(const Amg::Transform3D& transf,
                                       Trk::Volume* subtrVol) ;
 
-  Volume* m_outer;
-  Volume* m_inner;
-
+  std::unique_ptr<Volume> m_outer{};
+  std::unique_ptr<Volume> m_inner{};
   /** There's only one single object Acessor for the moment
      has to be implemented if Subtracteds are used more widely */
-  EightObjectsAccessor m_objectAccessor;
-
-  std::vector<bool> m_boundsOrientation;
+  EightObjectsAccessor m_objectAccessor{};
+  std::vector<bool> m_boundsOrientation{};
 };
 
 inline SubtractedVolumeBounds* SubtractedVolumeBounds::clone() const {
@@ -110,11 +108,11 @@ inline bool SubtractedVolumeBounds::inside(const Amg::Vector3D& pos,
   return (m_outer->inside(pos, tol) && !m_inner->inside(pos, -tol));
 }
 
-inline const Volume* SubtractedVolumeBounds::outer() const { return m_outer; }
-inline Volume* SubtractedVolumeBounds::outer() { return m_outer; }
+inline const Volume* SubtractedVolumeBounds::outer() const { return m_outer.get(); }
+inline Volume* SubtractedVolumeBounds::outer() { return m_outer.get(); }
 
-inline const Volume* SubtractedVolumeBounds::inner() const { return m_inner; }
-inline Volume* SubtractedVolumeBounds::inner() { return m_inner; }
+inline const Volume* SubtractedVolumeBounds::inner() const { return m_inner.get(); }
+inline Volume* SubtractedVolumeBounds::inner() { return m_inner.get(); }
 
 inline ObjectAccessor SubtractedVolumeBounds::boundarySurfaceAccessor(
     const Amg::Vector3D&, const Amg::Vector3D&, bool) const {

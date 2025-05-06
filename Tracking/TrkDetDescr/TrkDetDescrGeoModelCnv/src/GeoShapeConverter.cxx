@@ -145,8 +145,8 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                 const double angle = i * twicePhiH;
                 Amg::Transform3D totalTransform = transf * Amg::getRotateZ3D(angle) * xTranslation;
                 auto volS = std::make_unique<Volume>(*bVol, totalTransform);
-                auto combBounds =std::make_shared<SubtractedVolumeBounds>(volume.release(),
-                                                                          volS.release());
+                auto combBounds =std::make_shared<SubtractedVolumeBounds>(std::move(volume),
+                                                                          std::move(volS));
                 volume = std::make_unique<Volume>(nullptr, std::move(combBounds));
             }
             return volume;
@@ -400,10 +400,10 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         if (cyls.size() < 2) {
             return std::move(cyls[0]);
         } else {
-            auto comb =std::make_shared<CombinedVolumeBounds>(cyls[0].release(), cyls[1].release(), false);
+            auto comb =std::make_shared<CombinedVolumeBounds>(std::move(cyls[0]), std::move(cyls[1]), false);
             std::unique_ptr<Volume> combVol = std::make_unique<Volume>(nullptr, std::move(comb));
             for (unsigned int ic = 2; ic < cyls.size(); ++ic) {
-                comb = std::make_shared<CombinedVolumeBounds>(combVol.release(), cyls[ic].release(), false);
+                comb = std::make_shared<CombinedVolumeBounds>(std::move(combVol), std::move(cyls[ic]), false);
                 combVol = std::make_unique<Volume>(nullptr, std::move(comb));
             }
             return combVol;
@@ -481,8 +481,8 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         const GeoShape* shB = sub->getOpB();
         std::unique_ptr<Volume> volA = translateGeoShape(shA, transf);
         std::unique_ptr<Volume> volB = translateGeoShape(shB, transf);
-        auto volBounds = std::make_shared<SubtractedVolumeBounds>(volA.release(),
-                                                                  volB.release());
+        auto volBounds = std::make_shared<SubtractedVolumeBounds>(std::move(volA),
+                                                                  std::move(volB));
         return std::make_unique<Volume>(nullptr, std::move(volBounds));
     } else if (sh->type() == "Union") {
         const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(sh);
@@ -490,8 +490,8 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         const GeoShape* shB = uni->getOpB();
         std::unique_ptr<Volume> volA = translateGeoShape(shA, transf);
         std::unique_ptr<Volume> volB = translateGeoShape(shB, transf);
-        auto volBounds = std::make_shared<CombinedVolumeBounds>(volA.release(),
-                                                                volB.release(), false);
+        auto volBounds = std::make_shared<CombinedVolumeBounds>(std::move(volA),
+                                                                std::move(volB), false);
         return std::make_unique<Volume>(nullptr, std::move(volBounds));
     } else if (sh->type() == "Intersection") {
         const GeoShapeIntersection* intersect = dynamic_cast<const GeoShapeIntersection*>(sh);
@@ -500,8 +500,8 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         const GeoShape* shB = intersect->getOpB();
         std::unique_ptr<Volume> volA{translateGeoShape(shA, transf)};
         std::unique_ptr<Volume> volB{translateGeoShape(shB, transf)};
-        auto volBounds = std::make_shared<CombinedVolumeBounds>(volA.release(),
-                                                                volB.release(), true);
+        auto volBounds = std::make_shared<CombinedVolumeBounds>(std::move(volA),
+                                                                std::move(volB), true);
         return std::make_unique<Volume>(nullptr, std::move(volBounds));
     }
 

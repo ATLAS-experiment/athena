@@ -175,21 +175,26 @@ std::vector<std::unique_ptr<Trk::Surface>>
   // face surfaces xy
   //  (1) - at negative local z
   Trk::PlaneSurface xymPlane(
-    Amg::Transform3D(
-      transform * Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ))),
+      Amg::Transform3D(transform *
+                       Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ))),
       std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY));
-  Trk::VolumeExcluder* volExcl = new Trk::VolumeExcluder(new Trk::Volume(
-    *m_combinedVolume,
-    Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ)))));
-  retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(xymPlane, volExcl, true));
+  Trk::VolumeExcluder* volExcl =
+      new Trk::VolumeExcluder(std::make_unique<Trk::Volume>(
+          *m_combinedVolume, Amg::Transform3D(Amg::Translation3D(
+                                 Amg::Vector3D(0., 0., -m_halfZ)))));
+
+  retsf.push_back(
+      std::make_unique<Trk::SubtractedPlaneSurface>(xymPlane, volExcl, true));
   //  (2) - at positive local z
   Trk::PlaneSurface xyPlane(
-    Amg::Transform3D(transform * Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ))),
-    std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY));
-  volExcl = new Trk::VolumeExcluder(new Trk::Volume(
-    *m_combinedVolume,
-    Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ)))));
-  retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(xyPlane, volExcl, true));
+      Amg::Transform3D(transform *
+                       Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ))),
+      std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY));
+  volExcl = new Trk::VolumeExcluder(std::make_unique<Trk::Volume>(
+      *m_combinedVolume,
+      Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ)))));
+  retsf.push_back(
+      std::make_unique<Trk::SubtractedPlaneSurface>(xyPlane, volExcl, true));
   // loop over xy vertices
   //  (3)
   for (unsigned int iv = 0; iv < m_xyVtx.size(); iv++) {
@@ -259,30 +264,25 @@ void
 Trk::SimplePolygonBrepVolumeBounds::processSubVols()
 {
   // translate into prisms (triangulate)
-  Trk::Volume* cVol = nullptr;
-#ifdef TRKDETDESCR_USEFLOATPRECISON
-#define double float
-#endif
-  std::vector<std::pair<double, double>> triangles = TriangulatePolygonCheck(
-    m_xyVtx); //@TODO change argument to const vector<pair< > >
+  std::unique_ptr<Trk::Volume> cVol;
+  std::vector<std::pair<double, double>> triangles = TriangulatePolygonCheck(m_xyVtx);
   std::vector<std::pair<double, double>> vertices;
-#ifdef TRKDETDESCR_USEFLOATPRECISON
-#undef double
-#endif
   for (unsigned int i = 0; i < triangles.size(); i = i + 3) {
     vertices.push_back(triangles[i]);
     vertices.push_back(triangles[i + 1]);
     vertices.push_back(triangles[i + 2]);
-    Trk::Volume* newVol =
-      new Trk::Volume(nullptr, std::make_shared<Trk::PrismVolumeBounds>(vertices, m_halfZ));
-    if (cVol)
-      cVol = new Trk::Volume(
-        nullptr, std::make_shared<Trk::CombinedVolumeBounds>(cVol, newVol, false));
-    else
-      cVol = newVol;
+    auto newVol = std::make_unique<Trk::Volume>(nullptr, std::make_shared<Trk::PrismVolumeBounds>(vertices, m_halfZ));
+    if (cVol){
+      cVol = std::make_unique<Trk::Volume>(nullptr, std::make_shared<Trk::CombinedVolumeBounds>(std::move(cVol),
+                                                                                                std::move(newVol),
+                                                                                                false));
+    }
+    else{
+      cVol = std::move(newVol);
+    }
     vertices.clear();
   }
-  m_combinedVolume = cVol;
+  m_combinedVolume = cVol.release();
 }
 
 // ostream operator overload
