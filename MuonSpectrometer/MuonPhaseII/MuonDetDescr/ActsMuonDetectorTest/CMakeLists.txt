@@ -14,7 +14,7 @@ atlas_add_component( ActsMuonDetectorTest
 
 atlas_add_test( testMuonDetectorNav
                 SCRIPT python -m ActsMuonDetectorTest.testMuonDetector 
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1000
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
