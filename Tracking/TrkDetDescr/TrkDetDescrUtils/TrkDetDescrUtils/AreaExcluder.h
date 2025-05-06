@@ -26,15 +26,17 @@ class AreaExcluder
 {
 
 public:
-  /** Default constructor - needed for POOL */
-  AreaExcluder() {}
-  /** Virtual Destructor */
-  virtual ~AreaExcluder() {}
-  /** Implizit Constructor */
-  virtual AreaExcluder* clone() const = 0;
+ AreaExcluder() = default;
+ AreaExcluder(const AreaExcluder&) = default;
+ AreaExcluder(AreaExcluder&&) = default;
+ AreaExcluder& operator=(const AreaExcluder&) = default;
+ AreaExcluder& operator=(AreaExcluder&&) = default;
+ virtual ~AreaExcluder() = default;
 
-  /** First bin from global position */
-  virtual bool inside(const Amg::Vector3D& gp, double tol = 0.) const = 0;
+ /** Implizit Constructor */
+ virtual AreaExcluder* clone() const = 0;
+ /** First bin from global position */
+ virtual bool inside(const Amg::Vector3D& gp, double tol = 0.) const = 0;
 };
 
 } // end of namespace Trk

@@ -368,12 +368,12 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
             std::shared_ptr<Volume> combSecond{comb->second()->clone()};
             if (comb->intersection()) {
                 newBounds = std::make_shared<Trk::SubtractedVolumeBounds>(
-                    combFirst->clone(), combSecond->clone());
+                std::unique_ptr<Trk::Volume>(combFirst->clone()), std::unique_ptr<Trk::Volume>(combSecond->clone()));
                 std::unique_ptr<Trk::Volume> newSubVol =
                     std::make_unique<Volume>(nullptr, std::move(newBounds));
                 if (subVol) {
                     newBounds = std::make_shared<CombinedVolumeBounds>(
-                        subVol->clone(), newSubVol.release(), false);
+                      std::unique_ptr<Trk::Volume>(subVol->clone()), std::move(newSubVol), false);
                     std::shared_ptr<Volume> newCSubVol =
                         std::make_unique<Volume>(nullptr, std::move(newBounds));
                     constituents.insert(sIter,
@@ -386,7 +386,8 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
                 constituents.insert(sIter, std::make_pair(combFirst, subVol));
                 if (subVol) {
                     newBounds = std::make_shared<CombinedVolumeBounds>(
-                        subVol->clone(), combFirst->clone(), false);
+                      std::unique_ptr<Trk::Volume>(subVol->clone()),
+                      std::unique_ptr<Trk::Volume>(combFirst->clone()), false);
                     std::unique_ptr<Trk::Volume> newSubVol =
                         std::make_unique<Volume>(nullptr, std::move(newBounds));
                     constituents.insert(
@@ -405,7 +406,8 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
             std::shared_ptr<Volume> outerVol{sub->outer()->clone()};
             if (subVol) {
                 newBounds = std::make_shared<CombinedVolumeBounds>(
-                    subVol->clone(), innerVol->clone(), false);
+                    std::unique_ptr<Trk::Volume>(subVol->clone()),
+                    std::unique_ptr<Trk::Volume>(innerVol->clone()), false);
                 std::unique_ptr<Volume> newSubVol =
                     std::make_unique<Trk::Volume>(nullptr, newBounds);
                 constituents.insert(

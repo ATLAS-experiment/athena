@@ -123,20 +123,20 @@ std::vector<std::unique_ptr<Trk::Surface>>
       bottomEllipseBounds()));
   else {
     if (m_subtractedVolume) {
-      Trk::Volume* subtrVol = new Trk::Volume(*m_subtractedVolume);
+      auto subtrVol = std::make_unique<Trk::Volume>(*m_subtractedVolume);
       Trk::DiscSurface bottomDisc(
-        Amg::Transform3D(
-          transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
-          Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
-        discBounds());
+          Amg::Transform3D(
+              transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
+              Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
+          discBounds());
       retsf.push_back(std::make_unique<Trk::SubtractedDiscSurface>(
-        bottomDisc, new Trk::VolumeExcluder(subtrVol), false));
+          bottomDisc, new Trk::VolumeExcluder(std::move(subtrVol)), false));
     } else
       retsf.push_back(std::make_unique<Trk::DiscSurface>(
-        Amg::Transform3D(
-          transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
-          Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
-        discBounds()));
+          Amg::Transform3D(
+              transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
+              Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
+          discBounds()));
   }
 
   // top Ellipse/Disc (positive z)
@@ -150,13 +150,13 @@ std::vector<std::unique_ptr<Trk::Surface>>
       topEllipseBounds()));
   else {
     if (m_subtractedVolume) {
-      Trk::Volume* subtrVol = new Trk::Volume(*m_subtractedVolume);
+      auto subtrVol = std::make_unique<Trk::Volume>(*m_subtractedVolume);
       Trk::DiscSurface topDisc(
         Amg::Transform3D(
           transform * Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
         discBounds());
       retsf.push_back(std::make_unique<Trk::SubtractedDiscSurface>(
-        topDisc, new Trk::VolumeExcluder(subtrVol), false));
+        topDisc, new Trk::VolumeExcluder(std::move(subtrVol)), false));
     } else
       retsf.push_back(std::make_unique<Trk::DiscSurface>(
         Amg::Transform3D(
@@ -523,27 +523,28 @@ Trk::BevelledCylinderVolumeBounds::subtractedVolume() const
     return nullptr;
 
   double tp = tan(m_halfPhiSector);
-  Trk::Volume* volIn = nullptr;
-  Trk::Volume* volOut = nullptr;
+  std::unique_ptr<Trk::Volume> volIn;
+  std::unique_ptr<Trk::Volume> volOut;
   if (m_type == 1 || m_type == 3) { // cut inner cylinder
-    volIn = new Trk::Volume(
-      nullptr,
-      std::make_shared<Trk::CuboidVolumeBounds>(
-        m_innerRadius, m_innerRadius * tp + 0.1, m_halfZ + 0.1));
+    volIn = std::make_unique<Trk::Volume>(
+        nullptr,
+        std::make_shared<Trk::CuboidVolumeBounds>(m_innerRadius, m_innerRadius * tp + 0.1, m_halfZ + 0.1));
   }
   if (m_type > 1) {
     double hz = m_outerRadius * (1. / cos(m_halfPhiSector) - 1.);
-    volOut = new Trk::Volume(
-      std::make_unique<Amg::Transform3D>(Amg::Translation3D(Amg::Vector3D(m_outerRadius + hz, 0., 0.))),
-      std::make_shared<Trk::CuboidVolumeBounds>(hz, m_outerRadius * tp + 0.1, m_halfZ + 0.1));
+    volOut = std::make_unique<Trk::Volume>(
+        std::make_unique<Amg::Transform3D>(Amg::Translation3D(Amg::Vector3D(m_outerRadius + hz, 0., 0.))),
+        std::make_shared<Trk::CuboidVolumeBounds>(hz, m_outerRadius * tp + 0.1, m_halfZ + 0.1));
   }
 
-  if (!volIn)
-    return volOut;
-  else if (!volOut)
-    return volIn;
+  if (!volIn){
+    return volOut.release();
+  }
+  else if (!volOut){
+    return volIn.release();
+  }
   return new Trk::Volume(
-    nullptr, std::make_shared<Trk::CombinedVolumeBounds>(volIn, volOut, false));
+    nullptr, std::make_shared<Trk::CombinedVolumeBounds>(std::move(volIn), std::move(volOut), false));
 }
 
 // ostream operator overload
