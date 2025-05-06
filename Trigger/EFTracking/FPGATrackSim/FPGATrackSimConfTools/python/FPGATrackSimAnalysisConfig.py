@@ -16,7 +16,7 @@ def getNSubregions(filePath):
         assert(fields.startswith('towers'))
         n = fields.split()[1]
         return int(n)
-    
+
 
 # Need to figure out if we have two output writers or somehow only one.
 def FPGATrackSimWriteOutputCfg(flags):
@@ -30,7 +30,16 @@ def FPGATrackSimWriteOutputCfg(flags):
     result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
     return result
 
-
+def FPGATrackSimSlicingEngineCfg(flags,name="FPGATrackSimSlicingEngineTool"):
+    result = ComponentAccumulator()
+    FPGATrackSimSlicingEngineTool = CompFactory.FPGATrackSimSlicingEngineTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
+    # this is the same as the layer map used by the genscan/inside out tool below.
+    FPGATrackSimSlicingEngineTool.LayerMap =  f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json"
+    FPGATrackSimSlicingEngineTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    # If the GNN is enabled (i.e. this is F-4xx) then we don't want to separate first vs second stage.
+    FPGATrackSimSlicingEngineTool.doSecondStage = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
+    result.setPrivateTools(FPGATrackSimSlicingEngineTool)
+    return result
 
 def FPGATrackSimBankSvcCfg(flags,name="FPGATrackSimBankSvc"):
     result=ComponentAccumulator()
@@ -39,22 +48,22 @@ def FPGATrackSimBankSvcCfg(flags,name="FPGATrackSimBankSvc"):
     pathBankSvc = flags.Trigger.FPGATrackSim.bankDir if flags.Trigger.FPGATrackSim.bankDir != '' else f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/'+FPGATrackSimDataPrepConfig.getBaseName(flags)+'/SectorBanks/'
     pathBankSvc=PathResolver.FindCalibDirectory(pathBankSvc)
     FPGATrackSimBankSvc.constantsNoGuess_1st = [
-        f'{pathBankSvc}corrgen_raw_8L_skipPlane0.gcon', 
-        f'{pathBankSvc}corrgen_raw_8L_skipPlane1.gcon', 
-        f'{pathBankSvc}corrgen_raw_8L_skipPlane2.gcon', 
-        f'{pathBankSvc}corrgen_raw_8L_skipPlane3.gcon', 
-        f'{pathBankSvc}corrgen_raw_8L_skipPlane4.gcon', 
-        f'{pathBankSvc}corrgen_raw_8L_skipPlane5.gcon', 
-        f'{pathBankSvc}corrgen_raw_8L_skipPlane6.gcon', 
+        f'{pathBankSvc}corrgen_raw_8L_skipPlane0.gcon',
+        f'{pathBankSvc}corrgen_raw_8L_skipPlane1.gcon',
+        f'{pathBankSvc}corrgen_raw_8L_skipPlane2.gcon',
+        f'{pathBankSvc}corrgen_raw_8L_skipPlane3.gcon',
+        f'{pathBankSvc}corrgen_raw_8L_skipPlane4.gcon',
+        f'{pathBankSvc}corrgen_raw_8L_skipPlane5.gcon',
+        f'{pathBankSvc}corrgen_raw_8L_skipPlane6.gcon',
         f'{pathBankSvc}corrgen_raw_8L_skipPlane7.gcon']
     FPGATrackSimBankSvc.constantsNoGuess_2nd = [
-        f'{pathBankSvc}corrgen_raw_13L_skipPlane0.gcon', 
-        f'{pathBankSvc}corrgen_raw_13L_skipPlane1.gcon', 
-        f'{pathBankSvc}corrgen_raw_13L_skipPlane2.gcon', 
-        f'{pathBankSvc}corrgen_raw_13L_skipPlane3.gcon', 
-        f'{pathBankSvc}corrgen_raw_13L_skipPlane4.gcon', 
-        f'{pathBankSvc}corrgen_raw_13L_skipPlane5.gcon', 
-        f'{pathBankSvc}corrgen_raw_13L_skipPlane6.gcon', 
+        f'{pathBankSvc}corrgen_raw_13L_skipPlane0.gcon',
+        f'{pathBankSvc}corrgen_raw_13L_skipPlane1.gcon',
+        f'{pathBankSvc}corrgen_raw_13L_skipPlane2.gcon',
+        f'{pathBankSvc}corrgen_raw_13L_skipPlane3.gcon',
+        f'{pathBankSvc}corrgen_raw_13L_skipPlane4.gcon',
+        f'{pathBankSvc}corrgen_raw_13L_skipPlane5.gcon',
+        f'{pathBankSvc}corrgen_raw_13L_skipPlane6.gcon',
         f'{pathBankSvc}corrgen_raw_13L_skipPlane7.gcon']
     layers="5L" if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else "9L"
     FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_{layers}_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
@@ -75,7 +84,7 @@ def FPGATrackSimBankSvcCfg(flags,name="FPGATrackSimBankSvc"):
 def FPGATrackSimRoadUnionToolCfg(flags,name="FPGATrackSimRoadUnionTool"):
     result=ComponentAccumulator()
     RF = CompFactory.FPGATrackSimRoadUnionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
-    
+
     xBins = flags.Trigger.FPGATrackSim.ActiveConfig.xBins
     xBufferBins = flags.Trigger.FPGATrackSim.ActiveConfig.xBufferBins
     yBins = flags.Trigger.FPGATrackSim.ActiveConfig.yBins
@@ -101,26 +110,26 @@ def FPGATrackSimRoadUnionToolCfg(flags,name="FPGATrackSimRoadUnionTool"):
 
 
     FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
-    for number in range(getNSubregions(FPGATrackSimMapping.subrmap)): 
+    for number in range(getNSubregions(FPGATrackSimMapping.subrmap)):
         HoughTransform = CompFactory.FPGATrackSimHoughTransformTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimHoughTransformTool")+"_" + str(number))
         HoughTransform.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
         HoughTransform.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
-        HoughTransform.FPGATrackSimMappingSvc = FPGATrackSimMapping 
-        HoughTransform.combine_layers = flags.Trigger.FPGATrackSim.ActiveConfig.combineLayers 
-        HoughTransform.convSize_x = flags.Trigger.FPGATrackSim.ActiveConfig.convSizeX 
-        HoughTransform.convSize_y = flags.Trigger.FPGATrackSim.ActiveConfig.convSizeY 
-        HoughTransform.convolution = flags.Trigger.FPGATrackSim.ActiveConfig.convolution 
-        HoughTransform.d0_max = 0 
-        HoughTransform.d0_min = 0 
+        HoughTransform.FPGATrackSimMappingSvc = FPGATrackSimMapping
+        HoughTransform.combine_layers = flags.Trigger.FPGATrackSim.ActiveConfig.combineLayers
+        HoughTransform.convSize_x = flags.Trigger.FPGATrackSim.ActiveConfig.convSizeX
+        HoughTransform.convSize_y = flags.Trigger.FPGATrackSim.ActiveConfig.convSizeY
+        HoughTransform.convolution = flags.Trigger.FPGATrackSim.ActiveConfig.convolution
+        HoughTransform.d0_max = 0
+        HoughTransform.d0_min = 0
         HoughTransform.fieldCorrection = flags.Trigger.FPGATrackSim.ActiveConfig.fieldCorrection
         HoughTransform.hitExtend_x = flags.Trigger.FPGATrackSim.ActiveConfig.hitExtendX
-        HoughTransform.localMaxWindowSize = flags.Trigger.FPGATrackSim.ActiveConfig.localMaxWindowSize        
+        HoughTransform.localMaxWindowSize = flags.Trigger.FPGATrackSim.ActiveConfig.localMaxWindowSize
         HoughTransform.nBins_x = xBins + 2 * xBufferBins
         HoughTransform.nBins_y = yBins + 2 * yBufferBins
         HoughTransform.phi_max = xMax
         HoughTransform.phi_min = xMin
-        HoughTransform.qpT_max = yMax 
-        HoughTransform.qpT_min = yMin 
+        HoughTransform.qpT_max = yMax
+        HoughTransform.qpT_min = yMin
         HoughTransform.scale = flags.Trigger.FPGATrackSim.ActiveConfig.scale
         HoughTransform.subRegion = number
         HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
@@ -227,7 +236,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
         Binning = CompFactory.FPGATrackSimGenScanPhiSlicedKeyLyrBinning(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanBinning"))
         Binning.approxMath = False
     else:
-        log.error("Unknown Binning") 
+        log.error("Unknown Binning")
     Binning.rin=cutset["rin"]
     Binning.rout=cutset["rout"]
     Binning.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
@@ -259,7 +268,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.z0FractionalPadding =0.05
     tool.etaFractionalPadding =0.05
     tool.phiFractionalPadding =0.05
-    tool.qOverPtFractionalPadding =0.05                
+    tool.qOverPtFractionalPadding =0.05
 
     # set cuts
     for (cut,val) in cutset.items():
@@ -273,7 +282,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
             # now assumed to be in the map directory with name = basename for region + _lyrmap.json
             tool.layerMapFile = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json"
 
-    # even though we are not actually doing a Union, we need the 
+    # even though we are not actually doing a Union, we need the
     # RoadUnionTool because mapping is now there
     RoadUnion = CompFactory.FPGATrackSimRoadUnionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     RoadUnion.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
@@ -300,7 +309,7 @@ def FPGATrackSimRoadUnionToolGNNCfg(flags,name="FPGATrackSimRoadUnionToolGNN"):
     patternRecoTool.GNNRoadMaker = result.popToolsAndMerge(FPGATrackSimGNNRoadMakerToolCfg(flags))
     patternRecoTool.GNNRootOutput = result.popToolsAndMerge(FPGATrackSimGNNRootOutputToolCfg(flags))
     patternRecoTool.doGNNRootOutput = flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput
-    
+
     RF.tools = [patternRecoTool]
     result.addPublicTool(RF, primary=True)
 
@@ -357,7 +366,7 @@ def FPGATrackSimGNNRoadMakerToolCfg(flags,name="FPGATrackSimGNNRoadMakerTool"):
     result.setPrivateTools(GNNRoadMakerTool)
 
     return result
-    
+
 def FPGATrackSimGNNRootOutputToolCfg(flags,name="FPGATrackSimGNNRootOutputTool"):
     result = ComponentAccumulator()
 
@@ -442,7 +451,7 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
     OR_1st.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
     OR_1st.NumOfHitPerGrouping = 3
     OR_1st.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
-    OR_1st.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut    
+    OR_1st.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
     if flags.Trigger.FPGATrackSim.ActiveConfig.hough or flags.Trigger.FPGATrackSim.ActiveConfig.hough1D:
         OR_1st.nBins_x = flags.Trigger.FPGATrackSim.ActiveConfig.xBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.xBufferBins
         OR_1st.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
@@ -451,7 +460,7 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
 
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimOverlapRemovalToolMonitoringCfg
     OR_1st.MonTool = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolMonitoringCfg(flags))
-    
+
     result.addPublicTool(OR_1st, primary=True)
     return result
 
@@ -482,7 +491,7 @@ def SPRoadFilterToolCfg(flags,secondStage=False,name="FPGATrackSimSpacepointRoad
 def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHitsProcessAlg",**kwargs):
     
     flags = prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(inputFlags)
-   
+
     result=ComponentAccumulator()
     kwargs.setdefault("name", FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     
@@ -529,10 +538,11 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
         ### set the window to be a constant value (could be changed), array should be length of the threshold
         windows = [flags.Trigger.FPGATrackSim.Hough1D.phifilterwindow for i in range(len(flags.Trigger.FPGATrackSim.ActiveConfig.hitExtendX))]
         RoadFilter2.window = windows
-        
+
         theFPGATrackSimLogicalHitsProcessAlg.RoadFilter2 = RoadFilter2
         theFPGATrackSimLogicalHitsProcessAlg.FilterRoads2 = True
 
+    theFPGATrackSimLogicalHitsProcessAlg.SlicingEngineTool = result.getPrimaryAndMerge(FPGATrackSimSlicingEngineCfg(flags))
 
     theFPGATrackSimLogicalHitsProcessAlg.HoughRootOutputTool = result.getPrimaryAndMerge(FPGATrackSimHoughRootOutputToolCfg(flags))
 
@@ -580,7 +590,7 @@ def getChi2Cut(region):
         (1.2, 1.4): chi2cut_l[6], (1.4, 1.6): chi2cut_l[7], (1.6, 1.8): chi2cut_l[8],
         (1.8, 2.0): chi2cut_l[9], (2.0, 2.2): chi2cut_l[10], (2.2, 2.4): chi2cut_l[11],
         (2.4, 2.6): chi2cut_l[12], (2.6, 2.8): chi2cut_l[13], (2.8, 3.0): chi2cut_l[14],
-        (3.0, 3.2): chi2cut_l[15], (3.2, 3.4): chi2cut_l[16], (3.4, 3.6): chi2cut_l[17], 
+        (3.0, 3.2): chi2cut_l[15], (3.2, 3.4): chi2cut_l[16], (3.4, 3.6): chi2cut_l[17],
         (3.6, 3.8): chi2cut_l[18], (3.8, 4.0): chi2cut_l[19]
     }
 
@@ -590,10 +600,10 @@ def getChi2Cut(region):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    
+
 
     flags = initConfigFlags()
-    
+
     ############################################
     # Flags used in the prototrack chain
     FinalProtoTrackChainxAODTracksKey="FPGA"
@@ -616,7 +626,7 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
-    
+
     # convert regex to array of regions
     if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
         flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
@@ -624,8 +634,8 @@ if __name__ == "__main__":
         from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
         flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
     print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
-    
-    if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut: 
+
+    if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut:
         flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
 
     assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-5'),"ERROR You are trying to run an F-5* pipeline! This is not yet supported!"
