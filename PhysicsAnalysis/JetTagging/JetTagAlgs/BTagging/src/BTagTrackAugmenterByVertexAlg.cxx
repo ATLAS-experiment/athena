@@ -84,15 +84,7 @@ namespace Analysis {
     SG::ReadHandle< xAOD::VertexContainer > vertexContainerHandle = SG::makeHandle< xAOD::VertexContainer >( m_VertexContainerKey,ctx );
     CHECK( vertexContainerHandle.isValid() );
     const xAOD::VertexContainer *verteces = vertexContainerHandle.get();
-
-    /*
-    const xAOD::Vertex* primaryVtx = getPrimaryVertex( *verteces );
-    if ( primaryVtx == nullptr ) {
-      ATH_MSG_FATAL("No primary vertex found");
-      return StatusCode::FAILURE;
-    }
-    */
-    
+   
     SG::ReadHandle< xAOD::TrackParticleContainer > trackContainerHandle = SG::makeHandle< xAOD::TrackParticleContainer >( m_TrackContainerKey,ctx);
     CHECK( trackContainerHandle.isValid() );
     const xAOD::TrackParticleContainer* tracks = trackContainerHandle.get();
