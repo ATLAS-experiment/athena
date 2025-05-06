@@ -71,11 +71,14 @@ StatusCode TrigTauMonitorSingleAlgorithm::processEvent(const EventContext& ctx) 
         const bool l1_accept_flag = passBits & TrigDefs::L1_isPassedAfterVeto;
         const bool hlt_not_prescaled_flag = (passBits & TrigDefs::EF_prescaled) == 0;
 
+        // Offline tau requirement check
+        const std::vector<const xAOD::TauJet*> offline_taus_with_id = classifyTausAll(offline_taus_all, 0, static_cast<TauID>(m_offline_tau_id.value()));
+        if(m_requireOfflineTaus && offline_taus_with_id.empty()) continue;
+
         // Filter offline taus
-        auto offline_taus = classifyOfflineTaus(offline_taus_all, info.getHLTTauThreshold() - threshold_offset, static_cast<TauID>(m_offline_tau_id.value()));
+        auto offline_taus = classifyOfflineTaus(offline_taus_with_id, info.getHLTTauThreshold() - threshold_offset);
         std::vector<const xAOD::TauJet*> offline_taus_1p = offline_taus.first;
         std::vector<const xAOD::TauJet*> offline_taus_3p = offline_taus.second;
-        if(m_requireOfflineTaus && offline_taus_1p.empty() && offline_taus_3p.empty()) continue;
 
         // Online taus
         std::vector<const xAOD::TauJet*> hlt_taus_all = getOnlineTausAll(trigger, true);

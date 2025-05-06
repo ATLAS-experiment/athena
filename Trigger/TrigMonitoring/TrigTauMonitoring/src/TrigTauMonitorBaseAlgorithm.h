@@ -56,7 +56,7 @@ protected:
 
     // Get offline 1P and 3P TauJet objects that pass the quality selection cuts
     std::vector<const xAOD::TauJet*> getOfflineTausAll(const EventContext& ctx, const float threshold = 20.0) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOfflineTaus(const EventContext& ctx, const float threshold = 20.0, const TauID tau_id = TauID::RNN) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOfflineTaus(const EventContext& ctx, const float threshold = 20.0, const TauID tau_id = TauID::None) const;
 
     // Get L1 RoIs
     std::vector<const xAOD::eFexTauRoI*> getL1eTAUs(const EventContext& ctx, const std::string& l1_item) const;
@@ -113,8 +113,8 @@ protected:
       return false;
     }
 
-    std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::RNN) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::RNN) const;
+    std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
     std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
 
 private:
