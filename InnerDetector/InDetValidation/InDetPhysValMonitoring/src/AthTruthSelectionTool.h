@@ -61,6 +61,7 @@ private:
   // set to within (Run2) pixel by default
   FloatProperty m_maxProdVertRadius{this, "maxProdVertRadius", 110.};
   IntegerProperty m_pdgId{this, "pdgId", -1};
+  IntegerProperty m_vetoPdgId{this, "vetoPdgId", -1};
   BooleanProperty m_grandparent{this, "hasNoGrandparent", false};
   BooleanProperty m_poselectronfromgamma{this, "poselectronfromgamma", false};
   std::vector<unsigned int> m_counters{};

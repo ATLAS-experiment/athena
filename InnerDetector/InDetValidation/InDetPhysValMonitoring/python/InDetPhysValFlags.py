@@ -51,5 +51,9 @@ def createIDPVMConfigFlags():
     icf.addFlag('JetPtMin', 100.*Units.GeV)
     icf.addFlag('JetPtMax', 5000.*Units.GeV)
     icf.addFlag('setCSVName', "")
+
+    icf.addFlag('vetoPdgId', -1)
+    icf.addFlag('pdgId', -1)
+
     return icf
 
