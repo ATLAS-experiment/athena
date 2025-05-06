@@ -99,7 +99,7 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOfflineTausAll(
         if(std::abs(tau->eta()) > 1.37 && std::abs(tau->eta()) < 1.52) continue;
 
         // Consider only offline taus which pass thinning 
-        if(tau->isAvailable<char>("passThinning") && !tau->auxdata<char>("passThinning") ) continue;
+        if(tau->isAvailable<char>("passThinning") && !tau->auxdata<char>("passThinning")) continue;
 
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
