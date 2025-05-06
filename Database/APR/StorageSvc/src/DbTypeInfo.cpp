@@ -1,14 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-
-// $Id: DbTypeInfo.cpp 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbTypeInfo implementation
 //--------------------------------------------------------------------
 //
-//  Package    : StorageSvc (The POOL project)
+//  Package    : APR/StorageSvc
 //
 //  Description: Type information for persistent objects
 //
@@ -17,20 +15,12 @@
 
 // Framework include files
 #include "StorageSvc/DbToken.h"
-#include "StorageSvc/DbArray.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbTransform.h"
-#include "StorageSvc/DbString.h"
 
-// STL include files
-#include <stdexcept>
-#include <cstring>
 #include <cstdio>
-#include <vector>
-#include <thread>
-#include <mutex>
 
 #include "cxxabi.h"
 

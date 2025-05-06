@@ -198,7 +198,7 @@ namespace RootAuxDynIO
       const auto& desc = m_ntupleReader->GetDescriptor();
       for( const auto &f : desc.GetTopLevelFields() ) {
          const string field_name = f.GetFieldName();
-         if( field_name.rfind(field_prefix,0) == 0 ) {
+         if( field_name.starts_with(field_prefix) ) {
             const string attr_infile = field_name.substr(field_prefix.size());
             const string attr_name = reg.inputRename(m_key, attr_infile);
             const string field_type = f.GetTypeName();
@@ -210,7 +210,12 @@ namespace RootAuxDynIO
             if( auxid != SG::null_auxid ) {
                addAuxID(auxid);
                m_fieldInfos[auxid].fieldName = field_name;
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
                m_fieldInfos[auxid].view = m_ntupleReader->GetView<void>(field_name, nullptr);
+#else
+               auto ti = (standalone and !reg.isLinked(auxid))? reg.getType(auxid) : reg.getVecType(auxid);
+               m_fieldInfos[auxid].view = m_ntupleReader->GetView(field_name, nullptr, *ti);
+#endif
             } else {
                errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader::init");
                msg << "Could not find auxid for " << attr_infile << " type: " << field_type
