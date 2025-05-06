@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GuideLineSystems/ProjectionSurfacesHelper.h"
@@ -220,7 +220,7 @@ ProjectionSurfacesHelper::~ProjectionSurfacesHelper()
     << m_d->sep_endcap_zasr_pos
     << m_d->sep_endcap_zasr_neg;
 
-  foreach(SoNode* n, l)
+  for(SoNode* n : l)
     if (n)
       n->unref();
 
