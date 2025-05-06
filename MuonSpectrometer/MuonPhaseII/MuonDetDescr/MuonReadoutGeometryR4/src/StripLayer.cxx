@@ -2,6 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonReadoutGeometryR4/StripLayer.h>
+
 namespace MuonGMR4{
 
     std::ostream& operator<<(std::ostream& ostr, const StripLayer& lay) {
@@ -27,12 +28,15 @@ namespace MuonGMR4{
         if (hash() != other.hash()) {
             return hash() < other.hash();
         }
-        if (m_etaDesign != other.m_etaDesign) {
-            return m_etaDesign < other.m_etaDesign;
+        if (m_transform != other.m_transform) {
+            return m_transform < other.m_transform;
+        }
+        if (hasPhiDesign() != hasPhiDesign()){
+            return hasPhiDesign();
         }
         if (m_phiDesign != other.m_phiDesign) {
             return m_phiDesign < other.m_phiDesign;
         }
-        return m_transform < other.m_transform;        
+        return m_etaDesign < other.m_etaDesign;
     }
 }
