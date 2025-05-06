@@ -315,12 +315,9 @@ class MonitorDef:
                     "L1_AFP_A_OR_C_jJ30",
                     # ZDC
                     "L1_ZDC_A_AND_C",
-                    "L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
-                    "L1_ZDC_E1_AND_E2ORE3",
-                    "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
                     # ZDC items in pp
-                    "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_OR", "L1_ZDC_PP_A_C",
-                    "L1_ZDC_PP_A2", "L1_ZDC_PP_C2", "L1_ZDC_PP_OR2",
+                    # "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_OR", "L1_ZDC_PP_A_C",
+                    # "L1_ZDC_PP_A2", "L1_ZDC_PP_C2", "L1_ZDC_PP_OR2",
                     # Mu+X
                     "L1_MU5VF_AFP_A_OR_C",
                     # Phase-I L1Calo
@@ -443,10 +440,10 @@ class MonitorDef:
             ])
             if "lowMu" in menuFullName:
                 monItemsHF[TBP|TAP|TAV].extend([
-                    "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_A_C", # luminosity measurements
-                    "L1_ZDC_PP_OR",                                # luminosity measurements
-                    "L1_ZDC_PP_A2", "L1_ZDC_PP_C2",                # luminosity measurements
-                    "L1_ZDC_PP_OR2",                               # luminosity measurements
+                    # "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_A_C", # luminosity measurements
+                    # "L1_ZDC_PP_OR",                                # luminosity measurements
+                    # "L1_ZDC_PP_A2", "L1_ZDC_PP_C2",                # luminosity measurements
+                    # "L1_ZDC_PP_OR2",                               # luminosity measurements
                 ])
             else: # HI HLT menu
                 monItemsHF[TBP|TAP|TAV].extend([

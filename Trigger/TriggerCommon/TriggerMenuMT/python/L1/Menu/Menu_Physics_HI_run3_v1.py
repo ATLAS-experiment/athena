@@ -234,13 +234,6 @@ def defineMenu():
         # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
         # They are needed for scheduled 2023 5 TeV pp runs, so not removed from the menu
         'L1_ZDC_OR'           ,
-        'L1_ZDC_XOR_E2'       ,
-        'L1_ZDC_XOR_E1_E3'    ,
-        'L1_ZDC_E1_AND_E1'    ,
-        'L1_ZDC_E1_AND_E2ORE3',
-        'L1_ZDC_E2_AND_E2'    ,
-        'L1_ZDC_E2_AND_E3'    ,
-        'L1_ZDC_E3_AND_E3'    ,
         'L1_ZDC_A_AND_C'      ,
         'L1_ZDC_OR_EMPTY', 'L1_ZDC_OR_UNPAIRED_NONISO',
         'L1_ZDC_A_AND_C_EMPTY', 'L1_ZDC_A_AND_C_UNPAIRED_NONISO',
@@ -248,12 +241,12 @@ def defineMenu():
         #'L1_ZDC_OR_LHCF',
 
         #ZDC pp (ATR-29027)
-        'L1_ZDC_PP_A','L1_ZDC_PP_C','L1_ZDC_PP_OR','L1_ZDC_PP_A_C',
-        'L1_ZDC_PP_A2','L1_ZDC_PP_C2','L1_ZDC_PP_OR2',
-        'L1_ZDC_PP_A_EMPTY','L1_ZDC_PP_C_EMPTY',
-        'L1_ZDC_PP_A2_EMPTY','L1_ZDC_PP_C2_EMPTY',
-        'L1_ZDC_PP_A_UNPAIRED_NONISO','L1_ZDC_PP_C_UNPAIRED_NONISO',
-        'L1_ZDC_PP_A2_UNPAIRED_NONISO','L1_ZDC_PP_C2_UNPAIRED_NONISO',
+        # 'L1_ZDC_PP_A','L1_ZDC_PP_C','L1_ZDC_PP_OR','L1_ZDC_PP_A_C',
+        # 'L1_ZDC_PP_A2','L1_ZDC_PP_C2','L1_ZDC_PP_OR2',
+        # 'L1_ZDC_PP_A_EMPTY','L1_ZDC_PP_C_EMPTY',
+        # 'L1_ZDC_PP_A2_EMPTY','L1_ZDC_PP_C2_EMPTY',
+        # 'L1_ZDC_PP_A_UNPAIRED_NONISO','L1_ZDC_PP_C_UNPAIRED_NONISO',
+        # 'L1_ZDC_PP_A2_UNPAIRED_NONISO','L1_ZDC_PP_C2_UNPAIRED_NONISO',
 
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
@@ -308,6 +301,15 @@ def defineMenu():
         'L1_DPHI-2eEM1','L1_DPHI-2eTAU1', 'L1_DPHI-2jTAU1',
         'L1_DPHI-2eEM1_VjTE200','L1_DPHI-2eTAU1_VjTE200',
         'L1_DPHI-2eEM1_VjTE200_GAP_AANDC','L1_DPHI-2eTAU1_VjTE200_GAP_AANDC',
+
+        # ATR-30727
+        'L1_10INVM-DPHI-2jJ5_VjTE200', 'L1_15INVM-DPHI-2jJ5_VjTE200', 'L1_20INVM-DPHI-2jJ5_VjTE200', 'L1_25INVM-DPHI-2jJ5_VjTE200',
+        'L1_10SUM-DPHI-2jJ5_VjTE200', 'L1_15SUM-DPHI-2jJ5_VjTE200', 'L1_20SUM-DPHI-2jJ5_VjTE200', 'L1_25SUM-DPHI-2jJ5_VjTE200',
+        'L1_15INVM-15SUM-DPHI-2jJ5_VjTE200', 'L1_20INVM-20SUM-DPHI-2jJ5_VjTE200',
+
+        # ATR-30728
+        'L1_1INVM-DPHI-2eTAU1_VjTE200', 'L1_2INVM-DPHI-2eTAU1_VjTE200', 'L1_3INVM-DPHI-2eTAU1_VjTE200', 'L1_4INVM-DPHI-2eTAU1_VjTE200',
+        'L1_3SUM-DPHI-2eTAU1_VjTE200', 'L1_4SUM-DPHI-2eTAU1_VjTE200',
 
         #ATR-17320
         # 'L1_CEP-CjJ100',
