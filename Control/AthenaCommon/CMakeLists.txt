@@ -42,6 +42,11 @@ else()
     atlas_add_test( JobProperties SCRIPT test/JobPropertiesUnitTests.py
        POST_EXEC_SCRIPT noerror.sh )
 
+    if (NOT XAOD_ANALYSIS)
+        atlas_add_test( ConsistencyOfConstants SCRIPT test/ConstantConsistencyUnitTests.py
+           POST_EXEC_SCRIPT noerror.sh )
+    endif()
+
     atlas_add_test( test_interactive_athena
        SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/test_interactive_athena.py )
 
