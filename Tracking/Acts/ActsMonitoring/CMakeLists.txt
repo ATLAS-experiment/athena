@@ -16,6 +16,7 @@ atlas_add_component( ActsMonitoring
 			ActsEventCnvLib
 			ActsGeometryLib
 			ActsGeometryInterfacesLib
+			InDetMeasurementUtilitiesLib
 			ActsToolInterfacesLib
 			AthenaMonitoringLib
 			AthenaMonitoringKernelLib

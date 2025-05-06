@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGAClusterConverter.h"
 
@@ -378,8 +378,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
   cov(1,1) = siWidth.z()*siWidth.z()/12; 
 
-  float omegax = 0.5; 
-  float omegay = 0.5;
   bool split = false;
   float splitProb1 = 0;
   float splitProb2 = 0;
@@ -399,7 +397,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   cl.globalPosition() = globalPosition; 
   cl.setChannelsInPhiEta(siWidth.colRow()[0], siWidth.colRow()[1]);
   cl.setWidthInEta(static_cast<float>(siWidth.widthPhiRZ()[1]));
-  cl.setOmegas(omegax, omegay);
   cl.setIsSplit(split);
   cl.setSplitProbabilities(splitProb1, splitProb2);
   ATH_MSG_DEBUG("\t\txaod width in eta " << cl.widthInEta());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMeasurementUtilities/ClusterConversionUtilities.h"
@@ -72,8 +72,6 @@ namespace TrackingUtilities {
     const auto& ToTs = indetCluster.totList();
     const auto& charges = indetCluster.chargeList();
     const auto& width = indetCluster.width();
-    auto omegaX = indetCluster.omegax();
-    auto omegaY = indetCluster.omegay();
     auto isSplit = indetCluster.isSplit();
     auto splitProbability1 = indetCluster.splitProbability1();
     auto splitProbability2 = indetCluster.splitProbability2();
@@ -89,7 +87,6 @@ namespace TrackingUtilities {
     xaodCluster.setLVL1A(indetCluster.LVL1A());
     xaodCluster.setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
     xaodCluster.setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));
-    xaodCluster.setOmegas(omegaX, omegaY);
     xaodCluster.setIsSplit(isSplit);
     xaodCluster.setSplitProbabilities(splitProbability1, splitProbability2);
 
@@ -168,21 +165,60 @@ namespace TrackingUtilities {
     int colmin = std::numeric_limits<int>::max();
     int rowmin = std::numeric_limits<int>::max();
 
+    float qRowMin = 0.f;
+    float qRowMax = 0.f;
+    float qColMin = 0.f;
+    float qColMax = 0.f;
+    
     const std::vector<Identifier>& rod_list_cluster = xaodCluster.rdoList();
-    for (const auto& this_rdo : rod_list_cluster) {
+    const std::vector<float>& charge_list_cluster = xaodCluster.chargeList();
+    if (rod_list_cluster.size() != charge_list_cluster.size()) {
+      return StatusCode::FAILURE;
+    }
+    
+    for (std::size_t i(0); i<rod_list_cluster.size(); ++i) {
+      const Identifier& this_rdo = rod_list_cluster.at(i);
+      const float this_charge = charge_list_cluster.at(i);
+
       const int row = pixelID.phi_index(this_rdo);
-      if (row > rowmax)
+      if (row > rowmax) {
 	rowmax = row;
-      if (row < rowmin)
+	qRowMax = this_charge;
+      } else if (row == rowmax) {
+	qRowMax += this_charge; 
+      }
+
+      if (row < rowmin) {  
 	rowmin = row;
+	qRowMin = this_charge;
+      } else if (row == rowmin) {
+	qRowMin += this_charge;
+      } 
 
       const int col = pixelID.eta_index(this_rdo);
-      if (col > colmax)
+      if (col > colmax) {
 	colmax = col;
-      if (col < colmin)
+	qColMax = this_charge;
+      } else if (col == colmax) {
+	qColMax += this_charge;
+      }     
+      
+      if (col < colmin) {
 	colmin = col;
+	qColMin = this_charge;
+      } else if (col == colmin) {
+	qColMin += this_charge;
+      } 
+
     }
 
+    // Compute omega for charge interpolation correction (if required)
+    // Two pixels may have charge=0 (very rarely, hopefully)
+    float omegax = -1.f;
+    float omegay = -1.f;
+    if(qRowMin + qRowMax > 0) omegax = qRowMax/(qRowMin + qRowMax);
+    if(qColMin + qColMax > 0) omegay = qColMax/(qColMin + qColMax);
+        
     double etaWidth = design->widthFromColumnRange(colmin, colmax);
     double phiWidth = design->widthFromRowRange(rowmin, rowmax);
     InDet::SiWidth width( Amg::Vector2D(xaodCluster.channelsInPhi(), xaodCluster.channelsInEta()),
@@ -198,8 +234,8 @@ namespace TrackingUtilities {
 					   width,
 					   &element,
 					   std::move(errorMatrix),
-					   xaodCluster.omegaX(),
-					   xaodCluster.omegaY(),
+					   omegax,
+					   omegay,
 					   xaodCluster.isSplit(),
 					   xaodCluster.splitProbability1(),
 					   xaodCluster.splitProbability2());

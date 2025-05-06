@@ -56,6 +56,7 @@ atlas_add_component( ActsTrackReconstruction
 		       xAODMeasurementBase
 		       xAODTracking
 		       PathResolver
+		       InDetMeasurementUtilitiesLib
                      )
 		     
 atlas_add_test ( TrackFindingMeasurementsTest

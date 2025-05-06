@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODINDETMEASUREMENT_VERSION_PIXELCLUSTER_V1_H
@@ -47,12 +47,6 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
     /// respectively
     float widthInEta() const;
 
-    /// Returns omegax and omegay, i.e. the charge
-    /// balance between the first and last rows and colums, respectively,
-    /// building the cluster, and are numbers between 0 and 1.
-    float omegaX() const;
-    float omegaY() const;
-
     /// Returns the list of ToT of the channels building the cluster
     const std::vector<int>& totList() const;
     /// Returns the sum of the ToTs of the channels building the cluster
@@ -93,11 +87,6 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
 
     /// Sets the width of the cluster in eta (y) direction
     void setWidthInEta(float widthInEta);
-
-    /// Sets omegax and omegay, i.e. the charge
-    /// balance between the first and last rows and colums, respectively,
-    /// building the cluster, and are numbers between 0 and 1.
-    void setOmegas(float omegax, float omegay);
 
     /// Sets the list of ToT of the channels building the cluster
     void setToTlist(const std::vector<int>& tots);

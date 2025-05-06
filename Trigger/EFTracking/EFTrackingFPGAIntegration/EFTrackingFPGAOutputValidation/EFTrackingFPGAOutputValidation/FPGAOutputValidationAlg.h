@@ -1,3 +1,4 @@
+
 /*
  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
@@ -15,6 +16,7 @@
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
+#include "InDetIdentifier/PixelID.h"
 
 class FPGAOutputValidationAlg : public AthReentrantAlgorithm
 {
@@ -42,6 +44,8 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
   // chrono service
   ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
+  const PixelID* m_pixelid {nullptr};
+  
  public:
   FPGAOutputValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override final;

@@ -12,7 +12,8 @@ atlas_add_component(EFTrackingFPGAOutputValidation
                                    xAODInDetMeasurement 
                                    InDetPrepRawData 
                                    InDetIdentifier 
-                                   InDetReadoutGeometry)
+                                   InDetReadoutGeometry
+				   InDetMeasurementUtilitiesLib )
 
 atlas_install_python_modules(python/*.py)
 

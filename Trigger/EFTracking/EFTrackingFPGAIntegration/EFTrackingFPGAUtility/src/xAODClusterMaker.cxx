@@ -144,7 +144,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
       pixelCl->setChannelsInPhiEta(pxAux.channelsInPhi[i],
                                    pxAux.channelsInEta[i]);
       pixelCl->setWidthInEta(pxAux.widthInEta[i]);
-      pixelCl->setOmegas(pxAux.omegaX[i], pxAux.omegaY[i]);
     }
     return StatusCode::SUCCESS;
   }
@@ -190,8 +189,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
   std::vector<float> localCovYY(nClusters);
   std::vector<int> totalToTBuffer(nClusters);
   std::vector<float> widthInEtaBuffer(nClusters);
-  std::vector<float> omegaXBuffer(nClusters);
-  std::vector<float> omegaYBuffer(nClusters);
   std::vector<int> channelsInPhiBuffer(nClusters);
   std::vector<int> channelsInEtaBuffer(nClusters);
 
@@ -224,10 +221,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
     // Fill the widthInEtaBuffer
     widthInEtaBuffer[i] = pxAux.widthInEta[i];
 
-    // Fill the omegaBuffer
-    omegaXBuffer[i] = pxAux.omegaX[i];
-    omegaYBuffer[i] = pxAux.omegaY[i];
-
     // Fill the channelsInPhiEtaBuffer
     channelsInPhiBuffer[i] = pxAux.channelsInPhi[i];
     channelsInEtaBuffer[i] = pxAux.channelsInEta[i];
@@ -247,8 +240,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
   static const SG::Accessor<float> localCovYYAcc("localCovarianceYY");
   static const SG::Accessor<int> totAcc("totalToT");
   static const SG::Accessor<float> widthEtaAcc("widthInEta");
-  static const SG::Accessor<float> omegaXAcc("omegasX");
-  static const SG::Accessor<float> omegaYAcc("omegasY");
   static const SG::Accessor<int> channelsInPhiAcc("channelsInPhi");
   static const SG::Accessor<int> channelsInEtaAcc("channelsInEta");
 
@@ -265,8 +256,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
   auto locCovYYSpan = localCovYYAcc.getDataSpan(*pixelCl);
   auto totSpan = totAcc.getDataSpan(*pixelCl);
   auto wEtaSpan = widthEtaAcc.getDataSpan(*pixelCl);
-  auto omegaXSpan = omegaXAcc.getDataSpan(*pixelCl);
-  auto omegaYSpan = omegaYAcc.getDataSpan(*pixelCl);
   auto gpSpan = globalPosAcc.getDataSpan(*pixelCl);
   auto channelsInPhiSpan = channelsInPhiAcc.getDataSpan(*pixelCl);
   auto channelsInEtaSpan = channelsInEtaAcc.getDataSpan(*pixelCl);
@@ -280,8 +269,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
   CxxUtils::copy_bounded(localCovYY, locCovYYSpan);
   CxxUtils::copy_bounded(totalToTBuffer, totSpan);
   CxxUtils::copy_bounded(widthInEtaBuffer, wEtaSpan);
-  CxxUtils::copy_bounded(omegaXBuffer, omegaXSpan);
-  CxxUtils::copy_bounded(omegaYBuffer, omegaYSpan);
   CxxUtils::copy_bounded(gpBuffer, gpSpan);
   CxxUtils::copy_bounded(channelsInPhiBuffer, channelsInPhiSpan);
   CxxUtils::copy_bounded(channelsInEtaBuffer, channelsInEtaSpan);

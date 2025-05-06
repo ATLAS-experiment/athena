@@ -121,8 +121,6 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
                           << ef_pixelClusters.at(i).channelsInPhi << ", "
                           << ef_pixelClusters.at(i).channelsInEta << ", "
                           << ef_pixelClusters.at(i).widthInEta << ", "
-                          << ef_pixelClusters.at(i).omegaX << ", "
-                          << ef_pixelClusters.at(i).omegaY << ", "
                           << ef_pixelClusters.at(i).totList[0] << ", "
                           << ef_pixelClusters.at(i).totalToT << ", "
                           << ef_pixelClusters.at(i).chargeList[0] << ", "
@@ -168,8 +166,6 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
         std::vector<int> pcChannelsInPhi(m_maxClusterNum);
         std::vector<int> pcChannelsInEta(m_maxClusterNum);
         std::vector<float> pcWidthInEta(m_maxClusterNum);
-        std::vector<float> pcOmegaX(m_maxClusterNum);
-        std::vector<float> pcOmegaY(m_maxClusterNum);   
         std::vector<int> pcTotList(m_maxClusterNum * 5000);
         std::vector<int> pcTotalToT(m_maxClusterNum);
         std::vector<float> pcChargeList(m_maxClusterNum * 5000);
@@ -191,8 +187,6 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
         ef_pcOutput.pcChannelsInPhi = pcChannelsInPhi.data();
         ef_pcOutput.pcChannelsInEta = pcChannelsInEta.data();
         ef_pcOutput.pcWidthInEta = pcWidthInEta.data();
-        ef_pcOutput.pcOmegaX = pcOmegaX.data();
-        ef_pcOutput.pcOmegaY = pcOmegaY.data();
         ef_pcOutput.pcTotList = pcTotList.data();
         ef_pcOutput.pcTotalToT = pcTotalToT.data();
         ef_pcOutput.pcChargeList = pcChargeList.data();
@@ -270,8 +264,6 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
         pcChannelsInPhi.resize(metadata->numOfPixelClusters);
         pcChannelsInEta.resize(metadata->numOfPixelClusters);
         pcWidthInEta.resize(metadata->numOfPixelClusters);
-        pcOmegaX.resize(metadata->numOfPixelClusters);
-        pcOmegaY.resize(metadata->numOfPixelClusters);
         pcTotList.resize(metadata->pcTotIndexSize);
         pcTotalToT.resize(metadata->numOfPixelClusters);
         pcChargeList.resize(metadata->pcChargeIndexSize);
@@ -330,8 +322,6 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
                               << i << "] = " << ef_pcOutput.pcChannelsInEta[i]);
                 ATH_MSG_DEBUG("pcWidthInEta["
                               << i << "] = " << ef_pcOutput.pcWidthInEta[i]);
-                ATH_MSG_DEBUG("pcOmegaX[" << i << "] = " << ef_pcOutput.pcOmegaX[i]);
-                ATH_MSG_DEBUG("pcOmegaY[" << i << "] = " << ef_pcOutput.pcOmegaY[i]);
                 ATH_MSG_DEBUG("pcTotList[" << i << "] = " << ef_pcOutput.pcTotList[i]);
                 ATH_MSG_DEBUG("pcTotalToT["
                               << i << "] = " << ef_pcOutput.pcTotalToT[i]);
@@ -369,8 +359,6 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
         pxAux.channelsInPhi = std::move(pcChannelsInPhi);
         pxAux.channelsInEta = std::move(pcChannelsInEta);
         pxAux.widthInEta = std::move(pcWidthInEta);
-        pxAux.omegaX = std::move(pcOmegaX);
-        pxAux.omegaY = std::move(pcOmegaY);
         pxAux.totList = std::move(pcTotList);
         pxAux.totalToT = std::move(pcTotalToT);
         pxAux.chargeList = std::move(pcChargeList);
@@ -534,8 +522,6 @@ StatusCode PassThroughTool::getInputClusterData(
         cache.channelsInPhi = pc->at(i)->channelsInPhi();
         cache.channelsInEta = pc->at(i)->channelsInEta();
         cache.widthInEta = pc->at(i)->widthInEta();
-        cache.omegaX = pc->at(i)->omegaX();
-        cache.omegaY = pc->at(i)->omegaY();
 
         for (long unsigned int j = 0; j < pc->at(i)->totList().size(); j++)
         {
@@ -723,8 +709,6 @@ StatusCode PassThroughTool::passThroughSW(
         ef_pcOutput.pcChannelsInPhi[i] = inputPC[i].channelsInPhi;
         ef_pcOutput.pcChannelsInEta[i] = inputPC[i].channelsInEta;
         ef_pcOutput.pcWidthInEta[i] = inputPC[i].widthInEta;
-        ef_pcOutput.pcOmegaX[i] = inputPC[i].omegaX;
-        ef_pcOutput.pcOmegaY[i] = inputPC[i].omegaY;
 
         inputpcTotListsize += inputPC[i].sizeOfTotList;
 
@@ -926,8 +910,6 @@ StatusCode PassThroughTool::passThroughSW_clusterOnly(
         ef_pcOutput.pcChannelsInPhi[i] = inputPC[i].channelsInPhi;
         ef_pcOutput.pcChannelsInEta[i] = inputPC[i].channelsInEta;
         ef_pcOutput.pcWidthInEta[i] = inputPC[i].widthInEta;
-        ef_pcOutput.pcOmegaX[i] = inputPC[i].omegaX;
-        ef_pcOutput.pcOmegaY[i] = inputPC[i].omegaY;
 
         inputpcTotListsize += inputPC[i].sizeOfTotList;
 

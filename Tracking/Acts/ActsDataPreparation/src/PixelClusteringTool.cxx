@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelClusteringTool.h"
@@ -77,11 +77,6 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   int colmin = std::numeric_limits<int>::max();
   int rowmin = std::numeric_limits<int>::max();
 
-  float qRowMin = 0.f;
-  float qRowMax = 0.f;
-  float qColMin = 0.f;
-  float qColMax = 0.f;
-
   // We temporary comment this since it is not used
   // bool hasGanged = false;
   
@@ -126,34 +121,12 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     }
     
     const int row = pixelID.phi_index(id);
-    if (row > rowmax) {
-      rowmax = row;
-      qRowMax =	charge;
-    } else if (row == rowmax) {
-      qRowMax += charge; 
-    }
-    
-    if (row < rowmin) {  
-      rowmin = row;
-      qRowMin = charge;
-    } else if (row == rowmin) {
-      qRowMin += charge;
-    } 
-       
+    rowmax = std::max(rowmax, row);
+    rowmin = std::min(rowmin, row);
+           
     const int col = pixelID.eta_index(id);
-    if (col > colmax) {
-      colmax = col;
-      qColMax =	charge;
-    } else if (col == colmax) {
-      qColMax += charge;
-    }     
-
-    if (col < colmin) {
-      colmin = col;
-      qColMin = charge;
-    } else if (col == colmin) {
-      qColMin += charge;
-    } 
+    colmax = std::max(colmax, col);
+    colmin = std::min(colmin, col);
     
     InDetDD::SiCellId si_cell = element->cellIdFromIdentifier(id);
     InDetDD::SiLocalPosition pos = design.localPositionOfCell(si_cell);
@@ -175,13 +148,6 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   
   if (tot_acc > 0)
     pos_acc /= tot_acc;
-
-  // Compute omega for charge interpolation correction (if required)
-  // Two pixels may have charge=0 (very rarely, hopefully)
-  float omegax = -1.f;
-  float omegay = -1.f;
-  if(qRowMin + qRowMax > 0) omegax = qRowMax/(qRowMin + qRowMax);
-  if(qColMin + qColMax > 0) omegay = qColMax/(qColMin + qColMax);
 
   
   const int colWidth = colmax - colmin + 1;
@@ -234,7 +200,6 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   xaodcluster.setChannelsInPhiEta(siWidth.colRow()[0],
 				  siWidth.colRow()[1]);
   xaodcluster.setWidthInEta(static_cast<float>(siWidth.widthPhiRZ()[1]));
-  xaodcluster.setOmegas(omegax, omegay);
   xaodcluster.setIsSplit(false);
   xaodcluster.setSplitProbabilities(0.0, 0.0);
     
