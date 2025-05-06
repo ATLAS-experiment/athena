@@ -189,7 +189,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     import sys
 
                     raw_md = f"""
-from ROOT.Experimental import RNTupleReader
+from ROOT import RNTupleReader
 from ROOT import TFile
 
 
