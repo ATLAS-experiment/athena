@@ -24,7 +24,7 @@
 
 #include "GaudiKernel/IEventProcessor.h"
 
-constexpr bool enableBenchmark = 
+constexpr bool enableBenchmark =
 #ifdef BENCHMARK_FPGATRACKSIM
     true;
 #else
@@ -63,15 +63,22 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_overlapRemovalTool_1st.retrieve());
     ATH_CHECK(m_writeOutputTool.retrieve());
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
+    ATH_CHECK(m_slicingEngineTool.retrieve());
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
 
-    // This file should only need to generate one input and output branch.
+    // ROOT branches created for test vectors.
     m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
 
-    // Connect the road union tool accordingly.
+    // Updated slicing engine test vectors will have three streams.
+    m_slicedFirstPixelHeader = m_writeOutputTool->addInputBranch(m_sliceFirstPixelBranch.value(), true);
+    m_slicedSecondPixelHeader = m_writeOutputTool->addInputBranch(m_sliceSecondPixelBranch.value(), true);
+    m_slicedStripHeader = m_writeOutputTool->addInputBranch(m_sliceStripBranch.value(), true);
+
+    // Connect the slicing tools accordingly. We probably no longer need to hook up the roadfinder here.
     m_roadFinderTool->setupSlices(m_slicedHitHeader);
+    m_slicingEngineTool->setupSlices(m_slicedFirstPixelHeader, m_slicedSecondPixelHeader, m_slicedStripHeader);
 
     ATH_MSG_DEBUG("initialize() Setting branch");
 
@@ -141,24 +148,21 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_evt++;
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
-    
-    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_1st, phits_2nd;
-    const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
-    const FPGATrackSimRegionMap* rmap_2nd = m_FPGATrackSimMapping->SubRegionMap_2nd();
-    ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
+
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_all, phits_1st, phits_2nd;
     phits_1st.reserve(FPGAHits->size());
     phits_2nd.reserve(FPGAHits->size());
+    ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
     for (const FPGATrackSimHit& hit : *(FPGAHits.cptr())) {
-        // If the hit falls within the boundaries of ANY subregion in the first stage, it's 1st stage.
-        if (rmap_1st->getRegions(hit).size() > 0) {
-            phits_1st.emplace_back(&hit, [](const FPGATrackSimHit*){});
-        }
-        if (rmap_2nd->getRegions(hit).size() > 0) {
-            // TODO: For now add all hits to 2nd stage until this is properly setup here
-            phits_2nd.emplace_back(&hit, [](const FPGATrackSimHit*) {});
-            FPGAHits_2nd->push_back(hit);
-        }
+        phits_all.emplace_back(&hit, [](const FPGATrackSimHit*){});
     }
+
+    // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
+    m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd);
+    for (auto& hit : phits_2nd) {
+        FPGAHits_2nd->push_back(*hit);
+    }
+
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
     ATH_MSG_DEBUG("1st stage hits: " << phits_1st.size() << "          2nd stage hits: " << phits_2nd.size() );
     if (phits_1st.empty()) return StatusCode::SUCCESS;
@@ -215,7 +219,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     Monitored::Group(m_monTool, mon_nroads_1st_postfilter);
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: RoadFiltering");
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Tracking");
-    
+
     // Get tracks
     std::vector<FPGATrackSimTrack> tracks_1st;
     if (m_doTracking) {
@@ -296,7 +300,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         FPGARoads_1st->push_back(*road);
     }
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Tracking");
-    
+
     // Monitor the number of tracks
     auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
     Monitored::Group(m_monTool, mon_ntracks_1st);
@@ -340,12 +344,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         auto truthz0= Monitored::Scalar<float>("z0",truthtracks.front().getZ0());
         if (roads_1st.size() > 0) m_nRoadsFound++;
 	if (roads_1st.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads_1st.size();
-	
+
         unsigned npasschi2(0);
         unsigned npasschi2OLR(0);
         if (tracks_1st.size() > 0) {
             m_nTracksFound++;
-	    if (tracks_1st.size() > m_maxNTracksTot) m_maxNTracksTot = tracks_1st.size();       	    
+	    if (tracks_1st.size() > m_maxNTracksTot) m_maxNTracksTot = tracks_1st.size();
             for (const auto& track : tracks_1st) {
                 if (track.getChi2ndof() < m_trackScoreCut) {
 		  npasschi2++;
@@ -356,7 +360,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             }
         }
 	if (npasschi2 > m_maxNTracksChi2Tot) m_maxNTracksChi2Tot = npasschi2;
-	if (npasschi2OLR > m_maxNTracksChi2OLRTot) m_maxNTracksChi2OLRTot = npasschi2OLR;						     
+	if (npasschi2OLR > m_maxNTracksChi2OLRTot) m_maxNTracksChi2OLRTot = npasschi2OLR;
         if (npasschi2 > 0) m_nTracksChi2Found++;
         if (npasschi2OLR > 0) m_nTracksChi2OLRFound++;
         auto passtrackchi2 = Monitored::Scalar<bool>("eff_track_chi2",(npasschi2 > 0));
@@ -459,7 +463,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vecto
 StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
 {
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS");
-    ATH_MSG_INFO("========================================================================================");    
+    ATH_MSG_INFO("========================================================================================");
     ATH_MSG_INFO("Ran on events = " << m_evt);
     ATH_MSG_INFO("Inclusive efficiency to find a road = " << m_nRoadsFound/m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track = " << m_nTracksFound/m_evt_truth);

@@ -19,6 +19,7 @@
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimClusteringToolI.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
+#include "FPGATrackSimMaps/FPGATrackSimSlicingEngineTool.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsTool.h"
 #include "FPGATrackSimInput/FPGATrackSimReadRawRandomHitsTool.h"
@@ -88,6 +89,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimTrackFitterTool>          m_trackFitterTool_1st {this, "TrackFitter_1st", "FPGATrackSimTrackFitterTool/FPGATrackSimTrackFitterTool_1st", "1st stage track fit tool"};
         ToolHandle<FPGATrackSimOverlapRemovalTool>       m_overlapRemovalTool_1st {this, "OverlapRemoval_1st", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_1st", "1st stage overlap removal tool"};
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
+        ToolHandle<FPGATrackSimSlicingEngineTool>        m_slicingEngineTool {this, "SlicingEngineTool", "FPGATrackSimSlicingEngineTool/FPGATrackSimSlicingEngineTool", "Slicing engine tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "", "Event selection Svc"};
         // chrono service
@@ -111,11 +113,17 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<bool> m_passLowestChi2TrackOnly {this,"passLowestChi2TrackOnly", false, "case when passing only lowest chi2 track per road"};
 
         // Properties for the output header tool.
-        Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for slied hits in output ROOT file." };
+        Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for sliced hits in output ROOT file." };
         Gaudi::Property<std::string> m_outputBranch {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
+        Gaudi::Property<std::string> m_sliceFirstPixelBranch {this, "FirstPixelBranchName", "LogicalEventFirstPixelHeader", "Name of the branch for first stage pixel hits in output ROOT file"};
+        Gaudi::Property<std::string> m_sliceSecondPixelBranch {this, "SecondPixelBranchName", "LogicalEventFirstPixelHeader", "Name of the branch for second stage pixel hits in output ROOT file"};
+        Gaudi::Property<std::string> m_sliceStripBranch {this, "StripBranchName", "LogicalEventStripHeader", "Name of the branch for strip hits in output ROOT file"};
 
         // ROOT pointers.
         FPGATrackSimLogicalEventInputHeader*  m_slicedHitHeader = nullptr;
+        FPGATrackSimLogicalEventInputHeader*  m_slicedFirstPixelHeader = nullptr;
+        FPGATrackSimLogicalEventInputHeader*  m_slicedSecondPixelHeader = nullptr;
+        FPGATrackSimLogicalEventInputHeader*  m_slicedStripHeader = nullptr;
         FPGATrackSimLogicalEventOutputHeader* m_logicEventOutputHeader = nullptr;
 
         // Event storage
@@ -139,7 +147,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         unsigned long m_maxNTracksChi2Tot = 0; // max number of tracks passing chi2 in an event
         unsigned long m_maxNTracksChi2OLRTot = 0; // max number of tracks passing chi2 and OLR in an events
 
-        
+
         StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
                                    FPGATrackSimDataFlowInfo const * dataFlowInfo);
 
