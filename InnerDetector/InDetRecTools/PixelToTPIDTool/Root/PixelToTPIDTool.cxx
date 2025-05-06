@@ -32,11 +32,22 @@ namespace CP {
     ATH_MSG_INFO("Initializing PixelToTPIDTool");
 
     /// Common to both EDMs ///
-    if (m_equalizeClusterMeasurements) {
+    if (m_equalizeClusterMeasurements && m_equalizeTrackMeasurements) {
+      ATH_MSG_ERROR("Can only equalize the dE/dx measurements at cluster-level OR track-level, not both.");
+      return StatusCode::FAILURE;
+    }
+    else if (m_equalizeClusterMeasurements) {
       ATH_MSG_INFO("Will equalize cluster dE/dx measurements before calculating truncated mean.");
+    }
+    else if (m_equalizeTrackMeasurements) {
+      ATH_MSG_INFO("Will equalize track-level dE/dx measurements after calculating truncated mean.");
     }
     else{
       ATH_MSG_INFO("Will NOT equalize cluster dE/dx measurements before calculating truncated mean.");
+    }
+
+    if (m_extraClusterCleaning) {
+      ATH_MSG_WARNING("Extra cluster cleaning requested for dE/dx calculation, but feature not yet supported.");
     }
 
 
@@ -47,9 +58,9 @@ namespace CP {
     ATH_CHECK(m_eventInfo.initialize());
 
     /// Set up scale factors. In XAOD_STANDALONE, read SFs from trees stored on CVMFS
-    if(m_equalizeClusterMeasurements) {
-      if (m_sfDirLocal != "") {
-        ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfDirLocal << "\"!! FOR DEVELOPMENT USE ONLY !! ");
+    if(m_equalizeClusterMeasurements || m_equalizeTrackMeasurements) {
+      if (m_sfLocalFileName != "") {
+        ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfLocalFileName << "\"!! FOR DEVELOPMENT USE ONLY !! ");
       }
       ATH_CHECK(initSFsFromTrees());
     }
@@ -99,16 +110,12 @@ namespace CP {
     /// Get path to SF trees.
     std::string filename;
     
-    if (!m_sfDirLocal.empty()) {      
-      filename = PathResolverFindCalibFile( Form("%s/%s", m_sfDirLocal.value().c_str(), m_sfFileName.value().c_str()) );
+    if (!m_sfLocalFileName.empty()) { // override official version in ASG calibration area.
+      filename = m_sfLocalFileName;
     }
     else {
-      filename = PathResolverFindCalibFile( Form("%s/%s", m_sfDir.value().c_str(), m_sfFileName.value().c_str()) );
+      filename = PathResolverFindCalibFile( m_sfFileName );
     }
-
-    //// For testing
-    //filename = "../src/athena/InnerDetector/InDetRecTools//PixelToTPIDTool/share/nTuple_data_lowMu_flat.root"; // FIXME!!!!
-    filename = "../athena/InnerDetector/InDetRecTools//PixelToTPIDTool/share/nTuple_data_lowMu_flat.root";
 
     if (filename.empty()) {
       ATH_MSG_ERROR("Could not find file: " << filename);
@@ -117,12 +124,25 @@ namespace CP {
 
     ATH_MSG_INFO("Found scale factor tree file: " << filename);
 
+    /// Get file
     m_file = std::make_shared<TFile>(filename.c_str(), "READ");
     if (!m_file || m_file->IsZombie()) {
       ATH_MSG_ERROR("Failed to open file: " << filename);
       return StatusCode::FAILURE;
     }
-    m_df = std::make_shared<ROOT::RDataFrame>(m_sfTreeName.value().c_str(), m_file.get());
+
+    /// Get dataframe
+    /// Already checked in initialize that m_equalizeClusterMeasurements or m_equalizeTrackMeasurements is true, but not both.
+    if(m_equalizeClusterMeasurements) {
+      m_df = std::make_shared<ROOT::RDataFrame>(m_clusterSFTreeName.value().c_str(), m_file.get());
+    }
+    else if(m_equalizeTrackMeasurements) {
+      m_df = std::make_shared<ROOT::RDataFrame>(m_trackSFTreeName.value().c_str(), m_file.get());
+    }
+    else { // should not get here
+      ATH_MSG_ERROR("Called initSFsFromTrees() but did not request dE/dx equalization at cluster or track level.");
+      return StatusCode::FAILURE;
+    }
 
     ATH_MSG_INFO("RDataFrame successfully initialized.");
 
@@ -215,8 +235,8 @@ namespace CP {
               cluster.iblOverflow = iblOverflow; //why int?
             }
 
-            /// Skip if too shallow.
-            if (std::abs(cluster.cosalpha)<0.16) { continue; }
+            /// Skip if too shallow.  MOVED TO getClusterdEdx()
+            //if (std::abs(cluster.cosalpha)<0.16) { continue; }
 
             /// Add function to insert info into dEdxMap.
             /// Apply all cuts here.  Don't forget abs(cosalpha).
@@ -482,8 +502,8 @@ namespace CP {
         cluster.iblOverflow = iblOverflow;
       }
 
-      /// Skip if too shallow.
-      if (std::abs(cluster.cosalpha)<0.16) { continue; }
+      /// Skip if too shallow. MOVED TO getClusterdEdx()
+      //if (std::abs(cluster.cosalpha)<0.16) { continue; }
       
       /// Get raw cluster dE/dx
       float clusterdEdx = getClusterdEdx(cluster, goodPixelhits, nUsedIBLOverflowHits); // returns -1 if bad cluster measurement.
@@ -598,13 +618,28 @@ namespace CP {
                                             int& nUsedIBLOverflowHits) const{    
     float dEdxValue;
 
+    /// Remove clusters if track is too shallow.
+    if ( std::abs(cluster.cosalpha) < 0.16 ) {
+      ATH_MSG_DEBUG("Cluster assigned dE/dx = -1 due to shallow path through sensor: cos(alpha) = " << cluster.cosalpha);
+      return -1;
+    }
+
+    ///  Apply extra cluster cleaning cuts for improved dE/dx measurements.
+    if (m_extraClusterCleaning) {
+
+      /// Add extra cleaning cuts here when ready.
+      /// Return -1 if fail.
+
+    }
+
+    /// Now check layer & barrel vs endcap, applying local (x,y) cuts.
     if (cluster.isIBL) { // check if IBL      
       if (((cluster.eta_module >= -10 && cluster.eta_module <= -7) ||
            (cluster.eta_module >= 6 && cluster.eta_module <= 9)) &&
           (fabs(cluster.locy) < 10. &&
            (cluster.locx > -8.33 &&
             cluster.locx < 8.3))) { // check if IBL 3D and good cluster selection
-        //dEdxValue = cluster.charge  *  m_conversionfactor / m_IBL_3D_sensorthickness;
+
         dEdxValue = cluster.charge * cluster.cosalpha *  m_conversionfactor / m_IBL_3D_sensorthickness;
         pixelhits++;
         if (cluster.iblOverflow == 1) {
@@ -614,8 +649,7 @@ namespace CP {
                  (fabs(cluster.locy) < 20. &&
                   (cluster.locx > -8.33 &&
                    cluster.locx < 8.3))) { // check if IBL planar and good cluster
-        // selection
-        //dEdxValue = cluster.charge * m_conversionfactor / m_IBL_PLANAR_sensorthickness;
+
         dEdxValue = cluster.charge * cluster.cosalpha * m_conversionfactor / m_IBL_PLANAR_sensorthickness;
         pixelhits++;
         if (cluster.iblOverflow == 1) {
@@ -627,12 +661,10 @@ namespace CP {
     }
     //PIXEL layer and ENDCAP
     else if(cluster.bec==0 && fabs(cluster.locy)<30. &&  ((cluster.locx>-8.20 && cluster.locx<-0.60) || (cluster.locx>0.50 && cluster.locx<8.10))) {
-      //dEdxValue = cluster.charge * m_conversionfactor / m_Pixel_sensorthickness;
       dEdxValue = cluster.charge * cluster.cosalpha * m_conversionfactor / m_Pixel_sensorthickness;
       pixelhits++;
     }
     else if (std::abs(cluster.bec)==2 && fabs(cluster.locy)<30. && ((cluster.locx>-8.15 && cluster.locx<-0.55) || (cluster.locx>0.55 && cluster.locx<8.15))) {
-      //dEdxValue = cluster.charge * m_conversionfactor / m_Pixel_sensorthickness;
       dEdxValue = cluster.charge * cluster.cosalpha * m_conversionfactor / m_Pixel_sensorthickness;
       pixelhits++;
     }

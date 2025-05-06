@@ -16,7 +16,17 @@ class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAn
         self.addOption ('postfix', "", type=str,
             info="a postfix to apply to decorations and algorithm names.")
         self.addOption ('equalizeClusterMeasurements', False, type=bool,
-            info="whether to equalize cluster level dE/dx measurements. ")
+            info="whether to equalize cluster level dE/dx measurements.")
+        self.addOption ('equalizeTrackMeasurements', False, type=bool,
+            info="whether to equalize track-level truncated mean dE/dx measurements (no pixel clusters required).")
+        self.addOption ('extraClusterCleaning', False, type=bool,
+            info="whether to perform extra cluster cleaning for dE/dx measurements (e.g. cluster size/shape).")
+        self.addOption ('sfLocalFileName', "", type=str,
+            info="Path to scale factor trees, overriding files stored in ASG calibration area.")
+        self.addOption ('clusterSFTreeName', "SFs_TTree", type=str, # FIX! TBD
+            info="Name of tree storing the cluster-level dE/dx equalization scale factors.")
+        self.addOption ('trackSFTreeName', "track_SFs_TTree", type=str, # FIX! TBD
+            info="Name of tree storing the track-level dE/dx equalization scale factors.")
 
         
     def makeAlgs (self, config) :
@@ -24,9 +34,15 @@ class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAn
                                       'PixelDEdxEqualizationAlg' + self.postfix,
                                       reentrant=True)
         config.addPrivateTool( 'PixelToTPIDTool', 'CP::PixelToTPIDTool' )
-        # alg.PixelToTPIDTool.TrackContainerName = self.containerName
-        alg.TrackContainerName = self.containerName # belongs to alg, not tool.
-        alg.PixelToTPIDTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements # belongs to tool, not alg.
+        ### Algorithm properties
+        alg.TrackContainerName = self.containerName
+        ### Tool properties
+        alg.PixelToTPIDTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
+        alg.PixelToTPIDTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
+        alg.PixelToTPIDTool.ExtraClusterCleaning = self.extraClusterCleaning
+        alg.PixelToTPIDTool.SFLocalFileName = self.sfLocalFileName
+        alg.PixelToTPIDTool.ClusterSFTreeName = self.clusterSFTreeName
+        alg.PixelToTPIDTool.TrackSFTreeName = self.trackSFTreeName
     
 
 

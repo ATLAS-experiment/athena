@@ -38,8 +38,17 @@
 /// Example of how to run the PixelToTPIDTool package to obtain cluster and dE/dx information
 int main(int argc, char* argv[]) {
 
-  // Whether or not to equalize.  Maybe make this an argument.
-  bool equalize = true;
+  using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
+
+  // Default arguments
+  bool equalize = false; // Whether or not to equalize the dE/dx.
+  int maxEvents = -1; // Max number of events to process.
+
+  // Path to equalization SF trees.  Update to CVMFS path.
+  std::string localSFPath = "../athena/InnerDetector/InDetRecTools//PixelToTPIDTool/share/nTuple_data_lowMu_flat.root"; // FIXME!
+
+  // Name of link from track to MSOS.
+  std::string msosLinkName = "Reco_msosLink";
 
   // The application's name:
   const char* APP_NAME = argv[0];
@@ -47,7 +56,7 @@ int main(int argc, char* argv[]) {
   // Check if we received a file name:
   if (argc < 2) {
     Error(APP_NAME, "No file name received!");
-    Error(APP_NAME, "  Usage: %s [xAOD file name] [Nevts to process]", APP_NAME);
+    Error(APP_NAME, "Usage: %s <xAOD file name> [--equalize] [--maxEvents N]", APP_NAME);
     return 1;
   }
 
@@ -78,11 +87,28 @@ int main(int argc, char* argv[]) {
   }
   Info(APP_NAME, "Number of events in the file: %i", static_cast<int>(event.getEntries()));
 
+  for (int i = 2; i < argc; ++i) {
+    std::string arg = argv[i];
+
+    if (arg == "--equalize") {
+      equalize = true;
+    } else if (arg == "--maxEvents") {
+      if (i + 1 < argc) {
+        maxEvents = std::stoll(argv[++i]);
+      } else {
+        std::cerr << "--maxEvents requires a number\n";
+        return 1;
+      }
+    } else {
+      std::cerr << "Unknown argument: " << arg << "\n";
+      return 1;
+    }
+  }
+
   // Decide how many events to run over:
   Long64_t entries = event.getEntries();
-  if (argc > 2) {
-    const Long64_t e = atoll(argv[2]);
-    if (e < entries) { entries = e; }
+  if (maxEvents>0 && maxEvents<entries) {
+    entries = maxEvents;
   }
 
   // Get tool
@@ -91,6 +117,7 @@ int main(int argc, char* argv[]) {
 
   bool failed = false;
   failed = failed || pidTool->setProperty("EqualizeClusterMeasurements", equalize).isFailure();
+  failed = failed || pidTool->setProperty("SFLocalFileName", localSFPath).isFailure();
   failed = failed || pidTool->initialize().isFailure();
   if (failed) {
     Error( APP_NAME, "Failed to set up PixelToTPIDTool!");
@@ -133,56 +160,115 @@ int main(int argc, char* argv[]) {
       trkIt->summaryValue(track_dEdx, xAOD::pixeldEdx);
       numberOfUsedHitsdEdx = (unsigned int) (trkIt)->auxdataConst<unsigned char>("numberOfUsedHitsdEdx");
 
+      // Print some info
+      Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
+      if( dEdx < 0.) {
+        Info(APP_NAME, "Could not calculate truncated mean dE/dx from clusters.");
+        Info(APP_NAME, "Clusters were likely not present or thinned away for this track.");
+        continue;
+      }
+      
       // Check if the recalculated dE/dx matches the stored dE/dx
       // Only makes sense if pidTool is configured to return the raw dE/dx, not the equalized.
       float epsilon = 1e-3;
-      if ( std::fabs(track_dEdx - dEdx) > epsilon ) {
-        if( dEdx < 0.) {
-          Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
-          Info(APP_NAME, "Could not calculate truncated mean dE/dx from clusters.");
-          Info(APP_NAME, "Clusters were likely not present or thinned away for this track.");
-        }
-        else if (!equalize) { // expect differences if equalizing.
-          Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
-          Info(APP_NAME, "Mismatch between recalculated track dE/dx and value stored in AOD.");
-          Info(APP_NAME, "Likely from a migration in the cluster (x,y) between reco (ESD) and now (xAOD).");
-          Info(APP_NAME, "Clusters too close to the edge of sensor not included in truncated mean.");
-          Info(APP_NAME, "Track dE/dx (orig):        %g ", track_dEdx);
-          Info(APP_NAME, "Track dE/dx (recalc):        %g ", dEdx);
-          Info(APP_NAME, "Track nUsedHits:        %d ", nUsedHits);
-          Info(APP_NAME, "Track nUsedHits (orig):        %u ", numberOfUsedHitsdEdx);
-          Info(APP_NAME, "Track nUsedIBLOverflowHits:        %d ", nUsedIBLOverflowHits);
-        }
+      Info(APP_NAME, "Track dE/dx (orig):          %g", track_dEdx);
+      Info(APP_NAME, "Track dE/dx (recalc):        %g", dEdx);
+      if ( !equalize && std::fabs(track_dEdx - dEdx) > epsilon ) {
+        Info(APP_NAME, "Mismatch between recalculated track dE/dx and value stored in AOD.");
+        Info(APP_NAME, "Likely from a migration in the cluster (x,y) between reco (ESD) and now (xAOD).");
+        Info(APP_NAME, "Clusters too close to the edge of sensor not included in truncated mean.");
+        Info(APP_NAME, "Track nUsedHits (orig):        %u ", numberOfUsedHitsdEdx);
+        Info(APP_NAME, "Track nUsedHits (recalc):      %d ", nUsedHits);
+        Info(APP_NAME, "Track nUsedIBLOverflowHits:    %d ", nUsedIBLOverflowHits);
       }
+
+      // Follow links from track -> MSOSs -> clusters and check that they are decorated with the dE/dx.
+      // Better to follow links since only clusters belonging to this track collection will be decorated.
+
+      // Check for track states:
+      static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(msosLinkName);
+      if( ! trackStateAcc.isAvailable( *trkIt ) ) {
+        Info(APP_NAME,"Cannot find TrackState link from xAOD::TrackParticle. Skipping track.");
+        return -1;
+      }
+      const StatesOnTrack& measurementsOnTrack = trackStateAcc(*trkIt);
+
+      // Loop over MSOS.
+      for( const ElementLink<xAOD::TrackStateValidationContainer>& msos : measurementsOnTrack) {
+        if (not msos.isValid()) {
+          continue; //not a valid link.  Can happen if clusters are thinned away via ThinInDetClustersAlg.
+        }
+        if ((int) (*msos)->detType() != 1) {
+          continue; // not a pixel cluster. See Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/TrackStateDefs.h
+        }
+        if ( (*msos)->type()!=0) {
+          continue; // not fittable.  See Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/TrackStateDefs. Want this?
+        }
+      
+        // Get the corresponding TrackMeasurementValidation object (cluster/drift tube)
+        const ElementLink<xAOD::TrackMeasurementValidationContainer> pixclus = (*msos)->trackMeasurementValidationLink();
+        if (not pixclus.isValid()) {
+          continue; //not a valid link
+        }
+        if (*pixclus == nullptr) {
+          continue; //not linking to a valid object -- is it necessary?
+        }
+      
+        // Get cluster info
+        int bec = -99;
+        int layer = -99;
+        float locx = -999.;
+        float locy = -999.;
+        float clusdEdxRaw = 0.;
+        float clusdEdxEq = 0.;
+        static const SG::AuxElement::ConstAccessor< int > becAcc("bec");
+        if (becAcc.isAvailable(**pixclus)) {
+          bec = bec = becAcc(**pixclus);
+        } else {
+          Error( APP_NAME,"bec auxdata is missing!");
+          continue;
+        }
+        static const SG::AuxElement::ConstAccessor< int > layerAcc("layer");
+        if (layerAcc.isAvailable(**pixclus)) {
+          layer = layer = layerAcc(**pixclus);
+        } else {
+          Error( APP_NAME, "layer auxdata is missing!");
+          continue;
+        }
+        static const SG::AuxElement::ConstAccessor< float > localXAcc("localX");
+        if (localXAcc.isAvailable(**pixclus)) {
+          locx = localXAcc(**pixclus);
+        } else {
+          Error( APP_NAME,"localX auxdata is missing!");
+          continue;
+        }
+        static const SG::AuxElement::ConstAccessor< float > localYAcc("localY");
+        if (localYAcc.isAvailable(**pixclus)) {
+          locy = localYAcc(**pixclus);
+        } else {
+          Error( APP_NAME,"localY auxdata is missing!");
+          continue;
+        }
+        static const SG::AuxElement::ConstAccessor< float > clusdEdxRawAcc("dEdx");
+        if (clusdEdxRawAcc.isAvailable(**pixclus)) {
+          clusdEdxRaw = clusdEdxRawAcc(**pixclus);
+        }
+        else {
+          Error( APP_NAME, "Could not find raw cluster dE/dx measurement!");
+          return 1;
+        }
+        Info(APP_NAME, "cluster dEdx:  %g,     bec:  %i,    layer:  %i,    local (x,y): (%g, %g) ", clusdEdxRaw, bec, layer,  locx, locy);
+
+        static const SG::AuxElement::ConstAccessor< float > clusdEdxEqAcc("dEdxEq");
+        if (clusdEdxEqAcc.isAvailable(**pixclus)) {
+          clusdEdxEq = clusdEdxEqAcc(**pixclus);
+          Info(APP_NAME, "cluster dEdxEq:        %g ", clusdEdxEq);
+        }
+
+      } // end msos loop
+
     } // done loop over tracks
     
-    // Get clusters
-    const xAOD::TrackMeasurementValidationContainer* clusters = 0;
-    if ( event.retrieve( clusters, "PixelClusters" ).isFailure() ) {
-      Error( APP_NAME, "Failed to read pixel cluster container!" );
-      return 1;
-    }
-    Info(APP_NAME, "Number of clusters: %i", static_cast<int>(clusters->size()));
-
-    for (const xAOD::TrackMeasurementValidation* clusIt : *clusters  ) { 
-      float clusdEdxRaw = 0.;
-      static const SG::AuxElement::ConstAccessor< float > clusdEdxRawAcc("dEdx");
-      if (clusdEdxRawAcc.isAvailable(*clusIt)) {
-        clusdEdxRaw = clusdEdxRawAcc(*clusIt);
-        Info(APP_NAME, "cluster dEdx:        %g ", clusdEdxRaw);
-      }
-      else {
-        Error( APP_NAME, "Could not find raw cluster dE/dx measurement!");
-        return 1;
-      }
-      float clusdEdxEq = 0.;
-      static const SG::AuxElement::ConstAccessor< float > clusdEdxEqAcc("dEdxEq");
-      if (clusdEdxEqAcc.isAvailable(*clusIt)) {
-        clusdEdxEq = clusdEdxEqAcc(*clusIt);
-        Info(APP_NAME, "cluster dEdxEq:        %g ", clusdEdxEq);
-      }
-    }
-
     // Close with a message:
     Info(APP_NAME,
          "===>>>  done processing event #%i, "

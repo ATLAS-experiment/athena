@@ -98,8 +98,22 @@ namespace CP {
   private:
     
     /// Common to both EDMs ///
+
+    /// Equalize the cluster-level dE/dx measuremented before the taking the truncated mean.
+    /// For xAOD EDM, Requires special datasets with pixel clusters.
     Gaudi::Property<bool> m_equalizeClusterMeasurements
     { this, "EqualizeClusterMeasurements", false, ""};
+
+    /// Equalize the track-level truncated mean instead of the individual cluster measurements.
+    /// Not as good as pixel-level equalization, but does not require access to clusters.
+    /// Nominal AOD does not have pixel clusters.
+    /// Perhaps no use case during reconstruction since have access to clusters in ESD EDM.
+    Gaudi::Property<bool> m_equalizeTrackMeasurements
+    { this, "EqualizeTrackMeasurements", false, ""};
+
+    /// Apply extra cluster cleaning requirements (e.g. cluster size/shape cuts).
+    Gaudi::Property<bool> m_extraClusterCleaning
+    { this, "ExtraClusterCleaning", false, ""};
 
     /// For charge -> dE/dx calc.
     double m_conversionfactor;
@@ -134,6 +148,7 @@ namespace CP {
 #ifndef XAOD_STANDALONE
     ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc {this, "IBLParameterSvc", "IBLParameterSvc"};
     const PixelID* m_pixelid;
+
     SG::ReadCondHandleKey<PixelChargeCalibCondData> m_moduleDataKey
     {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};
 #endif
@@ -148,11 +163,13 @@ namespace CP {
     Gaudi::Property<std::string> m_msosLink
     { this, "MSOSLink", "Reco_msosLink"};
 
-    Gaudi::Property<std::string> m_sfDir { this, "SFDir", "share/"};
-    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "nTuple_data_lowMu_flat.root"};
-    Gaudi::Property<std::string> m_sfTreeName { this, "SFTreeName", "SFs_TTree"};
-    // possible override for the calibration version
-    Gaudi::Property<std::string> m_sfDirLocal {this, "SFDirLocal", ""};
+    /// PathResolverFindCalibFile need the logical filename in ASG calibration area.
+    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "nTuple_data_lowMu_flat.root"}; // FIX! TBD
+    /// Override version in ASG calibration area with a local file is not empty string.
+    Gaudi::Property<std::string> m_sfLocalFileName {this, "SFLocalFileName", ""};
+    /// Name of SF tree.
+    Gaudi::Property<std::string> m_clusterSFTreeName { this, "ClusterSFTreeName", "SFs_TTree"}; // FIX! TBD
+    Gaudi::Property<std::string> m_trackSFTreeName { this, "TrackSFTreeName", "track_SFs_TTree"}; // FIX! TBD
 
     /// dE/dx equalization scale factor dataframe read from trees.
     std::shared_ptr<ROOT::RDataFrame> m_df;
