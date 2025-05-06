@@ -45,22 +45,12 @@ def JetBTagginglessAlgCfg(
             )
         )
     else:      
-        if ByVertex:
-            acc.merge(BTagTrackAugmenterByVertexAlgCfg(
-                cfgFlags,
-                TrackCollection='InDetTrackParticles',
-                PrimaryVertexCollectionName=pv_col,
-                prefix=trackAugmenterPrefix,
-            ))
-          
-            
-        else:
-            acc.merge(BTagTrackAugmenterAlgCfg(
-                cfgFlags,
-                TrackCollection='InDetTrackParticles',
-                PrimaryVertexCollectionName=pv_col,
-                prefix=trackAugmenterPrefix,
-            ))
+        acc.merge(BTagTrackAugmenterAlgCfg(
+            cfgFlags,
+            TrackCollection='InDetTrackParticles',
+            PrimaryVertexCollectionName=pv_col,
+            prefix=trackAugmenterPrefix,
+        ))
             
 
     acc.merge(JetParticleAssociationAlgCfg(
