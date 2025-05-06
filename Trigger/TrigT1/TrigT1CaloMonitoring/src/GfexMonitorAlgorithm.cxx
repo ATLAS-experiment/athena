@@ -182,7 +182,7 @@ GfexMonitorAlgorithm::FPGAType GfexMonitorAlgorithm::getFPGAType(const float& et
 }
 
 int GfexMonitorAlgorithm::getBinNumberJet (float inputEta, float inputPhi, int xbin, int ybin) const{
-   const std::vector<float> eta = {-4.9, -4.1,-3.5,-3.25,-3.2,-3.1,-2.9,-2.7,-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0,6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5,2.7,2.9,3.1,3.3,3.25,3.5,4.1,4.9};
+   const std::vector<float> eta = {-4.9, -4.1,-3.5,-3.25,-3.2,-3.1,-2.9,-2.7,-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5,2.7,2.9,3.1,3.25,3.3,3.5,4.1,4.9};
    for (int i = 0; i <= 40; i++){ 
        if (inputEta >= eta[i] && inputEta < eta[i+1]){
            xbin = i+1;
@@ -197,7 +197,7 @@ int GfexMonitorAlgorithm::getBinNumberJet (float inputEta, float inputPhi, int x
         }
         j++;
 	}
-    int binN = 40*(ybin-1)+xbin; 
+    int binN = 32*(xbin-1)+ybin; 
     return binN;
 }
 
