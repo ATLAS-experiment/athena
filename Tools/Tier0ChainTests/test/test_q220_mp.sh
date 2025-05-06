@@ -12,6 +12,8 @@
 # art-include: 21.9/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
+# art-output: AOD.pool.root
+# art-output: ESD.pool.root
 
 Reco_tf.py \
 --AMI=q220 \
@@ -20,7 +22,7 @@ Reco_tf.py \
 --maxEvents=500 \
 --preExec='pass' \
 --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
---outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --imf False
+--outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root --imf False
 
 
 rc1=$?

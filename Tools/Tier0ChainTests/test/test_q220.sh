@@ -12,6 +12,8 @@
 # art-include: 21.9/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8         
+# art-output: AOD.pool.root
+# art-output: ESD.pool.root
 
 Reco_tf.py \
 --CA \
@@ -20,7 +22,7 @@ Reco_tf.py \
 --athenaopts='--threads=8' \
 --preExec='pass' \
 --maxEvents=800 \
---outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root --imf False
+--outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root --outputHISTFile=myHIST.root --imf False
 
 
 rc1=$?

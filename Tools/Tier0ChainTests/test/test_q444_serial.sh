@@ -7,6 +7,9 @@
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
 # art-include: 24.0/Athena
+# art-output: AOD.pool.root
+# art-output: ESD.pool.root
+# art-output: RDO.pool.root
 
 Reco_tf.py \
 --AMI=q444 \
@@ -14,7 +17,7 @@ Reco_tf.py \
 --conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-12' \
 --maxEvents=100 \
 --steering doOverlay doRDO_TRIG \
---outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
+--outputRDOFile=RDO.pool.root --outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root \
 --imf False
 
 rc1=$?
