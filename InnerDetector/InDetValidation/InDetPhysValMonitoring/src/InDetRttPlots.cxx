@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -78,11 +78,11 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
   }
 
   if (m_config.doHitsRecoTracksPlotsPerAuthor){
-    m_hitsSiSPSeededFinderPlots                  = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/SiSPSeededFinder/Tracks/Selected/HitsOnTracks", m_config.isITk);
-    m_hitsInDetExtensionProcessorPlots           = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/InDetExtensionProcessor/Tracks/Selected/HitsOnTracks", m_config.isITk);
-    m_hitsTRTSeededTrackFinderPlots              = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/TRTSeededTrackFinder/Tracks/Selected/HitsOnTracks", m_config.isITk);
-    m_hitsTRTStandalonePlots                     = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/TRTStandalone/Tracks/Selected/HitsOnTracks", m_config.isITk);
-    m_hitsSiSpacePointsSeedMaker_LargeD0Plots    = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/SiSpacePointsSeedMaker_LargeD0/Tracks/Selected/HitsOnTracks", m_config.isITk);
+    m_hitsSiSPSeededFinderPlots                  = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/SiSPSeededFinder/Tracks/HitsOnTracks", m_config.isITk);
+    m_hitsInDetExtensionProcessorPlots           = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/InDetExtensionProcessor/Tracks/HitsOnTracks", m_config.isITk);
+    m_hitsTRTSeededTrackFinderPlots              = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/TRTSeededTrackFinder/Tracks/HitsOnTracks", m_config.isITk);
+    m_hitsTRTStandalonePlots                     = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/TRTStandalone/Tracks/HitsOnTracks", m_config.isITk);
+    m_hitsSiSpacePointsSeedMaker_LargeD0Plots    = std::make_unique<InDetPerfPlot_Hits>(this, "TracksByAuthor/SiSpacePointsSeedMaker_LargeD0/Tracks/HitsOnTracks", m_config.isITk);
   }
     
   if (m_config.doTrkInJetPlots)                m_trkInJetPlots = std::make_unique<InDetPerfPlot_TrkInJet>(this, "TracksInJets/Tracks");
