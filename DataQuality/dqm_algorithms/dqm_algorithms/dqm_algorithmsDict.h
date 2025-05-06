@@ -117,6 +117,7 @@
 #include "dqm_algorithms/KurtosisTest_LessThanAbs.h"
 #include "dqm_algorithms/LastBinThreshold.h"
 #include "dqm_algorithms/L1Calo_OutlierAndFlatnessTest.h"
+#include "dqm_algorithms/L1Calo_BinsDiffFromStripMedian.h"
 #include "dqm_algorithms/MDTADCSpectrum.h"
 #include "dqm_algorithms/MDTChi2.h"
 #include "dqm_algorithms/MDTCluster.h"

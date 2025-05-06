@@ -2464,6 +2464,79 @@ class TopoAlgoDef:
             alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion)
             tm.registerTopoAlgo(alg)
 
+        # InvMass + DPHI (+ SumET) for ATR-30727 and ATR-30728
+        from dataclasses import dataclass
+
+        @dataclass
+        class InvMassDPhiSumETAlgoParams:
+            """ Parameters for InvariantMassDeltaPhiInclusive1 and InvariantMassDeltaPhiSumEtInclusive1 Topo algorithms """
+            MinEt1: float
+            MinEt2: float
+            DeltaPhiMin: int = 23
+            DeltaPhiMax: int = 32
+            MinInvMass: int = 0  # Algorithm uses MinMSqr
+            MaxInvMass : int = 1000  # Algorithm uses MaxMSqr
+            MinSumEt: int = 0
+            MaxSumEt: int = 1000
+
+        def AddInvMassDPhiSumETAlgos(otype: str, nleading, list_of_algos: list[InvMassDPhiSumETAlgoParams]):
+            for x in list_of_algos:
+                # Check which parameters are set and choose correct algorithm
+                is_InvMass_set = x.MinInvMass != 0 or x.MaxInvMass != 1000
+                is_SumEt_set = x.MinSumEt != 0 or x.MaxSumEt != 1000
+                algoname = AlgConf.InvariantMassDeltaPhiSumEtInclusive1 if is_SumEt_set else AlgConf.InvariantMassDeltaPhiInclusive1
+
+                obj = f'2{otype}{round(x.MinEt1)}s'
+                toponame = f'{x.DeltaPhiMin}DPHI{x.DeltaPhiMax}-{obj}' # Always present
+                # Check Min/MaxSumEt only for algorithm which supports it
+                if is_SumEt_set:
+                    toponame = f'{x.MinSumEt}SUM{x.MaxSumEt}-{toponame}'
+                if is_InvMass_set:
+                    toponame = f'{x.MinInvMass}INVM{x.MaxInvMass}-{toponame}'
+                log.debug('Define %s', toponame)
+
+                alg = algoname(name=toponame, inputs=[f'{otype}s'], outputs=[toponame])
+                alg.addgeneric('NumResultBits', 1)
+                alg.addgeneric('InputWidth', nleading)
+                alg.addgeneric('MaxTob', nleading)
+                alg.addvariable('MinET1',       x.MinEt1 * _et_conversion)
+                alg.addvariable('MinET2',       x.MinEt2 * _et_conversion)
+                alg.addvariable('MinMSqr',      (x.MinInvMass * _et_conversion) ** 2)  # Algoritm uses InvMass squared
+                alg.addvariable('MaxMSqr',      (x.MaxInvMass * _et_conversion) ** 2)
+                alg.addvariable('MinDeltaPhi',  x.DeltaPhiMin * _phi_conversion)
+                alg.addvariable('MaxDeltaPhi',  x.DeltaPhiMax * _phi_conversion)
+                # Set Min/MaxSumEt only for algorithm which supports it
+                if is_SumEt_set:
+                    alg.addvariable('MinSumEt', x.MinSumEt * _et_conversion)
+                    alg.addvariable('MaxSumEt', x.MaxSumEt * _et_conversion)
+                tm.registerTopoAlgo(alg)
+
+        # From ATR-30728
+        algo_list = [
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinInvMass=1, MaxInvMass=200), # 1INVM200-23DPHI32_2eTAU1
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinInvMass=2, MaxInvMass=200), # 2INVM200-23DPHI32_2eTAU1
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinInvMass=3, MaxInvMass=200), # 3INVM200-23DPHI32_2eTAU1
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinInvMass=4, MaxInvMass=200), # 4INVM200-23DPHI32_2eTAU1
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinSumEt=3,   MaxSumEt=200),   # 3SUM200-23DPHI32_2eTAU1
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinSumEt=4,   MaxSumEt=200),   # 4SUM200-23DPHI32_2eTAU1
+        ]
+        AddInvMassDPhiSumETAlgos('eTAU', HW.eTauOutputWidthSort, algo_list)
+
+        # From ATR-30727
+        algo_list = [
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=10, MaxInvMass=200), # 10INVM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=15, MaxInvMass=200), # 15INVM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=20, MaxInvMass=200), # 20INVM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=25, MaxInvMass=200), # 25INVM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinSumEt=10,   MaxSumEt=200), # 10SUM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinSumEt=15,   MaxSumEt=200), # 15SUM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinSumEt=20,   MaxSumEt=200), # 20SUM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinSumEt=25,   MaxSumEt=200), # 25SUM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=15, MaxInvMass=200, MinSumEt=15, MaxSumEt=200), # 15INVM200-15SUM200-20DPHI32_2jJ5
+            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=20, MaxInvMass=200, MinSumEt=20, MaxSumEt=200), # 20INVM200-20SUM200-20DPHI32_2jJ5
+        ]
+        AddInvMassDPhiSumETAlgos('jJ', HW.jJetOutputWidthSort, algo_list)
+
         # g-2 tau (ATR-30638)
         Algo = namedtuple('Algo', ['dPhiMin', 'dPhiMax', 'otype', 'olist', 'ocut1', 'ocut2', 'nTOB'])
         algolist=[

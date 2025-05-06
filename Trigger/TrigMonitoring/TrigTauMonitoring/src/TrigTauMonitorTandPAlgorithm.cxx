@@ -121,9 +121,12 @@ StatusCode TrigTauMonitorTandPAlgorithm::processEvent(const EventContext& ctx) c
         const bool l1_accept_flag = passBits & TrigDefs::L1_isPassedAfterVeto;
         const bool hlt_not_prescaled_flag = (passBits & TrigDefs::EF_prescaled) == 0;
 
+        // Offline tau requirement check
+        std::vector<const xAOD::TauJet*> offline_taus_with_id = classifyTausAll(offline_taus_all, 0, static_cast<TauID>(m_offline_tau_id.value()));
+        if(m_requireOfflineTaus && offline_taus_with_id.empty()) continue;
+
         // Filter offline taus
-        std::vector<const xAOD::TauJet*> offline_taus = classifyTausAll(offline_taus_all, info.getHLTTauThreshold() - threshold_offset, static_cast<TauID>(m_offline_tau_id.value()));
-        if(m_requireOfflineTaus && offline_taus.empty()) continue;
+        std::vector<const xAOD::TauJet*> offline_taus = classifyTausAll(offline_taus_with_id, info.getHLTTauThreshold() - threshold_offset);
 
         // Online taus
         std::vector<const xAOD::TauJet*> hlt_taus = getOnlineTausAll(trigger, true);
