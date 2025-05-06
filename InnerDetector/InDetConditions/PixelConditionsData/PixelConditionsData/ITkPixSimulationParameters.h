@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,7 +21,7 @@ class ITkPixSimulationParameters{
     //channel number.
     //As they grow in complexity, the implementation should be moved to the .cxx file.
     int totThreshold() const { return m_totThreshold;}
-    float crossTalk() const { return m_crossTalk;}
+    double crossTalk() const { return m_crossTalk;}
     double disableProbability() const {return m_disableProbability;}
     double noiseOccupancy() const { return m_noiseOccupancy;}
     const std::vector<float> & noiseShape() const{ return m_noiseShape;}
@@ -30,7 +30,7 @@ class ITkPixSimulationParameters{
     std::vector<float> m_noiseShape{0.f,1.f};
     double m_disableProbability{9e-3};
     double m_noiseOccupancy{5e-8};
-    float m_crossTalk{0.06f};
+    double m_crossTalk{0.06};
     int m_totThreshold{-1};
 };
 
