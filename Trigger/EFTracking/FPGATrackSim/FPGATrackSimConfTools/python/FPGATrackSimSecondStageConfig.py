@@ -176,7 +176,7 @@ def FPGATrackSimHoughRootOutputToolCfg(flags,name="FPGATrackSimHoughRootOutputTo
     result.setPrivateTools(HoughRootOutputTool)
     return result
 
-def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool"):
+def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool_2nd"):
     result=ComponentAccumulator()
     NNTrackTool = CompFactory.FPGATrackSimNNTrackTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     NNTrackTool.THistSvc = CompFactory.THistSvc()
@@ -184,7 +184,7 @@ def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool"):
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
     NNTrackTool.IdealGeoRoads = False
     NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
-    NNTrackTool.SPRoadFilterTool = FPGATrackSimAnalysisConfig.getSPRoadFilterTool(flags,secondStage=True)
+    NNTrackTool.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
     NNTrackTool.Do2ndStageTrackFit = True
     NNTrackTool.useSectors = False
     result.setPrivateTools(NNTrackTool)
@@ -206,7 +206,7 @@ def FPGATrackSimTrackFitterToolCfg(flags,name="FPGATrackSimTrackFitterTool_2nd")
     TF.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     TF.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     TF.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
-    TF.SPRoadFilterTool = FPGATrackSimAnalysisConfig.getSPRoadFilterTool(flags,secondStage=True)
+    TF.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
     TF.Do2ndStageTrackFit = True
     result.setPrivateTools(TF)
     return result
@@ -274,7 +274,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags,name="FPGATrackSimSecondStageAlg",s
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
     if flags.Trigger.FPGATrackSim.spacePoints and theFPGATrackSimSecondStageAlg.tracking:
-        theFPGATrackSimSecondStageAlg.SPRoadFilterTool = FPGATrackSimAnalysisConfig.getSPRoadFilterTool(flags,secondStage=True)
+        theFPGATrackSimSecondStageAlg.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
         theFPGATrackSimSecondStageAlg.Spacepoints = True
 
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimSecondStageAlgMonitoringCfg

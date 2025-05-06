@@ -672,6 +672,8 @@ if __name__ == "__main__":
                 flags.Trigger.FPGATrackSim.tracking = True
                 flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = True
                 flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis2nd = flags.Trigger.FPGATrackSim.Hough.secondStage
+                if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
+                    flags.Trigger.FPGATrackSim.doNNPathFinder = True
             else:
                 raise AssertionError("ERROR Your tracking option for the pipeline = " + str(trackingOption) + " is not yet supported!")
 
