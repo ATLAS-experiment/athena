@@ -298,7 +298,8 @@ def ActsSpacePointFormationCfg(flags,
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius pass uses the same roi as the primary pass (FS roi)
     if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
-        roisName = 'ActsRegionOfInterest'
+        from InDetConfig.ITkActsHelpers import primaryPassExtension
+        roisName = f'{primaryPassExtension(flags)}RegionOfInterest'
     
     # Cluster Collection name(s) and Space Point Collection name(s)
     # The name depends on the tracking pass as well as the cache mechanism

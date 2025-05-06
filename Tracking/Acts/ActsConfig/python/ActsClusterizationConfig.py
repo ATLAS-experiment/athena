@@ -364,7 +364,8 @@ def ActsClusterizationCfg(flags,
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius Tracking uses full scan RoI created in the primary pass
     if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
-        roisName = 'ActsRegionOfInterest'
+        from InDetConfig.ITkActsHelpers import primaryPassExtension
+        roisName = f'{primaryPassExtension(flags)}RegionOfInterest'
         
     # Name of the Cluster container -> ITk + extension without "Acts" + Pixel or Strip + Clusters
     # We also define the same collection from the main ACTS pass (primary)
