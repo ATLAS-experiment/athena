@@ -129,10 +129,6 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
       ActsTrk::MutableTrackContainer::ConstTrackProxy>
       Optionals;
 
-  using TrackProxyType = Acts::TrackProxy<ActsTrk::MutableTrackSummaryContainer,
-                                          ActsTrk::MutableMultiTrajectory,
-                                          Acts::detail::ValueHolder, true>;
-
   // Adding optional cuts
   Optionals.cuts.push_back(ScoreBasedSolverCutsImpl::etaDependentCuts);
 
