@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -47,16 +47,18 @@ public:
                                   std::vector< std::pair<double, double> >& trfHitRecord,
                                   std::vector<double>& initialConditions,
                                   CLHEP::HepRandomEngine* rndmEngine,
-                                  const EventContext &ctx) override;
+                                  const EventContext &ctx) const override;
 
 
   // 3D sensor simulation using probability density map (used in RUN-2 (no radiation damage)
   StatusCode readProbMap(const std::string&);
   StatusCode printProbMap(const std::string&) const;
 
-  double getMobility(double electricField, bool isHoleBit);
+  double getMobility(double electricField, bool isHoleBit) const;
   std::vector<double> getDriftTime(bool isHoleBit, size_t number,
-                                   CLHEP::HepRandomEngine* rndmEngine);
+                                   CLHEP::HepRandomEngine* rndmEngine,
+                                   double trappingTimeElectrons,
+                                   double trappingTimeHoles) const;
 
 private:
   SensorSim3DTool();
@@ -89,16 +91,6 @@ private:
   Gaudi::Property<bool> m_doChunkCorrection
   {
     this, "doChunkCorrection", false, "doChunkCorrection bool: should be flag"
-  };
-
-  Gaudi::Property<double> m_trappingTimeElectrons
-  {
-    this, "trappingTimeElectrons", 0.0, "Characteristic time till electron is trapped [ns]"
-  };
-
-  Gaudi::Property<double> m_trappingTimeHoles
-  {
-    this, "trappingTimeHoles", 0.0, "Characteristic time till hole is trapped [ns]"
   };
 
   Gaudi::Property<double> m_temperature

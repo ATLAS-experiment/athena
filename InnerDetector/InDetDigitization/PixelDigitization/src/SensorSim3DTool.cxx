@@ -1,7 +1,6 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "SensorSim3DTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -102,7 +101,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
                                          std::vector< std::pair<double, double> >& trfHitRecord,
                                          std::vector<double>& initialConditions,
                                          CLHEP::HepRandomEngine* rndmEngine,
-                                         const EventContext &ctx) {
+                                         const EventContext &ctx) const {
 
   if (p_design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53) {
     if (m_digitizeITk3Das3D) {
@@ -176,9 +175,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
     SG::ReadCondHandle<PixelRadiationDamageFluenceMapData> fluenceDataHandle(m_fluenceDataKey,ctx);
     const PixelRadiationDamageFluenceMapData *fluenceData = *fluenceDataHandle;
 
-    std::pair < double, double > trappingTimes = m_radDamageUtil->getTrappingTimes(fluenceData->getFluenceLayer3D(0));   //0 = IBL
-    m_trappingTimeElectrons = trappingTimes.first;
-    m_trappingTimeHoles = trappingTimes.second;
+    auto [trappingTimeElectrons, trappingTimeHoles]  = m_radDamageUtil->getTrappingTimes(fluenceData->getFluenceLayer3D(0));   //0 = IBL
 
     const PixelHistoConverter& ramoPotentialMap = fluenceData->getRamoPotentialMap3D(0);
     const PixelHistoConverter& eFieldMap        = fluenceData->getEFieldMap3D(0);
@@ -255,8 +252,8 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
       const double mobilityElectron = getMobility(efield, false);
       const double mobilityHole     = getMobility(efield, true);
-      auto driftTimeElectron = getDriftTime(false, ncharges, rndmEngine);
-      auto driftTimeHole = getDriftTime(true, ncharges, rndmEngine);
+      auto driftTimeElectron = getDriftTime(false, ncharges, rndmEngine, trappingTimeElectrons, trappingTimeHoles);
+      auto driftTimeHole = getDriftTime(true, ncharges, rndmEngine, trappingTimeElectrons, trappingTimeHoles);
       //Need to determine how many elementary charges this charge chunk represents.
       double chunk_size = energy_per_step * eleholePairEnergy; //number of electrons/holes
       //set minimum limit to prevent dividing into smaller subcharges than one fundamental charge
@@ -783,7 +780,7 @@ double SensorSim3DTool::getProbMapEntry(const InDetDD::PixelReadoutTechnology &r
   return echarge;
 }
 
-double SensorSim3DTool::getMobility(double electricField, bool isHoleBit) {
+double SensorSim3DTool::getMobility(double electricField, bool isHoleBit) const {
   //Not exactly the same as the getMobility function in RadDamageUtil, since we don't have a Hall effect for 3D sensors
   // (B and E are parallel)
   //Maybe good to do something about this in the future
@@ -810,16 +807,18 @@ double SensorSim3DTool::getMobility(double electricField, bool isHoleBit) {
 }
 
 std::vector<double> SensorSim3DTool::getDriftTime(bool isHoleBit, size_t n,
-                                                  CLHEP::HepRandomEngine* rndmEngine)
+                                                  CLHEP::HepRandomEngine* rndmEngine,
+                                                  double trappingTimeElectrons,
+                                                  double trappingTimeHoles) const
 {
   std::vector<double> rand (n, 0.);
   std::vector<double> result (n, 0.);
   CLHEP::RandFlat::shootArray(rndmEngine, n, rand.data(), 0., 1.);
   for(size_t i = 0; i < n; i++) {
     if (isHoleBit) {
-      result[i]= (-1.) * m_trappingTimeHoles * logf(rand[i]); // ns
+      result[i]= (-1.) * trappingTimeHoles * logf(rand[i]); // ns
     } else {
-      result[i] = (-1.) * m_trappingTimeElectrons * logf(rand[i]); // ns
+      result[i] = (-1.) * trappingTimeElectrons * logf(rand[i]); // ns
     }
   }
   return result;
