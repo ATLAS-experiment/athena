@@ -10,6 +10,11 @@ def primaryPassUsesActs(flags) -> bool:
                                                    ITkPrimaryPassConfig.ActsHeavyIon]
 
 
+def primaryPassExtension(flags) -> str:
+    # we rely on the fact that flags.Tracking.ITkPrimaryPassConfig.value is
+    # equal to ITk{extension}
+    return flags.Tracking.ITkPrimaryPassConfig.value.replace("ITk", "")
+
 def extractTrackingPasses(flags) -> list:
     # Function for extracting the requested tracking passes that need to be scheduled
     trackingPasses = []
