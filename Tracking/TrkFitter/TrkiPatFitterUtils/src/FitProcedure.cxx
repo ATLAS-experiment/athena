@@ -750,7 +750,7 @@ void FitProcedure::calculateChiSq(
                << "----------------------------------" << std::endl
                << "   ";
 
-    (**measurements.begin()).printHeading(*cache.log);
+    Trk::FitMeasurement::printHeading(*cache.log);
     int n = 0;
     for (auto* m : measurements) {
       *cache.log << std::setiosflags(std::ios::fixed) << std::setw(3) << ++n;

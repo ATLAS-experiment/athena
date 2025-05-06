@@ -934,7 +934,7 @@ std::unique_ptr<Trk::Track> iPatFitter::performFit(
                                             *parameters, garbage);
 
     // construct the fitted track
-    fittedTrack.reset(m_fitProcedure->constructTrack(
+    fittedTrack.reset(Trk::FitProcedure::constructTrack(
         cache, measurements, *parameters, trackInfo, leadingTSOS));
     if (fittedTrack) {
       // set StraightLine when momentum unfitted
