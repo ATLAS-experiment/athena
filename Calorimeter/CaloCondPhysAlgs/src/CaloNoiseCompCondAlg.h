@@ -163,36 +163,35 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
    private: 
   
     std::string   m_ReturnNoiseName;
-    int m_gain_from_joboption;
  
  
     //Constants
-    static const int m_nCalos=4;// number of calorimeters
-    static const int m_nGains=3;// number of gains
-    float m_LowGainThresh[m_nCalos];
-    float m_HighGainThresh[m_nCalos];  
-    CaloGain::CaloGain  m_highestGain[m_nCalos];
+    static constexpr int m_nCalos=4;// number of calorimeters
+    static constexpr int m_nGains=3;// number of gains
+    float m_LowGainThresh[m_nCalos]{};
+    float m_HighGainThresh[m_nCalos]{};
+    CaloGain::CaloGain  m_highestGain[m_nCalos]{};
  
-    bool m_diagnostic[m_nGains];
-    int m_nCellsWithProblem[m_nGains];
-    int m_nReason[5000][m_nGains];
-    int m_itReason[10][m_nGains];
-    int m_idHash[5000][m_nGains];
-    int m_reason[5000][10][m_nGains];
+    bool m_diagnostic[m_nGains]{};
+    int m_nCellsWithProblem[m_nGains]{};
+    int m_nReason[5000][m_nGains]{};
+    int m_itReason[10][m_nGains]{};
+    int m_idHash[5000][m_nGains]{};
+    int m_reason[5000][10][m_nGains]{};
     std::string m_reasonName[10];
  
     //Identifiers
-    const AtlasDetectorID* m_atlas_id; 
+    const AtlasDetectorID* m_atlas_id{};
  
-    const CaloIdManager* m_calo_id_man;
+    const CaloIdManager* m_calo_id_man{};
  
-    const LArEM_Base_ID*    m_lar_em_id; 
-    const LArHEC_Base_ID*   m_lar_hec_id;
-    const LArFCAL_Base_ID*  m_lar_fcal_id; 
+    const LArEM_Base_ID*    m_lar_em_id{};
+    const LArHEC_Base_ID*   m_lar_hec_id{};
+    const LArFCAL_Base_ID*  m_lar_fcal_id{};
      
  
-    const CaloCell_ID* m_calocell_id;
-    const CaloCell_SuperCell_ID* m_calosupercell_id;
+    const CaloCell_ID* m_calocell_id{};
+    const CaloCell_SuperCell_ID* m_calosupercell_id{};
  
     IdentifierHash m_LArHashMax;
     IdentifierHash m_TileHashMax;
@@ -216,17 +215,17 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
  
     //Database  
  
-    float  m_Adc2MeVFactor;
+    float  m_Adc2MeVFactor{};
     LArVectorProxy m_OFC;
     LArVectorProxy m_Shape;
     LArVectorProxy m_AutoCorr;
-    float m_c[32][32];
-    float m_RMSpedestal;
-    int m_nsamples;
-    float  m_SigmaNoise;
-    float m_fSampl;
-    double m_AdcPerMev;
-    float m_MinBiasRMS;
+    float m_c[32][32]{};
+    float m_RMSpedestal{};
+    int m_nsamples{};
+    float  m_SigmaNoise{};
+    float m_fSampl{};
+    double m_AdcPerMev{};
+    float m_MinBiasRMS{};
 
     SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey {this,"CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
     const CaloDetDescrManager* m_calo_dd_man=nullptr; 
@@ -288,7 +287,7 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
                                   std::vector<bool> &retrieve);
     StatusCode checkCellDatabase(const Identifier & id, int igain,
                                std::vector<bool> &retrieve);
-    void updateDiagnostic(int reason,std::string reason_name,int igain, bool &noiseOK);
+    void updateDiagnostic(int reason, const std::string &reason_name,int igain, bool &noiseOK);
  
     std::vector<float> 
       calculateElecNoiseForLAR(const IdentifierHash &idCaloHash);

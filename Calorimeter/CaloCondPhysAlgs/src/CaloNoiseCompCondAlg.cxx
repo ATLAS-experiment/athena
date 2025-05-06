@@ -1014,7 +1014,7 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
 //////////////////////////////////////////////////
 
 void
-CaloNoiseCompCondAlg::updateDiagnostic(int ireason,std::string nameReason,int igain, bool &noiseOK)
+CaloNoiseCompCondAlg::updateDiagnostic(int ireason,const std::string &nameReason,int igain, bool &noiseOK)
 {
   int nTmp=m_nCellsWithProblem[igain];
   if (nTmp >= 5000) return;
