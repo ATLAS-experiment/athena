@@ -17,6 +17,8 @@
 #include "ReadoutGeometryBase/SiCellId.h"
 #include "PixelConditionsData/PixelModuleData.h"  
 #include "PixelConditionsData/PixelChargeCalibCondData.h"  
+#include "PixelConditionsData/ITkPixSimulationParameters.h" 
+
 #include <limits>
 
 
@@ -93,6 +95,20 @@ namespace PixelDigitization{
     }
     return randomNoise(chargedDiodes, totalNoiseOccupancy, noiseShape, overflowToT, chargeCalibData, rndmEngine, pixelReadout);
   }
+  
+  void 
+  randomNoise(SiChargedDiodeCollection& chargedDiodes, const ITkPixSimulationParameters & chipData,
+    int nBcid,
+    const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
+    InDetDD::IPixelReadoutManager * pixelReadout) {
+    const double totalNoiseOccupancy = chipData.noiseOccupancy() * nBcid;
+    //prepare to enter loop
+    const std::vector<float> &noiseShape = chipData.noiseShape();
+    // protection to the overflow ToT, that depends on the sensor technology
+    float overflowToT = std::numeric_limits<float>::max();
+    return randomNoise(chargedDiodes, totalNoiseOccupancy, noiseShape, overflowToT, chargeCalibData, rndmEngine, pixelReadout);
+  }
+
 
   void 
   randomNoise(SiChargedDiodeCollection& chargedDiodes, const double totalNoiseOccupancy, const std::vector<float> &noiseShape, float overflowToT,
@@ -150,6 +166,12 @@ namespace PixelDigitization{
     const int barrel_ec = pixelId->barrel_ec(chargedDiodes.element()->identify());
     const int layerIndex = pixelId->layer_disk(chargedDiodes.element()->identify());
     const double disableProbability = moduleData->getDisableProbability(barrel_ec, layerIndex);
+    return randomDisable(chargedDiodes, disableProbability, rndmEngine);
+  }
+  void 
+  randomDisable(SiChargedDiodeCollection& chargedDiodes,const ITkPixSimulationParameters & chipData,
+    CLHEP::HepRandomEngine* rndmEngine) {
+    const double disableProbability = chipData.disableProbability();
     return randomDisable(chargedDiodes, disableProbability, rndmEngine);
   }
 

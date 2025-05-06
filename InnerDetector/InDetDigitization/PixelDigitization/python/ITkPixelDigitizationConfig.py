@@ -58,7 +58,6 @@ def BarrelRD53SimToolCfg(flags, name="BarrelRD53SimTool", **kwargs):
     kwargs.setdefault("BarrelEC", 0)
     kwargs.setdefault("DoNoise", flags.Digitization.DoInnerDetectorNoise)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
-    kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(ITkPixelConditionsSummaryCfg(flags)))
     kwargs.setdefault("DoTimeWalk", False) #Set this to true to enable Timewalk effects
@@ -74,7 +73,6 @@ def EndcapRD53SimToolCfg(flags, name="EndcapRD53SimTool", **kwargs):
     kwargs.setdefault("BarrelEC", 2)
     kwargs.setdefault("DoNoise", flags.Digitization.DoInnerDetectorNoise)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
-    kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(ITkPixelConditionsSummaryCfg(flags)))
     kwargs.setdefault("DoTimeWalk", False) #Set this to true to enable Timewalk effects

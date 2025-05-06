@@ -58,7 +58,6 @@ def PLR_RD53SimToolCfg(flags, name="PLR_RD53SimTool", **kwargs):
     kwargs.setdefault("BarrelEC", 4)
     kwargs.setdefault("DoNoise", flags.Digitization.DoInnerDetectorNoise)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
-    kwargs.setdefault("PixelModuleData", "PLR_ModuleData")
     kwargs.setdefault("PixelChargeCalibCondData", "PLR_ChargeCalibCondData")
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PLR_ConditionsSummaryCfg(flags)))
     kwargs.setdefault("DoTimeWalk", False) 
