@@ -65,7 +65,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimHoughRootOutputTool>      m_houghRootOutputTool {this, "HoughRootOutputTool", "FPGATrackSimHoughRootOutputTool/FPGATrackSimHoughRootOutputTool", "Hough ROOT Output Tool"};
 
         // Scoring and duplicate removal. We need second stage versions of these.
-        ToolHandle<FPGATrackSimNNTrackTool>              m_NNTrackTool {this, "NNTrackTool", "FPGATrackSimNNTrackTool/FPGATrackSimNNTrackTool", "NN Track Tool"};
+        ToolHandle<FPGATrackSimNNTrackTool>              m_NNTrackTool {this, "NNTrackTool", "FPGATrackSimNNTrackTool/FPGATrackSimNNTrackTool_2nd", "NN Track Tool"};
         ToolHandle<FPGATrackSimTrackFitterTool>          m_trackFitterTool {this, "TrackFitter_2nd", "FPGATrackSimTrackFitterTool/FPGATrackSimTrackFitterTool_2nd", "2nd stage track fit tool"};
         ToolHandle<FPGATrackSimOverlapRemovalTool>       m_overlapRemovalTool {this, "OverlapRemoval_2nd", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_2nd", "2nd stage overlap removal tool"};
 

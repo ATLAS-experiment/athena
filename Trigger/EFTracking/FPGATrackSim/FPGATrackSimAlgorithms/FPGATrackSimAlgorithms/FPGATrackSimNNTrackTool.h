@@ -59,7 +59,7 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 
   private:
 
-	ServiceHandle<IFPGATrackSimMappingSvc>   m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc","FPGATrackSimMappingSvc"};
+	ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc", ""};
 	ServiceHandle<ITHistSvc> m_tHistSvc{this, "THistSvc","THistSvc"};
 
 	OnnxRuntimeBase m_paramNN_1st;
