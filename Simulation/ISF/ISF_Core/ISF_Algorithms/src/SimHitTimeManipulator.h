@@ -179,8 +179,6 @@ namespace ISF {
     if ( inputReadHandleKey.key().empty() ) {
       return StatusCode::SUCCESS;
     }
-    // TODO: is there a way to conveniently get the total number of hits in all inputReadHandleKeys
-    //       and reserve the corresponding size in the outputHandle
     SG::WriteHandle<T> outputHandle{outputWriteHandleKey, ctx};
     ATH_CHECK( outputHandle.record(std::make_unique<T>()) );
 
@@ -216,8 +214,6 @@ namespace ISF {
     if ( inputReadHandleKey.key().empty() ) {
       return StatusCode::SUCCESS;
     }
-    // TODO: is there a way to conveniently get the total number of hits in all inputReadHandleKeys
-    //       and reserve the corresponding size in the outputHandle
     SG::WriteHandle<LArHitContainer> outputHandle{outputWriteHandleKey, ctx};
     ATH_CHECK( outputHandle.record(std::make_unique<LArHitContainer>()) );
 
@@ -227,9 +223,10 @@ namespace ISF {
     }
     outputHandle->setName(inputHandle->Name());
 
-   // for ( const LArHit* hit: *outputHandle ) {
-   //   // FIXME Currently no way of setting LArHit times after they are created.
-   // }
+    for ( const LArHit* hit: *outputHandle ) {
+      if (m_eventTimeOffset) { hit->overrideHitTime( hit->time() - m_eventTimeOffset ); }
+      if (m_doHitTimeWrapping) { hit->overrideHitTime( fmod( hit->time() , m_wrapTime ) ); }
+    }
 
    return StatusCode::SUCCESS;
   }
@@ -242,8 +239,6 @@ namespace ISF {
     if ( inputReadHandleKey.key().empty() ) {
       return StatusCode::SUCCESS;
     }
-    // TODO: is there a way to conveniently get the total number of hits in all inputReadHandleKeys
-    //       and reserve the corresponding size in the outputHandle
     SG::WriteHandle<TileHitVector> outputHandle{outputWriteHandleKey, ctx};
     ATH_CHECK( outputHandle.record(std::make_unique<TileHitVector>()) );
 
@@ -272,8 +267,6 @@ namespace ISF {
     if ( inputReadHandleKey.key().empty() ) {
       return StatusCode::SUCCESS;
     }
-    // TODO: is there a way to conveniently get the total number of hits in all inputReadHandleKeys
-    //       and reserve the corresponding size in the outputHandle
     SG::WriteHandle<TrackRecordCollection> outputHandle{outputWriteHandleKey, ctx};
     ATH_CHECK( outputHandle.record(std::make_unique<TrackRecordCollection>()) );
 

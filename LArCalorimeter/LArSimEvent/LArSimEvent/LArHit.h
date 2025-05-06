@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* author : Johann Collot                                                           */
@@ -7,7 +7,7 @@
 /* date of last modification : 13/09/2002  CLID removed                             */
 
 // 03-Dec-2003 Bill Seligman: Substantially revised.  This class no
-// longer inherits from any base class.  
+// longer inherits from any base class.
 
 // 09-Dec-2006 RD Schaffer: moved energy to double for accumulation
 // precision - float in persistent version
@@ -18,14 +18,14 @@
 #include "Identifier/Identifier.h"
 #include "AthenaKernel/Units.h"
 
-class LArHit 
+class LArHit
 
 /** @brief  Class to store hit energy and time in LAr cell from G4 simulation */
 
 {
 public:
 
-    /** LArHit Constructor. 
+    /** LArHit Constructor.
       @param[in] l_cell   Identifier of the cell in which the hit occured.
       @param[in] l_energy Energy (in MeV) deposited in the cell.
       @param[in] l_time   Time   (in ns) of the hit. <br>
@@ -40,13 +40,13 @@ public:
 
     /** Destructor. */
     ~LArHit();
-  
+
     /** @return  cell identifier of this hit */
     Identifier cellID() const;
-  
+
     /** @return  energy in MeV of this hit */
     double     energy() const;
-  
+
     /** @return time in ns of this hit <br>
       Time is defined as the g4 time minus the time of flight at speed of light from the center of Atlas
     */
@@ -65,16 +65,20 @@ public:
     /** The method to be called at the end of event by SD.
          Finalize time computation time = Sum(E.t)/Sum(E)  */
     void       finalize();
-    
+
+    /** Allow hit time to be overridden for the use-case of shifting
+         simulated events with long-lived particles back in time. */
+    void overrideHitTime(double time) { m_time = time; }
+
 
 private:
-  
+
     /** identifier of the cell in which this hit occured. */
     Identifier m_ID;
-  
+
     /** energy (in MeV) deposited in this hit */
     double m_energy;
-  
+
     /** time (in ns) */
     double m_time;
 
@@ -83,49 +87,49 @@ private:
 
 /// inlines
 inline
-LArHit::LArHit(Identifier l_cell, double l_energy, double l_time) 
-	:
-	m_ID(l_cell), 
-	m_energy(l_energy),
+LArHit::LArHit(Identifier l_cell, double l_energy, double l_time)
+        :
+        m_ID(l_cell),
+        m_energy(l_energy),
         m_time( (l_time*l_energy) )
 {}
 
 
 inline
-LArHit::LArHit() 
-	:
-	m_ID(Identifier()),
-	m_energy(0.),
+LArHit::LArHit()
+        :
+        m_ID(Identifier()),
+        m_energy(0.),
         m_time(0.)
 {}
 
 inline
-LArHit::~LArHit() 
+LArHit::~LArHit()
 { }
 
 inline
 Identifier
-LArHit::cellID() const 
+LArHit::cellID() const
 { return m_ID; }
 
 inline
 double
-LArHit::energy() const 
+LArHit::energy() const
 { return (double) m_energy; }
-  
+
 inline
 double
 LArHit::time() const
 { return m_time; }
 
-inline 
+inline
 bool
-LArHit::Less(LArHit* const& h) const 
-{ return m_ID < h->m_ID; } 
+LArHit::Less(LArHit* const& h) const
+{ return m_ID < h->m_ID; }
 
 inline
 bool
-LArHit::Equals(LArHit* const& h) const 
+LArHit::Equals(LArHit* const& h) const
 { return m_ID == h->m_ID; }
 
 inline
@@ -147,4 +151,3 @@ LArHit::finalize()
 }
 
 #endif  // LArSimEvent_LArHit_h
-
