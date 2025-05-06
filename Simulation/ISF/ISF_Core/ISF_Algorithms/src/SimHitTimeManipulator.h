@@ -223,7 +223,7 @@ namespace ISF {
     }
     outputHandle->setName(inputHandle->Name());
 
-    for ( const LArHit* hit: *outputHandle ) {
+    for ( LArHit* hit: *outputHandle ) {
       if (m_eventTimeOffset) { hit->overrideHitTime( hit->time() - m_eventTimeOffset ); }
       if (m_doHitTimeWrapping) { hit->overrideHitTime( fmod( hit->time() , m_wrapTime ) ); }
     }
