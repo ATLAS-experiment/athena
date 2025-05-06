@@ -11,13 +11,13 @@
 
 //Trk
 #include "TrkDetDescrUtils/GeometryStatics.h"
-#include <memory>
 #include "TrkDetDescrUtils/ObjectAccessor.h"
 #include "GeoPrimitives/GeoPrimitives.h"
+//
 #include "AthenaKernel/CLASS_DEF.h"
-#include "CxxUtils/CachedUniquePtr.h"
+//std
 #include <memory>
-#include <utility>
+
 class MsgStream;
 
 namespace Trk {
@@ -35,10 +35,13 @@ namespace Trk {
     */
     class Volume {
       public:
-        /** Default constructor */
-        Volume();
+        /** Defaults copies are special due ot unique ptr data member  */
+        Volume() = default;
+        Volume(Volume&&) = default;
+        Volume& operator=(Volume&&) = default;
+        virtual ~Volume() = default;
 
-        /** Expizit constructor with arguments */
+        /** Constructor with arguments */
         Volume(std::unique_ptr<Amg::Transform3D> htrans,
                std::shared_ptr<VolumeBounds> volBounds);
 
@@ -48,13 +51,10 @@ namespace Trk {
         /** Copy Constructor */
         Volume(const Volume& vol, const Amg::Transform3D& shift);
 
-        /** Destructor */
-        virtual ~Volume();
-
         /** Assignment operator */
         Volume& operator=(const Volume& vol);
 
-        /** Pseudo-constructor */
+        /** polymorpic deep copy */
         virtual Volume* clone() const;
 
         /** Return methods for geometry transform */
@@ -75,24 +75,21 @@ namespace Trk {
                                                 const Amg::Vector3D& mom,
                                                 bool forceInside=false) const;
       protected:
-        std::unique_ptr<Amg::Transform3D>             m_transform;         //!< HepGeom::Transform3D
-        CxxUtils::CachedUniquePtr<Amg::Vector3D>      m_center;            //!< center position of the surface
-        std::shared_ptr<VolumeBounds>                 m_volumeBounds;      //!< the volumeBounds
+        std::unique_ptr<Amg::Transform3D> m_transform = nullptr;    //!< Transform3D (optional)
+        Amg::Vector3D                     m_center = Trk::s_origin; //!< center position of the surface
+        std::shared_ptr<VolumeBounds>     m_volumeBounds = nullptr; //!< the volumeBounds
     };
 
-    inline const Amg::Transform3D& Volume::transform() const
-    {  if (m_transform) return(*m_transform);
-       return Trk::s_idTransform;
+    inline const Amg::Transform3D& Volume::transform() const {
+      if (m_transform) {
+        return (*m_transform);
+      }
+      return Trk::s_idTransform;
     }
 
     inline const Amg::Vector3D& Volume::center() const
     {
-     if (m_center) return (*m_center);
-     if (!m_center && m_transform){
-        m_center.set(std::make_unique<Amg::Vector3D>(std::as_const(*m_transform).translation()));
-        return(*m_center);
-      }
-     return Trk::s_origin;
+      return m_center;
     }
 
     inline const VolumeBounds&

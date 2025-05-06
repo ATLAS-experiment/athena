@@ -1209,8 +1209,7 @@ Trk::TrackingVolume::moveVolume(Amg::Transform3D& shift)
   } else {
     this->m_transform = std::make_unique<Amg::Transform3D>(shift);
   }
-  this->m_center.store(
-    std::make_unique<Amg::Vector3D>(m_transform->translation()));
+  this->m_center = (m_transform->translation());
 }
 
 Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) const
