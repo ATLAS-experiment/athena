@@ -41,7 +41,7 @@ void TRTCalib_StrawStatusReport(){
     // read the content from a default txt file name into an ntuple
     int run = 0;
     TNtuple *ntuple = new TNtuple("ntuple", "data", "side:phi:straw:status:hits:occ:htocc:eff:lay");
-    gErrorIgnoreLevel = kWarning;
+    gErrorIgnoreLevel = kError;
 
     int var[15];
     double par[5];
