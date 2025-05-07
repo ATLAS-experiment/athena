@@ -307,43 +307,34 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
   info.setMotherProperties(mother);
 
-  int NumOfPhot(0);
-  int NumOfEl(0);
-  int NumOfPos(0);
-  int NumOfNucFr(0);
-  int NumOfquark(0);
-  int NumOfgluon(0);
-  int NumOfElNeut(0);
-  int NumOfLQ(0);
-  int NumOfMuPl(0);
-  int NumOfMuMin(0);
-  int NumOfMuNeut(0);
-  int NumOfTau(0);
-  int NumOfTauNeut(0);
-  samePart = false;
+  // Determine decay products
+  auto DP = DecayProducts(partOriVert);
+  const int NumOfPhot = DP.pd(MC::PHOTON);
+  const int NumOfEl = DP.pd(MC::ELECTRON);
+  const int NumOfPos = DP.pd(MC::POSITRON);
+  const int NumOfquark = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK});
+  const int NumOfgluon = DP.apd(MC::GLUON);
+  const int NumOfElNeut = DP.apd(MC::NU_E);
+  const int NumOfLQ = DP.apd(MC::LEPTOQUARK);
+  const int NumOfMuPl = DP.pd(-MC::MUON);
+  const int NumOfMuMin = DP.pd(MC::MUON);
+  const int NumOfMuNeut = DP.apd(MC::NU_MU);
+  const int NumOfTau = DP.apd(MC::TAU);
+  const int NumOfTauNeut = DP.apd(MC::NU_TAU);
 
+  samePart = false;
+  int NumOfNucFr(0);
+  const bool possibleNuclearFragment = (numOfParents == 1 && (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || MC::isMuon(motherPDG) || abs(motherPDG) == MC::PIPLUS));
   for (const auto& theDaug: partOriVert->particles_out()) {
     if (!theDaug) continue;
-    int DaugType = theDaug->pdgId();
-    if (MC::isSMQuark(DaugType)) NumOfquark++;
-    else if (MC::isGluon(DaugType)) NumOfgluon++;
-    else if (abs(DaugType) == MC::NU_E) NumOfElNeut++;
-    else if (abs(DaugType) == MC::NU_MU) NumOfMuNeut++;
-    else if (MC::isPhoton(DaugType)) NumOfPhot++;
-    else if (DaugType == MC::ELECTRON) NumOfEl++;
-    else if (DaugType == MC::POSITRON) NumOfPos++;
-    else if (DaugType == MC::MUON) NumOfMuMin++;
-    else if (DaugType == -MC::MUON) NumOfMuPl++;
-    else if (MC::isTau(DaugType)) NumOfTau++;
-    else if (abs(DaugType) == MC::NU_TAU) NumOfTauNeut++;
-    else if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
-    if (abs(DaugType) == abs(motherPDG) && theDaug && HepMC::is_same_generator_particle(theDaug, mother )) samePart = true;
-    if (numOfParents == 1 &&
-        (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || MC::isMuon(motherPDG) || abs(motherPDG) == MC::PIPLUS) &&
-        (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON ||
+    const int DaugType = theDaug->pdgId();
+    if (abs(DaugType) == abs(motherPDG) && HepMC::is_same_generator_particle(theDaug, mother )) samePart = true;
+    if (possibleNuclearFragment &&
+        (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON || // FIXME Do we really expect particles with PDG_ID = 0 in the truth record?
          abs(DaugType) == MC::PIPLUS || abs(DaugType) == MC::PI0))
       NumOfNucFr++;
   }
+  // End of section determining decay products
 
   if (MC::isPhoton(motherPDG) && mothOriVert) {
     if (mothOriVert->nIncomingParticles() > 1) { ATH_MSG_DEBUG("DefOrigOfElectron:: photon has more than one parent.");  }
@@ -606,6 +597,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   const int numOfDaug = partOriVert->nOutgoingParticles();
 
   info.setMotherProperties(mother);
+
+  // Determine decay products
   auto DP = DecayProducts(partOriVert);
   const int NumOfPhot = DP.pd(MC::PHOTON);
   const int NumOfEl = DP.pd(MC::ELECTRON);
@@ -619,6 +612,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   const int NumOfMuMin = DP.pd(MC::MUON);
   const int NumOfTau = DP.apd(MC::TAU);
   const int NumOfTauNeut = DP.apd(MC::NU_TAU);
+  // End of section determining decay products
+
   if (std::abs(motherPDG) == MC::PIPLUS && numOfDaug == 2 && NumOfMuNeut == 1) return PionDecay;
   if (std::abs(motherPDG) == MC::KPLUS && numOfDaug == 2 && NumOfMuNeut == 1) return KaonDecay;
   if (MC::isTau(motherPDG)) {
@@ -803,6 +798,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   if (!partOriVert) return NonDefined; // FIXME not sure this could ever be true?
 
   numOfParents = partOriVert->nIncomingParticles();
+
+  // Determine decay products
   auto DP = DecayProducts(partOriVert);
   const int numOfDaug = DP.size();
   const int NumOfPhot = DP.pd(MC::PHOTON);
@@ -817,6 +814,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   const int NumOfMuMin = DP.pd(MC::MUON);
   const int NumOfTau = DP.apd(MC::TAU);
   const int NumOfTauNeut = DP.apd(MC::NU_TAU);
+  // End of section determining decay products
 
   if (MC::isTop(motherPDG)) return top;
   if (MC::isW(motherPDG) && mothOriVert && mothOriVert->nIncomingParticles() != 0) {
@@ -962,43 +960,43 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   partOriVert = mother->decayVtx(); // FIXME how often does this line actually change the pointer???
   numOfParents = partOriVert->nIncomingParticles();
   const int numOfDaug = partOriVert->nOutgoingParticles();
-  int NumOfNucFr(0);
-  int NumOfEl(0);
-  int NumOfPos(0);
-  int NumOfMu(0);
-  int NumOfTau(0);
-  int NumOfPht(0);
-  int NumOfLQ(0);
+
+  // Determine decay products
+  auto DP = DecayProducts(partOriVert);
+  const int NumOfEl = DP.pd(MC::ELECTRON);
+  const int NumOfPos = DP.pd(MC::POSITRON);
+  const int NumOfMu = DP.apd(MC::MUON);
+  const int NumOfTau = DP.apd(MC::TAU);
+  const int NumOfLQ = DP.apd(MC::LEPTOQUARK);
+  const int NumOfLep = NumOfEl + NumOfPos + NumOfMu + NumOfTau;
+  const int NumOfNeut = DP.apd({MC::NU_E,MC::NU_MU,MC::NU_TAU});
+  const int NumOfPht = DP.pd(MC::PHOTON);
+
   int DaugType(0);
-  long NumOfLep(0); // FIXME does this really need to be a long???
-  long NumOfNeut(0); // FIXME does this really need to be a long???
-  long NumOfPartons(0); // FIXME does this really need to be a long???
+  int NumOfPartons(0);
+  int NumOfNucFr(0);
+  const bool possibleNuclearFragment = (numOfParents == 1 && (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || abs(motherPDG) == MC::PIPLUS));
   const xAOD::TruthParticle* Daug{};
   for (const auto& pout: partOriVert->particles_out()) {
     if (!pout) continue;
     DaugType = pout->pdg_id();
-    if (numOfParents == 1 && (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || abs(motherPDG) == MC::PIPLUS) &&
-        (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON))
+    if (possibleNuclearFragment &&
+        (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON)) { // FIXME Do we really expect particles with PDG_ID = 0 in the truth record?
       NumOfNucFr++;
-    if (DaugType == MC::PHOTON) NumOfPht++;
-    else if (DaugType == MC::ELECTRON) NumOfEl++;
-    else if (DaugType == MC::POSITRON) NumOfPos++;
-    else if (MC::isMuon(DaugType)) NumOfMu++;
-    else if (MC::isTau(DaugType)) NumOfTau++;
-    else if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
-    else if (MC::isElectron(DaugType) || MC::isMuon(DaugType) || MC::isTau(DaugType)) NumOfLep++;
-    else if (abs(DaugType) == MC::NU_E || abs(DaugType) == MC::NU_MU || abs(DaugType) == MC::NU_TAU) NumOfNeut++;
-    if (abs(DaugType) < MC::ELECTRON || (abs(DaugType) > MC::NU_TAU && abs(DaugType) < 43 && !MC::isPhoton(DaugType))) {
+    }
+    if (abs(DaugType) < MC::ELECTRON ||
+        (abs(DaugType) > MC::NU_TAU && abs(DaugType) < 43 && !MC::isPhoton(DaugType))) {
       // FIXME Too loose? This definition picks up 4th generation quarks and leptons as well as all gauge bosons and leptoquarks.
       // Suggest MC::isSMQuark(DaugType) || (MC::isBoson(DaugType) && !MC::isPhoton(DaugType))
       // or maybe even MC::isSMQuark(DaugType) || MC::isGluon(DaugType)
-      // AKA const long NumOfPartons = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK,MC::GLUON});
+      // AKA const int NumOfPartons = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK,MC::GLUON});
       NumOfPartons++;
     }
     if (DaugType == motherPDG) {
       Daug = pout;
     }
   }
+  // End of section determining decay products
 
   bool foundISR = false;
   bool foundFSR = false;
@@ -1279,33 +1277,28 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
 
   info.setMotherProperties(mother);
 
-  int NumOfPhot(0);
-  int NumOfquark(0);
-  int NumOfgluon(0);
-  int NumOfLQ(0);
-  int NumOfElNeut(0);
-  int NumOfMuNeut(0);
-  int NumOfTauNeut(0);
-  int NumOfEl(0);
-  int NumOfMu(0);
-  int NumOfTau(0);
-  samePart = false;
+  // Determine decay products
+  auto DP = DecayProducts(partOriVert);
+  const int NumOfPhot = DP.pd(MC::PHOTON);
+  const int NumOfquark = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK});
+  const int NumOfgluon = DP.apd(MC::GLUON);
+  const int NumOfLQ = DP.apd(MC::LEPTOQUARK);
+  const int NumOfElNeut = DP.apd(MC::NU_E);
+  const int NumOfMuNeut = DP.apd(MC::NU_MU);
+  const int NumOfTauNeut = DP.apd(MC::NU_TAU);
+  const int NumOfEl = DP.apd(MC::ELECTRON);
+  const int NumOfMu = DP.apd(MC::MUON);
+  const int NumOfTau = DP.apd(MC::TAU);
 
+  samePart = false;
   for (const auto& theDaug: partOriVert->particles_out()) {
     if (!theDaug) continue;
-    int DaugType = theDaug->pdgId();
-    if (MC::isSMQuark(DaugType)) NumOfquark++;
-    else if (MC::isGluon(DaugType)) NumOfgluon++;
-    else if (abs(DaugType) == MC::NU_E) NumOfElNeut++;
-    else if (std::abs(DaugType) == MC::NU_MU) NumOfMuNeut++;
-    else if (std::abs(DaugType) == MC::NU_TAU) NumOfTauNeut++;
-    else if (MC::isPhoton(DaugType)) NumOfPhot++;
-    else if (MC::isElectron(DaugType)) NumOfEl++;
-    else if (MC::isMuon(DaugType)) NumOfMu++;
-    else if (MC::isTau(DaugType)) NumOfTau++;
-    else if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
-    if (std::abs(DaugType) == std::abs(motherPDG) && theDaug && HepMC::is_same_generator_particle(theDaug,mother)) samePart = true;
+    if (theDaug->pdgId() == motherPDG && HepMC::is_same_generator_particle(theDaug,mother)) {
+      samePart = true;
+      break;
+    }
   }
+  // End of section determining decay products
 
   // Quark weak decay
   if (MC::isQuark(motherPDG) && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1)) return QuarkWeakDec;
