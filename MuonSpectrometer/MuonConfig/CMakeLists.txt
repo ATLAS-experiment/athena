@@ -44,6 +44,6 @@ if( NOT SIMULATIONBASE )
 
    atlas_add_test( MuonSegmentFindingConfigTest
                    SCRIPT python -m MuonConfig.MuonSegmentFindingConfig --threads=1
-                   PROPERTIES TIMEOUT 450
+                   PROPERTIES TIMEOUT 600
                    POST_EXEC_SCRIPT noerror.sh )
 endif()

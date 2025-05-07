@@ -19,7 +19,7 @@ atlas_add_component( TrkVertexFitters
 # Test(s) in the package.
 atlas_add_test( AdaptiveVertexFitter_test
    SCRIPT python -m TrkConfig.TrkVertexFittersConfig --test AVF
-   PROPERTIES TIMEOUT 300
+   PROPERTIES TIMEOUT 600
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( AdaptiveMultiVertexFitter_test

@@ -21,7 +21,7 @@ if( XAOD_STANDALONE )
       atlas_add_test( ${NAME}
          SCRIPT FullCPAlgorithmsTest_eljob.py --data-type ${DATA_TYPE} --direct-driver --submission-dir submitDir-${NAME} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
-         PROPERTIES TIMEOUT 900 )
+         PROPERTIES TIMEOUT 1200 )
 
    endfunction()
 

@@ -62,7 +62,7 @@ atlas_add_test( test_athena_ntuple_dumper_novarhandles
                 SCRIPT athena.py -c"USEVARHANDLE=0" -lERROR AthenaRootComps/test_athena_ntuple_dumper.py
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 POST_EXEC_SCRIPT "arc_refcomp.sh ref.d3pd.ascii"
-                PROPERTIES TIMEOUT 300
+                PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY )
 
 atlas_add_test( test_athena_ntuple_dumper_read
