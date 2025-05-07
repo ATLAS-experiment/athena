@@ -638,7 +638,5 @@ if __name__ == '__main__':
     with open("config.pkl", "wb") as f:
         acc.store(f)
     status = acc.run()
-    if status.isFailure():
-        import sys
-        sys.exit(-1)
-
+    import sys
+    sys.exit(status.isFailure())
