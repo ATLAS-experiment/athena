@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "xAODInDetMeasurement/Utilities.h"
@@ -14,7 +14,7 @@ namespace xAOD::xAODInDetMeasurement::Utilities {
 
   float computeTotalCharge( const std::vector<float>& charges) {
     float totalCharge = 0.f;
-    for (auto& charge : charges)
+    for (float charge : charges)
       totalCharge += charge;
     return totalCharge;
   }
@@ -27,7 +27,7 @@ namespace xAOD::xAODInDetMeasurement::Utilities {
 
   int computeTotalToT( const std::vector<int>& tots) {
     int totalToT = 0;
-    for (auto& tot : tots)
+    for (int tot : tots)
       totalToT += tot;
     return totalToT;
   }

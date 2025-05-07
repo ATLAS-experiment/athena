@@ -9,6 +9,7 @@
 
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "InDetMeasurementUtilities/Helpers.h"
 
 namespace ActsTrk::detail {
 
@@ -193,35 +194,37 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedPosition(
 {
     auto& [anglePhi, angleEta] = angles;
 
-    std::optional<float> posX;
-    std::optional<float> posY;
-    
-    float omX = cluster.omegaX();
-    float omY = cluster.omegaY();
+    std::optional<float> posX {std::nullopt};
+    std::optional<float> posY {std::nullopt};
+
     int nrows = cluster.channelsInPhi();
     int ncols = cluster.channelsInEta();
 
-    if (omX > -0.5 && omY > -0.5 && (nrows > 1 || ncols > 1)) {
-
+    // If size of cluster (in any direction) is higher than 1, we may need to apply a correction
+    if (nrows > 1 or ncols > 1) {
+      const auto& [omX, omY] = TrackingUtilities::computeOmegas(cluster,
+								*m_pixelid);
+      // if the omegas are valid, we can apply the correction
+      if (omX > -0.5 and omY > -0.5) {
 	std::pair<float, float> centroid = getCentroid(cluster, element);
+	
+	IdentifierHash idHash = element.identifyHash();
 
-        IdentifierHash idHash = element.identifyHash();
-        
 	std::pair<double, double> delta =
-	    errorData.getDelta(
-		idHash,
-		nrows,
-		anglePhi,
-		ncols,
-		angleEta);
-
+	  errorData.getDelta(idHash,
+			     nrows,
+			     anglePhi,
+			     ncols,
+			     angleEta);
+	
 	if (nrows > 1)
-	    posX = centroid.first + delta.first * (omX - 0.5);
-
+	  posX = centroid.first + delta.first * (omX - 0.5);
+	
 	if (ncols > 1)
-	    posY = centroid.second + delta.second * (omY - 0.5);
-    }
-
+	  posY = centroid.second + delta.second * (omY - 0.5);
+      } // check on omega values
+    } // check on cluster sizes
+    
     return std::make_pair(posX, posY);
 }
 

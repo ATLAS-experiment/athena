@@ -6,6 +6,7 @@ atlas_subdir( InDetMeasurementUtilities )
 atlas_add_library( InDetMeasurementUtilitiesLib
 		   src/ClusterConversionUtilities.cxx
 		   src/SpacePointConversionUtilities.cxx
+		   src/Helpers.cxx
 		   PUBLIC_HEADERS
 		      InDetMeasurementUtilities
    		   LINK_LIBRARIES
@@ -24,8 +25,8 @@ atlas_add_library( InDetMeasurementUtilitiesLib
 
 # Component(s) in the package:
 atlas_add_component( InDetMeasurementUtilities
-                     src/*.cxx
-				     src/components/*.cxx
+                     src/*.cxx src/*.h
+		     src/components/*.cxx
                      LINK_LIBRARIES
 		 		        InDetMeasurementUtilitiesLib
 						GaudiKernel

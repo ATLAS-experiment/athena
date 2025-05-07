@@ -6,6 +6,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "InDetMeasurementUtilities/Helpers.h"
 
 namespace ActsTrk {
   
@@ -165,6 +166,9 @@ namespace ActsTrk {
     auto localCov = cluster->localCovariance<2>();
     measurement->setLocalPositionError( localCov(0,0), localCov(1,1), localCov(0,1) );
 
+    const auto& [omegax, omegay] = TrackingUtilities::computeOmegas(*cluster,
+								    *m_PixelHelper);
+    
     const Identifier waferId = m_PixelHelper->wafer_id(hashId);
     decor_detectorElementID(*measurement) = hashId;
     decor_waferID(*measurement) = waferId.get_compact();
@@ -175,8 +179,8 @@ namespace ActsTrk {
     decor_SiWidth(*measurement) = cluster->channelsInPhi();
     decor_eta_module(*measurement) = m_PixelHelper->eta_module(waferId);
     decor_phi_module(*measurement) = m_PixelHelper->phi_module(waferId);
-    decor_omegax(*measurement) = cluster->omegaX();
-    decor_omegay(*measurement) = cluster->omegaY();
+    decor_omegax(*measurement) = omegax;
+    decor_omegay(*measurement) = omegay;
     decor_LorentzShift(*measurement) = static_cast<float>( m_lorentzAngleTool->getLorentzShift(cluster->identifierHash(), ctx) );
     decor_centroid_xphi(*measurement) = centroid.xPhi();
     decor_centroid_xeta(*measurement) = centroid.xEta();

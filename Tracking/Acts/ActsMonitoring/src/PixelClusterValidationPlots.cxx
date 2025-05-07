@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/PixelClusterValidationPlots.h"
+#include "InDetMeasurementUtilities/Helpers.h"
 
 namespace ActsTrk {
 
@@ -126,6 +127,9 @@ namespace ActsTrk {
     if (charges.size() != tots.size()) {
       throw std::runtime_error("Wrong sizes of charge and tot collections");
     }
+
+    const auto& [omegax, omegay] = TrackingUtilities::computeOmegas(*cluster,
+								    *pixelID);
     
     if (isBarrel) {
       m_layerDisk_barrel->Fill(pixLayerDisk, beamSpotWeight);
@@ -140,8 +144,8 @@ namespace ActsTrk {
       m_total_charge_barrel->Fill(cluster->totalCharge(), beamSpotWeight);
       m_total_tot_barrel->Fill(cluster->totalToT(), beamSpotWeight);
 
-      m_omega_x_barrel->Fill(cluster->omegaX(), beamSpotWeight);
-      m_omega_y_barrel->Fill(cluster->omegaY(), beamSpotWeight);
+      m_omega_x_barrel->Fill(omegax, beamSpotWeight);
+      m_omega_y_barrel->Fill(omegay, beamSpotWeight);
 
       m_lvl1a_barrel->Fill(cluster->lvl1a(), beamSpotWeight);
       
@@ -186,8 +190,8 @@ namespace ActsTrk {
       m_total_charge_endcap->Fill(cluster->totalCharge(), beamSpotWeight);
       m_total_tot_endcap->Fill(cluster->totalToT(), beamSpotWeight);
 
-      m_omega_x_endcap->Fill(cluster->omegaX(), beamSpotWeight);
-      m_omega_y_endcap->Fill(cluster->omegaY(), beamSpotWeight);
+      m_omega_x_endcap->Fill(omegax, beamSpotWeight);
+      m_omega_y_endcap->Fill(omegay, beamSpotWeight);
 
       m_lvl1a_endcap->Fill(cluster->lvl1a(), beamSpotWeight);
       

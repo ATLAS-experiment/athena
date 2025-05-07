@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODINDETMEASUREMENT_VERSIONS_PIXELCLUSTERAUXCONTAINER_V1_H
@@ -36,8 +36,6 @@ class PixelClusterAuxContainer_v1 : public AuxContainerBase {
     std::vector<int> channelsInPhi;
     std::vector<int> channelsInEta;
     std::vector<float> widthInEta;
-    std::vector<float> omegaX;
-    std::vector<float> omegaY;
     std::vector<std::vector<int> > totList;
     std::vector<int> totalToT;
     std::vector<std::vector<float> > chargeList;
