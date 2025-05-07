@@ -105,7 +105,7 @@ namespace MuonValR4{
                                                      const DisplayView view) {
         using enum DisplayView;
         if (view == RZ) { 
-            return posOnCylinder * inM;
+            return Amg::Vector2D{ posOnCylinder[1]*inM,  posOnCylinder[0]*inM};
         }
         const CxxUtils::sincos phi{phiV};
         return posOnCylinder[0] * inM * Amg::Vector2D{phi.cs, phi.sn};
@@ -250,7 +250,7 @@ namespace MuonValR4{
             extPrimitives.insert(extPrimitives.begin() + nPrim, std::move(theLine));
         }
         auto canvas = makeCanvas(ctx, boundBox, view == DisplayView::XY ?  
-                                 std::tie("x [m]", "y [m]") : std::tie("R [m]", "z [m]"));
+                                 std::tie("x [m]", "y [m]") : std::tie("z [m]", "R [m]"));
 
         for (auto& prim: extPrimitives){
            prim->Draw(); 
