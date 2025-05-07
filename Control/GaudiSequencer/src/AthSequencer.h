@@ -176,7 +176,7 @@ private:
    **************************/
   
   Gaudi::Property<std::vector<std::string>> m_names{this, "Members",{},
-    "Algorithm names (of the form '<cppType>/<instanceName>')","SubAlgorithm"};
+    "Algorithm names (of the form '<cppType>/<instanceName>')","std::vector<Algorithm>"};
 
   Gaudi::Property<bool> m_modeOR{this, "ModeOR", false,
     "Use OR logic instead of AND"};
