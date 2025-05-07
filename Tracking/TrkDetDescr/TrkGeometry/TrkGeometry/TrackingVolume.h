@@ -23,7 +23,6 @@
 #include "TrkGeometry/Material.h"
 #include "TrkSurfaces/BoundaryCheck.h"
 #include "TrkSurfaces/Surface.h"
-#include "TrkVolumes/AbstractVolume.h"
 #include "TrkVolumes/BoundaryCylinderSurface.h"
 #include "TrkVolumes/BoundaryDiscSurface.h"
 #include "TrkVolumes/BoundarySurface.h"
