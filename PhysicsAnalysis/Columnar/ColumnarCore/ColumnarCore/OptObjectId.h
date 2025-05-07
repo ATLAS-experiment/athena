@@ -64,6 +64,11 @@ namespace columnar
         throw std::bad_optional_access();
       return ObjectId<CI,ColumnarModeXAOD> (*m_object);}
 
+    [[nodiscard]] ObjectId<CI,ColumnarModeXAOD> operator * () const {
+      if (m_object == nullptr)
+        throw std::bad_optional_access();
+      return ObjectId<CI,ColumnarModeXAOD> (*m_object);}
+
     [[nodiscard]] xAODObject *getXAODObject () const noexcept {
       return m_object;}
 
@@ -135,6 +140,11 @@ namespace columnar
         throw std::bad_optional_access();
       return ObjectId<CI,ColumnarModeArray> (m_data, m_index);}
 
+    [[nodiscard]] ObjectId<CI,ColumnarModeArray> operator * () const {
+      if (m_index == invalidObjectIndex)
+        throw std::bad_optional_access();
+      return ObjectId<CI,ColumnarModeArray> (m_data, m_index);}
+  
     [[nodiscard]] bool operator == (const OptObjectId<CI,ColumnarModeArray>& that) const noexcept {
       return m_index == that.m_index;}
 
