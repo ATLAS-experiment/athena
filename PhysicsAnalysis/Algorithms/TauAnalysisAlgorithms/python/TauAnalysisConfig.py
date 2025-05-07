@@ -129,6 +129,9 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('useGNTau', False, type=bool,
             info="use GNTau based ID instead of RNNTau ID "
             "recommendations: that's new experimental feature and might come default soon")
+        self.addOption ('useLowPt', False, type=bool, 
+            info="select taus starting from 15 GeV instead of the default 20 GeV cut "
+            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -155,14 +158,17 @@ class TauWorkingPointConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
+        nameFormat = 'TauAnalysisAlgorithms/tau_selection_'
+        if self.useLowPt:
+            nameFormat = nameFormat + 'lowpt_'
         if self.useGNTau:
-            nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_eleid.conf'
-            if not self.use_eVeto:
-                nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_noeleid.conf'
+            nameFormat = nameFormat + 'gntau_'
+        nameFormat = nameFormat + '{}_'
+        if self.use_eVeto:
+            nameFormat = nameFormat + 'eleid'
         else:
-            nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_eleid.conf'
-            if not self.use_eVeto:
-                nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_noeleid.conf'
+            nameFormat = nameFormat + 'noeleid'
+        nameFormat = nameFormat + '.conf'    
 
         if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
             raise ValueError ("invalid tau quality: \"" + self.quality +
