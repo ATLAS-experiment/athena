@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -21,35 +21,34 @@ from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
 from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
-zdcConfigMap = {}
+from AthenaCommon.Logging import logging
+log = logging.getLogger("ZdcRecConfig")
 
-defaultGeometryZdcRun2 = "ATLAS-R2-2016-01-03-00"
-defaultGeometryZdc2023 = "ATLAS-R3S-2021-03-03-00"
-defaultGeometryZdc2024 = "ATLAS-R3S-2021-03-04-00"
+zdcConfigMap = {}
 
 def zdcGeometry(flags):
     projName = flags.Input.ProjectName
     match projName:
         case "data15_hi":
-            return defaultGeometryZdcRun2
+            return defaultGeometryTags.RUN2_ZDC
         case "data18_hi":
-            return defaultGeometryZdcRun2
+            return defaultGeometryTags.RUN2_ZDC
         case "data16_hi":
-            return defaultGeometryZdcRun2
+            return defaultGeometryTags.RUN2_ZDC
         case "data16_hip":
-            return defaultGeometryZdcRun2
+            return defaultGeometryTags.RUN2_ZDC
         case "data23_hi":
-            return defaultGeometryZdc2023
+            return defaultGeometryTags.RUN3_ZDC23
         case "data24_hi":
-            return defaultGeometryZdc2024
+            return defaultGeometryTags.RUN3_ZDC24
         case "data24_hicomm":
-            return defaultGeometryZdc2024
+            return defaultGeometryTags.RUN3_ZDC24
         case _:
             run = flags.GeoModel.Run
-            if (run == LHCPeriod.RUN2):
-                return defaultGeometryTags.RUN2
-            if (run == LHCPeriod.RUN3):
-                return defaultGeometryTags.RUN3
+            if run == LHCPeriod.Run2:
+                return defaultGeometryTags.RUN2_ZDC
+            if run == LHCPeriod.Run3:
+                return defaultGeometryTags.RUN3_ZDC24
             return ""
         
 def GenerateConfigTagDict():
@@ -84,15 +83,15 @@ def GenerateConfigTagDict():
 def SetConfigTag(flags):
 
     if flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # calibration_DcmDummyProcessor is the "trigger stream" in the data we record in the standalone partition that is NOT LED data                
-        config = "Injectorpp2024" # default config tag for injector pulse
+        config = "InjectorPbPb2024" # default config tag for injector pulse - suitable also for running in standalone partition (except for standalone data taken during pp reference run + its commissionging period)
 
-        if flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
-            config = "InjectorPbPb2024"
+        if flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
+            config = "Injectorpp2024" 
     else:
         config = "PbPb2023" # default config tag
         
         run = flags.GeoModel.Run
-        if (run == LHCPeriod.Run3):
+        if run == LHCPeriod.Run3:
             if flags.Input.isMC:
                 config = "MonteCarloPbPb2023"
             elif flags.Input.ProjectName == "data22_13p6TeV":
@@ -105,7 +104,7 @@ def SetConfigTag(flags):
                 config = "pp2024"
             elif flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
                 config = "PbPb2024"
-        elif (run == LHCPeriod.Run2):
+        elif run == LHCPeriod.Run2:
             if flags.Input.ProjectName == "data15_hi":
                 config = "PbPb2015"
             elif flags.Input.ProjectName == "data17_13TeV":
@@ -116,6 +115,117 @@ def SetConfigTag(flags):
                 config = "PbPb2018"
 
     return config
+
+
+def ZdcGenericFlagSetting(flags): # pass flags object by reference: directly set flags in function
+    '''set generic flags needed for ZDC reconstruction that are independent of stream type
+    Also fills flags from input arguments'''
+
+    flags.Scheduler.CheckDependencies = True
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Scheduler.EnableVerboseViews = True
+
+    flags.Detector.GeometryZDC=True
+    flags.Detector.GeometryAFP=False
+    flags.Detector.GeometryALFA=False
+    flags.Detector.GeometryLucid=False
+    flags.Detector.GeometryMDT=False
+    flags.Detector.GeometryMM=False
+    flags.Detector.GeometryMuon=False
+
+    flags.Trigger.decodeHLT=False
+    flags.Trigger.enableL1MuonPhase1=False
+    flags.Trigger.L1.doMuon=False
+    flags.Trigger.L1.doCalo=False
+    flags.Trigger.L1.doTopo=False
+
+    # This does not work in this context
+    # run = flags.GeoModel.Run
+    # The EDM Version should be auto configured, but is not working at the moment, so is set by hand
+
+    parser = flags.getArgumentParser()
+    parser.add_argument('--runInjForStandaloneData',default="Inj",help="indicate if we run inj/LED reconstruction for standalone data: inj (default) --> run injected-pulse reconstruction for injector-pulse events; LED --> run LED reconstruction for LED events")
+    flags.fillFromArgs(parser=parser)
+
+    flags.GeoModel.AtlasVersion=zdcGeometry(flags)
+
+
+def ZdcStreamDependentFlagSetting(flags): 
+    '''Function that checks on data type from triggerstream tag
+    and sets run-type-and-year-dependent settings
+    Returns: a tuple of the following four values
+        isLED - bool, true if running on LED data
+        isInj - bool, true if running on Inj data
+        isCalib - bool, true if running on Calib data
+        pn - string, project name such as data24_hi
+    '''
+    # check for LED / calibration data running, and configure appropriately
+    isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
+    isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib")
+    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC")
+    
+    if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
+        runInjForStandaloneDataArgValid = False
+        
+        if flags.hasFlag("runInjForStandaloneData"): # if passed as an argument, runInjForStandaloneData should have been dynamically loaded as a flag in fillFromArgs
+            if flags.runInjForStandaloneData.lower() == "inj":
+                isInj = True
+                runInjForStandaloneDataArgValid = True
+            elif flags.runInjForStandaloneData.lower() == "led":
+                isLED = True
+                runInjForStandaloneDataArgValid = True
+
+        if not runInjForStandaloneDataArgValid: # runInjForStandaloneData is not a defined flag
+            log.warning("runInjForStandaloneData is either not a defined flag or has invalid value (value must be Inj / LED, case insensitive).")
+            log.warning("Running nominal reconstruction (injector-pulse) by default for standalone data")
+            log.warning("Could lead to undesired behavior if pulsing LED in standalone mode")
+            isInj = True
+
+    if isLED:
+        log.info('ZdcRecConfig: Running LED data!')
+    if isInj:
+        log.info('ZdcRecConfig: Running Injected pulse data!')
+    if isCalib:
+        log.info('ZdcRecConfig: Running ZDC calibration data!')
+    if flags.Input.isMC:
+        log.info('ZdcRecConfig: Running over MC Samples')
+        flags.Input.ProjectName = "data23_hi"
+        flags.Reco.EnableTrigger = False
+ 
+    # supply missing metadata based on project name
+    pn = flags.Input.ProjectName
+    if not pn:
+        raise ValueError('Unknown project name')
+    
+    if isLED or isInj or pn == 'data_test':
+        flags.Trigger.EDMVersion=3
+        flags.GeoModel.Run = LHCPeriod.Run3
+    else:
+        year = int(pn.split('_')[0].split('data')[1])
+        if year < 20:
+            flags.Trigger.EDMVersion=2
+            flags.GeoModel.Run = LHCPeriod.Run2
+        elif year > 20:
+            flags.Trigger.EDMVersion=3
+            flags.GeoModel.Run = LHCPeriod.Run3
+
+    if flags.Input.isMC:
+        log.info('ZdcRecConfig: Overriding MC run to be Run 3!')
+        flags.GeoModel.Run = LHCPeriod.Run3
+
+    if (isInj
+        or flags.Input.TriggerStream == "calibration_DcmDummyProcessor"
+        or pn == "data22_13p6TeV"):
+        flags.Detector.EnableZDC_RPD = False # disable RPD for injector, LHCf
+
+    if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: no trigger info available
+        flags.DQ.useTrigger = False
+        flags.DQ.triggerDataAvailable = False 
+
+    return isLED, isInj, isCalib, pn # return a ntuple of stream and project-name info for further use
+
 
 def ZdcRecOutputCfg(flags):
 
@@ -131,10 +241,9 @@ def ZdcRecOutputCfg(flags):
     acc.merge(addToESD(flags,ZDC_ItemList))
     acc.merge(addToAOD(flags,ZDC_ItemList))
 
-    # In case running standalone (i.e. not within RecoSteering)
     if flags.Output.doWriteAOD:
         from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-        acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))
+        acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))    
 
     return acc
 
@@ -142,7 +251,7 @@ def ZdcRecOutputCfg(flags):
 def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=False, DoNonLinCorr=False, DoTimeCalib=False, DoTrigEff=False, ForceCalibRun=-1, ForceCalibLB=814):
     acc = ComponentAccumulator()
 
-    print('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
+    log.info('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
 
     acc.setPrivateTools(CompFactory.ZDC.ZdcAnalysisTool(
         name = 'ZdcAnalysisTool'+config, 
@@ -160,7 +269,7 @@ def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=
 def ZdcLEDAnalysisToolCfg(flags, config = 'ppPbPb2023', DoFADCCorr = True):  
     acc = ComponentAccumulator()
 
-    print('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
+    log.info('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
     acc.setPrivateTools(CompFactory.ZDC.ZdcLEDAnalysisTool(name = 'ZdcLEDAnalysisTool'+config, 
                                                            Configuration = config,
                                                            DoFADCCorr = DoFADCCorr))
@@ -209,7 +318,7 @@ def RpdSubtractCentroidToolCfg(flags, config: str):
 def ZdcRecRun2Cfg(flags):        
     acc = ComponentAccumulator()
     config = SetConfigTag(flags)
-    print ('ZdcRecConfig.py: Running with config tag ', config)
+    log.info ('ZdcRecConfig.py: Running with config tag%s', config)
 
     doCalib = False
     doTimeCalib = False
@@ -250,7 +359,7 @@ def ZdcRecRun3Cfg(flags):
 
     acc = ComponentAccumulator()
     config = SetConfigTag(flags)
-    print ('ZdcRecConfig.py: Running with config tag ', config)
+    log.info ('ZdcRecConfig.py: Running with config tag %s', config)
 
     doCalib = False
     doTimeCalib = False
@@ -290,24 +399,24 @@ def ZdcRecRun3Cfg(flags):
 
     doRPD = flags.Detector.EnableZDC_RPD
 
-    print('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
-    print('RPD enable flag is '+str(doRPD))
+    log.info('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
+    log.info('RPD enable flag is '+str(doRPD))
     
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doFADCCorr,doNonLinCorr,doTimeCalib,doTrigEff,ForceCalibRun,ForceCalibLB))
 
-    if (doRPD):
+    if doRPD:
         rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags, config))
         centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags, config))
 
-    if ( flags.Input.isMC ):
+    if  flags.Input.isMC :
         zdcTools = [anaTool] # expand list as needed
         if doRPD:
             zdcTools += [rpdAnaTool,centroidTool]
-    elif ( flags.Trigger.doZDC ): # if doZDC flag is true we are in a trigger reprocessing -> no TrigValidTool
+    elif  flags.Trigger.doZDC : # if doZDC flag is true we are in a trigger reprocessing -> no TrigValidTool
         zdcTools = [anaTool] # expand list as needed
     elif flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor":
         zdcTools = [anaTool] # no trigger / RPD / centroid - either online or offline
-    elif (flags.Common.isOnline): # running online + NOT injector pulse: with RPD + centroid but no trigger validation for now; may add later
+    elif flags.Common.isOnline: # running online + NOT injector pulse: with RPD + centroid but no trigger validation for now; may add later
         zdcTools = [anaTool] # expand list as needed
         if doRPD:
             zdcTools += [rpdAnaTool,centroidTool]
@@ -335,14 +444,14 @@ def ZdcNtupleLocalCfg(flags):
     acc = ComponentAccumulator()
     run = flags.GeoModel.Run
 
-    if (run == LHCPeriod.Run2):
-        print ('ZdcRecConfig.py: setting up Run 2 ntuple!')
+    if run == LHCPeriod.Run2:
+        log.info ('ZdcRecConfig.py: setting up Run 2 ntuple!')
         acc.merge(ZdcNtupleRun2Cfg(flags))
-    elif (run == LHCPeriod.Run3):
-        print ('ZdcRecConfig.py: setting up Run 3 ntuples!')
+    elif run == LHCPeriod.Run3:
+        log.info ('ZdcRecConfig.py: setting up Run 3 ntuples!')
         acc.merge(ZdcNtupleRun3Cfg(flags))
     else:
-        print ('ZdcRecConfig.py: setting up no ntuple!')
+        log.info ('ZdcRecConfig.py: setting up no ntuple!')
 
     return acc
 
@@ -360,7 +469,6 @@ def ZdcNtupleRun2Cfg(flags,**kwargs):
                            **kwargs))
 
     acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='zdctree.root' OPT='RECREATE'"]))
-#    acc.setAppProperty("HistogramPersistency","ROOT")
     return acc
 
 def ZdcNtupleRun3Cfg(flags,**kwargs):
@@ -426,7 +534,7 @@ def ZdcLEDRecCfg(flags):
         run = flags.GeoModel.Run
         
         # debugging message since the metadata isn't working for calibration files yet
-        print ("ZdcRecConfig.py: run = "+run.name)
+        log.info ("ZdcRecConfig.py: run = "+run.name)
         
         config = 'ppPbPb2023'
         #config = 'ppALFA2023'
@@ -475,16 +583,16 @@ def ZdcRecCfg(flags):
     run = flags.GeoModel.Run
 
     # debugging message since the metadata isn't working for calibration files yet
-    print ("ZdcRecConfig.py: run = "+run.name)
+    log.info ("ZdcRecConfig.py: run = "+run.name)
 
-    if (run == LHCPeriod.Run2):
-        print ('ZdcRecConfig.py: setting up Run 2!')
+    if run == LHCPeriod.Run2:
+        log.info ('ZdcRecConfig.py: setting up Run 2!')
         acc.merge(ZdcRecRun2Cfg(flags))
-    elif (run == LHCPeriod.Run3):
-        print ('ZdcRecConfig.py: setting up Run 3!')
+    elif run == LHCPeriod.Run3:
+        log.info ('ZdcRecConfig.py: setting up Run 3!')
         acc.merge(ZdcRecRun3Cfg(flags))
     else:
-        print ('ZdcRecConfig.py: setting up nothing (problem)!')
+        log.warning ('ZdcRecConfig.py: setting up nothing (problem)!')
 
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         acc.merge(ZdcRecOutputCfg(flags))
@@ -495,99 +603,23 @@ def ZdcRecCfg(flags):
 if __name__ == '__main__':
 
     """ This is selftest & ZDC calibration transform at the same time"""
+    
+    # Configure log level in main entry point
+    from AthenaCommon.Constants import INFO
+    log.setLevel(INFO)
+
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     flags = initConfigFlags()
 
-    flags.Scheduler.CheckDependencies = True
-    flags.Scheduler.ShowDataDeps = True
-    flags.Scheduler.ShowDataFlow = True
-    flags.Scheduler.ShowControlFlow = True
-    flags.Scheduler.EnableVerboseViews = True
-
-    flags.Detector.GeometryZDC=True
-    flags.Detector.GeometryAFP=False
-    flags.Detector.GeometryALFA=False
-    flags.Detector.GeometryLucid=False
-    flags.Detector.GeometryMDT=False
-    flags.Detector.GeometryMM=False
-    flags.Detector.GeometryMuon=False
-    flags.Trigger.decodeHLT=False
-    flags.Trigger.enableL1MuonPhase1=False
-    flags.Trigger.L1.doMuon=False
-    flags.Trigger.L1.doCalo=False
-    flags.Trigger.L1.doTopo=False
-    #flags.Reco.EnableTrigger = False
-
-    # This does not work in this context
-    # run = flags.GeoModel.Run
-    # The EDM Version should be auto configured, but is not working at the moment, so is set by hand
+    ZdcGenericFlagSetting(flags) # set generic (stream-independent) ZDC flags
 
     flags.Output.AODFileName="AOD.pool.root"
     flags.Output.HISTFileName="HIST.root"
     flags.Output.doWriteAOD=True
 
-    parser = flags.getArgumentParser()
-    parser.add_argument('--runCalibForStandaloneData',default="Calib",help="indicate if we run calib/LED reconstruction for standalone data: Calib (default) --> run calib reconstruction for injector-pulse events; LED --> run LED reconstruction for LED events")
-    args = flags.fillFromArgs(parser=parser)
-
-    # check for LED / calibration data running, and configure appropriately
-    isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
-    isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib")
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC")
-    if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
-        if args.runCalibForStandaloneData == "Calib" or args.runCalibForStandaloneData == "calib":
-            isCalib = True
-        elif args.runCalibForStandaloneData == "LED" or args.runCalibForStandaloneData == "led":
-            isLED = True
-        else:
-            print('WARNING: The value for the argument runCalibForStandaloneData is invalid')
-            print('Running nominal reconstruction (injector-pulse) by default')
-            isCalib = True
-
-    if (isLED):
-       print('ZdcRecConfig: Running LED data!')
-    if (isInj):
-       print('ZdcRecConfig: Running Injected pulse data!')
-    if (isCalib):
-       print('ZdcRecConfig: Running ZDC calibration data!')
-    if (flags.Input.isMC):
-       print('ZdcRecConfig: Running over MC Samples')
-       flags.Input.ProjectName = "data23_hi"
-       flags.Reco.EnableTrigger = False
- 
-    # supply missing metadata based on project name
-    pn = flags.Input.ProjectName
-    if not pn:
-        raise ValueError('Unknown project name')
-    
-    if (isInj or isLED or isInj or pn == 'data_test'):
-        flags.Trigger.EDMVersion=3
-        flags.GeoModel.Run = LHCPeriod.Run3
-    else:
-        year = int(pn.split('_')[0].split('data')[1])
-        if (year < 20):
-            flags.Trigger.EDMVersion=2
-            flags.GeoModel.Run = LHCPeriod.Run2
-        elif (year > 20):
-            flags.Trigger.EDMVersion=3
-            flags.GeoModel.Run = LHCPeriod.Run3
-
-    if (flags.Input.isMC):
-        print('ZdcRecConfig: Overriding MC run to be Run 3!')
-        flags.GeoModel.Run = LHCPeriod.Run3
-
-    if (isInj
-        or flags.Input.TriggerStream == "calibration_DcmDummyProcessor"
-        or pn == "data22_13p6TeV"):
-        flags.Detector.EnableZDC_RPD = False # disable RPD for injector, LHCf
-
-    if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: no trigger info available
-        flags.DQ.useTrigger = False
-        flags.DQ.triggerDataAvailable = False 
-
-    flags.GeoModel.AtlasVersion=zdcGeometry(flags)
+    isLED, isInj, isCalib, pn = ZdcStreamDependentFlagSetting(flags) # set stream-dependent ZDC flags & get return values
 
     flags.lock()
     # flags.dump(evaluate=True) # uncomment this line if needed for testing
@@ -602,7 +634,6 @@ if __name__ == '__main__':
         acc.merge(TriggerRecoCfgData(flags))
 
     if isLED:
-        #acc.merge(ZdcLEDTrigCfg(flags))
         acc.merge(ZdcLEDRecCfg(flags))
     if isCalib: # should be able to run both if in standalone data
         acc.merge(ZdcRecCfg(flags))
@@ -610,30 +641,28 @@ if __name__ == '__main__':
         acc.merge(ZdcRecCfg(flags))
 
     if not flags.Input.isMC:
-        if (isLED):
+        if isLED:
             from ZdcMonitoring.ZdcLEDMonitorAlgorithm import ZdcLEDMonitoringConfig
             acc.merge(ZdcLEDMonitoringConfig(flags,'ppPbPb2023'))
             acc.merge(ZdcLEDNtupleCfg(flags))
             
-        if (isCalib):
+        if isCalib:
             from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
             zdcMonitorAcc = ZdcMonitoringConfig(flags)
             acc.merge(zdcMonitorAcc)
-            # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # turn on DEBUG messages
-            if (flags.Input.TriggerStream != "calibration_DcmDummyProcessor"): #after ntuple works for standalone data, take this line out
+            if flags.Input.TriggerStream != "calibration_DcmDummyProcessor": #after ntuple works for standalone data, take this line out
                 acc.merge(ZdcNtupleLocalCfg(flags))
-
-        if (isInj):
+        if isInj:
             from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
             zdcMonitorAcc = ZdcMonitoringConfig(flags)
             acc.merge(zdcMonitorAcc)
-            # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # turn on DEBUG messages
             acc.merge(ZdcInjNtupleCfg(flags))            
     else:
         acc.merge(ZdcRecCfg(flags))
         acc.merge(ZdcNtupleLocalCfg(flags))
 
     acc.printConfig(withDetails=True)
+    # acc.foreach_component("*Zdc*").OutputLevel=DEBUG #uncomment to turn on DEBUG messages for ZDC applications
 
     with open("config.pkl", "wb") as f:
         acc.store(f)

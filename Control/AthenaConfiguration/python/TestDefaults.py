@@ -89,6 +89,10 @@ class defaultGeometryTags:
     RUN3 = "ATLAS-R3S-2021-03-02-00"
     RUN4 = "ATLAS-P2-RUN4-03-00-00"
 
+    RUN2_ZDC = "ATLAS-R2-2016-01-03-00" # default ZDC geometry tag for Run2
+    RUN3_ZDC23 = "ATLAS-R3S-2021-03-03-00" # default ZDC geometry tag for Run3 Year 2023
+    RUN3_ZDC24 = "ATLAS-R3S-2021-03-04-00" # default ZDC geometry tag for Run3 Year 2024
+
     @staticmethod
     def autoconfigure(flags):
         if flags.GeoModel.AtlasVersion:

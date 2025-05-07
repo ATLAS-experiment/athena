@@ -305,7 +305,7 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                 ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
 
-            genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+            genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt', type='TH2F', title=';FCal Energy [TeV];ZDC Hadronic Energy [TeV]',
                                 path = '/EXPERT/Global/ZDCHEFcalCorr',
                                 opt='kAlwaysCreate',
                                 xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
@@ -343,31 +343,31 @@ def ZdcMonitoringConfig(inputFlags):
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
 
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT15', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT15', type='TH2F', title=';FCal Energy [TeV];ZDC Hadronic Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCHEFcalCorr',
                                     cutmask = 'passUCCTrig_HELT15',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT20', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT20', type='TH2F', title=';FCal Energy [TeV];ZDC Hadronic Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCHEFcalCorr',
                                     cutmask = 'passUCCTrig_HELT20',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT25', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT25', type='TH2F', title=';FCal Energy [TeV];ZDC Hadronic Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCHEFcalCorr',
                                     cutmask = 'passUCCTrig_HELT25',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT35', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT35', type='TH2F', title=';FCal Energy [TeV];ZDC Hadronic Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCHEFcalCorr',
                                     cutmask = 'passUCCTrig_HELT35',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT50', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT50', type='TH2F', title=';FCal Energy [TeV];ZDC Hadronic Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCHEFcalCorr',
                                     cutmask = 'passUCCTrig_HELT50',
                                     opt='kAlwaysCreate',
@@ -402,11 +402,13 @@ def ZdcMonitoringConfig(inputFlags):
         # --------------------- calibrated energy sum in the 1-to-4n-range ---------------------
         zdcSideMonToolArr.defineHistogram('zdcEnergySum;zdcEnergySum_zoomin_noTrigSelec',title='ZDC Side {0} Energy Sum (1-to-4n, no trigger selection);Side {0} Energy[GeV];Events',
                                 path = '/SHIFT/ZDC/PerArm/Energy',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 xbins=energy_sum_zoomin_nbins,xmin=0.0,xmax=energy_sum_zoomin_xmax) # up to the "far end" of 4-neutron peak
 
         if (zdcMonAlg.EnableZDCSingleSideTriggers):
             zdcSideMonToolArr.defineHistogram('zdcEnergySum;zdcEnergySum_zoomin_wTrigSelec',title='ZDC Side {0} Energy Sum (1-to-4n, require opposite-side trigger);Side {0} Energy[GeV];Events',
                                     path = '/SHIFT/ZDC/PerArm/Energy',
+                                    opt='kAlwaysCreate', # always create for shift-needed histograms
                                     cutmask = 'passTrigOppSide',
                                     xbins=energy_sum_zoomin_nbins,xmin=0.0,xmax=energy_sum_zoomin_xmax) # up to the "far end" of 4-neutron peak
         
@@ -441,6 +443,7 @@ def ZdcMonitoringConfig(inputFlags):
         else: # online - use coarse LB binnings
             zdcSideMonToolArr.defineHistogram('zdcEnergySum;zdcEnergySum_1n_noTrigSelec',title='ZDC Side {0} Energy Sum (1n range, no trigger selection);Side {0} Energy[GeV];Events',
                                     path = '/SHIFT/ZDC/PerArm/Energy',
+                                    opt='kAlwaysCreate', # always create for shift-needed histograms
                                     xbins=energy_sum_1n_nbins,xmin=energy_sum_1n_xmin,xmax=energy_sum_1n_xmax)
 
             zdcSideMonToolArr.defineHistogram('lumiBlock, zdcEnergySum;zdcEnergySum_1n_vs_lb_noTrig', type='TH2F', title=';lumi block;Side {0} Energy (1n range) [GeV]',
@@ -497,11 +500,13 @@ def ZdcMonitoringConfig(inputFlags):
     # ---------------------------- centroid status ---------------------------- 
         zdcSideMonToolArr.defineHistogram('centroidStatusBits',title=';;Events',
                                 path='/EXPERT/RPD/PerArm/Centroid',
-                                xbins=nRpdCentroidStatusBits,xmin=0.0,xmax=nRpdCentroidStatusBits,opt='kVec',
+                                xbins=nRpdCentroidStatusBits,xmin=0.0,xmax=nRpdCentroidStatusBits,
+                                opt='kVec',
                                 xlabels=['ValidBit', 'HasCentroidBit', 'ZDCInvalidBit', 'InsufficientZDCEnergyBit', 'ExcessiveZDCEnergyBit', 'EMInvalidBit', 'InsufficientEMEnergyBit', 'ExcessiveEMEnergyBit', 'RPDInvalidBit', 'PileupBit', 'ExcessivePileupBit', 'ZeroSumBit', 'ExcessiveSubtrUnderflowBit', 'Row0ValidBit', 'Row1ValidBit', 'Row2ValidBit', 'Row3ValidBit', 'Col0ValidBit', 'Col1ValidBit', 'Col2ValidBit', 'Col3ValidBit'])
 
         zdcSideMonToolArr.defineHistogram('centroidValidBitFloat;centroidValidBit_RequireMinZDCEnergy',title='Centroid valid bit;;Events',
                                 path='/SHIFT/RPD/PerArm/Centroid',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 cutmask='passMinZDCEnergyCutForCentroidValidEvaluation',
                                 xbins=2,xmin=0,xmax=2,
                                 xlabels=['Valid','Invalid'])
@@ -509,11 +514,13 @@ def ZdcMonitoringConfig(inputFlags):
     # ---------------------------- x, y centroid & reaction plane angle requiring centroid ValidBit ---------------------------- 
         zdcSideMonToolArr.defineHistogram('xCentroid',title=';Centroid x position [mm];Events',
                                 path='/SHIFT/RPD/PerArm/Centroid',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 cutmask='centroidValid',
                                 xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max)
 
         zdcSideMonToolArr.defineHistogram('yCentroid',title=';Centroid y position [mm];Events',
                                 path='/SHIFT/RPD/PerArm/Centroid',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 cutmask='centroidValid',
                                 xbins=n_time_centroid_bins_default*2,xmin=y_centroid_min,xmax=y_centroid_max)
 
@@ -590,13 +597,15 @@ def ZdcMonitoringConfig(inputFlags):
 
     zdcModuleMonToolArr.defineHistogram('zdcStatusBits',title=';;Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleStatusBits',
-                            xbins=nZdcStatusBits,xmin=0.0,xmax=nZdcStatusBits,opt='kVec',
+                            opt='kAlwaysCreate kVec', # always create for shift-needed histograms
+                            xbins=nZdcStatusBits,xmin=0.0,xmax=nZdcStatusBits,
                             xlabels=['PulseBit', 'LowGainBit', 'FailBit', 'HGOverflowBit', 'HGUnderflowBit', 'PSHGOverUnderflowBit', 'LGOverflowBit', 'LGUnderflowBit', 'PrePulseBit', 'PostPulseBit', 'FitFailedBit', 'BadChisqBit', 'BadT0Bit', 'ExcludeEarlyLGBit', 'ExcludeLateLGBit', 'preExpTailBit', 'FitMinAmpBit', 'RepassPulseBit'])
 
     # ---------------------------- ZDC-module amplitudes & amplitude fractions ---------------------------- 
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp',title=';Module Amplitude [ADC Counts];Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleAmp',
+                            opt='kAlwaysCreate', # always create for shift-needed histograms
                             xbins=n_fpga_bins * 2,xmin=0.0,xmax=module_amp_xmax)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC',title=';Module Max ADC;Events',
@@ -655,10 +664,12 @@ def ZdcMonitoringConfig(inputFlags):
     if (zdcMonAlg.IsInjectedPulse): # no real energy deposit --> do not require minimum ZDC energy
         zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
                                 path='/SHIFT/ZDC/ZdcModule/ModuleFraction',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
     else:
         zdcModuleMonToolArr.defineHistogram('zdcModuleFract;zdcModuleFract_above_cut',title=';Module Amplitude Fraction;Events',
                                 path='/SHIFT/ZDC/ZdcModule/ModuleFraction',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 cutmask='zdcEnergyAboveModuleFractCut',
                                 xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
         zdcModuleMonToolArr.defineHistogram('zdcEnergySumCurrentSide, zdcModuleFract;zdcModuleFract_vs_zdcEnergySum_fullrange', type='TH2F', title=';ZDC Energy Sum Current Side [GeV];Module Amplitude Fraction',
@@ -738,16 +749,19 @@ def ZdcMonitoringConfig(inputFlags):
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleTime',title=';Module Time [ns];Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleTime',
+                            opt='kAlwaysCreate', # always create for shift-needed histograms
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
 
     if (not zdcMonAlg.IsPPMode): # for PP mode, LG never filled
         zdcModuleMonToolArr.defineHistogram('zdcModuleTime;zdcModuleTime_LG',title=';Module Time [ns];Events',
                                 path='/SHIFT/ZDC/ZdcModule/ModuleTime',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 cutmask='zdcModuleLG',
                                 xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleTime;zdcModuleTime_HG',title=';Module Time [ns];Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleTime',
+                            opt='kAlwaysCreate', # always create for shift-needed histograms
                             cutmask='zdcModuleHG',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
 
@@ -780,10 +794,12 @@ def ZdcMonitoringConfig(inputFlags):
                             xbins=create_log_bins(module_chisq_min, module_chisq_max, module_chisq_nbins))
     zdcModuleMonToolArr.defineHistogram('zdcModuleChisqOverAmp',title=';Module Chi-square / Amplitude;Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleChisq',
+                            opt='kAlwaysCreate', # always create for shift-needed histograms
                             weight='zdcModuleChisqOverAmpEventWeight',
                             xbins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
     zdcModuleMonToolArr.defineHistogram('zdcModuleChisqOverAmp;zdcModuleChisqOverAmp_linear',title=';Module Chi-square / Amplitude;Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleChisq',
+                            opt='kAlwaysCreate', # always create for shift-needed histograms
                             xbins=module_chisq_over_amp_linear_nbins,xmin=0.,xmax=module_chisq_over_amp_linear_max)
 
     if (not zdcMonAlg.IsOnline):
@@ -797,12 +813,14 @@ def ZdcMonitoringConfig(inputFlags):
     # ---------------------------- LG & HG comparisons ---------------------------- 
     zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGAmpRatio',title=';HG-to-LG Amplitude Raio;Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleHGLGCompr',
+                            opt='kAlwaysCreate', # always create for shift-needed histograms
                             cutmask='zdcModuleHG',
                             xbins=n_HG_LG_amp_ratio_bins,xmin=hg_lg_amp_ratio_min_nominal,xmax=hg_lg_amp_ratio_max_nominal)
 
     if (not zdcMonAlg.IsInjectedPulse):
         zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGAmpRatioNoNonlinCorr',title=';HG-to-LG Amplitude Raio;Events',
                                 path='/SHIFT/ZDC/ZdcModule/ModuleHGLGComprNoNonlinCorr',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 cutmask='zdcModuleHG',
                                 xbins=n_HG_LG_amp_ratio_bins,xmin=hg_lg_amp_ratio_min_nominal,xmax=hg_lg_amp_ratio_max_nominal)
 
@@ -921,6 +939,7 @@ def ZdcMonitoringConfig(inputFlags):
     # ---------------------------- amplitudes ---------------------------- 
         rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib', title=';RPD Channel Calibrated Amplitude;Events',
                                 path='/SHIFT/RPD/RPDChannel/CalibAmp',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 cutmask='RPDChannelValid',
                                 xbins=n_rpd_amp_bins_full_range,xmin=rpd_channel_amp_min,xmax=rpd_sum_adc_max) # NOT energy calibration - calibration factor is 1 for now
         rpdChannelMonToolArr.defineHistogram('RPDChannelMaxADC', title=';Max ADC [ADC Counts];Events',
@@ -951,11 +970,13 @@ def ZdcMonitoringConfig(inputFlags):
     # ---------------------------- status bits ---------------------------- 
         rpdChannelMonToolArr.defineHistogram('RPDStatusBits',title=';;Events',
                                 path='/EXPERT/RPD/RPDChannel/StatusBits',
-                                xbins=nRpdStatusBits,xmin=0,xmax=nRpdStatusBits,opt='kVec',
+                                xbins=nRpdStatusBits,xmin=0,xmax=nRpdStatusBits,
+                                opt='kVec',
                                 xlabels=['ValidBit', 'OutOfTimePileupBit', 'OverflowBit', 'PrePulseBit', 'PostPulseBit', 'NoPulseBit', 'BadAvgBaselineSubtrBit', 'InsufficientPileupFitPointsBit', 'PileupStretchedExpFitFailBit', 'PileupStretchedExpGrowthBit', 'PileupBadStretchedExpSubtrBit', 'PileupExpFitFailBit', 'PileupExpGrowthBit', 'PileupBadExpSubtrBit', 'PileupStretchedExpPulseLike'])
 
         rpdChannelMonToolArr.defineHistogram('RPDChannelValidBitFloat;RPDChannelValidBit',title='RPD Channel valid bit;;Events',
                                 path='/SHIFT/RPD/RPDChannel/StatusBits',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
                                 xbins=2,xmin=0,xmax=2,
                                 xlabels=['Valid','Invalid'])
 
