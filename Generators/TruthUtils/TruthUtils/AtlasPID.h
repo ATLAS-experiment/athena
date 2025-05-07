@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTHUTILS_ATLASPID_H
 #define TRUTHUTILS_ATLASPID_H
@@ -36,7 +36,7 @@ static const std::array<int,TABLESIZE> triple_charge = {
   +0, -1, +2, -1, +2, -1, +2, -1, +2, +0,
   +0, -3, +0, -3, +0, -3, +0, -3, +0, +0,
   +0, +0, +0, +0, +3, +0, +0, +0, +0, +0,
-  +0, +0, +0, +0, +3, +0, +0, +3, +0, +0,
+  +0, +0, +0, +0, +3, +0, +0, +3, +6, +0,
   +0, +0, -1, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
@@ -370,7 +370,7 @@ template<> inline bool isMSSMHiggs(const int& p){ return p == HIGGS2 || p == HIG
 template<class T> inline bool isGraviton(const T& p) {return isGraviton(p->pdg_id());}
 template<> inline bool isGraviton(const int& p){ return p == GRAVITON; }
 
-template<class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p) || isHiggs(p) || isTop(p); } // APID: not including t' (pdg_id=8)
+template<class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p) || isHiggs(p) || isTop(p); } // APID: not including t' (pdg_id=8), Z', Z'' and W'+ or BSM Higgs bosons
 
 /// PDG rule 11c:
 /// “One-of-a-kind” exotic particles are assigned numbers in the range
@@ -784,7 +784,7 @@ template<class T> inline bool isBSM(const T& p){return isBSM(p->pdg_id());}
 template<> inline bool isBSM(const DecodedPID& p){
   if (p.pid() == GRAVITON || std::abs(p.pid()) == MAVTOP || p.pid() == DARKPHOTON) return true;
   if (std::abs(p.pid()) > 16 && std::abs(p.pid()) < 19) return true;
-  if (std::abs(p.pid()) > 31 && std::abs(p.pid()) < 38) return true;
+  if (std::abs(p.pid()) > 31 && std::abs(p.pid()) < 39) return true;
   if (std::abs(p.pid()) > 39 && std::abs(p.pid()) < 81) return true;
   if (std::abs(p.pid()) > 6 && std::abs(p.pid()) < 9) return true;
   if (isSUSY(p)) return true;
@@ -1010,8 +1010,9 @@ template<> inline double fractionalCharge(const DecodedPID& p) {
 }
 template<> inline double fractionalCharge(const int& p){auto value_digits = DecodedPID(p); return fractionalCharge(value_digits);}
 
+// APID: Including Z' and Z'' as EM interacting.
 template<class T> inline bool isEMInteracting(const T& p){return isEMInteracting(p->pdg_id());}
-template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || std::abs(charge(p))>std::numeric_limits<double>::epsilon() || isMonopole(p));}
+template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || p == ZPRIME || p == ZDBLPRIME || std::abs(charge(p))>std::numeric_limits<double>::epsilon() || isMonopole(p));}
 
 template<class T> inline bool isParton(const T& p) { return isQuark(p)||isGluon(p);}
 
