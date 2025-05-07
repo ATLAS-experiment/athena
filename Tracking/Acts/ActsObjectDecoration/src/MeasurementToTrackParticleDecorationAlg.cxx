@@ -29,29 +29,6 @@ namespace ActsTrk {
 	
         ATH_CHECK(m_trackParticlesKey.initialize());
 
-	m_measurementRegionKey = m_trackParticlesKey.key() + "." + m_measurementRegionKey.key();
-	m_measurementDetectorKey = m_trackParticlesKey.key() + "." + m_measurementDetectorKey.key();
-	m_measurementLayerKey = m_trackParticlesKey.key() + "." + m_measurementLayerKey.key();
-	m_chi2HitPredictedKey = m_trackParticlesKey.key() + "." + m_chi2HitPredictedKey.key();
-	m_chi2HitFilteredKey = m_trackParticlesKey.key() + "." + m_chi2HitFilteredKey.key();
-	m_measurementTypeKey = m_trackParticlesKey.key() + "." + m_measurementTypeKey.key();
-	m_measurementPhiWidthKey = m_trackParticlesKey.key() + "." + m_measurementPhiWidthKey.key();
-	m_measurementEtaWidthKey = m_trackParticlesKey.key() + "." + m_measurementEtaWidthKey.key();
-
-	m_residualLocXkey = m_trackParticlesKey.key() + "." + m_residualLocXkey.key();
-	m_pullLocXkey = m_trackParticlesKey.key() + "." + m_pullLocXkey.key();
-	m_measurementLocXkey = m_trackParticlesKey.key() + "." + m_measurementLocXkey.key();
-	m_trackParameterLocXkey = m_trackParticlesKey.key() + "." + m_trackParameterLocXkey.key();
-	m_measurementLocCovXkey = m_trackParticlesKey.key() + "." + m_measurementLocCovXkey.key();
-	m_trackParameterLocCovXkey = m_trackParticlesKey.key() + "." + m_trackParameterLocCovXkey.key();
-
-	m_residualLocYkey = m_trackParticlesKey.key() + "." + m_residualLocYkey.key();
-	m_pullLocYkey = m_trackParticlesKey.key() + "." + m_pullLocYkey.key();
-	m_measurementLocYkey = m_trackParticlesKey.key() + "." + m_measurementLocYkey.key();
-	m_trackParameterLocYkey = m_trackParticlesKey.key() + "." + m_trackParameterLocYkey.key();
-	m_measurementLocCovYkey = m_trackParticlesKey.key() + "." + m_measurementLocCovYkey.key();
-	m_trackParameterLocCovYkey = m_trackParticlesKey.key() + "." + m_trackParameterLocCovYkey.key();
-	
 	// Decorations
 	ATH_CHECK(m_measurementRegionKey.initialize());
 	ATH_CHECK(m_measurementDetectorKey.initialize());
