@@ -89,7 +89,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
 
         // set the layer to the two surfaces
         if (lmps){
-            std::shared_ptr<Layer> mLayer = std::make_shared<MaterialLayer>(firstFaceSurface, *lmps);
+            auto mLayer = std::make_shared<MaterialLayer>(firstFaceSurface, std::move(lmps));
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of first volume." );
             firstFaceSurface.setMaterialLayer(mLayer);
             ATH_MSG_VERBOSE("Set MaterialLayer to the BoundarySurface of second volume.");
@@ -113,7 +113,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
             ATH_MSG_VERBOSE( "              -> " << (volIter)->volumeName() );
     }
     // prepare the material layer if needed
-    std::shared_ptr<Layer> mLayer{};
+    std::shared_ptr<MaterialLayer> mLayer{};
     // ----------------------------------------------------------------------------------------
     // create a MaterialLayer as a boundary
     if (buildBoundaryLayer){
@@ -123,7 +123,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
         // LayerMaterialProperties are cloned by MaterialLayer
 
         // the material layer is ready - it can be assigned
-        mLayer = std::make_unique<MaterialLayer>(firstFaceSurface, *lmps);
+        mLayer = std::make_unique<MaterialLayer>(firstFaceSurface, std::move(lmps));
         ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of first volume (may be shared with second volume)." );
         firstFaceSurface.setMaterialLayer(mLayer);
     }
@@ -198,7 +198,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
     BinnedArray<TrackingVolume>* navArrayTwo = nullptr;
 
     std::unique_ptr<Surface>     mLayerSurface;
-    std::shared_ptr<Layer>       mLayer;
+    std::shared_ptr<MaterialLayer>       mLayer;
 
     ATH_MSG_VERBOSE("Glue configuration firstFace | secondFace = " << firstFace << " | " << secondFace );
 
@@ -230,7 +230,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
               // MaterialLayer clones the LayerMaterialPropteries.
 
               if (lmps) {
-                mLayer = std::make_unique<MaterialLayer>(std::move(mLayerSurface), *lmps);
+                mLayer = std::make_unique<MaterialLayer>(std::move(mLayerSurface), std::move(lmps));
               }
             }
             if (boundaryFaceExchange){
@@ -302,8 +302,8 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                 std::unique_ptr<LayerMaterialProperties>  lmps = layerMaterialProperties(*mLayerSurface);
                 // LayerMaterialProperties will be cloned in MaterialLayer
                 if (lmps) mLayer = std::make_unique<MaterialLayer>(
-                                                               std::shared_ptr<Surface>(std::move(mLayerSurface)),
-                                                               *lmps );
+                                                               std::move(mLayerSurface),
+                                                               std::move(lmps) );
             }
             // check if boundary face should be exchanged
             if (boundaryFaceExchange) {

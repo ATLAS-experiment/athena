@@ -29,6 +29,7 @@
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DetachedTrackingVolume.h"
 #include "TrkGeometry/Layer.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkGeometry/SubtractedCylinderLayer.h"
 #include "TrkGeometry/TrackingGeometry.h"
 //

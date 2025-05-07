@@ -48,13 +48,17 @@ namespace Trk {
 class TrkDetElementBase;
 class SurfaceBounds;
 class Layer;
+class MaterialLayer;
 
-enum SurfaceOwner
-{
-  noOwn = 0,
-  TGOwn = 1,
-  DetElOwn = 2,
-  userOwn = 3
+/* enum that affects how this surface is to be managed.
+ * See TrkEventPrimitives/SurfaceHolderImpl.
+ */
+enum SurfaceOwner {
+  noOwn = 0,     // Surface is free can be deleted at will.
+  TGOwn = 1,     // Surface is owned by the Geometry and will be deleted by it.
+  DetElOwn = 2,  // Surface is associated with a detector element. So can not be
+                 // deleted as long this is active.
+  userOwn = 3  // Surface is owned by the user. e.g could be "static"
 };
 
 /**
@@ -77,7 +81,7 @@ class Surface: public Trk::ObjectCounter<Trk::Surface>
 public:
   /*
    * struct holding the transform, center, normal,
-   * needed when by surfaces when not delegating
+   * needed by surfaces when not delegating
    * to a detector element
    */
   struct Transforms
@@ -194,8 +198,8 @@ public:
   const Trk::Layer* associatedLayer() const;
 
   /** return the material Layer */
-  const Trk::Layer* materialLayer() const;
-  Trk::Layer* materialLayer();
+  const Trk::MaterialLayer* materialLayer() const;
+  Trk::MaterialLayer* materialLayer();
 
   /** return the base surface (simplified for persistification) */
   virtual const Trk::Surface* baseSurface() const;
@@ -347,7 +351,7 @@ public:
 
   /** fst straight line intersection schema - templated for charged and neutral
    * parameters */
-  template<class T>
+  template<typename T>
   Intersection straightLineIntersection(
     const T& pars,
     bool forceDir = false,
@@ -358,7 +362,7 @@ public:
   }
 
   /** fast straight line intersection schema - standard: provides closest
-     intersection and (signed) path length forceFwd is to provide the closest
+     intersection and (signed) path length forceDir provides the closest
      forward solution
    */
   virtual Intersection straightLineIntersection(
@@ -398,7 +402,7 @@ public:
   SurfaceOwner owner() const;
 
   /** set material layer */
-  void setMaterialLayer(const std::shared_ptr<Layer>& mlay);
+  void setMaterialLayer(const std::shared_ptr<Trk::MaterialLayer>& mlay);
 
   /** Output Method for MsgStream, to be overloaded by child classes */
   virtual MsgStream& dump(MsgStream& sl) const;
@@ -409,16 +413,16 @@ public:
   /** Return properly formatted class name */
   virtual std::string name() const = 0;
 
-  /** method to associate the associated Trk::Layer which is alreay owned
-     - only allowed by LayerBuilder
-     - only done if no Layer is set already  */
+  /** method to associate a Trk::Layer.
+   * We do not take ownership as this is typically already
+   * owned by the Geometry */
   void associateLayer(const Layer& lay);
 
 protected:
- /**Copy operators for inheriting classes
-  They  resets the associated
-  detector element to nullptr and the identifier to invalid,
-  as the copy cannot be owned by the same detector element as the original */
+ /** Copy operators for inheriting classes
+  They  reset the associated
+  detector element to nullptr and the identifier to invalid.
+  The copy cannot be owned by the same detector element as the original*/
  Surface(const Surface& sf);
  Surface& operator=(const Surface& sf);
  // Move operators for inheriting classes
@@ -432,26 +436,23 @@ protected:
 
  friend class ::SurfaceCnv_p1;
 
- //!< Unique Pointer to the Transforms struct*/
+ /** Unique Pointer to the Transforms struct*/
  std::unique_ptr<Transforms> m_transforms{};
-
- /** Not owning Pointer to the TrkDetElementBase*/
+ /** Not owning Pointer to the Detector  Element */
  const TrkDetElementBase* m_associatedDetElement{};
-
- /** Identifier for the TrkDetElementBase*/
+ /** Identifier to the Detector Element */
  Identifier m_associatedDetElementId{};
-
- /**The associated layer Trk::Layer
-  - layer in which the Surface is embedded
-  (not owning pointed)
+ /** The associated layer Trk::Layer
+  This is the layer in which the Surface is embedded.
+  so not owning pointer.
   */
  const Layer* m_associatedLayer{};
- /** Possibility to attach a material descrption
- - potentially given as the associated material layer
-   (not owning pointer)
- */
- std::shared_ptr<Layer> m_materialLayer{};
- /** enum for surface owner : 0  free surface */
+ /** Possibility to attach a material description to the surface.
+  * In this case the surface is what holds the MaterialLayer.
+  * This is usually done for boundary surfaces so shared ptr.
+  */
+ std::shared_ptr<MaterialLayer> m_materialLayer{};
+ /** enum for surface owner : default  free surface */
  SurfaceOwner m_owner{SurfaceOwner::noOwn};
 
  /**Tolerance for being on Surface */

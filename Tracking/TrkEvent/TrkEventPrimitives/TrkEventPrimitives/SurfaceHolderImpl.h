@@ -28,18 +28,6 @@ we need to repeat some boiler plate code.
 These helpers try to make writing such code
 a bit easier and more uniform.
 
-In reality one should prefer the code based
-on SurfaceUniquePtr
-But :
-We get this kind of
-warning when creating
-dictionaries:
-Error in <CloseStreamerInfoROOTFile>: I/O is supported only
-for unique_ptrs with a default deleter.
-Trk::SurfaceUniqHolder::m_associatedSurface  appears to have a custom one
-Which can be problematic for some cases. So we provide also
-the plain ptr one
-
 Under TrkDetDescr/TrkSurfaces :
 
 The test : SurfaceHolder_test
@@ -58,17 +46,6 @@ some details of the implementation
 **/
 
 namespace Trk {
-
-/* Helper to avoid repeating code
- */
-template<typename S>
-class SurfacePtrHolderImplBase
-{
-protected:
-  // protected we can not create instances of this object
-  // is to be used as helper
-  ~SurfacePtrHolderImplBase() = default;
-};
 
 /*
  * Implementation based on plain ptr and

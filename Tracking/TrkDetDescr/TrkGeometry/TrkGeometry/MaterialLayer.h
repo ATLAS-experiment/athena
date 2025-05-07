@@ -6,8 +6,8 @@
 // MaterialLayer.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-#ifndef TRKGEOMETRY_NAVIGATIONLAYER_H
-#define TRKGEOMETRY_NAVIGATIONLAYER_H
+#ifndef TRKGEOMETRY_MATERIALLAYER_H
+#define TRKGEOMETRY_MATERIALLAYER_H
 
 class MsgStream;
 
@@ -15,43 +15,46 @@ class MsgStream;
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/Layer.h"
 #include "TrkParameters/TrackParameters.h"
-
+#include "TrkGeometry/LayerMaterialProperties.h"
+#include "TrkSurfaces/Surface.h"
+//
 #include <memory>
 namespace Trk {
-
-class Surface;
-class LayerMaterialProperties;
 
 /**
  @class MaterialLayer
 
  A material layer is a simple helper class to attach material information to a
- boundary surface, it is not associated to the layer navigation, but only with
- the
+ boundary surface.
+ There is a complication as they are two use cases
+
+ 1) We attach the material layer to an existing surface
+ via setMaterialLayer in this case the material layer
+ should NOT own the surface.
+ 2) We constuct a material layer with some surface
+ representation. In which case it owns it
 
  @author Andreas.Salzburger@cern.ch
+ @author Christos Anastopoulos (Athena MT modifications)
 
  */
 
-class MaterialLayer final : public Layer
-{
-public:
-  /** Constructor with already existing boundary surface
-    - the surface representation is the according boundary surface */
-  MaterialLayer(Surface& sf, const LayerMaterialProperties& mlprop);
+class MaterialLayer final : public Layer {
+ public:
+  MaterialLayer() = delete;
+  MaterialLayer(const MaterialLayer&) = default;
+  MaterialLayer(MaterialLayer&&) = default;
+  MaterialLayer& operator=(const MaterialLayer&) = default;
+  MaterialLayer& operator=(MaterialLayer&&) = default;
+  virtual ~MaterialLayer() = default;
 
-  /** Constructor with new surface, as of a combined boundary surface */
-  MaterialLayer(const std::shared_ptr<Surface>& sfso,
-                const LayerMaterialProperties& mlprop);
+  /** Constructor allowing the Material to be attached to an existing surface
+   It does NOT own the representation. */
+  MaterialLayer(Surface& sf, std::unique_ptr<LayerMaterialProperties> mlprop);
 
-  /**Copy Constructor - */
-  MaterialLayer(const MaterialLayer& lay);
-
-  /**Destructor*/
-  virtual ~MaterialLayer() override;
-
-  /** Assignment operator */
-  MaterialLayer& operator=(const MaterialLayer& lay);
+  /** Constructor with a surface representation. It owns that representation  */
+  MaterialLayer(std::shared_ptr<Surface>&& sfso,
+                std::unique_ptr<LayerMaterialProperties> mlprop);
 
   /** Transforms the layer into a Surface representation for extrapolation */
   virtual const Surface& surfaceRepresentation() const override final;
@@ -74,26 +77,19 @@ public:
                                         const Amg::Vector3D&,
                                         double) override final {}
 
- protected:
-  std::shared_ptr<Surface>
-      m_surfaceRepresentation;  //!< for the navigation Volume the surface is
-                                //!< a private member */
-
  private:
-  /**Default Constructor*/
-  MaterialLayer() {}
+  //shared_ptr as we use the custom deleter.
+  //It should never be nullptr
+  std::shared_ptr<Surface> m_surfaceRepresentation;
 };
 
 inline const Surface& MaterialLayer::surfaceRepresentation() const {
   return (*(m_surfaceRepresentation.get()));
 }
 
-
-inline Surface& MaterialLayer::surfaceRepresentation(){
+inline Surface& MaterialLayer::surfaceRepresentation() {
   return (*(m_surfaceRepresentation.get()));
 }
-
-
 
 }  // namespace Trk
 

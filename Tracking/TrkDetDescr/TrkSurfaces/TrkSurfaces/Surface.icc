@@ -198,19 +198,19 @@ Surface::associatedDetectorElementIdentifier() const
   return m_associatedDetElement->identify();
 }
 
-inline const Layer*
+inline const Trk::Layer*
 Surface::associatedLayer() const
 {
   return (m_associatedLayer);
 }
 
-inline const Layer*
+inline const Trk::MaterialLayer*
 Surface::materialLayer() const
 {
   return m_materialLayer.get();
 }
 
-inline Layer*
+inline Trk::MaterialLayer*
 Surface::materialLayer()
 {
   return m_materialLayer.get();
@@ -253,7 +253,7 @@ Surface::owner() const
 }
 
 inline void
-Surface::setMaterialLayer(const std::shared_ptr<Layer>& mlay)
+Surface::setMaterialLayer(const std::shared_ptr<MaterialLayer>& mlay)
 {
   m_materialLayer = mlay;
 }

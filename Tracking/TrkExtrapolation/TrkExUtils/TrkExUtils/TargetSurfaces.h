@@ -41,7 +41,7 @@ enum SurfNavigType
   BoundaryFrame = 1,
   BoundaryDetached = 2,
   SensitiveLayer = 3, // sensitive layer
-  MaterialLayer = 4   // material layer
+  MaterialLayerBoundary = 4   // material layer
 };
 enum TVNavigType
 {

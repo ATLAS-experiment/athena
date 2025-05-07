@@ -22,6 +22,7 @@
 #include "TrkGeometry/DetachedTrackingVolume.h"
 #include "TrkGeometry/AlignableTrackingVolume.h"
 #include "TrkGeometry/Layer.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkGeometry/CompoundLayer.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/SubtractedCylinderLayer.h"
