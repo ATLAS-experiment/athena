@@ -20,22 +20,22 @@ def addPhysValidationFiles(parser):
     parser.defineArgGroup('PhysVal', 'Physics validation files and steering options')
     parser.add_argument('--outputNTUP_PHYSVALFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
-                        help='Output physics validation file', group='Validation Files')
+                        help='Output physics validation file', group='PhysVal')
     
 def addPhysValidationMergeFiles(parser):
     # TODO: Better to somehow auto-import this from PhysicsAnalysis/PhysicsValidation/PhysValMonitoring
     # Use arggroup to get these arguments in their own sub-section (of --help)
-    parser.defineArgGroup('Merge_tf', 'Physics Validation merge job specific options')
+    parser.defineArgGroup('PhysVal', 'Physics Validation merge job specific options')
     parser.add_argument('--inputNTUP_PHYSVALFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='input'),
-                        help='Input physics validation file', group='Validation Files', nargs='+')
-    parser.add_argument('--outputNTUP_PHYSVAL_MRGFile', 
-                        allow_abbrev=False,
+                        help='Input physics validation file', group='PhysVal', nargs='+')
+    parser.add_argument('--outputNTUP_PHYSVAL_MRGFile',
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
-                        help='Output merged physics validation file', group='Validation Files')
+                        help='Output merged physics validation file', group='PhysVal')
     parser.add_argument('--skipPostProcessing', 
                         action='store_true', 
-                        help='If given, skip the post-processing step and just do the merging')
+                        help='If given, skip the post-processing step and just do the merging',
+                        group='PhysVal')
 
 def addNTUPMergeSubsteps(executorSet, skip_post_processing=False):
     # Ye olde NTUPs
