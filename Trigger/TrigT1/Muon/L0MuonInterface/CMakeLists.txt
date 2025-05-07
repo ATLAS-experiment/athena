@@ -7,7 +7,7 @@ find_package( CLHEP )
 atlas_add_library (L0MuonInterface
         L0MuonInterface/*.h src/*.cxx
         PUBLIC_HEADERS L0MuonInterface
-	LINK_LIBRARIES AnaAlgorithmLib AthenaKernel AthenaMonitoringKernelLib
+	LINK_LIBRARIES AnaAlgorithmLib AthenaKernel AthenaMonitoringKernelLib 
       )
 
 
