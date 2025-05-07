@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSTATIONINDEX_MUONSTATIONINDEX_H
@@ -7,12 +7,12 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 namespace Muon {
-  class MuonStationIndex {
-  public:
+  namespace MuonStationIndex {
     /** enum to classify the different chamber layers in the muon spectrometer */
-    enum ChIndex {
+    enum ChIndex: int8_t {
       ChUnknown = -1,
       BIS, BIL, BMS, BML, BOS, BOL, BEE,
       EIS, EIL, EMS, EML, EOS, EOL, EES, EEL, CSS, CSL,
@@ -20,7 +20,7 @@ namespace Muon {
     };
 
     /** enum to classify the different station layers in the muon spectrometer */
-    enum StIndex {
+    enum StIndex: int8_t {
       StUnknown = -1,
       BI, BM, BO, BE,
       EI, EM, EO, EE,
@@ -28,14 +28,14 @@ namespace Muon {
     };
 
     /** enum to classify the different phi layers in the muon spectrometer */
-    enum PhiIndex {
+    enum PhiIndex: int8_t {
       PhiUnknown = -1,
       BI1, BI2, BM1, BM2, BO1, BO2, T1, T2, T3, T4, CSC, STGC1, STGC2,
       PhiIndexMax
     };
 
     /** enum to classify the different layers in the muon spectrometer */
-    enum LayerIndex {
+    enum LayerIndex: int8_t {
       LayerUnknown = -1,
       Inner, Middle, Outer, 
       Extended,       /// EE
@@ -44,71 +44,81 @@ namespace Muon {
     };
     
     /** enum to classify the different layers in the muon spectrometer */
-    enum DetectorRegionIndex {
+    enum DetectorRegionIndex: int8_t {
       DetectorRegionUnknown = -1,
       EndcapA, Barrel, EndcapC,
       DetectorRegionIndexMax 
     };    
 
     /** enum to classify the different layers in the muon spectrometer */
-    enum TechnologyIndex {
+    enum TechnologyIndex: int8_t {
       TechnologyUnknown = -1,
       MDT, CSCI, RPC, TGC, STGC, MM,
       TechnologyIndexMax  
     };    
-
+    /*** Convert the strong enum to an integer */
+    template <typename EnumType>
+    constexpr int toInt(const EnumType enumVal) {
+      return static_cast<int>(enumVal);
+    }
     /** convert ChIndex into StIndex */
-    static StIndex toStationIndex( ChIndex index );
+    StIndex toStationIndex( ChIndex index );
 
     /** convert ChIndex into LayerIndex */
-    static LayerIndex toLayerIndex( ChIndex index );
+    LayerIndex toLayerIndex( ChIndex index );
 
     /** convert StIndex into LayerIndex */
-    static LayerIndex toLayerIndex( StIndex index );
+    LayerIndex toLayerIndex( StIndex index );
 
     /** convert DetectorRegionIndex + LayerIndex into StIndex */
-    static StIndex toStationIndex( DetectorRegionIndex region, LayerIndex layer );
+    StIndex toStationIndex( DetectorRegionIndex region, LayerIndex layer );
 
     /** convert DetectorRegionIndex + LayerIndex + isSmall into ChIndex */
-    static ChIndex toChamberIndex( DetectorRegionIndex region, LayerIndex layer, bool isSmall ) ;
+    ChIndex toChamberIndex( DetectorRegionIndex region, LayerIndex layer, bool isSmall ) ;
 
+    /** @brief Returns true if the chamber index points to a barrel chamber */
+    bool isBarrel(const ChIndex index);
+    /** @brief Returns true if the chamber index is in a small sector */
+    bool isSmall(const ChIndex index);
     /** convert StIndex + isSmall into ChIndex */
-    static ChIndex toChamberIndex( StIndex stIndex, bool isSmall ) ;
+    ChIndex toChamberIndex( StIndex stIndex, bool isSmall ) ;
 
     /** convert PhiIndex into a string */
-    static const std::string& phiName( PhiIndex index ) ;
+    const std::string& phiName( PhiIndex index ) ;
 
     /** convert StIndex into a string */
-    static const std::string& stName( StIndex index ) ;
+    const std::string& stName( StIndex index ) ;
 
     /** convert ChIndex into a string */
-    static const std::string& chName( ChIndex index ) ;
+    const std::string& chName( ChIndex index ) ;
 
     /** convert DetectorRegionIndex into a string */
-    static const std::string& regionName( DetectorRegionIndex index ) ;
+    const std::string& regionName( DetectorRegionIndex index ) ;
 
     /** convert LayerIndex into a string */
-    static const std::string& layerName( LayerIndex index ) ;
+    const std::string& layerName( LayerIndex index ) ;
 
     /** convert LayerIndex into a string */
-    static const std::string& technologyName( TechnologyIndex index ) ;
+    const std::string& technologyName( TechnologyIndex index ) ;
 
     /** create a hash out of region and layer */
-    static unsigned int sectorLayerHash( DetectorRegionIndex detectorRegionIndex, LayerIndex layerIndex );
+    unsigned int sectorLayerHash( DetectorRegionIndex detectorRegionIndex, LayerIndex layerIndex );
 
     /** maximum create a hash out of region and layer */
-    static unsigned int sectorLayerHashMax();
+    constexpr unsigned int sectorLayerHashMax() {
+       return toInt(DetectorRegionIndex::DetectorRegionIndexMax)*toInt(LayerIndex::LayerIndexMax);
+    }
 
     /** decompose the hash into Region and Layer */
-    static std::pair<DetectorRegionIndex,LayerIndex> decomposeSectorLayerHash( unsigned int hash );
+    std::pair<DetectorRegionIndex,LayerIndex> decomposeSectorLayerHash( unsigned int hash );
 
     /** return total number of sectors */
-    static unsigned int numberOfSectors() { return 16; }
+    constexpr unsigned numberOfSectors() { return 16; }
     
     /** convert ChIndex name string to enum */
-    static ChIndex chIndex( const std::string& index );
+    ChIndex chIndex( const std::string& index );
 
-  };
+  }
 }
-
+#include "MuonStationIndex/MuonStationIndex.icc"
 #endif

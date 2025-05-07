@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <format>
 
 #include "MuonLayerHough/MuonLayerHough.h"
 #include "MuonLayerHough/MuonPhiLayerHough.h"
@@ -48,8 +49,9 @@ namespace MuonHough {
         using LayIdx = Muon::MuonStationIndex::LayerIndex;
         /// access the Hough transform for a given region
         MuonLayerHough& hough(DetRegIdx region, LayIdx layer) {
-            int index = Muon::MuonStationIndex::sectorLayerHash(region, layer);
-            return *m_transforms[index];
+            using namespace Muon::MuonStationIndex;
+            int index = sectorLayerHash(region, layer);
+            return *m_transforms.at(index);
         }
 
         /// reset histograms
@@ -72,7 +74,7 @@ namespace MuonHough {
 
         /// access precision transform
         MuonLayerHough& hough(int sector, DetRegIdx region, LayIdx layer) {
-            return m_sectors[sector - 1]->hough(region, layer);
+            return m_sectors.at(sector - 1)->hough(region, layer);
         }
 
         /// reset histograms
