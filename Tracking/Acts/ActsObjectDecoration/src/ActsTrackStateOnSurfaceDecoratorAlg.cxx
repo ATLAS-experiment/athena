@@ -19,9 +19,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("Initializing " << name() << " ...");
 
     ATH_CHECK(m_trackParticlesKey.initialize());
-    m_decorator_actsTracks = m_trackParticlesKey.key() + "." + m_decorator_actsTracks.key();
     ATH_CHECK(m_decorator_actsTracks.initialize());
-    m_trackMsosLink = m_trackParticlesKey.key() + "." + m_trackMsosLink.key();
     ATH_CHECK(m_trackMsosLink.initialize());
     
     ATH_CHECK(m_pixelMeasurementsKey.initialize());
