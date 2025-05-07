@@ -41,6 +41,18 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
 
   EventIDRange rangeW{start, stop};
 
+
+  if (m_configStatus == 0) {
+    ATH_MSG_INFO("Turned off PixelToTPIDTool scalefactors. The default behavior is to do nothing. -- Rebecca");
+    writeCdo->setConfig(0);
+    const std::tuple<std::tuple<int,int,int>,float> & sf_placeholder = std::make_tuple(std::make_tuple(0,0,0), -1.0);
+    const std::vector<std::tuple<std::tuple<int,int,int>,float>> & params_placeholder = {sf_placeholder};
+    writeCdo->setVar(params_placeholder);
+    ATH_MSG_INFO("Rebecca - recorded new CDO " << writeHandle.key() << " with range " << rangeW << " into Conditions Store");
+    return StatusCode::SUCCESS;
+  }
+
+
   //Making readCdo
   if(!m_readKey.empty()){
     SG::ReadCondHandle<CondAttrListCollection> readHandle(m_readKey,ctx);
@@ -56,16 +68,6 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
       return StatusCode::FAILURE;
     }
 
-
-  if (m_configStatus == false) {
-    ATH_MSG_INFO("Turned off PixelToTPIDTool scalefactors. The default behavior is to do nothing. -- Rebecca");
-    writeCdo->setConfig(0);
-    const std::tuple<std::tuple<int,int,int>,float> & sf_placeholder = std::make_tuple(std::make_tuple(0,0,0), -1.0);
-    const std::vector<std::tuple<std::tuple<int,int,int>,float>> & params_placeholder = {sf_placeholder};
-    writeCdo->setVar(params_placeholder);
-    ATH_MSG_INFO("Rebecca - recorded new CDO " << writeHandle.key() << " with range " << rangeW << " into Conditions Store");
-    return StatusCode::SUCCESS;
-  }
     //Reading from COOL DB
     //DB Structure:
     //Using tag selection: PixelTest
@@ -74,7 +76,6 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
     for (itr = readCdo->begin(); itr != readCdo->end(); ++itr){//Loop over channels (only one in this case)
       const coral::AttributeList &atr = itr->second;
       std::string dataString = *(static_cast<const std::string *>((atr["data_array"]).addressOfData())); // read everything from DB
-      // ATH_MSG_INFO("Rebecca Payload from DB:" << dataString);
       nlohmann::json dataJson = nlohmann::json::parse(dataString); //transform everything
       ATH_MSG_INFO("Rebecca -- parsed DB data: " << dataJson);
       std::vector<int> bec_data = dataJson["bec"];
@@ -114,14 +115,12 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
                   << std::get<2>(inner_tuple) << ") "
                   << "-> " << value << std::endl;
       }
-      //int testData = -999;
-      //testData = channeldata;
-      writeCdo->setVar(params); //Gives error that testData is null
+      writeCdo->setVar(params); 
    }
   }
 
   else { // no readKey and no jsonFiles have been defined.
-    ATH_MSG_DEBUG("No readKey and jsonFile have been passed to PixelClusterdEdxCondAlg.");
+    ATH_MSG_DEBUG("No readKey has been passed to PixelClusterdEdxCondAlg.");
   }
 
   if (rangeW.stop().isValid() and rangeW.start()>rangeW.stop()) {
