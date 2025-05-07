@@ -356,7 +356,7 @@ def CaloRingerElectronAlgsCfg(flags, name="CaloRingerElectronAlgorithm", **kwarg
     acc = ComponentAccumulator()
     acc.addPublicTool(electronBuilderTool)
     acc.addPublicTool(electronInputReaderTool)
-    kwargs.setdefault('inputReaderTools', electronInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [electronInputReaderTool])
 
     CaloRingerAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloRingerElectronAlgorithm', **kwargs)
     acc.addEventAlgo(CaloRingerAlgorithm)
@@ -367,7 +367,7 @@ def CaloRingerAsymElectronAlgsCfg(flags, name="CaloRingerAsymElectronAlgorithm",
     acc = ComponentAccumulator()
     acc.addPublicTool(electronAsymBuilderTool)
     acc.addPublicTool(electronAsymInputReaderTool)
-    kwargs.setdefault('inputReaderTools', electronAsymInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [electronAsymInputReaderTool])
 
     CaloRingerAsymAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloRingerAsymAlgorithm', **kwargs)
     acc.addEventAlgo(CaloRingerAsymAlgorithm)
@@ -378,7 +378,7 @@ def CaloRingerStripsElectronAlgsCfg(flags, name="CaloRingerStripsElectronAlgorit
     acc = ComponentAccumulator()
     acc.addPublicTool(electronStripsBuilderTool)
     acc.addPublicTool(electronStripsInputReaderTool)
-    kwargs.setdefault('inputReaderTools', electronStripsInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [electronStripsInputReaderTool])
 
     CaloRingerStripsAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloRingerStripsElectronAlgorithm', **kwargs)
     acc.addEventAlgo(CaloRingerStripsAlgorithm)
@@ -389,7 +389,7 @@ def CaloRingerPhotonAlgsCfg(flags, name="CaloRingerPhotonAlgorithm", **kwargs):
     acc = ComponentAccumulator()
     acc.addPublicTool(photonBuilderTool)
     acc.addPublicTool(photonInputReaderTool)
-    kwargs.setdefault('inputReaderTools', photonInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [photonInputReaderTool])
 
     CaloRingerAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloRingerPhotonAlgorithm', **kwargs)
     acc.addEventAlgo(CaloRingerAlgorithm)
@@ -400,7 +400,7 @@ def CaloRingerAsymPhotonAlgsCfg(flags, name="CaloAsymRingerAlgorithm", **kwargs)
     acc = ComponentAccumulator()
     acc.addPublicTool(photonAsymBuilderTool)
     acc.addPublicTool(photonAsymInputReaderTool)
-    kwargs.setdefault('inputReaderTools', photonAsymInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [photonAsymInputReaderTool])
 
     CaloAsymRingerAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloAsymRingerAlgorithm', **kwargs)
     acc.addEventAlgo(CaloAsymRingerAlgorithm)
@@ -411,7 +411,7 @@ def CaloRingerStripsPhotonAlgsCfg(flags, name="CaloRingerStripsAlgorithm", **kwa
     acc = ComponentAccumulator()
     acc.addPublicTool(photonStripsBuilderTool)
     acc.addPublicTool(photonStripsInputReaderTool)
-    kwargs.setdefault('inputReaderTools', photonStripsInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [photonStripsInputReaderTool])
 
     CaloRingerStripsAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloRingerStripsAlgorithm', **kwargs)
     acc.addEventAlgo(CaloRingerStripsAlgorithm)
@@ -422,7 +422,7 @@ def CaloRingerAsymJetAlgsCfg(flags, name="CaloAsymRingerAlgorithm", **kwargs):
     acc = ComponentAccumulator()
     acc.addPublicTool(jetAsymBuilderTool)
     acc.addPublicTool(jetAsymInputReaderTool)
-    kwargs.setdefault('inputReaderTools', jetAsymInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [jetAsymInputReaderTool])
 
     CaloAsymRingerAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloAsymRingerAlgorithm', **kwargs)
     acc.addEventAlgo(CaloAsymRingerAlgorithm)
@@ -434,7 +434,7 @@ def CaloRingerStripsJetAlgsCfg(flags, name="CaloRingerStripsAlgorithm", **kwargs
     acc = ComponentAccumulator()
     acc.addPublicTool(jetStripsBuilderTool)
     acc.addPublicTool(jetStripsInputReaderTool)
-    kwargs.setdefault('inputReaderTools', jetStripsInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [jetStripsInputReaderTool])
 
     CaloRingerStripsAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloRingerStripsAlgorithm', **kwargs)
     acc.addEventAlgo(CaloRingerStripsAlgorithm)
@@ -446,7 +446,7 @@ def CaloRingerJetAlgsCfg(flags, name="CaloRingerJetAlgorithm", **kwargs):
     acc = ComponentAccumulator()
     acc.addPublicTool(jetBuilderTool)
     acc.addPublicTool(jetInputReaderTool)
-    kwargs.setdefault('inputReaderTools', jetInputReaderTool)
+    kwargs.setdefault('inputReaderTools', [jetInputReaderTool])
 
     CaloRingerAlgorithm = CompFactory.Ringer.CaloRingerAlgorithm(name='CaloRingerJetAlgorithm', **kwargs)
     acc.addEventAlgo(CaloRingerAlgorithm)
