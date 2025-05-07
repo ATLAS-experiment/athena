@@ -77,8 +77,10 @@ class EventLoopCPRunScript(CPBaseRunner):
         
         self.job = ROOT.EL.Job()
         self.job.sampleHandler(self.sampleHandler)
+        self.job.options().setDouble(ROOT.EL.Job.optFilesPerWorker, 100)
         self.job.options().setDouble(ROOT.EL.Job.optMaxEvents, self.flags.Exec.MaxEvents)
         self.job.options().setString(ROOT.EL.Job.optSubmitDirMode, 'unique-link')
+    
         for alg in self.makeAlgSequence():
             self.job.algsAdd(alg)
         self.job.outputAdd(ROOT.EL.OutputStream('ANALYSIS'))
