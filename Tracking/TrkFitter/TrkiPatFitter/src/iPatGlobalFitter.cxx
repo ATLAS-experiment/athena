@@ -144,7 +144,7 @@ std::unique_ptr<Amg::MatrixX> iPatGlobalFitter::fullCovarianceMatrix(
   ATH_MSG_VERBOSE(" FullCovarianceMatrix for " << numberParameters
                                                << " parameters");
 
-  return std::make_unique<Amg::MatrixX>(m_fitProcedure->fullCovariance()->block(
+  return std::make_unique<Amg::MatrixX>(Trk::FitProcedure::fullCovariance()->block(
       0, 0, numberParameters, numberParameters));
 }
 

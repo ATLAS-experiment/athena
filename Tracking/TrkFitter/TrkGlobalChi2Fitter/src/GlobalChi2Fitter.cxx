@@ -5131,11 +5131,6 @@ namespace Trk {
     double maxbrempull = -0.2;
 
     /*
-     * Helper parameter accessor.
-     */
-    ParamDefsAccessor paraccessor;
-
-    /*
      * Loop over all hits and do some preprocessing. In this step, we do:
      * - Get residuals
      * - Get errors
@@ -5185,7 +5180,7 @@ namespace Trk {
           /*
            * Skip the parameter, if there is no accessor for it.
            */
-          if (!measbase->localParameters().contains(paraccessor.pardef[i])) {
+          if (!measbase->localParameters().contains(Trk::ParamDefsAccessor::pardef[i])) {
             continue;
           }
 
@@ -5518,8 +5513,6 @@ namespace Trk {
 
     int nmeas = (int) weightderiv.rows();
 
-    ParamDefsAccessor paraccessor;
-
     for (std::unique_ptr<GXFTrackState> & state : states) {
       if (state->getStateType(TrackStateOnSurface::Measurement)) {
         TrackState::MeasurementType hittype = state->measurementType();
@@ -5555,7 +5548,7 @@ namespace Trk {
         };
 
         for (int i = 0; i < 5; i++) {
-          if (!measbase->localParameters().contains(paraccessor.pardef[i])) {
+          if (!measbase->localParameters().contains(Trk::ParamDefsAccessor::pardef[i])) {
             continue;
           }
 
@@ -5652,7 +5645,7 @@ namespace Trk {
   void GlobalChi2Fitter::fillFirstLastMeasurement(
     Cache & cache,
     GXFTrajectory & trajectory
-  ) const {
+  ) {
     const int nFitPars = trajectory.numberOfFitParameters();
     const int nPerPars = trajectory.numberOfPerigeeParameters();
     const int nScatPars = 2 * trajectory.numberOfScatterers();
@@ -5713,7 +5706,7 @@ namespace Trk {
     const Cache & cache,
     GXFTrajectory & trajectory,
     Amg::VectorX & b
-  ) const {
+  ) {
     const int nFitPars = trajectory.numberOfFitParameters();
     const int nPerPars = trajectory.numberOfPerigeeParameters();
     const int nScatPars = 2 * trajectory.numberOfScatterers();
@@ -5757,7 +5750,7 @@ namespace Trk {
     const Cache & cache,
     GXFTrajectory & trajectory,
     Amg::SymMatrixX & a
-  ) const {
+  ) {
     const int nFitPars = trajectory.numberOfFitParameters();
     const Amg::MatrixX & weightDeriv = trajectory.weightedResidualDerivatives();
 
@@ -5779,7 +5772,7 @@ namespace Trk {
   void GlobalChi2Fitter::fillAfromScatterers(
     GXFTrajectory & trajectory,
     Amg::SymMatrixX & a
-  ) const {
+  ) {
     const int nFitPars = trajectory.numberOfFitParameters();
     const int nPerPars = trajectory.numberOfPerigeeParameters();
     const int nScatPars = 2 * trajectory.numberOfScatterers();
@@ -5832,7 +5825,7 @@ namespace Trk {
     const int it,
     const double oldRedChi2,
     const double newRedChi2
-  ) const {
+  ) {
     const int nPerPars = trajectory.numberOfPerigeeParameters();
 
     /*
@@ -5960,7 +5953,7 @@ namespace Trk {
     Cache & cache,
     GXFTrajectory & trajectory,
     Amg::SymMatrixX & a
-  ) const {
+  ) {
     const int nPerPars = trajectory.numberOfPerigeeParameters();
     std::size_t scatno = 0;
 
@@ -8221,13 +8214,12 @@ namespace Trk {
         const MeasurementBase *measurement = state->measurement();
         const Amg::MatrixX & meascov = measurement->localCovariance();
         int j = 0;
-        ParamDefsAccessor paraccessor;
         int indices[5] = {
           -1, -1, -1, -1, -1
         };
         bool errorok = true;
         for (int i = 0; i < 5; i++) {
-          if (measurement->localParameters().contains(paraccessor.pardef[i])) {
+          if (measurement->localParameters().contains(Trk::ParamDefsAccessor::pardef[i])) {
             if (state->getStateType(TrackStateOnSurface::Measurement)
                 && trackerrmat(i, i) > meascov(j, j)) {
               errorok = false;
@@ -8305,7 +8297,6 @@ namespace Trk {
     PropDirection propdir,
     const MagneticFieldProperties& fieldprop) const
   {
-    ParamDefsAccessor paraccessor;
     double J[25] = {
       1, 0, 0, 0, 0,
       0, 1, 0, 0, 0,
@@ -8334,8 +8325,8 @@ namespace Trk {
         eps[i] /= vec[0];
       }
 
-      vecpluseps[paraccessor.pardef[i]] += eps[i];
-      vecminuseps[paraccessor.pardef[i]] -= eps[i];
+      vecpluseps[Trk::ParamDefsAccessor::pardef[i]] += eps[i];
+      vecminuseps[Trk::ParamDefsAccessor::pardef[i]] -= eps[i];
       if (i == 0 && thiscylsurf) {
         vecminuseps[i] = -std::remainder(-vecminuseps[i], 2 * M_PI * previousSurface.bounds().r());
       } else if (i == 1 && thisdiscsurf) {
@@ -8420,8 +8411,8 @@ namespace Trk {
       }
 
       for (int j = 0; j < 5; j++) {
-        double diff = newparpluseps->parameters()[paraccessor.pardef[j]] -
-          newparminuseps->parameters()[paraccessor.pardef[j]];
+        double diff = newparpluseps->parameters()[Trk::ParamDefsAccessor::pardef[j]] -
+          newparminuseps->parameters()[Trk::ParamDefsAccessor::pardef[j]];
 
         if (j == 0 && cylsurf) {
           diff = -std::remainder(-diff, 2 * M_PI * surf.bounds().r());
