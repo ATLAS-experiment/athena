@@ -15,7 +15,6 @@
 #include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/DiscBounds.h"
-#include "TrkVolumes/AbstractVolume.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/CylinderLayer.h"
