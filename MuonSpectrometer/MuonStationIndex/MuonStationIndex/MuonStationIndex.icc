@@ -1,0 +1,123 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "MuonStationIndex/MuonStationIndex.h"
+#include <cassert>
+namespace Muon::MuonStationIndex{
+   inline ChIndex toChamberIndex( StIndex stIndex, bool isSmall ) {
+      switch (stIndex) {
+         case StIndex::BI:
+         case StIndex::BM:
+         case StIndex::BO:
+            return static_cast<ChIndex>(2*toInt(stIndex) + !isSmall);
+         case StIndex::BE:
+            return isSmall ? ChIndex::ChUnknown : ChIndex::BEE;
+         /** There's no BES -> the station indices shift by 1 to the right */
+         case StIndex::EI:
+         case StIndex::EM:
+         case StIndex::EO:
+         case StIndex::EE:
+            return static_cast<ChIndex>(2*toInt(stIndex) -1 + !isSmall);
+         default:
+            break;
+      }
+      return ChIndex::ChUnknown;
+   }
+   inline bool isBarrel(const ChIndex index) {
+      switch (index) {
+         case ChIndex::BIS:
+         case ChIndex::BIL:
+         case ChIndex::BMS:
+         case ChIndex::BML:
+         case ChIndex::BOL:
+         case ChIndex::BOS:
+         case ChIndex::BEE:
+            return true;
+         default:
+            return false;
+      }
+   }
+   inline bool isSmall(const ChIndex index) {
+      switch (index) {
+         case ChIndex::BIS:
+         case ChIndex::BMS:
+         case ChIndex::BOS:
+         case ChIndex::EIS:
+         case ChIndex::EMS:
+         case ChIndex::EOS:
+         case ChIndex::EES:
+         case ChIndex::CSS:
+            return true;
+         default:
+            return false;
+      }
+   }
+   inline StIndex toStationIndex( ChIndex index ) {
+      switch (index) {
+         case ChIndex::BIS:
+         case ChIndex::BIL:
+            return StIndex::BI;
+         case ChIndex::BMS:
+         case ChIndex::BML:
+            return StIndex::BM;
+         case ChIndex::BOL:
+         case ChIndex::BOS:
+            return StIndex::BO;
+         case ChIndex::BEE:
+            return StIndex::BE;
+         case ChIndex::EIL:
+         case ChIndex::EIS:
+         case ChIndex::CSL:
+         case ChIndex::CSS:
+            return StIndex::EI;
+         case ChIndex::EML:
+         case ChIndex::EMS:
+            return StIndex::EM;
+         case ChIndex::EOL:
+         case ChIndex::EOS:
+            return StIndex::EO;
+         case ChIndex::EEL:
+         case ChIndex::EES:
+            return StIndex::EE;
+         /// Don't do anything for
+         case ChIndex::ChIndexMax:
+         case ChIndex::ChUnknown:
+            break;
+      };
+      return StIndex::StUnknown;
+   }
+   inline LayerIndex toLayerIndex( ChIndex index ) {
+      return toLayerIndex(toStationIndex(index));
+   }
+   inline LayerIndex toLayerIndex(StIndex index) {
+      switch(index) {
+         case StIndex::BI:
+         case StIndex::EI:
+            return LayerIndex::Inner;
+         case StIndex::BM:
+         case StIndex::EM:
+            return LayerIndex::Middle;
+         case StIndex::EO:
+         case StIndex::BO:
+            return LayerIndex::Outer;
+         case StIndex::BE:
+            return LayerIndex::BarrelExtended;
+         case StIndex::EE:
+            return LayerIndex::Extended;
+         case StIndex::StUnknown:
+         case StIndex::StIndexMax:
+            break;
+      }
+      return LayerIndex::LayerIndexMax;
+   }
+   inline unsigned int sectorLayerHash(DetectorRegionIndex regionIdx, 
+                                       LayerIndex layerIndex ){
+      return toInt(regionIdx)*toInt(LayerIndex::LayerIndexMax) + toInt(layerIndex);
+   }
+   inline std::pair< DetectorRegionIndex, LayerIndex > decomposeSectorLayerHash( unsigned int hash ) {
+      assert(hash < sectorLayerHashMax());
+      return std::make_pair( static_cast< DetectorRegionIndex >( hash / toInt(LayerIndex::LayerIndexMax) ),
+                              static_cast< LayerIndex >( hash % toInt(LayerIndex::LayerIndexMax) ) );
+   }   
+}

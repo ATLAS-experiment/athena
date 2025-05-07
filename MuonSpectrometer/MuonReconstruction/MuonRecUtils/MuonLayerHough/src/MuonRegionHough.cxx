@@ -20,8 +20,9 @@ namespace MuonHough {
 
                 // skip the few empty slots in the hash
                 RegionDescriptor descriptor = regionDescriptions.getDescriptor(sector, region, layer);
-                if (descriptor.chIndex == ChIdx::ChUnknown) continue;
-
+                if (descriptor.chIndex == ChIdx::ChUnknown) {
+                    continue;
+                }
                 int index = Muon::MuonStationIndex::sectorLayerHash(region, layer);
                 m_transforms[index] = std::make_unique<MuonLayerHough>(descriptor);
             }
@@ -49,7 +50,8 @@ namespace MuonHough {
     void MuonDetectorHough::init() {
         MuonDetectorDescription detectorDescription;  // initialize all the regions
         for (unsigned int i = 1; i <= 16; ++i) { m_sectors.push_back(std::make_unique<MuonSectorHough>(i, detectorDescription)); }
-        for (int i = 0; i < static_cast<int>(DetRegIdx::DetectorRegionIndexMax); ++i) {
+        using namespace Muon::MuonStationIndex;
+        for (int i = 0; i < toInt(DetRegIdx::DetectorRegionIndexMax); ++i) {
             m_phiTransforms.push_back(std::make_unique<MuonPhiLayerHough>(60, -M_PI, M_PI, static_cast<DetRegIdx>(i)));
         }
     }
@@ -58,12 +60,13 @@ namespace MuonHough {
 
     RegionDescriptor MuonDetectorDescription::getDescriptor(int sector, DetRegIdx region, LayIdx layer) const {
         bool isSmall = (sector % 2 == 0);
-        ChIdx chIndex = Muon::MuonStationIndex::toChamberIndex(region, layer, isSmall);
-        if (chIndex <= ChIdx::ChUnknown || chIndex >= ChIdx::ChIndexMax) {
+        using namespace Muon::MuonStationIndex;
+        ChIdx chIndex = toChamberIndex(region, layer, isSmall);
+        if (chIndex == ChIdx::ChUnknown || chIndex == ChIdx::ChIndexMax) {
             return RegionDescriptor{};
         }
 
-        RegionDescriptor descriptor = m_regionDescriptions[static_cast<int>(chIndex)];
+        RegionDescriptor descriptor = m_regionDescriptions[toInt(chIndex)];
         descriptor.sector = sector;
         // exceptions for a few barrel regions
         if (region == DetRegIdx::Barrel) {
