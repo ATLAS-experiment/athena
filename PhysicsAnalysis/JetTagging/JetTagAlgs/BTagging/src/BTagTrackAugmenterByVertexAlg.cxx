@@ -1,5 +1,6 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Version of the BTagTrackAugmenterAlg but applied to ByVertex jets for the pileup effort
 */
 
 #include "BTagging/BTagTrackAugmenterByVertexAlg.h"

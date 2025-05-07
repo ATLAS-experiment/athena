@@ -14,7 +14,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def JetParticleAssociationByVertexCfg(ConfigFlags, jetCollName, partcollname, assocname, dzCut, useMinZ0Vertex, **options):
 
     acc=ComponentAccumulator()
-
+    # Same values used for the ParticleJetTools.JetParticleAssociationAlgConfig
     options["coneSizeFitPar1"] = +0.239
     options["coneSizeFitPar2"] = -1.220
     options["coneSizeFitPar3"] = -1.64e-5
