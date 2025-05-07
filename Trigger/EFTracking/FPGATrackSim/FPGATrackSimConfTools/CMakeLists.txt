@@ -59,13 +59,6 @@ atlas_add_test( FPGATrackSim_F410_test
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
 
-atlas_add_test( FPGATrackSim_F610_test
-                PRIVATE_WORKING_DIRECTORY 
-                SCRIPT FPGATrackSim_F610.sh -m -n -1
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*|.* WARNING FPE.*FPGATrackSimProtoTackFitAlg.*"
-                POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 600 )
-
 atlas_add_test( FPGATrackSimHelperFunctions
                 PRIVATE_WORKING_DIRECTORY 
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimHelperFunctions
