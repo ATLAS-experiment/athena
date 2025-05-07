@@ -7,7 +7,7 @@
 #include <tuple>
 #include <stdexcept>
 
-PixelClusterdEdxCondData::PixelClusterdEdxCondData() : m_var() {
+PixelClusterdEdxCondData::PixelClusterdEdxCondData() : m_var(), m_configFlag() {
   }
 
 PixelClusterdEdxCondData::~PixelClusterdEdxCondData() = default;
@@ -23,14 +23,18 @@ float PixelClusterdEdxCondData::getVar(const std::tuple<int,int,int>& module_coo
       std::tuple<int,int,int> module_location = std::get<0>(module_sf_pair);
       float sf_value = std::get<1>(module_sf_pair);
       if (module_location == module_coordinates) {return sf_value;} 
-      else {
-        throw std::invalid_argument("Input module coordinates in PixelToTPIDTool is invalid. Cannot find scale factor.");
-        }
       }
+    //Should only run if scale factor is not found. 
+    throw std::invalid_argument("Input module coordinates in PixelToTPIDTool is invalid. Cannot find scale factor.");
+    return 1.0;
   }
   if(!m_configFlag) {
     float sf_default = 1.0;
     return sf_default;
+  }
+  else {
+  throw std::invalid_argument("This should never be run");
+  return -999.0;
   }
 }
 

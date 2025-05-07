@@ -98,20 +98,20 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
               params.push_back(sf_coordinate_value);
               }
             }
-          std::cout << "Rebecca -- The parameter vector" << std::endl;
-          // Iterate through the vector and print each element
-          // for (const auto& outer_tuple : params) {
+           std::cout << "Rebecca -- The parameter vector" << std::endl;
+           //Iterate through the vector and print each element
+           for (const auto& outer_tuple : params) {
             // Extract the inner tuple and the long double
-           // auto inner_tuple = std::get<0>(outer_tuple);
-           // long double value = std::get<1>(outer_tuple);
+            auto inner_tuple = std::get<0>(outer_tuple);
+            long double value = std::get<1>(outer_tuple);
 
             // Print the elements of the inner tuple
-          //  std::cout << "("
-          //            << std::get<0>(inner_tuple) << ", "
-          //            << std::get<1>(inner_tuple) << ", "
-          //            << std::get<2>(inner_tuple) << ") "
-          //            << "-> " << value << std::endl;
-          //}
+            std::cout << "("
+                      << std::get<0>(inner_tuple) << ", "
+                      << std::get<1>(inner_tuple) << ", "
+                      << std::get<2>(inner_tuple) << ") "
+                      << "-> " << value << std::endl;
+          }
           writeCdo->setVar(params); 
           }
     }
