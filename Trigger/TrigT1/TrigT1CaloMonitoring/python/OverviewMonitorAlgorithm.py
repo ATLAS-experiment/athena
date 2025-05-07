@@ -11,37 +11,38 @@ def OverviewMonitoringConfig(inputFlags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
-    # make the athena monitoring helper
-    from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'OverviewMonitoringCfg')
+    # use L1Calo's special MonitoringCfgHelper
+    from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+    helper = L1CaloMonitorCfgHelper(inputFlags,CompFactory.OverviewMonitorAlgorithm,'OverviewMonAlg')
 
     # get any algorithms
-    OverviewMonAlg = helper.addAlgorithm(CompFactory.OverviewMonitorAlgorithm,'OverviewMonAlg')
-
+    OverviewMonAlg = helper.alg
 
     # add any steering
     groupName = 'OverviewMonitor' # the monitoring group name is also used for the package name
     OverviewMonAlg.PackageName = groupName
 
-    mainDir = 'L1Calo'
-
-    # add monitoring algorithm to group, with group name and main directory 
-    myGroup = helper.addGroup(OverviewMonAlg, groupName , mainDir)
-
     # flag for online - different duration options required
     isOnline=inputFlags.Trigger.Online.isPartition and inputFlags.Input.Format is Format.BS
 
+    # histogram path
+    histPath_exp = 'Expert/PpmTrex/Overview/'
+    histPath_det = 'Expert/PpmTrex/Overview/detail'
+    
     # number of processed events
     global_labels = ["Processed Events"]
-    myGroup.defineHistogram('n_processed;l1calo_1d_NumberOfEvents',
-                            title='Number of processed events',                            
-                            type='TH1I',
-                            path='Overview/',
-                            xbins=1,xmin=0,xmax=1, xlabels=global_labels)
+    helper.defineHistogram('n_processed;l1calo_1d_NumberOfEvents',
+                           fillGroup=groupName,
+                           title='Number of processed events',                            
+                           type='TH1I',
+                           path=histPath_det,
+                           hanConfig={
+                               "description": "Number of processed events."
+                           },
+                           xbins=1,xmin=0,xmax=1, xlabels=global_labels)
 
 
     # global overview
-    trigPath = 'Overview/Errors/'
     NumberOfGlobalErrors=15
     globalStatus_xlabels = [
         "PPMDataStatus",
@@ -70,32 +71,49 @@ def OverviewMonitoringConfig(inputFlags):
         type = "PP " if (crate < 8) else "CP " if (crate < 12) else "JEP "
         globalStatus_ylabels.append(type)
     
-    myGroup.defineHistogram('globalOverviewX,globalOverviewY;l1calo_2d_GlobalOverview',title='L1Calo Global Error Overview;;',
-                            type='TH2I',
-                            path=trigPath,
-                            xbins=NumberOfGlobalErrors,xmin=0.,xmax=NumberOfGlobalErrors,
-                            ybins=14,ymin=0.,ymax=14, xlabels=globalStatus_xlabels, ylabels=globalStatus_ylabels,
-                            duration='' if isOnline else 'lb',
-                            opt='kAlwaysCreate')
+    helper.defineHistogram('globalOverviewX,globalOverviewY;l1calo_2d_GlobalOverview',
+                           title='L1Calo Global Error Overview;;',
+                           fillGroup=groupName,
+                           type='TH2I',
+                           path=histPath_exp,
+                           hanConfig={
+                               "algorithm" : "Histogram_Empty",
+                               "display" : "SetPalette(1),SetGridx,SetGridy",
+                               "description" : "L1Calo Global Error Overview."
+                           },
+                           xbins=NumberOfGlobalErrors,xmin=0.,xmax=NumberOfGlobalErrors,
+                           ybins=14,ymin=0.,ymax=14,
+                           xlabels=globalStatus_xlabels, ylabels=globalStatus_ylabels,
+                           opt='kAlwaysCreate')
 
     if isOnline:
-        myGroup.defineHistogram('globalOverviewX,globalOverviewY;l1calo_2d_GlobalOverviewRecent',
-                                title='L1Calo Global Error Overview Last 10 LumiBlocks;;',
-                                type='TH2I',
-                                path=trigPath,
-                                xbins=NumberOfGlobalErrors,xmin=0.,xmax=NumberOfGlobalErrors,
-                                ybins=14,ymin=0.,ymax=14, xlabels=globalStatus_xlabels, ylabels=globalStatus_ylabels,
-                                opt='kLBNHistoryDepth=10,kAlwaysCreate')
+        helper.defineHistogram('globalOverviewX,globalOverviewY;l1calo_2d_GlobalOverviewRecent',
+                               title='L1Calo Global Error Overview Last 10 LumiBlocks;;',
+                               fillGroup=groupName,
+                               type='TH2I',
+                               path=histPath_exp,
+                               hanConfig={
+                                   "algorithm" : "Histogram_Empty",
+                                   "display" : "SetPalette(1),SetGridx,SetGridy",
+                                   "description": "L1Calo Global Error Overview Last 10 LumiBlocks."
+                               },
+                               xbins=NumberOfGlobalErrors,xmin=0.,xmax=NumberOfGlobalErrors,
+                               ybins=14,ymin=0.,ymax=14,
+                               xlabels=globalStatus_xlabels, ylabels=globalStatus_ylabels,
+                               opt='kLBNHistoryDepth=10,kAlwaysCreate')
 
 
-    myGroup.defineHistogram('lb_errors;l1calo_1d_ErrorsByLumiblock',
-                            title='Events with Errors by Lumiblock;Lumi Block;Number of Events;',                            
-                            type='TH1I',
-                            path=trigPath,
-                            xbins=3000,xmin=0,xmax=3000,
-                            weight='n_lb_errors',
-                            opt='kAlwaysCreate')
-
+    helper.defineHistogram('lb_errors;l1calo_1d_ErrorsByLumiblock',
+                           title='Events with Errors by Lumiblock;Lumi Block;Number of Events;',
+                           fillGroup=groupName,
+                           type='TH1I',
+                           path=histPath_det,
+                           hanConfig={
+                               "description": "Events with Errors by Lumiblock."
+                           },
+                           xbins=3000,xmin=0,xmax=3000,
+                           weight='n_lb_errors',
+                           opt='kAlwaysCreate')
     
     acc = helper.result()
     result.merge(acc)
