@@ -61,6 +61,10 @@ enum CalorimeterNoiseSymmetryHandling {
     ABSOLUTEENERGYVALUE     =  1, /* integral pdf from abs(E) to infinity     */
     MAXSYMMETRYHANDLING   = 9999  /* defined by jobOptions       */ };
 
+enum CaloNumbers {
+   NCALOS = 4,
+   NGAINS = 3,};
+
 namespace CLHEP { class HepRandomEngine; }
 
 class CaloNoiseCompCondAlg: public AthAlgorithm {
@@ -167,18 +171,19 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
  
  
     //Constants
-    static const int m_nCalos=4;// number of calorimeters
-    static const int m_nGains=3;// number of gains
-    float m_LowGainThresh[m_nCalos];
-    float m_HighGainThresh[m_nCalos];  
-    CaloGain::CaloGain  m_highestGain[m_nCalos];
+    const unsigned int m_nCalos=NCALOS;// number of calorimeters
+    const unsigned int m_nGains=NGAINS;// number of gains
+
+    float m_LowGainThresh[NCALOS];
+    float m_HighGainThresh[NCALOS];  
+    CaloGain::CaloGain  m_highestGain[NCALOS];
  
-    bool m_diagnostic[m_nGains];
-    int m_nCellsWithProblem[m_nGains];
-    int m_nReason[5000][m_nGains];
-    int m_itReason[10][m_nGains];
-    int m_idHash[5000][m_nGains];
-    int m_reason[5000][10][m_nGains];
+    bool m_diagnostic[NGAINS];
+    int m_nCellsWithProblem[NGAINS];
+    int m_nReason[5000][NGAINS];
+    int m_itReason[10][NGAINS];
+    int m_idHash[5000][NGAINS];
+    int m_reason[5000][10][NGAINS];
     std::string m_reasonName[10];
  
     //Identifiers
