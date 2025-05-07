@@ -22,6 +22,9 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODTrigger/jFexSRJetRoIContainer.h"
 
+//Athena::Units::GeV
+#include "AthenaKernel/Units.h"
+
 #include <string>
 
 
@@ -48,6 +51,28 @@ class GepJetAlg: public ::AthReentrantAlgorithm {
   SG::WriteHandleKey<xAOD::JetContainer> m_outputGepJetsKey{
     this, "outputJetsKey", "",
     "key for xAOD:Jet wrappers for GepJets"};
+
+  // WTAConeMaker parameters
+  Gaudi::Property<float> m_WTAConstEtCut{this, "WTAConstEtCut", 2.0,
+    "Minimum Et for a tower to be considered as a constituent"};
+
+  Gaudi::Property<float> m_WTASeedEtCut{this, "WTASeedEtCut", 5.0,
+      "Minimum Et for a tower to be considered as a seed"};
+
+  Gaudi::Property<float> m_WTAJet_dR2{this, "WTAJet_dR2", 0.16,
+      "Jet area for merging constituents"};
+
+  Gaudi::Property<unsigned int> m_WTAMaxConstN{this, "WTAMaxConstN", 205,
+      "Maximum number of constituents per jet"};
+
+  Gaudi::Property<unsigned int> m_WTAMaxSeedSortingN{this, "WTAMaxSeedSortingN", 50,
+      "Maximum number of seeds to sort"};
+
+  Gaudi::Property<unsigned int> m_WTABlockN{this, "WTABlockN", 4,
+      "Number of blocks to divide the input towers into for parallel processing. Options: 1, 4"};
+
+  Gaudi::Property<std::string> m_WTASeedCleaningName{this, "WTASeedCleaningName", "TwoPass",
+      "Seed cleaning algorithm to use. Options: Baseline, TwoPass"};
 
 };
 
