@@ -69,9 +69,9 @@ StatusCode SharedHiveEvtQueueConsumer::initialize()
   ATH_CHECK(m_chronoStatSvc.retrieve());
 
   SmartIF<IConversionSvc> cnvSvc(serviceLocator()->service("AthenaPoolCnvSvc"));
-  m_dataShare = SmartIF<IDataShare>(cnvSvc);
-  if(!m_dataShare) {
-    if(m_useSharedWriter) {
+  if(m_useSharedWriter) {
+    m_dataShare = SmartIF<IDataShare>(cnvSvc);
+    if(!m_dataShare) {
       ATH_MSG_ERROR("Error retrieving AthenaPoolCnvSvc " << cnvSvc);
       return StatusCode::FAILURE;
     }
