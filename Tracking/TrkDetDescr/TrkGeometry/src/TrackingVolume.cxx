@@ -6,6 +6,7 @@
 // TrackingVolume.cxx, (b) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
+#include "TrkGeometry/TrackingVolume.h"
 // Gaudi Kernel
 #include "GaudiKernel/MsgStream.h"
 // Trk
@@ -17,7 +18,7 @@
 #include "TrkGeometry/PlaneLayer.h"
 #include "TrkGeometry/SubtractedCylinderLayer.h"
 #include "TrkGeometry/SubtractedPlaneLayer.h"
-#include "TrkGeometry/TrackingVolume.h"
+#include "TrkGeometry/MaterialLayer.h"
 //
 #include "TrkVolumes/BoundaryCylinderSurface.h"
 #include "TrkVolumes/BoundaryDiscSurface.h"
@@ -839,7 +840,7 @@ Trk::TrackingVolume::indexContainedStaticLayers(GeometrySignature geoSig,
   // the boundary surface layer
   auto& bSurfaces = boundarySurfaces();
   for (const auto& bsIter : bSurfaces) {
-    Trk::Layer* mLayer = bsIter->surfaceRepresentation().materialLayer();
+    Trk::MaterialLayer* mLayer = bsIter->surfaceRepresentation().materialLayer();
     if (mLayer && mLayer->layerIndex().value() < 0.) {
       Trk::LayerIndex layIndex = Trk::LayerIndex(
         int(geoSig) * TRKDETDESCR_GEOMETRYSIGNATUREWEIGHT + (++offset));
@@ -876,7 +877,7 @@ Trk::TrackingVolume::indexContainedMaterialLayers(GeometrySignature geoSig,
           Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = surfArray->arrayObjects();
           // loop over the surfaces - there can be 0 entries
           for (Trk::Surface* const laySurf : layerSurfaces) {
-            Trk::Layer* materialLayer = laySurf ? laySurf->materialLayer() : nullptr;
+            Trk::MaterialLayer* materialLayer = laySurf ? laySurf->materialLayer() : nullptr;
             if (materialLayer && materialLayer->layerIndex().value() < 0) {
               // sign only those with material properties - rest goes to 0
               Trk::LayerIndex layIndex =

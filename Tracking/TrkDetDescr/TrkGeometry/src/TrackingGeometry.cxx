@@ -11,6 +11,7 @@
 
 #include "TrkGeometry/DetachedTrackingVolume.h"
 #include "TrkGeometry/Layer.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/TrackingVolume.h"
@@ -38,7 +39,7 @@ void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<DetachedTra
                [](const std::unique_ptr<DetachedTrackingVolume>& ptr){
                   return ptr.get () != nullptr;
                });
-  
+
 }
 void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<TrackingVolume>>&& garbageVec){
       std::copy_if(std::make_move_iterator(garbageVec.begin()), std::make_move_iterator(garbageVec.end()),
@@ -129,7 +130,7 @@ Trk::TrackingGeometry::registerTrackingVolumes(Trk::TrackingVolume& tvol,
   // boundary layers
   const auto& bounds = tvol.boundarySurfaces();
   for (const auto & bound : bounds) {
-    Trk::Layer* bLayer =
+    Trk::MaterialLayer* bLayer =
       bound->surfaceRepresentation().materialLayer();
     if (bLayer) {
       int& layerCount{m_boundaryLayers[bLayer]};

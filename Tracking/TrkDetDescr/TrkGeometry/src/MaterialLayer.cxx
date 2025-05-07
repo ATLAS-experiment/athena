@@ -8,52 +8,27 @@
 
 #include "TrkGeometry/MaterialLayer.h"
 
-#include "TrkGeometry/LayerMaterialProperties.h"
-#include "TrkSurfaces/Surface.h"
 #include "TrkDetDescrUtils/SharedDoNoDelete.h"
-
-// constructor with arguments
-Trk::MaterialLayer::MaterialLayer(Surface& surfaceRepresentation,
-                                  const LayerMaterialProperties& mlprop)
-    : Trk::Layer(),
-      // m_surfaceRepresentation(std::shared_ptr<const
-      // Surface>(&surfaceRepresentation,true))
-      /*
-       * The above line was setting the not delete ndel to true
-       * do the same with no-op deleter for shared_ptr
-       * Probably ownership might need some clean up here
-       */
-      m_surfaceRepresentation(std::shared_ptr<Surface>(
-          &surfaceRepresentation, do_not_delete<Surface>)) {
-  m_layerMaterialProperties.reset(mlprop.clone());
-  m_layerThickness = 1.;
-}
-
-// constructor with arguments
+// No ownership of the surface representation
+// Expressed via shared_ptr with custom deleter
 Trk::MaterialLayer::MaterialLayer(
-    const std::shared_ptr<Surface>& surfaceRepresentation,
-    const LayerMaterialProperties& mlprop)
-    : Trk::Layer(), m_surfaceRepresentation(surfaceRepresentation) {
-  m_layerMaterialProperties.reset(mlprop.clone());
+    Surface& surfaceRepresentation,
+    std::unique_ptr<LayerMaterialProperties> mlprop)
+    : Trk::Layer(),
+    m_surfaceRepresentation(std::shared_ptr<Surface>(&surfaceRepresentation, do_not_delete<Surface>))
+{
+  m_layerMaterialProperties = std::move(mlprop);
   m_layerThickness = 1.;
 }
 
-// copy constructor
-Trk::MaterialLayer::MaterialLayer(const Trk::MaterialLayer& lay)
-    : Trk::Layer(lay), m_surfaceRepresentation(lay.m_surfaceRepresentation) {
+// Keep ownership of the surface representation
+Trk::MaterialLayer::MaterialLayer(
+    std::shared_ptr<Surface>&& surfaceRepresentation,
+    std::unique_ptr<LayerMaterialProperties> mlprop)
+    : Trk::Layer(),
+    m_surfaceRepresentation(std::move(surfaceRepresentation)) {
+  m_layerMaterialProperties = std::move(mlprop);
   m_layerThickness = 1.;
-}
-
-// destructor
-Trk::MaterialLayer::~MaterialLayer() = default;
-
-Trk::MaterialLayer& Trk::MaterialLayer::operator=(
-    const Trk::MaterialLayer& lay) {
-  if (this != &lay) {
-    Trk::Layer::operator=(lay);
-    m_surfaceRepresentation = lay.m_surfaceRepresentation;
-  }
-  return (*this);
 }
 
 bool Trk::MaterialLayer::isOnLayer(const Amg::Vector3D& gp,

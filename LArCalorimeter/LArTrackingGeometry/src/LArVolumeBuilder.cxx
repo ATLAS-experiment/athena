@@ -299,14 +299,14 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
     const Trk::BinnedMaterial lArBarrelMaterialBinNeg(*lArBarrelMaterial,bubn,layBUN,indexN,matID);
 
 
-    auto lArBarrelPos = new Trk::AlignableTrackingVolume(
+    auto *lArBarrelPos = new Trk::AlignableTrackingVolume(
       std::move(lArBPosTransform),
       std::move(lArBarrelBoundsPos),
       lArBarrelMaterialBinPos,
       1,
       "Calo::Detectors::LAr::BarrelPos");
 
-    auto lArBarrelNeg = new Trk::AlignableTrackingVolume(
+    auto *lArBarrelNeg = new Trk::AlignableTrackingVolume(
       std::move(lArBNegTransform),
       std::move(lArBarrelBoundsNeg),
       lArBarrelMaterialBinNeg,
@@ -458,14 +458,14 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
     const Trk::BinnedMaterial lArBarrelPresamplerMaterialBinPos(*lArBarrelPresamplerMaterial,rBU,dummylay,matBP);
     const Trk::BinnedMaterial lArBarrelPresamplerMaterialBinNeg(*lArBarrelPresamplerMaterial,rBUc,dummylay,matBP);
 
-    auto lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(
+    auto *lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(
                           std::move(lArPBPosTransform),
 											    lArBarrelPresamplerPosBounds,
 											    lArBarrelPresamplerMaterialBinPos,
 											    0,
 											    "Calo::Detectors::LAr::BarrelPresamplerPos");
 
-    auto lArBarrelPresamplerNeg = new Trk::AlignableTrackingVolume(
+    auto *lArBarrelPresamplerNeg = new Trk::AlignableTrackingVolume(
                           std::move(lArPBNegTransform),
 											    std::move(lArBarrelPresamplerNegBounds),
 											    lArBarrelPresamplerMaterialBinNeg,

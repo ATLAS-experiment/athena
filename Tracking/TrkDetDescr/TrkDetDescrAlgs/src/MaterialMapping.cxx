@@ -17,6 +17,7 @@
 #include "TrkGeometry/LayerMaterialRecord.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/MaterialStep.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/AssociatedMaterial.h"
 #include "TrkGeometry/LayerMaterialMap.h"
@@ -196,14 +197,24 @@ StatusCode Trk::MaterialMapping::execute()
                   const Trk::Surface& pSurface = parameters->associatedSurface();
                   // get the surface with associated layer (that has material)
                   ATH_MSG_VERBOSE("[L] Testing layer with associatedLayer() " << pSurface.associatedLayer() << " and materialLayer() " << pSurface.materialLayer() );
-                  //
-                  if ( ( pSurface.associatedLayer() && pSurface.associatedLayer()->layerMaterialProperties() )  || pSurface.materialLayer() ){
-                      // material layer
-                      const Trk::Layer* mLayer = pSurface.materialLayer() ? pSurface.materialLayer() : pSurface.associatedLayer();
-                      // record that one
-                      std::pair<const Trk::Layer*, Amg::Vector3D> layerHitPair(mLayer, parameters->position());
-                      ATH_MSG_VERBOSE("[L] Layer " << ++ilayer << " with index " << mLayer->layerIndex().value() << " hit at " << Amg::toString(parameters->position()));
-                      layersAndHits.push_back(layerHitPair);
+
+                  if ((pSurface.associatedLayer() &&
+                       pSurface.associatedLayer()->layerMaterialProperties()) ||
+                      pSurface.materialLayer()) {
+                    // material layer
+
+                    const Trk::Layer* mLayer = pSurface.materialLayer()
+                                                   ? pSurface.materialLayer()
+                                                   : pSurface.associatedLayer();
+                    // record that one
+                    std::pair<const Trk::Layer*, Amg::Vector3D> layerHitPair(
+                        mLayer, parameters->position());
+                    ATH_MSG_VERBOSE("[L] Layer "
+                                    << ++ilayer << " with index "
+                                    << mLayer->layerIndex().value()
+                                    << " hit at "
+                                    << Amg::toString(parameters->position()));
+                    layersAndHits.push_back(layerHitPair);
                   }
                   delete parameters;
               }
