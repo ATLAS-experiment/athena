@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimHitTimeManipulator.h"
+#include "GaudiKernel/PhysicalConstants.h"
 
 /** Constructor */
 ISF::SimHitTimeManipulator::SimHitTimeManipulator( const std::string& name, ISvcLocator* pSvcLocator ) :
@@ -105,6 +106,7 @@ StatusCode ISF::SimHitTimeManipulator::execute(const EventContext &ctx) const
     return StatusCode::FAILURE;
   }
   if (m_doEventTimeOffset) {
+    const double event_ct_offset = m_eventTimeOffset*Gaudi::Units::c_light;
     for (HepMC::GenEvent* currentGenEvent : *outputMcEventCollection ) {
       // loop over the vertices in the event
 #ifdef HEPMC3
@@ -117,7 +119,7 @@ StatusCode ISF::SimHitTimeManipulator::execute(const EventContext &ctx) const
         // HepMC3::GenVertex::position() to return the position of
         // another GenVertex in the event if the position isn't set (or is set to zero)!
         const HepMC::FourVector &curVec = (curVtx->has_set_position()) ? curVtx->position() : HepMC::FourVector::ZERO_VECTOR();
-        curVtx->set_position(HepMC::FourVector(curVec.x(), curVec.y(), curVec.z(), curVec.t() + m_eventTimeOffset));
+        curVtx->set_position(HepMC::FourVector(curVec.x(), curVec.y(), curVec.z(), curVec.t() + event_ct_offset));
         ATH_MSG_DEBUG("Revised current Vertex");
         if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
           HepMC::Print::line(curVtx);
@@ -134,7 +136,7 @@ StatusCode ISF::SimHitTimeManipulator::execute(const EventContext &ctx) const
           HepMC::Print::line(curVtx);
         }
         const HepMC::FourVector &curVec = curVtx->position();
-        const CLHEP::HepLorentzVector newPos( curVec.x(), curVec.y(), curVec.z(), curVec.t() + m_eventTimeOffset );
+        const CLHEP::HepLorentzVector newPos( curVec.x(), curVec.y(), curVec.z(), curVec.t() + event_ct_offset );
         curVtx->set_position(newPos);
         ATH_MSG_DEBUG("Revised current Vertex");
         if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {

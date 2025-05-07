@@ -12,7 +12,6 @@
 
 // Framework includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
@@ -85,9 +84,9 @@ namespace ISF {
       void insertCopy(HitType_t * const hit, OutputType_t& outputHandle) const;
 
     Gaudi::Property<bool> m_doEventTimeOffset{this, "DoEventTimeOffset", true};
-    Gaudi::Property<double> m_eventTimeOffset{this, "EventTimeOffset", -25.0*Gaudi::Units::ns};
+    Gaudi::Property<double> m_eventTimeOffset{this, "EventTimeOffset", -25.0, "offset in nanoseconds"};
     Gaudi::Property<bool> m_doHitTimeWrapping{this, "DoHitTimeWrapping", false};
-    Gaudi::Property<double> m_wrapTime{this, "WrapTime", 50.0*Gaudi::Units::ns};
+    Gaudi::Property<double> m_wrapTime{this, "WrapTime", 50.0, "wrapping window in nanoseconds"};
 
     /** Input collection ReadHandleKeys */
     SG::ReadHandleKey<McEventCollection>        m_inputMcEventCollection {this, "InputMcEventCollection", "", "Input truth collection name"};
