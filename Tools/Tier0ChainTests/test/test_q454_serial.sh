@@ -8,6 +8,9 @@
 # art-include: 22.0-mc20/Athena
 # art-include: 24.0/Athena
 # art-memory: 8000 
+# art-output: AOD.pool.root
+# art-output: ESD.pool.root
+# art-output: RDO.pool.root
 
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
@@ -16,7 +19,7 @@ Reco_tf.py \
 --preExec "r2a:flags.DQ.Steering.HLT.doInDet=False; flags.Exec.FPE=500;" \
 --athenaopts "RDOtoRDOTrigger:--threads=1" \
 --maxEvents=100 \
---outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
+--outputRDOFile=RDO.pool.root --outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root \
 --conditionsTag "all:${conditions}" \
 --imf False
 

@@ -1,0 +1,143 @@
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
+from AthenaConfiguration.ComponentFactory import CompFactory 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
+
+from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
+from AthenaCommon.Logging import logging
+
+def CaloComputeNoiseCfg(flagsIn,mu=60,dt=25,output='cellnoise_data.root'):
+
+    if (dt!=25):
+        raise RuntimeError("At this point (early run 3), only a dt of 25ns is supported")
+    
+    #Clone flags-container and modify it, since this is not a standard reco job
+    flags=flagsIn.clone()
+    flags.Calo.Noise.fixedLumiForNoise=mu
+    flags.LAr.doHVCorr = False #Avoid double-rescaling
+    flags.LAr.ROD.NumberOfCollisions = mu # for OFC computation
+    flags.lock()
+
+    msg = logging.getLogger("CaloComputeNoiseCfg")
+    #pick noise-tag depending on mu and dt
+
+    #FIXME: make this configurable
+    minbiastag="LARElecCalibMCMinBias-mc16-Epos-A3-s3687"
+    fsampltag="LARElecCalibMCfSampl-G4101-20371-FTFP_BERT_BIRK_v2"
+    shapetag="LARElecCalibMCShapeLArPileupShape-RUN2-2018"
+    hvcorrtag="LARElecCalibMCHVScaleCorr-IOVDEP-02"
+
+    msg.info("Noise computing for mu=%i and dt=%i" , mu,dt)
+
+    result=ComponentAccumulator()
+
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    result.merge(LArGMCfg(flags))
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    result.merge(TileGMCfg(flags))
+
+    from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
+    from LArRecUtils.LArRecUtilsConfig import LArOFCCondAlgCfg
+    result.merge(LArADC2MeVCondAlgCfg(flags))
+    result.merge(LArOFCCondAlgCfg(flags))
+    result.merge(LArHVScaleCfg(flags))
+
+    #make proper overrides
+    from IOVDbSvc.IOVDbSvcConfig import addOverride
+    result.merge(addOverride(flags,"/LAR/ElecCalibMC/MinBias", minbiastag))
+    result.merge(addOverride(flags,"/LAR/ElecCalibMC/fSampl", fsampltag))
+    result.merge(addOverride(flags,"/LAR/ElecCalibMC/Shape", shapetag))
+    result.merge(addOverride(flags,"/LAR/ElecCalibMC/HVScaleCorr", hvcorrtag))
+    result.merge(addOverride(flags,"/LAR/NoiseOfl/CellNoise", "LARNoiseOflCellNoise-empty"))
+    result.merge(addOverride(flags,"/TILE/OFL02/NOISE/CELL", "TileOfl02NoiseCell-OF2-05-25ns-R2-single-IOV"))
+    result.merge(addOverride(flags,"/CALO/Ofl/Noise/CellNoise", "CaloOflNoiseCellnoise-empty"))
+
+    #we need a pedestal folder from data
+    #first remove the MC folder
+    iovdbsvc=result.getService("IOVDbSvc")
+    # check existing list of folders and remove it if found
+    folder="/LAR/ElecCalibMC/Pedestal"
+    for i in range(0,len(iovdbsvc.Folders)):
+        if (iovdbsvc.Folders[i].find(folder)>=0):
+            del iovdbsvc.Folders[i]
+            break
+    condInputLoader=result.getCondAlgo("CondInputLoader")
+    for cil_Loadval in condInputLoader.Load:
+        if folder in cil_Loadval:        
+            condInputLoader.Load.remove(cil_Loadval)
+            break
+
+    #and now configure data one       
+    dfolder="/LAR/ElecCalibFlat/Pedestal"        
+    iovdbsvc.Folders.append(dfolder+"<db>COOLONL_LAR/CONDBR2</db>")
+    condInputLoader.Load.add(("CondAttrListCollection",dfolder))
+    result.addCondAlgo(CompFactory.getComp("LArFlatConditionsAlg<LArPedestalFlat>")(ReadKey=dfolder,WriteKey="LArPedestal"))
+
+    result.addEventAlgo(CompFactory.CaloNoiseCompCondAlg(NMinBias=flags.Calo.Noise.fixedLumiForNoise,DiagnosticHG=True))
+    
+    result.addEventAlgo(CompFactory.CaloRescaleNoise(absScaling=True,
+                                         ElecNoiseKey="elecNoise",PileupNoiseKey="pileupNoise"))
+
+    import os
+    if os.path.exists(output):
+        os.remove(output)
+    result.addService(CompFactory.THistSvc(Output = ["file1 DATAFILE='"+output+"' OPT='RECREATE'"]))
+    result.setAppProperty("HistogramPersistency","ROOT")
+
+    return result
+
+
+if __name__=="__main__":
+    import  argparse
+    parser= argparse.ArgumentParser(description="(Compute noise")
+
+    parser.add_argument('-r', '--run', type=int, default=358013, help="Which run number to use ")
+    parser.add_argument('-t', '--globaltag', type=str, default="OFLCOND-MC21-SDR-RUN3-12",help="Global conditions tag ")
+    parser.add_argument('-o', '--output',type=str,default="cellnoise_data.root",help="name stub for root and sqlite output files")
+    parser.add_argument('-m', '--mu', type=int, default=60, help="Which mu to use ")
+    parser.add_argument('--olevel', type=int, default=3, help="Output level to use ")
+
+    args = parser.parse_args()
+    print(args)
+
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.RunNumbers=[args.run]
+    print("set the runnumber: ",flags.Input.RunNumbers)
+    flags.Input.Files=[]
+    flags.IOVDb.DatabaseInstance="OFLP200"
+    flags.Input.isMC=True
+    from Campaigns.Utils import Campaign
+    flags.Input.MCCampaign=Campaign.Unknown
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+  
+    if args.globaltag:
+        flags.IOVDb.GlobalTag=args.globaltag
+
+    flags.lock()
+    cfg=MainEvgenServicesCfg(flags)
+    from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
+    cfg.merge(McEventSelectorCfg(flags,
+                                 FirstLB           = 0,
+                                 EventsPerRun      = 1,
+                                 FirstEvent        = 1,
+                                 InitialTimeStamp  = 0,
+                                 TimeStampInterval = 1))
+
+    cfg.merge(CaloComputeNoiseCfg(flags,output=args.output,mu=args.mu))
+
+    cfg.getService("DetectorStore").Dump=True
+    cfg.getService("ConditionStore").Dump=True
+
+    cfg.getService("MessageSvc").OutputLevel=args.olevel
+    if args.olevel < 3:
+       cfg.getCondAlgo("LArAutoCorrTotalCondAlg").OutputLevel=3
+    cfg.getService("MessageSvc").defaultLimit=999999999
+
+    cfg.printConfig(withDetails=True)
+
+    print("Start running...")
+    cfg.run(1)

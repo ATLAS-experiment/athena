@@ -8,8 +8,9 @@ import libpbeastpy; pbeast = libpbeastpy.ServerProxy(pbeastServer)
 import logging; log = logging.getLogger("DCSCalculator2.variable")
 
 from bisect import bisect
+from collections.abc import Collection, Iterable, Mapping
+import functools
 from itertools import chain
-from types import GenericAlias
 
 from DQUtils.events import process_iovs
 from DQUtils.general import timer
@@ -54,12 +55,6 @@ class DCSC_Merged_Variable(DCSC_Variable):
         super().__init__(folder_merge, evaluator, **kwargs)
         self.folder_names = folders
         self.mapping = mapping
-    
-    def get_variable(self, name):
-        for var in self.variables:
-            if var.folder_name == name:
-                return var
-        raise RuntimeError("Folder '%s' not found" % name)
 
     def read(self, query_range, folder_base, folder_names):
         var_iovs = []
@@ -268,34 +263,35 @@ class TDAQC_Array_Variable(TDAQC_Multi_Channel_Variable):
             giov.append(current)
         return giov
 
-SiT_LV_Current_Type = GenericAlias(tuple, (float,)*16)
-def load_sit_current() -> tuple[list[float],list[SiT_LV_Current_Type]]:
+def load_current(filename:str, n_modules:int) -> tuple[list[float],list[tuple[float,...]]]:
     from datetime import datetime, timezone
     from pkg_resources import resource_string
-    sit_current = resource_string('DCSCalculator2.subdetectors.data', 'afp_sit_current.dat').decode().strip().split('\n')
-    result = dict()
-    for line in sit_current:
+    data = resource_string('DCSCalculator2.subdetectors.data', filename).decode().strip().split('\n')
+    result = {}
+    for line in data:
         line = line.strip()
         if not line or line[0] == '#': continue
         line = line.split()
         current = tuple(float(x) for x in line[1:])
-        if len(current) != 16: 
-            log.warn(f"Wrong number of AFP SiT planes ({len(current)}) in the LV resource from {line[0]}. Setting thresholds to 0...")
-            current = [0] * 16
-        assert(len(current) == 16)
+        if len(current) != n_modules:
+            log.warning(f"Wrong number of modules ({len(current)}) in resource '{filename}' from {line[0]}. Setting thresholds to 0...")
+            current = (0.,) * n_modules
         time = datetime.fromisoformat(line[0])
         if time.tzinfo is None: time = time.replace(tzinfo=timezone.utc)
         time = time.timestamp()
         result[time] = current
     keys, values = zip(*sorted(result.items()))
+    if not values: keys, values = [0.], [(0.,) * n_modules]
     return (list(keys), list(values))
 
-SIT_LV_CURRENT_LOW_DATA:tuple[list[float],list[SiT_LV_Current_Type]] = load_sit_current()
-def get_sit_current(timestamp:float) -> SiT_LV_Current_Type:
+def get_current(data: tuple[list[float],list[tuple[float,...]]], timestamp:float) -> tuple[float, ...]:
     timestamp = timestamp / 1e9
-    keys, values = SIT_LV_CURRENT_LOW_DATA
+    keys, values = data
     index = max(bisect(keys, timestamp) - 1, 0)
-    return values[index] if values else [0] * 16
+    return values[index]
+
+get_sit_current = functools.partial(get_current, load_current('afp_sit_current.dat', 16))
+get_tdc_current = functools.partial(get_current, load_current('afp_tdc_current.dat', 4))
 
 # DCS channels
 A_FAR_GARAGE, A_NEAR_GARAGE, C_FAR_GARAGE, C_NEAR_GARAGE = 101, 105, 109, 113
@@ -333,20 +329,13 @@ TOF_DISABLED = [A_FAR_TOF_DISABLED,                      C_FAR_TOF_DISABLED]
 SIT_HV_DEAD_BAND = 0.05
 TOF_HV_DEAD_BAND = 0.90
 
-#SIT_LV_CURRENT_LOW = 0.4
-#SIT_LV_CURRENT_LOW = [0.44, 0.40, 0.42, 0.46,
-#                      0.38, 0.35, 0.38, 0.42,
-#                      0.40, 0.39, 0.39, 0.38,
-#                      0.41, 0.40, 0.43, 0.40]
-SIT_LV_CURRENT_LOW = get_sit_current
 SIT_LV_CURRENT_HIGH = 0.8
 TOF_HV_CURRENT_LOW  = 600
-TOF_LV_CURRENT_LOW  = 1.4
 
-def mapChannels(*mapseqArgs):
+def mapChannels(*mapseqArgs: tuple[Collection[int], int]) -> dict[int, int]:
     return dict(chain(*[zip(channels, range(defectChannel, defectChannel + len(channels))) for channels, defectChannel in mapseqArgs]))
 
-def mapTranslatorCounts(countMap):
+def mapTranslatorCounts(countMap:Mapping[int,Iterable[int]]) -> dict[int, range]:
     return {channel: range(channel, channel + count) for count, channels in countMap.items() for channel in channels}
 
 def remove_None(value, default):
@@ -371,7 +360,7 @@ class AFP(DCSC_DefectTranslate_Subdetector):
             'SIT/LV',
             #lambda iov: SIT_LV_CURRENT_LOW <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
             #lambda iov: SIT_LV_CURRENT_LOW[iov.channel - SIT_LV[0]] <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
-            lambda iov: SIT_LV_CURRENT_LOW(iov.since)[iov.channel - SIT_LV[0]] <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
+            lambda iov: get_sit_current(iov.since)[iov.channel - SIT_LV[0]] <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
             mapping = mapChannels(
                 ([ 9, 10, 11, 12], A_FAR_SIT_LV ),
                 ([13, 14, 15, 16], A_NEAR_SIT_LV),
@@ -401,8 +390,8 @@ class AFP(DCSC_DefectTranslate_Subdetector):
         # AFP_(A|C)_FAR_TOF_NOT_OPERATIONAL_LV
         DCSC_Multi_Channel_Variable(
             'TOF_TDC_CURRENT',
-            lambda iov: [(iov.channel,     TOF_LV_CURRENT_LOW <= remove_None(iov.hptdc1_current, 0)),
-                         (iov.channel + 1, TOF_LV_CURRENT_LOW <= remove_None(iov.hptdc2_current, 0))],
+            lambda iov: [(iov.channel,     get_tdc_current(iov.since)[iov.channel     - TOF_LV[0]] <= remove_None(iov.hptdc1_current, 0)),
+                         (iov.channel + 1, get_tdc_current(iov.since)[iov.channel + 1 - TOF_LV[0]] <= remove_None(iov.hptdc2_current, 0))],
             mapping = {1: A_FAR_TOF_LV, 2: C_FAR_TOF_LV}
         ),
 
@@ -673,7 +662,8 @@ class AFP(DCSC_DefectTranslate_Subdetector):
     
     @staticmethod
     def comment_tof_tdc(iov, message, defect_offset=None, module_tagger=None):
-        return AFP.comment_device(iov, 'ToF TDC', message, defect_offset - 16, module_tagger)
+        if defect_offset is not None: defect_offset -= 16
+        return AFP.comment_device(iov, 'ToF TDC', message, defect_offset, module_tagger)
 
     @staticmethod
     def comment_device(iov, device, message, defect_offset=None, module_tagger=None):

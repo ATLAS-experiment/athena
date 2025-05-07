@@ -39,11 +39,14 @@ StatusCode TrigTauMonitorL1Algorithm::processEvent(const EventContext& ctx) cons
             continue;
         }
 
+        // Offline tau requirement check
+        std::vector<const xAOD::TauJet*> offline_taus_with_id = classifyTausAll(offline_taus_all, 0, static_cast<TauID>(m_offline_tau_id.value()));
+        if(m_requireOfflineTaus && offline_taus_with_id.empty()) continue;
+
         // Filter offline taus
-        auto offline_taus = classifyOfflineTaus(offline_taus_all, info.getL1TauThreshold() - threshold_offset, static_cast<TauID>(m_offline_tau_id.value()));
+        auto offline_taus = classifyOfflineTaus(offline_taus_with_id, info.getL1TauThreshold() - threshold_offset);
         std::vector<const xAOD::TauJet*> offline_taus_1p = offline_taus.first;
         std::vector<const xAOD::TauJet*> offline_taus_3p = offline_taus.second;
-        if(m_requireOfflineTaus && offline_taus_1p.empty() && offline_taus_3p.empty()) continue;
 
         if(info.getL1TauType() == "eTAU") {
             std::vector<const xAOD::eFexTauRoI*> rois = getL1eTAUs(ctx, info.getL1TauItem());

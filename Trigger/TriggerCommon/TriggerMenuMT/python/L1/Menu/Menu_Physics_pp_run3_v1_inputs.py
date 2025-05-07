@@ -338,7 +338,6 @@ def defineInputsMenu():
                     TopoMenuDef( '0INVM9-eEM9ab-eEMab',                  outputbits = 9 ),
                     TopoMenuDef( 'INVM_BOOSTDR_Ranges_eEM12sl6',         outputbits = (10,11), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM12sl6', 
                                                                                                               '25INVM70-13DR25-eEM12sl1-eEM12sl6']),  
-
                 ]
             },
             
@@ -421,8 +420,7 @@ def defineInputsMenu():
                 "clock" : 0,
                 "algorithms" : [
                     TopoMenuDef( 'INVM_DR_eEM_MU',                       outputbits = (0,1), outputlines =  ['0INVM10-0DR15-eEM10abl-MU8Fab',
-                                                                                                            '0INVM10-0DR15-eEM15abl-MU5VFab' ]) #LFV
-                    
+                                                                                                            '0INVM10-0DR15-eEM15abl-MU5VFab' ]), #LFV
                 ]
             },
 
