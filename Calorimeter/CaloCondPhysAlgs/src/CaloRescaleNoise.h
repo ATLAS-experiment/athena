@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloRescaleNoise.h
@@ -78,7 +78,6 @@ class CaloRescaleNoise : public AthAlgorithm {
   float m_phi{};
   int m_layer{};
   int m_Gain{};
-  float m_noise{};
   float m_elecNoise{};
   float m_pileupNoise{}; 
   float m_elecNoiseRescaled{};

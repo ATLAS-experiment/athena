@@ -296,7 +296,9 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
       calculatePileUpNoise(const IdentifierHash &idCaloHash,
           		 const float &Nminbias);
  
-    int  index(const IdentifierHash &idCaloHash);  
+    using AthAlgorithm::index;
+    int  index(const IdentifierHash &idCaloHash);
+
     CaloCell_ID::SUBCALO caloNum(const IdentifierHash idCaloHash);  
     bool isBadValue(float tested_value); 
  
