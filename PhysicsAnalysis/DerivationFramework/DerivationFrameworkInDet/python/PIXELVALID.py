@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # PIXELVALID.py
 # Component accumulator version
@@ -29,7 +29,8 @@ def PIXELVALID_ANDToolCfg(flags, name='PIXELVALID_ANDTool'):
         SecondObjectRequirements = sel_muon2,
         MassHypothesis           = 105.66,
         SecondMassHypothesis     = 105.66,
-        StoreGateEntryName       = "DRZmumuMass"))
+        StoreGateEntryName       = "DRZmumuMass",
+        InputDecorNames          = ["Muons.ptcone40"]))
 
     PIXELVALID_SkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
         flags,
