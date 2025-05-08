@@ -16,6 +16,7 @@ class L1CaloMonitorCfgHelper(object):
     hanAlgConfigs = {}
     hanThresholdConfigs = {}
     xmlConfigs = {} # flat dictionary of histograms that are in the shifter folders, so are used for online monitoring
+    embargoed = [] # list of embargoed dqdm plots
 
     SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gTEJWOJ","gXENC","gTENC","gXERHO","gTERHO","jJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
     HELPURL = "https://codimd.web.cern.ch/s/678H65Tk9"
@@ -123,6 +124,7 @@ class L1CaloMonitorCfgHelper(object):
                 #     algorithm No_UnderFlows
 
                 outputs = set()
+                algorithms = set()
                 def printConf(d,prefix=""):
                     for key,value in d.items():
                         if type(value)==dict:
@@ -141,6 +143,7 @@ class L1CaloMonitorCfgHelper(object):
                             # save all output paths to add to output block (don't need to print here b.c. specified at dir level
                             if key == "output": outputs.add(value)
                             else: print(prefix,key,"=",value)
+                            if key == "algorithm": algorithms.add(value)
 
 
                 print("#inputs")
@@ -155,7 +158,7 @@ class L1CaloMonitorCfgHelper(object):
                             pass # do nothing
                         elif type(value)==dict:
                             print(prefix,key.replace("dir ","output "),"{")
-                            if key=="dir Developer": print(prefix,"  algorithm = L1Calo_AlwaysUndefinedSummary")
+                            if key=="dir detail" or key=="dir Developer": print(prefix,"  algorithm = L1Calo_AlwaysUndefinedSummary")
                             printOutputs(value,prefix + "  ")
                             print(prefix,"}")
                 print("  output L1Calo {")
@@ -177,9 +180,12 @@ algorithm L1Calo_AlwaysUndefinedSummary {
     name = AlwaysUndefinedSummary
 }
 """)
+                thresholds = set()
                 for algName,algProps in L1CaloMonitorCfgHelper.hanAlgConfigs.items():
+                    if algName not in algorithms: continue # only print the algorithms that were used
                     print(f"algorithm {algName} {{")
                     for propName,propVal in algProps.items():
+                        if propName == "thresholds": thresholds.add(propVal)
                         print(f"  {propName} = {propVal}")
                     print("  }")
                 print("""
@@ -192,6 +198,7 @@ thresholds th_AnyBinIsError {
 }
 """)
                 for threshName,threshProps in L1CaloMonitorCfgHelper.hanThresholdConfigs.items():
+                    if threshName not in thresholds: continue # only print used thresholds
                     print(f"thresholds {threshName} {{")
                     for parName,parLims in threshProps.items():
                         print(f"  limits {parName} {{")
@@ -222,7 +229,7 @@ thresholds th_AnyBinIsError {
 
         :param name: name of algorithm
         :param hanConfig: dict of algo properties
-        :param thresholdConfig: dict of thresholds, keys in form of ParName.level
+        :param thresholdConfig: dict of thresholds, key = ParName, value = pair of thresholds [warning,error]
         :return:
         """
 
@@ -287,16 +294,18 @@ thresholds th_AnyBinIsError {
             return None
 
         # require a hanConfig not in Developer or a detail dir
-        if splitPath[0] != "Developer" and splitPath[-1] != "detail" and ("algorithm" not in hanConfig):
+        if splitPath[0] != "Developer" and splitPath[-1] != "detail" and ("algorithm" not in hanConfig) and (splitPath[0]+"/algorithm" not in hanConfig):
             # will default to using GatherData as long as there is a description
-            if "description" not in hanConfig:
+            if "description" not in hanConfig and splitPath[0]+"/description" not in hanConfig:
                 raise Exception("Must specify a hanConfig for a Shifter or Expert (non-detail) histogram")
             else:
                 hanConfig["algorithm"] = "GatherData" # must have an algo, otherwise wont be valid han config
         elif "algorithm" in hanConfig and hanConfig["algorithm"] not in self.hanAlgConfigs and hanConfig["algorithm"] not in ["All_Bins_Filled","Histogram_Effective_Empty","Histogram_Empty","Histogram_Not_Empty","No_OverFlows","No_UnderFlows"]:
             # if algorithm specified, must have been defined
             raise Exception(f'DQ Algorithm {hanConfig["algorithm"]} for histogram {args[0]} not defined. Please use defineDQAlgorithm method to define it')
-
+        elif splitPath[0]+"/algorithm" in hanConfig and hanConfig[splitPath[0]+"/algorithm"] not in self.hanAlgConfigs and hanConfig[splitPath[0]+"/algorithm"] not in ["All_Bins_Filled","Histogram_Effective_Empty","Histogram_Empty","Histogram_Not_Empty","No_OverFlows","No_UnderFlows"]:
+            # if algorithm specified, must have been defined
+            raise Exception(f'{splitPath[0]} DQ Algorithm {hanConfig[splitPath[0]+"/algorithm"]} for histogram {args[0]} not defined. Please use defineDQAlgorithm method to define it')
 
         if fillGroup is None: fillGroup = self.alg.name + "_fillGroup"
         if fillGroup not in self.fillGroups:
@@ -312,25 +321,45 @@ thresholds th_AnyBinIsError {
         if splitPath[0] == "Expert":
             linkUrl = self.HELPURL + "#" + "".join(splitPath[1:]+[histName])
             linkUrl = f"<a href=\"{linkUrl}\">Help</a>"
-            if "description" not in hanConfig: hanConfig["description"] = linkUrl
-            else: hanConfig["description"] += " - " + linkUrl
+            if "description" not in hanConfig and "Expert/descripton" not in hanConfig: hanConfig["description"] = linkUrl
+            elif "description" in hanConfig: hanConfig["description"] += " - " + linkUrl
+            else: hanConfig["Expert/description"] += " - " + linkUrl
 
         # only add to hanConfig if in Expert or Developer folder
         if splitPath[0] == "Expert" or splitPath[0] == "Developer":
+            splitPathWithHist = splitPath + [histName]
+            # check if hist is in the embargoed list
+            embargo = ("/".join(splitPathWithHist) in L1CaloMonitorCfgHelper.embargoed)
+            if embargo:
+                if "Expert/description" not in hanConfig: hanConfig["description"] = "<b>EMBARGOED PLOT</b> - " + (hanConfig.get("description",""))
+                else: hanConfig["Expert/description"] = "<b>EMBARGOED PLOT</b> - " + (hanConfig.get("Expert/description",""))
             if "description" in hanConfig and hanConfig["description"]=="":
                 del hanConfig["description"]
-            splitPathWithHist = splitPath + [histName]
+            if splitPath[0]+"/description" in hanConfig and hanConfig[splitPath[0]+"/description"]=="":
+                del hanConfig[splitPath[0]+"/description"]
             x = L1CaloMonitorCfgHelper.hanConfigs
             for i,p in enumerate(splitPathWithHist):
                 key = ("dir " if i!=len(splitPathWithHist)-1 else "hist ") + p
                 if key not in x:
                     x[key] = {}
                 x = x[key]
-            hanConfig["output"] = "/".join(["L1Calo"]+splitPath)
-            x.update(hanConfig)
+            hanConfig["output"] = "/".join(["L1Calo"]+[splitPath[0] if not embargo else "Developer"]+splitPath[1:]) #embargoed plots appear in developer folder in DQDM, but come from Expert folder in ROOT file
+            # create a copy of the hanConfig and remove any keys beginning with "Shifter/", which means its a shifter-only config attribute
+            myConfig = {}
+            for k,v in hanConfig.items():
+                if k.startswith("Shifter/"): continue
+                # strip Expert/ prefix if it exists
+                myConfig[str(k).replace("Expert/","")] = v
+            x.update(myConfig)
         elif splitPath[0] == "Shifter": # record shifter histograms in another map, for generating xmls
+            # create a copy of the hanConfig and remove any keys beginning with "Expert/", which means its a expert-only config attribute
+            myConfig = {}
+            for k,v in hanConfig.items():
+                if k.startswith("Expert/"): continue
+                # strip Shifter/ prefix if it exists
+                myConfig[str(k).replace("Shifter/","")] = v
             L1CaloMonitorCfgHelper.xmlConfigs["/".join(["L1Calo"]+splitPath+[histName])] = {}
-            L1CaloMonitorCfgHelper.xmlConfigs["/".join(["L1Calo"]+splitPath+[histName])].update(hanConfig) # copy in the config
+            L1CaloMonitorCfgHelper.xmlConfigs["/".join(["L1Calo"]+splitPath+[histName])].update(myConfig) # copy in the config
 
         return out
 
