@@ -178,23 +178,27 @@ std::vector<std::unique_ptr<Trk::Surface>>
       Amg::Transform3D(transform *
                        Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ))),
       std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY));
-  Trk::VolumeExcluder* volExcl =
-      new Trk::VolumeExcluder(std::make_unique<Trk::Volume>(
-          *m_combinedVolume, Amg::Transform3D(Amg::Translation3D(
-                                 Amg::Vector3D(0., 0., -m_halfZ)))));
+  auto volExcl =
+      std::make_unique<Trk::VolumeExcluder>(
+        std::make_unique<Trk::Volume>(
+          *m_combinedVolume,
+          Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ)))
+          )
+        );
 
-  retsf.push_back(
-      std::make_unique<Trk::SubtractedPlaneSurface>(xymPlane, volExcl, true));
+  retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(xymPlane, std::move(volExcl), true));
   //  (2) - at positive local z
   Trk::PlaneSurface xyPlane(
-      Amg::Transform3D(transform *
-                       Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ))),
-      std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY));
-  volExcl = new Trk::VolumeExcluder(std::make_unique<Trk::Volume>(
-      *m_combinedVolume,
-      Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ)))));
-  retsf.push_back(
-      std::make_unique<Trk::SubtractedPlaneSurface>(xyPlane, volExcl, true));
+      Amg::Transform3D(transform *Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ))),
+      std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY)
+      );
+
+  volExcl = std::make_unique<Trk::VolumeExcluder>(
+    std::make_unique<Trk::Volume>(*m_combinedVolume,
+      Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ)))
+      )
+    );
+  retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(xyPlane, std::move(volExcl), true));
   // loop over xy vertices
   //  (3)
   for (unsigned int iv = 0; iv < m_xyVtx.size(); iv++) {

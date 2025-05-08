@@ -1325,7 +1325,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                                                                  std::move(combinedBounds));
                         volExcl = std::make_unique<Trk::VolumeExcluder>(std::unique_ptr<Trk::Volume>(cVol->clone()));
                         Trk::PlaneSurface surf{transf[ic] * Amg::getTranslateX3D(shift) * Amg::getRotateY3D(M_PI_2) * Amg::getRotateZ3D(M_PI_2), std::move(bounds)};
-                        auto subPlane = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), volExcl.release(), false);
+                        auto subPlane = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), std::move(volExcl), false);
                         auto subPlaneX = std::make_unique<Trk::SubtractedPlaneSurface>(*subPlane, Amg::getTranslateX3D(-2 * shift));
 
                         Trk::MaterialProperties material(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
@@ -1344,7 +1344,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         auto volEx = std::make_unique<Trk::VolumeExcluder>(std::make_unique<Trk::Volume>(*cVol, Amg::getTranslateX3D(2 * shift)));
 
                         surf = Trk::PlaneSurface{transf[ic] * Amg::getRotateX3D(M_PI_2), std::move(bounds)};
-                        auto subPlaneBis = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), volEx.release(), false);
+                        auto subPlaneBis = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), std::move(volEx), false);
                         material = Trk::MaterialProperties(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                         spacerMaterial = Trk::HomogeneousLayerMaterial(material, 0.);
                         auto lay = std::make_unique<Trk::SubtractedPlaneLayer>(subPlaneBis.get(), spacerMaterial, thickness, nullptr, 0);

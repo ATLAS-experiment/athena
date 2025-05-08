@@ -33,9 +33,9 @@ SubtractedCylinderSurface::shared() const
   return m_shared;
 }
 
-inline std::shared_ptr<AreaExcluder>
+inline const AreaExcluder*
 SubtractedCylinderSurface::subtractedVolume() const
 {
-  return m_subtrVol;
+  return m_subtrVol.get();
 }
 }

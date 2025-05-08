@@ -38,8 +38,8 @@ public:
   SlidingCylinderSurface(const CylinderSurface& surf,
                          const Trk::BinUtility & bu,
                          const std::vector<float> & offset);
-                         
- 
+
+
   /**Equality operator*/
   virtual bool operator==(const Surface& sf) const override final;
 

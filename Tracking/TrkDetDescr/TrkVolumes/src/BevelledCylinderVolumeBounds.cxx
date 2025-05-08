@@ -130,7 +130,7 @@ std::vector<std::unique_ptr<Trk::Surface>>
               Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
           discBounds());
       retsf.push_back(std::make_unique<Trk::SubtractedDiscSurface>(
-          bottomDisc, new Trk::VolumeExcluder(std::move(subtrVol)), false));
+          bottomDisc, std::make_unique<Trk::VolumeExcluder>(std::move(subtrVol)), false));
     } else
       retsf.push_back(std::make_unique<Trk::DiscSurface>(
           Amg::Transform3D(
@@ -156,7 +156,7 @@ std::vector<std::unique_ptr<Trk::Surface>>
           transform * Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
         discBounds());
       retsf.push_back(std::make_unique<Trk::SubtractedDiscSurface>(
-        topDisc, new Trk::VolumeExcluder(std::move(subtrVol)), false));
+        topDisc, std::make_unique<Trk::VolumeExcluder>(std::move(subtrVol)), false));
     } else
       retsf.push_back(std::make_unique<Trk::DiscSurface>(
         Amg::Transform3D(
