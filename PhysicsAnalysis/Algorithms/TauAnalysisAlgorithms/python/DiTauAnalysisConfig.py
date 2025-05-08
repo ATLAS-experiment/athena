@@ -57,6 +57,10 @@ class DiTauWorkingPointConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        selectionPostfix = self.selectionName
+        if selectionPostfix != '' and selectionPostfix[0] != '_' :
+            selectionPostfix = '_' + selectionPostfix
+          
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
@@ -72,6 +76,20 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         else :
             raise ValueError ("invalid tau quality: \"" + self.quality +
                               "\", allowed values are Tight, Medium, Loose")
+
+        inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt.conf'
+        if "DiTauJetsLowPt" in self.containerName:
+            inputfile = 'TauAnalysisAlgorithms/ditau_selection_lowpt.conf' 
+
+        # Set up the algorithm selecting taus:
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'DiTauSelectionAlg' + postfix )
+        config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::DiTauSelectionTool' )
+        alg.selectionTool.ConfigPath = inputfile
+        alg.selectionDecoration = 'selected_ditau' + selectionPostfix + ',as_char'
+        alg.particles = config.readName (self.containerName)
+        alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                             preselection=self.addSelectionToPreselection) 
 
 
         # Set up the algorithm calculating the efficiency scale factors for the
