@@ -197,7 +197,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     m_tuple->Branch("idHF",       &m_curTup->idHF,    "idHF[ntrk]/I");
     m_tuple->Branch("trkTRT",     &m_curTup->trkTRT,  "trkTRT[ntrk]/I");
     m_tuple->Branch("etatrk",     &m_curTup->etatrk,  "etatrk[ntrk]/F");
-
+    m_tuple->Branch("displaced",  &m_curTup->displaced,"displaced[ntrk]/I");
     m_tuple->Branch("n2Vrt",      &m_curTup->n2Vrt,      "n2Vrt/I");
     m_tuple->Branch("VrtTrkHF",   &m_curTup->VrtTrkHF,   "VrtTrkHF[n2Vrt]/I");
     m_tuple->Branch("VrtTrkI",    &m_curTup->VrtTrkI,    "VrtTrkI[n2Vrt]/I");
@@ -221,7 +221,12 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     m_tuple->Branch("VrtBDT",     &m_curTup->VrtBDT,     "VrtBDT[n2Vrt]/F");
     m_tuple->Branch("VrtDZ",      &m_curTup->VrtDZ,      "VrtDZ[n2Vrt]/F");
     m_tuple->Branch("VrtDisk",    &m_curTup->VrtDisk,    "VrtDisk[n2Vrt]/I");
+    m_tuple->Branch("VrtTrueBar", &m_curTup->VrtTrueBar, "VrtTrueBar[n2Vrt]/I");  //Truth vertex barcode based ident.
+    m_tuple->Branch("VrtTrueNear",&m_curTup->VrtTrueNear,"VrtTrueNear[n2Vrt]/I"); //Truth vertex closeness based ident.
     m_tuple->Branch("VSigMat",    &m_curTup->VSigMat,    "VSigMat[n2Vrt]/F");
+    m_tuple->Branch("VrtIT",      &m_curTup->VrtIT,      "VrtIT[n2Vrt]/I");
+    m_tuple->Branch("VrtJT",      &m_curTup->VrtJT,      "VrtJT[n2Vrt]/I");
+
 
     m_tuple->Branch("nNVrt",       &m_curTup->nNVrt,       "nNVrt/I");
     m_tuple->Branch("NVrtTrk",     &m_curTup->NVrtTrk,     "NVrtTrk[nNVrt]/I");

@@ -16,6 +16,7 @@
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/Layer.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
  // Other stuff
 #include <cmath>
 
@@ -243,53 +244,56 @@ namespace Rec{
   int NewVrtSecInclusiveTool::getIdHF(const xAOD::TrackParticle* TP ) const {
     static const SG::ConstAccessor< ElementLink< xAOD::TruthParticleContainer> >
       truthParticleLinkAcc ( "truthParticleLink");
-     if( truthParticleLinkAcc.isAvailable(*TP) ) {
-        const ElementLink<xAOD::TruthParticleContainer>& tplink = 
-          truthParticleLinkAcc(*TP);
-        if( !tplink.isValid() ) return 0;
-        static const SG::ConstAccessor< float >
-          truthMatchProbabilityAcc ( "truthMatchProbability" );
-        if( truthMatchProbabilityAcc( *TP ) < 0.75 ) return 0;
-        if( HepMC::is_simulation_particle((*tplink))) return 0;
-        if( (*tplink)->hasProdVtx()){
-          if( (*tplink)->prodVtx()->nIncomingParticles()==1){
-             int PDGID1=0, PDGID2=0, PDGID3=0;
-             const xAOD::TruthParticle * parTP1=getPreviousParent(*tplink, PDGID1);
-             const xAOD::TruthParticle * parTP2=nullptr;
-             int noBC1=notFromBC(PDGID1);
-             if(noBC1)  parTP2 = getPreviousParent(parTP1, PDGID2);
-             int noBC2=notFromBC(PDGID2);
-             if(noBC2 && parTP2) getPreviousParent(parTP2, PDGID3);
-             int noBC3=notFromBC(PDGID3);
-             if((*tplink)->prodVtx()->perp()>1.)return 1.; //For SUSY studies
-             if(noBC1 && noBC2 && noBC3)return 0;
-             return 1;  //This is a reconstructed track from B/C decays
-      } } }
-      return 0;
+    if( truthParticleLinkAcc.isAvailable(*TP) ) {
+       const ElementLink<xAOD::TruthParticleContainer>& tplink = truthParticleLinkAcc(*TP);
+       if( !tplink.isValid() ) return 0;
+       static const SG::ConstAccessor< float >truthMatchProbabilityAcc ( "truthMatchProbability" );
+       if( truthMatchProbabilityAcc( *TP ) < 0.75 ) return 0;
+       if( HepMC::is_simulation_particle((*tplink))) return 0;
+       //-------------
+       const xAOD::TruthParticle * parent1=getPreviousParent(*tplink);
+       if(!parent1 || !parent1->isHadron()) return 0;
+       if(parent1->isBottomHadron()) return isExcitedHadron(parent1) ? 0 : 1;  //Ground state B-hadron
+       if(parent1->isCharmHadron() && !isExcitedHadron(parent1))return 1;      //Ground state C-hadron
+       //--------------
+       const xAOD::TruthParticle * parent2=getPreviousParent(parent1);
+       if(!parent2 || !parent2->isHadron()) return 0;
+       if(parent2->isBottomHadron()) return isExcitedHadron(parent2) ? 0 : 1;  //Ground state B-hadron
+       if(parent2->isCharmHadron() && !isExcitedHadron(parent2))return 1;      //Ground state C-hadron
+       //--------------
+       const xAOD::TruthParticle * parent3=getPreviousParent(parent2);
+       if(!parent3 || !parent3->isHadron()) return 0;
+       if(parent3->isBottomHadron()) return isExcitedHadron(parent3) ? 0 : 1;  //Ground state B-hadron
+       if(parent3->isCharmHadron() && !isExcitedHadron(parent3))return 1;      //Ground state C-hadron
+    }
+    return 0;
   }
-
-  int NewVrtSecInclusiveTool::notFromBC(int PDGID) {
-    int noBC=0;
-    if(PDGID<=0)return 1;
-    if(PDGID>600 && PDGID<4000)noBC=1;
-    if(PDGID<400 || PDGID>5600)noBC=1;
-    if(PDGID==513  || PDGID==523  || PDGID==533  || PDGID==543)noBC=1;  //Remove tracks from B* (they are in PV)
-    if(PDGID==5114 || PDGID==5214 || PDGID==5224 || PDGID==5314 || PDGID==5324)noBC=1; //Remove tracks from B_Barions* (they are in PV)
-  //if(PDGID==413  || PDGID==423  || PDGID==433 )continue;  //Keep tracks from D* (they are from B vertex)
-  //if(PDGID==4114 || PDGID==4214 || PDGID==4224 || PDGID==4314 || PDGID==4324)continue;
-    return noBC;
-  }
-  const xAOD::TruthParticle * NewVrtSecInclusiveTool::getPreviousParent(const xAOD::TruthParticle * child, int & ParentPDG) {
-    ParentPDG=0;
+  const xAOD::TruthParticle * NewVrtSecInclusiveTool::getPreviousParent(const xAOD::TruthParticle * child) {
     if( child->hasProdVtx() ){
        if( child->prodVtx()->nIncomingParticles()==1 ){
-            ParentPDG = std::abs((*(child->prodVtx()->incomingParticleLinks())[0])->pdgId());
             return *(child->prodVtx()->incomingParticleLinks())[0];
        }
     }
     return nullptr;
   }
+  bool NewVrtSecInclusiveTool::isExcitedHadron(const xAOD::TruthParticle * tp) {
+    if( !tp->hasProdVtx() )return false;
+    if( !tp->hasDecayVtx() )return false;
+    Amg::Vector3D pvrt(tp->prodVtx()->x(),tp->prodVtx()->y(),tp->prodVtx()->z());
+    Amg::Vector3D dvrt(tp->decayVtx()->x(),tp->decayVtx()->y(),tp->decayVtx()->z());
+    return Amg::distance(pvrt,dvrt) < 0.001*Gaudi::Units::mm ? true : false;
+  }
 
+  bool NewVrtSecInclusiveTool::isDisplaced(const xAOD::TrackParticle * TP) {
+     if(!TP)return false;
+     static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> truthParticleLinkAcc( "truthParticleLink");
+     if( truthParticleLinkAcc.isAvailable( *TP ) ) {
+       const ElementLink<xAOD::TruthParticleContainer>& tplink = truthParticleLinkAcc( *TP );
+       if( !tplink.isValid() ) return false;
+       if((*tplink)->hasProdVtx() && (*tplink)->prodVtx()->perp() > 1.*Gaudi::Units::mm) return true;
+     }
+     return false;
+  }
 
   int NewVrtSecInclusiveTool::getG4Inter(const xAOD::TrackParticle* TP ) {
       static const SG::ConstAccessor< ElementLink< xAOD::TruthParticleContainer> >
@@ -312,9 +316,81 @@ namespace Rec{
       return 0;
   }
 
+  int NewVrtSecInclusiveTool::getProdVrtBarcode(const xAOD::TrackParticle * TP, float resolLimit)
+  {
+     int barVrt=0;
+     if(!TP)return barVrt;
+     static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> truthParticleLinkAcc( "truthParticleLink");
+     if( truthParticleLinkAcc.isAvailable( *TP ) ) {
+       barVrt=-1;
+       const ElementLink<xAOD::TruthParticleContainer>& tplink = truthParticleLinkAcc( *TP );
+       if( !tplink.isValid() ) return barVrt;
+       const xAOD::TruthParticle *tparticle = (*tplink);         // truth particle for TrackPartile
+       if(tparticle->hasProdVtx()){                              // truth particle has production vertex
+          barVrt = tparticle->prodVtx()->barcode();
+          if(HepMC::is_simulation_vertex(tparticle->prodVtx()))      return barVrt;          // Geant4 vertex
+	  if(tparticle->prodVtx()->nIncomingParticles()!=1) return barVrt;           // Safety!
+	  const xAOD::TruthParticle *parent = *(tparticle->prodVtx()->incomingParticleLinks())[0];
+	  Amg::Vector3D vpos0(tparticle->prodVtx()->x(),tparticle->prodVtx()->y(),tparticle->prodVtx()->z()); //Truth vertex position
+          //
+	  //--  Now check parent
+	  if(!parent->isHadron()) return barVrt;    // Parent is parton not particle! Stop.
+          if(!parent->hasProdVtx())         return barVrt;    // Parent particle doesn't have production vertex
+	  Amg::Vector3D vpos1(parent->prodVtx()->x(),parent->prodVtx()->y(),parent->prodVtx()->z()); //Truth vertex position
+          if( Amg::distance(vpos0,vpos1) > resolLimit) return barVrt;    // Parent vertex is far
+          barVrt = parent->prodVtx()->barcode();                         // Else use parent vertex as reference
+          if(HepMC::is_simulation_vertex(parent->prodVtx()))   return barVrt;     // Geant4 vertex
+	  if(parent->prodVtx()->nIncomingParticles()!=1)       return barVrt;     // Not a decay vertex
+	  const xAOD::TruthParticle *grandparent = *(parent->prodVtx()->incomingParticleLinks())[0];
+          //
+	  //--  Now check grandparent
+	  if(!grandparent->isHadron()) return barVrt;    // Grandparent is parton not particle! Stop.
+          if(!grandparent->hasProdVtx())         return barVrt;    // Parent particle doesn't have production vertex
+	  Amg::Vector3D vpos2(grandparent->prodVtx()->x(),grandparent->prodVtx()->y(),grandparent->prodVtx()->z()); //Truth vertex position
+          if( Amg::distance(vpos0,vpos2) > resolLimit) return barVrt;    // Grandparent vertex is far
+          barVrt = grandparent->prodVtx()->barcode();                    // Use grandparent vertex as reference
+          if(HepMC::is_simulation_vertex(grandparent->prodVtx()))      return barVrt;          // Geant4 vertex
+	  if(grandparent->prodVtx()->nIncomingParticles()!=1) return barVrt;           // Not a decay vertex
+	  const xAOD::TruthParticle *biggrandparent = *(grandparent->prodVtx()->incomingParticleLinks())[0];
+          //
+	  //--  Now check biggrandparent
+	  if(!biggrandparent->isHadron()) return barVrt;    // BigGrandparent is parton not particle! Stop.
+          if(!biggrandparent->hasProdVtx())         return barVrt;    // Parent particle doesn't have production vertex
+	  Amg::Vector3D vpos3(biggrandparent->prodVtx()->x(),biggrandparent->prodVtx()->y(),biggrandparent->prodVtx()->z());
+          if( Amg::distance(vpos0,vpos3) > resolLimit) return barVrt;    // Grandparent vertex is far
+          barVrt = biggrandparent->prodVtx()->barcode();               // Use grandparent vertex as reference
+       }
+     }
+     return barVrt;
+  }
+
+  bool NewVrtSecInclusiveTool::checkTrue2TrVrt(const xAOD::TrackParticle * TP1, const xAOD::TrackParticle * TP2, float nearCut)
+  {
+     if( !TP1 || !TP2 )return false;
+     static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> truthParticleLinkAcc( "truthParticleLink");
+     if( !truthParticleLinkAcc.isAvailable(*TP1) ) return false;
+     if( !truthParticleLinkAcc.isAvailable(*TP2) ) return false;
+     const ElementLink<xAOD::TruthParticleContainer>& tplink1 = truthParticleLinkAcc( *TP1 );
+     if( !tplink1.isValid() ) return false;
+     const ElementLink<xAOD::TruthParticleContainer>& tplink2 = truthParticleLinkAcc( *TP2 );
+     if( !tplink2.isValid() ) return false;
+     const xAOD::TruthParticle *tpart1 = (*tplink1);        // truth particle for TrackPartile1
+     const xAOD::TruthParticle *tpart2 = (*tplink2);        // truth particle for TrackPartile2
+     //-----
+     if(!tpart1->hasProdVtx()) return false;
+     if(!tpart2->hasProdVtx()) return false;
+     if(tpart1->prodVtx()->nOutgoingParticles()<2) return false;
+     if(tpart2->prodVtx()->nOutgoingParticles()<2) return false;
+     //-----
+     Amg::Vector3D vpos1(tpart1->prodVtx()->x(),tpart1->prodVtx()->y(),tpart1->prodVtx()->z());
+     Amg::Vector3D vpos2(tpart2->prodVtx()->x(),tpart2->prodVtx()->y(),tpart2->prodVtx()->z());
+     return Amg::distance(vpos1,vpos2)<nearCut ? true : false;
+  }
+
+
   double NewVrtSecInclusiveTool::distToMatLayerSignificance(Vrt2Tr & Vrt) const
   { 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+     const EventContext& ctx = Gaudi::Hive::currentContext();
      if(Vrt.fitVertex.perp()<20.) return 1.e9;
      double normP=1./Vrt.momentum.P();
      Amg::Vector3D momentumP(Vrt.momentum.Px()*normP,Vrt.momentum.Py()*normP,Vrt.momentum.Pz()*normP);
