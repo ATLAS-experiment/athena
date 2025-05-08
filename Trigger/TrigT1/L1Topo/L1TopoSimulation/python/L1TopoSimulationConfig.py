@@ -43,7 +43,7 @@ def L1LegacyTopoSimulationCfg(flags):
     acc.addEventAlgo(topoSimAlg)
     return acc
 
-def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1TopoSimulation", DeactivateL1TopoMuons=False):
+def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1TopoSimulation", DeactivateL1TopoMuons=False, UseMuonDecoder=False):
 
     acc = ComponentAccumulator()
 
@@ -74,10 +74,22 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
         muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
         muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
 
+        if UseMuonDecoder:
+            from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuonRoIByteStreamToolCfg
+            muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(flags, name="L1MuonBSDecoderTool", writeBS=False))
+            decoderTools += [muonRoiTool]
+            maybeMissingRobs += muonRoiTool.ROBIDs
 
-    emtauProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
-    jetProvider = CompFactory.LVL1.jFexInputProvider("jFexInputProvider")
-    energyProvider = CompFactory.LVL1.gFexInputProvider("gFexInputProvider")
+    emtauProvider = ""
+    jetProvider = ""
+    energyProvider = ""
+
+    if flags.Trigger.L1.doeFex:
+        emtauProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
+    if flags.Trigger.L1.dojFex:
+        jetProvider = CompFactory.LVL1.jFexInputProvider("jFexInputProvider")
+    if flags.Trigger.L1.dogFex:
+        energyProvider = CompFactory.LVL1.gFexInputProvider("gFexInputProvider")
 
     controlHistSvc = CompFactory.LVL1.ControlHistSvc("ControlHistSvc")
     
