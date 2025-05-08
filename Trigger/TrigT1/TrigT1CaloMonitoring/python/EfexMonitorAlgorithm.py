@@ -85,7 +85,7 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
     commonAlgConfig = {"libname":"libdqm_summaries.so",
                        "name":"L1Calo_BinsDiffFromStripMedian",
                        "PublishDetail":32}
-    hotCuts = {"ColdCut":-3.5,"WarmCut":9,"HotCut":20} # when looking at frequency of hot deposits, use these cuts
+    hotCuts = {"ColdCut":-5,"WarmCut":9,"HotCut":20} # when looking at frequency of hot deposits, use these cuts
 
     commonThresholdConfig = {
         "NWrongKnown":[0,100], # warn of any corrections that are needed for the known anomalies lists
@@ -115,15 +115,22 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                              thresholdConfig=commonThresholdConfig
                              )
 
-    helper.defineDQAlgorithm("Efex_eEM_etaPhiLBMapOutliers",
+    helper.defineDQAlgorithm("Efex_eEM_etaPhiLBMapOutliers_Shifter",
                              hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eEM|{"NBinsY":64,"LiveMode":1},
                              thresholdConfig=commonThresholdConfig
+                             ) # configuration for P1 monitoring
+    helper.defineDQAlgorithm("Efex_eEM_etaPhiLBMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eEM|{"NBinsY":64,"LiveMode":0},
+                             thresholdConfig=commonThresholdConfig
                              )
-
-    helper.defineDQAlgorithm("Efex_eTAU_etaPhiLBMapOutliers",
+    helper.defineDQAlgorithm("Efex_eTAU_etaPhiLBMapOutliers_Shifter",
                          hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eTAU|{"NBinsY":64,"LiveMode":1},
                          thresholdConfig=commonThresholdConfig
-                         )
+                         ) # configuration for P1 monitoring
+    helper.defineDQAlgorithm("Efex_eTAU_etaPhiLBMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eTAU|{"NBinsY":64,"LiveMode":0},
+                             thresholdConfig=commonThresholdConfig
+                             )
 
 
     # Now define the histograms with low/hi Pt cut
@@ -161,7 +168,8 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
             if "Sim" not in containerKey and "x" not in containerKey:
                 helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title=tobStr+' Count'+cut_title_addition+';LB;64(x-1)+y',
                                    fillGroup=fillGroup,
-                                   hanConfig={"algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers","description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
+                                   hanConfig={"Expert/algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers","Shifter/algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers_Shifter",
+                                              "description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
                                    type='TH2I',
                                    paths=["Expert/Outputs/"+pathFromKey(containerKey,"")+"/detail","Shifter/Outputs/"+pathFromKey(containerKey,"")],
                                    xbins=1,xmin=0,xmax=10,
@@ -240,7 +248,8 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
             if "Sim" not in containerKey and "x" not in containerKey:
                 helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title='eTAU '+tobStr+' Count'+cut_title_addition+';LB;64(x-1)+y',
                                fillGroup=fillGroup,
-                               hanConfig={"algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers","description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
+                               hanConfig={"Expert/algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers","Shifter/algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers_Shifter",
+                                          "description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
                                type='TH2I',
                                paths=["Expert/Outputs/"+pathFromKey(containerKey,"")+"/detail","Shifter/Outputs/"+pathFromKey(containerKey,"")],
                                xbins=1,xmin=0,xmax=10,

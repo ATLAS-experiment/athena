@@ -268,6 +268,10 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
                             result->tags_[TString::Format("_%s(%d,%d)", k.c_str(), bin.m_ix,
                                                           bin.m_iy).Data()] = bin.m_outstandingRatio;
                             counts["N"+k]++;
+                        } else {
+                            // report as a known anomaly
+                            result->tags_[TString::Format("_Known%s(%d,%d)",k.c_str(), bin.m_ix,
+                                                          bin.m_iy).Data()] = bin.m_outstandingRatio;
                         }
                         break;
                     }
