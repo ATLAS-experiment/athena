@@ -20,7 +20,7 @@ SignatureDict = OrderedDict({
     'Photon'  : ('g','AllTag'),
     'Muon'    : ('mu','AllTag'),
     'Bphysics': ('', 'AllTag'),
-    'Tau'     : ('tau','AllTag'),
+    'Tau'     : ('tau','JetMET'),
     'Jet'     : ('j',  'JetMET'),
     'Bjet'    : ('', 'JetMET'),
     'MET'     : ('xe', 'JetMET'),
@@ -657,7 +657,7 @@ AllowedTopos_tau = []
 # ---- Tau Dictionary of all allowed Values ----
 TauChainParts = {
     'signature'     : ['Tau'],
-    'alignmentGroup': ['Tau'],
+    'alignmentGroup': ['Tau', 'JetMET'],
     'extra'         : [],
     'L1threshold'   : '',
     'chainPartName' : '',

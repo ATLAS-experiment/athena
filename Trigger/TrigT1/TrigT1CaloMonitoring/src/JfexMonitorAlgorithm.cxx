@@ -163,6 +163,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
           for (int iphi=-32; iphi<33; iphi++){
               jFexEMphi = M_PI/32 * iphi + M_PI/64;
               fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+              fill(m_GroupmapsHighPt,jFexEMeta,jFexEMphi,weight);
           }
       }
       weight = 1;
