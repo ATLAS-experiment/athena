@@ -365,7 +365,7 @@ StatusCode CaloCellNoiseAlg::fillNtuple()
    m_treeData->m_nevt[i] = m_CellList[i].nevt;
    m_treeData->m_nevt_good[i] = m_CellList[i].nevt_good;
    m_treeData->m_average[i] = (float) (m_CellList[i].average);
-   m_treeData->m_rms[i] = (float) (sqrt(m_CellList[i].rms));
+   m_treeData->m_rms[i] = (float) (std::sqrt(m_CellList[i].rms));
    m_treeData->m_reference[i] = (float) (m_CellList[i].reference);
    ATH_MSG_DEBUG ( " hash,Nevt,Average,RMS " << i << " " << m_treeData->m_nevt[i] << " " << m_treeData->m_average[i] << " " << m_treeData->m_rms[i] );
  }
@@ -447,9 +447,9 @@ StatusCode CaloCellNoiseAlg::fitNoise()
      b4->GetEntry(i);
 
      if (m_treeData->m_nevt[icell]>m_nmin) {
-        x.push_back(sqrt(m_treeData->m_luminosity));
+        x.push_back(std::sqrt(m_treeData->m_luminosity));
         y.push_back(m_treeData->m_rms[icell]);
-        ey.push_back(m_treeData->m_rms[icell]/sqrt(2.*m_treeData->m_nevt[icell]));
+        ey.push_back(m_treeData->m_rms[icell]/std::sqrt(2.*m_treeData->m_nevt[icell]));
      }
    }
 
@@ -464,14 +464,14 @@ StatusCode CaloCellNoiseAlg::fitNoise()
        for (unsigned int j=0;j<2;j++) {
          alpha[i][j]=0.;
          for (unsigned int k=0;k<x.size();k++) {
-            alpha[i][j] += ((pow(x[k],i))*(pow(x[k],j))/(pow(ey[k],2)));
+            alpha[i][j] += ((std::pow(x[k],i))*(std::pow(x[k],j))/(std::pow(ey[k],2)));
          }
        }
      }
      for (unsigned int i=0;i<2;i++) {
          beta[i]=0.;
          for (unsigned int k=0;k<x.size();k++) {
-           beta[i] += (y[k]*(pow(x[k],i))/(pow(ey[k],2)));
+           beta[i] += (y[k]*(std::pow(x[k],i))/(std::pow(ey[k],2)));
          }
      }
      HepVector comp=solve(alpha,beta);

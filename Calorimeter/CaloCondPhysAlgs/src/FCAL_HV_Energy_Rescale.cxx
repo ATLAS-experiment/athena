@@ -98,7 +98,7 @@ StatusCode FCAL_HV_Energy_Rescale::stop()
       HWIdentifier hwid=cabling->createSignalChannelID(id);
       const float corr=scaleCorr->HVScaleCorr(hwid);
       
-      if (fabs(1.0-corr)>0.01) {
+      if (std::fabs(1.0-corr)>0.01) {
 	value=corr;
 	++nSet;
       }
