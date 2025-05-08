@@ -14,34 +14,28 @@
 #include <iomanip>
 #include <iostream>
 
-// default constructor
-Trk::SubtractedPlaneSurface::SubtractedPlaneSurface()
-  : Trk::PlaneSurface()
-  , m_subtrVol()
-  , m_shared(true)
-{}
 
 // copy constructor
 Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const SubtractedPlaneSurface& psf)
-   
-= default;
+   : Trk::PlaneSurface(psf)
+  , m_subtrVol(psf.m_subtrVol->clone())
+  , m_shared(psf.m_shared)
+{}
 
 // copy constructor with shift
 Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const SubtractedPlaneSurface& psf, const Amg::Transform3D& transf)
   : Trk::PlaneSurface(psf, transf)
-  , m_subtrVol(psf.m_subtrVol)
+  , m_subtrVol(psf.m_subtrVol->clone())
   , m_shared(psf.m_shared)
 {}
 
 // constructor
-Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const Trk::PlaneSurface& ps, AreaExcluder* vol, bool shared)
+Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const Trk::PlaneSurface& ps, std::unique_ptr<AreaExcluder> vol, bool shared)
   : Trk::PlaneSurface(ps)
-  , m_subtrVol(vol)
+  , m_subtrVol(std::move(vol))
   , m_shared(shared)
 {}
 
-// destructor (will call destructor from base class which deletes objects)
-Trk::SubtractedPlaneSurface::~SubtractedPlaneSurface() = default;
 
 Trk::SubtractedPlaneSurface&
 Trk::SubtractedPlaneSurface::operator=(const Trk::SubtractedPlaneSurface& psf)
@@ -49,7 +43,7 @@ Trk::SubtractedPlaneSurface::operator=(const Trk::SubtractedPlaneSurface& psf)
 
   if (this != &psf) {
     Trk::PlaneSurface::operator=(psf);
-    m_subtrVol = psf.m_subtrVol;
+    m_subtrVol.reset(psf.m_subtrVol->clone());
     m_shared = psf.m_shared;
   }
   return *this;

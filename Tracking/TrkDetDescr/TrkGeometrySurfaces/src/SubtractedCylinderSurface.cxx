@@ -12,45 +12,37 @@
 #include <iomanip>
 #include <iostream>
 
-// default constructor
-Trk::SubtractedCylinderSurface::SubtractedCylinderSurface()
-  : Trk::CylinderSurface()
-  , m_subtrVol()
-  , m_shared(true)
+// constructor
+Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const Trk::CylinderSurface& ps,
+                                                          std::unique_ptr<AreaExcluder> vol,
+                                                          bool shared)
+  : Trk::CylinderSurface(ps)
+  , m_subtrVol(std::move(vol))
+  , m_shared(shared)
 {}
 
 // copy constructor
 Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const SubtractedCylinderSurface& psf)
-
-= default;
+    : Trk::CylinderSurface(psf),
+      m_subtrVol{psf.m_subtrVol->clone()},
+      m_shared(psf.m_shared) {}
 
 // copy constructor with shift
 Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const SubtractedCylinderSurface& psf,
                                                           const Amg::Transform3D& transf)
   : Trk::CylinderSurface(psf, transf)
-  , m_subtrVol(psf.m_subtrVol)
+  , m_subtrVol{psf.m_subtrVol->clone()}
   , m_shared(psf.m_shared)
 {}
 
-// constructor
-Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const Trk::CylinderSurface& ps,
-                                                          AreaExcluder* vol,
-                                                          bool shared)
-  : Trk::CylinderSurface(ps)
-  , m_subtrVol(std::shared_ptr<Trk::AreaExcluder>(vol))
-  , m_shared(shared)
-{}
-
-// destructor (will call destructor from base class which deletes objects)
-Trk::SubtractedCylinderSurface::~SubtractedCylinderSurface() = default;
-
+//Assignement
 Trk::SubtractedCylinderSurface&
 Trk::SubtractedCylinderSurface::operator=(const Trk::SubtractedCylinderSurface& psf)
 {
 
   if (this != &psf) {
     Trk::CylinderSurface::operator=(psf);
-    m_subtrVol = psf.m_subtrVol;
+    m_subtrVol.reset(psf.m_subtrVol->clone());
     m_shared = psf.m_shared;
   }
   return *this;
