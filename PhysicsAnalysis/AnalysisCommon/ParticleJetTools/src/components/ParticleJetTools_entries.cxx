@@ -7,6 +7,7 @@
 #include "ParticleJetTools/ParticleJetGhostLabelTool.h"
 #include "ParticleJetTools/JetParticleShrinkingConeAssociation.h"
 #include "ParticleJetTools/JetParticleCenterOfMassAssociation.h"
+#include "ParticleJetTools/JetParticleOriginVertexAssociation.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 #include "ParticleJetTools/JetPileupLabelingTool.h"
 
@@ -25,6 +26,7 @@ DECLARE_COMPONENT( ParticleJetDeltaRLabelTool )
 DECLARE_COMPONENT( ParticleJetGhostLabelTool )
 DECLARE_COMPONENT( JetParticleShrinkingConeAssociation )
 DECLARE_COMPONENT( JetParticleCenterOfMassAssociation )
+DECLARE_COMPONENT( JetParticleOriginVertexAssociation )
 DECLARE_COMPONENT( JetTruthLabelingTool )
 DECLARE_COMPONENT( JetPileupLabelingTool )
 DECLARE_COMPONENT( TruthParentDecoratorAlg )
