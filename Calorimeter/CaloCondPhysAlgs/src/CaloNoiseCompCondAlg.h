@@ -12,34 +12,23 @@
 #define CALOCONDPHYSALGS_CaloNoiseCompCondAlg_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloIdentifier/LArID.h"
-
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/LArID_Exception.h"
-#include "CaloConditions/CaloNoise.h"
- 
-#include "CaloIdentifier/CaloGain.h"
-
-#include "LArCabling/LArOnOffIdMapping.h"
-
-#include "LArElecCalib/ILArShape.h"
-#include "LArElecCalib/ILArPedestal.h"
-#include "LArElecCalib/ILArfSampl.h"
-#include "LArElecCalib/ILArMinBias.h"
-#include "LArElecCalib/ILArAutoCorr.h"
-
-#include "LArRawConditions/LArADC2MeV.h"
-#include "LArRawConditions/LArOFC.h"
-
-#include "CaloEvent/CaloCell.h"
-#include "LArRecEvent/LArCell.h"
-#include "TileEvent/TileCell.h"
-
+#include "CaloDetDescr/CaloDetDescrManager.h" //read handle
+#include "CaloIdentifier/CaloCell_ID.h" //use of enum in namespace
+#include "CaloConditions/CaloNoise.h" //write handle
+#include "CaloIdentifier/CaloGain.h" //use of enum in namespace
+#include "LArCabling/LArOnOffIdMapping.h" //read handle
+#include "LArElecCalib/ILArShape.h" //read handle
+#include "LArElecCalib/ILArPedestal.h" //read handle
+#include "LArElecCalib/ILArfSampl.h" //read handle
+#include "LArElecCalib/ILArMinBias.h" //read handle
+#include "LArElecCalib/ILArAutoCorr.h" //read handle
+#include "LArRawConditions/LArADC2MeV.h" //read handle
+#include "LArRawConditions/LArOFC.h" //read handle
 #include "AthenaKernel/IOVSvcDefs.h"
 
+class AtlasDetectorID;
+class CaloIdManager;
+class CaloCell;
 
 typedef std::vector< std::vector<float> > VectorContainer;
 typedef std::vector< float >              SingleContainer;

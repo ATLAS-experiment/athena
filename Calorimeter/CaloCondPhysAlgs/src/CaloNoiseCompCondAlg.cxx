@@ -3,7 +3,8 @@
 */
 
 #include "CaloNoiseCompCondAlg.h"
-
+#include "CaloEvent/CaloCell.h"
+#include "CaloIdentifier/CaloIdManager.h"
 // For Gaudi
 #include "GaudiKernel/MsgStream.h"
 #include "TileIdentifier/TileRawChannelUnit.h"
@@ -588,7 +589,7 @@ E=SUMi { OFCi * (short[ (PulseShapei*Ehit/Adc2MeV(gain) + Noisei(gain)
 
    => Sigma^2=SUMi{NOISEi(gain)*NOISEj(gain)*cij} + quantification part
              =        NOISE(gain)                 +   REST
-      Sigma  = sqrt( NOISE(gain) + REST) 
+      Sigma  = std::sqrt( NOISE(gain) + REST) 
 
 
 */
@@ -630,13 +631,13 @@ E=SUMi { OFCi * (short[ (PulseShapei*Ehit/Adc2MeV(gain) + Noisei(gain)
       this->commonCalculations(OFC_AC_OFC,OFC_OFC,1);
       //::::::::::::::::::::::::::::::::::::::
       float NOISE= OFC_AC_OFC*m_SigmaNoise*m_SigmaNoise ;
-      float REST = OFC_OFC*(1./12.);// 12.=sqrt(12)*sqrt(12)
+      float REST = OFC_OFC*(1./12.);// 12.=std::sqrt(12)*std::sqrt(12)
       sigma=(NOISE+REST) * m_Adc2MeVFactor*m_Adc2MeVFactor;   
       //::::::::::::::::::::::::::::::::::::::
-      if(sigma>0) sigma=sqrt(sigma);
+      if(sigma>0) sigma=std::sqrt(sigma);
       else  
       {
-        sigma=-sqrt(-sigma);
+        sigma=-std::sqrt(-sigma);
         //:::::::::::::::::
         //      MsgStream log(msgSvc(), name());
         //      if(igain==0) log << MSG::ERROR 
@@ -681,7 +682,7 @@ CaloNoiseCompCondAlg::calculatePileUpNoise(const IdentifierHash & idCaloHash,
     //no pile-up for tiles, for the moment ...
 
   /*
-    SigmaPileUp^2 = ( SigmaE * sqrt(Nmb) )^2 * Ipileup/Tc
+    SigmaPileUp^2 = ( SigmaE * std::sqrt(Nmb) )^2 * Ipileup/Tc
     where:  
       - Ipileup = Tc * SUM(k=1->Nb) g(tk)^2 
       - Tc is the time between bunch crossings
@@ -715,7 +716,7 @@ CaloNoiseCompCondAlg::calculatePileUpNoise(const IdentifierHash & idCaloHash,
   //::::::::::::::::::::::::::::::::::::::
 
 // overall normalization factor
-  float  PileUp=m_MinBiasRMS*sqrt(Nminbias);
+  float  PileUp=m_MinBiasRMS*std::sqrt(Nminbias);
  
   //::::::::::::::::::::::::::::::::::::::
 
@@ -727,7 +728,7 @@ CaloNoiseCompCondAlg::calculatePileUpNoise(const IdentifierHash & idCaloHash,
  
   //::::::::::::::::::::::::::::::::::::::
 
-  PileUp*=sqrt(OFC_AC_OFC);
+  PileUp*=std::sqrt(OFC_AC_OFC);
 
   //std::cout<<"PILEUP "<<m_lar_em_id->show_to_string(id)<<" "
   //	   <<MinBiasRMS<<" "<<OFC_AC_OFC<<" "<<PileUp<<std::endl;
@@ -885,7 +886,7 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
   //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   //ADC2MEV
   if(retrieve[iADC2MEV]) {
-    if(fabs(m_Adc2MeVFactor)<0.000001) {
+    if(std::fabs(m_Adc2MeVFactor)<0.000001) {
       StatusDatabase=StatusCode::FAILURE;
       if(m_diagnostic[igain]) 
 	this->updateDiagnostic(0,"m_Adc2MeVFactor=0",igain,dummy);
@@ -895,7 +896,7 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
   //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   //SIGMANOISE
   if(retrieve[iSIGMANOISE]) {
-    if(fabs(m_SigmaNoise)<0.000001) {
+    if(std::fabs(m_SigmaNoise)<0.000001) {
       StatusDatabase=StatusCode::FAILURE;
       if(m_diagnostic[igain]) 
 	this->updateDiagnostic(1,"m_SigmaNoise=0",igain,dummy);	
@@ -939,7 +940,7 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
       {
 	unsigned int n_OFCnull=0;
 	for(auto ofc : m_OFC)
-	  if(fabs(ofc)<0.000001) ++n_OFCnull;
+	  if(std::fabs(ofc)<0.000001) ++n_OFCnull;
 	if(n_OFCnull==m_OFC.size()) this->updateDiagnostic(5,"OFC=0",igain,dummy);
       }
     m_nsamples=m_OFC.size();
@@ -969,7 +970,7 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
       {
 	unsigned int n_SHAPEnull=0;
 	for(auto shp : m_Shape)
-	  if(fabs(shp)<0.000001) ++n_SHAPEnull;
+	  if(std::fabs(shp)<0.000001) ++n_SHAPEnull;
 	if(n_SHAPEnull==m_Shape.size()) 	  
 	  this->updateDiagnostic(7,"Shape=0",igain,dummy);
       }	
@@ -1159,7 +1160,7 @@ CaloNoiseCompCondAlg::totalNoiseRMS(const CaloCell* theCell,
   float pileupNoiseRMS_tmp = this->pileupNoiseRMS(theCell,Nminbias);
   
   if(elecNoiseRMS_tmp>=0)
-    return sqrt((elecNoiseRMS_tmp*elecNoiseRMS_tmp) + (pileupNoiseRMS_tmp*pileupNoiseRMS_tmp));
+    return std::sqrt((elecNoiseRMS_tmp*elecNoiseRMS_tmp) + (pileupNoiseRMS_tmp*pileupNoiseRMS_tmp));
   return(-1);
 }
 
@@ -1209,7 +1210,7 @@ CaloNoiseCompCondAlg::totalNoiseRMS(const CaloDetDescrElement* caloDDE,
   
   // checks that elecNoise is valid
   if(elecNoiseRMS_tmp>0) 
-    totalNoiseRMS= sqrt((elecNoiseRMS_tmp*elecNoiseRMS_tmp) + (pileupNoiseRMS_tmp*pileupNoiseRMS_tmp) );
+    totalNoiseRMS= std::sqrt((elecNoiseRMS_tmp*elecNoiseRMS_tmp) + (pileupNoiseRMS_tmp*pileupNoiseRMS_tmp) );
   
   return totalNoiseRMS;
 }
@@ -1229,8 +1230,11 @@ float
 CaloNoiseCompCondAlg::totalNoiseRMSHighestGain(const CaloDetDescrElement* caloDDE, 
 					const float Nminbias)
 {
-  //CaloCell_ID::SUBCALO iCalo = caloNum(caloDDE->calo_hash());
+  //getSubCalo can return 999999 (CaloCell_ID::SUBCALO::NOT_VALID)
   CaloCell_ID::SUBCALO iCalo = caloDDE->getSubCalo();
+  if (iCalo ==  CaloCell_ID::SUBCALO::NOT_VALID){
+    throw std::runtime_error("Invalid CaloID in CaloNoiseCompCondAlg::totalNoiseRMSHighestGain");
+  }
   CaloGain::CaloGain highestGain=m_highestGain[iCalo];
   return this->totalNoiseRMS(caloDDE,highestGain,Nminbias);
 }
