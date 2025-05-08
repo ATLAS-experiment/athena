@@ -306,7 +306,7 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
   std::vector<std::vector<int>> hitLineQAPtPhi0(input_bins_vector_size);
   hitLineQAPtPhi0 = lineGenLay(hit);
   
-	for (auto it_base : hitLineQAPtPhi0) {   	         
+	for (const std::vector<int>& it_base : hitLineQAPtPhi0) {
 	    if (it_base[0] != -1 && it_base[1] != -1) {   
 		      image(it_base[0] , it_base[1]).first++;
 		      if (m_traceHits) {
