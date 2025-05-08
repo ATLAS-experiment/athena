@@ -2,8 +2,9 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonStationIndex/MuonStationIndex.h"
 #include <cassert>
+#include <utility> //std::pair
+
 namespace Muon::MuonStationIndex{
    inline ChIndex toChamberIndex( StIndex stIndex, bool isSmall ) {
       switch (stIndex) {

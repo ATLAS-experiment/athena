@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MuonIdHelperSvc.h"
@@ -171,7 +171,9 @@ namespace Muon {
             if (!idHelper) return;
             const TechIdx techIdx = technologyIndex(*idHelper->module_begin());
             for (auto itr = idHelper->module_begin(); itr != idHelper->module_end(); ++itr) {
-                const int stIdx = static_cast<int>(MuonStationIndex::toStationIndex(chamberIndex(*itr)));
+                const auto idx = MuonStationIndex::toStationIndex(chamberIndex(*itr));
+                if (idx == Muon::MuonStationIndex::StUnknown) continue;
+                const int stIdx = static_cast<int>(idx);
                 m_techPerStation[stIdx].insert(techIdx);
             }
         }); 
