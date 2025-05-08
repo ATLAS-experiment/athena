@@ -22,8 +22,10 @@ def getNSubregions(filePath):
         return int(n)
 
 def FPGATrackSimBinnedHitsToolCfg_2nd(flags,name="FPGATrackSimBinnedHitsTool_2nd"):
+    result = ComponentAccumulator()
+
     # This can probably be imported in the future from the analysis config, but for now it's here.
-    result = ComponentAccumulator(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
+    ##NameWithRegion = ComponentAccumulator(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
 
     # The second stge, like layer study alg, technically doesn't need a cuts file.
     # So for now allow the same override here I guess?
@@ -54,7 +56,7 @@ def FPGATrackSimBinnedHitsToolCfg_2nd(flags,name="FPGATrackSimBinnedHitsTool_2nd
 
     # make the binned hits class
     BinnnedHits = CompFactory.FPGATrackSimBinnedHits(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimBinnedHits_2nd"))
-    BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
 
     # TODO: we need a new flag for this!
     BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
