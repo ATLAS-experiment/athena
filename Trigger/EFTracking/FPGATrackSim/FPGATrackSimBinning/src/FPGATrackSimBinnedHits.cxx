@@ -127,7 +127,7 @@ StatusCode FPGATrackSimBinnedHits::fill(
     } //  end loop over bins
       
     stepnum++;
-  } // end loop over stepsd
+  } // end loop over steps
 
   return StatusCode::SUCCESS;
 }
@@ -163,12 +163,15 @@ unsigned FPGATrackSimBinnedHits::BinEntry::hitsInLyr(unsigned lyr) const {
 //
 //-------------------------------------------------------------------------------
 
-void FPGATrackSimBinnedHits::readLayerMap(const std::string& filename) {
+void FPGATrackSimBinnedHits::readLayerMap(const std::string &filename) {
+
+  ATH_MSG_INFO("Reading lyrmap json: " << filename);
+  
   std::ifstream f(filename);
   nlohmann::json data = nlohmann::json::parse(f);
 
   m_lyr_to_mod_map.setsize(m_bintool->lastStep()->nBins(),
-                   std::vector <std::set<unsigned> >(8,std::set<unsigned>()));
+                   std::vector <std::set<unsigned> >());
   m_mod_to_lyr_map.setsize(m_bintool->lastStep()->nBins(),
                    std::map <unsigned,unsigned>());
 
@@ -183,6 +186,7 @@ void FPGATrackSimBinnedHits::readLayerMap(const std::string& filename) {
     for (auto &lyrelem : lyrmap) {
       unsigned lyr;
       lyrelem.at("lyr").get_to(lyr);
+      m_lyr_to_mod_map[bin].push_back(std::set<unsigned>());
       lyrelem.at("mods").get_to(m_lyr_to_mod_map[bin][lyr]);
       ATH_MSG_DEBUG("lyr = " << lyr);
       ATH_MSG_DEBUG("mods = " << m_lyr_to_mod_map[bin][lyr]);
@@ -192,11 +196,14 @@ void FPGATrackSimBinnedHits::readLayerMap(const std::string& filename) {
       // set valid bins, this expects binning based on the last step
       m_bintool->setValidBin(bin);
     }
+    for (auto &lyrmods : m_lyr_to_mod_map[bin]) {
+      ATH_MSG_DEBUG(" mods: "  << lyrmods);
+    } 
     if (m_nLayers == 0) {
       m_nLayers = m_lyr_to_mod_map[bin].size();
     } else if (m_nLayers != m_lyr_to_mod_map[bin].size())  {
       ATH_MSG_FATAL("Layer map bins have inconsistent numbers of layers");
     }
   }
-
+  ATH_MSG_INFO("JSON layer map speficied " << m_nLayers << " layers" );
 }

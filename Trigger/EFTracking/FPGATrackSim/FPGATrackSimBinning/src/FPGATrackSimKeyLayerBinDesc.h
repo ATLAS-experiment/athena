@@ -80,6 +80,9 @@ public:
     virtual bool hitInBin(const FPGATrackSimBinStep &step, const IdxSet &idx,
                           StoredHit &storedhit) const override;
 
+    // Write the relevant LUT tables for firmware    
+    virtual void writeLUTs(const FPGATrackSimBinStep &step) const override;
+    
   private:
     // Configurable Properties
     Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for keylayer definition"};
@@ -99,7 +102,7 @@ public:
     const std::vector<std::string> m_parNames{"zR1", "zR2", "phiR1", "phiR2", "xm"};
 
     const std::vector<unsigned> m_phipars{2, 3, 4};
-    const std::vector<unsigned> m_etapars{1, 2};
+    const std::vector<unsigned> m_etapars{0, 1};
     
 };
 

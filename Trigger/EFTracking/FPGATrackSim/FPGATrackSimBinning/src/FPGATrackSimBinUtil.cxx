@@ -127,15 +127,6 @@ std::ostream &operator<<(std::ostream &os, const std::vector<unsigned>& idx) {
   return os;
 }
 
-template <typename T>
-void StreamManager::StreamManager::writeVar(const std::string &var, T val) {
-  auto emplace_result = m_map.try_emplace(
-      var, m_setname + "_" + var + "_const.txt", std::ios_base::out);
-  if (!emplace_result.second) {
-    emplace_result.first->second << ",\n";
-  }
-  emplace_result.first->second << val;
-}
 
 
 //-------------------------------------------------------------------------------------------------------

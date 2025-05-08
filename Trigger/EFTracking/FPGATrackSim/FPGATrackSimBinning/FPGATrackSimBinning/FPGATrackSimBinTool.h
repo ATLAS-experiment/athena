@@ -94,6 +94,9 @@ public:
   void setValidBin(const std::vector<unsigned>& idx); // also sets SubBins
   void printValidBin() const; // dump an output to log for x-checks
 
+  // Write Firmware LUTs (constants)
+  void writeLUTs() const;
+
 private:
   //--------------------------------------------------------------------------------------------------
   //
