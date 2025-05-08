@@ -576,13 +576,13 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     return result
 
 def getChi2Cut(region):
-    #list of chi2 cuts for time being
     chi2cut_l = [12, 16, 16, 16, 16, 18, 14, 16, 16, 16, 19, 15, 18, 12, 15, 15, 14, 14, 12, 15]
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F
     etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
-    abs_etaRange = tuple(abs(val) for val in etaRange)
+    
+    abs_etaRange = tuple(round(abs(val), 1) for val in etaRange)
 
     eta_to_chi2 = {
         (0.0, 0.2): chi2cut_l[0], (0.2, 0.4): chi2cut_l[1], (0.4, 0.6): chi2cut_l[2],
@@ -594,7 +594,7 @@ def getChi2Cut(region):
         (3.6, 3.8): chi2cut_l[18], (3.8, 4.0): chi2cut_l[19]
     }
 
-    return eta_to_chi2.get(abs_etaRange, 9) #Set default chi2 if the region is not found
+    return eta_to_chi2.get(abs_etaRange, 20)
 
 
 if __name__ == "__main__":
