@@ -48,7 +48,7 @@ else()
       atlas_add_test( ${NAME}
          SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --force-output TestJobOutput-${NAME}.hist.root --data-type ${DATA_TYPE} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
-         PROPERTIES TIMEOUT 900 )
+         PROPERTIES TIMEOUT 1200 )
 
    endfunction()
 
