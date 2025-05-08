@@ -596,10 +596,9 @@ def runDataPrepChain():
                                 'StripClusterToTruthAssociationAlg.Measurements' : 'xAODStripClusters_1stFromFPGACluster'}))
 
         if flags.Trigger.FPGATrackSim.writeToAOD:
-            acc.merge(WriteToAOD(flags, stage = '_1st',))
-            if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(WriteToAOD(flags,
-                                                                             stage = '_1st',
-                                                                             finalTrackParticles=f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"))
+            acc.merge(WriteToAOD(flags,
+                                stage = '_1st',
+                                finalTrackParticles=f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"))
             
         # Printout for various FPGA-related objects
         from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
