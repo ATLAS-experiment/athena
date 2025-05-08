@@ -101,7 +101,7 @@ class TauCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
         config.addOutputVar (self.containerName, 'nTracks', 'nTracks', noSys=True)
-
+        config.addOutputVar (self.containerName, 'TESCompatibility', 'TESCompatibility')  
 
 class TauWorkingPointConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point
