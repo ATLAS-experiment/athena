@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
@@ -35,6 +35,7 @@ _PartialEventBuildingIdentifiers = {
     'Lvl1CaloPEB' : False,
     # DataScouting identifiers from TrigEDMConfig.DataScoutingInfo:
     'CostMonDS': False,
+    'MuonDS': False,
     'PhysicsTLA': False,
     'DarkJetPEBTLA' : True,
     'FTagPEBTLA' : True,
