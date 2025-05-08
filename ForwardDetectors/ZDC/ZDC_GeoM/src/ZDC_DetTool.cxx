@@ -46,8 +46,8 @@ StatusCode ZDC_DetTool::create()
   // Locate the top level experiment node  
   GeoModelExperiment* theExpt = nullptr;
   if (StatusCode::SUCCESS != detStore()->retrieve(theExpt, "ATLAS")) {
-    if (msgLevel(MSG::ERROR)) msg(MSG::ERROR) << " Could not find GeoModelExperiment ATLAS " << endmsg; 
-    return (StatusCode::FAILURE); 
+    ATH_MSG_ERROR(" Could not find GeoModelExperiment ATLAS "); 
+    return StatusCode::FAILURE; 
   } 
   
   // Create the ZDC Detector Factory
@@ -57,6 +57,11 @@ StatusCode ZDC_DetTool::create()
 
   const IZdcGeometryDB *theZdcGeoDB = ZdcGeoDBGeometryDB::getInstance();  
   const nlohmann::json& zdcGeo = theZdcGeoDB->getDB();
+  if (zdcGeo.is_null()) {
+    ATH_MSG_ERROR("The ZDC geometry DB is null!"); 
+    return StatusCode::FAILURE; 
+}
+
   
   /*************************************************
   * Get the TAN/TAXN slots and hold onto the transform
@@ -107,7 +112,7 @@ StatusCode ZDC_DetTool::create()
       pDet = std::make_unique<ZDC_BRANModule>( name, side, module );
 
     }else {
-      if (msgLevel(MSG::ERROR)) msg(MSG::ERROR) << "Unknown detector type " << det.key() << endmsg;
+      ATH_MSG_ERROR("Unknown detector type " << det.key());
       return StatusCode::FAILURE;
     }
 

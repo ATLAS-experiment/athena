@@ -79,10 +79,10 @@ StatusCode LArDigitalTriggMonAlg::initialize()
   ATH_CHECK(m_bcContKey.initialize());
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
 
-  ATH_CHECK(m_digitContainerKey.initialize());
+  ATH_CHECK(m_digitContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyPedestalSC.initialize());
   ATH_CHECK(m_caloSuperCellMgrKey.initialize());
-  ATH_CHECK(m_rawSCContainerKey.initialize());
+  ATH_CHECK(m_rawSCContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_rawSCEtRecoContainerKey.initialize());
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_actualMuKey.initialize());
@@ -233,17 +233,24 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,ctx};
   const LArOnOffIdMapping* cabling=*cablingHdl;
 
-  SG::ReadHandle<LArDigitContainer> hLArDigitContainer{m_digitContainerKey,ctx}; //"SC"
-  if (!hLArDigitContainer.isValid()) {
-    ATH_MSG_WARNING("The requested digit container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
-    ATH_MSG_DEBUG("hLArDigitContainer.size() " << hLArDigitContainer->size());
+  SG::ReadHandle<LArDigitContainer> hLArDigitContainer;
+  if (!m_digitContainerKey.empty()) {
+    hLArDigitContainer= makeHandle(m_digitContainerKey,ctx); //"SC"
+    if (!hLArDigitContainer.isValid()) {
+      ATH_MSG_WARNING("The requested digit container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }else{
+      ATH_MSG_DEBUG("hLArDigitContainer.size() " << hLArDigitContainer->size());
+    }
   }
-  SG::ReadHandle<LArRawSCContainer > hSCetContainer{m_rawSCContainerKey,ctx}; //"SC_ET"
-  if (!hSCetContainer.isValid()) {
-    ATH_MSG_WARNING("The requested SC ET container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
-    ATH_MSG_DEBUG("hSCetContainer.size() " << hSCetContainer->size());
+  
+  SG::ReadHandle<LArRawSCContainer> hSCetContainer;
+  if (!m_rawSCContainerKey.empty()) {
+      hSCetContainer=makeHandle(m_rawSCContainerKey,ctx); //"SC_ET"
+    if (!hSCetContainer.isValid()) {
+      ATH_MSG_WARNING("The requested SC ET container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }else{
+      ATH_MSG_DEBUG("hSCetContainer.size() " << hSCetContainer->size());
+    }
   }
   SG::ReadHandle<LArRawSCContainer > hSCetRecoContainer{m_rawSCEtRecoContainerKey,ctx}; //"SC_ET_RECO"
   if (!hSCetRecoContainer.isValid()) {

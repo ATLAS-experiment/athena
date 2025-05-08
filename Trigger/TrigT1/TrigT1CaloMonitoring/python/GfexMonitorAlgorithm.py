@@ -99,7 +99,7 @@ def GfexMonitoringConfig(flags):
                     xbins=eta_bins,ybins=32,ymin=-3.2,ymax=3.2)
                                   
                 
-                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}{ptCutString}_posVsLBN",title="{} {} LBN vs 40(y-1)+x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
+                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}{ptCutString}_posVsLBN",title="{} {} LBN vs 32(x-1)+y; LBN; 32(x-1)+y".format(tobTypeStr, ptStrTitle),
                            path=f"{expertPath}{gPath}/detail",
                            fillGroup = groupName,
                            hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='../h_etaphiMap{containerKey}{ptCutString}'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
@@ -119,7 +119,7 @@ def GfexMonitoringConfig(flags):
                     opt=['kAlwaysCreate'],
                     xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
                                         
-                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}{ptCutString}_posVsLBN",title="{} {} LBN vs 40(y-1)+x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
+                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}{ptCutString}_posVsLBN",title="{} {} LBN vs 32(x-1)+y; LBN; 32(x-1)+y".format(tobTypeStr, ptStrTitle),
                            path=f"{expertPath}{gPath}/detail",
                            fillGroup = groupName,
                            hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='../h_etaphiMap{containerKey}{ptCutString}'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},

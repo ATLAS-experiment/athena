@@ -489,17 +489,19 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
             int krow = XMPD_GTRN_ARR[i][k]/12;
             int kcolumn = XMPD_GTRN_ARR[i][k]%12; //columns 0-11
 
-            int korow = XMPD_GTRN_ARR[i][k]; //row for overlap column
-            int kxrow = XMPD_GTRN_ARR[i][k]; //row for exteneded column
+            int korow = 4;
+            int kxrow = 0;
 
-            int kocolumn , kxcolumn; // overlap and extended column initialisation - 
-            // not that they are different in FPGA a and FPGA b
+            int  kocolumn =  XMPD_GTRN_ARR[i][k];
+            int  kxcolumn =  XMPD_GTRN_ARR[i][k];
+
+            // note that they are different in FPGA a and FPGA b
             if (XFPGA == 0){
-                kocolumn = 4;
-                kxcolumn = 0;
+                korow = 4;
+                kxrow = 0;
             } else if (XFPGA == 1){
-                kocolumn = 7;
-                kxcolumn = 11;
+                korow = 7;
+                kxrow = 11;
             }
             
             if (fiberSaturation[i][k] == 1){
@@ -537,8 +539,8 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                 krow = XMPD_GTRN_ARR[i][k+8]/12;
                 kcolumn = XMPD_GTRN_ARR[i][k+8]%12;
 
-                korow = XMPD_GTRN_ARR[i][k+8];
-                kxrow = XMPD_GTRN_ARR[i][k+8];
+                kocolumn = XMPD_GTRN_ARR[i][k+8];
+                kxcolumn = XMPD_GTRN_ARR[i][k+8];
                 
                 //htowers
                 if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 11  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){

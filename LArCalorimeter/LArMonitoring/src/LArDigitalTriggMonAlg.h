@@ -66,8 +66,8 @@ private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "CablingSCKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"}; 
 
   /** Handle to EventData (input) */
-  SG::ReadHandleKey<LArDigitContainer> m_digitContainerKey{this,"LArDigitContainerKey","dummy","SG key of LArDigitContainer read from Bytestream"}; //raw ADC 12 bits - ADC axis up to 4096
-  SG::ReadHandleKey<LArRawSCContainer> m_rawSCContainerKey{this,"LArRawSCContainerKey","dummy","SG key of LArRawSCContainer read from Bytestream"};
+  SG::ReadHandleKey<LArDigitContainer> m_digitContainerKey{this,"LArDigitContainerKey","","SG key of LArDigitContainer read from Bytestream"}; //raw ADC 12 bits - ADC axis up to 4096
+  SG::ReadHandleKey<LArRawSCContainer> m_rawSCContainerKey{this,"LArRawSCContainerKey","","SG key of LArRawSCContainer read from Bytestream"};
   SG::ReadHandleKey<LArRawSCContainer> m_rawSCEtRecoContainerKey{this,"LArRawSCEtRecoContainerKey","SC_ET_RECO","SG key of LArRawSCContainer read from Bytestream"};
   SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LATOMEHeaderContainerKey{this,"LArLATOMEHeaderContainerKey","SC_LATOME_HEADER","SG key of LArLATOMEHeaderContainer read from Bytestream"};
 
