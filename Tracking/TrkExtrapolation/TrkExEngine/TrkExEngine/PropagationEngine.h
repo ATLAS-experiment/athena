@@ -14,37 +14,37 @@
 #include "GaudiKernel/ToolHandle.h"
 // Trk
 #include "TrkExInterfaces/IPropagationEngine.h"
+#include "TrkExInterfaces/IPropagator.h"
 #include "TrkExInterfaces/ExtrapolationMacros.h"
 #include "TrkExUtils/ExtrapolationCell.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
- 
+
 namespace Trk {
-  
+
   class Surface;
-  class IPropagator;
-    
-  /** @class PropagationEngine 
-  
+
+  /** @class PropagationEngine
+
       Wrapper around the IPropagator interface,
       the neutral propagation is solved by using the surface::straightLineIntersection
       mehtod.
-  
-      @author Andreas Salzburger -at - cern.ch 
+
+      @author Andreas Salzburger -at - cern.ch
   */
   class PropagationEngine : public AthAlgTool, virtual public IPropagationEngine {
     public:
 
       /** Constructor */
       PropagationEngine(const std::string&,const std::string&,const IInterface*);
-      
+
       /** Destructor */
       ~PropagationEngine();
 
       /** AlgTool initialize method */
       StatusCode initialize();
-      
+
       /** AlgTool finalize method */
       StatusCode finalize();
 
@@ -56,7 +56,7 @@ namespace Trk {
                                           const Surface& sf,
                                           PropDirection dir=alongMomentum,
                                           BoundaryCheck bcheck = true,
-                                          bool returnCurvilinear = true) const;  
+                                          bool returnCurvilinear = true) const;
 
       /** resolve the boundary situation - for neutral particles */
       virtual ExtrapolationCode propagate(ExCellNeutral& enCell,
@@ -64,7 +64,7 @@ namespace Trk {
                                           PropDirection dir=alongMomentum,
                                           BoundaryCheck bcheck = true,
                                           bool returnCurvilinear = true) const;
-       
+
     protected:
       ToolHandle<IPropagator>     m_propagator{this, "Propagator", "Trk::RungeKuttaPropagator/AtlasRungeKuttaPropagator"};
       DoubleProperty m_pathLimitTolerance{this, "PathLimitTolerance", 0.01};
@@ -72,7 +72,7 @@ namespace Trk {
       StringProperty m_sopPostfix_prop{this, "OutputPostfix", ""};
 
   };
-      
+
 
 } // end of namespace
 

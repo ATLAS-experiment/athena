@@ -25,7 +25,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
-#include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
 #include "TrkParameters/TrackParameters.h"

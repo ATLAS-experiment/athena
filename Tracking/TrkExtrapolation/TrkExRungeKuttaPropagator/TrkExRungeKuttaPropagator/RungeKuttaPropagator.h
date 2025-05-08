@@ -355,15 +355,6 @@ public:
     return std::nullopt;
   }
 
-  virtual Trk::ExtrapolationCode propagate(
-    const EventContext&,
-    Trk::ExCellCharged&,
-    Trk::TargetSurfaces&,
-    Trk::TargetSurfaceVector&) const override final
-  {
-    return Trk::ExtrapolationCode::FailureConfiguration;
-  }
-
   struct Cache
   {
     MagField::AtlasFieldCache m_fieldCache;
