@@ -131,7 +131,7 @@ class SolenoidalIntersector final: public extends<AthAlgTool, IIntersector> {
                          const double endRadius) const;
   bool extrapolateToR(TrackSurfaceIntersection& isect, double& radius2,
                       Constants& com, const double endRadius) const;
- 
+
   static bool extrapolateToZ(TrackSurfaceIntersection& isect, Constants& com,
                              const double endZ);
 
