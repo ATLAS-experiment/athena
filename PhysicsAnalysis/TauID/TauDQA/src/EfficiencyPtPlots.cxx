@@ -99,18 +99,22 @@ namespace Tau{
 
     static const SG::ConstAccessor<char> acc_GNTauL("GNTauL_v0prune");
     double pass_loose = acc_GNTauL.withDefault(tau,false);
-    m_eff_pt_jetGNTauloose      ->Fill(tau.pt()/1000., pass_loose, weight);
+    m_eff_pt_jetGNTauloose->Fill(tau.pt()/1000., pass_loose, weight);
+    m_eff_pt_jetGNTaulooseHighPt->Fill(tau.pt()/1000., pass_loose, weight);
+    m_eff_jetGNTauloose->Fill(0.,pass_loose , weight);
 
 
     static const SG::ConstAccessor<char> acc_GNTauM("GNTauM_v0prune");
     double pass_medium = acc_GNTauM.withDefault(tau,false);
-    m_eff_pt_jetGNTaumed      ->Fill(tau.pt()/1000., pass_medium, weight);
-
+    m_eff_pt_jetGNTaumed->Fill(tau.pt()/1000., pass_medium, weight);
+    m_eff_pt_jetGNTaumedHighPt->Fill(tau.pt()/1000., pass_medium, weight);
+    m_eff_jetGNTaumed->Fill(0., pass_medium, weight);
 
     static const SG::ConstAccessor<char> acc_GNTauT("GNTauT_v0prune");
     double pass_tight = acc_GNTauT.withDefault(tau,false);
-    m_eff_pt_jetGNTautight      ->Fill(tau.pt()/1000., pass_tight, weight);
-
+    m_eff_pt_jetGNTautight->Fill(tau.pt()/1000., pass_tight, weight);
+    m_eff_pt_jetGNTautightHighPt->Fill(tau.pt()/1000., pass_tight, weight);
+    m_eff_jetGNTautight->Fill(0., pass_tight, weight);
 
   }
   
