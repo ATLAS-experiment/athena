@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonEfficiencyCorrections )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree RIO Hist Physics )
+find_package( GTest )
 
 set (extra_libs)
 if( NOT XAOD_STANDALONE )
@@ -48,7 +49,7 @@ endif()
 atlas_add_test( gt_ColumnarToolTests
                 SOURCES test/gt_ColumnarToolTests.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib MuonEfficiencyCorrectionsLib
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib MuonEfficiencyCorrectionsLib AsgTestingLib
                 POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
