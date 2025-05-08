@@ -1,18 +1,15 @@
 /*
  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
+#include "WTAConeJetMaker.h"
+#include "WTAConeParallelHelper.h"
 
- #include "./Cluster.h"
- #include "./Jet.h"
- #include "./WTAConeJetMaker.h"
- #include <iostream>
- #include <fstream>
  
  std::vector<Gep::Jet> Gep::WTAConeJetMaker::makeJets(const std::vector<Gep::Cluster>& inTopoTowers) const
  { // Makesure the WTA parameters are set before calling makeJets()
  
    std::vector<WTATrigObj> input_towers;
-   for(auto TopoTower: inTopoTowers)
+   for(const auto &TopoTower: inTopoTowers)
    {
      WTATrigObj this_tower(TopoTower.vec.Pt(), TopoTower.vec.Eta(), TopoTower.vec.Phi(), TopoTower.vec.M());
      input_towers.push_back(this_tower);

@@ -2,28 +2,20 @@
  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
- #ifndef TRIGGEPPERF_WTACONEJETMAKER_H
- #define TRIGGEPPERF_WTACONEJETMAKER_H
- 
- #include <string>
- #include <TLorentzVector.h>
- 
- #include "xAODTrigger/JetRoI.h"
- #include "xAODTrigger/JetRoIAuxContainer.h"
- #include "xAODTrigger/JetRoIContainer.h"
- #include "xAODCaloEvent/CaloClusterContainer.h"
- #include "xAODCaloEvent/CaloClusterAuxContainer.h"
- #include "xAODJet/JetContainer.h"
- #include "xAODJet/JetAuxContainer.h"
- 
- #include "./IJetMaker.h"
- #include "./Jet.h"
- #include "./Cluster.h"
- 
- #include "./WTAObject.h"
- #include "./WTAConeMaker.h" // WTAConeMaker is the core header
- #include "./WTACone2PassMaker.h" // WTACone2PassMaker is the 2-Pass header
- #include "./WTAConeParallelHelper.h"
+#ifndef TRIGGEPPERF_WTACONEJETMAKER_H
+#define TRIGGEPPERF_WTACONEJETMAKER_H
+
+#include "IJetMaker.h"
+#include "Jet.h"
+#include "Cluster.h"
+
+#include "WTAConeMaker.h" // WTAConeMaker is the core header
+#include "WTACone2PassMaker.h" // WTACone2PassMaker is the 2-Pass header
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
 
  enum WTAConeMakerEnum{ // use WTAConeMakerEnum for algorithm variants
   Baseline = 0,
@@ -69,9 +61,9 @@
  
    private:
     //  WTAConeParallelHelper m_WTAParallelHelper;
-     unsigned int m_BlockN;
-     unsigned int m_SeedCleaningAlgo;
-     unsigned int m_RollOffBufferSize; // Only for TwoPass
+     unsigned int m_BlockN{};
+     unsigned int m_SeedCleaningAlgo{};
+     unsigned int m_RollOffBufferSize{}; // Only for TwoPass
  
    };
  
