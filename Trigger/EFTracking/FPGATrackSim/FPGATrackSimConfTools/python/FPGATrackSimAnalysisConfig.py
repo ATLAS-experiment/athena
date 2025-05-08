@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
 from PathResolver import PathResolver
 import importlib
+import os
 
 log = AthenaLogger(__name__)
 
@@ -34,7 +35,7 @@ def FPGATrackSimSlicingEngineCfg(flags,name="FPGATrackSimSlicingEngineTool"):
     result = ComponentAccumulator()
     FPGATrackSimSlicingEngineTool = CompFactory.FPGATrackSimSlicingEngineTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     # this is the same as the layer map used by the genscan/inside out tool below.
-    FPGATrackSimSlicingEngineTool.LayerMap =  f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json"
+    FPGATrackSimSlicingEngineTool.LayerMap =  os.path.join(PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),f"{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json")
     FPGATrackSimSlicingEngineTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     # If the GNN is enabled (i.e. this is F-4xx) then we don't want to separate first vs second stage.
     FPGATrackSimSlicingEngineTool.doSecondStage = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
@@ -219,42 +220,91 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
             toload = 'FPGATrackSimHough.FPGATrackSimGenScanCuts_incr'
         cutset = importlib.import_module(toload).cuts[flags.Trigger.FPGATrackSim.region]
     else:
-        cutFileName = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py"
-        print(f"Cut File = {cutFileName}")
-        # this allows the cut file defined in python to be loaded from the map directory
-        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts ,cutFileName)
-        print ("Spec = ", spec)
+        # this allows the cut file defined in python to be loaded from the map directory                                                            
+        cutpath = os.path.join(
+             PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
+             f"{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py")
+        print("Cut File = ", cutpath)
+        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts,cutpath)
         if spec is None:
             print("Failed to find Cut File")
         cutmodule = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cutmodule)
         cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
 
-    # make the binning class
-    Binning = None
+    # make the binned hits class
+    BinnnedHits = CompFactory.FPGATrackSimBinnedHits("BinnedHits_1stStage")
+    BinnnedHits.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
+    
+    # set layer map
+    if not flags.Trigger.FPGATrackSim.GenScan.layerStudy:
+        if flags.Trigger.FPGATrackSim.oldRegionDefs:
+            BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+        else:
+            # now assumed to be in the map directory with name = basename for region + _lyrmap.json
+            BinnnedHits.layerMapFile =os.path.join(
+             PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
+             f"{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json")
+
+   
+    # make the bintool class
+    BinTool = CompFactory.FPGATrackSimBinTool("BinTool_1stStage")
+    BinTool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+
+     # Inputs for the BinTool
+    binsteps=[]
+    BinDesc=None
     if (cutset["parSet"]=="PhiSlicedKeyLyrPars") :
-        Binning = CompFactory.FPGATrackSimGenScanPhiSlicedKeyLyrBinning(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanBinning"))
-        Binning.approxMath = False
+        BinDesc = CompFactory.FPGATrackSimKeyLayerBinDesc("KeyLayerBinDesc")
+        BinDesc.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+        BinDesc.rin=cutset["rin"]
+        BinDesc.rout=cutset["rout"]        
+
+        # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
+        step1 = CompFactory.FPGATrackSimBinStep("PhiBinning")
+        step1.OutputLevel=flags.Trigger.FPGATrackSim.loglevel 
+        step1.parBins = [1,1,cutset["parBins"][2],cutset["parBins"][3],cutset["parBins"][4]]
+        step2 = CompFactory.FPGATrackSimBinStep("FullBinning")
+        step2.OutputLevel=flags.Trigger.FPGATrackSim.loglevel 
+        step2.parBins = cutset["parBins"]
+        binsteps = [step1,step2]          
     else:
-        log.error("Unknown Binning")
-    Binning.rin=cutset["rin"]
-    Binning.rout=cutset["rout"]
-    Binning.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+        log.error("Unknown Binning Setup: ",cutset["parSet"]) 
+
+    BinTool.BinDesc = BinDesc
+    BinTool.Steps=binsteps
+
+
+    # configure the padding around the nominal region
+    BinTool.d0FractionalPadding =0.05
+    BinTool.z0FractionalPadding =0.05
+    BinTool.etaFractionalPadding =0.05
+    BinTool.phiFractionalPadding =0.05
+    BinTool.qOverPtFractionalPadding =0.05  
+    BinTool.parMin = cutset["parMin"]
+    BinTool.parMax = cutset["parMax"]
+    BinnnedHits.BinTool = BinTool
+    
 
     # make the monitoring class
     Monitor = CompFactory.FPGATrackSimGenScanMonitoring(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanMonitoring"))
     Monitor.dir = "/GENSCAN/"
     Monitor.THistSvc = CompFactory.THistSvc()
     Monitor.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    Monitor.THistSvc = CompFactory.THistSvc()
+    Monitor.phiScale = 10.0
+    Monitor.etaScale = 100.0
+    Monitor.drScale = 20.0
 
     # make the main tool
     tool = CompFactory.FPGATrackSimGenScanTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanTool"))
     tool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
-    tool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
     tool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     tool.Monitoring = Monitor
-    tool.Binning = Binning
-    tool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    tool.BinnedHits = BinnnedHits
+    tool.rin=cutset["rin"]
+    tool.rout=cutset["rout"]
 
     # configure which filers and thresholds to apply
     tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
@@ -262,27 +312,14 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.threshold = 4
-
-    # configure the padding around the nominal region
-    tool.d0FractionalPadding =0.05
-    tool.z0FractionalPadding =0.05
-    tool.etaFractionalPadding =0.05
-    tool.phiFractionalPadding =0.05
-    tool.qOverPtFractionalPadding =0.05
-
+        
     # set cuts
     for (cut,val) in cutset.items():
+        if cut in ["parBins","parSet","parMin","parMax"]:
+            continue
         setattr(tool,cut,val)
 
-    # set layer map
-    if not flags.Trigger.FPGATrackSim.GenScan.layerStudy:
-        if flags.Trigger.FPGATrackSim.oldRegionDefs:
-            tool.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
-        else:
-            # now assumed to be in the map directory with name = basename for region + _lyrmap.json
-            tool.layerMapFile = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json"
-
-    # even though we are not actually doing a Union, we need the
+    # even though we are not actually doing a Union, we need the 
     # RoadUnionTool because mapping is now there
     RoadUnion = CompFactory.FPGATrackSimRoadUnionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     RoadUnion.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
@@ -769,10 +806,10 @@ if __name__ == "__main__":
                                                 perEventReports = ((flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') and flags.Exec.MaxEvents<=10 ) )) # disable perEventReports for pileup samples or many events
 
         acc.store(open('AnalysisConfig.pkl','wb'))
-
+      
         acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         if flags.Trigger.FPGATrackSim.msgLimit!=-1:
-            acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
+            acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit            
             acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
 
         statusCode = acc.run(flags.Exec.MaxEvents)

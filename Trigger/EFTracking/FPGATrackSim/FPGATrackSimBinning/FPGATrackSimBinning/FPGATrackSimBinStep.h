@@ -82,7 +82,10 @@ public:
   IdxSet binIdx(const ParSet &pars) const;
 
   // Convert to previous steps idx
-  IdxSet convertToPrev(const IdxSet& cur) const;
+  IdxSet convertToPrev(const IdxSet &cur) const;
+
+  // Check if its the first step
+  bool isFirstStep() const {return m_prev==0;}
   
   //--------------------------------------------------------------------------------------------------
   //
@@ -96,6 +99,7 @@ public:
   void setValidBin(const std::vector<unsigned>& idx); // also sets SubBins
   void printValidBin() const; // dump an output to log for x-checks
   const FPGATrackSimBinArray<int>& validBinsFull() const { return m_validBinFull;}
+  const FPGATrackSimBinArray<int>& validBinsLocal() const { return m_validBinLocal;}
 
 private:
   Gaudi::Property<std::vector<unsigned>> m_parBinsConfig{this,"parBins",{},"Vector of number of bins for each parameter (expect 5)"};
@@ -107,14 +111,15 @@ private:
   // some bins may not be valid because they correspond to (pT,eta,phi,d0,z0)
   // that are being targeted for reconstruction
   FPGATrackSimBinArray<int> m_validBinFull; // this is the full binning
+  FPGATrackSimBinArray<int> m_validBinLocal; // this is for the pars used at this step
 
   // pointer to FPGATrackSimBinStep of previous step
   FPGATrackSimBinStep *m_prev{0};
   unsigned m_stepNum{}; // number of step
   
   // the bins for this step
-  ParSet m_parStep;
   IdxSet m_parBins; // one means no binning this step
+  ParSet m_parStep; // step size of each bin
 
   // reference to the full range defined in the "tool"
   ParSet m_parMin;

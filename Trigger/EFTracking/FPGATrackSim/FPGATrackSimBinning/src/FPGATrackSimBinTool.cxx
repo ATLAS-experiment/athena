@@ -157,3 +157,12 @@ ParSet FPGATrackSimBinTool::center() const
     }
     return parset;
 }
+
+// ----------------------------------------------------------------------------------------
+//  Write Firmware LUTs (constants)
+// ----------------------------------------------------------------------------------------
+void FPGATrackSimBinTool::writeLUTs() const {
+  for (const auto &step : m_steps) {
+    m_binDesc->writeLUTs(*step.get());
+  }
+}
