@@ -8,10 +8,17 @@ from AthenaCommon.Logging import logging
 def InDetTrackTruthOriginToolCfg(flags, name="InDetTrackTruthOriginTool", **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("isFullPileUpTruth", flags.Digitization.PileUp \
-                      and flags.Digitization.DigiSteeringConf in ['StandardPileUpToolsAlg', \
-                                                                  'StandardInTimeOnlyTruthPileUpToolsAlg', \
-                                                                  'StandardInTimeOnlyGeantinoTruthPileUpToolsAlg'])
+    log = logging.getLogger("InDetTrackTruthOriginTool")
+    # this might fail if we're in AthAnalysis
+    try:
+        kwargs.setdefault("isFullPileUpTruth", flags.Digitization.PileUp
+                          and flags.Digitization.DigiSteeringConf in ['StandardPileUpToolsAlg',
+                                                                      'StandardInTimeOnlyTruthPileUpToolsAlg',
+                                                                      'StandardInTimeOnlyGeantinoTruthPileUpToolsAlg'])
+    except AttributeError:
+        # assume this should be false if we're unable to load flags (temporary solution)
+        kwargs.setdefault("isFullPileUpTruth", False)
+        log.warning("Unable to load digi flags, assuming isFullPileUpTruth=False. Normal if you're in AthAnalysis.")
 
     acc.setPrivateTools(
         CompFactory.InDet.InDetTrackTruthOriginTool(name, **kwargs))
@@ -20,26 +27,27 @@ def InDetTrackTruthOriginToolCfg(flags, name="InDetTrackTruthOriginTool", **kwar
 def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool", **kwargs):
     acc = ComponentAccumulator()
 
-    log = logging.getLogger("InDetTrackTruthFilterToolCfg")
-
     if "trackOriginTool" not in kwargs:
         kwargs.setdefault("trackOriginTool", acc.popToolsAndMerge(
             InDetTrackTruthOriginToolCfg(flags)))
         
     from AthenaConfiguration.Enums import LHCPeriod
     # 2022 recommendations (MC23a)
-    if flags.GeoModel.Run == LHCPeriod.Run3:
-        if flags.Input.MCCampaign == Campaign.MC23a:
-            kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
-            kwargs.setdefault("fFakeLoose", 0.40)
-            kwargs.setdefault("fFakeTight", 1.00)
+    if flags.GeoModel.Run == LHCPeriod.Run3 and flags.Input.MCCampaign == Campaign.MC23a:
+        kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
+        kwargs.setdefault("fFakeLoose", 0.40)
+        kwargs.setdefault("fFakeTight", 1.00)
+    elif flags.GeoModel.Run == LHCPeriod.Run3 and flags.Input.MCCampaign == Campaign.MC23d:
+        kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
+        kwargs.setdefault("fFakeLoose", 0.40)
+        kwargs.setdefault("fFakeTight", 1.00)
     # Run 2 recommendations (MC20)
     elif flags.GeoModel.Run == LHCPeriod.Run2:
         kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
         kwargs.setdefault("fFakeLoose", 0.10)
         kwargs.setdefault("fFakeTight", 1.00)
     else:
-        log.warning("InDetTrackTruthFilterTool: Recommendations not yet available for this campaign! Please check the configuration and contact Tracking CP if you believe this message is in error.")
+        raise ValueError(f"InDetTrackTruthFilterTool: Recommendations not yet available for campaign {flags.Input.MCCampaign}! Please check the configuration and contact Tracking CP if you believe this message is in error.")
 
     acc.setPrivateTools(
         CompFactory.InDet.InDetTrackTruthFilterTool(name, **kwargs))
@@ -66,18 +74,17 @@ def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", **kwargs):
 def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool", **kwargs):
     acc = ComponentAccumulator()
 
-    log = logging.getLogger("InclusiveTrackFilterToolCfg")
-
     from AthenaConfiguration.Enums import LHCPeriod
     # 2022 recommendations (MC23a)
-    if flags.GeoModel.Run == LHCPeriod.Run3:
-        if flags.Input.MCCampaign == Campaign.MC23a:
-            kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23a.root")
+    if flags.GeoModel.Run == LHCPeriod.Run3 and flags.Input.MCCampaign == Campaign.MC23a:
+        kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23a.root")
+    elif flags.GeoModel.Run == LHCPeriod.Run3 and flags.Input.MCCampaign == Campaign.MC23d:
+        kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23d.root")
     # Run 2 recommendations (MC20)
     elif flags.GeoModel.Run == LHCPeriod.Run2:
         kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_24.0_2023-v00/LargeD0TrackingRecommendations_20230824.root")
     else:
-        log.warning("InclusiveTrackFilterTool: Recommendations not yet available for this campaign! Please check the configuration and contact Tracking CP if you believe this message is in error.")
+        raise ValueError(f"InclusiveTrackFilterTool: Recommendations not yet available for campaign {flags.Input.MCCampaign}! Please check the configuration and contact Tracking CP if you believe this message is in error.")
 
     acc.setPrivateTools(
         CompFactory.InDet.InclusiveTrackFilterTool(name, **kwargs))
