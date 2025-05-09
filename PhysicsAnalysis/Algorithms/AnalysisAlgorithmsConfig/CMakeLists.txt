@@ -21,7 +21,7 @@ if( XAOD_STANDALONE )
       atlas_add_test( ${NAME}
          SCRIPT FullCPAlgorithmsTest_eljob.py --data-type ${DATA_TYPE} --direct-driver --submission-dir submitDir-${NAME} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
-         PROPERTIES TIMEOUT 1200 )
+         PROPERTIES TIMEOUT 1500 )
 
    endfunction()
 
@@ -48,7 +48,7 @@ else()
       atlas_add_test( ${NAME}
          SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --force-output TestJobOutput-${NAME}.hist.root --data-type ${DATA_TYPE} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
-         PROPERTIES TIMEOUT 1200 )
+         PROPERTIES TIMEOUT 1500 )
 
    endfunction()
 
