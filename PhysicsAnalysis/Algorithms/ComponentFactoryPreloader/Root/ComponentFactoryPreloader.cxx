@@ -213,7 +213,9 @@ namespace CP
     using namespace asg::msgComponentConfig;
     ANA_CHECK_SET_TYPE (bool);
 
-    asg::msgComponentConfig::setMsgLevel (MSG::DEBUG);
+    // uncomment this if you want to see detailed messages about
+    // component factories and configuration
+    // asg::msgComponentConfig::setMsgLevel (MSG::DEBUG);
 
     ANA_MSG_INFO ("preloading component factories");
 
