@@ -74,9 +74,9 @@ ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.
 
 run "Reconstruction-acts" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsFastWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-    	       flags.Tracking.ITkActsFastPass.storeSiSPSeededTracks=True;" \
+    	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
     --ignorePatterns ${ignore_pattern} \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.acts.root \
@@ -97,7 +97,7 @@ run "IDPVM-acts" \
     --doTechnicalEfficiency \
     --doExpertPlots \
     --OnlyTrackingPreInclude \
-    --validateExtraTrackCollections "SiSPSeededTracksActsFast" \
+    --validateExtraTrackCollections "SiSPSeededTracksActs" \
     ${idpvmOpts[@]}
 
 reco_rc=$?

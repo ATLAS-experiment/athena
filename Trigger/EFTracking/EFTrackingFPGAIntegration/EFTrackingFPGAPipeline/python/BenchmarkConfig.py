@@ -60,8 +60,8 @@ if __name__ == "__main__":
     flags.Tracking.ITkMainPass.doAthenaToActsCluster = True
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint = True
     flags.Tracking.ITkMainPass.doAthenaSpacePoint = True
-    from TrkConfig.TrkConfigFlags import TrackingComponent
-    flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
+    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
+    actsLegacyWorkflowFlags(flags)
     flags.Acts.doRotCorrection = False
     
     flags.Concurrency.NumThreads = 1

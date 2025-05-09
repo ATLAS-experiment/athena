@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ttbar mu=200 input
 input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
@@ -9,10 +9,10 @@ n_events=2
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-  	     flags.Tracking.ITkActsPass.storeSeparateContainer=True; \
+  	     flags.Tracking.ITkActsLegacyPass.storeSeparateContainer=True; \
   	     flags.Acts.EDM.PersistifySpacePoints=True; \
 	     flags.Acts.EDM.PersistifyTracks=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events} \
@@ -31,10 +31,10 @@ ActsReadEDM.py \
    readClusters=True \
    readSpacePoints=True \
    readTracks=True \
-   tracks="ActsTracks" \
+   tracks="ActsLegacyTracks" \
    readTrackParticles=True \
    redoAmbiguity=True \
-   trackParticles="InDetActsTrackParticles"
+   trackParticles="InDetActsLegacyTrackParticles"
 
 rc=$?
 if [ $rc != 0 ]; then
@@ -46,5 +46,5 @@ runIDPVM.py \
    --filesInput AOD.pool.root \
    --outputFile idpvm.root \
    --doActs \
-   --validateExtraTrackCollections "InDetActs"
+   --validateExtraTrackCollections "InDetActsLegacy"
 

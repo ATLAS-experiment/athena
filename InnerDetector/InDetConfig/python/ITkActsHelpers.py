@@ -6,7 +6,7 @@ def isPrimaryPass(flags) -> bool:
 def primaryPassUsesActs(flags) -> bool:
     from TrkConfig.TrkConfigFlags import ITkPrimaryPassConfig
     return flags.Tracking.ITkPrimaryPassConfig in [ITkPrimaryPassConfig.Acts, \
-                                                   ITkPrimaryPassConfig.ActsFast, \
+                                                   ITkPrimaryPassConfig.ActsLegacy, \
                                                    ITkPrimaryPassConfig.ActsHeavyIon]
 
 
@@ -26,9 +26,9 @@ def extractTrackingPasses(flags) -> list:
     
     # Quick check about fast tracking configuration
     from TrkConfig.TrkConfigFlags import ITkPrimaryPassConfig
-    if flags.Tracking.ITkPrimaryPassConfig is ITkPrimaryPassConfig.ActsFast:
+    if flags.Tracking.ITkPrimaryPassConfig is ITkPrimaryPassConfig.Acts:
         if not flags.Tracking.doITkFastTracking:
-            raise ValueError(f"Main pass is set to Fast Tracking but Tracking.doITkFastTracking is set to {flags.Tracking.doITkFastTracking}")
+            raise ValueError(f"Main pass is set to Acts Fast Tracking but Tracking.doITkFastTracking is set to {flags.Tracking.doITkFastTracking}")
     else:
         if flags.Tracking.doITkFastTracking:
             raise ValueError(f"Main pass is NOT set to Fast Tracking but Tracking.doITkFastTracking is set to {flags.Tracking.doITkFastTracking}")

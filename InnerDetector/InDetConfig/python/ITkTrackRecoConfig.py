@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
@@ -7,7 +7,7 @@ from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
-_actsExtensions  = ['Acts', 'ActsFast', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt'] # Possible Acts Alone Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags):
@@ -35,17 +35,17 @@ def CombinedTrackingPassFlagSets(flags):
             "Tracking.ActiveConfig",
             f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")]
 
-    # Acts Pass
+    # Acts Pass - Legacy like
+    if TrackingComponent.ActsLegacyChain in flags.Tracking.recoChain:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsLegacyPass")]
+
+    # Acts Pass - Fast Tracking based
     if TrackingComponent.ActsChain in flags.Tracking.recoChain:
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsPass")]
-
-    # Acts Fast Pass
-    if TrackingComponent.ActsFastChain in flags.Tracking.recoChain:
-        flags_set += [flags.cloneAndReplace(
-            "Tracking.ActiveConfig",
-            "Tracking.ITkActsFastPass")]
         
     # Acts Heavy Ion Pass
     if TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
