@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -19,10 +19,7 @@ TauEfficiencyTriggerTool::TauEfficiencyTriggerTool(const std::string& sName)
   : CommonEfficiencyTool ( sName )
 {
   m_mSystematics = {};
-  declareProperty( "MinRunNumber", m_iMinRunNumber = 0 );
-  declareProperty( "MaxRunNumber", m_iMaxRunNumber = 0 );
 }
-
 //______________________________________________________________________________
 StatusCode TauEfficiencyTriggerTool::initialize()
 {

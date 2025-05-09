@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLSEXAMPLEATHENA_H
@@ -10,6 +10,7 @@
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
 #include "TauAnalysisTools/ITauSelectionTool.h"
@@ -34,19 +35,19 @@ public:
 
 private:
   /// StoreGate key for the tau container to investigate
-  std::string m_sgKey_TauJets;
+  Gaudi::Property<std::string> m_sgKey_TauJets{this, "SGKey", "TauJets"};
   //! Special StoreGate key for the muon-removed taus. 
   //! This can impact your MET calculation and OLR.
   //! You will know if you need this, otherwise leave empty.
-  std::string m_sgKey_TauJets_MuonRM;
-  bool m_useMuonRemovalTaus = false;
+  Gaudi::Property<std::string> m_sgKey_TauJets_MuonRM{this, "SGKey_MuonRM", "TauJets_MuonRM"};
+  Gaudi::Property<bool> m_useMuonRemovalTaus{this, "UseMuonRemovalTaus", false};
 
   /// Connection to the selection tool
-  ToolHandle< ITauSelectionTool > m_selTool;
+  ToolHandle< ITauSelectionTool > m_selTool {this, "TauSelectionTool", "TauAnalysisTools::TauSelectionTool/TauSelectionTool"};
   /// Connection to the smearing tool
-  ToolHandle< ITauSmearingTool > m_smearTool;
+  ToolHandle< ITauSmearingTool > m_smearTool {this, "TauSmearingTool", "TauAnalysisTools::TauSmearingTool/TauSmearingTool"};
   /// Connection to the efficiency correction tool
-  ToolHandle< ITauEfficiencyCorrectionsTool > m_effTool;
+  ToolHandle< ITauEfficiencyCorrectionsTool > m_effTool {this, "TauEfficiencyTool", "TauAnalysisTools::TauEfficiencyCorrectionsTool/TauEfficiencyCorrectionsTool"};
 
 }; // class TauAnalysisToolsExampleAthena
 
