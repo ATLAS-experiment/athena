@@ -227,6 +227,9 @@ namespace InDet
     bool m_dumpGeometry;
     bool m_alignDBM;
     
+    Gaudi::Property<std::string> m_pixelDetManagerName{this,"PixelDetectorManager","Pixel","Name of the Pixel Detector Manager to attempt to retrieve"};
+    Gaudi::Property<bool> m_doEtaCorrection{this,"EtaCorrection",true,"If we should check the DB to see if eta 0 should be skipped"};
+
   }; // end class
 
 } // end namespace

@@ -75,12 +75,12 @@ SiTrkAlignDBTool::SiTrkAlignDBTool(const std::string & type, const std::string &
   declareProperty("WriteSQLFile",      m_writeSQLFile);
   declareProperty("SQLiteTag",         m_SQLiteTag);
   declareProperty("OutputTextFile",    m_outputAlignFile);
-  declareProperty("OutputIBLDistFile", m_outIBLDistFile);
+  declareProperty("OutputIBLDistFile", m_outIBLDistFile, "File to write out IBL distortions - set empy to suppress writing this folder");
   declareProperty("OutputGlobalFolderFile",m_outGlobalFolderFile);
   declareProperty("WriteTextFile",     m_writeTextFile);
   declareProperty("WriteOldConstants", m_writeOldConstants);
   declareProperty("OldAlignFile",      m_oldAlignFile);
-  declareProperty("OldIBLDistFile",    m_oldIBLDistFile);
+  declareProperty("OldIBLDistFile",    m_oldIBLDistFile,"File to write out  (old-style) IBL distortions - set empy to suppress writing this folder");
   declareProperty("OldGlobalFolderFile",m_oldGlobalFolderFile);
   declareProperty("UpdateConstants",   m_updateConstants);
   declareProperty("WriteAsL3",         m_writeAsL3);
@@ -358,7 +358,7 @@ void SiTrkAlignDBTool::writeAlignPar()
   if(m_writeOldConstants) {
     ATH_MSG_INFO("Writing old Silicon alignment constants to file "<<m_oldAlignFile);
     m_IDAlignDBTool->writeFile(false, m_oldAlignFile);
-    m_IDAlignDBTool->writeIBLDistFile(m_oldIBLDistFile);
+    if(m_oldIBLDistFile!="") m_IDAlignDBTool->writeIBLDistFile(m_oldIBLDistFile);
     m_IDAlignDBTool->writeGlobalFolderFile(m_oldGlobalFolderFile);
   }
 
@@ -369,7 +369,7 @@ void SiTrkAlignDBTool::writeAlignPar()
   if(m_writeTextFile) {
     ATH_MSG_INFO("Writing Silicon alignment constants to file "<<m_outputAlignFile);
     m_IDAlignDBTool->writeFile(false, m_outputAlignFile);
-    m_IDAlignDBTool->writeIBLDistFile(m_outIBLDistFile);
+    if(m_outIBLDistFile!="") m_IDAlignDBTool->writeIBLDistFile(m_outIBLDistFile);
     m_IDAlignDBTool->writeGlobalFolderFile(m_outGlobalFolderFile);
   }
 

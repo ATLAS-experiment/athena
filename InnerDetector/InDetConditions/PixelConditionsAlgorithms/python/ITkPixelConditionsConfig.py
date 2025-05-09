@@ -45,7 +45,8 @@ def ITkPixelAlignCondAlgCfg(flags,name="ITkPixelAlignCondAlg", **kwargs):
     if flags.GeoModel.Align.Dynamic:
         raise RuntimeError("Dynamic alignment not supported for ITk yet")
     else:
-        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder , className="AlignableTransformContainer"))
+        if not flags.ITk.Align.useLocalDatabase:
+            acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder , className="AlignableTransformContainer"))
 
     kwargs.setdefault("DetManagerName", "ITkPixel")
     kwargs.setdefault("UseDynamicAlignFolders", flags.GeoModel.Align.Dynamic)
