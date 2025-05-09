@@ -1,42 +1,38 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "MuonLayerEvent/MuonLayerROTs.h"
 
-#include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
-#include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
-
 namespace Muon {
-
-    MuonLayerROTs::MuonLayerROTs() { m_clustersPerTechnology.resize(MuonStationIndex::TechnologyIndexMax); }
-
-    MuonLayerROTs::~MuonLayerROTs() {
-        // clean-up memory
-        for (const auto *mdt : m_mdts) delete mdt;
-        for (auto& clvec : m_clustersPerTechnology) {
-            for (const auto *cl : clvec) delete cl;
-        }
-    }
+    using namespace MuonStationIndex;
 
     void MuonLayerROTs::addMdts(const std::vector<const MdtDriftCircleOnTrack*>& mdts) {
         m_mdts.insert(m_mdts.end(), mdts.begin(), mdts.end());
+        std::for_each(mdts.begin(), mdts.end(), 
+                      [this](const MdtDriftCircleOnTrack* rot){
+                           m_garbage.emplace_back(rot);
+                       });
     }
 
-    void MuonLayerROTs::addClusters(const std::vector<const MuonClusterOnTrack*>& clusters, MuonStationIndex::TechnologyIndex tech) {
-        m_clustersPerTechnology[tech].insert(m_clustersPerTechnology[tech].end(), clusters.begin(), clusters.end());
+    void MuonLayerROTs::addClusters(const std::vector<const MuonClusterOnTrack*>& clusters, 
+                                    MuonStationIndex::TechnologyIndex tech) {
+        
+        std::vector<const MuonClusterOnTrack*>& insertMe{m_clustersPerTechnology[toInt(tech)]};
+        insertMe.insert(insertMe.end(), clusters.begin(), clusters.end());
+        std::for_each(clusters.begin(), clusters.end(), 
+                      [this](const MuonClusterOnTrack* rot){
+                           m_garbage.emplace_back(rot);
+                       });
     }
 
     void MuonLayerROTs::replaceMdts(const std::vector<const MdtDriftCircleOnTrack*>& mdts) {
-        // clean-up memory and add
-        for (const auto *mdt : m_mdts) delete mdt;
         m_mdts.clear();
         addMdts(mdts);
     }
 
-    void MuonLayerROTs::replaceClusters(const std::vector<const MuonClusterOnTrack*>& clusters, MuonStationIndex::TechnologyIndex tech) {
-        for (const auto *cl : m_clustersPerTechnology[tech]) delete cl;
-        m_clustersPerTechnology[tech].clear();
+    void MuonLayerROTs::replaceClusters(const std::vector<const MuonClusterOnTrack*>& clusters, 
+                                        MuonStationIndex::TechnologyIndex tech) {
+        m_clustersPerTechnology[toInt(tech)].clear();
         addClusters(clusters, tech);
     }
 
