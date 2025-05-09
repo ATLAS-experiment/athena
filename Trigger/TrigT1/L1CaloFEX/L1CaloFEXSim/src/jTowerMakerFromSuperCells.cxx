@@ -2,15 +2,6 @@
     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-
-#include "xAODTrigL1Calo/TriggerTowerContainer.h"
-
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerBuilder.h"
-
-#include "L1CaloFEXSim/jSuperCellTowerMapper.h"
 #include "L1CaloFEXSim/jTowerMakerFromSuperCells.h"
 
 #include <fstream>
