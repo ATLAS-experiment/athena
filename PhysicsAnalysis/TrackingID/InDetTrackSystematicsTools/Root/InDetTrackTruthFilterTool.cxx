@@ -53,26 +53,6 @@ namespace InDet {
 
     m_rnd = std::make_unique<TRandom3>(m_seed);
 
-    bool anyEffSystActive = isActive(TRK_EFF_LOOSE_GLOBAL) || isActive(TRK_EFF_LOOSE_IBL) || isActive(TRK_EFF_LOOSE_PP0) || 
-                isActive(TRK_EFF_LOOSE_PHYSMODEL) || isActive(TRK_EFF_TIGHT_GLOBAL) || isActive(TRK_EFF_TIGHT_IBL) || 
-                isActive(TRK_EFF_TIGHT_PP0) || isActive(TRK_EFF_TIGHT_PHYSMODEL ) || isActive(TRK_EFF_LOOSE_COMBINED) || isActive(TRK_EFF_TIGHT_COMBINED);
-
-    bool anyFakeRateActive = isActive(TRK_FAKE_RATE_LOOSE) || isActive(TRK_FAKE_RATE_TIGHT);
-
-    if (anyEffSystActive) {
-      if (m_calibFileNomEff.empty()) {
-      ATH_MSG_ERROR("No calibration file for requested track efficiency set. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
-      return StatusCode::FAILURE;
-      }
-    }
-
-    if (anyFakeRateActive) {
-      if (m_fFakeLoose == -1.0 && m_fFakeTight == -1.0) {
-      ATH_MSG_ERROR("Requested fake rate is unavailable. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
-      return StatusCode::FAILURE;
-      }
-    }
-
     ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
            m_trkEffHistLooseGlobal,
            m_calibFileNomEff,
@@ -147,6 +127,25 @@ namespace InDet {
   }
 
   bool InDetTrackTruthFilterTool::accept(const xAOD::TrackParticle* track) const {
+
+    // these checks shouldn't occur because the config should prevent this from being reached -- but just in case!
+    bool anyEffSystActive = isActive(TRK_EFF_LOOSE_GLOBAL) || isActive(TRK_EFF_LOOSE_IBL) || isActive(TRK_EFF_LOOSE_PP0) || 
+                isActive(TRK_EFF_LOOSE_PHYSMODEL) || isActive(TRK_EFF_TIGHT_GLOBAL) || isActive(TRK_EFF_TIGHT_IBL) || 
+                isActive(TRK_EFF_TIGHT_PP0) || isActive(TRK_EFF_TIGHT_PHYSMODEL ) || isActive(TRK_EFF_LOOSE_COMBINED) || isActive(TRK_EFF_TIGHT_COMBINED);
+
+    bool anyFakeRateActive = isActive(TRK_FAKE_RATE_LOOSE) || isActive(TRK_FAKE_RATE_TIGHT);
+
+    if (anyEffSystActive) {
+      if (m_calibFileNomEff.empty()) {
+      ATH_MSG_ERROR("No calibration file for requested track efficiency set. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
+      }
+    }
+
+    if (anyFakeRateActive) {
+      if (m_fFakeLoose == -1.0 && m_fFakeTight == -1.0) {
+      ATH_MSG_ERROR("Requested fake rate is unavailable. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
+      }
+    }
 
     float pt = track->pt();
     float eta = track->eta();
