@@ -124,10 +124,9 @@ public:
 
   /** Closest Material Layer - used for the mapping option */
   template<class T>
-  LayerIntersection<Amg::Vector3D> closestMaterialLayer(
-    const T& pars,
-    PropDirection pDir = Trk::alongMomentum,
-    const BoundaryCheck& bchk = true) const;
+  LayerIntersection<Amg::Vector3D> closestMaterialLayer(const T& pars,
+                                                        PropDirection pDir = Trk::alongMomentum,
+                                                        const BoundaryCheck& bchk = true) const;
   /** check position at volume boundary */
   static bool atVolumeBoundary(const Amg::Vector3D& gp,
                                const TrackingVolume* vol,
@@ -212,11 +211,15 @@ public:
   /** The Navigation level for identification */
   NavigationLevel m_navigationLevel;
 
-  /** keep ownership of MuonTrackingGeometry elements in here */
-  // muon chambers
-  std::vector<std::shared_ptr<DetachedTrackingVolume>> m_detachedVolGarbage{};  
-  std::vector<std::shared_ptr<TrackingVolume>> m_trkVolumeGarbage{};
- 
+  /** In some cases the Tracking Geometry needs to keep
+   * certain objectss alive delete them at the end of its lifetime.
+   * This should typically happen
+   * for objects that can be  referenced but are not owned
+   * by any other object
+   */
+  std::vector<std::unique_ptr<DetachedTrackingVolume>> m_detachedVolGarbage{};
+  std::vector<std::unique_ptr<TrackingVolume>> m_trkVolumeGarbage{};
+
 };
 
 } // end of namespace

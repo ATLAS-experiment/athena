@@ -34,21 +34,21 @@ Trk::TrackingGeometry::~TrackingGeometry() {
     if (m_world) delete m_world;
 }
 void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<DetachedTrackingVolume>>&& garbageVec) {
-  std::copy_if(std::make_move_iterator(garbageVec.begin()), std::make_move_iterator(garbageVec.end()),
+  std::copy_if(std::make_move_iterator(garbageVec.begin()),
+               std::make_move_iterator(garbageVec.end()),
                std::back_inserter(m_detachedVolGarbage),
-               [](const std::unique_ptr<DetachedTrackingVolume>& ptr){
-                  return ptr.get () != nullptr;
+               [](const std::unique_ptr<DetachedTrackingVolume>& ptr) {
+                 return ptr.get() != nullptr;
                });
-
 }
 void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<TrackingVolume>>&& garbageVec){
-      std::copy_if(std::make_move_iterator(garbageVec.begin()), std::make_move_iterator(garbageVec.end()),
-                  std::back_inserter(m_trkVolumeGarbage),
-                  [](const std::unique_ptr<TrackingVolume>& ptr){
-                      return ptr.get () != nullptr;
-                  });
+  std::copy_if(std::make_move_iterator(garbageVec.begin()),
+               std::make_move_iterator(garbageVec.end()),
+               std::back_inserter(m_trkVolumeGarbage),
+               [](const std::unique_ptr<TrackingVolume>& ptr) {
+                 return ptr.get() != nullptr;
+               });
 }
-
 
 const Trk::TrackingVolume*
 Trk::TrackingGeometry::lowestTrackingVolume(const Amg::Vector3D& gp) const
@@ -94,44 +94,45 @@ Trk::TrackingGeometry::registerTrackingVolumes(Trk::TrackingVolume& tvol,
 {
   int sublvl = lvl + 1;
   std::string indent = "";
-  for (int l = 0; l < lvl; ++l, indent += "  ")
-    ;
+  for (int l = 0; l < lvl; ++l){
+    indent += "  ";
+  }
 
   tvol.setMotherVolume(mvol);
   m_trackingVolumes[tvol.volumeName()] = (&tvol);
-  Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes =
-    tvol.confinedVolumes();
+  Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = tvol.confinedVolumes();
   if (confinedVolumes) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume* const> volumes =
-      confinedVolumes->arrayObjects();
-    for (const auto& volumesIter : volumes)
-      if (volumesIter)
+    Trk::BinnedArraySpan<Trk::TrackingVolume* const> volumes = confinedVolumes->arrayObjects();
+    for (const auto& volumesIter : volumes){
+      if (volumesIter){
         registerTrackingVolumes(*volumesIter, &tvol, sublvl);
+      }
+    }
   }
 
-  Trk::ArraySpan<Trk::TrackingVolume* const> confinedDenseVolumes =
-    tvol.confinedDenseVolumes();
+  Trk::ArraySpan<Trk::TrackingVolume* const> confinedDenseVolumes = tvol.confinedDenseVolumes();
   if (!confinedDenseVolumes.empty()) {
-    for (const auto& volumesIter : confinedDenseVolumes)
-      if (volumesIter)
+    for (const auto& volumesIter : confinedDenseVolumes){
+      if (volumesIter){
         registerTrackingVolumes(*volumesIter, &tvol, sublvl);
+      }
+    }
   }
   /** should detached tracking volumes be part of the tracking geometry ? */
-  Trk::ArraySpan<Trk::DetachedTrackingVolume* const> confinedDetachedVolumes =
-    tvol.confinedDetachedVolumes();
+  Trk::ArraySpan<Trk::DetachedTrackingVolume* const> confinedDetachedVolumes = tvol.confinedDetachedVolumes();
   if (!confinedDetachedVolumes.empty()) {
-    for (const auto& volumesIter : confinedDetachedVolumes)
+    for (const auto& volumesIter : confinedDetachedVolumes){
       if (volumesIter &&
-          tvol.inside(volumesIter->trackingVolume()->center(), 0.))
-        registerTrackingVolumes(
-          *(volumesIter->trackingVolume()), &tvol, sublvl);
+          tvol.inside(volumesIter->trackingVolume()->center(), 0.)){
+        registerTrackingVolumes( *(volumesIter->trackingVolume()), &tvol, sublvl);
+      }
+    }
   }
   /** register the boundary layers */
   // boundary layers
   const auto& bounds = tvol.boundarySurfaces();
   for (const auto & bound : bounds) {
-    Trk::MaterialLayer* bLayer =
-      bound->surfaceRepresentation().materialLayer();
+    Trk::MaterialLayer* bLayer = bound->surfaceRepresentation().materialLayer();
     if (bLayer) {
       int& layerCount{m_boundaryLayers[bLayer]};
       ++layerCount;
@@ -300,8 +301,7 @@ Trk::TrackingGeometry::dump(MsgStream& out, const std::string& head) const
     dumpLayer(out, "", bound_layers.first);
   }
   int counter = 0;
-  for (const std::pair<const std::string, const TrackingVolume*>& volume :
-       m_trackingVolumes) {
+  for (const std::pair<const std::string, const TrackingVolume*>& volume : m_trackingVolumes) {
     out << head << " [" << counter++ << "] " << volume.first << " volumeBound=";
     volume.second->volumeBounds().dump(out);
     out << std::endl;
