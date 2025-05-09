@@ -16,12 +16,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "L1CaloFEXSim/jFEXForwardElecTOB.h"
-#include "StoreGate/StoreGateSvc.h"
 
 namespace LVL1 {
 

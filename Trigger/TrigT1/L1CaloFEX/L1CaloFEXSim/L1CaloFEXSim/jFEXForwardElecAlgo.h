@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //		jFEXForwardElecAlgo - Algorithm for Forward Electron Algorithm in jFEX
@@ -18,11 +18,6 @@
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/jFEXForwardElecTOB.h"
 #include "L1CaloFEXSim/jFEXForwardElecInfo.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 namespace LVL1 {
@@ -81,13 +76,13 @@ namespace LVL1 {
     std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeTauMap;
     
     virtual std::array<float,2> getEtaPhi(uint) override;
-    virtual std::array<int,2> getEtEmHad(uint) override;
+    virtual std::array<int,2> getEtEmHad(uint) const override;
     bool getEMSat(unsigned int ttID);
     
-    bool isValidSeed(uint seedTTID);
+    bool isValidSeed(uint seedTTID) const;
     void findAndFillNextTT(jFEXForwardElecInfo& elCluster, int neta, int nphi);
     
-    StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);
+    StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&) const;
   };
   
 }//end of namespace

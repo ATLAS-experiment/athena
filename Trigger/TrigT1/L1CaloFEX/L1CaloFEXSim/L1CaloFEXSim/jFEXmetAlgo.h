@@ -14,14 +14,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXmetAlgo.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h" 
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h" 
-#include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 
