@@ -23,7 +23,6 @@
 #include "TrkGeometry/AlignableTrackingVolume.h"
 #include "TrkGeometry/Layer.h"
 #include "TrkGeometry/MaterialLayer.h"
-#include "TrkGeometry/CompoundLayer.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/SubtractedCylinderLayer.h"
 #include "TrkGeometry/TrackingGeometry.h"
@@ -84,7 +83,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   m_robustSampling(true),
   m_useDenseVolumeDescription(true),
   m_useMuonMatApprox(false),
-  m_checkForCompundLayers(false),
   m_resolveActive(false),
   m_resolveMultilayers(true),
   m_printHelpOutputAtInitialize(false),
@@ -119,7 +117,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   declareProperty("UseDenseVolumeDescription", m_useDenseVolumeDescription);
   // muon system specifics
   declareProperty("UseMuonMatApproximation", m_useMuonMatApprox);
-  declareProperty("CheckForCompoundLayers", m_checkForCompundLayers);
   declareProperty("ResolveMuonStation", m_resolveActive);
   declareProperty("ResolveMultilayers", m_resolveMultilayers);
   declareProperty("ConsiderMuonStationOverlaps", m_activeOverlap);

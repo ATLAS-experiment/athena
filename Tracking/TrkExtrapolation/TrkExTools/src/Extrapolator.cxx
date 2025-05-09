@@ -24,7 +24,6 @@
 //
 #include "TrkExUtils/ExtrapolationCache.h"
 //
-#include "TrkGeometry/CompoundLayer.h"
 #include "TrkGeometry/AlignableTrackingVolume.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DetachedTrackingVolume.h"
@@ -142,7 +141,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   , m_activeOverlap(false)
   , m_useMuonMatApprox(false)
   , m_useDenseVolumeDescription(true)
-  , m_checkForCompundLayers(false)
   , m_maxNavigSurf{ 1000 }
   , m_maxNavigVol{ 50 }
   , m_dumpCache(false)
@@ -191,7 +189,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   // muon system specifics
   declareProperty("UseMuonMatApproximation", m_useMuonMatApprox);
   declareProperty("UseDenseVolumeDescription", m_useDenseVolumeDescription);
-  declareProperty("CheckForCompoundLayers", m_checkForCompundLayers);
   declareProperty("ResolveMuonStation", m_resolveActive = false);
   declareProperty("ResolveMultilayers", m_resolveMultilayers);
   declareProperty("ConsiderMuonStationOverlaps", m_activeOverlap);
@@ -3791,28 +3788,9 @@ Trk::Extrapolator::extrapolateToIntermediateLayer(const EventContext& ctx,
   ManagedTrackParmPtr parm(cache.manage(parm_ref));
   ManagedTrackParmPtr parsOnLayer(cache.trackParmContainer());
 
-  if (m_checkForCompundLayers) {
-    const Trk::CompoundLayer* cl = dynamic_cast<const Trk::CompoundLayer*>(&lay);
-    if (cl) {
-      // try each surface in turn
-      const std::vector<const Surface*> cs = cl->constituentSurfaces();
-      for (const auto *c : cs) {
-        parsOnLayer = cache.manage(prop.propagate(
-          ctx, *parm, *c, dir, true, m_fieldProperties, particle));
-        if (parsOnLayer) {
-          break;
-        }
-      }
-    } else {
-      parsOnLayer = cache.manage(
-        prop.propagate(
-          ctx, *parm, lay.surfaceRepresentation(), dir, true, m_fieldProperties, particle));
-    }
-  } else {
-    parsOnLayer = cache.manage(
-      prop.propagate(
-        ctx, *parm, lay.surfaceRepresentation(), dir, true, m_fieldProperties, particle));
-  }
+  parsOnLayer = cache.manage(
+    prop.propagate(
+      ctx, *parm, lay.surfaceRepresentation(), dir, true, m_fieldProperties, particle));
 
   // return if there is nothing to do
   if (!parsOnLayer) {
@@ -4337,29 +4315,9 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
   ManagedTrackParmPtr parsOnLayer;
   // make sure the parameters are on surface
   if (parms->associatedSurface() != lay.surfaceRepresentation()) {
-    if (m_checkForCompundLayers) {
-      const Trk::CompoundLayer* cl = dynamic_cast<const Trk::CompoundLayer*>(&lay);
-      if (cl) {
-        // try each surface in turn
-        const std::vector<const Surface*> cs = cl->constituentSurfaces();
-        for (const auto *c : cs) {
-          parsOnLayer = cache.manage(
-            prop.propagateParameters(
-              ctx, *parms, *c, Trk::anyDirection, false, m_fieldProperties));
-          if (parsOnLayer) {
-            break;
-          }
-        }
-      } else {
-        parsOnLayer = cache.manage(
-          prop.propagateParameters(
-            ctx, *parms, lay.surfaceRepresentation(), Trk::anyDirection, false, m_fieldProperties));
-      }
-    } else {
-      parsOnLayer = cache.manage(
-        prop.propagateParameters(
-          ctx, *parms, lay.surfaceRepresentation(), Trk::anyDirection, false, m_fieldProperties));
-    }
+    parsOnLayer = cache.manage(
+        prop.propagateParameters(ctx, *parms, lay.surfaceRepresentation(),
+                                 Trk::anyDirection, false, m_fieldProperties));
   } else {
     parsOnLayer = parms;
   }
