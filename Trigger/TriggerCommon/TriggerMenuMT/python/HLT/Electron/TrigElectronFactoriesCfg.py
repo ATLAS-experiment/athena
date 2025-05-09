@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 __doc__ = "ToolFactories to configure egammaAlgs to be used at the HLT" 
@@ -96,19 +96,16 @@ def TrigTopoEgammaElectronCfg(flags, tag, variant, cellsName, InputElectronRecCo
 
 
 def TrigTrackIsolationToolCfg(flags,tag,trackParticleLocation):
+        from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
         acc = ComponentAccumulator()
 
         tpicTool = CompFactory.xAOD.TrackParticlesInConeTool(TrackParticleLocation = trackParticleLocation)
-
         tiTool = CompFactory.xAOD.TrackIsolationTool(name='TrigTrackIsolationTool'+tag,
-                                                    TrackParticleLocation = trackParticleLocation,
-                                                    VertexLocation = '',
-                                                    TracksInConeTool  = tpicTool)
-        # configure default TrackSelectionTool
-        tiTool.TrackSelectionTool.maxZ0SinTheta = 3
-        tiTool.TrackSelectionTool.minPt         = 1000
-        tiTool.TrackSelectionTool.CutLevel      = "Loose"
-
+                                                     TrackParticleLocation = trackParticleLocation,
+                                                     VertexLocation = '',
+                                                     TracksInConeTool  = tpicTool,
+                                                     TrackSelectionTool = acc.popToolsAndMerge(
+                                                         InDetTrackSelectionTool_Loose_Cfg(flags, maxZ0SinTheta = 3, minPt = 1000)))
         acc.setPrivateTools(tiTool)
         return acc
 
