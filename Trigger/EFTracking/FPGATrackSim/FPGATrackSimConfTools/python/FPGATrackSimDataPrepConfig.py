@@ -401,8 +401,8 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwar
     flags = flagsIn.clone()
     
     # configure FastTracking based on C-100 flags
-    from ActsConfig.ActsCIFlags import actsFastWorkflowFlags
-    actsFastWorkflowFlags(flags)
+    from ActsConfig.ActsCIFlags import actsWorkflowFlags
+    actsWorkflowFlags(flags)
     
     flags.Tracking.ActiveConfig.extension=FinalTracks 
     flags.Tracking.writeExtendedSi_PRDInfo=True
@@ -513,8 +513,8 @@ def runDataPrepChain():
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
     flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-    from TrkConfig.TrkConfigFlags import TrackingComponent
-    flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
+    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
+    actsLegacyWorkflowFlags(flags)
     flags.Acts.doRotCorrection = False
     
     ############################################

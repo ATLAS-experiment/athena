@@ -1,40 +1,40 @@
-ActsPixelClusterizationAlg                                        INFO Clusterization statistics
+ActsLegacyPixelClusterizationAlg                                  INFO Clusterization statistics
 |----------|------------|
 | RDOs     |    3423993 |
 | Clusters |    1165578 |
 |----------|------------|
-ActsStripClusterizationAlg                                        INFO Clusterization statistics
+ActsLegacyStripClusterizationAlg                                  INFO Clusterization statistics
 |----------|------------|
 | RDOs     |    1345365 |
 | Clusters |    1081478 |
 |----------|------------|
-ActsHgtdClusterizationAlg                                         INFO Clusterization statistics
+ActsLegacyHgtdClusterizationAlg                                   INFO Clusterization statistics
 |----------|------------|
 | RDOs     |     341404 |
 | Clusters |     341404 |
 |----------|------------|
-ActsPixelSpacePointFormationAlg                                   INFO Space Point Formation statistics
+ActsLegacyPixelSpacePointFormationAlg                             INFO Space Point Formation statistics
 |--------------|------------|
 | Clusters     |    1165578 |
 | Space Points |    1165578 |
 |--------------|------------|
-ActsStripSpacePointFormationAlg                                   INFO Space Point Formation statistics
+ActsLegacyStripSpacePointFormationAlg                             INFO Space Point Formation statistics
 |----------------------|------------|
 | Clusters             |    1081478 |
 | Space Points         |     325456 |
 | Overlap Space Points |     101370 |
 |----------------------|------------|
-ActsPixelSeedingAlg                                               INFO Seed statistics
+ActsLegacyPixelSeedingAlg                                         INFO Seed statistics
 |-------------|------------|
 | Spacepoints |    1165578 |
 | Seeds       |     123685 |
 |-------------|------------|
-ActsStripSeedingAlg                                               INFO Seed statistics
+ActsLegacyStripSeedingAlg                                         INFO Seed statistics
 |-------------|------------|
 | Spacepoints |     426826 |
 | Seeds       |      25844 |
 |-------------|------------|
-ActsTrackFindingAlg                                               INFO statistics
+ActsLegacyTrackFindingAlg                                         INFO statistics
 |-----------------------------------|------------|------------|------------|
 |                           All eta | PPP        | SSS        | ALL        |
 |-----------------------------------|------------|------------|------------|
@@ -54,7 +54,7 @@ ActsTrackFindingAlg                                               INFO statistic
 | Stopped tracks above max eta      |          0 |          0 |          0 |
 | Total shared hits                 |      91996 |      16122 |     108118 |
 |-----------------------------------|------------|------------|------------|
-ActsTrackFindingAlg                                               INFO Ratios
+ActsLegacyTrackFindingAlg                                         INFO Ratios
 |------------------------------------------|------------|------------|------------|
 |                                          | PPP        | SSS        | ALL        |
 |------------------------------------------|------------|------------|------------|
@@ -76,13 +76,13 @@ ActsTrackFindingAlg                                               INFO Ratios
 |                                 3.0- 3.5 |   0.937596 |          0 |   0.937596 |
 |                                 3.5-+inf |   0.965331 |          0 |   0.965331 |
 |------------------------------------------|------------|------------|------------|
-ActsAmbiguityResolutionAlg                                        INFO Ambiguity Resolution statistics
+ActsLegacyAmbiguityResolutionAlg                                  INFO Ambiguity Resolution statistics
 |-------------------|------------|
 | Input tracks      |      13976 |
 | Resolved tracks   |       9551 |
 | Total shared hits |        212 |
 |-------------------|------------|
-ActsPrdAssociationAlg                                             INFO Prd Map statistics
+ActsLegacyPrdAssociationAlg                                       INFO Prd Map statistics
 |-----------------------|------------|
 | N. Tracks             |       9551 |
 | N. Pixel Measurements |     102456 |

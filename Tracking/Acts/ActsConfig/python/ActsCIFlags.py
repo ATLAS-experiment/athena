@@ -1,23 +1,23 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Flags used in CI tests
 
 from TrkConfig.TrkConfigFlags import TrackingComponent
 
-def actsWorkflowFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: add Acts workflow to reco sequence"""
+def actsLegacyWorkflowFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: add Acts (legacy like) workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
-    flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+    flags.Tracking.recoChain = [TrackingComponent.ActsLegacyChain]
 
-def actsFastWorkflowFlags(flags) -> None:
+def actsWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = True
     flags.Tracking.doITkFastTracking = True
-    flags.Tracking.recoChain = [TrackingComponent.ActsFastChain]
+    flags.Tracking.recoChain = [TrackingComponent.ActsChain]
 
 def actsScoreBasedAmbiguityWorkflowFlags(flags) -> None:
-    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
-    actsWorkflowFlags(flags)
+    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS (legacy like) workflow to reco sequence"""
+    actsLegacyWorkflowFlags(flags)
     from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy
     flags.Acts.AmbiguitySolverStrategy = AmbiguitySolverStrategy.ScoreBased
         
@@ -103,7 +103,7 @@ def actsGSFEgammaFlags(flags) -> None:
     flags.Acts.doAnalysis =  False
     flags.Acts.doMonitoring = False
     flags.Acts.doAmbiguityResolution = True
-    flags.Tracking.recoChain = [ TrackingComponent.ActsChain]
+    flags.Tracking.recoChain = [ TrackingComponent.ActsLegacyChain]
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.doITkConversion = False
     flags.Acts.GsfRefitActs = True

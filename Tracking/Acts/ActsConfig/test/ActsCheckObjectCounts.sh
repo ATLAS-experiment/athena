@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ttbar mu=200 input
 input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
@@ -11,16 +11,7 @@ ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-  	     flags.Acts.doITkConversion=True; \
-	     flags.Tracking.doTruth=False; \
-	     flags.Tracking.doITkConversion=False; \
-	     flags.Detector.EnableCalo=True; \
-	     flags.Detector.GeometryCalo=True; \
-	     flags.Detector.EnableLAr=True; \
-	     flags.Detector.EnableTile=True; \
-       	     flags.Detector.EnableMuon=False; \
-	     flags.Acts.doLargeRadius=True; \
-	     flags.Acts.doLowPt=True;" \
+	     flags.Tracking.doTruth=False;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \

@@ -11,8 +11,14 @@ ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-	     flags.Tracking.doTruth=False;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsFastWorkflowFlags" \
+       	     flags.Detector.EnableMuon=False; \
+  	     flags.Acts.doITkConversion=True; \
+	     flags.Tracking.doTruth=False; \
+	     flags.Tracking.doITkConversion=False; \
+	     flags.Acts.doLargeRadius=True; \
+	     flags.Acts.doLowPt=True; \
+	     flags.Acts.useCache=True;" \
+  --preInclude "ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
