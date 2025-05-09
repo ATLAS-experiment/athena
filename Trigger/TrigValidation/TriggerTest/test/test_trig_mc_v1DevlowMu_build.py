@@ -11,11 +11,12 @@
 from TriggerTest.MCExecStep import MCBuildStep
 from TrigValTools.TrigValSteering import Test, CheckSteps
 
-ex = MCBuildStep(menu='Dev_pp_lowMu_run3_v1_TriggerValidation_prescale', mc_campaign='Campaigns.MC23ppReferenceRun2024')
+ex = MCBuildStep(menu='Dev_pp_lowMu_run3_v1_TriggerValidation_prescale')
 ex.input = 'ttbar'
 ex.flags += [
+    'Input.ConditionsRunNumber=488000',
     'Trigger.doRuntimeNaviVal=True',
-    'Trigger.L1.Menu.doHeavyIonTobThresholds=True'
+    'Trigger.L1.Menu.doHeavyIonTobThresholds=True',
 ]
 
 test = Test.Test()
@@ -24,4 +25,5 @@ test.exec_steps = [ex]
 test.check_steps = CheckSteps.default_check_steps(test)
 
 import sys
+
 sys.exit(test.run())
