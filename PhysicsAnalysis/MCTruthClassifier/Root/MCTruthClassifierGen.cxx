@@ -1212,23 +1212,19 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
+      if (ancestor == ancestorParent) { break; }
       if (TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
         ancestorParent = ancestor;
         break;
       }
-      //
-      if (ancestorParent) {
-        pPDG = ancestorParent->pdgId(); // FIXME difference in behaviour compared to defOrigOfElectron/Muon pPDG set even if we are in a loop
-      }
-      // to prevent Sherpa loop
-      if (ancestor == ancestorParent) { break; }
       // End of method 2 of protecting against Sherpa loops
-      if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
-        // There will be another iteration so set ancestor to ancestorParent
-        ancestor = ancestorParent; // ancestorParent is not a nullptr
-        info.setMotherProperties(ancestor); // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfElectron/Muon
+      if (ancestorParent) {
+        pPDG = ancestorParent->pdgId();
+        if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
+          // There will be another iteration so set ancestor to ancestorParent
+          ancestor = ancestorParent; // ancestorParent is not a nullptr
+        }
       }
-
     } while ((std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG)));
 
     if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
@@ -1236,7 +1232,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
       ancestor = ancestorParent; // ancestorParent is not nullptr here
-      info.setMotherProperties(ancestor);
     }
   }
   //if ancestor is still nullptr, we have a problem
