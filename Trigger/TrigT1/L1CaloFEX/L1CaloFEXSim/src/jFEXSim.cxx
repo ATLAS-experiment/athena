@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -11,16 +11,6 @@
 
 
 #include "L1CaloFEXSim/jFEXSim.h"
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jFEXFPGA.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 namespace LVL1 {
 
@@ -767,7 +757,6 @@ std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getSmallRJetTOBs()
 std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getLargeRJetTOBs()
 {
     std::vector< std::vector<std::unique_ptr<jFEXTOB>> > ljTOBs;
-    ljTOBs.clear();
     ljTOBs.resize(m_largeRJet_tobWords.size());
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
@@ -782,7 +771,6 @@ std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getLargeRJetTOBs()
 std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getTauTOBs()
 {
     std::vector< std::vector<std::unique_ptr<jFEXTOB>> > tauTOBs;
-    tauTOBs.clear();
     tauTOBs.resize(m_tau_tobWords.size());
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
@@ -797,14 +785,12 @@ std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getTauTOBs()
 
 std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getFwdElTOBs(){
     
-    return m_fwdEl_tobWords;
-    
+    return m_fwdEl_tobWords;    
 }
   
 std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getSumEtTOBs(){
     
     std::vector<std::unique_ptr<jFEXTOB>> sumetTOBs;
-    sumetTOBs.clear();
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for (unsigned int i = 0; i < m_sumET_tobWords.size(); ++i){
@@ -819,7 +805,6 @@ std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getSumEtTOBs(){
 std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getMetTOBs(){
     
     std::vector<std::unique_ptr<jFEXTOB>> metTOBs;
-    metTOBs.clear();
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for (unsigned int i = 0; i < m_Met_tobWords.size(); ++i){
@@ -888,4 +873,3 @@ void jFEXSim::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[FEXAlgoSpaceDefs::j
   
 
 } // end of namespace bracket
-

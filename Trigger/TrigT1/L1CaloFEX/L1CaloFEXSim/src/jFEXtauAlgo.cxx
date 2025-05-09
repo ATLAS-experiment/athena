@@ -8,16 +8,13 @@
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
 #include <iostream>
-#include <vector>
+#include <fstream>
 #include <stdio.h>
 #include <math.h>
 #include "L1CaloFEXSim/jFEXtauAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-
-#include <fstream>
+#include "PathResolver/PathResolver.h"
 
 namespace LVL1{
 
@@ -201,7 +198,7 @@ bool LVL1::jFEXtauAlgo::getTauSat() const {
     return m_TauSaturation;
 }
 
-void LVL1::jFEXtauAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
+void LVL1::jFEXtauAlgo::setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map){
     m_map_Etvalues=et_map;
 }
 
