@@ -21,9 +21,6 @@ CaloCalibrationHitContainer::CaloCalibrationHitContainer(const std::string& coll
 
 }
 
-CaloCalibrationHitContainer::~CaloCalibrationHitContainer() 
-= default;
-
 CaloCalibrationHitContainer::operator std::string () const
 {
  std::string newline( "\n" ) ;    

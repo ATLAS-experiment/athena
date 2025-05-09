@@ -13,6 +13,7 @@
 //
 //
 // vector class
+#include <type_traits>
 #include <vector>
 
 #include "AthContainers/tools/DVLInfo.h"
@@ -34,9 +35,19 @@ namespace AthHitVec{
   };
 }
 
+
+struct HitsVectorBase {
+  // This is an empty base class to allow the use of AthenaHitsVector
+  // and AtlasHitsVector in the same container through static downcast,
+  // without having to use type punning, or RTTI through std::any.
+  // This should stay empty.
+};
+
+static_assert(std::is_empty_v<HitsVectorBase>, "HitsVectorBase should be an empty base");
+
 //
 template <typename T>
-class AthenaHitsVector {
+class AthenaHitsVector : HitsVectorBase {
  public:
   //
   // additional typedef

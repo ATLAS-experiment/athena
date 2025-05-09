@@ -16,20 +16,18 @@
 #ifndef CaloSimEvent_CaloCalibrationHitContainer_h
 #define CaloSimEvent_CaloCalibrationHitContainer_h
 
+#include <type_traits>
 #include "HitManagement/AthenaHitsVector.h"
 #include "CaloSimEvent/CaloCalibrationHit.h"
 
 #include "AthenaKernel/CLASS_DEF.h"
 
-class CaloCalibrationHitContainer:public AthenaHitsVector<CaloCalibrationHit>
+class CaloCalibrationHitContainer: public AthenaHitsVector<CaloCalibrationHit>
 {
 public:
 
   /** Constructor of CaloCalibrationHitContainer */
   CaloCalibrationHitContainer (const std::string& collectionName="DefaultCollectionName" );
-
-  /** Destructor */
-  virtual ~CaloCalibrationHitContainer()  ;
 
   /**
      Returns a string containing the description of this <br>
@@ -37,9 +35,13 @@ public:
      that it contains<br>
      Can be used in printouts <br>
   */
-  virtual operator std::string () const;
+  operator std::string () const;
 
 };
+
+static_assert(std::is_standard_layout_v<CaloCalibrationHitContainer>,
+              "CaloCalibrationHitContainer must be standard layout class to guarantee "
+              "empty base class optimization");
 
 CLASS_DEF (CaloCalibrationHitContainer, 1312841250 , 1 )
 
