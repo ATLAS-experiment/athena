@@ -7,20 +7,9 @@
 //     begin                : 07 07 2021
 //     email                : varsiha.sothilingam@cern.ch
 //***************************************************************************  
-#include <iostream>
-#include <vector>
-#include <string>
-#include <map>
-//#include "L1CaloFEXSim/jFEXForwardJetsAlgo.h"
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
+
 #include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
+
 
 void  LVL1::jFEXForwardJetsInfo::setCentreTTEta(float centreTTEta)
 {
@@ -133,4 +122,3 @@ void LVL1::jFEXForwardJetsInfo::addToSearchWindowET(int et){
 int LVL1::jFEXForwardJetsInfo::getSearchWindowET(){
     return m_SearchWindow_ET;
 }
-

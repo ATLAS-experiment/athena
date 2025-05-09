@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -34,7 +34,7 @@ Interface definition for eFEXTOBEtTool
                                   std::vector<unsigned int> &RhadSums, 
                                   std::vector<unsigned int> &WstotSums) = 0;
 								  
-    virtual StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs) = 0;
+    virtual StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs) const = 0;
 
 
     /** Tool to calculate eTaudiscriminant sums */
@@ -46,7 +46,7 @@ Interface definition for eFEXTOBEtTool
     virtual unsigned int eTowerID(float eta, float phi) const = 0;
 
     /** Tool to find eFEX and FPGA numbers and eta index of a TOB within the FPGA */
-    virtual void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta) = 0;
+    virtual void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta) const = 0;
 
 
 

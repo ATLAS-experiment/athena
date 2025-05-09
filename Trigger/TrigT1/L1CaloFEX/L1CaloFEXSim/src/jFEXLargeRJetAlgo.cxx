@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXSmallRJetAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -8,16 +8,10 @@
 //     email                : varsiha.sothilingam@cern.ch
 //***************************************************************************
 
-#include <iostream>
 #include <vector>
 #include "L1CaloFEXSim/jFEXLargeRJetAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 
 namespace LVL1{
 
@@ -77,7 +71,7 @@ bool LVL1::jFEXLargeRJetAlgo::getLRjetSat() {
     return m_saturation;
 }
 
-unsigned int LVL1::jFEXLargeRJetAlgo::getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET){
+unsigned int LVL1::jFEXLargeRJetAlgo::getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) const {
   int largeClusterET = smallClusterET + largeRingET;
   return largeClusterET; 
 }
@@ -109,7 +103,7 @@ bool LVL1::jFEXLargeRJetAlgo::getTTowerSat(unsigned int TTID ) {
 }
 
 
-void LVL1::jFEXLargeRJetAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
+void LVL1::jFEXLargeRJetAlgo::setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map){
     m_map_Etvalues=et_map;
 }
 

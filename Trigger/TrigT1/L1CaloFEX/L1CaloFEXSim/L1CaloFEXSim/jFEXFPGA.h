@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -26,22 +26,14 @@
 #include "L1CaloFEXToolInterfaces/IjFEXForwardElecAlgo.h"
 #include "L1CaloFEXToolInterfaces/IjFEXPileupAndNoise.h"
 #include "L1CaloFEXToolInterfaces/IjFEXFormTOBs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/jFEXOutputCollection.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
+#include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
+#include "L1CaloFEXSim/jFEXForwardElecInfo.h"
 #include "TrigConfData/L1Menu.h"
 #include <vector>
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/IClassIDSvc.h"
 #include "SGTools/StlMapClids.h"
-#include "SGTools/TestStore.h"
-#include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "StoreGate/StoreGateSvc.h"
 
 #include "L1CaloFEXSim/jFEXTOB.h"
 
@@ -104,7 +96,7 @@ namespace LVL1 {
         return (((i->getWord() >> bits ) & mask)>((j->getWord() >> bits ) & mask)); 
     }
     
-    static bool etFwdElSort  (std::vector<uint32_t> i, std::vector<uint32_t> j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jEM_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jEM_etBit) & 0x7ff ));}
+    static bool etFwdElSort  (const std::vector<uint32_t>& i, const std::vector<uint32_t>& j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jEM_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jEM_etBit) & 0x7ff ));}
     
     std::vector<std::unique_ptr<jFEXTOB>> m_tau_tobwords;
     std::vector<std::unique_ptr<jFEXTOB>> m_SRJet_tobwords;
@@ -132,7 +124,8 @@ namespace LVL1 {
     int m_SRJetET;
     int m_LRJetET;
 
-    CaloCellContainer m_sCellsCollection;
+    // FIXME: unused?
+    //CaloCellContainer m_sCellsCollection;
 
     SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyETowers", "jTowerContainer", "Input container for jTowers"};
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 

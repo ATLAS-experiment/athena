@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXLargeRJetAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -24,8 +24,8 @@ namespace LVL1{
       virtual StatusCode safetyTest() = 0;
       virtual void setupCluster(int inputTable[15][15]) = 0;
       virtual unsigned int getRingET() = 0;
-      virtual unsigned int getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) = 0;
-      virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
+      virtual unsigned int getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) const = 0;
+      virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map)   =0;
       virtual bool getLRjetSat() =0;
 
    private:
