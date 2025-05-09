@@ -141,6 +141,9 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     # Add additional e/gamma variables
     FTAG1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
 
+    # Add labels in EMTopo jets
+    FTAG1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal"]
+
     # update AppendToDictionary
     extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!
     FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG1SlimmingHelper, flags, extra_AppendToDictionary)
