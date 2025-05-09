@@ -2,7 +2,6 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-import AthenaCommon.SystemOfUnits as Units
 
 class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
     """the ConfigBlock for the Pixel ToT PID tool"""
@@ -19,13 +18,13 @@ class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAn
             info="whether to equalize cluster level dE/dx measurements.")
         self.addOption ('equalizeTrackMeasurements', False, type=bool,
             info="whether to equalize track-level truncated mean dE/dx measurements (no pixel clusters required).")
-        self.addOption ('extraClusterCleaning', False, type=bool,
+        self.addOption ('tightClusterCleaning', False, type=bool,
             info="whether to perform extra cluster cleaning for dE/dx measurements (e.g. cluster size/shape).")
         self.addOption ('sfLocalFileName', "", type=str,
             info="Path to scale factor trees, overriding files stored in ASG calibration area.")
-        self.addOption ('clusterSFTreeName', "SFs_TTree", type=str, # FIX! TBD
+        self.addOption ('clusterSFTreeName', "cluster_SFs", type=str, # FIX! TBD
             info="Name of tree storing the cluster-level dE/dx equalization scale factors.")
-        self.addOption ('trackSFTreeName', "track_SFs_TTree", type=str, # FIX! TBD
+        self.addOption ('trackSFTreeName', "track_SFs", type=str, # FIX! TBD
             info="Name of tree storing the track-level dE/dx equalization scale factors.")
 
         
@@ -39,7 +38,7 @@ class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAn
         ### Tool properties
         alg.PixelToTPIDTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.PixelToTPIDTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
-        alg.PixelToTPIDTool.ExtraClusterCleaning = self.extraClusterCleaning
+        alg.PixelToTPIDTool.TightClusterCleaning = self.tightClusterCleaning
         alg.PixelToTPIDTool.SFLocalFileName = self.sfLocalFileName
         alg.PixelToTPIDTool.ClusterSFTreeName = self.clusterSFTreeName
         alg.PixelToTPIDTool.TrackSFTreeName = self.trackSFTreeName

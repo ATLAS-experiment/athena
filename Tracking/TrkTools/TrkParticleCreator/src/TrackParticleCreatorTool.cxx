@@ -982,7 +982,6 @@ TrackParticleCreatorTool::addPIDInformation(const EventContext& ctx, const Trk::
      int nOverflowHits_dedx = initialValue;
      if (track && !m_dedxtool.empty() && track->info().trackFitter() != TrackInfo::Unknown) {
         dedx = m_dedxtool->dEdx(ctx, *track, nHitsUsed_dedx, nOverflowHits_dedx);
-        ATH_MSG_INFO("dedx = " << dedx);
      }
      tp.setNumberOfUsedHitsdEdx(nHitsUsed_dedx);
      tp.setNumberOfIBLOverflowsdEdx(nOverflowHits_dedx);

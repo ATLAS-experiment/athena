@@ -26,6 +26,8 @@
 //#include "StoreGate/ReadCondHandleKey.h"
 #include "PixelGeoModel/IIBLParameterSvc.h"
 //
+//#include "EventInfo/EventInfo.h"
+//#include "EventInfo/EventType.h"
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkTrack/TrackInfo.h"
@@ -34,7 +36,7 @@
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkSurfaces/Surface.h"
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
-#include "Identifier/Identifier.h" // needed?
+//#include "Identifier/Identifier.h" // needed?
 #include "InDetIdentifier/PixelID.h"
 
 #else
@@ -99,21 +101,17 @@ namespace CP {
     
     /// Common to both EDMs ///
 
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
+
     /// Equalize the cluster-level dE/dx measuremented before the taking the truncated mean.
-    /// For xAOD EDM, Requires special datasets with pixel clusters.
+    /// For ESD EDM, always have access to pixel clusters.
+    /// For xAOD EDM, requires special datasets with pixel clusters.
     Gaudi::Property<bool> m_equalizeClusterMeasurements
-    { this, "EqualizeClusterMeasurements", false, ""};
+    { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
 
-    /// Equalize the track-level truncated mean instead of the individual cluster measurements.
-    /// Not as good as pixel-level equalization, but does not require access to clusters.
-    /// Nominal AOD does not have pixel clusters.
-    /// Perhaps no use case during reconstruction since have access to clusters in ESD EDM.
-    Gaudi::Property<bool> m_equalizeTrackMeasurements
-    { this, "EqualizeTrackMeasurements", false, ""};
-
-    /// Apply extra cluster cleaning requirements (e.g. cluster size/shape cuts).
-    Gaudi::Property<bool> m_extraClusterCleaning
-    { this, "ExtraClusterCleaning", false, ""};
+    /// Apply tight cluster cleaning requirements (e.g. cluster size/shape cuts).
+    Gaudi::Property<bool> m_tightClusterCleaning
+    { this, "TightClusterCleaning", false, ""};
 
     /// For charge -> dE/dx calc.
     double m_conversionfactor;
@@ -133,9 +131,11 @@ namespace CP {
       float dEdxEq = -99.9;
       bool isIBL = false;
       int iblOverflow = 0;
+      bool passdEdxCutsLoose = false;
+      bool passdEdxCutsTight = false;
     };
 
-    float getClusterdEdx(const PixelCluster& cluster,
+    void  getClusterdEdx( PixelCluster& cluster,
                          int& pixelhits,
                          int& nUsedIBLOverflowHits) const;
     
@@ -158,18 +158,22 @@ namespace CP {
 #ifdef XAOD_STANDALONE
     StatusCode initSFsFromTrees();
 
-    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"}; // needed?
+    /// Equalize the track-level truncated mean instead of the individual cluster measurements.
+    /// Not as good as pixel-level equalization, but does not special datasets with clusters.
+    /// Nominal AOD does not have pixel clusters.
+    Gaudi::Property<bool> m_equalizeTrackMeasurements
+    { this, "EqualizeTrackMeasurements", false, "Equalize track-level truncated mean dE/dx"};
 
     Gaudi::Property<std::string> m_msosLink
     { this, "MSOSLink", "Reco_msosLink"};
 
     /// PathResolverFindCalibFile need the logical filename in ASG calibration area.
-    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "nTuple_data_lowMu_flat.root"}; // FIX! TBD
+    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "pixeldEdxEqualizationSFs_v0.root"}; // FIX! TBD
     /// Override version in ASG calibration area with a local file is not empty string.
     Gaudi::Property<std::string> m_sfLocalFileName {this, "SFLocalFileName", ""};
     /// Name of SF tree.
-    Gaudi::Property<std::string> m_clusterSFTreeName { this, "ClusterSFTreeName", "SFs_TTree"}; // FIX! TBD
-    Gaudi::Property<std::string> m_trackSFTreeName { this, "TrackSFTreeName", "track_SFs_TTree"}; // FIX! TBD
+    Gaudi::Property<std::string> m_clusterSFTreeName { this, "ClusterSFTreeName", "cluster_SFs"}; // FIX! TBD
+    Gaudi::Property<std::string> m_trackSFTreeName { this, "TrackSFTreeName", "track_SFs"}; // FIX! TBD
 
     /// dE/dx equalization scale factor dataframe read from trees.
     std::shared_ptr<ROOT::RDataFrame> m_df;
@@ -181,21 +185,14 @@ namespace CP {
     mutable std::map<unsigned int, std::shared_ptr<ROOT::RDF::RNode>> m_filteredRDFMap;
     mutable std::mutex m_mapMutex;
 
-
     /// Decorators for xAOD EDM
-    /// Raw track-level truncated mean dE/dx:
-    ///    Returned by dEdx() if m_equalizeClusterMeasurements == false.
-    ///    Already in AOD, calculated during reconstruction via this same tool using ESD EDM, stored by TrackParticleCreator.
-    ///    NB: dE/dx calculated from xAOD and ESD EDMs can differ, likely due to migrations of cluster local (x,y).
-    ///        We place cuts on cluster location when calculating dE/dx to avoid sensor edges.
-    ///        As a result, hits used for one EDM can be excluded in calculation for the other EDM.
-    /// Equalized track-level truncated mean dE/dx:
-    ///    Returned by dEdx() if m_equalizeClusterMeasurements == true.
-    ///    Called by PixelDEdxEqualizationAlg in TrackingAnalysisAlgorithms.  Decorate there instead.
-    /// Raw cluster dE/dx:
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
+    /// Only one PixelClusters container shared by all track containers, so should not need to modify keys...
+    /// Raw cluster dE/dx
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey
+      {this, "clusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
     /// Equalized cluster dE/dx:
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey{this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey
+      {this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
 
 #endif
 

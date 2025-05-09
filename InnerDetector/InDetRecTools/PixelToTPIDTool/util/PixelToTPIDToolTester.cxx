@@ -41,14 +41,19 @@ int main(int argc, char* argv[]) {
   using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
 
   // Default arguments
-  bool equalize = false; // Whether or not to equalize the dE/dx.
-  int maxEvents = -1; // Max number of events to process.
+  bool clusterEqualize = false; // Whether or not to equalize the dE/dx at cluster level.
+  bool trackEqualize = false; // Whether or not to equalize the dE/dx at track level.
+  int maxEvents = 1; // Max number of events to process.
 
-  // Path to equalization SF trees.  Update to CVMFS path.
-  std::string localSFPath = "../athena/InnerDetector/InDetRecTools//PixelToTPIDTool/share/nTuple_data_lowMu_flat.root"; // FIXME!
+  // Path to equalization SF trees.
+  // Will eventualy not need to set this property.
+  // Will instead rely on default properties pointing to the file in the ASG calibration area.
+  std::string localSFPath = "../athena/InnerDetector/InDetRecTools//PixelToTPIDTool/share/pixeldEdxEqualizationSFs_v0.root"; // FIXME!
 
   // Name of link from track to MSOS.
   std::string msosLinkName = "Reco_msosLink";
+
+
 
   // The application's name:
   const char* APP_NAME = argv[0];
@@ -90,9 +95,13 @@ int main(int argc, char* argv[]) {
   for (int i = 2; i < argc; ++i) {
     std::string arg = argv[i];
 
-    if (arg == "--equalize") {
-      equalize = true;
-    } else if (arg == "--maxEvents") {
+    if (arg == "--cluster") {
+      clusterEqualize = true;
+    } 
+    else if (arg == "--track") {
+      trackEqualize = true;
+    }
+    else if (arg == "--maxEvents") {
       if (i + 1 < argc) {
         maxEvents = std::stoll(argv[++i]);
       } else {
@@ -103,6 +112,15 @@ int main(int argc, char* argv[]) {
       std::cerr << "Unknown argument: " << arg << "\n";
       return 1;
     }
+  }
+  
+  if(clusterEqualize && trackEqualize) {
+    std::cerr << "Must choose --cluster OR --track, not both!\n";
+    return 1;
+  }
+  if(!clusterEqualize && !trackEqualize) {
+    std::cerr << "Must choose --cluster OR --track!\n";
+    return 1;
   }
 
   // Decide how many events to run over:
@@ -116,8 +134,9 @@ int main(int argc, char* argv[]) {
   pidTool->msg().setLevel(MSG::INFO);
 
   bool failed = false;
-  failed = failed || pidTool->setProperty("EqualizeClusterMeasurements", equalize).isFailure();
-  failed = failed || pidTool->setProperty("SFLocalFileName", localSFPath).isFailure();
+  failed = failed || pidTool->setProperty("EqualizeClusterMeasurements", clusterEqualize).isFailure();
+  failed = failed || pidTool->setProperty("EqualizeTrackMeasurements", trackEqualize).isFailure();
+  failed = failed || pidTool->setProperty("SFLocalFileName", localSFPath).isFailure();  // FIXME!  Eventually won't need.
   failed = failed || pidTool->initialize().isFailure();
   if (failed) {
     Error( APP_NAME, "Failed to set up PixelToTPIDTool!");
@@ -155,31 +174,39 @@ int main(int argc, char* argv[]) {
       float dEdx = pidTool->dEdx(*trkIt, nUsedHits, nUsedIBLOverflowHits);
 
       // Get summary values for comparison
-      float track_dEdx { 0 };
-      unsigned char numberOfUsedHitsdEdx = -1;
-      trkIt->summaryValue(track_dEdx, xAOD::pixeldEdx);
-      numberOfUsedHitsdEdx = (unsigned int) (trkIt)->auxdataConst<unsigned char>("numberOfUsedHitsdEdx");
+      float stored_dEdx { 0 };
+      unsigned char stored_numberOfUsedHitsdEdx = -1;
+      trkIt->summaryValue(stored_dEdx, xAOD::pixeldEdx);
+      stored_numberOfUsedHitsdEdx = (unsigned int) (trkIt)->auxdataConst<unsigned char>("numberOfUsedHitsdEdx");
 
       // Print some info
       Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
       if( dEdx < 0.) {
-        Info(APP_NAME, "Could not calculate truncated mean dE/dx from clusters.");
-        Info(APP_NAME, "Clusters were likely not present or thinned away for this track.");
+        Info(APP_NAME, "Invalid track dE/dx found by tool.");
+        if (clusterEqualize) {
+          Info(APP_NAME, "Perhaps clusters were not present or thinned away for this track.");
+        }
+        Info(APP_NAME, "Track dE/dx from AOD: %g", stored_dEdx);
         continue;
       }
       
       // Check if the recalculated dE/dx matches the stored dE/dx
       // Only makes sense if pidTool is configured to return the raw dE/dx, not the equalized.
       float epsilon = 1e-3;
-      Info(APP_NAME, "Track dE/dx (orig):          %g", track_dEdx);
+      Info(APP_NAME, "Track dE/dx (orig):          %g", stored_dEdx);
       Info(APP_NAME, "Track dE/dx (recalc):        %g", dEdx);
-      if ( !equalize && std::fabs(track_dEdx - dEdx) > epsilon ) {
+      if ( !clusterEqualize && !trackEqualize && std::fabs(stored_dEdx - dEdx) > epsilon ) {
         Info(APP_NAME, "Mismatch between recalculated track dE/dx and value stored in AOD.");
         Info(APP_NAME, "Likely from a migration in the cluster (x,y) between reco (ESD) and now (xAOD).");
         Info(APP_NAME, "Clusters too close to the edge of sensor not included in truncated mean.");
-        Info(APP_NAME, "Track nUsedHits (orig):        %u ", numberOfUsedHitsdEdx);
+        Info(APP_NAME, "Track nUsedHits (orig):        %u ", stored_numberOfUsedHitsdEdx);
         Info(APP_NAME, "Track nUsedHits (recalc):      %d ", nUsedHits);
         Info(APP_NAME, "Track nUsedIBLOverflowHits:    %d ", nUsedIBLOverflowHits);
+      }
+
+      // If using track-level equalization, don't try to find linked pixel clusters.
+      if( trackEqualize ) {
+        continue;
       }
 
       // Follow links from track -> MSOSs -> clusters and check that they are decorated with the dE/dx.
@@ -223,14 +250,14 @@ int main(int argc, char* argv[]) {
         float clusdEdxEq = 0.;
         static const SG::AuxElement::ConstAccessor< int > becAcc("bec");
         if (becAcc.isAvailable(**pixclus)) {
-          bec = bec = becAcc(**pixclus);
+          bec  = becAcc(**pixclus);
         } else {
           Error( APP_NAME,"bec auxdata is missing!");
           continue;
         }
         static const SG::AuxElement::ConstAccessor< int > layerAcc("layer");
         if (layerAcc.isAvailable(**pixclus)) {
-          layer = layer = layerAcc(**pixclus);
+          layer = layerAcc(**pixclus);
         } else {
           Error( APP_NAME, "layer auxdata is missing!");
           continue;
