@@ -35,6 +35,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.oldRegionDefs=True \
     Trigger.FPGATrackSim.region=0 \
     Trigger.FPGATrackSim.spacePoints=False \
+    Trigger.FPGATrackSim.writeOfflPRDInfo=True \
     Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root"
 
