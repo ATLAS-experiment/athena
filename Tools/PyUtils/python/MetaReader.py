@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os
 import re
@@ -1639,6 +1639,9 @@ def dataheader_nentries(infile):
             if ROOT.gROOT.GetVersionInt() < 63100:
                 raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
             if isRNTuple(obj):
-                return ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                try:
+                    return ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                except AttributeError:
+                    return ROOT.RNTupleReader.Open(obj).GetNEntries()
             else:
                 raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
