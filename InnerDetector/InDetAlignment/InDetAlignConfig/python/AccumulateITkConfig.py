@@ -1,21 +1,19 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-# File: InDetAlignConfig/python/AccumulateConfig.py
-# Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 ##----- Setup of Tools for Trk::AlignAlg -----##
     
-def ConstrainedTrackProviderCfg(flags, name="ConstrainedTrackProvider", **kwargs):
+def ITkConstrainedTrackProviderCfg(flags, name="ITkConstrainedTrackProvider", **kwargs):
     cfg = ComponentAccumulator()
 
     if "TrackFitter" not in kwargs:
-
-        from TrkConfig.CommonTrackFitterConfig import InDetStandaloneTrackFitterCfg
+            
+        from TrkConfig.CommonTrackFitterConfig import ITkStandaloneTrackFitterCfg
         kwargs.setdefault("TrackFitter", cfg.addPublicTool(cfg.popToolsAndMerge(
-        InDetStandaloneTrackFitterCfg(flags, FillDerivativeMatrix = True))))
+        ITkStandaloneTrackFitterCfg(flags, FillDerivativeMatrix = True))))
 
     kwargs.setdefault("MinPt", 0.)
 
@@ -32,19 +30,20 @@ def ConstrainedTrackProviderCfg(flags, name="ConstrainedTrackProvider", **kwargs
     kwargs.setdefault("UseConstraintError", False)
     kwargs.setdefault("UseConstrainedTrkOnly", True)
     kwargs.setdefault("InputTracksCollection", flags.ConstrainedTrackProvider.InputTracksCollection)
+    #kwargs.setdefault("OutputLevel", 1)
                 
                 
     cfg.setPrivateTools(CompFactory.Trk.ConstrainedTrackProvider(name, **kwargs))
     return cfg
 
 
-def AnalyticalDerivCalcToolCfg(flags, name="AnalyticalDerivCalcTool", **kwargs):
+def ITkAnalyticalDerivCalcToolCfg(flags, name="ITkAnalyticalDerivCalcTool", **kwargs):
     cfg = ComponentAccumulator()
 
     if "AlignModuleTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import InDetAlignModuleToolCfg
+        from InDetAlignConfig.ITkAlignToolsConfig import ITkAlignModuleToolCfg
         kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(cfg.popToolsAndMerge(
-            InDetAlignModuleToolCfg(flags))))
+            ITkAlignModuleToolCfg(flags))))
 
     kwargs.setdefault("UseIntrinsicPixelError", True)
     kwargs.setdefault("UseIntrinsicSCTError", True)
@@ -54,24 +53,24 @@ def AnalyticalDerivCalcToolCfg(flags, name="AnalyticalDerivCalcTool", **kwargs):
     return cfg
 
 
-def AlignTrackDresserCfg(flags, name="AlignTrackDresser", **kwargs):
+def ITkAlignTrackDresserCfg(flags, name="ITkAlignTrackDresser", **kwargs):
     cfg = ComponentAccumulator()
 
     if "DerivCalcTool" not in kwargs:
         kwargs.setdefault("DerivCalcTool", cfg.popToolsAndMerge(
-            AnalyticalDerivCalcToolCfg(flags)))
+            ITkAnalyticalDerivCalcToolCfg(flags)))
         
     cfg.setPrivateTools(CompFactory.Trk.AlignTrackDresser(name, **kwargs))
     return cfg
 
 
-def SimpleIDNtupleToolCfg(flags, name="SimpleIDNtupleTool", **kwargs):
+def SimpleITkNtupleToolCfg(flags, name="SimpleITkNtupleTool", **kwargs):
     cfg = ComponentAccumulator()
 
     if "AlignModuleTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import InDetAlignModuleToolCfg
+        from InDetAlignConfig.ITkAlignToolsConfig import ITkAlignModuleToolCfg
         kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(cfg.popToolsAndMerge(
-            InDetAlignModuleToolCfg(flags))))
+            ITkAlignModuleToolCfg(flags))))
 
     if "TrackParticleCreatorTool" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
@@ -82,58 +81,58 @@ def SimpleIDNtupleToolCfg(flags, name="SimpleIDNtupleTool", **kwargs):
     return cfg
 
 
-def AlignAlgCfg(flags, name="AlignAlgAccumulate", **kwargs):
+def ITkAlignAlgCfg(flags, name="ITkAlignAlgAccumulate", **kwargs):
     cfg = ComponentAccumulator()
 
     if "GeometryManagerTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import GeometryManagerToolCfg
+        from InDetAlignConfig.ITkAlignToolsConfig import ITkGeometryManagerToolCfg
         kwargs.setdefault("GeometryManagerTool", cfg.addPublicTool(cfg.popToolsAndMerge(
-            GeometryManagerToolCfg(flags))))
+            ITkGeometryManagerToolCfg(flags))))
 
     if "AlignTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import GlobalChi2AlignToolCfg
-        kwargs.setdefault("AlignTool", cfg.popToolsAndMerge(GlobalChi2AlignToolCfg(flags)))
+        from InDetAlignConfig.ITkAlignToolsConfig import ITkGlobalChi2AlignToolCfg
+        kwargs.setdefault("AlignTool", cfg.popToolsAndMerge(ITkGlobalChi2AlignToolCfg(flags)))
 
     if "AlignDBTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import AlignDBToolCfg
-        kwargs.setdefault("AlignDBTool", cfg.popToolsAndMerge(AlignDBToolCfg(flags)))
+        from InDetAlignConfig.ITkAlignToolsConfig import ITkTrkAlignDBToolCfg
+        kwargs.setdefault("AlignDBTool", cfg.popToolsAndMerge(ITkTrkAlignDBToolCfg(flags)))
 
     kwargs.setdefault("TrackCollectionProvider", cfg.popToolsAndMerge(
-        ConstrainedTrackProviderCfg(flags)))
+        ITkConstrainedTrackProviderCfg(flags)))
 
     if "AlignTrackCreator" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import AlignTrackCreatorCfg
+        from InDetAlignConfig.ITkAlignToolsConfig import ITkAlignTrackCreatorCfg
         kwargs.setdefault("AlignTrackCreator", cfg.popToolsAndMerge(
-            AlignTrackCreatorCfg(flags)))
+            ITkAlignTrackCreatorCfg(flags)))
 
-    kwargs.setdefault("AlignTrackDresser", cfg.popToolsAndMerge(AlignTrackDresserCfg(flags)))
+    kwargs.setdefault("AlignTrackDresser", cfg.popToolsAndMerge(ITkAlignTrackDresserCfg(flags)))
 
     if "AlignTrackPreProcessor" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import BeamspotVertexPreProcessorCfg
+        from InDetAlignConfig.ITkAlignToolsConfig import ITkBeamspotVertexPreProcessorCfg
         kwargs.setdefault("AlignTrackPreProcessor", cfg.popToolsAndMerge(
-            BeamspotVertexPreProcessorCfg(flags)))
+            ITkBeamspotVertexPreProcessorCfg(flags)))
 
-    kwargs.setdefault("WriteNtuple", flags.InDet.Align.writeAlignNtuple)
+    kwargs.setdefault("WriteNtuple", flags.ITk.Align.writeAlignNtuple)
     if kwargs["WriteNtuple"]:
-        kwargs.setdefault("FillNtupleTool", cfg.popToolsAndMerge(SimpleIDNtupleToolCfg(flags)))
-        kwargs.setdefault("FilePath", "{flags.InDet.Align.baseDir}/Accumulate")
+        kwargs.setdefault("FillNtupleTool", cfg.popToolsAndMerge(SimpleITkNtupleToolCfg(flags)))
+        kwargs.setdefault("FilePath", "{flags.ITk.Align.baseDir}/Accumulate")
         kwargs.setdefault("FileName", "newIDalign.root")
 
     cfg.addEventAlgo(CompFactory.Trk.AlignAlg(name, **kwargs))
     return cfg
 
 
-def AlignTrackCollSplitterCfg(flags, name="AlignTrackCollSplitter", **kwargs):
+def ITkAlignTrackCollSplitterCfg(flags, name="ITkAlignTrackCollSplitter", **kwargs):
     cfg = ComponentAccumulator()
     cfg.addEventAlgo(CompFactory.Trk.AlignTrackCollSplitter(name, **kwargs))
     return cfg
 
 
-def AccumulateCfg(flags, **kwargs):
-    cfg = AlignAlgCfg(flags)
-    cfg.merge(AlignTrackCollSplitterCfg(flags))
+def ITkAccumulateCfg(flags, **kwargs):
+    cfg = ITkAlignAlgCfg(flags)
+    cfg.merge(ITkAlignTrackCollSplitterCfg(flags))
     
-    if flags.InDet.Align.doMonitoring:
+    if flags.ITk.Align.doMonitoring:
         from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import (
             InDetAlignmentMonitoringRun3Config)
         cfg.merge(InDetAlignmentMonitoringRun3Config(flags))

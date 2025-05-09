@@ -211,6 +211,8 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
   
   Gaudi::Property<std::string> m_pixmanName{this, "PixelManager", "Pixel", "Pixel manager name" };
   Gaudi::Property<std::string> m_sctmanName{this, "SCT_Manager", "SCT", "SCT manager name" };
+  Gaudi::Property<bool> m_doPix{this, "AlignPixel", true, "Include Pixel" };
+  Gaudi::Property<bool> m_doStrip{this, "AlignStrip", true, "Include SCT/ITkStrip" }; 
 
 };
 

@@ -111,10 +111,10 @@ namespace InDet {
     ATH_CHECK( detStore()->retrieve(m_idHelper) );
       
     // retrieve SCT detector manager
-    ATH_CHECK( detStore()->retrieve(m_sctDetManager, "SCT") );
+    ATH_CHECK( detStore()->retrieve(m_sctDetManager,m_stripDetManagerName) );
 
     // retrieve PIX detector manager
-    ATH_CHECK( detStore()->retrieve(m_pixelDetManager, "Pixel") );
+    ATH_CHECK( detStore()->retrieve(m_pixelDetManager,m_pixelDetManagerName) );
 
     // dump module selection
     if(m_doModuleSelection && msgLvl(MSG::INFO)) {
@@ -531,12 +531,12 @@ namespace InDet {
     TGeoMedium*   med=new TGeoMedium("Vacuum",1,mat);
     TGeoVolume*   top = gm->MakeBox("Silicon",med,2000.,2000.,10000.);
     gm->SetTopVolume(top);
-    TGeoVolume*   Si_cog[22000];
-    TGeoVolume*   Si[22000];
+    TGeoVolume*   Si_cog[60000]; //where does 22000 come from? For ITk this is too small it seems. Make configurable?
+    TGeoVolume*   Si[60000];
     int           Si_count=0; 
-    TGeoTranslation* tr[22000];
-    TGeoRotation*    ro[22000];
-    TGeoCombiTrans*  mx[22000];
+    TGeoTranslation* tr[60000];
+    TGeoRotation*    ro[60000];
+    TGeoCombiTrans*  mx[60000];
 
     TGeoTranslation* nulltrans=new TGeoTranslation(0.0,0.0,0.0);
     TGeoRotation*    nullrota=new TGeoRotation();

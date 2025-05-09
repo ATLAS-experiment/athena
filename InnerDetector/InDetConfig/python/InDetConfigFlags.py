@@ -84,5 +84,10 @@ def createInDetConfigFlags():
     # SCT skimming flags
     icf.addFlag("InDet.SCTxAODZmumuSkimming", False)
     icf.addFlag("InDet.SCTxAODSaveOnlyAssociatedMSOS", False)
+   
+    # config flags for alignment configuration
+    from InDetAlignConfig.IDAlignFlags import createInDetAlignFlags
+    icf.addFlagsCategory("InDet.Align", createInDetAlignFlags, prefix=True)
+
 
     return icf

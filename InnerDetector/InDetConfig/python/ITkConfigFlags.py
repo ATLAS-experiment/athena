@@ -88,6 +88,10 @@ def createITkConfigFlags():
     itkcf.addFlagsCategory("ITk.trackingGeometry",
                            createITkTrackingGeometryFlags, prefix=True)
 
+    # config flags for alignment configuration
+    from InDetAlignConfig.ITkAlignFlags import createITkAlignFlags
+    itkcf.addFlagsCategory("ITk.Align", createITkAlignFlags, prefix=True)
+
     # if we want to make eta overlap space points in strip endcaps
     # need to search for neighbour elements in eta
     itkcf.addFlag("ITk.doEndcapEtaNeighbour", False)

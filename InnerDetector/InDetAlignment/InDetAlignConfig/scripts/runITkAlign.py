@@ -10,7 +10,7 @@ from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeome
 
 def parser():
     from argparse import ArgumentParser
-    parser = ArgumentParser(description='Script for the IDAlignment')
+    parser = ArgumentParser(description='Script for the ITk Alignment')
     
     ## Type of running mode
     parser.add_argument("-a", '--accumulate', action="store_true", help='Run accumulation step')
@@ -19,30 +19,32 @@ def parser():
     parser.add_argument("-b", '--baseDir', default = "./", help='Base dir where output is placed')
     
     ## IO
-    parser.add_argument("-i", "--input", default = defaultTestFiles.RAW_RUN3, nargs = "+", help='Input file(s)')
+    parser.add_argument("-i", "--input", default = defaultTestFiles.RDO_RUN4, nargs = "+", help='Input file(s)')
     parser.add_argument("--maxEvents", default = -1, type = int, help='Number of maximal processed events')
-    parser.add_argument("-t", "--inputTracksCollection", default = "CombinedInDetTracks", type = str, help='Name of the track collection to use')
+    parser.add_argument("-t", "--inputTracksCollection", default = "CombinedITkTracks", type = str, help='Name of the track collection to use')
     parser.add_argument("--inputTFiles", default = "AlignmentTFile.root", type = str, help='ROOT file produced in MatrixTool in the accumulation step')
     
     parser.add_argument("--alignmentConstants", default = [], nargs = "+", help='Local alignment constants to use')
-    parser.add_argument("--bowingDatabase", default = "", help='Local bowing database to use')
-    parser.add_argument("--dynamicGlobalDatabase", default = "", help='Local dynamic global database to use')
     
     ## Things to align
-    parser.add_argument("--alignInDet", action="store_true", help='Align whole inner detector')
-    parser.add_argument("--alignSilicon", action="store_true", help='Align silicon part of the inner detector')
-    parser.add_argument("--alignPixel", action="store_true", help='Align pixel')
-    parser.add_argument("--alignSCT", action="store_true", help='Align SCT')
-    parser.add_argument("--alignTRT", action="store_true", help='Align TRT')
+    parser.add_argument("--alignITk", action="store_true", help='Align whole ITk')
+    parser.add_argument("--alignITkPixel", action="store_true", help='Align ITkPixel')
+    parser.add_argument("--alignITkStrip", action="store_true", help='Align ITkStrip')
     
     ## Tags
-    parser.add_argument("--globalTag", default = defaultConditionsTags.RUN3_DATA, help='Global tag')
-    parser.add_argument("--atlasVersion", default = defaultGeometryTags.RUN3, help='Global tag')
-    parser.add_argument("--projectName", default = "data23_13p6TeV", help='Global tag')
+    parser.add_argument("--globalTag", default = defaultConditionsTags.RUN4_MC, help='Global tag')
+    parser.add_argument("--atlasVersion", default = defaultGeometryTags.RUN4, help='Global tag')
     
     parser.add_argument("--isBFieldOff", action="store_true", help='Check if Bfield is off')
     parser.add_argument("--isCosmics", action="store_true", help='Check if cosmics run')
     parser.add_argument("--isHeavyIon", action="store_true", help='Check if heavy ion run')
+
+    ## Local Geometry
+    parser.add_argument("--localgeo", action="store_true", help='Use local geometry XML files')
+
+    ## Local DB File
+    parser.add_argument("--localDB", default = "", help='Use local DB file rather than from conditions tag')
+
     
     return parser.parse_args()
 
@@ -57,23 +59,16 @@ from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
 OnlyTrackingPreInclude(flags)
 
 ## Update flags based on parser line args
-flags.InDet.Align.accumulate = kwargs["accumulate"]
-flags.InDet.Align.baseDir = os.path.abspath(kwargs["baseDir"])
+flags.ITk.Align.accumulate = kwargs["accumulate"]
+flags.ITk.Align.baseDir = os.path.abspath(kwargs["baseDir"])
 
-flags.InDet.Align.alignInDet = kwargs["alignInDet"]
-flags.InDet.Align.alignSilicon = kwargs["alignInDet"] or kwargs["alignSilicon"]
-flags.InDet.Align.alignPixel = kwargs["alignInDet"] or kwargs["alignSilicon"] or kwargs["alignPixel"]
-flags.InDet.Align.alignSCT = kwargs["alignInDet"]  or kwargs["alignSilicon"] or kwargs["alignSCT"]
-flags.InDet.Align.alignTRT = kwargs["alignInDet"] or kwargs["alignTRT"]
+flags.ITk.Align.alignITk = kwargs["alignITk"] or (not kwargs["alignITk"] and not kwargs["alignITkPixel"] and not kwargs["alignITkStrip"])
+flags.ITk.Align.alignITkPixel = kwargs["alignITkPixel"] or flags.ITk.Align.alignITk
+flags.ITk.Align.alignITkStrip = kwargs["alignITkStrip"]  or flags.ITk.Align.alignITk
 
-flags.InDet.Align.writeSilicon = flags.InDet.Align.alignPixel or flags.InDet.Align.alignSCT
-flags.InDet.Align.writeTRT = flags.InDet.Align.alignTRT
+flags.ITk.Align.writeSilicon = False #Issues with folders ATM - should be flags.ITk.Align.alignITkPixel or flags.ITk.Align.alignITkStrip
 
-flags.InDet.Align.useDynamicAlignFolders = bool(kwargs["dynamicGlobalDatabase"])
-flags.InDet.Align.inputAlignmentConstants = kwargs["alignmentConstants"]
-flags.InDet.Align.inputBowingDatabase = kwargs["bowingDatabase"]
-flags.InDet.Align.inputDynamicGlobalDatabase = kwargs["dynamicGlobalDatabase"]
-flags.InDet.Align.inputTFiles = kwargs["inputTFiles"]
+flags.ITk.Align.inputTFiles = kwargs["inputTFiles"]
 
 flags.Input.Files = kwargs["input"]
 flags.Exec.MaxEvents = kwargs["maxEvents"] if not kwargs["solve"] else 1
@@ -81,7 +76,7 @@ flags.IOVDb.GlobalTag = kwargs["globalTag"]
     
 flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", kwargs["inputTracksCollection"])
 
-flags.GeoModel.Align.Dynamic = True
+flags.GeoModel.Align.Dynamic = False
 flags.GeoModel.AtlasVersion = kwargs["atlasVersion"]
 
 if not flags.Input.isMC and kwargs["isCosmics"]:
@@ -110,39 +105,55 @@ else:
     flags.BField.barrelToroidOn = False
     flags.BField.endcapToroidOn = False
     
-if not flags.InDet.Align.alignTRT:
-    flags.Detector.GeometryTRT = False
-    flags.Detector.EnableTRT = False
+
+if kwargs["localgeo"]:
+    flags.ITk.Geometry.AllLocal = True
+
+DBFile = ""
+DBName="OFLCOND"
+tag="InDetSi_MisalignmentMode_random misalignment"
+
+if kwargs["localDB"]:
+    flags.ITk.Align.useLocalDatabase = True
+    DBFile = kwargs["localDB"]
+    flags.IOVDb.DBConnection ="sqlite://;schema="+DBFile+";dbname="+DBName
+    flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+
+if flags.ITk.Align.alignITkPixel:
+    flags.ITk.Geometry.pixelAlignable = True
+if flags.ITk.Align.alignITkStrip:
+    flags.ITk.Geometry.stripAlignable = True
 
 flags.lock()
 
 from RecJobTransforms.RecoSteering import RecoSteering
 cfg = RecoSteering(flags)
 
+if flags.ITk.Align.useLocalDatabase:
+    from IOVDbSvc.IOVDbSvcConfig import addFolders, getSqliteContent
+    print("Adding Align Folder "+flags.ITk.Geometry.alignmentFolder+" from local "+DBName+" Database in file "+DBFile)
+    cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=DBFile,tag=tag, className="AlignableTransformContainer"))     
+
 from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
 cfg.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags))
-    
-## Update condition databases
-# from InDetAlignConfig.CondConfig import CondCfg
-# cfg.merge(CondCfg(flags))
 
 ## Accumulate step
 if kwargs["accumulate"] and not kwargs["solve"]:
-    os.makedirs(f"{flags.InDet.Align.baseDir}/Accumulate", exist_ok = True)
+    os.makedirs(f"{flags.ITk.Align.baseDir}/Accumulate", exist_ok = True)
     os.chdir("Accumulate")
-    from InDetAlignConfig.AccumulateConfig import AccumulateCfg
-    cfg.merge(AccumulateCfg(flags))
+    from InDetAlignConfig.AccumulateITkConfig import ITkAccumulateCfg
+    cfg.merge(ITkAccumulateCfg(flags))
 
 ## Solve step
 elif kwargs["solve"] and not kwargs["accumulate"]:
-    os.makedirs(f"{flags.InDet.Align.baseDir}/Solve", exist_ok = True)
+    os.makedirs(f"{flags.ITk.Align.baseDir}/Solve", exist_ok = True)
     os.chdir("Solve")
-    from InDetAlignConfig.SolveConfig import SolveCfg
-    cfg.merge(SolveCfg(flags))
-           
+    from InDetAlignConfig.SolveITkConfig import ITkSolveCfg
+    cfg.merge(ITkSolveCfg(flags))
+       
 else:
     raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
-                
+
 ##----- Run the setup -----##
                 
 if kwargs["dryRun"]:

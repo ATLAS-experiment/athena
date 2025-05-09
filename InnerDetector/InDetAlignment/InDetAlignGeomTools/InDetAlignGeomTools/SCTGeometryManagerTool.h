@@ -187,6 +187,9 @@ namespace InDet
     bool m_useOldL2;
     bool m_dumpGeometry;
 
+    Gaudi::Property<std::string> m_stripDetManagerName{this,"StripDetectorManager","SCT","Name of the Strip Detector Manager to attempt to retrieve"};
+
+
   }; // end class
 
 } // end namespace

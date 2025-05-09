@@ -112,18 +112,20 @@ StatusCode InDetAlignDBTool::initialize()
   int ndet[2];
   ndet[0]=0;
   ndet[1]=0;
-
-  //We use the presence of the DetManagers as proxies for whether we run with the detector enabled everywhere
-  if (StatusCode::SUCCESS!=detStore()->retrieve(m_pixman,m_pixmanName) || m_pixman==nullptr) {
-    ATH_MSG_INFO( "Could not find pixel manager "<<m_pixmanName<<" running without pixel");
+  if(m_doPix){
+    if (detStore()->retrieve(m_pixman,m_pixmanName)!=StatusCode::SUCCESS || m_pixman==nullptr) {
+      ATH_MSG_INFO( "Could not find pixel manager "<<m_pixmanName<<" running without pixel");
+    }
+    else m_managers.push_back(m_pixman);
   }
-  else m_managers.push_back(m_pixman);
-
-  if (StatusCode::SUCCESS!=detStore()->retrieve(m_sctman,m_sctmanName) || m_sctman==nullptr) {
-    ATH_MSG_INFO("Could not find SCT manager "<<m_sctmanName<<" running without SCT/Strip");
+  
+  if(m_doStrip){
+    if (detStore()->retrieve(m_sctman,m_sctmanName)!=StatusCode::SUCCESS || m_sctman==nullptr) {
+      ATH_MSG_INFO("Could not find SCT manager "<<m_sctmanName<<" running without SCT/Strip");
+    }
+    else m_managers.push_back(m_sctman);
   }
-  else m_managers.push_back(m_sctman);
-
+  
   if(m_pixman){  
       if (m_pixman->m_alignfoldertype == InDetDD::static_run1 && !m_forceUserDBConfig){
         m_dynamicDB = false;
@@ -252,7 +254,6 @@ StatusCode InDetAlignDBTool::finalize()
 
 void InDetAlignDBTool::createDB() const
 {
-  
   ATH_MSG_DEBUG("createDB method called");
   // check not running in fake mode (need real geometry here)
   if (m_par_fake) {
@@ -617,7 +618,7 @@ void InDetAlignDBTool::dispGroup(const int dettype, const int bec,
                                 ++nmod;
             }
           } else {
-            ATH_MSG_ERROR("Cannot find AlignableTransform for key" << key );
+            ATH_MSG_ERROR("Cannot find AlignableTransform for key" << key <<" in AlignableTransform container");
           }
         }
       }
@@ -684,6 +685,7 @@ void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file)
         const Amg::Transform3D& trans=Amg::CLHEPTransformToEigen( cit->transform() );
         int det,bec,layer,ring,sector,side;
         float dx,dy,dz,phi,theta,psi;
+        if(!ident.is_valid()) ATH_MSG_FATAL("Attempting to write an Invalid ID!!!");
         if (!idToDetSet(ident,det,bec,layer,ring,sector,side)) {
           // can fail for testbeam whe identifier with all layer
           // and wafer indices set to zero is not valid in the dictionary
@@ -733,11 +735,13 @@ void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file)
                 *outfile << "2 " << det << " " << 2*bec << " " << layer << " " << sector << 
             " " << ring << " " << side << " " << dx << " "  << dy << " "
              << dz << " " << alpha/CLHEP::mrad << " " << beta/CLHEP::mrad << " " << gamma/CLHEP::mrad << std::endl;
+            ATH_MSG_VERBOSE("Found AlignableTransform for key "
+            << *iobj << " when writing output file");        
         }
       }
     } else {
       ATH_MSG_ERROR("Cannot find AlignableTransform for key "
-            << *iobj );
+            << *iobj << " when writing output file");
     }
   }
   if (ntuple) {
@@ -871,7 +875,7 @@ void InDetAlignDBTool::readTextFile(const std::string& file) const {
       pat = nullptr;
       if (!(pat=cgetTransPtr(channelName))) {
   ATH_MSG_ERROR("Cannot find AlignableTransform object for key" 
-              << channelName );
+              << channelName << " when reading text file");
       } else {
   nobj++;
       }
