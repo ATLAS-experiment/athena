@@ -514,17 +514,19 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyMC(const MuonDriftCircleE
         }
         // Don't know how to handle other cases - error?
     } else {  // Track
-        MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
+        
+        using namespace MuonStationIndex;
+        const StIndex stIdx = m_idHelperSvc->stationIndex(id);
         if (myStrategy.creationParameter(MuonDriftCircleErrorStrategy::StationError)) {
-            if (stIndex == MuonStationIndex::BE) {
+            if (stIdx == StIndex::BE) {
                 ATH_MSG_VERBOSE(" track error BEE ");
                 return 1.44 * sigmaR2 + 1.44;  // 1.2* + 1.2 mm
-            } else if (stIndex == MuonStationIndex::EE) {
+            } else if (stIdx == StIndex::EE) {
                 ATH_MSG_VERBOSE(" track error EE ");
                 if (!m_isMC && m_idHelperSvc->stationEta(id) < 0)
                     return 1.44 * sigmaR2 + 0.16;  // 1.2* + 0.4 mm
                 return 1.44 * sigmaR2 + 1.;        // 1.2* + 1. mm
-            } else if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BIS &&
+            } else if (m_idHelperSvc->chamberIndex(id) == ChIndex::BIS &&
                        std::abs(m_idHelperSvc->stationEta(id)) >= 7) {
                 ATH_MSG_VERBOSE(" track error BIS78 ");
                 if (std::abs(m_idHelperSvc->stationEta(id)) == 7)
@@ -552,13 +554,10 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyMC(const MuonDriftCircleE
                 return 2.25 * sigmaR2 + 0.09;
             } else {
                 // use slightly smaller errors for the barrel
-                double fixedTerm = (stIndex == MuonStationIndex::BI ||
-                                    stIndex == MuonStationIndex::BM ||
-                                    stIndex == MuonStationIndex::BO)
-                                       ? 0.014
-                                       : 0.04;
+                double fixedTerm = (stIdx == StIndex::BI || stIdx == StIndex::BM || stIdx == StIndex::BO)
+                                 ? 0.014 : 0.04;
                 if (m_doIndividualChamberReweights &&
-                    m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BIL &&
+                    m_idHelperSvc->chamberIndex(id) == ChIndex::BIL &&
                     m_idHelperSvc->stationEta(id) == 1 &&
                     m_idHelperSvc->sector(id) == 13 &&
                     m_idHelperSvc->mdtIdHelper().multilayer(id) == 1) {
@@ -598,16 +597,17 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyLoose(const MuonDriftCirc
         }
         // Don't know how to handle other cases - error?
     } else {  // Track
-        MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
+        using namespace MuonStationIndex;
+        StIndex stIdx = m_idHelperSvc->stationIndex(id);
         if (myStrategy.creationParameter(
                 MuonDriftCircleErrorStrategy::StationError)) {
-            if (stIndex == MuonStationIndex::BE) {
+            if (stIdx == StIndex::BE) {
                 ATH_MSG_VERBOSE(" track error BEE ");
                 return 1.44 * sigmaR2 + 4;  // 1.2* + 2 mm
-            } else if (stIndex == MuonStationIndex::EE) {
+            } else if (stIdx == StIndex::EE) {
                 ATH_MSG_VERBOSE(" track error EE ");
                 return 1.44 * sigmaR2 + 0.04;  // 1.2* + 0.2 mm
-            } else if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BIS &&
+            } else if (m_idHelperSvc->chamberIndex(id) == ChIndex::BIS &&
                        std::abs(m_idHelperSvc->stationEta(id)) >= 7) {
                 ATH_MSG_VERBOSE(" track error BIS78 ");
                 if (std::abs(m_idHelperSvc->stationEta(id)) == 7)
@@ -619,9 +619,8 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyLoose(const MuonDriftCirc
                 return 1.44 * sigmaR2 + 0.25;  // 1.2* + 0.5 mm
             }
             /// Need to check whether this Identifier is still existent
-            else if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BOL &&
-                       std::abs(m_idHelperSvc->stationEta(id)) == 7 &&
-                       m_idHelperSvc->stationPhi(id) == 7) {
+            else if (m_idHelperSvc->chamberIndex(id) == ChIndex::BOL && std::abs(m_idHelperSvc->stationEta(id)) == 7 &&
+                     m_idHelperSvc->stationPhi(id) == 7) {
                 ATH_MSG_VERBOSE(" track error BOE ");
                 return 1.44 * sigmaR2 + 0.25;  // 1.2* + 0.5 mm
             }
@@ -646,16 +645,11 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyLoose(const MuonDriftCirc
                 return 2.25 * sigmaR2 + 0.09;
             } else {
                 // use slightly smaller errors for the barrel
-                double fixedTerm = (stIndex == MuonStationIndex::BI ||
-                                    stIndex == MuonStationIndex::BM ||
-                                    stIndex == MuonStationIndex::BO)
-                                       ? 0.015
-                                       : 0.015;
+                double fixedTerm = (stIdx == StIndex::BI || stIdx == StIndex::BM || stIdx == StIndex::BO)
+                                 ? 0.015 : 0.015;
                 if (m_doIndividualChamberReweights &&
-                    m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BIL &&
-                    m_idHelperSvc->stationEta(id) == 1 &&
-                    m_idHelperSvc->sector(id) == 13 &&
-                    m_idHelperSvc->mdtIdHelper().multilayer(id) == 1) {
+                    m_idHelperSvc->chamberIndex(id) == ChIndex::BIL && m_idHelperSvc->stationEta(id) == 1 &&
+                    m_idHelperSvc->sector(id) == 13 && m_idHelperSvc->mdtIdHelper().multilayer(id) == 1) {
                     fixedTerm = 1;
                     ATH_MSG_VERBOSE(" track error Scaled: BIL1A13, first multi layer ");
                 } else {
@@ -692,39 +686,37 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyTight(const MuonDriftCirc
         }
         // Don't know how to handle other cases - error?
     } else {  // Track
-        MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
+        using namespace MuonStationIndex;
+        StIndex stIdx = m_idHelperSvc->stationIndex(id);
         if (myStrategy.creationParameter(MuonDriftCircleErrorStrategy::StationError)) {
-            if (stIndex == MuonStationIndex::BE) {
+            if (stIdx == StIndex::BE) {
                 ATH_MSG_VERBOSE(" track error BEE ");
                 return 1.44 * sigmaR2 + 0.04;  // 1.2* + 0.2 mm
-            } else if (stIndex == MuonStationIndex::EE) {
+            } else if (stIdx == StIndex::EE) {
                 ATH_MSG_VERBOSE(" track error EE ");
                 if (m_idHelperSvc->isSmallChamber(id))
                     return 1.21 * sigmaR2 + 0.01;  // 1.1* + 0.1 mm
                 else
                     return 1.21 * sigmaR2 + 0.01;  // 1.1* + 0.1 mm
-            } else if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BIS &&
+            } else if (m_idHelperSvc->chamberIndex(id) == ChIndex::BIS &&
                        std::abs(m_idHelperSvc->stationEta(id)) >= 7) {
                 ATH_MSG_VERBOSE(" track error BIS78 ");
                 if (std::abs(m_idHelperSvc->stationEta(id)) == 7)
                     return 1.44 * sigmaR2 + 1.;  // 1.2* + 1. mm
 
                 return 4 * sigmaR2 + 1.;  // 2* + 1. mm
-            } else if (stIndex == MuonStationIndex::BM &&
+            } else if (stIdx == StIndex::BM &&
                        m_idHelperSvc->stationPhi(id) == 7 &&
                        (m_idHelperSvc->mdtIdHelper()).stationName(id) == m_BME_idx) {
                 ATH_MSG_VERBOSE(" track error BME ");
                 return 1.21 * sigmaR2 + 0.25;  // 1.1* + 0.5 mm
             }
             /// Need to check whether this Identifier is still valid?
-            else if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BOL &&
-                       std::abs(m_idHelperSvc->stationEta(id)) == 7 &&
-                       m_idHelperSvc->stationPhi(id) == 7) {
+            else if (m_idHelperSvc->chamberIndex(id) == ChIndex::BOL && std::abs(m_idHelperSvc->stationEta(id)) == 7 &&
+                    m_idHelperSvc->stationPhi(id) == 7) {
                 ATH_MSG_VERBOSE(" track error BOE ");
                 return 1.21 * sigmaR2 + 0.25;  // 1.1* + 0.5 mm
-            } else if (stIndex == MuonStationIndex::EE &&
-                       m_idHelperSvc->chamberIndex(id) == MuonStationIndex::EEL &&
-                       m_idHelperSvc->stationEta(id) < 0 &&
+            } else if (m_idHelperSvc->chamberIndex(id) == ChIndex::EEL &&  m_idHelperSvc->stationEta(id) < 0 &&
                        m_idHelperSvc->stationPhi(id) == 3) {
                 ATH_MSG_VERBOSE(" track error EEL1C05 ");
                 return 1.21 * sigmaR2 + 25.;  // 1.1* + 5 mm
@@ -753,10 +745,8 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyTight(const MuonDriftCirc
                 //
                 double fixedTerm = 0.01;
                 if (m_doIndividualChamberReweights) {
-                    if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BIL &&
-                        m_idHelperSvc->stationEta(id) == 1 &&
-                        m_idHelperSvc->sector(id) == 13 &&
-                        m_idHelperSvc->mdtIdHelper().multilayer(id) == 1) {
+                    if (m_idHelperSvc->chamberIndex(id) == ChIndex::BIL && m_idHelperSvc->stationEta(id) == 1 &&
+                        m_idHelperSvc->sector(id) == 13 && m_idHelperSvc->mdtIdHelper().multilayer(id) == 1) {
                         fixedTerm = 1;
                         ATH_MSG_VERBOSE(" track error Scaled: BIL1A13, first multi layer ");
                     }
