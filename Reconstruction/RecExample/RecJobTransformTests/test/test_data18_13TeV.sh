@@ -5,6 +5,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
+# art-output: log.*
 
 export ATHENA_CORE_NUMBER=8
 INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RAW_RUN2_DATA18[0])")
