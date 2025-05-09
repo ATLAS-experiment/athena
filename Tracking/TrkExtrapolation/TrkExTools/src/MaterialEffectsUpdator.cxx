@@ -15,7 +15,6 @@
 #include "TrkExInterfaces/IEnergyLossUpdator.h"
 #include "TrkExInterfaces/IMultipleScatteringUpdator.h"
 #include "TrkGeometry/AssociatedMaterial.h"
-#include "TrkGeometry/CompoundLayer.h"
 #include "TrkGeometry/Layer.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/TrackingVolume.h"
@@ -34,13 +33,15 @@
 #include <functional>
 #include <cmath>
 
+#define TRKEXTOOLS_MAXUPDATES 100
+#ifndef COVARIANCEUPDATEWITHCHECK
+#define COVARIANCEUPDATEWITHCHECK(cov, sign, value)                            \
+  cov += (sign > 0 ? value : (value > cov ? 0 : sign * value))
+#endif
 
 // constructor
 Trk::MaterialEffectsUpdator::MaterialEffectsUpdator(const std::string& t, const std::string& n, const IInterface* p)
   : AthAlgTool(t, n, p)
-  ,
-  //  TrkParametersManipulator(),
-  m_doCompoundLayerCheck(false)
   , m_doEloss(true)
   , m_doMs(true)
   , m_forceMomentum(false)
@@ -61,7 +62,6 @@ Trk::MaterialEffectsUpdator::MaterialEffectsUpdator(const std::string& t, const 
 {
   declareInterface<IMaterialEffectsUpdator>(this);
   // configuration (to be changed to new genconf style)
-  declareProperty("CheckForCompoundLayers", m_doCompoundLayerCheck);
   declareProperty("EnergyLoss", m_doEloss);
   declareProperty("EnergyLossUpdator", m_eLossUpdator);
   declareProperty("MultipleScattering", m_doMs);
@@ -159,7 +159,7 @@ Trk::MaterialEffectsUpdator::updateImpl(
 
   // get the real pathlength
   double pathCorrection = std::abs(lay.surfaceRepresentation().pathCorrection(parm->position(), parm->momentum()));
-  
+
   // --------------------------------------------------------------------------------------------------
   if (m_validationMode) {
     cache.validationLayer = &lay;
@@ -284,8 +284,6 @@ Trk::MaterialEffectsUpdator::updateImpl(
       } else if (m_landauMode) {
         // subtract what we added up till now and add what we should add up till now
         // Landau's 68% limit is approx 1.6*sigmaParameter
-
-        /* Get the TLS to a local here once and use it for calculation*/
         (*updatedCovariance)(Trk::qOverP, Trk::qOverP) -=
           sign * std::pow(1.6 * (cache.accumulatedElossSigma - p * p * sigmaQoverP) / (p * p), 2);
         (*updatedCovariance)(Trk::qOverP, Trk::qOverP) +=
@@ -296,9 +294,6 @@ Trk::MaterialEffectsUpdator::updateImpl(
         // the covariance is invalid
         return nullptr;
       }
-
-      // create the ErrorMatrix
-      // updatedError = new Trk::ErrorMatrix(updatedCovariance);
       // -------------------------------------- screen output --------------------------------------
       if (m_msgOutputCorrections) {
         double sigmaAngle = std::sqrt(angularVariation);
@@ -567,8 +562,6 @@ Trk::MaterialEffectsUpdator::updateImpl(
           return nullptr;
         }
 
-        // create the ErrorMatrix
-
         // -------------------------------------- screen output --------------------------------------
         if (outputFlag && m_msgOutputCorrections) {
           double sigmaAngle = std::sqrt(angularVariation);
@@ -730,14 +723,12 @@ Trk::MaterialEffectsUpdator::updateImpl(
         (*updatedCovariance)(Trk::qOverP, Trk::qOverP) +=
           sign * std::pow(1.6 * cache.accumulatedElossSigma / ((p + deltaP) * (p + deltaP)), 2);
       }
-
       // the checks for the remove Noise mode -----------------------------------------------------
       if (matupmode == Trk::removeNoise && !checkCovariance(*updatedCovariance)) {
         // the covariance is invalid
         return nullptr;
       }
-
-      // create the ErrorMatrix         // -------------------------------------- screen output
+      // -------------------------------------- screen output
       // --------------------------------------
       if (outputFlag && m_msgOutputCorrections) {
         double sigmaAngle = std::sqrt(angularVariation);
@@ -799,11 +790,12 @@ Trk::MaterialEffectsUpdator::updateImpl(
         std::move(updatedCovariance)
     );
   }
+  //default if we have not returned before
   return parm.uniqueClone();
 }
 
 void
-Trk::MaterialEffectsUpdator::validationActionImpl(ICache& cache) 
+Trk::MaterialEffectsUpdator::validationActionImpl(ICache& cache)
 {
   cache.validationEta = 0.;
   cache.validationPhi = 0.;
@@ -811,7 +803,7 @@ Trk::MaterialEffectsUpdator::validationActionImpl(ICache& cache)
 }
 
 void
-Trk::MaterialEffectsUpdator::modelActionImpl(ICache& cache, const Trk::TrackParameters* /*parm*/) 
+Trk::MaterialEffectsUpdator::modelActionImpl(ICache& cache, const Trk::TrackParameters* /*parm*/)
 {
   cache.accumulatedElossSigma = 0;
 }

@@ -23,12 +23,6 @@
 
 #include <boost/thread/tss.hpp>
 
-#define TRKEXTOOLS_MAXUPDATES 100
-#ifndef COVARIANCEUPDATEWITHCHECK
-#define COVARIANCEUPDATEWITHCHECK(cov, sign, value)                            \
-  cov += (sign > 0 ? value : (value > cov ? 0 : sign * value))
-#endif
-
 namespace Trk {
 
 class Layer;
@@ -49,7 +43,7 @@ class IMaterialMapper;
   (e.g silicon sensors) that most of the material
   corresponds to the sensor itself or is located
   behind it.
-  
+
   In this case the material effects would be post-update
   with respect to the measurement update on the given surface,
   e.g in a Kalman filter procedure.
@@ -310,8 +304,6 @@ private:
     const TrackParameters* parm) const;
 
   /* Private Class members*/
-  bool m_doCompoundLayerCheck; //!< turn on/off the necessary checks when we may
-                               //!< have compound layers
   bool m_doEloss;              //!< steer energy loss On/Off from outside
   bool m_doMs;                 //!< steer multiple scattering On/Off from outside
 

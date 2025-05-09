@@ -343,8 +343,6 @@ private:
   bool m_useDenseVolumeDescription; //!<  use dense volume description when
                                     //!<  available in ID/Calo
   bool m_useMuonMatApprox;          //!<  use approximative MS inert material
-  bool m_checkForCompundLayers;     //!<  use the multi-layer tests for compound
-                                    //!<  layers
   bool m_resolveActive;
   bool m_resolveMultilayers;
 

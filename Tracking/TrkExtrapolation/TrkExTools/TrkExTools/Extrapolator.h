@@ -674,7 +674,6 @@ private:
   bool m_activeOverlap;             //!<  consider overlaps between active muon volumes
   bool m_useMuonMatApprox;          //!<  use approximative MS inert material
   bool m_useDenseVolumeDescription; //!<  use dense volume description when available in ID/Calo
-  bool m_checkForCompundLayers;     //!<  use the multi-layer tests for compound layers
   unsigned int m_maxNavigSurf;
   unsigned int m_maxNavigVol;
   bool m_dumpCache;
