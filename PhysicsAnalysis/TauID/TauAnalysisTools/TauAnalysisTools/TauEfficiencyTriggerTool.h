@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUEFFICIENCYTRIGGERTOOL_H
@@ -12,6 +12,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
@@ -49,8 +50,9 @@ public:
 
 protected:
 
-  int m_iMinRunNumber;
-  int m_iMaxRunNumber;
+  Gaudi::Property<int> m_iMinRunNumber{this, "MinRunNumber", 0};
+  Gaudi::Property<int> m_iMaxRunNumber{this, "MaxRunNumber", 0};  
+
 };
 } // namespace TauAnalysisTools
 

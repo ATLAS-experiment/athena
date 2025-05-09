@@ -119,7 +119,8 @@ private:
   void setupCutFlowHistogram();
 
 protected:
-  bool m_bCreateControlPlots;
+  
+  Gaudi::Property<bool> m_bCreateControlPlots{this, "CreateControlPlots", false};
 
   /// Object used to store selection information.
   asg::AcceptInfo m_aAccept;

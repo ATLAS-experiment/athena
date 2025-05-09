@@ -27,20 +27,10 @@ DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
   , m_fOutFile(nullptr)
   , m_aAccept( "DiTauSelection" )
 {
-  declareProperty( "CreateControlPlots", m_bCreateControlPlots = false);
-  /*
-    Baseline properties declaration:
-    properties containing 'Region' are a vector of lower and upper bounds
-    other properties named in plural are a list of exact values to cut on
-    other properties are single cuts
-  */
- 
   declareProperty( "PtRegion",       m_vPtRegion       = {});  // in GeV
   declareProperty( "AbsEtaRegion",   m_vAbsEtaRegion   = {});
   declareProperty( "NSubjetsRegion", m_vNSubjetsRegion = {});
-
 }
-
 //______________________________________________________________________________
 DiTauSelectionTool::~DiTauSelectionTool()
 {
