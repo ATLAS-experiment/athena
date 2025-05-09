@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODBase/IParticleContainer.h"
@@ -202,7 +202,7 @@ auto vushortAccessors = initAccessors<std::vector<unsigned short>>("robs_status"
 
 auto vuintAccessors = initAccessors<std::vector<unsigned>>("robs_history");
 
-auto vuint32Accessors = initAccessors<std::vector<uint32_t>>("robs_id", "robs_size", "PEBROBList", "PEBSubDetList");
+auto vuint32Accessors = initAccessors<std::vector<uint32_t>>("robs_id", "robs_size", "PEBROBList", "PEBSubDetList", "MuonCalibrationStream");
 
 auto vuint8Accessors = initAccessors<std::vector<uint8_t>>("parameterPosition");
 

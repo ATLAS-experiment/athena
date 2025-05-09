@@ -1,10 +1,7 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#undef NDEBUG
-
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
@@ -16,13 +13,7 @@
 #include "L1CaloFEXSim/jSuperCellTowerMapper.h"
 #include "L1CaloFEXSim/jTowerMakerFromSuperCells.h"
 
-#include "SGTools/TestStore.h"
-
-
 #include <fstream>
-
-#define DEBUG_VHB 1
-
 
 namespace LVL1 {
 

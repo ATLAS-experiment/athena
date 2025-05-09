@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXtauAlgo - Algorithm for Tau Algorithm in jFEX
@@ -64,8 +64,8 @@ protected:
         std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGMap;
         std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeMap;     
         
-        StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);  
-        int getTTowerET(unsigned int TTID );  
+        StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&) const;
+        int getTTowerET(unsigned int TTID ) const;
         bool getTTowerSat(unsigned int TTID );
         
         int m_TTwindow[3][3]={{0}};

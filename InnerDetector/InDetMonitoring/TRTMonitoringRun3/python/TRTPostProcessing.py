@@ -77,8 +77,6 @@ def hHitXonTMap2(inputs):
     for j in range(1,nBins+2): #range of the input histogram, not the output
         if plot0.GetBinEntries(j) > 0:
             rh.Fill(j, plot1.GetBinContent(j)*1./plot0.GetBinEntries(j))
-        else:
-            rh.Fill(j, 0)
     return [rh]
     
 def hHitOnTrackVsAll(inputs):

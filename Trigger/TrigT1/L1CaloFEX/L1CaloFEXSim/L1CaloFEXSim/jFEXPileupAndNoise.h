@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXPileupAndNoise - Algorithm for Pileup and Noise in jFEX
@@ -16,11 +16,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXToolInterfaces/IjFEXPileupAndNoise.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h" 
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h" 
-#include "StoreGate/StoreGateSvc.h" 
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 #include "L1CaloFEXCond/jFEXDBCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ namespace DerivationFramework {
       ATH_CHECK(m_containerName2.initialize());
     }
 
-
+    ATH_CHECK(m_inputDecorNames.initialize(SG::AllowEmpty));
 
     return StatusCode::SUCCESS;
   }

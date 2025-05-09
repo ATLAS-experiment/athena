@@ -44,7 +44,7 @@ if( NOT SIMULATIONBASE )
 
    atlas_add_test( MuonSegmentFindingConfigTest
                    SCRIPT python -m MuonConfig.MuonSegmentFindingConfig --threads=1
-                   PROPERTIES TIMEOUT 600
+                   PROPERTIES TIMEOUT 900
                    POST_EXEC_SCRIPT noerror.sh )
   
    atlas_add_test( NewxAODConvertorTest

@@ -85,8 +85,8 @@ def JfexMonitoringConfig(flags):
     n_bins_eta_2p3 = 46 * 64
     # number of bins above |eta| = 3.2 that will never be filled with TOBs
     # due to the low granularity and irregular structure of the FCAL
-    # (given by the length of the list of empty bin in JfexMapForwardEmptyBins.h)
-    n_empty_bins_fcal = 2036
+    # (given by the length of the list of empty bin in JfexMapForwardEmptyBins.h - nope this fills overflow bins too, and sometimes double-fills those)
+    n_empty_bins_fcal = 1708
     # number of bins in 3.15 < |eta| < 3.2 where no jets are produced
     n_empty_bins_fcal_overlap = 96
 
@@ -156,41 +156,41 @@ def JfexMonitoringConfig(flags):
                            ybins=(len(eta_bins_jets)-1)*64,ymin=0.5,ymax=(len(eta_bins_jets)-1)*64+0.5,
                            opt=['kAddBinsDynamically'])
 
-    ###### jTau ######
+    ###### jTAU ######
 
-    helper.defineHistogram('jTau_Eta,jTau_Phi;h_jTau_EtaPhiMap', title="jFex Tau #eta vs #phi;#eta;#phi",
+    helper.defineHistogram('jTau_Eta,jTau_Phi;h_jTAU_EtaPhiMap', title="jFex Tau #eta vs #phi;#eta;#phi",
                            fillGroup=mapGroupName,
                            hanConfig={
                                "algorithm": "Jfex_etaPhiMapFilled_TAU",
                                "description": "Inspect for hot/cold spots - check help for list of known hot/coldspots",
                                "display": "SetPalette(87)"
                            },
-                           type='TH2I',path=expertPath+'jTau/',opt=['kAlwaysCreate'], **eta_phi_bins_central)
+                           type='TH2I',path=expertPath+'jTAU/',opt=['kAlwaysCreate'], **eta_phi_bins_central)
 
-    helper.defineHistogram('jTau_Eta,jTau_Phi;h_jTau_EtaPhiMap_Pt10', title="jFex Tau #geq 10 GeV #eta vs #phi;#eta;#phi",
+    helper.defineHistogram('jTau_Eta,jTau_Phi;h_jTAU_EtaPhiMap_Pt10', title="jFex Tau #geq 10 GeV #eta vs #phi;#eta;#phi",
                            fillGroup=mapHighPtGroupName,
                            hanConfig={
                                "algorithm": "Jfex_etaPhiMapFilled_TAU",
                                "description": "Inspect for hot/cold spots - check help for list of known hot/coldspots",
                                "display": "SetPalette(87)"
                            },
-                           type='TH2I',path=expertPath+'jTau/',opt=['kAlwaysCreate'], **eta_phi_bins_central)
+                           type='TH2I',path=expertPath+'jTAU/',opt=['kAlwaysCreate'], **eta_phi_bins_central)
 
-    helper.defineHistogram('LBN,jTau_binNumber;h_jTau_posVsLBN', title="jFex Tau count vs LB;LB;50(y-1)+x",
+    helper.defineHistogram('LBN,jTau_binNumber;h_jTAU_posVsLBN', title="jFex Tau count vs LB;LB;50(y-1)+x",
                            fillGroup=mapGroupName,
-                           type="TH2I", path=expertPath+'jTau/detail/',
+                           type="TH2I", path=expertPath+'jTAU/detail/',
                            hanConfig={
-                           "description": "Timeseries of TOB counts at each location, y-axis relates to x and y bin numbers from <a href='../h_jTau_EtaPhiMap'>eta-phi map</a>. Use projection X1 for 1D plot."
+                           "description": "Timeseries of TOB counts at each location, y-axis relates to x and y bin numbers from <a href='../h_jTAU_EtaPhiMap'>eta-phi map</a>. Use projection X1 for 1D plot."
                            },
                            xbins=1, xmin=0, xmax=10,
                            ybins=50*64,ymin=0.5,ymax=50*64+0.5,
                            opt=['kAddBinsDynamically'])
 
-    helper.defineHistogram('LBN,jTau_binNumber;h_jTau_posVsLBN_Pt10', title="jFex Tau #geq 10 GeV count vs LB;LB;50(y-1)+x",
+    helper.defineHistogram('LBN,jTau_binNumber;h_jTAU_posVsLBN_Pt10', title="jFex Tau #geq 10 GeV count vs LB;LB;50(y-1)+x",
                            fillGroup=mapHighPtGroupName,
-                           type="TH2I", path=expertPath+'jTau/detail/',
+                           type="TH2I", path=expertPath+'jTAU/detail/',
                            hanConfig={
-                           "description": "Timeseries of TOB counts at each location, y-axis relates to x and y bin numbers from <a href='../h_jTau_EtaPhiMap_Pt10'>eta-phi map</a>. Use projection X1 for 1D plot."
+                           "description": "Timeseries of TOB counts at each location, y-axis relates to x and y bin numbers from <a href='../h_jTAU_EtaPhiMap_Pt10'>eta-phi map</a>. Use projection X1 for 1D plot."
                            },
                            xbins=1, xmin=0, xmax=10,
                            ybins=50*64,ymin=0.5,ymax=50*64+0.5,
@@ -318,46 +318,46 @@ def JfexMonitoringConfig(flags):
     helper.defineHistogram('jLJ_GlobalEta,jLJ_GlobalPhi;h_jLJ_GlobalEtaPhiMap', title="jFex LRJet #eta vs #phi;(int) #eta; (int) #phi",
                            fillGroup=groupName,
                            type='TH2F',path=developerPath+'jLJ/', xbins=100,xmin=-50,xmax=50,ybins=67,ymin=-1,ymax=65)
-    ######  jTau  ######
-    helper.defineHistogram('jTau_jFexNumber;h_jTau_jFexNumber', title='jFex Tau Module;Module number;Counts',
+    ######  jTAU  ######
+    helper.defineHistogram('jTau_jFexNumber;h_jTAU_jFexNumber', title='jFex Tau Module;Module number;Counts',
                            fillGroup=groupName,
-                           type='TH1I', path=developerPath+'jTau/', xbins=6,xmin=0,xmax=6)
+                           type='TH1I', path=developerPath+'jTAU/', xbins=6,xmin=0,xmax=6)
 
-    helper.defineHistogram('jTau_fpgaNumber;h_jTau_fpgaNumber', title='jFex Tau FPGA;FPGA number;Counts',
+    helper.defineHistogram('jTau_fpgaNumber;h_jTAU_fpgaNumber', title='jFex Tau FPGA;FPGA number;Counts',
                            fillGroup=groupName,
-                           type='TH1F', path=developerPath+'jTau/',xbins=4,xmin=0,xmax=4)
+                           type='TH1F', path=developerPath+'jTAU/',xbins=4,xmin=0,xmax=4)
 
-    helper.defineHistogram('jTau_jFexNumber,jTau_fpgaNumber;h_jTau_DetectorMap', title="jFex Tau module vs FPGA; jFEX module; FPGA",
+    helper.defineHistogram('jTau_jFexNumber,jTau_fpgaNumber;h_jTAU_DetectorMap', title="jFex Tau module vs FPGA; jFEX module; FPGA",
                            fillGroup=groupName,
-                           type='TH2I',path=developerPath+'jTau/', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
+                           type='TH2I',path=developerPath+'jTAU/', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
 
-    helper.defineHistogram('jTau_Et;h_jTau_Et', title='jFex Tau Transverse Energy;tobEt [200 MeV Scale];Counts',
+    helper.defineHistogram('jTau_Et;h_jTAU_Et', title='jFex Tau Transverse Energy;tobEt [200 MeV Scale];Counts',
                            fillGroup=groupName,
-                           type='TH1I', path=developerPath+'jTau/',xbins=512,xmin=0,xmax=2048)
+                           type='TH1I', path=developerPath+'jTAU/',xbins=512,xmin=0,xmax=2048)
 
-    helper.defineHistogram('jTau_Iso;h_jTau_Iso', title='jFex Tau Isolation;tobIso [200 MeV Scale];Counts',
+    helper.defineHistogram('jTau_Iso;h_jTAU_Iso', title='jFex Tau Isolation;tobIso [200 MeV Scale];Counts',
                            fillGroup=groupName,
-                           type='TH1I', path=developerPath+'jTau/',xbins=512,xmin=0,xmax=2048)
+                           type='TH1I', path=developerPath+'jTAU/',xbins=512,xmin=0,xmax=2048)
 
-    helper.defineHistogram('jTau_Eta;h_jTau_Eta', title='jFex Tau #eta;#eta;Counts',
+    helper.defineHistogram('jTau_Eta;h_jTAU_Eta', title='jFex Tau #eta;#eta;Counts',
                            fillGroup=groupName,
-                           type='TH1F', path=developerPath+'jTau/',xbins=100,xmin=-5.0,xmax=5.0)
+                           type='TH1F', path=developerPath+'jTAU/',xbins=100,xmin=-5.0,xmax=5.0)
 
-    helper.defineHistogram('jTau_Phi;h_jTau_Phi', title='jFex Tau #phi;#phi;Counts',
+    helper.defineHistogram('jTau_Phi;h_jTAU_Phi', title='jFex Tau #phi;#phi;Counts',
                            fillGroup=groupName,
-                           type='TH1F', path=developerPath+'jTau/',**phi_bins)
+                           type='TH1F', path=developerPath+'jTAU/',**phi_bins)
 
-    helper.defineHistogram('jTau_GlobalEta;h_jTau_GlobalEta', title='jFex Tau Global #eta;#eta;Counts',
+    helper.defineHistogram('jTau_GlobalEta;h_jTAU_GlobalEta', title='jFex Tau Global #eta;#eta;Counts',
                            fillGroup=groupName,
-                           type='TH1F', path=developerPath+'jTau/',xbins=100,xmin=-50,xmax=50)
+                           type='TH1F', path=developerPath+'jTAU/',xbins=100,xmin=-50,xmax=50)
 
-    helper.defineHistogram('jTau_GlobalPhi;h_jTau_GlobalPhi', title='jFex Tau Global #phi;#phi;Counts',
+    helper.defineHistogram('jTau_GlobalPhi;h_jTAU_GlobalPhi', title='jFex Tau Global #phi;#phi;Counts',
                            fillGroup=groupName,
-                           type='TH1F', path=developerPath+'jTau/',xbins=67,xmin=-1,xmax=65)
+                           type='TH1F', path=developerPath+'jTAU/',xbins=67,xmin=-1,xmax=65)
 
-    helper.defineHistogram('jTau_GlobalEta,jTau_GlobalPhi;h_jTau_GlobalEtaPhiMap', title="jFex Tau Global #eta vs #phi;(int) #eta; (int) #phi",
+    helper.defineHistogram('jTau_GlobalEta,jTAU_GlobalPhi;h_jTAU_GlobalEtaPhiMap', title="jFex Tau Global #eta vs #phi;(int) #eta; (int) #phi",
                            fillGroup=groupName,
-                           type='TH2F',path=developerPath+'jTau/', xbins=100,xmin=-50,xmax=50,ybins=67,ymin=-1,ymax=65)
+                           type='TH2F',path=developerPath+'jTAU/', xbins=100,xmin=-50,xmax=50,ybins=67,ymin=-1,ymax=65)
     ######  jEM  ######
     helper.defineHistogram('jEM_jFexNumber;h_jEM_jFexNumber', title='jFex EM Module;Module number;Counts',
                            fillGroup=groupName,
@@ -367,7 +367,7 @@ def JfexMonitoringConfig(flags):
                            fillGroup=groupName,
                            type='TH1F', path=developerPath+'jEM/',xbins=4,xmin=0,xmax=4)
 
-    helper.defineHistogram('jEM_jFexNumber,jEM_fpgaNumber;h_jTau_DetectorMap', title="jFex EM module vs FPGA; jFEX module; FPGA",
+    helper.defineHistogram('jEM_jFexNumber,jEM_fpgaNumber;h_jEM_DetectorMap', title="jFex EM module vs FPGA; jFEX module; FPGA",
                            fillGroup=groupName,
                            type='TH2I',path=developerPath+'jEM/', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
 

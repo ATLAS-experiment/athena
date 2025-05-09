@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -98,9 +98,7 @@ namespace LVL1 {
         return (((i->getWord() >> bits ) & mask)>((j->getWord() >> bits ) & mask)); 
     }
     
-    static bool etFwdElSort  (const std::vector<uint32_t>& i,
-                              const std::vector<uint32_t>& j)
-    { return (((i.at(0) >> FEXAlgoSpaceDefs::jEM_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jEM_etBit) & 0x7ff ));}
+    static bool etFwdElSort  (const std::vector<uint32_t>& i, const std::vector<uint32_t>& j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jEM_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jEM_etBit) & 0x7ff ));}
     
     std::vector<std::unique_ptr<jFEXTOB>> m_tau_tobwords;
     std::vector<std::unique_ptr<jFEXTOB>> m_SRJet_tobwords;
@@ -128,7 +126,8 @@ namespace LVL1 {
     int m_SRJetET{};
     int m_LRJetET{};
 
-    CaloCellContainer m_sCellsCollection;
+    // FIXME: unused?
+    //CaloCellContainer m_sCellsCollection;
 
     SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyETowers", "jTowerContainer", "Input container for jTowers"};
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 

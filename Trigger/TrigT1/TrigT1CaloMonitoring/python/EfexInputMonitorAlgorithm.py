@@ -92,13 +92,23 @@ def EfexInputMonitoringConfig(flags):
                              thresholdConfig=commonThresholdConfig
                              )
 
-    helper.defineDQAlgorithm("Efex_ecal_hot_etaPhiLBMapOutliers",
+    helper.defineDQAlgorithm("Efex_ecal_hot_etaPhiLBMapOutliers_Shifter",
                              hanConfig=commonAlgConfig|hotCuts|knownAnomalies_hotEcal|{"NBinsY":64,"LiveMode":1},
                              thresholdConfig=commonThresholdConfig
                              )
 
-    helper.defineDQAlgorithm("Efex_hcal_hot_etaPhiLBMapOutliers",
+    helper.defineDQAlgorithm("Efex_hcal_hot_etaPhiLBMapOutliers_Shifter",
                              hanConfig=commonAlgConfig|hotCuts|knownAnomalies_hotHcal|{"NBinsY":64,"LiveMode":1},
+                             thresholdConfig=commonThresholdConfig
+                             )
+
+    helper.defineDQAlgorithm("Efex_ecal_hot_etaPhiLBMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_hotEcal|{"NBinsY":64,"LiveMode":0},
+                             thresholdConfig=commonThresholdConfig
+                             )
+
+    helper.defineDQAlgorithm("Efex_hcal_hot_etaPhiLBMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_hotHcal|{"NBinsY":64,"LiveMode":0},
                              thresholdConfig=commonThresholdConfig
                              )
 
@@ -125,7 +135,8 @@ def EfexInputMonitoringConfig(flags):
         helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_hot_posVsLBN',title=f'{layer.upper()} SuperCells >= 500MeV;LB;64(x-1)+y',
                            paths=["Expert/Inputs/eFEX/detail","Shifter/Inputs/eFEX"],
                            cutmask="AboveCut",
-                           hanConfig={"algorithm":f"Efex_{layer}_hot_etaPhiLBMapOutliers","description":f"x and y correspond to axis bin numbers on <a href='../h_dataTowers_{layer}_hot_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           hanConfig={"Expert/algorithm":f"Efex_{layer}_hot_etaPhiLBMapOutliers","Shifter/algorithm":f"Efex_{layer}_hot_etaPhiLBMapOutliers_Shifter",
+                                      "description":f"x and y correspond to axis bin numbers on <a href='../h_dataTowers_{layer}_hot_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            fillGroup=layer,
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
