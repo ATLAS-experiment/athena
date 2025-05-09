@@ -172,10 +172,6 @@ namespace CP {
                                   int& nUsedIBLOverflowHits) const
   {
 
-    /// Total number of good pixel hits considered in truncated mean calc.    
-    /// Clusters will be subjected to various cuts.
-    int goodPixelhits = 0; 
-
     /// passed by ref, so will update here.  
     nUsedHits=0; // divisor in the truncated mean calculation.
     nUsedIBLOverflowHits=0; // number of IBL hits in overflow.
@@ -244,7 +240,7 @@ namespace CP {
             cluster.charge = pixclus->prepRawData()->totalCharge();
 
             /// keep track if this is an ibl cluster with overflow
-            int iblOverflow=0;
+            bool iblOverflow = false;
             if ((m_IBLParameterSvc->containsIBL()) and (cluster.bec==0) and (cluster.layer==0)) { // check if IBL
               
               //loop over ToT and check if anyone is overflow (ToT==14) check for IBL cluster overflow
@@ -254,18 +250,18 @@ namespace CP {
               for (int pixToT : ToTs) {
                 if (pixToT >= overflowIBLToT) {
                   //overflow pixel hit -- flag cluster
-                  iblOverflow = 1;
+                  iblOverflow = true;
                   break; //no need to check other hits of this cluster
                 }
               }// end
               cluster.isIBL = true;
-              cluster.iblOverflow = iblOverflow; //why int?
+              cluster.iblOverflow = iblOverflow;
             }
 
             /// If good measurement, update cluster raw cluster dE/dx, passdEdxCutsLoose, and passdEdxCutsTight.
-            /// Also, increment goodPixelhits & nUsedIBLOverflowHits
+            /// Also, increment nUsedIBLOverflowHits
             /// If bad measurement, keep default negative value for dE/dx, don't increment.
-            getClusterdEdx(cluster, goodPixelhits, nUsedIBLOverflowHits);
+            getClusterdEdx(cluster, nUsedIBLOverflowHits);
 
             /// Check if good measurement.
             if (cluster.dEdx < 0.0) { continue; }
@@ -292,12 +288,12 @@ namespace CP {
     } // end if reco track states found.
 
     /// Always calculate raw truncated mean & update number of hits used in truncated mean.
-    float averagedEdx = getTruncatedMean(clusters, nUsedHits, goodPixelhits);
+    float averagedEdx = getTruncatedMean(clusters, nUsedHits);
     
     /// Calculate equalized truncated mean.
     if(m_equalizeClusterMeasurements) {
       int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
-      float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, goodPixelhits, true);
+      float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, true);
 
       /// Sanity check that nUsedHits and nUsedHitsEq are the same.
       if (nUsedHitsEq != nUsedHits) {
@@ -328,10 +324,6 @@ namespace CP {
   {
 
     using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
-
-    /// Total number of good pixel hits considered in truncated mean calc.    
-    /// Clusters will be subjected to various cuts.
-    int goodPixelhits = 0;
 
     /// All pixel hits linked to the track.
     int allPixelHits = 0;
@@ -440,7 +432,7 @@ namespace CP {
       /// Only derive SFs for |eta| < 2.5.
       /// If |eta|>2.5, apply last SF.
       double absEta = abs(track.eta());
-      if(absEta > 2.5) {
+      if(absEta > 2.5) { // FIXME instead of hardcoding, maybe check if absEta larger than highest etaHigh...
         absEta = 2.49;
       }
       auto result = filtered_df->Filter(
@@ -572,7 +564,7 @@ namespace CP {
       }
 
       /// Keep track if this is an ibl cluster with overflow
-      int iblOverflow=0;
+      bool iblOverflow = false;
       if ((cluster.bec==0) and (cluster.layer==0)) { // check if IBL
         int overflowIBLToT = 16; // see getFEI4OverflowToT() in PixelChargeCalibCondData.h
         std::vector<int> ToTs;
@@ -587,7 +579,7 @@ namespace CP {
         for (int pixToT : ToTs) {
           if (pixToT >= overflowIBLToT) {
             //overflow pixel hit -- flag cluster
-            iblOverflow = 1;
+            iblOverflow = true;
             break; //no need to check other hits of this cluster
           }
         }// end
@@ -596,9 +588,9 @@ namespace CP {
       }
 
       /// If good measurement, update cluster raw cluster dE/dx, passdEdxCutsLoose, and passdEdxCutsTight.
-      /// Also, increment goodPixelhits & nUsedIBLOverflowHits
+      /// Also, increment nUsedIBLOverflowHits
       /// If bad measurement, keep default negative value for dE/dx, don't increment.
-      getClusterdEdx(cluster, goodPixelhits, nUsedIBLOverflowHits);
+      getClusterdEdx(cluster, nUsedIBLOverflowHits);
 
       /// Decorate pixel cluster on track with raw dE/dx, whether it's a good dE/dx measurement or not.
       /// Will be negative default value if cluster fails the cleaning cuts.
@@ -671,7 +663,7 @@ namespace CP {
     } // MSOS iterator
     
     /// Always calculate raw truncated mean.
-    float averagedEdx = getTruncatedMean(clusters, nUsedHits, goodPixelhits);
+    float averagedEdx = getTruncatedMean(clusters, nUsedHits);
     
     /// Sanity check that the recalculated raw dE/dx matches what was calculated during reco and stored as a track summary variable.
     float epsilon = 1e-3;
@@ -693,7 +685,7 @@ namespace CP {
     }
 
     int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
-    float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, goodPixelhits, true);
+    float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, true);
       
     /// Sanity check that nUsedHits and nUsedHitsEq are the same.
     if (nUsedHitsEq != nUsedHits) {
@@ -715,10 +707,9 @@ namespace CP {
   /// As is the number of IBL hits in overflow (again, only if they are considered for the trunc mean calc).
 
   /// If good measurement, update cluster raw cluster dE/dx, passdEdxCutsLoose, and passdEdxCutsTight.
-  /// Also, increment goodPixelhits & nUsedIBLOverflowHits.
+  /// Also, increment nUsedIBLOverflowHits.
   /// If bad measurement, keep default negative value for dE/dx, don't increment.
   void PixelToTPIDTool::getClusterdEdx(PixelCluster& cluster,
-                                       int& pixelhits,
                                        int& nUsedIBLOverflowHits) const{    
     float dEdxValue;
 
@@ -798,8 +789,7 @@ namespace CP {
     if (m_tightClusterCleaning) { // Applying tight cluster cleaning on top of the (nominal) loose cuts on (x,y) and cos(alpha).
       if(cluster.passdEdxCutsLoose && cluster.passdEdxCutsTight) { // technically shouldn't have to check cluster.passdEdxCutsLoose 
         /// Update counters & assign dE/dx.
-        pixelhits++;
-        if (cluster.isIBL && cluster.iblOverflow>1) {
+        if (cluster.isIBL && cluster.iblOverflow) {
           nUsedIBLOverflowHits++;
         }
         cluster.dEdx = dEdxValue;
@@ -814,8 +804,7 @@ namespace CP {
     else { // Only applying (nominal) loose cuts on (x,y) and cos(alpha).
       if(cluster.passdEdxCutsLoose) { // technically shouldn't have to check cluster.passdEdxCutsLoose 
         /// Update counters & assign dE/dx.
-        pixelhits++;
-        if (cluster.isIBL && cluster.iblOverflow>0) {
+        if (cluster.isIBL && cluster.iblOverflow) {
           nUsedIBLOverflowHits++;
         }
         cluster.dEdx = dEdxValue;
@@ -838,19 +827,19 @@ namespace CP {
   /// NB:  nUsedHits (divisor of trunc mean) is passed by reference and updated.  Do not call this function multiple times with the same counter.
   float PixelToTPIDTool::getTruncatedMean(const std::vector<PixelCluster>& clusters,
                                               int& nUsedHits, 
-                                              int pixelhits,
                                               bool equalize) const {
 
+    int pixelhits = clusters.size();
     /// Get the dEdxMap.
     /// First in pair is the dE/dx (raw or equalized).  Second indicates if it's a IBL cluster in with ToT in overflow.
     /// Multimaps  will automatically sort based on the first element in the pair.  Useful for truncated mean alg.
-    std::multimap<float,int> dEdxMap;
+    std::multimap<float,bool> dEdxMap;
     for (const auto& cluster : clusters) {
       if(equalize) {
-        dEdxMap.insert(std::pair<float, int>(cluster.dEdxEq, cluster.iblOverflow));
+        dEdxMap.insert(std::pair<float, bool>(cluster.dEdxEq, cluster.iblOverflow));
       }
       else {
-        dEdxMap.insert(std::pair<float, int>(cluster.dEdx, cluster.iblOverflow));
+        dEdxMap.insert(std::pair<float, bool>(cluster.dEdx, cluster.iblOverflow));
       }
     }
 
@@ -885,7 +874,7 @@ namespace CP {
 
       ATH_MSG_DEBUG("Truncated mean dEdx = " << averagedEdx);
       ATH_MSG_DEBUG("Used hits: " << nUsedHits << ", IBL overflows: " << IBLOverflow );
-      ATH_MSG_DEBUG("Number of good measurements = " << pixelhits << "( map size = " << dEdxMap.size() << ")"); // FIXME! Check pixelHits == dEdxMap.size()
+      ATH_MSG_DEBUG("Number of good measurements = " << pixelhits );
       return averagedEdx;
     }
     return -1;

@@ -67,12 +67,13 @@ namespace CP {
       /// However, the charge collection eff. in each layer of the pixel detector is degrading at a different rate.
       ///    This motivates run- and module-specific equalization scale factors.
       ///    To use these, custom datasets with pixel clusters and MSOSs are required.
-      /// If pixel clusters & MSOSs are available, this tool will follow the links from the track to the clusters.
-      ///    It will then calculate the cluster dE/dx, apply the equalization SF, and decorate the cluster with the equalized dE/dx.
-      ///    It will also calculate the truncated mean using the equalized cluster measurements.
-      /// If pixel clusters & MSOSs are not available (e.g. in nominal AODs), the simple run-specific SFs will be applied the the stored truncated mean instead.
+      /// The equalization strategy is determined by the tool properties: EqualizeTrackMeasurements or EqualizeClusterMeasurements.
+      ///    These are configured in TrackingAnalysisConfig.py & passed through to the tool.
+      /// If the cluster EQ strategy is chosen AND pixel clusters & MSOSs are available, this tool will follow the links from the track to the clusters.
+      ///    It will then calculate the cluster dE/dx, apply the equalization SF, and decorate the cluster with the raw & equalized dE/dx.
+      ///    It will then calculate and return the truncated mean using the equalized cluster measurements.
       
-      float pixeldEdxEqual = -99.0;
+      float pixeldEdxEqual = -1.0;
       int nUsedHits = -1;
       int nUsedIBLOverflowHits = -1;
       pixeldEdxEqual = m_pixelToTPIDTool->dEdx(*trk, nUsedHits, nUsedIBLOverflowHits); // returns raw or equalized based on 'EqualizeClusterMeasurements' boolean property

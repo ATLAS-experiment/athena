@@ -74,7 +74,7 @@ namespace CP {
     /// Container will be set dynamically in initialize.  
     /// Form will be <container>.<m_dEdxEqKey>.
     Gaudi::Property<std::string>  m_dEdxEqVarName
-    { this, "dEdxEqVarName", "dEdxEq", "Variabel name for the equalized pixel dE/dx attribute" };
+    { this, "dEdxEqVarName", "pixeldEdxEq", "Variable name for the equalized pixel dE/dx attribute" };
 
     /// Declare WriteDectorHandleKey but set dynamically in initialize once track container is known...
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey; 

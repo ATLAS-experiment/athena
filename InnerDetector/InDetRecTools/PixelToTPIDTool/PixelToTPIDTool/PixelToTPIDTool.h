@@ -130,18 +130,16 @@ namespace CP {
       float dEdx = -99.9;
       float dEdxEq = -99.9;
       bool isIBL = false;
-      int iblOverflow = 0;
+      bool iblOverflow = 0;
       bool passdEdxCutsLoose = false;
       bool passdEdxCutsTight = false;
     };
 
     void  getClusterdEdx( PixelCluster& cluster,
-                         int& pixelhits,
                          int& nUsedIBLOverflowHits) const;
     
     float getTruncatedMean(const std::vector<PixelCluster>& clusters,
                            int& nUsedHits,
-                           int pixelhits,
                            bool equalize = false) const;
 
     /// Athena (ESD EDM) ///
