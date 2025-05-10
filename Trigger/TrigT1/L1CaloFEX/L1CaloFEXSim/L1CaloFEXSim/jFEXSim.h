@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -16,11 +16,9 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jFEXFPGA.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+#include "L1CaloFEXSim/jFEXTOB.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-
+#include <vector>
 
 namespace LVL1 {
   
@@ -76,7 +74,8 @@ namespace LVL1 {
     int m_jTowersIDs_Thin [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]{};
 
     std::unordered_map<int,jTower> m_jTowersColl;
-    CaloCellContainer m_sCellsCollection;
+    // FIXME: unused?
+    //CaloCellContainer m_sCellsCollection;
     std::vector<jFEXFPGA*> m_jFEXFPGACollection;
    
     std::vector<std::vector<std::vector<uint32_t>>> m_fwdEl_tobWords;

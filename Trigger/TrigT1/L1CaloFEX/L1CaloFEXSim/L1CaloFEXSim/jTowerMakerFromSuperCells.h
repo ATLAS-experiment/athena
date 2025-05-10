@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JTOWERMAKERFROMSUPERCELLS_H
@@ -12,17 +12,13 @@
 // Athena/Gaudi
 #include "StoreGate/WriteHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/jTowerBuilder.h"
 #include "L1CaloFEXSim/jSuperCellTowerMapper.h"
 
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
-class CaloIdManager;
 
 namespace LVL1 {
 

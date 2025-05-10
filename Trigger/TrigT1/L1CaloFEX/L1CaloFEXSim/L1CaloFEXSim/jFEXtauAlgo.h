@@ -11,17 +11,12 @@
 #ifndef jFEXtauAlgo_H
 #define jFEXtauAlgo_H
 
+#include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXtauAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h" 
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h" 
-#include "StoreGate/StoreGateSvc.h" 
-#include "PathResolver/PathResolver.h"
 
 
 namespace LVL1 {
@@ -48,7 +43,7 @@ namespace LVL1 {
     virtual int getClusterEt() const override;
     virtual int getFirstEtRing() const override;
     virtual bool getTauSat() const override;
-    virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
+    virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map)  override;
     
 protected:
 

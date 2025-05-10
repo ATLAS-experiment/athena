@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -13,7 +13,6 @@
 #define jFEXSysSim_H
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXSysSim.h"
-#include "AthenaKernel/CLASS_DEF.h"
 
 #include "L1CaloFEXCond/jFEXDBCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -23,25 +22,17 @@
 #include "L1CaloFEXSim/jFEXSim.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+#include "L1CaloFEXSim/jFEXTOB.h"
+#include "L1CaloFEXSim/jFEXOutputCollection.h"
 
 #include "xAODTrigger/jFexSRJetRoIContainer.h"
-#include "xAODTrigger/jFexSRJetRoIAuxContainer.h"
 #include "xAODTrigger/jFexLRJetRoIContainer.h"
-#include "xAODTrigger/jFexLRJetRoIAuxContainer.h"
 #include "xAODTrigger/jFexTauRoIContainer.h"
-#include "xAODTrigger/jFexTauRoIAuxContainer.h"
 #include "xAODTrigger/jFexFwdElRoIContainer.h"
-#include "xAODTrigger/jFexFwdElRoIAuxContainer.h"
 #include "xAODTrigger/jFexMETRoIContainer.h"
-#include "xAODTrigger/jFexMETRoIAuxContainer.h"
 #include "xAODTrigger/jFexSumETRoIContainer.h"
-#include "xAODTrigger/jFexSumETRoIAuxContainer.h"
 #include "TrigConfData/L1Menu.h"
 
-#include "L1CaloFEXSim/jFEXTOB.h"
 
 namespace LVL1 {
   
@@ -107,7 +98,6 @@ namespace LVL1 {
     // decoration handles for sim-only quantities
     SG::WriteDecorHandleKey<xAOD::jFexSRJetRoIContainer> m_TobDecorKey_jJ_seedET  { this, "Key_tobDecor_jJ_seedET"  , m_TobOutKey_jJ   , "seedETMeV"  , "jJet seed ET value in MeV" };
     SG::WriteDecorHandleKey<xAOD::jFexSRJetRoIContainer> m_xTobDecorKey_jJ_seedET { this, "Key_xTobDecor_jJ_seedET" , m_xTobOutKey_jJ  , "seedETMeV"  , "jJet seed ET value in MeV" };
-    
 
 
     std::unordered_map<int,jTower> m_jTowersColl;
