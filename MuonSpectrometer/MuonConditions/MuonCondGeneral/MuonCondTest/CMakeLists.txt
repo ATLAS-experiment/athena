@@ -68,7 +68,7 @@ atlas_add_test( NSWPassivTest
 atlas_add_test( NSWDcsTest
                 PRIVATE_WORKING_DIRECTORY
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWDcsAlg.sh 
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 900
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( TgcCondTest
                 SCRIPT python -m MuonCondDump.dumpTgcDigiDeadChambers  &&  python -m MuonCondTest.TgcCondTester

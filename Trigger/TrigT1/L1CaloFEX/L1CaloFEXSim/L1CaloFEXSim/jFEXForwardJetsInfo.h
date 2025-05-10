@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXForwardJetsInfo - Class to store information about trigger towers
@@ -11,15 +11,7 @@
 #ifndef jFEXForwardJetsInfo_H
 #define jFEXForwardJetsInfo_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
+#include <vector>
 
 namespace LVL1 {
 class jFEXForwardJetsInfo {

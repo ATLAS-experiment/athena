@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //		jFEXForwardElecAlgo - Algorithm for Forward Electron Algorithm in jFEX
@@ -20,11 +20,6 @@
 #include "L1CaloFEXSim/jFEXForwardElecInfo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "PathResolver/PathResolver.h"
 
 namespace LVL1 {
@@ -79,17 +74,17 @@ namespace LVL1 {
     return {tmpTower->centreEta(),tmpTower->centrePhi()};
   }
 
-  std::array<int,2> LVL1::jFEXForwardElecAlgo::getEtEmHad(uint ttID) {
+  std::array<int,2> LVL1::jFEXForwardElecAlgo::getEtEmHad(uint ttID) const {
     if(ttID == 0) {
       return {0,0};
     }
     int TT_EtEM = 0;
     if(m_map_Etvalues_EM.find(ttID) != m_map_Etvalues_EM.end()) {
-      TT_EtEM = m_map_Etvalues_EM[ttID][0];
+      TT_EtEM = m_map_Etvalues_EM.at(ttID)[0];
     }
     int TT_EtHad = 0;
     if(m_map_Etvalues_HAD.find(ttID) != m_map_Etvalues_HAD.end()) {
-      TT_EtHad = m_map_Etvalues_HAD[ttID][0];
+      TT_EtHad = m_map_Etvalues_HAD.at(ttID)[0];
     }
 
     return {TT_EtEM, TT_EtHad};
@@ -112,7 +107,7 @@ namespace LVL1 {
   }
   
   
-  bool LVL1::jFEXForwardElecAlgo::isValidSeed(uint seedTTID) {
+  bool LVL1::jFEXForwardElecAlgo::isValidSeed(uint seedTTID) const {
     auto [centreTT_EtEM,centreTT_EtHad] = getEtEmHad(seedTTID);
     // check if seed has strictly more energy than its neighbours
     {
@@ -356,7 +351,7 @@ namespace LVL1 {
     return clusterList;
   } 
       
-  StatusCode LVL1::jFEXForwardElecAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap){
+  StatusCode LVL1::jFEXForwardElecAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap) const {
     std::string myline;
     //opening file with ifstream
     std::ifstream myfile(fileName);

@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -8,9 +8,23 @@ from PyCool import cool
 sys.path.append('/afs/cern.ch/user/a/atlcond/utils22')
 from CondUtilsLib.AtlCoolBKLib import resolveAlias
 
+
+def _resolveTagFaster(folder,tag):
+    try:
+        import cppyy
+        # <folder> is at this point a pythonized shared_ptr<cool::IFolder>.
+        # Doing an explicit cast to the base class cool::IHvsNode
+        # significantly reduces the overhead from cling, for some reason.
+        folder=cppyy.bind_object(cppyy.addressof(folder),
+                                 getattr(cppyy.gbl,'cool::IHvsNode'))
+        # this is in general not a safe cast, but IFolder is an abstract class
+        # only inheriting from IHvsNode.
+    except Exception: pass
+    return folder.resolveTag(tag)
+
+
 def getCurrentFolderTag(dbname,folderName,ES=False):
-    current=None
-    next=None
+    currentTag,nextTag=None,None
 
     #1. Get current and next global tags using resolver class in ~atlcond
     resolver=resolveAlias()
@@ -27,7 +41,7 @@ def getCurrentFolderTag(dbname,folderName,ES=False):
     db = dbSvc.openDatabase(dbname)
     f=db.getFolder(folderName)
     try:
-        current=f.resolveTag(currentGlobal)
+        currentTag=_resolveTagFaster(f,currentGlobal)
     except Exception:
         print('Warning: could not resolve ',currentGlobal,' in db: ',dbname)
         if "DBR2" in dbname:
@@ -38,7 +52,7 @@ def getCurrentFolderTag(dbname,folderName,ES=False):
            tmpGlobal='COMCOND-BLKPA-RUN1-06'
 
         try:
-           current=f.resolveTag(tmpGlobal)
+           currentTag=_resolveTagFaster(f,tmpGlobal)
         except Exception:
            print('Also not working, giving up')
            pass
@@ -47,13 +61,13 @@ def getCurrentFolderTag(dbname,folderName,ES=False):
     if len(nextGlobal)>2:
         # NEXT exists, try to resolve it
         try:
-            next=f.resolveTag(nextGlobal)
+            nextTag=_resolveTagFaster(f,nextGlobal)
         except Exception:
             pass
         pass
     
     db.closeDatabase()
-    return (current,next)
+    return (currentTag,nextTag)
 
 
 if __name__=="__main__":
@@ -75,4 +89,3 @@ if __name__=="__main__":
         sys.exit(-1)
 
     print(currTag)
-    

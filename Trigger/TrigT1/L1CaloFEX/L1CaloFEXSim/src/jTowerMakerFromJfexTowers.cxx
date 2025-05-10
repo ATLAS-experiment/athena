@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -15,8 +15,6 @@
 //     
 //***************************************************************************/
 
-#undef NDEBUG
-
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
 
 #include "L1CaloFEXSim/jTower.h"
@@ -27,9 +25,6 @@
 
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-
-#define DEBUG_VHB 1
-
 
 namespace LVL1 {
     

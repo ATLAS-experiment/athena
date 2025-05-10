@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 
@@ -173,7 +173,7 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
         recipePEB=payload['recipe_tdaq_B']
         mux.append(ord(payload['mux_setting_0_tdaq']))
         mux.append(ord(payload['mux_setting_1_tdaq']))
-        adccalib=payload['ADCCalibMode']
+        adccalib=ord(payload['ADCCalibMode'])
         if run > 493743: # hardcoded, first run when this info was filled
             fw=ord(payload['ttype_mask_A'])
         mlog_LRF.info("Found DT info for run %i",run)

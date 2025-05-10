@@ -297,7 +297,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeAuxContainer#HLT_TrigCostContainerAux.alg.store.view.thread.thash.slot.roi.start.stop', 'CostMonDS ESD', 'Steer'),
     ('xAOD::TrigCompositeContainer#HLT_TrigCostROSContainer',   'CostMonDS ESD', 'Steer'),
     ('xAOD::TrigCompositeAuxContainer#HLT_TrigCostROSContainerAux.alg_idx.lvl1ID.robs_id.robs_size.robs_history.robs_status.start.stop', 'CostMonDS ESD', 'Steer'),
-
+    
     # PEB RoIs for full-scan chains
     ('TrigRoiDescriptorCollection#HLT_Roi_LArPEBHLT',            'BS ESD AODFULL',  'Calo'),
 
@@ -545,6 +545,11 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_MuonLRT_FTF',                 'BS ESD AODFULL', 'Muon', [InViews('l2muCombLRTViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_MuonLRT_FTFAux.',          'BS ESD AODFULL', 'Muon'),
 
+    #Muon DS calibration
+    ('xAOD::TrigCompositeContainer#MuonCalibrationStream',                    'MuonDS', 'Muon'),
+    ('xAOD::TrigCompositeAuxContainer#MuonCalibrationStreamAux.MuonCalibrationStream',             'MuonDS', 'Muon'),
+
+    
 
 # These extra muon collections have all be removed now, as they all have identical
 # reconstruction as the standard Muon collections so unique collections names should
