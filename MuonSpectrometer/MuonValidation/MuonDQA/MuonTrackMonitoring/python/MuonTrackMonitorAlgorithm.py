@@ -782,6 +782,13 @@ def MuonTrackConfig(flags, **kwargs):
 ### Overview
 ###########################################################
 
+    # Overview/General
+    myGroup.defineHistogram('LumiBlock,LumiBlockTrackCategory;Overview_LB_nMuonTrack',
+            title='Overview_LB_nMuonTrack;LumiBlock;LumiBlockTrackCategory',
+            type='TH2F', path='Overview/General',
+            xbins=2500, xmin=0, xmax=2500,
+            ybins=27, ymin=-1, ymax=26, ylabels=["", "", "NoTrigNonCB", "NoTrigCB", "NonCB", "CB", "AllNonCB", "AllCB", "", "Z", "Jpsi", "", "ME_EC", "ME_BC", "ME_BA", "ME_EA", "", "MS_EC", "MS_BC", "MS_BA", "MS_EA", "", "ID_EC", "ID_BC", "ID_BA", "ID_EA", ""],
+            opt='kAlwaysCreate')
 
     # Overview/Jpsi
     myGroup.defineHistogram('JpsiMuonLumiBlock;Overview_Jpsi_nJpsi_LB', 

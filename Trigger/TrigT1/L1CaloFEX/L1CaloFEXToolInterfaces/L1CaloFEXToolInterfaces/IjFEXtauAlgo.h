@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXtauAlgo - Algorithm for Tau Algorithm in jFEX
@@ -12,7 +12,6 @@
 #define IjFEXtauAlgo_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
 
 namespace LVL1 {
 
@@ -30,7 +29,7 @@ class IjFEXtauAlgo : virtual public IAlgTool {
         virtual int getClusterEt() const =0;
         virtual int getFirstEtRing() const =0;
         virtual bool getTauSat() const =0;
-        virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
+        virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map)   =0;
 
     private:
 

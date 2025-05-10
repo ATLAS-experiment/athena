@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -15,31 +15,16 @@
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
 
-#include "xAODTrigger/jFexSRJetRoI.h"
-#include "xAODTrigger/jFexSRJetRoIContainer.h" 
 #include "xAODTrigger/jFexSRJetRoIAuxContainer.h"
-
-#include "xAODTrigger/jFexLRJetRoI.h"
-#include "xAODTrigger/jFexLRJetRoIContainer.h"
 #include "xAODTrigger/jFexLRJetRoIAuxContainer.h"
-
-#include "xAODTrigger/jFexTauRoI.h"
-#include "xAODTrigger/jFexTauRoIContainer.h" 
 #include "xAODTrigger/jFexTauRoIAuxContainer.h"
-
-#include "xAODTrigger/jFexFwdElRoI.h"
-#include "xAODTrigger/jFexFwdElRoIContainer.h"
 #include "xAODTrigger/jFexFwdElRoIAuxContainer.h"
-
-#include "L1CaloFEXSim/jFEXOutputCollection.h"
+#include "xAODTrigger/jFexMETRoIAuxContainer.h"
+#include "xAODTrigger/jFexSumETRoIAuxContainer.h"
 
 #include <ctime>
 

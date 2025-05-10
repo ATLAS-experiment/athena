@@ -196,11 +196,17 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
   }
 
   // Create and initialise the combinations generator for the requirements of this chain, given the objects available in this event.
+  // Extract the features on legs not used for the decision, so they stay in the navigation
+  Combination extraLegs;
   HLT::NestedUniqueCombinationGenerator nucg;
   for (size_t legindex = 0; size_t legmult : legMultiplicityForComputation){
     size_t out_of = legDecisions[legindex].size();
-    nucg.add({out_of, legmult});
-    ATH_MSG_DEBUG("For leg index " << legindex << " we will be choosing any " << legmult << " Decision Objects out of " << out_of);
+    if(legmult==0) {
+      extraLegs.insert(extraLegs.end(),legDecisions[legindex].cbegin(),legDecisions[legindex].cend());
+    } else {
+      nucg.add({out_of, legmult});
+      ATH_MSG_DEBUG("For leg index " << legindex << " we will be choosing any " << legmult << " Decision Objects out of " << out_of);
+    }
     ++legindex;
   }
 
@@ -209,6 +215,14 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
   std::vector<float> values;
   values.reserve(m_varInfo_vec.size());
   size_t warnings = 0, iterations = 0;
+  // Correct for the legs on which we compute with 2 features
+  auto get_index_offset = [legMultiplicityForComputation](size_t legindex) {
+    size_t offset{0};
+    for (auto iLeg=legMultiplicityForComputation.cbegin(); iLeg!=legMultiplicityForComputation.cbegin()+legindex; ++iLeg) {
+      offset += (*iLeg)-1;
+    }
+    return offset;
+  };
   do {
     bool lastDecision(true);
     const std::vector<size_t> combination = nucg();
@@ -233,11 +247,16 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
         << iVarInfo->legB << " (" << legB_index << ")"
       );
       if(iVarInfo->legA==iVarInfo->legB) {
-        combinationToCheck.insert(combinationToCheck.end(),{legDecisions[legA_index][combination.at(0)],legDecisions[legA_index][combination.at(1)]});
-        combinationToRecord.insert(combinationToRecord.end(),{legDecisions[legA_index][combination.at(0)],legDecisions[legA_index][combination.at(1)]});
+        // 2 objects on 1 leg
+        // Due to multiplicity checks, a computation like 'dRAA' never overlaps with one like 'dRAB'
+        const auto& featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index)+1)]};
+        combinationToCheck.insert(combinationToCheck.end(),featurePair);
+        combinationToRecord.insert(combinationToRecord.end(),featurePair);
       } else {
-        combinationToCheck.insert(combinationToCheck.end(),{legDecisions[legA_index][combination.at(0)],legDecisions[legB_index][combination.at(1)]});
-        combinationToRecord.insert(combinationToRecord.end(),{legDecisions[legA_index][combination.at(0)],legDecisions[legB_index][combination.at(1)]});
+        // 1 object each on 2 legs
+        const auto& featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legB_index][combination.at(legB_index+get_index_offset(legB_index))]};
+        combinationToCheck.insert(combinationToCheck.end(),featurePair);
+        combinationToRecord.insert(combinationToRecord.end(),featurePair);
       }
 
       try {
@@ -260,6 +279,7 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
 
     // Assess the collective decision on the combination
     if (lastDecision) {
+      combinationToRecord.insert(combinationToRecord.end(),extraLegs.cbegin(),extraLegs.cend());
       passingCombinations.push_back(combinationToRecord);
       if (m_modeOR == true and m_enableOverride) {
         break;
