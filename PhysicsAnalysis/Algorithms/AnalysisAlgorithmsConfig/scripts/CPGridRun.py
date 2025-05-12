@@ -222,6 +222,9 @@ class CPGridRun:
                     continue
 
         # Check for changes in sourceDir
+        if sourceDir is None:
+            logCPGridRun.warning("Source directory is not detected, auto-compression is not performed. Use --recreateTar to update the submission")
+            return False
         for root, _, files in os.walk(sourceDir):
             for file in files:
                 file_path = os.path.join(root, file)
@@ -242,14 +245,12 @@ class CPGridRun:
         cmakeCachePath = os.path.join(self._buildDir(), 'CMakeCache.txt')
         sourceDir = None
         if not os.path.exists(cmakeCachePath):
-            raise FileNotFoundError(f"CMakeCache.txt not found at {cmakeCachePath}")
+            return sourceDir
         with open(cmakeCachePath, 'r') as cmakeCache:
             for line in cmakeCache:
-                if line.startswith('UserAnalysis_SOURCE_DIR:STATIC='):
+                if '_SOURCE_DIR:STATIC=' in line:
                     sourceDir = line.split('=')[1].strip()
                     break
-        if not sourceDir:
-            raise ValueError("UserAnalysis_SOURCE_DIR not found in CMakeCache.txt")
         return sourceDir
 
     def execFormatter(self):
