@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPatternCalibrator/MuonPatternCalibration.h"
@@ -38,7 +38,7 @@ MuonPatternCalibration::initialize()
 
 
 StatusCode MuonPatternCalibration::calibrate(const EventContext& ctx, const MuonPatternCombination& pattern, ROTsPerRegion& hitsPerRegion) const {
-    Muon::MuonPatternCalibration::RegionMap regionMap;
+    MuonPatternCalibration::RegionMap regionMap;
     bool hasPhiMeasurements = checkForPhiMeasurements(pattern);
     ATH_CHECK(createRegionMap(ctx, pattern, regionMap, hasPhiMeasurements));
     // calibrate hits
@@ -51,7 +51,8 @@ int MuonPatternCalibration::getRegionId(const Identifier& id) const{
 
     // simple division of MuonSpectrometer in regions using barrel/endcap seperation plus
     // inner/middle/outer seperation
-    return m_idHelperSvc->stationIndex(id)* (  m_idHelperSvc->stationEta(id) > 0 ? 1 : -1);
+    using namespace MuonStationIndex;
+    return toInt(m_idHelperSvc->stationIndex(id)) * (m_idHelperSvc->stationEta(id) > 0 ? 1 : -1);
 }
 
 
@@ -79,8 +80,8 @@ MuonPatternCalibration::createRegionMap(const EventContext& ctx,const MuonPatter
         ATH_MSG_DEBUG("No phi measurements using center tubes");
 
     
-    const Muon::TgcPrepDataContainer* tgcPrdCont{nullptr};
-    const Muon::RpcPrepDataContainer* rpcPrdCont{nullptr};
+    const TgcPrepDataContainer* tgcPrdCont{nullptr};
+    const RpcPrepDataContainer* rpcPrdCont{nullptr};
     ATH_CHECK(loadFromStoreGate(ctx, m_keyRpc, rpcPrdCont));
     ATH_CHECK(loadFromStoreGate(ctx, m_keyTgc, tgcPrdCont)); 
    
@@ -170,23 +171,23 @@ MuonPatternCalibration::createRegionMap(const EventContext& ctx,const MuonPatter
             if ((hits.neta > 0 && hits.nphi == 0) || (hits.nphi > 0 && hits.neta == 0)) {
                 if (m_idHelperSvc->isRpc(id) && rpcPrdCont) {
 
-                    const Muon::RpcPrepDataCollection* prd_coll = rpcPrdCont->indexFindPtr(coll_hash);
+                    const RpcPrepDataCollection* prd_coll = rpcPrdCont->indexFindPtr(coll_hash);
                     if (!prd_coll) {
                         ATH_MSG_VERBOSE("RpcPrepDataCollection not found in container!!"<< m_keyRpc);
                         continue;
                     }                   
-                    for (const Muon::RpcPrepData* rpc_prd : *prd_coll) {
+                    for (const RpcPrepData* rpc_prd : *prd_coll) {
                         if (!clusterIds.insert(rpc_prd->identify()).second) continue;
                         insertCluster(*rpc_prd, regionMap, patpose, patdire, hasPhiMeasurements);
                     }                    
                 } else if (m_idHelperSvc->isTgc(id) && tgcPrdCont) {
-                     const Muon::TgcPrepDataCollection* prd_coll = tgcPrdCont->indexFindPtr(coll_hash);
+                     const TgcPrepDataCollection* prd_coll = tgcPrdCont->indexFindPtr(coll_hash);
                      if (!prd_coll) {
                         ATH_MSG_DEBUG("TgcPrepDataCollection not found in container!! "<< m_keyTgc);
                         continue;
                     }
                    
-                    for (const Muon::TgcPrepData* tgc_prd : *prd_coll) {
+                    for (const TgcPrepData* tgc_prd : *prd_coll) {
                         if (!clusterIds.insert(tgc_prd->identify()).second) continue;
                         insertCluster(*tgc_prd, regionMap, patpose, patdire, hasPhiMeasurements);                        
                     }                    

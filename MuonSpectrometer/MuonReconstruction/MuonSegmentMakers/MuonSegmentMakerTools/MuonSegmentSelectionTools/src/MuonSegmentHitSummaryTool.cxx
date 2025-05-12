@@ -50,19 +50,20 @@ MuonSegmentHitSummaryTool::getHitCounts(const MuonSegment& seg) const
     const MdtDriftCircleOnTrack* mdtShortest    = nullptr;
     bool                         transformIsSet = false;
     Amg::Transform3D             gToAMDB;
-    Amg::Vector3D                lpos(0., 0., 0.);
-    Amg::Vector3D                ldir{0.,0.,0.};
+    Amg::Vector3D                lpos{Amg::Vector3D::Zero()};
+    Amg::Vector3D                ldir{Amg::Vector3D::Zero()};
     double                       dxdy = 1.;
 
-    Identifier                chid    = m_edmHelperSvc->chamberId(seg);
-    MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(chid);
+    using namespace MuonStationIndex;
+    const Identifier chid = m_edmHelperSvc->chamberId(seg);
+    const StIndex stIdx = m_idHelperSvc->stationIndex(chid);
     
     /// This concerns only the RPC & TGC chambers
-    if ((!m_idHelperSvc->isCsc(chid) && stIndex == MuonStationIndex::EI) || stIndex == MuonStationIndex::BO)
+    if ((!m_idHelperSvc->isCsc(chid) && stIdx == StIndex::EI) || stIdx == StIndex::BO)
         hitCounts.nexpectedTrigHitLayers = 1;
-    else if (stIndex == MuonStationIndex::BM)
+    else if (stIdx == StIndex::BM)
         hitCounts.nexpectedTrigHitLayers = 2;
-    else if (stIndex == MuonStationIndex::EM)
+    else if (stIdx == StIndex::EM)
         hitCounts.nexpectedTrigHitLayers = 3;
 
     // loop over hits

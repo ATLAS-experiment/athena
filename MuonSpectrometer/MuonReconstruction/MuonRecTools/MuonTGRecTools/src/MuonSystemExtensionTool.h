@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSYSTEMEXTENSIONTOOL_H
@@ -29,12 +29,12 @@ namespace Muon {
 
     class MuonSystemExtension;
 
-    class MuonSystemExtensionTool : virtual public IMuonSystemExtensionTool, public AthAlgTool {
+    class MuonSystemExtensionTool : public extends<AthAlgTool, IMuonSystemExtensionTool> {
     public:
         typedef std::vector<MuonLayerSurface> SurfaceVec;
 
         /** Default AlgTool functions */
-        MuonSystemExtensionTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~MuonSystemExtensionTool() = default;
         StatusCode initialize() override;
 
@@ -64,14 +64,15 @@ namespace Muon {
         
         PublicToolHandle<MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         
-        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+        ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         ServiceHandle<IMuonEDMHelperSvc> m_edmHelperSvc{this,"edmHelper","Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
                                                         "Handle to the service providing the IMuonEDMHelperSvc interface"};
 
         /** reference surfaces per region and sector */
+        using DetRegIdx = MuonStationIndex::DetectorRegionIndex;
         std::array<std::array<SurfaceVec, 16> , 
-                   MuonStationIndex::DetectorRegionIndexMax > m_referenceSurfaces{};
+                   MuonStationIndex::toInt(DetRegIdx::DetectorRegionIndexMax)> m_referenceSurfaces{};
 
         /** sector mapping helper */
         MuonSectorMapping m_sectorMapping;
