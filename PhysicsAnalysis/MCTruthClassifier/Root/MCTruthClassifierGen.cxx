@@ -414,21 +414,16 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     bool isZboson = false;
     bool isWboson = false;
     bool skipnext = false;
-
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ++ipOut) {
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
-      if (!aChild) continue;
-      const xAOD::TruthParticle* theNextChild = nullptr;
+      if (!aChild) { continue; }
+      const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) continue;
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
-
+      if (!theNextChild) { continue; }
       if (MC::isElectron(aChild) && MC::isElectron(theNextChild)) {
         // Zboson
         if (thePartToCheck == aChild || thePartToCheck == theNextChild) {
@@ -448,6 +443,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
+
   if (numOfParents == 2) {
     //--Sherpa Z->ee
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfEl == 1 && NumOfPos == 1) return ZBoson;
@@ -639,18 +635,15 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     bool isWboson = false;
     bool skipnext = false;
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ipOut++) {
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
       if (!aChild) continue;
       const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) continue;
+      if (!theNextChild) { continue; }
       if (MC::isMuon(aChild) && MC::isMuon(theNextChild)) {
         // Zboson
         if (thePriPart == aChild || thePriPart == theNextChild) {
@@ -670,6 +663,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
+
   if (numOfParents == 2 ) {
     //--Sherpa Z->mumu
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfMuPl == 1 && NumOfMuMin == 1) return ZBoson;
@@ -815,25 +809,22 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   }
   if (MC::isW(ancestorPDG)) { return WBoson;}
   if (MC::isZ(ancestorPDG)) { return ZBoson;}
+
+  // MadGraphPythia ZWW*->lllnulnu
   if (numOfParents == 1 && numberOfChildren > 4 && (MC::isSMQuark(ancestorPDG) || MC::isGluon(ancestorPDG))) {
     bool isZboson = false;
     bool isWboson = false;
     bool skipnext = false;
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ipOut++) {
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
       if (!aChild) continue;
       const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) {
-        continue;
-      }
+      if (!theNextChild) { continue; }
       if (MC::isTau(aChild) && MC::isTau(theNextChild)) {
         // Zboson
         if (thePriPart == aChild || thePriPart == theNextChild) {
@@ -853,6 +844,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
+
   if (numOfParents == 2 ) {
     const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
     const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
@@ -1105,18 +1097,15 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
     bool isWboson = false;
     bool skipnext = false;
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ipOut++) {
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
-      if (!aChild) continue;
+      if (!aChild) { continue; }
       const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) continue;
+      if (!theNextChild) { continue; }
       if (MC::isTau(aChild) && MC::isTau(theNextChild)) {
         // Zboson
         if (thePriPart == aChild || thePriPart == theNextChild) {
@@ -1303,20 +1292,15 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     bool skipnext = false;
 
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ++ipOut) {
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
-      if (!aChild) continue;
+      if (!aChild) { continue; }
       const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) continue;
-
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
-
+      if (!theNextChild) { continue; }
       const int apdgID1 = std::abs(aChild->pdgId());
       const int apdgID2 = std::abs(theNextChild->pdgId());
       if (apdgID1 == apdgID2 && MC::isSMNeutrino(apdgID1)) {
