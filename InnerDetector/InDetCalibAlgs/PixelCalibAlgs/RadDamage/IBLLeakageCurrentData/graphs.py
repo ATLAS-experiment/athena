@@ -6,7 +6,7 @@ import pandas as pd
 # Jennet averages over modules and saves TGraphs
 def averageModules (suffix):
 
-    blacklist = ["LI_S01_C_M4","LI_S03_A_M4","LI_S05_C_M4","LI_S11_A_M4","LI_S12_A_M4","LI_S13_C_M4"]
+    blocklist = ["LI_S01_C_M4","LI_S03_A_M4","LI_S05_C_M4","LI_S11_A_M4","LI_S12_A_M4","LI_S13_C_M4"]
 
     indir = "/eos/atlas/user/j/jdickins/Pixel/LeakageCurrent/IBLData/processedData/means/"
     header = ["unix-timestamp","HV_VMeas","start","intlumi","HV_VSet","volume","HV_VMeas_0","HV_VMeas_1","PP4LV","TModule","HV_IMeas","ENV_TT","I_Eg1.12","I_Eg1.21","I_Eg1.30"]
@@ -20,8 +20,8 @@ def averageModules (suffix):
         m = "LI_S" + str(staveString) + "_" + suffix
         print(m)
         this_infile = indir + m + ".ssv"
-        if m in blacklist:
-            print(m + " is blacklisted. Skipping...")
+        if m in blocklist:
+            print(m + " is blocklisted. Skipping...")
             continue
 
         this_infile = indir + "LI_S" + str(staveString) + "_" + suffix + ".ssv"

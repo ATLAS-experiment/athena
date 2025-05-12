@@ -171,10 +171,10 @@ def main():
         name='using release'
         tmp=JOsDict[name][0].replace('using release','').strip().split()[0]
         val=tmp.replace('[','').replace(']','')
-        #checkForBlacklist
+        #checkForBlocklist
         if not opts.NO_SVN:
-            if checkBlackList(val.split('-')[0],val.split('-')[1],'MC15JobOptions',".",JOsList) :
-                logerr( '- '+name+' = ',"".join(val)+" <-- ERROR: Cache is blacklisted for this generator")
+            if checkBlockList(val.split('-')[0],val.split('-')[1],'MC15JobOptions',".",JOsList) :
+                logerr( '- '+name+' = ',"".join(val)+" <-- ERROR: Cache is blocklisted for this generator")
             else:
                 loggood( '- '+name+' = ',"".join(val))
         else:
@@ -377,7 +377,7 @@ def main():
         if not opts.TOTAL_EVENTS:
             logwarn("","WARNING: --Ntotal (-N) flag is not used - total number of events not given - impossible to calculated effective lumi.")
         if opts.NO_SVN:
-            logwarn("","WARNING: --nosvn (-x) flag is used - could not check that SVN JOs are registered or whether release is blacklisted.")
+            logwarn("","WARNING: --nosvn (-x) flag is used - could not check that SVN JOs are registered or whether release is blocklisted.")
     
     print("")
     return 
@@ -395,7 +395,7 @@ def getJOsList(JOsDict):
     return tmplist
 
 
-def checkBlackList(branch,cache,MCJobOptions,outnamedir,JOsList) :
+def checkBlockList(branch,cache,MCJobOptions,outnamedir,JOsList) :
 
     import getpass
     user = getpass.getuser()
@@ -405,19 +405,19 @@ def checkBlackList(branch,cache,MCJobOptions,outnamedir,JOsList) :
         if "MC15." in l:
             aJOs.append(l)   
     print("JOSH",aJOs)
-    ## Black List Caches MC15
-    blacklist = 'svn export svn+ssh://svn.cern.ch/reps/atlasoff/Generators/'+MCJobOptions+'/trunk/common/BlackList_caches.txt'
-    tmpblackfile = "%s/BlackList_caches.txt" % (outnamedir)
+    ## Block List Caches MC15
+    blocklist = 'svn export svn+ssh://svn.cern.ch/reps/atlasoff/Generators/'+MCJobOptions+'/trunk/common/BlackList_caches.txt'
+    tmpblockfile = "%s/BlackList_caches.txt" % (outnamedir)
         
     isError = False
     if 'MC15' in MCJobOptions :
-        svnexcomm='%s %s' % (blacklist,tmpblackfile)
+        svnexcomm='%s %s' % (blocklist,tmpblockfile)
         retcode = subprocess.Popen(svnexcomm, shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()
         if retcode[1].find("exist") != -1 or retcode[1].find("cannot") != -1 :
             logerr("","export failed= BlackList_caches.txt" )
             isError = True
         
-        bfile = open(tmpblackfile)
+        bfile = open(tmpblockfile)
         for line in bfile:
             if not line.strip():
                 continue

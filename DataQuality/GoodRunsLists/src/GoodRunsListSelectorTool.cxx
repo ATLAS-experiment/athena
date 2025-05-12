@@ -71,7 +71,7 @@ GoodRunsListSelectorTool::initialize()
   /// warn about pass-thru mode
   if (m_passthrough) ATH_MSG_WARNING ("Set to pass-through mode.");
 
-  /// checking existence of goodrunslists / blacklists
+  /// checking existence of goodrunslists / blocklists
   std::vector<std::string>::iterator itr;
   for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end(); ++itr)  {
     //const char* fname;

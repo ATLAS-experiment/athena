@@ -533,25 +533,25 @@ if hasattr(testSeq, "TestHepMC") and not gens_testhepmc(evgenConfig.generators):
 ##=============================================================
 ## Check release number
 ##=============================================================
-# Function to check blacklist (from Spyros'es logParser.py)
-def checkBlackList(relFlavour,cache,generatorName) :
+# Function to check blocklist (from Spyros'es logParser.py)
+def checkBlockList(relFlavour,cache,generatorName) :
     isError = None
     with open('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common/BlackList_caches.txt') as bfile:
         for line in bfile.readlines():
             if not line.strip():
                 continue
-            # Blacklisted release flavours
+            # Blocklisted release flavours
             badRelFlav=line.split(',')[0].strip()
-            # Blacklisted caches
+            # Blocklisted caches
             badCache=line.split(',')[1].strip()
-            # Blacklisted generators
+            # Blocklisted generators
             badGens=line.split(',')[2].strip()
             
             used_gens = ','.join(generatorName)
             #Match Generator and release type e.g. AtlasProduction, MCProd
             if relFlavour==badRelFlav and cache==badCache and re.search(badGens,used_gens) is not None:
                 if badGens=="": badGens="all generators"
-                isError=relFlavour+","+cache+" is blacklisted for " + badGens
+                isError=relFlavour+","+cache+" is blocklisted for " + badGens
                 return isError
     return isError
 
@@ -573,19 +573,19 @@ def checkPurpleList(relFlavour,cache,generatorName) :
             used_gens = ','.join(generatorName)
             #Match Generator and release type e.g. AtlasProduction, MCProd
             if relFlavour==purpleRelFlav and cache==purpleCache and re.search(purpleGens,used_gens) is not None:
-                isError=relFlavour+","+cache+" is blacklisted for " + purpleGens + " if it uses " + purpleProcess
+                isError=relFlavour+","+cache+" is blocklisted for " + purpleGens + " if it uses " + purpleProcess
                 return isError
     return isError
 
 ## Announce start of JO checkingrelease number checking
 evgenLog.debug("****************** CHECKING RELEASE IS NOT BLACKLISTED *****************")
 if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common'):
-   errorBL = checkBlackList("AthGeneration",rel,gennames)
+   errorBL = checkBlockList("AthGeneration",rel,gennames)
    if (errorBL):
      if (hasattr( runArgs, "ignoreBlackList") and runArgs.ignoreBlackList): 
-         evgenLog.warning("This run is blacklisted for this generator, please use a different one for production !! "+ errorBL )
+         evgenLog.warning("This run is blocklisted for this generator, please use a different one for production !! "+ errorBL )
      else:
-         raise RuntimeError("This run is blacklisted for this generator, please use a different one !! "+ errorBL)   
+         raise RuntimeError("This run is blocklisted for this generator, please use a different one !! "+ errorBL)   
  
    errorPL = checkPurpleList("AthGeneration",rel,gennames)
    if (errorPL):
@@ -594,7 +594,7 @@ if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common
       evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 else:
-   msg.waring("No access to cvmfs, so blacklisted runs will not be checked")  
+   msg.waring("No access to cvmfs, so blocklisted runs will not be checked")  
 ##==============================================================
 ## Handling of a post-include/exec args at the end of standard configuration
 ##==============================================================
