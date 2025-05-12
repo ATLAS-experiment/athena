@@ -1304,7 +1304,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                 const GeoBox* box = dynamic_cast<const GeoBox*>(shape);
                 if (box && subVs.size() == 4) {
                     std::unique_ptr<Trk::Volume> v1{}, v2{};
-                    std::unique_ptr<Trk::VolumeExcluder> volExcl = nullptr;
+                    std::shared_ptr<const Trk::VolumeExcluder> volExcl = nullptr;
                     const GeoBox* sb1 = dynamic_cast<const GeoBox*>(subVs[0].first);
                     if (sb1) {
                         v1 = std::make_unique<Trk::Volume>(makeTransform(subVs[0].second),
@@ -1323,7 +1323,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         auto combinedBounds = std::make_shared<Trk::CombinedVolumeBounds>(std::move(v1), std::move(v2), false);
                         auto cVol = std::make_unique<Trk::Volume>(makeTransform(Amg::getTranslateX3D(-shift)),
                                                                  std::move(combinedBounds));
-                        volExcl = std::make_unique<Trk::VolumeExcluder>(std::unique_ptr<Trk::Volume>(cVol->clone()));
+                        volExcl = std::make_shared<const Trk::VolumeExcluder>(std::unique_ptr<Trk::Volume>(cVol->clone()));
                         Trk::PlaneSurface surf{transf[ic] * Amg::getTranslateX3D(shift) * Amg::getRotateY3D(M_PI_2) * Amg::getRotateZ3D(M_PI_2), std::move(bounds)};
                         auto subPlane = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), std::move(volExcl), false);
                         auto subPlaneX = std::make_unique<Trk::SubtractedPlaneSurface>(*subPlane, Amg::getTranslateX3D(-2 * shift));
@@ -1341,7 +1341,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         thickness = subVs[2].second.translation().mag();
 
 
-                        auto volEx = std::make_unique<Trk::VolumeExcluder>(std::make_unique<Trk::Volume>(*cVol, Amg::getTranslateX3D(2 * shift)));
+                        auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::make_unique<Trk::Volume>(*cVol, Amg::getTranslateX3D(2 * shift)));
 
                         surf = Trk::PlaneSurface{transf[ic] * Amg::getRotateX3D(M_PI_2), std::move(bounds)};
                         auto subPlaneBis = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), std::move(volEx), false);

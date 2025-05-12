@@ -46,7 +46,7 @@ public:
 
   /** Constructor */
   SubtractedPlaneSurface(const PlaneSurface& ps,
-                         std::unique_ptr<AreaExcluder> vol,
+                         std::shared_ptr<const AreaExcluder> vol,
                          bool shared);
 
   /**Assignment operator*/
@@ -73,7 +73,7 @@ public:
   }
 
 protected:
-  std::unique_ptr<AreaExcluder> m_subtrVol;
+  std::shared_ptr<const AreaExcluder> m_subtrVol;
   bool m_shared{true};
 };
 

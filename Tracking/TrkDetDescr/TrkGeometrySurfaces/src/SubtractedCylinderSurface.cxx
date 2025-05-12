@@ -14,7 +14,7 @@
 
 // constructor
 Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const Trk::CylinderSurface& ps,
-                                                          std::unique_ptr<AreaExcluder> vol,
+                                                          std::shared_ptr<const AreaExcluder> vol,
                                                           bool shared)
   : Trk::CylinderSurface(ps)
   , m_subtrVol(std::move(vol))
@@ -22,31 +22,19 @@ Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const Trk::CylinderSur
 {}
 
 // copy constructor
-Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const SubtractedCylinderSurface& psf)
-    : Trk::CylinderSurface(psf),
-      m_subtrVol{psf.m_subtrVol->clone()},
-      m_shared(psf.m_shared) {}
+Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const SubtractedCylinderSurface& psf) = default;
 
 // copy constructor with shift
 Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const SubtractedCylinderSurface& psf,
                                                           const Amg::Transform3D& transf)
   : Trk::CylinderSurface(psf, transf)
-  , m_subtrVol{psf.m_subtrVol->clone()}
+  , m_subtrVol{psf.m_subtrVol}
   , m_shared(psf.m_shared)
 {}
 
 //Assignement
 Trk::SubtractedCylinderSurface&
-Trk::SubtractedCylinderSurface::operator=(const Trk::SubtractedCylinderSurface& psf)
-{
-
-  if (this != &psf) {
-    Trk::CylinderSurface::operator=(psf);
-    m_subtrVol.reset(psf.m_subtrVol->clone());
-    m_shared = psf.m_shared;
-  }
-  return *this;
-}
+Trk::SubtractedCylinderSurface::operator=(const Trk::SubtractedCylinderSurface& psf) = default;
 
 bool
 Trk::SubtractedCylinderSurface::operator==(const Trk::Surface& sf) const

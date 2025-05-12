@@ -145,7 +145,7 @@ Trk::SubtractedVolumeBounds::decomposeToSurfaces(
           nullptr,
           std::make_shared<Trk::SubtractedVolumeBounds>(std::move(outerSub), std::move(innerSub)));
       }
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(comb_sub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(comb_sub));
       if (splo){
         retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*splo, std::move(volEx), shared));
       }
@@ -154,7 +154,7 @@ Trk::SubtractedVolumeBounds::decomposeToSurfaces(
           std::make_unique<Trk::SubtractedCylinderSurface>(*sclo, std::move(volEx), shared));
       }
     } else {
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(innerSub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(innerSub));
       if (plo){
         retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*plo, std::move(volEx), false));
       }
@@ -239,7 +239,7 @@ Trk::SubtractedVolumeBounds::decomposeToSurfaces(
           nullptr,
           std::make_shared<Trk::CombinedVolumeBounds>(std::move(innerSub), std::move(outerSub), true));
       }
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(comb_sub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(comb_sub));
       if (spli){
         retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*spli, std::move(volEx), true));
       }
@@ -248,7 +248,7 @@ Trk::SubtractedVolumeBounds::decomposeToSurfaces(
       }
 
     } else if (pli || cli) {
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(outerSub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(outerSub));
       if (pli){
         retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*pli, std::move(volEx), true));
       }
@@ -263,7 +263,7 @@ Trk::SubtractedVolumeBounds::decomposeToSurfaces(
       }
       auto eb = std::make_shared<EllipseBounds>(db->rMin(), db->rMin(), db->rMax(), db->rMax(), db->halfPhiSector());
       PlaneSurface pla(Amg::Transform3D(dli->transform()), eb);
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(outerSub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(outerSub));
       retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(pla, std::move(volEx), true));
     } else {
       throw std::runtime_error(

@@ -39,7 +39,7 @@ public:
   virtual ~SubtractedDiscSurface() = default;
 
   /** Constructor */
-  SubtractedDiscSurface(const DiscSurface& ps, std::unique_ptr<AreaExcluder> vol, bool shared);
+  SubtractedDiscSurface(const DiscSurface& ps, std::shared_ptr<const AreaExcluder> vol, bool shared);
 
   /** Copy Constructor*/
   SubtractedDiscSurface(const SubtractedDiscSurface& psf);
@@ -72,7 +72,7 @@ public:
   }
 
 protected:
-  std::unique_ptr<AreaExcluder> m_subtrVol{nullptr};
+  std::shared_ptr<const AreaExcluder> m_subtrVol{nullptr};
   bool m_shared{true};
 };
 

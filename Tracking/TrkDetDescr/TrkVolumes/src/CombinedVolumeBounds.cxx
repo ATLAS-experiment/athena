@@ -161,7 +161,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
           nullptr,
           std::make_shared<Trk::SubtractedVolumeBounds>(std::move(firstSub), std::move(secondSub)));
       }
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(comb_sub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(comb_sub));
       bool new_shared = shared;
       if (m_intersection){
         new_shared = true;
@@ -173,7 +173,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
         retsf.push_back(std::make_unique<Trk::SubtractedCylinderSurface>(*sclo, std::move(volEx), new_shared));
       }
     } else if (plo || clo || dlo) {
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(secondSub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(secondSub));
       if (plo){
         retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*plo, std::move(volEx), m_intersection));
       }
@@ -273,7 +273,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
           nullptr,
           std::make_shared<Trk::SubtractedVolumeBounds>(std::move(secondSub), std::move(firstSub)));
       }
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(comb_sub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(comb_sub));
       bool new_shared = shared;
       if (m_intersection){
         new_shared = true;
@@ -285,7 +285,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
         retsf.push_back( std::make_unique<Trk::SubtractedCylinderSurface>(*scli, std::move(volEx), new_shared));
 
     } else if (pli || cli || dli) {
-      auto volEx = std::make_unique<Trk::VolumeExcluder>(std::move(firstSub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(firstSub));
       if (pli){
         retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*pli, std::move(volEx), m_intersection));
       }
