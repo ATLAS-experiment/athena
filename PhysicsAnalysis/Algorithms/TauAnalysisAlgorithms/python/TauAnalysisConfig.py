@@ -58,7 +58,7 @@ class TauCalibrationConfig (ConfigBlock):
                                           'TauTruthDecorationsAlg' + postfix,
                                            reentrant=True )
             alg.taus = config.readName (self.containerName)
-            alg.doubleDecorations = ['pt_vis', 'eta_vis', 'phi_vis', 'm_vis']
+            alg.doubleDecorations = ['pt_vis', 'pt_invis', 'eta_vis', 'eta_invis', 'phi_vis', 'phi_invis', 'm_vis', 'm_invis']
             alg.floatDecorations = []
             alg.intDecorations = ['pdgId']
             alg.unsignedIntDecorations = ['classifierParticleOrigin', 'classifierParticleType']
