@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDBASETOOLS_MUONCANDIDATETOOL_H
@@ -22,9 +22,9 @@
 
 namespace MuonCombined {
 
-    class MuonCandidateTool : public AthAlgTool, virtual public IMuonCandidateTool {
+    class MuonCandidateTool : public extends<AthAlgTool, IMuonCandidateTool> {
     public:
-        MuonCandidateTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~MuonCandidateTool() = default;
 
         virtual StatusCode initialize() override;
