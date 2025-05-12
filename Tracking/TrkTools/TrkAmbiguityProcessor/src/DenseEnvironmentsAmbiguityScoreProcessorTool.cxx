@@ -187,7 +187,7 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::addNewTracks(const TrackColle
 
     if (category == AmbiguityProcessor::TrackAccepted){
       ATH_MSG_VERBOSE ("Track  ("<< pThisTrack <<") has score "<<score);
-      trackScoreTrackMap->push_back(std::make_pair(pThisTrack, -score));
+      trackScoreTrackMap->emplace_back(pThisTrack, -score);
       if (m_observerTool.isEnabled()) {
         nToMap++;
       }
