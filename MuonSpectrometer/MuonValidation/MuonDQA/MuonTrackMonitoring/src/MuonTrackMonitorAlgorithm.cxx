@@ -314,10 +314,11 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
             if (!muonSegment) {
                 continue;
             }
+            using namespace Muon::MuonStationIndex;
             MuonSmallSectorR = MuonLargeSectorR = std::hypot(muonSegment->x(), muonSegment->y());
             MuonSmallSectorZ = MuonLargeSectorZ = muonSegment->z();
             MuonSector = muonSegment->sector();
-            MuonCIndex = muonSegment->chamberIndex();
+            MuonCIndex = toInt(muonSegment->chamberIndex());
             int sector = muonSegment->sector();
             if(sector % 2 == 0) {
                 fill(tool, MuonLargeSectorZ, MuonLargeSectorR, MuonSector, MuonCIndex);

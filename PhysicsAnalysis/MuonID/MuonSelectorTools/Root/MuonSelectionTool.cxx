@@ -19,6 +19,7 @@ namespace {
         // a reordering could be considered for a rel. 22 retuning, which can then easily be achieved by
         // swapping around the elements in the below initialization.
         using ChIdx = Muon::MuonStationIndex::ChIndex;
+        using namespace Muon::MuonStationIndex;
         const std::vector<ChIdx> orderedChIndices{
             ChIdx::CSS, ChIdx::CSL, ChIdx::BIS, ChIdx::BIL,
             ChIdx::BMS, ChIdx::BML, ChIdx::BOS, ChIdx::BOL,
@@ -31,7 +32,7 @@ namespace {
         std::vector<int> chamberIndexOrder(orderedChIndices.size());
 
         for (unsigned int i = 0; i < orderedChIndices.size(); i++) {
-            chamberIndexOrder[static_cast<int>(orderedChIndices[i])] = i;
+            chamberIndexOrder[toInt(orderedChIndices[i])] = i;
         }
         return chamberIndexOrder;
     }
@@ -39,8 +40,8 @@ namespace {
     // This is the comparison function for the sorting of segments according to the chamber index
     bool chamberIndexCompare(const xAOD::MuonSegment* first, const xAOD::MuonSegment* second) {
         static const std::vector<int> chamberIndexOrder = initializeChamberIdxOrder();
-        return (chamberIndexOrder[static_cast<int>(first->chamberIndex())] < 
-                chamberIndexOrder[static_cast<int>(second->chamberIndex())]);
+        return (chamberIndexOrder[toInt(first->chamberIndex())] < 
+                chamberIndexOrder[toInt(second->chamberIndex())]);
     }
 
     static const SG::AuxElement::Accessor<float> mePt_acc("MuonSpectrometerPt");
@@ -838,8 +839,9 @@ namespace CP {
         if (mu.author() == xAOD::Muon::MuTagIMO && muonSegments.size() == 0)
             ATH_MSG_WARNING("passedLowPtEfficiencyMVACut - found segment-tagged muon with no segments!");
 
-        seg1ChamberIdx = (!muonSegments.empty()) ? muonSegments[0]->chamberIndex() : -9;
-        seg2ChamberIdx = (muonSegments.size() > 1) ? muonSegments[1]->chamberIndex() : -9;
+        using namespace Muon::MuonStationIndex;
+        seg1ChamberIdx = (!muonSegments.empty())   ? toInt(muonSegments[0]->chamberIndex()) : -9;
+        seg2ChamberIdx = (muonSegments.size() > 1) ? toInt(muonSegments[1]->chamberIndex()) : -9;
 
         // these variables are only used for MuTagIMO
         if (mu.author() == xAOD::Muon::MuTagIMO) {

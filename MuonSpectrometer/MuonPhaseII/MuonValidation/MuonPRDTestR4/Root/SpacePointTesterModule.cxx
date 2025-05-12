@@ -4,6 +4,8 @@
 
 #include "MuonPRDTestR4/SpacePointTesterModule.h"
 #include "StoreGate/ReadHandle.h"
+
+using namespace Muon::MuonStationIndex;
 namespace MuonValR4{
     SpacePointTesterModule::SpacePointTesterModule(MuonTesterTree& tree,
                                    const std::string& inContainer,
@@ -23,7 +25,7 @@ namespace MuonValR4{
             return insert_itr.first->second;
         }
         
-        m_globPos.push_back(spacePoint.positionInChamber());
+        m_spPos.push_back(spacePoint.positionInChamber());
         m_driftR.push_back(spacePoint.driftRadius());
 
 
@@ -42,7 +44,7 @@ namespace MuonValR4{
         using TechIndex = Muon::MuonStationIndex::TechnologyIndex; 
         const Identifier id = spacePoint.identify();
         const TechIndex techIdx = idHelperSvc()->technologyIndex(id);
-        m_techIdx.push_back(static_cast<int>(techIdx));
+        m_techIdx.push_back(toInt(techIdx));
         m_spacePointId.push_back(id);
         int phiChannel{-1};
         switch (techIdx) {
@@ -123,9 +125,8 @@ namespace MuonValR4{
     }
     bool SpacePointTesterModule::fill(const EventContext& ctx) {
         m_internalFill = true;
-        SG::ReadHandle container{m_key, ctx};
-        if (!container.isPresent()) {
-            ATH_MSG_FATAL("Failed to retrieve container "<<m_key.fullKey());
+        const MuonR4::SpacePointContainer* container{nullptr};
+        if (!SG::get(container, m_key, ctx).isSuccess()) {
             return false;
         }
         for (const MuonR4::SpacePointBucket* bucket : *container) {

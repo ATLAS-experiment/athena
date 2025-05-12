@@ -7,6 +7,7 @@
 #include "TruthUtils/MagicNumbers.h"
 #include <unordered_set>
 
+using namespace Muon::MuonStationIndex;
 struct HitTruthMatching{
     HitTruthMatching(const xAOD::TruthParticle* truthPart_):
       truthPart{truthPart_}{
@@ -97,7 +98,7 @@ StatusCode MuonHoughDataNtuple::execute()
         m_maxHit_sector = sec_i;
         m_maxHit_z0 = max->pos;
         m_maxHit_theta = max->theta;
-        m_maxHit_region = max->refregion;
+        m_maxHit_region = toInt(max->refregion);
         bool firstHit = true; // to store station information
         // now record all hits in the maximum
         int hit_index = 0;
@@ -115,7 +116,7 @@ StatusCode MuonHoughDataNtuple::execute()
             const Identifier measId = prd->identify();
             // station info
             if(firstHit){
-              m_maxHit_stationIndex = m_idHelperSvc->stationIndex(measId);
+              m_maxHit_stationIndex = toInt(m_idHelperSvc->stationIndex(measId));
               m_maxHit_stationEta = m_idHelperSvc->stationEta(measId);
               m_maxHit_stationPhi = m_idHelperSvc->stationPhi(measId);
               firstHit = false;
@@ -190,7 +191,7 @@ StatusCode MuonHoughDataNtuple::execute()
             const Identifier measId = prd->identify();
             // station info
             if(firstHit){
-              m_maxPhiHit_stationIndex = m_idHelperSvc->stationIndex(prd->identify());
+              m_maxPhiHit_stationIndex = toInt(m_idHelperSvc->stationIndex(prd->identify()));
               m_maxPhiHit_stationEta = m_idHelperSvc->stationEta(prd->identify());
               m_maxPhiHit_stationPhi = m_idHelperSvc->stationPhi(prd->identify());
               firstHit = false;

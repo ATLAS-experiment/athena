@@ -48,7 +48,8 @@ namespace MuonPRDTest {
        m_dir.push_back(segment.direction());
        m_etaIdx += segment.etaIndex();
        m_sector += segment.sector();
-       m_chamberIdx +=segment.chamberIndex();
+       using namespace Muon::MuonStationIndex;
+       m_chamberIdx += toInt(segment.chamberIndex());
        m_chi2 +=segment.chiSquared();
        m_nDoF +=segment.numberDoF();
 
