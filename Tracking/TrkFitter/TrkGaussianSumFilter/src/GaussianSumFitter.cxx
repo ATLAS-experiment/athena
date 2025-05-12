@@ -1052,9 +1052,8 @@ Trk::GaussianSumFitter::addCCOT(
   }
  // Combine the improved state after extrapolating back from the calo
  // and find the mode of the distribution
-  std::unique_ptr<Trk::TrackParameters> combinedState =
-    MultiComponentStateCombiner::combineToSingle(improvedState, m_useMode);
-  auto combinedFitQuality = Trk::GsfMeasurementUpdator::fitQuality(improvedState, *ownCCOT);
+  std::unique_ptr<Trk::TrackParameters> combinedSingleState =
+      MultiComponentStateCombiner::combineToSingle(improvedState, m_useMode);
 
   // Now build a dummy measurement for the improved estimation
   AmgSymMatrix(5) covMatrix;
@@ -1074,9 +1073,10 @@ Trk::GaussianSumFitter::addCCOT(
 
   // Build a TSOS using the dummy measurement and and the final combined state
   smoothedTrajectory.emplace_back(
-      combinedFitQuality,
+      FitQualityOnSurface{},  // We do not add the fitquality again. As this would be the one we
+           // add at calo, here not a real measurement
       std::move(pseudoMeasurement),
-      std::move(combinedState),
+      std::move(combinedSingleState),
       std::move(improvedState));
 
   return true;
