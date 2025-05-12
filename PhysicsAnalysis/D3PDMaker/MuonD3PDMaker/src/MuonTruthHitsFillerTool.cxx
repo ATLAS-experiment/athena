@@ -18,8 +18,9 @@
 #include <format>
 
 
+using namespace Muon::MuonStationIndex;
 namespace{
-  constexpr int chIdxMMS = Muon::MuonStationIndex::toInt(Muon::MuonStationIndex::ChIndex::ChIndexMax);
+  constexpr int chIdxMMS = toInt(ChIndex::ChIndexMax);
   constexpr int chIdxMML = chIdxMMS + 1;
 }
 
@@ -63,7 +64,6 @@ StatusCode MuonTruthHitsFillerTool::initialize()
  */
 StatusCode MuonTruthHitsFillerTool::book() {
   
-  using namespace Muon::MuonStationIndex;
 
   ATH_CHECK( addVariable ("nprecLayers",     m_nprecLayers )  );
   ATH_CHECK( addVariable ("nphiLayers",      m_nphiLayers )  );
@@ -111,7 +111,6 @@ StatusCode MuonTruthHitsFillerTool::fill (const xAOD::TruthParticle& p)
 
 StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode) {
 
-  using namespace Muon::MuonStationIndex;
   bool found = false;
   for (const std::string& key : m_PRD_TruthNames) {
     if (!evtStore()->contains<PRD_MultiTruthCollection>(key)) {
@@ -120,7 +119,6 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode) {
     }
     const PRD_MultiTruthCollection* collection = nullptr;
     ATH_CHECK( evtStore()->retrieve(collection, key) );
-
     for (const PRD_MultiTruthCollection::value_type& mc : *collection) {
       // check if gen particle same as input
       // TODO Here barcode is being used purely as a unique
@@ -134,7 +132,7 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode) {
       bool measPhi   = m_idHelperSvc->measuresPhi(id);
 
       if( m_idHelperSvc->issTgc(id) ) {
-        int index = m_idHelperSvc->phiIndex(id);
+        int index = toInt(m_idHelperSvc->phiIndex(id));
         if( measPhi ) ++*(m_nphiHitsPerChamberLayer[index]);
         else          ++*(m_ntrigEtaHitsPerChamberLayer[index]);
       }

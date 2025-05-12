@@ -402,7 +402,8 @@ StatusCode L2MuonSAIOMon :: fillVariablesPerOfflineMuonPerChain(const EventConte
       float segmentPy = segment->py();
       float segmentPz = segment->pz();
       float segmentSector = segment->sector();
-      int segmentChamberIndex = segment->chamberIndex();
+      using namespace Muon::MuonStationIndex;
+      int segmentChamberIndex = toInt(segment->chamberIndex());
       float distance_bw_FTFroad_and_offlinesegment = 99999.;
       float distance_bw_MDT_and_offlinesegment = 99999.;
       int roadChamberIndex = -1;
