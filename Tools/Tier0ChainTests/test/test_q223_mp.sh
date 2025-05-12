@@ -12,6 +12,8 @@
 # art-include: 21.9/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
+# art-output: AOD.pool.root
+# art-output: ESD.pool.root
 
 
 # Added "preExec" here, because it was needed to disable dynamic alignment wrt q223 as discussed in ATLASRECTS-5783 (changed InDetGeometryFlags.useDynamicAlignFolders to false wrt q223).    
@@ -30,7 +32,7 @@ Reco_tf.py \
 --conditionsTag='CONDBR2-BLKPA-RUN2-11' \
 --geometryVersion='ATLAS-R2-2016-01-00-01' \
 --maxEvents=500 \
---outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --imf False
+--outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root --imf False
 
 rc1=$?
 echo "art-result: $rc1 Reco"

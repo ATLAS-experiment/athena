@@ -32,11 +32,6 @@ class IDVarCalculator : public DiTauToolBase {
   virtual StatusCode execute(DiTauCandidateData * data,
 			     const EventContext& ctx) const override;
 
-
- private:
-
-  Gaudi::Property<bool> m_useCells{this, "useCells", true};
-
 };
 
 #endif // DITAUREC_IDVARCALCULATOR_H

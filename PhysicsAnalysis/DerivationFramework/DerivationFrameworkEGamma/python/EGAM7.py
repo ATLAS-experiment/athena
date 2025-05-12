@@ -496,6 +496,16 @@ def EGAM7Cfg(flags):
             "CaloClusterCellLinkContainer#egammaClusters_links",
         ]
 
+    # PLIT variables
+    if flags.Derivation.Egamma.addPLITInputs:
+        from LeptonTaggers.LeptonTaggersConfig import DecorateImprovedPromptLeptonAlgsCfg, GetExtraImprovedPromptVariablesForDxAOD
+        acc.merge(DecorateImprovedPromptLeptonAlgsCfg(flags))
+        EGAM7SlimmingHelper.ExtraVariables += [ item for item in GetExtraImprovedPromptVariablesForDxAOD() if item.startswith("Electrons")]
+    if flags.Derivation.Egamma.addPLITOutputs:
+        from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg, GetExtraPLITVariablesForDxAOD
+        acc.merge(DecoratePLITAlgsCfg(flags))
+        EGAM7SlimmingHelper.ExtraVariables += [ item for item in GetExtraPLITVariablesForDxAOD() if item.startswith("Electrons")]
+
     EGAM7ItemList = EGAM7SlimmingHelper.GetItemList()
     acc.merge(
         OutputStreamCfg(

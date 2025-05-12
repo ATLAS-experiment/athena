@@ -125,12 +125,11 @@ StatusCode Tile::TileVolumeBuilder::initialize()
   return StatusCode::SUCCESS;
 }
 
-std::vector<Trk::TrackingVolume*>*
-Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
-					 , const GeoAlignmentStore* /*geoAlign*/) const
-{
+std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
+    const CaloDetDescrManager& caloDDM,
+    const GeoAlignmentStore* /*geoAlign*/) const {
   // the return vector
-  std::vector<Trk::TrackingVolume*>* tileTrackingVolumes = new std::vector<Trk::TrackingVolume*>;
+  auto tileTrackingVolumes = std::vector<Trk::TrackingVolume*>();
   // the converter helpers
   //Trk::GeoShapeConverter    geoShapeToVolumeBounds;
   //Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
@@ -162,13 +161,13 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   Trk::TrackingVolume* tileNegativeFingerGap                   = nullptr;
 
   // The Bounds To be Assigned (for resizing) ====================
-  Trk::CylinderVolumeBounds* tileBarrelBounds                        = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> tileBarrelBounds;
   std::unique_ptr<Trk::CylinderVolumeBounds> tileBarrelGirderBounds;
 
   Trk::CylinderVolumeBounds  tilePositiveExtendedBarrelBounds;
-  Trk::CylinderVolumeBounds* itcPlug1Bounds                          = nullptr;
-  Trk::CylinderVolumeBounds* itcPlug2Bounds                          = nullptr;
-  Trk::CylinderVolumeBounds* gapBounds                               = nullptr;
+  std::shared_ptr<Trk::CylinderVolumeBounds> itcPlug1Bounds;
+  std::shared_ptr<Trk::CylinderVolumeBounds> itcPlug2Bounds;
+  std::shared_ptr<Trk::CylinderVolumeBounds> gapBounds;
 
   // dummy objects
   Trk::LayerArray* dummyLayers = nullptr;
@@ -180,11 +179,11 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     m_surfBuilder->exitSurfaces(&caloDDM);
 
   // averaged material properties
-  auto barrelProperties = std::make_unique<Trk::Material>(22.7, 212., 45.8, 21.4, 0.0062);
-  auto extendedBarrelProperties = std::make_unique<Trk::Material>(22.7, 210., 45.8, 21.4, 0.0062);
+  auto barrelProperties = std::make_shared<Trk::Material>(22.7, 212., 45.8, 21.4, 0.0062);
+  auto extendedBarrelProperties = std::make_shared<Trk::Material>(22.7, 210., 45.8, 21.4, 0.0062);
   // material properties with layer encoding - to be defined later
-  const Trk::BinnedMaterial* barrelMaterialBinned = nullptr;
-  const Trk::BinnedMaterial* extendedMaterialBinned = nullptr;
+  Trk::BinnedMaterial barrelMaterialBinned{};
+  Trk::BinnedMaterial extendedMaterialBinned{};
 
   Trk::Material girderProperties = Trk::Material(28.6, 272.5, 40.4, 19., 0.0049);
   Trk::Material extendedGirderProperties = Trk::Material(27.9, 266.4, 41., 19.2, 0.005);
@@ -196,10 +195,10 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   // layer material can be adjusted here
   std::vector<Trk::IdentifiedMaterial> matTB;
   int baseID = Trk::GeometrySignature(Trk::Calo)*1000 + 12;
-  matTB.emplace_back(barrelProperties.get(),0);
-  matTB.emplace_back(barrelProperties.get(),baseID);
-  matTB.emplace_back(barrelProperties.get(),baseID+1);
-  matTB.emplace_back(barrelProperties.get(),baseID+2);
+  matTB.emplace_back(barrelProperties,0);
+  matTB.emplace_back(barrelProperties,baseID);
+  matTB.emplace_back(barrelProperties,baseID+1);
+  matTB.emplace_back(barrelProperties,baseID+2);
 
   // material index
   std::vector<size_t> ltb{0,1,2,3};
@@ -207,10 +206,10 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   // layer material can be adjusted here
   std::vector<Trk::IdentifiedMaterial> matETB;
   baseID = Trk::GeometrySignature(Trk::Calo)*1000 + 18;
-  matETB.emplace_back(extendedBarrelProperties.get(),0);
-  matETB.emplace_back(extendedBarrelProperties.get(),baseID);
-  matETB.emplace_back(extendedBarrelProperties.get(),baseID+1);
-  matETB.emplace_back(extendedBarrelProperties.get(),baseID+2);
+  matETB.emplace_back(extendedBarrelProperties,0);
+  matETB.emplace_back(extendedBarrelProperties,baseID);
+  matETB.emplace_back(extendedBarrelProperties,baseID+1);
+  matETB.emplace_back(extendedBarrelProperties,baseID+2);
 
   // layer material can be adjusted here
   //Trk::MaterialProperties barrelFingerGapProperties = Trk::MaterialProperties(1., 130./0.35, 0.003*pow(0.35,3),30.);
@@ -250,7 +249,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
       ATH_MSG_VERBOSE( "  Child: " << childLogVol->getName() << " has shape  " << childShape->type() );
 
       const GeoTubs* currentTubs  = dynamic_cast<const GeoTubs*>(childShape);
-      Trk::CylinderVolumeBounds* childCylVolBounds = currentTubs ? Trk::GeoShapeConverter::convert(currentTubs).release() : nullptr;
+      std::shared_ptr<Trk::CylinderVolumeBounds> childCylVolBounds = currentTubs ? Trk::GeoShapeConverter::convert(currentTubs) : nullptr;
       // get the transform
       GeoTrf::Transform3D childTransform = currentVPhysVolLink->getXToChildVol(ichild);
       double childZposition = childTransform.translation().z();
@@ -271,12 +270,10 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	  // the centered one is the TileBarrel
 	  if ( fabs(childZposition)< 100.*mm ){
 	    //depth is where we split childCylVolBounds
-	    tileBarrelBounds = new Trk::CylinderVolumeBounds(childCylVolBounds->innerRadius(),depth,childCylVolBounds->halflengthZ());
+	    tileBarrelBounds = std::make_shared<Trk::CylinderVolumeBounds>(childCylVolBounds->innerRadius(),depth,childCylVolBounds->halflengthZ());
 
 	    // assign Bounds
 	    tileBarrelGirderBounds = make_unique<Trk::CylinderVolumeBounds>(depth,childCylVolBounds->outerRadius(),childCylVolBounds->halflengthZ());
-
-	    Amg::Transform3D* align=nullptr;     //  no alignment given yet
 
 	    // construct bin utilities
 	    std::vector<float> steps;
@@ -287,15 +284,13 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	    steps.push_back(depth);
 	    auto rBU = Trk::BinUtility(steps, Trk::open, Trk::binR);
 
-	    barrelMaterialBinned = new Trk::BinnedMaterial(barrelProperties.get(),rBU,ltb,matTB);
+	    barrelMaterialBinned = Trk::BinnedMaterial(*barrelProperties,rBU,ltb,matTB);
 
-	    tileBarrel = new Trk::AlignableTrackingVolume(nullptr,align,
-							  tileBarrelBounds,
-							  barrelMaterialBinned,
-							  12,
-							  "Calo::Detectors::Tile::Barrel");
-	  }
-	} break;
+            tileBarrel = new Trk::AlignableTrackingVolume(
+                nullptr, tileBarrelBounds, barrelMaterialBinned, 12,
+                "Calo::Detectors::Tile::Barrel");
+          }
+        } break;
 
 	default : { // Tile Extended Barrel ==================================================================
 
@@ -304,17 +299,16 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	  std::vector<double> girderLayerRadius;
 	  std::vector<double> layerRadius;
 	  std::vector<double> layerEnvelope;
-	  Trk::CylinderVolumeBounds* tileExtendedBounds = nullptr;
-          bool tileExtendedBoundsUsed = false;
+    std::shared_ptr<Trk::CylinderVolumeBounds> tileExtendedBounds = nullptr;
 	  std::unique_ptr<Trk::CylinderVolumeBounds> gapVolBounds;
 
 	  // prepare for the Extended Barrel
 	  if (childCylVolBounds->halflengthZ() > 1000.){
-              volumeName = childZposition > 0. ?
-                "Calo::Detectors::Tile::PositiveExtendedBarrel" : "Calo::Detectors::Tile::NegativeExtendedBarrel";
+      volumeName = childZposition > 0. ?
+        "Calo::Detectors::Tile::PositiveExtendedBarrel" : "Calo::Detectors::Tile::NegativeExtendedBarrel";
 
-              //depth is where we split childCylVolBounds
-              tileExtendedBounds = new Trk::CylinderVolumeBounds(childCylVolBounds->innerRadius(),depth,childCylVolBounds->halflengthZ());
+      //depth is where we split childCylVolBounds
+      tileExtendedBounds = std::make_shared<Trk::CylinderVolumeBounds>(childCylVolBounds->innerRadius(),depth,childCylVolBounds->halflengthZ());
 
 	  } else if (childCylVolBounds->halflengthZ() > 100.){
 	    // prepare for the EBarrel Finger : (ST) : merge with combined girder
@@ -335,7 +329,6 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	  // only account for misalignment along z
 	  Amg::Vector3D childPosition(0.,0.,childZposition);
 	  Trk::TrackingVolume* tileExtendedTrackingVolume = nullptr;
-	  Amg::Transform3D* align=nullptr;     //  no alignment given yet
 
 	  if(m_useCaloSurfBuilder  && childCylVolBounds->halflengthZ() > 1000.){
 
@@ -351,19 +344,16 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	    steps.push_back(tileExtendedBounds->outerRadius());
 	    auto eBU = Trk::BinUtility(steps, Trk::open, Trk::binR);
 
-	    extendedMaterialBinned = new Trk::BinnedMaterial(extendedBarrelProperties.get(),eBU,ltb,matETB);
+	    extendedMaterialBinned = Trk::BinnedMaterial(*extendedBarrelProperties,eBU,ltb,matETB);
 
-	    tileExtendedTrackingVolume = new Trk::AlignableTrackingVolume(new Amg::Transform3D(Amg::Translation3D(childPosition)),
-									  align,
-									  tileExtendedBounds,
-									  extendedMaterialBinned,
-									  18,
-									  volumeName);
-            tileExtendedBoundsUsed = true;
+      tileExtendedTrackingVolume = new Trk::AlignableTrackingVolume(
+        std::make_unique<Amg::Transform3D>(Amg::Translation3D(childPosition)),
+        tileExtendedBounds,
+        extendedMaterialBinned, 18, volumeName);
 
-	  } else {
+    } else {
 	    if ( gapVolBounds ) {
-	      gapBounds = gapVolBounds.release();
+	      gapBounds = std::move(gapVolBounds);
 
 	    } else if (tileExtendedBounds) {
 
@@ -376,15 +366,14 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	      steps.push_back(tileExtendedBounds->outerRadius());
 	      auto eBU = Trk::BinUtility(steps, Trk::open, Trk::binR);
 
-	      extendedMaterialBinned = new Trk::BinnedMaterial(extendedBarrelProperties.get(),eBU,ltb,matETB);
+	      extendedMaterialBinned = Trk::BinnedMaterial(*extendedBarrelProperties.get(),eBU,ltb,matETB);
 
-	      tileExtendedTrackingVolume = new Trk::AlignableTrackingVolume(new Amg::Transform3D(Amg::Translation3D(childPosition)),
-									    align,
-									    tileExtendedBounds,
-									    extendedMaterialBinned,
-									    18,
-									    volumeName);
-              tileExtendedBoundsUsed = true;
+	      tileExtendedTrackingVolume = new Trk::AlignableTrackingVolume(
+          std::make_unique<Amg::Transform3D>(Amg::Translation3D(childPosition)),
+          tileExtendedBounds,
+          extendedMaterialBinned,
+          18,
+          volumeName);
 	    }
 	  }
 	  // and assign it to the right one
@@ -392,19 +381,15 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	    if (childZposition > 0.) {
 	      tilePositiveExtendedBarrel             = tileExtendedTrackingVolume;
 	      tilePositiveExtendedBarrelBounds       = *tileExtendedBounds;
-        // tileExtendedBoundsUsed = true; - this line is not needed, we copy everything from *tileExtendedBounds to tilePositiveExtendedBarrelBounds
 	    } else {
 	      tileNegativeExtendedBarrel             = tileExtendedTrackingVolume;
 	    }
 	  } else if (childCylVolBounds->halflengthZ() > 100.) {
 	    tileZ = fabs(childZposition)+childCylVolBounds->halflengthZ();
 	  }
-          if (!tileExtendedBoundsUsed)
-            delete tileExtendedBounds;
 	} break;
-	} // end of switch
+  } // end of switch
       } // end of ? cylVolBounds
-      delete childCylVolBounds;
     } //end of ichild loop
   } // end of treetop loop
 
@@ -417,16 +402,16 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
   // combined girder volume
   {
-    auto tileGirderBounds = std::make_unique<Trk::CylinderVolumeBounds>
+    auto tileGirderBounds = std::make_shared<Trk::CylinderVolumeBounds>
       (tileBarrelGirderBounds->innerRadius(),
        tileBarrelGirderBounds->outerRadius(),
        tileZ);
 
-    tileGirder =new Trk::TrackingVolume(nullptr,
-                                        tileGirderBounds.release(),
-                                        girderProperties,
-                                        dummyLayers, dummyVolumes,
-                                        "Calo::Girder::TileCombined");
+    tileGirder = new Trk::TrackingVolume(nullptr,
+                                         std::move(tileGirderBounds),
+                                         girderProperties,
+                                         dummyLayers, dummyVolumes,
+                                         "Calo::Girder::TileCombined");
   }
 
   // build the gap volumes ( crack done by CaloTG )
@@ -436,112 +421,107 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   std::vector<Trk::IdentifiedMaterial> matITC;
   // layer material can be adjusted here
   baseID = Trk::GeometrySignature(Trk::Calo)*1000;
-  matITC.emplace_back(barrelProperties.get(),baseID+15);
-  matITC.emplace_back(barrelProperties.get(),baseID+16);
-  matITC.emplace_back(barrelProperties.get(),baseID+17);
+  matITC.emplace_back(barrelProperties,baseID+15);
+  matITC.emplace_back(barrelProperties,baseID+16);
+  matITC.emplace_back(barrelProperties,baseID+17);
 
   // ITCPlug1
   double p1Z = 0.5*(plug1Z-plug1hZ+tileExtZ);
   double hp1Z = 0.5*(tileExtZ-plug1Z+plug1hZ);
-  itcPlug1Bounds = new Trk::CylinderVolumeBounds(plug1R,
-						 tileBarrelBounds->outerRadius(),
-						 hp1Z);
+  itcPlug1Bounds = std::make_shared<Trk::CylinderVolumeBounds>(
+    plug1R,
+    tileBarrelBounds->outerRadius(),
+    hp1Z);
 
   Amg::Vector3D itcP1Pos(0.,0.,p1Z);
   Amg::Vector3D itcP1Neg(0.,0.,-p1Z);
-  Amg::Transform3D* itcP1PosTransform = new Amg::Transform3D(Amg::Translation3D(itcP1Pos));
-  Amg::Transform3D* itcP1NegTransform = new Amg::Transform3D(Amg::Translation3D(itcP1Neg));
+  auto itcP1PosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(itcP1Pos));
+  auto itcP1NegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(itcP1Neg));
 
 
   std::vector<size_t> dummylay(1,1);
   std::vector<float> bpsteps{float(plug1R), float(tileBarrelBounds->outerRadius())};
   auto rBU = Trk::BinUtility(bpsteps, Trk::open, Trk::binR);
   const Trk::BinUtility& rBUc(rBU);
-  const Trk::BinnedMaterial* plug1MatPos = new Trk::BinnedMaterial(barrelProperties.get(),rBU,dummylay,matITC);
-  const Trk::BinnedMaterial* plug1MatNeg = new Trk::BinnedMaterial(barrelProperties.get(),rBUc,dummylay,matITC);
+  const Trk::BinnedMaterial plug1MatPos(*barrelProperties,rBU,dummylay,matITC);
+  const Trk::BinnedMaterial plug1MatNeg(*barrelProperties,rBUc,dummylay,matITC);
 
-  Amg::Transform3D* align=nullptr;
+  Trk::AlignableTrackingVolume* itcPlug1Pos = new Trk::AlignableTrackingVolume(
+      std::move(itcP1PosTransform),
+      itcPlug1Bounds,
+      plug1MatPos,
+      16,
+      "Calo::Detectors::Tile::ITCPlug1Pos");
 
-  Trk::AlignableTrackingVolume* itcPlug1Pos = new Trk::AlignableTrackingVolume(itcP1PosTransform, align,
-									       itcPlug1Bounds,
-									       plug1MatPos,
-									       16,
-									       "Calo::Detectors::Tile::ITCPlug1Pos");
-
-  Trk::AlignableTrackingVolume* itcPlug1Neg = new Trk::AlignableTrackingVolume(itcP1NegTransform, align,
-									       itcPlug1Bounds->clone(),
-									       plug1MatNeg,
-									       16,
-									       "Calo::Detectors::Tile::ITCPlug1Neg");
-
-  //std::cout <<"ITC Plug1 ok:"<< std::endl;
+  Trk::AlignableTrackingVolume* itcPlug1Neg = new Trk::AlignableTrackingVolume(
+      std::move(itcP1NegTransform),
+      std::shared_ptr<Trk::CylinderVolumeBounds>(itcPlug1Bounds->clone()),
+      plug1MatNeg, 16, "Calo::Detectors::Tile::ITCPlug1Neg");
 
   // ITCPlug2
   double p2Z = 0.5*(plug2Z-plug2hZ+tileExtZ);
   double hp2Z = 0.5*(tileExtZ-plug2Z+plug2hZ);
-  itcPlug2Bounds = new Trk::CylinderVolumeBounds(plug2R,
-						 plug1R,
-						 hp2Z);
+  itcPlug2Bounds =
+      std::make_shared<Trk::CylinderVolumeBounds>(plug2R, plug1R, hp2Z);
 
   Amg::Vector3D itcP2Pos(0.,0.,p2Z);
   Amg::Vector3D itcP2Neg(0.,0.,-p2Z);
-  Amg::Transform3D* itcP2PosTransform = new Amg::Transform3D(Amg::Translation3D(itcP2Pos));
-  Amg::Transform3D* itcP2NegTransform = new Amg::Transform3D(Amg::Translation3D(itcP2Neg));
+  auto itcP2PosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(itcP2Pos));
+  auto itcP2NegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(itcP2Neg));
 
   std::vector<size_t> p2lay(1,0);
   std::vector<float> p2steps{float(plug2R), float(plug1R)};
   auto  p2BU = Trk::BinUtility(p2steps, Trk::open, Trk::binR);
   const Trk::BinUtility&  p2BUc(p2BU);
-  const Trk::BinnedMaterial* plug2MatPos = new Trk::BinnedMaterial(barrelProperties.get(),p2BU,p2lay,matITC);
-  const Trk::BinnedMaterial* plug2MatNeg = new Trk::BinnedMaterial(barrelProperties.get(),p2BUc,p2lay,matITC);
+  const Trk::BinnedMaterial plug2MatPos(*barrelProperties,p2BU,p2lay,matITC);
+  const Trk::BinnedMaterial plug2MatNeg(*barrelProperties,p2BUc,p2lay,matITC);
 
-  Trk::AlignableTrackingVolume* itcPlug2Pos = new Trk::AlignableTrackingVolume(itcP2PosTransform, align,
-									       itcPlug2Bounds,
-									       plug2MatPos,
-									       15,
-									       "Calo::Detectors::Tile::ITCPlug2Pos");
+  Trk::AlignableTrackingVolume* itcPlug2Pos = new Trk::AlignableTrackingVolume(
+      std::move(itcP2PosTransform),
+      itcPlug2Bounds,
+      plug2MatPos,
+      15,
+      "Calo::Detectors::Tile::ITCPlug2Pos");
 
-  Trk::AlignableTrackingVolume* itcPlug2Neg = new Trk::AlignableTrackingVolume(itcP2NegTransform, align,
-									       itcPlug2Bounds->clone(),
-									       plug2MatNeg,
-									       15,
-									       "Calo::Detectors::Tile::ITCPlug2Neg");
+  Trk::AlignableTrackingVolume* itcPlug2Neg = new Trk::AlignableTrackingVolume(
+      std::move(itcP2NegTransform),
+      std::shared_ptr<Trk::CylinderVolumeBounds> (itcPlug2Bounds->clone()),
+      plug2MatNeg, 15,
+      "Calo::Detectors::Tile::ITCPlug2Neg");
 
   //std::cout <<"ITC Plug2 ok:"<< std::endl;
 
   // Gap
   float gapi = 0.5*(gapZ-gapBounds->halflengthZ()+tileExtZ);
   double hgZ = 0.5*(tileExtZ-gapZ+gapBounds->halflengthZ());
-  delete gapBounds;
-  gapBounds = new Trk::CylinderVolumeBounds(tileBarrelBounds->innerRadius(),
-					    plug2R,
-					    hgZ);
+  gapBounds = std::make_shared<Trk::CylinderVolumeBounds>(
+      tileBarrelBounds->innerRadius(), plug2R, hgZ);
 
   Amg::Vector3D gPos(0.,0.,gapi);
   Amg::Vector3D gNeg(0.,0.,-gapi);
-  Amg::Transform3D* gapPosTransform = new Amg::Transform3D(Amg::Translation3D(gPos));
-  Amg::Transform3D* gapNegTransform = new Amg::Transform3D(Amg::Translation3D(gNeg));
+  auto gapPosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(gPos));
+  auto gapNegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(gNeg));
 
   std::vector<size_t> glay(1,2);
   std::vector<float> gsteps{float(gapi-gapBounds->halflengthZ()), float(gapi+gapBounds->halflengthZ())};
   auto gp = Trk::BinUtility(gsteps, Trk::open, Trk::binZ);
-  const Trk::BinnedMaterial* gpMat = new Trk::BinnedMaterial(barrelProperties.get(),gp,glay,matITC);
+  const Trk::BinnedMaterial gpMat(*barrelProperties,gp,glay,matITC);
 
-  Trk::AlignableTrackingVolume* gapPos = new Trk::AlignableTrackingVolume(gapPosTransform, align,
-									  gapBounds,
-									  gpMat,
-									  17,
-									  "Calo::Detectors::Tile::GapPos");
+  Trk::AlignableTrackingVolume* gapPos =
+      new Trk::AlignableTrackingVolume(
+        std::move(gapPosTransform),
+        gapBounds, gpMat,
+        17, "Calo::Detectors::Tile::GapPos");
 
   std::vector<float> nsteps{float(-gapi-gapBounds->halflengthZ()), float(-gapi+gapBounds->halflengthZ())};
   auto gn = Trk::BinUtility(nsteps, Trk::open, Trk::binZ);
-  const Trk::BinnedMaterial* gnMat = new Trk::BinnedMaterial(barrelProperties.get(),gn,glay,matITC);
+  const Trk::BinnedMaterial gnMat(*barrelProperties,gn,glay,matITC);
 
-  Trk::AlignableTrackingVolume* gapNeg = new Trk::AlignableTrackingVolume(gapNegTransform, align,
-									  gapBounds->clone(),
-									  gnMat,
-									  15,
-									  "Calo::Detectors::Tile::GapNeg");
+  Trk::AlignableTrackingVolume* gapNeg = new Trk::AlignableTrackingVolume(
+      std::move(gapNegTransform),
+      std::shared_ptr<Trk::CylinderVolumeBounds>(gapBounds->clone()),
+      gnMat, 15,
+      "Calo::Detectors::Tile::GapNeg");
 
   // add buffer volumes and glue together gap sections
   float p1i = itcPlug1Pos->center().z()-itcPlug1Bounds->halflengthZ();
@@ -551,26 +531,23 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   float hgBuff = 0.5*(gi-p1i);
   Amg::Vector3D gBuffPos(0.,0.,zgBuff);
   Amg::Vector3D gBuffNeg(0.,0.,-zgBuff);
-  Amg::Transform3D* gBuffPosTransform = new Amg::Transform3D(Amg::Translation3D(gBuffPos));
-  Amg::Transform3D* gBuffNegTransform = new Amg::Transform3D(Amg::Translation3D(gBuffNeg));
+  auto gBuffPosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(gBuffPos));
+  auto gBuffNegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(gBuffNeg));
 
-  Trk::CylinderVolumeBounds* gapBuffBounds = new Trk::CylinderVolumeBounds(gapBounds->innerRadius(),
-									   gapBounds->outerRadius(),
-                                                                           hgBuff);
+  auto gapBuffBounds = std::make_shared<Trk::CylinderVolumeBounds>(
+    gapBounds->innerRadius(),
+    gapBounds->outerRadius(),
+    hgBuff);
 
+  Trk::TrackingVolume* gBufferPos = new Trk::TrackingVolume(
+      std::move(gBuffPosTransform), gapBuffBounds, fingerProperties,
+      dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::GapBufferPos");
 
-  Trk::TrackingVolume*  gBufferPos = new Trk::TrackingVolume(gBuffPosTransform,
-								   gapBuffBounds,
-								   fingerProperties,
-								   dummyLayers, dummyVolumes,
-								   "Calo::GapVolumes::Tile::GapBufferPos");
-
-
-  Trk::TrackingVolume*  gBufferNeg = new Trk::TrackingVolume(gBuffNegTransform,
-								   gapBuffBounds->clone(),
-								   fingerProperties,
-								   dummyLayers, dummyVolumes,
-								   "Calo::GapVolumes::Tile::GapBufferNeg");
+  Trk::TrackingVolume* gBufferNeg = new Trk::TrackingVolume(
+      std::move(gBuffNegTransform),
+      std::shared_ptr<Trk::CylinderVolumeBounds>(gapBuffBounds->clone()),
+      fingerProperties, dummyLayers, dummyVolumes,
+      "Calo::GapVolumes::Tile::GapBufferNeg");
 
   Trk::TrackingVolume* positiveGapSector = nullptr;
   if (gBufferPos) {
@@ -598,26 +575,21 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   float h2Buff = 0.5*(p2i-p1i);
   Amg::Vector3D p2BuffPos(0.,0.,z2Buff);
   Amg::Vector3D p2BuffNeg(0.,0.,-z2Buff);
-  Amg::Transform3D* p2BuffPosTransform = new Amg::Transform3D(Amg::Translation3D(p2BuffPos));
-  Amg::Transform3D* p2BuffNegTransform = new Amg::Transform3D(Amg::Translation3D(p2BuffNeg));
+  auto p2BuffPosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(p2BuffPos));
+  auto p2BuffNegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(p2BuffNeg));
 
-  Trk::CylinderVolumeBounds* p2BuffBounds = new Trk::CylinderVolumeBounds(itcPlug2Bounds->innerRadius(),
-									  itcPlug2Bounds->outerRadius(),
-                                                                          h2Buff);
+  auto p2BuffBounds = std::make_shared<Trk::CylinderVolumeBounds>(
+      itcPlug2Bounds->innerRadius(), itcPlug2Bounds->outerRadius(), h2Buff);
 
+  Trk::TrackingVolume* p2BufferPos = new Trk::TrackingVolume(
+      std::move(p2BuffPosTransform), p2BuffBounds, fingerProperties, dummyLayers,
+      dummyVolumes, "Calo::GapVolumes::Tile::Plug2BufferPos");
 
-  Trk::TrackingVolume*  p2BufferPos = new Trk::TrackingVolume(p2BuffPosTransform,
-								    p2BuffBounds,
-								    fingerProperties,
-								    dummyLayers, dummyVolumes,
-								    "Calo::GapVolumes::Tile::Plug2BufferPos");
-
-
-  Trk::TrackingVolume*  p2BufferNeg = new Trk::TrackingVolume(p2BuffNegTransform,
-								    p2BuffBounds->clone(),
-								    fingerProperties,
-								    dummyLayers, dummyVolumes,
-								    "Calo::GapVolumes::Tile::Plug2BufferNeg");
+  Trk::TrackingVolume* p2BufferNeg = new Trk::TrackingVolume(
+      std::move(p2BuffNegTransform),
+      std::shared_ptr<Trk::CylinderVolumeBounds>(p2BuffBounds->clone()),
+      fingerProperties, dummyLayers,
+      dummyVolumes, "Calo::GapVolumes::Tile::Plug2BufferNeg");
 
   Trk::TrackingVolume* positiveP2Sector = nullptr;
   if (p2BufferPos) {
@@ -674,25 +646,24 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
   double zFG = 0.5*(tileBarrelBounds->halflengthZ()+p1i);
   double hZ = 0.5*(p1i-tileBarrelBounds->halflengthZ());
-  Trk::CylinderVolumeBounds* tileBarrelFingerGapBounds = new Trk::CylinderVolumeBounds(rMin,rMax,hZ);
+  auto tileBarrelFingerGapBounds = std::make_shared<Trk::CylinderVolumeBounds>(rMin,rMax,hZ);
 
   Amg::Vector3D pBFPos(0.,0.,zFG);
   Amg::Vector3D pBFNeg(0.,0.,-zFG);
-  Amg::Transform3D* bfPosTransform = new Amg::Transform3D(Amg::Translation3D(pBFPos));
-  Amg::Transform3D* bfNegTransform = new Amg::Transform3D(Amg::Translation3D(pBFNeg));
+  auto bfPosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(pBFPos));
+  auto bfNegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(pBFNeg));
 
-  tileBarrelPositiveFingerGap = new Trk::TrackingVolume(bfPosTransform,
-							tileBarrelFingerGapBounds,
-							barrelFingerGapProperties,
-							dummyLayers, dummyVolumes,
-							"Calo::GapVolumes::Tile::BarrelPositiveFingerGap");
+  tileBarrelPositiveFingerGap = new Trk::TrackingVolume(
+      std::move(bfPosTransform), tileBarrelFingerGapBounds, barrelFingerGapProperties,
+      dummyLayers, dummyVolumes,
+      "Calo::GapVolumes::Tile::BarrelPositiveFingerGap");
 
-  tileBarrelNegativeFingerGap =  new Trk::TrackingVolume(bfNegTransform,
-							 tileBarrelFingerGapBounds->clone(),
-							 barrelFingerGapProperties,
-							 dummyLayers, dummyVolumes,
-							 "Calo::GapVolumes::Tile::BarrelNegativeFingerGap");
-
+  tileBarrelNegativeFingerGap = new Trk::TrackingVolume(
+      std::move(bfNegTransform),
+      std::shared_ptr<Trk::CylinderVolumeBounds>(
+          tileBarrelFingerGapBounds->clone()),
+      barrelFingerGapProperties, dummyLayers, dummyVolumes,
+      "Calo::GapVolumes::Tile::BarrelNegativeFingerGap");
 
   // ------------------------------ ENDCAP SECTION COMPLETION --------------------------------------------------
 
@@ -700,28 +671,24 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   zFG = 0.5*(tileZ + zBE);
   hZ  = 0.5*(tileZ - zBE);
 
-  Trk::CylinderVolumeBounds* tilePositiveFingerGapBounds = new Trk::CylinderVolumeBounds(
-                                                                         tilePositiveExtendedBarrelBounds.innerRadius(),
-                                                                         tilePositiveExtendedBarrelBounds.outerRadius(),
-                                                                         hZ);
+  auto tilePositiveFingerGapBounds = std::make_shared<Trk::CylinderVolumeBounds>(
+    tilePositiveExtendedBarrelBounds.innerRadius(),
+    tilePositiveExtendedBarrelBounds.outerRadius(),
+    hZ);
 
   Amg::Vector3D pEFPos(0.,0.,zFG);
   Amg::Vector3D pEFNeg(0.,0.,-zFG);
-  Amg::Transform3D* efPosTransform = new Amg::Transform3D(Amg::Translation3D(pEFPos));
-  Amg::Transform3D* efNegTransform = new Amg::Transform3D(Amg::Translation3D(pEFNeg));
+  auto efPosTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(pEFPos));
+  auto efNegTransform = std::make_unique<Amg::Transform3D>(Amg::Translation3D(pEFNeg));
 
-  tilePositiveFingerGap = new Trk::TrackingVolume(efPosTransform,
-						  tilePositiveFingerGapBounds,
-						  fingerGapProperties,
-						  dummyLayers, dummyVolumes,
-						  "Calo::GapVolumes::Tile::PositiveFingerGap");
+  tilePositiveFingerGap = new Trk::TrackingVolume(
+      std::move(efPosTransform), tilePositiveFingerGapBounds, fingerGapProperties,
+      dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::PositiveFingerGap");
 
-  tileNegativeFingerGap = new Trk::TrackingVolume(efNegTransform,
-						  tilePositiveFingerGapBounds->clone(),
-						  fingerGapProperties,
-						  dummyLayers, dummyVolumes,
-						  "Calo::GapVolumes::Tile::NegativeFingerGap");
-
+  tileNegativeFingerGap = new Trk::TrackingVolume(
+      std::move(efNegTransform),
+      std::shared_ptr<Trk::CylinderVolumeBounds>(tilePositiveFingerGapBounds->clone()),
+      fingerGapProperties, dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::NegativeFingerGap");
 
   // set the color code for displaying
   tileBarrel->registerColorCode( 4 );
@@ -767,8 +734,8 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
   ATH_MSG_DEBUG( "Combined Tile built " );
 
-  tileTrackingVolumes->push_back(tile);                  // [0]
-  tileTrackingVolumes->push_back(tilePositiveExtendedBarrel);                  // [1]
+  tileTrackingVolumes.push_back(tile);                  // [0]
+  tileTrackingVolumes.push_back(tilePositiveExtendedBarrel);// [1]
 
   if (msgLvl(MSG::INFO)) {
     ATH_MSG_DEBUG( "Checking the existence of all Tracking Volumes:" );
@@ -790,9 +757,6 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     printCheckResult(msg(MSG::DEBUG), tileGirder);
   } // end of detailed output
 
-  throwIntoGarbage (std::move (barrelProperties));
-  throwIntoGarbage (std::move (extendedBarrelProperties));
-
   return tileTrackingVolumes;
 }
 
@@ -802,16 +766,15 @@ void Tile::TileVolumeBuilder::printCheckResult(MsgStream& log, const Trk::Tracki
   else     log << "... missing" << endmsg;
 }
 
-
-
-void Tile::TileVolumeBuilder::printInfo(const PVConstLink& pv) const
-{
+void Tile::TileVolumeBuilder::printInfo(const PVConstLink& pv) const {
   const GeoLogVol* lv = pv->getLogVol();
-  std::cout << "New Tile Object:"<<lv->getName()<<", made of"<<lv->getMaterial()->getName()<<","<<lv->getShape()->type()<<std::endl;
-  //m_geoShapeConverter->decodeShape(lv->getShape());
-  int igen=0;
-  Amg::Transform3D transf =  pv->getX();
-  printChildren(pv,igen,transf);
+  std::cout << "New Tile Object:" << lv->getName() << ", made of"
+            << lv->getMaterial()->getName() << "," << lv->getShape()->type()
+            << std::endl;
+  // m_geoShapeConverter->decodeShape(lv->getShape());
+  int igen = 0;
+  Amg::Transform3D transf = pv->getX();
+  printChildren(pv, igen, transf);
 }
 
 void Tile::TileVolumeBuilder::printChildren(
@@ -823,14 +786,6 @@ void Tile::TileVolumeBuilder::printChildren(
   for (unsigned int ic = 0; ic < nc; ic++) {
     Amg::Transform3D transf = trIn * pv->getXToChildVol(ic);
 
-    //
-    // std::cout << " dumping transform to subcomponent" << std::endl;
-    // std::cout << transf[0][0]<<"," <<transf[0][1]<<","
-    // <<transf[0][2]<<","<<transf[0][3] << std::endl; std::cout <<
-    // transf[1][0]<<"," <<transf[1][1]<<"," <<transf[1][2]<<","<<transf[1][3]
-    // << std::endl; std::cout << transf[2][0]<<"," <<transf[2][1]<<","
-    // <<transf[2][2]<<","<<transf[2][3] << std::endl;
-    //
     const PVConstLink cv = pv->getChildVol(ic);
     const GeoLogVol* clv = cv->getLogVol();
     std::cout << "  ";
@@ -868,10 +823,4 @@ void Tile::TileVolumeBuilder::printChildren(
       cname = clv->getName();
     }
   }
-}
-
-void Tile::TileVolumeBuilder::throwIntoGarbage (std::unique_ptr<Trk::Material> mat) const
-{
-  std::scoped_lock lock (m_garbageMutex);
-  m_garbage.push_back (std::move (mat));
 }

@@ -59,6 +59,8 @@ def InDetRttTruthSelectionToolCfg(
     kwargs.setdefault("minPt", flags.PhysVal.IDPVM.truthMinPt)
     kwargs.setdefault("ancestorList", flags.PhysVal.IDPVM.ancestorIDs)
     kwargs.setdefault("requireSiHit", flags.PhysVal.IDPVM.requiredSiHits)
+    kwargs.setdefault("vetoPdgId", flags.PhysVal.IDPVM.vetoPdgId)
+    kwargs.setdefault("pdgId", flags.PhysVal.IDPVM.pdgId)
 
     if "radiusCylinder" in kwargs or "zDisc" in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
@@ -154,6 +156,8 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("JetContainerName", '')
         kwargs.setdefault("FillTrackInJetPlots", False)
 
+    kwargs.setdefault("doPerAuthorPlots",
+                      flags.PhysVal.IDPVM.doPerAuthorPlots)
 
     if flags.Input.isMC and not flags.PhysVal.IDPVM.doRecoOnly:
         kwargs.setdefault("TruthParticleContainerName", "TruthParticles")
@@ -184,8 +188,6 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
                           flags.PhysVal.IDPVM.doTruthOriginPlots)
         kwargs.setdefault("doDuplicatePlots",
                           flags.PhysVal.IDPVM.doDuplicatePlots)
-        kwargs.setdefault("doPerAuthorPlots",
-                          flags.PhysVal.IDPVM.doPerAuthorPlots)
         kwargs.setdefault("doHitLevelPlots",
                           flags.PhysVal.IDPVM.doHitLevelPlots)
 

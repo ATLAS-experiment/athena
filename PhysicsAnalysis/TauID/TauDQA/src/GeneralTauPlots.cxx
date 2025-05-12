@@ -24,8 +24,8 @@ void GeneralTauPlots::initializePlots(){
    m_tauCharge      = Book1D("Charge",m_sTauJetContainerName + " Tau charge; charge; # Taus",7,-3.,4.);
    m_tauNChargedTracks = Book1D("NChargedTracks", m_sTauJetContainerName + " Tau n charged tracks; nCharged; # Taus",10,0.,10.);
    m_tauNIsolatedTracks = Book1D("NIsolatedTracks", m_sTauJetContainerName + " Tau n isolated tracks; nIsolated; # Taus",10,0.,10.);
-   m_tauNCoreTracks = Book1D("NCoreTracks",m_sTauJetContainerName + " Tau n core tracks; nCore; # Taus",10,0.,10.);
-   m_tauNWideTracks = Book1D("NWideTracks",m_sTauJetContainerName + " Tau n wide tracks; nWide; # Taus",10,0.,10.);
+   m_tauNCoreTracks = Book1D("NCoreTracks",m_sTauJetContainerName + " Tau n core tracks; nCore; # Taus",15,0.,15.);
+   m_tauNWideTracks = Book1D("NWideTracks",m_sTauJetContainerName + " Tau n wide tracks; nWide; # Taus",20,0.,20.);
    m_ptHighPt = Book1D("ptHighPt", m_sTauJetContainerName+" HighPt"+"; pt; # Taus",20, 0.0, 1500.0);
    m_RNNEleScore = Book1D("RNNEleScore", m_sTauJetContainerName+" RNNEleScore;RNNEleScore;# Tau", 50,0.,1.);
    m_RNNEleScoreSigTrans = Book1D("RNNEleScoreSigTrans", m_sTauJetContainerName+" RNNEleScoreSigTrans;RNNEleScoreSigTrans;"+"# Tau", 50,0.,1.);

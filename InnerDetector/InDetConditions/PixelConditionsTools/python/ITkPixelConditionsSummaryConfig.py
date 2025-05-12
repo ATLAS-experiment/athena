@@ -1,6 +1,6 @@
 """Define a function to configure ITkPixelConditionsSummaryCfg
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -33,7 +33,7 @@ def ITkPixelConditionsSummaryCfg(flags, name="ITkPixelConditionsSummary", **kwar
 def ITkByteStreamErrorDetectorElementStatusToolCfg(flags, name = "ITkByteStreamErrorDetectorElementStatusTool",**kwargs) :
     # @TODO bytestream errors for ITk have not been defined yet.
     acc = ComponentAccumulator()
-    kwargs.setdefault("PixelReadoutManager","ITkPixelReadoutManager")
+    kwargs.setdefault("PixelReadoutManager","InDetDD::ITk::PixelReadoutManager")
     kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection") # @TODO do we need the DetEleColl for the Acts chain ?
     if not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.Input.Format is Format.BS :
         kwargs.setdefault("PixelByteStreamErrs", "PixelByteStreamErrs")

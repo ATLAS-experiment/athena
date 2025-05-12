@@ -9,7 +9,10 @@ MAP_5L_VERSION="v0.22"
 MAP_9L_GNN_VERSION="v0.10"
 
 BANK_9L_VERSION="v0.20"
-BANK_5L_VERSION="v0.21"
+BANK_5L_VERSION="v0.22"
+
+NN_1ST="v0.10"
+NN_2ND="v0.10"
 
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
 
@@ -22,11 +25,17 @@ BANKS_5L="banks_5L/${BANK_5L_VERSION}/"
 
 COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${BANKS_5L}/combined_matrix_reg34.root"
 
-ONNX_INPUT_FAKE="${BANKS_5L}HT_class_v7_longer_training_pruned_0.5.onnx"
-ONNX_INPUT_PARAM="${BANKS_5L}HT_param_v7_long_training_400_epochs_pruned_0.5.onnx"
-ONNX_INPUT_HIT="${BANKS_5L}NNPathfinderHit_4Hits_V005_200e.onnx"
-ONNX_INPUT_VOL="${BANKS_5L}NNPathfinderVol_4Hits_V005_200e.onnx"
 
+# NN 1st stage
+ONNX_INPUT_FAKE="NN/1stStage/${NN_1ST}/Class_5Hit_V001_16bit_34_1000e_pruned_0.6.onnx"
+ONNX_INPUT_PARAM="NN/1stStage/${NN_1ST}/Param_5Hits_V001_16bit_60PQ_400e_pruned_0.6.onnx"
+# NN 2nd stage
+ONNX_INPUT_FAKE_2ND="NN/2ndStage/${NN_2ND}/Class_9Hit_V001_16bit_34_1000e_pruned_0.6.onnx"
+ONNX_INPUT_PARAM_2ND="NN/2ndStage/${NN_2ND}/Param_9Hits_V001_16bit_34_1000e_pruned_0.6.onnx"
+ONNX_INPUT_HIT="NN/2ndStage/${NN_2ND}/NNPathfinderHit_4Hits_V006_500e_lower_lr_162_98_34.onnx"
+ONNX_INPUT_VOL="NN/2ndStage/${NN_2ND}/NNPathfinderVol_4Hits_V006_200e_162_98_34.onnx"
+
+# GNN
 GNN_MODULE_MAP="GNN/v0.10/FPGATrackSim_DoubletModuleMap_v1.root" # New training will be done later
 GNN_ONNX_MODEL="GNN/v0.10/edge_classifier-InteractionGNN2-v1.onnx" # New training will be done later
 GNN_METRIC_LEARNING="GNN/v0.10/graph_construction-MetricLearning-v2.onnx" # New training will be done in the future

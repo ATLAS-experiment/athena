@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcReadoutGeomTool.h"
@@ -36,10 +36,6 @@ using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
 using defineArgs = TgcReadoutElement::defineArgs;
 
 
-TgcReadoutGeomTool::TgcReadoutGeomTool(const std::string& type,
-                                       const std::string& name,
-                                       const IInterface* parent)
-    : base_class{type, name, parent} {}
 StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& define,
                                               FactoryCache& factoryCache) {
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
@@ -111,7 +107,8 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                                              * Amg::getRotateX3D(180.* Gaudi::Units::deg)};
                 /// Reserve the first bit for the isStrip property
                 const IdentifierHash hash{gasGap << 1};
-                wireLayout = std::make_unique<StripLayer>(trans, (*factoryCache.wireLayouts.insert(std::move(wireGrp)).first), hash);
+                wireLayout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
+                                                          (*factoryCache.wireLayouts.insert(std::move(wireGrp)).first), hash);
             }
             if (!stripLayout && table.bottomStripPos.size()) {
                 RadialStripDesignPtr radDesign = std::make_unique<RadialStripDesign>();
@@ -128,7 +125,8 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                 const Amg::Transform3D trans{pVolTrans.transform 
                                              * Amg::getRotateZ3D(90.* Gaudi::Units::deg)                                            
                                              * Amg::getRotateX3D(90.*Gaudi::Units::deg)};
-                stripLayout = std::make_unique<StripLayer>(trans, (*factoryCache.stripLayouts.insert(std::move(radDesign)).first), hash);                
+                stripLayout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
+                                                          (*factoryCache.stripLayouts.insert(std::move(radDesign)).first), hash);                
             }
         }
         ++gasGap;

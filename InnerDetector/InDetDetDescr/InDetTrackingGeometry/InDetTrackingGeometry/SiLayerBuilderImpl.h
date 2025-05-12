@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKINGGEOMETRY_SILAYERBUILDERIMPL_H
@@ -12,10 +12,10 @@
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkGeometry/TrackingGeometry.h"
 // STL
+#include <memory>
 #include <vector>
 #include <utility> //for std::pair
 
@@ -38,7 +38,7 @@ namespace Trk {
   class CylinderLayer;
   class DiscLayer;
   class BinnedLayerMaterial;
-  typedef std::pair< SharedObject<Surface>, Amg::Vector3D > SurfaceOrderPosition;
+  typedef std::pair< std::shared_ptr<Surface>, Amg::Vector3D > SurfaceOrderPosition;
 }
 
 namespace InDet {

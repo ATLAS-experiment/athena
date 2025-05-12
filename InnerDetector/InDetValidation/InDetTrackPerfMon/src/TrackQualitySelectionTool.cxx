@@ -31,7 +31,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::initialize() {
 
   ATH_CHECK( asg::AsgTool::initialize() );
 
-  ATH_MSG_INFO( "Initializing " << name() );
+  ATH_MSG_DEBUG( "Initializing " << name() );
 
   ATH_CHECK( m_offlineSelectionTool.retrieve( EnableTool{ m_doOfflSelection.value() } ) );
   ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool{ m_doTruthSelection.value() } ) );

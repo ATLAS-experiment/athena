@@ -14,11 +14,12 @@ namespace Muon {
     /** types */
     struct MuonLayerSurface {
         using SurfacePtr = std::shared_ptr<const Trk::Surface>;
-
+        using DetRegIdx = MuonStationIndex::DetectorRegionIndex;
+        using LayerIdx = MuonStationIndex::LayerIndex;
         MuonLayerSurface() = default;
 
-        MuonLayerSurface(SurfacePtr surfacePtr_, int sector_, MuonStationIndex::DetectorRegionIndex regionIndex_,
-                         MuonStationIndex::LayerIndex layerIndex_) :
+        MuonLayerSurface(SurfacePtr surfacePtr_, int sector_, DetRegIdx regionIndex_,
+                         LayerIdx layerIndex_) :
             surfacePtr{surfacePtr_}, sector{sector_}, regionIndex{regionIndex_}, layerIndex{layerIndex_} {}
 
         inline MuonStationIndex::StIndex stIndex() const {
@@ -26,8 +27,8 @@ namespace Muon {
         }
         SurfacePtr surfacePtr{nullptr};
         int sector{-1};
-        MuonStationIndex::DetectorRegionIndex regionIndex{MuonStationIndex::DetectorRegionUnknown};
-        MuonStationIndex::LayerIndex layerIndex{MuonStationIndex::LayerUnknown};
+        DetRegIdx regionIndex{DetRegIdx::DetectorRegionUnknown};
+        LayerIdx layerIndex{LayerIdx::LayerUnknown};
     };
 
 }  // namespace Muon

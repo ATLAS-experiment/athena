@@ -6,6 +6,7 @@
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-output: *.txt
+# art-athena-mt: 8
 # art-output: *.log
 # art-output: log.*
 # art-output: *.out
@@ -27,12 +28,11 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 def generate_exec_steps(slice_name = None):
     name = slice_name or 'FullMenu'
 
-    from TriggerTest.MCExecStep import MCExecStep
+    from TriggerTest.MCExecStep import MCGridStep
     
     # athena
-    ex = MCExecStep(name,menu='Dev_pp_run3_v1',signatures=slice_name)
+    ex = MCGridStep(name,menu='Dev_pp_run3_v1',signatures=[slice_name] if slice_name else None)
     ex.input = 'ttbar'
-    ex.threads = 1
     ex.max_events = 100
     # rename histogram file
     hist_file_name = 'expert-monitoring_{:s}.root'.format(name)

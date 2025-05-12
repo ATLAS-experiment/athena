@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef XAOD_STANDALONE 
 #ifndef MUONEFFICIENCYCORRECTION_MUONSFTESTHELPER_H
@@ -95,9 +95,9 @@ namespace TestMuonSF {
             /// Helper struct to store scale factor, data efficiency + mc efficiency
             /// for each systematic variation
             struct SFSet {
-                    SFSet(const CP::SystematicSet& _cpSet,
-                          MuonSFBranches& _parent):
-                    cpSet{_cpSet}, parent{_parent}{}
+                    SFSet(const CP::SystematicSet& cpSet_,
+                          MuonSFBranches& parent_):
+                    cpSet{cpSet_}, parent{parent_}{}
                     /// Initialization of the branches
                     bool init() {
                         return scaleFactor.init() && mcEff.init() && dataEff.init();

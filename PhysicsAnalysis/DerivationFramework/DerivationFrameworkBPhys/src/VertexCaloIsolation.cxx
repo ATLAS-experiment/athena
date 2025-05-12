@@ -22,7 +22,7 @@
 
 
 
-#include "DerivationFrameworkBPhys/VertexCaloIsolation.h"
+#include "VertexCaloIsolation.h"
 
 #include <vector>
 #include <string>

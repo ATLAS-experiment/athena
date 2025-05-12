@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from Campaigns.Utils import getMCCampaign, Campaign
 from PyUtils.Logging import logging
@@ -17,6 +17,7 @@ def getDataYear(flags):
             Campaign.MC23c: 2023,
             Campaign.MC23d: 2023,
             Campaign.MC23e: 2024,
+            Campaign.MC23g: 2025,
             Campaign.PhaseII: 2030,
         }[campaign]
     else:
@@ -75,6 +76,7 @@ def getBJetTriggerContent(flags):
             2022: ['DL1d20211216'],
             2023: ['GN120220813'],
             2024: ['GN220240122'],
+            2025: ['GN220240122'],
             2030: [], # Some day we'll have something amazing here
         }[year]
         for btagger in btaggers:

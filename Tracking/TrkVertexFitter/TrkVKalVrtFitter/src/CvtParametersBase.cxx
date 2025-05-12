@@ -57,8 +57,8 @@ namespace Trk {
       // Global position of hit
       perGlobalPos = (*i_pbase)->position();
       // Crazy user protection
-      if(std::abs(perGlobalPos.z()) > m_IDsizeZ) return StatusCode::FAILURE;
-      if(perGlobalPos.perp() > m_IDsizeR) return StatusCode::FAILURE;
+      if(!(state.m_allowUltraDisplaced) && std::abs(perGlobalPos.z()) > m_IDsizeZ) return StatusCode::FAILURE;
+      if(!(state.m_allowUltraDisplaced) && perGlobalPos.perp() > m_IDsizeR) return StatusCode::FAILURE;
       tmp_refFrameX += perGlobalPos.x();
       tmp_refFrameY += perGlobalPos.y();
       tmp_refFrameZ += perGlobalPos.z();

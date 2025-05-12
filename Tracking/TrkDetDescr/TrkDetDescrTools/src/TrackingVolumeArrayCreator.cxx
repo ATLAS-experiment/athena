@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include "TrkDetDescrUtils/BinnedArray2D.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkDetDescrUtils/NavBinnedArray1D.h"
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 #include "TrkVolumes/BevelledCylinderVolumeBounds.h"
 #include "TrkVolumes/CuboidVolumeBounds.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
@@ -60,6 +61,21 @@ TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInR(const s
                                                                          bool navtype) const {
     return cylinderVolumesArrayInR(translateToShared(vols, navtype), navtype).release();
 }
+
+TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(const std::vector<TrackingVolume*>& vols,
+                                                                         bool navtype) const {
+      return cylinderVolumesArrayInZ(translateToShared(vols, navtype), navtype).release();
+}
+
+TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<TrackingVolume*>& vols,
+                                                         bool navtype) const {
+    return cylinderVolumesArrayInPhiR(translateToShared(vols, navtype), navtype).release();
+}
+TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<TrackingVolume*>& vols,
+                                                       bool navtype) const {
+    return cylinderVolumesArrayInPhiZ(translateToShared(vols, navtype), navtype).release();
+}
+
 std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumesArrayInR(const std::vector<VolumePtr>& vols,
                                                                                          bool navtype) const {
 
@@ -132,11 +148,6 @@ std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumes
   return nullptr;
 }
 
-
-TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(const std::vector<TrackingVolume*>& vols,
-                                                                         bool navtype) const {
-      return cylinderVolumesArrayInZ(translateToShared(vols, navtype), navtype).release();
-  }
 
 std::unique_ptr<TrackingVolumeArray>
   TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(const std::vector<VolumePtr>& vols,
@@ -211,11 +222,6 @@ std::unique_ptr<TrackingVolumeArray>
   return nullptr;
 }
 
-TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInPhi(const std::vector<TrackingVolume*>& vols,
-                                                                           bool navtype) const {
-    return cylinderVolumesArrayInPhi(translateToShared(vols,navtype), navtype).release();
-}
-
 std::unique_ptr<TrackingVolumeArray>
   TrackingVolumeArrayCreator::cylinderVolumesArrayInPhi(const std::vector<VolumePtr>& vols,
                                                         bool /*navtype*/) const {
@@ -251,11 +257,6 @@ std::unique_ptr<TrackingVolumeArray>
   return nullptr;
 }
 
-TrackingVolumeArray*
-  TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<TrackingVolume*>& vols,
-                                                         bool navtype) const {
-    return cylinderVolumesArrayInPhiR(translateToShared(vols, navtype), navtype).release();
-}
 std::unique_ptr<TrackingVolumeArray>
 TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumePtr>& vols,
                                                        bool navtype) const {
@@ -635,11 +636,6 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
   return std::make_unique<BinnedArray1D1D<TrackingVolume>>(volOrder, binGenR, phiUtil);
 }
 
-TrackingVolumeArray*
-TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<TrackingVolume*>& vols,
-                                                       bool navtype) const {
-    return cylinderVolumesArrayInPhiZ(translateToShared(vols, navtype), navtype).release();
-}
 std::unique_ptr<TrackingVolumeArray>
 TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumePtr>& vols,
                                                        bool navtype) const {
@@ -814,15 +810,9 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
 }
 
 
-TrackingVolumeArray*
-TrackingVolumeArrayCreator::cuboidVolumesArrayNav(const std::vector<TrackingVolume*>& vols,
-                                                  BinUtility* binUtil,
-                                                  bool navtype) const {
-    return cuboidVolumesArrayNav(translateToShared(vols, navtype), binUtil).release();
-}
 std::unique_ptr<TrackingVolumeArray>
     TrackingVolumeArrayCreator::cuboidVolumesArrayNav(const std::vector<VolumePtr>& vols,
-                                                      BinUtility* binUtil) const {
+                                                      const BinUtility& binUtil) const {
   // the vector needed for the BinnedArray
   std::vector<VolumePtr> volOrder;
   // loop over volumes and fill primaries
@@ -837,22 +827,15 @@ std::unique_ptr<TrackingVolumeArray>
      volOrder.push_back(*volIter);
   }
   if (!volOrder.empty()) {
-    auto navTransform = std::make_unique<Amg::Transform3D>(Amg::Transform3D::Identity());
-    return std::make_unique<NavBinnedArray1D<TrackingVolume>>(volOrder, binUtil, navTransform.release());
+    Amg::Transform3D navTransform  = Amg::Transform3D::Identity();
+    return std::make_unique<NavBinnedArray1D<TrackingVolume>>(volOrder, binUtil, navTransform);
   }
   ATH_MSG_ERROR("No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
   return nullptr;
 }
 
-
-TrackingVolumeArray*
-TrackingVolumeArrayCreator::trapezoidVolumesArrayNav(const std::vector<TrackingVolume*>& vols,
-                                                     BinUtility* binUtil, bool navtype) const {
-  return trapezoidVolumesArrayNav(translateToShared(vols, navtype), binUtil).release();
-}
-
 std::unique_ptr<TrackingVolumeArray>
-  TrackingVolumeArrayCreator::trapezoidVolumesArrayNav(const std::vector<VolumePtr>& vols, BinUtility* binUtil) const {
+  TrackingVolumeArrayCreator::trapezoidVolumesArrayNav(const std::vector<VolumePtr>& vols, const BinUtility& binUtil) const {
   // the vector needed for the BinnedArray
   std::vector<VolumePtr> volOrder;
   // loop over volumes and fill primaries
@@ -868,21 +851,15 @@ std::unique_ptr<TrackingVolumeArray>
     volOrder.push_back(*volIter);
   }
   if (!volOrder.empty()) {
-    Amg::Transform3D* navTransform = new Amg::Transform3D(Amg::Transform3D::Identity());
+    Amg::Transform3D navTransform  = Amg::Transform3D::Identity();
     return std::make_unique<NavBinnedArray1D<TrackingVolume>>(volOrder, binUtil, navTransform);
   }
   ATH_MSG_ERROR("No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
   return nullptr;
 }
 
-TrackingVolumeArray* TrackingVolumeArrayCreator::doubleTrapezoidVolumesArrayNav(const std::vector<TrackingVolume*>& vols,
-                                                                                BinUtility* binUtil,
-                                                                                bool navtype) const {
-    return doubleTrapezoidVolumesArrayNav(translateToShared(vols, navtype), binUtil).release();
-}
-
 std::unique_ptr<TrackingVolumeArray>
-  TrackingVolumeArrayCreator::doubleTrapezoidVolumesArrayNav(const std::vector<VolumePtr>& vols, BinUtility* binUtil) const {
+  TrackingVolumeArrayCreator::doubleTrapezoidVolumesArrayNav(const std::vector<VolumePtr>& vols, const BinUtility& binUtil) const {
   // the vector needed for the BinnedArray
   std::vector<VolumePtr> volOrder;
   // loop over volumes and fill primaries
@@ -898,7 +875,7 @@ std::unique_ptr<TrackingVolumeArray>
     volOrder.push_back(*volIter);
   }
   if (!volOrder.empty()) {
-    Amg::Transform3D* navTransform = new Amg::Transform3D(Amg::Transform3D::Identity());
+    Amg::Transform3D navTransform = Amg::Transform3D::Identity();
     return std::make_unique<NavBinnedArray1D<TrackingVolume>>(volOrder, binUtil, navTransform);
   }
   ATH_MSG_ERROR(

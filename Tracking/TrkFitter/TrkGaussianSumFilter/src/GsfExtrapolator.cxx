@@ -10,28 +10,27 @@
  */
 
 #include "TrkGaussianSumFilter/GsfExtrapolator.h"
-
+//
 #include "TrkGaussianSumFilter/IMaterialMixtureConvolution.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
-
+//
 #include "TrkGeometry/Layer.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/TrackingVolume.h"
-
+#include "TrkSurfaces/Surface.h"
+//
 #include "TrkExUtils/MaterialUpdateMode.h"
-
+//
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
-
 #include "TrkParameters/TrackParameters.h"
-#include "TrkSurfaces/Surface.h"
 #include "TrkTrack/TrackStateOnSurface.h"
-
-#include <utility>
-
+//
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
+#include <utility>
 
 namespace {
 constexpr bool useBoundaryMaterialUpdate(true);
@@ -569,7 +568,7 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
     // If so, apply material effects update.
 
     // Get layer associated with boundary surface.
-    const Trk::Layer* layerAtBoundary =
+    const Trk::MaterialLayer * layerAtBoundary =
       (nextNavigationCell.parametersOnBoundary)
         ? (nextNavigationCell.parametersOnBoundary->associatedSurface())
             .materialLayer()

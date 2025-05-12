@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -40,9 +40,9 @@
 
 namespace Rec {
 
-    class CombinedMuonTrackFitter : public AthAlgTool, virtual public ICombinedMuonTrackFitter {
+    class CombinedMuonTrackFitter : public extends<AthAlgTool, ICombinedMuonTrackFitter> {
     public:
-        CombinedMuonTrackFitter(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~CombinedMuonTrackFitter();
 
         virtual StatusCode initialize() override;
@@ -133,7 +133,7 @@ namespace Rec {
         SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey{this, "AtlasFieldCacheCondObj", "fieldCondObj",
                                                                                   "Name of the Magnetic Field conditions object key"};
 
-        ServiceHandle<Trk::ITrackingVolumesSvc> m_trackingVolumesSvc{this, "TrackingVolumesSvc", "TrackingVolumesSvc/TrackingVolumesSvc"};
+        ServiceHandle<Trk::ITrackingVolumesSvc> m_trackingVolumesSvc{this, "TrackingVolumesSvc", "Trk::TrackingVolumesSvc/TrackingVolumesSvc"};
 
        
         Gaudi::Property<bool> m_allowCleanerVeto{this, "AllowCleanerVeto", true};       

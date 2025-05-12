@@ -57,7 +57,7 @@ Interface definition for eFEXtauAlgo
 		    const std::vector<unsigned int>& bdtThreshold,
 		    unsigned int etThreshold,
 		    unsigned int etThresholdForRHad,
-		    unsigned int bdtMinEtThreshold) = 0;
+		    unsigned int bdtMinEtThreshold, unsigned int etThresholdForRHadFrac) = 0;
 
   private:
 

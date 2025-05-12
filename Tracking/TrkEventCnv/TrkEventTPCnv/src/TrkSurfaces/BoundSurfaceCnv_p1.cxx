@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -12,10 +12,10 @@
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkSurfaces/CylinderSurface.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkSurfaces/NoBounds.h"
 #include "TrkEventTPCnv/TrkSurfaces/BoundSurfaceCnv_p1.h"
 #include <typeinfo>
+#include <memory>
 
 template< class SURFACE, class BOUNDS_CNV >
 void
@@ -24,7 +24,7 @@ persToTrans( const Trk::BoundSurface_p1 *persObj, SURFACE *transObj, MsgStream &
 {
    m_surfaceCnv.persToTrans( persObj, transObj, log );
    Trk::SurfaceBounds* bounds = this->createTransFromPStore( &m_boundsCnv, persObj->m_bounds, log );
-   transObj->m_bounds = Trk::SharedObject<const Trk::SurfaceBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::SurfaceBounds>(bounds);
 }
 
 // Specialization for CylinderSurface (most surfaces have m_bound == SurfaceBounds*, but Cyl Surf is limited to having Cylinder Bounds.)
@@ -35,7 +35,7 @@ persToTrans( const Trk::BoundSurface_p1 *persObj, Trk::CylinderSurface *transObj
 {
    m_surfaceCnv.persToTrans( persObj, transObj, log );
    Trk::CylinderBounds* bounds = this->createTransFromPStore( &m_boundsCnv, persObj->m_bounds, log );
-   transObj->m_bounds = Trk::SharedObject<const Trk::CylinderBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::CylinderBounds>(bounds);
 }
 
 // Specialization for StraightLineSurface (most surfaces have m_bound == SurfaceBounds*, but StraightLineSurface is limited to having Cylinder Bounds.)
@@ -46,7 +46,7 @@ persToTrans( const Trk::BoundSurface_p1 *persObj, Trk::StraightLineSurface *tran
 {
    m_surfaceCnv.persToTrans( persObj, transObj, log );
    Trk::CylinderBounds* bounds = this->createTransFromPStore( &m_boundsCnv, persObj->m_bounds, log );
-   transObj->m_bounds = Trk::SharedObject<const Trk::CylinderBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::CylinderBounds>(bounds);
 }
 
 
@@ -73,7 +73,7 @@ persToTrans( const Trk::BoundSurface_p1 *persObj, SURFACE *transObj, MsgStream &
 {
    m_surfaceCnv.persToTrans( persObj, transObj, log );
    Trk::SurfaceBounds* bounds = this->createTransFromPStore( (TPCnvForSurfBnds**)nullptr, persObj->m_bounds, log );
-   transObj->m_bounds = Trk::SharedObject<const Trk::SurfaceBounds>(bounds);
+   transObj->m_bounds = std::shared_ptr<Trk::SurfaceBounds>(bounds);
 }
 
 
@@ -85,7 +85,7 @@ transToPers( const SURFACE *transObj, Trk::BoundSurface_p1 *persObj, MsgStream &
    m_surfaceCnv.transToPers( transObj, persObj, log );
    if ((transObj->m_bounds).get() && !dynamic_cast<const Trk::NoBounds*>((transObj->m_bounds).get()))
        log<<MSG::WARNING<<" No longer writing out bounds... "<<endmsg;
-       
+
 }
 
 

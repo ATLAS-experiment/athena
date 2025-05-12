@@ -12,4 +12,8 @@ namespace ActsTrk {
                                                    InDetSimDataCollection,
                                                    xAODTruthParticleLinkVector,
                                                    MeasurementToTruthAssociationDebugHistograms>;
+   template class MeasurementToTruthAssociationAlg<xAOD::HGTDClusterContainer,
+                                                   InDetSimDataCollection,
+                                                   xAODTruthParticleLinkVector,
+                                                   MeasurementToTruthAssociationDebugHistograms>;                 
 }

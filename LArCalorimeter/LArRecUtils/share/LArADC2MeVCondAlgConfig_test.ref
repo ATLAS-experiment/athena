@@ -3,65 +3,65 @@ Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
 Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'), ('CaloRec::CaloCellPositionShift', '/LAR/LArCellPositionShift'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMBA1'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMBA2'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMBA3'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMBA4'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMBC1'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMBC2'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMBC3'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMBC4'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMECA1'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMECA2'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMECA3'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMECC1'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMECC2'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/EMECC3'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/FCALA'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/FCALC'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/HECA'), ('CondAttrListCollection', '/LAR/Configuration/FEBConfig/Physics/HECC'), ('CondAttrListCollection', '/LAR/ElecCalibFlat/DAC2uA'), ('CondAttrListCollection', '/LAR/ElecCalibFlat/HVScaleCorr'), ('CondAttrListCollection', '/LAR/ElecCalibFlat/MphysOverMcal'), ('CondAttrListCollection', '/LAR/ElecCalibFlat/Ramp'), ('CondAttrListCollection', '/LAR/ElecCalibFlat/uA2MeV'), ('DetCondKeyTrans', '/LAR/Align')}
 Py:ComponentAccumulator    INFO  \__ LArOnOffMappingAlg (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/Identifier/OnOffIdMap
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/Identifier/OnOffIdMap'
 Py:ComponentAccumulator    INFO  \__ LArAlignCondAlg (cond alg)
 Py:ComponentAccumulator    INFO  \__ CaloAlignCondAlg (cond alg)
 Py:ComponentAccumulator    INFO  \__ LArFEBConfigCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * ListOfFolders: ['/LAR/Configuration/FEBConfig/Physics/EMBA1', '/LAR/Configuration/FEBConfig/Physics/EMBA2', '/LAR/Configuration/FEBConfig/Physics/EMBA3', '/LAR/Configuration/FEBConfig/Physics/EMBA4', '/LAR/Configuration/FEBConfig/Physics/EMBC1', '/LAR/Configuration/FEBConfig/Physics/EMBC2', '/LAR/Configuration/FEBConfig/Physics/EMBC3', '/LAR/Configuration/FEBConfig/Physics/EMBC4', '/LAR/Configuration/FEBConfig/Physics/EMECA1', '/LAR/Configuration/FEBConfig/Physics/EMECA2', '/LAR/Configuration/FEBConfig/Physics/EMECA3', '/LAR/Configuration/FEBConfig/Physics/EMECC1', '/LAR/Configuration/FEBConfig/Physics/EMECC2', '/LAR/Configuration/FEBConfig/Physics/EMECC3', '/LAR/Configuration/FEBConfig/Physics/FCALA', '/LAR/Configuration/FEBConfig/Physics/FCALC', '/LAR/Configuration/FEBConfig/Physics/HECA', '/LAR/Configuration/FEBConfig/Physics/HECC']
-Py:ComponentAccumulator    INFO      * keyOutput: LArFebConfig
+Py:ComponentAccumulator    INFO      * keyOutput: 'LArFebConfig'
 Py:ComponentAccumulator    INFO  \__ LArFlatConditionsAlg<LArRampFlat> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/ElecCalibFlat/Ramp
-Py:ComponentAccumulator    INFO      * WriteKey: LArRamp
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/ElecCalibFlat/Ramp'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArRamp'
 Py:ComponentAccumulator    INFO  \__ LArFlatConditionsAlg<LArDAC2uAFlat> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/ElecCalibFlat/DAC2uA
-Py:ComponentAccumulator    INFO      * WriteKey: LArDAC2uA
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/ElecCalibFlat/DAC2uA'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArDAC2uA'
 Py:ComponentAccumulator    INFO  \__ LArFlatConditionsAlg<LAruA2MeVFlat> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/ElecCalibFlat/uA2MeV
-Py:ComponentAccumulator    INFO      * WriteKey: LAruA2MeV
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/ElecCalibFlat/uA2MeV'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LAruA2MeV'
 Py:ComponentAccumulator    INFO  \__ LArFlatConditionsAlg<LArMphysOverMcalFlat> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/ElecCalibFlat/MphysOverMcal
-Py:ComponentAccumulator    INFO      * WriteKey: LArMphysOverMcal
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/ElecCalibFlat/MphysOverMcal'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArMphysOverMcal'
 Py:ComponentAccumulator    INFO  \__ LArFlatConditionsAlg<LArHVScaleCorrFlat> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/ElecCalibFlat/HVScaleCorr
-Py:ComponentAccumulator    INFO      * WriteKey: LArHVScaleCorr
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/ElecCalibFlat/HVScaleCorr'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArHVScaleCorr'
 Py:ComponentAccumulator    INFO  \__ LArADC2MeVCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * LArADC2MeVKey: LArADC2MeV
+Py:ComponentAccumulator    INFO      * LArADC2MeVKey: 'LArADC2MeV'
 --- mc
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
 Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'), ('CaloRec::CaloCellPositionShift', '/LAR/LArCellPositionShift'), ('DetCondKeyTrans', '/LAR/Align'), ('LArDAC2uAMC', '/LAR/ElecCalibMC/DAC2uA'), ('LArHVScaleCorrComplete', '/LAR/ElecCalibMC/HVScaleCorr'), ('LArMphysOverMcalMC', '/LAR/ElecCalibMC/MphysOverMcal'), ('LArRampMC', '/LAR/ElecCalibMC/Ramp'), ('LAruA2MeVMC', '/LAR/ElecCalibMC/uA2MeV')}
 Py:ComponentAccumulator    INFO  \__ LArOnOffMappingAlg (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/Identifier/OnOffIdMap
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/Identifier/OnOffIdMap'
 Py:ComponentAccumulator    INFO  \__ LArAlignCondAlg (cond alg)
 Py:ComponentAccumulator    INFO  \__ CaloAlignCondAlg (cond alg)
 Py:ComponentAccumulator    INFO  \__ CaloSuperCellAlignCondAlg (cond alg)
 Py:ComponentAccumulator    INFO  \__ AthReadAlg_AllCalo (cond alg)
 Py:ComponentAccumulator    INFO      * Aliases: []
 Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
-Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/AllCalo
+Py:ComponentAccumulator    INFO      * Key: 'CaloCellContainer/AllCalo'
 Py:ComponentAccumulator    INFO  \__ AthReadAlg_SCell (cond alg)
 Py:ComponentAccumulator    INFO      * Aliases: []
 Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
-Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/SCell
+Py:ComponentAccumulator    INFO      * Key: 'CaloCellContainer/SCell'
 Py:ComponentAccumulator    INFO  \__ LArMCSymCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: LArOnOffIdMap
+Py:ComponentAccumulator    INFO      * ReadKey: 'LArOnOffIdMap'
 Py:ComponentAccumulator    INFO  \__ LArSymConditionsAlg<LArRampMC, LArRampSym> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: LArRamp
-Py:ComponentAccumulator    INFO      * WriteKey: LArRampSym
+Py:ComponentAccumulator    INFO      * ReadKey: 'LArRamp'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArRampSym'
 Py:ComponentAccumulator    INFO  \__ LArSymConditionsAlg<LArDAC2uAMC, LArDAC2uASym> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: LArDAC2uA
-Py:ComponentAccumulator    INFO      * WriteKey: LArDAC2uASym
+Py:ComponentAccumulator    INFO      * ReadKey: 'LArDAC2uA'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArDAC2uASym'
 Py:ComponentAccumulator    INFO  \__ LArSymConditionsAlg<LAruA2MeVMC, LAruA2MeVSym> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: LAruA2MeV
-Py:ComponentAccumulator    INFO      * WriteKey: LAruA2MeVSym
+Py:ComponentAccumulator    INFO      * ReadKey: 'LAruA2MeV'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LAruA2MeVSym'
 Py:ComponentAccumulator    INFO  \__ LArSymConditionsAlg<LArMphysOverMcalMC, LArMphysOverMcalSym> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: LArMphysOverMcal
-Py:ComponentAccumulator    INFO      * WriteKey: LArMphysOverMcalSym
+Py:ComponentAccumulator    INFO      * ReadKey: 'LArMphysOverMcal'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArMphysOverMcalSym'
 Py:ComponentAccumulator    INFO  \__ LArADC2MeVCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * LArADC2MeVKey: LArADC2MeV
-Py:ComponentAccumulator    INFO      * LArDAC2uAKey: LArDAC2uASym
-Py:ComponentAccumulator    INFO      * LArHVScaleCorrKey: LArHVScaleCorr
-Py:ComponentAccumulator    INFO      * LArMphysOverMcalKey: LArMphysOverMcalSym
-Py:ComponentAccumulator    INFO      * LArRampKey: LArRampSym
-Py:ComponentAccumulator    INFO      * LAruA2MeVKey: LAruA2MeVSym
+Py:ComponentAccumulator    INFO      * LArADC2MeVKey: 'LArADC2MeV'
+Py:ComponentAccumulator    INFO      * LArDAC2uAKey: 'LArDAC2uASym'
+Py:ComponentAccumulator    INFO      * LArHVScaleCorrKey: 'LArHVScaleCorr'
+Py:ComponentAccumulator    INFO      * LArMphysOverMcalKey: 'LArMphysOverMcalSym'
+Py:ComponentAccumulator    INFO      * LArRampKey: 'LArRampSym'
+Py:ComponentAccumulator    INFO      * LAruA2MeVKey: 'LAruA2MeVSym'
 Py:ComponentAccumulator    INFO      * UseFEBGainTresholds: False

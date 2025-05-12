@@ -210,7 +210,7 @@ namespace Muon {
         MuonStationIndex::LayerIndex          layerIndex    = intersection.layerSurface.layerIndex;
 
         // get hough data
-        SG::ReadHandle<MuonLayerHoughTool::HoughDataPerSectorVec> houghDataPerSectorVec{m_houghDataPerSectorVecKey, ctx};
+        SG::ReadHandle houghDataPerSectorVec{m_houghDataPerSectorVecKey, ctx};
         if (!houghDataPerSectorVec.isValid()) {
             ATH_MSG_ERROR("Hough data per sector vector not found");
             return;

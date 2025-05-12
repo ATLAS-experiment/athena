@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'dual-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -82,7 +82,6 @@ if (NOT XAOD_STANDALONE)
     src/TrackTruthDecoratorAlg.cxx
     src/SoftElectronDecoratorAlg.cxx
     src/SoftElectronTruthDecoratorAlg.cxx
-    src/FoldDecoratorAlg.cxx
     src/GNNAuxTaskDecoratorAlg.cxx
     src/CountIParticleAlg.cxx
     src/CountTrackParticleAlg.cxx

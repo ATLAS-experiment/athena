@@ -249,7 +249,7 @@ def BPHY25Cfg(flags):
         list_disV_obj[i].DisplacedMassLowerCut    = list_disV_disVLo[i]
         list_disV_obj[i].DisplacedMassUpperCut    = list_disV_disVHi[i]
         list_disV_obj[i].MassLowerCut             = 0.
-        list_disV_obj[i].MassUpperCut             = 12200.
+        list_disV_obj[i].MassUpperCut             = 20000.
         list_disV_obj[i].CascadeVertexCollections = ["BPHY25_"+list_disV_hypo[i]+"_CascadeVtx1_sub","BPHY25_"+list_disV_hypo[i]+"_CascadeVtx1","BPHY25_"+list_disV_hypo[i]+"_CascadeMainVtx"]
         list_disV_obj[i].HasJXSubVertex           = False
         list_disV_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -322,7 +322,7 @@ def BPHY25Cfg(flags):
         list_BpmLd_obj[i].JpsiMassLowerCut         = Jpsi_lo
         list_BpmLd_obj[i].JpsiMassUpperCut         = Jpsi_hi
         list_BpmLd_obj[i].MassLowerCut             = 6200.
-        list_BpmLd_obj[i].MassUpperCut             = 100000.
+        list_BpmLd_obj[i].MassUpperCut             = 150000.
         list_BpmLd_obj[i].CascadeVertexCollections = ["BPHY25_"+list_BpmLd_hypo[i]+"_CascadeVtx1","BPHY25_"+list_BpmLd_hypo[i]+"_CascadeVtx2","BPHY25_"+list_BpmLd_hypo[i]+"_CascadeMainVtx"]
         list_BpmLd_obj[i].HasJXSubVertex           = True
         list_BpmLd_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -394,7 +394,7 @@ def BPHY25Cfg(flags):
         list_B0Ld_obj[i].JpsiMassLowerCut         = Jpsi_lo
         list_B0Ld_obj[i].JpsiMassUpperCut         = Jpsi_hi
         list_B0Ld_obj[i].MassLowerCut             = 0.
-        list_B0Ld_obj[i].MassUpperCut             = 100000.
+        list_B0Ld_obj[i].MassUpperCut             = 150000.
         list_B0Ld_obj[i].CascadeVertexCollections = ["BPHY25_"+list_B0Ld_hypo[i]+"_CascadeVtx1","BPHY25_"+list_B0Ld_hypo[i]+"_CascadeVtx2","BPHY25_"+list_B0Ld_hypo[i]+"_CascadeMainVtx"]
         list_B0Ld_obj[i].HasJXSubVertex           = True
         list_B0Ld_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -468,7 +468,7 @@ def BPHY25Cfg(flags):
         list_B0Ks_obj[i].JpsiMassLowerCut         = Jpsi_lo
         list_B0Ks_obj[i].JpsiMassUpperCut         = Jpsi_hi
         list_B0Ks_obj[i].MassLowerCut             = 0.
-        list_B0Ks_obj[i].MassUpperCut             = 9400.
+        list_B0Ks_obj[i].MassUpperCut             = 150000.
         list_B0Ks_obj[i].CascadeVertexCollections = ["BPHY25_"+list_B0Ks_hypo[i]+"_CascadeVtx1","BPHY25_"+list_B0Ks_hypo[i]+"_CascadeVtx2","BPHY25_"+list_B0Ks_hypo[i]+"_CascadeMainVtx"]
         list_B0Ks_obj[i].HasJXSubVertex           = True
         list_B0Ks_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -492,8 +492,8 @@ def BPHY25Cfg(flags):
         list_B0Ks_obj[i].ApplyJpsiMassConstraint  = True
         list_B0Ks_obj[i].ApplyV0MassConstraint    = True
         list_B0Ks_obj[i].ApplyMainVMassConstraint = False
-        list_B0Ks_obj[i].Chi2CutV0                = 4.
-        list_B0Ks_obj[i].Chi2Cut                  = 4.
+        list_B0Ks_obj[i].Chi2CutV0                = 5.
+        list_B0Ks_obj[i].Chi2Cut                  = 5.
         list_B0Ks_obj[i].Trackd0Cut               = 3.0
         list_B0Ks_obj[i].MaxJXCandidates          = 20
         list_B0Ks_obj[i].MaxV0Candidates          = 20
@@ -753,7 +753,7 @@ def BPHY25Cfg(flags):
         list_2V0A_obj[i].JpsiMassLowerCut         = Jpsi_lo
         list_2V0A_obj[i].JpsiMassUpperCut         = Jpsi_hi
         list_2V0A_obj[i].MassLowerCut             = 0.
-        list_2V0A_obj[i].MassUpperCut             = 100000.
+        list_2V0A_obj[i].MassUpperCut             = 150000.
         list_2V0A_obj[i].CascadeVertexCollections = ["BPHY25_"+list_2V0A_hypo[i]+"_CascadeVtx1","BPHY25_"+list_2V0A_hypo[i]+"_CascadeVtx2","BPHY25_"+list_2V0A_hypo[i]+"_CascadeMainVtx"]
         list_2V0A_obj[i].HasJXSubVertex           = False
         list_2V0A_obj[i].HasJXV02SubVertex        = False
@@ -819,7 +819,7 @@ def BPHY25Cfg(flags):
         list_2V0B_obj[i].JXV02MassLowerCut        = list_2V0B_jxv02massLo[i]
         list_2V0B_obj[i].JXV02MassUpperCut        = list_2V0B_jxv02massHi[i]
         list_2V0B_obj[i].MassLowerCut             = 0.
-        list_2V0B_obj[i].MassUpperCut             = 9400.
+        list_2V0B_obj[i].MassUpperCut             = 150000.
         list_2V0B_obj[i].CascadeVertexCollections = ["BPHY25_"+list_2V0B_hypo[i]+"_CascadeVtx1","BPHY25_"+list_2V0B_hypo[i]+"_CascadeVtx2","BPHY25_"+list_2V0B_hypo[i]+"_CascadeVtx3","BPHY25_"+list_2V0B_hypo[i]+"_CascadeMainVtx"]
         list_2V0B_obj[i].HasJXSubVertex           = True
         list_2V0B_obj[i].HasJXV02SubVertex        = True
@@ -864,6 +864,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_JpsiXi = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_JpsiXi",
         InputVtxContainerName      = "BPHY25_JpsiXi_CascadeMainVtx",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1 ],
         UseMassConstraint          = True,
         VertexMass                 = Jpsimass,
@@ -879,6 +881,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_JpsiOmg = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_JpsiOmg",
         InputVtxContainerName      = "BPHY25_JpsiOmg_CascadeMainVtx",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1 ],
         UseMassConstraint          = True,
         VertexMass                 = Jpsimass,
@@ -894,6 +898,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_BpmLd = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_BpmLd",
         InputVtxContainerName      = "BPHY25_BpmLd_CascadeVtx2",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1, 2 ],
         SubVertexTrackIndices      = [ 1, 2 ],
         UseMassConstraint          = True,
@@ -910,6 +916,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_B0KpiLd = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_B0KpiLd",
         InputVtxContainerName      = "BPHY25_B0KpiLd_CascadeVtx2",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1, 2, 3 ],
         SubVertexTrackIndices      = [ 1, 2 ],
         UseMassConstraint          = True,
@@ -927,6 +935,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_B0piKLd = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_B0piKLd",
         InputVtxContainerName      = "BPHY25_B0piKLd_CascadeVtx2",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1, 2, 3 ],
         SubVertexTrackIndices      = [ 1, 2 ],
         UseMassConstraint          = True,
@@ -944,6 +954,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_B0KpiKs = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_B0KpiKs",
         InputVtxContainerName      = "BPHY25_B0KpiKs_CascadeVtx2",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1, 2, 3 ],
         SubVertexTrackIndices      = [ 1, 2 ],
         UseMassConstraint          = True,
@@ -961,6 +973,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_B0piKKs = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_B0piKKs",
         InputVtxContainerName      = "BPHY25_B0piKKs_CascadeVtx2",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1, 2, 3 ],
         SubVertexTrackIndices      = [ 1, 2 ],
         UseMassConstraint          = True,
@@ -978,6 +992,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_Bpm3body = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_Bpm3body",
         InputVtxContainerName      = "BPHY25_Bpm3body_CascadeMainVtx",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1, 2 ],
         SubVertexTrackIndices      = [ 1, 2 ],
         UseMassConstraint          = True,
@@ -994,6 +1010,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_Xibpm3body = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_Xibpm3body",
         InputVtxContainerName      = "BPHY25_Xibpm3body_CascadeMainVtx",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1, 2 ],
         SubVertexTrackIndices      = [ 1, 2 ],
         UseMassConstraint          = True,
@@ -1010,6 +1028,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_XibpmRef = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_XibpmRef",
         InputVtxContainerName      = "BPHY25_XibpmRef_CascadeVtx2",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1 ],
         UseMassConstraint          = True,
         VertexMass                 = Jpsimass,
@@ -1025,6 +1045,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_Xib03body = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_Xib03body",
         InputVtxContainerName      = "BPHY25_Xib03body_CascadeMainVtx",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1 ],
         UseMassConstraint          = True,
         VertexMass                 = Jpsimass,
@@ -1040,6 +1062,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_Lambdab03body = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_Lambdab03body",
         InputVtxContainerName      = "BPHY25_Lambdab03body_CascadeMainVtx",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1 ],
         UseMassConstraint          = True,
         VertexMass                 = Jpsimass,
@@ -1055,6 +1079,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_Jpsi2V0A = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_Jpsi2V0A",
         InputVtxContainerName      = "BPHY25_Jpsi2V0A_CascadeMainVtx",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1 ],
         UseMassConstraint          = True,
         VertexMass                 = Jpsimass,
@@ -1070,6 +1096,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_Jpsi2V0B1 = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_Jpsi2V0B1",
         InputVtxContainerName      = "BPHY25_Jpsi2V0B1_CascadeVtx3",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1 ],
         UseMassConstraint          = True,
         VertexMass                 = Jpsimass,
@@ -1085,6 +1113,8 @@ def BPHY25Cfg(flags):
     BPHY25Rev_Jpsi2V0B2 = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_Jpsi2V0B2",
         InputVtxContainerName      = "BPHY25_Jpsi2V0B2_CascadeVtx3",
+        TrackContainerName         = mainIDInput,
+        RelinkTracks               = TrkToRelink,
         TrackIndices               = [ 0, 1 ],
         UseMassConstraint          = True,
         VertexMass                 = Jpsimass,
@@ -1170,5 +1200,5 @@ def BPHY25Cfg(flags):
     BPHY25ItemList = BPHY25SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY25", ItemList=BPHY25ItemList, AcceptAlgs=["BPHY25Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY25", AcceptAlgs=["BPHY25Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc

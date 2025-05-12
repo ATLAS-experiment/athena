@@ -24,10 +24,7 @@ namespace InDet {
       CP::SystematicVariation("TRK_EFF_LARGED0_GLOBAL")
     };
     CP::SystematicSet systSetSTD = {  
-      CP::SystematicVariation("TRK_EFF_LOOSE_GLOBAL"),
-      CP::SystematicVariation("TRK_EFF_LOOSE_IBL"),
-      CP::SystematicVariation("TRK_EFF_LOOSE_PP0"),
-      CP::SystematicVariation("TRK_EFF_LOOSE_PHYSMODEL"),
+      CP::SystematicVariation("TRK_EFF_LOOSE_COMBINED"),
     };
 
     ATH_CHECK(m_trackFilterToolLRT->applySystematicVariation(systSetLRT));

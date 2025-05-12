@@ -4,20 +4,23 @@ Py:ComponentAccumulator    INFO Top sequence 0
 Py:ComponentAccumulator    INFO \__ AthAlgSeq
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CaloBCIDCoeffsCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * MCSymKey: LArMCSym
-Py:ComponentAccumulator    INFO      * MinBiasAvgKey: LArPileupAverageSym
-Py:ComponentAccumulator    INFO      * OFCKey: LArOFC
-Py:ComponentAccumulator    INFO      * OutputCoeffsKey: CaloBCIDCoeffs
-Py:ComponentAccumulator    INFO      * ShapeKey: LArShape32Sym
+Py:ComponentAccumulator    INFO      * MCSymKey: 'LArMCSym'
+Py:ComponentAccumulator    INFO      * MinBiasAvgKey: 'LArPileupAverageSym'
+Py:ComponentAccumulator    INFO      * OFCKey: 'LArOFC'
+Py:ComponentAccumulator    INFO      * OutputCoeffsKey: 'CaloBCIDCoeffs'
+Py:ComponentAccumulator    INFO      * ShapeKey: 'LArShape32Sym'
 Py:ComponentAccumulator    INFO  \__ LuminosityCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * LuminosityFolderInputKey: /TRIGGER/OFLLUMI/OflPrefLumi
-Py:ComponentAccumulator    INFO      * LuminosityOutputKey: LuminosityCondData
-Py:ComponentAccumulator    INFO      * OnlineLumiCalibrationInputKey: OnlineLumiCalibrationCondData
+Py:ComponentAccumulator    INFO      * BunchGroupInputKey: ''
+Py:ComponentAccumulator    INFO      * BunchLumisInputKey: ''
+Py:ComponentAccumulator    INFO      * FillParamsInputKey: ''
+Py:ComponentAccumulator    INFO      * LuminosityFolderInputKey: '/TRIGGER/OFLLUMI/OflPrefLumi'
+Py:ComponentAccumulator    INFO      * LuminosityOutputKey: 'LuminosityCondData'
+Py:ComponentAccumulator    INFO      * OnlineLumiCalibrationInputKey: 'OnlineLumiCalibrationCondData'
 Py:ComponentAccumulator    INFO  \__ CaloBCIDLumiCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * BunchCrossingCondDataKey: BunchCrossingData
-Py:ComponentAccumulator    INFO      * CoeffsKey: CaloBCIDCoeffs
-Py:ComponentAccumulator    INFO      * LuminosityCondDataKey: LuminosityCondData
-Py:ComponentAccumulator    INFO      * OutputLumiKey: CaloBCIDLumi
+Py:ComponentAccumulator    INFO      * BunchCrossingCondDataKey: 'BunchCrossingData'
+Py:ComponentAccumulator    INFO      * CoeffsKey: 'CaloBCIDCoeffs'
+Py:ComponentAccumulator    INFO      * LuminosityCondDataKey: 'LuminosityCondData'
+Py:ComponentAccumulator    INFO      * OutputLumiKey: 'CaloBCIDLumi'
 Py:ComponentAccumulator    INFO      * isMC: False
 Py:ComponentAccumulator    INFO Services
 Py:ComponentAccumulator    INFO []
@@ -35,16 +38,16 @@ Py:ComponentAccumulator    INFO Top sequence 0
 Py:ComponentAccumulator    INFO \__ AthAlgSeq
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CaloBCIDCoeffsCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * MCSymKey: LArMCSym
-Py:ComponentAccumulator    INFO      * MinBiasAvgKey: LArPileupAverageSym
-Py:ComponentAccumulator    INFO      * OFCKey: LArOFC
-Py:ComponentAccumulator    INFO      * OutputCoeffsKey: CaloBCIDCoeffs
-Py:ComponentAccumulator    INFO      * ShapeKey: LArShapeSym
+Py:ComponentAccumulator    INFO      * MCSymKey: 'LArMCSym'
+Py:ComponentAccumulator    INFO      * MinBiasAvgKey: 'LArPileupAverageSym'
+Py:ComponentAccumulator    INFO      * OFCKey: 'LArOFC'
+Py:ComponentAccumulator    INFO      * OutputCoeffsKey: 'CaloBCIDCoeffs'
+Py:ComponentAccumulator    INFO      * ShapeKey: 'LArShapeSym'
 Py:ComponentAccumulator    INFO  \__ CaloBCIDLumiCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * BunchCrossingCondDataKey: BunchCrossingData
-Py:ComponentAccumulator    INFO      * CoeffsKey: CaloBCIDCoeffs
-Py:ComponentAccumulator    INFO      * LuminosityCondDataKey: LuminosityCondData
-Py:ComponentAccumulator    INFO      * OutputLumiKey: CaloBCIDLumi
+Py:ComponentAccumulator    INFO      * BunchCrossingCondDataKey: 'BunchCrossingData'
+Py:ComponentAccumulator    INFO      * CoeffsKey: 'CaloBCIDCoeffs'
+Py:ComponentAccumulator    INFO      * LuminosityCondDataKey: 'LuminosityCondData'
+Py:ComponentAccumulator    INFO      * OutputLumiKey: 'CaloBCIDLumi'
 Py:ComponentAccumulator    INFO      * isMC: True
 Py:ComponentAccumulator    INFO Services
 Py:ComponentAccumulator    INFO []

@@ -297,6 +297,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
         self.addOption ('streamName', 'ANALYSIS', type=str,
             info="name of the output stream to save the cut bookkeeper in. "
             "The default is ANALYSIS.")
+        self.addOption ('detailedPDFinfo', False, type=bool,
+            info="save the necessary information to run the LHAPDF tool offline. "
+                 "The default is False.")
 
     def makeAlgs (self, config) :
 
@@ -328,6 +331,11 @@ class GeneratorAnalysisBlock (ConfigBlock):
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
         config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'weight_mc')
+
+        if self.detailedPDFinfo:
+            alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg' + self.streamName, reentrant=True )
+            for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
+                config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
 
 
 class PtEtaSelectionBlock (ConfigBlock):

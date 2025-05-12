@@ -7,6 +7,8 @@ if __name__=='__main__':
 
    import os,sys
    import argparse
+   from AthenaCommon import Logging
+   log = Logging.logging.getLogger( 'LArDelayOFCCali' )
 
    # now process the CL options and assign defaults
    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -14,7 +16,7 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408918', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="Em", help='Data taking partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data24_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data25_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
@@ -192,8 +194,7 @@ if __name__=='__main__':
             pdir += 'Delay/'
             #FIXME create search also for main readout
       pass
-
-   flags.LArCalib.Input.paramsFile = pfile
+      flags.LArCalib.Input.paramsFile = pfile
 
    #Define the global output Level:
    from AthenaCommon.Constants import INFO
@@ -228,16 +229,33 @@ if __name__=='__main__':
    #   # block standard patching for this CB
    #   cfg.getEventAlgo("LArCaliWavePatch").DoNotPatchCBs=[0x3df70000]
 
-   if args.fw6:
-      from IOVDbSvc.IOVDbSvcConfig import addOverride
-      cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
+   if flags.LArCalib.isSC:
+      fwversion=5
+      # autoconfig
+      from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+      try:
+         runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+         log.info("Got DT run info !")
+      except Exception:
+         log.warning("Could not get DT run info, using defaults !")
+      else:   
+         fwversion=runinfo.FWversion()   
+      if args.fw6 or fwversion==6:
+         #FIXME: for some reason addOverride is not working, CA merger is then complaining
+         #from IOVDbSvc.IOVDbSvcConfig import addOverride
+         #cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
+         fldrs=cfg.getService("IOVDbSvc").Folders
+         for i in range(0, len(fldrs)):
+             if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-fw6</tag>'
+
 
    if args.emf:
       # additions for EMF
-      from IOVDbSvc.IOVDbSvcConfig import addOverride
-      cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-EMF"))   
+      #from IOVDbSvc.IOVDbSvcConfig import addOverride
+      #cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-EMF"))   
       fldrs=cfg.getService("IOVDbSvc").Folders
       for i in range(0, len(fldrs)):
+          if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-EMF</tag>'
           if 'Align' in fldrs[i]: fldrs[i] += '<forceRunNumber>9999999</forceRunNumber>'
 
    # ignore some channels ?
@@ -254,7 +272,11 @@ if __name__=='__main__':
 
    cfg.getService("IOVDbSvc").DBInstance=""
 
-   cfg.getService("MessageSvc").defaultLimit=20000 #more messages
+   cfg.getService("MessageSvc").defaultLimit=2000000 #more messages
+   #cfg.getEventAlgo("LArCalibDigitMaker").OutputLevel=2
+   #cfg.getEventAlgo("LArCalibDigitsAccumulator").OutputLevel=2
+   #cfg.getEventAlgo("LArCaliWaveBuilder").OutputLevel=2
+   #cfg.getEventAlgo("LArCalibDigitsAccumulator").OutputLevel=2
 
    #run the application
    cfg.run() 

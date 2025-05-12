@@ -138,7 +138,7 @@ namespace InDet {
       ATH_MSG_INFO("retrieved Silicon SCT Helper");
 
     // retrieve SCT detector manager
-    if ( detStore()->retrieve(m_detManager, "SCT").isFailure() ) {
+    if ( detStore()->retrieve(m_detManager,m_stripDetManagerName).isFailure() ) {
       msg(MSG::FATAL) << " Cannot retrieve SCT Detector Manager " << endmsg;
       return StatusCode::FAILURE;
     }

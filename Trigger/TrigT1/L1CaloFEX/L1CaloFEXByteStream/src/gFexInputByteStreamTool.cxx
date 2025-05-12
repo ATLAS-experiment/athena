@@ -175,7 +175,6 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                          gPos::AMSK,
                          Asatur  );
 
-        gtCalib(Atwr,200, 0,gPos::CAL_OFF);
 
 
         b_gtrx_map(Bfiber, BMapped);
@@ -197,8 +196,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::BMSK,
                           Bsatur  );
 
-        gtCalib(Btwr,200, 0,gPos::CAL_OFF);
-
+    
         c_gtrx_map(Cfiber, CMapped);
 
         int fpgaC = 2; 
@@ -218,7 +216,6 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::CMSK, 
                           Csatur );
 
-        gtCalib(Ctwr,200, 0,gPos::CAL_OFF);
 
         // Fill the gTower EDM with the corresponding towers
         int iEta = 0;
@@ -487,19 +484,90 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                 }
             }
         }
+        //overlap and extended region for FPGAa-(0) & FPGAb-(1) - NEWSAT
+        for (unsigned int k=0; k<8; ++k){
+            int krow = XMPD_GTRN_ARR[i][k]/12;
+            int kcolumn = XMPD_GTRN_ARR[i][k]%12; //columns 0-11
 
-        int kFilled = 0; 
-        for(unsigned int k=0; k<16; k++){
-            if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] != 4 ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ) { 
-                int krow = XMPD_GTRN_ARR[i][k]/12;
-                int kcolumn = XMPD_GTRN_ARR[i][k]%12;
-                if(kFilled <8 ){
-                    if( fiberSaturation[i][kFilled] == 1   ) {
+            int korow = 4;
+            int kxrow = 0;
+
+            int  kocolumn =  XMPD_GTRN_ARR[i][k];
+            int  kxcolumn =  XMPD_GTRN_ARR[i][k];
+
+            // note that they are different in FPGA a and FPGA b
+            if (XFPGA == 0){
+                korow = 4;
+                kxrow = 0;
+            } else if (XFPGA == 1){
+                korow = 7;
+                kxrow = 11;
+            }
+            
+            if (fiberSaturation[i][k] == 1){
+                //etowers
+                if ( ( XMPD_DTYP_ARR[XMPD_NFI[i]][2*k] == 0 )  && ( XMPD_GTRN_ARR[i][2*k] > -1 ) ){
+                    int krow2     = XMPD_GTRN_ARR[i][2*k]/12;
+                    int kcolumn2  = XMPD_GTRN_ARR[i][2*k]%12;
+                    Xsaturation[krow2][kcolumn2] = 1;
+                }
+                //htowers
+                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 11  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
+                    Xsaturation[ krow][kcolumn] = 1;
+                }
+                //extended region for FPGAa and FPGAb - no equivalent for FPGAc
+                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 2  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
+                    Xsaturation[ kxrow][kxcolumn] = 1;
+                }
+                if (XFPGA < 2) {
+                    // FPGA a and FPGA b - extended region condition
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 3  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
+                         Xsaturation[ kxrow][kxcolumn] = 1;
+                    }
+                } else {
+                    // FPGAc -- all channels type 3
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 3  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
                         Xsaturation[ krow][kcolumn] = 1;
                     }
                 }
-                kFilled = kFilled + 1; 
+                //overlap region for FPGAa and FPGAb - no equivalent for FPGAc
+                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 6  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
+                    Xsaturation[ korow][kocolumn] = 1; 
+                }
+                
+                // repeat for the next k+8 values  (16 values) cases
+                krow = XMPD_GTRN_ARR[i][k+8]/12;
+                kcolumn = XMPD_GTRN_ARR[i][k+8]%12;
+
+                kocolumn = XMPD_GTRN_ARR[i][k+8];
+                kxcolumn = XMPD_GTRN_ARR[i][k+8];
+                
+                //htowers
+                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 11  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
+                    Xsaturation[ krow][kcolumn] = 1;
+                }
+                //extended region for FPGAa and FPGAb - no equivalent for FPGAc
+                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 2  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
+                    Xsaturation[ kxrow][kxcolumn] = 1;
+                }
+                if (XFPGA < 2) {
+                    // FPGA a and FPGA b - extended region condition
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 3  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
+                         Xsaturation[ kxrow][kxcolumn] = 1;
+                    }
+                } else {
+                    // FPGAc -- all channels type 3
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 3  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
+                        Xsaturation[ krow][kcolumn] = 1;
+                    }
+                }
+                //overlap regio for FPGAa and FPGAb - no equivalent for FPGAc
+                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 6  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
+                    Xsaturation[ korow][kocolumn] = 1; 
+                }
+                
             }
+
         }
     }
 
@@ -1282,7 +1350,6 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     // limit input to 12 bits to avoid accidental sign extension
     int din = (0x00000FFF &  datumPtr );
     // map all special cases to zero for now
-    if( din > 0x0FDE ) din = 0x4EE;
     // limit negative values
     if( (din > 0) && ( din < 962 )  ) din =  962;
     //zeroZero
@@ -1295,6 +1362,7 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int FPGA_CONVLIN_TH3 = 1773;
     int FPGA_CONVLIN_TH4 = 2541;
     int FPGA_CONVLIN_TH5 = 4029;
+    int FPGA_CONVLIN_TH6 = 4062;
 
     int FPGA_CONVLIN_OF0 = -5072;
     int FPGA_CONVLIN_OF1 = -2012;
@@ -1309,6 +1377,7 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int oth3 = 0;
     int oth4 = 0;
     int oth5 = 0;
+    int oth6 = 0;
   
     int r1shv = 0;
     int r2shv = 0;
@@ -1373,29 +1442,39 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     else{
         oth5 = 0; 
     }
+    if ( din > FPGA_CONVLIN_TH6 ){
+        oth6 = 1;
+   }
+   else{
+        oth6 = 0; 
+   }
+
 
     // divide by 2 to 50 MeV LSB
 
-    if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )   ) {
         dout = 0;
     } 
-    else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout =  r1conv >>1;
     } 
-    else if( ( oth0) & (  oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r2conv >>1;
     } 
-    else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r3conv >>1;
     }  
-    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r4conv >>1;
     }  
-    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 ) & (! oth6 ) ) {
         dout = r5conv >>1;
-    }  
-    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 )  ) {
+    } 
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & ( oth5 ) & (! oth6 ) ) {
         dout = r6conv >>1;
+    }  
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & ( oth6 )  ) {
+        dout = 0;
     } 
     else {
         dout = 0; 

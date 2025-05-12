@@ -59,8 +59,8 @@ main()
     vec0, vec1, vec2, vec3, vec4
   };
 
-  std::array<double, 10> result = evaluateMode(mixture);
-  for (double i : result) {
+  const std::array<double, 10> result = evaluateMode(mixture);
+  for (const double i : result) {
     std::cout << i << '\n';
   }
 

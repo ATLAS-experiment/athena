@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ReadMeta.cxx
  *  @brief This file contains the implementation for the ReadMeta class.
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
- *  $Id: ReadMeta.cxx,v 1.16 2008-12-10 21:28:11 gemmeren Exp $
  **/
 
 #include "ReadMeta.h"
@@ -22,10 +21,9 @@ using namespace AthPoolEx;
 
 //___________________________________________________________________________
 ReadMeta::ReadMeta(const std::string& type, const std::string& name, const IInterface* parent) : 
-   AthAlgTool(type, name, parent), 
+   base_class(type, name, parent),
    m_pMetaDataStore ("StoreGateSvc/MetaDataStore",      name), 
    m_pInputStore    ("StoreGateSvc/InputMetaDataStore", name) {
-   declareInterface<IMetaDataTool>(this);
 }
 //___________________________________________________________________________
 ReadMeta::~ReadMeta() {
@@ -35,27 +33,14 @@ StatusCode ReadMeta::initialize() {
    ATH_MSG_INFO("in initialize()");
 
    // locate the DetectorStore and initialize our local ptr
-   if (!m_pMetaDataStore.retrieve().isSuccess()) {
-      ATH_MSG_ERROR("Could not find MetaDataStore");
-      return StatusCode::FAILURE;
-   }
-   if (!m_pInputStore.retrieve().isSuccess()) {
-      ATH_MSG_ERROR("Could not find InputMetaDataStore");
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK( m_pMetaDataStore.retrieve() );
+   ATH_CHECK( m_pInputStore.retrieve() );
+
    // Set to be listener for end of event
    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", this->name());
-   if (!incSvc.retrieve().isSuccess()) {
-      ATH_MSG_ERROR("Unable to get the IncidentSvc");
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK( incSvc.retrieve() );
    incSvc->addListener(this, "BeginInputFile", 60); // pri has to be < 100 to be after MetaDataSvc.
    incSvc->addListener(this, "EndInputFile", 50); // pri has to be > 10 to be before MetaDataSvc.
-   return StatusCode::SUCCESS;
-}
-//___________________________________________________________________________
-StatusCode ReadMeta::finalize() {
-   ATH_MSG_INFO("in finalize()");
    return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
@@ -66,12 +51,10 @@ void ReadMeta::handle(const Incident& inc) {
       ATH_MSG_ERROR(" Unable to get FileName from BeginInputFile/EndInputFile incident");
       return;
    }
-   const std::string fileName = fileInc->fileName();
-   ATH_MSG_DEBUG("handle() " << inc.type() << " for " << fileName);
-
+   ATH_MSG_DEBUG("handle() " << inc.type() << " for " << fileInc->fileName());
 }
 //__________________________________________________________________________
-StatusCode ReadMeta::beginInputFile()
+StatusCode ReadMeta::beginInputFile(const SG::SourceID&)
 {
    ATH_MSG_DEBUG("saw BeginInputFile incident.");
    if (m_pInputStore->contains<ExampleHitContainer>("PedestalWriteData")) {

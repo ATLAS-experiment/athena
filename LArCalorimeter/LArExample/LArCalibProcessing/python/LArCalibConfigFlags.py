@@ -84,6 +84,7 @@ def addLArCalibFlags(flags, isSC=False):
     flags.addFlag("LArCalib.OFC.useDelta",False)
     flags.addFlag("LArCalib.OFC.Nsamples",4)
     flags.addFlag("LArCalib.OFC.ShapeCorrection",False)
+    flags.addFlag("LArCalib.OFC.usePed",False)
 
     flags.addFlag("LArCalib.PhysACuseHG",False)
 

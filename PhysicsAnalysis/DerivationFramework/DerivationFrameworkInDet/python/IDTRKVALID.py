@@ -51,7 +51,8 @@ def IDTRKVALID_ANDToolCfg(flags, name='IDTRKVALID_ANDTool'):
         SecondObjectRequirements = sel_muon2,
         MassHypothesis           = 105.66,
         SecondMassHypothesis     = 105.66,
-        StoreGateEntryName       = "DRZmumuMass"))
+        StoreGateEntryName       = "DRZmumuMass",
+        InputDecorNames          = ["Muons.ptcone40"]))
 
     IDTRKVALID_SkimmingTool = acc.getPrimaryAndMerge(
         xAODStringSkimmingToolCfg(flags, name="IDTRKVALID_SkimmingTool",

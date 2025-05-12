@@ -100,12 +100,11 @@ Trk::TrapezoidVolumeBounds::operator=(const Trk::TrapezoidVolumeBounds& trabo)
   return *this;
 }
 
-const std::vector<const Trk::Surface*>*
+std::vector<std::unique_ptr<Trk::Surface>>
   Trk::TrapezoidVolumeBounds::decomposeToSurfaces
   (const Amg::Transform3D& transform)
 {
-  std::vector<const Trk::Surface*>* retsf =
-    new std::vector<const Trk::Surface*>;
+  auto retsf = std::vector<std::unique_ptr<Trk::Surface>>();
 
   // face surfaces xy
   Amg::RotationMatrix3D trapezoidRotation(transform.rotation());
@@ -115,14 +114,14 @@ const std::vector<const Trk::Surface*>*
   Amg::Vector3D trapezoidCenter(transform.translation());
 
   //   (1) - at negative local z
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::AngleAxis3D(180 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
       Amg::Translation3D(Amg::Vector3D(0., 0., this->halflengthZ()))),
     this->faceXYTrapezoidBounds()));
   //   (2) - at positive local z
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(0., 0., this->halflengthZ()))),
@@ -160,13 +159,13 @@ const std::vector<const Trk::Surface*>*
                        0.f, -1.f, 0.f;
   }
 
-  RectangleBounds* faceAlphaBounds = this->faceAlphaRectangleBounds();
+  std::shared_ptr<RectangleBounds> faceAlphaBounds = this->faceAlphaRectangleBounds();
   Amg::Vector3D faceAlphaPosition0(
     -0.5 * (this->minHalflengthX() + this->maxHalflengthX()), 0., 0.);
   Amg::Vector3D faceAlphaPosition = transform * faceAlphaPosition0;
-  retsf->push_back(new Trk::PlaneSurface( Amg::Translation3D(faceAlphaPosition)
-                                          * Amg::Transform3D(trapezoidRotation * rotateToFaceAlpha),
-                                          faceAlphaBounds));
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>( Amg::Translation3D(faceAlphaPosition)
+                                                       * Amg::Transform3D(trapezoidRotation * rotateToFaceAlpha),
+                                                       faceAlphaBounds));
   //   (4) - at point B, attached to beta opening angle
   //  same as above but rotate to the right by beta
   Amg::RotationMatrix3D rotateToFaceBeta;
@@ -178,16 +177,16 @@ const std::vector<const Trk::Surface*>*
                        0.f, -1.f, 0.f;
   }
 
-  RectangleBounds* faceBetaBounds = this->faceBetaRectangleBounds();
+  std::shared_ptr<RectangleBounds> faceBetaBounds = this->faceBetaRectangleBounds();
   // Amg::Vector3D
   // faceBetaPosition(B+faceBetaRotation.colX()*faceBetaBounds->halflengthX());
   Amg::Vector3D faceBetaPosition0(
     0.5 * (this->minHalflengthX() + this->maxHalflengthX()), 0., 0.);
   Amg::Vector3D faceBetaPosition = transform * faceBetaPosition0;
-  retsf->push_back(new Trk::PlaneSurface( Amg::Translation3D(faceBetaPosition)
-                                          * Amg::Transform3D(trapezoidRotation * rotateToFaceBeta),
-                                          faceBetaBounds));
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>( Amg::Translation3D(faceBetaPosition)
+                                                       * Amg::Transform3D(trapezoidRotation * rotateToFaceBeta),
+                                                       faceBetaBounds));
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::AngleAxis3D(180. * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.)) *
@@ -196,7 +195,7 @@ const std::vector<const Trk::Surface*>*
       Amg::AngleAxis3D(-90. * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.))),
     this->faceZXRectangleBoundsBottom()));
   //   (6) - at positive local x
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(0., this->halflengthY(), 0.)) *
@@ -208,38 +207,37 @@ const std::vector<const Trk::Surface*>*
 }
 
 // faces in xy
-Trk::TrapezoidBounds*
+std::shared_ptr<Trk::TrapezoidBounds>
 Trk::TrapezoidVolumeBounds::faceXYTrapezoidBounds() const
 {
-  // return new Trk::TrapezoidBounds(m_minHalfX,m_halfY, m_alpha, m_beta);
-  return new Trk::TrapezoidBounds(m_minHalfX, m_maxHalfX, m_halfY);
+  return std::make_shared<Trk::TrapezoidBounds>(m_minHalfX, m_maxHalfX, m_halfY);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::TrapezoidVolumeBounds::faceAlphaRectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfY / cos(m_alpha - 0.5 * M_PI), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_halfY / cos(m_alpha - 0.5 * M_PI), m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::TrapezoidVolumeBounds::faceBetaRectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfY / cos(m_beta - 0.5 * M_PI), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_halfY / cos(m_beta - 0.5 * M_PI), m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::TrapezoidVolumeBounds::faceZXRectangleBoundsBottom() const
 {
-  return new Trk::RectangleBounds(m_halfZ, m_minHalfX);
+  return std::make_shared<Trk::RectangleBounds>(m_halfZ, m_minHalfX);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::TrapezoidVolumeBounds::faceZXRectangleBoundsTop() const
 {
   // double delta = (m_alpha < m_beta) ? m_alpha - M_PI/2. : m_beta - M_PI/2.;
   // return new Trk::RectangleBounds(m_halfZ,
   // 0.5*(m_minHalfX+m_minHalfX+2.*m_halfY/cos(delta)));
-  return new Trk::RectangleBounds(m_halfZ, m_maxHalfX);
+  return std::make_shared<Trk::RectangleBounds>(m_halfZ, m_maxHalfX);
 }
 
 bool
@@ -249,10 +247,9 @@ Trk::TrapezoidVolumeBounds::inside(const Amg::Vector3D& pos, double tol) const
     return false;
   if (std::abs(pos.y()) > m_halfY + tol)
     return false;
-  Trk::TrapezoidBounds* faceXYBounds = this->faceXYTrapezoidBounds();
+  std::shared_ptr<Trk::TrapezoidBounds> faceXYBounds = this->faceXYTrapezoidBounds();
   Amg::Vector2D locp(pos.x(), pos.y());
   bool inside(faceXYBounds->inside(locp, tol, tol));
-  delete faceXYBounds;
   return inside;
 }
 

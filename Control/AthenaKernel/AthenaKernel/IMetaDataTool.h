@@ -17,7 +17,7 @@
 /** @class IMetaDataTool
  *  @brief This class provides the interface for MetaDataTools.
  **/
-class IMetaDataTool : virtual public IAlgTool {
+class IMetaDataTool : public extend_interfaces<IAlgTool> {
 
 public: // Non-static members
   DeclareInterfaceID(IMetaDataTool, 1, 0);

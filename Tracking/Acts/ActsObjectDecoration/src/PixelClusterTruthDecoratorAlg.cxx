@@ -6,6 +6,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "InDetMeasurementUtilities/Helpers.h"
 
 namespace ActsTrk {
   
@@ -26,27 +27,6 @@ namespace ActsTrk {
     ATH_CHECK(m_write_xaod_key.initialize());
 
     // Decorators
-    m_measurement_truth_indices = m_write_xaod_key.key() + "." + m_measurement_truth_indices.key();
-    m_measurement_truth_barcodes = m_write_xaod_key.key() + "." + m_measurement_truth_barcodes.key();
-
-    m_measurement_detectorElementID = m_write_xaod_key.key() + "." + m_measurement_detectorElementID.key();
-    m_measurement_waferID = m_write_xaod_key.key() + "." + m_measurement_waferID.key();
-    m_measurement_bec = m_write_xaod_key.key() + "." + m_measurement_bec.key();
-    m_measurement_layer = m_write_xaod_key.key() + "." + m_measurement_layer.key();
-    m_measurement_sizePhi = m_write_xaod_key.key() + "." + m_measurement_sizePhi.key();
-    m_measurement_sizeZ = m_write_xaod_key.key() + "." + m_measurement_sizeZ.key();
-    m_measurement_SiWidth = m_write_xaod_key.key() + "." + m_measurement_SiWidth.key();
-    m_measurement_eta_module = m_write_xaod_key.key() + "." + m_measurement_eta_module.key();
-    m_measurement_phi_module = m_write_xaod_key.key() + "." + m_measurement_phi_module.key();
-    m_measurement_omegax = m_write_xaod_key.key() + "." + m_measurement_omegax.key();
-    m_measurement_omegay = m_write_xaod_key.key() + "." + m_measurement_omegay.key();
-    m_measurement_LorentzShift = m_write_xaod_key.key() + "." + m_measurement_LorentzShift.key();
-    m_measurement_centroid_xphi = m_write_xaod_key.key() + "." + m_measurement_centroid_xphi.key();
-    m_measurement_centroid_xeta = m_write_xaod_key.key() + "." + m_measurement_centroid_xeta.key();
-    m_measurement_side = m_write_xaod_key.key() + "." + m_measurement_side.key();
-
-    m_measurement_tots = m_write_xaod_key.key() + "." + m_measurement_tots.key();
-    
     ATH_CHECK(m_measurement_truth_indices.initialize(m_useTruthInfo));
     ATH_CHECK(m_measurement_truth_barcodes.initialize(m_useTruthInfo));
 
@@ -186,6 +166,9 @@ namespace ActsTrk {
     auto localCov = cluster->localCovariance<2>();
     measurement->setLocalPositionError( localCov(0,0), localCov(1,1), localCov(0,1) );
 
+    const auto& [omegax, omegay] = TrackingUtilities::computeOmegas(*cluster,
+								    *m_PixelHelper);
+    
     const Identifier waferId = m_PixelHelper->wafer_id(hashId);
     decor_detectorElementID(*measurement) = hashId;
     decor_waferID(*measurement) = waferId.get_compact();
@@ -196,8 +179,8 @@ namespace ActsTrk {
     decor_SiWidth(*measurement) = cluster->channelsInPhi();
     decor_eta_module(*measurement) = m_PixelHelper->eta_module(waferId);
     decor_phi_module(*measurement) = m_PixelHelper->phi_module(waferId);
-    decor_omegax(*measurement) = cluster->omegaX();
-    decor_omegay(*measurement) = cluster->omegaY();
+    decor_omegax(*measurement) = omegax;
+    decor_omegay(*measurement) = omegay;
     decor_LorentzShift(*measurement) = static_cast<float>( m_lorentzAngleTool->getLorentzShift(cluster->identifierHash(), ctx) );
     decor_centroid_xphi(*measurement) = centroid.xPhi();
     decor_centroid_xeta(*measurement) = centroid.xEta();

@@ -29,7 +29,7 @@
 
 //
 template <typename T>
-class AtlasHitsVector
+class AtlasHitsVector : HitsVectorBase
 {
 public:
   //

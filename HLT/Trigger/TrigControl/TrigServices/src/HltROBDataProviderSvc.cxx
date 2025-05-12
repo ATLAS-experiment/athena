@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "HltROBDataProviderSvc.h"
 #include "TrigKernel/HltExceptions.h"
@@ -281,12 +281,13 @@ void HltROBDataProviderSvc::setNextEvent(const EventContext& context, const RawE
   for (size_t irob = 0; irob < number_robs; irob++) {
     rob_fragments.push_back(ROBF(robF[irob]));
   }
-  // add the ROBs to the cache/rob map
+  // add the ROBs to the cache/rob map, but extract the size before moving it
+  const size_t nRobs = rob_fragments.size();
   eventCache_addRobData(cache, std::move(rob_fragments)) ;
 
   ATH_MSG_DEBUG(" ---> setNextEvent for                " << name() );
   ATH_MSG_DEBUG("      current [global id, LVL1 id] = [" << cache->globalEventNumber << "," << cache->currentLvl1ID << "]" );
-  ATH_MSG_DEBUG("      number of received ROBs      =  " << rob_fragments.size() );
+  ATH_MSG_DEBUG("      number of received ROBs      =  " << nRobs );
   ATH_MSG_DEBUG("      size of ROB cache            =  " << cache->robmap.size() );
 
   //------------------------------+

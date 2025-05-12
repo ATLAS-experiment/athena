@@ -46,7 +46,7 @@ def ParticleBrokerSvcNoOrderingCfg(flags, name="ISF_ParticleBrokerSvcNoOrdering"
     result = ComponentAccumulator()
     if "EntryLayerTool" not in kwargs:
         kwargs.setdefault("EntryLayerTool", result.addPublicTool(result.popToolsAndMerge(EntryLayerToolCfg(flags))))
-        kwargs.setdefault("GeoIDSvc", result.getService("ISF_GeoIDSvc").name) # FIXME
+        kwargs.setdefault("GeoIDSvc", result.getService("ISF_GeoIDSvc")) # FIXME
     # assume "GeoIDSvc" has been set alongside "EntryLayerTool"
     kwargs.setdefault("AlwaysUseGeoIDSvc", False)
     kwargs.setdefault("ValidateGeoIDs", flags.Sim.ISF.ValidationMode)
@@ -70,7 +70,7 @@ def ParticleBrokerSvcCfg(flags, name="ISF_ParticleBrokerSvc", **kwargs):
 def ATLFAST_ParticleBrokerSvcCfg(flags, name="ISF_ATLFAST_ParticleBrokerSvc", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("EntryLayerTool", result.addPublicTool(result.popToolsAndMerge(ATLFAST_EntryLayerToolCfg(flags))))
-    kwargs.setdefault("GeoIDSvc", result.getService("ISF_ATLFAST_GeoIDSvc").name) # FIXME
+    kwargs.setdefault("GeoIDSvc", result.getService("ISF_ATLFAST_GeoIDSvc")) # FIXME
     pbsvc = result.getPrimaryAndMerge(ParticleBrokerSvcCfg(flags, name, **kwargs))
     result.addService(pbsvc, primary = True)
     return result
@@ -102,7 +102,7 @@ def TruthServiceCfg(flags, **kwargs):
 
 def GenericTruthServiceCfg(flags, name="ISF_TruthService", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("BarcodeSvc", result.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
+    kwargs.setdefault("BarcodeSvc", result.getPrimaryAndMerge(BarcodeSvcCfg(flags)))
 
     kwargs.setdefault("SkipIfNoChildren", True)
     kwargs.setdefault("SkipIfNoParentId", True)

@@ -34,7 +34,11 @@ def GfexInputMonitoringConfig(flags):
                              thresholdConfig={"NBins":[0,32*40]}, # 0 bins expected to be empty
                              )
 
-    
+
+    helper.defineTree('LBNString,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEt,RefTowerEt,TowerSaturationflag,RefTowerSat;errors',
+                      "lbnString/string:error/string:eventNumber/l:id/i:eta/F:phi/F:et/I:ref_et/I:sat/B:ref_sat/B",
+                      title="errors tree;LBN;Error",fillGroup="errors")
+
     # histograms of gFex tower variables
     helper.defineHistogram('LBN,NGfexTowers;h_LBN_vs_nGfexTowers', title='Number of gFex towers in each event with Et > 10 GeV;LBN; gTowers per event; Number of events',
                            fillGroup = "highEtgTowers",
@@ -57,7 +61,7 @@ def GfexInputMonitoringConfig(flags):
 
                           
 
-    helper.defineHistogram('LBN,binNumber;h_HotTowers_posVsLBN',title='gFex Towers with Et > 2GeV;LB;40(y-1)+x',
+    helper.defineHistogram('LBN,binNumber;h_HotTowers_posVsLBN',title='gFex Towers with Et > 2GeV;LB;32(x-1)+y',
                            path=f"{trigPath}/detail",
                            fillGroup = "highEtgTowers",
                            hanConfig={"description":"x and y correspond to axis bin numbers on <a href='../h_HotTower_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
@@ -83,7 +87,7 @@ def GfexInputMonitoringConfig(flags):
                             "description":"Look for cold spots with unusual high statistics; Check <a href='./detail/h_ColdTowers_posVsLBN'>detail plot</a> to get timeseries for each location ", "display":"SetPalette(55),Draw=COL1Z"},
                            xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
 
-    helper.defineHistogram('LBN,binNumber;h_ColdTowers_posVsLBN',title='gFex Towers with Et < -2GeV;LB;40(y-1)+x',
+    helper.defineHistogram('LBN,binNumber;h_ColdTowers_posVsLBN',title='gFex Towers with Et < -2GeV;LB;32(x-1)+y',
                            path=f"{trigPath}/detail",
                            fillGroup = "lowEtgTowers",
                            hanConfig={"description":"x and y correspond to axis bin numbers on <a href='../h_ColdTower_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
@@ -100,11 +104,12 @@ def GfexInputMonitoringConfig(flags):
 #                           **eta_phi_bins)                           
 
     helper.defineHistogram('TowerEt;h_TowerEt', title='gFex Tower Et ; Et (count x 50 MeV)',
-                            fillGroup = "gTowers",
-                            type='TH1I',
-                            path='Developer/gFexInput',
-                            hanConfig={"description":""},
-                            xbins= 1000, xmin=-500.0, xmax=500.0)
+                        fillGroup = "gTowers",
+                        type='TH1I',
+                        path='Developer/gFexInput',
+                        hanConfig={"description":""},
+                        xbins= 100, xmin=-50.0, xmax=100.0)
+    
 
     helper.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='gFex Tower Saturation FLag',
                             fillGroup = "gTowers",

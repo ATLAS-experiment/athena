@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,15 +26,14 @@ class Volume;
 
  BoundaryPlaneSurface description inside the tracking realm,
  it extends the PlaneSurface description to make a surface being a boundary of a
- Trk::Volume (used for all volume shapes).
- It inherits from BoundarySurface to get the interface of boundaries.
+ volume.
 
  @author Andreas.Salzburger@cern.ch
  @author Christos Anastopoulos (Athena  MT modifications)
 */
 
 template <class Tvol>
-class BoundaryPlaneSurface final : virtual public BoundarySurface<Tvol>,
+class BoundaryPlaneSurface final : public BoundarySurface<Tvol>,
                                    public PlaneSurface {
   /** typedef the BinnedArray */
   typedef BinnedArray<Tvol> VolumeArray;
@@ -58,8 +57,8 @@ class BoundaryPlaneSurface final : virtual public BoundarySurface<Tvol>,
       : BoundarySurface<Tvol>(inside, outside), PlaneSurface(psf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundaryPlaneSurface(SharedObject<VolumeArray> insideArray,
-                       SharedObject<VolumeArray> outsideArray,
+  BoundaryPlaneSurface(std::shared_ptr<const VolumeArray> insideArray,
+                       std::shared_ptr<const VolumeArray> outsideArray,
                        const PlaneSurface& psf)
       : BoundarySurface<Tvol>(insideArray, outsideArray), PlaneSurface(psf) {}
 

@@ -61,6 +61,7 @@ class TH2D;
     void parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vector<FPGATrackSimTruthTrack> const & truthtracks);
 
     // Fill methods
+    void fillHitLevelInput(const FPGATrackSimHit* hit);
     void fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const FPGATrackSimBinUtil::IdxSet &idx, const FPGATrackSimBinnedHits::BinEntry &data);
     void fillBinningSummary ATLAS_NOT_THREAD_SAFE(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
 
@@ -108,6 +109,17 @@ class TH2D;
 
     TH1D *m_inputHits = 0;
 
+    // residuals and shifts from truth bin center
+    std::vector<TH1D *> m_phiResidual;
+    std::vector<TH1D *> m_etaResidual;
+    std::vector<TH1D *> m_phiTrueBinShift;
+    std::vector<TH1D *> m_etaTrueBinShift;
+    int m_N_ptplot{5}; // for 2-d plots in pt slices
+    std::vector<TH2D *> m_phiResidual_v_r;
+    std::vector<TH2D *> m_etaResidual_v_r;
+    std::vector<TH2D *> m_phiScale_v_r;
+    std::vector<TH2D *> m_etaScale_v_r;
+
     TH1D *m_phiShift_road = 0;
     TH1D *m_etaShift_road = 0;
     TH2D *m_phiShift2D_road = 0;
@@ -122,20 +134,29 @@ class TH2D;
     private:
 
     // TTree for layer definitions studies
-    StatusCode bookTree();
+    StatusCode bookTrees();
     void ClearTreeVectors();
-    TTree *m_bin_module_tree = nullptr; // output tree
-    std::vector<unsigned> m_tree_bin; // 5 tracks parameter bin
-    std::vector<float> m_tree_r;
-    std::vector<float> m_tree_z;
-    std::vector<int> m_tree_id;
-    std::vector<int> m_tree_hash;
-    std::vector<int> m_tree_layer;
-    std::vector<int> m_tree_side;
-    std::vector<int> m_tree_etamod;
-    std::vector<int> m_tree_phimod;
-    std::vector<int> m_tree_dettype;
-    std::vector<int> m_tree_detzone;
+
+    TTree *m_bin_tree = nullptr; // output tree
+    std::vector<unsigned> m_bin_tree_bin; // 5 tracks parameter bin
+    std::vector<float> m_bin_tree_r;
+    std::vector<float> m_bin_tree_z;
+    std::vector<int> m_bin_tree_id;
+    std::vector<int> m_bin_tree_hash;
+    std::vector<int> m_bin_tree_layer;
+    std::vector<int> m_bin_tree_side;
+    std::vector<int> m_bin_tree_etamod;
+    std::vector<int> m_bin_tree_phimod;
+    std::vector<int> m_bin_tree_dettype;
+    std::vector<int> m_bin_tree_detzone;
+
+    TTree *m_truth_tree = nullptr; // output tree
+    double m_truth_tree_phi{0.0};
+    double m_truth_tree_qOverPt{0.0};
+    double m_truth_tree_d0{0.0};
+    double m_truth_tree_z0{0.0};
+    double m_truth_tree_eta{0.0};
+    std::vector<double> m_truth_tree_parset;
 
     //////////////////////////////////////////////////////////////////////
     // make and register histogram or vector of histograms in one line...

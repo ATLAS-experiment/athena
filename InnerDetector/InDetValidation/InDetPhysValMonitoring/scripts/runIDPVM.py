@@ -53,6 +53,8 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--JetPtMin", help='Minimum pt for jet selection in GeV', type=float, default=100)
     IDPVMparser.add_argument("--JetPtMax", help='Maximum pt for jet selection in GeV', type=float, default=5000)
     IDPVMparser.add_argument("--setCSVName", help='Convert AOD to a SCV file for the track overlay ML training dataset', default="")
+    IDPVMparser.add_argument("--vetoPdgId", help='Veto a particle based on PDG ID', type=int, default=-1)
+    IDPVMparser.add_argument("--pdgId", help='Select a particle based on PDG ID', type=int, default=-1)
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -83,6 +85,10 @@ if MyArgs.doTracksInBJets:
     flags.PhysVal.IDPVM.doValidateTracksInBJets = True
 if MyArgs.setCSVName != "":
     flags.PhysVal.IDPVM.setCSVName = MyArgs.setCSVName
+if MyArgs.vetoPdgId > 0:
+    flags.PhysVal.IDPVM.vetoPdgId = MyArgs.vetoPdgId
+if MyArgs.pdgId > 0:
+    flags.PhysVal.IDPVM.pdgId = MyArgs.pdgId
 flags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
 flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
 flags.PhysVal.IDPVM.doValidateHILoose = MyArgs.doHILoose

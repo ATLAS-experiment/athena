@@ -67,7 +67,13 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>&           m_bucket_max{m_tree.newScalar<float>("bucket_max", -1)};
     MuonVal::ScalarBranch<uint16_t>&        m_bucket_spacePoints{m_tree.newScalar<uint16_t>("bucket_spacePoints", 0)};
     MuonVal::ScalarBranch<uint16_t>&        m_bucket_segments{m_tree.newScalar<uint16_t>("bucket_segments", 0)};
-    MuonVal::ScalarBranch<uint16_t>&        m_bucket_layers{m_tree.newScalar<uint16_t>("bucket_layers", 0)}; 
+    MuonVal::ScalarBranch<uint16_t>&        m_bucket_layers{m_tree.newScalar<uint16_t>("bucket_layers", 0)};
+    MuonVal::ScalarBranch<uint8_t>&         m_bucket_truthHit{m_tree.newScalar<uint8_t>("bucket_hasTruth", 0)};
+    MuonVal::ScalarBranch<float>&           m_bucket_posX{m_tree.newScalar<float>("bucket_positionX")};
+    MuonVal::ScalarBranch<float>&           m_bucket_posY{m_tree.newScalar<float>("bucket_positionY")};
+    MuonVal::ScalarBranch<float>&           m_bucket_posZ{m_tree.newScalar<float>("bucket_positionZ")};
+    MuonVal::ScalarBranch<uint8_t>&         m_bucket_chIdx{m_tree.newScalar<uint8_t>("bucket_chIndex")};
+
 
     MuonVal::ThreeVectorBranch              m_spoint_localPosition{m_tree, "localPosition"}; 
     MuonVal::ThreeVectorBranch              m_spoint_globalPosition{m_tree, "globalPosition"}; 

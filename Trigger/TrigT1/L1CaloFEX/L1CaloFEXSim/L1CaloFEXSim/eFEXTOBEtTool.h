@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -54,7 +54,7 @@ namespace LVL1 {
                                   std::vector<unsigned int> &WstotSums) override;
 								  
     virtual
-    StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs) override;
+    StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs) const override;
 
 
     /** Tool to calculate eTaudiscriminant sums */
@@ -69,7 +69,7 @@ namespace LVL1 {
 
     /** Tool to find eFEX and FPGA numbers and eta index of a TOB within the FPGA */
     virtual
-    void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta) override;
+    void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta) const override;
 
     /** Internal data */
   private:

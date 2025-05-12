@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef TRIGFPGATrackSimMAPPINGSVC_H
 #define TRIGFPGATrackSimMAPPINGSVC_H
@@ -41,11 +41,8 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
 
     private:
 
-        // Handles
-        ServiceHandle<IFPGATrackSimEventSelectionSvc>  m_EvtSel;
-
         // Configuration
-
+        Gaudi::Property<unsigned int> m_regionID { this, "regionID", 0, "current region under processing"};  // Current region of interest
         Gaudi::Property<std::string> m_mappingType {this, "mappingType", "FILE", "for now should be FILE only, DB for the future"};
         Gaudi::Property<std::string> m_rmap_path {this, "rmap", "", "path of the region-map file"};
         Gaudi::Property<std::string> m_subrmap_path {this, "subrmap", "", "path of the region-map file for subregions"};

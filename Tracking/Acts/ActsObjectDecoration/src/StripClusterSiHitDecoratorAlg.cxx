@@ -27,28 +27,11 @@ namespace ActsTrk {
     ATH_CHECK( m_siHitsKey.initialize() );
     
     // SDO decorations
-    m_sdo_words = m_inputMeasurementsKey.key() + "." + m_sdo_words.key();
-    m_sdo_depositsBarcode = m_inputMeasurementsKey.key() + "." + m_sdo_depositsBarcode.key();
-    m_sdo_depositsEnergy = m_inputMeasurementsKey.key() + "." + m_sdo_depositsEnergy.key();
-
     ATH_CHECK( m_sdo_words.initialize() );
     ATH_CHECK( m_sdo_depositsBarcode.initialize() );
     ATH_CHECK( m_sdo_depositsEnergy.initialize() );
 
     // SiHit decorations
-    m_sihit_energyDeposit_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_energyDeposit_decor_key.key();
-    m_sihit_meanTime_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_meanTime_decor_key.key();
-    m_sihit_barcode_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_barcode_decor_key.key();
-    m_sihit_pdgid_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_pdgid_decor_key.key();
-
-    m_sihit_startPosX_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_startPosX_decor_key.key();
-    m_sihit_startPosY_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_startPosY_decor_key.key();
-    m_sihit_startPosZ_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_startPosZ_decor_key.key();
-
-    m_sihit_endPosX_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_endPosX_decor_key.key();
-    m_sihit_endPosY_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_endPosY_decor_key.key();
-    m_sihit_endPosZ_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_endPosZ_decor_key.key();
-
     ATH_CHECK( m_sihit_energyDeposit_decor_key.initialize() );
     ATH_CHECK( m_sihit_meanTime_decor_key.initialize() );
     ATH_CHECK( m_sihit_barcode_decor_key.initialize() );

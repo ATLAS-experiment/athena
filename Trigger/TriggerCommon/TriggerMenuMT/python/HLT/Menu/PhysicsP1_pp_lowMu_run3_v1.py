@@ -335,22 +335,8 @@ def getLowMuPhysicsSignatures():
 
         #ATR-27744
         ChainProp(name='HLT_mb_sptrk_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_XOR_E2', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_XOR_E1_E3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_E1_AND_E1', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_E1_AND_E2ORE3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_E2_AND_E2', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_E2_AND_E3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_E3_AND_E3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_sptrk_L1ZDC_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E1_AND_E1', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E1_AND_E2ORE3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E2_AND_E2', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E2_AND_E3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E3_AND_E3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_sp100_trk30_hmt_L1jTE3', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroupPhI),
 

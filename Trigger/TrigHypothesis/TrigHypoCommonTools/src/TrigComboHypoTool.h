@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOMBOHYPO_TRIGCOMBOHYPOTOOL_H
@@ -80,9 +80,9 @@ class TrigComboHypoTool:  public ComboHypoToolBase {
   typedef std::tuple<float,float,float> KineInfo;
   typedef std::vector<Combo::LegDecision> Combination;
 
-  /// Top-level function to make chain-level decision
-  /// This applies the AND of all configured var selections
-  virtual bool executeAlg(const Combination& combination) const override;
+  /// Override the ComboHypoToolBase::decide in order to optimise combination generation
+  /// This is to avoid excessive combinatorics for complex multileg chains
+  StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*ctx*/) const final;
 
   /// Implementation of selection on individual variables
   bool executeAlgStep(const Combination& combination, const VarInfo&, std::vector<float>& values) const;

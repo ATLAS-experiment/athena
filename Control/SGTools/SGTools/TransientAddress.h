@@ -37,7 +37,7 @@ namespace SG {
     /// of entries, so store it as a sorted vector instead.
     typedef std::vector<CLID> TransientClidSet;
 
-    typedef std::set<std::string> TransientAliasSet;
+    typedef std::vector<std::string> TransientAliasSet;
     typedef IStringPool::sgkey_t sgkey_t;
 
     ///< Default Constructor
@@ -105,13 +105,16 @@ namespace SG {
     void setAlias(const std::string& key);
 
     ///< set alias'
-    void setAlias(const std::set<std::string>& keys);
+    void setAlias(const std::vector<std::string>& keys);
 
     ///< set alias'
-    void setAlias(std::set<std::string>&& keys);
+    void setAlias(std::vector<std::string>&& keys);
 
     /// remove alias from proxy
     bool removeAlias(const std::string& key);
+
+    ///< Test for an alias.
+    bool hasAlias(const std::string& key) const;
 
     ///< get transient alias
     const TransientAliasSet& alias() const;
@@ -248,7 +251,7 @@ namespace SG {
   /// get transient CLID's
   inline
   const TransientAddress::TransientClidSet& TransientAddress::transientID() const 
-  { 
+  {
     return m_transientID; 
   }
 
@@ -256,19 +259,22 @@ namespace SG {
   inline 
   void TransientAddress::setAlias(const std::string& key)
   {
-    m_transientAlias.insert(key);
+    auto it = std::ranges::lower_bound (m_transientAlias, key);
+    if (it == m_transientAlias.end() || *it != key) {
+      m_transientAlias.insert (it, key);
+    }
   } 
 
   /// set transient Alias'
   inline 
-  void TransientAddress::setAlias(const std::set<std::string>& keys)
+  void TransientAddress::setAlias(const std::vector<std::string>& keys)
   {
     m_transientAlias = keys;
   } 
 
   /// set transient Alias'
   inline 
-  void TransientAddress::setAlias(std::set<std::string>&& keys)
+  void TransientAddress::setAlias(std::vector<std::string>&& keys)
   {
     m_transientAlias = std::move(keys);
   } 
@@ -276,7 +282,18 @@ namespace SG {
   /// remove alias
   inline bool TransientAddress::removeAlias(const std::string& key)
   {
-    return (m_transientAlias.erase(key) == 1) ? true:false;
+    auto it = std::ranges::lower_bound (m_transientAlias, key);
+    if (it != m_transientAlias.end() && *it == key) {
+      m_transientAlias.erase (it);
+      return true;
+    }
+    return false;
+  }
+
+  /// Test for an alias.
+  inline bool TransientAddress::hasAlias(const std::string& key) const
+  {
+    return std::ranges::binary_search (m_transientAlias, key);
   }
 
   /// get transient Alias'

@@ -216,15 +216,6 @@ public:
     return {};
   }
 
-  virtual Trk::ExtrapolationCode propagate(
-    const EventContext&,
-    Trk::ExCellCharged&,
-    Trk::TargetSurfaces&,
-    Trk::TargetSurfaceVector&) const override final
-  {
-    return Trk::ExtrapolationCode::FailureConfiguration;
-  }
-
 private:
   struct Cache
   {

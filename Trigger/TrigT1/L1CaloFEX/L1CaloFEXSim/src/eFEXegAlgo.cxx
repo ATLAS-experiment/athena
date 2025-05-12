@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -9,6 +9,7 @@
 //     email                : antonio.jacques.costa@cern.ch ulla.blumenschein@cern.ch tong.qiu@cern.ch
 //  ***************************************************************************/
 #include <vector>
+#include <mutex>
 
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
@@ -17,14 +18,6 @@
 
 
 namespace LVL1 {
-
-    static thread_local int s_corrections[3][25] = {
-            {0,0,0,0,0,0,0,0x8,0,0,0xb,0x4,0x8,0x9,0x34,0x7e,0x7b,0x6b,0,0,0,0,0,0,0xc},
-            {0xe,0x12,0x12,0x12,0x12,0x13,0x18,0x17,0x42,0x40,0x38,0x3d,0x3b,0x4e,0x2d,0xc,0x10,0x4,0x27,0x19,0x19,0x16,0x12,0x10,0xc},
-            {0xb,0x8,0x8,0x8,0x8,0x8,0x7,0x9,0x8,0x8,0x8,0x7,0x8,0x8,0x21,0x2,0x2,0x4,0x6,0x8,0x8,0x8,0x9,0x10,0x12}
-    };
-    bool thread_local eFEXegAlgo::s_dmCorrectionsLoaded = false;
-
 
     // default constructor for persistency
     eFEXegAlgo::eFEXegAlgo(const std::string& type, const std::string& name, const IInterface* parent):
@@ -190,12 +183,12 @@ namespace LVL1 {
         } else {
 
             // see slide 4 of https://indico.cern.ch/event/1513502/contributions/6389265/attachments/3019474/5326755/Rate%20Reduction%20Methods%20Overview.pdf
-            // for updated definition of rhad sum (introduced for 2025)
+            // Update 29-Apr-2025: removing 4 corners of EM3 from sum
 
             // EM cluster depends on UnD flag
             int phi2 = (m_seed_UnD > 0 ? 2 : 0);
 
-            // 3x3 Towers Had + EM3; 1x2 L0
+            // 3x3 Towers Had + EM3 (excluding corners in EM3); 1x2 L0
             for (int i = 0; i < 3; ++i) { // phi
                 for (int j = 0; j <= 2; ++j) { // eta
                     if (((m_efexid % 3 == 0) && (m_fpgaid == 0) && (m_central_eta == 0) && (j == 0)) ||
@@ -203,7 +196,7 @@ namespace LVL1 {
                         continue;
                     } else {
                         const eTower *tTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[i][j]);
-                        hadsum += tTower->getLayerTotalET(4) + tTower->getLayerTotalET(3);
+                        hadsum += tTower->getLayerTotalET(4) + (((i==0&&j==0)||(i==2&&j==2)||(i==0&&j==2)||(i==2&&j==0)) ? 0 : tTower->getLayerTotalET(3));
                         // For PS add central tower + UnD phi neighbour
                         if (j == 1 && (i == 1 || i == phi2)) {
                             emsum += (tTower->getLayerTotalET(0));
@@ -377,10 +370,11 @@ namespace LVL1 {
             ieta = 8 + 4*(3-m_fpgaid) + (4-m_central_eta);
         }
 
-        if (!s_dmCorrectionsLoaded) {
-            std::lock_guard<std::mutex> lk(m_dmCorrectionsMutex); // ensure only one thread tries to load corrections
+	static std::once_flag flag;
+	std::call_once(flag, [&]() {
+
             if (!m_dmCorrectionsKey.empty()) {
-                // replace s_corrections values with values from database ... only try this once
+                // replace m_corrections values with values from database ... only try this once
                 SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey/*, ctx*/ };
                 if (dmCorrections.isValid()) {
                     if(dmCorrections->size()==0 && Gaudi::Hive::currentContext().eventID().time_stamp()>1672527600) { // not an error for data before 2023 (will include MC21 and MC23a)
@@ -389,20 +383,19 @@ namespace LVL1 {
                     }
                     for (auto itr = dmCorrections->begin(); itr != dmCorrections->end(); ++itr) {
                         if (itr->first < 25 || itr->first >= 50) continue;
-                        s_corrections[0][itr->first - 25] = itr->second["EmPS"].data<int>();
-                        s_corrections[1][itr->first - 25] = itr->second["EmFR"].data<int>();
-                        s_corrections[2][itr->first - 25] = itr->second["EmMD"].data<int>();
-                        ATH_MSG_DEBUG("DM Correction for etaIdx=" << (itr->first - 25) << " : [" << s_corrections[0][itr->first - 25] << ","
-                                                                  << s_corrections[1][itr->first - 25] << "," << s_corrections[2][itr->first - 25] << "]" );
+                        m_corrections[0][itr->first - 25] = itr->second["EmPS"].data<int>();
+                        m_corrections[1][itr->first - 25] = itr->second["EmFR"].data<int>();
+                        m_corrections[2][itr->first - 25] = itr->second["EmMD"].data<int>();
+                        ATH_MSG_DEBUG("DM Correction for etaIdx=" << (itr->first - 25) << " : [" << m_corrections[0][itr->first - 25] << ","
+                                                                  << m_corrections[1][itr->first - 25] << "," << m_corrections[2][itr->first - 25] << "]" );
                     }
                 }
-                ATH_MSG_INFO("Loaded DM Corrections from database");
+		ATH_MSG_INFO("Loaded DM Corrections from database");
             }
-            s_dmCorrectionsLoaded = true;
-        }
+        });
 
         /// Retrieve the factor from table (eventually from DB)
-        unsigned int factor = s_corrections[layer][ieta];
+        unsigned int factor = m_corrections[layer][ieta];
 
         /** Calculate correction
             Factors are 7 bit words, highest bit corresponding to the most significant

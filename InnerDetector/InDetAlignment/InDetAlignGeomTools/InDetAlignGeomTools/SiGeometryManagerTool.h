@@ -143,6 +143,9 @@ namespace InDet
     bool m_dumpGeometry;
     bool m_actualGeom;
 
+    Gaudi::Property<std::string> m_pixelDetManagerName{this,"PixelDetectorManager","Pixel","Name of the Pixel Detector Manager to attempt to retrieve"};
+    Gaudi::Property<std::string> m_stripDetManagerName{this,"StripDetectorManager","SCT","Name of the Strip Detector Manager to attempt to retrieve"};
+
   }; // end class
 
 } // end namespace

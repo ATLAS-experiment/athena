@@ -11,7 +11,7 @@ class StreamerInfoGenerator:
     self.classlist = []
     self.problemclasses = []
     #MN: ROOT6 strips std:: from types, so we need to check the names
-    self.blacklist = ['std::', 'vector<', 'map<', 'queue<', 'list<']
+    self.blocklist = ['std::', 'vector<', 'map<', 'queue<', 'list<']
     self.type = cppyy.gbl.RootType
     self.type.EnableCintex()
     cppyy.load_library('libAtlasSTLAddReflexDict')
@@ -24,9 +24,9 @@ class StreamerInfoGenerator:
 
     dontAdd = False
     
-    for b in self.blacklist:
+    for b in self.blocklist:
       if typename.find(b) == 0:
-        if self.debug: print('blacklisted ', typename)
+        if self.debug: print('blocklisted ', typename)
         dontAdd = True
         
     # print self.classlist

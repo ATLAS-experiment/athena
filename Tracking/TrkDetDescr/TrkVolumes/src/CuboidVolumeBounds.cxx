@@ -60,25 +60,24 @@ Trk::CuboidVolumeBounds::operator=(const Trk::CuboidVolumeBounds& bobo)
   return *this;
 }
 
-const std::vector<const Trk::Surface*>*
+std::vector<std::unique_ptr<Trk::Surface>>
   Trk::CuboidVolumeBounds::decomposeToSurfaces
   (const Amg::Transform3D& transform)
 {
 
-  std::vector<const Trk::Surface*>* retsf =
-    new std::vector<const Trk::Surface*>;
+  auto retsf = std::vector<std::unique_ptr<Trk::Surface>>() ;
   // memory optimisation
-  retsf->reserve(6);
+  retsf.reserve(6);
   // face surfaces xy
   //   (1) - at negative local z
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::AngleAxis3D(180. * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
       Amg::Translation3D(Amg::Vector3D(0., 0., this->halflengthZ()))),
     this->faceXYRectangleBounds()));
   //   (2) - at positive local z
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(0., 0., this->halflengthZ()))),
@@ -86,7 +85,7 @@ const std::vector<const Trk::Surface*>*
   // face surfaces yz
   // transmute cyclical
   //   (3) - at negative local x
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::AngleAxis3D(180. * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)) *
@@ -95,7 +94,7 @@ const std::vector<const Trk::Surface*>*
       Amg::AngleAxis3D(90. * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.))),
     this->faceYZRectangleBounds()));
   //   (4) - at positive local x
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(this->halflengthX(), 0., 0.)) *
@@ -104,7 +103,7 @@ const std::vector<const Trk::Surface*>*
     this->faceYZRectangleBounds()));
   // face surfaces zx
   //   (5) - at negative local y
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::AngleAxis3D(180. * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.)) *
@@ -113,7 +112,7 @@ const std::vector<const Trk::Surface*>*
       Amg::AngleAxis3D(-90. * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.))),
     this->faceZXRectangleBounds()));
   //   (6) - at positive local y
-  retsf->push_back(new Trk::PlaneSurface(
+  retsf.push_back(std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform *
       Amg::Translation3D(Amg::Vector3D(0., this->halflengthY(), 0.)) *
@@ -124,22 +123,22 @@ const std::vector<const Trk::Surface*>*
   return retsf;
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::CuboidVolumeBounds::faceXYRectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfX, m_halfY);
+  return std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::CuboidVolumeBounds::faceYZRectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfY, m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_halfY, m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::CuboidVolumeBounds::faceZXRectangleBounds() const
 {
-  return new Trk::RectangleBounds(m_halfZ, m_halfX);
+  return std::make_shared<Trk::RectangleBounds>(m_halfZ, m_halfX);
 }
 
 // ostream operator overload

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -97,8 +97,6 @@ public:
 				   const InDet::SiWidth& width,
 				   const InDetDD::SiDetectorElement* detEl,
 				   const Amg::MatrixX& locErrMat,
-				   const float omegax,
-				   const float omegay,
 				   bool split,
 				   float splitProb1,
 				   float splitProb2) {
@@ -119,7 +117,6 @@ public:
 	m_cluster->setLVL1A(lvl1a);
 	m_cluster->setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
 	m_cluster->setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));
-	m_cluster->setOmegas(omegax, omegay);
 	m_cluster->setIsSplit(split);
 	m_cluster->setSplitProbabilities(splitProb1, splitProb2);
 
@@ -406,8 +403,6 @@ ClusterType ClusterMakerTool::makePixelCluster(
 			width,
 			element,
 			errorMatrix,
-			omegax,
-			omegay,
 			split,
 			splitProb1,
 			splitProb2);

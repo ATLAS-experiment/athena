@@ -97,8 +97,6 @@ namespace tauRecTools
      */
     template <typename T>
     static T pfoAttr(const xAOD::PFO *pfo, const xAOD::PFODetails::PFOAttributes &attr);
-    static float ptSubRatio(const xAOD::PFO *pfo);
-    static float energyFracEM2(const xAOD::PFO *pfo, float energy_em2);
   };
 
   /**

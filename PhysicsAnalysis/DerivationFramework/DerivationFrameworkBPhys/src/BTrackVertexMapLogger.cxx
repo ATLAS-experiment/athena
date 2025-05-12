@@ -37,7 +37,7 @@
 //============================================================================
 //
 
-#include "DerivationFrameworkBPhys/BTrackVertexMapLogger.h"
+#include "BTrackVertexMapLogger.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 namespace DerivationFramework {

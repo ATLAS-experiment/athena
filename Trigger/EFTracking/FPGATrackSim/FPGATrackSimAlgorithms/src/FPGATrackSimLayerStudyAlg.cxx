@@ -158,15 +158,20 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
     // Update truth information in output layer study tree.
     m_binMonitoring->parseTruthInfo(*FPGATruthTracks);
 
+    // Make hit level plots
+    for (auto &hit : phits) {
+        m_binMonitoring->fillHitLevelInput(hit.get());
+    }
+
     // Bin the hits, depending on m_stage we either use phits_1st, phits_2nd, or all the hits.
     ATH_CHECK(m_hitBinningTool->fill(phits));
     m_binMonitoring->fillBinningSummary(phits);
 
     // scan over image building pairs for bins over threshold
     for (FPGATrackSimBinArray<FPGATrackSimBinnedHits::BinEntry>::ConstIterator &bin : m_hitBinningTool->lastStepBinnedHits()) {
-        // Apply threshold, if it's not -1
-        if (m_threshold < 0 || bin.data().lyrCnt() < (unsigned)m_threshold) continue;
-        ATH_MSG_DEBUG("Bin passes threshold " << bin.data().lyrCnt() << " " << bin.idx());
+        // Apply threshold, of course if threshold is 0 then use all bins
+        if (bin.data().hitCnt < m_threshold) continue;
+        ATH_MSG_DEBUG("Bin passes threshold " << bin.data().hitCnt << " " << bin.idx());
 
         // Monitor contents of bins passing threshold
         m_binMonitoring->fillBinLevelOutput(bin.idx(), bin.data());

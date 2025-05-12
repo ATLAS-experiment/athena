@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONCHAMBERLAYERDESCRIPTION_H
@@ -17,16 +17,18 @@ namespace Muon {
         /// constructor
         MuonChamberLayerDescription();
 
-        MuonChamberLayerDescriptor getDescriptor(int sector, Muon::MuonStationIndex::DetectorRegionIndex region,
-                                                 Muon::MuonStationIndex::LayerIndex layer) const;
+        using LayerIdx = MuonStationIndex::LayerIndex;
+        using DetRegIdx = MuonStationIndex::DetectorRegionIndex;
+
+        MuonChamberLayerDescriptor getDescriptor(int sector, DetRegIdx region, LayerIdx layer) const;
 
     private:
         /// initialize default geometry
         void initDefaultRegions();
 
         /// cached geometry
-        typedef std::vector<MuonChamberLayerDescriptor> MuonChamberLayerDescriptorVec;
-        MuonChamberLayerDescriptorVec m_chamberLayerDescriptors;  /// region descriptions
+        using MuonChamberLayerDescriptorVec =  std::vector<MuonChamberLayerDescriptor>;
+        MuonChamberLayerDescriptorVec m_chamberLayerDescriptors{};  /// region descriptions
     };
 }  // namespace Muon
 

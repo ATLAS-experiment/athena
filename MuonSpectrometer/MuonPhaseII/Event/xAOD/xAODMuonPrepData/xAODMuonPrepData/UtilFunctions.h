@@ -1,12 +1,22 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_UTILFUNCTIONS_H
 #define XAODMUONPREPDATA_UTILFUNCTIONS_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
-#include "MuonReadoutGeometryR4/MuonReadoutElement.h"
+
+
+class ActsGeometryContext;
+class Identifier;
+namespace MuonGMR4{
+    class MuonReadoutElement;
+}
+namespace Acts {
+    class Surface;
+}
 namespace xAOD{
     /** @brief Returns the position of the uncalibrated muon measurement in the attached
      *         Muon chamber frame
@@ -31,7 +41,10 @@ namespace xAOD{
                                          const UncalibratedMeasurement* meas);
     
     /** @brief Returns the associated readout element to the measurement*/
-    const MuonGMR4::MuonReadoutElement* readoutElement(const UncalibratedMeasurement* meas);
+    const MuonGMR4::MuonReadoutElement* muonReadoutElement(const UncalibratedMeasurement* meas);
+    /** @brief Returns the associated Acts surface to the measurement */
+    const Acts::Surface& muonSurface(const xAOD::UncalibratedMeasurement* meas);
+
     /** @brief Returns the associated identifier from the muon measurement */
     const Identifier& identify(const UncalibratedMeasurement* meas);
 }

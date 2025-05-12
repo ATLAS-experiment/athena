@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODELR4_MMREAOUDGEOMTOOL_H
@@ -7,12 +7,13 @@
 
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
-#include <MuonReadoutGeometryR4/CutOutArea.h>
 
 #include <GeoModelInterfaces/IGeoDbTagSvc.h>
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
 #include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include <GeoModelHelpers/GeoDeDuplicator.h>
+
 
 namespace MuonGMR4 {
 
@@ -46,7 +47,9 @@ class MmReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
        std::vector<StripLayer> layers{};
     };
 
-
+    /** @brief Cache object to the wMMTable & store stripDesigns & layers
+     *         to make the information available throughout the geometry building and to
+     *         allow for sharing of Identical StripLayers */
     struct FactoryCache {
        
         using ParamBookTable = std::map<std::string, wMMTable>;
@@ -54,7 +57,8 @@ class MmReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
         std::set<StripLayerPtr, StripLayerSorter> stripLayers{};
 
         ParamBookTable parameterBook{};
-       
+        /** @brief Helper object to turn Amg::Transforms into GeoModel tree transform nodes */
+        GeoDeDuplicator trfNodeMaker{};
     };
 
 

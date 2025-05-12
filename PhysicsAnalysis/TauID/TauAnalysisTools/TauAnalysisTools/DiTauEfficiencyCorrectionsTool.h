@@ -110,13 +110,12 @@ private:
 
 private:
 
-  std::vector<int> m_vEfficiencyCorrectionTypes;
-
   Gaudi::Property<std::string> m_sInputFilePathJetIDHadTau{this, "InputFilePathJetIDHadTau", ""};
   Gaudi::Property<std::string> m_sVarNameJetIDHadTau{this, "VarNameJetIDHadTau", ""};
   Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2017-moriond"};
   Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDBDTTIGHT)};
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};   
+  Gaudi::Property<std::vector<int>> m_vEfficiencyCorrectionTypes{this, "EfficiencyCorrectionTypes", {SFJetIDHadTau}};
 
   std::vector< asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;
   bool m_bIsData;

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // TrackingVolume.cxx, (b) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
+#include "TrkGeometry/TrackingVolume.h"
 // Gaudi Kernel
 #include "GaudiKernel/MsgStream.h"
 // Trk
@@ -17,7 +18,7 @@
 #include "TrkGeometry/PlaneLayer.h"
 #include "TrkGeometry/SubtractedCylinderLayer.h"
 #include "TrkGeometry/SubtractedPlaneLayer.h"
-#include "TrkGeometry/TrackingVolume.h"
+#include "TrkGeometry/MaterialLayer.h"
 //
 #include "TrkVolumes/BoundaryCylinderSurface.h"
 #include "TrkVolumes/BoundaryDiscSurface.h"
@@ -65,12 +66,13 @@ Trk::TrackingVolume::TrackingVolume()
 {}
 
 // constructor: 1 a)
-Trk::TrackingVolume::TrackingVolume(Amg::Transform3D* htrans,
-                                    VolumeBounds* volbounds,
-                                    LayerArray* subLayers,
-                                    TrackingVolumeArray* subVolumes,
-                                    const std::string& volumeName)
-  : Volume(htrans, volbounds)
+Trk::TrackingVolume::TrackingVolume(
+  std::unique_ptr<Amg::Transform3D> htrans,
+  std::shared_ptr<VolumeBounds> volbounds,
+  LayerArray* subLayers,
+  TrackingVolumeArray* subVolumes,
+  const std::string& volumeName)
+  : Volume(std::move(htrans), std::move(volbounds))
   , Material()
   , m_motherVolume(nullptr)
   , m_boundarySurfaces{}
@@ -121,13 +123,14 @@ Trk::TrackingVolume::TrackingVolume(const Volume& volume,
 }
 
 // constructor: 3 a)
-Trk::TrackingVolume::TrackingVolume(Amg::Transform3D* htrans,
-                                    VolumeBounds* volbounds,
-                                    const Material& matprop,
-                                    LayerArray* subLayers,
-                                    TrackingVolumeArray* subVolumes,
-                                    const std::string& volumeName)
-  : Volume(htrans, volbounds)
+Trk::TrackingVolume::TrackingVolume(
+  std::unique_ptr<Amg::Transform3D> htrans,
+  std::shared_ptr<VolumeBounds> volbounds,
+  const Material& matprop,
+  LayerArray* subLayers,
+  TrackingVolumeArray* subVolumes,
+  const std::string& volumeName)
+  : Volume(std::move(htrans), std::move(volbounds))
   , Material(matprop)
   , m_motherVolume(nullptr)
   , m_confinedLayers(subLayers)
@@ -150,12 +153,12 @@ Trk::TrackingVolume::TrackingVolume(Amg::Transform3D* htrans,
 
 // 1 b)
 Trk::TrackingVolume::TrackingVolume(
-  Amg::Transform3D* htrans,
-  VolumeBounds* volbounds,
+  std::unique_ptr<Amg::Transform3D> htrans,
+  std::shared_ptr<VolumeBounds> volbounds,
   const Material& matprop,
   std::vector<DetachedTrackingVolume*>* detachedSubVolumes,
   const std::string& volumeName)
-  : Volume(htrans, volbounds)
+  : Volume(std::move(htrans), std::move(volbounds))
   , Material(matprop)
   , m_motherVolume(nullptr)
   , m_confinedLayers(nullptr)
@@ -201,12 +204,12 @@ Trk::TrackingVolume::TrackingVolume(
 
 // 1 d)
 Trk::TrackingVolume::TrackingVolume(
-  Amg::Transform3D* htrans,
-  VolumeBounds* volbounds,
+  std::unique_ptr<Amg::Transform3D> htrans,
+  std::shared_ptr<VolumeBounds> volbounds,
   const Material& matprop,
   const std::vector<TrackingVolume*>* unorderedSubVolumes,
   const std::string& volumeName)
-  : Volume(htrans, volbounds)
+  : Volume(std::move(htrans), std::move(volbounds))
   , Material(matprop)
   , m_motherVolume(nullptr)
   , m_confinedLayers(nullptr)
@@ -251,12 +254,13 @@ Trk::TrackingVolume::TrackingVolume(
 }
 
 // 1 c)
-Trk::TrackingVolume::TrackingVolume(Amg::Transform3D* htrans,
-                                    VolumeBounds* volbounds,
-                                    const Material& matprop,
-                                    const std::vector<Layer*>* layers,
-                                    const std::string& volumeName)
-  : Volume(htrans, volbounds)
+Trk::TrackingVolume::TrackingVolume(
+  std::unique_ptr<Amg::Transform3D> htrans,
+  std::shared_ptr<VolumeBounds> volbounds,
+  const Material& matprop,
+  const std::vector<Layer*>* layers,
+  const std::string& volumeName)
+  : Volume(std::move(htrans), std::move(volbounds))
   , Material(matprop)
   , m_motherVolume(nullptr)
   , m_confinedLayers(nullptr)
@@ -301,13 +305,13 @@ Trk::TrackingVolume::TrackingVolume(const Volume& volume,
 
 // 1 d)
 Trk::TrackingVolume::TrackingVolume(
-  Amg::Transform3D* htrans,
-  VolumeBounds* volbounds,
+  std::unique_ptr<Amg::Transform3D> htrans,
+  std::shared_ptr<VolumeBounds> volbounds,
   const std::vector<Layer*>* layers,
   const std::vector<TrackingVolume*>* unorderedSubVolumes,
   const Material& matprop,
   const std::string& volumeName)
-  : Volume(htrans, volbounds)
+  : Volume(std::move(htrans), std::move(volbounds))
   , Material(matprop)
   , m_motherVolume(nullptr)
   , m_confinedLayers(nullptr)
@@ -393,43 +397,38 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
         trVol.boundarySurfaces()[ib]);
     if (scyl)
       m_boundarySurfaces.push_back(
-        Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-          new Trk::BoundarySubtractedCylinderSurface<Trk::TrackingVolume>(
-            in, out, *scyl, transform)));
+        std::make_shared<Trk::BoundarySubtractedCylinderSurface<Trk::TrackingVolume>>(
+            in, out, *scyl, transform));
     else if (spla)
       m_boundarySurfaces.push_back(
-        Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-          new Trk::BoundarySubtractedPlaneSurface<Trk::TrackingVolume>(
-            in, out, *spla, transform)));
+        std::make_shared<Trk::BoundarySubtractedPlaneSurface<Trk::TrackingVolume>>(
+            in, out, *spla, transform));
     else if (cyl)
       m_boundarySurfaces.push_back(
-        Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-          new Trk::BoundaryCylinderSurface<Trk::TrackingVolume>(
-            in, out, *cyl, transform)));
+        std::make_shared<Trk::BoundaryCylinderSurface<Trk::TrackingVolume>>(
+            in, out, *cyl, transform));
     else if (dis)
       m_boundarySurfaces.push_back(
-        Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-          new Trk::BoundaryDiscSurface<Trk::TrackingVolume>(
-            in, out, *dis, transform)));
+        std::make_shared<Trk::BoundaryDiscSurface<Trk::TrackingVolume>>(
+            in, out, *dis, transform));
     else if (pla)
       m_boundarySurfaces.push_back(
-        Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-          new Trk::BoundaryPlaneSurface<Trk::TrackingVolume>(
-            in, out, *pla, transform)));
+        std::make_shared<Trk::BoundaryPlaneSurface<Trk::TrackingVolume>>(
+            in, out, *pla, transform));
   }
 
   // confined layers
   const Trk::BinnedArray<Trk::Layer>* confinedLayers = trVol.confinedLayers();
   if (confinedLayers) {
     Trk::BinnedArraySpan<Trk::Layer const* const> layers = confinedLayers->arrayObjects();
-    std::vector<Trk::SharedObject<Trk::Layer>> layerOrder;
+    std::vector<std::shared_ptr<Trk::Layer>> layerOrder;
     layerOrder.reserve(layers.size());
     for (const auto *layer : layers) {
       const Trk::PlaneLayer* lay =
         dynamic_cast<const Trk::PlaneLayer*>(layer);
       if (lay) {
         Trk::PlaneLayer* newlay = new Trk::PlaneLayer(*lay, transform);
-        layerOrder.push_back(Trk::SharedObject<Trk::Layer>(newlay));
+        layerOrder.push_back(std::shared_ptr<Trk::Layer>(newlay));
       }
     }
     const Trk::NavBinnedArray1D<Trk::Layer>* confLays =
@@ -437,7 +436,7 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
     if (confLays)
       m_confinedLayers = new Trk::NavBinnedArray1D<Trk::Layer>(
         *confLays,
-        std::vector<Trk::SharedObject<Trk::Layer>>(layerOrder),
+        std::vector<std::shared_ptr<Trk::Layer>>(layerOrder),
         transform);
   }
 
@@ -486,18 +485,18 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
     // retrieve array objects and apply the transform
     Trk::BinnedArraySpan<Trk::TrackingVolume const * const > volumes =
       confinedVolumes->arrayObjects();
-    std::vector<Trk::SharedObject<Trk::TrackingVolume>> volOrder;
+    std::vector<std::shared_ptr<Trk::TrackingVolume>> volOrder;
     volOrder.reserve(volumes.size());
     for (const auto *volume : volumes) {
       Trk::TrackingVolume* vol = new Trk::TrackingVolume(*volume, transform);
-      volOrder.push_back(Trk::SharedObject<TrackingVolume>(vol));
+      volOrder.push_back(std::shared_ptr<TrackingVolume>(vol));
     }
     const Trk::NavBinnedArray1D<Trk::TrackingVolume>* confVols =
       dynamic_cast<const Trk::NavBinnedArray1D<Trk::TrackingVolume>*>(confinedVolumes);
     if (confVols)
       m_confinedVolumes = new Trk::NavBinnedArray1D<Trk::TrackingVolume>(
         *confVols,
-        std::vector<Trk::SharedObject<Trk::TrackingVolume>>(volOrder),
+        std::vector<std::shared_ptr<Trk::TrackingVolume>>(volOrder),
         transform);
   }
 
@@ -768,7 +767,7 @@ Trk::TrackingVolume::nextVolume(const Amg::Vector3D& gp,
   double dirScalor = (pDir == Trk::oppositeMomentum) ? -1. : 1.;
   Amg::Vector3D cDir = dirScalor * dir;
   double pathLength = 10e10;
-  // now loop through the and find the closest  
+  // now loop through the and find the closest
   const auto& bSurfaces = boundarySurfaces();
   for (size_t ib = 0; ib < bSurfaces.size(); ++ib) {
     // get the intersection soltuion
@@ -841,7 +840,7 @@ Trk::TrackingVolume::indexContainedStaticLayers(GeometrySignature geoSig,
   // the boundary surface layer
   auto& bSurfaces = boundarySurfaces();
   for (const auto& bsIter : bSurfaces) {
-    Trk::Layer* mLayer = bsIter->surfaceRepresentation().materialLayer();
+    Trk::MaterialLayer* mLayer = bsIter->surfaceRepresentation().materialLayer();
     if (mLayer && mLayer->layerIndex().value() < 0.) {
       Trk::LayerIndex layIndex = Trk::LayerIndex(
         int(geoSig) * TRKDETDESCR_GEOMETRYSIGNATUREWEIGHT + (++offset));
@@ -878,7 +877,7 @@ Trk::TrackingVolume::indexContainedMaterialLayers(GeometrySignature geoSig,
           Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = surfArray->arrayObjects();
           // loop over the surfaces - there can be 0 entries
           for (Trk::Surface* const laySurf : layerSurfaces) {
-            Trk::Layer* materialLayer = laySurf ? laySurf->materialLayer() : nullptr;
+            Trk::MaterialLayer* materialLayer = laySurf ? laySurf->materialLayer() : nullptr;
             if (materialLayer && materialLayer->layerIndex().value() < 0) {
               // sign only those with material properties - rest goes to 0
               Trk::LayerIndex layIndex =
@@ -978,7 +977,7 @@ Trk::TrackingVolume::sign(Trk::GeometrySignature geosign,
   }
 }
 
-std::vector<Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>>&
+std::vector<std::shared_ptr<Trk::BoundarySurface<Trk::TrackingVolume>>>&
 Trk::TrackingVolume::boundarySurfaces()
 {
   return m_boundarySurfaces;
@@ -1002,15 +1001,15 @@ Trk::TrackingVolume::createBoundarySurfaces()
 {
   // prepare the BoundarySurfaces
   m_boundarySurfaces =
-    std::vector<Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>>();
+    std::vector<std::shared_ptr<Trk::BoundarySurface<Trk::TrackingVolume>>>();
   // transform Surfaces To BoundarySurfaces
-  const std::vector<const Trk::Surface*>* surfaces =
+  std::vector<std::unique_ptr<Trk::Surface>> surfaces =
     Trk::Volume::volumeBounds().decomposeToSurfaces(transform());
-  std::vector<const Trk::Surface*>::const_iterator surfIter = surfaces->begin();
+  auto surfIter = surfaces.begin();
 
   // counter to flip the inner/outer position for Cylinders
   unsigned int sfCounter = 0;
-  unsigned int sfNumber = surfaces->size();
+  unsigned int sfNumber = surfaces.size();
 
   // memory optimisation
   m_boundarySurfaces.reserve(sfNumber + 1);
@@ -1030,7 +1029,7 @@ Trk::TrackingVolume::createBoundarySurfaces()
       dynamic_cast<const Trk::SimplePolygonBrepVolumeBounds*>(
         &(Trk::Volume::volumeBounds()));
 
-    for (; surfIter != surfaces->end(); ++surfIter) {
+    for (; surfIter != surfaces.end(); ++surfIter) {
       sfCounter++;
 
       Trk::TrackingVolume* in = this;
@@ -1039,52 +1038,43 @@ Trk::TrackingVolume::createBoundarySurfaces()
       // ST update: subtracted surfaces may appear in 'simple' volumes
       // (SimplePolygonBrep...)
       const Trk::SubtractedPlaneSurface* spsf =
-        dynamic_cast<const Trk::SubtractedPlaneSurface*>(*surfIter);
+        dynamic_cast<const Trk::SubtractedPlaneSurface*>((*surfIter).get());
       const Trk::PlaneSurface* psf =
-        dynamic_cast<const Trk::PlaneSurface*>(*surfIter);
+        dynamic_cast<const Trk::PlaneSurface*>((*surfIter).get());
       if (spsf) {
         if (spbVol && sfCounter == 1) {
           in = nullptr;
           out = this;
         }
         m_boundarySurfaces.push_back(
-          Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-            new Trk::BoundarySubtractedPlaneSurface<Trk::TrackingVolume>(
-              in, out, *spsf)));
-        delete spsf;
+          std::make_shared<Trk::BoundarySubtractedPlaneSurface<Trk::TrackingVolume>>(
+              in, out, *spsf));
         continue;
       }
       if (psf) {
         m_boundarySurfaces.push_back(
-          Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-            new Trk::BoundaryPlaneSurface<Trk::TrackingVolume>(in, out, *psf)));
-        delete psf;
+          std::make_shared<Trk::BoundaryPlaneSurface<Trk::TrackingVolume>>(in, out, *psf));
         continue;
       }
 
       const Trk::DiscSurface* dsf =
-        dynamic_cast<const Trk::DiscSurface*>(*surfIter);
+        dynamic_cast<const Trk::DiscSurface*>((*surfIter).get());
       if (dsf) {
         m_boundarySurfaces.push_back(
-          Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-            new Trk::BoundaryDiscSurface<Trk::TrackingVolume>(in, out, *dsf)));
-        delete dsf;
+          std::make_shared<Trk::BoundaryDiscSurface<Trk::TrackingVolume>>(in, out, *dsf));
         continue;
       }
 
       const Trk::SubtractedCylinderSurface* scsf =
-        dynamic_cast<const Trk::SubtractedCylinderSurface*>(*surfIter);
+        dynamic_cast<const Trk::SubtractedCylinderSurface*>((*surfIter).get());
       const Trk::CylinderSurface* csf =
-        dynamic_cast<const Trk::CylinderSurface*>(*surfIter);
+        dynamic_cast<const Trk::CylinderSurface*>((*surfIter).get());
       if (scsf) {
         Trk::TrackingVolume* inner =
           (sfCounter == 4 && sfNumber > 3) ? nullptr : this;
         Trk::TrackingVolume* outer = (inner) ? nullptr : this;
         m_boundarySurfaces.push_back(
-          Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-            new Trk::BoundarySubtractedCylinderSurface<Trk::TrackingVolume>(
-              inner, outer, *scsf)));
-        delete scsf;
+          std::make_shared<Trk::BoundarySubtractedCylinderSurface<Trk::TrackingVolume>>(inner, outer, *scsf));
         continue;
       }
       if (csf) {
@@ -1092,10 +1082,8 @@ Trk::TrackingVolume::createBoundarySurfaces()
           (sfCounter == 4 && sfNumber > 3) ? nullptr : this;
         Trk::TrackingVolume* outer = (inner) ? nullptr : this;
         m_boundarySurfaces.push_back(
-          Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-            new Trk::BoundaryCylinderSurface<Trk::TrackingVolume>(
-              inner, outer, *csf)));
-        delete csf;
+          std::make_shared<Trk::BoundaryCylinderSurface<Trk::TrackingVolume>>(
+              inner, outer, *csf));
         continue;
       }
     }
@@ -1104,36 +1092,30 @@ Trk::TrackingVolume::createBoundarySurfaces()
     const std::vector<bool> bOrient =
       subtrVol ? subtrVol->boundsOrientation() : combVol->boundsOrientation();
 
-    for (; surfIter != surfaces->end(); ++surfIter) {
+    for (; surfIter != surfaces.end(); ++surfIter) {
       Trk::TrackingVolume* in = bOrient[sfCounter] ? this : nullptr;
       Trk::TrackingVolume* out = bOrient[sfCounter] ? nullptr : this;
       sfCounter++;
 
       const Trk::SubtractedPlaneSurface* psf =
-        dynamic_cast<const Trk::SubtractedPlaneSurface*>(*surfIter);
+        dynamic_cast<const Trk::SubtractedPlaneSurface*>((*surfIter).get());
       if (psf) {
         m_boundarySurfaces.push_back(
-          Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-            new Trk::BoundarySubtractedPlaneSurface<Trk::TrackingVolume>(
-              in, out, *psf)));
-        delete psf;
+          std::make_shared<Trk::BoundarySubtractedPlaneSurface<Trk::TrackingVolume>>(
+              in, out, *psf));
         continue;
       }
 
       const Trk::SubtractedCylinderSurface* csf =
-        dynamic_cast<const Trk::SubtractedCylinderSurface*>(*surfIter);
+        dynamic_cast<const Trk::SubtractedCylinderSurface*>((*surfIter).get());
       if (csf) {
         m_boundarySurfaces.push_back(
-          Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>>(
-            new Trk::BoundarySubtractedCylinderSurface<Trk::TrackingVolume>(
-              in, out, *csf)));
-        delete csf;
+          std::make_shared<Trk::BoundarySubtractedCylinderSurface<Trk::TrackingVolume>>(
+              in, out, *csf));
         continue;
       }
     }
   }
-
-  delete surfaces;
 }
 
 void
@@ -1228,142 +1210,7 @@ Trk::TrackingVolume::moveVolume(Amg::Transform3D& shift)
   } else {
     this->m_transform = std::make_unique<Amg::Transform3D>(shift);
   }
-  this->m_center.store(
-    std::make_unique<Amg::Vector3D>(m_transform->translation()));
-}
-
-Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) const
-{
-  // clone the mother volume
-  Trk::Volume* vol = Trk::Volume::clone();
-
-  // clone 'ordered layers
-  Trk::LayerArray* layerArray = nullptr;
-  // confined layers
-  const Trk::BinnedArray<Trk::Layer>* confLayers = confinedLayers();
-  if (confLayers) {
-    // retrieve array objects and apply the transform
-    Trk::BinnedArraySpan<Trk::Layer const * const> layers = confLayers->arrayObjects();
-    std::vector<Trk::SharedObject<Trk::Layer>> layerOrder;
-    for (const auto *layer : layers) {
-      const Trk::PlaneLayer* lay =
-        dynamic_cast<const Trk::PlaneLayer*>(layer);
-      if (lay) {
-        Trk::PlaneLayer* newlay = new Trk::PlaneLayer(*lay, transform);
-        layerOrder.push_back(Trk::SharedObject<Trk::Layer>(newlay));
-      }
-    }
-    // recreate LayerArray
-    const Trk::NavBinnedArray1D<Trk::Layer>* confLaysNav =
-      dynamic_cast<const Trk::NavBinnedArray1D<Trk::Layer>*>(confLayers);
-    if (confLaysNav)
-      layerArray = new Trk::NavBinnedArray1D<Trk::Layer>(
-        *confLaysNav,
-        std::vector<Trk::SharedObject<Trk::Layer>>(layerOrder),
-        transform);
-  }
-
-  // clone 'unordered' layers
-  std::vector<Trk::Layer*>* unorderedLayers = nullptr;
-  Trk::ArraySpan<const Trk::Layer* const> confArbLayers =
-    confinedArbitraryLayers();
-  if (!confArbLayers.empty()) {
-    // clone & apply the transform
-    std::vector<Trk::Layer*> uLayers;
-    for (const auto *confArbLayer : confArbLayers) {
-      const Trk::SubtractedPlaneLayer* slayer =
-        dynamic_cast<const Trk::SubtractedPlaneLayer*>(confArbLayer);
-      const Trk::SubtractedCylinderLayer* sclayer =
-        dynamic_cast<const Trk::SubtractedCylinderLayer*>(confArbLayer);
-      const Trk::PlaneLayer* layer =
-        dynamic_cast<const Trk::PlaneLayer*>(confArbLayer);
-      const Trk::CylinderLayer* clayer =
-        dynamic_cast<const Trk::CylinderLayer*>(confArbLayer);
-
-      if (slayer) {
-        Trk::SubtractedPlaneLayer* lay = new Trk::SubtractedPlaneLayer(*slayer);
-        lay->moveLayer(transform);
-        uLayers.push_back(lay);
-      } else if (layer) {
-        Trk::PlaneLayer* lay = new Trk::PlaneLayer(*layer);
-        lay->moveLayer(transform);
-        uLayers.push_back(lay);
-      } else if (sclayer) {
-        Trk::SubtractedCylinderLayer* lay =
-          new Trk::SubtractedCylinderLayer(*sclayer);
-        lay->moveLayer(transform);
-        uLayers.push_back(lay);
-      } else if (clayer) {
-        Trk::CylinderLayer* lay = new Trk::CylinderLayer(*clayer);
-        lay->moveLayer(transform);
-        uLayers.push_back(lay);
-      }
-    }
-    unorderedLayers = new std::vector<Trk::Layer*>(uLayers);
-  }
-
-  // cloning confined volumes
-  Trk::TrackingVolumeArray* volumeArray = nullptr;
-  const Trk::BinnedArray<Trk::TrackingVolume>* confVolumes = confinedVolumes();
-  if (confVolumes) {
-    // retrieve array objects and apply the transform
-    Trk::BinnedArraySpan<Trk::TrackingVolume const* const> volumes = confVolumes->arrayObjects();
-    std::vector<Trk::SharedObject<TrackingVolume>> volOrder;
-    for (const auto *volume : volumes) {
-      Trk::TrackingVolume* vol = volume->cloneTV(transform);
-      volOrder.push_back(Trk::SharedObject<TrackingVolume>(vol));
-    }
-    // recreate TrackingVolumeArray
-    const Trk::NavBinnedArray1D<Trk::TrackingVolume>* confVolsNav =
-      dynamic_cast<const Trk::NavBinnedArray1D<Trk::TrackingVolume>*>(
-        confVolumes);
-    if (confVolsNav)
-      volumeArray = new Trk::NavBinnedArray1D<Trk::TrackingVolume>(
-        *confVolsNav, std::vector<Trk::SharedObject<TrackingVolume>>(volOrder), transform);
-  }
-
-  // cloning confined unordered volumes
-  Trk::ArraySpan<const Trk::TrackingVolume* const> confDenseVolumes =
-    confinedDenseVolumes();
-  std::vector<Trk::TrackingVolume*>* newDenseVol = nullptr;
-  if (!confDenseVolumes.empty()) {
-    std::vector<Trk::TrackingVolume*> newVol;
-    // retrieve array objects and apply the transform
-    for (const auto *confDenseVolume : confDenseVolumes) {
-      Trk::TrackingVolume* vol =
-        confDenseVolume->cloneTV(transform);
-      newVol.push_back(vol);
-    }
-    newDenseVol = new std::vector<Trk::TrackingVolume*>(newVol);
-  }
-
-  // create the Tracking Volume
-  Trk::TrackingVolume* newTrkVol = nullptr;
-  if (!confArbLayers.empty() || !confDenseVolumes.empty()) {
-    if (!confArbLayers.empty() && !confDenseVolumes.empty()) {
-      newTrkVol = new Trk::TrackingVolume(
-        *vol, unorderedLayers, newDenseVol, *this, volumeName());
-    } else if (!confArbLayers.empty()) {
-      newTrkVol =
-        new Trk::TrackingVolume(*vol, *this, unorderedLayers, volumeName());
-    } else {
-      newTrkVol =
-        new Trk::TrackingVolume(*vol, *this, newDenseVol, volumeName());
-    }
-    delete layerArray;
-  } else {
-    newTrkVol = new Trk::TrackingVolume(
-      *vol, *this, layerArray, volumeArray, volumeName());
-  }
-  delete vol;
-  // finally, position the mother volume
-  newTrkVol->moveVolume(transform);
-  // create boundary surfaces
-  newTrkVol->m_boundarySurfaces.clear();
-  newTrkVol->createBoundarySurfaces();
-
-  delete volumeArray;
-  return newTrkVol;
+  this->m_center = (m_transform->translation());
 }
 
 const Trk::Layer*

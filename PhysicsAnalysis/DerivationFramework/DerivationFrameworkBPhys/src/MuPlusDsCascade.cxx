@@ -4,9 +4,9 @@
 /////////////////////////////////////////////////////////////////
 // MuPlusDsCascade.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/MuPlusDsCascade.h"
+#include "MuPlusDsCascade.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"

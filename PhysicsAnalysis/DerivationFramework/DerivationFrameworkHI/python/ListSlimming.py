@@ -326,6 +326,10 @@ def HION5AllVariables():
     variables += ["ForwardElectronClusters"]
     variables += ["EventInfo"]
     variables += ["CaloSums"]
+    variables += ["ZdcModules"]
+    variables += ["ZdcSums"]
+    variables += ["ZdcTriggerTowers"]
+    variables += ["PeripheralCaloCalTopoClusters"]
     
     return variables
 

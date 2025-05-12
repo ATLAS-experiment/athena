@@ -8,6 +8,8 @@
 # art-include: 22.0-mc20/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8                                                                                                                                     
+# art-output: AOD.pool.root
+# art-output: ESD.pool.root
 
 Reco_tf.py \
 --AMI=q442 \
@@ -15,7 +17,7 @@ Reco_tf.py \
 --preExec "all:flags.DQ.Steering.doHLTMon=False" \
 --athenaopts='--threads=8' \
 --maxEvents=500 \
---outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \
+--outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root --outputHISTFile=myHIST.root \
 --imf False
 
 rc1=$?

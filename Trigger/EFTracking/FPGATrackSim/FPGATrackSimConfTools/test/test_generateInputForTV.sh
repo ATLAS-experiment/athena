@@ -39,6 +39,6 @@ mv test.root "TVinput_${LABEL}.root"
 
 LABEL="F600_singleMu"
 run "${LABEL}" \
-    FPGATrackSim_F600.sh -o "${LABEL}.root" --single-muon --events 3
+    FPGATrackSim_F600.sh -o "${LABEL}.root" --single-muon --events 50
 ls -ltr
 mv test.root "TVinput_${LABEL}.root"

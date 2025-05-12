@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_DITAUSELECTIONTOOL_H
@@ -14,6 +14,7 @@
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "PATCore/IAsgSelectionTool.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 
@@ -91,8 +92,6 @@ private:
   template<typename T>
   void PrintConfigValue(const std::string& sCutName, T& sVal) const;
 
-  // bitmask of tau selection cuts
-  int m_iSelectionCuts;
   // vector of transverse momentum cut regions
   std::vector<float> m_vPtRegion;
   // vector of absolute eta cut regions
@@ -100,26 +99,28 @@ private:
   // vector of number of subjets cut regions
   std::vector<float> m_vNSubjetsRegion;
 
-  float m_dPtMin;
-  float m_dPtMax;
-  float m_dAbsEtaMin;
-  float m_dAbsEtaMax;
-  float m_dNSubjetsMax;
-  float m_dNSubjetsMin;
+  Gaudi::Property<std::string> m_sConfigPath{this, "ConfigPath", ""};
+  Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", NoDiTauCut};
+  Gaudi::Property<float> m_dPtMin{this, "PtMin", NAN};
+  Gaudi::Property<float> m_dPtMax{this, "PtMax", NAN};
+  Gaudi::Property<float> m_dAbsEtaMin{this, "AbsEtaMin", NAN};
+  Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
+  Gaudi::Property<float> m_dNSubjetsMin{this, "NSubjetsMin", NAN};
+  Gaudi::Property<float> m_dNSubjetsMax{this, "NSubjetsMax", NAN};
 
 protected:
   TFile* m_fOutFile;//!
   std::shared_ptr<TH1F> m_hCutFlow;//!
 
 private:
-  std::string m_sConfigPath;
 
   std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>> m_cMap;
 
   void setupCutFlowHistogram();
 
 protected:
-  bool m_bCreateControlPlots;
+  
+  Gaudi::Property<bool> m_bCreateControlPlots{this, "CreateControlPlots", false};
 
   /// Object used to store selection information.
   asg::AcceptInfo m_aAccept;

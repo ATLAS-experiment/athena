@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#
 # art-description: MC21-style simulation using FullG4 for producing input samples needed for the Fast Calorimeter Simulation parametrisation
 # art-type: build
 # art-include: 24.0/Athena
@@ -37,7 +39,7 @@ then
         --outputESDFile ESD.CA.pool.root \
 	--conditionsTag "default:${conditions}" \
 	--geometryVersion "default:${geometry}" \
-        --preInclude 'all:Campaigns.MC23NoPileUp' \
+        --preInclude 'all:Campaigns.MC23aNoPileUp' \
         --preExec 'all:flags.LAr.ROD.NumberOfCollisions=20;flags.LAr.ROD.UseHighestGainAutoCorr=True;' 'HITtoRDO:flags.Digitization.DoCaloNoise=False' 'RAWtoALL:flags.Reco.EnableTrigger=False' \
         --postInclude 'all:PyJobTransforms.UseFrontier' 'HITtoRDO:ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig.PostIncludeISF_FastCaloSimParametrizationDigi' 'RAWtoALL:ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig.PostIncludeISF_FastCaloSimParametrizationReco' \
         --maxEvents -1 \

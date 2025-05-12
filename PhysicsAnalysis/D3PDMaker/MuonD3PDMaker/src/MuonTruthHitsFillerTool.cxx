@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,6 +15,14 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/MagicNumbers.h"
+#include <format>
+
+
+using namespace Muon::MuonStationIndex;
+namespace{
+  constexpr int chIdxMMS = toInt(ChIndex::ChIndexMax);
+  constexpr int chIdxMML = chIdxMMS + 1;
+}
 
 namespace D3PD {
 /**
@@ -45,8 +53,8 @@ MuonTruthHitsFillerTool::MuonTruthHitsFillerTool (const std::string& type,
  */
 StatusCode MuonTruthHitsFillerTool::initialize()
 {
-  CHECK(book());
-  CHECK( m_idHelperSvc.retrieve() );
+  ATH_CHECK(book());
+  ATH_CHECK( m_idHelperSvc.retrieve() );
   return StatusCode::SUCCESS;
 }
 
@@ -54,34 +62,27 @@ StatusCode MuonTruthHitsFillerTool::initialize()
 /**
  * @brief Book variables for this block.
  */
-StatusCode MuonTruthHitsFillerTool::book()
-{
-  typedef Muon::MuonStationIndex MSI;
+StatusCode MuonTruthHitsFillerTool::book() {
+  
 
-  CHECK( addVariable ("nprecLayers",     m_nprecLayers )  );
-  CHECK( addVariable ("nphiLayers",      m_nphiLayers )  );
-  CHECK( addVariable ("ntrigEtaLayers",  m_ntrigEtaLayers )  );
+  ATH_CHECK( addVariable ("nprecLayers",     m_nprecLayers )  );
+  ATH_CHECK( addVariable ("nphiLayers",      m_nphiLayers )  );
+  ATH_CHECK( addVariable ("ntrigEtaLayers",  m_ntrigEtaLayers )  );
 
-  m_nprecHitsPerChamberLayer.resize(Muon::MuonStationIndex::ChIndexMax+2);
-  for( unsigned int i=0; i<MSI::ChIndexMax; ++i) {
-    MSI::ChIndex chIndex = (MSI::ChIndex)i;
-    CHECK( addVariable ( std::string("nprecHits")+MSI::chName(chIndex),
+  m_nprecHitsPerChamberLayer.resize( toInt(ChIndex::ChIndexMax)+2);
+  for( unsigned int i=0; i<toInt(ChIndex::ChIndexMax); ++i) {
+    ATH_CHECK( addVariable ( std::format("nprecHits{:}", chName(static_cast<ChIndex>(i))),
                          m_nprecHitsPerChamberLayer[i] )  );
   }
 
-  CHECK( addVariable ( std::string("nprecHitsMMS"),
-                       m_nprecHitsPerChamberLayer[MSI::ChIndexMax] )  );
-  CHECK( addVariable ( std::string("nprecHitsMML"),
-                       m_nprecHitsPerChamberLayer[MSI::ChIndexMax+1] )  );
+  ATH_CHECK( addVariable("nprecHitsMMS", m_nprecHitsPerChamberLayer[chIdxMMS] )  );
+  ATH_CHECK( addVariable("nprecHitsMML", m_nprecHitsPerChamberLayer[chIdxMML] )  );
 
-  m_nphiHitsPerChamberLayer.resize(MSI::PhiIndexMax);
-  m_ntrigEtaHitsPerChamberLayer.resize(MSI::PhiIndexMax);
-  for( unsigned int i=0; i<MSI::PhiIndexMax; ++i) {
-    MSI::PhiIndex phiIndex = (MSI::PhiIndex)i;
-    CHECK( addVariable ( std::string("nphiHits")+MSI::phiName(phiIndex),
-                         m_nphiHitsPerChamberLayer[i] )  );
-    CHECK( addVariable ( std::string("ntrigEtaHits")+MSI::phiName(phiIndex),
-                         m_ntrigEtaHitsPerChamberLayer[i] )  );
+  m_nphiHitsPerChamberLayer.resize(toInt(PhiIndex::PhiIndexMax));
+  m_ntrigEtaHitsPerChamberLayer.resize(toInt(PhiIndex::PhiIndexMax));
+  for( unsigned int i=0; i<toInt(PhiIndex::PhiIndexMax); ++i) {
+    ATH_CHECK(addVariable(std::format("nphiHits{:}", phiName(static_cast<PhiIndex>(i))), m_nphiHitsPerChamberLayer[i]));
+    ATH_CHECK(addVariable(std::format("ntrigEtaHits{:}", phiName(static_cast<PhiIndex>(i))), m_ntrigEtaHitsPerChamberLayer[i]));
   }
 
   return StatusCode::SUCCESS;
@@ -93,7 +94,7 @@ StatusCode MuonTruthHitsFillerTool::book()
  */
 StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
 {
-  CHECK( fillHitCounts (HepMC::barcode(trackRecord)) );  // FIXME barcode-based
+  ATH_CHECK( fillHitCounts (HepMC::barcode(trackRecord)) );  // FIXME barcode-based
   return StatusCode::SUCCESS;
 }
 
@@ -103,14 +104,12 @@ StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
  */
 StatusCode MuonTruthHitsFillerTool::fill (const xAOD::TruthParticle& p)
 {
-  CHECK( fillHitCounts (HepMC::barcode(p)) );
+  ATH_CHECK( fillHitCounts (HepMC::barcode(p)) );
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
-{
-  typedef Muon::MuonStationIndex MSI;
+StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode) {
 
   bool found = false;
   for (const std::string& key : m_PRD_TruthNames) {
@@ -120,7 +119,6 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
     }
     const PRD_MultiTruthCollection* collection = nullptr;
     ATH_CHECK( evtStore()->retrieve(collection, key) );
-
     for (const PRD_MultiTruthCollection::value_type& mc : *collection) {
       // check if gen particle same as input
       // TODO Here barcode is being used purely as a unique
@@ -134,26 +132,24 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
       bool measPhi   = m_idHelperSvc->measuresPhi(id);
 
       if( m_idHelperSvc->issTgc(id) ) {
-        int index = m_idHelperSvc->phiIndex(id);
+        int index = toInt(m_idHelperSvc->phiIndex(id));
         if( measPhi ) ++*(m_nphiHitsPerChamberLayer[index]);
         else          ++*(m_ntrigEtaHitsPerChamberLayer[index]);
       }
       else if( m_idHelperSvc->isMM(id) ) {
-        int index = m_idHelperSvc->isSmallChamber(id) ? MSI::ChIndexMax : MSI::ChIndexMax + 1;
+        int index = m_idHelperSvc->isSmallChamber(id) ? chIdxMMS:  chIdxMML;
         ++*(m_nprecHitsPerChamberLayer[index]);
       }
       else if( m_idHelperSvc->isTrigger(id) ) {
-        MSI::PhiIndex index = m_idHelperSvc->phiIndex(id);
+        const int index = toInt(m_idHelperSvc->phiIndex(id));
         if( measPhi ) ++*(m_nphiHitsPerChamberLayer[index]);
         else          ++*(m_ntrigEtaHitsPerChamberLayer[index]);
       }
       else {
         if( measPhi ) {
-          Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
-          ++*(m_nphiHitsPerChamberLayer[index]);
+          ++*(m_nphiHitsPerChamberLayer[toInt(m_idHelperSvc->phiIndex(id))]);
         }else{
-          Muon::MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(id);
-          ++*(m_nprecHitsPerChamberLayer[chIndex]);
+          ++*(m_nprecHitsPerChamberLayer[toInt(m_idHelperSvc->chamberIndex(id))]);
         }
       }
     }
@@ -168,37 +164,37 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
     const std::vector<int*>& nphi  = m_nphiHitsPerChamberLayer;
     const std::vector<int*>& ntrig = m_ntrigEtaHitsPerChamberLayer;
 
-    if( *nprec[MSI::BIS] + *nprec[MSI::BIL] > 3 ) ++*m_nprecLayers;
-    if( *nprec[MSI::BMS] + *nprec[MSI::BML] > 2 ) ++*m_nprecLayers;
-    if( *nprec[MSI::BOS] + *nprec[MSI::BOL] > 2 ) ++*m_nprecLayers;
-    if( *nprec[MSI::EIS] + *nprec[MSI::EIL] > 3 ) ++*m_nprecLayers;
-    if( *nprec[MSI::EMS] + *nprec[MSI::EML] > 2 ) ++*m_nprecLayers;
-    if( *nprec[MSI::EOS] + *nprec[MSI::EOL] > 2 ) ++*m_nprecLayers;
-    if( *nprec[MSI::EES] + *nprec[MSI::EEL] > 3 ) ++*m_nprecLayers;
-    if( *nprec[MSI::CSS] + *nprec[MSI::CSL] > 2 ) ++*m_nprecLayers;
-    if( *nprec[MSI::BEE] > 3 ) ++*m_nprecLayers;
-    if( *nprec[MSI::ChIndexMax] + *nprec[MSI::ChIndexMax+1] > 3 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::BIS)] + *nprec[toInt(ChIndex::BIL)] > 3 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::BMS)] + *nprec[toInt(ChIndex::BML)] > 2 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::BOS)] + *nprec[toInt(ChIndex::BOL)] > 2 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::EIS)] + *nprec[toInt(ChIndex::EIL)] > 3 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::EMS)] + *nprec[toInt(ChIndex::EML)] > 2 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::EOS)] + *nprec[toInt(ChIndex::EOL)] > 2 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::EES)] + *nprec[toInt(ChIndex::EEL)] > 3 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::CSS)] + *nprec[toInt(ChIndex::CSL)] > 2 ) ++*m_nprecLayers;
+    if( *nprec[toInt(ChIndex::BEE)] > 3 ) ++*m_nprecLayers;
+    if( *nprec[chIdxMML] + *nprec[chIdxMMS] > 3 ) ++*m_nprecLayers;
 
-    if( *nphi[MSI::BM1] > 0 )  ++*m_nphiLayers;
-    if( *nphi[MSI::BM2] > 0 )  ++*m_nphiLayers;
-    if( *nphi[MSI::BO1] > 0 )  ++*m_nphiLayers;
-    if( *nphi[MSI::T1]  > 0 )  ++*m_nphiLayers;
-    if( *nphi[MSI::T2]  > 0 )  ++*m_nphiLayers;
-    if( *nphi[MSI::T3]  > 0 )  ++*m_nphiLayers;
-    if( *nphi[MSI::T4]  > 0 )  ++*m_nphiLayers;
-    if( *nphi[MSI::CSC] > 2 )  ++*m_nphiLayers;
-    if( *nphi[MSI::STGC1] + *nphi[MSI::STGC2] > 3 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::BM1)] > 0 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::BM2)] > 0 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::BO1)] > 0 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::T1)]  > 0 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::T2)]  > 0 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::T3)]  > 0 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::T4)]  > 0 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::CSC)] > 2 )  ++*m_nphiLayers;
+    if( *nphi[toInt(PhiIndex::STGC1)] + *nphi[toInt(PhiIndex::STGC2)] > 3 )  ++*m_nphiLayers;
 
-    if( *ntrig[MSI::BM1] > 0 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::BM2] > 0 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::BO1] > 0 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::T1]  > 0 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::T2]  > 0 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::T3]  > 0 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::T4]  > 0 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::CSC] > 2 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::STGC1] +
-        *ntrig[MSI::STGC2] > 3 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::BM1)] > 0 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::BM2)] > 0 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::BO1)] > 0 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::T1)]  > 0 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::T2)]  > 0 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::T3)]  > 0 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::T4)]  > 0 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::CSC)] > 2 )  ++*m_ntrigEtaLayers;
+    if( *ntrig[toInt(PhiIndex::STGC1)] +
+        *ntrig[toInt(PhiIndex::STGC2)] > 3 )  ++*m_ntrigEtaLayers;
 
     ATH_MSG_DEBUG("Muon hits: prec " << *m_nprecLayers <<
                   " phi " << *m_nphiLayers

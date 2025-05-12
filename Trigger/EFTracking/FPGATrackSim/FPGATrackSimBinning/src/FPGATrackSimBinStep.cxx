@@ -70,6 +70,8 @@ StatusCode FPGATrackSimBinStep::setRanges(FPGATrackSimBinStep *prev,
     }
   }
 
+  ATH_MSG_DEBUG("Parameters = " << m_pars);
+
   return StatusCode::SUCCESS;
 }
 
@@ -133,7 +135,7 @@ void FPGATrackSimBinStep::setValidBin(const std::vector<unsigned>& idx) {
 
 void FPGATrackSimBinStep::initValidBins() {
   m_validBinFull.setsize(m_parBins, false);
-  m_validBinLocal.setsize(stepBins(), false);
+  m_validBinLocal.setsize(stepIdx(m_parBins), false);
 }
 
 void FPGATrackSimBinStep::printValidBin() const {
@@ -146,13 +148,13 @@ void FPGATrackSimBinStep::printValidBin() const {
   }
   ATH_MSG_INFO("Step" << name() << "Valid Bins Full: " << validBinsFull);
 
-  // count valid bins
+  // count valid bins local
   int validBinsLocal = 0;
   for (FPGATrackSimBinArray<int>::ConstIterator bin : m_validBinLocal) {
   if (bin.data())
     validBinsLocal++;
   }
   ATH_MSG_INFO("Step" << name() <<  "Valid Bins Local: " << validBinsLocal);
-  
+    
 }
 

@@ -29,6 +29,7 @@ StatusCode JetClustererByVertex::initialize()
 {
   ATH_CHECK( JetClusterer::initialize() ); 
   ATH_CHECK(m_vertexContainer_key.initialize());
+  m_jetRankAccessor = SG::AuxElement::Accessor<int>(m_jetRank);
 
   return StatusCode::SUCCESS;
 }
@@ -128,6 +129,10 @@ std::pair<std::unique_ptr<xAOD::JetContainer>, std::unique_ptr<SG::IAuxStore>> J
       for (const fastjet::PseudoJet &pj : *outputPseudoJetVectorByVertex)
       {
         processPseudoJet(pj, pjContCopy, jets.get(), vertex);
+        //Mario we need to add jetRank for btagging
+        // we want the rank to start with zero, but this is after the
+        // jet has been added, thus the "size() - 1" here.
+        m_jetRankAccessor(*jets.get()->back()) = jets->size() - 1;
       }
     }
     ATH_MSG_DEBUG("For vertex index " << iVertex << ", total reconstructed jet count so far: " << jets->size() << "  clusterseq=" << clSequenceByVertex.get());

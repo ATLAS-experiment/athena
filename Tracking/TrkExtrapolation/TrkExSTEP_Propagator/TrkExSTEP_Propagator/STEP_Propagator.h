@@ -334,15 +334,6 @@ public:
     ATH_MSG_ERROR("Call to non-implemented multiStatePropagate");
     return {};
   }
-  virtual Trk::ExtrapolationCode propagate(
-    const EventContext&,
-    Trk::ExCellCharged&,
-    Trk::TargetSurfaces&,
-    Trk::TargetSurfaceVector&) const override final
-  {
-    return Trk::ExtrapolationCode::FailureConfiguration;
-  }
-
   /////////////////////////////////////////////////////////////////////////////////
   // Private methods:
   /////////////////////////////////////////////////////////////////////////////////

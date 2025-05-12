@@ -105,10 +105,6 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_larnoiseburst_L1All', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['PS:NoHLTRepro','RATE:Calibration','BW:Detector']), # Temporary for testing, high CPU cost
         ChainProp(name='HLT_acceptedevts_larnoiseburst_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD','BW:DISCARD']),
 
-        ## larpsall/em*FIRSTEMPTY Ph1
-        ChainProp(name='HLT_larpsall_L1jJ30_FIRSTEMPTY', l1SeedThresholds=['jJ30'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
-        ChainProp(name='HLT_larpsall_L1jJ60_FIRSTEMPTY', l1SeedThresholds=['jJ60'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
-
         ## larpsall/em*EMPTY
         ChainProp(name='HLT_larpsall_L1jJ30_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
         ChainProp(name='HLT_larpsall_L1jJ60_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
@@ -172,6 +168,8 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1MBTS_1', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1MBTS_2', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_vdm_LumiPEB_L1TRT_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_vdm_LumiPEB_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
 
         ChainProp(name='HLT_larpsallem_L1eEM9_EMPTY', l1SeedThresholds=['eEM9'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM9_EMPTY',  l1SeedThresholds=['eEM9'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
@@ -368,7 +366,6 @@ def addHighMuP1Signatures(chains):
 
         ChainProp(name='HLT_larpsallem_L1eEM5_EMPTY', l1SeedThresholds=['eEM5'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
         #ATR-27253,Phase-I        
-        ChainProp(name='HLT_larpsallem_L1eEM9_FIRSTEMPTY', l1SeedThresholds=['eEM9'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM5_EMPTY',  l1SeedThresholds=['eEM5'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
 
         # End of event chains for MET
@@ -466,19 +463,19 @@ def addLowMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_AND_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_AND_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
         # new items ATR-29027
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A2',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C2',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A_C',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A2_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C2_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A2_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C2_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A2',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C2',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A_C',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A2_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C2_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A2_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C2_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
 
         # End of event chains for MET
         ChainProp(name='HLT_acceptedevts_metcalo_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']),

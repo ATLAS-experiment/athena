@@ -41,7 +41,7 @@ class sTGCSensitiveDetectortest : public ::testing::Test {
 TEST_F ( sTGCSensitiveDetectortest, Initialize )
 {
   G4HCofThisEvent hce;
-  sTGCSensitiveDetector sd1("name1", "name1" );
+  sTGCSensitiveDetector sd1("name1", "name1" , false);
   sd1.Initialize( &hce );
   ASSERT_TRUE(sd1.m_sTGCSimHitCollection.isValid()); //check if initialization of m_sTGCSimHitCollection is successful
 }
@@ -172,7 +172,7 @@ TEST_F ( sTGCSensitiveDetectortest, ProcessHits )
 
   sp.SetTrack(track);
 
-  sTGCSensitiveDetector sd2("name2", "name2" );
+  sTGCSensitiveDetector sd2("name2", "name2" , false);
   sd2.Initialize( &hce );//initialize the hit collection m_sTGCSimHitCollection
   sd2.ProcessHits(&sp, &th );//invoke the tested member function
 

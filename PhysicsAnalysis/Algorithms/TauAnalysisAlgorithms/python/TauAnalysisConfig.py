@@ -58,7 +58,7 @@ class TauCalibrationConfig (ConfigBlock):
                                           'TauTruthDecorationsAlg' + postfix,
                                            reentrant=True )
             alg.taus = config.readName (self.containerName)
-            alg.doubleDecorations = ['pt_vis', 'eta_vis', 'phi_vis', 'm_vis']
+            alg.doubleDecorations = ['pt_vis', 'pt_invis', 'eta_vis', 'eta_invis', 'phi_vis', 'phi_invis', 'm_vis', 'm_invis']
             alg.floatDecorations = []
             alg.intDecorations = ['pdgId']
             alg.unsignedIntDecorations = ['classifierParticleOrigin', 'classifierParticleType']
@@ -83,8 +83,9 @@ class TauCalibrationConfig (ConfigBlock):
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
+        alg.smearingTool.RecommendationTag = "2025-prerec"
         alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
-        alg.smearingTool.Campaign = "mc21" if config.geometry() is LHCPeriod.Run3 else "mc20"
+        alg.smearingTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -100,7 +101,7 @@ class TauCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
         config.addOutputVar (self.containerName, 'nTracks', 'nTracks', noSys=True)
-
+        config.addOutputVar (self.containerName, 'TESCompatibility', 'TESCompatibility')  
 
 class TauWorkingPointConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point
@@ -128,6 +129,9 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('useGNTau', False, type=bool,
             info="use GNTau based ID instead of RNNTau ID "
             "recommendations: that's new experimental feature and might come default soon")
+        self.addOption ('useLowPt', False, type=bool, 
+            info="select taus starting from 15 GeV instead of the default 20 GeV cut "
+            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -154,14 +158,17 @@ class TauWorkingPointConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
+        nameFormat = 'TauAnalysisAlgorithms/tau_selection_'
+        if self.useLowPt:
+            nameFormat = nameFormat + 'lowpt_'
         if self.useGNTau:
-            nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_eleid.conf'
-            if not self.use_eVeto:
-                nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_noeleid.conf'
+            nameFormat = nameFormat + 'gntau_'
+        nameFormat = nameFormat + '{}_'
+        if self.use_eVeto:
+            nameFormat = nameFormat + 'eleid'
         else:
-            nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_eleid.conf'
-            if not self.use_eVeto:
-                nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_noeleid.conf'
+            nameFormat = nameFormat + 'noeleid'
+        nameFormat = nameFormat + '.conf'    
 
         if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
             raise ValueError ("invalid tau quality: \"" + self.quality +
@@ -192,6 +199,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                                    'TauEfficiencyCorrectionsAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+            alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
             alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [0]
             alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
             alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
@@ -212,6 +220,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                                    'TauEfficiencyCorrectionsAlgID' + postfix )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+                alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
                 if self.quality=="Loose":
                     JetIDLevel = 7
@@ -243,13 +252,19 @@ class TauWorkingPointConfig (ConfigBlock) :
                                    'TauEfficiencyCorrectionsAlgEvetoFakeTau' + postfix )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
-
+                alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
                 # since all TauSelectionTool config files have loose eRNN, code only this option for now
                 alg.efficiencyCorrectionsTool.EleIDLevel = 2
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
                 alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                 alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
+                # for 2025-prerec, eVeto recommendations are given separately for Loose and Medium RNN 
+                if self.quality=="Loose":
+                    JetIDLevel = 7
+                elif self.quality=="Medium":
+                    JetIDLevel = 8
+                alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel 
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_EvetoFakeTau_eff' + selectionPostfix
                 alg.taus = config.readName (self.containerName)
@@ -264,7 +279,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                                    'TauEfficiencyCorrectionsAlgEvetoTrueTau' + postfix )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
-
+                alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [8]
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
                 alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"

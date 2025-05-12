@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -184,7 +184,7 @@ if __name__=='__main__':
     acc = MainServicesCfg(flags)
     acc.merge(PoolReadCfg(flags))
     
-    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags, legacy=False, phaseI=True)
+    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags, Legacy=False, PhaseI=True)
     acc.merge(MistimedStreamMonitorCfg)
 
     MistimedStreamMonitorCfg.getEventAlgo('MistimedStreamMonitorAlg').OutputLevel = 2 # 1/2 INFO/DEBUG

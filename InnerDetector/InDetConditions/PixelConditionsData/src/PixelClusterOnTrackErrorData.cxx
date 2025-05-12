@@ -88,36 +88,36 @@ int PixelClusterOnTrackErrorData::getNumberOfEtaIBLBins() const{
 
 double PixelClusterOnTrackErrorData::getPixelBarrelPhiError(double ang, 
                                                     int deltax) { 
-   double errphi=50*CLHEP::micrometer/pow(12,0.5);
+   double errphi=50*CLHEP::micrometer/std::pow(12,0.5);
    // error on phi coordinate
     if(deltax == 1){
     // 1-row hit not expected - return conservative error estimate.
-      if(ang>12){ errphi = 50*CLHEP::micrometer/sqrt(12.); }
+      if(ang>12){ errphi = 50*CLHEP::micrometer/std::sqrt(12.); }
       else{
          // probability to get a 1-row cluster. Error basically proportional 
 	//  to this. 
          double frac = 0.8-0.6*ang/12;
-         errphi = frac*50*CLHEP::micrometer/sqrt(12.);
+         errphi = frac*50*CLHEP::micrometer/std::sqrt(12.);
 	 // Now account for some smearing w.r.t. ideal case
 	 // tuned so that pulls turns out ok
 	 // also some overall rescaling
          double delta = 3*CLHEP::micrometer;
-         errphi = 1.1*sqrt(errphi*errphi+delta*delta);
+         errphi = 1.1*std::sqrt(errphi*errphi+delta*delta);
       }
     }
     else if(deltax == 2){
     // Charge interpolation: good precision, weakly dependent on angle.
     // Have not studied resolution yet for large angles (CTB, or very low 
     // pt tracks) - I put a conservative estimate here.
-      if(ang > 14){ errphi = 25*CLHEP::micrometer/sqrt(12); }
+      if(ang > 14){ errphi = 25*CLHEP::micrometer/std::sqrt(12); }
       else{ errphi = 3*CLHEP::micrometer+2.5*CLHEP::micrometer*ang/14; }
     }
     else{
       // Have not studied resolution yet for large angles (CTB, or very low 
     // pt tracks) - I put a conservative estimate here.
-      if(ang > 14){ errphi = 25*CLHEP::micrometer/sqrt(12); }
+      if(ang > 14){ errphi = 25*CLHEP::micrometer/std::sqrt(12); }
       // at low angles do not expect large clusters - maybe a delta ray?
-      else{ errphi = deltax*50*CLHEP::micrometer/sqrt(12); }
+      else{ errphi = deltax*50*CLHEP::micrometer/std::sqrt(12); }
     }
     return errphi; 
 }
@@ -266,7 +266,7 @@ void PixelClusterOnTrackErrorData::setParameters(const int n1, // number of clus
     m_iblphierror.clear();
     m_iblphierror.reserve(nxbinsibl);
     for(int i = 0; i<nxbinsibl; i++){
-      m_iblphierror.push_back(50.0/sqrt(12)*CLHEP::micrometer);
+      m_iblphierror.push_back(50.0/std::sqrt(12)*CLHEP::micrometer);
     }
   }
   int nybinsibl = m_csybinsibl*m_etabinsibl;
@@ -274,20 +274,20 @@ void PixelClusterOnTrackErrorData::setParameters(const int n1, // number of clus
     m_ibletaerror.clear();
     m_ibletaerror.reserve(nybinsibl);
     for(int ib1=0; ib1<nybinsibl; ib1++){ 
-      m_ibletaerror.push_back(250./sqrt(12)*CLHEP::micrometer);
+      m_ibletaerror.push_back(250./std::sqrt(12)*CLHEP::micrometer);
     }
   }
   int nbiny = m_csx.size()*m_csy.size()*m_etaref.size();
   m_barreletaerror.clear();
   m_barreletaerror.reserve(nbiny);
   for(int i = 0; i<nbiny; i++){
-     m_barreletaerror.push_back(400./sqrt(12)*CLHEP::micrometer);
+     m_barreletaerror.push_back(400./std::sqrt(12)*CLHEP::micrometer);
   }
   int nbinx = m_csx.size()*m_phibins.size();
   m_barrelphierror.clear();
   m_barrelphierror.reserve(nbinx);
   for(int i = 0; i<nbinx; i++){
-     m_barrelphierror.push_back(50./sqrt(12)*CLHEP::micrometer);
+     m_barrelphierror.push_back(50./std::sqrt(12)*CLHEP::micrometer);
   }
   }
 

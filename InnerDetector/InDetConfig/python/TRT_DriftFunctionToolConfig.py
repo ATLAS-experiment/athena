@@ -1,7 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_DriftFunctionTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
+
 
 def TRT_DriftFunctionToolCfg(flags, name = "InDetTRT_DriftFunctionTool", **kwargs):
     acc = ComponentAccumulator()
@@ -43,7 +45,7 @@ def TRT_DriftFunctionToolCfg(flags, name = "InDetTRT_DriftFunctionTool", **kwarg
         kwargs.setdefault("ToTCorrectionsEndcapAr", NullToTCorrections)
 
     # Second calibration DB Service in case pile-up and physics hits have different calibrations for data overlay
-    if flags.Overlay.DataOverlay:
+    if flags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and flags.Overlay.DataOverlay:
         if "TRTCalDbTool2" not in kwargs:
             from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_MCCalDbToolCfg
             kwargs.setdefault("TRTCalDbTool2", acc.popToolsAndMerge(TRT_MCCalDbToolCfg(flags)))

@@ -249,7 +249,7 @@ def getBoostedJetTaggerTool(jetdef, modspec):
     bjtTool = CompFactory.BoostedJetTaggerTool("BoostedJetTaggerTool",
                                                MLTagger = jssutils,
                                                DecorationName = "QGTransformer",
-                                               CalibArea = "QGConstituentTagger/Nov24",
+                                               CalibArea = "QGConstituentTagger/May2025",
                                                ConfigFile = "QGTagger_AntiKt04PFlow_Transformer.dat"
                                                )
 

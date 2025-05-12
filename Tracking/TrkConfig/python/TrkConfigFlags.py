@@ -24,7 +24,7 @@ class ITkPrimaryPassConfig(FlagEnum):
     FastTracking = 'ITkFast'
     HeavyIon = 'ITkHeavyIon'
     Acts = 'ITkActs'
-    ActsFast = 'ITkActsFast'
+    ActsLegacy = 'ITkActsLegacy'
     ActsHeavyIon = 'ITkActsHeavyIon'
     Default = 'ITkMain'
 
@@ -48,7 +48,7 @@ class PixelClusterSplittingType(FlagEnum):
 class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
     ActsChain = "ActsChain"  # full Acts Chain
-    ActsFastChain = "ActsFastChain" # fast tracking Acts Chain
+    ActsLegacyChain = "ActsLegacyChain" # Acts Chain - legacy like
     ActsHeavyIon = "ActsHeavyIon"
     # Validation options
     ActsValidateClusters = "ActsValidateClusters"
@@ -540,8 +540,8 @@ def createTrackingConfigFlags():
             return ITkPrimaryPassConfig.FTF
         elif TrackingComponent.ActsChain in flags.Tracking.recoChain:
             return ITkPrimaryPassConfig.Acts
-        elif TrackingComponent.ActsFastChain in flags.Tracking.recoChain:
-            return ITkPrimaryPassConfig.ActsFast
+        elif TrackingComponent.ActsLegacyChain in flags.Tracking.recoChain:
+            return ITkPrimaryPassConfig.ActsLegacy
         elif TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
             return ITkPrimaryPassConfig.ActsHeavyIon
         elif flags.Tracking.doITkFastTracking:
@@ -576,7 +576,7 @@ def createTrackingConfigFlags():
     # Acts
     from ActsConfig.ActsTrackingPassFlags import (
         createActsTrackingPassFlags,
-        createActsFastTrackingPassFlags,
+        createActsLegacyTrackingPassFlags,
         createActsLargeRadiusTrackingPassFlags,
         createActsConversionTrackingPassFlags,
         createActsLowPtTrackingPassFlags,
@@ -592,8 +592,8 @@ def createTrackingConfigFlags():
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsFastPass",
-                          createActsFastTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsLegacyPass",
+                          createActsLegacyTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLargeRadiusPass",
                           createActsLargeRadiusTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ('Tracking.ITkActsConversionPass',
@@ -641,5 +641,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doV0Finder", False)
     
     icf.addFlag('Tracking.TruthClusterSplittingEff', 0.9)
+
+    # Dump GBTS training data: 0=no dump, 1=standard tracking, 2=LRT
+    icf.addFlag("Tracking.dumpGBTSTrainingData", 0)
 
     return icf

@@ -176,6 +176,7 @@ def sTGCSensitiveDetectorCfg(flags, name="sTGCSensitiveDetector", **kwargs):
                                                        region)
     kwargs.setdefault("LogicalVolumeNames", ["Muon::sTGC_Sensitive"])
     kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
+    kwargs.setdefault("onSqLite", flags.GeoModel.SQLiteDB )
 
     result.setPrivateTools( CompFactory.sTGCSensitiveDetectorTool(name, **kwargs) )
     return result

@@ -183,10 +183,10 @@ class GenericMonitoringArray:
 #  @param name string to check
 #  @return set of forbidden characters found
 def _invalidName(flags, name):
-    blacklist = '/\\'
+    blocklist = '/\\'
     if flags.Common.isOnline:
-        blacklist += '=,:.()'
-    return set(name).intersection(blacklist)
+        blocklist += '=,:.()'
+    return set(name).intersection(blocklist)
 
 
 ## Generate an alias for a set of variables

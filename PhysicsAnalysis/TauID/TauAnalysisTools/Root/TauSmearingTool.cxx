@@ -19,15 +19,6 @@ TauSmearingTool::TauSmearingTool( const std::string& sName )
   : asg::AsgMetadataTool( sName )
   , m_tCommonSmearingTool(sName+"_CommonSmearingTool", this)
 {
-  declareProperty( "InputFilePath",           m_sInputFilePath = "" );
-  declareProperty( "RecommendationTag",       m_sRecommendationTag = "2022-prerec" );
-  declareProperty( "Campaign",                m_sCampaign = "mc21" );
-  declareProperty( "Generator",               m_sGenerator = "PoPy" );  
-  declareProperty( "SkipTruthMatchCheck",     m_bSkipTruthMatchCheck = false );
-  declareProperty( "ApplyFading",             m_bApplyFading = true );
-  declareProperty( "MVATESQualityCheck",      m_bMVATESQualityCheck = true );
-  declareProperty( "ApplyInsituCorrection",   m_bApplyInsituCorrection = true );
-  declareProperty( "useFastSim",              m_useFastSim = false );
 }
 
 TauSmearingTool::~TauSmearingTool()
@@ -57,9 +48,9 @@ StatusCode TauSmearingTool::initialize()
       }
 
       if (m_sCampaign=="mc23") {
-        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc23_v0.root";
+        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc23_v1.root";
       } else {
-        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v0.root";
+        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v1.root";
       }
 
     } else if (m_sRecommendationTag == "2022-prerec") {

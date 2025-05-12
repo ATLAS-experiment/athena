@@ -28,6 +28,7 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES AsgAnalysisAlgorithmsLib )
 endif()
 
+atlas_install_data( data/* )
 atlas_install_python_modules( python/*.py )
 
 find_package( GTest )
@@ -52,3 +53,11 @@ if( NOT XAOD_STANDALONE )
     POST_EXEC_SCRIPT nopost.sh )
 
 endif()
+
+# a test job that includes both the Final MET terms and all MET terms
+# in the output file
+atlas_add_test( TestFullTermsOutput
+   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_full_terms_output.yaml -e 150
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 400 
+   )

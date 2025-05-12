@@ -74,7 +74,7 @@ class CuboidVolumeBounds final: public VolumeBounds {
   bool inside(const Amg::Vector3D&, double tol = 0.) const override final;
 
   /** Method to decompose the Bounds into boundarySurfaces */
-  const std::vector<const Trk::Surface*>* decomposeToSurfaces
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces
   (const Amg::Transform3D& transform) override final;
 
   /** Provide accessor for BoundarySurfaces */
@@ -100,15 +100,15 @@ class CuboidVolumeBounds final: public VolumeBounds {
  private:
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * parallel to local xy plane */
-  RectangleBounds* faceXYRectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceXYRectangleBounds() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * parallel to local yz plane */
-  RectangleBounds* faceYZRectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceYZRectangleBounds() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * parallel to local zx plane */
-  RectangleBounds* faceZXRectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceZXRectangleBounds() const;
 
   double m_halfX;
   double m_halfY;

@@ -12,13 +12,14 @@
 #include "MaterialValidation.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/Layer.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/AssociatedMaterial.h"
 #include "TrkDetDescrInterfaces/IMaterialMapper.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 
-// test 
+// test
 #include "TrkVolumes/CylinderVolumeBounds.h"
 
 // Gaudi Units
@@ -45,7 +46,7 @@ Trk::MaterialValidation::MaterialValidation(const std::string& name, ISvcLocator
     declareProperty("MaxEta"                      , m_etaMax);
     // ---------------------- Native navigation ----------------------------- //
     declareProperty("NativeNavigation"            , m_runNativeNavigation);
-}  
+}
 
 Trk::MaterialValidation::~MaterialValidation()
 {
@@ -55,10 +56,10 @@ Trk::MaterialValidation::~MaterialValidation()
 
 StatusCode Trk::MaterialValidation::initialize()
 {
-    
+
     // Get the TrackingGeometry from StoreGate
     ATH_CHECK( m_trackingGeometryReadKey.initialize(!m_trackingGeometryReadKey.key().empty()) );
-    
+
     if ( (m_materialMapper.retrieve()).isFailure() )
         ATH_MSG_WARNING("Could not retrieve MaterialMapper");
 
@@ -77,13 +78,13 @@ StatusCode Trk::MaterialValidation::execute()
     double theta = 2.*atan(exp(-eta));
     double phi   = M_PI * ( 2*m_flatDist->shoot() - 1.);
     m_accTinX0 = 0;
-    
+
     // get the position and riection from the random numbers
     Amg::Vector3D position(0.,0.,0.);
     Amg::Vector3D direction(sin(theta)*cos(phi),sin(theta)*sin(phi), cos(theta));
-    
-    ATH_MSG_DEBUG("[>] Start mapping event with phi | eta = " << phi << " | " << direction.eta()); 
-     
+
+    ATH_MSG_DEBUG("[>] Start mapping event with phi | eta = " << phi << " | " << direction.eta());
+
     // find the start TrackingVolume
     const Trk::TrackingVolume* sVolume = trackingGeometry().lowestTrackingVolume(position);
     const Trk::TrackingVolume* nVolume = sVolume;
@@ -91,34 +92,34 @@ StatusCode Trk::MaterialValidation::execute()
         Trk::PositionAtBoundary paB = collectMaterialAndExit(*nVolume, position, direction);
         position =  paB.first;
         nVolume  =  paB.second;
-    }     
+    }
     ATH_MSG_DEBUG("[<] Finishing event with collected path [X0] = " << m_accTinX0);
     return StatusCode::SUCCESS;
 }
 
-Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Trk::TrackingVolume& tvol, 
-                                                                        const Amg::Vector3D& position, 
+Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Trk::TrackingVolume& tvol,
+                                                                        const Amg::Vector3D& position,
                                                                         const Amg::Vector3D& direction)
 {
     // get the entry layers -----------------------------------------------------------
     std::map<double, Trk::AssociatedMaterial>                      collectedMaterial;
-    
-    // all boundaries found --- proceed 
+
+    // all boundaries found --- proceed
     Trk::PositionAtBoundary pab(position, 0);
-    
+
     ATH_MSG_DEBUG("[>>] Entering Volume: " << tvol.volumeName() << "- at " << Amg::toString(position));
-    
+
     Trk::NeutralCurvilinearParameters cvp(position,direction,0.);
-    
+
     if (m_runNativeNavigation){
-        // A : collect all hit layers 
+        // A : collect all hit layers
         auto layerIntersections = tvol.materialLayersOrdered<Trk::NeutralCurvilinearParameters>(nullptr,nullptr,cvp,Trk::alongMomentum);
         // loop over the layers
         for (auto& lCandidate : layerIntersections ) {
             // get the layer
              const Trk::Layer*    layer   = lCandidate.object;
              double pathLength = lCandidate.intersection.pathLength;
-             // get the associate material 
+             // get the associate material
              if (layer->layerMaterialProperties()){
                  // take it from the global position
                  const Trk::MaterialProperties* mprop = layer->layerMaterialProperties()->fullMaterial(lCandidate.intersection.position);
@@ -127,8 +128,8 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
                      collectedMaterial[pathLength] = Trk::AssociatedMaterial(lCandidate.intersection.position, mprop, stepLength, &tvol, layer);
                  }
              }
-         }             
-        // B : collect all boundary layers, start from last hit layer         
+         }
+        // B : collect all boundary layers, start from last hit layer
         Amg::Vector3D lastPosition = !collectedMaterial.empty() ? collectedMaterial.rbegin()->second.materialPosition() : (position + direction.unit());
         Trk::NeutralCurvilinearParameters lcp(lastPosition,direction,0.);
         // boundary surfaces
@@ -137,7 +138,7 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
             // by definition is the first one
             lastPosition = boundaryIntersections.begin()->intersection.position;
             const Trk::BoundarySurface<Trk::TrackingVolume>* bSurfaceTV = boundaryIntersections.begin()->object;
-            const Trk::Surface& bSurface = bSurfaceTV->surfaceRepresentation(); 
+            const Trk::Surface& bSurface = bSurfaceTV->surfaceRepresentation();
             // get the path lenght to it
             if (bSurface.materialLayer() && bSurface.materialLayer()->layerMaterialProperties()){
                 const Trk::MaterialProperties* mprop = bSurface.materialLayer()->layerMaterialProperties()->fullMaterial(lastPosition);
@@ -148,14 +149,14 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
                 } else
                     collectedMaterial[pathLength] = Trk::AssociatedMaterial(lastPosition, &tvol, bSurface.materialLayer());
             }
-            // set the new volume 
+            // set the new volume
             const Trk::TrackingVolume* naVolume = bSurfaceTV->attachedVolume(lastPosition, direction, Trk::alongMomentum);
             pab = Trk::PositionAtBoundary(lastPosition,naVolume);
-        } else 
+        } else
             pab = Trk::PositionAtBoundary(lastPosition,0);
     } else {
         std::map<double, std::pair<const Trk::Layer*, Amg::Vector3D> > intersectedLayers;
-               
+
         // Process the contained layers if they exist
         const Trk::LayerArray* layerArray = tvol.confinedLayers();
         if (layerArray) {
@@ -175,24 +176,24 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
                      if (mprop) {
                          double stepLength = mprop->thickness()*fabs((*layIter)->surfaceRepresentation().pathCorrection(lsIntersection.position,direction));
                          collectedMaterial[lsIntersection.pathLength] = Trk::AssociatedMaterial(lsIntersection.position, mprop, stepLength, &tvol, (*layIter));
-                     } else 
+                     } else
                          collectedMaterial[lsIntersection.pathLength] = Trk::AssociatedMaterial(lsIntersection.position, &tvol, (*layIter));
-        
+
                      ATH_MSG_VERBOSE("[>>>>] record material hit at layer with index " << (*layIter)->layerIndex().value() << " - at " << Amg::toString(lsIntersection.position) );
                      if (mprop)
                          ATH_MSG_VERBOSE("[>>>>] MaterialProperties are " << (*mprop) );
-                     else 
-                         ATH_MSG_VERBOSE("[>>>>] No MaterialProperties found." );                     
+                     else
+                         ATH_MSG_VERBOSE("[>>>>] No MaterialProperties found." );
                    }
                }
            }
         }
-        
+
         // material for confined layers collected, now go to boundary
-        
+
         // update the position to the last one
         Amg::Vector3D lastPosition = !intersectedLayers.empty() ? (*(--(intersectedLayers.end()))).second.second : position;
-        
+
         std::map<double, Trk::VolumeExit > volumeExits;
         // now find the exit point
         const auto & bSurfaces = tvol.boundarySurfaces();
@@ -213,7 +214,7 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
             } else
                 ATH_MSG_VERBOSE("[>>>>] starting position is on surface ! " );
         }
-        // prepare the boundary    
+        // prepare the boundary
         if (!volumeExits.empty()){
             // get the first entry in the map: closest next volume
             VolumeExit closestVolumeExit = (*volumeExits.begin()).second;
@@ -229,7 +230,7 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
                 } else
                     collectedMaterial[pathToExit] = Trk::AssociatedMaterial(closestVolumeExit.vExit, &tvol, bSurface->materialLayer());
             }
-            // 
+            //
             if (closestVolumeExit.nVolume != &tvol && closestVolumeExit.nVolume) {
                  ATH_MSG_VERBOSE("[>>>>] Next Volume: " << closestVolumeExit.nVolume->volumeName() << " - at " << Amg::toString(closestVolumeExit.vExit) );
                 // return for further navigation
@@ -238,17 +239,17 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
         } else {
             ATH_MSG_VERBOSE( "[>>>>] No exit found from Volume '" <<  tvol.volumeName() << "' - starting radius = " << lastPosition.perp() );
             const Trk::CylinderVolumeBounds* cvb = dynamic_cast<const Trk::CylinderVolumeBounds*>(&(tvol.volumeBounds()));
-            if (cvb) 
+            if (cvb)
                 ATH_MSG_VERBOSE( "[>>>>] Volume outer radius = " << cvb->outerRadius() );
         }
-    
+
     }
     // finally collect the material
     ATH_MSG_DEBUG("[>>>] Collecting materials from "<< collectedMaterial.size() << " layers");
-    // provide the material to the material mapper 
+    // provide the material to the material mapper
     auto cmIter  = collectedMaterial.begin();
     auto cmIterE = collectedMaterial.end();
-    for ( ; cmIter != cmIterE; ++cmIter ){        
+    for ( ; cmIter != cmIterE; ++cmIter ){
         m_materialMapper->recordMaterialHit(cmIter->second, cmIter->second.materialPosition());
         m_accTinX0 += cmIter->second.steplengthInX0();
         int layerIndex = cmIter->second.associatedLayer() ? cmIter->second.associatedLayer()->layerIndex().value() : 0;
@@ -277,12 +278,12 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
         }
         ATH_MSG_DEBUG("      Distance to origin is " << cmIter->second.materialPosition().mag() );
     }
-    
+
     // return what you have
     return pab;
-                                                                            
+
 }
-                                          
+
 
 
 StatusCode Trk::MaterialValidation::finalize()

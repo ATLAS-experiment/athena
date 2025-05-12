@@ -143,6 +143,7 @@ namespace ActsTrk {
 					     [](const ConstTrackProxy& tp)
 					     { return static_cast<double>(  -std::log(std::tan(tp.theta() * 0.5)) ); } );
     auto monitor_qoverp = Monitored::Collection("qoverp", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.qOverP()); } );
+    auto monitor_pt = Monitored::Collection("pt", proxies, [](const ConstTrackProxy& tp){ return tp.transverseMomentum(); } );
     auto monitor_phi = Monitored::Collection("phi", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.phi()); } );
     auto monitor_chi2 = Monitored::Collection("chi2", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.chi2()); } );
     auto monitor_chi2OverNdof = Monitored::Collection("chi2OverNdof", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.chi2()/tp.nDoF()); } );
@@ -163,7 +164,7 @@ namespace ActsTrk {
 	 monitor_nsharedpertrack,
 	 monitor_nsharedperlayer_pixelbarrel, monitor_nsharedperlayer_pixelendcap,
 	 monitor_nsharedperlayer_stripbarrel, monitor_nsharedperlayer_stripendcap,
-	 monitor_ntracks, monitor_theta, monitor_eta, monitor_phi, 
+	 monitor_ntracks, monitor_theta, monitor_eta, monitor_phi, monitor_pt,
 	 monitor_qoverp, monitor_nstates, monitor_phi, monitor_chi2, monitor_chi2OverNdof, 
 	 monitor_ndof, monitor_nstates, monitor_nmeas, monitor_noutliers, monitor_nholes, monitor_surftype,
 	 monitor_nPixelHits, monitor_nStripHits);

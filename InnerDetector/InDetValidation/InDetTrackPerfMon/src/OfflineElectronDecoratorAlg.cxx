@@ -68,7 +68,7 @@ StatusCode IDTPM::OfflineElectronDecoratorAlg::execute( const EventContext& ctx 
 
   /// check if ALL required decorations exist already. If so return SUCCESS
   if( IDTPM::decorationsAllExist( *ptracks, m_decor_ele ) ) {
-    ATH_MSG_INFO( "All decorations already exist. Exiting gracefully" );
+    ATH_MSG_DEBUG( "All decorations already exist. Exiting gracefully" );
     return StatusCode::SUCCESS;
   }
 

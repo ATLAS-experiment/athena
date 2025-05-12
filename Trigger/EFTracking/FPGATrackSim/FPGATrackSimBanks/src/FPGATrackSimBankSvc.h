@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef TRIGFPGATrackSimBANKSVC_H
 #define TRIGFPGATrackSimBANKSVC_H
@@ -51,7 +51,7 @@ class FPGATrackSimBankSvc : public extends< AthService, IFPGATrackSimBankSvc >
 	Gaudi::Property<bool> m_absQOverPtBinning { this, "qptAbsBinning", false, "Controls whether or not to interpret the bins as q/pt or |q/pt|"};
 	Gaudi::Property<std::vector<double> > m_qOverPtBins { this, "sectorQPtBins", {}, "q/pt bins for sector definition"};
 
-        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping;
+        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
 
 
         ///////////////////////////////////////////////////////////////////////

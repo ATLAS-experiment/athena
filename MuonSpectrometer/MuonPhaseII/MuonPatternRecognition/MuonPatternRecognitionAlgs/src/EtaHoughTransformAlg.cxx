@@ -13,21 +13,52 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
+#include "xAODMuonPrepData/MdtDriftCircle.h"
+#include "xAODMuonPrepData/MMCluster.h"
+#include "xAODMuonPrepData/sTgcMeasurement.h"
+
+#include "Acts/Utilities/RangeXD.hpp"
 #include <format>
 
 namespace MuonR4{
     // helper to check if our trajectory traverses a chamber
     inline bool passesThrough(const SpacePointBucket::chamberLocation & loc, double y0, double tanTheta){
-        double yCross = (y0 + 0.5 * (loc.zBottom+loc.zTop) * tanTheta);  
-        return (loc.yLeft < yCross && yCross < loc.yRight); 
+        double yCross = (y0 + loc.location().z() * tanTheta);  
+        return (loc.minY() < yCross && yCross < loc. maxY()); 
     } 
     // determines the local residual when traversing a chamber 
-    inline double  proximity(const SpacePoint* dc, double y0, double tanTheta) {
+    inline double proximity(const SpacePoint* dc, double y0, double tanTheta) {
         if (dc->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             return std::min(std::abs(HoughHelpers::Eta::houghParamMdtLeft(tanTheta, dc) - y0), 
                             std::abs(HoughHelpers::Eta::houghParamMdtRight(tanTheta, dc) - y0));
         }
         return std::abs(HoughHelpers::Eta::houghParamStrip(tanTheta, dc) - y0);
+    }
+    /** @brief Calculates how much of the unkknown coordinate along the tube range 
+     *         is covered by the chamber of interest.
+     * @param seedEdges: Array encoding the minimal [0] and maximal [1] possible position of the
+     *                   muon along the tube /strip
+     * @param chambEdges: Array encoding the minmal [1] and maximal [1] position along the strip
+     *                    of a chamber */
+    constexpr double chamberCoverage(const std::array<double,2>& seedEdges,
+                                    const std::array<double, 2>& chambEdges) {
+        // The seed is full embedded
+        if (chambEdges[0] <= seedEdges[0] && chambEdges[1] >= seedEdges[1]) {
+            return 1.;
+        }
+        /// Partial overlap. The lower side of the seed is covered by the chamber.
+        else if (chambEdges[0]<= seedEdges[0]) {
+            return (chambEdges[1] - seedEdges[0]) / (seedEdges[1] - seedEdges[0]);
+        } 
+        /// Reverse case with the upper side of the seed covered
+        else if (chambEdges[1] >= seedEdges[1]) {
+            return (seedEdges[1] - chambEdges[0]) / (seedEdges[1] - seedEdges[0]);
+        }
+        /// The chamber is fully embedded in the possible seed range
+        else if (seedEdges[0] <= chambEdges[0] && seedEdges[1] >= chambEdges[1]) {
+            return (chambEdges[1] -  chambEdges[0]) / (seedEdges[1] - seedEdges[0]);
+        }
+        return 0.;
     }
 
 StatusCode EtaHoughTransformAlg::initialize() {
@@ -123,16 +154,14 @@ bool EtaHoughTransformAlg::isPrecisionHit(const HoughHitType& hit) {
         case xAOD::UncalibMeasType::MdtDriftCircleType: {
             const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(hit->primaryMeasurement());
             return dc->status() == Muon::MdtDriftCircleStatus::MdtStatusDriftTime;
-            break;
         }
         case xAOD::UncalibMeasType::MMClusterType:{
             return hit->measuresEta();
-            break;
         }
-        case xAOD::UncalibMeasType::sTgcStripType:
-            return hit->measuresEta();
-            break;
-        default:
+        case xAOD::UncalibMeasType::sTgcStripType: {
+            const auto* meas = static_cast<const xAOD::sTgcMeasurement*>(hit->primaryMeasurement()); 
+            return meas->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip;
+        } default:
             break;
     }
     return false;
@@ -155,64 +184,93 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
     // now we propagate along the seed trajectory and collect crossed volumes 
     int expectedPrecisionChambers{0}, seenPrecisionChambers{0}; 
     bool hasTrig = false; 
-    const double distCutOff = 2.*m_targetResoIntercept;
-    // loop over all chambers in the bucket    
+
+    std::unordered_set<const MuonGMR4::MuonReadoutElement*> seenChambers{};
+    std::set<std::pair<int,int>> seenLayers;
+    using enum Acts::TrapezoidVolumeBounds::BoundValues;
+    const double halfX = currentBucket.bucket->msSector()->bounds()->get(eHalfLengthXposY);
+    /** Determine the minimal & maximal possible position along the tube / strip  */
+    std::array<double, 2> tubeExtend{halfX, -halfX}; 
+
+    auto addSeenHit = [&tubeExtend, &seenLayers, &seenChambers](const SpacePoint& sp,
+                                                            const MuonGMR4::MuonReadoutElement* re,
+                                                            const double sensorL,
+                                                            const int mL, const int layer){
+        seenLayers.emplace(mL, layer);
+        seenChambers.insert(re);
+        tubeExtend[0] = std::min(tubeExtend[0], sp.positionInChamber().x() - sensorL);
+        tubeExtend[1] = std::max(tubeExtend[1], sp.positionInChamber().x() + sensorL);
+    };
+    for (const SpacePoint* SP : maximum.hitIdentifiers){       
+        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Maximum has associated hit in "
+                      << m_idHelperSvc->toStringDetEl(SP->identify()));
+
+        if (isPrecisionHit(SP)) {
+             if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
+                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
+                 const MuonGMR4::MdtReadoutElement* re = dc->readoutElement();
+                 addSeenHit(*SP, re, 0.5*re->activeTubeLength(dc->measurementHash()),
+                            re->multilayer(), dc->tubeLayer());                
+             } else if(SP->type() == xAOD::UncalibMeasType::MMClusterType){
+                 const auto* clust = static_cast<const xAOD::MMCluster*>(SP->primaryMeasurement());
+                 const MuonGMR4::MmReadoutElement* re = clust->readoutElement();
+                 addSeenHit(*SP, re, 0.5*re->stripLayer(clust->measurementHash()).design().stripLength(clust->channelNumber()),
+                            re->multilayer(), clust->gasGap());   
+             } else if (SP->type() == xAOD::UncalibMeasType::sTgcStripType) {
+                 const auto* clust = static_cast<const xAOD::sTgcMeasurement*>(SP->primaryMeasurement());
+                 const MuonGMR4::sTgcReadoutElement* re = clust->readoutElement();
+                 addSeenHit(*SP, re, 0.5*re->stripLayer(clust->measurementHash()).design().stripLength(clust->channelNumber()),
+                            re->multilayer(), clust->gasGap());   
+             }
+         } else {
+            seenChambers.insert(xAOD::muonReadoutElement(SP->primaryMeasurement()));
+         }
+     }
+     // loop over all chambers in the bucket    
     for (const auto & muonChamber : currentBucket.bucket->chamberLocations()){      
         // skip any we don't touch 
         if (!passesThrough(muonChamber, maximum.y, maximum.x)) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" maximum does not cross "
-                          << m_idHelperSvc->toStringDetEl(muonChamber.reEle->identify()));
+                          << m_idHelperSvc->toStringDetEl(muonChamber.readoutEle()->identify()));
             continue; 
         }
         ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" maximum crosses "
-            << m_idHelperSvc->toStringDetEl(muonChamber.reEle->identify()));
-
+            << m_idHelperSvc->toStringDetEl(muonChamber.readoutEle()->identify())<<", "
+            <<(*muonChamber.bounds())<<", @: "<<Amg::toString(muonChamber.location()));
         // for MDT multilayers, we increase our expected number of crossed chambers / tubes
-        const ActsTrk::DetectorType type = muonChamber.reEle->detectorType();
-        if (type == ActsTrk::DetectorType::Mdt || type == ActsTrk::DetectorType::Mm ||
-            type == ActsTrk::DetectorType::sTgc){
-            ++expectedPrecisionChambers; 
-        }
+        const ActsTrk::DetectorType type = muonChamber.readoutEle()->detectorType();
+
         // now we check if we have a compatible measurement on our seed
-        bool hasHit = false;
-        for (const SpacePoint* SP : maximum.hitIdentifiers){
-            // the hit should be inside the current volume and the local residual should be 
-            // compatible with the desired resolution            
-            if (readoutElement(SP->primaryMeasurement()) != muonChamber.reEle){
-                continue;
-            } 
-            const double dist = proximity(SP, maximum.y, maximum.x);
-            if (dist < distCutOff){
-                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Maximum has associated in "
-                        << m_idHelperSvc->toStringDetEl(muonChamber.reEle->identify()));
-                hasHit=true;
-                break;
+        const bool hasHit = seenChambers.count(muonChamber.readoutEle());
+        const bool precTech = (type == ActsTrk::DetectorType::Mdt || type == ActsTrk::DetectorType::Mm ||
+                               type == ActsTrk::DetectorType::sTgc) ;
+        if (hasHit) {
+            // if we find an MDT hit, we increment the counter for seen chambers
+            if  (precTech) {
+                ++seenPrecisionChambers;
             } else {
-                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Hit "<<m_idHelperSvc->toString(SP->identify())
-                    <<" is too far away: "<<dist<<" >= "<<distCutOff);
+                hasTrig = true;
+                continue;
             }
-        }
-        // if we find an MDT hit, we increment the counter for seen chambers
-        if (type == ActsTrk::DetectorType::Mdt || type == ActsTrk::DetectorType::Mm ||
-            type == ActsTrk::DetectorType::sTgc){
-            seenPrecisionChambers += (hasHit); 
-        }
-        // for trigger hits, we set a flag indicating we have at least one 
-        else hasTrig |= hasHit; 
-    }
-    // now count the total number of MDT tube layers we collected on our seed 
-    std::set<std::pair<int,int>> seenLayers; 
-    for (const SpacePoint*  SP : maximum.hitIdentifiers){       
-        // apply a compatibility window - enforce hits are at least reasonably close 
-        if (proximity(SP,maximum.y, maximum.x) < distCutOff) {
-            if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
-                const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
-                seenLayers.emplace(dc->readoutElement()->multilayer(), dc->tubeLayer()); 
-            } else if(SP->type() == xAOD::UncalibMeasType::MMClusterType){
-                const auto* mmclust = static_cast<const xAOD::MMCluster*>(SP->primaryMeasurement());
-                seenLayers.emplace(mmclust->readoutElement()->multilayer(), mmclust->gasGap()); 
+        } else if (precTech) {
+            /// Calculate the width / tube length at the centre crossing point 
+            /// (maximum.x -> tanTheta, maximum.y -> y0)
+            const double lowL = muonChamber.width(maximum.y + muonChamber.location().z() * maximum.x);
+            const std::array<double, 2> chambEdges{muonChamber.location().x() - lowL,
+                                                   muonChamber.location().x() + lowL};
+
+            const double coverage = chamberCoverage(tubeExtend, chambEdges);
+            if  (coverage < 0.95){
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Reject chamber due to partial coverage: "<<coverage
+                            <<", chamb extend: "<<chambEdges[0]<<"-"<<chambEdges[1]
+                            <<", tube extend: "<<tubeExtend[0]<<"-"<<tubeExtend[1]
+                            <<", "<<(*muonChamber.readoutEle()->msSector()->bounds()));
+                continue;
             }
+        } else {
+            continue;
         }
+        ++expectedPrecisionChambers; 
     }
     // compute the minimum number of requested precision layers
     // the integer division will round down (resulting cut: 2 for single-ML, 4 for dual-ML)  
@@ -328,18 +386,19 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
                 MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};  
                 MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};  
                 for (auto & chamber : bucket.bucket->chamberLocations()) {
-                    primitives.push_back(MuonValR4::drawBox(chamber.yLeft, chamber.zBottom, chamber.yRight, chamber.zTop, kGray+2)); 
-                    const Identifier detId{chamber.reEle->identify()};
+                    primitives.push_back(MuonValR4::drawBox(chamber.minY(), chamber.minZ(), 
+                                                            chamber.maxY(), chamber.maxZ(), kGray+2)); 
+                    const Identifier detId{chamber.readoutEle()->identify()};
                     const int eta = m_idHelperSvc->stationEta(detId);
                     std::string chLabel = std::format("{:}{:1d}{:}{:2d}", m_idHelperSvc->stationNameString(detId), 
                                                       std::abs(eta), eta > 0? 'A' : 'C', m_idHelperSvc->stationPhi(detId));
-                    switch (chamber.reEle->detectorType()) {
+                    switch (chamber.readoutEle()->detectorType()) {
                         case ActsTrk::DetectorType::Mdt: {
                             chLabel += std::format("M{:1d}", m_idHelperSvc->mdtIdHelper().multilayer(detId));
                         } default:
                             break;
                     }
-                    primitives.push_back(MuonValR4::drawLabel(chLabel, chamber.yLeft, chamber.zTop + 0.02,8));
+                    primitives.push_back(MuonValR4::drawLabel(chLabel, chamber.minY(), chamber.maxZ() + 0.02,8));
                 }
        
                 primitives.push_back(MuonValR4::drawLabel(std::format("Missed seed - score {}, layer score {}, comprising {} measurements ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size()),0.05,0.03,12)); 
@@ -368,11 +427,9 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
             MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{}; 
             MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};   
             for (auto & chamber : bucket.bucket->chamberLocations()){
-                primitives.push_back(MuonValR4::drawBox(chamber.yLeft, chamber.zBottom, chamber.yRight, chamber.zTop, kGray+2)); 
+                primitives.push_back(MuonValR4::drawBox(chamber.minY(), chamber.minZ(), chamber.maxY(), chamber.maxZ(), kGray+2)); 
             }
-            
             primitives.push_back(MuonValR4::drawLabel(std::format("score {}, layer score {}, comprising {} measurements. wx = {:.2f}, wy = {:.1f} ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size(), max.wx, max.wy),0.05,0.03,12)); 
-
             primitivesForAcc.push_back(MuonValR4::drawLabel(std::format("score {}, layer score {}, comprising {} measurements. wx = {:.2f}, wy = {:.1f} ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size(), max.wx / m_targetResoTanTheta, max.wy / m_targetResoIntercept),0.05,0.03,12)); 
 
             m_visionTool->visualizeAccumulator(ctx, *data.houghPlane, data.currAxisRanges, {max},"#eta Hough accumulator", std::move(primitivesForAcc));

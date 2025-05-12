@@ -39,7 +39,7 @@ ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.
 
 run "Reconstruction-acts" \
     Reco_tf.py --CA \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.acts.root \

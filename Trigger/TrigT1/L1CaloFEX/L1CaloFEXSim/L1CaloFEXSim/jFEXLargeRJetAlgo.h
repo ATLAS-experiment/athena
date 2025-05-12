@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXLargeRJetAlgo - Algorithm for large R jet Algorithm in jFEX
@@ -12,16 +12,9 @@
 #define jFEXLargeRJetAlgo_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/CLASS_DEF.h" 
 #include "L1CaloFEXToolInterfaces/IjFEXLargeRJetAlgo.h"
 #include "L1CaloFEXToolInterfaces/IjFEXSmallRJetAlgo.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h" 
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h" 
-#include "StoreGate/StoreGateSvc.h" 
 
 
 namespace LVL1 {
@@ -41,8 +34,8 @@ namespace LVL1 {
     virtual StatusCode safetyTest() override;
     virtual void setupCluster(int inputTable[15][15]) override;
     virtual unsigned int getRingET() override;
-    virtual unsigned int getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) override;
-    virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
+    virtual unsigned int getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) const override;
+    virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map)  override;
     virtual bool getLRjetSat() override;
 
   protected:

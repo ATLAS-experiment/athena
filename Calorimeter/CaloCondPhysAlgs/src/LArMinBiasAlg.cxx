@@ -256,7 +256,7 @@
           }
           int index = (int) (m_calo_id->calo_cell_hash(cellID));
 
-          if (index < m_ncell && index>=0 && fabs(time)<25.) {
+          if (index < m_ncell && index>=0 && std::fabs(time)<25.) {
              m_eCell[index] += energy;
         }
 
@@ -315,7 +315,7 @@
      m_nevt[i] = m_CellList[i].nevt;
      m_offset[i] = (float) (m_CellList[i].offset);
      m_average[i] = (float) (m_CellList[i].average);
-     m_rms[i] = (float) (sqrt(m_CellList[i].rms));
+     m_rms[i] = (float) (std::sqrt(m_CellList[i].rms));
    }
    m_tree->Fill();
    ATH_MSG_INFO(" after tree fill ");

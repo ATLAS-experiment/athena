@@ -41,14 +41,14 @@ def BarrelPresamplerCalibrationCalculatorCfg(flags, name="BarrelPresamplerCalibr
 
 def EMBCalculatorCfg(flags, name="EMBCalculator", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(LArBarrelGeometryCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(LArBarrelGeometryCfg(flags)))
     result.addService(CompFactory.LArBarrelCalculator(name, **kwargs), primary=True)
     return result
 
 
 def EMBPresamplerCalculatorCfg(flags, name="EMBPresamplerCalculator", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(LArBarrelPresamplerGeometryCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(LArBarrelPresamplerGeometryCfg(flags)))
 
     result.addService(CompFactory.LArBarrelPresamplerCalculator(name, **kwargs), primary=True)
     return result

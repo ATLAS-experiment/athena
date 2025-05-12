@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigDecisionTool )
@@ -70,12 +70,12 @@ endif()
 if (NOT XAOD_ANALYSIS )
    atlas_add_test( Run2TrigDecisionToolOnRAW_test 
       SCRIPT python -m TrigDecisionTool.TrigDecisionToolConfig --RAWRUN2
-      LOG_SELECT_PATTERN "UnitTest")
+      POST_EXEC_SCRIPT noerror.sh )
 
       # AOD test
    atlas_add_test( Run2TrigDecisionToolOnAOD_test
       SCRIPT python -m TrigDecisionTool.TrigDecisionToolConfig
-      LOG_SELECT_PATTERN "UnitTest")
+      POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 if (NOT XAOD_STANDALONE)

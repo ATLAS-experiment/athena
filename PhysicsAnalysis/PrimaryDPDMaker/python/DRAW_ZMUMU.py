@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -16,9 +16,6 @@ def DRAW_ZmumuKernelCfg(flags, name="DRAW_ZMUMUKernel", **kwargs):
     # Object selection strings
     sel_muon1 = 'Muons.pt > 25*GeV && Muons.ptcone40/Muons.pt < 0.3'
     sel_muon2 = 'Muons.pt > 20*GeV && Muons.ptcone40/Muons.pt < 0.3'
-    # Ensure that it's scheduled after the Isolation builder
-    kwargs.setdefault(
-        "ExtraInputs", [('xAOD::MuonContainer', 'StoreGateSvc+Muons.ptcone40')])
 
     mass_tool = result.getPrimaryAndMerge(InvariantMassToolCfg(flags,
                                                                name="DRZmumuMassTool",
@@ -27,7 +24,8 @@ def DRAW_ZmumuKernelCfg(flags, name="DRAW_ZMUMUKernel", **kwargs):
                                                                SecondObjectRequirements=sel_muon2,
                                                                MassHypothesis=105.66,
                                                                SecondMassHypothesis=105.66,
-                                                               StoreGateEntryName=massEntryName))
+                                                               StoreGateEntryName=massEntryName,
+                                                               InputDecorNames=["Muons.ptcone40"]))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg

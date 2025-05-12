@@ -111,7 +111,9 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
         tools.append(acc.popToolsAndMerge(EgammaPhysValMonitoringToolCfg(flags, useOQQuality=flags.PhysVal.applyAllDataCleaning)))
     if flags.PhysVal.doTau:
         from TauDQA.TauDQAConfig import PhysValTauCfg
-        tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags)))
+        tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags, tauContainer="TauJets")))
+        tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags, tauContainer="TauJets_MuonRM")))
+        tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags, tauContainer="TauJets_EleRM")))
     if flags.PhysVal.doJet:
         from JetValidation.JetValidationConfig import PhysValJetCfg
         tools.append(acc.popToolsAndMerge(PhysValJetCfg(flags)))

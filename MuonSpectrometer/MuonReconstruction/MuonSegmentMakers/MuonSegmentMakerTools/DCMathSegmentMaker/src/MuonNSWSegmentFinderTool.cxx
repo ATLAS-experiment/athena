@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonNSWSegmentFinderTool.h"
@@ -122,14 +122,14 @@ namespace Muon {
         }
         m_width /= std::sqrt(3);
     }
-    NSWSeed::NSWSeed(const MuonNSWSegmentFinderTool* parent, const SeedMeasurement& _leftM,
-                     const SeedMeasurement& _rightM) :
-        m_parent{parent}, m_pos{_leftM.pos()} {
-        m_dir = (_rightM.pos() - m_pos).unit();
-        m_width = std::hypot(Amg::error(_leftM->localCovariance(), Trk::locX),
-                             Amg::error(_rightM->localCovariance(), Trk::locX)) / std::sqrt(2);
-        insert(_leftM);
-        insert(_rightM);
+    NSWSeed::NSWSeed(const MuonNSWSegmentFinderTool* parent, const SeedMeasurement& first,
+                     const SeedMeasurement& second) :
+        m_parent{parent}, m_pos{first.pos()} {
+        m_dir = (second.pos() - m_pos).unit();
+        m_width = std::hypot(Amg::error(first->localCovariance(), Trk::locX),
+                             Amg::error(second->localCovariance(), Trk::locX)) / std::sqrt(2);
+        insert(first);
+        insert(second);
     }
     NSWSeed::NSWSeed(const MuonNSWSegmentFinderTool* parent, const Muon::MuonSegment& seg) :
         m_parent{parent}, m_pos{seg.globalPosition()}, m_dir{seg.globalDirection()} {

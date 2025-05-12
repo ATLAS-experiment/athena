@@ -37,6 +37,7 @@
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/ParticleHypothesisEncoding.h"
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -228,11 +229,11 @@ std::unique_ptr<Trk::Track>
 KalmanFitterTool::fit(const EventContext& ctx,
 		      const Trk::Track& inputTrack,
 		      const Trk::RunOutlierRemoval /*runOutlier*/,
-		      const Trk::ParticleHypothesis /*prtHypothesis*/) const
+		      const Trk::ParticleHypothesis hypothesis) const
 {
   std::unique_ptr<Trk::Track> track = nullptr;
   ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,,)    with Track from author = "
-       << inputTrack.info().dumpInfo());
+       << inputTrack.info().dumpInfo()<<", "<<hypothesis);
 
   // protection against not having measurements on the input track
   if (!inputTrack.measurementsOnTrack() || inputTrack.measurementsOnTrack()->size() < 2) {
@@ -247,8 +248,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
   }
 
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
   
   Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
@@ -257,7 +257,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
-  ATLASSourceLinkSurfaceAccessor surfaceAccessor{&(*m_ATLASConverterTool)};
+  ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
   kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
@@ -267,7 +267,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
       kfOptions(tgContext, mfContext, calContext,
                 kfExtensions,
                 propagationOption,
-                &(*pSurface));
+                pSurface.get());
 
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack);
   // protection against error in the conversion from Atlas masurement to Acts source link
@@ -276,7 +276,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
     return track;
   }
 
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
+  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
@@ -286,13 +286,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
     (scaledCov)(i,i) = scale * initialParams.covariance().value()(i,i);
   }
 
-  // @TODO: Synchronize with prtHypothesis
-  Acts::ParticleHypothesis hypothesis = Acts::ParticleHypothesis::pion();
-
   const Acts::BoundTrackParameters scaledInitialParams(initialParams.referenceSurface().getSharedPtr(),
                                                        initialParams.parameters(),
                                                        scaledCov,
-                                                       hypothesis);
+                                                       Acts::ParticleHypothesis::pion());
 
   ActsTrk::MutableTrackContainer tracks;
   
@@ -333,7 +330,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
-  ATLASSourceLinkSurfaceAccessor surfaceAccessor{&(*m_ATLASConverterTool)};
+  ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
   kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
@@ -343,7 +340,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
       kfOptions(tgContext, mfContext, calContext,
                 kfExtensions,
                 propagationOption,
-                &(*pSurface));
+                pSurface.get());
 
   std::vector<Acts::SourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
@@ -357,7 +354,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
     return track;
   }
 
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
+  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
   ActsTrk::MutableTrackContainer tracks;
 
@@ -411,7 +408,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
         kfOptions(tgContext, mfContext, calContext,
                   kfExtensions,
                   propagationOption,
-                  &(*pSurface));
+                  pSurface.get());
 
 
     std::vector<Acts::SourceLink> trackSourceLinks; 
@@ -427,7 +424,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
     }
     //
 
-    const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
+    const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
 
     ActsTrk::MutableTrackContainer tracks;
@@ -566,10 +563,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
       kfOptions(tgContext, mfContext, calContext,
                 kfExtensions,
                 propagationOption,
-                &(*pSurface));
+                pSurface.get());
 
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
+  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
 
   for (auto it = addMeasColl.begin(); it != addMeasColl.end(); ++it)
   {
@@ -611,11 +608,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
 		      const Trk::Track& intrk1,
 		      const Trk::Track& intrk2,
 		      const Trk::RunOutlierRemoval /*runOutlier*/,
-		      const Trk::ParticleHypothesis /*matEffects*/) const
+		      const Trk::ParticleHypothesis hypothesis) const
 {
   ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,Track,)");
   ATH_MSG_VERBOSE ("    with Tracks from #1 = " << intrk1.info().dumpInfo()
-                   << " and #2 = " << intrk2.info().dumpInfo());
+                   << " and #2 = " << intrk2.info().dumpInfo()<<", "<<hypothesis);
 
   // protection, if empty track2
   if (!intrk2.measurementsOnTrack()) {
@@ -655,7 +652,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
       kfOptions(tgContext, mfContext, calContext,
                 kfExtensions,
                 propagationOption,
-                &(*pSurface));
+                pSurface.get());
 
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1);
   std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2);
@@ -678,8 +675,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
   const Acts::BoundTrackParameters scaledInitialParams(initialParams.referenceSurface().getSharedPtr(),
                                                        initialParams.parameters(),
-                                                       scaledCov,
-                                                       Acts::ParticleHypothesis::pion());
+                                                       scaledCov, Acts::ParticleHypothesis::pion());
 
 
   ActsTrk::MutableTrackContainer tracks;

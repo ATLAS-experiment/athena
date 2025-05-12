@@ -76,7 +76,7 @@ namespace Muon {
     Identifier id = rpcRIO.identify();
     int measPhi = m_idHelperSvc->measuresPhi(id);
     MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
-    if( stIndex == MuonStationIndex::BO) {
+    if( stIndex == MuonStationIndex::StIndex::BO) {
       // outer layer station => high pt 
       if (measPhi==1) return 5.10;
       return 4.84;     

@@ -277,30 +277,14 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   //sort the lists by Et
   std::sort(list_AllConstituents.begin(),     list_AllConstituents.end(),     sortTauConstituentEt);
   std::sort(list_TypeConstituents.begin(),    list_TypeConstituents.end(),    sortTauConstituentEt);
-    
-  TLorentzVector  tlv_1st_Et;
-  TLorentzVector  tlv_2nd_Et;
-  TLorentzVector  tlv_3rd_Et;
-    
-  if(!list_TypeConstituents.empty()) tlv_1st_Et = list_TypeConstituents[0]->p4();
-  if(list_TypeConstituents.size() > 1) tlv_2nd_Et = list_TypeConstituents[1]->p4();
-  if(list_TypeConstituents.size() > 2) tlv_3rd_Et = list_TypeConstituents[2]->p4();
-    
-    
-  TLorentzVector tlv_Last_Et;
-  if(!list_TypeConstituents.empty()) tlv_Last_Et = list_TypeConstituents.back()->p4();
-    
+  
   //make an additional list of constituents, but now ordered by BDT value
   std::vector<PanTau::TauConstituent*>    list_TypeConstituents_SortBDT = list_TypeConstituents;
   std::sort(list_TypeConstituents_SortBDT.begin(), list_TypeConstituents_SortBDT.end(), sortTauConstituentMVA);
     
   TLorentzVector  tlv_1st_BDT;
-  TLorentzVector  tlv_2nd_BDT;
-  TLorentzVector  tlv_3rd_BDT;
     
   if(!list_TypeConstituents_SortBDT.empty()) tlv_1st_BDT = list_TypeConstituents_SortBDT[0]->p4();
-  if(list_TypeConstituents_SortBDT.size() > 1) tlv_2nd_BDT = list_TypeConstituents_SortBDT[1]->p4();
-  if(list_TypeConstituents_SortBDT.size() > 2) tlv_3rd_BDT = list_TypeConstituents_SortBDT[2]->p4();
     
   //! //////////////////////////////////////////                  
   //! Prepare variables for information from eflow Objects
@@ -313,20 +297,8 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   double                      sum_Et2                     = 0;
   // ===> Sum of Et (and E) times DeltaR, DeltaR', Angle 
   double                      sum_EtxDR                   = 0;
-  double                      sum_EtxDR2                  = 0;
-  double                      sum_EtxDRprime              = 0;
-  double                      sum_EtxAngle                = 0;
-  // ===> Isolation rings
-  double                      sum_EtInRing00To01          = 0;
-  double                      sum_EtInRing01To02          = 0;
-  double                      sum_EtInRing02To03          = 0;
-  double                      sum_EtInRing03To04          = 0;
-  double                      sum_EtInRing04To05          = 0;
   // ===> Multiplicities
   unsigned int                num_EFOs                    = 0;
-  // ===> Maximal values
-  double                      max_DeltaR                  = 0;
-    
     
   //! //////////////////////////////////////////
   //! Loop over selected constituents and collect information
@@ -348,28 +320,14 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     double hlp_Et               = tlv_curConst.Et();
     double hlp_Et2              = hlp_Et * hlp_Et;
     double hlp_DeltaR           = tlv_Reference.DeltaR(tlv_curConst);
-    double hlp_DeltaR2          = hlp_DeltaR * hlp_DeltaR;
-    double hlp_DeltaRprime      = m_HelperFunctions.deltaRprime(tlv_Reference.Vect(), tlv_curConst.Vect());
-    double hlp_Angle            = tlv_Reference.Angle(tlv_curConst.Vect());
 
     // update Sum of Et, Et^2, E and E^2
     sum_Et                      += hlp_Et;
     sum_Et2                     += hlp_Et2;
     // update Sum of Et (and E) times DeltaR, DeltaR', Angle 
     sum_EtxDR                   += hlp_Et * hlp_DeltaR;
-    sum_EtxDR2                  += hlp_Et * hlp_DeltaR2;
-    sum_EtxDRprime              += hlp_Et * hlp_DeltaRprime;
-    sum_EtxAngle                += hlp_Et * hlp_Angle;
-    // update Isolation rings
-    if(hlp_DeltaR >= 0.0 && hlp_DeltaR < 0.1) sum_EtInRing00To01 += hlp_Et;
-    if(hlp_DeltaR >= 0.1 && hlp_DeltaR < 0.2) sum_EtInRing01To02 += hlp_Et;
-    if(hlp_DeltaR >= 0.2 && hlp_DeltaR < 0.3) sum_EtInRing02To03 += hlp_Et;
-    if(hlp_DeltaR >= 0.3 && hlp_DeltaR < 0.4) sum_EtInRing03To04 += hlp_Et;
-    if(hlp_DeltaR >= 0.4 && hlp_DeltaR < 0.5) sum_EtInRing04To05 += hlp_Et;
     // update Multiplicities
     num_EFOs++;
-    // update Max values
-    if(hlp_DeltaR > max_DeltaR) max_DeltaR = hlp_DeltaR;
   }//end loop over selected EFOs
     
     
@@ -391,7 +349,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   prefixVARType = m_varTypeName_PID;
     
   // Sorted by highest BDT score
-  double value_sumBDT_BDTSort = 0;
   for(unsigned int iTypeConst=0; iTypeConst<n_Constituents_Type; iTypeConst++) {
         
     double value_BDT = list_TypeConstituents_SortBDT[iTypeConst]->getBDTValue();
@@ -409,10 +366,9 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
       value_BDT = value_BDT - mvaCorrection;
     }
         
-    value_sumBDT_BDTSort += value_BDT;
     std::string iConst = m_HelperFunctions.convertNumberToString((double)(iTypeConst+1));
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_BDTValues_BDTSort_" + iConst, value_BDT);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_BDTValuesSum_BDTSort_" + iConst, value_sumBDT_BDTSort);
+
   }
     
   //! Shot information ///////////////////////////////////////////
@@ -422,11 +378,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
         
     TLorentzVector          totalTLV_SumShots       = TLorentzVector(0., 0., 0., 0.);
     unsigned int            totalPhotonsInSeed      = 0;
-    unsigned int            totalShotsInSeed        = 0;
-    double                  maxDeltaRSumShotToConst = -999;
-    double                  minDeltaRSumShotToConst = 999;
-    double                  maxDeltaRSumShotToTau   = -999;
-    double                  minDeltaRSumShotToTau   = 999;
         
     std::vector<TLorentzVector> allShotTLVs = std::vector<TLorentzVector>(0);
         
@@ -446,39 +397,18 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
 	tlv_SumShots += curShot->p4();
 	allShotTLVs.push_back(curShot->p4());
       }//end loop over shots
-      totalShotsInSeed    += nShots;
       totalTLV_SumShots   += tlv_SumShots;
       totalPhotonsInSeed  += totalPhotonsInNeutral;
             
       std::string iConstStr = m_HelperFunctions.convertNumberToString((double)(iConst+1));
                        
       tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_nPhotons_BDTSort_" + iConstStr, totalPhotonsInNeutral);
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_nShots_BDTSort_" + iConstStr, nShots);
-            
-      //the et/eta/phi/m of the hlv of all shots combined for this neutral-type constituent
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SumShots_Et_BDTSort_" + iConstStr, tlv_SumShots.Et());
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SumShots_Eta_BDTSort_" + iConstStr, tlv_SumShots.Eta());
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SumShots_Phi_BDTSort_" + iConstStr, tlv_SumShots.Phi());
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SumShots_M_BDTSort_" + iConstStr, tlv_SumShots.M());
-            
-      //energy ratio, deltaR of sumShots and constituent
-      double deltaRSumShotToConst = tlv_CurConst.DeltaR(tlv_SumShots);
-      if(deltaRSumShotToConst > maxDeltaRSumShotToConst) maxDeltaRSumShotToConst = deltaRSumShotToConst;
-      if(deltaRSumShotToConst < minDeltaRSumShotToConst) minDeltaRSumShotToConst = deltaRSumShotToConst;
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_ConstDeltaRToSumShots_BDTSort_" + iConstStr, deltaRSumShotToConst);
+
       if(tlv_CurConst.Et() > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtSumShotsOverConstEt_BDTSort_" + iConstStr, tlv_SumShots.Et() / tlv_CurConst.Et());
-            
-      //energy ratio, deltaR of shots and tauSeed
-      double deltaRSumShotToTau = tlv_Reference.DeltaR(tlv_SumShots);
-      if(deltaRSumShotToTau > maxDeltaRSumShotToTau) maxDeltaRSumShotToTau = deltaRSumShotToTau;
-      if(deltaRSumShotToTau < minDeltaRSumShotToTau) minDeltaRSumShotToTau = deltaRSumShotToTau;
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_TauDeltaRToSumShots_BDTSort_" + iConstStr, deltaRSumShotToTau);
-      if(tlv_Reference.Et() > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtSumShotsOverTauEt_BDTSort_" + iConstStr, tlv_SumShots.Et() / tlv_Reference.Et());
             
     }//end loop over constituents in tau
     
     //number of shots in seed
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_NShotsInSeed", totalShotsInSeed);
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_NPhotonsInSeed", totalPhotonsInSeed);
  
   }//end if check for shot info dumping
@@ -489,46 +419,9 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     
   if(curTypeName != curTypeName_All) addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtOver", sum_Et, variants_SeedEt);
     
-  if(tlv_1st_Et.Pt() != 0) addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_1stEtOver",   tlv_1st_Et.Et(), variants_SeedEt);
   if(tlv_1st_BDT.Pt() != 0) addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_1stBDTEtOver",   tlv_1st_BDT.Et(), variants_SeedEt);
     
-  if(tlv_Last_Et.Pt() != 0) addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SoftestEtOver",   tlv_Last_Et.Et(), variants_SeedEt);
-    
-  if(tlv_1st_Et.Pt() != 0 && sum_Et > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_1stEtOverTypeEt",    tlv_1st_Et.Et() / sum_Et);
   if(tlv_1st_BDT.Pt() != 0 && sum_Et > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_1stBDTEtOverTypeEt",    tlv_1st_BDT.Et() / sum_Et);    
-    
-  //! EtRings  ///////////////////////////////////////////
-  if(curTypeName == curTypeName_All) {
-    prefixVARType = m_varTypeName_EtInRing;
-        
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_00To01", sum_EtInRing00To01);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_01To02", sum_EtInRing01To02);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_02To03", sum_EtInRing02To03);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_03To04", sum_EtInRing03To04);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_04To05", sum_EtInRing04To05);
-  }
-    
-    
-  //! Isolations ///////////////////////////////////////////
-  if(curTypeName == curTypeName_All) {
-    prefixVARType = m_varTypeName_Isolation;
-        
-    double iso_EtIn01 = sum_EtInRing00To01;
-    double iso_EtIn02 = iso_EtIn01 + sum_EtInRing01To02;
-    double iso_EtIn03 = iso_EtIn02 + sum_EtInRing02To03;
-    double iso_EtIn04 = iso_EtIn03 + sum_EtInRing03To04;
-        
-    addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtIn01Over", iso_EtIn01, variants_SeedEt);
-    addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtIn02Over", iso_EtIn02, variants_SeedEt);
-    addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtIn03Over", iso_EtIn03, variants_SeedEt);
-    addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtIn04Over", iso_EtIn04, variants_SeedEt);
-        
-    addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtIn00To02Over", (sum_EtInRing00To01 + sum_EtInRing01To02), variants_SeedEt);
-    addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtIn02To04Over", (sum_EtInRing02To03 + sum_EtInRing03To04), variants_SeedEt);
-        
-    if(iso_EtIn02>0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtIn01OverEtIn02", iso_EtIn01 / iso_EtIn02);
-    if(iso_EtIn04>0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtIn01OverEtIn04", iso_EtIn01 / iso_EtIn04);
-  }
     
   //! Standard deviations ///////////////////////////////////////////
   prefixVARType =  m_varTypeName_StdDev;
@@ -546,9 +439,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   if(sum_Et > 0.) {
     //Using transverse energy
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtDR",            sum_EtxDR / sum_Et);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtDRprime",       sum_EtxDRprime / sum_Et);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtDR2",           sum_EtxDR2 / sum_Et);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtAngle",         sum_EtxAngle / sum_Et);
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtDRxTotalEt",    (sum_EtxDR / sum_Et) * variants_SeedEt.at("EtAllConsts"));
   }
 

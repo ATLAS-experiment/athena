@@ -182,11 +182,11 @@ class EvgenExecutor(athenaExecutor):
         if "inputGenConfFile" in self._trf.argdict:
             expand_if_archive(self._trf.argdict["inputGenConfFile"].value)
 
-def move_files(main_dir,tmp_dir,whitelist):
+def move_files(main_dir,tmp_dir,allowedlist):
     files = os.listdir(tmp_dir)
     files.sort()
     for f in files:
-       for i in whitelist:
+       for i in allowedlist:
             if i in f:
                 src = tmp_dir+"/"+f
                 dest = main_dir+"/"+f
@@ -236,8 +236,8 @@ def main():
       os.mkdir("tmprun")
       os.chdir("tmprun")
       tmp_dir = os.getcwd()
-      whitelist_in = ['MC','group','TXT']
-      move_files(tmp_dir,main_dir,whitelist_in)
+      allowedlist_in = ['MC','group','TXT']
+      move_files(tmp_dir,main_dir,allowedlist_in)
 
     trf.execute()
     trf.generateReport()
@@ -247,9 +247,9 @@ def main():
 # read files/dirs that should be saved and if present in cwd - remove
 
     if (("cleanOut" in trf.argdict) and (trf.argdict["cleanOut"].value!=0)):
-       whitelist_out = ['log.generate','.root']
+       allowedlist_out = ['log.generate','.root']
        if "outputTXTFile" in trf.argdict:
-         whitelist_out.append('TXT')
+         allowedlist_out.append('TXT')
        if "saveList" in trf.argdict:
          saveList_dic= trf.argdict["saveList"].value
          saveList_str= str(saveList_dic)
@@ -262,9 +262,9 @@ def main():
            elif os.path.isfile(test_ex):
              os.remove(test_ex)
          if not saveList[0].isdigit():
-             whitelist_out=whitelist_out+saveList
+             allowedlist_out=allowedlist_out+saveList
 
-       move_files(main_dir,tmp_dir,whitelist_out)
+       move_files(main_dir,tmp_dir,allowedlist_out)
        os.chdir(main_dir)
        if "saveList" not in trf.argdict:
          shutil.rmtree(tmp_dir, ignore_errors=True)

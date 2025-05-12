@@ -72,7 +72,12 @@ public:
   // idx should be with the definition specifed in the step
   // NOTE: the stored hit may be modified!
   virtual bool hitInBin(const FPGATrackSimBinStep &step, const IdxSet &idx,
-                        StoredHit& storedhit) const = 0;
+                        StoredHit &storedhit) const = 0;
+
+  // Write the relevant LUT tables for firmware
+  // Implementation is optional. This is not needed for operation,
+  // but to generate constants for the firmware
+  virtual void writeLUTs([[maybe_unused]] const FPGATrackSimBinStep &step) const {}
 
 private:
   

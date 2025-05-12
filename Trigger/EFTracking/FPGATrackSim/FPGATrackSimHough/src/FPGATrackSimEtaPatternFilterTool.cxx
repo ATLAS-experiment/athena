@@ -227,7 +227,7 @@ void FPGATrackSimEtaPatternFilterTool::addHitsToMap(const std::shared_ptr<const 
 }
 
 // Dropping hits from currPattern can still result in valid (duplicated) patterns above threshold.
-// This functions adds all of those duplicates to a blacklist in "usedPatterns".
+// This functions adds all of those duplicates to a blocklist in "usedPatterns".
 void FPGATrackSimEtaPatternFilterTool::addRedundantPatterns(std::set<EtaPattern> & usedPatterns, EtaPattern const & currPatt, unsigned nExtra)
 {
     usedPatterns.insert(currPatt);

@@ -111,7 +111,7 @@ def RPC_DigitizationToolCfg(flags, name="RpcDigitizationTool", **kwargs):
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(RPC_RangeCfg(flags))]
-        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("PileUpMergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)

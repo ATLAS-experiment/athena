@@ -4,6 +4,7 @@
 #include "InDetSimData/InDetSimDataCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
 #include "GeneratorObjects/xAODTruthParticleLink.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
@@ -100,6 +101,19 @@ namespace ActsTrk {
    {
    public:
       using MeasurementToTruthAssociationAlg<xAOD::StripClusterContainer,
+                                             InDetSimDataCollection,
+                                             xAODTruthParticleLinkVector,
+                                             MeasurementToTruthAssociationDebugHistograms>::MeasurementToTruthAssociationAlg;
+   };
+      // name the specialistion to get a nicer name in python
+   class HgtdClusterToTruthAssociationAlg
+      : public MeasurementToTruthAssociationAlg<xAOD::HGTDClusterContainer,
+                                                InDetSimDataCollection,
+                                                xAODTruthParticleLinkVector,
+                                                MeasurementToTruthAssociationDebugHistograms>
+   {
+   public:
+      using MeasurementToTruthAssociationAlg<xAOD::HGTDClusterContainer,
                                              InDetSimDataCollection,
                                              xAODTruthParticleLinkVector,
                                              MeasurementToTruthAssociationDebugHistograms>::MeasurementToTruthAssociationAlg;

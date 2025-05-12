@@ -62,7 +62,7 @@ Reco_tf.py \
     --maxEvents ${n_events} \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Tracking.doTIDE_AmbiTrackMonitoring=True;" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
     --multithreaded
 
 rc=$?

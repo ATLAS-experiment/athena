@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
 
 // Trk
 #include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkVolumes/BoundarySurface.h"
 #include "TrkVolumes/BoundarySurfaceFace.h"
 
@@ -52,7 +52,7 @@ protected:
   /** protected method to set the boundary surface of a tracking volume */
   static void setBoundarySurface(
     TrackingVolume& tvol,
-    SharedObject<BoundarySurface<TrackingVolume>> bsurf,
+    std::shared_ptr<BoundarySurface<TrackingVolume>> bsurf,
     BoundarySurfaceFace face);
 
   /** protected method to set inside Volume of a BoundarySurface:
@@ -81,7 +81,7 @@ protected:
   static void setInsideVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    const SharedObject<BinnedArray<TrackingVolume>>& insidevolarray);
+    const std::shared_ptr<BinnedArray<TrackingVolume>>& insidevolarray);
 
   /** protected method to set outside Volume of a BoundarySurface:
       input:
@@ -110,7 +110,7 @@ protected:
   static void setOutsideVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    const SharedObject<BinnedArray<TrackingVolume>>& outsidevolarray);
+    const std::shared_ptr<BinnedArray<TrackingVolume>>& outsidevolarray);
 
   /** protected method to confine (dense) volumes:
       input:

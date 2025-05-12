@@ -532,7 +532,7 @@ namespace MuonCombined {
             if (m_segmentQualityCut > 0) {
                 Identifier chId = m_edmHelperSvc->chamberId(*itSeg);
                 StationIndex stIndex = m_idHelperSvc->stationIndex(chId);
-                if (!m_triggerHitCut && stIndex == Muon::MuonStationIndex::EM) {
+                if (!m_triggerHitCut && stIndex == StationIndex::EM) {
                     // don't apply the TGC requirement for the first station as it sometimes has not trigger hits due to TGC acceptance
                     int stationEta = m_idHelperSvc->stationEta(chId);
                     if (std::abs(stationEta) != 1) {
@@ -540,7 +540,7 @@ namespace MuonCombined {
                         if (hitCounts.nphiTrigHitLayers == 0 && hitCounts.netaTrigHitLayers == 0) continue;
                     }
                 }
-                if (stIndex == Muon::MuonStationIndex::EI) {
+                if (stIndex == StationIndex::EI) {
                     // remove CSC segment with hits in only one projection
                     /// Update ME: Need to think about cuts for the NSW!
                     if (m_idHelperSvc->isCsc(chId) && !hitCounts.ncscHits.hasEtaAndPhi()) continue;

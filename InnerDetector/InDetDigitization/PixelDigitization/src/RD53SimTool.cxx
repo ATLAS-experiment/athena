@@ -5,7 +5,7 @@
 #include "RD53SimTool.h"
 #include "PixelDigitizationUtilities.h"
 #include "PixelNoiseFunctions.h"
-#include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "InDetIdentifier/PixelID.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 #include "SiDigitization/SiChargedDiodeCollection.h"
 #include "InDetRawData/PixelRDO_Collection.h"
@@ -28,7 +28,6 @@ RD53SimTool::~RD53SimTool() = default;
 StatusCode RD53SimTool::initialize() {
   ATH_CHECK(FrontEndSimTool::initialize());
   ATH_MSG_DEBUG("RD53SimTool::initialize()");
-  ATH_CHECK(m_moduleDataKey.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -39,49 +38,34 @@ StatusCode RD53SimTool::finalize() {
 
 void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                           CLHEP::HepRandomEngine* rndmEngine) {
-  const InDetDD::PixelModuleDesign* p_design =
-    static_cast<const InDetDD::PixelModuleDesign*>(&(chargedDiodes.element())->design());
-
-  if (p_design->getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
-    return;
-  }
-
   const PixelID* pixelId = static_cast<const PixelID*>(chargedDiodes.element()->getIdHelper());
   const IdentifierHash moduleHash = pixelId->wafer_hash(chargedDiodes.identify()); // wafer hash
   Identifier moduleID = pixelId->wafer_id(chargedDiodes.element()->identify());
 
   int barrel_ec = pixelId->barrel_ec(chargedDiodes.element()->identify());
-  int layerIndex = pixelId->layer_disk(chargedDiodes.element()->identify());
-
   if (std::abs(barrel_ec) != m_BarrelEC) {
     return;
   }
 
   const EventContext& ctx{Gaudi::Hive::currentContext()};
-  SG::ReadCondHandle<PixelModuleData> moduleDataHandle(m_moduleDataKey, ctx);
-  const PixelModuleData *moduleData = *moduleDataHandle;
   SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
 
   int overflowToT = 14; //for RD53 (aka ITkPixV2) chip, not FEI4
 
-  std::vector<Pixel1RawData*> p_rdo_small_fei4;
-  std::vector<int> row, col;
-  
-
   // Add cross-talk
-  crossTalk(moduleData->getCrossTalk(barrel_ec, layerIndex), chargedDiodes);
+  auto xtalk = m_chipSim.crossTalk();
+  crossTalk(xtalk, chargedDiodes);
 
   if (m_doNoise) {
     // Add thermal noise
     thermalNoise(m_thermalNoise, chargedDiodes, rndmEngine);
-
     // Add random noise
-    randomNoise(chargedDiodes, moduleData, m_numberOfBcid, calibData, rndmEngine, m_pixelReadout.get());
+    randomNoise(chargedDiodes, m_chipSim, m_numberOfBcid, calibData, rndmEngine, m_pixelReadout.get());
   }
 
   // Add random diabled pixels
-  randomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
+  randomDisable(chargedDiodes, m_chipSim, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
 
   for (auto &[mapId,mapDiode]:chargedDiodes) {//cannot be const ref, mapDiode will be altered
     Identifier diodeID = chargedDiodes.getId(mapId);
@@ -95,7 +79,6 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     // Apply analogue threshold, timing simulation
     const auto &thresholds = calibData->getThresholds(type, moduleHash, FE);
     double threshold =  PixelDigitization::randomThreshold(thresholds, rndmEngine); 
-    // This noise check is unaffected by digitizationFlags.doInDetNoise in 21.0 - see PixelCellDiscriminator.cxx in that branch
 
     if (charge > threshold) {
       int bunchSim = 0;
@@ -124,9 +107,10 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     // charge to ToT conversion
     double tot = calibData->getToT(type, moduleHash, FE, charge);
     double totsig = calibData->getTotRes(moduleHash, FE, tot);
-    int nToT = generateToT(rndmEngine, tot,totsig, std::make_pair(1,overflowToT));
+    int nToT = generateToT(rndmEngine, tot,totsig, std::make_pair(0,overflowToT));
+    auto thresh = m_chipSim.totThreshold();
 
-    if (nToT <= moduleData->getToTThreshold(barrel_ec, layerIndex)) {
+    if (nToT <= thresh) {
       SiHelper::belowThreshold(mapDiode, true, true);
     }
 

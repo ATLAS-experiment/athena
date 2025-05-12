@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=8 sw=2
@@ -39,8 +39,8 @@ using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 //______________________________constructor________________________________
 MissingMassCalculator::MissingMassCalculator(
-    MMCCalibrationSet::e aset, std::string m_paramFilePath)
-    : m_randomGen(), Prob(new MissingMassProb(aset, m_paramFilePath)) {
+    MMCCalibrationSet::e aset, std::string paramFilePath)
+    : m_randomGen(), Prob(new MissingMassProb(aset, paramFilePath)) {
   m_mmcCalibrationSet = aset;
   preparedInput.m_fUseVerbose = 0;
   preparedInput.m_beamEnergy = 6500.0; // for now LHC default is sqrt(S)=7 TeV
@@ -85,6 +85,9 @@ MissingMassCalculator::MissingMassCalculator(
                                   // if need to study various options
   m_fUseEfficiencyRecovery = 0;     // no re-fit by default
   m_fUseFloatStopping = 0;
+  m_fUseFloatStoppingMinIter = 10000;
+  m_fUseFloatStoppingCheckFreq = 1000;
+  m_fUseFloatStoppingComp = 0.05;
 
   preparedInput.m_METScanScheme = 1; // MET-scan scheme: 0- use JER; 1- use simple sumEt & missingHt
                                    // for Njet=0 events in (lep-had winter 2012)
@@ -2521,23 +2524,23 @@ bool MissingMassCalculator::SpaceWalkerWalk() {
     return false; // for now simple stopping criterion on number of iteration
 
   // floating stopping criterion, reduces run-time for lh, hh by a factor ~2 and ll by roughly
-  // factor ~3 check if every scanned variable and resulting mass thermalised after 10k iterations
-  // and then every 1k iterations do this by checking that the means of the split distributions is
-  // comparable within 5% of their sigma
-  if (m_iter0 >= 10000 && (m_iter0 % 1000) == 0 && m_fUseFloatStopping) {
-    if (std::abs(m_fMEtP_split1->GetMean() - m_fMEtP_split2->GetMean()) <= 0.05 * m_fMEtP_split1->GetRMS()) {
+  // factor ~3 check if every scanned variable and resulting mass thermalised after N (default 10k) iterations
+  // and then every M (default 1k) iterations do this by checking that the means of the split distributions is
+  // comparable within X% (default 5%) of their sigma
+  if (m_iter0 >= m_fUseFloatStoppingMinIter && (m_iter0 % m_fUseFloatStoppingCheckFreq) == 0 && m_fUseFloatStopping) {
+    if (std::abs(m_fMEtP_split1->GetMean() - m_fMEtP_split2->GetMean()) <= m_fUseFloatStoppingComp * m_fMEtP_split1->GetRMS()) {
       if (std::abs(m_fMEtL_split1->GetMean() - m_fMEtL_split2->GetMean()) <=
-          0.05 * m_fMEtL_split1->GetRMS()) {
+          m_fUseFloatStoppingComp * m_fMEtL_split1->GetRMS()) {
         if (std::abs(m_fMnu1_split1->GetMean() - m_fMnu1_split2->GetMean()) <=
-            0.05 * m_fMnu1_split1->GetRMS()) {
+            m_fUseFloatStoppingComp * m_fMnu1_split1->GetRMS()) {
           if (std::abs(m_fMnu2_split1->GetMean() - m_fMnu2_split2->GetMean()) <=
-              0.05 * m_fMnu2_split1->GetRMS()) {
+              m_fUseFloatStoppingComp * m_fMnu2_split1->GetRMS()) {
             if (std::abs(m_fPhi1_split1->GetMean() - m_fPhi1_split2->GetMean()) <=
-                0.05 * m_fPhi1_split1->GetRMS()) {
+                m_fUseFloatStoppingComp * m_fPhi1_split1->GetRMS()) {
               if (std::abs(m_fPhi2_split1->GetMean() - m_fPhi2_split2->GetMean()) <=
-                  0.05 * m_fPhi2_split1->GetRMS()) {
+                  m_fUseFloatStoppingComp * m_fPhi2_split1->GetRMS()) {
                 if (std::abs(m_fMmass_split1->GetMean() - m_fMmass_split2->GetMean()) <=
-                    0.05 * m_fMmass_split1->GetRMS()) {
+                    m_fUseFloatStoppingComp * m_fMmass_split1->GetRMS()) {
                   return false;
                 }
               }

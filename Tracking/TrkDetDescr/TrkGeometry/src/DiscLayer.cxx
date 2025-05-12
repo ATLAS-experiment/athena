@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,12 +19,12 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
-                          Trk::DiscBounds* dbounds,
+                          std::shared_ptr<const Trk::DiscBounds> dbounds,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
-  : DiscSurface(transform, dbounds)
+  : DiscSurface(transform, std::move(dbounds))
   , Layer(laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(nullptr)
 {
@@ -44,13 +44,13 @@ Trk::DiscLayer::DiscLayer(Trk::DiscSurface* disc,
 }
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
-                          Trk::DiscBounds* dbounds,
+                          std::shared_ptr<const Trk::DiscBounds> dbounds,
                           std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           Trk::IApproachDescriptor* ades,
                           int laytyp)
-  : DiscSurface(transform, dbounds)
+  : DiscSurface(transform, std::move(dbounds))
   , Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
@@ -61,14 +61,14 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
 }
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
-                          Trk::DiscBounds* dbounds,
+                          std::shared_ptr<const Trk::DiscBounds> dbounds,
                           std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           Trk::IApproachDescriptor* ades,
                           int laytyp)
-  : DiscSurface(transform, dbounds)
+  : DiscSurface(transform, std::move(dbounds))
   , Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
@@ -158,7 +158,7 @@ void Trk::DiscLayer::resizeLayer(const VolumeBounds& bounds, double envelope) {
     Trk::DiscBounds* rDiscBounds =
         new Trk::DiscBounds(rInner + envelope, rOuter - envelope);
     Trk::DiscSurface::m_bounds =
-        Trk::SharedObject<const Trk::SurfaceBounds>(rDiscBounds);
+        std::shared_ptr<const Trk::SurfaceBounds>(rDiscBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // r/phi binning
     if (Trk::Layer::m_layerMaterialProperties) {
@@ -247,8 +247,8 @@ void Trk::DiscLayer::buildApproachDescriptor() {
       Amg::Transform3D(Amg::Translation3D(asnPosition));
     Amg::Transform3D aspTransform =
       Amg::Transform3D(Amg::Translation3D(aspPosition));
-    aSurfaces->push_back(new Trk::DiscSurface(aspTransform, db->clone()));
-    aSurfaces->push_back(new Trk::DiscSurface(asnTransform, db->clone()));
+    aSurfaces->push_back(new Trk::DiscSurface(aspTransform, std::make_shared<Trk::DiscBounds>(*db)));
+    aSurfaces->push_back(new Trk::DiscSurface(asnTransform, std::make_shared<Trk::DiscBounds>(*db)));
     // set the layer and make TGOwn
     for (auto& sIter : (*aSurfaces)) {
       sIter->associateLayer(*this);

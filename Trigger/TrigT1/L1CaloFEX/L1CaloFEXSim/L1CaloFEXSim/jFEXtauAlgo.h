@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXtauAlgo - Algorithm for Tau Algorithm in jFEX
@@ -11,17 +11,12 @@
 #ifndef jFEXtauAlgo_H
 #define jFEXtauAlgo_H
 
+#include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXtauAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h" 
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h" 
-#include "StoreGate/StoreGateSvc.h" 
-#include "PathResolver/PathResolver.h"
 
 
 namespace LVL1 {
@@ -48,7 +43,7 @@ namespace LVL1 {
     virtual int getClusterEt() const override;
     virtual int getFirstEtRing() const override;
     virtual bool getTauSat() const override;
-    virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
+    virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map)  override;
     
 protected:
 
@@ -64,8 +59,8 @@ protected:
         std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGMap;
         std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeMap;     
         
-        StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);  
-        int getTTowerET(unsigned int TTID );  
+        StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&) const;
+        int getTTowerET(unsigned int TTID ) const;
         bool getTTowerSat(unsigned int TTID );
         
         int m_TTwindow[3][3]={{0}};

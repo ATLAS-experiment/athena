@@ -26,17 +26,17 @@ def activateActsComponents(icf):
 
     
 # Main ACTS Tracking pass    
-def createActsTrackingPassFlags():
+def createActsLegacyTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension = "Acts"
+    icf.extension = "ActsLegacy"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     return icf
 
 # Main ACTS Tracking pass with Fast Tracking configuration
-def createActsFastTrackingPassFlags():
+def createActsTrackingPassFlags():
     icf = createITkFastTrackingPassFlags()
-    icf.extension = "ActsFast"
+    icf.extension = "Acts"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     return icf

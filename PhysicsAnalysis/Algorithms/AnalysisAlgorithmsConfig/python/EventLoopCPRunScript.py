@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AnalysisAlgorithmsConfig.CPBaseRunner import CPBaseRunner
 from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
+import os
 
 class EventLoopCPRunScript(CPBaseRunner):
     def __init__(self):
@@ -17,6 +18,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         derivedGroup.add_argument('--strip', dest='strip', action='store_true', help='Move the analysis root file to the top level, and delete the work directory.'
                                   ' Mainly useful for standardizing the output with the Athena framework.')
         derivedGroup.add_argument('--work-dir', dest='work_dir', default='workDir', help='The work directory for the EL job')
+        derivedGroup.add_argument('--no-factory-preload', dest='no_factory_preload', action='store_true', help='Preload the factories for the EL job. This saves memory and sidesteps some issues.')
         return
         
     def makeAlgSequence(self):
@@ -77,11 +79,17 @@ class EventLoopCPRunScript(CPBaseRunner):
         
         self.job = ROOT.EL.Job()
         self.job.sampleHandler(self.sampleHandler)
+        self.job.options().setDouble(ROOT.EL.Job.optFilesPerWorker, 100)
         self.job.options().setDouble(ROOT.EL.Job.optMaxEvents, self.flags.Exec.MaxEvents)
         self.job.options().setString(ROOT.EL.Job.optSubmitDirMode, 'unique-link')
+    
         for alg in self.makeAlgSequence():
             self.job.algsAdd(alg)
         self.job.outputAdd(ROOT.EL.OutputStream('ANALYSIS'))
+        if not self.args.no_factory_preload:
+            preload = os.getenv('EL_FACTORY_PRELOAD', 'libComponentFactoryPreloaderDict.so,CP::preloadComponentFactories')
+            self.logger.info(f"Preloading factories: {preload}")
+            self.job.options().setString(ROOT.EL.Job.optFactoryPreload, preload)
         
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
         self.driverSubmit(driver)

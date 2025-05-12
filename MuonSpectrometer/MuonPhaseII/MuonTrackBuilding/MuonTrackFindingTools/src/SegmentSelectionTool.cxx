@@ -88,7 +88,8 @@ namespace MuonR4{
             return false;
         }
         /** Segment sector deviates too much */
-        const unsigned deltaSec = std::abs(segA.msSector()->sector() - segB.msSector()->sector()) ;
+        const unsigned secMax = Muon::MuonStationIndex::numberOfSectors();
+        const unsigned deltaSec = std::abs(segA.msSector()->sector() - segB.msSector()->sector()) % secMax;
         if (deltaSec > 1) {
             return false;
         } 

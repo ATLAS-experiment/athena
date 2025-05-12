@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVDBMETADATATOOLS_IOVDBMETADATATOOL_H
@@ -36,9 +36,8 @@ class IOVMetaDataContainer;
  *
  **/
 
-class IOVDbMetaDataTool : virtual public AthAlgTool,
-                          virtual public IIncidentListener,
-                          virtual public IIOVDbMetaDataTool
+class IOVDbMetaDataTool : public extends<AthAlgTool,
+                                         IIncidentListener, IIOVDbMetaDataTool>
 {
 public:    
     // Constructor
@@ -114,10 +113,6 @@ private:
     typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
     StoreGateSvc_t   m_metaDataStore;
     StoreGateSvc_t   m_inputStore;
-
-    // Has the FirstInputFileIncident fired? Used to skip the first
-    // BeginInputFile incident
-    bool             m_processedFirstInputFileIncident;
 
     // Flag to check whether we need to override run number for MC
     // events in incoming file meta data. This is needed for example

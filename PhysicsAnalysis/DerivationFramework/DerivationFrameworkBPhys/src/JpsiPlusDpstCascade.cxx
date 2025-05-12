@@ -4,12 +4,12 @@
 /////////////////////////////////////////////////////////////////
 // JpsiPlusDpstCascade.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/JpsiPlusDpstCascade.h"
+#include "JpsiPlusDpstCascade.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include <algorithm>

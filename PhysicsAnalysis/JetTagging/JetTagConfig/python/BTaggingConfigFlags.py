@@ -115,6 +115,13 @@ def getNNs(flags):
                 'cone_association': True
             },
             *[{'folds' : [nn_path]} for nn_path in gn3_paths]
+        ],
+        'AntiKt4EMPFlowByVertexJets': [
+            {
+                'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True
+            }
         ]
     }
 
@@ -171,6 +178,9 @@ def createBTaggingConfigFlags():
 
     # GNN vertex fitter
     btagcf.addFlag("BTagging.GNNVertexFitter", False)
+
+    # a flag to enable legacy BTagging
+    btagcf.addFlag("BTagging.EnableLegacyBTagging", True)
 
     # (multifold) NN trainings, each jet collection maps to a list of
     # dicts. The dict has several keys:

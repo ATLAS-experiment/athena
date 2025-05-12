@@ -22,7 +22,7 @@
 #include "TrkGeometry/DetachedTrackingVolume.h"
 #include "TrkGeometry/AlignableTrackingVolume.h"
 #include "TrkGeometry/Layer.h"
-#include "TrkGeometry/CompoundLayer.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/SubtractedCylinderLayer.h"
 #include "TrkGeometry/TrackingGeometry.h"
@@ -34,7 +34,6 @@
 #include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkEventUtils/TrkParametersComparisonFunction.h"
 #include "TrkDetDescrInterfaces/IDynamicLayerCreator.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
@@ -84,7 +83,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   m_robustSampling(true),
   m_useDenseVolumeDescription(true),
   m_useMuonMatApprox(false),
-  m_checkForCompundLayers(false),
   m_resolveActive(false),
   m_resolveMultilayers(true),
   m_printHelpOutputAtInitialize(false),
@@ -119,7 +117,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   declareProperty("UseDenseVolumeDescription", m_useDenseVolumeDescription);
   // muon system specifics
   declareProperty("UseMuonMatApproximation", m_useMuonMatApprox);
-  declareProperty("CheckForCompoundLayers", m_checkForCompundLayers);
   declareProperty("ResolveMuonStation", m_resolveActive);
   declareProperty("ResolveMultilayers", m_resolveMultilayers);
   declareProperty("ConsiderMuonStationOverlaps", m_activeOverlap);
@@ -1837,7 +1834,8 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
   // 1/ order valid intersections ( already in trSurfs )
 
   std::vector<unsigned int> sols;
-  for (unsigned int i = 0; i < cache.m_trSurfs.size(); i++) {
+  sols.reserve(cache.m_trSurfs.size());
+  for (unsigned int i = 0; i < cache.m_trSurfs.size(); ++i) {
     sols.push_back(i);
   }
 
@@ -2104,7 +2102,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
       if (dIter != cache.m_denseVols.end()) {
         currVol = (*dIter).first;
 
-        if (m_navigator->trackingGeometry(ctx)->atVolumeBoundary(nextPos, nextPar->momentum(), currVol, assocVol, dir,
+        if (Trk::TrackingGeometry::atVolumeBoundary(nextPos, nextPar->momentum(), currVol, assocVol, dir,
                                                               m_tolerance)) {
           if (assocVol && assocVol->zOverAtimesRho() != 0.) {
             cache.m_currentDense = assocVol;
@@ -2133,7 +2131,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
     throwIntoGarbageBin(cache,nextPar);
   }
 
- 
+
 
   if (nextPar) {
    ATH_MSG_DEBUG(
@@ -2229,7 +2227,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
         if (d2n.second > 0.001) {    // retrieve material and save bin entry
           pot = pos + 0.5 * d2n.second * dir * umo;
           binIDMat = binMat->material(pot);
-          iis.emplace_back(distTot, binIDMat->second, binIDMat->first);
+          iis.emplace_back(distTot, binIDMat->second, binIDMat->first.get());
           // std::cout <<"saving next bin entry:"<< distTot<<","<<binIDMat->second<<std::endl;
         }
       }
@@ -2429,7 +2427,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
 
   throwIntoGarbageBin(cache,nextPar);
 
- 
+
 
   ATH_MSG_DEBUG("  [+] StaticVol boundary reached of '" << cache.m_currentStatic->volumeName() << "'.");
 
@@ -2482,7 +2480,7 @@ Trk::TimedExtrapolator::extrapolateInAlignableTV(Trk::TimedExtrapolator::Cache &
   emptyGarbageBin(cache,&parm);
 
   // verify current position
-  Amg::Vector3D gp = parm.position();
+  const Amg::Vector3D& gp = parm.position();
   if (vol && vol->inside(gp, m_tolerance)) {
     staticVol = vol;
   } else {

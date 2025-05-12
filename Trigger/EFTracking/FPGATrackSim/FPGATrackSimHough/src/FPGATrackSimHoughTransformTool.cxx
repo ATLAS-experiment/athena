@@ -562,10 +562,10 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
                     double d_c4 = m_bitwise_phi0_conv * m_qApt_min_bit / (m_bitwise_phi0_conv * m_DBinQApt_bit_int);
 
                     if (static_cast<int64_t>(d_c1) <= static_cast<int64_t>(d_phi_conv_over_DBinQApt)) {
-			qApt_ht_pre = c2 - m_qApt_min_post_conv;
-		    }else{
-			qApt_ht_pre = 1 + c2 - m_qApt_min_post_conv;
-		    }
+                      qApt_ht_pre = c2 - m_qApt_min_post_conv;
+                    }else{
+                      qApt_ht_pre = 1 + c2 - m_qApt_min_post_conv;
+                    }
                     qApt_ht_sector = c3;
                     d_qApt_ht_sector = d_c3;
                     qApt_ht_array[j - start_phi0_bins_first_sector] = qApt_ht_sector;
@@ -581,15 +581,16 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
                     if (qApt_ht >= 0 && qApt_ht <= m_imageSize_y -1) {
                         hitLineQAPtPhi0[j] = {static_cast<int>(qApt_ht), static_cast<int>(j)};
                     }
-		    qApt_ht = -1;
-		    qApt_ht_pre = -1;
+                    qApt_ht = -1;
                 }
                 if (m_phi0_sectors > 1) { //formula after first sector
                     for (int ps = 0; ps < m_phi0_sectors -1; ps++) {
-                        double d_c6 = (m_DBinPhi0_bit_int * ((ps + 1) * m_phi0_bins_first_sector) * m_bitwise_qApt_conv) / m_DBinQApt_bit_int;
+                        //note: this is integer division, e.g. 3/2 = 1
+                        int64_t d_c6 = (m_DBinPhi0_bit_int * ((ps + 1) * m_phi0_bins_first_sector) * m_bitwise_qApt_conv) / m_DBinQApt_bit_int;
 
-                        Delta_phi0_after_first_sector = static_cast<int64_t>(d_c6) * static_cast<int64_t>(d_one_over_r_by_const);
-                        d_Delta_phi0_after_first_sector = d_c6 * d_one_over_r_by_const;
+                        Delta_phi0_after_first_sector = d_c6 * static_cast<int64_t>(d_one_over_r_by_const);
+                        //want a double here
+                        d_Delta_phi0_after_first_sector = static_cast<double>(d_c6) * d_one_over_r_by_const;
                         for (unsigned psi = start_phi0_bins_first_sector; psi < end_phi0_bins_first_sector; psi++) {
                             int64_t c7 = (qApt_ht_array[psi - start_phi0_bins_first_sector] + Delta_phi0_after_first_sector) / m_one_r_const_twoexp_post_conv;
                             
@@ -626,11 +627,13 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
               
                 for (unsigned n = start_qApt_bins_first_sector; n < end_qApt_bins_first_sector; n++) {
                   //formula for first sector
-                  double d_d2 =m_bitwise_phi0_conv * static_cast<int>(bins_y_new[n]) / m_DBinPhi0_bit_int;
+                  //note: this is integer division e.g. 3/2 = 1
+                  int64_t d2 =m_bitwise_phi0_conv * bins_y_new[n] / m_DBinPhi0_bit_int;
 
-                  phi0_ht_sector = phi_conv_offseted + r_bit * static_cast<int64_t>(d_d2); 
+                  phi0_ht_sector = phi_conv_offseted + r_bit * d2; 
                   phi0_ht_array[n - start_qApt_bins_first_sector] = phi0_ht_sector;
-                  d_phi0_ht_sector = d_phi_conv_offseted + r_bit * d_d2;
+                  //want a double result here
+                  d_phi0_ht_sector = d_phi_conv_offseted + r_bit * static_cast<double>(d2);
                   d_phi0_ht_array[n - start_qApt_bins_first_sector] = d_phi0_ht_sector;
 
                   if (phi0_ht_sector >= 0) {

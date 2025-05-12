@@ -11,6 +11,8 @@
 #include "FPGATrackSimKeyLayerBinDesc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
+#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
+#include "src/FPGATrackSimKeyLayerTool.h"
 
 StatusCode FPGATrackSimKeyLayerBinDesc::initialize()
 {
@@ -18,7 +20,7 @@ StatusCode FPGATrackSimKeyLayerBinDesc::initialize()
   const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
   for( Gaudi::Details::PropertyBase* prop : props ) {
     if (prop->ownerTypeName()==this->type()) {      
-      ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
+      ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t"<< prop->toString());
     }
   }
 
@@ -62,8 +64,15 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         double width_z_in  = step.binWidth(0)/2.0;
         double width_z_out = step.binWidth(1)/2.0;
         double zrange = width_z_in + (width_z_out-width_z_in) * (hitr-r1)/(r2-r1);
-        
-        passesEta = std::abs(storedhit.etaShift) < zrange;
+
+        // pad for strip length or imprecise SP.
+        double padding = 0;
+        if (storedhit.hitptr->getDetType() == SiliconTech::strip) {
+          // 2.5 cm, length of short strip, half length of long strip
+          padding = 0.025;
+        }
+
+        passesEta = std::abs(storedhit.etaShift) < (zrange+padding);
 
     }
 
@@ -92,3 +101,100 @@ bool FPGATrackSimKeyLayerBinDesc::stepIsREta(
   }
   return false;
 }
+
+//---------------------------------------------------------------------------------------
+//
+//     Write the relevant LUT tables for firmware
+// 
+//---------------------------------------------------------------------------------------
+void FPGATrackSimKeyLayerBinDesc::writeLUTs(const FPGATrackSimBinStep &step) const {
+  double r_in = m_keylyrtool.R1();
+  double r_out = m_keylyrtool.R2();
+
+  ATH_MSG_INFO("Writing constants for step:" << step.stepName() << " isRPhi="<< stepIsRPhi(step) << " isREta="<< stepIsREta(step));
+  
+  // write the keylayer definition
+  if (step.isFirstStep()) {
+    FPGATrackSimBinUtil::StreamManager sm("KeyLayer");
+    sm.writeVar("r_in",r_in);
+    sm.writeVar("r_out",r_out);
+  }
+
+  if (stepIsRPhi(step)) {
+
+    FPGATrackSimBinUtil::StreamManager sm(step.stepName());
+    int nbins = 0;
+    for (FPGATrackSimBinArray<int>::ConstIterator &bin : step.validBinsLocal()) {
+      if (!bin.data())
+        continue;      
+
+      sm.writeVar("phi_bin", bin.idx());
+
+      FPGATrackSimKeyLayerTool::KeyLyrPars keypars;
+      keypars.phi1 = step.binCenter(2,bin.idx()[0]);
+      keypars.phi2 = step.binCenter(3,bin.idx()[1]);
+      keypars.xm = step.binCenter(4, bin.idx()[2]);
+
+      auto rotated_coords = m_keylyrtool.getRotatedConfig(keypars);
+
+      sm.writeVar("y", rotated_coords.y);
+      sm.writeVar("x1p", rotated_coords.xy1p.first);
+      sm.writeVar("y1p", rotated_coords.xy1p.second);
+      sm.writeVar("cosb", rotated_coords.rotang.first);
+      sm.writeVar("sinb", rotated_coords.rotang.second);
+
+      sm.writeVar("x_m", keypars.xm);
+      sm.writeVar("x_factor", 4.0 * keypars.xm / (rotated_coords.y * rotated_coords.y));
+
+      nbins++;
+    }
+
+    double w_in = r_in * step.binWidth(2) / 2.0;
+    double w_out = r_out * step.binWidth(3) / 2.0;
+    double w_x = step.binWidth(4) / 2.0;
+    double dw_dr = (w_out - w_in) / (r_out - r_in);
+
+    sm.writeVar("w_x", 4.0 * w_x / ((r_out - r_in) * (r_out - r_in)));
+    sm.writeVar("w_in", w_in);
+    sm.writeVar("dw_dr", dw_dr);
+
+    sm.writeVar("nbins", nbins);
+  }
+
+  if (stepIsREta(step)) {
+
+    FPGATrackSimBinUtil::StreamManager sm(step.stepName());
+
+    int nbins = 0;
+    for (FPGATrackSimBinArray<int>::ConstIterator &bin : step.validBinsLocal()) {
+      if (!bin.data())
+        continue;
+
+      // write just this steps idxs
+      sm.writeVar("z_bin", bin.idx());
+
+      double z_in = step.binCenter(0, bin.idx()[0]);
+      double z_out = step.binCenter(1, bin.idx()[1]);
+      double dz_dr = (z_out - z_in) / (r_out - r_in);
+      
+      sm.writeVar("z_in", z_in);
+      sm.writeVar("dz_dr", dz_dr);
+    
+      nbins++;
+    }
+    sm.writeVar("nbins", nbins);
+
+    // same for all bins
+    double w_in = step.binWidth(0) / 2.0;
+    double w_out = step.binWidth(1) / 2.0;
+    double dw_dr = (w_out - w_in) / (r_out - r_in);
+    sm.writeVar("w_in", w_in);
+    sm.writeVar("dw_dr", dw_dr);
+
+  }
+
+    
+
+
+}
+    

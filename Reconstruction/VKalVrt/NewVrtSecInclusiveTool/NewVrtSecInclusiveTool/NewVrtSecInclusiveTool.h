@@ -221,11 +221,14 @@ namespace Rec {
 // Functions and structure below are for algorithm development, debugging and calibration
 // NOT USED IN PRODUCTION!
 
-     static int notFromBC(int PDGID) ;
-     static const xAOD::TruthParticle * getPreviousParent(const xAOD::TruthParticle * child, int & ParentPDG) ;
+     static const xAOD::TruthParticle * getPreviousParent(const xAOD::TruthParticle * child);
+     static bool isExcitedHadron(const xAOD::TruthParticle * tp);
+     static bool isDisplaced(const xAOD::TrackParticle * tp);
      int getIdHF(const xAOD::TrackParticle* TP ) const;
-     static int getG4Inter( const xAOD::TrackParticle* TP ) ;
-     static int getMCPileup(const xAOD::TrackParticle* TP ) ;
+     static int getG4Inter( const xAOD::TrackParticle* TP );
+     static int getMCPileup(const xAOD::TrackParticle* TP );
+     static int getProdVrtBarcode(const xAOD::TrackParticle* TP , float resolLimit=0.1); //Vertex-Vertex resolution limit =100mkm
+     static bool checkTrue2TrVrt(const xAOD::TrackParticle * TP1, const xAOD::TrackParticle * TP2, float nearCut=0.1); // Check true prod. vrt. closeness, def=100mkm
 
      struct DevTuple 
      { 
@@ -235,17 +238,21 @@ namespace Rec {
        float pttrk[maxNTrk];
        float d0trk[maxNTrk];
        float etatrk[maxNTrk];
-       float Sig3D[maxNTrk];
-       float dRdZrat[maxNTrk];
-       int   idHF[maxNTrk];
-       int   trkTRT[maxNTrk];
+       float Sig3D[maxNTrk];     // Track-PV 3D significance
+       float dRdZrat[maxNTrk];   // Track dR_signicance/dZ_significance
+       int   idHF[maxNTrk];      // Track from ground state  B/C hadron
+       int   trkTRT[maxNTrk];    // TRT hits on track
+       int   displaced[maxNTrk]; // Track from displaced truth vertex
+       //---
        int   n2Vrt;
-       int   VrtTrkHF[maxNVrt];
-       int   VrtTrkI[maxNVrt];
-       int   VrtCh[maxNVrt];
-       int   VrtIBL[maxNVrt];
-       int   VrtBL[maxNVrt];
+       int   VrtTrkHF[maxNVrt];  // Number of HF track in this vertex
+       int   VrtTrkI[maxNVrt];   // Number of interaction tracks in this vertex
+       int   VrtCh[maxNVrt];     // Vertex charge
+       int   VrtIBL[maxNVrt];    // 2-track IBL hits sum
+       int   VrtBL[maxNVrt];     // 2-track BL hits sum
        int   VrtDisk[maxNVrt];
+       int   VrtTrueBar[maxNVrt];  // Truth vertex barcode based identification
+       int   VrtTrueNear[maxNVrt]; // Truth vertex closeness based identification
        float VrtDist2D[maxNVrt];
        float VrtSig3D[maxNVrt];
        float VrtSig2D[maxNVrt];
@@ -253,16 +260,18 @@ namespace Rec {
        float VrtZ[maxNVrt];
        float VrtPt[maxNVrt];
        float VrtEta[maxNVrt];
-       float VrtBDT[maxNVrt];
-       float VrtProb[maxNVrt];
-       float VrtHR1[maxNVrt];
-       float VrtHR2[maxNVrt];
+       float VrtBDT[maxNVrt];    // Vertex selection BDT value (B/C vs others)
+       float VrtProb[maxNVrt];   // 2-track vertex probability
+       float VrtHR1[maxNVrt];    // First measured point on track 1
+       float VrtHR2[maxNVrt];    // First measured point on track 2
        float VrtDZ[maxNVrt];
        float VrtCosSPM[maxNVrt];
-       float VMinPtT[maxNVrt];
-       float VMinS3DT[maxNVrt];
-       float VMaxS3DT[maxNVrt];
+       float VMinPtT[maxNVrt];   // min(trk1_pt,trk2_pt) in 2-track vertex
+       float VMinS3DT[maxNVrt];  // min(trk1_signif,trk2_signif) in 2-track vertex
+       float VMaxS3DT[maxNVrt];  // min(trk1_signif,trk2_signif) in 2-track vertex
        float VSigMat[maxNVrt];
+       int   VrtIT[maxNVrt];    // Reference to track 1 in the track list
+       int   VrtJT[maxNVrt];    // Reference to track 2 in the track list
        //---
        int   nNVrt;
        int   NVrtTrk[maxNVrt];

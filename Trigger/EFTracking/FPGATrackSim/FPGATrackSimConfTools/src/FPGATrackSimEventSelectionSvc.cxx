@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TMath.h"
@@ -230,7 +230,7 @@ bool FPGATrackSimEventSelectionSvc::passMatching(FPGATrackSimTruthTrack const & 
   return true;
 }
 
-bool FPGATrackSimEventSelectionSvc::selectEvent(FPGATrackSimEventInputHeader* eventHeader)
+bool FPGATrackSimEventSelectionSvc::selectEvent(const FPGATrackSimEventInputHeader* eventHeader)
 {
   bool retval = false;
   if (m_st == SampleType::skipTruth)
@@ -286,17 +286,18 @@ const FPGATrackSimRegionSlices* FPGATrackSimEventSelectionSvc::getRegions()
 void FPGATrackSimEventSelectionSvc::createRegions()
 {
   if (!m_regions)
-    {
-      ATH_MSG_INFO("Creating the slices object");
-      MsgStream cmsg(msgSvc(), "FPGATrackSimRegionSlices");
-      cmsg.setLevel(msg().level()); // cause AthMessaging is stupid and doesn't have this function
-      if (m_oldRegionDefs.value())
-	m_regions = new FPGATrackSimRegionSlices(PathResolverFindCalibFile(m_regions_path.value()));
-      else 
-	m_regions = new FPGATrackSimRegionSlices(m_mind0.value(), m_minz0.value(), m_minqOverPt.value(),
-						 m_maxd0.value(), m_maxz0.value(), m_maxqOverPt.value());
-    }
+  {
+    ATH_MSG_INFO("Creating the slices object");
+    MsgStream cmsg(msgSvc(), "FPGATrackSimRegionSlices");
+    cmsg.setLevel(msg().level()); // cause AthMessaging is stupid and doesn't have this function
+    if (m_oldRegionDefs.value())
+      m_regions = new FPGATrackSimRegionSlices(PathResolverFindCalibFile(m_regions_path.value()));
+    else
+      m_regions = new FPGATrackSimRegionSlices(m_mind0.value(), m_minz0.value(), m_minqOverPt.value(),
+                                               m_maxd0.value(), m_maxz0.value(), m_maxqOverPt.value());
+  }
 }
+
 
 bool FPGATrackSimEventSelectionSvc::checkTruthTracks(const std::vector<FPGATrackSimTruthTrack>& truthTracks) const
 {  
@@ -310,9 +311,9 @@ bool FPGATrackSimEventSelectionSvc::checkTruthTracks(const std::vector<FPGATrack
 	      good=false;
       } 
       else {    
-	    ATH_MSG_DEBUG("selectEvent(): found one truth track, in region "
+	      ATH_MSG_DEBUG("selectEvent(): found one truth track, in region "
 		      <<getRegionID() <<"; track pars: "<< track.getPars());
-	    break;
+	      break;
       }
     }
     else {
@@ -321,7 +322,6 @@ bool FPGATrackSimEventSelectionSvc::checkTruthTracks(const std::vector<FPGATrack
     }
   }
   return good;
-  
 }
 
 bool FPGATrackSimEventSelectionSvc::checkTruthTracksLRT(const std::vector<FPGATrackSimTruthTrack>& truthTracks) const

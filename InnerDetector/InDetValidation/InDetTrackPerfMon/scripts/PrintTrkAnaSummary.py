@@ -6,22 +6,21 @@ import pandas as pd
 
 # Parsing arguments
 commandName = os.path.basename( sys.argv[0] )
-summaryDirDefault="InDetTrackPerfMonPlots/TrkAnaEF/Offline/Tracks/"
+summaryDirDefault="InDetTrackPerfMonPlots/&TrkAnaName&/Offline/Tracks/"
 parser = argparse.ArgumentParser( description = commandName+" options:" )
 parser.add_argument( "-t", "--testFile", help="Path to input TEST file" )
 parser.add_argument( "-r", "--refFile", default="", help="Path to input REFERENCE file" )
 parser.add_argument( "-T", "--testLabel", default="TEST", help="Label for TEST" )
 parser.add_argument( "-R", "--refLabel", default="REF", help="Label for REFERENCE" )
 parser.add_argument( "-d", "--dirName", default=summaryDirDefault, help="Name of the TDirectory path with plots" )
-parser.add_argument( "-o", "--outName", default="TrkAnaSummary.html", help="Name of the output html file" )
+parser.add_argument( "-a", "--analyses", default="TrkAnaEF", help="Comma-separeted list of track analyses to process" )
+parser.add_argument( "-o", "--outName", default="TrkAnaSummary_&TrkAnaName&.html", help="Name of the output html files" )
 MyArgs = parser.parse_args()
+anaList = MyArgs.analyses.strip().split(',')
 
 if not MyArgs.testFile:
     print( "ERROR: input test file not provided" )
     sys.exit(1)
-
-data={}
-index=[]
 
 def processFile( inFileName, dirName, label, data, index, updateIndex=True ):
     sList = []
@@ -119,33 +118,52 @@ def processFile( inFileName, dirName, label, data, index, updateIndex=True ):
     data.update( { label : sList } )
     inFile.Close()
 
+## Remove final .html if it exists
+outFile = MyArgs.outName.replace( "_&TrkAnaName&", "" )
+if os.path.isfile( outFile ) :
+    os.remove( outFile ) 
 
-## Processing test file
-processFile(
-    inFileName  = MyArgs.testFile,
-    dirName     = MyArgs.dirName,
-    label       = MyArgs.testLabel,
-    data        = data,
-    index       = index
-)
+## Looping over all the track analyses
+for anaName in anaList :
+    ## Track-analysis specific quantities
+    data = {}
+    index = []
+    anaDirName = MyArgs.dirName.replace( "&TrkAnaName&", anaName )
+    anaOutName = MyArgs.outName.replace( "&TrkAnaName&", anaName )
 
-## Processing reference file
-if MyArgs.refFile :
+    ## Processing test file
     processFile(
-        inFileName  = MyArgs.refFile,
-        dirName     = MyArgs.dirName,
-        label       = MyArgs.refLabel,
+        inFileName  = MyArgs.testFile,
+        dirName     = anaDirName,
+        label       = MyArgs.testLabel,
         data        = data,
-        index       = index,
-        updateIndex=False
+        index       = index
     )
 
-## printing table to screen
-df = pd.DataFrame( data, index=index )
-print( df )
+    ## Processing reference file
+    if MyArgs.refFile :
+        processFile(
+            inFileName  = MyArgs.refFile,
+            dirName     = anaDirName,
+            label       = MyArgs.refLabel,
+            data        = data,
+            index       = index,
+            updateIndex=False
+        )
 
-## printing table to html output file
-with open( MyArgs.outName, 'w' ) as f :
-    print( df.to_html(), file=f )
+    ## printing table to screen
+    df = pd.DataFrame( data, index=index )
+    titleStr = f"Summary for TrackAnalysis = {anaName}:"
+    print( f"\n\n---------------\n{titleStr}" )
+    print( df )
+
+    ## printing table to html output file
+    with open( anaOutName, 'w' ) as f :
+        print( df.to_html(), file=f )
+
+    ## Appending html table to final .html summary file
+    os.system( f"echo \"<br><b>{titleStr}</b><br>\" >> {outFile}" )
+    os.system( f"cat {anaOutName} >> {outFile}" )
+    os.remove( f"{anaOutName}" ) 
 
 sys.exit(0)

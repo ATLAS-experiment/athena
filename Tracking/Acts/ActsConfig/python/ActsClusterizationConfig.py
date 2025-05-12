@@ -69,11 +69,7 @@ def ActsPixelClusteringToolCfg(flags,
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
 
-    kwargs.setdefault(
-        'UseWeightedPosition',
-        not (flags.Tracking.doPixelDigitalClustering or flags.Beam.Type is BeamType.Cosmics)
-    )
-
+    kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
     kwargs.setdefault('UseBroadErrors', flags.Beam.Type is BeamType.Cosmics)
 
     acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
@@ -368,7 +364,8 @@ def ActsClusterizationCfg(flags,
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius Tracking uses full scan RoI created in the primary pass
     if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
-        roisName = 'ActsRegionOfInterest'
+        from InDetConfig.ITkActsHelpers import primaryPassExtension
+        roisName = f'{primaryPassExtension(flags)}RegionOfInterest'
         
     # Name of the Cluster container -> ITk + extension without "Acts" + Pixel or Strip + Clusters
     # We also define the same collection from the main ACTS pass (primary)

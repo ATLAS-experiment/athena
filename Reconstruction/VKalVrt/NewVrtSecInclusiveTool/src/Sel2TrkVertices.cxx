@@ -75,6 +75,8 @@ namespace Rec{
                h.m_curTup->Sig3D[i]=trackSignif[i];
                h.m_curTup->idHF[i] =getIdHF(selectedTracks[i]);
                h.m_curTup->dRdZrat[i] =dRdZratio[i];
+               h.m_curTup->displaced[i]=isDisplaced(selectedTracks[i]);
+
                uint8_t TRTHits;
                if( !(selectedTracks[i]->summaryValue(  TRTHits,xAOD::numberOfTRTHits))) TRTHits=0;
                h.m_curTup->trkTRT[i] =TRTHits;
@@ -184,9 +186,13 @@ namespace Rec{
                 getPixelDiscs(selectedTracks[j],jdisk1,jdisk2,jdisk3);
                 vrtVrtDist(primVrt, tmpVrt.fitVertex, tmpVrt.errorMatrix, Sig3D);
                 Dist2D=vrtVrtDist2D(primVrt, tmpVrt.fitVertex, tmpVrt.errorMatrix, Sig2D);
+                int barVrt1=getProdVrtBarcode(tracksForFit[0],0.1);
+                int barVrt2=getProdVrtBarcode(tracksForFit[1],0.1);
                 h.m_hb_signif3D->Fill(Sig3D,1.);
                 h.m_curTup->VrtTrkHF [h.m_curTup->n2Vrt] = getIdHF(tracksForFit[0])+ getIdHF(tracksForFit[1]);
                 h.m_curTup->VrtTrkI  [h.m_curTup->n2Vrt] = getG4Inter(tracksForFit[0])+ getG4Inter(tracksForFit[1]);
+                h.m_curTup->VrtTrueBar[h.m_curTup->n2Vrt]  = (barVrt1 && barVrt2 && barVrt1==barVrt2) ? 1 : 0;
+                h.m_curTup->VrtTrueNear[h.m_curTup->n2Vrt] = checkTrue2TrVrt(tracksForFit[0],tracksForFit[1],0.1);
                 h.m_curTup->VrtCh    [h.m_curTup->n2Vrt] = Charge;
                 h.m_curTup->VrtProb  [h.m_curTup->n2Vrt] = Prob2v;
                 h.m_curTup->VrtSig3D [h.m_curTup->n2Vrt] = Sig3D;
@@ -208,6 +214,8 @@ namespace Rec{
                 h.m_curTup->VrtDZ    [h.m_curTup->n2Vrt] = minDZ;
                 h.m_curTup->VrtDisk  [h.m_curTup->n2Vrt] = idisk1+10*idisk2+20*idisk3+30*jdisk1+40*jdisk2+50*jdisk3;
                 h.m_curTup->VSigMat  [h.m_curTup->n2Vrt] = dstMatSignif;
+                h.m_curTup->VrtIT    [h.m_curTup->n2Vrt] = i;
+                h.m_curTup->VrtJT    [h.m_curTup->n2Vrt] = j;
                 if(h.m_curTup->n2Vrt<DevTuple::maxNVrt-1)h.m_curTup->n2Vrt++;
              }
 //-------------------BDT based rejection

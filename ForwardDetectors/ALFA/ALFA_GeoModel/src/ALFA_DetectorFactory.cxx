@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelKernel/GeoMaterial.h"  
@@ -415,7 +415,7 @@ void ALFA_DetectorFactory::CreateAxes(GeoPhysVol* pMotherVolume)
 
 void ALFA_DetectorFactory::AddBeamPipeInStation(GeoFullPhysVol* pPhysStation, const char* pszStationLabel)
 {
-	char szLabel[32];
+	char szLabel[32]{};
 
 	double fzs=2*ALFASTATIONHSIZEZ;
 	double fzd=INNERDETZSPACE;
@@ -440,7 +440,7 @@ void ALFA_DetectorFactory::AddBeamPipeInStation(GeoFullPhysVol* pPhysStation, co
 
 void ALFA_DetectorFactory::AddGlobalVacuumSensorInStation(GeoFullPhysVol *pPhysStation, eAStationName eStatName)
 {
-	char szLabel[32];
+	char szLabel[32]{};
 	double fZOffset=0.0*CLHEP::mm;
 
 	if(eStatName==EASN_B7L1 || eStatName==EASN_A7L1) fZOffset=-ALFASTATIONHSIZEZ+0.5*ALFA_GVSTHICKNESS+100.0*CLHEP::mm;
@@ -460,7 +460,7 @@ void ALFA_DetectorFactory::AddGlobalVacuumSensorInStation(GeoFullPhysVol *pPhysS
 
 void ALFA_DetectorFactory::ConstructAlfaStations(map<eAStationName,ALFAPHYSVOLUME>* pmapActiveStations, GeoPhysVol* pWorld)
 {
-	char szLabel[32];
+	char szLabel[32]{};
 	eAStationName eAStation=EASN_UNDEFINED;
 	ASPOSPARAMS AStationParams;
 	ALFAPHYSVOLUME APhysVolume;
@@ -547,7 +547,7 @@ void ALFA_DetectorFactory::ConstructAlfaStations(map<eAStationName,ALFAPHYSVOLUM
 
 void ALFA_DetectorFactory::ConstructBeampipe(GeoPhysVol* pWorld)
 {
-	char szLabel[32], szLabel2[32];
+	char szLabel[32]{}, szLabel2[32]{};
 	double fInnerTubeHLength;
 	GeoTube* pTube, *pTube2;
 	GeoLogVol* pLogTube, *pLogTube2;

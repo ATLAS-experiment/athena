@@ -65,7 +65,7 @@ def getSecondStagePlanes(flags):
 
 def FPGATrackSimMapMakerCfg(flags):
     acc = ComponentAccumulator()
-    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimReadInputCfg, FPGATrackSimEventSelectionCfg
+    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimReadInputCfg, FPGATrackSimEventSelectionSvcCfg
     alg = CompFactory.FPGATrackSimMapMakerAlg(
         GeometryVersion=flags.GeoModel.AtlasVersion,
         OutFileName=flags.OutFileName,
@@ -75,7 +75,7 @@ def FPGATrackSimMapMakerCfg(flags):
         trim=flags.trim,
         globalTrim=flags.globalTrim,
         InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags)),
-        eventSelector = acc.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags)),
+        eventSelector = acc.getPrimaryAndMerge(FPGATrackSimEventSelectionSvcCfg(flags)),
         planes = getFirstStagePlanes(flags),
         planes2 = getSecondStagePlanes(flags)
         )

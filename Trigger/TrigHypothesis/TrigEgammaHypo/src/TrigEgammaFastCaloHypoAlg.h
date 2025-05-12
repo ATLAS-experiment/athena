@@ -1,15 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_TRIGEGAMMAFASTCALOHYPOALG_H
 #define TRIGEGAMMAHYPO_TRIGEGAMMAFASTCALOHYPOALG_H 1
 
 #include <string>
 #include "DecisionHandling/HypoBase.h"
-#include "xAODTrigCalo/TrigEMCluster.h"
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
-#include "xAODTrigRinger/TrigRingerRings.h"
 #include "xAODTrigRinger/TrigRingerRingsContainer.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "RingerSelectorTools/IAsgRingerSelectorTool.h"

@@ -72,13 +72,20 @@ public:
 
   // get bin value for a specific parameter value
   unsigned binIdx(unsigned par, double val) const {
-    return (val > m_parMin[par]) ? unsigned(floor((val - m_parMin[par]) / m_parStep[par])): 0; }
+    // Guard against both underflow and overflow.
+    if (val < m_parMin[par]) return 0;
+    else if (val > m_parMax[par]) return unsigned(floor((m_parMax[par] - m_parMin[par]) / m_parStep[par])) - 1;
+    else return unsigned(floor((val - m_parMin[par]) / m_parStep[par]));
+  }
 
   // convert parset (the binning parameters) to a 5-d bin
   IdxSet binIdx(const ParSet &pars) const;
 
   // Convert to previous steps idx
-  IdxSet convertToPrev(const IdxSet& cur) const;
+  IdxSet convertToPrev(const IdxSet &cur) const;
+
+  // Check if its the first step
+  bool isFirstStep() const {return m_prev==0;}
   
   //--------------------------------------------------------------------------------------------------
   //
@@ -111,8 +118,8 @@ private:
   unsigned m_stepNum{}; // number of step
   
   // the bins for this step
-  ParSet m_parStep;
   IdxSet m_parBins; // one means no binning this step
+  ParSet m_parStep; // step size of each bin
 
   // reference to the full range defined in the "tool"
   ParSet m_parMin;

@@ -58,7 +58,7 @@
 //
 //============================================================================
 //
-#include "DerivationFrameworkBPhys/CfAthAlgTool.h"
+#include "CfAthAlgTool.h"
 
 namespace DerivationFramework {
 

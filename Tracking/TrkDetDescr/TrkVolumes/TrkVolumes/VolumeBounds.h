@@ -59,7 +59,7 @@ class VolumeBounds {
 
   /** Method to decompose the Bounds into Surfaces, the Volume can turn them
    * into BoundarySurfaces */
-  virtual const std::vector<const Trk::Surface*>* decomposeToSurfaces(
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces(
     const Amg::Transform3D& transform) = 0;
 
   /** Provide accessor for BoundarySurfaces */

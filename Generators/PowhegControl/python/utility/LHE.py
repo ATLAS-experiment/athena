@@ -369,7 +369,7 @@ def update_XWGTUP_with_reweighted_nominal(input_event, wgtid_for_old_XWGTUP_valu
     rwgt_nominal = None
     XWGTUP = None
     for input_line in input_event.splitlines(True): # loop first to fine reweighted nominal
-        if input_line.find("<wgt id='0'>") < 0:
+        if input_line.find("<wgt id=\"0\">") < 0:
             continue
         else:
             try:

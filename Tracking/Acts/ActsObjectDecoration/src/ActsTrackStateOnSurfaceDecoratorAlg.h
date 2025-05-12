@@ -35,11 +35,11 @@ namespace ActsTrk {
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_trackParticlesKey {this, "TrackParticles", "", "Input xAOD::TrackParticles"};
     SG::ReadHandleKey< xAOD::TrackMeasurementValidationContainer > m_pixelMeasurementsKey {this, "PixelMeasurements", ""};
     SG::ReadHandleKey< xAOD::TrackMeasurementValidationContainer > m_stripMeasurementsKey {this, "StripMeasurements", ""};
-    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_decorator_actsTracks {this, "ActsTrackLink", "actsTrack"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_decorator_actsTracks {this, "ActsTrackLink", m_trackParticlesKey, "actsTrack"};
     
     SG::WriteHandleKey< xAOD::TrackStateValidationContainer > m_pixelMsosKey {this, "PixelMSOSs", ""};
     SG::WriteHandleKey< xAOD::TrackStateValidationContainer > m_stripMsosKey {this, "StripMSOSs", ""};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trackMsosLink {this, "msosLink", "msosLink"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trackMsosLink {this, "msosLink", m_trackParticlesKey, "msosLink"};
 
   };
 

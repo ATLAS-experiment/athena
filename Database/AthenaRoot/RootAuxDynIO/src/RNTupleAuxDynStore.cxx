@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/error.h"
@@ -44,7 +43,6 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
       auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
          : std::unique_lock<std::recursive_mutex>();
 
-      //auto view = m_reader.getNativeReader()->GetView<void>(fieldInfo.fieldName, nullptr);
       fieldInfo.view->BindRawPtr(data);
       (*fieldInfo.view)(m_entry);
 

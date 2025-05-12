@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkBPhys/AnyVertexSkimmingTool.h"
+#include "AnyVertexSkimmingTool.h"
 #include "xAODTracking/VertexContainer.h"
 #include "Gaudi/Property.h"
 namespace DerivationFramework {

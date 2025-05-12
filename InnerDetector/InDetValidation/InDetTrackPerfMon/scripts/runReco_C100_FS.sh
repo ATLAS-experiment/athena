@@ -51,7 +51,7 @@ fi
 ## running reconstruction
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsFastWorkflowFlags' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \

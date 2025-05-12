@@ -28,6 +28,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "ActsInterop/LoggerUtils.h"
 #include <fstream>
 #include <format>
+#include <cmath>
 
 using namespace Acts::UnitLiterals;
 
@@ -174,7 +175,7 @@ StatusCode MuonDetectorNavTest::execute() {
         //the particle hypothesis
         Acts::ParticleHypothesis particleHypothesis(static_cast<Acts::PdgParticle>(truthParticle->absPdgId()),
         truthParticle->m(),
-        Acts::AnyCharge(truthParticle->charge()));
+        Acts::AnyCharge(std::abs(truthParticle->charge())));
 
         
         std::vector<std::pair<const xAOD::MuonSegment*, std::vector<const xAOD::MuonSimHit*>>> muonSegmentWithSimHits;

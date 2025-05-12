@@ -39,9 +39,7 @@ class MuFastPatternFinder: public AthAlgTool
 {
    public:
 
-      MuFastPatternFinder(const std::string& type, 
-			   const std::string& name,
-			   const IInterface*  parent);
+      using AthAlgTool::AthAlgTool;
     
       virtual StatusCode initialize() override;
     

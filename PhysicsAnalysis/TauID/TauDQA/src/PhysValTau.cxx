@@ -51,7 +51,7 @@ StatusCode PhysValTau::bookHistograms()
   ATH_MSG_INFO ("Booking hists " << name() << "...");
    
   // Physics validation plots are level 10
-  m_oTauValidationPlots.reset(new TauValidationPlots(0,"Tau/" /* + m_TauJetContainerName*/, m_TauJetContainerName));
+  m_oTauValidationPlots.reset(new TauValidationPlots(0,"Tau/" + m_TauJetContainerName + "_", m_TauJetContainerName));
   m_oTauValidationPlots->setDetailLevel(100);
   m_oTauValidationPlots->initialize();
   std::vector<HistData> hists = m_oTauValidationPlots->retrieveBookedHistograms();

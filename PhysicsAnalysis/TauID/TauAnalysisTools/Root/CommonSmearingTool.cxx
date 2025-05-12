@@ -81,11 +81,6 @@ CommonSmearingTool::CommonSmearingTool(const std::string& sName)
   , m_tTauCombinedTES("TauCombinedTES", this)
   , m_eCheckTruth(TauAnalysisTools::Unknown)
 {
-  declareProperty("InputFilePath",           m_sInputFilePath           = "" );
-  declareProperty("SkipTruthMatchCheck",     m_bSkipTruthMatchCheck     = false );
-  declareProperty("ApplyFading",             m_bApplyFading             = true );
-  declareProperty("MVATESQualityCheck",      m_bMVATESQualityCheck      = true );
-  declareProperty("ApplyInsituCorrection",   m_bApplyInsituCorrection   = true );
 }
 
 /*

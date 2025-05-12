@@ -19,7 +19,6 @@
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkSurfaces/StraightLineSurface.h"
 #include "TrkSurfaces/ConeSurface.h"
-#include "TrkParameters/TrackParameters.h"
 
 #include "TrkEventTPCnv/TrkParameters/TrackParametersCnv_p2.h"
 #include "TrkEventTPCnv/helpers/EigenHelpers.h"

@@ -4,8 +4,8 @@
 #include "MsTrackTester.h"
 
 #include "StoreGate/ReadHandle.h"
+#include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
-
 
 using namespace MuonVal;
 using namespace MuonPRDTest;
@@ -22,10 +22,22 @@ namespace MuonValR4 {
         ATH_CHECK(m_truthKey.initialize(m_isMC));
         ATH_CHECK(m_msTrkSeedKey.initialize());
         ATH_CHECK(m_recoSegmentKey.initialize());
+        ATH_CHECK(m_segSelector.retrieve());
 
         int evOpts{0};
 
         m_recoSegs = std::make_unique<SegmentVariables>(m_tree, m_recoSegmentKey.key(), "Segments", msgLevel());
+        m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
+            "Segments_passSeedQual",[this](const SG::AuxElement* aux){
+            const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
+            return m_segSelector->passSeedingQuality(Gaudi::Hive::currentContext(),
+                                                     *MuonR4::detailedSegment(*seg)); }));
+        m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
+                                "Segments_passTrackQual",[this](const SG::AuxElement* aux){
+            const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
+            return m_segSelector->passTrackQuality(Gaudi::Hive::currentContext(),
+                                                   *MuonR4::detailedSegment(*seg)); 
+        }));
         if (m_isMC) {
             evOpts |= EventInfoBranch::isMC;
             m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
@@ -55,7 +67,17 @@ namespace MuonValR4 {
                     unsigned short linkIdx = m_truthTrks->find(truthP);                    
                     return linkIdx;
                 }));
-            
+            m_truthSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree,
+                                     "TruthSegments_hasBarrelProj", [this](const SG::AuxElement* aux){
+                                        const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
+                                        return std::abs(expressAtRefPlane(*seg, Location::Barrel)) < m_refEndcapDiscZ;
+                                    }));
+
+            m_truthSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree,
+                "TruthSegments_hasEndcapProj", [this](const SG::AuxElement* aux){
+                    const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
+                    return std::abs(expressAtRefPlane(*seg, Location::Endcap)) < m_refEndcapDiscR;
+                }));
             m_tree.addBranch(m_truthSegs);
 
             m_truthTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "TruthMuons");
@@ -82,17 +104,27 @@ namespace MuonValR4 {
         for (const MuonR4::MsTrackSeed& seed : *trkSeeds) {
             unsigned int seedIdx = m_seedPos.size();
             m_seedPos += seed.position();
+            m_seedType+= static_cast<char>(seed.location());
+            double minL{Gaudi::Units::km}, maxL{-Gaudi::Units::km}, minTheta{M_PI}, maxTheta{-M_PI};
             for (const xAOD::MuonSegment* seg : seed.segments()) {
                 m_seedRecoSegMatch[seedIdx].push_back(m_recoSegs->push_back(*seg));
                 const xAOD::MuonSegment* truthSeg = MuonR4::getMatchedTruthSegment(*seg);
                 if (!truthSeg) {
                     continue;
                 }
+                const double projected = expressAtRefPlane(*seg, seed.location());
+                const double theta = seg->direction().theta();
+                minL = std::min(minL, projected);
+                maxL = std::max(maxL, projected);
+                minTheta = std::min(minTheta, theta);
+                maxTheta = std::max(maxTheta, theta);
 
                 std::vector<unsigned>& matchCounter = truthToSeedMatchCounter[MuonR4::getTruthMatchedParticle(*truthSeg)];
                 if (seedIdx >= matchCounter.size()) matchCounter.resize(seedIdx +1);
                 ++matchCounter[seedIdx];
             }
+            m_seedLength+=(maxL - minL);
+            m_seedThetaCone+=(maxTheta - minTheta);
         }
         /** Then dump the reconstructed segments */
         const xAOD::MuonSegmentContainer* recoSegments{nullptr};
@@ -141,6 +173,27 @@ namespace MuonValR4 {
         ATH_CHECK(m_tree.fill(ctx));
         return StatusCode::SUCCESS;
     }
+    double MsTrackTester::expressAtRefPlane(const xAOD::MuonSegment& segment,
+                                            const Location plane) const {
+
+        const Amg::Vector3D pos{segment.position()};
+        const Amg::Vector3D dir{segment.direction()};
+
+        const Amg::Vector2D projPos{pos.perp(), pos.z()};
+        const Amg::Vector2D projDir{dir.perp(), dir.z()};
+
+        double lambda{0.};
+        if (Location::Barrel == plane) {
+            lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitX(), 
+                                       m_refBarrelR).value_or(0.);
+        } else {
+            lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitY(), 
+                                    (projPos[1] > 0 ? 1. : .1)* m_refEndcapDiscZ).value_or(0.);
+        }
+        const Amg::Vector2D refPoint{ (projPos + lambda * projDir)};
+        return plane == Location::Barrel ? refPoint.y() :  refPoint.x();
+    }
+
     StatusCode MsTrackTester::finalize() {
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;

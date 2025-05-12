@@ -11,7 +11,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
 
   // Boolean values
   MapInt m01 = {
-    {"UseDefaultCellBasedConfig",1},//is this one necessary
     {"TauConstituents_UsePionMass",1},
     {"FeatureExtractor_UseEmptySeeds",0},
   };

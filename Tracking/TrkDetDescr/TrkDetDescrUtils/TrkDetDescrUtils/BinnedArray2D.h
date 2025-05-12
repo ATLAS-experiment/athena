@@ -12,10 +12,10 @@
 #include "GaudiKernel/GaudiException.h"
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 
 // STL
 #include <vector>
+#include <memory>
 
 class MsgStream;
 
@@ -45,7 +45,7 @@ public:
 
  /**Constructors with arguments*/
  BinnedArray2D(
-     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector,
      const BinUtility& bingen)
      : BinnedArray<T>(),
        m_array{},
@@ -54,7 +54,7 @@ public:
    initialize(tclassvector);
  }
  BinnedArray2D(
-     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector,
      BinUtility&& bingen)
      : BinnedArray<T>(),
        m_array{},
@@ -167,17 +167,17 @@ private:
     }
   }
 
-  void initialize(const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector){
-    m_array = std::vector<std::vector<SharedObject<T>>>(m_binUtility.bins(1));
+  void initialize(const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector){
+    m_array = std::vector<std::vector<std::shared_ptr<T>>>(m_binUtility.bins(1));
     for (size_t i = 0; i < m_binUtility.bins(1); ++i) {
-      m_array[i] = std::vector<SharedObject<T>>(m_binUtility.bins(0));
+      m_array[i] = std::vector<std::shared_ptr<T>>(m_binUtility.bins(0));
     }
     // fill the Volume vector into the array
     size_t vecsize = tclassvector.size();
     for (size_t ivec = 0; ivec < vecsize; ++ivec) {
       const Amg::Vector3D currentGlobal(((tclassvector[ivec]).second));
       if (m_binUtility.inside(currentGlobal)) {
-        std::vector<SharedObject<T>>& curVec = m_array[m_binUtility.bin(currentGlobal, 1)];
+        std::vector<std::shared_ptr<T>>& curVec = m_array[m_binUtility.bin(currentGlobal, 1)];
         curVec[m_binUtility.bin(currentGlobal, 0)] = ((tclassvector)[ivec]).first;
       } else {
         throw GaudiException("BinnedArray2D", "Object outside bounds",
@@ -186,7 +186,7 @@ private:
     }
   }
   //!< vector of pointers to the class T
-  std::vector<std::vector<SharedObject<T>>> m_array{};
+  std::vector<std::vector<std::shared_ptr<T>>> m_array{};
   //!< 1D vector of cached not owning pointers to class T
   CxxUtils::CachedUniquePtr<std::vector<T*>> m_arrayObjects{nullptr};
   //!< binUtility for retrieving and filling the Array

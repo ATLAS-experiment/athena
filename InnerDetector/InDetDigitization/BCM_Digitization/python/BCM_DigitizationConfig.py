@@ -37,7 +37,7 @@ def BCM_DigitizationToolCommonCfg(flags, name="BCM_DigitizationTool", **kwargs):
     """Return a ComponentAccumulator with configured BCM_DigitizationTool"""
     acc = ComponentAccumulator()
     kwargs.setdefault("RndmSvc",
-                      acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+                      acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     kwargs.setdefault("HitCollName", "BCMHits")
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputRDOKey", flags.Overlay.BkgPrefix + "BCM_RDOs")
@@ -65,7 +65,7 @@ def BCM_DigitizationToolCommonCfg(flags, name="BCM_DigitizationTool", **kwargs):
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", BCM_FirstXing())
         kwargs.setdefault("LastXing",  BCM_LastXing())
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     BCM_DigitizationTool = CompFactory.BCM_DigitizationTool
     acc.setPrivateTools(BCM_DigitizationTool(name, **kwargs))
@@ -79,7 +79,7 @@ def BCM_DigitizationToolCfg(flags, name="BCM_DigitizationTool", **kwargs):
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(BCM_RangeCfg(flags))]
-        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)

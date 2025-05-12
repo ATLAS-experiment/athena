@@ -65,17 +65,19 @@ def TauTruthToolsCfg(flags):
 
     # tau truth matching, if reconstructed taus are present in the input
     # this should be dropped from derivations and deferred to analysis level (the only use case in derivations is PHYSLITE)
-    if "xAOD::TauJetContainer#TauJets" in flags.Input.TypedCollections:
-        DFCommonTauTruthMatchingTool = acc.getPrimaryAndMerge(TauTruthMatchingToolCfg(
+    DFCommonTauTruthMatchingTool = acc.getPrimaryAndMerge(TauTruthMatchingToolCfg(
             flags,
             name                            = "DFCommonTauTruthMatchingTool",
             TruthJetContainerName           = "AntiKt4TruthDressedWZJets"))
-        DFCommonTauTruthWrapperTool = acc.getPrimaryAndMerge(TauTruthMatchingWrapperCfg(
-            flags,
-            name                 = "DFCommonTauTruthMatchingWrapper",
-            TauTruthMatchingTool = DFCommonTauTruthMatchingTool,
-            TauContainerName     = "TauJets")) 
-        DFCommonTauTruthWrapperTools.append(DFCommonTauTruthWrapperTool)
+
+    for cont in ["TauJets","TauJets_EleRM"]:
+        if "xAOD::TauJetContainer#"+cont in flags.Input.TypedCollections: 
+            DFCommonTauTruthWrapperTool = acc.getPrimaryAndMerge(TauTruthMatchingWrapperCfg(
+                flags,
+                name                 = "DFCommon"+cont+"TruthMatchingWrapper",
+                TauTruthMatchingTool = DFCommonTauTruthMatchingTool,
+                TauContainerName     = cont))
+            DFCommonTauTruthWrapperTools.append(DFCommonTauTruthWrapperTool)
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation( "TauTruthCommonKernel", AugmentationTools = DFCommonTauTruthWrapperTools,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2.semantics
 from GaudiKernel.GaudiHandles import PrivateToolHandleArray, PublicToolHandle, ServiceHandle
@@ -222,27 +222,6 @@ class ToolHandleArraySemantics(GaudiConfig2.semantics.PropertySemantics):
                 a.append(bTool)
         return a
 
-class SubAlgoSemantics(GaudiConfig2.semantics.PropertySemantics):
-    __handled_types__  = ("SubAlgorithm",)
-    def __init__(self,cpp_type):
-        super(SubAlgoSemantics, self).__init__(cpp_type)
-        
-    def store(self,value):
-        if not isinstance(value,Sequence):
-            value=[value,]
-        
-        for v in value:
-            if v.__component_type__ != 'Algorithm':
-                raise TypeError('Algorithm expected, got {!r} in assignemnt to {}'.\
-                                format(value, self.name))
-        return value
-
-
-    #Without explicitly definig a default, calling .append or += will change the class-default, 
-    #affecting all instances of the same class. 
-    def default(self,value):
-        return []
-
 
 from AthenaServices.ItemListSemantics import OutputStreamItemListSemantics
 
@@ -253,6 +232,5 @@ GaudiConfig2.semantics.SEMANTICS.append(ToolHandleSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(ToolHandleArraySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(PublicHandleSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(PublicHandleArraySemantics)
-GaudiConfig2.semantics.SEMANTICS.append(SubAlgoSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(MapMergeNoReplaceSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(OutputStreamItemListSemantics)

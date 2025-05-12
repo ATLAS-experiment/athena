@@ -3,7 +3,7 @@
 */
 
 
-#include "DerivationFrameworkBPhys/VertexPlus1TrackCascade.h"
+#include "VertexPlus1TrackCascade.h"
 
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"

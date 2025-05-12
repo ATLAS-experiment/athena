@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -106,9 +106,9 @@ StatusCode L1TopoOnlineMonitor::initialize() {
   auto & connOpt3 = l1menu->connector("Topo1Opt3");
 
   m_TopoAlgTriggerNames.reserve(32*4);
-  m_TopoAlgTriggerNotVetoed.reserve(32*4);
+  m_TopoAlgTriggerNotVetoed.resize(32*4);
   m_TopoMultTriggerNames.reserve(64*4);
-  m_TopoMultTriggerNotVetoed.reserve(64*4);
+  m_TopoMultTriggerNotVetoed.resize(64*4);
 
   //TopoOpt
   auto & tlopt0 = connOpt0.triggerLines();

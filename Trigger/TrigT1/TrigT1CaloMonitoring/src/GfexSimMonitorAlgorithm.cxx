@@ -116,8 +116,10 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 	auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
 	auto simReady = Monitored::Scalar<bool>("SimulationReady",simReadyFlag);
 
-
+	//sorting mismatched data/sim TOB
     std::set<const xAOD::gFexJetRoI*> mismatchedTOBs;
+	std::set<const xAOD::gFexJetRoI*> DataMismatchedTOBs;
+
 	for (auto tob1 : *tobs1Cont) {
 		bool isMatched = false;
 		//bool isPartMatched = false;
@@ -136,6 +138,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 		}
 		if(!isMatched) {
             mismatchedTOBs.insert(tob1);
+			DataMismatchedTOBs.insert(tob1); //saving only the mismatched data tob
 		}
 	}
 
@@ -192,12 +195,13 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
         tobMismatched=100;
         auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
 		fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady,eventType);
+		
 		if (label=="gJ" || label=="gLJ") {
             auto locIdx = Monitored::Scalar<std::string>("locIdx","");
-            for(auto tob : mismatchedTOBs) {
-                locIdx = std::to_string(tob->iEta()) + ":" + std::to_string(tob->iPhi());
-                fill("mismatches"+label,lbn,locIdx);
-            }
+			for(auto tob : DataMismatchedTOBs) {
+				locIdx = std::to_string(tob->iEta()) + ":" + std::to_string(tob->iPhi());
+                fill("mismatches"+label,lbn,locIdx); //only recording data eta,phi vs LBN
+			}
 		}
 	} else {
         tobMismatched=0;

@@ -8,5 +8,62 @@
         "plotTechnicalEfficiencies" : true,
         "useActsSiMeasurements" : true,
         "plotDuplicateRates"  : true
+    },
+    "TrkAnaEF_EFsel" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true,
+        "OfflineQualityWP" : "EFTracking"
+    },
+    "TruthMuons" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "SelectTruthObject"  : "Muon",
+        "plotDuplicateRates"  : true
+    },
+    "TruthMuons_EFsel" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true,
+        "SelectTruthObject"  : "Muon",
+        "OfflineQualityWP" : "EFTracking"
+    },
+    "TruthPions" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "SelectTruthObject"  : "Pion",
+        "plotDuplicateRates"  : true
+    },
+    "TruthPions_EFsel" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true,
+        "SelectTruthObject"  : "Pion",
+        "OfflineQualityWP" : "EFTracking"
     }
 }

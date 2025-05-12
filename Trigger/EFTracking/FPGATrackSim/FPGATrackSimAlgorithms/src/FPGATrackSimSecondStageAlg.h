@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSim_SECONDSTAGEALG_H
 #define FPGATrackSim_SECONDSTAGEALG_H
@@ -65,14 +65,14 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimHoughRootOutputTool>      m_houghRootOutputTool {this, "HoughRootOutputTool", "FPGATrackSimHoughRootOutputTool/FPGATrackSimHoughRootOutputTool", "Hough ROOT Output Tool"};
 
         // Scoring and duplicate removal. We need second stage versions of these.
-        ToolHandle<FPGATrackSimNNTrackTool>              m_NNTrackTool {this, "NNTrackTool", "FPGATrackSimNNTrackTool/FPGATrackSimNNTrackTool", "NN Track Tool"};
+        ToolHandle<FPGATrackSimNNTrackTool>              m_NNTrackTool {this, "NNTrackTool", "FPGATrackSimNNTrackTool/FPGATrackSimNNTrackTool_2nd", "NN Track Tool"};
         ToolHandle<FPGATrackSimTrackFitterTool>          m_trackFitterTool {this, "TrackFitter_2nd", "FPGATrackSimTrackFitterTool/FPGATrackSimTrackFitterTool_2nd", "2nd stage track fit tool"};
         ToolHandle<FPGATrackSimOverlapRemovalTool>       m_overlapRemovalTool {this, "OverlapRemoval_2nd", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_2nd", "2nd stage overlap removal tool"};
 
         // Miscellaneous infrastructure.
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
-        ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
+        ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "", "Event selection Svc"};
         // chrono service
         ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 

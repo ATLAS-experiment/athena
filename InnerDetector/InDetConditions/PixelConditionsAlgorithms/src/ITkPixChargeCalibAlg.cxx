@@ -41,9 +41,15 @@ namespace{
   }
   
   LegacyFitParameters 
-  defaultLegacyParameters(){
-    static const LegacyFitParameters legacyFit{14.0f, -1000.f, 8000.f, 14.0f};
-    return legacyFit;
+  defaultLegacyParameters(int bec, int layer){
+    // the first parameter should match the threshold
+    static const LegacyFitParameters t{14.0f, -600.f, 4500.f, 14.0f};
+    static const LegacyFitParameters ec0{14.0f, -600.f, 4500.f, 14.0f};
+    static const LegacyFitParameters b0{14.0f, -900.f, 4000.f, 14.0f}; //different for first layer of barrel
+    if (layer == 0){
+      return bec==0 ? b0 : ec0;
+    }
+    return t;
   }
   
   Resolutions
@@ -100,7 +106,7 @@ StatusCode ITkPixChargeCalibAlg::execute(const EventContext& ctx) const {
     const auto & [numFE, technology] = numChipsAndTechnology(element);
     const std::vector<Thresholds> allDefaultThresholds(numFE, defaultThresholds(barrel_ec, layer));
     //
-    const std::vector<LegacyFitParameters> allDefaultFitParams(numFE, defaultLegacyParameters());
+    const std::vector<LegacyFitParameters> allDefaultFitParams(numFE, defaultLegacyParameters(barrel_ec, layer));
     //
     const std::vector<LinearFitParameters> allDefaultLinearParams(numFE, LinearFitParameters{0.0f, 0.0f});
     //

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_DATASTORE_H
@@ -70,7 +70,7 @@ namespace SG {
    * we fill in the CLID/key fields of the proxy and also enter
    * it in m_storeMap.
    */
-  class DataStore : virtual public IProxyRegistry
+  class DataStore : public IProxyRegistry
   {
 
   public:
@@ -90,7 +90,7 @@ namespace SG {
     virtual ~DataStore();
 
     void setStoreID(StoreID::type id) { m_storeID = id;}
-    virtual StoreID::type storeID() const { return m_storeID; }
+    virtual StoreID::type storeID() const override { return m_storeID; }
  
     // If FORCE is true, then force deleting of all proxies,
     // even if they would normally only be reset.
@@ -102,17 +102,17 @@ namespace SG {
     //////////////////////////////////////////////////////////////////
     /// \name Implementation of IProxyRegistry.
     //@{
-    virtual StatusCode addToStore(const CLID& id, DataProxy* proxy);
+    virtual StatusCode addToStore(const CLID& id, DataProxy* proxy) override;
     /// return proxy for a given type/key pair
     /// if key is empty returns the default proxy (currently last registered)
-    virtual DataProxy* proxy(const TransientAddress* tAddr) const; 
+    virtual DataProxy* proxy(const TransientAddress* tAddr) const override;
     //@}
     virtual DataProxy* proxy(const CLID& id, 
-			     const std::string& key=SG::DEFAULTKEY) const;
+			     const std::string& key=SG::DEFAULTKEY) const override;
 
     /// get proxy with given key. Returns 0 to flag failure
     /// the key must match exactly (no wild carding for the default key)
-    SG::DataProxy* proxy_exact (sgkey_t sgkey) const;
+    virtual SG::DataProxy* proxy_exact (sgkey_t sgkey) const override;
 
     /// Like proxy_exact, but intended to be called without holding
     /// the store lock.  However, the store lock still must be passed
@@ -124,7 +124,7 @@ namespace SG {
     /// get proxy with given id. Returns 0 to flag failure
     /// the key must match exactly (no wild carding for the default key)
     virtual SG::DataProxy* proxy_exact(const CLID& id,
-                                       const std::string& key) const;
+                                       const std::string& key) const override;
 
     /// remove proxy from store, unless proxy is reset only.   
     /// @param forceRemove remove the proxy no matter what
@@ -137,7 +137,7 @@ namespace SG {
     StatusCode addSymLink(const CLID& linkid, DataProxy* proxy);
 
     /// add alias to store
-    StatusCode addAlias(const std::string& aliasKey, DataProxy* proxy);
+    virtual StatusCode addAlias(const std::string& aliasKey, DataProxy* proxy) override;
 
     /// Count number of object of a given type in store
     int typeCount(const CLID& id) const;

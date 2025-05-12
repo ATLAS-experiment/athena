@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from Hto4lConfig import Hto4lConfig
+from .Hto4lConfig import Hto4lConfig
 
 class Hto4lPowhegDefault(Hto4lConfig) :
 

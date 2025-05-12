@@ -6,6 +6,13 @@
 # art-include: 23.0/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
+# art-output: myDAOD_L1CALO1.pool.root
+# art-output: AOD.pool.root
+# art-output: DAOD_IDTIDE.pool.root
+# art-output: myDESDM_ALLCELLS.pool.root
+# art-output: ESD.pool.root
+# art-output: myDESDM_MCP.pool.root
+# art-output: myDESDM_PHOJET.pool.root
 
 # TODO update following ATLASRECTS-8054
 

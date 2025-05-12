@@ -50,10 +50,7 @@ kwargs = vars(parser())
 
 ## Create flags and set alignment specific parameter
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from InDetAlignConfig.IDAlignFlags import createInDetAlignFlags
-
 flags = initConfigFlags()
-flags.addFlagsCategory("InDet.Align", createInDetAlignFlags, prefix=True)
 
 ## Disable all non-track related flag parameter
 from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude

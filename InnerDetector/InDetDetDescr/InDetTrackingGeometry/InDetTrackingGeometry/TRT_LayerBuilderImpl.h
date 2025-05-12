@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKINGGEOMETRY_TRT_LAYERBUILDERIMPL_H
@@ -12,13 +12,13 @@
 // Gaudi
 #include "GaudiKernel/SystemOfUnits.h"
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkGeometry/TrackingGeometry.h"
 // InDet
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 // StoreGate
 #include "StoreGate/ReadCondHandleKey.h"
 // STL
+#include <memory>
 #include <vector>
 
 #ifndef TRKDETDESCR_TAKESMALLERBIGGER
@@ -38,7 +38,7 @@ namespace Trk {
   class CylinderLayer;
   class DiscLayer;
   class ExtendedMaterialProperties;
-  typedef std::pair< SharedObject<Surface>, Amg::Vector3D > SurfaceOrderPosition;
+  typedef std::pair< std::shared_ptr<Surface>, Amg::Vector3D > SurfaceOrderPosition;
 }
 
 namespace InDet {

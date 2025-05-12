@@ -3,6 +3,12 @@
 # Declare the package
 atlas_subdir( TrigGepPerf )
 
+# Define macros based on conditions
+# For example, you can set these flags based on some conditions or manually
+# Here we manually define FLOATING_POINT_SIMULATION
+add_definitions(-DFLOATING_POINT_SIMULATION)
+# add_definitions(-DBITWISE_SIMULATION)
+
 # External package dependencies:
 find_package( ROOT COMPONENTS Core Math Physics )
 

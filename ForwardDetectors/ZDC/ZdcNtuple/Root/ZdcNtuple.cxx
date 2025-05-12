@@ -38,7 +38,9 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("enableTrigger",  enableTrigger = true, "comment");
   declareProperty("enableTracks",  enableTracks = false, "comment");
   declareProperty("trackLimit",  trackLimit = 500, "comment");
-  declareProperty("enableClusters",  enableClusters = true, "comment");
+  declareProperty("enableID",  enableID = false, "turn on to enable ID tracks & vertices for physics streams");
+  declareProperty("enableCalo",  enableCalo = false, "turn on to enable calorimeter energy info for physics streams");
+  declareProperty("enableClusters",  enableClusters = false, "turn on to enable calo topo cluster info for physics streams");
   declareProperty("writeOnlyTriggers",  writeOnlyTriggers = false, "comment");
   declareProperty("useGRL",  useGRL = true, "comment");
   declareProperty("grlFilename",  grlFilename = "$ROOTCOREBIN/data/ZdcNtuple/data16_hip8TeV.periodAllYear_DetStatus-v86-pro20-19_DQDefects-00-02-04_PHYS_HeavyIonP_All_Good.xml", "comment");
@@ -420,6 +422,8 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("reprocZdc = " << reprocZdc);
   ANA_MSG_INFO("auxSuffix = " << auxSuffix );
   ANA_MSG_INFO("zdcLowGainMode = " << zdcLowGainMode);
+  ANA_MSG_INFO("enableID = " << enableID);
+  ANA_MSG_INFO("enableCalo = " << enableCalo);
   ANA_MSG_INFO("enableClusters = " << enableClusters);
   ANA_MSG_INFO("trackLimit = " << trackLimit);
   ANA_MSG_INFO("trackLimitReject = " << trackLimitReject);
@@ -544,7 +548,7 @@ StatusCode ZdcNtuple :: execute ()
 
   m_trackParticles = 0;
 
-  if (!(zdcCalib || zdcLaser || zdcOnly || zdcInj))
+  if ((!(zdcCalib || zdcLaser || zdcOnly || zdcInj)) && enableID)
   {
     ANA_MSG_DEBUG("Trying to extract InDetTrackParticles from evtStore()=" << evtStore());
     ANA_CHECK(evtStore()->retrieve( m_trackParticles, "InDetTrackParticles") );
@@ -582,14 +586,15 @@ StatusCode ZdcNtuple :: execute ()
     // PLEASE NOTE: the commented sections here will be restored once we have a better sense of the Run 3 HI data
 
     // Global E_T quantities for centrality
+    if (enableCalo){
+	    ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
+	    ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
 
-    //ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
-    //ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
+	    m_lvl1EnergySumRoI = 0;
+	    ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
 
-    m_lvl1EnergySumRoI = 0;
-    //ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
-
-    //processFCal();
+    	processFCal();
+    } 
 
     // MBTS quantities, but may require a derivation to be accessible (required STDM6 in pp)
     //ANA_CHECK(evtStore()->retrieve( m_mbtsInfo, "MBTSForwardEventInfo") );
@@ -598,12 +603,16 @@ StatusCode ZdcNtuple :: execute ()
     //ANA_CHECK(evtStore()->retrieve( m_trigT2MbtsBits, "HLT_xAOD__TrigT2MbtsBitsContainer_T2Mbts") );
     //processMBTS();
 
-    ANA_CHECK(evtStore()->retrieve( m_primaryVertices, "PrimaryVertices") );
-    processInDet();
+    if (enableID){
+	    ANA_CHECK(evtStore()->retrieve( m_primaryVertices, "PrimaryVertices") );
+	    processInDet();    	
+    }
 
 
-    ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
-    processClusters();
+    if (enableClusters){
+	    ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
+	    processClusters();    	
+    }
 
     // Gaps will require some evaluation of Run 3 performance of the clusters
     //processGaps();

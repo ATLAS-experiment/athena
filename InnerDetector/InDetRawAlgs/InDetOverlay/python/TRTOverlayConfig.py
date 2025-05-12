@@ -42,7 +42,7 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
     kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TRT_OverlayLocalOccupancyCfg(flags)))
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     # Do TRT overlay
     acc.addEventAlgo(CompFactory.TRTOverlay(name, **kwargs))

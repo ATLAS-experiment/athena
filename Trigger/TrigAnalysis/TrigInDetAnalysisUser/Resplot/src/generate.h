@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:39 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef GENERATE_H
@@ -73,7 +73,7 @@ class hist_generator : public generator_base {
 
 public:
 
-  hist_generator(TH1D* h, bool _smooth=true );
+  hist_generator(TH1D* h, bool smooth_=true );
   
   hist_generator(const hist_generator &) = delete;
   hist_generator operator=(const hist_generator &) = delete;

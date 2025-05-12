@@ -69,9 +69,9 @@ StatusCode SharedHiveEvtQueueConsumer::initialize()
   ATH_CHECK(m_chronoStatSvc.retrieve());
 
   SmartIF<IConversionSvc> cnvSvc(serviceLocator()->service("AthenaPoolCnvSvc"));
-  m_dataShare = SmartIF<IDataShare>(cnvSvc);
-  if(!m_dataShare) {
-    if(m_useSharedWriter) {
+  if(m_useSharedWriter) {
+    m_dataShare = SmartIF<IDataShare>(cnvSvc);
+    if(!m_dataShare) {
       ATH_MSG_ERROR("Error retrieving AthenaPoolCnvSvc " << cnvSvc);
       return StatusCode::FAILURE;
     }
@@ -364,7 +364,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedHiveEvtQueueConsumer::e
   }
   else {
     std::string propertyName("SkipEvents");
-    IntegerProperty skipEventsProp(propertyName,skipEvents);
+    IntegerProperty skipEventsProp(std::move(propertyName),skipEvents);
     if(propertyServer->getProperty(&skipEventsProp).isFailure()) {
       ATH_MSG_INFO("Event Selector does not have SkipEvents property");
     }

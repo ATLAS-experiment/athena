@@ -1,9 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimPrototrackFitterAlg.h"
 
+constexpr bool enableBenchmark = 
+#ifdef BENCHMARK_FPGATRACKSIM
+    true;
+#else
+    false;
+#endif
 
 FPGATrackSim::FPGATrackSimPrototrackFitterAlg::FPGATrackSimPrototrackFitterAlg (const std::string& name, ISvcLocator* pSvcLocator ) : AthReentrantAlgorithm( name, pSvcLocator ){
 }
@@ -17,6 +23,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::initialize() {
   ATH_CHECK(m_ProtoTrackCollectionFromFPGAKey.initialize());
   ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
 
+  ATH_CHECK(m_chrono.retrieve());
   return StatusCode::SUCCESS;
 }
 
@@ -54,7 +61,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 
   ActsTrk::MutableTrackContainer trackContainer;
-
+  if constexpr (enableBenchmark) m_chrono->chronoStart("FPGATrackSimPrototrackFitterAlg: ACTS KF");
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
     auto res = m_actsFitter->fit(ctx, proto.measurements, *proto.parameters,
@@ -75,6 +82,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
     destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
   }
+  if constexpr (enableBenchmark) m_chrono->chronoStop("FPGATrackSimPrototrackFitterAlg: ACTS KF");
   std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), 
     m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);  
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));

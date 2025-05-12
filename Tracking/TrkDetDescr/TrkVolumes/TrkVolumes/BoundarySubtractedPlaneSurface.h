@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,8 +26,7 @@ class Volume;
 
  BoundarySubtractedPlaneSurface description inside the tracking realm,
  it extends the SubtractedPlaneSurface description to make a surface being a
- boundary of a Trk::Volume (used for all volume shapes). It inherits from
- BoundarySurface to get the interface of boundaries.
+ boundary of a volume,
 
  @author Sarka.Todorova@cern.ch
  @author Christos Anastopoulos (Athena  MT modifications)
@@ -35,7 +34,7 @@ class Volume;
 
 template <class Tvol>
 class BoundarySubtractedPlaneSurface final
-    : virtual public BoundarySurface<Tvol>,
+    : public BoundarySurface<Tvol>,
       public SubtractedPlaneSurface {
   /** typedef the BinnedArray */
   typedef BinnedArray<Tvol> VolumeArray;
@@ -60,8 +59,8 @@ class BoundarySubtractedPlaneSurface final
       : BoundarySurface<Tvol>(inside, outside), SubtractedPlaneSurface(psf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundarySubtractedPlaneSurface(SharedObject<VolumeArray> insideArray,
-                                 SharedObject<VolumeArray> outsideArray,
+  BoundarySubtractedPlaneSurface(std::shared_ptr<const VolumeArray> insideArray,
+                                 std::shared_ptr<const VolumeArray> outsideArray,
                                  const SubtractedPlaneSurface& psf)
       : BoundarySurface<Tvol>(insideArray, outsideArray),
         SubtractedPlaneSurface(psf) {}

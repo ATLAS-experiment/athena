@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,7 +12,7 @@
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/MaterialProperties.h"
 // Gaudi
@@ -84,7 +84,7 @@ class LayerMaterialProperties {
   virtual const MaterialProperties* material(size_t ib0, size_t ib1) const = 0;
 
   /** Update the ElementTable */
-  void updateElementTable(const SharedObject<const ElementTable>&) const {}
+  void updateElementTable(const std::shared_ptr<const ElementTable>&) const {}
 
   /** Get the ElementTable */
   const ElementTable* elementTable() const { return nullptr; }

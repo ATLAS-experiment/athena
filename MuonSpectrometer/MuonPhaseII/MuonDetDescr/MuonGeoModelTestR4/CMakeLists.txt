@@ -70,7 +70,7 @@ atlas_add_test( testR3SensitiveDetectors
 ##### Simulation test R4
 atlas_add_test( testR4SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 --defaultGeoFile RUN4
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 #### Test that the sector envelopes fully enclose the particular chambers

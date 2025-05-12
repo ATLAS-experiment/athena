@@ -20,7 +20,7 @@ def ISF_HitAnalysisCfg(flags, name="ISF_HitAnalysis",
     kwargs.setdefault("TileSamplingFraction", "TileSamplingFraction")
 
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
-    kwargs.setdefault("TileCablingSvc", result.getPrimaryAndMerge(TileCablingSvcCfg(flags)).name)
+    kwargs.setdefault("TileCablingSvc", result.getPrimaryAndMerge(TileCablingSvcCfg(flags)))
 
     kwargs.setdefault("NtupleFileName", 'ISF_HitAnalysis')
     kwargs.setdefault("GeoFileName", 'ISF_Geometry')
@@ -48,7 +48,7 @@ def ISF_HitAnalysisCfg(flags, name="ISF_HitAnalysis",
     kwargs.setdefault("TimingCut", 999999)
 
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags)).name)
+    kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags)))
 
     result.merge(addFolders(flags, ["/Simulation/Parameters", "/Digitization/Parameters"]))
 

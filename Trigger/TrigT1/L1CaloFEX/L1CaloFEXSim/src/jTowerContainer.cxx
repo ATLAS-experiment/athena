@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Code stolen shamelessly from Calorimeter/CaloEvent/src/CaloCellContainer.cxx and modified
@@ -7,8 +7,6 @@
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "AthenaKernel/errorcheck.h"
-#include "CLHEP/Geometry/Vector3D.h"
-#include <atomic>
 
 namespace LVL1 {
 

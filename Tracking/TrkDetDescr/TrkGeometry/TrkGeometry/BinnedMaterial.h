@@ -20,7 +20,7 @@
 
 namespace Trk {
 
-typedef std::pair<const Material*, int> IdentifiedMaterial;
+typedef std::pair<std::shared_ptr<Material>, int> IdentifiedMaterial;
 
 class BinUtility;
 
@@ -43,12 +43,12 @@ class BinnedMaterial final: public Material {
   BinnedMaterial& operator=(const BinnedMaterial& amc);
 
   /** Constructor with averaged material and binning in 1D*/
-  BinnedMaterial(const Material* mat, const BinUtility& bu,
+  BinnedMaterial(const Material& mat, const BinUtility& bu,
                  const std::vector<size_t>& index,
                  const std::vector<IdentifiedMaterial>& detailedMat);
 
   /** Constructor with averaged material and binning in 2D*/
-  BinnedMaterial(const Material* mat, const BinUtility& bu,
+  BinnedMaterial(const Material& mat, const BinUtility& bu,
                  const std::vector<Trk::BinUtility>& bVec,
                  const std::vector<std::vector<size_t> >& index,
                  const std::vector<IdentifiedMaterial>& detailedMat);

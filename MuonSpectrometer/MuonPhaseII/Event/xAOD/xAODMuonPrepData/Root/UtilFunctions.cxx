@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "GeoModelKernel/throwExcept.h"
@@ -9,6 +9,7 @@
 #include "MuonReadoutGeometryR4/TgcReadoutElement.h"
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/MdtTwinDriftCircle.h"
@@ -18,8 +19,6 @@
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
-#include "xAODMuonPrepData/versions/AccessorMacros.h"
-#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 
 namespace {
@@ -36,11 +35,15 @@ namespace {
         const MuonGMR4::MuonReadoutElement* reEle{unCalibMeas->readoutElement()};
         return reEle->msSector()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, hash);
     }
+    template <class MeasType> const Acts::Surface& fetchSurface(const xAOD::UncalibratedMeasurement* meas) {
+        auto castedM = static_cast<const MeasType*>(meas);
+        return castedM->readoutElement()->surface(castedM->measurementHash());
+    }
 }
 
 namespace xAOD{
-    const MuonGMR4::MuonReadoutElement* readoutElement(const UncalibratedMeasurement* meas){
-        if (!meas) return nullptr;
+    const MuonGMR4::MuonReadoutElement* muonReadoutElement(const UncalibratedMeasurement* meas){
+         if (!meas) return nullptr;
         switch (meas->type()) {
             case UncalibMeasType::MdtDriftCircleType:{
                 return static_cast<const MdtDriftCircle*>(meas)->readoutElement();
@@ -53,15 +56,38 @@ namespace xAOD{
             } case UncalibMeasType::MMClusterType:{
                 return static_cast<const MMCluster*>(meas)->readoutElement();
             } default:
+#ifndef NDEBUG
                 THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
+#endif
+                break;
         }
-        THROW_EXCEPTION("Something went wrong with measurement "<<typeid(*meas).name());
         return nullptr;
     }
-    const Identifier& identify(const UncalibratedMeasurement* meas) {
-        static const Identifier defId{};
+    const Acts::Surface& muonSurface(const xAOD::UncalibratedMeasurement* meas) {
         if (!meas) {
-            return defId;
+            THROW_EXCEPTION("No measurement passed");
+        }
+        switch (meas->type()) {
+            case UncalibMeasType::MdtDriftCircleType:{
+                return fetchSurface<MdtDriftCircle>(meas);
+            } case UncalibMeasType::RpcStripType: {
+                return fetchSurface<RpcMeasurement>(meas);
+            } case UncalibMeasType::TgcStripType:{
+                return fetchSurface<TgcStrip>(meas);
+            } case UncalibMeasType::sTgcStripType:{
+                return fetchSurface<sTgcMeasurement>(meas);
+            } case UncalibMeasType::MMClusterType:{
+                return fetchSurface<MMCluster>(meas);
+            } default:
+                THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
+                break;
+        }
+    }
+
+    const Identifier& identify(const UncalibratedMeasurement* meas) {
+        static const Identifier detId{};
+        if (!meas) {
+            return detId;
         }
         switch (meas->type()) {
             case UncalibMeasType::MdtDriftCircleType :{
@@ -81,7 +107,7 @@ namespace xAOD{
                 break;
             }
         }
-        return defId;
+        return detId;
     }
     Amg::Vector3D positionInChamber(const ActsGeometryContext& gctx,
                                     const UncalibratedMeasurement* meas){

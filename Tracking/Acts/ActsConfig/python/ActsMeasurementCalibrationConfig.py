@@ -15,6 +15,7 @@ def ActsAnalogueClusteringToolCfg(flags,
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelOfflineCalibCondAlgCfg
     acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))
 
+    kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
     kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("PixelOfflineCalibData", "ITkPixelOfflineCalibData")
     kwargs.setdefault("PerformCovarianceCalibration", flags.Acts.OnTrackCalibration.performCovarianceCalibration)

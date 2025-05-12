@@ -4,16 +4,16 @@
 /////////////////////////////////////////////////////////////////
 // Cascade3Plus1.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/Cascade3Plus1.h"
+#include "Cascade3Plus1.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "Math/Vector4D.h"
 

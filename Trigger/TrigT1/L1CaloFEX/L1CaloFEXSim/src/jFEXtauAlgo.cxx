@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXtauAlgo - Algorithm for Tau Algorithm in jFEX
@@ -8,19 +8,13 @@
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
 #include <iostream>
-#include <vector>
+#include <fstream>
 #include <stdio.h>
 #include <math.h>
 #include "L1CaloFEXSim/jFEXtauAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
-
-#include <fstream>
+#include "PathResolver/PathResolver.h"
 
 namespace LVL1{
 
@@ -166,7 +160,7 @@ bool LVL1::jFEXtauAlgo::getTTowerSat(unsigned int TTID ) {
 }
 
 //Gets the ET for the TT. This ET is EM + HAD
-int LVL1::jFEXtauAlgo::getTTowerET(unsigned int TTID ) {
+int LVL1::jFEXtauAlgo::getTTowerET(unsigned int TTID ) const {
     if(TTID == 0) {
         return 0;
     } 
@@ -204,12 +198,12 @@ bool LVL1::jFEXtauAlgo::getTauSat() const {
     return m_TauSaturation;
 }
 
-void LVL1::jFEXtauAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
+void LVL1::jFEXtauAlgo::setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map){
     m_map_Etvalues=et_map;
 }
 
 
-StatusCode LVL1::jFEXtauAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap){
+StatusCode LVL1::jFEXtauAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap) const {
     
     std::string myline;
     
@@ -257,7 +251,6 @@ StatusCode LVL1::jFEXtauAlgo::ReadfromFile(const std::string & fileName, std::un
 
     return StatusCode::SUCCESS;
 }
-
 
 
 

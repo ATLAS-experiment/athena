@@ -45,7 +45,7 @@ StatusCode CaloAddCellPedShift::initialize()
   m_tree->Branch("PedestalCorr",&m_ped1corr,"PedestalCorr/F");
   m_tree->Branch("PedLumi",&m_ped2,"PedLumi/F");
 
-  ATH_CHECK( m_thistSvc->regTree("/file1/calonoise/mytree",m_tree) );
+  ATH_CHECK( m_thistSvc->regTree("/file1/caloped/mytree",m_tree) );
 
   ATH_MSG_INFO ( " end of CaloAddCellPedShift::initialize " );
   return StatusCode::SUCCESS; 
@@ -120,6 +120,10 @@ StatusCode CaloAddCellPedShift::stop()
   const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
 
   FILE* fp = fopen("calopedestal.txt","w");
+  if (!fp) {
+    ATH_MSG_ERROR("Cannot open file calopedestal.txt for writing");
+    return StatusCode::FAILURE;
+  }
   ATH_MSG_INFO ( " start loop over Calo cells " << ncell );
   for (int i=0;i<ncell;i++) {
        IdentifierHash idHash=i;
@@ -215,7 +219,7 @@ StatusCode CaloAddCellPedShift::stop()
           m_tree->Fill();
 
          if (std::fabs(ped1-ped1_old)>1.)
-           ATH_MSG_WARNING ( "  Pedestal shift found for cell " << m_OffId << " HWID: " << m_bec << " " << m_posneg << " " << m_FT << " " << m_slot << " " << m_channel << " New/Old pedestals "  << ped1 << " " << ped1_old );
+           ATH_MSG_WARNING ( "  Pedestal shift found for cell " << m_OffId << " HWID: " << m_bec << " " << m_posneg << " " << m_FT << " " << m_slot << " " << m_channel << " iCool " << iCool << " subHash " << ii << " New/Old pedestals "  << ped1 << " " << ped1_old );
 
        }   // loop over gains
 

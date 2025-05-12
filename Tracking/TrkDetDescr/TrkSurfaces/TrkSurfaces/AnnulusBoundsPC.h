@@ -52,7 +52,7 @@ public:
   /// @param maxR outer radius, in module system
   /// @param phiMin right angular edge, in strip system
   /// @param phiMax left angular edge, in strip system
-  /// @param moduleOrigin The origin offset between the two systems. 
+  /// @param moduleOrigin The origin offset between the two systems.
   /// @param phiAvg (Optional) internal rotation of this bounds object's local frame
   /// @note For @c moduleOrigin you need to actually calculate the cartesian offset
   AnnulusBoundsPC(double minR,
@@ -73,7 +73,7 @@ public:
 
 
 
-  /// @brief Static factory method to produce an instance of this class from the 
+  /// @brief Static factory method to produce an instance of this class from the
   ///        cartesian implementation
   /// @param annbo A reference to the original cartesian bounds object
   /// @return pair containing the PC bounds, and an angular shift @c phiShift
@@ -84,7 +84,7 @@ public:
   ///       @c phiShift contains necessary information to (re)construct a transform
   ///       that will perform this rotation.
   static
-  std::pair<AnnulusBoundsPC, double> fromCartesian(AnnulusBounds& annbo);
+  std::pair<AnnulusBoundsPC, double> fromCartesian(const AnnulusBounds& annbo);
 
   virtual AnnulusBoundsPC* clone() const override;
   bool operator==(const SurfaceBounds& sb) const override;
@@ -97,7 +97,7 @@ public:
   /// @param tol2 Tolerance in phi
   /// @return true if is inside, false if not
   bool inside(const Amg::Vector2D& locpo, double tol1 = 0., double tol2 = 0.) const override final;
-  
+
   /// @brief Returns if a point in local coordinates is inside the bounds
   /// @param locpo Local position
   /// @param bchk The boundary check object to consult for inside checks
@@ -109,7 +109,7 @@ public:
   /// @param tol1 Tolerance in r
   /// @return true if is inside, false if not
   bool insideLoc1(const Amg::Vector2D& locpo, double tol1 = 0.) const override final;
-  
+
   /// @brief Check if local point is inside of phi bounds
   /// @param locpo Local position
   /// @param tol2 Tolerance in phi
@@ -152,16 +152,16 @@ public:
   /// @return the stream given in @c sl
   MsgStream& dump(MsgStream& sl) const override;
   std::ostream& dump(std::ostream& sl) const override;
-      
+
   /**
    * @brief Returns the four corners of the bounds
-   * 
-   * Returns the module corners starting from the upper right (max R, pos locPhi) and proceding clock-wise, 
+   *
+   * Returns the module corners starting from the upper right (max R, pos locPhi) and proceding clock-wise,
    * i.e. (max R; pos locPhi), (min R; pos locPhi), (min R; neg loc X), (max R; neg locPhi).
-   * 
+   *
    * This method is only intended for debug purposes. If used for production code, this should be changed to a
    * return-by-reference. This will necessitate the vector being stored in the class.
-   * 
+   *
    * @return array of pairs of doubles giving the (R, phi) of each corner clockwise from upper-right
    * */
   std::array<std::pair<double, double>, 4> corners() const;

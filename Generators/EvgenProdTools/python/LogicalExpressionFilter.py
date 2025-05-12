@@ -242,7 +242,8 @@ class LogicalExpressionFilter( PyAthena.Alg ):
         print("MetaData: sumOfSqrWeights = %e" % (self.nEventsPassedWeighted2 if self.UseEventWeight else self.nEventsPassed))
         print("MetaData: sumOfPosWeightsNoFilter = %e" % (self.nEventsProcessedPosWeighted if self.UseEventWeight else self.nEventsProcessed))
         print("MetaData: sumOfNegWeightsNoFilter = %e" % (self.nEventsProcessedNegWeighted if self.UseEventWeight else self.nEventsProcessed))
-        print("MetaData: sumOfSqrWeightsNoFilter = %e" % (self.nEventsProcessedWeighted2 if self.UseEventWeight else self.nEventsProcessed))
+        # In MP jobs, sometimes these printed lines don't flush to the log in good time. Add 'flush=True' here to force them out
+        print("MetaData: sumOfSqrWeightsNoFilter = %e" % (self.nEventsProcessedWeighted2 if self.UseEventWeight else self.nEventsProcessed),flush=True)
 
         return StatusCode.Success
 

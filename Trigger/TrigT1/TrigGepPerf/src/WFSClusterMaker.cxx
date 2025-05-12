@@ -32,7 +32,7 @@ Gep::WFSClusterMaker::makeClusters(const pGepCellMap& caloCellsMap) const {
 bool Gep::WFSClusterMaker::isSeedCell (const Gep::GepCaloCell& cell) const {
 
   if (cell.isBadCell()) return false;
-  if (fabs(cell.sigma) < m_seed_threshold) return false;
+  if (std::fabs(cell.sigma) < m_seed_threshold) return false;
   if (!isInAllowedSampling(cell.sampling, m_allowed_seed_samplings)) return false;
 
   return true;
@@ -96,7 +96,7 @@ Gep::WFSClusterMaker::clusterFromCells(const Gep::GepCaloCell& seed,
                         if (neighbour.isBadCell()) continue;
 
                         // Reject if cell is not above clustering threshold
-                        if (fabs(neighbour.sigma) < m_clustering_threshold) continue;
+                        if (std::fabs(neighbour.sigma) < m_clustering_threshold) continue;
 
                         // Reject if cell was already considered
                         if (!isNewCell(neighbour.id, seenCells)) continue;
@@ -131,11 +131,11 @@ Gep::Cluster Gep::WFSClusterMaker::getClusterFromListOfCells(const std::vector<G
   for (unsigned int i_cell = 0; i_cell < cells.size(); ++i_cell) {
 	float cell_e = cells[i_cell].et * TMath::CosH(cells[i_cell].eta);
         cluster_e += cell_e;
-        abs_e += fabs(cell_e);
+        abs_e += std::fabs(cell_e);
         v_cellIDs.push_back(cells[i_cell].id);
-        etaSum += fabs(cell_e) * cells[i_cell].eta;
-        phiSum += fabs(cell_e) * getDeltaPhi(cells[i_cell].phi, seed_phi);
-        if (fabs(cells[i_cell].sigma) > m_seed_threshold) weight += 1.0;
+        etaSum += std::fabs(cell_e) * cells[i_cell].eta;
+        phiSum += std::fabs(cell_e) * getDeltaPhi(cells[i_cell].phi, seed_phi);
+        if (std::fabs(cells[i_cell].sigma) > m_seed_threshold) weight += 1.0;
   }
 
   cluster.ncells = cells.size();
@@ -152,10 +152,10 @@ Gep::Cluster Gep::WFSClusterMaker::getClusterFromListOfCells(const std::vector<G
 
 
 double Gep::WFSClusterMaker::getDeltaPhi(double phi, double seed_phi) const {
-  double delta_phi = fabs(fabs( fabs( phi - seed_phi ) - TMath::Pi() ) - TMath::Pi());
+  double delta_phi = std::fabs(std::fabs( std::fabs( phi - seed_phi ) - TMath::Pi() ) - TMath::Pi());
   if (phi < seed_phi) delta_phi *= -1.00;
   // Taking care of the -pi/pi split
-  if ((fabs(phi + seed_phi) < TMath::Pi()) && (fabs(phi) + fabs(seed_phi) > 5.0)) delta_phi *= -1.00;
+  if ((std::fabs(phi + seed_phi) < TMath::Pi()) && (std::fabs(phi) + std::fabs(seed_phi) > 5.0)) delta_phi *= -1.00;
   return delta_phi;
 }
 

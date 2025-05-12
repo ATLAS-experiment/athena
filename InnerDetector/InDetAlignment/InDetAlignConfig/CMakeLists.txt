@@ -8,6 +8,8 @@ atlas_subdir( InDetAlignConfig )
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
 atlas_install_scripts( scripts/runIDAlign.py )
+atlas_install_scripts( scripts/runITkAlign.py )
+
 
 if (NOT SIMULATIONBASE)
     file( MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/unitTestRun_inDet" )

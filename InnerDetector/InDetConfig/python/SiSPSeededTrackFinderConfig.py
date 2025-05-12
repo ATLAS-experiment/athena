@@ -172,6 +172,12 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
             kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService(
                 "ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
 
+    # Dump GBTS training data?
+    if flags.Tracking.dumpGBTSTrainingData == 1:
+        kwargs.setdefault("doDumpGBTSTrainingData", True)
+    elif flags.Tracking.dumpGBTSTrainingData == 2:
+        kwargs.setdefault("doDumpGBTSTrainingDataLRT", True)
+
     acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinder(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc

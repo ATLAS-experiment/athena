@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_METADATASVC_H
@@ -303,24 +303,24 @@ class MetaDataSvc : public extends<::AthService,
   ServiceHandle<OutputStreamSequencerSvc> m_outSeqSvc;
   ServiceHandle<IClassIDSvc> m_classIDSvc{"ClassIDSvc", name()};
 
-  long m_storageType;
-  bool m_clearedInputDataStore;
-  bool m_clearedOutputDataStore;
-  bool m_allowMetaDataStop;
-  bool m_outputPrepared;
-  std::map<std::string, CLID> m_persToClid;
+  long m_storageType{0L};
+  bool m_clearedInputDataStore{true};
+  bool m_clearedOutputDataStore{false};
+  bool m_allowMetaDataStop{false};
+  bool m_outputPrepared{false};
+  std::map<std::string_view, CLID> m_persToClid{};
 
-  std::set<CLID>        m_handledClasses;
+  std::set<CLID>        m_handledClasses{};
   /// marker string for embedding stream name in MetaData object keys for SharedWriter server
-  const std::string     m_streamInKeyMark = "__STREAM[";
+  static constexpr std::string_view m_streamInKeyMark{"__STREAM["};
 
-  std::map< std::string, std::set<std::string> > m_streamKeys;
+  std::map< std::string, std::set<std::string> > m_streamKeys{};
 
  private:  // properties
   /// MetaDataContainer, POOL container name for MetaData.
-  StringProperty m_metaDataCont;
+  Gaudi::Property<std::string> m_metaDataCont{this, "MetaDataContainer", ""};
   /// MetaDataTools, vector with the MetaData tools
-  ToolHandleArray<IMetaDataTool> m_metaDataTools;
+  PublicToolHandleArray<IMetaDataTool> m_metaDataTools{this, "MetaDataTools", {}};
 };
 
 #endif

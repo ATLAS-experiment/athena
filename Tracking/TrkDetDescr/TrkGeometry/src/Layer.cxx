@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,20 +14,6 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkVolumes/Volume.h"
-
-Trk::Layer::Layer()
-    : m_surfaceArray(nullptr),
-      m_layerMaterialProperties(nullptr),
-      m_layerThickness(0.),
-      m_overlapDescriptor(nullptr),
-      m_previousLayer(nullptr),
-      m_nextLayer(nullptr),
-      m_binUtility(nullptr),
-      m_enclosingTrackingVolume(nullptr),
-      m_enclosingDetachedTrackingVolume(nullptr),
-      m_index(-1),
-      m_layerType(Trk::active),
-      m_ref(0.) {}
 
 Trk::Layer::Layer(const Trk::LayerMaterialProperties& laymatprop,
                   double thickness,
@@ -249,6 +235,6 @@ size_t Trk::Layer::compatibleSurfaces(
                                ice);
 }
 
-inline bool Trk::Layer::hasSubStructure(bool resolveSensitive) const {
+bool Trk::Layer::hasSubStructure(bool resolveSensitive) const {
   return resolveSensitive && m_surfaceArray;
 }

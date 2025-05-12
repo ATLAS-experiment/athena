@@ -4,13 +4,13 @@
 /////////////////////////////////////////////////////////////////
 // JpsiPlusDs1Cascade.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/JpsiPlusDs1Cascade.h"
+#include "JpsiPlusDs1Cascade.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include <algorithm>

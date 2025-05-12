@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,20 +10,12 @@
 #include <string>
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjTowerBuilder.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXCond/jFEXDBCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
-
-#include "TH1F.h"
-#include "TH1I.h"
-#include "TFile.h"
-
-class CaloIdManager;
 
 namespace LVL1 {
 

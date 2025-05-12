@@ -18,14 +18,6 @@ Purpose : create a EventInfoAttList - The Tag information associated to the even
 #include "xAODEventInfo/EventInfo.h"
 
 
-/** the constructor */
-EventInfoAttListTool::EventInfoAttListTool (const std::string& type, const
-					std::string& name, const IInterface* parent) : 
-  AthAlgTool( type, name, parent )
-{
-  declareInterface<EventInfoAttListTool>( this );
-}
-
 /** initialization - called once at the beginning */
 StatusCode  EventInfoAttListTool::initialize() {
   ATH_MSG_DEBUG("in initialize()");

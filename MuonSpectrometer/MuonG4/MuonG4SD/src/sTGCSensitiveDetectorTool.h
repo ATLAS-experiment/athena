@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef sTGCSensitiveDetectorTool_H
@@ -15,6 +15,7 @@ public:
     ~sTGCSensitiveDetectorTool() {}
 protected:
     G4VSensitiveDetector* makeSD() const override final;
+    Gaudi::Property<bool> m_onSqLite{this, "onSqLite", false, "Runs on Sqlite -> adapt base depth of the detector to 1"};
 };
 
 #endif

@@ -8,7 +8,6 @@
 #include <cmath>
 
 #include <typeinfo>
-#include <cmath>
 
 //#include "TrkSurfaces/Surface.h"
 #include "TrkEventTPCnv/TrkMaterialOnTrack/MaterialEffectsOnTrackCnv_p2.h"
@@ -16,7 +15,7 @@
 void MaterialEffectsOnTrackCnv_p2 :: persToTrans(
    const Trk::MaterialEffectsOnTrack_p2 *persObj,
    Trk::MaterialEffectsOnTrack          *transObj,
-   MsgStream& log) 
+   MsgStream& log)
 {
   fillTransFromPStore(&m_mefBaseCnv, persObj->m_mefBase, transObj, log);
   if ((std::abs(persObj->m_deltaPhi) + std::abs(persObj->m_deltaTheta) >
@@ -36,7 +35,7 @@ void MaterialEffectsOnTrackCnv_p2 :: persToTrans(
 void MaterialEffectsOnTrackCnv_p2 :: transToPers(
    const Trk::MaterialEffectsOnTrack *transObj,
    Trk::MaterialEffectsOnTrack_p2  *persObj,
-   MsgStream& log) 
+   MsgStream& log)
 {
   persObj->m_mefBase = baseToPersistent( &m_mefBaseCnv, transObj, log );
   if (transObj->scatteringAngles()!=nullptr) {
@@ -45,7 +44,7 @@ void MaterialEffectsOnTrackCnv_p2 :: transToPers(
     persObj->m_sigmaDeltaPhi   = (float)transObj->scatteringAngles()->sigmaDeltaPhi();
     persObj->m_sigmaDeltaTheta = (float)transObj->scatteringAngles()->sigmaDeltaTheta();
   }
-  //  persObj->m_energyLoss = toPersistent( &m_elossCnv, transObj->m_energyLoss, log );  
+  //  persObj->m_energyLoss = toPersistent( &m_elossCnv, transObj->m_energyLoss, log );
 //  if (transObj->m_energyLoss!=0) std::cout<<"Ending MaterialEffectsOnTrackCnv_p2::transToPers: "<<(typeid(*(transObj->m_energyLoss))).name()<<std::endl;
   persObj->m_energyLoss = toPersistent( (ITPConverterFor<Trk::EnergyLoss>**)nullptr, transObj->energyLoss(), log );
 }

@@ -1,27 +1,30 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONLAYERROTS_H
 #define MUON_MUONLAYERROTS_H
 
 #include <vector>
+#include <memory>
 
 #include "MuonStationIndex/MuonStationIndex.h"
+#include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
+#include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 
 namespace Muon {
-
-    class MdtDriftCircleOnTrack;
-    class MuonClusterOnTrack;
 
     /** struct holding RIO_OnTracks for a given layer */
     class MuonLayerROTs {
     public:
         /** constructor */
-        MuonLayerROTs();
-
+        MuonLayerROTs() = default;
+        /** Move constructor */
+        MuonLayerROTs(MuonLayerROTs&& other) = default;
+        /** Move assignment */
+        MuonLayerROTs& operator=(MuonLayerROTs&&) = default;
         /** destructor */
-        ~MuonLayerROTs();
+        ~MuonLayerROTs() = default;
 
         /** add MDTs, will merge them with existing MDT's. Takes ownership of all pointers  */
         void addMdts(const std::vector<const MdtDriftCircleOnTrack*>& mdts);
@@ -42,19 +45,20 @@ namespace Muon {
         const std::vector<const MuonClusterOnTrack*>& getClusters(MuonStationIndex::TechnologyIndex tech) const;
 
     private:
-        /** no copying nor assignment allow, use shared pointers instead */
-        MuonLayerROTs& operator=(const MuonLayerROTs&) = delete;
-        MuonLayerROTs(const MuonLayerROTs&) = delete;
-
         /** payload */
-        std::vector<const MdtDriftCircleOnTrack*> m_mdts;
-        std::vector<std::vector<const MuonClusterOnTrack*> > m_clustersPerTechnology;
+        std::vector<const MdtDriftCircleOnTrack*> m_mdts{};
+        static constexpr int s_techMax = MuonStationIndex::toInt(MuonStationIndex::TechnologyIndex::TechnologyIndexMax);
+        std::array<std::vector<const MuonClusterOnTrack*>, s_techMax> m_clustersPerTechnology{};
+
+        std::vector<std::unique_ptr<const Trk::RIO_OnTrack>> m_garbage{};
     };
 
     inline const std::vector<const MdtDriftCircleOnTrack*>& MuonLayerROTs::getMdts() const { return m_mdts; }
 
-    inline const std::vector<const MuonClusterOnTrack*>& MuonLayerROTs::getClusters(MuonStationIndex::TechnologyIndex tech) const {
-        return m_clustersPerTechnology[tech];
+    inline const std::vector<const MuonClusterOnTrack*>& 
+        MuonLayerROTs::getClusters(MuonStationIndex::TechnologyIndex tech) const {
+        using namespace MuonStationIndex;
+        return m_clustersPerTechnology[toInt(tech)];
     }
 }  // namespace Muon
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODELR4_RPCREAOUDGEOMTOOL_H
@@ -7,15 +7,17 @@
 
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
-#include <MuonReadoutGeometryR4/CutOutArea.h>
 
 #include <GeoModelInterfaces/IGeoDbTagSvc.h>
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
 #include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 
-namespace MuonGMR4 {
+#include <GeoModelHelpers/GeoDeDuplicator.h>
 
+namespace MuonGMR4 {
+/** @brief Implementation to construct Rpc readout element from the list of published
+ *         full physical volumes and the WRPC meta data table. */
 class RpcReadoutGeomTool : public extends<AthAlgTool,IMuonReadoutGeomTool> {
    public:
     // Constructor
@@ -51,16 +53,19 @@ class RpcReadoutGeomTool : public extends<AthAlgTool,IMuonReadoutGeomTool> {
        unsigned int numPhiStrips{0};
     };
 
+    /** @brief Cache object to the wRPCTable & store stripDesigns & layers
+     *         to make the information available throughout the geometry building and to
+     *         allow for sharing of Identical StripLayers */
     struct FactoryCache {
        
       using ParamBookTable = std::map<std::string, wRPCTable>;
-      using CutOutTable = std::map<Identifier, std::vector<CutOutArea>>;
 
        std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
        std::set<StripLayerPtr, StripLayerSorter> stripLayers{};
        ParamBookTable parameterBook{};
-       CutOutTable cutOuts{};
-       
+      /** @brief Helper object to turn Amg::Transforms into GeoModel tree transform nodes */
+      GeoDeDuplicator trfNodeMaker{};
+          
     };
 
     /// Retrieves the auxillary tables from the database

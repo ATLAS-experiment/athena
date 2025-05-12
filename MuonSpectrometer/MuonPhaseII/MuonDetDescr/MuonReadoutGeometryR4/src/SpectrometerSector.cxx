@@ -64,7 +64,7 @@ std::shared_ptr<Acts::Volume> SpectrometerSector::boundingVolume(const ActsGeome
     return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
 }
 std::shared_ptr<Acts::TrapezoidVolumeBounds> SpectrometerSector::bounds() const {
-    return std::make_shared<Acts::TrapezoidVolumeBounds>(halfXShort(), halfXLong(), halfY(), halfZ());
+    return m_args.bounds;
 }
 Chamber::ReadoutSet SpectrometerSector::readoutEles() const {
     Chamber::ReadoutSet toReturn{};

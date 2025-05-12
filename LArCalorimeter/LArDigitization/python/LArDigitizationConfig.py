@@ -99,7 +99,7 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
             intervals += [acc.popToolsAndMerge(LArRangeEMCfg(flags))]
             intervals += [acc.popToolsAndMerge(LArRangeHECCfg(flags))]
             intervals += [acc.popToolsAndMerge(LArRangeFCALCfg(flags))]
-        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("PileUpMergeSvc", '')
     kwargs.setdefault("RndmEvtOverlay", flags.Common.isOverlay)
@@ -335,7 +335,7 @@ def LArSCL1MakerCfg(flags, **kwargs):
     kwargs.setdefault("NSamples", flags.LAr.ROD.nSamples + 2)  # For consistency with LArAutoCorrNoiseSC - see ATLASSIM-5483
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc",
-                      acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+                      acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("SCL1ContainerName", f"{flags.Overlay.BkgPrefix}LArDigitSCL2") # Output - why L2??
     if flags.Common.isOverlay:

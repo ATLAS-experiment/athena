@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaOutputStream.h"
@@ -156,7 +156,7 @@ namespace {
 AthenaOutputStream::AthenaOutputStream(const string& name, ISvcLocator* pSvcLocator)
       : base_class(name, pSvcLocator),
         m_dataStore("StoreGateSvc", name),
-        m_metadataStore("MetaDataStore", name),
+        m_metadataStore("StoreGateSvc/MetaDataStore", name),
         m_currentStore(&m_dataStore),
         m_itemSvc("ItemListSvc", name),
         m_metaDataSvc("MetaDataSvc", name),

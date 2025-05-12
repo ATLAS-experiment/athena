@@ -45,11 +45,20 @@ def LArPileUpAutoCorrCfg(flags):
     rsac=FolderTagResolver(dbname="COOLOFL_LAR/CONDBR2")
     PhysAutoCorrTag= rsac.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
     nColl=flags.LArCalib.OFC.Ncoll
-    if (nColl>0 and "mu" not in PhysAutoCorrTag):
-        #Insert mu in tag-name:
-        elems=PhysAutoCorrTag.split("-")
-        PhysAutoCorrTag="-".join([elems[0]+"_mu_%i"%nColl,]+elems[1:])
-        del elems
+    if nColl>0:
+        if "mu" in PhysAutoCorrTag and str(nColl) not in PhysAutoCorrTag:
+           #Change mu in tag-name:
+           elems=PhysAutoCorrTag.split("_")
+           elems1=elems[2].split("-")
+           PhysAutoCorrTag="-".join([elems[0]+"_mu_%i"%nColl,]+elems1[1:])
+           del elems
+           del elems1
+        elif "mu" not in PhysAutoCorrTag:
+           #Insert mu in tag-name:
+           elems=PhysAutoCorrTag.split("-")
+           PhysAutoCorrTag="-".join([elems[0]+"_mu_%i"%nColl,]+elems[1:])
+           del elems
+    print("PhysAutoCorrTag: ",PhysAutoCorrTag)
 
     del rs
 

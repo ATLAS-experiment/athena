@@ -62,6 +62,12 @@ namespace columnar
   };
 
   template<ContainerId CI>
+  std::ostream& operator<< (std::ostream& str, const ObjectId<CI,ColumnarModeXAOD>& obj)
+  {
+    return str << &obj.getXAODObject() << "/" << obj.getXAODObject().index();
+  }
+
+  template<ContainerId CI>
   bool operator== (const ObjectId<CI,ColumnarModeXAOD>& lhs, const ObjectId<CI,ColumnarModeXAOD>& rhs)
   {
     return &lhs.getXAODObject() == &rhs.getXAODObject();
@@ -134,6 +140,12 @@ namespace columnar
     void **m_data = nullptr;
     std::size_t m_index = 0u;
   };
+
+  template<ContainerId CI>
+  std::ostream& operator<< (std::ostream& str, const ObjectId<CI,ColumnarModeArray>& obj)
+  {
+    return str << static_cast<unsigned>(CI) << "/" << obj.getIndex();
+  }
 
   template<ContainerId CI>
   bool operator== (const ObjectId<CI,ColumnarModeArray>& lhs, const ObjectId<CI,ColumnarModeArray>& rhs)

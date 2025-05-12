@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXForwardJetsAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -13,16 +13,9 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXForwardJetsAlgo.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h" 
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h" 
-#include "StoreGate/StoreGateSvc.h" 
-#include "PathResolver/PathResolver.h"
 
 
 namespace LVL1 {
@@ -47,7 +40,7 @@ namespace LVL1 {
     virtual std::unordered_map<int, jFEXForwardJetsInfo> calculateJetETs(int seedThreshold) override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
-    virtual int SumEtSeed(unsigned int TTID) override;
+    virtual int SumEtSeed(unsigned int TTID) const override;
     
   protected:
 
@@ -81,20 +74,20 @@ namespace LVL1 {
         std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGMap;
         std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeMap;
         
-        StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);
+        StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&) const;
         
         
-        int getEt(unsigned int TTID);
-        bool isLM(unsigned int TTID);
-        bool isLMabove(unsigned int TTID);
+        int getEt(unsigned int TTID) const;
+        bool isLM(unsigned int TTID) const;
+        bool isLMabove(unsigned int TTID) const;
         bool getTTowerSat(unsigned int TTID );
         
         //Conditions for greater
-        unsigned int elementsCorr(unsigned int TTID);
-        bool condCorr(unsigned int TTID);
+        unsigned int elementsCorr(unsigned int TTID) const;
+        bool condCorr(unsigned int TTID) const;
         //Conditions for greater or equal
-        unsigned int elementsCorr2(unsigned int TTID);
-        bool condCorr2(unsigned int TTID);
+        unsigned int elementsCorr2(unsigned int TTID) const;
+        bool condCorr2(unsigned int TTID) const;
         
         std::array<float,2> globalEtaPhi(int TTID);
         

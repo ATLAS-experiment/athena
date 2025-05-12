@@ -42,7 +42,7 @@ Trk::StraightLineSurface::StraightLineSurface(
   double halez)
   : Surface(htrans)
   , m_lineDirection{}
-  , m_bounds(std::make_shared<Trk::CylinderBounds>(radius, halez))
+  , m_bounds(std::make_shared<const Trk::CylinderBounds>(radius, halez))
 {}
 
 // dummy implementation

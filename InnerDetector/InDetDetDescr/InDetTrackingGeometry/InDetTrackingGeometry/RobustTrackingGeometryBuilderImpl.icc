@@ -255,8 +255,8 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
   // first the beampipe volume
   Trk::TrackingVolume* beamPipeVolume = nullptr;
   // the Volume Bounds
-  Trk::CylinderVolumeBounds* beamPipeBounds =
-      new Trk::CylinderVolumeBounds(overallRmin, overallExtendZ);
+  auto  beamPipeBounds =
+      std::make_shared<Trk::CylinderVolumeBounds>(overallRmin, overallExtendZ);
   // BinnedArray needed
   Trk::BinnedArray<Trk::Layer>* beamPipeLayerArray = nullptr;
 

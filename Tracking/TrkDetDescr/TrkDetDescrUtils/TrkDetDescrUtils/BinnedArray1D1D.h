@@ -11,11 +11,11 @@
 
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 
 #include "CxxUtils/CachedUniquePtr.h"
 #include <vector>
 #include <utility>
+#include <memory>
 
 namespace Trk {
 
@@ -42,7 +42,7 @@ public:
  /** ctors with arguments*/
  /** Constructor with std::vector and a  BinUtility */
  BinnedArray1D1D(
-     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector,
      const BinUtility& steeringBinGen1D,
      const std::vector<BinUtility>& singleBinGen)
      : BinnedArray<T>(),
@@ -53,7 +53,7 @@ public:
    initialize(tclassvector);
  }
  BinnedArray1D1D(
-     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector,
      BinUtility&& steeringBinGen1D,
      std::vector<BinUtility>&& singleBinGen)
      : BinnedArray<T>(),
@@ -156,11 +156,11 @@ private:
     }
   }
 
-  void initialize(const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector) {
-    m_array = std::vector<std::vector<SharedObject<T>>>(m_steeringBinUtility.bins());
+  void initialize(const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector) {
+    m_array = std::vector<std::vector<std::shared_ptr<T>>>(m_steeringBinUtility.bins());
     for (size_t i = 0; i < m_steeringBinUtility.bins(); ++i) {
       size_t sizeOfSubBin = ((m_singleBinUtilities)[i]).bins();
-      m_array[i] = std::vector<SharedObject<T>>(sizeOfSubBin);
+      m_array[i] = std::vector<std::shared_ptr<T>>(sizeOfSubBin);
     }
     // fill the Volume vector into the array
     int vecsize(tclassvector.size());
@@ -169,7 +169,7 @@ private:
       if (m_steeringBinUtility.inside(currentGlobal)) {
         int steeringBin = m_steeringBinUtility.bin(currentGlobal, 0);
         int singleBin = (m_singleBinUtilities[steeringBin]).bin(currentGlobal, 0);
-        std::vector<SharedObject<T>>& curVec = m_array[steeringBin];
+        std::vector<std::shared_ptr<T>>& curVec = m_array[steeringBin];
         curVec[singleBin] = ((tclassvector)[ivec]).first;
       } else {
         throw GaudiException("BinnedArray1D1D", "Object outside bounds",
@@ -179,7 +179,7 @@ private:
   }
 
   //!< vector of pointers to the class T
-  std::vector<std::vector<SharedObject<T>>> m_array{};
+  std::vector<std::vector<std::shared_ptr<T>>> m_array{};
   //!< forced 1D vector of pointers to class T
   CxxUtils::CachedUniquePtr<std::vector<T*>> m_arrayObjects{nullptr};
   //!< binUtility for retrieving and filling the Array

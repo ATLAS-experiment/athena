@@ -762,7 +762,7 @@ StatusCode EvtRangeProcessor::setNewInputFile(const std::string& newFile)
     }
   }
   std::vector<std::string> vect{newFile,};
-  StringArrayProperty newInputFileList(propertyName, vect);
+  StringArrayProperty newInputFileList(std::move(propertyName), vect);
   if(propertyServer->setProperty(newInputFileList).isFailure()) {
     ATH_MSG_ERROR("Unable to update " << newInputFileList.name() << " property on the Event Selector");
     return StatusCode::FAILURE;

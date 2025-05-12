@@ -7,7 +7,7 @@
  *  @author Wolfgang Walkowiak <wolfgang.walkowiak@cern.ch>
  */
 
-#include "DerivationFrameworkBPhys/Bmumu_metadata.h"
+#include "Bmumu_metadata.h"
 
 namespace DerivationFramework {
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
@@ -71,8 +71,8 @@ def enhancedBiasReco(flags):
 
 
 def EnhancedBiasHypoToolGen(chainDict):
-    tool = CompFactory.L1InfoHypoTool(chainDict['chainName'])
-    tool.CTPUnpackingTool.UseTBPBits = True
+    tool = CompFactory.L1InfoHypoTool(chainDict['chainName'],
+                                      CTPUnpackingTool = CompFactory.CTPUnpackingTool(UseTBPBits = True))
 
     key = chainDict['chainParts'][0]['algType']
     if key not in l1seeds:

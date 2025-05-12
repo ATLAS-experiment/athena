@@ -13,7 +13,8 @@ from G4AtlasServices.G4AtlasUserActionConfig import (
     ISFPassBackUserActionSvcCfg, ISF_ATLFAST_UserActionSvcCfg,
 )
 from G4AtlasTools.G4AtlasToolsConfig import (
-    SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
+    G4ThreadPoolSvcCfg, SensitiveDetectorMasterToolCfg,
+    FastSimulationMasterToolCfg
 )
 from ISF_Services.ISF_ServicesConfig import (
     InputConverterCfg
@@ -28,16 +29,16 @@ def G4RunManagerHelperCfg(flags, name="G4RunManagerHelper", **kwargs):
 
 def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("DetGeoSvc", acc.getPrimaryAndMerge(DetectorGeometrySvcCfg(flags)).name)
+    kwargs.setdefault("DetGeoSvc", acc.getPrimaryAndMerge(DetectorGeometrySvcCfg(flags)))
 
-    kwargs.setdefault("RandomNumberService", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RandomNumberService", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     # Only add it if it's not added already
     if "InputConverter" not in kwargs.keys():
-        kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)).name)
+        kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)))
 
     if "UserActionSvc" not in kwargs.keys():
-        kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISFUserActionSvcCfg(flags)).name)
+        kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISFUserActionSvcCfg(flags)))
 
     kwargs.setdefault("RecordFlux", flags.Sim.RecordFlux)
 
@@ -53,7 +54,7 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
         kwargs.setdefault("FastSimMasterTool", acc.addPublicTool(acc.popToolsAndMerge(FastSimulationMasterToolCfg(flags))))
 
     # PhysicsListSvc
-    kwargs.setdefault("PhysicsListSvc", acc.getPrimaryAndMerge(PhysicsListSvcCfg(flags)).name)
+    kwargs.setdefault("PhysicsListSvc", acc.getPrimaryAndMerge(PhysicsListSvcCfg(flags)))
 
     if flags.Sim.ISF.Simulator.isMT():
         from G4AtlasTools.G4AtlasToolsConfig import SimHitContainerListCfg
@@ -62,6 +63,7 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
     # Workaround to keep other simulation flavours working while we migrate everything to be AthenaMT-compatible.
     from SimulationConfig.SimEnums import SimulationFlavour
     if flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFAST3F_ACTSMT, SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
+        acc.merge(G4ThreadPoolSvcCfg(flags))
         acc.setPrivateTools(CompFactory.iGeant4.G4TransportTool(name, **kwargs))
     else:
         kwargs.setdefault("G4RunManagerHelper", acc.addPublicTool(acc.popToolsAndMerge(G4RunManagerHelperCfg(flags))))
@@ -71,7 +73,7 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
 
 def FullGeant4ToolCfg(flags, name="ISF_FullGeant4Tool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISFFullUserActionSvcCfg(flags)).name)
+    kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISFFullUserActionSvcCfg(flags)))
     FullGeant4Tool = acc.popToolsAndMerge(Geant4ToolCfg(flags, name, **kwargs))
     acc.setPrivateTools(FullGeant4Tool)
     return acc
@@ -79,7 +81,7 @@ def FullGeant4ToolCfg(flags, name="ISF_FullGeant4Tool", **kwargs):
 
 def PassBackGeant4ToolCfg(flags, name="ISF_PassBackGeant4Tool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISFPassBackUserActionSvcCfg(flags)).name)
+    kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISFPassBackUserActionSvcCfg(flags)))
     PassBackGeant4Tool = acc.popToolsAndMerge(Geant4ToolCfg(flags, name, **kwargs))
     acc.setPrivateTools(PassBackGeant4Tool)
     return acc
@@ -87,7 +89,7 @@ def PassBackGeant4ToolCfg(flags, name="ISF_PassBackGeant4Tool", **kwargs):
 
 def ATLFAST_Geant4ToolCfg(flags, name="ISF_ATLFAST_Geant4Tool", **kwargs): # TODO Rename
     acc = ComponentAccumulator()
-    kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISF_ATLFAST_UserActionSvcCfg(flags)).name)
+    kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISF_ATLFAST_UserActionSvcCfg(flags)))
     PassBackGeant4Tool = acc.popToolsAndMerge(Geant4ToolCfg(flags, name, **kwargs))
     acc.setPrivateTools(PassBackGeant4Tool)
     return acc

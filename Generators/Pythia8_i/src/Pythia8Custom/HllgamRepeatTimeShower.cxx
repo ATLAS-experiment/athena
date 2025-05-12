@@ -1,18 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HllgamRepeatTimeShower.h"
 
-
-
-  HllgamRepeatTimeShower::HllgamRepeatTimeShower(const std::string& type, const std::string& name, const IInterface* parent) :
-  AthAlgTool(type, name, parent),
-  m_nPass(0),
-  m_nVetos(0){
-    declareInterface<IPythia8Custom>(this);
-  }
-  
   
   StatusCode HllgamRepeatTimeShower::initialize() {
     ATH_MSG_INFO( "Initialisation of " << name() << " was successful" );

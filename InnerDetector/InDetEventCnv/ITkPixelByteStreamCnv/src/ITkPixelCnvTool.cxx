@@ -5,17 +5,22 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 /*
 * Author: Ondra Kovanda, ondrej.kovanda at cern.ch
 * Date: 03/2025
-* Description: Top-level tool to be called from BS converter
+* Description: Top-level tool to be called from BS converter or algorithm
 */
 
 #include "ITkPixelCnvTool.h"
 #include "ITkPixelCabling/ITkPixelOnlineId.h"
+#include "InDetRawData/PixelRDO_Container.h"
+#include "ITkPixelRDO_Container.h"
+#include "ITkPixelHitSortingTool.h"
+#include "ITkPixelEncodingTool.h"
+
+
 
 ITkPixelCnvTool::ITkPixelCnvTool(const std::string& type,const std::string& name,const IInterface* parent)
     : AthAlgTool(type, name, parent),
     m_hitSortingTool("ITkPixelHitSortingTool", this),
     m_encodingTool("ITkPixelEncodingTool", this),
-    m_packingTool("ITkPixelDataPackingTool", this),
     m_byteStreamCnvSvc(this, "ByteStreamCnvSvc", "ByteStreamCnvSvc")
 {}
 
@@ -27,17 +32,17 @@ StatusCode ITkPixelCnvTool::initialize(){
     //Initialize the sub-tools
     ATH_CHECK(m_hitSortingTool.retrieve());
     ATH_CHECK(m_encodingTool.retrieve());
-    ATH_CHECK(m_packingTool.retrieve());
 
     return StatusCode::SUCCESS;
 
 }
 
 /**
-* @brief Take ITkPixelRDO_Container and translate it to
+* @brief Take ITkPixelRDO_Container or PixelRDO_Container and translate it to
 * bytestream
 */
-StatusCode ITkPixelCnvTool::convertToByteStream(const ITkPixelRDO_Container* cont) const {
+template<class ContainerType>
+StatusCode ITkPixelCnvTool::convertToByteStream(const ContainerType* cont) const {
     //Get the full event assembler from ByteStreamCnvSvcBase
     //SrcIdMap translates lower lvl IDs into higher lvl, e. g. ROD -> ROB, ROB -> ROS, ROS -> Det
     FullEventAssembler<SrcIdMap>* fea = 0;
@@ -67,6 +72,8 @@ StatusCode ITkPixelCnvTool::convertToByteStream(const ITkPixelRDO_Container* con
 
     }
 
-
     return StatusCode::SUCCESS;
 }
+
+template StatusCode ITkPixelCnvTool::convertToByteStream<ITkPixelRDO_Container>(const ITkPixelRDO_Container* cont) const;
+template StatusCode ITkPixelCnvTool::convertToByteStream<PixelRDO_Container>(const PixelRDO_Container* cont) const;

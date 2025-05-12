@@ -138,7 +138,7 @@ namespace InDet {
     ATH_CHECK( detStore()->retrieve(m_idHelper) );
 
     // retrieve PIX detector manager
-    ATH_CHECK( detStore()->retrieve(m_detManager, "Pixel") );
+    ATH_CHECK( detStore()->retrieve(m_detManager,m_pixelDetManagerName) );
 
     // retrieve geomodel service
     ATH_CHECK( m_geoModelSvc.retrieve());
@@ -316,12 +316,14 @@ namespace InDet {
     if (!m_detManager->numerology().useLayer(iLayer))
         ATH_MSG_INFO(" When checking for IBL-Layer, layer "<<iLayer<<" not present");
       
-    int noSkipEtaZero=getNoSkipEtaValueFromGeometry();
-    if (noSkipEtaZero>0 && m_detManager->numerology().skipEtaZeroForLayer(iLayer)){
-      m_etaCorrection = 1;
+    if(m_doEtaCorrection){
+        int noSkipEtaZero=getNoSkipEtaValueFromGeometry();
+        if(noSkipEtaZero>0 && m_detManager->numerology().skipEtaZeroForLayer(iLayer)){
+          m_etaCorrection = 1;
+        }
+        ATH_MSG_DEBUG("IBL-etaCorrection value set to: "<<m_etaCorrection);
     }
-    ATH_MSG_DEBUG("IBL-etaCorrection value set to: "<<m_etaCorrection);
-
+    
     if(!m_alignDBM && m_alignLevel == 1 && (m_alignLevelBarrel == -1 || m_alignLevelEndcaps == -1))
       buildL1();
     else if (!m_alignDBM && m_alignLevel == 11 && (m_alignLevelBarrel == -1 || m_alignLevelEndcaps == -1))

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONLAYERINTERSECTION_H
@@ -13,7 +13,7 @@ namespace Muon {
     struct MuonLayerIntersection {
         /** constructor */
         MuonLayerIntersection() = default;
-        MuonLayerIntersection(const MuonSystemExtension::Intersection& intersection_, const std::shared_ptr<const MuonSegment>& segment_, int quality);
+        MuonLayerIntersection(const MuonSystemExtension::Intersection& intersection_, const std::shared_ptr<const MuonSegment>& segment_, int quality_);
 
         /** intersection with layer */
         MuonSystemExtension::Intersection intersection{};

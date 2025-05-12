@@ -5,7 +5,7 @@
 // Reco_V0Finder.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Author: Adam Barton
-#include "DerivationFrameworkBPhys/Reco_V0Finder.h"
+#include "Reco_V0Finder.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 

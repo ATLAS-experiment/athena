@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaServices/src/AthReadAlg.cxx
@@ -87,12 +87,7 @@ StatusCode AthReadAlg::execute (const EventContext& ctx) const
     SG::DataObjectSharedPtr<DataObject> dobj (newprox->accessData());
 
     for (std::string a : proxy->alias()) {
-#if __cplusplus >= 201709
-      if (a.ends_with ("_DELETED"))
-#else
-      if (a.compare (a.size() - 8, 8, "_DELETED") == 0)
-#endif
-      {
+      if (a.ends_with ("_DELETED")) {
         a.erase (a.size() - 8, 8);
         if (!evtStore()->recordObject (dobj, a, false, true)) {
           ATH_MSG_ERROR( "Can't make alias " << a << " for " <<

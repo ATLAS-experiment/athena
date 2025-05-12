@@ -20,4 +20,5 @@ atlas_add_component( ActsObjectDecoration
    InDetSimData
    InDetSimEvent
    PixelReadoutGeometryLib
+   InDetMeasurementUtilitiesLib
 )

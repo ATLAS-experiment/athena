@@ -216,7 +216,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     HIGG9D1_tauTrks = '(TauJets.nTracks + TauJets.nTracksIsolation >= 1 && TauJets.nTracks + TauJets.nTracksIsolation <= 8)'
     HIGG9D1_tauLead = '(TauJets.pt > 23.0*GeV || TauJets.ptFinalCalib > 23.0*GeV)'
     HIGG9D1_tauSubl = '(TauJets.pt > 18.0*GeV || TauJets.ptFinalCalib > 18.0*GeV)'
-    HIGG9D1_tauId   = 'TauJets.DFTauLoose'
+    HIGG9D1_tauId   = 'TauJets.DFTauRNNLoose'
     HIGG9D1_tauReq0 = 'count( '+HIGG9D1_tauSubl+' && '+HIGG9D1_tauTrks+' ) >= 2'
     HIGG9D1_tauReq1 = 'count( '+HIGG9D1_tauSubl+' && '+HIGG9D1_tauTrks+' && '+HIGG9D1_tauId+' ) >= 1'
     HIGG9D1_tauReq2 = 'count( '+HIGG9D1_tauLead+' && '+HIGG9D1_tauTrks+' ) >= 1'
@@ -303,24 +303,12 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     #================
     # Thinning tools
     #================
-    # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    from DerivationFrameworkInDet.InDetToolsConfig import (TrackParticleThinningCfg, MuonTrackParticleThinningCfg)
-    HIGG9D1TPthinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
-    HIGG9D1TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        flags,
-        name                    = "HIGG9D1TrackParticleThinningTool",
-        StreamName              = kwargs['StreamName'],
-        SelectionString         = HIGG9D1TPthinning_expression,
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-    acc.addPublicTool(HIGG9D1TrackParticleThinningTool)
-
     # Include inner detector tracks associated with muons
-    HIGG9D1MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        flags,
+    HIGG9D1MuonTPThinningTool = CompFactory.DerivationFramework.MuonTrackParticleThinning(
         name                    = "HIGG9D1MuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
+        InDetTrackParticlesKey  = "InDetTrackParticles")
     acc.addPublicTool(HIGG9D1MuonTPThinningTool)
 
     # Include inner detector tracks associated with electonrs
@@ -328,19 +316,29 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         name                   = "HIGG9D1ElectronTPThinningTool",
         SGKey                  = "Electrons",
         StreamName             = kwargs['StreamName'],
+        GSFTrackParticlesKey   = "GSFTrackParticles",
         InDetTrackParticlesKey = "InDetTrackParticles")
     acc.addPublicTool(HIGG9D1ElectronTPThinningTool)
 
+    # Include inner detector tracks associated with photons
+    HIGG9D1PhotonTPThinningTool = CompFactory.DerivationFramework.EgammaTrackParticleThinning(
+        name                     = "HIGG9D1PhotonTPThinningTool",
+        SGKey                    = "Photons",
+        StreamName               = kwargs['StreamName'],
+        GSFTrackParticlesKey     = "GSFTrackParticles",
+        GSFConversionVerticesKey = "GSFConversionVertices",
+        InDetTrackParticlesKey   = "InDetTrackParticles")
+    acc.addPublicTool(HIGG9D1PhotonTPThinningTool)
+
     # Include inner detector tracks associated with taus
-    from DerivationFrameworkInDet.InDetToolsConfig import TauTrackParticleThinningCfg
-    HIGG9D1TauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
-        flags,
+    HIGG9D1TauTPThinningTool = CompFactory.DerivationFramework.TauTrackParticleThinning(
         name                   = "HIGG9D1TauTPThinningTool",
         StreamName             = kwargs['StreamName'],
         TauKey                 = "TauJets",
         InDetTrackParticlesKey = "InDetTrackParticles",
         DoTauTracksThinning    = True,
-        TauTracksKey           = "TauTracks"))
+        TauTracksKey           = "TauTracks")
+    acc.addPublicTool(HIGG9D1TauTPThinningTool)
 
     # ID tracks associated to vertices
     HIGG9D1_ThinVtxTracks = CompFactory.DerivationFramework.Thin_vtxTrk(
@@ -351,9 +349,9 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         IgnoreFlags                = True )
     acc.addPublicTool(HIGG9D1_ThinVtxTracks)
 
-    thinningTools = [HIGG9D1TrackParticleThinningTool,
-                     HIGG9D1MuonTPThinningTool,
+    thinningTools = [HIGG9D1MuonTPThinningTool,
                      HIGG9D1ElectronTPThinningTool,
+                     HIGG9D1PhotonTPThinningTool,
                      HIGG9D1TauTPThinningTool,
                      HIGG9D1_ThinVtxTracks]
 
@@ -446,10 +444,9 @@ def HIGG9D1Cfg(flags):
         HIGG9D1SlimmingHelper.SmartCollections.append("TauJets_EleRM")
 
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
-    AllVariables  = getDefaultAllVariables()
+    AllVariables = getDefaultAllVariables()
     AllVariables += ["PrimaryVertices"]
     AllVariables += ["CombinedMuonTrackParticles"]
-    AllVariables += ["ExtrapolatedMuonTrackParticles"]
 
     doLRT = flags.Tracking.doLargeD0
     AllVariables += ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else ["InDetTrackParticles"]
@@ -486,25 +483,37 @@ def HIGG9D1Cfg(flags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
 
+    # Extra CP content
+    from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent
+    HIGG9D1SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
+
+    from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (ElectronsCPDetailedContent, GSFTracksCPDetailedContent, ElectronsAddAmbiguityContent)
+    HIGG9D1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
+    HIGG9D1SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
+    HIGG9D1SlimmingHelper.ExtraVariables += ElectronsAddAmbiguityContent
+
+    from DerivationFrameworkTau.TauJetsCPContent import TauJetsCPContent
+    HIGG9D1SlimmingHelper.ExtraVariables += TauJetsCPContent
+
+    from DerivationFrameworkTau.TauJets_LepRMCPContent import (TauJets_EleRMCPContent, TauJets_MuonRMCPContent)
+    HIGG9D1SlimmingHelper.ExtraVariables += TauJets_EleRMCPContent
+    HIGG9D1SlimmingHelper.ExtraVariables += TauJets_MuonRMCPContent
+
+    StaticContent += ["xAOD::TauJetContainer#TauJets_MuonRM"]
+    StaticContent += ["xAOD::TauJetAuxContainer#TauJets_MuonRMAux.-VertexedClusters"]
+    StaticContent += ["xAOD::VertexContainer#TauSecondaryVertices_MuonRM"]
+    StaticContent += ["xAOD::VertexAuxContainer#TauSecondaryVertices_MuonRMAux.-vxTrackAtVertex"]
+
     HIGG9D1SlimmingHelper.StaticContent = StaticContent
 
-    # Extra content
     HIGG9D1SlimmingHelper.ExtraVariables += [
         "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
         "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
         "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
         "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
-        "TauJets.dRmax.etOverPtLeadTrk",
-        "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
         "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
         "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
-    if flags.Tau.TauEleRM_isAvailable:
-        HIGG9D1SlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
-    # needed for photon ID
-    from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent
-    HIGG9D1SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
-        
     # FTAG Xbb extra content
     extraList = []
     for tagger in ["GN2Xv01", "GN2Xv02"]:
@@ -518,19 +527,25 @@ def HIGG9D1Cfg(flags):
     for score in ["mass", "pt"]:
         extraListReg.append(f"{modelName}_{score}")
     HIGG9D1SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraListReg)]
-        
-    # Truth extra content
+
+    # Truth content
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(HIGG9D1SlimmingHelper)
-        HIGG9D1SlimmingHelper.ExtraVariables += ["Electrons.TruthLink","Muons.TruthLink","Photons.TruthLink","AntiKt4TruthDressedWZJets.IsoFixedCone5Pt","TruthPrimaryVertices.t.x.y.z"]
+        HIGG9D1SlimmingHelper.ExtraVariables += ["Electrons.TruthLink","Muons.TruthLink","Photons.TruthLink","AntiKt4TruthDressedWZJets.IsoFixedCone5Pt"]
 
-        AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles","TruthPrimaryVertices"]
-        AllVariables += ["TruthLHEParticles","TruthHFWithDecayParticles","TruthHFWithDecayVertices","TruthCharm","TruthPileupParticles","InTimeAntiKt4TruthJets","OutOfTimeAntiKt4TruthJets","AntiKt4TruthDressedWZJets","AntiKt4TruthWZJets"]
+        AllVariables += ["TruthLHEParticles","TruthHFWithDecayParticles","TruthHFWithDecayVertices","TruthCharm","TruthPileupParticles","InTimeAntiKt4TruthJets","OutOfTimeAntiKt4TruthJets",
+                         "TruthPrimaryVertices","TruthEvents","TruthParticles","TruthVertices","TruthElectrons","TruthMuons","TruthTaus"]
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
         AllVariables += ["TruthTausWithDecayParticles","TruthTausWithDecayVertices"]
+
+        HIGG9D1SlimmingHelper.SmartCollections += [
+            "AntiKt4TruthDressedWZJets",
+            "AntiKt4TruthWZJets",
+            "AntiKt4TruthJets"
+        ]
 
     # Extra isolation content
     EgammaExtraContent= [
@@ -575,7 +590,7 @@ def HIGG9D1Cfg(flags):
 
     from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
     HIGG9D1SlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
-    
+
     HIGG9D1SlimmingHelper.AllVariables = AllVariables
 
     # Trigger content
@@ -621,5 +636,5 @@ def HIGG9D1Cfg(flags):
     HIGG9D1ItemList = HIGG9D1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_HIGG9D1", ItemList=HIGG9D1ItemList, AcceptAlgs=["HIGG9D1Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_HIGG9D1", AcceptAlgs=["HIGG9D1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc

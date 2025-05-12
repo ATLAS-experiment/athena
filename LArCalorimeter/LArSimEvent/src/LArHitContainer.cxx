@@ -14,11 +14,6 @@ LArHitContainer::LArHitContainer(const std::string& collectionName)
 
 }
 
-LArHitContainer::~LArHitContainer() 
-{
-
-}
-
 LArHitContainer::operator std::string () const {
  
  char * stCounter = new char[48] ;

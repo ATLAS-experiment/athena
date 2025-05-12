@@ -137,7 +137,7 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     // ppm_em_2d_etaPhi_tt_lutcp_Threshold, ppm_had_2d_etaPhi_tt_lutcp_Threshold
     
     for (int th : m_TT_HitMap_ThreshVec) {
-      groupName = "groupLUTCP_"+layerName+"_"+std::to_string(th)+"_LB";
+      groupName = "groupLUTCP_"+layerName+"_"+std::to_string(th);
       ATH_MSG_DEBUG("Filling group " << groupName);
       ATH_MSG_DEBUG("cpET > " << th << " ? " << (cpET > th));  
       if (cpET > th) {
@@ -170,7 +170,7 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     // ppm_em_2d_etaPhi_tt_lutjep_Threshold, ppm_had_2d_etaPhi_tt_lutcp_Threshold
 
     for (int th : m_TT_HitMap_ThreshVec) {
-      groupName = "groupLUTJEP_"+layerName+"_"+std::to_string(th)+"_LB";
+      groupName = "groupLUTJEP_"+layerName+"_"+std::to_string(th);
       ATH_MSG_DEBUG("Filling group " << groupName);
       ATH_MSG_DEBUG("jepET > " << th << " ? " << (jepET > th));
       if (jepET > th) {

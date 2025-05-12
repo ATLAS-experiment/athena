@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 // MuonExtrapolationTool.cxx
-#include "DerivationFrameworkBPhys/MuonExtrapolationTool.h"
+#include "MuonExtrapolationTool.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "TrkSurfaces/DiscSurface.h"

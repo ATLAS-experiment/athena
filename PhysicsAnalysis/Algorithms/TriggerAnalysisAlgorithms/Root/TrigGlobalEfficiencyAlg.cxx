@@ -93,7 +93,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   // collect the combined electron and photon trigger keys supported by Egamma
   std::map<std::string,std::string> electronLegsPerKey, photonLegsPerKey;
   if (m_isRun3Geo) {
-    ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2025/rel22.2/2022_Summer_Prerecom_v1", electronLegsPerKey));
+    ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2025/rel22.2/2025_Precision2023_Recommendation", electronLegsPerKey));
   }
   else {
     ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2018/rel21.2/Precision_Summer2020_v1", electronLegsPerKey));

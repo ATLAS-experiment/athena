@@ -15,20 +15,19 @@
 #ifndef LArSimEvent_LArHitContainer_h
 #define LArSimEvent_LArHitContainer_h
 
+#include <type_traits>
 #include "HitManagement/AthenaHitsVector.h"
 #include "LArSimEvent/LArHit.h"
 
 #include "AthenaKernel/CLASS_DEF.h"
 
-class LArHitContainer:public AthenaHitsVector<LArHit>
+class LArHitContainer: public AthenaHitsVector<LArHit>
 
 /** @brief Hit collection */
 {
 public: 
 
   LArHitContainer (const std::string& collectionName="DefaultCollectionName" ); 
-
-  virtual ~LArHitContainer()  ; 
 
     /**
      * Returns a string containing the description of this <br>
@@ -38,9 +37,13 @@ public:
      *
      * Can be used in printouts <br>
      */
-    virtual operator std::string () const ;
+    operator std::string () const ;
 
 };
+
+static_assert(std::is_standard_layout_v<LArHitContainer>,
+              "LArHitContainer must be standard layout class to guarantee "
+              "empty base class optimization");
 
 CLASS_DEF (LArHitContainer, 2701 , 1 ) 
 

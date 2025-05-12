@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -426,7 +426,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
 	  int Cval[9] = {Ciso[0], Ciso[1], Ciso[2], Chad1[0], Chad1[1], Chad1[2], Chad2[0], Chad2[1], Chad2[2]};
 
 	  elCluster.setup(Cval,jFEXETResolution);
-    elCluster.calcFwdElEDM();
+	  elCluster.calcFwdElEDM();
           
 	  uint etEM = elCluster.getEt();
 	  uint32_t FwdEl_tobword = elCluster.getTobWord();
@@ -482,7 +482,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
     return StatusCode::SUCCESS;
 } //end of the execute function
 
-void jFEXFPGA::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]){
+void jFEXFPGA::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) {
     
   const int rows = FEXAlgoSpaceDefs::jFEX_algoSpace_height;
   const int cols = sizeof tmp_jTowersIDs_subset[0] / sizeof tmp_jTowersIDs_subset[0][0];
@@ -524,10 +524,8 @@ void jFEXFPGA::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[][FEXAlgoSpaceDefs
 }
 
 std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getSmallRJetTOBs()
-{
-        
+{       
     std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
-    tobsSort.clear();
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for(auto &j : m_SRJet_tobwords) {
@@ -535,16 +533,12 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getSmallRJetTOBs()
     }
     std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<jFEXTOB>>, std::placeholders::_1, std::placeholders::_2, FEXAlgoSpaceDefs::jJ_etBit, 0x7ff));
     
-    return tobsSort;    
-
+    return tobsSort;
 }
 
 std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getLargeRJetTOBs()
-{
-    
-        
+{            
     std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
-    tobsSort.clear();
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for(auto &j : m_LRJet_tobwords) {
@@ -552,8 +546,7 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getLargeRJetTOBs()
     }
     std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<jFEXTOB>>, std::placeholders::_1, std::placeholders::_2, FEXAlgoSpaceDefs::jLJ_etBit, 0x1fff));
     
-    return tobsSort;    
-
+    return tobsSort;
 }
 
 
@@ -566,14 +559,12 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getLargeRJetTOBs()
     std::sort (tobsSort.begin(), tobsSort.end(), etFwdElSort);
   
     return tobsSort;
-
   }
 
 
 std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getTauTOBs() {
     
     std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
-    tobsSort.clear();
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for(auto &j : m_tau_tobwords) {
@@ -587,15 +578,13 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getTauTOBs() {
 std::vector<std::unique_ptr<jFEXTOB>> jFEXFPGA::getSumEtTOBs() {
     
     std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
-    tobsSort.clear();
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for(auto &j : m_sumET_tobwords) {
         tobsSort.push_back(std::move(j));
     }
     
-    return tobsSort;    
-
+    return tobsSort;
 }
 
 
@@ -603,15 +592,13 @@ std::vector<std::unique_ptr<jFEXTOB>> jFEXFPGA::getSumEtTOBs() {
 std::vector<std::unique_ptr<jFEXTOB>> jFEXFPGA::getMetTOBs() {
     
     std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
-    tobsSort.clear();
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for(auto &j : m_Met_tobwords) {
         tobsSort.push_back(std::move(j));
     }
     
-    return tobsSort;    
-
+    return tobsSort;
 }
 
 
@@ -623,8 +610,7 @@ int jFEXFPGA::getTTowerET_EM(unsigned int TTID) {
     }
     
     ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_EM, TTower ID not found in map: " << TTID );
-    return -99999;
-    
+    return -99999;    
 }
 
 
@@ -636,8 +622,7 @@ int jFEXFPGA::getTTowerET_HAD(unsigned int TTID) {
     }
     
     ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_HAD, TTower ID not found in map: " << TTID );
-    return -99999;
-    
+    return -99999;    
 }
 
 
@@ -645,8 +630,7 @@ int jFEXFPGA::getTTowerET_HAD(unsigned int TTID) {
 int jFEXFPGA::getTTowerET(unsigned int TTID) {
 
     return getTTowerET_EM(TTID)+getTTowerET_HAD(TTID);
-
-}  
+}
 
 
 //Returns the Total TT energy for MET/SumÉT Algos
@@ -673,7 +657,6 @@ int jFEXFPGA::getTTowerET_forMET(unsigned int TTID) {
     
     
     return tmp_EM + tmp_HAD;
-
 }  
 
 
@@ -687,10 +670,6 @@ int jFEXFPGA::getTTowerET_SG(unsigned int TTID) {
     const LVL1::jTower * tmpTower = jTowerContainer->findTower(TTID);
     return tmpTower->getTotalET();
 }
-
-
-
-
 
 
 } // end of namespace bracket

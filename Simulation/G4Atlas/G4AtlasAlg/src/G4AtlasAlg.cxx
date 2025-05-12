@@ -314,20 +314,6 @@ StatusCode G4AtlasAlg::execute()
   static std::atomic<unsigned int> n_Event=0;
   ATH_MSG_DEBUG("++++++++++++  G4AtlasAlg execute  ++++++++++++");
 
-#ifdef G4MULTITHREADED
-  // In some rare cases, TBB may create more physical worker threads than
-  // were requested via the pool size.  This can happen at any time.
-  // In that case, those extra threads will not have had the thread-local
-  // initialization done, leading to a crash.  Try to detect that and do
-  // the initialization now if needed.
-  if (G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume() == nullptr)
-  {
-    ToolHandle<IThreadInitTool> ti ("G4ThreadInitTool", nullptr);
-    ATH_CHECK( ti.retrieve() );
-    ti->initThread();
-  }
-#endif
-
   n_Event += 1;
 
   if (n_Event<=10 || (n_Event%100) == 0) {

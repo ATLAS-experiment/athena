@@ -66,7 +66,7 @@ def AthenaEventLoopMgrCfg(flags):
     elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge( EvtIdModifierSvcCfg(flags) ).name
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge( EvtIdModifierSvcCfg(flags) )
 
     if flags.Common.isOverlay:
         if not flags.Overlay.DataOverlay:
@@ -96,7 +96,7 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))
 
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         elmgr.RequireInputAttributeList = True
@@ -141,7 +141,7 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))
 
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         elmgr.RequireInputAttributeList = True

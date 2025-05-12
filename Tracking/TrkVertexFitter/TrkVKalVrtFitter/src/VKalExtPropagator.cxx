@@ -43,7 +43,7 @@ namespace Trk {
      m_extrapolator = Pnt;
   }
 
-//Protection against exit outside ID volume
+//Protection against exit outside ID volume (unless explicitly requested in configuration for LLP scenarios -- then uses MS volume)
 //
   double VKalExtPropagator::Protection(const double *RefEnd,
                                        const IVKalState& istate) const
@@ -53,8 +53,12 @@ namespace Trk {
       double Xend=RefEnd[0] + state.m_refFrameX;
       double Yend=RefEnd[1] + state.m_refFrameY;
       double Zend=RefEnd[2] + state.m_refFrameZ;
-      double Rlim=sqrt(Xend*Xend+Yend*Yend) / m_vkalFitSvc->m_IDsizeR;
-      double Zlim=fabs(Zend)                / m_vkalFitSvc->m_IDsizeZ;
+      
+      double sizeR = state.m_allowUltraDisplaced ? m_vkalFitSvc->m_MSsizeR : m_vkalFitSvc->m_IDsizeR;
+      double sizeZ = state.m_allowUltraDisplaced ? m_vkalFitSvc->m_MSsizeZ : m_vkalFitSvc->m_IDsizeZ;
+      double Rlim=std::hypot(Xend, Yend) / sizeR;
+      double Zlim=std::abs(Zend) / sizeZ;
+
       double Scale = Rlim; if(Zlim>Rlim) Scale=Zlim;
 //std::cout<<"relative TARG="<<RefEnd[0]<<","<<RefEnd[1]<<","<<RefEnd[2]
 //<<" global ref.="<<m_vkalFitSvc->state.m_refFrameX<<","<<m_vkalFitSvc->state.m_refFrameY<<","<<m_vkalFitSvc->state.m_refFrameZ

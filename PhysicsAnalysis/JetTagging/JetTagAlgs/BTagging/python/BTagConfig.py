@@ -67,6 +67,10 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "BTagging/20220314/dipsLoose/antikt4empflow/network.json",    # input to DL1dv01
             "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",    # 2023 pre-rec DL1dv01
             "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx", # fold 0 of the GN2v01 (safe for HLT jets)
+        ],
+        "AntiKt4EMPFlowByVertex": [ # ByVertex added 
+            #"BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx",
+            "BTagging/20220314/dipsLoose/antikt4empflow/network.json"
         ]
     }
     
@@ -151,7 +155,6 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
 
     #Track Augmenter
     result.merge(BTagTrackAugmenterAlgCfg(inputFlags))
-
     # loop over jet collections and schedule btagging algorithms
     for jc in JetCollection:
         result.merge(

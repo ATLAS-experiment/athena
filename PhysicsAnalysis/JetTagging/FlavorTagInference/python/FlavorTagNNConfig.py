@@ -154,14 +154,16 @@ def MultifoldGNNCfg(
         tag_requirements=set(),
         defaultOutputValues={},
         foldHashName='jetFoldRankHash',
+        dz_suffix='',
 ):
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
-    algname = 'FtagMultifoldNN_{jc}_{tc}_{nn}_{fc}'.format(
+    algname = 'FtagMultifoldNN_{jc}_{tc}_{nn}_{fc}{dz}'.format(
         jc=JetCollection,
         tc=TrackCollection,
         nn=nn_name,
         fc=FlipConfig,
+        dz=dz_suffix,
     )
 
     default_zero_tracks = NONZERO_TRACKS in tag_requirements

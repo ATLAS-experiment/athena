@@ -190,7 +190,7 @@ AthenaMP::AllWorkerOutputs_ptr AthenaMPToolBase::generateOutputReport()
 
 void AthenaMPToolBase::useFdsRegistry(std::shared_ptr<AthenaInterprocess::FdsRegistry> registry)
 {
-  m_fdsRegistry = registry;
+  m_fdsRegistry = std::move(registry);
 }
 
 void AthenaMPToolBase::setRandString(const std::string& randStr)
@@ -307,7 +307,7 @@ int AthenaMPToolBase::redirectLog(const std::string& rundir, bool addTimeStamp)
       if(oldFormat.find("%t")==std::string::npos) {
         // Add time stamps
         std::string newFormat("%t " + oldFormat);
-        StringProperty newFormatProp(propertyName,newFormat);
+        StringProperty newFormatProp(std::move(propertyName),newFormat);
         ATH_CHECK(propertyServer->setProperty(newFormatProp), -1);
       }
       else {

@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import os, subprocess, time
-from DecoratorFactory import decorate
+from .DecoratorFactory import decorate
 from AthenaCommon import Logging
 from PowhegControl.utility import HeartbeatTimer, RepeatingTimer
 import collections
@@ -79,8 +79,8 @@ class Hto4lConfig(object) :
       self.logger.info( ': {0:<22} : {1:>17} : {2}'.format( value_tuple[0], getattr(self, value_tuple[0]), value_tuple[1] ) )
 
     ## Add configurable parameters to fixed list
-    [ self.fix_parameter( parameter=value_tuple[0], desc=value_tuple[1] ) for value_tuple in self.configurable_parameters.values() ]
-
+    [ self.fix_parameter(parameter=value_tuple[0], desc=value_tuple[1]) for value_tuple in list(self.configurable_parameters.values()) ]
+    
     ## Write out final runcard
     self.logger.info( 'Writing Hto4l runcard to {0}'.format( self.run_card_path ) )
     with open( self.run_card_path, 'w' ) as f :

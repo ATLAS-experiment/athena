@@ -99,7 +99,7 @@ class CylinderVolumeBounds final: public VolumeBounds {
   bool inside(const Amg::Vector3D&, double tol = 0.) const override final;
 
   /** Method to decompose the Bounds into boundarySurfaces */
-  const std::vector<const Trk::Surface*>* decomposeToSurfaces
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces
   (const Amg::Transform3D& transform) override final;
 
   /** Provide accessor for BoundarySurfaces */
@@ -133,23 +133,23 @@ class CylinderVolumeBounds final: public VolumeBounds {
  private:
   /** This method returns the associated CylinderBounds of the inner
    * CylinderSurfaces. */
-  CylinderBounds* innerCylinderBounds() const;
+  std::shared_ptr<CylinderBounds> innerCylinderBounds() const;
 
   /** This method returns the associated CylinderBounds of the outer
    * CylinderSurfaces. */
-  CylinderBounds* outerCylinderBounds() const;
+  std::shared_ptr<CylinderBounds> outerCylinderBounds() const;
 
   /** This method returns the associated DiscBounds for the bottom/top
    * DiscSurface. */
-  DiscBounds* bottomDiscBounds() const;
+  std::shared_ptr<DiscBounds> bottomDiscBounds() const;
 
   /** This method returns the associated DiscBounds for the bottom/top
    * DiscSurface. */
-  DiscBounds* topDiscBounds() const;
+  std::shared_ptr<DiscBounds> topDiscBounds() const;
 
   /** This method returns the associated PlaneBounds limiting a sectoral
    * CylinderVolume. */
-  RectangleBounds* sectorPlaneBounds() const;
+  std::shared_ptr<RectangleBounds> sectorPlaneBounds() const;
 
   /** Private method to construct the accessors */
   void createBoundarySurfaceAccessors();
@@ -206,7 +206,7 @@ inline double CylinderVolumeBounds::halfPhiSector() const {
 
 inline double CylinderVolumeBounds::halflengthZ() const { return m_halfZ; }
 
-inline DiscBounds* CylinderVolumeBounds::topDiscBounds() const {
+inline std::shared_ptr<DiscBounds> CylinderVolumeBounds::topDiscBounds() const {
   return this->bottomDiscBounds();
 }
 

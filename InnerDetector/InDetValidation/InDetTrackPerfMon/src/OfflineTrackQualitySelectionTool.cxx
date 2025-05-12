@@ -9,29 +9,41 @@
 
 namespace IDTPM {
 
-OfflineTrackQualitySelectionTool::OfflineTrackQualitySelectionTool(const std::string& name)
-  : asg::AsgTool( name ) {}
+OfflineTrackQualitySelectionTool::OfflineTrackQualitySelectionTool( const std::string& name )
+  : asg::AsgTool( name ) { }
 
-StatusCode OfflineTrackQualitySelectionTool::initialize() {
+StatusCode OfflineTrackQualitySelectionTool::initialize()
+{
   ATH_CHECK( asg::AsgTool::initialize() );  
   ATH_CHECK( m_offlineTool.retrieve() );
   return StatusCode::SUCCESS;
 }
 
 StatusCode OfflineTrackQualitySelectionTool::selectTracks(
-    TrackAnalysisCollections& trkAnaColls) {
-
+    TrackAnalysisCollections& trkAnaColls )
+{
   std::vector< const xAOD::TrackParticle* > selected;
-  for ( auto trkPtr: trkAnaColls.offlTrackVec(TrackAnalysisCollections::FS)) {
-    if ( m_offlineTool->accept(trkPtr) and this->accept(trkPtr)) // TODO vertex needs to be provided here
-      selected.push_back(trkPtr);
+  for( const xAOD::TrackParticle* track :
+       trkAnaColls.offlTrackVec( TrackAnalysisCollections::FS ) ) {
+    if( accept( track ) ) selected.push_back( track );
   }
-  ATH_MSG_DEBUG("Out of " << trkAnaColls.offlTrackVec(TrackAnalysisCollections::FS).size() << " tracks, selected " << selected.size() );
-  ATH_CHECK(trkAnaColls.fillOfflTrackVec(selected, TrackAnalysisCollections::FS));
+
+  ATH_MSG_DEBUG( "Size before selection: " <<
+                 trkAnaColls.offlTrackVec( TrackAnalysisCollections::FS ).size() <<
+                 "\t Size after selection: " << selected.size() );
+
+  /// updating FS collection
+  ATH_CHECK( trkAnaColls.fillOfflTrackVec( selected, TrackAnalysisCollections::FS ) );
+
   return StatusCode::SUCCESS;
 }
 
-bool OfflineTrackQualitySelectionTool::accept(const xAOD::TrackParticle* track) {
+bool OfflineTrackQualitySelectionTool::accept( const xAOD::TrackParticle* track )
+{
+  /// Baseline selection, via InDetTrackSelectionTool
+  if ( not m_offlineTool->accept( track ) )           return false; // TODO vertex needs to be provided here
+
+  /// Customised selections
   if (m_maxPt!=-9999.   and (pT(*track)) > m_maxPt )                return false;  
   if (m_maxEta!=-9999.  and (eta(*track)) > m_maxEta )              return false;
   if (m_minEta!=-9999.  and (eta(*track)) < m_minEta )              return false; 
@@ -49,11 +61,14 @@ bool OfflineTrackQualitySelectionTool::accept(const xAOD::TrackParticle* track) 
   if (m_minAbsZ0!=-9999.   and std::fabs(z0(*track)) < m_minAbsZ0 )         return false; 
   if (m_maxAbsZ0!=-9999.   and std::fabs(z0(*track)) > m_maxAbsZ0 )         return false; 
   if (m_minAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) < m_minAbsQoPT )  return false; 
-  if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) > m_maxAbsQoPT )  return false; 
-  if (!m_minHitsVec.empty() and !nHitsSelVec(*track, m_minHitsVec, m_etaBins))  return false; 
-  if (!m_minPtVec.empty() and !minPtSelVec(*track, m_minPtVec, m_etaBins))  return false; 
-  if (!m_maxD0Vec.empty() and !maxD0SelVec(*track, m_maxD0Vec, m_etaBins))  return false; 
-  if (!m_maxZ0Vec.empty() and !maxZ0SelVec(*track, m_maxZ0Vec, m_etaBins))  return false; 
+  if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) > m_maxAbsQoPT )  return false;
+  if ( !m_etaBins.empty() ) {
+    if (!m_minHitsVec.empty() and !nHitsSelVec(*track, m_minHitsVec, m_etaBins))  return false;
+    if (!m_minPtVec.empty() and !minPtSelVec(*track, m_minPtVec, m_etaBins))  return false;
+    if (!m_maxD0Vec.empty() and !maxD0SelVec(*track, m_maxD0Vec, m_etaBins))  return false;
+    if (!m_maxZ0Vec.empty() and !maxZ0SelVec(*track, m_maxZ0Vec, m_etaBins))  return false;
+  }
+
   return true;
 }
 

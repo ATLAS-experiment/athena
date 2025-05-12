@@ -6,21 +6,21 @@
 
 /** Constructor with averaged material and binning in 1D*/
 Trk::BinnedMaterial::BinnedMaterial(
-    const Trk::Material* mat, const Trk::BinUtility& bu,
+    const Trk::Material& mat, const Trk::BinUtility& bu,
     const std::vector<size_t>& index,
     const std::vector<Trk::IdentifiedMaterial>& detailedMat)
-    : Trk::Material(*mat),
+    : Trk::Material(mat),
       m_matVec(detailedMat),
       m_matBins(std::make_unique<Trk::CompactBinnedArray1D<const Trk::IdentifiedMaterial> >(ptrs(), index, bu))
      {}
 
 /** Constructor with averaged material and binning in 2D*/
 Trk::BinnedMaterial::BinnedMaterial(
-    const Trk::Material* mat, const Trk::BinUtility& bu,
+    const Trk::Material& mat, const Trk::BinUtility& bu,
     const std::vector<Trk::BinUtility>& bVec,
     const std::vector<std::vector<size_t> >& index,
     const std::vector<Trk::IdentifiedMaterial>& detailedMat)
-    : Trk::Material(*mat),
+    : Trk::Material(mat),
       m_matVec(detailedMat),
       m_matBins(std::make_unique<Trk::CompactBinnedArray2D<const Trk::IdentifiedMaterial> >(ptrs(), index, bu, bVec))
      {}

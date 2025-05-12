@@ -63,7 +63,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
 
   declareProperty("THistSvc", m_thistSvc);
 
-  declareProperty("DoHist", m_doHist=true); //histograming yes/no true/false
+  declareProperty("DoHist", m_doHist=false); //histograming yes/no true/false
 
   m_nPass = 0;
   m_nFail = 0;
@@ -807,43 +807,46 @@ StatusCode TestHepMC::execute() {
 StatusCode TestHepMC::finalize() {
 
   ATH_MSG_INFO("Events passed = " << m_nPass << ", Events Failed = " << m_nFail);
+  // Keep a denominator for all the fractions, to ensure we don't get a bunch of nans.
+  // If nothing passed or failed, all the other counters should be zero; this is just avoiding FPEs etc.
+  double denom = m_nPass + m_nFail > 0. ? m_nPass + m_nFail : 1.;
 
-  ATH_MSG_INFO(" Event rate with invalid Beam Particles = " << m_invalidBeamParticlesCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with invalid Beam Particles = " << m_invalidBeamParticlesCheckRate*100.0/denom << "% (not included in test efficiency)");
   ATH_MSG_INFO(" Event rate with beam particles and status not equal to 4 = " << m_beamParticleswithStatusNotFourCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with incorrect beam particle energies = " << m_beamEnergyCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with NaN (Not A Number) or inf found in the event record vertex positions = " << m_vtxNANandINFCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with incorrect beam particle energies = " << m_beamEnergyCheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with NaN (Not A Number) or inf found in the event record vertex positions = " << m_vtxNANandINFCheckRate*100.0/denom << "%");
   if (!m_vtxNaNTest) ATH_MSG_INFO(" The check for NaN or inf in vtx. record is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with vertices displaced more than " << m_max_dist_trans << "~mm in transverse direction for particles with status code other than 1 and 2 = " << m_vtxDisplacedstatuscodenot12CheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with vertices displaced more than " << m_max_dist << "~mm = " << m_vtxDisplacedMoreThan_1m_CheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with vertices displaced more than " << m_max_dist_trans << "~mm in transverse direction for particles with status code other than 1 and 2 = " << m_vtxDisplacedstatuscodenot12CheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with vertices displaced more than " << m_max_dist << "~mm = " << m_vtxDisplacedMoreThan_1m_CheckRate*100.0/denom << "%");
   if (!m_vtxDisplacedTest) ATH_MSG_INFO(" The check for displaced vertices is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with NAN (Not A Number) or inf found in particle momentum values = " << m_partMomentumNANandINFCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with NAN (Not A Number) or inf found in particle momentum values = " << m_partMomentumNANandINFCheckRate*100.0/denom << "%");
   if (!m_momNaNTest) ATH_MSG_INFO(" The check for NaN/inf in momentum record is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with undecayed pi0's with status 1 or 2 = " << m_undecayedPi0statuscode12CheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with unstable particles with no end vertex = " << m_unstableNoEndVtxCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with negative total energy like for tachyonic particles = " << m_negativeEnergyTachyonicCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with particles with improper decay properties = " << m_decayCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with undisplaced daughters of long lived hadrons = " << m_undisplacedLLHdaughtersCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with non zero photon mass = " << m_nonZeroPhotonMassCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
-  ATH_MSG_INFO(" Event rate with no energy balance = " << m_energyBalanceCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with undecayed pi0's with status 1 or 2 = " << m_undecayedPi0statuscode12CheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with unstable particles with no end vertex = " << m_unstableNoEndVtxCheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with negative total energy like for tachyonic particles = " << m_negativeEnergyTachyonicCheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with particles with improper decay properties = " << m_decayCheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with undisplaced daughters of long lived hadrons = " << m_undisplacedLLHdaughtersCheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with non zero photon mass = " << m_nonZeroPhotonMassCheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Event rate with no energy balance = " << m_energyBalanceCheckRate*100.0/denom << "%");
   if (!m_energyImbalanceTest) ATH_MSG_INFO(" The check for energy imbalance is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with no momentum balance = " << m_momentumBalanceCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with no momentum balance = " << m_momentumBalanceCheckRate*100.0/denom << "%");
   if (!m_momImbalanceTest) ATH_MSG_INFO(" The check for momentum imbalance is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with negative energy particles = " << m_negativeEnergyCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with negative energy particles = " << m_negativeEnergyCheckRate*100.0/denom << "%");
   if (!m_negativeEnergyTest) ATH_MSG_INFO(" The check for particles with negative energy is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with tachyons = " << m_tachyonCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with tachyons = " << m_tachyonCheckRate*100.0/denom << "%");
   if (!m_tachyonsTest) ATH_MSG_INFO(" The check for tachyons is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with stable or unstable particles with no parents = " << m_stableUnstableNoParentCheckRate*100.0/double(m_nPass + m_nFail) << "%");
-  ATH_MSG_INFO(" Event rate with unstable particle with no decay vertex = " << m_unstablePartNoDecayVtxCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with stable or unstable particles with no parents = " << m_stableUnstableNoParentCheckRate*100.0/denom << "%");
+  ATH_MSG_INFO(" Event rate with unstable particle with no decay vertex = " << m_unstablePartNoDecayVtxCheckRate*100.0/denom << "%");
   if (!m_unstableNoVtxTest) ATH_MSG_INFO(" The check for unstable part. without end vertex is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with undecayed Pi0's = " << m_undecayedPi0CheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with undecayed Pi0's = " << m_undecayedPi0CheckRate*100.0/denom << "%");
   if (!m_pi0NoVtxTest) ATH_MSG_INFO(" The check for undecayed pi0's is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with undisplaced decay daughters of displaced vertices = " << m_undisplacedDecayDaughtersOfDisplacedVtxCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with undisplaced decay daughters of displaced vertices = " << m_undisplacedDecayDaughtersOfDisplacedVtxCheckRate*100.0/denom << "%");
   if (!m_undisplacedDaughtersTest) ATH_MSG_INFO(" The check for  undisplaced daughters is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with particles with status 1 but lifetime < " << m_min_tau << "~ns = " << m_Status1ShortLifetime*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with particles with status 1 but lifetime < " << m_min_tau << "~ns = " << m_Status1ShortLifetime*100.0/denom << "%");
   if (!m_lifeTimeTest) ATH_MSG_INFO(" The check for status 1 particles with too short lifetime is switched off, so is not included in the final TestHepMC efficiency ");
-  ATH_MSG_INFO(" Event rate with energy sum of interacting particles non known by Geant4 above " << m_nonG4_energy_threshold << " MeV = " << m_nonG4_energyCheckRate*100.0/double(m_nPass + m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with energy sum of interacting particles non known by Geant4 above " << m_nonG4_energy_threshold << " MeV = " << m_nonG4_energyCheckRate*100.0/denom << "%");
   if (!m_energyG4Test) ATH_MSG_INFO(" The check for energy not known by G4 is switched off, so is not included in the final TestHepMC efficiency "); 
-  ATH_MSG_INFO(" Event rate with unknown PDG IDs " << m_unknownPDGIDCheckRate*100.0/double(m_nPass+m_nFail) << "%");
+  ATH_MSG_INFO(" Event rate with unknown PDG IDs = " << m_unknownPDGIDCheckRate*100.0/denom << "%");
   if (!m_unknownPDGIDTest) ATH_MSG_INFO(" The check for unknown PDG IDs is sitched off, so it is not included in the final TestHepMC efficiency ");
 
   const double tau_fastDrate = double(m_FastDecayedTau) / double(m_TotalTaus);

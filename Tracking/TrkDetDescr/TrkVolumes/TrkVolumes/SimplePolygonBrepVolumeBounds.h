@@ -69,10 +69,10 @@ class SimplePolygonBrepVolumeBounds final: public VolumeBounds {
 
   /**This method checks if position in the 3D volume frame is inside the
    * volume*/
-  bool inside(const Amg::Vector3D&, double tol = 0.) const override final; 
+  bool inside(const Amg::Vector3D&, double tol = 0.) const override final;
 
   /** Method to decompose the Bounds into Surfaces */
-  const std::vector<const Trk::Surface*>* decomposeToSurfaces
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces
   (const Amg::Transform3D& transform) override final;
 
   /** Provide accessor for BoundarySurfaces */
@@ -98,8 +98,8 @@ class SimplePolygonBrepVolumeBounds final: public VolumeBounds {
 
  private:
   void processSubVols();
-  Trk::PlaneSurface* sideSurf(const Amg::Transform3D&, unsigned int,
-                              unsigned int) const;
+  std::unique_ptr<Trk::PlaneSurface> sideSurf(const Amg::Transform3D&, unsigned int,
+                                              unsigned int) const;
   static bool Xor(bool x, bool y) ;
 
   bool Left(std::pair<double, double> a, std::pair<double, double> b,

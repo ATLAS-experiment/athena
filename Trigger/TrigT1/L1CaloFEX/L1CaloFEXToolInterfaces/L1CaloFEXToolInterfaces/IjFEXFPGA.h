@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -14,9 +14,6 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "L1CaloFEXSim/jTower.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 #include "TrigConfData/L1Menu.h"
 #include "L1CaloFEXSim/jFEXOutputCollection.h"

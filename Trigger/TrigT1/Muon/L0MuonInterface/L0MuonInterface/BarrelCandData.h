@@ -13,14 +13,10 @@ namespace L0Muon
   {
   public:
     // default constructor
-    BarrelCandData() = default;
+    BarrelCandData()  = default;
     ~BarrelCandData() = default;
 
     BarrelCandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag);
-
-    uint16_t quality() const { return m_quality; }
-    void setQuality(uint16_t quality) { m_quality = quality; }
-
     /// quality of the candidate
     enum class Quality
     {
@@ -28,12 +24,12 @@ namespace L0Muon
       Q_BEST,
       Q_LOW
     };
+    Quality quality() const { return m_quality; }
+    void setQuality(Quality quality) { m_quality = quality; }
 
   private:
-
     /// quality of the candidate
-    uint16_t m_quality{0};
-    
+    Quality m_quality{0};
   };
 
 } // namespace L0Muon

@@ -11,6 +11,7 @@
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/Layer.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkExInterfaces/IPropagationEngine.h"
 #include "TrkExInterfaces/INavigationEngine.h"
 #include <iostream>

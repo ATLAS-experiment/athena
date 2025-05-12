@@ -82,7 +82,7 @@ if (NOT XAOD_STANDALONE)
 
   # Suppress spurious warnings seen in the LTO build originating in
   # the boost parser code.
-  set_target_properties( FlavorTagInferenceLib
+  set_target_properties( FlavorTagInference
     PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
 
 endif()

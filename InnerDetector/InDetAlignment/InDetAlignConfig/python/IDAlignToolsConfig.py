@@ -216,6 +216,7 @@ def GeometryManagerToolCfg(flags, **kwargs):
     elif flags.InDet.Align.alignTRT:
         return TRTGeometryManagerToolCfg(flags, **kwargs)
     else:
+        print("Configuration Error - No Geometry Manager Configured!")
         pass
  
 def AlignDBToolCfg(flags, **kwargs):
@@ -226,6 +227,9 @@ def AlignDBToolCfg(flags, **kwargs):
         return SiTrkAlignDBToolCfg(flags, **kwargs)
     elif flags.InDet.Align.alignTRT:
         return TRTTrkAlignDBToolCfg(flags, **kwargs)
+    else:
+        print("Configuration Error - No AlignDBTool Configured!")
+        pass
 
 ##----- GlobalChi2AlignTool Setup -----##
 
@@ -306,7 +310,7 @@ def BeamspotVertexPreProcessorCfg(
         from TrkConfig.CommonTrackFitterConfig import InDetStandaloneTrackFitterCfg
         kwargs.setdefault("TrackFitter", cfg.addPublicTool(
             cfg.popToolsAndMerge(InDetStandaloneTrackFitterCfg(
-                flags, FillDerivativeMatrix = True))))
+            flags, FillDerivativeMatrix = True))))
 
     if "TrackToVertexIPEstimatorTool" not in kwargs:
         from TrkConfig.TrkVertexFitterUtilsConfig import (

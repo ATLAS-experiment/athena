@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Script building all the externals necessary for AthSimulation.
 #
@@ -10,7 +10,7 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthSimulationExternals"
 ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=107
-                        -DLCG_VERSION_POSTFIX="a_ATLAS_5"
+                        -DLCG_VERSION_POSTFIX="a_ATLAS_9"
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v39r4.000/Gaudi-v39r4.000.tar.gz;URL_MD5;abe78ac62447548328d563201e0018d4"
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.10.0/GeoModel-6.10.0.tar.bz2;URL_MD5;b5c2368db049c1a8dee223789cca03c0"
                         -DATLAS_GEANT4_USE_LTO=TRUE

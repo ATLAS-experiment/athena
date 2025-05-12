@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -16,6 +16,7 @@
 
 // System include(s)
 #include <atomic>
+#include <cmath>  // for std::isnan
 
 using namespace TauAnalysisTools;
 
@@ -26,27 +27,10 @@ DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
   , m_fOutFile(nullptr)
   , m_aAccept( "DiTauSelection" )
 {
-  declareProperty( "CreateControlPlots", m_bCreateControlPlots = false);
-  /*
-    Baseline properties declaration:
-    properties containing 'Region' are a vector of lower and upper bounds
-    other properties named in plural are a list of exact values to cut on
-    other properties are single cuts
-  */
-  declareProperty( "ConfigPath",     m_sConfigPath     = "");
-  declareProperty( "SelectionCuts",  m_iSelectionCuts  = NoDiTauCut); // initialize with 'no' cuts
   declareProperty( "PtRegion",       m_vPtRegion       = {});  // in GeV
-  declareProperty( "PtMin",          m_dPtMin          = NAN); // in GeV
-  declareProperty( "PtMax",          m_dPtMax          = NAN); // in GeV
   declareProperty( "AbsEtaRegion",   m_vAbsEtaRegion   = {});
-  declareProperty( "AbsEtaMin",      m_dAbsEtaMin      = NAN);
-  declareProperty( "AbsEtaMax",      m_dAbsEtaMax      = NAN);
   declareProperty( "NSubjetsRegion", m_vNSubjetsRegion = {});
-  declareProperty( "NSubjetsMin",    m_dNSubjetsMin    = NAN);
-  declareProperty( "NSubjetsMax",    m_dNSubjetsMax    = NAN);
-
 }
-
 //______________________________________________________________________________
 DiTauSelectionTool::~DiTauSelectionTool()
 {
@@ -59,14 +43,14 @@ StatusCode DiTauSelectionTool::initialize()
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
   if (!bConfigViaProperties and !m_vPtRegion.empty())             bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dPtMin == m_dPtMin)             bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dPtMax == m_dPtMax)             bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dPtMin.value()))             bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dPtMax.value()))             bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())         bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dAbsEtaMin == m_dAbsEtaMin)     bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dAbsEtaMax == m_dAbsEtaMax)     bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMin.value()))     bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMax.value()))     bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vNSubjetsRegion.empty())       bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dNSubjetsMin == m_dNSubjetsMin) bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dNSubjetsMax == m_dNSubjetsMax) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMin.value())) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMax.value())) bConfigViaProperties = true;
 
   if (bConfigViaConfigFile and bConfigViaProperties)
   {
@@ -119,13 +103,13 @@ StatusCode DiTauSelectionTool::initialize()
       else if (sCut == "PtMin")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutPt;
-        if (m_dPtMin != m_dPtMin)
+        if (std::isnan(m_dPtMin.value()))
           m_dPtMin = rEnv.GetValue("PtMin",NAN);
       }
       else if (sCut == "PtMax")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutPt;
-        if (m_dPtMax != m_dPtMax)
+        if (std::isnan(m_dPtMax.value()))
           m_dPtMax = rEnv.GetValue("PtMax",NAN);
       }
       else if (sCut == "AbsEtaRegion")
@@ -137,13 +121,13 @@ StatusCode DiTauSelectionTool::initialize()
       else if (sCut == "AbsEtaMin")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutAbsEta;
-        if (m_dAbsEtaMin != m_dAbsEtaMin)
+        if (std::isnan(m_dAbsEtaMin.value()))
           m_dAbsEtaMin = rEnv.GetValue("AbsEtaMin",NAN);
       }
       else if (sCut == "AbsEtaMax")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutAbsEta;
-        if (m_dAbsEtaMax != m_dAbsEtaMax)
+        if (std::isnan(m_dAbsEtaMax.value()))
           m_dAbsEtaMax = rEnv.GetValue("AbsEtaMax",NAN);
       }
       else if (sCut == "NSubjetsRegion")
@@ -155,13 +139,13 @@ StatusCode DiTauSelectionTool::initialize()
       else if (sCut == "NSubjetsMin")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutNSubjets;
-        if (m_dNSubjetsMin != m_dNSubjetsMin)
+        if (std::isnan(m_dNSubjetsMin.value()))
           m_dNSubjetsMin = rEnv.GetValue("NSubjetsMin",NAN);
       }
       else if (sCut == "NSubjetsMax")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutNSubjets;
-        if (m_dNSubjetsMax != m_dNSubjetsMax)
+        if (std::isnan(m_dNSubjetsMax.value()))
           m_dNSubjetsMax = rEnv.GetValue("NSubjetsMax",NAN);
       }
       else ATH_MSG_WARNING("Cut " << sCut << " is not available");
@@ -185,9 +169,9 @@ StatusCode DiTauSelectionTool::initialize()
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
   
   ATH_MSG_INFO( "Initializing TauSelectionTool" );
-  FillRegionVector(m_vPtRegion, m_dPtMin, m_dPtMax);
-  FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin, m_dAbsEtaMax);
-  FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin, m_dNSubjetsMax);
+  FillRegionVector(m_vPtRegion, m_dPtMin.value(), m_dPtMax.value());
+  FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
+  FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin.value(), m_dNSubjetsMax.value());
 
   PrintConfigRegion ("Pt",          m_vPtRegion);
   PrintConfigRegion ("AbsEta",      m_vAbsEtaRegion);
@@ -364,12 +348,12 @@ void DiTauSelectionTool::FillRegionVector(std::vector<T>& vRegion, U tMin, U tMa
 {
   if (!vRegion.empty())
     return;
-  if (tMin == tMin) 		// if tMin is NAN, then this assumption fails and -inf is added to the vector
+  if (!std::isnan(tMin)) 		// if tMin is NAN, then this assumption fails and -inf is added to the vector
     vRegion.push_back(tMin);
   else
     vRegion.push_back(-std::numeric_limits<T>::infinity());
 
-  if (tMax == tMax)		// if tMax is NAN, then this assumption fails and inf is added to the vector
+  if (!std::isnan(tMax))		// if tMax is NAN, then this assumption fails and inf is added to the vector
     vRegion.push_back(tMax);
   else
     vRegion.push_back(std::numeric_limits<T>::infinity());

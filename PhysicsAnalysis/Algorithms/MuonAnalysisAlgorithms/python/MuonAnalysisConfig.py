@@ -62,8 +62,8 @@ class MuonCalibrationConfig (ConfigBlock):
         inputContainer = "AnalysisMuons" if config.isPhyslite() else "Muons"
         if self.inputContainer:
             inputContainer = self.inputContainer
-        config.setSourceName (self.containerName, inputContainer,
-                              calibMode=calibMode)
+        config.setSourceName (self.containerName, inputContainer)
+        config.setContainerMeta (self.containerName, 'calibMode', calibMode)
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
@@ -336,7 +336,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the TTVA scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.trackSelection and not self.onlyRecoEffSF and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgTTVA' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',

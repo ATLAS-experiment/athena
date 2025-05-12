@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDALGS_MUONINDETSYSTEMEXTENSIONALG_H
@@ -33,7 +33,7 @@
 /// muonSystem extension.
 class MuonInDetToMuonSystemExtensionAlg : public AthReentrantAlgorithm {
 public:
-    MuonInDetToMuonSystemExtensionAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     ~MuonInDetToMuonSystemExtensionAlg() = default;
 
     StatusCode initialize() override;
@@ -71,7 +71,7 @@ private:
     struct MuidCoCache {
         const MuonCombined::InDetCandidate* id_trk{nullptr};
         const MuonCombined::CombinedFitTag* cmb_trk{nullptr};
-        MuidCoCache(const MuonCombined::InDetCandidate* _id, const MuonCombined::CombinedFitTag* _cb) : id_trk{_id}, cmb_trk{_cb} {}
+        MuidCoCache(const MuonCombined::InDetCandidate* id, const MuonCombined::CombinedFitTag* cb) : id_trk{id}, cmb_trk{cb} {}
     };
     using MuidCoVector = std::vector<MuidCoCache>;
 
@@ -120,7 +120,7 @@ private:
 
     const Muon::MuonSectorMapping m_sector_mapping{};
 
-    /// Select the MuidCo candidates and put the associated id tracks on a black list
+    /// Select the MuidCo candidates and put the associated id tracks on a block list
     StatusCode selectCandidates(const EventContext& ctx, InDetCandidateCache& cache) const;
     /// Find the sectors in the MS with muon signals
     StatusCode findHitSectors(const EventContext& ctx, InDetCandidateCache& output_cache) const;

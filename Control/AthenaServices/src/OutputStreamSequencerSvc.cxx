@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file OutputStreamSequencerSvc.cxx
@@ -131,7 +131,7 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
          m_currentRangeID = rangeID;
          // for ESMT these incidents are asynchronous, so wait for BeginProcessing to update the range map
          if( not inConcurrentEventsMode() or has_context ) {
-            m_rangeIDinSlot[ slot ] = rangeID;
+            m_rangeIDinSlot[ slot ] = std::move(rangeID);
          }
       }
       if( not inConcurrentEventsMode() and not fileInc ) {

@@ -86,10 +86,12 @@ cd ../..
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --postInclude 'EFTracking.TrackingAlgConfig.TrackingAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
+    --postInclude 'EFTracking.TrackingAlgConfig.TrackingAlgCfg' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
+    ## FIXME - temporarily not producing teachnical efficiencies plots
+    #--postInclude 'EFTracking.TrackingAlgConfig.TrackingAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
 
 rc=$?

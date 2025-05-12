@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -571,7 +571,7 @@ void CoreDumpSvc::handle(const Incident& incident)
     // Intentional:
     // cppcheck-suppress selfAssignment
     newstr[0] = newstr[0];
-    currRec.EvId = newstr;
+    currRec.EvId = std::move(newstr);
   }
 
 }

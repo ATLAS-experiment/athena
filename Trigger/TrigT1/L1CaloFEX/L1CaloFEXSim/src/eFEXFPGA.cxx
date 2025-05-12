@@ -337,7 +337,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       threshBDT.push_back(iso_loose.rCore_fw());
       threshBDT.push_back(iso_medium.rCore_fw());
       threshBDT.push_back(iso_tight.rCore_fw());
-      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, ptTauMinToTopoInEfexCounts, maxEtCountsTau, bdtMinEtCounts);
+      // in tau algoVersion 2, the autopass threshold for rhad frac (last parameter) is hardcoded
+      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, ptTauMinToTopoInEfexCounts, maxEtCountsTau, bdtMinEtCounts, (tauAlgoVersion==2) ? 0x0ff0 : maxEtCountsTau);
       // Re-compute after setting thresholds. 
       // Threshold bits in the BDT algorithm's implementation are computed inside the algorithm class
       m_eFEXtauBDTAlgoTool->compute();

@@ -328,7 +328,9 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     Vertex[1]= xyzfit[1] + state.m_refFrameY;
     Vertex[2]= xyzfit[2] + state.m_refFrameZ;
 
-    if(Vertex.perp()>m_IDsizeR || std::abs(Vertex.z())>m_IDsizeZ)return -5; // Solution outside acceptable volume due to divergence
+    double sizeR = state.m_allowUltraDisplaced ? m_MSsizeR : m_IDsizeR;
+    double sizeZ = state.m_allowUltraDisplaced ? m_MSsizeZ : m_IDsizeZ;
+    if (Vertex.perp() > sizeR || std::abs(Vertex.z()) > sizeZ) return -5; // Solution outside acceptable volume due to divergence
 
     state.m_save_xyzfit[0]=xyzfit[0];    // saving of vertex position
     state.m_save_xyzfit[1]=xyzfit[1];    // for full error matrix

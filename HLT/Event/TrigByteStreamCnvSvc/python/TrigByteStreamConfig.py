@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -101,7 +101,7 @@ def TrigByteStreamCfg(flags, type_names=[]):
 
     event_selector = CompFactory.TrigEventSelectorByteStream(
         name='EventSelectorByteStream',
-        ByteStreamInputSvc=bytestream_input.name)
+        ByteStreamInputSvc=bytestream_input)
     acc.addService(event_selector)
     acc.setAppProperty("EvtSel", event_selector.name)
 

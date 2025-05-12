@@ -24,6 +24,8 @@ namespace OutputConversion
         EventHeader,
         EventFooter,
         GlobalHits,
+        GTracks,
+        Slices,
         PixelEDM,
         StripEDM,
         Error
@@ -46,6 +48,11 @@ public:
                               EFTrackingTransient::StripClusterAuxInput &scAux) const;
 
     StatusCode decodeSpacePoints(const std::vector<uint64_t> &bytestream, EFTrackingTransient::Metadata *metadata) const;
+
+    StatusCode decodeSlices(const std::vector<uint64_t> &bytestream, EFTrackingTransient::Metadata *metadata) const;
+
+    StatusCode decodeGTracks(const std::vector<uint64_t> &bytestream, EFTrackingTransient::Metadata *metadata) const;
+    
 
     /**
      * @brief Decode the FPGA output based on the type. user shouldn't call this function directly

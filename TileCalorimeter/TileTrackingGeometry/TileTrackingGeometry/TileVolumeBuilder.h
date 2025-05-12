@@ -68,12 +68,13 @@ public:
   /** AlgTool initialize method */
   virtual StatusCode initialize() override final;
 
-  /** TrackingVolumeBuilder interface method - returns vector of Volumes */
-  virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(
-    const CaloDetDescrManager& caloDDM
-    , const GeoAlignmentStore* geoAlign) const override final;
+  /** TrackingVolumeBuilder interface method - returns vector of ptrs
+   * to volumes. The caller assumes ownership of the pointers*/
+  virtual std::vector<Trk::TrackingVolume*> trackingVolumes(
+      const CaloDetDescrManager& caloDDM,
+      const GeoAlignmentStore* geoAlign) const override final;
 
-private:
+ private:
   static void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) ;
 
   void printInfo(const GeoPVConstLink& pv) const;
@@ -96,8 +97,6 @@ private:
 
   bool m_forceSymmetry; //!< forces volume symmetry between negative/positive part
 
-  mutable std::mutex m_garbageMutex;
-  mutable std::vector<std::unique_ptr<Trk::Material>> m_garbage ATLAS_THREAD_SAFE;
 };
 
 } // end of namespace

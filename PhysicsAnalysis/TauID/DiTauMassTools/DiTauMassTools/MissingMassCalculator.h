@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -65,7 +65,10 @@ class MissingMassCalculator {
   MMCCalibrationSet::e m_mmcCalibrationSet{};
 
   bool m_fUseEfficiencyRecovery{}; // switch to turn ON/OFF re-fit in order to recover efficiency
-  bool m_fUseFloatStopping{}; // switch to turn ON/OFF floating stopping criterion
+  bool m_fUseFloatStopping{}; // switch to turn ON/OFF floating stopping criterion 
+  int m_fUseFloatStoppingMinIter{};
+  int m_fUseFloatStoppingCheckFreq{};
+  double m_fUseFloatStoppingComp{};
 
   int m_nsolmax,m_nsolfinalmax{};
   int m_niterRandomLocal{};
@@ -329,7 +332,7 @@ public:
 
   ~MissingMassCalculator() ;
 
-  MissingMassCalculator(MMCCalibrationSet::e aset, std::string m_paramFilePath) ;
+  MissingMassCalculator(MMCCalibrationSet::e aset, std::string paramFilePath) ;
 
   MissingMassCalculator(const MissingMassCalculator&) = delete;
   MissingMassCalculator& operator= (const MissingMassCalculator&) = delete;
@@ -390,6 +393,9 @@ public:
   void SetNsigmaMETscan(const double val) { m_nsigma_METscan=val; } // number of sigma's for MET-scan
 
   void SetUseFloatStopping(const bool val); // switch for floating stopping criterion
+  void SetFloatStoppingMinIter(const int val) { m_fUseFloatStoppingMinIter = val;}
+  void SetFloatStoppingCheckFreq(const int val) { m_fUseFloatStoppingCheckFreq = val;} 
+  void SetFloatStoppingComp(const double val) { m_fUseFloatStoppingComp = val;} 
   void SetBeamEnergy(const double val) { m_beamEnergy=val; }
   void SetLFVLeplepRefit(const bool val) { m_lfvLeplepRefit=val; }
   void SaveLlhHisto(const bool val);

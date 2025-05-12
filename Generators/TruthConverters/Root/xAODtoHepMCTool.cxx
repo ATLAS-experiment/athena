@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthConverters/xAODtoHepMCTool.h"
@@ -70,15 +70,16 @@ std::vector<HepMC::GenEvent> xAODtoHepMCTool ::getHepMCEvents(const xAOD::TruthE
     #ifdef HEPMC3
     std::shared_ptr<HepMC3::GenRunInfo> runinfo = std::make_shared<HepMC3::GenRunInfo>(*(hepmcEvent.run_info().get()));
     #endif
+    //possibly print info, before moving the object
+    if (doPrint){
+      ATH_MSG_DEBUG("XXX Printing HepMC Event");
+      HepMC::Print::line(std::cout, hepmcEvent);
+    }
     // Insert into McEventCollection
     mcEventCollection.push_back(std::move(hepmcEvent));
     #ifdef HEPMC3
     mcEventCollection[mcEventCollection.size()-1].set_run_info(runinfo);
     #endif
-    if (doPrint)
-      ATH_MSG_DEBUG("XXX Printing HepMC Event");
-    if (doPrint)
-      HepMC::Print::line(std::cout, hepmcEvent);
     // Quit if signal only
     if (m_signalOnly)
       break;

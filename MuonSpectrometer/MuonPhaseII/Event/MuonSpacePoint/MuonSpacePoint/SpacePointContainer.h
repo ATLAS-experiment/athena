@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINT_MUONSPACEPOINTCONTAINER_H
 #define MUONSPACEPOINT_MUONSPACEPOINTCONTAINER_H
@@ -24,10 +24,7 @@ namespace MuonR4{
             /** @brief Standard constructor*/
             using std::vector<std::shared_ptr<SpacePoint>>::vector;
             /** @brief set the range in the precision plane covered by the bucket*/
-            void setCoveredRange(double min, double max){
-                m_min = min;
-                m_max = max;
-            }
+            void setCoveredRange(double min, double max);
             /** @brief lower interval value covered by the bucket */
             double coveredMin() const { return m_min; }
             /** @brief upper interval value covered by the bucket */
@@ -37,49 +34,14 @@ namespace MuonR4{
                 return empty() ? nullptr : front()->msSector();
             }
             /** @brief sets the Identifier of the MuonSpacePointBucket in context
-             *         of the associated muonChamber
-            */
-            void setBucketId(unsigned int id) {
-                m_bucketId = id;
-            }
+             *         of the associated muonChamber */
+            void setBucketId(unsigned int id);
             /** @brief  Returns the Identifier in the context of the MuonChamber*/
             unsigned int bucketId() const { return m_bucketId; }
-            bool operator<(const SpacePointBucket& other) const {
-                using ChamberSorter = MuonGMR4::MuonDetectorManager::MSEnvelopeSorter;
-                static const ChamberSorter sorter{};
-                int chambCompare = -sorter(msSector(), other.msSector()) + 
-                                    sorter(other.msSector(), msSector());
-                if (chambCompare) return chambCompare < 0;
-                return bucketId() < other.bucketId();
-            }
+            bool operator<(const SpacePointBucket& other) const;
             /// populate the chamber location list. 
             /// This should be done once all the hits have been added. 
-            void populateChamberLocations(){
-                if (!msSector()){
-                    std::cerr << "SpacePointContainer::populateChamberLocations can only be called once we have a valid hit"<<std::endl;
-                    return; 
-                }
-                chamberLocation closestRight{1e8,1e8,1e8,1e8}; 
-                // loop over all chambers in the sector
-                for (auto & chamber : msSector()->chamberLocations()){
-                    // truncate to the bucket volume 
-                    double left = std::max(m_min, chamber.yLeft); 
-                    double right = std::min(m_max, chamber.yRight);
-                    // only keep one chamber outside the bucket - the right-hand side 
-                    // neighbour (for shallow tracks)  
-                    if (left > right){
-                        if (chamber.yLeft - m_max < closestRight.yLeft - m_max){
-                            closestRight = chamber; 
-                        }
-                    } 
-                    // keep all chambers inside the bucket 
-                    else{
-                        m_chamberLocs.push_back(chamber);
-                    }
-                }
-                // add the closest right hand side chamber, if there is one 
-                if (closestRight.yLeft < 1e8) m_chamberLocs.push_back(closestRight); 
-            }
+            void populateChamberLocations();
             /// returns the list of all tracking chambers in the bucket for fast navigation
             const std::vector<chamberLocation> & chamberLocations() const{
                 return m_chamberLocs; 
@@ -88,9 +50,9 @@ namespace MuonR4{
             unsigned int m_bucketId{0};
             double m_min{-20. *Gaudi::Units::m};
             double m_max{20. * Gaudi::Units::m};
-            std::vector<chamberLocation> m_chamberLocs; 
+            std::vector<chamberLocation> m_chamberLocs{}; 
     };
-
+    /** @brief Abrivation of the space point container type */
     using SpacePointContainer = DataVector<SpacePointBucket>;
 }
 #include "AthenaKernel/CLASS_DEF.h"

@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGAClusterConverter.h"
 
@@ -29,7 +29,8 @@ StatusCode FPGAClusterConverter::initialize() {
   ATH_CHECK(detStore()->retrieve(m_SCTId, "SCT_ID"));
   ATH_CHECK(detStore()->retrieve(m_pixelManager));
   ATH_CHECK(detStore()->retrieve(m_SCTManager));
-  ATH_CHECK(m_lorentzAngleTool.retrieve());
+  ATH_CHECK(m_lorentzAngleToolPixel.retrieve());
+  ATH_CHECK(m_lorentzAngleToolStrip.retrieve());
 
   ATH_CHECK( m_FPGAClusterKey.initialize() );
   ATH_CHECK(m_beamSpotKey.initialize());
@@ -292,7 +293,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, co
 
   //TODO: understand if shift is needed
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
+    double shift =  m_lorentzAngleToolPixel->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -364,7 +365,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   //TODO: understand if shift is needed
 
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
+    double shift =  m_lorentzAngleToolPixel->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -377,8 +378,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
   cov(1,1) = siWidth.z()*siWidth.z()/12; 
 
-  float omegax = 0.5; 
-  float omegay = 0.5;
   bool split = false;
   float splitProb1 = 0;
   float splitProb2 = 0;
@@ -398,7 +397,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   cl.globalPosition() = globalPosition; 
   cl.setChannelsInPhiEta(siWidth.colRow()[0], siWidth.colRow()[1]);
   cl.setWidthInEta(static_cast<float>(siWidth.widthPhiRZ()[1]));
-  cl.setOmegas(omegax, omegay);
   cl.setIsSplit(split);
   cl.setSplitProbabilities(splitProb1, splitProb2);
   ATH_MSG_DEBUG("\t\txaod width in eta " << cl.widthInEta());
@@ -456,7 +454,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   ATH_MSG_DEBUG("\t\tStrip length: " << stripLength );
   ATH_MSG_DEBUG("\t\tlocal position before shift: " << localPos.x() << " phi: " << localPos.y());
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
+    double shift =  m_lorentzAngleToolStrip->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -551,7 +549,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   ATH_MSG_DEBUG("\t\tlocal position before shift: " << localPos.x() << " phi: " << localPos.y());
 
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
+    double shift =  m_lorentzAngleToolStrip->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }

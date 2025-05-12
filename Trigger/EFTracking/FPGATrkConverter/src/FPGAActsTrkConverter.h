@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrkConverter_FPGAACTSTRKCONVERTER__H
@@ -40,13 +40,16 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
     std::vector<Identifier> getRdoIdList(const FPGATrackSimHit& hit) const;
     template <typename XAOD_CLUSTER>
     StatusCode matchTrackMeasurements(const EventContext& ctx,
-                                           const DataVector<XAOD_CLUSTER>& clusterContainer,
-                                           const std::vector<Identifier>& rdoIDs,
-                                           std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements) const;
+                                      const XAOD_CLUSTER& cluster,
+                                      const FPGATrackSimHit & trackHit,
+                                      std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
+                                      const DataVector<XAOD_CLUSTER>& clusterContainer) const;
     
     StatusCode findPrototrackMeasurements( const EventContext& ctx,
                                            const xAOD::PixelClusterContainer &pixelClusterContainer,
                                            const xAOD::StripClusterContainer &stripClusterContainer,
+                                           const std::multimap<xAOD::DetectorIDHashType, const xAOD::PixelCluster*> & pixelClusterMap,
+                                           const std::multimap<IdentifierHash, const xAOD::StripCluster*> & stripClusterMap,
                                            std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
                                            const std::vector <FPGATrackSimHit>& hits) const;
     private:

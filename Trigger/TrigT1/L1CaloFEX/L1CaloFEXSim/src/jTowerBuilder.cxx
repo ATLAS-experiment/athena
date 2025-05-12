@@ -1,18 +1,11 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-
-#include "xAODTrigL1Calo/TriggerTowerContainer.h"
-
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerBuilder.h"
-
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 // TOWER IS A COLLECTION OF SUPER CELLS

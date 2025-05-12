@@ -34,6 +34,11 @@ class OutputAnalysisConfig (ConfigBlock):
             info="a dictionary mapping prefixes (key) to container names "
             "(values) to be used when saving to the output tree. Branches "
             "are then of the form prefix_decoration.")
+        self.addOption ('containersFullMET', {}, type=None,
+            info="same as containers, but for MET containers that should be "
+            "saved with all terms (as opposed to just the final term). This "
+            "is useful for special studies.  A container can appear both here and "
+            "in containers (with different prefixes).")
         self.addOption ('containersOnlyForMC', {}, type=None,
             info="same as containers, but for MC-only containers so as to avoid "
             "a crash when running on data.")
@@ -69,6 +74,8 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('alwaysAddNosys', False, type=bool,
             info="If set to True, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
+        # helper to protect for second pass
+        self.validated = False
 
     @staticmethod
     def branchSortOrder (rule):
@@ -90,36 +97,63 @@ class OutputAnalysisConfig (ConfigBlock):
 
         log = logging.getLogger('OutputAnalysisConfig')
 
-        self.vars = set(self.vars)
-        self.varsOnlyForMC = set(self.varsOnlyForMC)
-        self.metVars = set(self.metVars)
-        self.truthMetVars = set(self.truthMetVars)
+        # do some transformations of the options we should only do once
+        if not self.validated:
 
-        # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
-        if config.dataType() is not DataType.Data:
-            self.vars |= self.varsOnlyForMC
+            self.containers = dict(self.containers)
+            self.vars = set(self.vars)
+            self.varsOnlyForMC = set(self.varsOnlyForMC)
+            self.metVars = set(self.metVars)
+            self.truthMetVars = set(self.truthMetVars)
 
-            # protect 'containers' against being overwritten
-            # find overlapping keys
-            overlapping_keys = set(self.containers.keys()).intersection(self.containersOnlyForMC.keys())
+            # check for overlaps between containers and containersFullMET
+            overlapping_keys = set(self.containers.keys()).intersection(self.containersFullMET.keys())
             if overlapping_keys:
                 # convert the set of overlapping keys to a list of strings for the message (represents the empty string too!)
                 keys_message = [repr(key) for key in overlapping_keys]
-                raise KeyError(f"containersOnlyForMC would overwrite the following container keys: {', '.join(keys_message)}")
+                raise KeyError(f"containersFullMET would overwrite the following container keys: {', '.join(keys_message)}")
+            # move items in self.containersFullMET to containers
+            self.containers.update(self.containersFullMET)
 
-            # move items in self.containersOnlyForMC to self.containers
-            self.containers.update(self.containersOnlyForMC)
-            # clear the dictionary to avoid overlapping key error during the second pass
-            self.containersOnlyForMC.clear()
+            # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
+            if config.dataType() is not DataType.Data:
+                self.vars |= self.varsOnlyForMC
 
-        # now filter the containers depending on DSIDs
-        for container,dsid_filters in self.containersOnlyForDSIDs.items():
-            if container not in self.containers:
-                log.warning(f"Skipping unrecognised container {container} for DSID-filtering in OutputAnalysisConfig...")
-                continue
-            if not filter_dsids (dsid_filters, config):
-                # if current DSID is not allowed for this container, remove it
-                self.containers.pop (container)
+                # protect 'containers' against being overwritten
+                # find overlapping keys
+                overlapping_keys = set(self.containers.keys()).intersection(self.containersOnlyForMC.keys())
+                if overlapping_keys:
+                    # convert the set of overlapping keys to a list of strings for the message (represents the empty string too!)
+                    keys_message = [repr(key) for key in overlapping_keys]
+                    raise KeyError(f"containersOnlyForMC would overwrite the following container keys: {', '.join(keys_message)}")
+
+                # move items in self.containersOnlyForMC to self.containers
+                self.containers.update(self.containersOnlyForMC)
+                # clear the dictionary to avoid overlapping key error during the second pass
+                self.containersOnlyForMC.clear()
+
+                # now filter the containers depending on DSIDs
+                if self.containersOnlyForDSIDs:
+                    for container, dsid_filters in self.containersOnlyForDSIDs.items():
+                        if container not in self.containers:
+                            log.warning("Skipping unrecognised container prefix '%s' for DSID-filtering in OutputAnalysisConfig...", container)
+                            continue
+                        if not filter_dsids (dsid_filters, config):
+                            # if current DSID is not allowed for this container, remove it
+                            log.info("Skipping container prefix '%s' due to DSID filtering...", container)
+                            # filter branches for validated containers
+                            for var in set(self.vars):  # make a copy of the list to avoid modifying it while iterating
+                                var_container = var.split('.')[0].replace('_NOSYS', '').replace('_%SYS%', '')
+                                if var_container == self.containers[container]:
+                                    self.vars.remove(var)
+                                    log.info("Skipping branch definition '%s' for excluded container %s...", var, var_container)
+                            # remove the container from the list at the end
+                            self.containers.pop (container)
+                    # clear the dictionary to avoid warnings during the second pass
+                    self.containersOnlyForDSIDs.clear()
+
+            # at this point we are OK
+            self.validated = True
 
         if self.storeSelectionFlags:
             self.createSelectionFlagBranches(config)
@@ -134,6 +168,11 @@ class OutputAnalysisConfig (ConfigBlock):
                     outputConfig.outputContainerName = containerName + '_%SYS%'
                 else:
                     outputConfig.outputContainerName = config.readName(containerName)
+                outputConfig.prefix = prefix
+                # if the container is a MET container with all terms, we
+                # also need to write out the name of each MET term
+                if prefix in self.containersFullMET and outputConfig.variableName == 'name':
+                    outputConfig.enabled = True
                 outputConfigs[prefix + outputName] = outputConfig
 
         # check for DSID-specific commands
@@ -174,7 +213,7 @@ class OutputAnalysisConfig (ConfigBlock):
         for outputName in outputConfigs :
             outputConfig = outputConfigs[outputName]
             if outputConfig.enabled :
-                if config.isMetContainer (outputConfig.origContainerName):
+                if config.isMetContainer (outputConfig.origContainerName) and outputConfig.prefix not in self.containersFullMET:
                     if "Truth" in outputConfig.origContainerName:
                         myVars = autoTruthMetVars
                     else:

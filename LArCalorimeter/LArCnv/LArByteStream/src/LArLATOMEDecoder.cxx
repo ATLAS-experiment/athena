@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #define DETAIL_DUMP_ON false
@@ -519,7 +519,15 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   /// not we have the packet size from the first packet, check all packet headers before decoding
   /// we can decide later if we drop decoding if we have inconsistency
   for (unsigned int ip = 1; ip < m_nPackets; ++ip) {
+    if (offset > m_ROBFragSize) {
+      ATH_MSG_WARNING("Data corruption, offset found at pos 0 (" << offset << ") is larger than the ROB fragment size (" << m_ROBFragSize << "). Ignoring data.");
+      return;
+    }
     offset = decodeHeader(p, offset);
+    if (offset > m_ROBFragSize) {
+      ATH_MSG_WARNING("Data corruption, offset found at pos 0 (" << offset << ") is larger than the ROB fragment size (" << m_ROBFragSize << "). Ignoring data.");
+      return;
+    }
     m_packetEnd.push_back(offset);
     offset = decodeTrailer(p, offset);
   }
@@ -1004,11 +1012,13 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
         // if it's HEC
         if (slot == 1) {
           if (channel >= 16 && channel <= 31) {  // eta 1.65 bin
-            DAC_value = DAC_value / 1.363;
-            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 1/1.363" << endmsg;
+            //DAC_value = DAC_value / 1.363; // measured value
+            DAC_value = DAC_value / 1.2;   // computed from geometry
+            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 1/1.2" << endmsg;
           } else if (channel >= 32 && channel <= 47) {  // eta 1.75 bin
-            DAC_value = DAC_value / 1.206;
-            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 1/1.206" << endmsg;
+            //DAC_value = DAC_value / 1.206; // measured value
+            DAC_value = DAC_value * 7. / 8.; // computed from geometry
+            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 7./8." << endmsg;
           }
         }
       }

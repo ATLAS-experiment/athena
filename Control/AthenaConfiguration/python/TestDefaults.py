@@ -12,7 +12,7 @@ class defaultTestFiles:
 
     HITS_RUN2 = [f"{d}/Tier0ChainTests/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3681/HITS.25836812._004813.pool.root.1"] #MC20
     HITS_RUN3_2022 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root"] #MC23a
-    HITS_RUN3_2023 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.HITS.e8514_e8528_s4159/100events.HITS.pool.root"] #MC23d
+    HITS_RUN3_2023 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4159/100events.HITS.pool.root"] #MC23d
     HITS_RUN3_2024 = HITS_RUN3_2022 # Temporary back-compatibility [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.HITS.e8514_e8528_s4369/100events.HITS.pool.root"] #MC23e
     HITS_RUN3_HI = HITS_RUN3_2022 # Temporary back-compatibility
     HITS_RUN3 = HITS_RUN3_2022 # Temporary back-compatibility
@@ -69,6 +69,9 @@ class defaultTestFiles:
     RAW_RUN2_DATA15_HI =[f"{d}/RecJobTransformTests/data15_hi.00286711.physics_MinBiasOverlay.daq.RAW._lb0217._SFO-2._0001.data"]
     RAW_RUN2_DATA18_HI =[f"{d}/RecJobTransformTests/data18_hi.00367384.physics_HardProbes.daq.RAW._lb0145._SFO-8._0001.data"]
     RAW_RUN3_DATA22_HI =[f"{d}/RecJobTransformTests/data22_hi/RAWFiles/data22_hi.00440101.physics_MinBias.daq.RAW/data22_hi.00440101.physics_MinBias.daq.RAW._lb0214._SFO-11._0001.data"]
+    RAW_RUN3_DATA23_HI =[f"{d}/RecJobTransformTests/data23_hi/data23_hi.00462809.physics_EnhancedBias.merge.RAW._lb0422._SFO-11._0001.1"]
+    RAW_RUN3_DATA24_HI =[f"{d}/RecJobTransformTests/data24_hi/data24_hi.00490145.physics_MinBias.daq.RAW._lb0142._SFO-15._0001.data"]
+
 
     # AFP tests should update? https://its.cern.ch/jira/browse/ATLASRECTS-8109
     HITS_RUN2_MC20_AFP = [f"{d}/RecJobTransformTests/user.ladamczy/user.ladamczy.mc15_13TeV.860102.SuperChicPy8_gg_jj_CEP_70_new.evgen.HITS.e8419.v1_EXT0/user.ladamczy.28711500.EXT0._000009.HITS.pool.root"] #Run mc20e MC setup, with APF, without pileup
@@ -85,6 +88,10 @@ class defaultGeometryTags:
     RUN2_BEST_KNOWLEDGE = "ATLAS-R2-2016-01-02-01"
     RUN3 = "ATLAS-R3S-2021-03-02-00"
     RUN4 = "ATLAS-P2-RUN4-04-00-00"
+
+    RUN2_ZDC = "ATLAS-R2-2016-01-03-00" # default ZDC geometry tag for Run2
+    RUN3_ZDC23 = "ATLAS-R3S-2021-03-03-00" # default ZDC geometry tag for Run3 Year 2023
+    RUN3_ZDC24 = "ATLAS-R3S-2021-03-04-00" # default ZDC geometry tag for Run3 Year 2024
 
     @staticmethod
     def autoconfigure(flags):
@@ -109,6 +116,7 @@ class defaultConditionsTags:
     RUN3_DATA = "CONDBR2-BLKPA-2024-05"
     RUN3_DATA22 = "CONDBR2-BLKPA-2022-17"
     RUN3_DATA23 = "CONDBR2-BLKPA-2023-07"
+    RUN3_DATA24 = "CONDBR2-BLKPA-2024-05"
     RUN3_MC = "OFLCOND-MC23-SDR-RUN3-08"
     RUN4_MC = "OFLCOND-MC21-SDR-RUN4-03"
 

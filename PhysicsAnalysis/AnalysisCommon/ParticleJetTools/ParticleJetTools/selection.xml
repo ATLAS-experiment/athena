@@ -12,6 +12,7 @@
   <class name="JetParticleAssociation" />  
   <class name="JetParticleShrinkingConeAssociation" />  
   <class name="JetParticleCenterOfMassAssociation" />  
+  <class name="JetParticleOriginVertexAssociation" />  
   <class name="JetTruthLabelingTool" />
   <class name="JetPileupLabelingTool" />
 </lcgdict>

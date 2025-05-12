@@ -51,6 +51,8 @@ StatusCode FPGATrackSimBinTool::initialize() {
     prev = step.get();
   }
 
+  ATH_MSG_DEBUG("Finished initializing BinTool");
+
   return StatusCode::SUCCESS;
 }
 
@@ -146,3 +148,21 @@ void FPGATrackSimBinTool::computeValidBins(const IFPGATrackSimEventSelectionSvc*
   }
 }
 
+ParSet FPGATrackSimBinTool::center() const
+{
+    ParSet parset;
+    for (unsigned i = 0; i < FPGATrackSimTrackPars::NPARS; i++)
+    {
+        parset[i] = parCenter(i);
+    }
+    return parset;
+}
+
+// ----------------------------------------------------------------------------------------
+//  Write Firmware LUTs (constants)
+// ----------------------------------------------------------------------------------------
+void FPGATrackSimBinTool::writeLUTs() const {
+  for (const auto &step : m_steps) {
+    m_binDesc->writeLUTs(*step.get());
+  }
+}

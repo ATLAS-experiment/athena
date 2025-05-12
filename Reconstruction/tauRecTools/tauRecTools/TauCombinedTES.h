@@ -46,7 +46,6 @@ private:
     double pt_tauRecCalibrated{0.0};
     double pt_weighted{0.0};
     double weight{-1111.0};
-    //double sigma_combined{-1111.};
     double sigma_compatibility{-1111.};
     double sigma_tauRec{-1111.0};
     double sigma_constituent{-1111.0};
@@ -85,9 +84,6 @@ private:
  
   /** Get the weight of calo TES */
   double getWeight(double caloSigma, double panTauSigma, double correlatioon) const;
-
-  /** Get the combined sigma of calo TES and PanTau */
-  double getCombinedSigma(double caloSigma, double panTauSigma, double correlation) const;
 
   /** Get the compatibility sigma of calo TES and PanTau */
   double getCompatibilitySigma(double caloSigma, double panTauSigma, double correlation) const;

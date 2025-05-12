@@ -560,13 +560,13 @@ void TRT_StrawNeighbourSvc::getPin(Identifier offlineID, int& pin ){
   int layer_or_wheel =  m_trtid->layer_or_wheel(offlineID);
   if (abs((m_trtid->barrel_ec(offlineID)))==1 ) {
     if (layer_or_wheel == 0) {
-      pin = (int)(100*fmod(m_chip_vector1[getRunningNumbering(offlineID)-1],1.)+0.1);
+      pin = (int)(100*std::fmod(m_chip_vector1[getRunningNumbering(offlineID)-1],1.)+0.1);
     }
     else if (layer_or_wheel == 1) {
-      pin = (int)(100*fmod(m_chip_vector2[getRunningNumbering(offlineID)-1],1.)+0.1);
+      pin = (int)(100*std::fmod(m_chip_vector2[getRunningNumbering(offlineID)-1],1.)+0.1);
     }
     else if (layer_or_wheel == 2){
-      pin = (int)(100*fmod(m_chip_vector3[getRunningNumbering(offlineID)-1],1.)+0.1);
+      pin = (int)(100*std::fmod(m_chip_vector3[getRunningNumbering(offlineID)-1],1.)+0.1);
     }
     else { msg(MSG::ERROR) << "Something is very wrong: According to identifier, straw belongs to a barrel module which is not of type 1,2 or 3 (corresponding to offline numbering: layer_or_wheel = 0,1 or 2) " << endmsg;}
     

@@ -1,5 +1,4 @@
-
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfFileValidationFunctions
 # @brief Transform file validation functions
@@ -14,7 +13,7 @@ import PyJobTransforms.trfExceptions as trfExceptions
 ## @brief Integrity function for file class argPOOLFile, argHITSFile, argRDOFile and argEVNTFile
 def returnIntegrityOfPOOLFile(fname):
     from PyJobTransforms.trfValidateRootFile import checkFile
-    rc = checkFile(fileName = fname, type = 'event', requireTree = True)
+    rc = checkFile(fileName = fname, the_type = 'event', requireTree = True)
     if rc == 0:
         return (True, "integrity of {fileName} good".format(fileName = str(fname)))
     else:
@@ -23,7 +22,7 @@ def returnIntegrityOfPOOLFile(fname):
 ## @brief Integrity function for file class argNTUPFile
 def returnIntegrityOfNTUPFile(fname):
     from PyJobTransforms.trfValidateRootFile import checkFile
-    rc = checkFile(fileName = fname, type = 'basket', requireTree = False)
+    rc = checkFile(fileName = fname, the_type = 'basket', requireTree = False)
     if rc == 0:
         return (True, "integrity of {fileName} good".format(fileName = str(fname)))
     else:

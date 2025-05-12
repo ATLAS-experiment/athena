@@ -127,9 +127,14 @@ if not partition.isValid() and len(flags.Input.Files)==0:
     log.fatal("Running in offline mode but no input files provided")
     exit(1)
 elif partition.isValid():
-  log.info("Running Online with Partition:",partition.name())
+  log.info("Running Online with Partition: "+partition.name())
   standalone = (partition.name()!="ATLAS")
   if standalone : log.info("Using local menu because partition is not ATLAS")
+  elif len(flags.Input.Files)==0:
+    # wait here for 2 minutes, to give LAr time to put fw info in the database
+    import time
+    log.info("Waiting 2 minutes for LATOME to get their databases in order")
+    time.sleep(120)
 
 # if running on an input file, change the DQ environment, which will allow debug tree creation from monitoring algs
 if len(flags.Input.Files)>0:
@@ -509,6 +514,10 @@ if flags.Output.AODFileName != "":
 
 # ensure reloading OTF masking every event if running online monitoring
 if "MaskedSCCondAlg" in cfg.getCondAlgos(): cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
+
+if flags.Trigger.L1.doeFex and (args.evtNumber is not None):
+  # when debugging individual events, add the eFex event dumper to the job
+  cfg.addEventAlgo(CompFactory.LVL1.eFexEventDumper(TowersKey="L1_eFexDataTowers",EMRoIKey="L1_eEMRoI",TauRoIKey="L1_eTauRoI"))
 
 # example of adding user algorithm
 # cfg.addEventAlgo(CompFactory.AnotherPackageAlg(),sequenceName="AthAlgSeq")

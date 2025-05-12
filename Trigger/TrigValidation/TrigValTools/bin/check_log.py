@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 """Tool to check for error messages in a log file.
 
@@ -147,6 +147,10 @@ def scanLogfile(args, logfile, ignorePattern=[]):
         categories += ['warning']
     if args.errors is True:
         categories += ['error/fatal', 'prohibited', 'python error', 'fpe', 'backtrace']
+
+    # if ignorePattern is empty, igLevels.search would match anything, protect by adding a pattern that matches nothing
+    if not ignorePattern:
+        ignorePattern.append('(?!)')
 
     igLevels = re.compile('|'.join(ignorePattern))
 

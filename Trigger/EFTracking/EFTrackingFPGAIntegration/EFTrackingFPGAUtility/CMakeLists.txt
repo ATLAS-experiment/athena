@@ -11,7 +11,8 @@ atlas_add_library(EFTrackingFPGAUtilityLib
                                  xAODInDetMeasurement 
                                  InDetPrepRawData 
                                  InDetIdentifier 
-                                 InDetReadoutGeometry)
+                                 InDetReadoutGeometry
+			         InDetMeasurementUtilitiesLib)
 
 atlas_add_component(EFTrackingFPGAUtility
                     src/components/*

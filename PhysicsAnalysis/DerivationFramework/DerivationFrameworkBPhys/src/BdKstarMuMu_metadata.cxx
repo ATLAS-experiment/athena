@@ -7,7 +7,7 @@
  *  @author Pavel Reznicek <pavel.reznicek@cern.ch>
  */
 
-#include "DerivationFrameworkBPhys/BdKstarMuMu_metadata.h"
+#include "BdKstarMuMu_metadata.h"
 
 namespace DerivationFramework {
 

@@ -65,12 +65,12 @@ public:
   /** AlgTool finalize method */
   virtual StatusCode finalize() override final;
 
-  /** TrackingVolumeBuilder interface method - returns vector of Volumes */
-  virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(const CaloDetDescrManager& caloDDM
-							     , const GeoAlignmentStore* geoAlign)
-    const override final;
+  /** TrackingVolumeBuilder interface method - returns vector of ptrs to tracking Volumes */
+  virtual std::vector<Trk::TrackingVolume*> trackingVolumes(
+      const CaloDetDescrManager& caloDDM,
+      const GeoAlignmentStore* geoAlign) const override final;
 
-private:
+ private:
   // ------------- private methods -----------------------------------------
   static void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol);
 
@@ -112,10 +112,6 @@ private:
 
   //!< tool required for DetDescr-based layering
   ToolHandle<ICaloSurfaceBuilder> m_calosurf{this, "CaloSurfaceBuilder", "CaloSurfaceBuilder"};
-
-  //internal garbage collector (protected by lock)
-  typedef std::set<const Trk::Material*> MaterialGarbage;
-  mutable MaterialGarbage m_materialGarbage ATLAS_THREAD_SAFE;
 
   // material scaling ( temporary ? )
   FloatProperty m_scale_HECmaterial{this, "ScaleFactor_HECmaterial", 1.1};

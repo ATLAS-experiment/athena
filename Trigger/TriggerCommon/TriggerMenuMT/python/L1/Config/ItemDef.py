@@ -1753,6 +1753,7 @@ class ItemDef:
         # VDM
         MenuItem('L1_ZDC_A_C_BGRP7'     ).setLogic( ZDC_A_C & bgrp7cond)
         MenuItem('L1_LUCID_BGRP7'       ).setLogic( (d.LUCID_A | d.LUCID_C) & bgrp7cond)
+        MenuItem('L1_TRT_BGRP11'        ).setLogic( d.NIMTRT & bgrp11cond )
 
         # LUCID
         MenuItem('L1_LUCID_A'           ).setLogic( d.LUCID_A             & physcond)
@@ -2154,6 +2155,26 @@ class ItemDef:
             MenuItem('L1_DPHI-2eEM1_VjTE200_GAP_AANDC').setLogic( d.TOPO_23DPHI32_2eEM1s & Not(d.jTE200) & GAPAC & physcond)
             MenuItem('L1_DPHI-2eTAU1_VjTE200_GAP_AANDC').setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & GAPAC & physcond)
             MenuItem('L1_DPHI-2jTAU1').setLogic( d.TOPO_23DPHI32_2jTAU1s & physcond)
+
+            # ATR-30727
+            MenuItem('L1_10INVM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_10INVM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_15INVM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_15INVM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_20INVM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_20INVM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_25INVM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_25INVM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_10SUM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_10SUM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_15SUM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_15SUM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_20SUM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_20SUM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_25SUM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_25SUM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_15INVM-15SUM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_15INVM200_15SUM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+            MenuItem('L1_20INVM-20SUM-DPHI-2jJ5_VjTE200').setLogic(d.TOPO_20INVM200_20SUM200_20DPHI32_2jJ5s & Not(d.jTE200) & physcond)
+
+            # ATR-30728
+            MenuItem('L1_1INVM-DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_1INVM200_23DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
+            MenuItem('L1_2INVM-DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_2INVM200_23DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
+            MenuItem('L1_3INVM-DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_3INVM200_23DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
+            MenuItem('L1_4INVM-DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_4INVM200_23DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
+            MenuItem('L1_3SUM-DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_3SUM200_23DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
+            MenuItem('L1_4SUM-DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_4SUM200_23DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
 
             # g-2 tau (ATR-30638)
             MenuItem('L1_2cTAU50M_DPHI-2eTAU50').setLogic(d.cTAU50M.x(2) & d.TOPO_30DPHI32_2eTAU50s & physcond)

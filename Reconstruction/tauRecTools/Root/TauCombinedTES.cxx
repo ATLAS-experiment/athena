@@ -167,7 +167,6 @@ StatusCode TauCombinedTES::execute(xAOD::TauJet& tau) const {
     decPtTauRecCalibrated(tau) = variables.pt_tauRecCalibrated;
     decPtWeighted(tau) = variables.pt_weighted;
     decWeightWeighted(tau) = variables.weight;
-    //decSigmaCombined(tau) = variables.sigma_combined;
     decSigmaCompatibility(tau) = variables.sigma_compatibility;
     decSigmaTaurec(tau) = variables.sigma_tauRec;
     decSigmaConstituent(tau) = variables.sigma_constituent;
@@ -350,20 +349,6 @@ double TauCombinedTES::getWeight(double caloSigma,
   return std::clamp(weight, 0., 1.);
 }
 
-
-
-double TauCombinedTES::getCombinedSigma(double caloSigma,
-					double panTauSigma,
-					double correlation) const {
-  double numerator = std::pow(caloSigma, 2) * std::pow(panTauSigma, 2) * (1 - std::pow(correlation, 2));
-  double denominator = std::pow(caloSigma, 2) + std::pow(panTauSigma, 2)
-                       - 2 * correlation * caloSigma * panTauSigma;
-
-  return std::sqrt(numerator/denominator);
-}
-
-
-
 double TauCombinedTES::getCompatibilitySigma(double caloSigma,
 					     double panTauSigma,
 					     double correlation) const {
@@ -424,7 +409,6 @@ double TauCombinedTES::getCombinedEt(double caloEt,
   double weight = getWeight(caloSigma, panTauSigma, correlation);
   double weightedEt = weight * caloCalEt + (1 - weight) * panTauCalEt;
   double compatibilitySigma = getCompatibilitySigma(caloSigma, panTauSigma, correlation);
-  //double combinedSigma = getCombinedSigma(caloSigma, panTauSigma, correlation);
 
   // FIXME: weighteEt will be updated in case the difference of calo TES and PanTau is too large
   variables.pt_weighted = weightedEt;
@@ -446,7 +430,6 @@ double TauCombinedTES::getCombinedEt(double caloEt,
   variables.pt_constituent = panTauCalEt;
   variables.weight = weight;
   variables.sigma_compatibility = compatibilitySigma;
-  //variables.sigma_combined = combinedSigma;
 
   ATH_MSG_DEBUG("Intermediate results\n" <<
                 "coff: " << correlation << " sigma(calo): " << caloSigma << " sigma(constituent): " << panTauSigma <<

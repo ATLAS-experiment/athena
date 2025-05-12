@@ -89,6 +89,8 @@ def PHYSVALCfg(flags):
                                               "MET_Baseline_AntiKt4EMTopo",
                                               "MET_Baseline_AntiKt4EMPFlow",
                                               "TauJets",
+                                              "TauJets_MuonRM",
+                                              "TauJets_EleRM",
                                               "DiTauJets",
                                               "DiTauJetsLowPt",
                                               "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
@@ -115,7 +117,11 @@ def PHYSVALCfg(flags):
                                            "BTagging_AntiKt4EMPFlowSecVtx",
                                            "BTagging_AntiKt4EMPFlowSecVtxFlip", #Flip version of SV1
                                            "TauJets",
+                                           "TauJets_MuonRM",
+                                           "TauJets_EleRM",
                                            "TauTracks",
+                                           "TauTracks_MuonRM",
+                                           "TauTracks_EleRM",
                                            "DiTauJets",
                                            "DiTauJetsLowPt",
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets","AntiKt10LCTopoJets","AntiKt4LCTopoJets","AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -159,6 +165,11 @@ def PHYSVALCfg(flags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
+    StaticContent += ["xAOD::TauJetContainer#TauJets_MuonRM"]
+    StaticContent += ["xAOD::TauJetAuxContainer#TauJets_MuonRMAux.-VertexedClusters"]
+    StaticContent += ["xAOD::VertexContainer#TauSecondaryVertices_MuonRM"]
+    StaticContent += ["xAOD::VertexAuxContainer#TauSecondaryVertices_MuonRMAux.-vxTrackAtVertex"]
+
     for wp in ["","_LeptonsMod_LRTR3_1p0"]:
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
         StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices" + wp + "Aux."]
@@ -238,6 +249,10 @@ def PHYSVALCfg(flags):
                                              "TruthPrimaryVertices.t.x.y.z",
                                              "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
                                              "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
+                                             "TauNeutralParticleFlowObjects_MuonRM.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
+                                             "TauChargedParticleFlowObjects_MuonRM.pt.eta.phi.m.bdtPi0Score",
+                                             "TauNeutralParticleFlowObjects_EleRM.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
+                                             "TauChargedParticleFlowObjects_EleRM.pt.eta.phi.m.bdtPi0Score",
                                              "MET_Track.sumet"]
     PHYSVALSlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
 

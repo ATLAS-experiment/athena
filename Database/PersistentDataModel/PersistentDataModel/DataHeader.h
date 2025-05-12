@@ -71,8 +71,8 @@ public: // Non-static members
    const std::set<CLID> getClassIDs() const;
    /// @return StoreGate key string.
    const std::string& getKey() const;
-   /// @return StoreGate alias string set.
-   const std::set<std::string>& getAlias() const;
+   /// @return StoreGate alias string vector.
+   const std::vector<std::string>& getAlias() const;
    /// @return token by pointer (and give away ownership).
    const Token* getToken() const;
    /// @return StorageType needed to read the DataObject (depends on technology).
@@ -100,7 +100,7 @@ private:
    DataHeaderElement(CLID clid,
                      const std::string& name,
                      const std::vector<CLID>& tClids,
-                     std::set<std::string>&& alias,
+                     std::vector<std::string>&& alias,
                      IOpaqueAddress* tadAddress,
                      IOpaqueAddress* tokAddress, const std::string& pTag);
 
@@ -110,8 +110,8 @@ private:
    std::vector<CLID> m_clids;
    /// string with StoreGate key.
    std::string m_key;
-   /// set of StoreGate alias string.
-   std::set<std::string> m_alias;
+   /// vector of StoreGate alias string.
+   std::vector<std::string> m_alias;
    /// Transient address token.
    Token m_token;
    /// hash table for ElementLink host container keys.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of TileROD_Encoder class 
@@ -19,6 +19,38 @@
 #include <algorithm> 
 #include <cassert>
 #include <cmath>
+
+
+namespace {
+
+// Helper to fill a vectorr of uint32_t with packed int16_t values.
+class ShortVecAdapter
+{
+public:
+  ShortVecAdapter (std::vector<uint32_t>& v)
+    : m_v (v) {}
+  void push_back (int16_t x)
+  {
+    if (m_offset) {
+      m_v.back() |= (x << 16);
+      m_offset = false;
+    }
+    else {
+      m_v.push_back (x);
+      m_offset = true;
+    }
+  }
+  void align()
+  {
+    m_offset = false;
+  }
+
+private:
+  std::vector<uint32_t>& m_v;
+  bool m_offset = false;
+};
+
+}
 
 
 TileROD_Encoder::TileROD_Encoder(): 
@@ -299,19 +331,16 @@ void TileROD_Encoder::fillROD2(std::vector<uint32_t>& v) {
 }
 
 void TileROD_Encoder::fillROD3(std::vector<uint32_t>& v) {
-  // get a reference to vector<short>, through static_cast
-  // be very careful with v16... make sure it is aligned 
-  std::vector<short>* p16;
-  p16 = (std::vector<short>*) (&v);
-  std::vector<short>& v16 = *p16;
+  ShortVecAdapter v16 (v);
 
   //std::sort(m_vTileRC.begin(), m_vTileRC.end(), m_order); 
 
   int currentFrag(-1);
   bool first = true;
-  short wc16 = 0;
   std::vector<uint32_t>::size_type head = 0;
   std::vector<uint32_t>::size_type count = 0;
+
+  std::vector<short> vshort;
 
   for (const TileFastRawChannel* rc : m_vTileRC) {
 
@@ -325,12 +354,9 @@ void TileROD_Encoder::fillROD3(std::vector<uint32_t>& v) {
       // a new frag
       if (!first) {
         // close the current frag
-        if ((v16.size() % 2) == 1) {
-          v16.push_back(0);
-          ++wc16;
-        }
+        v16.align();
         // inclusive word (32bit) for this frag
-        v[count] = wc16 / 2;
+        v[count] = v.size();
       } else
         first = false;
 
@@ -346,7 +372,6 @@ void TileROD_Encoder::fillROD3(std::vector<uint32_t>& v) {
       // 2 words (64 bits) for channel map
       v.push_back(0);
       v.push_back(0);
-      wc16 = 8; // we stored 4 full words (8 shorts) already
     }
 
     // FIXME:: protection against both low and high gain amplitude
@@ -355,10 +380,12 @@ void TileROD_Encoder::fillROD3(std::vector<uint32_t>& v) {
     // low and high gain and we should use different fragment type
 
     if (checkBit(&(v[head]), chan)) {
-      // the same channel with another gain alreay exists, ignore second one
+      // the same channel with another gain already exists, ignore second one
     } else {
-      // get the shorts, and increment wc16 by number of shorts written. 
-      wc16 += m_rc2bytes3.getBytes(rc, gain, v16);
+      vshort.clear();
+      m_rc2bytes3.getBytes(rc, gain, vshort);
+      for (short x : vshort)
+        v16.push_back (x);
       // set bitmap for this channel
       setBit(&(v[head]), chan);
     }
@@ -367,12 +394,9 @@ void TileROD_Encoder::fillROD3(std::vector<uint32_t>& v) {
 
   if (!first) {
     // close the last Frag
-    if ((v16.size() % 2) == 1) {
-      v16.push_back(0);
-      ++wc16;
-    }
+    v16.align();
     // inclusive word (32bit) for this frag
-    v[count] = wc16 / 2;
+    v[count] = v.size();
   }
 
   // dumpROD (v) ;

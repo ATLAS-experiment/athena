@@ -40,7 +40,7 @@ namespace MuonValR4{
 
          
            /** @brief Space point position */
-           ThreeVectorBranch m_globPos{parent(), m_collName+"spacePoint_Position"};
+           ThreeVectorBranch m_spPos{parent(), m_collName+"spacePoint_Position"};
            /** @brief Space point drift radius */
            VectorBranch<float>& m_driftR{parent().newVector<float>(m_collName+"spacePoint_driftR")};
            /** @brief Covariance of the space point */

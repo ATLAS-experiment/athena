@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -451,36 +451,17 @@ GenAodValidationTool::compareParts( const HepMC::ConstGenParticlePtr& p1, const 
 
 StatusCode GenAodValidationTool::setupHepMcWriterTools()
 {
-  if ( !m_refMcEventWriter.retrieve().isSuccess() ) {
-    ATH_MSG_ERROR("Creation of algTool ["
-		  << m_refMcEventWriter.type() << "/" 
-		  << "] FAILED !");
-    return StatusCode::FAILURE;
-  }
-
-  if ( !m_checkMcEventWriter.retrieve().isSuccess() ) {
-    ATH_MSG_ERROR("Creation of algTool ["
-		  << m_checkMcEventWriter.type() << "/" 
-		  << "] FAILED !");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( m_refMcEventWriter.retrieve() );
+  ATH_CHECK( m_checkMcEventWriter.retrieve() );
 
   // now we configure the tools
-  StringProperty refProp( "McEvents", m_refMcEventsName.value() );
-  if ( m_refMcEventWriter->setProperty( refProp ).isFailure() ) {
-    ATH_MSG_ERROR("Could not set property [" << refProp.name() 
-		  << "] for tool [" << m_refMcEventWriter.type() << "/" 
-		  << "] !");
-    return StatusCode::FAILURE;
-  }
+  SmartIF<IProperty> prop{m_refMcEventWriter.get()};
+  ATH_CHECK( prop.isValid() );
+  ATH_CHECK( prop->setProperty("McEvents", m_refMcEventsName.value()) );
 
-  StringProperty checkProp( "McEvents", m_checkMcEventsName.value() );
-  if ( m_checkMcEventWriter->setProperty( checkProp ).isFailure() ) {
-    ATH_MSG_ERROR("Could not set property [" << checkProp.name()
-		  << "] for tool [" << m_checkMcEventWriter.type() << "/" 
-		  << "] !");
-    return StatusCode::FAILURE;
-  }
+  prop = m_checkMcEventWriter.get();
+  ATH_CHECK( prop.isValid() );
+  ATH_CHECK( prop->setProperty("McEvents", m_checkMcEventsName.value()) );
 
   return StatusCode::SUCCESS;
 }

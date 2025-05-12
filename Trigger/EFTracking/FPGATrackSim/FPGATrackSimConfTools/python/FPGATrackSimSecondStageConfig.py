@@ -2,9 +2,15 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Logging import AthenaLogger
 from PathResolver import PathResolver
+import importlib
+import os
+import AthenaCommon.Utils.unixtools as unixtools
 
-#### Now inmport Data Prep config from other file
+log = AthenaLogger(__name__)
+
+#### Now import Data Prep config from other file
 from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
 from FPGATrackSimConfTools import FPGATrackSimAnalysisConfig
 
@@ -15,9 +21,86 @@ def getNSubregions(filePath):
         n = fields.split()[1]
         return int(n)
 
-def FPGATrackSimWindowExtensionToolCfg(flags):
+def FPGATrackSimBinnedHitsToolCfg_2nd(flags,name="FPGATrackSimBinnedHitsTool_2nd"):
     result = ComponentAccumulator()
-    FPGATrackSimWindowExtensionTool = CompFactory.FPGATrackSimWindowExtensionTool()
+
+    # This can probably be imported in the future from the analysis config, but for now it's here.
+    ##NameWithRegion = ComponentAccumulator(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
+
+    # The second stge, like layer study alg, technically doesn't need a cuts file.
+    # So for now allow the same override here I guess?
+    if flags.Trigger.FPGATrackSim.GenScan.initialLayerStudy:
+        cutset = {"rin": flags.Trigger.FPGATrackSim.GenScan.rin,
+                  "rout": flags.Trigger.FPGATrackSim.GenScan.rout,
+                  "parBins": flags.Trigger.FPGATrackSim.GenScan.parBins,
+                  "parMin": flags.Trigger.FPGATrackSim.GenScan.parMin,
+                  "parMax": flags.Trigger.FPGATrackSim.GenScan.parMax,
+                  "parSet": flags.Trigger.FPGATrackSim.GenScan.parSet
+                  }
+        log.info("Running initial layer study, taking FPGATrackSimBinning cuts from flags")
+        log.info(cutset)
+    else:
+        if flags.Trigger.FPGATrackSim.oldRegionDefs:
+            cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts).cuts[flags.Trigger.FPGATrackSim.region]
+        else:
+            # this allows the cut file defined in python to be loaded from the map directory
+            # Updated to use python path resolver. It seems like we have to manually pass in CALIBPATH.
+            relpath = os.path.join(flags.Trigger.FPGATrackSim.mapsDir, flags.Trigger.FPGATrackSim.GenScan.genScanCuts + ".py")
+            abspath = unixtools.find_datafile(relpath, pathlist=os.getenv("CALIBPATH").split(":"))
+            spec=importlib.util.spec_from_file_location("FPGATrackSimGenScanCuts", abspath)
+            cutmodule = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(cutmodule)
+            cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+        log.info("Running layer study using configured cuts file")
+        log.info(cutset)
+
+    # make the binned hits class
+    BinnnedHits = CompFactory.FPGATrackSimBinnedHits(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimBinnedHits_2nd"))
+    BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
+
+    # TODO: we need a new flag for this!
+    BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+
+    # make the bintool class
+    BinTool = CompFactory.FPGATrackSimBinTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimBinTool_2nd"))
+
+    # Inputs for the BinTool
+    binsteps=[]
+    BinDesc=None
+    if (cutset["parSet"]=="PhiSlicedKeyLyrPars"):
+        BinDesc = CompFactory.FPGATrackSimKeyLayerBinDesc(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimKeyLayerBinDesc2nd"))
+        BinDesc.rin=cutset["rin"]
+        BinDesc.rout=cutset["rout"]
+
+        # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
+        step1 = CompFactory.FPGATrackSimBinStep(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimPhiBinning_2nd"))
+        step1.parBins = [1,1,cutset["parBins"][2],cutset["parBins"][3],cutset["parBins"][4]]
+        step2 = CompFactory.FPGATrackSimBinStep(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimFullBinning_2nd"))
+        step2.parBins = cutset["parBins"]
+        binsteps = [step1,step2]
+    else:
+        log.fatal("Unknown Binning Setup: ",cutset["parSet"])
+
+    BinTool.BinDesc = BinDesc
+    BinTool.Steps = binsteps
+
+    # configure the padding around the nominal region
+    BinTool.d0FractionalPadding =0.05
+    BinTool.z0FractionalPadding =0.05
+    BinTool.etaFractionalPadding =0.05
+    BinTool.phiFractionalPadding =0.05
+    BinTool.qOverPtFractionalPadding =0.05
+    BinTool.parMin = cutset["parMin"]
+    BinTool.parMax = cutset["parMax"]
+    BinnnedHits.BinTool = BinTool
+
+    result.setPrivateTools(BinnnedHits)
+
+    return result
+
+def FPGATrackSimWindowExtensionToolCfg(flags,name="FPGATrackSimWindowExtensionTool"):
+    result = ComponentAccumulator()
+    FPGATrackSimWindowExtensionTool = CompFactory.FPGATrackSimWindowExtensionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
 
     # these are services so we use getPrimaryAndMerge; tools (configured elsewhere) should use popToolsAndMerge
     FPGATrackSimWindowExtensionTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
@@ -31,6 +114,11 @@ def FPGATrackSimWindowExtensionToolCfg(flags):
     FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84., 84.]
     FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045]
 
+    # If we're doing binning, i.e. genscan.
+    if flags.Trigger.FPGATrackSim.ActiveConfig.genScan:
+        FPGATrackSimWindowExtensionTool.doBinning = True
+        FPGATrackSimWindowExtensionTool.BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg_2nd(flags))
+
     # Other settings, shared with the first stage mostly. disable 2nd stage tracking for now.
     FPGATrackSimWindowExtensionTool.fieldCorrection =flags.Trigger.FPGATrackSim.ActiveConfig.fieldCorrection
     FPGATrackSimWindowExtensionTool.IdealGeoRoads = False # (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
@@ -39,9 +127,9 @@ def FPGATrackSimWindowExtensionToolCfg(flags):
     result.setPrivateTools(FPGATrackSimWindowExtensionTool)
     return result
 
-def FPGATrackSimNNPathfinderExtensionToolCfg(flags):
+def FPGATrackSimNNPathfinderExtensionToolCfg(flags,name="FPGATrackSimNNPathfinderExtensionTool"):
     result = ComponentAccumulator()
-    FPGATrackSimNNPathfinderExtensionTool = CompFactory.FPGATrackSimNNPathfinderExtensionTool()
+    FPGATrackSimNNPathfinderExtensionTool = CompFactory.FPGATrackSimNNPathfinderExtensionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
 
     # these are services so we use getPrimaryAndMerge; tools (configured elsewhere) should use popToolsAndMerge
     FPGATrackSimNNPathfinderExtensionTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
@@ -69,11 +157,11 @@ def FPGATrackSimNNPathfinderExtensionToolCfg(flags):
 
 
 # Need to figure out if we have two output writers or somehow only one.
-def FPGATrackSimSecondStageOutputCfg(flags):
+def FPGATrackSimSecondStageOutputCfg(flags,name="FPGATrackSimWriteOutputSecondStage"):
     result=ComponentAccumulator()
-    FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputSecondStage")
+    FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
-    FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimSecondStageTree"
+    FPGATrackSimWriteOutput.OutputTreeName = FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimSecondStageTree")
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
@@ -81,33 +169,33 @@ def FPGATrackSimSecondStageOutputCfg(flags):
     result.setPrivateTools(FPGATrackSimWriteOutput)
     return result
 
-def FPGATrackSimHoughRootOutputToolCfg(flags):
+def FPGATrackSimHoughRootOutputToolCfg(flags,name="FPGATrackSimHoughRootOutputTool"):
     result=ComponentAccumulator()
-    HoughRootOutputTool = CompFactory.FPGATrackSimHoughRootOutputTool()
-    HoughRootOutputTool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    HoughRootOutputTool = CompFactory.FPGATrackSimHoughRootOutputTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
+    HoughRootOutputTool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     HoughRootOutputTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     HoughRootOutputTool.THistSvc = CompFactory.THistSvc()
     result.setPrivateTools(HoughRootOutputTool)
     return result
 
-def NNTrackToolCfg(flags):
+def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool_2nd"):
     result=ComponentAccumulator()
-    NNTrackTool = CompFactory.FPGATrackSimNNTrackTool()
+    NNTrackTool = CompFactory.FPGATrackSimNNTrackTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     NNTrackTool.THistSvc = CompFactory.THistSvc()
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
     NNTrackTool.IdealGeoRoads = False
     NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
-    NNTrackTool.SPRoadFilterTool = FPGATrackSimAnalysisConfig.getSPRoadFilterTool(flags,secondStage=True)
+    NNTrackTool.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
     NNTrackTool.Do2ndStageTrackFit = True
     NNTrackTool.useSectors = False
     result.setPrivateTools(NNTrackTool)
     return result
 
 
-def FPGATrackSimTrackFitterToolCfg(flags):
+def FPGATrackSimTrackFitterToolCfg(flags,name="FPGATrackSimTrackFitterTool_2nd"):
     result=ComponentAccumulator()
-    TF = CompFactory.FPGATrackSimTrackFitterTool("FPGATrackSimTrackFitterTool_2nd")
+    TF = CompFactory.FPGATrackSimTrackFitterTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     TF.GuessHits = flags.Trigger.FPGATrackSim.ActiveConfig.guessHits
     TF.IdealCoordFitType = flags.Trigger.FPGATrackSim.ActiveConfig.idealCoordFitType
     TF.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
@@ -120,14 +208,14 @@ def FPGATrackSimTrackFitterToolCfg(flags):
     TF.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     TF.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     TF.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
-    TF.SPRoadFilterTool = FPGATrackSimAnalysisConfig.getSPRoadFilterTool(flags,secondStage=True)
+    TF.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
     TF.Do2ndStageTrackFit = True
     result.setPrivateTools(TF)
     return result
 
-def FPGATrackSimOverlapRemovalToolCfg(flags):
+def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool_2nd"):
     result=ComponentAccumulator()
-    OR = CompFactory.FPGATrackSimOverlapRemovalTool("FPGATrackSimOverlapRemovalTool_2nd")
+    OR = CompFactory.FPGATrackSimOverlapRemovalTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     OR.ORAlgo = "Normal"
     OR.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
     OR.NumOfHitPerGrouping = 5
@@ -146,22 +234,22 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
     return result
 
 def prepareFlagsForFPGATrackSimSecondStageAlg(flags):
-    newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
+    newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag,keepOriginal=True)
     return newFlags
 
-def FPGATrackSimSecondStageAlgCfg(inputFlags):
+def FPGATrackSimSecondStageAlgCfg(inputFlags,name="FPGATrackSimSecondStageAlg",suffix="",**kwargs):
 
     flags = prepareFlagsForFPGATrackSimSecondStageAlg(inputFlags)
 
     result=ComponentAccumulator()
 
-    theFPGATrackSimSecondStageAlg=CompFactory.FPGATrackSimSecondStageAlg()
+    theFPGATrackSimSecondStageAlg=CompFactory.FPGATrackSimSecondStageAlg(name=FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name),**kwargs)
     theFPGATrackSimSecondStageAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
-    theFPGATrackSimSecondStageAlg.tracking = flags.Trigger.FPGATrackSim.tracking
+    theFPGATrackSimSecondStageAlg.tracking = flags.Trigger.FPGATrackSim.secondTracking
     theFPGATrackSimSecondStageAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     theFPGATrackSimSecondStageAlg.DoHoughRootOutput2nd = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput2nd
     theFPGATrackSimSecondStageAlg.DoNNTrack_2nd = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd
-    theFPGATrackSimSecondStageAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    theFPGATrackSimSecondStageAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     theFPGATrackSimSecondStageAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.secondChi2Cut
     theFPGATrackSimSecondStageAlg.doNNPathFinder = flags.Trigger.FPGATrackSim.doNNPathFinder
 
@@ -188,7 +276,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
     if flags.Trigger.FPGATrackSim.spacePoints and theFPGATrackSimSecondStageAlg.tracking:
-        theFPGATrackSimSecondStageAlg.SPRoadFilterTool = FPGATrackSimAnalysisConfig.getSPRoadFilterTool(flags,secondStage=True)
+        theFPGATrackSimSecondStageAlg.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
         theFPGATrackSimSecondStageAlg.Spacepoints = True
 
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimSecondStageAlgMonitoringCfg

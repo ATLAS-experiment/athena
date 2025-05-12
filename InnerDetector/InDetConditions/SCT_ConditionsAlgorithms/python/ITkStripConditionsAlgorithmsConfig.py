@@ -12,7 +12,8 @@ def ITkStripAlignCondAlgCfg(flags, name="ITkStripAlignCondAlg", **kwargs):
     if flags.GeoModel.Align.Dynamic:
         raise RuntimeError("Dynamic alignment not supported for ITk yet")
     else:
-        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder, className="AlignableTransformContainer"))
+        if not flags.ITk.Align.useLocalDatabase:
+            acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder, className="AlignableTransformContainer"))
 
     kwargs.setdefault("DetManagerName", "ITkStrip")
     kwargs.setdefault("WriteKey", "ITkStripAlignmentStore")
