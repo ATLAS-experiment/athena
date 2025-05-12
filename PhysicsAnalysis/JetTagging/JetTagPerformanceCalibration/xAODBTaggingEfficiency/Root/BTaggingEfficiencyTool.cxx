@@ -217,12 +217,6 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_MSG_ERROR( "BTaggingEfficiencyTool configuration is invalid - follow the above suggestions to correct your config!");
     return StatusCode::FAILURE;
   };
-  if (msgLvl(MSG::INFO)) {
-    ATH_MSG_INFO( " --- Calibration file configuration options ---" );
-    Reader.printTaggers();
-    Reader.printJetCollections();
-    Reader.printWorkingPoints();
-  }
 
   std::vector<std::string> config_labels = Reader.getLabels(); // the labels compatible with this configuration
   std::vector<std::string> flavours;
