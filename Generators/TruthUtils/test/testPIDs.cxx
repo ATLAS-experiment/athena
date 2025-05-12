@@ -76,9 +76,10 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isGraviton)
     TEST_FUNCTION(isHadron)
     TEST_FUNCTION(isHeavyBaryon)
+    TEST_FUNCTION(isHeavyBoson)
     TEST_FUNCTION(isHeavyHadron)
-    TEST_FUNCTION(isHeavyMeson)
-    TEST_FUNCTION(isHiddenValley) // 40
+    TEST_FUNCTION(isHeavyMeson) // 40
+    TEST_FUNCTION(isHiddenValley)
     TEST_FUNCTION(isHiggs)
     TEST_FUNCTION(isKK)
     TEST_FUNCTION(isLeptoQuark)
@@ -87,55 +88,57 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isLightHadron)
     TEST_FUNCTION(isLightMeson)
     TEST_FUNCTION(isMeson)
-    TEST_FUNCTION(isMonopole)
-    TEST_FUNCTION(isMuon) // 50
+    TEST_FUNCTION(isMonopole) // 50
+    TEST_FUNCTION(isMSSMHiggs)
+    TEST_FUNCTION(isMuon)
     TEST_FUNCTION(isNeutral)
     TEST_FUNCTION(isNeutrino)
+    TEST_FUNCTION(isNeutrinoRH)
     TEST_FUNCTION(isNucleus)
     TEST_FUNCTION(isParton)
     TEST_FUNCTION(isPentaquark)
     TEST_FUNCTION(isPhoton)
-    TEST_FUNCTION(isPythia8Specific)
+    TEST_FUNCTION(isPythia8Specific) // 60
     TEST_FUNCTION(isQuark)
     TEST_FUNCTION(isRBaryon)
-    TEST_FUNCTION(isRGlueball) // 60
+    TEST_FUNCTION(isRGlueball)
     TEST_FUNCTION(isRHadron)
     TEST_FUNCTION(isRMeson)
     TEST_FUNCTION(isResonance)
     TEST_FUNCTION(isSlepton)
     TEST_FUNCTION(isSleptonLH)
     TEST_FUNCTION(isSleptonRH)
-    TEST_FUNCTION(isSMLepton)
+    TEST_FUNCTION(isSMLepton) // 70
     TEST_FUNCTION(isSMNeutrino)
     TEST_FUNCTION(isSUSY)
-    TEST_FUNCTION(isSquark) // 70
+    TEST_FUNCTION(isSquark)
     TEST_FUNCTION(isSquarkLH)
     TEST_FUNCTION(isSquarkRH)
     TEST_FUNCTION(isStrange)
     TEST_FUNCTION(isStrangeBaryon)
     TEST_FUNCTION(isStrangeHadron)
     TEST_FUNCTION(isStrangeMeson)
-    TEST_FUNCTION(isStrongInteracting)
+    TEST_FUNCTION(isStrongInteracting) // 80
     TEST_FUNCTION(isTau)
     TEST_FUNCTION(isTechnicolor)
-    TEST_FUNCTION(isTetraquark) // 80
+    TEST_FUNCTION(isTetraquark)
     TEST_FUNCTION(isTop)
     TEST_FUNCTION(isTopBaryon)
     TEST_FUNCTION(isTopHadron)
     TEST_FUNCTION(isTopMeson)
     TEST_FUNCTION(isTrajectory)
     TEST_FUNCTION(isTransportable)
-    TEST_FUNCTION(isValid)
+    TEST_FUNCTION(isValid) // 90
     TEST_FUNCTION(isW)
     TEST_FUNCTION(isWeaklyDecayingBHadron)
-    TEST_FUNCTION(isWeaklyDecayingCHadron) // 90
+    TEST_FUNCTION(isWeaklyDecayingCHadron)
     TEST_FUNCTION(isZ)
     TEST_FUNCTION(leadingQuark)
     TEST_FUNCTION(numberOfLambdas)
     TEST_FUNCTION(numberOfProtons)
     TEST_FUNCTION(spin2)
     TEST_FUNCTION(strangeness)
-    TEST_FUNCTION(threeCharge)
+    TEST_FUNCTION(threeCharge) // 100
     processed=true;
     // uncomment when updating reference file
     // printf("%s\n",current.c_str()); continue;
