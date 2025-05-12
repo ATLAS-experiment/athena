@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFAGEOMODEL_ALFADETECTORFACTORY_H
@@ -24,7 +24,7 @@ class GeoPhysVol;
 class GeoFullPhysVol;
 
 typedef struct _ALFAPHYSVOLUME {
-	GeoFullPhysVol* pPhysVolume;
+	GeoFullPhysVol* pPhysVolume{};
 	HepGeom::Transform3D Transform;
 } ALFAPHYSVOLUME, *PALFAPHYSVOLUME;
 
@@ -39,8 +39,8 @@ enum eTransformDeltaType { ETDT_RPTRANSFORM };
 typedef struct _CONFIGURATION {
 	GEOMETRYCONFIGURATION GeometryConfig;
 
-	bool bConstructBeampipe;
-	bool bAddIBP;
+	bool bConstructBeampipe{};
+	bool bAddIBP{};
 
 	std::vector<bool> bIsTransformInStation;
 	std::vector<bool> bIsTransformInDetector;
@@ -76,13 +76,13 @@ class ALFA_DetectorFactory : public GeoVDetectorFactory
 {
 	private:
 		// The managers:
-		ALFA_DetectorManager* m_pDetectorManager;   
-		StoreGateSvc* m_pDetectorStore;
-		IRDBAccessSvc* m_pIRDBAccess;
+		ALFA_DetectorManager* m_pDetectorManager{};   
+		StoreGateSvc* m_pDetectorStore{};
+		IRDBAccessSvc* m_pIRDBAccess{};
 
-		eMetrologyType m_eRequestedMetrologyType;
+		eMetrologyType m_eRequestedMetrologyType{eMetrologyType::EMT_UNDEFINED};
 		CONFIGURATION m_Config;
-                std::unique_ptr<ALFA_GeometryReader> m_pGeoReader;
+    std::unique_ptr<ALFA_GeometryReader> m_pGeoReader;
 		std::list<eRPotName> m_ListExistingRPots;
 		std::map<std::string,const GeoMaterial*> m_MapMaterials;
 
