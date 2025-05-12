@@ -1510,7 +1510,7 @@ class memFileToTable():
             firstline = True
             for line in f:
                 fields = line.split(separator)
-                fields = [''.join(filter(str.isalnum, field)) for field in fields]
+                fields = [''.join(filter(str.isprintable, field)) for field in fields]
                 if firstline:
                     firstline = False
                     tabledict, keylist = self._defineTableDictKeys(header, fields, separator)
