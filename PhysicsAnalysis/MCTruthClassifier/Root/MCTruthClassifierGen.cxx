@@ -232,11 +232,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   if (!thePriPart) return NonDefined;
   if (!MC::isElectron(thePriPart)) return NonDefined;
 
-  const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
-
   //-- to define electron outcome status
   info.particleOutCome = defOutComeOfElectron(thePriPart);
 
+  const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
   int numOfParents = partProdVtx->nIncomingParticles();
@@ -244,66 +243,77 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
-  if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
+  if (!ancestor) { return NonDefined; } // After this point "ancestor" cannot be nullptr
 
   int ancestorPDG = ancestor->pdgId();
-  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-
+  // Start of method 1 of protecting against loops
   bool samePart = false;
   for (const auto& aChild: partProdVtx->particles_out()) {
     if (!aChild)  continue;
-    if (ancestorPDG == aChild->pdgId() && HepMC::is_same_generator_particle(aChild, ancestor)) samePart = true;
+    if (ancestorPDG == aChild->pdgId() && HepMC::is_same_generator_particle(aChild, ancestor)) {
+      // One of the child particles produced in the decay of ancestor is
+      // actually the same particle.  NB In the case of multiple
+      // child particles this particle may not necessarily be
+      // thePriPart. Does this matter?
+      samePart = true;
+    }
   }
 
   // to resolve Sherpa loop
-  if (ancestorProdVtx && HepMC::is_same_vertex(ancestorProdVtx,partProdVtx)) samePart = true;
-  //
+  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+  if (ancestorProdVtx && HepMC::is_same_vertex(ancestorProdVtx,partProdVtx)) {
+    // The "ancestor" and the "thePriPart" have the same production vertex.
+    samePart = true;
+  }
+  // End of method 1 of protecting against loops
 
   if ((MC::isMuon(ancestorPDG) || MC::isTau(ancestorPDG) || MC::isW(ancestorPDG)) && ancestorProdVtx && !samePart) {
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
-      pPDG = 0;
+      pPDG = 0; // reset pPDG
       ancestorParent = MC::findMother(ancestor);
+      // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
       const xAOD::TruthVertex* ancestor_prdVtx{};
       const xAOD::TruthVertex* ancestor_endVtx{};
-      if (ancestor) {
-        ancestor_prdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-        ancestor_endVtx = ancestor->decayVtx();
-      }
+      ancestor_prdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+      ancestor_endVtx = ancestor->decayVtx();
       const xAOD::TruthVertex* parent_prdVtx{};
       const xAOD::TruthVertex* parent_endVtx{};
       if (ancestorParent) {
         parent_prdVtx = ancestorParent->hasProdVtx() ? ancestorParent->prodVtx() : nullptr;
         parent_endVtx = ancestorParent->decayVtx();
       }
+      // V0->AP->V1-> ...->V2->A->V3
+      // V3 == V0 && V1 == V2
       if (ancestor_endVtx == parent_prdVtx && ancestor_prdVtx == parent_endVtx) {
         ancestorParent = ancestor;
         break;
       }
-      //
-      if (ancestorParent) pPDG = ancestorParent->pdgId();
       // to prevent Sherpa loop
-      if (ancestor == ancestorParent) break;
-      if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) ancestor = ancestorParent;
-
+      // End of method 2 of protecting against loops
+      // FIXME why are slightly different criteria used in method 1 and method 2???
+      if (ancestor == ancestorParent) { break; }
+      if (ancestorParent) { pPDG = ancestorParent->pdgId(); } // Only set pPDG in the case that we aren't in a loop.
+      if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) { // There will be another iteration so set ancestor to ancestorParent
+        ancestor = ancestorParent; // ancestorParent is not nullptr here
+      }
     } while ((MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)));
 
     if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
-        abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
+        std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG))
       ancestor = ancestorParent; // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfMuon/Neutrino
   }
 
+  info.setMotherProperties(ancestor);
   ancestorPDG = ancestor->pdgId();
-  partProdVtx = ancestor->decayVtx();
   ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+  partProdVtx = ancestor->decayVtx();
   numOfParents = partProdVtx->nIncomingParticles();
   const int numberOfChildren = partProdVtx->nOutgoingParticles();
-
-  info.setMotherProperties(ancestor);
 
   // Determine decay products
   auto DP = DecayProducts(partProdVtx);
@@ -322,14 +332,14 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
   samePart = false;
   int NumOfNucFr(0);
-  const bool possibleNuclearFragment = (numOfParents == 1 && (MC::isPhoton(ancestorPDG) || MC::isElectron(ancestorPDG) || MC::isMuon(ancestorPDG) || abs(ancestorPDG) == MC::PIPLUS));
+  const bool possibleNuclearFragment = (numOfParents == 1 && (MC::isPhoton(ancestorPDG) || MC::isElectron(ancestorPDG) || MC::isMuon(ancestorPDG) || std::abs(ancestorPDG) == MC::PIPLUS));
   for (const auto& aChild: partProdVtx->particles_out()) {
     if (!aChild) continue;
     const int childPDG = aChild->pdgId();
-    if (abs(childPDG) == abs(ancestorPDG) && HepMC::is_same_generator_particle(aChild, ancestor )) samePart = true;
+    if (std::abs(childPDG) == std::abs(ancestorPDG) && HepMC::is_same_generator_particle(aChild, ancestor )) samePart = true;
     if (possibleNuclearFragment &&
         (MC::isNucleus(childPDG) || childPDG == 0 || childPDG == MC::PROTON || childPDG == MC::NEUTRON || // FIXME Do we really expect particles with PDG_ID = 0 in the truth record?
-         abs(childPDG) == MC::PIPLUS || abs(childPDG) == MC::PI0))
+         std::abs(childPDG) == MC::PIPLUS || std::abs(childPDG) == MC::PI0))
       NumOfNucFr++;
   }
   // End of section determining decay products
@@ -338,7 +348,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if (ancestorProdVtx->nIncomingParticles() > 1) { ATH_MSG_DEBUG("DefOrigOfElectron:: photon has more than one parent.");  }
     for (const auto& photonParent: ancestorProdVtx->particles_in()) {
       if (!photonParent) continue;
-      info.photonMother = photonParent; // FIXME Just taking the first one...
+      info.photonMother = photonParent;  // FIXME Just taking the first valid particle...
     }
   }
 
@@ -347,7 +357,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   // e,gamma,pi+Nuclear->NuclearFragments+nuclons+e
   if ((numOfParents == 1 && (MC::isPhoton(ancestorPDG) || MC::isElectron(ancestorPDG) || MC::isTau(ancestorPDG))) && numberOfChildren > 1 && NumOfNucFr != 0) return ElMagProc;
 
-  if (numOfParents == 1 && abs(ancestorPDG) == MC::PIPLUS && numberOfChildren > 2 && NumOfNucFr != 0) return ElMagProc;
+  if (numOfParents == 1 && std::abs(ancestorPDG) == MC::PIPLUS && numberOfChildren > 2 && NumOfNucFr != 0) return ElMagProc;
 
   // nuclear photo fission
   if (MC::isPhoton(ancestorPDG) && numberOfChildren > 4 && NumOfNucFr != 0) return ElMagProc;
@@ -382,16 +392,16 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   if (MC::isW(ancestorPDG) && ancestorProdVtx && ancestorProdVtx->nIncomingParticles() != 0) {
 
     const xAOD::TruthVertex* prodVert = ancestorProdVtx;
-    const xAOD::TruthParticle* ptrPart;
+    const xAOD::TruthParticle* ptrPart{};
     do {
       ptrPart = prodVert->incomingParticle(0); // FIXME just taking the first one
       prodVert = ptrPart->hasProdVtx() ? ptrPart->prodVtx() : nullptr;
     } while (MC::isW(ptrPart) && prodVert);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(ptrPart->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
-      if (abs(ptrPart->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
-      if (abs(ptrPart->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+      if (std::abs(ptrPart->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (std::abs(ptrPart->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (std::abs(ptrPart->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -403,7 +413,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
     const xAOD::TruthParticle* thePartToCheck = thePriPart;
     const xAOD::TruthParticle* theParent = thePriPart->hasProdVtx() ? thePriPart->prodVtx()->incomingParticle(0) : nullptr; // FIXME just taking the first one
-    if (theParent && MC::isElectron(theParent) && MC::isDecayed(theParent)) thePartToCheck = theParent;
+    if (theParent && MC::isElectron(theParent) && MC::isDecayed(theParent)) { thePartToCheck = theParent; }
 
     bool isZboson = false;
     bool isWboson = false;
@@ -430,7 +440,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
           break;
         }
         skipnext = true;
-      } else if (MC::isElectron(aChild) && abs(theNextChild->pdgId()) == MC::NU_E) {
+      } else if (MC::isElectron(aChild) && std::abs(theNextChild->pdgId()) == MC::NU_E) {
         // WBoson
         if (thePartToCheck == aChild || thePartToCheck == theNextChild) {
           isWboson = true;
@@ -443,25 +453,27 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if (isZboson) return ZBoson;
   }
   if (numOfParents == 2) {
-    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
-    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
     //--Sherpa Z->ee
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfEl == 1 && NumOfPos == 1) return ZBoson;
 
     //--Sherpa W->enu ??
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) return WBoson;
 
+    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
+    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
     //--Sherpa ZZ,ZW
-    if ((numberOfChildren - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
+    if ((numberOfChildren - NumOfquark - NumOfgluon) == 4 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
     //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-    if ((numberOfChildren - NumOfquark - NumOfgluon - NumOfPhot) == 6 && (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+    if ((numberOfChildren - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
 
   // New Sherpa Z->ee
-  if (partProdVtx == ancestorProdVtx && partProdVtx) {
+  if (partProdVtx == ancestorProdVtx) {
     int NumOfEleLoop = 0;
     int NumOfLepLoop = 0;
     int NumOfEleNeuLoop = 0;
@@ -471,15 +483,15 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
         if (!pin) continue;
         if (!HepMC::is_same_particle(pout,pin)) continue;
         if (MC::isElectron(pout)) NumOfEleLoop++;
-        if (std::abs(pin->pdgId()) == MC::NU_E) NumOfEleNeuLoop++; // FIXME pin vs pout difference in behaviour compared to MCTruthClassifier::defOrigOfMuon
+        if (std::abs(pout->pdgId()) == MC::NU_E) NumOfEleNeuLoop++;
         if (MC::isSMLepton(pout)) NumOfLepLoop++;
+        break; // break out of inner loop after having found two matching particles
       }
     }
     if (NumOfEleLoop == 2 && NumOfEleNeuLoop == 0) return ZBoson;
     if (NumOfEleLoop == 1 && NumOfEleNeuLoop == 1) return WBoson;
     if ((NumOfEleLoop == 4 && NumOfEleNeuLoop == 0) || (NumOfEleLoop == 3 && NumOfEleNeuLoop == 1) ||
-        (NumOfEleLoop == 2 && NumOfEleNeuLoop == 2))
-      return DiBoson;
+        (NumOfEleLoop == 2 && NumOfEleNeuLoop == 2)) return DiBoson;
     if (NumOfLepLoop == 4) return DiBoson;
   }
 
@@ -498,13 +510,14 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     return (tautype == IsoTau)?tauOrig:TauLep;
   }
 
-  if (abs(ancestorPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(ancestorPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(ancestorPDG)) return SUSY;
   if (MC::isBSM(ancestorPDG)) return OtherBSM;
+
   const ParticleType pType = defTypeOfHadron(ancestorPDG);
   if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && ancestorProdVtx && MC::isHardScatteringVertex(ancestorProdVtx)) isPrompt = true;
   return convHadronTypeToOrig(pType, ancestorPDG);
@@ -537,64 +550,61 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
-  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   int ancestorPDG = ancestor->pdgId();
+  // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
+  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
 
   if ((MC::isTau(ancestorPDG)|| MC::isW(ancestorPDG)) && ancestorProdVtx) {
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
-      //
       pPDG = 0;
-      //
+      ancestorParent = MC::findMother(ancestor);
+      // Start of method 2 of protecting against loops
+      // to prevent Sherpa loop
       const xAOD::TruthVertex* ancestor_prdVtx{};
       const xAOD::TruthVertex* ancestor_endVtx{};
-      ancestorParent = MC::findMother(ancestor);
-      // to prevent Sherpa loop
       ancestor_prdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
       ancestor_endVtx = ancestor->decayVtx();
-      //
       const xAOD::TruthVertex* parent_prdVtx{};
       const xAOD::TruthVertex* parent_endVtx{};
       if (ancestorParent) {
         parent_prdVtx = ancestorParent->hasProdVtx() ? ancestorParent->prodVtx() : nullptr;
         parent_endVtx = ancestorParent->decayVtx();
       }
-      //
+      // V0->AP->V1-> ...->V2->A->V3
+      // V3 == V0 && V1 == V2
       if (ancestor_endVtx == parent_prdVtx && ancestor_prdVtx == parent_endVtx) {
         ancestorParent = ancestor;
         break;
       }
-      //
       // to prevent Sherpa loop
-      if (ancestor == ancestorParent) {
-        break;
-      }
+      if (ancestor == ancestorParent) { break; }
+      // End of method 2 of protecting against loops
 
       if (ancestorParent) {
-        pPDG = ancestorParent->pdgId();
-        if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) {
-          ancestor = ancestorParent;
-          info.setMotherProperties(ancestor);
+        pPDG = ancestorParent->pdgId();// Only set pPDG in the case that we aren't in a loop.
+        if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) { // FIXME should this be (MC::isTau(pPDG) || MC::isW(pPDG)) ???
+          // There will be another iteration so set ancestor to ancestorParent
+          ancestor = ancestorParent; // ancestorParent is not nullptr here
         }
       }
     } while ((MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG))); // FIXME should this be (MC::isTau(pPDG) || MC::isW(pPDG)) ???
 
     if (MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
-        abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) ||  // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
+        std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) ||  // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
-      info.setMotherProperties(ancestor); // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfElectron
+      info.setMotherProperties(ancestor); // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfElectron/Neutrino
     }
   }
 
+  info.setMotherProperties(ancestor);
   ancestorPDG = ancestor->pdgId();
   ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   partProdVtx = ancestor->decayVtx();
   numOfParents = partProdVtx->nIncomingParticles();
   const int numberOfChildren = partProdVtx->nOutgoingParticles();
-
-  info.setMotherProperties(ancestor);
 
   // Determine decay products
   auto DP = DecayProducts(partProdVtx);
@@ -633,9 +643,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     } while (MC::isW(itrP) && prodVert);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
-      if (abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
-      if (abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+      if (std::abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (std::abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (std::abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -645,7 +655,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   //-- Exotics
 
   // MadGraphPythia ZWW*->lllnulnu
-
   if (numOfParents == 1 && numberOfChildren > 4 && (MC::isSMQuark(ancestorPDG) || MC::isGluon(ancestorPDG))) {
     bool isZboson = false;
     bool isWboson = false;
@@ -670,7 +679,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
           break;
         }
         skipnext = true;
-      } else if (MC::isMuon(aChild) && abs(theNextChild->pdgId()) == MC::NU_MU) {
+      } else if (MC::isMuon(aChild) && std::abs(theNextChild->pdgId()) == MC::NU_MU) {
         // WBoson
         if (thePriPart == aChild || thePriPart == theNextChild) {
           isWboson = true;
@@ -683,8 +692,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     if (isZboson) return ZBoson;
   }
   if (numOfParents == 2 ) {
-    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
-    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
     //--Sherpa Z->mumu
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfMuPl == 1 && NumOfMuMin == 1) return ZBoson;
 
@@ -692,6 +699,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     // if(numOfParents==2&&(numberOfChildren-NumOfquark-NumOfgluon)==2&&(NumOfEl==1||NumOfPos==1)&&NumOfElNeut==1) return WBoson;
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && (NumOfMuPl == 1 || NumOfMuMin == 1) && NumOfMuNeut == 1) return WBoson;
 
+    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
+    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
     //--Sherpa ZZ,ZW
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 4 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
@@ -709,19 +718,21 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     int NumOfMuNeuLoop = 0;
     int NumOfLepLoop = 0;
     for (const auto & pout: partProdVtx->particles_out()) {
+      if (!pout) continue;
       for (const auto & pin: partProdVtx->particles_in()) {
-        if (!pout) continue;
         if (!pin) continue;
         if (HepMC::is_same_particle(pout,pin)) {
           if (MC::isMuon(pout)) NumOfMuLoop++;
-          if (std::abs(pout->pdg_id()) == MC::NU_MU) NumOfMuNeuLoop++; // FIXME pin vs pout difference in behaviour compared to MCTruthClassifier::defOrigOfElectron
+          if (std::abs(pout->pdg_id()) == MC::NU_MU) NumOfMuNeuLoop++;
           if (MC::isSMLepton(pout)) NumOfLepLoop++;
+          break; // break out of inner loop after having found two matching particles
         }
       }
     }
     if (NumOfMuLoop == 2 && NumOfMuNeuLoop == 0) return ZBoson;
     if (NumOfMuLoop == 1 && NumOfMuNeuLoop == 1) return WBoson;
-    if ((NumOfMuLoop == 4 && NumOfMuNeuLoop == 0) || (NumOfMuLoop == 3 && NumOfMuNeuLoop == 1) || (NumOfMuLoop == 2 && NumOfMuNeuLoop == 2)) return DiBoson;
+    if ((NumOfMuLoop == 4 && NumOfMuNeuLoop == 0) || (NumOfMuLoop == 3 && NumOfMuNeuLoop == 1) ||
+        (NumOfMuLoop == 2 && NumOfMuNeuLoop == 2)) return DiBoson;
     if (NumOfLepLoop == 4) return DiBoson;
   }
 
@@ -733,10 +744,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 
   if (MC::isHeavyBoson(ancestorPDG))  return HeavyBoson;  // Heavy bosons( Z', Z'', W'+)
 
-  if (abs(ancestorPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(ancestorPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(ancestorPDG)) return SUSY;
   if (MC::isBSM(ancestorPDG)) return OtherBSM;
@@ -747,14 +758,17 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   return convHadronTypeToOrig(pType, ancestorPDG);
 }
 
+
 ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                const xAOD::TruthParticle* thePart,
                                                int ancestorPDGin,
                                                MCTruthPartClassifier::Info& info) const
 {
   ATH_MSG_DEBUG("Executing DefOrigOfTau ");
+
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
   const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
+
   if (!thePriPart) return NonDefined;
   if (!MC::isTau(thePriPart)) return NonDefined;
 
@@ -772,19 +786,17 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
+  // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
   const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
 
+  // Difference from defOrigOfElectron and defOrigOfMuon - no loop through ancestor particles
   const xAOD::TruthParticle* ancestorParent{};
 
   if (MC::isW(ancestorPDGin) && ancestorProdVtx) { // FIXME ancestorPDGin here could in principle be inconsistent with ancestorProdVtx
     ancestorParent = MC::findMother(ancestor);
-    int pPDG(0);
-
     if (ancestorParent) {//ancestorParent checked here...
-      pPDG = ancestorParent->pdgId();
-      if (MC::isTop(pPDG)) {
+      if (MC::isTop(ancestorParent->pdgId())) {
         ancestor = ancestorParent; //...so ancestor cannot be nullptr
-        info.setMotherProperties(ancestor);
       }
     }
   }
@@ -824,9 +836,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     } while (MC::isW(itrP) && prodVert);
 
     if (prodVert && prodVert->nIncomingParticles() == 1 ) {
-      if (abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
-      if (abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
-      if (abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+      if (std::abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (std::abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (std::abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -858,7 +870,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
           break;
         }
         skipnext = true;
-      } else if (MC::isTau(aChild) && abs(theNextChild->pdgId()) == MC::NU_TAU) {
+      } else if (MC::isTau(aChild) && std::abs(theNextChild->pdgId()) == MC::NU_TAU) {
         // WBoson
         if (thePriPart == aChild || thePriPart == theNextChild) {
           isWboson = true;
@@ -874,7 +886,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
     const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
     //--Sherpa Z->tautau
-    if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfTau == 2  && (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return ZBoson;
+    if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfTau == 2  && (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return ZBoson; // FIXME Why the extra checks on incoming particles compared to Z->ee, Z->mumu and Z->nunu?
 
     //--Sherpa W->taunu  new
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfTau == 1 && NumOfTauNeut == 1) return WBoson;
@@ -889,6 +901,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
+
   // New Sherpa Z->tautau
   if (partProdVtx == ancestorProdVtx) {
     int NumOfTauLoop = 0;
@@ -900,8 +913,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
         if (!pin) continue;
         if (!HepMC::is_same_particle(pout,pin)) continue;
         if (MC::isTau(pout)) NumOfTauLoop++;
-        if (std::abs(pout->pdgId()) == MC::NU_TAU) NumOfTauNeuLoop++; // FIXME pin vs pout difference in behaviour compared to MCTruthClassifier::defOrigOfElectron
+        if (std::abs(pout->pdgId()) == MC::NU_TAU) NumOfTauNeuLoop++;
         if (MC::isSMLepton(pout)) NumOfLepLoop++;
+        break; // break out of inner loop after having found two matching particles
       }
     }
     if (NumOfTauLoop == 2 && NumOfTauNeuLoop == 0) return ZBoson;
@@ -910,18 +924,21 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     if (NumOfLepLoop == 4) return DiBoson;
   }
 
+  //-- McAtNLo
+
   if (MC::isHiggs(ancestorPDG)) return Higgs;
   if (MC::isMSSMHiggs(ancestorPDG)) return HiggsMSSM; // MSSM Higgs bosons
   if (MC::isHeavyBoson(ancestorPDG)) return HeavyBoson; // Heavy bosons( Z', Z'', W'+)
-  if (abs(ancestorPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isSUSY(ancestorPDG)) return SUSY;
   if (MC::isBSM(ancestorPDG)) return OtherBSM;
-  if (abs(ancestorPDG) == MC::JPSI) return JPsi;
+  if (std::abs(ancestorPDG) == MC::JPSI) return JPsi;
 
   const ParticleType pType = defTypeOfHadron(ancestorPDG);
   return convHadronTypeToOrig(pType, ancestorPDG);
 }
+
 
 ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                   const xAOD::TruthParticle* thePart,
@@ -943,20 +960,23 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   //-- to define photon outcome status
   info.particleOutCome = defOutComeOfPhoton(thePriPart);
+
   if (!partProdVtx) return NonDefined;
 
   int numOfParents = partProdVtx->nIncomingParticles();
   if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfPhoton:: photon has more than one parent.");
-
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
   int ancestorPDG = ancestor->pdgId();
+  // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
   const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+
   partProdVtx = ancestor->decayVtx(); // FIXME how often does this line actually change the pointer???
   numOfParents = partProdVtx->nIncomingParticles();
+
   const int numberOfChildren = partProdVtx->nOutgoingParticles();
 
   // Determine decay products
@@ -973,7 +993,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   int childPDG(0);
   int NumOfPartons(0);
   int NumOfNucFr(0);
-  const bool possibleNuclearFragment = (numOfParents == 1 && (MC::isPhoton(ancestorPDG) || MC::isElectron(ancestorPDG) || abs(ancestorPDG) == MC::PIPLUS));
+  const bool possibleNuclearFragment = (numOfParents == 1 && (MC::isPhoton(ancestorPDG) || MC::isElectron(ancestorPDG) || std::abs(ancestorPDG) == MC::PIPLUS));
   const xAOD::TruthParticle* child{};
   for (const auto& pout: partProdVtx->particles_out()) {
     if (!pout) continue;
@@ -982,8 +1002,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
         (MC::isNucleus(childPDG) || childPDG == 0 || childPDG == MC::PROTON || childPDG == MC::NEUTRON)) { // FIXME Do we really expect particles with PDG_ID = 0 in the truth record?
       NumOfNucFr++;
     }
-    if (abs(childPDG) < MC::ELECTRON ||
-        (abs(childPDG) > MC::NU_TAU && abs(childPDG) < 43 && !MC::isPhoton(childPDG))) {
+    if (std::abs(childPDG) < MC::ELECTRON ||
+        (std::abs(childPDG) > MC::NU_TAU && std::abs(childPDG) < 43 && !MC::isPhoton(childPDG))) {
       // FIXME Too loose? This definition picks up 4th generation quarks and leptons as well as all gauge bosons and leptoquarks.
       // Suggest MC::isSMQuark(childPDG) || (MC::isBoson(childPDG) && !MC::isPhoton(childPDG))
       // or maybe even MC::isSMQuark(childPDG) || MC::isGluon(childPDG)
@@ -1013,7 +1033,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       Vert = prodVert;
       for (const auto & pin: Vert->particles_in()) {
         if (!pin) continue;
-        PartPDG = abs(pin->pdgId());
+        PartPDG = std::abs(pin->pdgId());
         prodVert = pin->prodVtx();
         if (MC::isZ(PartPDG) || MC::isW(PartPDG) || MC::isHiggs(PartPDG)) foundFSR = true;
       }
@@ -1022,7 +1042,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
         ATH_MSG_WARNING("DefOrigOfPhoton:: infinite while");
         break;
       }
-    } while (prodVert && abs(ancestorPDG) == PartPDG);
+    } while (prodVert && std::abs(ancestorPDG) == PartPDG);
 
     if (foundFSR) return FSRPhot;
   }
@@ -1033,7 +1053,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   // pi+Nuclear=>gamma+Nucl.Fr+Nuclons+pions
 
   if ((numOfParents == 1 && (MC::isPhoton(ancestorPDG) || MC::isElectron(ancestorPDG)) && numberOfChildren > 2 && NumOfNucFr != 0) ||
-      (numOfParents == 1 && abs(ancestorPDG) == MC::PIPLUS && numberOfChildren > 10 && NumOfNucFr != 0) ||
+      (numOfParents == 1 && std::abs(ancestorPDG) == MC::PIPLUS && numberOfChildren > 10 && NumOfNucFr != 0) ||
       (numOfParents == 1 && MC::isPhoton(ancestorPDG) && numberOfChildren > 10 && MC::isStable(ancestor)) ||
       (numOfParents == 1 && MC::isNucleus(ancestorPDG) && std::abs(ancestorPDG) != MC::PROTON)) // FIXME vetoing protons here to preserve previous behaviour
     return NucReact;
@@ -1065,10 +1085,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   // FSR  from Photos
   //-- Exotics- CompHep
   if (numOfParents == 2 && ((MC::isElectron(ancestorPDG) && NumOfEl == 1 && NumOfPos == 1) || (MC::isMuon(ancestorPDG) && NumOfMu == 2) || (MC::isTau(ancestorPDG) && NumOfTau == 2))) {
-    if (abs(partProdVtx->incomingParticle(0)->pdgId()) == abs(partProdVtx->incomingParticle(1)->pdgId())) return FSRPhot;
+    if (std::abs(partProdVtx->incomingParticle(0)->pdgId()) == std::abs(partProdVtx->incomingParticle(1)->pdgId())) return FSRPhot;
   }
 
-  if (numOfParents == 2 && NumOfLep == 1 && NumOfNeut == 1 && (MC::isElectron(ancestorPDG) || abs(ancestorPDG) == MC::NU_E)) return FSRPhot;
+  if (numOfParents == 2 && NumOfLep == 1 && NumOfNeut == 1 && (MC::isElectron(ancestorPDG) || std::abs(ancestorPDG) == MC::NU_E)) return FSRPhot;
 
   //-- Exotics - CompHep
   if (MC::isElectron(ancestorPDG) && numOfParents == 1 && numberOfChildren == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfPht == 1 &&
@@ -1078,7 +1098,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   // FSR  from Photos
   if (MC::isZ(ancestorPDG) && ((NumOfEl + NumOfPos == 2 || NumOfEl + NumOfPos == 4) || (NumOfMu == 2 || NumOfMu == 4) || (NumOfTau == 2 || NumOfTau == 4)) && NumOfPht > 0) return FSRPhot;
 
-  if (NumOfPht > 0 && (abs(ancestorPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(ancestorPDG))) return FSRPhot; // Left-right symmetric model WBoson || Right-handed neutrinos (Pythia-specific)
+  if (NumOfPht > 0 && (std::abs(ancestorPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(ancestorPDG))) return FSRPhot; // Left-right symmetric model WBoson || Right-handed neutrinos (Pythia-specific)
 
   if (numOfParents == 2 && NumOfLQ == 1) return FSRPhot;
 
@@ -1100,9 +1120,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       if (prodVert && prodVert->nIncomingParticles() == 1 ) {
         if ( MC::isTau(itrP)) return TauLep;
         if ( MC::isMuon(itrP)) return Mu;
-        if ( abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
-        if ( abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
-        if ( abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+        if ( std::abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+        if ( std::abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+        if ( std::abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
       }
     } else
       return WBoson;
@@ -1133,7 +1153,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
           break;
         }
         skipnext = true;
-      } else if (MC::isTau(aChild) && abs(theNextChild->pdgId()) == MC::NU_TAU) {
+      } else if (MC::isTau(aChild) && std::abs(theNextChild->pdgId()) == MC::NU_TAU) {
         // WBoson
         if (thePriPart == aChild || thePriPart == theNextChild) {
           isWboson = true;
@@ -1154,20 +1174,20 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   }
 
   //--New Sherpa single photon
-  if (partProdVtx == ancestorProdVtx && partProdVtx) {
-    int NumOfPhtLoop = 0;
+  if (partProdVtx == ancestorProdVtx) {
     for (const auto *const pout: partProdVtx->particles_out()) {
       if (!pout) continue;
       for (const auto *const pin: partProdVtx->particles_in()) {
         if (!pin) continue;
-        if (HepMC::is_same_particle(pout,pin) && MC::isPhoton(pout)) NumOfPhtLoop++;
-        if (NumOfPhtLoop == 1) return SinglePhot;
+        if (!HepMC::is_same_particle(pout,pin)) continue;
+        if (MC::isPhoton(pout)) return SinglePhot;
+        break; // break out of inner loop after having found two matching particles
       }
     }
   }
 
   if (MC::isHiggs(ancestorPDG)) return Higgs;
-  if (abs(ancestorPDG) == MC::PI0) return PiZero;
+  if (std::abs(ancestorPDG) == MC::PI0) return PiZero;
   if (MC::isMSSMHiggs(ancestorPDG)) return HiggsMSSM; // MSSM Higgs bosons
   if (MC::isHeavyBoson(ancestorPDG) || std::abs(ancestorPDG) == 5100039 ) return HeavyBoson; // Heavy Bosons (Z' Z'' W'+) + KK excited graviton
 
@@ -1190,11 +1210,11 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
 {
   ATH_MSG_DEBUG("Executing DefOrigOfNeutrino ");
 
-  const int nuFlav = abs(thePart->pdgId());
+  const int nuFlav = std::abs(thePart->pdgId());
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
   const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
   if (!thePriPart) return NonDefined;
-  if (abs(thePriPart->pdgId()) != nuFlav) return NonDefined;
+  if (std::abs(thePriPart->pdgId()) != nuFlav) return NonDefined; // FIXME should this be if (!MC::isSMNeutrino(thePriPart) || abs(thePriPart->pdgId()) != nuFlav) return NonDefined; // (Use MC::isNeutrino if 4th generation neutrinos OK)
 
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
@@ -1213,45 +1233,48 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   int ancestorPDG = ancestor->pdgId();
   const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
 
+  // Start of method 3 of protecting against loops
   // to resolve Sherpa loop
-  bool samePart = false;
-  if (ancestorProdVtx && HepMC::is_same_vertex(ancestorProdVtx,partProdVtx)) samePart = true;
-  //
-  if ((abs(ancestorPDG) == nuFlav || MC::isTau(ancestorPDG) || MC::isW(ancestorPDG)) && ancestorProdVtx &&
-      !samePart) {
+  bool samePart = (ancestorProdVtx && HepMC::is_same_vertex(ancestorProdVtx,partProdVtx));
+  // End of method 3 of protecting against loops
+
+  if ((std::abs(ancestorPDG) == nuFlav || MC::isTau(ancestorPDG) || MC::isW(ancestorPDG)) && ancestorProdVtx && !samePart) {
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
       pPDG = 0;
       ancestorParent = MC::findMother(ancestor);
+      // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
       const xAOD::TruthVertex* ancestor_prdVtx{};
       const xAOD::TruthVertex* ancestor_endVtx{};
-      if (ancestor) {
-        ancestor_prdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-        ancestor_endVtx = ancestor->decayVtx();
-      }
+      ancestor_prdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+      ancestor_endVtx = ancestor->decayVtx();
       const xAOD::TruthVertex* parent_prdVtx{};
       const xAOD::TruthVertex* parent_endVtx{};
       if (ancestorParent) {
         parent_prdVtx = ancestorParent->hasProdVtx() ? ancestorParent->prodVtx() : nullptr;
         parent_endVtx = ancestorParent->decayVtx();
       }
+      // V0->AP->V1-> ...->V2->A->V3
+      // V3 == V0 && V1 == V2
       if (ancestor_endVtx == parent_prdVtx && ancestor_prdVtx == parent_endVtx) {
         ancestorParent = ancestor;
         break;
       }
       //
       if (ancestorParent) {
-        pPDG = ancestorParent->pdgId();
+        pPDG = ancestorParent->pdgId(); // FIXME difference in behaviour compared to defOrigOfElectron/Muon pPDG set even if we are in a loop
       }
       // to prevent Sherpa loop
       if (ancestor == ancestorParent) {
         break;
       }
-      if (abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
-        ancestor = ancestorParent;
-        info.setMotherProperties(ancestor);
+      // End of method 2 of protecting against Sherpa loops
+      if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
+        // There will be another iteration so set ancestor to ancestorParent
+        ancestor = ancestorParent; // ancestorParent is not a nullptr
+        info.setMotherProperties(ancestor); // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfElectron/Muon
       }
 
     } while ((std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG)));
@@ -1260,20 +1283,19 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) ||  // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
-      ancestor = ancestorParent;
+      ancestor = ancestorParent; // ancestorParent is not nullptr here
       info.setMotherProperties(ancestor);
     }
   }
   //if ancestor is still nullptr, we have a problem
   if (!ancestor) return NonDefined; // FIXME it should not be possible for ancestor to be nullptr at this point???
 
+  info.setMotherProperties(ancestor);
   ancestorPDG = ancestor->pdgId();
   partProdVtx = ancestor->decayVtx();
   ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   numOfParents = partProdVtx->nIncomingParticles();
   const int numberOfChildren = partProdVtx->nOutgoingParticles();
-
-  info.setMotherProperties(ancestor);
 
   // Determine decay products
   auto DP = DecayProducts(partProdVtx);
@@ -1311,9 +1333,9 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     } while (MC::isW(ptrPart) && prodVert);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(ptrPart->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
-      if (abs(ptrPart->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
-      if (abs(ptrPart->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+      if (std::abs(ptrPart->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (std::abs(ptrPart->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (std::abs(ptrPart->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -1328,7 +1350,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     const xAOD::TruthParticle* thePartToCheck = thePriPart;
     const xAOD::TruthParticle* theParent = thePriPart->hasProdVtx() ? thePriPart->prodVtx()->incomingParticle(0) : nullptr; // FIXME just taking the first one
 
-    if (MC::isElectron(theParent) && MC::isDecayed(theParent)) thePartToCheck = theParent;
+    if (MC::isElectron(theParent) && MC::isDecayed(theParent)) { thePartToCheck = theParent; }
     bool isZboson = false;
     bool isWboson = false;
     bool skipnext = false;
@@ -1348,8 +1370,8 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
         continue;
       }
 
-      const int apdgID1 = abs(aChild->pdgId());
-      const int apdgID2 = abs(theNextChild->pdgId());
+      const int apdgID1 = std::abs(aChild->pdgId());
+      const int apdgID2 = std::abs(theNextChild->pdgId());
       if (apdgID1 == apdgID2 && MC::isSMNeutrino(apdgID1)) {
         // Zboson
         if (thePartToCheck == aChild || thePartToCheck == theNextChild) {
@@ -1377,14 +1399,14 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   }
 
   if (numOfParents == 2) {
-    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
-    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
     //--Sherpa Z->nunu
     if ( (numberOfChildren - NumOfquark - NumOfgluon) == 2 && (NumOfElNeut == 2 || NumOfMuNeut == 2 || NumOfTauNeut == 2)) return ZBoson;
 
     //--Sherpa W->enu ??
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && ((NumOfEl == 1 && NumOfElNeut == 1) || (NumOfMu == 1 && NumOfMuNeut == 1) || (NumOfTau == 1 && NumOfTauNeut == 1))) return WBoson;
 
+    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
+    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
     //--Sherpa ZZ,ZW
     if ( (numberOfChildren - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
          (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
@@ -1395,7 +1417,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   }
 
   // New Sherpa Z->nunu
-  if (partProdVtx == ancestorProdVtx && partProdVtx) {
+  if (partProdVtx == ancestorProdVtx) {
     int NumOfLepLoop = 0;
     int NumOfNeuLoop = 0;
     for (const auto *const pout: partProdVtx->particles_out()) {
@@ -1403,11 +1425,12 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
       for (const auto *const pin: partProdVtx->particles_in()) {
         if (!pin) continue;
         if (HepMC::is_same_particle(pin,pout)) continue;
-        const int apdgid = abs(pout->pdgId());
+        const int apdgid = std::abs(pout->pdgId());
         if (MC::isSMLepton(apdgid)) {
           if (MC::isSMNeutrino(apdgid)) { NumOfNeuLoop++; }
           else { NumOfLepLoop++; }
         }
+        break; // break out of inner loop after having found two matching particles
       }
     }
     if (NumOfNeuLoop == 2 && NumOfLepLoop == 0) return ZBoson;
@@ -1427,10 +1450,10 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     return (tautype == IsoTau)?tauOrig:TauLep;
   }
 
-  if (abs(ancestorPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
-  if (abs(ancestorPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (std::abs(ancestorPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(ancestorPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(ancestorPDG)) return SUSY;
   if (MC::isBSM(ancestorPDG)) return OtherBSM;
