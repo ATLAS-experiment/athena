@@ -216,7 +216,7 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
   values.reserve(m_varInfo_vec.size());
   size_t warnings = 0, iterations = 0;
   // Correct for the legs on which we compute with 2 features
-  auto get_index_offset = [legMultiplicityForComputation](size_t legindex) {
+  auto get_index_offset = [&legMultiplicityForComputation](size_t legindex) {
     size_t offset{0};
     for (auto iLeg=legMultiplicityForComputation.cbegin(); iLeg!=legMultiplicityForComputation.cbegin()+legindex; ++iLeg) {
       offset += (*iLeg)-1;
