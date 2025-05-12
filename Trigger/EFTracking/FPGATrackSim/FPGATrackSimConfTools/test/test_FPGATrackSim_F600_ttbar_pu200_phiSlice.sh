@@ -1,9 +1,9 @@
 #!/bin/bash
-# art-description: Test running the F600 pipeline (no Tracking) on singleMu events in region0 (<μ>=200)
+# art-description: Test running the F600 (InsideOut) pipeline
 # art-type: grid
 # art-include: main/Athena
-# art-input: mc21_14TeV:mc21_14TeV.900171.PG_singlemu_InvPtFlat1_etaFlat01_03_phiFlat03_05.recon.RDO.e8488_s4345_r15700
-# art-input-nfiles: 50
+# art-input: mc21_14TeV:mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583
+# art-input-nfiles: 11
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
@@ -15,12 +15,13 @@ set -e
 echo "$ArtInFile"
 fileList="${ArtInFile// /,}"
 echo $fileList
+
 PREFIX="F600"
 lastref_dir=last_results
 INPUT_AOD_FILE="xAOD_${PREFIX}.root"
 
 ATHENA_SOURCE="${ATLAS_RELEASE_BASE}/Athena/${Athena_VERSION}/InstallArea/${Athena_PLATFORM}/src/"
-IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/IDTPM_ttbar_region0.json"
+IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/IDTPM_phiSlice.json"
 DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/dcube/config/FPGATrackSimIDTPMconfig.xml"
 
 # Don't run if dcube config for nightly cmp is not found
@@ -47,35 +48,15 @@ run () {
     fi
     return $rc
 }
-
+# 
 run "${PREFIX} pipeline" \
-    source FPGATrackSim_CommonEnv.sh -t -n -1 -q -i $fileList
-    python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
-        --evtMax=${RDO_EVT_ANALYSIS} \
-        --skipEvents=${SKIP_EVENTS} \
-        --filesInput="${RDO_ANALYSIS}" \
-        Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
-        Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
-        Trigger.FPGATrackSim.runCKF=$RUN_CKF \
-        Trigger.FPGATrackSim.region=0 \
-        Trigger.FPGATrackSim.Hough.genScan=True \
-        Trigger.FPGATrackSim.spacePoints=False \
-        Trigger.FPGATrackSim.tracking=False \
-        Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
-        Trigger.FPGATrackSim.doEDMConversion=True \
-        Trigger.FPGATrackSim.doOverlapRemoval=True \
-        Trigger.FPGATrackSim.Hough.secondStage=False \
-        Trigger.FPGATrackSim.writeToAOD=True \
-        Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
-        Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
-        Output.AODFileName=${INPUT_AOD_FILE}
+    FPGATrackSim_F600.sh -o ${INPUT_AOD_FILE} -t -n 1000 -q -i $fileList
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
                 --outputFilePrefix="IDTPM.${PREFIX}" \
                 --writeAOD_IDTPM \
                 --trkAnaCfgFile=$IDTPM_CONFIG
-
 
 if [ -z $ArtJobType ]; then
     echo "Not in ART environment. Stopping here..."

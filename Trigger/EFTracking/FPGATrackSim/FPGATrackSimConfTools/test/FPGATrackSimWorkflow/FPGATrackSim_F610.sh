@@ -27,12 +27,12 @@ run_F610(){
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \
-        Trigger.FPGATrackSim.regionList="34" \
+        Trigger.FPGATrackSim.regionList="34,98,162,226,290,354,418,482,546,610,674,738,802,866,930,994,1058,1122,1186,1250" \
         Trigger.FPGATrackSim.pipeline='F-610' \
         Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=True \
-        Trigger.FPGATrackSim.Hough.secondStage=True \
+        Trigger.FPGATrackSim.Hough.secondStage=False \
         Trigger.FPGATrackSim.writeToAOD=True \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
