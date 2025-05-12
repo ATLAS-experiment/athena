@@ -490,9 +490,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   //-- McAtNLo
 
   if (MC::isHiggs(ancestorPDG)) return Higgs;
-
   if (MC::isMSSMHiggs(ancestorPDG)) return HiggsMSSM; // MSSM Higgs bosons
-
   if (MC::isHeavyBoson(ancestorPDG)) return HeavyBoson;  // Heavy bosons( Z', Z'', W'+)
 
   if (MC::isMuon(ancestorPDG)) return Mu;
@@ -1146,11 +1144,12 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
     }
   }
 
+  //-- McAtNLo
+
   if (MC::isHiggs(ancestorPDG)) return Higgs;
   if (std::abs(ancestorPDG) == MC::PI0) return PiZero;
   if (MC::isMSSMHiggs(ancestorPDG)) return HiggsMSSM; // MSSM Higgs bosons
   if (MC::isHeavyBoson(ancestorPDG) || std::abs(ancestorPDG) == 5100039 ) return HeavyBoson; // Heavy Bosons (Z' Z'' W'+) + KK excited graviton
-
   if (MC::isSUSY(ancestorPDG)) return SUSY;
   if (MC::isBSM(ancestorPDG)) return OtherBSM;
 
