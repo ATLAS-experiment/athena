@@ -63,7 +63,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
 
   declareProperty("THistSvc", m_thistSvc);
 
-  declareProperty("DoHist", m_doHist=true); //histograming yes/no true/false
+  declareProperty("DoHist", m_doHist=false); //histograming yes/no true/false
 
   m_nPass = 0;
   m_nFail = 0;
