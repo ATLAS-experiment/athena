@@ -57,7 +57,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
     ATH_CHECK(m_roadFilterTool.retrieve(EnableTool{m_filterRoads}));
     ATH_CHECK(m_roadFilterTool2.retrieve(EnableTool{m_filterRoads2}));
-    ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_doSpacepoints}));
+
+    ATH_CHECK(m_spacepointsTool.retrieve(EnableTool{m_doSpacepoints}));
 
     ATH_CHECK(m_trackFitterTool_1st.retrieve(EnableTool{m_doTracking}));
     ATH_CHECK(m_overlapRemovalTool_1st.retrieve());
@@ -76,6 +77,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     m_slicedSecondPixelHeader = m_writeOutputTool->addInputBranch(m_sliceSecondPixelBranch.value(), true);
     m_slicedStripHeader = m_writeOutputTool->addInputBranch(m_sliceStripBranch.value(), true);
 
+    // We also need a pre- and post- SP copy of the SPs.
+    m_slicedStripHeaderPreSP = m_writeOutputTool->addInputBranch(m_sliceStripBranchPreSP.value(), true);
+
     // Connect the slicing tools accordingly. We probably no longer need to hook up the roadfinder here.
     m_roadFinderTool->setupSlices(m_slicedHitHeader);
     m_slicingEngineTool->setupSlices(m_slicedFirstPixelHeader, m_slicedSecondPixelHeader, m_slicedStripHeader);
@@ -85,6 +89,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     if (!m_monTool.empty())
         ATH_CHECK(m_monTool.retrieve());
 
+    ATH_CHECK( m_FPGASpacePointsKey.initialize() );
     ATH_CHECK( m_FPGAHitInRoadsKey.initialize() );
     ATH_CHECK( m_FPGAHitFilteredKey.initialize() );
     ATH_CHECK( m_FPGARoadKey.initialize() );
@@ -138,6 +143,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitsFiltered_1st (m_FPGAHitFilteredKey, ctx);
     ATH_CHECK( FPGAHitsFiltered_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
 
+    SG::WriteHandle<FPGATrackSimClusterCollection> FPGASpacePoints (m_FPGASpacePointsKey, ctx);
+    ATH_CHECK( FPGASpacePoints.record (std::make_unique<FPGATrackSimClusterCollection>()));
+
     // Query the event selection service to make sure this event passed cuts.
     if (!m_evtSel->getSelectedEvent()) {
         return StatusCode::SUCCESS;
@@ -159,6 +167,22 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
     m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd);
+    if(m_writeOutputData) *m_slicedStripHeaderPreSP = *m_slicedStripHeader;
+
+    // The slicing engine puts strip hits into a logical event input header. That header now needs to go
+    // to the spacepoint tool if it's turned on. Those hits then get added to phits_1st or phits_2nd as appropriate.
+    if (m_doSpacepoints) {
+        m_spacepoints.clear();
+        if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: SP fornmation");
+        ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_slicedStripHeader, m_spacepoints));
+        if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: SP fornmation");
+        for (const FPGATrackSimCluster& cluster : m_spacepoints) FPGASpacePoints->push_back(cluster);
+    }
+
+    // Use a property to control whether the strips/SPs go to 1st or second stage.
+    for (const FPGATrackSimHit& hit : m_slicedStripHeader->towers().at(0).hits()) {
+        (m_secondStageStrips ? phits_2nd : phits_1st).emplace_back(&hit, [](const FPGATrackSimHit*){});
+    }
     for (auto& hit : phits_2nd) {
         FPGAHits_2nd->push_back(*hit);
     }

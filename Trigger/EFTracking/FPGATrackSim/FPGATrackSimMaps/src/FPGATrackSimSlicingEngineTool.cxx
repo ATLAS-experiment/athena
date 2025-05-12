@@ -90,11 +90,7 @@ void FPGATrackSimSlicingEngineTool::sliceHits(const std::vector<std::shared_ptr<
                 if (m_rootOutput) m_slicedSecondPixelHeader->getTower(0)->addHit(*hit);
             }
         } else {
-            if (m_doSecondStage) {
-                secondHits.push_back(hit);
-            } else {
-                firstHits.push_back(hit);
-            }
+            // Strip hits need to be post-processed in LogicalHitsProcessAlg, so we only put them in a header here.
             if (m_rootOutput) m_slicedStripHeader->getTower(0)->addHit(*hit);
         }
     }

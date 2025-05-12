@@ -11,7 +11,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "FPGATrackSimInput/FPGATrackSimOutputHeaderTool.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
-#include "FPGATrackSimMaps/FPGATrackSimSpacePointsToolI.h"
 #include "FPGATrackSimMaps/IFPGATrackSimHitFilteringTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimClusteringToolI.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
@@ -75,7 +74,6 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         ToolHandleArray<FPGATrackSimRawToLogicalHitsTool>     m_hitMapTools {this, "RawToLogicalHitsTools", {}, "Raw To Logical Tools"};
         ToolHandle<IFPGATrackSimHitFilteringTool>        m_hitFilteringTool {this, "HitFilteringTool", "FPGATrackSimHitFilteringTool/FPGATrackSimHitFilteringTool", "Hit Filtering Tool"};
         ToolHandle<FPGATrackSimClusteringToolI>          m_clusteringTool {this, "ClusteringTool", "FPGATrackSimClusteringTool/FPGATrackSimClusteringTool", "Hit Clustering Tool"};
-        ToolHandle<FPGATrackSimSpacePointsToolI>         m_spacepointsTool {this, "SpacePointTool", "FPGATrackSimSpacePointsTool/FPGATrackSimSpacePointsTool", "Space Points Tool"};
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ToolHandleArray<FPGATrackSim::FPGATrackSimEventSelectionTool> m_eventSelectionTools {this, "eventSelectors", {}, "Event selection Tools"};
         // chrono service
@@ -86,7 +84,6 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         Gaudi::Property<int> m_secondInputToolN {this, "SecondInputToolN", 0, "number of times to use event from second input tool"};
         Gaudi::Property<bool> m_doHitFiltering {this, "HitFiltering", false, "flag to enable hit/cluster filtering"};
         Gaudi::Property<int> m_clustering {this, "Clustering", 0, "int to enable the clustering and say how many times to run it"};
-        Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", false, "do event selection"};
         Gaudi::Property<bool> m_useInternalTruthTracks {this,"useInternalTruthTracks", false, "case when runnin on RDO file (and not or wrapper)"};
@@ -106,7 +103,6 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
 
         // Event storage
         std::unique_ptr<FPGATrackSimClusterCollection> m_clusters = std::make_unique<FPGATrackSimClusterCollection>();
-        std::vector<FPGATrackSimCluster> m_spacepoints{};
         std::vector<FPGATrackSimHit>     m_hits_miss{};
 
         // internal counters
@@ -121,14 +117,12 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
   
         StatusCode readInputs(bool & done);
         StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
-                                 SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters,
-                                 SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints);
+                                 SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters);
 
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
         // NOTE: the clusters collection(s) contain ALL Clusters, not just "first stage" clusters.
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey",{"FPGAClusters_1st"},"FPGATrackSim Clusters key"};
-        SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey",{"FPGASpacePoints_1st","FPGASpacePoints_2nd"},"FPGATrackSim SpacePoints key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim Hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitUnmappedKey{this, "FPGATrackSimHitUnmappedKey","FPGAHitsUnmapped_1st","FPGATrackSim Unmapped Hits 1st stage key"};
         

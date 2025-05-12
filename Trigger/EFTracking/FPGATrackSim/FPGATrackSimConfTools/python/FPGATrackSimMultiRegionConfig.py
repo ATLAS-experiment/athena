@@ -28,7 +28,8 @@ def FPGATrackSimRunFirstStageOnManyRegions(flags):
                      'FPGATrackSimHitFiltered1stKey': f"FPGAHitsFiltered_1st_reg{region}",
                      'FPGATrackSimHitInRoads1stKey': f"FPGAHitsInRoads_1st_reg{region}",
                      'FPGATrackSimRoad1stKey': f"FPGARoads_1st_reg{region}",
-                     'FPGATrackSimTrack1stKey': f"FPGATracks_1st_reg{region}"}))
+                     'FPGATrackSimTrack1stKey': f"FPGATracks_1st_reg{region}",
+                     'FPGATrackSimSpacePoints1stKey': f"FPGASpacePoints_1st_reg{region}"}))
     return acc
     
 def FPGATrackSimRunSecondStageOnManyRegions(flags):
