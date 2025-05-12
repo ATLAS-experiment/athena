@@ -3,12 +3,12 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
-class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
+class PixelDEdxEqualizationBlock (ConfigBlock) :  ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
     """the ConfigBlock for the Pixel ToT PID tool"""
 
     def __init__ (self, containerName='') :
-        super (PixelToTPIDBlock, self).__init__ ()
-        self.setBlockName('PixelToTPID')
+        super (PixelDEdxEqualizationBlock, self).__init__ ()
+        self.setBlockName('PixelDEdxEqualization')
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -32,16 +32,16 @@ class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAn
         alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg',
                                       'PixelDEdxEqualizationAlg' + self.postfix,
                                       reentrant=True)
-        config.addPrivateTool( 'PixelToTPIDTool', 'CP::PixelToTPIDTool' )
+        config.addPrivateTool( 'PixelDEdxEqualizationTool', 'CP::PixelDEdxEqualizationTool' )
         ### Algorithm properties
         alg.TrackContainerName = self.containerName
         ### Tool properties
-        alg.PixelToTPIDTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
-        alg.PixelToTPIDTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
-        alg.PixelToTPIDTool.TightClusterCleaning = self.tightClusterCleaning
-        alg.PixelToTPIDTool.SFLocalFileName = self.sfLocalFileName
-        alg.PixelToTPIDTool.ClusterSFTreeName = self.clusterSFTreeName
-        alg.PixelToTPIDTool.TrackSFTreeName = self.trackSFTreeName
+        alg.PixelDEdxEqualizationTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
+        alg.PixelDEdxEqualizationTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
+        alg.PixelDEdxEqualizationTool.TightClusterCleaning = self.tightClusterCleaning
+        alg.PixelDEdxEqualizationTool.SFLocalFileName = self.sfLocalFileName
+        alg.PixelDEdxEqualizationTool.ClusterSFTreeName = self.clusterSFTreeName
+        alg.PixelDEdxEqualizationTool.TrackSFTreeName = self.trackSFTreeName
     
 
 

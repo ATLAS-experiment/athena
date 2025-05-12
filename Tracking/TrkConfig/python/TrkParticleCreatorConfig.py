@@ -42,10 +42,9 @@ def TrackParticleCreatorToolCfg(flags,
             TRT_ElectronPidToolCfg(flags, name="InDetTRT_ElectronPidTool")))
 
     if 'PixelToTPIDTool' not in kwargs and flags.Detector.EnablePixel:
-        from PixelToTPIDTool.PixelToTPIDToolConfig import PixelToTPIDToolCfg
-        tool = PixelToTPIDToolCfg(flags)
-        tool.printConfig(withDetails=True)
-        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(tool))
+        from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
+        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
+            PixelToTPIDToolCfg(flags)))
 
     if 'TestPixelLayerTool' not in kwargs and flags.Detector.EnablePixel:
         from InDetConfig.InDetTestPixelLayerConfig import (
@@ -254,7 +253,7 @@ def GSFBuildInDetParticleCreatorToolCfg(flags,
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
 
     if flags.GeoModel.Run < LHCPeriod.Run4 and "PixelToTPIDTool" not in kwargs:
-        from PixelToTPIDTool.PixelToTPIDToolConfig import PixelToTPIDToolCfg
+        from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
         kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
             PixelToTPIDToolCfg(flags)))
 
@@ -343,7 +342,7 @@ def MuonCombinedParticleCreatorCfg(flags,
     if not flags.Muon.MuonTrigger:
 
         if 'PixelToTPIDTool' not in kwargs and flags.Detector.EnablePixel:
-            from PixelToTPIDTool.PixelToTPIDToolConfig import PixelToTPIDToolCfg
+            from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
             kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
                 PixelToTPIDToolCfg(flags)))
 

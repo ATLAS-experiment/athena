@@ -1,5 +1,5 @@
 <lcgdict>
-   <class name="CP::PixelToTPIDTool" />
+   <class name="CP::PixelDEdxEqualizationTool" />
    <exclusion>
      <class name="SG::IConstAuxStore"/>
      <class name="DataLink<SG::IConstAuxStore>"/>

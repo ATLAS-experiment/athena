@@ -18,7 +18,7 @@ namespace CP {
 
     ANA_CHECK ( m_trackContainerName.initialize () );
 
-    ANA_CHECK ( m_pixelToTPIDTool.retrieve() );
+    ANA_CHECK ( m_pixelDEdxEqualizationTool.retrieve() );
       
     ATH_CHECK ( m_trackContainerName.initialize() );
 
@@ -76,7 +76,7 @@ namespace CP {
       float pixeldEdxEqual = -1.0;
       int nUsedHits = -1;
       int nUsedIBLOverflowHits = -1;
-      pixeldEdxEqual = m_pixelToTPIDTool->dEdx(*trk, nUsedHits, nUsedIBLOverflowHits); // returns raw or equalized based on 'EqualizeClusterMeasurements' boolean property
+      pixeldEdxEqual = m_pixelDEdxEqualizationTool->dEdx(*trk, nUsedHits, nUsedIBLOverflowHits); // returns raw or equalized based on 'EqualizeClusterMeasurements' boolean property
 
       /// As a sanity check, can confirm that nUsedHits & nUsedIBLOverflowHits match what was calculated during reconstruction.
       /// NB: these actually can be different since the dE/dx calculated during reco uses the ESD EDM.

@@ -21,7 +21,7 @@
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 
-#include "TrkAnalysisInterfaces/IPixelToTPIDTool.h"
+#include "TrkAnalysisInterfaces/IPixelDEdxEqualizationTool.h"
 
 #include <string>
 #include <vdt/vdtMath.h> // for RDataFrame
@@ -58,7 +58,7 @@ namespace CP {
     
   private:
 
-    ToolHandle<CP::IPixelToTPIDTool> m_pixelToTPIDTool{this, "PixelToTPIDTool", "", "tool for pixel dE/dx"};
+    ToolHandle<CP::IPixelDEdxEqualizationTool> m_pixelDEdxEqualizationTool{this, "PixelDEdxEqualizationTool", "", "tool for pixel dE/dx"};
 
     /// @name Algorithm properties
     /// @{

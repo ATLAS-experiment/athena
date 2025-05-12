@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/// a simple testing macro for the PixelToTPIDTool package
+/// a simple testing macro for the PixelDEdxEqualizationTool package
 /// shamelessly stolen from MuonSelectorToolsTester.cxx
 
 // System include(s):
@@ -32,10 +32,10 @@
 #include "AthContainers/ConstAccessor.h"
 
 // Local include(s):
-#include "PixelToTPIDTool/PixelToTPIDTool.h"
+#include "PixelToTPIDTool/PixelDEdxEqualizationTool.h"
 
 
-/// Example of how to run the PixelToTPIDTool package to obtain cluster and dE/dx information
+/// Example of how to run the PixelDEdxEqualizationTool package to obtain cluster and dE/dx information
 int main(int argc, char* argv[]) {
 
   using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
   // Path to equalization SF trees.
   // Will eventualy not need to set this property.
   // Will instead rely on default properties pointing to the file in the ASG calibration area.
-  std::string localSFPath = "../athena/InnerDetector/InDetRecTools//PixelToTPIDTool/share/pixeldEdxEqualizationSFs_v0.root"; // FIXME!
+  std::string localSFPath = "../athena/InnerDetector/InDetRecTools/PixelToTPIDTool/share/pixeldEdxEqualizationSFs_v0.root"; // FIXME!
 
   // Name of link from track to MSOS.
   std::string msosLinkName = "Reco_msosLink";
@@ -130,16 +130,16 @@ int main(int argc, char* argv[]) {
   }
 
   // Get tool
-  CP::PixelToTPIDTool* pidTool = new CP::PixelToTPIDTool("PixelToTPIDTool");
-  pidTool->msg().setLevel(MSG::INFO);
+  CP::PixelDEdxEqualizationTool* dEdxEqTool = new CP::PixelDEdxEqualizationTool("PixelDEdxEqualizationTool");
+  dEdxEqTool->msg().setLevel(MSG::INFO);
 
   bool failed = false;
-  failed = failed || pidTool->setProperty("EqualizeClusterMeasurements", clusterEqualize).isFailure();
-  failed = failed || pidTool->setProperty("EqualizeTrackMeasurements", trackEqualize).isFailure();
-  failed = failed || pidTool->setProperty("SFLocalFileName", localSFPath).isFailure();  // FIXME!  Eventually won't need.
-  failed = failed || pidTool->initialize().isFailure();
+  failed = failed || dEdxEqTool->setProperty("EqualizeClusterMeasurements", clusterEqualize).isFailure();
+  failed = failed || dEdxEqTool->setProperty("EqualizeTrackMeasurements", trackEqualize).isFailure();
+  failed = failed || dEdxEqTool->setProperty("SFLocalFileName", localSFPath).isFailure();  // FIXME!  Eventually won't need.
+  failed = failed || dEdxEqTool->initialize().isFailure();
   if (failed) {
-    Error( APP_NAME, "Failed to set up PixelToTPIDTool!");
+    Error( APP_NAME, "Failed to set up PixelDEdxEqualizationTool!");
     return 1;
   }
   
@@ -168,10 +168,13 @@ int main(int argc, char* argv[]) {
       
       trkCounter ++;
 
+      // Print some info
+      Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
+
       // Calculate dE/dx from clusters using tool
       int nUsedHits = -1;
       int nUsedIBLOverflowHits = -1;
-      float dEdx = pidTool->dEdx(*trkIt, nUsedHits, nUsedIBLOverflowHits);
+      float dEdx = dEdxEqTool->dEdx(*trkIt, nUsedHits, nUsedIBLOverflowHits);
 
       // Get summary values for comparison
       float stored_dEdx { 0 };
@@ -180,7 +183,6 @@ int main(int argc, char* argv[]) {
       stored_numberOfUsedHitsdEdx = (unsigned int) (trkIt)->auxdataConst<unsigned char>("numberOfUsedHitsdEdx");
 
       // Print some info
-      Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
       if( dEdx < 0.) {
         Info(APP_NAME, "Invalid track dE/dx found by tool.");
         if (clusterEqualize) {
@@ -191,7 +193,7 @@ int main(int argc, char* argv[]) {
       }
       
       // Check if the recalculated dE/dx matches the stored dE/dx
-      // Only makes sense if pidTool is configured to return the raw dE/dx, not the equalized.
+      // Only makes sense if dEdxEqTool is configured to return the raw dE/dx, not the equalized.
       float epsilon = 1e-3;
       Info(APP_NAME, "Track dE/dx (orig):          %g", stored_dEdx);
       Info(APP_NAME, "Track dE/dx (recalc):        %g", dEdx);
