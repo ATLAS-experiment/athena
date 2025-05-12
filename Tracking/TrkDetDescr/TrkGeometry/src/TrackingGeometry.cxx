@@ -34,20 +34,14 @@ Trk::TrackingGeometry::~TrackingGeometry() {
     if (m_world) delete m_world;
 }
 void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<DetachedTrackingVolume>>&& garbageVec) {
-  std::copy_if(std::make_move_iterator(garbageVec.begin()),
-               std::make_move_iterator(garbageVec.end()),
-               std::back_inserter(m_detachedVolGarbage),
-               [](const std::unique_ptr<DetachedTrackingVolume>& ptr) {
-                 return ptr.get() != nullptr;
-               });
+  m_detachedVolGarbage.insert(m_detachedVolGarbage.end(),
+                              std::make_move_iterator(garbageVec.begin()),
+                              std::make_move_iterator(garbageVec.end()));
 }
 void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<TrackingVolume>>&& garbageVec){
-  std::copy_if(std::make_move_iterator(garbageVec.begin()),
-               std::make_move_iterator(garbageVec.end()),
-               std::back_inserter(m_trkVolumeGarbage),
-               [](const std::unique_ptr<TrackingVolume>& ptr) {
-                 return ptr.get() != nullptr;
-               });
+  m_trkVolumeGarbage.insert(m_trkVolumeGarbage.end(),
+                            std::make_move_iterator(garbageVec.begin()),
+                            std::make_move_iterator(garbageVec.end()));
 }
 
 const Trk::TrackingVolume*
