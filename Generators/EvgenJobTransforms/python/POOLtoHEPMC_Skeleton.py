@@ -81,8 +81,14 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    # Use the WriteHepMC AlgTool from TruthIO to do the conversion
+    # We need the component factory to build the job up
     from AthenaConfiguration.ComponentFactory import CompFactory
+
+    # Add FixHepMC to remove loops here
+    # This is a work-around for AGENE-2342, which needs a HepMC patch to fix
+    cfg.addEventAlgo(CompFactory.FixHepMC("FixHepMC"))
+
+    # Use the WriteHepMC AlgTool from TruthIO to do the conversion
     cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
                       OutputFile = my_output_HepMCFile,
                       McEventKey = McEventKey ) )
