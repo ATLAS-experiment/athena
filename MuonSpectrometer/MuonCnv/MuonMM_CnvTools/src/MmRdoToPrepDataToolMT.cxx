@@ -145,7 +145,7 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(const EventContext& ct
     ATH_CHECK (m_calibTool->calibrateStrip(ctx, rdo, calibStrip));
     if (calibStrip.charge < 0) {
         if (!hitNegativeCharge || msgLvl(MSG::DEBUG)){
-          ATH_MSG_WARNING("One MM RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibStrip.charge << "). Skipping these RDOs");
+          ATH_MSG_DEBUG("One MM RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibStrip.charge << "). Skipping these RDOs");
           hitNegativeCharge = true;
         }
         continue;
