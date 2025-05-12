@@ -235,6 +235,7 @@ computePosition(const StripClusteringTool::Cluster& cluster,
 
     // update the xPhi position
     pos.xPhi( pos.xPhi() + lorentzShift );
+    Eigen::Matrix<float,3,1> posG(element->surface().localToGlobal(pos).cast<float>());
 
     if (!element->isBarrel()) {
 	const InDetDD::StripStereoAnnulusDesign& annulusDesign =
@@ -244,7 +245,7 @@ computePosition(const StripClusteringTool::Cluster& cluster,
     }
 
     return std::make_pair(Eigen::Matrix<float,1,1>(pos.xPhi()),
-			  Eigen::Matrix<float,3,1>(element->surface().localToGlobal(pos).cast<float>()));
+			  std::move(posG));
 }
 
 
