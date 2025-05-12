@@ -83,7 +83,7 @@ fullPdf(double x, int i, const std::array<VecOfComponents, 5>& mixture)
   pdfAndDeriv pdf{};
   auto component = mixture[i].begin();
   for (; component != mixture[i].end(); ++component) {
-    double componentgaus = gaus(x, component->mean, component->sigma);
+    const double componentgaus = gaus(x, component->mean, component->sigma);
     pdf.value += component->weight * componentgaus;
     const double invertSigma = 1. / component->sigma;
     const double z = (x - component->mean) * invertSigma;
@@ -135,7 +135,7 @@ fillMixture(const Trk::MultiComponentState& multiComponentState,
       // Ensure that we don't have any problems with the cyclical nature of
       // phi Use first state as reference point
       if (i == 2) { // phi
-        double deltaPhi =
+        const double deltaPhi =
           multiComponentState.begin()->params->parameters()[2] - mean;
         if (deltaPhi > M_PI) {
           mean += 2 * M_PI;
@@ -172,7 +172,7 @@ findMode(double xStart,
     }
 
     // Calculate the mixture pdf at next mode point
-    pdfAndDeriv nextPdf = fullPdf(nextMode, i, mixture);
+    pdfAndDeriv const nextPdf = fullPdf(nextMode, i, mixture);
     // check if we have converged
     if ((nextPdf.value + currentPdf.value) != 0.0) {
       tolerance = std::abs(nextPdf.value - currentPdf.value) /
@@ -220,8 +220,8 @@ findRoot(double& result,
   double c(0);
   double d(0);
   double e(0);
-  int MaxIterations = 20;
-  double tolerance = 1.e-6;
+  constexpr int  MaxIterations = 20;
+  constexpr double tolerance = 1.e-6;
 
   for (int iter = 0; iter <= MaxIterations; iter++) {
 
@@ -244,8 +244,8 @@ findRoot(double& result,
       fc = fa;
     }
 
-    double tol = 0.5 * tolerance * std::abs(b);
-    double m = 0.5 * (c - b);
+    const double tol = 0.5 * tolerance * std::abs(b);
+    const double m = 0.5 * (c - b);
 
     if (fb == 0 || std::abs(m) <= tol) {
       result = b;
@@ -261,7 +261,7 @@ findRoot(double& result,
       double p = 0;
       double q = 0;
       double r = 0;
-      double s = fb / fa;
+      const double s = fb / fa;
 
       if (ac_equal) {
         p = 2 * m * s;
@@ -279,8 +279,8 @@ findRoot(double& result,
         p = -p;
       }
 
-      double min1 = 3 * m * q - std::abs(tol * q);
-      double min2 = std::abs(e * q);
+      const double min1 = 3 * m * q - std::abs(tol * q);
+      const double min2 = std::abs(e * q);
       if (2 * p < (min1 < min2 ? min1 : min2)) {
         // Accept the interpolation
         e = d;
@@ -328,7 +328,7 @@ evaluateMode(const std::array<VecOfComponents, 5>& mixture)
      * finding in this direction
      */
     for (const Component& component : mixture[i]) {
-      double pdfValue = pdf(component.mean, i, mixture);
+      const double pdfValue = pdf(component.mean, i, mixture);
       if (pdfValue > largerPdfComponent) {
         largerPdfComponent = pdfValue;
         largerMeanComponent = component.mean;
@@ -339,10 +339,10 @@ evaluateMode(const std::array<VecOfComponents, 5>& mixture)
     // the covariance matrix
     if (largerMeanComponent != modes[i]) {
       // mode calculation was successful now calulate FWHM
-      double currentWidth = width(i, mixture);
+      const double  currentWidth = width(i, mixture);
       modes[i + 5] = -1; // Failure is flagged with a value less than 0;
 
-      double pdfVal = pdf(modes[i], i, mixture);
+      const double pdfVal = pdf(modes[i], i, mixture);
       double highX(0);
       double lowX(0);
 
@@ -355,7 +355,7 @@ evaluateMode(const std::array<VecOfComponents, 5>& mixture)
         }
       }
 
-      bool highXFound =
+      const bool highXFound =
         findRoot(highX, modes[i], upperbound, pdfVal * 0.5, i, mixture);
 
       double lowerbound = modes[i] - 1.5 * currentWidth;
@@ -366,10 +366,10 @@ evaluateMode(const std::array<VecOfComponents, 5>& mixture)
           break;
         }
       }
-      bool lowXFound =
+      const bool lowXFound =
         findRoot(lowX, lowerbound, modes[i], pdfVal * 0.5, i, mixture);
       if (highXFound && lowXFound) {
-        double FWHM = highX - lowX;
+        const double FWHM = highX - lowX;
         modes[i + 5] = FWHM / 2.35482; // 2 * sqrt( 2* log(2))
       }
       // Ensure that phi is between -pi and pi
