@@ -31,14 +31,7 @@ HGTD_DetectorManager::HGTD_DetectorManager(StoreGateSvc* detStore)
     }
 }
 
-HGTD_DetectorManager::~HGTD_DetectorManager()
-{
-    // Clean up
-    HGTD_DetectorElementCollection::iterator iter;
-    for (iter = m_elementCollection.begin(); iter != m_elementCollection.end(); ++iter){
-        delete *iter;
-    }
-}
+HGTD_DetectorManager::~HGTD_DetectorManager() = default;
 
 unsigned int HGTD_DetectorManager::getNumTreeTops() const
 {
@@ -54,7 +47,7 @@ void HGTD_DetectorManager::addTreeTop(PVConstLink vol){
     m_volume.push_back(vol);
 }
 
-HGTD_DetectorElement* HGTD_DetectorManager::getDetectorElement(const Identifier & id) const
+const HGTD_DetectorElement* HGTD_DetectorManager::getDetectorElement(const Identifier & id) const
 {
     // Make sure it is a wafer Id
     Identifier waferId =  m_idHelper->wafer_id(id);
@@ -66,12 +59,12 @@ HGTD_DetectorElement* HGTD_DetectorManager::getDetectorElement(const Identifier 
     }
 }
 
-HGTD_DetectorElement* HGTD_DetectorManager::getDetectorElement(const IdentifierHash & idHash) const
+const HGTD_DetectorElement* HGTD_DetectorManager::getDetectorElement(const IdentifierHash & idHash) const
 {
     return m_elementCollection[idHash];
 }
 
-HGTD_DetectorElement* HGTD_DetectorManager::getDetectorElement(int endcap, int layer, int phi_module, int eta_module) const
+const HGTD_DetectorElement* HGTD_DetectorManager::getDetectorElement(int endcap, int layer, int phi_module, int eta_module) const
 {
     return getDetectorElement(m_idHelper->wafer_id(endcap, layer, phi_module, eta_module));
 }
@@ -79,16 +72,6 @@ HGTD_DetectorElement* HGTD_DetectorManager::getDetectorElement(int endcap, int l
 const HGTD_DetectorElementCollection* HGTD_DetectorManager::getDetectorElementCollection() const
 {
     return &m_elementCollection;
-}
-
-HGTD_DetectorElementCollection::const_iterator HGTD_DetectorManager::getDetectorElementBegin() const
-{
-    return m_elementCollection.begin();
-}
-
-HGTD_DetectorElementCollection::const_iterator HGTD_DetectorManager::getDetectorElementEnd() const
-{
-    return m_elementCollection.end();
 }
 
 void HGTD_DetectorManager::addDetectorElement(HGTD_DetectorElement * element)
@@ -104,26 +87,22 @@ const HGTD_ID* HGTD_DetectorManager::getIdHelper() const
     return m_idHelper;
 }
 
-void HGTD_DetectorManager::invalidateAll() const
+void HGTD_DetectorManager::invalidateAll()
 {
-    for (HGTD_DetectorElementCollection::const_iterator element_iter = getDetectorElementBegin();
-    element_iter != getDetectorElementEnd();
-    ++element_iter) {
-        if (*element_iter) {
-            (*element_iter)->invalidate();
-        }
+  for (HGTD_DetectorElement* element : m_elementCollection) {
+    if (element) {
+      element->invalidate();
     }
+  }
 }
 
-void HGTD_DetectorManager::updateAll() const
+void HGTD_DetectorManager::updateAll()
 {
-    for (HGTD_DetectorElementCollection::const_iterator element_iter = getDetectorElementBegin();
-    element_iter != getDetectorElementEnd();
-    ++element_iter) {
-        if (*element_iter) {
-            (*element_iter)->setCache();
-        }
+  for (HGTD_DetectorElement* element : m_elementCollection) {
+    if (element) {
+      element->setCache();
     }
+  }
 }
 
 void HGTD_DetectorManager::setCommonItems(std::unique_ptr<const SiCommonItems>&& commonItems)
