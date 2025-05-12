@@ -1,33 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/RPCRODDecode.h"
-
-#include <math.h>
-
 #include <iostream>
 
 //----------------------------------------------------------------------------//
 RPCRODDecode::RPCRODDecode() : BaseObject(Hardware, "RPCRODDecode") {
-    // std::cout<<" This is the constructor of RPCRODDecode "<<std::endl;
-    //
-    // define RPC data word indentifiers
-    //
-    m_field = 0xf000;  // field map of word identifier
-    // reserved3  = 0xd000; // reserved
-    m_reserved4 = 0xe000;  // reserved
-    // reserved5  = 0xf000; // reserved
-    //
-    // ROD Data Address
-    //
-    m_RODDataAddress = m_noRecord32;
-    //
-    m_noRecord16 = 9999;        // no record content for 16bit words
-    m_noRecord32 = 0xdeadcafe;  // no record content for 32bit words
-    //
     // the ROD header
-    //
     headerMarker = m_noRecord32;
     headerSize = m_noRecord32;
     formatVersion = m_noRecord32;
@@ -42,26 +22,15 @@ RPCRODDecode::RPCRODDecode() : BaseObject(Hardware, "RPCRODDecode") {
     SourceModuleID = m_noRecord16;
     //
     // the RPC identifiers
-    //
     SectorID = m_noRecord16;
     PadID = m_noRecord16;
     CMID = m_noRecord16;
     //
-    // m_previousRecord initialization
-    //
-    m_previousRecord = Empty;
-    //
     // the structure control flags
-    //
     CMFragCheck = m_noRecord16;
-    m_CMFlag = 0;
-    m_PADFlag = 0;
-    m_RXFlag = 0;
-    m_isSLBody = false;
-    m_enablePrintOut = false;
 }  // end-of-RPCRODDecode::RPCRODDecode
 //----------------------------------------------------------------------------//
-RPCRODDecode::~RPCRODDecode() {}  // distructor
+RPCRODDecode::~RPCRODDecode() {}  // destructor
 //----------------------------------------------------------------------------//
 void RPCRODDecode::enablePrintOut() { m_enablePrintOut = true; }  // RPCRODDecode::enablePrintOut
 //----------------------------------------------------------------------------//
