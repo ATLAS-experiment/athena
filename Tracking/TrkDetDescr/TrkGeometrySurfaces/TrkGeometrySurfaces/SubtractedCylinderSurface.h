@@ -40,7 +40,7 @@ public:
 
   /** Constructor */
   SubtractedCylinderSurface(const CylinderSurface& cs,
-                            std::unique_ptr<AreaExcluder> vol,
+                            std::shared_ptr<const AreaExcluder> vol,
                             bool shared);
 
   /** Copy Constructor*/
@@ -72,7 +72,7 @@ public:
   }
 
 protected:
-  std::unique_ptr<AreaExcluder> m_subtrVol{nullptr};
+  std::shared_ptr<const AreaExcluder> m_subtrVol{nullptr};
   bool m_shared{true};
 };
 } // end of namespace

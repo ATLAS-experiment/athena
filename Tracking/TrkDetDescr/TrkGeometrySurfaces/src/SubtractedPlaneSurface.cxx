@@ -16,21 +16,19 @@
 
 
 // copy constructor
-Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const SubtractedPlaneSurface& psf)
-   : Trk::PlaneSurface(psf)
-  , m_subtrVol(psf.m_subtrVol->clone())
-  , m_shared(psf.m_shared)
-{}
+Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const SubtractedPlaneSurface& psf) = default;
 
 // copy constructor with shift
 Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const SubtractedPlaneSurface& psf, const Amg::Transform3D& transf)
   : Trk::PlaneSurface(psf, transf)
-  , m_subtrVol(psf.m_subtrVol->clone())
+  , m_subtrVol(psf.m_subtrVol)
   , m_shared(psf.m_shared)
 {}
 
 // constructor
-Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const Trk::PlaneSurface& ps, std::unique_ptr<AreaExcluder> vol, bool shared)
+Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const Trk::PlaneSurface& ps,
+                                                    std::shared_ptr<const AreaExcluder> vol,
+                                                    bool shared)
   : Trk::PlaneSurface(ps)
   , m_subtrVol(std::move(vol))
   , m_shared(shared)
@@ -38,16 +36,7 @@ Trk::SubtractedPlaneSurface::SubtractedPlaneSurface(const Trk::PlaneSurface& ps,
 
 
 Trk::SubtractedPlaneSurface&
-Trk::SubtractedPlaneSurface::operator=(const Trk::SubtractedPlaneSurface& psf)
-{
-
-  if (this != &psf) {
-    Trk::PlaneSurface::operator=(psf);
-    m_subtrVol.reset(psf.m_subtrVol->clone());
-    m_shared = psf.m_shared;
-  }
-  return *this;
-}
+Trk::SubtractedPlaneSurface::operator=(const Trk::SubtractedPlaneSurface& psf) = default;
 
 bool
 Trk::SubtractedPlaneSurface::operator==(const Trk::Surface& sf) const

@@ -179,7 +179,7 @@ std::vector<std::unique_ptr<Trk::Surface>>
                        Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ))),
       std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY));
   auto volExcl =
-      std::make_unique<Trk::VolumeExcluder>(
+      std::make_shared<const Trk::VolumeExcluder>(
         std::make_unique<Trk::Volume>(
           *m_combinedVolume,
           Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ)))
@@ -193,7 +193,7 @@ std::vector<std::unique_ptr<Trk::Surface>>
       std::make_shared<Trk::RectangleBounds>(m_halfX, m_halfY)
       );
 
-  volExcl = std::make_unique<Trk::VolumeExcluder>(
+  volExcl = std::make_shared<const Trk::VolumeExcluder>(
     std::make_unique<Trk::Volume>(*m_combinedVolume,
       Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ)))
       )

@@ -17,35 +17,24 @@
 
 // constructor
 Trk::SubtractedDiscSurface::SubtractedDiscSurface(
-    const Trk::DiscSurface& ps, std::unique_ptr<AreaExcluder> vol, bool shared)
+    const Trk::DiscSurface& ps,
+    std::shared_ptr<const AreaExcluder> vol,
+    bool shared)
     : Trk::DiscSurface(ps), m_subtrVol(std::move(vol)), m_shared(shared) {}
 
 // copy constructor
-Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf)
-  : Trk::DiscSurface(psf)
-  , m_subtrVol{psf.m_subtrVol->clone()}
-  , m_shared(psf.m_shared)
-{}
+Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf) = default;
 
 // copy constructor with shift
 Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf, const Amg::Transform3D& shift)
   : Trk::DiscSurface(psf, shift)
-  , m_subtrVol{psf.m_subtrVol->clone()}
+  , m_subtrVol{psf.m_subtrVol}
   , m_shared(psf.m_shared)
 {}
 
 //Assignment
 Trk::SubtractedDiscSurface&
-Trk::SubtractedDiscSurface::operator=(const Trk::SubtractedDiscSurface& psf)
-{
-
-  if (this != &psf) {
-    Trk::DiscSurface::operator=(psf);
-    m_subtrVol.reset(psf.m_subtrVol->clone());
-    m_shared = psf.m_shared;
-  }
-  return *this;
-}
+Trk::SubtractedDiscSurface::operator=(const Trk::SubtractedDiscSurface& psf) = default;
 
 bool
 Trk::SubtractedDiscSurface::operator==(const Trk::Surface& sf) const

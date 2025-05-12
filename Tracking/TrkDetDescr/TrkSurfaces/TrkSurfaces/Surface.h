@@ -137,9 +137,6 @@ public:
   /**Virtual Destructor*/
   virtual ~Surface();
 
-  /**Copy constructor with shift */
-  Surface(const Surface& sf, const Amg::Transform3D& transf);
-
   /**Constructor with Amg::Transform3D reference */
   Surface(const Amg::Transform3D& htrans);
 
@@ -425,6 +422,8 @@ protected:
   The copy cannot be owned by the same detector element as the original*/
  Surface(const Surface& sf);
  Surface& operator=(const Surface& sf);
+ /**Copy constructor with shift */
+ Surface(const Surface& sf, const Amg::Transform3D& transf);
  // Move operators for inheriting classes
  Surface(Surface&& sf) noexcept = default;
  Surface& operator=(Surface&& sf) noexcept = default;
