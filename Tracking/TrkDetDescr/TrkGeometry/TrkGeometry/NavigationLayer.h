@@ -41,13 +41,8 @@ class BinUtility;
 class NavigationLayer final : public Layer {
  public:
   /**Constructor*/
-  NavigationLayer(std::unique_ptr<Surface> surfaceRepresentation,
-                  Layer* previous = nullptr,
-                  Layer* next = nullptr,
-                  BinUtility* binUtil = nullptr);
-
-  /**Constructor */
-  NavigationLayer(std::unique_ptr<Surface> surfaceRepresentation, double thickness);
+  NavigationLayer(std::unique_ptr<Surface> surfaceRepresentation);
+  NavigationLayer(std::unique_ptr<Trk::Surface> surfaceRepresentation, double thickness);
 
   /**Copy Constructor - */
   NavigationLayer(const NavigationLayer& lay);

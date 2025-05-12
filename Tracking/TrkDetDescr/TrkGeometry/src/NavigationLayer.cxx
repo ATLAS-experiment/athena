@@ -9,24 +9,20 @@
 #include "TrkGeometry/NavigationLayer.h"
 
 // constructor with arguments
-Trk::NavigationLayer::NavigationLayer(std::unique_ptr<Trk::Surface> surfaceRepresentation,
-                                      Trk::Layer* previous,
-                                      Trk::Layer* next,
-                                      Trk::BinUtility* binUtil)
-    : Trk::Layer(), m_surfaceRepresentation(std::move(surfaceRepresentation)) {
-  Trk::Layer::m_previousLayer = previous;
-  Trk::Layer::m_nextLayer = next;
-  Trk::Layer::m_binUtility = binUtil;
-  Trk::Layer::m_layerType = Trk::passive;
-}
+Trk::NavigationLayer::NavigationLayer
+    (std::unique_ptr<Trk::Surface> surfaceRepresentation)
+    : Trk::Layer(),
+      m_surfaceRepresentation(std::move(surfaceRepresentation)) {
+      Trk::Layer::m_layerType = Trk::passive;
+    }
 
 // constructor with arguments
-Trk::NavigationLayer::NavigationLayer(std::unique_ptr<Trk::Surface> surfaceRepresentation,
-                                      double thickness)
-    : Trk::Layer(),
-    m_surfaceRepresentation(std::move(surfaceRepresentation)) {
-  Trk::Layer::m_layerThickness = thickness;
-}
+Trk::NavigationLayer::NavigationLayer(
+  std::unique_ptr<Trk::Surface> surfaceRepresentation, double thickness)
+  : Trk::Layer(),
+  m_surfaceRepresentation(std::move(surfaceRepresentation)) {
+    Trk::Layer::m_layerThickness = thickness;
+  }
 
 // copy constructor
 Trk::NavigationLayer::NavigationLayer(const Trk::NavigationLayer& lay)

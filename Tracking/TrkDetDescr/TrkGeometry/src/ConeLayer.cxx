@@ -17,7 +17,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
-                          std::shared_ptr<Trk::ConeBounds> cbounds,
+                          std::shared_ptr<const Trk::ConeBounds> cbounds,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
@@ -36,7 +36,7 @@ Trk::ConeLayer::ConeLayer(Trk::ConeSurface* cyl,
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
-                          std::shared_ptr<Trk::ConeBounds> cbounds,
+                          std::shared_ptr<const Trk::ConeBounds> cbounds,
                           std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
@@ -46,7 +46,7 @@ Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
-                          std::shared_ptr<Trk::ConeBounds> cbounds,
+                          std::shared_ptr<const Trk::ConeBounds> cbounds,
                           std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,

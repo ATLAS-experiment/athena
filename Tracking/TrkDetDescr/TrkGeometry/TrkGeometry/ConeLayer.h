@@ -46,7 +46,7 @@ public:
 
   /**Constructor with ConeBounds components and  MaterialProperties */
   ConeLayer(const Amg::Transform3D& transform,
-            std::shared_ptr<ConeBounds> cbounds,
+            std::shared_ptr<const ConeBounds> cbounds,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
             std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -62,7 +62,7 @@ public:
   /**Constructor with ConeSurface components and pointer to SurfaceArray
    * (passing ownership) */
   ConeLayer(const Amg::Transform3D& transform,
-            std::shared_ptr<ConeBounds> cbounds,
+            std::shared_ptr<const ConeBounds> cbounds,
             std::unique_ptr<SurfaceArray> surfaceArray,
             double thickness = 0.,
             std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -71,7 +71,7 @@ public:
   /**Constructor with ConeSurface components,
      MaterialProperties and pointer SurfaceArray (passing ownership) */
   ConeLayer(const Amg::Transform3D& transform,
-            std::shared_ptr<ConeBounds> cbounds,
+            std::shared_ptr<const ConeBounds> cbounds,
             std::unique_ptr<SurfaceArray> surfaceArray,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
