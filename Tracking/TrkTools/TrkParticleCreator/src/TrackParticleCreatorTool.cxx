@@ -978,13 +978,13 @@ TrackParticleCreatorTool::addPIDInformation(const EventContext& ctx, const Trk::
   {
      const int initialValue{-1};
      float dedx = initialValue;
-     int nHitsUsed_dedx = initialValue;
-     int nOverflowHits_dedx = initialValue;
+     int nHitsUsed_dEdx = initialValue;
+     int nOverflowHits_dEdx = initialValue;
      if (track && !m_dedxtool.empty() && track->info().trackFitter() != TrackInfo::Unknown) {
-        dedx = m_dedxtool->dEdx(ctx, *track, nHitsUsed_dedx, nOverflowHits_dedx);
+        dedx = m_dedxtool->dEdx(ctx, *track, nHitsUsed_dEdx, nOverflowHits_dEdx);
      }
-     tp.setNumberOfUsedHitsdEdx(nHitsUsed_dedx);
-     tp.setNumberOfIBLOverflowsdEdx(nOverflowHits_dedx);
+     tp.setNumberOfUsedHitsdEdx(nHitsUsed_dEdx);
+     tp.setNumberOfIBLOverflowsdEdx(nOverflowHits_dEdx);
      tp.setSummaryValue(dedx, static_cast<xAOD::SummaryType>(51));
   }
 }

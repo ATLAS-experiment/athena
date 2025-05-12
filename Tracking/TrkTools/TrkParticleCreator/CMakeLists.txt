@@ -8,7 +8,7 @@ atlas_add_library( TrkParticleCreatorLib
    TrkParticleCreator/*.h
    INTERFACE
    PUBLIC_HEADERS TrkParticleCreator
-   LINK_LIBRARIES ITrackToVertex TrkToolInterfaces TrkAnalysisInterfacesLib AthenaBaseComps GaudiKernel TrkParticleBase
+   LINK_LIBRARIES ITrackToVertex TrkToolInterfaces AthenaBaseComps GaudiKernel TrkParticleBase
    TrkParameters TrkTrackSummary TrkTrack TrkEventPrimitives MagFieldConditions MagFieldElements
    MuonRecToolInterfaces TrkExInterfaces TrkTrackSummary xAODTracking AthContainers
    EventPrimitives InDetIdentifier PixelGeoModelLib )

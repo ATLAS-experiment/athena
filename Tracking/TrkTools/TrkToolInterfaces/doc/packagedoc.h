@@ -40,6 +40,7 @@ Abstract interfaces for the following tracking tasks are defined:
    - Trk::ITrackSummaryHelperTool : sub-structure of the above tool to allow detetector-specific access to information
    - Trk::ITrackTimingTool : interface for having time-space points calculated from various subdetector time measurements on a track
    - Trk::ITRT_ElectronPidTool : performs electron identification on given (Indet) track
+   - Trk::IPixelToTPIDTool : performs particle identification using pixel charge information
    - Trk::ITruthToTrack : converts MC-generator particle parameters into EDM representation for validation studies
    - Trk::ITruthTrajectoryBuilder : collects MC-generator information to build full (truth) trajectory across the detector
    - Trk::IUpdator : collection of methods operating on track states, mainly for Kalman filtering
