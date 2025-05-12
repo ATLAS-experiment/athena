@@ -57,7 +57,7 @@
 
 struct DetectorLayer {
     DetectorLayer() = default;
-    Muon::MuonStationIndex::StIndex stIndex{Muon::MuonStationIndex::StUnknown};
+    Muon::MuonStationIndex::StIndex stIndex{Muon::MuonStationIndex::StIndex::StUnknown};
     bool isEndcap{false};
     double minPos{FLT_MAX};  // flag whether first and second globalpos have been filled
     double maxPos{-FLT_MAX};
@@ -518,12 +518,12 @@ namespace Trk {
             const Muon::MMPrepData* mm = dynamic_cast<const Muon::MMPrepData*>(prd);
             if (mm) {
                 isEndcap = true;
-                stIndex = Muon::MuonStationIndex::EI;
+                stIndex = Muon::MuonStationIndex::StIndex::EI;
             }
             const Muon::sTgcPrepData* stgc = dynamic_cast<const Muon::sTgcPrepData*>(prd);
             if (stgc) {
                 isEndcap = true;
-                stIndex = Muon::MuonStationIndex::EI;
+                stIndex = Muon::MuonStationIndex::StIndex::EI;
             }
             // BEGIN NEW WORK
 
