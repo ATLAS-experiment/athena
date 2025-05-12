@@ -1,8 +1,9 @@
 #!/bin/bash
-# art-description: Test running F200 pipeline
+# art-description: Test running the F600 (InsideOut) pipeline
 # art-type: grid
 # art-include: main/Athena
-# art-input-nfiles: 2
+# art-input: mc21_14TeV:mc21_14TeV.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8481_s4203_r14697
+# art-input-nfiles: 11
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
@@ -11,13 +12,16 @@
 
 
 set -e
+echo "$ArtInFile"
+fileList="${ArtInFile// /,}"
+echo $fileList
 
-PREFIX="F200"
+PREFIX="F600"
 lastref_dir=last_results
 INPUT_AOD_FILE="xAOD_${PREFIX}.root"
 
 ATHENA_SOURCE="${ATLAS_RELEASE_BASE}/Athena/${Athena_VERSION}/InstallArea/${Athena_PLATFORM}/src/"
-IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/IDTPM_singleMu_region0.json"
+IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/IDTPM_singleMu_phiSlice.json"
 DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/dcube/config/FPGATrackSimIDTPMconfig.xml"
 
 # Don't run if dcube config for nightly cmp is not found
@@ -44,9 +48,9 @@ run () {
     fi
     return $rc
 }
-
+# 
 run "${PREFIX} pipeline" \
-    FPGATrackSim_F200.sh -o $INPUT_AOD_FILE -m
+    FPGATrackSim_F600.sh -o ${INPUT_AOD_FILE} -t -n 10000 -q -i $fileList
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
@@ -61,7 +65,7 @@ else
     art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
 
     run "dcube-${PREFIX}-latest" \
-        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        ${ATLAS_LOCAL_ROOT}/dcube/current/DCubeClient/python/dcube.py \
             -p -x dcube_last \
             --plotopts=ratio \
             -c ${DCUBE_CONFIG} \

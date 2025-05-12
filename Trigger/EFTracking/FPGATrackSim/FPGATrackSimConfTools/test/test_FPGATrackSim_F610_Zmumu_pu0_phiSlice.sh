@@ -1,8 +1,9 @@
 #!/bin/bash
-# art-description: Test running F610 pipeline
+# art-description: Test running F610 pipeline on Zmumu
 # art-type: grid
 # art-include: main/Athena
-# art-input-nfiles: 2
+# art-input: mc21_14TeV:mc21_14TeV.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8481_s4203_r14697
+# art-input-nfiles: 11
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
@@ -11,7 +12,9 @@
 
 
 set -e
-
+echo "$ArtInFile"
+fileList="${ArtInFile// /,}"
+echo $fileList
 PREFIX="F610"
 lastref_dir=last_results
 INPUT_AOD_FILE="xAOD_${PREFIX}.root"
@@ -47,7 +50,7 @@ run () {
 
 
 run "${PREFIX} pipeline" \
-    FPGATrackSim_F610.sh -o $INPUT_AOD_FILE -m -q
+    FPGATrackSim_F610.sh -o $INPUT_AOD_FILE -t -n 10000 -q -i $fileList
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
