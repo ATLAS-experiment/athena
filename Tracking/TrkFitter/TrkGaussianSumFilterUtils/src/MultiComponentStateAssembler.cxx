@@ -68,8 +68,8 @@ prepareStateForAssembly(Cache& cache)
   }
 
   // Check for minimum fraction of valid states
-  double den = cache.validWeightSum + cache.invalidWeightSum;
-  double validWeightFraction = den > 0 ? cache.validWeightSum / den : 0;
+  double const den = cache.validWeightSum + cache.invalidWeightSum;
+  double const validWeightFraction = den > 0 ? cache.validWeightSum / den : 0;
   if (cache.invalidWeightSum > 0. &&
       validWeightFraction < Trk::MultiComponentStateAssembler::Cache::minimumValidFraction) {
     return false;
@@ -81,7 +81,7 @@ prepareStateForAssembly(Cache& cache)
         return x.weight > y.weight;
       });
 
-  double totalWeight(cache.validWeightSum + cache.invalidWeightSum);
+  double const totalWeight(cache.validWeightSum + cache.invalidWeightSum);
   if (totalWeight != 0.) {
 
     // ordered in descending order

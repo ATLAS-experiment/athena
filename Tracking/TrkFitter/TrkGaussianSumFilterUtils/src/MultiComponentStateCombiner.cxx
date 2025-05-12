@@ -142,7 +142,7 @@ Trk::ComponentParameters combineToSingleImpl(
   Trk::MultiComponentState::const_iterator component = uncombinedState.begin();
   double totalWeight(0.);
   for (; component != uncombinedState.end(); ++component) {
-    double weight = (*component).weight;
+    double const weight = (*component).weight;
     totalWeight += weight;
   }
 
@@ -151,7 +151,7 @@ Trk::ComponentParameters combineToSingleImpl(
   for (; component != uncombinedState.end(); ++component) {
 
     const Trk::TrackParameters* trackParameters = (*component).params.get();
-    double weight = (*component).weight;
+    double const weight = (*component).weight;
 
     AmgVector(5) parameters = trackParameters->parameters();
 
@@ -159,7 +159,7 @@ Trk::ComponentParameters combineToSingleImpl(
     // Use first state as reference poin
     // Ensure that we don't have any problems with the cyclical nature of phi
     // Use first state as reference poin
-    double deltaPhi =
+    double const deltaPhi =
         (uncombinedState.begin())->params->parameters()[2] - parameters[2];
     if (deltaPhi > M_PI) {
       parameters[2] += 2 * M_PI;
@@ -194,7 +194,7 @@ Trk::ComponentParameters combineToSingleImpl(
         AmgVector(5) parameterDifference =
           parameters - ((*remainingComponentIterator).params)->parameters();
 
-        double remainingComponentIteratorWeight =
+        double const remainingComponentIteratorWeight =
           (*remainingComponentIterator).weight;
 
         covariancePart2 += weight * remainingComponentIteratorWeight *
@@ -281,11 +281,11 @@ Trk::ComponentParameters combineToSingleImpl(
   }   // useMode && dimensions==5
 
   std::unique_ptr<Trk::TrackParameters> combinedTrackParameters = nullptr;
-  double loc1 = mean[Trk::loc1];
-  double loc2 = mean[Trk::loc2];
-  double phi = mean[Trk::phi];
-  double theta = mean[Trk::theta];
-  double qoverp = mean[Trk::qOverP];
+  double const loc1 = mean[Trk::loc1];
+  double const loc2 = mean[Trk::loc2];
+  double const phi = mean[Trk::phi];
+  double const theta = mean[Trk::theta];
+  double const qoverp = mean[Trk::qOverP];
   if (firstMeasuredCov) {
     combinedTrackParameters =
       firstParameters->associatedSurface().createUniqueTrackParameters(
@@ -316,11 +316,11 @@ const Trk::ComponentParameters& addThis)
 {
   const Trk::TrackParameters* firstTrackParameters = mergeTo.params.get();
   const AmgVector(5)& firstParameters = firstTrackParameters->parameters();
-  double firstWeight = mergeTo.weight;
+  double const firstWeight = mergeTo.weight;
 
   const Trk::TrackParameters* secondTrackParameters = addThis.params.get();
   const AmgVector(5)& secondParameters = secondTrackParameters->parameters();
-  double secondWeight = addThis.weight;
+  double const secondWeight = addThis.weight;
 
   // copy over the first
   AmgVector(5) finalParameters(firstParameters);
@@ -361,9 +361,9 @@ Trk::MultiComponentStateCombiner::combineParametersWithWeight(
   const AmgVector(5) & secondParameters,
   const double secondWeight)
 {
-  double totalWeight = firstWeight + secondWeight;
-  double invTotalWeight = 1.0/totalWeight;
-  double deltaPhi = firstParameters[2] - secondParameters[2];
+  double const totalWeight = firstWeight + secondWeight;
+  double const invTotalWeight = 1.0/totalWeight;
+  double const deltaPhi = firstParameters[2] - secondParameters[2];
   if (deltaPhi > M_PI) {
     firstParameters[2] -= 2 * M_PI;
   } else if (deltaPhi < -M_PI) {
@@ -390,7 +390,7 @@ Trk::MultiComponentStateCombiner::combineCovWithWeight(
   const AmgSymMatrix(5) & secondMeasuredCov,
   const double secondWeight)
 {
-  double invTotalWeight = 1.0/(firstWeight + secondWeight);
+  double const invTotalWeight = 1.0/(firstWeight + secondWeight);
   AmgVector(5) parameterDifference = firstParameters - secondParameters;
   parameterDifference[2] = CxxUtils::wrapToPi(parameterDifference[2]);
   parameterDifference *= invTotalWeight;
@@ -471,10 +471,10 @@ Trk::MultiComponentStateCombiner::combineWithSmoother(
         summedCovariance.inverse();
       // Determine the scaling factor for the new weighting. Determined from the
       // PDF of the many-dimensional gaussian
-      double exponent =
+      double const exponent =
         parametersDiff.transpose() * invertedSummedCovariance * parametersDiff;
-      double weightScalingFactor = exp(-0.5 * exponent);
-      double combinedWeight = smootherComponent.weight *
+      double const weightScalingFactor = exp(-0.5 * exponent);
+      double const combinedWeight = smootherComponent.weight *
                               forwardsComponent.weight * weightScalingFactor;
       Trk::ComponentParameters combinedComponent = {
         std::move(combinedTrackParameters), combinedWeight};

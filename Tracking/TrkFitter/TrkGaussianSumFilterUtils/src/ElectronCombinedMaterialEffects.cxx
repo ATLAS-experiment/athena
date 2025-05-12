@@ -84,7 +84,7 @@ correctWeights(BH::MixtureParameters& mixture, const int numberOfComponents)
   for (int i = 0; i < numberOfComponents; ++i) {
     weightSum += mixture[i].weight;
   }
-  double norm = 1. / weightSum;
+  const double norm = 1. / weightSum;
   // Rescale so that total weighting is 1
   for (int i = 0; i < numberOfComponents; ++i) {
     mixture[i].weight *= norm;
@@ -203,7 +203,7 @@ Trk::ElectronCombinedMaterialEffects::ElectronCombinedMaterialEffects(
   // we could consider refactoring
   // The low X0 polynomials
   {
-    std::string resolvedFileName =
+    const std::string resolvedFileName =
       PathResolver::find_file(parameterisationFileName, "DATAPATH");
     if (resolvedFileName.empty()) {
       std::ostringstream ss;
@@ -259,7 +259,7 @@ Trk::ElectronCombinedMaterialEffects::ElectronCombinedMaterialEffects(
   }
   // Read the high X0 polynomials
   {
-    std::string resolvedFileName =
+    const std::string resolvedFileName =
       PathResolver::find_file(parameterisationFileNameHighX0, "DATAPATH");
     if (resolvedFileName.empty()) {
       std::ostringstream ss;
@@ -356,8 +356,8 @@ Trk::ElectronCombinedMaterialEffects::compute(
   // Cache is to be filled so 0 entries here
   cache.numEntries = 0;
   for (int i = 0; i < cache_energyLoss.numElements; ++i) {
-    double combinedWeight = cache_energyLoss.elements[i].weight;
-    double combinedDeltaP = cache_energyLoss.elements[i].deltaP;
+    const double combinedWeight = cache_energyLoss.elements[i].weight;
+    const double combinedDeltaP = cache_energyLoss.elements[i].deltaP;
     cache.weights[i] = combinedWeight;
     cache.deltaPs[i] = combinedDeltaP;
     if (measuredCov) {

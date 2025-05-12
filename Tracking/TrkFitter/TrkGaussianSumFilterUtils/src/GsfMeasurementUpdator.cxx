@@ -165,7 +165,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
                        int paramKey,
                        Trk::FitQualityOnSurface& fitQoS)
 {
-  int mk = measurementCoord_1D(paramKey);
+  const int mk = measurementCoord_1D(paramKey);
   // get the parameters from the
   const AmgVector(5)& trkPar = TP.parameters();
   // use measuring coordinate (variable "mk") instead of reduction matrix
@@ -315,7 +315,7 @@ filterStep(Trk::TrackParameters& trackParameters,
     return false;
   }
 
-  int nLocCoord = measCovariance.cols();
+  const int nLocCoord = measCovariance.cols();
   if (!(measurement.dimension() == nLocCoord)) {
     return false;
   }
@@ -380,7 +380,7 @@ makeChi2_1D(Trk::FitQualityOnSurface& updatedFitQoS,
 {
 
   const int mk = measurementCoord_1D(paramKey);
-  double r = valRio - trkPar(mk);
+  const double r = valRio - trkPar(mk);
   //  if (mk==3) catchPiPi;
   double chiSquared = rioCov + trkCov(mk, mk);
   if (chiSquared == 0.0) {
@@ -425,7 +425,7 @@ stateFitQuality(Trk::FitQualityOnSurface& updatedFitQoS,
   }
   // For the LocalPos. version, need to get # meas. coord. from covariance
   // matrix.
-  int nLocCoord = covariance.cols();
+  const int nLocCoord = covariance.cols();
   switch (nLocCoord) {
     case 1: {
       return makeChi2_1D(updatedFitQoS,
@@ -467,10 +467,10 @@ calculateWeight_T(const Trk::TrackParameters* componentTrackParameters,
     s_reMatrices.expansionMatrix(paramKey).topLeftCorner<DIM, 5>();
 
   // Calculate the residual
-  AmgVector(DIM) r = measPar - H * componentTrackParameters->parameters();
+  const AmgVector(DIM) r = measPar - H * componentTrackParameters->parameters();
   // Residual covariance. Posterior weights is calculated used predicted state
   // and measurement. Therefore add covariances
-  AmgSymMatrix(DIM) R(measCov + predictedCov->similarity(H));
+  AmgSymMatrix(DIM) const R(measCov + predictedCov->similarity(H));
   // compute determinant of residual
   const double det = R.determinant();
   if (det == 0) {
@@ -507,11 +507,11 @@ calculateWeight_2D_3(const Trk::TrackParameters* componentTrackParameters,
                      const AmgSymMatrix(2) & measCov)
 {
   // Calculate the residual
-  AmgVector(2) r =
+  const AmgVector(2) r =
     measPar - componentTrackParameters->parameters().head<2>();
   // Residual covariance. Posterior weights is calculated used predicted state
   // and measurement. Therefore add covariances
-  AmgSymMatrix(2) R(measCov + predictedCov->topLeftCorner<2, 2>());
+  const AmgSymMatrix(2) R(measCov + predictedCov->topLeftCorner<2, 2>());
   // compute determinant of residual
   const double det = R.determinant();
   if (det == 0) {
@@ -536,7 +536,7 @@ weights(Trk::MultiComponentState&& predictedState,
   }
   const Trk::LocalParameters& measurementLocalParameters =
     measurement.localParameters();
-  int nLocCoord = measurement.localParameters().dimension();
+  const int nLocCoord = measurement.localParameters().dimension();
   if (nLocCoord < 1 || nLocCoord > 5) {
     return {};
   }
@@ -642,7 +642,7 @@ weights(Trk::MultiComponentState&& predictedState,
   for (; componentItr != returnMultiComponentState.end();
        ++componentItr, ++index) {
     // Extract common factor to avoid numerical problems during exponentiation
-    double chi2 = determinantRandChi2.elements[index].chi2 - minimumChi2;
+    const double chi2 = determinantRandChi2.elements[index].chi2 - minimumChi2;
     const double priorWeight = componentItr->weight;
     fallBackWeights[index] = priorWeight;
     double updatedWeight(0.);
@@ -660,7 +660,7 @@ weights(Trk::MultiComponentState&& predictedState,
     sumWeights += updatedWeight;
   }
   if (sumWeights > 0.) {
-    double invertSumWeights = 1. / sumWeights;
+    const double invertSumWeights = 1. / sumWeights;
     // Renormalise the state to total weight = 1
     for (auto& returnComponent : returnMultiComponentState) {
       returnComponent.weight *= invertSumWeights;
@@ -757,7 +757,7 @@ calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
     }
     Trk::FitQualityOnSurface componentFitQuality;
     /// Update the component in place
-    bool updateSuccess = filterStep(*(component.params),
+    bool const updateSuccess = filterStep(*(component.params),
                                     componentFitQuality,
                                     measurement.localParameters(),
                                     measurement.localCovariance());
