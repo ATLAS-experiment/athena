@@ -2,7 +2,7 @@
 from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg, PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
-from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
+from G4AtlasTools.G4AtlasToolsConfig import G4ThreadPoolSvcCfg, SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 from G4AtlasServices.G4AtlasUserActionConfig import UserActionSvcCfg
 from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata, readSimulationParameters
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -70,6 +70,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     is_hive = flags.Concurrency.NumThreads > 0
     kwargs.setdefault("MultiThreading", is_hive)
     if is_hive:
+        result.merge(G4ThreadPoolSvcCfg(flags))
         kwargs.setdefault('Cardinality', flags.Concurrency.NumThreads)
 
     kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)))

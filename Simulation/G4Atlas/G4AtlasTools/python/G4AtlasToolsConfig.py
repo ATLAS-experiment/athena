@@ -49,6 +49,14 @@ def FastSimulationToolListCfg(flags):
     result.setPrivateTools(tools)
     return result
 
+def G4ThreadPoolSvcCfg(flags):
+    acc = ComponentAccumulator()
+
+    svc = CompFactory.ThreadPoolSvc(name="ThreadPoolSvc")
+    svc.ThreadInitTools += [CompFactory.G4ThreadInitTool()]
+
+    acc.addService(svc)
+    return acc
 
 def FastSimulationMasterToolCfg(flags, **kwargs):
     result = ComponentAccumulator()

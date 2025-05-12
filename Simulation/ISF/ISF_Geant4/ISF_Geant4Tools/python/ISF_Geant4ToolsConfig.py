@@ -13,7 +13,8 @@ from G4AtlasServices.G4AtlasUserActionConfig import (
     ISFPassBackUserActionSvcCfg, ISF_ATLFAST_UserActionSvcCfg,
 )
 from G4AtlasTools.G4AtlasToolsConfig import (
-    SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
+    G4ThreadPoolSvcCfg, SensitiveDetectorMasterToolCfg,
+    FastSimulationMasterToolCfg
 )
 from ISF_Services.ISF_ServicesConfig import (
     InputConverterCfg
@@ -62,6 +63,7 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
     # Workaround to keep other simulation flavours working while we migrate everything to be AthenaMT-compatible.
     from SimulationConfig.SimEnums import SimulationFlavour
     if flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFAST3F_ACTSMT, SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
+        acc.merge(G4ThreadPoolSvcCfg(flags))
         acc.setPrivateTools(CompFactory.iGeant4.G4TransportTool(name, **kwargs))
     else:
         kwargs.setdefault("G4RunManagerHelper", acc.addPublicTool(acc.popToolsAndMerge(G4RunManagerHelperCfg(flags))))
