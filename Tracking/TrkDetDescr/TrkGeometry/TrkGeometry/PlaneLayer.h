@@ -46,7 +46,7 @@ public:
      components and MaterialProperties
      - rectangle bounds */
   PlaneLayer(const Amg::Transform3D & transform,
-             std::shared_ptr<SurfaceBounds> rbounds,
+             std::shared_ptr<const SurfaceBounds> rbounds,
              const LayerMaterialProperties& laymatprop,
              double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -63,7 +63,7 @@ public:
   components and pointer to SurfaceArray (passing ownership),
   - rectangle bounds */
   PlaneLayer(const Amg::Transform3D & transform,
-             std::shared_ptr<Trk::SurfaceBounds> tbounds,
+             std::shared_ptr<const Trk::SurfaceBounds> tbounds,
              std::unique_ptr<SurfaceArray> surfaceArray,
              double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr,

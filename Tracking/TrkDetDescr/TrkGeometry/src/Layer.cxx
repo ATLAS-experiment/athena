@@ -15,20 +15,6 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkVolumes/Volume.h"
 
-Trk::Layer::Layer()
-    : m_surfaceArray(nullptr),
-      m_layerMaterialProperties(nullptr),
-      m_layerThickness(0.),
-      m_overlapDescriptor(nullptr),
-      m_previousLayer(nullptr),
-      m_nextLayer(nullptr),
-      m_binUtility(nullptr),
-      m_enclosingTrackingVolume(nullptr),
-      m_enclosingDetachedTrackingVolume(nullptr),
-      m_index(-1),
-      m_layerType(Trk::active),
-      m_ref(0.) {}
-
 Trk::Layer::Layer(const Trk::LayerMaterialProperties& laymatprop,
                   double thickness,
                   std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)

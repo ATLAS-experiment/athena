@@ -21,7 +21,7 @@
 
 Trk::CylinderLayer::CylinderLayer(
   const Amg::Transform3D& transform,
-  std::shared_ptr<Trk::CylinderBounds> cbounds,
+  std::shared_ptr<const Trk::CylinderBounds> cbounds,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
   std::unique_ptr<Trk::OverlapDescriptor> olap,
@@ -48,7 +48,7 @@ Trk::CylinderLayer::CylinderLayer(
 
 Trk::CylinderLayer::CylinderLayer(
   const Amg::Transform3D& transform,
-  std::shared_ptr<Trk::CylinderBounds> cbounds,
+  std::shared_ptr<const Trk::CylinderBounds> cbounds,
   std::unique_ptr<Trk::SurfaceArray> surfaceArray,
   double thickness,
   std::unique_ptr<Trk::OverlapDescriptor> olap,
@@ -68,7 +68,7 @@ Trk::CylinderLayer::CylinderLayer(
 
 Trk::CylinderLayer::CylinderLayer(
   const Amg::Transform3D& transform,
-  std::shared_ptr<Trk::CylinderBounds> cbounds,
+  std::shared_ptr<const Trk::CylinderBounds> cbounds,
   std::unique_ptr<Trk::SurfaceArray> surfaceArray,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
@@ -88,7 +88,7 @@ Trk::CylinderLayer::CylinderLayer(
 }
 
 Trk::CylinderLayer::CylinderLayer(
-    std::shared_ptr<Trk::CylinderBounds> cbounds,
+    std::shared_ptr<const Trk::CylinderBounds> cbounds,
     const Trk::LayerMaterialProperties& laymatprop,
     double thickness,
     std::unique_ptr<Trk::OverlapDescriptor> olap,
@@ -100,7 +100,7 @@ Trk::CylinderLayer::CylinderLayer(
 }
 
 Trk::CylinderLayer::CylinderLayer(
-  std::shared_ptr<Trk::CylinderBounds> cbounds,
+  std::shared_ptr<const Trk::CylinderBounds> cbounds,
   std::unique_ptr<Trk::SurfaceArray> surfaceArray,
   double thickness,
   std::unique_ptr<Trk::OverlapDescriptor> olap,
@@ -115,7 +115,7 @@ Trk::CylinderLayer::CylinderLayer(
 }
 
 Trk::CylinderLayer::CylinderLayer(
-    std::shared_ptr<Trk::CylinderBounds> cbounds,
+    std::shared_ptr<const Trk::CylinderBounds> cbounds,
     std::unique_ptr<Trk::SurfaceArray> surfaceArray,
     const Trk::LayerMaterialProperties& laymatprop,
     double thickness,
@@ -217,7 +217,7 @@ void Trk::CylinderLayer::resizeLayer(const VolumeBounds& bounds,
     Trk::CylinderBounds* rCylinderBounds =
         new Trk::CylinderBounds(r, hLengthZ - envelope);
     Trk::CylinderSurface::m_bounds =
-        std::shared_ptr<Trk::CylinderBounds>(rCylinderBounds);
+        std::shared_ptr<const Trk::CylinderBounds>(rCylinderBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // rphi/z binning
     if (Trk::Layer::m_layerMaterialProperties) {

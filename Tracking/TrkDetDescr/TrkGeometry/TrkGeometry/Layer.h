@@ -18,12 +18,11 @@ class MsgStream;
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/Intersection.h"
 #include "TrkDetDescrUtils/LayerIndex.h"
-#include <memory>
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/OverlapDescriptor.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkParameters/TrackParameters.h"
-
+//
 #include <memory>
 
 namespace Trk {
@@ -73,7 +72,10 @@ enum LayerType { passive = 0, active = 1 };
 class Layer {
  public:
   /**Default Constructor*/
-  Layer();
+  Layer() = default;
+  /**Destructor*/
+  virtual ~Layer() = default;
+
 
   /**Constructor with MaterialProperties */
   Layer(const LayerMaterialProperties& laymatprop, double thickness = 0.,
@@ -89,9 +91,6 @@ class Layer {
   Layer(std::unique_ptr<SurfaceArray> surfaceArray, const LayerMaterialProperties& laymatprop,
         double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
         int ltype = int(passive));
-
-  /**Destructor*/
-  virtual ~Layer() = default;
 
   /** Return the entire SurfaceArray, returns nullptr if no SurfaceArray*/
   const SurfaceArray* surfaceArray() const;
@@ -284,29 +283,29 @@ class Layer {
   Layer& operator=(const Layer& lay);
 
   //!< SurfaceArray on this layer Surface (owning ptr)
-  std::unique_ptr<SurfaceArray> m_surfaceArray;
+  std::unique_ptr<SurfaceArray> m_surfaceArray{};
   //!< MaterialPoperties of this layer Surface
-  std::unique_ptr<LayerMaterialProperties> m_layerMaterialProperties;
+  std::unique_ptr<LayerMaterialProperties> m_layerMaterialProperties{};
   //!< thickness of the Layer
-  double m_layerThickness;
+  double m_layerThickness{};
   //!< descriptor for overlap/next surface (owning ptr)
-  std::unique_ptr<OverlapDescriptor> m_overlapDescriptor;
+  std::unique_ptr<OverlapDescriptor> m_overlapDescriptor{};
 
   // These are stored by not owning pointers belong to the  Volume
   //!< the previous Layer according to BinGenUtils
-  const Layer* m_previousLayer;
+  const Layer* m_previousLayer = nullptr;
   //!< next Layer according to BinGenUtils
-  const Layer* m_nextLayer;
+  const Layer* m_nextLayer = nullptr;
   //!< BinUtility for next/previous decision
-  const BinUtility* m_binUtility;
+  const BinUtility* m_binUtility = nullptr;
   //!< Enclosing TrackingVolume
-  const TrackingVolume* m_enclosingTrackingVolume;
+  const TrackingVolume* m_enclosingTrackingVolume = nullptr;
   //!< Enclosing DetachedTrackingVolume
-  const DetachedTrackingVolume* m_enclosingDetachedTrackingVolume;
+  const DetachedTrackingVolume* m_enclosingDetachedTrackingVolume = nullptr;
 
-  LayerIndex m_index;  //!< LayerIndex
-  int m_layerType;     //!< active passive layer
-  double m_ref;        //!< reference measure for local coordinate convertors
+  LayerIndex m_index{-1};  //!< LayerIndex
+  int m_layerType{Trk::active}; //!< active passive layer
+  double m_ref{};  //!< reference measure for local coordinate convertors
 };
 
 }  // namespace Trk
