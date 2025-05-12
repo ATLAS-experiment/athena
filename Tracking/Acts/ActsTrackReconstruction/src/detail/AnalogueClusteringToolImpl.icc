@@ -261,9 +261,9 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedError(
     } else if (nrows > 1 or ncols > 1) {
         IdentifierHash idHash = element.identifyHash();
 	auto [vX, vY] = errorData.getDeltaError(idHash);
-	if (vX > 0)
+	if (nrows > 1 and vX > 0)
 	  errX = vX;
-	if (vY > 0)
+	if (ncols > 1 and vY > 0)
 	  errY = vY;
     }
 
