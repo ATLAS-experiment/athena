@@ -29,14 +29,13 @@ class Volume;
   BoundaryDiscSurface description inside the tracking realm,
   it extends the DiscSurface description to make a surface being a boundary of a
   Trk::Volume (used for cylindrical shape).
-  It inherits from BoundarySurface to get the interface of boundaries.
 
   @author Andreas.Salzburger@cern.ch
   @author Christos Anastopoulos (Athena  MT modifications)
  */
 
 template <class Tvol>
-class BoundaryDiscSurface final : virtual public BoundarySurface<Tvol>,
+class BoundaryDiscSurface final : public BoundarySurface<Tvol>,
                                   public DiscSurface {
   /** typedef the BinnedArray */
   typedef BinnedArray<Tvol> VolumeArray;
@@ -60,10 +59,10 @@ class BoundaryDiscSurface final : virtual public BoundarySurface<Tvol>,
       : BoundarySurface<Tvol>(inside, outside), DiscSurface(dsf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundaryDiscSurface(std::shared_ptr<VolumeArray> insideArray,
-                      std::shared_ptr<VolumeArray> outsideArray,
+  BoundaryDiscSurface(std::shared_ptr<const VolumeArray> insideArray,
+                      std::shared_ptr<const VolumeArray> outsideArray,
                       const DiscSurface& dsf)
-      : BoundarySurface<Tvol>(insideArray, outsideArray), DiscSurface(dsf) {}
+      : BoundarySurface<Tvol>(std::move(insideArray), std::move(outsideArray)), DiscSurface(dsf) {}
 
   /** Copy constructor with a shift */
   BoundaryDiscSurface(const Tvol* inside, const Tvol* outside,

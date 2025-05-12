@@ -25,7 +25,7 @@ class Volume;
  @class BoundaryCylinderSurface
 
  BoundaryCylinderSurface description inside the tracking realm,
- it extends the Surface description to make a surface being a boundary of a
+ Extends the Surface description to make a surface being a boundary of a
  Trk::Volume
 
  @author Andreas.Salzburger@cern.ch
@@ -33,7 +33,7 @@ class Volume;
  */
 
 template <class Tvol>
-class BoundaryCylinderSurface final : virtual public BoundarySurface<Tvol>,
+class BoundaryCylinderSurface final : public BoundarySurface<Tvol>,
                                       public CylinderSurface {
   /** typedef the BinnedArray */
   typedef BinnedArray<Tvol> VolumeArray;
@@ -54,10 +54,10 @@ class BoundaryCylinderSurface final : virtual public BoundarySurface<Tvol>,
       : BoundarySurface<Tvol>(inside, outside), CylinderSurface(csf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundaryCylinderSurface(std::shared_ptr<VolumeArray> insideArray,
-                          std::shared_ptr<VolumeArray> outsideArray,
+  BoundaryCylinderSurface(std::shared_ptr<const VolumeArray> insideArray,
+                          std::shared_ptr<const VolumeArray> outsideArray,
                           const CylinderSurface& csf)
-      : BoundarySurface<Tvol>(insideArray, outsideArray),
+      : BoundarySurface<Tvol>(std::move(insideArray), std::move(outsideArray)),
         CylinderSurface(csf) {}
 
   /** Copy constructor with a shift */

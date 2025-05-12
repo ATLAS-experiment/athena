@@ -34,7 +34,7 @@ class Volume;
 
 template <class Tvol>
 class BoundarySubtractedCylinderSurface final
-    : virtual public BoundarySurface<Tvol>,
+    : public BoundarySurface<Tvol>,
       public SubtractedCylinderSurface {
   /** typedef the BinnedArray */
   typedef BinnedArray<Tvol> VolumeArray;
@@ -61,8 +61,8 @@ class BoundarySubtractedCylinderSurface final
         SubtractedCylinderSurface(csf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundarySubtractedCylinderSurface(std::shared_ptr<VolumeArray> insideArray,
-                                    std::shared_ptr<VolumeArray> outsideArray,
+  BoundarySubtractedCylinderSurface(std::shared_ptr<const VolumeArray> insideArray,
+                                    std::shared_ptr<const VolumeArray> outsideArray,
                                     const SubtractedCylinderSurface& csf)
       : BoundarySurface<Tvol>(insideArray, outsideArray),
         SubtractedCylinderSurface(csf) {}
