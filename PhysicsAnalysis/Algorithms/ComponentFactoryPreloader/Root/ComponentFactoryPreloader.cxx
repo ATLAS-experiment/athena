@@ -48,6 +48,7 @@
 #include <AsgAnalysisAlgorithms/MCTCDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/ObjectCutFlowHistAlg.h>
 #include <AsgAnalysisAlgorithms/OverlapRemovalAlg.h>
+#include <AsgAnalysisAlgorithms/PDFinfoAlg.h>
 #include <AsgAnalysisAlgorithms/PMGTruthWeightAlg.h>
 #include <AsgAnalysisAlgorithms/PileupReweightingAlg.h>
 #include <AsgAnalysisAlgorithms/SysListDumperAlg.h>
@@ -332,6 +333,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelMissingETAlg>("CP::ParticleLevelMissingETAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelOverlapRemovalAlg>("CP::ParticleLevelOverlapRemovalAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelPtEtaPhiDecoratorAlg>("CP::ParticleLevelPtEtaPhiDecoratorAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::PDFinfoAlg>("CP::PDFinfoAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::PMGTruthWeightAlg>("CP::PMGTruthWeightAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VertexSelectionAlg>("CP::VertexSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VGammaORAlg>("CP::VGammaORAlg"));
