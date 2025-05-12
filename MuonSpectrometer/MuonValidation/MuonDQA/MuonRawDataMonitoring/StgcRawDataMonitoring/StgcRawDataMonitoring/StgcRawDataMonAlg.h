@@ -73,6 +73,7 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   void fillsTgcEfficiencyHistograms(const xAOD::MuonContainer*, const MuonGM::MuonDetectorManager*) const;
   void fillsTgcPadTriggerEfficiencyHistograms(const xAOD::MuonContainer*, const Muon::NSW_PadTriggerDataContainer*, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const;
   
+  int getFEBs(int eta,int layers) const;
   int getSectors(const Identifier& id) const;
   int getLayer(const int multiplet, const int gasGap) const;
   int32_t sourceidToSector(uint32_t sourceid, bool isSideA) const;
