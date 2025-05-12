@@ -20,6 +20,8 @@
 // Message Stream Member
 #include "AthenaBaseComps/AthMessaging.h"
 
+#include <span>
+
 class StoreGateSvc;
 
 /** @class HGTD_DetectorManager
@@ -51,34 +53,32 @@ public:
     //
 
     /** access to individual elements : via Identifier */
-    InDetDD::HGTD_DetectorElement * getDetectorElement(const Identifier &id) const;
+    const InDetDD::HGTD_DetectorElement * getDetectorElement(const Identifier &id) const;
 
     /** access to individual elements : via IdentifierHash */
-    InDetDD::HGTD_DetectorElement * getDetectorElement(const IdentifierHash &idHash) const;
+    const InDetDD::HGTD_DetectorElement * getDetectorElement(const IdentifierHash &idHash) const;
 
     /** access to individual elements : via element identification */
-    InDetDD::HGTD_DetectorElement * getDetectorElement(int endcap,
-                                                       int layer,
-                                                       int phi_module,
-                                                       int eta_module) const;
+    const InDetDD::HGTD_DetectorElement * getDetectorElement(int endcap,
+                                                             int layer,
+                                                             int phi_module,
+                                                             int eta_module) const;
 
-    /** access to whole collection via Iterators */
-    const InDetDD::HGTD_DetectorElementCollection * getDetectorElementCollection() const;
-    InDetDD::HGTD_DetectorElementCollection::const_iterator getDetectorElementBegin() const;
-    InDetDD::HGTD_DetectorElementCollection::const_iterator getDetectorElementEnd() const;
+    /** Get the collection of element that is held*/
+    const InDetDD::HGTD_DetectorElementCollection* getDetectorElementCollection() const;
 
     /** Add elememts */
     void addDetectorElement(InDetDD::HGTD_DetectorElement * element);
 
     /** Invalidate cache for all detector elements */
-    void invalidateAll() const;
+    void invalidateAll();
 
     /** Update all caches */
-    void updateAll() const;
+    void updateAll();
 
     /** Set SiCommonItems */
     void setCommonItems(std::unique_ptr<const InDetDD::SiCommonItems>&& commonItems);
-    
+
 private:
 
     /** Prevent copy and assignment */
@@ -88,9 +88,10 @@ private:
     const HGTD_ID  * getIdHelper() const;
 
     // Private member data
-    std::vector<PVConstLink>              m_volume;
-    InDetDD::HGTD_DetectorElementCollection   m_elementCollection;
-    const HGTD_ID*                   m_idHelper;
+    std::vector<PVConstLink>                         m_volume;
+    // Note that the elements can be altered
+    InDetDD::HGTD_DetectorElementCollection          m_elementCollection;
+    const HGTD_ID*                                   m_idHelper;
 
     std::unique_ptr<const InDetDD::SiCommonItems> m_commonItems;
 

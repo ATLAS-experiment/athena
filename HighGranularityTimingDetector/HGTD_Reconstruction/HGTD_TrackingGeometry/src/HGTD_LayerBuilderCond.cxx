@@ -178,14 +178,20 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
 
 
      // Register the chosen side in the object array
+     //
      // Passing a no-op deleter (no delete happens)
-     // This line can be problematic for MT  .
-     // Basically we couple the DetElement owned surface to the Tracking Geometry.
+     // This line can be problematic
+     // 1. We couple the DetElement owned surface to the Tracking Geometry.
      // The lifetime is not controlled by the geometry.
      // For now we need to be careful on how we schedule these as we do not
      // want to end up with dangling ptr.
-     // Also the payload is modifiable at this point
-     std::shared_ptr<Trk::Surface> sharedSurface(&((*hgtdDetIter)->surface()),[](Trk::Surface*) {});
+     // 2. We modiy the payload (see const_cast).
+     // NOTE !!! We can avoid these if we can clone and not "share".
+     // Or if we have also created the layer and attached them
+     // to the surfaces when the Det Elements are created.
+     // Aka run this Layer Builder as part of the DetElement creation.
+     Trk::Surface* mutableSurace = const_cast<Trk::Surface*>(&((*hgtdDetIter)->surface()));
+     std::shared_ptr<Trk::Surface> sharedSurface(mutableSurace,[](Trk::Surface*) {});
      //
      Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
 

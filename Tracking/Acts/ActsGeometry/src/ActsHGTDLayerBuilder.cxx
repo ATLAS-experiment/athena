@@ -106,7 +106,7 @@ void ActsHGTDLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
   // @param gctx The current geometry context object, e.g. alignment
   // @param surfaces The vector of surfaces to consider
 
-  std::vector<Acts::ProtoLayer> protoLayers; 
+  std::vector<Acts::ProtoLayer> protoLayers;
   protoLayers.reserve(initialLayers.size());
 
   for (const auto &[key, surfaces] : initialLayers) {
@@ -241,17 +241,16 @@ ActsHGTDLayerBuilder::getDetectorElements() const {
   }
   auto hgtdDetMng = static_cast<const HGTD_DetectorManager *>(m_cfg.mng);
   ACTS_VERBOSE("Detector manager has "
-               << std::distance(hgtdDetMng->getDetectorElementBegin(),
-                                hgtdDetMng->getDetectorElementEnd())
+               << std::distance(hgtdDetMng->getDetectorElementCollection()->begin(),
+                                hgtdDetMng->getDetectorElementCollection()->end())
                << " elements");
 
   std::vector<std::shared_ptr<const ActsDetectorElement>> elements;
 
-  InDetDD::HGTD_DetectorElementCollection::const_iterator iter;
-  for (iter = hgtdDetMng->getDetectorElementBegin();
-       iter != hgtdDetMng->getDetectorElementEnd(); ++iter) {
+  for (auto iter = hgtdDetMng->getDetectorElementCollection()->begin();
+       iter != hgtdDetMng->getDetectorElementCollection()->end(); ++iter) {
     const InDetDD::HGTD_DetectorElement *detElement =
-        dynamic_cast<InDetDD::HGTD_DetectorElement *>(*iter);
+        dynamic_cast<const InDetDD::HGTD_DetectorElement *>(*iter);
 
     if (not detElement) {
       ACTS_ERROR("Detector element was nullptr");
