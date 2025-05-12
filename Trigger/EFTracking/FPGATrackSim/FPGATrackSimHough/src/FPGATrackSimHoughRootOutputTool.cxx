@@ -140,9 +140,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
   m_tracknumber = 0;
   ResetVectors();
 
-  if (roadsAreSecondStage) {
-    m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap_2nd();
-  }
+  if (roadsAreSecondStage) m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap_2nd();
+  else m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap();
 
 
   std::vector<float> tmp_hits_x;
