@@ -89,7 +89,7 @@ StatusCode Trk::CombinedExtrapolatorTest::execute()
   // input covariance matrix
   const Trk::TrackParameters* seed = initialPerigee.clone();
 
-  const Trk::PerigeeSurface pSf = initialPerigee.associatedSurface();
+  const Trk::PerigeeSurface& pSf = initialPerigee.associatedSurface();
   
   const Trk::TrackParameters* destParameters = m_extrapolator->extrapolateToVolume(
     ctx, 
@@ -98,7 +98,7 @@ StatusCode Trk::CombinedExtrapolatorTest::execute()
     Trk::alongMomentum,
     static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
 
-  if (!destParameters || !m_extrapolator->trackingGeometry()->atVolumeBoundary(destParameters->position(),m_outerBoundary,0.001) ) {
+  if (!destParameters || !Trk::TrackingGeometry::atVolumeBoundary(destParameters->position(),m_outerBoundary,0.001) ) {
     msg(MSG::ERROR) << " extrapolation to outer boundary failed for input parameters: " << initialPerigee.parameters() << endmsg;
 
   } else {

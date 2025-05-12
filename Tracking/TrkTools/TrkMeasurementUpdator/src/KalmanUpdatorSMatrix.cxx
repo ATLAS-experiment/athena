@@ -384,7 +384,7 @@ Trk::KalmanUpdatorSMatrix::fullStateFitQuality (const Trk::TrackParameters& trkP
     if (nLocCoord == 1) {
       return makeChi2_1D(SParVector5(&trkPar.parameters()[0],5),
                          (*trkPar.covariance()),
-                         parRio[s_enumAccessor.pardef[intAccessor(0)]],covRio(0,0),
+                         parRio[Trk::ParamDefsAccessor::pardef[intAccessor(0)]],covRio(0,0),
                          parRio.parameterKey(),-1);
     } if (nLocCoord == 2) {
       SCovMatrix2 SmeasCov;
@@ -397,8 +397,8 @@ Trk::KalmanUpdatorSMatrix::fullStateFitQuality (const Trk::TrackParameters& trkP
       }
       return makeChi2_2D(SParVector5(&trkPar.parameters()[0],5),
                          (*trkPar.covariance()),
-                         SParVector2(parRio[s_enumAccessor.pardef[intAccessor(0)]],
-                                     parRio[s_enumAccessor.pardef[intAccessor(1)]]),
+                         SParVector2(parRio[Trk::ParamDefsAccessor::pardef[intAccessor(0)]],
+                                     parRio[Trk::ParamDefsAccessor::pardef[intAccessor(1)]]),
                          SmeasCov, parRio.parameterKey(),-1);
     } if (nLocCoord == 5) {
       return makeChi2_5D(SParVector5(&trkPar.parameters()[0],5),
@@ -475,7 +475,7 @@ Trk::KalmanUpdatorSMatrix::predictedStateFitQuality (const Trk::TrackParameters&
     if (nLocCoord == 1) {
       return makeChi2_1D(SParVector5(&predPar.parameters()[0],5),
                          (*predPar.covariance()),
-                         parRio[s_enumAccessor.pardef[intAccessor(0)]],covRio(0,0),
+                         parRio[Trk::ParamDefsAccessor::pardef[intAccessor(0)]],covRio(0,0),
                          parRio.parameterKey(),+1);
     } if (nLocCoord == 2) {
       SCovMatrix2 SmeasCov;
@@ -488,8 +488,8 @@ Trk::KalmanUpdatorSMatrix::predictedStateFitQuality (const Trk::TrackParameters&
       }
       return makeChi2_2D(SParVector5(&predPar.parameters()[0],5),
                          (*predPar.covariance()),
-                         SParVector2(parRio[s_enumAccessor.pardef[intAccessor(0)]],
-                                     parRio[s_enumAccessor.pardef[intAccessor(1)]]),
+                         SParVector2(parRio[Trk::ParamDefsAccessor::pardef[intAccessor(0)]],
+                                     parRio[Trk::ParamDefsAccessor::pardef[intAccessor(1)]]),
                          SmeasCov, parRio.parameterKey(),+1);
     } if (nLocCoord == 5 ) {
       return makeChi2_5D(SParVector5(&predPar.parameters()[0],5),
@@ -565,11 +565,11 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanUpdatorSMatrix::prepareFilterSt
     for (int i=0,k=0; i<5; ++i) { if (parRio.parameterKey() & (1<<i)) intAccessor(k++)=i; }
 
     if (nLocCoord==1) return calculateFilterStep_1D (inputTrkPar,SParVector5(&inputTrkPar.parameters()[0],5),covTrk,
-                                                     parRio[s_enumAccessor.pardef[intAccessor(0)]],
+                                                     parRio[Trk::ParamDefsAccessor::pardef[intAccessor(0)]],
                                                      parRio.parameterKey(),covRio,
                                                      sign,fitQoS,createFQoS);
     if (nLocCoord==2) return calculateFilterStep_2D (inputTrkPar,SParVector5(&inputTrkPar.parameters()[0],5),covTrk,
-                                                     SParVector2(parRio[s_enumAccessor.pardef[intAccessor(0)]],parRio[s_enumAccessor.pardef[intAccessor(1)]]),
+                                                     SParVector2(parRio[Trk::ParamDefsAccessor::pardef[intAccessor(0)]],parRio[Trk::ParamDefsAccessor::pardef[intAccessor(1)]]),
                                                      parRio.parameterKey(),covRio,
                                                      sign,fitQoS,createFQoS);
 
