@@ -13,7 +13,7 @@ namespace Muon::MuonStationIndex{
          case StIndex::BO:
             return static_cast<ChIndex>(2*toInt(stIndex) + !isSmall);
          case StIndex::BE:
-            return isSmall ? ChIndex::ChUnknown : ChIndex::BEE;
+            return isSmall ? ChIndex::BEE : ChIndex::ChUnknown;
          /** There's no BES -> the station indices shift by 1 to the right */
          case StIndex::EI:
          case StIndex::EM:
@@ -49,6 +49,7 @@ namespace Muon::MuonStationIndex{
          case ChIndex::EOS:
          case ChIndex::EES:
          case ChIndex::CSS:
+         case ChIndex::BEE:
             return true;
          default:
             return false;

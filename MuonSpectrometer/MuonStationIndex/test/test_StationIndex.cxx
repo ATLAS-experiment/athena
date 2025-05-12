@@ -37,7 +37,7 @@ bool checkStIdxToChIdx(StIndex st, bool large) {
         }
         break;
       } case StIndex::BE: {
-        if ( (!large && ch == ChIndex::ChUnknown) || (large && ch == ChIndex::BEE)) {
+        if ( (large && ch == ChIndex::ChUnknown) || (!large && ch == ChIndex::BEE)) {
             return true;
         }
         break;
@@ -128,7 +128,8 @@ int main (){
             PRINT_ERROR("Chamber name "<<name<<" is duplciate. ");
             exit_code = EXIT_FAILURE;
         }
-        if ( (name[2] == 'S') != isSmall(chIdx)) {
+        /// BEE is in the small sectors
+        if ( (name[2] == 'S' || name[2] == 'E') != isSmall(chIdx)) {
             PRINT_ERROR("Big/small expectation of "<<name<<" is incorrect: "<<(isSmall(chIdx) ? "si" : "no"));
             exit_code = EXIT_FAILURE;
         }
