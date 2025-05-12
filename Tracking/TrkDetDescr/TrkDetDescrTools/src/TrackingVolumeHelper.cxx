@@ -89,7 +89,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
 
         // set the layer to the two surfaces
         if (lmps){
-            auto mLayer = std::make_shared<MaterialLayer>(firstFaceSurface, std::move(lmps));
+            auto mLayer = std::make_shared<MaterialLayerNoOwnSurf>(&firstFaceSurface, std::move(lmps));
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of first volume." );
             firstFaceSurface.setMaterialLayer(mLayer);
             ATH_MSG_VERBOSE("Set MaterialLayer to the BoundarySurface of second volume.");
@@ -123,7 +123,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
         // LayerMaterialProperties are cloned by MaterialLayer
 
         // the material layer is ready - it can be assigned
-        mLayer = std::make_unique<MaterialLayer>(firstFaceSurface, std::move(lmps));
+        mLayer = std::make_shared<MaterialLayerNoOwnSurf>(&firstFaceSurface, std::move(lmps));
         ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of first volume (may be shared with second volume)." );
         firstFaceSurface.setMaterialLayer(mLayer);
     }
@@ -230,7 +230,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
               // MaterialLayer clones the LayerMaterialPropteries.
 
               if (lmps) {
-                mLayer = std::make_unique<MaterialLayer>(std::move(mLayerSurface), std::move(lmps));
+                mLayer = std::make_shared<MaterialLayerOwnSurf>(std::move(mLayerSurface), std::move(lmps));
               }
             }
             if (boundaryFaceExchange){
@@ -301,9 +301,9 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                 // create a MaterialLayer
                 std::unique_ptr<LayerMaterialProperties>  lmps = layerMaterialProperties(*mLayerSurface);
                 // LayerMaterialProperties will be cloned in MaterialLayer
-                if (lmps) mLayer = std::make_unique<MaterialLayer>(
-                                                               std::move(mLayerSurface),
-                                                               std::move(lmps) );
+                if (lmps) mLayer = std::make_shared<MaterialLayerOwnSurf>(
+                  std::move(mLayerSurface),
+                  std::move(lmps) );
             }
             // check if boundary face should be exchanged
             if (boundaryFaceExchange) {

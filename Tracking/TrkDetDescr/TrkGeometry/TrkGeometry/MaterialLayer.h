@@ -14,8 +14,8 @@ class MsgStream;
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/Layer.h"
-#include "TrkParameters/TrackParameters.h"
 #include "TrkGeometry/LayerMaterialProperties.h"
+#include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/Surface.h"
 //
 #include <memory>
@@ -39,59 +39,87 @@ namespace Trk {
 
  */
 
-class MaterialLayer final : public Layer {
+class MaterialLayer : public Layer {
  public:
-  MaterialLayer() = delete;
-  MaterialLayer(const MaterialLayer&) = default;
-  MaterialLayer(MaterialLayer&&) = default;
-  MaterialLayer& operator=(const MaterialLayer&) = default;
-  MaterialLayer& operator=(MaterialLayer&&) = default;
+  MaterialLayer() = default;
   virtual ~MaterialLayer() = default;
 
-  /** Constructor allowing the Material to be attached to an existing surface
-   It does NOT own the representation. */
-  MaterialLayer(Surface& sf, std::unique_ptr<LayerMaterialProperties> mlprop);
-
-  /** Constructor with a surface representation. It owns that representation  */
-  MaterialLayer(std::shared_ptr<Surface>&& sfso,
-                std::unique_ptr<LayerMaterialProperties> mlprop);
-
   /** Transforms the layer into a Surface representation for extrapolation */
-  virtual const Surface& surfaceRepresentation() const override final;
-  virtual Surface& surfaceRepresentation() override final;
-
+  virtual const Surface& surfaceRepresentation() const override = 0;
+  virtual Surface& surfaceRepresentation() override = 0;
   /** isOnLayer() method, using isOnSurface() with Layer specific
    * tolerance */
   virtual bool isOnLayer(
       const Amg::Vector3D& gp,
-      const BoundaryCheck& bcheck = BoundaryCheck(true)) const override final;
-
+      const BoundaryCheck& bcheck = BoundaryCheck(true)) const override = 0;
   /** Move the layer  - not implemented */
   virtual void moveLayer(Amg::Transform3D&) override final {};
-
   /** Resize the layer to the tracking volume - not implemented */
   virtual void resizeLayer(const VolumeBounds&, double) override final {}
-
   /** Resize the layer to the tracking volume - not implemented */
   virtual void resizeAndRepositionLayer(const VolumeBounds&,
                                         const Amg::Vector3D&,
                                         double) override final {}
-
- private:
-  //shared_ptr as we use the custom deleter.
-  //It should never be nullptr
-  std::shared_ptr<Surface> m_surfaceRepresentation;
 };
 
-inline const Surface& MaterialLayer::surfaceRepresentation() const {
-  return (*(m_surfaceRepresentation.get()));
-}
+class MaterialLayerOwnSurf final : public MaterialLayer {
+ public:
+  virtual ~MaterialLayerOwnSurf() = default;
+  /** Constructor with a surface representation. It owns that representation  */
+  MaterialLayerOwnSurf(std::unique_ptr<Surface> surfaceRepresentation,
+                       std::unique_ptr<LayerMaterialProperties> mlprop)
+      : Trk::MaterialLayer(),
+        m_surfaceRepresentation(std::move(surfaceRepresentation)) {
+    m_layerMaterialProperties = std::move(mlprop);
+    m_layerThickness = 1.;
+  }
 
-inline Surface& MaterialLayer::surfaceRepresentation() {
-  return (*(m_surfaceRepresentation.get()));
-}
+  virtual const Surface& surfaceRepresentation() const override final {
+    return *(m_surfaceRepresentation.get());
+  }
+  virtual Surface& surfaceRepresentation() override final {
+    return *(m_surfaceRepresentation.get());
+  }
+  virtual bool isOnLayer(
+      const Amg::Vector3D& gp,
+      const BoundaryCheck& bcheck = BoundaryCheck(true)) const override final {
+    return m_surfaceRepresentation.get()->isOnSurface(gp, bcheck);
+  }
+
+ private:
+  std::unique_ptr<Surface> m_surfaceRepresentation{};
+};
+
+class MaterialLayerNoOwnSurf : public MaterialLayer {
+ public:
+  virtual ~MaterialLayerNoOwnSurf() = default;
+
+  /** Constructor allowing the Material to be attached to an existing surface
+   It does NOT own the representation. */
+  MaterialLayerNoOwnSurf(Surface* surfaceRepresentation,
+                         std::unique_ptr<LayerMaterialProperties> mlprop)
+      : Trk::MaterialLayer(), m_surfaceRepresentation(surfaceRepresentation) {
+    m_layerMaterialProperties = std::move(mlprop);
+    m_layerThickness = 1.;
+  }
+
+  virtual const Surface& surfaceRepresentation() const override final {
+    return *m_surfaceRepresentation;
+  }
+  virtual Surface& surfaceRepresentation() override final {
+    return *m_surfaceRepresentation;
+  }
+  virtual bool isOnLayer(
+      const Amg::Vector3D& gp,
+      const BoundaryCheck& bcheck = BoundaryCheck(true)) const override final {
+    return m_surfaceRepresentation->isOnSurface(gp, bcheck);
+  }
+
+ private:
+  Surface* m_surfaceRepresentation{};
+};
 
 }  // namespace Trk
 
-#endif  // TRKGEOMETRY_NAVIGATIONLAYER_H
+#endif  // TRKGEOMETRY_MATERIALLAYER_H
 
