@@ -99,7 +99,7 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
         }
         Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
         /// Select only the segements from the EI station
-        if (stIndex != Muon::MuonStationIndex::EI) {
+        if (stIndex != Muon::MuonStationIndex::StIndex::EI) {
             ATH_MSG_VERBOSE("Segment "<<m_idHelperSvc->toStringChamber(id)<<" is not in EI");
             continue;
         }
