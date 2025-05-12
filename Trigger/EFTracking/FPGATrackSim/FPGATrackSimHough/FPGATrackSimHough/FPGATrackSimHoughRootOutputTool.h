@@ -60,13 +60,13 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         void ResetVectors();
 
 	ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
-        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
+        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", ""};
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
         Gaudi::Property <std::string> m_algorithm { this, "ORAlgo", "Normal", "Overlap removal algorithm"};
 
         ORAlgo m_algo{ORAlgo::Normal};       //  Internal ORAlgo enum for faster compare
 
-        const FPGATrackSimRegionMap* m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap();
+        const FPGATrackSimRegionMap* m_SUBREGIONMAP{nullptr};
         TrackCorrType m_IdealCoordFitType = TrackCorrType::None;
 
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
