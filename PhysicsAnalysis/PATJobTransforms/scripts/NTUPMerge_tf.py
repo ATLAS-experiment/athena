@@ -43,7 +43,8 @@ def getTransform():
     # add custom merge and post-processing 
     # steering parameters and get the 'args'
     addPhysValidationMergeFiles(trf.parser)
-    args = trf.parser.parse_args(args=['--skipPostProcessing'])
+    args = trf.parser.parse_args()
+    msg.debug("args:", args)
 
     # get the modified executor
     mergeStepSet = set()
@@ -52,7 +53,7 @@ def getTransform():
     # add to the transform the merge and 
     # post-processing steps conditionally 
     # based on user's input
-    addNTUPMergeSubsteps(mergeStepSet, skip_post_processing = args.skipPostProcessing)
+    addNTUPMergeSubsteps(mergeStepSet, skip_post_processing = 'skipPostProcessing' in args)
     trf.appendToExecutorSet(list(mergeStepSet))
 
     # additional setup
