@@ -21,8 +21,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 namespace Muon {
-
-
+    using namespace MuonStationIndex;
     StatusCode MuonTrackTruthTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_printer.retrieve());
@@ -35,8 +34,7 @@ namespace Muon {
         } else {
             // add pdgs
             for (auto pdg : m_pdgsToBeConsidered.value()) { m_selectedPdgs.insert(pdg); }
-            ATH_MSG_DEBUG(" PDG codes used for matching");
-            for (auto val : m_selectedPdgs) { ATH_MSG_DEBUG(" " << val); }
+            ATH_MSG_DEBUG(" PDG codes used for matching "<<m_selectedPdgs);
         }
         return StatusCode::SUCCESS;
     }
@@ -295,7 +293,7 @@ namespace Muon {
                 if (m_idHelperSvc->isMdt(id)) {
                     eit->second.mdtHits.insert(*it);
                 } else if (m_idHelperSvc->isRpc(id)) {
-                    if (m_idHelperSvc->stationIndex(id) == MuonStationIndex::BO && m_idHelperSvc->rpcIdHelper().doubletR(id) == 2) {
+                    if (m_idHelperSvc->stationIndex(id) == StIndex::BO && m_idHelperSvc->rpcIdHelper().doubletR(id) == 2) {
                         ATH_MSG_VERBOSE(" Discarding non existing RPC hit " << m_idHelperSvc->toString(id));
                         continue;
                     }

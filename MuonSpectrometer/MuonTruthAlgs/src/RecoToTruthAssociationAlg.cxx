@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RecoToTruthAssociationAlg.h"
@@ -42,6 +42,7 @@ namespace {
 }  // namespace
 
 namespace Muon {
+using namespace MuonStationIndex;
 // Initialize method:
 StatusCode RecoToTruthAssociationAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -180,11 +181,10 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
 
                     ElementLink<xAOD::MuonContainer> muonLink{muon, *muonTruthParticleLink, ctx};
 
-
                     /// Zero supression do not want to store meaningless zeros
-                    std::vector<unsigned int> nprecHitsPerChamberLayer(Muon::MuonStationIndex::ChIndexMax, dummy_unsigned);
-                    std::vector<unsigned int> nphiHitsPerChamberLayer(Muon::MuonStationIndex::PhiIndexMax, dummy_unsigned);
-                    std::vector<unsigned int> ntrigEtaHitsPerChamberLayer(Muon::MuonStationIndex::PhiIndexMax, dummy_unsigned);
+                    std::vector<unsigned int> nprecHitsPerChamberLayer(toInt(ChIndex::ChIndexMax), dummy_unsigned);
+                    std::vector<unsigned int> nphiHitsPerChamberLayer(toInt(PhiIndex::PhiIndexMax), dummy_unsigned);
+                    std::vector<unsigned int> ntrigEtaHitsPerChamberLayer(toInt(PhiIndex::PhiIndexMax), dummy_unsigned);
 
                     constexpr int author_sel = (1<<xAOD::Muon::MuidCo) | (1<<xAOD::Muon::MuidSA) | (1<<xAOD::Muon::MuGirl);
                     count_chamber_layers(muon->allAuthors() & author_sel
@@ -284,12 +284,12 @@ void RecoToTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* trut
 
         bool measPhi = m_idHelperSvc->measuresPhi(id);
         bool isTgc = m_idHelperSvc->isTgc(id);
-        Muon::MuonStationIndex::ChIndex chIndex = !isTgc ? m_idHelperSvc->chamberIndex(id) : Muon::MuonStationIndex::ChUnknown;
+        ChIndex chIndex = !isTgc ? m_idHelperSvc->chamberIndex(id) : ChIndex::ChUnknown;
         if (m_idHelperSvc->isMdt(id)) {
             for (unsigned int i = 0; i < mdtTruth.size(); ++i) {
                 if (id == mdtTruth[i]) {
-                    if (chIndex >= 0) {
-                      increment_unsigned(nprecHitsPerChamberLayer.at(chIndex));
+                    if (chIndex != ChIndex::ChUnknown) {
+                      increment_unsigned(nprecHitsPerChamberLayer.at(toInt(chIndex)));
                     }
                     break;
                 }
@@ -298,13 +298,13 @@ void RecoToTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* trut
             for (unsigned int i = 0; i < cscTruth.size(); ++i) {
                 if (id != cscTruth[i]) continue;
                 if (measPhi) {
-                    Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
-                    if (index >= 0) {
-                      increment_unsigned(nphiHitsPerChamberLayer.at(index));
+                    PhiIndex index = m_idHelperSvc->phiIndex(id);
+                    if (index != PhiIndex::PhiUnknown) {
+                      increment_unsigned(nphiHitsPerChamberLayer.at(toInt(index)));
                     }
                 } else {
-                  if (chIndex >= 0) {
-                    increment_unsigned(nprecHitsPerChamberLayer.at(chIndex));
+                  if (chIndex != ChIndex::ChUnknown) {
+                    increment_unsigned(nprecHitsPerChamberLayer.at(toInt(chIndex)));
                   }
                 }
                 break;
@@ -312,12 +312,12 @@ void RecoToTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* trut
         } else if (m_idHelperSvc->isRpc(id)) {
             for (unsigned int i = 0; i < rpcTruth.size(); ++i) {
                 if (id != rpcTruth[i]) { continue; }
-                int index = m_idHelperSvc->phiIndex(id);
-                if (index >= 0) {
+                PhiIndex index = m_idHelperSvc->phiIndex(id);
+                if (index != PhiIndex::PhiUnknown) {
                   if (measPhi) {
-                    increment_unsigned(nphiHitsPerChamberLayer.at(index));
+                    increment_unsigned(nphiHitsPerChamberLayer.at(toInt(index)));
                   } else {
-                    increment_unsigned(ntrigEtaHitsPerChamberLayer.at(index));
+                    increment_unsigned(ntrigEtaHitsPerChamberLayer.at(toInt(index)));
                   }
                 }
                 break;
@@ -325,12 +325,12 @@ void RecoToTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* trut
         } else if (m_idHelperSvc->isTgc(id)) {
             for (unsigned int i = 0; i < tgcTruth.size(); ++i) {
                 if (id != tgcTruth[i]) { continue; }
-                int index = m_idHelperSvc->phiIndex(id);
-                if (index >= 0) {
+                PhiIndex index = m_idHelperSvc->phiIndex(id);
+                if (index != PhiIndex::PhiUnknown) {
                   if (measPhi) {
-                    increment_unsigned(nphiHitsPerChamberLayer.at(index));
+                    increment_unsigned(nphiHitsPerChamberLayer.at(toInt(index)));
                   } else {
-                    increment_unsigned(ntrigEtaHitsPerChamberLayer.at(index));
+                    increment_unsigned(ntrigEtaHitsPerChamberLayer.at(toInt(index)));
                   }
                 }
                 break;
@@ -359,13 +359,13 @@ void RecoToTruthAssociationAlg::clear_dummys(const std::vector<unsigned long lon
         for (unsigned j = 0; j < identifiers.size(); ++j) {
             const Identifier id{identifiers[j]};
             if (m_idHelperSvc->measuresPhi(id)) {
-                const auto phiIdx = static_cast<Muon::MuonStationIndex::PhiIndex>(i);
+                const auto phiIdx = static_cast<PhiIndex>(i);
                 if (m_idHelperSvc->phiIndex(id) == phiIdx) {
                     vec[i] = 0;
                     break;
                 }
             } else {
-                const auto chIdx = static_cast<Muon::MuonStationIndex::ChIndex>(i);
+                const auto chIdx = static_cast<ChIndex>(i);
                 if (m_idHelperSvc->chamberIndex(id) == chIdx) {
                     vec[i] = 0;
                     break;
