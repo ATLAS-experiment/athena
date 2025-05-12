@@ -10,6 +10,16 @@
          
 #include "StgcRawDataMonitoring/StgcRawDataMonAlg.h"
 
+int sTgcRawDataMonAlg::getFEBs(int eta, int layer) const {
+  int feb=-1;
+  if (std::abs(eta)==1) feb=layer-1;
+  else if(std::abs(eta)==2) feb=layer+7;
+  else if(std::abs(eta)==3) feb=layer+15;
+    
+  //ATH_MSG_DEBUG("FEB: " << feb << " Eta: " << eta << " Layer: " << layer);  
+  return feb;
+}
+
 int sTgcRawDataMonAlg::getSectors(const Identifier& id) const { 
   return m_idHelperSvc -> sector(id)*(m_idHelperSvc -> stationEta(id) > 0 ? 1. : -1.);
 }
@@ -40,10 +50,10 @@ std::optional<Identifier> sTgcRawDataMonAlg::getPadId(uint32_t sourceid, uint32_
   const auto pad_id = help.channelID(help.elementID(decoder::offlineStationName(sec),
 						    decoder::offlineStationAbsEta(pfeb) * side,
 						    decoder::offlineStationPhi(sourceid)),
-				     decoder::offlineMultilayer(pfeb), 
-				     decoder::offlineGasgap(pfeb),
-				     Muon::nsw::OFFLINE_CHANNEL_TYPE_PAD,
-				     decoder::offlineChannelNumber(sec, pfeb, vmm, vmmchan), isValid);
+				                    decoder::offlineMultilayer(pfeb), 
+				                    decoder::offlineGasgap(pfeb),
+				                    Muon::nsw::OFFLINE_CHANNEL_TYPE_PAD,
+				                    decoder::offlineChannelNumber(sec, pfeb, vmm, vmmchan), isValid);
   
   if (!isValid) {
     ATH_MSG_WARNING("Pad Identifier not valid, skipping");

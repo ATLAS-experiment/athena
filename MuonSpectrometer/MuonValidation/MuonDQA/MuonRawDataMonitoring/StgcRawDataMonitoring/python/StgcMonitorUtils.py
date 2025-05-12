@@ -36,11 +36,15 @@ def wireOccupancyLabels():
             counterGroupNumberLabel += 1
 
     return wireGroupNumberLabel
-        
+
+def FEBLabels():
+    labels = [ f"Q{int(feb/8)+1}/L{feb%8+1}" for feb in range(0, 24) ]
+    return labels
+
 columnLabels_AL = padTriggerOccupancyLabels()[0]
 columnLabels_CL = padTriggerOccupancyLabels()[1]
 columnLabels_AS = padTriggerOccupancyLabels()[2]
 columnLabels_CS = padTriggerOccupancyLabels()[3]
 rowLabels = padTriggerOccupancyLabels()[4]
 wireGroupNumberLabel = wireOccupancyLabels()
-
+FebLabels = FEBLabels()
