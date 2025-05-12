@@ -249,14 +249,14 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
       if(iVarInfo->legA==iVarInfo->legB) {
         // 2 objects on 1 leg
         // Due to multiplicity checks, a computation like 'dRAA' never overlaps with one like 'dRAB'
-        const auto& featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index)+1)]};
-        combinationToCheck.insert(combinationToCheck.end(),featurePair);
-        combinationToRecord.insert(combinationToRecord.end(),featurePair);
+        Combination featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index)+1)]};
+        combinationToCheck.insert(combinationToCheck.end(),featurePair.cbegin(),featurePair.cend());
+        combinationToRecord.insert(combinationToRecord.end(),featurePair.cbegin(),featurePair.cend());
       } else {
         // 1 object each on 2 legs
-        const auto& featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legB_index][combination.at(legB_index+get_index_offset(legB_index))]};
-        combinationToCheck.insert(combinationToCheck.end(),featurePair);
-        combinationToRecord.insert(combinationToRecord.end(),featurePair);
+        Combination featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legB_index][combination.at(legB_index+get_index_offset(legB_index))]};
+        combinationToCheck.insert(combinationToCheck.end(),featurePair.cbegin(),featurePair.cend());
+        combinationToRecord.insert(combinationToRecord.end(),featurePair.cbegin(),featurePair.cend());
       }
 
       try {
