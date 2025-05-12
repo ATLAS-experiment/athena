@@ -15,7 +15,7 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r25.0.26"
+relname="r25.0.31"
 
 lastref_dir=last_results
 
