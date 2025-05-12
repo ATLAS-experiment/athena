@@ -508,6 +508,11 @@ namespace MuonGM {
 
         bool conditionsApplied{false};
         Amg::Transform3D trfToML{Amg::Transform3D::Identity()};
+        
+        // this block is used for dedicated studies of alignemnt and allows to inject as built corrections before the actual as built and B-Line corrections are applied
+        if(manager()->getMmAsBuilt2()){
+            pos.head(2) = manager()->getMmAsBuilt2()->correctPosition(layerId, pos.head(2));
+        }
 
 #ifndef SIMULATIONBASE
         //*********************

@@ -627,6 +627,10 @@ namespace MuonGM {
         m_nswAsBuilt = nswAsBuiltData;
     }
 
+    void MuonDetectorManager::setMmAsBuilt2(const sTGCAsBuiltData* mmAsBuilt2) {
+        m_mmAsBuilt2 = mmAsBuilt2;
+    }
+
     void MuonDetectorManager::setsTGCAsBuilt(const sTGCAsBuiltData* stgcAsBuilt) {
         m_stgcAsBuildData = stgcAsBuilt;
     }
