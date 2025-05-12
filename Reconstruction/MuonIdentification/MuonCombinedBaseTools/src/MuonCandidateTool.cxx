@@ -25,12 +25,6 @@ namespace {
 }  // namespace
 
 namespace MuonCombined {
-
-    MuonCandidateTool::MuonCandidateTool(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonCandidateTool>(this);
-    }
-
     StatusCode MuonCandidateTool::initialize() {
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_trackBuilder.retrieve(EnableTool{!m_trackBuilder.empty()}));
@@ -121,7 +115,8 @@ namespace MuonCombined {
                 } else
                     msMuonTrackSummary = msTrack.trackSummary()->muonTrackSummary();
                 for (const auto& chs : msMuonTrackSummary->chamberHitSummary()) {
-                    if ((chs.isMdt() && m_idHelperSvc->stationIndex(chs.chamberId()) != Muon::MuonStationIndex::EM) ||
+                    using namespace Muon::MuonStationIndex;
+                    if ((chs.isMdt() && m_idHelperSvc->stationIndex(chs.chamberId()) != StIndex::EM) ||
                         m_idHelperSvc->isCsc(chs.chamberId())) {
                         skipTrack = false;
                         break;

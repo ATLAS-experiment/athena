@@ -40,9 +40,9 @@
 
 namespace Rec {
 
-    class CombinedMuonTrackFitter : public AthAlgTool, virtual public ICombinedMuonTrackFitter {
+    class CombinedMuonTrackFitter : public extends<AthAlgTool, ICombinedMuonTrackFitter> {
     public:
-        CombinedMuonTrackFitter(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~CombinedMuonTrackFitter();
 
         virtual StatusCode initialize() override;

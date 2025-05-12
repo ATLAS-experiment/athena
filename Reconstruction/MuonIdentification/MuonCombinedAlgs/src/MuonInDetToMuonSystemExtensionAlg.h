@@ -33,7 +33,7 @@
 /// muonSystem extension.
 class MuonInDetToMuonSystemExtensionAlg : public AthReentrantAlgorithm {
 public:
-    MuonInDetToMuonSystemExtensionAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     ~MuonInDetToMuonSystemExtensionAlg() = default;
 
     StatusCode initialize() override;
