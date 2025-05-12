@@ -399,10 +399,6 @@ public:
 
   void screenDump(MsgStream& msg) const;
 
-protected:
-  /** clone at new position */
-  TrackingVolume* cloneTV (Amg::Transform3D& transform) const;
-
 private:
   /** reIndex the static layers of the TrackingVolume */
   void indexContainedStaticLayers(GeometrySignature geoSig, int& offset);
