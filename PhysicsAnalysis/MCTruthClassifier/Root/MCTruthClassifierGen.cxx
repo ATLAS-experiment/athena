@@ -274,9 +274,11 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   // End of method 1 of protecting against loops
 
   if ((MC::isMuon(ancestor) || MC::isTau(ancestor) || MC::isW(ancestor)) && ancestor->hasProdVtx() && !samePart) {
+    int nAncestorIterations{0};
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
+      ++nAncestorIterations;
       pPDG = 0; // reset pPDG
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
@@ -291,6 +293,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       if (ancestorParent) {
         pPDG = ancestorParent->pdgId(); // Only set pPDG in the case that we aren't in a loop.
         if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) { // There will be another iteration so set ancestor to ancestorParent
+          ATH_MSG_WARNING("DefOrigOfElectron: no. interations = " << nAncestorIterations << ", override ancestor from pdgID: "<< ancestor->pdgId() << " to pdgID: " << ancestorParent ->pdgId());
           ancestor = ancestorParent; // ancestorParent is not nullptr here
         }
       }
@@ -300,8 +303,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
+      ATH_MSG_WARNING("DefOrigOfElectron: no. interations = " << nAncestorIterations << ", override ancestor from pdgID: "<< ancestor->pdgId() << " to pdgID: " << ancestorParent ->pdgId());
       ancestor = ancestorParent; // ancestorParent is not nullptr here
     }
+    ATH_MSG_WARNING("DefOrigOfElectron: no. interations = " << nAncestorIterations << ", final ancestor is pdgID: "<< ancestor->pdgId() );
   }
 
   info.setMotherProperties(ancestor);
@@ -541,9 +546,11 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
 
   if ((MC::isTau(ancestor)|| MC::isW(ancestor)) && ancestor->hasProdVtx()) {
+    int nAncestorIterations{0};
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
+      ++nAncestorIterations;
       pPDG = 0;
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
@@ -559,6 +566,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
         pPDG = ancestorParent->pdgId();// Only set pPDG in the case that we aren't in a loop.
         if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) { // FIXME should this be (MC::isTau(pPDG) || MC::isW(pPDG)) ???
           // There will be another iteration so set ancestor to ancestorParent
+          ATH_MSG_WARNING("DefOrigOfMuon: no. interations = " << nAncestorIterations << ", override ancestor from pdgID: "<< ancestor->pdgId() << " to pdgID: " << ancestorParent ->pdgId());
           ancestor = ancestorParent; // ancestorParent is not nullptr here
         }
       }
@@ -568,8 +576,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) ||  // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
+      ATH_MSG_WARNING("DefOrigOfMuon: no. interations = " << nAncestorIterations << ", override ancestor from pdgID: "<< ancestor->pdgId() << " to pdgID: " << ancestorParent ->pdgId());
       ancestor = ancestorParent; // ancestorParent is not nullptr here
     }
+    ATH_MSG_WARNING("DefOrigOfMuon: no. interations = " << nAncestorIterations << ", final ancestor is pdgID: "<< ancestor->pdgId() );
   }
 
   info.setMotherProperties(ancestor);
@@ -1206,6 +1216,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
         break;
       }
       // End of method 2 of protecting against Sherpa loops
+      
       if (ancestorParent) {
         pPDG = ancestorParent->pdgId();
         if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
