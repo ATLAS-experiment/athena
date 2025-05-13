@@ -13,6 +13,7 @@ def createPhysValConfigFlags():
     icf.addFlag("PhysVal.doMET", False)
     icf.addFlag("PhysVal.doEgamma", False)
     icf.addFlag("PhysVal.doTau", False)
+    icf.addFlag("PhysVal.doDiTau", False)
     icf.addFlag("PhysVal.doJet", False)
     icf.addFlag("PhysVal.doTopoCluster", False)
     icf.addFlag("PhysVal.doZee", False)

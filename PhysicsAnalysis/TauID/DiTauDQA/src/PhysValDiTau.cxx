@@ -1,0 +1,88 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+// PhysValDdiTau.cxx 
+// Implementation file for class PhysValDiTau
+// Author: S.Binet<binet@cern.ch>
+// Author: A.DeMaria<antonio.de.maria@cern.ch>
+
+// PhysVal includes
+#include "PhysValDiTau.h"
+
+// STL includes
+#include <vector>
+
+// FrameWork includes
+#include "GaudiKernel/IToolSvc.h"
+#include "xAODJet/JetContainer.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/ConstAccessor.h"
+
+
+PhysValDiTau::PhysValDiTau(const std::string& type, 
+		         const std::string& name, 
+                         const IInterface* parent) : 
+  ManagedMonitorToolBase(type, name, parent)
+{
+}
+
+
+StatusCode PhysValDiTau::initialize()
+{
+  ATH_MSG_INFO ("Initializing " << name() << "...");    
+  ATH_CHECK(ManagedMonitorToolBase::initialize());
+   
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PhysValDiTau::bookHistograms()
+{
+  ATH_MSG_INFO ("Booking hists " << name() << "...");
+   
+  // Physics validation plots are level 10
+  m_oDiTauValidationPlots.reset(new DiTauValidationPlots(0,"Tau/" + m_DiTauJetContainerName + "_", m_DiTauJetContainerName));
+  m_oDiTauValidationPlots->setDetailLevel(100);
+  m_oDiTauValidationPlots->initialize();
+  std::vector<HistData> hists = m_oDiTauValidationPlots->retrieveBookedHistograms();
+  ATH_MSG_INFO ("Filling n of hists " << hists.size() << " ");
+  for (const auto& hist : hists) {
+    ATH_CHECK(regHist(hist.first,hist.second,all));
+  }
+   
+  return StatusCode::SUCCESS;      
+}
+
+StatusCode PhysValDiTau::fillHistograms()
+{
+  ATH_MSG_DEBUG ("Filling hists " << name() << "...");
+
+  // Retrieve tau container
+  const xAOD::DiTauJetContainer* ditaus = nullptr;
+  ATH_CHECK( evtStore()->retrieve(ditaus, m_DiTauJetContainerName) ); 
+
+  ATH_MSG_DEBUG("Number of ditaus: " << ditaus->size());
+  
+  // Retrieve event info and beamSpotWeight
+  const xAOD::EventInfo* eventInfo = nullptr;
+  ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
+  
+  float weight = eventInfo->beamSpotWeight();
+
+  // Loop through recoonstructed tau container
+  for (auto ditau : *ditaus) {
+    if ( m_detailLevel < 10 ) continue;
+      
+    // fill histograms for reconstructed taus
+    m_oDiTauValidationPlots->m_oNewCorePlots.fill(*ditau, weight);
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PhysValDiTau::procHistograms()
+{
+  ATH_MSG_INFO ("Finalising hists " << name() << "...");
+  return StatusCode::SUCCESS;
+}

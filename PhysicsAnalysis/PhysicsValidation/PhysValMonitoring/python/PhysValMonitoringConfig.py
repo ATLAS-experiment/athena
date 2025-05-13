@@ -114,6 +114,9 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
         tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags, tauContainer="TauJets")))
         tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags, tauContainer="TauJets_MuonRM")))
         tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags, tauContainer="TauJets_EleRM")))
+    if flags.PhysVal.doDiTau:
+        from DiTauDQA.DiTauDQAConfig import PhysValDiTauCfg
+        tools.append(acc.popToolsAndMerge(PhysValDiTauCfg(flags)))
     if flags.PhysVal.doJet:
         from JetValidation.JetValidationConfig import PhysValJetCfg
         tools.append(acc.popToolsAndMerge(PhysValJetCfg(flags)))
