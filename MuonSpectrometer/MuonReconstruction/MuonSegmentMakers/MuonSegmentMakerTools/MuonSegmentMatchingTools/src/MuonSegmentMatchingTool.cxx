@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentMatchingTool.h"
@@ -11,9 +11,10 @@
 
 namespace Muon {
 
+using StIndex = MuonStationIndex::StIndex; 
+
 MuonSegmentMatchingTool::MuonSegmentMatchingTool(const std::string& ty, const std::string& na, const IInterface* pa)
-    : AthAlgTool(ty, na, pa) {
-    declareInterface<IMuonSegmentMatchingTool>(this);
+    : base_class(ty, na, pa) {
     declareProperty("UseCosmicsSettings", m_isCosmics = false, "Pick up settings for cosmics");
     declareProperty("DoOverlapMatch", m_doOverlapMatch = true,
                     "Perform matching for segments in a small/large overlap");
@@ -48,8 +49,6 @@ MuonSegmentMatchingTool::MuonSegmentMatchingTool(const std::string& ty, const st
     declareProperty("TightSegmentMatching", m_useTightCuts = false,
                     "Use tight selection for busy event to suppress combinatorics and improve CPU");
 
-    declareProperty("DumpAngles", m_dumpAngles = false,
-                    "Print matching angle information to screen. WARNING: always returns True for suppressNoise");
     declareProperty("DoMatchingCutsBIBM_S", m_matchingbibm_sphisec = 0.015,
                     "Cut on sumDeltaYZ, segments in BI and BM, small phi sec");
     declareProperty("DoMatchingCutsBIBO_S", m_matchingbibo_sphisec = 0.015,
@@ -126,8 +125,8 @@ MuonSegmentMatchingTool::match(const EventContext& ctx, const MuonSegment& seg1,
     Identifier chid2 = m_edmHelperSvc->chamberId(seg2);
     if (chid1 == chid2) return false;
 
-    MuonStationIndex::StIndex stIndex1 = m_idHelperSvc->stationIndex(chid1);
-    MuonStationIndex::StIndex stIndex2 = m_idHelperSvc->stationIndex(chid2);
+    StIndex stIndex1 = m_idHelperSvc->stationIndex(chid1);
+    StIndex stIndex2 = m_idHelperSvc->stationIndex(chid2);
 
     if (isSLMatch(chid1, chid2)) {
         if (!m_idHelperSvc->isMdt(chid1) || !m_idHelperSvc->isMdt(chid2)) return false;
@@ -285,15 +284,15 @@ MuonSegmentMatchingTool::isSLMatch(const Identifier& chid1, const Identifier& ch
     // check whether there is field
     if (!m_toroidOn) return true;
 
-    MuonStationIndex::StIndex stIndex1 = m_idHelperSvc->stationIndex(chid1);
-    MuonStationIndex::StIndex stIndex2 = m_idHelperSvc->stationIndex(chid2);
+    StIndex stIndex1 = m_idHelperSvc->stationIndex(chid1);
+    StIndex stIndex2 = m_idHelperSvc->stationIndex(chid2);
 
     // check whether segments in same station
     if (stIndex1 == stIndex2) return true;
 
     // check whether segments in endcap EM/EO region
-    if ((stIndex1 == MuonStationIndex::EO && stIndex2 == MuonStationIndex::EM)
-        || (stIndex1 == MuonStationIndex::EM && stIndex2 == MuonStationIndex::EO))
+    if ((stIndex1 == StIndex::EO && stIndex2 == StIndex::EM)|| 
+        (stIndex1 == StIndex::EM && stIndex2 == StIndex::EO))
         return true;
 
     // all other cases should be treated with curvature
@@ -328,28 +327,26 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
     // calculate matching variables
     IMuonSegmentPairMatchingTool::SegmentMatchResult result = m_pairMatchingTool->matchResult(seg1, seg2);
 
-    MuonStationIndex::StIndex station_a = m_idHelperSvc->stationIndex(result.chid_a);
-    MuonStationIndex::StIndex station_b = m_idHelperSvc->stationIndex(result.chid_b);
+    StIndex station_a = m_idHelperSvc->stationIndex(result.chid_a);
+    StIndex station_b = m_idHelperSvc->stationIndex(result.chid_b);
 
     bool isEndcap_a = m_idHelperSvc->isEndcap(result.chid_a);
     bool isCSC_a    = m_idHelperSvc->isCsc(result.chid_a);
-    bool isBEE_a    = station_a == MuonStationIndex::BE;
+    bool isBEE_a    = station_a == StIndex::BE;
 
     bool isEndcap_b = m_idHelperSvc->isEndcap(result.chid_b);
     bool isCSC_b    = m_idHelperSvc->isCsc(result.chid_b);
-    bool isBEE_b    = station_b == MuonStationIndex::BE;
+    bool isBEE_b    = station_b == StIndex::BE;
 
 
-    if (m_dumpAngles) {
 
-        std::cout << "SegmentPositionChange "
+
+    ATH_MSG_VERBOSE("SegmentPositionChange "
                   << " " << m_idHelperSvc->chamberNameString(result.chid_a) << " "
                   << m_idHelperSvc->chamberNameString(result.chid_b) << " " << result.phiSector_a << " "
                   << result.phiSector_b << " " << result.deltaTheta_a << " " << result.deltaTheta_b << " "
-                  << result.deltaTheta << " " << result.angleAC << " " << result.angleBC << " " << result.angleAB
-                  << std::endl;
-        //      return true; // to get the maximum statistics and not be hindered by current cuts
-    }
+                  << result.deltaTheta << " " << result.angleAC << " " << result.angleBC << " " << result.angleAB);
+
 
     ATH_MSG_VERBOSE("matching " << m_idHelperSvc->chamberNameString(result.chid_a) << " "
                                 << m_idHelperSvc->chamberNameString(result.chid_b) << " phis " << result.phiSector_a
@@ -395,7 +392,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
             }
         }
         // Barrel inner to middle station
-        else if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BM)
+        else if (station_a == StIndex::BI && station_b == StIndex::BM)
         {
             ATH_MSG_VERBOSE(" check BI BM result ");
             if (result.phiSector_a % 2 == 0) {
@@ -405,7 +402,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
             }
         }
         // Barrel inner to outer station
-        else if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BO)
+        else if (station_a == StIndex::BI && station_b == StIndex::BO)
         {
             ATH_MSG_VERBOSE(" check BI BO result ");
             if (result.phiSector_a % 2 == 0) {
@@ -416,7 +413,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         }
 
         // Barrel middle to outer station
-        else if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO)
+        else if (station_a == StIndex::BM && station_b == StIndex::BO)
         {
             ATH_MSG_VERBOSE(" check BM BO result ");
             if (result.phiSector_a % 2 == 0) {
@@ -426,7 +423,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
             }
         }
         // Endcap inner to middle station
-        else if (station_a == MuonStationIndex::EI && (station_b == MuonStationIndex::EM))
+        else if (station_a == StIndex::EI && (station_b == StIndex::EM))
         {
             ATH_MSG_VERBOSE(" check EI EM result ");
             if (result.phiSector_a % 2 == 0) {
@@ -446,7 +443,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
             }
         }
         // Endcap inner to outer station
-        else if (station_a == MuonStationIndex::EI && (station_b == MuonStationIndex::EO))
+        else if (station_a == StIndex::EI && (station_b == StIndex::EO))
         {
             ATH_MSG_VERBOSE(" check EI EO result ");
             if (result.phiSector_a % 2 == 0) {
@@ -466,7 +463,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
             }
         }
         // Endcap middle to outer station
-        else if (station_a == MuonStationIndex::EM && station_b == MuonStationIndex::EO)
+        else if (station_a == StIndex::EM && station_b == StIndex::EO)
         {
             // 5 mrad
             ATH_MSG_VERBOSE(" check EM EO result ");
@@ -517,7 +514,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         return result.deltaTheta <= 0.150;
     }
     // Barrel inner to middle station
-    else if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BM)
+    else if (station_a == StIndex::BI && station_b == StIndex::BM)
     {
         if (result.phiSector_a % 2 == 0) {
             return result.deltaTheta <= m_matchingbibm_sphisec;
@@ -526,7 +523,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         }
     }
     // Barrel inner to outer station
-    else if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BO)
+    else if (station_a == StIndex::BI && station_b == StIndex::BO)
     {
         if (result.phiSector_a % 2 == 0) {
             return result.deltaTheta <= m_matchingbibo_sphisec;
@@ -535,7 +532,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         }
     }
     // Barrel middle to outer station
-    else if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO)
+    else if (station_a == StIndex::BM && station_b == StIndex::BO)
     {
         if (result.phiSector_a % 2 == 0) {
             return result.deltaTheta <= m_matchingbmbo_sphisec;
@@ -544,8 +541,8 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         }
     }
     // Endcap inner to middle station
-    else if ((station_a == MuonStationIndex::EI || station_a == MuonStationIndex::BI)
-             && station_b == MuonStationIndex::EM)
+    else if ((station_a == StIndex::EI || station_a == StIndex::BI)
+             && station_b == StIndex::EM)
     {
         if (result.phiSector_a % 2 == 0) {
             if (result.deltaTheta > m_matchingeiem_sphisec) {
@@ -562,7 +559,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         }
     }
     // Endcap inner to outer station
-    else if (station_a == MuonStationIndex::EI && (station_b == MuonStationIndex::EO))
+    else if (station_a == StIndex::EI && (station_b == StIndex::EO))
     {
         if (result.phiSector_a % 2 == 0) {
             if (result.deltaTheta > m_matchingeieo_sphisec) {
@@ -579,7 +576,7 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         }
     }
     // Endcap middle to outer station
-    else if (station_a == MuonStationIndex::EM && station_b == MuonStationIndex::EO)
+    else if (station_a == StIndex::EM && station_b == StIndex::EO)
     {
         if (result.phiSector_a % 2 == 0) {
             return result.deltaTheta <= m_matchingemeo_sphisec;
@@ -598,23 +595,21 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
     // calculate matching variables
     IMuonSegmentPairMatchingTool::SegmentMatchResult result = m_pairMatchingTool->matchResult(seg1, seg2);
 
-    MuonStationIndex::StIndex station_a = m_idHelperSvc->stationIndex(result.chid_a);
-    MuonStationIndex::StIndex station_b = m_idHelperSvc->stationIndex(result.chid_b);
+    StIndex station_a = m_idHelperSvc->stationIndex(result.chid_a);
+    StIndex station_b = m_idHelperSvc->stationIndex(result.chid_b);
 
     bool isEndcap_a = m_idHelperSvc->isEndcap(result.chid_a);
 
     bool isEndcap_b = m_idHelperSvc->isEndcap(result.chid_b);
 
-    if (m_dumpAngles) {
-        std::cout << "SegmentPositionChange Phi"
+
+    ATH_MSG_VERBOSE("SegmentPositionChange Phi"
                   << " " << m_idHelperSvc->chamberNameString(result.chid_a) << " "
                   << m_idHelperSvc->chamberNameString(result.chid_b) << " deltaPhipos " << result.deltaPhipos
                   << " deltaPhidir " << result.deltaPhidir << " phiposerr_a " << result.phiposerr_a << " phiposerr_b "
                   << result.phiposerr_b << " phidirerr_a " << result.phidirerr_a << " phidirerr_b "
                   << result.phidirerr_b << " shorttube_a " << result.shorttube_a << " shorttube_b "
-                  << result.shorttube_b << std::endl;
-        //      return true; // to get the maximum statistics and not be hindered by current cuts
-    }
+                  << result.shorttube_b);
 
     // Keep segments only if they are in the same or adjacent phi sectors
     if (result.phiSector_a != result.phiSector_b
@@ -661,32 +656,32 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
         if (result.phiSector_a != result.phiSector_b) {
             // measured inner segment
             if (result.phiposerr_a < 10001.000) {
-                if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO) {
+                if (station_a == StIndex::BM && station_b == StIndex::BO) {
                     return result.shorttube_a <= 800;
                 }
-                if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EM) {
+                if (station_a == StIndex::EI && station_b == StIndex::EM) {
                     // MM or STGC have result.shorttube = 99999.
                     return result.shorttube_a <= 3500 || result.shorttube_a == 99999.;
                 }
-                if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EO) {
+                if (station_a == StIndex::EI && station_b == StIndex::EO) {
                     return result.shorttube_a <= 3500 || result.shorttube_a == 99999.;
                 }
-                if (station_a == MuonStationIndex::EM && station_b == MuonStationIndex::EO) {
+                if (station_a == StIndex::EM && station_b == StIndex::EO) {
                     return result.shorttube_a <= 800;
                 }
             }
             // measured outer segment
             if (result.phiposerr_b < 10001.000) {
-                if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BM) {
+                if (station_a == StIndex::BI && station_b == StIndex::BM) {
                     return result.shorttube_b <= 800;
                 }
-                if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BO) {
+                if (station_a == StIndex::BI && station_b == StIndex::BO) {
                     return result.shorttube_b <= 800;
                 }
-                if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO) {
+                if (station_a == StIndex::BM && station_b == StIndex::BO) {
                     return result.shorttube_b <= 800;
                 }
-                if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EM) {
+                if (station_a == StIndex::EI && station_b == StIndex::EM) {
                     return result.shorttube_b <= 1400;
                 }
             }
@@ -729,31 +724,31 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
        
         // measured inner segment
         if (result.phiposerr_a < 10001.000) {
-            if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO) {
+            if (station_a == StIndex::BM && station_b == StIndex::BO) {
                 return result.shorttube_a <= 600;
             }
-            if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EM) {
+            if (station_a == StIndex::EI && station_b == StIndex::EM) {
                 return result.shorttube_a <= 3500 || result.shorttube_a == 99999.;
             }
-            if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EO) {
+            if (station_a == StIndex::EI && station_b == StIndex::EO) {
                 return result.shorttube_a <= 3500 || result.shorttube_a == 99999.;
             }
-            if (station_a == MuonStationIndex::EM && station_b == MuonStationIndex::EO) {
+            if (station_a == StIndex::EM && station_b == StIndex::EO) {
                 return result.shorttube_a <= 500;
             }
         }
         // measured outer segment
         if (result.phiposerr_b < 10001.000) {
-            if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BM) {
+            if (station_a == StIndex::BI && station_b == StIndex::BM) {
                 return result.shorttube_b <= 600;
             }
-            if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BO) {
+            if (station_a == StIndex::BI && station_b == StIndex::BO) {
                 return result.shorttube_b <= 700;
             }
-            if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO) {
+            if (station_a == StIndex::BM && station_b == StIndex::BO) {
                 return result.shorttube_b <= 700;
             }
-            if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EM) {
+            if (station_a == StIndex::EI && station_b == StIndex::EM) {
                 return result.shorttube_b <= 700;
             }
         }
@@ -774,17 +769,17 @@ MuonSegmentMatchingTool::endcapExtrapolationMatch(const MuonSegment& seg1, const
     Identifier chid2 = m_edmHelperSvc->chamberId(seg2);
     if (chid1 == chid2) return false;
 
-    MuonStationIndex::StIndex stIndex1 = m_idHelperSvc->stationIndex(chid1);
-    MuonStationIndex::StIndex stIndex2 = m_idHelperSvc->stationIndex(chid2);
+    StIndex stIndex1 = m_idHelperSvc->stationIndex(chid1);
+    StIndex stIndex2 = m_idHelperSvc->stationIndex(chid2);
     if (stIndex1 == stIndex2) return false;
 
     const MuonSegment* segInner = nullptr;
-    if (stIndex1 == MuonStationIndex::EI) segInner = &seg1;
-    if (stIndex2 == MuonStationIndex::EI) segInner = &seg2;
+    if (stIndex1 == StIndex::EI) segInner = &seg1;
+    if (stIndex2 == StIndex::EI) segInner = &seg2;
 
     const MuonSegment* segOuter = nullptr;
-    if (stIndex1 == MuonStationIndex::EM || stIndex1 == MuonStationIndex::EO) segOuter = &seg1;
-    if (stIndex2 == MuonStationIndex::EM || stIndex2 == MuonStationIndex::EO) segOuter = &seg2;
+    if (stIndex1 == StIndex::EM || stIndex1 == StIndex::EO) segOuter = &seg1;
+    if (stIndex2 == StIndex::EM || stIndex2 == StIndex::EO) segOuter = &seg2;
 
     if (!segInner || !segOuter) {
         return false;
@@ -809,8 +804,8 @@ MuonSegmentMatchingTool::endcapExtrapolationMatch(const MuonSegment& seg1, const
     else
         drCut *= 4;
 
-    if ((stIndex1 == MuonStationIndex::EM && stIndex2 == MuonStationIndex::BI)
-        || (stIndex1 == MuonStationIndex::BI && stIndex2 == MuonStationIndex::EM))
+    if ((stIndex1 == StIndex::EM && stIndex2 == StIndex::BI)
+        || (stIndex1 == StIndex::BI && stIndex2 == StIndex::EM))
     {
         drCut += 3 * m_drExtrapAlignmentOffset;
     } else {
