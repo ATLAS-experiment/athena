@@ -12,7 +12,7 @@ using namespace asg::msgUserCode;
 // EPSILON for hit position float comparisons
 constexpr float EPSILON = 1e-5;
 
-StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> monTool)
+StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> monTool, bool checkOLRForDuplicates)
 {
   ANA_MSG_DEBUG("Beginning runOverlapRemoval()");
   ANA_MSG_DEBUG("Tracks in event: " << tracks.size());
@@ -56,13 +56,13 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
       if(i!=j)
       {
         fit2=tracks.at(j);
-        // Apply Chi2 cut
-        if(fit2.getChi2ndof()>minChi2)
-        {
-          // Only consider track with chi2 smaller than minChi2
-          tracks.at(j).setPassedOR(0);
-          continue;
-        }
+        // Apply Chi2 cut and potentially OR cut if so desired
+        if(fit2.getChi2ndof()>minChi2 || (!fit2.passedOR() && checkOLRForDuplicates))
+	  {
+	    // Only consider track with chi2 smaller than minChi2 
+	    tracks.at(j).setPassedOR(0);
+	    continue;
+	  }
         //  Based on the algorithm choose common hit of non-common hit
         if(orAlgo == ORAlgo::Normal)
         {

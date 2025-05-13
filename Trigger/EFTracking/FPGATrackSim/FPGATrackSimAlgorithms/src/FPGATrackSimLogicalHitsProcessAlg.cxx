@@ -309,7 +309,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_doOverlapRemoval)  ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks_1st) {
-        if (track.getChi2ndof() < m_trackScoreCut) {
+      if (track.getChi2ndof() < m_trackScoreCut.value()) {
             m_nTracksChi2Tot++;
             if (track.passedOR()) {
                 ntrackOLRChi2++;
@@ -351,7 +351,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             m_nTracksFound++;
 	    if (tracks_1st.size() > m_maxNTracksTot) m_maxNTracksTot = tracks_1st.size();
             for (const auto& track : tracks_1st) {
-                if (track.getChi2ndof() < m_trackScoreCut) {
+	      if (track.getChi2ndof() < m_trackScoreCut.value()) {
 		  npasschi2++;
                     if (track.passedOR()) {
 		      npasschi2OLR++;
@@ -412,7 +412,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         // Concatenate 1st and 2nd stage hits vectors to access both in the OutputTool
         phits_2nd.insert(phits_2nd.end(), std::make_move_iterator(phits_1st.begin()), std::make_move_iterator(phits_1st.end()));
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping, false));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
     }
 
     // Reset data pointers
