@@ -4,6 +4,7 @@
 
 #include "HadProngPlots.h"
 #include "AthContainers/ConstAccessor.h"
+#include "AthenaKernel/Units.h"
 
 namespace Tau{
 
@@ -80,10 +81,10 @@ void HadProngPlots::fill(const xAOD::TauJet& tau, float weight) {
   if(test) m_tauDRMax->Fill(avariable, weight);
 
   test = tau.detail(xAOD::TauJetParameters::massTrkSys, avariable);
-  if(test) m_tauMtrks->Fill(avariable/1000., weight);
+  if(test) m_tauMtrks->Fill(avariable/Athena::Units::GeV, weight);
 
   test = tau.detail(xAOD::TauJetParameters::SumPtTrkFrac, avariable);
-  if(test) m_SumPtTrkFrac->Fill(avariable/1000., weight);
+  if(test) m_SumPtTrkFrac->Fill(avariable/Athena::Units::GeV, weight);
 
   test = tau.detail(xAOD::TauJetParameters::innerTrkAvgDist, avariable);
   if(test) m_innerTrkAvgDist->Fill(avariable, weight);

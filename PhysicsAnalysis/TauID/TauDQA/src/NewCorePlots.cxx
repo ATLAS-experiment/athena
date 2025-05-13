@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -8,6 +8,7 @@
 #include "NewCorePlots.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 #include "AthContainers/ConstAccessor.h"
+#include "AthenaKernel/Units.h"
 
 namespace Tau{
 
@@ -139,7 +140,7 @@ namespace Tau{
     if(test) m_etOverPtLeadTrk->Fill(avariable, weight);
 
     test = tau.detail(xAOD::TauJetParameters::massTrkSys, avariable);
-    if(test) m_massTrkSys->Fill(avariable/1000., weight);
+    if(test) m_massTrkSys->Fill(avariable/Athena::Units::GeV, weight);
 
     test = tau.detail(xAOD::TauJetParameters::trkWidth2, avariable);
     if(test) m_trkWidth2->Fill(avariable, weight);
@@ -276,7 +277,7 @@ namespace Tau{
       m_track_d0SigTJVA->Fill(d0SigTJVA, weight);
       m_track_z0sinthetaSigTJVA->Fill(z0sinthetaSigTJVA, weight);
       m_track_charge->Fill(trackParticle->charge(), weight);
-      m_track_qOverP->Fill(qOverP*1000., weight);
+      m_track_qOverP->Fill(qOverP*Athena::Units::GeV, weight);
       m_track_logRConv->Fill(std::log(rConv), weight);
       m_track_tanhRConvII->Fill( std::tanh(rConvII/500.0), weight);
       m_track_ptRatioSeedJet->Fill(trackPt/tauSeedPt, weight);
