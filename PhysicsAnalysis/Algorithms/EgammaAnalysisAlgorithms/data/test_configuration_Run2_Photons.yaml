@@ -8,7 +8,6 @@ EventCleaning:
 Photons:
 - containerName: AnaPhotons
   recomputeIsEM: False
-  forceFullSimConfigForP4: True
   forceFullSimConfigForIso: True
   recalibratePhyslite: False
   decorateTruth: true

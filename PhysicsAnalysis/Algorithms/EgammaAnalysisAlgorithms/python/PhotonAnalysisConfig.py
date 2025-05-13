@@ -98,10 +98,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
             if config.geometry() is LHCPeriod.Run2:
                 alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v1'
             elif config.geometry() is LHCPeriod.Run3:
-                alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+                alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             elif config.geometry() is LHCPeriod.Run4:
                 log.warning("No ESModel set for Run4, using Run3 model")
-                alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+                alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
                                   "there must be something wrong!")

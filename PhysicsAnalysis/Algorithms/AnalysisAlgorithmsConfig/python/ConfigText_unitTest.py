@@ -95,7 +95,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # Electrons
     config.addBlock ('Electrons')
     config.setOptions (containerName='AnaElectrons')
-    config.setOptions (forceFullSimConfig=True)
+    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (recalibratePhyslite=False)
     config.setOptions (decorateTruth=True)
     config.setOptions (decorateCaloClusterEta=True)
@@ -122,7 +122,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
 
     # Photons
     config.addBlock ('Photons', containerName='AnaPhotons')
-    config.setOptions (forceFullSimConfigForP4=True)
     config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (recomputeIsEM=False)
     config.setOptions (recalibratePhyslite=False)
