@@ -119,15 +119,15 @@ def ActsTruthAssociationAlgCfg(flags,
     return acc
 
 def setDefaultTruthMatchingArgs(kwargs) :
-    kwargs.setdefault('MatchWeights',[0.,               # other
-                                      10., 5.,           # ID (pixel, strips)
-                                      0.,  0., 0. , 0.,  # MS
-                                      0. ])             # HGTD
+    kwargs.setdefault('MatchWeights',[0.,                    # other
+                                      10., 5.,               # ID (pixel, strips)
+                                      0.,  0., 0. , 0., 0.,  # MS (MdtDriftCircle, RpcStrip, TgcStrip, MMCluster, sTgcStrip)
+                                      0. ])                  # HGTD
     # weights used for hit purity and hit efficiencies
-    kwargs.setdefault('CountWeights',[0.,               # other
-                                      1.,1.,            # ID (pixel, strips)
-                                      0., 0., 0. , 0.,  # MS
-                                      0. ])             # HGTD
+    kwargs.setdefault('CountWeights',[0.,                   # other
+                                      1.,1.,                # ID (pixel, strips)
+                                      0., 0., 0. , 0., 0.,  # MS (MdtDriftCircle, RpcStrip, TgcStrip, MMCluster, sTgcStrip)
+                                      0. ])                 # HGTD
     kwargs.setdefault('StatisticPtBins',[1e3,2.5e3,5e3,10e3,100e3])
     kwargs.setdefault('ShowDetailedTables',False)
     kwargs.setdefault('PdgIdCategorisation',False)
