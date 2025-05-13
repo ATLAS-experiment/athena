@@ -53,13 +53,15 @@ namespace MuonGM {
         if (m_idHelperSvc->hasRPC()){
             m_rpcArray.resize(m_idHelperSvc->rpcIdHelper().detectorElement_hash_max());
         }
-        
         if (m_idHelperSvc->hasMM()){
             m_mmcArray.resize(m_idHelperSvc->mmIdHelper().detectorElement_hash_max());
         }
         if (m_idHelperSvc->hasSTGC()){
             m_stgArray.resize(m_idHelperSvc->stgcIdHelper().detectorElement_hash_max());
         }
+    }
+    void MuonDetectorManager::setMMPassivation(const NswPassivationDbData* passiv) {
+        m_mmPassivation = passiv;
     }
 
     MuonDetectorManager::~MuonDetectorManager()  = default;
