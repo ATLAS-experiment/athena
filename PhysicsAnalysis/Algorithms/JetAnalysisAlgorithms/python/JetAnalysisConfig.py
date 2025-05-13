@@ -581,7 +581,11 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             "JetETmiss recommendations. The default is None.")
         # Uncertainties tool options
         self.addOption ('uncertToolConfigPath', None, type=str,
-            info="name (str) of the config file to use for the jet uncertainty "
+            info="name (str) of the config file to use for the JES, JER, and JMS uncertainty "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('uncertToolConfigPathJMR', None, type=str,
+            info="name (str) of the config file to use for the JMR uncertainty "
             "tool. Expert option to override JetETmiss recommendations. The "
             "default is None.")
         self.addOption ('uncertToolCalibArea', None, type=str,
@@ -629,7 +633,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             config_file = self.uncertToolConfigPath
         else:
             if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
-                config_file = "rel22/Winter2024_PreRec/" + config_file
+                config_file = "rel22/Spring2025_PreRec/" + config_file
             else:
                 log.warning("Uncertainties for UFO jets are not for Run 4!")
 
@@ -643,13 +647,10 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             mc_type = self.uncertToolMCType
         else:
             if config.dataType() is DataType.FastSim:
-                # To be updated when FastSim recommendatiosn are released
-                log.warning("AF3 uncertainties for large-R jets are not yet released!")
-                log.warning("Using full-sim ones in the meantime!")
                 if config.geometry() is LHCPeriod.Run2:
-                    mc_type = "MC20"
+                    mc_type = "MC20AF3"
                 else:
-                    mc_type = "MC23"
+                    mc_type = "MC23AF3"
             else:
                 if config.geometry() is LHCPeriod.Run2:
                     mc_type = "MC20"
@@ -710,11 +711,11 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             )
 
         # Expert override for config path:
-        if self.uncertToolConfigPath is not None:
-            config_file = self.uncertToolConfigPath
+        if self.uncertToolConfigPathJMR is not None:
+            config_file = self.uncertToolConfigPathJMR
         else:
             if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
-                config_file = "rel22/Fall2024_PreRec/" + config_file
+                config_file = "rel22/Spring2025_PreRec/" + config_file
             else:
                 log.warning("Uncertainties for UFO jets are not for Run 4!")
 
@@ -725,7 +726,10 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             else:
                 mc_type = "MC20"
         elif config.geometry() is LHCPeriod.Run3:
-            mc_type = "MC23"
+            if config.dataType() is DataType.FastSim:
+                mc_type = "MC23AF3"
+            else:
+                mc_type = "MC23"
 
         # Set up the FF smearing tool
         config.addPrivateTool( 'FFSmearingTool', 'CP::FFJetSmearingTool')
