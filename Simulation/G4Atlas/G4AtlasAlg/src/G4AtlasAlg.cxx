@@ -17,35 +17,37 @@
 #include "G4AtlasAlg/G4AtlasRunManager.h"
 
 // Geant4 includes
-#include "G4StateManager.hh"
-#include "G4TransportationManager.hh"
-#include "G4RunManagerKernel.hh"
+#include <G4Event.hh>
+
 #include "G4EventManager.hh"
-#include "G4Navigator.hh"
-#include "G4PropagatorInField.hh"
-#include "G4TrackingManager.hh"
-#include "G4StackManager.hh"
-#include "G4UImanager.hh"
-#include "G4ScoringManager.hh"
-#include "G4VUserPhysicsList.hh"
-#include "G4VModularPhysicsList.hh"
-#include "G4ParallelWorldPhysics.hh"
 #include "G4GDMLParser.hh"
+#include "G4Navigator.hh"
+#include "G4ParallelWorldPhysics.hh"
+#include "G4PropagatorInField.hh"
+#include "G4RunManagerKernel.hh"
+#include "G4ScoringManager.hh"
+#include "G4StackManager.hh"
+#include "G4StateManager.hh"
+#include "G4TrackingManager.hh"
+#include "G4TransportationManager.hh"
+#include "G4UImanager.hh"
+#include "G4VModularPhysicsList.hh"
+#include "G4VUserPhysicsList.hh"
 
 // CLHEP includes
 #include "CLHEP/Random/RandomEngine.h"
 
 // Athena includes
-#include "StoreGate/ReadHandle.h"
-#include "StoreGate/WriteHandle.h"
-#include "MCTruthBase/TruthStrategyManager.h"
-#include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GaudiKernel/IThreadInitTool.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
+#include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "MCTruthBase/TruthStrategyManager.h"
 #include "PathResolver/PathResolver.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
 
-
-// call_once mutexes
+// standard library
+#include <memory>
 #include <mutex>
 static std::once_flag initializeOnceFlag;
 static std::once_flag finalizeOnceFlag;
@@ -388,27 +390,29 @@ StatusCode G4AtlasAlg::execute()
   // tell TruthService we're starting a new event
   ATH_CHECK( m_truthRecordSvc->initializeTruthCollection(largestGeneratedParticleBC, largestGeneratedVertexBC) );
 
-  G4Event *inputEvent{};
-  ATH_CHECK( m_inputConverter->convertHepMCToG4Event(ctx, *outputTruthCollection, inputEvent, *shadowTruth) );
-
   bool abort = false;
-  // Worker run manager
-  // Custom class has custom method call: ProcessEvent.
-  // So, grab custom singleton class directly, rather than base.
-  // Maybe that should be changed! Then we can use a base pointer.
-  if(m_useMT) {
+
+  {
+    auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());
+    ATH_CHECK(m_inputConverter->convertHepMCToG4Event(
+        *outputTruthCollection, *inputEvent, *shadowTruth));
+    // Worker run manager
+    // Custom class has custom method call: ProcessEvent.
+    // So, grab custom singleton class directly, rather than base.
+    // Maybe that should be changed! Then we can use a base pointer.
+    if (m_useMT) {
 #ifdef G4MULTITHREADED
-    auto* workerRM = G4AtlasWorkerRunManager::GetG4AtlasWorkerRunManager();
-    abort = workerRM->ProcessEvent(inputEvent);
+      auto* workerRM = G4AtlasWorkerRunManager::GetG4AtlasWorkerRunManager();
+      abort = workerRM->ProcessEvent(inputEvent.release());
 #else
-    ATH_MSG_ERROR("Trying to use multi-threading in non-MT build!");
-    return StatusCode::FAILURE;
+      ATH_MSG_ERROR("Trying to use multi-threading in non-MT build!");
+      return StatusCode::FAILURE;
 #endif
-  }
-  else {
-    auto* workerRM ATLAS_THREAD_SAFE = // single-threaded case
-      G4AtlasRunManager::GetG4AtlasRunManager();
-    abort = workerRM->ProcessEvent(inputEvent);
+    } else {
+      auto* workerRM ATLAS_THREAD_SAFE =  // single-threaded case
+          G4AtlasRunManager::GetG4AtlasRunManager();
+      abort = workerRM->ProcessEvent(inputEvent.release());
+    }
   }
   if (abort) {
     ATH_MSG_WARNING("Event was aborted !! ");
