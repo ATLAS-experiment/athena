@@ -13,8 +13,6 @@
 
 #include "PixelToTPIDTool/PixelDEdxUtils.h"
 
-//#include "Identifier/Identifier.h" // needed?
-//#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"    
 
 #include "TrkToolInterfaces/IPixelToTPIDTool.h"
@@ -32,10 +30,6 @@
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 #include "InDetIdentifier/PixelID.h"
 
-#include "xAODEventInfo/EventInfo.h"
-
-class AtlasDetectorID; // needed?
-class Identifier; // needed?
 class PixelID;
 class IIBLParameterSvc;
 
@@ -61,9 +55,6 @@ namespace InDet {
       ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc;
       const PixelID* m_pixelid;
       bool m_isMC = false;
-
-      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
-      {this, "EventInfoContName", "EventInfo", "Event info key"};
 
       SG::ReadCondHandleKey<PixelChargeCalibCondData> m_moduleDataKey
       {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};

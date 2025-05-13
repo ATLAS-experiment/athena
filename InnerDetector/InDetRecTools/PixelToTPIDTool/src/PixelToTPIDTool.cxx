@@ -22,8 +22,6 @@ StatusCode InDet::PixelToTPIDTool::initialize() {
     ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and return the truncated mean.");
   }
   
-  ATH_CHECK(m_eventInfoKey.initialize());
-
   /// FIXME TODO: Check if running on data or simulation
 
   /// For now, cannot equalize dE/dx measurements in simulation. 
@@ -43,7 +41,6 @@ StatusCode InDet::PixelToTPIDTool::initialize() {
 
   ATH_CHECK(m_moduleDataKey.initialize());
 
-  //ATH_CHECK(m_dedxKey.initialize());
 
   return StatusCode::SUCCESS;
 }
