@@ -47,6 +47,9 @@ def initConfigFlags():
     acf.addFlag('Debug.DumpDetStore', False, help='dump detector store on each event')
     acf.addFlag('Debug.DumpCondStore', False, help='dump conditions store on each event')
 
+    #Activate NameAuditor
+    acf.addFlag('Debug.NameAuditor',False,help='Activate NameAuditor')
+
     acf.addFlag('ExecutorSplitting.TotalSteps', 0, help='number of steps for pileup overlay')
     acf.addFlag('ExecutorSplitting.Step', -1, help='step number of current pileup overlay job')
     acf.addFlag('ExecutorSplitting.TotalEvents', -1, help='events per pileup overlay step')
