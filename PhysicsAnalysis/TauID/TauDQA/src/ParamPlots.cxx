@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
 
 #include "ParamPlots.h"
+#include "AthenaKernel/Units.h"
 
 namespace Tau{
 
@@ -35,10 +36,10 @@ void ParamPlots::initializePlots()
    
 void ParamPlots::fill(const xAOD::IParticle& tau, float weight)
 {
-  pt->Fill(tau.pt()/1000., weight);
+  pt->Fill(tau.pt()/Athena::Units::GeV, weight);
   eta->Fill(tau.eta(), weight);
   phi->Fill(tau.phi(), weight);
-  eta_pt->Fill(tau.eta(), tau.pt()/1000., weight);
+  eta_pt->Fill(tau.eta(), tau.pt()/Athena::Units::GeV, weight);
   eta_phi->Fill(tau.eta(), tau.phi(), weight);
 }
 

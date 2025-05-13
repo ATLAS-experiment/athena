@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "GeneralTauPlots.h"
 #include "AthContainers/ConstAccessor.h"
+#include "AthenaKernel/Units.h"
 
 namespace Tau{
 
@@ -59,7 +60,7 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
   m_tauNIsolatedTracks->Fill(tau.nTracks(xAOD::TauJetParameters::classifiedIsolation), weight);
   m_tauNCoreTracks->Fill(tau.nTracks(xAOD::TauJetParameters::coreTrack), weight);
   m_tauNWideTracks->Fill(tau.nTracks(xAOD::TauJetParameters::wideTrack), weight); 
-  m_ptHighPt->Fill(tau.pt()/1000, weight);
+  m_ptHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
 
   static const SG::ConstAccessor<float> acc_RNNEleScore("RNNEleScore");
   if ( acc_RNNEleScore.isAvailable(tau) ) {
@@ -92,36 +93,36 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
      if ( gntauScoreSigTrans > -2.0 ) m_GNTauScoreSigTrans->Fill(gntauScoreSigTrans, weight);
   }
   if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose) ) {
-     m_ptRNNVeryLoose      ->Fill(tau.pt()/1000, weight);
-     m_ptRNNVeryLooseHighPt->Fill(tau.pt()/1000, weight);
+     m_ptRNNVeryLoose      ->Fill(tau.pt()/Athena::Units::GeV, weight);
+     m_ptRNNVeryLooseHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
   }
   if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigLoose) ) {
-     m_ptRNNLoose      ->Fill(tau.pt()/1000, weight);
-     m_ptRNNLooseHighPt->Fill(tau.pt()/1000, weight);
+     m_ptRNNLoose      ->Fill(tau.pt()/Athena::Units::GeV, weight);
+     m_ptRNNLooseHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
   }
   if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigMedium) ) {
-     m_ptRNNMedium      ->Fill(tau.pt()/1000, weight);
-     m_ptRNNMediumHighPt->Fill(tau.pt()/1000, weight);
+     m_ptRNNMedium      ->Fill(tau.pt()/Athena::Units::GeV, weight);
+     m_ptRNNMediumHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
   }
   if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigTight) ) {
-     m_ptRNNTight      ->Fill(tau.pt()/1000, weight);
-     m_ptRNNTightHighPt->Fill(tau.pt()/1000, weight);
+     m_ptRNNTight      ->Fill(tau.pt()/Athena::Units::GeV, weight);
+     m_ptRNNTightHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
   }
 
   static const SG::ConstAccessor<char> acc_GNTauL("GNTauL_v0prune");
   if( acc_GNTauL.isAvailable(tau) && acc_GNTauL(tau)) {
-     m_ptGNTauLoose      ->Fill(tau.pt()/1000, weight);
-     m_ptGNTauLooseHighPt->Fill(tau.pt()/1000, weight);
+     m_ptGNTauLoose      ->Fill(tau.pt()/Athena::Units::GeV, weight);
+     m_ptGNTauLooseHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
   }
   static const SG::ConstAccessor<char> acc_GNTauM("GNTauM_v0prune");
   if( acc_GNTauM.isAvailable(tau) && acc_GNTauM(tau)) {
-     m_ptGNTauMedium      ->Fill(tau.pt()/1000, weight);
-     m_ptGNTauMediumHighPt->Fill(tau.pt()/1000, weight);
+     m_ptGNTauMedium      ->Fill(tau.pt()/Athena::Units::GeV, weight);
+     m_ptGNTauMediumHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
   }
   static const SG::ConstAccessor<char> acc_GNTauT("GNTauT_v0prune");
   if( acc_GNTauT.isAvailable(tau) && acc_GNTauT(tau)) {
-     m_ptGNTauTight      ->Fill(tau.pt()/1000, weight);
-     m_ptGNTauTightHighPt->Fill(tau.pt()/1000, weight);
+     m_ptGNTauTight      ->Fill(tau.pt()/Athena::Units::GeV, weight);
+     m_ptGNTauTightHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
   }
 }
 

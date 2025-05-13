@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
 
 #include "EfficiencyPtPlots.h"
-                       
+#include "AthenaKernel/Units.h"
+
 namespace Tau{
 
   EfficiencyPtPlots::EfficiencyPtPlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
@@ -64,56 +65,56 @@ namespace Tau{
   void EfficiencyPtPlots::fill(const xAOD::TauJet& tau, float weight)
   {
     if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigLoose) ) {
-      m_eff_pt_jetRNNloose      ->Fill(tau.pt()/1000., 1., weight);
-      m_eff_pt_jetRNNlooseHighPt->Fill(tau.pt()/1000., 1., weight);
+      m_eff_pt_jetRNNloose      ->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
+      m_eff_pt_jetRNNlooseHighPt->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
       m_eff_jetRNNloose         ->Fill(0., 1., weight);
     }
     else {
-      m_eff_pt_jetRNNloose      ->Fill(tau.pt()/1000., 0., weight);
-      m_eff_pt_jetRNNlooseHighPt->Fill(tau.pt()/1000., 0., weight);
+      m_eff_pt_jetRNNloose      ->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
+      m_eff_pt_jetRNNlooseHighPt->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
       m_eff_jetRNNloose         ->Fill(0., 0., weight);
     }
    
     if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigMedium) ) {
-      m_eff_pt_jetRNNmed      ->Fill(tau.pt()/1000., 1., weight);
-      m_eff_pt_jetRNNmedHighPt->Fill(tau.pt()/1000., 1., weight);
+      m_eff_pt_jetRNNmed      ->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
+      m_eff_pt_jetRNNmedHighPt->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
       m_eff_jetRNNmed         ->Fill(0., 1., weight);
     }
     else {
-      m_eff_pt_jetRNNmed      ->Fill(tau.pt()/1000., 0., weight);
-      m_eff_pt_jetRNNmedHighPt->Fill(tau.pt()/1000., 0., weight);
+      m_eff_pt_jetRNNmed      ->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
+      m_eff_pt_jetRNNmedHighPt->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
       m_eff_jetRNNmed         ->Fill(0., 0., weight);
     }
 
     if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigTight) ) {
-      m_eff_pt_jetRNNtight      ->Fill(tau.pt()/1000., 1., weight);
-      m_eff_pt_jetRNNtightHighPt->Fill(tau.pt()/1000., 1., weight);
+      m_eff_pt_jetRNNtight      ->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
+      m_eff_pt_jetRNNtightHighPt->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
       m_eff_jetRNNtight         ->Fill(0., 1., weight);
     }
     else {
-      m_eff_pt_jetRNNtight      ->Fill(tau.pt()/1000., 0., weight);
-      m_eff_pt_jetRNNtightHighPt->Fill(tau.pt()/1000., 0., weight);
+      m_eff_pt_jetRNNtight      ->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
+      m_eff_pt_jetRNNtightHighPt->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
       m_eff_jetRNNtight         ->Fill(0., 0., weight);
     }
 
 
     static const SG::ConstAccessor<char> acc_GNTauL("GNTauL_v0prune");
     double pass_loose = acc_GNTauL.withDefault(tau,false);
-    m_eff_pt_jetGNTauloose->Fill(tau.pt()/1000., pass_loose, weight);
-    m_eff_pt_jetGNTaulooseHighPt->Fill(tau.pt()/1000., pass_loose, weight);
+    m_eff_pt_jetGNTauloose->Fill(tau.pt()/Athena::Units::GeV, pass_loose, weight);
+    m_eff_pt_jetGNTaulooseHighPt->Fill(tau.pt()/Athena::Units::GeV, pass_loose, weight);
     m_eff_jetGNTauloose->Fill(0.,pass_loose , weight);
 
 
     static const SG::ConstAccessor<char> acc_GNTauM("GNTauM_v0prune");
     double pass_medium = acc_GNTauM.withDefault(tau,false);
-    m_eff_pt_jetGNTaumed->Fill(tau.pt()/1000., pass_medium, weight);
-    m_eff_pt_jetGNTaumedHighPt->Fill(tau.pt()/1000., pass_medium, weight);
+    m_eff_pt_jetGNTaumed->Fill(tau.pt()/Athena::Units::GeV, pass_medium, weight);
+    m_eff_pt_jetGNTaumedHighPt->Fill(tau.pt()/Athena::Units::GeV, pass_medium, weight);
     m_eff_jetGNTaumed->Fill(0., pass_medium, weight);
 
     static const SG::ConstAccessor<char> acc_GNTauT("GNTauT_v0prune");
     double pass_tight = acc_GNTauT.withDefault(tau,false);
-    m_eff_pt_jetGNTautight->Fill(tau.pt()/1000., pass_tight, weight);
-    m_eff_pt_jetGNTautightHighPt->Fill(tau.pt()/1000., pass_tight, weight);
+    m_eff_pt_jetGNTautight->Fill(tau.pt()/Athena::Units::GeV, pass_tight, weight);
+    m_eff_pt_jetGNTautightHighPt->Fill(tau.pt()/Athena::Units::GeV, pass_tight, weight);
     m_eff_jetGNTautight->Fill(0., pass_tight, weight);
 
   }
