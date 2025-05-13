@@ -9,10 +9,12 @@
 #include <string>
 // ISF include
 #include "ISF_Interfaces/IInputConverter.h"
+// Geant4 includes
+#include <G4Event.hh>
 // FrameWork includes
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthService.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 
 namespace HepPDT {
   class ParticleDataTable;
@@ -62,17 +64,22 @@ namespace ISF {
                                ISF::ISFParticleContainer& simParticles) const override final;
 
     /** */
-    virtual StatusCode convertHepMCToG4Event(const EventContext& ctx, McEventCollection& inputGenEvents,
-                                             G4Event*& outputG4Event, McEventCollection& shadowGenEvents) const override final;
+    virtual StatusCode convertHepMCToG4Event(
+        McEventCollection& inputGenEvents, G4Event& outputG4Event,
+        McEventCollection& shadowGenEvents) const override final;
 
-    virtual StatusCode convertHepMCToG4EventLegacy(const EventContext& ctx, McEventCollection& inputGenEvents,
-                                             G4Event*& outputG4Event) const override final;
+    virtual StatusCode convertHepMCToG4EventLegacy(
+        McEventCollection& inputGenEvents,
+        G4Event& outputG4Event) const override final;
 
     /** Converts vector of ISF::ISFParticles to G4Event */
-    G4Event* ISF_to_G4Event(const EventContext& ctx, const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent=nullptr, bool useHepMC=false) const override final;
+    void ISF_to_G4Event(G4Event& event,
+                        const std::vector<ISF::ISFParticle*>& isp,
+                        HepMC::GenEvent* genEvent,
+                        HepMC::GenEvent* shadowGenEvent = nullptr,
+                        bool useHepMC = false) const override final;
 
-  private:
-
+   private:
     const G4ParticleDefinition* getG4ParticleDefinition(int pdgcode) const;
 
 #ifdef HEPMC3
@@ -84,7 +91,9 @@ namespace ISF {
 
     G4PrimaryParticle* getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC, HepMC::GenEvent *shadowGenEvent) const;
 
-    void addG4PrimaryVertex(G4Event* g4evt, ISF::ISFParticle& isp, bool useHepMC, HepMC::GenEvent *shadowGenEvent) const;
+    void addG4PrimaryVertex(G4Event& g4evt, ISF::ISFParticle& isp,
+                            bool useHepMC,
+                            HepMC::GenEvent* shadowGenEvent) const;
 
 #ifdef HEPMC3
     void processPredefinedDecays(const HepMC::ConstGenParticlePtr& genpart, ISF::ISFParticle& isp, G4PrimaryParticle* g4particle) const;

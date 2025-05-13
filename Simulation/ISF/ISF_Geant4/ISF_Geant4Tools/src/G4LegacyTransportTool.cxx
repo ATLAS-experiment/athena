@@ -17,36 +17,35 @@
 #include "ISF_Event/ISFParticleContainer.h"
 
 // Athena classes
+#include "AtlasDetDescr/AtlasRegionHelper.h"
 #include "GeneratorObjects/McEventCollection.h"
-
-#include "MCTruth/PrimaryParticleInformation.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
+#include "MCTruth/PrimaryParticleInformation.h"
 
 // HepMC classes
 #include "AtlasHepMC/GenParticle.h"
 
 // Geant4 classes
-#include "G4LorentzVector.hh"
-#include "G4PrimaryVertex.hh"
-#include "G4PrimaryParticle.hh"
-#include "G4Trajectory.hh"
-#include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
+#include "G4Event.hh"
+#include "G4Geantino.hh"
+#include "G4LorentzVector.hh"
+#include "G4ParallelWorldPhysics.hh"
 #include "G4ParticleTable.hh"
+#include "G4PrimaryParticle.hh"
+#include "G4PrimaryVertex.hh"
+#include "G4SDManager.hh"
+#include "G4ScoringManager.hh"
 #include "G4StateManager.hh"
+#include "G4Timer.hh"
+#include "G4Trajectory.hh"
 #include "G4TransportationManager.hh"
 #include "G4UImanager.hh"
-#include "G4ScoringManager.hh"
-#include "G4Timer.hh"
-#include "G4SDManager.hh"
-#include "G4VUserPhysicsList.hh"
 #include "G4VModularPhysicsList.hh"
-#include "G4ParallelWorldPhysics.hh"
-#include "G4Timer.hh"
+#include "G4VUserPhysicsList.hh"
 
-#include "AtlasDetDescr/AtlasRegionHelper.h"
-
-// call_once mutexes
+// standard library
+#include <memory>
 #include <mutex>
 static std::once_flag initializeOnceFlag;
 static std::once_flag finalizeOnceFlag;
@@ -258,14 +257,12 @@ StatusCode iGeant4::G4LegacyTransportTool::simulateVector(const EventContext& ct
 
   ATH_MSG_DEBUG (name() << ".simulateVector(...) : Received a vector of " << particles.size() << " particles for simulation.");
   /** Process ParticleState from particle stack */
-  G4Event* inputEvent = m_inputConverter->ISF_to_G4Event(ctx, particles, genEvent(mcEventCollection));
-  if (!inputEvent) {
-    ATH_MSG_ERROR("ISF Event conversion failed ");
-    return StatusCode::FAILURE;
-  }
+  auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());
+  m_inputConverter->ISF_to_G4Event(*inputEvent, particles,
+                                   genEvent(mcEventCollection));
 
   ATH_MSG_DEBUG("Calling ISF_Geant4 ProcessEvent");
-  bool abort = m_pRunMgr->ProcessEvent(inputEvent);
+  bool abort = m_pRunMgr->ProcessEvent(inputEvent.release());
 
   if (abort) {
     ATH_MSG_WARNING("Event was aborted !! ");

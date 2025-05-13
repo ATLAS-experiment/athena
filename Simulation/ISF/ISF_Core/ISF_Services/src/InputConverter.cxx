@@ -8,6 +8,7 @@
 #include <memory>
 
 // framework
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
@@ -152,9 +153,9 @@ ISF::InputConverter::convert(McEventCollection& inputGenEvents,
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::InputConverter::convertHepMCToG4Event(const EventContext& ctx, McEventCollection& inputGenEvents,
-                                                      G4Event*& outputG4Event, McEventCollection& shadowGenEvents) const
-{
+StatusCode ISF::InputConverter::convertHepMCToG4Event(
+    McEventCollection& inputGenEvents, G4Event& outputG4Event,
+    McEventCollection& shadowGenEvents) const {
   ISF::ISFParticleContainer simParticleList{}; // particles for ISF simulation
   ATH_CHECK(this->convert(inputGenEvents, simParticleList));
   //Convert from ISFParticleContainer to ConstISFParticleVector
@@ -162,19 +163,17 @@ StatusCode ISF::InputConverter::convertHepMCToG4Event(const EventContext& ctx, M
     std::make_move_iterator(std::begin(simParticleList)),
       std::make_move_iterator(std::end(simParticleList))
       };
-  if (!shadowGenEvents.empty()) {
-    outputG4Event = this->ISF_to_G4Event(ctx, simParticleVector, inputGenEvents.back(), shadowGenEvents.back());
-  }
-  else{
-    outputG4Event = this->ISF_to_G4Event(ctx, simParticleVector, inputGenEvents.back(), nullptr);
-  }
+  HepMC::GenEvent* shadowGenEvent =
+      !shadowGenEvents.empty()
+          ? static_cast<HepMC::GenEvent*>(shadowGenEvents.back())
+          : nullptr;
+  this->ISF_to_G4Event(outputG4Event, simParticleVector, inputGenEvents.back(),
+                       shadowGenEvent);
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode ISF::InputConverter::convertHepMCToG4EventLegacy(const EventContext& ctx, McEventCollection& inputGenEvents,
-                                                            G4Event*& outputG4Event) const
-{
+StatusCode ISF::InputConverter::convertHepMCToG4EventLegacy(
+    McEventCollection& inputGenEvents, G4Event& outputG4Event) const {
   ISF::ISFParticleContainer simParticleList{}; // particles for ISF simulation
   ATH_CHECK(this->convert(inputGenEvents, simParticleList));
   //Convert from ISFParticleContainer to ConstISFParticleVector
@@ -182,10 +181,10 @@ StatusCode ISF::InputConverter::convertHepMCToG4EventLegacy(const EventContext& 
     std::make_move_iterator(std::begin(simParticleList)),
       std::make_move_iterator(std::end(simParticleList))
       };
-  outputG4Event = this->ISF_to_G4Event(ctx, simParticleVector, inputGenEvents.back(), nullptr);
+  this->ISF_to_G4Event(outputG4Event, simParticleVector, inputGenEvents.back(),
+                       nullptr);
   return StatusCode::SUCCESS;
 }
-
 
 /** get all generator particles which pass filters */
 #ifdef HEPMC3
@@ -466,9 +465,11 @@ ISF::InputConverter::passesFilters(const HepMC::GenParticle& part) const
 
 
 //________________________________________________________________________
-G4Event* ISF::InputConverter::ISF_to_G4Event(const EventContext& ctx, const ISF::ISFParticleVector& ispVector, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent, bool useHepMC) const
-{
-  G4Event *g4evt = new G4Event(ctx.eventID().event_number());
+void ISF::InputConverter::ISF_to_G4Event(
+    G4Event& event, const ISF::ISFParticleVector& ispVector,
+    HepMC::GenEvent* genEvent, HepMC::GenEvent* shadowGenEvent,
+    bool useHepMC) const {
+  // G4Event *g4evt = new G4Event(ctx.eventID().event_number());
 
   // retrieve world solid (volume)
   const G4VSolid *worldSolid = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume()->GetLogicalVolume()->GetSolid();
@@ -488,16 +489,18 @@ G4Event* ISF::InputConverter::ISF_to_G4Event(const EventContext& ctx, const ISF:
       }
       continue;
     }
-    this->addG4PrimaryVertex(g4evt,isp,useHepMC,shadowGenEvent);
+    this->addG4PrimaryVertex(event, isp, useHepMC, shadowGenEvent);
   }
 
-  AtlasG4EventUserInfo *atlasG4EvtUserInfo=new AtlasG4EventUserInfo();
+  AtlasG4EventUserInfo* atlasG4EvtUserInfo =
+      dynamic_cast<AtlasG4EventUserInfo*>(event.GetUserInformation());
+  if (!atlasG4EvtUserInfo) {
+    atlasG4EvtUserInfo = new AtlasG4EventUserInfo;
+    event.SetUserInformation(atlasG4EvtUserInfo);
+  }
   atlasG4EvtUserInfo->SetLastProcessedTrackID(0); // TODO Check if it is better to set this to -1 initially
   atlasG4EvtUserInfo->SetLastProcessedStep(0); // TODO Check if it is better to set this to -1 initially
   atlasG4EvtUserInfo->SetHepMCEvent(genEvent);
-  g4evt->SetUserInformation(atlasG4EvtUserInfo);
-
-  return g4evt;
 }
 
 //________________________________________________________________________
@@ -1139,8 +1142,9 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
 }
 
 //________________________________________________________________________
-void ISF::InputConverter::addG4PrimaryVertex(G4Event* g4evt, ISF::ISFParticle& isp, bool useHepMC, HepMC::GenEvent *shadowGenEvent) const
-{
+void ISF::InputConverter::addG4PrimaryVertex(
+    G4Event& g4evt, ISF::ISFParticle& isp, bool useHepMC,
+    HepMC::GenEvent* shadowGenEvent) const {
   /*
     see conversion from PrimaryParticleInformation to TrackInformation in
     http://acode-browser.usatlas.bnl.gov/lxr/source/atlas/Simulation/G4Atlas/G4AtlasAlg/src/AthenaStackingAction.cxx#0044
@@ -1165,7 +1169,7 @@ void ISF::InputConverter::addG4PrimaryVertex(G4Event* g4evt, ISF::ISFParticle& i
   g4vertex->SetPrimary( g4particle );
   ATH_MSG_VERBOSE("Print G4PrimaryVertex: ");
   if (msgLevel(MSG::VERBOSE)) { g4vertex->Print(); }
-  g4evt->AddPrimaryVertex( g4vertex );
+  g4evt.AddPrimaryVertex(g4vertex);
   return;
 }
 
