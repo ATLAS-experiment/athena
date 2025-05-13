@@ -34,6 +34,22 @@ python -m MuonVertexValidation.MuonVertexValidationRun -i <path to input AOD fil
 ```
 Note that a list of input files can be passed (for example via globbing) and by default `--maxEvents=-1`.
 
+#### Running on the grid
+The ntuple maker can run on the grid via the pathena tool. To run, set up atlas as usual, then call:
+```
+lsetup rucio
+lsetup panda
+pathena --trf "python -m MuonVertexValidation.MuonVertexValidationRun \
+        --inputFile=%IN \
+        --outputFile=%OUT.NTUP.root" \
+        --inDS <your dataset> \ 
+        --outDS=user.<username>.<output dataset name> \
+        --nFiles <number of pool files to run over> \
+        --nFilesPerJob <number of files per job> \
+        --mergeOutput \
+        --nCore 8 \
+```
+
 ### Validation plots 
 The plotting routines are defined in `util/`. The package offers two main functionalities: 
 - `makeValidationPlots.cxx` produces validation plots for a single dataset
