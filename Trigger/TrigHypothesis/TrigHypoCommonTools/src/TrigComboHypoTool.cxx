@@ -216,7 +216,7 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
   values.reserve(m_varInfo_vec.size());
   size_t warnings = 0, iterations = 0;
   // Correct for the legs on which we compute with 2 features
-  auto get_index_offset = [legMultiplicityForComputation](size_t legindex) {
+  auto get_index_offset = [&legMultiplicityForComputation](size_t legindex) {
     size_t offset{0};
     for (auto iLeg=legMultiplicityForComputation.cbegin(); iLeg!=legMultiplicityForComputation.cbegin()+legindex; ++iLeg) {
       offset += (*iLeg)-1;
@@ -249,14 +249,14 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
       if(iVarInfo->legA==iVarInfo->legB) {
         // 2 objects on 1 leg
         // Due to multiplicity checks, a computation like 'dRAA' never overlaps with one like 'dRAB'
-        const auto& featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index)+1)]};
-        combinationToCheck.insert(combinationToCheck.end(),featurePair);
-        combinationToRecord.insert(combinationToRecord.end(),featurePair);
+        Combination featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index)+1)]};
+        combinationToCheck.insert(combinationToCheck.end(),featurePair.cbegin(),featurePair.cend());
+        combinationToRecord.insert(combinationToRecord.end(),featurePair.cbegin(),featurePair.cend());
       } else {
         // 1 object each on 2 legs
-        const auto& featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legB_index][combination.at(legB_index+get_index_offset(legB_index))]};
-        combinationToCheck.insert(combinationToCheck.end(),featurePair);
-        combinationToRecord.insert(combinationToRecord.end(),featurePair);
+        Combination featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legB_index][combination.at(legB_index+get_index_offset(legB_index))]};
+        combinationToCheck.insert(combinationToCheck.end(),featurePair.cbegin(),featurePair.cend());
+        combinationToRecord.insert(combinationToRecord.end(),featurePair.cbegin(),featurePair.cend());
       }
 
       try {

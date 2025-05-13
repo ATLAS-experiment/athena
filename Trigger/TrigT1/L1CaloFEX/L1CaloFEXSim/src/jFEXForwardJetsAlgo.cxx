@@ -261,7 +261,11 @@ int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) const {
     }
     int summedEt = 0;
     for(const auto& seedTT : it_seed_map->second){
-        summedEt += getEt(seedTT);  
+        //getEt can return -999 as an error value
+        const int thisEt = getEt(seedTT);
+        if (thisEt != -999){
+          summedEt += getEt(seedTT);
+        } 
     }
 
     return summedEt;
@@ -274,7 +278,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID) const {
     // Exists the jTower in the seach (greater than) tower map?
     auto it_seed_map = m_SearchGMap.find(TTID);
     if(it_seed_map == m_SearchGMap.end()) {
-        ATH_MSG_ERROR("Could not find TT" << TTID << " in the seach (>) local maxima for jets file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the search (>) local maxima for jets file.");
         return false;
     }
 

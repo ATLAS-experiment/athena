@@ -110,6 +110,7 @@ namespace Muon {
         for (const MuonSegment* segment : coll) {
             ATH_MSG_DEBUG("Adding segment ");
             std::unique_ptr<MuPatSegment> aSeg = m_candidateTool->createSegInfo(ctx, *segment);
+            if (!aSeg) continue;
             ATH_MSG_DEBUG(" -> MuPatSegment " << m_candidateTool->print(*aSeg));
 
             MuonStationIndex::ChIndex chIndex = aSeg->chIndex;
@@ -234,8 +235,9 @@ namespace Muon {
                 }
                 std::unique_ptr<MuPatSegment> segInfo = m_candidateTool->createSegInfo(ctx, *newseg);
                 // check whether segment of good quality AND that its quality is equal or better than the input segments
-                if (segInfo->quality < 2 || (segInfo->quality < sit1->quality || segInfo->quality < sit2->quality)) {
-                    ATH_MSG_VERBOSE("resolveSLOverlaps::bad segment " << std::endl << m_printer->print(*segInfo->segment));
+                if (!segInfo || segInfo->quality < 2 || (segInfo->quality < sit1->quality || segInfo->quality < sit2->quality)) {
+                    if(segInfo) ATH_MSG_VERBOSE("resolveSLOverlaps::bad segment " << std::endl << m_printer->print(*segInfo->segment));
+                    else ATH_MSG_VERBOSE("Invalid segment info");
                     continue;
                 }                
                 int shared_eta = 0, shared_phi = 0;  // check for hits shared between segments

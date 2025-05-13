@@ -110,21 +110,24 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
         acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
 
     if not flags.Trigger.enableL1CaloPhase1:
-        emtauProvider.eFexEMRoIKey = ""
-        emtauProvider.eFexTauRoIKey = ""
-        jetProvider.jFexSRJetRoIKey = ""
-        jetProvider.jFexLRJetRoIKey = ""
-        jetProvider.jFexFwdElRoIKey = ""
-        jetProvider.jFexTauRoIKey = ""
-        jetProvider.jFexMETRoIKey = ""
-        jetProvider.jFexSumETRoIKey = ""
-        energyProvider.gFexSRJetRoIKey = ""
-        energyProvider.gFexLRJetRoIKey = ""
-        energyProvider.gMETComponentsJwojKey = ""
-        energyProvider.gMHTComponentsJwojKey = ""
-        energyProvider.gMETComponentsNoiseCutKey = ""
-        energyProvider.gMETComponentsRmsKey = ""
-        energyProvider.gScalarEJwojKey = ""
+        if (emtauProvider != ""):
+            emtauProvider.eFexEMRoIKey = ""
+            emtauProvider.eFexTauRoIKey = ""
+        if (jetProvider != ""):
+            jetProvider.jFexSRJetRoIKey = ""
+            jetProvider.jFexLRJetRoIKey = ""
+            jetProvider.jFexFwdElRoIKey = ""
+            jetProvider.jFexTauRoIKey = ""
+            jetProvider.jFexMETRoIKey = ""
+            jetProvider.jFexSumETRoIKey = ""
+        if (energyProvider != ""):
+            energyProvider.gFexSRJetRoIKey = ""
+            energyProvider.gFexLRJetRoIKey = ""
+            energyProvider.gMETComponentsJwojKey = ""
+            energyProvider.gMHTComponentsJwojKey = ""
+            energyProvider.gMETComponentsNoiseCutKey = ""
+            energyProvider.gMETComponentsRmsKey = ""
+            energyProvider.gScalarEJwojKey = ""
 
     topoSimAlg = CompFactory.LVL1.L1TopoSimulation(name,
                                                     MuonInputProvider = muProvider,
