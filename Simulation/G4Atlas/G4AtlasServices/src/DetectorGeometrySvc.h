@@ -27,7 +27,7 @@ public:
   StatusCode initialize() override final;
   StatusCode finalize() override final;
 
-  G4VUserDetectorConstruction* GetDetectorConstruction() override final;
+  UPDetectorConstruction GetDetectorConstruction() override final;
 
   std::vector<std::string>& GetParallelWorldNames() override final; // Called by G4AtlasAlg and (G4Legacy)TransportTool.
 

@@ -60,8 +60,7 @@ StatusCode DetectorGeometrySvc::finalize(){
   return StatusCode::SUCCESS;
 }
 
-G4VUserDetectorConstruction* DetectorGeometrySvc::GetDetectorConstruction()
-{
+auto DetectorGeometrySvc::GetDetectorConstruction() -> UPDetectorConstruction {
   return m_detConstruction->GetDetectorConstruction();
 }
 
