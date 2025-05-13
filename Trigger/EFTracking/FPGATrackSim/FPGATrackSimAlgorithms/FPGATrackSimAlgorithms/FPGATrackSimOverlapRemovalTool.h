@@ -66,6 +66,7 @@ private:
   Gaudi::Property <unsigned> m_imageSize_y { this, "nBins_y", 0, "number of bins in, eg, q/pT"};
   Gaudi::Property <std::string> m_algorithm { this, "ORAlgo", "Normal", "Overlap removal algorithm"};
   Gaudi::Property <bool> m_doFastOR { this, "doFastOR", false, "Use fast overlap removal algorithm instead of default"};
+  Gaudi::Property <bool> m_ORCheckFail { this, "ORCheckFail", true, "Check OLR Failure for duplicate list"};
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
   int m_totLayers = 0;                 //  Total number of layers used for a track
