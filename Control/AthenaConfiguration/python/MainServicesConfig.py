@@ -19,6 +19,8 @@ def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='Ath
     cfg.setAppProperty('JobOptionsPostAction', '')
     cfg.setAppProperty('JobOptionsPreAction', '')
     cfg.setAppProperty('PrintAlgsSequence', flags.Exec.PrintAlgsSequence)
+    if flags.Debug.NameAuditor:
+        cfg.addAuditor(CompFactory.NameAuditor())
     return cfg
 
 
