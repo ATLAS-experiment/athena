@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EGAMMA1BDTALGTOOL_H
@@ -12,8 +12,8 @@
 #include "../IGlobalSimAlgTool.h"
 #include "../IO/LArStripNeighborhoodContainer.h"
 
-#include "../NumericTypes/ap_int.h"
-#include "../NumericTypes/ap_fixed.h"
+#include "ap_int.h"
+#include "ap_fixed.h"
 
 #include "Egamma1BDT/BDT.h"
 
