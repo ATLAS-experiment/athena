@@ -24,15 +24,8 @@ StatusCode InDet::PixelToTPIDTool::initialize() {
   
   ATH_CHECK(m_eventInfoKey.initialize());
 
-  /*
-  /// Check if running on data or simulation
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, Gaudi::Hive::currentContext());
-  if (!eventInfo.isValid()) {
-    ATH_MSG_ERROR("Could not retrieve xAOD::EventInfo");
-    return StatusCode::FAILURE;
-  }
-  m_isMC = eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
-  */
+  /// FIXME TODO: Check if running on data or simulation
+
   /// For now, cannot equalize dE/dx measurements in simulation. 
   if(m_isMC && m_equalizeClusterMeasurements) {
     ATH_MSG_ERROR("Requested to equalize the dE/dx, but this is not yet supported for MC.");
@@ -84,27 +77,6 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
   /// Second value keeps track if the cluster is in IBL and has at least an overflow hit
   std::multimap<float,int> dEdxMap;
 
-  /*
-  /// Check if MC or data
-  bool isMC = false;
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo, ctx);        
-  if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) { //MC
-    ATH_MSG_DEBUG("The current event is simulation.");
-    isMC = true;
-  }
-  else { // Data
-    ATH_MSG_DEBUG("The current event is data.");
-  }
-      
-  if(isMC && m_equalizeClusterMeasurements) {
-    ATH_MSG_ERROR("Requested to equalize the dE/dx, but this is not yet supported for MC.");
-    ATH_MSG_ERROR("Eventually, can apply scale factors to \"undo\" the radiation modeling in MC23.");
-    ATH_MSG_ERROR("Or equalize the MC to the data reference run.");        
-    /// Throw runtime error since not returning a status code.
-    throw std::runtime_error("Cannot equalize MC (for now).");
-  }
-  */
-
   // Check for track states:
   const Trk::TrackStates* recoTrackStates = track.trackStateOnSurfaces();
   if (recoTrackStates) {
@@ -140,7 +112,6 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
             
           float dotProd = (*tsosIter)->trackParameters()->momentum().dot( (*tsosIter)->trackParameters()->associatedSurface().normal() );
           cluster.cosalpha = fabs(dotProd / (*tsosIter)->trackParameters()->momentum().mag());
-          //cluster.charge = pixclus->prepRawData()->totalCharge()*cluster.cosalpha; // NB: multiplying by cosalpha!
           cluster.charge = pixclus->prepRawData()->totalCharge();
 
           /// keep track if this is an ibl cluster with overflow
@@ -195,7 +166,6 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
   float averagedEdx = 0;
   float sigmadEdx = 0;
   PixelDEdx::getdEdxMetrics(clusters, averagedEdx, sigmadEdx, nUsedHits);
-  //float averagedEdx = getTruncatedMean(clusters, nUsedHits);
     
   /// Calculate equalized truncated mean.
   if(m_equalizeClusterMeasurements) {
@@ -203,7 +173,6 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
     float averagedEdxEq = 0;
     float sigmadEdxEq = 0;
     PixelDEdx::getdEdxMetrics(clusters, averagedEdxEq, sigmadEdxEq, nUsedHitsEq, true);
-    //float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, true);
 
     /// Sanity check that nUsedHits and nUsedHitsEq are the same.
     if (nUsedHitsEq != nUsedHits) {
@@ -218,26 +187,3 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
   return averagedEdx;
 
 }
-
-
-/*
-std::vector<float>
-InDet::PixelToTPIDTool::getLikelihoods(const EventContext& ctx,
-                                       double dedx2,
-                                       double p2,
-                                       int nGoodPixels) const
-{
-  return SG::ReadCondHandle<PixeldEdxData>(m_dedxKey, ctx)
-    ->getLikelihoods(dedx2, p2, nGoodPixels);
-}
-
-float
-InDet::PixelToTPIDTool::getMass(const EventContext& ctx,
-                                double dedx,
-                                double p,
-                                int nGoodPixels) const
-{
-  return SG::ReadCondHandle<PixeldEdxData>(m_dedxKey, ctx)
-    ->getMass(dedx, p / 1000, nGoodPixels);
-}
-*/

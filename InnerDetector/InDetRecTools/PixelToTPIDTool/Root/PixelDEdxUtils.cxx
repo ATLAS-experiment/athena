@@ -22,7 +22,6 @@ namespace PixelDEdx {
 
     /// Remove clusters if track is too shallow.
     if ( std::abs(cluster.cosalpha) < 0.16 ) {
-      //msg << MSG::DEBUG << "Path through sensor is too shallow for good dE/dx measurement: cos(alpha) = " << cluster.cosalpha << endmsg;
       /// Do not update cluster.dEdx from default negative value.
       /// Do not update cluster.passdEdxCutsLoose or cluster.passdEdxCutsTight from default false values.
       return;
@@ -62,7 +61,6 @@ namespace PixelDEdx {
       cluster.passdEdxCutsLoose = true;
     }
     else{ // Cluster fails.
-      //msg << MSG::DEBUG << "Cluster fails loose cuts. bec: " << cluster.bec << ", layer: " << cluster.layer << ", locx: " << cluster.locx << ", locy: " << cluster.locy << endmsg;
       /// Do not update cluster.dEdx from default negative value.
       /// Do not update cluster.passdEdxCutsLoose or cluster.passdEdxCutsTight from default false values.
       return;
@@ -81,7 +79,7 @@ namespace PixelDEdx {
       /// Add extra cleaning cuts here when ready.
       /// Exploring cuts on cluster size to remove e.g. delta rays.
 
-      /// Now set cluster.passdEdxCutsTight appropriately.
+      /// Set cluster.passdEdxCutsTight appropriately here.
 
     }
 
@@ -125,66 +123,9 @@ namespace PixelDEdx {
   //////////////////
   //////////////////
 
-  /// Returns the truncated mean over the track. 
+  /// Returns the truncated mean & truncated standard deviation dE/dx over the track. 
   /// If equalize == true, it will use the equalized cluster dE/dx measurement in the calculation.
-  /// NB:  nUsedHits (divisor of trunc mean) is passed by reference and updated.  Do not call this function multiple times with the same counter.
-  /*
-  float getTruncatedMean(const std::vector<PixelClusterStruct>& clusters,
-                         int& nUsedHits, 
-                         bool equalize) {
-
-    int pixelhits = clusters.size();
-    /// Get the dEdxMap.
-    /// First in pair is the dE/dx (raw or equalized).  Second indicates if it's a IBL cluster in with ToT in overflow.
-    /// Multimaps  will automatically sort based on the first element in the pair.  Useful for truncated mean alg.
-    std::multimap<float,bool> dEdxMap;
-    for (const auto& cluster : clusters) {
-      if(equalize) {
-        dEdxMap.insert(std::pair<float, bool>(cluster.dEdxEq, cluster.iblOverflow));
-      }
-      else {
-        dEdxMap.insert(std::pair<float, bool>(cluster.dEdx, cluster.iblOverflow));
-      }
-    }
-
-    /// Now calculate the truncated mean.
-    float averagedEdx=0.;
-    nUsedHits=0;
-    int IBLOverflow=0;
-    for (std::pair<float,int> itdEdx : dEdxMap) {
-      if (itdEdx.second==0) {
-        averagedEdx += itdEdx.first;
-        nUsedHits++;
-      }
-      if (itdEdx.second>0) { IBLOverflow++; }
-
-      //break, skipping last or the two last elements depending on total measurements
-      if (((int)pixelhits>=5) and ((int)nUsedHits>=(int)pixelhits-2)) { break; }
-
-      //break, IBL Overflow case pixelhits==3 and 4
-      if ((int)IBLOverflow>0 and ((int)pixelhits==3) and (int)nUsedHits==1) { break; }
-      if ((int)IBLOverflow>0 and ((int)pixelhits==4) and (int)nUsedHits==2) { break; }
-
-      if (((int)pixelhits > 1) and ((int)nUsedHits >=(int)pixelhits-1)) { break; }
-
-      if ((int)IBLOverflow>0 and (int)pixelhits==1) { //only IBL in overflow
-        averagedEdx=itdEdx.first;
-        break;
-      }
-    }
-
-    if (nUsedHits>0 or (nUsedHits==0 and(int)IBLOverflow>0 and (int)pixelhits==1)) {
-      if (nUsedHits>0) { averagedEdx=averagedEdx/nUsedHits; }
-
-      //msg << MSG::DEBUG << "Truncated mean dEdx = " << averagedEdx << endmsg;
-      //msg << MSG::DEBUG << "Used hits: " << nUsedHits << ", IBL overflows: " << IBLOverflow << endmsg;
-      //msg << MSG::DEBUG << "Number of good measurements = " << pixelhits << endmsg;
-      return averagedEdx;
-    }
-    return -1;
-  }
-*/
-
+  /// NB: Pass by reference and updated, so do not call this function multiple times with the same variables.
   void getdEdxMetrics(const std::vector<PixelClusterStruct>& clusters,
                          float& averagedEdx, 
                          float& sigmadEdx, 

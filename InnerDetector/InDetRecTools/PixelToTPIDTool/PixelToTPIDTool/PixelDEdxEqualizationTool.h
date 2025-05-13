@@ -31,9 +31,6 @@
 
 namespace CP {
 
-  /// Implementation of the Pixel ToT PID tool.
-  /// This is refactoring of the tool for dual use in Athena and AnalysisBase using CP Algs.
-
   class PixelDEdxEqualizationTool : public virtual IPixelDEdxEqualizationTool, public asg::AsgTool {
     /// Create a proper constructor for Athena
     ASG_TOOL_CLASS(PixelDEdxEqualizationTool, CP::IPixelDEdxEqualizationTool)  // depends where I put the interface...
@@ -63,13 +60,10 @@ namespace CP {
 
   private:
     
-    /// Common to both EDMs ///
-
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
 
     /// Equalize the cluster-level dE/dx measuremented before the taking the truncated mean.
-    /// For ESD EDM, always have access to pixel clusters.
-    /// For xAOD EDM, requires special datasets with pixel clusters.
+    /// For xAOD EDM, this requires special datasets with pixel clusters.
     Gaudi::Property<bool> m_equalizeClusterMeasurements
     { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
 

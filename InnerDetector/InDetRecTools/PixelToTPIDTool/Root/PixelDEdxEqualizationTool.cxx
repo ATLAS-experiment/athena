@@ -40,7 +40,7 @@ namespace CP {
       return StatusCode::FAILURE;
     }
 
-    /// Set up scale factors. In XAOD_STANDALONE, read SFs from trees stored on CVMFS
+    /// Set up scale factors. Read SFs from trees stored in ASG calibration area by default.
     if(m_equalizeClusterMeasurements || m_equalizeTrackMeasurements) {
       if (m_sfLocalFileName != "") {
         ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfLocalFileName << "\"!! FOR DEVELOPMENT USE ONLY !! ");
@@ -301,11 +301,11 @@ namespace CP {
       const ElementLink<xAOD::TrackMeasurementValidationContainer> pixclus = (*msos)->trackMeasurementValidationLink();
       if (not pixclus.isValid()) {
         ATH_MSG_INFO("Invalid link to cluster.");
-        continue; //not a valid link
+        continue;
       }
       if (*pixclus == nullptr) {
         ATH_MSG_INFO("pixclus is a nullptr.");
-        continue; //not linking to a valid object -- is it necessary?
+        continue; //  necessary?
       }
       
       /// Build PixelClusterStruct to abstract away the EDMs.
@@ -401,7 +401,7 @@ namespace CP {
 
       /// Apply cluster-level equalization if it's a good measurement.
       /// Otherwise, leave negative default value for cluster.dEdxEq.
-      /// Read from trees on CVMFS or from conditions database.
+      /// Read SFs from trees in ASG calibration area.
       if(cluster.dEdx > 0.0){
 
         /// Get bec (barrel vs endcap) & eta bin for the SF.
@@ -466,7 +466,6 @@ namespace CP {
     float averagedEdx = 0;
     float sigmadEdx = 0;
     PixelDEdx::getdEdxMetrics(clusters, averagedEdx, sigmadEdx, nUsedHits);
-    //float averagedEdx = PixelDEdx::getTruncatedMean(clusters, nUsedHits);
     
     /// Sanity check that the recalculated raw dE/dx matches what was calculated during reco and stored as a track summary variable.
     float epsilon = 1e-3;
@@ -491,7 +490,6 @@ namespace CP {
     float averagedEdxEq = 0;
     float sigmadEdxEq = 0;
     PixelDEdx::getdEdxMetrics(clusters, averagedEdxEq, sigmadEdxEq, nUsedHitsEq, true);
-    // float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, true);
       
     /// Sanity check that nUsedHits and nUsedHitsEq are the same.
     if (nUsedHitsEq != nUsedHits) {

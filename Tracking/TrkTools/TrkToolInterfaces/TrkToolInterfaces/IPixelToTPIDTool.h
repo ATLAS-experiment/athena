@@ -39,23 +39,6 @@ namespace Trk {
     float dEdx(const Trk::Track& track,
                int& nUsedHits,
                int& nUsedIBLOverflowHits) const;
-    /*
-    virtual std::vector<float> getLikelihoods(const EventContext& ctx,
-                                              double dedx,
-                                              double p,
-                                              int nGoodPixels) const = 0;
-
-    std::vector<float> getLikelihoods(double dedx,
-                                      double p,
-                                      int nGoodPixels) const;
-
-    virtual float getMass(const EventContext& ctx,
-                          double dedx,
-                          double p,
-                          int nGoodPixels) const = 0;
-
-    float getMass(double dedx, double p, int nGoodPixels) const;
-    */
   };
 
   inline const InterfaceID& Trk::IPixelToTPIDTool::interfaceID()

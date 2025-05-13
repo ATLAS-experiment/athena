@@ -10,7 +10,7 @@ namespace PixelDEdx {
   /// For charge -> dE/dx calc.
   constexpr float energyPair = 3.68e-6; // Energy in MeV to create an electron-hole pair in silicon
   constexpr float sidensity = 2.329; // silicon density in g cm^-3
-  constexpr float conversionfactor=energyPair/sidensity;
+  constexpr double conversionfactor=energyPair/sidensity; // use double to match old tool, trying to match precision when checking for differences. 
 
   constexpr float Pixel_sensorthickness=.025; // 250 microns Pixel Planars
   constexpr float IBL_3D_sensorthickness=.023; // 230 microns IBL 3D
@@ -36,11 +36,6 @@ namespace PixelDEdx {
                         int& nUsedIBLOverflowHits,
                         bool tightClusterCleaning = false);
   
-  /*
-  float getTruncatedMean(const std::vector<PixelClusterStruct>& clusters,
-                         int& nUsedHits,
-                         bool equalize = false);
-  */
   void getdEdxMetrics(const std::vector<PixelClusterStruct>& clusters,
                          float& averagedEdx, 
                          float& sigmadEdx, 

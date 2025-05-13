@@ -424,8 +424,8 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.PrintToolConfigAlgConfig import PrintToolConfigAlgBlock
         self.addAlgConfigBlock(algName="PrintConfiguration", alg=PrintToolConfigAlgBlock)
 
-        # Pixel ToT PID tool
-        from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import PixelToTPIDBlock
-        self.addAlgConfigBlock(algName="PixelToTPID", alg=PixelToTPIDBlock)
+        # Pixel dE/dx equalization tool
+        from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import PixelDEdxEqualizationBlock
+        self.addAlgConfigBlock(algName="PixelDEdxEqualization", alg=PixelDEdxEqualizationBlock)
         
         return
