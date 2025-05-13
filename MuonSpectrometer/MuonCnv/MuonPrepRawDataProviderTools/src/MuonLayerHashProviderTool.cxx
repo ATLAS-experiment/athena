@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPrepRawDataProviderTools/MuonLayerHashProviderTool.h"
@@ -11,7 +11,7 @@
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 
 namespace Muon {
-
+  using namespace MuonStationIndex;
   MuonLayerHashProviderTool::MuonLayerHashProviderTool(const std::string& type, const std::string& name, const IInterface* parent):
     AthAlgTool(type,name,parent) {
     declareInterface<MuonLayerHashProviderTool>(this);
@@ -37,9 +37,9 @@ namespace Muon {
   }
 
   void MuonLayerHashProviderTool::insertHash( int sector, const IdentifierHash& hash, const Identifier& id ) const {
-    MuonStationIndex::TechnologyIndex techIndex = m_idHelperSvc->technologyIndex(id);
-    int sectorLayerHash = MuonStationIndex::sectorLayerHash(m_idHelperSvc->regionIndex(id),m_idHelperSvc->layerIndex(id));
-    m_regionHashesPerSector[sector-1].technologyRegionHashVecs[techIndex][sectorLayerHash].push_back(hash);
+    const int techIndex = toInt(m_idHelperSvc->technologyIndex(id));
+    const int layHash = sectorLayerHash(m_idHelperSvc->regionIndex(id),m_idHelperSvc->layerIndex(id));
+    m_regionHashesPerSector[sector-1].technologyRegionHashVecs[techIndex][layHash].push_back(hash);
   }
 
   void MuonLayerHashProviderTool::insertTechnology( const MuonIdHelper& idHelper ){
@@ -101,19 +101,12 @@ namespace Muon {
 
   // all chambers are mapped onto a layer and sector map
   bool MuonLayerHashProviderTool::initializeSectorMapping() {
-
-    m_regionHashesPerSector.resize(MuonStationIndex::numberOfSectors());
     // set sector numbers
-    unsigned int nsectorHashMax = MuonStationIndex::sectorLayerHashMax();
     for( unsigned int i=0;i<m_regionHashesPerSector.size();++i ) {
-      m_regionHashesPerSector[i].sector=i+1;
-      m_regionHashesPerSector[i].technologyRegionHashVecs.resize(MuonStationIndex::TechnologyIndexMax);
-      for( auto it = m_regionHashesPerSector[i].technologyRegionHashVecs.begin();it!=m_regionHashesPerSector[i].technologyRegionHashVecs.end(); ++it ) {
-        it->resize(nsectorHashMax);
-      }
+      m_regionHashesPerSector[i].sector=i+1;      
     }
-    ATH_MSG_DEBUG("Initializing hashes: number of sectors " << MuonStationIndex::numberOfSectors() 
-                 << " sectorLayers " << MuonStationIndex::sectorLayerHashMax() );
+    ATH_MSG_DEBUG("Initializing hashes: number of sectors " << numberOfSectors() 
+                 << " sectorLayers " << sectorLayerHashMax() );
 
     // add technologies
     if (m_idHelperSvc->hasMDT()) insertTechnology(m_idHelperSvc->mdtIdHelper());

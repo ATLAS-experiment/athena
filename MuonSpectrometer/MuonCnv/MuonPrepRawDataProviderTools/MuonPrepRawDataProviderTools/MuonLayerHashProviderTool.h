@@ -14,6 +14,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <array>
 
 
 namespace Muon {
@@ -26,17 +27,20 @@ namespace Muon {
             - hashes
     */
     using HashVec = std::vector<IdentifierHash>;
-    using RegionHashVec = std::vector<HashVec>;
-    using TechnologyRegionHashVec = std::vector< RegionHashVec >;
+    
+    using RegionHashVec = std::array<HashVec, MuonStationIndex::sectorLayerHashMax()>;
+    using TechnologyIndex = MuonStationIndex::TechnologyIndex;
+    static constexpr unsigned techMax = MuonStationIndex::toInt(TechnologyIndex::TechnologyIndexMax);
+    using TechnologyRegionHashVec = std::array< RegionHashVec, techMax>;
 
     struct RegionHashesPerSector {
       int sector{-1};
       TechnologyRegionHashVec technologyRegionHashVecs{};
     };
-    using RegionHashesPerSectorVec =  std::vector<RegionHashesPerSector>;
+    using RegionHashesPerSectorVec =  std::array<RegionHashesPerSector, MuonStationIndex::numberOfSectors()>;
 
     /** access hashes for a given sector, technology and layer hash */
-    const HashVec& getHashes( int sector, MuonStationIndex::TechnologyIndex technologyIndex, unsigned int sectorLayerHash ) const;
+    const HashVec& getHashes( int sector, TechnologyIndex technologyIndex, unsigned int sectorLayerHash ) const;
 
     /** Default AlgTool functions */
     MuonLayerHashProviderTool(const std::string& type, const std::string& name, const IInterface* parent);
@@ -81,12 +85,13 @@ namespace Muon {
   };
 
  
-  inline const std::vector<IdentifierHash>& MuonLayerHashProviderTool::getHashes( int sector, MuonStationIndex::TechnologyIndex technologyIndex, 
+  inline const std::vector<IdentifierHash>& MuonLayerHashProviderTool::getHashes( int sector, TechnologyIndex technologyIndex, 
                                                                                   unsigned int sectorLayerHash ) const {
     if (!m_hashLoaded){
       insertTgcs();
     }
-    return m_regionHashesPerSector[sector-1].technologyRegionHashVecs[technologyIndex][sectorLayerHash];
+    using namespace MuonStationIndex;
+    return m_regionHashesPerSector[sector-1].technologyRegionHashVecs[toInt(technologyIndex)][sectorLayerHash];
   }
 }
 
