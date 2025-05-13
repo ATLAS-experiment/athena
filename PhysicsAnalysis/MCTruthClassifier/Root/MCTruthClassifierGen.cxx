@@ -23,7 +23,7 @@ using std::abs;
 
 #ifndef XAOD_ANALYSIS
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
+MCTruthClassifier::particleHepMCTruthClassifier(const HepMcParticleLink& theLink, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
   // Retrieve the links between HepMC and xAOD::TruthParticle
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
   SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVecReadHandle(m_truthLinkVecReadHandleKey, ctx);
@@ -39,7 +39,7 @@ MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, MCT
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
+MCTruthClassifier::particleHepMCTruthClassifier(HepMC::ConstGenParticlePtr theGenPart, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
   ParticleType partType = Unknown;
   ParticleOrigin partOrig = NonDefined;
 
