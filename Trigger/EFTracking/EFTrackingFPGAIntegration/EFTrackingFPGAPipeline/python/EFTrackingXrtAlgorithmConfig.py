@@ -7,18 +7,14 @@ def EFTrackingXrtAlgorithmCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("bufferSize", 8192)
-    kwargs.setdefault(
-       "xclbinPath", 
-       "/eos/project-a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/12_road2track_HLS/Road2Track_hw.xclbin"
-    )
 
     from json import dumps
     kwargs.setdefault("kernelDefinitionsJsonString", dumps({
       "loader": [{"storeGateKey": "inputDataStream",
-                  "argumentIndex": 0,
+                  "argumentIndex": "0",
                   "interfaceMode": ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT}],
       "unloader": [{"storeGateKey": "outputDataStream",
-                    "argumentIndex": 1,
+                    "argumentIndex": "1",
                     "interfaceMode": ROOT.EFTrackingXrtParameters.InterfaceMode.OUTPUT}]}))
 
     from AthenaConfiguration.ComponentFactory import CompFactory 
@@ -81,7 +77,6 @@ if __name__ == "__main__":
     from json import dumps
     acc.merge(EFTrackingXrtAlgorithmCfg(flags, 
                                         bufferSize = arguments.bufferSize,
-                                        xclbinPath = arguments.xclbinPath,
                                         kernelDefinitionsJsonString = dumps(arguments.kernelDefinitions)))
 
     for outputCsvPath, sgKey in arguments.outputCsvPathToSgKeyMap.items():
