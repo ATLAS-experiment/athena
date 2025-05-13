@@ -48,34 +48,40 @@ def SetupSensitiveDetectorsCfg(flags):
 def SimHitContainerListCfg(flags):
     simHitContainers = []
     if flags.Detector.EnableMDT:
+        simHitContainers+=[("MDTSimHitCollection", "MDT_Hits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("MDTSimHitCollection", "MDT_Hits_G4")]
-        else:
-            simHitContainers+=[("MDTSimHitCollection", "MDT_Hits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("MDTSimHitCollection", "MDT_Hits_Fatras")]
     if flags.Detector.EnableRPC:
+        simHitContainers+=[("RPCSimHitCollection", "RPC_Hits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("RPCSimHitCollection", "RPC_Hits_G4")]
-        else:
-            simHitContainers+=[("RPCSimHitCollection", "RPC_Hits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("RPCSimHitCollection", "RPC_Hits_Fatras")]
     if flags.Detector.EnableTGC:
+        simHitContainers+=[("TGCSimHitCollection", "TGC_Hits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("TGCSimHitCollection", "TGC_Hits_G4")]
-        else:
-            simHitContainers+=[("TGCSimHitCollection", "TGC_Hits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("TGCSimHitCollection", "TGC_Hits_Fatras")]
     if flags.Detector.EnableMM:
+        simHitContainers+=[("MMSimHitCollection", "MM_Hits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("MMSimHitCollection", "MM_Hits_G4")]
-        else:
-            simHitContainers+=[("MMSimHitCollection", "MM_Hits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("MMSimHitCollection", "MM_Hits_Fatras")]
     if flags.Detector.EnablesTGC:
+        simHitContainers+=[("sTGCSimHitCollection", "sTGC_Hits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("sTGCSimHitCollection", "sTGC_Hits_G4")]
-        else:
-            simHitContainers+=[("sTGCSimHitCollection", "sTGC_Hits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("sTGCSimHitCollection", "sTGC_Hits_Fatras")]
     if flags.Detector.EnableCSC:
+        simHitContainers+=[("CSCSimHitCollection", "CSC_Hits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("CSCSimHitCollection", "CSC_Hits_G4")]
-        else:
-            simHitContainers+=[("CSCSimHitCollection", "CSC_Hits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("CSCSimHitCollection", "CSC_Hits_Fatras")]
     return simHitContainers
 
