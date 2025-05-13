@@ -31,7 +31,7 @@ namespace EFTrackingFPGAIntegration
             Athena::Chrono chrono("CL::loadProgram", m_chronoSvc.get());
             ATH_CHECK(IntegrationBase::loadProgram(m_xclbin));
         }
-
+        ATH_MSG_INFO("loading "<<m_xclbin);
         ATH_CHECK(m_inputPixelClusterKey.initialize());
         ATH_CHECK(m_inputStripClusterKey.initialize());
         ATH_CHECK(m_pixelRDOKey.initialize());
@@ -233,12 +233,6 @@ namespace EFTrackingFPGAIntegration
                 row = 15; // width in eta
                 pcAux.widthInEta.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
-                row = 16; // omega x
-                pcAux.omegaX.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 17; // omega y
-                pcAux.omegaY.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
                 row = 18; // total ToT
                 pcAux.totalToT.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
@@ -264,8 +258,6 @@ namespace EFTrackingFPGAIntegration
                     ATH_MSG_DEBUG("Pixel cluster " << i << " channelsInPhi: " << pcAux.channelsInPhi[i]);
                     ATH_MSG_DEBUG("Pixel cluster " << i << " channelsInEta: " << pcAux.channelsInEta[i]);
                     ATH_MSG_DEBUG("Pixel cluster " << i << " widthInEta: " << pcAux.widthInEta[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " omegaX: " << pcAux.omegaX[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " omegaY: " << pcAux.omegaY[i]);
                     ATH_MSG_DEBUG("Pixel cluster " << i << " totalToT: " << pcAux.totalToT[i]);
                     ATH_MSG_DEBUG("Pixel cluster " << i << " rdoList size: " << metadata->pcRdoIndex[i]);
                 }

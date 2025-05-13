@@ -310,13 +310,7 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
 		ATH_MSG_DEBUG("width in eta = " << pcAux.widthInEta.back());
 
 		row++;
-		pcAux.omegaX.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-		ATH_MSG_DEBUG("omega x = " << pcAux.omegaX.back());
-
 		row++;
-		pcAux.omegaY.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-		ATH_MSG_DEBUG("omega y = " << pcAux.omegaY.back());
-
 		row++;
 		pcAux.totalToT.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 		ATH_MSG_DEBUG("total ToT = " << pcAux.totalToT.back());

@@ -224,12 +224,10 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w6(pixelCluster_w6));
 
         // Pixel cluster w7
-	const auto& [omegax, omegay] = TrackingUtilities::computeOmegas(*pixelClusters->at(i),
-									*m_pixelid);
         auto pixelCluster_w7 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w7(pixelClusters->at(i)->localCovariance<2>()(0, 0),
                                                                                  pixelClusters->at(i)->localCovariance<2>()(1, 1),
-                                                                                 omegax,
-										 omegay
+                                                                                 0,
+										                                         0
                                                                                  );
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w7(pixelCluster_w7));
 

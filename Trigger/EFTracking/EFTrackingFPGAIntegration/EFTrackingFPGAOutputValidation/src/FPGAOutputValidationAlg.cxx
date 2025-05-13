@@ -109,10 +109,6 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       }
 
       const xAOD::PixelCluster *cluster1 = matchedClusters[0];
-      const auto& [omegax_cl0, omegay_cl0] = TrackingUtilities::computeOmegas(*cluster0,
-                                                                              *m_pixelid);
-      const auto& [omegax_cl1, omegay_cl1] = TrackingUtilities::computeOmegas(*cluster1,
-									      *m_pixelid);
       
       Monitored::Group(
         m_monitoringTool,
@@ -120,8 +116,6 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
         Monitored::Scalar<float>("diff_pixel_locy",cluster0->localPosition<2>()[1] - cluster1->localPosition<2>()[1]),
         Monitored::Scalar<float>("diff_pixel_covxx",cluster0->localCovariance<2>()(0, 0) - cluster1->localCovariance<2>()(0, 0)),
         Monitored::Scalar<float>("diff_pixel_covyy",cluster0->localCovariance<2>()(1, 1) - cluster1->localCovariance<2>()(1, 1)),  
-        Monitored::Scalar<float>("diff_pixel_omegax",omegax_cl0 - omegax_cl1),
-        Monitored::Scalar<float>("diff_pixel_omegay",omegay_cl0 - omegay_cl1),
         Monitored::Scalar<float>("diff_pixel_globalx",cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
         Monitored::Scalar<float>("diff_pixel_globaly",cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
         Monitored::Scalar<float>("diff_pixel_globalz",cluster0->globalPosition()[2] - cluster1->globalPosition()[2]),
@@ -212,16 +206,6 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       }),
       Monitored::Collection(key.key() + "_LOCALCOVARIANCE_YY", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->localCovariance<2>()(1, 1);
-      }),
-      Monitored::Collection(key.key() + "_OMEGA_X", *handle, [this](const xAOD::PixelCluster* cluster){
-	const auto& [omegax, omegay] = TrackingUtilities::computeOmegas(*cluster,
-									*m_pixelid);
-        return omegax;
-      }),
-      Monitored::Collection(key.key() + "_OMEGA_Y", *handle, [this](const xAOD::PixelCluster* cluster){
-	const auto& [omegax, omegay] = TrackingUtilities::computeOmegas(*cluster,
-                                                                        *m_pixelid);
-        return omegay;
       }),
       Monitored::Collection(key.key() + "_GLOBALPOSITION_X", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->globalPosition()[0];

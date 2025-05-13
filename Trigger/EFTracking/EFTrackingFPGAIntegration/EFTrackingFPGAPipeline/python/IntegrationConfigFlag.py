@@ -4,7 +4,10 @@
 # @brief: Customized flags for FPGA data preparation pipeline
 
 def addFPGADataPrepFlags(flags):
-    
+
+
+    flags.addFlag("FPGADataPrep.xclbin", "/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin")
+
     flags.addFlag("FPGADataPrep.DoActs", True)
     flags.addFlag("FPGADataPrep.FPGA.RunPixelClustering", True)
     flags.addFlag("FPGADataPrep.FPGA.RunSpacePoint", True)

@@ -221,7 +221,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                 // For pixel EDM aux, we need
                 // id, idHash, localPosition, localCovariance, rdoList
                 // channelsInPhi, channelsInEta, width in Eta
-                // omegaX, omegaY, global position
+                // global position
                 // totalToT
                 pcAux->idHash.push_back(get_bitfields_EDM_PIXELCLUSTER_w1(pixel_edm_words[0]).id_hash);
 
@@ -262,8 +262,6 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
 
                 pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w7_localcovariance_xx(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).localcovariance_xx));
                 pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w7_localcovariance_yy(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).localcovariance_yy));
-                pcAux->omegaX.push_back(to_real_EDM_PIXELCLUSTER_w7_omega_x(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).omega_x));
-                pcAux->omegaY.push_back(to_real_EDM_PIXELCLUSTER_w7_omega_y(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).omega_y));
 
                 pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w8_globalposition_x(get_bitfields_EDM_PIXELCLUSTER_w8(pixel_edm_words[7]).globalposition_x));
                 pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w8_globalposition_y(get_bitfields_EDM_PIXELCLUSTER_w8(pixel_edm_words[7]).globalposition_y));
@@ -302,8 +300,6 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                     ATH_MSG_DEBUG("\tchannelsInPhi: " << pcAux->channelsInPhi.back());
                     ATH_MSG_DEBUG("\tchannelsInEta: " << pcAux->channelsInEta.back());
                     ATH_MSG_DEBUG("\twidthInEta: " << pcAux->widthInEta.back());
-                    ATH_MSG_DEBUG("\tomegaX: " << pcAux->omegaX.back());
-                    ATH_MSG_DEBUG("\tomegaY: " << pcAux->omegaY.back());
                     ATH_MSG_DEBUG("\ttotalToT: " << pcAux->totalToT.back());
                 }
                 break;
