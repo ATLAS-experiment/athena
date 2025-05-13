@@ -75,15 +75,20 @@ void EVetoPlots::initializePlots(){
        m_id_RNNEleScoreSigTrans->Fill(RNNEleScoreSigTrans_v1Acc(tau), weight);	    
     }  
 
-    if ( tau.isTau(xAOD::TauJetParameters::EleRNNLoose) ) {
+    static const SG::ConstAccessor<char> acc_RNNEleLoose("EleRNNLoose_v1");
+    if(acc_RNNEleLoose.isAvailable(tau) && acc_RNNEleLoose(tau)){ 
       m_pt_eleRNNloose->Fill(tau.pt()/Athena::Units::GeV, weight);
       m_pt_eleRNNlooseHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
     }
-    if ( tau.isTau(xAOD::TauJetParameters::EleRNNMedium) ) {
+
+    static const SG::ConstAccessor<char> acc_RNNEleMedium("EleRNNMedium_v1");
+    if(acc_RNNEleMedium.isAvailable(tau) && acc_RNNEleMedium(tau)){
       m_pt_eleRNNmed->Fill(tau.pt()/Athena::Units::GeV, weight);
       m_pt_eleRNNmedHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
     }
-    if ( tau.isTau(xAOD::TauJetParameters::EleRNNTight) ) {
+
+    static const SG::ConstAccessor<char> acc_RNNEleTight("EleRNNTight_v1");
+    if(acc_RNNEleTight.isAvailable(tau) && acc_RNNEleTight(tau)){
       m_pt_eleRNNtight->Fill(tau.pt()/Athena::Units::GeV, weight);
       m_pt_eleRNNtightHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
     }
