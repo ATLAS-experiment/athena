@@ -157,7 +157,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.decorateCaloClusterEta', True)
     configSeq.setOptionValue ('.writeTrackD0Z0', True)
-    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
+    configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Electrons.WorkingPoint',
         containerName='AnaElectrons',
@@ -185,7 +185,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('Photons',
         containerName='AnaPhotons' )
     configSeq.setOptionValue ('.decorateTruth', True)
-    configSeq.setOptionValue ('.forceFullSimConfigForP4', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recomputeIsEM', False)
     configSeq.setOptionValue ('.recalibratePhyslite', False)

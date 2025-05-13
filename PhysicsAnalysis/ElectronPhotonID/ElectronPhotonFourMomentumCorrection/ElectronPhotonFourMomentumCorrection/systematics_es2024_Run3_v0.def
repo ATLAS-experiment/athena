@@ -1,0 +1,43 @@
+SYSMACRO(EG_SCALE_ZEESYST, 1, std::vector<double>(),
+         egEnergyCorr::Scale::ZeeSystUp, egEnergyCorr::Scale::ZeeSystDown)
+SYSMACRO(EG_SCALE_LARUNCONVCALIB, 0, decorrelation_bins_BE,
+         egEnergyCorr::Scale::LArUnconvCalibUp,
+         egEnergyCorr::Scale::LArUnconvCalibDown)
+SYSMACRO(EG_SCALE_LARELECCALIB, 1, std::vector<double>(),
+         egEnergyCorr::Scale::LArElecCalibUp,
+         egEnergyCorr::Scale::LArElecCalibDown)
+SYSMACRO(EG_SCALE_LARELECUNCONV, 0, decorrelation_bins_BE,
+         egEnergyCorr::Scale::LArElecUnconvUp,
+         egEnergyCorr::Scale::LArElecUnconvDown)
+SYSMACRO(EG_SCALE_G4, 1, std::vector<double>(), egEnergyCorr::Scale::G4Up,
+         egEnergyCorr::Scale::G4Down)
+SYSMACRO(EG_SCALE_PS, 0, decorrelation_edges_MODULE, egEnergyCorr::Scale::PSUp,
+         egEnergyCorr::Scale::PSDown)
+SYSMACRO(EG_SCALE_PS_EXTRARUN3, 1, std::vector<double>(), egEnergyCorr::Scale::PSEXTRARUN3Up,
+         egEnergyCorr::Scale::PSEXTRARUN3Down)
+SYSMACRO(EG_SCALE_S12, 0, decorrelation_edges_S12, egEnergyCorr::Scale::S12Up,
+         egEnergyCorr::Scale::S12Down);
+SYSMACRO(EG_SCALE_S12_EXTRARUN3, 0, decorrelation_edges_S12_EXTRARUN3, egEnergyCorr::Scale::S12EXTRARUN3Up,
+         egEnergyCorr::Scale::S12EXTRARUN3Down);
+SYSMACRO(EG_SCALE_MATID, 0, decorrelation_edges_MATERIAL,
+         egEnergyCorr::Scale::MatIDUp, egEnergyCorr::Scale::MatIDDown);
+SYSMACRO(EG_SCALE_MATCRYO, 0, decorrelation_edges_TWELVE,
+         egEnergyCorr::Scale::MatCryoUp, egEnergyCorr::Scale::MatCryoDown)
+SYSMACRO(EG_SCALE_MATCALO, 0, decorrelation_edges_TWELVE,
+         egEnergyCorr::Scale::MatCaloUp, egEnergyCorr::Scale::MatCaloDown)
+SYSMACRO(EG_SCALE_L1GAIN, 1, std::vector<double>(),
+         egEnergyCorr::Scale::L1GainUp, egEnergyCorr::Scale::L1GainDown)
+SYSMACRO(EG_SCALE_PEDESTAL, 1, std::vector<double>(),
+         egEnergyCorr::Scale::PedestalUp, egEnergyCorr::Scale::PedestalDown)
+SYSMACRO(PH_SCALE_LEAKAGEUNCONV, 1, std::vector<double>(),
+         egEnergyCorr::Scale::LeakageUnconvUp,
+         egEnergyCorr::Scale::LeakageUnconvDown)
+SYSMACRO(PH_SCALE_LEAKAGECONV, 1, std::vector<double>(),
+         egEnergyCorr::Scale::LeakageConvUp,
+         egEnergyCorr::Scale::LeakageConvDown)
+SYSMACRO(PH_SCALE_CONVRADIUS, 1, std::vector<double>(),
+         egEnergyCorr::Scale::ConvRadiusUp, egEnergyCorr::Scale::ConvRadiusDown)
+SYSMACRO(EG_SCALE_L2MEDIUMGAINEXTRARUN3, 1, std::vector<double>(),
+         egEnergyCorr::Scale::L2MediumGainEXTRARUN3Up, egEnergyCorr::Scale::L2MediumGainEXTRARUN3Down)
+SYSMACRO(EG_SCALE_L2LOWGAINEXTRARUN3, 1, std::vector<double>(),
+         egEnergyCorr::Scale::L2LowGainEXTRARUN3Up, egEnergyCorr::Scale::L2LowGainEXTRARUN3Down)

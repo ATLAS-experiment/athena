@@ -8,7 +8,7 @@ EventCleaning:
 
 Electrons:
 - containerName: AnaElectrons
-  forceFullSimConfig: True
+  forceFullSimConfigForIso: True
   recalibratePhyslite: False
   decorateTruth: true
   decorateCaloClusterEta: true
