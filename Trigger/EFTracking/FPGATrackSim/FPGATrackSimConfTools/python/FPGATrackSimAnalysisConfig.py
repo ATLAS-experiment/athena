@@ -631,6 +631,14 @@ def getChi2Cut(region):
 
     return eta_to_chi2.get(abs_etaRange, 20)
 
+def ConfigureMultiRegionFlags(flags):
+    # convert regex to array of regions
+    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
+        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
+    else: # otherwise use the regionList (this overrides the region flag)
+        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
+    print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -661,14 +669,8 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
-
-    # convert regex to array of regions
-    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
-        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
-    else: # otherwise use the regionList (this overrides the region flag)
-        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
-        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
-    print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
+    ConfigureMultiRegionFlags(flags)
+    
 
     if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut:
         flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2Cut(flags.Trigger.FPGATrackSim.region)

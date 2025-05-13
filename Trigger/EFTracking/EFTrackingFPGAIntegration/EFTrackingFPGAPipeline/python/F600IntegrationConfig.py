@@ -56,9 +56,13 @@ if __name__ == "__main__":
     flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"]
-
+    
     flags.fillFromArgs()
-
+    
+    # Additional (necessary) flag re-configuration for mutliregion tracking
+    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
+    ConfigureMultiRegionFlags(flags)
+    
     if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
         print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.genScan=True
@@ -93,11 +97,14 @@ if __name__ == "__main__":
         from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
         cfg.merge(InDetTrackRecoCfg(flags))
 
-    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import  FPGATrackSimDataPrepAlgCfg
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimLogicalHitsProcessAlgCfg
+    
     # Configure both the dataprep and logical hits algorithms.
+    from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
+    cfg.merge(ITkXAODToInDetClusterConversionCfg(flags)) # needed for the FPGATrackSim DataPrep to work
+    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import  FPGATrackSimDataPrepAlgCfg
     cfg.merge(FPGATrackSimDataPrepAlgCfg(flags))
-    cfg.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
+    from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
+    cfg.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
 
     kwarg = {}
     acc = F600IntegrationCfg(flags, **kwarg)
