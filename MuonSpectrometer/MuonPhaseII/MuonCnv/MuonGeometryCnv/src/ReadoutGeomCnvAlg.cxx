@@ -482,6 +482,9 @@ StatusCode ReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx, Construct
     const auto alignStore = alignItr ?
                             static_cast<const MmAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
 
+    if (alignStore) {
+        cacheObj.detMgr->setMMPassivation(alignStore->passivation);
+    }
     const std::vector<const MuonGMR4::MmReadoutElement*> mmReadouts{m_detMgr->getAllMmReadoutElements()};
     ATH_MSG_INFO("Copy "<<mmReadouts.size()<<" Mm readout elements to the legacy system");
     
@@ -492,8 +495,7 @@ StatusCode ReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx, Construct
                                                                 m_idHelperSvc->stationNameString(reId),
                                                                 copyMe->stationEta(),
                                                                 copyMe->stationPhi(),
-                                                                copyMe->multilayer(), cacheObj.detMgr.get(),
-                                                                alignStore ? alignStore->passivation : nullptr);
+                                                                copyMe->multilayer(), cacheObj.detMgr.get());
         /// Loop over the gas gaps & efine the 
         for (unsigned int gasGap = 0; gasGap < copyMe->nGasGaps(); ++gasGap) {
             const MuonGMR4::StripLayer& stripLayer{copyMe->stripLayer(MuonGMR4::MmReadoutElement::createHash(gasGap +1, 0))};
