@@ -37,7 +37,7 @@ StatusCode RD53SimTool::finalize() {
 }
 
 void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
-                          CLHEP::HepRandomEngine* rndmEngine) {
+                          CLHEP::HepRandomEngine* rndmEngine) const {
   const PixelID* pixelId = static_cast<const PixelID*>(chargedDiodes.element()->getIdHelper());
   const IdentifierHash moduleHash = pixelId->wafer_hash(chargedDiodes.identify()); // wafer hash
   Identifier moduleID = pixelId->wafer_id(chargedDiodes.element()->identify());

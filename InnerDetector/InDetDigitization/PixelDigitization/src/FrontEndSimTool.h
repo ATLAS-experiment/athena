@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELDIGITIZATION_FrontEndSimTool_H
@@ -40,7 +40,7 @@ public:
   virtual ~FrontEndSimTool() {}
   //
   virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
-                       CLHEP::HepRandomEngine* rndmEngine) = 0;
+                       CLHEP::HepRandomEngine* rndmEngine) const = 0;
 
  
 

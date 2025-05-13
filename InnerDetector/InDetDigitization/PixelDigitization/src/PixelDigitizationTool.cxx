@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "PixelDigitizationTool.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
 #include "AthenaKernel/RNGWrapper.h"
@@ -63,10 +62,11 @@ StatusCode PixelDigitizationTool::finalize() {
 //=======================================
 // P R O C E S S   S U B E V E N T S
 //=======================================
-StatusCode PixelDigitizationTool::processAllSubEvents(const EventContext& ctx) {
+StatusCode PixelDigitizationTool::processAllSubEventsConst(const EventContext& ctx) const {
   // Prepare event
   ATH_MSG_DEBUG("Prepare event");
-  ATH_CHECK(prepareEvent(ctx, 0));
+  EventData event_data;
+  ATH_CHECK(prepareEvent(ctx, event_data));
 
   // Get the container(s)
   using TimedHitCollList = PileUpMergeSvc::TimedList<SiHitCollection>::type;
@@ -80,35 +80,36 @@ StatusCode PixelDigitizationTool::processAllSubEvents(const EventContext& ctx) {
       return StatusCode::FAILURE;
     }
 
+    assert(event_data.m_timedHits);
     // create a new hits collection
-    m_timedHits->reserve(1);
-    m_timedHits->insert(0, hitCollection.cptr());
+    event_data.m_timedHits->reserve(1);
+    event_data.m_timedHits->insert(0, hitCollection.cptr());
     ATH_MSG_DEBUG("SiHitCollection found with " << hitCollection->size() << " hits");
   } else {
     TimedHitCollList hitCollList;
     unsigned int numberOfSiHits(0);
     ATH_CHECK(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSiHits));
-    m_timedHits->reserve(numberOfSiHits);
+    event_data.m_timedHits->reserve(numberOfSiHits);
     // Now merge all collections into one
     for (auto & iColl : hitCollList) {
       // Decide if this event will be processed depending on HardScatterSplittingMode
-      if (m_HardScatterSplittingMode == 2 && !m_HardScatterSplittingSkipper) {
-        m_HardScatterSplittingSkipper = true;
+      if (m_HardScatterSplittingMode == 2 && !event_data.m_HardScatterSplittingSkipper) {
+        event_data.m_HardScatterSplittingSkipper = true;
         continue;
       }
-      if (m_HardScatterSplittingMode == 1 && m_HardScatterSplittingSkipper) {
+      if (m_HardScatterSplittingMode == 1 && event_data.m_HardScatterSplittingSkipper) {
         continue;
       }
-      if (m_HardScatterSplittingMode == 1 && !m_HardScatterSplittingSkipper) {
-        m_HardScatterSplittingSkipper = true;
+      if (m_HardScatterSplittingMode == 1 && !event_data.m_HardScatterSplittingSkipper) {
+        event_data.m_HardScatterSplittingSkipper = true;
       }
       const SiHitCollection* p_collection(iColl.second);
-      m_timedHits->insert(iColl.first, p_collection);
+      event_data.m_timedHits->insert(iColl.first, p_collection);
       ATH_MSG_DEBUG("SiTrackerHitCollection found with" << p_collection->size() << " hits"); // loop on the hit collections
     }
   }
   // Digitize hits
-  ATH_CHECK(digitizeEvent(ctx));
+  ATH_CHECK(digitizeEvent(ctx, event_data));
 
   ATH_MSG_DEBUG("Digitize success!");
   return StatusCode::SUCCESS;
@@ -117,7 +118,7 @@ StatusCode PixelDigitizationTool::processAllSubEvents(const EventContext& ctx) {
 //=======================================
 // D I G I T I Z E   E V E N T (main)
 //=======================================
-StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx) {
+StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx, EventData &event_data) const {
   ATH_MSG_VERBOSE("PixelDigitizationTool::digitizeEvent()");
 
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
@@ -144,7 +145,8 @@ StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx) {
   ////////////////////////////////////////////////
   // **** Loop over the Detectors with hits ****
   ////////////////////////////////////////////////
-  while (m_timedHits->nextDetectorElement(firstHit, lastHit)) {
+  assert(event_data.m_timedHits);
+  while (event_data.m_timedHits->nextDetectorElement(firstHit, lastHit)) {
     // Create the identifier for the collection
     ATH_MSG_DEBUG("create ID for the hit collection");
     Identifier id = m_detID->wafer_id((*firstHit)->getBarrelEndcap(),
@@ -218,14 +220,14 @@ StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx) {
       ATH_MSG_DEBUG("Executing tool " << m_fesimTool[itool]->name());
       m_fesimTool[itool]->process(*chargedDiodes, *RDOColl, rndmEngine);
     }
-    ATH_CHECK(m_rdoContainer->addCollection(RDOColl, RDOColl->identifyHash()));
+    assert(event_data.m_rdoContainer.isValid());
+    ATH_CHECK(event_data.m_rdoContainer->addCollection(RDOColl, RDOColl->identifyHash()));
 
     ATH_MSG_DEBUG("Pixel RDOs '" << RDOColl->identifyHash() << "' added to container");
-    addSDO(chargedDiodes.get());
+    addSDO(chargedDiodes.get(), event_data);
     chargedDiodes->clear();
   }
-  delete m_timedHits;
-  m_timedHits = nullptr;
+  event_data.m_timedHits.reset();
   ATH_MSG_DEBUG("hits processed");
 
   ///////////////////////////////////////////////////////////
@@ -257,10 +259,11 @@ StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx) {
             ATH_MSG_DEBUG("Executing tool " << m_fesimTool[itool]->name());
             m_fesimTool[itool]->process(*chargedDiodes, *RDOColl, rndmEngine);
           }
-          ATH_CHECK(m_rdoContainer->addCollection(RDOColl, RDOColl->identifyHash()));
+          assert( event_data.m_rdoContainer.isValid());
+          ATH_CHECK(event_data.m_rdoContainer->addCollection(RDOColl, RDOColl->identifyHash()));
 
           ATH_MSG_DEBUG("Pixel RDOs '" << RDOColl->identifyHash() << "' added to container");
-          addSDO(chargedDiodes.get());
+          addSDO(chargedDiodes.get(),event_data);
           chargedDiodes->clear();
         }
       }
@@ -276,7 +279,7 @@ StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx) {
 //=======================================
 // Convert a SiTotalCharge to a InDetSimData, and store it. (this needs working...)
 //-----------------------------------------------------------------------------------------------
-void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection) {
+void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection, EventData &event_data) const {
   using list_t = SiTotalCharge::list_t;
 
   std::vector<InDetSimData::Deposit> deposits;
@@ -320,8 +323,9 @@ void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection) {
     }
     // add the simdata object to the map:
     if (real_particle_hit || m_createNoiseSDO) {
-      m_simDataColl->try_emplace(collection->getId((*i_chargedDiode).first),
-                                           std::move(deposits), (*i_chargedDiode).second.flag());
+      assert( event_data.m_simDataColl.isValid());
+      event_data.m_simDataColl->try_emplace(collection->getId((*i_chargedDiode).first),
+                                            std::move(deposits), (*i_chargedDiode).second.flag());
     }
   }
 }
@@ -329,23 +333,22 @@ void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection) {
 //=======================================
 // P R E P A R E   E V E N T
 //=======================================
-StatusCode PixelDigitizationTool::prepareEvent(const EventContext& ctx, unsigned int) {
+StatusCode PixelDigitizationTool::prepareEvent(const EventContext& ctx, EventData &event_data) const {
   ATH_MSG_VERBOSE("PixelDigitizationTool::prepareEvent()");
 
   // Prepare event
-  m_rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
-  ATH_CHECK(m_rdoContainer.record(std::make_unique<PixelRDO_Container>(m_detID->wafer_hash_max())));
-  ATH_MSG_DEBUG("PixelRDO_Container " << m_rdoContainer.name() << " registered in StoreGate");
+  event_data.m_rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
+  ATH_CHECK(event_data.m_rdoContainer.record(std::make_unique<PixelRDO_Container>(m_detID->wafer_hash_max())));
+  ATH_MSG_DEBUG("PixelRDO_Container " << event_data.m_rdoContainer.name() << " registered in StoreGate");
 
-  m_simDataColl = SG::makeHandle(m_simDataCollKey, ctx);
-  ATH_CHECK(m_simDataColl.record(std::make_unique<InDetSimDataCollection>()));
-  ATH_MSG_DEBUG("InDetSimDataCollection " << m_simDataColl.name() << " registered in StoreGate");
+  event_data.m_simDataColl = SG::makeHandle(m_simDataCollKey, ctx);
+  ATH_CHECK(event_data.m_simDataColl.record(std::make_unique<InDetSimDataCollection>()));
+  ATH_MSG_DEBUG("InDetSimDataCollection " << event_data.m_simDataColl.name() << " registered in StoreGate");
 
   // Create hit collection
-  if (m_timedHits) delete m_timedHits;
-  m_timedHits = new TimedHitCollection<SiHit>();
+  event_data.m_timedHits = std::make_unique<TimedHitCollection<SiHit> >();
 
-  m_HardScatterSplittingSkipper = false;
+  event_data.m_HardScatterSplittingSkipper = false;
   return StatusCode::SUCCESS;
 }
 
@@ -356,7 +359,7 @@ StatusCode PixelDigitizationTool::mergeEvent(const EventContext& ctx) {
   ATH_MSG_VERBOSE("PixelDigitizationTool::mergeEvent()");
 
   // Digitize hits
-  ATH_CHECK(digitizeEvent(ctx));
+  ATH_CHECK(digitizeEvent(ctx, getCurrentEventData()));
 
   for (auto & hitCollPtr : m_hitCollPtrs) {
     hitCollPtr->Clear();
@@ -374,15 +377,16 @@ StatusCode PixelDigitizationTool::processBunchXing(int bunchXing, SubEventIterat
                                                    SubEventIterator eSubEvents) {
   ATH_MSG_VERBOSE("PixelDigitizationTool::processBunchXing() " << bunchXing);
   //decide if this event will be processed depending on HardScatterSplittingMode & bunchXing
-  if (m_HardScatterSplittingMode == 2 && !m_HardScatterSplittingSkipper) {
-    m_HardScatterSplittingSkipper = true;
+  EventData &event_data = getCurrentEventData();
+  if (m_HardScatterSplittingMode == 2 && !event_data.m_HardScatterSplittingSkipper) {
+    event_data.m_HardScatterSplittingSkipper = true;
     return StatusCode::SUCCESS;
   }
-  if (m_HardScatterSplittingMode == 1 && m_HardScatterSplittingSkipper) {
+  if (m_HardScatterSplittingMode == 1 && event_data.m_HardScatterSplittingSkipper) {
     return StatusCode::SUCCESS;
   }
-  if (m_HardScatterSplittingMode == 1 && !m_HardScatterSplittingSkipper) {
-    m_HardScatterSplittingSkipper = true;
+  if (m_HardScatterSplittingMode == 1 && !event_data.m_HardScatterSplittingSkipper) {
+    event_data.m_HardScatterSplittingSkipper = true;
   }
 
   using TimedHitCollList = PileUpMergeSvc::TimedList<SiHitCollection>::type;
@@ -407,7 +411,8 @@ StatusCode PixelDigitizationTool::processBunchXing(int bunchXing, SubEventIterat
     ATH_MSG_VERBOSE(
       "time index info. time: " << timeIndex.time() << " index: " << timeIndex.index() << " type: " <<
         timeIndex.type());
-    m_timedHits->insert(timeIndex, hitCollPtr);
+    assert(event_data.m_timedHits);
+    event_data.m_timedHits->insert(timeIndex, hitCollPtr);
     m_hitCollPtrs.push_back(hitCollPtr);
   }
   return StatusCode::SUCCESS;
