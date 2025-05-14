@@ -31,20 +31,24 @@ namespace MCP {
       
       TH2* hist = nullptr;
       fmc->GetObject(histName.c_str(), hist);
-      if (!hist) 
-        {
-	  throw std::invalid_argument("Cannot find hist ("+histName+") in file " + fileName);
-        }
-      hist->SetDirectory(nullptr);
-      m_calibConstantHist.reset(hist);
+      if (!hist) {
+          if (histName.find("ptExtra") != std::string::npos) {
+            // exceptional condition, to make it compatible with old recommendations
+            m_calibConstantHist.reset(nullptr);
+          } else {
+	    throw std::invalid_argument("Cannot find hist ("+histName+") in file " + fileName);
+          }
+      } else {
+        hist->SetDirectory(nullptr);
+        m_calibConstantHist.reset(hist);
       
-      // Store to check later if the input ranges are within the range of the hist
-      // subtract epsilon so that it doesn't go into the overflow bin at the highest edge
-      m_maxX  = m_calibConstantHist->GetXaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
-      m_minX  = m_calibConstantHist->GetXaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
-      m_maxY  = m_calibConstantHist->GetYaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
-      m_minY  = m_calibConstantHist->GetYaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
-      
+        // Store to check later if the input ranges are within the range of the hist
+        // subtract epsilon so that it doesn't go into the overflow bin at the highest edge
+        m_maxX  = m_calibConstantHist->GetXaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
+        m_minX  = m_calibConstantHist->GetXaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
+        m_maxY  = m_calibConstantHist->GetYaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
+        m_minY  = m_calibConstantHist->GetYaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
+      }  
     }
 
     double CalibContainer::getCalibConstant(const TrackCalibObj& trk) const

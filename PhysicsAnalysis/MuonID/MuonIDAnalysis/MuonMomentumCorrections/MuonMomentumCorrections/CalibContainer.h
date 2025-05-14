@@ -23,6 +23,7 @@ namespace MCP {
 
         // To retrieve the calib constant
         double getCalibConstant(const TrackCalibObj& trk) const;
+        bool mapExist() const { return m_calibConstantHist ? true : false; };
 
     protected:
         std::unique_ptr<const TH1> m_calibConstantHist;  

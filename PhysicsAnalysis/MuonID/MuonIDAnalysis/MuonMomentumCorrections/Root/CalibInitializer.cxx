@@ -24,6 +24,7 @@ namespace MCP {
                 calibMap[SagittaCorrection::Nominal]        = std::make_shared<CalibContainer>(path, "p" + trackType + "_0");
                 calibMap[SagittaCorrection::Datastat__1up]  = std::make_shared<CalibContainer>(path, "p" + trackType + "_statError");
                 calibMap[SagittaCorrection::Residual__1up]  = std::make_shared<CalibContainer>(path, "p" + trackType + "_1");
+                calibMap[SagittaCorrection::PtExtra__1up]  = std::make_shared<CalibContainer>(path, "p" + trackType + "_ptExtra");
             }
             else if(correctionType == "mc")
             {
