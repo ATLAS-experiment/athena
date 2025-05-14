@@ -982,7 +982,7 @@ namespace CP {
 
             //::: BIS78
             if (isBIS78(etaMS, phiMS)) {
-                if (!isRun3() || !(m_developMode && m_useBEEBISInHighPtRun3)) {
+                if (!isRun3() || !m_useBEEBISInHighPtRun3) {
 		            ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
                     return false;
 	    	    }	
@@ -1000,7 +1000,7 @@ namespace CP {
             //::: BEE
             if (isBEE(etaMS, phiMS)) {
                 // in Run3, large mis-alignment on the BEE chamber was found. temporarily mask the BEE region
-                if (isRun3() && !(m_developMode && m_useBEEBISInHighPtRun3)) {
+                if (isRun3() && !m_useBEEBISInHighPtRun3) {
                     ATH_MSG_VERBOSE("Muon is in BEE eta/phi region - fail high-pT");
                     return false;
                 }

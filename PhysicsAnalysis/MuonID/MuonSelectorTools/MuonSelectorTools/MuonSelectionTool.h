@@ -193,7 +193,7 @@ namespace CP {
         Gaudi::Property<bool> m_geoOnTheFly{this, "AllowSettingGeometryOnTheFly", false,"avoids crash if run2/run3 geo is wrongly set"};
         Gaudi::Property<bool> m_doBadMuonVetoMimic{this, "DoBadMuonVetoMimic", false}; // switch to cut away the tail of very large smearing in MC to mimic the effect of the bad muon veto for 2-station muons in the high-pT selection
         Gaudi::Property<bool> m_allowComm{this, "AcceptCommChain", true, "Accepts muons from the EMEO chain if set to true"};
-        Gaudi::Property<bool> m_useBEEBISInHighPtRun3{this, "UseBEEBISInHighPtRun3", false, "Include BEE and BIS7/8 in high-pT WP in Run3"};        
+        Gaudi::Property<bool> m_useBEEBISInHighPtRun3{this, "UseBEEBISInHighPtRun3", true, "Include BEE and BIS7/8 in high-pT WP in Run3"};        
 
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
 

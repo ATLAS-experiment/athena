@@ -286,7 +286,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidityDeco = 'muon_reco_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
             if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '240711_Preliminary_r24run3'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '250418_Preliminary_r24run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -326,7 +326,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidityDeco = 'muon_isol_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.isolation + 'Iso'
             if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '240711_Preliminary_r24run3'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '250418_Preliminary_r24run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -346,7 +346,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidityDeco = 'muon_TTVA_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = 'TTVA'
             if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '240711_Preliminary_r24run3'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '250418_Preliminary_r24run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
