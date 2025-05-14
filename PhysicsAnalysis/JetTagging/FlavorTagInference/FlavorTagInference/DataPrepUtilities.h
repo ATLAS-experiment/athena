@@ -11,12 +11,13 @@
 #include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/ConstituentsLoader.h"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
 #include "xAODBTagging/BTagging.h"
 
-// external libraries
+// external libraries, can be removed once we retire DL2
 #include "lwtnn/lightweight_network_config.hh"
 
 // STL includes
@@ -149,13 +150,14 @@ namespace FlavorTagInference {
     typedef std::vector<std::pair<std::regex, std::string> > StringRegexes;
     StringRegexes getNameFlippers(const FlipTagConfig& flip_config);
 
-    // Get the configuration structures based on the lwtnn NN
+    // Get the configuration structures based on the GraphConfig NN
     // structure.
+    template <typename GraphConfig, typename OutputNodeConfig>
     std::tuple<
-      std::vector<FTagInputConfig>,
-      std::vector<ConstituentsInputConfig>,
-      FTagOptions>
-    createGetterConfig( lwt::GraphConfig& graph_config,
+    std::vector<FTagInputConfig>,
+    std::vector<ConstituentsInputConfig>,
+    FTagOptions>
+    createGetterConfig( GraphConfig& graph_config,
       FlipTagConfig flip_config,
       std::map<std::string, std::string> remap_scalar,
       TrackLinkType track_link_type);
@@ -169,22 +171,24 @@ namespace FlavorTagInference {
       const std::vector<FTagInputConfig>& inputs);
 
     // return the decorators for the NNs
+    template <typename GraphConfig>
     std::tuple<
       std::map<std::string, internal::OutNodeFloat>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createDecorators(
-      const lwt::GraphConfig& config,
+      const GraphConfig& config,
       const FTagOptions& options);
 
     // return a function to check if IP is invalid
+    template <typename GraphConfig>
     std::tuple<
       std::function<char(const internal::Tracks&)>,
       std::vector<SG::AuxElement::Decorator<char>>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createIpChecker(
-      const lwt::GraphConfig&, const FTagOptions&);
+      const GraphConfig&, const FTagOptions&);
 
     // check that all the remapping was used
     void checkForUnusedRemaps(

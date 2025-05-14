@@ -489,19 +489,19 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
             int krow = XMPD_GTRN_ARR[i][k]/12;
             int kcolumn = XMPD_GTRN_ARR[i][k]%12; //columns 0-11
 
-            int korow = 4;
-            int kxrow = 0;
+            int  korow =  XMPD_GTRN_ARR[i][k];
+            int  kxrow =  XMPD_GTRN_ARR[i][k];
 
-            int  kocolumn =  XMPD_GTRN_ARR[i][k];
-            int  kxcolumn =  XMPD_GTRN_ARR[i][k];
+            int kocolumn = 4;
+            int kxcolumn = 0;
 
             // note that they are different in FPGA a and FPGA b
             if (XFPGA == 0){
-                korow = 4;
-                kxrow = 0;
+                kocolumn = 4;
+                kxcolumn = 0;
             } else if (XFPGA == 1){
-                korow = 7;
-                kxrow = 11;
+                kocolumn = 7;
+                kxcolumn = 11;
             }
             
             if (fiberSaturation[i][k] == 1){
@@ -511,65 +511,72 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     int kcolumn2  = XMPD_GTRN_ARR[i][2*k]%12;
                     Xsaturation[krow2][kcolumn2] = 1;
                 }
-                //htowers
+                //htowers - XMPD_DTYP_ARR = 11 (0b1011) only defined for FPGAa and FPGAb
                 if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 11  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
                     Xsaturation[ krow][kcolumn] = 1;
                 }
-                //extended region for FPGAa and FPGAb - no equivalent for FPGAc
-                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 2  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
-                    Xsaturation[ kxrow][kxcolumn] = 1;
-                }
+                
+                // Applying condition for extended and overlap regions in fpga a&b
+
                 if (XFPGA < 2) {
                     // FPGA a and FPGA b - extended region condition
                     if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 3  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
                          Xsaturation[ kxrow][kxcolumn] = 1;
                     }
+                    //extended region for FPGAa and FPGAb 
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 2  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
+                        Xsaturation[ kxrow][kxcolumn] = 1;
+                    }
+                    //overlap region for FPGAa and FPGAb - no equivalent for FPGAc
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 6  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
+                        Xsaturation[ korow][kocolumn] = 1; 
+                    }
                 } else {
-                    // FPGAc -- all channels type 3
+                    // FPGAc -- all channels type 3 & 2
                     if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 3  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
                         Xsaturation[ krow][kcolumn] = 1;
                     }
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 2  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
+                        Xsaturation[ krow][kcolumn] = 1;
+                    }
                 }
-                //overlap region for FPGAa and FPGAb - no equivalent for FPGAc
-                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 6  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
-                    Xsaturation[ korow][kocolumn] = 1; 
-                }
-                
                 // repeat for the next k+8 values  (16 values) cases
                 krow = XMPD_GTRN_ARR[i][k+8]/12;
-                kcolumn = XMPD_GTRN_ARR[i][k+8]%12;
+                kcolumn = XMPD_GTRN_ARR[i][k+8]%12; // column values : 0-11
 
-                kocolumn = XMPD_GTRN_ARR[i][k+8];
-                kxcolumn = XMPD_GTRN_ARR[i][k+8];
+                korow = XMPD_GTRN_ARR[i][k+8];
+                kxrow = XMPD_GTRN_ARR[i][k+8];
                 
-                //htowers
+                //htowers - XMPD_DTYP_ARR = 11 (0b1011) only defined for FPGAa and FPGAb
                 if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 11  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
                     Xsaturation[ krow][kcolumn] = 1;
                 }
-                //extended region for FPGAa and FPGAb - no equivalent for FPGAc
-                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 2  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
-                    Xsaturation[ kxrow][kxcolumn] = 1;
-                }
+
                 if (XFPGA < 2) {
                     // FPGA a and FPGA b - extended region condition
                     if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 3  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
                          Xsaturation[ kxrow][kxcolumn] = 1;
                     }
+                    //extended region for FPGAa and FPGAb 
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 2  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
+                        Xsaturation[ kxrow][kxcolumn] = 1;
+                    }
+                    //overlap regio for FPGAa and FPGAb - no equivalent for FPGAc
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 6  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
+                        Xsaturation[ korow][kocolumn] = 1; 
+                    }
                 } else {
-                    // FPGAc -- all channels type 3
+                    // FPGAc -- all channels type 3 & 2
                     if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 3  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
                         Xsaturation[ krow][kcolumn] = 1;
                     }
-                }
-                //overlap regio for FPGAa and FPGAb - no equivalent for FPGAc
-                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 6  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
-                    Xsaturation[ korow][kocolumn] = 1; 
-                }
-                
-            }
-
-        }
-    }
+                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 2  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
+                        Xsaturation[ krow][kcolumn] = 1;
+                    }
+                } 
+            }// close fibreSaturation loop
+        } // k (max 8) loop close
+    } // i (max 100) loop close
 
     //Loop over fibers
     for(int iFiber = 0; iFiber < Xin; iFiber++) { 
