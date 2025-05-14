@@ -388,7 +388,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         auto atlasInnerSectorVolumes = std::vector<Trk::TrackingVolume*>{atlasInnerNegativeSector,highestVolume,atlasInnerPositiveSector};
 
         ATH_MSG_VERBOSE( "Create the Atlas Inner Sector volumes. " );
-        Trk::BinnedArray<Trk::TrackingVolume>* atlasInnerSectorVolumeArray = m_trackingVolumeArrayCreator ?
+        std::unique_ptr<Trk::BinnedArray<Trk::TrackingVolume>> atlasInnerSectorVolumeArray = m_trackingVolumeArrayCreator ?
                 m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(atlasInnerSectorVolumes) : nullptr;
 
 
@@ -400,7 +400,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
                                                                         innerSectorBounds,
                                                                         m_worldMaterial,
                                                                         nullptr,
-                                                                        atlasInnerSectorVolumeArray,
+                                                                        std::move(atlasInnerSectorVolumeArray),
                                                                         "AtlasInnerSector");
 
         // Atlas outer Sector
@@ -418,7 +418,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         // create the array of Inner and Outer sector
         auto atlasVolumes =  std::vector<Trk::TrackingVolume*>{atlasInnerSector, atlasOuterSector};
 
-        Trk::BinnedArray<Trk::TrackingVolume>* atlasVolumeArray = m_trackingVolumeArrayCreator ?
+        std::unique_ptr<Trk::BinnedArray<Trk::TrackingVolume>> atlasVolumeArray = m_trackingVolumeArrayCreator ?
                 m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(atlasVolumes) : nullptr;
 
         // create the Atlas volume bounds
@@ -429,7 +429,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
                                                                    atlasBounds,
                                                                    m_worldMaterial,
                                                                    nullptr,
-                                                                   atlasVolumeArray,
+                                                                   std::move(atlasVolumeArray),
                                                                    "Atlas");
 
         ATH_MSG_VERBOSE( "Atlas Tracking World volume built successfully." );

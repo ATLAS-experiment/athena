@@ -258,7 +258,7 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
   auto  beamPipeBounds =
       std::make_shared<Trk::CylinderVolumeBounds>(overallRmin, overallExtendZ);
   // BinnedArray needed
-  Trk::BinnedArray<Trk::Layer>* beamPipeLayerArray = nullptr;
+  std::unique_ptr<Trk::BinnedArray<Trk::Layer>> beamPipeLayerArray = nullptr;
 
   std::unique_ptr<const std::vector<Trk::CylinderLayer*> > beamPipeVecPtr =
       nullptr;
@@ -275,7 +275,7 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
   // create the TrackingVolume
   beamPipeVolume =
       new Trk::TrackingVolume(nullptr, beamPipeBounds, *m_materialProperties,
-                              beamPipeLayerArray, nullptr, "InDet::BeamPipe");
+                              std::move(beamPipeLayerArray), nullptr, "InDet::BeamPipe");
   // set the color code
   beamPipeVolume->registerColorCode(46);
 

@@ -319,9 +319,11 @@ std::unique_ptr<Trk::TrackingGeometry> Trk::GeometryBuilder::atlasTrackingGeomet
         auto atlasInnerSectorVolumes = std::vector<Trk::TrackingVolume*>{atlasInnerNegativeSector,highestVolume,atlasInnerPositiveSector};
 
         ATH_MSG_VERBOSE( "Create the Atlas Inner Sector volumes. " );
-        Trk::BinnedArray<Trk::TrackingVolume>* atlasInnerSectorVolumeArray = m_trackingVolumeArrayCreator ?
-                m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(atlasInnerSectorVolumes) : nullptr;
-
+        std::unique_ptr<Trk::BinnedArray<Trk::TrackingVolume>>
+            atlasInnerSectorVolumeArray =
+                m_trackingVolumeArrayCreator
+                    ? m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(atlasInnerSectorVolumes)
+                    : nullptr;
 
         // Atlas inner Sector bounds
         auto innerSectorBounds =
@@ -331,7 +333,7 @@ std::unique_ptr<Trk::TrackingGeometry> Trk::GeometryBuilder::atlasTrackingGeomet
                                                                         std::move(innerSectorBounds),
                                                                         m_worldMaterial,
                                                                         nullptr,
-                                                                        atlasInnerSectorVolumeArray,
+                                                                        std::move(atlasInnerSectorVolumeArray),
                                                                         "AtlasInnerSector");
 
         // Atlas outer Sector
@@ -349,8 +351,11 @@ std::unique_ptr<Trk::TrackingGeometry> Trk::GeometryBuilder::atlasTrackingGeomet
         // create the array of Inner and Outer sector
         auto atlasVolumes =  std::vector<Trk::TrackingVolume*>{atlasInnerSector, atlasOuterSector};
 
-        Trk::BinnedArray<Trk::TrackingVolume>* atlasVolumeArray = m_trackingVolumeArrayCreator ?
-                m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(atlasVolumes) : nullptr;
+        std::unique_ptr<Trk::BinnedArray<Trk::TrackingVolume>>
+            atlasVolumeArray =
+                m_trackingVolumeArrayCreator
+                    ? m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(atlasVolumes)
+                    : nullptr;
 
         // create the Atlas volume bounds
         auto atlasBounds = std::make_shared<Trk::CylinderVolumeBounds>(0., m_worldDimension[1], m_worldDimension[2]);
@@ -360,7 +365,7 @@ std::unique_ptr<Trk::TrackingGeometry> Trk::GeometryBuilder::atlasTrackingGeomet
                                                                    std::move(atlasBounds),
                                                                    m_worldMaterial,
                                                                    nullptr,
-                                                                   atlasVolumeArray,
+                                                                   std::move(atlasVolumeArray),
                                                                    "Atlas");
 
         ATH_MSG_VERBOSE( "Atlas Tracking World volume built successfully." );
@@ -382,8 +387,11 @@ std::unique_ptr<Trk::TrackingGeometry> Trk::GeometryBuilder::atlasTrackingGeomet
         // glue outer and inner sector together
         std::vector<Trk::TrackingVolume*> atlasInnerOuterVolumes;
         atlasInnerOuterVolumes.push_back(atlasInnerNegativeSector);
-        for ( ; volIter != volIterEnd; ++volIter)
-            if (*volIter) atlasInnerOuterVolumes.push_back(*volIter);
+        for (; volIter != volIterEnd; ++volIter) {
+          if (*volIter) {
+            atlasInnerOuterVolumes.push_back(*volIter);
+          }
+        }
         atlasInnerOuterVolumes.push_back(atlasInnerPositiveSector);
 
         m_trackingVolumeHelper->glueTrackingVolumes(*atlasOuterSector, Trk::tubeInnerCover,

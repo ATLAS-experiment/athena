@@ -169,10 +169,6 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
   std::shared_ptr<Trk::CylinderVolumeBounds> itcPlug2Bounds;
   std::shared_ptr<Trk::CylinderVolumeBounds> gapBounds;
 
-  // dummy objects
-  Trk::LayerArray* dummyLayers = nullptr;
-  Trk::TrackingVolumeArray* dummyVolumes = nullptr;
-
   std::vector<std::pair<const Trk::Surface*, const Trk::Surface*>> entrySurf =
     m_surfBuilder->entrySurfaces(&caloDDM);
   std::vector<std::pair<const Trk::Surface*, const Trk::Surface*>> exitSurf =
@@ -410,7 +406,7 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
     tileGirder = new Trk::TrackingVolume(nullptr,
                                          std::move(tileGirderBounds),
                                          girderProperties,
-                                         dummyLayers, dummyVolumes,
+                                         nullptr, nullptr,
                                          "Calo::Girder::TileCombined");
   }
 
@@ -541,12 +537,12 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
 
   Trk::TrackingVolume* gBufferPos = new Trk::TrackingVolume(
       std::move(gBuffPosTransform), gapBuffBounds, fingerProperties,
-      dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::GapBufferPos");
+      nullptr, nullptr, "Calo::GapVolumes::Tile::GapBufferPos");
 
   Trk::TrackingVolume* gBufferNeg = new Trk::TrackingVolume(
       std::move(gBuffNegTransform),
       std::shared_ptr<Trk::CylinderVolumeBounds>(gapBuffBounds->clone()),
-      fingerProperties, dummyLayers, dummyVolumes,
+      fingerProperties, nullptr, nullptr,
       "Calo::GapVolumes::Tile::GapBufferNeg");
 
   Trk::TrackingVolume* positiveGapSector = nullptr;
@@ -582,14 +578,14 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
       itcPlug2Bounds->innerRadius(), itcPlug2Bounds->outerRadius(), h2Buff);
 
   Trk::TrackingVolume* p2BufferPos = new Trk::TrackingVolume(
-      std::move(p2BuffPosTransform), p2BuffBounds, fingerProperties, dummyLayers,
-      dummyVolumes, "Calo::GapVolumes::Tile::Plug2BufferPos");
+      std::move(p2BuffPosTransform), p2BuffBounds, fingerProperties, nullptr,
+      nullptr, "Calo::GapVolumes::Tile::Plug2BufferPos");
 
   Trk::TrackingVolume* p2BufferNeg = new Trk::TrackingVolume(
       std::move(p2BuffNegTransform),
       std::shared_ptr<Trk::CylinderVolumeBounds>(p2BuffBounds->clone()),
-      fingerProperties, dummyLayers,
-      dummyVolumes, "Calo::GapVolumes::Tile::Plug2BufferNeg");
+      fingerProperties, nullptr,
+      nullptr, "Calo::GapVolumes::Tile::Plug2BufferNeg");
 
   Trk::TrackingVolume* positiveP2Sector = nullptr;
   if (p2BufferPos) {
@@ -655,14 +651,14 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
 
   tileBarrelPositiveFingerGap = new Trk::TrackingVolume(
       std::move(bfPosTransform), tileBarrelFingerGapBounds, barrelFingerGapProperties,
-      dummyLayers, dummyVolumes,
+      nullptr, nullptr,
       "Calo::GapVolumes::Tile::BarrelPositiveFingerGap");
 
   tileBarrelNegativeFingerGap = new Trk::TrackingVolume(
       std::move(bfNegTransform),
       std::shared_ptr<Trk::CylinderVolumeBounds>(
           tileBarrelFingerGapBounds->clone()),
-      barrelFingerGapProperties, dummyLayers, dummyVolumes,
+      barrelFingerGapProperties, nullptr, nullptr,
       "Calo::GapVolumes::Tile::BarrelNegativeFingerGap");
 
   // ------------------------------ ENDCAP SECTION COMPLETION --------------------------------------------------
@@ -683,12 +679,12 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
 
   tilePositiveFingerGap = new Trk::TrackingVolume(
       std::move(efPosTransform), tilePositiveFingerGapBounds, fingerGapProperties,
-      dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::PositiveFingerGap");
+      nullptr, nullptr, "Calo::GapVolumes::Tile::PositiveFingerGap");
 
   tileNegativeFingerGap = new Trk::TrackingVolume(
       std::move(efNegTransform),
       std::shared_ptr<Trk::CylinderVolumeBounds>(tilePositiveFingerGapBounds->clone()),
-      fingerGapProperties, dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::NegativeFingerGap");
+      fingerGapProperties, nullptr, nullptr, "Calo::GapVolumes::Tile::NegativeFingerGap");
 
   // set the color code for displaying
   tileBarrel->registerColorCode( 4 );

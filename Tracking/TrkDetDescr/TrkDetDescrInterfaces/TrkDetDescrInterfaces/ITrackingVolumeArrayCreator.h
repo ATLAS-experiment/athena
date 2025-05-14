@@ -49,16 +49,16 @@ class ITrackingVolumeArrayCreator : virtual public IAlgTool {
   virtual ~ITrackingVolumeArrayCreator() = default;
 
   /** Extra interface methods for compatibility*/
-  virtual TrackingVolumeArray* cylinderVolumesArrayInR(
+  virtual std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInR(
       const std::vector<TrackingVolume*>& vols,
       bool navigationtype = false) const = 0;
-  virtual TrackingVolumeArray* cylinderVolumesArrayInZ(
+  virtual std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInZ(
       const std::vector<TrackingVolume*>& vols,
       bool navigationtype = false) const = 0;
-  virtual TrackingVolumeArray* cylinderVolumesArrayInPhiR(
+  virtual std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInPhiR(
       const std::vector<TrackingVolume*>& vols,
       bool navigationtype = false) const = 0;
-  virtual TrackingVolumeArray* cylinderVolumesArrayInPhiZ(
+  virtual std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInPhiZ(
       const std::vector<TrackingVolume*>& vols,
       bool navigationtype = false) const = 0;
 

@@ -199,12 +199,9 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry(
     auto idBounds = std::make_shared<Trk::CylinderVolumeBounds>(enclosedInnerRadius,
                                                                 enclosedInnerSectorHalflength);
     auto idTr = std::make_unique<Amg::Transform3D>(Trk::s_idTransform);
-    // dummy objects
-    Trk::LayerArray* dummyLayers = nullptr;
-    Trk::TrackingVolumeArray* dummyVolumes = nullptr;
 
     innerVol = new Trk::TrackingVolume(std::move(idTr), std::move(idBounds), *materialProperties,
-                                       dummyLayers, dummyVolumes,
+                                       nullptr, nullptr,
                                        "HGTD::GapVolumes::DummyID");
   }
 
