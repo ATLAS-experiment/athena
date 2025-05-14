@@ -991,16 +991,16 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
             auto layerRepr = m_muonStationTypeBuilder->createLayerRepresentation(*csc_station);
             // create prototype as detached tracking volume
             auto layerVec = std ::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
-            typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, csc_station.release(),
-                                                                     layerRepr.first.release(), layerVec.release());
+            typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, std::move(csc_station),
+                                                                     std::move(layerRepr.first), std::move(layerVec));
         } else {
             std::unique_ptr<Trk::TrackingVolume> tgc_station{m_muonStationTypeBuilder->processTgcStation(cv, cache)};
             // create layer representation
             auto layerRepr =  m_muonStationTypeBuilder->createLayerRepresentation(*tgc_station);
             // create prototype as detached tracking volume
             auto layerVec = std ::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
-            typeStat =  std::make_unique<Trk::DetachedTrackingVolume>(stname, tgc_station.release(),
-                                                                      layerRepr.first.release(), layerVec.release());
+            typeStat =  std::make_unique<Trk::DetachedTrackingVolume>(stname, std::move(tgc_station),
+                                                                      std::move(layerRepr.first), std::move(layerVec));
         }
 
     } else {
@@ -1089,8 +1089,9 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
 
                 // create prototype as detached tracking volume
                 auto layerVec = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
-                typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, newType.release(),
-                                                                         layerRepr.first.release(), layerVec.release());
+                typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, std::move(newType),
+                                                                         std::move(layerRepr.first),
+                                                                         std::move(layerVec));
             }
         }
     }  // end new station type
