@@ -394,6 +394,16 @@ public:
 
 
 class AAH : public AthAnalysisHelper {
+public:
+  using AthAnalysisHelper::setProperty;
+
+  // Add some explicit specializations for easier calling from job options.
+  static StatusCode setProperty (const GaudiHandleBase& toolHandle, const std::string& property, const int& value, bool override = true)
+  { return AthAnalysisHelper::setProperty (toolHandle, property, value, override); }
+  static StatusCode setProperty (const GaudiHandleBase& toolHandle, const std::string& property, const double& value, bool override = true)
+  { return AthAnalysisHelper::setProperty (toolHandle, property, value, override); }
+  static StatusCode setProperty (const GaudiHandleBase& toolHandle, const std::string& property, const std::string& value, bool override = true)
+  { return AthAnalysisHelper::setProperty (toolHandle, property, value, override); }
   
 };
 
