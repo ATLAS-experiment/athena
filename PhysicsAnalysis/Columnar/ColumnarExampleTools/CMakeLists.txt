@@ -4,11 +4,12 @@
 
 atlas_subdir( ColumnarExampleTools )
 
+find_package( GTest )
+
 # Add the shared library:
 atlas_add_library (ColumnarExampleToolsLib
   ColumnarExampleTools/*.h Root/*.cxx
   PUBLIC_HEADERS ColumnarExampleTools
-  INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS}
   LINK_LIBRARIES ColumnarCoreLib AsgTools ColumnarMetLib ColumnarMuonLib ColumnarTrackingLib)
 
 atlas_add_test( gt_ColumnarToolTests
