@@ -59,11 +59,11 @@ namespace FlavorTagInference {
   {
 
     // Extract metadata from the ONNX file, primarily about the model's inputs.
-    auto lwt_config = m_saltModel->getLwtConfig();
+    auto graph_config = m_saltModel->getGraphConfig();
 
     // Create configuration objects for data preprocessing.
-    auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
-        lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
+    auto [inputs, constituents_configs, options] = dataprep::createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>(
+        graph_config, o.flip_config, o.variable_remapping, o.track_link_type);
 
     for (auto config : constituents_configs){
       switch (config.type){

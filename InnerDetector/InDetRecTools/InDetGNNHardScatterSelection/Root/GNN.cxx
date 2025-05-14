@@ -4,6 +4,7 @@
 
 #include "InDetGNNHardScatterSelection/GNN.h"
 #include "FlavorTagInference/SaltModel.h"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -27,10 +28,10 @@ namespace InDetGNNHardScatterSelection {
     m_saltModel = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile);
 
     // Extract metadata from the ONNX file, primarily about the model's inputs.
-    auto lwt_config = m_saltModel->getLwtConfig();
+    auto graph_config = m_saltModel->getGraphConfig();
 
     // Create configuration objects for data preprocessing.
-    auto [inputs, constituents_configs] = dataprep::createGetterConfig(lwt_config);
+    auto [inputs, constituents_configs] = dataprep::createGetterConfig(graph_config);
     
     for (auto config : constituents_configs){
       switch (config.type){

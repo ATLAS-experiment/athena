@@ -4,7 +4,7 @@
 
 #include "tauRecTools/TauGNN.h"
 #include "FlavorTagInference/SaltModel.h"
-#include "lwtnn/parse_json.hh"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 #include "PathResolver/PathResolver.h"
 
 #include <algorithm>
@@ -32,39 +32,39 @@ TauGNN::TauGNN(const std::string &nnFile, const Config &config):
     }
 
     //Get model config (for inputs)
-    auto lwtnn_config = m_saltModel->getLwtConfig();
+    auto graph_config = m_saltModel->getGraphConfig();
     
     //===================================================//
     // This part is ported from tauRecTools TauJetRNN.cxx//
     //===================================================//
 
     // Search for input layer names specified in 'config'
-    auto node_is_scalar = [&config](const lwt::InputNodeConfig &in_node) {
+    auto node_is_scalar = [&config](const FlavorTagInference::SaltModelGraphConfig::InputNodeConfig &in_node) {
         return in_node.name == config.input_layer_scalar;
     };
-    auto node_is_track = [&config](const lwt::InputNodeConfig &in_node) {
+    auto node_is_track = [&config](const FlavorTagInference::SaltModelGraphConfig::InputNodeConfig &in_node) {
         return in_node.name == config.input_layer_tracks;
     };
-    auto node_is_cluster = [&config](const lwt::InputNodeConfig &in_node) {
+    auto node_is_cluster = [&config](const FlavorTagInference::SaltModelGraphConfig::InputNodeConfig &in_node) {
         return in_node.name == config.input_layer_clusters;
     };
 
-    auto scalar_node = std::find_if(lwtnn_config.inputs.cbegin(),
-                                    lwtnn_config.inputs.cend(),
+    auto scalar_node = std::find_if(graph_config.inputs.cbegin(),
+                                    graph_config.inputs.cend(),
                                     node_is_scalar);
 
-    auto track_node = std::find_if(lwtnn_config.input_sequences.cbegin(),
-                                   lwtnn_config.input_sequences.cend(),
+    auto track_node = std::find_if(graph_config.input_sequences.cbegin(),
+                                   graph_config.input_sequences.cend(),
                                    node_is_track);
 
-    auto cluster_node = std::find_if(lwtnn_config.input_sequences.cbegin(),
-                                     lwtnn_config.input_sequences.cend(),
+    auto cluster_node = std::find_if(graph_config.input_sequences.cbegin(),
+                                     graph_config.input_sequences.cend(),
                                      node_is_cluster);
 
     // Check which input layers were found
-    auto has_scalar_node = scalar_node != lwtnn_config.inputs.cend();
-    auto has_track_node = track_node != lwtnn_config.input_sequences.cend();
-    auto has_cluster_node = cluster_node != lwtnn_config.input_sequences.cend();
+    auto has_scalar_node = scalar_node != graph_config.inputs.cend();
+    auto has_track_node = track_node != graph_config.input_sequences.cend();
+    auto has_cluster_node = cluster_node != graph_config.input_sequences.cend();
     if(!has_scalar_node) ATH_MSG_WARNING("No scalar node with name "<<config.input_layer_scalar<<" found!");
     if(!has_track_node) ATH_MSG_WARNING("No track node with name "<<config.input_layer_tracks<<" found!");
     if(!has_cluster_node) ATH_MSG_WARNING("No cluster node with name "<<config.input_layer_clusters<<" found!");
