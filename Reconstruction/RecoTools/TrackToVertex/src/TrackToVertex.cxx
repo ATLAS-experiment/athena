@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -181,25 +181,30 @@ Reco::TrackToVertex::perigeeAtBeamline(
   Trk::PerigeeSurface persf(pAmgTransf);
 
   std::unique_ptr<Trk::Perigee> vertexPerigee;
-  std::unique_ptr<Trk::TrackParameters> extrapResult =
-     !startAtOriginalPerigee(track)
-     ? m_extrapolator->extrapolateTrack(ctx,track, persf)
-     : m_extrapolator->extrapolate(ctx,*(track.perigeeParameters()), persf);
-  if (extrapResult && extrapResult->surfaceType() == Trk::SurfaceType::Perigee) {
-    vertexPerigee.reset(static_cast<Trk::Perigee*>(extrapResult.release()));
+  if(track.perigeeParameters() && std::abs(track.perigeeParameters()->position().z())>5000.){
+    ATH_MSG_DEBUG("Perigee well outside of tracking detector, skipping extrapolation");
+  }
+  else{
+    std::unique_ptr<Trk::TrackParameters> extrapResult =
+      !startAtOriginalPerigee(track)
+      ? m_extrapolator->extrapolateTrack(ctx,track, persf)
+      : m_extrapolator->extrapolate(ctx,*(track.perigeeParameters()), persf);
+    if (extrapResult && extrapResult->surfaceType() == Trk::SurfaceType::Perigee) {
+      vertexPerigee.reset(static_cast<Trk::Perigee*>(extrapResult.release()));
+    }
   }
   if (!vertexPerigee) {
     // workaround.
     // try again using the first track parameter set, since the current extrapolator will
-    // use "the closest" track parameterset which is not necessarily the mostuseful one to
+    // use "the closest" track parameter set which is not necessarily the most useful one to
     // start the extrapolation with.
     const DataVector<const Trk::TrackParameters> *track_parameter_list= track.trackParameters();
     if (track_parameter_list) {
       for(const Trk::TrackParameters *trk_params: *track_parameter_list) {
-        if (!trk_params) {
+        if (!trk_params || std::abs(trk_params->position().z())>5000.) {
           continue;
         }
-        extrapResult = m_extrapolator->extrapolate(ctx,*trk_params, persf);
+        std::unique_ptr<Trk::TrackParameters> extrapResult = m_extrapolator->extrapolate(ctx,*trk_params, persf);
         if (extrapResult &&
             extrapResult->surfaceType() == Trk::SurfaceType::Perigee) {
           vertexPerigee.reset(static_cast<Trk::Perigee*>(extrapResult.release()));
