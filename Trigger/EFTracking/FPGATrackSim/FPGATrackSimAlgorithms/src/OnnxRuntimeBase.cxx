@@ -62,6 +62,24 @@ void OnnxRuntimeBase::initialize(TString fileName)
   }
 }
 
+// Inference function using ONNX runtime for multiple entries
+std::vector<std::vector<float> >OnnxRuntimeBase::runONNXInference(std::vector<std::vector<float> >& inputTensorValues) const 
+{
+  std::vector<std::vector<float> > output;
+  if (inputTensorValues.size() == 0) return output;
+
+  NetworkBatchInput vectorInput(inputTensorValues.size(), inputTensorValues[0].size());
+  for (size_t i = 0; i < inputTensorValues.size(); i++) { 
+    for (size_t j = 0; j < inputTensorValues[i].size(); j++) {
+      vectorInput(i,j) = inputTensorValues[i][j];
+    }
+  }
+  output = runONNXInference(vectorInput);
+  return output;
+}
+
+
+
 // Inference function using ONNX runtime for one single entry
 std::vector<float> OnnxRuntimeBase::runONNXInference(std::vector<float>& inputTensorValues) const 
 {

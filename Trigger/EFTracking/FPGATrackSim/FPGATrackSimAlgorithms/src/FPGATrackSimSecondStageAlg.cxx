@@ -317,6 +317,12 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     // Overlap removal
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Overlap Removal");
     ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks));
+
+    // If running NN Track tool, now we get the track parameters (it's slow so we only do it for tracks passing OLR)
+    if (m_doTracking && m_doNNTrack_2nd) {
+      ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks,false));
+    }
+    
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks) {
       if (track.getChi2ndof() < m_trackScoreCut.value()) {

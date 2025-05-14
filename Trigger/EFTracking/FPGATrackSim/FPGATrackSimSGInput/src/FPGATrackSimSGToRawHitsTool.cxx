@@ -309,11 +309,13 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       tmpSGhit.setParentageMask(parentMask.to_ulong());
 
-      // Add truth
-      FPGATrackSimMultiTruth mt;
-      FPGATrackSimMultiTruth::Barcode uniqueID(tmpSGhit.getEventIndex(), tmpSGhit.getBarcode()); // FIXME barcode-based
-      mt.maximize(uniqueID, tmpSGhit.getBarcodePt()); // FIXME barcode-based
-      tmpSGhit.setTruth(mt);
+      if (m_doMultiTruth) {
+	// Add truth
+	FPGATrackSimMultiTruth mt;
+	FPGATrackSimMultiTruth::Barcode uniqueID(tmpSGhit.getEventIndex(), tmpSGhit.getBarcode()); // FIXME barcode-based
+	mt.maximize(uniqueID, tmpSGhit.getBarcodePt()); // FIXME barcode-based
+	tmpSGhit.setTruth(mt);
+      }
 
       m_eventHeader->addHit(tmpSGhit);
     } // end for each RDO in the collection
@@ -483,11 +485,13 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setY(0.5 * (endsOfStrip.first.y() + endsOfStrip.second.y()));
       tmpSGhit.setZ(0.5 * (endsOfStrip.first.z() + endsOfStrip.second.z()));
 
+      if (m_doMultiTruth) {
       // Add truth
-      FPGATrackSimMultiTruth mt;
-      FPGATrackSimMultiTruth::Barcode uniqueID(tmpSGhit.getEventIndex(), tmpSGhit.getBarcode()); // FIXME barcode-based
-      mt.maximize(uniqueID, tmpSGhit.getBarcodePt()); // FIMXE barcode-based
-      tmpSGhit.setTruth(mt);
+       FPGATrackSimMultiTruth mt;
+       FPGATrackSimMultiTruth::Barcode uniqueID(tmpSGhit.getEventIndex(), tmpSGhit.getBarcode()); // FIXME barcode-based
+       mt.maximize(uniqueID, tmpSGhit.getBarcodePt()); // FIMXE barcode-based
+       tmpSGhit.setTruth(mt);
+      }
 
       m_eventHeader->addHit(tmpSGhit);
     } // end for each RDO in the strip collection

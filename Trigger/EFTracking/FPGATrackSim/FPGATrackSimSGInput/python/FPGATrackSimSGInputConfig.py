@@ -16,6 +16,7 @@ def FPGATrackSimSGInputToolCfg(flags):
     from TrkConfig.TrkConfigFlags import TrackingComponent
     FPGATrackSimSGInputTool = CompFactory.FPGATrackSimSGToRawHitsTool(maxEta=5.0, minPt=0.8 * GeV,
         Extrapolator = extrapolatorTool, TruthToTrackTool = truthToTrackTool, ReadOfflineTracks=TrackingComponent.AthenaChain in flags.Tracking.recoChain)
+    FPGATrackSimSGInputToolCfg.doMultiTruth = flags.Trigger.FPGATrackSim.doMultiTruth
     acc.setPrivateTools(FPGATrackSimSGInputTool)
 
     return acc

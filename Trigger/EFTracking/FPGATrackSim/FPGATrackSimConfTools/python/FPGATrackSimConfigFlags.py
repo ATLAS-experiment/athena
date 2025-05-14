@@ -13,6 +13,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
+    cf.addFlag('doMultiTruth', True)
     cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
     cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
