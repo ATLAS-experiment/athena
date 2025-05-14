@@ -1663,7 +1663,7 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     // create layer representation
     auto layerRepr = std::make_unique<Trk::PlaneLayer>(transf * envelope_trf_local, layBounds, stgcMaterial, sTgc_mat.thickness());
     // create prototype as detached tracking volume
-    return std::make_unique<Trk::DetachedTrackingVolume>(vName, sTgc.release(), layerRepr.release(), nullptr);
+    return std::make_unique<Trk::DetachedTrackingVolume>(vName, std::move(sTgc), std::move(layerRepr), nullptr);
 }
 
 std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::process_MM(const Identifier& nswId,
@@ -1729,7 +1729,7 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     // create layer representation
     auto layerRepr = std::make_unique<Trk::PlaneLayer>(transf * envelope_trf_local, layBounds, mmMaterial, mm_mat.thickness());
     // create prototype as detached tracking volume
-    return std::make_unique<Trk::DetachedTrackingVolume>(vName, mM.release(), layerRepr.release(), nullptr);
+    return std::make_unique<Trk::DetachedTrackingVolume>(vName, std::move(mM), std::move(layerRepr), nullptr);
 }
 
 double Muon::MuonStationTypeBuilder::get_x_size(const GeoVPhysVol* pv) const {
