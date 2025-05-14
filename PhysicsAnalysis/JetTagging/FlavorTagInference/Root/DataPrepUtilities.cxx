@@ -6,6 +6,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "FlavorTagInference/CustomGetterUtils.h"
 #include "FlavorTagInference/StringUtils.h"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 
 #include "xAODBTagging/BTaggingUtilities.h"
 
@@ -39,12 +40,14 @@ namespace {
   // Since the names of the inputs are stored in the NN config, we
   // also allow some user-configured remapping. Items in replaced_vars
   // are removed as they are used.
-  void remap_inputs(std::vector<lwt::Input>& nn,
+  template <typename Input>
+  void remap_inputs(std::vector<Input>& nn,
                     std::map<std::string, std::string>& replaced_vars,
                     std::map<std::string, double>& defaults);
 
   // replace strings for flip taggers
-  void rewriteFlipConfig(lwt::GraphConfig&, const StringRegexes&);
+  template <typename GraphConfig, typename OutputNodeConfig>
+  void rewriteFlipConfig(GraphConfig&, const StringRegexes&);
 
 
   //_______________________________________________________________________
@@ -71,14 +74,15 @@ namespace {
 
 
   // do some input variable magic in case someone asked
-  void remap_inputs(std::vector<lwt::Input>& nn,
+  template <typename Input>
+  void remap_inputs(std::vector<Input>& nn,
                     std::map<std::string, std::string>& replaced_vars,
                     std::map<std::string, double>& defaults) {
     // keep track of the new default values, and which values they
     // were moved from
     std::map<std::string, double> new_defaults;
     std::set<std::string> moved_defaults;
-    for (lwt::Input& input: nn) {
+    for (Input& input: nn) {
       std::string nn_name = input.name;
       auto replacement_itr = replaced_vars.find(nn_name);
       if (replacement_itr != replaced_vars.end()) {
@@ -102,8 +106,8 @@ namespace {
       defaults.erase(moved);
     }
   }
-
-  void rewriteFlipConfig(lwt::GraphConfig& config,
+  template <typename GraphConfig, typename OutputNodeConfig>
+  void rewriteFlipConfig(GraphConfig& config,
                          const StringRegexes& res){
     std::string context = "building negative tag b-btagger";
     for (auto& node: config.inputs) {
@@ -116,7 +120,7 @@ namespace {
       }
       node.defaults = new_defaults;
     }
-    std::map<std::string, lwt::OutputNodeConfig> new_outputs;
+    std::map<std::string, OutputNodeConfig> new_outputs;
     for (auto& pair: config.outputs) {
       new_outputs[str::sub_first(res, pair.first, context)] = pair.second;
     }
@@ -229,11 +233,12 @@ namespace FlavorTagInference {
     // informaton encoded as strings into structures and enums to be
     // consumed by the code that actually constructs the NN.
     //
+    template <typename GraphConfig, typename OutputNodeConfig>
     std::tuple<
       std::vector<FTagInputConfig>,
       std::vector<ConstituentsInputConfig>,
       FTagOptions>
-    createGetterConfig( lwt::GraphConfig& config,
+    createGetterConfig( GraphConfig& config,
       FlipTagConfig flip_config,
       std::map<std::string, std::string> remap_scalar,
       TrackLinkType track_link_type
@@ -243,7 +248,7 @@ namespace FlavorTagInference {
       StringRegexes flip_converters = getNameFlippers(flip_config);
 
       if (flip_config != FlipTagConfig::STANDARD) {
-        rewriteFlipConfig(config, flip_converters);
+        rewriteFlipConfig<GraphConfig, OutputNodeConfig>(config, flip_converters);
       }
 
       // build the jet inputs
@@ -379,12 +384,13 @@ namespace FlavorTagInference {
     //
     // This returns the "decorators" that we use to save outputs to
     // the EDM.
+    template <typename GraphConfig>
     std::tuple<
       std::map<std::string, internal::OutNodeFloat>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createDecorators(
-      const lwt::GraphConfig& config,
+      const GraphConfig& config,
       const FTagOptions& options)
     {
       FTagDataDependencyNames deps;
@@ -416,13 +422,14 @@ namespace FlavorTagInference {
     }
 
     // return a function to check IP validity
+    template <typename GraphConfig>
     std::tuple<
       std::function<char(const internal::Tracks&)>,
       std::vector<SG::AuxElement::Decorator<char>>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createIpChecker(
-      const lwt::GraphConfig& gc, const FTagOptions& opts) {
+      const GraphConfig& gc, const FTagOptions& opts) {
       using namespace internal;
       FTagDataDependencyNames deps;
       std::map<std::string, std::string> remap = opts.remap_scalar;
@@ -473,6 +480,73 @@ namespace FlavorTagInference {
         throw std::logic_error("found unused output remapping(s): " + outputs);
       }
     }
+
+  // create the explicit instantiations of the templated functions, supporting 
+  // both SaltModel and lwt. When DL2 is removed, this can be simplified to just
+  // one instantiation for SaltModel.
+  template
+  std::tuple<
+    std::vector<FTagInputConfig>,
+    std::vector<ConstituentsInputConfig>,
+    FTagOptions>
+  createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>( 
+    lwt::GraphConfig& config,
+    FlipTagConfig flip_config,
+    std::map<std::string, std::string> remap_scalar,
+    TrackLinkType track_link_type
+  );
+
+  template
+  std::tuple<
+    std::vector<FTagInputConfig>,
+    std::vector<ConstituentsInputConfig>,
+    FTagOptions>
+  createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>( 
+    SaltModelGraphConfig::GraphConfig& config,
+    FlipTagConfig flip_config,
+    std::map<std::string, std::string> remap_scalar,
+    TrackLinkType track_link_type
+  );
+
+  template
+  std::tuple<
+    std::map<std::string, internal::OutNodeFloat>,
+    FTagDataDependencyNames,
+    std::set<std::string>>
+  createDecorators<SaltModelGraphConfig::GraphConfig>(
+    const SaltModelGraphConfig::GraphConfig& config,
+    const FTagOptions& options);
+
+  template
+  std::tuple<
+    std::map<std::string, internal::OutNodeFloat>,
+    FTagDataDependencyNames,
+    std::set<std::string>>
+  createDecorators<lwt::GraphConfig>(
+    const lwt::GraphConfig& config,
+    const FTagOptions& options);
+
+    template 
+    std::tuple<
+      std::function<char(const internal::Tracks&)>,
+      std::vector<SG::AuxElement::Decorator<char>>,
+      FTagDataDependencyNames,
+      std::set<std::string>>
+    createIpChecker<lwt::GraphConfig>(
+      const lwt::GraphConfig& gc, 
+      const FTagOptions& opts
+    );
+
+    template 
+    std::tuple<
+      std::function<char(const internal::Tracks&)>,
+      std::vector<SG::AuxElement::Decorator<char>>,
+      FTagDataDependencyNames,
+      std::set<std::string>>
+    createIpChecker<SaltModelGraphConfig::GraphConfig>(
+      const SaltModelGraphConfig::GraphConfig& gc, 
+      const FTagOptions& opts
+    );
   } // end of datapre namespace
 
 } // end of FlavorTagInference namespace
