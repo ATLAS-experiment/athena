@@ -120,8 +120,7 @@ def defineMenu():
         'L1_jJ55', 'L1_jJ55p0ETA23', 'L1_jJ55p0ETA23_2jJ40p30ETA49', 
 
         'L1_jJ60', 'L1_jJ60_EMPTY', 'L1_jJ60_FIRSTEMPTY','L1_jJ60p30ETA49',  
-        'L1_jJ60p30ETA49_EMPTY', 'L1_jJ60p30ETA49_UNPAIRED_ISO', 'L1_jJ60p30ETA49_UNPAIRED_NONISO',
-
+        'L1_jJ60p30ETA49_EMPTY',
         'L1_jJ70p0ETA23', 
 
         'L1_jJ80', 
