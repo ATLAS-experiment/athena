@@ -175,7 +175,7 @@ namespace xAOD {
    /// Tau BDT score, only available in xTOBs 
    unsigned int eFexTauRoI_v1::bdtScore() const {
      /// Was the BDT algorithm run?
-     if (tobVersion() != BDT || type() != xTOB) return 0;
+     if (tobVersion() == Heuristic || type() != xTOB) return 0;
      return (word0() >> s_bdtScoreBit) & s_bdtScoreMask;
    }
     
@@ -189,7 +189,7 @@ namespace xAOD {
    /// Results of BDT discriminant algorithm
    unsigned int eFexTauRoI_v1::bdtThresholds() const {
      // Return BDT results if used, otherwise return 0
-    return (tobVersion() == BDT ? tauOneThresholds() : 0);
+    return (tobVersion() == Heuristic ? 0 : tauOneThresholds());
    }
     
    /// Results of the rHad discriminant algorithm
