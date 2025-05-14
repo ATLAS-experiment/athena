@@ -3,9 +3,10 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def GepTopoTowerAlgCfg(
+def GepTowersAlgCfg(
         flags,
         name,
+        TowerAlg,
         caloClustersKey,
         outputCaloClustersKey,
         gepCellMapKey='GepCells',
@@ -13,8 +14,9 @@ def GepTopoTowerAlgCfg(
     
     cfg = ComponentAccumulator()
 
-    alg = CompFactory.GepTopoTowerAlg(name,
+    alg = CompFactory.GepTowersAlg(name,
                                 gepCellMapKey=gepCellMapKey,
+                                TowerAlg=TowerAlg,
                                 caloClustersKey=caloClustersKey,
                                 outputCaloClustersKey=outputCaloClustersKey)
     if OutputLevel is not None:
@@ -23,5 +25,3 @@ def GepTopoTowerAlgCfg(
     cfg.addEventAlgo(alg)
 
     return cfg
-    
-                     
