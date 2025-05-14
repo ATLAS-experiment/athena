@@ -83,10 +83,11 @@ namespace Muon {
         // chamber with largest eta
         if (chEtaRight > stEtaMax) chEtaRight = -999;
 
-        Muon::MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(id);
+        using namespace MuonStationIndex;
+        ChIndex chIndex = m_idHelperSvc->chamberIndex(id);
 
         // special treatment of EOS chambers
-        if (chIndex == Muon::MuonStationIndex::EOS) {
+        if (chIndex == ChIndex::EOS) {
             chEtaRight = -999;
             chEtaLeft = -999;
         }
@@ -102,18 +103,18 @@ namespace Muon {
         }
 
         // no neighbours for BIS8
-        if (chIndex == Muon::MuonStationIndex::BIS && std::abs(stEta) == 8) {
+        if (chIndex == ChIndex::BIS && std::abs(stEta) == 8) {
             chEtaLeft = -999;
             chEtaRight = -999;
         }
 
         // BIS 8 never neighbour of a chamber
-        if (chIndex == Muon::MuonStationIndex::BIS) {
+        if (chIndex == ChIndex::BIS) {
             if (std::abs(chEtaLeft) == 8) chEtaLeft = -999;
             if (std::abs(chEtaRight) == 8) chEtaRight = -999;
         }
         
-        if ((chIndex == Muon::MuonStationIndex::EIS || chIndex == Muon::MuonStationIndex::EIL) && !m_idHelperSvc->hasCSC()) {
+        if ((chIndex == ChIndex::EIS || chIndex == ChIndex::EIL) && !m_idHelperSvc->hasCSC()) {
             //Chambers can only be -5, -4, 4, 5
             if( std::abs(chEtaLeft) != 5 && std::abs(chEtaLeft) != 4 ) chEtaLeft = -999;
             if( std::abs(chEtaRight) != 5 && std::abs(chEtaRight) != 4 ) chEtaRight = -999;
