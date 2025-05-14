@@ -287,9 +287,10 @@ namespace Muon {
 
         // special treatment of single station tracks
         if (stations.size() == 1) {
-            if (!stations.count(MuonStationIndex::EM)) return false;
+            using namespace MuonStationIndex;
+            if (!stations.count(StIndex::EM)) return false;
 
-            StationData& stData = stations[MuonStationIndex::EM];
+            StationData& stData = stations[StIndex::EM];
 
             unsigned int nExpectedTriggerStations = m_tightSingleStationCuts ? 3 : 2;
             unsigned int maxHolesSingle = m_tightSingleStationCuts ? 0 : 1;
