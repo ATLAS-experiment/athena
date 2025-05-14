@@ -99,7 +99,8 @@ class FTagJetSFBlock(ConfigBlock):
             "The default is True.")
 
     def configureEfficiencyTool(self, config, btagger, btagWP, jetContainer,
-                                bTagCalibFile, DSID, tool):
+                                bTagCalibFile, DSID, tool,
+                                selectionCDI="", selectionTagger=""):
         tool.TaggerName = btagger
         tool.OperatingPoint = btagWP
         tool.JetAuthor = config.originalName(jetContainer)
@@ -121,6 +122,10 @@ class FTagJetSFBlock(ConfigBlock):
             tool.EfficiencyTCalibrations = DSID
             tool.EfficiencyCCalibrations = DSID
             tool.EfficiencyLightCalibrations = DSID
+        if selectionCDI:
+            tool.SelectionCDIFileName = selectionCDI
+        if selectionTagger:
+            tool.SelectionTaggerName = selectionTagger
 
     def makeAlgs(self, config):
 
@@ -173,25 +178,18 @@ class FTagJetSFBlock(ConfigBlock):
                 else:
                     # Interface to retrieve b-jet trigger CDI + tagger-wp to be implemented when available
                     # bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry(), trigger)
-                    # Use offline one for now
-                    bTagCalibTriggerFile = bTagCalibFile
-
+                    # Set nothing for now
+                    bTagCalibTriggerFile = ""
 
                 # bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(trigger)
-                # Naming scheme for conditional SF TBD
-                # bTagConditionalTagger = "ConditionalOffline" + self.btagger + "GivenOnline" + bTagOnlineTagger + bTagOnlineWP
-                # bTagConditionalWP = bTagOnlineWP
-
-                # For now using offline ones
-                bTagOnlineTagger = self.btagger
-                bTagOnlineWP = self.btagWP
-                bTagConditionalTagger = self.btagger
+                # For now configure fixed WP
+                bTagOnlineTagger = "OnlineDL1d"
+                bTagOnlineWP = "FixedCutBEff_77"
+                bTagConditionalTagger = "ConditionalOffline" + self.btagger + "Given" + bTagOnlineTagger + "WP" + bTagOnlineWP.split("_")[-1]
                 bTagConditionalWP = self.btagWP
 
                 alg = config.createAlgorithm( 'CP::BTaggingTriggerEfficiencyAlg',
                                               'FTagEfficiencyTriggerScaleFactorAlg' + postfix + '_' + chain )
-                # For now configure the three efficiency tools identically
-                # Dedicated CDI files will be ultimately needed
                 config.addPrivateTool( 'offlineEfficiencyTool',
                                        'BTaggingEfficiencyTool' )
                 self.configureEfficiencyTool(
@@ -206,7 +204,8 @@ class FTagJetSFBlock(ConfigBlock):
                                        'BTaggingEfficiencyTool' )
                 self.configureEfficiencyTool(
                     config, bTagConditionalTagger, bTagConditionalWP, jetContainer,
-                    bTagCalibTriggerFile, DSID, alg.conditionalEfficiencyTool)
+                    bTagCalibTriggerFile, DSID, alg.conditionalEfficiencyTool,
+                    selectionCDI=bTagCalibFile, selectionTagger=self.btagger)
 
                 alg.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
 
