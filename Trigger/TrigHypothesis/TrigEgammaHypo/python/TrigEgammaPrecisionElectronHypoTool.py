@@ -141,7 +141,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     tool.d0Cut          = -1
     tool.AcceptAll      = False
     tool.DoNoPid	= False
-    tool.IsoValidation = False
+    tool.UseRelptvarcone30 = False
     self.__tool         = tool    
 
     self.__log.debug( 'Electron_Chain     :%s', self.__name )
@@ -213,14 +213,12 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
   # Isolation extra cut
   #
   def addIsoCut(self,flags):
-    if not self.isoInfo() in self.__isolationCut:
+    # rely on flag rather than self.__isolationCut
+    valIsoCut = {None:None, 'ivarloose':flags.Trigger.egamma.isoWPs[0], 'ivarmedium':flags.Trigger.egamma.isoWPs[1], 'ivartight':flags.Trigger.egamma.isoWPs[2]}
+    if not self.isoInfo() in valIsoCut:
       self.__log.fatal(f"Bad Iso selection name: {self.isoInfo()}")
-    if flags.Trigger.egamma.isoValidation:
-      self.tool().IsoValidation = flags.Trigger.egamma.isoValidation
-      valIsoCut = {None: None,'ivarloose': 0.15,'ivarmedium': 0.065,'ivartight': 0.06}
-      self.tool().RelPtConeCut = valIsoCut[self.isoInfo()]
-    else:
-      self.tool().RelPtConeCut = self.__isolationCut[self.isoInfo()]
+    self.tool().UseRelptvarcone30 = flags.Trigger.egamma.useRelptvarcone30
+    self.tool().RelPtConeCut = valIsoCut[self.isoInfo()]
 
 
  
