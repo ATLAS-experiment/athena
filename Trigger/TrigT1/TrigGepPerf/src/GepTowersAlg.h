@@ -3,7 +3,7 @@
 */
 
 #ifndef TRIGGEPPERF_GEPTOWERSALG_H
-#define TRIGGEPPERF_GEPTOWERSGALG_H
+#define TRIGGEPPERF_GEPTOWERSALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
