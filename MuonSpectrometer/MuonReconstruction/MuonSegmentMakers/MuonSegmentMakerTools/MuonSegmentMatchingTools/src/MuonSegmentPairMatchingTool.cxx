@@ -58,28 +58,28 @@ IMuonSegmentPairMatchingTool::SegmentMatchResult
 MuonSegmentPairMatchingTool::matchResult(const MuonSegment& seg1, const MuonSegment& seg2) const
 {
     IMuonSegmentPairMatchingTool::SegmentMatchResult result;
-
+    using namespace MuonStationIndex;
     // get identifiers
     // and the detector region from identifier
     Identifier                chid1    = m_edmHelperSvc->chamberId(seg1);
-    MuonStationIndex::StIndex station1 = m_idHelperSvc->stationIndex(chid1);
+    StIndex station1 = m_idHelperSvc->stationIndex(chid1);
 
     Identifier                chid2    = m_edmHelperSvc->chamberId(seg2);
-    MuonStationIndex::StIndex station2 = m_idHelperSvc->stationIndex(chid2);
+    StIndex station2 = m_idHelperSvc->stationIndex(chid2);
 
     // Don't deal with overlap/merge of segments here
     if (chid1 == chid2) return result;
     if (station1 == station2) return result;
 
     // Don't know how to deal with these cases yet...
-    if (station1 == MuonStationIndex::StUnknown) return result;
-    if (station2 == MuonStationIndex::StUnknown) return result;
-    if (station1 >= MuonStationIndex::StIndexMax) return result;
-    if (station2 >= MuonStationIndex::StIndexMax) return result;
+    if (station1 == StIndex::StUnknown) return result;
+    if (station2 == StIndex::StUnknown) return result;
+    if (station1 >= StIndex::StIndexMax) return result;
+    if (station2 >= StIndex::StIndexMax) return result;
 
     // Here order matters, so sort segment by order a= inner, b= outer
-    // MuonStationIndex::StIndex station_a = station1;
-    // MuonStationIndex::StIndex station_b = station2;
+    // StIndex::StIndex station_a = station1;
+    // StIndex::StIndex station_b = station2;
 
     const MuonSegment* pSeg_a = nullptr;
     const MuonSegment* pSeg_b = nullptr;
