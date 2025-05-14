@@ -254,7 +254,9 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_tauConfigPathBaseline(""),
     m_tauDoTTM(false),
     m_tauSmearingToolRecommendationTag(""),
+    m_tauEffToolRecommendationTag(""),
     m_tauSmearingToolGenerator(""),
+    m_ApplyMVATESQualityCheck(true),
     //
     m_jetPt(-99.),
     m_jetEta(-99.),
@@ -611,6 +613,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "TauDoTruthMatching", m_tauDoTTM);
   declareProperty( "TauSmearingToolRecommendationTag", m_tauSmearingToolRecommendationTag);
   declareProperty( "TauSmearingToolGenerator", m_tauSmearingToolGenerator);
+  declareProperty( "TauEffToolRecommendationTag", m_tauEffToolRecommendationTag);
+  declareProperty( "TauMVATESQualityCheck", m_ApplyMVATESQualityCheck);
 
   //Leptons
   declareProperty( "SigLepRequireIso", m_doIsoSignal ); //leave here for back-compatibility
@@ -1547,8 +1551,10 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_tauConfigPathBaseline, "TauBaseline.ConfigPath", rEnv, "default");
   configFromFile(m_tauDoTTM, "Tau.DoTruthMatching", rEnv, false);
   //
-  configFromFile(m_tauSmearingToolRecommendationTag,"Tau.SmearingToolRecommendationTag", rEnv, "2022-prerec");
+  configFromFile(m_tauSmearingToolRecommendationTag,"Tau.SmearingToolRecommendationTag", rEnv, "2025-prerec");
   configFromFile(m_tauSmearingToolGenerator,"Tau.SmearingToolGenerator", rEnv, "PoPy");
+  configFromFile(m_tauEffToolRecommendationTag,"Tau.EffToolRecommendationTag", rEnv, "2025-prerec");
+  configFromFile(m_ApplyMVATESQualityCheck, "Tau.MVATESQualityCheck", rEnv, true);
   //
   configFromFile(m_jetPt, "Jet.Pt", rEnv, 20000.);
   configFromFile(m_jetEta, "Jet.Eta", rEnv, 2.8);

@@ -1644,6 +1644,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_tauEffTool.setProperty("EfficiencyCorrectionTypes", correction_types) );
       ATH_CHECK( m_tauEffTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauEffTool.setProperty("useFastSim", isAtlfast()) );
+      ATH_CHECK( m_tauEffTool.setProperty("RecommendationTag", m_tauEffToolRecommendationTag) );
+      if (m_isRun3){ ATH_CHECK( m_tauEffTool.setProperty("Campaign", "mc23") );}
+      else         { ATH_CHECK( m_tauEffTool.setProperty("Campaign", "mc20") );}
       ATH_CHECK( m_tauEffTool.retrieve() );
     } else if (m_tauEffTool.isUserConfigured()) ATH_CHECK( m_tauEffTool.retrieve() );
 
@@ -1689,6 +1692,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         {"HLT_tau160L1TAU100_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau160_medium1_tracktwoEF_L1TAU100,HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100"}
       };
 
+      if (m_isRun3){
+          m_tau_trig_support = {
+            // 2022, 2023 75-1800 bunches
+            {"HLT_tau160_mediumRNN_tracktwoMVA", "HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100"},
+            // 2023 from 400 bunches
+            {"HLT_tau160_mediumRNN_tracktwoMVA", "HLT_tau160_mediumRNN_tracktwoMVA_L1eTAU140"}
+          };
+      }
+
       for(auto const& trigger : m_tau_trig_support) {
         toolName = "TauTrigEffTool_" + m_tauId + "_" + trigger.first;
         auto tau_trigSF = m_tauTrigEffTool.emplace(m_tauTrigEffTool.end(), "TauAnalysisTools::TauEfficiencyCorrectionsTool/"+toolName);
@@ -1698,6 +1710,14 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( tau_trigSF->setProperty("PileupReweightingTool", m_prwTool.getHandle()) );
         ATH_CHECK( tau_trigSF->setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( tau_trigSF->setProperty("useFastSim", isAtlfast()) );
+        if (m_isRun3){
+            ATH_CHECK( tau_trigSF->setProperty("RecommendationTag", m_tauEffToolRecommendationTag) );
+        } else if (m_tauEffToolRecommendationTag=="2025-prerec"){
+            ATH_MSG_WARNING("mc20 tau triggers not supported in 2025-prerec, failling back to 2022-prerec");
+            ATH_CHECK( tau_trigSF->setProperty("RecommendationTag", "2022-prerec") );
+        }
+        if (m_isRun3){ ATH_CHECK( tau_trigSF->setProperty("Campaign", m_mcCampaign) );}
+        else         { ATH_CHECK( tau_trigSF->setProperty("Campaign", "mc20") );}
         ATH_CHECK( tau_trigSF->initialize() );
       }
     }
@@ -1709,9 +1729,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_tauSmearingTool.isUserConfigured()) {
       m_tauSmearingTool.setTypeAndName("TauAnalysisTools::TauSmearingTool/TauSmearingTool");
       ATH_CHECK( m_tauSmearingTool.setProperty("RecommendationTag", m_tauSmearingToolRecommendationTag) );
-      if (m_isRun3){ ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc21") );}
+      if (m_isRun3){ ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc23") );}
       else         { ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc20") );}
       ATH_CHECK( m_tauSmearingTool.setProperty("Generator", m_tauSmearingToolGenerator) );
+      ATH_CHECK( m_tauSmearingTool.setProperty("MVATESQualityCheck", m_ApplyMVATESQualityCheck) );
       ATH_CHECK( m_tauSmearingTool.setProperty("useFastSim", isAtlfast()) );
       ATH_CHECK( m_tauSmearingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauSmearingTool.retrieve() );

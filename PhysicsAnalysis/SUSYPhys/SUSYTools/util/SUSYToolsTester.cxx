@@ -291,6 +291,30 @@ int main( int argc, char* argv[] ) {
     }
   }
 
+  // Tau Trigger Efficiency Tool requires proper MC campaign, which requires proper ilumicalc file
+  std::string mcCampaign = "mc16e";
+  std::string ilumi = "GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root";
+  if ((fileName.Contains("mc23a") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) {
+    mcCampaign = "mc23a";
+    ilumi = "GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root"; 
+  } else if ((fileName.Contains("mc23d") || fileName.Contains("data23")) && fileName.Contains("13p6TeV")) {
+    mcCampaign = "mc23d";
+    ilumi = "GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root";
+  } else if ((fileName.Contains("mc23e") || fileName.Contains("data24")) && fileName.Contains("13p6TeV")) {
+    mcCampaign = "mc23e";
+    ilumi = "GoodRunsLists/data24_13p6TeV/20241118/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-005.root";
+  } else if (fileName.Contains("mc20a") || fileName.Contains("data15") || fileName.Contains("data16")) {
+    mcCampaign = "mc20a";
+    // Just use 2016 ilumicalc file for mc20a
+    ilumi = "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root";
+  } else if (fileName.Contains("mc20d") || fileName.Contains("data17")) {
+    mcCampaign = "mc20d";
+    ilumi = "GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root";
+  } else if (fileName.Contains("mc20e") || fileName.Contains("data18")) {
+    mcCampaign = "mc20e";
+    ilumi = "GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root";
+  }
+  
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////
   //// Pick up only relevant ilumicalc files for each MC16 campaign. 
@@ -308,11 +332,10 @@ int main( int argc, char* argv[] ) {
   ////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+  ANA_CHECK( objTool.setProperty( "mcCampaign", mcCampaign ) );
   std::vector<std::string> prw_lumicalc;
   if (ilumicalc_file == "DUMMY") {
-    ANA_CHECK( objTool.setProperty( "mcCampaign", "mc16e" ) );
-    prw_lumicalc.push_back(PathResolverFindCalibFile("GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root"));
+    prw_lumicalc.push_back(PathResolverFindCalibFile(ilumi));
   } else {
     prw_lumicalc = getTokens(ilumicalc_file,",");
   }
