@@ -418,7 +418,7 @@ class athenaLogFileReport(logFileReport):
                     else:
                         # Overcounted
                         pass
-                if 'Total payload read from COOL' in fields['message']:
+                if 'Total payload read from IOVDb' in fields['message']:
                     msg.debug("Found COOL payload information at line {0}".format(line))
                     a = re.match(r'(\D+)(?P<bytes>\d+)(\D+)(?P<time>\d+[.]?\d*)(\D+)', fields['message'])
                     self._dbbytes += int(a.group('bytes'))

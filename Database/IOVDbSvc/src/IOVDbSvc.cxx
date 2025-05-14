@@ -258,6 +258,7 @@ StatusCode IOVDbSvc::io_finalize() {
 
 StatusCode IOVDbSvc::finalize() {
   // summarise and delete folders, adding total read from COOL
+  unsigned long long nread=0;
   float readtime=0.;
   // accumulate a map of readtime by connection
   typedef std::map<IOVDbConn*,float> CTMap;
@@ -265,6 +266,7 @@ StatusCode IOVDbSvc::finalize() {
   for (const auto & namePtrPair : m_foldermap) {
     IOVDbFolder* folder=namePtrPair.second;
     folder->summary();
+    nread+=folder->bytesRead();
     const float& fread=folder->readTime();
     readtime+=fread;
     IOVDbConn* cptr=folder->conn();
@@ -276,7 +278,7 @@ StatusCode IOVDbSvc::finalize() {
     }
     delete folder;
   }
-  ATH_MSG_INFO(  " bytes in (( " << std::fixed << std::setw(9) << std::setprecision(2) <<
+  ATH_MSG_INFO(  "Total payload read from IOVDb: " << nread << " bytes in (( " << std::fixed << std::setw(9) << std::setprecision(2) <<
     readtime << " ))s" );
 
   // close and delete connections, printing time in each one
