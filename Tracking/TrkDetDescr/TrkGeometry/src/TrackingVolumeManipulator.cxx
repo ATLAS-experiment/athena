@@ -61,17 +61,6 @@ void
 Trk::TrackingVolumeManipulator::setInsideVolumeArray(
   Trk::TrackingVolume& tvol,
   Trk::BoundarySurfaceFace face,
-  Trk::BinnedArray<Trk::TrackingVolume>* insidevolarray)
-{
-
-  (tvol.m_boundarySurfaces)[face]->setInsideVolumeArray(
-    std::shared_ptr<Trk::BinnedArray<Trk::TrackingVolume>>(insidevolarray));
-}
-
-void
-Trk::TrackingVolumeManipulator::setInsideVolumeArray(
-  Trk::TrackingVolume& tvol,
-  Trk::BoundarySurfaceFace face,
   const std::shared_ptr<Trk::BinnedArray<Trk::TrackingVolume>>&
     insidevolarray)
 {
@@ -85,17 +74,6 @@ Trk::TrackingVolumeManipulator::setOutsideVolume(
   Trk::TrackingVolume* outsidevol)
 {
   (tvol.m_boundarySurfaces)[face]->setOutsideVolume(outsidevol);
-}
-
-void
-Trk::TrackingVolumeManipulator::setOutsideVolumeArray(
-  Trk::TrackingVolume& tvol,
-  Trk::BoundarySurfaceFace face,
-  Trk::BinnedArray<Trk::TrackingVolume>* outsidevolarray)
-{
-
-  (tvol.m_boundarySurfaces)[face]->setOutsideVolumeArray(
-    std::shared_ptr<Trk::BinnedArray<Trk::TrackingVolume>>(outsidevolarray));
 }
 
 void

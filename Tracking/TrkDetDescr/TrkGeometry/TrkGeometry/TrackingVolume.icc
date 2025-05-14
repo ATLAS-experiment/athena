@@ -21,41 +21,42 @@ TrackingVolume::layerAttempts(BoundarySurfaceFace exitFace) const
 inline unsigned int
 TrackingVolume::maxLayerAttempts() const
 {
-  if (m_layerAttemptsCalculator)
+  if (m_layerAttemptsCalculator){
     return m_layerAttemptsCalculator->maxLayerAttempts();
+  }
   return TRKGEOMETRY_MAXLAYERATTEMPTS;
 }
 
 inline const LayerArray*
 TrackingVolume::confinedLayers() const
 {
-  return m_confinedLayers;
+  return m_confinedLayers.get();
 }
 
 inline LayerArray*
 TrackingVolume::confinedLayers()
 {
-  return m_confinedLayers;
+  return m_confinedLayers.get();
 }
 
 inline const TrackingVolumeArray*
 TrackingVolume::confinedVolumes() const
 {
-  return m_confinedVolumes;
+  return m_confinedVolumes.get();
 }
 
 inline TrackingVolumeArray*
 TrackingVolume::confinedVolumes()
 {
-  return m_confinedVolumes;
+  return m_confinedVolumes.get();
 }
 
 inline ArraySpan<Layer const* const>
 TrackingVolume::confinedArbitraryLayers() const
 {
   if (m_confinedArbitraryLayers) {
-    return ArraySpan<Layer const* const>(&*m_confinedArbitraryLayers->begin(),
-                                         &*m_confinedArbitraryLayers->end());
+    return ArraySpan<Layer const* const>(m_confinedArbitraryLayers->begin(),
+                                         m_confinedArbitraryLayers->end());
   }
   return {};
 }
@@ -65,8 +66,8 @@ TrackingVolume::confinedArbitraryLayers()
 {
 
   if (m_confinedArbitraryLayers) {
-    return ArraySpan<Layer* const>(&*m_confinedArbitraryLayers->begin(),
-                                   &*m_confinedArbitraryLayers->end());
+    return ArraySpan<Layer* const>(m_confinedArbitraryLayers->begin(),
+                                   m_confinedArbitraryLayers->end());
   }
   return {};
 }
@@ -76,7 +77,7 @@ TrackingVolume::confinedDetachedVolumes() const
 {
   if (m_confinedDetachedVolumes) {
     return ArraySpan<DetachedTrackingVolume const* const>(
-      &*m_confinedDetachedVolumes->begin(), &*m_confinedDetachedVolumes->end());
+      m_confinedDetachedVolumes->begin(), m_confinedDetachedVolumes->end());
   }
   return {};
 }
@@ -86,7 +87,7 @@ TrackingVolume::confinedDetachedVolumes()
 {
   if (m_confinedDetachedVolumes) {
     return ArraySpan<DetachedTrackingVolume* const>(
-      &*m_confinedDetachedVolumes->begin(), &*m_confinedDetachedVolumes->end());
+      m_confinedDetachedVolumes->begin(), m_confinedDetachedVolumes->end());
   }
   return {};
 }
@@ -96,7 +97,7 @@ TrackingVolume::confinedDenseVolumes() const
 {
   if (m_confinedDenseVolumes) {
     return ArraySpan<TrackingVolume const* const>(
-      &*m_confinedDenseVolumes->begin(), &*m_confinedDenseVolumes->end());
+      m_confinedDenseVolumes->begin(), m_confinedDenseVolumes->end());
   }
   return {};
 }
@@ -105,8 +106,8 @@ inline ArraySpan<Trk::TrackingVolume* const>
 TrackingVolume::confinedDenseVolumes()
 {
   if (m_confinedDenseVolumes) {
-    return ArraySpan<TrackingVolume* const>(&*m_confinedDenseVolumes->begin(),
-                                            &*m_confinedDenseVolumes->end());
+    return ArraySpan<TrackingVolume* const>(m_confinedDenseVolumes->begin(),
+                                            m_confinedDenseVolumes->end());
   }
   return {};
 }

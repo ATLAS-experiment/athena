@@ -166,11 +166,6 @@ public:
   void setInsideTrackingVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    BinnedArray<TrackingVolume>* insidevolarray) const override;
-
-  void setInsideTrackingVolumeArray(
-    TrackingVolume& tvol,
-    BoundarySurfaceFace face,
     std::shared_ptr<BinnedArray<TrackingVolume>> insidevolarray) const override;
 
   /** protected method to set outside Volume of a BoundarySurface:
@@ -191,11 +186,6 @@ public:
       - the volume that holds the BoundarySurface
       - the face type of the boundary to be set
       - the volume array to be set as outside volume array */
-  void setOutsideTrackingVolumeArray(
-    TrackingVolume& tvol,
-    BoundarySurfaceFace face,
-    BinnedArray<TrackingVolume>* outsidevolarray) const override;
-
   void setOutsideTrackingVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,

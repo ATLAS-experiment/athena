@@ -1074,9 +1074,9 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
                 std::unique_ptr<Trk::TrackingVolume> newType{};
                 if (!confinedLayers.empty()) {
                     auto confinedLayerPtr = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(confinedLayers));
-                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, confinedLayerPtr.release(), stname);
+                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, std::move(confinedLayerPtr), stname);
                 } else {
-                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, nullptr, confinedVolumes.release(), stname);
+                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, nullptr, std::move(confinedVolumes), stname);
                 }
 
 

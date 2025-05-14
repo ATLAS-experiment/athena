@@ -120,7 +120,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
             auto confinedVols =std::make_unique<std::vector<TrackingVolume*>>();
             confinedVols->push_back(std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr, name).release());
             envName = name + "_envelope";
-            trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, confinedVols.release(), envName);
+            trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, std::move(confinedVols), envName);
         }
 
         return trEnv;
@@ -217,7 +217,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
         auto confinedVols = std::make_unique<std::vector<TrackingVolume*>>();
         confinedVols->push_back( std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr, name).release());
         envName = envName + "_envelope";
-        trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, confinedVols.release(), envName);
+        trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, std::move(confinedVols), envName);
     }
 
     return trEnv;
