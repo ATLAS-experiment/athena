@@ -48,6 +48,7 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	virtual StatusCode initialize() override;
 	StatusCode getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
 	StatusCode getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+        StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst);
 
 	static float getXScale() { return 1015.;};
 	static float getYScale() { return 1015.;};
@@ -69,9 +70,6 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 
 	bool m_useParamNN_1st = true;
 	bool m_useParamNN_2nd = true;
-
-	void setTrackParameters_1st(FPGATrackSimTrack& track, std::vector<float> inputTensorValues);
-	void setTrackParameters_2nd(FPGATrackSimTrack& track, std::vector<float> inputTensorValues);
 
 	std::vector<float> m_x; // x position of hit in road
 	std::vector<float> m_y; // y pos
