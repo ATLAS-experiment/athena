@@ -35,8 +35,8 @@ namespace columnar
     }
 
     AccessorTemplate (AccessorTemplate&& that)
+      : m_accessor (that.m_accessor)
     {
-      m_accessor = that.m_accessor;
       that.m_accessor = std::string("UNDEFINED_ACCESSOR_") + typeid (typename ColumnTypeTraits<CT,CM>::ColumnType).name();
     }
 

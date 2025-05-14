@@ -73,7 +73,7 @@ namespace columnar
       return data != nullptr;
     }
 
-    [[nodiscard]] bool isAvailable (ObjectRange<CI,CM> range) const noexcept
+    [[nodiscard]] bool isAvailable (const ObjectRange<CI,CM>& range) const noexcept
     {
       auto *data = static_cast<ColumnType*>(range.getData()[m_dataIndex]);
       return data != nullptr;

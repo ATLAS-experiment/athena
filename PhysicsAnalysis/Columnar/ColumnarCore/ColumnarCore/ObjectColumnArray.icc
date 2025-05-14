@@ -42,6 +42,7 @@ namespace columnar
       moveAccessor (m_offsetsIndex, m_offsetsData, that.m_offsetsIndex, that.m_offsetsData);
     }
 
+    // cppcheck-suppress operatorEqVarError; m_columnBase not copied
     AccessorTemplate& operator = (AccessorTemplate&& that)
     {
       if (this != &that)

@@ -107,8 +107,9 @@ namespace columnar
 
     ObjectId& operator = (const ObjectId<O,ColumnarModeArray>& that) noexcept = default;
 
-    [[nodiscard]] xAODObject& getXAODObject () const {
-      throw std::logic_error ("can't call xAOD function in columnar mode");}
+    // Calling this method is not allowed.
+    //[[nodiscard]] xAODObject& getXAODObject () const {
+    //  throw std::logic_error ("can't call xAOD function in columnar mode");}
 
     template<typename Acc,typename... Args>
       requires std::invocable<Acc,ObjectId<O,ColumnarModeArray>,Args...>
