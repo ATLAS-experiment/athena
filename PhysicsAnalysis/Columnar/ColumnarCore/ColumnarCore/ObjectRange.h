@@ -214,8 +214,9 @@ namespace columnar
     [[nodiscard]] std::size_t size () const noexcept {
       return m_endIndex - m_beginIndex;}
 
-    [[nodiscard]] xAODContainer& getXAODObject () const {
-      throw std::logic_error ("can't call xAOD function in columnar mode");}
+    // Calling this function is not allowed.
+    //[[nodiscard]] xAODContainer& getXAODObject () const {
+    //  throw std::logic_error ("can't call xAOD function in columnar mode");}
 
     [[nodiscard]] ObjectId<CI,CM> operator [] (std::size_t index) const noexcept {
       return ObjectId<CI,CM> (m_data, index + m_beginIndex);
