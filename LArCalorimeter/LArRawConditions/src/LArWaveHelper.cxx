@@ -219,7 +219,11 @@ double  LArWaveHelper::getWidth(const LArWave& theWave) const
       imax = i;
       amax = asample-base ;
       }
- }
+  }
+  if (amax == 0.) {
+    // the width is ill-defined in that case.
+    return 0.;
+  }
 
   double wleft=0.;
   double wright=0.;
