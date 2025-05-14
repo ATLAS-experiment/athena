@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,12 +13,8 @@
 namespace DerivationFramework {
 
   TauTruthMatchingWrapper::TauTruthMatchingWrapper(const std::string& t, const std::string& n, const IInterface* p) : 
-    base_class(t,n,p),
-    m_tauKey("TauJets"),
-    m_tTauTruthMatchingTool("TauAnalysisTools::TauTruthMatchingTool")
+    base_class(t,n,p)
   {
-    declareProperty("TauContainerName", m_tauKey);
-    declareProperty("TauTruthMatchingTool", m_tTauTruthMatchingTool);
   }
 
   StatusCode TauTruthMatchingWrapper::initialize()
