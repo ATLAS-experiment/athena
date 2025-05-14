@@ -188,12 +188,15 @@ GbtsDeviceContext* TrigITkModuleCuda::createGbtsContext(int id, const TrigAccel:
   //Allocate memory and copy input data
 
   GbtsDeviceContext& ctx = *p;
+	
+  ctx.m_useGPUseedExtraction = pData->m_useGPUseedExtraction;
 
   ctx.m_nMaxEdges = pData->m_nMaxEdges;
   ctx.m_maxEtaBin = pData->m_maxEtaBin + 1;
   ctx.m_nNodes    = pData->m_nSpacepoints;
   ctx.m_nLayers   = pData->m_nLayers;
 
+  ctx.m_minLevel  = pData->m_minLevel;
   //1. spacepoint params storage
 
   size_t data_size = 4*pData->m_nSpacepoints*sizeof(float);//x,y,z,w
@@ -203,9 +206,13 @@ GbtsDeviceContext* TrigITkModuleCuda::createGbtsContext(int id, const TrigAccel:
   cudaMemcpy(ctx.d_sp_params, &pData->m_params, data_size, cudaMemcpyHostToDevice);
 
   ctx.d_size += data_size;
+	
+  data_size = pData->m_nSpacepoints*sizeof(unsigned char); //type
+	
+  ctx.d_size += data_size;	
 
   //2. layer information: spacepoint views and geometry
-
+	
   data_size = 4*pData->m_nLayers*sizeof(int);
 
   cudaMalloc((void**) &ctx.d_layer_info, data_size);
@@ -298,9 +305,22 @@ GbtsDeviceContext* TrigITkModuleCuda::createGbtsContext(int id, const TrigAccel:
   ctx.d_neighbours = 0;
   ctx.d_output_graph = 0;
 
-  //9. the graph
+ //9. data structure for graph processing
 
-  data_size = 4*sizeof(unsigned int);
+  ctx.d_active_edges = 0;
+  ctx.d_levels = 0;
+  ctx.d_level_views = 0;
+  ctx.d_level_boundaries = 0;
+
+  ctx.d_mini_states = 0;
+  ctx.d_seed_proposals = 0;
+  ctx.d_state_store = 0;
+  ctx.d_edge_bids = 0;
+  ctx.d_seed_ambiguity = 0;
+
+  //10. the graph
+
+  data_size = 12*sizeof(unsigned int);
 
   cudaMalloc((void **)&ctx.d_counters, data_size);
   cudaMemset(ctx.d_counters, 0, data_size);

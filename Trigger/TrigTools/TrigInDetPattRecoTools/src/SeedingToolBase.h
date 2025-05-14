@@ -59,6 +59,8 @@ class SeedingToolBase: public AthAlgTool {
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};
   StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4_UPD_10_APR_2025.txt"};
 
+  BooleanProperty m_useGPUseedExtraction{this, "UseGPUseedExtraction", true};
+
   float m_phiSliceWidth = 0.;
 
   std::unique_ptr<GNN_FasTrackConnector> m_connector = nullptr;
