@@ -8,8 +8,6 @@
 # art-output: myAOD.pool.root
 # art-output: myDAOD_IDTIDE.pool.root
 
-# TODO fix merge for DESDM_MCP
-
 aod=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1
 Merge_tf.py \
 --CA True \
@@ -29,9 +27,11 @@ rc2=$?
 echo "art-result: $rc2 for DAOD_IDTIDE merging"
 
 mcp=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/DESDM_MCP/data23_13p6TeV.00453713.physics_Main.recon.DESDM_MCP.f1357/759events.data23_13p6TeV.00453713.physics_Main.recon.DESDM_MCP.f1357._lb1406._0007.1
+CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
 Merge_tf.py \
 --CA True \
 --autoConfiguration=everything \
+--conditionsTag=${CONDTAG} \
 --inputESDFile="${mcp},${mcp}" \
 --outputESD_MRGFile=myDESDM_MCP.pool.root
 rc3=$?
