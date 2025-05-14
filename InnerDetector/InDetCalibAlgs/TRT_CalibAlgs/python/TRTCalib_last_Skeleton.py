@@ -1,6 +1,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import sys, os, glob, subprocess, tarfile, fnmatch, smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 
 def nextstep(text):
     print("\n"+"#"*100)
@@ -20,40 +23,105 @@ def tryError(command, error):
     except OSError as e:
         print(error,e)
         sys.exit(e.errno)       
-        
-    
-def send_statusmail(itera, runNumber, mto, outdir, a, b, c, d, e, f, g, h) :
-    mserver = 'cernmx.cern.ch'
-    mfrom   = 'no-reply@cern.ch'
-    msubject = "TRT CALIB TIER0 - Exit Status for Run %d" % (runNumber)
 
-    # assemble mail body
-    mbody  = " Calibration job finished for run %d, iteration: %s \n\n" % (runNumber, itera)
-    mbody += "   Here are the residuals obtained at detector level with currently used constants: \n"
-    mbody += "   Residual-Barrel A: %s, Time-Residual-Barrel A: %s \n" % (a, b)
-    mbody += "   Residual-Barrel C: %s, Time-Residual-Barrel C: %s \n" % (c, d)
-    mbody += "   Residual-Endcap A: %s, Time-Residual-Endcap A: %s \n" % (e, f)
-    mbody += "   Residual-Endcap C: %s, Time-Residual-Endcap C: %s \n\n" % (g, h)      
-    mbody += " Expect Residual 140 +- 10mu in the barrel (Ar) and 130 +- 10mu in EC (Xe). Expect Time-Residual 0.0 +- 0.5ns.\n\n" 
-    mbody += " Please check the histograms of the current run, to decide whether to upload new constants.\n" 
-    mbody += " Histograms can be found on AFS, directory %s \n\n" % (outdir)
-    
-    print("Email body:\n\n",mbody)
+def send_statusmail(itera, runNumber, mto, outdir, a, b, c, d, e, f, g, h):
+
+    thres_Res_Ar = 140
+    thres_Res_Xe = 130
+    res_tolerance = 10
+    thres_Res_time = 0
+    res_time_tolerance = 0.5
+
+    mserver = 'cernmx.cern.ch'
+    mfrom = 'no-reply@cern.ch'
+    msubject = "TRT CALIB TIER0 - Exit Status for Run %d" % runNumber
+
+    def color(cond):
+        if cond:
+            return '#90EE90'
+        else:
+            return '#FF5733'
+
+    # Build HTML message body
+    mbody_html = f"""
+    <html>
+        <head>
+            <style>
+                table, th, td {{
+                    border: 1px solid white;
+                    border-collapse: collapse;
+                    font-weight:bold;
+                    margin-left:20px
+                }}
+            </style>
+        </head>
+        <body>
+            <p><b>Calibration job finished</b> for run <b>{runNumber}</b>, iteration: <b>{itera}</b></p>
+            <p>Here are the residuals obtained at detector level with currently used constants:</p>
+
+            <table>
+                <tr>
+                    <td>Residual-Barrel A: </td>
+                    <td style="background-color:{color(abs(a-thres_Res_Ar)<res_tolerance)};">{a:.1f}μm</td>
+                    <td>&nbsp&nbsp</td>
+                    <td>Time-Residual-Barrel A: </td>
+                    <td style="background-color:{color(abs(b-thres_Res_time)<res_time_tolerance)};">{b:.2f}ns</td>
+                </tr>
+                <tr>
+                    <td>Residual-Barrel C: </td>
+                    <td style="background-color:{color(abs(c-thres_Res_Ar)<res_tolerance)};"> {c:.1f}μm</td>
+                    <td>&nbsp&nbsp</td>
+                    <td>Time-Residual-Barrel C: </td>
+                    <td style="background-color:{color(abs(d-thres_Res_time)<res_time_tolerance)};"> {d:.2f}ns</td>
+                </tr>
+                <tr>
+                    <td>Residual-Endcap A: </td>
+                    <td style="background-color:{color(abs(e-thres_Res_Xe)<res_tolerance)};"> {e:.1f}μm</td>
+                    <td>&nbsp&nbsp</td>
+                    <td>Time-Residual-Endcap A: </td>
+                    <td style="background-color:{color(abs(f-thres_Res_time)<res_time_tolerance)};"> {f:.2f}ns</td>
+                </tr>
+                <tr>
+                    <td>Residual-Endcap C: </td>
+                    <td style="background-color:{color(abs(g-thres_Res_Xe)<res_tolerance)};">{g:.1f}μm</td>
+                    <td>&nbsp&nbsp</td>
+                    <td>Time-Residual-Endcap C: </td>
+                    <td style="background-color:{color(abs(h-thres_Res_time)<res_time_tolerance)};">{h:.2f}ns</td>
+                </tr>
+            </table>
+
+            <p><b>Expect:</b> Residual 140 ± 10 μm in the barrel (Ar) and 130 ± 10 μm in EC (Xe). Time-Residual 0.0 ± 0.5 ns.</p>
+            <p><span style="color:{color(True)}; font-weight:bold;">Green</span> is within the threshold, <span style="color:{color(False)}; font-weight:bold;">Red</span> otherwise</p>
+            <p>Please check the histograms of the current run to decide whether to upload new constants.<br>
+            Histograms can be found on AFS, directory: <b>{outdir}</b></p>
+        </body>
+    </html>
+    """
+
+    # Create MIME email
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = msubject
+    msg["From"] = mfrom
+    msg["To"] = ", ".join(mto) if isinstance(mto, list) else mto
+
+    msg.attach(MIMEText(mbody_html, "html"))
+
+    print("Email body (HTML):\n\n", mbody_html)
     print("Email sent to:")
-    
-    try :
-        con = smtplib.SMTP(mserver)
-        if isinstance(mto, str) :
-            print("\t- %s"% (mto))
-            con.sendmail(mfrom, mto, 'Subject:' + str(msubject) + '\n\n' + str(mbody))
-        elif isinstance(mto, list) :
-            for onemto in mto :
-                print("\t- %s"% (onemto))
-                con.sendmail(mfrom, onemto, 'Subject:' + str(msubject) + '\n\n' + str(mbody))
-        con.quit()
+
+    try:
+        with smtplib.SMTP(mserver) as con:
+            if isinstance(mto, str):
+                print(f"\t- {mto}")
+                con.sendmail(mfrom, mto, msg.as_string())
+            elif isinstance(mto, list):
+                for onemto in mto:
+                    print(f"\t- {onemto}")
+                    con.sendmail(mfrom, onemto, msg.as_string())
     except OSError as e:
-        print("ERROR: Failed sending email notification\n",e)
+        print("ERROR: Failed sending email notification\n", e)
         exit(e.errno)
+
 
 
 def fromRunArgs(runArgs):
@@ -288,22 +356,23 @@ def fromRunArgs(runArgs):
     try:
         with open("%s/extraction.txt" % (outDIR)) as exfile:
             for line in exfile :
+                line = line.strip()
                 if fnmatch.fnmatch(line,'* res *') and fnmatch.fnmatch(line, '*part 1*') :
-                        res_ba = line.split()[6]  
+                        res_ba = float(line.split()[6])*1000
                 if fnmatch.fnmatch(line,'* tresmean *') and fnmatch.fnmatch(line, '*part 1*') :
-                        tres_ba = line.split()[6]
+                        tres_ba = float(line.split()[6])
                 if fnmatch.fnmatch(line,'* res *') and fnmatch.fnmatch(line, '*part -1*') :
-                        res_bc = line.split()[6]
+                        res_bc = float(line.split()[6])*1000
                 if fnmatch.fnmatch(line,'* tresmean *') and fnmatch.fnmatch(line, '*part -1*') :
-                        tres_bc = line.split()[6]
+                        tres_bc = float(line.split()[6])
                 if fnmatch.fnmatch(line,'* res *') and fnmatch.fnmatch(line, '*part 2*') :
-                        res_ea = line.split()[6]
+                        res_ea = float(line.split()[6])*1000
                 if fnmatch.fnmatch(line,'* tresmean *') and fnmatch.fnmatch(line, '*part 2*') :
-                        tres_ea = line.split()[6]
+                        tres_ea = float(line.split()[6])
                 if fnmatch.fnmatch(line,'* res *') and fnmatch.fnmatch(line, '*part -2*') :
-                        res_ec = line.split()[6]
+                        res_ec = float(line.split()[6])*1000
                 if fnmatch.fnmatch(line,'* tresmean *') and fnmatch.fnmatch(line, '*part -2*') :
-                        tres_ec = line.split()[6]
+                        tres_ec = float(line.split()[6])
     except OSError as e:
         print("ERROR: Failed reading %s/extraction.txt file\n" % (outDIR) ,e)
         sys.exit(e.errno)    
