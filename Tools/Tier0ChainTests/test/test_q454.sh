@@ -18,10 +18,9 @@ Reco_tf.py \
 --CA 'all:True' \
 --AMI=q454 \
 --preExec "r2a:flags.DQ.Steering.HLT.doInDet=False; flags.Exec.FPE=500;" \
---postExec "" \
 --multithreaded \
 --maxEvents=500 \
---outputRDOFile=RDO.pool.root --outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root --outputHISTFile=myHIST.root \
+--outputRDOFile=RDO.pool.root --outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root \
 --conditionsTag "all:${conditions}" \
 --imf False
 
