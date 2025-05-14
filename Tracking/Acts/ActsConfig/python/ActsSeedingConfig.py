@@ -25,10 +25,7 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
   if flags.Acts.GbtsConnectionTableVersion == 0:
     kwargs.setdefault("MatchBeforeCreate", True)
   kwargs.setdefault("ConnectionFileName",
-                    "binTables_ITK_RUN4_LRT.txt" if isLRT else
-                    "binTables_ITK_RUN4.txt" if flags.Acts.GbtsConnectionTableVersion == 0 else
-                    "binTables_ITK_RUN4_UPD_10_APR_2025.txt" if flags.Acts.GbtsConnectionTableVersion == 1 else
-                    "binTables_ITK_RUN4_test.txt")
+                    "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
 
   acc.setPrivateTools(CompFactory.Gbts2ActsSeedingTool(name, **kwargs))
 

@@ -56,8 +56,9 @@ class SeedingToolBase: public AthAlgTool {
   BooleanProperty m_useEtaBinning{this, "UseEtaBinning", true};
   BooleanProperty m_matchBeforeCreate{this, "MatchBeforeCreate", false};
   FloatProperty m_minPt{this, "pTmin", 1000.0};
+  FloatProperty m_etaBinOverride{this, "etaBin", 0.0f, "specify non-zero to override eta bin width from connection file (default 0.2 in createLinkingScheme.py)"};
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};
-  StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4_UPD_10_APR_2025.txt"};
+  StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4.txt"};
 
   float m_phiSliceWidth = 0.;
 
