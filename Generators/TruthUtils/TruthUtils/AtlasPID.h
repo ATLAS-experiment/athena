@@ -50,7 +50,7 @@ static const std::array<int,TABLESIZE> double_spin = {
   +2, +2, +2, +2, +2, +0, +0, +0, +0, +0,
   +0, +0, +2, +2, +2, +0, +0, +0, +0, +4,
   +0, +0, -1, +0, +0, +0, +0, +0, +0, +0,
-  +0, +1, +2, +0, +2, +0, +0, +0, +0, +0,
+  +0, +0, +1, +2, +0, +2, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
@@ -596,10 +596,10 @@ template<> inline bool isMonopole(const int& p){ auto value_digits = DecodedPID(
 /// classified therein, such as 1000022 for the lightest neutralino.
 /// Generic fundamental states can be given temporary codes in the range 51 - 60,
 /// with 51, 52 and 53 reserved for spin 0, 1/2 and 1 ones (this could also be an axion state).
-/// Generic mediators of s-channel DM pair creation of annihilationcan be given
+/// Generic mediators of s-channel DM pair creation of annihilation can be given
 /// codes 54 and 55 for spin 0 or 1 ones. Separate antiparticles, with negativecodes,
 /// may or may not exist. More elaborate new scenarios should be constructed with n= 5 and nr = 9.
-/// APID: Only the 51-60 range is considered DM. The antiparticles are assumed to be existing.
+/// APID: Only the 51-60 range is considered DM. The antiparticles are assumed to exist.
 template<class T> inline bool isDM(const T& p){return isDM(p->pdg_id());}
 template<> inline bool isDM(const int& p){ auto sp = std::abs(p); return (sp >= 51 && sp <= 60) || sp == DARKPHOTON; }
 
