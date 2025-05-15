@@ -2,6 +2,7 @@
 # art-description: Test running the F600 pipeline (no Tracking) on singleMu events in region0 (<μ>=200)
 # art-type: grid
 # art-include: main/Athena
+# art-memory: 8192
 # art-input: mc21_14TeV:mc21_14TeV.900171.PG_singlemu_InvPtFlat1_etaFlat01_03_phiFlat03_05.recon.RDO.e8488_s4345_r15700
 # art-input-nfiles: 50
 # art-output: *.txt

@@ -2,6 +2,7 @@
 # art-description: Test running the F600 (InsideOut) pipeline
 # art-type: grid
 # art-include: main/Athena
+# art-memory: 8192
 # art-input: mc21_14TeV:mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583
 # art-input-nfiles: 11
 # art-output: *.txt
