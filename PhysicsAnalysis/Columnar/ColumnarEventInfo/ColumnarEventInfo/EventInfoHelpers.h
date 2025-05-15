@@ -5,8 +5,8 @@
 /// @author Nils Krumnack
 
 
-#ifndef COLUMNAR_CORE_EVENT_INFO_HELPERS_H
-#define COLUMNAR_CORE_EVENT_INFO_HELPERS_H
+#ifndef COLUMNAR_EVENT_INFO_EVENT_INFO_HELPERS_H
+#define COLUMNAR_EVENT_INFO_EVENT_INFO_HELPERS_H
 
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
