@@ -8,6 +8,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <array>
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -27,10 +28,11 @@ public:
 
     unsigned int cardinality() const override final { return 1;}
 private:
-    bool retrieve(const SG::ReadHandleKey<xAOD::MuonSegmentContainer> &, const xAOD::MuonSegmentContainer *&ptr) const;
-    std::string printRatio(const std::string& prefix, unsigned int begin, unsigned int end, const std::vector<int>& reco,
-                           const std::vector<int>& truth) const;
-    std::string printRatio(const std::string& prefix, unsigned int begin, unsigned int end, const std::vector<int>& reco) const;
+    constexpr static unsigned s_chIdxMax = Muon::MuonStationIndex::toInt(Muon::MuonStationIndex::ChIndex::ChIndexMax);
+    using counter_t = std::array<int, s_chIdxMax>;
+    std::string printRatio(const std::string& prefix, unsigned int begin, unsigned int end, const counter_t& reco,
+                           const counter_t& truth) const;
+    std::string printRatio(const std::string& prefix, unsigned int begin, unsigned int end, const counter_t& reco) const;
 
     /** name of external file to write statistics */
     bool m_writeToFile;
@@ -46,9 +48,9 @@ private:
     unsigned int m_nevents;
     std::vector<int> m_nhitCuts;
     std::vector<std::string> m_hitCutString;
-    std::vector<std::vector<int> > m_ntruth;
-    std::vector<std::vector<int> > m_nfound;
-    std::vector<std::vector<int> > m_nfake;
+    std::vector<counter_t > m_ntruth;
+    std::vector<counter_t > m_nfound;
+    std::vector<counter_t > m_nfake;
 };
 
 #endif  // MUONPERFORMANCEALG

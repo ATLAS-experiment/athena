@@ -9,6 +9,7 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "AthContainers/ConstAccessor.h"
 
+using namespace Muon::MuonStationIndex;
 MuonSegmentPerformanceAlg::MuonSegmentPerformanceAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator),
     m_writeToFile(false),   
@@ -27,56 +28,50 @@ StatusCode MuonSegmentPerformanceAlg::initialize() {
     m_nfake.resize(nbins);
     m_nhitCuts = {3, 4, 5};
     m_hitCutString = {"n==3 ", "n==4 ", "n>=5 "};
-    for (unsigned int i = 0; i < nbins; ++i) {
-        m_ntruth[i].resize(Muon::MuonStationIndex::ChIndexMax, 0);
-        m_nfound[i].resize(Muon::MuonStationIndex::ChIndexMax, 0);
-        m_nfake[i].resize(Muon::MuonStationIndex::ChIndexMax, 0);
-    }
 
-    if (!m_segmentKey.key().empty()) ATH_CHECK(m_segmentKey.initialize());
-    if (!m_truthSegmentKey.key().empty()) ATH_CHECK(m_truthSegmentKey.initialize());
-    if (!m_truthSegmenLinkKey.key().empty()) ATH_CHECK(m_truthSegmenLinkKey.initialize());
+    ATH_CHECK(m_segmentKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_truthSegmentKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_truthSegmenLinkKey.initialize(SG::AllowEmpty));
 
     return StatusCode::SUCCESS;
 }
 
 StatusCode MuonSegmentPerformanceAlg::execute() {
+    const EventContext& ctx{Gaudi::Hive::currentContext()};
     const xAOD::MuonSegmentContainer* segments = nullptr;
-    if (!retrieve(m_segmentKey, segments) || !segments) return StatusCode::SUCCESS;
-
     const xAOD::MuonSegmentContainer* truthSegments = nullptr;
-    if (!retrieve(m_truthSegmentKey, truthSegments) || !truthSegments) return StatusCode::SUCCESS;
+    ATH_CHECK(SG::get(segments, m_segmentKey, ctx));
+    ATH_CHECK(SG::get(truthSegments, m_truthSegmentKey, ctx));
+    if (!segments || !truthSegments) {
+        return StatusCode::SUCCESS;
+    }
     std::set<const xAOD::MuonSegment*> matchedSegments;
     ++m_nevents;
 
     bool missedSegment = false;
     for (const auto seg : *truthSegments) {
-        int chIndex = seg->chamberIndex();
-        if (chIndex < 0 || chIndex >= Muon::MuonStationIndex::ChIndexMax) {
-            ATH_MSG_WARNING("bad index " << chIndex);
+        ChIndex chIndex = seg->chamberIndex();
+        if (chIndex == ChIndex::ChUnknown || chIndex == ChIndex::ChIndexMax) {
             continue;
         }
         unsigned int index = 0;
         if (seg->nPrecisionHits() < 3) continue;
         while ((index < m_nhitCuts.size() - 1) && seg->nPrecisionHits() > m_nhitCuts[index] ) ++index;
 
-        ++m_ntruth[index][chIndex];
+        ++m_ntruth[index][toInt(chIndex)];
 
-        if (index == 2) {
-            if (Muon::MuonStationIndex::chName(static_cast<Muon::MuonStationIndex::ChIndex>(chIndex)) == "CSS")
-                ATH_MSG_WARNING(" CSS with more than 4 layers ");
-            if (Muon::MuonStationIndex::chName(static_cast<Muon::MuonStationIndex::ChIndex>(chIndex)) == "CSL")
-                ATH_MSG_WARNING(" CSL with more than 4 layers ");
+        if (index == 2 && (chIndex == ChIndex::CSS || chIndex == ChIndex::CSL) ){
+            ATH_MSG_WARNING(chName(chIndex)<<"  with more than 4 layers ");
         }
         static const SG::ConstAccessor<ElementLink<xAOD::MuonSegmentContainer> >
           recoSegmentLinkAcc("recoSegmentLink");
         const ElementLink<xAOD::MuonSegmentContainer>& recoLink = recoSegmentLinkAcc(*seg);
         if (recoLink.isValid()) {
-            ++m_nfound[index][chIndex];
+            ++m_nfound[index][toInt(chIndex)];
             matchedSegments.insert(*recoLink);
         } else {
             ATH_MSG_DEBUG(" Missing segment in sector "
-                          << seg->sector() << "  " << Muon::MuonStationIndex::chName(static_cast<Muon::MuonStationIndex::ChIndex>(chIndex))
+                          << seg->sector() << "  " << chName(chIndex)
                           << " eta " << seg->etaIndex() << " nprec " << seg->nPrecisionHits() << " nphi " << seg->nPhiLayers()
                           << " nTrigEta " << seg->nTrigEtaLayers());
             missedSegment = true;
@@ -86,9 +81,9 @@ StatusCode MuonSegmentPerformanceAlg::execute() {
 
     for (const auto seg : *segments) {
         if (matchedSegments.count(seg)) continue;
-        int chIndex = seg->chamberIndex();
-        if (chIndex < 0 || chIndex >= Muon::MuonStationIndex::ChIndexMax) {
-            ATH_MSG_WARNING("bad index " << chIndex);
+        ChIndex chIndex = seg->chamberIndex();
+        if (chIndex == ChIndex::ChUnknown || chIndex == ChIndex::ChIndexMax) {
+            ATH_MSG_WARNING("bad index ");
             continue;
         }
 
@@ -97,18 +92,18 @@ StatusCode MuonSegmentPerformanceAlg::execute() {
         while ((index < m_nhitCuts.size() - 1) and (seg->nPrecisionHits() > m_nhitCuts[index]) ) ++index;
         if (missedSegment)
             ATH_MSG_DEBUG(" Fake segment in sector "
-                          << seg->sector() << "  " << Muon::MuonStationIndex::chName(static_cast<Muon::MuonStationIndex::ChIndex>(chIndex))
+                          << seg->sector() << "  " << chName(chIndex)
                           << " eta " << seg->etaIndex() << " nprec " << seg->nPrecisionHits() << " nphi " << seg->nPhiLayers()
                           << " nTrigEta " << seg->nTrigEtaLayers());
 
-        ++m_nfake[index][chIndex];
+        ++m_nfake[index][toInt(chIndex)];
     }
 
     return StatusCode::SUCCESS;
 }
 
-std::string MuonSegmentPerformanceAlg::printRatio(const std::string& prefix, unsigned int begin, unsigned int end, const std::vector<int>& reco,
-                                                  const std::vector<int>& truth) const {
+std::string MuonSegmentPerformanceAlg::printRatio(const std::string& prefix, unsigned int begin, unsigned int end, 
+                                                  const counter_t& reco, const counter_t& truth) const {
     std::ostringstream sout;
     unsigned int width = 9;
     unsigned int precision = 3;
@@ -133,7 +128,7 @@ std::string MuonSegmentPerformanceAlg::printRatio(const std::string& prefix, uns
     return sout.str();
 }
 std::string MuonSegmentPerformanceAlg::printRatio(const std::string& prefix, unsigned int begin, unsigned int end,
-                                                  const std::vector<int>& reco) const {
+                                                  const counter_t& reco) const {
     std::ostringstream sout;
     unsigned int width = 9;
     unsigned int precision = 3;
@@ -160,28 +155,34 @@ StatusCode MuonSegmentPerformanceAlg::finalize() {
     sout << " Chambers        ";
     std::string prefix_eff = " Efficiency ";
     std::string prefix_fake = " Fake rate  ";
-    for (unsigned int i = 0; i < Muon::MuonStationIndex::BEE; ++i)
-        sout << std::setw(width) << Muon::MuonStationIndex::chName((Muon::MuonStationIndex::ChIndex)i);
-    for (unsigned int j = 0; j < m_nfound.size(); ++j) {
-        sout << printRatio(prefix_eff + m_hitCutString[j], 0, Muon::MuonStationIndex::BEE, m_nfound[j], m_ntruth[j]);
+    unsigned end{0};
+    for (unsigned int i = 0; i < s_chIdxMax; ++i){
+        if (!isBarrel(static_cast<ChIndex>(i))) {
+            break;
+        }
+        sout << std::setw(width) << chName(static_cast<ChIndex>(i));
+        ++end;
+    }
+    for (unsigned int j = 0; j < end; ++j) {
+        sout << printRatio(prefix_eff + m_hitCutString[j], 0, end, m_nfound[j], m_ntruth[j]);
     }
     sout << std::endl;
-    for (unsigned int j = 0; j < m_nfound.size(); ++j) {
-        sout << printRatio(prefix_fake + m_hitCutString[j], 0, Muon::MuonStationIndex::BEE, m_nfake[j]);
+    for (unsigned int j = 0; j < end; ++j) {
+        sout << printRatio(prefix_fake + m_hitCutString[j], 0, end, m_nfake[j]);
     }
     sout << std::endl;
 
     sout << "Segment finding efficiencies endcaps" << std::endl;
     sout << " Chambers        ";
-    for (unsigned int i = Muon::MuonStationIndex::BEE; i < Muon::MuonStationIndex::ChIndexMax; ++i)
-        sout << std::setw(width) << Muon::MuonStationIndex::chName((Muon::MuonStationIndex::ChIndex)i);
+    for (unsigned int i = end; i < s_chIdxMax; ++i)
+        sout << std::setw(width) << chName(static_cast<ChIndex>(i));
     for (unsigned int j = 0; j < m_nfound.size(); ++j) {
-        sout << printRatio(prefix_eff + m_hitCutString[j], Muon::MuonStationIndex::BEE, Muon::MuonStationIndex::ChIndexMax, m_nfound[j],
+        sout << printRatio(prefix_eff + m_hitCutString[j], end, s_chIdxMax, m_nfound[j],
                            m_ntruth[j]);
     }
     sout << std::endl;
     for (unsigned int j = 0; j < m_nfound.size(); ++j) {
-        sout << printRatio(prefix_fake + m_hitCutString[j], Muon::MuonStationIndex::BEE, Muon::MuonStationIndex::ChIndexMax, m_nfake[j]);
+        sout << printRatio(prefix_fake + m_hitCutString[j], end, s_chIdxMax, m_nfake[j]);
     }
     sout << std::endl;
     fileOutput << sout.str() << std::endl;
@@ -189,15 +190,3 @@ StatusCode MuonSegmentPerformanceAlg::finalize() {
     return StatusCode::SUCCESS;
 }
 
-bool MuonSegmentPerformanceAlg::retrieve(const SG::ReadHandleKey<xAOD::MuonSegmentContainer>& segments,
-                                         const xAOD::MuonSegmentContainer*& ptr) const {
-    SG::ReadHandle<xAOD::MuonSegmentContainer> handle(segments);
-    if (!handle.isPresent() || !handle.isValid()) {  // Cautious isPresent TODO remove once job options are more intelligent
-        ATH_MSG_WARNING("Unable to retrieve " << segments.key());
-        ptr = nullptr;
-        return false;
-    }
-    ptr = handle.cptr();
-    ATH_MSG_DEBUG("Retrieved " << segments.key() << " size " << ptr->size());
-    return true;
-}
