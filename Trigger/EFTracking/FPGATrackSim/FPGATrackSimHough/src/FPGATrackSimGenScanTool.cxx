@@ -590,7 +590,7 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
   //    r.setPID(y * m_imageSize_y + x);
   r->setHits(std::move(sorted_hits));
 
-  ParSet binCenterPars = m_binnedhits->getBinTool().lastStep()->binCenter(idx);
+  FPGATrackSimBinUtil::ParSet binCenterPars = m_binnedhits->getBinTool().lastStep()->binCenter(idx);
   FPGATrackSimTrackPars trackpars = m_binnedhits->getBinTool().binDesc()->parSetToTrackPars(binCenterPars);
   r->setX(trackpars[FPGATrackSimTrackPars::IPHI]);
   r->setY(trackpars[FPGATrackSimTrackPars::IHIP]);

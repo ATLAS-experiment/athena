@@ -239,7 +239,7 @@ void FPGATrackSimLayerStudyTool::fillHitLevelInput(const FPGATrackSimHit *hit) {
 
 
       if (m_truthbin.back() != FPGATrackSimBinUtil::invalidBin) {
-        ParSet binCenter = m_binnedhits->getBinTool().lastStep()->binCenter(m_truthbin.back());
+        FPGATrackSimBinUtil::ParSet binCenter = m_binnedhits->getBinTool().lastStep()->binCenter(m_truthbin.back());
         m_etaTrueBinShift[m_binnedhits->getNLayers()]->Fill(bindesc->etaResidual(binCenter, hit));
         m_phiTrueBinShift[m_binnedhits->getNLayers()]->Fill(bindesc->phiResidual(binCenter, hit));
       }
