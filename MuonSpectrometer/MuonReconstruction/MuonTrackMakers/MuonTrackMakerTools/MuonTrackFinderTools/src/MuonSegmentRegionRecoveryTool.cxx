@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentRegionRecoveryTool.h"
@@ -43,12 +43,8 @@
 #include "TrkSurfaces/StraightLineSurface.h"
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 
-namespace Muon {
-
-    MuonSegmentRegionRecoveryTool::MuonSegmentRegionRecoveryTool(const std::string& ty, const std::string& na, const IInterface* pa) :
-        AthAlgTool(ty, na, pa) {
-        declareInterface<IMuonHoleRecoveryTool>(this);
-    }
+namespace Muon { 
+    using namespace MuonStationIndex;
 
     StatusCode MuonSegmentRegionRecoveryTool::initialize() {
         ATH_CHECK(m_edmHelperSvc.retrieve());
@@ -122,7 +118,7 @@ namespace Muon {
             IMuonHitSummaryTool::CompactSummary hitSummary = m_hitSummaryTool->summary(*chRecTrack);
             // should be single station
             // using release until parent tools use unique_ptr
-            if (hitSummary.stationLayers.size() != 1 || !hitSummary.stationLayers.count(MuonStationIndex::EM)) return chRecTrack;
+            if (hitSummary.stationLayers.size() != 1 || !hitSummary.stationLayers.count(StIndex::EM)) return chRecTrack;
             ATH_MSG_DEBUG("Single station track, checking for EO hits");
         }
 
@@ -162,57 +158,70 @@ namespace Muon {
 
     //// NO, NO, NO, should pass in an IRoiDescriptor
     // void MuonSegmentRegionRecoveryTool::addHashes( DETID type, double etamin, double etamax, double phimin, double phimax,
-  void MuonSegmentRegionRecoveryTool::addHashes( const EventContext& ctx, DETID type, const IRoiDescriptor& roi, std::set<IdentifierHash>& hashes,
+  void MuonSegmentRegionRecoveryTool::addHashes( const EventContext& ctx, 
+                                                 TechnologyIndex type, const IRoiDescriptor& roi, std::set<IdentifierHash>& hashes,
 						 const std::set<IdentifierHash>& exclusion) const {
         // if only looking at EO, skip all but MDT chambers
-        if (m_onlyEO && type != MDT) return;
+        if (m_onlyEO && type != TechnologyIndex::MDT) return;
 
         std::vector<IdentifierHash> crossed;
 
-        if (type == MDT && m_regsel_mdt->lookup(ctx)) m_regsel_mdt->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == CSC && m_regsel_csc->lookup(ctx)) m_regsel_csc->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == RPC && m_regsel_rpc->lookup(ctx)) m_regsel_rpc->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == TGC && m_regsel_tgc->lookup(ctx)) m_regsel_tgc->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == STGC && m_regsel_stgc->lookup(ctx)) m_regsel_stgc->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == MM && m_regsel_mm->lookup(ctx)) m_regsel_mm->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TechnologyIndex::MDT && m_regsel_mdt->lookup(ctx)) m_regsel_mdt->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TechnologyIndex::CSCI && m_regsel_csc->lookup(ctx)) m_regsel_csc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TechnologyIndex::RPC && m_regsel_rpc->lookup(ctx)) m_regsel_rpc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TechnologyIndex::TGC && m_regsel_tgc->lookup(ctx)) m_regsel_tgc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TechnologyIndex::STGC && m_regsel_stgc->lookup(ctx)) m_regsel_stgc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TechnologyIndex::MM && m_regsel_mm->lookup(ctx)) m_regsel_mm->lookup(ctx)->HashIDList(roi, crossed);
 
-        for (std::vector<IdentifierHash>::iterator it = crossed.begin(); it != crossed.end(); ++it) {
-            if (!exclusion.count(*it) && !hashes.count(*it)) {
-                if (type == MDT) {
+        for (const IdentifierHash& hash : crossed) {
+            if (exclusion.count(hash) || hashes.count(hash)) {
+                continue;
+            }
+            switch (type) {
+                using enum TechnologyIndex;
+                case TechnologyUnknown:
+                case TechnologyIndexMax:
+                    break;
+                case RPC:
+                case TGC:{
+                    break;
+                }
+                case MDT: {
                     Identifier chId;
                     IdContext otCont = m_idHelperSvc->mdtIdHelper().module_context();
-                    m_idHelperSvc->mdtIdHelper().get_id(*it, chId, &otCont);
+                    m_idHelperSvc->mdtIdHelper().get_id(hash, chId, &otCont);
 
-                    if (m_excludeEES && m_idHelperSvc->chamberIndex(chId) == MuonStationIndex::EES) {
-                        ATH_MSG_VERBOSE("  excluding " << *it << " " << m_idHelperSvc->toStringChamber(chId));
+                    if (m_excludeEES && m_idHelperSvc->chamberIndex(chId) == ChIndex::EES) {
+                        ATH_MSG_VERBOSE("  excluding " << hash << " " << m_idHelperSvc->toStringChamber(chId));
                         continue;
                     }
-                    if (m_onlyEO && m_idHelperSvc->stationIndex(chId) != MuonStationIndex::EO) {
-                        ATH_MSG_VERBOSE("  excluding " << *it << " " << m_idHelperSvc->toStringChamber(chId));
+                    if (m_onlyEO && m_idHelperSvc->stationIndex(chId) != StIndex::EO) {
+                        ATH_MSG_VERBOSE("  excluding " << hash << " " << m_idHelperSvc->toStringChamber(chId));
                         continue;
                     }
-                    ATH_MSG_VERBOSE("  -- hash " << *it << " " << m_idHelperSvc->toStringChamber(chId));
-                }
-                if (type == CSC) {
-                    Identifier chId;
-                    IdContext otCont = m_idHelperSvc->cscIdHelper().module_context();
-                    m_idHelperSvc->cscIdHelper().get_id(*it, chId, &otCont);
-                    ATH_MSG_VERBOSE("  -- csc hash " << *it << " " << m_idHelperSvc->toStringChamber(chId));
-                }
-                if (type == STGC) {
+                    ATH_MSG_VERBOSE("  -- hash " << hash << " " << m_idHelperSvc->toStringChamber(chId));
+                    break;
+                } case STGC: {
                     Identifier chId;
                     IdContext otCont = m_idHelperSvc->stgcIdHelper().detectorElement_context();
-                    m_idHelperSvc->stgcIdHelper().get_id(*it, chId, &otCont);
-                    ATH_MSG_VERBOSE("  -- stgc hash " << *it << " " << m_idHelperSvc->toStringChamber(chId));
-                }
-                if (type == MM) {
+                    m_idHelperSvc->stgcIdHelper().get_id(hash, chId, &otCont);
+                    ATH_MSG_VERBOSE("  -- stgc hash " << hash << " " << m_idHelperSvc->toStringChamber(chId));
+                    break;
+                } case MM: {
                     Identifier chId;
                     IdContext otCont = m_idHelperSvc->mmIdHelper().detectorElement_context();
-                    m_idHelperSvc->mmIdHelper().get_id(*it, chId, &otCont);
-                    ATH_MSG_VERBOSE("  -- mm hash " << *it << " " << m_idHelperSvc->toStringChamber(chId));
+                    m_idHelperSvc->mmIdHelper().get_id(hash, chId, &otCont);
+                    ATH_MSG_VERBOSE("  -- mm hash " << hash << " " << m_idHelperSvc->toStringChamber(chId));
+                    break;
+                } case CSCI: {
+                    Identifier chId;
+                    IdContext otCont = m_idHelperSvc->cscIdHelper().module_context();
+                    m_idHelperSvc->cscIdHelper().get_id(hash, chId, &otCont);
+                    ATH_MSG_VERBOSE("  -- csc hash " << hash << " " << m_idHelperSvc->toStringChamber(chId));
+                    break;
                 }
-                hashes.insert(*it);
             }
+            hashes.insert(hash);
         }
     }
 
@@ -285,12 +294,12 @@ namespace Muon {
 
         RoiDescriptor roi(etamin, etamax, phimin, phimax);
 
-        if (m_idHelperSvc->hasMDT())  addHashes( ctx, MDT, roi, data.mdt, data.mdtTrack);
-        if (m_idHelperSvc->hasRPC())  addHashes( ctx, RPC, roi, data.rpc, data.rpcTrack);
-        if (m_idHelperSvc->hasTGC())  addHashes( ctx, TGC, roi, data.tgc, data.tgcTrack);
-        if (m_regsel_csc.isEnabled()) addHashes( ctx, CSC, roi, data.csc, data.cscTrack);
-        if (m_recoverSTGC) addHashes( ctx, STGC, roi, data.stgc, data.stgcTrack);
-        if (m_recoverMM) addHashes( ctx, MM, roi, data.mm, data.mmTrack);
+        if (m_idHelperSvc->hasMDT())  addHashes( ctx, TechnologyIndex::MDT, roi, data.mdt, data.mdtTrack);
+        if (m_idHelperSvc->hasRPC())  addHashes( ctx, TechnologyIndex::RPC, roi, data.rpc, data.rpcTrack);
+        if (m_idHelperSvc->hasTGC())  addHashes( ctx, TechnologyIndex::TGC, roi, data.tgc, data.tgcTrack);
+        if (m_regsel_csc.isEnabled()) addHashes( ctx, TechnologyIndex::CSCI, roi, data.csc, data.cscTrack);
+        if (m_recoverSTGC) addHashes( ctx, TechnologyIndex::STGC, roi, data.stgc, data.stgcTrack);
+        if (m_recoverMM) addHashes( ctx, TechnologyIndex::MM, roi, data.mm, data.mmTrack);
 
         std::set<IdentifierHash>::iterator hsit = data.mdt.begin();
         std::set<IdentifierHash>::iterator hsit_end = data.mdt.end();

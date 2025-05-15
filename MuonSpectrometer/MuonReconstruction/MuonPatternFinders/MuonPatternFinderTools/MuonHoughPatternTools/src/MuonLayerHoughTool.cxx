@@ -18,6 +18,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 namespace Muon {
+    using namespace MuonStationIndex;
 
     StatusCode MuonLayerHoughTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -25,7 +26,6 @@ namespace Muon {
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_muonManagerKey.initialize());
         ATH_CHECK(m_truthNames.initialize());
-        using namespace MuonStationIndex;
         constexpr int nSelect = toInt(ChIndex::ChIndexMax);
         // initialize cuts, if only one cut, use make_pair to avoid compiler issues, format is (position, cut)
         m_selectors.resize(nSelect);
@@ -355,7 +355,7 @@ namespace Muon {
             }
 
             if (road.neighbouringRegion != DetRegIdx::DetectorRegionUnknown) {
-                associatePhiMaxima(road, houghDataPerSectorVec->vec[sector - 1].phiMaxVec[road.neighbouringRegion]);
+                associatePhiMaxima(road, houghDataPerSectorVec->vec[sector - 1].phiMaxVec[toInt(road.neighbouringRegion)]);
             }
             // if close to a sector boundary, try adding maxima in that sector as well
             if (road.neighbouringSector != -1) {
@@ -367,7 +367,7 @@ namespace Muon {
 
             // finally deal with the case that we have both neighbouring region and sector
             if (road.neighbouringRegion != DetRegIdx::DetectorRegionUnknown && road.neighbouringSector != -1) {
-                associatePhiMaxima(road, houghDataPerSectorVec->vec[road.neighbouringSector - 1].phiMaxVec[road.neighbouringRegion]);
+                associatePhiMaxima(road, houghDataPerSectorVec->vec[road.neighbouringSector - 1].phiMaxVec[toInt(road.neighbouringRegion)]);
             }
 
             // merge phi maxima
@@ -510,7 +510,7 @@ namespace Muon {
         DetRegIdx region = seed.hough->m_descriptor.region;
 
         // loop over layers in the same region as the seed ( inner, middle, outer)
-        for (int lay = 0; lay < MuonStationIndex::LayerIndexMax; ++lay) {
+        for (int lay = 0; lay < toInt(LayerIndex::LayerIndexMax); ++lay) {
             MuonStationIndex::LayerIndex layer = static_cast<MuonStationIndex::LayerIndex>(lay);
             if (layer == seedLayer && seed.hough->m_descriptor.sector == sectorData.sector) continue;
 
@@ -543,7 +543,7 @@ namespace Muon {
         }
 
         // check if the maximum is close to the detector boundary, if yes look for maxima in the neighbouring region, skip BarrelExtended
-        if (seedLayer == MuonStationIndex::BarrelExtended) return;
+        if (seedLayer == LayerIndex::BarrelExtended) return;
 
         ATH_MSG_DEBUG("Checking Barrel/Endcap overlaps: min dist edge "
                       << seed.pos - seed.hough->m_descriptor.yMinRange << " max dist edge " << seed.pos - seed.hough->m_descriptor.yMaxRange
@@ -553,20 +553,20 @@ namespace Muon {
         if (std::abs(seed.pos - seed.hough->m_descriptor.yMinRange) < 4000. ||
             std::abs(seed.pos - seed.hough->m_descriptor.yMaxRange) < 4000.) {
             // asumes region is barrel and looks in adjacent regions (clever logic TM here)
-            DetRegIdx neighbourRegion = MuonStationIndex::Barrel;
-            if (region == MuonStationIndex::Barrel) {
+            DetRegIdx neighbourRegion = DetRegIdx::Barrel;
+            if (region == DetRegIdx::Barrel) {
                 if (seed.pos < 0)
-                    neighbourRegion = MuonStationIndex::EndcapC;
+                    neighbourRegion = DetRegIdx::EndcapC;
                 else
-                    neighbourRegion = MuonStationIndex::EndcapA;
+                    neighbourRegion = DetRegIdx::EndcapA;
             }  // in all other cases the neigbourRegion is definitely barrel
 
             // looping over all layers in neigbouring region
-            for (int lay = 0; lay < MuonStationIndex::LayerIndexMax; ++lay) {
+            for (int lay = 0; lay < toInt(LayerIndex::LayerIndexMax); ++lay) {
                 MuonStationIndex::LayerIndex layer = static_cast<MuonStationIndex::LayerIndex>(lay);
 
                 // skip barrel combinations with BEE
-                if (region == MuonStationIndex::Barrel && layer == MuonStationIndex::BarrelExtended) continue;
+                if (region == DetRegIdx::Barrel && layer == LayerIndex::BarrelExtended) continue;
 
                 double distanceCut = 1000.;
 
@@ -907,7 +907,7 @@ namespace Muon {
             ATH_MSG_DEBUG(" looping over eta maxima");
 
             // now loop over eta maxima per layer
-            for (unsigned int lay = 0; lay < MuonStationIndex::LayerIndexMax; ++lay) {
+            for (unsigned int lay = 0; lay < toInt(LayerIndex::LayerIndexMax); ++lay) {
                 MuonStationIndex::LayerIndex layer = static_cast<MuonStationIndex::LayerIndex>(lay);
                 unsigned int layerHash = MuonStationIndex::sectorLayerHash(region, layer);
                 MaximumVec& maxima = houghData.maxVec[layerHash];
@@ -985,19 +985,19 @@ namespace Muon {
                     ATH_MSG_DEBUG(" Overlap with Phi maximum: tgc " << ntgcOverlaps << " stgc " << nstgcOverlaps << " rpc " << nrpcOverlaps
                                                                     << " nphiTgc " << tgcClusters[stIndex].size() << " trigLay "
                                                                     << triggerLayers.size());
-                    if (stIndex == MuonStationIndex::EM && !tgcClusters[stIndex].empty() && ntgcOverlaps == 0) {
+                    if (stIndex == StIndex::EM && !tgcClusters[stIndex].empty() && ntgcOverlaps == 0) {
                         ATH_MSG_VERBOSE(" No association in StationLayer " << MuonStationIndex::stName(stIndex) << " tgcs overlaps "
                                                                            << ntgcOverlaps << " on phi maximum "
                                                                            << tgcClusters[stIndex].size());
                         continue;
                     }
-                    if (stIndex == MuonStationIndex::EI && !tgcClusters[stIndex].empty() && ntgcOverlaps == 0) {
+                    if (stIndex == StIndex::EI && !tgcClusters[stIndex].empty() && ntgcOverlaps == 0) {
                         ATH_MSG_VERBOSE(" No association in StationLayer " << MuonStationIndex::stName(stIndex) << " tgcs overlaps "
                                                                            << ntgcOverlaps << " on phi maximum "
                                                                            << tgcClusters[stIndex].size());
                         continue;
                     }
-                    if (stIndex == MuonStationIndex::EI && nstgcOverlaps == 0 && nstgcNoOverlaps != 0) {
+                    if (stIndex ==  StIndex::EI && nstgcOverlaps == 0 && nstgcNoOverlaps != 0) {
                         ATH_MSG_VERBOSE(" No association in StationLayer " << MuonStationIndex::stName(stIndex)
                                                                            << " stgcs without overlaps " << nstgcNoOverlaps);
                         continue;
@@ -1023,11 +1023,11 @@ namespace Muon {
 
         // finally idenitify all unassociated maxima and add them to the unassociated maxima list
         // now loop over eta maxima per layer
-        for (unsigned int lay = 0; lay < MuonStationIndex::LayerIndexMax; ++lay) {
+        for (unsigned int lay = 0; lay < toInt(LayerIndex::LayerIndexMax); ++lay) {
             MuonStationIndex::LayerIndex layer = static_cast<MuonStationIndex::LayerIndex>(lay);
             unsigned int layerHash = MuonStationIndex::sectorLayerHash(region, layer);
 
-            if (layer >= (int)unassEtaMaxima.size()) {
+            if (lay >= unassEtaMaxima.size()) {
                 ATH_MSG_WARNING(" size of unassEtaMaxima too small for region " << unassEtaMaxima.size() << " region "
                                                                                 << MuonStationIndex::regionName(region));
                 break;
@@ -1037,7 +1037,7 @@ namespace Muon {
             // loop over maxima per layer
             for (const auto& mit : maxima) {
                 if (associatedMaxima.count(mit)) continue;
-                unassEtaMaxima[layer].push_back(mit);
+                unassEtaMaxima[lay].push_back(mit);
                 ATH_MSG_DEBUG(" unassociated maximum in layer " << MuonStationIndex::layerName(layer) << " max-val " << mit->max);
             }
         }
@@ -1172,7 +1172,7 @@ namespace Muon {
                         // eta maximum has z(r) and theta parameters but these are local
                         double maxpos = max->pos;
                         double refPlane = 0.;
-                        bool isBarrel = !m_idHelperSvc->isEndcap(chId) || chIndex == MuonStationIndex::BEE;
+                        bool isBarrel = !m_idHelperSvc->isEndcap(chId) || chIndex == ChIndex::BEE;
                         if (max->hough)
                             refPlane = max->hough->m_descriptor.referencePosition;
                         else if (hit->tgc)
@@ -1282,7 +1282,7 @@ namespace Muon {
         using namespace MuonStationIndex;
         if (hough.m_descriptor.chIndex == ChIndex::ChUnknown || hough.m_descriptor.chIndex == ChIndex::ChIndexMax) {
             Identifier id = hits.front()->tgc ? hits.front()->tgc->etaCluster.front()->identify() : hits.front()->prd->identify();
-            ATH_MSG_WARNING("Bad ChIndex " << m_idHelperSvc->toString(id) << "  " << hough.m_descriptor.chIndex);
+            ATH_MSG_WARNING("Bad ChIndex " << m_idHelperSvc->toString(id) << "  " << chName(hough.m_descriptor.chIndex));
             return false;
         }
 
@@ -1299,8 +1299,8 @@ namespace Muon {
             selectorLoose = MuonHough::MuonLayerHoughSelector({std::make_pair(0, 3.9)});
             selector = MuonHough::MuonLayerHoughSelector({std::make_pair(0, 7.9)});
         } else {
-            selectorLoose = m_selectorsLoose[hough.m_descriptor.chIndex];
-            selector = m_selectors[hough.m_descriptor.chIndex];
+            selectorLoose = m_selectorsLoose[toInt(hough.m_descriptor.chIndex)];
+            selector = m_selectors[toInt(hough.m_descriptor.chIndex)];
         }
 
         //    MuonStationIndex::StIndex stIndex = MuonStationIndex::toStationIndex(hough.m_descriptor.chIndex);
@@ -1434,23 +1434,23 @@ namespace Muon {
 
                 for (const IdentifierHash& id_hash : hashes) {
                     // !?! else if made by Felix
-                    if (mdtCont && !mdtCont->empty() && tech == MuonStationIndex::MDT) {
+                    if (mdtCont && !mdtCont->empty() && tech == toInt(TechnologyIndex::MDT)) {
                         const MdtPrepDataCollection* pos = mdtCont->indexFindPtr(id_hash);
                         if (pos) fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash]);
-                    } else if (rpcCont && !rpcCont->empty() && tech == MuonStationIndex::RPC) {
+                    } else if (rpcCont && !rpcCont->empty() && tech == toInt(TechnologyIndex::RPC)) {
                         const RpcPrepDataCollection* pos = rpcCont->indexFindPtr(id_hash);
-                        if (pos) fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash], houghData.phiHitVec[regionLayer.first]);
-                    } else if (tgcCont && !tgcCont->empty() && tech == MuonStationIndex::TGC) {
+                        if (pos) fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash], houghData.phiHitVec[toInt(regionLayer.first)]);
+                    } else if (tgcCont && !tgcCont->empty() && tech == toInt(TechnologyIndex::TGC)) {
                         const TgcPrepDataCollection* pos = tgcCont->indexFindPtr(id_hash);
                         if (pos)
                             fill(ctx, state.truthHits, state.houghDataPerSectorVec->tgcClusteringObjs, *pos, houghData.hitVec[layerHash],
-                                 houghData.phiHitVec[regionLayer.first], collectionsPerSector.sector);
-                    } else if (stgcCont && !stgcCont->empty() && tech == MuonStationIndex::STGC) {
+                                 houghData.phiHitVec[toInt(regionLayer.first)], collectionsPerSector.sector);
+                    } else if (stgcCont && !stgcCont->empty() && tech == toInt(TechnologyIndex::STGC)) {
                         const sTgcPrepDataCollection* pos = stgcCont->indexFindPtr(id_hash);
                         if (pos)
-                            fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash], houghData.phiHitVec[regionLayer.first],
+                            fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash], houghData.phiHitVec[toInt(regionLayer.first)],
                                  collectionsPerSector.sector);
-                    } else if (mmCont && !mmCont->empty() && tech == MuonStationIndex::MM) {
+                    } else if (mmCont && !mmCont->empty() && tech == toInt(TechnologyIndex::MM)) {
                         const MMPrepDataCollection* pos = mmCont->indexFindPtr(id_hash);
                         if (pos) fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash]);
                     }
@@ -1486,8 +1486,8 @@ namespace Muon {
         DetRegIdx region = m_idHelperSvc->regionIndex(chid);
         MuonStationIndex::LayerIndex layer = m_idHelperSvc->layerIndex(chid);
         int sector = m_idHelperSvc->sector(chid);
-        unsigned int technology = m_idHelperSvc->technologyIndex(chid);
-        bool barrelLike = (region == MuonStationIndex::Barrel || layer == MuonStationIndex::BarrelExtended);
+        unsigned int technology = toInt(m_idHelperSvc->technologyIndex(chid));
+        bool barrelLike = (region == DetRegIdx::Barrel || layer == LayerIndex::BarrelExtended);
         unsigned int nmdts(mdts.size()), nmdtsBad{0};
         for (const MdtPrepData* prd : mdts) {
             if (prd->adc() < 50 || prd->status() != MdtStatusDriftTime) {
@@ -1524,7 +1524,7 @@ namespace Muon {
         return;
         auto truthCollections = m_truthNames.makeHandles(ctx);
         Identifier chid = cscs.identify();
-        unsigned int technology = m_idHelperSvc->technologyIndex(chid);
+        unsigned int technology = toInt(m_idHelperSvc->technologyIndex(chid));
         MuonStationIndex::LayerIndex layer = m_idHelperSvc->layerIndex(chid);
         DetRegIdx region = m_idHelperSvc->regionIndex(chid);
         int sector = m_idHelperSvc->sector(chid);
@@ -1571,7 +1571,7 @@ namespace Muon {
         if (rpcs.empty()) return;
         auto truthCollections = m_truthNames.makeHandles(ctx);
         Identifier chid = rpcs.identify();
-        unsigned int technology = m_idHelperSvc->technologyIndex(chid);
+        unsigned int technology = toInt(m_idHelperSvc->technologyIndex(chid));
         MuonStationIndex::LayerIndex layer = m_idHelperSvc->layerIndex(chid);
         DetRegIdx region = m_idHelperSvc->regionIndex(chid);
         int sector = m_idHelperSvc->sector(chid);
@@ -1624,7 +1624,7 @@ namespace Muon {
         DetRegIdx region = m_idHelperSvc->regionIndex(chid);
         MuonStationIndex::LayerIndex layer = m_idHelperSvc->layerIndex(chid);
         int sector = m_idHelperSvc->sector(chid);
-        unsigned int technology = m_idHelperSvc->technologyIndex(chid);
+        unsigned int technology = toInt(m_idHelperSvc->technologyIndex(chid));
         ATH_MSG_DEBUG("fillMM: Filling " << m_idHelperSvc->toStringChamber(chid) << ": loc s" << sector << " "
                                          << MuonStationIndex::regionName(region) << " " << MuonStationIndex::layerName(layer) << " -> hits "
                                          << mms.size());
@@ -1670,7 +1670,7 @@ namespace Muon {
         MuonStationIndex::LayerIndex layer = m_idHelperSvc->layerIndex(chid);
         int sector = m_idHelperSvc->sector(chid);
         bool isNeighbouringSector = sector != selectedSector;
-        unsigned int technology = m_idHelperSvc->technologyIndex(chid);
+        unsigned int technology = toInt(m_idHelperSvc->technologyIndex(chid));
         ATH_MSG_DEBUG("fillsTGC: Filling " << m_idHelperSvc->toStringChamber(chid) << ": loc s" << sector << " "
                                            << MuonStationIndex::regionName(region) << " " << MuonStationIndex::layerName(layer)
                                            << " -> hits: " << stgcs.size());
@@ -1800,7 +1800,7 @@ namespace Muon {
         auto truthCollections = m_truthNames.makeHandles(ctx);
         std::vector<int> sectors;
         getSectors(clustering.clusters3D.front(), sectors);
-        unsigned int technology = m_idHelperSvc->technologyIndex(chid);
+        unsigned int technology = toInt(m_idHelperSvc->technologyIndex(chid));
         for (unsigned int si = 0; si < sectors.size(); ++si) {
             if (sectors[si] != sector) continue;
 
@@ -1861,7 +1861,7 @@ namespace Muon {
     void MuonLayerHoughTool::insertHash(int sector, const IdentifierHash& hash, const Identifier& id) const{
         MuonStationIndex::TechnologyIndex techIndex = m_idHelperSvc->technologyIndex(id);
         int sectorLayerHash = MuonStationIndex::sectorLayerHash(m_idHelperSvc->regionIndex(id), m_idHelperSvc->layerIndex(id));
-        m_collectionsPerSector[sector - 1].technologyRegionHashVecs[techIndex][sectorLayerHash].push_back(hash);
+        m_collectionsPerSector[sector - 1].technologyRegionHashVecs[toInt(techIndex)][sectorLayerHash].push_back(hash);
     }
 
     // all chambers are mapped onto a layer and sector map
