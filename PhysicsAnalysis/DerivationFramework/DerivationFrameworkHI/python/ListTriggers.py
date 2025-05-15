@@ -501,9 +501,14 @@ def HION5SkimmingTriggers():
     triggers += ["HLT_e20_medium_nogsf_ion_L1EM15"]
     triggers += ["HLT_mu10_L1MU8F"] #also 2024
     triggers += ["HLT_mu10_L1MU5VF"] #also 2024
+    triggers += ["HLT_g15_loose_ion_L1eEM12"]
+    triggers += ["HLT_g15_loose_ion_L1eEM15"]
+    triggers += ["HLT_g20_loose_ion_L1eEM15"]
+    triggers += ["HLT_g20_loose_ion_L1eEM18"]
+    triggers += ["HLT_g30_loose_ion_L1eEM18"]
+    triggers += ["HLT_g50_loose_ion_L1eEM26"]
 
     #2024 HI
-
     triggers += ["HLT_e15_lhloose_nogsf_ion_L1eEM15"]
     triggers += ["HLT_e15_loose_nogsf_ion_L1eEM15"]
     triggers += ["HLT_e15_lhmedium_nogsf_ion_L1eEM15"]
@@ -533,7 +538,12 @@ def HION5SkimmingTriggers():
     triggers += ["HLT_mu15_L1MU8F"]
     triggers += ["HLT_mu15_L1MU14FCH"]
     triggers += ["HLT_mu4noL1_L1MBTS_1"]
-
+    triggers += ["HLT_g15_loose_L1eEM15"]
+    triggers += ["HLT_g20_loose_L1eEM15"]
+    triggers += ["HLT_g30_loose_L1eEM18"]
+    triggers += ["HLT_g40_loose_L1eEM18"]
+    triggers += ["HLT_g40_loose_L1eEM26"]
+    triggers += ["HLT_g50_loose_L1eEM26"]
     
     return triggers
 
