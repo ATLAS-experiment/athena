@@ -19,10 +19,12 @@ StatusCode ExtractCaloGeoConstants::initialize()
   m_h3_eta=new TH3F("h3_eta","; #it{#eta}; #it{phi}; Sampling",100,-5,5,64,-TMath::Pi(),TMath::Pi(),24,-0.5,23.5);
   m_h3_phi=new TH3F("h3_phi","; #it{#eta}; #it{phi}; Sampling",100,-5,5,64,-TMath::Pi(),TMath::Pi(),24,-0.5,23.5);
   m_h3_R=new TH3F("h3_R","; #it{#eta}; #it{phi}; Sampling",100,-5,5,64,-TMath::Pi(),TMath::Pi(),24,-0.5,23.5);
+  m_h1_events=new TH1F("h1_events","; Processed Events",1,0,1);
   CHECK(m_thistSvc->regHist("/" + m_hist_stream + "/" + m_h3_w->GetName(), m_h3_w));
   CHECK(m_thistSvc->regHist("/" + m_hist_stream + "/" + m_h3_eta->GetName(), m_h3_eta));
   CHECK(m_thistSvc->regHist("/" + m_hist_stream + "/" + m_h3_phi->GetName(), m_h3_phi));
   CHECK(m_thistSvc->regHist("/" + m_hist_stream + "/" + m_h3_R->GetName(), m_h3_R));
+  CHECK(m_thistSvc->regHist("/" + m_hist_stream + "/" + m_h1_events->GetName(), m_h1_events));
 
   return StatusCode::SUCCESS;
 }
@@ -42,6 +44,9 @@ StatusCode ExtractCaloGeoConstants::execute()
     ATH_MSG_ERROR("Could not find CaloCellContainer " << m_cell_container_key);
     return(StatusCode::FAILURE);
   }
+
+  // record number of processed events
+  m_h1_events->Fill(0.5);
 
   // loop on towers
   for(auto towerItr : *navInColl)
