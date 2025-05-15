@@ -64,7 +64,7 @@ namespace Muon {
        region selector
     */
 
-    class MuonSegmentRegionRecoveryTool : virtual public IMuonHoleRecoveryTool, public AthAlgTool {
+    class MuonSegmentRegionRecoveryTool : public extends<AthAlgTool, IMuonHoleRecoveryTool> {
     public:
         struct MuonData {
             std::set<IdentifierHash> mdt;
@@ -91,8 +91,7 @@ namespace Muon {
 
     public:
         /** @brief constructor */
-        MuonSegmentRegionRecoveryTool(const std::string&, const std::string&, const IInterface*);
-
+        using base_class::base_class;
         /** @brief destructor */
         virtual ~MuonSegmentRegionRecoveryTool() = default;
 
@@ -119,7 +118,7 @@ namespace Muon {
         // Select hashes of chambers not yet on track
         std::unique_ptr<Trk::Track> addMissingChambers(const EventContext& ctx, const Trk::Track& track, MuonData& data, bool addMdt) const;
 
-        void addHashes( const EventContext& ctx, DETID type, const IRoiDescriptor& roi, std::set<IdentifierHash>& hashes,
+        void addHashes( const EventContext& ctx, MuonStationIndex::TechnologyIndex type, const IRoiDescriptor& roi, std::set<IdentifierHash>& hashes,
 			const std::set<IdentifierHash>& exclusion) const;
 
         std::unique_ptr<Trk::Track> findHoles(const EventContext& ctx, const Trk::Track& track, MuonData& data) const;

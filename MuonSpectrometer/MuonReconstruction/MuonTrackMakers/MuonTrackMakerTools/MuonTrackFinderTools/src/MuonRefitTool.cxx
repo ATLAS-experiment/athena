@@ -26,7 +26,7 @@
 #include "TrkTrackSummary/TrackSummary.h"
 
 namespace Muon {
-
+    using namespace MuonStationIndex;
     MuonRefitTool::MuonRefitTool(const std::string& ty, const std::string& na, const IInterface* pa) :
         AthAlgTool(ty, na, pa),
         m_errorStrategyBEE(MuonDriftCircleErrorStrategyInput()),
@@ -394,7 +394,7 @@ namespace Muon {
 
         ATH_MSG_DEBUG(" AlignmentMap size " << alignerrmap.size());
 
-        std::set<MuonStationIndex::ChIndex> stationIds;
+        std::set<ChIndex> stationIds;
 
         for (const auto& itAli : alignerrmap) {
             unsigned int imiddle = (itAli.first.size()) / 2;
@@ -518,7 +518,7 @@ namespace Muon {
             Identifier id = m_edmHelperSvc->getIdentifier(*meas);
             // Not a ROT, else it would have had an identifier. Keep the TSOS.
             if (!id.is_valid() || !m_idHelperSvc->isMuon(id)) continue;
-            MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
+            StIndex stIndex = m_idHelperSvc->stationIndex(id);
             // skip phi measurements
             if ((m_idHelperSvc->isTrigger(id) && m_idHelperSvc->measuresPhi(id)) ||
                 (m_idHelperSvc->isCsc(id) && m_idHelperSvc->measuresPhi(id)))
@@ -532,7 +532,7 @@ namespace Muon {
             } else {
                 // skip trigger hits and CSC phi measurements  and select precision hits
                 if (m_idHelperSvc->isTrigger(id)) continue;
-                if (stIndex == MuonStationIndex::BM || stIndex == MuonStationIndex::EM) {
+                if (stIndex == StIndex::BM || stIndex == StIndex::EM) {
                     if (indexFirst == -1) indexFirst = index;
                     indicesOfAffectedTSOS.push_back(tsit);
                     indicesOfAffectedIds.push_back(id);
@@ -542,8 +542,7 @@ namespace Muon {
                         indicesOfAffectedTSOSInner.push_back(tsit);
                         indicesOfAffectedIdsInner.push_back(id);
                     }
-                }
-                if (stIndex == MuonStationIndex::BI || stIndex == MuonStationIndex::EI) {
+                }else if (stIndex == StIndex::BI || stIndex == StIndex::EI) {
                     if (indexFirstInner == -1) indexFirstInner = index;
                     indicesOfAffectedTSOSInner.push_back(tsit);
                     indicesOfAffectedIdsInner.push_back(id);
@@ -642,7 +641,7 @@ namespace Muon {
         newStates.reserve(states->size() + 5);
 
         const Trk::TrackParameters* startPars = nullptr;
-        std::map<int, std::set<MuonStationIndex::StIndex>> stationsPerSector;
+        std::map<int, std::set<StIndex>> stationsPerSector;
 
         // loop over TSOSs and find start parameters
         for (const Trk::TrackStateOnSurface* tsit : *states) {
@@ -673,7 +672,7 @@ namespace Muon {
             // Not a ROT, else it would have had an identifier. Keep the TSOS.
             if (!id.is_valid() || !m_idHelperSvc->isMuon(id)) continue;
             if (m_idHelperSvc->isTrigger(id) || (m_idHelperSvc->isCsc(id) && m_idHelperSvc->measuresPhi(id))) continue;
-            MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
+            StIndex stIndex = m_idHelperSvc->stationIndex(id);
             int sector = m_idHelperSvc->sector(id);
             stationsPerSector[sector].insert(stIndex);
         }
@@ -690,13 +689,13 @@ namespace Muon {
         // loop over sectors and select the one with most layers
         std::vector<int> sectorsWithMostStations;
         unsigned int nmaxStations = 0;
-        std::map<int, std::set<MuonStationIndex::StIndex>>::iterator stit = stationsPerSector.begin();
-        std::map<int, std::set<MuonStationIndex::StIndex>>::iterator stit_end = stationsPerSector.end();
+        std::map<int, std::set<StIndex>>::iterator stit = stationsPerSector.begin();
+        std::map<int, std::set<StIndex>>::iterator stit_end = stationsPerSector.end();
         for (; stit != stit_end; ++stit) {
             if (msgLvl(MSG::VERBOSE)) {
                 ATH_MSG_VERBOSE(" sector " << stit->first);
-                for (std::set<MuonStationIndex::StIndex>::iterator ssit = stit->second.begin(); ssit != stit->second.end(); ++ssit) {
-                    ATH_MSG_VERBOSE(" " << MuonStationIndex::stName(*ssit));
+                for (std::set<StIndex>::iterator ssit = stit->second.begin(); ssit != stit->second.end(); ++ssit) {
+                    ATH_MSG_VERBOSE(" " << stName(*ssit));
                 }
             }
             if (stit->second.size() > nmaxStations) {
@@ -724,13 +723,13 @@ namespace Muon {
 
         // no check whether we have a barrel/endcap overlap
         
-        static constexpr std::array<MuonStationIndex::StIndex, 3> barel_stations{MuonStationIndex::BI, MuonStationIndex::BM, MuonStationIndex::BO};
-        static constexpr std::array<MuonStationIndex::StIndex, 5> endcap_stations{MuonStationIndex::EI,MuonStationIndex::EM, MuonStationIndex::EO, MuonStationIndex::EE, MuonStationIndex::BE};
-        const std::set<MuonStationIndex::StIndex>& selected_set = stationsPerSector[selectedSector];
-        const int nbarrel = std::accumulate(barel_stations.begin(),barel_stations.end(),0, [&selected_set](int n, const MuonStationIndex::StIndex& idx){
+        static constexpr std::array<StIndex, 3> barel_stations{StIndex::BI, StIndex::BM, StIndex::BO};
+        static constexpr std::array<StIndex, 5> endcap_stations{StIndex::EI,StIndex::EM, StIndex::EO, StIndex::EE, StIndex::BE};
+        const std::set<StIndex>& selected_set = stationsPerSector[selectedSector];
+        const int nbarrel = std::accumulate(barel_stations.begin(),barel_stations.end(),0, [&selected_set](int n, const StIndex& idx){
             return (selected_set.count(idx) > 0) + n;
         });
-        const int  nendcap = std::accumulate(endcap_stations.begin(),endcap_stations.end(),0, [&selected_set](int n, const MuonStationIndex::StIndex& idx){
+        const int  nendcap = std::accumulate(endcap_stations.begin(),endcap_stations.end(),0, [&selected_set](int n, const StIndex& idx){
             return (selected_set.count(idx) > 0) + n;
         });
         bool barrelEndcap {false}, deweightBarrel{false}, deweightEndcap{false};
@@ -818,7 +817,7 @@ namespace Muon {
                 newStates.emplace_back(tsos->clone());
             } else {
                 Identifier chId = m_idHelperSvc->chamberId(id);
-                MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
+                StIndex stIndex = m_idHelperSvc->stationIndex(id);
                 if (m_idHelperSvc->isMdt(id)) {
                     const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(meas);
                     if (!mdt) {
@@ -839,8 +838,7 @@ namespace Muon {
 
                     // error update for three stations with barrel-endcap and shared sectors
                     if (!m_deweightTwoStationTracks || nmaxStations > 2) {
-                        if (m_deweightEEL1C05 && stIndex == MuonStationIndex::EE &&
-                            m_idHelperSvc->chamberIndex(id) == MuonStationIndex::EEL && m_idHelperSvc->stationEta(id) < 0 &&
+                        if (m_deweightEEL1C05 &&  m_idHelperSvc->chamberIndex(id) == ChIndex::EEL && m_idHelperSvc->stationEta(id) < 0 &&
                             m_idHelperSvc->stationPhi(id) == 3) {
                             // for this chamber the errors are enormous (for a period of time)
                             rot.reset(m_mdtRotCreator->updateError(*mdt, pars, &m_errorStrategyEEL1C05));
@@ -859,23 +857,23 @@ namespace Muon {
                             ++deweightHits;
                             rot.reset(m_mdtRotCreator->updateError(*mdt, pars, &m_errorStrategySL));
 
-                        } else if (m_deweightBEE && stIndex == MuonStationIndex::BE) {
+                        } else if (m_deweightBEE && stIndex == StIndex::BE) {
                             rot.reset(m_mdtRotCreator->updateError(*mdt, pars, &m_errorStrategyBEE));
                             if (settings.removeBEE) type = Trk::TrackStateOnSurface::Outlier;
 
-                        } else if (m_deweightEE && stIndex == MuonStationIndex::EE) {
+                        } else if (m_deweightEE && stIndex == StIndex::EE) {
                             rot.reset(m_mdtRotCreator->updateError(*mdt, pars, &m_errorStrategyEE));
 
-                        } else if (m_deweightBIS78 && stIndex == MuonStationIndex::BI &&
-                                   m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BIS && abs(m_idHelperSvc->stationEta(id)) > 6) {
+                        } else if (m_deweightBIS78 && m_idHelperSvc->chamberIndex(id) == ChIndex::BIS && 
+                                  std::abs(m_idHelperSvc->stationEta(id)) > 6) {
                             rot.reset(m_mdtRotCreator->updateError(*mdt, pars, &m_errorStrategyBIS78));
 
-                        } else if (m_deweightBME && stIndex == MuonStationIndex::BM && m_idHelperSvc->stationPhi(id) == 7 &&
+                        } else if (m_deweightBME && stIndex == StIndex::BM && m_idHelperSvc->stationPhi(id) == 7 &&
                                    (m_idHelperSvc->mdtIdHelper()).stationName(id) == m_BME_station) {
                             rot.reset(m_mdtRotCreator->updateError(*mdt, pars, &m_errorStrategyBXE));
 
-                        } else if (m_deweightBOE && stIndex == MuonStationIndex::BO &&
-                                   m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BOL && abs(m_idHelperSvc->stationEta(id)) == 7 &&
+                        } else if (m_deweightBOE && m_idHelperSvc->chamberIndex(id) == ChIndex::BOL && 
+                                    std::abs(m_idHelperSvc->stationEta(id)) == 7 &&
                                    m_idHelperSvc->stationPhi(id) == 7) {
                             rot.reset(m_mdtRotCreator->updateError(*mdt, pars, &m_errorStrategyBXE));
 
@@ -932,9 +930,7 @@ namespace Muon {
                     }
                 } else if (m_idHelperSvc->isTrigger(id)) {
                     if (m_idHelperSvc->measuresPhi(id)) {
-                        MuonStationIndex::PhiIndex phiIndex = m_idHelperSvc->phiIndex(id);
-
-                        if (settings.chambersToBeremoved.count(chId) || settings.phiLayersToBeremoved.count(phiIndex)) {
+                        if (settings.chambersToBeremoved.count(chId) || settings.phiLayersToBeremoved.count(m_idHelperSvc->phiIndex(id))) {
                             std::unique_ptr<Trk::TrackStateOnSurface> new_tsos = MuonTSOSHelper::cloneTSOS(*tsos, Trk::TrackStateOnSurface::Outlier);
                             newStates.emplace_back(std::move(new_tsos));
 
@@ -1100,7 +1096,7 @@ namespace Muon {
                 newStates.emplace_back(tsos->clone());
             } else {
                 Identifier chId = m_idHelperSvc->chamberId(id);
-                MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
+                StIndex stIndex = m_idHelperSvc->stationIndex(id);
                 if (m_idHelperSvc->isMdt(id)) {
                     const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(meas);
                     if (!mdt) {
@@ -1159,9 +1155,7 @@ namespace Muon {
                     }
                 } else if (m_idHelperSvc->isTrigger(id)) {
                     if (m_idHelperSvc->measuresPhi(id)) {
-                        MuonStationIndex::PhiIndex phiIndex = m_idHelperSvc->phiIndex(id);
-
-                        if (settings.chambersToBeremoved.count(chId) || settings.phiLayersToBeremoved.count(phiIndex)) {
+                        if (settings.chambersToBeremoved.count(chId) || settings.phiLayersToBeremoved.count(m_idHelperSvc->phiIndex(id))) {
                             std::unique_ptr<Trk::TrackStateOnSurface> new_tsos = MuonTSOSHelper::cloneTSOS(*tsos, Trk::TrackStateOnSurface::Outlier);
                             newStates.emplace_back(std::move(new_tsos));
 
