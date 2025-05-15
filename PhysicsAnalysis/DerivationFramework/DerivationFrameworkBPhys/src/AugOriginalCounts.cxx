@@ -95,7 +95,7 @@ namespace DerivationFramework {
 
       SG::WriteDecorHandle<xAOD::EventInfo, int> PV_count(m_OrigPVNTracks, ctx);
       SG::ReadHandle<xAOD::VertexContainer> vertices(m_PVContainername, ctx);
-      PV_count(0) = vertices->size();
+      if(!PV_count.isAvailable()) PV_count(0) = vertices->size();
       
       if ( m_addPVCountsByType ) {
       	SG::WriteDecorHandle<xAOD::EventInfo, int> PV0_count(m_OrigNtype0, ctx);
@@ -115,19 +115,21 @@ namespace DerivationFramework {
             nvtc[nvtypes-1]++; // unknown
           }
         }
-        PV0_count(0) = nvtc[0];
-        PV1_count(0) = nvtc[1];
-        PV2_count(0) = nvtc[2];
-        PV3_count(0) = nvtc[3];
-        PVUnk_count(0) = nvtc[4];
+        if(!PV0_count.isAvailable()) PV0_count(0) = nvtc[0];
+        if(!PV1_count.isAvailable()) PV1_count(0) = nvtc[1];
+        if(!PV2_count.isAvailable()) PV2_count(0) = nvtc[2];
+        if(!PV3_count.isAvailable()) PV3_count(0) = nvtc[3];
+        if(!PVUnk_count.isAvailable()) PVUnk_count(0) = nvtc[4];
       } // m_addPVCountsByType
 
       // decorate PVs with track counts
       // (needed if track collection will be thinned)
       if ( m_addNTracksToPVs ) {
         SG::WriteDecorHandle<xAOD::VertexContainer, int> d_nPVTracks(m_d_nPVTracks, ctx);
-        for (auto vtx : *vertices) {
-          d_nPVTracks(*vtx) = (int)vtx->nTrackParticles();
+        if(!d_nPVTracks.isAvailable()){
+          for (auto vtx : *vertices) {
+            d_nPVTracks(*vtx) = (int)vtx->nTrackParticles();
+          }
         }
       } // m_addNTracksToPVs
       
@@ -135,12 +137,14 @@ namespace DerivationFramework {
       // (needed if track collection will be thinned)
       if ( m_addSqrtPt2SumToPVs ) {
       	SG::WriteDecorHandle<xAOD::VertexContainer, float> d_pvSqrtPt2Sum(m_OrigSqrtPt2Sum, ctx);
-        for (auto vtx : *vertices) {
-          float sqrtPt2Sum(0.);
-          for (auto tp : vtx->trackParticleLinks()) {
-            sqrtPt2Sum += std::sqrt(pow((*tp)->pt(),2));
+        if(!d_pvSqrtPt2Sum.isAvailable()){
+          for (auto vtx : *vertices) {
+            float sqrtPt2Sum(0.);
+            for (auto tp : vtx->trackParticleLinks()) {
+              sqrtPt2Sum += std::sqrt(pow((*tp)->pt(),2));
+            }
+            d_pvSqrtPt2Sum(*vtx) = sqrtPt2Sum;
           }
-          d_pvSqrtPt2Sum(*vtx) = sqrtPt2Sum;
         }
       } // m_addSqrtPt2SumToPVs
     }
@@ -148,12 +152,12 @@ namespace DerivationFramework {
     if(!m_TrackContainername.empty()){
       SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_TrackContainername, ctx);
       SG::WriteDecorHandle<xAOD::EventInfo, int> track_count(m_OrigNTracksKeys, ctx);
-      track_count(0) = tracks->size();
+      if(!track_count.isAvailable()) track_count(0) = tracks->size();
     }
     if(!m_TrackContainerLRTname.empty()){
       SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_TrackContainerLRTname, ctx);
       SG::WriteDecorHandle<xAOD::EventInfo, int> track_count(m_OrigNTracksLRTKeys, ctx);
-      track_count(0) = tracks->size();
+      if(!track_count.isAvailable()) track_count(0) = tracks->size();
     }
 
     return StatusCode::SUCCESS;
