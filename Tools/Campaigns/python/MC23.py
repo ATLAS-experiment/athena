@@ -253,6 +253,38 @@ def MC23HeavyIons2024(flags): # FIXME This configuration is a placeholder
     flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
 
 
+def MC23HeavyIons2025OO(flags): # FIXME This configuration is a placeholder
+    """MC23 flags for the 2025 Heavy Ions (Oxygen) run"""
+    flags.Input.MCCampaign = Campaign.MC23g
+
+    flags.Beam.BunchSpacing = 500
+    flags.Beam.NumberOfCollisions = 0.0 # TODO: change once we have 
+    flags.Input.ConditionsRunNumber = 488000 # TODO: replace with the actual run number once we have the conditions
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    # pile-up
+    flags.Digitization.PileUp = False #TODO: change once we have the conditions
+    flags.Digitization.DoXingByXingPileUp = False #TODO: as above
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructureHeavyIon2022'  # New file being prepared ATLGBLCONDTAGS-182
+    flags.Digitization.PU.InitialBunchCrossing = 0
+    flags.Digitization.PU.FinalBunchCrossing = 0
+    flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
+
+    from HIRecConfig.HIModeFlags import HIPmode
+    HIPmode(flags)
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_pp_lowMu_run3_v1_TriggerValidation_prescale'
+
+
 def MC23aSingleBeamspot(flags):
     """MC23a flags for MC to match 2022 Run 3 data (single beamspot version)"""
     MC23a(flags)
@@ -480,6 +512,15 @@ def MC23Simulation2024HeavyIonRun(flags):
     flags.Input.MCCampaign = Campaign.MC23e
 
     flags.Input.RunNumbers = [488600]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumbers = [1] # dummy value
+
+def MC23Simulation2025OORun(flags):
+    """MC23 flags for simulation simulation of the 2025 Oxygen Oxygen run"""
+    MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23g
+
+    flags.Input.RunNumbers = [488000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1] # dummy value
 

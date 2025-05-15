@@ -337,7 +337,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
        return pass;
      }
 
-     if (m_isoValidation){
+     if (m_useRelptvarcone30){
       pass = (relptvarcone30 < m_RelPtConeCut);
       ATH_MSG_DEBUG("reptvarcon30_rel cut is: " << m_RelPtConeCut);
       if (!pass){

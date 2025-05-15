@@ -928,6 +928,7 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
   }
 
   const HWIdentifier hwidEmpty;
+  unsigned nWarnings = 0;
   for (SuperCell ch = 0; ch < N_LATOME_CHANNELS; ++ch) {
     LArCalibParams* calibParams = 0;
     auto SCID = map ? map->getChannelID(m_nthLATOME, ch) : hwidEmpty;
@@ -952,14 +953,21 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
     sum.resize(m_averagedRawValuesInEvent[ch].sum.size());
     sum2.resize(m_averagedRawValuesInEvent[ch].sum.size());
 
-    for (unsigned int is = 0; is < m_averagedRawValuesInEvent[ch].sum.size(); ++is) {
-      double fsum = (double)m_averagedRawValuesInEvent[ch].sum[is] / m_averagedRawValuesInEvent[ch].nTrigValid[is] * ntmin;
-      double fsum2 = (double)m_averagedRawValuesInEvent[ch].sumSq[is] / m_averagedRawValuesInEvent[ch].nTrigValid[is] * ntmin;
-      sum[is] = round(fsum);
-      sum2[is] = round(fsum2);
+    if (ntmin > 0) {
+      for (unsigned int is = 0; is < m_averagedRawValuesInEvent[ch].sum.size(); ++is) {
+        double fsum = (double)m_averagedRawValuesInEvent[ch].sum[is] / m_averagedRawValuesInEvent[ch].nTrigValid[is] * ntmin;
+        double fsum2 = (double)m_averagedRawValuesInEvent[ch].sumSq[is] / m_averagedRawValuesInEvent[ch].nTrigValid[is] * ntmin;
+        sum[is] = round(fsum);
+        sum2[is] = round(fsum2);
+      }
+    } else {
+      std::fill(sum.begin(), sum.end(), 0);
+      std::fill(sum2.begin(), sum2.end(), 0);
+      if (++nWarnings < 64) {
+        ATH_MSG_WARNING("No valid triggers for supercell " << SCID.getString());
+      }
     }
     if (m_accdigits) {
-
       LArAccumulatedDigit* accdigi = new LArAccumulatedDigit(SCID, gain, sum, sum2, ntmin);
       m_accdigits->push_back(accdigi);
     }
@@ -1030,6 +1038,9 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
     }
 
   }  /// for loop on SCs
+  if (nWarnings > 16) {
+      ATH_MSG_WARNING("Found " << nWarnings << " supercells with no valid triggers");
+  }
 }
 
 // Pass ADC values from an event

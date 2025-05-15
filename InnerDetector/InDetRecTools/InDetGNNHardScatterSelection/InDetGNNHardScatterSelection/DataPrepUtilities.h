@@ -8,12 +8,11 @@
 // local includes
 #include "InDetGNNHardScatterSelection/ConstituentsLoader.h"
 #include "FlavorTagInference/SaltModel.h"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 
 // EDM includes
 #include "xAODTracking/Vertex.h"
 
-// external libraries
-#include "lwtnn/lightweight_network_config.hh"
 
 // STL includes
 #include <string>
@@ -52,7 +51,7 @@ namespace InDetGNNHardScatterSelection {
     // Getter functions
     //
     // internally we want a bunch of std::functions that return pairs
-    // to populate the lwtnn input map.
+    // to populate the GraphConfig input map.
     //
     template <typename T>
     class VertexVarGetter {
@@ -126,12 +125,12 @@ namespace InDetGNNHardScatterSelection {
   namespace dataprep {
     typedef std::vector<std::pair<std::regex, std::string> > StringRegexes;
 
-    // Get the configuration structures based on the lwtnn NN
+    // Get the configuration structures based on the GraphConfig
     // structure.
     std::tuple<
       std::vector<HSGNNInputConfig>,
       std::vector<ConstituentsInputConfig>>
-    createGetterConfig( lwt::GraphConfig& graph_config );
+    createGetterConfig( FlavorTagInference::SaltModelGraphConfig::GraphConfig& graph_config );
 
     // return the scalar getter functions for NNs
     std::vector<internal::VarFromVertex>

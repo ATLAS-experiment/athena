@@ -13,7 +13,7 @@
 #include <onnxruntime_cxx_api.h>
 
 #include "nlohmann/json.hpp"
-#include "lwtnn/parse_json.hh"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 
 #include "FlavorTagInference/SaltModelOutput.h"
 
@@ -57,7 +57,7 @@ namespace FlavorTagInference {
 
       InferenceOutput runInference(std::map<std::string, Inputs>& gnn_inputs) const;
 
-      const lwt::GraphConfig getLwtConfig() const;
+      const SaltModelGraphConfig::GraphConfig getGraphConfig() const;
       const nlohmann::json& getMetadata() const;
       const OutputConfig& getOutputConfig() const;
       SaltModelVersion getSaltModelVersion() const;

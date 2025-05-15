@@ -115,7 +115,7 @@ namespace InDetGNNHardScatterSelection {
     std::tuple<
       std::vector<HSGNNInputConfig>,
       std::vector<ConstituentsInputConfig>>
-    createGetterConfig( lwt::GraphConfig& config)
+    createGetterConfig( FlavorTagInference::SaltModelGraphConfig::GraphConfig& config)
     {
 
       // build the standard inputs
