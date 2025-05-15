@@ -73,9 +73,14 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   ATH_MSG_INFO("Monitoring Dir :" << m_monitoring->dir());
 
   // Setup layer configuration if not already set from layerMap
-  if (m_binnedhits->getNLayers()==0)
-    m_binnedhits->setNLayers(m_FPGATrackSimMapping->PlaneMap_1st(getSubRegion())->getNLogiLayers());
-
+  if (m_binnedhits->getNLayers()==0){
+    auto nLogicalLayers = m_FPGATrackSimMapping->PlaneMap_1st(getSubRegion())->getNLogiLayers();
+    if (nLogicalLayers == 0){
+      ATH_MSG_ERROR("Number of logical layers is zero in FPGATrackSimGenScanTool::initialize");
+      return StatusCode::FAILURE;
+    }
+    m_binnedhits->setNLayers(nLogicalLayers);
+  }
   // This is the layers they get paired with previous layers
   for (unsigned lyr = 0; lyr < m_binnedhits->getNLayers(); ++lyr) m_pairingLayers.push_back(lyr);
   if (m_reversePairDir) {

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimGenScanMonitoring_H
 #define FPGATrackSimGenScanMonitoring_H
@@ -273,7 +273,7 @@ class TH2D;
     //////////////////////////////////////////////////////////////////////
     // make and register histogram or vector of histograms in one line...
     template <typename HistType, typename... HistDef>
-    StatusCode makeAndRegHist(HistType *&ptr, HistDef... histargs)
+    StatusCode makeAndRegHist(HistType *&ptr, const HistDef & ... histargs)
     {   
         ptr = new HistType(histargs...);
         ATH_CHECK(m_tHistSvc->regHist(m_dir + ptr->GetName(), ptr));
@@ -282,7 +282,7 @@ class TH2D;
 
 
     template <typename HistType, typename... HistDef>
-    StatusCode makeAndRegHistVector(std::vector<HistType*>& vec, unsigned len, const std::vector<std::string>* namevec, const char* namebase, HistDef... histargs)
+    StatusCode makeAndRegHistVector(std::vector<HistType*>& vec, unsigned len, const std::vector<std::string>* namevec, const char* namebase,  const HistDef & ... histargs)
     {
         if (vec.size()==0){
             for (unsigned i = 0; i < len; i++) {
