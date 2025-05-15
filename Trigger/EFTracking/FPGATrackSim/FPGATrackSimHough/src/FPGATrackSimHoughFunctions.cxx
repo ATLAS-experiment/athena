@@ -12,7 +12,7 @@ using namespace asg::msgUserCode;
 // EPSILON for hit position float comparisons
 constexpr float EPSILON = 1e-5;
 
-StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> monTool, bool checkOLRForDuplicates)
+StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> & monTool, bool checkOLRForDuplicates)
 {
   ANA_MSG_DEBUG("Beginning runOverlapRemoval()");
   ANA_MSG_DEBUG("Tracks in event: " << tracks.size());
