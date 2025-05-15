@@ -374,12 +374,6 @@ public:
   /** Get the color code */
   unsigned int colorCode() const;
 
-  /** force a navigation check */
-  void forceNavigationCheck();
-
-  /** Boolean, if true navigation needs to be redone when hitting this volume */
-  bool redoNavigation() const;
-
   /** Return the MotherVolume - if it exists */
   const TrackingVolume* getMotherVolume() const;
 
@@ -458,8 +452,6 @@ private:
   std::unique_ptr<LayerAttemptsCalculator> m_layerAttemptsCalculator{nullptr};
  //!< defines how the Extrapolator propagates through this
   GeometryType m_geometryType{Trk::NumberOfGeometryTypes};
-  //!< Navigation boolean. If true navigation needs to be  redone when entering this volume
-  bool m_redoNavigation{false} ;
   //!< The Signature done by the GeometryBuilder
   GeometrySignature m_geometrySignature{Trk::Unsigned};
   std::string m_name {"undefined"};       //!< Volume name for debug reasons

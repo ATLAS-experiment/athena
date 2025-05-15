@@ -226,7 +226,6 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
   , Material(trVol)
   , m_motherVolume(trVol.m_motherVolume)
   , m_boundarySurfaces{}
-  , m_redoNavigation(trVol.m_redoNavigation)
   , m_name(trVol.m_name)
   , m_colorCode(trVol.m_colorCode)
 {

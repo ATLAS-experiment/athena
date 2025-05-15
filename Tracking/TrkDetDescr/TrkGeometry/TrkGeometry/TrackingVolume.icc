@@ -291,18 +291,6 @@ TrackingVolume::colorCode() const
   return m_colorCode;
 }
 
-inline void
-TrackingVolume::forceNavigationCheck()
-{
-  m_redoNavigation = true;
-}
-
-inline bool
-TrackingVolume::redoNavigation() const
-{
-  return m_redoNavigation;
-}
-
 inline const TrackingVolume*
 TrackingVolume::getMotherVolume() const
 {
