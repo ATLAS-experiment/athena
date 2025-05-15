@@ -117,8 +117,7 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
                                             DoubletDR_Max            = 150.0,
                                             LRT_Mode                 = isLRT,
                                             doDisappearingTrk        = False,
-                                            dodEdxTrk                = False,
-                                            ConnectionFileName       = "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
+                                            dodEdxTrk                = False)
 
     acc.addEventAlgo( ftf, primary=True )
     
