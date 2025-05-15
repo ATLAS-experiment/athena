@@ -18,3 +18,6 @@ DECLARE_COMPONENT( SCT_RodEncoder )
 
 #include "../SCTEventFlagWriter.h"
 DECLARE_COMPONENT( SCTEventFlagWriter )
+
+#include "../SCTRawContByteStreamToolProviderTool.h"
+DECLARE_COMPONENT( SCTRawContByteStreamToolProviderTool )

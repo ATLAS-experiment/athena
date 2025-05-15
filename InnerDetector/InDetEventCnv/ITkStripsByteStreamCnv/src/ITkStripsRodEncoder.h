@@ -8,8 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ITkStripsByteStreamCnv/IITkStripsRodEncoder.h"
 
-#include "InDetRawData/SCT_RDO_Container.h"
-#include "SCT_Cabling/ISCT_CablingTool.h"
+#include "ITkStripCabling/IITkStripCablingTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include <set>
@@ -154,9 +153,9 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   uint16_t getTrailer(const int& errorWord) const;
   
   /** Providing mappings of online and offline identifiers and also serial numbers. */
-  ToolHandle<ISCT_CablingTool> m_cabling{this, 
-                                         "SCT_CablingTool", 
-                                         "SCT_CablingTool", 
+  ToolHandle<IITkStripCablingTool> m_cabling{this, 
+                                         "ITkStripCablingTool", 
+                                         "ITkStripCablingTool", 
                                          "Tool to retrieve ITkStrips Cabling"};
 
   /** Identifier helper class for the ITkStrips subdetector that creates compact Identifier objects and 
