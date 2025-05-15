@@ -161,7 +161,7 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
         const Trk::LayerArray* layerArray = tvol.confinedLayers();
         if (layerArray) {
            // display output
-           Trk::BinnedArraySpan<Trk::Layer const * const> layers = layerArray->arrayObjects();
+           std::span<Trk::Layer const * const> layers = layerArray->arrayObjects();
            auto layIter  = layers.begin();
            auto layIterE = layers.end();
            for ( ; layIter != layIterE; ++layIter){

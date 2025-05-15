@@ -102,7 +102,7 @@ inline void IApproachDescriptor::registerLayer(const Layer& lay) {
     m_approachSurfaceArraySurface->setOwner(Trk::TGOwn);
   }
   if (m_approachSurfaceArray) {
-   BinnedArraySpan<ApproachSurfaces const * const> aSurfaceObjects =
+   std::span<ApproachSurfaces const * const> aSurfaceObjects =
         m_approachSurfaceArray->arrayObjects();
     for (auto& aSurfaces : aSurfaceObjects) {
       registerLayerToSurfaces(lay, *aSurfaces);

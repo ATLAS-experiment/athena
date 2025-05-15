@@ -91,15 +91,15 @@ public:
   }
 
   /** Return all objects of the Array non-const T*/
-  virtual BinnedArraySpan<T* const > arrayObjects() override final
+  virtual std::span<T* const > arrayObjects() override final
   {
-    return BinnedArraySpan<T* const >(m_arrayObjects.begin(), m_arrayObjects.end());
+    return std::span<T* const >(m_arrayObjects.begin(), m_arrayObjects.end());
   }
 
   /** Return all objects of the Array const T*/
-  virtual BinnedArraySpan<T const * const> arrayObjects() const override final
+  virtual std::span<T const * const> arrayObjects() const override final
   {
-    return BinnedArraySpan<T const* const>(m_arrayObjects.begin(), m_arrayObjects.end());
+    return std::span<T const* const>(m_arrayObjects.begin(), m_arrayObjects.end());
   }
 
   /** Number of Entries in the Array */
@@ -119,7 +119,7 @@ private:
    //reserve num of Bin Arrays times num of Bins
    m_arrayObjects.reserve(numArrrays * m_binUtility.bins(0));
    for (size_t index = 0; index <numArrrays; ++index) {
-     BinnedArraySpan<T* const> aObjects = m_binnedArrays[index].arrayObjects();
+     std::span<T* const> aObjects = m_binnedArrays[index].arrayObjects();
      for (auto& o : aObjects) {
        m_arrayObjects.push_back(o);
      }

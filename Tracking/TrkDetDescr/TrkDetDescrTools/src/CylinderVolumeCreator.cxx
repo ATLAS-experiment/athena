@@ -639,7 +639,7 @@ StatusCode Trk::CylinderVolumeCreator::interGlueTrackingVolume(Trk::TrackingVolu
     Trk::GlueVolumesDescriptor& glueDescr  = tVolume.glueVolumesDescriptor();
 
     // so far we know that we can do that (private method)
-    BinnedArraySpan<Trk::TrackingVolume * const> volumes = tVolume.confinedVolumes()->arrayObjects();
+    std::span<Trk::TrackingVolume * const> volumes = tVolume.confinedVolumes()->arrayObjects();
 
     // the needed iterators
     auto tVolIter = volumes.begin();

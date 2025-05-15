@@ -2225,7 +2225,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
                                                     std::make_shared<Trk::RectangleBounds>(*bounds), mat, thickness, nullptr, 1);
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
+            std::span<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (auto* vol : vols) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(*vol, sf);
@@ -2257,7 +2257,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
 
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
+            std::span<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (auto* vol : vols) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(*vol, sf);
@@ -2289,7 +2289,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
         layRepr = std::make_unique<Trk::PlaneLayer>(trVol.transform(), bounds, mat, thickness, nullptr, 1);
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
+            std::span<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (auto* vol : vols) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(*vol, sf);
@@ -2356,7 +2356,7 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     // sf is surface of the new layer used to calculate the average 'thickness'
     // of components layers
     if (vol.confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer const* const> lays = vol.confinedLayers()->arrayObjects();
+        std::span<Trk::Layer const* const> lays = vol.confinedLayers()->arrayObjects();
         for (const auto* lay : lays) {
             const Trk::MaterialProperties* mLay =lay->layerMaterialProperties()->fullMaterial(lay->surfaceRepresentation().center());
             // protect nan
@@ -2388,10 +2388,10 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     }
     // subvolumes
     if (vol.confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume const* const> subVols = vol.confinedVolumes()->arrayObjects();
+        std::span<Trk::TrackingVolume const* const> subVols = vol.confinedVolumes()->arrayObjects();
         for (const auto* subVol : subVols) {
             if (subVol->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer const* const> lays = subVol->confinedLayers()->arrayObjects();
+                std::span<Trk::Layer const* const> lays = subVol->confinedLayers()->arrayObjects();
                 for (const auto* lay : lays) {
                     const Trk::MaterialProperties* mLay = lay->layerMaterialProperties()->fullMaterial(
                                                                             lay->surfaceRepresentation().center());

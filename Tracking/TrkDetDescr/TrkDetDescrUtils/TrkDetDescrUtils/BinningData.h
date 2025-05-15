@@ -43,7 +43,7 @@ enum LayerOrder
      @author Andreas.Salzburger @ cern.ch, Sharka.Todorova @ cern.ch
 */
 
-class BinningData
+class BinningData final
 {
 public:
   /** holding all the data for binning calculatuion */
