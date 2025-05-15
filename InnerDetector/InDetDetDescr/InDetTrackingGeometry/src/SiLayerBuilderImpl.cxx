@@ -260,7 +260,7 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
     std::map< Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
     std::map< Trk::Surface*,Amg::Vector3D >::iterator usmIter = uniqueSurfaceMap.end();
     // check the registered surfaces in the binned array
-    Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
+    std::span<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
     size_t dsumCheckSurfaces = 0;
     double lastPhi = 0.;
     for (const auto & asurfIter : arraySurfaces){
@@ -289,7 +289,7 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
     std::vector<Trk::BinUtility> binUtils = std::vector<Trk::BinUtility>();
     // prepare the right overlap descriptor
     auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(currentBinnedArray.get(), binUtils, true);
-    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
+    std::span<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
     // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
     // activeLayerTransform deleted in 'Surface' baseclass
     Trk::DiscLayer* activeLayer = new Trk::DiscLayer(
@@ -705,7 +705,7 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
         std::map< const Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
         std::map< const Trk::Surface*,Amg::Vector3D >::iterator usmIter = uniqueSurfaceMap.end();
         // check the registered surfaces in the binned array
-        Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
+        std::span<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
         size_t dsumCheckSurfaces = 0;
         double lastPhi = 0.;
         for (const auto & asurfIter : arraySurfaces){
@@ -751,7 +751,7 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
         }
         // register the layer to the surfaces --- if necessary to the other sie
         // as well
-        Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
+        std::span<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
         // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
         // activeLayerTransform deleted in 'Surface' baseclass
         Trk::DiscLayer* activeLayer =
@@ -1087,7 +1087,7 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
           std::make_unique<Trk::BinnedArray2D<Trk::Surface>>(
               layerSurfaces[layerCounter], currentBinUtility);
       // unit test for sub surface ordering
-      Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
+      std::span<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
 
       if (m_runGeometryValidation){
          // checking for :
@@ -1152,7 +1152,7 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
         olDescriptor = std::make_unique<InDet::SCT_OverlapDescriptor>(m_addMoreSurfaces);
       }
 
-      Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
+      std::span<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
       // construct the layer (finally)
       activeLayer = new Trk::CylinderLayer(
           std::make_shared<Trk::CylinderBounds>(layerRadius[layerCounter],
@@ -1283,7 +1283,7 @@ InDet::SiLayerBuilderImpl::endcapLayerMaterial(double rMin, double rMax) const
 }
 
 void InDet::SiLayerBuilderImpl::registerSurfacesToLayer(
-    Trk::BinnedArraySpan<Trk::Surface* const>& layerSurfaces,
+    std::span<Trk::Surface* const>& layerSurfaces,
     Trk::Layer& lay) const {
   if (!m_setLayerAssociation){
       return;

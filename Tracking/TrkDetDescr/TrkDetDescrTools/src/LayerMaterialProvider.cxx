@@ -55,7 +55,7 @@ Trk::LayerMaterialProvider::process(Trk::TrackingGeometry& tgeo) const
 
   ATH_MSG_VERBOSE("Start processing the TrackingGeometry recursively");
   // retrieve the highest tracking volume
-  Trk::TrackingVolume* worldVolume = tgeo.highestTrackingVolume();  
+  Trk::TrackingVolume* worldVolume = tgeo.highestTrackingVolume();
   // check for the world volume
   if (worldVolume){
       // TrackingVolume : confined layers
@@ -70,7 +70,7 @@ Trk::LayerMaterialProvider::process(Trk::TrackingGeometry& tgeo) const
           for (const auto& bLayerIter : tgeo.boundaryLayers() ){
               Trk::Layer* lay = bLayerIter.first;
               int layCount = bLayerIter.second;
-              int layIndex = lay->layerIndex().value();  
+              int layIndex = lay->layerIndex().value();
               // only move on if layer index is different from 0
               if (layIndex){
                   StatusCode sc( process(*lay, *layerMaterialMap, 0) );
@@ -81,7 +81,7 @@ Trk::LayerMaterialProvider::process(Trk::TrackingGeometry& tgeo) const
                   //    ATH_MSG_WARNING("Failed to call process(const Layer&) on layers - but recoverable.");
                   else {
                       ATH_MSG_FATAL("Failed to call process(const Layer&) on layer. Aborting.");
-                      return StatusCode::FAILURE;            
+                      return StatusCode::FAILURE;
                   }
               }
            } // loop over layers
@@ -118,23 +118,23 @@ Trk::LayerMaterialProvider::process(Trk::TrackingVolume& tvol,
 {
   std::stringstream displayBuffer;
   for (size_t il = 0; il < level; ++il) displayBuffer << " ";
-  // formatted screen output     
+  // formatted screen output
   ATH_MSG_VERBOSE(displayBuffer.str() << "TrackingVolume '" << tvol.volumeName() << "'");
-  
+
   // @TODO add boundary surfaces
-   
-  // Process the contained layers 
+
+  // Process the contained layers
   Trk::LayerArray* layerArray = tvol.confinedLayers();
   if (layerArray) {
       // display output
-      Trk::BinnedArraySpan<Trk::Layer * const> layers = layerArray->arrayObjects(); 
-      ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." ); 
+      std::span<Trk::Layer * const> layers = layerArray->arrayObjects();
+      ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." );
       for ( const auto & layIter : layers ){
           if (!layIter)
               ATH_MSG_WARNING("Zero-pointer found in LayerArray - indicates problem !");
           else {
             // get the layer index and only process if it's an indexed layer
-            int layIndex = layIter->layerIndex().value();  
+            int layIndex = layIter->layerIndex().value();
             if (layIndex){
                 StatusCode sc = process(*layIter, layerMaterialMap, level);
                 if (sc.isSuccess())
@@ -143,31 +143,31 @@ Trk::LayerMaterialProvider::process(Trk::TrackingVolume& tvol,
                     ATH_MSG_WARNING("Failed to call process(const Layer&) on layers - but recoverable.");
                 else {
                     ATH_MSG_FATAL("Failed to call process(const Layer&) on layer. Aborting.");
-                    return StatusCode::FAILURE;            
+                    return StatusCode::FAILURE;
                 }
-            } else 
+            } else
                 ATH_MSG_DEBUG(displayBuffer.str() << "---[o] Navigation layer: skipping.");
         }
       }
-   } 
+   }
 
    // Process the contained TrackingVolumes (recursively) if they exist
    Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
    // register the next round
    if (confinedVolumes) {
-       Trk::BinnedArraySpan<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
-       Trk::BinnedArraySpan<Trk::TrackingVolume * const>::iterator volumesIter = volumes.begin();
+       std::span<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
+       std::span<Trk::TrackingVolume * const>::iterator volumesIter = volumes.begin();
        for (; volumesIter != volumes.end(); ++volumesIter){
            if (!(*volumesIter))
               ATH_MSG_WARNING("Zero-pointer found in VolumeArray - indicates problem !");
            if ((*volumesIter) && process(**volumesIter, layerMaterialMap, ++level).isFailure() ){
                ATH_MSG_FATAL("Failed to call process(const TrackingVolume&) on confined volumes. Aborting.");
-               return StatusCode::FAILURE;  
+               return StatusCode::FAILURE;
            }
        }
    }
-   
-   // return 
+
+   // return
    return StatusCode::SUCCESS;
 }
 
@@ -229,7 +229,7 @@ Trk::LayerMaterialProvider::process(Trk::Layer& lay,
   return StatusCode::SUCCESS;
 }
 
-// Processor Action to work on Surfaces 
+// Processor Action to work on Surfaces
 StatusCode Trk::LayerMaterialProvider::process(Trk::Surface&, size_t) const{
     return StatusCode::SUCCESS;
 }

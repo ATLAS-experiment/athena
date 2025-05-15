@@ -119,7 +119,7 @@ const Trk::Surface* Trk::Layer::subSurfaceReference(unsigned int idx) const {
   const Trk::Surface* referenceSurface = nullptr;
   if (m_surfaceArray) {
     // get a reference surface
-    Trk::BinnedArraySpan<Trk::Surface const * const> surfaces =  std::as_const(*m_surfaceArray).arrayObjects();
+    std::span<Trk::Surface const * const> surfaces =  std::as_const(*m_surfaceArray).arrayObjects();
     // get a reference surface
     unsigned int rfSurfaces = surfaces.size();
     if (idx && idx < rfSurfaces) return surfaces[idx];
@@ -193,7 +193,7 @@ Trk::Layer::compactify(size_t& cSurfaces, size_t& tSurfaces)
   }
   // set the subsurface representation, usually already owned by DetElement
   if (m_surfaceArray) {
-    BinnedArraySpan<Trk::Surface * const> surfaces = m_surfaceArray->arrayObjects();
+    std::span<Trk::Surface * const> surfaces = m_surfaceArray->arrayObjects();
     for (Trk::Surface * const sIter : surfaces) {
       if (sIter && (*sIter).owner() == Trk::noOwn) {
         (*sIter).setOwner(Trk::TGOwn);

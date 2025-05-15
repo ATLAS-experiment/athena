@@ -1464,11 +1464,11 @@ void Calo::CaloTrackingGeometryBuilderImpl::registerInLayerIndexCaloSampleMap(
   if (!confinedLayers)
     return;
 
-  Trk::BinnedArraySpan<Trk::Layer const* const> layerObjects =
+  std::span<Trk::Layer const* const> layerObjects =
       confinedLayers->arrayObjects();
-  Trk::BinnedArraySpan<Trk::Layer const* const>::iterator layerObjIter =
+  std::span<Trk::Layer const* const>::iterator layerObjIter =
       layerObjects.begin();
-  Trk::BinnedArraySpan<Trk::Layer const* const>::iterator layerObjEnd =
+  std::span<Trk::Layer const* const>::iterator layerObjEnd =
       layerObjects.end();
 
   // now pick out the material layers (and skip the navigation ones)

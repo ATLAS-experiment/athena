@@ -145,17 +145,17 @@ public:
   }
 
   /** Return all objects of the Array non-const T*/
-  BinnedArraySpan<T* const> arrayObjects()
+  std::span<T* const> arrayObjects()
   {
     createArrayCache();
-    return BinnedArraySpan<T* const>(&*(m_arrayObjects->begin()), &*(m_arrayObjects->end()));
+    return std::span<T* const>(m_arrayObjects->begin(),m_arrayObjects->end());
   }
 
   /** Return all objects of the Array const T*/
-  BinnedArraySpan<T const * const> arrayObjects() const
+  std::span<T const * const> arrayObjects() const
   {
     createArrayCache();
-    return BinnedArraySpan<T const * const>(&*(m_arrayObjects->begin()), &*(m_arrayObjects->end()));
+    return std::span<T const * const>(m_arrayObjects->begin(), m_arrayObjects->end());
   }
 
   /** Number of Entries in the Array */

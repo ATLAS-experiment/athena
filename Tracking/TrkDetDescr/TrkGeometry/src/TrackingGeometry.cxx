@@ -96,7 +96,7 @@ Trk::TrackingGeometry::registerTrackingVolumes(Trk::TrackingVolume& tvol,
   m_trackingVolumes[tvol.volumeName()] = (&tvol);
   Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = tvol.confinedVolumes();
   if (confinedVolumes) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume* const> volumes = confinedVolumes->arrayObjects();
+    std::span<Trk::TrackingVolume* const> volumes = confinedVolumes->arrayObjects();
     for (const auto& volumesIter : volumes){
       if (volumesIter){
         registerTrackingVolumes(*volumesIter, &tvol, sublvl);
@@ -195,7 +195,7 @@ Trk::TrackingGeometry::printVolumeInformation(MsgStream& msg,
 
   const Trk::BinnedArray<Trk::Layer>* confinedLayers = tvol.confinedLayers();
   if (confinedLayers) {
-    Trk::BinnedArraySpan<Trk::Layer const* const> layers =
+    std::span<Trk::Layer const* const> layers =
       confinedLayers->arrayObjects();
     for (int indent = 0; indent < sublevel; ++indent)
       msg << "  ";
@@ -205,7 +205,7 @@ Trk::TrackingGeometry::printVolumeInformation(MsgStream& msg,
   const Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes =
     tvol.confinedVolumes();
   if (confinedVolumes) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume const* const> volumes =
+    std::span<Trk::TrackingVolume const* const> volumes =
       confinedVolumes->arrayObjects();
 
     for (int indent = 0; indent < sublevel; ++indent)

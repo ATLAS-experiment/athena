@@ -85,7 +85,7 @@ class ATLAS_NOT_THREAD_SAFE  HGTD_LayerBuilderCond : public extends<AthAlgTool, 
     const Trk::BinnedLayerMaterial discLayerMaterial(double rMin, double rMax) const;
 
     //!< layer association
-    void registerSurfacesToLayer( Trk::BinnedArraySpan<Trk::Surface * const>& surfaces,const Trk::Layer& layer) const;
+    void registerSurfacesToLayer( std::span<Trk::Surface * const>& surfaces,const Trk::Layer& layer) const;
 
     static void evaluateBestBinning(std::vector<Trk::SurfaceOrderPosition>& surfaces,
                              std::vector<float>& rBins,

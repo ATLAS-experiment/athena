@@ -270,7 +270,7 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
   // confined layers
   const Trk::BinnedArray<Trk::Layer>* confinedLayers = trVol.confinedLayers();
   if (confinedLayers) {
-    Trk::BinnedArraySpan<Trk::Layer const* const> layers = confinedLayers->arrayObjects();
+    std::span<Trk::Layer const* const> layers = confinedLayers->arrayObjects();
     std::vector<std::shared_ptr<Trk::Layer>> layerOrder;
     layerOrder.reserve(layers.size());
     for (const auto *layer : layers) {
@@ -331,7 +331,7 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
     trVol.confinedVolumes();
   if (confinedVolumes) {
     // retrieve array objects and apply the transform
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const > volumes =
+    std::span<Trk::TrackingVolume const * const > volumes =
       confinedVolumes->arrayObjects();
     std::vector<std::shared_ptr<Trk::TrackingVolume>> volOrder;
     volOrder.reserve(volumes.size());
@@ -647,7 +647,7 @@ Trk::TrackingVolume::indexContainedStaticLayers(GeometrySignature geoSig,
   // the static layers first
   // ------------------------------------------------------------------
   if (m_confinedLayers) {
-    Trk::BinnedArraySpan<Trk::Layer* const> layers = confinedLayers()->arrayObjects();
+    std::span<Trk::Layer* const> layers = confinedLayers()->arrayObjects();
     for (Trk::Layer* layerptr : layers) {
       // only index the material layers & only those that have not yet been
       // singed
@@ -678,7 +678,7 @@ Trk::TrackingVolume::indexContainedStaticLayers(GeometrySignature geoSig,
   // step down the hierarchy to the contained volumes and index those
   // ------------------------
   if (confinedVolumes()) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume* const > volumes = confinedVolumes()->arrayObjects();
+    std::span<Trk::TrackingVolume* const > volumes = confinedVolumes()->arrayObjects();
     for (const auto& volumesIter : volumes) {
       if (volumesIter)
         volumesIter->indexContainedStaticLayers(geoSig, offset);
@@ -694,14 +694,14 @@ Trk::TrackingVolume::indexContainedMaterialLayers(GeometrySignature geoSig,
   // the static layers first and check if they have surfaces with material
   // layers that need index
   if (m_confinedLayers) {
-    Trk::BinnedArraySpan<Trk::Layer * const> layers = confinedLayers()->arrayObjects();
+    std::span<Trk::Layer * const> layers = confinedLayers()->arrayObjects();
     for (Trk::Layer* layerIter : layers) {
       // only index the material layers & only those that have not yet been
       // singed
       if (layerIter) {
         Trk::SurfaceArray* surfArray = layerIter->surfaceArray();
         if (surfArray) {
-          Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = surfArray->arrayObjects();
+          std::span<Trk::Surface * const> layerSurfaces = surfArray->arrayObjects();
           // loop over the surfaces - there can be 0 entries
           for (Trk::Surface* const laySurf : layerSurfaces) {
             Trk::MaterialLayer* materialLayer = laySurf ? laySurf->materialLayer() : nullptr;
@@ -725,7 +725,7 @@ Trk::TrackingVolume::indexContainedMaterialLayers(GeometrySignature geoSig,
   // step down the hierarchy to the contained volumes and index those
   // ------------------------
   if (confinedVolumes()) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume * const> volumes = confinedVolumes()->arrayObjects();
+    std::span<Trk::TrackingVolume * const> volumes = confinedVolumes()->arrayObjects();
     for (Trk::TrackingVolume* volumesIter : volumes) {
       if (volumesIter)
         volumesIter->indexContainedMaterialLayers(geoSig, offset);
@@ -776,7 +776,7 @@ Trk::TrackingVolume::sign(Trk::GeometrySignature geosign,
   // confined volumes
   Trk::BinnedArray<Trk::TrackingVolume>* confVolumes = confinedVolumes();
   if (confVolumes) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume* const> volumes =
+    std::span<Trk::TrackingVolume* const> volumes =
       confVolumes->arrayObjects();
     for (const auto& volumesIter : volumes){
       if (volumesIter){
@@ -968,10 +968,10 @@ Trk::TrackingVolume::createLayerAttemptsCalculator()
 void Trk::TrackingVolume::interlinkLayers()
 {
   if (m_confinedLayers) {
-    BinnedArraySpan<Trk::Layer* const> layers = m_confinedLayers->arrayObjects();
+    std::span<Trk::Layer* const> layers = m_confinedLayers->arrayObjects();
     // forward loop
     const Trk::Layer* lastLayer = nullptr;
-    BinnedArraySpan<Trk::Layer* const>::iterator layerIter = layers.begin();
+    std::span<Trk::Layer* const>::iterator layerIter = layers.begin();
     for (; layerIter != layers.end(); ++layerIter) {
       if (*layerIter) {
         // register the layers
@@ -1134,7 +1134,7 @@ Trk::TrackingVolume::compactify(size_t& cSurfaces, size_t& tSurfaces)
   // confined 'ordered' layers
   Trk::BinnedArray<Trk::Layer>* confLayers = confinedLayers();
   if (confLayers) {
-    Trk::BinnedArraySpan<Trk::Layer* const> layers = confLayers->arrayObjects();
+    std::span<Trk::Layer* const> layers = confLayers->arrayObjects();
     for (const auto& clayIter : layers) {
       if (&(*clayIter) != nullptr){
         clayIter->compactify(cSurfaces, tSurfaces);
@@ -1160,7 +1160,7 @@ Trk::TrackingVolume::compactify(size_t& cSurfaces, size_t& tSurfaces)
   // confined volumes
   Trk::BinnedArray<Trk::TrackingVolume>* confVolumes = confinedVolumes();
   if (confVolumes) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume* const> volumes =
+    std::span<Trk::TrackingVolume* const> volumes =
       confVolumes->arrayObjects();
     for (const auto& cVolumesIter : volumes) {
       cVolumesIter->compactify(cSurfaces, tSurfaces);

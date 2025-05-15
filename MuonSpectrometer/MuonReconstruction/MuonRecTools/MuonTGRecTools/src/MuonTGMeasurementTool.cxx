@@ -1146,8 +1146,8 @@ const Trk::Layer* Muon::MuonTGMeasurementTool::associatedLayer(Identifier id, co
     if (!vol) return lay;
 
     if (vol->confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume const * const > subVols = vol->confinedVolumes()->arrayObjects();
-        Trk::BinnedArraySpan<Trk::TrackingVolume const * const >::iterator iter = subVols.begin();
+        std::span<Trk::TrackingVolume const * const > subVols = vol->confinedVolumes()->arrayObjects();
+        std::span<Trk::TrackingVolume const * const >::iterator iter = subVols.begin();
         while (!lay && iter != subVols.end()) {
             lay = associatedLayer(id, *iter);
             if (lay) break;
@@ -1157,8 +1157,8 @@ const Trk::Layer* Muon::MuonTGMeasurementTool::associatedLayer(Identifier id, co
     }
 
     if (vol->confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer const * const > ordLay = vol->confinedLayers()->arrayObjects();
-        Trk::BinnedArraySpan<Trk::Layer const * const >::iterator iter = ordLay.begin();
+        std::span<Trk::Layer const * const > ordLay = vol->confinedLayers()->arrayObjects();
+        std::span<Trk::Layer const * const >::iterator iter = ordLay.begin();
         while (!lay && iter != ordLay.end()) {
             lay = match(id, *iter);
             if (lay) break;
