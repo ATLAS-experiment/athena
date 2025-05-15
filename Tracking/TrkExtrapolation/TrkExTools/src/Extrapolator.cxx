@@ -2374,20 +2374,6 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
     if (updateLastValid) {
       cache.m_lastValidParameters = nextParameters;
     }
-    // re-initialize (will only overwrite destVolume)
-    if (nextVolume->redoNavigation()) {
-      dir = initializeNavigation(ctx,
-                                 cache,
-                                 *currentPropagator,
-                                 nextParameters.index(),
-                                 sf,
-                                 dir,
-                                 particle,
-                                 refParameters,
-                                 nextLayer,
-                                 nextVolume,
-                                 destVolume);
-    }
     // avoid the oszillation
     previousVolume = lastVolume;
     // for the next step to termine if infinite loop occurs
