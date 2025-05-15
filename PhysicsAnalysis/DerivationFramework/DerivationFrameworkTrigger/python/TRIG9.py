@@ -101,8 +101,10 @@ def TRIG9KernelCfg(flags, name='TRIG9Kernel', **kwargs):
     # Pieces of trigger names to keep
     trig_keys = ['mediumRNN',]
     # Add specific triggers
-    additional_triggers = [
+    additional_triggers = [    
         "HLT_mu24_ivarmedium_L1MU14FCH",
+        "HLT_mu26_ivarmedium_L1MU14FCH",
+        "HLT_e26_lhtight_ivarloose_L1EM22VHI",
         "HLT_e26_lhtight_ivarloose_L1eEM26M",
     ]
     trig_keys += additional_triggers
