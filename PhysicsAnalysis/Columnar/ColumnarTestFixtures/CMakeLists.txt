@@ -19,4 +19,4 @@ ColumnarTestFixtures/*.h Root/*.cxx
   PUBLIC_HEADERS ColumnarTestFixtures
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
   LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib PATInterfaces AsgTestingLib
-  PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib)
+  PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib xAODCaloEvent)

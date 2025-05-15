@@ -242,6 +242,8 @@ namespace columnar
   template<typename CT,typename CM=ColumnarModeDefault> using PhotonDecorator = AccessorTemplate<ContainerId::photon,CT,ColumnAccessMode::output,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using EgammaAccessor  = AccessorTemplate<ContainerId::egamma,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using EgammaDecorator = AccessorTemplate<ContainerId::egamma,CT,ColumnAccessMode::output,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaAccessor  = AccessorTemplate<ContainerId::mutableEgamma,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaDecorator = AccessorTemplate<ContainerId::mutableEgamma,CT,ColumnAccessMode::output,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using ClusterAccessor  = AccessorTemplate<ContainerId::cluster,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using ClusterDecorator = AccessorTemplate<ContainerId::cluster,CT,ColumnAccessMode::output,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using EventInfoAccessor  = AccessorTemplate<ContainerId::eventInfo,CT,ColumnAccessMode::input,CM>;

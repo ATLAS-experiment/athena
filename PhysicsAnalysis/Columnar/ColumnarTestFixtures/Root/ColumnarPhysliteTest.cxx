@@ -19,6 +19,8 @@
 #include <ColumnarToolWrapper/ColumnarToolWrapper.h>
 #include <PATInterfaces/ISystematicsTool.h>
 
+#include <xAODCaloEvent/CaloClusterContainer.h>
+
 #ifdef XAOD_STANDALONE
 #include <ComponentFactoryPreloader/ComponentFactoryPreloader.h>
 #else
@@ -454,6 +456,73 @@ namespace columnar
           tool.setColumn (offsetName, offsets.size(), offsets.data());
       } 
     };
+
+    template<typename T>
+    struct ColumnDataVectorVectorLink final : public PhysliteTestHelpers::IColumnData
+    {
+      std::string columnName;
+      std::string branchName;
+      std::string offsetName;
+      std::vector<ColumnarOffsetType> offsets;
+      std::vector<ColumnarOffsetType> columnData;
+      std::vector<std::vector<ElementLink<T>>> *branchData = nullptr;
+      TBranch *branch = nullptr;
+      Benchmark benchmark;
+
+      ColumnDataVectorVectorLink (const std::string& val_columnName, const std::string& val_branchName)
+        : columnName (val_columnName), branchName (val_branchName), benchmark (columnName) {}
+
+      virtual bool connect (TTree *tree, std::unordered_map<std::string,const PhysliteTestHelpers::IColumnData*>& /*sizeColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      {
+        auto iter = requestedColumns.find (columnName);
+        if (iter == requestedColumns.end())
+          return false;
+
+        branch = tree->GetBranch (branchName.c_str());
+        if (!branch)
+          throw std::runtime_error ("failed to get branch: " + branchName);
+        branch->SetAddress (&branchData);
+
+        offsetName = iter->second.offsetName;
+
+        requestedColumns.erase (iter);
+
+        iter = requestedColumns.find (offsetName);
+        if (iter == requestedColumns.end())
+        {
+          offsetName.clear();
+          return true;
+        }
+        requestedColumns.erase (iter);
+        return true;
+      }
+
+      virtual std::size_t getSize () const override
+      {
+        return columnData.size();
+      }
+
+      virtual void setData (ColumnarToolWrapperData& tool, Long64_t entry) override
+      {
+        benchmark.startTimer ();
+        branch->GetEntry (entry);
+        benchmark.stopTimer ();
+        columnData.clear();
+        offsets.clear();
+        offsets.push_back (0);
+        for (auto& data : *branchData)
+        {
+          for (auto& element : data)
+          {
+            columnData.push_back (!element.isDefault() ? element.index() : invalidObjectIndex);
+          }
+          offsets.push_back (columnData.size());
+        }
+        tool.setColumn (columnName, columnData.size(), columnData.data());
+        if (!offsetName.empty())
+          tool.setColumn (offsetName, offsets.size(), offsets.data());
+      } 
+    };
   }
 
 
@@ -520,7 +589,7 @@ namespace columnar
     knownColumns.push_back (std::make_shared<ColumnDataVector<float>> ("AnalysisElectrons.phi", "AnalysisElectronsAuxDyn.phi"));
     knownColumns.push_back (std::make_shared<ColumnDataVector<float>> ("AnalysisElectrons.m", "AnalysisElectronsAuxDyn.m"));
     knownColumns.push_back (std::make_shared<ColumnDataVector<uint16_t>> ("AnalysisElectrons.author", "AnalysisElectronsAuxDyn.author"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVector<ColumnarOffsetType>> ("AnalysisElectrons.caloClusterLinks.data", "AnalysisElectronsAuxDyn.caloClusterIndex"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisElectrons.caloClusterLinks.data", "AnalysisElectronsAuxDyn.caloClusterLinks"));
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisElectrons.ptOut", 0));
 

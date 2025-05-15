@@ -203,6 +203,7 @@ namespace columnar
   using OptElectronId = OptObjectId<ContainerId::electron>;
   using OptPhotonId = OptObjectId<ContainerId::photon>;
   using OptEgammaId = OptObjectId<ContainerId::egamma>;
+  using OptMutableEgammaId = OptObjectId<ContainerId::mutableEgamma>;
   using OptClusterId = OptObjectId<ContainerId::cluster>;
   using OptTrackId = OptObjectId<ContainerId::track>;
   using OptTrack0Id = OptObjectId<ContainerId::track0>;

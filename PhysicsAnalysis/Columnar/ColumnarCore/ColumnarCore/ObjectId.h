@@ -9,6 +9,7 @@
 #define COLUMNAR_CORE_OBJECT_ID_H
 
 #include <ColumnarCore/ContainerId.h>
+#include <CxxUtils/checker_macros.h>
 #include <iostream>
 #include <stdexcept>
 
@@ -45,9 +46,13 @@ namespace columnar
     ObjectId& operator = (const ObjectId<O,ColumnarModeXAOD>& that) noexcept = default;
 
     [[nodiscard]] xAODObject& getXAODObject () const noexcept {
-      return *m_object;}
-
-    template<typename Acc,typename... Args>
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *result ATLAS_THREAD_SAFE = m_object;
+      return *result;}
+  
+      template<typename Acc,typename... Args>
       requires std::invocable<Acc,ObjectId<O,ColumnarModeXAOD>,Args...>
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
@@ -171,6 +176,7 @@ namespace columnar
   using ElectronId = ObjectId<ContainerId::electron>;
   using PhotonId = ObjectId<ContainerId::photon>;
   using EgammaId = ObjectId<ContainerId::egamma>;
+  using MutableEgammaId = ObjectId<ContainerId::mutableEgamma>;
   using ClusterId = ObjectId<ContainerId::cluster>;
   using TrackId = ObjectId<ContainerId::track>;
   using VertexId = ObjectId<ContainerId::vertex>;
