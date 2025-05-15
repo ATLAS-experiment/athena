@@ -2,6 +2,7 @@
 # art-description: Test running F610 pipeline on Zmumu
 # art-type: grid
 # art-include: main/Athena
+# art-memory: 8192
 # art-input: mc21_14TeV:mc21_14TeV.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8481_s4203_r14697
 # art-input-nfiles: 11
 # art-output: *.txt

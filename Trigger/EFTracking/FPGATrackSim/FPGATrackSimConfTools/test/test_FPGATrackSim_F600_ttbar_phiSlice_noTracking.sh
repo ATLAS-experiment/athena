@@ -2,6 +2,7 @@
 # art-description: Test running the F600 (InsideOut) pipeline
 # art-type: grid
 # art-include: main/Athena
+# art-memory: 8192
 # art-input-nfiles: 2
 # art-output: *.txt
 # art-output: *.root
