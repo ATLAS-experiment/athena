@@ -14,6 +14,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "src/FPGATrackSimKeyLayerTool.h"
 
+using FPGATrackSimBinUtil::IdxSet;
+using FPGATrackSimBinUtil::StoredHit;
+
 StatusCode FPGATrackSimKeyLayerBinDesc::initialize()
 {
   // Dump the configuration to make sure it propagated through right

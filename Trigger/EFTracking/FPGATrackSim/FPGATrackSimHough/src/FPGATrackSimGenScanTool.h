@@ -70,11 +70,13 @@
 #include <bit>
 
 class FPGATrackSimGenScanMonitoring;
-typedef FPGATrackSimBinnedHits::BinEntry BinEntry;
 
 class FPGATrackSimGenScanTool : public extends<AthAlgTool, IFPGATrackSimRoadFinderTool>
 {
 public:
+    using StoredHit = FPGATrackSimBinUtil::StoredHit;
+    using BinEntry = FPGATrackSimBinnedHits::BinEntry;
+
     /// Constructor
     using base_class::base_class;
     FPGATrackSimGenScanTool(const std::string& algname, const std::string &name, const IInterface *ifc);

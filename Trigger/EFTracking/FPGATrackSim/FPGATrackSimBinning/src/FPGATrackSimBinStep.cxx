@@ -13,6 +13,9 @@
 #include <GaudiKernel/StatusCode.h>
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
 
+using FPGATrackSimBinUtil::ParSet;
+using FPGATrackSimBinUtil::IdxSet;
+
 StatusCode FPGATrackSimBinStep::initialize()
 {
   // Dump the configuration to make sure it propagated through right
@@ -108,7 +111,7 @@ IdxSet FPGATrackSimBinStep::binIdx(const ParSet &pars) const
 
 
 // Convert to previous steps idx
-IdxSet FPGATrackSimBinStep::convertToPrev(const IdxSet &cur) const {
+IdxSet FPGATrackSimBinStep::convertToPrev(const FPGATrackSimBinUtil::IdxSet &cur) const {
   IdxSet retv{};
   if (m_prev) {
     for (unsigned par =0; par < FPGATrackSimTrackPars::NPARS; par++) {

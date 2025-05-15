@@ -36,11 +36,6 @@
 #include <string>
 #include <vector>
 
-// Use IdxSet and ParSet from FPGATrackSimUtil
-using FPGATrackSimBinUtil::IdxSet;
-using FPGATrackSimBinUtil::ParSet;
-using FPGATrackSimBinUtil::StoredHit;
-
 class FPGATrackSimKeyLayerBinDesc : public  extends<AthAlgTool, IFPGATrackSimBinDesc> {
 
 public:
@@ -52,22 +47,22 @@ public:
     virtual const std::string &parNames(unsigned i) const override { return m_parNames[i]; }
 
     // convert back and forth from pT, eta, phi, d0, z0 and internal paramater set
-    virtual const ParSet
+    virtual const FPGATrackSimBinUtil::ParSet
     trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
       return keyparsToParSet(m_keylyrtool.trackParsToKeyPars(pars));
     }
-    virtual const FPGATrackSimTrackPars parSetToTrackPars(const ParSet &parset) const override {
+    virtual const FPGATrackSimTrackPars parSetToTrackPars(const FPGATrackSimBinUtil::ParSet &parset) const override {
       return m_keylyrtool.keyParsToTrackPars(parSetToKeyPars(parset));
     }
 
     // calculate the distance in phi or eta from a track defined by parset to a
     // hit these can be implemented as any variable in the r-phi or r-eta plane
     // (not necessarily eta and phi).
-    virtual double phiResidual(const ParSet &parset, FPGATrackSimHit const *hit) const override {
+    virtual double phiResidual(const FPGATrackSimBinUtil::ParSet &parset, FPGATrackSimHit const *hit) const override {
         return m_keylyrtool.deltaX(parSetToKeyPars(parset), hit);
     }
   
-    virtual double etaResidual(const ParSet &parset, FPGATrackSimHit const *hit) const override {
+    virtual double etaResidual(const FPGATrackSimBinUtil::ParSet &parset, FPGATrackSimHit const *hit) const override {
       return hit->getZ()- m_keylyrtool.zExpected(parSetToKeyPars(parset),hit->getR());
     }
 
@@ -77,8 +72,8 @@ public:
     
     // idx should be with the definition specifed in the step
     // NOTE: the stored hit may be modified!
-    virtual bool hitInBin(const FPGATrackSimBinStep &step, const IdxSet &idx,
-                          StoredHit &storedhit) const override;
+    virtual bool hitInBin(const FPGATrackSimBinStep &step, const FPGATrackSimBinUtil::IdxSet &idx,
+                          FPGATrackSimBinUtil::StoredHit &storedhit) const override;
 
     // Write the relevant LUT tables for firmware    
     virtual void writeLUTs(const FPGATrackSimBinStep &step) const override;
@@ -90,10 +85,10 @@ public:
     Gaudi::Property<bool> m_approxMath{this, "approxMath", {false}, "Use approximate math to emulate possible firmware"};
 
     // convert to/from the KeyLyrPars struct and the ParSet
-    ParSet keyparsToParSet(const FPGATrackSimKeyLayerTool::KeyLyrPars& keypars) const {
-      return ParSet({keypars.z1,keypars.z2,keypars.phi1,keypars.phi2,keypars.xm});
+    FPGATrackSimBinUtil::ParSet keyparsToParSet(const FPGATrackSimKeyLayerTool::KeyLyrPars& keypars) const {
+      return FPGATrackSimBinUtil::ParSet({keypars.z1,keypars.z2,keypars.phi1,keypars.phi2,keypars.xm});
     }
-    FPGATrackSimKeyLayerTool::KeyLyrPars parSetToKeyPars(const ParSet &parset) const {
+    FPGATrackSimKeyLayerTool::KeyLyrPars parSetToKeyPars(const FPGATrackSimBinUtil::ParSet &parset) const {
       return FPGATrackSimKeyLayerTool::KeyLyrPars(parset);
     }
 
