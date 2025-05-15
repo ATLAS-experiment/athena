@@ -23,7 +23,7 @@ namespace { // Anonymous namespace
     return ((b >>shift) & mask64).to_ullong();
   }
   int
-  rodLinkFromOnlineID(const SCT_OnlineId onlineID){
+  rodLinkFromOnlineID(const ITkStripOnlineId onlineID){
     const uint32_t fibre{onlineID.fibre()};
     const int formatter{static_cast<int>((fibre/12) & 0x7)};
     const int linkNum{static_cast<int>((fibre - (formatter*12)) & 0xF)};
@@ -110,7 +110,7 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /
      
     //Populate the bitset for each chip with active strips
     int strip = getStrip(rdo);
-    int chip = static_cast<int>(std::floor((strip + 1) / 128));
+    int chip = static_cast<int>(std::floor(strip / 128));
     int strip_position = strip % 128;
     int strip_logical_channel = 2*strip_position + (eta_mod & 1);
     StripData[chip].set(strip_logical_channel);
@@ -141,7 +141,7 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /
 void
 ITkStripsRodEncoder::encodeData(const std::vector<uint16_t>& clusters, std::vector<uint8_t>& data_encode,
                                 int ptyp, uint8_t l0tag, uint8_t bc_count) const {
-  ///code to be filled here
+
   uint16_t header = getHeaderPhysicsPacket(ptyp, l0tag, bc_count);
 
   data_encode.push_back((header>>8) & 0xff);

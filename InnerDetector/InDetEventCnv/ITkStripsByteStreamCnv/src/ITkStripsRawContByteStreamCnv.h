@@ -13,7 +13,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 class DataObject;
-class IITkStripsRawContByteStreamTool;
+class ISCTRawContByteStreamTool;
 
 /**
  * @class ITkStripsRawContByteStreamCnv
@@ -63,7 +63,7 @@ class ITkStripsRawContByteStreamCnv : public AthConstConverter {
  private: 
 
   /** Tool to do coversion from ITkStrips RDO container to ByteStream */
-  ToolHandle<IITkStripsRawContByteStreamTool> m_rawContByteStreamTool;
+  ToolHandle<ISCTRawContByteStreamTool> m_rawContByteStreamTool;
 
   /** Interface for accessing raw data */
   ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess; 
