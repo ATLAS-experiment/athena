@@ -349,17 +349,19 @@ def ActsClusterizationCfg(flags,
     # pass only if cache is enabled. In the latter case it is useed to collect all
     # the clusters from all views before passing them to the downstream algorithms
 
-    if flags.Tracking.ActiveConfig.isSecondaryPass:
+    from InDetConfig.ITkActsHelpers import isPrimaryPass, isValidationPass
+    if isPrimaryPass(flags) or isValidationPass(flags):
+        # Primary pass
+        # Validation passes count as primary passes
+        kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
+        kwargs.setdefault('runReconstruction', True)
+        kwargs.setdefault('runPreparation', flags.Acts.useCache)
+    else:
         # Secondary passes
         kwargs.setdefault('runCacheCreation', False)
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
         kwargs.setdefault('runPreparation', True)
-    else:
-        # Primary pass
-        kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
-        kwargs.setdefault('runReconstruction', True)
-        kwargs.setdefault('runPreparation', flags.Acts.useCache)
-
+        
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius Tracking uses full scan RoI created in the primary pass

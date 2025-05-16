@@ -3,12 +3,20 @@
 def isPrimaryPass(flags) -> bool:
     return f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass" not in flags.Tracking
 
+def isFastPrimaryPass(flags) -> bool:
+    return flags.Tracking.doITkFastTracking and isPrimaryPass(flags)
+
+def isValidationPass(flags) -> bool:
+    return "Validate" in flags.Tracking.ActiveConfig.extension
+
+def isProductionPass(flags) -> bool:
+    return not isValidationPass(flags)
+
 def primaryPassUsesActs(flags) -> bool:
     from TrkConfig.TrkConfigFlags import ITkPrimaryPassConfig
     return flags.Tracking.ITkPrimaryPassConfig in [ITkPrimaryPassConfig.Acts, \
                                                    ITkPrimaryPassConfig.ActsLegacy, \
                                                    ITkPrimaryPassConfig.ActsHeavyIon]
-
 
 def primaryPassExtension(flags) -> str:
     # we rely on the fact that flags.Tracking.ITkPrimaryPassConfig.value is

@@ -1,3 +1,4 @@
+
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -36,7 +37,8 @@ def ActsTrackStatePrinterToolCfg(flags,
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("InputSpacePoints", isdet(flags, noStrip=flags.Tracking.doITkFastTracking,
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+    kwargs.setdefault("InputSpacePoints", isdet(flags, noStrip=isFastPrimaryPass(flags),
                                                 pixel=['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'],
                                                 strip=['ITkStripSpacePoints_Cached', 'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']))
 
@@ -107,7 +109,8 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
     # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
-    if flags.Tracking.doITkFastTracking:
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+    if isFastPrimaryPass(flags):
         kwargs.setdefault("chi2CutOff", [100])
         kwargs.setdefault("chi2OutlierCutOff", [100])
     else:
@@ -222,10 +225,11 @@ def ActsTrackFindingCfg(flags,
     pixelSeedLabels = ['PPP']
     stripSeedLabels = ['SSS']
     # Conversion and LRT do not process pixel seeds
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
     if flags.Tracking.ActiveConfig.extension in ['ActsConversion', 'ActsLargeRadius']:
         pixelSeedLabels = None
     # Main pass does not process strip seeds in the fast tracking configuration
-    elif flags.Tracking.doITkFastTracking:
+    elif isFastPrimaryPass(flags):
         stripSeedLabels = None
 
     # Now set the seed and estimated parameters keys accordingly
