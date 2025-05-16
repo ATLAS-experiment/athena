@@ -211,7 +211,7 @@ SGInputLoader::loadObjs(const DataObjIDColl& objs) const {
           ATH_MSG_ERROR("   obj " << obj << " has no provider, and is only Transient - indicative of a missing output declaration" );
           ok =false;
         } else { // just warning for now for potentially undeclared decorations, instead of error, because too many cases to fix
-          ATH_MSG_WARNING("   decoration " << obj << " has no provider, and is only Transient - indicative of a missing output declaration" );
+          ATH_MSG_WARNING("   decoration " << obj << " has no provider, and is only Transient - either a decoration output declaration is missing, or a ReadDecorHandleKey is being used to read a non-decoration" );
         }
       }
     } else {
