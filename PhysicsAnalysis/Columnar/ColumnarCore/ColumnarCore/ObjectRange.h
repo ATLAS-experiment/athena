@@ -45,6 +45,14 @@ namespace columnar
       auto *container ATLAS_THREAD_SAFE = m_container;
       return *container;}
 
+    // a version of `getXAODObject` that only exists when it is `noexcept`
+    [[nodiscard]] xAODContainer& getXAODObjectNoexcept () const noexcept {
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *container ATLAS_THREAD_SAFE = m_container;
+      return *container;}
+
     auto begin () const noexcept {
       // This object should ever be held within the context of a
       // single thread (and generally on the stack), so the associated
@@ -134,6 +142,10 @@ namespace columnar
     [[nodiscard]] xAODContainer& getXAODObject () const noexcept {
       return *m_singlet;}
 
+    // a version of `getXAODObject` that only exists when it is `noexcept`
+    [[nodiscard]] xAODContainer& getXAODObjectNoexcept () const noexcept {
+      return *m_singlet;}
+
     auto begin () const noexcept {
       return ObjectRangeIteratorXAODSinglet<CI> (m_singlet);}
     auto end () const noexcept {
@@ -216,6 +228,10 @@ namespace columnar
     [[nodiscard]] std::size_t endIndex () const noexcept {
       return m_endIndex;}
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     ObjectRange (const xAODContainer& /*val_container*/)
     {
       throw std::logic_error ("can't call xAOD function in columnar mode");
@@ -227,9 +243,12 @@ namespace columnar
     [[nodiscard]] std::size_t size () const noexcept {
       return m_endIndex - m_beginIndex;}
 
-    // Calling this function is not allowed.
-    //[[nodiscard]] xAODContainer& getXAODObject () const {
-    //  throw std::logic_error ("can't call xAOD function in columnar mode");}
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
+    [[nodiscard]] xAODContainer& getXAODObject () const {
+      throw std::logic_error ("can't call xAOD function in columnar mode");}
 
     [[nodiscard]] ObjectId<CI,CM> operator [] (std::size_t index) const noexcept {
       return ObjectId<CI,CM> (m_data, index + m_beginIndex);
