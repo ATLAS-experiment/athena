@@ -776,7 +776,8 @@ void IOVDbSvc::handle( const Incident& inc) {
     Athena::DBLock dblock;
 
     const StoreClearedIncident* sinc = dynamic_cast<const StoreClearedIncident*>(&inc);
-    if( (inc.type()=="StoreCleared" && sinc!=nullptr && sinc->store()==&*m_h_sgSvc)
+    if( (inc.type()=="StoreCleared" && sinc!=nullptr && sinc->store()==&*m_h_sgSvc
+         && m_state>=IOVDbSvc::EVENT_LOOP)
         or inc.type()==IncidentType::EndProcessing )
     {
        m_state=IOVDbSvc::FINALIZE_ALG;

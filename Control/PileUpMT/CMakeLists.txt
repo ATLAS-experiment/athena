@@ -40,4 +40,5 @@ atlas_add_component(
   SGTools
   StoreGateLib
   GaudiKernel
+  BeamSpotConditionsData
   CxxUtils)
