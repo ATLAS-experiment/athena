@@ -149,7 +149,6 @@ def createBasicFPGATrackSimConfigFlags():
 
     # overlap removal
     cf.addFlag('doFastOR', False)
-    cf.addFlag('ORCheckFail', True)
 
     #pass lowest chi2 track
     cf.addFlag('passLowestChi2TrackOnly', False)
