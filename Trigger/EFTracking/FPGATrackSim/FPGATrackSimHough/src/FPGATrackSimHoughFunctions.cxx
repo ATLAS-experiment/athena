@@ -12,7 +12,7 @@ using namespace asg::msgUserCode;
 // EPSILON for hit position float comparisons
 constexpr float EPSILON = 1e-5;
 
-StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> & monTool, bool checkOLRForDuplicates)
+StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> & monTool)
 {
   ANA_MSG_DEBUG("Beginning runOverlapRemoval()");
   ANA_MSG_DEBUG("Tracks in event: " << tracks.size());
@@ -54,7 +54,7 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
       if(i!=j)
       {
         // Apply Chi2 cut and potentially OR cut if so desired
-        if(tracks.at(j).getChi2ndof()>minChi2 || (!tracks.at(j).passedOR() && checkOLRForDuplicates))
+        if(tracks.at(j).getChi2ndof()>minChi2)
         {
           tracks.at(j).setPassedOR(0);
           continue;
@@ -185,7 +185,6 @@ void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrack
 {
   int ntr_belowMinChi2 = 0;
   std::vector<int> track_counter;
-  std::vector<int> track_counter_minChi2;
 
   for(unsigned int i=0; i<RMtracks.size();i++)
   {
@@ -196,7 +195,6 @@ void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrack
     }
     ntr_belowMinChi2++;    
     track_counter.push_back(ntr_belowMinChi2);
-    track_counter_minChi2.push_back(ntr_belowMinChi2);
     flags_OR.push_back(1);
   }
 
@@ -231,7 +229,7 @@ void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrack
       }
       else if(t_nhitlayers==head_nhits)
       {
-        if(t_chi2<head_chi2)
+        if((head_chi2-t_chi2)>0.000001)
           {
             RMtracks.at(head_track).setPassedOR(0);
           }
