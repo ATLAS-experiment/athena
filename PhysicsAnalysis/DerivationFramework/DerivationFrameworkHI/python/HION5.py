@@ -15,7 +15,6 @@ def HION5SkimmingToolCfg(flags):
     ExtraData += ['xAOD::ElectronContainer/Electrons']
     ExtraData += ['xAOD::PhotonContainer/Photons']
     ExtraData += ['xAOD::TrackParticleContainer/InDetTrackParticles']
-    ExtraData += ['xAOD::TrackParticleContainer/InDetTrackPaasdasdrticles']
     
     acc.addSequence( seqAND("HION5Sequence") )
     acc.getSequence("HION5Sequence").ExtraDataForDynamicConsumers = ExtraData
