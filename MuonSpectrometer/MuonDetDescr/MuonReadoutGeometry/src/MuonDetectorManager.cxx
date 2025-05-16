@@ -96,7 +96,7 @@ namespace MuonGM {
             case TechIndex::TGC:
                 reEle = getTgcReadoutElement(id);
                 break;
-            case TechIndex::CSCI:
+            case TechIndex::CSC:
                 reEle = getCscReadoutElement(id);
                 break;
             case TechIndex::MM:

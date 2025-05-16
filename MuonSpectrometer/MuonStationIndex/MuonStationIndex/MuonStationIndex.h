@@ -12,7 +12,7 @@
 namespace Muon {
   namespace MuonStationIndex {
     /** enum to classify the different chamber layers in the muon spectrometer */
-    enum ChIndex: int8_t {
+    enum class ChIndex: int8_t {
       ChUnknown = -1,
       BIS, BIL, BMS, BML, BOS, BOL, BEE,
       EIS, EIL, EMS, EML, EOS, EOL, EES, EEL, CSS, CSL,
@@ -20,7 +20,7 @@ namespace Muon {
     };
 
     /** enum to classify the different station layers in the muon spectrometer */
-    enum StIndex: int8_t {
+    enum class StIndex: int8_t {
       StUnknown = -1,
       BI, BM, BO, BE,
       EI, EM, EO, EE,
@@ -28,14 +28,14 @@ namespace Muon {
     };
 
     /** enum to classify the different phi layers in the muon spectrometer */
-    enum PhiIndex: int8_t {
+    enum class PhiIndex: int8_t {
       PhiUnknown = -1,
       BI1, BI2, BM1, BM2, BO1, BO2, T1, T2, T3, T4, CSC, STGC1, STGC2,
       PhiIndexMax
     };
 
     /** enum to classify the different layers in the muon spectrometer */
-    enum LayerIndex: int8_t {
+    enum class LayerIndex: int8_t {
       LayerUnknown = -1,
       Inner, Middle, Outer, 
       Extended,       /// EE
@@ -44,16 +44,16 @@ namespace Muon {
     };
     
     /** enum to classify the different layers in the muon spectrometer */
-    enum DetectorRegionIndex: int8_t {
+    enum class DetectorRegionIndex: int8_t {
       DetectorRegionUnknown = -1,
       EndcapA, Barrel, EndcapC,
       DetectorRegionIndexMax 
     };    
 
     /** enum to classify the different layers in the muon spectrometer */
-    enum TechnologyIndex: int8_t {
+    enum class TechnologyIndex: int8_t {
       TechnologyUnknown = -1,
-      MDT, CSCI, RPC, TGC, STGC, MM,
+      MDT, CSC, RPC, TGC, STGC, MM,
       TechnologyIndexMax  
     };    
     /*** Convert the strong enum to an integer */

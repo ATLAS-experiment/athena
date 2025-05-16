@@ -167,7 +167,7 @@ namespace Muon {
         std::vector<IdentifierHash> crossed;
 
         if (type == TechnologyIndex::MDT && m_regsel_mdt->lookup(ctx)) m_regsel_mdt->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == TechnologyIndex::CSCI && m_regsel_csc->lookup(ctx)) m_regsel_csc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TechnologyIndex::CSC && m_regsel_csc->lookup(ctx)) m_regsel_csc->lookup(ctx)->HashIDList(roi, crossed);
         if (type == TechnologyIndex::RPC && m_regsel_rpc->lookup(ctx)) m_regsel_rpc->lookup(ctx)->HashIDList(roi, crossed);
         if (type == TechnologyIndex::TGC && m_regsel_tgc->lookup(ctx)) m_regsel_tgc->lookup(ctx)->HashIDList(roi, crossed);
         if (type == TechnologyIndex::STGC && m_regsel_stgc->lookup(ctx)) m_regsel_stgc->lookup(ctx)->HashIDList(roi, crossed);
@@ -213,7 +213,7 @@ namespace Muon {
                     m_idHelperSvc->mmIdHelper().get_id(hash, chId, &otCont);
                     ATH_MSG_VERBOSE("  -- mm hash " << hash << " " << m_idHelperSvc->toStringChamber(chId));
                     break;
-                } case CSCI: {
+                } case CSC: {
                     Identifier chId;
                     IdContext otCont = m_idHelperSvc->cscIdHelper().module_context();
                     m_idHelperSvc->cscIdHelper().get_id(hash, chId, &otCont);
@@ -297,7 +297,7 @@ namespace Muon {
         if (m_idHelperSvc->hasMDT())  addHashes( ctx, TechnologyIndex::MDT, roi, data.mdt, data.mdtTrack);
         if (m_idHelperSvc->hasRPC())  addHashes( ctx, TechnologyIndex::RPC, roi, data.rpc, data.rpcTrack);
         if (m_idHelperSvc->hasTGC())  addHashes( ctx, TechnologyIndex::TGC, roi, data.tgc, data.tgcTrack);
-        if (m_regsel_csc.isEnabled()) addHashes( ctx, TechnologyIndex::CSCI, roi, data.csc, data.cscTrack);
+        if (m_regsel_csc.isEnabled()) addHashes( ctx, TechnologyIndex::CSC, roi, data.csc, data.cscTrack);
         if (m_recoverSTGC) addHashes( ctx, TechnologyIndex::STGC, roi, data.stgc, data.stgcTrack);
         if (m_recoverMM) addHashes( ctx, TechnologyIndex::MM, roi, data.mm, data.mmTrack);
 
