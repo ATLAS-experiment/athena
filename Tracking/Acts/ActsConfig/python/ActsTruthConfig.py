@@ -71,7 +71,8 @@ def ActsTrackToTruthAssociationAlgCfg(flags,
     kwargs.setdefault('ACTSTracksLocation','ActsTracks')
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
-    kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
+    if flags.Detector.EnableHGTD and (flags.Acts.useHGTDClusterInTrackFinding or flags.HGTD.doActs):
+        kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
 
