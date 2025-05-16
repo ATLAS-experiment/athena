@@ -1,6 +1,6 @@
 """Disable everything but track reconstruction
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 def OnlyTrackingPreInclude(flags):
@@ -15,6 +15,7 @@ def OnlyTrackingPreInclude(flags):
     flags.Reco.EnableJet=False
     flags.Reco.EnableTau=False
     flags.Reco.EnablePFlow=False
+    flags.Reco.EnableTrigger=False
     flags.Reco.EnableTracking=True
 
     flags.Detector.EnableCalo=False
