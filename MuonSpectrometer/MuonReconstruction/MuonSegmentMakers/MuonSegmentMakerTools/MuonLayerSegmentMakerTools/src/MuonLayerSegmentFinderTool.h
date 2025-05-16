@@ -31,10 +31,10 @@ namespace Muon {
     class MuonLayerROTs;
     class MdtDriftCircleOnTrack;
     class MuonClusterOnTrack;
-    class MuonLayerSegmentFinderTool : virtual public IMuonLayerSegmentFinderTool, public AthAlgTool {
+    class MuonLayerSegmentFinderTool : public extends<AthAlgTool, IMuonLayerSegmentFinderTool> {
     public:
         /** Default AlgTool functions */
-        MuonLayerSegmentFinderTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~MuonLayerSegmentFinderTool() = default;
         StatusCode initialize() override;
 

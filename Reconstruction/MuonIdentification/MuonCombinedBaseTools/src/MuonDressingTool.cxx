@@ -285,7 +285,7 @@ namespace MuonCombined {
                         case TechnologyIndex::MDT:{
                             incrementPrecSummary(summary.chamberId(), summary.nhits(), summary.nholes());
                             break;
-                        } case TechnologyIndex::CSCI:{
+                        } case TechnologyIndex::CSC:{
                             incrementPrecSummary(summary.chamberId(), summary.netaHits(), summary.etaProjection().nholes);
                             cscEtaHits += summary.etaProjection().nhits;
                             cscUnspoiledEtaHits += summary.etaProjection().ngoodHits;
