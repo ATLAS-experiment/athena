@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaKernel/IAthRNGSvc.h"
+#include <BeamSpotConditionsData/BeamSpotData.h>
 #include "PileUpMT/IMinbiasSvc.h"
 #include "PileUpTools/IBeamIntensity.h"
 #include "PileUpTools/IBeamLuminosity.h"
@@ -137,8 +138,10 @@ class PileUpMTAlg : public AthAlgorithm {
   ServiceHandle<ISkipEventIdxSvc> m_skipEventIdxSvc{
       this, "SkipEvtIdxSvc", "SkipEventIdxSvc",
       "Skipped event index (run / lb num) provider"};
-  SG::WriteHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EventInfoKey", "OverlayEvent",
-                                                   "Overlay EventInfo key"};
+  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{
+      this, "BeamSpotKey", "BeamSpotData", "Beam spot info key"};
+  SG::WriteHandleKey<xAOD::EventInfo> m_evtInfoKey{
+      this, "EventInfoKey", "OverlayEvent", "Overlay EventInfo key"};
   SG::WriteHandleKey<xAOD::EventInfoContainer> m_evtInfoContKey{""};
   // Utilities
   StatusCode get_ei(StoreGateSvc& sg,
