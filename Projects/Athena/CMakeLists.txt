@@ -112,6 +112,12 @@ if( ATLAS_USE_CPPCHECK )
    mark_as_advanced( CPPCHECK_ATLAS )
 
    if( CPPCHECK_FOUND AND CPPCHECK_ATLAS )
+      # TODO: remove this once cppcheck 2.17 is default in main
+      if( CPPCHECK_LCGVERSION VERSION_LESS "2.17" )
+         list( APPEND CMAKE_CPPCHECK_DEFAULT
+            "--library=${CxxUtilsSettings_DIR}/../share/cppcheck_2.16_athena.cfg" )
+      endif()
+
       # Prepend cppcheck command to already defined command line options:
       list( PREPEND CMAKE_CPPCHECK_DEFAULT ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/atlas_build_run.sh
          "${CMAKE_CURRENT_SOURCE_DIR}/../../Control/CxxUtils/scripts/cppcheck_atlas" )
