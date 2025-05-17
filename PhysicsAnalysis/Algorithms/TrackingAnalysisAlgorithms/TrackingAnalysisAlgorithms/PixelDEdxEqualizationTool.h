@@ -1,9 +1,10 @@
-#ifndef PIXELTOTPIDTOOL_PIXELDEDXEQUALIZATIONTOOL_H
-#define PIXELTOTPIDTOOL_PIXELDEDXEQUALIZATIONTOOL_H
+#ifndef TRACKINGANALYSISALGORITHMS_PIXELDEDXEQUALIZATIONTOOL_H
+#define TRACKINGANALYSISALGORITHMS_PIXELDEDXEQUALIZATIONTOOL_H
 
 #include "TrkAnalysisInterfaces/IPixelDEdxEqualizationTool.h"
 
-#include "PixelToTPIDTool/PixelDEdxUtils.h"
+#include "TrackingAnalysisAlgorithms/PixelDEdxUtils.h"
+
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
@@ -11,10 +12,12 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
-#include "PathResolver/PathResolver.h"
+//#include "PathResolver/PathResolver.h" // not available in AnalysisBase?
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackParticleContainer.h"
+//#include "xAODTracking/TrackParticleContainerAux.h"
 #include "xAODTracking/TrackStateValidation.h"
 #include "xAODTracking/TrackStateValidationContainer.h"
 #include "xAODTracking/TrackMeasurementValidation.h"
@@ -53,34 +56,19 @@ namespace CP {
     /// @name Function(s) implementing the IPixelDEdxEqualizationTool interface
     /// @{
 
-    /// AnalysisBase with xAOD EDM
-    virtual float dEdx(const xAOD::TrackParticle& track,
-                       int& nUsedHits,
-                       int& nUsedIBLOverflowHits) const;
+    virtual std::shared_ptr<ROOT::RDF::RNode> getFilteredSFDF(const int runNumber) const override;
+    virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const override;
+    virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const int runNumber) const override;
 
   private:
     
-    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
-
-    /// Equalize the cluster-level dE/dx measuremented before the taking the truncated mean.
-    /// For xAOD EDM, this requires special datasets with pixel clusters.
-    Gaudi::Property<bool> m_equalizeClusterMeasurements
-    { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
-
-    /// Apply tight cluster cleaning requirements (e.g. cluster size/shape cuts).
-    Gaudi::Property<bool> m_tightClusterCleaning
-    { this, "TightClusterCleaning", false, ""};
-
     StatusCode initSFsFromTrees();
 
-    /// Equalize the track-level truncated mean instead of the individual cluster measurements.
-    /// Not as good as pixel-level equalization, but does not special datasets with clusters.
-    /// Nominal AOD does not have pixel clusters.
+    /// Flags
     Gaudi::Property<bool> m_equalizeTrackMeasurements
     { this, "EqualizeTrackMeasurements", false, "Equalize track-level truncated mean dE/dx"};
-
-    Gaudi::Property<std::string> m_msosLink
-    { this, "MSOSLink", "Reco_msosLink"};
+    Gaudi::Property<bool> m_equalizeClusterMeasurements
+    { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
 
     /// PathResolverFindCalibFile need the logical filename in ASG calibration area.
     Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "pixeldEdxEqualizationSFs_v0.root"}; // FIX! TBD
@@ -99,15 +87,6 @@ namespace CP {
     /// Will be updated in execute, so must be mutable
     mutable std::map<unsigned int, std::shared_ptr<ROOT::RDF::RNode>> m_filteredRDFMap;
     mutable std::mutex m_mapMutex;
-
-    /// Decorators for xAOD EDM
-    /// Only one PixelClusters container shared by all track containers, so should not need to modify keys...
-    /// Raw cluster dE/dx
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey
-      {this, "clusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
-    /// Equalized cluster dE/dx:
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey
-      {this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
 
   }; // class PixelDEdxEqualizationTool
 

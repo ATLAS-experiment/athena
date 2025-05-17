@@ -11,7 +11,8 @@
 #ifndef INDETPIXELTOTPIDTOOL_H
 #define INDETPIXELTOTPIDTOOL_H
 
-#include "PixelToTPIDTool/PixelDEdxUtils.h"
+//#include "PixelToTPIDTool/PixelDEdxUtils.h"
+#include "TrackingAnalysisAlgorithms/PixelDEdxUtils.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"    
 

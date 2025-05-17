@@ -6,8 +6,16 @@
 #define TRACKINGANALYSISALGORITHMS_PIXELDEDXEQUALIZATIONALG_H
 
 #include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+
+#include "TrackingAnalysisAlgorithms/PixelDEdxUtils.h"
+
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTracking/TrackParticleAuxContainer.h>
+#include "xAODTracking/TrackStateValidation.h"
+#include "xAODTracking/TrackStateValidationContainer.h"
+#include "xAODTracking/TrackMeasurementValidation.h"
+#include "xAODTracking/TrackMeasurementValidationContainer.h"
+#include "xAODEventInfo/EventInfo.h"
 
 #include <AsgTools/PropertyWrapper.h>
 #include <AthContainers/ConstDataVector.h>
@@ -51,33 +59,72 @@ namespace CP {
     StatusCode initialize() override;
 
     /// Function executing the algorithm
-    /// Only support use in AnalysisBase.
-#ifdef XAOD_STANDALONE
     StatusCode execute(const EventContext& ctx) const override;
-#endif
     
   private:
 
+    PixelDEdx::PixelClusterStruct getPixelClusterStruct(const xAOD::TrackMeasurementValidation* pixclus, const xAOD::TrackStateValidation* msos) const;
+    
     ToolHandle<CP::IPixelDEdxEqualizationTool> m_pixelDEdxEqualizationTool{this, "PixelDEdxEqualizationTool", "", "tool for pixel dE/dx"};
 
     /// @name Algorithm properties
     /// @{
     // Declare the algorithm's properties:
 
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfoKey", "EventInfo", "event info key"};
+
     /// Input track collection to decorate
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainerName {
     this, "TrackContainerName", "InDetTrackParticles", "Input track collection to decorate with corrected dE/dx measurements."};
 
-    /// Decorators
-    /// Equalized dE/dx.
-    /// Provide the variable name without the container.  
-    /// Container will be set dynamically in initialize.  
-    /// Form will be <container>.<m_dEdxEqKey>.
-    Gaudi::Property<std::string>  m_dEdxEqVarName
-    { this, "dEdxEqVarName", "pixeldEdxEq", "Variable name for the equalized pixel dE/dx attribute" };
+    /// Name of link from tracks to MSOSs.
+    Gaudi::Property<std::string> m_msosLink
+    { this, "MSOSLink", "Reco_msosLink"};
 
-    /// Declare WriteDectorHandleKey but set dynamically in initialize once track container is known...
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey; 
+    /// Flags
+    Gaudi::Property<bool> m_equalizeTrackMeasurements
+    { this, "EqualizeTrackMeasurements", false, "Equalize track-level truncated mean dE/dx"};
+    Gaudi::Property<bool> m_equalizeClusterMeasurements
+    { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
+
+    /// Apply tight cluster cleaning requirements (e.g. cluster size/shape cuts).
+    Gaudi::Property<bool> m_tightClusterCleaning
+    { this, "TightClusterCleaning", false, ""};
+
+    //////////////////
+    /// Decorators ///
+    //////////////////
+
+    /// Equalized truncated mean dE/dx of the track 
+    /// Declare WriteDectorHandleKey but set dynamically in initialize() once track container is known...
+    /// And once the equalization strategy is known (cluster- or track-level).
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackdEdxEqKey
+      {this, "TrackdEdxDecorKey", "", "SG key for the equalized truncated mean dE/dx decoration" };
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackdEdxEqStdDevKey
+      {this, "TrackdEdxStdDevDecorKey", "", "SG key for the equalized truncated standard deviation dE/dx decoration" };
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackdEdxEqNUsedKey
+      {this, "TrackdEdxNUsedDecorKey", "", "SG key for decorating track with number of used hits in dE/dx truncated mean." };
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackdEdxEqIBLOFKey
+      {this, "TrackdEdxIBLOFDecorKey", "", "SG key for decorating track with number of good IBL hits in overflow." };
+
+    /// Only one PixelClusters container shared by all track containers, so should not need to modify keys...
+    /// Raw cluster dE/dx
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey
+      {this, "clusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
+    /// Equalized cluster dE/dx:
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey
+      {this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
+
+
+
+
+
+
+
+
+
+
+
  
     /// Counters.  Maybe drop?
     mutable std::atomic<unsigned long> m_nEventsProcessed{};

@@ -6,10 +6,14 @@
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
 
-#ifndef XAOD_STANDALONE
-#include "TrkTrack/Track.h"
-#endif
 #include "xAODTracking/TrackParticle.h"
+
+#include "ROOT/RDataFrame.hxx"
+
+/// Forward declare
+namespace PixelDEdx {
+  struct PixelClusterStruct;
+}
 
 namespace CP {
 
@@ -22,10 +26,16 @@ namespace CP {
     
   public:
 
+    virtual std::shared_ptr<ROOT::RDF::RNode> getFilteredSFDF(const int runNumber) const = 0;
+    virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const = 0;
+    virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct&, const int runNumber) const = 0;
+
+    //virtual StatusCode dEdx(const xAOD::TrackParticle& track) const = 0;
+    /*
     virtual float dEdx(const xAOD::TrackParticle& track,
                        int& nUsedHits,
                        int& nUsedIBLOverflowHits) const = 0;
-
+    */
   }; //class IPixelDEdxEqualizationTool
 
 } // namespace CP

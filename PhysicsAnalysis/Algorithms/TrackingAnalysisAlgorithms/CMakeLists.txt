@@ -8,7 +8,6 @@ atlas_subdir( TrackingAnalysisAlgorithms )
 find_package( ROOT COMPONENTS Core Tree TreePlayer RIO ROOTDataFrame )
 find_package( VDT )
 
-
 # Components in the package:
 atlas_add_library( TrackingAnalysisAlgorithmsLib
    TrackingAnalysisAlgorithms/*.h Root/*.cxx
@@ -26,6 +25,15 @@ if( NOT XAOD_STANDALONE )
    atlas_add_component( TrackingAnalysisAlgorithms
       src/*.h src/*.cxx src/components/*.cxx
       LINK_LIBRARIES GaudiKernel TrackingAnalysisAlgorithmsLib )
+endif()
+
+if( XAOD_STANDALONE )
+   atlas_add_executable( PixelDEdxEqualizationToolTester
+      util/PixelDEdxEqualizationToolTester.cxx
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo
+      xAODTracking xAODCore TrkAnalysisInterfacesLib TrackingAnalysisAlgorithmsLib PATCoreLib AsgDataHandlesLib)
+
 endif()
 
 atlas_install_python_modules( python/*.py )

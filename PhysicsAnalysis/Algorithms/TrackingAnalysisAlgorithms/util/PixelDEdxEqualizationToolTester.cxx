@@ -32,7 +32,7 @@
 #include "AthContainers/ConstAccessor.h"
 
 // Local include(s):
-#include "PixelToTPIDTool/PixelDEdxEqualizationTool.h"
+#include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationTool.h"
 
 
 /// Example of how to run the PixelDEdxEqualizationTool package to obtain cluster and dE/dx information
@@ -48,12 +48,10 @@ int main(int argc, char* argv[]) {
   // Path to equalization SF trees.
   // Will eventualy not need to set this property.
   // Will instead rely on default properties pointing to the file in the ASG calibration area.
-  std::string localSFPath = "../athena/InnerDetector/InDetRecTools/PixelToTPIDTool/share/pixeldEdxEqualizationSFs_v0.root"; // FIXME!
+  std::string localSFPath = "../athena/PhysicsAnalysis/Algorithms/TrackingAnalysisAlgorithms/share/pixeldEdxEqualizationSFs_v0.root"; // FIXME!
 
   // Name of link from track to MSOS.
   std::string msosLinkName = "Reco_msosLink";
-
-
 
   // The application's name:
   const char* APP_NAME = argv[0];
@@ -171,16 +169,64 @@ int main(int argc, char* argv[]) {
       // Print some info
       Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
 
-      // Calculate dE/dx from clusters using tool
+      // Calculate dE/dx metrics & decorate tracks+clusters using tool
       int nUsedHits = -1;
-      int nUsedIBLOverflowHits = -1;
-      float dEdx = dEdxEqTool->dEdx(*trkIt, nUsedHits, nUsedIBLOverflowHits);
+      int numberOfIBLOverflowsdEdx = -1;
+      float dEdx = -1;
+      float stdDev = -1;
+      /*
+      StatusCode sc = dEdxEqTool->dEdx(*trkIt);
+      if (sc.isFailure()) {
+        Error( APP_NAME, "PixelDEdxEqualizationTool::dEdx failed!");
+        return StatusCode::FAILURE;
+      }
+      */
+
+      // Now access newly decorated dE/dx metrics and counters.
+      std::string trackdEdxEqName = "pixeldEdx";
+      std::string trackdEdxEqStdDevName = "pixeldEdxStdDev";
+      std::string nUsedName = "numberOfUsedHitsdEdx";
+      std::string iblofName = "numberOfIBLOverflowsdEdx";
+      if(clusterEqualize) {
+        trackdEdxEqName += "ClusterEqualized"; // hardcode?
+        trackdEdxEqStdDevName += "ClusterEqualized"; // hardcode?
+        nUsedName += "ClusterEqualized"; // hardcode?
+        iblofName += "ClusterEqualized"; // hardcode?
+      } else if(trackEqualize) {
+        trackdEdxEqName += "TrackEqualized"; // hardcode?
+        trackdEdxEqStdDevName += "TrackEqualized"; // hardcode?
+        nUsedName += "TrackEqualized"; // hardcode?
+        iblofName += "TrackEqualized"; // hardcode?
+      } else { //redundant with check above.
+        Error(APP_NAME, "Must choose to equalize the dE/dx measurements at cluster-level OR track-level.");
+      }
+      static const SG::AuxElement::ConstAccessor< float > trackdEdxEqAcc(trackdEdxEqName);
+      if (trackdEdxEqAcc.isAvailable(*trkIt)) {
+        dEdx = trackdEdxEqAcc(*trkIt);
+      }
+      // Next 3 won't be available if equalizing at track level
+      // Since pixel clusters are required to redo the trunc mean & std dev calc here.
+      static const SG::AuxElement::ConstAccessor< float > trackdEdxEqStdDevAcc(trackdEdxEqStdDevName);
+      if (trackdEdxEqStdDevAcc.isAvailable(*trkIt)) {
+        stdDev = trackdEdxEqStdDevAcc(*trkIt);
+      }
+      static const SG::AuxElement::ConstAccessor< int > nUsedAcc(nUsedName);
+      if (nUsedAcc.isAvailable(*trkIt)) {
+        nUsedHits = nUsedAcc(*trkIt);
+      }
+      static const SG::AuxElement::ConstAccessor< int > iblofAcc(iblofName);
+      if (iblofAcc.isAvailable(*trkIt)) {
+        numberOfIBLOverflowsdEdx = iblofAcc(*trkIt);
+      }
+
 
       // Get summary values for comparison
       float stored_dEdx { 0 };
       unsigned char stored_numberOfUsedHitsdEdx = -1;
+      unsigned char stored_numberOfIBLOverflowsdEdx = -1;
       trkIt->summaryValue(stored_dEdx, xAOD::pixeldEdx);
       stored_numberOfUsedHitsdEdx = (unsigned int) (trkIt)->auxdataConst<unsigned char>("numberOfUsedHitsdEdx");
+      stored_numberOfIBLOverflowsdEdx = (unsigned int) (trkIt)->auxdataConst<unsigned char>("numberOfIBLOverflowsdEdx");
 
       // Print some info
       if( dEdx < 0.) {
@@ -192,18 +238,17 @@ int main(int argc, char* argv[]) {
         continue;
       }
       
-      // Check if the recalculated dE/dx matches the stored dE/dx
-      // Only makes sense if dEdxEqTool is configured to return the raw dE/dx, not the equalized.
-      float epsilon = 1e-3;
+      // Check if the hit counters differ between now (xAOD) and reco (ESD).
       Info(APP_NAME, "Track dE/dx (orig):          %g", stored_dEdx);
-      Info(APP_NAME, "Track dE/dx (recalc):        %g", dEdx);
-      if ( !clusterEqualize && !trackEqualize && std::fabs(stored_dEdx - dEdx) > epsilon ) {
-        Info(APP_NAME, "Mismatch between recalculated track dE/dx and value stored in AOD.");
+      Info(APP_NAME, "Track dE/dx (EQ):        %g", dEdx);
+      if( ((int) stored_numberOfUsedHitsdEdx != nUsedHits) || ((int) stored_numberOfIBLOverflowsdEdx != numberOfIBLOverflowsdEdx) ) {
+        Info(APP_NAME, "Mismatch in either numberOfUsedHitsdEdx or numberOfIBLOverflowsdEdx!");
         Info(APP_NAME, "Likely from a migration in the cluster (x,y) between reco (ESD) and now (xAOD).");
         Info(APP_NAME, "Clusters too close to the edge of sensor not included in truncated mean.");
         Info(APP_NAME, "Track nUsedHits (orig):        %u ", stored_numberOfUsedHitsdEdx);
-        Info(APP_NAME, "Track nUsedHits (recalc):      %d ", nUsedHits);
-        Info(APP_NAME, "Track nUsedIBLOverflowHits:    %d ", nUsedIBLOverflowHits);
+        Info(APP_NAME, "Track nUsedHits (EQ):      %d ", nUsedHits);
+        Info(APP_NAME, "Track numberOfIBLOverflowsdEdx (orig):    %u ", numberOfIBLOverflowsdEdx);
+        Info(APP_NAME, "Track numberOfIBLOverflowsdEdx (EQ):  %d ", stored_numberOfIBLOverflowsdEdx);
       }
 
       // If using track-level equalization, don't try to find linked pixel clusters.

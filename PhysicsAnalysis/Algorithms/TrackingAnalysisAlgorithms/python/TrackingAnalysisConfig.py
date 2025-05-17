@@ -35,10 +35,12 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :  ## should match the alg in ../
         config.addPrivateTool( 'PixelDEdxEqualizationTool', 'CP::PixelDEdxEqualizationTool' )
         ### Algorithm properties
         alg.TrackContainerName = self.containerName
+        alg.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
+        alg.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
+        alg.TightClusterCleaning = self.tightClusterCleaning
         ### Tool properties
         alg.PixelDEdxEqualizationTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.PixelDEdxEqualizationTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
-        alg.PixelDEdxEqualizationTool.TightClusterCleaning = self.tightClusterCleaning
         alg.PixelDEdxEqualizationTool.SFLocalFileName = self.sfLocalFileName
         alg.PixelDEdxEqualizationTool.ClusterSFTreeName = self.clusterSFTreeName
         alg.PixelDEdxEqualizationTool.TrackSFTreeName = self.trackSFTreeName

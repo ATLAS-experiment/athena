@@ -14,6 +14,6 @@
 #include "PixelToTPIDTool/PixelToTPIDTool.h"
 #endif
 
-#include "PixelToTPIDTool/PixelDEdxEqualizationTool.h"
-#include "PixelToTPIDTool/PixelDEdxUtils.h"
+//#include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationTool.h"
+//#include "TrackingAnalysisAlgorithms/PixelDEdxUtils.h"
 #endif  // PIXELTOTPIDTOOL_PIXELTOTPIDTOOLDICT_H

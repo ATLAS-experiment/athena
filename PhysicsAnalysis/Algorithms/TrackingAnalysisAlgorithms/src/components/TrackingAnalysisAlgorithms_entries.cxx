@@ -7,10 +7,12 @@
 #include "TrackingAnalysisAlgorithms/TrackParticleMergerAlg.h"
 #include "TrackingAnalysisAlgorithms/SecVertexTruthMatchAlg.h"
 #include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationAlg.h"
+#include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationTool.h"
 
 // Declare the component(s) of the package:
 DECLARE_COMPONENT( CP::VertexSelectionAlg )
 DECLARE_COMPONENT( CP::TrackParticleMergerAlg )
 DECLARE_COMPONENT( CP::SecVertexTruthMatchAlg )
 DECLARE_COMPONENT( CP::PixelDEdxEqualizationAlg )
+DECLARE_COMPONENT( CP::PixelDEdxEqualizationTool )
 

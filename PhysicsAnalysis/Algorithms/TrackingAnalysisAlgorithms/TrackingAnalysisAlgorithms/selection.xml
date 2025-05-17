@@ -5,5 +5,6 @@
   <class name="CP::TrackParticleMergerAlg" />
   <class name="CP::SecVertexTruthMatchAlg" />
   <class name="CP::PixelDEdxEqualizationAlg" />
-
+  <class name="CP::PixelDEdxEqualizationTool" />
+  <class name="PixelDEdx::PixelClusterStruct" />
 </lcgdict>
