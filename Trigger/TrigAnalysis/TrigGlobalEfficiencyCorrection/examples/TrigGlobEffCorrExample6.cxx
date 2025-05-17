@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
     }
     
     #ifndef XAOD_STANDALONE
-		ANA_CHECK(app->finalize())
+		ANA_CHECK(app->finalize());
     #endif
     return errors? 4 : 0;
 }
