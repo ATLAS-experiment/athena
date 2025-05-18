@@ -3,11 +3,16 @@
 # The name of the package:
 atlas_subdir( TrkAnalysisInterfaces )
 
+# External dependencies. VDT is necessary because the DataFrame code has
+# a public dependency on it.
+find_package( VDT )
+
 # Component(s) in the package:
 atlas_add_library( TrkAnalysisInterfacesLib
    TrkAnalysisInterfaces/*.h
    INTERFACE
    PUBLIC_HEADERS TrkAnalysisInterfaces
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools xAODEventInfo  PATCoreLib PATInterfaces  xAODTracking)
 
 if (NOT XAOD_STANDALONE)

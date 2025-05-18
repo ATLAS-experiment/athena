@@ -119,7 +119,7 @@ namespace CP {
     ///    Eventually, can apply scale factors to "undo" MC23 rad damage modeling.
     bool isMC = false;
     int runNumber = 0; // won't be used if not in XAOD_STANDALONE, since not applying SFs from trees.
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);        
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) { //MC
       ATH_MSG_DEBUG("The current event is simulation.");
       isMC = true;
@@ -205,7 +205,7 @@ namespace CP {
 
         /// Decorate track
         ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqKey << " with value " << averagedEdxEq);
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqHandle(m_trackdEdxEqKey);
+        SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqHandle(m_trackdEdxEqKey, ctx);
         trackdEdxEqHandle(*trk) = averagedEdxEq;
       }
 
@@ -216,8 +216,8 @@ namespace CP {
 
         /// Declare decorators here
         /// Will cause issues with TrackParticleCreator during reco if included outside of XAOD_STANDALONE.
-        SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxHandle(m_clusterdEdxKey);
-        SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxEqHandle(m_clusterdEdxEqKey);
+        SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxHandle(m_clusterdEdxKey, ctx);
+        SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxEqHandle(m_clusterdEdxEqKey, ctx);
 
         /// Check for track states:
         static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
@@ -330,22 +330,22 @@ namespace CP {
         
         /// Decorate track with cluster-level equalized dE/dx truncated mean and std dev.
         ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqKey << " with value " << averagedEdxEq);
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqHandle(m_trackdEdxEqKey);
+        SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqHandle(m_trackdEdxEqKey, ctx);
         trackdEdxEqHandle(*trk) = averagedEdxEq;
         
         ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqStdDevKey << " with value " << sigmadEdxEq);
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqStdDevDeco(m_trackdEdxEqStdDevKey);
+        SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqStdDevDeco(m_trackdEdxEqStdDevKey, ctx);
         trackdEdxEqStdDevDeco(*trk) = sigmadEdxEq;
         
         /// Decorate with nUsedHits and nUsedIBLOverflowHits as calculated here on the xAOD?
         /// Can be different from those calculated during reconstruction due to migration across cluster quality cuts.
         /// Particularly the cluster local (x,y), we changes between the ESD and the xAOD...
         ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqNUsedKey << " with value " << nUsedHitsEq);
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqNUsedHandle(m_trackdEdxEqNUsedKey);
+        SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqNUsedHandle(m_trackdEdxEqNUsedKey, ctx);
         trackdEdxEqNUsedHandle(*trk) = nUsedHitsEq;
         
         ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqIBLOFKey << " with value " << nUsedIBLOverflowHits);
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqIBLOFHandle(m_trackdEdxEqIBLOFKey);
+        SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqIBLOFHandle(m_trackdEdxEqIBLOFKey, ctx);
         trackdEdxEqIBLOFHandle(*trk) = nUsedIBLOverflowHits;
         
       } // end cluster-level equalization if 
