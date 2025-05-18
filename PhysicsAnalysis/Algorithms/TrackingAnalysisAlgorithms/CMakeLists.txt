@@ -27,14 +27,5 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES GaudiKernel TrackingAnalysisAlgorithmsLib )
 endif()
 
-if( XAOD_STANDALONE )
-   atlas_add_executable( PixelDEdxEqualizationToolTester
-      util/PixelDEdxEqualizationToolTester.cxx
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo
-      xAODTracking xAODCore TrkAnalysisInterfacesLib TrackingAnalysisAlgorithmsLib PATCoreLib AsgDataHandlesLib)
-
-endif()
-
 atlas_install_python_modules( python/*.py )
 atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
