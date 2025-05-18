@@ -101,10 +101,6 @@ namespace CP {
       ATH_MSG_INFO("Will decorate PixelClusters with their equalized dE/dx using key: " << m_clusterdEdxEqKey);
     }
 
-
-
-
-
     return StatusCode::SUCCESS;
   }
 
@@ -130,13 +126,13 @@ namespace CP {
     }
     else { // Data
       runNumber =  eventInfo->runNumber();
-      ATH_MSG_INFO("The current event is data with run number: " << runNumber);
+      ATH_MSG_DEBUG("The current event is data with run number: " << runNumber);
     }
     
     if(isMC) {
-      ATH_MSG_ERROR("Requested to equalize the dE/dx, but this is not yet supported for MC.");
-      ATH_MSG_ERROR("Eventually, can apply scale factors to \"undo\" the radiation modeling in MC23.");
-      ATH_MSG_ERROR("Or equalize the MC to the data reference run.");        
+      ATH_MSG_ERROR("Requested to equalize the dE/dx, but this is not yet supported for MC."
+                    << "\nEventually, can apply scale factors to \"undo\" the radiation modeling in MC23."
+                    << "\nOr equalize the MC to the data reference run.");
       return StatusCode::FAILURE;
     }
 
@@ -168,7 +164,7 @@ namespace CP {
       ///    These are configured in TrackingAnalysisConfig.py & passed through to the tool.
       /// If the cluster EQ strategy is chosen AND pixel clusters & MSOSs are available, this tool will follow the links from the track to the clusters.
       ///    It will then calculate the cluster dE/dx, apply the equalization SF, and decorate the cluster with the raw & equalized dE/dx.
-      ///    It will then calculate and return the truncated mean using the equalized cluster measurements.
+      ///    It will then calculate the truncated mean (and other metrics) using the equalized cluster measurements.
       
       int allPixelHits = 0; // all pixel hits linked to the track.
       int nUsedHits = 0; // divisor in truncated mean.
@@ -208,7 +204,7 @@ namespace CP {
         float averagedEdxEq = stored_dEdx * SF;
 
         /// Decorate track
-        ATH_MSG_INFO("Will decorate  variable " << m_trackdEdxEqKey << " with value " << averagedEdxEq);
+        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqKey << " with value " << averagedEdxEq);
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqHandle(m_trackdEdxEqKey);
         trackdEdxEqHandle(*trk) = averagedEdxEq;
       }
@@ -302,12 +298,12 @@ namespace CP {
         }
         else {
           if ( std::fabs(stored_dEdx - averagedEdx) > epsilon ) {
-            ATH_MSG_WARNING("The track dE/dx stored in the AOD as summary variable (" << stored_dEdx
+            ATH_MSG_DEBUG("The track dE/dx stored in the AOD as summary variable (" << stored_dEdx
                             << ") does not match the value calculated here (" << averagedEdx << ")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
           }
           if ( (int) stored_numberOfUsedHitsdEdx != nUsedHits ) {
-            ATH_MSG_WARNING("The numberOfUsedHitsdEdx stored in the AOD ("<< (int) stored_numberOfUsedHitsdEdx
+            ATH_MSG_DEBUG("The numberOfUsedHitsdEdx stored in the AOD ("<< (int) stored_numberOfUsedHitsdEdx
                             << ") does not match the value calculated here ("<< nUsedHits <<")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
           }
@@ -321,8 +317,8 @@ namespace CP {
         
         /// Sanity check that nUsedHits and nUsedHitsEq are the same.
         if (nUsedHitsEq != nUsedHits) {
-          ATH_MSG_WARNING("The numberOfUsedHitsdEdx calculated for the raw ("<< nUsedHits <<") and equalized ("<< nUsedHitsEq <<") dE/dx differ!");
-          ATH_MSG_WARNING("This can happen if the equalization changes the order of the clusters and there's an IBL OF hit.");
+          ATH_MSG_DEBUG("The numberOfUsedHitsdEdx calculated for the raw ("<< nUsedHits <<") and equalized ("<< nUsedHitsEq <<") dE/dx differ!"
+                        << "\nThis can happen if the equalization changes the order of the clusters and there's an IBL OF hit.");
           /// For example, imagine there are 4 good clusters on track, and one is an IBL overflow hit.
           /// Say it is the third cluster when sorting by increasing dE/dx.
           /// On the third iteration in getdEdxMetrics, you'll notice that you have an IBL OF hit.
@@ -333,22 +329,22 @@ namespace CP {
         }
         
         /// Decorate track with cluster-level equalized dE/dx truncated mean and std dev.
-        ATH_MSG_INFO("Will decorate  variable " << m_trackdEdxEqKey << " with value " << averagedEdxEq);
+        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqKey << " with value " << averagedEdxEq);
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqHandle(m_trackdEdxEqKey);
         trackdEdxEqHandle(*trk) = averagedEdxEq;
         
-        ATH_MSG_INFO("Will decorate  variable " << m_trackdEdxEqStdDevKey << " with value " << sigmadEdxEq);
+        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqStdDevKey << " with value " << sigmadEdxEq);
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqStdDevDeco(m_trackdEdxEqStdDevKey);
         trackdEdxEqStdDevDeco(*trk) = sigmadEdxEq;
         
         /// Decorate with nUsedHits and nUsedIBLOverflowHits as calculated here on the xAOD?
         /// Can be different from those calculated during reconstruction due to migration across cluster quality cuts.
         /// Particularly the cluster local (x,y), we changes between the ESD and the xAOD...
-        ATH_MSG_INFO("Will decorate  variable " << m_trackdEdxEqNUsedKey << " with value " << nUsedHitsEq);
+        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqNUsedKey << " with value " << nUsedHitsEq);
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqNUsedHandle(m_trackdEdxEqNUsedKey);
         trackdEdxEqNUsedHandle(*trk) = nUsedHitsEq;
         
-        ATH_MSG_INFO("Will decorate  variable " << m_trackdEdxEqIBLOFKey << " with value " << nUsedIBLOverflowHits);
+        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqIBLOFKey << " with value " << nUsedIBLOverflowHits);
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqIBLOFHandle(m_trackdEdxEqIBLOFKey);
         trackdEdxEqIBLOFHandle(*trk) = nUsedIBLOverflowHits;
         
@@ -443,8 +439,5 @@ namespace CP {
 
     return cluster;
   }
-  
-  
-  
 
 } // namespace CP

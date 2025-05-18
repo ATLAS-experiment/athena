@@ -144,19 +144,7 @@ namespace CP {
   
   double PixelDEdxEqualizationTool::getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const {
 
-    /// Get the raw track-level truncated mean dE/dx & counters from the AOD.
-    //float stored_dEdx { 0 };
-    //unsigned char stored_numberOfUsedHitsdEdx = 99;
     unsigned char stored_numberOfIBLOverflowsdEdx = 99;
-    //track.summaryValue(stored_dEdx, xAOD::pixeldEdx);
-    /*
-    static const SG::AuxElement::ConstAccessor< unsigned char > nUsedAcc("numberOfUsedHitsdEdx");
-    if (nUsedAcc.isAvailable(track)) {
-      stored_numberOfUsedHitsdEdx = nUsedAcc(track);
-    } else {
-      ATH_MSG_WARNING("numberOfUsedHitsdEdx auxdata is missing!");
-    }
-    */
     static const SG::AuxElement::ConstAccessor< unsigned char > nIBLOFAcc("numberOfIBLOverflowsdEdx");
     if (nIBLOFAcc.isAvailable(track)) {
       stored_numberOfIBLOverflowsdEdx = nIBLOFAcc(track);
@@ -183,14 +171,14 @@ namespace CP {
     
     auto SF_values = ( (int) stored_numberOfIBLOverflowsdEdx > 0) ? result.Take<double>("SF_IBLOFYes") : result.Take<double>("SF_IBLOFNo");
     if (SF_values->empty()) {
-      ATH_MSG_ERROR("Could not find the scale factor matching the eta & IBLOF status of this track!");
-      ATH_MSG_ERROR("Run: " << runNumber << ", |eta| = " << absEta << ", IBLOF: " << stored_numberOfIBLOverflowsdEdx);
-      ATH_MSG_ERROR("Cannot equalize track dE/dx.");
+      ATH_MSG_ERROR("Could not find the scale factor matching the eta & IBLOF status of this track!"
+                    << "\nRun: " << runNumber << ", |eta| = " << absEta << ", IBLOF: " << stored_numberOfIBLOverflowsdEdx
+                    << "\nCannot equalize track dE/dx.");
       return -1.;
     }
     if (SF_values->size()>1) {
-      ATH_MSG_ERROR("Found multiple scale factors matching the eta & IBLOF of this track!");
-      ATH_MSG_ERROR("Cannot equalize track dE/dx.");
+      ATH_MSG_ERROR("Found multiple scale factors matching the eta & IBLOF of this track!"
+                    << "\nCannot equalize track dE/dx.");
       return -1.;
     }
     
@@ -228,7 +216,7 @@ namespace CP {
       }
     }
     
-        /// Get SF and error from the filtered dataframe ((tree->RDataFrame->filtered RDataFrame for specific run).
+    /// Get SF and error from the filtered dataframe ((tree->RDataFrame->filtered RDataFrame for specific run).
     auto result = filtered_df->Filter(
                                       [cluster, sfBECBin, sfEtaBin](int bec, int layerID, int etaM) {
                                         return bec == sfBECBin && layerID == cluster.layer && etaM == sfEtaBin; // average over phi & +-z.
@@ -238,13 +226,13 @@ namespace CP {
     auto SF_values = result.Take<double>("SF");
     auto SF_error_values = result.Take<double>("SF_error");
     if (SF_values->empty() || SF_error_values->empty()) {
-      ATH_MSG_ERROR("Could not find the scale factor matching the (bec, layer, module eta) of this pixel cluster!");
-      ATH_MSG_ERROR("Cannot equalize cluster dE/dx.");
+      ATH_MSG_ERROR("Could not find the scale factor matching the (bec, layer, module eta) of this pixel cluster!"
+                    << "\nCannot equalize cluster dE/dx.");
       return -1.;
     }
     if (SF_values->size()>1 || SF_error_values->size()>1) {
-      ATH_MSG_ERROR("Found multiple scale factors matching the (bec, layer, module eta) of this pixel cluster!");
-      ATH_MSG_ERROR("Cannot equalize cluster dE/dx.");
+      ATH_MSG_ERROR("Found multiple scale factors matching the (bec, layer, module eta) of this pixel cluster!"
+                    << "\nCannot equalize cluster dE/dx.");
       return -1.;
     }
 

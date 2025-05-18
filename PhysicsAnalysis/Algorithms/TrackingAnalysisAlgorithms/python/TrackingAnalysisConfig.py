@@ -14,6 +14,8 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :  ## should match the alg in ../
             info="the name of the input container.")
         self.addOption ('postfix', "", type=str,
             info="a postfix to apply to decorations and algorithm names.")
+        self.addOption ('msosLink', "", type=str,
+            info="Name of link from tracks to MSOSs.")
         self.addOption ('equalizeClusterMeasurements', False, type=bool,
             info="whether to equalize cluster level dE/dx measurements.")
         self.addOption ('equalizeTrackMeasurements', False, type=bool,
@@ -35,6 +37,7 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :  ## should match the alg in ../
         config.addPrivateTool( 'PixelDEdxEqualizationTool', 'CP::PixelDEdxEqualizationTool' )
         ### Algorithm properties
         alg.TrackContainerName = self.containerName
+        alg.MSOSLink = self.msosLink
         alg.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
         alg.TightClusterCleaning = self.tightClusterCleaning

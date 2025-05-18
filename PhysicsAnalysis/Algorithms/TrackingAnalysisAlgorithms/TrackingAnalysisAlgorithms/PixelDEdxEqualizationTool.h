@@ -12,12 +12,10 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
-//#include "PathResolver/PathResolver.h" // not available in AnalysisBase?
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
-//#include "xAODTracking/TrackParticleContainerAux.h"
 #include "xAODTracking/TrackStateValidation.h"
 #include "xAODTracking/TrackStateValidationContainer.h"
 #include "xAODTracking/TrackMeasurementValidation.h"

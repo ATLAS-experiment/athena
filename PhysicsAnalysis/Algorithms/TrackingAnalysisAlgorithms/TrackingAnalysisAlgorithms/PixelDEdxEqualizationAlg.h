@@ -115,17 +115,6 @@ namespace CP {
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey
       {this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
 
-
-
-
-
-
-
-
-
-
-
- 
     /// Counters.  Maybe drop?
     mutable std::atomic<unsigned long> m_nEventsProcessed{};
     mutable std::atomic<unsigned long> m_nTracksProcessed{};

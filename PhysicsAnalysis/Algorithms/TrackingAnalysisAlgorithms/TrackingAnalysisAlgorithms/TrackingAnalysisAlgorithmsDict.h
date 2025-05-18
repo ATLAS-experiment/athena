@@ -10,5 +10,6 @@
 #include "TrackingAnalysisAlgorithms/TrackParticleMergerAlg.h"
 #include "TrackingAnalysisAlgorithms/SecVertexTruthMatchAlg.h"
 #include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationAlg.h"
+#include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationTool.h"
 
 #endif // TRACKINGANALYSISALGORITHMS_TRACKINGANALYSISALGORITHMSDICT_H

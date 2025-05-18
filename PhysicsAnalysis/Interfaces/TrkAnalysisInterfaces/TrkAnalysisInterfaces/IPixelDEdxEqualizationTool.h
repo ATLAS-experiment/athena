@@ -1,5 +1,3 @@
-//#ifndef IPIXELDEDXEQUALIZATIONTOOL_H
-//#define IPIXELDEDXEQUALIZATIONTOOL_H
 #ifndef PIXELDEDXEQUALIZATIONTOOL_IPIXELDEDXEQUALIZATIONTOOL_H
 #define PIXELDEDXEQUALIZATIONTOOL_IPIXELDEDXEQUALIZATIONTOOL_H
 
@@ -30,12 +28,6 @@ namespace CP {
     virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const = 0;
     virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct&, const int runNumber) const = 0;
 
-    //virtual StatusCode dEdx(const xAOD::TrackParticle& track) const = 0;
-    /*
-    virtual float dEdx(const xAOD::TrackParticle& track,
-                       int& nUsedHits,
-                       int& nUsedIBLOverflowHits) const = 0;
-    */
   }; //class IPixelDEdxEqualizationTool
 
 } // namespace CP
