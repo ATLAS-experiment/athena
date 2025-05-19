@@ -48,6 +48,9 @@ if __name__=='__main__':
   parser.add_argument('--FTs', dest='ft', default=[], nargs="+", type=int, help='list of FT which will be read out (space separated).')
   parser.add_argument('--posneg', dest='posneg', default=[], nargs="+", help='side to read out (-1 means both), can give multiple arguments (space separated). Default %(default)s.', type=int,choices=range(-1,2))
   parser.add_argument('--barrel_ec', dest='be', default=[], nargs="+", help='subdet to read out (-1 means both), can give multiple arguments (space separated) Default %(default)s.', type=int,choices=range(-1,2))
+  parser.add_argument('--ETThresh', dest='etthresh', default=-1., help='ET threshold to dump info', type=float)
+  parser.add_argument('--ETThreshMain', dest='etthreshmain', default=-1., help='ET threshold from Main to dump info', type=float)
+  parser.add_argument('--ADCThresh', dest='adcthresh', default=-1, help='ADC threshold to dump info', type=int)
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -217,6 +220,12 @@ if __name__=='__main__':
      flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap",)
     
+  if args.etthresh > 0.:
+     flags.LArSCDump.ETThresh = args.etthresh
+
+  if args.etthreshmain > 0.:
+     flags.LArSCDump.ETThreshMain = args.etthreshmain
+
   flags.lock()
   flags.dump('LArSCDump.*')
 
@@ -269,6 +278,7 @@ if __name__=='__main__':
                             SCContainerKeys=CKeys, OverwriteEventNumber = args.overEvN,                        # from LArSC2Ntuple
                             FillRODEnergy = flags.LArSCDump.doRawChan,
                             FillLB=args.evtree, FillTriggerType = args.evtree,
+                            ETThreshold = flags.LArSCDump.ETThresh, ETThresholdMain = flags.LArSCDump.ETThreshMain, ADCThreshold=args.adcthresh,
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
                             TrigDecisionTool=tdt, FillTriggerTowers = args.TT,
                             OutputLevel=args.olevel

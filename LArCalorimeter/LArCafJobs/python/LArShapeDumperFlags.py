@@ -19,7 +19,9 @@ def addShapeDumpFlags(flags):
     flags.addFlag("LArShapeDump.outputNtup","out.root")
     flags.addFlag("LArShapeDump.HECNoiseNtup","")
     flags.addFlag("LArShapeDump.digitsKeySC","SC_ADC_BAS")
+    flags.addFlag("LArShapeDump.ndigitsSC",6)
     flags.addFlag("LArShapeDump.rawSCKey","SC_ET_ID")
+    flags.addFlag("LArShapeDump.nrawSC",1)
     flags.addFlag("LArShapeDump.energySCCut",1000.)
     flags.addFlag("LArShapeDump.adcSCCut",100)
     

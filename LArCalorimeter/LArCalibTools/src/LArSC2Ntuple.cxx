@@ -10,8 +10,10 @@
 #include "TrigDecisionTool/FeatureContainer.h"
 #include "TrigDecisionTool/Feature.h"
 
+#include <numeric>
+
 LArSC2Ntuple::LArSC2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
-  LArDigits2Ntuple(name, pSvcLocator) {
+  LArDigits2Ntuple(name, pSvcLocator), m_caloMgrSC(nullptr) {
     m_ntTitle = "SCDigits";
     m_ntpath = "/NTUPLES/FILE1/SCDIGITS";
   }
@@ -32,6 +34,8 @@ StatusCode LArSC2Ntuple::initialize() {
   ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
   ATH_CHECK(m_LArLatomeHeaderContainerKey.initialize() );
+
+  ATH_CHECK( m_caloSCMgrKey.initialize(m_ETThresh > 0. || m_ETThreshMain > 0.) );
 
   StatusCode sc=m_nt->addItem("latomeChannel",m_latomeChannel);
   if (sc.isFailure()) {
@@ -269,6 +273,11 @@ StatusCode LArSC2Ntuple::execute()
       ATH_MSG_DEBUG( "Got LArRawChannelContainer with key LArRawChannels" );
   }
 
+  if(m_ETThreshMain > 0. && !RawChannelContainer) {
+      ATH_MSG_WARNING( "Asked for ETThresholdMain, but no LArRawChannelContainer, will not apply ! " );
+      m_ETThreshMain = -1.;
+  }
+
   if ((std::find(m_contKeys.begin(), m_contKeys.end(), "SC_ADC_BAS")  != m_contKeys.end()) ){
     sc	   = evtStore()->retrieve(DigitContainer_next,"SC_ADC_BAS");  
     if (sc.isFailure()) {
@@ -302,7 +311,7 @@ StatusCode LArSC2Ntuple::execute()
   } else {
      ATH_MSG_DEBUG( "LArLATOME container found");
      headcontainer=&*hdrCont;
-     thisELVL1Id   = (*hdrCont->begin())->L1Id();
+     if(&*hdrCont && *hdrCont->begin()) thisELVL1Id   = (*hdrCont->begin())->L1Id();
      ATH_MSG_DEBUG( " ELVL1I FROM LATOME HEADER " << thisELVL1Id );
   }
   
@@ -349,6 +358,22 @@ StatusCode LArSC2Ntuple::execute()
      }
   }
   ATH_MSG_DEBUG("DigitContainer has size: "<<cellsno<<" hasDigitContainer: "<<hasDigitContainer);
+
+  if(m_ETThresh > 0. && !etcontainer && !etcontainer_next) {
+      ATH_MSG_WARNING( "Asked for ETThreshold, but no SC_ET* container, will not apply ! " );
+      m_ETThresh = -1.;
+  }
+
+  if(m_ETThresh > 0. || m_ETThreshMain > 0.) {
+     SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSCMgrKey};
+     ATH_CHECK(caloMgrHandle.isValid());
+     m_caloMgrSC = *caloMgrHandle;
+  }
+
+  if(m_ADCThresh > 0. && ! DigitContainer&& !DigitContainer_next) {
+      ATH_MSG_WARNING( "Asked for ADCThreshold, but no digits container, will not apply ! " );
+      m_ADCThresh = -1.;
+  }
 
   if (hasAccCalibDigitContainer) {
      if( !AccCalibDigitContainer->empty() ) {
@@ -397,6 +422,8 @@ StatusCode LArSC2Ntuple::execute()
     m_IEvent	   = thisevent;
     if(m_overwriteEventNumber) m_IEvent   = ctx.evt();
 
+    bool acceptETMain = true;
+
     if( hasAccDigitContainer ){
 
       const LArAccumulatedDigit* digi   = AccDigitContainer->at(c);     
@@ -416,10 +443,13 @@ StatusCode LArSC2Ntuple::execute()
 
       fillFromIdentifier(digi->hardwareID());      
 
+      float adcmax=-1.;
       for(unsigned i =	0; i<trueMaxSample;++i) {
          m_mean[i] = digi->mean(i);
          m_RMS[i] = digi->RMS(i);
+         if(m_ADCThresh > 0 && m_mean[i]>adcmax) adcmax=m_mean[i]; 
       }
+      if(m_ADCThresh > 0 && adcmax-m_mean[0] <= m_ADCThresh) continue; 
 
     }//hasAccDigitContainer
 
@@ -442,10 +472,13 @@ StatusCode LArSC2Ntuple::execute()
 
       fillFromIdentifier(digi->hardwareID());      
 
+      float adcmax=-1.;
       for(unsigned i =	0; i<trueMaxSample;++i) {
          m_mean[i] = digi->mean(i);
          m_RMS[i] = digi->RMS(i);
+         if(m_ADCThresh > 0 && m_mean[i]>adcmax) adcmax=m_mean[i]; 
       }
+      if(m_ADCThresh > 0 && adcmax-m_mean[0] <= m_ADCThresh) continue; 
       m_dac = digi->DAC();
       m_delay = digi->delay();
       m_pulsed = digi->getIsPulsedInt();
@@ -476,8 +509,17 @@ StatusCode LArSC2Ntuple::execute()
 	}
       }
 
+      if( m_fillRawChan && RawChannelContainer ){
+	fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD, acceptETMain);
+        if(!acceptETMain) continue; // do not pass the ETThreshMain cut
+      }
 
-      for(unsigned i =	0; i<trueMaxSample;++i) m_samples[i]	   = digi->samples().at(i);
+      short  adcmax=0;
+      for(unsigned i =	0; i<trueMaxSample;++i) {
+         m_samples[i]	   = digi->samples().at(i);
+         if(m_ADCThresh > 0 && m_samples[i]>adcmax) adcmax=m_samples[i]; 
+      }
+      if(m_ADCThresh > 0 && adcmax-m_samples[0] <= m_ADCThresh) continue; 
 
       const LArSCDigit*	scdigi   = dynamic_cast<const LArSCDigit*>(digi);
       if(!scdigi){ 
@@ -501,9 +543,6 @@ StatusCode LArSC2Ntuple::execute()
       }
     
 
-      if( m_fillRawChan && RawChannelContainer ){
-	fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD);
-      }
     }//hasDigitContainer
     ATH_MSG_DEBUG("After hasDigitContainer ");
     
@@ -527,11 +566,17 @@ StatusCode LArSC2Ntuple::execute()
       if( !hasDigitContainer){ //// already filled in DigitContainer
         fillFromIdentifier(digi->hardwareID());
         if( m_fillRawChan && RawChannelContainer ){
-	   fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD);
+	   fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD, acceptETMain);
+           if(!acceptETMain) continue; // do not pass the ETThreshMain cut
         }
       }
          
-     for(unsigned i =	0; i<trueMaxSample;++i) m_samples_ADC_BAS[i]   = digi->samples().at(i);
+     short  adcmax=0;
+     for(unsigned i =	0; i<trueMaxSample;++i) {
+        m_samples_ADC_BAS[i]   = digi->samples().at(i);
+        if(m_ADCThresh > 0 && m_samples_ADC_BAS[i]>adcmax) adcmax=m_samples_ADC_BAS[i]; 
+     }
+     if(m_ADCThresh > 0 && adcmax-m_samples_ADC_BAS[0] <= m_ADCThresh) continue; 
 
      const LArSCDigit*	scdigi   = dynamic_cast<const LArSCDigit*>(digi);
      if(!scdigi){ ATH_MSG_DEBUG(" Can't cast digi to LArSCDigit*");
@@ -550,9 +595,6 @@ StatusCode LArSC2Ntuple::execute()
 	  m_latomeSourceId	   = scdigi->SourceId();
       }
 
-      if( !hasDigitContainer && m_fillRawChan && RawChannelContainer ){
-        fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD);
-      }
     }
     ATH_MSG_DEBUG("After DigitContainer_next ");
     
@@ -573,7 +615,8 @@ StatusCode LArSC2Ntuple::execute()
 	  }
 	}
         if( m_fillRawChan && RawChannelContainer ){
-	   fillRODEnergy(rawSC->hardwareID(), rawChannelMap, cabling, cablingROD);
+	   fillRODEnergy(rawSC->hardwareID(), rawChannelMap, cabling, cablingROD, acceptETMain);
+           if(!acceptETMain) continue; // do not pass the ETThreshMain cut
         }
       }
       unsigned int truenet = m_Net;
@@ -582,9 +625,21 @@ StatusCode LArSC2Ntuple::execute()
 	m_bcidVec_ET[i]	   = rawSC->bcids().at(i);
       }
       if(truenet > rawSC->energies().size()) truenet=rawSC->energies().size();
-      for( unsigned i=0; i<truenet;++i){	// just use the vector directly?
+      unsigned i;
+      for( i=0; i<truenet;++i){	// just use the vector directly?
 	m_energyVec_ET[i]	   = rawSC->energies().at(i);
+        if(rawSC->bcids().size()) {
+           if(m_ETThresh > 0. && m_bcidVec_ET[i] == thisbcid) { // our ET
+              if(m_energyVec_ET[i] < m_ETThresh) break;
+           }
+        } else {
+           if(m_ETThresh > 0. ) { // our ET
+              if(m_energyVec_ET[i] < m_ETThresh) break;
+           }
+        }
       }
+      if(i<truenet) continue; // energy cut 
+
       if(truenet > rawSC->satur().size()) truenet=rawSC->satur().size();
       for( unsigned i = 0; i<truenet;++i){	// just use the vector directly?
 	m_saturVec_ET[i]	   = rawSC->satur().at(i);
@@ -593,6 +648,7 @@ StatusCode LArSC2Ntuple::execute()
       m_ntNet=truenet;
 
     }
+    ATH_MSG_DEBUG("After  etcontainer");
     // etcontainer_next -> SC_ET_ID
     if( etcontainer_next ){
       const LArRawSC*rawSC   = etcontainer_next->at(c);
@@ -608,19 +664,36 @@ StatusCode LArSC2Ntuple::execute()
 	  }
 	}
         if( m_fillRawChan && RawChannelContainer ){
-	   fillRODEnergy(rawSC->hardwareID(), rawChannelMap, cabling, cablingROD);
+	   fillRODEnergy(rawSC->hardwareID(), rawChannelMap, cabling, cablingROD, acceptETMain);
+           if(!acceptETMain) continue; // do not pass the ETThreshMain cut
         }
       }
+      ATH_MSG_DEBUG("Mid etcontainer_next "<<c);
       for( unsigned i=0; i<rawSC->bcids().size();++i){	// just use the vector directly?
 	m_bcidVec_ET_ID[i]	   = rawSC->bcids()[i];
       }
-      for( unsigned i=0; i<rawSC->energies().size();++i){	// just use the vector directly?
+      unsigned i;
+      for( i=0; i<rawSC->energies().size();++i){	// just use the vector directly?
 	m_energyVec_ET_ID[i]	   = rawSC->energies()[i];
+        if(rawSC->bcids().size()) {
+           if(m_ETThresh > 0. && m_bcidVec_ET_ID[i] == thisbcid) { // our ET
+              if(m_energyVec_ET_ID[i] < m_ETThresh) break;
+           }
+        } else {
+           if(m_ETThresh > 0.) { // our ET
+              if(m_energyVec_ET_ID[i] < m_ETThresh) break;
+           }
+        }
       }
+      if(i<rawSC->energies().size()) {
+         continue; // energy cut 
+      }
+
       for( unsigned i = 0; i<rawSC->satur().size();++i){	// just use the vector directly?
 	m_saturVec_ET_ID[i]	   = rawSC->satur()[i];
       }
     }
+    ATH_MSG_DEBUG("After  etcontainer_next");
 
     sc   = ntupleSvc()->writeRecord(m_nt);
     if (sc != StatusCode::SUCCESS) {
@@ -629,6 +702,7 @@ StatusCode LArSC2Ntuple::execute()
     }
     cellCounter++;
   }// over cells 
+
   if(m_fillTType) {
      m_TType = thisttype;
      m_IEventEvt   = thisevent;
@@ -646,6 +720,7 @@ StatusCode LArSC2Ntuple::execute()
      if(evt->errorState(xAOD::EventInfo::LAr)==xAOD::EventInfo::Warning) m_LArInError = m_LArInError | 0x2; 
 
   }
+
   if(m_fillCaloTT){
     const DataVector<LVL1::TriggerTower>* TTVector = nullptr;
     if ( evtStore()->retrieve(TTVector,m_triggerTowerKey).isFailure() ) {
@@ -676,9 +751,9 @@ StatusCode LArSC2Ntuple::execute()
 
   ATH_MSG_DEBUG( "LArSC2Ntuple has finished, filled " << cellCounter << " cells");
   return StatusCode::SUCCESS;
-}// end finalize-method.
+}// end execute-method.
 
-void LArSC2Ntuple::fillRODEnergy(HWIdentifier SCId, rawChanMap_t &rawChanMap, const LArOnOffIdMapping* cabling, const LArOnOffIdMapping* cablingROD)
+void LArSC2Ntuple::fillRODEnergy(HWIdentifier SCId, rawChanMap_t &rawChanMap, const LArOnOffIdMapping* cabling, const LArOnOffIdMapping* cablingROD,                                  bool &acceptETMain)
 {
  const Identifier offId = cabling->cnvToIdentifier(SCId);
  const std::vector<Identifier> cellIds = m_scidtool->superCellToOfflineID(offId);
@@ -695,5 +770,9 @@ void LArSC2Ntuple::fillRODEnergy(HWIdentifier SCId, rawChanMap_t &rawChanMap, co
        ATH_MSG_DEBUG(i<<"-th cell invalid Id");
     }
  }
-
+ if(acceptETMain && m_ETThreshMain > 0. && m_caloMgrSC) { // check if cell is above threshold
+   auto result = std::reduce(m_ROD_energy.begin(), m_ROD_energy.end());
+   auto dde = m_caloMgrSC->get_element(offId);
+   if(dde && result / cosh(dde->eta()) < m_ETThreshMain) acceptETMain = false; 
+ }
 }
