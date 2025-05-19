@@ -72,7 +72,7 @@ def CPAlgorithmsCfg(flags):
     logPLCPAlgCfg.info('Do Electrons')
 
     subConfig = factory.makeConfig ('Electrons', containerName='AnalysisElectrons')
-    subConfig.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
+    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateSamplingPattern', True)
@@ -95,7 +95,7 @@ def CPAlgorithmsCfg(flags):
 
     # So SiHit electrons - should come after the standard selection in order to avoid keeping the same electrons twice
     subConfig = factory.makeConfig ('Electrons', containerName='AnalysisSiHitElectrons')
-    subConfig.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
+    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.postfix', 'SiHit')
@@ -121,7 +121,6 @@ def CPAlgorithmsCfg(flags):
     logPLCPAlgCfg.info('Do Photons')
 
     subConfig = factory.makeConfig ('Photons', containerName='AnalysisPhotons')
-    subConfig.setOptionValue ('.forceFullSimConfigForP4', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)

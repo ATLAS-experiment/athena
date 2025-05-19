@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonDetectorManager_H
@@ -18,6 +18,7 @@
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
 #include "MuonAlignmentData/sTGCAsBuiltData.h"
+#include "MuonAlignmentData/NswPassivationDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 
@@ -163,6 +164,10 @@ namespace MuonGM {
             return m_stgcAsBuildData;
         }
 
+        const NswPassivationDbData* getMMPassivation() const {
+            return m_mmPassivation;
+        }
+        void setMMPassivation(const NswPassivationDbData* passiv);
         // map the RPC station indices (0-NRpcStatType) back to the RpcIdHelper stationNames
         int rpcStationName(const int stationIndex) const;
       
@@ -215,6 +220,7 @@ namespace MuonGM {
         
         const NswAsBuiltDbData* m_nswAsBuilt{nullptr};
         const sTGCAsBuiltData* m_stgcAsBuildData {nullptr};
+        const NswPassivationDbData* m_mmPassivation{nullptr};
     
         /// RPC name caches
         std::map<int, int> m_rpcStatToIdx;

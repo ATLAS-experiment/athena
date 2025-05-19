@@ -31,6 +31,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <cmath>
 
 using namespace Acts::UnitLiterals;
+using namespace Muon::MuonStationIndex;
 
 namespace {
 
@@ -347,7 +348,7 @@ StatusCode MuonDetectorNavTest::execute() {
                 const Amg::Vector3D globalPos = toGlobalTrf(*gctx, simHit->identify())*xAOD::toEigen(simHit->localPosition());
                 const Amg::Vector3D localDir = localTrf.linear()*xAOD::toEigen(simHit->localDirection());
                 m_detId.push_back(ID);
-                m_techIdx.push_back(m_idHelperSvc->technologyIndex(ID));
+                m_techIdx.push_back(toInt(m_idHelperSvc->technologyIndex(ID)));
                 m_gasGapId.push_back(layerHash(ID));
 
                 m_truthLoc.push_back(localPos);

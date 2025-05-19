@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimSpacepointRoadFilterTool.cxx
@@ -150,8 +150,8 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             retval = false;
 
             // Update the spacepoint vectors.
-            spacepoints_in = new_sp_in;
-            spacepoints_out = new_sp_out;
+            spacepoints_in = std::move(new_sp_in);
+            spacepoints_out = std::move(new_sp_out);
 
             // Now update the two layers accordingly, having converted invalid SPs back to paired hits.
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_in = spacepoints_in;
@@ -249,7 +249,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
                 // Because we are only iterating up to the *original* size, we can add new
                 // entries to the end like this.
                 // Require that we only keep roads that have enough hits to save time.
-                working_roads[i] = spacepoints_only;
+                working_roads[i] = std::move(spacepoints_only);
                 if (strips_only.getNHitLayers() >= m_threshold) {
                     working_roads.push_back(strips_only);
                 }

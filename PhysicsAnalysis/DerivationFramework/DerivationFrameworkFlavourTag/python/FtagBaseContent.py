@@ -134,6 +134,9 @@ def trigger_setup(SlimmingHelper, option=''):
         SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10tclcwsubjesFSAux.')
         SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a10ttclcwjesFS')
         SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10ttclcwjesFSAux.')
+    if option == 'FTAG5':
+        SlimmingHelper.IncludeTriggerNavigation = True
+        SlimmingHelper.IncludeJetTriggerContent = True
 
 
 def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):

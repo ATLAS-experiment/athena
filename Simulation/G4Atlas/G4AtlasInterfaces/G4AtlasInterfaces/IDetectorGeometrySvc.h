@@ -7,8 +7,11 @@
 
 #include "GaudiKernel/IService.h"
 
-#include <vector>
 #include <string>
+#include <vector>
+
+// Athena headers
+#include "IDetectorConstructionTool.h"
 
 /** @class IDetectorGeometrySvc IDetectorGeometrySvc.h "G4AtlasInterfaces/IDetectorGeometrySvc.h"
  *
@@ -22,12 +25,14 @@ class G4VUserDetectorConstruction;
 
 class IDetectorGeometrySvc : virtual public IService {
  public:
+  using UPDetectorConstruction =
+      IDetectorConstructionTool::UPDetectorConstruction;
   IDetectorGeometrySvc() {}
   virtual ~IDetectorGeometrySvc() {}
   /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID(IDetectorGeometrySvc, 1, 0);
 
-  virtual G4VUserDetectorConstruction* GetDetectorConstruction() = 0;
+  virtual UPDetectorConstruction GetDetectorConstruction() = 0;
 
   virtual std::vector<std::string>& GetParallelWorldNames() = 0;
 

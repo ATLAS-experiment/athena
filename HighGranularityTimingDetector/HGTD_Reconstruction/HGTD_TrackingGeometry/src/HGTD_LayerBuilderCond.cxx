@@ -256,7 +256,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
       std::map< const Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
       std::map< const Trk::Surface*,Amg::Vector3D >::iterator usmIter = uniqueSurfaceMap.end();
       // check the registered surfaces in the binned array
-      Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
+      std::span<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
       size_t dsumCheckSurfaces = 0;
       double lastPhi = 0.;
       for (const auto & asurfIter : arraySurfaces){
@@ -293,7 +293,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
         currentBinnedArray.get(), rBins, phiBins);
 
     // register the layer to the surfaces
-    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = currentBinnedArray->arrayObjects();
+    std::span<Trk::Surface * const> layerSurfaces = currentBinnedArray->arrayObjects();
     // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
     // activeLayerTransform deleted in 'Surface' baseclass
     Trk::DiscLayer* activeLayer = new Trk::DiscLayer(activeLayerTransform,
@@ -332,7 +332,7 @@ const Trk::BinnedLayerMaterial HGTD_LayerBuilderCond::discLayerMaterial(double r
   return Trk::BinnedLayerMaterial(layerBinUtilityR);
 }
 
-void HGTD_LayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const>& layerSurfaces, const Trk::Layer& lay) const
+void HGTD_LayerBuilderCond::registerSurfacesToLayer(std::span<Trk::Surface * const>& layerSurfaces, const Trk::Layer& lay) const
 {
    if (!m_setLayerAssociation) return;
    // register the surfaces to the layer

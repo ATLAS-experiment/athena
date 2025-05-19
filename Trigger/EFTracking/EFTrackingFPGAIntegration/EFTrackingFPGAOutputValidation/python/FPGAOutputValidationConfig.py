@@ -26,8 +26,6 @@ def FPGAOutputValidationCfg(flags, **kwargs):
         monitoringTool.defineHistogram("diff_pixel_globalx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globalx;Global position x;", xbins = 200, xmin = -0.05, xmax = 0.05)
         monitoringTool.defineHistogram("diff_pixel_globaly",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globaly;Global position y;", xbins = 200, xmin = -0.05, xmax = 0.05)
         monitoringTool.defineHistogram("diff_pixel_globalz",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globalz;Global position z;", xbins = 200, xmin = -0.05, xmax = 0.05)        
-        monitoringTool.defineHistogram("diff_pixel_omegax",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:omegax;Omega x;", xbins = 200, xmin = -1, xmax = 1)
-        monitoringTool.defineHistogram("diff_pixel_omegay",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:omegay;Omega y;", xbins = 200, xmin = -1, xmax = 1)
         monitoringTool.defineHistogram("diff_pixel_channelsphi", path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:channels in phi;Channels in #phi;", xbins = 10, xmin = -5, xmax = 5)
         monitoringTool.defineHistogram("diff_pixel_channelseta", path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:channels in eta;Channels in #eta;", xbins = 10, xmin = -5, xmax = 5)        
         monitoringTool.defineHistogram("diff_pixel_widtheta", path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:width in eta;Channels in #phi;", xbins = 10, xmin = -5, xmax = 5)
@@ -55,9 +53,6 @@ def FPGAOutputValidationCfg(flags, **kwargs):
         monitoringTool.defineHistogram(f"{key}_GLOBALPOSITION_X", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_GLOBALPOSITION_X;Global position x [mm];", xbins = 200, xmin = -350, xmax = 350)
         monitoringTool.defineHistogram(f"{key}_GLOBALPOSITION_Y", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_GLOBALPOSITION_Y;Global position y [mm];", xbins = 200, xmin = -350, xmax = 350)
         monitoringTool.defineHistogram(f"{key}_GLOBALPOSITION_Z", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_GLOBALPOSITION_Z;Global position z [mm];", xbins = 200, xmin = -3000, xmax =3000)
-
-        monitoringTool.defineHistogram(f"{key}_OMEGA_X", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_OMEGA_X;Omega X;", xbins = 100, xmin = 0, xmax = 1)
-        monitoringTool.defineHistogram(f"{key}_OMEGA_Y", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_OMEGA_Y;Omega Y;", xbins = 100, xmin = 0, xmax = 1)
 
         monitoringTool.defineHistogram(f"{key}_CHANNELS_IN_PHI", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_CHANNELS_IN_PHI;Channels in #phi;", xbins = 100, xmin = 0, xmax = 100)
         monitoringTool.defineHistogram(f"{key}_CHANNELS_IN_ETA", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_CHANNELS_IN_ETA;Channels in #eta;", xbins = 100, xmin = 0, xmax = 100)

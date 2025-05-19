@@ -23,31 +23,8 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   , m_bIsConfigured(false)
   , m_iRunNumber(0)
   , m_iMu(0)
-  , m_tPRWTool("")
 {
   declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );
-  declareProperty( "InputFilePathRecoHadTau",      m_sInputFilePathRecoHadTau      = "" );
-  declareProperty( "InputFilePathEleIDHadTau",     m_sInputFilePathEleIDHadTau     = "" );
-  declareProperty( "InputFilePathEleIDElectron",   m_sInputFilePathEleIDElectron   = "" );
-  declareProperty( "InputFilePathJetIDHadTau",     m_sInputFilePathJetIDHadTau     = "" );
-  declareProperty( "InputFilePathTriggerHadTau",   m_sInputFilePathTriggerHadTau   = "" );
-  declareProperty( "VarNameRecoHadTau",            m_sVarNameRecoHadTau            = "" );
-  declareProperty( "VarNameEleIDHadTau",           m_sVarNameEleIDHadTau           = "" );
-  declareProperty( "VarNameEleIDElectron",         m_sVarNameEleIDElectron         = "" );
-  declareProperty( "VarNameJetIDHadTau",           m_sVarNameJetIDHadTau           = "" );
-  declareProperty( "VarNameDecayModeHadTau",       m_sVarNameDecayModeHadTau       = "" );
-  declareProperty( "VarNameTriggerHadTau",         m_sVarNameTriggerHadTau         = "" );
-  declareProperty( "RecommendationTag",            m_sRecommendationTag            = "2022-prerec" );
-  declareProperty( "TriggerName",                  m_sTriggerName                  = "" );
-  declareProperty( "AutoTriggerYear",              m_bReadRandomRunNumber          = false );
-  declareProperty( "TriggerSFMeasurement",         m_sTriggerSFMeasurement         = "combined" ); // "combined", "Ztautau" or "ttbar"
-  declareProperty( "UseTauSubstructure",           m_bUseTauSubstructure           = false );
-  declareProperty( "JetIDLevel",                   m_iJetIDLevel                   = (int)JETIDNONE );
-  declareProperty( "EleIDLevel",                   m_iEleIDLevel                   = (int)ELEIDNONE );
-  declareProperty( "Campaign",                     m_sCampaign                     = "" ); // MC20, MC23
-  declareProperty( "useFastSim",                   m_useFastSim                    = false );
-  declareProperty( "SkipTruthMatchCheck",          m_bSkipTruthMatchCheck          = false );
-  declareProperty( "PileupReweightingTool",        m_tPRWTool );
 }
 
 
@@ -411,7 +388,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       if (m_sInputFilePathTriggerHadTau.empty()) {
         // Determine the input file name from the given trigger name.
 	if(m_sCampaign=="mc23a"){
-          if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
+          if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
             m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2022"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
           }
           else {
@@ -419,7 +396,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             return StatusCode::FAILURE;
           }
 	} if(m_sCampaign=="mc23d"){
-          if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
+          if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
             m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
           }
           else {
@@ -559,19 +536,19 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
 	// Every other trigger having "tau160_medium1" is only part of 2016.
 	// Every other trigger having "tau160" is only part of 2017/2018.
 	// Lastly check for other possible triggers, if this is not fulfilled the passed trigger is not supported.
-	if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
+	if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
 	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2018aftTS1"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
 	}
-	else if (m_sTriggerName.find("tracktwoEF") != std::string::npos) {
+	else if (m_sTriggerName.value().find("tracktwoEF") != std::string::npos) {
 	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2018"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
 	}
-	else if (m_sTriggerName.find("tau160_medium1") != std::string::npos) {
+	else if (m_sTriggerName.value().find("tau160_medium1") != std::string::npos) {
 	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2016"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
 	}
-	else if ((m_sTriggerName.find("tau160") != std::string::npos) || (m_sTriggerName.find("tau60") != std::string::npos)) {
+	else if ((m_sTriggerName.value().find("tau160") != std::string::npos) || (m_sTriggerName.value().find("tau60") != std::string::npos)) {
 	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data1718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
 	}
-	else if ((m_sTriggerName.find("tau125") != std::string::npos) || (m_sTriggerName.find("tau25") != std::string::npos) || (m_sTriggerName.find("tau35") != std::string::npos) || (m_sTriggerName.find("tau50") != std::string::npos) || (m_sTriggerName.find("tau80") != std::string::npos) ) {
+	else if ((m_sTriggerName.value().find("tau125") != std::string::npos) || (m_sTriggerName.value().find("tau25") != std::string::npos) || (m_sTriggerName.value().find("tau35") != std::string::npos) || (m_sTriggerName.value().find("tau50") != std::string::npos) || (m_sTriggerName.value().find("tau80") != std::string::npos) ) {
 	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data161718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
 	}
 	else {

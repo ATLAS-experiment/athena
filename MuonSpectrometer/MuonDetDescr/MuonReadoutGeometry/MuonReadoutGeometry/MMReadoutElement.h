@@ -27,7 +27,7 @@ namespace MuonGM {
         friend class MuonGMR4::ReadoutGeomCnvAlg;
         /** constructor */
         MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, 
-                         MuonDetectorManager* mgr, const NswPassivationDbData*);
+                         MuonDetectorManager* mgr);
 
         /** destructor */
         ~MMReadoutElement();
@@ -158,7 +158,6 @@ namespace MuonGM {
 
         int m_nlayers{0};  // #of gas gaps
 
-        const NswPassivationDbData* m_passivData{nullptr};
 
         int m_ml{0};  // multilayer (values: 1,2)
 
@@ -230,9 +229,8 @@ namespace MuonGM {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return -1;
 
-        const PCBPassivation& passiv = m_passivData ? m_passivData->getPassivation(id) : s_dummy_passiv;
-        // Let's keep it for the moment as we have to think about proper treatmeant of the non-passivated stuff
-        // if (m_passivData && !passiv.valid) return -1;
+        const PCBPassivation& passiv = manager()->getMMPassivation() ? 
+                                       manager()->getMMPassivation()->getPassivation(id) : s_dummy_passiv;
 
         double l = design->channelHalfLength(m_idHelper.channel(id), true);
         if (l < 0) return -1;
@@ -243,9 +241,8 @@ namespace MuonGM {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return -1;
 
-        const PCBPassivation& passiv = m_passivData ? m_passivData->getPassivation(id) : s_dummy_passiv;
-        // Let's keep it for the moment as we have to think about proper treatmeant of the non-passivated stuff
-        // if (m_passivData && !passiv.valid) return -1;
+        const PCBPassivation& passiv = manager()->getMMPassivation() ? 
+                                       manager()->getMMPassivation()->getPassivation(id) : s_dummy_passiv;
 
         double l = design->channelHalfLength(m_idHelper.channel(id), false);
         if (l < 0) return -1;
@@ -264,8 +261,8 @@ namespace MuonGM {
         //==============================================
         int pcb      = (stripNo-1)/1024 + 1; // starts from 1
         int pcbStrip = stripNo % 1024;// - 1024*(pcb - 1);
-        const PCBPassivation& pcbPassiv = m_passivData ? m_passivData->getPassivation(channelId) : s_dummy_passiv;
-        // if(m_passivData && !pcbPassiv.valid) return false;
+        const PCBPassivation& pcbPassiv = manager()->getMMPassivation() ? 
+                                          manager()->getMMPassivation()->getPassivation(channelId) : s_dummy_passiv;
         // the passivated width is constant along the PCB edge (not along y for stereo strips)
         bool topPcb{pcb == 5 || (std::abs(getStationEta()) == 2 && pcb == 3)};
         int pcbStripMin =    1 + (int)std::floor((design->passivatedHeight(pcbPassiv.bottom, pcb ==1) + 0.5*design->inputPitch - tol1)/design->inputPitch); // first pcb strip surviving passivation

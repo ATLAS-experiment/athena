@@ -1023,8 +1023,8 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
   
   // loop over confined layers
   if (confinedLayers){
-    Trk::BinnedArraySpan<Trk::Layer const * const> layerVector =  confinedLayers->arrayObjects();
-    Trk::BinnedArraySpan<Trk::Layer const * const>::iterator layerIter = layerVector.begin();
+    std::span<Trk::Layer const * const> layerVector =  confinedLayers->arrayObjects();
+    std::span<Trk::Layer const * const>::iterator layerIter = layerVector.begin();
     // loop over layers
     for ( ; layerIter != layerVector.end(); ++layerIter){
       // push_back the layer
@@ -1113,8 +1113,8 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
         if (layerSepHelper) processTrkLayer(*layerIter, layerSepHelper, tvol->colorCode());
         // Surface
         if (layerSubSurfaces && surfaceSepHelper){
-          Trk::BinnedArraySpan<Trk::Surface const * const> surfaceVector = layerSubSurfaces->arrayObjects();
-          Trk::BinnedArraySpan<Trk::Surface const * const>::iterator surfaceIter = surfaceVector.begin();
+          std::span<Trk::Surface const * const> surfaceVector = layerSubSurfaces->arrayObjects();
+          std::span<Trk::Surface const * const>::iterator surfaceIter = surfaceVector.begin();
           for ( ; surfaceIter != surfaceVector.end(); ++surfaceIter ){
             // push_back the surface
             if (*surfaceIter)
@@ -1128,9 +1128,9 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
   const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol->confinedVolumes();
   // get the confined volumes and loop over it -> call recursively
   if (confinedVolumes){
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIter = volumes.begin();
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
+    std::span<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
+    std::span<Trk::TrackingVolume const * const>::iterator volIter = volumes.begin();
+    std::span<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
     for ( ; volIter != volIterEnd; ++volIter)
       if (*volIter) processTrkVolume(*volIter);
   }
@@ -1177,9 +1177,9 @@ void VP1TrackingGeometrySystem::processMsVolume(const Trk::TrackingVolume* tvol,
     const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol->confinedVolumes();
     // get the confined volumes and loop over it -> call recursively
     if (confinedVolumes){
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIter = volumes.begin();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
+      std::span<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
+      std::span<Trk::TrackingVolume const * const>::iterator volIter = volumes.begin();
+      std::span<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
       for ( ; volIter != volIterEnd; ++volIter)
 	if (*volIter) processMsVolume(*volIter,sepHelper, layHelper);
     }
@@ -1265,8 +1265,8 @@ void VP1TrackingGeometrySystem::processMsLayDense(const Trk::TrackingVolume* tvo
   // ordered layers
   const Trk::BinnedArray< Trk::Layer >* confinedLayers = tvol->confinedLayers();
   if (confinedLayers){
-    Trk::BinnedArraySpan<Trk::Layer const * const> layerVector =  confinedLayers->arrayObjects();
-    Trk::BinnedArraySpan<Trk::Layer const * const>::iterator layerIter = layerVector.begin();
+    std::span<Trk::Layer const * const> layerVector =  confinedLayers->arrayObjects();
+    std::span<Trk::Layer const * const>::iterator layerIter = layerVector.begin();
     // loop over layers
     for ( ; layerIter != layerVector.end(); ++layerIter){
       // push_back the layer

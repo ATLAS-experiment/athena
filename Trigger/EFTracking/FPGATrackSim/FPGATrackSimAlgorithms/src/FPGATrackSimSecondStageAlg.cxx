@@ -317,9 +317,15 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     // Overlap removal
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Overlap Removal");
     ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks));
+
+    // If running NN Track tool, now we get the track parameters (it's slow so we only do it for tracks passing OLR)
+    if (m_doTracking && m_doNNTrack_2nd) {
+      ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks,false));
+    }
+    
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks) {
-        if (track.getChi2ndof() < m_trackScoreCut) {
+      if (track.getChi2ndof() < m_trackScoreCut.value()) {
             m_nTracksChi2Tot++;
             if (track.passedOR()) {
                 ntrackOLRChi2++;
@@ -362,7 +368,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
             m_nTracksFound++;
 	    if (tracks.size() > m_maxNTracksTot) m_maxNTracksTot = tracks.size();
             for (const auto& track : tracks) {
-                if (track.getChi2ndof() < m_trackScoreCut) {
+	      if (track.getChi2ndof() < m_trackScoreCut.value()) {
 		    npasschi2++;
                     if (track.passedOR()) {
 		      npasschi2OLR++;
@@ -390,7 +396,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     if (m_doHoughRootOutput2nd) {
         ATH_MSG_DEBUG("Running HoughRootOutputTool in 2nd stage.");
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping, true));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, true));
     }
 
     // Reset data pointers

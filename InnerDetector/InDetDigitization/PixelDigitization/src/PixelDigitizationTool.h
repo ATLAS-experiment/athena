@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelDigitization/PixelDigitizationTool.h
@@ -36,20 +36,29 @@
 
 
 class PixelDigitizationTool: public PileUpToolBase {
+protected:
+   struct EventData;
 public:
   PixelDigitizationTool(const std::string& type, const std::string& name, const IInterface* pIID);
 
   virtual StatusCode initialize() override;
-  virtual StatusCode processAllSubEvents(const EventContext& ctx) override;
+  virtual StatusCode processAllSubEvents(const EventContext& ctx) override {
+     return processAllSubEventsConst(ctx);
+  }
+  StatusCode processAllSubEventsConst(const EventContext& ctx) const;
   virtual StatusCode finalize() override;
 
-  virtual StatusCode prepareEvent(const EventContext& ctx, unsigned int) override;
-  StatusCode digitizeEvent(const EventContext& ctx);
+  virtual StatusCode prepareEvent(const EventContext& ctx, unsigned int) override {
+     if (!m_eventData) { m_eventData = std::make_unique<EventData>(); }
+     return prepareEvent(ctx, *m_eventData);
+  }
   virtual StatusCode mergeEvent(const EventContext& ctx) override;
   virtual StatusCode processBunchXing(int bunchXing, SubEventIterator bSubEvents,
                                       SubEventIterator eSubEvents) override final;
 protected:
-  void addSDO(SiChargedDiodeCollection* collection);
+  StatusCode digitizeEvent(const EventContext& ctx, EventData &event_data) const;
+  StatusCode prepareEvent(const EventContext& ctx, EventData &event_data) const;
+  void addSDO(SiChargedDiodeCollection* collection, EventData &event_data) const;
 private:
   PixelDigitizationTool();
   PixelDigitizationTool(const PixelDigitizationTool&);
@@ -72,17 +81,26 @@ private:
   SG::WriteHandleKey<PixelRDO_Container>     m_rdoContainerKey {
     this, "RDOCollName", "PixelRDOs", "RDO collection name"
   };
-  SG::WriteHandle<PixelRDO_Container>        m_rdoContainer {};
   SG::WriteHandleKey<InDetSimDataCollection> m_simDataCollKey {
     this, "SDOCollName", "PixelSDO_Map", "SDO collection name"
   };
-  SG::WriteHandle<InDetSimDataCollection>    m_simDataColl {};
   Gaudi::Property<int>                       m_HardScatterSplittingMode {
     this, "HardScatterSplittingMode", 0, "Control pileup & signal splitting"
   };
-  bool m_HardScatterSplittingSkipper {
-    false
+
+protected:
+  struct EventData {
+     SG::WriteHandle<PixelRDO_Container>        m_rdoContainer {};
+     SG::WriteHandle<InDetSimDataCollection>    m_simDataColl {};
+     std::unique_ptr<TimedHitCollection<SiHit> > m_timedHits {};
+     bool m_HardScatterSplittingSkipper {
+        false
+     };
   };
+  // For old interface which stores the event data in class members
+  EventData &getCurrentEventData() { assert(m_eventData); return *m_eventData; }
+  std::unique_ptr<EventData> m_eventData;
+private:
   Gaudi::Property<bool>                      m_onlyHitElements {
     this, "OnlyHitElements", false, "Process only elements with hits"
   };
@@ -91,7 +109,6 @@ private:
   Gaudi::Property<std::string> m_pixelIDName
   {this, "PixelIDName", "PixelID", "Pixel ID name"};
 
-  TimedHitCollection<SiHit>* m_timedHits {};
 
   ToolHandleArray<SensorSimTool> m_chargeTool {
     this, "ChargeTools", {}, "List of charge tools"

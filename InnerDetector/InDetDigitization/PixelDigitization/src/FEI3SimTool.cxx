@@ -1,7 +1,6 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
-
 #include "FEI3SimTool.h"
 #include "PixelDigitizationUtilities.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -40,7 +39,7 @@ StatusCode FEI3SimTool::finalize() {
 }
 
 void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
-                          CLHEP::HepRandomEngine* rndmEngine) {
+                          CLHEP::HepRandomEngine* rndmEngine) const {
   const InDetDD::PixelModuleDesign* p_design =
     static_cast<const InDetDD::PixelModuleDesign*>(&(chargedDiodes.element())->design());
 

@@ -220,7 +220,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
             toload = 'FPGATrackSimHough.FPGATrackSimGenScanCuts_incr'
         cutset = importlib.import_module(toload).cuts[flags.Trigger.FPGATrackSim.region]
     else:
-        # this allows the cut file defined in python to be loaded from the map directory                                                            
+        # this allows the cut file defined in python to be loaded from the map directory
         cutpath = os.path.join(
              PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
              f"{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py")
@@ -236,7 +236,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     BinnnedHits = CompFactory.FPGATrackSimBinnedHits("BinnedHits_1stStage")
     BinnnedHits.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
     BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
-    
+
     # set layer map
     if not flags.Trigger.FPGATrackSim.GenScan.layerStudy:
         if flags.Trigger.FPGATrackSim.oldRegionDefs:
@@ -247,7 +247,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
              PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
              f"{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json")
 
-   
+
     # make the bintool class
     BinTool = CompFactory.FPGATrackSimBinTool("BinTool_1stStage")
     BinTool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
@@ -259,18 +259,18 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
         BinDesc = CompFactory.FPGATrackSimKeyLayerBinDesc("KeyLayerBinDesc")
         BinDesc.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         BinDesc.rin=cutset["rin"]
-        BinDesc.rout=cutset["rout"]        
+        BinDesc.rout=cutset["rout"]
 
         # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
         step1 = CompFactory.FPGATrackSimBinStep("PhiBinning")
-        step1.OutputLevel=flags.Trigger.FPGATrackSim.loglevel 
+        step1.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         step1.parBins = [1,1,cutset["parBins"][2],cutset["parBins"][3],cutset["parBins"][4]]
         step2 = CompFactory.FPGATrackSimBinStep("FullBinning")
-        step2.OutputLevel=flags.Trigger.FPGATrackSim.loglevel 
+        step2.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         step2.parBins = cutset["parBins"]
-        binsteps = [step1,step2]          
+        binsteps = [step1,step2]
     else:
-        log.error("Unknown Binning Setup: ",cutset["parSet"]) 
+        log.error("Unknown Binning Setup: ",cutset["parSet"])
 
     BinTool.BinDesc = BinDesc
     BinTool.Steps=binsteps
@@ -281,11 +281,11 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     BinTool.z0FractionalPadding =0.05
     BinTool.etaFractionalPadding =0.05
     BinTool.phiFractionalPadding =0.05
-    BinTool.qOverPtFractionalPadding =0.05  
+    BinTool.qOverPtFractionalPadding =0.05
     BinTool.parMin = cutset["parMin"]
     BinTool.parMax = cutset["parMax"]
     BinnnedHits.BinTool = BinTool
-    
+
 
     # make the monitoring class
     Monitor = CompFactory.FPGATrackSimGenScanMonitoring(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanMonitoring"))
@@ -312,14 +312,14 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.threshold = 4
-        
+
     # set cuts
     for (cut,val) in cutset.items():
         if cut in ["parBins","parSet","parMin","parMax"]:
             continue
         setattr(tool,cut,val)
 
-    # even though we are not actually doing a Union, we need the 
+    # even though we are not actually doing a Union, we need the
     # RoadUnionTool because mapping is now there
     RoadUnion = CompFactory.FPGATrackSimRoadUnionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     RoadUnion.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
@@ -434,7 +434,7 @@ def FPGATrackSimHoughRootOutputToolCfg(flags,name="FPGATrackSimHoughRootOutputTo
     return result
 
 def LRTRoadFinderCfg(flags,name="LRTRoadFinder"):
-    
+
     result=ComponentAccumulator()
     LRTRoadFinder =CompFactory.FPGATrackSimHoughTransform_d0phi0_Tool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     LRTRoadFinder.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
@@ -485,7 +485,7 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
     result=ComponentAccumulator()
     OR_1st = CompFactory.FPGATrackSimOverlapRemovalTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     OR_1st.ORAlgo = "Normal"
-    OR_1st.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
+    OR_1st.doFastOR = flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
     OR_1st.NumOfHitPerGrouping = 3
     OR_1st.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     OR_1st.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
@@ -526,12 +526,12 @@ def SPRoadFilterToolCfg(flags,secondStage=False,name="FPGATrackSimSpacepointRoad
     return result
 
 def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHitsProcessAlg",**kwargs):
-    
+
     flags = prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(inputFlags)
 
     result=ComponentAccumulator()
     kwargs.setdefault("name", FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
-    
+
     theFPGATrackSimLogicalHitsProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg(**kwargs)
     theFPGATrackSimLogicalHitsProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
     theFPGATrackSimLogicalHitsProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
@@ -611,12 +611,12 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     return result
 
 def getChi2Cut(region):
-    chi2cut_l = [12, 16, 16, 16, 16, 18, 14, 16, 16, 16, 19, 15, 18, 12, 15, 15, 14, 14, 12, 15]
+    chi2cut_l = [12, 16, 16, 17, 17, 19, 15, 17, 16, 16, 19, 15, 18, 15, 15, 15, 14, 14, 12, 16]
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F
     etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
-    
+
     abs_etaRange = tuple(round(abs(val), 1) for val in etaRange)
 
     eta_to_chi2 = {
@@ -631,6 +631,14 @@ def getChi2Cut(region):
 
     return eta_to_chi2.get(abs_etaRange, 20)
 
+def ConfigureMultiRegionFlags(flags):
+    # convert regex to array of regions
+    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
+        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
+    else: # otherwise use the regionList (this overrides the region flag)
+        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
+    print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -661,14 +669,8 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
+    ConfigureMultiRegionFlags(flags)
 
-    # convert regex to array of regions
-    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
-        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
-    else: # otherwise use the regionList (this overrides the region flag)
-        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
-        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
-    print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
 
     if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut:
         flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
@@ -772,7 +774,7 @@ if __name__ == "__main__":
 
         # Configure both the dataprep and logical hits algorithms.
         acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
-        
+
         from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
         acc.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
 
@@ -794,7 +796,7 @@ if __name__ == "__main__":
                                                     ProtoTracksLocation=f"ActsProtoTracks{stage}FromFPGATrack")) # run CKF track extension on FPGA tracks
 
             if flags.Trigger.FPGATrackSim.writeToAOD:
-                acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags, 
+                acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags,
                                                                 stage = f"{stage}",
                                                                 finalTrackParticles=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
 
@@ -804,10 +806,10 @@ if __name__ == "__main__":
                                                 perEventReports = ((flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') and flags.Exec.MaxEvents<=10 ) )) # disable perEventReports for pileup samples or many events
 
         acc.store(open('AnalysisConfig.pkl','wb'))
-      
+
         acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         if flags.Trigger.FPGATrackSim.msgLimit!=-1:
-            acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit            
+            acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
             acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
 
         statusCode = acc.run(flags.Exec.MaxEvents)

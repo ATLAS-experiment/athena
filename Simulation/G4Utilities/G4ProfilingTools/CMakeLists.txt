@@ -23,3 +23,6 @@ atlas_add_library( G4ProfilingTools
                    NO_PUBLIC_HEADERS
                    PRIVATE_LINK_LIBRARIES G4ProfilingToolsLib )
 set_target_properties( G4ProfilingTools PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+
+# Install files from the package:
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -134,7 +134,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
         glueTrackingVolumes(firstVol, firstFace, *(secondVolumes[0]), secondFace);
     } else {
         // create the navigation bin array
-        BinnedArray<TrackingVolume>* navArray = nullptr;
+      std::unique_ptr<BinnedArray<TrackingVolume>> navArray = nullptr;
         // create the Array - either r-binned or z-binned
         if (firstFace == negativeFaceXY || firstFace == positiveFaceXY )
             navArray = m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(secondVolumes, true);
@@ -142,10 +142,12 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
             navArray = m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(secondVolumes, true);
 
         // set the volume array to the first boundary surface - this must always happen
-        if (firstFace != tubeInnerCover)
-            setOutsideTrackingVolumeArray( firstVol, firstFace, navArray );
-        else
-            setInsideTrackingVolumeArray( firstVol, firstFace, navArray );
+        if (firstFace != tubeInnerCover){
+            setOutsideTrackingVolumeArray( firstVol, firstFace, std::move(navArray) );
+        }
+        else{
+            setInsideTrackingVolumeArray( firstVol, firstFace, std::move(navArray) );
+        }
         // the navigation arrays are completed now - check if the boundary face should be exchanged
         // [1] the boundary face exchange ----------------------------------------------------------------------------------------
         if (boundaryFaceExchange){
@@ -194,8 +196,8 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
 {
 
 
-    BinnedArray<TrackingVolume>* navArrayOne = nullptr;
-    BinnedArray<TrackingVolume>* navArrayTwo = nullptr;
+    std::unique_ptr<BinnedArray<TrackingVolume>> navArrayOne = nullptr;
+    std::unique_ptr<BinnedArray<TrackingVolume>> navArrayTwo = nullptr;
 
     std::unique_ptr<Surface>     mLayerSurface;
     std::shared_ptr<MaterialLayer>       mLayer;
@@ -247,8 +249,8 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                     std::swap(navArrayTwo, navArrayOne);
                 }
                 // create the new boudnary surface which spans over the entire volume border
-                std::shared_ptr< BinnedArray<TrackingVolume> >  navArrayInside(navArrayOne);
-                std::shared_ptr< BinnedArray<TrackingVolume> >  navArrayOutside(navArrayTwo);
+                std::shared_ptr< BinnedArray<TrackingVolume> >  navArrayInside(std::move(navArrayOne));
+                std::shared_ptr< BinnedArray<TrackingVolume> >  navArrayOutside(std::move(navArrayTwo));
                 BoundaryDiscSurface<TrackingVolume>* boundarySurface = new BoundaryDiscSurface<TrackingVolume>(navArrayInside,navArrayOutside,dSurface);
                 std::shared_ptr<BoundarySurface<TrackingVolume> > sharedBoundarySurface(boundarySurface);
                 // attach the material layer to the shared boundary if existing
@@ -326,13 +328,11 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                 }
                 // swap if needed
                 if (volumerTwo < volumerOne){
-                    BinnedArray<TrackingVolume>* navArraySwap = navArrayOne;
-                    navArrayTwo = navArrayOne;
-                    navArrayOne = navArraySwap;
+                  std::swap(navArrayTwo, navArrayOne);
                 }
                 // create the new boudnary surface which spans over the entire volume border
-                std::shared_ptr< BinnedArray<TrackingVolume> >  navArrayInside(navArrayOne);
-                std::shared_ptr< BinnedArray<TrackingVolume> >  navArrayOutside(navArrayTwo);
+                std::shared_ptr< BinnedArray<TrackingVolume> >  navArrayInside(std::move(navArrayOne));
+                std::shared_ptr< BinnedArray<TrackingVolume> >  navArrayOutside(std::move(navArrayTwo));
                 BoundaryCylinderSurface<TrackingVolume>* boundarySurface = new BoundaryCylinderSurface<TrackingVolume>(navArrayInside,navArrayOutside,cSurface);
                 std::shared_ptr<BoundarySurface<TrackingVolume> > sharedBoundarySurface(boundarySurface);
                 // attach the material layer to the shared boundary if existing
@@ -352,7 +352,6 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                 }
                 // we are done here
                 return;
-
             }
         } // build either boundary layer or exchange the face
     } // radial glueing
@@ -362,8 +361,8 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
     ATH_MSG_VERBOSE("Leaving individual boundary surfaces for n-to-n glueing case.");
 
     // assign the navigation arrays
-    std::shared_ptr< BinnedArray< TrackingVolume> > navArrayOneShared(navArrayOne);
-    std::shared_ptr< BinnedArray< TrackingVolume> > navArrayTwoShared(navArrayTwo);
+    std::shared_ptr< BinnedArray< TrackingVolume> > navArrayOneShared(std::move(navArrayOne));
+    std::shared_ptr< BinnedArray< TrackingVolume> > navArrayTwoShared(std::move(navArrayTwo));
 
     // (a) to the first set of volumes
     for (const auto & tVolIter: firstVolumes) {
@@ -437,7 +436,10 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
     std::unique_ptr<BinnedArray<TrackingVolume>>  subVols{};
     vols.push_back(firstVol);
     vols.push_back(secondVol);
-    std::vector<std::shared_ptr<TrackingVolume>> envGlueNegXY{}, envGluePosXY{}, envGlueOuter, envGlueInner{};
+    std::vector<std::shared_ptr<TrackingVolume>> envGlueNegXY{};
+    std::vector<std::shared_ptr<TrackingVolume>> envGluePosXY{};
+    std::vector<std::shared_ptr<TrackingVolume>> envGlueOuter;
+    std::vector<std::shared_ptr<TrackingVolume>> envGlueInner{};
 
     if (firstFace==positiveFaceXY) {
         envBounds =  std::make_shared<CylinderVolumeBounds>(cyl1->innerRadius(),
@@ -521,14 +523,17 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
     enclosingVolume  =  std::make_unique<TrackingVolume>(std::move(envTransf),
                                                          envBounds,
                                                          *firstVol,
-                                                         nullptr, subVols.release(), name);
+                                                         nullptr, std::move(subVols), name);
 
     // ENVELOPE GLUE DESCRIPTION -----------------------------------------------------------------
     // glue descriptors ---- they jump to the first one
     GlueVolumesDescriptor& glueDescr  = enclosingVolume->glueVolumesDescriptor();
 
     // for the outside volumes, could be done in a loop as well, but will only save 4 lines
-    std::vector<TrackingVolume*> glueNegXY{}, gluePosXY{}, glueInner{},glueOuter{};
+    std::vector<TrackingVolume*> glueNegXY{};
+    std::vector<TrackingVolume*> gluePosXY{};
+    std::vector<TrackingVolume*> glueInner{};
+    std::vector<TrackingVolume*> glueOuter{};
     fillGlueVolumes(vols, envGlueNegXY, negativeFaceXY,glueNegXY);
     fillGlueVolumes(vols, envGluePosXY, positiveFaceXY,gluePosXY);
     fillGlueVolumes(vols, envGlueInner, tubeInnerCover,glueInner);
@@ -552,7 +557,8 @@ void TrackingVolumeHelper::fillGlueVolumes(const std::vector<std::shared_ptr<Tra
                                            const std::vector<std::shared_ptr<TrackingVolume>>& envelopeFaceVolumes,
                                            BoundarySurfaceFace glueFace,
                                            std::vector<TrackingVolume*>& glueVols){
-    std::vector<std::shared_ptr<TrackingVolume>> sharedTops{}, sharedFaces{};
+    std::vector<std::shared_ptr<TrackingVolume>> sharedTops{};
+    std::vector<std::shared_ptr<TrackingVolume>> sharedFaces{};
     return fillGlueVolumes(::toRawVec(topLevelVolumes),
                            ::toRawVec(envelopeFaceVolumes),
                            glueFace, glueVols);
@@ -618,7 +624,8 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
         GlueVolumesDescriptor& glueDescr2 = (*secondVol)->glueVolumesDescriptor();
 
         // glue volumes at navigation level
-        std::vector<TrackingVolume*> glueVols1{}, glueVols2{};
+        std::vector<TrackingVolume*> glueVols1{};
+        std::vector<TrackingVolume*> glueVols2{};
         glueVols1 = glueDescr1.glueVolumes(firstFace);
         glueVols2 = glueDescr2.glueVolumes(secondFace);
 
@@ -749,14 +756,6 @@ void TrackingVolumeHelper::setInsideTrackingVolume(TrackingVolume& tvol,
 /** Simply forward to base class method to enhance friendship relation */
 void TrackingVolumeHelper::setInsideTrackingVolumeArray(TrackingVolume& tvol,
                                                         BoundarySurfaceFace face,
-                                                        BinnedArray<TrackingVolume>* insidevolarray) const {
-    TrackingVolumeManipulator::setInsideVolumeArray(tvol,face,insidevolarray);
-}
-
-
-/** Simply forward to base class method to enhance friendship relation */
-void TrackingVolumeHelper::setInsideTrackingVolumeArray(TrackingVolume& tvol,
-                                                        BoundarySurfaceFace face,
                                                         std::shared_ptr<BinnedArray<TrackingVolume> > insidevolarray) const {
     TrackingVolumeManipulator::setInsideVolumeArray(tvol,face,insidevolarray);
 }
@@ -768,16 +767,6 @@ void TrackingVolumeHelper::setOutsideTrackingVolume(TrackingVolume& tvol,
                                                     TrackingVolume* outsidevol) const {
     ATH_MSG_VERBOSE( "     -> Glue '" << outsidevol->volumeName() << "' at face " << face << " to '" << tvol.volumeName() << "'.");
     TrackingVolumeManipulator::setOutsideVolume( tvol, face, outsidevol );
-}
-
-
-/** Simply forward to base class method to enhance friendship relation */
-void TrackingVolumeHelper::setOutsideTrackingVolumeArray(TrackingVolume& tvol,
-                                                         BoundarySurfaceFace face,
-                                                         BinnedArray<TrackingVolume>* outsidevolarray) const {
-    unsigned int numVols = outsidevolarray->arrayObjects().size() ;
-    ATH_MSG_VERBOSE( "     -> Glue " << numVols << " volumes at face " << face << " to '" << tvol.volumeName() );
-    TrackingVolumeManipulator::setOutsideVolumeArray( tvol, face, outsidevolarray );
 }
 
 

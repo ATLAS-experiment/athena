@@ -118,7 +118,6 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty("pTmin",                    m_pTmin = 1000.0,"Triplet pT threshold is pTmin*Triplet_MinPtFrac" );
   declareProperty("Triplet_MinPtFrac",        m_tripletMinPtFrac = 0.3,"Triplet pT threshold is pTmin*Triplet_MinPtFrac");
   declareProperty("doSeedRedundancyCheck",    m_checkSeedRedundancy = false,"skip Triplets already used in a track");
-  declareProperty( "ConnectionFileName",      m_connectionFile = "binTables_ITK_RUN4.txt");
 
   /** settings for the ML-enhanced track seeding */
   declareProperty("UseTrigSeedML",              m_tcs.m_useTrigSeedML = 0,"set ML-based seed selection mode (0 disables)" );

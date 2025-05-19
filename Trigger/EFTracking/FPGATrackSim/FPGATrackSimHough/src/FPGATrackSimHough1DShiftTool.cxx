@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimHough1DShiftTool.cxx
@@ -706,7 +706,7 @@ void FPGATrackSimHough1DShiftTool::calculateDropable()
        }
     }
     
-    m_dropable[iShift]=drops;
+    m_dropable[iShift]=std::move(drops);
 
   }
 

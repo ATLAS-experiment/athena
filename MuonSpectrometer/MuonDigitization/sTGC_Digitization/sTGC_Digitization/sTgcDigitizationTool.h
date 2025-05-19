@@ -179,6 +179,8 @@ private:
 
   Gaudi::Property<double> m_stripChargeScale{this, "stripChargeScale",0.4, "strip charge scale"};
 
+  Gaudi::Property<bool> m_applyAsBuiltBLines{this, "applyAsBuiltBLines",false, "correct the hit position by the as built and B-lines parameters"};
+
   const double m_timeJitterElectronicsStrip{2.f}; //ns
   const double m_timeJitterElectronicsPad{2.f}; //ns
   const double m_hitTimeMergeThreshold{30.f}; //30ns = resolution of peak finding descriminator

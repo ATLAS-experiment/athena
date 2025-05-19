@@ -1,22 +1,32 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def SetupArgParser():
+def splitOnComma(inputs):
+    files = []
+    for item in inputs: files.extend(item.split(','))
+
+    return files
+
+
+def GetArgsFromParser():
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument( "-i", "--inputFile", required=True, help="Input file to run on ", nargs="+") # flexible number of arguments, gathered into a list
-    parser.add_argument( "-o", "--outputFile", default="MSVtxVal_out.root", help="output root file")
+    parser.add_argument( "-i", "--inputFile", required=True, help="Input files to run on. Files can be comma or space separated", nargs="+")
+    parser.add_argument( "-o", "--outputFile", default="MSVtxVal_out.NTUP.root", help="output root file")
     parser.add_argument("--maxEvents", default=-1, type=int, help="How many events shall be run maximally")
     parser.add_argument("--skipEvents", default=0, type=int, help="How many events shall be skipped")
     parser.add_argument("--threads", default=1, type=int, help="number of threads")
+    
+    args = parser.parse_args()
+    args.inputFile = splitOnComma(args.inputFile) # to support comma separated input files
 
-    return parser
+    return args
 
 
 def setupHistSvcCfg(flags, out_file="out.root", out_stream="MSVtxValidation"):
@@ -47,7 +57,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import setupServicesCfg
 
-    args = SetupArgParser().parse_args()
+    args = GetArgsFromParser()
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads
     flags.Exec.MaxEvents = args.maxEvents

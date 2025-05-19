@@ -362,8 +362,12 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   InDetDD::SiLocalPosition silPos(pDE->rawLocalPositionOfCell(cell)); 
   Amg::Vector2D localPos(silPos);
 
+  if(m_useInherentLocalCoordinates){
+    // replace localPos with the one stored in the FPGATrackSimHit
+    localPos(0,0) = h.getPhiCoord();
+    localPos(1,0) = h.getEtaCoord();
+  }
   //TODO: understand if shift is needed
-
   if (m_doShift) {
     double shift =  m_lorentzAngleToolPixel->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
@@ -544,10 +548,14 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
 
   InDet::SiWidth siWidth(Amg::Vector2D(phiWidth,1), Amg::Vector2D(width,stripLength) ); //TODO: ok??
   Amg::Vector2D localPos(centre.xPhi(),  centre.xEta()); 
+  if(m_useInherentLocalCoordinates){
+    // replace localPos with the one stored in the FPGATrackSimHit
+    localPos(0,0) = h.getPhiCoord();
+  }
   ATH_MSG_DEBUG("\t\tcentre eta: " << centre.xEta() << " phi: " << centre.xPhi());
   ATH_MSG_DEBUG("\t\tStrip length: " << stripLength );
   ATH_MSG_DEBUG("\t\tlocal position before shift: " << localPos.x() << " phi: " << localPos.y());
-
+  
   if (m_doShift) {
     double shift =  m_lorentzAngleToolStrip->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
@@ -572,7 +580,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
     localPosition(0, 0) = localInPolar.xPhi();
     localCovariance(0, 0) = designNew->phiPitchPhi() * designNew->phiPitchPhi() * (1./12.);
   }
-
+  
   Eigen::Matrix<float,3,1> globalPosition(h.getX(),h.getY(),h.getZ()); 
   ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPosition.x() << " y=" << globalPosition.y()  << " z=" << globalPosition.z() );
 

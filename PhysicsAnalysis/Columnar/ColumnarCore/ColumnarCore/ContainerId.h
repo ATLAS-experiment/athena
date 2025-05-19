@@ -75,6 +75,7 @@ namespace columnar
     electron,
     photon,
     egamma,
+    mutableEgamma,
     cluster,
     track,
     track0 = track,

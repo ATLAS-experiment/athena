@@ -14,6 +14,7 @@
 #include <boost/core/demangle.hpp>
 #include <chrono>
 #include <range/v3/all.hpp>
+#include "BeamSpotConditionsData/BeamSpotData.h"
 #include "EventInfo/EventInfo.h"
 
 #include "PileUpTools/PileUpHashHelper.h"
@@ -148,6 +149,7 @@ StatusCode PileUpMTAlg::initialize() {
   m_evtInfoContKey = "PileUpEventInfo";
   ATH_CHECK(m_evtInfoKey.initialize());
   ATH_CHECK(m_evtInfoContKey.initialize());
+  ATH_CHECK(m_beamSpotKey.initialize());
 
   // Trace skipped events
   if (m_writeTrace) {
@@ -212,6 +214,24 @@ StatusCode PileUpMTAlg::execute() {
   overlaidEvt->setBCID(evtID.bunch_crossing_id());
   overlaidEvt->setTimeStamp(evtID.time_stamp());
   overlaidEvt->setTimeStampNSOffset(evtID.time_stamp_ns_offset());
+  // Set beam spot info
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle{m_beamSpotKey, ctx};
+  if (!beamSpotHandle.isValid()) {
+    ATH_MSG_ERROR("Beam spot information not valid");
+    return StatusCode::FAILURE;
+  }
+
+  overlaidEvt->setBeamPos(beamSpotHandle->beamPos()[Amg::x],
+                          beamSpotHandle->beamPos()[Amg::y],
+                          beamSpotHandle->beamPos()[Amg::z]);
+  overlaidEvt->setBeamPosSigma(beamSpotHandle->beamSigma(0),
+                               beamSpotHandle->beamSigma(1),
+                               beamSpotHandle->beamSigma(2));
+  overlaidEvt->setBeamPosSigmaXY(beamSpotHandle->beamSigmaXY());
+  overlaidEvt->setBeamTiltXZ(beamSpotHandle->beamTilt(0));
+  overlaidEvt->setBeamTiltYZ(beamSpotHandle->beamTilt(1));
+  overlaidEvt->setBeamStatus(beamSpotHandle->beamStatus());
+
   // Pileup container
   SG::WriteHandle<xAOD::EventInfoContainer> puCont(m_evtInfoContKey, ctx);
   ATH_CHECK(puCont.record(std::make_unique<xAOD::EventInfoContainer>(),

@@ -10,6 +10,7 @@
 
 #include <ColumnarCore/ContainerId.h>
 #include <ColumnarCore/ObjectId.h>
+#include <CxxUtils/checker_macros.h>
 #include <exception>
 
 namespace columnar
@@ -38,12 +39,32 @@ namespace columnar
     {}
 
     [[nodiscard]] xAODContainer& getXAODObject () const noexcept {
-      return *m_container;}
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *container ATLAS_THREAD_SAFE = m_container;
+      return *container;}
+
+    // a version of `getXAODObject` that only exists when it is `noexcept`
+    [[nodiscard]] xAODContainer& getXAODObjectNoexcept () const noexcept {
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *container ATLAS_THREAD_SAFE = m_container;
+      return *container;}
 
     auto begin () const noexcept {
-      return ObjectRangeIteratorXAODContainer<CI> (m_container->begin());}
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *container ATLAS_THREAD_SAFE = m_container;
+      return ObjectRangeIteratorXAODContainer<CI> (container->begin());}
     auto end () const noexcept {
-      return ObjectRangeIteratorXAODContainer<CI> (m_container->end());}
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *container ATLAS_THREAD_SAFE = m_container;
+      return ObjectRangeIteratorXAODContainer<CI> (container->end());}
 
     [[nodiscard]] bool empty () const noexcept {
       return m_container->empty();}
@@ -119,6 +140,10 @@ namespace columnar
     {}
 
     [[nodiscard]] xAODContainer& getXAODObject () const noexcept {
+      return *m_singlet;}
+
+    // a version of `getXAODObject` that only exists when it is `noexcept`
+    [[nodiscard]] xAODContainer& getXAODObjectNoexcept () const noexcept {
       return *m_singlet;}
 
     auto begin () const noexcept {
@@ -203,6 +228,10 @@ namespace columnar
     [[nodiscard]] std::size_t endIndex () const noexcept {
       return m_endIndex;}
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     ObjectRange (const xAODContainer& /*val_container*/)
     {
       throw std::logic_error ("can't call xAOD function in columnar mode");
@@ -214,6 +243,10 @@ namespace columnar
     [[nodiscard]] std::size_t size () const noexcept {
       return m_endIndex - m_beginIndex;}
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     [[nodiscard]] xAODContainer& getXAODObject () const {
       throw std::logic_error ("can't call xAOD function in columnar mode");}
 
@@ -286,6 +319,7 @@ namespace columnar
   using JetRange = ObjectRange<ContainerId::jet>;
   using MutableJetRange = ObjectRange<ContainerId::mutableJet>;
   using EgammaRange = ObjectRange<ContainerId::egamma>;
+  using MutableEgammaRange = ObjectRange<ContainerId::mutableEgamma>;
   using ElectronRange = ObjectRange<ContainerId::electron>;
   using PhotonRange = ObjectRange<ContainerId::photon>;
   using MuonRange = ObjectRange<ContainerId::muon>;

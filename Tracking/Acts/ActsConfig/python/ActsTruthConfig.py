@@ -71,7 +71,8 @@ def ActsTrackToTruthAssociationAlgCfg(flags,
     kwargs.setdefault('ACTSTracksLocation','ActsTracks')
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
-    kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
+    if flags.Detector.EnableHGTD and (flags.Acts.useHGTDClusterInTrackFinding or flags.HGTD.doActs):
+        kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
 
@@ -119,15 +120,15 @@ def ActsTruthAssociationAlgCfg(flags,
     return acc
 
 def setDefaultTruthMatchingArgs(kwargs) :
-    kwargs.setdefault('MatchWeights',[0.,               # other
-                                      10., 5.,           # ID (pixel, strips)
-                                      0.,  0., 0. , 0.,  # MS
-                                      0. ])             # HGTD
+    kwargs.setdefault('MatchWeights',[0.,                    # other
+                                      10., 5.,               # ID (pixel, strips)
+                                      0.,  0., 0. , 0., 0.,  # MS (MdtDriftCircle, RpcStrip, TgcStrip, MMCluster, sTgcStrip)
+                                      0. ])                  # HGTD
     # weights used for hit purity and hit efficiencies
-    kwargs.setdefault('CountWeights',[0.,               # other
-                                      1.,1.,            # ID (pixel, strips)
-                                      0., 0., 0. , 0.,  # MS
-                                      0. ])             # HGTD
+    kwargs.setdefault('CountWeights',[0.,                   # other
+                                      1.,1.,                # ID (pixel, strips)
+                                      0., 0., 0. , 0., 0.,  # MS (MdtDriftCircle, RpcStrip, TgcStrip, MMCluster, sTgcStrip)
+                                      0. ])                 # HGTD
     kwargs.setdefault('StatisticPtBins',[1e3,2.5e3,5e3,10e3,100e3])
     kwargs.setdefault('ShowDetailedTables',False)
     kwargs.setdefault('PdgIdCategorisation',False)

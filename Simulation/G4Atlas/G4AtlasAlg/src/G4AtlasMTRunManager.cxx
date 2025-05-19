@@ -73,7 +73,7 @@ void G4AtlasMTRunManager::InitializeGeometry()
   }
 
   // Create/assign detector construction
-  SetUserInitialization( m_detGeoSvc->GetDetectorConstruction() );
+  SetUserInitialization(m_detGeoSvc->GetDetectorConstruction().release());
   if (userDetector) {
     G4RunManager::InitializeGeometry();
   }

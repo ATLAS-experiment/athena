@@ -25,10 +25,7 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
   if flags.Acts.GbtsConnectionTableVersion == 0:
     kwargs.setdefault("MatchBeforeCreate", True)
   kwargs.setdefault("ConnectionFileName",
-                    "binTables_ITK_RUN4_LRT.txt" if isLRT else
-                    "binTables_ITK_RUN4.txt" if flags.Acts.GbtsConnectionTableVersion == 0 else
-                    "binTables_ITK_RUN4_UPD_10_APR_2025.txt" if flags.Acts.GbtsConnectionTableVersion == 1 else
-                    "binTables_ITK_RUN4_test.txt")
+                    "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
 
   acc.setPrivateTools(CompFactory.Gbts2ActsSeedingTool(name, **kwargs))
 
@@ -245,8 +242,9 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
     # Do not overwrite if already present in `kwargs`
     seedTool_pixel = None
     if 'SeedToolPixel' not in kwargs:
+        from InDetConfig.ITkActsHelpers import isFastPrimaryPass
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            if flags.Tracking.doITkFastTracking:
+            if isFastPrimaryPass(flags):
                 seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags))
             else:
                 seedTool_pixel = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
@@ -256,7 +254,7 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
         elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts2:
             seedTool_pixel = acc.popToolsAndMerge(ActsGbts2SeedingTrigToolCfg(flags))
         else:
-            if flags.Tracking.doITkFastTracking:
+            if isFastPrimaryPass(flags):
                 kwargs.setdefault("useFastTracking", True)
                 seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags))
             else:
@@ -299,7 +297,8 @@ def ActsPixelSeedingAlgCfg(flags,
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
-    useFastTracking = kwargs.get("useFastTracking", flags.Tracking.doITkFastTracking)
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+    useFastTracking = kwargs.get("useFastTracking", isFastPrimaryPass(flags))
 
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
@@ -407,10 +406,11 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
     processStrips = flags.Detector.EnableITkStrip
 
     # For conversion pass we do not process pixels
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
     if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
         processPixels = False
     # For main pass disable strips if fast tracking configuration
-    elif flags.Tracking.doITkFastTracking:
+    elif isFastPrimaryPass(flags):
         processStrips = False
 
     kwargs.setdefault('processPixels', processPixels)
@@ -430,7 +430,7 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
     if processPixels:
         # Seeding algo
         kwargs.setdefault('PixelSeedingAlg.name', f'{flags.Tracking.ActiveConfig.extension}PixelSeedingAlg')
-        kwargs.setdefault('PixelSeedingAlg.useFastTracking', flags.Tracking.doITkFastTracking)    
+        kwargs.setdefault('PixelSeedingAlg.useFastTracking', isFastPrimaryPass(flags))
         kwargs.setdefault('PixelSeedingAlg.OutputSeeds', f'{flags.Tracking.ActiveConfig.extension}PixelSeeds')
 
         pixelSpacePoints = ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints']        

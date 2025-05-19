@@ -41,6 +41,13 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "OfflineVtxKey" , "PrimaryVertices" )
     icf.addFlag( "TruthVtxKey"  , "TruthVertices" )
     icf.addFlag( "pileupSwitch"  , "HardScatter" )
+    # Cluster/space-point collections properties (for offline-type, ITk/ACTS only)
+    icf.addFlag( "doClusterValidation"      , False )
+    icf.addFlag( "PixelClusterKey"          , "" )
+    icf.addFlag( "StripClusterKey"          , "" )
+    icf.addFlag( "PixelSpacePointKey"       , "" )
+    icf.addFlag( "StripSpacePointKey"       , "" )
+    icf.addFlag( "StripOverlapSpacePointKey", "" )
     # Matching properties
     icf.addFlag( "MatchingType"    , "DeltaRMatch" )
     icf.addFlag( "dRmax"           , 0.05 )

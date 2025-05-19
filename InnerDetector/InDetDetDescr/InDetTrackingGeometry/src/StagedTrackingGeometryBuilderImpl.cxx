@@ -847,7 +847,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
       }
       binUtils.push_back(*(surfArray->binUtility()));
       if (id+1<discOrder.size()) rsteps.push_back( 0.5*(rbounds[id].second+rbounds[id+1].first));
-      Trk::BinnedArraySpan<Trk::Surface * const> ringSurf =surfArray->arrayObjects();
+      std::span<Trk::Surface * const> ringSurf =surfArray->arrayObjects();
       surfs.insert(surfs.end(),ringSurf.begin(),ringSurf.end());
 
     }
@@ -880,7 +880,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
 
   Amg::Transform3D transf;
   transf = Amg::Translation3D(0.,0.,disc_pos);
-  Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = mergeBA->arrayObjects();
+  std::span<Trk::Surface * const> layerSurfaces     = mergeBA->arrayObjects();
   // create disc layer
   // layer creation; deletes mergeBA in baseclass 'Layer' upon destruction
   Trk::DiscLayer* layer =

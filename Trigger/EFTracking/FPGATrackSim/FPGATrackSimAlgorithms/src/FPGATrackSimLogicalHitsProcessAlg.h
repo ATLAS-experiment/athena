@@ -117,7 +117,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for sliced hits in output ROOT file." };
         Gaudi::Property<std::string> m_outputBranch {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
         Gaudi::Property<std::string> m_sliceFirstPixelBranch {this, "FirstPixelBranchName", "LogicalEventFirstPixelHeader", "Name of the branch for first stage pixel hits in output ROOT file"};
-        Gaudi::Property<std::string> m_sliceSecondPixelBranch {this, "SecondPixelBranchName", "LogicalEventFirstPixelHeader", "Name of the branch for second stage pixel hits in output ROOT file"};
+        Gaudi::Property<std::string> m_sliceSecondPixelBranch {this, "SecondPixelBranchName", "LogicalEventSecondPixelHeader", "Name of the branch for second stage pixel hits in output ROOT file"};
         Gaudi::Property<std::string> m_sliceStripBranch {this, "StripBranchName", "LogicalEventSpacepointHeader", "Name of the branch for (post-SP) strip hits in output ROOT file"};
         Gaudi::Property<std::string> m_sliceStripBranchPreSP {this, "StripPreSPBranchName", "LogicalEventStripHeader", "Name of the branch for (pre-SP) strip hits in output ROOT file"};
 

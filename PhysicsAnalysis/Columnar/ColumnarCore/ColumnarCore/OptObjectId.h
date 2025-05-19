@@ -42,7 +42,7 @@ namespace columnar
     OptObjectId (std::nullopt_t) noexcept {}
 
     OptObjectId (ObjectId<CI,ColumnarModeXAOD> val_object) noexcept
-      : m_object (&val_object.getXAODObject())
+      : m_object (&val_object.getXAODObjectNoexcept())
     {}
 
     OptObjectId (xAODObject *val_object) noexcept
@@ -72,6 +72,10 @@ namespace columnar
     [[nodiscard]] xAODObject *getXAODObject () const noexcept {
       return m_object;}
 
+    // a version of `getXAODObject` that only exists when it is `noexcept`
+    [[nodiscard]] xAODObject *getXAODObjectNoexcept () const noexcept {
+      return m_object;}
+
     [[nodiscard]] bool operator == (const OptObjectId<CI,ColumnarModeXAOD>& that) const noexcept {
       return m_object == that.m_object;}
 
@@ -87,13 +91,13 @@ namespace columnar
   template<ContainerId CI>
   bool operator== (const OptObjectId<CI,ColumnarModeXAOD>& lhs, const OptObjectId<CI,ColumnarModeXAOD>& rhs)
   {
-    return lhs.getXAODObject() == rhs.getXAODObject();
+    return lhs.getXAODObjectNoexcept() == rhs.getXAODObjectNoexcept();
   }
 
   template<ContainerId CI>
   bool operator!= (const OptObjectId<CI,ColumnarModeXAOD>& lhs, const OptObjectId<CI,ColumnarModeXAOD>& rhs)
   {
-    return lhs.getXAODObject() != rhs.getXAODObject();
+    return lhs.getXAODObjectNoexcept() != rhs.getXAODObjectNoexcept();
   }
 
 
@@ -117,6 +121,10 @@ namespace columnar
       : m_data (val_object.getData()), m_index (val_object.getIndex())
     {}
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     OptObjectId (xAODObject * /*val_object*/)
     {
       throw std::logic_error ("can't call xAOD function in columnar mode");
@@ -126,6 +134,10 @@ namespace columnar
 
     OptObjectId& operator = (const OptObjectId<CI,ColumnarModeArray>& that) noexcept = default;
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     [[nodiscard]] xAODObject *getXAODObject () const {
       throw std::logic_error ("can't call xAOD function in columnar mode");}
 
@@ -203,6 +215,7 @@ namespace columnar
   using OptElectronId = OptObjectId<ContainerId::electron>;
   using OptPhotonId = OptObjectId<ContainerId::photon>;
   using OptEgammaId = OptObjectId<ContainerId::egamma>;
+  using OptMutableEgammaId = OptObjectId<ContainerId::mutableEgamma>;
   using OptClusterId = OptObjectId<ContainerId::cluster>;
   using OptTrackId = OptObjectId<ContainerId::track>;
   using OptTrack0Id = OptObjectId<ContainerId::track0>;

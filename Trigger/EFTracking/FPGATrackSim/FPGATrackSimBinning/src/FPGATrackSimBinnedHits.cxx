@@ -16,6 +16,7 @@
 #include <GaudiKernel/StatusCode.h>
 #include <nlohmann/json.hpp>
 
+using FPGATrackSimBinUtil::StoredHit;
 
 StatusCode FPGATrackSimBinnedHits::initialize() {
   // Dump the configuration to make sure it propagated through right

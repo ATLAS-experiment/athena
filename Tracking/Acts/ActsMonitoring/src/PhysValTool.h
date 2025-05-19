@@ -80,6 +80,15 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_doPixelSpacePoints {this, "doPixelSpacePoints", false, "Analyse Pixel Space Points"};
     Gaudi::Property<bool> m_doStripSpacePoints {this, "doStripSpacePoints", false, "Analyse Strip Space Points"};
     Gaudi::Property<bool> m_doStripOverlapSpacePoints {this, "doStripOverlapSpacePoints", false, "Analyse Overlap Strip Space Points"};
+
+    Gaudi::Property< std::string > m_folder { this, "folder", "SquirrelPlots/Acts", "Main output directory path" };
+    /// If these propeties are empty (default) the directories are created with the same name of the corresponding collection 
+    Gaudi::Property< std::string > m_pixelClustersDir { this, "pixelClustersDirectory", "", "Name of directory for pixel cluster plots" };
+    Gaudi::Property< std::string > m_stripClustersDir { this, "stripClustersDirectory", "", "Name of directory for strip cluster plots" };
+    Gaudi::Property< std::string > m_hgtdClustersDir { this, "hgtdClustersDirectory", "", "Name of directory for HGTD cluster plots" };
+    Gaudi::Property< std::string > m_pixelSPDir { this, "pixelSpacePointsDirectory", "", "Name of directory for pixel space points plots" };
+    Gaudi::Property< std::string > m_stripSPDir { this, "stripSpacePointsDirectory", "", "Name of directory for strip space points plots" };
+    Gaudi::Property< std::string > m_stripOSPDir { this, "stripSpaceOverlapPointsDirectory", "", "Name of directory for strip overlap space points plots" };
     
     std::unique_ptr< ActsTrk::PixelClusterValidationPlots > m_pixelClusterValidationPlots;
     std::unique_ptr< ActsTrk::StripClusterValidationPlots > m_stripClusterValidationPlots;

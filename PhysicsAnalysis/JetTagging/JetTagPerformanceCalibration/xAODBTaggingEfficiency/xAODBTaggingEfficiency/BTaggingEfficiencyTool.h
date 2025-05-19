@@ -306,6 +306,7 @@ private:
   /// name of the data/MC efficiency scale factor calibration file (may be changed by the @c PathResolver)
   Gaudi::Property<std::string> m_SFFile{this, "ScaleFactorFileName", ftag::defaults::cdi_path, "name of the official scale factor calibration CDI file (uses PathResolver)"};
   std::string m_SFFileFull;
+  Gaudi::Property<std::string> m_SelectionCDIFile{this, "SelectionCDIFileName", "", "name of the CDI file to be used to configure the selection tool if needed, will use the SF CDI file by default"};
   /// name of the optional MC efficiency file (may be changed by the @c PathResolver)
   Gaudi::Property<std::string> m_EffFile{this, "EfficiencyFileName", "", "name of optional user-provided MC efficiency CDI file"};
   Gaudi::Property<std::string> m_EffConfigFile{this, "EfficiencyConfig", "", "name of config file specifying which efficiency map to use with a given samples DSID"};
@@ -360,6 +361,7 @@ private:
 
   /// tagger name
   Gaudi::Property<std::string> m_taggerName{this, "TaggerName", ftag::defaults::tagger, "tagging algorithm name as specified in CDI file"};
+  Gaudi::Property<std::string> m_selectionTaggerName{this, "SelectionTaggerName", "", "tagging algorithm name as specified in selection CDI file, will use TaggerName by default"};
   /// operating point
   Gaudi::Property<std::string> m_OP{this, "OperatingPoint", ftag::defaults::pcbt_op, "operating point as specified in CDI file"};
   ///  jet collection name

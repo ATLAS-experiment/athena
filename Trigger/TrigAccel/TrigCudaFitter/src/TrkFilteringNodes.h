@@ -2,7 +2,7 @@
 // TrkFilteringNodes.h
 //   Header file for classes representing filtering nodes
 ///////////////////////////////////////////////////////////////////
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ///////////////////////////////////////////////////////////////////
 // Author: Dmitry Emeliyanov, RAL
 // D.Emeliyanov@rl.ac.uk
@@ -72,7 +72,7 @@ class TrkClusterNode : public TrkFilteringNode1D
     void validateMeasurement(TrkTrackState*);
     void updateTrackState(TrkTrackState*);
     double getChi2Distance(TrkTrackState*);
-    void serialize(char fileName[]);
+    void serialize(char*) {};
     void report(){};
 };
 
@@ -85,7 +85,7 @@ class TrkEndCapClusterNode : public TrkFilteringNode1D
     void validateMeasurement(TrkTrackState*);
     void updateTrackState(TrkTrackState*);
     double getChi2Distance(TrkTrackState*);
-    void serialize(char fileName[]);
+    void serialize(char*) {};
     void report(){};
 
   private:
@@ -101,7 +101,7 @@ class TrkPixelNode : public TrkFilteringNode2D
     void validateMeasurement(TrkTrackState*);
     void updateTrackState(TrkTrackState*);
     double getChi2Distance(TrkTrackState*);
-    void serialize(char fileName[]);
+    void serialize(char*) {};
     void report();
 };
 

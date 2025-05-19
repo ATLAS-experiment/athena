@@ -1006,7 +1006,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                 }
                 auto detVolVecPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
                 auto sVol = std::make_unique<Trk::TrackingVolume>(*subVol, aLVC.m_muonMaterial,
-                                                                  detVolVecPtr.release(), volName);
+                                                                  std::move(detVolVecPtr), volName);
                 // statistics
                 ++aLVC.m_frameNum;
                 aLVC.m_frameStat += detVols.size();
@@ -1069,7 +1069,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                                                                                  volBinUtil);
 
         tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, nullptr,
-                                                     subVols.release(), volumeName);
+                                                     std::move(subVols), volumeName);
         // register glue volumes
         Trk::GlueVolumesDescriptor& volGlueVolumes = tVol->glueVolumesDescriptor();
         volGlueVolumes.registerGlueVolumes(Trk::tubeInnerCover, sVols);
@@ -1086,7 +1086,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
         }
         auto muonObjsPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(muonObjs);
 
-        tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, muonObjsPtr.release(),
+        tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, std::move(muonObjsPtr),
                                                      volumeName);
         // statistics
         ++aLVC.m_frameNum;
@@ -1298,7 +1298,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                     auto detVolsPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
                     auto sVol = std::make_unique<Trk::TrackingVolume>(*subVol,
                                                                       aLVC.m_muonMaterial,
-                                                                      detVolsPtr.release(),
+                                                                      std::move(detVolsPtr),
                                                                       volName);
 
                     // statistics
@@ -1429,7 +1429,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                                                                                      hBinVecPtr);
 
         tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, nullptr,
-                                                     subVols.release(), volumeName);
+                                                     std::move(subVols), volumeName);
         // register glue volumes
         Trk::GlueVolumesDescriptor& volGlueVolumes = tVol->glueVolumesDescriptor();
         volGlueVolumes.registerGlueVolumes(Trk::tubeInnerCover, sVolsInn);
@@ -1491,7 +1491,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                 }
                 auto detVolPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
                 auto sVol = std::make_unique<Trk::TrackingVolume>(subVol, aLVC.m_muonMaterial,
-                                                                  detVolPtr.release(),
+                                                                  std::move(detVolPtr),
                                                                   volName);
                 // statistics
                 ++aLVC.m_frameNum;
@@ -1577,7 +1577,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                                                                                  volBinUtil);
 
         tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, nullptr,
-                                                     subVols.release(), volumeName);
+                                                     std::move(subVols), volumeName);
         // register glue volumes
         Trk::GlueVolumesDescriptor& volGlueVolumes = tVol->glueVolumesDescriptor();
         volGlueVolumes.registerGlueVolumes(Trk::tubeInnerCover, sVols);
@@ -1594,7 +1594,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
         }
         auto muonObjPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(muonObjs);
         tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial,
-                                                     muonObjPtr.release(),
+                                                     std::move(muonObjPtr),
                                                      volumeName);
         // statistics
         ++aLVC.m_frameNum;
@@ -1710,7 +1710,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processShield(const Trk::Volu
             }
             auto detVolPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
             auto sVol = std::make_unique<Trk::TrackingVolume>(subVol, aLVC.m_muonMaterial,
-                                                              detVolPtr.release(), volName);
+                                                              std::move(detVolPtr), volName);
 
             // statistics
             ++aLVC.m_frameNum;
@@ -1790,7 +1790,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processShield(const Trk::Volu
                                                                                  hBinVecPtr);
 
     tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, nullptr,
-                                                 subVols.release(), volumeName);
+                                                 std::move(subVols), volumeName);
     // register glue volumes
     Trk::GlueVolumesDescriptor& volGlueVolumes = tVol->glueVolumesDescriptor();
     volGlueVolumes.registerGlueVolumes(Trk::tubeInnerCover, sVolsInn);

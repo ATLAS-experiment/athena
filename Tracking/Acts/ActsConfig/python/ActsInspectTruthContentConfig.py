@@ -42,7 +42,8 @@ def ActsInspectTruthContentAlgCfg(flags,
                                                         pixel=['ITkPixelClustersToTruthParticles'],
                                                         strip=['ITkStripClustersToTruthParticles']))
 
-    kwargs.setdefault('Seeds', ['ActsFastPixelSeeds'] if flags.Tracking.doITkFastTracking else ['ActsPixelSeeds', 'ActsStripSeeds'])
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+    kwargs.setdefault('Seeds', ['ActsFastPixelSeeds'] if isFastPrimaryPass(flags) else ['ActsPixelSeeds', 'ActsStripSeeds'])
     kwargs.setdefault('Tracks', ['ActsTracks'] if not flags.Acts.doAmbiguityResolution else ['ActsResolvedTracks'])
 
     acc.addEventAlgo(CompFactory.ActsTrk.ActsInspectTruthContentAlg(name, **kwargs))

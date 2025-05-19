@@ -374,7 +374,7 @@ TrackParticleCnvAlg::convert(
             // if configured also get truth classification
             if (result->second.particleLink().cptr() &&
                 !m_truthClassifier.empty()) {
-              auto truthClass = m_truthClassifier->particleTruthClassifier(
+              auto truthClass = m_truthClassifier->particleHepMCTruthClassifier(
                 result->second.particleLink());
               type = truthClass.first;
               origin = truthClass.second;

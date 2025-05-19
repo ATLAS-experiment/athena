@@ -48,16 +48,18 @@ namespace Muon {
 
         For more details look at the mainpage of this package.
     */
-    class MuonTrackSteering : virtual public IMuonTrackFinder, public AthAlgTool {
+    class MuonTrackSteering :  public  extends <AthAlgTool , IMuonTrackFinder> {
     public:
         typedef std::vector<MuPatTrack*> TrkVec;
         typedef std::vector<Trk::Track*> TrkCollVec;
         typedef std::vector<MuPatSegment*> SegCol;
         typedef std::vector<MuPatSegment*>::iterator SegColIt;
-        typedef std::vector<SegCol> SegColVec;
-        typedef SegColVec::iterator SegColVecIt;
-        typedef SegColVec::const_iterator SegColVecCit;
-
+        /** @brief Helper container to sort the segments by station index */
+        using StSegCol_t = std::array<SegCol, MuonStationIndex::toInt(MuonStationIndex::StIndex::StIndexMax)>;
+        /** @brief Helper container to sort the segments by chamber index */
+        using ChSegCol_t = std::array<SegCol, MuonStationIndex::toInt(MuonStationIndex::ChIndex::ChIndexMax)>;
+        /** @brief  */
+        using SegColVec_t = std::vector<SegCol>;
         typedef std::set<MuonStationIndex::ChIndex> ChSet;
         typedef ChSet::iterator ChIt;
         typedef ChSet::const_iterator ChCit;
@@ -96,15 +98,15 @@ namespace Muon {
         std::unique_ptr<TrackCollection> selectTracks(std::vector<std::unique_ptr<MuPatTrack>>& candidates, bool takeOwnership = true) const;
 
         /** actual find method */
-        std::unique_ptr<TrackCollection> findTracks(const EventContext& ctx, SegColVec& chamberSegments, SegColVec& stationSegments) const;
-        bool extractSegments(const EventContext& ctx, const MuonSegmentCollection& coll, SegColVec& chamberSegments, SegColVec& stationSegments,
+        std::unique_ptr<TrackCollection> findTracks(const EventContext& ctx, ChSegCol_t& chamberSegments, StSegCol_t& stationSegments) const;
+        bool extractSegments(const EventContext& ctx, const MuonSegmentCollection& coll, ChSegCol_t& chamberSegments, StSegCol_t& stationSegments,
                              ChSet& chambersWithSegments, StSet& stationsWithSegments, GarbageContainer& trash_bin) const;
 
         StatusCode decodeStrategyVector(const std::vector<std::string>& strategy);
         std::unique_ptr<const MuonTrackSteeringStrategy> decodeStrategy(const std::string& strategy) const;
         static bool decodeList(const std::string& input, std::vector<std::string>& list) ;
 
-        std::vector<std::unique_ptr<MuPatTrack>> extendWithLayer(const EventContext& ctx, MuPatTrack& candidate, const SegColVec& segcol, unsigned int nextlayer,
+        std::vector<std::unique_ptr<MuPatTrack>> extendWithLayer(const EventContext& ctx, MuPatTrack& candidate, const SegColVec_t& segcol, unsigned int nextlayer,
                                                                  const unsigned int endlayer, int cutLevel = 0) const;
         /** @brief Find tracks starting from a good segment
             @param seedSeg the seeding MuonSegment pointer
@@ -112,7 +114,7 @@ namespace Muon {
             @param layer the current layer for the seed
         */
         std::vector<std::unique_ptr<MuPatTrack>> findTrackFromSeed(const EventContext& ctx, MuPatSegment& seedSeg, const MuonTrackSteeringStrategy& strat,
-                                                                   const unsigned int layer, const SegColVec& segs) const;
+                                                                   const unsigned int layer, const SegColVec_t& segs) const;
 
         void refineTracks(const EventContext& ctx, std::vector<std::unique_ptr<MuPatTrack>>& candidates) const;
 
@@ -123,7 +125,7 @@ namespace Muon {
         */
         void solveAmbiguities(std::vector<std::unique_ptr<MuPatTrack>>& tracks, const MuonTrackSteeringStrategy* strat = nullptr) const;
 
-        void combineOverlapSegments(const EventContext& ctx, std::vector<MuPatSegment*>& ch1, std::vector<MuPatSegment*>& ch2, SegColVec& stationSegments,
+        void combineOverlapSegments(const EventContext& ctx, std::vector<MuPatSegment*>& ch1, std::vector<MuPatSegment*>& ch2, StSegCol_t& stationSegments,
                                     StSet& stationsWithSegments, GarbageContainer& trash_bin) const;
 
     private:

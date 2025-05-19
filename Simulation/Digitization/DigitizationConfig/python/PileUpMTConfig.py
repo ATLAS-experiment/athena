@@ -152,14 +152,16 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
 
 
 def PileUpMTAlgCfg(flags, **kwargs):
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc = ComponentAccumulator()
     acc.addService(CompFactory.SkipEventIdxSvc("SkipEventIdxSvc"))
     kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
-    # acc = BeamSpotFixerAlgCfg(flags)  # Needed currently for running on 21.0 HITS
 
     assert (
         not flags.Digitization.DoXingByXingPileUp
     ), "PileUpMTAlg does not support XingByXing pile-up!"
+    acc.merge(BeamSpotCondAlgCfg(flags))
+
     # Set a number of kwargs early so they can be passed to the minbias services
     # Bunch Structure
     if flags.Digitization.PU.BeamIntensityPattern:

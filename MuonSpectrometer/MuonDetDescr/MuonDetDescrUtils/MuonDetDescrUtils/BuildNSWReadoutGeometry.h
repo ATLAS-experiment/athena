@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_BUILDNSWREADOUTGEOMETRY_H
@@ -10,13 +10,13 @@
 namespace MuonGM {
     class MuonDetectorManager;
 }
-class NswPassivationDbData;
+
 
 class BuildNSWReadoutGeometry {
 public:
     BuildNSWReadoutGeometry();
 
-    static bool BuildReadoutGeometry(MuonGM::MuonDetectorManager* mgr, const NswPassivationDbData*) ;
+    static bool BuildReadoutGeometry(MuonGM::MuonDetectorManager* mgr) ;
 
 private:
 };

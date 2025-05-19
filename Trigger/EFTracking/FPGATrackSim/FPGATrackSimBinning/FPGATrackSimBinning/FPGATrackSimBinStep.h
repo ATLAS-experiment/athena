@@ -35,10 +35,6 @@
 #include <vector>
 #include <array>
 
-// Use IdxSet and ParSet from FPGATrackSimUtil
-using FPGATrackSimBinUtil::ParSet;
-using FPGATrackSimBinUtil::IdxSet;
-
 class FPGATrackSimBinTool;
 
 //--------------------------------------------------------------------------------------------------
@@ -52,10 +48,10 @@ public:
                       const IInterface * ifc) : AthAlgTool(algname, name, ifc) {}
 
   virtual StatusCode initialize() override;
-  StatusCode setRanges(FPGATrackSimBinStep* prev,const ParSet& parMin, const ParSet& parMax);
+  StatusCode setRanges(FPGATrackSimBinStep* prev,const FPGATrackSimBinUtil::ParSet& parMin, const FPGATrackSimBinUtil::ParSet& parMax);
 
   // property of step
-  const std::vector<unsigned> stepIdx(IdxSet idx) const; // index for only the pars used in this step
+  const std::vector<unsigned> stepIdx(FPGATrackSimBinUtil::IdxSet idx) const; // index for only the pars used in this step
   const std::vector<unsigned> stepBins() const;   // bin sizes for only the pars used in this step
   const std::vector<unsigned>& stepPars() const {return m_pars;}  // parameters used for this step
   const std::vector<unsigned> nBins() const {return m_parBins;}   // bin sizes for only the pars used in this step
@@ -67,8 +63,8 @@ public:
   double binLowEdge(unsigned par, unsigned bin) const { return m_parMin[par] + m_parStep[par] * (double(bin)); }
   double binHighEdge(unsigned par, unsigned bin) const { return m_parMin[par] + m_parStep[par] * (double(bin) + 1.0);}
   double binWidth(unsigned par) const { return m_parStep[par]; }
-  ParSet binLowEdge(const IdxSet &idx) const;
-  ParSet binCenter(const IdxSet &idx) const;
+  FPGATrackSimBinUtil::ParSet binLowEdge(const FPGATrackSimBinUtil::IdxSet &idx) const;
+  FPGATrackSimBinUtil::ParSet binCenter(const FPGATrackSimBinUtil::IdxSet &idx) const;
 
   // get bin value for a specific parameter value
   unsigned binIdx(unsigned par, double val) const {
@@ -79,10 +75,10 @@ public:
   }
 
   // convert parset (the binning parameters) to a 5-d bin
-  IdxSet binIdx(const ParSet &pars) const;
+  FPGATrackSimBinUtil::IdxSet binIdx(const FPGATrackSimBinUtil::ParSet &pars) const;
 
   // Convert to previous steps idx
-  IdxSet convertToPrev(const IdxSet &cur) const;
+  FPGATrackSimBinUtil::IdxSet convertToPrev(const FPGATrackSimBinUtil::IdxSet &cur) const;
 
   // Check if its the first step
   bool isFirstStep() const {return m_prev==0;}
@@ -118,12 +114,12 @@ private:
   unsigned m_stepNum{}; // number of step
   
   // the bins for this step
-  IdxSet m_parBins; // one means no binning this step
-  ParSet m_parStep; // step size of each bin
+  FPGATrackSimBinUtil::IdxSet m_parBins; // one means no binning this step
+  FPGATrackSimBinUtil::ParSet m_parStep; // step size of each bin
 
   // reference to the full range defined in the "tool"
-  ParSet m_parMin;
-  ParSet m_parMax;
+  FPGATrackSimBinUtil::ParSet m_parMin;
+  FPGATrackSimBinUtil::ParSet m_parMax;
   
   friend FPGATrackSimBinTool;
 };

@@ -16,6 +16,7 @@
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
 #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
@@ -92,39 +93,40 @@ private:
 
 private:
 
+  Gaudi::Property<std::string> m_sInputFilePathRecoHadTau{this, "InputFilePathRecoHadTau", ""};
+  Gaudi::Property<std::string> m_sInputFilePathEleIDHadTau{this, "InputFilePathEleIDHadTau", ""};
+  Gaudi::Property<std::string> m_sInputFilePathEleIDElectron{this, "InputFilePathEleIDElectron", ""};
+  Gaudi::Property<std::string> m_sInputFilePathJetIDHadTau{this, "InputFilePathJetIDHadTau", ""};  
+  Gaudi::Property<std::string> m_sInputFilePathTriggerHadTau{this, "InputFilePathTriggerHadTau", ""};   
+  Gaudi::Property<std::string> m_sVarNameRecoHadTau{this, "VarNameRecoHadTau", ""}; 
+  Gaudi::Property<std::string> m_sVarNameEleIDHadTau{this, "VarNameEleIDHadTau", ""};
+  Gaudi::Property<std::string> m_sVarNameEleIDElectron{this, "VarNameEleIDElectron", ""};
+  Gaudi::Property<std::string> m_sVarNameJetIDHadTau{this, "VarNameJetIDHadTau", ""};
+  Gaudi::Property<std::string> m_sVarNameDecayModeHadTau{this, "VarNameDecayModeHadTau", ""};  
+  Gaudi::Property<std::string> m_sVarNameTriggerHadTau{this, "VarNameTriggerHadTau", ""};
+  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2022-prerec"};
+  Gaudi::Property<std::string> m_sTriggerName{this, "TriggerName", ""};
+  Gaudi::Property<bool> m_bReadRandomRunNumber{this, "AutoTriggerYear", false}; 
+  Gaudi::Property<std::string> m_sTriggerSFMeasurement{this, "TriggerSFMeasurement", "combined"}; 
+  Gaudi::Property<bool> m_bUseTauSubstructure{this, "UseTauSubstructure", false}; 
+  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDNONE)}; 
+  Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(ELEIDNONE)};
+  Gaudi::Property<std::string> m_sCampaign{this, "Campaign", ""};
+  Gaudi::Property<bool> m_useFastSim{this, "useFastSim", false};
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
+  
+  ToolHandle<CP::IPileupReweightingTool> m_tPRWTool{this, "PileupReweightingTool", ""};
+
   std::vector<int> m_vEfficiencyCorrectionTypes;
   std::vector< asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;
   std::vector< asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* > m_vTriggerEfficiencyTools;
-  std::string m_sInputFilePathRecoHadTau;
-  std::string m_sInputFilePathJetIDHadTau;
   std::string m_sInputFilePathDecayModeHadTau;
-  std::string m_sInputFilePathEleIDHadTau;
-  std::string m_sInputFilePathEleIDElectron;
-  std::string m_sInputFilePathTriggerHadTau;
   std::string m_sVarNameBase;
-  std::string m_sVarNameRecoHadTau;
-  std::string m_sVarNameEleIDHadTau;
-  std::string m_sVarNameEleIDElectron;
-  std::string m_sVarNameJetIDHadTau;
-  std::string m_sVarNameDecayModeHadTau;
-  std::string m_sVarNameTriggerHadTau;
-  std::string m_sRecommendationTag;
-  std::string m_sTriggerName;
-  std::string m_sTriggerSFMeasurement;
-  bool m_bSkipTruthMatchCheck;
-  bool m_bUseTauSubstructure;
   bool m_bIsData;
   bool m_bIsConfigured;
-  bool m_bReadRandomRunNumber;
-  int m_iJetIDLevel;
-  int m_iEleIDLevel;
-  std::string m_sCampaign;
-  bool m_useFastSim;
   bool m_firstEvent = false;
   unsigned int m_iRunNumber;
   unsigned int m_iMu;
-
-  ToolHandle<CP::IPileupReweightingTool> m_tPRWTool;
 
 }; // class TauEfficiencyCorrectionsTool
 

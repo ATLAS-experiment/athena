@@ -266,7 +266,7 @@ namespace MuonValR4 {
         return StatusCode::SUCCESS;
     }
     void MuonHoughTransformTester::fillChamberInfo(const MuonGMR4::SpectrometerSector* msSector){
-        m_out_chamberIndex = msSector->chamberIndex();
+        m_out_chamberIndex = toInt(msSector->chamberIndex());
         m_out_stationSide = msSector->side();
         m_out_stationPhi = msSector->stationPhi();
     }                
@@ -286,11 +286,11 @@ namespace MuonValR4 {
 
         const auto [chamberPos, chamberDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(*segment));
         m_out_gen_nHits = segment->nPrecisionHits()+segment->nPhiLayers() + segment->nTrigEtaLayers(); 
-       
-        m_out_gen_nMDTHits = (segment->technology() == Muon::MuonStationIndex::MDT ? segment->nPrecisionHits() : 0); 
-        m_out_gen_nNswHits = (segment->technology() != Muon::MuonStationIndex::MDT ? segment->nPrecisionHits() : 0); 
-        m_out_gen_nTGCHits = (segment->chamberIndex() > Muon::MuonStationIndex::ChIndex::BEE ? segment->nPhiLayers() + segment->nTrigEtaLayers() : 0);
-        m_out_gen_nRPCHits = (segment->chamberIndex() <= Muon::MuonStationIndex::ChIndex::BEE ? segment->nPhiLayers() + segment->nTrigEtaLayers() : 0);
+        using namespace Muon::MuonStationIndex;
+        m_out_gen_nMDTHits = segment->nPrecisionHits() * (segment->technology() == TechnologyIndex::MDT); 
+        m_out_gen_nNswHits = segment->nPrecisionHits() * (segment->technology() != TechnologyIndex::MDT); 
+        m_out_gen_nTGCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) * !isBarrel(segment->chamberIndex());
+        m_out_gen_nRPCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) *  isBarrel(segment->chamberIndex());
 
         m_out_gen_tantheta = houghTanTheta(chamberDir); 
         m_out_gen_tanphi   = houghTanPhi(chamberDir);

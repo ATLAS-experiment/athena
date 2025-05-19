@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
 
 #include "EVetoPlots.h"
 #include "AthContainers/ConstAccessor.h"
+#include "AthenaKernel/Units.h"
 
 namespace Tau{
 
@@ -74,17 +75,22 @@ void EVetoPlots::initializePlots(){
        m_id_RNNEleScoreSigTrans->Fill(RNNEleScoreSigTrans_v1Acc(tau), weight);	    
     }  
 
-    if ( tau.isTau(xAOD::TauJetParameters::EleRNNLoose) ) {
-      m_pt_eleRNNloose->Fill(tau.pt()/1000., weight);
-      m_pt_eleRNNlooseHighPt->Fill(tau.pt()/1000., weight);
+    static const SG::ConstAccessor<char> acc_RNNEleLoose("EleRNNLoose_v1");
+    if(acc_RNNEleLoose.isAvailable(tau) && acc_RNNEleLoose(tau)){ 
+      m_pt_eleRNNloose->Fill(tau.pt()/Athena::Units::GeV, weight);
+      m_pt_eleRNNlooseHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
     }
-    if ( tau.isTau(xAOD::TauJetParameters::EleRNNMedium) ) {
-      m_pt_eleRNNmed->Fill(tau.pt()/1000., weight);
-      m_pt_eleRNNmedHighPt->Fill(tau.pt()/1000., weight);
+
+    static const SG::ConstAccessor<char> acc_RNNEleMedium("EleRNNMedium_v1");
+    if(acc_RNNEleMedium.isAvailable(tau) && acc_RNNEleMedium(tau)){
+      m_pt_eleRNNmed->Fill(tau.pt()/Athena::Units::GeV, weight);
+      m_pt_eleRNNmedHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
     }
-    if ( tau.isTau(xAOD::TauJetParameters::EleRNNTight) ) {
-      m_pt_eleRNNtight->Fill(tau.pt()/1000., weight);
-      m_pt_eleRNNtightHighPt->Fill(tau.pt()/1000., weight);
+
+    static const SG::ConstAccessor<char> acc_RNNEleTight("EleRNNTight_v1");
+    if(acc_RNNEleTight.isAvailable(tau) && acc_RNNEleTight(tau)){
+      m_pt_eleRNNtight->Fill(tau.pt()/Athena::Units::GeV, weight);
+      m_pt_eleRNNtightHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
     }
   }
 }

@@ -110,7 +110,7 @@ StatusCode sTgcDigitizationTool::initialize() {
     return StatusCode::FAILURE;
   }
   double meanGasGain = 2.15 * 1E-4 * std::exp(6.88*m_runVoltage);
-  m_digitizer = std::make_unique<sTgcDigitMaker>(m_idHelperSvc.get(), m_doChannelTypes, meanGasGain, m_doPadSharing, m_stripChargeScale);
+  m_digitizer = std::make_unique<sTgcDigitMaker>(m_idHelperSvc.get(), m_doChannelTypes, meanGasGain, m_doPadSharing, m_stripChargeScale, m_applyAsBuiltBLines);
   m_digitizer->setLevel(static_cast<MSG::Level>(msgLevel()));
   ATH_CHECK(m_digitizer->initialize());
 

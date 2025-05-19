@@ -344,9 +344,7 @@ class MonitorDef:
                         "L1_AFP_NSA_BGRP12",
                         "L1_AFP_NSC_BGRP12",
                         # AFP combined
-                        "L1_AFP_A_AND_C_MBTS_2",
                         "L1_AFP_A_AND_C_TOF_T0T1",
-                        "L1_AFP_A_OR_C_MBTS_2",
                     ])
 
             else: # HI HLT menu

@@ -72,7 +72,7 @@ namespace InDet {
     /** AlgTool style constructor */
     SiLayerBuilderImpl(const std::string&,const std::string&,const IInterface*);
 
-    void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& layerSurfaces, Trk::Layer& lay) const;
+    void registerSurfacesToLayer(std::span<Trk::Surface * const >& layerSurfaces, Trk::Layer& lay) const;
 
     std::unique_ptr<const std::vector<Trk::CylinderLayer*> >
       cylindricalLayersImpl(const InDetDD::SiDetectorElementCollection& siDetElementCollection) const;

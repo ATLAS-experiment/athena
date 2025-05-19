@@ -115,7 +115,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getAllActiveSequences( const Even
     IProxyDict* storeProxy = Atlas::getExtendedEventContext(context).proxy();
     SmartIF<SGImplSvc> eventStore (storeProxy);
     if (m_cachedEventID != context.eventID().event_number()){
-        ATH_MSG_INFO("Caching the event store keys for event " << context.eventID().event_number());
+        ATH_MSG_DEBUG("Caching the event store keys for event " << context.eventID().event_number());
         eventStore->keys(static_cast<CLID>( ClassID_traits<TrigCompositeUtils::DecisionContainer>::ID() ), m_cachedEventStoreKeys);
         m_cachedEventID = context.eventID().event_number();
     }
@@ -149,7 +149,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getAllActiveSequences( const Even
 
 void TrigCompositeUtils::AlgToChainTool::cacheSGKeys(const EventContext& context) {
     if (m_cachedEventID != context.eventID().event_number()){
-        ATH_MSG_INFO("Caching the event store keys for event " << context.eventID().event_number());
+        ATH_MSG_DEBUG("Caching the event store keys for event " << context.eventID().event_number());
         m_cachedEventStoreKeys = readSGKeys(context);
         m_cachedEventID = context.eventID().event_number();
     }

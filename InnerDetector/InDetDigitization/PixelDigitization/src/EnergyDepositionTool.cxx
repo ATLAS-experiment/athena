@@ -1,7 +1,6 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
-
 #include "EnergyDepositionTool.h"
 
 
@@ -136,7 +135,7 @@ StatusCode EnergyDepositionTool::depositEnergy(const TimedHitPtr<SiHit>& phit, c
                                                std::vector<std::pair<double, double> >& trfHitRecord,
                                                std::vector<double>& initialConditions,
                                                CLHEP::HepRandomEngine* rndmEngine,
-                                               const EventContext &ctx) {
+                                               const EventContext &ctx) const {
   ATH_MSG_DEBUG("Deposit energy in sensor volume.");
 
   //Check if simulated particle or delta ray
@@ -425,7 +424,7 @@ std::vector<std::pair<double, double> > EnergyDepositionTool::clusterHits(std::v
   ATH_MSG_DEBUG("Begin EnergyDepositionTool::clusterHits");
   std::vector<std::pair<double, double> > trfHitRecord;
 
-  if ((int) (rawHitRecord.size()) < n_pieces) { // each single collision is the most fundamental unit
+  if (static_cast<int>(rawHitRecord.size()) < n_pieces) { // each single collision is the most fundamental unit
     n_pieces = rawHitRecord.size();
   }
 
@@ -453,11 +452,11 @@ std::vector<std::pair<double, double> > EnergyDepositionTool::clusterHits(std::v
     index_start = index_end + 1;
     index_end = index_start + unitlength - 1;
 
-    if (index_start > (int) (rawHitRecord.size() - 1)) {
+    if (index_start > static_cast<int>(rawHitRecord.size() - 1)) {
       break;
     }
 
-    if (index_end > (int) (rawHitRecord.size() - 1)) {
+    if (index_end > static_cast<int>(rawHitRecord.size() - 1)) {
       index_end = rawHitRecord.size() - 1;
     }
   }

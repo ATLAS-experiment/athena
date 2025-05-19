@@ -358,36 +358,29 @@ MuonPatternCalibration::insertMdt(const MdtPrepData& mdt, RegionMap& regionMap, 
     // enter hit in map
     Identifier elId = m_idHelperSvc->mdtIdHelper().elementID(id);
 
-    MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(elId);
-    int                       chFlag  = elId.get_identifier32().get_compact();
+    using ChIndex = MuonStationIndex::ChIndex;
+    ChIndex chIndex = m_idHelperSvc->chamberIndex(elId);
+    int chFlag  = elId.get_identifier32().get_compact();
     if (m_doMultiAnalysis) {
-        if (m_idHelperSvc->isSmallChamber(id)) {
+        if (isSmall(chIndex)) {
             ATH_MSG_VERBOSE(" Small chamber " << m_idHelperSvc->toString(elId));
             chFlag = 0;
-            if (chIndex == MuonStationIndex::BIS) {
-                int eta = m_idHelperSvc->stationEta(elId);
-                if (std::abs(eta) == 8) {
-                    ATH_MSG_VERBOSE(" BIS8 chamber " << m_idHelperSvc->toString(elId));
-                    chFlag = 3;
-                }
+            if (chIndex == ChIndex::BIS && std::abs(m_idHelperSvc->stationEta(elId)) == 8) {
+                ATH_MSG_VERBOSE(" BIS8 chamber " << m_idHelperSvc->toString(elId));
+                chFlag = 3;
             }
         } else {
             ATH_MSG_VERBOSE(" Large chamber " << m_idHelperSvc->toString(elId));
             chFlag = 1;
-            if (chIndex == MuonStationIndex::BIL) {
-                std::string stName = m_idHelperSvc->chamberNameString(id);
-                if (stName[2] == 'R') {
-                    ATH_MSG_VERBOSE(" BIR chamber " << m_idHelperSvc->toString(elId));
-                    chFlag = 2;
-                }
-            } else if (chIndex == MuonStationIndex::BOL) {
-                if (std::abs(m_idHelperSvc->stationEta(id)) == 7) {
-                    ATH_MSG_VERBOSE(" BOE chamber " << m_idHelperSvc->toString(elId));
-                    chFlag = 4;
-                }
+            if (chIndex == ChIndex::BIL && m_idHelperSvc->stationNameString(id)[2] == 'R') {
+                ATH_MSG_VERBOSE(" BIR chamber " << m_idHelperSvc->toString(elId));
+                chFlag = 2;
+            } else if (chIndex == ChIndex::BOL && std::abs(m_idHelperSvc->stationEta(id)) == 7) {
+                ATH_MSG_VERBOSE(" BOE chamber " << m_idHelperSvc->toString(elId));
+                chFlag = 4;
             }
         }
-        int phi = m_idHelperSvc->mdtIdHelper().stationPhi(id);
+        int phi = m_idHelperSvc->stationPhi(id);
 
         chFlag += 10 * phi;
     }

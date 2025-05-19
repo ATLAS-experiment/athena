@@ -344,7 +344,8 @@ namespace Muon {
         }
 
         cuts.cutOnMatchChiSquared = true;
-        if (entry2.containsChamber(MuonStationIndex::CSS) || entry2.containsChamber(MuonStationIndex::CSL)) {
+        if (entry2.containsChamber(MuonStationIndex::ChIndex::CSS) || 
+            entry2.containsChamber(MuonStationIndex::ChIndex::CSL)) {
             // CSC
             cuts.cutOnPosX = true;
             cuts.cutOnPosY = true;
@@ -815,8 +816,8 @@ namespace Muon {
         if (!straightLineMatch && !entry1.hasMomentum() && info.trackChamberId.is_valid()) {
             MuonStationIndex::StIndex trackStationIndex = m_idHelperSvc->stationIndex(info.trackChamberId);
             MuonStationIndex::StIndex segmentStationIndex = entry2.stIndex;
-            if (((trackStationIndex == MuonStationIndex::EM && segmentStationIndex == MuonStationIndex::EO) ||
-                 (trackStationIndex == MuonStationIndex::EO && segmentStationIndex == MuonStationIndex::EM)) &&
+            if (((trackStationIndex == MuonStationIndex::StIndex::EM && segmentStationIndex == MuonStationIndex::StIndex::EO) ||
+                 (trackStationIndex == MuonStationIndex::StIndex::EO && segmentStationIndex == MuonStationIndex::StIndex::EM)) &&
                 closestPars->position().z() * entry2.entryPars().position().z() > 0.0) {
                 straightLineMatch = true;
                 ATH_MSG_DEBUG("track in " << m_idHelperSvc->toStringStation(info.trackChamberId) << " and segment in "

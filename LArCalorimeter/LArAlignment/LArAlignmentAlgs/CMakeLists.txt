@@ -9,3 +9,5 @@ atlas_add_component( LArAlignmentAlgs
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel DetDescrConditions RegistrationServicesLib GeoModelUtilities LArGeoCode )
 
+# Install files from the package:
+atlas_install_python_modules(python/*.py)

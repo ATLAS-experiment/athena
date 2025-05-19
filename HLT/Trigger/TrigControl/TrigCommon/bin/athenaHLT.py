@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- mode: python -*-
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # This is a script that is born as shell to setup the preloading and then
 # resurrected as python script for the actual athenaHLT.py application.
@@ -411,6 +411,10 @@ def main():
 
    (args, unparsed_args) = parser.parse_known_args()
    check_args(parser, args)
+
+   # set ROOT to batch mode (ATR-21890)
+   from ROOT import gROOT
+   gROOT.SetBatch()
 
    # set default OutputLevels and file inclusion
    import AthenaCommon.Logging

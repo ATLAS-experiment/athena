@@ -1830,6 +1830,9 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_data(const EventContext & /*ctx
           counts_group.push_back(std::ref(count_scalars.back()));
         }
 
+      // Taking a std::ref of the back() iterator above is safe because the vector
+      // has been reserved with the correct number of elements.
+      // cppcheck-suppress invalidContainer
       auto monitor_clusters = Monitored::Group(m_moniTool, cluster_group);
       auto monitor_cells = Monitored::Group(m_moniTool, cell_group);
       auto monitor_counts = Monitored::Group(m_moniTool, counts_group);
@@ -2196,10 +2199,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
     counts_group.push_back(std::ref(count_scalars.back()));
 
     count_scalars.emplace_back(Monitored::Scalar(prefix + "_" + name + "_test", test_num));
-    counts_group.push_back(std::ref(count_scalars.back()));
+    counts_group.push_back(std::ref(count_scalars.back()));  // cppcheck-suppress invalidContainer; reserve used
 
     count_scalars.emplace_back(Monitored::Scalar(prefix + "_delta_" + name, test_num - ref_num));
-    counts_group.push_back(std::ref(count_scalars.back()));
+    counts_group.push_back(std::ref(count_scalars.back()));  // cppcheck-suppress invalidContainer; reserve used
   };
 
   add_count_vars("num_clusters", clusters_1.number, clusters_2.number);
@@ -2236,6 +2239,9 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
       counts_group.push_back(std::ref(count_scalars.back()));
     }
 
+  // Taking a std::ref of the back() iterator above is safe because the vector
+  // has been reserved with the correct number of elements.
+  // cppcheck-suppress invalidContainer
   auto monitor_clusters = Monitored::Group(m_moniTool, cluster_group);
   auto monitor_cells = Monitored::Group(m_moniTool, cell_group);
   auto monitor_counts = Monitored::Group(m_moniTool, counts_group);

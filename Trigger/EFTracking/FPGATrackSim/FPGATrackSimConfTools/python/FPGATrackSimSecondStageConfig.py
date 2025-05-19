@@ -98,6 +98,71 @@ def FPGATrackSimBinnedHitsToolCfg_2nd(flags,name="FPGATrackSimBinnedHitsTool_2nd
 
     return result
 
+def getWindowCuts(region):
+    binSize = 0.2
+    side = (region >> 5) & 0x1
+    etaBin = (region >> 6) & 0x1F
+    etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
+    abs_etaRange = tuple(round(abs(val), 1) for val in etaRange)
+
+    # Default (very large windows)
+    default_phi = [0]*5 + [0.75, 0.75, 1.5, 1.5, 3.24, 3.24, 4.5, 4.5]
+    default_z   = [0]*5 + [2145, 2145, 3645, 3645, 4657.5, 4657.5, 8400, 8400]
+
+    # phi windows (currently all same)
+    eta_to_phi = {
+        (0.0, 0.2): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (0.2, 0.4): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (0.4, 0.6): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (0.6, 0.8): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (0.8, 1.0): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (1.0, 1.2): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (1.2, 1.4): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (1.4, 1.6): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (1.6, 1.8): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (1.8, 2.0): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (2.0, 2.2): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (2.2, 2.4): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (2.4, 2.6): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (2.6, 2.8): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (2.8, 3.0): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (3.0, 3.2): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (3.2, 3.4): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (3.4, 3.6): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (3.6, 3.8): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+        (3.8, 4.0): [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045],
+    }
+
+    # z windows (also currently all same)
+    eta_to_z = {
+        (0.0, 0.2): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (0.2, 0.4): [0, 0, 0, 0, 0, 900, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (0.4, 0.6): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (0.6, 0.8): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (0.8, 1.0): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (1.0, 1.2): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (1.2, 1.4): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (1.4, 1.6): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (1.6, 1.8): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (1.8, 2.0): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (2.0, 2.2): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (2.2, 2.4): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (2.4, 2.6): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (2.6, 2.8): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (2.8, 3.0): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (3.0, 3.2): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (3.2, 3.4): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (3.4, 3.6): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (3.6, 3.8): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+        (3.8, 4.0): [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84.0, 84.0],
+    }
+
+    phi_window = eta_to_phi.get(abs_etaRange, default_phi)
+    z_window = eta_to_z.get(abs_etaRange, default_z)
+
+    return phi_window, z_window
+
+
 def FPGATrackSimWindowExtensionToolCfg(flags,name="FPGATrackSimWindowExtensionTool"):
     result = ComponentAccumulator()
     FPGATrackSimWindowExtensionTool = CompFactory.FPGATrackSimWindowExtensionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
@@ -111,9 +176,12 @@ def FPGATrackSimWindowExtensionToolCfg(flags,name="FPGATrackSimWindowExtensionTo
 
     # These MUST be of size equal to the full number of layers (13), though only the "new" layers
     # in the second stage are actually used.
+    #leaving these here for now although we remove the flag later when we have optimized windows
     FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84., 84.]
     FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045]
-
+    if flags.Trigger.FPGATrackSim.GenScan.useVaryingWindow:
+        FPGATrackSimWindowExtensionTool.zWindow =   getWindowCuts(flags.Trigger.FPGATrackSim.region)[1]
+        FPGATrackSimWindowExtensionTool.phiWindow = getWindowCuts(flags.Trigger.FPGATrackSim.region)[0]
     # If we're doing binning, i.e. genscan.
     if flags.Trigger.FPGATrackSim.ActiveConfig.genScan:
         FPGATrackSimWindowExtensionTool.doBinning = True
@@ -143,13 +211,13 @@ def FPGATrackSimNNPathfinderExtensionToolCfg(flags,name="FPGATrackSimNNPathfinde
     FPGATrackSimNNPathfinderExtensionTool.lowPtValueWindowZ = flags.Trigger.FPGATrackSim.lowPtvalueZ
     FPGATrackSimNNPathfinderExtensionTool.lowPtZScaling = flags.Trigger.FPGATrackSim.lowPtWindowZScaling
     FPGATrackSimNNPathfinderExtensionTool.missedHitRScaling = flags.Trigger.FPGATrackSim.missedHitRScaling
-    FPGATrackSimNNPathfinderExtensionTool.missedHitZScaling = flags.Trigger.FPGATrackSim.missedHitZScaling    
+    FPGATrackSimNNPathfinderExtensionTool.missedHitZScaling = flags.Trigger.FPGATrackSim.missedHitZScaling
     FPGATrackSimNNPathfinderExtensionTool.maxBranches = flags.Trigger.FPGATrackSim.maxBranches
     FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = True
     if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
         FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = False
         FPGATrackSimNNPathfinderExtensionTool.predictionWindowLength = 4
-    
+
     # Other settings
     FPGATrackSimNNPathfinderExtensionTool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
     result.setPrivateTools(FPGATrackSimNNPathfinderExtensionTool)
@@ -217,7 +285,7 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
     result=ComponentAccumulator()
     OR = CompFactory.FPGATrackSimOverlapRemovalTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     OR.ORAlgo = "Normal"
-    OR.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
+    OR.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR   
     OR.NumOfHitPerGrouping = 5
     OR.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     OR.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.secondChi2Cut
@@ -226,7 +294,7 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
         OR.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
         OR.localMaxWindowSize = flags.Trigger.FPGATrackSim.ActiveConfig.localMaxWindowSize
         OR.roadSliceOR = flags.Trigger.FPGATrackSim.ActiveConfig.roadSliceOR
-    
+
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimOverlapRemovalToolMonitoringCfg
     OR.MonTool = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolMonitoringCfg(flags))
 

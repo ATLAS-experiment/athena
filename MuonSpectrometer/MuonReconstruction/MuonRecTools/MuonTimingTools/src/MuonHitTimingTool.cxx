@@ -23,9 +23,9 @@ namespace Muon {
   StatusCode MuonHitTimingTool::initialize() {
 
     ATH_CHECK(m_idHelperSvc.retrieve());
-  using namespace MuonStationIndex;
+    using namespace MuonStationIndex;
     // ensure that the number of tool handles corresponds to the number of technologies
-    if( m_hitTimingTools.size() != toInt(TechnologyIndex::TechnologyIndexMax) ){
+    if( static_cast<int>(m_hitTimingTools.size()) != toInt(TechnologyIndex::TechnologyIndexMax) ){
       ATH_MSG_ERROR(" The MuonHitTimingTool ToolHandleArray SHOULD contain exactly " 
                     << toInt(TechnologyIndex::TechnologyIndexMax) << " ToolHandles (they can be empty). ");
       return StatusCode::FAILURE;

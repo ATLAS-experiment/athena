@@ -171,6 +171,9 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   m_excludeFlvFromEV["C"] = m_excludeFlvFromEVC;
   m_excludeFlvFromEV["Light"] = m_excludeFlvFromEVLight;
 
+  if(m_SelectionCDIFile.empty()) m_SelectionCDIFile = m_SFFile;
+  if(m_selectionTaggerName.empty()) m_selectionTaggerName = m_taggerName;
+
   // set default MCMC map if they haven't been specified
   for (auto& [k, v]: m_EffNames) {
     if (v.size() == 0) v = m_effName;
@@ -664,8 +667,8 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       m_taggerName.value().find("GN1") != std::string::npos ||
       m_taggerName.value().find("GN2") != std::string::npos) {
     m_selectionTool.setTypeAndName("BTaggingSelectionTool/" + name() + "_selection");
-    ATH_CHECK( m_selectionTool.setProperty("FlvTagCutDefinitionsFileName", m_SFFile) );
-    ATH_CHECK( m_selectionTool.setProperty("TaggerName",                   m_taggerName) );
+    ATH_CHECK( m_selectionTool.setProperty("FlvTagCutDefinitionsFileName", m_SelectionCDIFile) );
+    ATH_CHECK( m_selectionTool.setProperty("TaggerName",                   m_selectionTaggerName) );
     ATH_CHECK( m_selectionTool.setProperty("OperatingPoint",               m_OP) );
     ATH_CHECK( m_selectionTool.setProperty("JetAuthor",                    m_jetAuthor) );
     ATH_CHECK( m_selectionTool.setProperty("MinPt",                        m_minPt) );

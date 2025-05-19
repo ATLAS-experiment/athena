@@ -58,13 +58,6 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
     "AthXRT::DeviceMgmtSvc",
     "The XRT device manager service to use"
   };
-  
-  Gaudi::Property<std::string> m_xclbinPath{
-    this,
-    "xclbinPath", 
-    "", 
-    "Path to Xilinx Compute Language Binary (firmware)."
-  };
 
   Gaudi::Property<std::string> m_kernelDefinitionsJsonString {
     this,

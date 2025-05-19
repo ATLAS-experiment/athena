@@ -618,7 +618,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
     } else {   // active material
       const Trk::TrackingVolume *detVol = dVol->associatedSubVolume(gp);
       if (!detVol && dVol->confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume const * const> subvols = dVol->confinedVolumes()->arrayObjects();
+        std::span<Trk::TrackingVolume const * const> subvols = dVol->confinedVolumes()->arrayObjects();
         for (const auto *subvol : subvols) {
           if (subvol->inside(gp, m_tolerance)) {
             detVol = subvol;
@@ -652,7 +652,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         // layers ?
         if (detVol->confinedLayers()) {
           if (m_robustSampling || cache.m_currentStatic->geometrySignature() == Trk::MS) {
-            Trk::BinnedArraySpan<Trk::Layer const * const> cLays = detVol->confinedLayers()->arrayObjects();
+            std::span<Trk::Layer const * const> cLays = detVol->confinedLayers()->arrayObjects();
             for (const auto *cLay : cLays) {
               if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
                 cache.m_layers.emplace_back(&(cLay->surfaceRepresentation()), true);
@@ -691,7 +691,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
   if (cache.m_currentStatic->confinedLayers() && updateStatic) {
     // if ( cache.m_currentStatic->confinedLayers() ) {
     if (m_robustSampling || cache.m_currentStatic->geometrySignature() == Trk::MS) {
-      Trk::BinnedArraySpan<Trk::Layer const * const> cLays = cache.m_currentStatic->confinedLayers()->arrayObjects();
+      std::span<Trk::Layer const * const> cLays = cache.m_currentStatic->confinedLayers()->arrayObjects();
       for (const auto *cLay : cLays) {
         if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
           cache.m_layers.emplace_back(&(cLay->surfaceRepresentation()),
@@ -1784,7 +1784,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
 
   // confined layers
   if (cache.m_currentStatic->confinedLayers()) {
-    Trk::BinnedArraySpan <Trk::Layer const * const> cLays = cache.m_currentStatic->confinedLayers()->arrayObjects();
+    std::span <Trk::Layer const * const> cLays = cache.m_currentStatic->confinedLayers()->arrayObjects();
     for (const auto *cLay : cLays) {
       if (cLay->layerMaterialProperties()) {
         const Trk::Surface &surf = cLay->surfaceRepresentation();

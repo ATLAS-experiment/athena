@@ -23,7 +23,7 @@ using std::abs;
 
 #ifndef XAOD_ANALYSIS
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
+MCTruthClassifier::particleHepMCTruthClassifier(const HepMcParticleLink& theLink, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
   // Retrieve the links between HepMC and xAOD::TruthParticle
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
   SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVecReadHandle(m_truthLinkVecReadHandleKey, ctx);
@@ -39,7 +39,7 @@ MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, MCT
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
+MCTruthClassifier::particleHepMCTruthClassifier(HepMC::ConstGenParticlePtr theGenPart, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
   ParticleType partType = Unknown;
   ParticleOrigin partOrig = NonDefined;
 
@@ -220,6 +220,63 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
 }
 
 
+bool MCTruthClassifier::TruthLoopDetectionMethod1(const xAOD::TruthVertex * childOrigVtx, const xAOD::TruthParticle* parent) const
+{
+  // Start of method 1 of protecting against loops
+  const int parentPDG = parent->pdgId();
+  for (const auto& aChild: childOrigVtx->particles_out()) {
+    if (!aChild)  continue;
+    if (parentPDG == aChild->pdgId() && HepMC::is_same_generator_particle(aChild, parent)) {
+      // One of the children produced in the decay of parent is
+      // actually the same particle.  NB In the case of multiple
+      // children this child may not necessarily be
+      // thePriPart. Does this matter?
+      return true;
+    }
+  }
+
+  // to resolve Sherpa loop
+  return TruthLoopDetectionMethod3(childOrigVtx, parent);
+  // End of method 1 of protecting against loops
+}
+
+
+bool MCTruthClassifier::TruthLoopDetectionMethod2(const xAOD::TruthParticle* child, const xAOD::TruthParticle* parent) const
+{
+  // Start of method 2 of protecting against loops
+  // to prevent Sherpa loop
+  const xAOD::TruthVertex* child_prdVtx{};
+  const xAOD::TruthVertex* child_endVtx{};
+  if (child) {
+    child_prdVtx = child->hasProdVtx() ? child->prodVtx() : nullptr;
+    child_endVtx = child->decayVtx();
+  }
+  const xAOD::TruthVertex* parent_prdVtx{};
+  const xAOD::TruthVertex* parent_endVtx{};
+  if (parent) {
+    parent_prdVtx = parent->hasProdVtx() ? parent->prodVtx() : nullptr;
+    parent_endVtx = parent->decayVtx();
+  }
+  // V0->parent->V1-> ...->V2->child->V3
+  // V3 == V0 && V1 == V2
+  return (child_endVtx == parent_prdVtx && child_prdVtx == parent_endVtx);
+}
+
+
+bool MCTruthClassifier::TruthLoopDetectionMethod3(const xAOD::TruthVertex * childOrigVtx, const xAOD::TruthParticle* parent) const
+{
+  // Start of method 3 of protecting against loops
+  // to resolve Sherpa loop
+  const xAOD::TruthVertex* parentOrigVtx = parent->hasProdVtx() ? parent->prodVtx() : nullptr;
+  if (parentOrigVtx && HepMC::is_same_vertex(parentOrigVtx,childOrigVtx)) {
+    // The "parent" and the "child" have the same production vertex.
+    return true;
+  }
+  return false;
+  // End of method 3 of protecting against loops
+}
+
+
 ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                     const xAOD::TruthParticle* thePart,
                                                     bool& isPrompt,
@@ -238,36 +295,18 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
-  int numOfParents = partProdVtx->nIncomingParticles();
-  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron has more than one parent.");
+  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // After this point "ancestor" cannot be nullptr
 
-  int ancestorPDG = ancestor->pdgId();
   // Start of method 1 of protecting against loops
-  bool samePart = false;
-  for (const auto& aChild: partProdVtx->particles_out()) {
-    if (!aChild)  continue;
-    if (ancestorPDG == aChild->pdgId() && HepMC::is_same_generator_particle(aChild, ancestor)) {
-      // One of the child particles produced in the decay of ancestor is
-      // actually the same particle.  NB In the case of multiple
-      // child particles this particle may not necessarily be
-      // thePriPart. Does this matter?
-      samePart = true;
-    }
-  }
-
+  bool samePart = TruthLoopDetectionMethod1(partProdVtx, ancestor);
   // to resolve Sherpa loop
-  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-  if (ancestorProdVtx && HepMC::is_same_vertex(ancestorProdVtx,partProdVtx)) {
-    // The "ancestor" and the "thePriPart" have the same production vertex.
-    samePart = true;
-  }
   // End of method 1 of protecting against loops
 
-  if ((MC::isMuon(ancestorPDG) || MC::isTau(ancestorPDG) || MC::isW(ancestorPDG)) && ancestorProdVtx && !samePart) {
+  if ((MC::isMuon(ancestor) || MC::isTau(ancestor) || MC::isW(ancestor)) && ancestor->hasProdVtx() && !samePart) {
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
@@ -275,29 +314,18 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
-      const xAOD::TruthVertex* ancestor_prdVtx{};
-      const xAOD::TruthVertex* ancestor_endVtx{};
-      ancestor_prdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-      ancestor_endVtx = ancestor->decayVtx();
-      const xAOD::TruthVertex* parent_prdVtx{};
-      const xAOD::TruthVertex* parent_endVtx{};
-      if (ancestorParent) {
-        parent_prdVtx = ancestorParent->hasProdVtx() ? ancestorParent->prodVtx() : nullptr;
-        parent_endVtx = ancestorParent->decayVtx();
-      }
-      // V0->AP->V1-> ...->V2->A->V3
-      // V3 == V0 && V1 == V2
-      if (ancestor_endVtx == parent_prdVtx && ancestor_prdVtx == parent_endVtx) {
+      if (ancestor == ancestorParent) { break; }
+      if (TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
         ancestorParent = ancestor;
         break;
       }
-      // to prevent Sherpa loop
       // End of method 2 of protecting against loops
       // FIXME why are slightly different criteria used in method 1 and method 2???
-      if (ancestor == ancestorParent) { break; }
-      if (ancestorParent) { pPDG = ancestorParent->pdgId(); } // Only set pPDG in the case that we aren't in a loop.
-      if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) { // There will be another iteration so set ancestor to ancestorParent
-        ancestor = ancestorParent; // ancestorParent is not nullptr here
+      if (ancestorParent) {
+        pPDG = ancestorParent->pdgId(); // Only set pPDG in the case that we aren't in a loop.
+        if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) { // There will be another iteration so set ancestor to ancestorParent
+          ancestor = ancestorParent; // ancestorParent is not nullptr here
+        }
       }
     } while ((MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)));
 
@@ -309,10 +337,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   }
 
   info.setMotherProperties(ancestor);
-  ancestorPDG = ancestor->pdgId();
-  ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+  const int ancestorPDG = ancestor->pdgId();
+  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   partProdVtx = ancestor->decayVtx();
-  numOfParents = partProdVtx->nIncomingParticles();
+  const int numOfParents = partProdVtx->nIncomingParticles();
   const int numberOfChildren = partProdVtx->nOutgoingParticles();
 
   // Determine decay products
@@ -536,25 +564,21 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   if (!thePriPart) return NonDefined;
   if (!MC::isMuon(thePriPart)) return NonDefined;
 
-  const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
-
   //-- to define muon  outcome status
   info.particleOutCome = defOutComeOfMuon(thePriPart);
 
+  const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
-  int numOfParents = partProdVtx->nIncomingParticles();
-  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfMuon:: muon has more than one parent.");
+  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfMuon:: muon has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
-  int ancestorPDG = ancestor->pdgId();
   // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
-  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
 
-  if ((MC::isTau(ancestorPDG)|| MC::isW(ancestorPDG)) && ancestorProdVtx) {
+  if ((MC::isTau(ancestor)|| MC::isW(ancestor)) && ancestor->hasProdVtx()) {
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
@@ -562,24 +586,11 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
-      const xAOD::TruthVertex* ancestor_prdVtx{};
-      const xAOD::TruthVertex* ancestor_endVtx{};
-      ancestor_prdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-      ancestor_endVtx = ancestor->decayVtx();
-      const xAOD::TruthVertex* parent_prdVtx{};
-      const xAOD::TruthVertex* parent_endVtx{};
-      if (ancestorParent) {
-        parent_prdVtx = ancestorParent->hasProdVtx() ? ancestorParent->prodVtx() : nullptr;
-        parent_endVtx = ancestorParent->decayVtx();
-      }
-      // V0->AP->V1-> ...->V2->A->V3
-      // V3 == V0 && V1 == V2
-      if (ancestor_endVtx == parent_prdVtx && ancestor_prdVtx == parent_endVtx) {
+      if (ancestor == ancestorParent) { break; }
+      if (TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
         ancestorParent = ancestor;
         break;
       }
-      // to prevent Sherpa loop
-      if (ancestor == ancestorParent) { break; }
       // End of method 2 of protecting against loops
 
       if (ancestorParent) {
@@ -600,10 +611,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   }
 
   info.setMotherProperties(ancestor);
-  ancestorPDG = ancestor->pdgId();
-  ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+  const int ancestorPDG = ancestor->pdgId();
+  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   partProdVtx = ancestor->decayVtx();
-  numOfParents = partProdVtx->nIncomingParticles();
+  const int numOfParents = partProdVtx->nIncomingParticles();
   const int numberOfChildren = partProdVtx->nOutgoingParticles();
 
   // Determine decay products
@@ -768,46 +779,38 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
 
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
   const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
-
   if (!thePriPart) return NonDefined;
   if (!MC::isTau(thePriPart)) return NonDefined;
-
-  const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define tau  outcome status
   if (MC::isPhysical(thePriPart)) info.particleOutCome = defOutComeOfTau(thePriPart); // FIXME why do we need the additional check on MC::isPhysical here c.f. defOrigOfElectron and defOrigOfMuon?
 
+  const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
-  int numOfParents = partProdVtx->nIncomingParticles();
-  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfTau:: tau has more than one parent.");
+  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfTau:: tau has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
   // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
-  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
 
   // Difference from defOrigOfElectron and defOrigOfMuon - no loop through ancestor particles
-  const xAOD::TruthParticle* ancestorParent{};
 
-  if (MC::isW(ancestorPDGin) && ancestorProdVtx) { // FIXME ancestorPDGin here could in principle be inconsistent with ancestorProdVtx
-    ancestorParent = MC::findMother(ancestor);
-    if (ancestorParent) {//ancestorParent checked here...
-      if (MC::isTop(ancestorParent->pdgId())) {
-        ancestor = ancestorParent; //...so ancestor cannot be nullptr
-      }
+  if (MC::isW(ancestorPDGin) && ancestor->hasProdVtx()) { // FIXME ancestorPDGin here could in principle be inconsistent with ancestorProdVtx
+    const xAOD::TruthParticle* ancestorParent = MC::findMother(ancestor);
+    if (ancestorParent && MC::isTop(ancestorParent->pdgId())) {
+      ancestor = ancestorParent; //...so ancestor cannot be nullptr
     }
   }
 
-  int ancestorPDG = ancestor->pdgId();
+  const int ancestorPDG = ancestor->pdgId();
   info.setMotherProperties(ancestor);
-  ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   partProdVtx = ancestor->decayVtx();
   if (!partProdVtx) return NonDefined; // FIXME not sure this could ever be true?
-
-  numOfParents = partProdVtx->nIncomingParticles();
+  const int numOfParents = partProdVtx->nIncomingParticles();
 
   // Determine decay products
   auto DP = DecayProducts(partProdVtx);
@@ -1216,29 +1219,24 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   if (!thePriPart) return NonDefined;
   if (std::abs(thePriPart->pdgId()) != nuFlav) return NonDefined; // FIXME should this be if (!MC::isSMNeutrino(thePriPart) || abs(thePriPart->pdgId()) != nuFlav) return NonDefined; // (Use MC::isNeutrino if 4th generation neutrinos OK)
 
-  const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
-
   //-- to define neutrino outcome status
   info.particleOutCome = NonInteract;
 
+  const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
-  int numOfParents = partProdVtx->nIncomingParticles();
-  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino has more than one parent.");
+  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
-  int ancestorPDG = ancestor->pdgId();
-  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-
   // Start of method 3 of protecting against loops
   // to resolve Sherpa loop
-  bool samePart = (ancestorProdVtx && HepMC::is_same_vertex(ancestorProdVtx,partProdVtx));
+  bool samePart = TruthLoopDetectionMethod1(partProdVtx, ancestor);
   // End of method 3 of protecting against loops
 
-  if ((std::abs(ancestorPDG) == nuFlav || MC::isTau(ancestorPDG) || MC::isW(ancestorPDG)) && ancestorProdVtx && !samePart) {
+  if ((std::abs(ancestor->pdgId()) == nuFlav || MC::isTau(ancestor) || MC::isW(ancestor)) && ancestor->hasProdVtx() && !samePart) {
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
@@ -1246,19 +1244,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
-      const xAOD::TruthVertex* ancestor_prdVtx{};
-      const xAOD::TruthVertex* ancestor_endVtx{};
-      ancestor_prdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-      ancestor_endVtx = ancestor->decayVtx();
-      const xAOD::TruthVertex* parent_prdVtx{};
-      const xAOD::TruthVertex* parent_endVtx{};
-      if (ancestorParent) {
-        parent_prdVtx = ancestorParent->hasProdVtx() ? ancestorParent->prodVtx() : nullptr;
-        parent_endVtx = ancestorParent->decayVtx();
-      }
-      // V0->AP->V1-> ...->V2->A->V3
-      // V3 == V0 && V1 == V2
-      if (ancestor_endVtx == parent_prdVtx && ancestor_prdVtx == parent_endVtx) {
+      if (TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
         ancestorParent = ancestor;
         break;
       }
@@ -1267,9 +1253,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
         pPDG = ancestorParent->pdgId(); // FIXME difference in behaviour compared to defOrigOfElectron/Muon pPDG set even if we are in a loop
       }
       // to prevent Sherpa loop
-      if (ancestor == ancestorParent) {
-        break;
-      }
+      if (ancestor == ancestorParent) { break; }
       // End of method 2 of protecting against Sherpa loops
       if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
         // There will be another iteration so set ancestor to ancestorParent
@@ -1291,10 +1275,10 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   if (!ancestor) return NonDefined; // FIXME it should not be possible for ancestor to be nullptr at this point???
 
   info.setMotherProperties(ancestor);
-  ancestorPDG = ancestor->pdgId();
+  const int ancestorPDG = ancestor->pdgId();
   partProdVtx = ancestor->decayVtx();
-  ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
-  numOfParents = partProdVtx->nIncomingParticles();
+  const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
+  const int numOfParents = partProdVtx->nIncomingParticles();
   const int numberOfChildren = partProdVtx->nOutgoingParticles();
 
   // Determine decay products

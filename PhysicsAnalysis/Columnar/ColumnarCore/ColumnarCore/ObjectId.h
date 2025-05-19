@@ -9,6 +9,7 @@
 #define COLUMNAR_CORE_OBJECT_ID_H
 
 #include <ColumnarCore/ContainerId.h>
+#include <CxxUtils/checker_macros.h>
 #include <iostream>
 #include <stdexcept>
 
@@ -39,15 +40,27 @@ namespace columnar
 
     template<ContainerId CI2> requires (ContainerIdTraits<CI2>::isMutable && ContainerIdTraits<CI2>::constId == O)
     ObjectId (const ObjectId<CI2,ColumnarModeXAOD>& that) noexcept
-      : m_object (&that.getXAODObject())
+      : m_object (&that.getXAODObjectNoexcept())
     {}
 
     ObjectId& operator = (const ObjectId<O,ColumnarModeXAOD>& that) noexcept = default;
 
     [[nodiscard]] xAODObject& getXAODObject () const noexcept {
-      return *m_object;}
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *result ATLAS_THREAD_SAFE = m_object;
+      return *result;}
 
-    template<typename Acc,typename... Args>
+    // a version of `getXAODObject` that only exists when it is `noexcept`
+    [[nodiscard]] xAODObject& getXAODObjectNoexcept () const noexcept {
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *result ATLAS_THREAD_SAFE = m_object;
+      return *result;}
+
+      template<typename Acc,typename... Args>
       requires std::invocable<Acc,ObjectId<O,ColumnarModeXAOD>,Args...>
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
@@ -64,19 +77,19 @@ namespace columnar
   template<ContainerId CI>
   std::ostream& operator<< (std::ostream& str, const ObjectId<CI,ColumnarModeXAOD>& obj)
   {
-    return str << &obj.getXAODObject() << "/" << obj.getXAODObject().index();
+    return str << &obj.getXAODObjectNoexcept() << "/" << obj.getXAODObjectNoexcept().index();
   }
 
   template<ContainerId CI>
   bool operator== (const ObjectId<CI,ColumnarModeXAOD>& lhs, const ObjectId<CI,ColumnarModeXAOD>& rhs)
   {
-    return &lhs.getXAODObject() == &rhs.getXAODObject();
+    return &lhs.getXAODObjectNoexcept() == &rhs.getXAODObjectNoexcept();
   }
 
   template<ContainerId CI>
   bool operator!= (const ObjectId<CI,ColumnarModeXAOD>& lhs, const ObjectId<CI,ColumnarModeXAOD>& rhs)
   {
-    return &lhs.getXAODObject() != &rhs.getXAODObject();
+    return &lhs.getXAODObjectNoexcept() != &rhs.getXAODObjectNoexcept();
   }
 
 
@@ -93,6 +106,10 @@ namespace columnar
     using CM = ColumnarModeArray;
     using xAODObject = typename ContainerIdTraits<O>::xAODObjectIdType;
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     ObjectId (xAODObject& /*val_object*/)
     {
       throw std::logic_error ("can't call xAOD function in columnar mode");
@@ -107,6 +124,10 @@ namespace columnar
 
     ObjectId& operator = (const ObjectId<O,ColumnarModeArray>& that) noexcept = default;
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     [[nodiscard]] xAODObject& getXAODObject () const {
       throw std::logic_error ("can't call xAOD function in columnar mode");}
 
@@ -170,6 +191,7 @@ namespace columnar
   using ElectronId = ObjectId<ContainerId::electron>;
   using PhotonId = ObjectId<ContainerId::photon>;
   using EgammaId = ObjectId<ContainerId::egamma>;
+  using MutableEgammaId = ObjectId<ContainerId::mutableEgamma>;
   using ClusterId = ObjectId<ContainerId::cluster>;
   using TrackId = ObjectId<ContainerId::track>;
   using VertexId = ObjectId<ContainerId::vertex>;

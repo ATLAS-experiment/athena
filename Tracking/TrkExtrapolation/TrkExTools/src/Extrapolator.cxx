@@ -923,7 +923,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
     } else { // active material
       const Trk::TrackingVolume* detVol = dVol->associatedSubVolume(gp);
       if (!detVol && dVol->confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume const * const> subvols = dVol->confinedVolumes()->arrayObjects();
+        std::span<Trk::TrackingVolume const * const> subvols = dVol->confinedVolumes()->arrayObjects();
         for (const auto *subvol : subvols) {
           if (subvol->inside(gp, m_tolerance)) {
             detVol = subvol;
@@ -2373,20 +2373,6 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
     // -------------------------------------------------------------
     if (updateLastValid) {
       cache.m_lastValidParameters = nextParameters;
-    }
-    // re-initialize (will only overwrite destVolume)
-    if (nextVolume->redoNavigation()) {
-      dir = initializeNavigation(ctx,
-                                 cache,
-                                 *currentPropagator,
-                                 nextParameters.index(),
-                                 sf,
-                                 dir,
-                                 particle,
-                                 refParameters,
-                                 nextLayer,
-                                 nextVolume,
-                                 destVolume);
     }
     // avoid the oszillation
     previousVolume = lastVolume;
@@ -4739,7 +4725,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
     } else { // active material
       const Trk::TrackingVolume* detVol = dVol->associatedSubVolume(gp);
       if (!detVol && dVol->confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume const * const> subvols = dVol->confinedVolumes()->arrayObjects();
+        std::span<Trk::TrackingVolume const * const> subvols = dVol->confinedVolumes()->arrayObjects();
         for (const auto *subvol : subvols) {
           if (subvol->inside(gp, m_tolerance)) {
             detVol = subvol;
@@ -4775,7 +4761,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         // layers ?
         if (detVol->confinedLayers()) {
           if (cache.m_robustSampling) {
-            Trk::BinnedArraySpan<Trk::Layer const * const> cLays = detVol->confinedLayers()->arrayObjects();
+            std::span<Trk::Layer const * const> cLays = detVol->confinedLayers()->arrayObjects();
             for (const auto *cLay : cLays) {
               if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
                 cache.addOneNavigationLayer(cLay);
@@ -4805,7 +4791,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
   if (cache.m_currentStatic->confinedLayers() && updateStatic) {
     // if ( cache.m_currentStatic->confinedLayers() ) {
     if (cache.m_robustSampling) {
-      Trk::BinnedArraySpan<Trk::Layer const * const> cLays =
+      std::span<Trk::Layer const * const> cLays =
         cache.m_currentStatic->confinedLayers()->arrayObjects();
       for (const auto *cLay : cLays) {
         if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {

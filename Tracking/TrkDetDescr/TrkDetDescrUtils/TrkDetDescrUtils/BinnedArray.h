@@ -30,8 +30,6 @@ namespace Trk {
    @author Andreas.Salzburger@cern.ch
    @author Christos Anastopoulos (AthenaMT)
    */
-template<class T>
-using BinnedArraySpan = std::span<T>;
 
 template<class T>
 class BinnedArray
@@ -69,10 +67,10 @@ public:
 
   /** Return all objects of the Array non-const
    * we can still modify the T*/
-  virtual BinnedArraySpan<T* const> arrayObjects() = 0;
+  virtual std::span<T* const> arrayObjects() = 0;
 
   /** Return all objects of the Array const */
-  virtual BinnedArraySpan<T const * const> arrayObjects() const = 0;
+  virtual std::span<T const * const> arrayObjects() const = 0;
 
   /** Number of Entries in the Array */
   virtual unsigned int arrayObjectsNumber() const = 0;

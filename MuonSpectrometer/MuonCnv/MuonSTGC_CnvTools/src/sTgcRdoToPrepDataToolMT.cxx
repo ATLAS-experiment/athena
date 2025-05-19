@@ -144,7 +144,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
         int calibratedCharge = static_cast<int>(calibStrip.charge);
         if (calibratedCharge < 0 && channelType == 1) { // we only want to protect against negatively charged strips and we should not lose wire or pad hits because of bad calibrations since charge does not matter for them in reco. 
             if (!hitNegativeCharge) {
-                ATH_MSG_WARNING("One sTGC RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibratedCharge << "). Skipping these RDOs");
+                ATH_MSG_DEBUG("One sTGC RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibratedCharge << "). Skipping these RDOs");
                 hitNegativeCharge = true; 
             }
             continue;

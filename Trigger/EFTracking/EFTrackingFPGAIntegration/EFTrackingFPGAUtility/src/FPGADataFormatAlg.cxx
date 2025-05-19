@@ -160,8 +160,6 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
       ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition y: " << pcAux.globalPosition[3 * i + 1]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition z: " << pcAux.globalPosition[3 * i + 2]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has channelsInPhi: " << pcAux.channelsInPhi[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has omegaX: " << pcAux.omegaX[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has omegaY: " << pcAux.omegaY[i]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has totalToT: " << pcAux.totalToT[i]);
     }
 

@@ -9,7 +9,7 @@
 #include "TrkEventPrimitives/FitQuality.h"
 
 namespace Muon {
-
+    using namespace MuonStationIndex;
     MuonLayerAmbiguitySolverTool::MuonLayerAmbiguitySolverTool(const std::string& type, const std::string& name, const IInterface* parent) :
         AthAlgTool(type, name, parent) {
         declareInterface<IMuonLayerAmbiguitySolverTool>(this);
@@ -33,9 +33,8 @@ namespace Muon {
         // build candidate by selecting seeds and extending them
         unsigned int nseeds = 0;                    // counter for number of seeds up to now
         std::set<const MuonSegment*> usedSegments;  // keep track of the segments already used
-        std::vector<MuonStationIndex::StIndex> inverseSeedLayerOrder = {MuonStationIndex::BO, MuonStationIndex::BI, MuonStationIndex::BM,
-                                                                        MuonStationIndex::EO, MuonStationIndex::EE, MuonStationIndex::EI,
-                                                                        MuonStationIndex::EM};
+        std::vector<StIndex> inverseSeedLayerOrder = {StIndex::BO, StIndex::BI, StIndex::BM,
+                                                      StIndex::EO, StIndex::EE, StIndex::EI, StIndex::EM};
         while (nseeds < m_maxSeeds) {
             // first get a seed
             MuonLayerIntersection layerIntersection;
@@ -85,7 +84,7 @@ namespace Muon {
 
         // get data in current layer
         MuonStationIndex::StIndex currentStIndex = inverseSeedLayerOrder.back();
-        const std::vector<MuonLayerIntersection>& layerIntersections = muonLayerDataHashVec[currentStIndex];
+        const std::vector<MuonLayerIntersection>& layerIntersections = muonLayerDataHashVec[toInt(currentStIndex)];
         if (!layerIntersections.empty()) {
             // store new MuonCandidates
             std::vector<MuonCandidate> newCandidates;
@@ -145,7 +144,7 @@ namespace Muon {
         std::vector<MuonStationIndex::StIndex>::const_reverse_iterator rit_end = inverseSeedLayerOrder.rend();
         for (; rit != rit_end; ++rit) {
             // loop over segments and find the next 'good' one that was not used yet
-            for (const MuonLayerIntersection& muonLayerIntersection : muonLayerDataHashVec[*rit]) {
+            for (const MuonLayerIntersection& muonLayerIntersection : muonLayerDataHashVec[toInt(*rit)]) {
                 /// select segment
                 if (muonLayerIntersection.quality < m_seedQualityThreshold) continue;
                 // only consider once
@@ -168,7 +167,7 @@ namespace Muon {
                                                      std::vector<std::vector<MuonLayerIntersection> >& muonLayerDataHashVec) const {
         // clear and resize hash vector, initialize with null_ptr
         muonLayerDataHashVec.clear();
-        muonLayerDataHashVec.resize(MuonStationIndex::StIndexMax);
+        muonLayerDataHashVec.resize(toInt(StIndex::StIndexMax));
 
         // loop over layers
         for (const MuonLayerRecoData& layer : allLayers) {
@@ -186,16 +185,15 @@ namespace Muon {
             }
 
             // if there are no segments yet in the layer, directly add them
-            if (muonLayerDataHashVec[stIndex].empty()) {
-                muonLayerDataHashVec[stIndex] = std::move(layerIntersections);
+            if (muonLayerDataHashVec[toInt(stIndex)].empty()) {
+                muonLayerDataHashVec[toInt(stIndex)] = std::move(layerIntersections);
             } else {
                 // there are already segment, try resolving small/large overlaps
-                resolveSmallLargeOverlaps(ctx, muonLayerDataHashVec[stIndex], layerIntersections);
+                resolveSmallLargeOverlaps(ctx, muonLayerDataHashVec[toInt(stIndex)], layerIntersections);
             }
 
             // finally sort the segments
-            std::stable_sort(
-                muonLayerDataHashVec[stIndex].begin(), muonLayerDataHashVec[stIndex].end(),
+            std::ranges::stable_sort(muonLayerDataHashVec[toInt(stIndex)],
                 [](const Muon::MuonLayerIntersection& a, const Muon::MuonLayerIntersection& b) { return a.quality > b.quality; });
         }
 

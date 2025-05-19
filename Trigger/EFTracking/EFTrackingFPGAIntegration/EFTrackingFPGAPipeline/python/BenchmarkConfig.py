@@ -7,7 +7,7 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('bdfID','0000:83:00.1') # On the testbed
-    kwarg.setdefault('xclbin', '/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin')
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
     kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
     kwarg.setdefault('StripClusterKernelName','processHits')
     kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
@@ -17,6 +17,7 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     kwarg.setdefault('InputStripClusterKey', 'ITkStripClusters')
     kwarg.setdefault('runPassThrough', flags.FPGADataPrep.RunPassThrough)
     
+
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
     clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))

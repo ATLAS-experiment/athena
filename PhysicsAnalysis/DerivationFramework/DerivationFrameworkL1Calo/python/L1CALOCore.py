@@ -486,7 +486,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     )    
     AllVariables += ["L1_jFexEmulatedTowers"]
 
-    # In case MC has no jets, schedule reconstruction
+    # In case MC has no jets, b-tagging or MET, schedule reconstruction
     if flags.Input.isMC:
         from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
         from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR, AntiKt10UFOCSSKSoftDrop_trigger
@@ -497,6 +497,38 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
             from JetRecConfig.JetRecConfig import JetRecCfg
             for container in jets_to_schedule:
                 acc.merge(JetRecCfg(flags, container))
+
+        jet_collections = set([_.fullname().replace('Jets','') for _ in jets_to_schedule])
+        btag_jet_collections = set(['AntiKt4EMPFlow'])
+        met_jet_collections = set(['AntiKt4EMPFlow'])
+
+        if jet_collections & btag_jet_collections:
+            log.info('Scheduling b-tagging of rebuilt jets')
+            from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+            acc.merge(BeamSpotCondAlgCfg(flags))
+            from BTagging.BTagConfig import BTagRecoSplitCfg
+            # 
+            for container in jet_collections & btag_jet_collections:
+                acc.merge(BTagRecoSplitCfg(flags, [container]))
+
+        # MET
+        if jet_collections & met_jet_collections:
+             log.info('Scheduling rebuild of standard MET')
+             from METReconstruction.METAssociatorCfg import METAssociatorCfg
+             from METUtilities.METMakerConfig import getMETMakerAlg
+             for container in jet_collections & met_jet_collections:
+                 if container == 'AntiKt4EMPFlow':
+                     # build links between FlowElements and electrons, photons, muons and taus
+                     log.info('Scheduling FlowElement linking')
+                     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+                     acc.merge(PFGlobalFlowElementLinkingCfg(flags))
+                 acc.merge(METAssociatorCfg(flags, container))
+                 acc.addEventAlgo(getMETMakerAlg(container))
+             from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+             acc.merge(CaloNoiseCondAlgCfg(flags)) # Prereq for Calo MET
+             from METReconstruction.METCalo_Cfg import METCalo_Cfg
+             acc.merge(METCalo_Cfg(flags))
+
 
     # Truth collections
     if flags.Input.isMC:

@@ -10,6 +10,7 @@
 
 
 namespace Muon {
+    using namespace MuonStationIndex;
 
     MuonIdHelperSvc::MuonIdHelperSvc(const std::string& name, ISvcLocator* svc) :
         base_class(name, svc) {}
@@ -41,7 +42,7 @@ namespace Muon {
             std::string name = m_primaryHelper->technologyString(tech);
             
             if (name == "MDT") m_technologies.push_back(TechIdx::MDT);
-            if (name == "CSC") m_technologies.push_back(TechIdx::CSCI);
+            if (name == "CSC") m_technologies.push_back(TechIdx::CSC);
             if (name == "RPC") m_technologies.push_back(TechIdx::RPC);
             if (name == "TGC") m_technologies.push_back(TechIdx::TGC);
             if (name == "STGC") m_technologies.push_back(TechIdx::STGC);
@@ -131,7 +132,7 @@ namespace Muon {
                ATH_MSG_ERROR("data.chIndex is negative in MuonIdHelperSvc::initialize ");
                return StatusCode::FAILURE;
             }
-            data.stIndex = MuonStationIndex::toStationIndex(data.chIndex);
+            data.stIndex = toStationIndex(data.chIndex);
 
             if (msgLvl(MSG::DEBUG)) {
                 msg(MSG::DEBUG) << "Adding station " << i << " " << data.stationName << " ";
@@ -144,7 +145,7 @@ namespace Muon {
                 else
                     msg(MSG::DEBUG) << " Large, ";
 
-                msg(MSG::DEBUG) << MuonStationIndex::chName(data.chIndex) << "  " << MuonStationIndex::stName(data.stIndex) << endmsg;
+                msg(MSG::DEBUG) << chName(data.chIndex) << "  " << stName(data.stIndex) << endmsg;
             }
         }
         /// Cache the sMDT stations
@@ -171,10 +172,9 @@ namespace Muon {
             if (!idHelper) return;
             const TechIdx techIdx = technologyIndex(*idHelper->module_begin());
             for (auto itr = idHelper->module_begin(); itr != idHelper->module_end(); ++itr) {
-                const auto idx = MuonStationIndex::toStationIndex(chamberIndex(*itr));
-                if (idx == Muon::MuonStationIndex::StUnknown) continue;
-                const int stIdx = static_cast<int>(idx);
-                m_techPerStation[stIdx].insert(techIdx);
+                const auto idx = toStationIndex(chamberIndex(*itr));
+                if (idx == StIndex::StUnknown) continue;
+                m_techPerStation[toInt(idx)].insert(techIdx);
             }
         }); 
 
@@ -188,13 +188,10 @@ namespace Muon {
             return m_rpcIdHelper->gasGap(id);
         } else if (isTgc(id)) {
             return m_tgcIdHelper->gasGap(id);
-
         } else if (isCsc(id)) {
             return m_cscIdHelper->wireLayer(id);
-
         } else if (issTgc(id)) {
             return m_stgcIdHelper->gasGap(id);
-
         } else if (isMM(id)) {
             return m_mmIdHelper->gasGap(id);
         } else {
@@ -227,10 +224,10 @@ namespace Muon {
         return m_stgcIdHelper && m_stgcIdHelper->is_stgc(id);
     }
 
-    const std::set<MuonStationIndex::TechnologyIndex>& 
-        MuonIdHelperSvc::technologiesInStation(MuonStationIndex::StIndex stIndex) const {
-        assert(static_cast<unsigned>(stIndex) < m_techPerStation.size());
-        return m_techPerStation[static_cast<unsigned>(stIndex)];
+    const std::set<TechnologyIndex>& 
+        MuonIdHelperSvc::technologiesInStation(StIndex stIndex) const {
+        assert(toInt(stIndex) < static_cast<int>(m_techPerStation.size()));
+        return m_techPerStation[toInt(stIndex)];
     }
     bool MuonIdHelperSvc::issMdt(const Identifier& id) const {
         if (!isMdt(id))
@@ -271,7 +268,7 @@ namespace Muon {
 
     bool MuonIdHelperSvc::isSmallChamber(const Identifier& id) const { return m_primaryHelper->isSmall(id); }
 
-    MuonStationIndex::ChIndex MuonIdHelperSvc::chamberIndex(const Identifier& id) const {
+    ChIndex MuonIdHelperSvc::chamberIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
             if (id.is_valid()) ATH_MSG_WARNING("chamberIndex: invalid ID " << m_primaryHelper->print_to_string(id));
             return ChIdx::ChUnknown;
@@ -279,7 +276,7 @@ namespace Muon {
         return m_stationNameData[stationName(id)].chIndex;
     }
 
-    MuonStationIndex::StIndex MuonIdHelperSvc::stationIndex(const Identifier& id) const {
+    StIndex MuonIdHelperSvc::stationIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
             if (id.is_valid()) ATH_MSG_WARNING("stationIndex: invalid ID " << m_primaryHelper->print_to_string(id));
             return StIdx::StUnknown;
@@ -287,7 +284,7 @@ namespace Muon {
         return m_stationNameData[stationName(id)].stIndex;
     }
 
-    MuonStationIndex::PhiIndex MuonIdHelperSvc::phiIndex(const Identifier& id) const {
+    PhiIndex MuonIdHelperSvc::phiIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
             if (id.is_valid()) ATH_MSG_WARNING("phiIndex: invalid ID " << m_primaryHelper->print_to_string(id));
             return PhiIdx::PhiUnknown;
@@ -326,23 +323,22 @@ namespace Muon {
         return index;
     }
 
-    MuonStationIndex::DetectorRegionIndex MuonIdHelperSvc::regionIndex(const Identifier& id) const {
-        using DetRegIdx = MuonStationIndex::DetectorRegionIndex;
-        if (isEndcap(id)) return stationEta(id) < 0 ? DetRegIdx::EndcapC : DetRegIdx::EndcapA;
-        return DetRegIdx::Barrel;
+    DetectorRegionIndex MuonIdHelperSvc::regionIndex(const Identifier& id) const {
+        if (isEndcap(id)) return stationEta(id) < 0 ? DetectorRegionIndex::EndcapC : DetectorRegionIndex::EndcapA;
+        return DetectorRegionIndex::Barrel;
     }
 
-    MuonStationIndex::LayerIndex MuonIdHelperSvc::layerIndex(const Identifier& id) const {
-        return MuonStationIndex::toLayerIndex(stationIndex(id));
+    LayerIndex MuonIdHelperSvc::layerIndex(const Identifier& id) const {
+        return toLayerIndex(stationIndex(id));
     }
 
-    MuonStationIndex::TechnologyIndex MuonIdHelperSvc::technologyIndex(const Identifier& id) const {
+    TechnologyIndex MuonIdHelperSvc::technologyIndex(const Identifier& id) const {
         if (isMdt(id)) return TechIdx::MDT;
-        if (isCsc(id)) return TechIdx::CSCI;
-        if (isTgc(id)) return TechIdx::TGC;
-        if (isRpc(id)) return TechIdx::RPC;
-        if (issTgc(id)) return TechIdx::STGC;
-        if (isMM(id)) return TechIdx::MM;
+        else if (isCsc(id)) return TechIdx::CSC;
+        else if (isTgc(id)) return TechIdx::TGC;
+        else if (isRpc(id)) return TechIdx::RPC;
+        else if (issTgc(id)) return TechIdx::STGC;
+        else if (isMM(id)) return TechIdx::MM;
         return TechIdx::TechnologyUnknown;
     }
     std::string MuonIdHelperSvc::toString(const Identifier& id) const {
@@ -368,7 +364,7 @@ namespace Muon {
     }
 
     std::string MuonIdHelperSvc::toStringTech(const Identifier& id) const {
-        return  MuonStationIndex::technologyName(technologyIndex(id));
+        return  technologyName(technologyIndex(id));
     }
 
     std::string MuonIdHelperSvc::chamberNameString(const Identifier& id) const {

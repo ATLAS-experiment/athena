@@ -77,7 +77,10 @@ std::shared_ptr<CylinderVolumeBounds> GeoShapeConverter::convert(const GeoPcon* 
 
     // get the pcon igredients ...
     unsigned int numberOfPlanes = gpcon->getNPlanes();
-    double rMin{10.e10}, rMax{-10.e10}, zMin{10.e10}, zMax{-10.e10};
+    double rMin{10.e10};
+    double rMax{-10.e10};
+    double zMin{10.e10};
+    double zMax{-10.e10};
 
     for (unsigned int iplane = 0; iplane < numberOfPlanes; ++iplane) {
         zMin = std::min(gpcon->getZPlane(iplane), zMin);
@@ -200,22 +203,27 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                                                   Amg::getRotateZ3D(p180deg);
 
                 if (msgLvl(MSG::DEBUG)) {
-                    const Amg::Vector3D top{-x1, y1, z}, bottom{-x2, y1, -z},
-                                        top2{x1, y1, z}, bottom2{x2, y1, -z};
+                    const Amg::Vector3D top{-x1, y1, z};
+                    const Amg::Vector3D bottom{-x2, y1, -z};
+                    const Amg::Vector3D top2{x1, y1, z};
+                    const Amg::Vector3D bottom2{x2, y1, -z};
                     ATH_MSG_DEBUG(" Trd new volume case 2 Trapezoid minHalflengthX "
                         << volBounds->minHalflengthX() << " maxHalflengthX() "
                         << volBounds->maxHalflengthX());
                     ATH_MSG_DEBUG(" Original topLocal " << Amg::toString(top) << " Radius " << top.perp());
                     ATH_MSG_DEBUG(" Original bottomLocal "<< Amg::toString(bottom) << " Radius " << bottom.perp());
-                    Amg::Vector3D topG{transf * top}, bottomG{transf * bottom};
+                    Amg::Vector3D topG{transf * top};
+                    Amg::Vector3D bottomG{transf * bottom};
                     ATH_MSG_DEBUG(" top Global " << Amg::toString(topG)<< " Radius " << topG.perp());
                     ATH_MSG_DEBUG(" bottom Global " << Amg::toString(bottomG)<< " Radius "<< bottomG.perp());
                     topG = transf * top2;
                     bottomG = transf * bottom2;
                     ATH_MSG_DEBUG(" top2 Global x " << Amg::toString(topG)<< " Radius " << topG.perp());
                     ATH_MSG_DEBUG(" bottom2 Global " << Amg::toString(bottomG) << " Radius: " << bottomG.perp());
-                    const Amg::Vector3D topR{-x2, z, y1}, bottomR{-x1, -z, y1},
-                                        top2R{x2, z, y1}, bottom2R{x1, -z, y1};
+                    const Amg::Vector3D topR{-x2, z, y1};
+                    const Amg::Vector3D bottomR{-x1, -z, y1};
+                    const Amg::Vector3D top2R{x2, z, y1};
+                    const Amg::Vector3D bottom2R{x1, -z, y1};
                     topG = totalTransform * topR;
                     bottomG = totalTransform * bottomR;
                     ATH_MSG_DEBUG(" topR Global " << Amg::toString(topG)<< " Radius " << topG.perp());

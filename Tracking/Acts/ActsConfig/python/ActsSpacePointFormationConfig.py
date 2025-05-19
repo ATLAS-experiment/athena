@@ -4,6 +4,32 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsConfig.ActsUtilities import extractChildKwargs
 
+def reconstructStripSpacePointsInPrimaryPass(flags) -> bool:
+    # Unlike for clusters, we need some non-trivial logic to understand
+    # if we want reconstruct strip space points
+    # Strip clusters are always created in the Full-Scan primary pass, since they
+    # are used in Track Finding
+    # But for space points this really depends on the fast tracking configuration
+    # and the sequence of secondary passes
+
+    # If strip detector is disabled we reconstruct nothing
+    if not flags.Detector.EnableITkStrip:
+        return False
+
+    # If primary pass is not fast tracking configuration, we reconstruct all space points
+    if not flags.Tracking.doITkFastTracking:
+        return True
+
+    # If we schedule LRT or Low Pt configurations (both are full scan) we reconstruct
+    # space points in primary pass
+    # We do the same for the conversion pass
+    if flags.Acts.doLargeRadius or flags.Acts.doLowPt or flags.Acts.doITkConversion:
+        return True
+
+    # If we only have the primary pass, no need to process strip space points
+    return False
+
+
 def ActsSpacePointCacheCreatorAlgCfg(flags,
                                      name: str = "ActsSpacePointCacheCreatorAlg",
                                      **kwargs: dict) -> ComponentAccumulator:
@@ -251,12 +277,12 @@ def ActsSpacePointFormationCfg(flags,
 
     # For conversion and LRT pass we do not process pixels since we assume
     # they have been processed on the primary pass.
+    from InDetConfig.ITkActsHelpers import isPrimaryPass
     if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
         processPixels = False
-    elif flags.Tracking.doITkFastTracking:
-        # Fast tracking configuration: disable strip
-        processStrips = False
-        
+    elif isPrimaryPass(flags) and flags.Tracking.doITkFastTracking:
+        processStrips = reconstructStripSpacePointsInPrimaryPass(flags)
+    
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
@@ -277,16 +303,18 @@ def ActsSpacePointFormationCfg(flags,
     # pass only if cache is enabled. In the latter case it is used to collect all
     # the clusters from all views before passing them to the downstream algorithms
 
-    if flags.Tracking.ActiveConfig.isSecondaryPass:
+    from InDetConfig.ITkActsHelpers import isValidationPass
+    if isPrimaryPass(flags) or isValidationPass(flags):
+        # Primary pass
+        # Validation passes count as primary passes
+        kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
+        kwargs.setdefault('runReconstruction', True)
+        kwargs.setdefault('runPreparation', flags.Acts.useCache)
+    else:
         # Secondary passes
         kwargs.setdefault('runCacheCreation', False)
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
         kwargs.setdefault('runPreparation', True)
-    else:
-        # Primary pass
-        kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
-        kwargs.setdefault('runReconstruction', True)
-        kwargs.setdefault('runPreparation', flags.Acts.useCache)
 
     # Overlap Space Points may not be required
     processOverlapSpacePoints = processStrips

@@ -6,7 +6,8 @@
 #define ITkStripsRawDataByteStreamCnv_ITkStripsRawContByteStreamTool_h
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ITkStripsByteStreamCnv/IITkStripsRawContByteStreamTool.h"
+//#include "ITkStripsByteStreamCnv/IITkStripsRawContByteStreamTool.h"
+#include "SCT_RawDataByteStreamCnv/ISCTRawContByteStreamTool.h"
 
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
@@ -31,7 +32,8 @@ class SCT_ID;
  * loops through the map, using RodEncoder to fill data for each ROD in turn.
  */
 class 
-ITkStripsRawContByteStreamTool : public extends<AthAlgTool, IITkStripsRawContByteStreamTool> {
+//ITkStripsRawContByteStreamTool : public extends<AthAlgTool, IITkStripsRawContByteStreamTool> {
+ITkStripsRawContByteStreamTool : public extends<AthAlgTool, ISCTRawContByteStreamTool> {
  public:
 
   /** Constructor */

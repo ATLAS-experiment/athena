@@ -50,11 +50,14 @@ class ElectronCalibrationConfig (ConfigBlock) :
             "The default is 4.5 GeV.")
         self.addOption ('maxEta', 2.47, type=float,
             info="maximum electron |eta| (float). The default is 2.47.")
-        self.addOption ('forceFullSimConfig', False, type=bool,
+        self.addOption ('forceFullSimConfigForP4', False, type=bool,
             info="whether to force the tool to use the configuration meant for "
-            "full simulation samples. Only for testing purposes. The default "
-            "is False.")
-
+            "full simulation samples for P4 corrections. Only for testing purposes. "
+            "The default is False.")
+        self.addOption ('forceFullSimConfigForIso', False, type=bool,
+            info="whether to force the tool to use the configuration meant for "
+            "full simulation samples for isolation corrections. Only for testing purposes. "
+            "The default is False.")
         self.addOption ('splitCalibrationAndSmearing', False, type=bool,
             info="EXPERIMENTAL: This splits the EgammaCalibrationAndSmearingTool "
             " into two steps. The first step applies a baseline calibration that "
@@ -94,17 +97,17 @@ class ElectronCalibrationConfig (ConfigBlock) :
             if config.geometry() is LHCPeriod.Run2:
                 alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v1'
             elif config.geometry() is LHCPeriod.Run3:
-                alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+                alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             elif config.geometry() is LHCPeriod.Run4:
                 log.warning("No ESModel set for Run4, using Run 3 model instead")
-                alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+                alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
                                   "there must be something wrong!")
 
         alg.calibrationAndSmearingTool.decorrelationModel = self.decorrelationModel
         alg.calibrationAndSmearingTool.useFastSim = (
-            0 if self.forceFullSimConfig
+            0 if self.forceFullSimConfigForP4
             else int( config.dataType() is DataType.FastSim ))
         alg.calibrationAndSmearingTool.decorateEmva = self.decorateEmva
         alg.egammas = config.readName (self.containerName)
@@ -117,7 +120,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         log = logging.getLogger('ElectronCalibrationConfig')
 
-        if self.forceFullSimConfig:
+        if self.forceFullSimConfigForP4:
             log.warning("You are running ElectronCalibrationConfig forcing full sim config")
             log.warning(" This is only intended to be used for testing purposes")
 
@@ -220,7 +223,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
                                    'CP::IsolationCorrectionTool' )
             alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
             alg.isolationCorrectionTool.AFII_corr = (
-                0 if self.forceFullSimConfig
+                0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)

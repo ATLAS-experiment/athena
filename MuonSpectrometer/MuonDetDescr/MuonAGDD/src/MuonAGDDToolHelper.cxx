@@ -121,8 +121,7 @@ bool MuonAGDDToolHelper::BuildMScomponents()
   if (!pDetStore.isValid()) return false;
   MuonGM::MuonDetectorManager* muonMgr=nullptr;
   if (pDetStore->retrieve(muonMgr).isFailure()) return false;
-  bool readoutGeoDone =  BuildNSWReadoutGeometry::BuildReadoutGeometry(muonMgr, nullptr/*, GetMSdetectors*/);
-  return readoutGeoDone;
+  return BuildNSWReadoutGeometry::BuildReadoutGeometry(muonMgr);
 }
 
 void MuonAGDDToolHelper::SetNSWComponents()

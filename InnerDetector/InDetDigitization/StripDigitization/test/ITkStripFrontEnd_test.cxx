@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -119,6 +119,7 @@ BOOST_AUTO_TEST_SUITE(TEST_ITkStripFrontEnd)
   auto  pToolSvc=g.toolSvc();
   auto  pDetStore=g.detStore();
   IAlgTool* pToolInterface{};
+  IAlgTool* pToolAmp{nullptr};
   
   BOOST_AUTO_TEST_CASE( sanityCheck ){
     const bool svcLocatorIsOk=(pSvcLoc != nullptr);
@@ -142,6 +143,32 @@ BOOST_AUTO_TEST_SUITE(TEST_ITkStripFrontEnd)
     BOOST_TEST ( pDetStore->record (std::move (sctMgr), "SCT").isSuccess() );
     BOOST_TEST ( pToolSvc->retrieveTool("ITkStripFrontEnd", pToolInterface).isSuccess());
     BOOST_TEST(pToolInterface -> initialize());
+  }
+
+  BOOST_AUTO_TEST_CASE(process){
+
+  ITkStripFrontEndData data;
+
+  // Check number of strips in design and from manager(max number of strips on any module)
+  // The design value should always be equal or lower than the manager one
+  // However, no resising is now done in case of a lower value
+  // const int strip_max = p_design->cells();
+  const int strip_max = 8;
+  // Init vectors
+  auto pToolFrontEnd = dynamic_cast<ITkStripFrontEnd*>(pToolInterface);
+  pToolFrontEnd->initVectors(strip_max, data);
+
+  // Contains strip hit info, reset to 0 for each wafer processed
+  data.m_StripHitsOnWafer.assign(strip_max, 0);
+
+  // Containes the charge for each bin on each hit strip
+
+  for (int i = 0; i < strip_max; ++i) {
+      data.m_Analogue[0][i] = 0.0;
+      data.m_Analogue[1][i] = 0.0;
+      data.m_Analogue[2][i] = 0.0;
+    }
+
   }
   
 BOOST_AUTO_TEST_SUITE_END()

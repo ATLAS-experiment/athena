@@ -13,6 +13,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
+    cf.addFlag('doMultiTruth', True)
     cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
     cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
@@ -101,10 +102,10 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('writeToAOD', False)
     cf.addFlag('writeOfflPRDInfo', False)
 
-    
+
     # Monitoring
     cf.addFlag('writeAdditionalOutputData', True)
-    
+
     # ACTS Tracking
     cf.addFlag('runCKF',True)
     cf.addFlag('useFPGATruthTrackMatching',False)
@@ -136,7 +137,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('NumOfHitPerGrouping', 5)
 
     cf.addFlag('etaPatternFilter', False)
-    cf.addFlag('phiRoadFilter', False)    
+    cf.addFlag('phiRoadFilter', False)
     cf.addFlag('GNN', False)
 
 
@@ -210,6 +211,7 @@ def createBasicFPGATrackSimConfigFlags():
     # second stage fitting
     cf.addFlag('secondStage', False)
     cf.addFlag('secondChi2Cut', 36)
+    cf.addFlag('useVaryingWindow', False) #can be removed once we optimize windows
 
     # fast monitoring
     cf.addFlag('fastMon', False)
@@ -228,7 +230,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('lrtDoubletQptBins', 216)
     cf.addFlag('lrtMonPhiRange', (0.2, 0.5))
     cf.addFlag('lrtMonD0Range', (-100,100))
-    cf.addFlag('lrtMonZ0Range', (-300,300)) 
+    cf.addFlag('lrtMonZ0Range', (-300,300))
     cf.addFlag('sampleType', '')
 
     return cf
@@ -296,9 +298,9 @@ def createHoughFPGATrackSimConfigFlags():
     cf.addFlag('lrtStraighttrackConvSizeY', 0)
     cf.addFlag('lrtStraighttrackHitExtendX', [])
     cf.addFlag('lrtStraighttrackStereo', False)
-    cf.addFlag('lrtStraighttrackLocalMaxWindowSize', 0) 
+    cf.addFlag('lrtStraighttrackLocalMaxWindowSize', 0)
 
-    return cf 
+    return cf
 
 
 def createDev21_02_15_FPGATrackSimConfigFlags():
@@ -327,7 +329,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf = createBasicFPGATrackSimConfigFlags()
 
     cf.name = 'genScan'
-    cf.addFlag('genScanCuts','FPGATrackSimGenScanCuts')    
+    cf.addFlag('genScanCuts','FPGATrackSimGenScanCuts')
     cf.addFlag('reverse','True')
     cf.addFlag('binFilter','IncrementalBuild')
     cf.addFlag('layerStudy',False)
@@ -372,12 +374,12 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("metricLearningR",0.1)
     cf.addFlag("metricLearningMaxN", 50)
     cf.addFlag("MLModelPath",'')
-    cf.addFlag("GNNModelPath",'') 
+    cf.addFlag("GNNModelPath",'')
     cf.addFlag("roadMakerTool", roadMakerTool.ConnectedComponents, type=roadMakerTool)
     cf.addFlag("edgeScoreCut",0.8)
     cf.addFlag("doGNNRootOutput",False)
     cf.addFlag("doGNNTracking",False)
-    
+
     return cf
 
 #####################################################################
@@ -395,12 +397,4 @@ if __name__ == "__main__":
   assert flags.Hough.fastMon is False , "default fastMon is wrong"
   assert flags.Hough.lrtMonZ0Range ==  (-300,300), "default lrtMonZ0Rang is wrong"
 
-  print( "allok" )   
-
-
-
-
-
-
-
-    
+  print( "allok" )

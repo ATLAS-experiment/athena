@@ -8,7 +8,9 @@
 #include "../ITkStripsRawContByteStreamTool.h"
 DECLARE_COMPONENT( ITkStripsRawContByteStreamTool )
 
-
-
 #include "../ITkStripsRodEncoder.h"
 DECLARE_COMPONENT( ITkStripsRodEncoder )
+
+#include "../ITkStripRawContByteStreamToolProviderTool.h"
+DECLARE_COMPONENT( ITkStripRawContByteStreamToolProviderTool )
+

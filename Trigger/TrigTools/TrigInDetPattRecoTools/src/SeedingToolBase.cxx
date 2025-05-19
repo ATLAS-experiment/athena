@@ -38,6 +38,9 @@ StatusCode SeedingToolBase::initialize() {
     std::ifstream ifs(conn_fileName.c_str());
     
     m_connector = std::make_unique<GNN_FASTRACK_CONNECTOR>(ifs, m_LRTmode);
+    if (m_etaBinOverride != 0.0f) {
+      m_connector->m_etaBin = m_etaBinOverride;
+    }
     
     ATH_MSG_INFO("Layer connections are initialized from file " << conn_fileName);
   }

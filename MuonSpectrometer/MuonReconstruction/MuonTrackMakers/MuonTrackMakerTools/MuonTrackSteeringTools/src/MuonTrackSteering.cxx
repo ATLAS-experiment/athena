@@ -46,11 +46,10 @@ namespace Muon {
         return s.str();
     }
     //----------------------------------------------------------------------------------------------------------
-
-    MuonTrackSteering::MuonTrackSteering(const std::string& t, const std::string& n, const IInterface* p) :
-        AthAlgTool(t, n, p), m_combinedSLOverlaps(false) {
-        declareInterface<IMuonTrackFinder>(this);
-
+    using namespace MuonStationIndex;
+    MuonTrackSteering::MuonTrackSteering(const std::string& t, const std::string& n, const IInterface* p) : 
+        base_class(t,n,p), m_combinedSLOverlaps(false) {
+ 
         declareProperty("StrategyList", m_stringStrategies, "List of strategies to be used by the track steering");
         declareProperty("SegSeedQCut", m_segQCut[0] = -2, "Required quality for segments to be a seed");
         declareProperty("Seg2ndQCut", m_segQCut[1] = -2, "Required quality for segments to be the second on a track");
@@ -88,8 +87,8 @@ namespace Muon {
 
         std::unique_ptr<TrackCollection> result = std::make_unique<TrackCollection>();
 
-        SegColVec chamberSegments(MuonStationIndex::ChIndexMax);  // <! Segments sorted per Chamber
-        SegColVec stationSegments(MuonStationIndex::StIndexMax);  // <! Segments sorted per station
+        ChSegCol_t chamberSegments{};  // <! Segments sorted per Chamber
+        StSegCol_t stationSegments{};  // <! Segments sorted per station
         ChSet chambersWithSegments;
         StSet stationsWithSegments;
         // Extract segments into work arrays
@@ -100,7 +99,7 @@ namespace Muon {
         return result;
     }
 
-    bool MuonTrackSteering::extractSegments(const EventContext& ctx, const MuonSegmentCollection& coll, SegColVec& chamberSegments, SegColVec& stationSegments,
+    bool MuonTrackSteering::extractSegments(const EventContext& ctx, const MuonSegmentCollection& coll, ChSegCol_t& chamberSegments, StSegCol_t& stationSegments,
                                             ChSet& chambersWithSegments, StSet& stationsWithSegments, GarbageContainer& trash_bin) const {
         if (coll.empty()) return false;
 
@@ -110,48 +109,49 @@ namespace Muon {
         for (const MuonSegment* segment : coll) {
             ATH_MSG_DEBUG("Adding segment ");
             std::unique_ptr<MuPatSegment> aSeg = m_candidateTool->createSegInfo(ctx, *segment);
+            if (!aSeg) continue;
             ATH_MSG_DEBUG(" -> MuPatSegment " << m_candidateTool->print(*aSeg));
 
-            MuonStationIndex::ChIndex chIndex = aSeg->chIndex;
-            MuonStationIndex::StIndex stIndex = aSeg->stIndex;
-            if (chIndex < 0 || stIndex < 0) {
+            ChIndex chIndex = aSeg->chIndex;
+            StIndex stIndex = aSeg->stIndex;
+            if (chIndex == ChIndex::ChUnknown || stIndex ==  StIndex::StUnknown) {
                 ATH_MSG_WARNING("Chamber or station index invalid:" << m_candidateTool->print(*aSeg));
                 continue;
             }
             chambersWithSegments.insert(chIndex);
             stationsWithSegments.insert(stIndex);
 
-            std::vector<MuPatSegment*>& segments = chamberSegments[chIndex];
+            std::vector<MuPatSegment*>& segments = chamberSegments[toInt(chIndex)];
             segments.push_back(aSeg.get());
             if (!m_combinedSLOverlaps) {
-                std::vector<MuPatSegment*>& segments2 = stationSegments[stIndex];
+                std::vector<MuPatSegment*>& segments2 = stationSegments[toInt(stIndex)];
                 segments2.push_back(aSeg.get());
             }
             trash_bin.push_back(std::move(aSeg));
         }
 
         if (m_combinedSLOverlaps) {
-            combineOverlapSegments(ctx, chamberSegments[MuonStationIndex::BIS], chamberSegments[MuonStationIndex::BIL], stationSegments,
+            combineOverlapSegments(ctx, chamberSegments[toInt(ChIndex::BIS)], chamberSegments[toInt(ChIndex::BIL)], stationSegments,
                                    stationsWithSegments, trash_bin);
-            combineOverlapSegments(ctx, chamberSegments[MuonStationIndex::BMS], chamberSegments[MuonStationIndex::BML], stationSegments,
+            combineOverlapSegments(ctx, chamberSegments[toInt(ChIndex::BMS)], chamberSegments[toInt(ChIndex::BML)], stationSegments,
                                    stationsWithSegments, trash_bin);
-            combineOverlapSegments(ctx, chamberSegments[MuonStationIndex::BOS], chamberSegments[MuonStationIndex::BOL], stationSegments,
+            combineOverlapSegments(ctx, chamberSegments[toInt(ChIndex::BOS)], chamberSegments[toInt(ChIndex::BOL)], stationSegments,
                                    stationsWithSegments, trash_bin);
-            combineOverlapSegments(ctx, chamberSegments[MuonStationIndex::EIS], chamberSegments[MuonStationIndex::EIL], stationSegments,
+            combineOverlapSegments(ctx, chamberSegments[toInt(ChIndex::EIS)], chamberSegments[toInt(ChIndex::EIL)], stationSegments,
                                    stationsWithSegments, trash_bin);
-            combineOverlapSegments(ctx, chamberSegments[MuonStationIndex::EMS], chamberSegments[MuonStationIndex::EML], stationSegments,
+            combineOverlapSegments(ctx, chamberSegments[toInt(ChIndex::EMS)], chamberSegments[toInt(ChIndex::EML)], stationSegments,
                                    stationsWithSegments, trash_bin);
-            combineOverlapSegments(ctx, chamberSegments[MuonStationIndex::EOS], chamberSegments[MuonStationIndex::EOL], stationSegments,
+            combineOverlapSegments(ctx, chamberSegments[toInt(ChIndex::EOS)], chamberSegments[toInt(ChIndex::EOL)], stationSegments,
                                    stationsWithSegments, trash_bin);
-            combineOverlapSegments(ctx, chamberSegments[MuonStationIndex::EES], chamberSegments[MuonStationIndex::EEL], stationSegments,
+            combineOverlapSegments(ctx, chamberSegments[toInt(ChIndex::EES)], chamberSegments[toInt(ChIndex::EEL)], stationSegments,
                                    stationsWithSegments, trash_bin);
-            combineOverlapSegments(ctx, chamberSegments[MuonStationIndex::CSS], chamberSegments[MuonStationIndex::CSL], stationSegments,
+            combineOverlapSegments(ctx, chamberSegments[toInt(ChIndex::CSS)], chamberSegments[toInt(ChIndex::CSL)], stationSegments,
                                    stationsWithSegments, trash_bin);
-            std::vector<MuPatSegment*>& segments = chamberSegments[MuonStationIndex::BEE];
+            std::vector<MuPatSegment*>& segments = chamberSegments[toInt(ChIndex::BEE)];
             if (!segments.empty()) {
-                chambersWithSegments.insert(MuonStationIndex::BEE);
-                stationsWithSegments.insert(MuonStationIndex::BE);
-                std::vector<MuPatSegment*>& segs = stationSegments[MuonStationIndex::BE];
+                chambersWithSegments.insert(ChIndex::BEE);
+                stationsWithSegments.insert(StIndex::BE);
+                std::vector<MuPatSegment*>& segs = stationSegments[toInt(StIndex::BE)];
                 segs.insert(segs.end(), segments.begin(), segments.end());
             }
         }
@@ -159,7 +159,7 @@ namespace Muon {
     }
 
     void MuonTrackSteering::combineOverlapSegments(const EventContext& ctx, std::vector<MuPatSegment*>& ch1, std::vector<MuPatSegment*>& ch2,
-                                                   SegColVec& stationSegments, StSet& stationsWithSegments,
+                                                   StSegCol_t& stationSegments, StSet& stationsWithSegments,
                                                    GarbageContainer& trash_bin) const {
         /** try to find small/large overlaps, insert segment into stationVec */
 
@@ -167,9 +167,9 @@ namespace Muon {
         if (ch1.empty() && ch2.empty()) return;
 
         // get station index from the first segment in the first non empty vector
-        MuonStationIndex::StIndex stIndex = !ch1.empty() ? ch1.front()->stIndex : ch2.front()->stIndex;
+        StIndex stIndex = !ch1.empty() ? ch1.front()->stIndex : ch2.front()->stIndex;
 
-        SegCol& stationVec = stationSegments[stIndex];
+        SegCol& stationVec = stationSegments[toInt(stIndex)];
 
         // vector to flag entries in the second station that were matched
         std::vector<bool> wasMatched2(ch2.size(), false);
@@ -234,8 +234,9 @@ namespace Muon {
                 }
                 std::unique_ptr<MuPatSegment> segInfo = m_candidateTool->createSegInfo(ctx, *newseg);
                 // check whether segment of good quality AND that its quality is equal or better than the input segments
-                if (segInfo->quality < 2 || (segInfo->quality < sit1->quality || segInfo->quality < sit2->quality)) {
-                    ATH_MSG_VERBOSE("resolveSLOverlaps::bad segment " << std::endl << m_printer->print(*segInfo->segment));
+                if (!segInfo || segInfo->quality < 2 || (segInfo->quality < sit1->quality || segInfo->quality < sit2->quality)) {
+                    if(segInfo) ATH_MSG_VERBOSE("resolveSLOverlaps::bad segment " << std::endl << m_printer->print(*segInfo->segment));
+                    else ATH_MSG_VERBOSE("Invalid segment info");
                     continue;
                 }                
                 int shared_eta = 0, shared_phi = 0;  // check for hits shared between segments
@@ -309,7 +310,7 @@ namespace Muon {
 
     //-----------------------------------------------------------------------------------------------------------
 
-    std::unique_ptr<TrackCollection> MuonTrackSteering::findTracks(const EventContext& ctx, SegColVec& chamberSegments, SegColVec& stationSegments) const {
+    std::unique_ptr<TrackCollection> MuonTrackSteering::findTracks(const EventContext& ctx, ChSegCol_t& chamberSegments, StSegCol_t& stationSegments) const {
         // Very basic : output all of the segments we are starting with
         ATH_MSG_DEBUG("List of all strategies: " << m_strategies.size());
         for (unsigned int i = 0; i < m_strategies.size(); ++i) ATH_MSG_DEBUG((*(m_strategies[i])));
@@ -325,25 +326,25 @@ namespace Muon {
             std::vector<std::unique_ptr<MuPatTrack> > result;
 
             // Segments that will be looped over...
-            SegColVec mySegColVec(strategy.getAll().size());
+            SegColVec_t mySegColVec(strategy.getAll().size());
 
             ATH_MSG_VERBOSE("Segments to be looped on: " << mySegColVec.size());
 
-            std::set<MuonStationIndex::StIndex> stations;
+            std::set<StIndex> stations;
             // Preprocessing : loop over layers
             for (unsigned int lit = 0; lit < strategy.getAll().size(); ++lit) {
-                std::vector<MuonStationIndex::ChIndex> chambers = strategy.getCh(lit);
+                std::vector<ChIndex> chambers = strategy.getCh(lit);
 
                 // Optional : combine segments in the same station but different chambers
                 if (strategy.option(MuonTrackSteeringStrategy::CombineSegInStation)) {
                     // Loop over stations in the layer
                     for (unsigned int chin = 0; chin < chambers.size(); ++chin) {
                         // get station index for the chamber
-                        MuonStationIndex::StIndex stIndex = MuonStationIndex::toStationIndex(chambers[chin]);
+                        StIndex stIndex = toStationIndex(chambers[chin]);
 
                         // skip those that are already included
                         if (stations.count(stIndex)) continue;
-                        SegCol& segments = stationSegments[stIndex];
+                        SegCol& segments = stationSegments[toInt(stIndex)];
                         // Add all of the MuPatSegments into the list for that layer
                         // db
 
@@ -366,7 +367,7 @@ namespace Muon {
                 } else {
                     // Loop over stations in the layer
                     for (unsigned int chin = 0; chin < chambers.size(); ++chin) {
-                        SegCol& segments = chamberSegments[chambers[chin]];
+                        SegCol& segments = chamberSegments[toInt(chambers[chin])];
                         // Throw all of the MuPatSegments into the list for that layer
                         mySegColVec[lit].insert(mySegColVec[lit].end(), segments.begin(), segments.end());
                     }  // End of loop over chambers
@@ -491,7 +492,7 @@ namespace Muon {
         if (!resultAll.empty()) { solveAmbiguities(resultAll); }
 
         if (m_outputSingleStationTracks) {
-            SegCol& emSegments = stationSegments[MuonStationIndex::EM];
+            SegCol& emSegments = stationSegments[toInt(StIndex::EM)];
             // loop over segments in EM stations
             if (!emSegments.empty()) {
                 for (MuPatSegment* sit : emSegments) {
@@ -538,7 +539,7 @@ namespace Muon {
 
     std::vector<std::unique_ptr<MuPatTrack> > MuonTrackSteering::findTrackFromSeed(const EventContext& ctx, MuPatSegment& seedSeg,
                                                                                    const MuonTrackSteeringStrategy& strat,
-                                                                                   const unsigned int layer, const SegColVec& segs) const {
+                                                                                   const unsigned int layer, const SegColVec_t& segs) const {
         // the resulting vector of tracks to be returned
         std::vector<std::unique_ptr<MuPatTrack> > result;
         ATH_MSG_DEBUG("Working on seed: " << std::endl << " --- " << m_candidateTool->print(seedSeg));
@@ -614,7 +615,7 @@ namespace Muon {
         return result;
     }
 
-    std::vector<std::unique_ptr<MuPatTrack> > MuonTrackSteering::extendWithLayer(const EventContext& ctx, MuPatTrack& candidate, const SegColVec& segs,
+    std::vector<std::unique_ptr<MuPatTrack> > MuonTrackSteering::extendWithLayer(const EventContext& ctx, MuPatTrack& candidate, const SegColVec_t& segs,
                                                                                  unsigned int nextlayer, const unsigned int endlayer, 
                                                                                  int cutLevel) const {
         std::vector<std::unique_ptr<MuPatTrack> > result;
@@ -781,20 +782,13 @@ namespace Muon {
         }
 
         if (success) {
-            std::vector<std::vector<MuonStationIndex::ChIndex> > path;
+            std::vector<std::vector<ChIndex> > path;
             for (unsigned int i = 0; i < sequence.size(); ++i) {
-                std::vector<MuonStationIndex::ChIndex> idxGrp;
+                std::vector<ChIndex> idxGrp;
                 for (unsigned int j = 0; j < sequence[i].size(); ++j) {
-                    MuonStationIndex::ChIndex idx = MuonStationIndex::chIndex(sequence[i][j]);
-                    if (MuonStationIndex::ChUnknown == idx) {
-                        if (sequence[i][j] != "all" && sequence[i][j] != "ALL" && sequence[i][j] != "All") {
-                            // Complain
-                            ATH_MSG_WARNING("I am complaining: Bad station index.");
-                        } else {  // asked for all chambers
-                            idxGrp.clear();
-                            for (int all = MuonStationIndex::BIS; all != MuonStationIndex::ChIndexMax; ++all)
-                                idxGrp.push_back(MuonStationIndex::ChIndex(all));
-                        }
+                    ChIndex idx = chIndex(sequence[i][j]);
+                    if (ChIndex::ChUnknown == idx) {
+                        ATH_MSG_WARNING("I am complaining: Bad station index.");
                     } else {
                         idxGrp.push_back(idx);
                     }

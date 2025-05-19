@@ -19,9 +19,9 @@ atlas_add_library( ElectronPhotonFourMomentumCorrectionLib
    PUBLIC_HEADERS ElectronPhotonFourMomentumCorrection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgMessagingLib xAODCaloEvent xAODEgamma
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgMessagingLib ColumnarClusterLib ColumnarEgammaLib
    xAODEventInfo PATInterfaces EgammaAnalysisInterfacesLib egammaUtils PATCoreAcceptLib
-   xAODRootAccess xAODTracking 
+   xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib 
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AthLinks xAODMetaData egammaLayerRecalibTool
    PathResolver ${extra_libs} )
 
@@ -78,6 +78,11 @@ if( XAOD_STANDALONE )
                    POST_EXEC_SCRIPT nopost.sh )
 endif()
 
+atlas_add_test( gt_ColumnarToolTests
+                SOURCES test/gt_ColumnarToolTests.cxx
+                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib ElectronPhotonFourMomentumCorrectionLib
+                POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} ) 
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

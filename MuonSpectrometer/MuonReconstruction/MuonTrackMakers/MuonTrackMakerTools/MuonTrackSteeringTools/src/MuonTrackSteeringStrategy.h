@@ -141,8 +141,12 @@ inline std::ostream& operator<<(std::ostream& sl, const Muon::MuonTrackSteeringS
     sl << " and chambers are: " << std::endl;
     for (unsigned int i = 0; i < mtss.getAll().size(); ++i) {
         sl << "\t Step " << i << " : ( ";
-        for (unsigned int j = 0; j < mtss.getCh(i).size() - 1; ++j) sl << mtss.getCh(i)[j] << " , ";
-        if (mtss.getCh(i).size()) sl << mtss.getCh(i)[mtss.getCh(i).size() - 1];
+        for (unsigned int j = 0; j < mtss.getCh(i).size() - 1; ++j) {
+            sl << Muon::MuonStationIndex::chName(mtss.getCh(i)[j]) << " , ";
+        }
+        if (mtss.getCh(i).size()) {
+            sl << Muon::MuonStationIndex::chName(mtss.getCh(i)[mtss.getCh(i).size() - 1]);
+        }
         sl << " ) " << std::endl;
     }
     return sl;
@@ -157,8 +161,12 @@ inline MsgStream& operator<<(MsgStream& sl, const Muon::MuonTrackSteeringStrateg
     sl << " and chambers are: " << std::endl;
     for (unsigned int i = 0; i < mtss.getAll().size(); ++i) {
         sl << "\t Step " << i << " : ( ";
-        for (unsigned int j = 0; j < mtss.getCh(i).size() - 1; ++j) sl << mtss.getCh(i)[j] << " , ";
-        if (mtss.getCh(i).size()) sl << mtss.getCh(i)[mtss.getCh(i).size() - 1];
+        for (unsigned int j = 0; j < mtss.getCh(i).size() - 1; ++j) {
+            sl << Muon::MuonStationIndex::chName(mtss.getCh(i)[j]) << " , ";
+        }
+        if (mtss.getCh(i).size()) {
+            sl << Muon::MuonStationIndex::chName(mtss.getCh(i)[mtss.getCh(i).size() - 1]);
+        }
         sl << " ) " << std::endl;
     }
     return sl;

@@ -8,6 +8,7 @@
 #include "FlavorTagInference/FlipTagEnums.h"
 #include "FlavorTagInference/AssociationEnums.h"
 #include "FlavorTagInference/FTagDataDependencyNames.h"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 
 // EDM includes
 #include "xAODBTagging/BTaggingFwd.h"

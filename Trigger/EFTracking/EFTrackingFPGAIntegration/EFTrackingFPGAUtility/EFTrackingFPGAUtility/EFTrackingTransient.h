@@ -69,8 +69,6 @@ namespace EFTrackingTransient
     int channelsInPhi = 0;
     int channelsInEta = 0;
     float widthInEta = 0.0f;
-    float omegaX = 0.0f;
-    float omegaY = 0.0f;
     int totList[1000] = {0};
     int totalToT = 0;
     float chargeList[1000] = {0.0f};
@@ -162,8 +160,6 @@ namespace EFTrackingTransient
     int *pcChannelsInPhi;
     int *pcChannelsInEta;
     float *pcWidthInEta;
-    float *pcOmegaX;
-    float *pcOmegaY;
     int *pcTotList;
     int *pcTotalToT;
     float *pcChargeList;
@@ -229,8 +225,6 @@ namespace EFTrackingTransient
     std::vector<int> channelsInPhi;
     std::vector<int> channelsInEta;
     std::vector<float> widthInEta;
-    std::vector<float> omegaX;
-    std::vector<float> omegaY;
     std::vector<int> totList;
     std::vector<int> totalToT;
     std::vector<float> chargeList;

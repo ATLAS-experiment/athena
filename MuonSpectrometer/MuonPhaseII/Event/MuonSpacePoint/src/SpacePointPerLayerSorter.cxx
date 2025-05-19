@@ -7,15 +7,16 @@
 
 namespace MuonR4 {
 
-    SpacePointPerLayerSorter::SpacePointPerLayerSorter(const Muon::IMuonIdHelperSvc* idHelperSvc)
-                : m_idHelperSvc{idHelperSvc} {}
+    SpacePointPerLayerSorter::SpacePointPerLayerSorter(const Muon::IMuonIdHelperSvc* idHelperSvc): 
+        m_idHelperSvc{idHelperSvc} {}
 
     Identifier SpacePointPerLayerSorter::detectorLayerId(const Identifier& id) const {
 
         Muon::MuonStationIndex::TechnologyIndex techIdx{m_idHelperSvc->technologyIndex(id)};
 
         switch (techIdx){
-            case Muon::MuonStationIndex::MDT:{
+            using enum Muon::MuonStationIndex::TechnologyIndex;
+            case MDT:{
                 const MdtIdHelper& idHelper {m_idHelperSvc->mdtIdHelper()};
 
                 Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1,
@@ -24,7 +25,7 @@ namespace MuonR4 {
                                                         idHelper.tubeLayer(id), 1)};
                 return detLayId;
             }
-            case Muon::MuonStationIndex::RPC:{
+            case RPC:{
                 const RpcIdHelper& idHelper {m_idHelperSvc->rpcIdHelper()};
 
                 Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1, 
@@ -33,7 +34,7 @@ namespace MuonR4 {
                                                         idHelper.gasGap(id), 0, 1)};
                 return detLayId;
             }
-            case Muon::MuonStationIndex::TGC:{
+            case TGC:{
                 const TgcIdHelper& idHelper {m_idHelperSvc->tgcIdHelper()};
 
                 Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1,
@@ -41,7 +42,7 @@ namespace MuonR4 {
                                                         idHelper.gasGap(id), 0, 1)};
                 return detLayId;
             }
-            case Muon::MuonStationIndex::STGC:{
+            case STGC:{
                 const sTgcIdHelper& idHelper {m_idHelperSvc->stgcIdHelper()};
 
                 Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1,
@@ -51,7 +52,7 @@ namespace MuonR4 {
                                                         idHelper.channelType(id), 1)};
                 return detLayId;
             }
-            case Muon::MuonStationIndex::MM:{
+            case MM:{
                 const MmIdHelper& idHelper {m_idHelperSvc->mmIdHelper()};
 
                 Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1,

@@ -50,16 +50,16 @@ class TrackingVolumeArrayCreator final
   virtual ~TrackingVolumeArrayCreator();
 
   /** Extra interface methods for compatibility*/
-  TrackingVolumeArray* cylinderVolumesArrayInR(
+  std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInR(
       const std::vector<TrackingVolume*>& vols,
       bool navigationtype = false) const override;
-  TrackingVolumeArray* cylinderVolumesArrayInZ(
+  std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInZ(
       const std::vector<TrackingVolume*>& vols,
       bool navigationtype = false) const override;
-  TrackingVolumeArray* cylinderVolumesArrayInPhiR(
+  std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInPhiR(
       const std::vector<TrackingVolume*>& vols,
       bool navigationtype = false) const override;
-  TrackingVolumeArray* cylinderVolumesArrayInPhiZ(
+  std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInPhiZ(
       const std::vector<TrackingVolume*>& vols,
       bool navigationtype = false) const override;
 

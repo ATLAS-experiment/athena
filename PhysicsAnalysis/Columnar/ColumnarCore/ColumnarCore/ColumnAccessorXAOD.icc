@@ -35,8 +35,8 @@ namespace columnar
     }
 
     AccessorTemplate (AccessorTemplate&& that)
+      : m_accessor (that.m_accessor)
     {
-      m_accessor = that.m_accessor;
       that.m_accessor = std::string("UNDEFINED_ACCESSOR_") + typeid (typename ColumnTypeTraits<CT,CM>::ColumnType).name();
     }
 
@@ -53,27 +53,27 @@ namespace columnar
     AccessorTemplate (const AccessorTemplate&) = delete;
     AccessorTemplate& operator = (const AccessorTemplate&) = delete;
 
-    [[nodiscard]] ColumnType& operator () (ObjectId<CI,CM> id) const noexcept
+    [[nodiscard]] ColumnType& operator () (ObjectId<CI,CM> id) const
     {
-      return m_accessor(id.getXAODObject());
+      return m_accessor(id.getXAODObjectNoexcept());
     }
 
-    [[nodiscard]] std::span<ColumnType> operator () (ObjectRange<CI,CM> range) const noexcept
+    [[nodiscard]] std::span<ColumnType> operator () (ObjectRange<CI,CM> range) const
     {
-      if (range.getXAODObject().empty())
+      if (range.getXAODObjectNoexcept().empty())
         return std::span<ColumnType> ();
-      return std::span<ColumnType> (&m_accessor (*range.getXAODObject()[0]), range.getXAODObject().size());
+      return std::span<ColumnType> (&m_accessor (*range.getXAODObjectNoexcept()[0]), range.getXAODObjectNoexcept().size());
     }
 
     [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
     {
-      return m_accessor.isAvailable (id.getXAODObject());
+      return m_accessor.isAvailable (id.getXAODObjectNoexcept());
     }
 
     [[nodiscard]] std::optional<ColumnType> getOptional (ObjectId<CI,CM> id) const
     {
-      if (m_accessor.isAvailable (id.getXAODObject()))
-        return m_accessor (id.getXAODObject());
+      if (m_accessor.isAvailable (id.getXAODObjectNoexcept()))
+        return m_accessor (id.getXAODObjectNoexcept());
       else
         return std::nullopt;
     }

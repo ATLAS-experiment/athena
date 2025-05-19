@@ -27,7 +27,7 @@ Jets:
 
 Electrons:
   - containerName: AnaElectrons
-    forceFullSimConfig: True
+    forceFullSimConfigForIso: True
     recalibratePhyslite: False
     decorateTruth: true
     decorateCaloClusterEta: true
@@ -47,7 +47,6 @@ Electrons:
 Photons:
   - containerName: AnaPhotons
     recomputeIsEM: False
-    forceFullSimConfigForP4: True
     forceFullSimConfigForIso: True
     recalibratePhyslite: False
     decorateTruth: true

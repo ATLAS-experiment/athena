@@ -35,13 +35,15 @@ sTgcDigitMaker::sTgcDigitMaker(const Muon::IMuonIdHelperSvc* idHelperSvc,
                                const int channelTypes,
                                double meanGasGain,
                                bool doPadChargeSharing,
-                               double stripChargeScale)
+                               double stripChargeScale,
+                               bool applyAsBuiltBLines)
   : AthMessaging ("sTgcDigitMaker"),
   m_idHelperSvc{idHelperSvc},
   m_channelTypes{channelTypes},
   m_meanGasGain{meanGasGain},
   m_doPadSharing{doPadChargeSharing},
-  m_stripChargeScale{stripChargeScale} {}
+  m_stripChargeScale{stripChargeScale},
+  m_applyAsBuiltBLines(applyAsBuiltBLines) {}
 //----- Destructor
 sTgcDigitMaker::~sTgcDigitMaker() = default;
 //------------------------------------------------------
@@ -273,8 +275,17 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
   const Trk::PlaneSurface& SURF_STRIP = detEl->surface(surfHash_strip); // get the strip surface
 
   const Amg::Vector3D hitOnSurface_strip = SURF_STRIP.transform().inverse()*glob_ionization_pos;
+  Amg::Vector2D posOnSurf_strip {Amg::Vector2D::Zero()};
 
-  const Amg::Vector2D posOnSurf_strip(hitOnSurface_strip.x(),hitOnSurface_strip.y());
+  if(m_applyAsBuiltBLines){
+    //This block is used to apply As-Built and BLine corrections for dedicated studies.
+    Amg::Vector3D posAfterAsBuilt {Amg::Vector3D::Zero()};
+    detEl->spacePointPosition(newId, hitOnSurface_strip.x(), hitOnSurface_strip.y(), posAfterAsBuilt);
+    posOnSurf_strip = posAfterAsBuilt.block<2,1>(0,0);
+  } else {
+    posOnSurf_strip = hitOnSurface_strip.block<2,1>(0,0);
+  }
+
   bool insideBounds = SURF_STRIP.insideBounds(posOnSurf_strip);
   if(!insideBounds) {
     ATH_MSG_DEBUG("Outside of the strip surface boundary : " <<  m_idHelperSvc->toString(newId) << "; local position " <<posOnSurf_strip );

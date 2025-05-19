@@ -21,22 +21,22 @@
 Trk::InputLayerMaterialProvider::InputLayerMaterialProvider(const std::string& t, const std::string& n, const IInterface* p)
 : AthAlgTool(t,n,p),
    m_constantMaterialToAllLayers(true),
-   m_constantThicknessInX0(0.02),       
-   m_constantThicknessInL0(0.06),       
-   m_constantAverageA(14.),            
-   m_constantAverageZ(7.),            
-   m_constantAverageRho(0.00233)          
-  
+   m_constantThicknessInX0(0.02),
+   m_constantThicknessInL0(0.06),
+   m_constantAverageA(14.),
+   m_constantAverageZ(7.),
+   m_constantAverageRho(0.00233)
+
 {
     declareInterface<Trk::IGeometryProcessor>(this);
-    
+
     declareProperty("AssignConstantMaterial",   m_constantMaterialToAllLayers);
-    declareProperty("ConstantMaterialInX0",     m_constantThicknessInX0);      
-    declareProperty("ConstantMaterialInL0",     m_constantThicknessInL0);      
-    declareProperty("ConstantMaterialA",        m_constantAverageA);            
-    declareProperty("ConstantMaterialZ",        m_constantAverageZ);            
-    declareProperty("ConstantMaterialRho",      m_constantAverageRho);        
-    
+    declareProperty("ConstantMaterialInX0",     m_constantThicknessInX0);
+    declareProperty("ConstantMaterialInL0",     m_constantThicknessInL0);
+    declareProperty("ConstantMaterialA",        m_constantAverageA);
+    declareProperty("ConstantMaterialZ",        m_constantAverageZ);
+    declareProperty("ConstantMaterialRho",      m_constantAverageRho);
+
 }
 
 // destructor
@@ -46,21 +46,21 @@ Trk::InputLayerMaterialProvider::~InputLayerMaterialProvider()
 StatusCode Trk::InputLayerMaterialProvider::initialize() {
 
   m_constantMaterialProperties = Trk::MaterialProperties(1.,
-							 1./m_constantThicknessInX0,      
-							 1./m_constantThicknessInL0,      
-							 m_constantAverageA,           
-							 m_constantAverageZ,           
+							 1./m_constantThicknessInX0,
+							 1./m_constantThicknessInL0,
+							 m_constantAverageA,
+							 m_constantAverageZ,
 							 m_constantAverageRho);
-                                                                   
+
     return StatusCode::SUCCESS;
 }
 
-// Processor Action to work on TrackingGeometry 
+// Processor Action to work on TrackingGeometry
 StatusCode Trk::InputLayerMaterialProvider::process(Trk::TrackingGeometry& tgeo) const {
-  
+
   ATH_MSG_VERBOSE("Start processing the TrackingGeometry recursively");
   // retrieve the highest tracking volume
-  Trk::TrackingVolume* worldVolume = tgeo.highestTrackingVolume();  
+  Trk::TrackingVolume* worldVolume = tgeo.highestTrackingVolume();
   if (worldVolume){
       ATH_MSG_VERBOSE("TrackingVolume '" << worldVolume->volumeName() << "' retrieved as highest level node.");
       return process(*worldVolume, 0);
@@ -72,20 +72,20 @@ StatusCode Trk::InputLayerMaterialProvider::process(Trk::TrackingGeometry& tgeo)
 
 // Processor Action to work on TrackingVolumes
 StatusCode Trk::InputLayerMaterialProvider::process(Trk::TrackingVolume& tvol, size_t level) const {
-  
+
   std::stringstream displayBuffer;
   for (size_t il = 0; il < level; ++il) displayBuffer << " ";
-  // formatted screen output     
+  // formatted screen output
   ATH_MSG_VERBOSE(displayBuffer.str() << "TrackingVolume '" << tvol.volumeName() << "'");
-  
+
   // Process the contained layers if they exist
   Trk::LayerArray* layerArray = tvol.confinedLayers();
   if (layerArray) {
       // display output
-      Trk::BinnedArraySpan<Trk::Layer * const> layers = layerArray->arrayObjects();
+      std::span<Trk::Layer * const> layers = layerArray->arrayObjects();
       auto layIter  = layers.begin();
       auto layIterE = layers.end();
-      ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." ); 
+      ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." );
       for ( ; layIter != layIterE; ++layIter){
           if (!(*layIter))
              ATH_MSG_WARNING("Zero-pointer found in LayerArray - indicates problem !");
@@ -94,53 +94,53 @@ StatusCode Trk::InputLayerMaterialProvider::process(Trk::TrackingVolume& tvol, s
              return StatusCode::FAILURE;
           }
       }
-   } 
+   }
 
    // Process the contained TrackingVolumes (recursively) if they exist
    Trk::BinnedArray< Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
    // register the next round
    if (confinedVolumes) {
-       Trk::BinnedArraySpan<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
+       std::span<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
        auto volumesIter = volumes.begin();
        for (; volumesIter != volumes.end(); ++volumesIter){
            if (!(*volumesIter))
               ATH_MSG_WARNING("Zero-pointer found in VolumeArray - indicates problem !");
            if ((*volumesIter) && process(**volumesIter, ++level).isFailure() ){
                ATH_MSG_FATAL("Failed to call process(const TrackingVolume&) on confined volumes. Aborting.");
-               return StatusCode::FAILURE;  
+               return StatusCode::FAILURE;
            }
        }
    }
-   
-   // return 
-   return StatusCode::SUCCESS;    
-    
+
+   // return
+   return StatusCode::SUCCESS;
+
 }
 
-// Processor Action to work on Layers 
+// Processor Action to work on Layers
 StatusCode Trk::InputLayerMaterialProvider::process(Trk::Layer& lay, size_t level) const {
-    
+
     // skip Layers w/o material
-    if (!lay.layerMaterialProperties()) 
+    if (!lay.layerMaterialProperties())
         return StatusCode::SUCCESS;
-    
+
     // get the layer index for assignment
     Trk::LayerIndex lIndex = lay.layerIndex();
-    
-    // display 
+
+    // display
     std::stringstream displayBuffer;
     for (size_t il = 0; il < level; ++il) displayBuffer << " ";
 
     ATH_MSG_DEBUG(displayBuffer.str() << "   assigning material for Layer with Index: " << lIndex.value());
     ATH_MSG_VERBOSE(displayBuffer.str() << "                 Layer memory adress is : " << &lay);
-    
+
     Trk::HomogeneousLayerMaterial hLayerMaterial = Trk::HomogeneousLayerMaterial(m_constantMaterialProperties, 1.);
     lay.assignMaterialProperties(hLayerMaterial);
-    
+
     return StatusCode::SUCCESS;
 }
 
-// Processor Action to work on Surfaces 
+// Processor Action to work on Surfaces
 StatusCode Trk::InputLayerMaterialProvider::process(Trk::Surface&, size_t) const {
     return StatusCode::SUCCESS;
 }

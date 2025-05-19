@@ -2,7 +2,7 @@
 // TrkTrackState.cxx
 //   Source file for TrkTrackState class
 ///////////////////////////////////////////////////////////////////
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ///////////////////////////////////////////////////////////////////
 // Author: Dmitry Emeliyanov, RAL
 // D.Emeliyanov@rl.ac.uk
@@ -55,6 +55,10 @@ void TrkTrackState::serialize(char fileName[])
   FILE *pFile;
   
   pFile=fopen(fileName,"a");
+  if (!pFile) {
+    printf("Cannot open %s", fileName);
+    return;
+  }
   fprintf(pFile,"%f %f %f %f %f\n",m_Rk[0],m_Rk[1],m_Rk[2],m_Rk[3],m_Rk[4]);
   for(int i=0;i<5;i++)
   {

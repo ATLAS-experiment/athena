@@ -29,13 +29,15 @@
 namespace {
     using VolumePtr = Trk::TrackingVolumeArrayCreator::VolumePtr;
     inline std::vector<VolumePtr> translateToShared(const std::vector<Trk::TrackingVolume*>& inVols,
-                                                    bool no_deletePtr) {
+                                                    bool navtype) {
         std::vector<VolumePtr> outVec{};
         outVec.reserve(inVols.size());
         for (Trk::TrackingVolume* vol : inVols) {
-            if(!no_deletePtr) {
+            if(!navtype) {
                 outVec.emplace_back(vol);
             } else {
+                //The volumes are just for navigation purposes
+                // so we want to have ust a view
                 outVec.emplace_back(vol, Trk::do_not_delete<Trk::TrackingVolume>);
             }
         }
@@ -57,23 +59,23 @@ TrackingVolumeArrayCreator::TrackingVolumeArrayCreator(const std::string& t,
 // destructor
 TrackingVolumeArrayCreator::~TrackingVolumeArrayCreator() = default;
 
-TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInR(const std::vector<TrackingVolume*>& vols,
-                                                                         bool navtype) const {
-    return cylinderVolumesArrayInR(translateToShared(vols, navtype), navtype).release();
+std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumesArrayInR(const std::vector<TrackingVolume*>& vols,
+                                                                                         bool navtype) const {
+    return cylinderVolumesArrayInR(translateToShared(vols, navtype), navtype);
 }
 
-TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(const std::vector<TrackingVolume*>& vols,
-                                                                         bool navtype) const {
-      return cylinderVolumesArrayInZ(translateToShared(vols, navtype), navtype).release();
+std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(const std::vector<TrackingVolume*>& vols,
+                                                                                         bool navtype) const {
+  return cylinderVolumesArrayInZ(translateToShared(vols, navtype), navtype);
 }
 
-TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<TrackingVolume*>& vols,
-                                                         bool navtype) const {
-    return cylinderVolumesArrayInPhiR(translateToShared(vols, navtype), navtype).release();
+std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<TrackingVolume*>& vols,
+                                                                                            bool navtype) const {
+  return cylinderVolumesArrayInPhiR(translateToShared(vols, navtype), navtype);
 }
-TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<TrackingVolume*>& vols,
-                                                       bool navtype) const {
-    return cylinderVolumesArrayInPhiZ(translateToShared(vols, navtype), navtype).release();
+std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<TrackingVolume*>& vols,
+                                                                                            bool navtype) const {
+    return cylinderVolumesArrayInPhiZ(translateToShared(vols, navtype), navtype);
 }
 
 std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumesArrayInR(const std::vector<VolumePtr>& vols,
@@ -83,7 +85,9 @@ std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumes
   ATH_MSG_VERBOSE("Create VolumeArray of "<< vols.size() << " Volumes (with CylinderVolumeBounds) with R-binning. ");
 
   // check for compatibility - needs r-sorting first
-  double lastZmin{0.}, lastZmax{0.}, lastOuterRadius{0.};
+  double lastZmin{0.};
+  double lastZmax{0.};
+  double lastOuterRadius{0.};
 
   // the vector of doubles for identification
   std::vector<float> boundaries;
@@ -157,7 +161,9 @@ std::unique_ptr<TrackingVolumeArray>
                   << " Volumes (with CylinderVolumeBounds) with Z-binning. ");
 
   // for compatibility checks
-  double lastRmin{0.}, lastRmax{0.}, lastZmax{0.};
+  double lastRmin{0.};
+  double lastRmax{0.};
+  double lastZmax{0.};
 
   // the vector of doubles for identification
   std::vector<float> boundaries;
@@ -284,7 +290,10 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
     for (const VolumePtr& vol : vols) {
       const auto *cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
       const auto *bcyl =dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol->volumeBounds()));
-      double rmin{0.}, rmax{0.}, dphi{0.}, mRad{0.};
+      double rmin{0.};
+      double rmax{0.};
+      double dphi{0.};
+      double mRad{0.};
       int type = 0;
 
       if (cyl) {
@@ -655,7 +664,10 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
   for (const VolumePtr& vol : vols) {
     const auto *cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
     const auto *bcyl = dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol->volumeBounds()));
-    double zmin{0.}, zmax{0.}, dphi{0.}, mRad{0.};
+    double zmin{0.};
+    double zmax{0.};
+    double dphi{0.};
+    double mRad{0.};
     if (cyl) {
       zmin = vol->center().z() - cyl->halflengthZ();
       zmax = vol->center().z() + cyl->halflengthZ();
