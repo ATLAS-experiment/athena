@@ -226,7 +226,7 @@ namespace Muon {
 
     const std::set<TechnologyIndex>& 
         MuonIdHelperSvc::technologiesInStation(StIndex stIndex) const {
-        assert(toInt(stIndex) < m_techPerStation.size());
+        assert(toInt(stIndex) < static_cast<int>(m_techPerStation.size()));
         return m_techPerStation[toInt(stIndex)];
     }
     bool MuonIdHelperSvc::issMdt(const Identifier& id) const {
