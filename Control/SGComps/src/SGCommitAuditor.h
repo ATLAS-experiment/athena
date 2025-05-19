@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_SGCOMMITAUDITOR_H
 #define SGTOOLS_SGCOMMITAUDITOR_H
 
-#include "GaudiKernel/Auditor.h"
-#include "GaudiKernel/IAuditor.h"
+#include "Gaudi/Auditor.h"
+#include "Gaudi/IAuditor.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/IHiveStoreMgr.h"
 
@@ -22,16 +22,16 @@
 // Date: 2015-02-03
 /////////////////////////////////////////////////////////////////////////
 
-class SGCommitAuditor: virtual public Auditor {
+class SGCommitAuditor: public Gaudi::Auditor {
 
 public:
   SGCommitAuditor(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~SGCommitAuditor();
   
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
 
-  virtual void afterExecute(INamedInterface* alg, const StatusCode&);
+  virtual void after(const std::string& event, const std::string& name,
+                     const EventContext&, const StatusCode&) override;
 
 private:
 

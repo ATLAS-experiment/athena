@@ -1,8 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SGCommitAuditor.h"
+
+#include "AthenaBaseComps/AthCheckMacros.h"
+
 
 SGCommitAuditor::SGCommitAuditor(const std::string& name,
 				 ISvcLocator* pSvcLocator) 
@@ -18,25 +21,15 @@ SGCommitAuditor::~SGCommitAuditor() {
 
 StatusCode
 SGCommitAuditor::initialize() {
-  if (p_sg.retrieve().isFailure()) {
-    MsgStream log ( msgSvc() , name() );
-    log << MSG::ERROR << "Could not retrieve \"" << p_sg.typeAndName() 
-	<< "\"" << endmsg;
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( p_sg.retrieve() );
 
   return StatusCode::SUCCESS;
 }
-
-StatusCode
-SGCommitAuditor::finalize() {
-  return StatusCode::SUCCESS;
-}
-
 
 
 void
-SGCommitAuditor::afterExecute(INamedInterface* /*alg*/, const StatusCode&) {
+SGCommitAuditor::after(const std::string& /*event*/, const std::string& /*name*/,
+                       const EventContext&, const StatusCode&) {
   p_sg->commitNewDataObjects();
 }
 
