@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file: PyAthenaComps.py
 # @purpose: a set of Python classes for PyAthena
@@ -338,7 +338,7 @@ class Aud( CfgPyAud ):
     def before(self, evt_name, comp_name):
         return
 
-    def after (self, evt_name, comp_name):
+    def after(self, evt_name, comp_name, sc):
         return
     
     pass # PyAthena.Aud
