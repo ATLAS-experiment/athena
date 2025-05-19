@@ -66,7 +66,7 @@ StatusCode CommonDiTauEfficiencyTool::initialize()
 
   generateSystematicSets();
 
-  if (m_sWP.length()>0)
+  if (m_sWP.size()>0)
     m_sSFHistName = "sf_"+m_sWP;
 
   // load empty systematic variation by default

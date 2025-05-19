@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_COMMONEFFICIENCYTOOL_H
@@ -12,6 +12,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
@@ -134,22 +135,23 @@ protected:
   CP::SystematicSet m_sAffectingSystematics;
   CP::SystematicSet m_sRecommendedSystematics;
 
-  std::string m_sInputFilePath;
+  Gaudi::Property<std::string> m_sInputFilePath{this, "InputFilePath", ""};
+  Gaudi::Property<std::string> m_sVarName{this, "VarName", ""};
+  Gaudi::Property<std::string> m_sWP{this, "WP", ""};
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
+  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDNONE)};
+  Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(ELEIDNONE)};
+  Gaudi::Property<bool> m_bSplitMu{this, "SplitMu", false};
+  Gaudi::Property<bool> m_bUseTauSubstructure{this, "UseTauSubstructure", false};
+
   std::string m_sInputFileName;
-  std::string m_sWP;
-  std::string m_sVarName;
   std::string m_sSFHistName;
-  bool m_bSkipTruthMatchCheck;
   bool m_bNoMultiprong;
-  bool m_bUseTauSubstructure;
-  int m_iJetIDLevel;
-  int m_iEleIDLevel;
 
   TruthMatchedParticleType m_eCheckTruth;
 
   bool m_bSFIsAvailable;
   bool m_bSFIsAvailableChecked;
-  bool m_bSplitMu;
 };
 } // namespace TauAnalysisTools
 

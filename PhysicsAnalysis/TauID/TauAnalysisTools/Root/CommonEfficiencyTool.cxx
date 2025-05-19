@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -83,14 +83,6 @@ CommonEfficiencyTool::CommonEfficiencyTool(const std::string& sName)
   , m_bSFIsAvailable(false)
   , m_bSFIsAvailableChecked(false)
 {
-  declareProperty( "InputFilePath",       m_sInputFilePath       = "" );
-  declareProperty( "VarName",             m_sVarName             = "" );
-  declareProperty( "WP",                  m_sWP                  = "" );
-  declareProperty( "SkipTruthMatchCheck", m_bSkipTruthMatchCheck = false );
-  declareProperty( "JetIDLevel",          m_iJetIDLevel          = (int)JETIDNONE );
-  declareProperty( "EleIDLevel",          m_iEleIDLevel          = (int)ELEIDNONE );
-  declareProperty( "SplitMu",             m_bSplitMu             = false );
-  declareProperty( "UseTauSubstructure",  m_bUseTauSubstructure  = false);
 }
 
 /*
