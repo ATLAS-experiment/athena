@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -15,7 +15,6 @@
 
 // PerfMonComps includes
 #include "PerfMonMTSvc.h"
-#include "PerfMonUtils.h"
 
 // STD includes
 #include <algorithm>
@@ -84,10 +83,8 @@ StatusCode PerfMonMTSvc::initialize() {
   }
 
   /// Configure the auditor
-  if (!PerfMon::makeAuditor("PerfMonMTAuditor", auditorSvc(), msg()).isSuccess()) {
-    ATH_MSG_ERROR("Could not register auditor [PerfMonMTAuditor]!");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(auditorSvc()->addAuditor("PerfMonMTAuditor"));
+
   return StatusCode::SUCCESS;
 }
 
