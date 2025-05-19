@@ -500,8 +500,8 @@ class athenaLogFileReportTests(unittest.TestCase):
 10:18:14   stack  = (2, 0, (nil))'''
 
         testDbMonitor = '''
-16:32:37 IOVDbSvc                                             INFO Total payload read from COOL: 123 bytes in ((    4.56 ))s
-16:32:39 IOVDbSvc                                             INFO Total payload read from COOL: 456 bytes in ((    7.89 ))s'''
+16:32:37 IOVDbSvc                                             INFO Total payload read from IOVDb: 123 bytes in ((    4.56 ))s
+16:32:39 IOVDbSvc                                             INFO Total payload read from IOVDb: 456 bytes in ((    7.89 ))s'''
 
         testCoreDumpAbNormalLine ='''
 00:49:51 RelationalDatabase Info Release number backward compatibility - NO SCHEMA EVOLUTION REQUIRED: database with OLDER release number 2.2.2 will be opened using CURRENT client release number 3.1.8
