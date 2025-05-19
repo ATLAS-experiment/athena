@@ -10,7 +10,7 @@ namespace FlavorTagInference {
             std::string name = v.at("name").get<std::string>();
             auto offset = v.at("offset").get<double>();
             auto scale = v.at("scale").get<double>();
-            return {name, offset, scale};
+            return {std::move(name), offset, scale};
         }
 
         InputNodeConfig get_input_node(const nlohmann::json& v) {
