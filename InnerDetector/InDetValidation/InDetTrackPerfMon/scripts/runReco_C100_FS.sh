@@ -14,6 +14,7 @@ usage () {
     -o  |  --outputAOD      STRING      name of the output AOD file (mandatory)
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
     -s  |  --skipCheck                  skip checks on output AOD file
+    -c  |  --doClusters                 persistify xAOD cluster and space point containers
     -h  |  --help                       this help
     "
     [ $# -gt 0 ] && exit $1
@@ -24,6 +25,7 @@ inputRDO=""
 outputAOD=""
 nEvents="-1"
 skipCheck=0
+doClusters="0"
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -32,7 +34,8 @@ while [ $# -ge 1 ];do
         -i  | --inputRDO )      if [ $# -lt 2 ] ; then usage ; fi ; inputRDO="$2"  ; shift ;;
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
-        -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ; shift ;;
+        -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
+        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; doClusters="1" ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -49,7 +52,17 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-Reco_tf.py --CA \
+if [ "$doClusters" == "1" ]; then
+  Reco_tf.py --CA \
+    --maxEvents ${nEvents} \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --postInclude "ActsConfig.ActsRegionsOfInterestConfig.ActsMainRegionsOfInterestCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsMainClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsMainSpacePointFormationCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
+    --steering 'doRAWtoALL' \
+    --inputRDOFile ${inputRDO} \
+    --outputAODFile ${outputAOD}
+else
+  Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
@@ -57,6 +70,7 @@ Reco_tf.py --CA \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
+fi
 
 rc=$?
 echo "Reco_tf.py result: $rc"
