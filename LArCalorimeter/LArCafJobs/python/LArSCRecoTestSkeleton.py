@@ -25,6 +25,8 @@ def fromRunArgs(runArgs):
     processPreInclude(runArgs, flags)
     processPreExec(runArgs, flags)
 
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.Input.Files=runArgs.inputBSFile
     flags.LArSCDump.outputNtup=runArgs.outputNTUP_SCRecoFile
 
@@ -43,7 +45,9 @@ def fromRunArgs(runArgs):
        flags.LArSCDump.nEt=1
        SCKey="SC_ET"    
        flags.LArSCDump.digitsKey="SC_ADC_BAS"
+       fw=5
     else:   
+       fw=runinfo.FWversion()
        flags.LArSCDump.digitsKey=""
        for i in range(0,len(runinfo.streamTypes())):
           if runinfo.streamTypes()[i] ==  "SelectedEnergy":
@@ -86,6 +90,10 @@ def fromRunArgs(runArgs):
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     cfg.merge(LArGMCfg(flags))
+
+    if fw==6:
+       from IOVDbSvc.IOVDbSvcConfig import addOverride
+       cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
 
     if flags.LArSCDump.doBC:
        from LArBadChannelTool.LArBadChannelConfig import  LArBadChannelCfg

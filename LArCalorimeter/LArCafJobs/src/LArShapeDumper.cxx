@@ -75,6 +75,8 @@ LArShapeDumper::LArShapeDumper(const std::string & name, ISvcLocator * pSvcLocat
   declareProperty("TriggerNames", m_triggerNames);
   declareProperty("DoAllLvl1", m_doAllLvl1 = true);
   declareProperty("onlyEmptyBC",m_onlyEmptyBC=false);
+
+  m_bcMaskSC.setSC();
 }
 
 
@@ -108,6 +110,7 @@ StatusCode LArShapeDumper::initialize()
 
   ATH_CHECK( m_digitsKeySC.initialize(m_doSC) );
   ATH_CHECK( m_rawscKey.initialize(m_doSC) );
+  ATH_CHECK( m_rawRecomputedscKey.initialize(m_doSC) );
   ATH_CHECK( m_cablingKeySC.initialize(m_doSC) );
   ATH_CHECK( m_pedestalKeySC.initialize(m_doSC) );
 
@@ -508,10 +511,21 @@ StatusCode LArShapeDumper::execute()
        return StatusCode::SUCCESS;
     } else
         ATH_MSG_DEBUG( "Got LArRawSCContainer with key " << m_rawscKey.key() );
-    const LArRawSCContainer*  etcontainer = &(*hdlSC);
  
-    if (etcontainer->empty()) {
+    if (hdlSC->empty()) {
       ATH_MSG_WARNING ( "LArRawSCContainer with key=" << m_rawscKey.key() << " is empty!" );
+      return StatusCode::SUCCESS;
+    }
+
+    SG::ReadHandle<LArRawSCContainer> hdlrecoSC(m_rawRecomputedscKey, ctx);
+    if(!hdlrecoSC.isValid()) {
+       ATH_MSG_WARNING( "Unable to retrieve LArRawSCContainer with key " << m_rawRecomputedscKey << " from EventStore. " );
+       return StatusCode::SUCCESS;
+    } else
+        ATH_MSG_DEBUG( "Got LArRawSCContainer with key " << m_rawRecomputedscKey.key() );
+ 
+    if (hdlrecoSC->empty()) {
+      ATH_MSG_WARNING ( "LArRawSCContainer with key=" << m_rawRecomputedscKey.key() << " is empty!" );
       return StatusCode::SUCCESS;
     }
 
@@ -533,18 +547,20 @@ StatusCode LArShapeDumper::execute()
        return StatusCode::FAILURE;
     }
 
-    std::map<unsigned int, std::pair<float,float> > channelsToKeepSC;
+    std::map<unsigned int, std::pair<float, std::pair<float,float> > > channelsToKeepSC;
 
-    for (const LArRawSC* rawSC : *hdlSC) {
+    for (const LArRawSC* rawSC : *hdlSC) { // from bytestream
+
+      // is SC masked ?
+      if (m_bcMaskSC.cellShouldBeMasked(bcCont,rawSC->hardwareID())) continue;
 
       const std::vector<unsigned short>& bcids = rawSC->bcids();
       const std::vector<int>& energies = rawSC->energies();
-      const std::vector<int>& tauenergies = rawSC->tauEnergies();
       const std::vector<bool>& satur = rawSC->satur();
   
       // Look for bcid:
       float scEne = 0;
-      float scTim = -99999999.;
+      float defValue = -99999999.;
   
       const size_t nBCIDs = bcids.size();
       size_t i = 0;
@@ -554,8 +570,7 @@ StatusCode LArShapeDumper::execute()
       if (satur[i]) continue;
   
       scEne = energies[i]; 
-      if (m_energyCutSC > 0 && TMath::Abs(scEne) < m_energyCut) continue;
-      if (m_bcMaskSC.cellShouldBeMasked(bcCont,rawSC->hardwareID())) continue;
+      if (m_energyCutSC > 0 && scEne < m_energyCutSC) continue;
  
       IdentifierHash hash = m_onlineHelperSC->channel_Hash(rawSC->hardwareID());
       
@@ -565,8 +580,7 @@ StatusCode LArShapeDumper::execute()
         return StatusCode::FAILURE;
       }    
 
-      if(tauenergies.size() && scEne != 0) scTim = tauenergies[i] / scEne;
-      channelsToKeepSC[hash] = std::make_pair(scEne, scTim);
+      channelsToKeepSC[hash] = std::make_pair(scEne, std::make_pair(defValue,defValue));
 
       if (m_dumpChannelInfos) {
         HistoryContainer* histCont = m_samples->hist_cont_sc(hash);
@@ -581,7 +595,54 @@ StatusCode LArShapeDumper::execute()
         }      
       }
     }
+    ATH_MSG_INFO("SC to keep in this event: "<<channelsToKeepSC.size());
 
+    for (const LArRawSC* rawSC : *hdlrecoSC) { //reconstructed
+
+      if (m_bcMaskSC.cellShouldBeMasked(bcCont,rawSC->hardwareID())) continue;
+      IdentifierHash hash = m_onlineHelperSC->channel_Hash(rawSC->hardwareID());
+      if (!hash.is_valid()) {
+        ATH_MSG_FATAL ( "Found a LArRawSC whose HWIdentifier (" << rawSC->hardwareID()
+                        << ") does not correspond to a valid hash -- returning StatusCode::FAILURE." );
+        return StatusCode::FAILURE;
+      }    
+
+      // do we keep this SC ?
+      if (channelsToKeepSC.find(hash) == channelsToKeepSC.end()) continue;
+
+      const std::vector<unsigned short>& bcids = rawSC->bcids();
+      const std::vector<int>& energies = rawSC->energies();
+      const std::vector<int>& tauenergies = rawSC->tauEnergies();
+  
+      // Look for bcid:
+      float scEne = 0;
+      float scTim = -99999999.;
+  
+      const size_t nBCIDs = bcids.size();
+      size_t i = 0;
+      for (i = 0; i < nBCIDs && bcids[i] != bunchId; i++) 
+        ;
+      if(i==nBCIDs) continue;
+  
+      scEne = energies[i]; 
+
+      if(tauenergies.size() && scEne != 0) scTim = tauenergies[i] / scEne;
+
+      channelsToKeepSC[hash].second = std::make_pair(scEne, scTim);
+
+      if (m_dumpChannelInfos) {
+        HistoryContainer* histCont = m_samples->hist_cont_sc(hash);
+        CellInfo* info = nullptr;
+        if (!histCont) {
+          HWIdentifier channelID = rawSC->hardwareID();
+          const Identifier id = cablingSC->cnvToIdentifier(channelID);
+          const CaloDetDescrElement* caloDetElement = caloMgrSC->get_element(id);
+          info = m_dumperToolSC->makeCellInfo(channelID, id, caloDetElement);
+          if (!info) continue;
+          m_samples->makeNewHistorySC(hash, info);
+        }      
+      }
+    }
     
     SG::ReadHandle<LArDigitContainer> hdlSCDigit(m_digitsKeySC, ctx);
     if(!hdlSCDigit.isValid()) {
@@ -603,7 +664,7 @@ StatusCode LArShapeDumper::execute()
       //Check Energy selection
       IdentifierHash hash = m_onlineHelperSC->channel_Hash((*digit)->channelID());
       
-      std::map<unsigned int, std::pair<float,float> >::const_iterator findChannel = channelsToKeepSC.find(hash);
+      std::map<unsigned int, std::pair<float, std::pair<float,float> > >::const_iterator findChannel = channelsToKeepSC.find(hash);
       if (findChannel == channelsToKeepSC.end()) continue;
  
       // Check ADCMax selection
@@ -638,11 +699,11 @@ StatusCode LArShapeDumper::execute()
       DataContainer* data = 
           new DataContainer((*digit)->gain(), (*digit)->samples(),
                                findChannel->second.first,
-                               findChannel->second.second/double(1000),
-                               -1,    
+                               findChannel->second.second.second,
+                               findChannel->second.second.first,    
                                eventIndex,
                                LArVectorProxy(), 
-          		     -1, pedestal);
+          		     -1, pedestal, 0, 0);
       
      
       histCont->add(data);

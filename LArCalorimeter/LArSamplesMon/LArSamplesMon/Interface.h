@@ -128,6 +128,7 @@ namespace LArSamples {
       
       const History*  cellHistory(unsigned int i) const;      
       const History*  getCellHistory(unsigned int i) const;      
+      const History*  getSCHistory(unsigned int i) const;      
       const CellInfo* getCellInfo(unsigned int i) const;
       
     private:

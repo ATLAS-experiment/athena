@@ -58,6 +58,12 @@ def fromRunArgs(runArgs):
     # real geom not working yet
     flags.LArSCDump.doGeom=False
 
+    if hasattr(runArgs,"ETThresh"):
+         flags.LArSCDump.ETThresh=float(runArgs.ETThresh)
+
+    if hasattr(runArgs,"ETThreshMain"):
+         flags.LArSCDump.ETThreshMain=float(runArgs.ETThreshMain)
+
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     try:
        runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
@@ -67,7 +73,9 @@ def fromRunArgs(runArgs):
        flags.LArSCDump.nSamples=5
        flags.LArSCDump.nEt=1
        CKeys=["SC_ET"]    
+       fw=5
     else:   
+       fw=runinfo.FWversion()
        CKeys=[]
        flags.LArSCDump.digitsKey=""
        for i in range(0,len(runinfo.streamTypes())):
@@ -116,6 +124,10 @@ def fromRunArgs(runArgs):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     cfg.merge(LArGMCfg(flags))
 
+    if fw==6:
+       from IOVDbSvc.IOVDbSvcConfig import addOverride
+       cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
+
     if flags.LArSCDump.doBC:
        # FIXME should be SC version
        from LArBadChannelTool.LArBadChannelConfig import  LArBadFebCfg, LArBadChannelCfg
@@ -126,13 +138,15 @@ def fromRunArgs(runArgs):
     cfg.merge(LArTimeVetoAlgCfg(flags))
 
     cfg.merge(LArSC2NtupleCfg(flags, AddBadChannelInfo=flags.LArSCDump.doBC, AddFEBTempInfo=False, isSC=True, isFlat=False,
-                            OffId=flags.LArSCDump.doOfflineId, AddHash=flags.LArSCDump.doHash, AddCalib=flags.LArSCDump.doCalib, RealGeometry=flags.LArSCDump.doGeom, ExpandId=flags.LArSCDump.expandId, # from LArCond2NtupleBase 
+                            OffId=flags.LArSCDump.doOfflineId, AddHash=flags.LArSCDump.doHash, AddCalib=flags.LArSCDump.doCalib, 
+                            RealGeometry=flags.LArSCDump.doGeom, ExpandId=flags.LArSCDump.expandId, BadChanKey="LArBadChannelSC", # from LArCond2NtupleBase 
                             NSamples=flags.LArSCDump.nSamples, FTlist=[], FillBCID=flags.LArSCDump.doBCID, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
-                            SCContainerKeys=CKeys, OverwriteEventNumber = flags.LArSCDump.overwriteEvN, Net=flags.LArSCDump.nEt, # from LArSC2Ntuple
+                            SCContainerKeys=CKeys, OverwriteEventNumber = flags.LArSCDump.overwriteEvN, Net=flags.LArSCDump.nEt, 
                             FillRODEnergy = flags.LArSCDump.doRawChan, FillLB = True, FillTriggerType = True,
+                            ETThreshold = flags.LArSCDump.ETThresh, ETThresholdMain = flags.LArSCDump.ETThreshMain, ADCThreshold=int(runArgs.ADCThresh),
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
                             TrigDecisionTool=tdt,
-                            OutputLevel=3))
+                            OutputLevel=2))
 
     if os.path.exists(flags.LArSCDump.outputNtup):
           os.remove(flags.LArSCDump.outputNtup)
