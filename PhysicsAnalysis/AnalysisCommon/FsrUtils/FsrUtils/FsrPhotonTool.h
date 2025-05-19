@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FSRUTILS_FsrPhotonTool_H
@@ -17,15 +17,17 @@
 namespace CP
 {
     class IIsolationSelectionTool;
-    class IIsolationCorrectionTool;
     class IEgammaCalibrationAndSmearingTool;
 }
+class IAsgSelectionTool;
+
 
 namespace FSR {
 
     /// Implementation for the "FSR" provider tool
     ///
     /// @author Tulay Cuhadar Donszelmann <tcuhadar@cern.ch>
+    /// @author RD Schaffer <R.D.Schaffer@cern.ch>
     ///
     class FsrPhotonTool : public virtual IFsrPhotonTool,
                           public asg::AsgTool {
@@ -97,6 +99,7 @@ namespace FSR {
         Gaudi::Property<double> m_topo_f1cut{this, "topo_f1cut", 0.2 , "Minimum f1 cut for low Et clusters" };
         Gaudi::Property<std::string> m_far_fsr_isoWorkingPoint{this, "far_fsr_isoWorkingPoint", "FixedCutLoose", "Far fsr isolation working point" };
         Gaudi::Property<std::string> m_energyRescalerName{this, "egCalibToolName", "" , "EnergyRescale tool to calibrate photons as electrons" };
+        Gaudi::Property<bool> m_suppresEnergyRescaling{this, "SuppressEnergyRescaling", false , "flag to suppress energy rescaling - should only be used for testing purposes, e.g. test w/o calib for PhysLite " };
         Gaudi::Property<bool> m_AFII_corr{this, "AFII_corr", false , "Is AFII for isolation correction" };
         Gaudi::Property<bool> m_is_mc{this, "IsMC", true , "Is MC" };
         //Flag to use isolation variables with 'CloseByCorr' suffix which have been corrected for close-by leptons and photons. If false, the uncorrected variables are used 
@@ -106,8 +109,10 @@ namespace FSR {
         FsrCandidate::FsrType     m_fsr_type;
 
         ToolHandle<CP::IIsolationSelectionTool>           m_isoSelTool;
-        ToolHandle<CP::IIsolationCorrectionTool>          m_isoCorrTool;
         ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_energyRescaler;
+        ToolHandle<IAsgSelectionTool>                     m_elIsGoodOQSelectionTool;
+        ToolHandle<IAsgSelectionTool>                     m_phIsGoodOQSelectionTool;
+
 
     }; // class FsrPhotonTool
 
