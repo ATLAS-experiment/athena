@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // FPEAuditor.h 
@@ -18,7 +18,7 @@
 #include <atomic>
 
 // FrameWork includes
-#include "GaudiKernel/Auditor.h"
+#include "Gaudi/Auditor.h"
 #include "AthenaBaseComps/AthCommonMsg.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
@@ -30,12 +30,9 @@
 class INamedInterface;
 
 
-class FPEAuditor : public AthCommonMsg<Auditor>
+class FPEAuditor : public AthCommonMsg<Gaudi::Auditor>
 { 
-  using Auditor::before;
-  using Auditor::after;
-
-  /////////////////////////////////////////////////////////////////// 
+  ///////////////////////////////////////////////////////////////////
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
@@ -50,38 +47,13 @@ class FPEAuditor : public AthCommonMsg<Auditor>
   virtual StatusCode initialize() override;
   
   virtual StatusCode finalize() override;
-  
 
-  // standard event auditing...
-  virtual void before(StandardEventType evt, INamedInterface* comp) override;
-  virtual void after(StandardEventType evt, INamedInterface* comp, const StatusCode& sc) override;
+  /// Auditor hooks
+  virtual void before(const std::string& event, const std::string& name,
+                      const EventContext& ctx) override;
 
-  // custom event auditing...
-
-  /// Audit the start of a custom "event".
-  virtual void before(IAuditor::CustomEventTypeRef evt, 
-		      INamedInterface* caller) override
-  { return this->before (evt, caller->name()); }
-
-  /**
-   * Audit the start of a custom "event" for callers that do not implement 
-   * the @c INamedInterface.
-   */
-  virtual void before (IAuditor::CustomEventTypeRef evt, 
-		       const std::string& caller) override;
-  
-  /// Audit the end of a custom "event".
-  virtual void after (IAuditor::CustomEventTypeRef evt, 
-		      INamedInterface* caller, 
-		      const StatusCode& sc) override
-  { return this->after (evt, caller->name(), sc); }
-  
-  /**
-   * Audit the end of a custom "event" for callers that do not implement 
-   * the @c INamedInterface.
-   */
-  virtual void after  (CustomEventTypeRef evt, const std::string& caller,
-		       const StatusCode& sc) override;
+  virtual void after(const std::string& event, const std::string& name,
+                     const EventContext& ctx, const StatusCode& sc) override;
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 

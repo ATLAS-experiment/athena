@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // FPEAuditor.cxx
@@ -160,11 +160,12 @@ void FPEAuditor::UninstallHandler()
   // fedisableexcept (FE_ALL_EXCEPT);
 }
 
-void FPEAuditor::before(StandardEventType evt, INamedInterface*)
+void FPEAuditor::before(const std::string& event, const std::string& /*name*/,
+                        const EventContext&)
 {
   add_fpe_node();
 
-  if ( evt==IAuditor::Execute ) {
+  if ( event==IAuditor::Execute ) {
     if ( m_NstacktracesOnFPE && ! FPEAudit::s_handlerInstalled ) {
       FPEAudit::lock_t lock (FPEAudit::s_mutex);
       if ( m_NstacktracesOnFPE && ! FPEAudit::s_handlerInstalled ) {
@@ -175,34 +176,21 @@ void FPEAuditor::before(StandardEventType evt, INamedInterface*)
   }
 }
 
-void FPEAuditor::after(StandardEventType evt, INamedInterface* comp, const StatusCode&)
+void FPEAuditor::after(const std::string& event, const std::string& name,
+                       const EventContext&, const StatusCode&)
 {
-  report_fpe(toStr(evt), comp->name());
+  report_fpe(event, name);
   pop_fpe_node();
 
-  if ( evt==IAuditor::Initialize ) {
+  if ( event==IAuditor::Initialize ) {
     FPEAudit::lock_t lock (FPEAudit::s_mutex);
     // CoreDumpSvc can also install a FPE handler, grrr.
-    if (comp->name() == "CoreDumpSvc") FPEAudit::s_handlerInstalled = false;
+    if (name == "CoreDumpSvc") FPEAudit::s_handlerInstalled = false;
     if ( m_NstacktracesOnFPE && ! FPEAudit::s_handlerInstalled ) {
       InstallHandler();
       m_nexceptions = m_NstacktracesOnFPE;
     }
   }
-}
-
-void FPEAuditor::before(CustomEventTypeRef /*evt*/,
-			const std::string& /*caller*/)
-{
-  add_fpe_node();
-}
-
-void FPEAuditor::after(CustomEventTypeRef evt,
-		       const std::string& caller,
-		       const StatusCode&)
-{
-  report_fpe(evt, caller);
-  pop_fpe_node();
 }
 
 /** report fpes which happened during step 'step' on behalf of 'caller'
