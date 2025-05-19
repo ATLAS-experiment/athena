@@ -80,8 +80,9 @@ bool DataContainer::isValid() const
   //if (gain() == CaloGain::UNKNOWNGAIN) return false;
   if (eventIndex() < 0) return false;
   if (Definitions::isNone(energy())) return false;
-  if (Definitions::isNone(ofcTime())) return false;
-  if (Definitions::isNone(quality())) return false;
+  //FIXME: not filled for SC
+  //if (Definitions::isNone(ofcTime())) return false;
+  //if (Definitions::isNone(quality())) return false;
   //if (Definitions::isNone(pedestal())) return false;
   //if (m_corrs.size() == 0) return false; temporary
   if (status() < 0) return false;
