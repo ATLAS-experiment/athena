@@ -311,7 +311,7 @@ StatusCode LArSC2Ntuple::execute()
   } else {
      ATH_MSG_DEBUG( "LArLATOME container found");
      headcontainer=&*hdrCont;
-     if(&*hdrCont && *hdrCont->begin()) thisELVL1Id   = (*hdrCont->begin())->L1Id();
+     if(headcontainer != nullptr && *hdrCont->begin()) thisELVL1Id   = (*hdrCont->begin())->L1Id();
      ATH_MSG_DEBUG( " ELVL1I FROM LATOME HEADER " << thisELVL1Id );
   }
   
