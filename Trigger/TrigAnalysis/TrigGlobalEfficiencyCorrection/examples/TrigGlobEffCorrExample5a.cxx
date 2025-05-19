@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
     Info(MSGSOURCE, "Average scale factor: %f (over %ld events)",
             sumW / nSuitableEvents, long(nSuitableEvents));
     #ifndef XAOD_STANDALONE
-		ANA_CHECK(app->finalize())
+		ANA_CHECK(app->finalize());
     #endif
     return errors? 4 : 0;
 }

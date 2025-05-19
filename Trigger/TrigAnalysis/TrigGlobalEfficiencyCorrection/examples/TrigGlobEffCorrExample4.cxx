@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 	ANA_CHECK(testPhotons(APP_NAME, quiet));
 	
 	#ifndef XAOD_STANDALONE
-		ANA_CHECK(app->finalize())
+		ANA_CHECK(app->finalize());
 	#endif
 	return 0;
 }
