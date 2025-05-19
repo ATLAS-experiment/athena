@@ -41,7 +41,8 @@ class sTgcDigitMaker : public AthMessaging {
                  const int channelTypes,
                  double meanGasGain, 
                  bool doPadChargeSharing,
-                 double stripChargeScale);
+                 double stripChargeScale,
+                 bool applyAsBuiltBLines);
 
   virtual ~sTgcDigitMaker();
 
@@ -163,6 +164,8 @@ class sTgcDigitMaker : public AthMessaging {
   double m_chargeAngularFactor{4.0};
   // Overall factor to scale the total strip cluster charge
   double m_stripChargeScale{0.4};
+
+  bool m_applyAsBuiltBLines{false}; // apply as built and B-lines parameters
 };
 
 #endif
