@@ -17,6 +17,9 @@
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+#include "InDetReadoutGeometry/SiDetectorManager.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 class FPGAOutputValidationAlg : public AthReentrantAlgorithm
 {
@@ -45,7 +48,9 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
   ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
   const PixelID* m_pixelid {nullptr};
-  
+  const SCT_ID* m_stripid {nullptr};
+  const InDetDD::SiDetectorManager* m_PIX_mgr = nullptr;
+  const InDetDD::SiDetectorManager* m_SCT_mgr = nullptr;
  public:
   FPGAOutputValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override final;
