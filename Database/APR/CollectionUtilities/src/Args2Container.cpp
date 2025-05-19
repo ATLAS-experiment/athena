@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <xercesc/dom/DOM.hpp>
@@ -82,6 +82,7 @@ evalArgs(argv) : save time/errors by calling evalArgs
    on the container rather than the individual CmdLineArg2's
 
 ***************************************************************/
+// cppcheck-suppress uninitMemberVar; false positive for m_log
 Args2Container::Args2Container( const std::string& name, bool doxml, coral::MessageStream *l )
       : m_log( l? *l : *new coral::MessageStream("CmdLine") ),
         m_name(name),
