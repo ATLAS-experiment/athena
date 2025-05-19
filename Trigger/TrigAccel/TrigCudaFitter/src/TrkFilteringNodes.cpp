@@ -2,7 +2,7 @@
 // TrkFilteringNodes.cxx
 //   Source file for TrkFilteringNodes classes
 ///////////////////////////////////////////////////////////////////
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ///////////////////////////////////////////////////////////////////
 // Author: Dmitry Emeliyanov, RAL
 // D.Emeliyanov@rl.ac.uk
@@ -121,13 +121,6 @@ TrkClusterNode::TrkClusterNode(TrkPlanarSurface* pS, double chi2Cut, double pos,
   m_m=pos;m_V=cov;m_nodeType=2;m_ndof=1;
 }
 
-void TrkClusterNode::serialize(char fileName[])
-{
-  FILE* pFile;
-  pFile=fopen(fileName,"a");
-  fclose(pFile);
-}
-
 void TrkClusterNode::validateMeasurement(TrkTrackState* pTS)
 {
   m_dChi2=getChi2Distance(pTS);
@@ -155,13 +148,6 @@ TrkEndCapClusterNode::TrkEndCapClusterNode(TrkPlanarSurface* pS, double chi2Cut,
   m_pSurface=pS;m_chi2Cut=chi2Cut;
   m_m=pos;m_V=cov;m_Rc=Rc;
   m_nodeType=2;m_ndof=1;
-}
-
-void TrkEndCapClusterNode::serialize(char fileName[])
-{
-  FILE* pFile;
-  pFile=fopen(fileName,"a");
-  fclose(pFile);
 }
 
 void TrkEndCapClusterNode::validateMeasurement(TrkTrackState* pTS)
@@ -202,13 +188,6 @@ TrkPixelNode::TrkPixelNode(TrkPlanarSurface* pS,double chi2Cut, double pos[2], d
   m_m[0]=pos[0];m_m[1]=pos[1];
   m_V[0][0]=cov[0];m_V[0][1]=cov[1]; m_V[1][0]=cov[2]; m_V[1][1]=cov[3];
   m_nodeType=1;m_ndof=2;
-}
-
-void TrkPixelNode::serialize(char fileName[])
-{
-  FILE* pFile;
-  pFile=fopen(fileName,"a");
-  fclose(pFile);
 }
 
 void TrkPixelNode::report()
