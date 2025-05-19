@@ -7,6 +7,7 @@
 # art-include: 24.0/Athena
 # art-output: myAOD.pool.root
 # art-output: myDAOD_IDTIDE.pool.root
+# art-output: myDESDM_MCP.pool.root
 
 aod=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1
 Merge_tf.py \
