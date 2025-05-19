@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VALKYRIE_VALGRINDAUDITOR_H
@@ -12,7 +12,7 @@
 #include <boost/regex.hpp>
 
 // FrameWork includes
-#include "GaudiKernel/Auditor.h"
+#include "Gaudi/Auditor.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIncidentListener.h"
 #include "GAUDI_VERSION.h"
@@ -29,51 +29,30 @@ class IValgrindSvc;
 /// Turns callgrind instrumentation on/off before/afterExecute.
 ///
 /// @author Frank Winklmeier
-/// $Id: ValgrindAuditor.h,v 1.4 2008-10-14 12:31:40 fwinkl Exp $
 //////////////////////////////////////////////////////////////////////
 
-class ValgrindAuditor : public Auditor,
+class ValgrindAuditor : public Gaudi::Auditor,
                         virtual public IIncidentListener
 {
 public:  
   ValgrindAuditor(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~ValgrindAuditor();
      
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   /// Incident handler
   virtual void handle( const Incident& incident );
 
-
-  /// \name before Auditor hooks
+  /// \name Auditor hooks
   //@{
-  virtual void before (StandardEventType evt, const std::string& name);
-  
-  virtual void before (StandardEventType evt, INamedInterface* alg)
-  { if (alg) before(evt, alg->name()); }
+  virtual void before(const std::string& event, const std::string& name,
+                      const EventContext& ctx) override;
 
-  virtual void before (CustomEventTypeRef evt, INamedInterface* alg)
-  { if (alg) before(evt, alg->name()); }
-
-  virtual void before (CustomEventTypeRef evt, const std::string& name)
-  { do_before(name, evt); }
+  virtual void after(const std::string& event, const std::string& name,
+                     const EventContext& ctx, const StatusCode& sc) override;
   //@}
 
-  /// \name after Auditor hooks
-  //@{
-  virtual void after (StandardEventType evt, const std::string& name, const StatusCode& sc);
-  
-  virtual void after (StandardEventType evt, INamedInterface* alg, const StatusCode& sc)
-  { if (alg) after(evt, alg->name(), sc); }
-  
-  virtual void after (CustomEventTypeRef evt, INamedInterface* alg, const StatusCode& sc)
-  { if (alg) after(evt, alg->name(), sc); }
-  
-  virtual void after (CustomEventTypeRef evt, const std::string& name, const StatusCode&)
-  { do_after(name, evt); }
-  
-  //@}
-  
+
   /// Start callgrind instrumentation
   virtual void do_beforeExecute(const std::string& name);
 
