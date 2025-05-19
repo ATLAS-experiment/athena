@@ -48,8 +48,17 @@ StatusCode IntegrationBase::initialize()
         // Loop over all devices in the platform and see if there is an accelerator card
         // If there is an accelerator card, use the first one
         bool foundAccelerator = false;
+
         for(auto device : allDevices)
         {
+            // If emulation is being used, use the first device
+            if(m_doEmulation.value())
+            {
+                m_accelerator = device;
+                foundAccelerator = true;
+                break;
+            }
+
             if (device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_ACCELERATOR)
             {
                 std::string deviceBDF = "";

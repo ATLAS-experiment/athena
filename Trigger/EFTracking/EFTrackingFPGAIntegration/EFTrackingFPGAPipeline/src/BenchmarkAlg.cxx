@@ -358,10 +358,10 @@ namespace EFTrackingFPGAIntegration
         // Clustering
         cl::Buffer pixelClusterInputBuffer(m_context, CL_MEM_READ_ONLY, sizeof(uint64_t) * encodedPixelRDO.size(), NULL, &err);
         cl::Buffer stripClusterInputBuffer(m_context, CL_MEM_READ_ONLY, sizeof(uint64_t) * encodedStripRDO.size(), NULL, &err);
-        cl::Buffer pixelClusterOutputBuffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * encodedPixelRDO.size(), NULL, &err); // Don't care in DataPrep
-        cl::Buffer stripClusterOutputBuffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * encodedStripRDO.size(), NULL, &err); // Don't care in DataPrep
-        cl::Buffer pixelClusterEDMOutputBuffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * encodedPixelRDO.size() * EFTrackingTransient::NUM_PIXEL_WORD, NULL, &err);
-        cl::Buffer stripClusterEDMOutputBuffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * encodedStripRDO.size() * EFTrackingTransient::NUM_STRIP_WORD, NULL, &err);
+        cl::Buffer pixelClusterOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err); // Don't care in DataPrep
+        cl::Buffer stripClusterOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err); // Don't care in DataPrep
+        cl::Buffer pixelClusterEDMOutputBuffer(m_context, CL_MEM_READ_WRITE,EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err);
+        cl::Buffer stripClusterEDMOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err);
         // L2G
         cl::Buffer pixelL2GOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err); // Don't care in DataPrep
         cl::Buffer stripL2GOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err); // Don't care in DataPrep

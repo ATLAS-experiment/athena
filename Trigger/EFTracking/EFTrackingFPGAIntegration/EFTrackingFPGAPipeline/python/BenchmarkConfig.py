@@ -16,6 +16,7 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     kwarg.setdefault('InputPixelClusterKey', 'ITkPixelClusters')
     kwarg.setdefault('InputStripClusterKey', 'ITkStripClusters')
     kwarg.setdefault('runPassThrough', flags.FPGADataPrep.RunPassThrough)
+    kwarg.setdefault('doEmulation', flags.FPGADataPrep.DoEmulation)
     
 
     # Set up Cluster maker tool
