@@ -180,6 +180,10 @@ void LArCelldeadOTXTool::buildMap(const EventContext& ctx, scToDeadCellMap_t& sc
       for (unsigned ch = 0; ch < nChans; ++ch) {
         const HWIdentifier chid = m_onlineID->channel_Id(febid, ch);
         const Identifier id = oflCabling->cnvToIdentifier(chid);
+        if (!id.is_valid()) {
+          ATH_MSG_DEBUG("Regular channel " << m_onlineID->channel_name(chid) << " disconnected. Ignoring.");
+          continue; //Disconnected channel (regular readout)
+        }
         const IdentifierHash hashId = m_calo_id->calo_cell_hash(id);
         const Identifier scID = m_scidtool->offlineToSuperCellID(id);
         const HWIdentifier scHwid = scCabling->createSignalChannelID(scID);
@@ -191,7 +195,7 @@ void LArCelldeadOTXTool::buildMap(const EventContext& ctx, scToDeadCellMap_t& sc
         const unsigned nCell = (m_scidtool->superCellToOfflineID(scID)).size();
         const CaloDetDescrElement* dde = caloDDM->get_element(hashId);
         if (ATH_UNLIKELY(!dde)) {
-          ATH_MSG_ERROR("No DetDescElement for cell hash" << hashId);
+          ATH_MSG_ERROR("No DetDescElement for cell hash " << hashId);
           return;
         }
         const float convFactor = 12.5 * (1.0 / nCell) * (1.0 / dde->sinTh());
