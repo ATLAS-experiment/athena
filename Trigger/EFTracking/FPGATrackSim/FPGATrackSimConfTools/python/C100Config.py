@@ -7,8 +7,8 @@ if __name__ == "__main__":
     TrackParticlePrefix="ActsFast"
     
     flags = initConfigFlags()
-    from ActsConfig.ActsCIFlags import actsWorkflowFlags
-    actsWorkflowFlags(flags)
+    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
+    actsLegacyWorkflowFlags(flags)
     
     # IDTPM flags
     from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
@@ -45,6 +45,8 @@ if __name__ == "__main__":
     if not flags.Reco.EnableTrackOverlay:
         from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
         acc.merge(InDetTrackRecoCfg(flags))
+        from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
+        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
         
     from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimDataPrepConnectToFastTracking
     acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=f"{TrackParticlePrefix}"))
