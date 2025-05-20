@@ -45,13 +45,13 @@ if [ ${rc1} -eq 0 ]
 then
 
   # Delete root files that do not have a meaningfull output
-  foreach f (`ls -l *.root | awk '{print $9}'`)
+  for f in `ls -l *.root | awk '{print $9}'`; do
     rf=`rootls -l $f  | grep CollectionTree`
     if [ ${#rf} -eq 0 ] ; then
 	echo $f does not contains CollectionTree, deleting it to only compare intersting reconstruction output
-      rm -f $f
+        rm -f $f
     fi
-  end
+  done
 
   ArtPackage=$1
   ArtJobName=$2
