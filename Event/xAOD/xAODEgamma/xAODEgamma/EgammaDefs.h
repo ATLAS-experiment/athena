@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: EgammaDefs.h 775814 2016-09-29 12:14:38Z ludovica $
@@ -131,9 +131,6 @@ namespace xAOD {
     0x1 << BadS1Core;
 
     const uint32_t ALLOQ= 0xFFFFFFFF;
-
-
-    struct ROOT6_NamespaceAutoloadHook{};
   }
 }
 

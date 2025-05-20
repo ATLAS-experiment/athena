@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -18,8 +18,6 @@ namespace ElectronEfficiencyHelpers{
   
   /// Return true if it's good ele for charge flip measurements
   CP::CorrectionCode isGoodEle( const xAOD::Electron& ele, bool& goodEle);
-
-  struct ROOT6_NamespaceAutoloadHook{};
 
 }
 

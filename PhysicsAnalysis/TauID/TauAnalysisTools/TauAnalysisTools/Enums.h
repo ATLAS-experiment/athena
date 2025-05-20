@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_ENUMS_H
@@ -101,8 +101,6 @@ namespace TauAnalysisTools
     TruthJet         = 5,
     TruthHadronicDiTau = 6
   };
-
-  struct ROOT6_NamespaceAutoloadHook{};
 
 }
 

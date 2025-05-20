@@ -80,8 +80,6 @@ struct LHCalcVars_t
   double ip;
 };
 
-struct ROOT6_NamespaceAutoloadHook
-{};
 } // namespace LikeEnumForward
 
 namespace Root {
