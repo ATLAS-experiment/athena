@@ -119,9 +119,8 @@ PlotBase(pParent, sDir)
     using namespace Muon::MuonStationIndex;
     SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
     if (!acc.isAvailable(muon)) return;
-    std::vector<unsigned int> vec=acc(muon);
-    hitPlots->Fill(vec[toInt(index)], weight);
-           
+    const std::vector<unsigned int>& vec=acc(muon);
+    if (vec.size()) hitPlots->Fill(vec[toInt(index)], weight);
 }
   void MuonTruthHitPlots::fillPlot(TH1* hitPlots, const std::string& sInfo, const Muon::MuonStationIndex::PhiIndex& index, const xAOD::Muon& muon, float weight){
   //protection
@@ -129,8 +128,8 @@ PlotBase(pParent, sDir)
   using namespace Muon::MuonStationIndex;
   SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
   if (!acc.isAvailable(muon)) return;
-  std::vector<unsigned int> vec=acc(muon);
-  hitPlots->Fill(vec[toInt(index)], weight);
+  const std::vector<unsigned int>& vec=acc(muon);
+  if (vec.size()) hitPlots->Fill(vec[toInt(index)], weight);
            
 }
 
