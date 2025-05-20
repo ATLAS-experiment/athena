@@ -49,7 +49,7 @@ PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
     "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink.InclusiveGNNVerticesLink",
     "TruthPrimaryVertices.t.x.y.z",
     "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
-    "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
+    "TauChargedParticleFlowObjects.pt.eta.phi.m",
     "MET_Track.sumet",
 ]
 
