@@ -4,12 +4,19 @@
 #include "SpacePointMakerAlg.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include <GaudiKernel/IMessageSvc.h>
+#include <memory>
+#include <type_traits>
 #include <xAODMuonViews/ChamberViewer.h>
-#include <thread>
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
+#include "xAODMeasurementBase/MeasurementDefs.h"
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "xAODMuonPrepData/RpcStrip.h"
 namespace {
     inline std::vector<std::shared_ptr<unsigned>> matchCountVec(unsigned int n) {
         std::vector<std::shared_ptr<unsigned>> out{};
@@ -22,6 +29,208 @@ namespace {
 }
 
 namespace MuonR4 {
+
+template<class MeasType>
+Amg::Transform3D SpacePointMakerAlg::toChamberTransform(const ActsGeometryContext& gctx, 
+                                                        const MeasType* meas) const{
+    IdentifierHash hash = {};
+    if constexpr(std::is_same_v<MeasType, xAOD::MdtDriftCircle>) {
+        hash = meas->measurementHash();
+    } else {
+        hash = meas->layerHash();
+    }
+    const MuonGMR4::MuonReadoutElement* reEle{meas->readoutElement()};
+    return reEle->msSector()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, hash);
+}
+
+template<class MeasType>
+Amg::Vector3D SpacePointMakerAlg::positionInChamber(const MeasType* meas,
+                                                    const Amg::Transform3D& toChamberTrans) const{
+    if constexpr (std::is_same_v<MeasType, xAOD::MdtDriftCircle>){
+        return toChamberTrans * meas->localCirclePosition();
+    }
+    else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement>){
+        return toChamberTrans * meas->localMeasurementPos();
+    }
+    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip> or std::is_same_v<MeasType, xAOD::MMCluster>){
+        return toChamberTrans * (meas->template localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
+    }
+    else if constexpr (std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
+        if (meas->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip ||
+            meas->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
+                return toChamberTrans * (meas->template localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
+        }
+        Amg::Vector3D locPos{Amg::Vector3D::Zero()};
+        locPos.block<2,1>(0,0) = xAOD::toEigen(meas->template localPosition<2>());
+        return toChamberTrans * locPos;
+    }
+    else static_assert(std::false_type::value, "Unsupported measurement type.");
+    return Amg::Vector3D::Zero();
+}
+
+template<class MeasType> 
+Amg::Vector3D SpacePointMakerAlg::channelDirInChamber(const MeasType* meas,
+                                    const Amg::Transform3D& toChamberTrans) const{       
+    if constexpr (std::is_same_v<MeasType, xAOD::MdtDriftCircle>){
+        return toChamberTrans.linear() * Amg::Vector3D::UnitZ();
+    }
+    else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement> or 
+                       std::is_same_v<MeasType, xAOD::MMCluster> or 
+                       std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
+        return toChamberTrans.linear() * Amg::Vector3D::UnitY();
+    }
+    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){           
+        Amg::Vector3D dir{Amg::Vector3D::UnitY()};
+        if (meas->measuresPhi()) {
+            dir.block<2,1>(0,0) = meas->readoutElement()->stripLayout(meas->gasGap()).stripDir(meas->channelNumber());
+        } 
+        return toChamberTrans.linear() * dir;
+    }
+    else static_assert(std::false_type::value, "Unsupported measurement type.");
+    return Amg::Vector3D::Zero();      
+}
+        
+template<class MeasType> 
+Amg::Vector3D SpacePointMakerAlg::channelNormalInChamber(const MeasType* meas,
+                                                         const Amg::Transform3D& toChamberTrans) const{
+    if constexpr (std::is_same_v<MeasType, xAOD::MdtDriftCircle>){
+        return toChamberTrans.linear() * Amg::Vector3D::UnitY();
+    }
+    else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement> or 
+                       std::is_same_v<MeasType, xAOD::MMCluster> or 
+                       std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
+        return toChamberTrans.linear() * Amg::Vector3D::UnitX();
+    }
+    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){                     
+        Amg::Vector3D dir{Amg::Vector3D::UnitX()};
+        if (meas->measuresPhi()) {
+            dir.block<2,1>(0,0) = meas->readoutElement()->stripLayout(meas->gasGap()).stripNormal(meas->channelNumber());
+        } 
+        return toChamberTrans.linear() * dir;
+    }
+    else static_assert(std::false_type::value, "Unsupported measurement type.");
+    return Amg::Vector3D::Zero();     
+}
+
+template<class MeasType>
+AmgSymMatrix(2) SpacePointMakerAlg::computeCov(const MeasType* primaryMeas,
+                                               const Amg::Vector3D& dir,
+                                               const Amg::Vector3D& nor) const {
+    AmgSymMatrix(2) Jac{AmgSymMatrix(2)::Identity()}, uvcov {AmgSymMatrix(2)::Identity()};
+        
+    if (primaryMeas->numDimensions() == 1) {
+        uvcov(0,0) = primaryMeas->template localCovariance<1>()[0];
+
+        if constexpr (std::is_same_v<MeasType, xAOD::MdtDriftCircle>) {
+            uvcov(1,1) = 0.5* primaryMeas->readoutElement()->activeTubeLength(primaryMeas->measurementHash());
+        }
+        else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement>) {
+            if (primaryMeas->numDimensions() == 1) {
+                const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(primaryMeas);
+                uvcov(1,1) = strip->measuresPhi() ? 0.5* strip->readoutElement()->stripPhiLength(): 0.5* strip->readoutElement()->stripEtaLength();
+            }
+        }
+        else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){
+            if (primaryMeas->measuresPhi()) {
+                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->stripLayout(primaryMeas->gasGap()).stripLength(primaryMeas->channelNumber());
+            } else {
+                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->wireGangLayout(primaryMeas->gasGap()).stripLength(primaryMeas->channelNumber());
+            }
+        }
+        else if constexpr (std::is_same_v<MeasType, xAOD::MMCluster>){
+            uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->stripLayer(primaryMeas->measurementHash()).design().stripLength(primaryMeas->channelNumber());
+        }
+        else if constexpr (std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
+            switch (primaryMeas->channelType()) {
+                case sTgcIdHelper::sTgcChannelTypes::Strip:
+                    uvcov(1,1) = 0.5 *  primaryMeas->readoutElement()->stripDesign(primaryMeas->measurementHash()).stripLength(primaryMeas->channelNumber());
+                    break;
+                case sTgcIdHelper::sTgcChannelTypes::Wire:
+                    uvcov(1,1) = 0.5 *  primaryMeas->readoutElement()->wireDesign(primaryMeas->measurementHash()).stripLength(primaryMeas->channelNumber());
+                    break;
+                /// Do nothing for the pads, the covariance is calculated in the 2D measurement case
+                case sTgcIdHelper::sTgcChannelTypes::Pad:
+                    break;
+            }
+        }    
+        else static_assert(std::false_type::value, "Unsupported measurement type.");
+
+        uvcov(1,1) = std::pow(uvcov(1,1), 2);
+    }
+    else if (primaryMeas->numDimensions() == 2){
+        /// In case of 2D measurements like sTgc-pads or BI-RPC strips we can directly take the covariance
+        /// from the measurement itself. To indicate that the space point measures both, eta & phi coordinate
+        /// set the secondary measurement to be the primary one
+        uvcov = xAOD::toEigen(primaryMeas->template localCovariance<2>());
+    }
+    else THROW_EXCEPTION("Unexpected numDimension for PRD: " << m_idHelperSvc->toString(primaryMeas->identify()));
+
+    Jac.col(0)  = nor.block<2,1>(0,0).unit();
+    Jac.col(1) = dir.block<2,1>(0,0).unit();
+    
+    return Jac * uvcov * Jac.inverse();
+}
+
+AmgSymMatrix(2) SpacePointMakerAlg::computeCov(const xAOD::UncalibratedMeasurement* primaryMeas,
+                                               const xAOD::UncalibratedMeasurement* secondaryMeas,
+                                               const Amg::Vector3D& nor1,
+                                               const Amg::Vector3D& nor2) const {
+    AmgSymMatrix(2) Jac{AmgSymMatrix(2)::Identity()}, uvcov {AmgSymMatrix(2)::Identity()};
+
+    if (primaryMeas->numDimensions() != 1) THROW_EXCEPTION("Unexpected numDimension");
+
+    uvcov(0,0) = primaryMeas->localCovariance<1>()[0];
+    uvcov(1,1) = secondaryMeas->localCovariance<1>()[0]; 
+
+    Jac.col(0)  = nor1.block<2,1>(0,0).unit();
+    Jac.col(1)  = nor2.block<2,1>(0,0).unit();
+
+    return Jac * uvcov * Jac.inverse();
+}
+
+template<class MeasType>
+void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
+                                        const MeasType* primaryMeas,
+                                        const Amg::Transform3D& toChamberTrans) const {
+    pointColl.emplace_back(primaryMeas);
+    SpacePoint& sp {pointColl.back()};
+
+    Amg::Vector3D pos {positionInChamber(primaryMeas, toChamberTrans)};
+    Amg::Vector3D dir {channelDirInChamber(primaryMeas, toChamberTrans)};
+    Amg::Vector3D nor {channelNormalInChamber(primaryMeas, toChamberTrans)};
+    AmgSymMatrix(2) cov {computeCov(primaryMeas,dir,nor)};
+
+    sp.setDirection(dir);
+    sp.setPosition(pos);
+    sp.setNormal(nor);
+    sp.setCovariance(cov);
+}
+
+template<class MeasType>
+void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
+                                        const MeasType* primaryMeas,
+                                        const MeasType* secondaryMeas,
+                                        const Amg::Transform3D& toChamberTrans_eta, 
+                                        const Amg::Transform3D& toChamberTrans_phi) const{
+    pointColl.emplace_back(primaryMeas, secondaryMeas);
+    SpacePoint& sp {pointColl.back()};
+
+    Amg::Vector3D dir1 {channelDirInChamber(primaryMeas, toChamberTrans_eta)};
+    Amg::Vector3D nor1 {channelNormalInChamber(primaryMeas, toChamberTrans_eta)};
+    Amg::Vector3D pos1 {positionInChamber(primaryMeas, toChamberTrans_eta)};
+
+    Amg::Vector3D dir2 {channelDirInChamber(secondaryMeas, toChamberTrans_phi)};
+    Amg::Vector3D nor2 {channelNormalInChamber(secondaryMeas, toChamberTrans_phi)};
+    Amg::Vector3D pos2 {positionInChamber(secondaryMeas, toChamberTrans_phi)};
+    
+    AmgSymMatrix(2) cov {computeCov(primaryMeas,secondaryMeas,nor1,nor2)};
+
+    sp.setDirection(dir1);
+    sp.setPosition(pos1 + Amg::intersect<3>(pos2,dir2, pos1, dir1).value_or(0) * dir1);
+    sp.setNormal(nor1);
+    sp.setCovariance(cov);
+}
+
 bool SpacePointMakerAlg::SpacePointStatistics::FieldKey::operator<(const FieldKey& other) const{
     if (techIdx != other.techIdx) {
         return static_cast<int>(techIdx) < static_cast<int>(other.techIdx);
@@ -158,7 +367,9 @@ template <class ContType>
             for (const PrdType prd: viewer) {
                 ATH_MSG_VERBOSE("Create space point from "<<m_idHelperSvc->toString(prd->identify())
                               <<", hash: "<<prd->identifierHash());
-                pointsInChamb.etaHits.emplace_back(*gctx, prd, nullptr);           
+
+                Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, prd)};
+                fillSpacePoint(pointsInChamb.etaHits, prd, toChamberTrans);
             }
        } else {
             /// Loop over the chamber hits to split the hits per gasGap
@@ -176,7 +387,8 @@ template <class ContType>
                 if constexpr(std::is_same_v<ContType, xAOD::sTgcMeasContainer>) {
                     /// Make directly to a space point
                     if (prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                        pointsInChamb.etaHits.emplace_back(*gctx, prd, nullptr);
+                        Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, prd)};
+                        fillSpacePoint(pointsInChamb.etaHits, prd, toChamberTrans);
                         continue;
                     }
                     /// Wires measure the phi coordinate
@@ -198,18 +410,29 @@ template <class ContType>
             }
             /// Create the space points
             for (auto& [etaHits, phiHits] : hitsPerGasGap) {
+
+                Amg::Transform3D toChamberTrans_eta {}, toChamberTrans_phi {};
+                if (!etaHits.empty()){
+                    toChamberTrans_eta = toChamberTransform(*gctx, etaHits.at(0));
+                }
+                if (!phiHits.empty()){
+                    toChamberTrans_phi = toChamberTransform(*gctx, phiHits.at(0));
+                }
+
                 if (!passOccupancy2D(etaHits, phiHits)) {
                     ATH_MSG_VERBOSE("Occupancy cut not passed "<<etaHits.size()<<", "<<phiHits.size());
                     pointsInChamb.etaHits.reserve(pointsInChamb.etaHits.size() + etaHits.size());
                     pointsInChamb.phiHits.reserve(pointsInChamb.phiHits.size() + phiHits.size());
                     for (const PrdType etaPrd : etaHits) {
-                        pointsInChamb.etaHits.emplace_back(*gctx, etaPrd);
+
+                        fillSpacePoint(pointsInChamb.etaHits, etaPrd, toChamberTrans_eta);
                         ATH_MSG_VERBOSE("Add new eta hit "<<m_idHelperSvc->toString(pointsInChamb.etaHits.back().identify())
                                 <<" "<<Amg::toString(pointsInChamb.etaHits.back().positionInChamber()));
 
                     }
                     for (const PrdType phiPrd : phiHits) {
-                        pointsInChamb.phiHits.emplace_back(*gctx, phiPrd);
+    
+                        fillSpacePoint(pointsInChamb.phiHits, phiPrd, toChamberTrans_phi);
                         ATH_MSG_VERBOSE("Add new phi hit "<<m_idHelperSvc->toString(pointsInChamb.phiHits.back().identify())
                                 <<" "<<Amg::toString(pointsInChamb.phiHits.back().positionInChamber()));
                     }
@@ -228,13 +451,15 @@ template <class ContType>
                                 continue;
                             }
                         }
-                        SpacePoint& spacePoint{pointsInChamb.etaHits.emplace_back(*gctx, etaHits[etaP], phiHits[phiP])};
+                        fillSpacePoint(pointsInChamb.etaHits, etaHits[etaP], phiHits[phiP], toChamberTrans_eta, toChamberTrans_phi);
+
+                        SpacePoint& sp {pointsInChamb.etaHits.back()};
                         ATH_MSG_VERBOSE("Create new spacepoint from "<<m_idHelperSvc->toString(etaHits[etaP]->identify())
-                        <<" & "<<m_idHelperSvc->toString(phiHits[phiP]->identify())<<" at "<<Amg::toString(spacePoint.positionInChamber()));
-                        spacePoint.setInstanceCounts(etaCounts[etaP], phiCounts[phiP]);
+                        <<" & "<<m_idHelperSvc->toString(phiHits[phiP]->identify())<<" at "<<Amg::toString(sp.positionInChamber()));
+                        sp.setInstanceCounts(etaCounts[etaP], phiCounts[phiP]);
                     }
                     if (!(*etaCounts[etaP])) {
-                        pointsInChamb.etaHits.emplace_back(*gctx, etaHits[etaP]);
+                        fillSpacePoint(pointsInChamb.etaHits, etaHits[etaP], toChamberTrans_eta);
                         continue;
                     }
                 }
@@ -242,7 +467,7 @@ template <class ContType>
                 /// or no eta measurement is suitable, then manually push_back the phi hits
                 for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
                     if (!(*phiCounts[phiP])) {
-                        pointsInChamb.phiHits.emplace_back(*gctx, phiHits[phiP]);
+                        fillSpacePoint(pointsInChamb.phiHits, phiHits[phiP], toChamberTrans_phi);
                     }
                 }
             }

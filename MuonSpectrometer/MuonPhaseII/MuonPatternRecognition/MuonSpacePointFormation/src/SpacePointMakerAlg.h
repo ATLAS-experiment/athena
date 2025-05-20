@@ -4,8 +4,11 @@
 #ifndef MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 #define MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "MuonSpacePoint/SpacePoint.h"
 #include "StoreGate/WriteHandleKey.h"
 
 
@@ -32,6 +35,62 @@ namespace MuonR4{
             StatusCode finalize() override;
         
         private:
+            /** @brief Returns the transform from the attached Muon chamber frame to the sector frame
+             * @param gctx: Geometry context to calculate the relative alignment between chamber & measurement
+             * @param meas: Uncalibrated muon measurement */
+            template<class MeasType> Amg::Transform3D toChamberTransform(const ActsGeometryContext& gctx, 
+                                                                         const MeasType* meas) const;
+            /** @brief Returns the position of the uncalibrated muon measurement in the sector frame
+             * @param meas: Uncalibrated muon measurement
+             * @param toChamberTrans: transform from the attached Muon chamber frame to the sector frame */
+            template<class MeasType> Amg::Vector3D positionInChamber(const MeasType* meas,
+                                                                     const Amg::Transform3D& toChamberTrans) const;
+            /** @brief Returns the direction of the measurement channel in the sector frame
+             * @param meas: Uncalibrated muon measurement
+             * @param toChamberTrans: transform from the attached Muon chamber frame to the sector frame */
+            template<class MeasType> Amg::Vector3D channelDirInChamber(const MeasType* meas,
+                                                                       const Amg::Transform3D& toChamberTrans) const;
+            /** @brief Returns the direction, in the sector frame, of the precision axis of the measurement, i.e. 
+             * the vector pointing to the next strip or tube 
+             * @param meas: Uncalibrated muon measurement
+             * @param toChamberTrans: transform from the attached Muon chamber frame to the sector frame */
+            template<class MeasType> Amg::Vector3D channelNormalInChamber(const MeasType* meas,
+                                                                          const Amg::Transform3D& toChamberTrans) const;
+            /** @brief Helper function to calculate the covariance for spacepoints having only one measurement 
+             * @param primaryMeas: Uncalibrated muon measurement
+             * @param dir: direction of the measurement channel in the sector frame
+             * @param nor: direction of the precision axis of the measurement in the sector frame */
+            template<class MeasType> AmgSymMatrix(2) computeCov(const MeasType* primaryMeas,
+                                                                const Amg::Vector3D& dir,
+                                                                const Amg::Vector3D& nor) const;
+            /** @brief Helper function to calculate the covariance for spacepoints having two measurements
+             * @param primaryMeas: Primary uncalibrated muon measurement
+             * @param secondaryMeas: Secondary uncalibrated muon measurement
+             * @param nor1: direction of the precision axis of the primary measurement in the sector frame
+             * @param nor2: direction of the precision axis of the secondary measurement in the sector frame */                                                    
+            AmgSymMatrix(2) computeCov(const xAOD::UncalibratedMeasurement* primaryMeas,
+                                       const xAOD::UncalibratedMeasurement* secondaryMeas,
+                                       const Amg::Vector3D& nor1,
+                                       const Amg::Vector3D& nor2) const;
+            /** @brief Helper function that creates the spacepoint and populates it, when having one measurement
+             * @param pointColl: Collection of spacepoints where the new one is being push
+             * @param primaryMeas: Uncalibrated muon measurement
+             * @param toChamberTrans: transform from the attached Muon chamber frame to the sector frame */
+            template <class MeasType> void fillSpacePoint (std::vector<SpacePoint>& pointColl,
+                                                          const MeasType* primaryMeas,
+                                                          const Amg::Transform3D& toChamberTrans) const;
+            /** @brief Helper function that creates the spacepoint and populates it, when having two measurement
+             * @param pointColl: Collection of spacepoints where the new one is being push
+             * @param primaryMeas: Primary uncalibrated muon measurement
+             * @param secondaryMeas: Secondary uncalibrated muon measurement
+             * @param toChamberTrans_eta: transform from the attached Muon chamber frame to the sector frame for the primary meas
+             * @param toChamberTrans_phi: transform from the attached Muon chamber frame to the sector frame for the secondary meas */
+            template <class MeasType> void fillSpacePoint (std::vector<SpacePoint>& pointColl,
+                                                           const MeasType* primaryMeas,
+                                                           const MeasType* secondaryMeas,
+                                                           const Amg::Transform3D& toChamberTrans_eta, 
+                                                           const Amg::Transform3D& toChamberTrans_phi) const;
+            
             /** @brief Helper class to keep track of how many eta+phi, eta and phi only space points are built
              *         in various detector regions. The SpacePointStatistics split the counts per muon station layer,
              *         i.e., BarrelInner, BarrelMiddle, EndCapInner, etc. are distinct categoriges. Each category
