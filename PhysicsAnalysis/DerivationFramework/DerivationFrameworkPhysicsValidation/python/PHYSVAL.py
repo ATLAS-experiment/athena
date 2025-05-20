@@ -248,11 +248,11 @@ def PHYSVALCfg(flags):
                                              "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.DFCommonJets_fJvt",
                                              "TruthPrimaryVertices.t.x.y.z",
                                              "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
-                                             "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
+                                             "TauChargedParticleFlowObjects.pt.eta.phi.m",
                                              "TauNeutralParticleFlowObjects_MuonRM.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
-                                             "TauChargedParticleFlowObjects_MuonRM.pt.eta.phi.m.bdtPi0Score",
+                                             "TauChargedParticleFlowObjects_MuonRM.pt.eta.phi.m",
                                              "TauNeutralParticleFlowObjects_EleRM.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
-                                             "TauChargedParticleFlowObjects_EleRM.pt.eta.phi.m.bdtPi0Score",
+                                             "TauChargedParticleFlowObjects_EleRM.pt.eta.phi.m",
                                              "MET_Track.sumet"]
     PHYSVALSlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
 
