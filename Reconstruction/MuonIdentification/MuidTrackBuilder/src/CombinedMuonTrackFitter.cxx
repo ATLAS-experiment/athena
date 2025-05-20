@@ -188,7 +188,7 @@ namespace Rec {
         std::unique_ptr<Trk::Track> fittedTrack = std::make_unique<Trk::Track>(track);
         if (isCombined && particleHypothesis == Trk::muon && !m_trackQuery->isCaloAssociated(*fittedTrack, ctx)) {
             // about to add the TSOS's describing calorimeter association to a combined muon;
-            m_messageHelper->printWarning(30);
+            ATH_MSG_VERBOSE( "fit:: about to add the TSOS's describing calorimeter association to a combined muon" );
 
             auto combinedTSOS = std::make_unique<Trk::TrackStates>();
 
