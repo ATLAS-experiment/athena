@@ -122,14 +122,15 @@ class ItemDef:
         PHYS_1ZDC_NZDC             = Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 ) & Not( d.ZDC_1 & d.ZDC_0)
 
         #ATR-26984 refine ZDC_A and ZDC_C logic
-        ZDC_A     = ( Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 ) ) | ( d.ZDC_2 & Not(d.ZDC_1) )
-        ZDC_C     = d.ZDC_1 | (d.ZDC_0 & Not(d.ZDC_2) )
+        #ZDC_A, ZDC_C and ZDC_A_C redefined due to O+O configuration, ATR-30690
+        #ZDC_A     = ( Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 ) ) | ( d.ZDC_2 & Not(d.ZDC_1) )
+        #ZDC_C     = d.ZDC_1 | (d.ZDC_0 & Not(d.ZDC_2) )
 
-        ZDC_A_C   = Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 )
-        ZDC_AND   = ZDC_A_C
+        #ZDC_A_C   = Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 )
+        #ZDC_AND   = ZDC_A_C
         VZDC_A_C  = ZDC_comb0
         ZDC_XOR   = d.ZDC_2
-        VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
+        #VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
         ZDCOR = Not(ZDC_comb0)
 
         # ZDC configuration for LHCf+ZDC special run in Sep. 2022
@@ -145,6 +146,16 @@ class ItemDef:
         # (additional) combined ZDC signals for LHCf+ZDC special run
         ZDC_OR = Not(ZDC_VETO)
         ZDC_A_AND_C = d.ZDC_2 | (d.ZDC_1 & d.ZDC_0)
+        
+        # new HG items for the upcoming O+O runs, ATR-30690
+        ZDC_XnXn = ZDC_comb2 | ZDC_comb4 | ZDC_comb5 | ZDC_comb7
+        ZDC_XnYn = ZDC_comb4 | ZDC_comb5 | ZDC_comb7
+        ZDC_XnZn = ZDC_comb7
+        ZDC_Xn_XOR = ZDC_comb1 | ZDC_comb3 | ZDC_comb6
+        ZDC_Yn_XOR = ZDC_comb3 | ZDC_comb6
+        ZDC_Zn_XOR = ZDC_comb6
+        ZDC_Yn = Not(ZDC_comb0 | ZDC_comb1)
+        ZDC_Zn = d.ZDC_2
 
         #new ZDC items defiition, ATR-29719
         ZDC_alt_comb0 = Not(d.ZDC_ALT_2) & Not(d.ZDC_ALT_1) & Not(d.ZDC_ALT_0) # this means no signal!
@@ -172,6 +183,15 @@ class ItemDef:
         ZDC_PP_C2 = d.ZDC_ALT_2 & d.ZDC_ALT_0
         ZDC_PP_A2 = d.ZDC_ALT_2 & d.ZDC_ALT_1
         ZDC_PP_OR2 = ZDC_PP_C2 | ZDC_PP_A2
+        
+        # new LG items for the upcoming O+O runs, ATR-30690
+        ZDC_LOR = Not(ZDC_alt_comb0)
+        ZDC_A = d.ZDC_ALT_0
+        ZDC_C = d.ZDC_ALT_1
+        ZDC_A_C = d.ZDC_ALT_0 & d.ZDC_ALT_1
+        ZDC_YnYn = ZDC_alt_comb7
+        ZDC_AND   = ZDC_A_C
+        VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM12'      ).setLogic( d.EM12       & physcond).setTriggerType( TT.calo )
@@ -1292,6 +1312,18 @@ class ItemDef:
         MenuItem('L1_ZDC_C'           ).setLogic( ZDC_C & physcond)
         MenuItem('L1_ZDC_AND'         ).setLogic( ZDC_AND & physcond)
         MenuItem('L1_ZDC_A_C'         ).setLogic( ZDC_A_C & physcond)
+        
+        # ZDC O+O (ATR-30690)
+        MenuItem('L1_ZDC_XNXN'        ).setLogic( ZDC_XnXn & physcond)
+        MenuItem('L1_ZDC_XNYN'        ).setLogic( ZDC_XnYn & physcond)
+        MenuItem('L1_ZDC_XNZN'        ).setLogic( ZDC_XnZn & physcond)
+        MenuItem('L1_ZDC_XN_XOR'        ).setLogic( ZDC_Xn_XOR & physcond)
+        MenuItem('L1_ZDC_YN_XOR'        ).setLogic( ZDC_Yn_XOR & physcond)
+        MenuItem('L1_ZDC_ZN_XOR'        ).setLogic( ZDC_Zn_XOR & physcond)
+        MenuItem('L1_ZDC_YN'        ).setLogic( ZDC_Yn & physcond)
+        MenuItem('L1_ZDC_ZN'        ).setLogic( ZDC_Zn & physcond)
+        MenuItem('L1_ZDC_LOR'        ).setLogic( ZDC_LOR & physcond)
+        MenuItem('L1_ZDC_YNYN'        ).setLogic( ZDC_YnYn & physcond)
 
         # ZDC pp (ATR-29027)
         MenuItem('L1_ZDC_PP_A'        ).setLogic( ZDC_PP_A & physcond)
