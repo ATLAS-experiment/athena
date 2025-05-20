@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataLinkCnv_p2.icc
@@ -16,8 +16,7 @@ void DataLinkCnv_p2<DLINK_TYPE>::transToPers (const DLink_t& trans,
                                                    PersDLink_t& pers,
                                                    MsgStream& /*log*/) const
 {
-  DLink_t tmp = trans; // ??? May not be needed now.
-  pers.m_SGKeyHash = tmp.key();
+  pers.m_SGKeyHash = trans.key();
 }
 
 template <typename DLINK_TYPE>
