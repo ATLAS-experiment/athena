@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
 Wraps the ACTS unit constants loaded from a ROOT dictionary.
@@ -10,9 +10,8 @@ value = 15*UnitConstants.mm
 ```
 
 """
-
-from ROOT import ActsUnitConstants
-dummy = ActsUnitConstants.ROOT6_NamespaceAutoloadHook
+# pull in the dictionary/headers with Acts Units
+from ROOT.Acts.UnitConstants import mm   # noqa: F401
 
 from ROOT import Acts
 import inspect

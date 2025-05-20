@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,10 +10,5 @@
 #define ATLASDETDESCR_ATLASDETDESCRDICT_H 1
 
 #include "AtlasDetDescr/AtlasRegion.h"
-
-namespace AtlasDetDescr {
-   // Athena namespace autoloading trigger for ROOT6
-   struct ROOT6_NamespaceAutoloadHook{};
-}
 
 #endif // ATLASDETDESCR_ATLASDETDESCRDICT_H

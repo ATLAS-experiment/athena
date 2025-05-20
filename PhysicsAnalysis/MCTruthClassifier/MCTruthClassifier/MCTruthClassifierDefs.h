@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTHCLASSIFIER_MCTRUTHCLASSIFIERDEFS_H
@@ -20,10 +20,7 @@ Updated Feb 2024 by Andrii Verbytskyi <andrii.verbytskyi@mpp.mpg.de>
 #include <vector>
 #include <string>
 namespace MCTruthPartClassifier {
-
 #include "TruthUtils/TruthClasses.h"
-  // Ensure that the enums are available from ROOT
-  struct ROOT6_NamespaceAutoloadHook{};
 }
 
 #endif // MCTRUTHCLASSIFIER_MCTRUTHCLASSIFIERDEFS_H

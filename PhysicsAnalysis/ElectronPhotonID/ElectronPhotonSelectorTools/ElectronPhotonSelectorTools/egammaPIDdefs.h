@@ -647,7 +647,6 @@ enum BitDefForwardElectron {
   const unsigned int ForwardElectronTight = 126;
   const unsigned int ForwardElectronLoose = 104;
 
-  struct ROOT6_NamespaceAutoloadHook{};
 }
 
 

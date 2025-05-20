@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -283,11 +283,6 @@ namespace SCT_ByteStreamErrors {
          TempMaskedChip4,
          TempMaskedChip5}}[chip]; }
 
-  /**
-   * @struct ROOT6_NamespaceAutoloadHook
-   * @brief Ensure that the enums are available from ROOT
-   */
-  struct ROOT6_NamespaceAutoloadHook{};
 }
 
 #endif // SCT_ByteStreamErrors_h
