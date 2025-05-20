@@ -72,6 +72,10 @@ def LArShapeDumperCfg(flags):
        result.merge(LArElecCalibDBSCCfg(flags,["Pedestal"]))
        from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
        result.merge(LArRawSCDataReadingCfg(flags))
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+       result.merge(LArElecCalibDBSCCfg(flags, condObjs=["Ramp","DAC2uA", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
+       larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg",LArDigitKey=flags.LArShapeDump.digitsKeySC, isADCBas="BAS" in flags.LArShapeDump.digitsKeySC, nEnergies =  flags.LArShapeDump.ndigitsSC - 3,  startEnergy = 0)
+       result.addEventAlgo(larLATOMEBuilderAlg)
                
 
        
@@ -90,8 +94,10 @@ def LArShapeDumperCfg(flags):
     dumperAlg.DigitsKey = flags.LArShapeDump.digitsKey
     dumperAlg.ProblemsToMask=['deadReadout', 'deadPhys','almostDead', 'short',
                               'highNoiseHG','highNoiseMG','highNoiseLG']
+    dumperAlg.ProblemsToMaskSC=["deadCalib","deadReadout","deadPhys","maskedOSUM",
+                                "OffOFCs","transmissionErrorFibre"] 
     dumperAlg.LArShapeDumperTool=CompFactory.LArShapeDumperTool(DoShape=True)
-    dumperAlg.LArShapeDumperTool=CompFactory.LArShapeDumperTool("LArShapeDumperToolSC",DoShape=False,IsSC=True)
+    dumperAlg.LArShapeDumperToolSC=CompFactory.LArShapeDumperTool("LArShapeDumperToolSC",DoShape=False,IsSC=True)
     dumperAlg.FileName=flags.LArShapeDump.outputNtup
     dumperAlg.TriggerNames = flags.LArShapeDump.triggerNames
     dumperAlg.TrigDecisionTool = result.getPublicTool('TrigDecisionTool')
@@ -100,7 +106,7 @@ def LArShapeDumperCfg(flags):
        dumperAlg.ChannelsKey = "LArRawChannels_FromDigits"
 
     dumperAlg.EnergyCutSC = flags.LArShapeDump.energySCCut   
-    dumperAlg.MinADCMaxSC = flags.LArShapeDump.adcSCCut
+    #dumperAlg.MinADCMaxSC = flags.LArShapeDump.adcSCCut
 
     result.addEventAlgo(dumperAlg)
 

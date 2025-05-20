@@ -50,7 +50,7 @@ def DESDM_ALLCELLSCfg(configFlags):
              'xAOD::VertexContainer#GSFConversionVertices','xAOD::VertexAuxContainer#GSFConversionVerticesAux.-vxTrackAtVertex',
              'xAOD::TrackParticleContainer#InDetTrackParticles','xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux.',
              'xAOD::CaloClusterContainer#egammaClusters','xAOD::CaloClusterAuxContainer#egammaClustersAux.',
-             'xAOD::CaloClusterContainer#ForwardElectronClusters','xAOD::CaloClusterAuxContainer#ForwardElectronClustersAux.',
+             'xAOD::CaloClusterContainer#ForwardElectronClusters','xAOD::CaloClusterAuxContainer#ForwardElectronClustersAux.-sigmaWidth',
              'xAOD::CaloClusterContainer#CaloCalTopoClusters','xAOD::CaloClusterAuxContainer#CaloCalTopoClustersAux.',
              'CaloCellContainer#AllCalo',
              'CaloClusterCellLinkContainer#CaloCalTopoClusters_links',

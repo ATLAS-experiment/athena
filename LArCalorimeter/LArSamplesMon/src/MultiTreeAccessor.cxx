@@ -199,6 +199,48 @@ const History* MultiTreeAccessor::getCellHistory(unsigned int i) const
   return h; 
 }
       
+const History* MultiTreeAccessor::getSCHistory(unsigned int i) const 
+{ 
+  CellInfo* cellInfo = nullptr;
+  std::vector<const Data*> allData;
+  std::vector<const EventData*> allEventData;
+  for (const TreeAccessor* accessor : m_accessors) {
+    //cout << "---> Getting history for a treeAccessor..." << endl; 
+    const History* thisHistory = accessor->getSCHistory(i);
+    //cout << "---> done Getting history for a treeAccessor..." << endl; 
+    if (!thisHistory) continue;
+    if (!cellInfo) {
+      cellInfo = new CellInfo(*thisHistory->cellInfo());
+    //cout << "---> done new cell info" << endl; 
+    }
+    //cout << "---> Creating new event data N = " << thisHistory->eventData().size() << endl; 
+    const std::vector<const EventData*>& thisEventData = thisHistory->eventData();
+    std::map<const EventData*, const EventData*> eventMap;
+    for (const EventData* event : thisEventData) {
+      if (eventMap.find(event) != eventMap.end()) continue;
+      EventData* newED = new EventData(*event);
+      eventMap[event] = newED;
+      allEventData.push_back(newED);
+    }
+    //cout << "---> Creating new data N = " << thisHistory->nData() << endl; 
+   
+    for (unsigned int i = 0; i < thisHistory->nData(); i++) {
+     //cout << "------> Creating new data " << i << endl; 
+      allData.push_back(new Data(*thisHistory->data(i), eventMap[thisHistory->data(i)->eventData()], nullptr, -1));
+     //cout << "------> done Creating new data " << i << endl; 
+      if (!cellInfo->shape(thisHistory->data(i)->gain())) {
+        const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(i)->gain());
+        cellInfo->setShape(thisHistory->data(i)->gain(), thisShape ? new ShapeInfo(*thisShape) : nullptr);
+      }
+     //cout << "------> done shape " << i << endl; 
+    }
+     //cout << "---> done Creating new data, deleting treeAcc history" << endl; 
+    delete thisHistory;
+  }
+  //cout << "--->returning new history..." << endl; 
+  return (cellInfo ? new History(allData, *cellInfo, allEventData, i) : nullptr); 
+}
+      
         
 const CellInfo* MultiTreeAccessor::getCellInfo(unsigned int i) const 
 {

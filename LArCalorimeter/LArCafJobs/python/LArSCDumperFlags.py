@@ -25,3 +25,5 @@ def addSCDumpFlags(flags):
     flags.addFlag("LArSCDump.outputNtup","SCDigits.root")
     flags.addFlag("LArSCDump.doRawChan",False)
     flags.addFlag("LArSCDump.fillNoisyRO",False)
+    flags.addFlag("LArSCDump.ETThresh",-1.)
+    flags.addFlag("LArSCDump.ETThreshMain",-1.)
