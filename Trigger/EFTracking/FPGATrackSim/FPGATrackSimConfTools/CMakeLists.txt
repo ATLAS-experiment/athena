@@ -45,6 +45,11 @@ atlas_add_test( FPGATrackSimBankGeneration_test
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 450)
 
+atlas_add_test( FPGATrackSimLayerStudy_test
+                SCRIPT FPGATrackSimLayerStudy.sh
+                POST_EXEC_SCRIPT noerror.sh
+                PROPERTIES TIMEOUT 600)
+
 atlas_add_test( FPGATrackSim_F600_test
                 PRIVATE_WORKING_DIRECTORY 
                 SCRIPT FPGATrackSim_F600.sh -t -n 1 -s 8
