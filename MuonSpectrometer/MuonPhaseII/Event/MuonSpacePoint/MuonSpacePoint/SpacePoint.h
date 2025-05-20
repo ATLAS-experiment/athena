@@ -4,6 +4,7 @@
 #ifndef MUONSPACEPOINT_SPACEPOINT_H
 #define MUONSPACEPOINT_SPACEPOINT_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
@@ -17,15 +18,24 @@ namespace MuonR4 {
     */
     class SpacePoint {
         public:
+            
+
             /*** @brief: Constructor of the SpacePoint
-             *   @param gctx: Geometry context needed to derive the local positions
              *   @param primaryMeas: Primary measurement of the spacepoint by convention that shall be the eta one
              *                       if both measurements are available
              *   @param secondaryMeas: The complementary phi measurement if availbe
             */
-            SpacePoint(const ActsGeometryContext& gctx,
-                       const xAOD::UncalibratedMeasurement* primMeas,
+            SpacePoint(const xAOD::UncalibratedMeasurement* primMeas,
                        const xAOD::UncalibratedMeasurement* secondMeas = nullptr);
+
+            /*** @brief  Setter for the measurement covariance */
+            void setCovariance(const AmgSymMatrix(2)& cov){ m_measCovariance = cov; };
+            /*** @brief  Setter for the direction of the measurement channel in the sector frame */
+            void setDirection(const Amg::Vector3D& dir){ m_dir = dir; };
+            /*** @brief  Setter for the direction of the precision axis of the measurement in the sector frame */
+            void setNormal(const Amg::Vector3D& normal){ m_normal = normal; };
+            /*** @brief  Setter for the position of the uncalibrated muon measurement in the sector frame */
+            void setPosition(const Amg::Vector3D& pos){ m_pos = pos; };
             
             /*** @brief: Pointer to the primary measurement */
             const xAOD::UncalibratedMeasurement* primaryMeasurement() const;
