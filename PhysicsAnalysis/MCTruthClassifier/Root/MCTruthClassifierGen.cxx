@@ -332,8 +332,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
-        MC::isSUSY(pPDG))
-      ancestor = ancestorParent; // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfMuon/Neutrino
+        MC::isSUSY(pPDG)) {
+      ancestor = ancestorParent; // ancestorParent is not nullptr here
+    }
   }
 
   info.setMotherProperties(ancestor);
@@ -606,7 +607,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) ||  // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
-      info.setMotherProperties(ancestor); // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfElectron/Neutrino
+      ancestor = ancestorParent; // ancestorParent is not nullptr here
     }
   }
 
