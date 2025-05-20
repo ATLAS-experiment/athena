@@ -3,7 +3,7 @@
 */
 
 // Calo
-#include "CaloTrackingGeometry/CaloTrackingGeometryBuilderImpl.h"
+#include "CaloTrackingGeometryBuilderImpl.h"
 // Trk
 #include "TrkDetDescrInterfaces/IDynamicLayerCreator.h"
 #include "TrkDetDescrInterfaces/ILayerArrayCreator.h"
@@ -47,44 +47,24 @@ StatusCode Calo::CaloTrackingGeometryBuilderImpl::initialize() {
 
   // Retrieve the tracking volume array creator
   // -------------------------------------------------
-  if (m_trackingVolumeArrayCreator.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Failed to retrieve tool " << m_trackingVolumeArrayCreator);
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_INFO("Retrieved tool " << m_trackingVolumeArrayCreator);
-
-  // Retrieve the tracking volume helper
-  // -------------------------------------------------
-  if (m_trackingVolumeHelper.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Failed to retrieve tool " << m_trackingVolumeHelper);
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_INFO("Retrieved tool " << m_trackingVolumeHelper);
-
+  ATH_CHECK(m_trackingVolumeArrayCreator.retrieve());
+  ATH_MSG_INFO("Retrieved tool " << m_trackingVolumeArrayCreator);
+  
   // Retrieve the second volume creator
-  if (m_buildMBTS && m_trackingVolumeCreator.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Failed to retrieve tool " << m_trackingVolumeCreator);
-    return StatusCode::FAILURE;
-  } else
+  if (m_buildMBTS) {
+    ATH_CHECK(m_trackingVolumeCreator.retrieve());
     ATH_MSG_INFO("Retrieved tool " << m_trackingVolumeCreator);
+  };
 
   // Retrieve the volume builders
-
-  // Retrieve the tracking volume array creator
   // -------------------------------------------------
-  if (m_lArVolumeBuilder.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Failed to retrieve tool " << m_lArVolumeBuilder);
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_INFO("Retrieved tool " << m_lArVolumeBuilder);
+  ATH_CHECK(m_lArVolumeBuilder.retrieve());
+  ATH_MSG_INFO("Retrieved tool " << m_lArVolumeBuilder);
 
   // Retrieve the tracking volume helper
   // -------------------------------------------------
-  if (m_tileVolumeBuilder.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Failed to retrieve tool " << m_tileVolumeBuilder);
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_INFO("Retrieved tool " << m_tileVolumeBuilder);
+  ATH_CHECK(m_tileVolumeBuilder.retrieve());
+  ATH_MSG_INFO("Retrieved tool " << m_tileVolumeBuilder);
 
   ATH_MSG_INFO("initialize() succesful");
 

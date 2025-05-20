@@ -28,9 +28,7 @@
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/Units.h"
 // Trk
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
-//#include "TrkDetDescrInterfaces/IMaterialEffectsOnTrackProvider.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/BinningType.h"
@@ -61,7 +59,6 @@ Tile::TileVolumeBuilder::TileVolumeBuilder(const std::string& t, const std::stri
   AthAlgTool(t,n,p),
   m_tileMgr(nullptr),
   m_tileMgrLocation("Tile"),
-  m_trackingVolumeHelper("Trk::TrackingVolumeHelper/TrackingVolumeHelper"),
   m_trackingVolumeCreator("Trk::CylinderVolumeCreator/TrackingVolumeCreator"),
   m_tileBarrelEnvelope(25.*mm),
   m_useCaloSurfBuilder(true),
@@ -77,7 +74,6 @@ Tile::TileVolumeBuilder::TileVolumeBuilder(const std::string& t, const std::stri
   declareProperty("BarrelEnvelopeCover",                    m_tileBarrelEnvelope);
   declareProperty("ForceVolumeSymmetry",                    m_forceSymmetry);
   // helper tools
-  declareProperty("TrackingVolumeHelper",                   m_trackingVolumeHelper);
   declareProperty("TrackingVolumeCreator",                  m_trackingVolumeCreator);
   declareProperty("UseCaloSurfBuilder",                     m_useCaloSurfBuilder);
   declareProperty("BarrelLayersPerSampling",                m_tileBarrelLayersPerSampling);
@@ -94,32 +90,14 @@ Tile::TileVolumeBuilder::~ TileVolumeBuilder()
 StatusCode Tile::TileVolumeBuilder::initialize()
 {
   // get Tile Detector Description Manager
-  if (detStore()->retrieve(m_tileMgr, m_tileMgrLocation).isFailure()){
-    ATH_MSG_FATAL( "Could not get TileDetDescrManager! Tile TrackingVolumes will not be built" );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(detStore()->retrieve(m_tileMgr, m_tileMgrLocation));
 
-  // Retrieve the tracking volume helper   -------------------------------------------------
-  if (m_trackingVolumeHelper.retrieve().isFailure())
-    {
-      ATH_MSG_FATAL(  "Failed to retrieve tool " << m_trackingVolumeHelper );
-      return StatusCode::FAILURE;
-    } else
-    ATH_MSG_INFO( "Retrieved tool " << m_trackingVolumeHelper );
+  // Retrieve the second volume creator
+  ATH_CHECK(m_trackingVolumeCreator.retrieve());
+  ATH_MSG_INFO( "Retrieved tool " << m_trackingVolumeCreator );
 
-    // Retrieve the second volume creator
-    if (m_trackingVolumeCreator.retrieve().isFailure()){
-        ATH_MSG_FATAL( "Failed to retrieve tool " << m_trackingVolumeCreator );
-        return StatusCode::FAILURE;
-    } else
-        ATH_MSG_INFO( "Retrieved tool " << m_trackingVolumeCreator );
-
-  if(m_surfBuilder.retrieve().isFailure())
-    {
-      ATH_MSG_FATAL(  "Failed to retrieve tool " << m_surfBuilder );
-      return StatusCode::FAILURE;
-    } else
-    ATH_MSG_INFO( "Retrieved tool " << m_surfBuilder );
+  ATH_CHECK(m_surfBuilder.retrieve());
+  ATH_MSG_INFO( "Retrieved tool " << m_surfBuilder );
 
   ATH_MSG_INFO( " initialize() successful" );
   return StatusCode::SUCCESS;

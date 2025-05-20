@@ -33,7 +33,6 @@ class StoreGateSvc;
 
 namespace Trk {
 class ILayerArrayCreator;
-class ITrackingVolumeHelper;
 class ITrackingVolumeCreator;
 class TrackingVolume;
 class Volume;
@@ -85,7 +84,6 @@ public:
   const TileDetDescrManager* m_tileMgr; //!< Calo DetDescrMgr
   std::string m_tileMgrLocation;        //!< Location of the CaloDetDescrMgr
 
-  ToolHandle<Trk::ITrackingVolumeHelper> m_trackingVolumeHelper;   //!< Helper Tool to create TrackingVolumes
   ToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator; //!< Second helper for volume creation
 
   double m_tileBarrelEnvelope; //!< envelope Cover of the Barrel

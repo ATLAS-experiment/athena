@@ -1,6 +1,6 @@
-#include "CaloTrackingGeometry/CaloTrackingGeometryBuilder.h"
+#include "../CaloTrackingGeometryBuilder.h"
 #include "../CaloSurfaceBuilder.h"
-#include "CaloTrackingGeometry/CaloTrackingGeometryBuilderCond.h"
+#include "../CaloTrackingGeometryBuilderCond.h"
 
 using namespace Calo;
 

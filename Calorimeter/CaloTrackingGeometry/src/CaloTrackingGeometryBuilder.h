@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@
 #ifndef CALORIMETER_CALOTRACKINGGEOMETRYBUILDER_H
 #define CALORIMETER_CALOTRACKINGGEOMETRYBUILDER_H
 
-#include "CaloTrackingGeometry/CaloTrackingGeometryBuilderImpl.h"
+#include "CaloTrackingGeometryBuilderImpl.h"
 #include "TrkDetDescrInterfaces/IGeometryBuilder.h"
 
 namespace Calo {

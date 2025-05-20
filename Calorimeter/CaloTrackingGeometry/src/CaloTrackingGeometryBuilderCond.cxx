@@ -6,7 +6,7 @@
 // CaloTrackingGeometryBuilderCond.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Calo
-#include "CaloTrackingGeometry/CaloTrackingGeometryBuilderCond.h"
+#include "CaloTrackingGeometryBuilderCond.h"
 
 #include <memory>
 
