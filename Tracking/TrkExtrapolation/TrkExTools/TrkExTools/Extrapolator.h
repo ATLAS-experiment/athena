@@ -10,7 +10,7 @@
 #define TRKEXTOOLS_EXTRAPOLATOR_H
 
 #include "LocalExtrapolatorCache.h" //for Trk::Cache
-#include "ObjContainer.h"
+#include "ExtrUniquePtrHolder.h"
 
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkExInterfaces/IMaterialEffectsUpdator.h" // in tool handle array
@@ -58,13 +58,9 @@ class AlignableTrackingVolume;
 class ExtrapolationCache;
 class TrackingVolume;
 
-typedef std::vector<std::unique_ptr<Trk::TrackParameters>> TrackParametersUVector;
-typedef std::pair<const Surface*, BoundaryCheck> DestSurf;
 
-using TrackParmContainer = ObjContainer<Trk::TrackParameters>;
-using TrackParmPtr = ObjRef;
-using ManagedTrackParmPtr = ObjPtr<Trk::TrackParameters>;
-
+using TrackParametersUVector = std::vector<std::unique_ptr<Trk::TrackParameters>>;
+using DestSurf = std::pair<const Surface*, BoundaryCheck>;
 
 /**
 @class Extrapolator
@@ -254,11 +250,11 @@ private:
   /**
    * Actual heavy lifting implementation for  extrapolate
    */
-  ManagedTrackParmPtr extrapolateImpl(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateImpl(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Surface& sf,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true,
@@ -286,11 +282,11 @@ private:
    * corresponding MaterialEffectsOnTrack -Final boolean only relevant if
    * LandauMode = true for the configured MaterialEffectsUpdator
    */
-  ManagedTrackParmPtr extrapolateImpl(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateImpl(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const std::vector<MaterialEffectsOnTrack>& sfMeff,
     const TrackingVolume& tvol,
     PropDirection dir,
@@ -299,10 +295,10 @@ private:
 
   /** Actual heavy lifting implementation for extrapolate
   */
-  virtual ManagedTrackParmPtr extrapolateImpl(
+  virtual Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateImpl(
     const EventContext& ctx,
     Cache& cache,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Surface& sf,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true,
@@ -327,7 +323,7 @@ private:
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true,
     ParticleHypothesis particle = pion,
@@ -382,10 +378,10 @@ private:
     - A) insideVolumeStaticLayers() for a TrackingVolume with static layers
     - C) insideVolumeDetachedVolumes() for a TrackingVolume with detached inner Volumes
     */
-  ManagedTrackParmPtr extrapolateInsideVolume(const EventContext& ctx,
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateInsideVolume(const EventContext& ctx,
                                               Cache& cache,
                                               const IPropagator& prop,
-                                              TrackParmPtr parm,
+                                              Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
                                               const Surface& sf,
                                               const Layer* associatedLayer,
                                               const TrackingVolume& tvol,
@@ -397,11 +393,11 @@ private:
   /** A) call from extrapolateInsideVolume or toBoundary,
     if it is to boundary, the return parameters are the parameters at the boundary
     */
-  ManagedTrackParmPtr insideVolumeStaticLayers(const EventContext& ctx,
+  Trk::CacheOwnedPtr<Trk::TrackParameters> insideVolumeStaticLayers(const EventContext& ctx,
                                                Cache& cache,
                                                bool toBoundary,
                                                const IPropagator& prop,
-                                               TrackParmPtr parm,
+                                               Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
                                                const Layer* associatedLayer,
                                                const TrackingVolume& tvol,
                                                PropDirection dir = anyDirection,
@@ -410,11 +406,11 @@ private:
                                                MaterialUpdateMode matupmode = addNoise) const;
 
   /** C) call from extrapolateInsideVolume */
-  ManagedTrackParmPtr extrapolateWithinDetachedVolumes(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateWithinDetachedVolumes(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Surface& sf,
     const TrackingVolume& tvol,
     PropDirection dir = anyDirection,
@@ -422,11 +418,11 @@ private:
     ParticleHypothesis particle = pion,
     MaterialUpdateMode matupmode = addNoise) const;
 
-  ManagedTrackParmPtr extrapolateToNextMaterialLayer(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateToNextMaterialLayer(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Trk::Surface* destSurf,
     const Trk::TrackingVolume* vol,
     PropDirection dir,
@@ -434,20 +430,20 @@ private:
     ParticleHypothesis particle = pion,
     MaterialUpdateMode matupmode = addNoise) const;
 
-  ManagedTrackParmPtr extrapolateInAlignableTV(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateInAlignableTV(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Trk::Surface* destSurf,
     const Trk::AlignableTrackingVolume* vol,
     PropDirection dir,
     ParticleHypothesis particle = pion) const;
 
-  ManagedTrackParmPtr extrapolateToVolumeWithPathLimit(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateToVolumeWithPathLimit(
     const EventContext& ctx,
     Cache& cache,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     double pathLim,
     Trk::PropDirection dir,
     Trk::ParticleHypothesis particle,
@@ -471,7 +467,7 @@ private:
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Layer* associatedLayer,
     const TrackingVolume& tvol,
     PropDirection dir = anyDirection,
@@ -481,15 +477,15 @@ private:
 
   /** Private method to step from one to the last
     layer and stop at last layer (before 0) or before destination layer */
-  ManagedTrackParmPtr extrapolateFromLayerToLayer(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateFromLayerToLayer(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const TrackingVolume& tvol,
     const Layer* nextLayer,
     const Layer* destinationLayer,
-    TrackParmPtr navParameters,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> navParameters,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true,
     ParticleHypothesis particle = pion,
@@ -497,11 +493,11 @@ private:
 
   /** Private to extrapolate to the destination layer + surface
    */
-  ManagedTrackParmPtr extrapolateToDestinationLayer(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateToDestinationLayer(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Surface& sf,
     const Layer& lay,
     const TrackingVolume& tvol,
@@ -515,11 +511,11 @@ private:
    * @return valid track parameters or nullptr, as first element and in case of nullptr as second
    * element true to indicate to kill the loop from material update(?)
    */
-  std::pair<ManagedTrackParmPtr, bool> extrapolateToIntermediateLayer(
+  std::pair<Trk::CacheOwnedPtr<Trk::TrackParameters>, bool> extrapolateToIntermediateLayer(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Layer& lay,
     const TrackingVolume& tvol,
     PropDirection dir = anyDirection,
@@ -532,8 +528,8 @@ private:
   void overlapSearch(const EventContext& ctx,
                      Cache& cache,
                      const IPropagator& prop,
-                     TrackParmPtr parm,
-                     TrackParmPtr parsOnLayer,
+                     Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
+                     Trk::CacheOwnedPtr<Trk::TrackParameters> parsOnLayer,
                      const Layer& lay,
                      const TrackingVolume& tvol,
                      PropDirection dir = anyDirection,
@@ -551,11 +547,11 @@ private:
     const EventContext& ctx,
     Cache& cache,
     const Trk::IPropagator& prop,
-    TrackParmPtr startPars,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> startPars,
     const Trk::Surface& destSurface,
     Trk::PropDirection dir,
     ParticleHypothesis particle,
-    ManagedTrackParmPtr& referenceParameters,
+    Trk::CacheOwnedPtr<Trk::TrackParameters>& referenceParameters,
     const Trk::Layer*& associatedLayer,
     const Trk::TrackingVolume*& associatedVolume,
     const Trk::TrackingVolume*& destinationVolume) const;
@@ -578,11 +574,6 @@ private:
   /** Access the subPropagator to the given volume*/
   const IMaterialEffectsUpdator* subMaterialEffectsUpdator(const TrackingVolume& tvol) const;
 
-
-  /** Private method to return from extrapolate() main method,
-      cleans up, calls model action or validation action, empties garbage bin and leaves */
-  const Trk::TrackParameters* returnResult(Cache& cache, const Trk::TrackParameters* result) const;
-
   /** For the output - global position */
   std::string positionOutput(const Amg::Vector3D& pos) const;
 
@@ -590,7 +581,7 @@ private:
   void addMaterialEffectsOnTrack(const EventContext& ctx,
                                  Cache& cache,
                                  const Trk::IPropagator& prop,
-                                 TrackParmPtr parm,
+                                 Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
                                  const Trk::Layer& lay,
                                  const Trk::TrackingVolume& vol,
                                  Trk::PropDirection propDir,
