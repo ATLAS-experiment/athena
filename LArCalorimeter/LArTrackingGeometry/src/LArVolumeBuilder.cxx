@@ -61,10 +61,6 @@ LAr::LArVolumeBuilder::~ LArVolumeBuilder() = default;
 // initialize
 StatusCode LAr::LArVolumeBuilder::initialize()
 {
-  // Retrieve the tracking volume helper
-  ATH_CHECK(m_lArTrackingVolumeHelper.retrieve());
-  ATH_MSG_DEBUG( "Retrieved tool " << m_lArTrackingVolumeHelper );
-
   // Retrieve the volume creator
   ATH_CHECK(m_trackingVolumeCreator.retrieve());
   ATH_MSG_DEBUG( "Retrieved tool " << m_trackingVolumeCreator );

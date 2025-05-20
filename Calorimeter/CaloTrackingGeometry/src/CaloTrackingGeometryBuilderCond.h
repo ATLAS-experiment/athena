@@ -9,7 +9,7 @@
 #ifndef CALORIMETER_CALOTRACKINGGEOMETRYBUILDERCOND_H
 #define CALORIMETER_CALOTRACKINGGEOMETRYBUILDERCOND_H
 
-#include "CaloTrackingGeometry/CaloTrackingGeometryBuilderImpl.h"
+#include "CaloTrackingGeometryBuilderImpl.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TrkDetDescrInterfaces/IGeometryBuilderCond.h"
 #include "GeoModelUtilities/GeoAlignmentStore.h"

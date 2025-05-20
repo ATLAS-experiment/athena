@@ -16,7 +16,6 @@
 #include "TrkDetDescrInterfaces/IGeometryBuilderCond.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkDetDescrUtils/LayerIndexSampleMap.h"
 #include "TrkGeometry/Material.h"
@@ -74,8 +73,6 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
 
   //!< Helper Tool to create TrackingVolume Arrays
   PublicToolHandle<Trk::ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator{this, "TrackingVolumeArrayCreator", "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"};
-  //!< Helper Tool to create TrackingVolumes
-  PublicToolHandle<Trk::ITrackingVolumeHelper> m_trackingVolumeHelper{this, "TrackingVolumeHelper", "Trk::TrackingVolumeHelper/TrackingVolumeHelper"};
   //!< Second helper for volume creation
   PublicToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator{this, "TrackingVolumeCreator", "Trk::CylinderVolumeCreator/TrackingVolumeCreator"};
   //!< Volume Builder for the Liquid Argon Calorimeter
