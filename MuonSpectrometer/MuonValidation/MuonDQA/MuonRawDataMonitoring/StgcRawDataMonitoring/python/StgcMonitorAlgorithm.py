@@ -37,7 +37,7 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     globalPath = 'Muon/MuonRawDataMonitoring/STG/'
 
     # Shifter
-    OverviewGroup  = helper.addGroup(sTgcMonAlg, 'Overview', globalPath + 'Shifter')
+    OverviewGroup  = helper.addGroup(sTgcMonAlg, 'Overview', globalPath + 'Shifter/Overview')
     OccupancyShifterGroup = helper.addGroup(sTgcMonAlg, 'OccupancyShifter', globalPath + 'Shifter/Occupancy')
     sTgcTimingGroup = helper.addGroup(sTgcMonAlg, 'sTgcTiming', globalPath + 'Shifter/Timing')
     sTgcPadTriggerShifterGroup = helper.addGroup(sTgcMonAlg, 'padTriggerShifter', globalPath + 'Shifter/')
@@ -62,29 +62,29 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     
     titleEtaPhiEffMap = '; #eta (reco); #phi (reco); Pad trigger efficiency wrt. reco. muon'
     varEtaPhiEffMap   = 'muonRecoTriggerMatch,etaRecoMuonEff,phiRecoMuonEff;padTrigger_Efficiency_per_etaPhi'
-    OverviewGroup.defineHistogram(varEtaPhiEffMap, type = 'TEfficiency', title = titleEtaPhiEffMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
+    OverviewGroup.defineHistogram(varEtaPhiEffMap, type = 'TEfficiency', title = titleEtaPhiEffMap, path = '', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
 
     titleEtaPhiRecoMuonMap = '; #eta (reco); #phi (reco); Entries'
     varEtaPhiRecoMuonMap   = 'etaRecoMuon,phiRecoMuon;recoMuon_Map_per_etaPhi'
-    OverviewGroup.defineHistogram(varEtaPhiRecoMuonMap, type = 'TH2F', title = titleEtaPhiRecoMuonMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
+    OverviewGroup.defineHistogram(varEtaPhiRecoMuonMap, type = 'TH2F', title = titleEtaPhiRecoMuonMap, path = '', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
     
     titleEtaPhiPadTriggerMap = '; #eta (trig); #phi (trig); Entries'
     varEtaPhiPadTriggerMap   = 'etaPadTrigger,phiPadTrigger;padTrigger_Map_per_etaPhi'
-    OverviewGroup.defineHistogram(varEtaPhiPadTriggerMap, type = 'TH2F', title = titleEtaPhiPadTriggerMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
+    OverviewGroup.defineHistogram(varEtaPhiPadTriggerMap, type = 'TH2F', title = titleEtaPhiPadTriggerMap, path = '', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
         
     titleEtaPadTriggerMap = '; #eta (trig); Entries'
     varEtaPadTriggerMap   = 'etaPadTrigger;padTrigger_Map_per_eta'
-    OverviewGroup.defineHistogram(varEtaPadTriggerMap, type = 'TH1F', title = titleEtaPadTriggerMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., opt = 'kAlwaysCreate')    
+    OverviewGroup.defineHistogram(varEtaPadTriggerMap, type = 'TH1F', title = titleEtaPadTriggerMap, path = '', xbins = 100, xmin = -3., xmax = 3., opt = 'kAlwaysCreate')    
 
     fEBvsLB  = 'FEB vs LB; LB; FEB'
     LBShifterGroup = helper.addGroup(sTgcMonAlg, 'LBShifterGroup', globalPath + 'Shifter/Lumiblock/')            
     for tIdx in tech:
-        varName = f'{tIdx}Sector,{tIdx}Feb'
-        OverviewGroup.defineHistogram(varName, type = 'TH2F', title = ';Sector; FEB; Hits', path = 'Overview', xbins = 33, xmin = -16.5, xmax = 16.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt='kAlwaysCreate')
+        varName = f'{tIdx}Sector,{tIdx}Feb;Feb_vs_sector_{tIdx}'
+        OverviewGroup.defineHistogram(varName, type = 'TH2F', title = ';Sector; FEB; Hits', path = '', xbins = 33, xmin = -16.5, xmax = 16.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt='kAlwaysCreate')
         for sideIndex in side:            
             for sIdx in range(1, sectorMax + 1):
-                varName = f'{tIdx}LBsector{sideIndex}{sIdx},{tIdx}FEBsector{sideIndex}{sIdx};LB_vs_FEB_perSector_{sideIndex}{sIdx}_{tIdx}'
-                LBShifterGroup.defineHistogram(varName, type = 'TH2F', title = fEBvsLB, path = f'{sideIndex}{sIdx}', xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt = 'kAlwaysCreate,kAddBinsDynamically')        
+                varName = f'{tIdx}LBsector{sideIndex}{sIdx},{tIdx}FEBsector{sideIndex}{sIdx};LB_vs_FEB_perSector_{tIdx}'
+                LBShifterGroup.defineHistogram(varName, type = 'TH2F', title = fEBvsLB, path = f'{sideIndex}'+f'{sIdx}'.zfill(2), xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt = 'kAlwaysCreate,kAddBinsDynamically')        
         
     titleSectorVsLB  = '; LB; Sector; Number of triggers'
     varSectorVsLB    = 'lb,sector;OccupancySector_vs_LB'
@@ -114,7 +114,7 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
         for layerIndex in range(1, layerMax + 1):
             titleEffYvsXstrip = f'{sideIndex}L{layerIndex}; sTgc-GlobalX-Strip (on track) [mm]; sTgc-GlobalY-Strip (on track) [mm]; Efficiency sTGC strip {sideIndex}L{layerIndex}'
             varEffYvsXstrip = f'hitLayer,xPosStrip_{sideIndex}_layer_{layerIndex},yPosStrip_{sideIndex}_layer_{layerIndex};strip_efficiency_per_mm_squared_Wheel{sideIndex}_layer{layerIndex}'
-            OverviewGroup.defineHistogram(varEffYvsXstrip, type = 'TEfficiency', title = titleEffYvsXstrip, path = 'Overview', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
+            sTgcPadTriggerShifterGroup.defineHistogram(varEffYvsXstrip, type = 'TEfficiency', title = titleEffYvsXstrip, path = 'StripEfficiency', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
 
     for stationEtaIndex in range(1, stationEtaMax + 1):
         sTgcPadTimingExpertGroup = helper.addGroup(sTgcMonAlg, f'padTiming_quad_{stationEtaIndex}', globalPath + 'Expert/Timing/Pad')
@@ -199,32 +199,32 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
         for sectorIndex in range(1, sectorMax + 1):
            for tIdx in tech:
                Tech   = tIdx[0].capitalize()+tIdx[1:] 
-               outdir = sideIndex+str(sectorIndex)
+               outdir = sideIndex+f'{sectorIndex}'.zfill(2)
                title  = f'{tIdx} layers vs quad; Layer; Quad; Hits'
-               var    = f'{tIdx}layer_{outdir},{tIdx}quad_{outdir};{tIdx}_quad_occupancy_per_layer'                
+               var    = f'{tIdx}layer_{sideIndex}{sectorIndex},{tIdx}quad_{sideIndex}{sectorIndex};{tIdx}_quad_occupancy_per_layer'
                OccupancyShifterGroup.defineHistogram(var, type = 'TH2F', title = title, path = outdir, xbins = layerMax, xmin = 0.5, xmax = layerMax + 0.5, ybins = stationEtaMax, ymin = 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
 
                title  = f'{tIdx} FEBs vs Timing; Time [ns]; FEB; Hits'
-               var    = f'{tIdx}Timing{outdir},{tIdx}FEB{outdir};{tIdx}_timing_{outdir}'                
-               sTgcTimingGroup.defineHistogram(var, type = 'TH2F', title = title, path = f'{Tech}/{outdir}', xbins = 9, xmin = -112.5, xmax = 112.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt = 'kAlwaysCreate')            
+               var    = f'{tIdx}Timing{sideIndex}{sectorIndex},{tIdx}FEB{sideIndex}{sectorIndex};{tIdx}_timing_{outdir}'                
+               sTgcTimingGroup.defineHistogram(var, type = 'TH2F', title = title, path = f'{Tech}/Sector', xbins = 9, xmin = -112.5, xmax = 112.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt = 'kAlwaysCreate')            
                     
     
     for layerIndex in range(1, layerMax + 1):
         titleStripClusterSizeTrack = f'L{layerIndex}; Sector; Strip Cluster Size (on-track); Hits'
         varStripClusterSizeTrack   = f'stripTrackSectorSided_layer_{layerIndex},stripTrackClusterSize_layer_{layerIndex};Strip_cluster_size_ontrk_per_sector_Layer{layerIndex}'
-        OverviewGroup.defineHistogram(varStripClusterSizeTrack, type = 'TH2F', title = titleStripClusterSizeTrack, path = 'StripClusterSize', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 13, ymin = -0.5, ymax = 12.5, opt = 'kAlwaysCreate')
+        sTgcPadTriggerShifterGroup.defineHistogram(varStripClusterSizeTrack, type = 'TH2F', title = titleStripClusterSizeTrack, path = 'StripClusterSize', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 13, ymin = -0.5, ymax = 12.5, opt = 'kAlwaysCreate')
         
         titleTimingPadTrack  = f'L{layerIndex}; Sector; Pad Timing (on-track) [ns]; Hits'
         varTimingPadTrack    = f'padTrackSectorSided_layer_{layerIndex},padTrackTiming_layer_{layerIndex};All_pad_timing_per_sector_Layer{layerIndex}'
-        sTgcTimingGroup.defineHistogram(varTimingPadTrack, type = 'TH2F', title = titleTimingPadTrack, path = 'Pad', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 225, ymin = -100., ymax = 125., opt = 'kAlwaysCreate')
+        sTgcTimingGroup.defineHistogram(varTimingPadTrack, type = 'TH2F', title = titleTimingPadTrack, path = 'Pad/Layer', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 225, ymin = -100., ymax = 125., opt = 'kAlwaysCreate')
 
         titleTimingStripTrack  = f'L{layerIndex}; Sector; Strip Cluster Timing (on-track) [ns]; Hits'
         varTimingStripTrack    = f'stripTrackSectorSided_layer_{layerIndex},stripTrackTiming_layer_{layerIndex};All_strip_timing_per_sector_Layer{layerIndex}'
-        sTgcTimingGroup.defineHistogram(varTimingStripTrack, type = 'TH2F', title = titleTimingStripTrack, path = 'Strip', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 225, ymin = -100., ymax = 125., opt = 'kAlwaysCreate')
+        sTgcTimingGroup.defineHistogram(varTimingStripTrack, type = 'TH2F', title = titleTimingStripTrack, path = 'Strip/Layer', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 225, ymin = -100., ymax = 125., opt = 'kAlwaysCreate')
         
         titleTimingWireGroupTrack  = f'L{layerIndex}; Sector; Wire Group timing (on-track) [ns]; Hits'
         varTimingWireGroupTrack    = f'wireGroupTrackSectorSided_layer_{layerIndex},wireGroupTrackTiming_layer_{layerIndex};All_wire_timing_per_sector_Layer{layerIndex}'
-        sTgcTimingGroup.defineHistogram(varTimingWireGroupTrack, type = 'TH2F', title = titleTimingWireGroupTrack, path = 'Wire', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 225, ymin = -100., ymax = 125., opt = 'kAlwaysCreate')
+        sTgcTimingGroup.defineHistogram(varTimingWireGroupTrack, type = 'TH2F', title = titleTimingWireGroupTrack, path = 'Wire/Layer', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 225, ymin = -100., ymax = 125., opt = 'kAlwaysCreate')
                 
         titlePadOccupancy  = f'L{layerIndex}; Sector; Pad Number; Hits'
         varPadOccupancy    = f'sector_layer_{layerIndex},padNumber_layer_{layerIndex};Pad_ch_occupancy_per_sector_Layer{layerIndex}'

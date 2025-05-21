@@ -116,6 +116,13 @@ def getDevSignatures():
 
         # ATR-22782, ATR-28868, 4mu analysis
         ChainProp(name='HLT_mu4_ivarloose_mu4_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF','MU3VF'], stream=['BphysDelayed'], groups=MultiMuonGroup+EOFBPhysL1MuGroup+Topo3Group),
+
+        #ATR-31050 - reuse id tracks from muComb
+        ChainProp(name='HLT_mu24_idReuse_ivarmedium_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, stream=[PhysicsStream], monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='HLT_mu50_idReuse_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_mu4_l2io_idReuse_L1MU3V', stream=[PhysicsStream], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU3V'], monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu10_l2mt_idReuse_L1MU10BOM', groups=SupportGroup+SingleMuonGroup),
+        ChainProp(name='HLT_2mu14_idReuse_L12MU8F', groups=PrimaryL1MuGroup+MultiMuonGroup, stream=[PhysicsStream], monGroups=['muonMon:online','muonMon:shifter']),
     ]
 
     chains['Egamma'] = [

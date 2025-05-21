@@ -2094,7 +2094,7 @@ void MaterialAllocator::spectrometerMaterial(
   }
 
   if (!haveLeadingMaterial && haveMaterial) {
-    ATH_MSG_WARNING(
+    ATH_MSG_DEBUG(
         " MS part of track has no leading material in front of first MS hit ");
   }
 
