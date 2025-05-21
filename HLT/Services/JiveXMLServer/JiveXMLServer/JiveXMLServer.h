@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_JIVEXMLSERVER_H
@@ -94,14 +94,14 @@ namespace JiveXML {
       //running. The semaphore will reach its post-condition either by
       // a) receiving a signal through the signal handler
       // b) the ServerThreadStopped callback being called
-      inline static OWLSemaphore lock ATLAS_THREAD_SAFE;
+      inline static OWLSemaphore m_lock ATLAS_THREAD_SAFE;
 
       //Store the received signal in a static member
       inline static std::atomic<int> m_receivedSignal{0};
 
       //Port number property - defaults to zero in which case
       //it is dynamically assigned
-      int portNumber;
+      int m_portNumber;
 
       //A map of the streams and their current events
       EventStreamMap m_eventStreamMap;
