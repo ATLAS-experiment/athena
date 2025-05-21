@@ -13,7 +13,7 @@ StatusCode FPGADataFormatTool::initialize() {
   ATH_CHECK(detStore()->retrieve(m_pixelId, "PixelID"));
   ATH_CHECK(detStore()->retrieve(m_SCT_mgr, "ITkStrip"));
   ATH_CHECK(detStore()->retrieve(m_sctId, "SCT_ID"));
-
+ 
   return StatusCode::SUCCESS;
 }
 
@@ -51,6 +51,116 @@ StatusCode FPGADataFormatTool::convertStripHitsToFPGADataFormat(
 
   return StatusCode::SUCCESS;
 }
+
+
+
+StatusCode FPGADataFormatTool::convertFPGATracksToFPGADataFormat(
+  const FPGATrackSimTrackCollection* tracks,
+  std::vector<uint64_t> &encodedData,
+  const EventContext &ctx) const {
+
+// Fill the event header
+ATH_CHECK(fillHeader(encodedData));
+
+// Convert the strip RDO
+ATH_CHECK(convertFPGATracks(tracks, encodedData, ctx));
+
+// Fill the event footer
+ATH_CHECK(fillFooter(encodedData));
+
+
+return StatusCode::SUCCESS;
+}
+
+StatusCode FPGADataFormatTool::convertFPGATracks(
+  const FPGATrackSimTrackCollection* tracks,
+  std::vector<uint64_t> &encodedData,
+  const EventContext &/*ctx*/
+  ) const {
+
+  for (const FPGATrackSimTrack& track : *tracks) 
+  {
+      int bitmask = 0;
+      for(const auto& hit: track.getFPGATrackSimHits())
+      {
+        bitmask |= 2 << hit.getLayer();
+      }
+
+      ATH_MSG_DEBUG("Encoded GTrack: ");
+      ATH_MSG_DEBUG("\tetaregion: " << track.getHoughY());
+      ATH_MSG_DEBUG("\tphiregion: " << track.getHoughX());
+      ATH_MSG_DEBUG("\tlayerbitmask: " << bitmask);
+      ATH_MSG_DEBUG("\td0: " << track.getD0());
+      ATH_MSG_DEBUG("\tz0: " << track.getZ0());
+      ATH_MSG_DEBUG("\tqoverpt: " << track.getQOverPt());
+      ATH_MSG_DEBUG("\tphi: " << track.getPhi());
+      ATH_MSG_DEBUG("\teta: " << track.getEta());
+
+      auto gtrackWord_w1 = FPGADataFormatUtilities::fill_GTRACK_HDR_w1(
+        0xee,
+        0,
+        track.getHoughY(),
+        track.getHoughX(),
+        0,
+        0,
+        0,
+        bitmask);
+      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w1(gtrackWord_w1));      
+
+      auto gtrackWord_w2 = FPGADataFormatUtilities::fill_GTRACK_HDR_w2(
+         0, 
+         track.getD0(),
+         track.getZ0(), 
+         0);
+      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w2(gtrackWord_w2));  
+      
+      auto gtrackWord_w3 = FPGADataFormatUtilities::fill_GTRACK_HDR_w3(
+        track.getQOverPt(), 
+        track.getPhi(),
+        track.getEta(), 
+        0);
+     encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w3(gtrackWord_w3));  
+      
+      auto hits = track.getFPGATrackSimHits();
+      for(unsigned int i = 0 ; i < hits.size(); i++)
+      {
+        const auto& hit = hits[i];
+        int cluster1D=0;
+        int cluster2D=0;
+        if(hit.getOriginalHit().getCluster1ID() >=0)
+        {
+          cluster1D=hit.getOriginalHit().getCluster1ID();
+        }
+        
+        if(hit.getOriginalHit().getCluster2ID() >=0)
+        {
+          cluster2D=hit.getOriginalHit().getCluster2ID();
+        }
+
+        ATH_MSG_DEBUG("Encoded Hits: ");
+        ATH_MSG_DEBUG("\tlast: " << (i+1 == hits.size()));
+        ATH_MSG_DEBUG("\tphiregion: " << hit.getLayer());
+        ATH_MSG_DEBUG("\tlayerbitmask: " << hit.getR());
+        ATH_MSG_DEBUG("\td0: " << hit.getGPhi());
+        ATH_MSG_DEBUG("\tz0: " << hit.getZ());
+        ATH_MSG_DEBUG("\tcluster1D: " << cluster1D);
+        ATH_MSG_DEBUG("\tcluster2D: " << cluster2D);
+
+    
+        auto ghit_w1 = FPGADataFormatUtilities::fill_GHITZ_w1 ((i+1 == hits.size()), hit.getLayer(), hit.getR(), hit.getGPhi(), hit.getZ(), 0, 0);
+        auto ghit_w2 = FPGADataFormatUtilities::fill_GHITZ_w2 (cluster1D, cluster2D, hit.getEtaModule(), 0);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w1(ghit_w1));  
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w2(ghit_w2));  
+      
+
+      }
+
+      
+    }
+
+
+  return StatusCode::SUCCESS;
+  }
 
 
 
