@@ -110,11 +110,9 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   , m_skipInitialLayerUpdate(false)
   , m_extendedLayerSearch(true)
   , m_robustSampling(true)
-  , m_referenceMaterial(false)
   , m_resolveMultilayers(true)
   , m_cacheLastMatLayer(false)
   , m_returnPassiveLayers(false)
-  , m_meotpIndex(0)
   , m_numOfValidPropagators(INVALIDPROPAGATORS)
   , m_initialLayerAttempts(3)
   , m_successiveLayerAttempts(1)
@@ -131,7 +129,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   , m_printRzOutput(true)
   , m_navigationStatistics(false)
   , m_navigationBreakDetails(false)
-  , m_materialEffectsOnTrackValidation(false)
   , m_extrapolateCalls{}
   , m_extrapolateBlindlyCalls{}
   , m_extrapolateDirectlyCalls{}
@@ -149,10 +146,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   , m_navigationBreakDistIncrease{}
   , m_navigationBreakVolumeSignature{}
   , m_overlapSurfaceHit{}
-  , m_meotSearchCallsFw{}
-  , m_meotSearchCallsBw{}
-  , m_meotSearchSuccessfulFw{}
-  , m_meotSearchSuccessfulBw{}
 {
   declareInterface<IExtrapolator>(this);
 
@@ -176,9 +169,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   declareProperty("ConsiderMuonStationOverlaps", m_activeOverlap);
   declareProperty("RobustSampling", m_robustSampling);
   // material & navigation related steering
-  declareProperty("MaterialEffectsOnTrackProviderIndex", m_meotpIndex);
-  declareProperty("MaterialEffectsOnTrackValidation", m_materialEffectsOnTrackValidation);
-  declareProperty("ReferenceMaterial", m_referenceMaterial);
   declareProperty("ExtendedLayerSearch", m_extendedLayerSearch);
   declareProperty("InitialLayerAttempts", m_initialLayerAttempts);
   declareProperty("SuccessiveLayerAttempts", m_successiveLayerAttempts);
@@ -397,24 +387,51 @@ Trk::Extrapolator::finalize()
     ATH_MSG_INFO("[P] Overlaps found ------------------------------------------------");
     ATH_MSG_INFO("     -> Number of overlap Surface hit                : " << m_overlapSurfaceHit);
     ATH_MSG_INFO(" ------------------------------------------------------------------");
-    // validation of the material collection methods
-    if (m_materialEffectsOnTrackValidation) {
-      ATH_MSG_INFO("[P] MaterialEffectsOnTrack collection -----------------------------");
-      ATH_MSG_INFO("     -> Forward successful/calls (ratio)           : "
-                   << m_meotSearchSuccessfulFw << "/" << m_meotSearchCallsFw << " ("
-                   << double(m_meotSearchSuccessfulFw.value()) / m_meotSearchCallsFw.value()
-                   << ")");
-      ATH_MSG_INFO("     -> Backward successful/calls (ratio)          : "
-                   << m_meotSearchSuccessfulBw << "/" << m_meotSearchCallsBw << " ("
-                   << double(m_meotSearchSuccessfulBw.value()) / m_meotSearchCallsBw.value()
-                   << ")");
-      ATH_MSG_INFO(" ------------------------------------------------------------------");
-    }
   }
 
   return StatusCode::SUCCESS;
 }
 
+//Public Extrapolate Directly public method
+std::unique_ptr<Trk::TrackParameters>
+Trk::Extrapolator::extrapolateDirectly(const EventContext& ctx,
+                                       const Trk::TrackParameters& parm,
+                                       const Trk::Surface& sf,
+                                       Trk::PropDirection dir,
+                                       const Trk::BoundaryCheck& bcheck,
+                                       Trk::ParticleHypothesis particle) const
+{
+  const IPropagator* currentPropagator =
+    !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
+  if (!currentPropagator) {
+    ATH_MSG_ERROR( "[!] No default Propagator is configured !");
+    return nullptr;
+  }
+  return extrapolateDirectlyImpl(
+    ctx, (*currentPropagator), parm, sf, dir, bcheck, particle);
+}
+
+//Public Charged Particle Extrapolation method
+std::unique_ptr<Trk::TrackParameters>
+Trk::Extrapolator::extrapolate(const EventContext& ctx,
+                               const TrackParameters& parm,
+                               const Surface& sf,
+                               PropDirection dir,
+                               const BoundaryCheck& bcheck,
+                               ParticleHypothesis particle,
+                               MaterialUpdateMode matupmode,
+                               Trk::ExtrapolationCache* extrapolationCache) const
+{
+  Cache cache{};
+  // Material effect updator cache
+  Trk::CacheOwnedPtr<Trk::TrackParameters> clonedInput = cache.m_ownedPtrs.push(parm.uniqueClone());
+  cache.populateMatEffUpdatorCache(m_subupdaters);
+  return cache.m_ownedPtrs.move(extrapolateImpl(ctx, cache, clonedInput, sf,
+                                                dir, bcheck, particle,
+                                                matupmode, extrapolationCache));
+}
+
+//Public Neutral Particle Extrapolation method
 std::unique_ptr<Trk::NeutralParameters>
 Trk::Extrapolator::extrapolate(const NeutralParameters& parameters,
                                const Surface& sf,
@@ -426,11 +443,243 @@ Trk::Extrapolator::extrapolate(const NeutralParameters& parameters,
   if (currentPropagator) {
     return currentPropagator->propagate(parameters, sf, dir, bcheck);
   }
+  ATH_MSG_ERROR("[!] No default Propagator is configured !");
+  return nullptr;
+}
+
+// Public Extrapolation method with step-wise navigation
+Trk::TrackParametersUVector
+Trk::Extrapolator::extrapolateStepwise(const EventContext& ctx,
+                                       const Trk::TrackParameters& parm,
+                                       const Trk::Surface& sf,
+                                       Trk::PropDirection dir,
+                                       const Trk::BoundaryCheck& bcheck,
+                                       Trk::ParticleHypothesis particle) const
+{
+
+  const IPropagator* currentPropagator =
+      !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
+  if (currentPropagator) {
+    return extrapolateStepwiseImpl(ctx, (*currentPropagator), parm, sf, dir,
+                                   bcheck, particle);
+  }
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured !");
+  return {};
+}
+
+//Public Extrapolate starting from a Trk::Track
+std::unique_ptr<Trk::TrackParameters>
+Trk::Extrapolator::extrapolateTrack(
+  const EventContext& ctx,
+  const Trk::Track& trk,
+  const Trk::Surface& sf,
+  Trk::PropDirection dir,
+  const Trk::BoundaryCheck& bcheck,
+  Trk::ParticleHypothesis particle,
+  MaterialUpdateMode matupmode,
+  Trk::ExtrapolationCache* extrapolationCache) const
+{
+  const Trk::TrackParameters* closestTrackParameters = m_navigator->closestParameters(trk, sf);
+  if (closestTrackParameters) {
+    return (extrapolate(
+      ctx, *closestTrackParameters, sf, dir, bcheck, particle, matupmode, extrapolationCache));
+  }
+    closestTrackParameters = *(trk.trackParameters()->begin());
+    if (closestTrackParameters) {
+      return (extrapolate(
+        ctx, *closestTrackParameters, sf, dir, bcheck, particle, matupmode, extrapolationCache));
+    }
+  return nullptr;
+}
+
+//Public Extrapolate Blindly
+Trk::TrackParametersUVector
+Trk::Extrapolator::extrapolateBlindly(const EventContext& ctx,
+                                      const Trk::TrackParameters& parm,
+                                      Trk::PropDirection dir,
+                                      const Trk::BoundaryCheck& bcheck,
+                                      Trk::ParticleHypothesis particle,
+                                      const Trk::Volume* boundaryVol) const
+{
+  const IPropagator* currentPropagator =
+      !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
+
+  if (currentPropagator) {
+      Cache cache{};
+      Trk::CacheOwnedPtr<Trk::TrackParameters> clonedInput = cache.m_ownedPtrs.push(parm.uniqueClone());
+      cache.populateMatEffUpdatorCache(m_subupdaters);
+      return extrapolateBlindlyImpl(ctx, cache, (*currentPropagator),
+                                    clonedInput, dir, bcheck, particle,
+                                    boundaryVol);
+  }
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured !");
+  return {};
+}
+
+//Public extrapolateM
+std::vector<const Trk::TrackStateOnSurface*>*
+Trk::Extrapolator::extrapolateM(const EventContext& ctx,
+                                const TrackParameters& parm,
+                                const Surface& sf,
+                                PropDirection dir,
+                                const BoundaryCheck& bcheck,
+                                ParticleHypothesis particle,
+                                Trk::ExtrapolationCache* extrapolationCache) const
+{
+
+  Cache cache{};
+  // Material effect updator cache
+  cache.populateMatEffUpdatorCache(m_subupdaters);
+  ATH_MSG_DEBUG("C-[" << cache.m_methodSequence << "] extrapolateM()");
+  // create a new vector for the material to be collected
+  cache.m_matstates = new std::vector<const Trk::TrackStateOnSurface*>;
+  if (m_dumpCache && extrapolationCache) {
+    ATH_MSG_DEBUG(" extrapolateM pointer extrapolationCache " << extrapolationCache << " x0tot "
+                                                              << extrapolationCache->x0tot());
+  }
+  // collect the material
+  Trk::CacheOwnedPtr<Trk::TrackParameters> clonedInput = cache.m_ownedPtrs.push(parm.uniqueClone());
+  Trk::CacheOwnedPtr<Trk::TrackParameters> parameterAtDestination =
+      extrapolateImpl(ctx, cache, clonedInput, sf, dir, bcheck, particle,
+                      Trk::addNoise, extrapolationCache);
+  // there are no parameters
+  if (!parameterAtDestination && m_requireMaterialDestinationHit) {
+    ATH_MSG_VERBOSE("  [!] Destination surface for extrapolateM has not been hit (required through "
+                    "configuration). Return 0");
+    // loop over and clean up
+    std::vector<const Trk::TrackStateOnSurface*>::iterator tsosIter = cache.m_matstates->begin();
+    std::vector<const Trk::TrackStateOnSurface*>::iterator const tsosIterEnd = cache.m_matstates->end();
+    for (; tsosIter != tsosIterEnd; ++tsosIter) {
+      delete (*tsosIter);
+    }
+    delete cache.m_matstates;
+    cache.m_matstates = nullptr;
+    // bail out
+    return nullptr;
+  }
+  if (parameterAtDestination) {
+    ATH_MSG_VERBOSE("  [+] Adding the destination surface to the TSOS vector in extrapolateM() ");
+    cache.m_matstates->push_back(new TrackStateOnSurface(
+        nullptr, cache.m_ownedPtrs.move(parameterAtDestination), nullptr));
+  } else {
+    ATH_MSG_VERBOSE("  [-] Destination surface was not hit extrapolateM(), but not required "
+                    "through configuration.");
+  }
+  // assign the temporary states
+  std::vector<const Trk::TrackStateOnSurface*>* tmpMatStates = cache.m_matstates;
+  cache.m_matstates = nullptr;
+  // retunr the material states
+  return tmpMatStates;
+}
+
+//public collectIntersection method
+std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
+Trk::Extrapolator::collectIntersections(
+  const EventContext& ctx,
+  const Trk::TrackParameters& parm,
+  Trk::PropDirection dir,
+  Trk::ParticleHypothesis particle,
+  int destination) const
+{
+  // extrapolation method intended for collection of intersections with active layers/volumes
+  // extrapolation stops at indicated geoID subdetector exit
+  Cache cache{};
+  ++cache.m_methodSequence;
+  ATH_MSG_DEBUG("M-[" << cache.m_methodSequence << "] extrapolate(through active volumes), from "
+                      << parm.position());
+  // reset the path
+  cache.m_path = 0.;
+  // initialize parameters vector
+  cache.m_identifiedParameters = std::make_unique<identifiedParameters_t>();
+  // dummy input
+  cache.m_currentStatic = nullptr;
+  const Trk::TrackingVolume* boundaryVol = nullptr;
+  // cleanup
+  cache.m_parametersAtBoundary.resetBoundaryInformation();
+  // Material effect updator cache
+  cache.populateMatEffUpdatorCache(m_subupdaters);
+  // extrapolate to subdetector boundary
+  auto *cloneInput = cache.m_ownedPtrs.push(parm.uniqueClone());
+  Trk::CacheOwnedPtr<Trk::TrackParameters> subDetBounds = extrapolateToVolumeWithPathLimit(
+      ctx, cache, cloneInput, -1., dir, particle, boundaryVol);
+
+  while (subDetBounds) {
+    ATH_MSG_DEBUG("  Identified subdetector boundary crossing saved "
+                  << positionOutput(subDetBounds->position()));
+    cache.m_identifiedParameters->push_back(std::pair<std::unique_ptr<Trk::TrackParameters>, int>(
+      subDetBounds->uniqueClone(),
+      cache.m_currentStatic ? cache.m_currentStatic->geometrySignature() : 0));
+    if (cache.m_currentStatic && cache.m_currentStatic->geometrySignature() == destination) {
+      break;
+    }
+    if (!cache.m_parametersAtBoundary.nextVolume) {
+      break; // world boundary
+    }
+    subDetBounds = extrapolateToVolumeWithPathLimit(
+      ctx, cache, subDetBounds, -1., dir, particle, boundaryVol);
+  }
+  if (cache.m_identifiedParameters->empty()) {
+    return nullptr;
+  }
+  return  std::move(cache.m_identifiedParameters);
+}
+
+//Public extrapolation to the next active layer
+std::pair<std::unique_ptr<Trk::TrackParameters>, const Trk::Layer*>
+Trk::Extrapolator::extrapolateToNextActiveLayerM(
+  const EventContext& ctx,
+  const TrackParameters& parm,
+  PropDirection dir,
+  const BoundaryCheck& bcheck,
+  std::vector<const Trk::TrackStateOnSurface*>& material,
+  ParticleHypothesis particle,
+  MaterialUpdateMode matupmode) const
+{
+  // set propagator to the MS one - can be reset inside the next methode (once
+  // volume information is there) set propagator to the MS one - can be reset
+  // inside the next methode (once volume information is there)
+  const IPropagator* currentPropagator =
+      !m_subPropagators.empty() ? m_subPropagators[Trk::MS] : nullptr;
+  if (currentPropagator) {
+    return extrapolateToNextActiveLayerMImpl(ctx, (*currentPropagator), parm,
+                                             dir, bcheck, material, particle,
+                                             matupmode);
+  }
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured ! Please check jobOptions.");
+  return {nullptr, nullptr};
+}
+
+//Extrapolation to volume
+std::unique_ptr<Trk::TrackParameters>
+Trk::Extrapolator::extrapolateToVolume(const EventContext& ctx,
+                                       const Trk::TrackParameters& parm,
+                                       const Trk::TrackingVolume& vol,
+                                       PropDirection dir,
+                                       ParticleHypothesis particle) const
+{
+  // take the volume signatrue to define the right propagator
+  const IPropagator* currentPropagator =
+      !m_subPropagators.empty() ? m_subPropagators[vol.geometrySignature()]
+                                : nullptr;
+  if (currentPropagator) {
+    return (extrapolateToVolumeImpl(ctx, *currentPropagator, parm, vol, dir,
+                                    particle));
+  }
   ATH_MSG_ERROR(
       "  [!] No default Propagator is configured ! Please check jobOptions.");
   return nullptr;
 }
 
+/* Private methods
+ * Most accept a Cache struct  as an argument.
+ * This is passed to them from the public/interface methods.
+ * Then it is also propagated in-between the private methods.
+ *
+ * Start with the extrapolate Implementation ones
+ */
 Trk::TrackParametersUVector
 Trk::Extrapolator::extrapolateStepwiseImpl(const EventContext& ctx,
                                            const IPropagator& prop,
@@ -976,12 +1225,10 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
       }
     }
   }
-
   // ready to propagate
   // till: A/ static volume boundary(bcheck=true) , B/ material layer(bcheck=true), C/ destination
   // surface(bcheck=false) update of cache.m_navigSurfs required if I/ entry into new navig volume,
   // II/ exit from currentActive without overlaps
-
   nextVol = nullptr;
   while (currPar) {
     double path = 0.;
@@ -1892,232 +2139,6 @@ Trk::Extrapolator::extrapolateToVolumeImpl(const EventContext& ctx,
   // available here
   return returnParms;
 }
-
-// Interface Extrapolation methods
-// ----------------------------------------------------------------/
-std::unique_ptr<Trk::TrackParameters>
-Trk::Extrapolator::extrapolate(const EventContext& ctx,
-                               const TrackParameters& parm,
-                               const Surface& sf,
-                               PropDirection dir,
-                               const BoundaryCheck& bcheck,
-                               ParticleHypothesis particle,
-                               MaterialUpdateMode matupmode,
-                               Trk::ExtrapolationCache* extrapolationCache) const
-{
-  Cache cache{};
-  // Material effect updator cache
-  //TODO revisit when objcontainer is streamlined
-  Trk::CacheOwnedPtr<Trk::TrackParameters> clonedInput = cache.m_ownedPtrs.push(parm.uniqueClone());
-  cache.populateMatEffUpdatorCache(m_subupdaters);
-  return cache.m_ownedPtrs.move(extrapolateImpl(ctx, cache, clonedInput, sf,
-                                                dir, bcheck, particle,
-                                                matupmode, extrapolationCache));
-}
-
-Trk::TrackParametersUVector
-Trk::Extrapolator::extrapolateStepwise(const EventContext& ctx,
-                                       const Trk::TrackParameters& parm,
-                                       const Trk::Surface& sf,
-                                       Trk::PropDirection dir,
-                                       const Trk::BoundaryCheck& bcheck,
-                                       Trk::ParticleHypothesis particle) const
-{
-
-  const IPropagator* currentPropagator =
-      !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
-  if (currentPropagator) {
-    return extrapolateStepwiseImpl(ctx, (*currentPropagator), parm, sf, dir,
-                                   bcheck, particle);
-  }
-  ATH_MSG_ERROR(
-      "  [!] No default Propagator is configured ! Please check jobOptions.");
-  return {};
-}
-
-std::unique_ptr<Trk::TrackParameters>
-Trk::Extrapolator::extrapolateTrack(
-  const EventContext& ctx,
-  const Trk::Track& trk,
-  const Trk::Surface& sf,
-  Trk::PropDirection dir,
-  const Trk::BoundaryCheck& bcheck,
-  Trk::ParticleHypothesis particle,
-  MaterialUpdateMode matupmode,
-  Trk::ExtrapolationCache* extrapolationCache) const
-{
-  const Trk::TrackParameters* closestTrackParameters =
-      m_navigator->closestParameters(trk, sf);
-  if (closestTrackParameters) {
-    return (extrapolate(
-      ctx, *closestTrackParameters, sf, dir, bcheck, particle, matupmode, extrapolationCache));
-  }
-    closestTrackParameters = *(trk.trackParameters()->begin());
-    if (closestTrackParameters) {
-      return (extrapolate(
-        ctx, *closestTrackParameters, sf, dir, bcheck, particle, matupmode, extrapolationCache));
-    }
-  return nullptr;
-}
-
-Trk::TrackParametersUVector
-Trk::Extrapolator::extrapolateBlindly(const EventContext& ctx,
-                                      const Trk::TrackParameters& parm,
-                                      Trk::PropDirection dir,
-                                      const Trk::BoundaryCheck& bcheck,
-                                      Trk::ParticleHypothesis particle,
-                                      const Trk::Volume* boundaryVol) const
-{
-  // set propagator to the global one
-  const IPropagator* currentPropagator =
-      !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
-
-  if (currentPropagator) {
-      Cache cache{};
-      Trk::CacheOwnedPtr<Trk::TrackParameters> clonedInput = cache.m_ownedPtrs.push(parm.uniqueClone());
-      // Material effect updator cache
-      cache.populateMatEffUpdatorCache(m_subupdaters);
-      return extrapolateBlindlyImpl(ctx, cache, (*currentPropagator),
-                                    clonedInput, dir, bcheck, particle,
-                                    boundaryVol);
-  }
-  ATH_MSG_ERROR(
-      "  [!] No default Propagator is configured ! Please check jobOptions.");
-  return {};
-}
-
-std::unique_ptr<Trk::TrackParameters>
-Trk::Extrapolator::extrapolateDirectly(const EventContext& ctx,
-                                       const Trk::TrackParameters& parm,
-                                       const Trk::Surface& sf,
-                                       Trk::PropDirection dir,
-                                       const Trk::BoundaryCheck& bcheck,
-                                       Trk::ParticleHypothesis particle) const
-{
-  // set propagator to the global one
-  const IPropagator* currentPropagator =
-    !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
-
-  if (!currentPropagator) {
-    ATH_MSG_ERROR(
-      "  [!] No default Propagator is configured ! Please check jobOptions.");
-    return nullptr;
-  }
-  return extrapolateDirectlyImpl(
-    ctx, (*currentPropagator), parm, sf, dir, bcheck, particle);
-}
-
-std::pair<std::unique_ptr<Trk::TrackParameters>, const Trk::Layer*>
-Trk::Extrapolator::extrapolateToNextActiveLayerM(
-  const EventContext& ctx,
-  const TrackParameters& parm,
-  PropDirection dir,
-  const BoundaryCheck& bcheck,
-  std::vector<const Trk::TrackStateOnSurface*>& material,
-  ParticleHypothesis particle,
-  MaterialUpdateMode matupmode) const
-{
-  // set propagator to the MS one - can be reset inside the next methode (once
-  // volume information is there) set propagator to the MS one - can be reset
-  // inside the next methode (once volume information is there)
-  const IPropagator* currentPropagator =
-      !m_subPropagators.empty() ? m_subPropagators[Trk::MS] : nullptr;
-  if (currentPropagator) {
-    return extrapolateToNextActiveLayerMImpl(ctx, (*currentPropagator), parm,
-                                             dir, bcheck, material, particle,
-                                             matupmode);
-  }
-  ATH_MSG_ERROR(
-      "  [!] No default Propagator is configured ! Please check jobOptions.");
-  return {nullptr, nullptr};
-}
-
-std::unique_ptr<Trk::TrackParameters>
-Trk::Extrapolator::extrapolateToVolume(const EventContext& ctx,
-                                       const Trk::TrackParameters& parm,
-                                       const Trk::TrackingVolume& vol,
-                                       PropDirection dir,
-                                       ParticleHypothesis particle) const
-{
-
-  // take the volume signatrue to define the right propagator
-  const IPropagator* currentPropagator =
-      !m_subPropagators.empty() ? m_subPropagators[vol.geometrySignature()]
-                                : nullptr;
-  if (currentPropagator) {
-    return (extrapolateToVolumeImpl(ctx, *currentPropagator, parm, vol, dir,
-                                    particle));
-  }
-  ATH_MSG_ERROR(
-      "  [!] No default Propagator is configured ! Please check jobOptions.");
-  return nullptr;
-}
-
-std::vector<const Trk::TrackStateOnSurface*>*
-Trk::Extrapolator::extrapolateM(const EventContext& ctx,
-                                const TrackParameters& parm,
-                                const Surface& sf,
-                                PropDirection dir,
-                                const BoundaryCheck& bcheck,
-                                ParticleHypothesis particle,
-                                Trk::ExtrapolationCache* extrapolationCache) const
-{
-
-  Cache cache{};
-  // Material effect updator cache
-  cache.populateMatEffUpdatorCache(m_subupdaters);
-  ATH_MSG_DEBUG("C-[" << cache.m_methodSequence << "] extrapolateM()");
-  // create a new vector for the material to be collected
-  cache.m_matstates = new std::vector<const Trk::TrackStateOnSurface*>;
-  if (m_dumpCache && extrapolationCache) {
-    ATH_MSG_DEBUG(" extrapolateM pointer extrapolationCache " << extrapolationCache << " x0tot "
-                                                              << extrapolationCache->x0tot());
-  }
-
-  // collect the material
-  //TODO revisit when objcontainer is streamlined
-  Trk::CacheOwnedPtr<Trk::TrackParameters> clonedInput = cache.m_ownedPtrs.push(parm.uniqueClone());
-  Trk::CacheOwnedPtr<Trk::TrackParameters> parameterAtDestination =
-      extrapolateImpl(ctx, cache, clonedInput, sf, dir, bcheck, particle,
-                      Trk::addNoise, extrapolationCache);
-  // there are no parameters
-  if (!parameterAtDestination && m_requireMaterialDestinationHit) {
-    ATH_MSG_VERBOSE("  [!] Destination surface for extrapolateM has not been hit (required through "
-                    "configuration). Return 0");
-    // loop over and clean up
-    std::vector<const Trk::TrackStateOnSurface*>::iterator tsosIter = cache.m_matstates->begin();
-    std::vector<const Trk::TrackStateOnSurface*>::iterator const tsosIterEnd = cache.m_matstates->end();
-    for (; tsosIter != tsosIterEnd; ++tsosIter) {
-      delete (*tsosIter);
-    }
-    delete cache.m_matstates;
-    cache.m_matstates = nullptr;
-    // bail out
-    return nullptr;
-  }
-  if (parameterAtDestination) {
-    ATH_MSG_VERBOSE("  [+] Adding the destination surface to the TSOS vector in extrapolateM() ");
-    cache.m_matstates->push_back(new TrackStateOnSurface(
-        nullptr, cache.m_ownedPtrs.move(parameterAtDestination), nullptr));
-  } else {
-    ATH_MSG_VERBOSE("  [-] Destination surface was not hit extrapolateM(), but not required "
-                    "through configuration.");
-  }
-  // assign the temporary states
-  std::vector<const Trk::TrackStateOnSurface*>* tmpMatStates = cache.m_matstates;
-  cache.m_matstates = nullptr;
-  // retunr the material states
-  return tmpMatStates;
-}
-
-/* Private methods
- *
- * Most accept a Cache struct  as an argument.
- * This is passed to them from the public/interface methods.
- * Then it is also propagated in-between the private methods.
- *
- * Start with the extrapolate Implementation ones
- */
 
 Trk::CacheOwnedPtr<Trk::TrackParameters>
 Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
@@ -3042,7 +3063,7 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
             particle, matupmode));
       }
       // collect the material : either for extrapolateM or for the valdiation
-      if (nextParameters && (cache.m_matstates || m_materialEffectsOnTrackValidation)) {
+      if (nextParameters && cache.m_matstates) {
         addMaterialEffectsOnTrack(
           ctx, cache, prop, nextParameters, *associatedLayer, tvol, dir, particle);
       }
@@ -3276,7 +3297,7 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
             matupmode));
       }
       // collect the material
-      if (bParameters && (cache.m_matstates || m_materialEffectsOnTrackValidation)) {
+      if (bParameters && cache.m_matstates) {
         addMaterialEffectsOnTrack(
             ctx, cache, prop, bParameters,
             *(bParameters->associatedSurface().materialLayer()), tvol, dir,
@@ -3459,7 +3480,7 @@ Trk::Extrapolator::extrapolateToDestinationLayer(const EventContext& ctx,
   }
 
   // collect the material : either for extrapolateM or for the valdiation
-  if ((cache.m_matstates || m_materialEffectsOnTrackValidation) && preUpdatedParameters &&
+  if (cache.m_matstates && preUpdatedParameters &&
       currentUpdator && !startIsDestLayer &&
       lay.preUpdateMaterialFactor(*destParameters, dir) >= 0.01) {
     addMaterialEffectsOnTrack(
@@ -3569,8 +3590,7 @@ Trk::Extrapolator::extrapolateToIntermediateLayer(const EventContext& ctx,
         currentUpdatorCache, parsOnLayer, lay, dir, particle, matupmode));
   }
   // there are layers that have a surfaceArray but no material properties
-  if (parsOnLayer && lay.layerMaterialProperties() &&
-      (cache.m_matstates || m_materialEffectsOnTrackValidation)) {
+  if (parsOnLayer && lay.layerMaterialProperties() && cache.m_matstates) {
     addMaterialEffectsOnTrack(ctx, cache, prop, parsOnLayer, lay, tvol, dir, particle);
   }
   // kill the track if the update killed the track
@@ -4013,12 +4033,6 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
 {
 
   ATH_MSG_VERBOSE("  [+] addMaterialEffectsOnTrack()  - at " << positionOutput(parms->position()));
-  // statistics counter Fw/Bw
-  if (propDir == Trk::alongMomentum) {
-    ++m_meotSearchCallsFw;
-  } else {
-    ++m_meotSearchCallsBw;
-  }
   // preparation for the material effects on track
   const Trk::MaterialProperties* materialProperties = nullptr;
   double pathCorrection = 0.;
@@ -4048,12 +4062,6 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
   if (!materialProperties) {
     ATH_MSG_DEBUG("  [!] No MaterialProperties on Layer after intersection.");
     return;
-  }
-  // statistics
-  if (propDir == Trk::alongMomentum) {
-    ++m_meotSearchSuccessfulFw;
-  } else {
-    ++m_meotSearchSuccessfulBw;
   }
   // pure validation mode
   if (!cache.m_matstates) {
@@ -4117,60 +4125,6 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
   }
 }
 
-
-
-
-std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-Trk::Extrapolator::collectIntersections(
-  const EventContext& ctx,
-  const Trk::TrackParameters& parm,
-  Trk::PropDirection dir,
-  Trk::ParticleHypothesis particle,
-  int destination) const
-{
-
-  // extrapolation method intended for collection of intersections with active layers/volumes
-  // extrapolation stops at indicated geoID subdetector exit
-  Cache cache{};
-  ++cache.m_methodSequence;
-  ATH_MSG_DEBUG("M-[" << cache.m_methodSequence << "] extrapolate(through active volumes), from "
-                      << parm.position());
-  // reset the path
-  cache.m_path = 0.;
-  // initialize parameters vector
-  cache.m_identifiedParameters = std::make_unique<identifiedParameters_t>();
-  // dummy input
-  cache.m_currentStatic = nullptr;
-  const Trk::TrackingVolume* boundaryVol = nullptr;
-  // cleanup
-  cache.m_parametersAtBoundary.resetBoundaryInformation();
-  // Material effect updator cache
-  cache.populateMatEffUpdatorCache(m_subupdaters);
-  // extrapolate to subdetector boundary
-  auto *cloneInput = cache.m_ownedPtrs.push(parm.uniqueClone());
-  Trk::CacheOwnedPtr<Trk::TrackParameters> subDetBounds = extrapolateToVolumeWithPathLimit(
-      ctx, cache, cloneInput, -1., dir, particle, boundaryVol);
-
-  while (subDetBounds) {
-    ATH_MSG_DEBUG("  Identified subdetector boundary crossing saved "
-                  << positionOutput(subDetBounds->position()));
-    cache.m_identifiedParameters->push_back(std::pair<std::unique_ptr<Trk::TrackParameters>, int>(
-      subDetBounds->uniqueClone(),
-      cache.m_currentStatic ? cache.m_currentStatic->geometrySignature() : 0));
-    if (cache.m_currentStatic && cache.m_currentStatic->geometrySignature() == destination) {
-      break;
-    }
-    if (!cache.m_parametersAtBoundary.nextVolume) {
-      break; // world boundary
-    }
-    subDetBounds = extrapolateToVolumeWithPathLimit(
-      ctx, cache, subDetBounds, -1., dir, particle, boundaryVol);
-  }
-  if (cache.m_identifiedParameters->empty()) {
-    return nullptr;
-  }
-  return  std::move(cache.m_identifiedParameters);
-}
 
 Trk::CacheOwnedPtr<Trk::TrackParameters>
 Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
