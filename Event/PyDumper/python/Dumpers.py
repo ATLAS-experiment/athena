@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ##
 #
@@ -3909,7 +3909,7 @@ def dump_TrigTauClusterDetails (t, f):
 def dump_TrigTauCluster (t, f):
     fprint (f, '  ')
     dump_TrigCaloCluster (t, f)
-    fprint (f, '\n   ', t.energy(), t.et(), t.EMCalibEnergy(), t.EMenergy(),
+    fprint (f, '\n   ', t.energy(), t.EMCalibEnergy(), t.EMenergy(),
             t.HADenergy(), t.eta(), t.phi(), t.IsoFrac(), t.numStripCells(),
             t.stripWidth(), t.eCalib(), t.eEMCalib(), t.EMRadius2())
     for s in range(25):
