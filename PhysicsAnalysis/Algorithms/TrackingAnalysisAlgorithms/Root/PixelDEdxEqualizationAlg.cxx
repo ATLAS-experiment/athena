@@ -41,6 +41,10 @@ namespace CP {
       ATH_MSG_WARNING("Tight cluster cleaning requested for dE/dx calculation, but feature not yet supported.");
     }
 
+    if (m_trackPtCutMeV > 0.) {
+      ATH_MSG_INFO("Only equalizing dE/dx and decorating tracks with pT > " << m_trackPtCutMeV << " MeV.");
+    }
+
     /// Initialize decorators, independent of equalization strategy.
     /// Most won't be used for track-level equalization strategy since no pixel clusters.
     std::string trackContainer = m_trackContainerName.key();
@@ -147,6 +151,12 @@ namespace CP {
 
     // Now decorate
     for (const auto* trk : *tracks) {
+
+      /// Skip tracks that fail pT cut
+      if( trk->pt() < m_trackPtCutMeV) {
+        ATH_MSG_DEBUG("Skipping track due to low pT: " << trk->pt() << " MeV.");
+        continue;
+      }
       
       /// Apply dE/dx equalization scale factors and recalculate the dE/dx truncated mean.
       ///    This is to account for:

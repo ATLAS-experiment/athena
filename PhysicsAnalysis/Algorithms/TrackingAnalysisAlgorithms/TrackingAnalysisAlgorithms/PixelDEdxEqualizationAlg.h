@@ -86,10 +86,13 @@ namespace CP {
     { this, "EqualizeTrackMeasurements", false, "Equalize track-level truncated mean dE/dx"};
     Gaudi::Property<bool> m_equalizeClusterMeasurements
     { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
-
-    /// Apply tight cluster cleaning requirements (e.g. cluster size/shape cuts).
     Gaudi::Property<bool> m_tightClusterCleaning
-    { this, "TightClusterCleaning", false, ""};
+    { this, "TightClusterCleaning", false, "Apply tight cluster cleaning requirements (e.g. cluster size/shape cuts)"};
+
+    /// Track cuts to speed things up
+    Gaudi::Property<float> m_trackPtCutMeV
+    { this, "TrackPtCutMev", -1., "Minimum track pT for equalizing dE/dx & decorating."};
+
 
     //////////////////
     /// Decorators ///
