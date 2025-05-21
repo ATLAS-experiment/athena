@@ -14,6 +14,7 @@
 
 struct Cache {
   Trk::ExtrUniquePtrHolder<int> m_ptr;
+  int* m_anotherPtr;
 };
 
 int main() {
@@ -24,14 +25,22 @@ int main() {
   {
     Cache cache{};
     /// make an element
-    auto uniq1 = std::make_unique<int>(1);
+    auto uniq0 = std::make_unique<int>(0);
     // Try to get what is there
-    auto nothere = cache.m_ptr.move(uniq1.get());
+    auto nothere = cache.m_ptr.move(uniq0.get());
     std::cout << "ptr not in the cache so nullptr  : " << nothere.get()
               << std::endl;
-
     // Now  properly pushed
-    Trk::CacheOwnedPtr<int> ptr1 = cache.m_ptr.push(std::move(uniq1));
+    Trk::CacheOwnedPtr<int> ptr1 = cache.m_ptr.push(std::move(uniq0));
+    // Alias
+    cache.m_anotherPtr = ptr1;
+    // some time later things can be set to nullptr
+    ptr1 = nullptr;
+    std::cout << "Cache contrains :" << *cache.m_anotherPtr << std::endl;
+    cache.m_anotherPtr = nullptr;
+    // And then point to something else
+    auto uniq1 = std::make_unique<int>(1);
+    ptr1 = cache.m_ptr.push(std::move(uniq1));
 
     // push another one
     auto uniq2 = std::make_unique<int>(2);
@@ -51,6 +60,12 @@ int main() {
     auto meaningless2 = cache.m_ptr.move(randomUnique.get());
     std::cout << "ptr not in the cache so nullptr  : " << meaningless2.get()
               << std::endl;
+
+    std::cout << "print what the vector holds : [ ";
+    for (const auto& i : cache.m_ptr.m_elements) {
+      std::cout << *i << " ";
+    }
+    std::cout << "] " << std::endl;
 
     // Release the ptr to the client
     clientPtr2 = cache.m_ptr.move(ptr2);
