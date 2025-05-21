@@ -30,6 +30,8 @@ StatusCode Pileup1DResidualCalibStep::initialize() {
     ATH_MSG_FATAL("If you're trying to apply only the Residual pile up correction, it needs to be specify in the Calibration Sequence. ApplyOnlyResidual should be true in the configuration file and the PileupStartScale should be specified.");
     return StatusCode::FAILURE;
   }
+
+  ATH_MSG_DEBUG("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
   
   ATH_CHECK( m_muKey.initialize() );
   ATH_CHECK( m_pvKey.initialize() );
@@ -133,14 +135,14 @@ StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) con
   ATH_MSG_DEBUG("  Rho = " << 0.001*rho << " GeV");
   static const double toGeV = 0.001;
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> areaAcc("ActiveArea4vec");  
-  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> puScaleMomAcc("JetPileupScaleMomentum");  
-  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> cstScaleMomAcc("JetConstitScaleMomentum");  
+  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> outScaleMomAcc(m_jetOutScale);  
+  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> startScaleMomAcc(m_jetInScale);  
   SG::AuxElement::Accessor<int> puCorrectedAcc("PileupCorrected");
  
   for( xAOD::Jet * jet : jetCont){
 
     
-    xAOD::JetFourMom_t jetStartP4 = cstScaleMomAcc.getAttribute(*jet);
+    xAOD::JetFourMom_t jetStartP4 = startScaleMomAcc.getAttribute(*jet);
     
     const double E_det = jetStartP4.e();
     const double pT_det = jetStartP4.pt();
@@ -192,7 +194,7 @@ StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) con
     //Attribute to track if a jet has received the pileup subtraction (always true if this code was run)
     puCorrectedAcc(*jet) = 1 ;    
     //Transfer calibrated jet properties to the Jet object
-    puScaleMomAcc.setAttribute(*jet, calibP4 );
+    outScaleMomAcc.setAttribute(*jet, calibP4 );
     jet->setJetP4( calibP4 );        
     
   }

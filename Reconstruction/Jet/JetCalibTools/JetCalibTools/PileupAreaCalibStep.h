@@ -40,7 +40,8 @@ class PileupAreaCalibStep   : public asg::AsgTool,
   Gaudi::Property<bool> m_useFull4vectorArea{this, "UseFull4vecArea", false, "doc"};
   Gaudi::Property<bool> m_doOrigin{this, "DoOrigin", false, "doc"};
 
-
+  Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetConstitScaleMomentum", "Starting jet scale" };
+  Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetAreaSubtractScaleMomentum", "Ending jet scale" };
  
 };
 

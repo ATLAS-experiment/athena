@@ -1,34 +1,56 @@
-# Example of shortened configuration (uses defaults for most properties)
+# Examples of different levels of verbosity for the GSC configuration (either falling back on defaults or fully configuring everything)
+
+# Assume default histogram naming and numbers
+GSC_minimal:
+  fileGSC: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
+  InScale: "JetEtaJESScaleMomentum"
+  OutScale: "JetGSCScaleMomentum"
+
+# Manually set number of histograms and naming
 GSC_short:
-  fileGSC: '/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
-  vartool1: "pt"
-  vartool2: "EM3"
-  histTool:
-    varX: "pt"
-    varY: "abseta"
-    histName: "AntiKt4EMPFlow_EM3_interpolation_resp_eta_0"
+  fileGSC: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
+  histTool_EM3:
+    N_hist: 35 # could we read this automatically from the histogram? Ideally this would just be a 3D histogram...
+    histNameBase: "AntiKt4EMPFlow_EM3_interpolation_resp_eta"
+  histTool_CharFrac:
+    N_hist: 25
+    histNameBase: "AntiKt4EMPFlow_chargedFraction_interpolation_resp_eta"
+  histTool_Tile0:
+    N_hist: 18
+    histNameBase: "AntiKt4EMPFlow_Tile0_interpolation_resp_eta"
+  histTool_nTrk:
+    N_hist: 25
+    histNameBase: "AntiKt4EMPFlow_nTrk_interpolation_resp_eta"
+  histTool_trackWIDTH:
+    N_hist: 25
+    histNameBase: "AntiKt4EMPFlow_trackWIDTH_interpolation_resp_eta"
+  InScale: "JetEtaJESScaleMomentum"
+  OutScale: "JetGSCScaleMomentum"
+
+# Manually set variables for some histograms
+GSC_custom_vars:
+  noRun: True
+  InScale: "JetConstitScaleMomentum" #JetEtaJESScaleMomentum"
+  fileGSC: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
   histTool_EM3:
     N_hist: 35
     varX: "pt"
-    varY: 
+    varY:
       Name: "EM3"
       isJetVar: False
     histNameBase: "AntiKt4EMPFlow_EM3_interpolation_resp_eta"
   histTool_CharFrac:
-    # default varX and varY will be used as not specified here (pT and ChargedFraction for this tool)
     N_hist: 25
-    histNameBase: "AntiKt4EMPFlow_EM3_interpolation_resp_eta"
-  
-# Example of functionality to fully customise the histTool lists
-# (doubt anyone would every want to do this, but the functionality is there!)
-GSC:
-  fileGSC: '/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
-  vartool1: "pt"
-  vartool2: "EM3"
-  histTool:
+    histNameBase: "AntiKt4EMPFlow_chargedFraction_interpolation_resp_eta"
     varX: "pt"
-    varY: "abseta"
-    histName: "AntiKt4EMPFlow_EM3_interpolation_resp_eta_0"
+    varY: "ChargedFraction"
+
+# Example of functionality to fully customise the list of histTools
+# (doubt anyone would every want to do this, but the functionality is there!)
+GSC_long:
+  noRun: True
+  InScale: "JetConstitScaleMomentum"
+  fileGSC: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
   histTool_EM3:
     N_hist: 35
     varX: "pt"

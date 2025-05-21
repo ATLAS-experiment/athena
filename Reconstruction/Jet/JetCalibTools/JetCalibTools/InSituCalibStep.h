@@ -48,8 +48,8 @@ private:
   Gaudi::Property<bool> m_CalibrateMC {this, "CalibrateMC", false, "force Insitu step for MC sample"};
   Gaudi::Property<bool> m_isMC {this, "isMC", false, "isMC"};
  
-  Gaudi::Property<std::string> m_jetStartScale {this, "InSituStartingScale", "JetGSCScaleMomentum", "Starting jet scale"};
-  Gaudi::Property<std::string> m_jetOutScale {this, "InSituOutScale", "JetInsituScaleMomentum", "Ending jet scale"};
+  Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetGSCScaleMomentum", "Starting jet scale"};
+  Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetInsituScaleMomentum", "Ending jet scale"};
   // retrieves in situ correction
   StatusCode getInsituCorr(const xAOD::Jet& jet,  JetHelper::JetContext& jc, unsigned int periodIndex, double &scale) const;
   // Relative calibration (derived with eta intercalibration)
