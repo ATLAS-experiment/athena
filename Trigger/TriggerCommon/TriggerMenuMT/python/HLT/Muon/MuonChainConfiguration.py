@@ -16,7 +16,7 @@ from .MuonMenuSequences import (
     muCombSequenceGenCfg, muCombOvlpRmSequenceGenCfg, mul2mtCBOvlpRmSequenceGenCfg, 
     mul2IOOvlpRmSequenceGenCfg, muCombLRTSequenceGenCfg, muEFSASequenceGenCfg, 
     muEFSAFSSequenceGenCfg, efLateMuSequenceGenCfg, muEFCBSequenceGenCfg, 
-    muEFCBl2ioSequenceGenCfg, muEFCBl2mtSequenceGenCfg,
+    muEFCBl2ioSequenceGenCfg, muEFCBl2mtSequenceGenCfg, muEFCBidReuseSequenceGenCfg,
     muEFCBIDperfSequenceGenCfg, muEFCBLRTSequenceGenCfg, muEFCBLRTIDperfSequenceGenCfg, 
     muEFCBFSSequenceGenCfg, muEFIDtpSequenceGenCfg, muEFIsoSequenceGenCfg, 
     muEFMSIsoSequenceGenCfg, efLateMuRoISequenceGenCfg, muRoiClusterSequenceGenCfg )
@@ -149,13 +149,13 @@ class MuonChainConfiguration(ChainConfigurationBase):
         elif "idtp" in self.chainPart['addInfo']:
             return self.getStep(flags, 'EFIDTP', [muEFIDtpSequenceGenCfg], is_probe_leg=is_probe_leg)
         else:
-            if flags.Muon.enableTrigIDtrackReuse:
+            if flags.Muon.enableTrigIDtrackReuse or "idReuse" in self.chainPart['addInfo']:
                 if "l2io" in self.chainPart['l2AlgInfo']:
                     return self.getStep(flags, 'EFCBl2io', [muEFCBl2ioSequenceGenCfg], is_probe_leg=is_probe_leg)
                 elif "l2mt" in self.chainPart['l2AlgInfo']:
                     return self.getStep(flags, 'EFCBl2mt', [muEFCBl2mtSequenceGenCfg], is_probe_leg=is_probe_leg)
                 else:
-                    return self.getStep(flags, 'EFCB', [muEFCBSequenceGenCfg], is_probe_leg=is_probe_leg)
+                    return self.getStep(flags, 'EFCBidReuse', [muEFCBidReuseSequenceGenCfg], is_probe_leg=is_probe_leg)
             else:
                 return self.getStep(flags, 'EFCB', [muEFCBSequenceGenCfg], is_probe_leg=is_probe_leg)
 
