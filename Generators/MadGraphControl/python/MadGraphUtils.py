@@ -1644,26 +1644,16 @@ def get_SUSY_variations( process , masses , syst_mod , ktdurham = None ):
         ktdurham = min(my_mass*0.25,500)
         # Should not be weirdly low - can't imagine a situation where you'd really want the scale below 15 GeV
         ktdurham = max(ktdurham,15)
-        if syst_mod is not None and 'qup' in syst_mod.lower():
+        if syst_mod == 'msup':
+            mglog.info('Applying upward variation (by 2x) of matching scale')
             ktdurham = ktdurham*2.
-        elif syst_mod is not None and 'qdown' in syst_mod.lower():
+        elif syst_mod == 'msdw':
+            mglog.info('Applying downward variation (by 2x) of matching scale')
             ktdurham = ktdurham*0.5
 
     mglog.info('For matching, will use ktdurham of '+str(ktdurham))
 
-    alpsfact = 1.0
-    scalefact = 1.0
-    if syst_mod is not None and 'alpsfactup' in syst_mod.lower():
-        alpsfact = 2.0
-    elif syst_mod is not None and 'alpsfactdown' in syst_mod.lower():
-        alpsfact = 0.5
-
-    if syst_mod is not None and 'scalefactup' in syst_mod.lower():
-        scalefact = 2.0
-    elif syst_mod is not None and 'scalefactdown' in syst_mod.lower():
-        scalefact = 0.5
-
-    return abs(ktdurham) , alpsfact , scalefact
+    return abs(ktdurham)
 
 
 def SUSY_process(process=''):
@@ -1705,7 +1695,7 @@ def SUSY_Generation(runArgs = None, process=None, plugin=None,\
         usePMGSettings (bool): See :py:func:`new_process`. Will set SM parameters to the appropriate values. Default: True.
     """
     ktdurham = run_settings['ktdurham'] if 'ktdurham' in run_settings else None
-    ktdurham , alpsfact , scalefact = get_SUSY_variations( process, params['MASS'] , syst_mod , ktdurham=ktdurham )
+    ktdurham = get_SUSY_variations( process, params['MASS'] , syst_mod , ktdurham=ktdurham )
 
     process_dir = MADGRAPH_GRIDPACK_LOCATION
     if not is_gen_from_gridpack():
@@ -1717,7 +1707,7 @@ def SUSY_Generation(runArgs = None, process=None, plugin=None,\
     modify_param_card(param_card_input=param_card,process_dir=process_dir,params=params)
 
     # Set up the extras dictionary
-    settings = {'ktdurham':ktdurham,'scalefact':scalefact,'alpsfact':alpsfact}
+    settings = {'ktdurham':ktdurham}
     settings.update(run_settings) # This allows explicit settings in the input to override these settings
 
     # Set up the run card
