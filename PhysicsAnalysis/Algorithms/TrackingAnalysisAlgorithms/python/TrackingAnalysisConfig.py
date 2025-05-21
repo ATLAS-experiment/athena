@@ -45,8 +45,8 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :  ## should match the alg in ../
         alg.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
         alg.TightClusterCleaning = self.tightClusterCleaning
-        alg.TrackMaxPtCutMeV = self.trackMaxPtCutMeV
-        alg.TrackMind0Cut = self.trackMind0Cut
+        alg.TrackMinPtCutMeV = self.trackMinPtCutMeV
+        alg.TrackMaxd0Cut = self.trackMaxd0Cut
         ### Tool properties
         alg.PixelDEdxEqualizationTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.PixelDEdxEqualizationTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
