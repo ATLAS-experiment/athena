@@ -34,7 +34,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::initialize()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
 {
-  m_tree = new TTree("FPGATrackSimHoughRootOutput","FPGATrackSimHoughRootOutput");
+  std::string tree_str = "FPGATrackSimHoughRootOutput_reg" + m_region.value();
+  m_tree = new TTree(tree_str.c_str(), tree_str.c_str());
+
   m_tree->Branch("x",&m_x);
   m_tree->Branch("y",&m_y);
   m_tree->Branch("z",&m_z);
@@ -78,7 +80,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
 
   m_treeindex = 0;
 
-  m_truthtree = new TTree("FPGATrackSimTruthTree","FPGATrackSimTruthTree");
+  std::string truthtree_str = "FPGATrackSimTruthTree_reg" + m_region.value();
+  m_truthtree = new TTree(truthtree_str.c_str(), truthtree_str.c_str());
+
   m_truthtree->Branch("truth_d0",&m_truth_d0);
   m_truthtree->Branch("truth_z0",&m_truth_z0);
   m_truthtree->Branch("truth_pt",&m_truth_pt);
@@ -107,7 +111,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_truthtree->Branch("truth_track_hit_volumeID", &m_track_hit_volumeID);
   m_truthtree->Branch("truth_track_hit_isMapped", &m_track_hit_isMapped);
 
-  m_offlinetree = new TTree("FPGATrackSimOfflineTree","FPGATrackSimOfflineTree");
+  std::string offltree_str = "FPGATrackSimOfflineTree_reg" + m_region.value();
+  m_offlinetree = new TTree(offltree_str.c_str(), offltree_str.c_str());
+
   m_offlinetree->Branch("offline_d0",&m_offline_d0);
   m_offlinetree->Branch("offline_z0",&m_offline_z0);
   m_offlinetree->Branch("offline_pt",&m_offline_pt);

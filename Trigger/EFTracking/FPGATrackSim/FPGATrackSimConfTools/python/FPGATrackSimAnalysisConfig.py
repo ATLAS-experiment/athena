@@ -430,6 +430,7 @@ def FPGATrackSimHoughRootOutputToolCfg(flags,name="FPGATrackSimHoughRootOutputTo
     HoughRootOutputTool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     HoughRootOutputTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     HoughRootOutputTool.THistSvc = CompFactory.THistSvc()
+    HoughRootOutputTool.OutputRegion = str(flags.Trigger.FPGATrackSim.region)
     result.setPrivateTools(HoughRootOutputTool)
     return result
 

@@ -439,10 +439,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
             return StatusCode::FAILURE;
         }
-        // Concatenate 1st and 2nd stage hits vectors to access both in the OutputTool
-        phits_2nd.insert(phits_2nd.end(), std::make_move_iterator(phits_1st.begin()), std::make_move_iterator(phits_1st.end()));
+
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_all, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
     }
 
     // Reset data pointers
