@@ -94,7 +94,7 @@ threshold_mapping = {
         100:98,
     },
     'SCjJ': { # 0ETA2[1,3,5], mostly a copy of CjJ but decoupled to allow for independent configuration of L1Topo's SimpleCone algorithm
-        10:10,
+        10:15,
         20:21,
         30:22,
         40:25,
