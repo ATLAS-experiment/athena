@@ -22,8 +22,10 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :  ## should match the alg in ../
             info="whether to equalize track-level truncated mean dE/dx measurements (no pixel clusters required).")
         self.addOption ('tightClusterCleaning', False, type=bool,
             info="whether to perform extra cluster cleaning for dE/dx measurements (e.g. cluster size/shape).")
-        self.addOption ('trackPtCutMeV', -1., type=float,
+        self.addOption ('trackMinPtCutMeV', -1., type=float,
             info="Minimum track pT for equalizing dE/dx & decorating.")
+        self.addOption ('trackMaxd0Cut', -1., type=float,
+            info="Maximum track |d0| for equalizing dE/dx & decorating.")
         self.addOption ('sfLocalFileName', "", type=str,
             info="Path to scale factor trees, overriding files stored in ASG calibration area.")
         self.addOption ('clusterSFTreeName', "cluster_SFs", type=str, # FIX! TBD
@@ -43,7 +45,8 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :  ## should match the alg in ../
         alg.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
         alg.TightClusterCleaning = self.tightClusterCleaning
-        alg.TrackPtCutMeV = self.trackPtCutMev
+        alg.TrackMaxPtCutMeV = self.trackMaxPtCutMeV
+        alg.TrackMind0Cut = self.trackMind0Cut
         ### Tool properties
         alg.PixelDEdxEqualizationTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.PixelDEdxEqualizationTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements

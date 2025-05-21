@@ -41,8 +41,11 @@ namespace CP {
       ATH_MSG_WARNING("Tight cluster cleaning requested for dE/dx calculation, but feature not yet supported.");
     }
 
-    if (m_trackPtCutMeV > 0.) {
-      ATH_MSG_INFO("Only equalizing dE/dx and decorating tracks with pT > " << m_trackPtCutMeV << " MeV.");
+    if (m_trackMinPtCutMeV > 0.) {
+      ATH_MSG_INFO("Only equalizing dE/dx and decorating tracks with pT > " << m_trackMinPtCutMeV << " MeV.");
+    }
+    if (m_trackMaxd0Cut > 0.) {
+      ATH_MSG_INFO("Only equalizing dE/dx and decorating tracks with |d0| > " << m_trackMaxd0Cut << " mm.");
     }
 
     /// Initialize decorators, independent of equalization strategy.
@@ -152,9 +155,13 @@ namespace CP {
     // Now decorate
     for (const auto* trk : *tracks) {
 
-      /// Skip tracks that fail pT cut
-      if( trk->pt() < m_trackPtCutMeV) {
+      /// Skip tracks that fail cuts
+      if( (m_trackMinPtCutMeV > 0.) && (trk->pt() < m_trackMinPtCutMeV) ) {
         ATH_MSG_DEBUG("Skipping track due to low pT: " << trk->pt() << " MeV.");
+        continue;
+      }
+      if( (m_trackMaxd0Cut > 0.) && (std::fabs(trk->d0()) > m_trackMaxd0Cut) ) {
+        ATH_MSG_DEBUG("Skipping track due to large |d0|: " << abs(trk->d0()) << " mm.");
         continue;
       }
       

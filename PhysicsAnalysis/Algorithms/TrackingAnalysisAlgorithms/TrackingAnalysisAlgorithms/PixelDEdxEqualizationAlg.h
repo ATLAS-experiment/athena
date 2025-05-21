@@ -90,8 +90,10 @@ namespace CP {
     { this, "TightClusterCleaning", false, "Apply tight cluster cleaning requirements (e.g. cluster size/shape cuts)"};
 
     /// Track cuts to speed things up
-    Gaudi::Property<float> m_trackPtCutMeV
-    { this, "TrackPtCutMev", -1., "Minimum track pT for equalizing dE/dx & decorating."};
+    Gaudi::Property<float> m_trackMinPtCutMeV
+    { this, "TrackMinPtCutMeV", -1., "Minimum track pT for equalizing dE/dx & decorating."};
+    Gaudi::Property<float> m_trackMaxd0Cut
+    { this, "TrackMaxd0Cut", -1., "Maximum track |d0| for equalizing dE/dx & decorating."};
 
 
     //////////////////
