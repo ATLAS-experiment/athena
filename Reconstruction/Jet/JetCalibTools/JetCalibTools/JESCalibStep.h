@@ -61,6 +61,10 @@ private:
   double getSplineCorr(const int etaBin, double E) const;
   double getSplineSlope(const int ieta, const double minE) const;
   
+  Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetPileupScaleMomentum", "Starting jet scale"};
+  // Change this to EtaMassJES? Or only if Mass is applied?
+  Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetEtaJESScaleMomentum", "Ending jet scale"};
+
   /// name of the text file
   Gaudi::Property< std::string > m_constantFileName { this, "CalibConstantFile", "/afs/cern.ch/work/s/stapiaar/JetDev4/athena/JetToolHelpers/data/file_JES.config", "text file containing constants" };
   /// jet collection to be calibrated

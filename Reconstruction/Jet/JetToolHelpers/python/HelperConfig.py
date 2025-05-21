@@ -1,5 +1,4 @@
-
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def VarToolCfg(flags, var, Tname="VarTool", **kwargs):
@@ -15,9 +14,14 @@ def VarToolCfg(flags, var, Tname="VarTool", **kwargs):
         kwargs.setdefault("Name", var)
     else:
         raise TypeError('Unregonised type for VarTool block')
-    kwargs.setdefault("isJetVar", True)
+    # Guess if this is a jet variable if not explicitly set
+    if var in ["e", "et", "pt", "eta", "abseta", "|eta|", "rapidity", "y", "|y|", "absy", "absrapidity", "|rapidity|", "DetectorEta"]:
+        kwargs.setdefault("isJetVar", True)
+    else:
+        kwargs.setdefault("isJetVar", False)
     kwargs.setdefault("Type","float")
-    if kwargs.get("isJetVar") and kwargs.get("Name") in ["pt", "e", "et"]:
+    # Guess the scale if not explicitly set
+    if kwargs.get("isJetVar") and var in ["pt", "e", "et"]:
         kwargs.setdefault("Scale", 1e-3)
     else:
         kwargs.setdefault("Scale",1.0)
