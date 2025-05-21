@@ -28,6 +28,7 @@
 #include "Acts/TrackFitting/MbfSmoother.hpp"
 
 // ActsTrk
+#include "ActsCalibration/CalibrationContext.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -428,7 +429,7 @@ namespace ActsTrk
       .geometry = m_trackingGeometryTool->getGeometryContext(ctx).context(),
       .magField = m_extrapolationTool->getMagneticFieldContext(ctx),
       // CalibrationContext converter not implemented yet.
-      .calib = Acts::CalibrationContext()
+      .calib = getCalibrationContext(ctx)
     };
 
     auto [options, secondOptions, measurementSelector] = getDefaultOptions(detContext, measurements, pSurface.get());

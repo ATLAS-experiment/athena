@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSEVENTCNV_ACTSTOTRK_CONVERTER_ALG_H
@@ -11,7 +11,7 @@
 #include "TrkTrack/TrackCollection.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "TrkToolInterfaces/IBoundaryCheckTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
@@ -21,12 +21,10 @@
 namespace ActsTrk
 {
 
-  class ActsToTrkConvertorAlg
-      : public AthReentrantAlgorithm
+  class ActsToTrkConvertorAlg: public AthReentrantAlgorithm
   {
   public:
-    ActsToTrkConvertorAlg(const std::string &name,
-			  ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual ~ActsToTrkConvertorAlg() = default;
 
     virtual StatusCode initialize() override;

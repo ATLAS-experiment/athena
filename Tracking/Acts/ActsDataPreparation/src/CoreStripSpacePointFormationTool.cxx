@@ -12,8 +12,8 @@
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "Acts/SpacePointFormation/SpacePointBuilderConfig.hpp"
+#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 
 #include "StoreGate/WriteHandle.h"
 namespace ActsTrk
@@ -92,18 +92,14 @@ namespace ActsTrk
     /// via the ContainerAccessor.
 
     auto spBuilderConfig = std::make_shared<Acts::SpacePointBuilderConfig>();
-    const Acts::TrackingGeometry *acts_tracking_geometry=m_trackingGeometryTool->trackingGeometry().get();
-    ATH_CHECK(acts_tracking_geometry != nullptr);
-    SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-       detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
-    ATH_CHECK(detectorElementToGeometryIdMap.isValid());
-
-    ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ *acts_tracking_geometry, **detectorElementToGeometryIdMap };
-
-    spBuilderConfig->slSurfaceAccessor
-      .connect<&ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
-
     const std::shared_ptr<const Acts::TrackingGeometry> trkGeometry = m_trackingGeometryTool->trackingGeometry();
+    const DetectorElementToActsGeometryIdMap* detectorElementToGeometryIdMap{nullptr};
+    ATH_CHECK(SG::get(detectorElementToGeometryIdMap, m_detectorElementToGeometryIdMapKey, ctx));
+
+    detail::xAODUncalibMeasSurfAcc surfaceAccessor{trkGeometry.get(), detectorElementToGeometryIdMap};
+    spBuilderConfig->slSurfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&surfaceAccessor);
+
+    
     spBuilderConfig->trackingGeometry = trkGeometry;
 
     

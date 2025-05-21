@@ -1,0 +1,46 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "ActsGeometry/ATLASSourceLink.h"
+#include "TrkSurfaces/Surface.h"
+#include "TrkSurfaces/SurfaceBounds.h"
+
+#include <format>
+namespace ActsTrk::detail {
+
+  template <typename trajectory_t>
+  void TrkMeasurementCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
+                                           const Acts::CalibrationContext& /*cctx*/,
+                                           const Acts::SourceLink& sl,
+                                           TrackState_t<trajectory_t> trackState) const {
+      const SourceLink_t sourceLink = unpack(sl);
+      switch (sourceLink->localParameters().dimension()) {
+        case 1: {
+          ProjectorType projector{ProjectorType::e1DimNoTime};
+          if (sourceLink->associatedSurface().bounds().type() == Trk::SurfaceBounds::Annulus) {
+             projector = ProjectorType::e1DimRotNoTime;
+          }
+          setState<1, trajectory_t>(projector, sourceLink->localParameters(), sourceLink->localCovariance(),
+                                    sl, trackState);
+          break;
+        } case 2: {
+          setState<2, trajectory_t>(ProjectorType::e2DimNoTime, sourceLink->localParameters(), 
+                                    sourceLink->localCovariance(), sl, trackState);
+          break;
+        }
+        case 3: {
+          setState<3, trajectory_t>(ProjectorType::e2DimWithTime, sourceLink->localParameters(), 
+                                    sourceLink->localCovariance(), sl, trackState);
+          break;
+        }
+        default: {
+          std::stringstream linkDump{};
+          sourceLink->dump(linkDump); 
+          throw std::domain_error(std::format("TrkMeasurementCalibrator::calibrate() - Invalid dimension {:d} for measurement {:} ",
+                                              sourceLink->localParameters().dimension(), linkDump.str()));
+        }
+    }
+  }
+} // namespace ActsTrk::detail
+

@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ProtoTrackCreationAndFitAlg.h"
 
+#include "ActsCalibration/CalibrationContext.h"
 #include "xAODEventInfo/EventInfo.h"
 #include <stdlib.h>
 
@@ -68,10 +69,9 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
      detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
   ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext = Acts::CalibrationContext();
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 
@@ -82,7 +82,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     auto res = m_actsFitter->fit(ctx, proto.measurements,*proto.parameters,
                                  m_trackingGeometryTool->getGeometryContext(ctx).context(),
                                  m_extrapolationTool->getMagneticFieldContext(ctx),
-                                 Acts::CalibrationContext(),
+                                 calContext,
                                  **detectorElementToGeometryIdMap);
 
     if(!res) continue;

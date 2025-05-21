@@ -5,9 +5,9 @@
 #ifndef ACTSTRACKRECONSTRUCTION_DUPLICATESEEDDETECTOR_H
 #define ACTSTRACKRECONSTRUCTION_DUPLICATESEEDDETECTOR_H
 
-#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "ActsEvent/SeedContainer.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 
 #include <unordered_map>
 #include <vector>

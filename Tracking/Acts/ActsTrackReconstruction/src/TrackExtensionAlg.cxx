@@ -29,6 +29,7 @@
 #include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
+#include "ActsCalibration/CalibrationContext.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
@@ -121,9 +122,10 @@ namespace ActsTrk{
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
     std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
-    Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
-
+    const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
+    const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
+    const Acts::CalibrationContext calContext{getCalibrationContext(context)};
+  
     SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
        detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, context};
     ATH_CHECK(detectorElementToGeometryIdMap.isValid());
@@ -157,7 +159,7 @@ namespace ActsTrk{
 
     TrackExtensionAlg::CKFOptions options(tgContext,
                       mfContext,
-                      m_calibrationContext,
+                      calContext,
                       m_ckfConfig->ckfExtensions,
                       plainOptions,
                       perigeeSurface.get());
@@ -193,7 +195,7 @@ namespace ActsTrk{
       auto res = m_actsFitter->fit(context, protoTrack.measurements,*protoTrack.parameters,
                                   m_trackingGeometryTool->getGeometryContext(context).context(),
                                   m_extrapolationTool->getMagneticFieldContext(context),
-                                  Acts::CalibrationContext(),
+                                  calContext,
                                   **detectorElementToGeometryIdMap, 
                                   refSurface);
       if(!res) continue;
