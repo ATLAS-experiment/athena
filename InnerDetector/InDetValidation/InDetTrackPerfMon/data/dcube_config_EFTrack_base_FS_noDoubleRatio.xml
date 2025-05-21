@@ -57,6 +57,12 @@
         <hist1D name="num_truth_all" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_selected" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_matched" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Parameters">
         <hist1D name="offl_pt" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -175,7 +181,6 @@
         <graph name="duplrate_vs_truth_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_truth_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="duplrate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="HitsOnTracks">
         <hist1D name="offl_nInnerMostPixelHits" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -226,18 +231,6 @@
         <hist1D name="offl_nSCTHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTHoles_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTSharedHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelEndcapHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nNextToInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
@@ -293,7 +286,6 @@
          <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-         <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         </TDirectory>
         <graph name="eff_vs_truth_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -309,7 +301,6 @@
         <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
         <graph name="fakerate_vs_offl_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -319,7 +310,6 @@
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -337,6 +327,12 @@
         <hist1D name="num_truth_all" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_selected" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_matched" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Parameters">
         <hist1D name="offl_pt" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -455,7 +451,6 @@
         <graph name="duplrate_vs_truth_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_truth_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="duplrate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="HitsOnTracks">
         <hist1D name="offl_nInnerMostPixelHits" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -506,18 +501,6 @@
         <hist1D name="offl_nSCTHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTHoles_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTSharedHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelEndcapHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nNextToInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
@@ -573,7 +556,6 @@
          <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-         <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         </TDirectory>
         <graph name="eff_vs_truth_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -589,7 +571,6 @@
         <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
         <graph name="fakerate_vs_offl_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -599,7 +580,6 @@
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -617,6 +597,12 @@
         <hist1D name="num_truth_all" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_selected" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_matched" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Parameters">
         <hist1D name="offl_pt" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -735,7 +721,6 @@
         <graph name="duplrate_vs_truth_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_truth_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="duplrate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="HitsOnTracks">
         <hist1D name="offl_nInnerMostPixelHits" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -786,18 +771,6 @@
         <hist1D name="offl_nSCTHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTHoles_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTSharedHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelEndcapHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nNextToInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
@@ -853,7 +826,6 @@
          <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-         <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         </TDirectory>
         <graph name="eff_vs_truth_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -869,7 +841,6 @@
         <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
         <graph name="fakerate_vs_offl_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -879,7 +850,6 @@
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -897,6 +867,12 @@
         <hist1D name="num_truth_all" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_selected" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_matched" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Parameters">
         <hist1D name="offl_pt" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -1015,7 +991,6 @@
         <graph name="duplrate_vs_truth_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_truth_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="duplrate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="HitsOnTracks">
         <hist1D name="offl_nInnerMostPixelHits" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -1066,18 +1041,6 @@
         <hist1D name="offl_nSCTHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTHoles_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTSharedHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelEndcapHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nNextToInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
@@ -1133,7 +1096,6 @@
          <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-         <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         </TDirectory>
         <graph name="eff_vs_truth_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -1149,7 +1111,6 @@
         <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
         <graph name="fakerate_vs_offl_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -1159,7 +1120,6 @@
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -1177,6 +1137,12 @@
         <hist1D name="num_truth_all" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_selected" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_matched" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Parameters">
         <hist1D name="offl_pt" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -1295,7 +1261,6 @@
         <graph name="duplrate_vs_truth_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_truth_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="duplrate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="HitsOnTracks">
         <hist1D name="offl_nInnerMostPixelHits" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -1346,18 +1311,6 @@
         <hist1D name="offl_nSCTHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTHoles_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTSharedHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelEndcapHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nNextToInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
@@ -1413,7 +1366,6 @@
          <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-         <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         </TDirectory>
         <graph name="eff_vs_truth_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -1429,7 +1381,6 @@
         <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
         <graph name="fakerate_vs_offl_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -1439,7 +1390,6 @@
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -1457,6 +1407,12 @@
         <hist1D name="num_truth_all" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_selected" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="num_truth_matched" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_offl_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_all_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_selected_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
+        <hist1D name="avgNum_truth_matched_vs_actualMu" type="TProfile" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Parameters">
         <hist1D name="offl_pt" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -1575,7 +1531,6 @@
         <graph name="duplrate_vs_truth_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_truth_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="duplrate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="duplrate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="HitsOnTracks">
         <hist1D name="offl_nInnerMostPixelHits" type="TH1D" plotopts="ratio;norm" tests="KSnorm"/>
@@ -1626,18 +1581,6 @@
         <hist1D name="offl_nSCTHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTHoles_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nSCTSharedHits_vs_offl_phi" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nNextToInnerMostPixelEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nInnerMostPixelSharedEndcapHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nPixelSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTHoles_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
-        <hist1D name="offl_nSCTSharedHits_vs_truthMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nInnerMostPixelEndcapHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="offl_nNextToInnerMostPixelHits_vs_actualMu" type="TProfile" plotopts="ratio" tests="KSnorm"/>
@@ -1693,7 +1636,6 @@
          <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
          <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-         <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         </TDirectory>
         <graph name="eff_vs_truth_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -1709,7 +1651,6 @@
         <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
         <graph name="fakerate_vs_offl_inclusive" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
@@ -1719,7 +1660,6 @@
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
-        <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="ratio" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
