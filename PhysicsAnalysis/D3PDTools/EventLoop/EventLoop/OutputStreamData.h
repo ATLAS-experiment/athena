@@ -64,6 +64,16 @@ namespace EL
       explicit OutputStreamData (std::unique_ptr<SH::DiskWriter> val_writer);
 
 
+      /// \brief the name of the main stream
+      ///
+      /// Some streams are aliases for other streams.  This is the name
+      /// of the main stream in this case, otherwise it is the name of
+      /// this stream.
+    public:
+      const std::string& mainStreamName () const noexcept;
+      void setMainStreamName (const std::string& val_mainStreamName);
+
+
       /// \brief the file we are writing to
       /// \par Guarantee
       ///   no-fail
@@ -160,6 +170,10 @@ namespace EL
       //
       // private interface
       //
+
+      /// \brief the name of the main stream
+    private:
+      std::string m_mainStreamName;
 
       /// \brief the writer we use
     private:

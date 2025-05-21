@@ -138,6 +138,26 @@ namespace EL
 
 
 
+    const std::string& OutputStreamData ::
+    mainStreamName () const noexcept
+    {
+      RCU_READ_INVARIANT (this);
+      return m_mainStreamName;
+    }
+
+
+
+    void OutputStreamData ::
+    setMainStreamName (const std::string& val_mainStreamName)
+    {
+      RCU_CHANGE_INVARIANT (this);
+      if (!m_mainStreamName.empty())
+        throw std::runtime_error ("main stream name already set");
+      m_mainStreamName = val_mainStreamName;
+    }
+
+
+
     TFile *OutputStreamData ::
     file () const noexcept
     {
