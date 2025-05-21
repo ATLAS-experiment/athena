@@ -228,7 +228,7 @@ StatusCode Generic4VecCorrection::initialize_correctionResponse()
   return StatusCode::SUCCESS;
 }
 
-StatusCode Generic4VecCorrection::load_json(nlohmann::json& json_object, std::string json_filepath) const
+StatusCode Generic4VecCorrection::load_json(nlohmann::json& json_object, const std::string& json_filepath) const
 {
   std::string full_path = PathResolverFindCalibFile(json_filepath);
   std::ifstream json_stream(full_path);
