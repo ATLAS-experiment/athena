@@ -219,7 +219,6 @@ namespace ActsTrk {
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
     Gaudi::Property< bool > m_doSeedConversion {this, "doSeedConversion", true, "Convert ActsTrk::Seed into ITk::SiSpacePointsProSeed"};
     Gaudi::Property< bool > m_useClusters {this, "useClustersForSeedConversion", false};
-    Gaudi::Property< bool > m_GbtsSeeding {this, "GbtsSeeding", false};
     
   private:
     // Validation
