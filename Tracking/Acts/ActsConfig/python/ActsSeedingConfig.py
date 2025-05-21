@@ -191,7 +191,7 @@ def ActsPixelGbtsSeedingToolCfg(flags,
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
-    kwargs.setdefault("ConnectorInputFile" , find_datafile("ActsPatternRecognition/GBTS_EdgeProbabilites_ITKPixels.txt"))
+    kwargs.setdefault("ConnectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
 
     kwargs.setdefault('PixelDetectorElements', 'ITkPixelDetectorElementCollection')
 
@@ -248,7 +248,6 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
             else:
                 seedTool_pixel = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
         elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
-            kwargs.setdefault("GbtsSeeding",True)
             seedTool_pixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
         elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts2:
             seedTool_pixel = acc.popToolsAndMerge(ActsGbts2SeedingTrigToolCfg(flags))

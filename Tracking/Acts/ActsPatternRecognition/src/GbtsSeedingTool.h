@@ -93,9 +93,6 @@ namespace ActsTrk {
     Gaudi::Property<float> m_sigmaScattering {this, "sigmaScattering", 2, 
 	"how many sigmas of scattering angle should be considered"};
 
-    Gaudi::Property<unsigned int> m_maxSeedsPerSpM {this, "maxSeedsPerSpM", 5, // also used by SeedFilterConfig
-	"For how many seeds can one SpacePoint be the middle SpacePoint"};
-
     // Geometry Settings
     // Detector ROI
     Gaudi::Property<float> m_highland {this, "highland",0, "need to check "};
@@ -124,43 +121,6 @@ namespace ActsTrk {
     Gaudi::Property<float> m_tripletPtMinFrac {this, "tripletPtMinFrac",0.3, "used to caluclate triplet pt"};
     Gaudi::Property<float> m_tripletPtMin {this, "tripletPtMin",m_PtMin * m_tripletPtMinFrac, "Limit on triplet pt"};
     Gaudi::Property<double> m_ptCoeff {this, "ptCoeff", 0.29997 * 1.9972 / 2.0, "~0.3*B/2 - assumes nominal field of 2*T"};
-
-
-    // Used by SeedConfirmationRangeConfig 
-    Gaudi::Property< float > m_seedConfCentralZMin {this, "seedConfCentralZMin", -250. * Acts::UnitConstants::mm,
-	"minimum z for central seed confirmation "};
-    Gaudi::Property< float > m_seedConfCentralZMax {this, "seedConfCentralZMax", 250. * Acts::UnitConstants::mm,
-	"maximum z for central seed confirmation "};
-    Gaudi::Property< float > m_seedConfCentralRMax {this, "seedConfCentralRMax", 140. * Acts::UnitConstants::mm,
-	"maximum r for central seed confirmation "};
-    Gaudi::Property< size_t > m_seedConfCentralNTopLargeR {this, "seedConfCentralNTopLargeR", 1,
-	"nTop for large R central seed confirmation"};
-    Gaudi::Property< size_t > m_seedConfCentralNTopSmallR {this, "seedConfCentralNTopSmallR", 2,
-	"nTop for small R central seed confirmation"};
-    Gaudi::Property< float > m_seedConfCentralMinBottomRadius {this, "seedConfCentralMinBottomRadius", 60 * Acts::UnitConstants::mm,
-        "Minimum radius for bottom SP in seed confirmation"};
-    Gaudi::Property< float > m_seedConfCentralMaxZOrigin {this, "seedConfCentralMaxZOrigin", 150 * Acts::UnitConstants::mm,
-        "Maximum zOrigin in seed confirmation"};
-    Gaudi::Property< float > m_seedConfCentralMinImpact {this, "seedConfCentralMinImpact", 1. * Acts::UnitConstants::mm,
-        "Minimum impact parameter for seed confirmation"};
-
-    Gaudi::Property< float > m_seedConfForwardZMin {this, "seedConfForwardZMin", -3000. * Acts::UnitConstants::mm,
-	"minimum z for forward seed confirmation "};
-    Gaudi::Property< float > m_seedConfForwardZMax {this, "seedConfForwardZMax", 3000. * Acts::UnitConstants::mm,
-	"maximum z for forward seed confirmation "};
-    Gaudi::Property< float > m_seedConfForwardRMax {this, "seedConfForwardRMax", 140. * Acts::UnitConstants::mm,
-	"maximum r for forward seed confirmation "};
-    Gaudi::Property< size_t > m_seedConfForwardNTopLargeR {this, "seedConfForwardNTopLargeR", 1,
-	"nTop for large R forward seed confirmation"};
-    Gaudi::Property< size_t > m_seedConfForwardNTopSmallR {this, "seedConfForwardNTopSmallR", 2,
-	"nTop for small R forward seed confirmation"};
-    Gaudi::Property< float > m_seedConfForwardMinBottomRadius {this, "seedConfForwardMinBottomRadius", 60 * Acts::UnitConstants::mm,
-	"Minimum radius for bottom SP in seed confirmation"};
-    Gaudi::Property< float > m_seedConfForwardMaxZOrigin {this, "seedConfForwardMaxZOrigin", 150 * Acts::UnitConstants::mm,
-        "Maximum zOrigin in seed confirmation"};
-    Gaudi::Property< float > m_seedConfForwardMinImpact {this, "seedConfForwardMinImpact", 1. * Acts::UnitConstants::mm,
-        "Minimum impact parameter for seed confirmation"};
-
 
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetectorElements", "ITkPixelDetectorElementCollection", "Key of input SiDetectorElementCollection for Pixel"}; 
 

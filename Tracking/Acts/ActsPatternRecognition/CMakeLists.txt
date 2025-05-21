@@ -35,7 +35,6 @@ atlas_add_component( ActsPatternRecognition
 		       TrkSpacePoint
 		       xAODInDetMeasurement )
 
-atlas_install_data( share/*.txt )
 
 
 if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
