@@ -40,11 +40,12 @@ class Node(object):
                 f'children="{[n.name for n in self.children]}">')
 
     def dot(self, current_node=False, tooltip: str ="", viewing_dependents: bool =False) -> str:
+        import html
         color = "grey" if self.primary else "white"
         if current_node:
             color = "darkslategray2" if viewing_dependents else "gold"
 
-        tooltip = ("[Virtual]" if self.virtual else "[Primary]") + " " + tooltip
+        tooltip = ("[Virtual]" if self.virtual else "[Primary]") + " " + html.escape(tooltip, True)
         label = self.name
 
 
