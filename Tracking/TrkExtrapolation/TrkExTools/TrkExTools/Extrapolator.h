@@ -214,8 +214,7 @@ public:
    * Employs the STEP_propagator, used to create ParticleCaloExtensions
    * mainly for muons and Particle Flow.
    */
-  virtual std::unique_ptr<
-      std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
+  virtual std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
   collectIntersections(
     const EventContext& ctx,
     const Trk::TrackParameters& parm,
@@ -647,12 +646,10 @@ private:
                                  //!< mode]
   bool m_extendedLayerSearch;    //!< extended layer search
   bool m_robustSampling;
-  bool m_referenceMaterial; //!< use the reference material for the update
   bool m_resolveActive;
   bool m_resolveMultilayers;
   bool m_cacheLastMatLayer; //!< steering of the material layer cache
   bool m_returnPassiveLayers;
-  unsigned int m_meotpIndex; //!< if several meotps are available in a volume steer which one to use
   //!< number of sub valid propagators in the m_subPropagators array
   //if we have no valid subpropagatos it will be set to an INVALID value
   unsigned int m_numOfValidPropagators;
@@ -679,7 +676,6 @@ private:
   // flags
   bool m_navigationStatistics;             //!< steer the output for the navigation statistics
   bool m_navigationBreakDetails;           //!< steer the output for the navigation break details
-  bool m_materialEffectsOnTrackValidation; //!< mat effects on track validation
 
   // extrapolation counters
   mutable Gaudi::Accumulators::Counter<> m_extrapolateCalls;         //!< number of calls: extrapolate() method
@@ -700,13 +696,8 @@ private:
   mutable Gaudi::Accumulators::Counter<> m_navigationBreakOscillation; //!< number of navigation breaks due to oscillation
   mutable Gaudi::Accumulators::Counter<> m_navigationBreakNoVolume; //!< number of navigation breaks due no Volume found
   mutable Gaudi::Accumulators::Counter<> m_navigationBreakDistIncrease; //!< number of navigation breaks due to distance increase
-  mutable Gaudi::Accumulators::Counter<>m_navigationBreakVolumeSignature; //!< number of navigation breaks due to distance increase
+  mutable Gaudi::Accumulators::Counter<> m_navigationBreakVolumeSignature; //!< number of navigation breaks due to distance increase
   mutable Gaudi::Accumulators::Counter<> m_overlapSurfaceHit; //!< number of OverlapSurfaces found
-
-  mutable Gaudi::Accumulators::Counter<> m_meotSearchCallsFw;      //!< how often the meot search is called: forward
-  mutable Gaudi::Accumulators::Counter<> m_meotSearchCallsBw;      //!< how often the meot search is called: backward
-  mutable Gaudi::Accumulators::Counter<> m_meotSearchSuccessfulFw; //!< how often the meot search was successful: forward
-  mutable Gaudi::Accumulators::Counter<> m_meotSearchSuccessfulBw; //!< how often the meot search was successful: backward
 };
 
 } // end of namespace
