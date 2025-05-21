@@ -18,13 +18,13 @@
 #include "EvtGen_i/EvtGenExternal/Belle2//EvtLLSWFF.h"
 
 
-EvtLLSWFF::EvtLLSWFF(double _tau_w1, double _tau_wp, double _zeta_1)
+EvtLLSWFF::EvtLLSWFF(double tau_w1, double tau_wp, double zeta_1)
 {
 
-  m_tau_w1 = _tau_w1;
-  m_tau_wp = _tau_wp;
+  m_tau_w1 = tau_w1;
+  m_tau_wp = tau_wp;
 
-  m_zeta_1 = _zeta_1;
+  m_zeta_1 = zeta_1;
 
   m_mb = 4.2; m_mc = 1.4; m_L = 0.40; m_Lp = 0.80; m_Ls = 0.76;
 
@@ -34,14 +34,14 @@ EvtLLSWFF::EvtLLSWFF(double _tau_w1, double _tau_wp, double _zeta_1)
   return;
 }
 
-EvtLLSWFF::EvtLLSWFF(double _tau_w1, double _tau_wp, double _tau_1, double _tau_2)
+EvtLLSWFF::EvtLLSWFF(double tau_w1, double tau_wp, double tau_1, double tau_2)
 {
 
-  m_tau_w1 = _tau_w1;
-  m_tau_wp = _tau_wp;
+  m_tau_w1 = tau_w1;
+  m_tau_wp = tau_wp;
 
-  m_tau_1 = _tau_1;
-  m_tau_2 = _tau_2;
+  m_tau_1 = tau_1;
+  m_tau_2 = tau_2;
 
   m_mb = 4.2; m_mc = 1.4; m_L = 0.40; m_Lp = 0.80; m_Ls = 0.76;
 

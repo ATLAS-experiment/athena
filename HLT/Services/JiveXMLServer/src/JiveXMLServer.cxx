@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <JiveXMLServer/JiveXMLServer.h>
@@ -39,7 +39,7 @@ namespace JiveXML {
    * Constructor
    */
   JiveXMLServer::JiveXMLServer( int port ):
-    portNumber(port){
+    m_portNumber(port){
 
     //Make sure ServerThread does not start unexpectedly
     m_runServerThread = false ;
@@ -81,7 +81,7 @@ namespace JiveXML {
 
     //The arguments passed on to the server - create new object on the heap that
     //is persistent through the lifetime of the thread
-    ServerThreadArguments* args = new ServerThreadArguments(this,portNumber);
+    ServerThreadArguments* args = new ServerThreadArguments(this,m_portNumber);
 
     //set runServer flag to true, so the  thread will start
     m_runServerThread = true ;
@@ -177,7 +177,7 @@ namespace JiveXML {
     //Store signal
     m_receivedSignal=signal;
     //finish semaphore lock
-    lock.post();
+    m_lock.post();
   }
 
   /**
@@ -187,7 +187,7 @@ namespace JiveXML {
    **/
   void JiveXMLServer::Wait(){
     //just wait for the lock
-    lock.wait();
+    m_lock.wait();
     //Tell why the lock was released
     ERS_INFO("Reached post-condition after received signal " << m_receivedSignal );
   }
