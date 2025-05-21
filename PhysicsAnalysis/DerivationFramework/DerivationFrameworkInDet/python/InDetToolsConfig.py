@@ -96,7 +96,6 @@ def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
         from InDetConfig.TRT_ElectronPidToolsConfig import TRT_dEdxToolCfg
         kwargs.setdefault("TRT_ToT_dEdx", acc.addPublicTool(acc.popToolsAndMerge(TRT_dEdxToolCfg(flags))))
 
-    kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapMerge_CombinedInDetTracks")
 
     acc.addPublicTool(
@@ -284,19 +283,26 @@ def ITkTrackStateOnSurfaceDecoratorCfg(
         ITkStripReadoutGeometryCfg)
     acc = ITkStripReadoutGeometryCfg(flags)
 
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    kwargs.setdefault("TrackExtrapolator", acc.addPublicTool(acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
+    kwargs.setdefault("DecorationPrefix", "notSet")
 
-    from InDetConfig.InDetTrackHoleSearchConfig import (
-        ITkTrackHoleSearchToolCfg)
-    kwargs.setdefault("HoleSearch", acc.addPublicTool(acc.popToolsAndMerge(ITkTrackHoleSearchToolCfg(flags))))
+    if "TrackExtrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs.setdefault("TrackExtrapolator", acc.addPublicTool(
+            acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
 
-    from TrkConfig.TrkResidualPullCalculatorConfig import (
-        ResidualPullCalculatorCfg)
-    kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
-        acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+    if "HoleSearch" not in kwargs:
+        from InDetConfig.InDetTrackHoleSearchConfig import (
+            ITkTrackHoleSearchToolCfg)
+        kwargs.setdefault("HoleSearch", acc.addPublicTool(
+            acc.popToolsAndMerge(ITkTrackHoleSearchToolCfg(flags))))
 
-    kwargs.setdefault("DecorationPrefix", "")
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
+            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+
+    kwargs.setdefault("AddExtraEventInfo", False) # Controls decoration of TrtPhaseTime
     kwargs.setdefault("PixelMapName", "ITkPixelClustersOffsets")
     kwargs.setdefault("SctMapName", "ITkStripClustersOffsets")
     kwargs.setdefault("PixelClustersName", "ITkPixelMeasurements")
@@ -311,12 +317,18 @@ def ITkTrackStateOnSurfaceDecoratorCfg(
             name, **kwargs), primary=True)
     return acc
 
-def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel"):
+def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel",
+                            listOfExtensions=[]):
     acc = ComponentAccumulator()
-    ITkTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
-        ITkTrackStateOnSurfaceDecoratorCfg(flags))
+    listOfAugmTools = []
+    for extension in listOfExtensions:
+        TrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
+            ITkTrackStateOnSurfaceDecoratorCfg(flags,
+                                               DecorationPrefix = "Reco_"))
+        listOfAugmTools.append(TrackStateOnSurfaceDecorator)
+
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[ITkTrackStateOnSurfaceDecorator]))
+        name, AugmentationTools=listOfAugmTools))
     return acc
 
 def DFITkTrackStateOnSurfaceDecoratorCfg(
@@ -345,6 +357,35 @@ def DFITkTSOSKernelCfg(flags, name='DFITkTSOSKernel'):
         AugmentationTools=tsos_augmentationTools,
         ThinningTools=[],
         OutputLevel=INFO))
+    return acc
+
+def ITkSiSPSeedsTrackStateOnSurfaceDecoratorCfg(
+        flags, name="ITkSiSPSeedsTrackStateOnSurfaceDecorator", **kwargs):
+    kwargs.setdefault("ContainerName", "SiSPSeedSegmentsTrackParticles")
+    kwargs.setdefault("DecorationPrefix", "Reco_")
+    kwargs.setdefault("PixelMsosName", "SiSPSeedSegments_ITkPixelMSOSs")
+    kwargs.setdefault("SctMsosName", "SiSPSeedSegments_ITkStripMSOSs")
+    kwargs.setdefault("TrtMsosName", "")
+    kwargs.setdefault("AddPRD", True)
+    kwargs.setdefault("StoreHoles", False)
+    return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
+
+def ITkSiSPSeedsTSOS_CommonKernelCfg(flags, name="ITkSiSPSeedsTSOS_CommonKernel",
+                                     listOfExtensions=[]):
+    acc = ComponentAccumulator()
+
+    listOfAugmTools = []
+    for extension in listOfExtensions:
+        SiSPSeedsTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
+            ITkSiSPSeedsTrackStateOnSurfaceDecoratorCfg(
+                flags, name = f"SiSPSeeds{extension}TrackStateOnSurfaceDecorator",
+                ContainerName = f"SiSPSeedSegments{extension}TrackParticles",
+                PixelMsosName = f"SiSPSeedSegments{extension}_ITkPixelMSOSs",
+                SctMsosName = f"SiSPSeedSegments{extension}_ITkStripMSOSs"))
+        listOfAugmTools.append(SiSPSeedsTrackStateOnSurfaceDecorator)
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+        name, AugmentationTools=listOfAugmTools))
     return acc
 
 def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
