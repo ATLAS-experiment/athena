@@ -11,6 +11,8 @@
  #include "EFTrackingFPGAUtility/xAODClusterMaker.h"
  #include "EFTrackingFPGAUtility/TestVectorTool.h"
  #include "EFTrackingFPGAUtility/FPGADataFormatTool.h"
+ #include "EFTrackingFPGAUtility/OutputConversionTool.h"
+ #include "EFTrackingFPGAPipeline/DataPreparationPipeline.h"
  #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 
  // Athena include
@@ -45,9 +47,13 @@
          Gaudi::Property<std::string> m_xclbin{
              this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
  
-        SG::ReadHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrack1stKey","FPGATracks_1st","FPGATrackSim Tracks 1st stage key"};
+        SG::ReadHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrack1stKey","FPGATracks_1st_reg34","FPGATrackSim Tracks 1st stage key"};
 
-        
+        // Tool for output conversion
+        ToolHandle<OutputConversionTool> m_outputConversionTool{this, "OutputConversionTool", "OutputConversionTool", "tool for output conversion"};
+
+
+
      };
  }
  

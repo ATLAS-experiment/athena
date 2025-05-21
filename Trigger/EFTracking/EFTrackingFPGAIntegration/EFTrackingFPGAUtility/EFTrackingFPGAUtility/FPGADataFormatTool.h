@@ -15,6 +15,7 @@
 #include "InDetReadoutGeometry/SiDetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include <cinttypes>
+#include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 
 
 class FPGADataFormatTool
@@ -38,7 +39,13 @@ class FPGADataFormatTool
         const SCT_RDO_Container &stripRDO,
         std::vector<uint64_t> &encodedData,
         const EventContext &ctx) const override;
-
+  
+    virtual  StatusCode convertFPGATracksToFPGADataFormat(
+	const FPGATrackSimTrackCollection* tracks,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &ctx
+        ) const override;  
+  
   private:
     const PixelID* m_pixelId = nullptr;
     const SCT_ID* m_sctId = nullptr;
@@ -59,6 +66,12 @@ class FPGADataFormatTool
         std::vector<uint64_t> &encodedData,
         const EventContext &ctx
         ) const;
+
+    StatusCode convertFPGATracks(
+	const FPGATrackSimTrackCollection* tracks,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &ctx
+        ) const;   
 
     // Helper function for common header and Footer info
     StatusCode fillHeader(std::vector<uint64_t> &encodedData) const;

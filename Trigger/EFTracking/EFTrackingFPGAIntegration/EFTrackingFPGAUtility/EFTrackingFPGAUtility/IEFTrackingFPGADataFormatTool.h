@@ -9,6 +9,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/SCT_RDO_Container.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 
 /**
  * @class IEFTrackingFPGADataFormatTool
@@ -29,6 +30,11 @@ class IEFTrackingFPGADataFormatTool : virtual public IAlgTool {
       std::vector<uint64_t> &encodedData,
       const EventContext &ctx) const = 0;
 
+  virtual  StatusCode convertFPGATracksToFPGADataFormat(
+        const FPGATrackSimTrackCollection* tracks,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &ctx
+        ) const = 0;
 };
 
 #endif  // EFTRACKINGFPGAINTEGRATION_IEFTRACKINGFPGADATAFORMATTOOL_H

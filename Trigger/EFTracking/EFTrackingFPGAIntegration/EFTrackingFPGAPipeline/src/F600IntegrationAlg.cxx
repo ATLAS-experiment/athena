@@ -5,6 +5,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "EFTrackingFPGAPipeline/F600IntegrationAlg.h"
 #include "EFTrackingFPGAUtility/EFTrackingTransient.h"
 #include "AthenaKernel/Chrono.h"
+#include "EFTrackingFPGAPipeline/DataPreparationPipeline.h"
 
 namespace EFTrackingFPGAIntegration
 {
@@ -30,14 +31,21 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_testVectorTool.retrieve());
         ATH_CHECK(m_FPGADataFormatTool.retrieve());
         ATH_CHECK(m_FPGATrackKey.initialize());
+        ATH_CHECK(m_outputConversionTool.retrieve());
         return StatusCode::SUCCESS;
     }
 
     StatusCode F600IntegrationAlg::execute(const EventContext &ctx) const
     {
         ATH_MSG_DEBUG("Executing F600IntegrationAlg");
+	    std::vector<uint64_t> encodedData;
+        auto FPGATrackHandle = SG::makeHandle(m_FPGATrackKey, ctx);
+        ATH_CHECK(m_FPGADataFormatTool->convertFPGATracksToFPGADataFormat(&(*FPGATrackHandle), encodedData, ctx));
 
-        [[maybe_unused]] auto FPGATrackHandle = SG::makeHandle(m_FPGATrackKey, ctx);
+        std::unique_ptr<EFTrackingTransient::Metadata> metadata =
+        std::make_unique<EFTrackingTransient::Metadata>();
+          
+	ATH_CHECK(m_outputConversionTool->decodeFPGAoutput(encodedData, metadata.get(), nullptr, nullptr, OutputConversion::FSM::GTracks));       
 
         return StatusCode::SUCCESS;
     }
