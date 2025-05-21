@@ -111,7 +111,7 @@ namespace IDTPM {
   inline float qOverP( const U& p ) { return getQoverP( p ); }
 
   template< class U >
-  inline float qOverPT( const U& p ) { return qOverP( p ) / std::sin( theta( p ) ); }
+  inline float qOverPT( const U& p ) { return theta(p)==0 ? -9999. : qOverP(p) / std::sin( theta(p) ); }
 
   /// Accessor utility function for getting the value of Energy
   template< class U >
