@@ -146,7 +146,7 @@ namespace EL
     auto iter = m_outputs.find (label);
     if (iter == m_outputs.end())
       return 0;
-    return iter->second.file();
+    return iter->second->file();
   }
 
 
@@ -165,7 +165,7 @@ namespace EL
       return ::StatusCode::FAILURE;
     }
 
-    outputIter->second.addClone (tree);
+    outputIter->second->addClone (tree);
 
     // Return gracefully:
     return ::StatusCode::SUCCESS;
@@ -186,7 +186,7 @@ namespace EL
                       + "\" found" );
     }
 
-    TTree *result = outputIter->second.getOutputTree( name );
+    TTree *result = outputIter->second->getOutputTree( name );
     if( result == nullptr ) {
       RCU_THROW_MSG ( "No tree with name \"" + name + "\" in stream \"" +
                       stream + "\"" );
@@ -416,7 +416,36 @@ namespace EL
       ANA_CHECK (addOutputStream (Job::histogramStreamName, std::move (data)));
     }
     RCU_ASSERT (m_outputs.find (Job::histogramStreamName) != m_outputs.end());
-    m_histOutput = &m_outputs.at(Job::histogramStreamName);
+    m_histOutput = m_outputs.at(Job::histogramStreamName).get();
+    if (auto aliases = metaData()->castString (Job::optStreamAliases, ""); !aliases.empty())
+    {
+      // the format of aliases is "alias1=realname1,alias2=realname2"
+      std::istringstream iss (aliases);
+      std::string alias;
+      while (std::getline (iss, alias, ','))
+      {
+        auto pos = alias.find ('=');
+        if (pos == std::string::npos)
+        {
+          ANA_MSG_ERROR ("Invalid alias format: " << alias);
+          return ::StatusCode::FAILURE;
+        }
+        auto aliasName = alias.substr (0, pos);
+        auto realName = alias.substr (pos + 1);
+        auto realOutput = m_outputs.find (realName);
+        if (realOutput == m_outputs.end())
+        {
+          ANA_MSG_ERROR ("output stream " << realName << " not found for alias " << aliasName);
+          return ::StatusCode::FAILURE;
+        }
+        auto [aliasOutput, success] = m_outputs.emplace (aliasName, realOutput->second);
+        if (!success)
+        {
+          ANA_MSG_ERROR ("output stream " << aliasName << " already exists, can't make alias");
+          return ::StatusCode::FAILURE;
+        }
+      }
+    }
 
     m_jobStats = std::make_unique<TTree>
       ("EventLoop_JobStats", "EventLoop job statistics");
@@ -466,11 +495,11 @@ namespace EL
       ANA_CHECK (module->onFinalize (*this));
     for (auto& output : m_outputs)
     {
-      if (output.first != Job::histogramStreamName)
+      if (output.first != Job::histogramStreamName && output.second->mainStreamName() == output.first)
       {
-        output.second.saveOutput ();
-        output.second.close ();
-        std::string path = output.second.finalFileName ();
+        output.second->saveOutput ();
+        output.second->close ();
+        std::string path = output.second->finalFileName ();
         if (!path.empty())
           addOutputList ("EventLoop_OutputStream_" + output.first, new TObjString (path.c_str()));
       }
@@ -697,7 +726,9 @@ namespace EL
       ANA_MSG_ERROR ("output stream does not have a file attached");
       return ::StatusCode::FAILURE;
     }
-    m_outputs.insert (std::make_pair (label, std::move (data)));
+    if (data.mainStreamName().empty())
+      data.setMainStreamName (label);
+    m_outputs.insert (std::make_pair (label, std::make_shared<Detail::OutputStreamData>(std::move (data))));
     return ::StatusCode::SUCCESS;
   }
 

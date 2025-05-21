@@ -38,6 +38,7 @@ namespace EL
   const std::string Job::optAlgorithmTimer = "nc_EventLoop_AlgorithmTimer";
   const std::string Job::optAlgorithmMemoryMonitor = "nc_EventLoop_AlgorithmMemoryMonitor";
   const std::string Job::optFactoryPreload = "nc_EventLoop_FactoryPreload";
+  const std::string Job::optStreamAliases = "nc_EventLoop_StreamAliases";
   const std::string Job::optMaxEvents = "nc_EventLoop_MaxEvents";
   const std::string Job::optSkipEvents = "nc_EventLoop_SkipEvents";
   const std::string Job::optWorkerConfigFile = "nc_EventLoop_WorkerConfigFile";
