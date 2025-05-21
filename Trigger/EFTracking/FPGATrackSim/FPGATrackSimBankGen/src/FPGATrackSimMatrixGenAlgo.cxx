@@ -306,7 +306,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
             // Now produce "track" candidates and loop over them.
             std::vector<FPGATrackSimTrack> tracks_2nd;
             roadsToTrack(roads_2nd, tracks_2nd, true);
-            for (auto track_2nd : tracks_2nd) {
+            for (const FPGATrackSimTrack& track_2nd : tracks_2nd) {
               std::vector<FPGATrackSimHit> track_hits_2nd = track_2nd.getFPGATrackSimHits();
               std::vector<module_t> modules(m_nLayers_2nd);
               FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
