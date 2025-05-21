@@ -1,95 +1,32 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
-
 #include "TestTools/initGaudi.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "src/detail/TrkMeasurementCalibrator.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+
+#include "ActsCalibration/TrkMeasurementCalibrator.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
+#include "Acts/EventData/VectorMultiTrajectory.hpp"
 
 #include <string>
 
-#include "src/detail/TrkMeasurementCalibrator.cxx"
-
 namespace ActsTrk::testing {
 
-  class MyDummyAlg
-    : public AthReentrantAlgorithm {
+  class MyDummyAlg : public AthReentrantAlgorithm {
   public:
-    MyDummyAlg(const std::string &name,
-	       ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
-    {}
-    virtual ~MyDummyAlg() override = default;
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
+      virtual ~MyDummyAlg() override = default;
+      virtual StatusCode execute(const EventContext& ) const override {
+          return StatusCode::SUCCESS;
+      }
 
-    virtual StatusCode initialize() override { return StatusCode::SUCCESS; }
-    virtual StatusCode execute(const EventContext&) const override { return StatusCode::SUCCESS; }
-  };
-
-  class MyDummyTool
-    : public extends<AthAlgTool, IActsToTrkConverterTool> {
-  public:
-    MyDummyTool(const std::string& type,
-		const std::string& name,
-		const IInterface* parent)
-      : base_class(type, name, parent)
-    {}
-    virtual ~MyDummyTool() override = default;
-
-    virtual StatusCode initialize() override { return StatusCode::SUCCESS; }
-
-    // Interface
-    virtual const Trk::Surface& actsSurfaceToTrkSurface(const Acts::Surface&) const override
-    { return *m_trkSurface; }
-
-    // THIS ONE
-    virtual const Acts::Surface& trkSurfaceToActsSurface(const Trk::Surface&) const override
-    { return *m_actsSurface; }
-    
-    virtual Acts::SourceLink trkMeasurementToSourceLink(const Acts::GeometryContext&,
-							const Trk::MeasurementBase &) const override
-    { return Acts::SourceLink{nullptr}; }
-    
-    virtual std::vector<Acts::SourceLink> trkTrackToSourceLinks(const Acts::GeometryContext&,
-								const Trk::Track&) const override
-    { return {}; }
-    
-    virtual const Acts::BoundTrackParameters trkTrackParametersToActsParameters(const Trk::TrackParameters&,
-										const Acts::GeometryContext&,
-										Trk::ParticleHypothesis) const override
-    { return Acts::BoundTrackParameters(m_actsSurface,
-					Acts::BoundVector::Zero(),
-					std::nullopt,
-					Acts::ParticleHypothesis::pion()); }
-    
-    virtual std::unique_ptr<Trk::TrackParameters>
-    actsTrackParametersToTrkParameters(const Acts::BoundTrackParameters&,
-				       const Acts::GeometryContext&) const override
-    { return nullptr; }
-    
-    virtual void trkTrackCollectionToActsTrackContainer(ActsTrk::MutableTrackContainer&,
-							const TrackCollection&,
-							const Acts::GeometryContext&) const override
-    {}
-    
-    virtual const IActsTrackingGeometryTool*
-    trackingGeometryTool() const override
-    { return nullptr; }
-
-  private:
-    std::shared_ptr<Acts::PerigeeSurface> m_actsSurface =
-      Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3{0., 0., 0.});
-    std::shared_ptr<Trk::PerigeeSurface> m_trkSurface = std::make_shared<Trk::PerigeeSurface>();
   };
 
   class MyDummyMeasurement : public Trk::MeasurementBase {
@@ -120,14 +57,14 @@ namespace ActsTrk::testing {
     
   private:
     std::shared_ptr<Trk::PerigeeSurface> m_trkSurface = std::make_shared<Trk::PerigeeSurface>();
-    Amg::Vector3D m_globPos{};
+    Amg::Vector3D m_globPos{Amg::Vector3D::Zero()};
   };
   
 } // namespace ActsTrk::testing
 
 int main() {
 
-  ISvcLocator* pSvcLoc;
+  ISvcLocator* pSvcLoc{nullptr};
   if (not Athena_test::initGaudi(pSvcLoc)) {
     std::cerr << " This test cannot be run without init Gaudi" << std::endl;
     return 1;
@@ -137,11 +74,6 @@ int main() {
   std::cout << "Creating dummy alg and tool for the test" << std::endl;
   ActsTrk::testing::MyDummyAlg alg("myDummyAlg", pSvcLoc);
   alg.addRef();
-  ActsTrk::testing::MyDummyTool tool("myDummyTool", "myDummyTool", &alg);
-  tool.addRef();
-  tool.bindPropertiesTo(pSvcLoc->getOptsSvc());
-  std::cout << "- bindPropertiesTo has completed" << std::endl;
-  assert (tool.sysInitialize().isSuccess());
 
   std::cout << "Starting now with the testing phase" << std::endl;
   std::cout << "Creating dummy Measurement on track object" << std::endl;
@@ -176,7 +108,7 @@ int main() {
   Acts::CalibrationContext cctx;
 
   std::cout << "Creating TrkMeasurementCalibrator" << std::endl;
-  ActsTrk::detail::TrkMeasurementCalibrator measCalibrator( tool );
+  ActsTrk::detail::TrkMeasurementCalibrator measCalibrator{};
 
   std::cout << "Start calling calibrate" << std::endl;
   measCalibrator.template calibrate<Acts::VectorMultiTrajectory>( gctx, cctx,
@@ -197,4 +129,5 @@ int main() {
   std::cout << "- checking BoundSubspaceIndices" << std::endl;
   Acts::BoundSubspaceIndices expectedBoundSpaceIndices{ Acts::eBoundLoc0, Acts::eBoundLoc1 };
   assert( trackStateBackend.getTrackState(0).projectorSubspaceIndices() == expectedBoundSpaceIndices );
+  return EXIT_SUCCESS;
 }

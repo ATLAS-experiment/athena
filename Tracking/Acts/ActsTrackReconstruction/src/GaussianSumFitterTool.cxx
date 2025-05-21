@@ -29,6 +29,7 @@
 #include "ActsEvent/TrackContainer.h"
 
 // PACKAGE
+#include "ActsCalibration/CalibrationContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
@@ -91,11 +92,11 @@ StatusCode GaussianSumFitterTool::initialize() {
   }
 
   m_gsfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
-  m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>(*m_ATLASConverterTool);
+  m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>();
   m_gsfExtensions.calibrator.connect<&ActsTrk::detail::TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
 
-  m_surfaceAccessor.m_converterTool = &(*m_ATLASConverterTool);
-  m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&m_surfaceAccessor);
+  m_surfaceAccessor = detail::TrkMeasSurfaceAccessor{m_ATLASConverterTool.get()};
+  m_gsfExtensions.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_surfaceAccessor);
   m_gsfExtensions.mixtureReducer.connect<&Acts::reduceMixtureWithKLDistance>();
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
@@ -147,11 +148,10 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   std::shared_ptr<Acts::PerigeeSurface> pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
       Acts::Vector3::Zero());
   
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext{};
-
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
+    
   // Set the GaussianSumFitter options
   Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
@@ -163,8 +163,8 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   gsfOptions.componentMergeMethod = m_componentMergeMethod;
   
 
-  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack);
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
+  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
 
   return performFit(ctx, 
 		    tgContext,
@@ -193,11 +193,10 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   std::shared_ptr<Acts::PerigeeSurface> pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
 												   Acts::Vector3::Zero());
   
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext{};
-
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
+                         
   // Set the GaussianSumFitter options
   Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
@@ -209,25 +208,15 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   gsfOptions.abortOnError = false;
   
   std::vector< Acts::SourceLink > trackSourceLinks;
-  trackSourceLinks.reserve(inputMeasSet.size());
+  m_ATLASConverterTool->toSourceLinks(inputMeasSet, trackSourceLinks);
 
-  for (auto* measSet : inputMeasSet) {
-    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *measSet));
-  }
-
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext);
+  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext);
   
   if(m_useDirectNavigation){
     
     std::vector<const Acts::Surface*> surfaces;
     surfaces.reserve(inputMeasSet.size());
-    for (auto* measSet : inputMeasSet) {
-      const auto& slink = m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *measSet);
-      const auto& sl = slink.get<ATLASSourceLink>();
-      const auto& trkSrf = sl->associatedSurface();
-      const auto& actsSrf = m_ATLASConverterTool->trkSurfaceToActsSurface(trkSrf);
-      surfaces.push_back(&actsSrf);
-    }
+    std::ranges::transform(trackSourceLinks, std::back_inserter(surfaces), m_surfaceAccessor);
     
     return performDirectFit(ctx,
 			    tgContext,
@@ -294,10 +283,9 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   // Construct a perigee surface as the target surface
   std::shared_ptr<Acts::PerigeeSurface> pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
   
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext{};
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
   // Set the GaussianSumFitter options
   Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>
@@ -306,16 +294,12 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
 				calContext,
 				*pSurface);
 
-  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
+  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
 
-  for (auto* meas : addMeasColl)  {
-    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *meas));
-  }
+  m_ATLASConverterTool->toSourceLinks(addMeasColl, trackSourceLinks);
 
-  return performFit(ctx,
-		    tgContext,
-		    gsfOptions,
+  return performFit(ctx, tgContext, gsfOptions,
                     trackSourceLinks,
                     initialParams);
 }
@@ -371,11 +355,10 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
    std::shared_ptr<Acts::PerigeeSurface> pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
       Acts::Vector3::Zero());
   
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext{};
-
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
+    
   // Set the GaussianSumFitter options
   Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
@@ -383,10 +366,10 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
 				calContext,
 				*pSurface);
 
-  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1);
-  std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(intrk1);
+  std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(intrk2);
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
-  const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
+  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
 
   return performFit(ctx,
 		    tgContext,

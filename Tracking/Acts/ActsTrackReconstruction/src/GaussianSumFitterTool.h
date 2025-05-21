@@ -29,11 +29,12 @@
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
-#include "src/detail/TrkMeasurementCalibrator.h"
-#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
+
+#include "ActsCalibration/TrkMeasurementCalibrator.h"
+#include "ActsCalibration/TrkMeasSurfaceAccessor.h"
 
 // STL
 #include <string>
@@ -207,7 +208,7 @@ private:
   std::unique_ptr<DirectFitter> m_directFitter {nullptr};
 
 
-  ATLASSourceLinkSurfaceAccessor m_surfaceAccessor{};
+  detail::TrkMeasSurfaceAccessor m_surfaceAccessor{};
   Acts::GsfExtensions<ActsTrk::MutableTrackStateBackend> m_gsfExtensions;
 
   ActsTrk::detail::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};

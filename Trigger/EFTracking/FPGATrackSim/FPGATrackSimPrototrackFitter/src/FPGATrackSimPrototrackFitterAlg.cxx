@@ -4,6 +4,8 @@
 
 #include "FPGATrackSimPrototrackFitterAlg.h"
 
+#include "ActsCalibration/CalibrationContext.h"
+
 constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_FPGATRACKSIM
     true;
@@ -53,10 +55,9 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
      detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
   ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext = Acts::CalibrationContext();
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{ActsTrk::getCalibrationContext(ctx)};
 
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 
@@ -65,10 +66,8 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
     auto res = m_actsFitter->fit(ctx, proto.measurements, *proto.parameters,
-      m_trackingGeometryTool->getGeometryContext(ctx).context(),
-      m_extrapolationTool->getMagneticFieldContext(ctx),
-      Acts::CalibrationContext(),
-      **detectorElementToGeometryIdMap);
+                                 tgContext, mfContext, calContext,
+                                 **detectorElementToGeometryIdMap);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;

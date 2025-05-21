@@ -16,8 +16,20 @@ def ActsToTrkConverterToolCfg(flags,
          # Disable TrackingGeometryTool
          kwargs.setdefault("TrackingGeometryTool", "")
     
-    if flags.Muon.usePhaseIIGeoSetup:
-         kwargs.setdefault("ExtractMuonSurfaces", True)
+    kwargs.setdefault("ExtractMuonSurfaces", flags.Muon.usePhaseIIGeoSetup)
+
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+    kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags)))
+
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+    kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
+    
+    if flags.Detector.GeometryITk:
+        from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
+        kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(ITkBoundaryCheckToolCfg(flags)))
+    elif flags.Detector.GeometryID:
+        from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
+        kwargs.setdefault("BoundaryCheckTool",acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
     return acc

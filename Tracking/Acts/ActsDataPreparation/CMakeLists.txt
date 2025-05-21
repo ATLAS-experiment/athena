@@ -11,7 +11,7 @@ atlas_add_component( ActsDataPreparation
    src/components/*.cxx
    LINK_LIBRARIES
    ActsCore
-   ActsEventCnvLib
+   ActsCalibrationLib
    ActsGeometryLib
    ActsGeometryInterfacesLib
    ActsToolInterfacesLib

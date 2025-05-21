@@ -16,7 +16,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "src/TrackStatePrinterTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 
 // ACTS
 #include "Acts/EventData/VectorTrackContainer.hpp"

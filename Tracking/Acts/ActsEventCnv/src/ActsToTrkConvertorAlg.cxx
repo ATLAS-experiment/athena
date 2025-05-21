@@ -28,14 +28,8 @@ static const InDetDD::SiDetectorElement *actsToDetElem(const Acts::Surface &surf
   return dynamic_cast<const InDetDD::SiDetectorElement *>(actsElement->upstreamDetectorElement());
 }
 
-namespace ActsTrk
-{
+namespace ActsTrk {
 
-  ActsToTrkConvertorAlg::ActsToTrkConvertorAlg(const std::string &name,
-					       ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
-  {
-  }
 
   StatusCode ActsToTrkConvertorAlg::initialize()
   {
