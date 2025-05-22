@@ -187,7 +187,8 @@ auto floatAccessors = initAccessors<float>(
   "ClusterEta", "ClusterPhi",
   "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA",
   "GNTau_Score", "GNTau_ScoreSigTrans", 
-  "pixQ2mod"
+  "pixQ2mod",
+  "adScore"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",
