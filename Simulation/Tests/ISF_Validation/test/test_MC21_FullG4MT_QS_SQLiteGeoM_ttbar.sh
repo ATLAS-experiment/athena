@@ -13,7 +13,7 @@ Sim_tf.py \
     --multithreaded True \
     --athenaopts "default:--threads=1" \
     --geometrySQLite True \
-    --geometrySQLiteFullPath "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/Geometry/ATLAS-R3S-2021-03-02-00-DEV01.db" \
+    --geometrySQLiteFullPath "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/Geometry/ATLAS-R3S-2021-03-02-00-DEV02.db" \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
