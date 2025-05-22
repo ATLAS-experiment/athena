@@ -247,6 +247,10 @@ def GSFBuildInDetParticleCreatorToolCfg(flags,
                                         isTrigger = False,
                                         **kwargs):
     result = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    result.merge(BeamSpotCondAlgCfg(flags))
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
 
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
