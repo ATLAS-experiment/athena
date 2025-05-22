@@ -464,19 +464,11 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
   #Pass verifier as an argument and it will automatically append necessary DataObjects
   #@NOTE: Don't provide any verifier if loaded in the same view as FTF
   if isCosmic(flags) and 'LRT' not in name:
-     # phase-ii EFCB muon flag here
-     if flags.Muon.enableTrigIDtrackReuse:
-        trackParticles='HLT_IDTrack_MuonComb_FTF'
-     else:
-        trackParticles=getIDTracks(flags, name, muonIDreuse=flags.Muon.enableTrigIDtrackReuse)
+    trackParticles=getIDTracks(flags, name, muonIDreuse=flags.Muon.enableTrigIDtrackReuse)
   elif 'LRT' in name:
      muLrtFlags = getFlagsForActiveConfig(flags, "muonLRT", log)
      acc.merge(trigInDetPrecisionTrackingCfg(muLrtFlags, rois= RoIs, signatureName="muonLRT"))
-     # phase-ii EFCB muon flag here
-     if flags.Muon.enableTrigIDtrackReuse:
-        trackParticles='HLT_IDTrack_MuonComb_FTF_LRT'
-     else:
-        trackParticles = getIDTracks(muLrtFlags, name, precision=True)
+     trackParticles = getIDTracks(muLrtFlags, name, precision=True)
   elif 'FS' in name:
      muFsFlags = getFlagsForActiveConfig(flags, "muonFS", log)
      acc.merge(trigInDetPrecisionTrackingCfg(muFsFlags, rois= RoIs, signatureName="muonFS", in_view=False))
@@ -486,21 +478,6 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
      if not flags.Muon.enableTrigIDtrackReuse or suffix=="":
         acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
      trackParticles=getIDTracks(muFlags, name, muonIDreuse=flags.Muon.enableTrigIDtrackReuse, precision=True, suffix=suffix)
-     # phase-ii EFCB muon flag here
-     if flags.Muon.enableTrigIDtrackReuse:
-        trackParticles='HLT_IDTrack_MuonComb_FTF'
-     else:
-        trackParticles = getIDTracks(muFlags, precision=True)
-
-  # phase-ii EFCB muon flag here
-  if flags.Muon.enableTrigIDtrackReuse:
-     from TrigMuonEF.TrigMuonEFConfig import MergeMuonInDetTracksAlgCfg
-     acc.merge(MergeMuonInDetTracksAlgCfg(flags, name="MergeInDetTracks",
-                                      FullIDTrackContainerLocation=getIDTracks(flags),
-                                      MuonCBContainerLocation=muNames.L2CBName, 
-                                      MuonInsideOutContainerLocation=muNames.L2CBName+'IOmode',
-                                      MuonL2mtContainerLocation=muNames.L2CBName+'l2mtmode',
-                                      IDtrackOutputLocation="HLT_IDTrack_MuonComb_FTF"))
 
   if flags.Muon.enableTrigIDtrackReuse:
      if 'LRT' not in name or 'FS' not in name:
