@@ -85,6 +85,11 @@ namespace CP {
     /// Will be updated in execute, so must be mutable
     mutable std::map<unsigned int, std::shared_ptr<ROOT::RDF::RNode>> m_filteredRDFMap;
     mutable std::mutex m_mapMutex;
+    //mutable std::shared_mutex m_mapMutex;
+
+    /// Highest eta bin for which track-based equalization SFs are define.
+    /// If track has higher eta, use SF from highest bin.
+    double m_maxEta;
 
   }; // class PixelDEdxEqualizationTool
 

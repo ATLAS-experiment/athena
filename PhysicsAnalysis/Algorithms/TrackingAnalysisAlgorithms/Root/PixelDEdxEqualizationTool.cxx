@@ -10,7 +10,9 @@ namespace {
 
 namespace CP {
   
-  PixelDEdxEqualizationTool::PixelDEdxEqualizationTool(const std::string& tool_name) : asg::AsgTool(tool_name) {    
+  PixelDEdxEqualizationTool::PixelDEdxEqualizationTool(const std::string& tool_name)
+    : asg::AsgTool(tool_name),
+      m_maxEta(2.5) {
   }
   
   PixelDEdxEqualizationTool::~PixelDEdxEqualizationTool() = default;
@@ -111,6 +113,7 @@ namespace CP {
     /// First, try to find it (lock the map while accessing)
     {
       std::lock_guard<std::mutex> lock(m_mapMutex);
+      //std::shared_lock lock(m_mapMutex);
       
       auto it = m_filteredRDFMap.find(runNumber);
       if (it != m_filteredRDFMap.end()) {
@@ -121,16 +124,21 @@ namespace CP {
     /// If not already cached, filter the dataframe and cache it now.
     if (!filtered_df) {
       ATH_MSG_INFO("SFs for run " << runNumber << " are NOT already cached.  Will filter RDF and cache now.");
-      auto df = std::make_shared<ROOT::RDataFrame>(*m_df);
-      auto runNumbers = df->Take<int>("runNumber");
+      //auto df = std::make_shared<ROOT::RDataFrame>(*m_df);
+      //auto runNumbers = df->Take<int>("runNumber");
+      auto runNumbers = m_df->Take<int>("runNumber");
       closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
                                            [runNumber](int a, int b) {
                                              return std::abs(a - runNumber) < std::abs(b - runNumber); });
       ATH_MSG_INFO("Closest run number:" << closestRunNumber);
-      auto filtered = std::make_shared<ROOT::RDF::RNode>(df->Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"}));
+      //auto filtered = std::make_shared<ROOT::RDF::RNode>(df->Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"}));
+      std::string expr = "runNumber == " + std::to_string(closestRunNumber);
+      auto filtered = std::make_shared<ROOT::RDF::RNode>(m_df->Filter(expr));
+
       /// Store it in the map (lock again)
       {
         std::lock_guard<std::mutex> lock(m_mapMutex);
+        //std::unique_lock lock(m_mapMutex);
         m_filteredRDFMap[runNumber] = filtered;
       }
       filtered_df = filtered;
@@ -159,8 +167,11 @@ namespace CP {
     /// Only derive SFs for |eta| < 2.5.
     /// If |eta|>2.5, apply last SF.
     double absEta = abs(track.eta());
-    if(absEta > 2.5) { // FIXME instead of hardcoding, maybe check if absEta larger than highest etaHigh...
-      absEta = 2.49;
+    //if(absEta > 2.5) { // FIXME instead of hardcoding, maybe check if absEta larger than highest etaHigh...
+    //  absEta = 2.49;
+    //}
+    if(absEta > m_maxEta) { // just use highest bin.  
+      absEta = m_maxEta - 0.001;
     }
     auto result = filtered_df->Filter(
                                       [absEta](double etaLow, double etaHigh) {
@@ -168,7 +179,7 @@ namespace CP {
                                       },
                                       {"etaLow", "etaHigh"}
                                       );
-    
+    /*
     auto SF_values = ( (int) stored_numberOfIBLOverflowsdEdx > 0) ? result.Take<double>("SF_IBLOFYes") : result.Take<double>("SF_IBLOFNo");
     if (SF_values->empty()) {
       ATH_MSG_ERROR("Could not find the scale factor matching the eta & IBLOF status of this track!"
@@ -186,7 +197,34 @@ namespace CP {
     ATH_MSG_DEBUG("Test: found SF " << SF << " for this track.");
     
     return SF;
+    */
+    const std::string sf_column = (static_cast<int>(stored_numberOfIBLOverflowsdEdx) > 0) ? "SF_IBLOFYes" : "SF_IBLOFNo";
+
+    double SF = -1.;
+    int matchCount = 0;
+
+    result.Foreach([&](double val) {
+      ++matchCount;
+      if (matchCount == 1) {
+        SF = val;
+      }
+    }, {sf_column});
     
+    if (matchCount == 0) {
+      ATH_MSG_ERROR("Could not find the scale factor matching the eta & IBLOF status of this track!"
+                    << "\nRun: " << runNumber << ", |eta| = " << absEta << ", IBLOF: " << stored_numberOfIBLOverflowsdEdx
+                    << "\nCannot equalize track dE/dx.");
+      return -1.;
+}
+    if (matchCount > 1) {
+      ATH_MSG_ERROR("Found multiple scale factors matching the eta & IBLOF of this track!"
+                    << "\nCannot equalize track dE/dx.");
+      return -1.;
+    }
+    
+    ATH_MSG_DEBUG("Test: found SF " << SF << " for this track.");
+    return SF;
+
   }
   ////////////////////////
   /// Cluster Level EQ ///
@@ -222,7 +260,7 @@ namespace CP {
                                         return bec == sfBECBin && layerID == cluster.layer && etaM == sfEtaBin; // average over phi & +-z.
                                       },
                                       {"bec", "layerID", "etaM"});
-    
+    /*
     auto SF_values = result.Take<double>("SF");
     auto SF_error_values = result.Take<double>("SF_error");
     if (SF_values->empty() || SF_error_values->empty()) {
@@ -241,6 +279,33 @@ namespace CP {
     ATH_MSG_DEBUG("Test: found SF " << SF << " with error " << SF_error << " for this pixel cluster.");
     
     /// Apply scale factor and store
+    return SF;
+    */
+    double SF = -1.;
+    double SF_error = -1.;
+    int matchCount = 0;
+
+    result.Foreach([&](double sf, double sfErr) {
+      ++matchCount;
+      if (matchCount == 1) {
+        SF = sf;
+        SF_error = sfErr;
+      }
+    }, {"SF", "SF_error"});
+
+    if (matchCount == 0) {
+      ATH_MSG_ERROR("Could not find the scale factor matching the (bec, layer, module eta) of this pixel cluster!"
+                    << "\nCannot equalize cluster dE/dx.");
+      return -1.;
+    }
+    if (matchCount > 1) {
+      ATH_MSG_ERROR("Found multiple scale factors matching the (bec, layer, module eta) of this pixel cluster!"
+                    << "\nCannot equalize cluster dE/dx.");
+      return -1.;
+    }
+
+    ATH_MSG_DEBUG("Test: found SF " << SF << " with error " << SF_error << " for this pixel cluster.");
+
     return SF;
   }
 
