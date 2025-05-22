@@ -60,8 +60,8 @@ namespace LVL1 {
 
       SG::ReadHandleKey<LVL1::MuCTPIL1Topo> m_MuCTPItoL1TopoLocation { this, "locationMuCTPItoL1Topo", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Storegate key for MuCTPItoL1Topo "};
       SG::ReadHandleKey<LVL1::MuCTPIL1Topo> m_MuCTPItoL1TopoLocationPlusOne { this, "locationMuCTPItoL1Topo1", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Storegate key for MuCTPItoL1TopoPlusOne"};
-      SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonL1RoILocation {this, "locationMuonRoI", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Empty=Use Muctpi, LVL1MuonRoIs=Use reading from xAOD L1 RoI"};
-      SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonL1RoILocationPlusOne {this, "locationMuonRoI1", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Empty=Use Muctpi, LVL1MuonRoIs=Use reading from xAOD L1 RoI"};
+      SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonL1RoILocation {this, "locationMuonRoI", "LVL1MuonRoIs", "Empty=Use Muctpi, LVL1MuonRoIs=Use reading from xAOD L1 RoI"};
+      SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonL1RoILocationPlusOne {this, "locationMuonRoI1", "LVL1MuonRoIsBCp1", "Empty=Use Muctpi, LVL1MuonRoIs=Use reading from xAOD L1 RoI"};
     
    };
 }
