@@ -49,6 +49,12 @@ def ActsTrackingGeometrySvcCfg(flags,
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
 
+  if flags.Detector.GeometryMuon and flags.Muon.usePhaseIIGeoSetup:
+    subDetectors += ["Muon"]
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    acc.merge(MuonGeoModelCfg(flags))
+    kwargs.setdefault("MSVolumeBuilder", CompFactory.ActsMSTrackingVolumeBuilder())
+
   if flags.Detector.GeometryITkPixel:
     subDetectors += ["ITkPixel"]
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
