@@ -50,13 +50,13 @@ MuonInputProvider::initialize() {
 
    // MuCTPIL1Topo from muon RoI
    if (!m_MuonL1RoILocation.key().empty())
-     {m_MuonL1RoILocation = m_MuonL1RoILocation.key() + "FromMuonRoI";}
+     {m_MuonL1RoILocation = m_MuonL1RoILocation.key();}
    CHECK(m_MuonL1RoILocation.initialize(!m_MuonL1RoILocation.key().empty()));
 
 
   //LateMuon from muonRoI
   if(!m_MuonL1RoILocationPlusOne.key().empty()){
-    m_MuonL1RoILocationPlusOne = m_MuonL1RoILocationPlusOne.key() + "FromMuonRoI1";
+     m_MuonL1RoILocationPlusOne = m_MuonL1RoILocationPlusOne.key();
   }
   CHECK(m_MuonL1RoILocationPlusOne.initialize(!m_MuonL1RoILocationPlusOne.key().empty()));
 

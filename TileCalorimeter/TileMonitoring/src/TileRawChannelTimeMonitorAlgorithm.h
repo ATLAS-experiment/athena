@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILERAWCHANNELTIMEMONITORALGORITHM_H
@@ -52,6 +52,12 @@ class TileRawChannelTimeMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<std::vector<std::pair<int, int>>> m_partitionTimeDifferencePairs{this,
          "PartitionTimeDiffferncePairs", {}, "Partition (ROS - 1) pairs to monitor time differnce"};
 
+   Gaudi::Property<int> m_fakeTime{this,
+         "FakeTime", -100, "Fake time to fill if there is no signal, but it's expected"};
+
+   Gaudi::Property<bool> m_fillFakeTime{this,
+         "FillFakeTime", true, "File fake time to fill if there is no signal, but it's expected"};
+
     Gaudi::Property<std::vector<int>> m_amplitudeFragIDs{this,
         "AmplitudeFragIDs", {}, "Tile Frag IDs of modules to fill histograms with amplitude vs LB."};
 
@@ -97,6 +103,9 @@ class TileRawChannelTimeMonitorAlgorithm : public AthMonitorAlgorithm {
     std::map<std::string, int> m_amplitudeVsLBGroups;
 
     std::array<bool, TileCalibUtils::MAX_DRAWERIDX> m_amplitudeMonitoredDrawerIdx{};
+
+    static constexpr int s_nDigitizers = 8;
+    enum Signal {SIGNAL_NOT_EXPECTED = 0, SIGNAL_EXPECTED, SIGNAL_PRESENT};
 };
 
 

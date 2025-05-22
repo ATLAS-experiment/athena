@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -279,16 +279,16 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
     static const SG::Decorator< std::vector<float> > cells_gainDec("cells_gain");
     static const SG::Decorator< std::vector<double> > asym_rings_sumDec("asym_rings_sum");
     static const SG::Decorator< std::vector<double> > rings_sumDec("rings_sum");
-    cells_etaDec(*ptrigRingerRings) = cells_eta;
-    cells_etDec(*ptrigRingerRings) = cells_et;
-    cells_phiDec(*ptrigRingerRings) = cells_phi;
-    cells_samplingDec(*ptrigRingerRings) = cells_sampling;
-    cells_sizeDec(*ptrigRingerRings) = cells_size;
-    cells_idDec(*ptrigRingerRings) = cells_id;
-    cells_gainDec(*ptrigRingerRings) = cells_gain;
+    cells_etaDec(*ptrigRingerRings) = std::move(cells_eta);
+    cells_etDec(*ptrigRingerRings) = std::move(cells_et);
+    cells_phiDec(*ptrigRingerRings) = std::move(cells_phi);
+    cells_samplingDec(*ptrigRingerRings) = std::move(cells_sampling);
+    cells_sizeDec(*ptrigRingerRings) = std::move(cells_size);
+    cells_idDec(*ptrigRingerRings) = std::move(cells_id);
+    cells_gainDec(*ptrigRingerRings) = std::move(cells_gain);
 
-    if (m_doQuarter[0]) asym_rings_sumDec(*ptrigRingerRings) = rings_sum;
-    else  rings_sumDec(*ptrigRingerRings) = rings_sum;
+    if (m_doQuarter[0]) asym_rings_sumDec(*ptrigRingerRings) = std::move(rings_sum);
+    else  rings_sumDec(*ptrigRingerRings) = std::move(rings_sum);
   }
 
   auto clusLink = ElementLink<xAOD::TrigEMClusterContainer>(m_clusterContainerKey.key(),0,context);

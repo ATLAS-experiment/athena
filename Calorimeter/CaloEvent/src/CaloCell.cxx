@@ -153,6 +153,11 @@ void CaloCell::setCaloDDE (const CaloDetDescrElement* caloDDE)
   m_time = time;
 }
 
+  void CaloCell::addTime (float delta)
+{
+  m_time += delta;
+}
+
   void CaloCell::setQuality (uint16_t quality)
 {
   m_qualProv[0] = quality;
