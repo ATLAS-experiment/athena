@@ -7,6 +7,7 @@
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "DecisionHandling/ComboHypoToolBase.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 #include "xAODJet/Jet.h"
 #include "xAODMuon/Muon.h"
@@ -14,6 +15,7 @@
 #include "xAODEgamma/Photon.h"
 #include "xAODTau/TauJet.h"
 #include "xAODTrigMissingET/TrigMissingET.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
 
 #include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 
@@ -27,7 +29,7 @@ public:
   TrigADComboHypoTool(const std::string& type, const std::string& name, const IInterface* parent);
   virtual StatusCode initialize() override;
   //need to see all jets at once not a series of combinations
-  virtual StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& ctx) const override;
+  virtual StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& context) const override;
   
 private:
   Gaudi::Property<unsigned int> m_maxjs{this, "max_jets",{6}, "Maximum number of jets allowed in the event"};
@@ -37,7 +39,11 @@ private:
 
   Gaudi::Property<double> m_adScoreThres{this, "adScoreThres", {0.}, "HLT AD score threshold"};
 
-  bool getAdDecision(
+  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_adScoreKey{this, "adScoreKey", "Undefined", ""};
+  ToolHandle<GenericMonitoringTool> m_monTool{this, "monTool", "", "Monitoring tool"};
+  Gaudi::Property<bool> m_monFlag{this, "monFlag", false, "Monitoring flag"};
+  
+  float getAdScore(
     const std::vector<const xAOD::Jet*> &input_jets,
     const std::vector<const xAOD::Muon*> &input_muons,
     const std::vector<const xAOD::Electron*> &input_electrons,

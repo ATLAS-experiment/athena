@@ -3,5 +3,5 @@
 from TrigAnomalyDetectionHypo.TrigADHypoConfig import TrigADComboHypoToolFromDict
 
 def TrigADComboHypoToolCfg(flags, chainDict):
-    tool = TrigADComboHypoToolFromDict(chainDict)
+    tool = TrigADComboHypoToolFromDict(flags, chainDict)
     return tool
