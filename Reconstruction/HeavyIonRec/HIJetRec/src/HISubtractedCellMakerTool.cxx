@@ -75,7 +75,7 @@ StatusCode HISubtractedCellMakerTool::process (CaloCellContainer* theCells,
     if(nCells!=0.) rho=s->rho()/nCells;
     rho*=m_modulatorTool->getModulation(phi, modShape);
     float ue=rho*HICaloCellHelper::getAreaEtaPhi(pCell)*std::cosh(eta);
-    pCell->setEnergy(pCell->energy()-ue);
+    pCell->addEnergy(-ue);
   }
   return StatusCode::SUCCESS;
 }
