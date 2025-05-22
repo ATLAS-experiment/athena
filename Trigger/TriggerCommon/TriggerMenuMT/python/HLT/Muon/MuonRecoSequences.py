@@ -68,7 +68,7 @@ def isLRT(name):
 #Returns relevant track collection name
 def getIDTracks(flags, name='', muonIDreuse=False, precision=False, suffix=''):
 
-  if muonIDreuse:
+  if muonIDreuse or suffix != '':
     if isLRT(name):
       return 'HLT_IDTrack_MuonComb_FTF_LRT'
     elif isCosmic(flags):
@@ -412,6 +412,8 @@ def VDVEFMuCBCfg(flags, RoIs, name, suffix):
   acc.addEventAlgo(alg)
   return acc
 
+
+
 def VDVPrecMuTrkCfg(flags, name, suffix):
   acc = ComponentAccumulator()
 
@@ -419,11 +421,13 @@ def VDVPrecMuTrkCfg(flags, name, suffix):
   trkname = "LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
   
-  # phase-ii EFCB muon flag here
-  if not flags.Muon.enableTrigIDtrackReuse:
+  if not flags.Muon.enableTrigIDtrackReuse and suffix == '':
     dataObjects += [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname, muonIDreuse=flags.Muon.enableTrigIDtrackReuse) )]
   else:
-    MuonL2CBContainer = muNames.L2CBName+suffix
+    if suffix != 'idReuse':
+      MuonL2CBContainer = muNames.L2CBName+suffix
+    else:
+      MuonL2CBContainer = muNames.L2CBName
     dataObjects += [( 'xAOD::L2CombinedMuonContainer', 'StoreGateSvc+'+MuonL2CBContainer)]
 
   if not flags.Input.isMC:
@@ -475,13 +479,16 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
      trackParticles = getIDTracks(muFsFlags, precision=True)
   else:
      muFlags = getFlagsForActiveConfig(flags, "muon", log)
-     if not flags.Muon.enableTrigIDtrackReuse or suffix=="":
+     if not flags.Muon.enableTrigIDtrackReuse and suffix == '':
         acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
      trackParticles=getIDTracks(muFlags, name, muonIDreuse=flags.Muon.enableTrigIDtrackReuse, precision=True, suffix=suffix)
 
-  if flags.Muon.enableTrigIDtrackReuse:
+  if flags.Muon.enableTrigIDtrackReuse or suffix != '':
      if 'LRT' not in name or 'FS' not in name:
-        MuonL2CBInputContainer = muNames.L2CBName+suffix
+        if suffix != 'idReuse':
+           MuonL2CBInputContainer = muNames.L2CBName+suffix
+        else:
+           MuonL2CBInputContainer = muNames.L2CBName
         from TrigMuonEF.TrigMuonEFConfig import GetL2CBmuonInDetTracksAlgCfg
         acc.merge(GetL2CBmuonInDetTracksAlgCfg(flags, name="GetL2CBInDetTracks"+suffix,
                                          MuonL2CBContainerLocation=MuonL2CBInputContainer, 

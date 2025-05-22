@@ -560,6 +560,25 @@ def muEFCBl2mtSequenceGenCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
+def muEFCBidReuseSequenceGenCfg(flags, is_probe_leg=False):
+
+    (selAcc, sequenceOut) = muEFCBAlgSequenceCfg(flags, 'idReuse', '', is_probe_leg)
+
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFCombinerHypoToolFromDict
+    efmuCBHypo = TrigMuonEFHypoAlgCfg( flags,
+                              name = 'TrigMuonEFCombinerHypoAlgidReuse',
+                              MuonDecisions = sequenceOut+'idReuse',
+                              MapToPreviousDecisions=True)
+
+    selAcc.addHypoAlgo(efmuCBHypo)
+    
+    efmuCBSequence = MenuSequence(flags, selAcc,
+                                    HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)
+
+    return efmuCBSequence
+
+
+@AccumulatorCache
 def muEFCBIDperfSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBAlgSequenceCfg(flags, '', 'idperf', is_probe_leg)
