@@ -395,7 +395,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
             return StatusCode::FAILURE;
           }
-	} if(m_sCampaign=="mc23d"){
+	} else if(m_sCampaign=="mc23d"){
           if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
             m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
           }
@@ -403,8 +403,8 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
             return StatusCode::FAILURE;
           }
-        } else if (m_sCampaign=="mc20"){
-            ATH_MSG_ERROR("SFs for Run2 not available, please check the Campaign option in the tool configuration. If the config is correct, then please contact the tau trigger coordinators");
+        } else {
+            ATH_MSG_ERROR("SFs are not available for " << m_sCampaign << " campaign.  For Run2, please fallback to the 2022-prerec tag. If the config is correct, then please contact the tau trigger coordinators");
 	    return StatusCode::FAILURE;
 	}
       }
