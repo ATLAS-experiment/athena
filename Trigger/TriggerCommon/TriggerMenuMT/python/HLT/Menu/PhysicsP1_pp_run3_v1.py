@@ -49,6 +49,8 @@ def addPhysicsP1Chains(chains):
     chainsP1['Jet'] = [
         # L1 item is not in MC menu
         ChainProp(name='HLT_j0_perf_L1jJ30_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:online']),
+        # ATR-31286 Higher Threshold Duplicate
+        ChainProp(name='HLT_j0_perf_L1jJ60_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:online']),
 
     ]
 
