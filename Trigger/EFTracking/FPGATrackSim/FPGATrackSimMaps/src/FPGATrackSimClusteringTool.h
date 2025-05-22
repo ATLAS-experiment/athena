@@ -17,6 +17,7 @@
 #include "FPGATrackSimMaps/FPGATrackSimClusteringToolI.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimCluster.h"
+#include "FPGATrackSimLorentzAngle/FPGATrackSimLorentzAngleTool.h"
 #include <vector>
 #include <memory>
 
@@ -35,6 +36,7 @@ public:
   FPGATrackSimClusteringTool(const std::string&, const std::string&, const IInterface*);
 
   virtual ~FPGATrackSimClusteringTool() = default;
+  virtual StatusCode initialize() override;
 
   virtual StatusCode DoClustering(FPGATrackSimLogicalEventInputHeader &, std::vector<FPGATrackSimCluster> &) const override;
 
@@ -45,7 +47,9 @@ public:
   Gaudi::Property<float> m_coordRPrecision {this, "CoordRPrecision", 1./64., "fixed point precision of r coordinate" };
   Gaudi::Property<float> m_coordPhiPrecision {this, "CoordPhiPrecision", 1./8192., "fixed point precision of phi coordinate" };
   Gaudi::Property<float> m_coordZPrecision {this, "CoordZPrecision", 1./32., "fixed point precision of z coordinate" };
+  Gaudi::Property<bool>  m_doLorentzAngleShift { this, "doLorentzAngleShift", false, "apply Lorentz angle shift" };
 
+  ToolHandle<FPGATrackSim::LorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "", "FPGATrackSim tool to retrieve Lorentz angle"};
 
   using HitPtrCollection = std::vector<std::unique_ptr<FPGATrackSimHit>>;
   using HitPtrContainer = std::vector<HitPtrCollection>;
