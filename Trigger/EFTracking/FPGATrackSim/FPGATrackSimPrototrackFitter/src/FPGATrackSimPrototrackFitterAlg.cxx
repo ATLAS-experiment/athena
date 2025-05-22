@@ -13,9 +13,6 @@ constexpr bool enableBenchmark =
     false;
 #endif
 
-FPGATrackSim::FPGATrackSimPrototrackFitterAlg::FPGATrackSimPrototrackFitterAlg (const std::string& name, ISvcLocator* pSvcLocator ) : AthReentrantAlgorithm( name, pSvcLocator ){
-}
-
 StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::initialize() {
   ATH_CHECK(m_trackContainerKey.initialize());
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
@@ -23,8 +20,6 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::initialize() {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ProtoTrackCollectionFromFPGAKey.initialize());
-  ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
-
   ATH_CHECK(m_chrono.retrieve());
   return StatusCode::SUCCESS;
 }
@@ -51,9 +46,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
   /// The block is borrowed from the ACTS TrackFindingAlg and 
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
-  SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-     detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
-  ATH_CHECK(detectorElementToGeometryIdMap.isValid());
+  const auto* detectorElementToGeometryIdMap = m_trackingGeometryTool->surfaceIdMap();
 
   const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
@@ -67,7 +60,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
   for (auto & proto : *myProtoTracks){
     auto res = m_actsFitter->fit(ctx, proto.measurements, *proto.parameters,
                                  tgContext, mfContext, calContext,
-                                 **detectorElementToGeometryIdMap);
+                                 *detectorElementToGeometryIdMap);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;

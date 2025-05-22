@@ -48,8 +48,8 @@
 namespace ActsTrk {
 class TrackExtensionAlg : public AthReentrantAlgorithm {
  public:
-  TrackExtensionAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;
   using CKFOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
@@ -66,11 +66,6 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
       this, "ACTSTracksLocation", "",
       "Output track collection (ActsTrk variant)"};
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
-  SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap>
-      m_detectorElementToGeometryIdMapKey{
-          this, "DetectorElementToActsGeometryIdMapKey",
-          "DetectorElementToActsGeometryIdMap",
-          "Map which associates detector elements to Acts Geometry IDs"};
 
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};

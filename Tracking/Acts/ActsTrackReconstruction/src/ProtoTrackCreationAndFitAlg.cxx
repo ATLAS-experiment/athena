@@ -9,8 +9,6 @@
 #include <stdlib.h>
 
 
-ActsTrk::ProtoTrackCreationAndFitAlg::ProtoTrackCreationAndFitAlg (const std::string& name, ISvcLocator* pSvcLocator ) : AthReentrantAlgorithm( name, pSvcLocator ){
-}
 
 StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::initialize() {
   ATH_CHECK(m_trackContainerKey.initialize()); 
@@ -20,7 +18,6 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::initialize() {
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsFitter.retrieve()); 
   ATH_CHECK(m_patternBuilder.retrieve());
-  ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
 
@@ -65,14 +62,12 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
 
-  SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-     detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
-  ATH_CHECK(detectorElementToGeometryIdMap.isValid());
+  const auto* detectorElementToGeometryIdMap =  m_trackingGeometryTool->surfaceIdMap();  
 
   const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
   const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
-
+  
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 
   ActsTrk::MutableTrackContainer trackContainer;
@@ -83,7 +78,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
                                  m_trackingGeometryTool->getGeometryContext(ctx).context(),
                                  m_extrapolationTool->getMagneticFieldContext(ctx),
                                  calContext,
-                                 **detectorElementToGeometryIdMap);
+                                 *detectorElementToGeometryIdMap);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;

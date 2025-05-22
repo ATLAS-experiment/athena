@@ -66,9 +66,6 @@ def ActsCoreStripSpacePointToolCfg(flags,
                                    **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
-    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
-    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
     kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
     
     if 'LorentzAngleTool' not in kwargs:
