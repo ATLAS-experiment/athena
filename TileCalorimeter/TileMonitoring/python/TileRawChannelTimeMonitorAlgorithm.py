@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from TileConfiguration.TileConfigFlags import TileRunType
@@ -147,7 +147,7 @@ def TileRawChannelTimeMonitoringConfig(flags, amplitudeFragIDs=None, **kwargs):
 
         moduleName = Tile.getDrawerString(ros + 1, module)
         title = 'Run ' + run + ' ' + moduleName + ' Digitizer ' + str(digitizer)
-        title +=  ': Time vs luminosity block (partition average time is subracted);LumiBlock;t [ns]'
+        title +=  ': Time vs LB (partition average time is subracted, fake time (-100) means no signal);LumiBlock;t [ns]'
         name = 'lumiBlock,time;TileDigitizerTimeLB_' + moduleName + '_DIGI_' + str(digitizer)
         path = getPartitionName(ros + 1) + '/' + moduleName
 
