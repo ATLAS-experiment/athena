@@ -43,7 +43,6 @@ namespace InDet {
   public:
     // create constructor for standalone Root
     JetTrackFilterTool( const std::string& name );
-    virtual ~JetTrackFilterTool();
 
     //  static const InterfaceID& interfaceID();
     virtual StatusCode initialize() override;
@@ -71,7 +70,7 @@ namespace InDet {
     double m_deltaR = 0.1;
     float m_trkEffSystScale = 1.0;
 
-    TH2* m_trkNomEff = nullptr; //!
+    std::unique_ptr<TH2> m_trkNomEff = nullptr; //!
 
     // allow the user to configure which calibration file to use if desired
     std::string m_calibFileNomEff;
