@@ -107,7 +107,7 @@ private:
 
   Gaudi::Property<std::vector<size_t>> m_barrelMaterialBins{this, "BarrelMaterialBins", {10, 10}};
   Gaudi::Property<std::vector<size_t>> m_endcapMaterialBins{this, "EndcapMaterialBins", {5, 20}};
-  Gaudi::Property<std::vector<std::string>> m_buildSubdetectors{this, "BuildSubDetectors", {"Pixel", "SCT", "TRT", "Calo", "HGTD"}};
+  Gaudi::Property<std::vector<std::string>> m_buildSubdetectors{this, "BuildSubDetectors", {"Pixel", "SCT", "TRT", "Calo", "HGTD", "Muon"}};
 
   /// the specifications for building additional
   /// passive cylinders in the barrel region:
@@ -136,6 +136,9 @@ private:
 
   ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, 
       "CaloVolumeBuilder", "", "CaloVolumeBuilder"};
+
+  ToolHandle<IActsTrackingVolumeBuilder> m_msVolumeBuilder{this, 
+      "MSVolumeBuilder", "", "MSVolumeBuilder"};
     /// Define the subdetectors for which the tracking geometry does not expect a valid alignment store
   Gaudi::Property<std::vector<unsigned int>> m_subDetNoAlignProp{this, "NotAlignDetectors", {}};
   std::set<ActsTrk::DetectorType> m_subDetNoAlign{};
