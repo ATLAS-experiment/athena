@@ -66,7 +66,6 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), true);
-    m_logicEventHeader_cluster = m_writeOutputTool->addInputBranch(m_clusterBranch.value(), true);
     m_logicEventHeader = m_writeOutputTool->addInputBranch(m_postClusterBranch.value(), true);
     
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -238,8 +237,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     m_eventHeader.reset();
     m_logicEventHeader->reset();
     m_logicEventHeader_precluster->reset();
-    m_logicEventHeader_cluster->reset();
-    
+
     return StatusCode::SUCCESS;
 }
 
@@ -299,7 +297,6 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     ATH_MSG_DEBUG("Running hits conversion");
     m_logicEventHeader->reset();
     m_logicEventHeader_precluster->reset();
-    m_logicEventHeader_cluster->reset();
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: RawToLogical");
     for (auto hitMapTool : m_hitMapTools){
         ATH_CHECK(hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader));
@@ -339,11 +336,6 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
         std::make_move_iterator(m_clusters->end()));
     
     if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: Clustering");
-
-    // At this stage, copy the logicEventHeader.
-    // TODO: no longer needed because we don't do SPs here.
-    if(m_writeOutputData) *m_logicEventHeader_cluster = *m_logicEventHeader;
-
 
     return StatusCode::SUCCESS;
 }
