@@ -62,11 +62,7 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import (ActsDetectorElementToActsGeometryIdMappingAlgCfg,
-                                               ActsVolumeIdToDetectorCollectionMappingAlgCfg)
-    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
-    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
-
+    from ActsConfig.ActsGeometryConfig import ActsVolumeIdToDetectorCollectionMappingAlgCfg
     # Remove HGTD Volumes from the propagation unless we need it
     if not flags.Acts.useHGTDClusterInTrackFinding:
         # HGTD has volume id:

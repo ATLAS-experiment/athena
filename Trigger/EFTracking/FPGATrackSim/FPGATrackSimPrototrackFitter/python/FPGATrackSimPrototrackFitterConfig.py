@@ -8,10 +8,6 @@ def FPGAPrototrackFitAlgCfg(flags,
                             **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
-    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
-    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
-
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 

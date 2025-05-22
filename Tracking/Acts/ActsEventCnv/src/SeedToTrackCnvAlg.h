@@ -12,7 +12,6 @@
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackParametersContainer.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -32,7 +31,7 @@ namespace ActsTrk {
  **/
 class SeedToTrackCnvAlg : public AthReentrantAlgorithm {
 public:
-  SeedToTrackCnvAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   virtual ~SeedToTrackCnvAlg() override = default;
 
   virtual StatusCode initialize() override;
@@ -42,10 +41,7 @@ private:
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
   SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKey{this, "SeedContainerKey", {}, "Seed containers"};
   SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_actsTrackParamsKey {this, "EstimatedTrackParametersKey", {}, "Track Parameters Key"};
-  SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
-     {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
-      "Map which associates detector elements to Acts Geometry IDs"};
-
+ 
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 };

@@ -19,19 +19,13 @@
 namespace ActsTrk
 {
 
-  CoreStripSpacePointFormationTool::CoreStripSpacePointFormationTool(const std::string &type,
-                                                                     const std::string &name,
-                                                                     const IInterface *parent)
-      : base_class(type, name, parent)
-  {}
-
+ 
   StatusCode CoreStripSpacePointFormationTool::initialize(){
 
     ATH_CHECK(detStore()->retrieve(m_stripId, "SCT_ID"));
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
-
+ 
     if(m_useSCTLayerDep_OverlapCuts)
       ATH_MSG_INFO("Use SCT SP overlap cuts based on layer number parity");
     
@@ -93,8 +87,7 @@ namespace ActsTrk
 
     auto spBuilderConfig = std::make_shared<Acts::SpacePointBuilderConfig>();
     const std::shared_ptr<const Acts::TrackingGeometry> trkGeometry = m_trackingGeometryTool->trackingGeometry();
-    const DetectorElementToActsGeometryIdMap* detectorElementToGeometryIdMap{nullptr};
-    ATH_CHECK(SG::get(detectorElementToGeometryIdMap, m_detectorElementToGeometryIdMapKey, ctx));
+    const DetectorElementToActsGeometryIdMap* detectorElementToGeometryIdMap = m_trackingGeometryTool->surfaceIdMap();
 
     detail::xAODUncalibMeasSurfAcc surfaceAccessor{trkGeometry.get(), detectorElementToGeometryIdMap};
     spBuilderConfig->slSurfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&surfaceAccessor);

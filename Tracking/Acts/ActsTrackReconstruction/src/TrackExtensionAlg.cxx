@@ -53,17 +53,12 @@
 
 namespace ActsTrk{
 
-  TrackExtensionAlg::TrackExtensionAlg(const std::string& name,
-                                      ISvcLocator* pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator) {}
-
   StatusCode TrackExtensionAlg::initialize() {
     ATH_CHECK(m_pixelClusters.initialize());
     ATH_CHECK(m_protoTrackCollectionKey.initialize());
     ATH_CHECK(m_trackContainerKey.initialize());
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(
         ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
-    ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
@@ -125,20 +120,17 @@ namespace ActsTrk{
     const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
     const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
     const Acts::CalibrationContext calContext{getCalibrationContext(context)};
-  
-    SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-       detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, context};
-    ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
+    const auto* detectorElementToGeometryIdMap = m_trackingGeometryTool->surfaceIdMap();
+ 
     const Acts::TrackingGeometry *
        acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
-    ATH_CHECK( acts_tracking_geometry != nullptr);
-
+   
     SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
     ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
     // potential TODO: filtering only certain layers
     detail::TrackFindingMeasurements measurements(1ul /* number of measurement containers*/);
-    measurements.addMeasurements(0, *pixelClustersHandle, **detectorElementToGeometryIdMap);
+    measurements.addMeasurements(0, *pixelClustersHandle, *detectorElementToGeometryIdMap);
     std::optional<detail::MeasurementIndex> measurementIndex;
     if (m_trackStatePrinter.isSet()) {
       measurementIndex.emplace(1ul);
@@ -168,7 +160,7 @@ namespace ActsTrk{
 
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
        *acts_tracking_geometry,
-       **detectorElementToGeometryIdMap,
+       *detectorElementToGeometryIdMap,
        m_pixelCalibTool,
        m_stripCalibTool,
        m_hgtdCalibTool);
@@ -189,14 +181,14 @@ namespace ActsTrk{
     for (const ActsTrk::ProtoTrack& protoTrack : *protoTracksHandle) {
       if(protoTrack.measurements.empty()) continue;
 
-      const Acts::Surface* refSurface = ActsTrk::getSurfaceOfMeasurement(*acts_tracking_geometry, **detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
+      const Acts::Surface* refSurface = ActsTrk::getSurfaceOfMeasurement(*acts_tracking_geometry, *detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
 //        ActsTrk::getSurfaceOfMeasurement( *m_trackingGeometryTool->trackingGeometry(), **detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
 
       auto res = m_actsFitter->fit(context, protoTrack.measurements,*protoTrack.parameters,
                                   m_trackingGeometryTool->getGeometryContext(context).context(),
                                   m_extrapolationTool->getMagneticFieldContext(context),
                                   calContext,
-                                  **detectorElementToGeometryIdMap, 
+                                  *detectorElementToGeometryIdMap, 
                                   refSurface);
       if(!res) continue;
       if (res->size() == 0 ) continue;

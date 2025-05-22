@@ -23,7 +23,8 @@
 namespace ActsTrk{
     class ProtoTrackCreationAndFitAlg: public ::AthReentrantAlgorithm { 
     public: 
-    ProtoTrackCreationAndFitAlg( const std::string& name, ISvcLocator* pSvcLocator );
+    
+    using ::AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual ~ProtoTrackCreationAndFitAlg() = default;
 
     ///uncomment and implement methods as required
@@ -44,11 +45,6 @@ namespace ActsTrk{
       ToolHandle<ActsTrk::IFitterTool> m_actsFitter{this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};
       // tracking geometry - used to translate ATLAS to ACTS geometry
       ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-      // detector element collections - again needed for geometry translation 
-      SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
-         {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
-          "Map which associates detector elements to Acts Geometry IDs"};
-
       // ACTS extrapolation tool - provides the magnetic field 
       ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
       // output location to write to 

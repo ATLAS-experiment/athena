@@ -523,9 +523,7 @@ def ActsStoreTrackSeedsCfg(flags,
     trackKey = f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks'
     particleKey = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}TrackParticles'
 
-    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
-    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
-    
+   
     if processPixels:
         # Create track parameters from pixel seeds
         from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg
@@ -638,7 +636,6 @@ def ActsSeedToTrackCnvAlgCfg(flags,
                              name: str = "ActsSeedToTrackCnvAlg",
                              **kwargs: dict) -> ComponentAccumulator:
   acc = ComponentAccumulator()
-  kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
   kwargs.setdefault('SeedContainerKey', [])
   kwargs.setdefault('EstimatedTrackParametersKey', [])
