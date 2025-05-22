@@ -169,7 +169,7 @@ StatusCode Generic4VecCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEve
     ATH_CHECK( readHisto(correctionFactor, h_correction_2D, this_pt, this_eta) );
   }
   // Apply the correction and set it in the jet EDM
-  calibP4 *= 1.0/correctionFactor;
+  calibP4 *= correctionFactor;
   jet.setAttribute<xAOD::JetFourMom_t>(m_outJetScale.Data(),calibP4);
   jet.setJetP4(calibP4);
 
