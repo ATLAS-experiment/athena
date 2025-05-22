@@ -191,7 +191,7 @@ void ActsToTrkConverterTool::toSourceLinks(const std::vector<const Trk::Measurem
     if (sourceLinks.capacity() < sourceLinks.size() + measSet.size()) {
       sourceLinks.reserve(sourceLinks.size() + measSet.size());
     }
-    std::ranges::transform(measSet, std::back_inserter(sourceLinks), [this](const Trk::MeasurementBase* meas) {
+    std::ranges::transform(measSet, std::back_inserter(sourceLinks), [](const Trk::MeasurementBase* meas) {
                              return detail::TrkMeasurementCalibrator::pack(meas);
                           });
 }
