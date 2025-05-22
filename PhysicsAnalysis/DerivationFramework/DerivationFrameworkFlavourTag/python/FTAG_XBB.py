@@ -25,7 +25,7 @@ def FTAG_XBBKernelCfg(flags, name='FTAG_XBBKernel', **kwargs):
     skimmingTools = []
 
     # filter leptons
-    lepton_skimming_expression = 'count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
+    lepton_skimming_expression = 'count( (Muons.pt > 5*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 5*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
     FTAG_XBBLeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
             name = "FTAG_XBBLeptonSkimmingTool",
             expression = lepton_skimming_expression )
@@ -103,9 +103,17 @@ def FTAG_XBBTriggerSkimmingToolCfg(flags, skimmingTools=None):
                         'HLT_j420_a10t_lcw_jes_35smcINF_L1SC111','HLT_j460_a10r_L1SC111','HLT_j460_a10r_L1J100',
                         'HLT_j460_a10_lcw_subjes_L1SC111','HLT_j460_a10_lcw_subjes_L1J100',
                         'HLT_j460_a10t_lcw_jes_L1SC111']
-    large_r_jet_run3 = []
-    
-    triggers = photon_run2 + photon_run3 + large_r_jet_run2 + large_r_jet_run3
+    large_r_jet_run3 = ["HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1J100","HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1SC111-CJ15",
+                        "HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1J100", "HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1SC111-CJ15"]
+
+    lepton_run2 = ["HLT_e24_lhmedium_L1EM20VH", "HLT_e60_lhmedium", "HLT_e120_lhloose", "HLT_mu20_iloose_L1MU15",
+                   "HLT_mu50", "HLT_e26_lhtight_nod0_ivarloose", "HLT_e60_lhmedium_nod0", "HLT_e140_lhloose_nod0",
+                   "HLT_mu26_ivarmedium"]
+    lepton_run3 = ["HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_e60_lhmedium_L1EM22VHI","HLT_e140_lhloose_L1EM22VHI",
+                   "HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH", "HLT_e26_lhtight_ivarloose_L1eEM26M",
+                   "HLT_e60_lhmedium_L1eEM26M", "HLT_e140_lhloose_L1eEM26M"]
+
+    triggers = photon_run2 + photon_run3 + large_r_jet_run2 + large_r_jet_run3 + lepton_run2 + lepton_run3
 
     FTAG_XBBTrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "FTAG_XBBTrigSkimmingTool1",
             TriggerListOR          = triggers )
