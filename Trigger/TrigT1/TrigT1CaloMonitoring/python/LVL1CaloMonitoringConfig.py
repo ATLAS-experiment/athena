@@ -519,11 +519,11 @@ def LVL1CaloMonitoringConfig(flags):
                 from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
                 JfexSimMonitoring = JfexSimMonitoringConfig(flags)
                 result.merge(JfexSimMonitoring)
-            
-            if flags.Trigger.L1.doTopo:
+
+            if flags.Trigger.L1.doTopo and isData:
                 #L1TopoSimulation (with monitoring Off to avoid clash with next call)
                 from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
-                result.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False,DeactivateL1TopoMuons=True))
+                result.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False))
                 #L1TopoOnlineMonitoring specific for L1Calo DQPlots
                 from L1TopoOnlineMonitoring.L1TopoOnlineMonitoringConfig import Phase1TopoMonitoringCfg
                 result.merge(Phase1TopoMonitoringCfg(flags))
