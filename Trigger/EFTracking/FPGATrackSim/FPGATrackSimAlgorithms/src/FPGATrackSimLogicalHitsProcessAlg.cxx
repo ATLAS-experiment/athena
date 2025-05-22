@@ -69,7 +69,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
 
     // ROOT branches created for test vectors.
-    m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
+    if (m_outputRoadUnionTool) m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
 
     // Updated slicing engine test vectors will have three streams.
@@ -81,7 +81,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     m_slicedStripHeaderPreSP = m_writeOutputTool->addInputBranch(m_sliceStripBranchPreSP.value(), true);
 
     // Connect the slicing tools accordingly. We probably no longer need to hook up the roadfinder here.
-    m_roadFinderTool->setupSlices(m_slicedHitHeader);
+    if (m_outputRoadUnionTool) m_roadFinderTool->setupSlices(m_slicedHitHeader);
     m_slicingEngineTool->setupSlices(m_slicedFirstPixelHeader, m_slicedSecondPixelHeader, m_slicedStripHeader);
 
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -445,7 +445,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Reset data pointers
-    m_slicedHitHeader->reset();
+    if (m_outputRoadUnionTool) m_slicedHitHeader->reset();
     m_logicEventOutputHeader->reset();
 
     return StatusCode::SUCCESS;

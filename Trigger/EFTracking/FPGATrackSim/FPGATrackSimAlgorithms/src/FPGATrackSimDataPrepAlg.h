@@ -91,14 +91,12 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
 
         // Properties for the output header tool.
         Gaudi::Property<std::string> m_preClusterBranch      {this, "preClusterBranch", "LogicalEventInputHeader_PreCluster", "Name of the branch for pre-cluster input data in output ROOT file." };
-        Gaudi::Property<std::string> m_clusterBranch         {this, "clusterBranch", "LogicalEventInputHeader_Cluster", "Name of the branch for clustered input data in output ROOT file." };
         Gaudi::Property<std::string> m_postClusterBranch     {this, "postClusterBranch", "LogicalEventInputHeader_PostCluster", "Name of the branch for post-cluster input data in output ROOT file." };
 
         // ROOT pointers 
         FPGATrackSimEventInputHeader          m_eventHeader;
         FPGATrackSimEventInputHeader          m_firstInputHeader;
         FPGATrackSimLogicalEventInputHeader*  m_logicEventHeader_precluster = nullptr;
-        FPGATrackSimLogicalEventInputHeader*  m_logicEventHeader_cluster = nullptr;
         FPGATrackSimLogicalEventInputHeader*  m_logicEventHeader = nullptr;
 
         // Event storage

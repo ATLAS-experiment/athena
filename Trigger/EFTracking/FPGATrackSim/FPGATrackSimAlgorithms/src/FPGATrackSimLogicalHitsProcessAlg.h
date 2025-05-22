@@ -112,6 +112,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property <int> m_NumOfHitPerGrouping { this, "NumOfHitPerGrouping", 5, "Number of minimum overlapping hits for a track candidate to be removed in the HoughRootOutputTool"};
         Gaudi::Property<bool> m_passLowestChi2TrackOnly {this,"passLowestChi2TrackOnly", false, "case when passing only lowest chi2 track per road"};
         Gaudi::Property<bool> m_secondStageStrips {this, "secondStageStrips", true, "If set to true, strip hits/SPs go to the second stage. Otherwise they go to the first." };
+        Gaudi::Property<bool> m_outputRoadUnionTool {this, "outputRoadUnionTool", false, "If set to true, create LogicalEventInputHeader in output ROOT file using road union tool."};
 
         // Properties for the output header tool.
         Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for sliced hits in output ROOT file." };
