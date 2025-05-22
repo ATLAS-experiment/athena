@@ -1,6 +1,39 @@
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
+
+# note: string DQ algo parameters must have leading/trailing ' char, to distinguish from other parts of algo config
+# these initial values were determined from run 486894 in 2024
+# these should be reviewed at an L1Calo meeting in 2025, prior to data taking
+# commenting out for start of 2025 - will remove this comment once new set of known anomalies established
+knownAnomalies_hotHcal = {
+    #     "KnownDead":"\"1,29;12,57;15,57;18,24;18,41;18,50;19,41;2,29;20,41;21,41;22,41;23,29;23,41;24,41;25,36;25,41;26,18;26,38;27,18;28,18;29,18;32,18;33,18;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
+    "KnownDead":"\"1,29;13,36;18,24;18,50;2,29;23,29;25,36;26,38;30,15;32,46;36,39;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
+    #     "KnownWarm":"\"26,3;27,3;28,3;29,3;30,3;31,3;32,3;33,3;34,3\"", # noisy tile drawer
+    #     "KnownHot":"\"15,49\"" # one hotspot in LAr HCal?
+    "KnownHot":"\"15,49;11,27\""
+}
+
+knownAnomalies_coldHcal = {
+    #"KnownDead":"\"1,29;2,29;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
+    "KnownDead":knownAnomalies_hotHcal["KnownDead"],
+    "KnownCold":"\"1,30;2,30\""
+    #"KnownWarm":"\"5,33\"" # one slightly-frequent coldspot
+}
+knownAnomalies_hotEcal = {
+    "KnownHot":"\"2,15;2,16;2,55;2,56;47,35;47,36;48,35;48,36;47,47;47,48;48,47;48,48\"",
+    #    "KnownCold":"\"19,18;48,8;8,33;9,19;9,20;9,33;9,34\"",
+    "KnownCold":"\"8,33;9,33;8,34;9,34;10,18;9,19;9,20;10,20;20,48;49,41;49,42;19,18;19,9;3,17;48,8\"",
+    "KnownWarm":"\"22,13;22,14;23,13:23,14;22,47;22,48;23,47;23,48\"",
+    #     "KnownWarm":"\"2,15;2,47;2,55;2,56;47,35;47,36;47,47;47,48;48,47;50,44\""
+}
+knownAnomalies_coldEcal = {
+    #     "KnownHot":"\"1,15;2,15;47,47;48,36\"",
+    "KnownHot":"\"1,15;1,16;2,15;2,16;1,47;1,48;2,47;2,48;1,55;1,56;2,55;2,56;22,47;22,48;23,47;23,48;22,13;22,14;23,13;23,14;50,43;50,44;47,35;47,36;48,35;48,36;47,47;47,48;48,47;48,48\"",
+    "KnownCold":"\"8,33;8,34;49,41;49,42\"",
+    #     "KnownWarm":"\"1,47;1,48;1,49;1,55;1,56;2,16;2,47;2,48;2,55;2,56;22,14;23,14;47,35;47,36;47,48;48,35;48,47;48,48;49,51;50,43;50,44\""
+}
+
 def EfexInputMonitoringConfig(flags):
     '''Function to configure LVL1 EfexInput algorithm in the monitoring system.'''
 
@@ -35,36 +68,9 @@ def EfexInputMonitoringConfig(flags):
                            xbins=50,xmin=-2.5,xmax=2.5,
                            ybins=64,ymin=-math.pi,ymax=math.pi)
 
-    # note: string DQ algo parameters must have leading/trailing ' char, to distinguish from other parts of algo config
-    # these initial values were determined from run 486894 in 2024
-    # these should be reviewed at an L1Calo meeting in 2025, prior to data taking
-    # commenting out for start of 2025 - will remove this comment once new set of known anomalies established
-    # knownAnomalies_hotHcal = {
-    #     "KnownDead":"\"1,29;12,57;15,57;18,24;18,41;18,50;19,41;2,29;20,41;21,41;22,41;23,29;23,41;24,41;25,36;25,41;26,18;26,38;27,18;28,18;29,18;32,18;33,18;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
-    #     "KnownWarm":"\"26,3;27,3;28,3;29,3;30,3;31,3;32,3;33,3;34,3\"", # noisy tile drawer
-    #     "KnownHot":"\"15,49\"" # one hotspot in LAr HCal?
-    # }
-    # knownAnomalies_coldHcal = {
-    #     "KnownDead":"\"1,29;2,29;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
-    #     "KnownWarm":"\"5,33\"" # one slightly-frequent coldspot
-    # }
-    # knownAnomalies_hotEcal = {
-    #     "KnownCold":"\"19,18;48,8;8,33;9,19;9,20;9,33;9,34\"",
-    #     "KnownWarm":"\"2,15;2,47;2,55;2,56;47,35;47,36;47,47;47,48;48,47;50,44\""
-    # }
-    # knownAnomalies_coldEcal = {
-    #     "KnownHot":"\"1,15;2,15;47,47;48,36\"",
-    #     "KnownWarm":"\"1,47;1,48;1,49;1,55;1,56;2,16;2,47;2,48;2,55;2,56;22,14;23,14;47,35;47,36;47,48;48,35;48,47;48,48;49,51;50,43;50,44\""
-    # }
 
-    knownAnomalies_hotHcal = {
-    }
-    knownAnomalies_coldHcal = {
-    }
-    knownAnomalies_hotEcal = {
-    }
-    knownAnomalies_coldEcal = {
-    }
+
+
 
     commonAlgConfig = {"libname":"libdqm_summaries.so",
                        "name":"L1Calo_BinsDiffFromStripMedian",
@@ -75,9 +81,9 @@ def EfexInputMonitoringConfig(flags):
     commonThresholdConfig = {
         "NWrongKnown":[0,100], # warn of any corrections that are needed for the known anomalies lists
         "NDead":[0,2], # warn on any new dead spots, error if more than a couple
-        "NHot":[0,2],  # warn on any new hot spots, error if more than a couple
-        "NCold":[0,2],  # warn on any new cold spots, error if more than a couple
-        "NWarm":[0,5],  # warn on any new warm spots, error if more than 5
+        "NHot":[0,5],  # warn on any new hot spots, error if more than a couple
+        "NCold":[0,5],  # warn on any new cold spots, error if more than a couple
+        "NWarm":[30,40],  # warn on more than 30 warm spots, error if more than 40
         "NDeadStrip":[0,0], # no dead strips - exception to this will be in cold hcal, where tile cannot be negative
         "NConsecUnlikelyStrip":[2,5], # warn if more than 2 consecutive strips deemed unlikely
     }
@@ -161,8 +167,8 @@ def EfexInputMonitoringConfig(flags):
                                ybins=64*50,ymin=0.5,ymax=64*50+0.5,
                                opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
 
-    helper.defineTree('LBNString,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID,timeSince,timeUntil;errors',
-                                           "lbnString/string:error/string:eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string:timeSince/I:timeUntil/I",
+    helper.defineTree('LBN,Error,LBNString,EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID,timeSince,timeUntil;errors',
+                                           "lbn/I:error/string:lbnString/string:eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string:timeSince/I:timeUntil/I",
                                            title="errors tree;LBN;Error",fillGroup="errors")
 
 

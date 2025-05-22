@@ -147,8 +147,17 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
                 double binvalue = (nBinsZ<=0) ? histogram->GetBinContent(i,j) : histogram->GetBinContent(t,reverseConvention ? ((ymax-ymin+1)*(i-1)+j) :  ((xmax-xmin+1)*(j-1)+i));
                 if (binvalue < ignoreBelow) continue;
                 if(binvalue>0) filledRows.insert(j); // used to veto running deadstrip tests on sparsely populated plots
-                onestrip.push_back(binvalue);
-                stripSum += binvalue;
+                // don't include known anomalous bins in strip calculations
+                bool knownAnomaly=false;
+                for(auto& [k,v] : knownBins) {
+                    if(v.find({i,j})!=v.end()) {
+                        knownAnomaly = true; break;
+                    }
+                }
+                if(!knownAnomaly) {
+                    onestrip.push_back(binvalue);
+                    stripSum += binvalue;
+                }
                 //stripSum2 += binvalue*binvalue;
             }
             stripsAvg.push_back(stripSum/onestrip.size());

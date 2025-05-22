@@ -85,7 +85,7 @@ def JetEfficiencyMonitoringConfig(flags):
     gfex_LR_triggers = ['L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25']
 
     jfex_SR_triggers = ['L1_jJ30','L1_jJ40','L1_jJ50', 'L1_jJ60', 'L1_jJ80','L1_jJ90', 'L1_jJ125','L1_jJ140','L1_jJ160', 'L1_jJ180']
-    jfex_LR_triggers = ['L1_SC111-CjJ40']
+    jfex_LR_triggers = []#['L1_SC111-CjJ40']
     
     all_SR_triggers =  gfex_SR_triggers + jfex_SR_triggers
     all_LR_triggers = gfex_LR_triggers + jfex_LR_triggers
