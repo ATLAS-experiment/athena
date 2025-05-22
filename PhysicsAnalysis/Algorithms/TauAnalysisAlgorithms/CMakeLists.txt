@@ -19,8 +19,7 @@ atlas_add_dictionary( TauAnalysisAlgorithmsDict
    LINK_LIBRARIES TauAnalysisAlgorithmsLib )
 
 if( NOT XAOD_STANDALONE )
-   atlas_add_component( TauAnalysisAlgorithms
-      src/*.h src/*.cxx src/components/*.cxx
+   atlas_add_component( TauAnalysisAlgorithms src/components/*.cxx
       LINK_LIBRARIES GaudiKernel TauAnalysisAlgorithmsLib )
 endif()
 
