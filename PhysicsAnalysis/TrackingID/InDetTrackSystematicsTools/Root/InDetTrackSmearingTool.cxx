@@ -58,14 +58,7 @@ namespace InDet {
 
     declareProperty("calibFileD0Dead", m_calibFileD0Dead = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/res_diff_d0_vs_pt.hist.root");
     declareProperty("calibFileZ0Dead", m_calibFileZ0Dead = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/res_diff_z0_vs_pt.hist.root");
-
-    declareProperty("calibFileIP_lowpt", m_calibFileIP_lowpt = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/trackIPAlign_dec2017.root");
-    declareProperty("calibFileIP_highpt_Data16", m_calibFileIP_highpt_Data16 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/trackIPAlignTight.root");
-    declareProperty("calibFileIP_highpt_Data17", m_calibFileIP_highpt_Data17 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v19/trackIPAlignTight_data2017.root");
     declareProperty("calibFileIP_CTIDE", m_calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/d0z0_smearing_factors.root");
-    declareProperty("runNumber", m_runNumber);
-    declareProperty("doCTIDE", m_doCTIDE);
-
   }
 
 
@@ -80,14 +73,16 @@ namespace InDet {
     ATH_MSG_INFO( "Using for TRK_RES_D0_DEAD case the calibration file " << PathResolverFindCalibFile(m_calibFileD0Dead) );
     ATH_MSG_INFO( "Using for TRK_RES_Z0_DEAD case the calibration file " << PathResolverFindCalibFile(m_calibFileZ0Dead) );
 
-    if (m_doCTIDE) {
-      ATH_MSG_INFO( "Using dedicated CTIDE smearing maps for tracks in jets" );
-      ATH_MSG_INFO( "Using for the full pT range the CTIDE calibration file " << PathResolverFindCalibFile(m_calibFileIP_CTIDE) );
-    } else {
-      ATH_MSG_INFO( "Using the low pT (< 15 GeV) calibration file " << PathResolverFindCalibFile(m_calibFileIP_lowpt) );
-      ATH_MSG_INFO( "Using the high pT (> 15 GeV) Data16 calibration file " << PathResolverFindCalibFile(m_calibFileIP_highpt_Data16) );
-      ATH_MSG_INFO( "Using the high pT (> 15 GeV) Data17 calibration file " << PathResolverFindCalibFile(m_calibFileIP_highpt_Data17) );
-    }
+    ATH_MSG_INFO( "Using dedicated CTIDE smearing maps for tracks in jets" );
+    ATH_MSG_INFO( "Using for the full pT range the CTIDE calibration file " << PathResolverFindCalibFile(m_calibFileIP_CTIDE) );
+
+    ATH_CHECK( initObject<TH1>(m_smearD0Dead, m_calibFileD0Dead, "res_pt_d0_0") );
+    ATH_CHECK( initObject<TH1>(m_smearZ0Dead, m_calibFileZ0Dead, "res_pt_z0_0") );
+
+    std::string rootfileName = m_calibFileIP_CTIDE;
+
+    ATH_CHECK( initObject<TH2>(m_smearD0, rootfileName, "d0quaddiff_Pt_Eta" ) );
+    ATH_CHECK( initObject<TH2>(m_smearZ0, rootfileName, "z0quaddiff_Pt_Eta" ) );
 
     // do common initialization (at time of writing, register affecting systematics)
     ATH_CHECK( InDetTrackSystematicsTool::initialize() );
@@ -96,71 +91,28 @@ namespace InDet {
     return StatusCode::SUCCESS;
   }
 
-  InDetTrackSmearingTool::~InDetTrackSmearingTool()
-  {
-    delete m_smearD0Dead; m_smearD0Dead = nullptr;
-    delete m_smearZ0Dead; m_smearZ0Dead = nullptr;
-
-    delete m_smearD0_lowpt; m_smearD0_lowpt = nullptr;
-    delete m_smearZ0_lowpt; m_smearZ0_lowpt = nullptr;
-    delete m_smearD0_lowpt_sys_up; m_smearD0_lowpt_sys_up = nullptr;
-    delete m_smearZ0_lowpt_sys_up; m_smearZ0_lowpt_sys_up = nullptr;
-    delete m_smearD0_lowpt_sys_dw; m_smearD0_lowpt_sys_dw = nullptr;
-    delete m_smearZ0_lowpt_sys_dw; m_smearZ0_lowpt_sys_dw = nullptr;
-
-    delete m_smearD0_highpt; m_smearD0_highpt = nullptr;
-    delete m_smearZ0_highpt; m_smearZ0_highpt = nullptr;
-    delete m_smearD0_highpt_sys_up; m_smearD0_highpt_sys_up = nullptr;
-    delete m_smearZ0_highpt_sys_up; m_smearZ0_highpt_sys_up = nullptr;
-    delete m_smearD0_highpt_sys_dw; m_smearD0_highpt_sys_dw = nullptr;
-    delete m_smearZ0_highpt_sys_dw; m_smearZ0_highpt_sys_dw = nullptr;
-  }
-
   float InDetTrackSmearingTool::GetSmearD0Sigma(const xAOD::TrackParticle& track) const {
     float pt = 1.e-3*track.pt(); // need to convert pt to GeV
     float eta = track.eta();
     float sigma_D0 = 0.f;
 
     if ( isActive(TRK_RES_D0_DEAD) ) {
-      float d0Smear = m_smearD0Dead->GetBinContent(std::as_const(m_smearD0Dead)->FindBin(pt));
+      float d0Smear = m_smearD0Dead->GetBinContent(std::as_const(m_smearD0Dead)->FindFixBin(pt));
       sigma_D0 += d0Smear*d0Smear;
     }
 
     bool isActiveD0Meas = isActive(TRK_RES_D0_MEAS);
-    bool isActiveD0MeasUp = isActive(TRK_RES_D0_MEAS_UP);
-    bool isActiveD0MeasDown = isActive(TRK_RES_D0_MEAS_DOWN);
 
-    if (isActiveD0Meas + isActiveD0MeasUp + isActiveD0MeasDown > 1) {
-      // this should be checked against in applySystematicVariation
-      throw std::runtime_error( "Multiple incompatible D0 systematics are activated." );
-    } else if (isActiveD0Meas + isActiveD0MeasUp + isActiveD0MeasDown == 0) {
+    if (isActiveD0Meas == 0) {
       // pass-through D0Meas, return sigma_D0 early
       return std::sqrt(sigma_D0);
     }
 
-    TH2* d0hist_lowpt = nullptr;
-    TH2* d0hist_highpt = nullptr;
+    TH2* d0hist = m_smearD0.get();
 
-    if(isActiveD0Meas) {
-      d0hist_lowpt = m_smearD0_lowpt;
-      d0hist_highpt = m_smearD0_highpt;
-    } else if(isActiveD0MeasUp) {
-      d0hist_lowpt = m_smearD0_lowpt_sys_up;
-      d0hist_highpt = m_smearD0_highpt_sys_up;
-    } else if(isActiveD0MeasDown) {
-      d0hist_lowpt = m_smearD0_lowpt_sys_dw;
-      d0hist_highpt = m_smearD0_highpt_sys_dw;
-    }
+    if (d0hist == nullptr) ATH_MSG_ERROR( "d0 histogram is null!" );
 
-    if (d0hist_lowpt == nullptr) ATH_MSG_ERROR( "d0 lowpt histogram is null!" );
-    if (d0hist_highpt == nullptr) ATH_MSG_ERROR( "d0 highpt histogram is null!" );
-
-    float d0Smear = 0.f;
-    if (pt < 15) {
-      d0Smear = readHistogram(d0hist_lowpt, pt, eta);
-    } else {
-      d0Smear = readHistogram(d0hist_highpt, pt, eta);
-    }
+    float d0Smear = readHistogram(d0hist, pt, eta);
 
     // Apply a minimum smearing in the case where there is an empty bin
     // TODO: Remove for next round of recommendations
@@ -181,46 +133,22 @@ namespace InDet {
 
     if ( isActive(TRK_RES_Z0_DEAD) ) {
       // the histogram returns a smeared value for z0*sin(theta), so we need to divide by sin(theta)
-      float z0Smear = m_smearZ0Dead->GetBinContent(std::as_const(m_smearZ0Dead)->FindBin(pt))/std::sin(track.theta());
+      float z0Smear = m_smearZ0Dead->GetBinContent(std::as_const(m_smearZ0Dead)->FindFixBin(pt))/std::sin(track.theta());
       sigma_Z0 += z0Smear*z0Smear;
     }
 
-
     bool isActiveZ0Meas = isActive(TRK_RES_Z0_MEAS);
-    bool isActiveZ0MeasUp = isActive(TRK_RES_Z0_MEAS_UP);
-    bool isActiveZ0MeasDown = isActive(TRK_RES_Z0_MEAS_DOWN);
 
-    if (isActiveZ0Meas + isActiveZ0MeasUp + isActiveZ0MeasDown > 1) {
-      // this should be checked against in applySystematicVariation
-      throw std::runtime_error( "Multiple incompatible Z0 systematics are activated." );
-    } else if (isActiveZ0Meas + isActiveZ0MeasUp + isActiveZ0MeasDown == 0) {
+    if (isActiveZ0Meas == 0) {
       // pass-through Z0Meas, return sigma_Z0 early
       return std::sqrt(sigma_Z0);
     }
 
-    TH2* z0hist_lowpt = nullptr;
-    TH2* z0hist_highpt = nullptr;
+    TH2* z0hist = m_smearZ0.get();
 
-    if(isActiveZ0Meas) {
-      z0hist_lowpt = m_smearZ0_lowpt;
-      z0hist_highpt = m_smearZ0_highpt;
-    } else if(isActiveZ0MeasUp) {
-      z0hist_lowpt = m_smearZ0_lowpt_sys_up;
-      z0hist_highpt = m_smearZ0_highpt_sys_up;
-    } else if(isActiveZ0MeasDown) {
-      z0hist_lowpt = m_smearZ0_lowpt_sys_dw;
-      z0hist_highpt = m_smearZ0_highpt_sys_dw;
-    }
+    if (z0hist == nullptr) ATH_MSG_ERROR( "z0 histogram is null!" );
 
-    if (z0hist_lowpt == nullptr) ATH_MSG_ERROR( "z0 lowpt histogram is null!" );
-    if (z0hist_highpt == nullptr) ATH_MSG_ERROR( "z0 highpt histogram is null!" );
-
-    float z0Smear = 0.f;
-    if (pt < 15) {
-      z0Smear = readHistogram(z0hist_lowpt, pt, eta);
-    } else {
-      z0Smear = readHistogram(z0hist_highpt, pt, eta);
-    }
+    float z0Smear = readHistogram(z0hist, pt, eta);
 
     // Apply a minimum smearing in the case where there is an empty bin
     // TODO: Remove for next round of recommendations
@@ -235,13 +163,6 @@ namespace InDet {
 
 CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle& track ) {
 
-    [[maybe_unused]] static const bool firstTime = [&]() {
-      if ( ! firstCall().isSuccess() ) { // this will check data vs. MC and run number.
-        throw std::runtime_error("Error calling InDetTrackBiasingTool::firstCall");
-      }
-      return false;
-    }();
-
     float sigmaD0 = GetSmearD0Sigma( track );
     float sigmaZ0 = GetSmearZ0Sigma( track );
 
@@ -253,104 +174,6 @@ CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle&
     if ( sigmaZ0 > 0. ) accZ0( track ) = m_rnd->Gaus( track.z0(), sigmaZ0 );
 
     return CP::CorrectionCode::Ok;
-  }
-
-  StatusCode InDetTrackSmearingTool::initHistograms(int runNumber)
-  {
-
-    // For now, the Dead and lowpt histograms can be initialized without knowing the run number
-    ATH_CHECK( initObject<TH1>(m_smearD0Dead, m_calibFileD0Dead, "res_pt_d0_0") );
-    ATH_CHECK( initObject<TH1>(m_smearZ0Dead, m_calibFileZ0Dead, "res_pt_z0_0") );
-
-    // determine maps based on which year to use
-    bool useData17Maps = false;
-    if (runNumber <= 0) {
-        ATH_MSG_WARNING( "Run number not set." );
-    }
-    if (runNumber >= 311481) {
-      ATH_MSG_INFO( "runNumber corresponds to 2017/2018 - using the Data17 smearing maps where appropriate" );
-      useData17Maps = true;
-    } else {
-      ATH_MSG_INFO( "using the Data16 smearing maps where appropriate" );
-    }
-
-    std::string rootfileName_lowpt;
-    std::string rootfileName_highpt;
-
-    if (m_doCTIDE) {
-
-      // tool configured for tracks in jets
-      // same map for lowpt and highpt
-
-      rootfileName_lowpt  = m_calibFileIP_CTIDE;
-      rootfileName_highpt = m_calibFileIP_CTIDE;
-
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt, rootfileName_lowpt, "d0quaddiff_Pt_Eta" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt, rootfileName_lowpt, "z0quaddiff_Pt_Eta" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt_sys_up, rootfileName_lowpt, "d0quaddiff_Pt_Eta_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt_sys_up, rootfileName_lowpt, "z0quaddiff_Pt_Eta_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt_sys_dw, rootfileName_lowpt, "d0quaddiff_Pt_Eta_down" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt_sys_dw, rootfileName_lowpt, "z0quaddiff_Pt_Eta_down" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt, rootfileName_highpt, "d0quaddiff_Pt_Eta" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt, rootfileName_highpt, "z0quaddiff_Pt_Eta" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt_sys_up, rootfileName_highpt, "d0quaddiff_Pt_Eta_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt_sys_up, rootfileName_highpt, "z0quaddiff_Pt_Eta_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt_sys_dw, rootfileName_highpt, "d0quaddiff_Pt_Eta_down" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt_sys_dw, rootfileName_highpt, "z0quaddiff_Pt_Eta_down" ) );
-
-    } else {
-
-      // nominally use the minbias and Zmumu maps
-
-      // for now, the minbias maps used for lowpt don't have a year dependence
-      rootfileName_lowpt = m_calibFileIP_lowpt;
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt, rootfileName_lowpt, "d0quaddiff_comb_Pt_Eta" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt, rootfileName_lowpt, "z0quaddiff_comb_Pt_Eta" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt_sys_up, rootfileName_lowpt, "d0quaddiff_comb_Pt_Eta_sys_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt_sys_up, rootfileName_lowpt, "z0quaddiff_comb_Pt_Eta_sys_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt_sys_dw, rootfileName_lowpt, "d0quaddiff_comb_Pt_Eta_sys_dw" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt_sys_dw, rootfileName_lowpt, "z0quaddiff_comb_Pt_Eta_sys_dw" ) );
-
-      // Zmumu maps for highpt
-      if (useData17Maps) {
-        rootfileName_highpt = m_calibFileIP_highpt_Data17;
-      } else {
-        rootfileName_highpt = m_calibFileIP_highpt_Data16;
-      }
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt, rootfileName_highpt, "quad_diff/d0quaddiff_comb_Pt_Eta" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt, rootfileName_highpt, "quad_diff/z0quaddiff_comb_Pt_Eta" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt_sys_up, rootfileName_highpt, "quad_diff/d0quaddiff_comb_Pt_Eta_sys_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt_sys_up, rootfileName_highpt, "quad_diff/z0quaddiff_comb_Pt_Eta_sys_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt_sys_dw, rootfileName_highpt, "quad_diff/d0quaddiff_comb_Pt_Eta_sys_dw" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt_sys_dw, rootfileName_highpt, "quad_diff/z0quaddiff_comb_Pt_Eta_sys_dw" ) );
-
-    }
-
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode InDetTrackSmearingTool::firstCall()
-  {
-
-    const xAOD::EventInfo* ei = nullptr;
-    auto sc = evtStore()->retrieve( ei, "EventInfo" );
-    if ( ! sc.isSuccess() ) {
-      if (m_runNumber <= 0) {
-        ATH_MSG_ERROR( "Unable to retrieve from event store. Manually set run number." );
-        return StatusCode::FAILURE;
-      }
-    }
-
-    auto runNumber = ei->runNumber();
-    if (m_runNumber > 0) {
-      if ( m_runNumber != runNumber ) {
-        ATH_MSG_WARNING( "Manually-set run number (" << m_runNumber <<
-                         ") does not match that from the event store (" << runNumber << ")." );
-        ATH_MSG_WARNING( "Will use the manually set run number, but you must make sure this is the desired behaviour!" );
-      }
-      runNumber = m_runNumber;
-    }
-    return initHistograms( runNumber );
   }
 
   CP::CorrectionCode InDetTrackSmearingTool::correctedCopy( const xAOD::TrackParticle& in,
@@ -386,7 +209,7 @@ CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle&
     return InDetTrackSystematicsTool::applySystematicVariation(systs);
   }
 
-  float InDetTrackSmearingTool::readHistogram(TH2* histogram, float pt, float eta) const {
+  float InDetTrackSmearingTool::readHistogram(const TH2* histogram, float pt, float eta) const {
     // safety measure:
     if( eta>2.499 )  eta= 2.499;
     if( eta<-2.499 ) eta=-2.499;

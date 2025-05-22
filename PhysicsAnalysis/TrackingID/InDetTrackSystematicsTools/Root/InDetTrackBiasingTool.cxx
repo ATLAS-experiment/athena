@@ -237,161 +237,61 @@ namespace InDet {
   StatusCode InDetTrackBiasingTool::initHistograms()
   {
 
-    TH2* data15_biasD0Histogram_tmp = nullptr;
-    TH2* data15_biasZ0Histogram_tmp = nullptr;
-    TH2* data15_biasQoverPsagittaHistogram_tmp = nullptr;
-    TH2* data15_biasD0HistError_tmp = nullptr;
-    TH2* data15_biasZ0HistError_tmp = nullptr;
-    TH2* data15_biasQoverPsagittaHistError_tmp = nullptr;
-
-    TH2* data16_1stPart_biasD0Histogram_tmp = nullptr;
-    TH2* data16_1stPart_biasZ0Histogram_tmp = nullptr;
-    TH2* data16_1stPart_biasQoverPsagittaHistogram_tmp = nullptr;
-    TH2* data16_1stPart_biasD0HistError_tmp = nullptr;
-    TH2* data16_1stPart_biasZ0HistError_tmp = nullptr;
-    TH2* data16_1stPart_biasQoverPsagittaHistError_tmp = nullptr;
-
-    TH2* data16_2ndPart_biasD0Histogram_tmp = nullptr;
-    TH2* data16_2ndPart_biasZ0Histogram_tmp = nullptr;
-    TH2* data16_2ndPart_biasQoverPsagittaHistogram_tmp = nullptr;
-    TH2* data16_2ndPart_biasD0HistError_tmp = nullptr;
-    TH2* data16_2ndPart_biasZ0HistError_tmp = nullptr;
-    TH2* data16_2ndPart_biasQoverPsagittaHistError_tmp = nullptr;
-
-    TH2* data17_1stPart_biasD0Histogram_tmp = nullptr;
-    TH2* data17_1stPart_biasZ0Histogram_tmp = nullptr;
-    TH2* data17_1stPart_biasQoverPsagittaHistogram_tmp = nullptr;
-    TH2* data17_1stPart_biasD0HistError_tmp = nullptr;
-    TH2* data17_1stPart_biasZ0HistError_tmp = nullptr;
-    TH2* data17_1stPart_biasQoverPsagittaHistError_tmp = nullptr;
-
-    TH2* data17_2ndPart_biasD0Histogram_tmp = nullptr;
-    TH2* data17_2ndPart_biasZ0Histogram_tmp = nullptr;
-    TH2* data17_2ndPart_biasQoverPsagittaHistogram_tmp = nullptr;
-    TH2* data17_2ndPart_biasD0HistError_tmp = nullptr;
-    TH2* data17_2ndPart_biasZ0HistError_tmp = nullptr;
-    TH2* data17_2ndPart_biasQoverPsagittaHistError_tmp = nullptr;
-
-    TH2* data18_1stPart_biasD0Histogram_tmp = nullptr;
-    TH2* data18_1stPart_biasZ0Histogram_tmp = nullptr;
-    TH2* data18_1stPart_biasQoverPsagittaHistogram_tmp = nullptr;
-    TH2* data18_1stPart_biasD0HistError_tmp = nullptr;
-    TH2* data18_1stPart_biasZ0HistError_tmp = nullptr;
-    TH2* data18_1stPart_biasQoverPsagittaHistError_tmp = nullptr;
-
-    TH2* data18_2ndPart_biasD0Histogram_tmp = nullptr;
-    TH2* data18_2ndPart_biasZ0Histogram_tmp = nullptr;
-    TH2* data18_2ndPart_biasQoverPsagittaHistogram_tmp = nullptr;
-    TH2* data18_2ndPart_biasD0HistError_tmp = nullptr;
-    TH2* data18_2ndPart_biasZ0HistError_tmp = nullptr;
-    TH2* data18_2ndPart_biasQoverPsagittaHistError_tmp = nullptr;
-
     ATH_MSG_INFO( "Using for data15 (before 296939) the calibration file " << PathResolverFindCalibFile(m_calibFileData15) );
-    ATH_CHECK ( initObject<TH2>(data15_biasD0Histogram_tmp, m_calibFileData15, m_d0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data15_biasZ0Histogram_tmp, m_calibFileData15, m_z0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data15_biasQoverPsagittaHistogram_tmp, m_calibFileData15, m_sagitta_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data15_biasD0HistError_tmp, m_calibFileData15, m_d0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data15_biasZ0HistError_tmp, m_calibFileData15, m_z0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data15_biasQoverPsagittaHistError_tmp, m_calibFileData15, m_sagitta_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data15_biasD0Histogram, m_calibFileData15, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data15_biasZ0Histogram, m_calibFileData15, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data15_biasQoverPsagittaHistogram, m_calibFileData15, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data15_biasD0HistError, m_calibFileData15, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data15_biasZ0HistError, m_calibFileData15, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data15_biasQoverPsagittaHistError, m_calibFileData15, m_sagitta_uncertainty_histName) );
 
     ATH_MSG_INFO( "Using for data16 part 1/2 (296939 to 301912) the calibration file " << PathResolverFindCalibFile(m_calibFileData16_1stPart) );
-    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasD0Histogram_tmp, m_calibFileData16_1stPart, m_d0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasZ0Histogram_tmp, m_calibFileData16_1stPart, m_z0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasQoverPsagittaHistogram_tmp, m_calibFileData16_1stPart, m_sagitta_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasD0HistError_tmp, m_calibFileData16_1stPart, m_d0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasZ0HistError_tmp, m_calibFileData16_1stPart, m_z0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasQoverPsagittaHistError_tmp, m_calibFileData16_1stPart, m_sagitta_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_1stPart_biasD0Histogram, m_calibFileData16_1stPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_1stPart_biasZ0Histogram, m_calibFileData16_1stPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_1stPart_biasQoverPsagittaHistogram, m_calibFileData16_1stPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_1stPart_biasD0HistError, m_calibFileData16_1stPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_1stPart_biasZ0HistError, m_calibFileData16_1stPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_1stPart_biasQoverPsagittaHistError, m_calibFileData16_1stPart, m_sagitta_uncertainty_histName) );
 
     ATH_MSG_INFO( "Using for data16 part 2/2 (301912 to 312649) the calibration file " << PathResolverFindCalibFile(m_calibFileData16_2ndPart) );
-    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasD0Histogram_tmp, m_calibFileData16_2ndPart, m_d0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasZ0Histogram_tmp, m_calibFileData16_2ndPart, m_z0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasQoverPsagittaHistogram_tmp, m_calibFileData16_2ndPart, m_sagitta_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasD0HistError_tmp, m_calibFileData16_2ndPart, m_d0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasZ0HistError_tmp, m_calibFileData16_2ndPart, m_z0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasQoverPsagittaHistError_tmp, m_calibFileData16_2ndPart, m_sagitta_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_2ndPart_biasD0Histogram, m_calibFileData16_2ndPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_2ndPart_biasZ0Histogram, m_calibFileData16_2ndPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_2ndPart_biasQoverPsagittaHistogram, m_calibFileData16_2ndPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_2ndPart_biasD0HistError, m_calibFileData16_2ndPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_2ndPart_biasZ0HistError, m_calibFileData16_2ndPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data16_2ndPart_biasQoverPsagittaHistError, m_calibFileData16_2ndPart, m_sagitta_uncertainty_histName) );
 
     ATH_MSG_INFO( "Using for data17 part 1/2 (324320 to 334842) the calibration file " << PathResolverFindCalibFile(m_calibFileData17_1stPart) );
-    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasD0Histogram_tmp, m_calibFileData17_1stPart, m_d0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasZ0Histogram_tmp, m_calibFileData17_1stPart, m_z0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasQoverPsagittaHistogram_tmp, m_calibFileData17_1stPart, m_sagitta_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasD0HistError_tmp, m_calibFileData17_1stPart, m_d0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasZ0HistError_tmp, m_calibFileData17_1stPart, m_z0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasQoverPsagittaHistError_tmp, m_calibFileData17_1stPart, m_sagitta_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_1stPart_biasD0Histogram, m_calibFileData17_1stPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_1stPart_biasZ0Histogram, m_calibFileData17_1stPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_1stPart_biasQoverPsagittaHistogram, m_calibFileData17_1stPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_1stPart_biasD0HistError, m_calibFileData17_1stPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_1stPart_biasZ0HistError, m_calibFileData17_1stPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_1stPart_biasQoverPsagittaHistError, m_calibFileData17_1stPart, m_sagitta_uncertainty_histName) );
 
     ATH_MSG_INFO( "Using for data17 (part 2/2 (334842 to 348197) the calibration file " << PathResolverFindCalibFile(m_calibFileData17_2ndPart) );
-    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasD0Histogram_tmp, m_calibFileData17_2ndPart, m_d0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasZ0Histogram_tmp, m_calibFileData17_2ndPart, m_z0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasQoverPsagittaHistogram_tmp, m_calibFileData17_2ndPart, m_sagitta_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasD0HistError_tmp, m_calibFileData17_2ndPart, m_d0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasZ0HistError_tmp, m_calibFileData17_2ndPart, m_z0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasQoverPsagittaHistError_tmp, m_calibFileData17_2ndPart, m_sagitta_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_2ndPart_biasD0Histogram, m_calibFileData17_2ndPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_2ndPart_biasZ0Histogram, m_calibFileData17_2ndPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_2ndPart_biasQoverPsagittaHistogram, m_calibFileData17_2ndPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_2ndPart_biasD0HistError, m_calibFileData17_2ndPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_2ndPart_biasZ0HistError, m_calibFileData17_2ndPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data17_2ndPart_biasQoverPsagittaHistError, m_calibFileData17_2ndPart, m_sagitta_uncertainty_histName) );
 
     ATH_MSG_INFO( "Using for data18 (part 1/2 (348197 to 353000) the calibration file " << PathResolverFindCalibFile(m_calibFileData18_1stPart) );
-    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasD0Histogram_tmp, m_calibFileData18_1stPart, m_d0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasZ0Histogram_tmp, m_calibFileData18_1stPart, m_z0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasQoverPsagittaHistogram_tmp, m_calibFileData18_1stPart, m_sagitta_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasD0HistError_tmp, m_calibFileData18_1stPart, m_d0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasZ0HistError_tmp, m_calibFileData18_1stPart, m_z0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasQoverPsagittaHistError_tmp, m_calibFileData18_1stPart, m_sagitta_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_1stPart_biasD0Histogram, m_calibFileData18_1stPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_1stPart_biasZ0Histogram, m_calibFileData18_1stPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_1stPart_biasQoverPsagittaHistogram, m_calibFileData18_1stPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_1stPart_biasD0HistError, m_calibFileData18_1stPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_1stPart_biasZ0HistError, m_calibFileData18_1stPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_1stPart_biasQoverPsagittaHistError, m_calibFileData18_1stPart, m_sagitta_uncertainty_histName) );
 
     ATH_MSG_INFO( "Using for data18 (part 2/2 (353000 to 364485) the calibration file " << PathResolverFindCalibFile(m_calibFileData18_2ndPart) );
-    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasD0Histogram_tmp, m_calibFileData18_2ndPart, m_d0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasZ0Histogram_tmp, m_calibFileData18_2ndPart, m_z0_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasQoverPsagittaHistogram_tmp, m_calibFileData18_2ndPart, m_sagitta_nominal_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasD0HistError_tmp, m_calibFileData18_2ndPart, m_d0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasZ0HistError_tmp, m_calibFileData18_2ndPart, m_z0_uncertainty_histName) );
-    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasQoverPsagittaHistError_tmp, m_calibFileData18_2ndPart, m_sagitta_uncertainty_histName) );
-
-    // m_trkLRTEff = std::unique_ptr<TH2>(trkLRTEff_tmp);
-
-    m_data15_biasD0Histogram = std::unique_ptr<TH2>(data15_biasD0Histogram_tmp);
-    m_data15_biasZ0Histogram = std::unique_ptr<TH2>(data15_biasZ0Histogram_tmp);
-    m_data15_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data15_biasQoverPsagittaHistogram_tmp);
-    m_data15_biasD0HistError = std::unique_ptr<TH2>(data15_biasD0HistError_tmp);
-    m_data15_biasZ0HistError = std::unique_ptr<TH2>(data15_biasZ0HistError_tmp);
-    m_data15_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data15_biasQoverPsagittaHistError_tmp);
-
-    m_data16_1stPart_biasD0Histogram = std::unique_ptr<TH2>(data16_1stPart_biasD0Histogram_tmp);
-    m_data16_1stPart_biasZ0Histogram = std::unique_ptr<TH2>(data16_1stPart_biasZ0Histogram_tmp);
-    m_data16_1stPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data16_1stPart_biasQoverPsagittaHistogram_tmp);
-    m_data16_1stPart_biasD0HistError = std::unique_ptr<TH2>(data16_1stPart_biasD0HistError_tmp);
-    m_data16_1stPart_biasZ0HistError = std::unique_ptr<TH2>(data16_1stPart_biasZ0HistError_tmp);
-    m_data16_1stPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data16_1stPart_biasQoverPsagittaHistError_tmp);
-
-    m_data16_2ndPart_biasD0Histogram = std::unique_ptr<TH2>(data16_2ndPart_biasD0Histogram_tmp);
-    m_data16_2ndPart_biasZ0Histogram = std::unique_ptr<TH2>(data16_2ndPart_biasZ0Histogram_tmp);
-    m_data16_2ndPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data16_2ndPart_biasQoverPsagittaHistogram_tmp);
-    m_data16_2ndPart_biasD0HistError = std::unique_ptr<TH2>(data16_2ndPart_biasD0HistError_tmp);
-    m_data16_2ndPart_biasZ0HistError = std::unique_ptr<TH2>(data16_2ndPart_biasZ0HistError_tmp);
-    m_data16_2ndPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data16_2ndPart_biasQoverPsagittaHistError_tmp);
-
-    m_data17_1stPart_biasD0Histogram = std::unique_ptr<TH2>(data17_1stPart_biasD0Histogram_tmp);
-    m_data17_1stPart_biasZ0Histogram = std::unique_ptr<TH2>(data17_1stPart_biasZ0Histogram_tmp);
-    m_data17_1stPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data17_1stPart_biasQoverPsagittaHistogram_tmp);
-    m_data17_1stPart_biasD0HistError = std::unique_ptr<TH2>(data17_1stPart_biasD0HistError_tmp);
-    m_data17_1stPart_biasZ0HistError = std::unique_ptr<TH2>(data17_1stPart_biasZ0HistError_tmp);
-    m_data17_1stPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data17_1stPart_biasQoverPsagittaHistError_tmp);
-
-    m_data17_2ndPart_biasD0Histogram = std::unique_ptr<TH2>(data17_2ndPart_biasD0Histogram_tmp);
-    m_data17_2ndPart_biasZ0Histogram = std::unique_ptr<TH2>(data17_2ndPart_biasZ0Histogram_tmp);
-    m_data17_2ndPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data17_2ndPart_biasQoverPsagittaHistogram_tmp);
-    m_data17_2ndPart_biasD0HistError = std::unique_ptr<TH2>(data17_2ndPart_biasD0HistError_tmp);
-    m_data17_2ndPart_biasZ0HistError = std::unique_ptr<TH2>(data17_2ndPart_biasZ0HistError_tmp);
-    m_data17_2ndPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data17_2ndPart_biasQoverPsagittaHistError_tmp);
-
-    m_data18_1stPart_biasD0Histogram = std::unique_ptr<TH2>(data18_1stPart_biasD0Histogram_tmp);
-    m_data18_1stPart_biasZ0Histogram = std::unique_ptr<TH2>(data18_1stPart_biasZ0Histogram_tmp);
-    m_data18_1stPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data18_1stPart_biasQoverPsagittaHistogram_tmp);
-    m_data18_1stPart_biasD0HistError = std::unique_ptr<TH2>(data18_1stPart_biasD0HistError_tmp);
-    m_data18_1stPart_biasZ0HistError = std::unique_ptr<TH2>(data18_1stPart_biasZ0HistError_tmp);
-    m_data18_1stPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data18_1stPart_biasQoverPsagittaHistError_tmp);
-
-    m_data18_2ndPart_biasD0Histogram = std::unique_ptr<TH2>(data18_2ndPart_biasD0Histogram_tmp);
-    m_data18_2ndPart_biasZ0Histogram = std::unique_ptr<TH2>(data18_2ndPart_biasZ0Histogram_tmp);
-    m_data18_2ndPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data18_2ndPart_biasQoverPsagittaHistogram_tmp);
-    m_data18_2ndPart_biasD0HistError = std::unique_ptr<TH2>(data18_2ndPart_biasD0HistError_tmp);
-    m_data18_2ndPart_biasZ0HistError = std::unique_ptr<TH2>(data18_2ndPart_biasZ0HistError_tmp);
-    m_data18_2ndPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data18_2ndPart_biasQoverPsagittaHistError_tmp);
+    ATH_CHECK ( initObject<TH2>(m_data18_2ndPart_biasD0Histogram, m_calibFileData18_2ndPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_2ndPart_biasZ0Histogram, m_calibFileData18_2ndPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_2ndPart_biasQoverPsagittaHistogram, m_calibFileData18_2ndPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_2ndPart_biasD0HistError, m_calibFileData18_2ndPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_2ndPart_biasZ0HistError, m_calibFileData18_2ndPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(m_data18_2ndPart_biasQoverPsagittaHistError, m_calibFileData18_2ndPart, m_sagitta_uncertainty_histName) );
 
     return StatusCode::SUCCESS;
   }
