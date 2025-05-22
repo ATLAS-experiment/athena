@@ -197,8 +197,10 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     kwargs.setdefault("ClusterConverter", result.popToolsAndMerge(FPGAClusterConverterCfg(flags)))
     kwargs.setdefault("ActsTrkConverter", result.popToolsAndMerge(FPGAActsTrkConverterCfg(flags)))
     
-    result.addEventAlgo(CompFactory.FPGAConversionAlgorithm(name, **kwargs))
-
+    ConvertionAlgorithm = CompFactory.FPGAConversionAlgorithm(name, **kwargs)
+    ConvertionAlgorithm.ClusterConverter.doLorentzShift=False # this should not be turned on unless needed for validation purposes
+    
+    result.addEventAlgo(ConvertionAlgorithm)
     return result
 
 def FPGAClusterConverterCfg(flags):
@@ -339,6 +341,20 @@ def FPGATrackSimHitFilteringToolCfg(flags):
     result.addPublicTool(HitFilteringTool, primary=True)
     return result
 
+def FPGATrackSimLorentzAngleToolCfg(flags):
+    result=ComponentAccumulator()
+    LorentzAngleTool = CompFactory.FPGATrackSim.LorentzAngleTool()
+    LorentzAngleTool.UseAthenaLorentzAngleTools=False
+    LorentzAngleTool.shiftGlobalPosition=False
+    
+    from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+    LorentzAngleTool.LorentzAngleToolPixel = result.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags))
+    
+    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+    LorentzAngleTool.LorentzAngleToolStrip = result.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags))
+    
+    result.addPublicTool(LorentzAngleTool, primary=True)
+    return result
 
 def FPGATrackSimDataPrepAlgCfg(inputFlags):
 
@@ -382,6 +398,14 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     theFPGATrackSimDataPrepAlg.HitFilteringTool = result.getPrimaryAndMerge(FPGATrackSimHitFilteringToolCfg(flags))
 
     theFPGATrackSimDataPrepAlg.ClusteringTool = CompFactory.FPGATrackSimClusteringTool()
+    if not flags.Trigger.FPGATrackSim.wrapperFileName:
+        theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleTool = result.getPrimaryAndMerge(FPGATrackSimLorentzAngleToolCfg(flags))
+        theFPGATrackSimDataPrepAlg.ClusteringTool.doLorentzAngleShift = flags.Trigger.FPGATrackSim.applyLorentzAngleShift
+    else:
+        theFPGATrackSimDataPrepAlg.ClusteringTool.doLorentzAngleShift = False # should be set to False by default in the tool class but just in case...
+        
+
+    
     theFPGATrackSimDataPrepAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimDataPrepOutputCfg(flags))
 
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimLogicalHitsProcessAlgMonitoringCfg

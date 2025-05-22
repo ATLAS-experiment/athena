@@ -13,7 +13,7 @@ atlas_add_library(
     FPGATrackSimMapsLib      src/*.cxx FPGATrackSimMaps/*.h
     PUBLIC_HEADERS      FPGATrackSimMaps
     INCLUDE_DIRS        ${LWTNN_INCLUDE_DIRS}
-    LINK_LIBRARIES      ${LWTNN_LIBRARIES} GaudiKernel FPGATrackSimConfToolsLib FPGATrackSimObjectsLib nlohmann_json::nlohmann_json
+    LINK_LIBRARIES      ${LWTNN_LIBRARIES} GaudiKernel FPGATrackSimConfToolsLib FPGATrackSimObjectsLib FPGATrackSimLorentzAngleLib nlohmann_json::nlohmann_json
     PRIVATE_INCLUDE_DIRS   ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
     PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgMessagingLib AthenaBaseComps PathResolver CxxUtils
 )
