@@ -19,6 +19,7 @@ class CorePlots: public PlotBase {
     TH1* eta;
     TH1* phi;
     TH1* pt;
+    TH1* mass;
     TH1* nsubjets;
     TH1* charge;
 
