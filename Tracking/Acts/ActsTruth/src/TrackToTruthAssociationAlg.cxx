@@ -148,8 +148,14 @@ namespace ActsTrk
         measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation.cptr();
     }
 
-    ATH_MSG_DEBUG("Measurement association entries: "  << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]->size()
-                 << " + " << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]->size() 
+    auto assocSize = [&measurement_to_truth_association_maps](xAOD::UncalibMeasType type) {
+      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[to_underlying(type)];
+      return assoc ? assoc->size() : 0ul;
+    };
+
+    ATH_MSG_DEBUG("Measurement association entries: "  << assocSize(xAOD::UncalibMeasType::PixelClusterType)
+                 << " + " << assocSize(xAOD::UncalibMeasType::StripClusterType)
+                 << " + " << assocSize(xAOD::UncalibMeasType::HGTDClusterType)
                  );
     unsigned int track_i=0;
     std::array<unsigned int,s_NCounterForAssociatedTruth> tracks_with_associated_truth{};
