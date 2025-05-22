@@ -897,7 +897,7 @@ namespace xAOD {
       }
 
       // Remember the setting:
-      m_auxItemList[ containerKey ] = attributes;
+      m_auxItemList[ containerKey ] = std::move(attributes);
 
       return;
    }
@@ -1755,7 +1755,9 @@ namespace xAOD {
                for (TObject * feObj : *fList){
                   if (feObj){
                      // Get corresponding friend tree
-                     TTree *friendTree = dynamic_cast<TFriendElement*>(feObj)->GetTree();
+                     auto * pElement = dynamic_cast<TFriendElement*>(feObj);
+                     if (not pElement) continue;
+                     TTree *friendTree = pElement->GetTree();
                      // Add list of branches of the friend tree
                      fullListOfBranches.push_back(friendTree->GetListOfBranches());
                   }
@@ -2020,7 +2022,9 @@ namespace xAOD {
                   for (TObject * feObj : *fList){
                      if (feObj){
                         // Get corresponding friend tree
-                        TTree *friendTree = dynamic_cast<TFriendElement*>(feObj)->GetTree();
+                        auto * pElement = dynamic_cast<TFriendElement*>(feObj);
+                        if (not pElement) continue;
+                        TTree *friendTree = pElement->GetTree();
                         // Add list of branches of the friend tree
                         fullListOfBranches.push_back(friendTree->GetListOfBranches());
                      }
