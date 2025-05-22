@@ -396,7 +396,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                     alg.efficiencyCorrectionsTool.Campaign = "mc20"
                 else:
                     alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
-                    alg.efficiencyCorrectionsTool.Campaign = str(config.campaign()) 
+                    alg.efficiencyCorrectionsTool.Campaign = config.campaign().value
                 alg.efficiencyCorrectionsTool.TriggerName = chain
 
                 # JetIDLevel from
