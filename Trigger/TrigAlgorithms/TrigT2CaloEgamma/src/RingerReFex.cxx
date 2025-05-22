@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -269,16 +269,16 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
     for( auto& rs : vec_rs )
       rs.fill_cells_info(cells_eta, cells_phi, cells_et, cells_sampling, cells_size, rings_sum, cells_id, cells_gain);
 
-    ptrigRingerRings->auxdecor< std::vector<float> >("cells_eta") = cells_eta;
-    ptrigRingerRings->auxdecor< std::vector<float> >("cells_et") = cells_et;
-    ptrigRingerRings->auxdecor< std::vector<float> >("cells_phi") = cells_phi;
-    ptrigRingerRings->auxdecor< std::vector<int> >("cells_sampling") = cells_sampling;
-    ptrigRingerRings->auxdecor< std::vector<int> >("cells_size") = cells_size;
-    ptrigRingerRings->auxdecor< std::vector<int> >("cells_id") = cells_id;
-    ptrigRingerRings->auxdecor< std::vector<float> >("cells_gain") = cells_gain;
+    ptrigRingerRings->auxdecor< std::vector<float> >("cells_eta") = std::move(cells_eta);
+    ptrigRingerRings->auxdecor< std::vector<float> >("cells_et") = std::move(cells_et);
+    ptrigRingerRings->auxdecor< std::vector<float> >("cells_phi") = std::move(cells_phi);
+    ptrigRingerRings->auxdecor< std::vector<int> >("cells_sampling") = std::move(cells_sampling);
+    ptrigRingerRings->auxdecor< std::vector<int> >("cells_size") = std::move(cells_size);
+    ptrigRingerRings->auxdecor< std::vector<int> >("cells_id") = std::move(cells_id);
+    ptrigRingerRings->auxdecor< std::vector<float> >("cells_gain") = std::move(cells_gain);
 
-    if (m_doQuarter[0]) ptrigRingerRings->auxdecor< std::vector< double > >("asym_rings_sum") = rings_sum;
-    else  ptrigRingerRings->auxdecor< std::vector< double > >("rings_sum") = rings_sum;
+    if (m_doQuarter[0]) ptrigRingerRings->auxdecor< std::vector< double > >("asym_rings_sum") = std::move(rings_sum);
+    else  ptrigRingerRings->auxdecor< std::vector< double > >("rings_sum") = std::move(rings_sum);
   }
 
   auto clusLink = ElementLink<xAOD::TrigEMClusterContainer>(m_clusterContainerKey.key(),0,context);
