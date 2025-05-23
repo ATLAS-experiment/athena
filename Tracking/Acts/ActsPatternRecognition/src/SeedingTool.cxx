@@ -233,7 +233,7 @@ ATH_FLATTEN
 			   external_iterator_t spEnd,
 			   const Acts::Vector3& beamSpotPos,
 			   const Acts::Vector3& bField,
-			   DataVector< Acts::Seed< typename SeedingTool::external_type, 3ul > >& seedContainer) const
+			   DataVector< ActsTrk::ActsSeed< typename SeedingTool::external_type, 3ul > >& seedContainer) const
   {
     static_assert(std::is_same<typename external_spacepoint< external_iterator_t >::type, const value_type&>::value,
 		  "Inconsistent type");
@@ -348,7 +348,10 @@ ATH_FLATTEN
     // Store seeds
     seedContainer.reserve(seeds.size());
     for(const auto& seed: seeds) {
-      const auto [bottom, middle, top] = seed.sp();
+      assert(seed.sp().size() == 3ul);
+      const auto bottom = seed.sp().at(0);
+      const auto middle = seed.sp().at(1);
+      const auto top = seed.sp().at(2);
 
       std::unique_ptr< ActsTrk::Seed > toAdd =
 	std::make_unique< ActsTrk::Seed >(bottom->externalSpacePoint(),
