@@ -315,13 +315,19 @@ class MonitorDef:
                     "L1_AFP_A_OR_C_jJ30",
                     # ZDC
                     "L1_ZDC_A_AND_C",
-                    # ZDC items in pp
-                    # "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_OR", "L1_ZDC_PP_A_C",
-                    # "L1_ZDC_PP_A2", "L1_ZDC_PP_C2", "L1_ZDC_PP_OR2",
                     # Mu+X
                     "L1_MU5VF_AFP_A_OR_C",
                     # Phase-I L1Calo
                     "L1_eEM9_AFP_A_AND_C", #"L1_eEM9_AFP_A_OR_C",
+                    # ATR-31296 – Oxygen/Neon runs
+                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_XOR",
+                    "L1_ZDC_XNXN", "L1_ZDC_XNYN", "L1_ZDC_XNZN",
+                    "L1_ZDC_XN_XOR", "L1_ZDC_YN_XOR", "L1_ZDC_ZN_XOR",
+                    "L1_ZDC_YN", "L1_ZDC_ZN", "L1_ZDC_LOR", "L1_ZDC_YNYN",
+                    "L1_TRT_FILLED",
+                    "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
+                    "L1_jJ10", "L1_jJ20",
+                    "L1_eEM5", "L1_eEM9",
                 ])
 
                 # lowMu HLT menu: Add triggers that are not in the MC menu
@@ -438,10 +444,9 @@ class MonitorDef:
             ])
             if "lowMu" in menuFullName:
                 monItemsHF[TBP|TAP|TAV].extend([
-                    # "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_A_C", # luminosity measurements
-                    # "L1_ZDC_PP_OR",                                # luminosity measurements
-                    # "L1_ZDC_PP_A2", "L1_ZDC_PP_C2",                # luminosity measurements
-                    # "L1_ZDC_PP_OR2",                               # luminosity measurements
+                    # ATR-31296 – Oxygen/Neon runs
+                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_XOR",
+                    "L1_TRT_FILLED"
                 ])
             else: # HI HLT menu
                 monItemsHF[TBP|TAP|TAV].extend([
