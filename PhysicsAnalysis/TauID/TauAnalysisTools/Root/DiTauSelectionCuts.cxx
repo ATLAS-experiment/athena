@@ -225,3 +225,63 @@ bool DiTauSelectionCutNSubjets::accept(const xAOD::DiTauJet& xDiTau,
   return false;
 }
 
+//____________________________SelectionCutAbsCharge_____________________________
+//______________________________________________________________________________
+DiTauSelectionCutAbsCharge::DiTauSelectionCutAbsCharge(DiTauSelectionTool* tDTST)
+  : DiTauSelectionCut("CutAbsCharge", tDTST),
+    m_bDiTauCharge(-1234)	
+{
+  m_hHistCutPre = CreateControlPlot("hCharge_pre","Charge_pre;charge; events",7,-3.5,3.5);
+  m_hHistCut = CreateControlPlot("hCharge_cut","Charge_cut;charge; events",7,-3.5,3.5);
+}
+
+//______________________________________________________________________________
+void DiTauSelectionCutAbsCharge::fillHistogram(const xAOD::DiTauJet& /*xTau*/, TH1F& hHist) const
+{
+  hHist.Fill(m_bDiTauCharge);	
+}
+
+//______________________________________________________________________________
+void DiTauSelectionCutAbsCharge::setAcceptInfo(asg::AcceptInfo& info) const
+{
+  info.addCut( "AbsCharge",
+               "Selection of taus according to their absolute charge" );
+}
+//______________________________________________________________________________
+bool DiTauSelectionCutAbsCharge::accept(const xAOD::DiTauJet& xTau,
+                            asg::AcceptData& acceptData)
+{
+  m_bDiTauCharge = -1234;
+  for (const auto& xTrack : xTau.trackLinks()) {
+     if (!xTrack.isValid())
+        continue;
+
+     if(xTau.nSubjets() >= 2){
+        for (int i = 0; i < 2; ++i) { // loop over two leading subjets 
+           TLorentzVector tlvSubjet = TLorentzVector();
+           tlvSubjet.SetPtEtaPhiE(xTau.subjetPt(i), xTau.subjetEta(i),
+                                  xTau.subjetPhi(i), xTau.subjetE(i));
+           double dR = tlvSubjet.DeltaR((*xTrack)->p4());
+           if (dR < 0.1) {
+              m_bDiTauCharge += (*xTrack)->charge();
+              break; //prevents double counting of tracks
+           }
+        }  // loop over subjets
+     }	   
+  } // loop over tracks
+	
+  // check charge, if ditau has one of the charges requiered then return true; false otherwise
+  for( unsigned int iCharge = 0; iCharge < m_tDTST->m_vAbsCharges.size(); iCharge++ )
+  {
+    if ( std::abs( m_bDiTauCharge ) == m_tDTST->m_vAbsCharges.at(iCharge) )
+    {
+      acceptData.setCutResult( "AbsCharge", true );
+      return true;
+    }
+  }
+  m_tDTST->msg() << MSG::VERBOSE << "DiTau failed charge requirement, ditau charge: " << m_bDiTauCharge << endmsg;
+  return false;
+
+}
+
+

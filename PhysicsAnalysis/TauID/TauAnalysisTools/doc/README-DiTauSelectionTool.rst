@@ -113,6 +113,19 @@ setup:
      - accepting taus with a number of subjets below an upper bound
      - if ``NSubjetsMax`` is configured, ``NSubjetsRegion`` configuration wont be considered
 
+   * - ``CutAbsCharge``
+     - ``AbsCharges``
+     - ``std::vector<int>``
+     - accepting taus with a set of absolute charges, each value in the vector will be accepted
+     - 
+
+   * - 
+     - ``AbsCharge``
+     - ``double``
+     - accepting taus with the given absolute charge
+     - if ``AbsCharge`` is configured, ``AbsCharges`` configuration wont be considered
+
+
 If one wants to use a different setup one has three options:
 
 1. Using an own config file

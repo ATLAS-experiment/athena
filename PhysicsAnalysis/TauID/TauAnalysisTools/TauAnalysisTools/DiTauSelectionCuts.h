@@ -99,6 +99,19 @@ private:
   virtual void fillHistogram(const xAOD::DiTauJet& xTau, TH1F& hHist) const override;
 };
 
+class DiTauSelectionCutAbsCharge
+  : public DiTauSelectionCut
+{
+public:
+  DiTauSelectionCutAbsCharge(DiTauSelectionTool* tDTST);
+  virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
+  virtual bool accept(const xAOD::DiTauJet& xTau,
+                      asg::AcceptData& accept) override;
+private:
+  float m_bDiTauCharge;
+  virtual void fillHistogram(const xAOD::DiTauJet& xTau, TH1F& hHist) const override;
+};
+
 
 }
 
