@@ -53,6 +53,10 @@ bool
 SCT_Cluster::type(Trk::PrepRawDataType type) const{
   return (type == Trk::PrepRawDataType::SCT_Cluster or type == Trk::PrepRawDataType::SiCluster);
 }
+Trk::PrepRawDataType SCT_Cluster::prdType() const {
+  return Trk::PrepRawDataType::SCT_Cluster;
+}
+
 
 MsgStream& SCT_Cluster::dump( MsgStream&    stream) const
 {
