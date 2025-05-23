@@ -303,7 +303,7 @@ StatusCode TestHepMC::execute() {
         std::shared_ptr<HepMC3::GenCrossSection> dummy_xsec = std::make_shared<HepMC3::GenCrossSection>();
         dummy_xsec->set_cross_section(1.0,0.0);
 	HepMC::GenEvent* evt_nonconst = const_cast<HepMC::GenEvent*>(evt);
-        evt_nonconst->set_cross_section(dummy_xsec);
+        evt_nonconst->set_cross_section(std::move(dummy_xsec));
       }
       else {
         ATH_MSG_WARNING("-> Will report this as failure.");
@@ -711,7 +711,7 @@ StatusCode TestHepMC::execute() {
     if (!negEnPart.empty()) {
       std::stringstream ss;
       ss << "NEGATIVE ENERGY PARTICLES FOUND :";
-      for (auto b: negEnPart){
+      for (const auto &b: negEnPart){
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
