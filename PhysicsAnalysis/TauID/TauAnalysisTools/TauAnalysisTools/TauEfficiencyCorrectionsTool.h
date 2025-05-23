@@ -114,8 +114,6 @@ private:
   Gaudi::Property<std::string> m_sCampaign{this, "Campaign", ""};
   Gaudi::Property<bool> m_useFastSim{this, "useFastSim", false};
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
-  
-  ToolHandle<CP::IPileupReweightingTool> m_tPRWTool{this, "PileupReweightingTool", ""};
 
   std::vector<int> m_vEfficiencyCorrectionTypes;
   std::vector< asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;

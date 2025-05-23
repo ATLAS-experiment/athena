@@ -1604,7 +1604,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_tauEffTool.isUserConfigured() && !isData()) {
       toolName = "TauEffTool_" + m_tauId;
       m_tauEffTool.setTypeAndName("TauAnalysisTools::TauEfficiencyCorrectionsTool/"+toolName);
-      ATH_CHECK( m_tauEffTool.setProperty("PileupReweightingTool",m_prwTool.getHandle()) );
 
       std::vector<int> correction_types;
       // Read out the tau ID from the config file and map into the enum from tau CP
@@ -1707,7 +1706,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( tau_trigSF->setProperty("EfficiencyCorrectionTypes", std::vector<int>({TauAnalysisTools::SFTriggerHadTau})) );
         ATH_CHECK( tau_trigSF->setProperty("TriggerName", trigger.first) );
         ATH_CHECK( tau_trigSF->setProperty("JetIDLevel", iTauID) );
-        ATH_CHECK( tau_trigSF->setProperty("PileupReweightingTool", m_prwTool.getHandle()) );
         ATH_CHECK( tau_trigSF->setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( tau_trigSF->setProperty("useFastSim", isAtlfast()) );
         if (m_isRun3){
