@@ -22,7 +22,7 @@ namespace InDetDD {
   class PixelDetectorManager;
 }
 
-class PixelDetectorTool final : public GeoModelTool {
+class PixelDetectorTool : public GeoModelTool {
 
  public:
   // Standard Constructor
@@ -36,7 +36,7 @@ class PixelDetectorTool final : public GeoModelTool {
   virtual StatusCode clear() override final;
 
   // Callback function itself
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override;
 
 private:
   //

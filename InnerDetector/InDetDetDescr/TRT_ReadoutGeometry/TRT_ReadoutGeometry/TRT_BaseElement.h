@@ -164,7 +164,7 @@ namespace InDetDD {
     void invalidate();
 
     /** Update all caches */
-    void updateAllCaches(GeoAlignmentStore* alignStore=nullptr);
+    void updateAllCaches(GeoAlignmentStore* alignStore=nullptr) const;
 
     /** Return the TRT_Conditions object associated to this Detector element */
     const TRT_Conditions* conditions() const;

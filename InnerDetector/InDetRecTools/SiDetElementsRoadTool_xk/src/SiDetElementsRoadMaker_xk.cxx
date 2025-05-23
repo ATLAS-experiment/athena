@@ -55,7 +55,7 @@ StatusCode InDet::SiDetElementsRoadMaker_xk::initialize()
     ATH_MSG_FATAL("Please don't call this tool if usePixel and useSCT are false");
     return StatusCode::FAILURE;
   }
- 
+
   if (m_fieldmode == "NoField") m_fieldModeEnum = Trk::NoField;
   else if (m_fieldmode == "MapSolenoid") m_fieldModeEnum = Trk::FastField;
   else m_fieldModeEnum = Trk::FullField;
@@ -124,7 +124,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
   Trk::MagneticFieldProperties fieldprop(fieldModeEnum);
 
   int mode = fieldprop.magneticFieldMode();
-  if (mode<0 || mode>8) mode = 8; 
+  if (mode<0 || mode>8) mode = 8;
 
   n = 62-fieldmode[mode].size();
   std::string s3;
@@ -283,8 +283,8 @@ std::ostream& InDet::SiDetElementsRoadMaker_xk::dump(std::ostream& out) const
 
 MsgStream& InDet::operator <<
 (MsgStream& sl, const InDet::SiDetElementsRoadMaker_xk& se)
-{ 
-  return se.dump(sl); 
+{
+  return se.dump(sl);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -293,9 +293,9 @@ MsgStream& InDet::operator <<
 
 std::ostream& InDet::operator <<
 (std::ostream& sl, const InDet::SiDetElementsRoadMaker_xk& se)
-{ 
-  return se.dump(sl); 
-}   
+{
+  return se.dump(sl);
+}
 
 
 ///////////////////////////////////////////////////////////////////
@@ -308,20 +308,20 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
  bool testDirection,
  SiDetElementRoadMakerData_xk & roadMakerData,
  const EventContext& ctx) const
-{  
+{
   if (!m_usePIX && !m_useSCT) return;
 
   /// this is a vector of vectors of detector elements
-  /// prepared by the SiDetElementsRoadCondAlg. 
-  /// The outer vector has 3 elements: 
-  /// 0 --> left endcap 
-  /// 1 --> barrel 
+  /// prepared by the SiDetElementsRoadCondAlg.
+  /// The outer vector has 3 elements:
+  /// 0 --> left endcap
+  /// 1 --> barrel
   /// 2 --> right endcap
   /// Each of the inner vectors is internally sorted.
-  /// For the endcaps, sorting is first in z, then for same Z in r, then 
+  /// For the endcaps, sorting is first in z, then for same Z in r, then
   /// for same r in phi.
-  /// For the barrel, we first sort in R, then for same R in phi, then for same 
-  /// phi in Z. 
+  /// For the barrel, we first sort in R, then for same R in phi, then for same
+  /// phi in Z.
   const SiDetElementsLayerVectors_xk &layer = *getLayers(ctx);
 
   /// iterators over the positions to consider
@@ -332,12 +332,12 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
   std::array<float,6> par_startingPoint{static_cast<float>((*currentPosition).x()),            // x of first position
                 static_cast<float>((*currentPosition).y()),             // y of first position
                 static_cast<float>((*currentPosition).z()),             // Z of first position
-                static_cast<float>(sqrt((*currentPosition).x()*(*currentPosition).x()+(*currentPosition).y()*(*currentPosition).y())),    // r of first position 
-                m_width,    // road width 
-                0.};    
-  
+                static_cast<float>(sqrt((*currentPosition).x()*(*currentPosition).x()+(*currentPosition).y()*(*currentPosition).y())),    // r of first position
+                m_width,    // road width
+                0.};
+
   /// check the left endcap layers
-  /// increment n0 until we are at the layer closest to 
+  /// increment n0 until we are at the layer closest to
   /// the first position from the left side
   int n0 = 0;
   for (; n0!=static_cast<int>(layer[0].size()); ++n0) {
@@ -345,28 +345,28 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
   }
 
   /// check the barrel layers
-  /// increment n1 until we are at the layer closest to 
+  /// increment n1 until we are at the layer closest to
   /// the first position in the radial direction
   int n1 = 0;
   for (; n1!=static_cast<int>(layer[1].size()); ++n1) {
     if (par_startingPoint[3] < layer[1][n1].r()) break;
   }
-  /// and finally, the left endcap. 
-  /// this time, look for the layer closest on the right side. 
+  /// and finally, the left endcap.
+  /// this time, look for the layer closest on the right side.
   int n2 = 0;
   for (; n2!=static_cast<int>(layer[2].size()); ++n2) {
     if (par_startingPoint[2] < layer[2][n2].z()) break;
   }
 
-  
 
-  /// reset the detector-element usage info. 
+
+  /// reset the detector-element usage info.
   /// If we are the first client to see this event data object,
-  /// we allocate the storage for all modules 
+  /// we allocate the storage for all modules
   if (!roadMakerData.isInitialized){
     bookUsageTracker(roadMakerData,layer);
   }
-  else{ 
+  else{
     /// if we are not the first client, we reset the event data without
     /// re-allocation
     roadMakerData.resetUsageTracker();
@@ -386,42 +386,42 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
 
     /// perform linearisation
     float dx = par_targetPoint[0]-par_startingPoint[0];         /// dx between the current and the first position
-    float dy = par_targetPoint[1]-par_startingPoint[1];         /// dy between the current and the first position 
-    float dz = par_targetPoint[2]-par_startingPoint[2];         /// dz between the current and the first position 
+    float dy = par_targetPoint[1]-par_startingPoint[1];         /// dy between the current and the first position
+    float dz = par_targetPoint[2]-par_startingPoint[2];         /// dz between the current and the first position
     float dist3D = std::sqrt(dx*dx+dy*dy+dz*dz);   /// 3D distance between the current and the first position
-    if (dist3D <=0.) {                    /// if geometry breaks down or two points are duplicates, 
-      ++currentPosition;                  /// we whistle innocently and make a point of looking somewhere else 
+    if (dist3D <=0.) {                    /// if geometry breaks down or two points are duplicates,
+      ++currentPosition;                  /// we whistle innocently and make a point of looking somewhere else
       continue;
     }
-    float inverseDistance = 1./dist3D;                   /// inverse distance to the first position 
-    /// now we can book the linearised search direction 
+    float inverseDistance = 1./dist3D;                   /// inverse distance to the first position
+    /// now we can book the linearised search direction
     std::array<float,3> searchDirection{dx*inverseDistance, dy*inverseDistance, dz*inverseDistance};
 
     /// Having found the search direction, we are ready to look for detector elements and iterate.
     /// Before doing so, we add an additional test to ensure we probe the perigee point
-    /// if we cross it on the way. 
-    float unitSepTransverseComp = searchDirection[0]*searchDirection[0]+searchDirection[1]*searchDirection[1];     /// transverse component of the separation vector 
-    float dr = 0.                 ;     
-    if (unitSepTransverseComp!=0.) {                               
-      /// *negative* component of the global location of the previous position into the direction connecting our positions in the x-y plane 
-      /// corresponds to the path length opposite to the linearised direction to reach the perigee 
+    /// if we cross it on the way.
+    float unitSepTransverseComp = searchDirection[0]*searchDirection[0]+searchDirection[1]*searchDirection[1];     /// transverse component of the separation vector
+    float dr = 0.                 ;
+    if (unitSepTransverseComp!=0.) {
+      /// *negative* component of the global location of the previous position into the direction connecting our positions in the x-y plane
+      /// corresponds to the path length opposite to the linearised direction to reach the perigee
       float sm = -( searchDirection[0]*par_startingPoint[0] +
                     searchDirection[1]*par_startingPoint[1])
-                    /unitSepTransverseComp; 
+                    /unitSepTransverseComp;
 
-      /// a positive value of SM means the closest approach to the beamline is between the two positions we are considering. 
-      /// In this case, we do not want to iterate to the next point, but instead insert an additional step where we use the 
-      /// perigee point as our reference. We do this by setting the target point to the perigee, which will be made the 
-      /// reference point when repeating the loop. 
+      /// a positive value of SM means the closest approach to the beamline is between the two positions we are considering.
+      /// In this case, we do not want to iterate to the next point, but instead insert an additional step where we use the
+      /// perigee point as our reference. We do this by setting the target point to the perigee, which will be made the
+      /// reference point when repeating the loop.
       /// Since the perigee is estimated using the linearised direction, this direction stays valid and does not need to be updated.
       if (sm > 1. && sm < dist3D) {   /// only add the perigee point if the next point is beyond the perigee, and if we are not too close anyway
         par_targetPoint[0] = par_startingPoint[0]+searchDirection[0]*sm;
         par_targetPoint[1] = par_startingPoint[1]+searchDirection[1]*sm;
         par_targetPoint[2] = par_startingPoint[2]+searchDirection[2]*sm;
         par_targetPoint[3] = std::sqrt(par_targetPoint[0]*par_targetPoint[0]+par_targetPoint[1]*par_targetPoint[1]);
-        /// now, the target point is the perigee estimate, while 
+        /// now, the target point is the perigee estimate, while
         /// the reference point for this round stays unchanged.
-	      dr    = 20.;  /// allow 2cm on top of the perigee location when extrapolating inward. 
+	      dr    = 20.;  /// allow 2cm on top of the perigee location when extrapolating inward.
       } else {
         ++currentPosition;
       }
@@ -429,11 +429,11 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
       ++currentPosition;
     }
 
-    /// Start collecting detector elements traversed by our linearised path. 
+    /// Start collecting detector elements traversed by our linearised path.
 
     /// First, barrel elements
 
-    /// if we are moving outwards in r: 
+    /// if we are moving outwards in r:
     if (par_targetPoint[3]>par_startingPoint[3]) {
       /// loop over all barrel layers (starting with the closest one previously identified)
       for (; n1<static_cast<int>(layer[1].size()); ++n1) {
@@ -507,7 +507,7 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
     /// and increment the total propagation distance
     par_startingPoint[5]+= dist3D;
   }
-  auto vec2 = lDE; 
+  auto vec2 = lDE;
   std::sort(lDE.begin(),lDE.end(),InDet::compDetElementWays());
   // Fill pointers to detector elements
   Road.reserve(lDE.size());
@@ -517,11 +517,11 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
   }
 }
 
-/// obtain an event usage tracker object 
+/// obtain an event usage tracker object
 void InDet::SiDetElementsRoadMaker_xk::bookUsageTracker(InDet::SiDetElementRoadMakerData_xk & data, const SiDetElementsLayerVectors_xk &layers) {
 
     /// book sufficient space
-    /// module_i: iterate over the detector side 
+    /// module_i: iterate over the detector side
     for ( unsigned int side_i=0; side_i<3; ++side_i) {
       data.elementUsageTracker[side_i].resize( layers[side_i].size() ); /// for each side, book the number of layers we expect to see
       for (unsigned int layer_i=0; layer_i < layers[side_i].size(); ++layer_i) {
@@ -530,7 +530,7 @@ void InDet::SiDetElementsRoadMaker_xk::bookUsageTracker(InDet::SiDetElementRoadM
       }
     }
     data.isInitialized=true;
-} 
+}
 
 ///////////////////////////////////////////////////////////////////
 // Main methods for road builder using track parameters and direction
@@ -545,12 +545,12 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
  SiDetElementRoadMakerData_xk & roadMakerData) const
 {
   if (!m_usePIX && !m_useSCT) return;
-  /// 500 MeV / pT 
+  /// 500 MeV / pT
   double qp   = fabs(500.*Tp.parameters()[4]);
-  /// truncate at huge pt 
-  if (qp < 1.e-10) qp = 1.e-10; 
-  /// step size - scaled by pt / 500 MeV 
-  double S    = m_step/qp;      
+  /// truncate at huge pt
+  if (qp < 1.e-10) qp = 1.e-10;
+  /// step size - scaled by pt / 500 MeV
+  double S    = m_step/qp;
   /// upper limit to step size: 1000               ;
   if (S  > 1000. ) S  = 1000. ;
 
@@ -568,14 +568,14 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
   // need to add interface RDS 2020/03
   std::deque<Amg::Vector3D> G;
 
-  /// get a list of global positions for the road search by starting from the first surface 
-  /// and walking along the trajectory using the RK propagator 
+  /// get a list of global positions for the road search by starting from the first surface
+  /// and walking along the trajectory using the RK propagator
   m_proptool->globalPositions(ctx, G, Tp, fieldprop,getBound(fieldCache, Tp), S, Trk::pion);
-  /// should find at least 2 positions to sample 
+  /// should find at least 2 positions to sample
   if (G.size()<2) return;
 
-  /// if we are extrapolating along them momentum direction, 
-  /// we pick out the part ascending in R 
+  /// if we are extrapolating along them momentum direction,
+  /// we pick out the part ascending in R
   if (direction > 0) {
     std::deque<Amg::Vector3D>::iterator currentPosition=G.begin(), nextPosition, endPositions=G.end();
     float r0 = (*currentPosition).x()*(*currentPosition).x()+(*currentPosition).y()*(*currentPosition).y();
@@ -583,9 +583,9 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
     while (currentPosition!=endPositions) {
       nextPosition = currentPosition;
       if (++nextPosition == endPositions) break;
-      
+
       float r = (*nextPosition).x()*(*nextPosition).x()+(*nextPosition).y()*(*nextPosition).y();
-      /// if the next point is at lower r than the previous point, remove the previous one  
+      /// if the next point is at lower r than the previous point, remove the previous one
       if (r < r0) {
         r0 = r;
         currentPosition = G.erase(currentPosition);
@@ -618,7 +618,7 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
       return;
     }
   }
-  
+
   // Get  SCT Detector Manager
   //
   const InDetDD::SCT_DetectorManager* sctmgr = nullptr;
@@ -636,7 +636,7 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
   if (m_usePIX && detStore()->retrieve(IDp, "PixelID").isFailure()) {
     ATH_MSG_FATAL("Could not get Pixel ID helper");
   }
-  
+
   if (m_useSCT && detStore()->retrieve(IDs, "SCT_ID").isFailure()) {
     ATH_MSG_FATAL("Could not get SCT ID helper");
   }
@@ -645,7 +645,7 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
   if (!IDs && !IDp) return;
 
   InDetDD::SiDetectorElementCollection::const_iterator s, se;
-  std::vector<InDetDD::SiDetectorElement*> pW[3];            
+  std::vector<InDetDD::SiDetectorElement const*> pW[3];
 
   if (IDp) {
     // Loop over each wafer of pixels
@@ -680,15 +680,15 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
   std::sort(pW[0].begin(), pW[0].end(), InDet::compDetElements_ZRA());
   std::sort(pW[2].begin(), pW[2].end(), InDet::compDetElements_ZRA());
 
-  double   mzmin [3];  // min Z coordinate 
+  double   mzmin [3];  // min Z coordinate
   double   mzmax [3];  // max Z coordinate
   double   mrmin [3];  // min radius
   double   mrmax [3];  // max radius
   bool     has[3] {false,false,false};
- 
+
   for (int N=0; N!=3; ++N) {
     double P[40];
-    int im    = static_cast<int>(pW[N].size()-1); 
+    int im    = static_cast<int>(pW[N].size()-1);
     int If    = 0      ;
     double z0 = 0.     ;
     double r0 = 0.     ;
@@ -696,15 +696,15 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
     mrmax[N] =-100000.;
     mzmin[N] = 100000.;
     mzmax[N] =-100000.;
-    
-    for (int i = 0; i<= im; ++i) {
-      InDet::SiDetElementsRoadUtils_xk::detElementInformation(*(pW[N][i]), P); 
 
-      if (P[ 9] < mrmin[N]) mrmin[N] = P[ 9]; 
-      if (P[10] > mrmax[N]) mrmax[N] = P[10]; 
-      if (P[11] < mzmin[N]) mzmin[N] = P[11]; 
-      if (P[12] > mzmax[N]) mzmax[N] = P[12]; 
- 
+    for (int i = 0; i<= im; ++i) {
+      InDet::SiDetElementsRoadUtils_xk::detElementInformation(*(pW[N][i]), P);
+
+      if (P[ 9] < mrmin[N]) mrmin[N] = P[ 9];
+      if (P[10] > mrmax[N]) mrmax[N] = P[10];
+      if (P[11] < mzmin[N]) mzmin[N] = P[11];
+      if (P[12] > mzmax[N]) mzmax[N] = P[12];
+
       double r    = P[0];
       double z    = P[1];
       bool   newl = false;
@@ -740,8 +740,8 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
   double rma = -100000;
   for (int i=0; i!=3; ++i) {
     if (has[i]) {
-      if (mzmin[i]<zmi) zmi=mzmin[i]; 
-      if (mzmax[i]>zma) zma=mzmax[i]; 
+      if (mzmin[i]<zmi) zmi=mzmin[i];
+      if (mzmax[i]>zma) zma=mzmax[i];
       if (mrmax[i]>rma) rma=mrmax[i];
     }
   }
@@ -758,7 +758,7 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
 ///////////////////////////////////////////////////////////////////
 
 float InDet::SiDetElementsRoadMaker_xk::stepToDetElement
-(const InDetDD::SiDetectorElement*& de, Amg::Vector3D& r, Amg::Vector3D& a) 
+(const InDetDD::SiDetectorElement*& de, Amg::Vector3D& r, Amg::Vector3D& a)
 {
   Amg::Vector3D R = de->center();
   Amg::Vector3D A = de->normal();
@@ -790,7 +790,7 @@ Trk::CylinderBounds InDet::SiDetElementsRoadMaker_xk::getBound
   if (fabs(zfield) < .0000001) return m_bounds;
 
   const AmgVector(5)& Vp = Tp.parameters();
-  
+
   double cur = zfield*Vp[4]/sin(Vp[3]);
 
   if (fabs(cur)*m_bounds.r() < cor) return m_bounds;

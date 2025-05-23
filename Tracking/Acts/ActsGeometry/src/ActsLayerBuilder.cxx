@@ -92,7 +92,7 @@ ActsLayerBuilder::getDetectorElements() const {
   for (iter = siDetMng->getDetectorElementBegin();
        iter != siDetMng->getDetectorElementEnd(); ++iter) {
     const InDetDD::SiDetectorElement *siDetElement =
-        dynamic_cast<InDetDD::SiDetectorElement *>(*iter);
+        dynamic_cast<const InDetDD::SiDetectorElement *>(*iter);
     if (siDetElement == nullptr) {
       ACTS_ERROR("Detector element was nullptr");
       throw std::runtime_error{"Corrupt detector element collection"};
@@ -508,12 +508,12 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     if(layerThickness > 2_mm) {
       ACTS_VERBOSE("Wide disc layer ("<< layerThickness << ") => adding cylinder like approach surfaces");
       Acts::Transform3 trf{Translation3{0, 0, layerZ}};
-      auto cylinderInner = 
+      auto cylinderInner =
         Acts::Surface::makeShared<Acts::CylinderSurface>(
           trf, pl.min(AxisR), layerHalfZ);
         aSurfaces.push_back(cylinderInner);
 
-      auto cylinderOuter = 
+      auto cylinderOuter =
         Acts::Surface::makeShared<Acts::CylinderSurface>(
           trf, pl.max(AxisR), layerHalfZ);
         aSurfaces.push_back(cylinderOuter);
@@ -621,25 +621,25 @@ std::ostream& operator<<(std::ostream& os, const ActsLayerBuilder::Mode& mode) {
 
   using Mode = ActsLayerBuilder::Mode;
   switch(mode) {
-    case Mode::Undefined: 
+    case Mode::Undefined:
       os << "Undefined";
       break;
-    case Mode::Pixel: 
+    case Mode::Pixel:
       os << "Pixel";
       break;
-    case Mode::SCT: 
+    case Mode::SCT:
       os << "SCT";
       break;
-    case Mode::TRT: 
+    case Mode::TRT:
       os << "TRT";
       break;
-    case Mode::ITkPixelInner: 
+    case Mode::ITkPixelInner:
       os << "ITkPixelInner";
       break;
-    case Mode::ITkPixelOuter: 
+    case Mode::ITkPixelOuter:
       os << "ITkPixelOuter";
       break;
-    case Mode::ITkStrip: 
+    case Mode::ITkStrip:
       os << "ITkStrip";
       break;
   }

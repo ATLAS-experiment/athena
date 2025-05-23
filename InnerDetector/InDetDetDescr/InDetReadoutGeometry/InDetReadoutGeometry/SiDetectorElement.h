@@ -96,7 +96,7 @@ namespace InDetDD {
    * * and do not race with each other.
    *
    * The non-const methods can set the state
-   * of the cache or the cache itself (invalidate/setCache methods etc)
+   * of the cache or the cache itself (invalidate methods etc)
    *
    *
    * Note: Synchronisation of creating SiDetElements for different events
@@ -419,11 +419,6 @@ namespace InDetDD {
      * Common code for constructors.
      */
     void commonConstructor();
-
-    /**
-     * Recalculate cached values.
-     */
-    virtual void updateCache() const override final;
 
     /**
      * Find isStereo.

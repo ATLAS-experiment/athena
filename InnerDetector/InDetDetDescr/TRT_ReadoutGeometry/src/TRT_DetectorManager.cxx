@@ -87,15 +87,15 @@ namespace InDetDD {
     void  TRT_DetectorManager::addTreeTop(const PVLink& vol) {
         m_volume.push_back(vol);
     }
-  
+
     // Manage the barrel elements:
-    void TRT_DetectorManager::manageBarrelElement(TRT_BarrelElement *barrel) 
+    void TRT_DetectorManager::manageBarrelElement(TRT_BarrelElement *barrel)
     {
       m_elementContainer.manageBarrelElement(barrel,m_idHelper);
     }
-  
+
     // Manage the endcap elements:
-    void TRT_DetectorManager::manageEndcapElement(TRT_EndcapElement *endcap) 
+    void TRT_DetectorManager::manageEndcapElement(TRT_EndcapElement *endcap)
     {
       m_elementContainer.manageEndcapElement(endcap,m_idHelper);
     }
@@ -103,7 +103,7 @@ namespace InDetDD {
     const TRT_BarrelElement *TRT_DetectorManager::getBarrelElement(unsigned int positive
                                                                    , unsigned int moduleIndex
                                                                    , unsigned int phiIndex
-                                                                   , unsigned int strawLayerIndex) const 
+                                                                   , unsigned int strawLayerIndex) const
     {
       return m_elementContainer.getBarrelDetElement(positive,moduleIndex,phiIndex,strawLayerIndex);
     }
@@ -119,7 +119,7 @@ namespace InDetDD {
     const TRT_EndcapElement *TRT_DetectorManager::getEndcapElement(unsigned int positive
 								   , unsigned int wheelIndex
 								   , unsigned int strawLayerIndex
-								   , unsigned int phiIndex) const 
+								   , unsigned int phiIndex) const
     {
       return m_elementContainer.getEndcapDetElement(positive,wheelIndex,strawLayerIndex,phiIndex);
     }
@@ -127,17 +127,17 @@ namespace InDetDD {
     TRT_EndcapElement *TRT_DetectorManager::getEndcapElement(unsigned int positive
 							     , unsigned int wheelIndex
 							     , unsigned int strawLayerIndex
-							     , unsigned int phiIndex) 
+							     , unsigned int phiIndex)
     {
       return m_elementContainer.getEndcapDetElement(positive,wheelIndex,strawLayerIndex,phiIndex);
     }
 
-    const TRT_ID *TRT_DetectorManager::getIdHelper() const 
+    const TRT_ID *TRT_DetectorManager::getIdHelper() const
     {
         return m_idHelper;
     }
 
-    void TRT_DetectorManager::setIdHelper(const TRT_ID *idHelper, bool owns) 
+    void TRT_DetectorManager::setIdHelper(const TRT_ID *idHelper, bool owns)
     {
         m_idHelper=idHelper;
         m_ownsIdHelper=owns;
@@ -145,7 +145,7 @@ namespace InDetDD {
 
 
 
-    const TRT_BaseElement *TRT_DetectorManager::getElement(Identifier id) const 
+    const TRT_BaseElement *TRT_DetectorManager::getElement(Identifier id) const
     {
       // Make sure it is a straw_layer id
       Identifier strawLayerId = m_idHelper->layer_id(id);
@@ -155,7 +155,7 @@ namespace InDetDD {
       return (*elements)[hashId];
     }
 
-    const TRT_BaseElement *TRT_DetectorManager::getElement(IdentifierHash id) const 
+    const TRT_BaseElement *TRT_DetectorManager::getElement(IdentifierHash id) const
     {
       const TRT_DetElementCollection* elements = m_elementContainer.getElements();
       if (id>=elements->size()) return nullptr;
@@ -167,21 +167,30 @@ namespace InDetDD {
       return &m_elementContainer;
     }
 
-    const TRT_DetElementCollection * TRT_DetectorManager::getDetectorElementCollection() const 
+    const TRT_DetElementCollection * TRT_DetectorManager::getDetectorElementCollection() const
     {
       return m_elementContainer.getElements();
     }
 
-    TRT_DetElementCollection::const_iterator TRT_DetectorManager::getDetectorElementBegin() const 
+    TRT_DetElementCollection::const_iterator TRT_DetectorManager::getDetectorElementBegin() const
     {
       return m_elementContainer.getElements()->begin();
     }
 
-    TRT_DetElementCollection::const_iterator TRT_DetectorManager::getDetectorElementEnd() const 
+    TRT_DetElementCollection::const_iterator TRT_DetectorManager::getDetectorElementEnd() const
     {
       return m_elementContainer.getElements()->end();
     }
 
+    TRT_DetElementCollection::iterator TRT_DetectorManager::getDetectorElementBegin()
+    {
+      return m_elementContainer.getElements()->begin();
+    }
+
+    TRT_DetElementCollection::iterator TRT_DetectorManager::getDetectorElementEnd()
+    {
+      return m_elementContainer.getElements()->end();
+    }
 
     void TRT_DetectorManager::setBarrelTransformField(size_t i, const GeoXF::Function * f){
         if (m_barrelXF[i]!=f)  delete  m_barrelXF[i];
@@ -407,7 +416,7 @@ namespace InDetDD {
 
         } else if (frame == InDetDD::local) { // Local
             // if its a local frame then no transform necessary. We set it directly.
-	    extXF->alignableTransform()->setDelta(delta, alignStore);
+          extXF->alignableTransform()->setDelta(delta, alignStore);
 
         } else { // Other frame
             // if child or frame is zero it will have been set to local or global above
@@ -433,12 +442,11 @@ namespace InDetDD {
 
 
   // We invalidate all the elements if at least one alignment changed.
-    void TRT_DetectorManager::invalidateAll() const
+    void TRT_DetectorManager::invalidateAll()
     {
-        for (TRT_DetElementCollection::const_iterator element_iter = getDetectorElementBegin();
+        for (TRT_DetElementCollection::iterator element_iter = getDetectorElementBegin();
         element_iter != getDetectorElementEnd();
         ++element_iter) {
-
             if (*element_iter) {
                 (*element_iter)->invalidate();
             }
@@ -464,7 +472,7 @@ namespace InDetDD {
     }
 
 
-    bool TRT_DetectorManager::processSpecialAlignment(const std::string & key, InDetDD::AlignFolderType /*dummy*/) const
+    bool TRT_DetectorManager::processSpecialAlignment(const std::string & key, InDetDD::AlignFolderType /*dummy*/)
     {
         if(msgLvl(MSG::DEBUG))
             msg(MSG::DEBUG) << "Processing TRT fine alignment." << endmsg;
@@ -480,22 +488,9 @@ namespace InDetDD {
                 msg(MSG::INFO) << "Cannot find StrawDxContainer for key "
                 << key << " - no fine alignment " << endmsg;
             throw std::runtime_error("Unable to apply TRT fine alignment. This is normal for simulation");
-      //return false;
         } else {
-
-      // Loop trough all barrel elements and pass container.
-
             this->setDxContainer(container);
-
-            for (TRT_DetElementCollection::const_iterator element_iter = getDetectorElementBegin();
-            element_iter != getDetectorElementEnd();
-            ++element_iter) {
-                TRT_BaseElement * element = *element_iter;
-                if (element) {
-                    element->invalidate();
-                }
-            }
-            return false; // we return false as we have already invalidated the elements
+           return true; //Elements will need to be invalidated via invalidateAll from the caller
         }
     }
 

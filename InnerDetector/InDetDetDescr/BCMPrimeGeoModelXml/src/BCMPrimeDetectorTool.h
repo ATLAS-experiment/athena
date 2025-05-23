@@ -29,7 +29,7 @@ public:
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
   virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
+  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
 
 private:
   const InDetDD::BCMPrimeDetectorManager *m_detManager{};

@@ -88,7 +88,7 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
 
   // Apply alignment using readCdo passed to HGTD_DetectorElement
   for (InDetDD::HGTD_DetectorElement* newEl: *writeCdo) {
-    newEl->setCache();
+    newEl->updateCache();
   }
 
   // Record WriteCondHandle

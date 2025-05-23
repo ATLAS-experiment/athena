@@ -3,8 +3,8 @@
 */
 
 #include "TRT_DetectorTool.h"
-#include "TRTDetectorFactory_Full.h" 
-#include "TRTDetectorFactory_Lite.h" 
+#include "TRTDetectorFactory_Full.h"
+#include "TRTDetectorFactory_Lite.h"
 
 #include "GeoModelUtilities/GeoModelExperiment.h"
 
@@ -14,7 +14,7 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 
 #include "DetDescrConditions/AlignableTransformContainer.h"
-#include "TRT_ConditionsData/StrawDxContainer.h" 
+#include "TRT_ConditionsData/StrawDxContainer.h"
 
 #include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
@@ -29,21 +29,21 @@ TRT_DetectorTool::TRT_DetectorTool( const std::string& type, const std::string& 
 //////////////  Create the Detector Node corresponding to this tool //////////////
 //
 StatusCode TRT_DetectorTool::create()
-{ 
+{
   // Get the detector configuration.
   ATH_CHECK( m_geoDbTagSvc.retrieve());
 
   // Get the straw status tool
   ATH_CHECK(m_sumTool.retrieve());
-  
+
   ServiceHandle<IRDBAccessSvc> accessSvc(m_geoDbTagSvc->getParamSvcName(),name());
   ATH_CHECK( accessSvc.retrieve());
 
-  // Locate the top level experiment node 
+  // Locate the top level experiment node
   GeoModelExperiment* theExpt{nullptr};
   ATH_CHECK(detStore()->retrieve(theExpt,"ATLAS"));
   GeoPhysVol *world = theExpt->getPhysVol();
-  
+
   // Retrieve the Geometry DB Interface
   ATH_CHECK( m_geometryDBSvc.retrieve() );
 
@@ -56,7 +56,7 @@ StatusCode TRT_DetectorTool::create()
   GeoModelIO::ReadGeoModel* sqliteReader  = m_geoDbTagSvc->getSqliteReader();
   //
   // If we are using the SQLite reader, then we are not building the raw geometry but
-  // just locating it and attaching to readout geometry and various other actions 
+  // just locating it and attaching to readout geometry and various other actions
   // taken in this factory.
   //
   if (sqliteReader) {
@@ -82,18 +82,18 @@ StatusCode TRT_DetectorTool::create()
     // Print the TRT version tag:
     std::string trtVersionTag = accessSvc->getChildTag("TRT", versionKey.tag(), versionKey.node());
     ATH_MSG_INFO("TRT Version: " << trtVersionTag );
-    
+
     // Check if version is empty. If so, then the TRT cannot be built. This may or may not be intentional. We
-    // just issue an INFO message. 
-    if (trtVersionTag.empty()) { 
+    // just issue an INFO message.
+    if (trtVersionTag.empty()) {
       ATH_MSG_INFO("No TRT Version. TRT will not be built." );
       return StatusCode::SUCCESS;
     }
-    
+
     ATH_MSG_DEBUG( "Keys for TRT Switches are "  << versionKey.tag()  << "  " << versionKey.node() );
     IRDBRecordset_ptr switchSet =  accessSvc->getRecordsetPtr("TRTSwitches", versionKey.tag(), versionKey.node());
     const IRDBRecord    *switches   = (*switchSet)[0];
-      
+
     if (switches->getInt("DC1COMPATIBLE")) {
       ATH_MSG_ERROR( "DC1COMPATIBLE flag set in database, but DC1 is no longer supported in the code!!");
       return StatusCode::FAILURE;
@@ -102,7 +102,7 @@ StatusCode TRT_DetectorTool::create()
     m_DC2CompatibleBarrelCoordinates = switches->getInt("DC2COMPATIBLE");
     m_useOldActiveGasMixture         = ( switches->getInt("GASVERSION") == 0 );
     m_initialLayout                  = switches->getInt("INITIALLAYOUT");
-      
+
     // Check if the new switches exists:
     if (m_doArgonMixture || m_doKryptonMixture ){
       if      ( switches->getInt("DOARGONMIXTURE") == 0) { m_doArgonMixture = false; }
@@ -149,27 +149,27 @@ StatusCode TRT_DetectorTool::create()
 
 
 
-StatusCode 
+StatusCode
 TRT_DetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE () // Thread unsafe StoreGateSvc::regFcn method and DataHandle template are used.
 {
   // This callback is kept because the folder never changes.
 
   MsgStream log(msgSvc(), name());
 
-  // If we fail to register any callbacks we return FAILURE. This just tells GeoModelSvc that 
+  // If we fail to register any callbacks we return FAILURE. This just tells GeoModelSvc that
   // no callbacks were registered. It will continue normally but without any alignments.
   StatusCode sc = StatusCode::FAILURE;
 
   if (m_alignable) {
 
-    
-    if (m_useDynamicAlignFolders){ // Regular alignment new schema   
+
+    if (m_useDynamicAlignFolders){ // Regular alignment new schema
       std::string folderName = "/TRT/AlignL1/TRT";
       if (detStore()->contains<CondAttrListCollection>(folderName)) {
         msg(MSG::DEBUG) << "Registering callback on global Container with folder " << folderName << endmsg;
         const DataHandle<CondAttrListCollection> calc;
         StatusCode trttmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), calc, folderName);
-        // We don't expect this to fail as we have already checked that the detstore contains the object. 
+        // We don't expect this to fail as we have already checked that the detstore contains the object.
         if (trttmp.isFailure()) {
           msg(MSG::ERROR) << "Problem when register callback on global Container with folder " << folderName <<endmsg;
         } else {
@@ -179,7 +179,7 @@ TRT_DetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE () // Thread unsafe Sto
 	msg(MSG::WARNING) << "Unable to register callback on global Container with folder " << folderName <<endmsg;
 	return StatusCode::FAILURE;
       }
-	
+
       folderName = "/TRT/AlignL2";
       if (detStore()->contains<AlignableTransformContainer>(folderName)) {
         if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Registering callback on AlignableTransformContainer with folder " << folderName << endmsg;
@@ -214,7 +214,7 @@ TRT_DetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE () // Thread unsafe Sto
 			  << folderName << ", Alignments disabled! (Only if no Run2 schema is loaded)" << endmsg;
       }
     }
-  
+
 
     // Fine alignment
     {
@@ -232,8 +232,8 @@ TRT_DetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE () // Thread unsafe Sto
       } else {
         msg(MSG::DEBUG) << "Unable to register callback on StrawDxContainer with folder " << folderName <<endmsg;
       }
-    }    
-   
+    }
+
   } else {
     msg(MSG::INFO) << "Alignment disabled. No callback registered" << endmsg;
     // We return failure otherwise it will try and register
@@ -253,17 +253,18 @@ StatusCode TRT_DetectorTool::clear()
   return StatusCode::SUCCESS;
 }
 
-  
-StatusCode 
-TRT_DetectorTool::align(IOVSVC_CALLBACK_ARGS_P(I,keys))
+
+StatusCode
+TRT_DetectorTool::align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys))
+//The manager align call invalidates all elements
 {
-  MsgStream log(msgSvc(), name()); 
-  if (!m_manager) { 
+  MsgStream log(msgSvc(), name());
+  if (!m_manager) {
     msg(MSG::WARNING) << "Manager does not exist" << endmsg;
     return StatusCode::FAILURE;
-  }    
-  if (m_alignable) {     
-    return m_manager->align(I,keys);
+  }
+  if (m_alignable) {
+    return const_cast<InDetDD::TRT_DetectorManager*>(m_manager)->align(I,keys);
   } else {
     msg(MSG::DEBUG) << "Alignment disabled. No alignments applied" << endmsg;
     return StatusCode::SUCCESS;

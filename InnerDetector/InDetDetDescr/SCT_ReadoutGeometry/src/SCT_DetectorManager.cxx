@@ -34,10 +34,10 @@ namespace InDetDD {
       m_doEndcapEtaNeighbour(doEndcapEtaNeighbour)
   {
     ATH_MSG_VERBOSE("Creating SCT_DetectorManager named " << name);
-    //  
+    //
     // Initialized the Identifier helper.
     //
-    StatusCode sc = detStore->retrieve(m_idHelper, "SCT_ID");  
+    StatusCode sc = detStore->retrieve(m_idHelper, "SCT_ID");
     if (sc.isFailure()) {
       ATH_MSG_ERROR("Could not retrieve SCT id helper");
     }
@@ -46,12 +46,12 @@ namespace InDetDD {
       m_elementCollection.resize(m_idHelper->wafer_hash_max());
       m_alignableTransforms.resize(m_idHelper->wafer_hash_max());
       m_moduleAlignableTransforms.resize(m_idHelper->wafer_hash_max()/2);
-    } 
+    }
   }
 
   unsigned int SCT_DetectorManager::getNumTreeTops() const
   {
-    return m_volume.size(); 
+    return m_volume.size();
   }
 
   PVConstLink SCT_DetectorManager::getTreeTop(unsigned int i) const
@@ -63,8 +63,8 @@ namespace InDetDD {
     m_volume.push_back(vol);
   }
 
-  SiDetectorElement* SCT_DetectorManager::getDetectorElement(const Identifier & id) const
-  {  
+  const SiDetectorElement* SCT_DetectorManager::getDetectorElement(const Identifier & id) const
+  {
     // NB the id helpers implementation for getting a hash is not optimal.
     // Essentially does a binary search.
     // Make sure it is a wafer Id
@@ -77,18 +77,18 @@ namespace InDetDD {
     }
   }
 
-  SiDetectorElement* SCT_DetectorManager::getDetectorElement(const IdentifierHash & idHash) const
+  const SiDetectorElement* SCT_DetectorManager::getDetectorElement(const IdentifierHash & idHash) const
   {
     return m_elementCollection[idHash];
   }
 
-  SiDetectorElement* SCT_DetectorManager::getDetectorElement(int barrel_endcap, int layer_wheel, int phi_module, int eta_module, int side) const
+  const SiDetectorElement* SCT_DetectorManager::getDetectorElement(int barrel_endcap, int layer_wheel, int phi_module, int eta_module, int side) const
   {
     return getDetectorElement(m_idHelper->wafer_id(barrel_endcap, layer_wheel, phi_module, eta_module, side));
   }
 
   const SiDetectorElementCollection* SCT_DetectorManager::getDetectorElementCollection() const
-  { 
+  {
     return &m_elementCollection;
   }
 
@@ -101,6 +101,17 @@ namespace InDetDD {
   {
     return m_elementCollection.end();
   }
+
+  SiDetectorElementCollection::iterator SCT_DetectorManager::getDetectorElementBegin()
+  {
+    return m_elementCollection.begin();
+  }
+
+  SiDetectorElementCollection::iterator SCT_DetectorManager::getDetectorElementEnd()
+  {
+    return m_elementCollection.end();
+  }
+
 
 
   void SCT_DetectorManager::addDetectorElement(SiDetectorElement * element)
@@ -136,7 +147,7 @@ namespace InDetDD {
           result = getStripEndcapEtaNeighbour(element, idHashOther, false);
           if(result==0) element->setNextInEta(m_elementCollection[idHashOther]);
 
-          // In ITk strip endcap, when we move from eta_module=9 to eta_module=10 we have change of module 
+          // In ITk strip endcap, when we move from eta_module=9 to eta_module=10 we have change of module
           // granularity in phi: twice more module in eta_module=10, therefore for module at eta_module=9
           // and phi_module=phi we have two neighbours at larger radius: both at eta_module=10, but one with
           // phi_module=2*phi the other with phi_module=2*phi+1, for completeness we store this neighbour in
@@ -162,7 +173,7 @@ namespace InDetDD {
     }
   }
 
-int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* element, 
+int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* element,
                                                     IdentifierHash& idHashNeighbour,
                                                     const bool phi_plus_one) const
 {
@@ -177,7 +188,7 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
   int eta_module = m_idHelper->eta_module(id);
   int side = m_idHelper->side(id);
 
-  // We want to find neighbour only for elements on "main" side 
+  // We want to find neighbour only for elements on "main" side
   // since the space points are made from trigger cluster (on side 0 for ITk)
   // and stero cluster (on side 1 for ITk)
   if(element->isStereo()) return 1;
@@ -192,7 +203,7 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
   for(const SiDetectorElement* other_element : m_elementCollection){
 
     Identifier other_id = other_element->identify();
-    
+
     // To speed up the search, screening firt on bec, then layer_disk, etc...
     int other_bec = m_idHelper->barrel_ec(other_id);
     if(other_bec != bec) continue;
@@ -227,8 +238,8 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
   }
 
 
-  bool SCT_DetectorManager::setAlignableTransformDelta(int level, 
-                                                       const Identifier & id, 
+  bool SCT_DetectorManager::setAlignableTransformDelta(int level,
+                                                       const Identifier & id,
                                                        const Amg::Transform3D & delta,
                                                        FrameType frame,
                                                        GeoVAlignmentStore* alignStore) const
@@ -246,21 +257,21 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
 
       } else if (frame == InDetDD::local) { // local shift
 
-        SiDetectorElement * element =  m_elementCollection[idHash];
+        const SiDetectorElement * element =  m_elementCollection[idHash];
         if (!element) return false;
 
 
         // Its a local transform
-        //See header file for definition of m_isLogical          
+        //See header file for definition of m_isLogical
         if( m_isLogical ){
           //Ensure cache is up to date and use the alignment corrected local to global transform
-          element->setCache();
+          element->updateCache();
           return setAlignableTransformLocalDelta(m_alignableTransforms[idHash].get(), element->transform(), delta, alignStore);
-        } else 
+        } else
           //Use default local to global transform
           return setAlignableTransformLocalDelta(m_alignableTransforms[idHash].get(), element->defTransform(), delta, alignStore);
 
-      } else {   
+      } else {
         // other not supported
         ATH_MSG_WARNING("Frames other than global or local are not supported.");
         return false;
@@ -283,16 +294,16 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
         // Its a global transform
         return setAlignableTransformGlobalDelta(m_moduleAlignableTransforms[idModuleHash].get(), delta, alignStore);
       } else if (frame == InDetDD::local) { // local shift
-        SiDetectorElement * element =  m_elementCollection[idHash];
+        const SiDetectorElement * element =  m_elementCollection[idHash];
         if (!element) return false;
-       
+
         // Its a local transform
-        //See header file for definition of m_isLogical          
+        //See header file for definition of m_isLogical
         if( m_isLogical ){
           //Ensure cache is up to date and use the alignment corrected local to global transform
-          element->setCache();
+          element->updateCache();
           return setAlignableTransformLocalDelta(m_moduleAlignableTransforms[idModuleHash].get(), element->moduleTransform(), delta, alignStore);
-        } else 
+        } else
           //Use default local to global transform
           return setAlignableTransformLocalDelta(m_moduleAlignableTransforms[idModuleHash].get(), element->defModuleTransform(), delta, alignStore);
 
@@ -312,10 +323,10 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
       int index = level - FIRST_HIGHER_LEVEL; // level 0 and 1 is treated separately.
       if (index  >=  static_cast<int>(m_higherAlignableTransforms.size())) return false;
 
-      // We retrieve it from a map. 
-      AlignableTransformMap::const_iterator iter;    
+      // We retrieve it from a map.
+      AlignableTransformMap::const_iterator iter;
       iter = m_higherAlignableTransforms[index].find(id);
-      if (iter == m_higherAlignableTransforms[index].end()) return false;      
+      if (iter == m_higherAlignableTransforms[index].end()) return false;
 
       // Its a global transform
       return setAlignableTransformGlobalDelta((iter->second).get(), delta, alignStore);
@@ -323,15 +334,15 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
 
   }
 
-  void SCT_DetectorManager::addAlignableTransform (int level, 
-                                                   const Identifier & id, 
+  void SCT_DetectorManager::addAlignableTransform (int level,
+                                                   const Identifier & id,
                                                    GeoAlignableTransform *transform,
                                                    const GeoVPhysVol * child)
   {
     if (m_idHelper) {
 
       const GeoVFullPhysVol * childFPV = dynamic_cast<const GeoVFullPhysVol *>(child);
-      if (!childFPV) { 
+      if (!childFPV) {
         ATH_MSG_ERROR("Child of alignable transform is not a full physical volume");
       } else {
         addAlignableTransform (level, id, transform, childFPV);
@@ -339,32 +350,32 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
     }
   }
 
-  void SCT_DetectorManager::addAlignableTransform (int level, 
-                                                   const Identifier & id, 
+  void SCT_DetectorManager::addAlignableTransform (int level,
+                                                   const Identifier & id,
                                                    GeoAlignableTransform *transform,
                                                    const GeoVFullPhysVol * child)
-  { 
+  {
     if (m_idHelper) {
-      if (level == 0) { 
+      if (level == 0) {
         // Element
         IdentifierHash idHash = m_idHelper->wafer_hash(id);
         if (idHash.is_valid()) {
           m_alignableTransforms[idHash] = std::make_unique<ExtendedAlignableTransform>(transform, child);
-        } 
+        }
       } else if (level == 1) {
         // Module
         IdentifierHash idHash = m_idHelper->wafer_hash(id);
         if (idHash.is_valid()) {
           m_moduleAlignableTransforms[idHash/2] = std::make_unique<ExtendedAlignableTransform>(transform, child);
-        } 
+        }
 
       } else {
 
-        // Higher levels are saved in a map. NB level=0,1 is treated above.   
+        // Higher levels are saved in a map. NB level=0,1 is treated above.
         int index = level - FIRST_HIGHER_LEVEL; // level 0 and 1 is treated separately.
-        if (index >= static_cast<int>(m_higherAlignableTransforms.size())) m_higherAlignableTransforms.resize(index+1); 
+        if (index >= static_cast<int>(m_higherAlignableTransforms.size())) m_higherAlignableTransforms.resize(index+1);
         m_higherAlignableTransforms[index][id] = std::make_unique<ExtendedAlignableTransform>(transform, child);
-      }  
+      }
     }
   }
 
@@ -448,7 +459,7 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
   }
 
 bool SCT_DetectorManager::processSpecialAlignment(
-    const std::string &, InDetDD::AlignFolderType) const {
+    const std::string &, InDetDD::AlignFolderType) {
   return false;
 }
 

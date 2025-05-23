@@ -372,7 +372,7 @@ namespace InDet {
       ATH_MSG_DEBUG(" DetectorElement id: "<<id);
 
       // get the element via hash
-      SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
@@ -549,7 +549,7 @@ namespace InDet {
       Amg::Translation3D translation(mod->centerOfGravity());
       ATH_MSG_DEBUG("Endcap:" << iSide << " , CoG (" << translation.x() << " , " << translation.y() << " , " << translation.z() << " ) " );
       Amg::Transform3D localtoglobal = translation * Amg::RotationMatrix3D::Identity();
-      
+
       mod->setGlobalFrameToAlignFrameTransform(localtoglobal.inverse());
 
       m_alignModuleListPtr->push_back(mod);
@@ -718,7 +718,7 @@ namespace InDet {
         Amg::Translation3D translation(mod->centerOfGravity());
         Amg::Transform3D localToGlobal = translation * rotation;
 
-      
+
         ATH_MSG_DEBUG("Prepared local to global transform :");
         ATH_MSG_DEBUG(" - translation: "<<localToGlobal.translation().x()<<"  "<<localToGlobal.translation().y()<<"  "<<localToGlobal.translation().z());
         ATH_MSG_DEBUG(" - rotation:");
@@ -885,9 +885,9 @@ namespace InDet {
           }
 
           // for endcap we move the CoG
-          
-     
-          
+
+
+
           Amg::Translation3D translation(mod->centerOfGravity());
           ATH_MSG_DEBUG("Endcap:" << iSide << " , disk: " << iWheel << " , CoG (" << translation.x() << " , " << translation.y() << " , " << translation.z() << " ) " );
           Amg::Transform3D localtoglobal = translation * Amg::RotationMatrix3D::Identity();
@@ -1067,7 +1067,7 @@ namespace InDet {
       // for endcap we move the CoG
       Amg::Translation3D translation(mod->centerOfGravity());
       ATH_MSG_DEBUG("Endcap:" << iSide << " , disk: " << iWheel << " , CoG (" << translation.x() << " , " << translation.y() << " , " << translation.z() << " ) " );
-  
+
       Amg::Transform3D localtoglobal = translation * Amg::RotationMatrix3D::Identity();
 
       mod->setGlobalFrameToAlignFrameTransform(localtoglobal.inverse());

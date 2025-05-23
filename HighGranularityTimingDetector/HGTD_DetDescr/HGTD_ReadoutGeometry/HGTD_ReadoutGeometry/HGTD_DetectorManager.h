@@ -20,8 +20,6 @@
 // Message Stream Member
 #include "AthenaBaseComps/AthMessaging.h"
 
-#include <span>
-
 class StoreGateSvc;
 
 /** @class HGTD_DetectorManager
@@ -74,7 +72,7 @@ public:
     void invalidateAll();
 
     /** Update all caches */
-    void updateAll();
+    void updateAll() const;
 
     /** Set SiCommonItems */
     void setCommonItems(std::unique_ptr<const InDetDD::SiCommonItems>&& commonItems);

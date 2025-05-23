@@ -115,6 +115,9 @@ namespace InDetDD {
     const TRT_DetElementCollection* getDetectorElementCollection() const;
     TRT_DetElementCollection::const_iterator getDetectorElementBegin() const;
     TRT_DetElementCollection::const_iterator getDetectorElementEnd() const;
+    TRT_DetElementCollection::iterator getDetectorElementBegin();
+    TRT_DetElementCollection::iterator getDetectorElementEnd();
+
 
     //-----------------------------------------------------------------------------//
 
@@ -211,7 +214,7 @@ namespace InDetDD {
 
 
     /** Invalidate cache for all detector elements */
-    virtual void invalidateAll() const override;
+    virtual void invalidateAll();
 
     /** Update all caches. */
     virtual void updateAll() const override;
@@ -229,7 +232,7 @@ namespace InDetDD {
                                 const CondAttrListCollection* obj,
                                 GeoVAlignmentStore* alignStore) const override;
 
-    bool processSpecialAlignment(const std::string & key, InDetDD::AlignFolderType dummy) const override;
+    bool processSpecialAlignment(const std::string & key, InDetDD::AlignFolderType dummy) override;
 
     bool processSpecialAlignment(const std::string& key,
                                  const CondAttrListCollection* obj=nullptr,

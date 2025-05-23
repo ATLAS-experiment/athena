@@ -13,8 +13,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "CLHEP/Geometry/Transform3D.h"
 
-#include <atomic>
-
 namespace TRTCond {
   class StrawDxContainer;
 }
@@ -22,25 +20,25 @@ namespace TRTCond {
 namespace InDetDD {
 
     /** @class TRT_Conditions
-        
+
         This class is an interface to conditions objects. There is a single instance shared by all TRT elements.
         The object of this class is owned by TRT_DetectorManager.
       */
 
   class TRT_Conditions {
-  
+
     public:
-  
+
       TRT_Conditions();
       ~TRT_Conditions() = default;
-  
+
       const TRTCond::StrawDxContainer* dxContainer() const;
 
     protected:
-      void setDxContainer(const TRTCond::StrawDxContainer* container) const;
-    
+      void setDxContainer(const TRTCond::StrawDxContainer* container);
+
     private:
-      mutable std::atomic<const TRTCond::StrawDxContainer*> m_dxContainer;
+      const TRTCond::StrawDxContainer* m_dxContainer;
 
   };
 

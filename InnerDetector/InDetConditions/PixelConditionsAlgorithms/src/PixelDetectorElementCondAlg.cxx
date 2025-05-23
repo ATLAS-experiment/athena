@@ -70,7 +70,7 @@ StatusCode PixelDetectorElementCondAlg::execute(const EventContext& ctx) const
     ATH_MSG_FATAL("Null pointer to the read conditions object of " << m_readKey.key());
     return StatusCode::FAILURE;
   }
-  
+
   // Make sure we make a mixed IOV.
   writeHandle.addDependency (IOVInfiniteRange::infiniteMixed());
 
@@ -108,7 +108,7 @@ StatusCode PixelDetectorElementCondAlg::execute(const EventContext& ctx) const
   // ____________ Update writeCdo using readCdo ____________
   std::map<const InDetDD::SiDetectorElement*, const InDetDD::SiDetectorElement*> oldToNewMap;
   oldToNewMap[nullptr] = nullptr;
-  writeCdo->resize(oldColl->size(), nullptr);
+  writeCdo->resize(oldColl->size());
   InDetDD::SiDetectorElementCollection::iterator newEl{writeCdo->begin()};
   for (const InDetDD::SiDetectorElement* oldEl: *oldColl) {
     *newEl = new InDetDD::SiDetectorElement(oldEl->identify(),
@@ -132,7 +132,8 @@ StatusCode PixelDetectorElementCondAlg::execute(const EventContext& ctx) const
     newEl->setNextInPhi(oldToNewMap[(*oldIt)->nextInPhi()]);
     newEl->setPrevInPhi(oldToNewMap[(*oldIt)->prevInPhi()]);
 
-    // Layer of old element is set by InDet::SiLayerBuilder::registerSurfacesToLayer.
+    //Note here we set the Layer but then is redo in
+    //Tracking Geometry which should be the last MT const correctness issue
     const Trk::Layer* layer{(*oldIt)->surface().associatedLayer()};
     if (layer) {
       newEl->surface().associateLayer(*layer);
@@ -142,13 +143,13 @@ StatusCode PixelDetectorElementCondAlg::execute(const EventContext& ctx) const
 
   // Apply alignment using readCdo passed to SiDetectorElement
   for (InDetDD::SiDetectorElement* newEl: *writeCdo) {
-    newEl->setCache();
+    newEl->updateCache();
   }
 
   // Record WriteCondHandle
   const std::size_t size{writeCdo->size()};
   if (writeHandle.record(std::move(writeCdo)).isFailure()) {
-    ATH_MSG_FATAL("Could not record " << writeHandle.key() 
+    ATH_MSG_FATAL("Could not record " << writeHandle.key()
                   << " with EventRange " << writeHandle.getRange()
                   << " into Conditions Store");
     return StatusCode::FAILURE;

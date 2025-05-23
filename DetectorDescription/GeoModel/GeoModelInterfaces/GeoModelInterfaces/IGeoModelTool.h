@@ -26,7 +26,7 @@ public:
     virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () = 0;
 
     // Callback function itself
-    virtual StatusCode align(IOVSVC_CALLBACK_ARGS) = 0;
+    virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) = 0;
 
 };
 

@@ -8,7 +8,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GeoModelUtilities/GeoModelTool.h"
-#include "HGTD_GeoModel/HGTD_GeoModelAthenaComps.h" 
+#include "HGTD_GeoModel/HGTD_GeoModelAthenaComps.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
@@ -37,7 +37,7 @@ class HGTD_DetectorTool : public GeoModelTool {
     virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
 
     // Callback function itself
-    virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override final;
+    virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override final;
 
  private:
 
