@@ -18,8 +18,9 @@ atlas_install_python_modules( python/*.py share/L1CaloPhase1Monitoring.py POST_B
 atlas_install_joboptions( share/*.py )
 atlas_install_data( share/hanConfig_header.txt )
 
+
 atlas_add_test( L1CaloPhase1_Data
-        SCRIPT athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_Main.daq.RAW._lb0461._SFO-13._0004.data --evtMax 10
+        SCRIPT athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_Main.daq.RAW._lb0461._SFO-13._0004.data --evtMax 10 --all
         PROPERTIES TIMEOUT 300
         PRIVATE_WORKING_DIRECTORY
         POST_EXEC_SCRIPT noerror.sh )
@@ -33,7 +34,7 @@ atlas_add_test( L1CaloPhase1_ConfigGenerating
         POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( L1CaloPhase1_Data_oneFex
-        SCRIPT athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_Main.daq.RAW._lb0461._SFO-13._0004.data --evtMax 10 -- Trigger.L1.dojFex=False Trigger.L1.dogFex=False
+        SCRIPT athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_Main.daq.RAW._lb0461._SFO-13._0004.data --evtMax 10 -- Trigger.L1.doeFex=True Trigger.L1.doCaloInputs=True
         PROPERTIES TIMEOUT 300
         PRIVATE_WORKING_DIRECTORY
         POST_EXEC_SCRIPT noerror.sh )

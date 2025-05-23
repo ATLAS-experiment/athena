@@ -321,13 +321,14 @@ if __name__=='__main__':
         if flags.Tile.doOptATLAS and any([flags.Tile.doFit, flags.Tile.doOpt2]):
             rawChannelContainer = 'TileRawChannelOpt2' if flags.Tile.doOpt2 else 'TileRawChannelFit'
         from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
+        mergeChannels = flags.Tile.RunType is TileRunType.PHY
         if biGainRun:
             cfg.merge( TileCellMakerCfg(flags, SkipGain=0, mergeChannels=False) )
             cfg.merge( TileCellMakerCfg(flags, SkipGain=1, mergeChannels=False) )
             cfg.getEventAlgo("TileCellMakerHG").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
             cfg.getEventAlgo("TileCellMakerLG").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
         else:
-            cfg.merge( TileCellMakerCfg(flags, mergeChannels=False) )
+            cfg.merge( TileCellMakerCfg(flags, mergeChannels=mergeChannels) )
             cfg.getEventAlgo("TileCellMaker").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
 
     # =======>>> Set up the Tile clusters maker
@@ -413,7 +414,7 @@ if __name__=='__main__':
         if args.dq_mon and flags.Tile.RunType is TileRunType.PHY and flags.Tile.readDigits:
             from TileMonitoring.TileDQFragMonitorAlgorithm import TileDQFragMonitoringConfig
             cfg.merge(TileDQFragMonitoringConfig(flags))
-            setOnlineEnvironment(cfg.getEventAlgo('TileDQMonAlg'))
+            setOnlineEnvironment(cfg.getEventAlgo('TileDQFragMonAlg'))
 
         if args.cell_mon:
             from TileMonitoring.TileCellMonitorAlgorithm import TileCellMonitoringConfig

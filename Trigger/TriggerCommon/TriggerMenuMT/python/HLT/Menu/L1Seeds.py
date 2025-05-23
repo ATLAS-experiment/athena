@@ -50,7 +50,7 @@ def getL1BackgroundSeed():
         'L1_jJ30_UNPAIREDB1', 'L1_jJ30_UNPAIREDB2',
         'L1_jJ30_UNPAIRED_ISO', 'L1_jJ30_UNPAIRED_NONISO',
         'L1_jJ90_UNPAIRED_ISO', 'L1_jJ90_UNPAIRED_NONISO',
-        'L1_jJ30_EMPTY', 'L1_jJ30_FIRSTEMPTY', 'L1_jJ30_BGRP12',
+        'L1_jJ30_EMPTY', 'L1_jJ60_EMPTY', 'L1_jJ30_FIRSTEMPTY', 'L1_jJ30_BGRP12',
         ]
 
 ##############################
@@ -131,7 +131,7 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         ],
         'EMPTY': 
         [
-            'L1_jJ30_EMPTY', 'L1_MU8VF_EMPTY', 'L1_eTAU12_EMPTY', 'L1_eTAU60_EMPTY', 'L1_eEM9_EMPTY'
+            'L1_jJ30_EMPTY', 'L1_jJ60_EMPTY', 'L1_MU8VF_EMPTY', 'L1_eTAU12_EMPTY', 'L1_eTAU60_EMPTY', 'L1_eEM9_EMPTY'
         ],
         'FIRSTEMPTY':
         [

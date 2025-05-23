@@ -69,6 +69,9 @@ def getCosmicSignatures():
         ChainProp(name='HLT_j0_0eta290_boffperf_ftf_L1MU8F',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleBjetGroup,monGroups=['idMon:shifter']),
         ChainProp(name='HLT_j0_0eta290_boffperf_ftf_L1RD0_EMPTY',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleBjetGroup,monGroups=['idMon:shifter']),
         ChainProp(name='HLT_j0_0eta290_boffperf_ftf_L1jJ30_EMPTY',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleBjetGroup,monGroups=['idMon:shifter']),
+        # ATR-31286
+        ChainProp(name='HLT_j0_0eta290_boffperf_ftf_L1jJ60_EMPTY',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleBjetGroup,monGroups=['idMon:shifter']),
+
     ]
 
     chains['Combined'] = [
