@@ -8,5 +8,5 @@ your build, set up your build environment as usual (using
 setupATLAS and asetup), and then set up your build like:
 
 cmake -DATLAS_PACKAGE_FILTER_FILE=some_filter_file.txt \
-   /workspace/athena/Projects/WorkDir/
+   /workspaces/athena/Projects/WorkDir/
 
