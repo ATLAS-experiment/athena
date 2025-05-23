@@ -10,6 +10,10 @@
 #include <GeoPrimitives/GeoPrimitives.h>
 #include <memory>
 
+#include "Acts/EventData/SourceLink.hpp"
+#include <ActsEvent/TrackContainer.h>
+
+
 class EventContext;
 
 namespace MuonR4{
@@ -87,7 +91,15 @@ namespace MuonR4{
              *  @param spacePoint: Reference to the calibrated space point for which the acceleration needs to be calculated. */
             virtual double driftAcceleration(const EventContext& ctx,
                                              const CalibratedSpacePoint& spacePoint) const = 0;
-
+            /** @brief Function that's hooked to the calibration delegate of the implemented Acts fitters
+              *  @param geoctx: The geometry context to fetch the local -> global transformations for the surfaces
+              *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+              *  @param link: Sourcelink to the actual measurement to calibrate
+              *  @param state: Proxy to the track-state to which the calibrated constants are written */
+            virtual void calibrate(const Acts::GeometryContext& geoctx,
+                                   const Acts::CalibrationContext& cctx,
+                                   const Acts::SourceLink& link,
+                                   ActsTrk::MutableTrackContainer::TrackStateProxy state) const = 0;
     };
 
 }
