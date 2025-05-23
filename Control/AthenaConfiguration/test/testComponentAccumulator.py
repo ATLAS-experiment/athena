@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # self test of ComponentAccumulator
 
@@ -55,7 +55,7 @@ class TestComponentAccumulator( unittest.TestCase ):
         acc.addPublicTool(CompFactory.HelloTool("TestPublicTool", MyMessage="The first"))
         acc.addCondAlgo(TestAlgo("Cond1", MyInt=7))
         acc.addService(CompFactory.CoreDumpSvc("CD", Signals=[15]))
-        acc.addAuditor(CompFactory.NameAuditor(EventTypes=["all"]))
+        acc.addAuditor(CompFactory.NameAuditor(Enable=True))
 
         def AlgsConf3(flags):
             acc = ComponentAccumulator()
@@ -105,7 +105,7 @@ class TestComponentAccumulator( unittest.TestCase ):
 
     def test_conflict_in_auditors(self):
         with self.assertRaises(ValueError):
-            self.acc.addAuditor(CompFactory.NameAuditor(EventTypes=["none"]))
+            self.acc.addAuditor(CompFactory.NameAuditor(Enable=False))
 
     def test_conflict_in_merge(self):
         with self.assertRaises(ValueError):
