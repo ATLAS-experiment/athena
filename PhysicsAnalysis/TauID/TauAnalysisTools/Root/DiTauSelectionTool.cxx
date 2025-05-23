@@ -53,7 +53,7 @@ StatusCode DiTauSelectionTool::initialize()
   if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMax.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsCharges.empty())       bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_iAbsCharge == m_iAbsCharge) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_iAbsCharge.value())) bConfigViaProperties = true;
 
 
   if (bConfigViaConfigFile and bConfigViaProperties)
@@ -161,7 +161,7 @@ StatusCode DiTauSelectionTool::initialize()
       else if (sCut == "AbsCharge")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutAbsCharge;
-        if (m_iAbsCharge != m_iAbsCharge)
+        if (std::isnan(m_iAbsCharge.value()))
           m_iAbsCharge = rEnv.GetValue("AbsCharge",NAN);
       }
       else ATH_MSG_WARNING("Cut " << sCut << " is not available");
@@ -189,7 +189,7 @@ StatusCode DiTauSelectionTool::initialize()
   FillRegionVector(m_vPtRegion, m_dPtMin.value(), m_dPtMax.value());
   FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
   FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin.value(), m_dNSubjetsMax.value());
-  FillValueVector(m_vAbsCharges, m_iAbsCharge );
+  FillValueVector(m_vAbsCharges, m_iAbsCharge.value());
 
   PrintConfigRegion ("Pt",          m_vPtRegion);
   PrintConfigRegion ("AbsEta",      m_vAbsEtaRegion);
