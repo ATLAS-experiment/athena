@@ -23,8 +23,6 @@ class LArDeadOTXCondAlg : public AthAlgorithm  {
 public:
   using AthAlgorithm::AthAlgorithm;
 
-
-  LArDeadOTXCondAlg() = default;
   virtual StatusCode initialize() override final;
   virtual StatusCode execute() override final;
   
