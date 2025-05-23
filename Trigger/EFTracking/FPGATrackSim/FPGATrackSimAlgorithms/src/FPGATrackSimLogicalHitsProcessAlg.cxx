@@ -98,6 +98,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGAHitKey_2nd.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
+    ATH_CHECK( m_FPGAEventInfoKey.initialize() );
 
     ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
@@ -155,6 +156,18 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
 
+    // Read event info structure. all we need this for is to propagate to our event info structures.
+    SG::ReadHandle<FPGATrackSimEventInfo> FPGAEventInfo(m_FPGAEventInfoKey, ctx);
+    if (!FPGAEventInfo.isValid()) {
+        ATH_MSG_ERROR("Could not find FPGA Event Info with key " << FPGAEventInfo.key());
+        return StatusCode::FAILURE;
+    }
+    FPGATrackSimEventInfo eventInfo = *FPGAEventInfo.cptr();
+    m_slicedFirstPixelHeader->newEvent(eventInfo);
+    m_slicedSecondPixelHeader->newEvent(eventInfo);
+    m_slicedStripHeader->newEvent(eventInfo);
+    m_slicedStripHeaderPreSP->newEvent(eventInfo);
+
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
 
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_all, phits_1st, phits_2nd;
@@ -203,7 +216,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_MSG_ERROR("Could not find FPGA Offline Track Collection with key " << FPGAOfflineTracks.key());
         return StatusCode::FAILURE;
     }
-    
+
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: GetRoads");
     // Get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
