@@ -3817,8 +3817,8 @@ def dump_TrigL2Bphys (j, f):
 
 
 def dump_TrigMissingET (m, f):
-    fprint (f, '  ', m.ex(), m.ey(), m.ez(), m.sumEt(), m.sumE(), m.et(),
-            m.e(), m.RoIword(), m.getFlag(), m.getNumOfComponents())
+    fprint (f, '  ', m.ex(), m.ey(), m.ez(), m.sumEt(), m.sumE(), 
+            m.RoIword(), m.getFlag(), m.getNumOfComponents())
     for ic in range(m.getNumOfComponents()):
         fprint (f, '\n   ', m.getNameOfComponent(ic),
                 m.getExComponent(ic), m.getEyComponent(ic),
