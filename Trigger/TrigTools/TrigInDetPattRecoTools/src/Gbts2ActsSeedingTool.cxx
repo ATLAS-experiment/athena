@@ -69,7 +69,7 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 	node.m_x = pos.x() - shift_x;
 	node.m_y = pos.y() - shift_y;
 	node.m_z = pos.z();
-        node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
+    node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
 	node.m_phi = std::atan2(node.m_y, node.m_x);
 	node.m_idx = idx;
 
