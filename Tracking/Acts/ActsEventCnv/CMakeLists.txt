@@ -42,7 +42,8 @@ atlas_add_test(ActsEventCnvTrackTest
     PROPERTIES TIMEOUT 900
     POST_EXEC_SCRIPT noerror.sh)
 
-#### atlas_add_test(ActsEventCnvMuonTrackTest
-####     SCRIPT test/testMuonTrackConversion.py
-####     PROPERTIES TIMEOUT 900
-####     POST_EXEC_SCRIPT noerror.sh)
+atlas_add_test(ActsEventCnvMuonTrackTest
+    SCRIPT test/testMuonTrackConversion.py
+    PROPERTIES TIMEOUT 900
+    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from AtasTrackingGeometryConversion
+    POST_EXEC_SCRIPT noerror.sh)

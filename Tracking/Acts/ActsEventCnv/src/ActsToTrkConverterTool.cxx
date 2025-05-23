@@ -30,6 +30,7 @@
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
 // ACTS
+#include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
@@ -170,7 +171,7 @@ const Acts::Surface &ActsToTrkConverterTool::trkSurfaceToActsSurface(
   if (it != m_actsSurfaceMap.end()) {
     return *it->second;
   }
-  ATH_MSG_ERROR("No Acts surface corresponding to this ATLAS surface:");
+  ATH_MSG_ERROR("No Acts surface corresponding to this ATLAS surface: "<<atlasID);
   ATH_MSG_ERROR(atlasSurface);
   throw std::domain_error("No Acts surface corresponding to the ATLAS one");
 }
@@ -238,6 +239,9 @@ ActsToTrkConverterTool::trkTrackParametersToActsParameters(const Trk::TrackParam
         break;
       case Trk::SurfaceType::Perigee:
         actsSurface = Acts::Surface::makeShared<const Acts::PerigeeSurface>(trf);
+        break;
+      case Trk::SurfaceType::Line:
+        actsSurface = Acts::Surface::makeShared<const Acts::StrawSurface>(trf);
         break;
       // TODO - implement the missing types?
       default: {

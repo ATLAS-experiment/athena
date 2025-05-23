@@ -3,7 +3,6 @@
 
 import json
 from ActsConfig.ActsEventCnvConfig import RunTrackConversion
-from MuonGeoModelTestR4.testGeoModel import geoModelFileDefault
 import math
 
 if "__main__" == __name__:
@@ -15,7 +14,10 @@ if "__main__" == __name__:
     
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ActsEventCnv/q447_ESD.pool.root']
     flags.GeoModel.SQLiteDB = True
-    flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault()
+    #### The official upgrade samples contain an ITk but a R3-MS. To compare the input
+    #### from those samples with the Phase-II style Muon geometry use a non-standard 
+    #### SQLite database with ITk + R3-MS. 
+    flags.GeoModel.SQLiteDBFullPath = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_R3MS.db"
 
     from AthenaConfiguration.TestDefaults import defaultConditionsTags
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
@@ -31,7 +33,7 @@ if "__main__" == __name__:
     )
     flags.Detector.GeometryITkPixel=False
     flags.Detector.GeometryITkStrip=False
-    flags.Detector.GeometryHGTD=False
+    flags.Detector.GeometryHGTD = False
 
     flags.Muon.enableAlignment = True
     flags.Muon.applyMMPassivation = False
@@ -44,7 +46,6 @@ if "__main__" == __name__:
     flags.Concurrency.NumThreads = 1
     flags.Exec.SkipEvents = 11
     flags.Exec.MaxEvents = 1
-
     flags.lock()
     flags.dump(evaluate=True)
 
