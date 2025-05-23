@@ -54,10 +54,7 @@ namespace TrackingUtilities {
 				       ::HGTD_Cluster*& indetCluster);  
 
   // Low level conversion for SCT cluster pulled out for use in calibrator
-  std::optional<std::pair<float, float>> convertSCT_LocalPosCov(
-                                           const InDet::SCT_Cluster &cluster,
-                                           const InDetDD::SiDetectorElement &element);
-
+  std::pair<xAOD::MeasVector<1>, xAOD::MeasMatrix<1>> convertSCT_LocalPosCov(const InDet::SCT_Cluster &cluster);
 } // Namespace
 
 #endif

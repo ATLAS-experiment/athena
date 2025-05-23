@@ -11,7 +11,8 @@ atlas_add_library( ActsCalibrationLib
                    PUBLIC_HEADERS ActsCalibration
                    LINK_LIBRARIES ActsCore ActsGeometryLib TrkEventPrimitives TrkMeasurementBase
                                   TrkSurfaces ActsToolInterfacesLib TrkToolInterfaces GeoPrimitives
-                                  TrkRIO_OnTrack xAODMuonPrepData)
+                                  TrkRIO_OnTrack xAODMuonPrepData InDetMeasurementUtilitiesLib
+                                  InDetRIO_OnTrack)
 
 atlas_add_test ( MeasurementCalibratorBaseTest
                  SOURCES test/MeasurementCalibratorBaseTest.cxx

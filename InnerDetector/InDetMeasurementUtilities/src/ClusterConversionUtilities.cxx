@@ -12,6 +12,7 @@
 #include "HGTD_PrepRawData/HGTD_Cluster.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
+#include "GeoModelKernel/throwExcept.h"
 
 constexpr static double one_over_twelve = 1. / 12.;
 
@@ -95,9 +96,8 @@ namespace TrackingUtilities {
     return StatusCode::SUCCESS;
   }
 
-  std::optional<std::pair<float, float>> convertSCT_LocalPosCov(
-                                           const InDet::SCT_Cluster &cluster,
-                                           const InDetDD::SiDetectorElement &element) {
+ std::pair<xAOD::MeasVector<1>, xAOD::MeasMatrix<1>> convertSCT_LocalPosCov(const InDet::SCT_Cluster &cluster) {
+    const InDetDD::SiDetectorElement& element{*cluster.detectorElement()};
     auto localPos = cluster.localPosition();
 
     float localPosition = 0.f, localCovariance = 0.f;
@@ -106,17 +106,17 @@ namespace TrackingUtilities {
       localCovariance = element.phiPitch() * element.phiPitch() * one_over_twelve;
     } else {
       InDetDD::SiCellId cellId = element.cellIdOfPosition(localPos);
-      const InDetDD::StripStereoAnnulusDesign *design = 
-        dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element.design());
+      const auto* design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element.design());
       if ( design == nullptr ) {
-        return std::nullopt;
+         THROW_EXCEPTION("Invalid bounds from "<<cluster);
       }
       InDetDD::SiLocalPosition localInPolar = design->localPositionOfCellPC(cellId);
       localPosition = localInPolar.xPhi();
       localCovariance = design->phiPitchPhi() * design->phiPitchPhi() * one_over_twelve;
     }
 
-    return std::pair{localPosition, localCovariance};
+    return std::make_pair(xAOD::MeasVector<1>{localPosition}, 
+                          xAOD::MeasMatrix<1>{localCovariance});
   }
 
   StatusCode convertInDetToXaodCluster(const InDet::SCT_Cluster& indetCluster,
@@ -125,14 +125,8 @@ namespace TrackingUtilities {
   {
     IdentifierHash idHash = element.identifyHash();
 
-    auto converted = convertSCT_LocalPosCov(indetCluster, element);
-    if(!converted) {
-      return StatusCode::FAILURE;
-    }
-
-    Eigen::Matrix<float,1,1> localPosition{converted->first};
-    Eigen::Matrix<float,1,1> localCovariance{converted->second};
-
+    const auto [localPosition, localCovariance] = convertSCT_LocalPosCov(indetCluster);
+   
     auto globalPos = indetCluster.globalPosition();
     Eigen::Matrix<float, 3, 1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z());
 
