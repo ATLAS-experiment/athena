@@ -53,7 +53,7 @@ namespace DerivationFramework {
 
   class TrackStateOnSurfaceDecorator : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
     public: 
-      TrackStateOnSurfaceDecorator(const std::string& t, const std::string& n, const IInterface* p);
+      using base_class::base_class;
 
       StatusCode initialize();
       StatusCode finalize();
