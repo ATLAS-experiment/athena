@@ -22,7 +22,7 @@ namespace InDetDD {
   class PixelDetectorManager;
 }
 
-class PixelDetectorTool : public GeoModelTool {
+class PixelDetectorTool final : public GeoModelTool {
 
  public:
   // Standard Constructor
