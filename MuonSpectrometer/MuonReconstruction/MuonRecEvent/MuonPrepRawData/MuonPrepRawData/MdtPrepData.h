@@ -76,9 +76,9 @@ public:
     The pointer will be zero if the det el is not defined (i.e. it was not passed in by the ctor)*/
     virtual const MuonGM::MdtReadoutElement* detectorElement() const override;
 
-    /** Interface method checking the type*/
-    virtual bool type(Trk::PrepRawDataType type) const override {
-      return type == Trk::PrepRawDataType::MdtPrepData;
+    /** @brief Interface method returning the prdType */
+    virtual Trk::PrepRawDataType prdType() const override {
+      return Trk::PrepRawDataType::MdtPrepData;
     }
     /** @brief Returns the dimension of the MdtPrepData. Ordinary prepData has dimension one
      *         twin drift circles have dimension 2 */

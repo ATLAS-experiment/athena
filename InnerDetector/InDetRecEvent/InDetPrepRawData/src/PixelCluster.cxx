@@ -212,6 +212,9 @@ bool PixelCluster::type(Trk::PrepRawDataType type) const {
   return (type == Trk::PrepRawDataType::PixelCluster or
           type == Trk::PrepRawDataType::SiCluster);
 }
+Trk::PrepRawDataType PixelCluster::prdType() const {
+  return Trk::PrepRawDataType::PixelCluster;
+}
 
 MsgStream& PixelCluster::dump(MsgStream& stream) const {
   std::ostringstream out;

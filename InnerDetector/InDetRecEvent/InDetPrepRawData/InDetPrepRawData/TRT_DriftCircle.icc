@@ -130,10 +130,9 @@ TRT_DriftCircle::isNoise() const
   return false;
 }
 
-inline bool
-TRT_DriftCircle::type(Trk::PrepRawDataType type) const
-{
-  return type == Trk::PrepRawDataType::TRT_DriftCircle;
+inline Trk::PrepRawDataType
+TRT_DriftCircle::prdType() const {
+  return Trk::PrepRawDataType::TRT_DriftCircle;
 }
 
 inline const InDetDD::TRT_BaseElement*

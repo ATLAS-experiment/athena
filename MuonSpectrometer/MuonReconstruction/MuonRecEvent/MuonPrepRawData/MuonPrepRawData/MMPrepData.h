@@ -106,11 +106,11 @@ namespace Muon {
 	The pointer will be zero if the det el is not defined (i.e. it was not passed in by the ctor)*/
     virtual const MuonGM::MMReadoutElement* detectorElement() const override final;
 
-    /** Interface method checking the type*/
-    virtual bool type(Trk::PrepRawDataType type) const override final
-    {
-      return type == Trk::PrepRawDataType::MMPrepData;
+    /** @brief Interface method returning the prdType */
+    virtual Trk::PrepRawDataType prdType() const override {
+      return Trk::PrepRawDataType::MMPrepData;
     }
+
 
     /** @brief Returns the time (in ns) */
     short int time() const;

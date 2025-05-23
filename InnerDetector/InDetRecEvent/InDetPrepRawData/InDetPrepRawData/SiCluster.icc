@@ -28,10 +28,10 @@ SiCluster::gangedPixel() const
   return m_gangedPixel;
 }
 
-inline bool
-SiCluster::type(Trk::PrepRawDataType type) const
+inline Trk::PrepRawDataType
+SiCluster::prdType() const
 {
-  return type == Trk::PrepRawDataType::SiCluster;
+  return Trk::PrepRawDataType::SiCluster;
 }
 
 inline const InDetDD::SiDetectorElement*

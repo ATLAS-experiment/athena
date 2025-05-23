@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -61,6 +61,7 @@ class SCT_Cluster final : public SiCluster {
 
   /** Interface method checking the type*/
   virtual bool type(Trk::PrepRawDataType type) const override final;
+  virtual Trk::PrepRawDataType prdType() const override final;
 
   /// dump information about the PRD object.
   virtual MsgStream& dump(MsgStream& stream) const override final;
