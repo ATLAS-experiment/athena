@@ -214,7 +214,7 @@ namespace InDetDD {
 
 
     /** Invalidate cache for all detector elements */
-    virtual void invalidateAll();
+    virtual void invalidateAll() override;
 
     /** Update all caches. */
     virtual void updateAll() const override;
