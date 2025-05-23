@@ -15,6 +15,7 @@
 #include "../LArRAWtoSuperCell.h"
 #include "../LArCelldeadOTXTool.h"
 #include "../LArCelldeadOTXAlg.h"
+#include "../LArDeadOTXCondAlg.h"
 
 DECLARE_COMPONENT( LArNoisyROAlg )
 DECLARE_COMPONENT( LArNonLinearity )
@@ -33,3 +34,4 @@ DECLARE_COMPONENT( LArHVFraction )
 DECLARE_COMPONENT( LArRAWtoSuperCell )
 DECLARE_COMPONENT( LArCelldeadOTXTool )
 DECLARE_COMPONENT( LArCelldeadOTXAlg )
+DECLARE_COMPONENT( LArDeadOTXCondAlg )

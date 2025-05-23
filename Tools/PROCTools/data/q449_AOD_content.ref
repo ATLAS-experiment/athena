@@ -384,6 +384,8 @@ HLT_AFPTrackContainer
 HLT_AFPTrackContainerAux.
 HLT_AFPVertexContainer
 HLT_AFPVertexContainerAux.
+HLT_AnomDet_ComboHypo
+HLT_AnomDet_ComboHypoAux.
 HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf
 HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.
 HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAuxDyn.AlgorithmType
@@ -821,6 +823,8 @@ HLT_CaloEMClusters_PhotonAux.
 HLT_CaloEMClusters_PhotonAuxDyn.viewIndex
 HLT_DiElecPrecisionGSF
 HLT_DiElecPrecisionGSFAux.
+HLT_DiTauJets
+HLT_DiTauJetsAux.
 HLT_DimuEF
 HLT_DimuEFAux.
 HLT_DisTrkBDTSel
