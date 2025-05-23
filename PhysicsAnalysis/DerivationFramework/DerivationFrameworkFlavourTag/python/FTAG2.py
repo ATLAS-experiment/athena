@@ -25,6 +25,7 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
 
 
     # filter leptons
@@ -40,10 +41,17 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
             expression = total_skimming_expression )
     acc.addPublicTool(FTAG2LeptonSkimmingTool)
 
+    # Thin jets that are below 15 GeV
+    FTAG2AntiKt4EMPFlowJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(
+        name = "FTAG2AntiKt4EMPFlowJetThinningTool",
+        StreamName = kwargs['StreamName'],
+        JetKey = "AntiKt4EMPFlowJets",
+        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
+    ))
 
     # TrackParticles associated with small-R jets
-    FTAG2Akt4PFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
-        name            = "FTAG2Akt4PFlowJetTPThinningTool",
+    FTAG2AntiKt4EMPFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
+        name            = "FTAG2AntiKt4EMPFlowJetTPThinningTool",
         StreamName      = kwargs['StreamName'],
         JetKey   = "AntiKt4EMPFlowJets",
         SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
@@ -67,9 +75,10 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
 
     # Finally the kernel itself
     thinningTools = [
+            FTAG2AntiKt4EMPFlowJetThinningTool,
+            FTAG2AntiKt4EMPFlowJetTPThinningTool,
             FTAG2MuonTPThinningTool,
             FTAG2ElectronTPThinningTool,
-            FTAG2Akt4PFlowJetTPThinningTool,
             ]
     skimmingTools = [
             FTAG2LeptonSkimmingTool,
