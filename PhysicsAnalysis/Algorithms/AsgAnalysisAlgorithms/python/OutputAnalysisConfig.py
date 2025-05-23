@@ -74,6 +74,10 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('alwaysAddNosys', False, type=bool,
             info="If set to True, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
+        self.addOption ('skipRedundantSelectionFlags', True, type=bool,
+            info="remove the redundant 'outputSelect' branches created by the Thinning step. "
+            "These could however be used to simplify downstream workflows, as in Easyjet. "
+            "The default is True.")
         # helper to protect for second pass
         self.validated = False
 
@@ -282,6 +286,9 @@ class OutputAnalysisConfig (ConfigBlock):
             for selectionName in selectionNames:
                 # skip default selection
                 if selectionName == '':
+                    continue
+                # skip selection coming from the Thinning block
+                if self.skipRedundantSelectionFlags and "outputSelect" in selectionName:
                     continue
                 self.makeSelectionSummaryAlg(config, containerName, selectionName)
 
