@@ -35,7 +35,7 @@ StatusCode DiTauOnnxDiscriminantTool::initialize()
 {
   ATH_MSG_INFO( "Initializing DiTauOnnxDiscriminantTool" );
   ATH_MSG_INFO( "onnxModelPath: " << m_onnxModelPath );
-  auto model_path = System::PathResolver::find_file (m_onnxModelPath, "DATAPATH");
+  auto model_path = PathResolverFindCalibFile (m_onnxModelPath);
   if (model_path.empty()) {
     ATH_MSG_ERROR("Could not find model file: " << m_onnxModelPath);
     return StatusCode::FAILURE;

@@ -23,9 +23,9 @@ references_map = {
     "d1912": "v6",
     # Reco
     "q442": "v13",
-    "q449": "v37",
+    "q449": "v38",
     "q452": "v14",
-    "q454": "v28",
+    "q454": "v29",
     # Derivations
     "data_PHYS_Run2": "v3",
     "data_PHYS_Run3": "v5",
