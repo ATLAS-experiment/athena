@@ -14,6 +14,7 @@
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfo.h"
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
 
 #include "FPGATrackSimAlgorithms/IFPGATrackSimTrackExtensionTool.h"
@@ -22,6 +23,7 @@
 
 #include <fstream>
 #include "StoreGate/StoreGateSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoadCollection.h"
@@ -142,6 +144,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         // Not sure if this algorithm also needs these.
         SG::ReadHandleKey<FPGATrackSimTruthTrackCollection> m_FPGATruthTrackKey {this, "FPGATrackSimTruthTrackKey", "FPGATruthTracks", "FPGATrackSim truth tracks"};
         SG::ReadHandleKey<FPGATrackSimOfflineTrackCollection> m_FPGAOfflineTrackKey {this, "FPGATrackSimOfflineTrackKey", "FPGAOfflineTracks", "FPGATrackSim offline tracks"};
+        SG::ReadHandleKey<FPGATrackSimEventInfo> m_FPGAEventInfoKey {this, "FPGATrackSimEventInfoKey", "FPGAEventInfo", "FPGATrackSim event info"};
 };
 
 

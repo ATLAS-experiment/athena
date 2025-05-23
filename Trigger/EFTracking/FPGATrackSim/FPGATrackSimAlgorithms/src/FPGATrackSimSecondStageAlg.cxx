@@ -88,6 +88,7 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
     ATH_CHECK( m_FPGAHitKey.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
+    ATH_CHECK( m_FPGAEventInfoKey.initialize() );
 
     ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
@@ -176,6 +177,15 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         ATH_MSG_ERROR("Could not find FPGA Offline Track Collection with key " << FPGAOfflineTracks.key());
         return StatusCode::FAILURE;
     }
+
+    // Same for event info structure. all we need this for is to propagate to our event info structures.
+    SG::ReadHandle<FPGATrackSimEventInfo> FPGAEventInfo(m_FPGAEventInfoKey, ctx);
+    if (!FPGAEventInfo.isValid()) {
+        ATH_MSG_ERROR("Could not find FPGA Event Info with key " << FPGAEventInfo.key());
+       return StatusCode::FAILURE;
+    }
+    FPGATrackSimEventInfo eventInfo = *FPGAEventInfo.cptr();
+    m_slicedHitHeader->newEvent(eventInfo);
 
     // Get second stage roads from tracks.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;

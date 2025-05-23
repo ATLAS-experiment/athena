@@ -10,6 +10,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "FPGATrackSimInput/FPGATrackSimOutputHeaderTool.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfo.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
 #include "FPGATrackSimMaps/IFPGATrackSimHitFilteringTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimClusteringToolI.h"
@@ -27,6 +28,7 @@
 #include <fstream>
 
 #include "StoreGate/StoreGateSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
@@ -110,9 +112,9 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         unsigned m_nMaxPixClusters = 0; // max number of pixel clusters in an event
         unsigned long m_nStripClusters = 0; // number of clusters for strip, total
         unsigned m_nMaxStripClusters = 0; // max number of strip clusters in an event
-        unsigned m_nMaxClusters = 0; // max number of total clusters in an event  
+        unsigned m_nMaxClusters = 0; // max number of total clusters in an event
 
-  
+
         StatusCode readInputs(bool & done);
         StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
                                  SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters);
@@ -123,12 +125,13 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey",{"FPGAClusters_1st"},"FPGATrackSim Clusters key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim Hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitUnmappedKey{this, "FPGATrackSimHitUnmappedKey","FPGAHitsUnmapped_1st","FPGATrackSim Unmapped Hits 1st stage key"};
-        
+
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleContainerKey{this, "TruthTrackContainer", "TruthParticles", "Truth Particle Container"};
         SG::WriteHandleKey<xAODTruthParticleLinkVector> m_truthLinkContainerKey{this, "TruthLinks", "xAODFPGATruthLinks", "Output EF xAODTruthLinks container"};
 
         SG::WriteHandleKey<FPGATrackSimTruthTrackCollection> m_FPGATruthTrackKey {this, "FPGATrackSimTruthTrackKey", "FPGATruthTracks", "FPGATrackSim truth tracks"};
         SG::WriteHandleKey<FPGATrackSimOfflineTrackCollection> m_FPGAOfflineTrackKey {this, "FPGATrackSimOfflineTrackKey", "FPGAOfflineTracks", "FPGATrackSim offline tracks"};
+        SG::WriteHandleKey<FPGATrackSimEventInfo> m_FPGAEventInfoKey{this, "FPGATrackSimEventInfoKey", "FPGAEventInfo", "FPGATrackSim event info"};
 
 };
 

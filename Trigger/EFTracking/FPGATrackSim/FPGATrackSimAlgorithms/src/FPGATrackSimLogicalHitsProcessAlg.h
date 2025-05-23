@@ -10,6 +10,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "FPGATrackSimInput/FPGATrackSimOutputHeaderTool.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfo.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
@@ -33,6 +34,7 @@
 #include <fstream>
 
 #include "StoreGate/StoreGateSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
@@ -175,6 +177,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
         SG::ReadHandleKey<FPGATrackSimTruthTrackCollection> m_FPGATruthTrackKey {this, "FPGATrackSimTruthTrackKey", "FPGATruthTracks", "FPGATrackSim truth tracks"};
         SG::ReadHandleKey<FPGATrackSimOfflineTrackCollection> m_FPGAOfflineTrackKey {this, "FPGATrackSimOfflineTrackKey", "FPGAOfflineTracks", "FPGATrackSim offline tracks"};
+        SG::ReadHandleKey<FPGATrackSimEventInfo> m_FPGAEventInfoKey {this, "FPGATrackSimEventInfoKey", "FPGAEventInfo", "FPGATrackSim event info"};
 };
 
 
