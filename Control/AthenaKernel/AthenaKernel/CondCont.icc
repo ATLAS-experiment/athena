@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/CondCont.icc
@@ -347,7 +347,7 @@ CondCont<T>::CondCont (Athena::IRCUSvc& rcusvc,
                        SG::DataProxy* proxy,
                        std::shared_ptr<typename CondContSet::IPayloadDeleter> payloadDeleter,
                        size_t capacity)
-  : Base (rcusvc, clid, id, proxy, payloadDeleter, capacity)
+  : Base (rcusvc, clid, id, proxy, std::move(payloadDeleter), capacity)
 {
   CondCont<T>::registerBaseInit();
 }

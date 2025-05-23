@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // DsoDb.cxx 
@@ -393,7 +393,7 @@ DsoDb::build_repository()
         else if (line.compare(0, 6, "class ")==0) {
           libname = lastlib;
           line.erase (0, 6);
-          dso_key = line;
+          dso_key = std::move(line);
         }
 
         else if (is_components && line.compare(0, 3, "lib") ==0) {
@@ -401,7 +401,7 @@ DsoDb::build_repository()
           if (pos == std::string::npos) continue;
           libname = line.substr(0, pos);
           line.erase (0, pos+1);
-          dso_key = line;
+          dso_key = std::move(line);
 
           if (dso_key.compare(0, 6, "_PERS_")==0 ||
               dso_key.compare(0, 7, "_TRANS_")==0)
