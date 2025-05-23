@@ -6,6 +6,10 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkSurfaces/SurfaceBounds.h"
 
+#include "InDetMeasurementUtilities/ClusterConversionUtilities.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
+#include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
+
 #include <format>
 namespace ActsTrk::detail {
 
@@ -18,9 +22,19 @@ namespace ActsTrk::detail {
       switch (sourceLink->localParameters().dimension()) {
         case 1: {
           ProjectorType projector{ProjectorType::e1DimNoTime};
+          /// Hack to make the coordinate systems between Acts & Trk match for the SCT endcap hits          
           if (sourceLink->associatedSurface().bounds().type() == Trk::SurfaceBounds::Annulus) {
              projector = ProjectorType::e1DimRotNoTime;
-          }
+             if (sourceLink->type(Trk::MeasurementBaseType::Type::RIO_OnTrack)) {
+               const auto* rot = static_cast<const Trk::RIO_OnTrack*>(sourceLink);
+               if (rot->prepRawData()->type(Trk::PrepRawDataType::SCT_Cluster)) {
+                  const auto* clust = static_cast<const InDet::SCT_ClusterOnTrack*>(rot);
+                  const auto [pos, cov] = TrackingUtilities::convertSCT_LocalPosCov(*clust->prepRawData());
+                  setState<1, trajectory_t>(projector, pos, cov, sl, trackState);
+                  break;
+               }
+             }
+          } 
           setState<1, trajectory_t>(projector, sourceLink->localParameters(), sourceLink->localCovariance(),
                                     sl, trackState);
           break;
