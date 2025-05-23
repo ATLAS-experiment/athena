@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ==============================================================================
 # Provides configs for the tools used for building/thinning tracking related
@@ -69,24 +69,28 @@ def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
 
     kwargs.setdefault("DecorationPrefix", "notSet")
 
+    if "Updator" not in kwargs:
+        from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
+        kwargs.setdefault("Updator", acc.popToolsAndMerge(
+            KalmanUpdatorCfg(flags)))
+    
     if "TrackExtrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("TrackExtrapolator", acc.addPublicTool(
-            acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
+        kwargs.setdefault("TrackExtrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
 
     if "HoleSearch" not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
             InDetTrackHoleSearchToolCfg)
-        kwargs.setdefault("HoleSearch", acc.addPublicTool(
-            acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags))))
+        kwargs.setdefault("HoleSearch", acc.popToolsAndMerge(
+            InDetTrackHoleSearchToolCfg(flags)))
 
     if "ResidualPullCalculator" not in kwargs:
         from TrkConfig.TrkResidualPullCalculatorConfig import (
             ResidualPullCalculatorCfg)
-        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
-            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+        kwargs.setdefault("ResidualPullCalculator", acc.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
 
-    kwargs.setdefault("IsSimulation", flags.Input.isMC)
     kwargs.setdefault("StorePixel", flags.Tracking.writeExtendedSi_PRDInfo)
     kwargs.setdefault("StoreSCT", flags.Tracking.writeExtendedSi_PRDInfo)
     kwargs.setdefault("StoreTRT", flags.Tracking.writeExtendedTRT_PRDInfo)
@@ -94,7 +98,8 @@ def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
 
     if kwargs["StoreTRT"] and "TRT_ToT_dEdx" not in kwargs:
         from InDetConfig.TRT_ElectronPidToolsConfig import TRT_dEdxToolCfg
-        kwargs.setdefault("TRT_ToT_dEdx", acc.addPublicTool(acc.popToolsAndMerge(TRT_dEdxToolCfg(flags))))
+        kwargs.setdefault("TRT_ToT_dEdx", acc.popToolsAndMerge(
+            TRT_dEdxToolCfg(flags)))
 
     kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapMerge_CombinedInDetTracks")
 
@@ -285,22 +290,27 @@ def ITkTrackStateOnSurfaceDecoratorCfg(
 
     kwargs.setdefault("DecorationPrefix", "notSet")
 
+    if "Updator" not in kwargs:
+        from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
+        kwargs.setdefault("Updator", acc.popToolsAndMerge(
+            KalmanUpdatorCfg(flags)))
+    
     if "TrackExtrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("TrackExtrapolator", acc.addPublicTool(
-            acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
+        kwargs.setdefault("TrackExtrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
 
     if "HoleSearch" not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
             ITkTrackHoleSearchToolCfg)
-        kwargs.setdefault("HoleSearch", acc.addPublicTool(
-            acc.popToolsAndMerge(ITkTrackHoleSearchToolCfg(flags))))
+        kwargs.setdefault("HoleSearch", acc.popToolsAndMerge(
+            ITkTrackHoleSearchToolCfg(flags)))
 
     if "ResidualPullCalculator" not in kwargs:
         from TrkConfig.TrkResidualPullCalculatorConfig import (
             ResidualPullCalculatorCfg)
-        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
-            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+        kwargs.setdefault("ResidualPullCalculator", acc.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
 
     kwargs.setdefault("AddExtraEventInfo", False) # Controls decoration of TrtPhaseTime
     kwargs.setdefault("PixelMapName", "ITkPixelClustersOffsets")
