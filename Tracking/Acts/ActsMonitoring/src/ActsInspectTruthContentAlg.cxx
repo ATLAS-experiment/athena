@@ -275,7 +275,10 @@ namespace ActsTrk {
   }
 
   ActsInspectTruthContentAlg::SeedType ActsInspectTruthContentAlg::deduceSeedType(const ActsTrk::Seed& seed) const {
-    const auto&	[bottom, middle, top] = seed.sp();
+    assert(seed.sp().size() == 3ul);
+    const auto& bottom = seed.sp().at(0);
+    const auto& middle = seed.sp().at(1);
+    const auto& top = seed.sp().at(2);
     xAOD::UncalibMeasType bottom_type = bottom->measurements().front()->type();
     xAOD::UncalibMeasType middle_type = middle->measurements().front()->type();
     xAOD::UncalibMeasType top_type = top->measurements().front()->type();
