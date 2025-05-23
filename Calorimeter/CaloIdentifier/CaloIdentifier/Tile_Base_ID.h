@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -15,11 +15,8 @@
 #ifndef CALOIDENTIFIER_TILE_BASE_ID_H
 #define CALOIDENTIFIER_TILE_BASE_ID_H
 
-#include "AtlasDetDescr/AtlasDetectorID.h"
-// #include "Identifier/IdentifierHash.h"
 #include "IdDict/IdDictFieldImplementation.h"
 #include "CaloIdentifier/CaloIDHelper.h"
-#include "CaloIdentifier/TileID_Exception.h"
 #include "CaloIdentifier/TileNeighbour.h"
 
 #include "AthenaKernel/CLASS_DEF.h"
@@ -30,7 +27,6 @@
 #include <set>
 
 class IdentifierHash;
-
 
 /**  
  *
