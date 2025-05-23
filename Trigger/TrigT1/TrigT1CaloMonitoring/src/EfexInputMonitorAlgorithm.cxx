@@ -166,7 +166,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
         if(!reportedErrors.count(Decision)) {
             ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
-            reportedErrors.insert(Decision);
+            reportedErrors.insert(Decision.getString(0));
         }
     }
       if(eTower->had_status()) {
@@ -175,7 +175,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
           fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
           if(!reportedErrors.count(Decision)) {
             ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
-            reportedErrors.insert(Decision);
+            reportedErrors.insert(Decision.getString(0));
           }
       }
       std::vector<uint16_t> counts=eTower->et_count();
@@ -205,7 +205,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
                   if(!reportedErrors.count(Decision)) {
                       ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
-                      reportedErrors.insert(Decision);
+                      reportedErrors.insert(Decision.getString(0));
                   }
               } else {
                   Decision = "MissingTile";
@@ -213,7 +213,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
                   if(!reportedErrors.count(Decision)) {
                       ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
-                      reportedErrors.insert(Decision);
+                      reportedErrors.insert(Decision.getString(0));
                   }
               }
               continue;
@@ -263,7 +263,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
                   if(!reportedErrors.count(Decision)) {
                       ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
-                      reportedErrors.insert(Decision);
+                      reportedErrors.insert(Decision.getString(0));
                   }
               }
           }
