@@ -380,7 +380,10 @@ class trigRecoExecutor(athenaExecutor):
                                 if 'accepted:' in line and int(line[14]) != 0:
                                     #Add the number of accepted events      
                                     accepted += int(line[14:])
-            
+                                if re.search('DFDcmEmuSession.* Communication error', line):
+                                    msg.error('Caught DFDcmEmuSession error, aborting job')
+                                    self._rc = 1
+
             if "HIST_DEBUGSTREAMMON" in self.conf.dataDictionary: 
                 # Add the HLT_accepted_events and HLT_rejected_events histograms to the output file 
                 dbgStream.getHltDecision(accepted, rejected, self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value[0])
