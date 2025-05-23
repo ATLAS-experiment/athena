@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -195,9 +195,9 @@ StatusCode FixHepMC::execute() {
             if (!part->production_vertex() || part->production_vertex()->id() == 0) v->add_particle_out(part);
           }
           for (auto part : semi_disconnected) {
-            if (!part->end_vertex()) v->add_particle_in(part);
+            if (!part->end_vertex()) v->add_particle_in(std::move(part));
           }
-          evt->add_vertex(v);
+          evt->add_vertex(std::move(v));
         }
       }
     }
@@ -226,9 +226,9 @@ StatusCode FixHepMC::execute() {
       for (auto sister : sisters) { 
         vprod->remove_particle_out(sister); 
         vend->remove_particle_in(sister); 
-        evt->remove_particle(sister);
+        evt->remove_particle(std::move(sister));
       }
-      evt->remove_vertex(vend);
+      evt->remove_vertex(std::move(vend));
 
     }
 
@@ -284,7 +284,7 @@ StatusCode FixHepMC::execute() {
         for(auto p : allParticles) {
           HepMC::ConstGenVertexPtr end_v=p->end_vertex();
           if(p->status() == 2 && !end_v) {
-            evt->remove_particle(p);
+            evt->remove_particle(std::move(p));
             ++purged;
             ++m_unstablePurged;
           } 
