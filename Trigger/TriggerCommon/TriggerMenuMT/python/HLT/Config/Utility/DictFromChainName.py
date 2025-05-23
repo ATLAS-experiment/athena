@@ -1,5 +1,5 @@
 #! /bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Class to obtain the chain configuration dictionary from the short or long name
@@ -519,23 +519,6 @@ def analyseChainName(chainName, L1thresholds, L1item):
                     if propSet is False:
                         log.debug('Changing %s from %s to %s', prop, str(chainProperties[prop]), str(bJetDefaultValues[prop]))
                         chainProperties[prop] = bJetDefaultValues[prop]
-            
-            
-            if chainProperties['ditauTag'] != '':
-                log.debug('Setting Ditau chain defaults')
-                # boosted ditau chain, so we now use the ditau defaults if they have not already been overriden
-                ditauJetDefaultValues, allowedDitauJetPropertiesAndValues = getSignatureInformation('Ditau')
-                for prop, value in ditauJetDefaultValues.items():
-                    propSet=False
-                    for value in allowedDitauJetPropertiesAndValues[prop]:
-                        if value in matchedparts:
-                            propSet=True
-                            break
-
-                    # if the property was not set already, then set if according to the ditau defaults
-                    if propSet is False:
-                        log.debug('Changing %s from %s to %s', prop, str(chainProperties[prop]), str(ditauJetDefaultValues[prop]))
-                        chainProperties[prop] = ditauJetDefaultValues[prop]
 
 
             if chainProperties['signature'] == 'Jet' and chainProperties['beamspotChain'] != '':
@@ -617,12 +600,6 @@ def analyseChainName(chainName, L1thresholds, L1item):
                 cPart['alignmentGroup'] = getAlignmentGroupFromPattern('Bjet', cPart['tnpInfo'])
             else:
                 cPart['alignmentGroup'] = getAlignmentGroupFromPattern('Bjet', cPart['extra'])
-        if cPart['signature'] == 'Jet' and cPart['ditauTag'] != '':
-            cPart['signature'] = 'Tau'
-            if 'tnpInfo' in cPart.keys() and cPart['tnpInfo'] != "":
-                cPart['alignmentGroup'] = getAlignmentGroupFromPattern('Tau', cPart['tnpInfo'])
-            else:
-                cPart['alignmentGroup'] = getAlignmentGroupFromPattern('Tau', cPart['extra'])
         genchainDict['signatures'] += [cPart['signature']]
         genchainDict['alignmentGroups'] += [cPart['alignmentGroup']]
 
@@ -633,6 +610,7 @@ def analyseChainName(chainName, L1thresholds, L1item):
             genchainDict['chainParts'] = unifyJetRecoParts(genchainDict['chainParts'])
         
     #genchainDict['signature'] = allChainProperties[0]['signature']
+
     return genchainDict
 
 
@@ -709,7 +687,6 @@ def dictFromChainName(flags, chainInfo):
                 
 
         thisSignature = chainPart['signature']
-        thisSubSigs = chainPart['subSigs']
         thisAlignGroup = chainPart['alignmentGroup']
         thisExtra = chainPart['extra']
         thisL1 = chainPart['L1threshold']
@@ -729,14 +706,14 @@ def dictFromChainName(flags, chainInfo):
                 log.error("Standard egamma chains should be seeded from L1_EM. Check %s seeded from %s (defined L1: %s),  signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
                 #incorrectL1=True
 
-        if thisSignature in ['Tau'] and 'Ditau' not in thisSubSigs:
+        if thisSignature in ['Tau']:
             if 'TAU' not in thisL1:
                 log.error("Standard tau chains should be seeded from L1_TAU. Check %s seeded from %s (defined L1: %s), signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
                 #incorrectL1=True
 
-        if thisSignature in ['Jet','Bjet','MET','UnconventionalTracking'] or (thisSignature =='Tau' and 'Ditau' in thisSubSigs):
+        if thisSignature in ['Jet','Bjet','MET','UnconventionalTracking']:
             if 'FSNOSEED' not in thisL1:
-                log.error("Jet, b-jet, MET and Tau:Ditau chains should be seeded from FSNOSEED. Check %s seeded from %s (defined L1: %s),  signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
+                log.error("Jet, b-jet, MET chains should be seeded from FSNOSEED. Check %s seeded from %s (defined L1: %s),  signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
                 #incorrectL1=True
 
         if thisChainPartName in ['noalg']:

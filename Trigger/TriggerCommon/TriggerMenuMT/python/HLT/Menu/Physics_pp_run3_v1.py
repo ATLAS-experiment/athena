@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # Physics_pp_run3_v1.py menu -- contains physics chains for MC and data
@@ -24,7 +24,6 @@ EgammaBjetGroup = ['RATE:EgammaBjet', 'BW:BJet']
 MuonBjetGroup = ['RATE:MuonBjet', 'BW:BJet']
 BjetMETGroup = ['RATE:BjetMET', 'BW:BJet']
 SingleTauGroup = ['RATE:SingleTau', 'BW:Tau']
-DiTauGroup = ['RATE:Ditau', 'BW:Tau']
 MultiTauGroup = ['RATE:MultiTau', 'BW:Tau']
 BphysicsGroup = ['RATE:Bphysics', 'BW:Bphysics']
 BphysElectronGroup = ['RATE:BphysicsElectron', 'BW:BphysicsElectron']

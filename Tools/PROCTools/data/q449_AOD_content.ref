@@ -823,8 +823,6 @@ HLT_CaloEMClusters_PhotonAux.
 HLT_CaloEMClusters_PhotonAuxDyn.viewIndex
 HLT_DiElecPrecisionGSF
 HLT_DiElecPrecisionGSFAux.
-HLT_DiTauJets
-HLT_DiTauJetsAux.
 HLT_DimuEF
 HLT_DimuEFAux.
 HLT_DisTrkBDTSel

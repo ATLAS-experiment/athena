@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
 log.debug("Importing %s",__name__)
@@ -71,7 +71,7 @@ def getListOfSignatures():
 
 class ChainStore(dict):
     """Class to hold list of chains for each signature (dictionary with fixed set of keys)"""
-    _allowedSignatures = ['Egamma', 'Muon', 'Jet', 'Bjet', 'Bphysics', 'MET', 'Tau', 
+    _allowedSignatures = ['Egamma', 'Muon', 'Jet', 'Bjet', 'Bphysics', 'MET', 'Tau',
                           'HeavyIon', 'Beamspot', 'Cosmic', 'EnhancedBias',
                           'Monitor', 'Calib', 'Streaming', 'Combined', 'MinBias',
                           'UnconventionalTracking', 'Test']
@@ -476,16 +476,6 @@ JetChainParts = {
                       'bgn260', 'bgn265', 'bgn270', 'bgn272',
                       'bgn275', 'bgn277', 'bgn280', 'bgn282',
                       'bgn285',                       ],
-    'ditauTag'     : ['ditauOmni0Trk33', 'ditauOmni0Trk55', 'ditauOmni0Trk99', 
-                      'ditauOmni1Trk33', 'ditauOmni1Trk55', 'ditauOmni1Trk99', 
-                      'ditauOmni2Trk33', 'ditauOmni2Trk55', 'ditauOmni2Trk99', 
-                      'ditauOmni3Trk33', 'ditauOmni3Trk55', 'ditauOmni3Trk99', 
-                      'ditauOmni4Trk33', 'ditauOmni4Trk55', 'ditauOmni4Trk99', 
-                      'ditauOmni5Trk33', 'ditauOmni5Trk55', 'ditauOmni5Trk99', 
-                      'ditauOmni6Trk33', 'ditauOmni6Trk55', 'ditauOmni6Trk99', 
-                      'ditauOmni7Trk33', 'ditauOmni7Trk55', 'ditauOmni7Trk99', 
-                      'ditauOmni8Trk33', 'ditauOmni8Trk55', 'ditauOmni8Trk99', 
-                      'ditauOmni9Trk33', 'ditauOmni9Trk55', 'ditauOmni9Trk99',],
     'bTracking'    : [],
     'bConfig'      : ['split',],
     'bMatching'    : ['antimatchdr05mu'],
@@ -536,7 +526,6 @@ JetChainParts_Default = {
     'smc'           : 'nosmc',
     #
     'bTag'          : '',
-    'ditauTag'      : '',
     'bTracking'     : '',
     'bConfig'       : [],
     'bMatching'     : [],
@@ -554,10 +543,6 @@ bJetChainParts_Default = {
     'subSigs'       : ['Bjet'],
 }
 
-ditauJetChainParts_Default = {
-    'sigFolder'     : ['Tau'],
-    'subSigs'       : ['Ditau'],
-}
 # ---- Beamspot Dictionary for chains confiugred through jets
 BeamspotJetChainParts_Default = {
     'signature'      : 'Beamspot',
@@ -1435,8 +1420,6 @@ def getSignatureInformation(signature):
         return [BeamspotJetChainParts_Default, JetChainParts]
     if signature == "Tau":
         return [TauChainParts_Default, TauChainParts]
-    if signature == "Ditau":
-        return [ditauJetChainParts_Default, JetChainParts]
     if (signature == "Muon"):
         return [MuonChainParts_Default, MuonChainParts]
     if  (signature == "Bphysics"):

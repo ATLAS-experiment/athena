@@ -11,7 +11,7 @@
 #include "xAODTau/DiTauJet.h"
 #include "DiTauToolBase.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "PathResolver/PathResolver.h"
+#include "GaudiKernel/PathResolver.h"
 
 #include "AthContainers/Accessor.h"
 #include "AthContainers/ConstAccessor.h"
