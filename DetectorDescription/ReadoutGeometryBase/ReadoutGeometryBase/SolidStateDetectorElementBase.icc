@@ -21,11 +21,6 @@ namespace InDetDD {
     m_cache.reset();
   }
 
-  inline void SolidStateDetectorElementBase::setCache()
-  {
-    updateCache();
-  }
-
   inline const SiCommonItems* SolidStateDetectorElementBase::getCommonItems() const
   {
     return m_commonItems;

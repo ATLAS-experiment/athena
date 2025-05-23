@@ -64,7 +64,7 @@ TRT_BarrelElement::TRT_BarrelElement(const TRT_BarrelElement& right)
   m_strawSurfacesCache.resize(m_nstraws);
 }
 
-const TRT_BarrelConditions * TRT_BarrelElement::getConditionsData() 
+const TRT_BarrelConditions * TRT_BarrelElement::getConditionsData()
 {
   return nullptr;
 }

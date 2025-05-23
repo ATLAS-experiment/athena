@@ -65,7 +65,7 @@ namespace InDet {
     declareProperty("AlignRotX",          m_alignRotX         = true);
     declareProperty("AlignRotY",          m_alignRotY         = true);
     declareProperty("AlignRotZ",          m_alignRotZ         = true);
-   
+
     declareProperty("SetSigmaX",          m_sigmaX            = 1.);
     declareProperty("SetSigmaY",          m_sigmaY            = 1.);
     declareProperty("SetSigmaZ",          m_sigmaZ            = 1.);
@@ -90,7 +90,7 @@ namespace InDet {
   }
 
   //________________________________________________________________________
-  InDetGeometryManagerTool::~InDetGeometryManagerTool() 
+  InDetGeometryManagerTool::~InDetGeometryManagerTool()
   {
     ATH_MSG_DEBUG("deleting alignModuleList");
     for (const auto & i:m_alignModuleList){
@@ -105,7 +105,7 @@ namespace InDet {
   }
 
   //________________________________________________________________________
-  StatusCode InDetGeometryManagerTool::initialize() 
+  StatusCode InDetGeometryManagerTool::initialize()
   {
     ATH_MSG_DEBUG("initialize() of InDetGeometryManagerTool");
 
@@ -120,7 +120,7 @@ namespace InDet {
 
     // retrieve silicon helper
     ATH_CHECK( detStore()->retrieve(m_siHelper) );
-      
+
     // retrieve TRT helper
     ATH_CHECK( detStore()->retrieve(m_trtHelper) );
 
@@ -166,8 +166,8 @@ namespace InDet {
   }
 
   //________________________________________________________________________
-  StatusCode InDetGeometryManagerTool::finalize() 
-  {  
+  StatusCode InDetGeometryManagerTool::finalize()
+  {
     ATH_MSG_DEBUG("finalize() of InDetGeometryManagerTool");
 
     return StatusCode::SUCCESS;
@@ -359,7 +359,7 @@ namespace InDet {
       ATH_MSG_DEBUG(" DetectorElement id: "<<id);
 
       // get the element via hash
-      SiDetectorElement * element2 = m_pixelDetManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_pixelDetManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
@@ -367,7 +367,7 @@ namespace InDet {
         // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
         // ATH_MSG_DEBUG(" DetectorElement idhash: " << index);
         // ATH_MSG_DEBUG(" DetectorElement id: " << id << " with center = " << center);
-        // ATH_MSG_DEBUG(" Is Barrel: "<< m_pixHelper->is_barrel(id));      
+        // ATH_MSG_DEBUG(" Is Barrel: "<< m_pixHelper->is_barrel(id));
 
         // add element to respective AlignModule
 
@@ -407,7 +407,7 @@ namespace InDet {
       ATH_MSG_DEBUG(" DetectorElement id: "<<id);
 
       // get the element via hash
-      SiDetectorElement * element2 = m_sctDetManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_sctDetManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 

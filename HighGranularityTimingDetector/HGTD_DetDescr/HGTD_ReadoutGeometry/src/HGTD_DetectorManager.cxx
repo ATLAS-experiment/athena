@@ -96,11 +96,11 @@ void HGTD_DetectorManager::invalidateAll()
   }
 }
 
-void HGTD_DetectorManager::updateAll()
+void HGTD_DetectorManager::updateAll() const
 {
-  for (HGTD_DetectorElement* element : m_elementCollection) {
+  for (const HGTD_DetectorElement* element : m_elementCollection) {
     if (element) {
-      element->setCache();
+      element->updateCache();
     }
   }
 }

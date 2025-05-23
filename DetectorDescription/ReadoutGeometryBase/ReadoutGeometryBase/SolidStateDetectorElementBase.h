@@ -120,7 +120,7 @@ namespace InDetDD {
    * and do not race with each other.
    *
    * The non-const methods can set the state
-   * of the cache or the cache itself (invalidate/setCache methods etc)
+   * of the cache or the cache itself (invalidate)
    *
    * Note: Synchronisation of creating SiDetElements for different events
    * and accessing for each events
@@ -183,12 +183,6 @@ namespace InDetDD {
      * Invalidate general cache (inline)
      */
     void invalidate();
-
-    /**
-     * Set/calculate cache values (inline)
-     */
-    void setCache();
-    //@}
 
     /**
      * @name Common items

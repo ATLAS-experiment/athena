@@ -30,7 +30,7 @@ public:
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
   virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
+  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
 
 private:
   const InDetDD::PixelDetectorManager *m_detManager{};
@@ -40,9 +40,9 @@ private:
   Gaudi::Property<bool> m_alignable{this, "Alignable", false, ""};
   // This should be changed to an ITk-specific one in future, once available
   Gaudi::Property<std::string> m_alignmentFolderName{this, "AlignmentFolderName", "/Indet/Align", ""};
-   
+
   // If the PLR should be built inside the pixel, it should use a different entry point
-  // in the geometry via the GeoModelXml "envelope" mechanism 
+  // in the geometry via the GeoModelXml "envelope" mechanism
   Gaudi::Property<std::string> m_containingDetectorName{this, "ContainingDetector", "", "Containing detector name"};
   Gaudi::Property<std::string> m_envelopeVolumeName{this, "EnvelopeVolume", "ITkPixelDetector", "Envelope volume name"};
 

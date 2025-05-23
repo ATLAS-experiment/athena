@@ -59,7 +59,7 @@ namespace InDet {
     declareProperty("AlignRotX",          m_alignRotX         = true);
     declareProperty("AlignRotY",          m_alignRotY         = true);
     declareProperty("AlignRotZ",          m_alignRotZ         = true);
-   
+
     declareProperty("SetSigmaX",          m_sigmaX            = 1.);
     declareProperty("SetSigmaY",          m_sigmaY            = 1.);
     declareProperty("SetSigmaZ",          m_sigmaZ            = 1.);
@@ -81,7 +81,7 @@ namespace InDet {
   }
 
   //________________________________________________________________________
-  SiGeometryManagerTool::~SiGeometryManagerTool() 
+  SiGeometryManagerTool::~SiGeometryManagerTool()
   {
     ATH_MSG_DEBUG("deleting alignModuleList");
     for (const auto & i:m_alignModuleList) delete i;
@@ -94,7 +94,7 @@ namespace InDet {
   }
 
   //________________________________________________________________________
-  StatusCode SiGeometryManagerTool::initialize() 
+  StatusCode SiGeometryManagerTool::initialize()
   {
     ATH_MSG_DEBUG("initialize() of SiGeometryManagerTool");
 
@@ -109,7 +109,7 @@ namespace InDet {
 
     // retrieve silicon helper
     ATH_CHECK( detStore()->retrieve(m_idHelper) );
-      
+
     // retrieve SCT detector manager
     ATH_CHECK( detStore()->retrieve(m_sctDetManager,m_stripDetManagerName) );
 
@@ -149,8 +149,8 @@ namespace InDet {
   }
 
   //________________________________________________________________________
-  StatusCode SiGeometryManagerTool::finalize() 
-  {  
+  StatusCode SiGeometryManagerTool::finalize()
+  {
     ATH_MSG_DEBUG("finalize() of SiGeometryManagerTool");
 
     return StatusCode::SUCCESS;
@@ -343,7 +343,7 @@ namespace InDet {
       ATH_MSG_DEBUG(" DetectorElement id: "<<id);
 
       // get the element via hash
-      SiDetectorElement * element2 = m_pixelDetManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_pixelDetManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
@@ -351,7 +351,7 @@ namespace InDet {
         // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
         // ATH_MSG_DEBUG(" DetectorElement idhash: " << index);
         // ATH_MSG_DEBUG(" DetectorElement id: " << id << " with center = " << center);
-        // ATH_MSG_DEBUG(" Is Barrel: "<< m_pixHelper->is_barrel(id));      
+        // ATH_MSG_DEBUG(" Is Barrel: "<< m_pixHelper->is_barrel(id));
 
         // add element to respective AlignModule
 
@@ -391,7 +391,7 @@ namespace InDet {
       ATH_MSG_DEBUG(" DetectorElement id: "<<id);
 
       // get the element via hash
-      SiDetectorElement * element2 = m_sctDetManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_sctDetManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
@@ -533,14 +533,14 @@ namespace InDet {
     gm->SetTopVolume(top);
     TGeoVolume*   Si_cog[60000]; //where does 22000 come from? For ITk this is too small it seems. Make configurable?
     TGeoVolume*   Si[60000];
-    int           Si_count=0; 
+    int           Si_count=0;
     TGeoTranslation* tr[60000];
     TGeoRotation*    ro[60000];
     TGeoCombiTrans*  mx[60000];
 
     TGeoTranslation* nulltrans=new TGeoTranslation(0.0,0.0,0.0);
     TGeoRotation*    nullrota=new TGeoRotation();
-    nullrota->SetAngles(0.0,0.0,0.0);    // Euler angles                                                     
+    nullrota->SetAngles(0.0,0.0,0.0);    // Euler angles
     TGeoRotation*    fliprota=new TGeoRotation();
     fliprota->SetAngles(0.0,-90.0,0.0);    // Euler angles (rotation around X)
     TGeoCombiTrans*  donothing=new TGeoCombiTrans(*nulltrans,*nullrota);
@@ -610,15 +610,15 @@ namespace InDet {
       // Loop over all detector elements of this align module:
       for(unsigned int j=0;j<nSi;j++) {
         const SiDetectorElement * element=nullptr;
-        if(isPix) element = dynamic_cast<const SiDetectorElement*>(module->detElementCollection(Trk::AlignModule::Pixel)->at(j)); 
-	if(isSCT) element = dynamic_cast<const SiDetectorElement*>(module->detElementCollection(Trk::AlignModule::SCT)->at(j)); 
+        if(isPix) element = dynamic_cast<const SiDetectorElement*>(module->detElementCollection(Trk::AlignModule::Pixel)->at(j));
+	if(isSCT) element = dynamic_cast<const SiDetectorElement*>(module->detElementCollection(Trk::AlignModule::SCT)->at(j));
 	if (not element){
 	  ATH_MSG_WARNING("Dynamic cast to SiDetectorElement from pixel or SCT module failed");
 	  return;
 	}
   const Identifier element_id = element->identify();
 	int det,bec,layer,ring,sector,side;
-	// in the future, the InDetAlignDBTool::idToDetSet should be directly used !                                              
+	// in the future, the InDetAlignDBTool::idToDetSet should be directly used !
 	bool resok=false;
 	if (m_pixHelper->is_pixel(element_id)) {
 	  det=1;
@@ -651,7 +651,7 @@ namespace InDet {
 
 	  ATH_MSG_INFO(">>> Element ident,det,bec,layer,ring,sector,side:      "<<element_id<<", "<<det<<", "<<bec<<", "<<layer<<", "<<ring<<", "<<sector<<", "<<side);
           ATH_MSG_INFO(">>> Element length/width/thickness:      "<<element->length()<<",  "<<element->width()<<",  "<<element->thickness());
-          if(element->isSCT() && element->isEndcap()) 
+          if(element->isSCT() && element->isEndcap())
             ATH_MSG_INFO(">>> SCT Endcap wedge,  min/max         "<<element->minWidth()<<" / "<<element->maxWidth());
           ATH_MSG_INFO(">>> Center position:                   "<<element->center());
           ATH_MSG_INFO(">>> Default transformation:            ");
@@ -681,17 +681,17 @@ namespace InDet {
 	  }  else  {
             Si[Si_count] = gm->MakeBox(mname,med,0.5*element->width(),0.5*element->thickness(),0.5*element->length());    // creator takes the half-lengths!
 	  }
-          tr[Si_count] = new TGeoTranslation(); 
+          tr[Si_count] = new TGeoTranslation();
           tr[Si_count]->SetTranslation(xyz[0],xyz[1],xyz[2]);
           ro[Si_count] = new TGeoRotation();
           ro[Si_count]->SetAngles(57.2957*ea[0],57.2957*ea[1],57.2957*ea[2]);
           mx[Si_count] = new TGeoCombiTrans(*tr[Si_count],*ro[Si_count]);
 
-	  TGeoVolume*   parrent_elem = nullptr; 
+	  TGeoVolume*   parrent_elem = nullptr;
 	  switch(det)
 	    {
 	    case 1:
-	      if(bec==0 && layer==0) parrent_elem = L1_IBL_A;   
+	      if(bec==0 && layer==0) parrent_elem = L1_IBL_A;
               else if(abs(bec)==4)   parrent_elem = L1_DBM_A;
 	      else                   parrent_elem = L1_PIX_A;
 	      break;

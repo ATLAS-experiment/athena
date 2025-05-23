@@ -37,7 +37,7 @@ public:
   virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
 
   // Callback function itself
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override final;
+  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override final;
 
 private:
   Gaudi::Property<bool> m_useOldActiveGasMixture{this,"UseOldActiveGasMixture",false};
