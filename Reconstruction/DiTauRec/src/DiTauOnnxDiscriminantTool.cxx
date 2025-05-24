@@ -67,16 +67,6 @@ StatusCode DiTauOnnxDiscriminantTool::execute(DiTauCandidateData * data, const E
     return StatusCode::SUCCESS;
 }
 
-float DiTauOnnxDiscriminantTool::nan_to_num(float value, float nan_replacement = 0.0f, float posinf_replacement = 0.0f, float neginf_replacement = 0.0f) const{
-  if (std::isnan(value))
-    return nan_replacement;
-  if (value == std::numeric_limits<float>::infinity())
-    return posinf_replacement;
-  if (value == -std::numeric_limits<float>::infinity())
-    return neginf_replacement;
-  return value;
-  }
-
 std::vector<float> DiTauOnnxDiscriminantTool::flatten(const std::vector<std::vector<float>> &vec_2d) const{
   std::vector<float> flattened;
   flattened.reserve(vec_2d.size() * (vec_2d.empty() ? 0 : vec_2d[0].size()));
@@ -201,16 +191,15 @@ float DiTauOnnxDiscriminantTool::GetDiTauObjOnnxScore(const xAOD::DiTauJet& dita
         float pt_log       = std::log(track_pt + 1e-8f);
         float jet_pt       = ditau_ptAcc(ditau);
         float pt_ratio     = track_pt / jet_pt;
-        float pt_ratio_log = std::log(1.0f - pt_ratio + 1e-8f);
+        float pt_ratio_log = (pt_ratio <= 1.0f) ? std::log(1.0f - pt_ratio + 1e-8f) : 0.0f;
         float track_charge = xTrack->charge();
-        float pt_ratio_log_nan_less = nan_to_num(pt_ratio_log, 0.0f, 0.0f, 0.0f);
 
         track_features[i] = {
             delta_eta,
             delta_phi,
             pt_log,
             d0Acc(*xTrack),
-            pt_ratio_log_nan_less,
+            pt_ratio_log,
             z0Acc(*xTrack),
             delta_R,
             static_cast<float>(numberOfInrmstPxlLyrHitsAcc(*xTrack)),
