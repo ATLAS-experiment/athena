@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.dump_root_file
 # @purpose ascii-fy a ROOT file
 # @author Sebastien Binet
 # @date December 2010
-
-from __future__ import print_function
 
 __doc__ = "ASCII-fy a ROOT file"
 __author__ = "Sebastien Binet"

@@ -39,7 +39,7 @@
 # adding '#pragma: NO COVER' to the end of the line.
 #
 # Original permission notice:
-# Copyright 1999, Bioreason, Inc., all rights reserved.
+# Copyright 1999, 2025, Bioreason, Inc., all rights reserved.
 # Author: Andrew Dalke
 #
 # Copyright 1995-1997, Automatrix, Inc., all rights reserved.
@@ -56,12 +56,7 @@
 # pertaining to distribution of the software without specific, written
 # prior permission.
 #
-from __future__ import print_function
 import sys
-
-## The completely brain-damaged fnorb setup overrides the builtin
-## parser module, which we need!  Cudgel it out of the way.
-#sys.path = [x for x in sys.path if string.find (x, '/fnorb/') < 0]
 
 import re
 import os

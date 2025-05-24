@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.acmdlib
 # @purpose a library to ease the writing of sub-command scripts
 # @author Sebastien Binet
 # @date January 2010
-
-from __future__ import with_statement
 
 __doc__ = "a library to ease the writing of sub-command scripts"
 __author__ = "Sebastien Binet"

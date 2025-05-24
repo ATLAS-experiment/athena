@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.gen_klass.py
 # @purpose helper script to generate header and cxx files of various
@@ -7,8 +7,6 @@
 # @date   April 2008
 #
 # Use PyUtils/test/test_genklass.sh to check compilation of generated code
-
-from __future__ import print_function
 
 __author__ = "Sebastien Binet"
 __doc__ = """\

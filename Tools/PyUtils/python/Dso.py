@@ -1,10 +1,8 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @author: Sebastien Binet
 ## @file : PyUtils/python/Dso.py
 ## @purpose: a set of classes to model so-called 'rootmap' files
-
-from __future__ import print_function
 
 __author__  = "Sebastien Binet"
 

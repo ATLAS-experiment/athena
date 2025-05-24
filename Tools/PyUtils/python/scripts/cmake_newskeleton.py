@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2014 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.cmt_newanalysisalg
 # @purpose streamline and ease the creation of new athena algs
@@ -6,8 +6,6 @@
 # @date February 2017
 
 #Note - this code could use a serious rewrite, I just hacked it together to get something working
-
-from __future__ import with_statement
 
 __version__ = "$Revision: 795362 $"
 __author__ = "Will Buttinger"
