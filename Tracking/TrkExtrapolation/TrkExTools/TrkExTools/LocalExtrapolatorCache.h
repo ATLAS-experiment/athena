@@ -39,7 +39,6 @@ struct Cache
     //!<  internal switch for resolved configuration
     bool m_dense = false;
     //!< Flag the recall solution
-    bool m_recall = false;
     bool m_robustSampling = true;
     unsigned int m_layerResolved{};
     unsigned int m_methodSequence = 0;
