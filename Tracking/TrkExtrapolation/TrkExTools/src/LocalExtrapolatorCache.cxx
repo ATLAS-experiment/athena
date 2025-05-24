@@ -46,7 +46,6 @@ namespace Trk{
 
   void
   Cache::setRecallInformation(const Surface& rsf,const Layer& rlay,const TrackingVolume& rvol) {
-    m_recall = true;
     m_recallSurface = &rsf;
     m_recallLayer = &rlay;
     m_recallTrackingVolume = &rvol;
@@ -54,7 +53,6 @@ namespace Trk{
 
   void
   Cache::resetRecallInformation() {
-    m_recall = false;
     m_recallSurface = nullptr;
     m_recallLayer = nullptr;
     m_recallTrackingVolume = nullptr;
