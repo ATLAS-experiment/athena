@@ -520,9 +520,9 @@ namespace Pythia8 {
             // at the end of the event and the final entry is the POWHEG emission.
             // If there is no POWHEG emission, then pThard is set to SCALUP.
 
-            inline bool canVetoMPIStep()    { return true; }
-            inline int  numberVetoMPIStep() { return 1; }
-            inline bool doVetoMPIStep(int nMPI, const Event &e) {
+            inline bool canVetoMPIStep() override { return true; }
+            inline int  numberVetoMPIStep() override { return 1; }
+            inline bool doVetoMPIStep(int nMPI, const Event &e) override {
                 // let the original PowhegHook intialise all necessary variables
                 // and set shower starting scale for pThard=0 mode
                 // consequence: always need to set nFinal = -1 in job options!
