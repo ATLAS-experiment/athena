@@ -75,8 +75,7 @@ StatusCode TrigDiTauHypoAlg::execute(const EventContext& context) const
 
         // Create new decision
         Decision* newDecision = newDecisionIn(outputHandle.ptr(), hypoAlgNodeName());
-        // TrigCompositeUtils::linkToPrevious(newDecision, decisionInput().key(), counter);
-        newDecision->setObjectLink(roiString(), roiEL.link);
+        TrigCompositeUtils::linkToPrevious(newDecision, decisionInput().key(), counter);
 
         ElementLink<xAOD::DiTauJetContainer> newDiTauEL = ViewHelper::makeLink(*viewEL, diTauHandle, 0);
         ATH_CHECK(newDiTauEL.isValid());
