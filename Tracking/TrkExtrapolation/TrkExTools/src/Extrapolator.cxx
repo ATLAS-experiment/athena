@@ -100,86 +100,9 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   : AthCheckedComponent<AthAlgTool>(t, n, p)
   , m_subPropagators(Trk::NumberOfSignatures)
   , m_subupdaters(Trk::NumberOfSignatures)
-  , m_propNames()
-  , m_updatNames()
-  , m_includeMaterialEffects(true)
-  , m_requireMaterialDestinationHit(false)
-  , m_stopWithNavigationBreak(false)
-  , m_stopWithUpdateZero(false)
-  , m_subSurfaceLevel(true)
-  , m_skipInitialLayerUpdate(false)
-  , m_extendedLayerSearch(true)
-  , m_robustSampling(true)
-  , m_resolveMultilayers(true)
-  , m_cacheLastMatLayer(false)
-  , m_returnPassiveLayers(false)
   , m_numOfValidPropagators(INVALIDPROPAGATORS)
-  , m_initialLayerAttempts(3)
-  , m_successiveLayerAttempts(1)
-  , m_maxMethodSequence(2000)
-  , m_tolerance(0.002)
-  , m_activeOverlap(false)
-  , m_useMuonMatApprox(false)
-  , m_useDenseVolumeDescription(true)
-  , m_maxNavigSurf{ 1000 }
-  , m_maxNavigVol{ 50 }
-  , m_dumpCache(false)
-  , m_fastField(false)
-  , m_referenceSurface{ nullptr }
-  , m_printRzOutput(true)
-  , m_navigationStatistics(false)
-  , m_navigationBreakDetails(false)
-  , m_extrapolateCalls{}
-  , m_extrapolateBlindlyCalls{}
-  , m_extrapolateDirectlyCalls{}
-  , m_extrapolateStepwiseCalls{}
-  , m_startThroughAssociation{}
-  , m_startThroughRecall{}
-  , m_startThroughGlobalSearch{}
-  , m_destinationThroughAssociation{}
-  , m_destinationThroughRecall{}
-  , m_destinationThroughGlobalSearch{}
-  , m_layerSwitched{}
-  , m_navigationBreakLoop{}
-  , m_navigationBreakOscillation{}
-  , m_navigationBreakNoVolume{}
-  , m_navigationBreakDistIncrease{}
-  , m_navigationBreakVolumeSignature{}
-  , m_overlapSurfaceHit{}
 {
   declareInterface<IExtrapolator>(this);
-
-  // extrapolation steering
-  declareProperty("StopWithNavigationBreak", m_stopWithNavigationBreak);
-  declareProperty("StopWithUpdateKill", m_stopWithUpdateZero);
-  declareProperty("SkipInitialPostUpdate", m_skipInitialLayerUpdate);
-  declareProperty("MaximalMethodSequence", m_maxMethodSequence);
-  // propagation steering
-  declareProperty("SubPropagators", m_propNames);
-  // material effects handling
-  declareProperty("ApplyMaterialEffects", m_includeMaterialEffects);
-  declareProperty("RequireMaterialDestinationHit", m_requireMaterialDestinationHit);
-  declareProperty("SubMEUpdators", m_updatNames);
-  declareProperty("CacheLastMaterialLayer", m_cacheLastMatLayer);
-  // muon system specifics
-  declareProperty("UseMuonMatApproximation", m_useMuonMatApprox);
-  declareProperty("UseDenseVolumeDescription", m_useDenseVolumeDescription);
-  declareProperty("ResolveMuonStation", m_resolveActive = false);
-  declareProperty("ResolveMultilayers", m_resolveMultilayers);
-  declareProperty("ConsiderMuonStationOverlaps", m_activeOverlap);
-  declareProperty("RobustSampling", m_robustSampling);
-  // material & navigation related steering
-  declareProperty("ExtendedLayerSearch", m_extendedLayerSearch);
-  declareProperty("InitialLayerAttempts", m_initialLayerAttempts);
-  declareProperty("SuccessiveLayerAttempts", m_successiveLayerAttempts);
-  // debug and validation
-  declareProperty("positionOutput", m_printRzOutput);
-  declareProperty("NavigationStatisticsOutput", m_navigationStatistics);
-  declareProperty("DetailedNavigationOutput", m_navigationBreakDetails);
-  declareProperty("Tolerance", m_tolerance);
-  // Magnetic field properties
-  declareProperty("DumpCache", m_dumpCache);
-  declareProperty("MagneticFieldProperties", m_fastField);
 }
 
 // destructor
@@ -253,7 +176,7 @@ Trk::Extrapolator::initialize()
   if (m_propNames.empty() && not m_propagators.empty()) {
     ATH_MSG_DEBUG(
       "Inconsistent setup of Extrapolator, no sub-propagators configured, doing it for you. ");
-    m_propNames.push_back(TrkExTools::getToolSuffix(fullPropagatorNames[0]));
+    m_propNames.value().push_back(TrkExTools::getToolSuffix(fullPropagatorNames[0]));
     if (TrkExTools::numberOfUniqueEntries(m_propNames) !=
         TrkExTools::numberOfUniqueEntries(fullPropagatorNames)) {
       ATH_MSG_ERROR("Some configured propagators have same name but different owners");
@@ -266,7 +189,7 @@ Trk::Extrapolator::initialize()
   if (m_updatNames.empty() && not m_updaters.empty()) {
     ATH_MSG_DEBUG("Inconsistent setup of Extrapolator, no sub-material updaters configured, doing "
                   "it for you. ");
-    m_updatNames.push_back(TrkExTools::getToolSuffix(fullUpdatorNames[0]));
+    m_updatNames.value().push_back(TrkExTools::getToolSuffix(fullUpdatorNames[0]));
     if (TrkExTools::numberOfUniqueEntries(m_updatNames) !=
         TrkExTools::numberOfUniqueEntries(fullUpdatorNames)) {
       ATH_MSG_ERROR("Some configured material updaters have same name but different owners");
@@ -279,8 +202,8 @@ Trk::Extrapolator::initialize()
   // ------------------------------------
   // Sanity check 2
   // fill the number of propagator names and updator names up with first one
-  m_propNames.resize(int(Trk::NumberOfSignatures), m_propNames[0]);
-  m_updatNames.resize(int(Trk::NumberOfSignatures), m_updatNames[0]);
+  m_propNames.value().resize(static_cast<int>(Trk::NumberOfSignatures), m_propNames[0]);
+  m_updatNames.value().resize(static_cast<int>(Trk::NumberOfSignatures), m_updatNames[0]);
 
   if (validprop && validmeuts) {
     // Per definition: if configured not found, take the lowest one
@@ -1533,7 +1456,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
               "  [!] This layer is identical to the one with last material update, return layer "
               "without repeating the update");
             collect = false;
-            if (!destSurf && (nextLayer->layerType() > 0 || m_returnPassiveLayers)) {
+            if (!destSurf && (nextLayer->layerType() > 0)) {
               return nextPar;
             }
           }
@@ -1636,7 +1559,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
             if (m_cacheLastMatLayer) {
               cache.m_lastMaterialLayer = nextLayer;
             }
-            if (!destSurf && (nextLayer->layerType() > 0 || m_returnPassiveLayers)) {
+            if (!destSurf && nextLayer->layerType() > 0) {
               return nextPar;
             }
           }
@@ -3042,7 +2965,7 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
                                                              0.5 * associatedLayer->thickness(),
                                                              0.5 * associatedLayer->thickness())) {
       // call the overlap search for the starting layer if asked for
-      if (cache.m_parametersOnDetElements && associatedLayer->surfaceArray() && m_subSurfaceLevel) {
+      if (cache.m_parametersOnDetElements && associatedLayer->surfaceArray()) {
         ATH_MSG_VERBOSE("  [o] Calling overlapSearch() on start layer.");
         overlapSearch(ctx, cache, prop, parm, nextParameters, *associatedLayer,
                       tvol, dir, bcheck, particle, true);
@@ -3360,7 +3283,7 @@ Trk::Extrapolator::extrapolateFromLayerToLayer(const EventContext& ctx,
                                : int(layersInVolume * 0.5);
 
   // set the maximal attempts to at least m_initialLayerAttempts
-  maxAttempts = (maxAttempts < m_initialLayerAttempts) ? m_initialLayerAttempts : maxAttempts;
+  maxAttempts = std::max(m_initialLayerAttempts.value(), maxAttempts);
 
   ATH_MSG_VERBOSE("  [+] Maximum number of failed layer attempts: " << maxAttempts);
 
@@ -3488,8 +3411,7 @@ Trk::Extrapolator::extrapolateToDestinationLayer(const EventContext& ctx,
   }
 
   // call the overlap search on the destination parameters - we are at the surface already
-  if (cache.m_parametersOnDetElements && preUpdatedParameters && lay.surfaceArray() &&
-      m_subSurfaceLevel) {
+  if (cache.m_parametersOnDetElements && preUpdatedParameters && lay.surfaceArray()) {
     ATH_MSG_VERBOSE("  [o] Calling overlapSearch() on destination layer.");
     // start is destination layer
     overlapSearch(ctx, cache, prop, parm, preUpdatedParameters, lay, tvol, dir,
@@ -3558,7 +3480,7 @@ Trk::Extrapolator::extrapolateToIntermediateLayer(const EventContext& ctx,
                   << momentumOutput(parsOnLayer->momentum()));
 
   // Fatras mode -----------------------------------------------------------------------
-  if (cache.m_parametersOnDetElements && lay.surfaceArray() && m_subSurfaceLevel) {
+  if (cache.m_parametersOnDetElements && lay.surfaceArray()) {
     // ceck the parameters size before the search
     size_t const sizeBeforeSearch = cache.m_parametersOnDetElements->size();
     // perform the overlap Search on this layer
