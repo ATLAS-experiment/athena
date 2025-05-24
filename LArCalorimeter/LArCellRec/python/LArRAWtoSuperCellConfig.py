@@ -29,14 +29,13 @@ def LArRAWtoSuperCellCfg(flags,name="LArRAWtoSuperCell",mask=True,SCellContainer
 
     if SCellContainerOut=="": SCellContainerOut=flags.LAr.DT.ET_IDKey 
 
-    algo = CompFactory.LArRAWtoSuperCell(name,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey,BCIDOffset=bcidShift)
+    algo = CompFactory.LArRAWtoSuperCell(name,isReco=doReco,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey,BCIDOffset=bcidShift)
 
     if mask and not flags.Input.isMC:
         # also setup to read OTF masked supercells if running on data
         result.merge(LArMaskedSCCfg(flags))
         algo.LArMaskedChannelKey="LArMaskedSC"
 
-    algo = CompFactory.LArRAWtoSuperCell(name,isReco=doReco,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey)
     if ( SCInput == ""):
        mlog.info("Not setting SCInput container name")
     else :
