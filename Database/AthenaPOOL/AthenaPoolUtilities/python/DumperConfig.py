@@ -1,7 +1,5 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 import os
-from future import standard_library
-standard_library.install_aliases()
 import subprocess
 from PyDumper.Dumpers import get_dumper_fct
 from AthenaPython import PyAthena
