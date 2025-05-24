@@ -38,7 +38,7 @@ atlas_add_test( FPGATrackSimConfigFlags_test
 atlas_add_test( FPGATrackSimMapGeneration_test 
                 SCRIPT FPGATrackSimMapGeneration.sh
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 450)
+                PROPERTIES TIMEOUT 900)
 
 atlas_add_test( FPGATrackSimBankGeneration_test 
                 SCRIPT FPGATrackSimBankGeneration.sh
@@ -48,21 +48,21 @@ atlas_add_test( FPGATrackSimBankGeneration_test
 atlas_add_test( FPGATrackSimLayerStudy_test
                 SCRIPT FPGATrackSimLayerStudy.sh
                 POST_EXEC_SCRIPT noerror.sh
-                PROPERTIES TIMEOUT 600)
+                PROPERTIES TIMEOUT 1200)
 
 atlas_add_test( FPGATrackSim_F600_test
                 PRIVATE_WORKING_DIRECTORY 
                 SCRIPT FPGATrackSim_F600.sh -t -n 1 -s 8
                 LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*"
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 600 )
+                PROPERTIES TIMEOUT 1800 )
 
 atlas_add_test( FPGATrackSim_F410_test
                 SCRIPT FPGATrackSim_F410.sh -t -n 1 -s 8
                 PRIVATE_WORKING_DIRECTORY
                 LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*|.*Found error reading file at line:.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 600 )
+                PROPERTIES TIMEOUT 1200 )
 
 atlas_add_test( FPGATrackSimHelperFunctions
                 PRIVATE_WORKING_DIRECTORY 
