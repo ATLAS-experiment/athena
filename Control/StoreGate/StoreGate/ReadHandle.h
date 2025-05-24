@@ -340,12 +340,4 @@ StatusCode get (const T*& ptr,
 #include "StoreGate/ReadHandle.icc"
 
 
-#ifndef NO_LEGACY_HANDLES
-namespace SG {
-  template <class T>
-  using RVar = ReadHandle<T>;
-} 
-#endif
-
-
 #endif //> !STOREGATE_SG_READHANDLE_H
