@@ -3,7 +3,7 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: main/Athena/x86_64-el9-gcc13-opt
-# art-include: main/Athena/x86_64-el9-clang19
+# art-include: main/Athena/x86_64-el9-clang19-opt
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml
