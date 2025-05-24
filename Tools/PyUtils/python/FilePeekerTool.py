@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.FilePeekerTool
 # @purpose peek into APR files to read in-file metadata without Athena (based on PyAthena.FilePeekerLib code by Sebastian Binet) 
 # @author Alexandre Vaniachine <vaniachine@anl.gov>
 # @date May 2015
-
-from __future__ import print_function
 
 __author__ = "Alexandre Vaniachine <vaniachine@anl.gov>"
 __doc__ = "peek into APR files to read in-file metadata"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file:    diff-jobo-cfg.py
 # @purpose: check that 2 jobosvc.ascii files (produced with find_cfg_dups.py)
@@ -13,8 +13,6 @@
 #
 # diff-jobo-cfg ref.josvc.ascii chk.josvc.ascii
 #
-
-from __future__ import print_function
 
 __author__  = "Sebastien Binet, Adrien Renaud"
 
@@ -52,8 +50,7 @@ def load_cfg_file(fname):
         comps_db = shelve.open(fname, 'r')
         return comps_db['all-cfgs']
     except Exception:
-        from past.builtins import execfile
-        execfile(fname, comps_db)
+        exec (open(fname).read(), comps_db)
         return comps_db['d']
 
 def dict_diff(ref, chk):

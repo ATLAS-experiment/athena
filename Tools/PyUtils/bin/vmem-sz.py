@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-
-from __future__ import print_function
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Sebastien Binet <binet@cern.ch>"
 __doc__    = "get the inclusive and exclusive vmem sizes of a library"

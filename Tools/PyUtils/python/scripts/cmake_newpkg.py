@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.cmake_newpkg
 # @purpose streamline and ease the creation of new cmake packages
 # @author Will Buttinger
 # @date Feb 2017
-
-from __future__ import with_statement
 
 __version__ = "$Revision: 795362 $"
 __author__ = "Will buttinger"
