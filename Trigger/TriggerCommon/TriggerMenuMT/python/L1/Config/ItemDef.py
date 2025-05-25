@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Disable flake8 checking due to the use of 'exec':
 # flake8: noqa
@@ -22,9 +22,6 @@ from ..Base.CTPCondition import ThrCondition, InternalTrigger  # noqa: F401
 from .TriggerTypeDef import TT
 from .ItemDef_run4 import ItemDef_run4
 
-from future.utils import with_metaclass
-
-
 
 class ItemDef:
     """
@@ -35,7 +32,7 @@ class ItemDef:
 
     @staticmethod
     def threshold_conditions(tc):
-        class d(with_metaclass(meta_d)): pass
+        class d(metaclass=meta_d): pass
 
         # ... and make them accessible by their name
         for thr in tc.getDefinedThresholds():

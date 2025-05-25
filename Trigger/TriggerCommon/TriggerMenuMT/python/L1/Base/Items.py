@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict as odict
 
@@ -7,8 +7,6 @@ from AthenaCommon.Logging import logging
 from ..Config.MonitorDef import MonitorDef
 from .PrescaleHelper import getCutFromPrescale, getPrescaleFromCut
 from .MenuUtils import binstr
-
-from past.builtins import cmp
 
 
 log = logging.getLogger(__name__)
@@ -187,7 +185,7 @@ class PrescaleHandler(object):
             self.itemsByPartition.setdefault(item.partition,[]).append(item)
 
         for itemList in self.itemsByPartition.values():
-            itemList.sort(lambda x,y: cmp(x.ctpid,y.ctpid))
+            itemList.sort(key = lambda x: x.ctpid)
 
 
 class meta_d(type):
