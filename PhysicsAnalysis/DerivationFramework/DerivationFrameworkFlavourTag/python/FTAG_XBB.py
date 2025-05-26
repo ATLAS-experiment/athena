@@ -24,13 +24,6 @@ def FTAG_XBBKernelCfg(flags, name='FTAG_XBBKernel', **kwargs):
     # skimming tools
     skimmingTools = []
 
-    # filter leptons
-    lepton_skimming_expression = 'count( (Muons.pt > 5*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 5*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
-    FTAG_XBBLeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAG_XBBLeptonSkimmingTool",
-            expression = lepton_skimming_expression )
-    acc.addPublicTool(FTAG_XBBLeptonSkimmingTool)
-
     # filter large-R jets
     UFOjets_skimming_expression = 'count( AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.pt > 150*GeV ) >= 1' 
     FTAG_XBBUFOjetsSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
@@ -46,7 +39,6 @@ def FTAG_XBBKernelCfg(flags, name='FTAG_XBBKernel', **kwargs):
 
     skimmingTools += [
         FTAG_XBBUFOjetsSkimmingTool,
-        FTAG_XBBLeptonSkimmingTool,
         ]
 
     thinningTools = [
