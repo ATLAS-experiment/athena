@@ -88,8 +88,9 @@ StatusCode LArDeadOTXCondAlg::execute() {
       ++nDeadFebs;
       const HWIdentifier febid(idBF.first);
       ATH_MSG_INFO("FEB " << m_onlineID->channel_name(febid) << " labelled as deadReadout");
-      const unsigned nChans = m_onlineID->channelInSlotMax(febid);
-      for (unsigned ch = 0; ch < nChans; ++ch) {
+      const int nChans = m_onlineID->channelInSlotMax(febid);
+      if (nChans < 1) continue; //channelInSlotMax can return -999
+      for (int ch = 0; ch < nChans; ++ch) {
         const HWIdentifier chid = m_onlineID->channel_Id(febid, ch);
         const Identifier id = oflCabling->cnvToIdentifier(chid);
         if (!id.is_valid()) {
