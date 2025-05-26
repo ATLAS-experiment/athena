@@ -40,7 +40,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('layerStudyStage', 0)
     cf.addFlag('doOverlapRemoval', True)
     cf.addFlag('clustering', 1)
-    cf.addFlag('applyLorentzAngleShift', True)
+    cf.addFlag('LorentzAngleShift', -1)
     cf.addFlag('bankDir', '')
     cf.addFlag('slicesFile', 'eventSelectionSlices/v1.0/slices.txt')
     cf.addFlag('spacePoints', True)
