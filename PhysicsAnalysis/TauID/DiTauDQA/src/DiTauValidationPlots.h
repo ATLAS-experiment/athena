@@ -12,7 +12,8 @@ class DiTauValidationPlots:public PlotBase {
     public:
       
       DiTauValidationPlots(PlotBase* pParent, const std::string& sDir, const std::string& sDiTauJetContainerName);
-      DiTau::CorePlots m_oNewCorePlots;		
+      DiTau::CorePlots m_oNewCorePlots;
+      DiTau::CorePlots m_oNewCorePlotsNom; // passing nominal selection      
 
 };
 
