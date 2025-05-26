@@ -38,8 +38,6 @@ struct Cache
     std::vector<Trk::IMaterialEffectsUpdator::ICache> m_MaterialUpCache;
     //!<  internal switch for resolved configuration
     bool m_dense = false;
-    //!< Flag the recall solution
-    bool m_robustSampling = true;
     unsigned int m_layerResolved{};
     unsigned int m_methodSequence = 0;
     const Surface* m_destinationSurface = nullptr;

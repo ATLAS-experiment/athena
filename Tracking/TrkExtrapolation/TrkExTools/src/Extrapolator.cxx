@@ -4353,22 +4353,10 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         }
         // layers ?
         if (detVol->confinedLayers()) {
-          if (cache.m_robustSampling) {
-            std::span<Trk::Layer const * const> const cLays = detVol->confinedLayers()->arrayObjects();
-            for (const auto *cLay : cLays) {
-              if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
-                cache.addOneNavigationLayer(cLay);
-              }
-            }
-          } else {
-            const Trk::Layer* lay = detVol->associatedLayer(gp);
-            if (lay) {
-              cache.addOneNavigationLayer(detVol, lay);
-            }
-            const Trk::Layer* nextLayer =
-              detVol->nextLayer(currPar->position(), dir * currPar->momentum().normalized(), true);
-            if (nextLayer && nextLayer != lay) {
-              cache.addOneNavigationLayer(detVol, nextLayer);
+          std::span<Trk::Layer const* const> const cLays = detVol->confinedLayers()->arrayObjects();
+          for (const auto* cLay : cLays) {
+            if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
+              cache.addOneNavigationLayer(cLay);
             }
           }
         } else if (!detVol->confinedArbitraryLayers().empty()) {
@@ -4383,30 +4371,10 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
   // confined layers
   if (cache.m_currentStatic->confinedLayers() && updateStatic) {
     // if ( cache.m_currentStatic->confinedLayers() ) {
-    if (cache.m_robustSampling) {
-      std::span<Trk::Layer const * const> const cLays =
-        cache.m_currentStatic->confinedLayers()->arrayObjects();
-      for (const auto *cLay : cLays) {
-        if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
-          cache.addOneNavigationLayer(cLay);
-        }
-      }
-    } else {
-      // * this does not work - debug !
-      const Trk::Layer* lay = cache.m_currentStatic->associatedLayer(gp);
-      if (lay) {
-        static constexpr bool boundsCheck{false};
-        cache.addOneNavigationLayer(lay, boundsCheck);
-        const Trk::Layer* nextLayer =
-          lay->nextLayer(currPar->position(), dir * currPar->momentum().normalized());
-        if (nextLayer && nextLayer != lay) {
-          cache.addOneNavigationLayer(nextLayer, boundsCheck);
-        }
-        const Trk::Layer* backLayer =
-          lay->nextLayer(currPar->position(), -dir * currPar->momentum().normalized());
-        if (backLayer && backLayer != lay) {
-          cache.addOneNavigationLayer(backLayer, boundsCheck);
-        }
+    std::span<Trk::Layer const* const> const cLays = cache.m_currentStatic->confinedLayers()->arrayObjects();
+    for (const auto* cLay : cLays) {
+      if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
+        cache.addOneNavigationLayer(cLay);
       }
     }
   }
@@ -4677,37 +4645,6 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
           }
           if (m_cacheLastMatLayer) {
             cache.m_lastMaterialLayer = nextLayer;
-          }
-        }
-
-        if (!cache.m_robustSampling) {
-          if (cache.m_navigLays[index].first && cache.m_navigLays[index].first->confinedLayers()) {
-            const Trk::Layer* newLayer =
-              nextLayer->nextLayer(nextPar->position(), dir * nextPar->momentum().normalized());
-            if (newLayer && newLayer != nextLayer) {
-              bool found = false;
-              int replace = -1;
-              for (unsigned int i = 0; i < cache.m_navigLays.size(); i++) {
-                if (cache.m_navigLays[i].second == newLayer) {
-                  found = true;
-                  break;
-                }
-                if (cache.m_navigLays[i].second != nextLayer) {
-                  replace = i;
-                }
-              }
-              if (!found) {
-                if (replace > -1) {
-                  cache.m_navigLays[replace].second = newLayer;
-                  cache.m_navigSurfs[solutions[iSol] + replace - index].first =
-                    &(newLayer->surfaceRepresentation());
-                } else {
-                  // can't insert a surface in middle
-                  return extrapolateToVolumeWithPathLimit(
-                    ctx, cache, nextPar, pathLim, dir, particle, destVol, matupmod);
-                }
-              }
-            }
           }
         }
         currPar = nextPar;
