@@ -20,7 +20,7 @@ class LArDeadOTXCorrFactors {
   //map key: SuperCell HWIdentifer, value.first: dead feb-cell hash, value.second: conversion factor from SC-ET integer to cell E in MeV
 
   payload_t& get() { return m_scToDeadCellMap; }             // non-const
-  const payload_t get() const { return m_scToDeadCellMap; }  // const
+  const payload_t &get() const { return m_scToDeadCellMap; }  // const
 
  private:
   payload_t m_scToDeadCellMap;
