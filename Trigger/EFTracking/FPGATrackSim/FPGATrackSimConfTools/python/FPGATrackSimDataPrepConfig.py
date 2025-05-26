@@ -400,9 +400,9 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     theFPGATrackSimDataPrepAlg.ClusteringTool = CompFactory.FPGATrackSimClusteringTool()
     if not flags.Trigger.FPGATrackSim.wrapperFileName:
         theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleTool = result.getPrimaryAndMerge(FPGATrackSimLorentzAngleToolCfg(flags))
-        theFPGATrackSimDataPrepAlg.ClusteringTool.doLorentzAngleShift = flags.Trigger.FPGATrackSim.applyLorentzAngleShift
+        theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleShift = flags.Trigger.FPGATrackSim.LorentzAngleShift
     else:
-        theFPGATrackSimDataPrepAlg.ClusteringTool.doLorentzAngleShift = False # should be set to False by default in the tool class but just in case...
+        theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleShift = -1 # should be set to False by default in the tool class but just in case...
         
 
     

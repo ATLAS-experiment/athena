@@ -31,8 +31,8 @@ namespace FPGATrackSim {
     virtual ~LorentzAngleTool() = default;
     virtual StatusCode initialize() override;
     
-    float getLorentzAngleShift(const FPGATrackSimHit & hit) const;
-    StatusCode updateHitPosition(FPGATrackSimHit & hit) const;
+    float getLorentzAngleShift(const FPGATrackSimHit & hit, int correctionType) const;
+    StatusCode updateHitPosition(FPGATrackSimHit & hit, int correctionType) const;
 
 private:
     Gaudi::Property<bool> m_useAthenaLorentzAngleTools{this, "UseAthenaLorentzAngleTools", false, "Use Athena Lorentz Angle tools to get the Lorentz angle shift"};
@@ -46,11 +46,21 @@ private:
     const PixelID* m_pixelId = nullptr;
     const SCT_ID* m_SCTId = nullptr;
 
-    float getPixelBarrelShift(unsigned layerDisk, int etaModule) const;
-    float getPixelEndcapShift(unsigned layerDisk, unsigned phiModule, int etaModule) const;
-    float getStripBarrelShift(bool isStereo, unsigned layerDisk, int etaModule) const;
-    float getStripEndcapShift(unsigned layerDisk, int etaModule, float z) const;
+    float getPixelBarrelShift_v0(unsigned layerDisk, int etaModule) const;
+    float getPixelEndcapShift_v0(unsigned layerDisk, unsigned phiModule, int etaModule) const;
+    float getStripBarrelShift_v0(bool isStereo, unsigned layerDisk, int etaModule) const;
+    float getStripEndcapShift_v0(unsigned layerDisk, int etaModule, float z) const;
 
+    float getPixelBarrelShift_v1(unsigned layerDisk, int etaModule) const;
+    float getPixelEndcapShift_v1(unsigned layerDisk, unsigned phiModule, int etaModule) const;
+    float getStripBarrelShift_v1(bool isStereo, int etaModule) const;
+    float getStripEndcapShift_v1(unsigned layerDisk, int etaModule, float z) const;
+
+    float getPixelBarrelShift_v2(unsigned layerDisk) const;
+    float getPixelEndcapShift_v2(unsigned layerDisk, unsigned phiModule, int etaModule) const;
+    float getStripBarrelShift_v2(bool isStereo) const;
+    float getStripEndcapShift_v2(unsigned layerDisk, int etaModule, float z) const;
+    
   };
 } // namespace FPGATrackSim
 

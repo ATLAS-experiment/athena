@@ -47,7 +47,7 @@ public:
   Gaudi::Property<float> m_coordRPrecision {this, "CoordRPrecision", 1./64., "fixed point precision of r coordinate" };
   Gaudi::Property<float> m_coordPhiPrecision {this, "CoordPhiPrecision", 1./8192., "fixed point precision of phi coordinate" };
   Gaudi::Property<float> m_coordZPrecision {this, "CoordZPrecision", 1./32., "fixed point precision of z coordinate" };
-  Gaudi::Property<bool>  m_doLorentzAngleShift { this, "doLorentzAngleShift", false, "apply Lorentz angle shift" };
+  Gaudi::Property<int>  m_LorentzAngleShift { this, "LorentzAngleShift", -1, "flag for Lorentz angle shift. -1 means off, 0 means full corrections from first version, 1 means smaller LUT, 2 means very small LUT" };
 
   ToolHandle<FPGATrackSim::LorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "", "FPGATrackSim tool to retrieve Lorentz angle"};
 
