@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -225,10 +225,10 @@ int CaloNeighbourRegion::setNeighbours(ExpandedIdentifier& id1,
 	theTargetHashIDs.push_back(myTargetHash);
       }
       if ( id1[SIDE]*side > 0 ) {
-	neighbourMapPlus[myHash] = std::move(theTargetHashIDs);
+	neighbourMapPlus[myHash] = theTargetHashIDs;
       }
       else {
-	neighbourMapMinus[myHash] = std::move(theTargetHashIDs);
+	neighbourMapMinus[myHash] = theTargetHashIDs;
       }
     }
   }

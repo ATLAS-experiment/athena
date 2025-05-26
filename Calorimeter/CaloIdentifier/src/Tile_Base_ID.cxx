@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -12,7 +12,6 @@
 
 
 #include "CaloIdentifier/Tile_Base_ID.h"
-#include "CaloIdentifier/TileID_Exception.h"
 #include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -1254,7 +1253,7 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
         << endmsg;
   } else {
     // remove testbeam ID from all ranges
-    reg_id = std::move(tile_id);
+    reg_id = tile_id;
     reg_id.add(tiletbField);
     m_full_adc_range.remove_range(reg_id);
     m_full_pmt_range.remove_range(reg_id);
