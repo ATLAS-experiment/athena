@@ -198,7 +198,7 @@ private:
   //  a list of folders to preload
   Gaudi::Property<std::vector<std::string> >  m_par_folders{this,"Folders",{},"List of database folders to preload","OrderedSet<std::string>"};
   //  a list of overriding tags definitions
-  Gaudi::Property<std::vector<std::string> >  m_par_overrideTags{this,"overrideTags",{},"List of foolder-tag overrides","OrderedSet<std::string>"};
+  Gaudi::Property<std::vector<std::string> >  m_par_overrideTags{this,"overrideTags",{},"List of xml-modifiers for folders like <prefix>/My/Folder</prefix><tag>MyFolderTag</tag>","OrderedSet<std::string>"};
   //  a list of folders to write to file meta data
   Gaudi::Property<std::vector<std::string> >  m_par_foldersToWrite{this,"FoldersToMetaData",{},"list of folders to write to file meta data","OrderedSet<std::string>"};    
   //  a flag to trigger the connections management
