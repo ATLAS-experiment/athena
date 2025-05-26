@@ -33,6 +33,7 @@ namespace ActsTrk::detail {
       if (!seed)
         continue;
 
+      std::size_t nSP = 0;
       for (const xAOD::SpacePoint *sp : seed->sp()) {
         const std::vector<const xAOD::UncalibratedMeasurement *> &els = sp->measurements();
         for (const xAOD::UncalibratedMeasurement *meas : els) {
@@ -44,6 +45,8 @@ namespace ActsTrk::detail {
           m_seedIndex[hitIndex].push_back(m_numSeeds);
           ++m_nSeedMeasurements[m_numSeeds];
         }
+        ++nSP;
+        if (nSP >= 3) break;
       }
       ++m_numSeeds;
     }
