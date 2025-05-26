@@ -152,10 +152,10 @@ def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
 
 @AccumulatorCache
 def TrigPFlowExtrapolatorCfg(flags, name='HLT_PFlowExtrapolator'):
-    # This is the extrapolator which is used in PFlow 
+    # This is the extrapolator which is used in PFlow
     # reconstruction at the level of HLT. It allows to
-    # setup the tolerance which influences speed (but also 
-    # precision) of the extrapolation. 
+    # setup the tolerance which influences speed (but also
+    # precision) of the extrapolation.
     result = ComponentAccumulator()
 
     PFlowExtrapolator = result.popToolsAndMerge(
@@ -195,72 +195,71 @@ def egammaCaloExtrapolatorCfg(flags, name='egammaCaloExtrapolator'):
     # e/gamma mainly uses Extrapolate Directly to a particular
     # surface to the calo. We do not do "tracking"
     # as electrons/photon have showered.
-    # This means that in practice only the 'Global'
+    # The means that in practice only the Global
     # propagator is used with not material effects.
     # Configure everything in any case for clarity/consistency.
     result = ComponentAccumulator()
-
     egammaExtrapolator = result.popToolsAndMerge(
         AtlasExtrapolatorCfg(flags, name))
+
+    egammaPropagators = []
+    egammaUpdators = []
 
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
         RungeKuttaPropagatorCfg)
     RungeKuttaPropagator = result.popToolsAndMerge(
         RungeKuttaPropagatorCfg(flags))
+    MaterialEffectsUpdator = result.popToolsAndMerge(
+        TC.AtlasMaterialEffectsUpdatorCfg(flags))
+
+    egammaPropagators += [RungeKuttaPropagator]
+    egammaUpdators += [MaterialEffectsUpdator]
+
     from TrkConfig.TrkExSTEP_PropagatorConfig import (
         AtlasNoMatSTEP_PropagatorCfg)
     NoMatSTEP_Propagator = result.popToolsAndMerge(
         AtlasNoMatSTEP_PropagatorCfg(flags))
-    ITkPropagator = None
+    NoElossMaterialEffectsUpdator = result.popToolsAndMerge(
+        TC.AtlasNoElossMaterialEffectsUpdatorCfg(flags))
+
+    egammaPropagators += [NoMatSTEP_Propagator]
+    egammaUpdators += [NoElossMaterialEffectsUpdator]
+
     if flags.Detector.GeometryITk:
         from TrkConfig.TrkExRungeKuttaPropagatorConfig import ITkPropagatorCfg
         ITkPropagator = result.popToolsAndMerge(
             ITkPropagatorCfg(flags))
-
-    egammaPropagators = []
-    egammaPropagators += [RungeKuttaPropagator]
-    egammaPropagators += [NoMatSTEP_Propagator]
-    if flags.Detector.GeometryITk:
-        egammaPropagators += [ITkPropagator]
-
-    MaterialEffectsUpdator = result.popToolsAndMerge(
-        TC.AtlasMaterialEffectsUpdatorCfg(flags))
-    NoElossMaterialEffectsUpdator = result.popToolsAndMerge(
-        TC.AtlasNoElossMaterialEffectsUpdatorCfg(flags))
-    ITkMaterialEffectsUpdator = None
-    if flags.Detector.GeometryITk:
         ITkMaterialEffectsUpdator = result.popToolsAndMerge(
             TC.ITkMaterialEffectsUpdatorCfg(flags))
 
-    egammaUpdators = []
-    egammaUpdators += [MaterialEffectsUpdator]
-    egammaUpdators += [NoElossMaterialEffectsUpdator]
-    if flags.Detector.GeometryITk:
+        egammaPropagators += [ITkPropagator]
         egammaUpdators += [ITkMaterialEffectsUpdator]
 
     # configure propagators/updators according to geometry signature
     egammaSubPropagators = []
-    egammaSubPropagators += [RungeKuttaPropagator.name]  # Global
-    if flags.Detector.GeometryITk:
-        egammaSubPropagators += [ITkPropagator.name]  # ITk
-    else:
-        egammaSubPropagators += [RungeKuttaPropagator.name]  # ID
-
-    egammaSubPropagators += [RungeKuttaPropagator.name]  # BeamPipe
-    egammaSubPropagators += [RungeKuttaPropagator.name]  # Calo
-    egammaSubPropagators += [NoMatSTEP_Propagator.name]  # MS
-    egammaSubPropagators += [RungeKuttaPropagator.name]  # Cavern
-
     egammaSubUpdators = []
-    egammaSubUpdators += [MaterialEffectsUpdator.name]  # Global
+    # Global
+    egammaSubPropagators += [RungeKuttaPropagator.name]
+    egammaSubUpdators += [MaterialEffectsUpdator.name]
+    # ID/ITK
     if flags.Detector.GeometryITk:
-        egammaSubUpdators += [ITkMaterialEffectsUpdator.name]  # ID
+        egammaSubPropagators += [ITkPropagator.name]
+        egammaSubUpdators += [ITkMaterialEffectsUpdator.name]
     else:
-        egammaSubUpdators += [MaterialEffectsUpdator.name]  # ID
-    egammaSubUpdators += [MaterialEffectsUpdator.name]  # BeamPipe
-    egammaSubUpdators += [NoElossMaterialEffectsUpdator.name]  # Calo
-    egammaSubUpdators += [NoElossMaterialEffectsUpdator.name]  # MS
-    egammaSubUpdators += [MaterialEffectsUpdator.name]  # Cavern
+        egammaSubPropagators += [RungeKuttaPropagator.name]
+        egammaSubUpdators += [MaterialEffectsUpdator.name]
+    # BeamPipe
+    egammaSubPropagators += [RungeKuttaPropagator.name]
+    egammaSubUpdators += [MaterialEffectsUpdator.name]
+    # Calo
+    egammaSubPropagators += [RungeKuttaPropagator.name]
+    egammaSubUpdators += [NoElossMaterialEffectsUpdator.name]
+    # MS
+    egammaSubPropagators += [NoMatSTEP_Propagator.name]
+    egammaSubUpdators += [NoElossMaterialEffectsUpdator.name]
+    # Cavern
+    egammaSubPropagators += [RungeKuttaPropagator.name]
+    egammaSubUpdators += [MaterialEffectsUpdator.name]
 
     egammaExtrapolator.MaterialEffectsUpdators = egammaUpdators
     egammaExtrapolator.SubMEUpdators = egammaSubUpdators
