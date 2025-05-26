@@ -30,7 +30,7 @@ class ActsSeed {
 
   template <typename arg_t>
     requires(N != 1)
-  explicit ActsSeed(const arg_t& points);
+  explicit ActsSeed(arg_t&& points);
 
   void setVertexZ(float vertex);
   void setQuality(float seedQuality);
@@ -55,8 +55,8 @@ ActsSeed<external_spacepoint_t, N>::ActsSeed(const args_t&... points)
 template <typename external_spacepoint_t, std::size_t N>
 template <typename arg_t>
   requires(N != 1)
-ActsSeed<external_spacepoint_t, N>::ActsSeed(const arg_t& points)
-    : m_spacepoints(points) {}
+ActsSeed<external_spacepoint_t, N>::ActsSeed(arg_t&& points)
+    : m_spacepoints(points.begin(), points.end()) {}
 
 template <typename external_spacepoint_t, std::size_t N>
 void ActsSeed<external_spacepoint_t, N>::setVertexZ(float vertex) {

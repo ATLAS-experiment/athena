@@ -79,9 +79,9 @@ namespace ActsTrk {
 
     // Compute free parameters
     Acts::FreeVector freeParams = useTopSp ?
-      Acts::estimateTrackParamsFromSeed(std::ranges::views::reverse(sp_collection),
+      Acts::estimateTrackParamsFromSeed(sp_collection | std::views::reverse | std::views::take(3),
                                         bField) :
-      Acts::estimateTrackParamsFromSeed(sp_collection,
+      Acts::estimateTrackParamsFromSeed(sp_collection | std::views::take(3),
                                         bField);
 
     if (useTopSp) {
