@@ -1,0 +1,34 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+Jets:
+- containerName: AnaJets
+  jetCollection: AntiKt4EMPFlowJets
+  runJvtUpdate: False
+  runNNJvtUpdate: True
+  recalibratePhyslite: False
+  FlavourTagging:
+  - selectionName: ftag
+    btagger: GN2v01
+    btagWP: FixedCutBEff_65
+    saveScores: All
+  FlavourTaggingEventSF:
+  - containerName: AnaJets.baselineJvt
+    btagger: GN2v01
+  JVT: {}
+- containerName: AnaLargeRJets
+  jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
+  recalibratePhyslite: False
+
+ObjectCutFlow:
+- containerName: AnaJets
+  selectionName: jvt
+
+GeneratorLevelAnalysis: {}
+
+PrintConfiguration: {}
