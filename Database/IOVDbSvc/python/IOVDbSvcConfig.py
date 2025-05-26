@@ -230,12 +230,12 @@ _dblist = {
 }
 
 
-def addOverride(flags, folder, tag, db=None):
-    """Add a tag override for the specified folder"""
+def addOverride(flags, folder, tag, tagType="tag", db=None):
+    """Add xml override for the specified folder (folder-level tag, forceRunNumber, ...)"""
     suffix = ''
     if db:
         suffix = f' <db>{db}</db>'
-    return IOVDbSvcCfg(flags, overrideTags=(f'<prefix>{folder}</prefix> <tag>{tag}</tag>{suffix}',))
+    return IOVDbSvcCfg(flags, overrideTags=(f'<prefix>{folder}</prefix> <{tagType}>{tag}</{tagType}>{suffix}',))
 
 
 def _extractFolder(folderString):
