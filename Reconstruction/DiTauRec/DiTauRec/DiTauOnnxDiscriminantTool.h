@@ -67,7 +67,6 @@ private:
 
   Ort::Value create_tensor(std::vector<float> &data, const std::vector<int64_t> &shape) const;
   InferenceOutput run_inference(OnnxInputs &inputs) const;
-  float nan_to_num(float value, float nan_replacement, float posinf_replacement, float neginf_replacement) const;
   std::vector<float> flatten(const std::vector<std::vector<float>> &vec_2d) const;
   std::vector<float> extract_points(const std::vector<std::vector<float>> &track_features) const;
   std::vector<float> create_mask(const std::vector<std::vector<float>> &track_features) const;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @brief: Trigger executor to call base transforms
 # @details: Based on athenaExecutor with some modifications
@@ -379,7 +379,7 @@ class trigRecoExecutor(athenaExecutor):
                                 if 'accepted:' in line and int(line[14]) != 0:
                                     #Add the number of accepted events      
                                     accepted += int(line[14:])
-                                if re.search('DFDcmEmuSession.* Communication error', line):
+                                if re.search('DFDcmEmuSession.* Communication error', line) or re.search('DFDcmEmuSession.* No new event provided within the timeout limit', line):
                                     msg.error('Caught DFDcmEmuSession error, aborting job')
                                     self._rc = 1
 
