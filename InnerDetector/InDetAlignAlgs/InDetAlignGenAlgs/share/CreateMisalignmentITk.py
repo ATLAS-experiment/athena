@@ -44,6 +44,10 @@ def getFlags(**kwargs):
     flags.GeoModel.Align.Dynamic = False
     
     flags.ITk.Geometry.isAlignable = True
+    flags.ITk.Align.alignITkPixel = True
+    flags.ITk.Align.alignITkStrip = True
+
+
 
     flags.ITk.Geometry.AllLocal = False
     detectors = [
