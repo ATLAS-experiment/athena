@@ -16,7 +16,8 @@ ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=107
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.11.1/GeoModel-6.11.1.tar.bz2;URL_MD5;5e95386417afd5df4069ca427b85c2c9"
                         -DATLAS_GEANT4_USE_LTO=TRUE
                         -DATLAS_VECGEOM_USE_LTO=TRUE
-                        -DATLAS_ONNXRUNTIME_USE_CUDA=TRUE)
+                        -DATLAS_ONNXRUNTIME_USE_CUDA=TRUE
+                        -DATLAS_GAUDI_USE_CUDA=TRUE)
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
