@@ -1081,6 +1081,8 @@ class TopoAlgoDef:
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 80, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ80ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 90, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ90ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ40ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ20ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU5VFab_CjJ20ab
         ]
         for x in algoList:
             class d:

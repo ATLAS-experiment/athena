@@ -33,9 +33,8 @@ def defineInputsMenu():
                             ]
                         elif group["fpga"]==0 and group["clock"]==1:
                             group["algorithms"] += [
-                                    TopoMenuDef( '0DR04-MU5VFab-CjJ90ab', outputbits = 13), #Bjet, TODO: not a primary
-                                    TopoMenuDef( '0DR04-MU8Fab-CjJ30ab' , outputbits = 14),
-                                    TopoMenuDef( '0DR04-MU8Fab-CjJ40ab' , outputbits = 15),
+                                    TopoMenuDef( '0DR04-MU5VFab-CjJ20ab' , outputbits = 13),
+                                    TopoMenuDef( '0DR04-MU3VFab-CjJ20ab' , outputbits = 14),
                             ]
                         elif group["fpga"]==1 and group["clock"]==0:
                             group["algorithms"] += [
