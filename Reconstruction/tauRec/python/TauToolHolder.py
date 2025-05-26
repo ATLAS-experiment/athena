@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -877,7 +877,7 @@ def TauGNNEvaluatorCfg(flags, version=0):
     result.setPrivateTools(myTauGNNEvaluator)
     return result
 
-def TauWPDecoratorGNNCfg(flags, version):
+def TauWPDecoratorGNNCfg(flags, version, tauContainerName=""):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorGNN_v' + str(version)
 
@@ -887,6 +887,7 @@ def TauWPDecoratorGNNCfg(flags, version):
                                       flatteningFile1Prong = WPConf[0],
                                       flatteningFile2Prong = WPConf[1],
                                       flatteningFile3Prong = WPConf[2],
+                                      TauContainerName = tauContainerName,
                                       DecorWPNames = flags.Tau.GNTauDecorWPNames[version],
                                       DecorWPCutEffs1P = [0.95, 0.85, 0.75, 0.60],
                                       DecorWPCutEffs2P = [0.95, 0.75, 0.60, 0.45],
