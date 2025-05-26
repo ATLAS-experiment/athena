@@ -652,7 +652,6 @@ private:
     "skip the initial post-Update at the layer [Fatras conversion mode]"};
   BooleanProperty m_extendedLayerSearch{this, "ExtendedLayerSearch", true,
     "extended layer search"};
-  BooleanProperty m_robustSampling{this, "RobustSampling", true};
   BooleanProperty m_resolveActive{this, "ResolveMuonStation", false};
   BooleanProperty m_resolveMultilayers{this, "ResolveMultilayers", true};
   BooleanProperty m_cacheLastMatLayer{this, "CacheLastMaterialLayer", false,
