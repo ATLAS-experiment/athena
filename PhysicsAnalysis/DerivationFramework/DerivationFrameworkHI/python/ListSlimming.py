@@ -320,6 +320,7 @@ def HION5Extravariables():
 def HION5AllVariables():
     variables  = []
     variables += ["AntiKt4HITrackJets"]
+    variables += ["AntiKt2HIJets"]
     variables += ["AntiKt4HIJets"]
     variables += ["HIEventShape"]
     variables += ["ForwardElectrons"]
