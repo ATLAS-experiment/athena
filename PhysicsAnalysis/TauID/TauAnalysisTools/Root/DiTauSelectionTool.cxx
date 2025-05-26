@@ -185,7 +185,7 @@ StatusCode DiTauSelectionTool::initialize()
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
   
-  ATH_MSG_INFO( "Initializing TauSelectionTool" );
+  ATH_MSG_INFO( "Initializing DiTauSelectionTool" );
   FillRegionVector(m_vPtRegion, m_dPtMin.value(), m_dPtMax.value());
   FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
   FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin.value(), m_dNSubjetsMax.value());

@@ -33,7 +33,10 @@ StatusCode PhysValDiTau::initialize()
 {
   ATH_MSG_INFO ("Initializing " << name() << "...");    
   ATH_CHECK(ManagedMonitorToolBase::initialize());
-   
+
+  // selections are configured in PhysicsValidation job options
+  ATH_CHECK(m_nomiDiTauSel.retrieve());
+
   return StatusCode::SUCCESS;
 }
 
@@ -73,9 +76,15 @@ StatusCode PhysValDiTau::fillHistograms()
   // Loop through recoonstructed tau container
   for (auto ditau : *ditaus) {
     if ( m_detailLevel < 10 ) continue;
+
+    bool nominal = static_cast<bool>(m_nomiDiTauSel->accept(*ditau));
       
     // fill histograms for reconstructed taus
     m_oDiTauValidationPlots->m_oNewCorePlots.fill(*ditau, weight);
+    if(nominal) {
+       m_oDiTauValidationPlots->m_oNewCorePlotsNom.fill(*ditau, weight);
+    }
+
   }
 
   return StatusCode::SUCCESS;

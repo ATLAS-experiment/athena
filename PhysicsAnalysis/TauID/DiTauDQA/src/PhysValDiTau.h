@@ -17,6 +17,7 @@
 
 // Local includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
+#include "TauAnalysisTools/IDiTauSelectionTool.h"
 
 // Local includes
 #include "DiTauValidationPlots.h"
@@ -44,6 +45,8 @@ private:
   // properties
   Gaudi::Property<std::string> m_DiTauJetContainerName{this, "DiTauContainerName", "DiTauJets"};
   Gaudi::Property<bool> m_isMC{this, "isMC", false};
+
+  ToolHandle<TauAnalysisTools::IDiTauSelectionTool> m_nomiDiTauSel{this, "NominalDiTauSelectionTool", "TauAnalysisTools::DiTauSelectionTool/NominalDiTauSelectionTool"};
 
   //Histograms
   std::unique_ptr<DiTauValidationPlots> m_oDiTauValidationPlots;

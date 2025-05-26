@@ -251,7 +251,7 @@ void DiTauSelectionCutAbsCharge::setAcceptInfo(asg::AcceptInfo& info) const
 bool DiTauSelectionCutAbsCharge::accept(const xAOD::DiTauJet& xTau,
                             asg::AcceptData& acceptData)
 {
-  m_bDiTauCharge = -1234;
+  m_bDiTauCharge = 0;
   for (const auto& xTrack : xTau.trackLinks()) {
      if (!xTrack.isValid())
         continue;
