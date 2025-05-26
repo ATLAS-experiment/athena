@@ -54,7 +54,8 @@ namespace CP {
     /// @name Function(s) implementing the IPixelDEdxEqualizationTool interface
     /// @{
 
-    virtual std::shared_ptr<ROOT::RDF::RNode> getFilteredSFDF(const int runNumber) const override;
+    virtual std::shared_ptr<std::vector<TrackSFRecord>> getRunTrackSFs(const int runNumber) const override;
+    virtual std::shared_ptr<std::vector<ClusterSFRecord>> getRunClusterSFs(const int runNumber) const override;
     virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const override;
     virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const int runNumber) const override;
 
@@ -83,16 +84,16 @@ namespace CP {
     /// Map where key = run number, value is a filtered scale factor RDF (an RDF::RNode) with only the rows for that run number.
     /// So not filtering everytime in execute().
     /// Will be updated in execute, so must be mutable
-    mutable std::map<unsigned int, std::shared_ptr<ROOT::RDF::RNode>> m_filteredRDFMap;
+    /// Cache map: runNumber -> vector<SFRecord>
+    mutable std::map<int, std::vector<ClusterSFRecord>> m_cachedClusterSFData;
+    mutable std::map<int, std::vector<TrackSFRecord>> m_cachedTrackSFData;
     mutable std::mutex m_mapMutex;
-    //mutable std::shared_mutex m_mapMutex;
 
     /// Highest eta bin for which track-based equalization SFs are define.
     /// If track has higher eta, use SF from highest bin.
     double m_maxEta;
 
   }; // class PixelDEdxEqualizationTool
-
 
 } // namespace CP
 

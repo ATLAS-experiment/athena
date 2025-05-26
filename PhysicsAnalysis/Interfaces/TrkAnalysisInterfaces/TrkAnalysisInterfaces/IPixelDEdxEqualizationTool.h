@@ -15,6 +15,23 @@ namespace PixelDEdx {
 
 namespace CP {
 
+  // Full struct definition needed here.
+
+  struct TrackSFRecord {
+    double etaLow;
+    double etaHigh;
+    double SF_IBLOFYes;
+    double SF_IBLOFNo;
+  };
+  
+  struct ClusterSFRecord {
+    int bec;
+    int layerID;
+    int etaM;
+    double SF;
+    double SFerr;
+  };
+  
   /// Interface for the Pixel ToT PID tool.
   /// This is refactoring of the tool for dual use in Athena and AnalysisBase using CP Algs.
 
@@ -24,7 +41,8 @@ namespace CP {
     
   public:
 
-    virtual std::shared_ptr<ROOT::RDF::RNode> getFilteredSFDF(const int runNumber) const = 0;
+    virtual std::shared_ptr<std::vector<TrackSFRecord>> getRunTrackSFs(const int runNumber) const = 0;
+    virtual std::shared_ptr<std::vector<ClusterSFRecord>> getRunClusterSFs(const int runNumber) const = 0;
     virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const = 0;
     virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct&, const int runNumber) const = 0;
 
