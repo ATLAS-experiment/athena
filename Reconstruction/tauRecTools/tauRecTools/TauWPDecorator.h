@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUWPDECORATOR_H
 #define TAURECTOOLS_TAUWPDECORATOR_H
 
 #include "tauRecTools/TauRecToolBase.h"
-
+#include "AsgTools/PropertyWrapper.h"
+#include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauDefs.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKeyArray.h"
 
 #include <utility>
 #include <memory>
@@ -89,8 +91,14 @@ class TauWPDecorator : public TauRecToolBase {
     std::vector<float> m_EDMWPEffs2p; //!< Efficiency of each WP in EDM for 2-prong taus
     std::vector<float> m_EDMWPEffs3p; //!< Efficiency of each WP in EDM for 3-prong taus
 
-    std::vector<std::string> m_decorWPs; //!< Vector of WPs not in the EDM (to be decorated)
-    std::vector<SG::AuxElement::Accessor<char>> m_charDecors; //!
+    // for WPs not implemented in the EDM (i.e. not encoded in IsTauFlag)
+    // use Accessors unless necessary
+    std::vector<std::string> m_decorWPs; //!< name of WPs
+    std::vector<SG::AuxElement::Accessor<char>> m_charDecors;
+    // when data handles are required (currently in tau trigger offline monitoring), need to use Write(Read)DecorHandleKeys
+    // redundant with above accessors, will be improved in the future but has implications for DAOD workflow
+    Gaudi::Property<std::string> m_tauContainerName{this, "TauContainerName", "", "Name of TauJetContainer, must be set when using "};
+    SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_decorHandleKeys {this, "DecorHandleKeys",{},"Name of WPs to be decorated"};
     std::vector<float> m_decorWPEffs0p; //!< Efficiency of each WP to be docorated for 0-prong taus
     std::vector<float> m_decorWPEffs1p; //!< Efficiency of each WP to be docorated for 1-prong taus
     std::vector<float> m_decorWPEffs2p; //!< Efficiency of each WP to be docorated for 2-prong taus

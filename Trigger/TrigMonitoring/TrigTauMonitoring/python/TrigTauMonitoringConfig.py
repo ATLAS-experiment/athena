@@ -55,6 +55,7 @@ class TrigTauMonAlgBuilder:
     'GNTau': ('GNTauScore_v0prune', 'GNTauScoreSigTrans_v0prune'),
   }
   offline_taujets = 'TauJets'
+  offline_GNTau_WP = ''
 
   #=============================================
   # Setup for L1Calo monitoring
@@ -249,6 +250,7 @@ class TrigTauMonAlgBuilder:
     mon_alg.L1Phase1Thresholds = self.L1_Phase1_thresholds
     mon_alg.L1Phase1ThresholdPatterns = self.L1_Phase1_threshold_mappings
     mon_alg.OfflineTauJetKey = self.offline_taujets
+    mon_alg.OfflineGNTauDecorKey = self.offline_GNTau_WP
     return mon_alg
 
 
