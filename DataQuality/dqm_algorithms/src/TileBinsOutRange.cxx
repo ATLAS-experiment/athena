@@ -36,7 +36,7 @@ dqm_core::Result* TileBinsOutRange::execute(const std::string& name,
   const TH1* histogram = nullptr;
 
   if(object.IsA()->InheritsFrom( "TH1" )) {
-    histogram = dynamic_cast<const TH1*>(&object);
+    histogram = static_cast<const TH1*>(&object);//type already checked in preceding line
     if (histogram->GetDimension() > 2 ){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 2 " );
     }
@@ -80,7 +80,7 @@ dqm_core::Result* TileBinsOutRange::execute(const std::string& name,
   TH1* resultHistogram = nullptr;
   if (publishHistogram) {
     if (histogram->InheritsFrom("TH1")) {
-      resultHistogram = dynamic_cast<TH1*>(histogram->Clone());
+      resultHistogram = static_cast<TH1*>(histogram->Clone());//type already checked
     } else {
       throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
     }
