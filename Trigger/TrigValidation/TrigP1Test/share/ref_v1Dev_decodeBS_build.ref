@@ -12789,12 +12789,12 @@ HLT_mu4_l2io_L1MU3V:
 HLT_mu4_l2io_idReuse_L1MU3V:
   eventCount: 3
   stepCounts:
-    0: 6
+    0: 7
     1: 3
     2: 3
     3: 3
   stepFeatures:
-    0: 7
+    0: 8
     1: 3
     2: 3
     3: 3
