@@ -345,6 +345,10 @@ namespace dqutils {
       return; //quasi null-operation
     HIST* a1 = (dynamic_cast<HIST*>(a));
     const HIST* b1 = dynamic_cast<const HIST*>(b);
+    if (!b1 || !a1){
+      std::cout << "ERROR in identical: Object not of correct type" << std::endl;
+      return;
+    }
     dqutils::MonitoringFile::merge_identical(*a1, *b1);
     return;
   }
@@ -388,6 +392,10 @@ namespace dqutils {
   void merge_TTree(TObject * a, const TObject* b) {
     TTree* a1 = dynamic_cast<TTree*>(a);
     const TTree* b1 = dynamic_cast<const TTree*>(b);
+    if (!a1 || !b1) {
+      std::cout << "ERROR in merge_TTree: Object not of type TTree" << std::endl;
+      return;
+    }
     TTree* b2 = const_cast<TTree*>(b1);
     TList listT;
     listT.Add(b2);
@@ -882,6 +890,10 @@ namespace dqutils {
         return -1;
       }
       TDirectory* dir(dynamic_cast<TDirectory*>(in->GetDirectory(runDir.c_str())));
+      if (not dir){
+        std::cout << "ERROR, could not cast to directory" << std::endl;
+        return -1;
+      }
       hc.addDirectory(dir, runDirFwd, files[i]);
       in->Delete("");
       in->Close();
