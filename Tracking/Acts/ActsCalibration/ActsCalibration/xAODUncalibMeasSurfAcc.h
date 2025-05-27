@@ -11,7 +11,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
 namespace ActsTrk {
-    class DetectorElementToActsGeometryIdMap;
+    struct DetectorElementToActsGeometryIdMap;
 }
 namespace ActsTrk::detail{
     /** @brief Helper class to access the Acts::surface associated with an Uncalibrated xAOD measurement.

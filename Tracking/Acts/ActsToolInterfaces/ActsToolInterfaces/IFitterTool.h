@@ -20,7 +20,7 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "TrkTrack/Track.h"
 namespace ActsTrk {
-  class DetectorElementToActsGeometryIdMap;
+  struct DetectorElementToActsGeometryIdMap;
   /** @brief Generic interface class to fit xAOD::Uncalibrated measurements to (multi)-trajectories. Depending on the fitter 
    *         in use, the methods either construct a single track trajectory or a bunch of trajectories sharing subsets of 
    *         measurements with each other. By convention, the creation of the returned trajectory container is not guaranteed
