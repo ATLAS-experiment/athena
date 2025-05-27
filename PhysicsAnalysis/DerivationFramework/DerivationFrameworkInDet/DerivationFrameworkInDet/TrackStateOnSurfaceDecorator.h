@@ -133,7 +133,7 @@ namespace DerivationFramework {
 	{this, "HoleSearch", "InDet::InDetTrackHoleSearchTool/InDetHoleSearchTool"};
       ToolHandle<Trk::IExtrapolator> m_extrapolator
 	{this, "TrackExtrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
-      ToolHandle<ITRT_CalDbTool> m_trtcaldbTool {this, "TRT_CalDbTool", ""};
+      ToolHandle<ITRT_CalDbTool> m_trtcaldbTool {this, "TRT_CalDbTool", "TRT_CalDbTool"};
       ToolHandle<ITRT_ToT_dEdx> m_TRTdEdxTool
 	{this, "TRT_ToT_dEdx", "InDet::TRT_ElectronPidTools/TRT_ToT_dEdx"};
 
