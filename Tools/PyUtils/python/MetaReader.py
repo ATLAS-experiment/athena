@@ -1194,6 +1194,7 @@ def make_peeker(meta_dict):
                 'Simulator',
                 'PhysicsList',
                 'SimulatedDetectors',
+                'IsDataOverlay',
             ]
             for item in list(meta_dict[filename]['/Simulation/Parameters']):
                 if item not in keys_to_keep:
@@ -1292,6 +1293,9 @@ def promote_keys(meta_dict, mode):
                 md['eventTypes'] = []
                 if mode == 'peeker' and 'simFlavour' in md[key]:
                     md['SimulationFlavour'] = md[key]['simFlavour']
+
+                if mode == 'peeker' and 'isDataOverlay' in md[key]:
+                    md['IsDataOverlay'] = md[key]['isDataOverlay']
 
                 if 'simFlavour' in md[key] and ('FullG4' in md[key]['simFlavour'] or 'ATLFAST' in md[key]['simFlavour']):
                     md['eventTypes'].append('IS_SIMULATION')
