@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTruthCreatorTools/DetailedTrackTruthBuilder.h"
@@ -73,12 +73,7 @@ namespace {
 
 namespace Trk {
 
-  //================================================================
-  DetailedTrackTruthBuilder::DetailedTrackTruthBuilder(const std::string& type, const std::string& name, const IInterface* parent)
-    : base_class(type, name, parent)
-  {}
-
-  //================================================================
+ //================================================================
   StatusCode DetailedTrackTruthBuilder::initialize()
   {
     ATH_CHECK( m_truthTrajBuilder.retrieve() );
@@ -105,25 +100,20 @@ namespace Trk {
     PRD_InverseTruth inverseTruth;
 
     for ( const PRD_MultiTruthCollection* prdTruthColl : prdTruth ) {
-      if (prdTruthColl) {
-        if (!(prdTruthColl)->empty()) {
-          SubDetHitStatistics::SubDetType subdet = findSubDetType(prdTruthColl->begin()->first) ;
-
-          //std::cout<<"Got SubDetType = "<<subdet<<" for "<< (prdTruthColl)->begin()->first <<std::endl;
-
-          if (subdet != SubDetHitStatistics::NUM_SUBDETECTORS) {
-            orderedPRD_Truth[subdet] = prdTruthColl;
-            makeTruthToRecMap(inverseTruth,*prdTruthColl);
-          }
-          else {
-            ATH_MSG_WARNING("Got unknown SubDetType in prdTruth ");
-          }
-        }
-        else {
-          ATH_MSG_DEBUG("Empty truth ???");
-        }
+      if (prdTruthColl->empty()) {
+          continue;
+      }
+        
+      SubDetHitStatistics::SubDetType subdet = findSubDetType(prdTruthColl->begin()->first);
+      ATH_MSG_DEBUG("Assign: "<<prdTruthColl<<" to "<<subdet);
+      if (subdet != SubDetHitStatistics::NUM_SUBDETECTORS) {
+         orderedPRD_Truth[subdet] = prdTruthColl;
+         makeTruthToRecMap(inverseTruth,*prdTruthColl);
+      } else {
+        ATH_MSG_WARNING("Got unknown SubDetType in prdTruth ");
       }
     }
+    ATH_MSG_DEBUG("makeTruthToRecMap filling done");
 
     //----------------------------------------------------------------
     // Find associated truth for each track
@@ -215,18 +205,18 @@ namespace Trk {
 
   //================================================================
   void DetailedTrackTruthBuilder::addTrack(DetailedTrackTruthCollection *output,
-                                           const ElementLink<DataVector<Trk::Track> > &track,
+                                           const ElementLink<DataVector<Trk::Track> > &trackLink,
                                            const std::vector<const PRD_MultiTruthCollection*>& orderedPRD_Truth,
                                            const PRD_InverseTruth& inverseTruth,
-                                           const EventContext& ctx
-                                           ) const
+                                           const EventContext& ctx) const
   {
+    const Trk::Track& track{**trackLink};
     SubDetHitStatistics trackStat;
     std::map<HepMcParticleLink,SubDetPRDs> pairStat; // stats for (track,GenParticle) for the current track
     IProxyDict *proxy=ctx.getExtension<Atlas::ExtendedEventContext>().proxy();
     //----------------------------------------------------------------
     //  loop over the RIO_OnTrack
-    for ( const Trk::MeasurementBase* measurement : *((*track)->measurementsOnTrack()) ) {
+    for (const Trk::MeasurementBase* measurement : *track.measurementsOnTrack()) {
       // not all MB are necessarily ROTs.
       const Trk::RIO_OnTrack * riontrack = dynamic_cast<const Trk::RIO_OnTrack*>(measurement);
 
@@ -236,55 +226,60 @@ namespace Trk {
           riontrack = & competing->rioOnTrack( competing->indexOfMaxAssignProb() );
         }
       }
+      if (!riontrack){
+          continue;
+      }
+      ATH_MSG_VERBOSE("Process ROT "<<(*riontrack));
 
-      if (riontrack) {
+      // get the PrepRawData from the RIO_OnTrack
+      const Trk::PrepRawData* prd = riontrack->prepRawData();
+      if (!prd) {
+          ATH_MSG_WARNING("ROT without prd found...");
+          continue;
+      }
+      const Identifier& id = prd->identify();
+      SubDetHitStatistics::SubDetType subdet = findSubDetType(id);
 
-        // get the PrepRawData from the RIO_OnTrack
-        const Trk::PrepRawData* prd = riontrack->prepRawData();
-        if (prd) {
-          Identifier id = prd->identify();
-          SubDetHitStatistics::SubDetType subdet = findSubDetType(id);
+      if (subdet == SubDetHitStatistics::NUM_SUBDETECTORS) {
+          ATH_MSG_WARNING("Invalid detector id "<<id);
+          continue;
+      }
+      if (!orderedPRD_Truth[subdet]) {
+          ATH_MSG_VERBOSE("No truth collection registered for "<<subdet);
+          continue;
+      }
+  
+      ++trackStat[subdet];
 
-          if (subdet != SubDetHitStatistics::NUM_SUBDETECTORS) {
-            // if PRD truth collection is missing, ignore subdet in track stat calculation as well.
-            if (orderedPRD_Truth[subdet]) {
+      using iprdt = PRD_MultiTruthCollection::const_iterator;
+      std::pair<iprdt, iprdt> range = orderedPRD_Truth[subdet]->equal_range(id);
 
-              ++trackStat[subdet];
-
-              using iprdt = PRD_MultiTruthCollection::const_iterator;
-              std::pair<iprdt, iprdt> range = orderedPRD_Truth[subdet]->equal_range(id);
-
-              int n=0;
-              // Loop over particles contributing to this cluster
-              for (iprdt i = range.first; i!= range.second; ++i) {
-                HepMC::ConstGenParticlePtr pa = (*i).second.cptr();
-                if (!pa) { continue; }
-
-                if (!i->second.isValid()) {
-                  ATH_MSG_WARNING("Unexpected invalid HepMcParticleLink in PRD_MultiTruthCollection");
-                }
-                else {
-                  pairStat[i->second].subDetHits[subdet].insert(id);
-                  ++n;
-                  ATH_MSG_VERBOSE("PRD-ID:"<<id<<" subdet:"<<subdet<<" number:"<<n<<" particle link:"<<i->second);
-                }
-              }
-              if (n == 0) {
-                ATH_MSG_VERBOSE("--> no link, noise ? PRD-ID:"<<id<<" subdet:"<<subdet);
-                // add id 0 to pairs, we like to keep track of fake fakes
-                unsigned int UID(HepMC::UNDEFINED_ID);
-                unsigned int EV(0);
-                pairStat[HepMcParticleLink(UID,EV,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID)].subDetHits[subdet].insert(id);
-              }
-            } // orderedPRD_Truth[] available
-          } // subdet type check, warning in findSubDetType()
+      int n=0;
+      // Loop over particles contributing to this cluster
+      for (iprdt i = range.first; i!= range.second; ++i) {
+        HepMC::ConstGenParticlePtr pa = (*i).second.cptr();
+        if (!pa) { 
+          continue; 
         }
-        else {
-          ATH_MSG_WARNING("Empty PrepRawData from RIO_OnTrack");
+
+        if (!i->second.isValid()) {
+          ATH_MSG_WARNING("Unexpected invalid HepMcParticleLink in PRD_MultiTruthCollection");
+          continue;
         }
-      } // if (riontrack)
+        pairStat[i->second].subDetHits[subdet].insert(id);
+        ++n;
+        ATH_MSG_VERBOSE("PRD-ID:"<<id<<" subdet:"<<subdet<<" number:"<<n<<" particle link:"<<i->second);
+      }
+      if (n == 0) {
+        ATH_MSG_VERBOSE("--> no link, noise ? PRD-ID:"<<id<<" subdet:"<<subdet);
+        // add id 0 to pairs, we like to keep track of fake fakes
+        unsigned int UID(HepMC::UNDEFINED_ID);
+        unsigned int EV(0);
+        pairStat[HepMcParticleLink(UID,EV,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID)].subDetHits[subdet].insert(id);
+      }
+       
     } // Loop over measurements
-
+    
     if (msgLvl(MSG::VERBOSE)) {
       msg(MSG::VERBOSE)<<"PRD truth particles = ";
       for (std::map<HepMcParticleLink,SubDetPRDs>::const_iterator i=pairStat.begin(); i!=pairStat.end(); ++i) {
@@ -293,6 +288,7 @@ namespace Trk {
       msg(MSG::VERBOSE)<<endmsg;
     }
 
+    ATH_MSG_VERBOSE("Construct the stat structures....");
     //----------------------------------------------------------------
     // The stat structures are ready.
     // Build truth trajectories for the track
@@ -315,7 +311,7 @@ namespace Trk {
         // Only valid HepMcParticleLink make it into seeds and then into sprouts, and
         // stored in the loop over sprouts below.
         // Store output for noise/no truth particles here.
-        output->insert(std::make_pair(track,
+        output->insert(std::make_pair(trackLink,
                                       DetailedTrackTruth(traj,
                                                          noiseStat,
                                                          trackStat,
@@ -326,19 +322,34 @@ namespace Trk {
     // Grow sprouts from the seeds
     using SproutMap = std::map<HepMcParticleLink, Sprout>;
     SproutMap sprouts;
-    while (!seeds.empty()) {
+    while (!seeds.empty() ) {
+      ATH_MSG_VERBOSE("Remaining seeds in set: "<<seeds.size());
       HepMcParticleLink link = *seeds.begin();
       Sprout current_sprout;
       std::queue<HepMC::ConstGenParticlePtr> tmp;
       ExtendedEventIndex eventIndex(link, proxy);
       HepMC::ConstGenParticlePtr current = link.cptr();
+      ATH_MSG_VERBOSE("Check link: "<<link);
+      const auto truthSuppressionStatus = link.getTruthSuppressionType();
 
-      do {
+    unsigned nAncestor{0};  
+    do {
         HepMcParticleLink curlink( eventIndex.makeLink(HepMC::uniqueID(current), proxy));
-
+        curlink.setTruthSuppressionType(truthSuppressionStatus);
+        //// Check that the current link can be erased from the set..
+        if (!nAncestor && !seeds.count(curlink)) {
+           ATH_MSG_WARNING("The first link should always point to the object itself.\nHowever "<<
+                            link<<"=="<<curlink<<"\n evaluates to " <<(curlink==link)<<", getTruthSuppressionType: "
+                          <<(curlink.getTruthSuppressionType() == link.getTruthSuppressionType())
+                          <<", id:"<<(curlink.id() == link.id())
+                          <<", eventIndex: "<<(curlink.eventIndex() == link.eventIndex()));
+          ATH_MSG_WARNING("Remove the link itself from the set");
+          seeds.erase(link);
+                            
+        }
         // remove the current particle from the list of particles to consider (if it is still there)
         seeds.erase(curlink);
-
+        
         // Have we worked on this particle before?
         SproutMap::iterator p_old = sprouts.find(curlink);
         if (p_old != sprouts.end()) {
@@ -363,7 +374,7 @@ namespace Trk {
         }
 
 
-      } while ( (current = m_truthTrajBuilder->getMother(current)) );
+      } while ( (current = m_truthTrajBuilder->getMother(current)) && ++nAncestor);
 
       // Add the grown sprout to the list
       sprouts.insert(std::make_pair(link, current_sprout));
@@ -403,7 +414,7 @@ namespace Trk {
       SubDetHitStatistics truthStat = countPRDsOnTruth(traj, inverseTruth);
 
       ATH_MSG_VERBOSE("addTrack(): sprout length = "<<traj.size());
-      output->insert(std::make_pair(track,
+      output->insert(std::make_pair(trackLink,
                                     DetailedTrackTruth(traj,
                                                        makeSubDetHitStatistics(s->second.stat),
                                                        trackStat,
@@ -414,7 +425,7 @@ namespace Trk {
     ATH_MSG_VERBOSE("addTrack(): #sprouts = "<<sprouts.size()<<", output->size() = "<<output->size());
   }
   //================================================================
-  void DetailedTrackTruthBuilder::makeTruthToRecMap( PRD_InverseTruth& result, const PRD_MultiTruthCollection& rec2truth) {
+  void DetailedTrackTruthBuilder::makeTruthToRecMap( PRD_InverseTruth& result, const PRD_MultiTruthCollection& rec2truth) const {
     // invert the map from Identifier (reco hit) to HepMcParticleLink,
     // to allow lookup of all Identifiers produced by a given HepMcParticleLink.
     // the result is only used in countPRDsOnTruth. since that code ignores
@@ -423,8 +434,15 @@ namespace Trk {
       // i.first = Identifier
       // i.second = HepMcParticleLink
       auto pa = i.second.cptr();
-      if ( !pa ) { continue; } // skip noise
-      if (  MC::isGeantino(pa) && HepMC::is_truth_suppressed_pileup(i.second) ) { continue; } // skip geantinos
+      if ( !pa ) {  // skip noise
+        continue; 
+      }
+      ATH_MSG_VERBOSE("Check geantino "<<MC::isGeantino(pa)<<", is_truth_suppressed_pileup:"
+                    <<HepMC::is_truth_suppressed_pileup(i.second));
+      
+      if ( MC::isGeantino(pa) && HepMC::is_truth_suppressed_pileup(i.second) ) { 
+        continue; 
+      } // skip geantinos
       result.insert(std::make_pair(i.second, i.first));
     }
   }
