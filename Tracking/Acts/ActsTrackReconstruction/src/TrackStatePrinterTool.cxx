@@ -342,20 +342,17 @@ namespace ActsTrk
   }
 
   void
-  TrackStatePrinterTool::printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
-							      const Acts::TrackingGeometry &tracking_geometry,
-							      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
-							      const xAOD::UncalibratedMeasurement *measurement,
-							      const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
-							      size_t offset) const
-  {
+  TrackStatePrinterTool::printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,                                                             
+                                                              const xAOD::UncalibratedMeasurement *measurement,
+                                                              const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
+                                                              size_t offset) const {
     if (!measurement)
       return;
 
     std::cout << std::setw(5) << (measurement->index() + offset) << ' '
               << std::setw(3) << measurement->numDimensions() << "D ";
 
-    const Acts::Surface *surface_ptr = ActsTrk::getSurfaceOfMeasurement( tracking_geometry, detectorElementToGeometryIdMap, *measurement);
+    const Acts::Surface *surface_ptr = m_surfAcc.get(measurement);
     if (!surface_ptr)
     {
       std::cout << std::setw(20 + 22 + 20 + 2) << "** no surface for measurement **";
@@ -430,13 +427,6 @@ namespace ActsTrk
   /// =========================================================================
   /// TrackStatePrinter class method definitions
   /// =========================================================================
-
-  TrackStatePrinterTool::TrackStatePrinterTool(const std::string &type,
-					       const std::string &name,
-					       const IInterface *parent)
-    : AthAlgTool(type, name, parent)
-  {}
-
   StatusCode TrackStatePrinterTool::initialize()
   {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
@@ -445,6 +435,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_printFilteredStates);
 
     ATH_CHECK(m_trackingGeometryTool.retrieve());
+    m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
     ATH_CHECK(m_spacePointKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -491,16 +482,9 @@ namespace ActsTrk
 
   void
   TrackStatePrinterTool::printMeasurements(const EventContext &ctx,
-					   const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
-					   const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
-					   const std::vector<size_t> &offsets) const
-  {
-    const Acts::TrackingGeometry *
-       acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
-    if (!acts_tracking_geometry) {
-       ATH_MSG_WARNING("No Acts tracking geometry.");
-       return;
-    }
+                                           const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,					  
+                                           const std::vector<size_t> &offsets) const {
+
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
     auto measToSp = addSpacePoints(ctx, clusterContainers, offsets);
@@ -512,12 +496,8 @@ namespace ActsTrk
     {
       for (const auto *measurement : *clusterContainers[icontainer])
       {
-         printMeasurementAssociatedSpacePoint(tgContext,
-                                              *acts_tracking_geometry,
-                                              detectorElementToGeometryIdMap,
-                                              measurement,
-                                              measToSp[icontainer],
-                                              offsets[icontainer]);
+         printMeasurementAssociatedSpacePoint(tgContext, measurement,
+                                              measToSp[icontainer], offsets[icontainer]);
       }
     }
     std::cout << std::flush;

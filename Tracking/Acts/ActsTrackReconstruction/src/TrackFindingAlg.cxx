@@ -307,7 +307,7 @@ namespace ActsTrk
     ATH_CHECK( propagateDetectorElementStatusToMeasurements(*(volumeIdToDetectorElementCollMap.cptr()), det_el_status_arr, measurements) );
 
     if (m_trackStatePrinter.isSet()) {
-      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, *detectorElementToGeometryIdMap, measurements.measurementOffsets());
+      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
     }
 
     detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);

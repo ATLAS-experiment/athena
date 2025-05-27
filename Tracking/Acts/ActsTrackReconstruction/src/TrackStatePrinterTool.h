@@ -29,7 +29,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
-
+#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
 // Other
 #include <vector>
 #include <memory>
@@ -46,19 +46,17 @@ namespace ActsTrk
   class TrackStatePrinterTool : virtual public AthAlgTool
   {
   public:
-    TrackStatePrinterTool(const std::string &type,
-			  const std::string &name,
-			  const IInterface *parent);
+   
+    using AthAlgTool::AthAlgTool;
     virtual ~TrackStatePrinterTool() = default;
 
     // standard Athena methods
     virtual StatusCode initialize() override;
 
-    void
-    printMeasurements(const EventContext &ctx,
-                      const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
-                      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
-                      const std::vector<size_t> &offsets) const;
+
+    void printMeasurements(const EventContext &ctx,
+                           const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
+                           const std::vector<size_t> &offsets) const;
 
     void
     printSeed(const Acts::GeometryContext &tgContext,
@@ -95,6 +93,8 @@ namespace ActsTrk
     // Tools
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 
+    detail::xAODUncalibMeasSurfAcc m_surfAcc{};
+
     // Configuration
     Gaudi::Property<bool> m_compareMeasurementTransforms{this, "compareMeasurementTransforms", false, "compare measurement coordinates transformed with Athena or ACTS"};
     Gaudi::Property<bool> m_printFilteredStates{this, "printFilteredStates", false, "print track states during filtering"};
@@ -109,13 +109,10 @@ namespace ActsTrk
                    const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
                    const std::vector<size_t> &offset) const;
 
-    void
-    printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
-                                         const Acts::TrackingGeometry &tracking_geometry,
-                                         const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
-                                         const xAOD::UncalibratedMeasurement *measurement,
-                                         const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
-                                         size_t offset) const;
+    void printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
+                                              const xAOD::UncalibratedMeasurement *measurement,
+                                              const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
+                                              size_t offset) const;
 
     // static member functions used by TrackStatePrinter.icc
     static void printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound);

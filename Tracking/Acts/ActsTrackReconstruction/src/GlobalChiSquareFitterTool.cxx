@@ -37,8 +37,6 @@
 #include "ActsInterop/Logger.h"
 
 #include "ActsCalibration/CalibrationContext.h"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
 // STL
 #include <vector>
 
@@ -80,12 +78,12 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
 
   /// Configure the fit extensions for Trk::MeasuremenBase pass through fits.
   {
-    m_calibrator = detail::TrkMeasurementCalibrator{};
+    m_trkMeasCalibrator = detail::TrkMeasurementCalibrator{};
     m_trkMeasSurfAcc = detail::TrkMeasSurfaceAccessor{m_ATLASConverterTool.get()};
 
     Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::TrkMeasurement)];
     configureMe = extensionTemplate;
-    configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&m_calibrator);
+    configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&m_trkMeasCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_trkMeasSurfAcc);
   }
   /// Configure the fit extensions for Trk::PrepRawData fits
@@ -95,6 +93,13 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
     Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::TrkPrepRawData)];
     configureMe.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<MutableTrackStateBackend>>(&m_prdCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&m_prdSurfaceAcc);
+  }
+  {
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+    /// Needs to be filled with live.
+    m_uncalibMeasCalibrator = detail::xAODUncalibMeasCalibrator{};
+    Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::xAODUnCalibMeas)];
+    configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
   }
   return StatusCode::SUCCESS;
 }
@@ -442,12 +447,11 @@ std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
   sourceLinks.reserve(6);
 
   
-  detail::xAODUncalibMeasSurfAcc surfAcc{actsTrackingGeometry, &detectorElementToGeometryIdMap};
   for (const xAOD::SpacePoint* sp : seed.sp()) {
     sourceLinks.insert(sourceLinks.end(), sp->measurements().begin(), sp->measurements().end());
   }
   return fit(ctx, sourceLinks, initialParams, tgContext, mfContext, calContext,
-             detectorElementToGeometryIdMap, surfAcc.get(sourceLinks.front()));
+             detectorElementToGeometryIdMap, m_unalibMeasSurfAcc.get(sourceLinks.front()));
 }
 
 

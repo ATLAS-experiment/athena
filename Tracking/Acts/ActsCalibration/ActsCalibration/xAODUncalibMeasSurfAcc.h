@@ -8,8 +8,11 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
+#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
+namespace ActsTrk {
+    class DetectorElementToActsGeometryIdMap;
+}
 namespace ActsTrk::detail{
     /** @brief Helper class to access the Acts::surface associated with an Uncalibrated xAOD measurement.
      *         In the ID domain, the Acts identifier of the uncalibrated measurement is looked-up in the
@@ -20,12 +23,11 @@ namespace ActsTrk::detail{
         public:
             /** @brief Empty default constructor -> conversion will crash for ID measurements */
             xAODUncalibMeasSurfAcc() = default;
-            /** @brief Constructor taking the pointer to the tracking geometry & the 
-             *         Acts surface identifier look-up to fetch ID surfaces.
-             *  @param trackGeom: Pointer to the Acts tracking geometry
-             *  @param assocMap: Detector element look-up map. */
-            xAODUncalibMeasSurfAcc(const Acts::TrackingGeometry* trackGeom,
-                                   const DetectorElementToActsGeometryIdMap* assocMap);
+            /** @brief Constructor taking the pointer to the Tracking geometry tool. 
+             *         The tracking geometry and the surface association map are directly retrieved
+             *         from the tool. 
+             *  @param trackGeoTool: Pointer to the tracking geometry tool*/
+            xAODUncalibMeasSurfAcc(const IActsTrackingGeometryTool* trackGeoTool);
             /** @brief Operator called by the Acts API to fetch the surface. */
             const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
             /** @brief Operator */

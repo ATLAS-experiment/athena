@@ -3,15 +3,14 @@
 */
 #include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
 #include "ActsCalibration/xAODUncalibMeasCalibrator.h"
-
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 
 namespace ActsTrk::detail{
-    xAODUncalibMeasSurfAcc::xAODUncalibMeasSurfAcc(const Acts::TrackingGeometry* trackGeom,
-                                                   const DetectorElementToActsGeometryIdMap* assocMap):
-        m_actsTrackingGeometry{trackGeom},
-        m_detectorElementToGeometryIdMap{assocMap} {}
+    xAODUncalibMeasSurfAcc::xAODUncalibMeasSurfAcc(const IActsTrackingGeometryTool* trackGeoTool):
+        m_actsTrackingGeometry{trackGeoTool->trackingGeometry().get()},
+        m_detectorElementToGeometryIdMap{trackGeoTool->surfaceIdMap()}{}
            
     const Acts::Surface* xAODUncalibMeasSurfAcc::operator()(const Acts::SourceLink& sourceLink) const {
         return get(xAODUncalibMeasCalibrator::unpack(sourceLink));
@@ -22,8 +21,16 @@ namespace ActsTrk::detail{
             /** ID measurements use the tracking geometry surface id look up to fetch the surface */
             case PixelClusterType:
             case StripClusterType:
-            case HGTDClusterType:
-                return getSurfaceOfMeasurement(*m_actsTrackingGeometry,*m_detectorElementToGeometryIdMap, *meas);
+            case HGTDClusterType:{
+                assert(m_detectorElementToGeometryIdMap);
+                assert(m_actsTrackingGeometry);
+                const auto geoKey = makeDetectorElementKey(meas->type(), meas->identifierHash());
+                const auto geoid_iter = m_detectorElementToGeometryIdMap->find(geoKey);
+                if (geoid_iter == m_detectorElementToGeometryIdMap->end()) {
+                    return nullptr;
+                }
+                return m_actsTrackingGeometry->findSurface( DetectorElementToActsGeometryIdMap::getValue(*geoid_iter));
+            }
             /** Muon measurements have a direct link to the readout geometry -> surface */
             case MdtDriftCircleType:
             case RpcStripType:
