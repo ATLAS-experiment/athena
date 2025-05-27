@@ -16,7 +16,7 @@ def mongroupsCfg(moniAccess, data_type):
         monitoringTP_electron = list(filter(lambda x: ('L1eEM28' not in x), shifter_tp))
         
         monitoring_ph = list(filter(lambda x: ('HLT_g' in x and 'noringer' not in x), shifter_eg))
-        monitoring_photon = monitoring_ph + ['HLT_g140_loose_noringer_L1eEM26M']
+        monitoring_photon = monitoring_ph + ['HLT_g140_loose_L1eEM26M','HLT_g140_loose_noringer_L1eEM26M']
         monitoring_bootstrap = {
                 'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
                 'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
