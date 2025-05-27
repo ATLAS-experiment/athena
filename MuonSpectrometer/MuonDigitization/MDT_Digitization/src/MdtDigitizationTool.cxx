@@ -404,12 +404,12 @@ bool MdtDigitizationTool::handleMDTSimHit(const EventContext& ctx,
     double qgamma = -9999.;
 
     if (m_DoQballCharge) {
-      // chargeCalculator returns the value of electric charge for multicharged particle.
-      // particleGamma returns the value of gamma for multicharged particle.
+      // BSM particles need to be treated specially in digitization because in the default simulation the particle gamma and charge are set to the SM muon values
+      // For heavy or multi-charged BSM particles the qgamma and QE are required as inputs to obtain the correct MDT ADC counts
       const HepMcParticleLink trkParticle = HepMcParticleLink::getRedirectedLink(hit.particleLink(),phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
       HepMC::ConstGenParticlePtr genParticle = trkParticle.cptr();
       if (genParticle) {
-        if ( MC::isGenericMultichargedParticle(genParticle) ) {
+        if ( MC::isBSM(genParticle) ) { 
           const double QE = genParticle->momentum().e();
           const double QM2 = genParticle->momentum().m2();
           if (QM2 >= 0.) {
@@ -426,6 +426,7 @@ bool MdtDigitizationTool::handleMDTSimHit(const EventContext& ctx,
     //-Implementation for RT_Relation_DB_Tool
 
     // simulate tube response, check if tube fired
+
     if (digiOutput.wasEfficient()) {
         double driftTime = digiOutput.driftTime();
         double adc = digiOutput.adc();
