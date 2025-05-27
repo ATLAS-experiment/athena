@@ -89,17 +89,17 @@ struct Cache
     ~Cache();
     Cache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
 
-    const Trk::TrackingGeometry *trackingGeometry( const Trk::INavigator &navigator, const EventContext &ctx) {
-       if (!m_trackingGeometry) {
-          m_trackingGeometry = navigator.trackingGeometry(ctx);
-       }
-       return m_trackingGeometry;
+    void setTrackingGeometry(const Trk::INavigator& navigator,
+                             const EventContext& ctx) {
+      if (!m_trackingGeometry) {
+        m_trackingGeometry = navigator.trackingGeometry(ctx);
+      }
     }
 
-    const Trk::TrackingVolume
-    *volume(const EventContext&, const Amg::Vector3D& gp) const {
-       assert(m_trackingGeometry);
-       return m_trackingGeometry->lowestTrackingVolume(gp);
+    const Trk::TrackingVolume* volume(const EventContext&,
+                                      const Amg::Vector3D& gp) const {
+      assert(m_trackingGeometry);
+      return m_trackingGeometry->lowestTrackingVolume(gp);
     }
 
     /** Get the IMaterialEffectsUpdator::ICache  for the MaterialEffectsUpdator*/
