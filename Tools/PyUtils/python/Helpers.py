@@ -15,13 +15,12 @@ from tempfile import NamedTemporaryFile
 # is used during the build (see athena!62739).
 # !!!
 
-def ROOT6Setup(batch=False):
+def ROOTSetup(batch=False):
    """
    At this point this function just makes sure the ROOT batch mode is set
    correctly when someone imports ROOT
    """
    from AthenaCommon.Logging import log
-   log.info('executing ROOT6Setup')
    import builtins as builtin_mod
    oldimporthook = builtin_mod.__import__
    batch_mode = bool(batch)

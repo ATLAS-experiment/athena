@@ -143,6 +143,7 @@ PP="$PP"'|MessageSvc not found, will use std::cerr'
 PP="$PP"'|^AtRndmGenSvc         INFO Initializing AtRndmGenSvc'
 PP="$PP"'|^AtRanluxGenSvc2      INFO Initializing AtRanluxGenSvc2'
 PP="$PP"'|^AtRanluxGenSvc       INFO Initializing AtRanluxGenSvc'
+PP="$PP"'|^Py:Athena            INFO executing ROOT6Setup'
 #ignore personal .athenarc files
 PP="$PP"'|including file "\$HOME/.athenarc'
 #ignore known gaudi python warning
