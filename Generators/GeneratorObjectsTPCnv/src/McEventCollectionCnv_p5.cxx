@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p5.cxx
@@ -136,7 +136,7 @@ void McEventCollectionCnv_p5::persToTrans( const McEventCollection_p5* persObj,
          hIon[2],                  // event_plane_angle
          hIon[1],                  // eccentricity
          hIon[0]         );         // sigma_inel_NN
-      genEvt->set_heavy_ion(hi);
+      genEvt->set_heavy_ion(std::move(hi));
     }
 
 
@@ -155,7 +155,7 @@ void McEventCollectionCnv_p5::persToTrans( const McEventCollection_p5* persObj,
               pdf[0],                   // pdf2
               static_cast<int>(pdf[6]), // pdf_id1
               static_cast<int>(pdf[5]));// pdf_id2
-      genEvt->set_pdf_info(pi);
+      genEvt->set_pdf_info(std::move(pi));
     }
     transObj->push_back( genEvt );
 
@@ -171,7 +171,7 @@ void McEventCollectionCnv_p5::persToTrans( const McEventCollection_p5* persObj,
     const unsigned int endVtx = persEvt.m_verticesEnd;
     for ( unsigned int iVtx = persEvt.m_verticesBegin; iVtx != endVtx; ++iVtx ) {
        auto vtx = createGenVertex( *persObj, persObj->m_genVertices[iVtx], partToEndVtx, datapools, genEvt );
-       brc_to_vertex[persObj->m_genVertices[iVtx].m_barcode] = vtx;
+       brc_to_vertex[persObj->m_genVertices[iVtx].m_barcode] = std::move(vtx);
     } //> end loop over vertices
 
     // set the signal process vertex
