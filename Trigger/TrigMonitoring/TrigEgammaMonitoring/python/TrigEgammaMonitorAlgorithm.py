@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigEgammaMonitorAlgorithm.py
@@ -44,10 +44,6 @@ def TrigEgammaMonConfig(inputFlags, emulator=None, onlyHLT = False):
 
 
 if __name__=='__main__':
-
-    # ATR-11839 to fix the egammaPid import
-    from PyUtils.Helpers import ROOT6Setup
-    ROOT6Setup()
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
