@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -16,6 +16,7 @@
 #include "VP1Base/VP1QtInventorUtils.h"
 #include "VP1Base/VP1ExaminerViewer.h"
 #include "VP1Base/VP1Msg.h"
+#include "CxxUtils/byteswap.h"
 
 #include "Inventor/nodes/SoMaterial.h"
 #include <Inventor/nodes/SoPerspectiveCamera.h>
@@ -117,31 +118,11 @@ public:
 		int *rowSize;
 	} ImageRec;
 
-	static void ConvertShort(unsigned short *array, long length)
-	{
-		unsigned b1, b2;
-		unsigned char *ptr;
-
-		ptr = (unsigned char *)array;
-		while (length--) {
-			b1 = *ptr++;
-			b2 = *ptr++;
-			*array++ = (b1 << 8) | (b2);
-		}
-	}
-
 	static void ConvertLong(unsigned *array, long length)
 	{
-		unsigned b1, b2, b3, b4;
-		unsigned char *ptr;
-
-		ptr = (unsigned char *)array;
 		while (length--) {
-			b1 = *ptr++;
-			b2 = *ptr++;
-			b3 = *ptr++;
-			b4 = *ptr++;
-			*array++ = (b1 << 24) | (b2 << 16) | (b3 << 8) | (b4);
+			*array = CxxUtils::byteswap (*array);
+			++array;
 		}
 	}
 
@@ -182,7 +163,12 @@ public:
         } **/
 
 		if (swapFlag) {
-			ConvertShort(&image->imagic, 6);
+			image->imagic = CxxUtils::byteswap (image->imagic);
+			image->type   = CxxUtils::byteswap (image->type);
+			image->dim    = CxxUtils::byteswap (image->dim);
+			image->xsize  = CxxUtils::byteswap (image->zsize);
+			image->ysize  = CxxUtils::byteswap (image->ysize);
+			image->zsize  = CxxUtils::byteswap (image->zsize);
 		}
 
         
