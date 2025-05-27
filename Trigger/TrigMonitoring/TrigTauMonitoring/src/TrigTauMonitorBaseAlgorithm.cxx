@@ -19,6 +19,8 @@ StatusCode TrigTauMonitorBaseAlgorithm::initialize() {
     ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
     ATH_CHECK( m_offlineTauJetKey.initialize() );
+    m_offlineGNTauDecorKey = m_offlineTauJetKey.key() + "." + m_offlineGNTauDecorKey.key();
+    ATH_CHECK( m_offlineGNTauDecorKey.initialize() );
 
     if(m_L1_select_by_et_only) ATH_MSG_INFO("L1 RoI selection by Et cut only! No isolated L1 tau items are allowed!");
     ATH_CHECK( m_phase1l1eTauRoIKey.initialize() );
@@ -273,14 +275,21 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(co
 {
     std::vector<const xAOD::TauJet*> tau_vec;
 
+    SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauDecorKey, Gaudi::Hive::currentContext()};
+    if(!tauid_medium.isValid()) {
+      ATH_MSG_WARNING("Cannot retrieve " << tauid_medium.key());
+      return tau_vec;
+    }
+
     for(const xAOD::TauJet* tau : taus) {
         if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
 
-        // Consider only offline taus which pass RNN medium WP 
-        if(tau_id == TauID::RNN && !tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
+        // Consider only offline taus which pass medium ID WP
+        if(tau_id == TauID::RNN) {
+	  if(!tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
+	}
         else if(tau_id == TauID::GNTau) {
-            static const SG::ConstAccessor<char> tauid_medium("GNTauM_v0prune");
-            if(!tauid_medium(*tau)) continue;
+	  if(!tauid_medium(*tau)) continue;
         }
 
         tau_vec.push_back(tau);
