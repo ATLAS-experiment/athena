@@ -15,6 +15,7 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 export TRF_ECHO=1;
 ATHENA_CORE_NUMBER=${NTHREADS} FastChain_tf.py \
    --CA \
+   --perfmon 'fullmonmt' \
    --steering 'doFCtoDAOD' 'doRDO_TRIG' 'doTRIGtoALL' \
    --simulator ATLFAST3F_G4MS \
    --physicsList FTFP_BERT_ATL \
