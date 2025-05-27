@@ -159,9 +159,11 @@ def MuonReconstructionCfg(flags):
     # It's probably better to have as part of TrackBuilding, or Segment building...
     if flags.Input.isMC:
         # filter TrackRecordCollection (true particles in muon spectrometer)
-        if "MuonEntryLayerFilter" not in flags.Input.Collections:
+        if "MuonEntryLayerFilter" not in flags.Input.Collections and \
+            ("MuonEntryLayer" in flags.Input.Collections):
             result.addEventAlgo(CompFactory.TrackRecordFilter())
-        if "MuonExitLayerFilter" not in flags.Input.Collections:
+        if "MuonExitLayerFilter" not in flags.Input.Collections and \
+            ("MuonExitLayer" in flags.Input.Collections):
             result.addEventAlgo(CompFactory.TrackRecordFilter("TrackRecordFilterMuonExitLayer",
                                                               inputName="MuonExitLayer",
                                                               outputName="MuonExitLayerFilter"))
