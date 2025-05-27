@@ -2170,11 +2170,10 @@ class ItemDef:
             MenuItem('L1_DPHI-2eEM9_VTE50').setLogic( d.eEM9.x(2) & d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE50) & physcond).setTriggerType(TT.calo)
             MenuItem('L1_BTAG-MU3VjJ40').setLogic( d.TOPO_0DR04_MU3Vab_CjJ40ab & physcond)
             MenuItem('L1_BTAG-MU5VFjJ80').setLogic( d.TOPO_0DR04_MU5VFab_CjJ80ab & physcond)
-            MenuItem('L1_BTAG-MU5VFjJ90').setLogic( d.TOPO_0DR04_MU5VFab_CjJ90ab & physcond)
             MenuItem('L1_BTAG-MU5VFjJ40_2jJ40p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ40ab & d.jJ400ETA25.x(2) & physcond)
-            MenuItem('L1_BTAG-MU8FjJ40_2jJ40p0ETA25').setLogic(  d.TOPO_0DR04_MU8Fab_CjJ40ab  & d.jJ400ETA25.x(2) & physcond)
-            MenuItem('L1_BTAG-MU8FjJ30_2jJ30p0ETA25').setLogic(  d.TOPO_0DR04_MU8Fab_CjJ30ab  & d.jJ300ETA25.x(2) & physcond)
-            MenuItem('L1_BTAG-MU8FjJ30_2jJ30p0ETA25_jJ50p0ETA25').setLogic(  d.TOPO_0DR04_MU8Fab_CjJ30ab  & d.jJ300ETA25.x(2) & d.jJ500ETA25 & physcond)
+            MenuItem('L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25').setLogic(  d.TOPO_0DR04_MU5VFab_CjJ20ab  & d.jJ400ETA25.x(2) & d.jJ500ETA25 & physcond)
+            MenuItem('L1_BTAG-MU5VFjJ20_2jJ40p0ETA25').setLogic(  d.TOPO_0DR04_MU5VFab_CjJ20ab  & d.jJ400ETA25.x(2) & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ20_2jJ40p0ETA25').setLogic(  d.TOPO_0DR04_MU3VFab_CjJ20ab  & d.jJ400ETA25.x(2) & physcond)
             MenuItem('L1_BPH-8M15-2MU3V-BO'    ).setLogic( d.TOPO_8INVM15_2CMU3Vab & physcond)           # 96% for Upsi
             #ATR-29784
             MenuItem('L1_DPHI-2eEM1').setLogic( d.TOPO_23DPHI32_2eEM1s & physcond)
