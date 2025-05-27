@@ -96,10 +96,17 @@ def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
     kwargs.setdefault("StoreTRT", flags.Tracking.writeExtendedTRT_PRDInfo)
     kwargs.setdefault("AddExtraEventInfo", flags.Beam.Type is BeamType.Cosmics)
 
-    if kwargs["StoreTRT"] and "TRT_ToT_dEdx" not in kwargs:
-        from InDetConfig.TRT_ElectronPidToolsConfig import TRT_dEdxToolCfg
-        kwargs.setdefault("TRT_ToT_dEdx", acc.popToolsAndMerge(
-            TRT_dEdxToolCfg(flags)))
+    if kwargs["StoreTRT"]:
+        if "TRT_ToT_dEdx" not in kwargs:
+            from InDetConfig.TRT_ElectronPidToolsConfig import TRT_dEdxToolCfg
+            kwargs.setdefault("TRT_ToT_dEdx", acc.popToolsAndMerge(
+                TRT_dEdxToolCfg(flags)))
+
+        if "TRT_CalDbTool" not in kwargs:
+            from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+                TRT_CalDbToolCfg)
+            kwargs.setdefault("TRT_CalDbTool", acc.popToolsAndMerge(
+                TRT_CalDbToolCfg(flags)))
 
     kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapMerge_CombinedInDetTracks")
 
