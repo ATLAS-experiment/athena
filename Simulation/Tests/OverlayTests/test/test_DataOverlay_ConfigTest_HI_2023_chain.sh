@@ -77,7 +77,7 @@ if command -v art.py >/dev/null 2>&1; then
     if [ $rc1 -eq 0 ]; then
         ArtPackage=$1
         ArtJobName=$2
-        art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --order-trees --file "*HITS*.pool.root *RDO*.pool.root"
+        art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --order-trees --file=dataOverlay.HITS.pool.root --file=dataOverlay.RDO.pool.root
         rc3=$?
         status=$rc3
     fi
