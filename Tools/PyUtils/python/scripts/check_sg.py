@@ -57,8 +57,6 @@ def main(args):
             print ("%40s%s%-40s" % ("Container type", " | ","StoreGate keys"))
             print ("%40s%s%-40s" % ("-"*40, "-+-", "-"*(40-3)))
             for name, sgkeys in sorted(item_list.items()):
-                # decode b-strings to strings
-                sgkeys = [(k.decode("utf-8") if not isinstance(k, str) else k) for k in sgkeys]
                 print ("%40s%s%-40s" % (name, " | ", ', '.join(sorted(sgkeys))))
             print ("="*80)
             if args.output:

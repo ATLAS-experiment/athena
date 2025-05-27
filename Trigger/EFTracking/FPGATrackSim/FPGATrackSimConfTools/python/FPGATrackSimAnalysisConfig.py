@@ -24,11 +24,12 @@ def FPGATrackSimWriteOutputCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutput")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
+    FPGATrackSimWriteOutput.OutputTreeName = FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimLogicalEventTree")
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
     FPGATrackSimWriteOutput.THistSvc = CompFactory.THistSvc()
-    result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
+    result.setPrivateTools(FPGATrackSimWriteOutput)
     return result
 
 def FPGATrackSimSlicingEngineCfg(flags,name="FPGATrackSimSlicingEngineTool"):
@@ -430,6 +431,7 @@ def FPGATrackSimHoughRootOutputToolCfg(flags,name="FPGATrackSimHoughRootOutputTo
     HoughRootOutputTool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     HoughRootOutputTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     HoughRootOutputTool.THistSvc = CompFactory.THistSvc()
+    HoughRootOutputTool.OutputRegion = str(flags.Trigger.FPGATrackSim.region)
     result.setPrivateTools(HoughRootOutputTool)
     return result
 
@@ -591,7 +593,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.LRTRoadFinder = result.getPrimaryAndMerge(LRTRoadFinderCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.NNTrackTool = result.getPrimaryAndMerge(NNTrackToolCfg(flags))
 
-    theFPGATrackSimLogicalHitsProcessAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimWriteOutputCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.OutputTool = result.popToolsAndMerge(FPGATrackSimWriteOutputCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.TrackFitter_1st = result.getPrimaryAndMerge(FPGATrackSimTrackFitterToolCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.OverlapRemoval_1st = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
 

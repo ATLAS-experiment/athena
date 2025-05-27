@@ -7,15 +7,13 @@
 //     begin                : 18 02 2021
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <math.h>
+
 #include "L1CaloFEXSim/jFEXtauAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "PathResolver/PathResolver.h"
-
+#include <fstream>
+#include <sstream>
 namespace LVL1{
 
 //Default Constructor
@@ -237,15 +235,11 @@ StatusCode LVL1::jFEXtauAlgo::ReadfromFile(const std::string & fileName, std::un
             ATH_MSG_ERROR("Unexpected number of elemennts (<1 expected) in file: "<< fileName);
             return StatusCode::FAILURE;
         }
-        
         //Central TiggerTower
         unsigned int TTID = elements.at(0);
-        
         // rest of TTs that need to be check 
         elements.erase(elements.begin());
-        
-        fillingMap[TTID] = elements;
-        
+        fillingMap[TTID] = std::move(elements);
     }
     myfile.close();
 

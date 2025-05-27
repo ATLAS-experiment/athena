@@ -10,7 +10,7 @@
 #define TRKEXTOOLS_EXTRAPOLATOR_H
 
 #include "LocalExtrapolatorCache.h" //for Trk::Cache
-#include "ObjContainer.h"
+#include "ExtrUniquePtrHolder.h"
 
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkExInterfaces/IMaterialEffectsUpdator.h" // in tool handle array
@@ -58,13 +58,9 @@ class AlignableTrackingVolume;
 class ExtrapolationCache;
 class TrackingVolume;
 
-typedef std::vector<std::unique_ptr<Trk::TrackParameters>> TrackParametersUVector;
-typedef std::pair<const Surface*, BoundaryCheck> DestSurf;
 
-using TrackParmContainer = ObjContainer<Trk::TrackParameters>;
-using TrackParmPtr = ObjRef;
-using ManagedTrackParmPtr = ObjPtr<Trk::TrackParameters>;
-
+using TrackParametersUVector = std::vector<std::unique_ptr<Trk::TrackParameters>>;
+using DestSurf = std::pair<const Surface*, BoundaryCheck>;
 
 /**
 @class Extrapolator
@@ -218,8 +214,7 @@ public:
    * Employs the STEP_propagator, used to create ParticleCaloExtensions
    * mainly for muons and Particle Flow.
    */
-  virtual std::unique_ptr<
-      std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
+  virtual std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
   collectIntersections(
     const EventContext& ctx,
     const Trk::TrackParameters& parm,
@@ -254,11 +249,11 @@ private:
   /**
    * Actual heavy lifting implementation for  extrapolate
    */
-  ManagedTrackParmPtr extrapolateImpl(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateImpl(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Surface& sf,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true,
@@ -286,11 +281,11 @@ private:
    * corresponding MaterialEffectsOnTrack -Final boolean only relevant if
    * LandauMode = true for the configured MaterialEffectsUpdator
    */
-  ManagedTrackParmPtr extrapolateImpl(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateImpl(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const std::vector<MaterialEffectsOnTrack>& sfMeff,
     const TrackingVolume& tvol,
     PropDirection dir,
@@ -299,10 +294,10 @@ private:
 
   /** Actual heavy lifting implementation for extrapolate
   */
-  virtual ManagedTrackParmPtr extrapolateImpl(
+  virtual Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateImpl(
     const EventContext& ctx,
     Cache& cache,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Surface& sf,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true,
@@ -327,7 +322,7 @@ private:
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true,
     ParticleHypothesis particle = pion,
@@ -382,10 +377,10 @@ private:
     - A) insideVolumeStaticLayers() for a TrackingVolume with static layers
     - C) insideVolumeDetachedVolumes() for a TrackingVolume with detached inner Volumes
     */
-  ManagedTrackParmPtr extrapolateInsideVolume(const EventContext& ctx,
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateInsideVolume(const EventContext& ctx,
                                               Cache& cache,
                                               const IPropagator& prop,
-                                              TrackParmPtr parm,
+                                              Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
                                               const Surface& sf,
                                               const Layer* associatedLayer,
                                               const TrackingVolume& tvol,
@@ -397,11 +392,11 @@ private:
   /** A) call from extrapolateInsideVolume or toBoundary,
     if it is to boundary, the return parameters are the parameters at the boundary
     */
-  ManagedTrackParmPtr insideVolumeStaticLayers(const EventContext& ctx,
+  Trk::CacheOwnedPtr<Trk::TrackParameters> insideVolumeStaticLayers(const EventContext& ctx,
                                                Cache& cache,
                                                bool toBoundary,
                                                const IPropagator& prop,
-                                               TrackParmPtr parm,
+                                               Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
                                                const Layer* associatedLayer,
                                                const TrackingVolume& tvol,
                                                PropDirection dir = anyDirection,
@@ -410,11 +405,11 @@ private:
                                                MaterialUpdateMode matupmode = addNoise) const;
 
   /** C) call from extrapolateInsideVolume */
-  ManagedTrackParmPtr extrapolateWithinDetachedVolumes(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateWithinDetachedVolumes(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Surface& sf,
     const TrackingVolume& tvol,
     PropDirection dir = anyDirection,
@@ -422,11 +417,11 @@ private:
     ParticleHypothesis particle = pion,
     MaterialUpdateMode matupmode = addNoise) const;
 
-  ManagedTrackParmPtr extrapolateToNextMaterialLayer(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateToNextMaterialLayer(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Trk::Surface* destSurf,
     const Trk::TrackingVolume* vol,
     PropDirection dir,
@@ -434,20 +429,20 @@ private:
     ParticleHypothesis particle = pion,
     MaterialUpdateMode matupmode = addNoise) const;
 
-  ManagedTrackParmPtr extrapolateInAlignableTV(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateInAlignableTV(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Trk::Surface* destSurf,
     const Trk::AlignableTrackingVolume* vol,
     PropDirection dir,
     ParticleHypothesis particle = pion) const;
 
-  ManagedTrackParmPtr extrapolateToVolumeWithPathLimit(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateToVolumeWithPathLimit(
     const EventContext& ctx,
     Cache& cache,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     double pathLim,
     Trk::PropDirection dir,
     Trk::ParticleHypothesis particle,
@@ -471,7 +466,7 @@ private:
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Layer* associatedLayer,
     const TrackingVolume& tvol,
     PropDirection dir = anyDirection,
@@ -481,15 +476,15 @@ private:
 
   /** Private method to step from one to the last
     layer and stop at last layer (before 0) or before destination layer */
-  ManagedTrackParmPtr extrapolateFromLayerToLayer(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateFromLayerToLayer(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const TrackingVolume& tvol,
     const Layer* nextLayer,
     const Layer* destinationLayer,
-    TrackParmPtr navParameters,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> navParameters,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true,
     ParticleHypothesis particle = pion,
@@ -497,11 +492,11 @@ private:
 
   /** Private to extrapolate to the destination layer + surface
    */
-  ManagedTrackParmPtr extrapolateToDestinationLayer(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateToDestinationLayer(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Surface& sf,
     const Layer& lay,
     const TrackingVolume& tvol,
@@ -515,11 +510,11 @@ private:
    * @return valid track parameters or nullptr, as first element and in case of nullptr as second
    * element true to indicate to kill the loop from material update(?)
    */
-  std::pair<ManagedTrackParmPtr, bool> extrapolateToIntermediateLayer(
+  std::pair<Trk::CacheOwnedPtr<Trk::TrackParameters>, bool> extrapolateToIntermediateLayer(
     const EventContext& ctx,
     Cache& cache,
     const IPropagator& prop,
-    TrackParmPtr parm,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
     const Layer& lay,
     const TrackingVolume& tvol,
     PropDirection dir = anyDirection,
@@ -532,8 +527,8 @@ private:
   void overlapSearch(const EventContext& ctx,
                      Cache& cache,
                      const IPropagator& prop,
-                     TrackParmPtr parm,
-                     TrackParmPtr parsOnLayer,
+                     Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
+                     Trk::CacheOwnedPtr<Trk::TrackParameters> parsOnLayer,
                      const Layer& lay,
                      const TrackingVolume& tvol,
                      PropDirection dir = anyDirection,
@@ -551,11 +546,11 @@ private:
     const EventContext& ctx,
     Cache& cache,
     const Trk::IPropagator& prop,
-    TrackParmPtr startPars,
+    Trk::CacheOwnedPtr<Trk::TrackParameters> startPars,
     const Trk::Surface& destSurface,
     Trk::PropDirection dir,
     ParticleHypothesis particle,
-    ManagedTrackParmPtr& referenceParameters,
+    Trk::CacheOwnedPtr<Trk::TrackParameters>& referenceParameters,
     const Trk::Layer*& associatedLayer,
     const Trk::TrackingVolume*& associatedVolume,
     const Trk::TrackingVolume*& destinationVolume) const;
@@ -578,11 +573,6 @@ private:
   /** Access the subPropagator to the given volume*/
   const IMaterialEffectsUpdator* subMaterialEffectsUpdator(const TrackingVolume& tvol) const;
 
-
-  /** Private method to return from extrapolate() main method,
-      cleans up, calls model action or validation action, empties garbage bin and leaves */
-  const Trk::TrackParameters* returnResult(Cache& cache, const Trk::TrackParameters* result) const;
-
   /** For the output - global position */
   std::string positionOutput(const Amg::Vector3D& pos) const;
 
@@ -590,7 +580,7 @@ private:
   void addMaterialEffectsOnTrack(const EventContext& ctx,
                                  Cache& cache,
                                  const Trk::IPropagator& prop,
-                                 TrackParmPtr parm,
+                                 Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
                                  const Trk::Layer& lay,
                                  const Trk::TrackingVolume& vol,
                                  Trk::PropDirection propDir,
@@ -641,81 +631,93 @@ private:
 
   // ---------------- For Extrapolator configuration ------------ //
 
-  std::vector<std::string> m_propNames;  //!<  configuration of subPropagators
-  std::vector<std::string> m_updatNames; //!<  configuration of subupdaters
+  StringArrayProperty m_propNames{this, "SubPropagators", {},
+    "configuration of subPropagators"};
+  StringArrayProperty m_updatNames{this, "SubMEUpdators", {},
+    "configuration of subupdaters"};
 
   // --------------- General steering & Navigation -------------- //
 
-  bool m_includeMaterialEffects;        //!< boolean to switch on/off material effects
-  bool m_requireMaterialDestinationHit; //!< require the destination surface hit for material
-                                        //!< collection
-  bool m_stopWithNavigationBreak;       //!< return 0 if navigation breaks - for validation reasons
-  bool m_stopWithUpdateZero;            //!< return 0 if update kills the trajectory
-  bool m_subSurfaceLevel;               //!< tep down to sub-surface level
-  bool m_skipInitialLayerUpdate; //!< skip the initial post-Update at the layer [Fatras conversion
-                                 //!< mode]
-  bool m_extendedLayerSearch;    //!< extended layer search
-  bool m_robustSampling;
-  bool m_referenceMaterial; //!< use the reference material for the update
-  bool m_resolveActive;
-  bool m_resolveMultilayers;
-  bool m_cacheLastMatLayer; //!< steering of the material layer cache
-  bool m_returnPassiveLayers;
-  unsigned int m_meotpIndex; //!< if several meotps are available in a volume steer which one to use
+  BooleanProperty m_includeMaterialEffects{this, "ApplyMaterialEffects", true,
+    "boolean to switch on/off material effects"};
+  BooleanProperty m_requireMaterialDestinationHit
+    {this, "RequireMaterialDestinationHit", false,
+     "require the destination surface hit for material collection"};
+  BooleanProperty m_stopWithNavigationBreak
+    {this, "StopWithNavigationBreak", false,
+     "return 0 if navigation breaks - for validation reasons"};
+  BooleanProperty m_stopWithUpdateZero{this, "StopWithUpdateKill", false,
+    "return 0 if update kills the trajectory"};
+  BooleanProperty m_skipInitialLayerUpdate{this, "SkipInitialPostUpdate", false,
+    "skip the initial post-Update at the layer [Fatras conversion mode]"};
+  BooleanProperty m_extendedLayerSearch{this, "ExtendedLayerSearch", true,
+    "extended layer search"};
+  BooleanProperty m_resolveActive{this, "ResolveMuonStation", false};
+  BooleanProperty m_resolveMultilayers{this, "ResolveMultilayers", true};
+  BooleanProperty m_cacheLastMatLayer{this, "CacheLastMaterialLayer", false,
+    "steering of the material layer cache"};
   //!< number of sub valid propagators in the m_subPropagators array
   //if we have no valid subpropagatos it will be set to an INVALID value
   unsigned int m_numOfValidPropagators;
-  unsigned int m_initialLayerAttempts; //!< allowed layer intersection attempts at the start of a volume
-  unsigned int m_successiveLayerAttempts; //!< layer intersection attemps after one layer has been
-                                          //!< hit sucessfully
-  unsigned int m_maxMethodSequence;
-  double m_tolerance; //!< surfacen & volume tolerance
+  UnsignedIntegerProperty m_initialLayerAttempts
+    {this, "InitialLayerAttempts", 3,
+    "allowed layer intersection attempts at the start of a volume"};
+  UnsignedIntegerProperty m_successiveLayerAttempts
+    {this, "SuccessiveLayerAttempts", 1,
+    "layer intersection attemps after one layer has been hit sucessfully"};
+  UnsignedIntegerProperty m_maxMethodSequence
+    {this, "MaximalMethodSequence", 2000};
+  DoubleProperty m_tolerance{this, "Tolerance", 0.002,
+    "surface & volume tolerance"};
   // ------------------------------------------------------- //
-  bool m_activeOverlap;             //!<  consider overlaps between active muon volumes
-  bool m_useMuonMatApprox;          //!<  use approximative MS inert material
-  bool m_useDenseVolumeDescription; //!<  use dense volume description when available in ID/Calo
-  unsigned int m_maxNavigSurf;
-  unsigned int m_maxNavigVol;
-  bool m_dumpCache;
+  BooleanProperty m_activeOverlap{this, "ConsiderMuonStationOverlaps", false,
+    "consider overlaps between active muon volumes"};
+  BooleanProperty m_useMuonMatApprox{this, "UseMuonMatApproximation", false,
+    "use approximative MS inert material"};
+  BooleanProperty m_useDenseVolumeDescription
+    {this, "UseDenseVolumeDescription", true,
+     "use dense volume description when available in ID/Calo"};
+
+  static const unsigned int m_maxNavigSurf = 1000;
+  static const unsigned int m_maxNavigVol = 50;
+  BooleanProperty m_dumpCache{this, "DumpCache", false};
   //------------ Magnetic field properties
-  bool m_fastField;
+  BooleanProperty m_fastField{this, "MagneticFieldProperties", false};
   Trk::MagneticFieldProperties m_fieldProperties;
   //------------Reference surface --------------
-  std::unique_ptr<Surface> m_referenceSurface;
+  std::unique_ptr<Surface> m_referenceSurface = nullptr;
   //-------------------------- SCREEN output steering -------------------------------------------//
-  bool m_printRzOutput;
+  BooleanProperty m_printRzOutput{this, "positionOutput", true};
   //------------------------- VALIDATION  SECTION ------------------------------------------//
   // flags
-  bool m_navigationStatistics;             //!< steer the output for the navigation statistics
-  bool m_navigationBreakDetails;           //!< steer the output for the navigation break details
-  bool m_materialEffectsOnTrackValidation; //!< mat effects on track validation
+  BooleanProperty m_navigationStatistics
+    {this, "NavigationStatisticsOutput", false,
+     "steer the output for the navigation statistics"};
+  BooleanProperty m_navigationBreakDetails
+    {this, "DetailedNavigationOutput", false,
+     "steer the output for the navigation break details"};
 
   // extrapolation counters
-  mutable Gaudi::Accumulators::Counter<> m_extrapolateCalls;         //!< number of calls: extrapolate() method
-  mutable Gaudi::Accumulators::Counter<> m_extrapolateBlindlyCalls;  //!< number of calls: extrapolateBlindly() method
-  mutable Gaudi::Accumulators::Counter<> m_extrapolateDirectlyCalls; //!< number of calls: extrapolateDirectly() method
-  mutable Gaudi::Accumulators::Counter<> m_extrapolateStepwiseCalls; //!< number of calls: extrapolateStepwise() method
+  mutable Gaudi::Accumulators::Counter<> m_extrapolateCalls{};         //!< number of calls: extrapolate() method
+  mutable Gaudi::Accumulators::Counter<> m_extrapolateBlindlyCalls{};  //!< number of calls: extrapolateBlindly() method
+  mutable Gaudi::Accumulators::Counter<> m_extrapolateDirectlyCalls{}; //!< number of calls: extrapolateDirectly() method
+  mutable Gaudi::Accumulators::Counter<> m_extrapolateStepwiseCalls{}; //!< number of calls: extrapolateStepwise() method
 
-  mutable Gaudi::Accumulators::Counter<> m_startThroughAssociation;        //!< navigation intialization
-  mutable Gaudi::Accumulators::Counter<> m_startThroughRecall;             //!< navigation intialization
-  mutable Gaudi::Accumulators::Counter<> m_startThroughGlobalSearch;       //!< navigation intialization
-  mutable Gaudi::Accumulators::Counter<> m_destinationThroughAssociation;  //!< navigation intialization
-  mutable Gaudi::Accumulators::Counter<> m_destinationThroughRecall;       //!< navigation intialization
-  mutable Gaudi::Accumulators::Counter<> m_destinationThroughGlobalSearch; //!< navigation intialization
-  mutable Gaudi::Accumulators::Counter<> m_layerSwitched;                  //!< number of layers that have been switched
+  mutable Gaudi::Accumulators::Counter<> m_startThroughAssociation{};        //!< navigation intialization
+  mutable Gaudi::Accumulators::Counter<> m_startThroughRecall{};             //!< navigation intialization
+  mutable Gaudi::Accumulators::Counter<> m_startThroughGlobalSearch{};       //!< navigation intialization
+  mutable Gaudi::Accumulators::Counter<> m_destinationThroughAssociation{};  //!< navigation intialization
+  mutable Gaudi::Accumulators::Counter<> m_destinationThroughRecall{};       //!< navigation intialization
+  mutable Gaudi::Accumulators::Counter<> m_destinationThroughGlobalSearch{}; //!< navigation intialization
+  mutable Gaudi::Accumulators::Counter<> m_layerSwitched{};                  //!< number of layers that have been switched
 
   // navigation counters
-  mutable Gaudi::Accumulators::Counter<> m_navigationBreakLoop; //!< number of navigation breaks due to loop
-  mutable Gaudi::Accumulators::Counter<> m_navigationBreakOscillation; //!< number of navigation breaks due to oscillation
-  mutable Gaudi::Accumulators::Counter<> m_navigationBreakNoVolume; //!< number of navigation breaks due no Volume found
-  mutable Gaudi::Accumulators::Counter<> m_navigationBreakDistIncrease; //!< number of navigation breaks due to distance increase
-  mutable Gaudi::Accumulators::Counter<>m_navigationBreakVolumeSignature; //!< number of navigation breaks due to distance increase
-  mutable Gaudi::Accumulators::Counter<> m_overlapSurfaceHit; //!< number of OverlapSurfaces found
-
-  mutable Gaudi::Accumulators::Counter<> m_meotSearchCallsFw;      //!< how often the meot search is called: forward
-  mutable Gaudi::Accumulators::Counter<> m_meotSearchCallsBw;      //!< how often the meot search is called: backward
-  mutable Gaudi::Accumulators::Counter<> m_meotSearchSuccessfulFw; //!< how often the meot search was successful: forward
-  mutable Gaudi::Accumulators::Counter<> m_meotSearchSuccessfulBw; //!< how often the meot search was successful: backward
+  mutable Gaudi::Accumulators::Counter<> m_navigationBreakLoop{}; //!< number of navigation breaks due to loop
+  mutable Gaudi::Accumulators::Counter<> m_navigationBreakOscillation{}; //!< number of navigation breaks due to oscillation
+  mutable Gaudi::Accumulators::Counter<> m_navigationBreakNoVolume{}; //!< number of navigation breaks due no Volume found
+  mutable Gaudi::Accumulators::Counter<> m_navigationBreakDistIncrease{}; //!< number of navigation breaks due to distance increase
+  mutable Gaudi::Accumulators::Counter<> m_navigationBreakVolumeSignature{}; //!< number of navigation breaks due to distance increase
+  mutable Gaudi::Accumulators::Counter<> m_overlapSurfaceHit{}; //!< number of OverlapSurfaces found
 };
 
 } // end of namespace

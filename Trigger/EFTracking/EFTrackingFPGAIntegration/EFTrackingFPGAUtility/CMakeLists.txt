@@ -12,6 +12,7 @@ atlas_add_library(EFTrackingFPGAUtilityLib
                                  InDetPrepRawData 
                                  InDetIdentifier 
                                  InDetReadoutGeometry
+				 FPGATrackSimObjectsLib
 			         InDetMeasurementUtilitiesLib)
 
 atlas_add_component(EFTrackingFPGAUtility

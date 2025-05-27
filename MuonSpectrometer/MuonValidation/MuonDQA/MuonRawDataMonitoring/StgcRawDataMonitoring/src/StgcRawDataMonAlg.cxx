@@ -282,7 +282,7 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
 	auto stripClusterTimesMon       = Monitored::Scalar<float>("stripTrackTiming_layer_" + std::to_string(layer), stripClusterTimes);
 	auto stripClusterSizeMon        = Monitored::Scalar<unsigned int>("stripTrackClusterSize_layer_" + std::to_string(layer), csize);
 	fill("sTgcTiming", stripClusterSectorSidedMon, stripClusterTimesMon);
-	fill("Overview", stripClusterSectorSidedMon, stripClusterSizeMon);
+	fill("padTriggerShifter", stripClusterSectorSidedMon, stripClusterSizeMon);
 
         ATH_MSG_DEBUG("Strip Timing: " << stripClusterTimes);        
         

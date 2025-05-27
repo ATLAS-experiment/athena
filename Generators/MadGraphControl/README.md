@@ -326,6 +326,19 @@ only contain letters, digits, hyphens, and underscores.
 You can check if the weights made it into your LHE file by following
 the instructions [here](doc/checkweights.md)
 
+#### Systematics extras for SUSY event generation
+
+For job configurations using the SUSY pre- and post-include fragments,
+matching scale variations are straightforward to set up. You can either
+include `_msup` or `_msdw` in the physics short of your job config,
+or in your job config you can set `syst_mod='ms_up'`, for example, to
+run an upward variation of the matching scale. The variation is by
+a factor of two from the nominal.
+
+Note that based on guidance in the MG5 documentation, the matching scale
+is set by default to 1/4 of the heavy mass being generated in the SUSY
+events. It is bounded above at 500 GeV, and bounded below at 15 GeV.
+
 ### SM parameters
 
 It is possible to set default parameters using [MadGraphParamHelpers](https://gitlab.cern.ch/atlas/athena/-/blob/main/Generators/MadGraphControl/python/MadGraphParamHelpers.py)	

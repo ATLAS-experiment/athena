@@ -50,7 +50,7 @@ def getL1BackgroundSeed():
         'L1_jJ30_UNPAIREDB1', 'L1_jJ30_UNPAIREDB2',
         'L1_jJ30_UNPAIRED_ISO', 'L1_jJ30_UNPAIRED_NONISO',
         'L1_jJ90_UNPAIRED_ISO', 'L1_jJ90_UNPAIRED_NONISO',
-        'L1_jJ30_EMPTY', 'L1_jJ30_FIRSTEMPTY', 'L1_jJ30_BGRP12',
+        'L1_jJ30_EMPTY', 'L1_jJ60_EMPTY', 'L1_jJ30_FIRSTEMPTY', 'L1_jJ30_BGRP12',
         ]
 
 ##############################
@@ -113,25 +113,27 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         'PhysicsHigh':
         [
             'L1_eEM18L_MU8F','L1_eEM26M', 'L1_eEM26T', 'L1_eEM28M','L1_2eEM10L_MU8F', 'L1_2eEM18M',
-            'L1_eEM24L_3eEM12L',
             'L1_4jJ40', 'L1_jJ160', 'L1_jXE100', 'L1_2jJ40_jXE110',
             'L1_eTAU140',
             'L1_cTAU30M_3DR35-MU8F-eTAU30', 'L1_MU14FCH', 'L1_MU18VFCH', 'L1_MU10BOM',
             'L1_5jJ40p0ETA25',
-            'L1_3MU5VF','L1_MU8F_2jJ40_jJ50',
-            'L1_jJ55p0ETA23_2jJ40p30ETA49', 'L1_jJ125p30ETA49', 'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49',
+            'L1_MU8F_2jJ40_jJ50',
+            'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49',
             'L1_2MU5VF_3MU3V','L1_MU8VF_2MU5VF',
             'L1_jMJJ-500-NFF', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 'L1_SC175-SCjJ10',
-            'L1_HT190-jJ40s5pETA21', 'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25', #'L1_TAU20IM_2TAU12IM_4J12p0ETA25', 
+            'L1_HT190-jJ40s5pETA21', 'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25',  
             'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 'L1_eEM18M_2cTAU20M_jXE70',
+            'L1_ZAFB-04DPHIM-eEM18M','L1_eEM18M_jEM25',
+            'L1_jJ55p0ETA23_2jJ40p30ETA49','L1_jJ125p30ETA49','L1_3MU5VF',
+            'L1_eEM24L_3eEM12L', 'L1_LATE-MU8F_jJ90', 'L1_LATE-MU8F_jXE70'
         ],
         'PhysicsVeryHigh':
         [
-             'L1_jJ500', 'L1_jXE500'
+             'L1_jJ500', 'L1_jXE500' 
         ],
         'EMPTY': 
         [
-            'L1_jJ30_EMPTY', 'L1_MU8VF_EMPTY', 'L1_eTAU12_EMPTY', 'L1_eTAU60_EMPTY', 'L1_eEM9_EMPTY'
+            'L1_jJ30_EMPTY', 'L1_jJ60_EMPTY', 'L1_MU8VF_EMPTY', 'L1_eTAU12_EMPTY', 'L1_eTAU60_EMPTY', 'L1_eEM15_EMPTY'
         ],
         'FIRSTEMPTY':
         [

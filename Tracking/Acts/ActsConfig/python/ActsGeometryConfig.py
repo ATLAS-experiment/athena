@@ -49,6 +49,12 @@ def ActsTrackingGeometrySvcCfg(flags,
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
 
+  if flags.Detector.GeometryMuon and flags.Muon.usePhaseIIGeoSetup:
+    subDetectors += ["Muon"]
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    acc.merge(MuonGeoModelCfg(flags))
+    kwargs.setdefault("MSVolumeBuilder", CompFactory.ActsMSTrackingVolumeBuilder())
+
   if flags.Detector.GeometryITkPixel:
     subDetectors += ["ITkPixel"]
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
@@ -268,18 +274,6 @@ def ActsMaterialMappingCfg(flags,
                                                                               processNonMaterial = False) ))
       
     acc.addEventAlgo(CompFactory.ActsMaterialMapping(name, **kwargs))
-    return acc
-
-def ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags,
-                           name: str = "ActsDetectorElementToActsGeometryIdMappingAlg",
-                           **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    if 'TrackingGeometryTool' not in kwargs :
-      kwargs.setdefault('TrackingGeometryTool',
-                        acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
-
-    acc.addCondAlgo(CompFactory.ActsTrk.DetectorElementToActsGeometryIdMappingAlg(name, **kwargs))
     return acc
 
 def ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags,

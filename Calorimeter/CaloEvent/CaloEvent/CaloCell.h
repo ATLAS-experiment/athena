@@ -164,6 +164,8 @@ public:
   virtual void scaleEnergy (float scale);
   /** @brief set time */
   virtual void setTime (float time);
+  /** @brief add time */
+  void addTime (float delta);
   /** @brief set quality */
   virtual void setQuality (uint16_t quality);
 

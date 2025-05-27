@@ -1,0 +1,29 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+TauJets:
+- containerName: AnaTauJets
+  decorateTruth: true
+  WorkingPoint:
+  - selectionName: medium
+    quality: Medium
+  TriggerSF:
+  - tauID: Medium
+    triggerChainsPerYear:
+      2022:
+      - HLT_tau25_mediumRNN_tracktwoMVA
+      - HLT_tau35_mediumRNN_tracktwoMVA
+      2023:
+      - HLT_tau25_mediumRNN_tracktwoMVA
+      - HLT_tau35_mediumRNN_tracktwoMVA
+  MCTCClassification:
+    prefix: truth_
+
+GeneratorLevelAnalysis: {}
+
+PrintConfiguration: {}

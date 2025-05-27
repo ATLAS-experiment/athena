@@ -125,9 +125,15 @@ namespace ActsTrk
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation;
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation;
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation;
-   ATH_MSG_DEBUG("Measurement association entries: "
-                  << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]->size()
-                  << " + " << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]->size());
+    auto assocSize = [&measurement_to_truth_association_maps](xAOD::UncalibMeasType type) {
+      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[to_underlying(type)];
+      return assoc ? assoc->size() : 0ul;
+    };
+
+    ATH_MSG_DEBUG("Measurement association entries: "  << assocSize(xAOD::UncalibMeasType::PixelClusterType)
+                 << " + " << assocSize(xAOD::UncalibMeasType::StripClusterType) 
+                 << " + " << assocSize(xAOD::UncalibMeasType::HGTDClusterType)
+                 );
 
     unsigned int measurement_type_i=0;
     --measurement_type_i;

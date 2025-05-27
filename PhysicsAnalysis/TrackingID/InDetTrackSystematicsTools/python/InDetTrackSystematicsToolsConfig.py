@@ -90,6 +90,25 @@ def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool", **kwargs
         CompFactory.InDet.InclusiveTrackFilterTool(name, **kwargs))
     return acc
 
+def InDetTrackSmearingToolCfg(flags, name="InDetTrackSmearingTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    # 2022 recommendations (MC23a)
+    if flags.Input.MCCampaign is Campaign.MC23a:
+        kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2022_d0z0_smearing_factors_v2.root")
+    elif flags.Input.MCCampaign is Campaign.MC23d:
+        kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0_smearing_factors_v2.root")
+    # Run 2 recommendations (MC20)
+    elif flags.GeoModel.Run is LHCPeriod.Run2:
+        kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/d0z0_smearing_factors_Run2_v2.root")
+    elif "calibFileIP_CTIDE" not in kwargs:
+        raise ValueError(f"InDetTrackSmearingTool: Recommendations not yet available for campaign {flags.Input.MCCampaign}! Please check the configuration and contact Tracking CP if you believe this message is in error.")
+
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetTrackSmearingTool(name, **kwargs))
+    return acc
+
 def TrackSystematicsAlgCfg(flags, name="InDetTrackSystematicsAlg", **kwargs):
     acc = ComponentAccumulator()
 

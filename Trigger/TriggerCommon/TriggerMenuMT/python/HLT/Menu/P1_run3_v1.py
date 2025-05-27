@@ -264,6 +264,8 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_l1calo_L1jJ500', l1SeedThresholds=['FSNOSEED'], stream=['L1Calo'], groups=JetStreamersGroup+['BW:Other']+SupportPhIGroup),
         
         ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ30_EMPTY',  l1SeedThresholds=['jJ30'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        # ATR-31286 Higher Threshold Duplicate
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ60_EMPTY',  l1SeedThresholds=['jJ60'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eTAU12_EMPTY', l1SeedThresholds=['eTAU12'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ60p30ETA49_EMPTY', l1SeedThresholds=['jJ60p30ETA49'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         

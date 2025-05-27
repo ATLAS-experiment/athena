@@ -378,7 +378,7 @@ void EvtTauolaEngine::decayTauEvent( EvtParticle* tauParticle )
         // The tau particle has no parent. Set "itself" as the incoming particle for the first vertex.
         // This is needed, otherwise Tauola warns of momentum non-conservation for this (1st) vertex.
         GenParticlePtr tauGenInit = this->createGenParticle( tauParticle );
-        theVertex->add_particle_in( tauGenInit );
+        theVertex->add_particle_in( std::move(tauGenInit) );
     }
 
     // Find all daughter particles and assign them as outgoing particles to the vertex.

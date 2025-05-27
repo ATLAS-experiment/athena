@@ -36,11 +36,11 @@ def FPGAOutputValidationCfg(flags, **kwargs):
         key1 = kwargs["stripKeys"][1]
         name = f"{key0} - {key1}"
         monitoringTool.defineHistogram("nmatched_strip_clusters", path = "FPGAOutputValidation", type = "TH1I", title = f"{name}: number of matched clusters", xbins = 100, xmin=0, xmax = 100)
-        monitoringTool.defineHistogram("diff_strip_locx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:locx;Local position x;", xbins = 200, xmin = -0.2, xmax = 0.2)
+        monitoringTool.defineHistogram("diff_strip_locx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:locx;Local position x;", xbins = 200, xmin = -0.02, xmax = 0.02)
         monitoringTool.defineHistogram("diff_strip_covxx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:covxx;Local covariance xx;", xbins = 100, xmin = -0.1, xmax = 0.1)
-        monitoringTool.defineHistogram("diff_strip_globalx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globalx;Global position x;", xbins = 200, xmin = -0.05, xmax = 0.05)
-        monitoringTool.defineHistogram("diff_strip_globaly",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globaly;Global position y;", xbins = 200, xmin = -0.05, xmax = 0.05)
-        monitoringTool.defineHistogram("diff_strip_globalz",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globalz;Global position z;", xbins = 200, xmin = -0.05, xmax = 0.05)        
+        monitoringTool.defineHistogram("diff_strip_globalx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globalx;Global position x;", xbins = 200, xmin = -0.1, xmax = 0.1)
+        monitoringTool.defineHistogram("diff_strip_globaly",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globaly;Global position y;", xbins = 200, xmin = -0.1, xmax = 0.1)
+        monitoringTool.defineHistogram("diff_strip_globalz",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globalz;Global position z;", xbins = 200, xmin = -0.1, xmax = 0.1)        
         monitoringTool.defineHistogram("diff_strip_channelsphi", path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:channels in phi;Channels in #phi;", xbins = 10, xmin = -5, xmax = 5)
 
     for key in kwargs["pixelKeys"]:

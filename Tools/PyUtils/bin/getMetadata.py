@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-from __future__ import print_function
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Will Buttinger"
 __doc__ = """Extract dataset parameters from AMI, and write them to a text file.\nExamples:\n\n\ngetMetadata.py --inDS="mc15_13TeV.361103%DAOD_TRUTH%" --fields=dataset_number,ldn,nfiles,events,crossSection,genFiltEff,generator_name"""
@@ -9,13 +8,7 @@ __doc__ = """Extract dataset parameters from AMI, and write them to a text file.
 import logging
 import sys
 
-from future import standard_library
-standard_library.install_aliases()
 import subprocess
-
-# Python 2.x/3.x compatibility
-if sys.version_info[0] >= 3:
-    unicode = str   # strings are unicode in Python3
 
 #pinched from pandatools!
 def readDsFromFile(txtName):
@@ -267,9 +260,9 @@ def main():
             for field in extraFields:
                 #ignore the keyword_ fields 
                 if field.startswith("keyword_"): continue
-                mydict[field] = float(info_res[0][unicode(field)]) if isfloat(info_res[0][unicode(field)]) else extraFieldDefaults[field]
+                mydict[field] = float(info_res[0][str(field)]) if isfloat(info_res[0][str(field)]) else extraFieldDefaults[field]
             for k in args.keywords:
-                mydict["keyword_%s" % k] = int( (k in str(info_res[0][unicode('keyword')]).split(",")) )
+                mydict["keyword_%s" % k] = int( (k in str(info_res[0][str('keyword')]).split(",")) )
             
     #sort dataset_values as well as possible
     from collections import OrderedDict
@@ -404,10 +397,10 @@ def main():
                     bestGroupIndex=args.physicsGroups.index(str(r[u'physicsGroup']))
                     #keep the explanation info 
                     for e in args.explainInfo: 
-                        if unicode(e) not in r:
+                        if str(e) not in r:
                             logging.error("Unrecognised explainInfo field: %s", e)
                             return -1
-                        explainInfo[param][e]=str(r[unicode(e)])
+                        explainInfo[param][e]=str(r[str(e)])
                 if args.oldTimestamp!="":
                     bestGroupIndex = len(args.physicsGroups)
                     paramVals2[param] = copy.copy(fieldDefaults[param])

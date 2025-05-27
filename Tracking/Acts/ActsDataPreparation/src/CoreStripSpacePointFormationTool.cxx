@@ -12,26 +12,20 @@
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "Acts/SpacePointFormation/SpacePointBuilderConfig.hpp"
+#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 
 #include "StoreGate/WriteHandle.h"
 namespace ActsTrk
 {
 
-  CoreStripSpacePointFormationTool::CoreStripSpacePointFormationTool(const std::string &type,
-                                                                     const std::string &name,
-                                                                     const IInterface *parent)
-      : base_class(type, name, parent)
-  {}
-
+ 
   StatusCode CoreStripSpacePointFormationTool::initialize(){
 
     ATH_CHECK(detStore()->retrieve(m_stripId, "SCT_ID"));
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
-
+ 
     if(m_useSCTLayerDep_OverlapCuts)
       ATH_MSG_INFO("Use SCT SP overlap cuts based on layer number parity");
     
@@ -92,18 +86,13 @@ namespace ActsTrk
     /// via the ContainerAccessor.
 
     auto spBuilderConfig = std::make_shared<Acts::SpacePointBuilderConfig>();
-    const Acts::TrackingGeometry *acts_tracking_geometry=m_trackingGeometryTool->trackingGeometry().get();
-    ATH_CHECK(acts_tracking_geometry != nullptr);
-    SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-       detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
-    ATH_CHECK(detectorElementToGeometryIdMap.isValid());
-
-    ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ *acts_tracking_geometry, **detectorElementToGeometryIdMap };
-
-    spBuilderConfig->slSurfaceAccessor
-      .connect<&ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
-
     const std::shared_ptr<const Acts::TrackingGeometry> trkGeometry = m_trackingGeometryTool->trackingGeometry();
+    const DetectorElementToActsGeometryIdMap* detectorElementToGeometryIdMap = m_trackingGeometryTool->surfaceIdMap();
+
+    detail::xAODUncalibMeasSurfAcc surfaceAccessor{trkGeometry.get(), detectorElementToGeometryIdMap};
+    spBuilderConfig->slSurfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&surfaceAccessor);
+
+    
     spBuilderConfig->trackingGeometry = trkGeometry;
 
     

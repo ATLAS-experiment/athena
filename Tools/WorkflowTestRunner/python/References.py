@@ -11,13 +11,13 @@
 # Format is "test" : "version"
 references_map = {
     # Simulation
-    "s3761": "v18",
-    "s4005": "v12",
-    "s4006": "v20",
-    "s4007": "v19",
+    "s3761": "v19",
+    "s4005": "v13",
+    "s4006": "v21",
+    "s4007": "v20",
     "s4008": "v1",
-    "s4454": "v4",
-    "a913": "v15",
+    "s4454": "v5",
+    "a913": "v16",
     # Digi
     "d1920": "v9",
     # Overlay
@@ -25,21 +25,21 @@ references_map = {
     "d1759": "v20",
     "d1912": "v9",
     # Reco
-    "q442": "v79",
-    "q449": "v133",
-    "q452": "v40",
-    "q454": "v55",
+    "q442": "v81",
+    "q449": "v136",
+    "q452": "v41",
+    "q454": "v57",
     # Derivations
     "data_PHYS_Run2": "v51",
     "data_PHYSLITE_Run2": "v28",
     "data_PHYS_Run3": "v54",
     "data_PHYSLITE_Run3": "v34",
-    "mc_PHYS_Run2": "v65",
-    "mc_PHYSLITE_Run2": "v33",
-    "mc_PHYS_Run3": "v68",
-    "mc_PHYSLITE_Run3": "v37",
-    "af3_PHYS_Run2": "v14",
-    "af3_PHYSLITE_Run2": "v11",
-    "af3_PHYS_Run3": "v48",
-    "af3_PHYSLITE_Run3": "v39",
+    "mc_PHYS_Run2": "v66",
+    "mc_PHYSLITE_Run2": "v34",
+    "mc_PHYS_Run3": "v69",
+    "mc_PHYSLITE_Run3": "v38",
+    "af3_PHYS_Run2": "v15",
+    "af3_PHYSLITE_Run2": "v12",
+    "af3_PHYS_Run3": "v49",
+    "af3_PHYSLITE_Run3": "v40",
 }

@@ -125,10 +125,11 @@ class L1CaloMonitorCfgHelper(object):
 
                 outputs = set()
                 algorithms = set()
-                def printConf(d,prefix=""):
+                def printConf(d,prefix="",currentOutput=""):
                     for key,value in d.items():
                         if type(value)==dict:
                             print(prefix,key,"{")
+                            newCurrentOutput=str(currentOutput)
                             if(key=="dir detail" or key=="dir Developer"):
                                 print(prefix+"  algorithm = GatherData") # define GatherData as default algo for all of these hists
                             if key.startswith("dir ") and any([x.startswith("hist ") for x in value.keys()]):
@@ -136,13 +137,15 @@ class L1CaloMonitorCfgHelper(object):
                                 for childKey,childVal in value.items():
                                     if childKey.startswith("hist ") and "output" in childVal:
                                         print(prefix+"  output = "+childVal["output"])
+                                        newCurrentOutput = str(childVal["output"])
                                         break
-                            printConf(value,prefix + "  ")
+                            printConf(value,prefix + "  ",newCurrentOutput)
                             print(prefix,"}")
                         else:
                             # save all output paths to add to output block (don't need to print here b.c. specified at dir level
+                            # exception is if plot was embargoed!
                             if key == "output": outputs.add(value)
-                            else: print(prefix,key,"=",value)
+                            if key != "output" or value != currentOutput: print(prefix,key,"=",value)
                             if key == "algorithm": algorithms.add(value)
 
 
@@ -152,17 +155,22 @@ class L1CaloMonitorCfgHelper(object):
                 print("}")
                 print("#outputs")
                 print("output top_level {")
-                def printOutputs(d,prefix=""):
-                    for key,value in d.items():
-                        if(key.startswith("hist ")):
-                            pass # do nothing
-                        elif type(value)==dict:
-                            print(prefix,key.replace("dir ","output "),"{")
-                            if key=="dir detail" or key=="dir Developer": print(prefix,"  algorithm = L1Calo_AlwaysUndefinedSummary")
-                            printOutputs(value,prefix + "  ")
-                            print(prefix,"}")
                 print("  output L1Calo {")
-                printOutputs(L1CaloMonitorCfgHelper.hanConfigs,"   ")
+
+                # go through outputs set, build a nested dictionary of paths
+                outputsDict = {}
+                for o in outputs:
+                    theDict = outputsDict
+                    for p in o.split("/"):
+                        if p not in theDict: theDict[p] = {}
+                        theDict = theDict[p]
+                def printOutputs(d,prefix=""):
+                     for key,value in d.items():
+                         print(prefix,"output",key,"{")
+                         if key=="detail" or key=="Developer": print(prefix,"  algorithm = L1Calo_AlwaysUndefinedSummary")
+                         printOutputs(value,prefix + "  ")
+                         print(prefix,"}")
+                printOutputs(outputsDict["L1Calo"],"   ")
                 print("  }")
                 print("}")
                 # include example of adding algorithms and thresholds
@@ -350,6 +358,12 @@ thresholds th_AnyBinIsError {
                 if k.startswith("Shifter/"): continue
                 # strip Expert/ prefix if it exists
                 myConfig[str(k).replace("Expert/","")] = v
+            if "algorithm" in myConfig and myConfig["algorithm"] in self.hanAlgConfigs:
+                # if there are any string parameters in the config, add them to the description
+                # need this until WebDisplay shows string parameters
+                for pName,pVal in self.hanAlgConfigs[myConfig["algorithm"]].items():
+                    if len(str(pVal))>0 and str(pVal)[0]=="\"":
+                        myConfig["description"] += f"<br>{pName} : {pVal[1:-1]}"
             x.update(myConfig)
         elif splitPath[0] == "Shifter": # record shifter histograms in another map, for generating xmls
             # create a copy of the hanConfig and remove any keys beginning with "Expert/", which means its a expert-only config attribute
@@ -519,11 +533,11 @@ def LVL1CaloMonitoringConfig(flags):
                 from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
                 JfexSimMonitoring = JfexSimMonitoringConfig(flags)
                 result.merge(JfexSimMonitoring)
-            
-            if flags.Trigger.L1.doTopo:
+
+            if flags.Trigger.L1.doTopo and isData:
                 #L1TopoSimulation (with monitoring Off to avoid clash with next call)
                 from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
-                result.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False,DeactivateL1TopoMuons=True))
+                result.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False))
                 #L1TopoOnlineMonitoring specific for L1Calo DQPlots
                 from L1TopoOnlineMonitoring.L1TopoOnlineMonitoringConfig import Phase1TopoMonitoringCfg
                 result.merge(Phase1TopoMonitoringCfg(flags))

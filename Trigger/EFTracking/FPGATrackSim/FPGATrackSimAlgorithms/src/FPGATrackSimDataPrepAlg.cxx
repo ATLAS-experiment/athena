@@ -66,7 +66,6 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), true);
-    m_logicEventHeader_cluster = m_writeOutputTool->addInputBranch(m_clusterBranch.value(), true);
     m_logicEventHeader = m_writeOutputTool->addInputBranch(m_postClusterBranch.value(), true);
     
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -81,6 +80,7 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
     ATH_CHECK( m_truthLinkContainerKey.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
+    ATH_CHECK( m_FPGAEventInfoKey.initialize() );
 
     ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
@@ -127,9 +127,8 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     ATH_CHECK(FPGATruthTracks.record(std::make_unique<FPGATrackSimTruthTrackCollection>()));
 
     SG::WriteHandle<FPGATrackSimOfflineTrackCollection> FPGAOfflineTracks (m_FPGAOfflineTrackKey);
-    ATH_CHECK(FPGAOfflineTracks.record(std::make_unique<FPGATrackSimOfflineTrackCollection>()));       
-    
-    // Apply event selection based on truth tracks    
+    ATH_CHECK(FPGAOfflineTracks.record(std::make_unique<FPGATrackSimOfflineTrackCollection>()));
+    // Apply event selection based on truth tracks
     if (m_doEvtSel) {
         bool acceptEvent = false;
         if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: EventSelection");
@@ -229,7 +228,11 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     auto mon_nhits = Monitored::Scalar<unsigned>("nHits", hits.size());
     auto mon_nhits_unmapped = Monitored::Scalar<unsigned>("nHits_unmapped", m_hits_miss.size());
     Monitored::Group(m_monTool, mon_nhits, mon_nhits_unmapped);
-    
+
+    // Put the FPGATrackSim event info on storegate so later algorithms can access it easily.
+    SG::WriteHandle<FPGATrackSimEventInfo> FPGAEventInfo (m_FPGAEventInfoKey);
+    ATH_CHECK(FPGAEventInfo.record(std::make_unique<FPGATrackSimEventInfo>(m_eventHeader.event())));
+
     // Write the output and reset
     if (m_writeOutputData)
         ATH_CHECK(m_writeOutputTool->writeData());
@@ -238,8 +241,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     m_eventHeader.reset();
     m_logicEventHeader->reset();
     m_logicEventHeader_precluster->reset();
-    m_logicEventHeader_cluster->reset();
-    
+
     return StatusCode::SUCCESS;
 }
 
@@ -299,7 +301,6 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     ATH_MSG_DEBUG("Running hits conversion");
     m_logicEventHeader->reset();
     m_logicEventHeader_precluster->reset();
-    m_logicEventHeader_cluster->reset();
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: RawToLogical");
     for (auto hitMapTool : m_hitMapTools){
         ATH_CHECK(hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader));
@@ -339,11 +340,6 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
         std::make_move_iterator(m_clusters->end()));
     
     if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: Clustering");
-
-    // At this stage, copy the logicEventHeader.
-    // TODO: no longer needed because we don't do SPs here.
-    if(m_writeOutputData) *m_logicEventHeader_cluster = *m_logicEventHeader;
-
 
     return StatusCode::SUCCESS;
 }

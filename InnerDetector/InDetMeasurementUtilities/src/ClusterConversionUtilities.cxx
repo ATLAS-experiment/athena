@@ -12,6 +12,9 @@
 #include "HGTD_PrepRawData/HGTD_Cluster.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
+#include "GeoModelKernel/throwExcept.h"
+
+constexpr static double one_over_twelve = 1. / 12.;
 
 namespace TrackingUtilities {
 
@@ -93,34 +96,37 @@ namespace TrackingUtilities {
     return StatusCode::SUCCESS;
   }
 
+ std::pair<xAOD::MeasVector<1>, xAOD::MeasMatrix<1>> convertSCT_LocalPosCov(const InDet::SCT_Cluster &cluster) {
+    const InDetDD::SiDetectorElement& element{*cluster.detectorElement()};
+    auto localPos = cluster.localPosition();
+
+    float localPosition = 0.f, localCovariance = 0.f;
+    if (element.isBarrel()) {
+      localPosition = localPos.x();
+      localCovariance = element.phiPitch() * element.phiPitch() * one_over_twelve;
+    } else {
+      InDetDD::SiCellId cellId = element.cellIdOfPosition(localPos);
+      const auto* design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element.design());
+      if ( design == nullptr ) {
+         THROW_EXCEPTION("Invalid bounds from "<<cluster);
+      }
+      InDetDD::SiLocalPosition localInPolar = design->localPositionOfCellPC(cellId);
+      localPosition = localInPolar.xPhi();
+      localCovariance = design->phiPitchPhi() * design->phiPitchPhi() * one_over_twelve;
+    }
+
+    return std::make_pair(xAOD::MeasVector<1>{localPosition}, 
+                          xAOD::MeasMatrix<1>{localCovariance});
+  }
 
   StatusCode convertInDetToXaodCluster(const InDet::SCT_Cluster& indetCluster,
 				       const InDetDD::SiDetectorElement& element,
 				       xAOD::StripCluster& xaodCluster)
   {
-    static const double one_over_twelve = 1. / 12.;
     IdentifierHash idHash = element.identifyHash();
 
-    auto localPos = indetCluster.localPosition();
-    
-    Eigen::Matrix<float,1,1> localPosition;
-    Eigen::Matrix<float,1,1> localCovariance;
-    localCovariance.setZero();
-
-    if (element.isBarrel()) {
-      localPosition(0, 0) = localPos.x();
-      localCovariance(0, 0) = element.phiPitch() * element.phiPitch() * one_over_twelve;
-    } else {
-      InDetDD::SiCellId cellId = element.cellIdOfPosition(localPos);
-      const InDetDD::StripStereoAnnulusDesign *design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element.design());
-      if ( design == nullptr ) {
-	return StatusCode::FAILURE;
-      }
-      InDetDD::SiLocalPosition localInPolar = design->localPositionOfCellPC(cellId);
-      localPosition(0, 0) = localInPolar.xPhi();
-      localCovariance(0, 0) = design->phiPitchPhi() * design->phiPitchPhi() * one_over_twelve;
-    }
-
+    const auto [localPosition, localCovariance] = convertSCT_LocalPosCov(indetCluster);
+   
     auto globalPos = indetCluster.globalPosition();
     Eigen::Matrix<float, 3, 1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z());
 
@@ -249,8 +255,6 @@ namespace TrackingUtilities {
                                        InDet::SCT_Cluster*& indetCluster,
 				       double shift)
   {
-    static const double one_over_twelve = 1. / 12.;
-
     bool isBarrel = element.isBarrel();
     const InDetDD::SCT_ModuleSideDesign* design = nullptr;
     if (not isBarrel) {

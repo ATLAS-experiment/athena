@@ -1,10 +1,10 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
- 
+
 #ifndef TRKEXTOOLS_LOCALEXCACHE_H
 #define TRKEXTOOLS_LOCALEXCACHE_H
-#include "ObjContainer.h"
+#include "ExtrUniquePtrHolder.h"
 #include "TrkParameters/TrackParameters.h"
 #include "ParametersNextVolume.h"
 #include "TrkExInterfaces/IMaterialEffectsUpdator.h"
@@ -21,29 +21,23 @@
    class EnergyLoss;
    class TrackStateOnSurface;
  }
- 
+
 namespace Trk{
 struct Cache
   {
-    using TrackParmContainer = ObjContainer<Trk::TrackParameters>;
-    using ManagedTrackParmPtr = ObjPtr<Trk::TrackParameters>;
-    typedef std::vector<std::unique_ptr<Trk::TrackParameters>> TrackParametersUVector;
-    typedef std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>> identifiedParameters_t;
-    using TrackParmPtr = ObjRef;
-    typedef std::pair<const Surface*, BoundaryCheck> DestSurf;
-    //
-    TrackParmContainer m_trackParmContainer;
+    using TrackParametersUVector = std::vector<std::unique_ptr<Trk::TrackParameters>>;
+    using identifiedParameters_t = std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>;
+    using DestSurf = std::pair<const Surface*, BoundaryCheck>;
+    //!< The class holding the unique ptr during the extrapolation loop.
+    Trk::ExtrUniquePtrHolder<Trk::TrackParameters> m_ownedPtrs;
     //!< parameters to be used for final propagation in case of fallback
-    ManagedTrackParmPtr m_lastValidParameters;
+    Trk::TrackParameters* m_lastValidParameters = nullptr;
     //!< return helper for parameters and boundary
-    ParametersNextVolume m_parametersAtBoundary;
+    ParametersNextVolume m_parametersAtBoundary{};
     //!< Caches per MaterialUpdator
     std::vector<Trk::IMaterialEffectsUpdator::ICache> m_MaterialUpCache;
     //!<  internal switch for resolved configuration
     bool m_dense = false;
-    //!< Flag the recall solution
-    bool m_recall = false;
-    bool m_robustSampling = true;
     unsigned int m_layerResolved{};
     unsigned int m_methodSequence = 0;
     const Surface* m_destinationSurface = nullptr;
@@ -58,7 +52,7 @@ struct Cache
     const Trk::TrackingVolume* m_currentStatic = nullptr;
     const Trk::TrackingVolume* m_currentDense = nullptr;
     const Trk::TrackingVolume* m_highestVolume = nullptr;
-    //!< Pointer (not owning) pointing 
+    //!< Pointer (not owning) pointing
     //to a vector of unique parameters of detector elements
     TrackParametersUVector* m_parametersOnDetElements = nullptr;
     //!< cache layer with last material update
@@ -89,23 +83,11 @@ struct Cache
     std::vector<std::pair<const Trk::Surface*, Trk::BoundaryCheck>> m_navigSurfs;
     std::vector<const Trk::DetachedTrackingVolume*> m_navigVols;
     std::vector<std::pair<const Trk::TrackingVolume*, unsigned int>> m_navigVolsInt;
-    
+
     //methods
     Cache();
     ~Cache();
     Cache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
-
-    TrackParmContainer& trackParmContainer() { return m_trackParmContainer; }
- 
-    ManagedTrackParmPtr manage(std::unique_ptr<Trk::TrackParameters>&& parm)
-    {
-      return ManagedTrackParmPtr(trackParmContainer(), std::move(parm));
-    }
-    ManagedTrackParmPtr manage(TrackParmPtr parm)
-    {
-      return ManagedTrackParmPtr(trackParmContainer(), parm);
-    }
-    ManagedTrackParmPtr manage() { return ManagedTrackParmPtr(trackParmContainer()); }
 
     const Trk::TrackingGeometry *trackingGeometry( const Trk::INavigator &navigator, const EventContext &ctx) {
        if (!m_trackingGeometry) {
@@ -114,59 +96,59 @@ struct Cache
        return m_trackingGeometry;
     }
 
-    const Trk::TrackingVolume 
+    const Trk::TrackingVolume
     *volume(const EventContext&, const Amg::Vector3D& gp) const {
        assert(m_trackingGeometry);
        return m_trackingGeometry->lowestTrackingVolume(gp);
     }
-    
+
     /** Get the IMaterialEffectsUpdator::ICache  for the MaterialEffectsUpdator*/
-    IMaterialEffectsUpdator::ICache& 
+    IMaterialEffectsUpdator::ICache&
     subMaterialEffectsUpdatorCache(const TrackingVolume& tvol) ;
-    
-    IMaterialEffectsUpdator::ICache& 
+
+    IMaterialEffectsUpdator::ICache&
     subMaterialEffectsUpdatorCache() ;
-    
+
     //
     void
     populateMatEffUpdatorCache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
-    
+
      /** Private method for setting recall Information */
-    void 
+    void
     setRecallInformation(const Surface&,const Layer&,const TrackingVolume&);
-    
+
     void
     resetRecallInformation();
-    
+
     ///String representation of cache
-    std::string 
+    std::string
     to_string(const std::string& txt) const;
-    
+
     ///Check cache integrity
     bool
     elossPointerOverwritten() const;
-    
+
     ///String error message if the cache has a problem
     std::string
     elossPointerErrorMsg(int lineNumber=0) const;
-    
+
     ///Retrieve boundaries
     void
     retrieveBoundaries();
-    
+
     ///Add one layer and navigLayer
     void
     addOneNavigationLayer(const Trk::TrackingVolume* pDetVol, const Trk::Layer* pLayer, bool boundaryCheck=true);
-    
+
     ///Add one layer and navigLayer using the current static vol
     void
     addOneNavigationLayer(const Trk::Layer* pLayer, bool boundaryCheck=true);
-    
+
     ///Insert navigation surfaces from layers, dense boundaries, navig boundaries and detached boundaries
     void
     copyToNavigationSurfaces();
   };
   }
   #endif
-  
-  
+
+

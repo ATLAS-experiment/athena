@@ -18,7 +18,8 @@ class EventLoopCPRunScript(CPBaseRunner):
         derivedGroup.add_argument('--strip', dest='strip', action='store_true', help='Move the analysis root file to the top level, and delete the work directory.'
                                   ' Mainly useful for standardizing the output with the Athena framework.')
         derivedGroup.add_argument('--work-dir', dest='work_dir', default='workDir', help='The work directory for the EL job')
-        derivedGroup.add_argument('--no-factory-preload', dest='no_factory_preload', action='store_true', help='Preload the factories for the EL job. This saves memory and sidesteps some issues.')
+        derivedGroup.add_argument('--no-factory-preload', dest='no_factory_preload', action='store_true', help='Do not preload the component factories for the EL job. The component factories save memory and sidestep some technical issues, so you should not disable them unless you have a good reason to do so.')
+        derivedGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
         return
         
     def makeAlgSequence(self):
@@ -85,7 +86,10 @@ class EventLoopCPRunScript(CPBaseRunner):
     
         for alg in self.makeAlgSequence():
             self.job.algsAdd(alg)
-        self.job.outputAdd(ROOT.EL.OutputStream('ANALYSIS'))
+        if self.args.merge_output_files:
+            self.job.options().setString(ROOT.EL.Job.optStreamAliases, "ANALYSIS=" + ROOT.EL.Job.histogramStreamName)
+        else:
+            self.job.outputAdd(ROOT.EL.OutputStream('ANALYSIS'))
         if not self.args.no_factory_preload:
             preload = os.getenv('EL_FACTORY_PRELOAD', 'libComponentFactoryPreloaderDict.so,CP::preloadComponentFactories')
             self.logger.info(f"Preloading factories: {preload}")

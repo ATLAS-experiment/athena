@@ -191,7 +191,7 @@ def ActsPixelGbtsSeedingToolCfg(flags,
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
-    kwargs.setdefault("ConnectorInputFile" , find_datafile("ActsPatternRecognition/GBTS_EdgeProbabilites_ITKPixels.txt"))
+    kwargs.setdefault("ConnectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
 
     kwargs.setdefault('PixelDetectorElements', 'ITkPixelDetectorElementCollection')
 
@@ -249,7 +249,6 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
             else:
                 seedTool_pixel = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
         elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
-            kwargs.setdefault("GbtsSeeding",True)
             seedTool_pixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
         elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts2:
             seedTool_pixel = acc.popToolsAndMerge(ActsGbts2SeedingTrigToolCfg(flags))
@@ -524,9 +523,7 @@ def ActsStoreTrackSeedsCfg(flags,
     trackKey = f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks'
     particleKey = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}TrackParticles'
 
-    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
-    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
-    
+   
     if processPixels:
         # Create track parameters from pixel seeds
         from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg
@@ -639,7 +636,6 @@ def ActsSeedToTrackCnvAlgCfg(flags,
                              name: str = "ActsSeedToTrackCnvAlg",
                              **kwargs: dict) -> ComponentAccumulator:
   acc = ComponentAccumulator()
-  kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
   kwargs.setdefault('SeedContainerKey', [])
   kwargs.setdefault('EstimatedTrackParametersKey', [])

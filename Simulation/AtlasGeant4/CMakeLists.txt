@@ -166,5 +166,6 @@ set_target_properties( AtlasGeant4 PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATL
 if( ATLAS_GEANT4_USE_LTO AND CMAKE_COMPILER_IS_GNUCXX )
   # Suppress spurious warnings seen in the LTO build.
   set_target_properties( AtlasGeant4Lib PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized -Wno-uninitialized "  )
+  set_target_properties( AtlasGeant4 PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized -Wno-uninitialized "  )
 endif()
 

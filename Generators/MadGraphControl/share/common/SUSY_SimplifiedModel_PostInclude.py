@@ -53,18 +53,12 @@ else:
         masses['5'] = 0.0
 
 # systematic variation
-if 'scup' in phys_short:
-    syst_mod=dict_index_syst[0]
-elif 'scdw' in phys_short:
-    syst_mod=dict_index_syst[1]
-elif 'alup' in phys_short:
-    syst_mod=dict_index_syst[2]
-elif 'aldw' in phys_short:
-    syst_mod=dict_index_syst[3]
-elif 'qcup' in phys_short:
-    syst_mod=dict_index_syst[6]
-elif 'qcdw' in phys_short:
-    syst_mod=dict_index_syst[7]
+if '_msup' in phys_short:
+    syst_mod='msup'
+elif '_msdw' in phys_short:
+    syst_mod='msdw'
+if syst_mod not in ['msup','msdw',None]:
+    raise RuntimeError(f'Systematic variation {syst_mod=} unknown; allowed values are "msup" or "msdw" for matching scale up/down variations')
 
 # Pass arguments as a dictionary: the "decays" argument is not accepted in older versions of MadGraphControl
 if 'mass' in [x.lower() for x in param_blocks]:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -76,13 +76,6 @@ namespace Muon
 
     /** @brief Returns the IdentifierHash corresponding to the PRD collection in the PRD container. */
     virtual IdentifierHash collectionHash() const;
-
-    /** @brief Returns the detector element corresponding to this PRD.
-    The pointer will be zero if the det el is not defined (i.e. it was not passed in by the ctor)*/
-    virtual const MuonGM::MuonClusterReadoutElement* detectorElement() const override = 0;
-
-    /** Interface method checking the type*/
-    virtual bool type(Trk::PrepRawDataType type) const override = 0;
 
     /** @brief Dumps information about the PRD*/
     virtual MsgStream&    dump( MsgStream&    stream) const override;

@@ -42,7 +42,6 @@ namespace InDet {
   public:
     // create constructor for standalone Root
     InDetTrackTruthFilterTool( const std::string& name );
-    virtual ~InDetTrackTruthFilterTool();
 
     //  static const InterfaceID& interfaceID();
     virtual StatusCode initialize() override;
@@ -67,8 +66,8 @@ namespace InDet {
 
   private:
 
-    StatusCode initTrkEffSystHistogram(float scale, TH2 *&histogram, std::string rootFileName, std::string histogramName) const;
-    float getFractionDropped(float fDefault, const TH2 *histogram, float x, float y, bool xAxisIspT = true) const;
+    StatusCode initTrkEffSystHistogram(float scale, std::unique_ptr<TH2>& histogram, std::string rootFileName, std::string histogramName) const;
+    float getFractionDropped(float fDefault, const std::unique_ptr<TH2>& histogram, float x, float y, bool xAxisIspT = true) const;
 
     ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool{this, "trackOriginTool", "InDet::InDetTrackTruthOriginTool", "Tool to get the truth origin of a track"};
 
@@ -79,14 +78,14 @@ namespace InDet {
     Gaudi::Property<float> m_fFakeTight{this, "fFakeTight", -1.0, "Fake tight fraction"};
     Gaudi::Property<float> m_trkEffSystScale{this, "trkEffSystScale", 1.0, "Track efficiency systematic scale"};
 
-    TH2* m_trkEffHistLooseGlobal = nullptr;
-    TH2* m_trkEffHistLooseIBL = nullptr;
-    TH2* m_trkEffHistLoosePP0 = nullptr;
-    TH2* m_trkEffHistLoosePhysModel = nullptr;
-    TH2* m_trkEffHistTightGlobal = nullptr;
-    TH2* m_trkEffHistTightIBL = nullptr;
-    TH2* m_trkEffHistTightPP0 = nullptr;
-    TH2* m_trkEffHistTightPhysModel = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistLooseGlobal = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistLooseIBL = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistLoosePP0 = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistLoosePhysModel = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistTightGlobal = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistTightIBL = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistTightPP0 = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistTightPhysModel = nullptr;
 
     std::unordered_map<std::string, TH2*> m_histMap;
 

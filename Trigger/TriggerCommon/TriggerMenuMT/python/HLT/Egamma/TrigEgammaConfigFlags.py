@@ -42,7 +42,7 @@ def createTrigEgammaConfigFlags():
 
     # Precision Electron Isolation
     flags.addFlag('Trigger.egamma.useRelptvarcone30', False)
-    flags.addFlag('Trigger.egamma.isoWPs', [0.15, 0.065, 0.06])
+    flags.addFlag('Trigger.egamma.isoWPs', [0.055, 0.05, 0.042])
 
     # Fast Electron Ringer Validation
     flags.addFlag('Trigger.egamma.enableFastElectronRinger', False)

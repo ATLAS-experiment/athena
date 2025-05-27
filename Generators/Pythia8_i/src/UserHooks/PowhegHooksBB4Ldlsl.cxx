@@ -111,7 +111,8 @@
 # define PYTHIA8_PLUGIN_CLASS(BASE, CLASS, PYTHIA, SETTINGS, LOGGER)
 # define PYTHIA8_PLUGIN_VERSIONS(...)
 #endif
-#include "Pythia8Plugins/PowhegHooks.h"
+
+#include "PowhegHooksSetterMethod.cxx"
 
 #include "UserSetting.h"
 #include <iostream>
@@ -130,7 +131,7 @@ Pythia8_UserHooks::UserHooksFactory::Creator<Pythia8::PowhegBB4Ldlsl> powhegBB4L
 namespace Pythia8 {
     using namespace std;
 
-    class PowhegBB4Ldlsl : public PowhegHooks {
+    class PowhegBB4Ldlsl : public PowhegHooksSetterMethod {
 
         public:
 
@@ -145,7 +146,8 @@ namespace Pythia8 {
                     m_vetoProduction("Powheg:veto", 1),
                     m_pTpythiaVeto("Powheg:bb4l:pTpythiaVeto", 0),
                     m_vetoDipoleFrame("Powheg:bb4l:FSREmission:vetoDipoleFrame", 0),
-                    m_scaleResonanceVeto("Powheg:bb4l:ScaleResonance:veto", 0.)
+                    m_scaleResonanceVeto("Powheg:bb4l:ScaleResonance:veto", 0.),
+                    m_pThardMode("POWHEG:pThard",0)
                 {
                 std::cout << "**********************************************************" << std::endl;
                 std::cout << "*                                                        *" << std::endl;
@@ -162,7 +164,7 @@ namespace Pythia8 {
             //--- Initialization -------------------------------------------------------
             virtual bool initAfterBeams() override {
                 // initialize settings of the parent class
-                PowhegHooks::initAfterBeams();
+                PowhegHooksSetterMethod::initAfterBeams();
                 // initialize settings of this class already initialized in constructor
                 return true;
             }
@@ -225,7 +227,7 @@ namespace Pythia8 {
 
                     // find the resonance the radiator originates from
                     int iRes = e[iRadBef].mother1();
-                    while ( iRes > 0 && (abs(e[iRes].id()) !=6 && abs(e[iRes].id()) != 24) ) {
+                    while ( iRes > 0 && (std::abs(e[iRes].id()) !=6 && std::abs(e[iRes].id()) != 24) ) {
                         iRes = e[iRes].mother1();
                     }
                     if (iRes == 0) {
@@ -258,7 +260,7 @@ namespace Pythia8 {
                         if (e[iRadBef].id() == 21)
                                 scale = gSplittingScale(psystem, pr, pe);
                         // quark emitting a gluon (or a photon)
-                        else if (abs(e[iRadBef].id()) <= 5 && ((e[iEmt].id() == 21) && ! m_vetoQED(settingsPtr)) )
+                        else if (std::abs(e[iRadBef].id()) <= 5 && ((e[iEmt].id() == 21) && ! m_vetoQED(settingsPtr)) )
                                 scale = qSplittingScale(psystem, pr, pe);
                         // other stuff (which we should not veto)
                         else {
@@ -298,7 +300,7 @@ namespace Pythia8 {
                 }
                 // FSR VETO THE PRODUCTION PROCESS, i.e. OUTSIDE RESONANCE (if it is switched on)
                 else if(!inResonance && m_vetoProduction(settingsPtr)){
-                        return PowhegHooks::doVetoFSREmission(sizeOld, e, iSys, inResonance);
+                        return PowhegHooksSetterMethod::doVetoFSREmission(sizeOld, e, iSys, inResonance);
                 }
                 // OTHERWISE DON'T VETO
                 else {
@@ -363,14 +365,14 @@ namespace Pythia8 {
                     return m_pTmin(settingsPtr);
                 }            
                 // iRes is a (anti-)top quark
-                else if (abs(event[iRes].id()) == 6) {
+                else if (std::abs(event[iRes].id()) == 6) {
                     // find top daughters
                     int idw = -1, idb = -1, idg = -1;
                     for (int i = 0; i < nDau; i++) {
                         int iDau = event[iRes].daughterList()[i];
-                        if (abs(event[iDau].id()) == 24) idw = iDau;
-                        if (abs(event[iDau].id()) ==  5) idb = iDau;
-                        if (abs(event[iDau].id()) == 21) idg = iDau;
+                        if (std::abs(event[iDau].id()) == 24) idw = iDau;
+                        if (std::abs(event[iDau].id()) ==  5) idb = iDau;
+                        if (std::abs(event[iDau].id()) == 21) idg = iDau;
                     }
 
                     // Get daughter 4-vectors in resonance frame
@@ -385,7 +387,7 @@ namespace Pythia8 {
                     return sqrt(2*pg*pb*pg.e()/pb.e());
                 }
                 // iRes is a W+(-) boson
-                else if (abs(event[iRes].id()) == 24) {
+                else if (std::abs(event[iRes].id()) == 24) {
                     // Find W daughters
                     int idq = -1, ida = -1, idg = -1;
                     for (int i = 0; i < nDau; i++) {
@@ -481,7 +483,7 @@ namespace Pythia8 {
                 double Qsq = Q.m2Calc();
 
                 // Mass term of radiator
-                double m2Rad = (abs(radID) >= 4 && abs(radID) < 7) ?
+                double m2Rad = (std::abs(radID) >= 4 && std::abs(radID) < 7) ?
                 pow2(particleDataPtr->m0(radID)) : 0.;
 
                 // z values for FSR 
@@ -510,6 +512,82 @@ namespace Pythia8 {
             // Functions to return statistics about the veto
             inline int getNInResonanceFSRVeto() { return m_nInResonanceFSRveto; }
 
+
+              //--------------------------------------------------------------------------
+
+            // Extraction of pThard based on the incoming event.
+            // Assume that all the final-state particles are in a continuous block
+            // at the end of the event and the final entry is the POWHEG emission.
+            // If there is no POWHEG emission, then pThard is set to SCALUP.
+
+            inline bool canVetoMPIStep() override { return true; }
+            inline int  numberVetoMPIStep() override { return 1; }
+            inline bool doVetoMPIStep(int nMPI, const Event &e) override {
+                // let the original PowhegHook intialise all necessary variables
+                // and set shower starting scale for pThard=0 mode
+                // consequence: always need to set nFinal = -1 in job options!
+                PowhegHooksSetterMethod::doVetoMPIStep(nMPI,e);
+                 // only reset pThard value if using pThardMode =1 or = 2 
+                if (m_pThardMode(settingsPtr) == 1 || m_pThardMode(settingsPtr) == 2){
+                    // Extra check on nMPI
+                    if (nMPI > 1) return false;
+                    int count = 0;
+                    //check if there is a top and an antitop in the event
+                    bool top_exists = false;
+                    bool antitop_exists = false;
+                    for (int i = e.size() - 1; i > 0; i--) {
+                    if (e[i].isFinal()) {
+                        count++;
+                        //check if there is a top and an antitop in the event
+                        if (e[i].id() == 6) top_exists = true;
+                        if (e[i].id() == -6) antitop_exists = true;
+                    } else break;
+                    }
+
+                    //adjust nFinal depending on the number of tops 
+                    int nCurrentFinal = -1;
+                    // if top and antitop exist, then pp -> t tbar (+ pwhg emissions) -> WbWb (+X) 
+                    if (top_exists && antitop_exists) nCurrentFinal = 2;
+                    // if only top or antitop exist, then pp -> t W b (+ pwhg emissions) -> WbWb (+X)
+                    else if (top_exists || antitop_exists) nCurrentFinal = 3;
+                    else{
+                        std::cout << "Error: neither top nor anti-top found - something went wrong" << std::endl;
+                        exit(1);
+                    }
+                    // other cases not considered currently
+                    if (count != nCurrentFinal && count != nCurrentFinal + 1) {
+                        cout << "Error: wrong number of final state particles in event: count " << count << " nCurrentFinal: "<< nCurrentFinal << endl;
+                        for (int i = e.size() - 1; i > 0; i--) {
+                            if (e[i].isFinal()) { std:: cout << "FS particle " << i << " PID: " << e[i].id() << std::endl;
+                            }
+                        }
+                        exit(1);
+                    }
+                    // Flag if POWHEG radiation present and index
+                    bool isEmt = (count == nCurrentFinal) ? false : true;
+                    int iEmt  = (isEmt) ? e.size() - 1 : -1;
+
+                    double pThard = 0;
+                    if (m_pThardMode(settingsPtr) == 1) {
+                        pThard = PowhegHooksSetterMethod::pTcalc(e, -1, iEmt, -1, -1, -1);
+                    // If pThardMode is 2, then the pT of all final-state partons is checked
+                    // against all other incoming and outgoing partons, with the minimal value
+                    // taken.
+                    } else if (m_pThardMode(settingsPtr) == 2) {
+                        pThard = PowhegHooksSetterMethod::pTcalc(e, -1, -1, -1, -1, -1);
+                    } else {
+                        std::cout << "Error: m_pThardMode neither 1 or 2 - something went wrong" << std::endl;
+                        exit(1);
+                    }
+
+                    // set pThard value in base class UserHook
+                    PowhegHooksSetterMethod::setpThard(pThard);
+                }
+
+                // Do not veto the event
+                return false;
+            }
+
             //--------------------------------------------------------------------------
 
         private:
@@ -520,6 +598,7 @@ namespace Pythia8 {
             Pythia8_UserHooks::UserSetting<double> m_pTmin;
             Pythia8_UserHooks::UserSetting<int> m_vetoProduction, m_pTpythiaVeto, m_vetoDipoleFrame;
             Pythia8_UserHooks::UserSetting<double>  m_scaleResonanceVeto;
+            Pythia8_UserHooks::UserSetting<int> m_pThardMode;
 
     };
 

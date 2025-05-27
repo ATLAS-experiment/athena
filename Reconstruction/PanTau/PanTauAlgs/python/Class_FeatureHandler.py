@@ -87,7 +87,6 @@ class FeatureHandler:
         # they are passed to the feature extractor later on - avoids errors due to typos
         self.m_VarTypeName_Sum          = "Sum"
         self.m_VarTypeName_Ratio        = "Ratio"
-        self.m_VarTypeName_EtInRing     = "EtInRing"
         self.m_VarTypeName_Isolation    = "Isolation"
         self.m_VarTypeName_Num          = "Num"
         self.m_VarTypeName_Mean         = "Mean"
@@ -97,8 +96,6 @@ class FeatureHandler:
         self.m_VarTypeName_DeltaR       = "DeltaR"
         self.m_VarTypeName_JetMoment    = "JetMoment"
         self.m_VarTypeName_Combined     = "Combined"
-        self.m_VarTypeName_JetShape     = "JetShape"
-        self.m_VarTypeName_ImpactParams = "ImpactParams"
         self.m_VarTypeName_Basic        = "Basic"
         self.m_VarTypeName_PID          = "PID"
         self.m_VarTypeName_Shots        = "Shots"
@@ -107,7 +104,6 @@ class FeatureHandler:
         self.m_DefaultValues = {}
         self.m_DefaultValues[self.m_VarTypeName_Sum]          = -4000.0
         self.m_DefaultValues[self.m_VarTypeName_Ratio]        = -0.2
-        self.m_DefaultValues[self.m_VarTypeName_EtInRing]     = -1000.0
         self.m_DefaultValues[self.m_VarTypeName_Isolation]    = -0.2
         self.m_DefaultValues[self.m_VarTypeName_Num]          = -5.0
         self.m_DefaultValues[self.m_VarTypeName_Mean]         = -0.2
@@ -117,8 +113,6 @@ class FeatureHandler:
         self.m_DefaultValues[self.m_VarTypeName_DeltaR]       = -0.2
         self.m_DefaultValues[self.m_VarTypeName_JetMoment]    = -0.2
         self.m_DefaultValues[self.m_VarTypeName_Combined]     = -10.0
-        self.m_DefaultValues[self.m_VarTypeName_JetShape]     = -2.0
-        self.m_DefaultValues[self.m_VarTypeName_ImpactParams] = -100.
         self.m_DefaultValues[self.m_VarTypeName_Basic]        = -5.0
         self.m_DefaultValues[self.m_VarTypeName_PID]          = -9.0
         self.m_DefaultValues[self.m_VarTypeName_Shots]        = -2.0

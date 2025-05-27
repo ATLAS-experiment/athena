@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootAsciiDumperAlgHandle.h 
@@ -32,13 +32,11 @@ class RootAsciiDumperAlgHandle
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  RootAsciiDumperAlgHandle( const std::string& name, ISvcLocator* pSvcLocator );
+  /// Inherited constructor.
+  using ::AthAlgorithm::AthAlgorithm;
 
   /// Destructor: 
-  virtual ~RootAsciiDumperAlgHandle(); 
+  virtual ~RootAsciiDumperAlgHandle() = default;
 
   // Assignment operator: 
   //RootAsciiDumperAlgHandle &operator=(const RootAsciiDumperAlgHandle &alg); 
@@ -65,30 +63,39 @@ class RootAsciiDumperAlgHandle
   RootAsciiDumperAlgHandle();
 
   /// ASCII output file name
-  std::string m_ofname;
+  StringProperty m_ofname
+    { this, "AsciiFileName", "d3pd.ascii",
+      "Name of the ascii file where the content of the "
+      "ROOT n-tuple file will be dumped." };
 
   /// file handle to the ASCII output file
-  int m_ofd;
+  int m_ofd = -1;
   
   /// number of entries processed so-far
-  uint64_t m_nentries;
+  uint64_t m_nentries = 0;
 
   /// run number
-  SG::RVar<uint32_t> m_runnbr;
+  SG::ReadHandleKey<uint32_t> m_runnbr
+    { this, "RunNumber", "RunNumber", "handle to the run-nbr in event (read)" };
 
   /// event number
-  SG::RVar<uint32_t> m_evtnbr;
+  SG::ReadHandleKey<uint32_t> m_evtnbr
+    { this, "EventNumber", "EventNumber", "handle to the evt-nbr in event (read)" };
 
   /// number of electrons
-  SG::RVar<int32_t> m_el_n;
+  SG::ReadHandleKey<int32_t> m_el_n
+    { this, "el_n", "el_n", "handle to the nbr of electrons in event (read)" };
 
   /// eta of electrons
-  SG::RVar<std::vector<float> > m_el_eta;
+  SG::ReadHandleKey<std::vector<float> > m_el_eta
+    { this, "el_eta", "el_eta", "handle to the eta of electrons in event (read)" };
 
   /// jetcone dR
-  SG::RVar<std::vector<std::vector<float> > > m_el_jetcone_dr;
+  SG::ReadHandleKey<std::vector<std::vector<float> > > m_el_jetcone_dr
+    { this, "el_jetcone_dr", "el_jetcone_dr", "handle to the jetcone-dR of electrons in event (read)" };
 
-  SG::ReadHandleKey<xAOD::EventInfo> m_eiKey;
+  SG::ReadHandleKey<xAOD::EventInfo> m_eiKey
+    { this, "eiKey", "EventInfo", "" };
 }; 
 
 // I/O operators

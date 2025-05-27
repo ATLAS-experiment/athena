@@ -43,8 +43,13 @@
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 #include "ActsInterop/Logger.h"
+
+#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibration/TrkMeasSurfaceAccessor.h"
+#include "ActsCalibration/TrkPrepRawDataCalibrator.h"
+#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibration/TrkPrepRawDataSurfaceAcc.h"
 
 #include "Acts/Propagator/DirectNavigator.hpp"
 #include "src/detail/OnTrackCalibrator.h"
@@ -54,124 +59,6 @@
 
 namespace ActsTrk {
 
-/*
-The following is the implementation of the PRDSourceLinkCalibrator.
-To use this implementation, the flag for a refitting from PRD measurment has to be turned on in the appropriate Acts config.
-*/
-template <typename trajectory_t>
-void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
-    const Acts::CalibrationContext& /*cctx*/,
-    const Acts::SourceLink& sl,
-    typename trajectory_t::TrackStateProxy trackState) const {
-    
-    const Trk::PrepRawData* prd = sl.template get<PRDSourceLink>().prd;
-    trackState.setUncalibratedSourceLink(Acts::SourceLink{sl});
-
-    const Acts::BoundTrackParameters actsParam(trackState.referenceSurface().getSharedPtr(),
-             trackState.predicted(),
-             trackState.predictedCovariance(),
-             Acts::ParticleHypothesis::pion());
-    std::unique_ptr<const Trk::TrackParameters> trkParam = converterTool->actsTrackParametersToTrkParameters(actsParam, gctx);
-    
-    //RIO_OnTrack creation from the PrepRawData
-    const Trk::Surface & prdsurf = prd->detectorElement()->surface(prd->identify());
-    const Trk::RIO_OnTrack *rot = nullptr;
-    const Trk::PlaneSurface *plsurf = nullptr;
-    if (prdsurf.type() == Trk::SurfaceType::Plane)
-      plsurf = static_cast < const Trk::PlaneSurface *>(&prdsurf);
-
-    const Trk::StraightLineSurface *slsurf = nullptr;
-        
-    if (prdsurf.type() == Trk::SurfaceType::Line)
-      slsurf = static_cast < const Trk::StraightLineSurface *>(&prdsurf);
-
-    //@TODO, there is no way to put a MSG in this framework yet. So the next 3 lines are commented
-    //if ((slsurf == nullptr) && (plsurf == nullptr)) {
-      //msg(MSG::ERROR) << "Surface is neither PlaneSurface nor StraightLineSurface!" << endmsg; //ATH_MSG_ERROR doesn't work here because (ActsTrk::PRDSourceLinkCalibrator' has no member named 'msg')
-    // }
-    if (slsurf != nullptr) {
-      Trk::AtaStraightLine atasl(
-        slsurf->center(), 
-        trackState.predicted()[Trk::phi],
-        trackState.predicted()[Trk::theta],
-        trackState.predicted()[Trk::qOverP], 
-        *slsurf
-       );
-      if(broadRotCreator){
-        rot = broadRotCreator->correct(*prd, atasl,Gaudi::Hive::currentContext()); 
-        }
-      else{
-        rot = rotCreator->correct(*prd, atasl,Gaudi::Hive::currentContext()); 
-        }
-     } else if (plsurf != nullptr) {
-      if ((trkParam.get())->covariance() != nullptr) { 
-        Trk::AtaPlane atapl(
-          plsurf->center(), 
-          trackState.predicted()[Trk::phi],
-          trackState.predicted()[Trk::theta],
-          trackState.predicted()[Trk::qOverP], 
-          *plsurf,
-          AmgSymMatrix(5)(*trkParam.get()->covariance()) 
-        );
-        rot = rotCreator->correct(*prd, atapl,Gaudi::Hive::currentContext());
-      } else {
-        Trk::AtaPlane atapl(
-          plsurf->center(), 
-          trackState.predicted()[Trk::phi],
-          trackState.predicted()[Trk::theta],
-          trackState.predicted()[Trk::qOverP], 
-          *plsurf
-        );
-        rot = rotCreator->correct(*prd, atapl,Gaudi::Hive::currentContext()); 
-      }
-    } // End of RIO_OnTrack creation from the PrepRawData
-
-    int dim = (*rot).localParameters().dimension();
-    trackState.allocateCalibrated(dim);
-    
-    //Writting the calibrated ROT measurment into the trackState
-    if (dim == 0)
-      {
-        throw std::runtime_error("Cannot create dim 0 measurement");
-      } else if (dim == 1) {
-        trackState.template calibrated<1>() = (*rot).localParameters().template head<1>(); 
-        trackState.template calibratedCovariance<1>() = (*rot).localCovariance().template topLeftCorner<1, 1>(); 
-        Acts::BoundSubspaceIndices subspaceIndices;
-        if ((*rot).associatedSurface().bounds().type() == Trk::SurfaceBounds::Annulus) { 
-          subspaceIndices = {Acts::eBoundLoc1}; // y coordinate is l0
-        } else {
-          subspaceIndices = {Acts::eBoundLoc0}; // x coordinate is l0
-        }
-        trackState.setProjectorSubspaceIndices(subspaceIndices);
-      }
-      else if (dim == 2)
-        {
-          trackState.template calibrated<2>() = (*rot).localParameters().template head<2>();
-          trackState.template calibratedCovariance<2>() = (*rot).localCovariance().template topLeftCorner<2, 2>();
-          Acts::BoundSubspaceIndices subspaceIndices = {Acts::eBoundLoc0, Acts::eBoundLoc1};
-          trackState.setProjectorSubspaceIndices(subspaceIndices);
-        }
-      else
-      {
-        throw std::runtime_error("Dim " + std::to_string(dim) +
-                                " currently not supported.");
-      }
-    delete rot; //Delete rot as a precaution
-
-}
-
-const Acts::Surface* PRDSourceLinkSurfaceAccessor::operator()(const Acts::SourceLink& sourceLink) const {
-  const auto& sl = sourceLink.get<PRDSourceLink>();
-  const auto& trkSrf = sl.prd->detectorElement()->surface(sl.prd->identify());
-  const auto& actsSrf = converterTool->trkSurfaceToActsSurface(trkSrf);
-  return &actsSrf;
-}
-
-KalmanFitterTool::KalmanFitterTool(const std::string& t,
-				   const std::string& n,
-				   const IInterface* p) :
-  base_class(t,n,p)
-{}
 
 StatusCode KalmanFitterTool::initialize() {
 
@@ -179,12 +66,7 @@ StatusCode KalmanFitterTool::initialize() {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ATLASConverterTool.retrieve());
-  ATH_CHECK(m_trkSummaryTool.retrieve());
-  if(m_doReFitFromPRD){
-  ATH_CHECK(m_ROTcreator.retrieve()); 
-  ATH_CHECK(m_broadROTcreator.retrieve());
-  }
-
+  ATH_CHECK(m_ROTcreator.retrieve(EnableTool{m_doReFitFromPRD}));
   m_logger = makeActsAthenaLogger(this, "KalmanRefit");
 
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
@@ -210,7 +92,7 @@ StatusCode KalmanFitterTool::initialize() {
 						  logger().cloneWithSuffix("DirectKalmanFitter"));
 
   ///
-  m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>(*m_ATLASConverterTool);
+  m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>();
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
 
@@ -229,9 +111,8 @@ std::unique_ptr<Trk::Track>
 KalmanFitterTool::fit(const EventContext& ctx,
 		      const Trk::Track& inputTrack,
 		      const Trk::RunOutlierRemoval /*runOutlier*/,
-		      const Trk::ParticleHypothesis hypothesis) const
-{
-  std::unique_ptr<Trk::Track> track = nullptr;
+		      const Trk::ParticleHypothesis hypothesis) const {
+ 
   ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,,)    with Track from author = "
        << inputTrack.info().dumpInfo()<<", "<<hypothesis);
 
@@ -250,15 +131,14 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Construct a perigee surface as the target surface
   auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
   
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext = Acts::CalibrationContext();
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
-  ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
-  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+  detail::TrkMeasSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
+  kfExtensions.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -269,11 +149,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
                 propagationOption,
                 pSurface.get());
 
-  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
-    return track;
+    return nullptr;
   }
 
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
@@ -295,11 +175,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
   
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-    scaledInitialParams, kfOptions, tracks);
-  if (result.ok()) {
-    track = makeTrack(ctx, tgContext, tracks, result);
-  }
-  return track;
+                              scaledInitialParams, kfOptions, tracks);
+  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+                                      Trk::TrackInfo::TrackFitter::KalmanFitter,
+                                      detail::SourceLinkType::TrkMeasurement);
 }
 
 // fit a set of MeasurementBase objects
@@ -309,9 +188,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
 		      const Trk::MeasurementSet& inputMeasSet,
 		      const Trk::TrackParameters& estimatedStartParameters,
 		      const Trk::RunOutlierRemoval /*runOutlier*/,
-		      const Trk::ParticleHypothesis /*matEffects*/) const
-{
-  std::unique_ptr<Trk::Track> track = nullptr;
+		      const Trk::ParticleHypothesis /*matEffects*/) const {
 
   // protection against not having measurements on the input track
   if (inputMeasSet.size() < 2) {
@@ -320,18 +197,16 @@ KalmanFitterTool::fit(const EventContext& ctx,
   }
 
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
   
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext = Acts::CalibrationContext();
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
-  ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
-  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+  detail::TrkMeasSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
+  kfExtensions.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -343,15 +218,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
                 pSurface.get());
 
   std::vector<Acts::SourceLink> trackSourceLinks;
-  trackSourceLinks.reserve(inputMeasSet.size());
-
-  for (auto it = inputMeasSet.begin(); it != inputMeasSet.end(); ++it){
-   trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, **it));
-  }
+  m_ATLASConverterTool->toSourceLinks(inputMeasSet, trackSourceLinks);
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
-    return track;
+    return nullptr;
   }
 
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
@@ -360,11 +231,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-    initialParams, kfOptions, tracks);
-  if (result.ok()) {
-    track = makeTrack(ctx, tgContext, tracks, result);
-  }
-  return track;
+                              initialParams, kfOptions, tracks);
+  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+                                                Trk::TrackInfo::TrackFitter::KalmanFitter,
+                                                detail::SourceLinkType::TrkMeasurement);
 }
 
 // fit a set of PrepRawData objects
@@ -374,32 +244,24 @@ KalmanFitterTool::fit(const EventContext& ctx,
 		      const Trk::PrepRawDataSet& inputPRDColl,
 		      const Trk::TrackParameters& estimatedStartParameters,
 		      const Trk::RunOutlierRemoval /*runOutlier*/,
-		      const Trk::ParticleHypothesis /*prtHypothesis*/) const
-{
+		      const Trk::ParticleHypothesis /*prtHypothesis*/) const {
     ATH_MSG_DEBUG("--> entering KalmanFitter::fit(PRDS,TP,)");
     
-  
-    std::unique_ptr<Trk::Track> track = nullptr;
-
     // Construct a perigee surface as the target surface
-    auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-        Acts::Vector3{0., 0., 0.}); 
+    auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero()); 
     
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-    Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-    // CalibrationContext converter not implemented yet.
-    Acts::CalibrationContext calContext = Acts::CalibrationContext();
+    const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+    const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
     Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
-    PRDSourceLinkCalibrator calibrator{}; // @TODO: Set tool pointers
-    calibrator.rotCreator =m_ROTcreator.get();
-    calibrator.broadRotCreator = m_broadROTcreator.get();
-    calibrator.converterTool = m_ATLASConverterTool.get();
-    kfExtensions.calibrator.connect<&PRDSourceLinkCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
+    detail::TrkPrepRawDataCalibrator calibrator{m_ATLASConverterTool.get(), m_ROTcreator.get()}; // @TODO: Set tool pointers
 
-    PRDSourceLinkSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
-    kfExtensions.surfaceAccessor.connect<&PRDSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+    kfExtensions.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
+
+    detail::TrkPrepRawDataSurfaceAcc surfaceAccessor{m_ATLASConverterTool.get()};
+    kfExtensions.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&surfaceAccessor);
 
     Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
     propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -411,16 +273,12 @@ KalmanFitterTool::fit(const EventContext& ctx,
                   pSurface.get());
 
 
-    std::vector<Acts::SourceLink> trackSourceLinks; 
-    trackSourceLinks.reserve(inputPRDColl.size());
-
-    for(const Trk::PrepRawData* prd : inputPRDColl) {
-      trackSourceLinks.push_back(Acts::SourceLink{PRDSourceLink{prd}});
-    }
+    std::vector<Acts::SourceLink> trackSourceLinks;
+    m_ATLASConverterTool->toSourceLinks(inputPRDColl, trackSourceLinks);
     // protection against error in the conversion from Atlas masurement to Acts source link
     if (trackSourceLinks.empty()) {
       ATH_MSG_WARNING("input contain measurement but no source link created, probable issue with the converter, reject fit ");
-      return track;
+      return nullptr;
     }
     //
 
@@ -430,11 +288,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
     ActsTrk::MutableTrackContainer tracks;
     // Perform the fit
     auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-      initialParams, kfOptions, tracks);
-    if (result.ok()) {
-      track = makeTrack(ctx, tgContext, tracks, result, true);
-    }
-    return track; 
+                                initialParams, kfOptions, tracks);
+    return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+                                                  Trk::TrackInfo::TrackFitter::KalmanFitter,
+                                                  detail::SourceLinkType::TrkPrepRawData);
 }
 
 // fit a set of PrepRawData objects
@@ -469,8 +326,8 @@ KalmanFitterTool::fit(const EventContext&,
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
-  ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor( *actsTrackingGeometry, detectorElementToGeometryIdMap);
-  kfExtensions.surfaceAccessor.connect<&ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+  ActsTrk::detail::xAODUncalibMeasSurfAcc surfaceAccessor(actsTrackingGeometry, &detectorElementToGeometryIdMap);
+  kfExtensions.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&surfaceAccessor);
 
   detail::OnTrackCalibrator calibrator = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>
     ::NoCalibration(*actsTrackingGeometry, detectorElementToGeometryIdMap);
@@ -543,16 +400,13 @@ KalmanFitterTool::fit(const EventContext& ctx,
     return nullptr;
   }
 
-   std::unique_ptr<Trk::Track> track = nullptr;
-
+ 
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
   
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext = Acts::CalibrationContext();
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
@@ -565,27 +419,23 @@ KalmanFitterTool::fit(const EventContext& ctx,
                 propagationOption,
                 pSurface.get());
 
-  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
+  m_ATLASConverterTool->toSourceLinks(addMeasColl, trackSourceLinks);
 
-  for (auto it = addMeasColl.begin(); it != addMeasColl.end(); ++it)
-  {
-    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, **it));
-  }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
-    return track;
+    return nullptr;
   }
+  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
 
   ActsTrk::MutableTrackContainer tracks;
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-    initialParams, kfOptions, tracks);
-  if (result.ok()) {
-    track = makeTrack(ctx, tgContext, tracks, result);
-  }
-  return track;
+                              initialParams, kfOptions, tracks);
+  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+                                                Trk::TrackInfo::TrackFitter::KalmanFitter,
+                                                detail::SourceLinkType::TrkMeasurement);
 }
 
 // extend a track fit to include an additional set of PrepRawData objects
@@ -632,16 +482,12 @@ KalmanFitterTool::fit(const EventContext& ctx,
     return nullptr;
   }
 
-   std::unique_ptr<Trk::Track> track = nullptr;
-
   // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
   
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext = Acts::CalibrationContext();
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
@@ -654,13 +500,14 @@ KalmanFitterTool::fit(const EventContext& ctx,
                 propagationOption,
                 pSurface.get());
 
-  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1);
-  std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2);
-  trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(intrk1);
+  std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(intrk2);
+  trackSourceLinks.insert(trackSourceLinks.end(), std::make_move_iterator(trackSourceLinks2.begin()), 
+                          std::make_move_iterator(trackSourceLinks2.end()));
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
-    return track;
+    return nullptr;
   }
 
   const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
@@ -678,198 +525,13 @@ KalmanFitterTool::fit(const EventContext& ctx,
                                                        scaledCov, Acts::ParticleHypothesis::pion());
 
 
-  ActsTrk::MutableTrackContainer tracks;
+  ActsTrk::MutableTrackContainer tracks{};
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-    scaledInitialParams, kfOptions, tracks);
-  if (result.ok()) {
-    track = makeTrack(ctx, tgContext, tracks, result);
-  }
-  return track;
-}
-
-std::unique_ptr<Trk::Track>
-KalmanFitterTool::makeTrack(const EventContext& ctx,
-			    Acts::GeometryContext& tgContext,
-			    ActsTrk::MutableTrackContainer& tracks,
-			    Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult,
-			    bool SourceLinkType) const {
-  
-  if (not fitResult.ok()) 
-    return nullptr;    
-
-  std::unique_ptr<Trk::Track> newtrack = nullptr;
-  // Get the fit output object
-  const auto& acts_track = fitResult.value();
-  auto finalTrajectory = std::make_unique<Trk::TrackStates>();
-  // initialise the number of dead Pixel and Acts strip
-  int numberOfDeadPixel = 0;
-  int numberOfDeadSCT = 0;
-
-  std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
-  // Loop over all the output state to create track state
-  tracks.trackStateContainer().visitBackwards(acts_track.tipIndex(), 
-                [&] (const auto &state) -> void
-  {
-    // First only concider state with an associated detector element not in the TRT
-    auto flag = state.typeFlags();
-    const auto* associatedDetEl = state.referenceSurface().associatedDetectorElement();
-    if (not associatedDetEl) 
-      return;
-    
-    const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(associatedDetEl);
-    if (not actsElement) 
-      return;
-
-    const auto* upstreamDetEl = actsElement->upstreamDetectorElement();
-    if (not upstreamDetEl) 
-      return;
-
-    ATH_MSG_VERBOSE("Try casting to TRT for if");    
-    if (dynamic_cast<const InDetDD::TRT_BaseElement*>(upstreamDetEl))
-      return;
-
-    const auto* trkDetElem = dynamic_cast<const Trk::TrkDetElementBase*>(upstreamDetEl);
-    if (not trkDetElem)
-      return;
-
-    ATH_MSG_VERBOSE("trkDetElem type: " << static_cast<std::underlying_type_t<Trk::DetectorElemType>>(trkDetElem->detectorType()));
-
-    ATH_MSG_VERBOSE("Try casting to SiDetectorElement");
-    const auto* detElem = dynamic_cast<const InDetDD::SiDetectorElement*>(upstreamDetEl);
-    if (not detElem)
-      return;
-    ATH_MSG_VERBOSE("detElem = " << detElem);
-
-    // We need to determine the type of state 
-    std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-    std::unique_ptr<Trk::TrackParameters> parm;
-
-    // State is a hole (no associated measurement), use predicted parameters   
-    if (flag.test(Acts::TrackStateFlag::HoleFlag)){
-      ATH_MSG_VERBOSE("State is a hole (no associated measurement), use predicted parameters");
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.predicted(),
-             state.predictedCovariance(),
-             acts_track.particleHypothesis());
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
-      auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
-      
-      // Check if this is a hole, a dead sensors or a state outside the sensor boundary
-      ATH_MSG_VERBOSE("Check if this is a hole, a dead sensors or a state outside the sensor boundary");
-      if(boundaryCheck == Trk::BoundaryCheckResult::DeadElement){
-        if (detElem->isPixel()) {
-          ++numberOfDeadPixel;
-        }
-        else if (detElem->isSCT()) {
-          ++numberOfDeadSCT;
-        }
-        // Dead sensors states are not stored              
-        return;
-            } else if (boundaryCheck != Trk::BoundaryCheckResult::Candidate){
-        // States outside the sensor boundary are ignored
-        return;
-      }
-      typePattern.set(Trk::TrackStateOnSurface::Hole);
-    }
-    // The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters
-    else if (flag.test(Acts::TrackStateFlag::OutlierFlag) or !state.hasSmoothed()) {
-      ATH_MSG_VERBOSE("The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters");
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.filtered(),
-             state.filteredCovariance(),
-             acts_track.particleHypothesis());
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
-      typePattern.set(Trk::TrackStateOnSurface::Outlier);
-    }
-    // The state is a measurement state, use smoothed parameters 
-    else{
-      ATH_MSG_VERBOSE("The state is a measurement state, use smoothed parameters");
-
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.smoothed(),
-             state.smoothedCovariance(),
-             acts_track.particleHypothesis());
-      
-      actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
-      typePattern.set(Trk::TrackStateOnSurface::Measurement);                                         
-    }
-    std::unique_ptr<Trk::MeasurementBase> measState;
-    if (state.hasUncalibratedSourceLink() && !SourceLinkType){
-      auto sl = state.getUncalibratedSourceLink().template get<ATLASSourceLink>();
-      assert(sl);
-      measState = sl->uniqueClone();
-    }
-    else if (state.hasUncalibratedSourceLink() && SourceLinkType){ //If the SourceLink is of type PRDSourceLink, we need to create the RIO_OnTrack here.
-      auto sl = state.getUncalibratedSourceLink().template get<PRDSourceLink>().prd;
-
-      //ROT creation
-      const IdentifierHash idHash = sl->detectorElement()->identifyHash();
-      int dim = state.calibratedSize();
-      std::unique_ptr<Trk::RIO_OnTrack> rot;
-      if (dim == 1) {
-        const InDet::SCT_Cluster* sct_Cluster = dynamic_cast<const InDet::SCT_Cluster*>(sl);
-        if(!sct_Cluster){
-          ATH_MSG_ERROR("ERROR could not cast PRD to SCT_Cluster");
-          return;
-        }
-        rot = std::make_unique<InDet::SCT_ClusterOnTrack>(sct_Cluster,Trk::LocalParameters(Trk::DefinedParameter(state.template calibrated<1>()[0], Trk::loc1)), state.template calibratedCovariance<1>(),idHash);
-        } 
-      else if (dim == 2) {
-        const InDet::PixelCluster* pixelCluster = dynamic_cast<const InDet::PixelCluster*>(sl);
-        if(!pixelCluster){ 
-          //sometimes even with dim=2, only the SCT_Cluster implementation work for RIO_OnTrack creation
-          ATH_MSG_VERBOSE("Dimension is 2 but we need SCT_Cluster for this measurment");
-          const InDet::SCT_Cluster* sct_Cluster = dynamic_cast<const InDet::SCT_Cluster*>(sl);
-          rot = std::make_unique<InDet::SCT_ClusterOnTrack>(sct_Cluster,Trk::LocalParameters(Trk::DefinedParameter(state.template calibrated<1>()[0], Trk::loc1)), state.template calibratedCovariance<1>(),idHash);
-          }
-        else{
-        rot = std::make_unique<InDet::PixelClusterOnTrack>(pixelCluster,Trk::LocalParameters(state.template calibrated<2>()),state.template calibratedCovariance<2>(),idHash);
-          }
-        } 
-      else {
-          throw std::domain_error("Cannot handle measurement dim>2");
-        }
-      measState = rot->uniqueClone();
-    }
-    double nDoF = state.calibratedSize();
-    auto quality =Trk::FitQualityOnSurface(state.chi2(), nDoF);
-    const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(quality, std::move(measState), std::move(parm), nullptr, typePattern);
-    // If a state was succesfully created add it to the trajectory 
-    if (perState) {
-      ATH_MSG_VERBOSE("State succesfully creates, adding it to the trajectory");
-      finalTrajectory->insert(finalTrajectory->begin(), perState);
-    }
-  });
-  // Convert the perigee state and add it to the trajectory
-  const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
-                                          acts_track.parameters(), 
-                                          acts_track.covariance(),
-                                          acts_track.particleHypothesis());
-  std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
-  std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-  typePattern.set(Trk::TrackStateOnSurface::Perigee);
-  const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);
-  if (perState) finalTrajectory->insert(finalTrajectory->begin(), perState);
-
-  // Create the track using the states
-  Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::KalmanFitter, Trk::noHypothesis);
-  newInfo.setTrackFitter(Trk::TrackInfo::TrackFitter::KalmanFitter); //Mark the fitter as KalmanFitter
-  newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
-  if (newtrack) {
-    // Create the track summary and update the holes information
-    if (!newtrack->trackSummary()) {
-      newtrack->setTrackSummary(std::make_unique<Trk::TrackSummary>());
-      newtrack->trackSummary()->update(Trk::numberOfPixelHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfSCTHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfTRTHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfPixelDeadSensors, numberOfDeadPixel);
-      newtrack->trackSummary()->update(Trk::numberOfSCTDeadSensors, numberOfDeadSCT);
-    }
-    m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, true);
-  }
-  return newtrack;
+                              scaledInitialParams, kfOptions, tracks);
+  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+                                                Trk::TrackInfo::TrackFitter::KalmanFitter,
+                                                detail::SourceLinkType::TrkMeasurement);
 }
 
 std::unique_ptr< ActsTrk::MutableTrackContainer >

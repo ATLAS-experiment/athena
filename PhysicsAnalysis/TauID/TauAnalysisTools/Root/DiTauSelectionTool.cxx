@@ -30,6 +30,7 @@ DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
   declareProperty( "PtRegion",       m_vPtRegion       = {});  // in GeV
   declareProperty( "AbsEtaRegion",   m_vAbsEtaRegion   = {});
   declareProperty( "NSubjetsRegion", m_vNSubjetsRegion = {});
+  declareProperty( "AbsCharges",     m_vAbsCharges    = {});
 }
 //______________________________________________________________________________
 DiTauSelectionTool::~DiTauSelectionTool()
@@ -51,6 +52,9 @@ StatusCode DiTauSelectionTool::initialize()
   if (!bConfigViaProperties and !m_vNSubjetsRegion.empty())       bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMax.value())) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !m_vAbsCharges.empty())       bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_iAbsCharge.value())) bConfigViaProperties = true;
+
 
   if (bConfigViaConfigFile and bConfigViaProperties)
   {
@@ -148,6 +152,18 @@ StatusCode DiTauSelectionTool::initialize()
         if (std::isnan(m_dNSubjetsMax.value()))
           m_dNSubjetsMax = rEnv.GetValue("NSubjetsMax",NAN);
       }
+      else if (sCut == "AbsCharges")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutAbsCharge;
+        if (m_vAbsCharges.empty())
+          TauAnalysisTools::split(rEnv,"AbsCharges", ';', m_vAbsCharges);
+      }
+      else if (sCut == "AbsCharge")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutAbsCharge;
+        if (std::isnan(m_iAbsCharge.value()))
+          m_iAbsCharge = rEnv.GetValue("AbsCharge",NAN);
+      }
       else ATH_MSG_WARNING("Cut " << sCut << " is not available");
     }
 
@@ -164,23 +180,27 @@ StatusCode DiTauSelectionTool::initialize()
    {DiTauCutPt, std::make_unique<TauAnalysisTools::DiTauSelectionCutPt>(this)},
    {DiTauCutAbsEta, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsEta>(this)},
    {DiTauCutNSubjets, std::make_unique<TauAnalysisTools::DiTauSelectionCutNSubjets>(this)},
+   {DiTauCutAbsCharge, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsCharge>(this)},
   };
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
   
-  ATH_MSG_INFO( "Initializing TauSelectionTool" );
+  ATH_MSG_INFO( "Initializing DiTauSelectionTool" );
   FillRegionVector(m_vPtRegion, m_dPtMin.value(), m_dPtMax.value());
   FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
   FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin.value(), m_dNSubjetsMax.value());
+  FillValueVector(m_vAbsCharges, m_iAbsCharge.value());
 
   PrintConfigRegion ("Pt",          m_vPtRegion);
   PrintConfigRegion ("AbsEta",      m_vAbsEtaRegion);
   PrintConfigRegion ("NSubjets",    m_vNSubjetsRegion);
+  PrintConfigValue  ("AbsCharge",   m_vAbsCharges);
 
   std::string sCuts = "";
   if (m_iSelectionCuts & DiTauCutPt) sCuts += "Pt ";
   if (m_iSelectionCuts & DiTauCutAbsEta) sCuts += "AbsEta ";
   if (m_iSelectionCuts & DiTauCutNSubjets) sCuts += "NSubjets ";
+  if (m_iSelectionCuts & DiTauCutAbsCharge) sCuts += "AbsCharge ";
 
   ATH_MSG_DEBUG( "cuts: " << sCuts);
 

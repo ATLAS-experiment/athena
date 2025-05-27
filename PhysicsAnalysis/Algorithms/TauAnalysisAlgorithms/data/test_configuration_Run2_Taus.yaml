@@ -10,10 +10,10 @@ TauJets:
 - containerName: AnaTauJets
   decorateTruth: true
   WorkingPoint:
-  - selectionName: tight
-    quality: Tight
+  - selectionName: medium
+    quality: Medium
   TriggerSF:
-  - tauID: Tight
+  - tauID: Medium
     triggerChainsPerYear:
       2015:
       - HLT_tau25_medium1_tracktwo

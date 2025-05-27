@@ -20,7 +20,7 @@ class RefittingCalibrator {
  public:
   using MutableTrackStateProxy =
       ActsTrk::MutableTrackStateBackend::TrackStateProxy;
-  using ConstTrackStateProxy =
+  using ConstTrackStateProxy=
       ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy;
 
   struct RefittingSourceLink {

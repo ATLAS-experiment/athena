@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,22 +12,18 @@
 // Gaudi includes
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/Algorithm.h"
-#include "GaudiKernel/MsgStream.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/GenEvent.h"
-#include "TH1.h"
 
 // FPTracker
 #include "FPTracker/Particle.h"
 #include "FPTracker/Point.h"
 
 #include "ALFA_BeamTrack.h"
-#include "ALFA_FPConfig.h"
 
-#include <iostream>
 #include <string>
 
 

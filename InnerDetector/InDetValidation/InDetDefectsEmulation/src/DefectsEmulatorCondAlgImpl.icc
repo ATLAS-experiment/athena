@@ -198,7 +198,7 @@ namespace InDet{
 
        std::size_t det_ele_sz = detEleColl->size();
        for (unsigned int module_i=0u; module_i < det_ele_sz; ++module_i) {
-          const typename T_DetectorElementCollection::value_type det_ele =   (*detEleColl.cptr())[module_i];
+          typename T_DetectorElementCollection::const_value_type det_ele = (*detEleColl.cptr())[module_i];
           if (defects->isModuleDefect(module_i)) continue;
           if (derived().isModuleDefect(ctx, module_i)) {
              defects->setModuleDefect(module_i);

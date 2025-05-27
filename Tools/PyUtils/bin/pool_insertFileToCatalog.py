@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file:    pool_insertFileToCatalog.py
 # @purpose: insert a POOL file into a POOL file catalog without displaying the
@@ -15,10 +15,6 @@
 #
 # if pool_insertFileToCatalog.py has been made 'chmod +x' one can just do:
 # ./pool_insertFileToCatalog.py aod.pool.root
-from __future__ import with_statement, print_function
-
-from future import standard_library
-standard_library.install_aliases()
 
 def pool_insert(files, catalog_name="xmlcatalog_file:PoolFileCatalog.xml"):
     print (":: inserting [%i] files into pool catalog... (%s)"%(

@@ -1141,14 +1141,18 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeContainer#HLT_MuRoICluster_Composites',                      'BS ESD AODFULL AODSLIM', 'Muon'),
     ('xAOD::TrigCompositeAuxContainer#HLT_MuRoICluster_CompositesAux.'+MuRoiVars,     'BS ESD AODFULL AODSLIM', 'Muon'),
 
-     # tau calo clusters (moved as last because of the truncation errors ATR-29142)
+    # Anomaly Detection Trigger
+    ('xAOD::TrigCompositeContainer#HLT_AnomDet_ComboHypo', 'BS ESD AODFULL AODSLIM', 'AnomDet'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_AnomDet_ComboHypoAux.adScore', 'BS ESD AODFULL AODSLIM', 'AnomDet'),
+
+    # tau calo clusters (moved as last because of the truncation errors ATR-29142)
     ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews'), allowTruncation]),   
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau', [allowTruncation]),
  
     # FS tracks (moved as last because of the truncation errors ATR-29142)
     ('xAOD::TrackParticleContainer#HLT_IDTrack_FS_FTF',                 'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FS_FTFAux.passPFTrackPresel.muonCaloTag.muonScore.ptCone20.etConeCore.trackIso.RErr.EOverP.caloIso.trkPtFraction.tagFakeTrack.tagMuonTrack.tagIsoTrack',          'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
- 
+    
 ]
 
 

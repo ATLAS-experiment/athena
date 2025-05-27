@@ -61,11 +61,6 @@ namespace InDet {
   }
 
 
-  JetTrackFilterTool::~JetTrackFilterTool()
-  {
-    delete m_trkNomEff; m_trkNomEff = nullptr;
-  }
-
   bool JetTrackFilterTool::accept(const xAOD::TrackParticle* track, const xAOD::Jet* jet) const
   {
 

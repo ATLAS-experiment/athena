@@ -14,11 +14,9 @@ l1seeds = { 'low'  : \
                ['L1_2eEM9',\
                 'L1_eEM12L',\
                 "L1_eTAU20",\
-                #'L1_EM12_XS20',\
                 'L1_jJ40p30ETA49',\
                 'L1_JPSI-1M5-eEM15',\
                 'L1_jJ60',\
-                #'L1_J30p0ETA49_2J20p0ETA49',\
                 'L1_JPSI-1M5-eEM9',\
                 'L1_MU8F',\
                 'L1_ZeroBias',\
@@ -40,7 +38,6 @@ l1seeds = { 'low'  : \
                 'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20',\
                 'L1_DY-BOX-2MU5VF',\
                 'L1_DY-BOX-2MU3VF',\
-                #'L1_EM15_XS30',\
                 'L1_eEM18L',\
                 'L1_eEM24L',\
                 'L1_gXEJWOJ100',\
@@ -51,11 +48,11 @@ l1seeds = { 'low'  : \
                 'L1_LFV-MU5VF',\
                 'L1_MU5VF_jJ80',\
                 'L1_cTAU30M_3DR35-MU8F-eTAU30',\
-                #'L1_MU5VF_J20',\
-                #'L1_MU5VF_J30p0ETA49_2J20p0ETA49',\
                 'L1_eTAU60',\
-                #'L1_XE35',
                 'L1_jXE70',
+                'L1_3jJ40p0ETA25',
+                'L1_2cTAU50M_DPHI-2eTAU50',
+                'L1_ADVAEL',
             ]
 }
 

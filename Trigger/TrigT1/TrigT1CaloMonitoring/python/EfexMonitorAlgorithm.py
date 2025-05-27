@@ -85,7 +85,7 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
     commonAlgConfig = {"libname":"libdqm_summaries.so",
                        "name":"L1Calo_BinsDiffFromStripMedian",
                        "PublishDetail":32}
-    hotCuts = {"ColdCut":-5,"WarmCut":9,"HotCut":20} # when looking at frequency of hot deposits, use these cuts
+    hotCuts = {"ColdCut":-7,"WarmCut":9,"HotCut":20} # when looking at frequency of hot deposits, use these cuts
 
     commonThresholdConfig = {
         "NWrongKnown":[0,100], # warn of any corrections that are needed for the known anomalies lists
@@ -98,11 +98,16 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
     }
 
     knownAnomalies_eEM = {
-        "KnownCold":"\"\"",
-        "KnownWarm":"\"\""
+        "KnownDead":"\"48,8;49,41;49,42\"",
+        "KnownCold":"\"2,18;3,17;4,18;5,17;20,31;21,31;23,26;49,10;11,29;11,30;11,44;11,51;14,51;15,51;40,12;40,19;40,26;10,17;10,18;11,17;11,18\"",
+        "KnownWarm":"\"11,26;11,52;21,48\""
     }
+
+    # use KnownDead list from input hcal as an automatic cold-spot for eTAU
+    from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import knownAnomalies_hotHcal
+
     knownAnomalies_eTAU = {
-        "KnownCold":"\"\"",
+        "KnownCold":knownAnomalies_eEM["KnownDead"][:-1]+";"+knownAnomalies_hotHcal["KnownDead"][1:-1]+";2,18;3,17;4,18;5,17;49,10;10,20;20,31;21,31;14,51;15,51;23,26;29,7;17,32;14,54\"",
         "KnownWarm":"\"\""
     }
 

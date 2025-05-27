@@ -30,8 +30,15 @@ endif()
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )
 
-atlas_add_test( TestCPRunJets
+atlas_add_test( TestCPRun2Jets
    SCRIPT CPRun.py  --text-config JetAnalysisAlgorithms/test_configuration_Run2_Jets.yaml -e 30 --input-list $ASG_TEST_FILE_MC
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 400 
 )
+
+atlas_add_test( TestCPRun3Jets
+   SCRIPT CPRun.py  --text-config JetAnalysisAlgorithms/test_configuration_Run3_Jets.yaml -e 30 --input-list $ASG_TEST_FILE_RUN3_MC
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 400
+)
+

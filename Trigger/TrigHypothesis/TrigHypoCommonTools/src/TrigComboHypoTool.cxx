@@ -161,6 +161,10 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
         size_t goodLegA{false}, goodLegB{false};
         int32_t iLegA = getIndexFromLeg(varInfo.legA);
         int32_t iLegB = getIndexFromLeg(varInfo.legB);
+        if ((iLegA<0) or (iLegB<0)){
+          ATH_MSG_ERROR("TrigComboHypoTool::decide: Index into array is negative");
+          return StatusCode::FAILURE;
+        }
         goodLegA = !passingLegs[varInfo.legA].empty();
         legMultiplicityForComputation[iLegA] = std::max<size_t>(1,legMultiplicityForComputation[iLegA]);
         ATH_MSG_DEBUG("Leg " << varInfo.legA << " has " << passingLegs[varInfo.legA].size() << " features --> " << (goodLegA ? "pass" : "fail"));

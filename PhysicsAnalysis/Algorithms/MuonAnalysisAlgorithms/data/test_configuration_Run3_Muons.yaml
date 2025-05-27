@@ -1,0 +1,30 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+Muons:
+- containerName: AnaMuons
+  recalibratePhyslite: False
+  decorateTruth: true
+  writeTrackD0Z0: True
+  WorkingPoint:
+  - selectionName: medium
+    quality: Medium
+    isolation: Loose_VarRad
+  IFFClassification: {}
+  MCTCClassification:
+    prefix: truth_
+  TriggerSF:
+    triggerChainsPerYear:
+      '2022':
+      - 'HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'
+      - 'HLT_mu24_ivarmedium_L1MU14FCH || HLT_mu50_L1MU14FCH'  
+    muonID: 'Tight'
+
+GeneratorLevelAnalysis: {}
+
+PrintConfiguration: {}

@@ -267,6 +267,7 @@ TreeAccessor* TreeAccessor::merge(const std::vector<const Accessor*>& accessors,
     }
   } 
   
+  cout << "Merging cells" << endl;
   for (unsigned int i = 0; i < newAcc->nChannels(); i++) {
     if (i % 10000 == 0) {
       cout << "Merging channel " << i << "/" <<  newAcc->nChannels() << " (current size = " << size << ")" << endl;
@@ -299,6 +300,43 @@ TreeAccessor* TreeAccessor::merge(const std::vector<const Accessor*>& accessors,
       size += historyContainer->nDataContainers();
     }
     newAcc->add(historyContainer);
+    delete historyContainer;
+    historyContainer=nullptr;
+    //}
+  }
+
+  cout << "Merging SC" << endl;
+  for (unsigned int i = 0; i < newAcc->nChannelsSC(); i++) {
+    if (i % 10000 == 0) {
+      cout << "Merging channel " << i << "/" <<  newAcc->nChannelsSC() << " (current size = " << size << ")" << endl;
+    }
+    HistoryContainer* historyContainer = nullptr;
+  for (const Accessor* accessor : accessors) {
+      const History* history = accessor->getSCHistory(i);
+      if (!history || !history->isValid()) continue;
+      if (!historyContainer) {
+        info = new CellInfo(*history->cellInfo());
+        historyContainer = new HistoryContainer(info);
+      }
+      for (unsigned int j = 0; j < history->nData(); j++) {
+        DataContainer* newDC = new DataContainer(history->data(j)->container());
+        std::map<std::pair<int, int>, int>::const_iterator newIndex 
+          = evtMap.find(std::make_pair(history->data(j)->run(), history->data(j)->event()));
+        //if (newIndex == evtMap.end()) cout << "Event not found for cell " << i << ", data " << j << "." << endl;
+        newDC->setEventIndex(newIndex != evtMap.end() ? newIndex->second : -1);
+        historyContainer->add(newDC);
+        if (!info->shape(history->data(j)->gain())) {
+         const ShapeInfo* shape = history->cellInfo()->shape(history->data(j)->gain());
+         if (!shape) 
+           cout << "Shape not filled for hash = " << i << ", index = " << j << ", gain = " << Data::gainStr(history->data(j)->gain()) << endl;
+          info->setShape(history->data(j)->gain(), (shape ? new ShapeInfo(*shape) : nullptr));
+        }
+      }
+    }
+    if(historyContainer){
+      size += historyContainer->nDataContainers();
+    }
+    newAcc->addSC(historyContainer);
     delete historyContainer;
     historyContainer=nullptr;
     //}

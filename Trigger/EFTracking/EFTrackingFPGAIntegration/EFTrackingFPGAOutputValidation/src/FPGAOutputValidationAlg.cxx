@@ -59,6 +59,10 @@ StatusCode FPGAOutputValidationAlg::initialize() {
   ATH_CHECK(m_chrono.retrieve());
 
   ATH_CHECK(detStore()->retrieve(m_pixelid, "PixelID"));
+  ATH_CHECK(detStore()->retrieve(m_stripid, "SCT_ID"));
+  ATH_CHECK(detStore()->retrieve(m_SCT_mgr, "ITkStrip"));
+  ATH_CHECK(detStore()->retrieve(m_PIX_mgr, "ITkPixel"));
+
   return StatusCode::SUCCESS;
 }
 

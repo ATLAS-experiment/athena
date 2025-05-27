@@ -1,8 +1,7 @@
-<!-- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration -->
-<lcgdict>
+<!-- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration -->
 
+<lcgdict>
   <!-- Enums -->
   <enum pattern="xAOD::Iso::*" />
-  <struct name="xAOD::Iso::ROOT6_NamespaceAutoloadHook" />
 
 </lcgdict>

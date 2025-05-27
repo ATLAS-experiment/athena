@@ -69,7 +69,7 @@ public:
   
   std::vector<const TrigFTF_GNN_Node*> m_vn;//nodes of the graph
   std::vector<std::pair<float, unsigned int> > m_vPhiNodes;
-  std::vector<std::vector<unsigned int> > m_in;//vectors of incoming edges
+  std::vector<std::vector<unsigned int> > m_in;//vectors of incoming edges, stores indicies of edges in the edge vector
   std::vector<std::array<float,5> > m_params;//node attributes: m_minCutOnTau, m_maxCutOnTau, m_phi, m_r, m_z;
 
   float m_minRadius, m_maxRadius;

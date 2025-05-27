@@ -19,7 +19,7 @@
 namespace FPGATrackSim{
     class FPGATrackSimPrototrackFitterAlg: public ::AthReentrantAlgorithm { 
     public: 
-    FPGATrackSimPrototrackFitterAlg( const std::string& name, ISvcLocator* pSvcLocator );
+    using ::AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual ~FPGATrackSimPrototrackFitterAlg() = default;
 
     ///uncomment and implement methods as required
@@ -41,10 +41,6 @@ namespace FPGATrackSim{
       ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
       // prototrack collection from FPGAClusters or FPGATracks
       SG::ReadHandleKey<ActsTrk::ProtoTrackCollection> m_ProtoTrackCollectionFromFPGAKey{this, "FPGATrackSimActsProtoTracks","","FPGATrackSim PrototrackCollection"};
-      SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
-         {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
-          "Map which associates detector elements to Acts Geometry IDs"};
-
       // chrono service
       ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
     }; 

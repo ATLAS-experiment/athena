@@ -51,7 +51,7 @@ class Generic4VecCorrection
     // For MC2MC, parse the calibration showerModel from sample metadata
     StatusCode parse_showerModel(TString& showerModel, int mcDSID, TString generatorsInfo) const;
     
-    StatusCode load_json(nlohmann::json& json_object, std::string json_filepath) const;
+    StatusCode load_json(nlohmann::json& json_object, const std::string& json_filepath) const;
 
     // Class variables from constructor
     TEnv* m_config;

@@ -1,0 +1,21 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include <format>
+namespace ActsTrk::detail {
+
+template <std::size_t Dim, typename trajectory_t, typename pos_t, typename cov_t>
+    inline void MeasurementCalibratorBase::setState(const ProjectorType projector,
+                                                    const pos_t& locpos, const cov_t& cov,
+                                                    Acts::SourceLink link,
+                                                    TrackState_t<trajectory_t>& trackState) const {
+      static_assert(Dim>0 && Dim <= 3, "Wrong measurement dimension");
+      trackState.setUncalibratedSourceLink(std::move(link));
+      trackState.allocateCalibrated(Dim);
+      trackState.setProjectorSubspaceIndices(s_boundSpaceIndices[static_cast<int>(projector)]);
+      trackState.template calibrated<Dim>() = locpos.template cast<double>();
+      trackState.template calibratedCovariance<Dim>() = cov.template cast<double>();
+  }
+} // namespace ActsTrk::detail
+

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file:    magnifyPoolFile.py
 # @purpose: produce a new POOL file with N times the content of an input one.
@@ -12,8 +12,6 @@
 # magnifyPoolFile.py 1000 aod.pool
 # magnifyPoolFile.py 1000 aod.pool my.magnified.aod.pool
 #
-
-from __future__ import print_function
 
 __author__  = "Sebastien Binet <binet@cern.ch>"
 

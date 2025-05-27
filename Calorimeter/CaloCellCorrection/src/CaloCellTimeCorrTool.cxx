@@ -46,7 +46,7 @@ StatusCode CaloCellTimeCorrTool::process (CaloCellContainer* theCaloCellContaine
     const IdentifierHash& hash_id=theCell->caloDDE()->calo_hash();
     if (hash_id<corrValues->getNChans()) {
       const float& shift= corrValues->getData(hash_id);
-      theCell->setTime(theCell->time()+shift);
+      theCell->addTime(shift);
     }//end if hash_id<NChans
   }//end loop over cells
   return StatusCode::SUCCESS;

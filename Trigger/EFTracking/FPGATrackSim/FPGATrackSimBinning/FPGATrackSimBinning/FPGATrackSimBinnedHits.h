@@ -34,6 +34,7 @@
 
 #include <string>
 #include <vector>
+#include <bit>
 
 //-------------------------------------------------------------------------------------------------------
 // BinnedHits
@@ -70,7 +71,7 @@ public:
     BinEntry() {}
     void reset();
     void addHit(const FPGATrackSimBinUtil::StoredHit& hit);
-    unsigned int lyrCnt() const { return __builtin_popcount(lyrhit); };
+    unsigned int lyrCnt() const { return std::popcount(lyrhit); };
     unsigned int hitsInLyr(unsigned lyr) const; 
     unsigned int hitCnt = 0;
     layer_bitmask_t lyrhit = 0;

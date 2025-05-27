@@ -17,6 +17,7 @@ namespace DiTau{
     eta(nullptr),
     phi(nullptr),
     pt(nullptr),
+    mass(nullptr),
     nsubjets(nullptr),
     charge(nullptr),
     eta_phi(nullptr),
@@ -34,6 +35,7 @@ namespace DiTau{
     pt       = Book1D("pt" , "DiTau pt; DiTau Transverse Momentum [GeV];Entries / 1 GeV",25,0.,200);
     eta      = Book1D("eta", "DiTau eta; DiTau Pseudo-Rapidity;Entries / 0.05", 32, -3.2, 3.2);
     phi      = Book1D("phi", "DiTau phi; DiTau Azimuthal Angle;Entries / 0.05", 32, -3.2, 3.2);
+    mass     = Book1D("mass", "DiTau mass; DiTau Mass; Entries / 10", 100,0,200);
     nsubjets = Book1D("nsubjets", "DiTau #subjets; DiTau #subjets; Entries", 10,0,10);
     charge   = Book1D("charge", "DiTau charge; DiTau charge; Entries", 10,-5,5);
 
@@ -47,6 +49,7 @@ namespace DiTau{
      pt->Fill(ditau.pt()/Athena::Units::GeV, weight);
      eta->Fill(ditau.eta(), weight);
      phi->Fill(ditau.phi(), weight);
+     mass->Fill(ditau.m()/Athena::Units::GeV, weight);
      nsubjets->Fill(ditau.nSubjets(), weight);
 
      eta_pt->Fill(ditau.eta(), ditau.pt()/Athena::Units::GeV, weight);

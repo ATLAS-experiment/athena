@@ -45,9 +45,6 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
   if (m_bSkipTruthMatchCheck)
     ATH_MSG_WARNING("Truth match check will be skipped. This is ONLY FOR TESTING PURPOSE!");
 
-  if (!m_tPRWTool.empty())
-    ATH_CHECK(m_tPRWTool.retrieve());
-
   // check efficiency correction type
   if (m_vEfficiencyCorrectionTypes.empty())
   {
@@ -56,7 +53,7 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
   }
   
   if(m_sRecommendationTag == "2025-prerec") {
-    ATH_MSG_WARNING("2025-prerec is under development and not complete yet.");
+    ATH_MSG_WARNING("2025-prerec are available. Tau trigger recommendations for Run2 still missing");
     ATH_CHECK(initializeTools_2025_prerec());
   } else if (m_sRecommendationTag == "2022-prerec") {
     ATH_MSG_WARNING("2022-prerec tag are pre-recommendations and still under development.");
@@ -97,14 +94,16 @@ StatusCode TauEfficiencyCorrectionsTool::firstEvent()
   const xAOD::EventInfo* xEventInfo = nullptr;
   ATH_CHECK(evtStore()->retrieve(xEventInfo, "EventInfo"));
 
-  if (xEventInfo->runNumber() != 284500 && xEventInfo->runNumber() != 300000 && xEventInfo->runNumber() != 310000)  // mc21/2022: 410000
-    {
-      ANA_MSG_WARNING( "Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (" << xEventInfo->runNumber() << "). Will only print this warning once." );
-    }
-  if (xEventInfo->runNumber() < 410000 && m_sRecommendationTag == "2022-prerec")  // mc21/2022: 410000
-    {
-      ANA_MSG_WARNING( "TauEfficiency callibrations from 2022-prerec are not recommended for Run2 MC. Will only print this warning once." );
-    }
+  if(m_sRecommendationTag == "2022-prerec"){
+    if (xEventInfo->runNumber() != 284500 && xEventInfo->runNumber() != 300000 && xEventInfo->runNumber() != 310000)  // mc21/2022: 410000
+      {
+        ANA_MSG_WARNING( "Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (" << xEventInfo->runNumber() << "). Will only print this warning once." );
+      }
+    if (xEventInfo->runNumber() < 410000)  // mc21/2022: 410000
+      {
+        ANA_MSG_WARNING( "TauEfficiency callibrations from 2022-prerec are not recommended for Run2 MC. Will only print this warning once." );
+      }
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -134,13 +133,8 @@ StatusCode TauEfficiencyCorrectionsTool::beginEvent()
   {
     // Reset the number at the beginning of event
     m_iRunNumber = 0;
-    return StatusCode::SUCCESS;
   }
 
-  if (m_tPRWTool.empty())
-    return StatusCode::SUCCESS;
-
-  m_iRunNumber = m_tPRWTool->getRandomRunNumber(*xEventInfo);
   return StatusCode::SUCCESS;
 }
 
@@ -395,7 +389,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
             return StatusCode::FAILURE;
           }
-	} if(m_sCampaign=="mc23d"){
+	} else if(m_sCampaign=="mc23d"){
           if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
             m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
           }
@@ -403,8 +397,8 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
             return StatusCode::FAILURE;
           }
-        } else if (m_sCampaign=="mc20"){
-            ATH_MSG_ERROR("SFs for Run2 not available, please check the Campaign option in the tool configuration. If the config is correct, then please contact the tau trigger coordinators");
+        } else {
+            ATH_MSG_ERROR("SFs are not available for " << m_sCampaign << " campaign.  For Run2, please fallback to the 2022-prerec tag. If the config is correct, then please contact the tau trigger coordinators");
 	    return StatusCode::FAILURE;
 	}
       }
@@ -667,6 +661,7 @@ std::string TauEfficiencyCorrectionsTool::GetTriggerSFMeasurementString() const
 
 StatusCode TauEfficiencyCorrectionsTool::readRandomRunNumber()
 {
+  // read the random run rumber from the EventInfo 	
   if (m_bReadRandomRunNumber && m_iRunNumber == 0)
   {
     static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");

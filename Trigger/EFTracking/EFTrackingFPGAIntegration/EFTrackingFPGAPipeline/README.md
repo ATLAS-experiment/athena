@@ -95,9 +95,9 @@ Once the pakcage is built successfully, modify the file `python/BenchmarkConfig.
 
 To run
 ```
-python -m EFTrackingFPGAPipeline.BenchmarkConfig FPGADataPrep.DoActs=True FPGADataPrep.RunPassThrough=False
+python -m EFTrackingFPGAPipeline.BenchmarkConfig FPGADataPrep.DoActs=True FPGADataPrep.RunPassThrough=False FPGADataPrep.DoEmulation=False
 ```
-If `FPGADataPrep.DoActs` is set to False, the algorithm will stop at the cluster level, otherwise it runs the ACTS spacepoint formation, seeding, and tracking. If `RunPassThrough` is set to True, only the EDMPrep kernel will be executed on the FPGA.
+If `FPGADataPrep.DoActs` is set to False, the algorithm will stop at the cluster level, otherwise it runs the ACTS spacepoint formation, seeding, and tracking. If `RunPassThrough` is set to True, only the EDMPrep kernel will be executed on the FPGA. If `DoEmulation` is set to True, the code will assume you are trying to run software or hardware emulation kernels.
 
 The benchmark algorithm produces two files `FPGA.Benchmark.AOD.pool.root` and `FPGAOutputValidation.root`. The first one include clusters and track particles (if ACTS enabled). This file can then be used to create IDTPM plots. The second one includes cluster-level monitoring histograms.
 

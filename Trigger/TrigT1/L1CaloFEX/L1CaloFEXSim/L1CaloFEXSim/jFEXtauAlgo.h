@@ -11,13 +11,14 @@
 #ifndef jFEXtauAlgo_H
 #define jFEXtauAlgo_H
 
-#include <vector>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXtauAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-
+#include <vector>
+#include <unordered_map>
 
 namespace LVL1 {
 

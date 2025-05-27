@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_ENUMS_H
@@ -58,6 +58,7 @@ namespace TauAnalysisTools
     DiTauCutPt           = 1,    // 000000000001
     DiTauCutAbsEta       = 1<<1, // 000000000010
     DiTauCutNSubjets     = 1<<2, // 000000000100
+    DiTauCutAbsCharge    = 1<<3, // 000000001000
   };
 
   enum EfficiencyCorrectionType
@@ -101,8 +102,6 @@ namespace TauAnalysisTools
     TruthJet         = 5,
     TruthHadronicDiTau = 6
   };
-
-  struct ROOT6_NamespaceAutoloadHook{};
 
 }
 

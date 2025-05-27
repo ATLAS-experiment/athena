@@ -10,14 +10,14 @@ TRT_Conditions::TRT_Conditions()
   : m_dxContainer(nullptr)
 {}
 
-const TRTCond::StrawDxContainer* 
+const TRTCond::StrawDxContainer*
 TRT_Conditions::dxContainer() const
 {
   return m_dxContainer;
 }
 
-void 
-TRT_Conditions::setDxContainer(const TRTCond::StrawDxContainer* container) const
+void
+TRT_Conditions::setDxContainer(const TRTCond::StrawDxContainer* container)
 {
   m_dxContainer = container;
 }

@@ -69,7 +69,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
 
     // ROOT branches created for test vectors.
-    m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
+    if (m_outputRoadUnionTool) m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
 
     // Updated slicing engine test vectors will have three streams.
@@ -81,7 +81,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     m_slicedStripHeaderPreSP = m_writeOutputTool->addInputBranch(m_sliceStripBranchPreSP.value(), true);
 
     // Connect the slicing tools accordingly. We probably no longer need to hook up the roadfinder here.
-    m_roadFinderTool->setupSlices(m_slicedHitHeader);
+    if (m_outputRoadUnionTool) m_roadFinderTool->setupSlices(m_slicedHitHeader);
     m_slicingEngineTool->setupSlices(m_slicedFirstPixelHeader, m_slicedSecondPixelHeader, m_slicedStripHeader);
 
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -98,6 +98,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGAHitKey_2nd.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
+    ATH_CHECK( m_FPGAEventInfoKey.initialize() );
 
     ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
@@ -155,6 +156,18 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
 
+    // Read event info structure. all we need this for is to propagate to our event info structures.
+    SG::ReadHandle<FPGATrackSimEventInfo> FPGAEventInfo(m_FPGAEventInfoKey, ctx);
+    if (!FPGAEventInfo.isValid()) {
+        ATH_MSG_ERROR("Could not find FPGA Event Info with key " << FPGAEventInfo.key());
+        return StatusCode::FAILURE;
+    }
+    FPGATrackSimEventInfo eventInfo = *FPGAEventInfo.cptr();
+    m_slicedFirstPixelHeader->newEvent(eventInfo);
+    m_slicedSecondPixelHeader->newEvent(eventInfo);
+    m_slicedStripHeader->newEvent(eventInfo);
+    m_slicedStripHeaderPreSP->newEvent(eventInfo);
+
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
 
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_all, phits_1st, phits_2nd;
@@ -203,7 +216,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_MSG_ERROR("Could not find FPGA Offline Track Collection with key " << FPGAOfflineTracks.key());
         return StatusCode::FAILURE;
     }
-    
+
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: GetRoads");
     // Get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
@@ -439,14 +452,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
             return StatusCode::FAILURE;
         }
-        // Concatenate 1st and 2nd stage hits vectors to access both in the OutputTool
-        phits_2nd.insert(phits_2nd.end(), std::make_move_iterator(phits_1st.begin()), std::make_move_iterator(phits_1st.end()));
+
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_all, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
     }
 
     // Reset data pointers
-    m_slicedHitHeader->reset();
+    if (m_outputRoadUnionTool) m_slicedHitHeader->reset();
     m_logicEventOutputHeader->reset();
 
     return StatusCode::SUCCESS;

@@ -141,7 +141,6 @@ class InformationHandler:
         #add the prefixes for the variables
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Sum"]         = theFeatureHandler.m_VarTypeName_Sum
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Ratio"]       = theFeatureHandler.m_VarTypeName_Ratio
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_EtInRing"]    = theFeatureHandler.m_VarTypeName_EtInRing
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Isolation"]   = theFeatureHandler.m_VarTypeName_Isolation
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Num"]         = theFeatureHandler.m_VarTypeName_Num
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Mean"]        = theFeatureHandler.m_VarTypeName_Mean
@@ -151,8 +150,6 @@ class InformationHandler:
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_DeltaR"]      = theFeatureHandler.m_VarTypeName_DeltaR
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_JetMoment"]   = theFeatureHandler.m_VarTypeName_JetMoment
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Combined"]    = theFeatureHandler.m_VarTypeName_Combined
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_JetShape"]    = theFeatureHandler.m_VarTypeName_JetShape
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_ImpactParams"]= theFeatureHandler.m_VarTypeName_ImpactParams
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Basic"]       = theFeatureHandler.m_VarTypeName_Basic
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_PID"]         = theFeatureHandler.m_VarTypeName_PID
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Shots"]       = theFeatureHandler.m_VarTypeName_Shots

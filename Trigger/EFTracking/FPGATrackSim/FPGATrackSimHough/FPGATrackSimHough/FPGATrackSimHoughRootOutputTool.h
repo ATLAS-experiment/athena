@@ -63,6 +63,7 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", ""};
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
         Gaudi::Property <std::string> m_algorithm { this, "ORAlgo", "Normal", "Overlap removal algorithm"};
+        Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
 
         ORAlgo m_algo{ORAlgo::Normal};       //  Internal ORAlgo enum for faster compare
 

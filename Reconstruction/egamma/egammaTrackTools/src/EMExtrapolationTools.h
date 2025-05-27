@@ -114,12 +114,14 @@ private:
    * (endcap) **/
   int getTRTsection(const xAOD::TrackParticle* trkPB) const;
 
+  /** Used for extrapolation to the calo*/
   ToolHandle<Trk::IParticleCaloExtensionTool> m_ParticleCaloExtensionTool{
     this,
     "CaloExtensionTool",
     "Trk::ParticleCaloExtensionTool/EMParticleCaloExtensionTool"
   };
 
+  /** Used for extrapolation to the conversion vertex */
   ToolHandle<Trk::IExtrapolator> m_extrapolator{
     this,
     "Extrapolator",

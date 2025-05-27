@@ -18,7 +18,8 @@ def addFPGADataPrepFlags(flags):
     flags.addFlag("FPGADataPrep.PassThrough.ClusterOnly", False)
     flags.addFlag("FPGADataPrep.PassThrough.MaxClusterNum", 500000)
     flags.addFlag("FPGADataPrep.PassThrough.MaxSpacePointNum", 500000)
-    
+    flags.addFlag("FPGADataPrep.DoEmulation", False)
+
     
     return flags
 

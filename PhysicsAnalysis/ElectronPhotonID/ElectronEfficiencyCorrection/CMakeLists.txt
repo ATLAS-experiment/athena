@@ -48,7 +48,7 @@ atlas_add_test(ut_SimpleInitTest
    LOG_IGNORE_PATTERN "Package.AsgTool...  DEBUG|MessageSvc not found")
 
 # AnalysisBase-only utilities:
-if( XAOD_STANDALONE )
+if( NOT COLUMNAR_ANALYSIS AND XAOD_STANDALONE )
    atlas_add_executable( EgEfficiencyCorr_testEgEfficiencyCorr
       util/testEgEfficiencyCorr.cxx util/SFHelpers.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}

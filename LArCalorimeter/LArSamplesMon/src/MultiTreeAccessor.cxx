@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/MultiTreeAccessor.h"
@@ -184,11 +184,11 @@ const History* MultiTreeAccessor::getCellHistory(unsigned int i) const
       allEventData.push_back(newED);
     }
    
-    for (unsigned int i = 0; i < thisHistory->nData(); i++) {
-      allData.push_back(new Data(*thisHistory->data(i), eventMap[thisHistory->data(i)->eventData()], nullptr, -1));
-      if (!cellInfo->shape(thisHistory->data(i)->gain())) {
-        const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(i)->gain());
-        cellInfo->setShape(thisHistory->data(i)->gain(), thisShape ? new ShapeInfo(*thisShape) : nullptr);
+    for (unsigned int j = 0; j < thisHistory->nData(); j++) {
+      allData.push_back(new Data(*thisHistory->data(j), eventMap[thisHistory->data(j)->eventData()], nullptr, -1));
+      if (!cellInfo->shape(thisHistory->data(j)->gain())) {
+        const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(j)->gain());
+        cellInfo->setShape(thisHistory->data(j)->gain(), thisShape ? new ShapeInfo(*thisShape) : nullptr);
       }
     }
     delete thisHistory;
@@ -197,6 +197,48 @@ const History* MultiTreeAccessor::getCellHistory(unsigned int i) const
   auto * h  = cellInfo ? new History(allData, *cellInfo, allEventData, i): nullptr;
   delete cellInfo;
   return h; 
+}
+      
+const History* MultiTreeAccessor::getSCHistory(unsigned int i) const 
+{ 
+  std::unique_ptr<CellInfo> cellInfo{};
+  std::vector<const Data*> allData;
+  std::vector<const EventData*> allEventData;
+  for (const TreeAccessor* accessor : m_accessors) {
+    //cout << "---> Getting history for a treeAccessor..." << endl; 
+    const History* thisHistory = accessor->getSCHistory(i);
+    //cout << "---> done Getting history for a treeAccessor..." << endl; 
+    if (!thisHistory) continue;
+    if (!cellInfo) {
+      cellInfo = std::make_unique<CellInfo>(*thisHistory->cellInfo());
+    //cout << "---> done new cell info" << endl; 
+    }
+    //cout << "---> Creating new event data N = " << thisHistory->eventData().size() << endl; 
+    const std::vector<const EventData*>& thisEventData = thisHistory->eventData();
+    std::map<const EventData*, const EventData*> eventMap;
+    for (const EventData* event : thisEventData) {
+      if (eventMap.find(event) != eventMap.end()) continue;
+      EventData* newED = new EventData(*event);
+      eventMap[event] = newED;
+      allEventData.push_back(newED);
+    }
+    //cout << "---> Creating new data N = " << thisHistory->nData() << endl; 
+   
+    for (unsigned int ii = 0; ii < thisHistory->nData(); ii++) {
+     //cout << "------> Creating new data " << i << endl; 
+      allData.push_back(new Data(*thisHistory->data(ii), eventMap[thisHistory->data(ii)->eventData()], nullptr, -1));
+     //cout << "------> done Creating new data " << i << endl; 
+      if (!cellInfo->shape(thisHistory->data(ii)->gain())) {
+        const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(ii)->gain());
+        cellInfo->setShape(thisHistory->data(ii)->gain(), thisShape ? new ShapeInfo(*thisShape) : nullptr);
+      }
+     //cout << "------> done shape " << i << endl; 
+    }
+     //cout << "---> done Creating new data, deleting treeAcc history" << endl; 
+    delete thisHistory;
+  }
+  //cout << "--->returning new history..." << endl; 
+  return (cellInfo ? new History(allData, *cellInfo, allEventData, i) : nullptr); 
 }
       
         

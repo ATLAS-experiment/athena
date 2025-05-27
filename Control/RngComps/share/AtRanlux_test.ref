@@ -1,7 +1,7 @@
 
 
-Initializing Gaudi ApplicationMgr using job opts ../share/AtRanlux_test.txt
-JobOptionsSvc        INFO # =======> /home/leggett/work/v30r1.002/src/Control/RngComps/share/../share/AtRanlux_test.txt
+Initializing Gaudi ApplicationMgr using job opts /build1/elmsheus/externals_20250519/athena/Control/RngComps/share/AtRanlux_test.txt
+JobOptionsSvc        INFO # =======> /build1/elmsheus/externals_20250519/athena/Control/RngComps/share/AtRanlux_test.txt
 JobOptionsSvc        INFO # (5,1): ApplicationMgr.Dlls += ["AthenaServices"]
 JobOptionsSvc        INFO # (6,1): ApplicationMgr.ExtSvc += ["AtRanluxGenSvc", "AtRanluxGenSvc/AtRanluxGenSvc2", "AtRanluxGenSvc/AtRanluxGenSvc3"]
 JobOptionsSvc        INFO # (7,1): ApplicationMgr.ExtSvcCreates = 0
@@ -16,13 +16,13 @@ JobOptionsSvc        INFO # (21,1): AtRanluxGenSvc2.FileToWrite = "test2_AtRanlu
 JobOptionsSvc        INFO # (23,1): AtRanluxGenSvc3.ReadFromFile = 1
 JobOptionsSvc        INFO # (24,1): AtRanluxGenSvc3.FileToRead = "test_AtRanluxGenSvc.out"
 JobOptionsSvc        INFO # (25,1): AtRanluxGenSvc3.SaveToFile = 0
-JobOptionsSvc        INFO Job options successfully read in from ../share/AtRanlux_test.txt
+JobOptionsSvc        INFO Job options successfully read in from /build1/elmsheus/externals_20250519/athena/Control/RngComps/share/AtRanlux_test.txt
 MessageSvc          DEBUG Service base class initialized successfully
 ApplicationMgr      DEBUG Getting my own properties
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v30r1)
-                                          running on zeus on Tue Jan  2 18:29:20 2018
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v39r4)
+                                          running on aiatlasbm004.cern.ch on Mon May 19 13:45:44 2025
 ====================================================================================================================================
 ApplicationMgr       INFO Successfully loaded modules : AthenaServices
 ApplicationMgr       INFO Application Manager Configured successfully
@@ -38,9 +38,6 @@ EventPersistenc...  DEBUG Service base class initialized successfully
 AlgExecStateSvc     DEBUG Service base class initialized successfully
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
-HistogramDataSvc    DEBUG Service base class initialized successfully
-HistogramPersis...  DEBUG Service base class initialized successfully
-HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 AtRanluxGenSvc      DEBUG Property update for OutputLevel : new value = 1
@@ -78,7 +75,7 @@ Initial status of PITHIA engine
 0.752328
 0.799401
 
- carry = 0, index = 11
+ carry = 0, index = -1
  luxury = 1 pDiscard = 202
 ----------------------------------------
 AtRanluxGenSvc      DEBUG Reseeding stream PITHIA with 1436487886
@@ -99,7 +96,7 @@ Status of PITHIA engine after 1st setOnDefinedSeeds
 0.198142
 0.789328
 
- carry = 0, index = 11
+ carry = 0, index = -1
  luxury = 1 pDiscard = 202
 ----------------------------------------
 AtRanluxGenSvc    VERBOSE Reseeding stream PITHIA with eventNumber 13 runNumber 10000
@@ -121,30 +118,30 @@ Status of PITHIA engine after 2nd setOnDefinedSeeds
 0.12242
 0.382519
 
- carry = 0, index = 11
+ carry = 0, index = -1
  luxury = 1 pDiscard = 202
 ----------------------------------------
 AtRanluxGenSvc      DEBUG  Handle EndEvent 
-AtRanluxGenSvc       INFO  Stream =  PITHIA 4010409557 1071359902 923895488 1070653998 1295591360 1072384929 2919734336 1072287587 60657856 1072272433 4141458400 1072257849 1666240032 1071292130 254686400 1067791650 3705107968 1069914481 3843436800 1070594215 3779337472 1069504228 1652535808 1071151921 159872128 0 0 11 1 202 
-AtRanluxGenSvc       INFO  Stream =  PITHIA_INIT 4010409557 1070001576 2790209408 1070913764 3473247296 1072196799 2887121152 1072689504 1599230528 1069781360 3994495232 1071724443 931237376 1071633230 1932934336 1071661341 2667702912 1072458392 4183670272 1072340018 1988780640 1072467520 654473952 1069623192 2472218880 0 0 11 0 109 
+AtRanluxGenSvc       INFO  Stream =  PITHIA 4010409557 1071359902 923895488 1070653998 1295591360 1072384929 2919734336 1072287587 60657856 1072272433 4141458400 1072257849 1666240032 1071292130 254686400 1067791650 3705107968 1069914481 3843436800 1070594215 3779337472 1069504228 1652535808 1071151921 159872128 0 0 4294967295 1 202 
+AtRanluxGenSvc       INFO  Stream =  PITHIA_INIT 4010409557 1070001576 2790209408 1070913764 3473247296 1072196799 2887121152 1072689504 1599230528 1069781360 3994495232 1071724443 931237376 1071633230 1932934336 1071661341 2667702912 1072458392 4183670272 1072340018 1988780640 1072467520 654473952 1069623192 2472218880 0 0 4294967295 0 109 
 Final status of PITHIA engine
 
 --------- Ranlux engine status ---------
  Initial seed = 2145682031
- randoms[] = 0.432106
-0.263805
-0.852982
-0.806566
-0.79934
-0.792386
-0.415947
-0.041421
-0.168745
-0.249776
-0.12242
-0.382519
+ randoms[] = 0.218344
+0.262343
+0.661007
+0.853113
+0.742693
+0.791976
+0.525288
+0.605654
+0.240895
+0.31635
+0.765293
+0.541288
 
- carry = 0, index = 10
+ carry = 0, index = 11
  luxury = 1 pDiscard = 202
 ----------------------------------------
 AtRanluxGenSvc       INFO  FINALISING 
@@ -157,28 +154,28 @@ IncidentSvc         DEBUG Adding [AfterReseedIncident] listener 'AtRanluxGenSvc2
 AtRanluxGenSvc2      INFO will be reseeded for every event
 IncidentSvc         DEBUG Adding [BeginEvent] listener 'AtRanluxGenSvc2' with priority 100
 IncidentSvc         DEBUG Adding [ReseedIncident] listener 'AtRanluxGenSvc2' with priority 100
-AtRanluxGenSvc2     DEBUG  INITIALISING PITHIA stream with seeds 4010409557 1071359902 923895488 1070653998 1295591360 1072384929 2919734336 1072287587 60657856 1072272433 4141458400 1072257849 1666240032 1071292130 254686400 1067791650 3705107968 1069914481 3843436800 1070594215 3779337472 1069504228 1652535808 1071151921 159872128 0 0 11 1 202  read from file test_AtRanluxGenSvc.out
+AtRanluxGenSvc2     DEBUG  INITIALISING PITHIA stream with seeds 4010409557 1071359902 923895488 1070653998 1295591360 1072384929 2919734336 1072287587 60657856 1072272433 4141458400 1072257849 1666240032 1071292130 254686400 1067791650 3705107968 1069914481 3843436800 1070594215 3779337472 1069504228 1652535808 1071151921 159872128 0 0 4294967295 1 202  read from file test_AtRanluxGenSvc.out
 AtRanluxGenSvc2     DEBUG PITHIA stream initialized succesfully
-AtRanluxGenSvc2     DEBUG  INITIALISING PITHIA_INIT stream with seeds 4010409557 1070001576 2790209408 1070913764 3473247296 1072196799 2887121152 1072689504 1599230528 1069781360 3994495232 1071724443 931237376 1071633230 1932934336 1071661341 2667702912 1072458392 4183670272 1072340018 1988780640 1072467520 654473952 1069623192 2472218880 0 0 11 0 109  read from file test_AtRanluxGenSvc.out
+AtRanluxGenSvc2     DEBUG  INITIALISING PITHIA_INIT stream with seeds 4010409557 1070001576 2790209408 1070913764 3473247296 1072196799 2887121152 1072689504 1599230528 1069781360 3994495232 1071724443 931237376 1071633230 1932934336 1071661341 2667702912 1072458392 4183670272 1072340018 1988780640 1072467520 654473952 1069623192 2472218880 0 0 4294967295 0 109  read from file test_AtRanluxGenSvc.out
 AtRanluxGenSvc2     DEBUG PITHIA_INIT stream initialized succesfully
 Final status of PITHIA engine for AtRanluxGenSvc2
 
 --------- Ranlux engine status ---------
  Initial seed = 9876
- randoms[] = 0.432106
-0.263805
-0.852982
-0.806566
-0.79934
-0.792386
-0.415947
-0.041421
-0.168745
-0.249776
-0.12242
-0.382519
+ randoms[] = 0.218344
+0.262343
+0.661007
+0.853113
+0.742693
+0.791976
+0.525288
+0.605654
+0.240895
+0.31635
+0.765293
+0.541288
 
- carry = 0, index = 10
+ carry = 0, index = 11
  luxury = 1 pDiscard = 202
 ----------------------------------------
 AtRanluxGenSvc2      INFO  FINALISING 
@@ -190,9 +187,9 @@ IncidentSvc         DEBUG Adding [AfterReseedIncident] listener 'AtRanluxGenSvc3
 AtRanluxGenSvc3      INFO will be reseeded for every event
 IncidentSvc         DEBUG Adding [BeginEvent] listener 'AtRanluxGenSvc3' with priority 100
 IncidentSvc         DEBUG Adding [ReseedIncident] listener 'AtRanluxGenSvc3' with priority 100
-AtRanluxGenSvc3     DEBUG  INITIALISING PITHIA stream with seeds 4010409557 1071359902 923895488 1070653998 1295591360 1072384929 2919734336 1072287587 60657856 1072272433 4141458400 1072257849 1666240032 1071292130 254686400 1067791650 3705107968 1069914481 3843436800 1070594215 3779337472 1069504228 1652535808 1071151921 159872128 0 0 11 1 202  read from file test_AtRanluxGenSvc.out
+AtRanluxGenSvc3     DEBUG  INITIALISING PITHIA stream with seeds 4010409557 1071359902 923895488 1070653998 1295591360 1072384929 2919734336 1072287587 60657856 1072272433 4141458400 1072257849 1666240032 1071292130 254686400 1067791650 3705107968 1069914481 3843436800 1070594215 3779337472 1069504228 1652535808 1071151921 159872128 0 0 4294967295 1 202  read from file test_AtRanluxGenSvc.out
 AtRanluxGenSvc3     DEBUG PITHIA stream initialized succesfully
-AtRanluxGenSvc3     DEBUG  INITIALISING PITHIA_INIT stream with seeds 4010409557 1070001576 2790209408 1070913764 3473247296 1072196799 2887121152 1072689504 1599230528 1069781360 3994495232 1071724443 931237376 1071633230 1932934336 1071661341 2667702912 1072458392 4183670272 1072340018 1988780640 1072467520 654473952 1069623192 2472218880 0 0 11 0 109  read from file test_AtRanluxGenSvc.out
+AtRanluxGenSvc3     DEBUG  INITIALISING PITHIA_INIT stream with seeds 4010409557 1070001576 2790209408 1070913764 3473247296 1072196799 2887121152 1072689504 1599230528 1069781360 3994495232 1071724443 931237376 1071633230 1932934336 1071661341 2667702912 1072458392 4183670272 1072340018 1988780640 1072467520 654473952 1069623192 2472218880 0 0 4294967295 0 109  read from file test_AtRanluxGenSvc.out
 AtRanluxGenSvc3     DEBUG PITHIA_INIT stream initialized succesfully
 AtRanluxGenSvc3      INFO  FINALISING 
 *** AtRanlux_test OK ***

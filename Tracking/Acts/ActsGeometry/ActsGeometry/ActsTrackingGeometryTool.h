@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSTRACKINGGEOMETRYTOOL_H
@@ -7,51 +7,46 @@
 
 // ATHENA
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
 
 // PACKAGE
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 // ACTS
 
 namespace Acts {
-class TrackingGeometry;
+  class TrackingGeometry;
 }
 
-class ActsGeometryContext;
 
 
-class ActsTrackingGeometryTool : public extends<AthAlgTool, IActsTrackingGeometryTool>
-{
 
-public:
-  StatusCode initialize() override;
+class ActsTrackingGeometryTool : public extends<AthAlgTool, IActsTrackingGeometryTool> {
 
-  ActsTrackingGeometryTool(const std::string &type, const std::string &name,
-                           const IInterface *parent);
+    public:
+      StatusCode initialize() override;
 
-  virtual
-  std::shared_ptr<const Acts::TrackingGeometry>
-  trackingGeometry() const override;
+      using base_class::base_class;
 
-  virtual
-  const ActsGeometryContext&
-  getGeometryContext(const EventContext& ctx) const override;
- const ActsGeometryContext&
-  getGeometryContext() const override;
+      virtual std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() const override;
 
-  virtual const ActsGeometryContext& getNominalGeometryContext() const override;
+      virtual const ActsGeometryContext& getGeometryContext(const EventContext& ctx) const override;
 
-private:
-  ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+      virtual const ActsGeometryContext& getNominalGeometryContext() const override;
 
-  SG::ReadHandleKey<ActsGeometryContext> m_rchk{
-      this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
+      virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const override;
+    private:
+      /** @brief Creates and popules the DetectorElement -> Acts::Surface geo identifier map from the geometry service */
+      std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> createDetectorElementToGeoIdMap() const;
+     
+      ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
+      SG::ReadHandleKey<ActsGeometryContext> m_rchk{this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
+
+      std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 };
 
 #endif

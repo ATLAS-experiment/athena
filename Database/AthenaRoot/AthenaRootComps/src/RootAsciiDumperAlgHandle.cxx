@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootAsciiDumperAlgHandle.cxx 
@@ -26,6 +26,7 @@
 
 // FrameWork includes
 #include "Gaudi/Property.h"
+#include "AthContainers/ConstAccessor.h"
 
 // SGTools
 #include "SGTools/BuiltinsClids.h"  // to put ints,... in evtstore
@@ -36,61 +37,6 @@ namespace Athena {
 /////////////////////////////////////////////////////////////////// 
 // Public methods: 
 /////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-RootAsciiDumperAlgHandle::RootAsciiDumperAlgHandle( const std::string& name, 
-			  ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_ofname(""),
-  m_ofd(-1),
-  m_nentries(0),
-  m_runnbr(),
-  m_evtnbr(),
-  m_el_n(),
-  m_el_eta(),
-  m_el_jetcone_dr()
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-
-  declareProperty("AsciiFileName",
-                  m_ofname = "d3pd.ascii",
-                  "Name of the ascii file where the content of the "
-                  "ROOT n-tuple file will be dumped.");
-
-  declareProperty("RunNumber",
-                  m_runnbr = SG::RVar<uint32_t>("RunNumber"),
-                  "handle to the run-nbr in event (read)");
-
-  declareProperty("EventNumber",
-                  m_evtnbr = SG::RVar<uint32_t>("EventNumber"),
-                  "handle to the evt-nbr in event (read)");
-
-  declareProperty("el_n",
-                  m_el_n = SG::RVar<int32_t>("el_n"),
-                  "handle to the nbr of electrons in event (read)");
-
-  declareProperty("el_eta",
-                  m_el_eta = SG::RVar<std::vector<float> >("el_eta"),
-                  "handle to the eta of electrons in event (read)");
-
-  declareProperty("el_jetcone_dr",
-                  m_el_jetcone_dr = SG::RVar<std::vector<std::vector<float> > >("el_jetcone_dr"),
-                  "handle to the jetcone-dR of electrons in event (read)");
-
-
-  declareProperty("eiKey",
-                  m_eiKey = "EventInfo");
-
-}
-
-// Destructor
-///////////////
-RootAsciiDumperAlgHandle::~RootAsciiDumperAlgHandle()
-{}
 
 // Athena Algorithm's Hooks
 ////////////////////////////
@@ -110,7 +56,7 @@ StatusCode RootAsciiDumperAlgHandle::initialize()
     ATH_MSG_ERROR("cannot dump data into an empty file name!");
     return StatusCode::FAILURE;
   }
-  m_ofd = open(m_ofname.c_str(), 
+  m_ofd = open(m_ofname.value().c_str(), 
                O_WRONLY | O_CREAT | O_TRUNC,
                S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
@@ -141,30 +87,19 @@ StatusCode RootAsciiDumperAlgHandle::execute()
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   uint64_t nevts = m_nentries;
   m_nentries += 1;
 
-  if (!m_runnbr.ptr()) {
-    ATH_MSG_WARNING("could not retrieve [" << m_runnbr.name() 
-                    << "] from store");
-    return StatusCode::RECOVERABLE;
-  }
+  SG::ReadHandle<uint32_t> runnbr (m_runnbr, ctx);
+  SG::ReadHandle<uint32_t> evtnbr (m_evtnbr, ctx);
 
-  if (!m_evtnbr.ptr()) {
-    ATH_MSG_WARNING("could not retrieve [" << m_evtnbr.name() 
-                    << "] from store");
-    return StatusCode::RECOVERABLE;
-  }
+  SG::ReadHandle<int32_t> el_n (m_el_n, ctx);
 
-  if (!m_el_n.ptr()) {
-    ATH_MSG_WARNING("could not retrieve [" << m_el_n.name() 
-                    << "] from store");
-    return StatusCode::RECOVERABLE;
-  }
-
-  SG::ReadHandle<xAOD::EventInfo> ei (m_eiKey);
-  static const SG::AuxElement::Accessor<std::string> tupleName ("tupleName");
-  static const SG::AuxElement::Accessor<std::string> collectionName ("collectionName");
+  SG::ReadHandle<xAOD::EventInfo> ei (m_eiKey, ctx);
+  static const SG::ConstAccessor<std::string> tupleName ("tupleName");
+  static const SG::ConstAccessor<std::string> collectionName ("collectionName");
   std::string collName = collectionName(*ei);
   std::string::size_type pos = collName.rfind ("/");
   if (pos != std::string::npos) {
@@ -188,35 +123,26 @@ StatusCode RootAsciiDumperAlgHandle::execute()
        tupleName(*ei).c_str(),
        nevts,
        "RunNumber",
-       *m_runnbr,
+       *runnbr,
        nevts,
        "EventNumber",
-       *m_evtnbr,
+       *evtnbr,
        nevts,
        "el_n",
-       *m_el_n);
+       *el_n);
     write(m_ofd, buf, buf_sz);
     free(buf);
   }
 
-  if (*m_el_n > 0) {
-    if (!m_el_eta.ptr()) {
-      ATH_MSG_WARNING("could not retrieve [" << m_el_eta.name() 
-                      << "] from store");
-      return StatusCode::RECOVERABLE;
-    }
-    
-    if (!m_el_jetcone_dr.ptr()) { 
-      ATH_MSG_WARNING("could not retrieve [" << m_el_jetcone_dr.name() 
-                      << "] from store");
-      return StatusCode::RECOVERABLE;
-    }
+  if (*el_n > 0) {
+    SG::ReadHandle<std::vector<float> > el_eta (m_el_eta, ctx);
+    SG::ReadHandle<std::vector<std::vector<float> > > el_jetcone_dr (m_el_jetcone_dr, ctx);
     
     {
       std::stringstream bufv;
-      for (int32_t ii = 0; ii < *m_el_n; ++ii) {
-        bufv << (*m_el_eta)[ii];
-        if (ii != (*m_el_n)-1) {
+      for (int32_t ii = 0; ii < *el_n; ++ii) {
+        bufv << (*el_eta)[ii];
+        if (ii != (*el_n)-1) {
           bufv << ", ";
         }
       }
@@ -234,18 +160,18 @@ StatusCode RootAsciiDumperAlgHandle::execute()
 
     {
       std::stringstream bufv;
-      for (int32_t ii = 0; ii < *m_el_n; ++ii) {
+      for (int32_t ii = 0; ii < *el_n; ++ii) {
         bufv << "[";
-        for (std::size_t jj = 0, jjmax = (*m_el_jetcone_dr)[ii].size();
+        for (std::size_t jj = 0, jjmax = (*el_jetcone_dr)[ii].size();
              jj < jjmax;
              ++jj) {
-          bufv << (*m_el_jetcone_dr)[ii][jj];
+          bufv << (*el_jetcone_dr)[ii][jj];
           if (jj != jjmax-1) {
             bufv << ", ";
           }
         }
         bufv << "]";
-        if (ii != (*m_el_n)-1) {
+        if (ii != (*el_n)-1) {
           bufv << ", ";
         }
       }

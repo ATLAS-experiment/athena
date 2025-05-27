@@ -8,8 +8,7 @@
 
 
 #include "AthenaBaseComps/AthAlgTool.h"
-
-
+#include "ActsCalibration/MeasurementCalibratorBase.h"
 #include "MuonSpacePoint/SpacePoint.h"
 #include "MuonSpacePoint/CalibratedSpacePoint.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -21,7 +20,8 @@
 #include "GaudiKernel/PhysicalConstants.h"
 namespace MuonR4{
     /*** @brief Implementation of the space point calibrator interface */
-    class SpacePointCalibrator : public extends<AthAlgTool, ISpacePointCalibrator> {
+    class SpacePointCalibrator : public extends<AthAlgTool, ISpacePointCalibrator>,
+                                 public ActsTrk::detail::MeasurementCalibratorBase {
         public:
             /** @brief Use the standard constructor */
             using base_class::base_class;
@@ -57,6 +57,12 @@ namespace MuonR4{
                                  const CalibratedSpacePoint& spacePoint) const override final;
             double driftAcceleration(const EventContext& ctx,
                                      const CalibratedSpacePoint& spacePoint) const override final;
+
+
+            void calibrate(const Acts::GeometryContext& geoctx,
+                           const Acts::CalibrationContext& cctx,
+                           const Acts::SourceLink& link,
+                           ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
         private:
             /// access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 
@@ -78,6 +84,12 @@ namespace MuonR4{
             /*** Resolution of the rpc time measurement  */
             Gaudi::Property<double> m_rpcTimeResolution{this, "rpcTimeResolution", 0.6 * Gaudi::Units::nanosecond,
                                                           "Estimated time resolution of the strip readout"};
+            
+            /** @brief Load the Rpc time on the track states for the track fit */
+            Gaudi::Property<bool> m_useRpcTime{this, "useRpcTime", false};
+            /** @brief Load the Tgc bunch crossing ID on the track states */
+            Gaudi::Property<bool> m_useTgcTime{this, "useTgcTime", false,
+                                               "Load the Tgc BC-ID on the track states for the fit"};
     };
 
 }

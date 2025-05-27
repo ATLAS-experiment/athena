@@ -1,0 +1,92 @@
+{
+    "TrkAnaEF" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true
+    },
+    "TrkAnaEF_EFsel" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true,
+        "OfflineQualityWP" : "EFTracking"
+    },
+    "TruthHighPtElectrons" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "SelectTruthObject"  : "HighPtElectron",
+        "plotDuplicateRates"  : true
+    },
+    "TruthHighPtElectrons_EFsel" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true,
+        "SelectTruthObject"  : "Electron",
+        "OfflineQualityWP" : "EFTracking"
+    },
+    "TruthElectrons" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "SelectTruthObject"  : "Electron",
+        "plotDuplicateRates"  : true
+    },
+    "TruthElectrons_EFsel" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true,
+        "SelectTruthObject"  : "HighPtElectron",
+        "OfflineQualityWP" : "EFTracking"
+    },
+    "TruthLowPtElectrons" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "SelectTruthObject"  : "LowPtElectron",
+        "plotDuplicateRates"  : true
+    },
+    "TruthLowPtElectrons_EFsel" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true,
+        "SelectTruthObject"  : "LowPtElectron",
+        "OfflineQualityWP" : "EFTracking"
+    }
+}

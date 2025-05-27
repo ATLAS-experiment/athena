@@ -35,6 +35,7 @@ class DiTauSelectionCut;
 class DiTauSelectionCutPt;
 class DiTauSelectionCutAbsEta;
 class DiTauSelectionCutNSubjets;
+class DiTauSelectionCutAbsCharge;
 
 class DiTauSelectionTool : public virtual IAsgSelectionTool,
   public virtual IDiTauSelectionTool,
@@ -46,6 +47,7 @@ class DiTauSelectionTool : public virtual IAsgSelectionTool,
   friend class DiTauSelectionCutPt;
   friend class DiTauSelectionCutAbsEta;
   friend class DiTauSelectionCutNSubjets;
+  friend class DiTauSelectionCutAbsCharge;
 
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( DiTauSelectionTool,
@@ -98,6 +100,8 @@ private:
   std::vector<float> m_vAbsEtaRegion;
   // vector of number of subjets cut regions
   std::vector<float> m_vNSubjetsRegion;
+  // vector of absolute charge requirements
+  std::vector<int> m_vAbsCharges;
 
   Gaudi::Property<std::string> m_sConfigPath{this, "ConfigPath", ""};
   Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", NoDiTauCut};
@@ -107,6 +111,7 @@ private:
   Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
   Gaudi::Property<float> m_dNSubjetsMin{this, "NSubjetsMin", NAN};
   Gaudi::Property<float> m_dNSubjetsMax{this, "NSubjetsMax", NAN};
+  Gaudi::Property<float> m_iAbsCharge{this, "AbsCharge", NAN};
 
 protected:
   TFile* m_fOutFile;//!

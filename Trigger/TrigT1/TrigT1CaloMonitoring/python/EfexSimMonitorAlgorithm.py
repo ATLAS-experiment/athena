@@ -69,6 +69,16 @@ def EfexSimMonitoringConfig(flags):
                            xbins=1,xmin=0,xmax=1,
                            ybins=1,ymin=0,ymax=1,
                                opt=['kAddBinsDynamically'])
+        helper.defineHistogram("LBN,locIdx;h_"+sig+"_mismatchesEmulated_posLbnMap", title = "Mismatched " + sig + " [EmulatedTower evts];LB;Position (Module:Proc:Eta:Phi);TOBs",
+                               fillGroup = sig + "_mismatches", cutmask='IsEmulatedTowers',
+                               hanConfig={
+                                   "algorithm":"Histogram_Empty",
+                                   "display":"SetPalette(87)",
+                                   "description":"Location of mismatched " + sig + " TOBs in events with EmulatedTower simput. Use this plot to identify any localized eFEX issues. N.B. this plot is only created if there are mismatches."},
+                               type="TH2I",
+                               xbins=1,xmin=0,xmax=1,
+                               ybins=1,ymin=0,ymax=1,
+                               opt=['kAddBinsDynamically'])
     helper.defineHistogram('LBNString,Signature;h_mismatched_DataTowerEvts',
                            fillGroup="mismatches",
                            type='TH2I', cutmask='IsDataTowers',

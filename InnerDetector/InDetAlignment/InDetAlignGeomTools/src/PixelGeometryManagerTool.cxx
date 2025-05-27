@@ -102,7 +102,7 @@ namespace InDet {
     declareProperty("AlignmentLevelBarrel",  m_alignLevelBarrel  = -1);
     declareProperty("AlignmentLevelEndcaps", m_alignLevelEndcaps = -1);
     declareProperty("AlignmentDBM",          m_alignDBM          =  false);
-    
+
     declareProperty("doModuleSelection",  m_doModuleSelection  = false);
     declareProperty("ModuleSelection",    m_moduleSelection);
 
@@ -110,7 +110,7 @@ namespace InDet {
 
     m_hashCounter = 0;
     m_logStream = nullptr;
-    
+
   }
 
   //________________________________________________________________________
@@ -142,11 +142,11 @@ namespace InDet {
 
     // retrieve geomodel service
     ATH_CHECK( m_geoModelSvc.retrieve());
-    
+
 
     // retrieve geometry DB access service
     ATH_CHECK( m_rdbAccessSvc.retrieve());
-    
+
     // dump module selection
     if(m_doModuleSelection && msgLvl(MSG::INFO)) {
     int idx{};
@@ -190,7 +190,7 @@ namespace InDet {
       ATH_MSG_INFO("Alignment level for Pixel is "<<m_alignLevel);
       return true;
     }
-    
+
     // check for DBM
     if(m_alignDBM && (m_alignLevel == 1 || m_alignLevel == 2 || m_alignLevel == 3)) {
       ATH_MSG_INFO("Alignment level for DBM is configured and set to "<<m_alignLevel);
@@ -308,14 +308,14 @@ namespace InDet {
   void PixelGeometryManagerTool::buildGeometry()
   {
     ATH_MSG_INFO("Preparing the Pixel geometry");
-      
+
     // Get skipetazero value for IBL layer if module with eta=0 value is set (e.g. ATLAS-IBL-03-00-00)
     // if noSkipEtaZero is set, loop over iEta stops earlier ( because eta=0 module is defined)
     m_etaCorrection = 0;
     int iLayer = 0;
     if (!m_detManager->numerology().useLayer(iLayer))
         ATH_MSG_INFO(" When checking for IBL-Layer, layer "<<iLayer<<" not present");
-      
+
     if(m_doEtaCorrection){
         int noSkipEtaZero=getNoSkipEtaValueFromGeometry();
         if(noSkipEtaZero>0 && m_detManager->numerology().skipEtaZeroForLayer(iLayer)){
@@ -323,14 +323,14 @@ namespace InDet {
         }
         ATH_MSG_DEBUG("IBL-etaCorrection value set to: "<<m_etaCorrection);
     }
-    
+
     if(!m_alignDBM && m_alignLevel == 1 && (m_alignLevelBarrel == -1 || m_alignLevelEndcaps == -1))
       buildL1();
     else if (!m_alignDBM && m_alignLevel == 11 && (m_alignLevelBarrel == -1 || m_alignLevelEndcaps == -1))
       buildL11();
-    
+
     else if (m_alignDBM){
-      
+
       switch(m_alignLevel) {
         case 1:
           buildL1DBM();
@@ -343,7 +343,7 @@ namespace InDet {
           break;
       }
     }
-    
+
     else {
 
       if(m_alignBarrel)
@@ -441,15 +441,15 @@ namespace InDet {
 
       ATH_MSG_DEBUG(" Pixel DetectorElement idhash: " << index);
       // ATH_MSG_DEBUG(" DetectorElement id: " << id);
-      
+
       // just to be sure check for DBM module
       if(m_idHelper->is_dbm(id)){
         ATH_MSG_DEBUG(" Found DBM element, skipping: " << m_idHelper->is_dbm(id));
         continue;
       }
-      
+
       // get the element via hash
-      SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
@@ -477,38 +477,38 @@ namespace InDet {
     // alignment for IBL with respect to "old" pixel detector
     // 1 module for all IBL-pixels + 1 module for all other pixels
     ATH_MSG_INFO("Preparing the Pixel geometry for L11 : IBL + rest of pixel detector");
-    
+
     if(m_detManager->numerology().numLayers() < 4) {
         ATH_MSG_WARNING("No IBL in geometry; Maybe this is not the level you want to use");
     }
-    
+
     Amg::Transform3D transform = Amg::Transform3D::Identity();
-    
+
     // get maximum number of elements from the helper
     unsigned int maxHash = m_idHelper->wafer_hash_max();
     ATH_MSG_DEBUG("maxHash for the Pixel "<<maxHash);
-    
+
     if(!m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel))
       m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel) = new Trk::AlignModuleList((size_t)(maxHash),nullptr);
     Trk::AlignModuleList * pixelIdHashMap = m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel);
-         
+
     // create two AlignModules: IBL and rest of pixel
     Trk::AlignModule * ibl = new Trk::AlignModule(this);
     ibl->setIdHash(getNextIDHash());
     ibl->setName("Pixel/IBL");
-         
+
     Trk::AlignModule * pixel_old = new Trk::AlignModule(this);
     pixel_old->setIdHash(getNextIDHash());
     pixel_old->setName("Pixel/oldPixel");
-         
+
     // we use identifier of 0th module in the 0th and 1st layer of barrel
     ibl->setIdentifier(m_idHelper->wafer_id(0, 0, 0, 0));
     pixel_old->setIdentifier(m_idHelper->wafer_id(0, 1, 0, 0));
-         
+
     ATH_MSG_DEBUG("Building module "<<ibl->name());
     ATH_MSG_DEBUG("Building module "<<pixel_old->name());
-    
-    
+
+
     // ==================================================================
     // loop over Pixel elements and add them to respective alignModules
     // ==================================================================
@@ -516,13 +516,13 @@ namespace InDet {
     {
       IdentifierHash idHash = index;
       Identifier id = m_idHelper->wafer_id(idHash);
-      
+
       // just to be sure check for DBM module
       if(m_idHelper->is_dbm(id)){
         ATH_MSG_DEBUG(" Found DBM element, skipping: " << m_idHelper->is_dbm(id));
         continue;
       }
-      
+
       // check what we're filling
       Trk::AlignModule * mod = nullptr;
       if( m_idHelper->is_barrel(id) && m_idHelper->is_blayer(id) && m_idHelper->layer_disk(id)==0) {
@@ -533,12 +533,12 @@ namespace InDet {
         ATH_MSG_DEBUG("pixel element "<<id<<" at index "<<index<<" is not in IBL-layer");
         mod = pixel_old;
       }
-      
+
       // get the element via hash
-      SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
-        
+
         // add element to the AlignModule
         mod->addDetElement(Trk::AlignModule::Pixel,element,transform);
         // and fill the corresponding map
@@ -548,7 +548,7 @@ namespace InDet {
         ATH_MSG_DEBUG("No Pixel detector with id:" << id);
     }
     ATH_MSG_DEBUG("-------------------------------------------------------");
-    
+
     // alignment fram for the barrel is the global frame
     // so we don't have to set any additional transform
     if(!moduleSelected(ibl)) {
@@ -557,16 +557,16 @@ namespace InDet {
     }
     else
       m_alignModuleListPtr->push_back(ibl);
-        
+
     if(!moduleSelected(pixel_old)) {
       ATH_MSG_DEBUG("Module "<<pixel_old->name()<<" NOT selected");
       delete pixel_old;
     }
     else
       m_alignModuleListPtr->push_back(pixel_old);
-         
+
   }
-                                                                                             
+
 
   //_______________________________________________________________________
   void PixelGeometryManagerTool::buildL12Barrel()
@@ -622,9 +622,9 @@ namespace InDet {
           ATH_MSG_DEBUG("iEta "<<iEta);
           const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
           const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
-          
+
           if (element) {
-            
+
             // just to be sure check for DBM module
             Identifier id = m_idHelper->wafer_id(0, iLayer, iPhi, iEta);
             if(m_idHelper->is_dbm(id)){
@@ -651,12 +651,12 @@ namespace InDet {
     // ========================================
     // BARREL
     ATH_MSG_INFO("Preparing the Pixel Barrel geometry for L15 : 2 barrel halfs");
-    
+
     if(!m_alignBarrel) {
       ATH_MSG_DEBUG("Not aligning barrel");
       return;
     }
-       
+
     // ========================================
     // get all modules for Level 15 alignment of the barrel
     // 2 Pixel half-shells
@@ -788,7 +788,7 @@ namespace InDet {
             const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
             if (element) {
-              
+
               // just to be sure check for DBM module
               Identifier id = m_idHelper->wafer_id(iSide, iWheel, iPhi, iEta);
               if(m_idHelper->is_dbm(id)){
@@ -840,34 +840,34 @@ namespace InDet {
       m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel) = new Trk::AlignModuleList((size_t)(maxHash),nullptr);
     Trk::AlignModuleList * pixelIdHashMap = m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel);
 
-         
+
     // create two AlignModules: IBL and rest of pixel
     Trk::AlignModule * pixel_old = new Trk::AlignModule(this);
     pixel_old->setIdHash(getNextIDHash());
     pixel_old->setName("Pixel/oldPixel");
-         
+
     // we use identifier of 0th module in the 0th and 1st layer of barrel
     pixel_old->setIdentifier(m_idHelper->wafer_id(0, 1, 0, 0));
-         
+
     ATH_MSG_DEBUG("Building module "<<pixel_old->name());
-    
-    
+
+
 
     for (int iLayer = 0; iLayer < m_detManager->numerology().numLayers(); iLayer++) {
       if (!m_detManager->numerology().useLayer(iLayer))
         ATH_MSG_INFO("  Layer "<<iLayer<<" not present");
-        
+
       // make sure that we do not correct if we are not looking at IBL
       if(iLayer!=0){
         m_etaCorrection = 0;
-        
+
         if(!moduleSelected(pixel_old)) {
           ATH_MSG_DEBUG("Module "<<pixel_old->name()<<" NOT selected");
           continue;
         }
 
         ATH_MSG_DEBUG("Adding to module "<<pixel_old->name());
-      
+
         for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
           ATH_MSG_DEBUG("iPhi "<<iPhi);
           for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
@@ -876,7 +876,7 @@ namespace InDet {
             const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
             if (element) {
-            
+
               // just to be sure check for DBM module
               Identifier id = m_idHelper->wafer_id(0, iLayer, iPhi, iEta);
               if(m_idHelper->is_dbm(id)){
@@ -891,7 +891,7 @@ namespace InDet {
           }
         }
       } else {
-        
+
         for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
           ATH_MSG_DEBUG("iPhi "<<iPhi);
 
@@ -919,7 +919,7 @@ namespace InDet {
             const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
             if (element) {
-            
+
               // just to be sure check for DBM module
               Identifier id = m_idHelper->wafer_id(0, iLayer, iPhi, iEta);
               if(m_idHelper->is_dbm(id)){
@@ -933,26 +933,26 @@ namespace InDet {
             }
 
           }
-          // we use create the align frame from the sum of all modules ;  
+          // we use create the align frame from the sum of all modules ;
           Amg::Transform3D alignModuleToGlobal =  mod->calculateAlignModuleToGlobal();
           mod->setGlobalFrameToAlignFrameTransform( alignModuleToGlobal.inverse() );
           mod->resetAlignModuleToDetElementTransforms();
-          
+
 
           // add AlignModule to the geometry
           m_alignModuleListPtr->push_back(mod);
         }
       } //end loop over staves
     }
-  
+
     if(!moduleSelected(pixel_old)) {
       ATH_MSG_DEBUG("Module "<<pixel_old->name()<<" NOT selected");
       delete pixel_old;
     }
     else
       m_alignModuleListPtr->push_back(pixel_old);
-  
-  
+
+
   }
 
 
@@ -1005,7 +1005,7 @@ namespace InDet {
       }
 
       ATH_MSG_DEBUG("Building module "<<mod->name());
-      
+
       for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
         ATH_MSG_DEBUG("iPhi "<<iPhi);
         for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
@@ -1014,7 +1014,7 @@ namespace InDet {
           const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
           if (element) {
-            
+
             // just to be sure check for DBM module
             Identifier id = m_idHelper->wafer_id(0, iLayer, iPhi, iEta);
             if(m_idHelper->is_dbm(id)){
@@ -1044,7 +1044,7 @@ namespace InDet {
       ATH_MSG_DEBUG("Not aligning barrel");
       return;
     }
-    
+
     // ========================================
     // get all modules for Level 22 alignment of the barrel
     // 6 Pixel half-layers
@@ -1089,8 +1089,8 @@ namespace InDet {
       ATH_MSG_DEBUG("Building module "<<top->name());
       ATH_MSG_DEBUG("Building module "<<bottom->name());
 
-      if(iLayer!=0) m_etaCorrection = 0;      
-      
+      if(iLayer!=0) m_etaCorrection = 0;
+
       for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
         ATH_MSG_DEBUG("iPhi "<<iPhi);
 
@@ -1134,8 +1134,8 @@ namespace InDet {
         m_alignModuleListPtr->push_back(bottom);
     }
   }
-  
- 
+
+
    //_______________________________________________________________________
   void PixelGeometryManagerTool::buildL26Barrel()
   {
@@ -1153,7 +1153,7 @@ namespace InDet {
     // get all modules for Level 16 alignment of the barrel
     // 14 Pixel ladders (staves) in  the IBL
     // 3 layers for the remainder of the Pixel barrel
-    
+
     Amg::Transform3D transform = Amg::Transform3D::Identity();
 
     unsigned int maxHash = m_idHelper->wafer_hash_max();
@@ -1166,7 +1166,7 @@ namespace InDet {
     for (int iLayer = 0; iLayer < m_detManager->numerology().numLayers(); iLayer++) {
       if (!m_detManager->numerology().useLayer(iLayer))
         ATH_MSG_INFO("  Layer "<<iLayer<<" not present");
-        
+
       // make sure that we do not correct if we are not looking at IBL
       if(iLayer!=0){
         m_etaCorrection = 0;
@@ -1185,7 +1185,7 @@ namespace InDet {
         }
 
         ATH_MSG_DEBUG("Building module "<<mod->name());
-      
+
         for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
           ATH_MSG_DEBUG("iPhi "<<iPhi);
           for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
@@ -1194,7 +1194,7 @@ namespace InDet {
             const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
             if (element) {
-            
+
               // just to be sure check for DBM module
               Identifier id = m_idHelper->wafer_id(0, iLayer, iPhi, iEta);
               if(m_idHelper->is_dbm(id)){
@@ -1211,7 +1211,7 @@ namespace InDet {
 
         m_alignModuleListPtr->push_back(mod);
       } else {
-        
+
         for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
           ATH_MSG_DEBUG("iPhi "<<iPhi);
 
@@ -1239,7 +1239,7 @@ namespace InDet {
             const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
             if (element) {
-            
+
               // just to be sure check for DBM module
               Identifier id = m_idHelper->wafer_id(0, iLayer, iPhi, iEta);
               if(m_idHelper->is_dbm(id)){
@@ -1253,7 +1253,7 @@ namespace InDet {
             }
           }
 
-          // we use create the align frame from the sum of all modules ;  
+          // we use create the align frame from the sum of all modules ;
           Amg::Transform3D alignModuleToGlobal =  mod->calculateAlignModuleToGlobal();
           mod->setGlobalFrameToAlignFrameTransform( alignModuleToGlobal.inverse() );
           mod->resetAlignModuleToDetElementTransforms();
@@ -1266,9 +1266,9 @@ namespace InDet {
     }
   }
 
-  
-  
-  
+
+
+
   //_______________________________________________________________________
   void PixelGeometryManagerTool::buildL27Barrel()
   {
@@ -1297,10 +1297,10 @@ namespace InDet {
     for (int iLayer = 0; iLayer < m_detManager->numerology().numLayers(); iLayer++) {
       if (!m_detManager->numerology().useLayer(iLayer))
         ATH_MSG_INFO("  Layer "<<iLayer<<" not present");
-        
+
       // make sure that we do not correct if we are not looking at IBL
       if(iLayer!=0) m_etaCorrection = 0;
-        
+
       for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
         ATH_MSG_DEBUG("iPhi "<<iPhi);
 
@@ -1328,7 +1328,7 @@ namespace InDet {
           const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
           if (element) {
-            
+
             // just to be sure check for DBM module
             Identifier id = m_idHelper->wafer_id(0, iLayer, iPhi, iEta);
             if(m_idHelper->is_dbm(id)){
@@ -1343,7 +1343,7 @@ namespace InDet {
 
           // we use the local frame for the 0th eta wafer as the stave alignment frame
           if (iEta==0) {
-            if (!element) { 
+            if (!element) {
               throw std::logic_error("No  detector element at the 0th eta wafer.");
             }
             mod->setGlobalFrameToAlignFrameTransform(element->transform().inverse());
@@ -1409,7 +1409,7 @@ namespace InDet {
             const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
 
             if (element) {
-              
+
               // just to be sure check for DBM module
               Identifier id = m_idHelper->wafer_id(iSide, iWheel, iPhi, iEta);
               if(m_idHelper->is_dbm(id)){
@@ -1460,10 +1460,10 @@ namespace InDet {
       ATH_MSG_DEBUG("iLayer "<<iLayer);
       if (!m_detManager->numerology().useLayer(iLayer))
         ATH_MSG_INFO("  Layer "<<iLayer<<" not present");
-        
+
       // make sure that we do not correct if we are not looking at IBL
       if(iLayer!=0) m_etaCorrection = 0;
-      
+
       for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
         ATH_MSG_DEBUG("iPhi "<<iPhi);
         for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
@@ -1475,7 +1475,7 @@ namespace InDet {
             ATH_MSG_DEBUG(" Found DBM element, skipping: " << m_idHelper->is_dbm(id));
             continue;
           }
-          
+
           // create the AlignModule
           Trk::AlignModule * mod = new Trk::AlignModule(this);
           mod->setIdHash(getNextIDHash());
@@ -1556,20 +1556,20 @@ namespace InDet {
         for (int iEta = 0; iEta < m_detManager->numerology().numRingsForDisk(iWheel); iEta++) {
           for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForDiskRing(iWheel,iEta); iPhi++) {
             ATH_MSG_DEBUG("iPhi "<<iPhi);
-            
+
             // just to be sure check for DBM module
             Identifier id = m_idHelper->wafer_id(iSide,iWheel,iPhi,iEta);
             if(m_idHelper->is_dbm(id)){
               ATH_MSG_DEBUG(" Found DBM element, skipping: " << m_idHelper->is_dbm(id));
               continue;
             }
-            
+
             Trk::AlignModule * mod = new Trk::AlignModule(this);
             mod->setIdHash(getNextIDHash());
             mod->setIdentifier(m_idHelper->wafer_id(iSide,iWheel,iPhi,iEta));
 
             std::string name = (iEndcapIndex == 0)? "Pixel/EndcapA" : "Pixel/EndcapC";
-           
+
             name+="/Disk_"+std::to_string(iWheel)+"/Phi_"+std::to_string(iPhi);
             mod->setName(name);
 
@@ -1621,45 +1621,45 @@ namespace InDet {
     // ========================================
     // DBM END CAPS
     ATH_MSG_INFO("Preparing the DBM Endcap geometry for L1 : 2 endcaps");
-    
+
     unsigned int maxHash = m_idHelper->wafer_hash_max();
     ATH_MSG_DEBUG("maxHash for the Pixel "<<maxHash);
- 
+
     if(!m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel))
     m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel) = new Trk::AlignModuleList((size_t)(maxHash),nullptr);
     Trk::AlignModuleList * pixelIdHashMap = m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel);
-    
+
     // create two AlignModules:
     Trk::AlignModule * dbm1 = new Trk::AlignModule(this);
     dbm1->setIdHash(getNextIDHash());
     dbm1->setName("Pixel/ECDBM");
-    
+
     Trk::AlignModule * dbm2 = new Trk::AlignModule(this);
     dbm2->setIdHash(getNextIDHash());
     dbm2->setName("Pixel/EADBM");
-    
+
     dbm1->setIdentifier(m_idHelper->wafer_id(-4, 0, 0, 0));
     dbm2->setIdentifier(m_idHelper->wafer_id(4, 0, 0, 0));
-    
+
     ATH_MSG_DEBUG("Building module "<<dbm1->name());
     ATH_MSG_DEBUG("Building module "<<dbm2->name());
-  
+
     const Amg::Transform3D transform = Amg::Transform3D::Identity();
 
     for (unsigned int index = 0; index < maxHash; index++)
     {
       IdentifierHash idHash = index;
       Identifier id = m_idHelper->wafer_id(idHash);
-      
+
     // just to be sure check for DBM module
       if(!m_idHelper->is_dbm(id)) continue;
-      
+
 //      ATH_MSG_DEBUG(" Found DBM element " << m_idHelper->is_dbm(id));
 //      ATH_MSG_DEBUG("DBM bec "<<m_idHelper->barrel_ec(id));
 //      ATH_MSG_DEBUG("DBM layer disk "<<m_idHelper->layer_disk(id));
 //      ATH_MSG_DEBUG("DBM ring (eta module) "<< m_idHelper->eta_module(id));
 //      ATH_MSG_DEBUG("DBM sector (phi module) "<< m_idHelper->phi_module(id));
-      
+
       // check what we're filling
       Trk::AlignModule * mod = nullptr;
       if( m_idHelper->is_dbm(id) && m_idHelper->barrel_ec(id)==-4) {
@@ -1670,9 +1670,9 @@ namespace InDet {
         ATH_MSG_DEBUG("pixel element "<<id<<" at index "<<index<<" is in EADBM");
         mod = dbm2;
       }
-      
+
       // get the element via hash
-      SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
         if (mod){
@@ -1688,7 +1688,7 @@ namespace InDet {
       ATH_MSG_DEBUG("No Pixel detector with id:" << id);
     }
     ATH_MSG_DEBUG("-------------------------------------------------------");
-    
+
     // alignment fram for the barrel is the global frame
     // so we don't have to set any additional transform
     if(!moduleSelected(dbm1)) {
@@ -1704,8 +1704,8 @@ namespace InDet {
 
       m_alignModuleListPtr->push_back(dbm1);
     }
-    
-    
+
+
     if(!moduleSelected(dbm2)) {
       ATH_MSG_DEBUG("Module "<<dbm2->name()<<" NOT selected");
       delete dbm2;
@@ -1716,44 +1716,44 @@ namespace InDet {
       ATH_MSG_DEBUG("Endcap:" << dbm2->name() << " , CoG (" << translation.x() << " , " << translation.y() << " , " << translation.z() << " ) " );
       Amg::Transform3D localtoglobal = translation * Amg::RotationMatrix3D::Identity();
       dbm2->setGlobalFrameToAlignFrameTransform(localtoglobal.inverse());
-      
+
       m_alignModuleListPtr->push_back(dbm2);
     }
   }
-  
-  
+
+
   //________________________________________________________________________
   void PixelGeometryManagerTool::buildL2DBM()
   {
     // ========================================
     // DBM telescopes
     ATH_MSG_INFO("Preparing the DBM telescope geometry for L2 : 8 telescopes");
-    
+
     unsigned int maxHash = m_idHelper->wafer_hash_max();
     ATH_MSG_DEBUG("maxHash for the Pixel "<<maxHash);
-    
+
     if(!m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel))
     m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel) = new Trk::AlignModuleList((size_t)(maxHash),nullptr);
     Trk::AlignModuleList * pixelIdHashMap = m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel);
-    
+
     std::vector<Trk::AlignModule*> mod_list;
     // create 8 AlignModules:
     for (unsigned int i = 0; i < 8; i++)
     {
-      
+
       Trk::AlignModule * mod = new Trk::AlignModule(this);
       mod->setIdHash(getNextIDHash());
       std::string name = (i<4) ? "Pixel/ECDBM"+std::to_string(i) : "Pixel/EADBM"+std::to_string(i-4);
       mod->setName(name);
       if(i<4) mod->setIdentifier(m_idHelper->wafer_id(-4, 0, i, 0));
       else    mod->setIdentifier(m_idHelper->wafer_id(4, 0, i-4, 0));
-      
+
       mod_list.push_back(mod);
       ATH_MSG_DEBUG("Building module "<<mod->name());
     }
-    
+
     const Amg::Transform3D transform = Amg::Transform3D::Identity();
-    
+
     // ==================================================================
     // loop over Pixel elements and add them to respective alignModules
     // ==================================================================
@@ -1761,16 +1761,16 @@ namespace InDet {
     {
       IdentifierHash idHash = index;
       Identifier id = m_idHelper->wafer_id(idHash);
-      
+
       // just to be sure check for DBM module
       if(!m_idHelper->is_dbm(id)) continue;
-      
+
 //      ATH_MSG_DEBUG(" Found DBM element " << m_idHelper->is_dbm(id));
 //      ATH_MSG_DEBUG("DBM bec "<<m_idHelper->barrel_ec(id));
 //      ATH_MSG_DEBUG("DBM layer disk "<<m_idHelper->layer_disk(id));
 //      ATH_MSG_DEBUG("DBM ring (eta module) "<< m_idHelper->eta_module(id));
 //      ATH_MSG_DEBUG("DBM sector (phi module) "<< m_idHelper->phi_module(id));
-      
+
       // check what we're filling
       unsigned int telescope = -1; // set to non existing telescope
       Trk::AlignModule * mod = nullptr;
@@ -1784,12 +1784,12 @@ namespace InDet {
         telescope = int(4+m_idHelper->phi_module(id));
         mod = mod_list.at(telescope);
       }
-      
+
       // get the element via hash
-      SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
+      const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
         const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
-        
+
         // add element to the AlignModule
         mod->addDetElement(Trk::AlignModule::Pixel,element,transform);
         // and fill the corresponding map
@@ -1799,7 +1799,7 @@ namespace InDet {
       ATH_MSG_DEBUG("No Pixel detector with id:" << id);
     }
     ATH_MSG_DEBUG("-------------------------------------------------------");
-    
+
     // alignment fram for the barrel is the global frame
     // so we don't have to set any additional transform
     for(unsigned int i=0;i<mod_list.size();i++) {
@@ -1813,27 +1813,27 @@ namespace InDet {
         ATH_MSG_DEBUG("Endcap:" << mod_list.at(i)->name() << " , CoG (" << translation.x() << " , " << translation.y() << " , " << translation.z() << " ) " );
         Amg::Transform3D localtoglobal = translation * Amg::RotationMatrix3D::Identity();
         mod_list.at(i)->setGlobalFrameToAlignFrameTransform(localtoglobal.inverse());
-        
+
         m_alignModuleListPtr->push_back(mod_list.at(i));
       }
     }
   }
 
-  
+
   //________________________________________________________________________
   void PixelGeometryManagerTool::buildL3DBM()
   {
     // ========================================
     // DBM telescopes
     ATH_MSG_INFO("Preparing the DBM module geometry for L3 : 24 modules");
-    
+
     unsigned int maxHash = m_idHelper->wafer_hash_max();
     ATH_MSG_DEBUG("maxHash for the Pixel "<<maxHash);
-    
+
     if(!m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel))
       m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel) = new Trk::AlignModuleList((size_t)(maxHash),nullptr);
     Trk::AlignModuleList * pixelIdHashMap = m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel);
-    
+
     // ==================================================================
     // loop over Pixel elements and add them to respective alignModules
     // ==================================================================
@@ -1841,43 +1841,43 @@ namespace InDet {
     {
       IdentifierHash idHash = index;
       Identifier id = m_idHelper->wafer_id(idHash);
-      
+
       // just to be sure check for DBM module
       if(!m_idHelper->is_dbm(id)) continue;
-      
+
 //      ATH_MSG_DEBUG(" Found DBM element " << m_idHelper->is_dbm(id));
 //      ATH_MSG_DEBUG("DBM bec "<<m_idHelper->barrel_ec(id));
 //      ATH_MSG_DEBUG("DBM layer disk "<<m_idHelper->layer_disk(id));
 //      ATH_MSG_DEBUG("DBM ring (eta module) "<< m_idHelper->eta_module(id));
 //      ATH_MSG_DEBUG("DBM sector (phi module) "<< m_idHelper->phi_module(id));
-      
+
       Trk::AlignModule * mod = new Trk::AlignModule(this);
       mod->setIdHash(getNextIDHash());
       std::string name = (m_idHelper->barrel_ec(id)==-4) ? "Pixel/ECDBM" : "Pixel/EADBM";
       name += "/Disk_"+std::to_string(m_idHelper->layer_disk(id))+"/Sector_"+std::to_string(m_idHelper->phi_module(id));
       mod->setName(name);
       mod->setIdentifier(m_idHelper->wafer_id(m_idHelper->barrel_ec(id), m_idHelper->layer_disk(id), m_idHelper->phi_module(id), 0));
-      
-      
+
+
       ATH_MSG_DEBUG("Building module "<<mod->name());
-      
+
       const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
-      
+
       if (element) {
- 
+
         // db frame constants are in the global frame. Or not?
         Amg::Transform3D transform = Amg::Transform3D::Identity();
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      
+
         // add to the barrel
         mod->addDetElement(Trk::AlignModule::Pixel,element,transform);
         // and fill the corresponding map
         (*pixelIdHashMap)[element->identifyHash()] = mod;
-      
+
         // set transformation
         mod->setGlobalFrameToAlignFrameTransform(element->transform().inverse());
-      
+
         // add module to the list
         m_alignModuleListPtr->push_back(mod);
       }
@@ -1887,8 +1887,8 @@ namespace InDet {
       }
     }
   }
-  
-  
+
+
   //________________________________________________________________________
   void PixelGeometryManagerTool::addModuleParameters(Trk::AlignModule * module, DataVector< DataVector<Trk::AlignPar> > * allFullModPars, DataVector< DataVector<Trk::AlignPar> > * allActiveModPars)
   {
@@ -2050,10 +2050,10 @@ namespace InDet {
       ATH_MSG_INFO(i<<". "<< module->name());
       ATH_MSG_INFO("   - identifier: "<<module->identify());
       ATH_MSG_INFO("   - has "<<module->detElementCollection(Trk::AlignModule::Pixel)->size()<<" Pixel modules");
-      
+
       Amg::Transform3D localtoglobal = (module->globalFrameToAlignFrame()).inverse();
       ATH_MSG_DEBUG("   - local to global : "<<std::setprecision(12)<<localtoglobal.translation()<<" "<<localtoglobal.rotation());
-      
+
       DataVector<Trk::AlignPar> * pars = m_alignModuleTool->getAlignPars(module);
       int npars = pars->size();
       ATH_MSG_DEBUG("   - number of active transform parameters: "<<npars);
@@ -2125,7 +2125,7 @@ namespace InDet {
 
     ATH_MSG_INFO("Decode geometry version key");
     DecodeVersionKey versionKey(&*m_geoModelSvc, "Pixel");
-    
+
     const std::string& detectorKey  = versionKey.tag();
     const std::string& detectorNode = versionKey.node();
 
@@ -2138,7 +2138,7 @@ namespace InDet {
     const IRDBRecord *geoTable_layer = (*geoSet_layer)[0];
     int staveIndex=0;
     if (!geoTable_layer->isFieldNull("STAVEINDEX")) staveIndex=geoTable_layer->getInt("STAVEINDEX");
-    
+
     // Read NoSkipEtaZero for IBL layer
     IRDBRecordset_ptr geoSet_stave = m_rdbAccessSvc->getRecordsetPtr("PixelStave", detectorKey, detectorNode);
     const IRDBRecord *geoTable_stave = (*geoSet_stave)[staveIndex];

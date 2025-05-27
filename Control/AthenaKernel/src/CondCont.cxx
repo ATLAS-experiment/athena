@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/src/CondCont.cpp
@@ -417,7 +417,7 @@ CondContBase::CondContBase (Athena::IRCUSvc& rcusvc,
     m_clid (clid),
     m_id (id),
     m_proxy (proxy),
-    m_condSet (Updater_t (rcusvc), payloadDeleter, capacity),
+    m_condSet (Updater_t (rcusvc), std::move(payloadDeleter), capacity),
     m_cleanerSvc (s_cleanerSvcName, "CondContBase"),
     m_deps (DepSet::Updater_t(), 16)
 {
@@ -881,7 +881,7 @@ CondContSingleBase::CondContSingleBase (Athena::IRCUSvc& rcusvc,
                                         std::shared_ptr<CondContSet::IPayloadDeleter> payloadDeleter,
                                         size_t capacity)
   : CondContBase (rcusvc, KeyType::SINGLE, clid, id, proxy,
-                  payloadDeleter, capacity)
+                  std::move(payloadDeleter), capacity)
 {
 }
 
@@ -908,7 +908,7 @@ CondContMixedBase::CondContMixedBase (Athena::IRCUSvc& rcusvc,
                   std::make_shared<Athena::CondObjDeleter<CondContSet> > (rcusvc),
                   capacity),
     m_rcusvc (rcusvc),
-    m_payloadDeleter (payloadDeleter)
+    m_payloadDeleter (std::move(payloadDeleter))
 {
 }
 

@@ -163,6 +163,9 @@ if __name__ == "__main__":
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
 
+    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
+    ConfigureMultiRegionFlags(flags)
+
     flags.lock()
     flags.dump()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")

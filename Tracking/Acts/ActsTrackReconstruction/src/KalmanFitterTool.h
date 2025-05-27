@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_KALMANFITTERTOOL_H
@@ -7,21 +7,12 @@
 
 #include "src/detail/FitterHelperFunctions.h"
 
-#include "GaudiKernel/ToolHandle.h"
-
-
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 
 #include "TrkPrepRawData/PrepRawData.h"
-#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
-#include "TrkToolInterfaces/IBoundaryCheckTool.h"
-#include "TrkEventPrimitives/PdgToParticleHypothesis.h"
-
 
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/EventContext.h"
 
 // ACTS
 #include "Acts/EventData/TrackParameters.hpp"
@@ -40,9 +31,9 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 
-#include "src/detail/TrkMeasurementCalibrator.h"
+#include "ActsCalibration/TrkMeasurementCalibrator.h"
 
 // STL
 #include <string>
@@ -62,33 +53,11 @@ namespace Trk{
 
 namespace ActsTrk {
 
-struct PRDSourceLink{
-  const Trk::PrepRawData* prd {nullptr};
-};
-
-struct PRDSourceLinkCalibrator {
-  template <typename trajectory_t>
-  void calibrate(const Acts::GeometryContext& gctx, 
-            const Acts::CalibrationContext& cctx,
-            const Acts::SourceLink& sl,
-					  typename trajectory_t::TrackStateProxy trackState) const;
-
-  const Trk::IRIO_OnTrackCreator* rotCreator {nullptr};
-  const Trk::IRIO_OnTrackCreator* broadRotCreator {nullptr};
-  const ActsTrk::IActsToTrkConverterTool* converterTool {nullptr};
-};
-
-struct PRDSourceLinkSurfaceAccessor {
-  const ActsTrk::IActsToTrkConverterTool* converterTool {nullptr};
-
-  const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
-};
-
 class KalmanFitterTool
   : public extends<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> { 
 public:
 
-  KalmanFitterTool(const std::string&,const std::string&,const IInterface*);
+  using base_class::base_class;
   virtual ~KalmanFitterTool() = default;
 
   // standard Athena methods
@@ -176,24 +145,10 @@ public:
   ///////////////////////////////////////////////////////////////////
 private:
 
-  // Create a track from the fitter result
-  std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
-          Acts::GeometryContext& tgContext, 
-          ActsTrk::MutableTrackContainer& tracks,
-          Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult, bool SourceLinkType = false) const;
-  //parameter (bool) SourceLinkType to distinguish between ATLASSourceLink and PRDSourceLink implementation. 
-  //bool SourceLinkType = false for ATLASSourceLink
-  //bool SourceLinkType = true for PRDSourceLink
-
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
   ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
-  ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
-  ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 
-                                                           "BoundaryCheckTool", 
-                                                           "",
-                                                           "Boundary checking tool for detector sensitivities"};
-    // the settable job options
+  // the settable job options
   Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
       "Chi2 cut used by the outlier finder" };
   Gaudi::Property< double > m_option_ReverseFilteringPt {this, "ReverseFilteringPt", 1.0 * Acts::UnitConstants::GeV,
@@ -225,7 +180,6 @@ private:
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
 
-  ToolHandle<Trk::IRIO_OnTrackCreator> m_broadROTcreator {this, "BroadRotCreatorTool", ""};
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", ""};
   //Gaudi Property to choose from PRD or ROT measurment ReFit
   Gaudi::Property<bool> m_doReFitFromPRD{this, "DoReFitFromPRD", false, "Do Refit From PRD instead of ROT"};

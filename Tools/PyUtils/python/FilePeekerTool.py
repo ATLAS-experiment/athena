@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.FilePeekerTool
 # @purpose peek into APR files to read in-file metadata without Athena (based on PyAthena.FilePeekerLib code by Sebastian Binet) 
 # @author Alexandre Vaniachine <vaniachine@anl.gov>
 # @date May 2015
-
-from __future__ import print_function
 
 __author__ = "Alexandre Vaniachine <vaniachine@anl.gov>"
 __doc__ = "peek into APR files to read in-file metadata"
@@ -108,7 +106,7 @@ class FilePeekerTool():
         peeked_data['run_number'] = list(esic.runNumbers(esi))
         peeked_data['stream_names'] = [s for s in esic.processingTags(esi)]
 
-        item_list = list( (cgen.getNameFromClid(i.first), i.second) for i in esic.itemList(esi))
+        item_list = list( (cgen.getNameFromClid(i.first), str(i.second)) for i in esic.itemList(esi))
         #reorder items to match that of StoreGate
         if ('DataHeader', esiName) in item_list:
             item_list.remove(('DataHeader', esiName))

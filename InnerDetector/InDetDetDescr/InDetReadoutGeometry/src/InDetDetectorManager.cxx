@@ -8,25 +8,25 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "DetDescrConditions/AlignableTransform.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
-#include "GeoPrimitives/CLHEPtoEigenConverter.h" 
+#include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
 #include <map>
 
-namespace InDetDD 
+namespace InDetDD
 {
 
     InDetDetectorManager::InDetDetectorManager(StoreGateSvc * detStore, const std::string & name)
         : AthMessaging(name+"DetectorManager"),
-          m_alignfoldertype{none},m_detStore(detStore), 
+          m_alignfoldertype{none},m_detStore(detStore),
           m_suppressWarnings(false)
     {
         setName(name);
     }
 
   // Destructor
-    InDetDetectorManager::~InDetDetectorManager() 
+    InDetDetectorManager::~InDetDetectorManager()
         = default;
 
 
@@ -45,9 +45,9 @@ namespace InDetDD
         m_version = version;
 
     // Since default alignments are for final layout, Pixel Rome-Initial
-    // layout will result in several (harmless) WARNING message. We suppress these.  
+    // layout will result in several (harmless) WARNING message. We suppress these.
     // Also the SR1 layout produce warnings due to missing parts. We suppress these also.
-        m_suppressWarnings = ( (getName() == "Pixel" && 
+        m_suppressWarnings = ( (getName() == "Pixel" &&
             (version.tag() == "Pixel-01" || version.tag() == "Pixel-DC2-Initial-00"))
             || version.layout() == "SR1" || version.layout() == "SR1-EndcapC");
 
@@ -58,9 +58,9 @@ namespace InDetDD
         std::string frameStr = "other";
         if (frame == InDetDD::global) frameStr = "global";
         if (frame == InDetDD::local) frameStr  = "local";
-        ATH_MSG_INFO("Registering alignment channel with key " << key << ", level " << level 
+        ATH_MSG_INFO("Registering alignment channel with key " << key << ", level " << level
                      << ", with frame " << frameStr << ".");
-        m_keys[key] = LevelInfo(level, frame); 
+        m_keys[key] = LevelInfo(level, frame);
     }
 
     void InDetDetectorManager::addFolder(const std::string & key)
@@ -84,7 +84,7 @@ namespace InDetDD
     }
 
   // Return the level in the hierarchy (user defined) corresponding to the key.
-    const InDetDetectorManager::LevelInfo& InDetDetectorManager::getLevel(const std::string & key) const 
+    const InDetDetectorManager::LevelInfo& InDetDetectorManager::getLevel(const std::string & key) const
     {
         std::map<std::string, LevelInfo>::const_iterator iter;
         iter = m_keys.find(key);
@@ -92,10 +92,10 @@ namespace InDetDD
         return iter->second;
     }
 
-    StatusCode InDetDetectorManager::align( IOVSVC_CALLBACK_ARGS_P(I,keys) ) const
+    StatusCode InDetDetectorManager::align( IOVSVC_CALLBACK_ARGS_P(I,keys) )
     {
 
-        (void) I; // avoid warning about unused parameter 
+        (void) I; // avoid warning about unused parameter
 
         ATH_MSG_DEBUG("AlignmentCallback called ");
 
@@ -133,7 +133,7 @@ namespace InDetDD
                     ATH_MSG_FATAL(err.what());
                     return StatusCode::FAILURE;
                 }
-            }  
+            }
             // Detector specific aligments
             for (const auto & specialFolder : m_specialFolders) {
                 try {
@@ -154,7 +154,7 @@ namespace InDetDD
 
                 ATH_MSG_DEBUG(" Processing call back key  " << key);
 
-                if ( m_globalFolders.find(key) != m_globalFolders.end() ) { 
+                if ( m_globalFolders.find(key) != m_globalFolders.end() ) {
 
                     try {
                         // New global alignemnts
@@ -166,7 +166,7 @@ namespace InDetDD
                         return StatusCode::FAILURE;
                     }
 
-                } else if ( m_folders.find(key) != m_folders.end() ) { 
+                } else if ( m_folders.find(key) != m_folders.end() ) {
 
                     try {
                         // Regular alignemnts
@@ -183,7 +183,7 @@ namespace InDetDD
                         // Detector specific alignments
                         bool status = processSpecialAlignment(key, aligninfo.AlignFolder());
                         alignmentChange = (alignmentChange || status);
-                    } 
+                    }
                     catch(std::runtime_error& err) {
                         // Should always exist if the folder was requested so we return fatal if we could not process the alignment for this key
                         ATH_MSG_FATAL(err.what());
@@ -197,10 +197,11 @@ namespace InDetDD
             }
         }
 
-    // We invalidate all the elements if at least one alignment changed.
+        // We invalidate all the elements if at least one alignment changed.
         if (alignmentChange) {
+            //this is non-const as it invalidate the elements we hold
             invalidateAll();
-        }    
+        }
 
         return StatusCode::SUCCESS;
     }
@@ -213,13 +214,13 @@ namespace InDetDD
 
         bool alignmentChange = false;
         //      const AlignInfo &aligninfo = AlignInfo(m_alignfoldertype);
-      
+
         for(const auto& alignObj : alignObjects) {
             const std::string& key = alignObj.first;
 
             ATH_MSG_DEBUG(" Processing folder  " << key);
 
-            if(m_globalFolders.find(key)!=m_globalFolders.end()) {  
+            if(m_globalFolders.find(key)!=m_globalFolders.end()) {
                 try {
                     // New global alignemnts
                     const CondAttrListCollection* obj = static_cast<const CondAttrListCollection*>(alignObj.second);
@@ -230,8 +231,8 @@ namespace InDetDD
                     ATH_MSG_FATAL(err.what());
                     return StatusCode::FAILURE;
                 }
-            } 
-            else if(m_folders.find(key)!=m_folders.end()) { 
+            }
+            else if(m_folders.find(key)!=m_folders.end()) {
                 try {
                     // Regular alignemnts
                     const AlignableTransformContainer* container = static_cast<const AlignableTransformContainer*>(alignObj.second);
@@ -242,7 +243,7 @@ namespace InDetDD
                     ATH_MSG_FATAL(err.what());
                     return StatusCode::FAILURE;
                 }
-            } 
+            }
             else if(m_specialFolders.find(key)!=m_specialFolders.end()) {
                 try {
                   // Detector specific alignments
@@ -257,7 +258,7 @@ namespace InDetDD
                   ATH_MSG_FATAL(err.what());
                   return StatusCode::FAILURE;
                 }
-            } 
+            }
             else {
                 // Should not be any other keys specified in raw alignment object.
                 ATH_MSG_ERROR("Unrecognized folder name "<<key<<". Expected names are:");
@@ -268,12 +269,7 @@ namespace InDetDD
                 return StatusCode::RECOVERABLE;
             }
         }
-        // To Do: custom caching is not going to work in MT
-        /*
-          if(alignmentChange) invalidateAll(); 
-        */
-
-        return StatusCode::SUCCESS;      
+        return StatusCode::SUCCESS;
     }
 
     bool InDetDetectorManager::processAlignmentContainer(const std::string & key) const
@@ -282,15 +278,15 @@ namespace InDetDD
 
         ATH_MSG_DEBUG("Dealing with key as container");
         const AlignableTransformContainer* container;
-        if (StatusCode::SUCCESS!=m_detStore->retrieve(container, key)) {        
-            ATH_MSG_ERROR("Cannot find AlignableTransformContainer for key " 
+        if (StatusCode::SUCCESS!=m_detStore->retrieve(container, key)) {
+            ATH_MSG_ERROR("Cannot find AlignableTransformContainer for key "
                           << key << " - no misalignment");
             // This should not occur in normal situations so we force job to abort.
             throw std::runtime_error("Unable to apply Inner Detector alignments");
         }
         // Check if container is empty - this can occur if it is an invalid IOV.
         if (container->empty()) {
-            ATH_MSG_ERROR("AlignableTransformContainer for key " 
+            ATH_MSG_ERROR("AlignableTransformContainer for key "
                           << key << " is empty. Probably due to out of range IOV");
             // This should not occur in normal situations so we force job to abort.
             throw std::runtime_error("Unable to apply Inner Detector alignments.");
@@ -302,7 +298,7 @@ namespace InDetDD
             alignmentChange = (alignmentChange || status);
         }
         return alignmentChange;
-    } 
+    }
 
     bool InDetDetectorManager::processAlignmentContainer(const AlignableTransformContainer* container, GeoVAlignmentStore* alignStore) const
     {
@@ -310,7 +306,7 @@ namespace InDetDD
 
         // Check if container is empty - this can occur if it is an invalid IOV.
         if (container->empty()) {
-            ATH_MSG_ERROR("AlignableTransformContainer " 
+            ATH_MSG_ERROR("AlignableTransformContainer "
                           << " is empty. Probably due to out of range IOV"); // To Do: add key to this printout for making it more informative
             // This should not occur in normal situations so we force job to abort.
             throw std::runtime_error("Unable to apply Inner Detector alignments.");
@@ -331,12 +327,12 @@ namespace InDetDD
 
     bool InDetDetectorManager::processKey(const std::string& key,
                                           const AlignableTransform* transformCollection,
-                                          GeoVAlignmentStore* alignStore) const 
-    {  
+                                          GeoVAlignmentStore* alignStore) const
+    {
         bool alignmentChange = false;
 
         // From the key determine what level in hierarchy we are dealing with.
-        // returns -1 if unrecognized.  
+        // returns -1 if unrecognized.
         const LevelInfo & levelInfo = getLevel(key);
         if (levelInfo.isValid()) {
             ATH_MSG_VERBOSE("Processing channel: " << key);
@@ -348,17 +344,17 @@ namespace InDetDD
         if (!levelInfo.isValid() ) return false;
 
         //Loop over the effected nodes.
-        for (AlignableTransform::AlignTransMem_citr trans_iter = transformCollection->begin(); 
-             trans_iter != transformCollection->end(); 
+        for (AlignableTransform::AlignTransMem_citr trans_iter = transformCollection->begin();
+             trans_iter != transformCollection->end();
              ++trans_iter) {
-            ATH_MSG_DEBUG( "Get alignment for identifier " 
-                           << getIdHelper()->show_to_string(trans_iter->identify())  
+            ATH_MSG_DEBUG( "Get alignment for identifier "
+                           << getIdHelper()->show_to_string(trans_iter->identify())
                            << " at level " << levelInfo.level());
 
             // The delta in the conditions DB is not necessarily the same as what is needed in the
             // alignable transform. At the moment we support global frame, local frame or an alternative frame
             // The setAlignableTransformDelta method takes care of this correction - this is CLHEP <--> Amg interfaced
-            bool status = setAlignableTransformDelta(levelInfo.level(), 
+            bool status = setAlignableTransformDelta(levelInfo.level(),
                                                      trans_iter->identify(),
                                                      Amg::CLHEPTransformToEigen(trans_iter->transform()),
                                                      levelInfo.frame(),
@@ -370,23 +366,23 @@ namespace InDetDD
                 if (!identifierBelongs(trans_iter->identify())) {
                     // Its probably OK. Eg /Indet/Align/ID contains alse pixel and sct ids.
                     ATH_MSG_DEBUG("Cannot set AlignableTransform for identifier."
-                                  << " Probably OK if its /Indet/Align/ID folder. "  
-                                  << getIdHelper()->show_to_string(trans_iter->identify())  
+                                  << " Probably OK if its /Indet/Align/ID folder. "
+                                  << getIdHelper()->show_to_string(trans_iter->identify())
                                   << " at level " << levelInfo.level());
                 } else {
                     if (m_suppressWarnings) {
-                        ATH_MSG_DEBUG("WARNING: Cannot set AlignableTransform for identifier  " 
-                                      << getIdHelper()->show_to_string(trans_iter->identify())  
+                        ATH_MSG_DEBUG("WARNING: Cannot set AlignableTransform for identifier  "
+                                      << getIdHelper()->show_to_string(trans_iter->identify())
                                       << " at level " << levelInfo.level());
                     } else {
-                        ATH_MSG_WARNING("Cannot set AlignableTransform for identifier  " 
-                                        << getIdHelper()->show_to_string(trans_iter->identify())  
+                        ATH_MSG_WARNING("Cannot set AlignableTransform for identifier  "
+                                        << getIdHelper()->show_to_string(trans_iter->identify())
                                         << " at level " << levelInfo.level());
                         ATH_MSG_WARNING("Subsequent WARNINGS will be printed at DEBUG level.");
-                        m_suppressWarnings = true; 
+                        m_suppressWarnings = true;
                     }
                 }
-            }  
+            }
         }
         return alignmentChange;
     }
@@ -399,28 +395,28 @@ namespace InDetDD
       bool alignmentChange = false;
 
       ATH_MSG_DEBUG("processing GlobalAlignmentContainer with key:  " << key);
-      // From the key determine what level in hierarchy we are dealing with.                                                                                   
-      // returns -1 if unrecognized.                                                                                                                           
+      // From the key determine what level in hierarchy we are dealing with.
+      // returns -1 if unrecognized.
       const LevelInfo & levelInfo = getLevel(key);
       if (levelInfo.isValid()) {
           ATH_MSG_VERBOSE("Processing channel: " << key);
       } else {
           ATH_MSG_DEBUG("Channel " << key << " not registered in this manager");
       }
-      // return silently if unrecognised - this can happen in container mode                                                                                   
-      // when a single container holds transforms for both pixel and SCT                                                                                       
+      // return silently if unrecognised - this can happen in container mode
+      // when a single container holds transforms for both pixel and SCT
       if (!levelInfo.isValid() ) return false;
-        
+
       // Within detector specific code
       bool status = processGlobalAlignment(key, levelInfo.level(), levelInfo.frame(), obj, alignStore);
-      
+
       alignmentChange = (alignmentChange || status);
 
       return alignmentChange;
 
     }
-  
-  // We provide a default implementation of any detector specific alignment.                                                                                 
+
+  // We provide a default implementation of any detector specific alignment.
     bool InDetDetectorManager::processGlobalAlignment(const std::string &, int /*level*/, FrameType /*frame*/,
                                                       const CondAttrListCollection* /*obj*/, GeoVAlignmentStore* /*alignStore*/) const
     {
@@ -428,8 +424,8 @@ namespace InDetDD
     }
 
 
-  // We provide a default implementation of any detector specific alignment.
-    bool InDetDetectorManager::processSpecialAlignment(const std::string &, InDetDD::AlignFolderType) const
+    // We provide a default implementation of any detector specific alignment.
+    bool InDetDetectorManager::processSpecialAlignment(const std::string &, InDetDD::AlignFolderType)
     {
         return false;
     }

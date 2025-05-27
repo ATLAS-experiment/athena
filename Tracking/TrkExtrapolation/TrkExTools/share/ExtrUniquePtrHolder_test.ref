@@ -1,0 +1,10 @@
+ptr not in the cache so nullptr  : 0
+Cache contrains :0
+Cache contrains ptr with value 1
+Cache contrains ptr with valus 2
+ptr not in the cache so nullptr  : 0
+ptr not in the cache so nullptr  : 0
+print what the vector holds : [ 0 1 2 ] 
+Not there since is moved out so nullptr : 0
+Client gets : 1
+Client gets : 2

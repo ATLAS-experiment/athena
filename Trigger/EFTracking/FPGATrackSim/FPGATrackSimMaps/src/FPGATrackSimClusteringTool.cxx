@@ -21,6 +21,11 @@ FPGATrackSimClusteringTool::FPGATrackSimClusteringTool(const std::string& algnam
 {
 }
 
+StatusCode FPGATrackSimClusteringTool::initialize() {
+    ATH_CHECK(m_lorentzAngleTool.retrieve(EnableTool{m_LorentzAngleShift >=0}));
+    return StatusCode::SUCCESS;
+}
+
 
 StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInputHeader &header, std::vector<FPGATrackSimCluster> &clusters) const
 {
@@ -77,6 +82,10 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
             }
             tower.addHit(cluster_as_FPGATrackSimhit);
 
+            if(m_LorentzAngleShift>= 0){
+	            ATH_CHECK(m_lorentzAngleTool->updateHitPosition(cluster_as_FPGATrackSimhit, m_LorentzAngleShift));
+            }
+            cluster.setClusterEquiv(cluster_as_FPGATrackSimhit);
             //send back a copy for monitoring and to check when writing out hits in each road
             clusters.push_back(cluster);
             cluster_count++;

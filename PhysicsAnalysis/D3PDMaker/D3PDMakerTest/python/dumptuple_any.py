@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: D3PDMakerTest/python/dumptuple_any.py
@@ -16,8 +16,6 @@ os.environ['TERM'] = 'dumb'
 
 import ROOT
 import cppyy
-from PyUtils.Helpers import ROOT6Setup
-ROOT6Setup()
 # Autoloading doesn't work correctly for vector<unsigned long long>,
 # since root will munge the name to vector<ULong64_t> before trying
 # to look up the autoload.  (cf  R__FindSTLClass in TROOT.cxx).

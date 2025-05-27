@@ -825,18 +825,18 @@
  
 	 inline GTRACK_HDR_w2 fill_GTRACK_HDR_w2 (const double& score, const double& d0, const double& z0, const uint64_t& spare) {
 		 GTRACK_HDR_w2 temp;
-		 temp.score = (uint64_t)(score * GTRACK_HDR_W2_SCORE_mf);
-		 temp.d0 = (int64_t)(d0 * GTRACK_HDR_W2_D0_mf);
-		 temp.z0 = (int64_t)(z0 * GTRACK_HDR_W2_Z0_mf);
+		 temp.score = static_cast<uint64_t>(score * GTRACK_HDR_W2_SCORE_mf);
+		 temp.d0 = static_cast<uint64_t>(d0 * GTRACK_HDR_W2_D0_mf);
+		 temp.z0 = static_cast<uint64_t>(z0 * GTRACK_HDR_W2_Z0_mf);
 		 temp.spare = spare;
 		 return temp;
 	 }
  
-	 inline GTRACK_HDR_w3 fill_GTRACK_HDR_w3 (const int64_t& qoverpt, const int64_t& phi, const int64_t& eta, const uint64_t& spare) {
+	 inline GTRACK_HDR_w3 fill_GTRACK_HDR_w3 (const double& qoverpt, const double& phi, const double& eta, const uint64_t& spare) {
 		 GTRACK_HDR_w3 temp;
-		 temp.qoverpt = qoverpt;
-		 temp.phi = phi;
-		 temp.eta = eta;
+		 temp.qoverpt = static_cast<uint64_t>(qoverpt * GTRACK_HDR_W3_QOVERPT_mf);
+		 temp.phi = static_cast<uint64_t>(phi * GTRACK_HDR_W3_PHI_mf);
+		 temp.eta = static_cast<uint64_t>(eta * GTRACK_HDR_W3_ETA_mf);
 		 temp.spare = spare;
 		 return temp;
 	 }

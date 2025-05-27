@@ -21,7 +21,6 @@
 // Trk
 #include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
 #include "TrkDetDescrInterfaces/ICaloTrackingVolumeBuilder.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
 
 // STL
@@ -87,9 +86,6 @@ public:
   StringProperty m_lArMgrLocation{
     this, "LArDetManagerLocation", "LArMgr", "Store Gate key for LAr Detector Manager"};
 
-  //!< Helper Tool to create TrackingVolumes
-  ToolHandle<Trk::ITrackingVolumeHelper> m_lArTrackingVolumeHelper{
-    this, "TrackingVolumeHelper", "Trk::TrackingVolumeHelper/LArTrackingVolumeHelper"};
   //!< helper for volume creation
   ToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator{
     this, "TrackingVolumeCreator", "Trk::CylinderVolumeCreator/TrackingVolumeCreator"};

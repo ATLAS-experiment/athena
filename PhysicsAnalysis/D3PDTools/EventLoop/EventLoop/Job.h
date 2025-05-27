@@ -213,6 +213,9 @@ namespace EL
     /// \brief a boolean flag for whether to perform a component factory preload
     static const std::string optFactoryPreload;
 
+    /// \brief an option for stream aliases
+    static const std::string optStreamAliases;
+
 
     /// description: the name of the option used for setting the
     ///   maximum number of events to process per sample

@@ -82,9 +82,9 @@ def LArDeadOTXCorrCfg(configFlags):
     from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
     acc.merge(LArRawSCDataReadingCfg(configFlags))
 
-    deadOTXTool=CompFactory.LArCelldeadOTXTool("LArCelldeadOTXTool",keyMF="LArBadFeb",
-                                   keyCabling="LArOnOffIdMap", keySCCabling="LArOnOffIdMapSC",
-                                   keySC=SCInput)
+    acc.addCondAlgo(CompFactory.LArDeadOTXCondAlg())
+    
+    deadOTXTool=CompFactory.LArCelldeadOTXTool("LArCelldeadOTXTool", keySC=SCInput)
     acc.setPrivateTools(deadOTXTool)
     return acc
 

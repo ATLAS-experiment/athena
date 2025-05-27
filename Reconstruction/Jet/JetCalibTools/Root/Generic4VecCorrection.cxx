@@ -169,7 +169,7 @@ StatusCode Generic4VecCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEve
     ATH_CHECK( readHisto(correctionFactor, h_correction_2D, this_pt, this_eta) );
   }
   // Apply the correction and set it in the jet EDM
-  calibP4 *= 1.0/correctionFactor;
+  calibP4 *= correctionFactor;
   jet.setAttribute<xAOD::JetFourMom_t>(m_outJetScale.Data(),calibP4);
   jet.setJetP4(calibP4);
 
@@ -228,7 +228,7 @@ StatusCode Generic4VecCorrection::initialize_correctionResponse()
   return StatusCode::SUCCESS;
 }
 
-StatusCode Generic4VecCorrection::load_json(nlohmann::json& json_object, std::string json_filepath) const
+StatusCode Generic4VecCorrection::load_json(nlohmann::json& json_object, const std::string& json_filepath) const
 {
   std::string full_path = PathResolverFindCalibFile(json_filepath);
   std::ifstream json_stream(full_path);

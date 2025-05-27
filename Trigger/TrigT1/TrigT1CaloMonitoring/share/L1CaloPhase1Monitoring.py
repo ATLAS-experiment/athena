@@ -14,6 +14,11 @@ topLog.setLevel(logging.WARNING) # default to suppressing all info logging excep
 log = logging.getLogger('L1CaloPhase1Monitoring.py')
 log.setLevel(logging.INFO)
 
+from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+L1CaloMonitorCfgHelper.embargoed = ["Expert/Efficiency/gFEX/MuonReferenceTrigger/SRpt_L1_gJ400p0ETA25","Expert/Sim/L1TopoAlgoMismatchRateVsLB","Expert/Sim/L1TopoMultiplicityMismatchRateVsLumi"]
+
+
+
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod,Format
@@ -43,13 +48,14 @@ flags.DQ.enableLumiAccess = False # in fact, we don't need lumi access for now .
 flags.DQ.FileKey = "" if partition.isValid() else "EXPERT" # histsvc file "name" to record to - Rafal asked it to be blank @ P1 ... means monitoring.root will be empty
 flags.Output.HISTFileName = os.getenv("L1CALO_ATHENA_JOB_NAME","") + "monitoring.root" # control names of monitoring root file - ensure each online monitoring job gets a different filename to avoid collision between processes
 flags.DQ.useTrigger = False # don't do TrigDecisionTool in MonitorCfg helper methods
-flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
+flags.Trigger.L1.doCaloInputs = partition.isValid() # flag for saying if inputs should be decoded or not
 flags.Trigger.enableL1CaloPhase1 = True # used by this script to turn on/off the simulation
-# flags for rerunning simulation
-flags.Trigger.L1.doeFex = True
-flags.Trigger.L1.dojFex = True
-flags.Trigger.L1.dogFex = True
-flags.Trigger.L1.doTopo = True
+# flags for rerunning simulation - on by default only in online environment
+flags.Trigger.L1.doCalo = partition.isValid()
+flags.Trigger.L1.doeFex = partition.isValid()
+flags.Trigger.L1.dojFex = partition.isValid()
+flags.Trigger.L1.dogFex = partition.isValid()
+flags.Trigger.L1.doTopo = partition.isValid()
 # if running online, override these with autoconfig values
 # will set things like the GlobalTag automatically
 if partition.isValid():
@@ -70,12 +76,12 @@ Extra flags are specified after a " -- " and the following are most relevant boo
   
   Trigger.enableL1CaloPhase1 : turn on/off the offline simulation [default: True]
   DQ.doMonitoring            : turn on/off the monitoring [default: True]
-  Trigger.L1.doCaloInputs    : controls input readout decoding and monitoring [default: True]
-  Trigger.L1.doCalo          : controls trex (legacy syst) monitoring  [default: True]
-  Trigger.L1.doeFex          : controls efex simulation and monitoring [default: True]
-  Trigger.L1.dojFex          : controls jfex simulation and monitoring [default: True]
-  Trigger.L1.dogFex          : controls gfex simulation and monitoring [default: True]
-  Trigger.L1.doTopo          : controls topo simulation and monitoring [default: True] (from 2023 Onwards)
+  Trigger.L1.doCaloInputs    : controls input readout decoding and monitoring [default: False]
+  Trigger.L1.doCalo          : controls trex (legacy syst) monitoring  [default: False]
+  Trigger.L1.doeFex          : controls efex simulation and monitoring [default: False]
+  Trigger.L1.dojFex          : controls jfex simulation and monitoring [default: False]
+  Trigger.L1.dogFex          : controls gfex simulation and monitoring [default: False]
+  Trigger.L1.doTopo          : controls topo simulation and monitoring [default: False] (from 2023 Onwards)
   DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not  [default: False]
   PerfMon.doFullMonMT        : print info about execution time of algorithms and memory use etc [default: False]
 
@@ -97,7 +103,17 @@ parser.add_argument('--stream',default="*",help="stream to lookup files in")
 parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
 parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath> or <folder>:<tag>[=<dbPath>] to override a tag, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
 parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
+parser.add_argument('--all',action='store_true',help="If specified, will turn on all simulation and monitoring (makes job slow though!)")
 args = flags.fillFromArgs(parser=parser)
+if args.all:
+  # turn everything on
+  flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
+  flags.Trigger.enableL1CaloPhase1 = True # used by this script to turn on/off the simulation
+  flags.Trigger.L1.doCalo = True
+  flags.Trigger.L1.doeFex = True
+  flags.Trigger.L1.dojFex = True
+  flags.Trigger.L1.dogFex = True
+  flags.Trigger.L1.doTopo = True
 if args.runNumber is not None:
   # todo: if an exact event number is provided, we can in theory use the event index and rucio to obtain a filename:
   # e.g: event-lookup -D RAW "477048 3459682284"
@@ -159,6 +175,7 @@ if standalone :
 if flags.Exec.MaxEvents == 0:
   # in this mode, ensure all monitoring activated, so that generated han config is complete
   flags.DQ.doMonitoring=True
+  flags.Trigger.L1.doCalo=True
   flags.Trigger.L1.doCaloInputs=True
   flags.Trigger.L1.doeFex=True
   flags.Trigger.L1.dojFex=True
@@ -188,6 +205,14 @@ log.setLevel(logging.INFO)
 
 flags.lock()
 if flags.Exec.MaxEvents == 0: flags.dump(evaluate=True)
+
+# if nothing enabled, exit out here
+if not any([flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doCalo,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo]):
+  log.fatal("You did not set any flags to specify what to run. ")
+  log.fatal("Please set at least one of the flags in Trigger.L1.(doCaloInputs, doCalo, doeFex, dojFex, dogFex, doTopo) ")
+  log.fatal("or use '--all' option to turn on everything (but that is slow)")
+  log.fatal("See --help for more info about the flags")
+  exit(1)
 
 if partition.isValid() and len(flags.Input.Files)==0:
   flags.dump(evaluate=True)
@@ -395,7 +420,6 @@ if args.evtNumber is not None:
   topSeq.Members = [topSeq.Members[0],CompFactory.AthSequencer(mainSeq),topSeq.Members[-1]]
   cfg.addEventAlgo(CompFactory.EventNumberFilterAlgorithm("EvtNumberFilter",EventNumbers=args.evtNumber),sequenceName=mainSeq)
   cfg.getSequence(mainSeq).Members += [algSeq]
-  # cfg.addEventAlgo(CompFactory.LVL1.eFexEventDumper("Dumper",TowersKey="L1_eFexEmulatedTowers"))
 
 from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
 cfg.merge( PerfMonMTSvcCfg(flags) )
@@ -513,7 +537,9 @@ if flags.Output.AODFileName != "":
   cfg.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
 # ensure reloading OTF masking every event if running online monitoring
-if "MaskedSCCondAlg" in cfg.getCondAlgos(): cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
+if "MaskedSCCondAlg" in [a.name for a in cfg.getCondAlgos()]: cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
+if "MuonAlignmentCondAlg" in [a.name for a in cfg.getCondAlgos()]: cfg.getCondAlgo("MuonAlignmentCondAlg").OutputLevel=Constants.ERROR # this alg produces warnings every time, silence it!
+
 
 if flags.Trigger.L1.doeFex and (args.evtNumber is not None):
   # when debugging individual events, add the eFex event dumper to the job

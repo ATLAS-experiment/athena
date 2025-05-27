@@ -34,7 +34,7 @@ StatusCode LArCellContHVCorrTool::process(CaloCellContainer* cellCollection, con
    
    for (CaloCell* theCell : *cellCollection) {
      const float hvcorr = oflHVCorr->HVScaleCorr(theCell->ID());
-     theCell->setEnergy(theCell->energy()*hvcorr);
+     theCell->scaleEnergy(hvcorr);
    }// End loop over cell-container
    return StatusCode::SUCCESS;
 }

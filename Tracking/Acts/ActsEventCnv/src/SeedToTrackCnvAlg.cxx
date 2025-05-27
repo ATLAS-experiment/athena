@@ -19,11 +19,6 @@
 
 namespace ActsTrk {
 
-SeedToTrackCnvAlg::SeedToTrackCnvAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{
-}
-
 StatusCode SeedToTrackCnvAlg::initialize()
 {
   ATH_CHECK(m_seedContainerKey.initialize());
@@ -31,12 +26,11 @@ StatusCode SeedToTrackCnvAlg::initialize()
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsTrackParamsKey.initialize());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
 
   if (m_seedContainerKey.size() != m_actsTrackParamsKey.size()) {
     ATH_MSG_ERROR("Seed and Parameter containers have different sizes: "
-		  << m_seedContainerKey.size() << " for seeds and "
-		  << m_actsTrackParamsKey.size() << " for the parameters");
+      << m_seedContainerKey.size() << " for seeds and "
+      << m_actsTrackParamsKey.size() << " for the parameters");
     return StatusCode::FAILURE;
   }
 
@@ -51,10 +45,6 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const
   Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(context).context();
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   ATH_CHECK(trackingGeometry.get() != nullptr);
-
-  SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-    detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, context};
-  ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
   for (std::size_t i(0); i<m_seedContainerKey.size(); ++i) {
     ATH_MSG_DEBUG("Retrieving Seed Collection with key: " << m_seedContainerKey.at(i).key());
@@ -81,17 +71,18 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const
       actsTrack.setReferenceSurface(paramsPointer->referenceSurface().getSharedPtr());
       std::size_t tsosPreviousIndex = Acts::MultiTrajectoryTraits::kInvalid;
       for (const xAOD::SpacePoint_v1* spacepoint: seedPointer->sp()) {
-	const auto& measurements = spacepoint->measurements();
-	for (const xAOD::UncalibratedMeasurement *umeas : measurements) {
-	  ActsTrk::ATLASUncalibSourceLink el(makeATLASUncalibSourceLink(umeas));
-	  const Acts::Surface *surf = ActsTrk::getSurfaceOfMeasurement(*trackingGeometry,**detectorElementToGeometryIdMap,*umeas);
-	  ATH_CHECK( surf && surf->getSharedPtr().get() != nullptr);
-	  auto actsTSOS = trackStateContainer.getTrackState(trackStateContainer.addTrackState(Acts::TrackStatePropMask::None, tsosPreviousIndex));
-	  actsTSOS.setReferenceSurface(surf->getSharedPtr());
-	  actsTSOS.setUncalibratedSourceLink(Acts::SourceLink(el));
-	  actsTrack.tipIndex() = actsTSOS.index();
-	  tsosPreviousIndex = actsTrack.tipIndex();
-	}
+  const auto& measurements = spacepoint->measurements();
+  for (const xAOD::UncalibratedMeasurement *umeas : measurements) {
+    ActsTrk::ATLASUncalibSourceLink el(makeATLASUncalibSourceLink(umeas));
+    const auto* detectorElementToGeometryIdMap =  m_trackingGeometryTool->surfaceIdMap();
+    const Acts::Surface *surf = ActsTrk::getSurfaceOfMeasurement(*trackingGeometry, *detectorElementToGeometryIdMap,*umeas);
+    ATH_CHECK( surf && surf->getSharedPtr().get() != nullptr);
+    auto actsTSOS = trackStateContainer.getTrackState(trackStateContainer.addTrackState(Acts::TrackStatePropMask::None, tsosPreviousIndex));
+    actsTSOS.setReferenceSurface(surf->getSharedPtr());
+    actsTSOS.setUncalibratedSourceLink(Acts::SourceLink(el));
+    actsTrack.tipIndex() = actsTSOS.index();
+    tsosPreviousIndex = actsTrack.tipIndex();
+  }
       }
     } 
 

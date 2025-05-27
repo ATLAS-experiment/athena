@@ -17,20 +17,14 @@ squarksl = []
 for anum in [1,2,3,4]:
     squarks += [str(1000000+anum),str(-1000000-anum),str(2000000+anum),str(-2000000-anum)]
     squarksl += [str(1000000+anum),str(-1000000-anum)]
-dict_index_syst = {0:'scalefactup',
-                   1:'scalefactdown',
-                   2:'alpsfactup',
-                   3:'alpsfactdown',
-                   4:'moreFSR',
-                   5:'lessFSR',
-                   6:'qup',
-                   7:'qdown'}
 
 # Basic settings for production and filters
-syst_mod = None
 ktdurham = None # Only set if you want a non-standard setting (1/4 heavy mass)
 madspin_card = None
 param_card = None # Only set if you *can't* just modify the default param card to get your settings (e.g. pMSSM)
+
+# In case someone wants to set a systematic variation in their job options fragment
+syst_mod = None
 
 # Default run settings
 run_settings = {'event_norm':'average',

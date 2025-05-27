@@ -32,7 +32,7 @@ namespace dbg {
    void break_point( double input1, double input2, const char *label);
    void break_point( uint64_t input1, uint64_t input2, const char *label);
 
-   
+
 }
 
 #define  VALIDATE_STATUS_ARRAY( use_info, info_val, summary_val)     \
@@ -91,7 +91,7 @@ namespace InDet {
        const InDetDD::SiDetectorElement* getDetectorElement(const IdentifierHash& hash) const {
           return m_detectorElements->at(hash.value());
        }
-       const std::vector<InDetDD::SiDetectorElement*> &getDetectorElements() const {
+       const InDetDD::SiDetectorElementCollection& getDetectorElements() const {
           return *m_detectorElements;
        }
        bool isGood(IdentifierHash hash)                             const {

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @file:    dlldep.py
 #
@@ -11,8 +11,6 @@
 #           based on Dominik Seichter's 'dependencies.sh':
 #           http://domseichter.blogspot.com/2008/02/visualize-dependencies-of-binaries-and.html
 #
-
-from __future__ import print_function
 
 import sys
 from os.path import basename

@@ -40,7 +40,7 @@ GNN_FasTrackConnector::GNN_FasTrackConnector(std::ifstream& inFile, bool LRTmode
     }
 
     int srcvol_id = src / 1000;
-    int dstvol_id = src / 1000;
+    int dstvol_id = dst / 1000;
 
     bool srcIsStrip = (srcvol_id == 13 || srcvol_id == 12 || srcvol_id == 14);
     bool dstIsStrip = (dstvol_id == 13 || dstvol_id == 12 || dstvol_id == 14);

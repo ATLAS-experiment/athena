@@ -91,9 +91,8 @@ namespace Muon
       virtual const MuonGM::CscReadoutElement* detectorElement() const override final;
 
       /** Interface method checking the type*/
-      virtual bool type(Trk::PrepRawDataType type) const override final
-      {
-        return type == Trk::PrepRawDataType::MdtPrepData;
+      virtual Trk::PrepRawDataType prdType() const override final {
+        return Trk::PrepRawDataType::CscPrepData;
       }
 
       /** returns the IdentifierHash corresponding to the channel. */

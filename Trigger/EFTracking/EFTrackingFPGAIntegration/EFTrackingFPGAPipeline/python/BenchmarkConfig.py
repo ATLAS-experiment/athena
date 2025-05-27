@@ -16,6 +16,7 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     kwarg.setdefault('InputPixelClusterKey', 'ITkPixelClusters')
     kwarg.setdefault('InputStripClusterKey', 'ITkStripClusters')
     kwarg.setdefault('runPassThrough', flags.FPGADataPrep.RunPassThrough)
+    kwarg.setdefault('doEmulation', flags.FPGADataPrep.DoEmulation)
     
 
     # Set up Cluster maker tool
@@ -39,6 +40,14 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
 
     return acc
 
+def FPGAClusterSortingCfg(flags):
+    acc = ComponentAccumulator()
+    from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg
+    ClusterSorting = FPGAClusterSortingAlgCfg(flags)
+    
+    acc.merge(ClusterSorting)
+    return acc
+    
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -111,15 +120,18 @@ if __name__ == "__main__":
         # convert xAOD Clusters to SPs
         from EFTrackingFPGAUtility.DataPrepToActsConfig import UseActsSpacePointFormationCfg
         cfg.merge(UseActsSpacePointFormationCfg(flags))
-                
+        
+        # Sort FPGAClusters
+        cfg.merge(FPGAClusterSortingCfg(flags))
+        
         # Run the ACTS Fast Tracking on FPGA clusters
         from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimDataPrepConnectToFastTracking
         cfg.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="FPGA",
                             **{'PixelSeedingAlg.InputSpacePoints' : ['FPGAPixelSpacePoints'],
                                 'StripSeedingAlg.InputSpacePoints' : [''],
-                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["FPGAPixelClusters","FPGAStripClusters"],
-                                'PixelClusterToTruthAssociationAlg.Measurements' : 'FPGAPixelClusters',
-                                'StripClusterToTruthAssociationAlg.Measurements' : 'FPGAStripClusters'}))
+                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["SortedFPGAPixelClusters","SortedFPGAStripClusters"],
+                                'PixelClusterToTruthAssociationAlg.Measurements' : 'SortedFPGAPixelClusters',
+                                'StripClusterToTruthAssociationAlg.Measurements' : 'SortedFPGAStripClusters'}))
         
         # Run the ACTS Fast Tracking (C-100) as an additional reference
         cfg.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))

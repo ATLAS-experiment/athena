@@ -42,11 +42,9 @@ class SmearingCalibStep
         virtual StatusCode getNominalResolutionMC(const xAOD::Jet& jet,  const JetHelper::JetContext& jc, double& resolution) const override;
 
     private:
-        Gaudi::Property<std::string> m_jetStartScale {this, "JSCStartingScale", "JetGSCScaleMomentum", "Starting jet scale"};
-        Gaudi::Property<std::string> m_jetOutScale {this, "JSCOutScale", "JetSmearedMomentum", "Ending jet scale"};
-        Gaudi::Property<std::string> m_smearType {this, "SmearType", "", "How to smear: pt, eta or FourVec"};
-      
-        // TODO: Old smearing step had different interpolation options -> not added to JetToolHelpers yet?
+        Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetGSCScaleMomentum", "Starting jet scale"};
+        Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetSmearedMomentum", "Ending jet scale"};
+        Gaudi::Property<std::string> m_smearType {this, "SmearType", "FourVec", "How to smear: pt, eta or FourVec"};
 
         ToolHandle<JetHelper::IVarTool> m_histToolMC {this, "HistoReaderMC", "HistoInput2D", "Instance of HistoInput1D or HistoInput2D for reading histogram for MC"};
         ToolHandle<JetHelper::IVarTool> m_histToolData {this, "HistoReaderData", "HistoInput2D", "Instance of HistoInput1D or HistoInput2D for reading histogram for data"};

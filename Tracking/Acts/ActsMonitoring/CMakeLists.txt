@@ -11,34 +11,33 @@ atlas_add_component( ActsMonitoring
                      src/*.h src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES 
-		        ActsCore
-		        ActsEventLib
-			ActsEventCnvLib
-			ActsGeometryLib
-			ActsGeometryInterfacesLib
-			InDetMeasurementUtilitiesLib
-			ActsToolInterfacesLib
-			AthenaMonitoringLib
-			AthenaMonitoringKernelLib
-			BeamSpotConditionsData
-			GaudiKernel
-			GeoPrimitives
-			InDetIdentifier
-			InDetPrepRawData
-			InDetReadoutGeometry
-			InDetRecToolInterfaces
-			MagFieldConditions
-			MagFieldElements
-			PixelReadoutGeometryLib
-			ReadoutGeometryBase
-			SiSPSeededTrackFinderData
-			StoreGateLib
-			TrkTruthData
-			TrkValHistUtils
-			xAODEventInfo
-			xAODInDetMeasurement
-			xAODMeasurementBase
-			HGTD_ReadoutGeometry )
+                ActsCore
+                ActsEventLib
+                ActsGeometryLib
+                ActsGeometryInterfacesLib
+                ActsToolInterfacesLib
+                AthenaMonitoringLib
+                AthenaMonitoringKernelLib
+                BeamSpotConditionsData
+                GaudiKernel
+                GeoPrimitives
+                InDetIdentifier
+                InDetPrepRawData
+                InDetReadoutGeometry
+                InDetRecToolInterfaces
+                MagFieldConditions
+                MagFieldElements
+                PixelReadoutGeometryLib
+                ReadoutGeometryBase
+                SiSPSeededTrackFinderData
+                StoreGateLib
+                TrkTruthData
+                TrkValHistUtils
+                xAODEventInfo
+                xAODInDetMeasurement
+                xAODMeasurementBase
+                InDetMeasurementUtilitiesLib
+                HGTD_ReadoutGeometry )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 

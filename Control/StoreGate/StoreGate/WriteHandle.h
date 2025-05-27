@@ -719,10 +719,4 @@ WriteHandle<T> makeHandle (const WriteHandleKey<T>& key,
 #include "StoreGate/WriteHandle.icc"
 
 
-#ifndef NO_LEGACY_HANDLES
-namespace SG {
-  template <class T>
-  using WVar = WriteHandle<T>;
-} 
-#endif
 #endif //> !STOREGATE_SG_WRITEHANDLE_H

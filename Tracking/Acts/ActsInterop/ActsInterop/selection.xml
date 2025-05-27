@@ -3,5 +3,4 @@
 
    <!-- Objects from the namespace. -->
    <variable pattern="Acts::UnitConstants::*" />
-   <class name="ActsUnitConstants::ROOT6_NamespaceAutoloadHook" />
 </lcgdict>

@@ -67,6 +67,8 @@ protected:
     cl::Context m_context;    //!< Context object for the application
     cl::Program m_program;    //!< Program object containing the kernel
     Gaudi::Property<std::string> m_deviceBDF{this, "bdfID", "", "BDF ID of the accelerator card"}; //!< BDF ID of the accelerator card
+    Gaudi::Property<bool> m_doEmulation{this, "doEmulation", false, "If software or hardware emulation is being used for debugging"}; 
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION_INTEGRATION_BASE_H
+ 

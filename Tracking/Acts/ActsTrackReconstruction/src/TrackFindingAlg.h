@@ -6,6 +6,7 @@
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
 
 // Base Class
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 // Gaudi includes
@@ -16,7 +17,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "src/TrackStatePrinterTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 
 // ACTS
 #include "Acts/EventData/VectorTrackContainer.hpp"
@@ -108,9 +109,6 @@ namespace ActsTrk
     SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementsKeys", {}, "Keys of input SiDetectorElementCollection"};
     // Measurement collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
-    SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
-       {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
-        "Map which associates detector elements to Acts Geometry IDs"};
     SG::ReadCondHandleKey<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap> m_volumeIdToDetectorElementCollMapKey
        {this, "ActsVolumeIdToDetectorElementCollectionMapKey", "ActsVolumeIdToDetectorElementCollectionMap",
         "Map which associates Acts geometry volume IDs to detector element collections."};

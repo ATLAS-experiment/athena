@@ -24,8 +24,14 @@ if 'McEventCollection#GEN_EVENT' not in flags.Input.TypedCollections:
     else:
         print('Truth collection not found in input file. Might be a problem.')
 
-# Use the WriteHepMC AlgTool from TruthIO to do the conversion
+# We need the component factory to build the job up
 from AthenaConfiguration.ComponentFactory import CompFactory
+
+# Add FixHepMC to remove loops here
+# This is a work-around for AGENE-2342, which needs a HepMC patch to fix
+cfg.addEventAlgo(CompFactory.FixHepMC("FixHepMC"))
+
+# Use the WriteHepMC AlgTool from TruthIO to do the conversion
 cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
                   OutputFile = flags.Output.HepMCFileName.replace('.tgz',''),
                   McEventKey = McEventKey ) )

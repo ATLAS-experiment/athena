@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileRecUtils )
@@ -36,6 +36,7 @@ set( extra_patterns "LArDetectorToolNV|is still valid|no data retrieved|Database
 atlas_add_test( TileCellBuilder_test
                 SCRIPT test/TileCellBuilder_test.sh
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)
 
 # The entries 
@@ -45,69 +46,83 @@ atlas_add_test( TileCellBuilder_test
 atlas_add_test( TileCellBuilderFromHit_test
                 SCRIPT test/TileCellBuilderFromHit_test.sh
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelBuilder_test
                 SCRIPT test/TileRawChannelBuilder_test.sh
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileDQstatusAlg_test
                 SCRIPT test/TileDQstatusAlg_test.sh
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileDQstatusTool_test
                 SCRIPT test/TileDQstatusTool_test.sh
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelBuilderFitConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelBuilderFitConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileRawChannelBuilderOptConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelBuilderOptConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileRawChannelBuilderMFConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelBuilderMFConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileRawChannelBuilderWienerConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelBuilderWienerConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileCellNoiseFilterConfig_test
                  SCRIPT python -m TileRecUtils.TileCellNoiseFilterConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileCellBuilderConfig_test
                  SCRIPT python -m TileRecUtils.TileCellBuilderConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileDQstatusConfig_test
                  SCRIPT python -m TileRecUtils.TileDQstatusConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileRawChannelCorrectionConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelCorrectionConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileRawChannelMakerConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelMakerConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileCellMakerConfig_test
                  SCRIPT python -m TileRecUtils.TileCellMakerConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT nopost.sh)

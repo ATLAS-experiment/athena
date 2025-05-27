@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -176,6 +176,11 @@ namespace xAOD {
          }
          PRINT_VERBOSE( "SetNSlots: Initialized objects for slot " << i );
       }
+
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,35,99)
+      // Pass on to the base class.
+      ROOT::RDF::RDataSource::SetNSlots( slots );
+#endif
 
       // Return gracefully.
       return;

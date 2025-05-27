@@ -391,7 +391,12 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 # SFTriggerHadTau correction type from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [12]
-                alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+                if config.geometry() is LHCPeriod.Run2:
+                    alg.efficiencyCorrectionsTool.RecommendationTag = "2022-prerec"
+                    alg.efficiencyCorrectionsTool.Campaign = "mc20"
+                else:
+                    alg.efficiencyCorrectionsTool.RecommendationTag = "2025-prerec"
+                    alg.efficiencyCorrectionsTool.Campaign = config.campaign().value
                 alg.efficiencyCorrectionsTool.TriggerName = chain
 
                 # JetIDLevel from

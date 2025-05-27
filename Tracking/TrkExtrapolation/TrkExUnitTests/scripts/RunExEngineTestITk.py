@@ -50,6 +50,9 @@ if(MisalignMode!=-1):
   flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
   flags.ITk.Geometry.stripAlignable=True
   flags.ITk.Geometry.pixelAlignable=True
+  flags.ITk.Align.alignITkPixel = True
+  flags.ITk.Align.alignITkStrip = True
+
 
   if(MisalignMode==0):
     tag="InDetSi_MisalignmentMode_no Misalignment"

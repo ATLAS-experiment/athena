@@ -28,6 +28,7 @@
 #include "Acts/TrackFitting/MbfSmoother.hpp"
 
 // ActsTrk
+#include "ActsCalibration/CalibrationContext.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -115,7 +116,6 @@ namespace ActsTrk
     ATH_CHECK(m_seedContainerKeys.initialize());
     ATH_CHECK(m_detEleCollKeys.initialize());
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
-    ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
     ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
     ATH_CHECK(m_detElStatus.initialize());
 
@@ -254,6 +254,8 @@ namespace ActsTrk
     auto timer = Monitored::Timer<std::chrono::milliseconds>("TIME_execute");
     auto mon_nTracks = Monitored::Scalar<int>("nTracks");
     auto mon = Monitored::Group(m_monTool, timer, mon_nTracks);
+    const auto* detectorElementToGeometryIdMap =  m_trackingGeometryTool->surfaceIdMap();
+
 
     // ================================================== //
     // ===================== INPUTS ===================== //
@@ -268,10 +270,6 @@ namespace ActsTrk
     std::vector<const xAOD::UncalibratedMeasurementContainer *> uncalibratedMeasurementContainers;
     std::size_t total_measurements = 0;
     ATH_CHECK(getContainersFromKeys(ctx, m_uncalibratedMeasurementContainerKeys, uncalibratedMeasurementContainers, total_measurements));
-
-    SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-       detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
-    ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
     // map detector element status to volume ids
     SG::ReadCondHandle<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap>
@@ -299,7 +297,7 @@ namespace ActsTrk
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
       measurements.addMeasurements(icontainer,
                                    *uncalibratedMeasurementContainers[icontainer],
-                                   **detectorElementToGeometryIdMap);
+                                   *detectorElementToGeometryIdMap);
       if (measurementIndexContainersSize > 0ul)
         measurementIndex.addMeasurements(*uncalibratedMeasurementContainers[icontainer]);
     }
@@ -309,7 +307,7 @@ namespace ActsTrk
     ATH_CHECK( propagateDetectorElementStatusToMeasurements(*(volumeIdToDetectorElementCollMap.cptr()), det_el_status_arr, measurements) );
 
     if (m_trackStatePrinter.isSet()) {
-      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, **detectorElementToGeometryIdMap, measurements.measurementOffsets());
+      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, *detectorElementToGeometryIdMap, measurements.measurementOffsets());
     }
 
     detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
@@ -337,7 +335,7 @@ namespace ActsTrk
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
     {
       ATH_CHECK(findTracks(ctx,
-                           **detectorElementToGeometryIdMap,
+                           *detectorElementToGeometryIdMap,
                            measurements,
                            measurementIndex,
                            sharedHits,
@@ -428,7 +426,7 @@ namespace ActsTrk
       .geometry = m_trackingGeometryTool->getGeometryContext(ctx).context(),
       .magField = m_extrapolationTool->getMagneticFieldContext(ctx),
       // CalibrationContext converter not implemented yet.
-      .calib = Acts::CalibrationContext()
+      .calib = getCalibrationContext(ctx)
     };
 
     auto [options, secondOptions, measurementSelector] = getDefaultOptions(detContext, measurements, pSurface.get());

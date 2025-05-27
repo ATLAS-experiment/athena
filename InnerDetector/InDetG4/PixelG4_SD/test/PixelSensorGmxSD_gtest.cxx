@@ -19,6 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "G4Track.hh"
 #include "G4StepPoint.hh"
+#include "G4MuonMinus.hh"
 #include "G4DynamicParticle.hh"
 #include "G4ThreeVector.hh"
 #include "G4Box.hh"
@@ -124,7 +125,9 @@ TEST_F( PixelSensorGmxSDtest, AddHit )
   lP2[SiHit::xPhi] = 0;
   lP2[SiHit::xDep] = 0;
   
-  G4DynamicParticle* dynamicPar = new G4DynamicParticle();
+  G4double energy = 1.0;
+  G4ThreeVector direction(1.0, 1.0, 1.0);
+  G4DynamicParticle* dynamicPar = new G4DynamicParticle(G4MuonMinus::MuonMinus(), direction, energy);
   G4double aValueTime = 1;
   G4ThreeVector ValuePosition(1.0, 1.0, 1.0);
   G4Track track(dynamicPar, aValueTime, ValuePosition);

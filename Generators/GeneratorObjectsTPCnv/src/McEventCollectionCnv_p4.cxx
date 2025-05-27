@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p4.cxx
@@ -127,7 +127,7 @@ void McEventCollectionCnv_p4::persToTrans( const McEventCollection_p4* persObj,
               pdf[2],                   // scalePDF
               pdf[1],                   // pdf1
               pdf[0] );                 // pdf2
-              genEvt->set_pdf_info(pi);
+              genEvt->set_pdf_info(std::move(pi));
         }
 
       transObj->push_back( genEvt );
@@ -144,7 +144,7 @@ void McEventCollectionCnv_p4::persToTrans( const McEventCollection_p4* persObj,
       for ( unsigned int iVtx= persEvt.m_verticesBegin; iVtx != endVtx; ++iVtx )
         {
          auto vtx = createGenVertex( *persObj, persObj->m_genVertices[iVtx], partToEndVtx, datapools, genEvt );
-         brc_to_vertex[persObj->m_genVertices[iVtx].m_barcode] = vtx;
+         brc_to_vertex[persObj->m_genVertices[iVtx].m_barcode] = std::move(vtx);
         } //> end loop over vertices
 
         // set the signal process vertex

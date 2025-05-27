@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @author: Sebastien Binet <binet@cern.ch>
 # @date:   March 2007
@@ -15,13 +15,15 @@ from tempfile import NamedTemporaryFile
 # is used during the build (see athena!62739).
 # !!!
 
-
 def ROOT6Setup(batch=False):
+   """
+   At this point this function just makes sure the ROOT batch mode is set
+   correctly when someone imports ROOT
+   """
    from AthenaCommon.Logging import log
    log.info('executing ROOT6Setup')
    import builtins as builtin_mod
    oldimporthook = builtin_mod.__import__
-   autoload_var_name = 'ROOT6_NamespaceAutoloadHook'
    batch_mode = bool(batch)
 
    def root6_importhook(name, globals={}, locals={}, fromlist=[], level=0):
@@ -39,21 +41,6 @@ def ROOT6Setup(batch=False):
           if bm is not None:
              log.debug('Setting ROOT batch mode to %s', bm)
              m.gROOT.SetBatch(bm)
-
-          if fromlist:
-             # in this case 'm' is the final nested module already, don't walk the full 'name'
-             vars = [ '.'.join(['', fl, autoload_var_name]) for fl in fromlist]
-          else:
-             vars = [ '.'.join([name, autoload_var_name]) ]
-
-          for v in vars:
-             try:
-                mm = m
-                # walk the module chain and try to touch 'autoload_var_name' to trigger ROOT autoloading of namespaces
-                for comp in v.split('.')[1:]:
-                   mm = getattr(mm, comp)
-             except Exception:
-                pass
 
        return m
 

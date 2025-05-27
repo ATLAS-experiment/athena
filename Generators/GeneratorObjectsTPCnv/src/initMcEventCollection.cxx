@@ -91,7 +91,7 @@ namespace Athena_test {
     HepMC::suggest_barcode(inParticle3,maxBarcode+3);
     HepMC::suggest_barcode(inParticle4,maxBarcode+4);
     HepMC::set_signal_process_vertex(&ge, myVertex );
-    ge.set_beam_particles(inParticle1,inParticle2);
+    ge.set_beam_particles(std::move(inParticle1),std::move(inParticle2));
   }
 
   void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenParticlePtr>& genPartVector)

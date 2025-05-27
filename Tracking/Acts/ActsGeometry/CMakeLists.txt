@@ -42,6 +42,9 @@ atlas_add_library( ActsGeometryLib
                    InDetIdentifier
                    InDetReadoutGeometry
                    MagFieldConditions
+                   MuonGeoModelR4Lib
+                   MuonIdHelpersLib
+                   MuonReadoutGeometryR4
                    StoreGateLib
                    TRT_ReadoutGeometry
                    SCT_ReadoutGeometry
@@ -68,7 +71,7 @@ atlas_add_component( ActsGeometry
                      src/ActsTrackingGeometryTool.cxx
                      src/ActsPropStepRootWriterSvc.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
-                     src/DetectorElementToActsGeometryIdMappingAlg.cxx
+                     src/ActsMSTrackingVolumeBuilder.cxx
                      src/ActsVolumeIdToDetectorElementCollectionMappingAlg.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}

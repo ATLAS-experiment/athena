@@ -85,7 +85,8 @@ void FPGATrackSimSlicingEngineTool::sliceHits(const std::vector<std::shared_ptr<
             if (!m_doSecondStage || m_layerMapModules.contains(hit->getIdentifierHash())) {
                 firstHits.push_back(hit);
                 if (m_rootOutput) m_slicedFirstPixelHeader->getTower(0)->addHit(*hit);
-            } else {
+            }
+            if (m_doSecondStage) {
                 secondHits.push_back(hit);
                 if (m_rootOutput) m_slicedSecondPixelHeader->getTower(0)->addHit(*hit);
             }

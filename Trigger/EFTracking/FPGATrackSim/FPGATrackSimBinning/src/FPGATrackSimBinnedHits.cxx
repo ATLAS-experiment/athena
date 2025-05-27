@@ -146,11 +146,11 @@ void FPGATrackSimBinnedHits::BinEntry::reset()
 void FPGATrackSimBinnedHits::BinEntry::addHit(const StoredHit& hit)
 {
   hitCnt++;
-  if (((lyrhit >> hit.layer) & 0x1) == 0x0)
+  hits.push_back(hit);
+  if (hit.layer != StoredHit::invalidLayer)
   {
     lyrhit |= (0x1 << hit.layer);
   }
-  hits.push_back(hit);
 }
 
 unsigned FPGATrackSimBinnedHits::BinEntry::hitsInLyr(unsigned lyr) const {

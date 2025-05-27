@@ -289,7 +289,7 @@ struct AtlasMeasurementSelector
       else {
          abstract_measurement_range_t range{range_iter->second.elementBeginIndex(),
                                             range_iter->second.elementEndIndex()};
-         assert( !range_iter->second.isMeasurementExpected() && range.begin() > range.end());
+         assert( !range_iter->second.isMeasurementExpected() || range.begin() <= range.end());
          // if surface marked as defect
          return { range_iter->second.isMeasurementExpected() ? &(m_measurementRanges->container(range_iter->second.containerIndex())) : nullptr,
                  std::move(range)};

@@ -52,7 +52,6 @@ setRecallInformation(Trk::IMultiStateExtrapolator::Cache& cache,
                      const Trk::Layer& recallLayer,
                      const Trk::TrackingVolume& recallTrackingVolume)
 {
-  cache.m_recall = true;
   cache.m_recallSurface = &recallSurface;
   cache.m_recallLayer = &recallLayer;
   cache.m_recallTrackingVolume = &recallTrackingVolume;
@@ -61,7 +60,6 @@ setRecallInformation(Trk::IMultiStateExtrapolator::Cache& cache,
 inline void
 resetRecallInformation(Trk::IMultiStateExtrapolator::Cache& cache)
 {
-  cache.m_recall = false;
   cache.m_recallSurface = nullptr;
   cache.m_recallLayer = nullptr;
   cache.m_recallTrackingVolume = nullptr;

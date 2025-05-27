@@ -22,10 +22,10 @@ class EvtLLSWFF : public EvtSemiLeptonicFF {
 public:
 
   /** Default constructor */
-  EvtLLSWFF(double _tau_w1, double _tau_wp, double zeta_1);
+  EvtLLSWFF(double tau_w1, double tau_wp, double zeta_1);
 
   /** Default constructor */
-  EvtLLSWFF(double _tau_w1, double _tau_wp, double _tau_1, double _tau_2);
+  EvtLLSWFF(double tau_w1, double tau_wp, double tau_1, double tau_2);
 
   /** Returns vector ffs */
   void getvectorff(EvtId, EvtId, double t, double mass, double* a1f, double* a2f, double* vf, double* a0f);

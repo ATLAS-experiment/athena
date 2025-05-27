@@ -146,14 +146,14 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
             if(word0s2.find(tobs1->at(i)->word0())==word0s2.end()) {
                 locIdx = std::to_string(tobs1->at(i)->shelfNumber()*12+tobs1->at(i)->eFexNumber()) + ":" + std::to_string(tobs1->at(i)->fpga()) + ":" +
                         std::to_string(tobs1->at(i)->iEta()) + ":" + std::to_string(tobs1->at(i)->iPhi());
-                fill(signa + "_mismatches",lbn,locIdx,simReady);
+                fill(signa + "_mismatches",lbn,locIdx,simReady,IsDataTowers,IsEmulatedTowers);
             }
         }
         for(size_t i = 0; i < tobs2->size();i++) {
             if(word0s1.find(tobs2->at(i)->word0())==word0s1.end()) {
                 locIdx = std::to_string(tobs2->at(i)->shelfNumber()*12+tobs2->at(i)->eFexNumber()) + ":" + std::to_string(tobs2->at(i)->fpga()) + ":" +
                         std::to_string(tobs2->at(i)->iEta()) + ":" + std::to_string(tobs2->at(i)->iPhi());
-                fill(signa + "_mismatches",lbn,locIdx,simReady);
+                fill(signa + "_mismatches",lbn,locIdx,simReady,IsDataTowers,IsEmulatedTowers);
             }
         }
 

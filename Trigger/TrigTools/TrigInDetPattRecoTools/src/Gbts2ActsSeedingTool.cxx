@@ -69,7 +69,7 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 	node.m_x = pos.x() - shift_x;
 	node.m_y = pos.y() - shift_y;
 	node.m_z = pos.z();
-        node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
+    node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
 	node.m_phi = std::atan2(node.m_y, node.m_x);
 	node.m_idx = idx;
 
@@ -170,13 +170,15 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
         if(vN.size()<3) continue;
 	
-	const auto & sp1 = spContainer.at(vN[0]->sp_idx()).externalSpacePoint();
-	const auto & sp2 = spContainer.at(vN[1]->sp_idx()).externalSpacePoint();
-	const auto & sp3 = spContainer.at(vN[2]->sp_idx()).externalSpacePoint();
+        std::vector<const xAOD::SpacePoint*> sps;
+        sps.reserve(vN.size());
+        for (const auto* vNptr : vN) {
+          sps.push_back(&spContainer.at(vNptr->sp_idx()).externalSpacePoint());
+        }
 	
 	//add seed to output
 
-	std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(sp1, sp2, sp3);
+	std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(std::move(sps));
 	
         seedContainer.push_back(std::move(to_add));
     }

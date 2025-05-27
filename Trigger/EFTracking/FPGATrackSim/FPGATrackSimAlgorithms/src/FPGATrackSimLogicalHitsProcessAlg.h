@@ -10,6 +10,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "FPGATrackSimInput/FPGATrackSimOutputHeaderTool.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfo.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
@@ -33,6 +34,7 @@
 #include <fstream>
 
 #include "StoreGate/StoreGateSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
@@ -112,6 +114,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property <int> m_NumOfHitPerGrouping { this, "NumOfHitPerGrouping", 5, "Number of minimum overlapping hits for a track candidate to be removed in the HoughRootOutputTool"};
         Gaudi::Property<bool> m_passLowestChi2TrackOnly {this,"passLowestChi2TrackOnly", false, "case when passing only lowest chi2 track per road"};
         Gaudi::Property<bool> m_secondStageStrips {this, "secondStageStrips", true, "If set to true, strip hits/SPs go to the second stage. Otherwise they go to the first." };
+        Gaudi::Property<bool> m_outputRoadUnionTool {this, "outputRoadUnionTool", false, "If set to true, create LogicalEventInputHeader in output ROOT file using road union tool."};
 
         // Properties for the output header tool.
         Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for sliced hits in output ROOT file." };
@@ -174,6 +177,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
         SG::ReadHandleKey<FPGATrackSimTruthTrackCollection> m_FPGATruthTrackKey {this, "FPGATrackSimTruthTrackKey", "FPGATruthTracks", "FPGATrackSim truth tracks"};
         SG::ReadHandleKey<FPGATrackSimOfflineTrackCollection> m_FPGAOfflineTrackKey {this, "FPGATrackSimOfflineTrackKey", "FPGAOfflineTracks", "FPGATrackSim offline tracks"};
+        SG::ReadHandleKey<FPGATrackSimEventInfo> m_FPGAEventInfoKey {this, "FPGATrackSimEventInfoKey", "FPGAEventInfo", "FPGATrackSim event info"};
 };
 
 

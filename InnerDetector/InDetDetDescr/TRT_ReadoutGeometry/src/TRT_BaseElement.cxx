@@ -201,15 +201,13 @@ TRT_BaseElement::deleteCache()
 {
   // for all straws
   for (auto & i : m_strawSurfacesCache) {
-    i.store(nullptr);
+    i.release();
   }
 }
 
 void
-TRT_BaseElement::updateAllCaches(GeoAlignmentStore* alignStore)
+TRT_BaseElement::updateAllCaches(GeoAlignmentStore* alignStore) const
 {
-  // delete the caches first
-  deleteCache();
   // Strawlayer caches
   if (!m_surfaceCache.isValid()){
     createSurfaceCache(alignStore);

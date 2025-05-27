@@ -248,6 +248,18 @@ def defineMenu():
         # 'L1_ZDC_PP_A_UNPAIRED_NONISO','L1_ZDC_PP_C_UNPAIRED_NONISO',
         # 'L1_ZDC_PP_A2_UNPAIRED_NONISO','L1_ZDC_PP_C2_UNPAIRED_NONISO',
 
+        # Run3 ZDC items for O+O runs (ATR-30690)
+        'L1_ZDC_XNXN',
+        'L1_ZDC_XNYN',
+        'L1_ZDC_XNZN',
+        'L1_ZDC_XN_XOR',
+        'L1_ZDC_YN_XOR',
+        'L1_ZDC_ZN_XOR',
+        'L1_ZDC_YN',
+        'L1_ZDC_ZN',
+        'L1_ZDC_LOR',
+        'L1_ZDC_YNYN',
+
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
 

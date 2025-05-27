@@ -33,36 +33,36 @@ class LArDetectorToolNV final : public GeoModelTool {
  public:
   // Standard Constructor
   LArDetectorToolNV( const std::string& type, const std::string& name, const IInterface* parent );
-  
+
   // Standard Destructor
   virtual ~LArDetectorToolNV();
-  
+
   // Create Method:
   virtual StatusCode create() override;
-  
+
   // Clear Method
   virtual StatusCode clear() override;
-  
+
   // Apply alignments (for simulation only)
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override;
 
  private:
   bool m_barrelSaggingOn;
   int  m_barrelVisLimit;
   int  m_fcalVisLimit;
-  
+
   bool m_buildBarrel;
   bool m_buildEndcap;
-  
+
   bool m_applyAlignments;
-  
+
   const LArDetectorManager *m_manager;
-  
+
   std::string m_geometryConfig; // FULL, SIMU, RECO
-  
+
   std::string m_EMECVariantInner;
   std::string m_EMECVariantOuter;
-  
+
   bool m_activateFT;
   bool m_enableMBTS;
 
