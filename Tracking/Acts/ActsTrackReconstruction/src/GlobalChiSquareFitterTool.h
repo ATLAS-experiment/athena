@@ -35,6 +35,8 @@
 #include "ActsCalibration/TrkPrepRawDataCalibrator.h"
 #include "ActsCalibration/TrkMeasSurfaceAccessor.h"
 #include "ActsCalibration/TrkPrepRawDataSurfaceAcc.h"
+#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
 
 // STL
 #include <cmath>   //std::abs
@@ -178,13 +180,17 @@ class GlobalChiSquareFitterTool
       "Scale factor for the input seed covariance when doing refitting"};
 
   /** @brief Pass through calibrator of the Trk::MeasurementBase objects from the TrackState container */
-  detail::TrkMeasurementCalibrator m_calibrator{};
+  detail::TrkMeasurementCalibrator m_trkMeasCalibrator{};
   /** @brief Calibrator of the uncalibrated Trk::PrepRawData objects to RIO_OnTrack objects */
   detail::TrkPrepRawDataCalibrator m_prdCalibrator{};
   /** @brief Surface accessor delegate for Trk::MeasurementBase objects */
   detail::TrkMeasSurfaceAccessor m_trkMeasSurfAcc{};
   /** @brief Surface accessor delegate for Trk::PrepRawData objects */
   detail::TrkPrepRawDataSurfaceAcc m_prdSurfaceAcc{};
+  /** @brief Surface accessor delegate for xAOD::UncalibratedMeasurement objects */
+  detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc{};
+  /** @brief Calibrator for the uncalibrated xAOD::UnCalibratedMeasurement objects */
+  detail::xAODUncalibMeasCalibrator m_uncalibMeasCalibrator{};
   /** @brief Array of all configured fitter extensions depending on which source link type is in use */
   static constexpr unsigned s_nExtensions = static_cast<unsigned>(detail::SourceLinkType::nTypes);
   std::array<Gx2FitterExtension_t, s_nExtensions>  m_gx2fExtensions{};

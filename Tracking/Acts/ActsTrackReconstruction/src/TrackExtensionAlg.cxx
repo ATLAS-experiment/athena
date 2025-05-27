@@ -30,6 +30,7 @@
 
 // ActsTrk
 #include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
@@ -120,12 +121,11 @@ namespace ActsTrk{
     const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
     const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
     const Acts::CalibrationContext calContext{getCalibrationContext(context)};
+   
+    detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometryTool.get()};
 
     const auto* detectorElementToGeometryIdMap = m_trackingGeometryTool->surfaceIdMap();
- 
-    const Acts::TrackingGeometry *
-       acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
-   
+    
     SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
     ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
     // potential TODO: filtering only certain layers
@@ -159,8 +159,7 @@ namespace ActsTrk{
     options.targetSurface = perigeeSurface.get();                  
 
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
-       *acts_tracking_geometry,
-       *detectorElementToGeometryIdMap,
+       m_trackingGeometryTool.get(),
        m_pixelCalibTool,
        m_stripCalibTool,
        m_hgtdCalibTool);
@@ -181,15 +180,10 @@ namespace ActsTrk{
     for (const ActsTrk::ProtoTrack& protoTrack : *protoTracksHandle) {
       if(protoTrack.measurements.empty()) continue;
 
-      const Acts::Surface* refSurface = ActsTrk::getSurfaceOfMeasurement(*acts_tracking_geometry, *detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
-//        ActsTrk::getSurfaceOfMeasurement( *m_trackingGeometryTool->trackingGeometry(), **detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
+      const Acts::Surface* refSurface = surfAcc.get(protoTrack.measurements[0]);
 
-      auto res = m_actsFitter->fit(context, protoTrack.measurements,*protoTrack.parameters,
-                                  m_trackingGeometryTool->getGeometryContext(context).context(),
-                                  m_extrapolationTool->getMagneticFieldContext(context),
-                                  calContext,
-                                  *detectorElementToGeometryIdMap, 
-                                  refSurface);
+      auto res = m_actsFitter->fit(context, protoTrack.measurements, *protoTrack.parameters,
+                                   tgContext, mfContext, calContext, *detectorElementToGeometryIdMap, refSurface);
       if(!res) continue;
       if (res->size() == 0 ) continue;
       ATH_MSG_DEBUG(".......Done fit of track with "<< protoTrack.measurements.size() << " measurements");
@@ -229,7 +223,7 @@ namespace ActsTrk{
     std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer =
         m_tracksBackendHandlesHelper.moveToConst(
             std::move(trackContainer),
-            m_trackingGeometryTool->getGeometryContext(context).context(),
+            tgContext,
             context);
     SG::WriteHandle<ActsTrk::TrackContainer> trackContainerHandle(m_trackContainerKey, context);
     ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));

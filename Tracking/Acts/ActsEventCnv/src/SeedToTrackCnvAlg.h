@@ -11,6 +11,8 @@
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
+#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
+
 #include "ActsEvent/TrackParametersContainer.h"
 
 #include "StoreGate/WriteHandleKey.h"
@@ -38,6 +40,7 @@ public:
   virtual StatusCode execute(const EventContext& context) const override;
 
 private:
+  detail::xAODUncalibMeasSurfAcc m_surfAcc{};
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
   SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKey{this, "SeedContainerKey", {}, "Seed containers"};
   SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_actsTrackParamsKey {this, "EstimatedTrackParametersKey", {}, "Track Parameters Key"};
