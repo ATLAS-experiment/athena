@@ -752,7 +752,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
     cache.m_lastMaterialLayer = nullptr;
   }
   // set tracking geometry in cache
-  (void) cache.trackingGeometry(*m_navigator, ctx);
+  cache.setTrackingGeometry(*m_navigator, ctx);
   if (!cache.m_highestVolume) {
     cache.m_highestVolume = cache.m_trackingGeometry->highestTrackingVolume();
   }
@@ -1743,7 +1743,7 @@ Trk::Extrapolator::extrapolateInAlignableTV(const EventContext& ctx,
   // double tol = 0.001;
   // double path = 0.;
   // set tracking geometry in cache
-  (void) cache.trackingGeometry(*m_navigator,ctx);
+  cache.setTrackingGeometry(*m_navigator,ctx);
   if (!cache.m_highestVolume) {
     cache.m_highestVolume = m_navigator->highestVolume(ctx);
   }
@@ -2676,7 +2676,7 @@ Trk::Extrapolator::extrapolateWithinDetachedVolumes(const EventContext& ctx,
   // ============================================================
 
   // set tracking geometry in cache
-  (void) cache.trackingGeometry(*m_navigator,ctx);
+  cache.setTrackingGeometry(*m_navigator,ctx);
   // arbitrary surface or destination layer ?
   // bool loopOverLayers = false;
   const Trk::Layer* destinationLayer =
@@ -3708,7 +3708,7 @@ Trk::Extrapolator::initializeNavigation(const EventContext& ctx,
                                         const TrackingVolume*& associatedVolume,
                                         const TrackingVolume*& destVolume) const
 {
-  (void) cache.trackingGeometry(*m_navigator, ctx);
+   cache.setTrackingGeometry(*m_navigator, ctx);
   // output for initializeNavigation should be an eye-catcher
   if (!cache.m_destinationSurface) {
     ATH_MSG_DEBUG("  [I] initializeNaviagtion() -------------------------- ");
@@ -4069,8 +4069,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
   unsigned int iDest = 0;
 
   // set tracking geometry in cache
-  (void)  cache.trackingGeometry(*m_navigator, ctx);
-
+  cache.setTrackingGeometry(*m_navigator, ctx);
   // destination volume boundary ?
   if (destVol && m_navigator->atVolumeBoundary(currPar, destVol, dir, nextVol, m_tolerance) &&
       nextVol != destVol) {
