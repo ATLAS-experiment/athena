@@ -49,17 +49,16 @@ def setOverlayInputFiles(runArgs, flags, log):
         else:
             raise RuntimeError('No secondaryFiles are defined')
 
-        if flags.Input.isMC:
-            # take MCChannelNumber from secondary input:
-            flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles, allowEmpty=False).get("mc_channel_number", 0)
+        # take MCChannelNumber from secondary input:
+        flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles, allowEmpty=False).get("mc_channel_number", 0)
 
-            # runNumber is MC channel number in reco
-            if hasattr(runArgs, 'runNumber'):
-                if flags.Input.MCChannelNumber != runArgs.runNumber:
-                    log.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, flags.Input.MCChannelNumber)
-                    flags.Input.MCChannelNumber = runArgs.runNumber
-                else:
-                    log.info('MC channel number: %d', flags.Input.MCChannelNumber)
+        # runNumber is MC channel number in reco
+        if hasattr(runArgs, 'runNumber'):
+            if flags.Input.MCChannelNumber != runArgs.runNumber:
+                log.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, flags.Input.MCChannelNumber)
+                flags.Input.MCChannelNumber = runArgs.runNumber
+            else:
+                log.info('MC channel number: %d', flags.Input.MCChannelNumber)
     else:
         log.info('Running MC+data overlay from ByteStream')
         flags.Overlay.DataOverlay = True
