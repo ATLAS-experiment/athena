@@ -84,6 +84,17 @@ namespace ActsTrk {
       Acts::estimateTrackParamsFromSeed(sp_collection | std::views::take(3),
                                         bField);
 
+    if (m_useLongSeeds && sp_collection.size() > 3ul) {
+      ActsTrk::Seed::container_type sp_collection2;
+      if (useTopSp)
+        sp_collection2.assign({sp_collection.back(), sp_collection.at(sp_collection.size()/2ul), sp_collection.front()});
+      else
+        sp_collection2.assign({sp_collection.front(), sp_collection.at(sp_collection.size()/2ul), sp_collection.back()});
+      Acts::FreeVector freeParams2 = Acts::estimateTrackParamsFromSeed(sp_collection2, bField);
+      ATH_MSG_DEBUG("update seed p = " << 1.0 / freeParams[Acts::eFreeQOverP] << " to " << 1.0 / freeParams2[Acts::eFreeQOverP]);
+      freeParams[Acts::eFreeQOverP] = freeParams2[Acts::eFreeQOverP];
+    }
+
     if (useTopSp) {
       // reverse direction so momentum vector pointing outwards
       freeParams = Acts::reflectFreeParameters(freeParams);
