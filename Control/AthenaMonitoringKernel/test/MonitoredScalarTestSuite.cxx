@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -31,6 +31,7 @@ class MonitoredScalarTestSuite {
         REGISTER_TEST_CASE(test_shouldAllowToProvideRepresentationConverter),
         REGISTER_TEST_CASE(test_shouldAllowToChangeUnderlayingValue),
         REGISTER_TEST_CASE(test_shouldReturnSingleElement),
+        REGISTER_TEST_CASE(test_valueOperator),
       };
     }
 
@@ -79,6 +80,13 @@ class MonitoredScalarTestSuite {
 
       assert(phi.size() == 1);
       assert(phi.get(0) == 4.2);
+    }
+
+    void test_valueOperator() {
+      auto name = Monitored::Scalar<std::string>("name", "foo");
+      std::vector<std::string> v;
+      v.push_back(name);
+      assert(v[0] == "foo");
     }
 
   // ==================== Helper methods ====================
