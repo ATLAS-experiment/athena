@@ -640,9 +640,6 @@ private:
 
   BooleanProperty m_includeMaterialEffects{this, "ApplyMaterialEffects", true,
     "boolean to switch on/off material effects"};
-  BooleanProperty m_requireMaterialDestinationHit
-    {this, "RequireMaterialDestinationHit", false,
-     "require the destination surface hit for material collection"};
   BooleanProperty m_stopWithNavigationBreak
     {this, "StopWithNavigationBreak", false,
      "return 0 if navigation breaks - for validation reasons"};

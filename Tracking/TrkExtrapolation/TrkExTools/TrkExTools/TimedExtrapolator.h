@@ -318,8 +318,6 @@ private:
   unsigned int m_configurationLevel;      //!< see the supported levels of
                                           //!< configuration above
   bool m_includeMaterialEffects;          //!< boolean to switch on/off material effects
-  bool m_requireMaterialDestinationHit;   //!< require the destination surface
-                                          //!< hit for material collection
   bool m_stopWithNavigationBreak;         //!< return 0 if navigation breaks - for
                                           //!< validation reasons
   bool m_stopWithUpdateZero;              //!< return 0 if update kills the trajectory
