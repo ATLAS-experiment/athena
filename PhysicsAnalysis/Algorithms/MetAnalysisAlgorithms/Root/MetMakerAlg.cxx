@@ -37,6 +37,7 @@ namespace CP
     ANA_CHECK (m_muonsSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK (m_photonsSelection.initialize(m_systematicsList, m_photonsHandle, SG::AllowEmpty));
     ANA_CHECK (m_tausSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
+    ANA_CHECK (m_invisSelection.initialize(m_systematicsList, m_invisHandle, SG::AllowEmpty));
     ANA_CHECK (m_jetsHandle.initialize (m_systematicsList));
     ANA_CHECK (m_metHandle.initialize (m_systematicsList));
 
@@ -72,11 +73,15 @@ namespace CP
       met->setStore (aux.get());
 
       metHelper.resetObjSelectionFlags();
-
+      
       if (m_invisHandle) {
         const xAOD::IParticleContainer* invisible = nullptr;
         ATH_CHECK( m_invisHandle.retrieve(invisible, sys) );
-        ATH_CHECK( m_makerTool->markInvisible(invisible, metHelper, met.get() ) );
+        ConstDataVector<xAOD::IParticleContainer> invisSelected(SG::VIEW_ELEMENTS);
+        for (const xAOD::IParticle *invisParticle : *invisible)
+          if (m_invisSelection.getBool(*invisParticle, sys))
+            invisSelected.push_back(invisParticle);
+        ANA_CHECK (m_makerTool->markInvisible (invisSelected.asDataVector(), metHelper, met.get() ) );
       }
 
       // Lambda helping with calculating the MET terms coming from the leptons

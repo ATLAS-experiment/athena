@@ -39,7 +39,7 @@ class MetAnalysisConfig (ConfigBlock):
             "the format `container` or `container.selection`")
         self.addOption ('invisible', "", type=str,
             info="any input container to be treated as invisible particles, "
-            "in the format `container` (no selection)")
+            "with a possible selection, in the format `container` or `container.selection`")
         self.addOption ('metWP', "Tight", type=str,
             info="the MET working point to use: Loose, Tight, Tighter, "
             "Tenacious")
@@ -102,7 +102,7 @@ class MetAnalysisConfig (ConfigBlock):
         if self.taus != "" :
             alg.taus, alg.tausSelection = config.readNameAndSelection (self.taus, excludeFrom={'or'})
         if self.invisible != "" :
-            alg.invisible = config.readName (self.invisible)
+            alg.invisible, alg.invisibleSelection = config.readNameAndSelection (self.invisible, excludeFrom={'or'})
         alg.met = config.writeName (self.containerName, isMet = True)
 
 
