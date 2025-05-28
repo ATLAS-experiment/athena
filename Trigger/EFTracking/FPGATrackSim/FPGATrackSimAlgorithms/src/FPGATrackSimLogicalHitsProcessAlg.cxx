@@ -315,13 +315,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                 Monitored::Group(m_monTool, mon_best_chi2_1st);
             }
         }
-    } else { // No tracking; add dummy tracks for monitoring
-        ATH_MSG_DEBUG("No tracking. Adding dummy tracks...");
-        int ntrackDummy = 0;
-        for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads_1st) {
-            ntrackDummy += road->getNHitCombos();
-        }
-        tracks_1st.resize(ntrackDummy); // Just filled with dummy tracks for monitoring
+    } else { // No tracking; 
+      ATH_MSG_DEBUG("No tracking. Just running dummy road2track algorith");
+      roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0));
     }
 
     // Loop over roads and store them in SG (after track finding to also copy the sector information)

@@ -31,6 +31,7 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
 void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrackSimTrack>& RMtracks, std::vector<int> flags_OR, const float minChi2);
 int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2);
 int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2);
+void roadsToTrack(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& track_cands, const FPGATrackSimPlaneMap *pmap);
 
 
 #endif // FPGATrackSimHoughFUNCTIONS_H
