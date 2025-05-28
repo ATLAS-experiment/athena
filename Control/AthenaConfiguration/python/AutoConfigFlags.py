@@ -10,29 +10,43 @@ msg = logging.getLogger('AutoConfigFlags')
 _fileMetaData = dict()
 
 class DynamicallyLoadMetadata:
-    def __init__(self, filename):
+    def __init__(self, filename, maxLevel='peeker'):
         self.metadata = {}
         self.filename = filename
-        self.metAccessLevel = 'lite'
+        self.currentAccessLevel = 'lite'
+        self.maxAccessLevel = maxLevel
         thisFileMD = read_metadata(filename, None, 'lite')
         self.metadata.update(thisFileMD[self.filename])
         msg.debug("Loaded using 'lite' %s", str(self.metadata))
 
-    def _loadMore(self):
-        thisFileMD = read_metadata(self.filename, None, 'peeker')
+    def _loadMore(self, level):
+        self.currentAccessLevel = level
+
+        thisFileMD = read_metadata(self.filename, None, level)
         self.metadata.update(thisFileMD[self.filename])
 
     def get(self, key, default):
         if key in self.metadata:
             return self.metadata[key]
-        if self.metAccessLevel != 'peeker' \
-            and key not in lite_primary_keys_to_keep \
-            and key not in lite_TagInfo_keys_to_keep:
-            msg.info("Looking into the file in 'peeker' mode as the configuration requires more details: %s ", key)
-            self.metAccessLevel = 'peeker'
-            self._loadMore()
+        if key in lite_primary_keys_to_keep or key in lite_TagInfo_keys_to_keep:
+            # no need to load more
+            return default
+        
+        if self.currentAccessLevel == self.maxAccessLevel:
+            return default
+
+        levels = []
+        if self.currentAccessLevel == 'lite':
+            levels = ['peeker', 'full'] if self.maxAccessLevel == 'full' else ['peeker']
+        elif self.currentAccessLevel == 'peeker':
+            levels = ['full']
+
+        for level in levels:
+            msg.info("Looking into the file in '%s' mode as the configuration requires more details: %s ", level, key)
+            self._loadMore(level)
             if key in self.metadata:
                 return self.metadata[key]
+
         return default
 
     def __contains__(self, key):
@@ -48,10 +62,12 @@ class DynamicallyLoadMetadata:
     def keys(self):
         return self.metadata.keys()
 
-def GetFileMD(filenames):
+def GetFileMD(filenames, allowEmpty=True, maxLevel='peeker'):
     if not filenames:
-        msg.info("Running an input-less job. Will have empty metadata.")
-        return {}
+        if allowEmpty:
+            msg.info("Running an input-less job. Will have empty metadata.")
+            return {}
+        raise RuntimeError("Metadata can not be read in an input-less job.")
     if isinstance(filenames, str):
         filenames = [filenames]
     if '_ATHENA_GENERIC_INPUTFILE_NAME_' in filenames:
@@ -59,7 +75,9 @@ def GetFileMD(filenames):
     for filename in filenames:
         if filename not in _fileMetaData:
             msg.info("Obtaining metadata of auto-configuration by peeking into '%s'", filename)
-            _fileMetaData[filename] = DynamicallyLoadMetadata(filename)
+            _fileMetaData[filename] = DynamicallyLoadMetadata(filename, maxLevel)
+        if _fileMetaData[filename].maxAccessLevel != maxLevel:
+            _fileMetaData[filename].maxAccessLevel = maxLevel
         if _fileMetaData[filename]['nentries'] not in [None, 0]: 
             return _fileMetaData[filename]
         else:

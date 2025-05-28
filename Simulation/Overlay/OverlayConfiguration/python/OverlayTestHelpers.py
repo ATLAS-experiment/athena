@@ -59,7 +59,6 @@ def overlayTestFlags(flags, args):
         from Campaigns import DataOverlayPPTest
         DataOverlayPPTest(flags)
     else:
-        flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles).get("mc_channel_number", 0)
         if args.run is LHCPeriod.Run2:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN2
@@ -80,6 +79,7 @@ def overlayTestFlags(flags, args):
             PhaseIIPileUp200(flags)
         else:
             raise ValueError("Run not supported")
+        flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles, allowEmpty=False).get("mc_channel_number", 0)
         flags.Output.RDOFileName = "mcOverlayRDO.pool.root"
         flags.Overlay.DataOverlay = False
 
