@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/RPDDataAnalyzer.h"
@@ -10,12 +10,13 @@
 
 namespace ZDC {
 
-unsigned int nullPileupFunc(unsigned int /* sample */) {
+float nullPileupFunc(unsigned int /* sample */) {
   return 0;
 }
 
 void helpResetFuncs(std::span<std::function<float(unsigned int)>> v) {
-  std::fill(v.begin(), v.end(), nullPileupFunc);
+  std::function<float(unsigned int)> f (nullPileupFunc);
+  std::fill(v.begin(), v.end(), f);
 }
 
 RPDDataAnalyzer::RPDDataAnalyzer(
