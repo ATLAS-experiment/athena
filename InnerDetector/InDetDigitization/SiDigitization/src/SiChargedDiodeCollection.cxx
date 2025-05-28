@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,12 +27,14 @@ using namespace InDetDD;
 
 SiChargedDiodeCollection::SiChargedDiodeCollection( ) :
   m_chargedDiodes(),
+  m_orderedChargedDiodes(SiChargedDiodeOrderedSetCompareWithReadoutIdentifier(nullptr)),
   m_sielement()
 {
 }
 
 SiChargedDiodeCollection::SiChargedDiodeCollection(const InDetDD::SolidStateDetectorElementBase* sielement ) :
   m_chargedDiodes(),
+  m_orderedChargedDiodes(SiChargedDiodeOrderedSetCompareWithReadoutIdentifier(sielement)),
   m_sielement(sielement)
 {
 }
