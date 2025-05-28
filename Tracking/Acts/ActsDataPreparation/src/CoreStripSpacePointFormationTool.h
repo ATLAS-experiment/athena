@@ -18,7 +18,6 @@
 #include "Acts/SpacePointFormation/SpacePointBuilder.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "InDetIdentifier/SCT_ID.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include <string>
 

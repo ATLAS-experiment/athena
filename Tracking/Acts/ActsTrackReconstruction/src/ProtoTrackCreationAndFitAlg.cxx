@@ -61,9 +61,6 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   /// The block is borrowed from the ACTS TrackFindingAlg and 
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
-
-  const auto* detectorElementToGeometryIdMap =  m_trackingGeometryTool->surfaceIdMap();  
-
   const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
   const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
@@ -74,11 +71,8 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
 
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
-    auto res = m_actsFitter->fit(ctx, proto.measurements,*proto.parameters,
-                                 m_trackingGeometryTool->getGeometryContext(ctx).context(),
-                                 m_extrapolationTool->getMagneticFieldContext(ctx),
-                                 calContext,
-                                 *detectorElementToGeometryIdMap);
+    auto res = m_actsFitter->fit(proto.measurements,*proto.parameters,
+                                 tgContext, mfContext, calContext);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;

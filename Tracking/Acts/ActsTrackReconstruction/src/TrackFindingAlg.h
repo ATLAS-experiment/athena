@@ -32,7 +32,6 @@
 #include "ActsEvent/TrackParametersContainer.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 #include "IMeasurementSelector.h"
@@ -304,11 +303,9 @@ namespace ActsTrk
      */
     template <class MeasurementSource>
     std::unique_ptr<Acts::BoundTrackParameters> doRefit(
-        const EventContext &ctx,
         const MeasurementSource &measurement,
         const Acts::BoundTrackParameters &initialParameters,
-        const DetectorContextHolder &detContext,
-        const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+        const DetectorContextHolder &detContext,        
         const bool paramsAtOutermostSurface) const;
 
     using TrkProxy = Acts::TrackProxy<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::RefHolder, false>;
@@ -353,7 +350,6 @@ namespace ActsTrk
      */
     StatusCode
     findTracks(const EventContext &ctx,
-               const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                const detail::TrackFindingMeasurements &measurements,
                const detail::MeasurementIndex &measurementIndex,
                detail::SharedHitCounter &sharedHits,

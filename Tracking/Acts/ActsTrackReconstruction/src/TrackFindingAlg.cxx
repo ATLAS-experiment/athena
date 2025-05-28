@@ -254,8 +254,6 @@ namespace ActsTrk
     auto timer = Monitored::Timer<std::chrono::milliseconds>("TIME_execute");
     auto mon_nTracks = Monitored::Scalar<int>("nTracks");
     auto mon = Monitored::Group(m_monTool, timer, mon_nTracks);
-    const auto* detectorElementToGeometryIdMap =  m_trackingGeometryTool->surfaceIdMap();
-
 
     // ================================================== //
     // ===================== INPUTS ===================== //
@@ -297,7 +295,7 @@ namespace ActsTrk
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
       measurements.addMeasurements(icontainer,
                                    *uncalibratedMeasurementContainers[icontainer],
-                                   *detectorElementToGeometryIdMap);
+                                   *m_trackingGeometryTool->surfaceIdMap());
       if (measurementIndexContainersSize > 0ul)
         measurementIndex.addMeasurements(*uncalibratedMeasurementContainers[icontainer]);
     }
@@ -335,7 +333,6 @@ namespace ActsTrk
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
     {
       ATH_CHECK(findTracks(ctx,
-                           *detectorElementToGeometryIdMap,
                            measurements,
                            measurementIndex,
                            sharedHits,
@@ -405,7 +402,6 @@ namespace ActsTrk
 
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
-                              const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                               const detail::TrackFindingMeasurements &measurements,
                               const detail::MeasurementIndex &measurementIndex,
                               detail::SharedHitCounter &sharedHits,
@@ -544,7 +540,7 @@ namespace ActsTrk
 
       std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;
       if (refitSeeds) {
-        refitSeedParameters = doRefit(ctx, seed, *initialParameters, detContext, detectorElementToGeoId, reverseSearch);
+        refitSeedParameters = doRefit(seed, *initialParameters, detContext, reverseSearch);
         if (refitSeedParameters.get() == nullptr) {
           ++event_stat[category_i][kNRejectedRefinedSeeds];
           continue;

@@ -124,13 +124,11 @@ namespace ActsTrk{
    
     detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometryTool.get()};
 
-    const auto* detectorElementToGeometryIdMap = m_trackingGeometryTool->surfaceIdMap();
-    
     SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
     ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
     // potential TODO: filtering only certain layers
     detail::TrackFindingMeasurements measurements(1ul /* number of measurement containers*/);
-    measurements.addMeasurements(0, *pixelClustersHandle, *detectorElementToGeometryIdMap);
+    measurements.addMeasurements(0, *pixelClustersHandle, *m_trackingGeometryTool->surfaceIdMap());
     std::optional<detail::MeasurementIndex> measurementIndex;
     if (m_trackStatePrinter.isSet()) {
       measurementIndex.emplace(1ul);
@@ -182,8 +180,8 @@ namespace ActsTrk{
 
       const Acts::Surface* refSurface = surfAcc.get(protoTrack.measurements[0]);
 
-      auto res = m_actsFitter->fit(context, protoTrack.measurements, *protoTrack.parameters,
-                                   tgContext, mfContext, calContext, *detectorElementToGeometryIdMap, refSurface);
+      auto res = m_actsFitter->fit(protoTrack.measurements, *protoTrack.parameters,
+                                   tgContext, mfContext, calContext, refSurface);
       if(!res) continue;
       if (res->size() == 0 ) continue;
       ATH_MSG_DEBUG(".......Done fit of track with "<< protoTrack.measurements.size() << " measurements");

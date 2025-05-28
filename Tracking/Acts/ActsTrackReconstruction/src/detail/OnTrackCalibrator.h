@@ -8,7 +8,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 #include "ActsCalibration/MeasurementCalibratorBase.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
