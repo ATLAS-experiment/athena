@@ -24,6 +24,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 // PyROOT includes
 #include <TPython.h>
+#include "CPyCppyy/API.h"
 
 // fixes 'dereferencing type-punned pointer will break strict-aliasing rules'
 #ifdef Py_True
@@ -128,23 +129,6 @@ new_pylist(PyObject *pylist, PyObject *item)
   PyObject *obj = PySequence_List(pylist);
   PyList_Append(obj, item);
   return obj;
-}
-
-// PySequence_Check returns true if the class implements __getitem__
-// In newer cppyy versions, e.g. 3+, every class has __getitem__ implemented
-// even if the class does not provide sequence protocol
-// This is one practical way of dealing with this issue (not strictly 1-to-1)
-// See ATEAM-974 and root/issues/15161
-inline
-bool is_sequence(PyObject *obj)
-{
-  auto item = PySequence_Size(obj) > 0 ? PySequence_GetItem(obj, 0) : nullptr;
-  if (item) {
-    Py_DECREF(item);
-    return true;
-  }
-  PyErr_Clear();
-  return false;
 }
 
 void
@@ -295,8 +279,13 @@ recurse_pyinspect(PyObject *pyobj,
     }
   }
 
+// PySequence_Check returns true if the class implements __getitem__
+// In newer cppyy versions, e.g. 3+, every class has __getitem__ implemented
+// even if the class does not provide sequence protocol
+// Hence, use the cppyy API CPyCppyy::Sequence_Check(PyObject*) function
+// See ATEAM-974 and root/issues/15161
   Int_t hdr = 0;
-  if (is_sequence(pyobj)) {
+  if (CPyCppyy::Sequence_Check(pyobj)) {
     if (clsname == "CLHEP::Hep3Vector" ||
         clsname == "TLorentzVector" ||
         clsname == "TVector3")
@@ -483,7 +472,7 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
   }
 
   Int_t hdr = 0;
-  if (is_sequence(pyobj)) {
+  if (CPyCppyy::Sequence_Check(pyobj)) {
     if (!strcmp(tcls->GetName(), "CLHEP::Hep3Vector")) {
       hdr = 0;
     } else {
