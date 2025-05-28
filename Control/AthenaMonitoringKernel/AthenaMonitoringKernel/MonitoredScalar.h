@@ -98,12 +98,6 @@ namespace Monitored {
     operator const T&() const { return m_value; }
     operator T&() { return m_value; }
 
-    // Needed to work around an apparent bug in clang 4.0.1.
-    // Without these declarations, clang rejects `--SCALAR'
-    // (but ++SCALAR, SCALAR++, and SCALAR-- are all accepted!).
-    T operator--() { return --m_value; }
-    T operator--(int) { return m_value--; }
-
     virtual double get(size_t) const override {
       if constexpr (std::is_convertible_v<double, T>) {
         return (m_valueGenerator ? static_cast<double>(m_valueGenerator()) :

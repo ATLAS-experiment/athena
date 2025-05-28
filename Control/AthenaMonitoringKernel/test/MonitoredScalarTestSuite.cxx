@@ -32,6 +32,7 @@ class MonitoredScalarTestSuite {
         REGISTER_TEST_CASE(test_shouldAllowToChangeUnderlayingValue),
         REGISTER_TEST_CASE(test_shouldReturnSingleElement),
         REGISTER_TEST_CASE(test_valueOperator),
+        REGISTER_TEST_CASE(test_operators),
       };
     }
 
@@ -87,6 +88,16 @@ class MonitoredScalarTestSuite {
       std::vector<std::string> v;
       v.push_back(name);
       assert(v[0] == "foo");
+    }
+
+    void test_operators() {
+      auto i = Monitored::Scalar<int>("int", 0);
+      i++;
+      ++i;
+      assert(i == 2);
+      i--;
+      --i;
+      assert(i == 0);
     }
 
   // ==================== Helper methods ====================

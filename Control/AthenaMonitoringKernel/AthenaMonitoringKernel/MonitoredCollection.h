@@ -288,8 +288,6 @@ namespace Monitored {
 
     static_assert(std::is_convertible<R, double>::value or std::is_constructible<std::string, R>::value, "Conversion from type returned by the converter/accessor to double or string is impossible");
 
-    // With a non-template friend declaration, clang 4.0.1
-    // fails to match the friend.
     // @brief .     \if empty doc string required due to https://github.com/doxygen/doxygen/issues/6251 \endif
     template <class U> friend ObjectsCollection<U, double>
     Collection(std::string name, const U& collection,
@@ -353,8 +351,6 @@ namespace Monitored {
 
     static_assert(std::is_convertible<R, double>::value or std::is_constructible<std::string, R>::value, "Conversion from type returned by the converter/accessor to double or string is impossible");
 
-    // With a non-template friend declaration, clang 4.0.1
-    // fails to match the friend.
     // @brief .     \if empty doc string required due to https://github.com/doxygen/doxygen/issues/6251 \endif
     template <class U> friend ObjectsRefCollection<U, double>
     Collection(std::string name, const std::reference_wrapper<U>& collection,
