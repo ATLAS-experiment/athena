@@ -95,9 +95,7 @@ namespace Monitored {
       return value;
     }
 
-    // cppcheck-suppress returnByReference
-    operator T() const { return m_value; }
-    // cppcheck-suppress returnByReference
+    operator const T&() const { return m_value; }
     operator T&() { return m_value; }
 
     // Needed to work around an apparent bug in clang 4.0.1.
