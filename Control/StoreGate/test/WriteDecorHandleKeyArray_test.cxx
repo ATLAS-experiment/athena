@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
-
-// $Id$
 /**
  * @file StoreGate/test/WriteDecorHandleKeyArrau_test.cxx
  * @author Jovan Mitrevski <Jovan.Mitrevski.cern.ch>
@@ -98,7 +94,8 @@ void test1()
   assert (k1[2].key() == "bbb.foo3");
   assert (k1[2].contHandleKey().key() == "bbb");
 
-  assert (k1.assign ({"ccc.fee1", "ccc.fee2", "ccc.fee3"}).isSuccess());
+  std::vector<std::string> vv {"ccc.fee1", "ccc.fee2", "ccc.fee3"};
+  assert (k1.assign (vv).isSuccess());
   assert (k1[1].key() == "ccc.fee2");
   assert (k1[1].contHandleKey().key() == "ccc");
 
@@ -128,10 +125,10 @@ void test1a()
   assert (k1[2].key() == "bbb.foo3");
   assert (k1[2].contHandleKey().key() == "bbb");
 
-  assert (k1.assign ({"ccc.fee1", "ccc.fee2", "ccc.fee3"}).isSuccess());
+  std::vector<std::string> vv {"ccc.fee1", "ccc.fee2", "ccc.fee3"};
+  assert (k1.assign (vv).isSuccess());
   assert (k1[1].key() == "ccc.fee2");
   assert (k1[1].contHandleKey().key() == "ccc");
-
 }
 
 
