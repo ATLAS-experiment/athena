@@ -24,7 +24,9 @@ def main():
     if sys.argv[1:] == []:
         msg.info("%s stopped at %s, no input parameters given" % (sys.argv[0], time.asctime()))
     
-    trf = getTransform()
+    # It is a bit of a hack to look for the skip post-processing argument in the command line arguments.
+    skip_post_processing = '--skipPostProcessing' in sys.argv
+    trf = getTransform(skip_post_processing)
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
@@ -32,29 +34,14 @@ def main():
     msg.info("%s stopped at %s, tf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
     sys.exit(trf.exitCode)
 
-def getTransform():
+def getTransform(skip_post_processing=False):
     msg.debug("in getTransform...")
 
     # get the default executor list
     executorSet = set()
-    # instantiate a transform with no steps
+    addNTUPMergeSubsteps(executorSet, skip_post_processing)
     trf = transform(executor = executorSet, description = 'ATLAS NTUPLE merge and post-processing transform')
-    
-    # add custom merge and post-processing 
-    # steering parameters and get the 'args'
     addPhysValidationMergeFiles(trf.parser)
-    args = trf.parser.parse_args()
-    msg.debug("args:", args)
-
-    # get the modified executor
-    mergeStepSet = set()
-
-    # check if the user used custom parameters
-    # add to the transform the merge and 
-    # post-processing steps conditionally 
-    # based on user's input
-    addNTUPMergeSubsteps(mergeStepSet, skip_post_processing = 'skipPostProcessing' in args)
-    trf.appendToExecutorSet(list(mergeStepSet))
 
     # additional setup
     addExtraDPDTypes(trf.parser, transform=trf, NTUPMergerArgs = True)
