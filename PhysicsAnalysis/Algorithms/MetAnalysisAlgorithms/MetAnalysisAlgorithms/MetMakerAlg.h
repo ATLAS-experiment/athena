@@ -124,9 +124,15 @@ namespace CP
     SysReadHandle<xAOD::JetContainer> m_jetsHandle {
       this, "jets", "", "the jet collection we use"};
 
+    /// \brief the container to be marked as invisible particles 
   private:
     SysReadHandle<xAOD::IParticleContainer> m_invisHandle {
       this, "invisible", "", "Any particles to treat as invisible."};
+
+    /// \brief the selection on the invisible container
+  private:
+    SysReadSelectionHandle m_invisSelection {
+      this, "invisibleSelection", "", "the selection on the particles to be treated as invisible." };
 
     /// \brief the key for \ref m_jetsHandle
   private:
