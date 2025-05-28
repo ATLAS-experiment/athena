@@ -1730,6 +1730,9 @@ class TopoAlgoDef:
             alg.addgeneric('MaxTob1', d.MaxTob1)
             alg.addgeneric('MaxTob2', d.MaxTob2)
             alg.addgeneric('NumResultBits', len(toponames) )
+            alg.addgeneric('Delay1', d.Delay1)
+            alg.addgeneric('Delay2', d.Delay2)
+
 
             for bitId in range(len(toponames)):
                 alg.addvariable('MinET1', d.MinET1, bitId)
