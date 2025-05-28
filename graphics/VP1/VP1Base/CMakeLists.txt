@@ -39,5 +39,8 @@ atlas_add_library( VP1Base VP1Base/*.h src/*.cxx src/*.qrc
    PRIVATE_LINK_LIBRARIES VP1HEPVis )
 
 # Enable Qt support for cppcheck:
-set_property( TARGET VP1Base
-   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+if( ATLAS_USE_CPPCHECK )
+  set_property( TARGET VP1Base
+     APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()
+
