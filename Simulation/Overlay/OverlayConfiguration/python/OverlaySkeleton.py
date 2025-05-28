@@ -51,7 +51,7 @@ def setOverlayInputFiles(runArgs, flags, log):
 
         if flags.Input.isMC:
             # take MCChannelNumber from secondary input:
-            flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles).get("mc_channel_number", 0)
+            flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles, allowEmpty=False).get("mc_channel_number", 0)
 
             # runNumber is MC channel number in reco
             if hasattr(runArgs, 'runNumber'):
