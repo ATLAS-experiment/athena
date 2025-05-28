@@ -275,13 +275,11 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(const EventContext& c
 // fit a set of PrepRawData objects
 // --------------------------------
 std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
-    const EventContext& /*eventContext*/,
     const std::vector<ATLASUncalibSourceLink>& /*clusterList*/,
     const Acts::BoundTrackParameters& /*initialParams*/,
     const Acts::GeometryContext& /*tgContext*/,
     const Acts::MagneticFieldContext& /*mfContext*/,
-    const Acts::CalibrationContext& /*calContext*/,
-    const DetectorElementToActsGeometryIdMap& /*detectorElementToGeometryIdMap*/,
+    const Acts::CalibrationContext& /*calContext*/,    
     const Acts::Surface* /*targetSurface*/) const {
   ATH_MSG_ERROR("The ACTS Global Chi Square Fitter has no direct fitter.");
   return nullptr;
@@ -430,19 +428,12 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
 }
 
 std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
-    const EventContext& ctx, const Seed& seed,
+    const Seed& seed,
     const Acts::BoundTrackParameters& initialParams,
     const Acts::GeometryContext& tgContext,
     const Acts::MagneticFieldContext& mfContext,
-    const Acts::CalibrationContext& calContext,
-    const DetectorElementToActsGeometryIdMap& detectorElementToGeometryIdMap)
-    const {
-  const Acts::TrackingGeometry* actsTrackingGeometry =
-      m_trackingGeometryTool->trackingGeometry().get();
-  if (!actsTrackingGeometry) {
-    throw std::runtime_error("No Acts tracking geometry.");
-  }
-
+    const Acts::CalibrationContext& calContext) const {
+  
   std::vector<ATLASUncalibSourceLink> sourceLinks;
   sourceLinks.reserve(6);
 
@@ -450,8 +441,8 @@ std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
   for (const xAOD::SpacePoint* sp : seed.sp()) {
     sourceLinks.insert(sourceLinks.end(), sp->measurements().begin(), sp->measurements().end());
   }
-  return fit(ctx, sourceLinks, initialParams, tgContext, mfContext, calContext,
-             detectorElementToGeometryIdMap, m_unalibMeasSurfAcc.get(sourceLinks.front()));
+  return fit(sourceLinks, initialParams, tgContext, mfContext, calContext,
+             m_unalibMeasSurfAcc.get(sourceLinks.front()));
 }
 
 

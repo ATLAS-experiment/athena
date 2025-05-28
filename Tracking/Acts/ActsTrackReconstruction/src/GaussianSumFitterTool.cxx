@@ -380,26 +380,22 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
 
 // Acts track refit
 std::unique_ptr< ActsTrk::MutableTrackContainer >
-GaussianSumFitterTool::fit(const EventContext& /*ctx*/,
-        const ActsTrk::Seed & /*seed*/,
+GaussianSumFitterTool::fit(const ActsTrk::Seed & /*seed*/,
         const Acts::BoundTrackParameters& /*initialParams*/,
         const Acts::GeometryContext& /*tgContext*/,
         const Acts::MagneticFieldContext& /*mfContext*/,
-        const Acts::CalibrationContext& /*calContext*/,
-        const DetectorElementToActsGeometryIdMap & /*detectorElementToGeometryIdMap*/) const
+        const Acts::CalibrationContext& /*calContext*/) const
 {
   ATH_MSG_VERBOSE("ACTS seed refit is not implemented in GaussianSumFitterTool");
   return nullptr;
 }
 
 std::unique_ptr< ActsTrk::MutableTrackContainer >
-GaussianSumFitterTool::fit(const EventContext& /*ctx*/,
-         const std::vector< ActsTrk::ATLASUncalibSourceLink> & /*clusterList*/,
+GaussianSumFitterTool::fit(const std::vector< ActsTrk::ATLASUncalibSourceLink> & /*clusterList*/,
          const Acts::BoundTrackParameters& /*initialParams*/,
          const Acts::GeometryContext& /*tgContext*/,
          const Acts::MagneticFieldContext& /*mfContext*/,
-         const Acts::CalibrationContext& /*calContext*/,
-         const DetectorElementToActsGeometryIdMap & /*detectorElementToGeometryIdMap*/,
+         const Acts::CalibrationContext& /*calContext*/,         
          const Acts::Surface* /*targetSurface*/) const
 {
   ATH_MSG_VERBOSE("ACTS uncalib slink refit is not implemented in GaussianSumFitterTool");  

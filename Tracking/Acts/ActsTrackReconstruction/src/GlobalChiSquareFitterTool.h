@@ -99,13 +99,11 @@ class GlobalChiSquareFitterTool
 
   //! fit a set of xAOD uncalibrated Measurements
   virtual std::unique_ptr<MutableTrackContainer> fit(
-      const EventContext& ctx,
       const std::vector<ATLASUncalibSourceLink>& clusterList,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
       const Acts::CalibrationContext& calContext,
-      const DetectorElementToActsGeometryIdMap& detectorElementToGeometryIdMap,
       const Acts::Surface* targetSurface =
           nullptr  // optional target surface - defaults to perigee in global
                    // origin
@@ -127,13 +125,11 @@ class GlobalChiSquareFitterTool
 
   //! Acts seed fit
   virtual std::unique_ptr<MutableTrackContainer> fit(
-      const EventContext& ctx, const Seed& seed,
+      const Seed& seed,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
-      const Acts::CalibrationContext& calContext,
-      const DetectorElementToActsGeometryIdMap& detectorElementToGeometryIdMap)
-      const override;
+      const Acts::CalibrationContext& calContext) const override;
 
 
   virtual StatusCode fit(

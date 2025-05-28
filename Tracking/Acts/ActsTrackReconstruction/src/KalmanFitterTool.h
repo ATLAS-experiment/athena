@@ -101,13 +101,11 @@ public:
   //! fit a set of xAOD uncalibrated Measurements
   virtual  
       std::unique_ptr< ActsTrk::MutableTrackContainer >
-      fit(const EventContext& ctx,
-	    const std::vector<ActsTrk::ATLASUncalibSourceLink> & clusterList,
+      fit(const std::vector<ActsTrk::ATLASUncalibSourceLink> & clusterList,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
-      const Acts::CalibrationContext& calContext,
-      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
+      const Acts::CalibrationContext& calContext,      
       const Acts::Surface* targetSurface = nullptr  // optional target surface - defaults to perigee in global origin
       ) const override;
 
@@ -130,13 +128,11 @@ public:
   //! Acts seed fit
   virtual
     std::unique_ptr< ActsTrk::MutableTrackContainer >
-    fit(const EventContext& ctx,
-	const ActsTrk::Seed &seed,
-	const Acts::BoundTrackParameters& initialParams,
-	const Acts::GeometryContext& tgContext,
-	const Acts::MagneticFieldContext& mfContext,
-	const Acts::CalibrationContext& calContext,
-	const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const override;
+    fit(const ActsTrk::Seed &seed,
+        const Acts::BoundTrackParameters& initialParams,
+        const Acts::GeometryContext& tgContext,
+        const Acts::MagneticFieldContext& mfContext,
+        const Acts::CalibrationContext& calContext) const override;
 
 
     virtual StatusCode fit(
