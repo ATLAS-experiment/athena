@@ -5,7 +5,7 @@ from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, get_standard_performance_checks, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import QTest, GenerationTest, SimulationTest, OverlayTest, DataOverlayTest, PileUpTest, DerivationTest
+from WorkflowTestRunner.StandardTests import QTest, GenerationTest, SimulationTest, OverlayTest, PileUpTest, DerivationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -32,8 +32,6 @@ def main():
     elif options.overlay:
         if not options.workflow or options.workflow is WorkflowType.MCOverlay:
             tests_to_run.append(OverlayTest("d1726", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args))
-        if not options.workflow or options.workflow is WorkflowType.DataOverlay:
-            tests_to_run.append(DataOverlayTest("d1912", run, WorkflowType.DataOverlay, ["Overlay"], setup, options.extra_args))
     elif options.pileup:
         if setup.parallel_execution:
             log.error("Parallel execution not supported for pile-up workflow")
