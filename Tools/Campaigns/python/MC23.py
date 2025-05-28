@@ -172,7 +172,6 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     flags.Input.MCCampaign = Campaign.MC23e
 
     flags.Beam.NumberOfCollisions = 0.
-    flags.Input.ConditionsRunNumber = 488000
 
     from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
     LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
@@ -182,12 +181,15 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
-    flags.Digitization.PileUp = True
-    flags.Digitization.DoXingByXingPileUp = True
-    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructureHeavyIon2022'  # New file being prepared ATLGBLCONDTAGS-182
-    flags.Digitization.PU.InitialBunchCrossing = 0
-    flags.Digitization.PU.FinalBunchCrossing = 0
-    flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
+    # These numbers are based upon a relative XS scaling of the high-pt slice
+    # of 64%, which leads to a relative high-pt / low-pt sampling of
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 7.5
+    # to follow pile-up profile. Only a relevant number of significant digits
+    # are kept.
+    flags.Digitization.PU.NumberOfLowPtMinBias = 7.485
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.015
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run488000_MC23e_SingleBeamspot'
 
     from HIRecConfig.HIModeFlags import HIPmode
     HIPmode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?

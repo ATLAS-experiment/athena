@@ -74,7 +74,8 @@ def LArShapeDumperCfg(flags):
        result.merge(LArRawSCDataReadingCfg(flags))
        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
        result.merge(LArElecCalibDBSCCfg(flags, condObjs=["Ramp","DAC2uA", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
-       larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg",LArDigitKey=flags.LArShapeDump.digitsKeySC, isADCBas="BAS" in flags.LArShapeDump.digitsKeySC, nEnergies =  flags.LArShapeDump.ndigitsSC - 3,  startEnergy = 0)
+       nEnergies = max(flags.LArShapeDump.ndigitsSC - 3, 0)
+       larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg",LArDigitKey=flags.LArShapeDump.digitsKeySC, isADCBas="BAS" in flags.LArShapeDump.digitsKeySC, nEnergies=nEnergies,  startEnergy = 0)
        result.addEventAlgo(larLATOMEBuilderAlg)
                
 
