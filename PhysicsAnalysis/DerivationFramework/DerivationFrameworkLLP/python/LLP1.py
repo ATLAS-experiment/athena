@@ -15,6 +15,7 @@ MergedElectronContainer = "StdWithLRTElectrons"
 MergedMuonContainer = "StdWithLRTMuons"
 MergedMuonContainer_wZPH = "StdWithLRTMuons_wZPH"
 MergedTrackCollection = "InDetWithLRTTrackParticles"
+MergedTrackletCollection = "InDetDisappearingWithLRTTrackParticles"
 MergedGSFTrackCollection = "InDetWithLRTGSFTrackParticles"
 LLP1VrtSecInclusiveSuffixes = []
 LLP1NewVSISuffixes = []
@@ -32,6 +33,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
     acc.merge(InDetLRTMergeCfg(flags))
     acc.merge(InDetLRTMergeCfg(flags, name="GSFTrackMergerAlg", InputTrackParticleLocations = ["GSFTrackParticles", "LRTGSFTrackParticles"], OutputTrackParticleLocation = MergedGSFTrackCollection, OutputTrackParticleLocationCopy = MergedGSFTrackCollection))
+    acc.merge(InDetLRTMergeCfg(flags, name="InDetDisappearingLRTMerge",InputTrackParticleLocations = ["InDetDisappearingTrackParticles", "InDetLargeD0TrackParticles"],OutputTrackParticleLocation = MergedTrackletCollection))    
 
     # LRT muons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
@@ -336,6 +338,31 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  TrackLocation               = MergedTrackCollection,
                                  twoTrkVtxFormingD0Cut       = 1.0))
     LLP1VrtSecInclusiveSuffixes.append(shortLifetimeSuffix)
+
+    # disappearing track + LRT VSI 
+    dissapearingSuffix = "_disappearing"
+    acc.merge(VrtSecInclusiveCfg(flags,
+                                 name = "VrtSecInclusive_"+dissapearingSuffix,
+                                 AugmentingVersionString     = dissapearingSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackletCollection,
+                                 doReassembleVertices        = True,
+                                 doMergeByShuffling          = False,
+                                 doMergeFinalVerticesDistance= False,
+                                 doAssociateNonSelectedTracks= False,
+                                 DoPVcompatibility           = True,
+                                 RemoveFake2TrkVrt           = False,
+                                 PassThroughTrackSelection   = True,
+                                 TruncateListOfWorkingVertices = False,
+                                 twoTrkVtxFormingD0Cut       = 0.0,
+                                 SelVrtChi2Cut               = 1000000.0,
+                                 twoTrVrtMaxPerigeeDist      = 50.0,
+                                 twoTrVrtMinRadius           = 50.0,
+                                 doDisappearingTrackVertexing= True
+    ))
+    LLP1VrtSecInclusiveSuffixes.append(dissapearingSuffix)    
+
+
     
     if flags.Input.isMC and flags.Derivation.LLP.doTrackSystematics:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
@@ -351,7 +378,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                      FillIntermediateVertices = False,
                                      TrackLocation            = f"{MergedTrackCollection}{TrackSystSuffix}"))
         LLP1VrtSecInclusiveSuffixes.append(TrackSystSuffix)
-
+    
         TrackSystSuffixShortLifetime = "_TRK_EFF_LARGED0_GLOBAL__1down_shortLifetime"
         acc.merge(TrackSystematicsAlgCfg(
             flags,

@@ -225,6 +225,11 @@ namespace VKalVrtAthena {
       bool doSelectIDAndGSFTracks;
       bool doRemoveNonLeptonVertices;
 
+      // vertexing using disapperaing track
+      bool doDisappearingTrackVertexing;
+      double twoTrVrtMaxPerigeeDist;
+      double twoTrVrtMinRadius;
+
       // When doSelectTracksWithLRTCuts is set to true, the addtional track cuts
       // be applied to the selected tracks to reduce the number of fake tracks in
       // the selected track collected. These cuts are inspired by the improvments that
