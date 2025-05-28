@@ -436,8 +436,7 @@ Trk::Extrapolator::extrapolateBlindly(const EventContext& ctx,
                                     clonedInput, dir, bcheck, particle,
                                     boundaryVol);
   }
-  ATH_MSG_ERROR(
-      "  [!] No default Propagator is configured !");
+  ATH_MSG_ERROR("  [!] No default Propagator is configured !");
   return {};
 }
 
@@ -467,28 +466,12 @@ Trk::Extrapolator::extrapolateM(const EventContext& ctx,
   Trk::CacheOwnedPtr<Trk::TrackParameters> parameterAtDestination =
       extrapolateImpl(ctx, cache, clonedInput, sf, dir, bcheck, particle,
                       Trk::addNoise, extrapolationCache);
-  // there are no parameters
-  if (!parameterAtDestination && m_requireMaterialDestinationHit) {
-    ATH_MSG_VERBOSE("  [!] Destination surface for extrapolateM has not been hit (required through "
-                    "configuration). Return 0");
-    // loop over and clean up
-    std::vector<const Trk::TrackStateOnSurface*>::iterator tsosIter = cache.m_matstates->begin();
-    std::vector<const Trk::TrackStateOnSurface*>::iterator const tsosIterEnd = cache.m_matstates->end();
-    for (; tsosIter != tsosIterEnd; ++tsosIter) {
-      delete (*tsosIter);
-    }
-    delete cache.m_matstates;
-    cache.m_matstates = nullptr;
-    // bail out
-    return nullptr;
-  }
   if (parameterAtDestination) {
     ATH_MSG_VERBOSE("  [+] Adding the destination surface to the TSOS vector in extrapolateM() ");
     cache.m_matstates->push_back(new TrackStateOnSurface(
         nullptr, cache.m_ownedPtrs.move(parameterAtDestination), nullptr));
   } else {
-    ATH_MSG_VERBOSE("  [-] Destination surface was not hit extrapolateM(), but not required "
-                    "through configuration.");
+    ATH_MSG_VERBOSE("  [-] Destination surface was not hit extrapolateM()");
   }
   // assign the temporary states
   std::vector<const Trk::TrackStateOnSurface*>* tmpMatStates = cache.m_matstates;
@@ -2633,7 +2616,7 @@ Trk::Extrapolator::extrapolateInsideVolume(const EventContext& ctx,
                                            const IPropagator& prop,
                                            Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
                                            const Surface& sf,
-                                           const Layer* assLayer,
+                                           const Layer* assocLayer,
                                            const TrackingVolume& tvol,
                                            PropDirection dir,
                                            const BoundaryCheck& bcheck,
@@ -2647,7 +2630,7 @@ Trk::Extrapolator::extrapolateInsideVolume(const EventContext& ctx,
   }
   // ---> A) static layers exist
   return insideVolumeStaticLayers(
-    ctx, cache, false, prop, parm, assLayer, tvol, dir, bcheck, particle, matupmode);
+    ctx, cache, false, prop, parm, assocLayer, tvol, dir, bcheck, particle, matupmode);
 }
 
 Trk::CacheOwnedPtr<Trk::TrackParameters>
@@ -2668,12 +2651,9 @@ Trk::Extrapolator::extrapolateWithinDetachedVolumes(const EventContext& ctx,
                       << tvol.volumeName() << "' to destination surface. ");
 
   double dist = 0.;
-  // double tol = 0.001;
-
   // initialization
   Trk::CacheOwnedPtr<Trk::TrackParameters> nextParameters= parm;
   const Trk::TrackingVolume* currVol = &tvol;
-  // ============================================================
 
   // set tracking geometry in cache
   cache.setTrackingGeometry(*m_navigator,ctx);
@@ -2795,7 +2775,6 @@ Trk::Extrapolator::extrapolateWithinDetachedVolumes(const EventContext& ctx,
                  (cache.m_parametersAtBoundary.nextVolume->geometrySignature() == Trk::MS ||
                   (cache.m_parametersAtBoundary.nextVolume->geometrySignature() == Trk::Calo &&
                    m_useDenseVolumeDescription))) {
-        // @TODO compare and store position rather than comparing pointers
         if (cache.m_parametersAtBoundary.nextParameters) {
           if (last_boundary_parameters &&
               last_boundary_parameters == cache.m_parametersAtBoundary.nextParameters) {
@@ -2831,7 +2810,7 @@ Trk::Extrapolator::extrapolateToVolumeBoundary(const EventContext& ctx,
                                                Cache& cache,
                                                const IPropagator& prop,
                                                Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
-                                               const Layer* assLayer,
+                                               const Layer* assocLayer,
                                                const TrackingVolume& tvol,
                                                PropDirection dir,
                                                const BoundaryCheck& bcheck,
@@ -2847,7 +2826,7 @@ Trk::Extrapolator::extrapolateToVolumeBoundary(const EventContext& ctx,
   }
   // ---> A) static layers exist
   Trk::CacheOwnedPtr<Trk::TrackParameters> inside_volume_static_layer(insideVolumeStaticLayers(
-    ctx, cache, true, prop, parm, assLayer, tvol, dir, bcheck, particle, matupmode));
+    ctx, cache, true, prop, parm, assocLayer, tvol, dir, bcheck, particle, matupmode));
   if (inside_volume_static_layer && cache.m_parametersAtBoundary.navParameters) {
     ATH_MSG_VERBOSE("  [+] Boundary intersection      -   at "
                     << positionOutput(cache.m_parametersAtBoundary.navParameters->position()));
@@ -2860,7 +2839,7 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
                                             bool toBoundary,
                                             const IPropagator& prop,
                                             Trk::CacheOwnedPtr<Trk::TrackParameters> parm,
-                                            const Trk::Layer* assLayer,
+                                            const Trk::Layer* assocLayer,
                                             const TrackingVolume& tvol,
                                             PropDirection dir,
                                             const BoundaryCheck& bcheck,
@@ -2920,9 +2899,9 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
   ATH_MSG_VERBOSE(
     "  [+] Perpendicular direction of the track   : " << radialDirection(*navParameters, dir));
   // check whether to do a postupdate with the assoicated Layer
-  const Trk::Layer* associatedLayer = assLayer;
-  // chache the assLayer given, because this may be needed for the destination layer
-  const Trk::Layer* assLayerReference = assLayer;
+  const Trk::Layer* associatedLayer = assocLayer;
+  // chache the assocLayer given, because this may be needed for the destination layer
+  const Trk::Layer* assocLayerReference = assocLayer;
 
   // the exit face of the last volume
   Trk::BoundarySurfaceFace exitFace = Trk::undefinedFace;
@@ -3002,7 +2981,7 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
       }
     }
   } else {
-    assLayer = nullptr; // reset the provided Layer in case no postUpdate happened: search a new one
+    assocLayer = nullptr; // reset the provided Layer in case no postUpdate happened: search a new one
                         // for layer2layer start
   }
   // ============================ RESOLVE STARTPOINT  =============================
@@ -3060,13 +3039,13 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
     navParameters = nextParameters;
   }
   // only associate the layer if the  destination layer is not the assigned reference
-  if (destinationLayer != assLayerReference || toBoundary) {
+  if (destinationLayer != assocLayerReference || toBoundary) {
     // get the starting layer for the layer - layer loop
-    associatedLayer = assLayer ? assLayer : tvol.associatedLayer(navParameters->position());
+    associatedLayer = assocLayer ? assocLayer : tvol.associatedLayer(navParameters->position());
     // ignore closest material layer if it is equal to the initially given layer (has been handled
     // by the post update )
     associatedLayer =
-      (associatedLayer && associatedLayer == assLayerReference)
+      (associatedLayer && associatedLayer == assocLayerReference)
         ? associatedLayer->nextLayer(navParameters->position(),
                                      dir * rScalor * navParameters->momentum().normalized())
         : associatedLayer;
@@ -3114,7 +3093,7 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
       // the final extrapolation to the destinationLayer
       nextParameters = extrapolateToDestinationLayer(
           ctx, cache, prop, nextParameters, *cache.m_destinationSurface,
-          *destinationLayer, tvol, assLayerReference, dir, bcheck, particle,
+          *destinationLayer, tvol, assocLayerReference, dir, bcheck, particle,
           matupmode);
 
       // set the recallInformation <- everything went fine
@@ -3153,9 +3132,9 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
       const bool vetoNavParameters = false; //
       // the next Parameters are usually better, because they're closer to the
       // boundary
-      //  --- in the initial volume (assLayerReference!=0), the parm are good if
+      //  --- in the initial volume (assocLayerReference!=0), the parm are good if
       //  no action taken
-      if (nextParameters != parm || assLayerReference) {
+      if (nextParameters != parm || assocLayerReference) {
         navParameters = nextParameters;
       } else {
         navParameters = (cache.m_parametersAtBoundary.navParameters && !vetoNavParameters)
@@ -4140,7 +4119,6 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       if (!destVol) {
         pathLim = cache.m_path;
       }
-      // return currPar->clone();
       return currPar;
     }
     cache.m_currentStatic = nextVol;

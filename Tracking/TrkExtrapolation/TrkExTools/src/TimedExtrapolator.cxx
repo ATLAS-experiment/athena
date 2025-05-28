@@ -69,7 +69,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   m_meotpIndex(0),
   m_configurationLevel(10),
   m_includeMaterialEffects(true),
-  m_requireMaterialDestinationHit(false),
   m_stopWithNavigationBreak(false),
   m_stopWithUpdateZero(false),
   m_skipInitialLayerUpdate(false),
@@ -106,7 +105,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   declareProperty("STEP_Propagator", m_stepPropagator);
   // material effects handling
   declareProperty("ApplyMaterialEffects", m_includeMaterialEffects);
-  declareProperty("RequireMaterialDestinationHit", m_requireMaterialDestinationHit);
   declareProperty("MaterialEffectsUpdators", m_updators);
   declareProperty("MultipleScatteringUpdators", m_msupdators);
   declareProperty("EnergyLossUpdater", m_elossupdater);
