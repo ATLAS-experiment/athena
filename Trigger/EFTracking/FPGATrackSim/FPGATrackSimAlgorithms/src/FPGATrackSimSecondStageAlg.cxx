@@ -313,12 +313,8 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
             }
         }
     } else {
-        // No tracking; collect dummy tracks for monitoring
-        int ntrackDummy = 0;
-        for (const auto& road : roads) {
-            ntrackDummy += road->getNHitCombos();
-        }
-        tracks.resize(ntrackDummy); // Dummy tracks for monitoring
+        // No tracking; just run road to track
+      roadsToTrack(roads, tracks, m_FPGATrackSimMapping->PlaneMap_2nd(0));
     }
     if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Track Extraction");
     auto mon_ntracks = Monitored::Scalar<unsigned>("ntrack_2nd", tracks.size());

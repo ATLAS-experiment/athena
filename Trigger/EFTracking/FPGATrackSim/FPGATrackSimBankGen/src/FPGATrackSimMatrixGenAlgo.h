@@ -159,7 +159,6 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
         int getRegion(std::vector<FPGATrackSimHit> const & hits, bool is1ststage) const;
         StatusCode makeAccumulator(std::vector<FPGATrackSimHit> const & sector_hits, FPGATrackSimTruthTrack const & track, std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> & accumulator) const;
         StatusCode fillAccumulatorByDropping(std::vector<FPGATrackSimHit> & sector_hits, bool is1ststage, double x, double y, std::vector<module_t> &modules, AccumulateMap &map, FPGATrackSimTruthTrack const & track, int subregion) const;
-        void roadsToTrack(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& houghRoads, std::vector<FPGATrackSimTrack>& track_cands, bool isSecond);
   
         std::vector<TTree*> createMatrixTrees();
         void fillMatrixTrees(std::vector<TTree*> const & matrixTrees);

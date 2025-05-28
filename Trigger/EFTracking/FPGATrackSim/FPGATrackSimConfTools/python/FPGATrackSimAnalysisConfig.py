@@ -717,12 +717,16 @@ if __name__ == "__main__":
                 flags.Trigger.FPGATrackSim.tracking = True
                 flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = False
             elif (trackingOptionMod == 10):
-                print("You are trying to run the NN fake rejection as part of a pipeline! I am going to enable this for you whether you want to or not")
+                print("You are trying to run the second stage NN fake rejection as part of a pipeline! I am going to enable this for you whether you want to or not")
                 flags.Trigger.FPGATrackSim.tracking = True
-                flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = True
+                flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = True ### enable the nn tool
                 flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis2nd = flags.Trigger.FPGATrackSim.Hough.secondStage
                 if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
                     flags.Trigger.FPGATrackSim.doNNPathFinder = True
+                    flags.Trigger.FPGATrackSim.doOverlapRemoval = False ## disable 1st stage overlap removal
+                    flags.Trigger.FPGATrackSim.tracking = False
+                    flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = False
+                    flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis2nd = flags.Trigger.FPGATrackSim.Hough.secondStage
             else:
                 raise AssertionError("ERROR Your tracking option for the pipeline = " + str(trackingOption) + " is not yet supported!")
 
