@@ -310,7 +310,7 @@ namespace ActsTrk {
 							track_stat_t& trackStat,
 							cluster_stat_t& onTrackStat) const {
     ATH_MSG_DEBUG( "Checking truth for tracks ..." );
-    for (const auto& track : tracks) {
+    for (const auto track : tracks) {
       ++trackStat[to_underlying(EStatTracks::kNTotal)][0];
       std::size_t nHoles = track.nHoles();
       if (nHoles == 0) ++trackStat[to_underlying(EStatTracks::kNTracks0Holes)][0];
