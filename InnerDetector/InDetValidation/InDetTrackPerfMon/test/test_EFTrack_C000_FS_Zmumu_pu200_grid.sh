@@ -26,7 +26,7 @@ testLabel="C-000_latest"
 
 ## search in $DATAPATH for matching files
 IDTPMjsonConfig='EFTrack_muon_FS_noDoubleRatio_IDTPMconfig.json'
-dcubeXmlIDTPMconfig='dcube_config_EFTrack_base_FS_noDoubleRatio.xml'
+dcubeXmlIDTPMconfig='dcube_config_EFTrack_muon_FS_noDoubleRatio.xml'
 
 IDTPMjsonConfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $IDTPMjsonConfig -print -quit 2>/dev/null )
 dcubeXmlIDTPMconfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXmlIDTPMconfig -print -quit 2>/dev/null )
