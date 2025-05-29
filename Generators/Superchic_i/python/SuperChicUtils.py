@@ -1,7 +1,7 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
-import subprocess, os, shlex, re
+import subprocess, os, shlex, re, shutil
 
 from AthenaCommon import Logging
 
@@ -329,13 +329,19 @@ def SuperChicInitialize(Init, stdin=None):
 
     logger.info("Starting SuperChic Initialization")
 
-    if not os.path.exists('inputs'):
-        os.makedirs('inputs')
-    if not os.path.exists('evrecs'):
-        os.makedirs('evrecs')
-    if not os.path.exists('outputs'):
-        os.makedirs('outputs')
-
+    os.makedirs('inputs', exist_ok=True)
+    os.makedirs('evrecs', exist_ok=True)
+    os.makedirs('outputs', exist_ok=True)
+    if not os.exists("param_card.dat"):
+      if os.exists(Init.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat"):
+        shutil.copyfile(Init.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat","param_card.dat")
+      else:
+        raise Exception('Unexpected error in superchic init execution: probably absent param_card.dat')
+    if not os.exists("ident_card.dat"):
+      if os.exists(Init.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat"):
+        shutil.copyfile(Init.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat","ident_card.dat")
+      else:
+        raise Exception('Unexpected error in superchic init execution: probably absent ident_card.dat')
 
     try:
         inputDAT = open('input.DAT')
@@ -362,15 +368,10 @@ def SuperChicInitialize(Init, stdin=None):
 def SuperChicExecute(Init):
 
     logger.info("Starting SuperChic Itself")
+    os.makedirs('inputs', exist_ok=True)
+    os.makedirs('evrecs', exist_ok=True)
+    os.makedirs('outputs', exist_ok=True)
 
-    if not os.path.exists('inputs'):
-        os.makedirs('inputs')
-    if not os.path.exists('evrecs'):
-        os.makedirs('evrecs')
-    if not os.path.exists('outputs'):
-        os.makedirs('outputs')
-
-    
     try:
         inputDAT = open('input.DAT')
     except IOError:
