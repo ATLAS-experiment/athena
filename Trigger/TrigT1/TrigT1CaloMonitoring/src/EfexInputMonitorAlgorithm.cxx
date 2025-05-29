@@ -104,15 +104,23 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
     // first test dataTowers not empty unless prescaled event
     bool isPrescaled = (((GetEventInfo(ctx)->extendedLevel1ID()&0xffffff) % 200) != 0);
+    size_t badTowers = 0;
     if(!isPrescaled && eFexTowerContainer->empty()) {
         Decision = "MissingDataTowers";
         fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
     } else if(isPrescaled && !eFexTowerContainer->empty()) {
-        Decision = "UnexpectedDataTowers";
-        fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+        // check if all the towers have errors, if so then this readout IS expected
+        for(auto eFexTower : *eFexTowerContainer) {
+            if(eFexTower->em_status()||eFexTower->had_status()) badTowers++;
+        }
+        if(badTowers != eFexTowerContainer->size()) {
+            Decision = "UnexpectedDataTowers";
+            fill("errors", Decision, timeSince, timeUntil, evtNumber, lbn, lbnString, TowerId, Towereta, Towerphi,
+                 Toweremstatus, Towerhadstatus, TowerSlot, TowerCount, TowerRefCount, SlotSCID);
+        }
     }
 
-    if(eFexTowerContainer->empty()) return StatusCode::SUCCESS; // don't do the rest of the monitoring unless processing a DataTowers event
+    if(eFexTowerContainer->empty() || badTowers==eFexTowerContainer->size()) return StatusCode::SUCCESS; // don't do the rest of the monitoring unless processing a DataTowers event
 
 
     // Access eFexTower ref container, if possible
