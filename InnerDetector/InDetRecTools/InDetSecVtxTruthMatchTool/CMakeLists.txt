@@ -9,7 +9,7 @@ find_package( ROOT COMPONENTS Core RIO Hist MathCore )
 atlas_add_library( InDetSecVtxTruthMatchToolLib
    InDetSecVtxTruthMatchTool/*.h Root/*.h Root/*.cxx
    PUBLIC_HEADERS InDetSecVtxTruthMatchTool
-   LINK_LIBRARIES PATCoreLib AsgAnalysisInterfaces TruthUtils xAODTracking xAODTruth)
+   LINK_LIBRARIES PATCoreLib AsgAnalysisInterfaces TruthUtils xAODTracking xAODTruth InDetTrackSystematicsToolsLib)
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( InDetSecVtxTruthMatchTool

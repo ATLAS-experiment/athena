@@ -2,10 +2,12 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetSecVtxTruthMatchTool/InDetSecVtxTruthMatchTool.h"
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h" // <-- Add this
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 using namespace InDetSecVtxTruthMatchUtils;
 
@@ -14,6 +16,8 @@ InDetSecVtxTruthMatchTool::InDetSecVtxTruthMatchTool( const std::string & name )
 StatusCode InDetSecVtxTruthMatchTool::initialize() {
   ATH_MSG_INFO("Initializing InDetSecVtxTruthMatchTool");
 
+  // Retrieve the TrackTruthOriginTool
+  ATH_CHECK(m_trackTruthOriginTool.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -44,6 +48,8 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
   static const xAOD::Vertex::Decorator<std::vector<VertexTruthMatchInfo> > matchInfoDecor("truthVertexMatchingInfos");
   static const xAOD::Vertex::Decorator<int> recoMatchTypeDecor("vertexMatchType");
   static const xAOD::Vertex::Decorator<std::vector<ElementLink<xAOD::VertexContainer> > > splitPartnerDecor("splitPartners");
+  //optional for SM origin matching
+  static const xAOD::Vertex::Decorator<int> smOriginDecor("vertexMatchOriginType");
 
   const xAOD::Vertex::Decorator<float> fakeScoreDecor("fakeScore");
   const xAOD::Vertex::Decorator<float> otherScoreDecor("otherScore");
@@ -52,7 +58,6 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
   // can switch to built in method in xAOD::Vertex once don't have to deal with changing names anymore
   xAOD::Vertex::ConstAccessor<xAOD::Vertex::TrackParticleLinks_t> trkAcc("trackParticleLinks");
   xAOD::Vertex::ConstAccessor<std::vector<float> > weightAcc("trackWeights");
-
   xAOD::TrackParticle::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> > trk_truthPartAcc("truthParticleLink");
   xAOD::TrackParticle::ConstAccessor<float> trk_truthProbAcc("truthMatchProbability");
 
@@ -67,12 +72,40 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
     //create the vector we will add as matching info decoration later
     std::vector<VertexTruthMatchInfo> matchinfo;
 
-    const xAOD::Vertex::TrackParticleLinks_t & trkParts = trkAcc( *vtx );
-    size_t ntracks = trkParts.size();
+    const xAOD::Vertex::TrackParticleLinks_t& trackParticles = trkAcc( *vtx );
+    size_t ntracks = trackParticles.size();
     const std::vector<float> & trkWeights = weightAcc( *vtx );
 
+    xAOD::Vertex::TrackParticleLinks_t trkMuSATrkParts; // For MuSA mode, we will populate this with MuSA track particles
+
+    // Create a local variable for track particles to use in the rest of the function
+    const xAOD::Vertex::TrackParticleLinks_t& trkParts = m_doMuSA ? trkMuSATrkParts : trackParticles;
+    
+    if ( m_doMuSA ) {
+      // MuSA also creates new "MuSA Track" collection which does not have truth particle links
+      // instead, we need to get the associated MS TrackParticle from the "MuSATrk_MSTPLink" decorations on the MuSA Track
+      // and then get the truth particle link from there
+      const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_MSTPLink("MuSATrk_MSTPLink");
+      // populate the MuSA track particle vector
+      trkMuSATrkParts.reserve(ntracks);
+      for (const auto& trkLink : trackParticles) {
+        if (!trkLink.isValid()) continue;
+        const xAOD::TrackParticle& trackParticle = **trkLink;
+        if (acc_MSTPLink.isAvailable(trackParticle)) {
+          const ElementLink<xAOD::TrackParticleContainer>& trkMuSATrkLink = acc_MSTPLink(trackParticle);
+          if (trkMuSATrkLink.isValid()) {
+            trkMuSATrkParts.push_back(trkMuSATrkLink);
+          } else {
+            ATH_MSG_WARNING("MS track particle link is not valid");
+          }
+        } else {
+          ATH_MSG_WARNING("MuSATrk_MSTPLink decoration is not available on track particle");
+        }
+      }
+    }
+    
     //if don't have track particles
-    if (!trkAcc.isAvailable(*vtx) || !weightAcc.isAvailable(*vtx) ) {
+    if ((!trkAcc.isAvailable(*vtx) || !weightAcc.isAvailable(*vtx)) && !m_doMuSA) {
       ATH_MSG_WARNING("trackParticles or trackWeights not available, vertex is missing info");
       continue;
     }
@@ -88,53 +121,97 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
     float otherPt = 0;
     float fakePt = 0;
 
+    // Add for SM origin tracking
+    int combinedSMOrigin = 0;
+    
     //loop over the tracks in the vertex
     for ( size_t t = 0; t < ntracks; ++t ) {
 
       ATH_MSG_DEBUG("Checking track number " << t);
 
-      if (!trkParts[t].isValid()) {
-         ATH_MSG_DEBUG("Track " << t << " is bad!");
-         continue;
+      // First check if the original track particle link is valid
+      if (!trackParticles[t].isValid()) {
+        ATH_MSG_DEBUG("Original track " << t << " is bad!");
+        continue;
       }
-      const xAOD::TrackParticle & trk = **trkParts[t];
 
-      // store the contribution to total weight and pT
-      totalWeight += trkWeights[t];
-      totalPt += trk.pt();
+      // Then check if we have a valid track after potential MuSA processing
+      if (t >= trkParts.size() || !trkParts[t].isValid()) {
+        ATH_MSG_DEBUG("Track " << t << " is invalid or out of bounds in trkParts!");
+        continue;
+      }
+      const xAOD::TrackParticle trk = **trkParts[t];
+
+      // Add to total weight
+      if (m_doMuSA) {
+        totalWeight += 1.0; // Add dummy weight of 1 for each track with MuSA
+      } else {
+        totalWeight += trkWeights[t];
+      }
+
+      // Safely get the track pt
+      float trkPt = 0;
+      try {
+        trkPt = trk.pt();
+        totalPt += trkPt;
+      } catch (const std::exception& e) {
+        ATH_MSG_WARNING("Exception when accessing track pt: " << e.what());
+        continue;
+      }
 
       // get the linked truth particle
       if (!trk_truthPartAcc.isAvailable(trk)) {
         ATH_MSG_DEBUG("The truth particle link decoration isn't available.");
         continue;
-      }  
-      const ElementLink<xAOD::TruthParticleContainer> & truthPartLink = trk_truthPartAcc( trk );
-      float prob = trk_truthProbAcc( trk );
-      ATH_MSG_DEBUG("Truth prob: " << prob);
+      }
+      const ElementLink<xAOD::TruthParticleContainer> & truthPartLink = trk_truthPartAcc(trk);
+      float prob = 0.0;
+      if (m_doMuSA) {
+        // For MuSA mode, assign a dummy probability of 1.0
+        prob = 1.0;
+        ATH_MSG_DEBUG("MuSA mode: using dummy truth prob of 1.0");
+      } else {
+        // For regular mode, use the decoration
+        prob = trk_truthProbAcc(trk);
+        ATH_MSG_DEBUG("Truth prob: " << prob);
+      }
 
       // check the truth particle origin
-      if (truthPartLink.isValid()  && prob > m_trkMatchProb) {
+      if (truthPartLink.isValid() && prob > m_trkMatchProb) {
         const xAOD::TruthParticle & truthPart = **truthPartLink;
 
-        const int ancestorVertexUniqueID =  checkProduction(truthPart, truthVerticesToMatch);
+        const int ancestorVertexUniqueID = checkProduction(truthPart, truthVerticesToMatch);
+        // optional SM origin classification
+        if (m_doSMOrigin) {
+          const int smOrigin = checkSMProduction(truthPart);
+          combinedSMOrigin |= smOrigin;
+          
+          // Check if this track is from LLP signal
+          if (ancestorVertexUniqueID != HepMC::INVALID_VERTEX_ID) {
+            combinedSMOrigin |= (0x1 << InDetSecVtxTruthMatchUtils::Signal);
+          }
+        }
 
         //check if the truth particle is "good"
-        if ( ancestorVertexUniqueID != HepMC::INVALID_VERTEX_ID ) {
+        if (ancestorVertexUniqueID != HepMC::INVALID_VERTEX_ID) {
           //track in vertex is linked to LLP descendant
           //create link to truth vertex and add to matchInfo
           auto it = std::find_if(truthVerticesToMatch.begin(), truthVerticesToMatch.end(),
-                                 [&](const auto& ele){ return HepMC::uniqueID(ele) == ancestorVertexUniqueID;} );
+             [&](const auto& ele){ return HepMC::uniqueID(ele) == ancestorVertexUniqueID;} );
 
-          if(it == truthVerticesToMatch.end()) {
+          if (it == truthVerticesToMatch.end()) {
             ATH_MSG_WARNING("Truth vertex with unique ID " << ancestorVertexUniqueID << " not found!");
-          }
-          else {
+          } else {
             ElementLink<xAOD::TruthVertexContainer> elLink;
             elLink.setElement(*it); 
-            elLink.setStorableObject( *dynamic_cast<const xAOD::TruthVertexContainer*>( (*it)->container()  ) );
-            size_t matchIdx = indexOfMatchInfo( matchinfo, elLink );
+            elLink.setStorableObject(*dynamic_cast<const xAOD::TruthVertexContainer*>((*it)->container()));
+            size_t matchIdx = indexOfMatchInfo(matchinfo, elLink);
 
-            std::get<1>(matchinfo[matchIdx]) += trkWeights[t];
+            if (m_doMuSA) {
+              std::get<1>(matchinfo[matchIdx]) += 1.0; // Add dummy weight of 1 for MuSA
+            } else {
+              std::get<1>(matchinfo[matchIdx]) += trkWeights[t];
+            }
             std::get<2>(matchinfo[matchIdx]) += trk.pt();
           }
         } else {
@@ -146,6 +223,10 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
         //not valid or low matching probability
         ATH_MSG_DEBUG("Invalid or low prob truth link!");
         fakePt += trk.pt();
+        // Mark as fake for SM origin tracking
+        if (m_doSMOrigin) {
+          combinedSMOrigin |= (0x1 << InDetSecVtxTruthMatchUtils::FakeOrigin);
+        }
       }
     }//end loop over tracks in vertex
 
@@ -162,6 +243,11 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
     matchInfoDecor ( *vtx ) = matchinfo;
     fakeScoreDecor ( *vtx ) = fakeScore;
     otherScoreDecor( *vtx ) = otherScore;
+
+    // Decorate with SM origin if enabled
+    if (m_doSMOrigin) {
+      smOriginDecor( *vtx ) = combinedSMOrigin;
+    }
   }
 
   //After first loop, all vertices have been decorated with their vector of match info (link to TruthVertex paired with weight)
@@ -287,8 +373,10 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
     }
       
     int truthMatchType = 0;
-    if( vertexInfo.at(0) > 1 &&  truthVtx->perp() <  320 && abs(truthVtx->z()) < 1500){
-      ATH_MSG_DEBUG("Vertex is reconstructable and in Inner Det region");
+    if( vertexInfo.at(0) > 1 && 
+        ((m_doMuSA && truthVtx->perp() < 8000 && std::abs(truthVtx->z()) < 10000) ||
+        (!m_doMuSA && truthVtx->perp() < 320 && std::abs(truthVtx->z()) < 1500))){
+      ATH_MSG_DEBUG("Vertex is reconstructable and in " << (m_doMuSA ? "Muon Spectrometer" : "Inner Det") << " region");
       truthMatchType = truthMatchType | (0x1 << InDetSecVtxTruthMatchUtils::Reconstructable);
     }
     if( InDetSecVtxTruthMatchUtils::isReconstructable(truthMatchType) and vertexInfo.at(1) > 1){
@@ -328,8 +416,48 @@ std::vector<int> InDetSecVtxTruthMatchTool::checkParticle(const xAOD::TruthParti
   else{
 
     for(const xAOD::TrackParticle* trkPart : *trkCont){
-      const ElementLink<xAOD::TruthParticleContainer> & truthPartLink = trk_truthPartAcc( *trkPart );
-      float matchProb = trk_truthProbAcc( *trkPart );
+      // Handle differently for MuSA vs standard mode
+      if (m_doMuSA) {
+        if (!trk_truthPartAcc.isAvailable(*trkPart)) {
+          ATH_MSG_DEBUG("Truth link not available on MS track");
+          continue;
+        }
+        const ElementLink<xAOD::TruthParticleContainer>& truthLink = trk_truthPartAcc(*trkPart);
+        if (!truthLink.isValid()) {
+          ATH_MSG_DEBUG("Truth link on MS track not valid");
+          continue;
+        }
+        const xAOD::TruthParticle& linkedTruth = **truthLink;
+        if (HepMC::is_same_particle(linkedTruth, truthPart)) {
+          // We found a match between truth particle and MS track!
+          // no selected decoration so need to implement manually -- MSTP must be |eta| < 2.5
+          // ideally we would want to check if the MSTP is also an SA muon but this is more complicated given we need the muon container
+          if (std::abs(trkPart->eta()) < 2.5) {
+            ATH_MSG_DEBUG("Particle has a track that passes track selection.");
+            return {1,1,1};
+          } else {
+            ATH_MSG_DEBUG("Particle has a track, but did not pass track selection.");
+            return {1,1,0};
+          }
+        }
+      }
+      
+      // Standard mode - check truth matching
+      if (!trk_truthPartAcc.isAvailable(*trkPart)) {
+        ATH_MSG_DEBUG("truthParticleLink not available on track");
+        continue;
+      }
+      
+      const ElementLink<xAOD::TruthParticleContainer> & truthPartLink = trk_truthPartAcc(*trkPart);
+      
+      // Check if truth match probability is available
+      float matchProb = 0.0;
+      if (trk_truthProbAcc.isAvailable(*trkPart)) {
+        matchProb = trk_truthProbAcc(*trkPart);
+      } else {
+        ATH_MSG_DEBUG("truthMatchProbability not available on track");
+        continue;
+      }
 
       if(truthPartLink.isValid() && matchProb > m_trkMatchProb) {
         const xAOD::TruthParticle& tmpPart = **truthPartLink;
@@ -382,42 +510,107 @@ int InDetSecVtxTruthMatchTool::checkProduction( const xAOD::TruthParticle & trut
   return HepMC::INVALID_VERTEX_ID;
 }
 
+// secvtx origin has extra categories compared to original track origin, so need to map them to our enum
+int mapTrkOriginToSecVtxOrigin(int trkOriginBits) {
+  int myBits = 0;
+  if (trkOriginBits & (1 << InDet::TrkOrigin::BHadronDecay))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::BHadronDecay);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::DHadronDecay))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::DHadronDecay);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::TauDecay))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::TauDecay);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::GammaConversion))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::GammaConversion);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::StrangeMesonDecay))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::StrangeMesonDecay);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::KshortDecay))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::KshortDecay);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::StrangeBaryonDecay))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::StrangeBaryonDecay);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::LambdaDecay))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::LambdaDecay);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::OtherDecay))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::OtherDecay);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::HadronicInteraction))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::HadronicInteraction);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::OtherSecondary))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::OtherSecondary);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::Fragmentation))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::Fragmentation);
+  if (trkOriginBits & (1 << InDet::TrkOrigin::OtherOrigin))
+    myBits |= (1 << InDetSecVtxTruthMatchUtils::OtherOrigin);
+  return myBits;
+}
+
+int InDetSecVtxTruthMatchTool::checkSMProduction(const xAOD::TruthParticle & truthPart) const {
+  if (m_trackTruthOriginTool.isSet()) {
+    int trkOriginBits = m_trackTruthOriginTool->getTruthOrigin(&truthPart);
+    return mapTrkOriginToSecVtxOrigin(trkOriginBits);
+  }
+  ATH_MSG_WARNING("TrackTruthOriginTool not set, returning 0 for origin");
+  return 0;
+}
+
 void InDetSecVtxTruthMatchTool::countReconstructibleDescendentParticles(const xAOD::TruthVertex& signalTruthVertex,
-                                                                           std::vector<const xAOD::TruthParticle*>& set, int counter) const {
+                     std::vector<const xAOD::TruthParticle*>& set, int counter) const {
 
   counter++;
 
-  for( size_t itrk = 0; itrk < signalTruthVertex.nOutgoingParticles(); itrk++) {
-    const auto* particle = signalTruthVertex.outgoingParticle( itrk );
-    if( !particle ) continue;
+  for (size_t itrk = 0; itrk < signalTruthVertex.nOutgoingParticles(); itrk++) {
+    const auto* particle = signalTruthVertex.outgoingParticle(itrk);
+    if (!particle) continue;
+  
     // Recursively add descendents
-    if( particle->hasDecayVtx() ) {
-      
-      TVector3 decayPos( particle->decayVtx()->x(), particle->decayVtx()->y(), particle->decayVtx()->z() );
-      TVector3 prodPos ( particle->prodVtx()->x(),  particle->prodVtx()->y(),  particle->prodVtx()->z()  );
-      
-      auto isInside  = []( TVector3& v ) { return ( v.Perp() < 300. && std::abs( v.z() ) < 1500. ); };
-      auto isOutside = []( TVector3& v ) { return ( v.Perp() > 563. || std::abs( v.z() ) > 2720. ); };
-      
+    if (particle->hasDecayVtx()) {
+    
+      TVector3 decayPos(particle->decayVtx()->x(), particle->decayVtx()->y(), particle->decayVtx()->z());
+      TVector3 prodPos(particle->prodVtx()->x(), particle->prodVtx()->y(), particle->prodVtx()->z());
+    
+      // Inner detector criteria
+      auto isInsideID = [](TVector3& v) { return (v.Perp() < 300. && std::abs(v.z()) < 1500.); };
+      auto isOutsideID = [](TVector3& v) { return (v.Perp() > 563. || std::abs(v.z()) > 2720.); };
+    
+      // Muon Spectrometer criteria
+      auto isOutsideID_MuSA = [](TVector3& v) { return (v.Perp() > 563. || std::abs(v.z()) > 2720.); };
+      auto isInsideMS_MuSA = [](TVector3& v) { return (v.Perp() < 8000. && std::abs(v.z()) < 10000.); };
+    
       const auto distance = (decayPos - prodPos).Mag();
 
       if (counter > 100) {
         ATH_MSG_WARNING("Vetoing particle that may be added recursively infinitely (potential loop in generator record");
         break;
       }
-      
+    
       // consider track reconstructible if it travels at least 10mm
-      if( distance < 10.0 ) {
-        countReconstructibleDescendentParticles( *particle->decayVtx(), set , counter);
-      } else if( isInside ( prodPos  )  && isOutside( decayPos )  && particle->isCharged() ) {
-        set.push_back( particle );
-      } else if( particle->isElectron() || particle->isMuon() ) {
-        set.push_back( particle );
+      if (distance < 10.0) {
+        countReconstructibleDescendentParticles(*particle->decayVtx(), set, counter);
+      } else if (m_doMuSA) {
+      // MuSA: particle originates outside ID and ends in MS
+        if (isOutsideID_MuSA(prodPos) && isInsideMS_MuSA(decayPos) && (particle->isCharged() || particle->isMuon())) {
+          set.push_back(particle);
+        }
+      } else {
+        // Regular tracking: particle originates inside ID and ends outside ID
+        if (isInsideID(prodPos) && isOutsideID(decayPos) && particle->isCharged()) {
+          set.push_back(particle);
+        } else if (particle->isElectron() || particle->isMuon()) {
+          set.push_back(particle);
+        }
       }
     } else {
-      if( !(particle->isCharged()) ) continue;
-      set.push_back( particle );
+      if (!(particle->isCharged())) continue;
+      // For particles without decay vertex, include them if they're charged
+      set.push_back(particle);
     }
   }
-  
+}
+
+bool InDetSecVtxTruthMatchTool::isFrom(const xAOD::TruthParticle& truth, int flav) const {
+  if (m_trackTruthOriginTool.isSet()) {
+    return m_trackTruthOriginTool->isFrom(&truth, flav);
   }
+  ATH_MSG_WARNING("TrackTruthOriginTool not set, returning false for isFrom");
+  return false;
+}
+
+
