@@ -183,6 +183,8 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False, doMonito
         if flags.Trigger.L1.doMuonTopoInputs:
             muProvider.locationMuCTPItoL1Topo = ""
             muProvider.locationMuCTPItoL1Topo1 = ""
+            muProvider.locationMuonRoI =  "L1MuCTPItoL1TopoLocationFromMuonRoI"
+            muProvider.locationMuonRoI1 = "L1MuCTPItoL1TopoLocationFromMuonRoI1"
         else:
             muProvider.locationMuonRoI = ""
             muProvider.locationMuonRoI1 = ""
