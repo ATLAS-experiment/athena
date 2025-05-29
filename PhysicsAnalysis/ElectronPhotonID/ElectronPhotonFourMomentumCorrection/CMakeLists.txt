@@ -57,7 +57,7 @@ atlas_add_executable( ElectronPhotonFourMomentumCorrection_testUniformityCorrect
    util/testUniformityCorrections.cxx
    LINK_LIBRARIES ElectronPhotonFourMomentumCorrectionLib )
 
-if( XAOD_STANDALONE )
+if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
    atlas_add_executable( ElectronPhotonFourMomentumCorrection_testEgammaCalibTool
       util/testEgammaCalibTool.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -66,7 +66,7 @@ if( XAOD_STANDALONE )
 endif()
 
 # Test(s) in the package:
-if( XAOD_STANDALONE )
+if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
    atlas_add_test( ut_maintest
                    SCRIPT test/ut_ElectronPhotonFourMomentumCorrection_maintest.py
                    POST_EXEC_SCRIPT nopost.sh PROPERTIES TIMEOUT 300 )

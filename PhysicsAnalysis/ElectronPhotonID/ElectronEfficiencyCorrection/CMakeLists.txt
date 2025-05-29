@@ -48,7 +48,12 @@ atlas_add_test(ut_SimpleInitTest
    LOG_IGNORE_PATTERN "Package.AsgTool...  DEBUG|MessageSvc not found")
 
 # AnalysisBase-only utilities:
-if( NOT COLUMNAR_ANALYSIS AND XAOD_STANDALONE )
+if ( NOT XAOD_STANDALONE )
+   atlas_add_test(ut_testTtool
+	          SCRIPT python -m  ElectronEfficiencyCorrection.TElectronTestAlgConfig --filesInput $ASG_TEST_FILE_MC --evtMax=5
+              POST_EXEC_SCRIPT nopost.sh 
+              PROPERTIES TIMEOUT 300)
+elseif ( NOT COLUMNAR_ANALYSIS )
    atlas_add_executable( EgEfficiencyCorr_testEgEfficiencyCorr
       util/testEgEfficiencyCorr.cxx util/SFHelpers.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -86,12 +91,6 @@ if( NOT COLUMNAR_ANALYSIS AND XAOD_STANDALONE )
    atlas_add_test(ut_TestFunctionality
 	          SCRIPT test/testEgEfficiencyDetailed.py
 	      	  PROPERTIES TIMEOUT 300)
-else()  
-   atlas_add_test(ut_testTtool
-	          SCRIPT python -m  ElectronEfficiencyCorrection.TElectronTestAlgConfig --filesInput $ASG_TEST_FILE_MC --evtMax=5
-              POST_EXEC_SCRIPT nopost.sh 
-              PROPERTIES TIMEOUT 300)
-
 endif()
 
 atlas_add_test( gt_ColumnarToolTests
