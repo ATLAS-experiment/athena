@@ -194,79 +194,46 @@ BFieldMesh<T>::getCache(double z,
   const double sf = scaleFactor;
   // store the B scale
   cache.setBscale(m_scale);
+  const BFieldVector<T>& fvec0 = m_field[im0];
+  const BFieldVector<T>& fvec1 = m_field[im0 + m_roff];
+  const BFieldVector<T>& fvec2 = m_field[im0 + m_zoff];
+  const BFieldVector<T>& fvec3 = m_field[im0 + m_zoff + m_roff];
+  const BFieldVector<T>& fvec4 = m_field[im0 + 1];
+  const BFieldVector<T>& fvec5 = m_field[im0 + m_roff + 1];
+  const BFieldVector<T>& fvec6 = m_field[im0 + m_zoff + 1];
+  const BFieldVector<T>& fvec7 = m_field[im0 + m_zoff + m_roff + 1];
+
   // In the usual case the  m_field is of type short int
   // else (special case) can be double
   if constexpr (std::is_same<T, short>::value) {
-    CxxUtils::vec<int, 8> field1I = { (m_field[im0][0]),
-                                      (m_field[im0 + m_roff][0]),
-                                      (m_field[im0 + m_zoff][0]),
-                                      (m_field[im0 + m_zoff + m_roff][0]),
-                                      (m_field[im0 + 1][0]),
-                                      (m_field[im0 + m_roff + 1][0]),
-                                      (m_field[im0 + m_zoff + 1][0]),
-                                      (m_field[im0 + m_zoff + m_roff + 1][0]) };
+    CxxUtils::vec<int, 8> field1I = {fvec0[0], fvec1[0], fvec2[0], fvec3[0],
+                                     fvec4[0], fvec5[0], fvec6[0], fvec7[0]};
+
+
+    CxxUtils::vec<int, 8> field2I = {fvec0[1], fvec1[1], fvec2[1], fvec3[1],
+                                     fvec4[1], fvec5[1], fvec6[1], fvec7[1]};
+
+
+    CxxUtils::vec<int, 8> field3I = {fvec0[2], fvec1[2], fvec2[2], fvec3[2],
+                                     fvec4[2], fvec5[2], fvec6[2], fvec7[2]};
 
     CxxUtils::vec<double, 8> field1;
-    CxxUtils::vconvert(field1, field1I);
-
-    CxxUtils::vec<int, 8> field2I = { (m_field[im0][1]),
-                                      (m_field[im0 + m_roff][1]),
-                                      (m_field[im0 + m_zoff][1]),
-                                      (m_field[im0 + m_zoff + m_roff][1]),
-                                      (m_field[im0 + 1][1]),
-                                      (m_field[im0 + m_roff + 1][1]),
-                                      (m_field[im0 + m_zoff + 1][1]),
-                                      (m_field[im0 + m_zoff + m_roff + 1][1]) };
-
     CxxUtils::vec<double, 8> field2;
-    CxxUtils::vconvert(field2, field2I);
-
-    CxxUtils::vec<int, 8> field3I = { (m_field[im0][2]),
-                                      (m_field[im0 + m_roff][2]),
-                                      (m_field[im0 + m_zoff][2]),
-                                      (m_field[im0 + m_zoff + m_roff][2]),
-                                      (m_field[im0 + 1][2]),
-                                      (m_field[im0 + m_roff + 1][2]),
-                                      (m_field[im0 + m_zoff + 1][2]),
-                                      (m_field[im0 + m_zoff + m_roff + 1][2]) };
-
     CxxUtils::vec<double, 8> field3;
+    CxxUtils::vconvert(field1, field1I);
+    CxxUtils::vconvert(field2, field2I);
     CxxUtils::vconvert(field3, field3I);
 
     cache.setField(sf * field1, sf * field2, sf * field3);
   } else {
-    CxxUtils::vec<double, 8> field1 = {
-      (m_field[im0][0]),
-      (m_field[im0 + m_roff][0]),
-      (m_field[im0 + m_zoff][0]),
-      (m_field[im0 + m_zoff + m_roff][0]),
-      (m_field[im0 + 1][0]),
-      (m_field[im0 + m_roff + 1][0]),
-      (m_field[im0 + m_zoff + 1][0]),
-      (m_field[im0 + m_zoff + m_roff + 1][0])
-    };
+    CxxUtils::vec<double, 8> field1 = {fvec0[0], fvec1[0], fvec2[0], fvec3[0],
+                                       fvec4[0], fvec5[0], fvec6[0], fvec7[0]};
 
-    CxxUtils::vec<double, 8> field2 = {
-      (m_field[im0][1]),
-      (m_field[im0 + m_roff][1]),
-      (m_field[im0 + m_zoff][1]),
-      (m_field[im0 + m_zoff + m_roff][1]),
-      (m_field[im0 + 1][1]),
-      (m_field[im0 + m_roff + 1][1]),
-      (m_field[im0 + m_zoff + 1][1]),
-      (m_field[im0 + m_zoff + m_roff + 1][1])
-    };
+    CxxUtils::vec<double, 8> field2 = {fvec0[1], fvec1[1], fvec2[1], fvec3[1],
+                                       fvec4[1], fvec5[1], fvec6[1], fvec7[1]};
 
-    CxxUtils::vec<double, 8> field3 = {
-      (m_field[im0][2]),
-      (m_field[im0 + m_roff][2]),
-      (m_field[im0 + m_zoff][2]),
-      (m_field[im0 + m_zoff + m_roff][2]),
-      (m_field[im0 + 1][2]),
-      (m_field[im0 + m_roff + 1][2]),
-      (m_field[im0 + m_zoff + 1][2]),
-      (m_field[im0 + m_zoff + m_roff + 1][2])
-    };
+    CxxUtils::vec<double, 8> field3 = {fvec0[2], fvec1[2], fvec2[2], fvec3[2],
+                                       fvec4[2], fvec5[2], fvec6[2], fvec7[2]};
 
     cache.setField(sf * field1, sf * field2, sf * field3);
   }
