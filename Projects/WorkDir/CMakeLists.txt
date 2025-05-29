@@ -27,7 +27,7 @@ set( ATLAS_ENABLE_CI_TESTS TRUE CACHE BOOL
 # Try to figure out what project is our parent. Just using a hard-coded list
 # of possible project names. Basically the names of all the other
 # sub-directories inside the Projects/ directory in the repository.
-set( _parentProjectNames Athena AthenaP1 AnalysisBase AthAnalysis
+set( _parentProjectNames Athena AthenaP1 AnalysisBase ColumnarAnalysis AthAnalysis
   AthSimulation AthDerivation AthDataQuality AthGeneration DetCommon )
 set( _defaultParentProject Athena )
 foreach( _pp ${_parentProjectNames} )
