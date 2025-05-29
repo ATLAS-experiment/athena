@@ -21,9 +21,9 @@ atlas_add_component( FPGATrackSimConfTools
 # Install files from the package:
 atlas_install_python_modules( python/*.py python/helperScripts/*.py )
 atlas_install_scripts( test/FPGATrackSimWorkflow/*.sh)
-atlas_install_scripts( test/test_FPGATrackSimWorkflow.sh)
 atlas_install_scripts( test/test_FPGATrackSimDataPrep.sh)
 atlas_install_scripts( test/FPGATrackSimInputTestSetup.sh )
+atlas_install_data( test/IDTPM_configs/*.json )
 
 # Tests in the package:
 atlas_add_test( FPGATrackSimRegionSlices_test
@@ -32,40 +32,16 @@ atlas_add_test( FPGATrackSimRegionSlices_test
    LINK_LIBRARIES ${ROOT_LIBRARIES} FPGATrackSimConfToolsLib )
 
 atlas_add_test( FPGATrackSimConfigFlags_test
+                PRIVATE_WORKING_DIRECTORY
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimConfigFlags
                 POST_EXEC_SCRIPT noerror.sh ) 
 
-atlas_add_test( FPGATrackSimMapGeneration_test 
-                SCRIPT FPGATrackSimMapGeneration.sh
-                POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 900)
-
-atlas_add_test( FPGATrackSimBankGeneration_test 
-                SCRIPT FPGATrackSimBankGeneration.sh
-                POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 450)
-
 atlas_add_test( FPGATrackSimLayerStudy_test
-                SCRIPT FPGATrackSimLayerStudy.sh
-                POST_EXEC_SCRIPT noerror.sh
-                PROPERTIES TIMEOUT 1200)
-
-atlas_add_test( FPGATrackSim_F600_test
                 PRIVATE_WORKING_DIRECTORY 
-                SCRIPT FPGATrackSim_F600.sh -t -n 1 -s 8
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*"
-                POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 1800 )
-
-atlas_add_test( FPGATrackSim_F410_test
-                SCRIPT FPGATrackSim_F410.sh -t -n 1 -s 8
-                PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*|.*Found error reading file at line:.*" # ACTS (C)KF related errors
-                POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 1200 )
+                SCRIPT FPGATrackSimLayerStudy.sh -n 10
+                POST_EXEC_SCRIPT noerror.sh )               
 
 atlas_add_test( FPGATrackSimHelperFunctions
                 PRIVATE_WORKING_DIRECTORY 
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimHelperFunctions
-                POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 5 )
+                POST_EXEC_SCRIPT noerror.sh )

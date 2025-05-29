@@ -795,7 +795,7 @@ if __name__ == "__main__":
             from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
             acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}",
                                             useRoads=not flags.Trigger.FPGATrackSim.tracking)) # Run ACTS KF
-            acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage=f"{stage}")) # Run Truth Matching/Decoration chain
+            acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey)) # Run Truth Matching/Decoration chain
             if flags.Trigger.FPGATrackSim.runCKF:
                 from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
                 acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension",

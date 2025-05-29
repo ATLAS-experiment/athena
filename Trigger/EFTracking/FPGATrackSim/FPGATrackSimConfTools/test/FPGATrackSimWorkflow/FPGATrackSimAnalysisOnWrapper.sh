@@ -1,32 +1,26 @@
 #!/bin/bash
 set -e
 
-
-GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
-WRP_EVT=200
-WRAPPER="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/Wrappers/v0.10/FPGATrackSimWrapper.root"
-BANKS="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/banks_9L/v0.20/"
-
-MAPS="maps_9L/OtherFPGAPipelines/v0.22/"
-
+source FPGATrackSim_CommonEnv.sh
 
 echo "... analysis on wrapper"
-PY_STATUS=0
-stderrFile=$(mktemp)
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
-    --evtMax=${WRP_EVT} \
-    Trigger.FPGATrackSim.wrapperFileName=${WRAPPER} \
-    Trigger.FPGATrackSim.mapsDir=${MAPS} \
+    --evtMax=${RDO_EVT} \
+    Trigger.FPGATrackSim.wrapperFileName="wrapper.root" \
+    Trigger.FPGATrackSim.regionList="34,98" \
+    Trigger.FPGATrackSim.pipeline='F-600' \
+    Trigger.FPGATrackSim.doOverlapRemoval=True \
+    Trigger.FPGATrackSim.Hough.secondStage=True \
+    Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
     Trigger.FPGATrackSim.tracking=True \
-    Trigger.FPGATrackSim.bankDir=${BANKS}
+    Trigger.FPGATrackSim.bankDir=${BANKS_5L}
 ls -l
 echo "... analysis on wrapper, this part is done ..."
 
 echo "... analysis output verification"
 cat << EOF > checkHist.C
 {
-    _file0->cd("FPGATrackSimLogicalHitsProcessAlg");
+    _file0->cd("FPGATrackSimLogicalHitsProcessAlg_reg34");
     TH1* h = (TH1*)gDirectory->Get("nroads_1st");
     if ( h == nullptr )
         throw std::runtime_error("oh dear, after all of this there are no roads histogram");

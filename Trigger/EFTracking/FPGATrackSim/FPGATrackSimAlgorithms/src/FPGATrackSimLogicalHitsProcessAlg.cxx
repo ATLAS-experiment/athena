@@ -503,16 +503,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS");
     ATH_MSG_INFO("========================================================================================");
     ATH_MSG_INFO("Ran on events = " << m_evt);
-    ATH_MSG_INFO("Inclusive efficiency to find a road = " << m_nRoadsFound/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track = " << m_nTracksFound/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << m_nTracksChi2Found/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 and OLR = " << m_nTracksChi2OLRFound/m_evt_truth);
+    ATH_MSG_INFO("Inclusive efficiency to find a road = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nRoadsFound/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksFound/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2Found/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 and OLR = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRFound/(float)m_evt_truth)));
 
 
-    ATH_MSG_INFO("Number of 1st stage roads/event = " << m_nRoadsTot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage track combinations/event = " << m_nTracksTot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage tracks passing chi2/event = " << m_nTracksChi2Tot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage tracks passing chi2 and OLR/event = " << m_nTracksChi2OLRTot/m_evt);
+    ATH_MSG_INFO("Number of 1st stage roads/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nRoadsTot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage track combinations/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksTot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage tracks passing chi2/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksChi2Tot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage tracks passing chi2 and OLR/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRTot/(float)m_evt)));
     ATH_MSG_INFO("========================================================================================");
 
     ATH_MSG_INFO("Max number of 1st stage roads in an event = " << m_maxNRoadsFound);

@@ -9,7 +9,7 @@ export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrad
 STD_PREFIX="MyMaps_std"
 run_map_maker() {
     python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
-    --filesInput=${WRAPPER} \
+    --filesInput="wrapper.root" \
     OutFileName=${STD_PREFIX} \
     Trigger.FPGATrackSim.oldRegionDefs=True \
     Trigger.FPGATrackSim.region=0 \
@@ -19,7 +19,7 @@ run_map_maker() {
 INSIDEOUT_PREFIX="MyMaps_insideOut"
 run_5L_map_maker() {
     python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
-    --filesInput=${WRAPPER} \
+    --filesInput="wrapper.root" \
     OutFileName=${INSIDEOUT_PREFIX} \
     Trigger.FPGATrackSim.region=33 \
     doInsideOut=True \

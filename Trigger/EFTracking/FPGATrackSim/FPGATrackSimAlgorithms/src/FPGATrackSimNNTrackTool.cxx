@@ -141,6 +141,7 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
           if (inputTensorValues.size() < 15) {
             inputTensorValues.resize(15, 0.0f); // Resize to 15 and fill with 0.0f                                                                                                                                  
           }
+          else if (m_doGNNTracking) inputTensorValues.resize(15);
         }
         else {
           if (inputTensorValues.size() < 27) {
