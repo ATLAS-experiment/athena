@@ -13,6 +13,7 @@
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "PATCore/IAsgSelectionTool.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
@@ -21,6 +22,7 @@
 #include "TauAnalysisTools/ITauSelectionTool.h"
 #include "TauAnalysisTools/Enums.h"
 #include "TauAnalysisTools/HelperFunctions.h"
+#include "TauAnalysisTools/SharedFilesVersion.h"
 
 // EDM include(s):
 #include "xAODMuon/MuonContainer.h"
@@ -113,8 +115,6 @@ private:
   template<typename T>
   void PrintConfigValue(const std::string& sCutName, T& sVal) const;
 
-  // bitmask of tau selection cuts
-  int m_iSelectionCuts;
   // vector of transverse momentum cut regions
   std::vector<float> m_vPtRegion;
   // vector of absolute eta cut regions
@@ -129,37 +129,38 @@ private:
   std::vector<float> m_vGNTauSigTransRegion;
   // JetID working point
   std::string m_sJetIDWP;
-  int m_iJetIDWP;
   bool m_useGNTau=false;
   // vector of EleRNN cut regions
   std::vector<float> m_vEleRNNRegion;
   // EleID working point
   std::string m_sEleIDWP;
-  int m_iEleIDWP;
-  int m_iEleIDVersion;
-  // do muon OLR
-  bool m_bMuonOLR;
 
-  float m_dPtMin;
-  float m_dPtMax;
-  float m_dAbsEtaMin;
-  float m_dAbsEtaMax;
-  float m_iAbsCharge;
-  float m_iNTrack;
-  float m_dJetRNNSigTransMin;
-  float m_dJetRNNSigTransMax;
-  float m_dGNTauSigTransMin;
-  float m_dGNTauSigTransMax;
-  float m_dEleRNNMin;
-  float m_dEleRNNMax;
+  // properties
+  Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", NoCut}; 
+  Gaudi::Property<float> m_dPtMin{this, "PtMin", NAN};
+  Gaudi::Property<float> m_dPtMax{this, "PtMax", NAN};
+  Gaudi::Property<float> m_dAbsEtaMin{this, "AbsEtaMin", NAN};
+  Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
+  Gaudi::Property<float> m_iAbsCharge{this, "AbsCharge", NAN}; 
+  Gaudi::Property<float> m_dJetRNNSigTransMin{this, "JetRNNSigTransMin", NAN};
+  Gaudi::Property<float> m_dJetRNNSigTransMax{this, "JetRNNSigTransMax", NAN}; 
+  Gaudi::Property<float> m_dGNTauSigTransMin{this, "GNTauSigTransMin", NAN};
+  Gaudi::Property<float> m_dGNTauSigTransMax{this, "GNTauSigTransMax", NAN};
+  Gaudi::Property<float> m_iNTrack{this, "NTrack", NAN};
+  Gaudi::Property<float> m_dEleRNNMin{this, "EleRNNMin", NAN};
+  Gaudi::Property<float> m_dEleRNNMax{this, "EleRNNMax", NAN};
+  Gaudi::Property<int> m_iJetIDWP{this, "JetIDWP", 0};
+  Gaudi::Property<int> m_iEleIDWP{this, "EleIDWP", 0};
+  Gaudi::Property<int> m_iEleIDVersion{this, "EleIDVersion", 1};
+  Gaudi::Property<bool> m_bMuonOLR{this, "MuonOLR", false};
 
 protected:
   TFile* m_fOutFile;//!
   std::shared_ptr<TH1F> m_hCutFlow;//!
 
 private:
-  std::string m_sConfigPath;
 
+  Gaudi::Property<std::string> m_sConfigPath{this, "ConfigPath", "TauAnalysisTools/"+std::string(sSharedFilesVersion)+"/Selection/recommended_selection_r22.conf"};  
   SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey {this, "MuonContainerName", "Muons", "Muon container name"};
   SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey {this, "TauContainerName", "TauJets", "Tau container name"};
   SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_eVetoDecorKey {this, "eVetoDecorName", "", "Name of eVeto decoration"};
@@ -174,7 +175,8 @@ private:
   std::string convertEleIDWPToStr(int iEleIDWP) const;
 
 protected:
-  bool m_bCreateControlPlots;
+
+  Gaudi::Property<bool> m_bCreateControlPlots{this, "CreateControlPlots", false};
 
   /// Object used to store selection information.
   asg::AcceptInfo m_aAccept;
