@@ -31,8 +31,7 @@ run_F610(){
         Trigger.FPGATrackSim.pipeline='F-610' \
         Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
         Trigger.FPGATrackSim.doEDMConversion=True \
-        Trigger.FPGATrackSim.doOverlapRemoval=True \
-        Trigger.FPGATrackSim.Hough.secondStage=False \
+        Trigger.FPGATrackSim.Hough.secondStage=True \
         Trigger.FPGATrackSim.writeToAOD=True \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
@@ -71,6 +70,6 @@ EOF
     root -b -q monitoring.root checkHist.C
     echo "... analysis output verification, this part is done ..."
     ls -l
-    echo "... Inside-Out on RDO, this part is done now checking the xAOD"
+    echo "... F-610 on RDO, this part is done now checking the xAOD"
     checkxAOD.py $xAODOutput
 fi

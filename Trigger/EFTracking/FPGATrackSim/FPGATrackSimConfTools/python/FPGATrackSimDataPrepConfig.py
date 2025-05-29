@@ -182,8 +182,8 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     kwargs.setdefault("FPGATrackSimHitInRoadsKey", "FPGAHitsInRoads")
     kwargs.setdefault("FPGATrackSimRoadKey", "FPGARoads")
     kwargs.setdefault("FPGATrackSimTrackKey", "FPGATracks")
-    kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClusters%sFromFPGACluster" %(stage))
-    kwargs.setdefault("xAODStripClusterFromFPGAClusterKey", "xAODStripClusters%sFromFPGACluster" %(stage))
+    kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClustersFromFPGACluster")
+    kwargs.setdefault("xAODStripClusterFromFPGAClusterKey", "xAODStripClustersFromFPGACluster")
     kwargs.setdefault("xAODStripSpacePointFromFPGAKey", "xAODStripSpacePoints%sFromFPGA" %(stage))
     kwargs.setdefault("xAODPixelSpacePointFromFPGAKey", "xAODPixelSpacePoints%sFromFPGA" %(stage))
     kwargs.setdefault("xAODPixelClusterFromFPGAHitKey", "xAODPixelClusters%sFromFPGAHit" %(stage))
@@ -251,8 +251,8 @@ def WriteToAOD(flags, stage = '',finalTrackParticles = ''): #  store xAOD contai
         toAOD += ['xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl','xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
                 'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl','xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.']
     if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
-        toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
-                f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
+        toAOD += ["xAOD::PixelClusterContainer#xAODPixelClustersFromFPGACluster","xAOD::PixelClusterAuxContainer#xAODPixelClustersFromFPGAClusterAux.",
+                "xAOD::StripClusterContainer#xAODStripClustersFromFPGACluster","xAOD::StripClusterAuxContainer#xAODStripClustersFromFPGAClusterAux.",
                 f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
                 f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink",
                 ]
@@ -609,8 +609,8 @@ def runDataPrepChain():
         # convert Pixel Clusters to SPs
         from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg
         acc.merge(ActsPixelSpacePointFormationAlgCfg(flags,name="FPGAActsPixelSpacePointFormationAlg",
-                                                     **{'PixelClusters':"xAODPixelClusters_1stFromFPGACluster",
-                                                        'PixelSpacePoints':"xAODPixelSpacePoints_1stFromFPGA"}))         
+                                                     **{'PixelClusters':"xAODPixelClustersFromFPGACluster",
+                                                        'PixelSpacePoints':"xAODPixelSpacePointsFromFPGA"}))         
         
         if flags.Trigger.FPGATrackSim.connectToToITkTracking:
             if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:     
@@ -619,11 +619,11 @@ def runDataPrepChain():
                
             # Run ACTS Fast Tracking for FPGA clusters (starting from seeding)
             acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=FinalDataPrepTrackChainxAODTracksKeyPrefix,
-                            **{'PixelSeedingAlg.InputSpacePoints' : ['xAODPixelSpacePoints_1stFromFPGA'],
+                            **{'PixelSeedingAlg.InputSpacePoints' : ['xAODPixelSpacePointsFromFPGA'],
                                 'StripSeedingAlg.InputSpacePoints' : [''],
-                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["xAODPixelClusters_1stFromFPGACluster","xAODStripClusters_1stFromFPGACluster"],
-                                'PixelClusterToTruthAssociationAlg.Measurements' : 'xAODPixelClusters_1stFromFPGACluster',
-                                'StripClusterToTruthAssociationAlg.Measurements' : 'xAODStripClusters_1stFromFPGACluster'}))
+                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["xAODPixelClustersFromFPGACluster","xAODStripClustersFromFPGACluster"],
+                                'PixelClusterToTruthAssociationAlg.Measurements' : 'xAODPixelClustersFromFPGACluster',
+                                'StripClusterToTruthAssociationAlg.Measurements' : 'xAODStripClustersFromFPGACluster'}))
 
 
         if flags.Trigger.FPGATrackSim.writeToAOD:
@@ -640,8 +640,8 @@ def runDataPrepChain():
         # cluster monitoring
         if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
             from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
-            acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClusters_1stFromFPGACluster","ITkPixelClusters"],
-                                                        'stripKeys':["xAODStripClusters_1stFromFPGACluster","ITkStripClusters"],
+            acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClustersFromFPGACluster","ITkPixelClusters"],
+                                                        'stripKeys':["xAODStripClustersFromFPGACluster","ITkStripClusters"],
                                                         'doDiffHistograms':True,
                                                         'matchByID' : True}))
             

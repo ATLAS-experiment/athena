@@ -44,9 +44,9 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.GNN.doGNNRootOutput=True \
     Trigger.FPGATrackSim.GNN.doGNNTracking=True \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
-    Trigger.FPGATrackSim.mapsDir=$MAPS_9L_GNN \
-    Trigger.FPGATrackSim.region=0 \
-    Trigger.FPGATrackSim.oldRegionDefs=True \
+    Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
+    Trigger.FPGATrackSim.region=34 \
+    Trigger.FPGATrackSim.oldRegionDefs=False \
     Trigger.FPGATrackSim.writeToAOD=True \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
     Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \

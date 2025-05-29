@@ -32,8 +32,8 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
     Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
     Trigger.FPGATrackSim.writeToAOD=True \
-    Trigger.FPGATrackSim.oldRegionDefs=True \
-    Trigger.FPGATrackSim.region=0 \
+    Trigger.FPGATrackSim.oldRegionDefs=False \
+    Trigger.FPGATrackSim.region=34 \
     Trigger.FPGATrackSim.spacePoints=False \
     Trigger.FPGATrackSim.writeOfflPRDInfo=True \
     Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \

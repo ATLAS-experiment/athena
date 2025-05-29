@@ -55,7 +55,7 @@ def FPGAProtoTrackFitCfg(flags,  name="FPGAPrototrackFitterConfig", stage = '', 
                                       **kwargs))
     return acc
 
-def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPrototracks", stage = '', **kwargs):
+def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPrototracks", **kwargs):
     ################################################################################
     # Track to Truth association and validation
     from ActsConfig.ActsTruthConfig import ActsTruthParticleHitCountAlgCfg, ActsPixelClusterToTruthAssociationAlgCfg,ActsStripClusterToTruthAssociationAlgCfg
@@ -69,13 +69,13 @@ def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPro
                                                        name="ActsFPGAPixelClusterToTruthAssociationAlg",
                                                        InputTruthParticleLinks=truthLinkVector,
                                                        AssociationMapOut="ITkFPGAPixelClustersToTruthParticles",
-                                                       Measurements=f"xAODPixelClusters{stage}FromFPGACluster")) 
+                                                       Measurements="xAODPixelClustersFromFPGACluster")) 
     
     acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAStripClusterToTruthAssociationAlg",
                                                        InputTruthParticleLinks=truthLinkVector,
                                                        AssociationMapOut="ITkFPGAStripClustersToTruthParticles",
-                                                       Measurements=f"xAODStripClusters{stage}FromFPGACluster"))
+                                                       Measurements="xAODStripClustersFromFPGACluster"))
     
     
     acc.merge(ActsTruthParticleHitCountAlgCfg(flags,
