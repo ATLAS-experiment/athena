@@ -1568,7 +1568,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_jetUncertaintiesMCType, "Jet.UncertMCType", rEnv, "", true); // empty string means the MCType is guessed
   configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, true); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
   configFromFile(m_fatJets, "Jet.LargeRcollection", rEnv, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"); // set to "None" to turn off large jets
-  configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, "rel22/Fall2024_PreRec/R10_CategoryJES_FullJER_FullJMS.config");
+  configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, "rel22/Spring2025_PreRec/R10_CategoryJES_FullJER_FullJMS.config");
   configFromFile(m_fatJetUncertaintiesPDsmearing, "Jet.LargeRUncertPDsmearing", rEnv, true); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
   configFromFile(m_fatJetUncVars, "Jet.LargeRuncVars", rEnv, "default"); // do all if not specified
   configFromFile(m_WtagConfig, "Jet.WtaggerConfig", rEnv, "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
@@ -1828,9 +1828,9 @@ const std::vector<std::string> SUSYObjDef_xAOD::split(const std::string& s, cons
 
 std::string SUSYObjDef_xAOD::getDefaultJetUncConfig() {
   if (m_isRun3)
-    return isAtlfast() ? "rel22/Winter2025_AF3_PreRec/R4_CategoryReduction_FullJER.config" : "rel22/Winter2025_PreRec/R4_CategoryReduction_FullJER.config";
+    return isAtlfast() ? "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC23.config" : "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC23.config";
   else
-    return isAtlfast() ? "rel22/Fall2024_PreRec/R4_CategoryReduction_FullJER.config" : "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config";  
+    return isAtlfast() ? "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC20_MC21.config" : "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC20_MC21.config";  
 }
 
 void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector<float>& pT_window, std::vector<float>& eta_window, bool &eleOLR, bool &muVeto, bool &muOLR) const {
