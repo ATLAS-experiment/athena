@@ -1810,9 +1810,6 @@ Trk::Extrapolator::extrapolateInAlignableTV(const EventContext& ctx,
     if (m_dumpCache && cache.m_extrapolationCache) {
       ATH_MSG_DEBUG("  prop.propagateM " << cache.m_extrapolationCache);
     }
-    // propagateM takes intersections by non-const reference to a pointer.
-    // however, it does not modify the pointer, so the parameter
-    // should really be passed just by pointer.
     identifiedParameters_t* intersections = cache.m_identifiedParameters.get();
     Trk::CacheOwnedPtr<Trk::TrackParameters> nextPar = cache.m_ownedPtrs.push(prop.propagateM(
         ctx, *currPar, cache.m_navigSurfs, dir, m_fieldProperties, particle,

@@ -191,7 +191,7 @@ public:
     const MagneticFieldProperties&,
     ParticleHypothesis,
     std::vector<unsigned int>&,
-    std::vector<const Trk::TrackStateOnSurface*>*&,
+    std::vector<const Trk::TrackStateOnSurface*>*,
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*,
     double&,
     bool,

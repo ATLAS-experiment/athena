@@ -109,7 +109,7 @@ class ExtrapolationCache;
    For propagation using Runge Kutta method we use global coordinate, direction,
    inverse momentum and Jacobian of transformation. All this parameters we save
    in array P[42].
-   /dL0    /dL1    /dPhi   /dThe   /dCM
+                     /dL0    /dL1    /dPhi   /dThe   /dCM
    X  ->P[0]  dX /   P[ 7]   P[14]   P[21]   P[28]   P[35]
    Y  ->P[1]  dY /   P[ 8]   P[15]   P[22]   P[29]   P[36]
    Z  ->P[2]  dZ /   P[ 9]   P[16]   P[23]   P[30]   P[37]
@@ -241,7 +241,7 @@ public:
     const MagneticFieldProperties& magneticFieldProperties,
     ParticleHypothesis particle,
     std::vector<unsigned int>& solutions,
-    std::vector<const Trk::TrackStateOnSurface*>*& matstates,
+    std::vector<const Trk::TrackStateOnSurface*>* matstates,
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*
       intersections,
     double& path,
