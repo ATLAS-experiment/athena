@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -35,7 +35,7 @@ protected:
                               const IDC_Container *signalContainer,
                               IDC_Container *outputContainer) const
   {
-    return overlayContainerBase(bkgContainer, signalContainer, outputContainer, false);
+    return overlayContainerImpl<false>(bkgContainer, signalContainer, outputContainer);
   }
 
   template <class IDC_Container>
@@ -43,15 +43,14 @@ protected:
                                       const IDC_Container *signalContainer,
                                       IDC_Container *outputContainer) const
   {
-    return overlayContainerBase(bkgContainer, signalContainer, outputContainer, true);
+    return overlayContainerImpl<true>(bkgContainer, signalContainer, outputContainer);
   }
 
 private:
-  template <class IDC_Container>
-  StatusCode overlayContainerBase(const IDC_Container *bkgContainer,
+  template <bool isMultiHitCollection, class IDC_Container>
+  StatusCode overlayContainerImpl(const IDC_Container *bkgContainer,
                                   const IDC_Container *signalContainer,
-                                  IDC_Container *outputContainer,
-                                  bool isMultiHitCollection) const;
+                                  IDC_Container *outputContainer) const;
 
   template <class Collection>
   std::unique_ptr<Collection> copyCollection(const IdentifierHash &hashId,

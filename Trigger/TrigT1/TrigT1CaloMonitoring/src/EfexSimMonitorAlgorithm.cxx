@@ -50,7 +50,15 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
     if(!m_eFexTowerContainerKey.empty()) {
         SG::ReadHandle<xAOD::eFexTowerContainer> towers{m_eFexTowerContainerKey, ctx};
         if(towers.isValid() && !towers->empty()) {
-            fexReadout = 1;
+            // check towers aren't all in error ... if they are
+            // this is a debug readout event not a fexReadout event
+            size_t badTowers=0;
+            for(auto eFexTower : *towers) {
+                if(eFexTower->em_status()||eFexTower->had_status()) badTowers++;
+            }
+            if(badTowers != towers->size()) {
+                fexReadout = 1;
+            }
         }
     }
     auto IsDataTowers = Monitored::Scalar<bool>("IsDataTowers",fexReadout==1);
