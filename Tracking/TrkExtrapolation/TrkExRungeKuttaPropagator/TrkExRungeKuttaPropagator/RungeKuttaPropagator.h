@@ -93,10 +93,10 @@ class PatternTrackParameters;
    direction, inverse momentum and Jacobian of transformation. All these
    parameters we save in an array P[42]
 
-   /dL0    /dL1    /dPhi   /dThe   /dCM
-   X  ->P[0]  dX /   P[ 7]   P[14]   P[21]   P[28]   P[35]
-   Y  ->P[1]  dY /   P[ 8]   P[15]   P[22]   P[29]   P[36]
-   Z  ->P[2]  dZ /   P[ 9]   P[16]   P[23]   P[30]   P[37]
+                     /dL0    /dL1    /dPhi   /dThe   /dCM
+   X  ->P[0]  dX/    P[ 7]   P[14]   P[21]   P[28]   P[35]
+   Y  ->P[1]  dY/    P[ 8]   P[15]   P[22]   P[29]   P[36]
+   Z  ->P[2]  dZ/    P[ 9]   P[16]   P[23]   P[30]   P[37]
    Ax ->P[3]  dAx/   P[10]   P[17]   P[24]   P[31]   P[38]
    Ay ->P[4]  dAy/   P[11]   P[18]   P[25]   P[32]   P[39]
    Az ->P[5]  dAz/   P[12]   P[19]   P[26]   P[33]   P[40]
@@ -330,7 +330,7 @@ public:
     const MagneticFieldProperties&,
     ParticleHypothesis,
     std::vector<unsigned int>&,
-    std::vector<const Trk::TrackStateOnSurface*>*&,
+    std::vector<const Trk::TrackStateOnSurface*>*,
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*,
     double&,
     bool,

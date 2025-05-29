@@ -132,7 +132,7 @@ public:
     const MagneticFieldProperties& mprop,
     ParticleHypothesis particle,
     std::vector<unsigned int>& solutions,
-    std::vector<const Trk::TrackStateOnSurface*>*& matstates,
+    std::vector<const Trk::TrackStateOnSurface*>* matstates,
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*
       intersections,
     double& path,

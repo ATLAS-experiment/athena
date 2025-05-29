@@ -1415,7 +1415,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateM(
     const EventContext& ctx, const Trk::TrackParameters& trackParameters,
     std::vector<DestSurf>& targetSurfaces, Trk::PropDirection propagationDirection,
     const Trk::MagneticFieldProperties& magneticFieldProperties, ParticleHypothesis particle,
-    std::vector<unsigned int>& solutions, std::vector<const Trk::TrackStateOnSurface*>*& matstates,
+    std::vector<unsigned int>& solutions, std::vector<const Trk::TrackStateOnSurface*>* matstates,
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>* intersections, double& path,
     bool usePathLimit, bool returnCurv, const Trk::TrackingVolume* tVol,
     Trk::ExtrapolationCache* extrapCache) const {
