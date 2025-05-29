@@ -10,7 +10,7 @@ def setupProfile(flags, scaleTaskLength=1):
 
   return [
     {'run':488000, 'lb':1, 'starttstamp':1730250060, 'evts':_evts(2), 'mu':0.5},
-    {'run':488000, 'lb':2, 'starttstamp':1730250120, 'evts':_evts(26), 'mu':1.5},
+    {'run':488000, 'lb':2, 'starttstamp':1730250120, 'evts':_evts(6), 'mu':1.5},
     {'run':488000, 'lb':3, 'starttstamp':1730250180, 'evts':_evts(120), 'mu':2.5},
     {'run':488000, 'lb':4, 'starttstamp':1730250240, 'evts':_evts(243), 'mu':3.5},
     {'run':488000, 'lb':5, 'starttstamp':1730250300, 'evts':_evts(446), 'mu':4.5},
