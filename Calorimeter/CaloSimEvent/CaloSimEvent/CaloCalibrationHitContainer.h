@@ -16,7 +16,6 @@
 #ifndef CaloSimEvent_CaloCalibrationHitContainer_h
 #define CaloSimEvent_CaloCalibrationHitContainer_h
 
-#include <type_traits>
 #include "HitManagement/AthenaHitsVector.h"
 #include "CaloSimEvent/CaloCalibrationHit.h"
 
@@ -38,10 +37,6 @@ public:
   operator std::string () const;
 
 };
-
-static_assert(std::is_standard_layout_v<CaloCalibrationHitContainer>,
-              "CaloCalibrationHitContainer must be standard layout class to guarantee "
-              "empty base class optimization");
 
 CLASS_DEF (CaloCalibrationHitContainer, 1312841250 , 1 )
 

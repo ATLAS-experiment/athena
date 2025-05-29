@@ -61,7 +61,7 @@ class AtlasHitsVector : public HitsVectorBase {
     m_hitvector.reserve(mySize);
   }
 
-  ~AtlasHitsVector () =default;
+  ~AtlasHitsVector() override = default;
 
   void Clear()
   {
