@@ -635,6 +635,7 @@ Trk::Extrapolator::extrapolateToNextActiveLayerMImpl(
   MaterialUpdateMode matupmode) const
 {
   Cache cache{};
+  cache.m_cacheLastMatLayer = true;
   ++cache.m_methodSequence;
   ATH_MSG_DEBUG("M-[" << cache.m_methodSequence << "] extrapolateToNextActiveLayerM(...) ");
   // Material effect updator cache
@@ -1539,7 +1540,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                 nullptr, std::move(cvlTP), std::move(mefot)));
             }
             //
-            if (m_cacheLastMatLayer) {
+            if (cache.m_cacheLastMatLayer) {
               cache.m_lastMaterialLayer = nextLayer;
             }
             if (!destSurf && nextLayer->layerType() > 0) {
@@ -4054,9 +4055,6 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
   }
 
   const bool resolveActive = true;
-  if (cache.m_lastMaterialLayer && !cache.m_lastMaterialLayer->isOnLayer(parm->position())) {
-    cache.m_lastMaterialLayer = nullptr;
-  }
   if (!cache.m_highestVolume) {
     cache.m_highestVolume = cache.m_trackingGeometry->highestTrackingVolume();
   }
@@ -4531,15 +4529,8 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         const unsigned int index = solutions[iSol] - iDest - cache.m_staticBoundaries.size();
         const Trk::Layer* nextLayer = cache.m_navigLays[index].second;
         // material update ?
-        // bool matUp = nextLayer->layerMaterialProperties() && m_includeMaterialEffects &&
-        // nextLayer->isOnLayer(nextPar->position());
         bool matUp = nextLayer->fullUpdateMaterialProperties(*nextPar) &&
                      m_includeMaterialEffects && nextLayer->isOnLayer(nextPar->position());
-        // identical to last material layer ?
-        if (matUp && nextLayer == cache.m_lastMaterialLayer &&
-            nextLayer->surfaceRepresentation().type() != Trk::SurfaceType::Cylinder) {
-          matUp = false;
-        }
 
         // material update: pre-update
         const IMaterialEffectsUpdator* currentUpdator =
@@ -4590,8 +4581,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
                     matupmod));
               }
               if (!nextPar) {
-                ATH_MSG_VERBOSE("postUpdate failed for input parameters:"
-                                << nextPar->position() << "," << nextPar->momentum());
+                ATH_MSG_VERBOSE("postUpdate failed");
                 ATH_MSG_VERBOSE("  [+] Update may have killed track - return.");
                 cache.m_parametersAtBoundary.resetBoundaryInformation();
                 return {};
@@ -4616,9 +4606,6 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
               ATH_MSG_VERBOSE(" Update energy loss:" << nextPar->momentum().mag() - pIn
                                                      << "at position:" << nextPar->position());
 
-          }
-          if (m_cacheLastMatLayer) {
-            cache.m_lastMaterialLayer = nextLayer;
           }
         }
         currPar = nextPar;

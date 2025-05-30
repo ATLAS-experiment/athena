@@ -355,9 +355,7 @@ private:
                                  //!< statistics
   bool m_navigationBreakDetails; //!< steer the output for the navigation
                                  //!< break details
-
   bool m_materialEffectsOnTrackValidation; //!< mat effects on track validation
-  //   bool m_cacheLastMatLayer {};   // steering of the material layer cache
   unsigned int m_maxNavigSurf;
   unsigned int m_maxNavigVol;
 
@@ -463,17 +461,6 @@ TimedExtrapolator::throwIntoGarbageBin(Trk::TimedExtrapolator::Cache& cache,
     cache.m_garbageBin[pars] = true;
 }
 
-/*
-inline unsigned int TimedExtrapolator::geoIDToDetOrder(Trk::GeometrySignature
-geoid) const
-{
-  if ( geoid == Trk::ID ) return 0;
-  else if ( geoid == Trk::Calo ) return 1;
-  else if ( geoid == Trk::MS ) return 2;
-
-  return 0;
-}
-*/
 
 } // end of namespace
 

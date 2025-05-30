@@ -89,7 +89,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   m_navigationStatistics(false),
   m_navigationBreakDetails(false),
   m_materialEffectsOnTrackValidation(false),
-  //  m_cacheLastMatLayer(false),
   m_maxNavigSurf{},
   m_maxNavigVol{},
   m_fastField(false) {
@@ -109,7 +108,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   declareProperty("MultipleScatteringUpdators", m_msupdators);
   declareProperty("EnergyLossUpdater", m_elossupdater);
   declareProperty("SubMEUpdators", m_updatNames);
-  //  declareProperty("CacheLastMaterialLayer", m_cacheLastMatLayer);
   // general behavior navigation
   declareProperty("Navigator", m_navigator);
   declareProperty("UseDenseVolumeDescription", m_useDenseVolumeDescription);
@@ -374,9 +372,6 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
     return parm.uniqueClone();
   }
 
-  // if (cache.m_lastMaterialLayer && !cache.m_lastMaterialLayer->isOnLayer(parm.position())) {
-  //   cache.m_lastMaterialLayer = nullptr;
-  // }
   if (!cache.m_highestVolume) {
     cache.m_highestVolume = m_navigator->highestVolume(ctx);
   }
@@ -965,12 +960,6 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         // nextLayer->isOnLayer(nextPar->position());
         bool matUp = nextLayer->fullUpdateMaterialProperties(*nextPar) && m_includeMaterialEffects &&
                      nextLayer->isOnLayer(nextPar->position());
-        // identical to last material layer ?
-        // if (matUp && nextLayer == cache.m_lastMaterialLayer &&
-        //     nextLayer->surfaceRepresentation().type() != Trk::Surface::Cylinder) {
-        //   matUp = false;
-        // }
-
         // material update
         const ITimedMatEffUpdator *currentUpdator = subMaterialEffectsUpdator(*cache.m_currentStatic);
         if (matUp) {
@@ -2054,16 +2043,6 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
       const Trk::Layer *nextLayer = cache.m_navigLays[index].second;
 
       bool matUp = nextLayer->layerMaterialProperties()->fullMaterial(nextPos) && m_includeMaterialEffects;
-
-      // if (!matUp && !nextLayer->layerMaterialProperties()->fullMaterial(nextPos) )
-      //  ATH_MSG_WARNING("layer without material:"<< nextLayer->layerIndex());
-
-      // identical to the last material layer ?
-
-      // if (matUp && nextLayer == cache.m_lastMaterialLayer &&
-      //     nextLayer->surfaceRepresentation().type() != Trk::Surface::Cylinder) {
-      //   matUp = false;
-      // }
 
       // material update
       if (matUp && m_includeMaterialEffects) {

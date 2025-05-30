@@ -651,8 +651,6 @@ private:
     "extended layer search"};
   BooleanProperty m_resolveActive{this, "ResolveMuonStation", false};
   BooleanProperty m_resolveMultilayers{this, "ResolveMultilayers", true};
-  BooleanProperty m_cacheLastMatLayer{this, "CacheLastMaterialLayer", false,
-    "steering of the material layer cache"};
   //!< number of sub valid propagators in the m_subPropagators array
   //if we have no valid subpropagatos it will be set to an INVALID value
   unsigned int m_numOfValidPropagators;
