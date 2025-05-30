@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -35,9 +35,9 @@ InDetTestPixelLayerTool::InDetTestPixelLayerTool(const std::string& name,
   , m_pixelId(nullptr)
 {
   declareInterface<IInDetTestPixelLayerTool>(this);
-  declareProperty("CheckActiveAreas", m_checkActiveAreas = false);
-  declareProperty("CheckDeadRegions", m_checkDeadRegions = false);
-  declareProperty("CheckDisabledFEs", m_checkDisabledFEs = false);
+  declareProperty("CheckActiveAreas", m_checkActiveAreas = true);
+  declareProperty("CheckDeadRegions", m_checkDeadRegions = true);
+  declareProperty("CheckDisabledFEs", m_checkDisabledFEs = true);
   declareProperty("PhiRegionSize", m_phiRegionSize = 3.);
   declareProperty("EtaRegionSize", m_etaRegionSize = 3.);
   declareProperty("GoodFracCut", m_goodFracCut = 0.5);
