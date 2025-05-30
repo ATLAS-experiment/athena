@@ -29,7 +29,7 @@ namespace columnar
   struct ColumnarModeArray
   {
     /// Whether this is the xAOD mode.
-    static constexpr bool isXAOD = true;
+    static constexpr bool isXAOD = false;
 
     /// Whether for this columnar mode decorators that replace the
     /// original column will also refer to the input column.

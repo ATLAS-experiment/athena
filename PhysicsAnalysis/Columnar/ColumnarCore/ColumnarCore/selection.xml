@@ -1,6 +1,6 @@
 <lcgdict>
 
-  <namespace name="col" />
+  <namespace name="columnar" />
 
   <enum name="columnar::ContainerId" />
 

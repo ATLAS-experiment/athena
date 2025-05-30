@@ -17,6 +17,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
+#include <ColumnarCore/VectorVectorColumn.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
 #include <ColumnarCore/ParticleDef.h>
 
@@ -179,6 +180,68 @@ namespace columnar
     EXPECT_EQ (eventRetypeAccessor(id1)[1],2);
     EXPECT_EQ (eventRetypeAccessor(id2)[0],3);
     EXPECT_EQ (eventRetypeAccessor(id2)[2],5);
+  }
+
+
+  TEST (AccessorTest, vectorVectorEventAccessor)
+  {
+    MyTool tool;
+    MyAccessor<std::vector<std::vector<uint32_t>>,ContainerId::eventInfo> eventAccessor {tool, "var1"};
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 4);
+      EXPECT_EQ (columns[1].name, "EventInfo.var1.data");
+      EXPECT_EQ (columns[1].index, 0);
+      EXPECT_EQ (columns[1].type, &typeid (uint32_t));
+      EXPECT_EQ (columns[1].accessMode, ColumnAccessMode::input);
+      EXPECT_EQ (columns[1].offsetName, "EventInfo.var1.innerOffset");
+      EXPECT_EQ (columns[2].name, "EventInfo.var1.innerOffset");
+      EXPECT_EQ (columns[2].index, 0);
+      EXPECT_EQ (columns[2].type, &typeid (ColumnarOffsetType));
+      EXPECT_EQ (columns[2].accessMode, ColumnAccessMode::input);
+      EXPECT_EQ (columns[2].offsetName, "EventInfo.var1.outerOffset");
+      EXPECT_EQ (columns[3].name, "EventInfo.var1.outerOffset");
+      EXPECT_EQ (columns[3].index, 0);
+      EXPECT_EQ (columns[3].type, &typeid (ColumnarOffsetType));
+      EXPECT_EQ (columns[3].accessMode, ColumnAccessMode::input);
+      EXPECT_EQ (columns[3].offsetName, numberOfEventsName);
+    }
+    tool.setColumnIndex ("EventInfo.var1.outerOffset", 1);
+    tool.setColumnIndex ("EventInfo.var1.innerOffset", 2);
+    tool.setColumnIndex ("EventInfo.var1.data", 3);
+    std::vector<void*> data (4, nullptr);
+    std::vector<ColumnarOffsetType> var1OuterOffsets = {0, 0, 2, 5};
+    std::vector<ColumnarOffsetType> var1InnerOffsets = {0, 1, 3, 6, 7, 10};
+    ASSERT_EQ (var1OuterOffsets.back(), var1InnerOffsets.size()-1);
+    std::vector<uint32_t> var1Data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    ASSERT_EQ (var1Data.size(), var1InnerOffsets.back());
+    data[1] = var1OuterOffsets.data();
+    data[2] = var1InnerOffsets.data();
+    data[3] = var1Data.data();
+    MyId<ContainerId::eventInfo> id0 {data.data(), 0};
+    MyId<ContainerId::eventInfo> id1 {data.data(), 1};
+    MyId<ContainerId::eventInfo> id2 {data.data(), 2};
+    EXPECT_EQ (eventAccessor (id0).size(), 0);
+    EXPECT_EQ (eventAccessor (id1).size(), 2);
+    EXPECT_EQ (eventAccessor (id2).size(), 3);
+    EXPECT_ANY_THROW ((void) eventAccessor (id0)[0]);
+    EXPECT_EQ (eventAccessor (id1)[0].size(), 1);
+    EXPECT_EQ (eventAccessor (id1)[1].size(), 2);
+    EXPECT_ANY_THROW ((void) eventAccessor (id1)[2]);
+    EXPECT_EQ (eventAccessor (id2)[0].size(), 3);
+    EXPECT_EQ (eventAccessor (id2)[1].size(), 1);
+    EXPECT_EQ (eventAccessor (id2)[2].size(), 3);
+    EXPECT_ANY_THROW ((void) eventAccessor (id2)[3]);
+    EXPECT_EQ (eventAccessor(id1)[0][0], 0);
+    EXPECT_EQ (eventAccessor(id1)[1][0], 1);
+    EXPECT_EQ (eventAccessor(id1)[1][1], 2);
+    EXPECT_EQ (eventAccessor(id2)[0][0], 3);
+    EXPECT_EQ (eventAccessor(id2)[0][1], 4);
+    EXPECT_EQ (eventAccessor(id2)[0][2], 5);
+    EXPECT_EQ (eventAccessor(id2)[1][0], 6);
+    EXPECT_EQ (eventAccessor(id2)[2][0], 7);
+    EXPECT_EQ (eventAccessor(id2)[2][1], 8);
+    EXPECT_EQ (eventAccessor(id2)[2][2], 9);
   }
 }
 

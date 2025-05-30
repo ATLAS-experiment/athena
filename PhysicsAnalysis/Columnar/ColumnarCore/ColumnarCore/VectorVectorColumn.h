@@ -71,9 +71,9 @@ namespace columnar
       auto *outerOffset = static_cast<const ColumnarOffsetType*>(id.getData()[m_outerOffsetIndex]);
       auto *innerOffset = static_cast<const ColumnarOffsetType*>(id.getData()[m_innerOffsetIndex]);
       auto *data = static_cast<const ElementType*>(id.getData()[m_dataIndex]);
-      return detail::VectorConvertView ([innerOffset,data] (const ColumnarOffsetType& index) noexcept {
+      return detail::VectorConvertView ([data] (const ColumnarOffsetType& index) noexcept {
           const ColumnarOffsetType& endIndex = (&index)[1];
-          return std::span<const ElementType> (data + innerOffset[index], data + innerOffset[endIndex]);},
+          return std::span<const ElementType> (data + index, data + endIndex);},
         std::span<const ColumnarOffsetType> (innerOffset + outerOffset[id.getIndex()], innerOffset + outerOffset[id.getIndex()+1]));
     }
 
