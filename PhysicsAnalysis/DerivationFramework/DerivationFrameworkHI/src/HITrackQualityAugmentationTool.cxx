@@ -1,12 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkHI/HITrackQualityAugmentationTool.h"
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include <vector>
-#include <string>
 
 namespace DerivationFramework {
 
@@ -15,21 +11,30 @@ HITrackQualityAugmentationTool::HITrackQualityAugmentationTool(const std::string
       const IInterface* p) :
     base_class(t,n,p)
   {
-    declareProperty("TrackSelectionTool_pp"      ,m_trkSelTool_pp      );
-    declareProperty("TrackSelectionTool_hi_loose",m_trkSelTool_hi_loose);
-    declareProperty("TrackSelectionTool_hi_tight",m_trkSelTool_hi_tight);
   }
 
+StatusCode HITrackQualityAugmentationTool::initialize()
+{
+  ATH_CHECK(m_trackParticlesName.initialize());
+  ATH_CHECK(m_vertexContainerName.initialize());
+  m_decorator = m_trackParticlesName.key() + "." + m_decorator.key();
+  ATH_CHECK(m_decorator.initialize());
+
+  CHECK(m_trkSelTool_pp.retrieve());
+  CHECK(m_trkSelTool_hi_loose.retrieve());
+  CHECK(m_trkSelTool_hi_tight.retrieve());
+
+  return StatusCode::SUCCESS;
+}
 
  
 StatusCode HITrackQualityAugmentationTool::addBranches() const{
-      // Set up the decorators
-      SG::AuxElement::Decorator<unsigned short> decorator("TrackQuality");
- 
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+
       // Get Primary vertex
-      const xAOD::VertexContainer* vertices =  evtStore()->retrieve< const xAOD::VertexContainer >("PrimaryVertices");
-      if(!vertices) {
-        ATH_MSG_ERROR ("Couldn't retrieve VertexContainer with key PrimaryVertices");
+      SG::ReadHandle<xAOD::VertexContainer> vertices{m_vertexContainerName, ctx};
+      if(!vertices.isValid()) {
+        ATH_MSG_ERROR ("Couldn't retrieve VertexContainer with key " << m_vertexContainerName.key());
         return StatusCode::FAILURE;
       }
       const xAOD::Vertex* pv(0);
@@ -39,24 +44,19 @@ StatusCode HITrackQualityAugmentationTool::addBranches() const{
           break;
         }
       }
-
-      //commented out, not used and generates compiler warning
-      //float z_vtx=0;
-      //if(pv) z_vtx=pv->z();
-
  
       // Get the track container
-      const xAOD::TrackParticleContainer* tracks = evtStore()->retrieve< const xAOD::TrackParticleContainer >("InDetTrackParticles");
-      if(!tracks) {
-        ATH_MSG_ERROR ("Couldn't retrieve TrackParticleContainer with key InDetTrackParticles");
+      SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_trackParticlesName, ctx};
+      if(!tracks.isValid()) {
+        ATH_MSG_ERROR ("Couldn't retrieve TrackParticleContainer with key " << m_trackParticlesName.key());
         return StatusCode::FAILURE;
       }
-
+     
+      // Decorator
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned short> decorator{m_decorator, ctx };
  
       // Get track quality this is what we're adding
       for(const auto* track:*tracks) {
-      //for (xAOD::TrackParticleContainer::const_iterator trackIt=tracks->begin(); trackIt!=tracks->end(); ++trackIt)
-        //std::cout<<GetTrackQuality(*trackIt,z_vtx)<<std::endl;
         if(pv) decorator(*track) =GetTrackQualityNew(track,pv);
         else   decorator(*track) = 0;
       }
