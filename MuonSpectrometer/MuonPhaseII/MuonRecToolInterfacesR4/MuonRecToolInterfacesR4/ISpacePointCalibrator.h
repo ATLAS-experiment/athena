@@ -96,10 +96,10 @@ namespace MuonR4{
               *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
               *  @param link: Sourcelink to the actual measurement to calibrate
               *  @param state: Proxy to the track-state to which the calibrated constants are written */
-            virtual void calibrate(const Acts::GeometryContext& geoctx,
-                                   const Acts::CalibrationContext& cctx,
-                                   const Acts::SourceLink& link,
-                                   ActsTrk::MutableTrackContainer::TrackStateProxy state) const = 0;
+            virtual void calibrateSourceLink(const Acts::GeometryContext& geoctx,
+                                             const Acts::CalibrationContext& cctx,
+                                             const Acts::SourceLink& link,
+                                             ActsTrk::MutableTrackStateBackend::TrackStateProxy state) const = 0;
     };
 
 }
