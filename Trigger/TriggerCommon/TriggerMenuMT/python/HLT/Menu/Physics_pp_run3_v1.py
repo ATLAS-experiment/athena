@@ -401,10 +401,12 @@ def setupMenu():
         ChainProp(name='HLT_e5_dnntight_e9_etcut_1invmAB5_L1JPSI-1M5-eEM9', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM5','eEM9'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group+['RATE:CPS_JPSI-1M5-eEM9'], monGroups=['egammaMon:shifter_topo']),
         ChainProp(name='HLT_e24_dnnloose_2e12_dnnloose_L1eEM24L_3eEM12L',l1SeedThresholds=['eEM24L','eEM12L'], groups=PrimaryPhIGroup+MultiElectronGroup), 
         ChainProp(name='HLT_e26_dnntight_ivarloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:t0_tp']),
-ChainProp(name='HLT_e60_dnnmedium_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
-ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
+        ChainProp(name='HLT_e60_dnnmedium_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
+        ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
 
-
+        #ATR-31145
+        ChainProp(name='HLT_e20_lhtight_ivarloose_L1ZAFB-04DPHIM-eEM18M', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup+Topo3Group),
+        ChainProp(name='HLT_e20_lhtight_ivarloose_L1eEM18M_jEM25', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup),
 
         # ATR-27373
         ChainProp(name='HLT_e28_dnntight_ivarloose_L1eEM28M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:t0_tp']),
@@ -455,10 +457,6 @@ ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectr
         
         #---------- primary 3e
         ChainProp(name='HLT_e24_lhvloose_2e12_lhvloose_L1eEM24L_3eEM12L',l1SeedThresholds=['eEM24L','eEM12L'], groups=PrimaryPhIGroup+MultiElectronGroup),
-        #--------- primary special
-        ChainProp(name='HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup+Topo3Group),
-        # ATR-30666
-        ChainProp(name='HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHIM-eEM18M', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup+Topo3Group),
 
         # ATR-25512
         ChainProp(name='HLT_e20_lhtight_ivarloose_L12eEM9', l1SeedThresholds=['eEM9'], groups=SupportPhIGroup+SingleElectronGroup), # Phase-1 ATR-27156
