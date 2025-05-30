@@ -69,12 +69,15 @@ def FTAG_XBBCfg(flags, skimmingTools=None):
                                 StreamName = 'StreamDAOD_'+FTAG_XBB_name_tag, 
                                 TriggerListsHelper = FTAG_XBBTriggerListsHelper))
 
+    gn3x_extra_variables = ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GN3XV00_phtautauhad.GN3XV00_phbb.GN3XV00_phcc.GN3XV00_ptop.GN3XV00_pqcdbb.GN3XV00_pqcdbx.GN3XV00_pqcdcx.GN3XV00_pqcdll.GN3XV00_pWqq"]
+    
     # PHYS content
     from DerivationFrameworkPhys.PHYS import PHYSCoreCfg
     acc.merge(PHYSCoreCfg(flags, 
         FTAG_XBB_name_tag,
         StreamName = 'StreamDAOD_'+FTAG_XBB_name_tag,
         TriggerListsHelper = FTAG_XBBTriggerListsHelper,
+        addExtraVariables = gn3x_extra_variables
         ))
 
     return acc

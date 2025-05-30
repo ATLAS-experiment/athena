@@ -59,7 +59,7 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
     return acc
 
 
-def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None):
+def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None, addExtraVariables=None):
     
     if TriggerListsHelper is None:
         from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
@@ -141,6 +141,10 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+
+    if addExtraVariables:
+        PHYSSlimmingHelper.ExtraVariables += addExtraVariables
+
     if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
