@@ -34,6 +34,7 @@
 #include "nlohmann/json.hpp"
 
 #include "CrestFunctions.h"
+#include "CoralCrestManager.h"
 
 class MsgStream;
 class IOVDbConn;
@@ -328,10 +329,9 @@ private:
   const std::string m_source;
   const std::string m_crestServer;
   const std::string m_crestTag;
-  std::string m_crest_tag = "";
-  nlohmann::json m_tag_info = nullptr;
 
   std::optional<IOVDbNamespace::CrestFunctions> m_cfunctions;
+  std::optional<CoralCrestManager> m_crest_mng;
 };
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}

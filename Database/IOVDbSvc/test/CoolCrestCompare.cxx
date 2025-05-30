@@ -117,8 +117,9 @@ public:
     if(m_crest_tag.size()==0){
       std::cerr<<"ERROR in Crest. No folder:\""<<m_folder<<"\" in Global tag:\""<<m_gTagCrest<<"\""<<std::endl;
       exit(1);
-    } 
-    m_crest_folder_desc=cfunctions.folderDescriptionForTag(m_crest_tag);
+    }
+    CoralCrestManager mg(m_crest_str,m_crest_tag); 
+    m_crest_folder_desc=mg.getFolderDescription();
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection("", true, m_log);
     IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",false,m_crest_str,m_crest_tag,true);
