@@ -50,22 +50,6 @@ namespace IOVDbNamespace{
     std::string 
     getPayloadForHash(const std::string & hash);
 
-    std::string 
-    folderDescriptionForTag(const std::string & tag);
-
-    std::string 
-    extractDescriptionFromJson(const std::string & jsonReply);
-
-    nlohmann::json getTagInfo(const std::string & tag);
-
-    nlohmann::json getTagProperties(const std::string & tag);
-
-    std::string
-    getTagInfoElement(nlohmann::json tag_info, const std::string & key);
-
-    std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
-    extractChannelListFromString(const std::string & chanString);
-
     std::vector<uint64_t>
     getIovGroups(const std::string & tag);
 

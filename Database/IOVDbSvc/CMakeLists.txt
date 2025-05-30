@@ -114,7 +114,7 @@ atlas_add_test( IOVDbFolder_test
    src/IOVDbFolder.cxx src/IovStore.cxx
    src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
    src/Cool2Json.cxx src/Base64Codec.cxx src/Json2Cool.cxx 
-   src/BasicFolder.cxx src/CrestFunctions.cxx src/IOVDbJsonStringFunctions.cxx
+   src/BasicFolder.cxx src/CrestFunctions.cxx src/IOVDbJsonStringFunctions.cxx src/CoralCrestManager.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    ${ROOT_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}

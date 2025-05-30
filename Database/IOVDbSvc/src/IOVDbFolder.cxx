@@ -109,8 +109,10 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_cachepar = folderprop.cache();
   // check for <noover> - disables using tag override read from input file
   m_notagoverride=folderprop.noTagOverride();
-  if (m_source == "CREST")
+  if (m_source == "CREST"){
     m_cfunctions.emplace(IOVDbNamespace::CrestFunctions(m_crestServer));	  
+    m_crest_mng.emplace(CoralCrestManager(crestServer,m_crestTag));
+  }
   if (m_notagoverride) ATH_MSG_INFO( "Inputfile tag override disabled for " << m_foldername );
 
   // channel selection from 'channelSelection' property
@@ -240,13 +242,8 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   std::string strCrestNodeDesc;
   if (m_source == "CREST"){
     ATH_MSG_INFO("Download tag would be: "<<m_crestTag);
-
-    if (m_crest_tag != m_crestTag){
-      m_crest_tag = m_crestTag;
-      m_tag_info = m_cfunctions.value().getTagInfo(m_crestTag); 
-    }
-    strCrestNodeDesc = m_cfunctions.value().folderDescriptionForTag(m_crestTag);
-    vectorPayload = (strCrestNodeDesc.find("CondAttrListVec") != std::string::npos);
+    m_crest_mng.value().loadTagInfo();
+    vectorPayload = m_crest_mng.value().isVectorPayload();
   }
   else {
     vectorPayload = (m_foldertype ==CoraCool) or (m_foldertype == CoolVector);
@@ -428,7 +425,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     auto [since,until] = m_iovs.getCacheBounds();
     std::vector<BasicFolder> crestObjs;
     try {
-      crestObjs = fetchCrestObjects(since,until,vectorPayload,vkey,strCrestNodeDesc);
+      crestObjs = fetchCrestObjects(since,until,vectorPayload,vkey,m_crest_mng.value().getFolderDescription());
     }
     catch(std::exception&) {
       return false;
@@ -899,11 +896,7 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   p_tagInfoMgr = tagInfoMgr;
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-      if (m_crest_tag != m_crestTag){
-        m_crest_tag = m_crestTag;
-        m_tag_info = m_cfunctions.value().getTagInfo(m_crestTag); 
-      }
-      m_folderDescription = m_cfunctions.value().folderDescriptionForTag(m_crestTag);
+      m_folderDescription = m_crest_mng.value().getFolderDescription();	    
     } else {
       //folder desc from db
       std::tie(m_multiversion, m_folderDescription) = IOVDbNamespace::folderMetadata(m_conn, m_foldername);
@@ -926,59 +919,10 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   // setup channel list and folder type
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-        const std::string & payloadSpec = m_cfunctions.value().getTagInfoElement(m_tag_info,"payload_spec");   
-        std::string chanList = m_cfunctions.value().getTagInfoElement(m_tag_info,"channel_list"); 
-        std::tie(m_channums, m_channames) = m_cfunctions.value().extractChannelListFromString(chanList); 
+	std::tie(m_channums, m_channames) = m_crest_mng.value().getChannelList();
 	
         //determine foldertype from the description, the spec and the number of channels
-        m_foldertype = IOVDbNamespace::determineFolderType(m_folderDescription, payloadSpec, m_channums);
- 
-        if (m_crestToFile){
-          int n_size = m_channums.size();
-	  nlohmann::json chan_list = nlohmann::json::array();
-          for (int i = 0; i < n_size; i++) {
-
-            nlohmann::json elem;
-	    std::string key = std::to_string(m_channums[i]);
-            elem[key] = m_channames[i];
-            chan_list.push_back(elem);
-          }
-
-          char ch = ':';
-          int colsize = std::count(payloadSpec.begin(), payloadSpec.end(), ch);
-
-	  nlohmann::json tag_meta;
-          tag_meta["tagName"] = m_crestTag;
-          tag_meta["description"] = "";
-          tag_meta["chansize"] = n_size;
-          tag_meta["colsize"] = colsize;
-
-	  nlohmann::json tagInfo;
-          tagInfo["channel_list"] = chan_list;
-          tagInfo["node_description"] = m_folderDescription;
-          tagInfo["payload_spec"] = payloadSpec;
-
-          tag_meta["tagInfo"] = tagInfo.dump();
-
-          std::string crest_work_dir=std::filesystem::current_path();
-          crest_work_dir += "/crest_data";
-          bool crest_rewrite = true;
-
-	  Crest::CrestApiFs crestFSClient = Crest::CrestApiFs(crest_rewrite, crest_work_dir);
-
-          try{
-	    TagMetaDto dto = TagMetaDto();
-	    dto = dto.fromJson(tag_meta);
-            crestFSClient.createTagMeta(dto);
-	    
-            ATH_MSG_INFO("Tag meta info for " << m_crestTag << " saved to disk.");
-            ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
-          }
-          catch (const std::exception& e) {
-            ATH_MSG_WARNING("Tag meta info saving for tag " << m_crestTag << " failed: " << e.what());
-          }
-	} // m_crestToFile
-
+        m_foldertype = m_crest_mng.value().determineFolderType(); 
     } else {
       // data being read from COOL
       auto fldPtr=m_conn->getFolderPtr<cool::IFolderPtr>(m_foldername);
@@ -1257,110 +1201,7 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
 					                , cool::ValidityKey vkey
 							, const std::string& nodeDesc)
 {
-
-  std::string crestPayloadType="crest-json-single-iov";
-  nlohmann::json tagProperties = m_cfunctions.value().getTagProperties(m_crestTag);
-  if(tagProperties!=nullptr
-     && tagProperties.contains("payloadSpec")) {
-    crestPayloadType=tagProperties["payloadSpec"].get<std::string>();
-  }
-
-  if(crestPayloadType.compare("crest-json-multi-iov")==0) {
-/*
-   try {
-      nlohmann::json multiPayload = nlohmann::json::parse(reply);
-      nlohmann::json jsIovs=multiPayload["obj"];
-      std::vector<IOV2Index> iov2IndexVect;
-      iov2IndexVect.reserve(jsIovs.size());
-      size_t hashInd{0};
-      for(const auto& jsIov : jsIovs.items()) {
-	iov2IndexVect.emplace_back(std::stoull(jsIov.key()),hashInd++);
-      }
-      std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
-		[](const IOV2Index& a, const IOV2Index& b)
-		{
-		  return a.first < b.first;
-		});
-      if(vkey < iov2IndexVect[0].first) {
-	std::string errorMessage{"Load cache failed for "+m_foldername+". No valid IOV retrieved from the payload"};
-	ATH_MSG_FATAL(errorMessage);
-	throw std::runtime_error{errorMessage};
-      }
-
-      uint64_t iov = 0;
-      for(const auto& iovhash : iov2IndexVect) {
-	if(vkey >= iovhash.first) {
-          iov=iovhash.first;
-	  continue;
-	}
-	else {
-	  break;
-	}
-      }
-      if (indIOV>=0){
-        iovHashVect[indIOV].first.first=iov;
-        nlohmann::json payload={};
-        payload["data"]=jsIovs[std::to_string(iov)];
-        reply=payload.dump();
-      } else {
-        ATH_MSG_FATAL("indIOV is negative in IOVDbFolder::dumpFile");
-      }
-    }
-    catch (std::exception & e) {
-      std::string errorMessage = "Failed of parse multi iovs struct of internal iovs from payload for DCS type: " + std::string{e.what()};
-      ATH_MSG_FATAL(errorMessage);
-      throw std::runtime_error{errorMessage};
-    }
-  }
-  ATH_MSG_DEBUG("Found IOV for " << m_foldername << " and VKEY " << vkey
-		<< " " << iovHashVect[indIOV].first);
-
-  if (m_crestToFile and (indIOV>=0)) { //indIOV must be >=0, it's used as a vector index in this block
-    unsigned long long sinceT =  iovHashVect[indIOV].first.first;
-
-    std::string crest_work_dir=std::filesystem::current_path();
-    crest_work_dir += "/crest_data";
-    bool crest_rewrite = true;
-    Crest::CrestClient crestFSClient = Crest::CrestClient(crest_rewrite, crest_work_dir);
-
-    nlohmann::json js =
-    {
-      {"name", m_crestTag}
-    };
-
-    try{
-      crestFSClient.createTag(js);
-      ATH_MSG_INFO("Tag " << m_crestTag << " saved to disk.");
-      ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
-    }
-    catch (const std::exception& e) {
-      ATH_MSG_WARNING("Data saving for tag " << m_crestTag << " failed: " << e.what());
-    }
-
-    try{
-      crestFSClient.storePayloadDump(m_crestTag, sinceT, reply);
-      ATH_MSG_INFO("Data (payload and IOV) saved for tag " << m_crestTag << ".");
-    }
-    catch (const std::exception& e) {
-      ATH_MSG_WARNING("Data (payload and IOV) saving for tag " << m_crestTag<<" failed; " << e.what());
-    }
-  }
-
-  const std::string& specString = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");
-  if (specString.empty()) {
-    std::string errorMessage = "Reading payload spec from "+m_foldername+" failed.";
-*/
-    // Support for this type of payload will be added later
-    std::string errorMessage = m_foldername + ": has multi-iov payload. Folders with multi-iov payloads currently not supported!";
-    ATH_MSG_FATAL(errorMessage);
-    throw std::runtime_error{errorMessage};
-  }
-  const std::string specString = m_cfunctions.value().getTagInfoElement(m_tag_info,"payload_spec");
-  if (specString.empty()) {
-    std::string errorMessage = "Reading payload spec from " + m_foldername + " failed.";
-    ATH_MSG_FATAL(errorMessage);
-    throw std::runtime_error{errorMessage};
-  }
+  const std::string specString = m_crest_mng.value().getPayloadSpec();
 
   std::vector<BasicFolder> retVector;
 
