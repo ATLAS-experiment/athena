@@ -9,6 +9,8 @@
 #define COLUMNAR_TEST_FIXTURES__COLUMNAR_PHYS_LITE_TEST_H
 
 #include <AsgTools/AsgTool.h>
+#include <ColumnarInterfaces/ColumnInfo.h>
+#include <ColumnarInterfaces/IColumnarTool.h>
 
 #include <gtest/gtest.h>
 
@@ -35,7 +37,7 @@ namespace columnar
 
     std::vector<std::shared_ptr<PhysliteTestHelpers::IColumnData>> knownColumns;
     std::vector<std::shared_ptr<PhysliteTestHelpers::IColumnData>> usedColumns;
-    std::unordered_map<std::string,const PhysliteTestHelpers::IColumnData*> sizeColumns;
+    std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*> offsetColumns;
 
     ColumnarPhysLiteTest ();
     ~ColumnarPhysLiteTest ();
