@@ -1522,7 +1522,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_egammaCalibTool.isUserConfigured()) {
       m_egammaCalibTool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/EgammaCalibrationAndSmearingTool");
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
-      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2023_R22_Run2_v1") );
+      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2024_Run3_v0" : "es2023_R22_Run2_v1") );
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
       // allows to bypass (intended) abort from of egamma calibration tool when configured for fastSim
       if (m_eleForceFullSimCalib) {
