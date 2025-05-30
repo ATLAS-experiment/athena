@@ -25,6 +25,8 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 
+#include "GeoModelHelpers/defineWorld.h"
+
 #include <fstream>
 
 GeoModelSvc::GeoModelSvc(const std::string& name,ISvcLocator* svc)
@@ -122,7 +124,7 @@ StatusCode GeoModelSvc::finalize()
 
 StatusCode GeoModelSvc::geoInit()
 {
-  GeoPhysVol* worldPhys{nullptr};
+  PVLink worldPhys{nullptr};
   ServiceHandle<IRDBAccessSvc> rdbAccess("RDBAccessSvc",name());
 
   // Setup the GeoDbTagSvc
@@ -156,8 +158,8 @@ StatusCode GeoModelSvc::geoInit()
       return StatusCode::FAILURE;
     }
     m_sqliteReader = std::make_unique<GeoModelIO::ReadGeoModel>(m_sqliteDbManager.get());
-    GeoVPhysVol* vWorldPhys ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(m_sqliteReader->buildGeoModel());
-    worldPhys = dynamic_cast<GeoPhysVol*>(vWorldPhys);
+    PVConstLink vWorldPhys{m_sqliteReader->buildGeoModel()};
+    worldPhys = const_pointer_cast(vWorldPhys);
     if(!worldPhys) {
       ATH_MSG_FATAL("Having Full Physical Volumes as World Volumes not supported!");
       return StatusCode::FAILURE;
@@ -267,11 +269,7 @@ StatusCode GeoModelSvc::geoInit()
     }
     ATH_CHECK( m_detStore->record(theMaterialManager,"MATERIALS") );
 
-    // Build the world node from which everything else will be suspended
-    const GeoMaterial* air = theMaterialManager->getMaterial("std::Air");  
-    const GeoBox* worldBox = new GeoBox(1000*Gaudi::Units::cm,1000*Gaudi::Units::cm, 1000*Gaudi::Units::cm);
-    const GeoLogVol* worldLog = new GeoLogVol("WorldLog", worldBox, air);
-    worldPhys=new GeoPhysVol(worldLog);
+    worldPhys= createGeoWorld();
   } // End of the GeometryDB-specific part
 
   // Create AtlasExperiment and register it within the transient detector store

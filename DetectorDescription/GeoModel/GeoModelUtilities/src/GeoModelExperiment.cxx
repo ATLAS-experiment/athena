@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -11,7 +11,7 @@
 /**
  ** Constructor(s)
  **/
-GeoModelExperiment::GeoModelExperiment( GeoPhysVol * physVol )
+GeoModelExperiment::GeoModelExperiment( PVLink physVol )
   : m_physVol(physVol) {}
 
 /**
@@ -19,12 +19,12 @@ GeoModelExperiment::GeoModelExperiment( GeoPhysVol * physVol )
  **/
 
 GeoPhysVol * GeoModelExperiment::getPhysVol() {
-  return m_physVol;
+  return dynamic_pointer_cast<GeoPhysVol>(m_physVol);
 }
 
 
 const GeoPhysVol *GeoModelExperiment::getPhysVol() const{
-  return m_physVol;
+  return dynamic_pointer_cast<GeoPhysVol>(m_physVol);
 }
 
 
