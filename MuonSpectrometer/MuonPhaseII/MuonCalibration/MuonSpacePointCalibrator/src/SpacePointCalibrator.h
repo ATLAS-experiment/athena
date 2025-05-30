@@ -59,10 +59,10 @@ namespace MuonR4{
                                      const CalibratedSpacePoint& spacePoint) const override final;
 
 
-            void calibrate(const Acts::GeometryContext& geoctx,
-                           const Acts::CalibrationContext& cctx,
-                           const Acts::SourceLink& link,
-                           ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
+            void calibrateSourceLink(const Acts::GeometryContext& geoctx,
+                                     const Acts::CalibrationContext& cctx,
+                                     const Acts::SourceLink& link,
+                                     ActsTrk::MutableTrackStateBackend::TrackStateProxy state) const override final;
         private:
             /// access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 

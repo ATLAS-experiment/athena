@@ -242,10 +242,10 @@ namespace MuonR4{
         return 0.;
     }
 
-    void SpacePointCalibrator::calibrate(const Acts::GeometryContext& geoctx,
-                                         const Acts::CalibrationContext& cctx,
-                                         const Acts::SourceLink& link,
-                                         ActsTrk::MutableTrackContainer::TrackStateProxy trackState) const {
+    void SpacePointCalibrator::calibrateSourceLink(const Acts::GeometryContext& geoctx,
+                                                   const Acts::CalibrationContext& cctx,
+                                                   const Acts::SourceLink& link,
+                                                   ActsTrk::MutableTrackStateBackend::TrackStateProxy trackState) const {
         
         /** Construct bound track parameters to fetch the global track position */
         const Acts::BoundTrackParameters trackPars{trackState.referenceSurface().getSharedPtr(), 
@@ -352,7 +352,8 @@ namespace MuonR4{
                     } else {
                     }
                 break;
-            } case MMClusterType: {
+            } 
+            case MMClusterType: {
                 THROW_EXCEPTION("Micromega measurements are not yet implemented");
                 break;
             } case sTgcStripType: {
