@@ -4,7 +4,8 @@
 # art-input-nfiles: 1
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: acts-expert-monitoring*.root
+# art-output: idpvm*.root
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_athena_acts
@@ -18,7 +19,7 @@ n_events=1000
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
 dcubeXmlTechEffAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXmlTechEff -print -quit 2>/dev/null)
 # Don't run if dcube config not found
-if [ -z "$dcubeXmlAbsPath" ]; then
+if [ -z "$dcubeXmlTechEffAbsPath" ]; then
     echo "art-result: 1 dcube-xml-config"
     exit 1
 fi
@@ -56,7 +57,6 @@ run "IDPVM-athena" \
     runIDPVM.py \
     --filesInput AOD.athena.root \
     --outputFile idpvm.athena.root \
-    --doTightPrimary \
     --doHitLevelPlots \
     --HSFlag All \
     --doTechnicalEfficiency \
@@ -75,6 +75,7 @@ run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
+               flags.Tracking.doTruth=True; \
 	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${ArtInFile} \
@@ -91,7 +92,6 @@ run "IDPVM-acts" \
     runIDPVM.py \
     --filesInput AOD.acts.root \
     --outputFile idpvm.acts.root \
-    --doTightPrimary \
     --doHitLevelPlots \
     --HSFlag All \
     --doTechnicalEfficiency \
@@ -111,14 +111,14 @@ ls -la "$lastref_dir"
 run "dcube-athena-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_athena_shifter_last \
-    -c ${dcubeXmlAbsPath} \
+    -c ${dcubeXmlTechEffAbsPath} \
     -r ${lastref_dir}/idpvm.athena.root \
     idpvm.athena.root
 
 run "dcube-acts-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_acts_shifter_last \
-    -c ${dcubeXmlAbsPath} \
+    -c ${dcubeXmlTechEffAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
     idpvm.acts.root
 

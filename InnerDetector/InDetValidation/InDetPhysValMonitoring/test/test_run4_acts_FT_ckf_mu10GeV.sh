@@ -2,7 +2,8 @@
 # art-description: Run 4 configuration, ITK only recontruction, Single muon 100GeV, acts activated
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: acts-expert-monitoring*.root
+# art-output: idpvm*.root
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_athena_acts
