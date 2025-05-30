@@ -108,6 +108,18 @@ namespace columnar
 
     void checkExpectations ();
 
+    template<typename T> void addTypedColumn (const std::string& name, std::vector<T> data)
+    {
+      auto column = m_columnMap.find (name);
+      if (column == m_columnMap.end())
+        throw std::runtime_error ("adding unknown column: " + name);
+      if (m_inputs.contains (name))
+        throw std::runtime_error ("column added twice: " + name);
+      if (column->second.type != &typeid(T))
+        throw std::runtime_error ("column " + name + " has wrong type: " + column->second.type->name());
+      m_inputs.emplace (name, std::move (data));
+    }
+
   private:
 
     template<typename T> T extractAny (const std::string& columnName, const std::any& value)
@@ -133,18 +145,6 @@ namespace columnar
       for (auto& value : data)
         typedData.emplace_back (extractAny<T> (name, value));
       m_inputs.emplace (name, std::move (typedData));
-    }
-
-    template<typename T> void addTypedColumn (const std::string& name, std::vector<T> data)
-    {
-      auto column = m_columnMap.find (name);
-      if (column == m_columnMap.end())
-        throw std::runtime_error ("adding unknown column: " + name);
-      if (m_inputs.contains (name))
-        throw std::runtime_error ("column added twice: " + name);
-      if (column->second.type != &typeid(T))
-        throw std::runtime_error ("column " + name + " has wrong type: " + column->second.type->name());
-      m_inputs.emplace (name, std::move (data));
     }
 
     template<typename T> void addExpectationTyped (const std::string& name, std::vector<std::any> data)
@@ -194,7 +194,7 @@ namespace columnar
         else
           EXPECT_EQ (output[index], expectation[index]);
       }
-      std::cout << "    m_columnMap.setExpectation (\"" << columnName << "\", {";
+      std::cout << "    columnMap.setExpectation (\"" << columnName << "\", {";
       for (std::size_t index = 0; index != expectation.size(); ++ index)
       {
         if (index != 0)
