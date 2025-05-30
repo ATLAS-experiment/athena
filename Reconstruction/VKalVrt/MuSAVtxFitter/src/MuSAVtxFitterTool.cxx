@@ -91,6 +91,12 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
                 continue;
             }
 
+            // ignore muons with unphysical pT (prevents extrapolator crashes!)
+            if (MuSAMSTP->pt() > 13000000) {
+                ATH_MSG_DEBUG("Skipping SA muon with pT " << (MuSAMSTP->pt() / 1000) << " GeV!");
+                continue;
+            }
+
             auto extrapolatedMuSATrack = extrapolateMuSA(*MuSAMSTP, eventInfo, ctx);
 
             //extrapolations can sometimes fail for non-pathological reasons, check for dummy parameters 
