@@ -4,10 +4,10 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsConfig.ActsConfigFlags import TrackFitterType
 from ActsInterop import UnitConstants
-
+from typing import Optional
 def ActsFitterCfg(flags,
                   name: str = "ActsFitterTool",
-                  fitterKind: TrackFitterType | None = None, 
+                  fitterKind:  Optional[TrackFitterType] = None, 
                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -30,12 +30,12 @@ def ActsFitterCfg(flags,
     kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
 
-    if flags.Acts.trackFitterType is TrackFitterType.KalmanFitter:
+    if fitterKind is TrackFitterType.KalmanFitter:
         kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
 
-    if flags.Acts.trackFitterType is TrackFitterType.KalmanFitter:    # This flag is by default set to KalmanFitter
+    if fitterKind is TrackFitterType.KalmanFitter:    # This flag is by default set to KalmanFitter
         acc.setPrivateTools(CompFactory.ActsTrk.KalmanFitterTool(name, **kwargs))
-    elif flags.Acts.trackFitterType is TrackFitterType.GaussianSumFitter:
+    elif fitterKind is TrackFitterType.GaussianSumFitter:
         if "SummaryTool" not in kwargs:
             from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
             kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags)))
@@ -49,7 +49,7 @@ def ActsFitterCfg(flags,
                 kwargs.setdefault("BoundaryCheckTool",acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
         name = name.replace("KalmanFitter", "GaussianSumFitter")
         acc.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitterTool(name, **kwargs))
-    elif flags.Acts.trackFitterType is TrackFitterType.GlobalChiSquareFitter:
+    elif fitterKind is TrackFitterType.GlobalChiSquareFitter:
         name = name.replace("KalmanFitter", "GlobalChiSquareFitter")
         acc.setPrivateTools(CompFactory.ActsTrk.GlobalChiSquareFitterTool(name, **kwargs))
 
