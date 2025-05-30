@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ListTriggers.py - List of triggers for skimming from athena 21.2 [HION4,HION12] 
 
 #################################################################################
@@ -183,7 +183,17 @@ def HION2pPb_2016_5TeV():
 
 def HION2MinBias2023():
     triggers  = []
-    triggers += ["HLT_.*"]
+    triggers += ["HLT_noalg_L1TE600p0ETA49"]
+    triggers += ["HLT_noalg_L1TE50_VTE600p0ETA49"]
+    triggers += ["HLT_mb_sptrk_pc_L1ZDC_A_C_VTE50"]
+    
+    return triggers
+
+def HION2MinBias2024():
+    triggers  = []
+    triggers += ["HLT_noalg_L1jTE600"]
+    triggers += ["HLT_noalg_L1jTE50_VjTE600"]
+    triggers += ["HLT_mb_sptrk_pc_L1ZDC_A_C_VjTE50"]
     
     return triggers
     
