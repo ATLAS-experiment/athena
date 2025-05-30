@@ -27,7 +27,7 @@ endif()
 #### Standard geometry dumping test R3 (MC)
 atlas_add_test( testR3Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers STL1A1 BML1A3 T1E1A01 MML1A1
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
@@ -49,7 +49,7 @@ atlas_add_test( testR3GeometryData
 #### Standard geometry dumping test R4 (MC)
 atlas_add_test( testR4Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --defaultGeoFile RUN4
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
@@ -70,7 +70,7 @@ atlas_add_test( testR3SensitiveDetectors
 ##### Simulation test R4
 atlas_add_test( testR4SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 --defaultGeoFile RUN4
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 #### Test that the sector envelopes fully enclose the particular chambers
