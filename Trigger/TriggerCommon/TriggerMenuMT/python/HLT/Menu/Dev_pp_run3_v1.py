@@ -25,7 +25,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                  BphysicsGroup,
                                  EgammaMETGroup,
                                  EgammaJetGroup,
-                                 SingleElectronGroup,
                                  MuonJetGroup,
                                  MinBiasGroup,
                                  SupportGroup,
@@ -150,9 +149,6 @@ def getDevSignatures():
         # ATR-23625
         ChainProp(name='HLT_g50_medium_g20_medium_L12eEM18M', l1SeedThresholds=['eEM18M','eEM18M'], groups=SupportPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_g50_medium_g20_medium_L12eEM18L', l1SeedThresholds=['eEM18L','eEM18L'], groups=SupportPhIGroup+MultiPhotonGroup),
-
-        ChainProp(name='HLT_e20_lhtight_ivarloose_L1ZAFB-04DPHIM-eEM18M', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup+Topo3Group),
-        ChainProp(name='HLT_e20_lhtight_ivarloose_L1eEM18M_jEM25', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup),
     ]
 
     chains['MET'] = [
@@ -645,7 +641,6 @@ def getDevSignatures():
 
         # mu-tag & tau-probe triggers for LLP (ATR-23150)
         ChainProp(name='HLT_mu26_ivarmedium_tau100_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbeLegGroup+SingleMuonGroup),
-        # ChainProp(name='HLT_e26_lhtight_ivarloose_tau100_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1EM22VHI', l1SeedThresholds=['EM22VHI','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbeLegGroup+SingleElectronGroup),
 
         # tau + jet and tau + photon tag and probe (ATR-24031)
         # *** Temporarily commented because counts are fluctuating in CI and causing confusion ***
@@ -812,8 +807,6 @@ def getDevSignatures():
 
     chains['Calib'] = [
 
-        # Calib Chains
-        # ChainProp(name='HLT_larpsallem_L1EM3', groups=SingleElectronGroup+SupportLegGroup),
     ]
 
     chains['Streaming'] = [
