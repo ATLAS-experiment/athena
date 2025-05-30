@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-------------------------------------------------------------------------------------------//
@@ -69,7 +69,7 @@ public:
   // ---------------------------For you: ----------------------------------------------------//
   //                                                                                         //
   // Standard Constructor                                                                    //
-  GeoModelExperiment(GeoPhysVol* physVol);                                                   //
+  GeoModelExperiment(PVLink physVol);                                                   //
   //                                                                                         //
   // Standard Destructor                                                                     //
   virtual ~GeoModelExperiment() = default;                                                             //
@@ -95,7 +95,7 @@ public:
   
  private:
   
-  GeoIntrusivePtr<GeoPhysVol>                           m_physVol{};
+  PVLink                                                m_physVol{};
   collection_type                                       m_managers;
   std::vector<PVConstLink>                              m_tmpVolumes;
 
