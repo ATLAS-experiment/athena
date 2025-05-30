@@ -21,6 +21,7 @@
 #include <xAODJet/JetContainer.h>
 #include <xAODMissingET/versions/MissingETAuxAssociationMap_v2.h>
 #include <xAODMissingET/versions/MissingETBase.h>
+#include <xAODCaloEvent/CaloClusterContainer.h>
 
 #include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
@@ -108,6 +109,7 @@ namespace columnar
       {"AnalysisElectrons", 0x3902fec0},
       {"AnalysisPhotons", 0x35d1472f},
       {"AnalysisJets", 0x1afd1919},
+      {"egammaClusters", 0x15788d1f},
     };
 
     template<typename T>
@@ -141,7 +143,7 @@ namespace columnar
           columnName.replace (index, 6, "");
         else if (auto index = columnName.find ("Aux."); index != std::string::npos)
           columnName.replace (index, 3, "");
-        else
+        else if (columnName.find (".") != std::string::npos)
           throw std::runtime_error ("branch name does not contain AuxDyn or Aux: " + m_branchName);
         return columnName;
       }
@@ -152,6 +154,8 @@ namespace columnar
           return m_branchName.substr (0, index);
         else if (auto index = m_branchName.find ("Aux."); index != std::string::npos)
           return m_branchName.substr (0, index);
+        else if (m_branchName.find (".") == std::string::npos)
+          return m_branchName;
         else
           throw std::runtime_error ("branch name does not contain AuxDyn or Aux: " + m_branchName);
       }
@@ -484,7 +488,7 @@ namespace columnar
     struct ColumnDataVectorVectorLink final : public PhysliteTestHelpers::IColumnData
     {
       BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
-      std::vector<ColumnarOffsetType> offsets;
+      std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<ColumnarOffsetType> columnData;
       const std::vector<ColumnarOffsetType>* targetOffsetColumn = nullptr;
       SG::sgkey_t targetKey = 0;
@@ -939,6 +943,72 @@ namespace columnar
           tool.setColumn (outputColumns.at(3).name, namesHash.size(), namesHash.data());
       }
     };
+
+    struct ColumnDataSamplingPattern final : public PhysliteTestHelpers::IColumnData
+    {
+      BranchReader<xAOD::CaloClusterContainer> branchReader;
+      std::vector<ColumnarOffsetType> offsets = {0};
+      std::vector<std::uint32_t> columnData;
+      Benchmark benchmark;
+
+      ColumnDataSamplingPattern (const std::string& val_branchName)
+        : branchReader (val_branchName), benchmark (branchReader.columnName() + ".samplingPattern(fallback)")
+      {
+        outputColumns.push_back ({.name = branchReader.columnName() + ".samplingPattern"});
+        outputColumns.push_back ({.name = branchReader.columnName(), .isOffset = true, .primary = false});
+      }
+
+      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      {
+        auto iter = requestedColumns.find (outputColumns.at(0).name);
+        if (iter == requestedColumns.end())
+          return false;
+        outputColumns.at(0).enabled = true;
+
+        branchReader.connectTree (tree);
+
+        if (iter->second.offsetName != outputColumns.at(1).name)
+          throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
+
+        requestedColumns.erase (iter);
+
+        iter = requestedColumns.find (outputColumns.at(1).name);
+        if (iter == requestedColumns.end())
+        {
+          return true;
+        }
+        outputColumns.at(1).enabled = true;
+        requestedColumns.erase (iter);
+        return true;
+      }
+
+      virtual void clearColumns () override
+      {
+        columnData.clear();
+        offsets.clear();
+        offsets.push_back (0);
+      }
+
+      virtual void getEntry (Long64_t entry) override
+      {
+        benchmark.startTimer ();
+        const auto& branchData = branchReader.getEntry (entry);
+        benchmark.stopTimer ();
+        for (auto data : branchData)
+        {
+          columnData.push_back (data->samplingPattern());
+        }
+        offsets.push_back (columnData.size());
+      }
+
+      virtual void setData (ColumnarToolWrapperData& tool) override
+      {
+        if (outputColumns.at(0).enabled)
+          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
+        if (outputColumns.at(1).enabled)
+          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+      } 
+    };
   }
 
 
@@ -1033,6 +1103,9 @@ namespace columnar
               case kULong_t:
                 knownColumns.push_back (std::make_shared<ColumnDataScalar<std::uint64_t>> (branch->GetName()));
                 break;
+              case kULong64_t:
+                knownColumns.push_back (std::make_shared<ColumnDataScalar<std::uint64_t>> (branch->GetName()));
+                break;
               case kFloat_t:
                 knownColumns.push_back (std::make_shared<ColumnDataScalar<float>> (branch->GetName()));
                 break;
@@ -1095,6 +1168,13 @@ namespace columnar
         }
       }
     }
+
+    // This is a fallback for the case that we don't have an explicit
+    // `samplingPattern` branch in our input file (i.e. an older file),
+    // to allow us to still test tools needing it.  This is likely not
+    // something that actual users can do (they need the new files), but
+    // for testing it seems like a reasonable workaround.
+    knownColumns.push_back (std::make_shared<ColumnDataSamplingPattern> ("egammaClusters"));
 
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisElectronsAuxDyn.caloClusterLinks"));
 
