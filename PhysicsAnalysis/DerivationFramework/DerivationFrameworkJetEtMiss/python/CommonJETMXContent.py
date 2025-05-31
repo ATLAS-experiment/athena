@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #### Low-level moments (clusters, FE, UFOs)
 ClusterVariables = ["calE.calEta.calPhi.calM.rawE.rawEta.rawPhi.rawM.time.e_sampl"]
@@ -17,7 +17,8 @@ TrackingVariables = ["particleHypothesis.vx.vy.vz",
                      "numberOfPixelHits.numberOfPixelHoles.numberOfPixelSharedHits.numberOfPixelDeadSensors.numberOfPixelSplitHits.numberOfPixelSpoiltHits.numberOfPixelOutliers",
                      "numberOfSCTHits.numberOfSCTHoles.numberOfSCTSharedHits.numberOfSCTDeadSensors.numberOfSCTOutliers.numberOfSCTDoubleHoles.numberOfSCTSpoiltHits",
                      "leptonID.trackFitter.trackLink.trackProperties.AssoClustersUFO",
-                     "ftagTruthOriginLabel.ftagTruthTypeLabel.ftagTruthVertexIndex.ftagTruthParentBarcode.ftagTruthBarcode"]
+                     "ftagTruthOriginLabel.ftagTruthTypeLabel.ftagTruthVertexIndex.ftagTruthParentBarcode.ftagTruthBarcode",
+                     "TTVA_AMVFVertices.TTVA_AMVFWeights"]
 
 TrackingVariablesHGTD = ["HGTD_cluster_time", "HGTD_extrap_x", "HGTD_extrap_y"]
 
