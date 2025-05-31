@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_CONDATTRLISTCOLLADDRESS_H
@@ -33,7 +33,7 @@ public:
     /// Assignment.
     CondAttrListCollAddress& operator= (const CondAttrListCollAddress& copy);
     /// Constructor from GA
-    CondAttrListCollAddress(const GenericAddress& copy);
+    explicit CondAttrListCollAddress(const GenericAddress& copy);
     /// Standard Constructor
     CondAttrListCollAddress( long svc,
 			  const CLID& clid,

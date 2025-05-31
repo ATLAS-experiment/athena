@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -71,7 +71,7 @@ public:
     typedef ChanNameMap::size_type                     name_size_type;
     
     /// Constructor with specification for type of time: run/lumiBlock or timestamp
-    CondAttrListCollection(bool hasRunLumiBlockTime);
+    explicit CondAttrListCollection(bool hasRunLumiBlockTime);
 
     ~CondAttrListCollection();
 
