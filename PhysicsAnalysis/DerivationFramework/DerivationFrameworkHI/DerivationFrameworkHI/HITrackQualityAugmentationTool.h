@@ -39,7 +39,7 @@ namespace DerivationFramework {
 
       HITrackQualityAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
       virtual StatusCode initialize() override;
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches() const override;
 
     private:
       unsigned short GetTrackQuality   (const xAOD::TrackParticle* track,float z_vtx           ) const;
