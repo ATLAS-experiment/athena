@@ -398,7 +398,7 @@ namespace LVL1 {
                         ATH_MSG_ERROR("No dead material corrections found in conditions database for this event in folder " << m_dmCorrectionsKey.key());
                         throw std::runtime_error("No dead material corrections found in database for this event");
                     }
-                    m_corrections = Corrections (*dmCorrections, msg());
+                    m_corrections = Corrections (*dmCorrections.cptr(), msg());
                 }
 		ATH_MSG_INFO("Loaded DM Corrections from database");
             }
