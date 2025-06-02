@@ -26,16 +26,16 @@ namespace {
 
 #define generalwarning(x)						\
   if (this->m_numGenWarnings < this->m_maxNumGenWarnings)		\
-    {ATH_MSG_WARNING(x); ++this->m_numGenWarnings;}			\
+    {ATH_MSG_DEBUG(x); ++this->m_numGenWarnings;}			\
   else if (this->m_numGenWarnings == this->m_maxNumGenWarnings)		\
-    {ATH_MSG_INFO("PixelRodDecoder: suppressing further general warnings"); ++this->m_numGenWarnings;} \
+    {ATH_MSG_DEBUG("PixelRodDecoder: suppressing further general warnings"); ++this->m_numGenWarnings;} \
   else {++this->m_numGenWarnings; /* No warning */}
 
 #define lvl1id_bcid_warning(x)						\
   if (this->m_numBCIDWarnings < this->m_maxNumBCIDWarnings)		\
-    {ATH_MSG_WARNING(x); ++this->m_numBCIDWarnings;}			\
+    {ATH_MSG_DEBUG(x); ++this->m_numBCIDWarnings;}			\
   else if (this->m_numBCIDWarnings == this->m_maxNumBCIDWarnings)	\
-    {ATH_MSG_INFO("PixelRodDecoder: suppressing further BCID/LVL1ID warnings"); ++this->m_numBCIDWarnings;} \
+    {ATH_MSG_DEBUG("PixelRodDecoder: suppressing further BCID/LVL1ID warnings"); ++this->m_numBCIDWarnings;} \
   else {++this->m_numBCIDWarnings; /* No warning */}
 
 
@@ -904,7 +904,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
             sc = StatusCode::RECOVERABLE;
             errorRecoverable = errorRecoverable | (MCCFlags << 12) | (FEFlags << 4); //encode error as HHHHMMMMMMMMFFFFFFFFTTTT for header, flagword, trailer errors
             //for now just sum all flagged errors_
-            const std::array<unsigned long long, 8> bitPosition {0_BIT, 1_BIT, 2_BIT, 3_BIT, 4_BIT, 5_BIT, 6_BIT, 7_BIT};
+            static constexpr std::array<unsigned long long, 8> bitPosition {0_BIT, 1_BIT, 2_BIT, 3_BIT, 4_BIT, 5_BIT, 6_BIT, 7_BIT};
             for (const auto thisBit:bitPosition){
               if (MCCFlags & thisBit) ++m_numFlaggedErrors;
               if (FEFlags & 0xf3 & thisBit) ++m_numFlaggedErrors;
