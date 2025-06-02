@@ -2,7 +2,7 @@
 
 from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
-from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata
+from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata, getGeneratorsInfo
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project
 from Campaigns.Utils import Campaign
 from PyUtils.moduleExists import moduleExists
@@ -74,9 +74,8 @@ def initConfigFlags():
                                                           else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", "")) # former global.TriggerStream
     acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, enum=Format) # former global.InputFormat
     acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []) ) # list of names of streams written to this file
-    from GeneratorConfig.Versioning import generatorsGetFromMetadata
-    acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : generatorsGetFromMetadata( GetFileMD(prevFlags.Input.Files).get("generators", "") ))
-    acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags.Input.Files, prevFlags.Input.SecondaryFiles))  # special Configuration options read from input file metadata
+    acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : getGeneratorsInfo(prevFlags) )
+    acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags) )  # special Configuration options read from input file metadata
 
     def _inputCollections(inputFile):
         rawCollections = [type_key[1] for type_key in GetFileMD(inputFile).get("itemList", [])]
