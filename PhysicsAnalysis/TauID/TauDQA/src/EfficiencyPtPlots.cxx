@@ -11,24 +11,6 @@ namespace Tau{
 
   EfficiencyPtPlots::EfficiencyPtPlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
     PlotBase(pParent, sDir),
-    m_eff_pt_jetRNNloose(nullptr),
-    m_eff_pt_jetRNNmed(nullptr),
-    m_eff_pt_jetRNNtight(nullptr),
-    m_eff_pt_jetRNNlooseHighPt(nullptr),
-    m_eff_pt_jetRNNmedHighPt(nullptr),
-    m_eff_pt_jetRNNtightHighPt(nullptr),  
-    m_eff_jetRNNloose(nullptr),
-    m_eff_jetRNNmed(nullptr),
-    m_eff_jetRNNtight(nullptr),
-    m_eff_pt_jetGNTauloose(nullptr),
-    m_eff_pt_jetGNTaumed(nullptr),
-    m_eff_pt_jetGNTautight(nullptr),
-    m_eff_pt_jetGNTaulooseHighPt(nullptr),
-    m_eff_pt_jetGNTaumedHighPt(nullptr),
-    m_eff_pt_jetGNTautightHighPt(nullptr),
-    m_eff_jetGNTauloose(nullptr),
-    m_eff_jetGNTaumed(nullptr),
-    m_eff_jetGNTautight(nullptr),
     m_sTauJetContainerName(std::move(sTauJetContainerName))
   {	
   }

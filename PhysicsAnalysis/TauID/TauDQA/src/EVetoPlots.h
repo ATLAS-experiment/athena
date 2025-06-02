@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUDQA_EVETOPLOTS_H
@@ -16,18 +16,18 @@ class EVetoPlots: public PlotBase {
     virtual ~EVetoPlots();
     void fill(const xAOD::TauJet& tau, float weight);
 
-    TH1* m_HadRadius;	 
-    TH1* m_EMRadius;	 
-    TH1* m_IsoFrac;	 
-    TH1* m_CentFrac;	 
-    TH1* m_id_RNNEleScore;
-    TH1* m_id_RNNEleScoreSigTrans;
-    TH1* m_pt_eleRNNloose;
-    TH1* m_pt_eleRNNmed; 
-    TH1* m_pt_eleRNNtight;
-    TH1* m_pt_eleRNNlooseHighPt;
-    TH1* m_pt_eleRNNmedHighPt; 
-    TH1* m_pt_eleRNNtightHighPt;
+    TH1* m_HadRadius{};	 
+    TH1* m_EMRadius{};	 
+    TH1* m_IsoFrac{};	 
+    TH1* m_CentFrac{};	 
+    TH1* m_id_RNNEleScore{};
+    TH1* m_id_RNNEleScoreSigTrans{};
+    TH1* m_pt_eleRNNloose{};
+    TH1* m_pt_eleRNNmed{}; 
+    TH1* m_pt_eleRNNtight{};
+    TH1* m_pt_eleRNNlooseHighPt{};
+    TH1* m_pt_eleRNNmedHighPt{}; 
+    TH1* m_pt_eleRNNtightHighPt{};
     
   private:
     void initializePlots();

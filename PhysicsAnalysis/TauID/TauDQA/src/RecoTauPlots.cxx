@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RecoTauPlots.h"
@@ -9,27 +9,6 @@ namespace Tau{
   RecoTauPlots::RecoTauPlots(PlotBase* pParent, const std::string& sDir, const std::string& sTauJetContainerName):
     PlotBase(pParent, sDir),
     m_oParamPlots(this, "", sTauJetContainerName),
-    m_cellBased_neuPFO_Pt(nullptr),
-    m_cellBased_neuPFO_Eta(nullptr),
-    m_cellBased_neuPFO_Phi(nullptr),
-    m_cellBased_neuPFO_E(nullptr),
-    m_cellBased_neuPFO_bdtPi0Score(nullptr),
-    m_pantau_CellBasedInput_isPanTauCandidate(nullptr),
-    m_pantau_CellBasedInput_DecayMode(nullptr),
-    m_pantau_CellBasedInput_BDTValue_1p0n_vs_1p1n(nullptr),
-    m_pantau_CellBasedInput_BDTValue_1p1n_vs_1pXn(nullptr),
-    m_pantau_CellBasedInput_BDTValue_3p0n_vs_3pXn(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Basic_NNeutralConsts(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Charged_JetMoment_EtDRxTotalEt(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Charged_StdDev_Et_WrtEtAllConsts(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Charged_HLV_SumM(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Neutral_HLV_SumM(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Neutral_PID_BDTValues_BDTSort_1(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Neutral_PID_BDTValues_BDTSort_2(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Neutral_Ratio_1stBDTEtOverEtAllConsts(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Neutral_Ratio_EtOverEtAllConsts(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Neutral_Shots_NPhotonsInSeed(nullptr),
-    m_pantau_CellBasedInput_BDTVar_Combined_DeltaR1stNeutralTo1stCharged(nullptr),
     m_sTauJetContainerName(sTauJetContainerName)
   {
   }

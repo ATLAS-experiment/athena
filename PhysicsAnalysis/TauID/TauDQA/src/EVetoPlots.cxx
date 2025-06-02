@@ -12,18 +12,6 @@ namespace Tau{
 
 EVetoPlots::EVetoPlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
    PlotBase(pParent, sDir),
-   m_HadRadius(nullptr),
-   m_EMRadius(nullptr),	 
-   m_IsoFrac(nullptr),
-   m_CentFrac(nullptr),
-   m_id_RNNEleScore(nullptr),
-   m_id_RNNEleScoreSigTrans(nullptr),
-   m_pt_eleRNNloose(nullptr),
-   m_pt_eleRNNmed(nullptr),
-   m_pt_eleRNNtight(nullptr),
-   m_pt_eleRNNlooseHighPt(nullptr),
-   m_pt_eleRNNmedHighPt(nullptr),
-   m_pt_eleRNNtightHighPt(nullptr),
    m_sTauJetContainerName(std::move(sTauJetContainerName))
 {
 }
