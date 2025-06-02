@@ -144,10 +144,10 @@ class ExtrapolationCache;
    along the step and adds them up in different ways to get two different
    solutions, of different order, for the integration. The higher order solution
    is used for the propagation and the lower order solution for error control.
-The difference between these solutions is used to estimate the quality of the
+   The difference between these solutions is used to estimate the quality of the
    integration (propagation), and to calculate the step size for the next step.
    If the quality is below a given tolerance then the step is rejected and
-repeated with a shorter step length. This propagator uses the TP43
+   repeated with a shorter step length. This propagator uses the TP43
    (Tsitouras-Papakostas 4th and 3rd order) Runge-Kutta pair.
 
    The step size algoritm by L.P.Endresen and J.Myrheim was choosen for its low

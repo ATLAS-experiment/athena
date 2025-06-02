@@ -49,10 +49,10 @@ struct ExtrUniquePtrHolder {
     return m_elements.back().get();
   }
 
-  /** @brief Release the ptr back as unique.
-  // The entry in the cache will be nullptr
-  // The lifetime of the ptr is now managed by
-  // the return unique_ptr*/
+  /** @brief Release a cached ptr.
+  The entry in the cache will be moved from.
+  The lifetime of the object is now managed by
+  the returned unique_ptr*/
   std::unique_ptr<T> move(CacheOwnedPtr<T> input) {
     if (input == nullptr) {
       return nullptr;
