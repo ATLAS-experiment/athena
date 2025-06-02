@@ -3251,16 +3251,13 @@ Trk::Extrapolator::extrapolateFromLayerToLayer(const EventContext& ctx,
   // break conditions: --------- handeled by layerAttempts
   unsigned int failedAttempts = 0;
 
-  // get the max attempts from the volume : only for Fatras - for reco take the maximum number
-  Trk::BoundarySurfaceFace const lastExitFace = cache.m_parametersAtBoundary.exitFace;
+  // get the max attempts from the volume
   const unsigned int layersInVolume =
-    tvol.confinedLayers() ? tvol.confinedLayers()->arrayObjects().size() : 0;
-  unsigned int maxAttempts = (!cache.m_parametersOnDetElements && !m_extendedLayerSearch)
-                               ? tvol.layerAttempts(lastExitFace)
-                               : int(layersInVolume * 0.5);
-
+      tvol.confinedLayers() ? tvol.confinedLayers()->arrayObjects().size() : 0;
   // set the maximal attempts to at least m_initialLayerAttempts
-  maxAttempts = std::max(m_initialLayerAttempts.value(), maxAttempts);
+  const unsigned int maxAttempts =
+      std::max(m_initialLayerAttempts.value(),
+               static_cast<unsigned int>(layersInVolume * 0.5));
 
   ATH_MSG_VERBOSE("  [+] Maximum number of failed layer attempts: " << maxAttempts);
 

@@ -73,7 +73,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   m_stopWithUpdateZero(false),
   m_skipInitialLayerUpdate(false),
   m_referenceMaterial(false),
-  m_extendedLayerSearch(true),
   m_initialLayerAttempts(3),
   m_successiveLayerAttempts(1),
   m_tolerance(0.002),
@@ -119,7 +118,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   declareProperty("MaterialEffectsOnTrackProviderIndex", m_meotpIndex);
   declareProperty("MaterialEffectsOnTrackValidation", m_materialEffectsOnTrackValidation);
   declareProperty("ReferenceMaterial", m_referenceMaterial);
-  declareProperty("ExtendedLayerSearch", m_extendedLayerSearch);
   declareProperty("InitialLayerAttempts", m_initialLayerAttempts);
   declareProperty("SuccessiveLayerAttempts", m_successiveLayerAttempts);
   // debug and validation
