@@ -20,6 +20,9 @@ class EventLoopCPRunScript(CPBaseRunner):
         derivedGroup.add_argument('--work-dir', dest='work_dir', default='workDir', help='The work directory for the EL job')
         derivedGroup.add_argument('--no-factory-preload', dest='no_factory_preload', action='store_true', help='Do not preload the component factories for the EL job. The component factories save memory and sidestep some technical issues, so you should not disable them unless you have a good reason to do so.')
         derivedGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
+        derivedGroup.add_argument('--run-perf-stat', dest='run_perf_stat', action='store_true', help='Run xAOD::PerfStats to get input branch access data. This is mostly useful for AMG experts wanting to understand branch access patterns.')
+        self.parser.add_argument('--algorithm-timers', dest='algorithm_timers', action='store_true', help='Enable algorithm timers. This is mostly useful for AMG experts wanting to understand tool performance.')
+        self.parser.add_argument('--algorithm-memory-monitoring', dest='algorithm_memory_monitoring', action='store_true', help='Enable algorithm memory monitoring. This is mostly useful for AMG experts wanting to understand tool memory usage. Note that this is imperfect and may in cases assign memory to the wrong algorithm.')
         return
         
     def makeAlgSequence(self):
@@ -95,6 +98,13 @@ class EventLoopCPRunScript(CPBaseRunner):
             self.logger.info(f"Preloading factories: {preload}")
             self.job.options().setString(ROOT.EL.Job.optFactoryPreload, preload)
         
+        if self.args.run_perf_stat:
+            self.job.options().setBool(ROOT.EL.Job.optXAODPerfStats, 1)
+        if self.args.algorithm_timers:
+            self.job.options().setBool(ROOT.EL.Job.optAlgorithmTimer, 1)
+        if self.args.algorithm_memory_monitoring:
+            self.job.options().setBool(ROOT.EL.Job.optAlgorithmMemoryMonitor, 1)
+
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
         self.driverSubmit(driver)
         if self.args.strip: self.stripPath()
