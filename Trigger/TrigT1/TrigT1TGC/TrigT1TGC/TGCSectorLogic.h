@@ -1,22 +1,19 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGGSectorLogic_hh
 #define TGGSectorLogic_hh
 
-#include "TrigT1TGC/TGCArguments.h"
-#include "TrigT1TGC/TGCNumbering.h"
-#include "TrigT1TGC/TGCReadoutIndex.h"
+
+
 #include "TrigT1TGC/TGCRPhiCoincidenceMatrix.h"
 #include "TrigT1TGC/TGCSSCController.h"
-#include "TrigT1TGC/TGCSSCControllerOut.h"
 #include "TrigT1TGC/TGCInnerTrackletSlotHolder.h"
-
 #include "TrigT1TGC/TGCTrackSelector.h"
-
 #include "StoreGate/ReadCondHandle.h"
 #include "MuonCondSvc/TGCTriggerData.h"
+#include <memory>
 
 namespace LVL1TGC {
 class TGCTileMuCoincidenceLUT;
@@ -25,6 +22,7 @@ class TGCNSW;
 class TGCBIS78;
 class TGCBIS78CoincidenceMap;
 class TGCEIFICoincidenceMap;
+
 }
 
 namespace LVL1TGCTrigger {
@@ -36,6 +34,7 @@ class TGCTMDB;
 class TGCNSWCoincidenceMap;
 class TGCRPhiCoincidenceOut;
 class TGCTrackSelectorOut;
+class TGCArguments;
 
 
 class TGCSectorLogic
