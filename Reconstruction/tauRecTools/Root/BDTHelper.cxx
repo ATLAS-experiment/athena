@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/BDTHelper.h"
@@ -17,11 +17,8 @@ BDTHelper::BDTHelper() :
 }
 
 
-
 BDTHelper::~BDTHelper() {
 }
-
-
 
 StatusCode BDTHelper::initialize(const TString& weightFileName) {
   
@@ -113,26 +110,6 @@ std::vector<float> BDTHelper::getInputVariables(const std::map<TString, float*>&
   return values;
 }
 
-std::vector<float> BDTHelper::getInputVariables(const xAOD::TauJet& tau) const {
-  std::vector<float> values;
-
-  // obtain the values of input variables by the name
-  // all the variables should be decorated to tau already
-  for (TString name : m_inputVariableNames) {
-    // remove prefix (::TauJets.centFrac -> cenFrac) 
-    if(name.Index(".")>=0){
-      name = name(name.Last('.')+1, name.Length()-name.Last('.')-1);
-    }
-  
-    SG::ConstAccessor<float> accessor(name.Data());
-    float value = accessor(tau);
-    values.push_back(value);
-  }
-
-  return values;
-}
-
-
 float BDTHelper::getGradBoostMVA(const std::map<TString, float>& availableVariables) const {
   std::vector<float> values = getInputVariables(availableVariables);
 
@@ -168,19 +145,6 @@ float BDTHelper::getClassification(const std::map<TString, float*>& availableVar
   }
   else {
     return  m_BDT->GetClassification(values);
-  }
-}
-
-
-float BDTHelper::getGradBoostMVA(const xAOD::TauJet& tau) const {
-  std::vector<float> values = getInputVariables(tau);
-
-  if (values.size() < m_inputVariableNames.size()) {
-    ATH_MSG_ERROR("There are missing variables when calculating the BDT score, will return -999");
-    return -999;
-  }
-  else {
-    return  m_BDT->GetGradBoostMVA(values);
   }
 }
 

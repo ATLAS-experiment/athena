@@ -112,9 +112,6 @@ StatusCode PanTau::Tool_InformationStore::initialize() {
 
   //This function does nothing in athena
   ABRDefaultInit();
-
-  ATH_CHECK( this->getInfo_String("Name_TauRecContainer", m_Name_Container_TauRec) );
-  ATH_CHECK( this->getInfo_String("Name_TrackParticleContainer", m_Name_Container_Tracks) );
     
   return StatusCode::SUCCESS;
 }
