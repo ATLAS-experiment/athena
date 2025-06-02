@@ -251,7 +251,7 @@ def ZdcRecOutputCfg(flags):
     return acc
 
 
-def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=False, DoNonLinCorr=False, DoTimeCalib=False, DoTrigEff=False, ForceCalibRun=-1, ForceCalibLB=814):
+def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=False, DoNonLinCorr=False, DoTimeCalib=False, DoTrigEff=False, ForceCalibRun=-1, ForceCalibLB=814, AuxSuffix=""):
     acc = ComponentAccumulator()
 
     log.info('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
@@ -265,7 +265,8 @@ def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=
         DoTimeCalib = DoTimeCalib,
         DoTrigEff = DoTrigEff,
         ForceCalibRun = ForceCalibRun,
-        ForceCalibLB = ForceCalibLB, 
+        ForceCalibLB = ForceCalibLB,
+        AuxSuffix = AuxSuffix,
         LHCRun = run ))
     return acc
 
@@ -298,22 +299,24 @@ def ZdcTrigValToolCfg(flags, config = 'PbPb2023'):
       
     return acc
 
-def RPDAnalysisToolCfg(flags, config: str):
+def RPDAnalysisToolCfg(flags, config: str, AuxSuffix=""):
     acc = ComponentAccumulator()
     acc.setPrivateTools(
         CompFactory.ZDC.RPDAnalysisTool(
             name="RPDAnalysisTool",
-            Configuration=config
+            Configuration=config,
+            AuxSuffix = AuxSuffix
         )
     )
     return acc
 
-def RpdSubtractCentroidToolCfg(flags, config: str):
+def RpdSubtractCentroidToolCfg(flags, config: str, AuxSuffix=""):
     acc = ComponentAccumulator()
     acc.setPrivateTools(
         CompFactory.ZDC.RpdSubtractCentroidTool(
             name="RpdSubtractCentroidTool",
-            Configuration=config
+            Configuration=config,
+            AuxSuffix = AuxSuffix
         )
     )
     return acc
@@ -328,7 +331,7 @@ def ZdcRecRun2Cfg(flags):
     doTrigEff = False
     doNonLinCorr = False
     doFADCCorr = False
-    
+
     if flags.Input.ProjectName == "data15_hi":
         doCalib = True
         doTimeCalib = True
@@ -371,6 +374,7 @@ def ZdcRecRun3Cfg(flags):
     doNonLinCorr = True #default for 2023
     ForceCalibRun = -1
     ForceCalibLB = 814
+    AuxSuffix = ""
     
     if flags.Input.TriggerStream != "calibration_ZDCInjCalib" and flags.Input.TriggerStream != "calibration_DcmDummyProcessor":
         if flags.Common.isOnline: # calibration file for ongoing run not available - copy calib file from eos & hard code the run + lb
@@ -404,12 +408,19 @@ def ZdcRecRun3Cfg(flags):
 
     log.info('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
     log.info('RPD enable flag is '+str(doRPD))
-    
-    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doFADCCorr,doNonLinCorr,doTimeCalib,doTrigEff,ForceCalibRun,ForceCalibLB))
 
-    if doRPD:
-        rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags, config))
-        centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags, config))
+    zdcReproc = False
+    if "ZdcModules" in flags.Input.Collections:
+        log.info('ZdcRecConfig.py: found ZdcModules in input, reprocessing mode set')
+        AuxSuffix="RP"
+        zdcReproc = True
+        
+    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doFADCCorr,doNonLinCorr,doTimeCalib,doTrigEff,ForceCalibRun,ForceCalibLB, AuxSuffix))
+
+        
+    if (doRPD):
+        rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags, config, AuxSuffix))
+        centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags, config, AuxSuffix))
 
     if  flags.Input.isMC :
         zdcTools = [anaTool] # expand list as needed
@@ -421,6 +432,10 @@ def ZdcRecRun3Cfg(flags):
         zdcTools = [anaTool] # no trigger / RPD / centroid - either online or offline
     elif flags.Common.isOnline: # running online + NOT injector pulse: with RPD + centroid but no trigger validation for now; may add later
         zdcTools = [anaTool] # expand list as needed
+        if doRPD:
+            zdcTools += [rpdAnaTool,centroidTool]
+    elif (zdcReproc): # ZDC reprocessing (will take work to make it work for RPD)
+        zdcTools = [anaTool]
         if doRPD:
             zdcTools += [rpdAnaTool,centroidTool]
     else: # default (not MC, not trigger repoc, not injector pulse, not online)
