@@ -39,7 +39,7 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::VertexContainer#MSDisplacedVertex"]
     aod_items += ["xAOD::VertexAuxContainer#MSDisplacedVertexAux."]
 
-    if flags.Input.isMC:
+    if flags.Input.isMC or flags.Overlay.DataOverlay:
         # Truth Particle Container
         aod_items += ["xAOD::TruthParticleContainer#MuonTruthParticles"]
         aod_items += ["xAOD::TruthParticleAuxContainer#MuonTruthParticlesAux."]
@@ -157,7 +157,7 @@ def MuonReconstructionCfg(flags):
 
     # FIXME - this is copied from the old configuration, but I'm not sure it really belongs here.
     # It's probably better to have as part of TrackBuilding, or Segment building...
-    if flags.Input.isMC:
+    if flags.Input.isMC  or flags.Overlay.DataOverlay:
         # filter TrackRecordCollection (true particles in muon spectrometer)
         if "MuonEntryLayerFilter" not in flags.Input.Collections and \
             ("MuonEntryLayer" in flags.Input.Collections):

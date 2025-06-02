@@ -146,9 +146,9 @@ private:
   /**ID pixel helper*/
   const PixelID* m_pixelId;
 
-  BooleanProperty m_checkActiveAreas{this, "CheckActiveAreas", false};
-  BooleanProperty m_checkDeadRegions{this, "CheckDeadRegions", false};
-  BooleanProperty m_checkDisabledFEs{this, "CheckDisabledFEs", false};
+  BooleanProperty m_checkActiveAreas{this, "CheckActiveAreas", true};
+  BooleanProperty m_checkDeadRegions{this, "CheckDeadRegions", true};
+  BooleanProperty m_checkDisabledFEs{this, "CheckDisabledFEs", true};
   DoubleProperty m_phiRegionSize{this, "PhiRegionSize", 3.};
   DoubleProperty m_etaRegionSize{this, "EtaRegionSize", 3.};
   DoubleProperty m_goodFracCut{this, "GoodFracCut", 0.5};
