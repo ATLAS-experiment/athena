@@ -65,6 +65,8 @@ namespace ActsTrk {
         "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate tracks"};
+    Gaudi::Property< bool > m_useLongSeeds {this, "useLongSeeds", true,
+        "use seeds with 4 or more SPs for better pT measurement"};
 
     using Stepper = Acts::SympyStepper;
     using Navigator = Acts::VoidNavigator;
