@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUDQA_MIGRATION_H
@@ -56,9 +56,9 @@ namespace Tau{
 	    "t3r1"
 	};
 	
-	TH1* m_migration_panTau;
-	TH1* m_migration_panTauProto;
-	TH1* m_migration_cellBased;
+	TH1* m_migration_panTau{};
+	TH1* m_migration_panTauProto{};
+	TH1* m_migration_cellBased{};
     private:
 	void initializePlots();
 	std::string m_sTauJetContainerName;

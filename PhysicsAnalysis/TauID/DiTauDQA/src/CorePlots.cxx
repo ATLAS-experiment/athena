@@ -14,14 +14,6 @@ namespace DiTau{
 
   CorePlots::CorePlots(PlotBase* pParent, const std::string& sDir, std::string sDiTauJetContainerName):
     PlotBase(pParent, sDir),
-    eta(nullptr),
-    phi(nullptr),
-    pt(nullptr),
-    mass(nullptr),
-    nsubjets(nullptr),
-    charge(nullptr),
-    eta_phi(nullptr),
-    eta_pt(nullptr),	
     m_sDiTauJetContainerName(std::move(sDiTauJetContainerName))
   {
   }

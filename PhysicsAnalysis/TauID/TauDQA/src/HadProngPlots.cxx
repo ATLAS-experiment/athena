@@ -12,23 +12,6 @@ HadProngPlots::HadProngPlots(PlotBase* pParent, const std::string& sDir,
 			       const std::string& sTauJetContainerName):
    PlotBase(pParent, sDir),
    m_oGeneralTauPlots(this, "", sTauJetContainerName),
-   m_tauNWideTracks(nullptr),
-   m_tauCoreFrac(nullptr),
-   m_tauEoverPTrk(nullptr),
-   m_tauTrkAvgDist(nullptr),
-   m_tauIpSig(nullptr),
-   m_tauDRMax(nullptr),
-   m_tauMtrks(nullptr),
-   m_SumPtTrkFrac(nullptr),
-   m_innerTrkAvgDist(nullptr),
-   m_ptRatioEflowApprox(nullptr),
-   m_mEflowApprox(nullptr),
-   m_ChPiEMEOverCaloEME(nullptr),
-   m_EMPOverTrkSysP(nullptr),
-   m_HadRadius(nullptr),
-   m_EMRadius(nullptr),
-   m_IsoFrac(nullptr),
-   m_tauSflight(nullptr),
    m_sTauJetContainerName(sTauJetContainerName)
 {
 }

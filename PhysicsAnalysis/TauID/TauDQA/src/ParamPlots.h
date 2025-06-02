@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUDQA_PARAMPLOTS_H
@@ -16,12 +16,12 @@ class ParamPlots:public PlotBase {
       ~ParamPlots();
       void fill(const xAOD::IParticle& prt, float weight);
       
-      TH1* eta;
-      TH1* phi;
-      TH1* pt;
+      TH1* eta{};
+      TH1* phi{};
+      TH1* pt{};
       
-      TH2* eta_phi;
-      TH2* eta_pt;
+      TH2* eta_phi{};
+      TH2* eta_pt{};
       
    private:
       void initializePlots();
