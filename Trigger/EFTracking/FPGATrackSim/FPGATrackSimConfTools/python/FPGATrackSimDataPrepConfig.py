@@ -345,7 +345,7 @@ def FPGATrackSimLorentzAngleToolCfg(flags):
     result=ComponentAccumulator()
     LorentzAngleTool = CompFactory.FPGATrackSim.LorentzAngleTool()
     LorentzAngleTool.UseAthenaLorentzAngleTools=False
-    LorentzAngleTool.shiftGlobalPosition=False
+    LorentzAngleTool.shiftGlobalPosition=True
     
     from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
     LorentzAngleTool.LorentzAngleToolPixel = result.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags))
