@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSector.h"
@@ -20,6 +20,9 @@
 #include "TrigT1TGC/TGCStripDoubletSB.h"
 #include "TrigT1TGC/TGCWireDoubletSB.h"
 #include "TrigT1TGC/TGCWireTripletSB.h"
+
+#include "TrigT1TGC/TGCArguments.h"
+#include "TrigT1TGC/TGCReadoutIndex.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 
@@ -112,7 +115,7 @@ TGCSector::TGCSector(LVL1TGCTrigger::TGCArguments* tgcargs,
 		     std::shared_ptr<const LVL1TGC::TGCNSW> nsw,
 		     std::shared_ptr<const LVL1TGC::TGCBIS78>  bis78)
  : m_id(idIn), m_regionType(type), m_numberOfHit(0),
-   m_TMDB(tm), m_NSW(nsw), m_BIS78(bis78),
+   m_TMDB(std::move(tm)), m_NSW(std::move(nsw)), m_BIS78(std::move(bis78)),
    m_tgcArgs(tgcargs), m_dbMgr(db)
 {
   m_sideId = static_cast<LVL1TGC::TGCSide>(idIn / NumberOfModule / NumberOfOctant);
