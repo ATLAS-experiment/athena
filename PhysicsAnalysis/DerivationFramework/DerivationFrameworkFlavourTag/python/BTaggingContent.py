@@ -202,17 +202,20 @@ def BTaggingLargeRContent(jetcol, ConfigFlags = None):
     return jetcontent + btagcontent
 
 def BTagginglessContent(jetcol, ConfigFlags=None):
-    BTaggingRun3AuxVar = _getVars("GN2v01", extra_flavours=['tau'])
+    BTaggingRun3AuxVar = _getVars("GN2v01", extra_flavours=["tau"])
 
-    for gn3_dev in ['GN3V00', 'GN3PflowV00', 'GN3MuonsV00']:
-        BTaggingRun3AuxVar += _getVars(gn3_dev, extra_flavours=['tau',], flip_modes=['SimpleFlip']) 
-
-    BTaggingRun3AuxVar += _getVars(
-        "GN3PflowMuonsV00", 
-        extra_flavours=['tau', 'ud', 'g', 's', 'quark'],
-        flip_modes=['SimpleFlip']
-    )
-    BTaggingRun3AuxVar += ['GN3PflowMuonsV00_ptFromTruthDressedWZJet']
+    gn3v00_models = [
+        "GN3V00", 
+        "GN3PflowV00", 
+        "GN3MuonsV00", 
+        "GN3PflowMuonsV00"
+    ]
+    for gn3_dev in gn3v00_models:
+        extra_flavours = ["tau",]
+        if gn3_dev in {"GN3PflowMuonsV00"}:
+            extra_flavours = ["tau", "ud", "g", "s", "quark"]
+            BTaggingRun3AuxVar += [f"{gn3_dev}_ptFromTruthDressedWZJet"]
+        BTaggingRun3AuxVar += _getVars(gn3_dev, extra_flavours=extra_flavours, flip_modes=["SimpleFlip"]) 
     
     isRun4 = _isRun4(ConfigFlags)
     aux = BTaggingRun3AuxVar if not isRun4 else []

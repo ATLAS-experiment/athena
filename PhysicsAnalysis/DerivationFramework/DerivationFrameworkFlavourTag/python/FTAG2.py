@@ -23,6 +23,10 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
+    # Add GN3 b-tagging algorithms
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
+    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
+
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
@@ -43,9 +47,10 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
 
     # Thin jets that are below 15 GeV
     FTAG2AntiKt4EMPFlowJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(
+        flags,
         name = "FTAG2AntiKt4EMPFlowJetThinningTool",
         StreamName = kwargs['StreamName'],
-        JetKey = "AntiKt4EMPFlowJets",
+        ContainerName = "AntiKt4EMPFlowJets",
         SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
     ))
 
@@ -117,8 +122,8 @@ def FTAG2Cfg(flags):
 
     FTAG2SlimmingHelper.SmartCollections = []
     FtagBaseContent.add_baseline_slimming_smartcollections(FTAG2SlimmingHelper)
-    
-    FTAG2SlimmingHelper.AllVariables = []
+
+    FTAG2SlimmingHelper.AllVariables = ["AntiKt4EMPFlowJets",]
     FtagBaseContent.add_baseline_slimming_allvariables(FTAG2SlimmingHelper)
     
     # update AppendToDictionary
