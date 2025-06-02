@@ -171,7 +171,23 @@ def getInitialTimeStampsFromRunNumbers(runNumbers):
     return timeStamps
 
 
-def getSpecialConfigurationMetadata(inputFiles, secondaryInputFiles):
+def getGeneratorsInfo(flags):
+    """Read in GeneratorsInfo from the input file
+    """
+    from AthenaConfiguration.Enums import ProductionStep
+    inputFiles = flags.Input.Files
+    if flags.Common.ProductionStep in [ProductionStep.Overlay, ProductionStep.FastChain] and not flags.Overlay.DataOverlay and flags.Input.SecondaryFiles:
+        # Do something special for MC Overlay
+        inputFiles = flags.Input.SecondaryFiles
+    generatorsString = ""
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    if inputFiles:
+        generatorsString = GetFileMD(inputFiles).get("generators", "")
+    from GeneratorConfig.Versioning import generatorsGetFromMetadata
+    return generatorsGetFromMetadata( generatorsString )
+
+
+def getSpecialConfigurationMetadata(flags):
     """Read in special simulation job option fragments based on metadata
     passed by the evgen stage
     """
@@ -193,6 +209,13 @@ def getSpecialConfigurationMetadata(inputFiles, secondaryInputFiles):
                                        'SimulationJobOptions/preInclude.RHadronsPythia8.py' : 'RHadrons.RHadronsConfig.RHadronsPreInclude',
                                        'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpPreInclude' }
     specialConfigString = ''
+    from AthenaConfiguration.Enums import ProductionStep
+    inputFiles = flags.Input.Files
+    secondaryInputFiles = flags.Input.SecondaryFiles
+    if flags.Common.ProductionStep in [ProductionStep.Overlay, ProductionStep.FastChain] and not flags.Overlay.DataOverlay and flags.Input.SecondaryFiles:
+        # Do something special for MC Overlay
+        inputFiles = flags.Input.SecondaryFiles
+        secondaryInputFiles = flags.Input.Files
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
     if len(inputFiles)>0:
         specialConfigString = GetFileMD(inputFiles).get('specialConfiguration', '')
