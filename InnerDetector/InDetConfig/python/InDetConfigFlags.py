@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType, ProductionStep
 from Campaigns.Utils import Campaign
 from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
@@ -14,7 +14,9 @@ def createInDetConfigFlags():
     # Only makes sense to run on RDO file where SplitDigi was used!
     icf.addFlag("InDet.doSplitReco", False)
     # Turn on running of PRD MultiTruthMaker
-    icf.addFlag("InDet.doTruth", lambda prevFlags: prevFlags.Input.isMC)
+    icf.addFlag("InDet.doTruth", lambda prevFlags: 
+        prevFlags.Input.isMC or
+        (prevFlags.Overlay.DataOverlay and prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing))
 
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (
