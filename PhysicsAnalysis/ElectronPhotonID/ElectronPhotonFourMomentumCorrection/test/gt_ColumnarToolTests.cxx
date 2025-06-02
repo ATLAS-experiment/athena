@@ -104,7 +104,7 @@ void callXAOD (const CP::EgammaCalibrationAndSmearingTool& tool, const std::stri
   ANA_CHECK_THROW (tool.evtStore()->record (auxCopy, outputName + "Aux."));
 }
 
-TEST_F (ColumnarPhysLiteTest, DISABLED_EgammaCalibrationAndSmearingTool)
+TEST_F (ColumnarPhysLiteTest, EgammaCalibrationAndSmearingTool)
 {
   auto tool = new CP::EgammaCalibrationAndSmearingTool (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ESModel", "es2022_R22_PRE"));
