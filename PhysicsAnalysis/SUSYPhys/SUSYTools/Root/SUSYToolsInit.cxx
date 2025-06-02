@@ -377,6 +377,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // if not set, derive the MCType from the simulation type and MC campaign
     if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? (isAtlfast() ? "MC23AF3" : "MC23") : (isAtlfast() ? "AF3" : "MC20");
 
+    // large-R jets use MC20AF3 instead of AF3
+    m_fatJetUncertaintiesMCType = m_jetUncertaintiesMCType;
+    if (m_fatJetUncertaintiesMCType == "AF3") {
+        m_fatJetUncertaintiesMCType = "MC20AF3";
+    }
+
     if (!m_jetUncertaintiesTool.isUserConfigured()) {
       std::string jetdef("AntiKt4" + xAOD::JetInput::typeName(xAOD::JetInput::Type(m_jetInputType)));
 
@@ -446,7 +452,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_fatjetUncertaintiesTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
 
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("JetDefinition", fatjetcoll) );
-      ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("MCType", m_jetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("MCType", m_fatJetUncertaintiesMCType) );
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("IsData", isData()) );
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("ConfigFile", m_fatJetUncConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
@@ -489,7 +495,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
       ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("JetDefinition", fatjetcoll) );
-      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("MCType", m_jetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("MCType", m_fatJetUncertaintiesMCType) );
       ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
       ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("PseudoDataJERsmearingMode", true) );
       ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_fatJetUncConfig) );
@@ -510,8 +516,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_fatjetFFSmearingTool.setTypeAndName("CP::FFJetSmearingTool/"+toolName);
 
       ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MassDef", "UFO") );
-      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MCType", m_jetUncertaintiesMCType) );
-      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("ConfigFile", "rel22/Fall2024_PreRec/R10_FullJMR.config") );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MCType", m_fatJetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("ConfigFile", "rel22/Spring2025_PreRec/R10_FullJMR.config") );
       ATH_CHECK( m_fatjetFFSmearingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_fatjetFFSmearingTool.retrieve() );
     } else if (m_fatjetFFSmearingTool.isUserConfigured()) ATH_CHECK(m_fatjetFFSmearingTool.retrieve());
