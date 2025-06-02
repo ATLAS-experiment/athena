@@ -10,7 +10,7 @@
 #include "ActsCalibration/MeasurementCalibratorBase.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
@@ -55,7 +55,7 @@ public:
      *         onto the track state
      * @param trackGeoTool: Pointer to a valid tracking geometry tool to associate the surfaces to the measurements */
     static OnTrackCalibrator
-    NoCalibration(const IActsTrackingGeometryTool* trackGeoTool);
+    NoCalibration(const ActsTrk::ITrackingGeometryTool* trackGeoTool);
     /** @brief Empty default constructor. Surface look will fail. */
     OnTrackCalibrator() = default;
     /** @brief Standard cosntructor which activates the calibration of the ITk & HGTD measurements 
@@ -67,7 +67,7 @@ public:
      *  @param pixelTool: Reference to a (configured) calibration tool responsible for the PixelCluster measurements
      *  @param stripTool: Reference to a (configured) calibration tool responsible for the ITk strip measurements
      *  @param hdtdTool: Reference to a  (configured) calibration tool responsible for the HGTD strip measurements */
-    OnTrackCalibrator(const IActsTrackingGeometryTool* trackGeoTool,
+    OnTrackCalibrator(const ActsTrk::ITrackingGeometryTool* trackGeoTool,
                       const ToolHandle<IOnTrackCalibratorTool<traj_t>> &pixelTool,
                       const ToolHandle<IOnTrackCalibratorTool<traj_t>> &stripTool,
                       const ToolHandle<IOnTrackCalibratorTool<traj_t>> &hgtdTool);

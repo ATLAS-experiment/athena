@@ -21,7 +21,7 @@ def ActsFitterCfg(flags,
     # Make sure this is set correctly!
     #  /eos/project-a/acts/public/MaterialMaps/ATLAS/material-maps-Pixel-SCT.json
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))

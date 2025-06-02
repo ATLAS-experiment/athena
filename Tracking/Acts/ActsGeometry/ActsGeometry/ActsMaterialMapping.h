@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSMATERIALMAPPING_H
@@ -21,7 +21,7 @@
 #include "Acts/Material/SurfaceMaterialMapper.hpp"
 #include "Acts/Material/VolumeMaterialMapper.hpp"
 // PACKAGE
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // STL
 #include <memory>
@@ -51,13 +51,14 @@ class IActsMaterialJsonWriterTool;
 // Not reentrant due to the mutable State variables.
 class ActsMaterialMapping : public AthAlgorithm {
 public:
-  ActsMaterialMapping (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
   virtual StatusCode finalize() override;
 
 private:
-  ServiceHandle<IActsMaterialTrackWriterSvc>      m_materialTrackWriterSvc;
+  ServiceHandle<IActsMaterialTrackWriterSvc>      m_materialTrackWriterSvc{this, "MaterialWriterSvc", "ActsMaterialTrackWriterSvc"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   Gaudi::Property<bool>                           m_mapSurfaces{this, "mapSurfaces", true, "Map the material onto surfaces"};
   Gaudi::Property<bool>                           m_mapVolumes{this, "mapVolumes", true, "Map the material onto volumes"};
   ToolHandle<IActsMaterialStepConverterTool>      m_materialStepConverterTool{this, "MaterialStepConverterTool", "ActsMaterialStepConverterTool"};
@@ -66,10 +67,10 @@ private:
   ToolHandle<IActsVolumeMappingTool>              m_volumeMappingTool{this, "VolumeMappingTool", "ActsVolumeMappingTool"};
   ToolHandle<IActsMaterialJsonWriterTool>         m_materialJsonWriterTool{this, "MaterialJsonWriterTool", "ActsMaterialJsonWriterTool"};
 
-  Acts::MagneticFieldContext                      m_mctx;
-  Acts::GeometryContext                           m_gctx;
-  Acts::SurfaceMaterialMapper::State              m_mappingState;
-  Acts::VolumeMaterialMapper::State               m_mappingStateVol;
+  Acts::MagneticFieldContext                      m_mctx{};
+  Acts::GeometryContext                           m_gctx{};
+  Acts::SurfaceMaterialMapper::State              m_mappingState{m_gctx, m_mctx};
+  Acts::VolumeMaterialMapper::State               m_mappingStateVol{m_gctx,m_mctx};
 };
 
 #endif // ActsGeometry_ActsExtrapolation_h

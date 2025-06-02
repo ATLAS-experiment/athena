@@ -9,7 +9,7 @@
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 
 #include "ActsToolInterfaces/IFitterTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
@@ -32,7 +32,7 @@ namespace FPGATrackSim{
       // the track fitter to use for the refit 
       ToolHandle<ActsTrk::IFitterTool> m_actsFitter{this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};
       // tracking geometry - used to translate ATLAS to ACTS geometry
-      ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+      PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
       // ACTS extrapolation tool - provides the magnetic field 
       ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
       // output location to write to 

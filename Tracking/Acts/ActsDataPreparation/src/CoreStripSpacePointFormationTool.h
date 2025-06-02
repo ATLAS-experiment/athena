@@ -5,7 +5,7 @@
 #ifndef ACTSTRK_DATAPREPARATION_CORESTRIPSPACEPOINTFORMATIONTOOL_H
 #define ACTSTRK_DATAPREPARATION_CORESTRIPSPACEPOINTFORMATIONTOOL_H
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsGeometry/ATLASSourceLink.h"
 
@@ -95,7 +95,7 @@ namespace ActsTrk {
     const SCT_ID* m_stripId{};
 
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "", "Tool to retreive Lorentz angle of SCT"};
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 
     Gaudi::Property<bool> m_allClusters{this, "AllClusters", false, "Process all clusters without limits."};
     Gaudi::Property<float> m_overlapLimitOpposite{this, "OverlapLimitOpposite", 2.8, "Overlap limit for opposite-neighbour."};

@@ -25,8 +25,6 @@ using ActsPropagationOutput =
         std::pair<std::vector<Acts::detail::Step>, ActsRecordedMaterial>;
 
 
-class IActsTrackingGeometryTool;
-
 
 class IActsExtrapolationTool : virtual public IAlgTool {
   public:
@@ -63,9 +61,6 @@ class IActsExtrapolationTool : virtual public IAlgTool {
             Acts::Direction navDir = Acts::Direction::Forward(),
             double pathLimit = std::numeric_limits<double>::max()) const = 0;
 
-  virtual
-  const IActsTrackingGeometryTool*
-  trackingGeometryTool() const = 0;
 
   virtual 
   Acts::MagneticFieldContext getMagneticFieldContext(const EventContext& ctx) const = 0;

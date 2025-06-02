@@ -30,7 +30,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Logger.hpp"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
 
 // OTHER
@@ -73,6 +73,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::initialize()
   
   ATH_CHECK( m_extrapolationTool.retrieve() );
   ATH_CHECK( m_atlasExtrapolator.retrieve() );
+  ATH_CHECK( m_trackingGeometryTool.retrieve() );
 
   // Create the destination surfaces for extrapolation
   // --> you need the Trk::Surfaces and the Acts::Surfaces
@@ -252,7 +253,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
     std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
     
     // Perigee, no alignment -> default geo context
-    ActsGeometryContext gctx = m_extrapolationTool->trackingGeometryTool()->getNominalGeometryContext();
+    ActsGeometryContext gctx = m_trackingGeometryTool->getNominalGeometryContext();
     auto anygctx = gctx.context();
     const auto* startParameters = new const Acts::GenericBoundTrackParameters(std::move(actsPerigeeSurface), pars, std::move(cov), Acts::ParticleHypothesis::pion());
     

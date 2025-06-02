@@ -24,7 +24,7 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeoUtils/SurfaceCache.h"
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"

@@ -43,7 +43,7 @@
 #include "ActsFatras/Physics/StandardInteractions.hpp"
 #include "ActsFatras/Selectors/SurfaceSelectors.hpp"
 // Tracking
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 #include <algorithm>
@@ -240,7 +240,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     "RandomEngineName", "Name of random number stream"};
 
   // Tracking geometry
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
 

@@ -13,7 +13,7 @@
 
 // Tools
 #include "ActsToolInterfaces/ISeedingTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 
 // Athena

@@ -8,14 +8,14 @@
 namespace ActsTrk::detail {
   
   template <typename traj_t>
-  OnTrackCalibrator<traj_t> OnTrackCalibrator<traj_t>::NoCalibration(const IActsTrackingGeometryTool* trackGeoTool)
+  OnTrackCalibrator<traj_t> OnTrackCalibrator<traj_t>::NoCalibration(const ActsTrk::ITrackingGeometryTool* trackGeoTool)
   {
     ToolHandle<IOnTrackCalibratorTool<traj_t>> null(nullptr);
     return OnTrackCalibrator<traj_t>(trackGeoTool, null, null, null);
   }
   
   template <typename traj_t>
-  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const IActsTrackingGeometryTool* trackGeoTool,
+  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const ActsTrk::ITrackingGeometryTool* trackGeoTool,
                  const ToolHandle<IOnTrackCalibratorTool<traj_t>>& pixelTool,
                  const ToolHandle<IOnTrackCalibratorTool<traj_t>>& stripTool,
                  const ToolHandle<IOnTrackCalibratorTool<traj_t>>& hgtdTool)

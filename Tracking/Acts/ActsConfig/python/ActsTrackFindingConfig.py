@@ -46,7 +46,7 @@ def ActsTrackStatePrinterToolCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
 
     acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinterTool(name, **kwargs))
@@ -143,7 +143,7 @@ def ActsMainTrackFindingAlgCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
 
     if 'ATLASConverterTool' not in kwargs:
@@ -304,7 +304,7 @@ def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     acc.addEventAlgo(
         CompFactory.ActsTrk.ScoreBasedAmbiguityResolutionAlg(name, **kwargs))
     return acc
@@ -329,7 +329,7 @@ def ActsMainAmbiguityResolutionAlgCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     acc.addEventAlgo(
         CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
     return acc

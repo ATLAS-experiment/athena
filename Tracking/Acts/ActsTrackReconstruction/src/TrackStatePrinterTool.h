@@ -26,7 +26,7 @@
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
 // Other
@@ -90,7 +90,7 @@ namespace ActsTrk
     SG::ReadHandleKeyArray<xAOD::SpacePointContainer> m_spacePointKey{this, "InputSpacePoints", {}, "Input Space Points for debugging"};
 
     // Tools
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 
     detail::xAODUncalibMeasSurfAcc m_surfAcc{};
 

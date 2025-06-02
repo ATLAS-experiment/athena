@@ -26,6 +26,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
@@ -70,6 +71,9 @@ namespace ActsTrk
 
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool
        {this, "ExtrapolationTool", ""};
+   
+   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+
 
     SG::ReadHandleKeyArray<ActsTrk::TrackContainer> m_tracksContainerKey
        {this, "ACTSTracksLocation", {},"Track collection (ActsTrk variant)"};

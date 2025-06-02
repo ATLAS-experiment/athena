@@ -11,7 +11,7 @@
 
 // Tools
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // ACTS
 #include "Acts/EventData/TrackContainer.hpp"
@@ -67,7 +67,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
       "Output track collection (ActsTrk variant)"};
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{
       this, "ExtrapolationTool", ""};

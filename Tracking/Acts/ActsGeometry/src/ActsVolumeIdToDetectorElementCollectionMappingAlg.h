@@ -9,7 +9,7 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/CondHandleKeyArray.h"
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometry/ActsVolumeIdToDetectorElementCollectionMap.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
@@ -27,7 +27,7 @@ namespace ActsTrk {
                                              std::unordered_map<unsigned long long,
                                                                 unsigned int> &detector_element_to_volume_id) const;
 
-     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool
+     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool
         {this, "TrackingGeometryTool", ""};
 
     SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys

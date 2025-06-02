@@ -11,7 +11,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
@@ -24,7 +24,7 @@ namespace Acts {
 
 
 
-class ActsTrackingGeometryTool : public extends<AthAlgTool, IActsTrackingGeometryTool> {
+class ActsTrackingGeometryTool : public extends<AthAlgTool, ActsTrk::ITrackingGeometryTool> {
 
     public:
       StatusCode initialize() override;

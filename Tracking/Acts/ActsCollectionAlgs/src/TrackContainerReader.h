@@ -9,7 +9,7 @@
 #include "GaudiKernel/EventContext.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // STL includes
 #include <string>
@@ -29,7 +29,7 @@ public:
   virtual StatusCode finalize() override;
 
 private:
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_tracksKey{this, "TrackContainer", "TrackContainer"};
 };
