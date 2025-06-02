@@ -70,6 +70,7 @@ class WorkflowType(Enum):
     HitsFilter = "HitsFilter"
     MCOverlay = "MCOverlay"
     DataOverlay = "DataOverlay"
+    DataOverlayChain = "DataOverlayChain"
     MCReco = "MCReco"
     MCPileUpReco = "MCPileUpReco"
     DataReco = "DataReco"

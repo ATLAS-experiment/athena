@@ -5,7 +5,7 @@ from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, get_standard_performance_checks, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import DataOverlayPreparationTest, DerivationTest, GenerationTest, OverlayTest, PileUpTest, QTest, SimulationTest
+from WorkflowTestRunner.StandardTests import DataOverlayPreparationTest, DerivationTest, GenerationTest, OverlayTest, DataOverlayTest, PileUpTest, QTest, SimulationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -39,7 +39,14 @@ def main():
             tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.HitsFilter, ["FilterHitTf"], setup, options.extra_args))
     elif options.overlay:
         if not options.workflow or options.workflow is WorkflowType.MCOverlay:
-            tests_to_run.append(OverlayTest("d1759", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229 --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08'"))
+            ami_tag = "d1759" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(OverlayTest(ami_tag, run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229 --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08'"))
+        if not options.workflow or options.workflow is WorkflowType.DataOverlay:
+            ami_tag = "d2029" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229"))
+        if not options.workflow or options.workflow is WorkflowType.DataOverlayChain:
+            ami_tag = "d2030" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlayChain, ["EVNTtoRDO"], setup, options.extra_args + " --runNumber 603398"))
     elif options.pileup:
         if setup.parallel_execution:
             log.error("Parallel execution not supported for pile-up workflow")
