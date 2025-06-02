@@ -149,9 +149,9 @@ class sTgcReadoutElement : public MuonReadoutElement {
     /// Returns the maximum number of pads that can be contained in a column of a pad. Used to match the pad numbering scheme
     unsigned int maxPadEta(const Identifier& measId) const;
     unsigned int maxPadEta(const IdentifierHash& measHash) const; 
-    /// Returns the pad number in the conventional pad numbering scheme from the sequential channel number 
-    unsigned int padNumber(const Identifier& measId) const;
-    unsigned int padNumber(const IdentifierHash& measHash) const;
+    /// Returns the pad number in the sequential numbering (1,2,3,...17,18,19,20,...)scheme from a pad identifier with conventional pad number (1, 2, 3, 19, 20,...) 
+    unsigned int padNumberSeq(const Identifier& measId) const;
+    unsigned int padNumberSeq(const IdentifierHash& measHash) const;
     /// Returns a pair of Eta and Phi index for the given pad identifier
     std::pair<uint, uint> padEtaPhi(const Identifier& measId) const;
     std::pair<uint, uint> padEtaPhi(const IdentifierHash& measHash) const;   

@@ -61,13 +61,13 @@ class PadDesign: public StripDesign {
         double padHeight() const;
         /// Returns the maximum number of pads that can be contained in a column of a pad. Used to match the pad numbering scheme
         int maxPadEta() const;
-        /// Returns the pad number in the conventional pad numbering scheme from the sequential channel number 
-        int padNumber(const int channel) const;
-        /// Returns a pair of Eta and Phi index for the given sequential channel number
+        /// Returns the pad (eta,phi) for a given pad number in sequence (1,2,3,...18,19,20...)
+        std::pair<int, int> padNumber(const int SeqChannel) const;
+        /// Returns a pair of Eta and Phi index for the given conventional pad number
         std::pair<int, int> padEtaPhi(const int channel) const;
-        /// Returns the Eta index of the pad for the given sequential channel number
+        /// Returns the Eta index of the pad for the given conventional pad number
         int padEta(const int channel) const;
-        /// Returns the Phi index of the pad for the given sequential channel number
+        /// Returns the Phi index of the pad for the given conventional pad number
         int padPhi(const int channel) const;
         /// Extracting the distance from gasGap center to beamline from the local to global transformation of the padLayer
         void defineBeamlineRadius(const double radius);
