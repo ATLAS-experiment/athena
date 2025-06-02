@@ -27,7 +27,7 @@
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
@@ -158,7 +158,7 @@ private:
 
  private:
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
   ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 

@@ -71,7 +71,7 @@ def ActsTrackReaderAlgCfg(flags,
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     acc.addEventAlgo(CompFactory.ActsTrk.TrackContainerReader(f"{prefix}TrackContainerReaderAlg",
                                                                TrackContainer=prefix+"Tracks",
-                                                               TrackingGeometryTool=acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+                                                               TrackingGeometryTool=acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
                                                               ))
     return acc
 

@@ -389,7 +389,7 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
         theFPGATrackSimDataPrepAlg.SGInputTool = ""
     else:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+        result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
         theFPGATrackSimDataPrepAlg.InputTool = ""
         theFPGATrackSimDataPrepAlg.InputTool2 = ""
         from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg

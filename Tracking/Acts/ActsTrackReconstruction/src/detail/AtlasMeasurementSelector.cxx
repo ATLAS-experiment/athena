@@ -3,7 +3,7 @@
 */
 
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"

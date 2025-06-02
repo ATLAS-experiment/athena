@@ -20,7 +20,7 @@ def ActsEMBremCollectionBuilderCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
     kwargs.setdefault('RefittedTracksLocation', 'ActsRefittedGSFTracks')
     

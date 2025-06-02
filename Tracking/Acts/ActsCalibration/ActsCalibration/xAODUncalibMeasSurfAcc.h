@@ -8,7 +8,7 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 namespace ActsTrk {
     struct DetectorElementToActsGeometryIdMap;
@@ -27,7 +27,7 @@ namespace ActsTrk::detail{
              *         The tracking geometry and the surface association map are directly retrieved
              *         from the tool. 
              *  @param trackGeoTool: Pointer to the tracking geometry tool*/
-            xAODUncalibMeasSurfAcc(const IActsTrackingGeometryTool* trackGeoTool);
+            xAODUncalibMeasSurfAcc(const ActsTrk::ITrackingGeometryTool* trackGeoTool);
             /** @brief Operator called by the Acts API to fetch the surface. */
             const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
             /** @brief Operator */

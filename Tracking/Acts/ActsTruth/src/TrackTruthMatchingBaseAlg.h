@@ -17,7 +17,7 @@
 
 #include "ActsEvent/TrackToTruthParticleAssociation.h"
 #include "ActsEvent/TruthParticleHitCounts.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "TrkTruthTrackInterfaces/IAthSelectionTool.h"
 
 #include <mutex>

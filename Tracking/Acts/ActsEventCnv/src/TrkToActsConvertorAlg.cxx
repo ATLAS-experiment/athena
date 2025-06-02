@@ -5,7 +5,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "TrkToActsConvertorAlg.h"
 
 #include "Acts/EventData/VectorTrackContainer.hpp"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSEXTRAPOLATIONALG_H
@@ -8,10 +8,8 @@
 // ATHENA
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "Gaudi/Property.h"  /*no forward decl: typedef*/
-#include "GaudiKernel/ISvcLocator.h"
 
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 // ACTS
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
@@ -40,15 +38,18 @@ class IActsPropStepRootWriterSvc;
 
 class ActsExtrapolationAlg : public AthReentrantAlgorithm {
 public:
-  ActsExtrapolationAlg (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   StatusCode initialize() override;
   StatusCode execute(const EventContext& ctx) const override;
 
 private:
-  ServiceHandle<IActsPropStepRootWriterSvc> m_propStepWriterSvc;
-  ServiceHandle<IAthRNGSvc> m_rndmGenSvc;
+
+  ServiceHandle<IActsPropStepRootWriterSvc> m_propStepWriterSvc{this, "PropStepRootWriterSvc", "ActsPropStepRootWriterSvc"};
+  ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "AthRNGSvc", "AthRNGSvc"};
 
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
+
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
 
   // poor-mans Particle Gun is included here right now
@@ -59,7 +60,7 @@ private:
   // material track writer for the material map validation
   Gaudi::Property<bool> m_writeMaterialTracks{this, "WriteMaterialTracks", false, "Write material track"};
   Gaudi::Property<bool> m_writePropStep{this, "WritePropStep", false, "Write propagation step"};
-  ServiceHandle<IActsMaterialTrackWriterSvc> m_materialTrackWriterSvc;
+  ServiceHandle<IActsMaterialTrackWriterSvc> m_materialTrackWriterSvc{this, "MaterialTrackWriterSvc", "ActsMaterialTrackWriterSvc"};
 
   // Mutex and members for optional debugging output
   mutable std::mutex m_writeMutex;

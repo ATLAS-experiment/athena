@@ -11,7 +11,7 @@ def ActsToTrkConverterToolCfg(flags,
     # Currently this does not work if we are in a muon-only mode
     if flags.Detector.GeometryITk and 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     else:
          # Disable TrackingGeometryTool
          kwargs.setdefault("TrackingGeometryTool", "")
@@ -62,7 +62,7 @@ def ActsToTrkConvertorAlgCfg(flags,
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
     if 'ATLASConverterTool' not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg

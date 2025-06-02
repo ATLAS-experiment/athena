@@ -19,7 +19,7 @@
 #include "ActsEvent/TrackContainer.h"
 
 // Athena
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
@@ -48,7 +48,7 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
  private:
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "",
                                               "Monitoring tool"};
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
 
   SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksKey{

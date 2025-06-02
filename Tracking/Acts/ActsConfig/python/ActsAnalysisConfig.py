@@ -366,7 +366,7 @@ def ActsBaseSeedAnalysisAlgCfg(flags,
     helper = AthMonitorCfgHelper(flags, extension + 'SeedAnalysisAlgCfg')
 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+    geoTool = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
     acc.addPublicTool(geoTool)
     
     # ATLAS Converter Tool
@@ -650,7 +650,7 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             'TrackingGeometryTool',
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
 
     if 'ATLASConverterTool' not in kwargs:

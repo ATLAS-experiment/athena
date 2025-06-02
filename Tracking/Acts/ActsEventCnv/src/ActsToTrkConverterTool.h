@@ -26,7 +26,7 @@
 
 // PACKAGE
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
@@ -94,7 +94,7 @@ private:
      const Acts::BoundTrackParameters& actsParameter,
      const Trk::TrackParameters& tsos, const Acts::GeometryContext& gctx) const;
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   
   /** @brief Tools needed to create Trk::Tracks from the ACts fit result */
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};

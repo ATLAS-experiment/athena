@@ -3,7 +3,7 @@
 */
 #include "TrackToTrackParticleCnvAlg.h"
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -145,6 +145,7 @@ namespace ActsTrk
      else if (m_perigeeExpression == "Vertex") m_expression_strategy = expressionStrategy::Vertex;
      else return StatusCode::FAILURE;
     
+     ATH_CHECK(m_trackingGeometryTool.retrieve());
      ATH_CHECK( m_tracksContainerKey.initialize() );
      ATH_CHECK( m_trackParticlesOutKey.initialize() );
      ATH_CHECK( m_beamSpotKey.initialize(m_expression_strategy == expressionStrategy::BeamLine) );
@@ -160,7 +161,7 @@ namespace ActsTrk
      {
         auto logger = makeActsAthenaLogger(this, "Prop");
 
-        Navigator::Config cfg{m_extrapolationTool->trackingGeometryTool()->trackingGeometry()};
+        Navigator::Config cfg{m_trackingGeometryTool->trackingGeometry()};
         cfg.resolvePassive = false;
         cfg.resolveMaterial = true;
         cfg.resolveSensitive = true;
@@ -255,7 +256,7 @@ namespace ActsTrk
     MagField::AtlasFieldCache fieldCache;
     field_cond_data->getInitializedCache(fieldCache);
 
-    const ActsGeometryContext &gctx = m_extrapolationTool->trackingGeometryTool()->getNominalGeometryContext();
+    const ActsGeometryContext &gctx = m_trackingGeometryTool->getNominalGeometryContext();
     std::shared_ptr<Acts::PerigeeSurface> perigee_surface {nullptr};
     if (m_expression_strategy == expressionStrategy::BeamLine) {
       perigee_surface = makePerigeeSurface(beamspot_data);

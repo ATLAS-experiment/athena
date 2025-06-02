@@ -17,7 +17,7 @@
 
 // PACKAGE
 #include "ActsGeometry/ActsObjWriterTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // STL
 #include <fstream>
@@ -44,7 +44,7 @@ private:
   const PixelID *m_pixelID;
   const SCT_ID  *m_SCT_ID;
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
   Gaudi::Property<std::string> m_outputName{this, "OutputName", "transforms.csv", "Filename to write the transform output to"};
   Gaudi::Property<bool> m_writeFullTransform{this,"WriteFullTransform",false,"Decide if full transformation needs to be written"};

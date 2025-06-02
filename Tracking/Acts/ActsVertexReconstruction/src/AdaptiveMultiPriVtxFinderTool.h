@@ -24,7 +24,7 @@
 #include "ActsInterop/Logger.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -105,7 +105,7 @@ namespace ActsTrk {
 
     // Provide access to the geometry tool
     virtual
-    const IActsTrackingGeometryTool*
+    const ActsTrk::ITrackingGeometryTool*
     trackingGeometryTool() const
     {
       return m_trackingGeometryTool.get();
@@ -129,7 +129,7 @@ namespace ActsTrk {
     // optional because of late initializatio
     std::optional<TrackLinearizer> m_linearizer = std::nullopt;
 
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "", "ActsExtrapolationTool"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter{this, "TrackSelector", "", "InDetTrackSelectionTool"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};

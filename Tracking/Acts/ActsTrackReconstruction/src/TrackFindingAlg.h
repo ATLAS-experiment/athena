@@ -14,7 +14,7 @@
 
 // Tools
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "src/TrackStatePrinterTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
@@ -90,7 +90,7 @@ namespace ActsTrk
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle< ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};

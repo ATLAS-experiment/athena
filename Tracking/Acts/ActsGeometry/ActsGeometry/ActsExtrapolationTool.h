@@ -22,7 +22,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 // ACTS
@@ -98,13 +98,6 @@ public:
             Acts::Direction navDir = Acts::Direction::Forward(),
             double pathLimit = std::numeric_limits<double>::max()) const override;
 
-  virtual
-  const IActsTrackingGeometryTool*
-  trackingGeometryTool() const override
-  {
-    return m_trackingGeometryTool.get();
-  }
-
 
   virtual
   Acts::MagneticFieldContext
@@ -119,7 +112,7 @@ private:
 
   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
   Gaudi::Property<std::string> m_fieldMode{this, "FieldMode", "ATLAS", "Either ATLAS or Constant"};
   Gaudi::Property<std::vector<double>> m_constantFieldVector{this, "ConstantFieldVector", {0, 0, 0}, "Constant field value to use if FieldMode == Constant"};

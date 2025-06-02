@@ -17,7 +17,7 @@
 #include "xAODTracking/TrackParticleFwd.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 /**
  * @class ActsEMBremCollectionBuilder
@@ -68,7 +68,7 @@ class ActsEMBremCollectionBuilder : public AthReentrantAlgorithm {
           this, "SelectedTrackParticleContainerName",
           "egammaSelectedTrackParticles", "Input of Selected TrackParticles"};
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
 
   ActsTrk::MutableTrackContainerHandlesHelper m_refittedTracksBackendHandles;

@@ -10,7 +10,7 @@
 #include "ActsInterop/Logger.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // ActsSurfaceMappingTool
 #include "Acts/Geometry/GeometryContext.hpp"

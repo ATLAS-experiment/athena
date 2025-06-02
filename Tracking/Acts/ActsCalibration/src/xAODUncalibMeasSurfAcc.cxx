@@ -8,7 +8,7 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 
 namespace ActsTrk::detail{
-    xAODUncalibMeasSurfAcc::xAODUncalibMeasSurfAcc(const IActsTrackingGeometryTool* trackGeoTool):
+    xAODUncalibMeasSurfAcc::xAODUncalibMeasSurfAcc(const ActsTrk::ITrackingGeometryTool* trackGeoTool):
         m_actsTrackingGeometry{trackGeoTool->trackingGeometry().get()},
         m_detectorElementToGeometryIdMap{trackGeoTool->surfaceIdMap()}{}
            

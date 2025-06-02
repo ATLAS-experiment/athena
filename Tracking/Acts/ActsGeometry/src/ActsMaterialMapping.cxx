@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsMaterialMapping.h"
@@ -22,7 +22,7 @@
 #include "ActsGeometryInterfaces/IActsMaterialJsonWriterTool.h"
 #include "ActsGeometryInterfaces/IActsMaterialStepConverterTool.h"
 #include "ActsGeometryInterfaces/IActsMaterialTrackWriterSvc.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsSurfaceMappingTool.h"
 #include "ActsGeometryInterfaces/IActsVolumeMappingTool.h"
 
@@ -37,14 +37,6 @@
 #include "Acts/Propagator/StandardAborters.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
 
-ActsMaterialMapping::ActsMaterialMapping(const std::string &name,
-                                           ISvcLocator *pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator),
-      m_materialTrackWriterSvc("ActsMaterialTrackWriterSvc", name),
-      m_mappingState(m_gctx,m_mctx),
-      m_mappingStateVol(m_gctx,m_mctx)
-{}
-
 StatusCode ActsMaterialMapping::initialize() {
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
@@ -52,7 +44,7 @@ StatusCode ActsMaterialMapping::initialize() {
     ATH_MSG_ERROR("No element to map onto defined.");
     return StatusCode::FAILURE;
   }
-
+  ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_materialStepConverterTool.retrieve() );
   ATH_CHECK(m_materialTrackWriterSvc.retrieve() );
   if(m_mapSurfaces){
@@ -77,13 +69,13 @@ StatusCode ActsMaterialMapping::execute() {
     Acts::RecordedMaterialTrack mTrack = m_materialStepConverterTool->convertToMaterialTrack(*materialStepCollection);
 
     if(m_mapSurfaces){
-      auto context = m_surfaceMappingTool->trackingGeometryTool()->getNominalGeometryContext().context();
+      auto context = m_trackingGeometryTool->getNominalGeometryContext().context();
       std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
       m_mappingState.geoContext = geoContext;
       m_surfaceMappingTool->mapper()->mapMaterialTrack(m_mappingState, mTrack);
     }
     if(m_mapVolumes){
-      auto context = m_volumeMappingTool->trackingGeometryTool()->getNominalGeometryContext().context();
+      auto context = m_trackingGeometryTool->getNominalGeometryContext().context();
       std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
       m_mappingStateVol.geoContext = geoContext;
       m_volumeMappingTool->mapper()->mapMaterialTrack(m_mappingStateVol, mTrack);
@@ -135,7 +127,7 @@ StatusCode ActsMaterialMapping::finalize() {
     }
   }
   
-  auto context = m_surfaceMappingTool->trackingGeometryTool()->getNominalGeometryContext();
+  auto context = m_trackingGeometryTool->getNominalGeometryContext();
   m_materialJsonWriterTool->write(context, detectorMaterial);
 
   return StatusCode::SUCCESS;

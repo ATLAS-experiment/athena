@@ -10,7 +10,7 @@
 #include "StoreGate/ReadHandleKey.h"
 
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 
@@ -32,7 +32,7 @@ namespace ActsTrk {
 
   private:
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::ITrackParamsEstimationTool> m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
 

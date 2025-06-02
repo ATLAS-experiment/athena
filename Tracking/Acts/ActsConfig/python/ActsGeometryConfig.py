@@ -125,7 +125,7 @@ def ActsTrackingGeometryToolCfg(flags,
   acc.merge(ActsTrackingGeometrySvcCfg(flags))
   from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
   acc.merge(ActsGeometryContextAlgCfg(flags))
-  acc.setPrivateTools(CompFactory.ActsTrackingGeometryTool(name))
+  acc.addPublicTool(CompFactory.ActsTrackingGeometryTool(name), primary = True)
   return acc
 
 def ActsExtrapolationToolCfg(flags,
@@ -134,7 +134,7 @@ def ActsExtrapolationToolCfg(flags,
   acc = ComponentAccumulator()
   from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
   acc.merge(AtlasFieldCacheCondAlgCfg(flags))
-  kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+  kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
   acc.setPrivateTools(CompFactory.ActsExtrapolationTool(name, **kwargs))
   return acc
 
@@ -160,7 +160,7 @@ def ActsSurfaceMappingToolCfg(flags,
                               name: str = "ActsSurfaceMappingTool",
                               **kwargs ) -> ComponentAccumulator:
   acc = ComponentAccumulator()
-  kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+  kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
   acc.addPublicTool(CompFactory.ActsSurfaceMappingTool(name, **kwargs), primary=True)
   return acc
 
@@ -169,7 +169,7 @@ def ActsVolumeMappingToolCfg(flags,
                              name: str = "ActsVolumeMappingTool",
                              **kwargs ) -> ComponentAccumulator:
   acc = ComponentAccumulator()
-  kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+  kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
   acc.addPublicTool(CompFactory.ActsVolumeMappingTool(name, **kwargs), primary=True)
   return acc
 
@@ -208,7 +208,7 @@ def ActsWriteTrackingGeometryCfg(flags,
     acc = ComponentAccumulator()
 
     if 'TrackingGeometryTool' not in kwargs:
-      kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+      kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
 
     if 'MaterialJsonWriterTool' not in kwargs:
       kwargs.setdefault("MaterialJsonWriterTool", acc.getPrimaryAndMerge(ActsMaterialJsonWriterToolCfg(flags,
@@ -247,7 +247,7 @@ def ActsWriteTrackingGeometryTransformsAlgCfg(flags,
     acc = ComponentAccumulator()
 
     if 'TrackingGeometryTool' not in kwargs:
-      kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+      kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
 
     acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometryTransforms(name,**kwargs))
     return acc
@@ -282,7 +282,7 @@ def ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags,
     acc = ComponentAccumulator()
     if 'TrackingGeometryTool' not in kwargs :
       kwargs.setdefault('TrackingGeometryTool',
-                        acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+                        acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault('ActsVolumeIdToDetectorElementCollectionMap', 'VolumeIdToDetectorElementCollectionMap')
 
     def filterCollections(flags, pixel_det_el, strip_det_el) :

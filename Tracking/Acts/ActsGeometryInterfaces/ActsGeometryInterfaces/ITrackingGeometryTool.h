@@ -17,13 +17,13 @@ namespace Acts {
 
 namespace ActsTrk{
     struct DetectorElementToActsGeometryIdMap;
-}
+
 
 /** @brief Geometry helper tool extending the Tracking geometry service by the data dependency to
  *         fetch the geometry context from StoreGate */
-class IActsTrackingGeometryTool : virtual public IAlgTool {
+class ITrackingGeometryTool : virtual public IAlgTool {
     public:
-        DeclareInterfaceID(IActsTrackingGeometryTool, 1, 0);
+        DeclareInterfaceID(ActsTrk::ITrackingGeometryTool, 1, 0);
         /** @brief Access to the built Acts tracking geometry  */
         virtual std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() const = 0;
         /** @brief Retrieve the geometry context with alignment constants from store gate
@@ -37,4 +37,5 @@ class IActsTrackingGeometryTool : virtual public IAlgTool {
         virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const= 0;
 
 };
+}
 #endif

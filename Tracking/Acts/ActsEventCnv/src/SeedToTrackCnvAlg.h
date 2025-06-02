@@ -20,7 +20,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // STL includes
 #include <string>
@@ -46,7 +46,7 @@ private:
   SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_actsTrackParamsKey {this, "EstimatedTrackParametersKey", {}, "Track Parameters Key"};
  
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 };
 
 } // namespace ActsTrk
