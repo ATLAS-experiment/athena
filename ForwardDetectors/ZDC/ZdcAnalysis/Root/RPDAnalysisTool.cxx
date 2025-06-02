@@ -34,7 +34,7 @@ RPDAnalysisTool::RPDAnalysisTool(std::string const& name) : asg::AsgTool(name) {
   declareProperty("SideACalibFactors", m_forceOutputCalibFactors.at(RPDUtils::sideA), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side A");
 }
 
-StatusCode RPDAnalysisTool::initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key) {
+StatusCode RPDAnalysisTool::initializeWriteKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key) {
   writeHandleKey = containerName + key + m_auxSuffix;
   return writeHandleKey.initialize();
 }
@@ -122,23 +122,23 @@ StatusCode RPDAnalysisTool::initialize() {
   m_dataAnalyzers.at(RPDUtils::sideA) = std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", finalConfig, finalOutputCalibFactors.at(RPDUtils::sideA));
 
   // initialize per-channel decorations (in ZdcModules)
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chBaselineKey, ".RPDChannelBaseline"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chPileupExpFitParamsKey, ".RPDChannelPileupExpFitParams"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chPileupStretchedExpFitParamsKey, ".RPDChannelPileupStretchedExpFitParams"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chPileupExpFitParamErrsKey, ".RPDChannelPileupExpFitParamErrs"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chPileupStretchedExpFitParamErrsKey, ".RPDChannelPileupStretchedExpFitParamErrs"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chPileupExpFitMSEKey, ".RPDChannelPileupExpFitMSE"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chPileupStretchedExpFitMSEKey, ".RPDChannelPileupStretchedExpFitMSE"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chAmplitudeKey, ".RPDChannelAmplitude"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chAmplitudeCalibKey, ".RPDChannelAmplitudeCalib"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chMaxADCKey, ".RPDChannelMaxADC"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chMaxADCCalibKey, ".RPDChannelMaxADCCalib"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chMaxSampleKey, ".RPDChannelMaxSample"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chStatusKey, ".RPDChannelStatus"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chPileupFracKey, ".RPDChannelPileupFrac"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chBaselineKey, ".RPDChannelBaseline"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chPileupExpFitParamsKey, ".RPDChannelPileupExpFitParams"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chPileupStretchedExpFitParamsKey, ".RPDChannelPileupStretchedExpFitParams"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chPileupExpFitParamErrsKey, ".RPDChannelPileupExpFitParamErrs"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chPileupStretchedExpFitParamErrsKey, ".RPDChannelPileupStretchedExpFitParamErrs"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chPileupExpFitMSEKey, ".RPDChannelPileupExpFitMSE"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chPileupStretchedExpFitMSEKey, ".RPDChannelPileupStretchedExpFitMSE"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chAmplitudeKey, ".RPDChannelAmplitude"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chAmplitudeCalibKey, ".RPDChannelAmplitudeCalib"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chMaxADCKey, ".RPDChannelMaxADC"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chMaxADCCalibKey, ".RPDChannelMaxADCCalib"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chMaxSampleKey, ".RPDChannelMaxSample"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chStatusKey, ".RPDChannelStatus"));
+  ATH_CHECK(initializeWriteKey(m_ZDCModuleContainerName, m_chPileupFracKey, ".RPDChannelPileupFrac"));
 
   // initialize per-side decorations (in ZdcSums)
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_sideStatusKey, ".RPDStatus"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_sideStatusKey, ".RPDStatus"));
 
   ATH_CHECK( m_eventInfoKey.initialize());
 
