@@ -66,6 +66,7 @@ run "IDPVM-athena" \
     --outputFile idpvm.athena.root \
     --doHitLevelPlots \
     --HSFlag All \
+    --doTechnicalEfficiency \
     --doExpertPlots \
     --OnlyTrackingPreInclude
 
@@ -97,6 +98,7 @@ run "IDPVM-acts" \
     --outputFile idpvm.acts.root \
     --doHitLevelPlots \
     --HSFlag All \
+    --doTechnicalEfficiency \
     --doExpertPlots \
     --OnlyTrackingPreInclude
 
