@@ -34,7 +34,7 @@ def RecoSteering(flags):
         log.info("---------- Configured POOL reading")
 
     acc.flagPerfmonDomain('Truth')
-    if flags.Input.isMC:
+    if flags.Input.isMC or flags.Overlay.DataOverlay:
         # AOD2xAOD Truth conversion
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
         acc.merge(GEN_AOD2xAODCfg(flags))
@@ -44,9 +44,11 @@ def RecoSteering(flags):
         # irrespective of whether we write jets to AOD in general
         # This is because we cannot rebuild jets from pileup truth
         # particles from the AOD
-        from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
-        acc.merge(addTruthPileupJetsToOutputCfg(flags))
-        log.info("---------- Configured Truth pileup jet writing")
+        # but truth jets are not available for DataOverlay
+        if not flags.Overlay.DataOverlay:
+            from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
+            acc.merge(addTruthPileupJetsToOutputCfg(flags))
+            log.info("---------- Configured Truth pileup jet writing")
 
     # trigger
     acc.flagPerfmonDomain('Trigger')
