@@ -1,33 +1,33 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-## \file Herwig7Control.py
-## \brief Main python interface for %Herwig7 for preparing the event generation
-## \author Daniel Rauch (daniel.rauch@desy.de)
-## \author Lukas Kretschmann (lukas.kretschmann@cern.ch)
-##
-## This part of the interface provides functionality for running all the tasks
-## necessary to initialize and prepare the event generation.
-## More concretely, it handles the read or alternatively the build/integrate/
-## mergegrids steps in order to produce the Herwig runfile and all other
-## ingredients for a run, possibly also creating a gridpack.
-## The event generation itself starting from reading the runfile is handled
-## in Herwig7_i/Herwig7.h and src/Herwig7.cxx.
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# \file Herwig7Control.py
+# \brief Main python interface for %Herwig7 for preparing the event generation
+# \author Daniel Rauch (daniel.rauch@desy.de)
+# \author Lukas Kretschmann (lukas.kretschmann@cern.ch)
+#
+# This part of the interface provides functionality for running all the tasks
+# necessary to initialize and prepare the event generation.
+# More concretely, it handles the read or alternatively the build/integrate/
+# mergegrids steps in order to produce the Herwig runfile and all other
+# ingredients for a run, possibly also creating a gridpack.
+# The event generation itself starting from reading the runfile is handled
+# in Herwig7_i/Herwig7.h and src/Herwig7.cxx.
 
 import os, shutil, subprocess, sys
 import six
 
 from . import Herwig7Utils as hw7Utils
 from . import Herwig7JOChecker as JOChecker
-# import Herwig7Defaults as HwDefaults
+from . import Herwig7ConfigDecoder as ConfigDecoder
 
 from AthenaCommon import Logging
 athMsgLog = Logging.logging.getLogger('Herwig7Control')
 
 
-## \brief Get path to the `share/Herwig` folder
-##
-## Try to get it from the `InstallArea` first.
-## If this fails fall back to `$HERWIG7_PATH/share/Herwig`
-##
+# \brief Get path to the `share/Herwig` folder
+#
+# Try to get it from the `InstallArea` first.
+# If this fails fall back to `$HERWIG7_PATH/share/Herwig`
+#
 def get_share_path():
 
   cmt_paths  = os.environ.get("CMAKE_PREFIX_PATH")
@@ -59,63 +59,63 @@ herwig7_share_path = get_share_path()
 herwig7_binary     = os.path.join(herwig7_bin_path, 'Herwig')
 
 
-## Do the read/run sequence.
-##
-## This function should provide the read and run step in one go
+# Do the read/run sequence.
+#
+# This function should provide the read and run step in one go
 def run(gen_config):
 
-  ## perform the read step
+  # perform the read step
   do_read(gen_config)
 
-  ## start the event generation
+  # start the event generation
   do_run(gen_config, cleanup_herwig_scratch=False)
 
 
-## Do the build, integrate, mergegrids and run step in one go
-## without creating a gridpack
-##
-## \param[in] cleanup_herwig_scratch Remove `Herwig-scratch` or 'Herwig-cache' folder after event generation to save disk space
+# Do the build, integrate, mergegrids and run step in one go
+# without creating a gridpack
+#
+# \param[in] cleanup_herwig_scratch Remove `Herwig-scratch` or 'Herwig-cache' folder after event generation to save disk space
 def matchbox_run(gen_config, integration_jobs, cleanup_herwig_scratch):
 
-  ## perform build/integrate/mergegrids sequence
+  # perform build/integrate/mergegrids sequence
   do_build_integrate_mergegrids(gen_config, integration_jobs)
 
-  ## start the event generation
+  # start the event generation
   do_run(gen_config, cleanup_herwig_scratch)
 
 
-## Either do the build, integrate and mergegrids steps and create a gridpack
-## or extract it and generate events from it
-##
-## \param[in] cleanup_herwig_scratch Remove `Herwig-scratch` or 'Herwig-cache' folder after event generation to save disk space
+# Either do the build, integrate and mergegrids steps and create a gridpack
+# or extract it and generate events from it
+#
+# \param[in] cleanup_herwig_scratch Remove `Herwig-scratch` or 'Herwig-cache' folder after event generation to save disk space
 def matchbox_run_gridpack(gen_config, integration_jobs, gridpack_name, cleanup_herwig_scratch, integrate):
 
-  ## print start banner including version numbers
+  # print start banner including version numbers
   log(message=start_banner())
 
   if not gridpack_name or integrate:
 
-    ## create infile from jobOption commands
+    # create infile from jobOption commands
     write_infile(gen_config)
 
-    ## do build/integrate/mergegrids sequence
+    # do build/integrate/mergegrids sequence
     xsec, err = do_build_integrate_mergegrids(gen_config, integration_jobs)
 
-    ## compress infile, runfile and process folder to gridpack tarball
+    # compress infile, runfile and process folder to gridpack tarball
     do_compress_gridpack(gen_config.run_name, gridpack_name)
 
-    ## display banner and exit
+    # display banner and exit
     log(message=exit_banner(gridpack_name, xsec, err))
     sys.exit(0)
 
   else:
 
-    ## unpack the gridpack
+    # unpack the gridpack
     DSIS_dir = gen_config.runArgs.jobConfig[0]+"/"
     do_uncompress_gridpack(DSIS_dir+gridpack_name)
     athMsgLog.info("Finished unpacking the gridpack")
 
-    ## start the event generation
+    # start the event generation
     do_run(gen_config, cleanup_herwig_scratch)
 
 
@@ -144,98 +144,93 @@ def do_abort():
   sys.exit(0)
 
 
-## Do the read step
+# Do the read step
 def do_read(gen_config):
 
-  ## print start banner including version numbers
+  # print start banner including version numbers
   log(message=start_banner())
 
-  ## create infile from JobOption object
+  # create infile from JobOption object
   write_infile(gen_config)
 
-  ## copy HerwigDefaults.rpo to the current working directory
+  # copy HerwigDefaults.rpo to the current working directory
   get_default_repository()
 
-  ## call Herwig7 binary to do the read step
+  # call Herwig7 binary to do the read step
   share_path = get_share_path()
   do_step('read', [herwig7_binary, 'read', get_infile_name(gen_config.run_name), '-I', share_path])
 
-## Do the read step and re-use an already existing infile
+# Do the read step and re-use an already existing infile
 def do_read_existing_infile(gen_config):
 
-  ## print start banner including version numbers
+  # print start banner including version numbers
   log(message=start_banner())
 
-  ## copy HerwigDefaults.rpo to the current working directory
+  # copy HerwigDefaults.rpo to the current working directory
   get_default_repository()
 
-  ## call Herwig7 binary to do the read step
+  # call Herwig7 binary to do the read step
   share_path = get_share_path()
   do_step('read', [herwig7_binary, 'read', gen_config.infile_name, '-I', share_path])
 
 
-## Do the build step
+# Do the build step
 def do_build(gen_config, integration_jobs):
 
-  ## print start banner including version numbers
+  # print start banner including version numbers
   log(message=start_banner())
 
-  ## create infile from JobOption object
+  # create infile from JobOption object
   write_infile(gen_config)
 
-  ## copy HerwigDefaults.rpo to the current working directory
+  # copy HerwigDefaults.rpo to the current working directory
   get_default_repository()
 
-  ## call the Herwig7 binary to do the build step
+  # call the Herwig7 binary to do the build step
   share_path = get_share_path()
   do_step('build', [herwig7_binary, 'build', get_infile_name(gen_config.run_name), '-I', share_path, '-y '+str(integration_jobs)])
 
 
-## Do the integrate step for one specific integration job
-## \todo provide info about the range
+# Do the integrate step for one specific integration job
+# \todo provide info about the range
 def do_integrate(run_name, integration_job):
 
   runfile_name = get_runfile_name(run_name)
-  # setupfile_name = get_setupfile_name(run_name) if setupfile else None
 
   integrate_log = run_name+'.integrate'+str(integration_job)+'.log'
   integrate_command = [herwig7_binary,'integrate',runfile_name,'--jobid='+str(integration_job)]
-  # if setupfile: integrate_command.append('--setupfile='+setupfile_name)
 
   do_step('integrate', integrate_command, integrate_log)
 
 
-## This function provides the mergegrids step
+# This function provides the mergegrids step
 def do_mergegrids(run_name, integration_jobs):
 
   runfile_name = get_runfile_name(run_name)
   mergegrids_command = [herwig7_binary, 'mergegrids', runfile_name]
-  # if setupfile_name: mergegrids_command.append('--setupfile='+setupfile_name)
 
   do_step('mergegrids', mergegrids_command)
 
-  ## calculate the cross section from the integration logfiles and possibly warn about low accuracy
+  # calculate the cross section from the integration logfiles and possibly warn about low accuracy
   xsec, err = hw7Utils.get_cross_section(run_name, integration_jobs)
 
   return(xsec, err)
 
 
-## Subsequent build, integrate and mergegrid steps
+# Subsequent build, integrate and mergegrid steps
 def do_build_integrate_mergegrids(gen_config, integration_jobs):
 
-  ## run build step
+  # run build step
   do_build(gen_config, integration_jobs)
 
-  ## run integration jobs in parallel subprocesses
+  # run integration jobs in parallel subprocesses
   runfile_name = get_runfile_name(gen_config.run_name)
-  # setupfile_name = get_setupfile_name(run_name) if setupfile else None
   athMsgLog.info(hw7Utils.ansi_format_info('Starting integration with {} jobs'.format(integration_jobs)))
 
   integration_procs = []
   for integration_job in range(integration_jobs):
     integrate_log = gen_config.run_name+'.integrate'+str(integration_job)+'.log'
     integrate_command = [herwig7_binary,'integrate',runfile_name,'--jobid='+str(integration_job)]
-    # if setupfile: integrate_command.append('--setupfile='+setupfile_name)
     integration_procs.append(hw7Utils.Process(integration_job, integrate_command, integrate_log))
 
   integration_handler = hw7Utils.ProcessHandler(integration_procs, athMsgLog)
@@ -244,7 +239,7 @@ def do_build_integrate_mergegrids(gen_config, integration_jobs):
 
   athMsgLog.info(hw7Utils.ansi_format_ok('All integration jobs finished successfully'))
 
-  ## combine the different integration grids
+  # combine the different integration grids
   xsec, err = do_mergegrids(gen_config.run_name, integration_jobs)
 
   return(xsec, err)
@@ -269,51 +264,54 @@ def do_uncompress_gridpack(gridpack_name):
   do_step('uncompress', ['tar', 'xzf', gridpack_name])
 
 
-## \param[in] cleanup_herwig_scratch Remove `Herwig-scratch` folder after event generation to save disk space
+# \param[in] cleanup_herwig_scratch Remove `Herwig-scratch` folder after event generation to save disk space
 def do_run(gen_config, cleanup_herwig_scratch=True):
 
-  ## this is necessary to make Herwig aware of the name of the run file
+  # this is necessary to make Herwig aware of the name of the run file
   gen_config.genSeq.Herwig7.RunFile = get_runfile_name(gen_config.run_name)
 
-  ## check the options in the .in file
+  # check the options in the .in file
   JOChecker.check_file()
+  
+  # decode the run file to get list of all parameters
+  ConfigDecoder.DecodeRunCard(input_file = gen_config.genSeq.Herwig7.RunFile)
 
-  ## overwrite athena's seed for the random number generator
+  # overwrite athena's seed for the random number generator
   if gen_config.runArgs.randomSeed is None:
     gen_config.genSeq.Herwig7.UseRandomSeedFromGeneratetf = False
   else:
     gen_config.genSeq.Herwig7.UseRandomSeedFromGeneratetf = True
     gen_config.genSeq.Herwig7.RandomSeedFromGeneratetf = gen_config.runArgs.randomSeed
 
-  ## set matrix element PDF name in the Herwig7 C++ class
+  # set matrix element PDF name in the Herwig7 C++ class
   gen_config.genSeq.Herwig7.PDFNameME = gen_config.me_pdf_name
 
-  ## set underlying event PDF name in the Herwig7 C++ class
+  # set underlying event PDF name in the Herwig7 C++ class
   gen_config.genSeq.Herwig7.PDFNameMPI = gen_config.mpi_pdf_name
 
-  ## possibly delete Herwig-scratch folder after finishing the event generation
+  # possibly delete Herwig-scratch folder after finishing the event generation
   gen_config.genSeq.Herwig7.CleanupHerwigScratch = cleanup_herwig_scratch
 
-  ## don't break out here so that the job options can be finished and the C++
-  ## part of the interface can take over and generate the events
+  # don't break out here so that the job options can be finished and the C++
+  # part of the interface can take over and generate the events
   athMsgLog.info(hw7Utils.ansi_format_info("Returning to the job options and starting the event generation afterwards"))
 
 
-## Do the run step and re-use an already existing runfile
+# Do the run step and re-use an already existing runfile
 def do_run_existing_runfile(gen_config):
 
-  ## this is necessary to make Herwig aware of the name of the run file
+  # this is necessary to make Herwig aware of the name of the run file
   gen_config.genSeq.Herwig7.RunFile = gen_config.runfile_name
 
-  ## overwrite athena's seed for the random number generator
+  # overwrite athena's seed for the random number generator
   if gen_config.runArgs.randomSeed is None:
     gen_config.genSeq.Herwig7.UseRandomSeedFromGeneratetf = False
   else:
     gen_config.genSeq.Herwig7.UseRandomSeedFromGeneratetf = True
     gen_config.genSeq.Herwig7.RandomSeedFromGeneratetf = gen_config.runArgs.randomSeed
 
-  ## don't break out here so that the job options can be finished and the C++
-  ## part of the interface can take over and generate the events
+  # don't break out here so that the job options can be finished and the C++
+  # part of the interface can take over and generate the events
   athMsgLog.info(hw7Utils.ansi_format_info("Returning to the job options and starting the event generation afterwards"))
 
 
@@ -430,8 +428,8 @@ def write_setupfile(run_name, commands, print_setupfile=True):
     athMsgLog.info("No setupfile commands given.")
 
 
-## \brief Copy default repository `HerwigDefaults.rpo` to current working directory
-##
+# \brief Copy default repository `HerwigDefaults.rpo` to current working directory
+#
 def get_default_repository():
 
   shutil.copy(os.path.join(get_share_path(), 'HerwigDefaults.rpo'), 'HerwigDefaults.rpo')
