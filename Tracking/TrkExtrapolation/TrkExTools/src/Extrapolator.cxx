@@ -543,9 +543,8 @@ Trk::Extrapolator::extrapolateToNextActiveLayerM(
   ParticleHypothesis particle,
   MaterialUpdateMode matupmode) const
 {
-  // set propagator to the MS one - can be reset inside the next methode (once
-  // volume information is there) set propagator to the MS one - can be reset
-  // inside the next methode (once volume information is there)
+  // set propagator to the MS one - can be reset inside the next method (once
+  // volume information is there)
   const IPropagator* currentPropagator =
       !m_subPropagators.empty() ? m_subPropagators[Trk::MS] : nullptr;
   if (currentPropagator) {
@@ -635,6 +634,7 @@ Trk::Extrapolator::extrapolateToNextActiveLayerMImpl(
   MaterialUpdateMode matupmode) const
 {
   Cache cache{};
+  //This is needed as we need to return a Trk::Layer
   cache.m_cacheLastMatLayer = true;
   ++cache.m_methodSequence;
   ATH_MSG_DEBUG("M-[" << cache.m_methodSequence << "] extrapolateToNextActiveLayerM(...) ");

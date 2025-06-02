@@ -78,7 +78,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   m_successiveLayerAttempts(1),
   m_tolerance(0.002),
   m_caloMsSecondary(false),
-  m_activeOverlap(false),
   m_robustSampling(true),
   m_useDenseVolumeDescription(true),
   m_useMuonMatApprox(false),
@@ -115,8 +114,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   declareProperty("UseMuonMatApproximation", m_useMuonMatApprox);
   declareProperty("ResolveMuonStation", m_resolveActive);
   declareProperty("ResolveMultilayers", m_resolveMultilayers);
-  declareProperty("ConsiderMuonStationOverlaps", m_activeOverlap);
-  // declareProperty("DynamicLayerCreator",          m_dynamicLayerCreator);
   declareProperty("RobustSampling", m_robustSampling );
   // material & navigation related steering
   declareProperty("MaterialEffectsOnTrackProviderIndex", m_meotpIndex);

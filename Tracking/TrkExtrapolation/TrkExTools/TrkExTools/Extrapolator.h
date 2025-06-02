@@ -665,8 +665,6 @@ private:
   DoubleProperty m_tolerance{this, "Tolerance", 0.002,
     "surface & volume tolerance"};
   // ------------------------------------------------------- //
-  BooleanProperty m_activeOverlap{this, "ConsiderMuonStationOverlaps", false,
-    "consider overlaps between active muon volumes"};
   BooleanProperty m_useMuonMatApprox{this, "UseMuonMatApproximation", false,
     "use approximative MS inert material"};
   BooleanProperty m_useDenseVolumeDescription
