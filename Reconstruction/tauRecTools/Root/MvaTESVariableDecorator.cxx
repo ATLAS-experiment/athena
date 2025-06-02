@@ -10,10 +10,6 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "CxxUtils/trapping_fp.h"
 
-#define GeV 1000
-
-
-
 MvaTESVariableDecorator::MvaTESVariableDecorator(const std::string& name) 
   : TauRecToolBase(name) {
 }

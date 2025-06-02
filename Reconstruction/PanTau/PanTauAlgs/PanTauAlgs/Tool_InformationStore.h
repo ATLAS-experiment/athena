@@ -57,11 +57,6 @@ namespace PanTau {
     MapInt          m_Infos_Int;
     MapDouble       m_Infos_Double;
     MapVecDouble    m_Infos_VecDouble;
-        
-    //!other information
-    // input containers
-    std::string  m_Name_Container_TauRec;
-    std::string  m_Name_Container_Tracks;
 
     bool m_init=false;
 

@@ -76,8 +76,6 @@ class InformationHandler:
         self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R3XX_CellBased"] = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R3XX_CellBased
 
     def setupInfo_String(self, flags):
-        self.m_Infos_String["Name_TauRecContainer"]             = flags.Tau.PanTau.Name_TauRecContainer
-        self.m_Infos_String["Name_TrackParticleContainer"]      = flags.Tau.PanTau.Name_TrackParticleContainer
         self.m_Infos_String["ModeDiscriminator_TMVAMethod"]     = flags.Tau.PanTau.ModeDiscriminator_TMVAMethod
 
 

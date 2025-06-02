@@ -19,9 +19,6 @@ def createPanTauConfigFlags():
     flags.addFlag("DecayModeDeterminator_BDTCutValue_R1XX_CellBased", -0.21)
     flags.addFlag("DecayModeDeterminator_BDTCutValue_R30X_CellBased", -0.13)
     flags.addFlag("DecayModeDeterminator_BDTCutValue_R3XX_CellBased", -0.08)
-    # CHECK THIS ONE
-    flags.addFlag("Name_TauRecContainer", "TauJets")
-    flags.addFlag("Name_TrackParticleContainer", "TrackParticleCandidate")
     flags.addFlag("ModeDiscriminator_TMVAMethod", "BDTG")
 
     flags.addFlag("TauConstituents_BinEdges_Eta", [0.000, 0.800, 1.400, 1.500, 1.900, 9.900])
