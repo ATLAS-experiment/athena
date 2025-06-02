@@ -1,8 +1,5 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-
-## \file Herwig7_JOChecker.py
-## \brief Helper script to extract parameters from the run-cards to spot possible errors in the JO or parameters being overwritten 
-## \author Lukas Kretschmann (lukas.kretschmann@cern.ch)
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Author: Lukas Kretschmann (lukas.kretschmann@cern.ch)
 
 # import modules
 import os
@@ -31,7 +28,7 @@ def clean_string(list,string,replace="",strip=False):
 # Helper functions to print the commands
 def print_commands(list):
   for command in list:
-    athMsgLog.info(command)
+    athMsgLog.debug(command)
 
 # Helper function to split command lines into command and value
 def split_commands(list):
@@ -196,11 +193,11 @@ def check_file():
   clean_string(insert_commands,"//","/",True)
 
   # Print the commands
-  athMsgLog.info("\n These are the commands found by the Herwig7JOChecker:\n")
+  athMsgLog.debug("\n These are the commands found by the Herwig7JOChecker:\n")
   print_commands(set_commands)
   print_commands(create_commands)
   print_commands(insert_commands)
-  athMsgLog.info("\n")
+  athMsgLog.debug("\n")
 
   # Now check if there are commands executed twice 
   # It can happen that there are commands set by the user but some config snippet from Herwig sets these commands again 
@@ -228,5 +225,7 @@ def check_file():
     athMsgLog.warn("There were some settings which are overwritten, please check the log-file HerwigCommandDuplicates.txt")
 
   # Godbye from the config checker
+  athMsgLog.info("Commands have been written to HerwigCommands.txt")
+  athMsgLog.info("Duplicates have been written to HerwigCommandsDuplicates.txt")
   athMsgLog.info("Godybe from the config-checker!")
 
