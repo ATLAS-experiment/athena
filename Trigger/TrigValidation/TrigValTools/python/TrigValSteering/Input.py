@@ -98,13 +98,32 @@ def get_input(keyword):
 
     log = get_logger()
 
-    data = load_input_json()
-    if keyword not in data.keys():
-        log.error('Failed to find keyword "%s" in input JSON %s',
-                  keyword, input_json)
-        return None
+    # for grid jobs run on the grid, use rucio dataset input if defined, else rely on TrigValInputs.json
+    import os
+    # "local" or "grid" job
+    grid = os.getenv("ArtJobType",None) == "grid"
+    # job run on the grid
+    panda = os.getenv("PandaID",None)
+    # rucio dataset input
+    paths=os.getenv("ArtInFile",None)
 
-    data_object = data[keyword]
+    if grid and panda and paths:
+        source = "data" if "data" in paths else "mc"
+        format = None
+        for key,value in {'RAW':'BS', 'HITS':'HITS', 'RDO':'RDO', 'ESD':'ESD', 'AOD':'AOD'}.items():
+            if key in paths:
+                format = value
+                break
+        data_object = {"source":source, "format":format, "paths":[paths]}
+        print("Using rucio dataset input")
+        print(data_object)
+    else:
+        data = load_input_json()
+        if keyword not in data.keys():
+            log.error('Failed to find keyword "%s" in input JSON %s',keyword, input_json)
+            return None
+
+        data_object = data[keyword]
 
     result = TrigValInput(
         keyword,
