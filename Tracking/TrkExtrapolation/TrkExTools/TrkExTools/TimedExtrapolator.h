@@ -336,7 +336,6 @@ private:
 
   // ------------------------------------------------------- //
 
-  bool m_activeOverlap; //!<  consider overlaps between active muon volumes
   bool m_robustSampling;
   bool m_useDenseVolumeDescription; //!<  use dense volume description when
                                     //!<  available in ID/Calo
