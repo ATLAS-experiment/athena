@@ -14,9 +14,39 @@ from BTagging.BTagToolConfig import BTagToolCfg
 from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactoryCfg
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
+from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
 
 
 from pathlib import Path
+
+
+def _addDepsByDirname(cfgFlags, dirname: str, jetCollection: str) -> ComponentAccumulator:
+    """
+    Add additional algorithms based on the dirname of the network files.
+
+    Parameters
+    ----------
+    cfgFlags : ConfigFlags
+        The configuration flags for.
+    dirname : str
+        The directory name where the network files are located.
+    jetCollection : str
+        The name of the jet collection to which the additional algorithms will be applied.
+
+    Returns
+    -------
+    ComponentAccumulator
+        An accumulator containing the additional algorithms based on the dirname.
+    """
+    acc = ComponentAccumulator()
+    if "GN3V01" in dirname or "Muon" in dirname:
+        acc.merge(TrackLeptonDecorationCfg(cfgFlags))
+    if "GN3V01" in dirname or "Electrons" in dirname:
+        acc.merge(FTagElectronAssociationCfg(
+            cfgFlags,
+            jetCollection=jetCollection,
+        ))
+    return acc
 
 
 def JetBTagginglessAlgCfg(
@@ -76,8 +106,7 @@ def JetBTagginglessAlgCfg(
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
-        if 'Muon' in dirname:
-            acc.merge(TrackLeptonDecorationCfg(cfgFlags))
+        acc.merge(_addDepsByDirname(cfgFlags, dirname, JetCollection))
 
         args = dict(
              flags=cfgFlags,
@@ -145,8 +174,7 @@ def JetBTagginglessByVertexAlgCfg(
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
-        if 'Muon' in dirname:
-            acc.merge(TrackLeptonDecorationCfg(cfgFlags))
+        acc.merge(_addDepsByDirname(cfgFlags, dirname, JetCollection))
 
         args = dict(
              flags=cfgFlags,

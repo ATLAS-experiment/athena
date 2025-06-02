@@ -89,7 +89,7 @@ def getNNs(flags):
     # But this *should* be cleaned up at some point
     # Note also, reco tests failing due to leptonID missing, so for now don't run taggers unless derivation
     # https://gitlab.cern.ch/atlas/athena/-/merge_requests/77764#note_9063625
-    gn3_paths = [
+    gn3v00_paths = [
         "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
         "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
         "BTagging/20250213/GN3MuonsV00/antikt4empflow/network.onnx", # Tracks+Muons
@@ -98,7 +98,13 @@ def getNNs(flags):
         "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
         "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
      ]
-
+    gn3v01_paths = [
+        "BTagging/20250527/GN3PflowMuonsChargeV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow+Charge
+        "BTagging/20250527/GN3PflowMuonsElectronsHybridV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow+Electrons+Hybrid
+        "BTagging/20250527/GN3V01/antikt4empflow/network.onnx", # Tracks+PFlow+Muons+Charge+Electrons+Hybrid
+    ] if isRun3Derivation(flags) else []
+    # Combine the paths for GN3v00 and GN3v01 models
+    gn3_paths = gn3v00_paths + gn3v01_paths
     return {
         'AntiKt4EMPFlowJets': [
             {
