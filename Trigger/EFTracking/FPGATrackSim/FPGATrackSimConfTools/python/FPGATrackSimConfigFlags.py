@@ -65,7 +65,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('missedHitRScaling', -1.0)
     cf.addFlag('missedHitZScaling', -1.0)
     cf.addFlag('maxBranches', -1)
-    cf.addFlag('hitThreshold', 10)
+    cf.addFlag('hitThreshold', 2)
 
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -84,6 +84,12 @@ def createFPGATrackSimConfigFlags():
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createGenScanFPGATrackSimConfigFlags
         return createGenScanFPGATrackSimConfigFlags()
     cf.addFlagsCategory("GenScan", __httGenScanFlags, prefix=True )
+
+    def __httSecondStageFlags():
+        """Additional function delays import"""
+        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createSecondStageFPGATrackSimConfigFlags
+        return createSecondStageFPGATrackSimConfigFlags()
+    cf.addFlagsCategory("SecondStage", __httSecondStageFlags, prefix=True )
 
     def __httDev21_02_15Flags():
         """Additional function delays import"""
@@ -348,6 +354,13 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
 
+    return cf
+
+def createSecondStageFPGATrackSimConfigFlags():
+    cf = createBasicFPGATrackSimConfigFlags()
+    cf.name = 'SecondStage'
+    cf.addFlag('CutFile', "Cuts_step1_2ndStage")
+    cf.addFlag('LayerMapFile', "")
     return cf
 
 class graphTool(FlagEnum):

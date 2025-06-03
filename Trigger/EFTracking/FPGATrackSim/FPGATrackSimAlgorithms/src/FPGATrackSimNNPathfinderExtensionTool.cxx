@@ -36,8 +36,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
       return StatusCode::FAILURE;
     }
 
-    m_maxMiss = (m_nLayers_1stStage + m_nLayers_2ndStage) - m_threshold;
-
     if (m_FPGATrackSimMapping->getExtensionNNVolMapString() != "" && m_FPGATrackSimMapping->getExtensionNNHitMapString() != "") {
         ATH_MSG_INFO("Initializing extension hit NN with string = " << m_FPGATrackSimMapping->getExtensionNNHitMapString());
         m_extensionHitNN.initialize(m_FPGATrackSimMapping->getExtensionNNHitMapString());

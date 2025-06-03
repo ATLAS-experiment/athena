@@ -457,7 +457,7 @@ def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool"):
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
     NNTrackTool.IdealGeoRoads = False
     NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan and not flags.Trigger.FPGATrackSim.ActiveConfig.GNN
-    NNTrackTool.SPRoadFilterTool = result.getPrimaryAndMerge(SPRoadFilterToolCfg(flags))
+    NNTrackTool.SPRoadFilterTool = result.popToolsAndMerge(SPRoadFilterToolCfg(flags))
     NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 9
     NNTrackTool.useSectors = False
     NNTrackTool.doGNNTracking = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
@@ -479,7 +479,7 @@ def FPGATrackSimTrackFitterToolCfg(flags,name="FPGATrackSimTrackFitterTool"):
     TF_1st.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     TF_1st.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     TF_1st.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
-    TF_1st.SPRoadFilterTool = result.getPrimaryAndMerge(SPRoadFilterToolCfg(flags))
+    TF_1st.SPRoadFilterTool = result.popToolsAndMerge(SPRoadFilterToolCfg(flags))
     result.addPublicTool(TF_1st, primary=True)
     return result
 

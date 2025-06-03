@@ -203,7 +203,7 @@ void FPGATrackSimBinnedHits::readLayerMap(const std::string &filename) {
     if (m_nLayers == 0) {
       m_nLayers = m_lyr_to_mod_map[bin].size();
     } else if (m_nLayers != m_lyr_to_mod_map[bin].size())  {
-      ATH_MSG_WARNING("Layer map bins have inconsistent numbers of layers");
+      ATH_MSG_WARNING("Layer map bins have inconsistent numbers of layers: " << m_nLayers << ", " << m_lyr_to_mod_map[bin].size());
     }
   }
   ATH_MSG_INFO("JSON layer map speficied " << m_nLayers << " layers" );

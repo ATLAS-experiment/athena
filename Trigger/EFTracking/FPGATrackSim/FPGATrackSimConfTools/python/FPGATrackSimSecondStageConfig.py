@@ -29,37 +29,34 @@ def FPGATrackSimBinnedHitsToolCfg_2nd(flags,name="FPGATrackSimBinnedHitsTool_2nd
 
     # The second stge, like layer study alg, technically doesn't need a cuts file.
     # So for now allow the same override here I guess?
-    if flags.Trigger.FPGATrackSim.GenScan.initialLayerStudy:
-        cutset = {"rin": flags.Trigger.FPGATrackSim.GenScan.rin,
-                  "rout": flags.Trigger.FPGATrackSim.GenScan.rout,
-                  "parBins": flags.Trigger.FPGATrackSim.GenScan.parBins,
-                  "parMin": flags.Trigger.FPGATrackSim.GenScan.parMin,
-                  "parMax": flags.Trigger.FPGATrackSim.GenScan.parMax,
-                  "parSet": flags.Trigger.FPGATrackSim.GenScan.parSet
-                  }
-        log.info("Running initial layer study, taking FPGATrackSimBinning cuts from flags")
-        log.info(cutset)
+    cutfile = flags.Trigger.FPGATrackSim.SecondStage.CutFile
+    if cutfile.endswith(".py"):
+        abspath = cutfile  # assume it's a full path to a .py file
     else:
-        if flags.Trigger.FPGATrackSim.oldRegionDefs:
-            cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts).cuts[flags.Trigger.FPGATrackSim.region]
-        else:
-            # this allows the cut file defined in python to be loaded from the map directory
-            # Updated to use python path resolver. It seems like we have to manually pass in CALIBPATH.
-            relpath = os.path.join(flags.Trigger.FPGATrackSim.mapsDir, flags.Trigger.FPGATrackSim.GenScan.genScanCuts + ".py")
-            abspath = unixtools.find_datafile(relpath, pathlist=os.getenv("CALIBPATH").split(":"))
-            spec=importlib.util.spec_from_file_location("FPGATrackSimGenScanCuts", abspath)
-            cutmodule = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(cutmodule)
-            cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
-        log.info("Running layer study using configured cuts file")
-        log.info(cutset)
+        relpath = os.path.join(flags.Trigger.FPGATrackSim.mapsDir, cutfile + ".py")
+        abspath = unixtools.find_datafile(relpath, pathlist=os.getenv("CALIBPATH").split(":"))
+
+    spec = importlib.util.spec_from_file_location("secondStageCuts", abspath)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load cut module from: {abspath}")
+
+    cutmodule = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cutmodule)
+    cutset = cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+    log.info("Running layer study using configured cuts file")
+    log.info(cutset)
 
     # make the binned hits class
     BinnnedHits = CompFactory.FPGATrackSimBinnedHits(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimBinnedHits_2nd"))
     BinnnedHits.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
 
     # TODO: we need a new flag for this!
-    BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+    if flags.Trigger.FPGATrackSim.SecondStage.LayerMapFile:
+        BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.SecondStage.LayerMapFile
+    else:
+        relpath = os.path.join(flags.Trigger.FPGATrackSim.mapsDir, f"region{flags.Trigger.FPGATrackSim.region}_lyrmap_2nd.json")
+        abspath = unixtools.find_datafile(relpath, pathlist=os.getenv("CALIBPATH").split(":"))
+        BinnnedHits.layerMapFile = abspath
 
     # make the bintool class
     BinTool = CompFactory.FPGATrackSimBinTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimBinTool_2nd"))
@@ -172,7 +169,8 @@ def FPGATrackSimWindowExtensionToolCfg(flags,name="FPGATrackSimWindowExtensionTo
     FPGATrackSimWindowExtensionTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
 
     # Hardcoded settings for now, hook up to flags later...
-    FPGATrackSimWindowExtensionTool.threshold = 11
+    # This threshold is the number of *missing* hits allowed
+    FPGATrackSimWindowExtensionTool.threshold = flags.Trigger.FPGATrackSim.hitThreshold
 
     # These MUST be of size equal to the full number of layers (13), though only the "new" layers
     # in the second stage are actually used.
@@ -255,7 +253,7 @@ def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool_2nd"):
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
     NNTrackTool.IdealGeoRoads = False
     NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
-    NNTrackTool.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
+    NNTrackTool.SPRoadFilterTool = result.popToolsAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
     NNTrackTool.Do2ndStageTrackFit = True
     NNTrackTool.useSectors = False
     result.setPrivateTools(NNTrackTool)
@@ -277,7 +275,7 @@ def FPGATrackSimTrackFitterToolCfg(flags,name="FPGATrackSimTrackFitterTool_2nd")
     TF.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     TF.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     TF.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
-    TF.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
+    TF.SPRoadFilterTool = result.popToolsAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
     TF.Do2ndStageTrackFit = True
     result.setPrivateTools(TF)
     return result
@@ -343,10 +341,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags,name="FPGATrackSimSecondStageAlg",s
     theFPGATrackSimSecondStageAlg.TrackFitter_2nd = result.popToolsAndMerge(FPGATrackSimTrackFitterToolCfg(flags))
     theFPGATrackSimSecondStageAlg.OverlapRemoval_2nd = result.popToolsAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
 
-    # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
-    if flags.Trigger.FPGATrackSim.spacePoints and theFPGATrackSimSecondStageAlg.tracking:
-        theFPGATrackSimSecondStageAlg.SPRoadFilterTool = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
-        theFPGATrackSimSecondStageAlg.Spacepoints = True
+    theFPGATrackSimSecondStageAlg.Spacepoints = flags.Trigger.FPGATrackSim.spacePoints
 
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimSecondStageAlgMonitoringCfg
     theFPGATrackSimSecondStageAlg.MonTool = result.popToolsAndMerge(FPGATrackSimSecondStageAlgMonitoringCfg(flags))
