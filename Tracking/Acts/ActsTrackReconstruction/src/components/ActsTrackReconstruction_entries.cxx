@@ -22,6 +22,7 @@
 
 // Algs
 DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
+DECLARE_COMPONENT( ActsTrk::TrackFindingBaseAlg )
 DECLARE_COMPONENT( ActsTrk::ReFitterAlg )
 DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ScoreBasedAmbiguityResolutionAlg )
