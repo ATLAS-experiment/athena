@@ -32,9 +32,28 @@ def getDevLowMuSignatures():
 
     chains['Egamma'] += [
         ChainProp(name='HLT_e6_etcut_L1eEM5',  stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e6_nopid_L1eEM5',  stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e6_loose_L1eEM5',  stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e6_lhloose_L1eEM5',  stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e6_medium_L1eEM5',  stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e6_lhmedium_L1eEM5',  stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        
         ChainProp(name='HLT_e10_etcut_L1eEM9', stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e10_nopid_L1eEM9', stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e10_loose_L1eEM9', stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e10_lhloose_L1eEM9', stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e10_medium_L1eEM9', stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_e10_lhmedium_L1eEM9', stream=[MinBiasStream], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        
         ChainProp(name='HLT_g6_etcut_L1eEM5',  stream=[MinBiasStream], groups=SinglePhotonGroup+PrimaryPhIGroup,   monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_g6_nopid_L1eEM5',  stream=[MinBiasStream], groups=SinglePhotonGroup+PrimaryPhIGroup,   monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_g6_loose_L1eEM5',  stream=[MinBiasStream], groups=SinglePhotonGroup+PrimaryPhIGroup,   monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_g6_medium_L1eEM5',  stream=[MinBiasStream], groups=SinglePhotonGroup+PrimaryPhIGroup,   monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        
         ChainProp(name='HLT_g10_etcut_L1eEM9', stream=[MinBiasStream], groups=SinglePhotonGroup+PrimaryPhIGroup,   monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_g10_nopid_L1eEM9', stream=[MinBiasStream], groups=SinglePhotonGroup+PrimaryPhIGroup,   monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_g10_loose_L1eEM9', stream=[MinBiasStream], groups=SinglePhotonGroup+PrimaryPhIGroup,   monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
+        ChainProp(name='HLT_g10_medium_L1eEM9', stream=[MinBiasStream], groups=SinglePhotonGroup+PrimaryPhIGroup,   monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val','caloMon:t0']),
     ]
 
     chains['Jet'] += [
@@ -80,6 +99,45 @@ def getDevLowMuSignatures():
         ChainProp(name='HLT_mb_sptrk_L1ZDC_A', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
         ChainProp(name='HLT_mb_sptrk_L1ZDC_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
         ChainProp(name='HLT_mb_sptrk_L1ZDC_A_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_XNXN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_XNYN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_XNZN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_XN_XOR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_YN_XOR',     l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_ZN_XOR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_YN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_ZN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_LOR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_YNYN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_A', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_A_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+
+        ChainProp(name='HLT_mb_sp1500_trk100_hmt_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp1500_trk100_hmt_L1TRT_ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp1500_trk100_hmt_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        
+        ChainProp(name='HLT_mb_sp3000_trk200_hmt_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp3000_trk200_hmt_L1TRT_ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp3000_trk200_hmt_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        
+        ChainProp(name='HLT_mb_sp5000_trk290_hmt_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp5000_trk290_hmt_L1TRT_ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp5000_trk290_hmt_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+                
+        ChainProp(name='HLT_mb_sp1500_pusup40_trk100_hmt_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp1500_pusup40_trk100_hmt_L1TRT_ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp1500_pusup40_trk100_hmt_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        
+        ChainProp(name='HLT_mb_sp3000_pusup100_trk200_hmt_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp3000_pusup100_trk200_hmt_L1TRT_ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp3000_pusup100_trk200_hmt_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        
+        ChainProp(name='HLT_mb_sp5000_pusup250_trk290_hmt_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp5000_pusup250_trk290_hmt_L1TRT_ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sp5000_pusup250_trk290_hmt_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
     ]
 
     chains['HeavyIon'] += [
@@ -102,6 +160,25 @@ def getDevLowMuSignatures():
         ChainProp(name='HLT_noalg_L1ZDC_A',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_noalg_L1ZDC_C',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_noalg_L1ZDC_A_C',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_OR',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_XNXN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_XNYN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_XNZN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_XN_XOR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_YN_XOR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_ZN_XOR',     l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_YN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_ZN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_LOR', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_YNYN', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_A',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_C',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1TRT_ZDC_A_C',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        
+        ChainProp(name='HLT_noalg_L1ZDC_OR_EMPTY',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_LOR_EMPTY',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_OR_UNPAIRED_NONISO',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_LOR_UNPAIRED_NONISO',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
     ]
 
 
