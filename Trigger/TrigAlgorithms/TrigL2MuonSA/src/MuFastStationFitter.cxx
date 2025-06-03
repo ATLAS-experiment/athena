@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastStationFitter.h"
@@ -50,7 +50,7 @@ StatusCode TrigL2MuonSA::MuFastStationFitter::initialize()
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
-StatusCode TrigL2MuonSA::MuFastStationFitter::setMCFlag(const BooleanProperty& use_mcLUT)
+StatusCode TrigL2MuonSA::MuFastStationFitter::setMCFlag(bool use_mcLUT)
 {
   m_use_mcLUT = use_mcLUT;
 

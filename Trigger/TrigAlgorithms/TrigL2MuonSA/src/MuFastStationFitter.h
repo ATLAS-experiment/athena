@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_MUFASTSTATIONFITTER_H
@@ -60,11 +60,11 @@ class MuFastStationFitter: public AthAlgTool
       StatusCode superPointFitter(TrigL2MuonSA::TrackPattern& trackPattern,
                                   const TrigL2MuonSA::MuonRoad&  muonRoad) const;
 
-      StatusCode setMCFlag(const BooleanProperty& use_mcLUT);
+      StatusCode setMCFlag(bool use_mcLUT);
 
    private:
 
-      BooleanProperty m_use_mcLUT {true};
+      bool m_use_mcLUT {true};
 		
       Gaudi::Property< double > m_endcapinn_mdt_chi2_limit {
 	this, "ENDCAPINN_MDT_CHI2_LIMIT", 20., ""};
