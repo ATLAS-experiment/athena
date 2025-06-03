@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 namespace InDet {
 template <RobustTrackingGeometryBuilderImpl::ToolType type,
@@ -516,7 +516,7 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
     idVolumes.push_back(centralEnclosure);
 
   std::string volumeName =
-      enclose ? "InDet::Detectors::BpPixSctTrt" : m_exitVolume;
+      enclose ? "InDet::Detectors::BpPixSctTrt" : m_exitVolume.value();
 
   ATH_MSG_VERBOSE("       -> inserting beam pipe into detectors.");
 
