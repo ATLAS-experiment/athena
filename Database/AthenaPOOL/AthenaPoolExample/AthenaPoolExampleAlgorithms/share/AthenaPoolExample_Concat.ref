@@ -2099,7 +2099,7 @@ SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-
 StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
 ClassIDSvc                                           INFO getRegistryEntries: read 12 CLIDRegistry entries for module ALL
-StreamStream1                                        INFO Metadata records written: 21
+StreamStream1                                       DEBUG Metadata items written: 4
 StreamStream1                                       DEBUG Leaving incident handler for MetaDataStop
 StreamStream2                                       DEBUG handle() incident type: MetaDataStop
 StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG Could not get mcProcID
@@ -2185,7 +2185,7 @@ SimplePoolFile3.root                                DEBUG --->Adding Assoc :A811
 SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 StreamStream2.StreamStream2Tool                     DEBUG In commitOutput
 SimplePoolFile3.root                                DEBUG DB Action Commit
-StreamStream2                                        INFO Metadata records written: 21
+StreamStream2                                       DEBUG Metadata items written: 4
 StreamStream2                                       DEBUG Leaving incident handler for MetaDataStop
 PoolSvc                                             DEBUG Disconnect request for contextId=0
 Domain[ROOT_All]                                     INFO >   Deaccess DbDomain     READ      [ROOT_All] 

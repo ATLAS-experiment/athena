@@ -483,7 +483,7 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
       if (write().isFailure()) {  // true mean write AND commit
          throw GaudiException("Cannot write on finalize", name(), StatusCode::FAILURE);
       }
-      ATH_MSG_INFO("Records written: " << m_events);
+      ATH_MSG_DEBUG("Written metadata on finalize");
    }
    // Prepare the WriteDataHeaderForms incident
    std::string DHFWriteIncidentfileName = m_outSeqSvc->buildSequenceFileName(m_outputName);
@@ -525,7 +525,7 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
       if ((pAsIProp->setProperty(m_itemList)).isFailure()) {
          throw GaudiException("Folder property [itemList] not found", name(), StatusCode::FAILURE);
       }
-      ATH_MSG_INFO("Metadata records written: " << m_events);
+      ATH_MSG_DEBUG("Metadata items written: " << m_metadataItemList.value().size());
    }
 }
 

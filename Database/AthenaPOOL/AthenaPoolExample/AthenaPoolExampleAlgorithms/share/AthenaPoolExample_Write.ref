@@ -1224,7 +1224,7 @@ MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaD
 SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [202]  (10 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile1.root                                DEBUG DB Action Commit
-StreamStream1                                        INFO Metadata records written: 21
+StreamStream1                                       DEBUG Metadata items written: 4
 StreamStream1                                       DEBUG Leaving incident handler for MetaDataStop
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
@@ -1281,7 +1281,6 @@ MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaD
 SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdrForm(DataHeaderForm) [202]  (f , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile2.root                                DEBUG DB Action Commit
-StreamStream2                                        INFO Metadata records written: 21
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -1360,7 +1359,6 @@ EmptyPoolFile.root                                  DEBUG --->Adding Shape[5 , 7
 EmptyPoolFile.root                                  DEBUG ---->Class:DataHeaderForm_p6
 EmptyPoolFile.root                                  DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
 EmptyPoolFile.root                                  DEBUG DB Action Commit
-StreamStream3                                        INFO Metadata records written: 1
 PoolSvc                                             DEBUG Disconnect request for contextId=0
 PoolSvc                                             DEBUG Disconnected PersistencySvc session
 PoolSvc                                             DEBUG Disconnect request for contextId=1
