@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamMergeOutputSvc.h"
@@ -18,9 +18,10 @@ typedef std::map<uint32_t, ROBF*> ROBMAP;
 
 // Constructor.
 ByteStreamMergeOutputSvc::ByteStreamMergeOutputSvc(const std::string& name, ISvcLocator* svcloc) :
-   base_class(name,svcloc),
-   m_bsOutputStreamName(name)
+   base_class(name,svcloc)
 {
+   // cppcheck-suppress useInitializationList; deprecated Property constructor
+   m_bsOutputStreamName = name;
 }
 
 // Destructor.
