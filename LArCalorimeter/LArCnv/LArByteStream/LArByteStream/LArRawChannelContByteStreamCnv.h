@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRAWCHANNELCONTRAWEVENTCNV_H
@@ -12,6 +12,7 @@
 #include "AthenaBaseComps/AthConstConverter.h"
 #include "ByteStreamData/RawEvent.h" 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
+#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -20,7 +21,6 @@ class StatusCode;
 class IAddressCreator;
 class LArRawChannelContainer;
 class LArRawDataContByteStreamTool;
-class IROBDataProviderSvc;  
 class IByteStreamCnvSvc;
 
 // Abstract factory to create the converter
