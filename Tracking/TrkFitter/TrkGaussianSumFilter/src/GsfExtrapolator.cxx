@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -257,21 +257,15 @@ Trk::GsfExtrapolator::extrapolateImpl(
                                    boundaryCheck,
                                    particleHypothesis);
   }
-
+  // Empty the garbage bin
+  emptyRecycleBins(cache);
   const Trk::Layer* associatedLayer = nullptr;
   const Trk::TrackingVolume* startVolume = nullptr;
   const Trk::TrackingVolume* destinationVolume = nullptr;
-  std::unique_ptr<Trk::TrackParameters> referenceParameters = nullptr;
-
-  initialiseNavigation(ctx,
-                       cache,
-                       multiComponentState,
-                       surface,
-                       associatedLayer,
-                       startVolume,
-                       destinationVolume,
-                       referenceParameters,
-                       direction);
+  std::unique_ptr<Trk::TrackParameters> referenceParameters =
+      initialiseNavigation(ctx, cache, multiComponentState, surface,
+                           associatedLayer, startVolume, destinationVolume,
+                           direction);
 
   // Bail to direct extrapolation if the direction cannot be determined
   if (direction == Trk::anyDirection) {
@@ -293,7 +287,6 @@ Trk::GsfExtrapolator::extrapolateImpl(
      - reference parameters (prefered if they exist) or
      - destination surface
      */
-
   const Amg::Vector3D globalSeparation =
     referenceParameters
       ? referenceParameters->position() - combinedState->position()
@@ -629,7 +622,7 @@ Trk::GsfExtrapolator::extrapolateInsideVolume(
   // Retrieve the current layer
   // Produce a combined state
   const Trk::TrackParameters* combinedState =
-    currentState->begin()->params.get();
+      currentState->begin()->params.get();
 
   const Trk::Layer* associatedLayer = layer;
 
@@ -935,7 +928,7 @@ Trk::GsfExtrapolator::extrapolateToDestinationLayer(
 /*
  * Initialise Navigation
  */
-void
+std::unique_ptr<Trk::TrackParameters>
 Trk::GsfExtrapolator::initialiseNavigation(
   const EventContext& ctx,
   Cache& cache,
@@ -944,95 +937,69 @@ Trk::GsfExtrapolator::initialiseNavigation(
   const Trk::Layer*& currentLayer,
   const Trk::TrackingVolume*& currentVolume,
   const Trk::TrackingVolume*& destinationVolume,
-  std::unique_ptr<Trk::TrackParameters>& referenceParameters,
-  Trk::PropDirection direction) const
+  Trk::PropDirection& direction) const
 {
-
-  // Empty the garbage bin
-  emptyRecycleBins(cache);
-  const Trk::TrackParameters* combinedState =
-    multiComponentState.begin()->params.get();
+  //Get the highest weight parameters. We will just use those
+  const Trk::TrackParameters* combinedState = multiComponentState.begin()->params.get();
   /* =============================================
      Look for current volume
      ============================================= */
   // 1. See if the current layer is associated with a tracking volume
-
   const Trk::Surface* associatedSurface = &(combinedState->associatedSurface());
-  currentLayer =
-    associatedSurface ? associatedSurface->associatedLayer() : currentLayer;
-  currentVolume =
-    currentLayer ? currentLayer->enclosingTrackingVolume() : currentVolume;
-
-  // If the association method failed then try the recall method
-
-  if (!currentVolume && associatedSurface == cache.m_recallSurface) {
-    currentVolume = cache.m_recallTrackingVolume;
-    currentLayer = cache.m_recallLayer;
-  }
-  // Global search method if this fails
-
-  else if (!currentVolume) {
-    // If the recall method fails then the cashed information needs to be reset
-    resetRecallInformation(cache);
-    currentVolume = m_navigator->volume(ctx, combinedState->position());
-    currentLayer = (currentVolume)
-                     ? currentVolume->associatedLayer(combinedState->position())
-                     : nullptr;
+  currentLayer = associatedSurface ? associatedSurface->associatedLayer() : currentLayer;
+  currentVolume = currentLayer ? currentLayer->enclosingTrackingVolume() : currentVolume;
+  // If the association method failed
+  if (!currentVolume) {
+    //Try the recall in case the associatedSurface is the recall one
+    if (associatedSurface == cache.m_recallSurface) {
+      currentVolume = cache.m_recallTrackingVolume;
+      currentLayer = cache.m_recallLayer;
+    }
+    // Global search method if this fails
+    else {
+      // If the recall method fails reset the cache
+      resetRecallInformation(cache);
+      currentVolume = m_navigator->volume(ctx, combinedState->position());
+      currentLayer = currentVolume
+              ? currentVolume->associatedLayer(combinedState->position())
+              : nullptr;
+    }
   }
   /* =============================================
      Determine the resolved direction
      ============================================= */
-  if (direction == Trk::anyDirection) {
-    referenceParameters =
-      currentVolume
-        ? m_propagator->propagateParameters(
-            ctx, *combinedState, surface, direction, false, m_fieldProperties)
-        : nullptr;
-    // These parameters will need to be deleted later. Add to list of garbage to
-    // be collected
-    if (referenceParameters) {
-      const Amg::Vector3D surfaceDirection(referenceParameters->position() -
-                                     combinedState->position());
-      direction = (surfaceDirection.dot(combinedState->momentum()) > 0.)
+  std::unique_ptr<Trk::TrackParameters> referenceParameters =
+      currentVolume ? m_propagator->propagateParameters(
+                          ctx, *combinedState, surface, direction, false,
+                          m_fieldProperties)
+                    : nullptr;
+  // Find concrete direction based on reference parameters
+  if (direction == Trk::anyDirection && referenceParameters) {
+    const Amg::Vector3D surfaceDirection(referenceParameters->position() -
+                                         combinedState->position());
+    direction = (surfaceDirection.dot(combinedState->momentum()) > 0.)
                     ? Trk::alongMomentum
                     : Trk::oppositeMomentum;
-    }
   }
-
   /* =============================================
      Look for destination volume
      ============================================= */
-
-  // 1. See if the destination layer is associated with a tracking volume
+  // See if the destination layer is associated with a tracking volume
   destinationVolume = surface.associatedLayer()
-                        ? surface.associatedLayer()->enclosingTrackingVolume()
-                        : nullptr;
-
-  // 2. See if there is a cashed recall surface
-  if (!destinationVolume && &surface == cache.m_recallSurface) {
-    destinationVolume = cache.m_recallTrackingVolume;
-    // If no reference parameters are defined, then determine them
-    if (!referenceParameters) {
-      referenceParameters =
-        currentVolume
-          ? m_propagator->propagateParameters(
-              ctx, *combinedState, surface, direction, false, m_fieldProperties)
-          : nullptr;
+                          ? surface.associatedLayer()->enclosingTrackingVolume()
+                          : nullptr;
+  // Association failed
+  if (!destinationVolume) {
+    // See if the cached recall surface is the destination one
+    if (&surface == cache.m_recallSurface) {
+      destinationVolume = cache.m_recallTrackingVolume;
+    } else {
+      // Global search of tracking geometry to find the destination volume
+      destinationVolume = m_navigator->volume(
+          ctx, referenceParameters ? referenceParameters->position()
+                                   : surface.globalReferencePoint());
     }
-    // 3. Global search
-  } else {
-    // If no reference parameters are defined try to determine them
-    if (!referenceParameters) {
-      referenceParameters =
-        currentVolume
-          ? m_propagator->propagateParameters(
-              ctx, *combinedState, surface, direction, false, m_fieldProperties)
-          : nullptr;
-    }
-    // Global search of tracking geometry to find the destination volume
-    destinationVolume = m_navigator->volume(
-        ctx, referenceParameters ? referenceParameters->position()
-                                 : surface.globalReferencePoint());
   }
+  return referenceParameters;
 }
 

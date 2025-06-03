@@ -404,7 +404,7 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
     return;
   }
 
-  // If the amount of material is between 0.0001 and 0.01 return the gaussian
+  // If the amount of material is between 0.0001 and 0.01 in x0 return the gaussian
   // approximation to the Bethe-Heitler distribution
   if (pathlengthInX0 < s_lowerRange) {
     const double meanZ = std::exp(-1. * pathlengthInX0);
@@ -425,8 +425,7 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
     cache.numElements = 1;
     return;
   }
-
-  // Now we do the full calculation
+  //clip to upper range
   if (pathlengthInX0 > s_upperRange) {
     pathlengthInX0 = s_upperRange;
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -33,11 +33,6 @@ class Track;
 class TrackingVolume;
 class TrackStateOnSurface;
 
-/** @struct StateAtBoundarySurface
-  - Structure to contain information about a state at the interface between
-  tracking volumes
-  */
-
 static const InterfaceID IID_IMultiStateExtrapolator("IMultiStateExtrapolator",
                                                      1, 0);
 
@@ -54,8 +49,6 @@ public:
    */
   struct Cache
   {
-    //!< Flag the recall solution
-    bool m_recall = false;
     //!< Surface for recall   (not owning)
     const Surface* m_recallSurface = nullptr;
     //!< Layer for recall   (not owning)
