@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetJvtEfficiency/JetJvtEfficiency.h"
@@ -27,7 +27,6 @@ JetJvtEfficiency::JetJvtEfficiency( const std::string& name): asg::AsgTool( name
   m_jvtEffTool("", this),
   m_h_JvtHist(nullptr),
   m_h_EffHist(nullptr),
-  m_passJvtDecName(""),
   m_useMuBinsSF(false),
   m_useDummySFs(false),
   m_jvtCut(0),
@@ -149,9 +148,6 @@ StatusCode JetJvtEfficiency::initialize(){
     }
 
     ATH_CHECK(m_NNJvtTool_handle.retrieve());
-
-    // NNJvt tool will decorate decision on jets that we can retrieve
-    m_passJvtDecName = "NNJvtPass";
   }
   // configure for fJvt mode
   else if (m_taggingAlg == JvtTagger::fJvt){
