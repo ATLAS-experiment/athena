@@ -7,7 +7,7 @@
 ///     
 ///   @author Mark Sutton
 ///
-///   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+///   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ///
 
 #ifndef REGIONSELECTOR_REGSELTOOL_H
@@ -38,14 +38,10 @@ class IInterface;
 class RegSelTool : public extends<AthAlgTool, IRegSelTool> {
 
 public:
-
-  /** @c Standard constructor for tool (obviously).
-   */
-  RegSelTool( const std::string& type, const std::string& name, const IInterface* parent );
+  using base_class::base_class;
 
   //! Destructor.
   virtual ~RegSelTool() override;
-
 
   //! @method initialize, loads lookup tables for retrieve %Identifier %Hash and ROBID 
   virtual StatusCode initialize() override;
@@ -58,11 +54,9 @@ protected:
     
 private:
 
-  //! Flag to determine whether it has yet been initialised
-  bool              m_initialised; 
-
-  //! Flag to dump loaded table in data file.
-  BooleanProperty  m_dumpTable;
+  //! Declare properties
+  Gaudi::Property<bool> m_dumpTable{ this, "WriteTable", false, "write out maps to files for debugging" };
+  Gaudi::Property<bool> m_initialised{ this, "Initialised", false, "flag to determine whether the corresponding subsystem is initilised" };
 
   SG::ReadCondHandleKey<IRegSelLUTCondData> m_tableKey{ this, "RegSelLUT", "Tool_Not_Initalised", "Region Selector lookup table" };
 
