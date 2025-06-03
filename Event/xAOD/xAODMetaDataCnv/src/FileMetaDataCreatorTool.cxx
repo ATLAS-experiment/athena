@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -29,6 +29,7 @@ StatusCode
       ATH_CHECK(m_eventStore.retrieve());
       ATH_CHECK(m_metaDataSvc.retrieve());
       ATH_CHECK(m_inputMetaDataStore.retrieve());
+      ATH_CHECK(m_metaDataStore.retrieve());
       ATH_CHECK(m_tagInfoMgr.retrieve());
 
       // If DataHeader key not specified, try determining it
@@ -252,39 +253,51 @@ StatusCode
       // Read simulation parameters
       const IOVMetaDataContainer * simInfo = nullptr;
       StatusCode sc = StatusCode::FAILURE;
-      if (m_inputMetaDataStore->contains< IOVMetaDataContainer >(m_simInfoKey))
+      if (m_inputMetaDataStore->contains< IOVMetaDataContainer >(m_simInfoKey)) {
         sc = m_inputMetaDataStore->retrieve(simInfo, m_simInfoKey);
+      } else if (m_metaDataStore->contains< IOVMetaDataContainer >(m_simInfoKey)) {
+        sc = m_metaDataStore->retrieve(simInfo, m_simInfoKey);
+      }
       const coral::AttributeList * attrList = nullptr;
-      if (simInfo && sc.isSuccess())
-        for (const CondAttrListCollection* payload : *simInfo->payloadContainer())
-          for (const auto& itr : *payload)
+      if (simInfo && sc.isSuccess()) {
+        for (const CondAttrListCollection* payload : *simInfo->payloadContainer()) {
+          for (const auto& itr : *payload) {
             attrList = &(itr.second);
+          }
+        }
+      }
+
+      bool simFlavourSet{};
+      bool isDataOverlaySet{};
       if (attrList) {
         { // set simulation flavor
           std::string key = "SimulationFlavour";
-          std::string value = "none";
-          if (attrList->exists(key))
-            value = (*attrList)[key].data< std::string >();
+          if (attrList->exists(key)) {
+            std::string value = (*attrList)[key].data< std::string >();
 
-          // remap simulation flavor "default" to "FullSim"
-          if (value == "default")
-            value = "FullSim";
+            // remap simulation flavor "default" to "FullSim"
+            if (value == "default")
+              value = "FullSim";
 
-          set(xAOD::FileMetaData::simFlavour, value);
+            set(xAOD::FileMetaData::simFlavour, value);
+            simFlavourSet = true;
+          }
         }
 
         { // set whether this is overlay
-          std::string key = "IsEventOverlayInputSim";
-          std::string attr = "False";
-          if (attrList->exists(key))
-            attr = (*attrList)[key].data< std::string >();
-          set(xAOD::FileMetaData::isDataOverlay, attr == "True");
+          std::string key = "IsDataOverlay";
+          if (attrList->exists(key)) {
+            std::string attr = (*attrList)[key].data< std::string >();
+            set(xAOD::FileMetaData::isDataOverlay, attr == "True");
+            isDataOverlaySet = true;
+          }
         }
+      }
 
-      } else {
+      if (!simFlavourSet || !isDataOverlaySet) {
           ATH_MSG_DEBUG(
-            "Failed to retrieve " << m_simInfoKey << " => cannot set: "
-            << xAOD::FileMetaData::simFlavour << ", and "
+            "Failed to set "
+            << xAOD::FileMetaData::simFlavour << " or "
             << xAOD::FileMetaData::isDataOverlay
             << ". Trying to get them from input metadata store." );
 
@@ -292,22 +305,34 @@ StatusCode
               const xAOD::FileMetaData* input = nullptr;
               input = m_inputMetaDataStore->tryConstRetrieve< xAOD::FileMetaData >(key);
               if (input) {
-                  std::string orig_simFlavour = "none";
-                  bool orig_isDataOverlay = false;
-                  if (!input->value(xAOD::FileMetaData::simFlavour, orig_simFlavour) ||
-                      !input->value(xAOD::FileMetaData::isDataOverlay,
-                                    orig_isDataOverlay))
-                      ATH_MSG_DEBUG(
-                          "Could not get simulation parameters from input metadata "
-                          "store");
-                  else {
-                      ATH_MSG_DEBUG("Retrieved from input metadata store: "
-                                    << xAOD::FileMetaData::simFlavour << " = "
-                                    << orig_simFlavour << ", "
-                                    << xAOD::FileMetaData::isDataOverlay << " = "
-                                    << orig_isDataOverlay);
-                      set(xAOD::FileMetaData::simFlavour, orig_simFlavour);
-                      set(xAOD::FileMetaData::isDataOverlay, orig_isDataOverlay);
+                  if (!simFlavourSet) {
+                    std::string orig_simFlavour = "none";
+                    if (!input->value(xAOD::FileMetaData::simFlavour, orig_simFlavour)) {
+                        ATH_MSG_DEBUG(
+                            "Could not get xAOD::FileMetaData::simFlavour "
+                            "from input metadata "
+                            "store");
+                    } else {
+                        ATH_MSG_DEBUG("Retrieved from input metadata store: "
+                                      << xAOD::FileMetaData::simFlavour << " = "
+                                      << orig_simFlavour);
+                        set(xAOD::FileMetaData::simFlavour, orig_simFlavour);
+                    }
+                  }
+
+                  if (!isDataOverlaySet) {
+                    bool orig_isDataOverlay = false;
+                    if (!input->value(xAOD::FileMetaData::isDataOverlay, orig_isDataOverlay)) {
+                        ATH_MSG_DEBUG(
+                            "Could not get "
+                            "xAOD::FileMetaData::isDataOverlay from input "
+                            "metadata store");
+                    } else {
+                        ATH_MSG_DEBUG("Retrieved from input metadata store: "
+                                      << xAOD::FileMetaData::isDataOverlay << " = "
+                                      << orig_isDataOverlay);
+                        set(xAOD::FileMetaData::isDataOverlay, orig_isDataOverlay);
+                    }
                   }
               }
           }
