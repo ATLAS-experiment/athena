@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_TESTRANDOMSEQALG_H
@@ -11,32 +11,30 @@
 #include "AthenaKernel/IAtRndmGenSvc.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
+
 namespace CLHEP { class HepRandomEngine; }
+
 /** @class TestRandomSegAlg
    * @brief a trivial algorithm to test the sequence of random numbers
    * produced by an IAtRndmGenSvc
    * 
    * @author srinir@bnl.gov
-   * $Id: TestRandomSegAlg.h,v 1.12 2008-12-15 19:14:58 binet Exp $
    */
 class TestRandomSeqAlg : public AthAlgorithm {
 
 public:
-  TestRandomSeqAlg(const std::string& name, ISvcLocator* pSvcLocator);
-  /// \name implement IAlgorithm
-  //@{
-  virtual StatusCode initialize();
-  virtual StatusCode execute();
-  //virtual StatusCode finalize();
-  //@}
+  using AthAlgorithm::AthAlgorithm;
+
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+
   
 private:
   /// handle to the @c IAtRndmGenSvc we want to test
-  ServiceHandle<IAtRndmGenSvc> m_rndmSvc;
-  StringProperty m_streamName;
-  /// number of random numbers to shoot (and print)
-  IntegerProperty           m_noOfNo;
-  CLHEP::HepRandomEngine* m_pEng;
+  ServiceHandle<IAtRndmGenSvc> m_rndmSvc{this, "RndmSvc", "AtRanluxGenSvc", "the IAtRndmGenSvc we want to test"};
+  Gaudi::Property<std::string> m_streamName{this, "StreamName", "TEST", "random number stream to use"};
+  Gaudi::Property<int> m_noOfNo{this, "NoOfNo", 10, "the number of random numbers to shoot and print per event"};
+  CLHEP::HepRandomEngine* m_pEng{nullptr};
 };
 
 #endif
