@@ -9,7 +9,6 @@
 #include "LArByteStream/LArRodDecoder.h"
 #include "LArByteStream/LArABBADecoder.h"
 #include "LArByteStream/LArLATOMEDecoder.h"
-#include "ByteStreamCnvSvcBase/CollectionByteStreamCnv.h"
 #include "../LArRawDataReadingAlg.h"
 #include "../LArRawCalibDataReadingAlg.h"
 #include "../LArRawSCDataReadingAlg.h"
