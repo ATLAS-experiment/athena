@@ -48,6 +48,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.region=34 \
     Trigger.FPGATrackSim.oldRegionDefs=False \
     Trigger.FPGATrackSim.writeToAOD=True \
+    Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
     Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
     Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM \

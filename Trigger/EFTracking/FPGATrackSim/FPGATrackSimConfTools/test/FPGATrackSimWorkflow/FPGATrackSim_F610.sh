@@ -33,6 +33,7 @@ run_F610(){
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.Hough.secondStage=True \
         Trigger.FPGATrackSim.writeToAOD=True \
+        Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
         Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM \

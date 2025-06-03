@@ -1,0 +1,21 @@
+
+{
+    "TrkAnaEF" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "ActsFastTrackParticles",
+        "MatchingType"  : "TruthMatch",
+        "doClusterValidation" : true,
+        "PixelClusterKey"  : "ITkPixelClusters",
+        "StripClusterKey"  : "ITkStripClusters",
+        "plotHitsOnMatchedTracks" : true,
+        "plotTechnicalEfficiencies" : true,
+        "truthMinD0"    : -2.0,
+        "truthMaxD0"    : 2.0,
+        "truthMinZ0"    : -150.0,
+        "truthMaxZ0"    : 150.0,
+        "truthMinQoPT"  : -0.001,
+        "truthMaxQoPT"  : 0.001
+    }
+}
