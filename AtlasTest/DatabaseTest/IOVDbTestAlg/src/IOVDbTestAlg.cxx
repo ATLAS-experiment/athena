@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IOVDbTestAlg.h"
@@ -35,43 +35,9 @@
 
 IOVDbTestAlg::IOVDbTestAlg(const std::string& name, ISvcLocator* pSvcLocator) :
         AthReentrantAlgorithm(name, pSvcLocator),
-        m_writeCondObjs(false),
-        m_regIOV(false),
-        m_readWriteCool(false),
-        m_twoStepWriteReg(false),
-        m_createExtraChans(false),
-        m_readInInit(false),
-        m_writeOnlyCool(false),
-        m_fancylist(false),
-        m_printLB(false),
-        m_writeNewTag(false),
-        m_readNewTag(false),
-	m_noStream(false),
-        m_regTime(0),
-        m_streamName("CondStream1"),
-        m_tagID(""),
         m_regSvc("IOVRegistrationSvc", name),
         m_streamer ("CondStream1")
-
 {
-    declareProperty("WriteCondObjs",     m_writeCondObjs);
-    declareProperty("RegisterIOV",       m_regIOV);
-    declareProperty("ReadWriteCool",     m_readWriteCool);
-    declareProperty("WriteOnlyCool",     m_writeOnlyCool);
-    declareProperty("TwoStepWriteReg",   m_twoStepWriteReg);
-    declareProperty("StreamName",        m_streamName);
-    declareProperty("CreateExtraChanns", m_createExtraChans);
-    declareProperty("NameChanns",        m_nameChans);
-    declareProperty("ReadInInit",        m_readInInit);
-    declareProperty("FancyList",         m_fancylist);
-    declareProperty("PrintLB",           m_printLB);
-    declareProperty("WriteNewTag",       m_writeNewTag);
-    declareProperty("ReadNewTag",        m_readNewTag);
-    declareProperty("RegTime",           m_regTime);  // Register time in sec
-    declareProperty("TagID",             m_tagID);
-    declareProperty("run",               m_run);
-    declareProperty("online",            m_online);
-    declareProperty("NoStream",          m_noStream);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -134,7 +100,7 @@ StatusCode IOVDbTestAlg::initialize ATLAS_NOT_THREAD_SAFE (){
     if (m_regIOV) {
         ATH_CHECK( m_regSvc.retrieve() );
         ATH_MSG_DEBUG( "Found IOVRegistrationSvc " );
-        ATH_MSG_INFO( "Tag to be used: " << m_tagID );
+        ATH_MSG_INFO( "Tag to be used: " << m_tagID.value() );
     }
 
     if (m_readInInit) {
