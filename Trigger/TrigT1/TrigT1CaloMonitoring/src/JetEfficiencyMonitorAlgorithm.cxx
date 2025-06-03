@@ -16,7 +16,7 @@ using Athena::Units::GeV;
 static const std::map<std::string, int> l1_trigger_flatline_vals = {
   {"L1_gLJ80p0ETA25", 175*GeV}, {"L1_gLJ100p0ETA25", 200*GeV},
   {"L1_gLJ140p0ETA25", 270*GeV}, {"L1_gLJ160p0ETA25", 270*GeV}, 
-  {"L1_SC111-CJ15", 270*GeV}, {"L1_gJ20p0ETA25", 40*GeV},
+  {"L1_SC175-SCjJ10", 270*GeV}, {"L1_gJ20p0ETA25", 40*GeV},
   {"L1_gJ50p0ETA25", 80*GeV}, {"L1_gJ100p0ETA25", 200*GeV},
   {"L1_gJ400p0ETA25", 800*GeV}, {"L1_jJ30", 50*GeV}, 
   {"L1_jJ40", 60*GeV}, {"L1_jJ50", 70*GeV}, 
