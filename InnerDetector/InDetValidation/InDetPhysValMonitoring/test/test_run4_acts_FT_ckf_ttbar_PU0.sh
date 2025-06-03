@@ -8,7 +8,7 @@
 # art-output: idpvm*.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_athena_acts
+# art-html: dcube_acts_shifter_last
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml

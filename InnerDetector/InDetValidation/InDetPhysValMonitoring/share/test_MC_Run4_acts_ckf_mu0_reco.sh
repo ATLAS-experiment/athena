@@ -180,7 +180,7 @@ fi
 if [ $ambi_rc == 0 ]; then
     run "dcube-ambi-last" \
         $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x dcube_ambi_last \
+        -p -x dcube_ambi_shifter_last \
         -c ${dcubeXmlAbsPath} \
         -r ${lastref_dir}/idpvm.ambi.root \
         idpvm.ambi.root
