@@ -11,6 +11,7 @@
 // FrameWork includes
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include <GaudiKernel/StatusCode.h>
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "AthenaBaseComps/AthService.h"
@@ -83,7 +84,7 @@ namespace ISF {
     virtual StatusCode simulateVector(const ISFParticleVector& particles, McEventCollection* mcEventCollection, McEventCollection *) override {
       // this implementation is a wrapper in case the simulator does
       // implement particle-vector input
-      bool success = true;
+      StatusCode sc = StatusCode::SUCCESS;
       // simulate each particle individually
       for (ISF::ISFParticle* part : particles) {
         ATH_MSG_VERBOSE( m_screenOutputPrefix <<  "Starting simulation of particle: " << part );
@@ -91,10 +92,10 @@ namespace ISF {
           ATH_MSG_WARNING("Simulation of particle failed!" << endmsg <<
                           "   -> simulator: " << this->simSvcDescriptor() <<
                           "   -> particle : " << *part );
-          success = false;
+          sc = StatusCode::FAILURE;
         }
       }
-      return ( success ) ? StatusCode::SUCCESS : StatusCode::FAILURE;
+      return sc;
     }
 
     /** Simulation call for individual particles */

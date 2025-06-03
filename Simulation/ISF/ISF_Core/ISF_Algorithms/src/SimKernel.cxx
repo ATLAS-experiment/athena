@@ -7,14 +7,16 @@
 // ISF_Event includes
 #include "ISF_Event/ISFParticle.h"
 // ISF_Interfaces includes
-#include "ISF_Interfaces/IParticleBroker.h"
-#include "ISF_Interfaces/ITruthSvc.h"
-#include "ISF_Interfaces/ISimulationSvc.h"
-#include "ISF_Interfaces/IMonitoringTool.h"
+#include "ISF_Interfaces/BaseSimulationG4Svc.h"
 #include "ISF_Interfaces/IEventFilterTool.h"
+#include "ISF_Interfaces/IMonitoringTool.h"
+#include "ISF_Interfaces/IParticleBroker.h"
+#include "ISF_Interfaces/ISimulationSvc.h"
+#include "ISF_Interfaces/ITruthSvc.h"
 // FrameWork includes
 #include "Gaudi/Property.h"
 // ATLAS cxx utils
+#include "HitManagement/HitCollectionMap.h"
 #include "PmbCxxUtils/CustomBenchmark.h"
 // ROOT includes
 #include "TTree.h"
@@ -23,6 +25,8 @@
 // GeneratorObjects
 #include "GeneratorObjects/McEventCollection.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
+// std includes
+#include <memory>
 
 #undef ISFDEBUG
 
@@ -333,6 +337,8 @@ StatusCode ISF::SimKernel::execute()
     m_memMon->recordCurrent("before 1st event");
   }
 
+  auto hitCollections = std::make_shared<HitCollectionMap>();
+
   // read and convert input
   //  a. hard-scatter
   ISFParticleContainer simParticles{}; // particles for ISF simulation
@@ -367,12 +373,22 @@ StatusCode ISF::SimKernel::execute()
       // if simulation with current flavour is registered
       //  -> setupEvent
       if ( curSimSvc){
-        if( curSimSvc->setupEvent().isFailure() ) {
-          ATH_MSG_WARNING( "Event setup failed for "
-                           << curSimSvc->simSvcDescriptor() );
+        auto status = [&] ATLAS_NOT_THREAD_SAFE {
+          if (auto* curSimSvcG4 =
+                  dynamic_cast<ISF::BaseSimulationG4Svc*>(curSimSvc)) {
+            // if the simulator is a Geant4 one, we need to pass the event info
+            return curSimSvcG4->setupEvent(*hitCollections);
+          } else {
+            return curSimSvc->setupEvent();
+          }
+        }();
+
+        if (status.isFailure()) {
+          ATH_MSG_WARNING("Event setup failed for "
+                          << curSimSvc->simSvcDescriptor());
         } else {
-          ATH_MSG_DEBUG  ( "Event setup done for "
-                           << curSimSvc->simSvcDescriptor() );
+          ATH_MSG_DEBUG("Event setup done for "
+                        << curSimSvc->simSvcDescriptor());
         }
       }
     }
@@ -437,7 +453,20 @@ StatusCode ISF::SimKernel::execute()
       // correct if Geant4 simulation were to be used for pile-up Hits
       // in Fast Chain.
       ATH_MSG_VERBOSE("Selected " << particles.size() << " particles to be processed by " <<  m_simSvcNames[simID]);
-      if (m_simSvcs[simID]->simulateVector(particles, m_outputHardScatterTruth.ptr(), shadowTruth.get()).isFailure()) {
+      if (auto* curSimSvcG4 =
+              dynamic_cast<ISF::BaseSimulationG4Svc*>(m_simSvcs[simID])) {
+        // if the simulator is a Geant4 one, we need to pass the event info
+        if (curSimSvcG4
+                ->simulateVector(particles, m_outputHardScatterTruth.ptr(),
+                                 hitCollections, shadowTruth.get())
+                .isFailure()) {
+          ATH_MSG_WARNING("Simulation of particles failed in Simulator: "
+                          << m_simSvcNames[simID]);
+        }
+      } else if (m_simSvcs[simID]
+                     ->simulateVector(particles, m_outputHardScatterTruth.ptr(),
+                                      shadowTruth.get())
+                     .isFailure()) {
         ATH_MSG_WARNING( "Simulation of particles failed in Simulator: " << m_simSvcNames[simID]);
       }
       ATH_MSG_VERBOSE(m_simSvcNames[simID] << " returned " << m_particleBroker->numParticles()-numParticlesLeftInBroker << " new particles to be added to the queue." );
@@ -463,12 +492,22 @@ StatusCode ISF::SimKernel::execute()
       // if simulation with current flavour is registered
       //  -> releaseEvent()
       if ( curSimSvc){
-        if( curSimSvc->releaseEvent().isFailure() ) {
-          ATH_MSG_WARNING( "Event release failed for "
-                           << curSimSvc->simSvcDescriptor() );
+        auto status = [&] ATLAS_NOT_THREAD_SAFE {
+          if (auto* curSimSvcG4 =
+                  dynamic_cast<ISF::BaseSimulationG4Svc*>(curSimSvc)) {
+            // if the simulator is a Geant4 one, we need to pass the event info
+            return curSimSvcG4->releaseEvent(*hitCollections);
+          } else {
+            return curSimSvc->releaseEvent();
+          }
+        }();
+
+        if (status.isFailure()) {
+          ATH_MSG_WARNING("Event release failed for "
+                          << curSimSvc->simSvcDescriptor());
         } else {
-          ATH_MSG_DEBUG  ( "Event release done for "
-                           << curSimSvc->simSvcDescriptor() );
+          ATH_MSG_DEBUG("Event release done for "
+                        << curSimSvc->simSvcDescriptor());
         }
       }
     } // -> loop over SimSvcs

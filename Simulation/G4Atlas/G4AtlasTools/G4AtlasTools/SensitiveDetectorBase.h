@@ -5,6 +5,14 @@
 #ifndef G4ATLASTOOLS_SENSITIVEDETECTORBASE_H
 #define G4ATLASTOOLS_SENSITIVEDETECTORBASE_H
 
+#pragma GCC diagnostic push
+// SDtools that have not yet been migrated to the new SD interface will trigger
+// this warning because SetupEvent(AtlasG4EventUserInfo&) and
+// Gather(AtlasG4EventUserInfo&) are hidden. this is fine, as these methods are
+// not used in the old-style SDs, but should be migrated. Remove this when all
+// SDs are migrated.
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 // Base classes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/ISensitiveDetector.h"
@@ -60,11 +68,17 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
   /** This is where collection initialization should happen.
       If we are using a WriteHandle, then this could be empty.  */
   virtual StatusCode SetupEvent() override { return StatusCode::SUCCESS; }
+  virtual StatusCode SetupEvent(HitCollectionMap&) override {
+    return SetupEvent();
+  }
 
   /// @brief End of an athena event.
   /** Store the output collection in SG at this point.
-      If we are using a WriteHandle, then this can be empty! */
+  If we are using a WriteHandle, then this can be empty! */
   virtual StatusCode Gather() override { return StatusCode::SUCCESS; }
+  virtual StatusCode Gather(HitCollectionMap&) override {
+    return Gather();
+  };
 
  protected:
 
@@ -112,5 +126,7 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
 #endif
 
 }; // class SensitiveDetectorBase
+
+#pragma GCC diagnostic pop
 
 #endif

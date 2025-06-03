@@ -6,14 +6,13 @@
 #include "TransportTool.h"
 
 //package includes
-#include "G4AtlasAlg/G4AtlasMTRunManager.h"
-#include "G4AtlasAlg/G4AtlasWorkerRunManager.h"
-#include "G4AtlasAlg/G4AtlasUserWorkerThreadInitialization.h"
-#include "G4AtlasAlg/G4AtlasRunManager.h"
-#include "G4AtlasAlg/G4AtlasActionInitialization.h"
-#include "ISFFluxRecorder.h"
-
 #include "AthenaKernel/RNGWrapper.h"
+#include "G4AtlasAlg/G4AtlasActionInitialization.h"
+#include "G4AtlasAlg/G4AtlasMTRunManager.h"
+#include "G4AtlasAlg/G4AtlasRunManager.h"
+#include "G4AtlasAlg/G4AtlasUserWorkerThreadInitialization.h"
+#include "G4AtlasAlg/G4AtlasWorkerRunManager.h"
+#include "ISFFluxRecorder.h"
 
 // ISF classes
 #include "ISF_Event/ISFParticle.h"
@@ -24,6 +23,7 @@
 #include "GaudiKernel/IThreadInitTool.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
+#include "HitManagement/HitCollectionMap.h"
 #include "MCTruth/PrimaryParticleInformation.h"
 
 // HepMC classes
@@ -49,6 +49,7 @@
 #include "G4VUserPhysicsList.hh"
 
 // std library
+#include <G4Event.hh>
 #include <memory>
 #include <mutex>
 static std::once_flag initializeOnceFlag;
@@ -58,7 +59,7 @@ static std::once_flag finalizeOnceFlag;
 iGeant4::G4TransportTool::G4TransportTool(const std::string& type,
                                           const std::string& name,
                                           const IInterface*  parent )
-  : ISF::BaseSimulatorTool(type, name, parent)
+  : ISF::BaseSimulatorG4Tool(type, name, parent)
 {
   //declareProperty("KillAllNeutrinos",      m_KillAllNeutrinos=true);
   //declareProperty("KillLowEPhotons",       m_KillLowEPhotons=-1.);
@@ -258,8 +259,10 @@ void iGeant4::G4TransportTool::finalizeOnce()
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4TransportTool::simulate(const EventContext& ctx,
- ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
+StatusCode iGeant4::G4TransportTool::simulate(
+    const EventContext& ctx, ISF::ISFParticle& isp,
+    ISF::ISFParticleContainer& secondaries,
+    McEventCollection* mcEventCollection, std::shared_ptr<HitCollectionMap> hitCollections) {
 
   // give a screen output that you entered Geant4SimSvc
   ATH_MSG_VERBOSE( "Particle " << isp << " received for simulation." );
@@ -268,7 +271,8 @@ StatusCode iGeant4::G4TransportTool::simulate(const EventContext& ctx,
   // wrap the given ISFParticle into a STL vector of ISFParticles with length 1
   // (minimizing code duplication)
   const ISF::ISFParticleVector ispVector(1, &isp);
-  StatusCode success = this->simulateVector(ctx, ispVector, secondaries, mcEventCollection);
+  StatusCode success = this->simulateVector(ctx, ispVector, secondaries,
+                                            mcEventCollection, hitCollections);
   ATH_MSG_VERBOSE( "Simulation done" );
 
   // Geant4 call done
@@ -276,12 +280,22 @@ StatusCode iGeant4::G4TransportTool::simulate(const EventContext& ctx,
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4TransportTool::simulateVector(const EventContext& ctx, const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *shadowTruth) {
+StatusCode iGeant4::G4TransportTool::simulateVector(
+    const EventContext& ctx, const ISF::ISFParticleVector& particles,
+    ISF::ISFParticleContainer& secondaries,
+    McEventCollection* mcEventCollection, std::shared_ptr<HitCollectionMap> hitCollections,
+    McEventCollection* shadowTruth) {
 
   ATH_MSG_DEBUG (name() << ".simulateVector(...) : Received a vector of " << particles.size() << " particles for simulation.");
   /** Process ParticleState from particle stack */
-  {
+
+  bool abort = [&] ATLAS_NOT_THREAD_SAFE {
+    auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+    eventInfo->SetHitCollectionMap(hitCollections);
+
     auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());
+    inputEvent->SetUserInformation(eventInfo.release());
+
     HepMC::GenEvent* shadowGenEvent =
         (shadowTruth && !shadowTruth->empty())
             ? static_cast<HepMC::GenEvent*>(shadowTruth->back())
@@ -290,31 +304,31 @@ StatusCode iGeant4::G4TransportTool::simulateVector(const EventContext& ctx, con
         *inputEvent, particles, genEvent(mcEventCollection), shadowGenEvent);
 
     ATH_MSG_DEBUG("Calling ISF_Geant4 ProcessEvent");
-    bool abort = false;
     // Worker run manager
     // Custom class has custom method call: ProcessEvent.
     // So, grab custom singleton class directly, rather than base.
     // Maybe that should be changed! Then we can use a base pointer.
     if (m_useMT) {
-#ifdef G4MULTITHREADED
-      auto* workerRM = G4AtlasWorkerRunManager::GetG4AtlasWorkerRunManager();
-      abort = workerRM->ProcessEvent(inputEvent.release());
-#else
-      ATH_MSG_ERROR("Trying to use multi-threading in non-MT build!");
-      return StatusCode::FAILURE;
-#endif
+#     ifdef G4MULTITHREADED
+        auto* workerRM = G4AtlasWorkerRunManager::GetG4AtlasWorkerRunManager();
+        return workerRM->ProcessEvent(inputEvent.release());
+#     else
+        ATH_MSG_ERROR("Trying to use multi-threading in non-MT build!");
+        return true;
+#     endif
     } else {
       auto* workerRM ATLAS_THREAD_SAFE =
           G4AtlasRunManager::GetG4AtlasRunManager();  // non-MT case
-      abort = workerRM->ProcessEvent(inputEvent.release());
+      return workerRM->ProcessEvent(inputEvent.release());
     }
-    if (abort) {
-      ATH_MSG_WARNING("Event was aborted !! ");
-      // ATH_MSG_WARNING("Simulation will now go on to the next event ");
-      // ATH_MSG_WARNING("setFilterPassed is now False");
-      // setFilterPassed(false);
-      return StatusCode::FAILURE;
-    }
+  }();
+
+  if (abort) {
+    ATH_MSG_WARNING("Event was aborted !! ");
+    // ATH_MSG_WARNING("Simulation will now go on to the next event ");
+    // ATH_MSG_WARNING("setFilterPassed is now False");
+    // setFilterPassed(false);
+    return StatusCode::FAILURE;
   }
 
   // Get user actions that return secondaries
@@ -365,8 +379,8 @@ StatusCode iGeant4::G4TransportTool::simulateVector(const EventContext& ctx, con
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4TransportTool::setupEvent(const EventContext& ctx)
-{
+StatusCode iGeant4::G4TransportTool::setupEvent(
+    const EventContext& ctx, HitCollectionMap& hitCollections) {
   ATH_MSG_DEBUG ( "setup Event" );
 
   // Set the RNG to use for this event. We need to reset it for MT jobs
@@ -375,7 +389,7 @@ StatusCode iGeant4::G4TransportTool::setupEvent(const EventContext& ctx)
   rngWrapper->setSeed( m_randomStreamName, ctx );
   G4Random::setTheEngine(rngWrapper->getEngine(ctx));
 
-  ATH_CHECK(m_senDetTool->BeginOfAthenaEvent());
+  ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(hitCollections));
 
   m_nrOfEntries++;
   if (m_doTiming) m_eventTimer->Start();
@@ -387,8 +401,8 @@ StatusCode iGeant4::G4TransportTool::setupEvent(const EventContext& ctx)
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4TransportTool::releaseEvent(const EventContext& ctx)
-{
+StatusCode iGeant4::G4TransportTool::releaseEvent(
+    const EventContext& ctx, HitCollectionMap& hitCollections) {
   ATH_MSG_DEBUG ( "release Event" );
   /** @todo : strip hits of the tracks ... */
 
@@ -426,7 +440,7 @@ StatusCode iGeant4::G4TransportTool::releaseEvent(const EventContext& ctx)
                  avgTimePerEvent<<" +- "<<std::setprecision(4) << sigma);
   }
 
-  ATH_CHECK(m_senDetTool->EndOfAthenaEvent());
+  ATH_CHECK(m_senDetTool->EndOfAthenaEvent(hitCollections));
   ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
 
   return StatusCode::SUCCESS;

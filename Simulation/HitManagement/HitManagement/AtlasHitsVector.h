@@ -29,9 +29,8 @@
 
 //
 template <typename T>
-class AtlasHitsVector : HitsVectorBase
-{
-public:
+class AtlasHitsVector : public HitsVectorBase {
+ public:
   //
   // additional typedef
   typedef T base_value_type;
@@ -172,7 +171,6 @@ public:
   { return DataModel_detail::DVLInfo<AtlasHitsVector<T> >::initHelper(); }
   static const std::type_info* const s_info;
 };
-
 
 /**
  * @brief Construct a new container.

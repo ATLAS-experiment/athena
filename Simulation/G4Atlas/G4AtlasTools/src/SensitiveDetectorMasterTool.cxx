@@ -42,20 +42,20 @@ StatusCode SensitiveDetectorMasterTool::initializeSDs()
   return StatusCode::SUCCESS;
 }
 
-StatusCode SensitiveDetectorMasterTool::BeginOfAthenaEvent()
-{
+StatusCode SensitiveDetectorMasterTool::BeginOfAthenaEvent(
+    HitCollectionMap& hitCollections) {
   // Call setup for all sensitive detectors
   for (auto& isd : m_senDetTools) {
-    CHECK( isd->SetupEvent() );
+    CHECK(isd->SetupEvent(hitCollections));
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode SensitiveDetectorMasterTool::EndOfAthenaEvent()
-{
+StatusCode SensitiveDetectorMasterTool::EndOfAthenaEvent(
+    HitCollectionMap& hitCollections) {
   // Call gather for all sensitive detectors
   for (auto& isd : m_senDetTools) {
-    CHECK( isd->Gather() );
+    CHECK(isd->Gather(hitCollections));
   }
   return StatusCode::SUCCESS;
 }
