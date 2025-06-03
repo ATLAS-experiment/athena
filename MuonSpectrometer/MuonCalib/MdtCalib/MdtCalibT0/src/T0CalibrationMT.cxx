@@ -123,7 +123,7 @@ namespace MuonCalib {
             const Identifier tubeId = idHelper.channelID(fId.stationNameString(), 
                                                          fId.eta(), fId.phi(), nML, nL, nT);
                  
-            bool setInfo = m_result[sid]->setCalib(std::make_unique<MdtTubeFitContainer::SingleTubeCalib>(stc), tubeId, log);
+            bool setInfo = m_result[sid]->setCalib(stc, tubeId, log);
             if (!setInfo) {
                 log << MSG::WARNING << "T0CalibrationMT::PROBLEM! could not set SingleTubeCalib info" << endmsg;
             }

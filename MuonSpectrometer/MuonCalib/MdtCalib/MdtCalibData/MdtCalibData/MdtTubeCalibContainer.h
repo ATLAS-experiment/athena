@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_MDTTUBECALIBCONTAINER_H
@@ -35,11 +35,11 @@ namespace MuonCalib {
         const SingleTubeCalib* getCalib(const Identifier& tubeId) const {
             unsigned int idx = vectorIndex(tubeId);
             if (idx >= m_data.size()) return nullptr;
-            return m_data[idx].get();
+            return &m_data[idx];
         };
 
         /** set the calibration constants of a single tube */
-        bool setCalib(SingleTubeCalibPtr val, const Identifier& tubeId, MsgStream& msg);
+        bool setCalib(SingleTubeCalib val, const Identifier& tubeId, MsgStream& msg);
 
         /** return container name and dimensions */
         const Identifier& identify() const { return m_moduleID; }
@@ -64,7 +64,7 @@ namespace MuonCalib {
         uint8_t m_nMl{0};       //!< number of multilayers in chamber
         uint8_t m_nLayers{0};   //!< number of layer
         uint8_t m_nTubes{0};    //!< number of tubes
-        std::vector<SingleTubeCalibPtr> m_data{};
+        std::vector<SingleTubeCalib> m_data{};
     };
 
 }  // namespace MuonCalib
