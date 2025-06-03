@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -18,10 +18,7 @@
 #include "GaudiKernel/FileIncident.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Incident.h"
-#include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/System.h"
-
-#include "AthenaKernel/ILoggedMessageSvc.h"
 
 #include <fstream>
 #include <unistd.h>
@@ -182,7 +179,11 @@ StatusCode AthenaSummarySvc::initialize() {
 
   // save some space for the summary output if we run out of memory
   ATH_MSG_DEBUG("allocating block of 100 pages");
-  s_block = new char[ sysconf( _SC_PAGESIZE ) * 100 ];
+  const int pageSize = sysconf( _SC_PAGESIZE );
+  if (pageSize < 1){
+    return StatusCode::FAILURE;
+  }
+  s_block = new char[ pageSize * 100 ];
 
 
   return StatusCode(s_block!=nullptr);
