@@ -4,7 +4,7 @@
 
 namespace ActsTrk {
   template <class HandleArrayKeyType, class ContainerType>
-  StatusCode TrackFindingAlg::getContainersFromKeys(
+  StatusCode TrackFindingBaseAlg::getContainersFromKeys(
       const EventContext &ctx,
       HandleArrayKeyType &handleKeyArray,
       std::vector<const ContainerType *> &outputContainers,
@@ -24,10 +24,10 @@ namespace ActsTrk {
   }
 
   template <class MeasurementSource>
-  std::unique_ptr<Acts::BoundTrackParameters> TrackFindingAlg::doRefit(     
+  std::unique_ptr<Acts::BoundTrackParameters> TrackFindingBaseAlg::doRefit(
       const MeasurementSource &measurement,
       const Acts::BoundTrackParameters &initialParameters,
-      const DetectorContextHolder &detContext,      
+      const DetectorContextHolder &detContext,
       const bool paramsAtOutermostSurface) const {
     // Perform KF before CKF
     const auto fittedSeedCollection = m_fitterTool->fit(measurement, initialParameters,
