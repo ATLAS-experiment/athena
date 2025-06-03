@@ -28,14 +28,8 @@ EvtRangeScatterer::EvtRangeScatterer(const std::string& type
 				     , const std::string& name
 				     , const IInterface* parent)
   : AthenaMPToolBase(type,name,parent)
-  , m_processorChannel("")
-  , m_eventRangeChannel("")
-  , m_doCaching(false)
 {
   m_subprocDirPrefix = "range_scatterer";
-  declareProperty("ProcessorChannel", m_processorChannel);
-  declareProperty("EventRangeChannel", m_eventRangeChannel);
-  declareProperty("DoCaching",m_doCaching);
 }
 
 EvtRangeScatterer::~EvtRangeScatterer()
