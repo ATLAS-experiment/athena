@@ -72,8 +72,8 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>&           m_bucket_posX{m_tree.newScalar<float>("bucket_positionX")};
     MuonVal::ScalarBranch<float>&           m_bucket_posY{m_tree.newScalar<float>("bucket_positionY")};
     MuonVal::ScalarBranch<float>&           m_bucket_posZ{m_tree.newScalar<float>("bucket_positionZ")};
-    MuonVal::ScalarBranch<uint8_t>&         m_bucket_chIdx{m_tree.newScalar<uint8_t>("bucket_chIndex")};
-
+    MuonVal::ScalarBranch<uint8_t>&         m_bucket_sector{m_tree.newScalar<uint8_t>("bucket_sector")};
+    MuonVal::ScalarBranch<uint8_t>&         m_bucket_chamberIdx{m_tree.newScalar<uint8_t>("bucket_chamberIndex")};
 
     MuonVal::ThreeVectorBranch              m_spoint_localPosition{m_tree, "localPosition"}; 
     MuonVal::ThreeVectorBranch              m_spoint_globalPosition{m_tree, "globalPosition"}; 
