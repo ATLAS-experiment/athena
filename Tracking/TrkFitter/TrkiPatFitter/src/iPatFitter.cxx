@@ -131,7 +131,7 @@ StatusCode iPatFitter::initialize() {
 
 StatusCode iPatFitter::finalize() {
   // print summary statistics
-  double fits = static_cast<double>(m_countFitAttempts);
+  const double fits = static_cast<double>(m_countFitAttempts);
   double goodFit = 0.;
   double iterations = 0.;
 
@@ -150,7 +150,7 @@ StatusCode iPatFitter::finalize() {
                  << std::setprecision(2) << iterations << " iterations");
   }
   if (m_forcedRefitsForValidation) {
-    double refits = static_cast<double>(m_countRefitAttempts);
+    const double refits = static_cast<double>(m_countRefitAttempts);
     double goodRefit = 0.;
     double refitIterations = 0.;
     if (m_countRefitAttempts) {
@@ -207,7 +207,7 @@ auto iPatFitter::fitWithState(const EventContext& ctx, const Track& track,
       return {nullptr, std::move(fitState)};
     }
 
-    Amg::Vector3D origin(s.trackParameters()->position());
+    const Amg::Vector3D origin(s.trackParameters()->position());
     perigeeSurface = std::make_unique<PerigeeSurface>(origin);
     newPerigee = std::make_unique<Perigee>(
         s.trackParameters()->position(), s.trackParameters()->momentum(),
@@ -228,7 +228,7 @@ auto iPatFitter::fitWithState(const EventContext& ctx, const Track& track,
 
   fitState->newMeasurements();
 
-  bool haveMaterial =
+  bool const haveMaterial =
       addMeasurements(ctx, fitState->getMeasurements(), *fitState->parameters,
                       particleHypothesis, *track.trackStateOnSurfaces());
 
@@ -374,7 +374,7 @@ std::unique_ptr<Trk::Track> iPatFitter::fit(
   }
 
   // perform fit and return fitted track
-  TrackInfo trackInfo(TrackInfo::iPatTrackFitter, particleHypothesis);
+  TrackInfo const trackInfo(TrackInfo::iPatTrackFitter, particleHypothesis);
   return performFit(fitState, particleHypothesis, trackInfo, nullptr, nullptr,
                     garbage);
 }
@@ -499,7 +499,7 @@ std::unique_ptr<Track> iPatFitter::fit(
   }
   fitState.getMeasurements().insert(fitState.getMeasurements().begin(),
                                     new FitMeasurement(*indetPerigee));
-  FitParameters measuredParameters(*indetPerigee);
+  FitParameters const measuredParameters(*indetPerigee);
   std::unique_ptr<Trk::Track> fittedTrack = performFit(
       fitState, particleHypothesis, trackInfo,
       indetTrack.trackStateOnSurfaces(), indetTrack.fitQuality(), garbage);
@@ -519,7 +519,7 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
                                  const MeasurementSet& measurementSet,
                                  const FitParameters& parameters) const {
   // extrapolation to set FittedTrajectory
-  double qOverP = parameters.qOverP();
+  const double qOverP = parameters.qOverP();
   double previousDistance = -m_orderingTolerance;
   double previousDistanceR = previousDistance;
   double previousDistanceZ = previousDistance;
@@ -527,7 +527,7 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
 
   Amg::Vector3D startDirection = parameters.direction();
   Amg::Vector3D startPosition = parameters.position();
-  ExtrapolationType type = FittedTrajectory;
+  const ExtrapolationType type = FittedTrajectory;
   TrackSurfaceIntersection intersection = parameters.intersection();
 
   TrackSurfaceIntersection startIntersection = intersection ;
@@ -543,10 +543,10 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
 
       // check if ordering OK
       if (!reorder) {
-        double distance =
+        const double distance =
             startDirection.dot(intersection.position() - startPosition);
         Amg::Vector3D positionMst = (**m).globalPosition();
-        double distanceR = std::sqrt((positionMst.x() - startPosition.x()) *
+        const double distanceR = std::sqrt((positionMst.x() - startPosition.x()) *
                                          (positionMst.x() - startPosition.x()) +
                                      (positionMst.y() - startPosition.y()) *
                                          (positionMst.y() - startPosition.y()));
@@ -643,8 +643,8 @@ bool iPatFitter::addMeasurements(
     std::unique_ptr<FitMeasurement> measurement2;
     const Surface* surface = nullptr;
     if (s.materialEffectsOnTrack() && s.trackParameters()) {
-      Amg::Vector3D position = s.trackParameters()->position();
-      bool calo = (!m_indetVolume->inside(position) &&
+      const Amg::Vector3D position = s.trackParameters()->position();
+      bool const calo = (!m_indetVolume->inside(position) &&
                    m_calorimeterVolume->inside(position));
       qOverP = s.trackParameters()->parameters()[Trk::qOverP];
       surface = &s.trackParameters()->associatedSurface();
@@ -680,8 +680,8 @@ bool iPatFitter::addMeasurements(
         continue;
       }
     } else if (s.alignmentEffectsOnTrack() && s.trackParameters()) {
-      Amg::Vector3D direction = s.trackParameters()->momentum().unit();
-      Amg::Vector3D position = s.trackParameters()->position();
+      const Amg::Vector3D direction = s.trackParameters()->momentum().unit();
+      const Amg::Vector3D position = s.trackParameters()->position();
       measurement1 = std::make_unique<FitMeasurement>(
           s.alignmentEffectsOnTrack(), direction, position);
     }
@@ -817,7 +817,7 @@ bool iPatFitter::addMeasurements(
       intersection = std::move(*newIntersection);
       if (s.materialEffectsOnTrack()) {
         const Amg::Vector3D& position = intersection.position();
-        bool calo = (!m_indetVolume->inside(position) &&
+        bool const calo = (!m_indetVolume->inside(position) &&
                      m_calorimeterVolume->inside(position));
         measurement1 = std::make_unique<FitMeasurement>(
             s.materialEffectsOnTrack(),
@@ -836,7 +836,7 @@ bool iPatFitter::addMeasurements(
 
     // check if ordering OK
     if (!reorder) {
-      double distance =
+      const double distance =
           startDirection.dot(intersection.position() - startPosition);
       Amg::Vector3D positionMst = startPosition;
       if (s.measurementOnTrack()) {
@@ -845,7 +845,7 @@ bool iPatFitter::addMeasurements(
       if (s.materialEffectsOnTrack()) {
         positionMst = s.materialEffectsOnTrack()->associatedSurface().center();
       }
-      double distanceR = std::sqrt((positionMst.x() - startPosition.x()) *
+      const double distanceR = std::sqrt((positionMst.x() - startPosition.x()) *
                                        (positionMst.x() - startPosition.x()) +
                                    (positionMst.y() - startPosition.y()) *
                                        (positionMst.y() - startPosition.y()));
@@ -1129,8 +1129,8 @@ void iPatFitter::refit(const EventContext& ctx, FitState& fitState,
                        const Track& track, const RunOutlierRemoval runOutlier,
                        const ParticleHypothesis particleHypothesis) const {
   ATH_MSG_VERBOSE(" refit ");
-  unsigned countGoodFits = m_countGoodFits;
-  unsigned countIterations = m_countIterations;
+  const unsigned countGoodFits = m_countGoodFits;
+  const unsigned countIterations = m_countIterations;
   m_countRefitAttempts++;
   // outlier removal not implemented
   if (runOutlier) {
@@ -1162,7 +1162,7 @@ void iPatFitter::refit(const EventContext& ctx, FitState& fitState,
       return;
     }
 
-    Amg::Vector3D origin(s.trackParameters()->position());
+    const Amg::Vector3D origin(s.trackParameters()->position());
     perigeeSurface = std::make_unique<PerigeeSurface>(origin);
     newPerigee = std::make_unique<Perigee>(
         s.trackParameters()->position(), s.trackParameters()->momentum(),
@@ -1187,7 +1187,7 @@ void iPatFitter::refit(const EventContext& ctx, FitState& fitState,
 
   fitState.newMeasurements();
 
-  bool haveMaterial =
+  bool const haveMaterial =
       addMeasurements(ctx, fitState.getMeasurements(), *fitState.parameters,
                       particleHypothesis, *track.trackStateOnSurfaces());
 
@@ -1202,7 +1202,7 @@ void iPatFitter::refit(const EventContext& ctx, FitState& fitState,
   // perform fit and return fitted track
   TrackInfo trackInfo(TrackInfo::iPatTrackFitter, particleHypothesis);
   trackInfo.addPatternReco(track.info());
-  std::unique_ptr<Trk::Track> fittedTrack{performFit(
+  const std::unique_ptr<Trk::Track> fittedTrack{performFit(
       fitState, particleHypothesis, trackInfo, nullptr, nullptr, garbage)};
 
   m_countGoodRefits += m_countGoodFits - countGoodFits;

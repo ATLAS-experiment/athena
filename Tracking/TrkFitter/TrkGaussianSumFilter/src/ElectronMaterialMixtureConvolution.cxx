@@ -89,7 +89,7 @@ getMaterialProperties(const Trk::TrackParameters* trackParameters,
 
   // The pathlength ( in mm ) is the path correction * the thickness of the
   // material
-  double pathLength = pathCorrection * materialProperties->thickness();
+  const double pathLength = pathCorrection * materialProperties->thickness();
   return { materialProperties, pathLength };
 }
 
@@ -341,8 +341,8 @@ Trk::ElectronMaterialMixtureConvolution::update(
     auto index = std::distance(componentsArray.components.data(), result);
 
     // Build the first TP
-    size_t stateIndex = indices[index].first;
-    size_t materialIndex = indices[index].second;
+    const size_t stateIndex = indices[index].first;
+    const size_t materialIndex = indices[index].second;
 
     AmgVector(5)& updatedStateVector =
       caches[stateIndex].deltaParameters[materialIndex];
@@ -380,7 +380,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
   // Merge components "From" to components "To"
   MultiComponentStateAssembler::Cache assemblerCache;
   std::array<bool, GSFConstants::maxComponentsAfterConvolution> isMerged = {};
-  int returnedMerges = KL.numMerges;
+  const int returnedMerges = KL.numMerges;
 
   for (int i = 0; i < returnedMerges; ++i) {
     const int8_t mini = KL.merges[i].To;
@@ -390,17 +390,17 @@ Trk::ElectronMaterialMixtureConvolution::update(
       continue;
     }
     // Get the first TP
-    size_t stateIndex = indices[mini].first;
-    size_t materialIndex = indices[mini].second;
+    const size_t stateIndex = indices[mini].first;
+    const size_t materialIndex = indices[mini].second;
     // Copy weight and first parameters as they are needed later on
     // for updating the covariance
-    AmgVector(5) firstParameters =
+    const AmgVector(5) firstParameters =
       caches[stateIndex].deltaParameters[materialIndex];
-    double firstWeight = caches[stateIndex].weights[materialIndex];
+    const double firstWeight = caches[stateIndex].weights[materialIndex];
 
     // Get the second TP
-    size_t stateIndex2 = indices[minj].first;
-    size_t materialIndex2 = indices[minj].second;
+    const size_t stateIndex2 = indices[minj].first;
+    const size_t materialIndex2 = indices[minj].second;
 
     // Some values for sanity checks
     isMerged[minj] = true;
@@ -433,8 +433,8 @@ Trk::ElectronMaterialMixtureConvolution::update(
     }
 
     // Build the TP
-    size_t stateIndex = indices[i].first;
-    size_t materialIndex = indices[i].second;
+    const size_t stateIndex = indices[i].first;
+    const size_t materialIndex = indices[i].second;
     AmgVector(5)& stateVector =
       caches[stateIndex].deltaParameters[materialIndex];
     AmgSymMatrix(5)& measuredCov =
@@ -450,7 +450,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
                                      stateVector[Trk::qOverP],
                                      measuredCov);
 
-    double updatedWeight = caches[stateIndex].weights[materialIndex];
+    const double updatedWeight = caches[stateIndex].weights[materialIndex];
 
     assemblerCache.multiComponentState.push_back({
       std::move(updatedTrackParameters), updatedWeight});

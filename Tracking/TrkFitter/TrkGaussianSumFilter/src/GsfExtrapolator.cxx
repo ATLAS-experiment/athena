@@ -79,7 +79,7 @@ int
 radialDirection(const Trk::MultiComponentState& pars, Trk::PropDirection dir)
 {
   // safe inbound/outbound estimation
-  double prePositionR = pars.begin()->params->position().perp();
+  const double prePositionR = pars.begin()->params->position().perp();
   return (prePositionR > (pars.begin()->params->position() +
                           static_cast<int>(dir) * 0.5 * prePositionR *
                               pars.begin()->params->momentum().unit())
@@ -105,7 +105,7 @@ radialDirectionCheck(const EventContext& ctx,
   const Amg::Vector3D& onLayerPosition = parsOnLayer.begin()->params->position();
 
   // the 3D distance to the layer intersection
-  double distToLayer = (startPosition - onLayerPosition).mag();
+  const double distToLayer = (startPosition - onLayerPosition).mag();
   // get the innermost contained surface for crosscheck
   const auto& boundarySurfaces = tvol.boundarySurfaces();
   // only for tubes the crossing makes sense to check for validity
@@ -123,7 +123,7 @@ radialDirectionCheck(const EventContext& ctx,
                                true,
                                fieldProperties,
                                particle);
-    double distToInsideSurface =
+    const double distToInsideSurface =
       parsOnInsideSurface
         ? (startPosition - (parsOnInsideSurface->position())).mag()
         : 10e10;
@@ -294,11 +294,11 @@ Trk::GsfExtrapolator::extrapolateImpl(
      - destination surface
      */
 
-  Amg::Vector3D globalSeparation =
+  const Amg::Vector3D globalSeparation =
     referenceParameters
       ? referenceParameters->position() - combinedState->position()
       : surface.globalReferencePoint() - combinedState->position();
-  double initialDistance = globalSeparation.mag();
+  const double initialDistance = globalSeparation.mag();
   // Clean up memory from combiner. It is no longer needed
   combinedState = nullptr;
 
@@ -363,10 +363,10 @@ Trk::GsfExtrapolator::extrapolateImpl(
       newDestination = surface.center();
     }
 
-    double revisedDistance =
+    const double revisedDistance =
         (cache.m_navigationParameters->position() - newDestination).mag();
 
-    double distanceChange = std::abs(revisedDistance - initialDistance);
+    const double distanceChange = std::abs(revisedDistance - initialDistance);
 
     if (revisedDistance > initialDistance && distanceChange > 0.01) {
       foundFinalBoundary = false;
@@ -825,8 +825,8 @@ Trk::GsfExtrapolator::extrapolateToIntermediateLayer(
   // ------------------------------------------------------------------------
   // check for radial direction change
   // ---------------------------------------------------------------------
-  int rDirection = radialDirection(multiComponentState, direction);
-  int newrDirection = radialDirection(destinationState, direction);
+  const int rDirection = radialDirection(multiComponentState, direction);
+  const int newrDirection = radialDirection(destinationState, direction);
   if (newrDirection != rDirection && doPerpCheck) {
     // it is unfortunate that the cancelling could invalidate the material
     // collection
@@ -991,7 +991,7 @@ Trk::GsfExtrapolator::initialiseNavigation(
     // These parameters will need to be deleted later. Add to list of garbage to
     // be collected
     if (referenceParameters) {
-      Amg::Vector3D surfaceDirection(referenceParameters->position() -
+      const Amg::Vector3D surfaceDirection(referenceParameters->position() -
                                      combinedState->position());
       direction = (surfaceDirection.dot(combinedState->momentum()) > 0.)
                     ? Trk::alongMomentum

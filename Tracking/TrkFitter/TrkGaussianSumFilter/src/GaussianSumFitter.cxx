@@ -119,7 +119,7 @@ Trk::GaussianSumFitter::initialize()
     m_rioOnTrackCreator.disable();
   }
   // Initialise the closest track parameters search algorithm
-  Amg::Vector3D referencePosition(m_sortingReferencePoint[0],
+  const Amg::Vector3D referencePosition(m_sortingReferencePoint[0],
                                   m_sortingReferencePoint[1],
                                   m_sortingReferencePoint[2]);
 
@@ -242,7 +242,7 @@ Trk::GaussianSumFitter::fit(
 
   // We need a sorted PrepRawDataSet
   Trk::PrepRawDataSet sortedPrepRawDataSet = PrepRawDataSet(prepRawDataSet);
-  Trk::PrepRawDataComparisonFunction prdComparisonFunction =
+  const Trk::PrepRawDataComparisonFunction prdComparisonFunction =
     Trk::PrepRawDataComparisonFunction(
       estimatedParametersNearOrigin.position(),
       estimatedParametersNearOrigin.momentum());
@@ -339,7 +339,7 @@ Trk::GaussianSumFitter::fit(
   Trk::MeasurementSet sortedMeasurementSet =
     MeasurementSet(cleanedMeasurementSet);
 
-  Trk::MeasurementBaseComparisonFunction measurementBaseComparisonFunction(
+  const Trk::MeasurementBaseComparisonFunction measurementBaseComparisonFunction(
     estimatedParametersNearOrigin.position(),
     estimatedParametersNearOrigin.momentum());
   sort(sortedMeasurementSet.begin(),
@@ -416,7 +416,7 @@ Trk::GaussianSumFitter::fit(const EventContext& ctx,
                        m_trkParametersComparisonFunction));
 
   // use external preparator class to prepare PRD set for fitter interface
-  PrepRawDataSet PRDColl = Trk::TrackFitInputPreparator::stripPrepRawData(
+  const PrepRawDataSet PRDColl = Trk::TrackFitInputPreparator::stripPrepRawData(
     intrk, addPrdColl, false, true);
 
   // delegate to fitting PrepRawData interface method
@@ -458,7 +458,7 @@ Trk::GaussianSumFitter::fit(const EventContext& ctx,
                        inputTrack.trackParameters()->end(),
                        m_trkParametersComparisonFunction));
 
-  MeasurementSet combinedMS = Trk::TrackFitInputPreparator::stripMeasurements(
+  const MeasurementSet combinedMS = Trk::TrackFitInputPreparator::stripMeasurements(
     inputTrack, measurementSet);
 
   // delegate to  measurementBase fit method
@@ -527,7 +527,7 @@ Trk::GaussianSumFitter::fit(const EventContext& ctx,
 /*Helper to convert the GSFTrajectory to a Trk::Track */
 std::unique_ptr<MultiComponentStateOnSurfaceDV> Trk::GaussianSumFitter::convertTrajToTrack(
     GSFTrajectory& trajectory) const{
-  bool slimTransientMTSOS = m_slimTransientMTSOS;
+  const bool slimTransientMTSOS = m_slimTransientMTSOS;
   auto MTSOS = std::make_unique<MultiComponentStateOnSurfaceDV>();
   MTSOS->reserve(trajectory.size());
   for (GSFTsos& state : trajectory) {
@@ -642,7 +642,7 @@ Trk::GaussianSumFitter::forwardPRDfit(
   forwardTrajectory.reserve(prepRawDataSet.size());
   for (const auto* prepRawData : prepRawDataSet) {
     // Every step the ForwardTrajectory is updated
-    bool stepIsValid = stepForwardFit(
+    const bool stepIsValid = stepForwardFit(
       ctx,
       extrapolatorCache,
       forwardTrajectory,
@@ -696,7 +696,7 @@ Trk::GaussianSumFitter::forwardMeasurementFit(
   forwardTrajectory.reserve(inputMeasurementSet.size());
   for (const auto* measurement : inputMeasurementSet) {
     // Every step the ForwardTrajectory is updated
-    bool stepIsValid = stepForwardFit(ctx,
+    const bool stepIsValid = stepForwardFit(ctx,
                                       extrapolatorCache,
                                       forwardTrajectory,
                                       nullptr,
@@ -967,7 +967,7 @@ Trk::GaussianSumFitter::smootherFit(
       return {};
     }
     // last in reverse (first in normal order) is special as we collapse to single track Parameters
-    bool islast = (trackStateOnSurfaceItr == lasttrackStateOnSurface);
+    const bool islast = (trackStateOnSurfaceItr == lasttrackStateOnSurface);
     if (m_combineWithFitter) {
       // Optional combine smoother state with fitter state
       // e.g combine the current tsos (from the forward) with
@@ -1059,7 +1059,7 @@ Trk::GaussianSumFitter::addCCOT(
   AmgSymMatrix(5) covMatrix;
   covMatrix.setZero();
   covMatrix(0, 0) = 1e6;
-  Trk::DefinedParameter locX(0, Trk::locX);
+  const Trk::DefinedParameter locX(0, Trk::locX);
   Trk::LocalParameters locpars(locX);
   auto pseudoMeasurement = std::make_unique<Trk::PseudoMeasurementOnTrack>(
     std::move(locpars), std::move(covMatrix), currentSurface);
