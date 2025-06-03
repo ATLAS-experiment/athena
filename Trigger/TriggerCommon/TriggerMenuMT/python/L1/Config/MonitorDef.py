@@ -446,7 +446,7 @@ class MonitorDef:
                 monItemsHF[TBP|TAP|TAV].extend([
                     # ATR-31296 – Oxygen/Neon runs
                     "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_XOR",
-                    "L1_TRT_FILLED"
+                    "L1_ZDC_XN_XOR", "L1_ZDC_YN_XOR", "L1_ZDC_ZN_XOR"
                 ])
             else: # HI HLT menu
                 monItemsHF[TBP|TAP|TAV].extend([

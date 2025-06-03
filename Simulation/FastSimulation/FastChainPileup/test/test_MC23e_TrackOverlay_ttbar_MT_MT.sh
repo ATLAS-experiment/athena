@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: CA-based config  Track-overlay for MC23a ttbar
+# art-description: CA-based config  Track-overlay for MC23e ttbar
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
@@ -10,12 +10,12 @@
 # art-output: AOD.pool.root
 # art-architecture: '#x86_64-intel'
 
-events=25
+events=20
 
 export ATHENA_CORE_NUMBER=8
 
-HITS_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root'
-RDO_BKG_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO_TrackOverlay_Run3_MC23a.pool.root'
+HITS_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.HITS.e8514_e8528_s4369/100events.HITS.pool.root'
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO_TrackOverlay_Run3_MC23e.pool.root"
 RDO_File='RDO.pool.root'
 AOD_File='AOD.pool.root'
 
@@ -32,7 +32,7 @@ Overlay_tf.py \
    --skipEvents 0 \
    --digiSeedOffset1 511 \
    --digiSeedOffset2 727 \
-   --preInclude 'Campaigns.MC23a' \
+   --preInclude 'Campaigns.MC23e' \
    --postInclude 'PyJobTransforms.UseFrontier' \
    --conditionsTag "default:${conditions}" \
    --geometryVersion "default:${geometry}" \
@@ -74,7 +74,7 @@ if [ ${rec} -eq 0 ]
 then
    ArtPackage=$1
    ArtJobName=$2
-   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file ${AOD_File}
+   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${AOD_File}
    reg=$?
    status=$reg
 fi

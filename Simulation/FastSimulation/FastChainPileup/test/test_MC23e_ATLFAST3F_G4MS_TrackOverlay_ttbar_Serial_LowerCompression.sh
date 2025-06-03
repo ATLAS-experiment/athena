@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: CA-based config Track-overlay for MC23a ttbar running serial
+# art-description: CA-based config ATLFAST3F_G4MS with Track-overlay for MC23e ttbar running serial
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
@@ -9,43 +9,47 @@
 # art-output: RDO.pool.root
 # art-output: AOD.pool.root
 # art-architecture: '#x86_64-intel'
+# art-memory: 5999
 
-events=25
+events=50
 
-HITS_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root'
-RDO_BKG_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO_TrackOverlay_Run3_MC23a.pool.root'
+EVNT_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1'
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO_TrackOverlay_Run3_MC23e.pool.root"
 RDO_File='RDO.pool.root'
 AOD_File='AOD.pool.root'
 
 geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
-Overlay_tf.py \
+FastChain_tf.py \
    --CA \
-   --inputHITSFile ${HITS_File} \
+   --simulator ATLFAST3F_G4MS \
+   --physicsList FTFP_BERT_ATL \
+   --useISF True \
+   --randomSeed 123 \
+   --inputEVNTFile ${EVNT_File} \
    --inputRDO_BKGFile ${RDO_BKG_File} \
    --outputRDOFile ${RDO_File} \
    --maxEvents ${events} \
    --skipEvents 0 \
    --digiSeedOffset1 511 \
    --digiSeedOffset2 727 \
-   --preInclude 'Campaigns.MC23a' \
+   --preInclude 'EVNTtoRDO:Campaigns.MC23eSimulationMultipleIoV' 'EVNTtoRDO:Campaigns.MC23e' \
    --postInclude 'PyJobTransforms.UseFrontier' \
    --conditionsTag "default:${conditions}" \
    --geometryVersion "default:${geometry}" \
-   --preExec 'flags.Overlay.doTrackOverlay=True;' \
+   --preExec 'EVNTtoRDO:flags.Overlay.doTrackOverlay=True;flags.Output.TemporaryStreams="RDO"' \
    --postExec 'with open("Config.pkl", "wb") as f: cfg.store(f)' \
    --imf False
 
-overlay=$?
-echo  "art-result: $overlay Overlay"
-status=$overlay
+fastchain=$?
+echo  "art-result: $fastchain EVNTtoRDO"
 
 rec=-9999
 reg=-9999
 
 # Reconstruction
-if [ ${overlay} -eq 0 ]
+if [ ${fastchain} -eq 0 ]
 then
    Reco_tf.py \
       --CA \
@@ -61,21 +65,30 @@ then
       --athenaopts "all:--threads=1" \
       --imf False
      rec=$?
-     status=$rec
 fi
 
 echo  "art-result: $rec reconstruction"
 
 # Regression test
-if [ ${rec} -eq 0 ]
+if [ ${fastchain} -eq 0 ]
 then
    ArtPackage=$1
    ArtJobName=$2
-   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file ${AOD_File}
+   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${RDO_File}
    reg=$?
-   status=$reg
 fi
 
 echo  "art-result: $reg regression"
+
+# Set status to the first failure encountered
+if [ ${fastchain} -ne 0 ]; then
+    status=$fastchain
+elif [ ${rec} -ne 0 ]; then
+    status=$rec
+elif [ ${reg} -ne 0 ]; then
+    status=$reg
+else
+    status=0
+fi
 
 exit $status
