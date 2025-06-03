@@ -4,6 +4,7 @@
 
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 // ATHENA
 #include "GaudiKernel/EventContext.h"
@@ -1051,9 +1052,11 @@ unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore 
     ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
     unsigned int nElements = 0;
     m_trackingGeometry->visitSurfaces([&store, &nElements](const Acts::Surface *srf) {
-        const Acts::DetectorElementBase *detElem = srf->associatedDetectorElement();
-        const IDetectorElement *gmde = dynamic_cast<const IDetectorElement *>(detElem);
-        nElements += gmde->storeAlignedTransforms(store);
+        const auto *detElem = dynamic_cast<const IDetectorElement *>(srf->associatedDetectorElement());
+        if (!detElem) {
+            return;
+        }
+        nElements += detElem->storeAlignedTransforms(store);
     });
     ATH_MSG_DEBUG("Populated with " << nElements << " elements");
     return nElements;
