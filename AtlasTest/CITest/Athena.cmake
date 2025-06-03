@@ -50,11 +50,15 @@ atlas_add_citest( DataOverlayPreparationRun3
 atlas_add_citest( OverlayRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--conditionsTag OFLCOND-MC16-SDR-RUN2-12')
 
-atlas_add_citest( OverlayRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay )
-
 atlas_add_citest( OverlayRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay )
+
+atlas_add_citest( OverlayRun3Data
+   SCRIPT RunWorkflowTests_Run3.py --CI -o -w DataOverlay )
+
+atlas_add_citest( OverlayRun3DataChain
+   SCRIPT RunWorkflowTests_Run3.py --CI -o -w DataOverlayChain -e '--maxEvents 3 --inputRDO_BKGFile=../../DataOverlayPreparationRun3/run_d2008/myRDO_BKG.pool.root' # go two levels up as the test runs in a subfolder
+   DEPENDS_SUCCESS DataOverlayPreparationRun3 )
 
 #################################################################################
 # Standard reconstruction workflows
