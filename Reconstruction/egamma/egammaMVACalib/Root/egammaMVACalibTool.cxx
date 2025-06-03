@@ -1,5 +1,5 @@
  /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaMVACalib/egammaMVACalibTool.h"
@@ -25,10 +25,27 @@ using Gaudi::Units::GeV;
 #define GeV 1000
 #endif
 
+namespace egammaMVACalibTool_detail {
+
+struct Funcs
+{
+  std::vector<std::vector<std::function<float(const xAOD::Egamma*, const xAOD::CaloCluster*)> > > funcs;
+};
+
+} // namespace egammaMVACalibTool_detail
+
 egammaMVACalibTool::egammaMVACalibTool(const std::string& name) :
-  asg::AsgTool(name)
+  asg::AsgTool(name),
+  m_funcs (std::make_unique<egammaMVACalibTool_detail::Funcs>())
 {
 }
+
+// Need to declare this out-of-line since the full type of m_funcs
+// isn't available in the header.
+egammaMVACalibTool::~egammaMVACalibTool()
+{
+}
+
 
 StatusCode egammaMVACalibTool::initialize()
 {
@@ -189,7 +206,7 @@ StatusCode egammaMVACalibTool::setupBDT(const egammaMVAFunctions::funcMap_t& fun
         return StatusCode::FAILURE;
       }
     }
-    m_funcs.push_back(std::move(funcs));
+    m_funcs->funcs.push_back(std::move(funcs));
 
     if (m_shiftType == MEAN10TOTRUE) {
       shift = (TObjString*) nextShift();
@@ -252,7 +269,7 @@ float egammaMVACalibTool::getEnergy(const xAOD::CaloCluster& clus,
   // if there is only one BDT just use that
   const int bin_BDT = m_BDTs.size() != 1 ? bin : 0;
   const auto& bdt = m_BDTs[bin_BDT];
-  const auto& funcs = m_funcs[bin_BDT];
+  const auto& funcs = m_funcs->funcs[bin_BDT];
 
   const size_t sz = funcs.size();
 
