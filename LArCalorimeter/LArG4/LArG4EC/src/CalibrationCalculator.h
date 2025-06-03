@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EC::CalibrationCalculator
@@ -72,12 +72,12 @@ namespace LArG4 {
 
     private:
 
-      int m_zside;
-      UnsignedShortProperty m_wcalc_tProp;
+      IntegerProperty m_zside{this, "zSide", 0};
+      UnsignedShortProperty m_wcalc_tProp{this, "WheelType", 0, &CalibrationCalculator::WheelTypeHandler};
       LArG4::LArWheelCalculator_t m_wcalc_t;
 
       // Geometry calculator
-      ServiceHandle<ILArCalculatorSvc> m_geometryCalculator;
+      ServiceHandle<ILArCalculatorSvc> m_geometryCalculator{this, "GeometryCalculator", ""};
 
       // Energy calculator
       CaloG4::SimulationEnergies m_energyCalculator;

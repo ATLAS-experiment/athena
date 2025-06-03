@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator
@@ -153,10 +153,6 @@ G4bool EnergyCalculator::Process_Default(const G4Step* step, std::vector<LArHitD
 EnergyCalculator::EnergyCalculator(const std::string& name, ISvcLocator *pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
 {
-  declareProperty("WheelType",m_solidtypeProp);
-  m_solidtypeProp.declareUpdateHandler(&EnergyCalculator::SolidTypeHandler, this);
-  declareProperty("EnergyCorrection",m_corrProp);
-  m_corrProp.declareUpdateHandler(&EnergyCalculator::CorrectionTypeHandler, this);
 }
 // ****************************************************************************
 
@@ -388,7 +384,7 @@ StatusCode EnergyCalculator::initialize()
       // Determine which version of the file by examining the user option.
       //if(m_suffix.empty()) FieldMapVersion = "v00";
       //else FieldMapVersion = m_suffix;
-      m_FieldMapVersion = m_suffix.empty() ? "v00" : m_suffix;
+      m_FieldMapVersion = m_suffix.empty() ? "v00" : m_suffix.value();
 
       ATH_MSG_DEBUG("EnergyCalculator: field map version = " << m_FieldMapVersion);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator.h
@@ -118,11 +118,11 @@ namespace LArG4 {
       // +dWRPtoFrontFace+ LongBarThickness                 // initialization
       // -DistOfEndofCuFromBack
 
-      G4double m_S3_Rlim[21]; // used as const after init
-      G4double m_rlim[50];    // used as const after init
-      G4double m_zlim[4];     // used as const after init
+      G4double m_S3_Rlim[21]{}; // used as const after init
+      G4double m_rlim[50]{};    // used as const after init
+      G4double m_zlim[4]{};     // used as const after init
 
-      UnsignedIntegerProperty m_corrProp{8};
+      UnsignedIntegerProperty m_corrProp{this, "EnergyCorrection", 8, &EnergyCalculator::CorrectionTypeHandler};
       EnergyCorrection_t m_correction_type{EMEC_ECOR_CHCL1};
 
       G4double (EnergyCalculator::*m_ecorr_method) (G4double, const G4ThreeVector&, const G4ThreeVector&, G4double /*Barret_PhiStart*/) const{};
@@ -175,9 +175,9 @@ namespace LArG4 {
       G4double m_FanEleThickness = 0.0;             // used as const after init
       G4double m_WaveLength = 0.0;                  // used as const after init
 
-      G4double m_zsep12[44]; // used as const after initialization
-      G4double m_ziw[7];     // used as const after initialization
-      G4double m_zsep23[22]; // used as const after initialization
+      G4double m_zsep12[44]{}; // used as const after initialization
+      G4double m_ziw[7]{};     // used as const after initialization
+      G4double m_zsep23[22]{}; // used as const after initialization
 
 
       inline G4double ElectrodeFanHalfThickness() const { return m_ElectrodeFanHalfThickness; };
@@ -314,7 +314,7 @@ namespace LArG4 {
       //  public:
       G4double distance_to_the_nearest_electrode(const G4ThreeVector &p) const;
 
-      UnsignedIntegerProperty m_solidtypeProp{0};
+      UnsignedIntegerProperty m_solidtypeProp{this, "WheelType", 0, &EnergyCalculator::SolidTypeHandler};
       LArG4::LArWheelCalculator_t m_solidtype{LArG4::InnerAbsorberWheel};
       IntegerProperty m_zside{this, "zSide", 1};
       LArG4BirksLaw *m_birksLaw{};
