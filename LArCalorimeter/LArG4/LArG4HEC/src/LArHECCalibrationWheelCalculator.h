@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Jan-2008: (M.Fincke)  To be used for new Module-Geometry
@@ -36,10 +36,9 @@ namespace LArG4 {
                               const eCalculatorProcessing process = kEnergyAndID) const override final;
     private:
 
-      ServiceHandle<IHECGeometry> m_geometryCalculator;
-      UnsignedShortProperty m_geometryTypeProp;
+      ServiceHandle<IHECGeometry> m_geometryCalculator{this, "GeometryCalculator", "HECGeometry"}; //FIXME LArG4::HEC::HECGeometry
+      UnsignedShortProperty m_geometryTypeProp{this, "GeometryType", 0, &LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler};
       eHECGeometryType m_geometryType;
-      //std::string m_strgeometryType;
 
       CaloG4::SimulationEnergies m_energyCalculator;
 

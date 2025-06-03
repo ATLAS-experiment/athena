@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHECCalibrationWheelCalculator.h"
@@ -19,13 +19,8 @@ namespace LArG4 {
 
     LArHECCalibrationWheelCalculator::LArHECCalibrationWheelCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_geometryCalculator("HECGeometry",name) //FIXME LArG4::HEC::HECGeometry
-      , m_geometryTypeProp(0)
       , m_geometryType(kWheelActive)
     {
-      declareProperty("GeometryCalculator",m_geometryCalculator);
-      declareProperty("GeometryType",m_geometryTypeProp);
-      m_geometryTypeProp.declareUpdateHandler(&LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler, this);
     }
 
     void LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler(Gaudi::Details::PropertyBase&)
