@@ -30,7 +30,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.pipeline='F-100' \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
-    Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
+    Trigger.FPGATrackSim.mapsDir=$MAPS_5L \
     Trigger.FPGATrackSim.writeToAOD=True \
     Trigger.FPGATrackSim.oldRegionDefs=False \
     Trigger.FPGATrackSim.region=34 \

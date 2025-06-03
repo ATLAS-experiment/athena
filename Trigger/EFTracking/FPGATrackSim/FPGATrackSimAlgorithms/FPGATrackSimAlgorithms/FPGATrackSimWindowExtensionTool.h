@@ -63,7 +63,7 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
 
         // We'll definitely need properties, but I don't know which ones.
-        Gaudi::Property<int> m_threshold  { this, "threshold", 11, "Minimum number of hits to fire a road"};
+        Gaudi::Property<int> m_maxMiss  { this, "threshold", 2, "Maximum number of missing hits allowed on a road"};
         Gaudi::Property<std::vector<float>> m_windows {this, "phiWindow", {}, "Default window settings for phi, must be size nlayers."};
         Gaudi::Property<std::vector<float>> m_zwindows {this, "zWindow", {}, "Default window settings for z, must be size nlayers."};
         Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};
@@ -83,7 +83,7 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         std::map<unsigned, std::map<unsigned, std::vector<std::shared_ptr<const FPGATrackSimHit>>>> m_phits_atLayer;
         unsigned m_nLayers_1stStage = 0;
         unsigned m_nLayers_2ndStage = 0;
-        unsigned m_maxMiss = 0;
+        unsigned m_threshold = 0;
 
         // Internal storage for the sliced hits (implemented as a LogicalEventInputHeader,
         // so we can easily copy to the output ROOT file).

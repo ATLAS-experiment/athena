@@ -34,7 +34,7 @@ StatusCode FPGATrackSimWindowExtensionTool::initialize() {
     m_nLayers_1stStage = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
     m_nLayers_2ndStage = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers() - m_nLayers_1stStage;
 
-    m_maxMiss = (m_nLayers_1stStage + m_nLayers_2ndStage) - m_threshold;
+    m_threshold = (m_nLayers_1stStage + m_nLayers_2ndStage) - m_maxMiss;
 
     // This now needs to be done once for each slice.
     for (size_t j=0; j<m_FPGATrackSimMapping->GetPlaneMap_2ndSliceSize(); j++){
@@ -128,7 +128,7 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> road_hits;
         road_hits.resize(m_nLayers_1stStage + m_nLayers_2ndStage);
         layer_bitmask_t hitLayers = 0;
-        int nhit = 0;
+        unsigned nhit = 0;
         // We can't just use the the iterator since hit.getLayer() isn't guaranteed to be right.
         for (unsigned layer = 0; layer < track->getFPGATrackSimHits().size(); layer++) {
             const FPGATrackSimHit& hit = track->getFPGATrackSimHits().at(layer);
@@ -152,8 +152,8 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         }
 
         // If we have enough hits, create a new road.
+        ATH_MSG_DEBUG("Found potential new road with " << nhit << " hits relative to threshold of " << m_threshold);
         if (nhit >= m_threshold) {
-            ATH_MSG_DEBUG("Found new road with " << nhit << " hits relative to " << m_threshold);
             m_roads.emplace_back();
             FPGATrackSimRoad & road = m_roads.back();
             road.setRoadID(roads.size() - 1);

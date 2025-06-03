@@ -54,7 +54,7 @@ class FPGATrackSimSpacepointRoadFilterTool : public extends<AthAlgTool, IFPGATra
 
         ///////////////////////////////////////////////////////////////////////
         // Handles
-        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", ""};
+        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc {this, "FPGATrackSimBankSvc", ""};
 
         ///////////////////////////////////////////////////////////////////////

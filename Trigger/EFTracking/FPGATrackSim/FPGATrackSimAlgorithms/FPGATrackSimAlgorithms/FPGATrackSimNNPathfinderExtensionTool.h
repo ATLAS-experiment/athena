@@ -145,8 +145,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
 
-        // We'll definitely need properties, but I don't know which ones.
-        Gaudi::Property<int> m_threshold  { this, "threshold", 10, "Minimum number of hits to fire a road"};
+        Gaudi::Property<unsigned> m_maxMiss { this, "threshold", 2, "Maximum number of missing hits to reject a road"};
 
         // Options only needed for sector assignment.
         // The eta pattern option here should probably be dropped, because we're not using it
@@ -177,7 +176,6 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         std::vector<FPGATrackSimRoad> m_roads;
         unsigned m_nLayers_1stStage = 0;
         unsigned m_nLayers_2ndStage = 0;
-        unsigned m_maxMiss = 0;
 
         static float getXScale() { return 1015.;};
         static float getYScale() { return 1015.;};

@@ -213,13 +213,17 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
         m_rmap_2nd->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
 
-        ATH_MSG_DEBUG("Setting the average radius per logical layer for Region and Subregion Maps");
-        ATH_MSG_DEBUG("Loading Radii from " << PathResolverFindCalibFile(m_radii_path.value()));
-        m_rmap_1st->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
-        m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
-        m_subrmap->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
-        m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
-        m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
+        if (m_loadRadii) {
+            ATH_MSG_DEBUG("Setting the average radius per logical layer for Region and Subregion Maps");
+            ATH_MSG_DEBUG("Loading Radii from " << PathResolverFindCalibFile(m_radii_path.value()));
+            m_rmap_1st->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()), 0, m_pmap_vector_1st.at(0)->getNLogiLayers());
+            m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()), 0, m_pmap_vector_1st.at(0)->getNLogiLayers());
+            m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii2nd_path.value()), m_pmap_vector_1st.at(0)->getNLogiLayers(), m_pmap_vector_2nd.at(0)->getNLogiLayers());
+
+            m_subrmap->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()), 0, m_pmap_vector_1st.at(0)->getNLogiLayers());
+            m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()), 0, m_pmap_vector_1st.at(0)->getNLogiLayers());
+            m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii2nd_path.value()), m_pmap_vector_1st.at(0)->getNLogiLayers(), m_pmap_vector_2nd.at(0)->getNLogiLayers());
+        }
 
         ATH_MSG_DEBUG("Creating NN weighting map");
         ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_fake.value() << " for fake track estimation");

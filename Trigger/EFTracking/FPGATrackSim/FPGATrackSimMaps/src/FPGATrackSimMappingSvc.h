@@ -55,7 +55,9 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         Gaudi::Property<std::string> m_NNmap_path_param {this, "ParamNNonnx1st", "", "path of the NN weighting file for 1st stage"};
         Gaudi::Property<std::string> m_NNmap2nd_path_param {this, "ParamNNonnx2nd", "", "path of the NN weighting file for 2nd stage"};
         Gaudi::Property<std::string> m_radii_path {this, "radiiFile", "", "path of the average radius file" };
+        Gaudi::Property<std::string> m_radii2nd_path {this, "radiiFile2nd", "", "path of the average radius file for 2nd stage" };
         Gaudi::Property<std::vector <int> > m_layerOverrides {this, "layerOverride", {}, "Overrides the selection of the 1st stage logical layers in the plane map. Each entry declares a detector layer to use as a logical layer. Specify a detector layer with { SiliconTech * 1000 + DetectorZone * 100 + PhysicalLayer }"};
+        Gaudi::Property<bool> m_loadRadii {this, "loadRadii", true, "Whether or not to attempt to read in the idealized radii files" };
 
             // Map unique pointers
         //vector of pmaps

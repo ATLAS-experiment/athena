@@ -59,7 +59,6 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
 
     ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput2nd}));
     ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack_2nd}));
-    if (m_doSpacepoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
 
     ATH_CHECK(m_trackFitterTool.retrieve(EnableTool{m_doTracking}));
     ATH_CHECK(m_overlapRemovalTool.retrieve());
@@ -232,18 +231,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     }
     Monitored::Group(m_monTool, mon_nroads);
 
-    // NOTE: for now we don't support road filtering again in the second stage,
-    // except for the special case of the spacepoint road filter tool. In principle filters
-    // could be added here.
-
-    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Road Filtering");
-    // Spacepoint road filter tool. Needed when fitting to spacepoints.
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> post_spfilter_roads;
-    if (m_doSpacepoints && !m_doNNPathFinder) {
-        ATH_CHECK(m_spRoadFilterTool->filterRoads(roads, post_spfilter_roads));
-        roads = std::move(post_spfilter_roads);
-    }
-    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Road Filtering");
+    // NOTE: for now we don't support road filtering again in the second stage.
     auto mon_nroads_postfilter = Monitored::Scalar<unsigned>("nroads_2nd_postfilter", roads.size());
     Monitored::Group(m_monTool, mon_nroads_postfilter);
 
