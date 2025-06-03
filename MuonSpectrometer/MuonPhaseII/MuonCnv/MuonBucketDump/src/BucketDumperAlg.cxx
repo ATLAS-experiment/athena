@@ -91,8 +91,9 @@ namespace MuonR4{
             m_bucket_posX = bucketPos.x();
             m_bucket_posY = bucketPos.y();
             m_bucket_posZ = bucketPos.z();
-            m_bucket_segments = segmentMap[bucket].size();
-            m_bucket_chIdx = static_cast<uint8_t>(bucket->msSector()->chamberIndex());
+            m_bucket_segments   = segmentMap[bucket].size();
+            m_bucket_sector     = bucket->msSector()->sector();
+            m_bucket_chamberIdx = static_cast<uint8_t>(bucket->msSector()->chamberIndex());
 
             std::unordered_map<const SpacePoint*, std::vector<int16_t>> spacePointToSegment;
             
