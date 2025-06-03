@@ -628,10 +628,10 @@ StatusCode MdtCalibDbAlg::defaultT0s(MuonCalib::MdtCalibDataContainer& writeCdo)
         for (unsigned int ml = 1; ml <= nml; ++ml) {
             for (unsigned int l = 1; l <= nlayers; ++l) {
                 for (unsigned int t = 1; t <= ntubes; ++t) {
-                    auto data = std::make_unique<MuonCalib::MdtTubeCalibContainer::SingleTubeCalib>();
+                    MuonCalib::MdtTubeCalibContainer::SingleTubeCalib data{};
                     const Identifier tubeId = id_helper.channelID(*it, ml, l, t);
-                    data->t0 = t0;
-                    data->adcCal = 1.;                   
+                    data.t0 = t0;
+                    data.adcCal = 1.;                   
                     tubes->setCalib(std::move(data), tubeId, msgStream());
                 }
             }
@@ -858,10 +858,10 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx, MuonCalib::MdtCalibD
             
             const int statusCode = tubeChannel["status"];
             const double meanAdc = tubeChannel["meanAdc"];
-            auto datatube = std::make_unique<MuonCalib::MdtTubeCalibContainer::SingleTubeCalib>(); 
-            datatube->statusCode = statusCode;
-            datatube->t0 = tzero;
-            datatube->adcCal = meanAdc;
+            MuonCalib::MdtTubeCalibContainer::SingleTubeCalib datatube{};
+            datatube.statusCode = statusCode;
+            datatube.t0 = tzero;
+            datatube.adcCal = meanAdc;
             const Identifier tubeId = idHelper.channelID(chId, ml, l, t);
             tubes->setCalib(std::move(datatube), tubeId, msgStream());
         }
