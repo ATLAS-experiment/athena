@@ -139,7 +139,6 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events 
 StorageSvc           INFO Building shape according to reflection information using shape ID for:
 StorageSvc           INFO xAOD::EventFormat_v1 [0EFE2D2C-9E78-441D-9A87-9EE2B908AC81]
 ClassIDSvc           INFO getRegistryEntries: read 7 CLIDRegistry entries for module ALL
-StreamThinned1       INFO Metadata records written: 21
 Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 xaodthinned...root   INFO Database being retired...
 Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   CREATE    [ROOT_All] 5604AD27-072C-0E4F-AF43-59156BD2ECA8

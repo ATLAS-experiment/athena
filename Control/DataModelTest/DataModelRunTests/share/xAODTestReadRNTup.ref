@@ -1857,7 +1857,6 @@ xAODTestReadPLinks   INFO   link: (ctrig:6)  links: (:inv) (cvec:4)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:7)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 ClassIDSvc           INFO getRegistryEntries: read 7 CLIDRegistry entries for module ALL
-StreamStream1        INFO Metadata records written: 21
 xaoddata.rn...root   INFO Database being retired...
 Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 16B9A4D0-4AC0-8B47-B2D7-57DC7A5D0065
 Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 

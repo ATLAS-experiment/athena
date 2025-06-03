@@ -1298,7 +1298,7 @@ SimplePoolReplica1.root                             DEBUG ---->ClassID:7BE56CEF-
 StreamCopy.StreamCopyTool                           DEBUG In commitOutput
 SimplePoolReplica1.root                             DEBUG DB Action Commit
 ClassIDSvc                                           INFO getRegistryEntries: read 6 CLIDRegistry entries for module ALL
-StreamCopy                                           INFO Metadata records written: 21
+StreamCopy                                          DEBUG Metadata items written: 4
 MetaDataSvc                                         DEBUG Unlocking metadata tools
 StreamCopy                                          DEBUG Leaving incident handler for MetaDataStop
 PoolSvc                                             DEBUG Disconnect request for contextId=0

@@ -1876,7 +1876,7 @@ SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E835
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 ClassIDSvc                                           INFO getRegistryEntries: read 6 CLIDRegistry entries for module ALL
-StreamWritexAODElectrons                             INFO Metadata records written: 21
+StreamWritexAODElectrons                            DEBUG Metadata items written: 4
 MetaDataSvc                                         DEBUG Unlocking metadata tools
 StreamWritexAODElectrons                            DEBUG Leaving incident handler for MetaDataStop
 PoolSvc                                             DEBUG Disconnect request for contextId=0

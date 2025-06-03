@@ -1795,7 +1795,7 @@ SimplePoolFile4.root                                DEBUG --->Adding Assoc :298D
 SimplePoolFile4.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile4.root                                DEBUG DB Action Commit
 ClassIDSvc                                           INFO getRegistryEntries: read 6 CLIDRegistry entries for module ALL
-StreamStream1                                        INFO Metadata records written: 21
+StreamStream1                                       DEBUG Metadata items written: 4
 MetaDataSvc                                         DEBUG Unlocking metadata tools
 StreamStream1                                       DEBUG Leaving incident handler for MetaDataStop
 PoolSvc                                             DEBUG Disconnect request for contextId=0

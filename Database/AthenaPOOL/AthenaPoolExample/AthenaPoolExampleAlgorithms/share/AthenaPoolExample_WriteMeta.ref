@@ -451,7 +451,6 @@ SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949
 SimplePoolFile5.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile5.root                                DEBUG DB Action Commit
 ClassIDSvc                                           INFO getRegistryEntries: read 12 CLIDRegistry entries for module ALL
-StreamExampleMeta                                    INFO Metadata records written: 11
 MetaDataSvc                                         DEBUG Unlocking metadata tools
 PoolSvc                                             DEBUG Disconnect request for contextId=0
 Domain[ROOT_All]                                     INFO >   Deaccess DbDomain     READ      [ROOT_All] 

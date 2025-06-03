@@ -211,7 +211,6 @@ Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #10, run #1 10 events processed so far  <<<===
-StreamStl                                            INFO Metadata records written: 11
 ApplicationMgr                                       INFO Application Manager Stopped successfully
 AthDictLoaderSvc                                     INFO in finalize...
 ToolSvc                                              INFO Removing all tools created by ToolSvc
