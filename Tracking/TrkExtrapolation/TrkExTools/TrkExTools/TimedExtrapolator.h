@@ -324,7 +324,6 @@ private:
   bool m_skipInitialLayerUpdate;          //!< skip the initial post-Update at the
                                           //!< layer [Fatras conversion mode]
   bool m_referenceMaterial;               //!< use the reference material for the update
-  bool m_extendedLayerSearch;             //!< extended layer search
   unsigned int m_initialLayerAttempts;    //!< allowed layer intersection
                                           //!< attempts at the start of a volume
   unsigned int m_successiveLayerAttempts; //!< layer intersection attemps after one

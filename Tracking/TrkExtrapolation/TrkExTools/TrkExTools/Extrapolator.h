@@ -647,8 +647,6 @@ private:
     "return 0 if update kills the trajectory"};
   BooleanProperty m_skipInitialLayerUpdate{this, "SkipInitialPostUpdate", false,
     "skip the initial post-Update at the layer [Fatras conversion mode]"};
-  BooleanProperty m_extendedLayerSearch{this, "ExtendedLayerSearch", true,
-    "extended layer search"};
   BooleanProperty m_resolveActive{this, "ResolveMuonStation", false};
   BooleanProperty m_resolveMultilayers{this, "ResolveMultilayers", true};
   //!< number of sub valid propagators in the m_subPropagators array
