@@ -228,6 +228,7 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
       auto itChildState = m_procStates.find(childPid);
       if(itChildState==m_procStates.end()) {
 	ATH_MSG_ERROR("Unable to find PID=" << childPid << " in the Proc States map!");
+	delete presult;
 	return StatusCode::FAILURE;
       }
 
