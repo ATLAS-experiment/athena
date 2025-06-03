@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUMONITORALGORITHM_H
@@ -21,7 +21,6 @@ public:
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 private:
-    Gaudi::Property<bool> m_doRandom {this,"RandomHist",false};
     std::vector<int> m_abGroups1;
     std::vector<std::vector<int>> m_abGroups2;
     std::map<std::string,int> m_cGroups1;
