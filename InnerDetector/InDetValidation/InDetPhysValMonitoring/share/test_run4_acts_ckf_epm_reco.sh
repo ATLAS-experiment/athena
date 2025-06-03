@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART Run 4 configuration, ITK only recontruction, acts activated, electron events
 
@@ -29,7 +29,7 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect these tests to succeed
-    if [[ ("${name}" == "dcube-ckf-ambi" || "${name}" == "dcube-ckf-athena" || "${name}" == "dcube-ambi-greedy-scored") && ${rc} -ne 255 ]]; then
+    if [[ ("${name}" == "dcube-comparison-athena-acts") && ${rc} -ne 255 ]]; then
         rc=0
     fi
     echo "art-result: $rc ${name}"
