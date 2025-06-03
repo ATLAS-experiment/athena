@@ -47,7 +47,7 @@ static_assert(std::is_empty_v<HitsVectorBase>, "HitsVectorBase should be an empt
 
 //
 template <typename T>
-class AthenaHitsVector : HitsVectorBase {
+class AthenaHitsVector : public HitsVectorBase {
  public:
   //
   // additional typedef

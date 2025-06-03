@@ -12,9 +12,9 @@
 
 // Can we safely include all of these?
 #include "G4AtlasAlg/G4AtlasMTRunManager.h"
-#include "G4AtlasAlg/G4AtlasWorkerRunManager.h"
-#include "G4AtlasAlg/G4AtlasUserWorkerThreadInitialization.h"
 #include "G4AtlasAlg/G4AtlasRunManager.h"
+#include "G4AtlasAlg/G4AtlasUserWorkerThreadInitialization.h"
+#include "G4AtlasAlg/G4AtlasWorkerRunManager.h"
 
 // Geant4 includes
 #include <G4Event.hh>
@@ -41,6 +41,8 @@
 #include "GaudiKernel/IThreadInitTool.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruthBase/TruthStrategyManager.h"
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadHandle.h"
@@ -342,7 +344,11 @@ StatusCode G4AtlasAlg::execute()
 
   ATH_MSG_DEBUG("Calling SimulateG4Event");
 
-  ATH_CHECK(m_senDetTool->BeginOfAthenaEvent());
+  auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+  // get a shared pointer to the hit collection map because we will need it after the G4Event is destroyed
+  std::shared_ptr<HitCollectionMap> hitCollections = eventInfo->GetHitCollectionMap();
+
+  ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(*hitCollections));
   ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent());
 
   SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey);
@@ -393,7 +399,10 @@ StatusCode G4AtlasAlg::execute()
   bool abort = false;
 
   {
+
     auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());
+    inputEvent->SetUserInformation(eventInfo.release());
+
     ATH_CHECK(m_inputConverter->convertHepMCToG4Event(
         *outputTruthCollection, *inputEvent, *shadowTruth));
     // Worker run manager
@@ -413,33 +422,34 @@ StatusCode G4AtlasAlg::execute()
           G4AtlasRunManager::GetG4AtlasRunManager();
       abort = workerRM->ProcessEvent(inputEvent.release());
     }
-  }
-  if (abort) {
-    ATH_MSG_WARNING("Event was aborted !! ");
-    ATH_MSG_WARNING("Simulation will now go on to the next event ");
-    if (m_killAbortedEvents) {
-      ATH_MSG_WARNING("setFilterPassed is now False");
-      setFilterPassed(false);
-    }
-    if (m_flagAbortedEvents) {
-      SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
-      if (!eventInfo.isValid()) {
-        ATH_MSG_FATAL( "Failed to retrieve xAOD::EventInfo while trying to update the error state!" );
-        return StatusCode::FAILURE;
+
+    if (abort) {
+      ATH_MSG_WARNING("Event was aborted !! ");
+      ATH_MSG_WARNING("Simulation will now go on to the next event ");
+      if (m_killAbortedEvents) {
+        ATH_MSG_WARNING("setFilterPassed is now False");
+        setFilterPassed(false);
       }
-      else {
-        eventInfo->updateErrorState(xAOD::EventInfo::Core,xAOD::EventInfo::Error);
-        ATH_MSG_WARNING( "Set error state in xAOD::EventInfo!" );
+      if (m_flagAbortedEvents) {
+        SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
+        if (!eventInfo.isValid()) {
+          ATH_MSG_FATAL(
+              "Failed to retrieve xAOD::EventInfo while trying to update the "
+              "error state!");
+          return StatusCode::FAILURE;
+        } else {
+          eventInfo->updateErrorState(xAOD::EventInfo::Core,
+                                      xAOD::EventInfo::Error);
+          ATH_MSG_WARNING("Set error state in xAOD::EventInfo!");
+        }
       }
     }
+
+    ATH_CHECK(m_senDetTool->EndOfAthenaEvent(*hitCollections));
+    ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
+
+    ATH_CHECK(m_truthRecordSvc->releaseEvent());
   }
-
-  // Register all of the collections if there are any new-style SDs
-  ATH_CHECK(m_senDetTool->EndOfAthenaEvent());
-  ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
-
-  ATH_CHECK( m_truthRecordSvc->releaseEvent() );
-
   // Remove QS patch if required
   if(!m_qspatcher.empty()) {
     for (HepMC::GenEvent* currentGenEvent : *outputTruthCollection ) {
