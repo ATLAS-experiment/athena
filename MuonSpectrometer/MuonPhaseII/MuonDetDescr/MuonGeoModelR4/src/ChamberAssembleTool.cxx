@@ -16,10 +16,10 @@
 #include <sstream>
 
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
-#include <Acts/Plugins/GeoModel/GeoModelToDetectorVolume.hpp>
+#include <Acts/Geometry/Volume.hpp>
+
 #include <GeoModelHelpers/TransformToStringConverter.h>
 #include <GeoModelKernel/GeoDefinitions.h>
-
 
 namespace {
    constexpr int sign(int numb) { 
