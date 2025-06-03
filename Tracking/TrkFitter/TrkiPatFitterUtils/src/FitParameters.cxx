@@ -50,7 +50,7 @@ FitParameters::FitParameters(const Perigee& perigee)
       m_vertex(perigee.associatedSurface().center()),
       m_z0(perigee.position().z()) {
   Amg::Vector3D momentum = perigee.momentum();
-  double ptInv0 = 1. / momentum.perp();
+  const double ptInv0 = 1. / momentum.perp();
   m_cosPhi = ptInv0 * momentum.x();
   m_sinPhi = ptInv0 * momentum.y();
   m_cotTheta = ptInv0 * momentum.z();
@@ -223,11 +223,11 @@ void FitParameters::performCutStep(double cutStep) {
 Perigee* FitParameters::perigee(void) const {
   // copy 'final' covariance
   AmgSymMatrix(5) covMatrix = AmgSymMatrix(5)(*m_finalCovariance);
-  double pT = std::abs(m_sinTheta / m_qOverP);
+  const double pT = std::abs(m_sinTheta / m_qOverP);
   double charge = 1.;
   if (m_qOverP < 0.)
     charge = -1.;
-  Amg::Vector3D momentum(pT * m_cosPhi, pT * m_sinPhi, pT * m_cotTheta);
+  const Amg::Vector3D momentum(pT * m_cosPhi, pT * m_sinPhi, pT * m_cotTheta);
 
   if (m_surface) {
     return new Perigee(m_position, momentum, charge,
@@ -272,11 +272,11 @@ void FitParameters::printCovariance(MsgStream& log) const {
   if (cov(4, 4) > 0.)
     error44 = std::sqrt(cov(4, 4));
   double correl02 = 0.;
-  double denom02 = cov(0, 0) * cov(2, 2);
+  const double denom02 = cov(0, 0) * cov(2, 2);
   if (denom02 > 0.)
     correl02 = cov(0, 2) / std::sqrt(denom02);
   double correl13 = 0.;
-  double denom13 = cov(1, 1) * cov(3, 3);
+  const double denom13 = cov(1, 1) * cov(3, 3);
   if (denom13 > 0.)
     correl13 = cov(1, 3) / std::sqrt(denom13);
   log << std::setiosflags(std::ios::fixed | std::ios::right) << std::setw(10)
@@ -452,8 +452,8 @@ void FitParameters::reset(const FitParameters& parameters) {
 ScatteringAngles FitParameters::scatteringAngles(
     const FitMeasurement& fitMeasurement, int scatterer) const {
   // scattering sigma used in chi2 computation
-  double scattererSigmaTheta = 1. / fitMeasurement.weight();
-  double scattererSigmaPhi =
+  const double scattererSigmaTheta = 1. / fitMeasurement.weight();
+  const double scattererSigmaPhi =
       scattererSigmaTheta /
       fitMeasurement.intersection(FittedTrajectory).direction().perp();
   if (scatterer < 0) {
@@ -470,11 +470,11 @@ void FitParameters::setPhiInstability(void) {
 
 Perigee* FitParameters::startingPerigee(void) const {
   // create momentum
-  double pT = std::abs(m_sinTheta / m_qOverP);
+  const double pT = std::abs(m_sinTheta / m_qOverP);
   double charge = 1.;
   if (m_qOverP < 0.)
     charge = -1.;
-  Amg::Vector3D momentum(pT * m_cosPhi, pT * m_sinPhi, pT * m_cotTheta);
+  const Amg::Vector3D momentum(pT * m_cosPhi, pT * m_sinPhi, pT * m_cotTheta);
 
   return new Perigee(m_position, momentum, charge, m_vertex);
 }
@@ -522,9 +522,9 @@ TrackParameters* FitParameters::trackParameters(
   if (withCovariance && (measurement.isDrift() || measurement.isCluster() ||
                          measurement.isPerigee())) {
     Amg::Vector3D direction = intersection.direction();
-    double sigma = 1. / measurement.weight();
-    double sigma2 = 1. / measurement.weight2();
-    int lastParameter = measurement.lastParameter();
+    const double sigma = 1. / measurement.weight();
+    const double sigma2 = 1. / measurement.weight2();
+    int const lastParameter = measurement.lastParameter();
     Amg::MatrixX jacobian = Amg::MatrixX::Zero(5, lastParameter);
     for (int i = 0; i != lastParameter; ++i) {
       jacobian(0, i) = sigma * measurement.derivative(i);
@@ -543,11 +543,11 @@ TrackParameters* FitParameters::trackParameters(
 
     // only if fit to curvature
     if (m_fitMomentum && m_qOverP) {
-      double sinTheta = direction.perp();
+      const double sinTheta = direction.perp();
       if (m_fitEnergyDeposit && measurement.afterCalo()) {
-        double deltaPhi =
+        const double deltaPhi =
             (direction.y() * m_cosPhi1 - direction.x() * m_sinPhi1) / sinTheta;
-        double deltaTheta =
+        const double deltaTheta =
             (sinTheta * m_cosTheta1 - direction.z() * m_sinTheta1);
         jacobian(0, 5) *= Gaudi::Units::TeV;
         jacobian(1, 5) *= Gaudi::Units::TeV;
@@ -555,9 +555,9 @@ TrackParameters* FitParameters::trackParameters(
         jacobian(3, 5) = deltaTheta / measurement.qOverP();
         jacobian(4, 5) = measurement.qOverP() / m_qOverP1;
       } else {
-        double deltaPhi =
+        const double deltaPhi =
             (direction.y() * m_cosPhi - direction.x() * m_sinPhi) / sinTheta;
-        double deltaTheta =
+        const double deltaTheta =
             (sinTheta * m_cosTheta - direction.z() * m_sinTheta);
         jacobian(0, 4) *= Gaudi::Units::TeV;
         jacobian(1, 4) *= Gaudi::Units::TeV;
@@ -634,7 +634,7 @@ void FitParameters::update(const Amg::VectorX& differences) {
   // impose charge conservation and decreasing energy
   if (m_fitEnergyDeposit) {
     m_qOverP1 += differences(5) / Gaudi::Units::TeV;
-    double deposit = 1. / std::abs(m_qOverP) - 1. / std::abs(m_qOverP1);
+    const double deposit = 1. / std::abs(m_qOverP) - 1. / std::abs(m_qOverP1);
     if (std::abs(deposit) < std::abs(m_minEnergyDeposit) ||
         deposit * m_minEnergyDeposit < 0. || m_qOverP * m_qOverP1 < 0.) {
       m_qOverP = 1. / (1. / std::abs(m_qOverP1) + m_minEnergyDeposit);
@@ -656,7 +656,7 @@ void FitParameters::update(const Amg::VectorX& differences) {
     }
   }
 
-  double cosPhi = m_cosPhi * cosDPhi - m_sinPhi * sinDPhi;
+  const double cosPhi = m_cosPhi * cosDPhi - m_sinPhi * sinDPhi;
   m_sinPhi = m_sinPhi * cosDPhi + m_cosPhi * sinDPhi;
   m_cosPhi = cosPhi;
   m_z0 += differences(1);
@@ -673,7 +673,7 @@ void FitParameters::update(Amg::Vector3D position, Amg::Vector3D direction,
   // update parameters after leading material corrections
   m_position = position;
   m_sinTheta = direction.perp();
-  double sinThetaInv = 1. / m_sinTheta;
+  const double sinThetaInv = 1. / m_sinTheta;
   m_cotTheta = sinThetaInv * m_cosTheta;
   m_cosPhi = sinThetaInv * direction.x();
   m_sinPhi = sinThetaInv * direction.y();

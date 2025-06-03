@@ -73,7 +73,7 @@ Trk::TrackFitInputPreparator::stripPrepRawData(
       newPrdSet.push_back(*itSet);
 
   if (doSorting) {
-    Trk::PrepRawDataComparisonFunction PRD_CompFunc(
+    const Trk::PrepRawDataComparisonFunction PRD_CompFunc(
       (*inputTrk.trackParameters()->begin())->position(),
       (*inputTrk.trackParameters()->begin())->momentum());
 

@@ -64,7 +64,7 @@ void FitMatrices::checkPointers(MsgStream& log) const {
         log << " col " << col << "   unexpected first nonzero DM element " << i
             << " / " << m_firstRowForParameter[col] << endmsg;
     }
-    int j = m_firstRowForParameter[col];
+    const int j = m_firstRowForParameter[col];
     if (m_fitMatrix.derivative[j][col] == 0.)
       log << " col " << col << "   first nonzero DM element is zero! " << j
           << " / " << m_firstRowForParameter[col] << endmsg;
@@ -126,7 +126,7 @@ const Amg::MatrixX* FitMatrices::fullCovariance(void) {
   // back convert curved fits to Tracking units (MeV)
   if (m_parameters->fitMomentum()) {
     // transform to MeV
-    double d4 = 1. / Gaudi::Units::TeV;
+    const double d4 = 1. / Gaudi::Units::TeV;
     for (int row = 0; row < m_columnsDM; ++row) {
       covariance(4, row) *= d4;
       covariance(row, 4) = covariance(4, row);
@@ -136,7 +136,7 @@ const Amg::MatrixX* FitMatrices::fullCovariance(void) {
     // transform units for fitted energy deposit (for now fit qOverP at calo
     // exit)
     if (m_parameters->fitEnergyDeposit()) {
-      double d5 = 1. / Gaudi::Units::TeV;
+      const double d5 = 1. / Gaudi::Units::TeV;
       for (int row = 0; row < m_columnsDM; ++row) {
         covariance(5, row) *= d5;
         covariance(row, 5) = covariance(5, row);

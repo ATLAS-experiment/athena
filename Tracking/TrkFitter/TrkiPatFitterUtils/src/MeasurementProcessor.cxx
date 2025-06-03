@@ -128,7 +128,7 @@ bool MeasurementProcessor::calculateDerivatives(void) {
 
   // extrapolate for any other numeric derivatives
   if (m_numericDerivatives) {
-    double ptInv = std::abs(m_parameters->ptInv0());
+    const double ptInv = std::abs(m_parameters->ptInv0());
     m_delta[DeltaD0] = 0.010 + 10.0 * ptInv;
     m_delta[DeltaZ0] = 0.010 + 10.0 * ptInv;
     m_delta[DeltaPhi0] = 0.0001 + 2.0 * ptInv;
@@ -149,8 +149,8 @@ bool MeasurementProcessor::calculateDerivatives(void) {
       return false;
     }
     double sinTheta = intersection.direction().perp();
-    double delCF = 1. - (0.5 * m_delta[DeltaPhi0] * m_delta[DeltaPhi0]);
-    Amg::Vector3D direction(
+    const double delCF = 1. - (0.5 * m_delta[DeltaPhi0] * m_delta[DeltaPhi0]);
+    const Amg::Vector3D direction(
         sinTheta * (m_cosPhi0 * delCF - m_sinPhi0 * m_delta[DeltaPhi0]),
         sinTheta * (m_sinPhi0 * delCF + m_cosPhi0 * m_delta[DeltaPhi0]),
         intersection.direction().z());
@@ -159,10 +159,10 @@ bool MeasurementProcessor::calculateDerivatives(void) {
     if (!extrapolateToMeasurements(DeltaPhi0)) {
       return false;
     }
-    double cotTheta =
+    const double cotTheta =
         m_vertexIntersect.direction().z() / sinTheta + m_delta[DeltaTheta0];
     sinTheta = 1. / std::sqrt(1. + cotTheta * cotTheta);
-    Amg::Vector3D directionTheta(sinTheta * m_cosPhi0, sinTheta * m_sinPhi0,
+    const Amg::Vector3D directionTheta(sinTheta * m_cosPhi0, sinTheta * m_sinPhi0,
                                  sinTheta * cotTheta);
     m_vertexIntersect =
         TrackSurfaceIntersection(intersection.position(), directionTheta, 0.);
@@ -212,9 +212,9 @@ bool MeasurementProcessor::calculateDerivatives(void) {
       m->derivative(param, m->weight());
       m->derivative2(++param, m->weight2());
     } else if (m->isEnergyDeposit()) {
-      double E0 = 1. / std::abs(m_qOverPbeforeCalo);
-      double E1 = 1. / std::abs(m_qOverPafterCalo);
-      double weight = m->weight();
+      const double E0 = 1. / std::abs(m_qOverPbeforeCalo);
+      const double E1 = 1. / std::abs(m_qOverPafterCalo);
+      const double weight = m->weight();
       m->derivative(QOverP0,
                     weight * E0 / (m_qOverPbeforeCalo * Gaudi::Units::TeV));
       m->derivative(QOverP1,
@@ -248,8 +248,8 @@ bool MeasurementProcessor::calculateFittedTrajectory(int /*iteration*/) {
   m_vertexIntersect = m_parameters->intersection();
 
   // increments for momentum derivatives (Mev^-1 : X-over at 30GeV)
-  double floor = 0.000000030;
-  double fraction = 0.0001;
+  const double floor = 0.000000030;
+  const double fraction = 0.0001;
   if (m_parameters->qOverP() < 0.) {
     m_delta[DeltaQOverP0] = floor - fraction * m_parameters->qOverP();
     m_delta[DeltaQOverP1] = m_delta[DeltaQOverP0];
@@ -301,11 +301,11 @@ void MeasurementProcessor::calculateResiduals(void) {
     if (!m->isPositionMeasurement()) {
       if (m->isScatterer())  // scattering centres
       {
-        double phiResidual =
+        const double phiResidual =
             -m->weight() * m_parameters->scattererPhi(nScat) *
             m->intersection(FittedTrajectory).direction().perp();
         m->residual(phiResidual);
-        double thetaResidual =
+        const double thetaResidual =
             -m->weight() * m_parameters->scattererTheta(nScat);
         (*m).residual2(thetaResidual);
         ++nScat;
@@ -320,9 +320,9 @@ void MeasurementProcessor::calculateResiduals(void) {
         ++nAlign;
       } else if (m->isEnergyDeposit()) {
         // Add the energy loss as a measurement
-        double E0 = 1. / std::abs(m_qOverPbeforeCalo);
-        double E1 = 1. / std::abs(m_qOverPafterCalo);
-        double residual = m->weight() * (E0 - E1 - m->energyLoss());
+        const double E0 = 1. / std::abs(m_qOverPbeforeCalo);
+        const double E1 = 1. / std::abs(m_qOverPafterCalo);
+        const double residual = m->weight() * (E0 - E1 - m->energyLoss());
         m->residual(residual);
       }
       continue;
@@ -358,7 +358,7 @@ void MeasurementProcessor::calculateResiduals(void) {
       m->residual(residual);
       if (!m->is2Dimensional())
         continue;
-      double residual2 = m->weight2() * m->sensorDirection().dot(offset);
+      const double residual2 = m->weight2() * m->sensorDirection().dot(offset);
       m->residual2(residual2);
     } else if (m->isDrift() ||
                m->isPerigee())  // else drift circles (perigee is similar)
@@ -391,21 +391,21 @@ void MeasurementProcessor::calculateResiduals(void) {
       // std::endl;
     } else if (m->isPseudo())  // else pseudo measurement
     {
-      double residual = m->weight() * minimizationDirection.dot(offset);
+      const double residual = m->weight() * minimizationDirection.dot(offset);
       m->residual(residual);
       if (!m->is2Dimensional())
         continue;
-      double residual2 = m->weight2() * m->sensorDirection().dot(offset);
+      const double residual2 = m->weight2() * m->sensorDirection().dot(offset);
       m->residual2(residual2);
     } else if (m->isVertex()) {
-      double residual = m->weight() *
+      const double residual = m->weight() *
                         (minimizationDirection.x() * offset.x() +
                          minimizationDirection.y() * offset.y()) /
                         minimizationDirection.perp();
       m->residual(residual);
       if (!m->is2Dimensional())
         continue;
-      double residual2 = m->weight2() * m->sensorDirection().dot(offset);
+      const double residual2 = m->weight2() * m->sensorDirection().dot(offset);
       m->residual2(residual2);
     }
   }
@@ -440,18 +440,18 @@ void MeasurementProcessor::fieldIntegralUncertainty(MsgStream& log,
   if (startDirection.z() == 0. || endDirection.z() == 0.)
     return;
 
-  double deflectionPhi = startDirection.x() * endDirection.y() -
+  const double deflectionPhi = startDirection.x() * endDirection.y() -
                          startDirection.y() * endDirection.x();
-  double deflectionTheta = startDirection.perp() * endDirection.z() -
+  const double deflectionTheta = startDirection.perp() * endDirection.z() -
                            startDirection.z() * endDirection.perp();
 
   // poorly measured phi
-  double shiftPhi0 = std::sqrt(covariance(2, 2));
+  const double shiftPhi0 = std::sqrt(covariance(2, 2));
   if (shiftPhi0 > m_largeDeltaPhi0) {
-    Amg::Vector3D vertex(m_parameters->position());
-    double cosPhi = m_parameters->cosPhi() - m_parameters->sinPhi() * shiftPhi0;
-    double sinPhi = m_parameters->sinPhi() + m_parameters->cosPhi() * shiftPhi0;
-    double cotTheta = m_parameters->cotTheta();
+    const Amg::Vector3D vertex(m_parameters->position());
+    const double cosPhi = m_parameters->cosPhi() - m_parameters->sinPhi() * shiftPhi0;
+    const double sinPhi = m_parameters->sinPhi() + m_parameters->cosPhi() * shiftPhi0;
+    const double cotTheta = m_parameters->cotTheta();
     sinTheta = 1. / std::sqrt(1. + cotTheta * cotTheta);
     startDirection = Amg::Vector3D(sinTheta * cosPhi, sinTheta * sinPhi,
                                    sinTheta * cotTheta);
@@ -460,14 +460,14 @@ void MeasurementProcessor::fieldIntegralUncertainty(MsgStream& log,
       return;
 
     endDirection = lastMeas.intersection(DeltaPhi0).direction();
-    double deltaPhi = startDirection.x() * endDirection.y() -
+    const double deltaPhi = startDirection.x() * endDirection.y() -
                       startDirection.y() * endDirection.x() - deflectionPhi;
-    double deltaTheta = startDirection.perp() * endDirection.z() -
+    const double deltaTheta = startDirection.perp() * endDirection.z() -
                         startDirection.z() * endDirection.perp() -
                         deflectionTheta;
     covariance(3, 3) += deltaTheta * deltaTheta;
     if (std::abs(deflectionTheta) > 0.0001) {
-      double deltaQOverP =
+      const double deltaQOverP =
           (deltaTheta / deflectionTheta) * m_parameters->qOverP();
       covariance(4, 4) += deltaQOverP * deltaQOverP;
     }
@@ -494,9 +494,9 @@ void MeasurementProcessor::fieldIntegralUncertainty(MsgStream& log,
     Amg::Vector3D vertex(-shiftD0 * m_parameters->sinPhi(),
                          shiftD0 * m_parameters->cosPhi(), shiftZ0);
     vertex += m_parameters->position();
-    double dPhi = covariance(0, 2) / shiftD0;
-    double cosPhi = m_parameters->cosPhi() - m_parameters->sinPhi() * dPhi;
-    double sinPhi = m_parameters->sinPhi() + m_parameters->cosPhi() * dPhi;
+    const double dPhi = covariance(0, 2) / shiftD0;
+    const double cosPhi = m_parameters->cosPhi() - m_parameters->sinPhi() * dPhi;
+    const double sinPhi = m_parameters->sinPhi() + m_parameters->cosPhi() * dPhi;
     double cotTheta = m_parameters->cotTheta();
     sinTheta = 1. / std::sqrt(1. + cotTheta * cotTheta);
     cotTheta -= covariance(1, 3) / (shiftZ0 * sinTheta * sinTheta);
@@ -507,16 +507,16 @@ void MeasurementProcessor::fieldIntegralUncertainty(MsgStream& log,
       return;
 
     endDirection = lastMeas.intersection(DeltaD0).direction();
-    double deltaPhi = startDirection.x() * endDirection.y() -
+    const double deltaPhi = startDirection.x() * endDirection.y() -
                       startDirection.y() * endDirection.x() - deflectionPhi;
-    double deltaTheta = startDirection.perp() * endDirection.z() -
+    const double deltaTheta = startDirection.perp() * endDirection.z() -
                         startDirection.z() * endDirection.perp() -
                         deflectionTheta;
 
     covariance(2, 2) += deltaPhi * deltaPhi;
     covariance(3, 3) += deltaTheta * deltaTheta;
     if (std::abs(deflectionTheta) > 0.0001) {
-      double deltaQOverP =
+      const double deltaQOverP =
           (deltaTheta / deflectionTheta) * m_parameters->qOverP();
       covariance(4, 4) += deltaQOverP * deltaQOverP;
     }
@@ -573,20 +573,20 @@ void MeasurementProcessor::clusterDerivatives(int derivativeFlag,
     return;
 
   // transverse distance to measurement
-  double xDistance = intersection.position().x() - m_x0;
-  double yDistance = intersection.position().y() - m_y0;
-  double rDistance = -(m_cosPhi0 * xDistance + m_sinPhi0 * yDistance) /
+  const double xDistance = intersection.position().x() - m_x0;
+  const double yDistance = intersection.position().y() - m_y0;
+  const double rDistance = -(m_cosPhi0 * xDistance + m_sinPhi0 * yDistance) /
                      (m_sinTheta0 * m_sinTheta0);
 
   if (derivativeFlag != 0) {
     // momentum derivative - always numeric
     if (m_parameters->fitEnergyDeposit() && measurement.afterCalo()) {
-      Amg::Vector3D offset = measurement.intersection(DeltaQOverP1).position() -
+      const Amg::Vector3D offset = measurement.intersection(DeltaQOverP1).position() -
                              intersection.position();
       measurement.derivative(
           QOverP1, weight * minimizationDirection.dot(offset) * m_derivQOverP1);
     } else if (m_parameters->fitMomentum()) {
-      Amg::Vector3D offset = measurement.intersection(DeltaQOverP0).position() -
+      const Amg::Vector3D offset = measurement.intersection(DeltaQOverP0).position() -
                              intersection.position();
       measurement.derivative(
           QOverP0, weight * minimizationDirection.dot(offset) * m_derivQOverP0);
@@ -630,11 +630,11 @@ void MeasurementProcessor::clusterDerivatives(int derivativeFlag,
     while (++param < measurement.lastParameter()) {
       const TrackSurfaceIntersection& scatteringCentre =
           (**s).intersection(FittedTrajectory);
-      double xDistScat =
+      const double xDistScat =
           intersection.position().x() - scatteringCentre.position().x();
-      double yDistScat =
+      const double yDistScat =
           intersection.position().y() - scatteringCentre.position().y();
-      double rDistScat = -(scatteringCentre.direction().x() * xDistScat +
+      const double rDistScat = -(scatteringCentre.direction().x() * xDistScat +
                            scatteringCentre.direction().y() * yDistScat) /
                          (scatteringCentre.direction().perp2() *
                           scatteringCentre.direction().perp());
@@ -683,12 +683,12 @@ void MeasurementProcessor::clusterDerivatives(int derivativeFlag,
 
   // momentum derivative - always numeric
   if (m_parameters->fitEnergyDeposit() && measurement.afterCalo()) {
-    Amg::Vector3D offset = measurement.intersection(DeltaQOverP1).position() -
+    const Amg::Vector3D offset = measurement.intersection(DeltaQOverP1).position() -
                            intersection.position();
     measurement.derivative2(
         QOverP1, weight * sensorDirection.dot(offset) * m_derivQOverP1);
   } else if (m_parameters->fitMomentum()) {
-    Amg::Vector3D offset = measurement.intersection(DeltaQOverP0).position() -
+    const Amg::Vector3D offset = measurement.intersection(DeltaQOverP0).position() -
                            intersection.position();
     measurement.derivative2(
         QOverP0, weight * sensorDirection.dot(offset) * m_derivQOverP0);
@@ -732,11 +732,11 @@ void MeasurementProcessor::clusterDerivatives(int derivativeFlag,
   while (++param < measurement.lastParameter()) {
     const TrackSurfaceIntersection& scatteringCentre =
         (**s).intersection(FittedTrajectory);
-    double xDistScat =
+    const double xDistScat =
         intersection.position().x() - scatteringCentre.position().x();
-    double yDistScat =
+    const double yDistScat =
         intersection.position().y() - scatteringCentre.position().y();
-    double rDistScat = -(scatteringCentre.direction().x() * xDistScat +
+    const double rDistScat = -(scatteringCentre.direction().x() * xDistScat +
                          scatteringCentre.direction().y() * yDistScat) /
                        (scatteringCentre.direction().perp2() *
                         scatteringCentre.direction().perp());
@@ -752,27 +752,27 @@ void MeasurementProcessor::driftDerivatives(int derivativeFlag,
   // transverse distance to measurement
   const TrackSurfaceIntersection& intersection =
       measurement.intersection(FittedTrajectory);
-  double xDistance = intersection.position().x() - m_x0;
-  double yDistance = intersection.position().y() - m_y0;
-  double rDistance = -(m_cosPhi0 * xDistance + m_sinPhi0 * yDistance) /
+  const double xDistance = intersection.position().x() - m_x0;
+  const double yDistance = intersection.position().y() - m_y0;
+  const double rDistance = -(m_cosPhi0 * xDistance + m_sinPhi0 * yDistance) /
                      (m_sinTheta0 * m_sinTheta0);
 
   // derivativeFlag definition: 0 take wrt Z0, 1 take wrt D0, 2 take wrt D0 and
   // Z0
   if (derivativeFlag != 0) {
-    double weight = measurement.weight();
+    const double weight = measurement.weight();
     const Amg::Vector3D& driftDirection = measurement.minimizationDirection();
-    double xDrift = driftDirection.x();
-    double yDrift = driftDirection.y();
+    const double xDrift = driftDirection.x();
+    const double yDrift = driftDirection.y();
 
     // momentum derivative - always numeric
     if (m_parameters->fitEnergyDeposit() && measurement.afterCalo()) {
-      Amg::Vector3D offset = measurement.intersection(DeltaQOverP1).position() -
+      const Amg::Vector3D offset = measurement.intersection(DeltaQOverP1).position() -
                              intersection.position();
       measurement.derivative(
           QOverP1, weight * driftDirection.dot(offset) * m_derivQOverP1);
     } else if (m_parameters->fitMomentum()) {
-      Amg::Vector3D offset = measurement.intersection(DeltaQOverP0).position() -
+      const Amg::Vector3D offset = measurement.intersection(DeltaQOverP0).position() -
                              intersection.position();
       measurement.derivative(
           QOverP0, weight * driftDirection.dot(offset) * m_derivQOverP0);
@@ -822,11 +822,11 @@ void MeasurementProcessor::driftDerivatives(int derivativeFlag,
     while (++param < measurement.lastParameter()) {
       const TrackSurfaceIntersection& scatteringCentre =
           (**s).intersection(FittedTrajectory);
-      double xDistScat =
+      const double xDistScat =
           intersection.position().x() - scatteringCentre.position().x();
-      double yDistScat =
+      const double yDistScat =
           intersection.position().y() - scatteringCentre.position().y();
-      double rDistScat = -(scatteringCentre.direction().x() * xDistScat +
+      const double rDistScat = -(scatteringCentre.direction().x() * xDistScat +
                            scatteringCentre.direction().y() * yDistScat) /
                          (scatteringCentre.direction().perp2() *
                           scatteringCentre.direction().perp());
@@ -906,19 +906,19 @@ void MeasurementProcessor::driftDerivatives(int derivativeFlag,
   // similar for derivatives along the wire direction
   if (derivativeFlag == 1)
     return;
-  double weight = measurement.weight2();
+  const double weight = measurement.weight2();
   const Amg::Vector3D& wireDirection = measurement.sensorDirection();
-  double xWire = wireDirection.x();
-  double yWire = wireDirection.y();
+  const double xWire = wireDirection.x();
+  const double yWire = wireDirection.y();
 
   // momentum derivative - always numeric
   if (m_parameters->fitEnergyDeposit() && measurement.afterCalo()) {
-    Amg::Vector3D offset = measurement.intersection(DeltaQOverP1).position() -
+    const Amg::Vector3D offset = measurement.intersection(DeltaQOverP1).position() -
                            intersection.position();
     measurement.derivative2(
         QOverP1, weight * wireDirection.dot(offset) * m_derivQOverP1);
   } else if (m_parameters->fitMomentum()) {
-    Amg::Vector3D offset = measurement.intersection(DeltaQOverP0).position() -
+    const Amg::Vector3D offset = measurement.intersection(DeltaQOverP0).position() -
                            intersection.position();
     measurement.derivative2(
         QOverP0, weight * wireDirection.dot(offset) * m_derivQOverP0);
@@ -956,11 +956,11 @@ void MeasurementProcessor::driftDerivatives(int derivativeFlag,
   while (++param < measurement.lastParameter()) {
     const TrackSurfaceIntersection& scatteringCentre =
         (**s).intersection(FittedTrajectory);
-    double xDistScat =
+    const double xDistScat =
         intersection.position().x() - scatteringCentre.position().x();
-    double yDistScat =
+    const double yDistScat =
         intersection.position().y() - scatteringCentre.position().y();
-    double rDistScat = -(scatteringCentre.direction().x() * xDistScat +
+    const double rDistScat = -(scatteringCentre.direction().x() * xDistScat +
                          scatteringCentre.direction().y() * yDistScat) /
                        (scatteringCentre.direction().perp2() *
                         scatteringCentre.direction().perp());
@@ -993,7 +993,7 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
       intersection = m_rungeKuttaIntersector->intersectSurface(
           *(**m).surface(), *intersection, qOverP);
       if (newIntersectionSTEP) {
-        double dist =
+        const double dist =
             1000. *
             (newIntersectionSTEP->position() - intersection->position()).mag();
         std::cout << " iMeasProc 1 distance STEP and Intersector " << dist
@@ -1051,7 +1051,7 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
         intersection = m_intersector->intersectSurface(*(**m).surface(),
                                                        *intersection, qOverP);
         if (newIntersectionSTEP) {
-          double dist = 1000. * (newIntersectionSTEP->position() -
+          const double dist = 1000. * (newIntersectionSTEP->position() -
                                  intersection->position())
                                     .mag();
           std::cout << " iMeasProc 2 distance STEP and Intersector " << dist
@@ -1105,19 +1105,19 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
         if ((**m).isScatterer())  // scattering centre
         {
           // update track direction for fitted scattering
-          double sinDeltaPhi = std::sin(m_parameters->scattererPhi(nScat));
-          double cosDeltaPhi = std::sqrt(1. - sinDeltaPhi * sinDeltaPhi);
-          double sinDeltaTheta = std::sin(m_parameters->scattererTheta(nScat));
+          const double sinDeltaPhi = std::sin(m_parameters->scattererPhi(nScat));
+          const double cosDeltaPhi = std::sqrt(1. - sinDeltaPhi * sinDeltaPhi);
+          const double sinDeltaTheta = std::sin(m_parameters->scattererTheta(nScat));
           double tanDeltaTheta = sinDeltaTheta;
           if (std::abs(sinDeltaTheta) < 1.)
             tanDeltaTheta /= std::sqrt(1. - sinDeltaTheta * sinDeltaTheta);
           Amg::Vector3D trackDirection(intersection->direction());
           trackDirection /= trackDirection.perp();
-          double cosPhi = trackDirection.x() * cosDeltaPhi -
+          const double cosPhi = trackDirection.x() * cosDeltaPhi -
                           trackDirection.y() * sinDeltaPhi;
-          double sinPhi = trackDirection.y() * cosDeltaPhi +
+          const double sinPhi = trackDirection.y() * cosDeltaPhi +
                           trackDirection.x() * sinDeltaPhi;
-          double cotTheta = (trackDirection.z() - tanDeltaTheta) /
+          const double cotTheta = (trackDirection.z() - tanDeltaTheta) /
                             (1. + trackDirection.z() * tanDeltaTheta);
           trackDirection = Amg::Vector3D(cosPhi, sinPhi, cotTheta);
           trackDirection = trackDirection.unit();
@@ -1133,7 +1133,7 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
     if (m_parameters->fitMomentum()) {
       // at extreme momenta use series expansion to avoid rounding (or FPE)
       if (m_parameters->extremeMomentum()) {
-        double loss = (**m).energyLoss() * std::abs(qOverP);
+        const double loss = (**m).energyLoss() * std::abs(qOverP);
         qOverP *= 1. + loss + loss * loss + loss * loss * loss;
       } else {
         double momentum = 1. / qOverP;
