@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Logging import logging
 
 #Based on G4UserActionsConfig.py
 
@@ -42,4 +43,19 @@ def VolumeDebugger(configFlags, name="G4UA::ISFFullUserActionSvc", **kwargs):
     kwargs_UATools.setdefault("UserActionTools",actionList)
     result.addService(CompFactory.G4UA.UserActionSvc(name,**kwargs_UATools))
 
+    return result
+
+def StepHistogramToolCfg(flags, name="G4UA::StepHistogramTool", **kwargs):
+    """
+    flags.Sim.OptionalUserActionList += ['G4DebuggingTools.G4DebuggingToolsConfig.StepHistogramToolCfg']
+    """
+    result = ComponentAccumulator()
+    if flags.Concurrency.NumThreads > 1:
+        msg = 'Attempt to run '+name+' with more than one thread, which is not supported'
+        log = logging.getLogger(name)
+        log.fatal(msg)
+        raise TypeError(msg)
+    output = './StepHistograms_opts_temp.root'
+    result.addService(CompFactory.THistSvc(Output = ["stepHisto DATAFILE='"+output+"' OPT='RECREATE'"]))
+    result.setPrivateTools(CompFactory.G4UA.StepHistogramTool(name, **kwargs))
     return result
