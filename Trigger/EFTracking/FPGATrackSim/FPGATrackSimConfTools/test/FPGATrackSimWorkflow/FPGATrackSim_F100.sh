@@ -37,6 +37,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.spacePoints=False \
     Trigger.FPGATrackSim.writeOfflPRDInfo=True \
     Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
+    Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root"
 
 

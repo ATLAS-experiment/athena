@@ -34,12 +34,7 @@ atlas_add_test( FPGATrackSimRegionSlices_test
 atlas_add_test( FPGATrackSimConfigFlags_test
                 PRIVATE_WORKING_DIRECTORY
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimConfigFlags
-                POST_EXEC_SCRIPT noerror.sh ) 
-
-atlas_add_test( FPGATrackSimLayerStudy_test
-                PRIVATE_WORKING_DIRECTORY 
-                SCRIPT FPGATrackSimLayerStudy.sh -n 10
-                POST_EXEC_SCRIPT noerror.sh )               
+                POST_EXEC_SCRIPT noerror.sh )             
 
 atlas_add_test( FPGATrackSimHelperFunctions
                 PRIVATE_WORKING_DIRECTORY 

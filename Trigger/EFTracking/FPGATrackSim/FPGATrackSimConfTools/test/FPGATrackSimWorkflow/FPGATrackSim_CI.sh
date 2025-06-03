@@ -25,17 +25,17 @@ echo "LayerStudy test is done"
 OUTPUT_AOD_FILE="FPGATrackSim_CI_AOD.root"
 
 echo "Running FPGATrackSim F-410 for a few single-mu events"
-FPGATrackSim_F410.sh -m -n 45 -o $OUTPUT_AOD_FILE
+FPGATrackSim_F410.sh -m -n 45 -c -o $OUTPUT_AOD_FILE
 echo "validating output AOD from F-410"
 python -m FPGATrackSimConfTools.FPGATrackSimValidateAODOutput $OUTPUT_AOD_FILE
 
 echo "Running FPGATrackSim F-610 for a few single-mu events"
-FPGATrackSim_F610.sh -m -n 45 -o $OUTPUT_AOD_FILE
+FPGATrackSim_F610.sh -m -n 45 -c -o $OUTPUT_AOD_FILE
 echo "validating output AOD from F-610"
 python -m FPGATrackSimConfTools.FPGATrackSimValidateAODOutput $OUTPUT_AOD_FILE
 
 echo "Running F-100 for a few ttbar events"
-FPGATrackSim_F100.sh -t -n 1 -o $OUTPUT_AOD_FILE
+FPGATrackSim_F100.sh -t -n 1 -c -o $OUTPUT_AOD_FILE
 echo "validating output AOD from F-100"
 python -m FPGATrackSimConfTools.FPGATrackSimValidateAODOutput $OUTPUT_AOD_FILE
 

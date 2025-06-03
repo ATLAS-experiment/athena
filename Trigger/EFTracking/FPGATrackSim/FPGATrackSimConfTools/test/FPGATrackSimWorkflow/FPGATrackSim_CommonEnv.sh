@@ -48,6 +48,7 @@ SKIP_EVENTS=0
 RDO_ANALYSIS=$RDO_SINGLE_MUON
 SAMPLE_TYPE='singleMuons'
 WRITE_UPSTREAM_OUTPUT_DATA=True
+WRITE_XAOD_CLUSTERS=False
 
 # arg parser
 while [[ $# -gt 0 ]]; do
@@ -65,6 +66,9 @@ while [[ $# -gt 0 ]]; do
         -i|--inputFile)
             RDO_ANALYSIS="$2"
             shift 2 ;;
+        -c|--writeClusters)
+            WRITE_XAOD_CLUSTERS=True
+            shift ;;
         -n|--events)
             RDO_EVT_ANALYSIS="$2";
             if [ "$RDO_EVT_ANALYSIS" -gt 10 ] || [ "$RDO_EVT_ANALYSIS" -eq -1 ]; then

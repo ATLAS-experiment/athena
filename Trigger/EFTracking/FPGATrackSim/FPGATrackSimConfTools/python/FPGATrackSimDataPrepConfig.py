@@ -245,17 +245,16 @@ def WriteToAOD(flags, stage = '',finalTrackParticles = ''): #  store xAOD contai
     log.info("---------- Configured AOD writing")
     
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-    toAOD = []
     toAOD = [f"xAOD::TrackParticleContainer#{finalTrackParticles}",f"xAOD::TrackParticleAuxContainer#{finalTrackParticles}Aux."]
+    if flags.Trigger.FPGATrackSim.writeClustersToAOD:
+        toAOD += ["xAOD::PixelClusterContainer#xAODPixelClustersFromFPGACluster","xAOD::PixelClusterAuxContainer#xAODPixelClustersFromFPGAClusterAux.",
+                "xAOD::StripClusterContainer#xAODStripClustersFromFPGACluster","xAOD::StripClusterAuxContainer#xAODStripClustersFromFPGAClusterAux."]
     if flags.Trigger.FPGATrackSim.writeOfflPRDInfo:
         toAOD += ['xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl','xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
                 'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl','xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.']
     if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
-        toAOD += ["xAOD::PixelClusterContainer#xAODPixelClustersFromFPGACluster","xAOD::PixelClusterAuxContainer#xAODPixelClustersFromFPGAClusterAux.",
-                "xAOD::StripClusterContainer#xAODStripClustersFromFPGACluster","xAOD::StripClusterAuxContainer#xAODStripClustersFromFPGAClusterAux.",
-                f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
-                f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink",
-                ]
+        toAOD += [f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
+                  f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink"]
     
     result.merge(addToAOD(flags, toAOD))
 
