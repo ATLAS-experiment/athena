@@ -162,7 +162,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
       Trk::BinnedLayerMaterial* layerMaterial = nullptr;
       // -- material with 1D binning
       Trk::BinUtility layerBinUtility1DZ(m_barrelLayerBinsZ,-layerHalflength, layerHalflength, Trk::open, Trk::binZ);
-      if (m_barrelLayerBinsPhi==1){
+      if (m_barrelLayerBinsPhi==1u){
         // no binning in phi
         layerMaterial =new Trk::BinnedLayerMaterial(layerBinUtility1DZ);
       } else { // -- material with 2D binning : Rphi*Z optimized for cylinder layer
@@ -384,7 +384,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           Trk::BinnedLayerMaterial* layerMaterial = nullptr;
           // -- material with 1D binning
           Trk::BinUtility layerBinUtilityZ(m_barrelLayerBinsZ, -layerHalflength, layerHalflength, Trk::open, Trk::binZ );
-          if (m_barrelLayerBinsPhi==1){
+          if (m_barrelLayerBinsPhi==1u){
             layerMaterial =new Trk::BinnedLayerMaterial(layerBinUtilityZ);
           } else { // -- material with 2D binning: RPhiZ binning
             Trk::BinUtility layerBinUtilityRPhiZ(m_barrelLayerBinsPhi,
@@ -489,7 +489,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                                    fullDiscBounds->rMax(),
                                    Trk::open,
                                    Trk::binR);
-  if (m_barrelLayerBinsPhi==1)
+  if (m_barrelLayerBinsPhi==1u)
     layerMaterial = std::make_unique<Trk::BinnedLayerMaterial>(layerBinUtilityR);
   else { // -- material with 2D binning
     Trk::BinUtility layerBinUtilityPhi(m_barrelLayerBinsPhi,
