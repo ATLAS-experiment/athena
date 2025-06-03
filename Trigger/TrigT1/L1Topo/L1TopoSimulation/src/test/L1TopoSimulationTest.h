@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1Topo_LVL1_L1TopoSimulationTest_h
@@ -50,8 +50,8 @@ namespace LVL1 {
     int m_OfftopoSteeringOutputLevel{TrigConf::MSGTC::WARNING};                          // property to set the outputlevel of the topo steering
 
     StringProperty  m_OffhistBaseDir; //! sets base dir for monitoring histograms
-    StringProperty  m_OffinputASCIIFile { "" }; // input dump file
-    StringProperty  m_OffinputJSONFile { "" }; // JSON file for menu
+    StringProperty  m_OffinputASCIIFile; // input dump file
+    StringProperty  m_OffinputJSONFile; // JSON file for menu
 
     std::unique_ptr<TCS::TopoSteering>  m_OfftopoSteering; //!< the topo steering
      
