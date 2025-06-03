@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauMonitorAlgorithm.h"
@@ -15,9 +15,7 @@ using namespace Monitored;
 tauMonitorAlgorithm::tauMonitorAlgorithm(const std::string &name,
                                          ISvcLocator *pSvcLocator)
     : AthMonitorAlgorithm(name, pSvcLocator)
-
-      ,
-      m_doRandom(true) {}
+{}
 
 tauMonitorAlgorithm::~tauMonitorAlgorithm() {}
 
