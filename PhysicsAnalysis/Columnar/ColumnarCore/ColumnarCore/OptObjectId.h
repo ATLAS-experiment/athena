@@ -62,7 +62,11 @@ namespace columnar
     [[nodiscard]] ObjectId<CI,ColumnarModeXAOD> value () const {
       if (m_object == nullptr)
         throw std::bad_optional_access();
-      return ObjectId<CI,ColumnarModeXAOD> (*m_object);}
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *result ATLAS_THREAD_SAFE = m_object;
+      return ObjectId<CI,ColumnarModeXAOD> (*result);}
 
     [[nodiscard]] ObjectId<CI,ColumnarModeXAOD> operator * () const {
       if (m_object == nullptr)
