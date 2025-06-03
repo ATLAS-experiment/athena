@@ -318,7 +318,7 @@ MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(DetachedVolVec && stations
                                                                              std::move(barrelZPBuffer),
                                                                              Trk::negativeFaceXY, "All::Gaps::BarrelZP"));
                 // set name
-                std::string nameEncl = msEntryDefined ? "All::Gaps::Barrel" : m_entryVolume;
+                std::string nameEncl = msEntryDefined ? "All::Gaps::Barrel" : m_entryVolume.value();
                 ATH_MSG_DEBUG(" nameEncl " << nameEncl);
                 enclosed = m_trackingVolumeHelper->glueTrackingVolumeArrays(std::move(barrelZP),
                                                                             Trk::negativeFaceXY,
