@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBJETMONITORING_TRIGBJETMONITORALGORITHM_H
@@ -20,7 +20,6 @@ class TrigBjetMonitorAlgorithm : public AthMonitorAlgorithm {
   virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 
  private:
-  Gaudi::Property<bool> m_doRandom {this,"RandomHist",true};
   Gaudi::Property<bool> m_collisionRun{this, "CollisionRun", true};
 
   Gaudi::Property<std::string> m_btaggingLinkName{this, "BtaggingLinkName", "btag"}; // TM 2021-10-30
