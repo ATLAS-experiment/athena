@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_SIMULATIONSELECTORS_BASESIMULATIONSELECTOR_H
@@ -70,10 +70,10 @@ class BaseSimulationSelector : public extends<AthAlgTool, ISimulationSelector> {
     virtual bool selfSelect(const ISFParticle& particle) const override;
 
   private:
-    ServiceHandle<ISimulationSvc>       m_simulator;  //!< simulation service assigned to a single advisor
-    bool                                m_isDynamic;  //!< this selector is either dynamic or static
-    bool                                m_invertCuts; //!< invert the result given by passesCuts(..) method
-    Gaudi::CheckedProperty<unsigned short> m_simFlavorProp{0}; //!< the simulation flavour that this selector will select
+    ServiceHandle<ISimulationSvc>       m_simulator{this, "Simulator", "", "simulation service assigned to a single advisor"};
+    Gaudi::Property<bool>               m_isDynamic{this, "IsDynamic", false, "this selector is either dynamic or static"};
+    Gaudi::Property<bool>               m_invertCuts{this, "InvertCuts", false, "invert the result given by passesCuts(..) method"};
+    Gaudi::CheckedProperty<unsigned short> m_simFlavorProp{this, "SimulationFlavor", 0, "the simulation flavour that this selector will select"};
     void SimulationFlavorHandler(Gaudi::Details::PropertyBase&);
     ISF::SimulationFlavor               m_simflavor{ISF::UndefinedSim};  //!< simulation flavor
 };
