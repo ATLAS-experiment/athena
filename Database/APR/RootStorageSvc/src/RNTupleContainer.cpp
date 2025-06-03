@@ -209,7 +209,8 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
             if( info->clazz().Name()=="pool::DbString" ) {
                dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, typeid(std::string));
             } else {
-               dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, info->clazz().TypeInfo());
+               // Can't use type_info because of default template argument in DataVectors ATEAM-1087
+               dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, info->clazz().Name());
             }
 #endif
             if( dsc.auxdyn_writer ) {

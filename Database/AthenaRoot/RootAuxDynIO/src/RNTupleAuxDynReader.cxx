@@ -213,8 +213,9 @@ namespace RootAuxDynIO
 #if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
                m_fieldInfos[auxid].view = m_ntupleReader->GetView<void>(field_name, nullptr);
 #else
-               auto ti = (standalone and !reg.isLinked(auxid))? reg.getType(auxid) : reg.getVecType(auxid);
-               m_fieldInfos[auxid].view = m_ntupleReader->GetView(field_name, nullptr, *ti);
+               // Can't use type_info because of default template argument in DataVectors ATEAM-1087
+               const std::string& tiname = (standalone and !reg.isLinked(auxid))? reg.getTypeName(auxid) : reg.getVecTypeName(auxid);
+               m_fieldInfos[auxid].view = m_ntupleReader->GetView(field_name, nullptr, tiname);
 #endif
             } else {
                errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader::init");
