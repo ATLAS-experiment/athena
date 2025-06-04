@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,7 +10,6 @@
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  *
- * $Id: AthenaPoolTestDataWriter.cxx,v 1.27 2009-03-30 17:28:18 schaffer Exp $
  *
  */
 
@@ -38,23 +37,12 @@
 
 AthenaPoolTestDataWriter::AthenaPoolTestDataWriter(const std::string& name,
                                                    ISvcLocator* pSvcLocator):
-    AthAlgorithm(name, pSvcLocator),
-    m_partialCreate(false),
-    m_readOtherHalf(false),
-    m_readFirstHalf(false)
+    AthAlgorithm(name, pSvcLocator)
 {
-    declareProperty("PartialCreate", m_partialCreate);
-    declareProperty("ReadOtherHalf", m_readOtherHalf);
-    declareProperty("ReadFirstHalf", m_readFirstHalf);
 }
 
 AthenaPoolTestDataWriter::~AthenaPoolTestDataWriter()
 {}
-
-StatusCode AthenaPoolTestDataWriter::initialize()
-{
-    return StatusCode::SUCCESS; 
-}
 
 StatusCode AthenaPoolTestDataWriter::execute()
 { 
@@ -590,10 +578,4 @@ StatusCode AthenaPoolTestDataWriter::execute()
     }
     return StatusCode::SUCCESS;
 }
-
-StatusCode AthenaPoolTestDataWriter::finalize() 
-{
-    return StatusCode::SUCCESS;
-}
-
 
