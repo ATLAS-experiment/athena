@@ -34,7 +34,13 @@
 #define MIN_ET 7000.0
 
 using Result = Root::TElectronEfficiencyCorrectionTool::Result;
-
+namespace correlationModel {
+enum model
+{
+  FULL = 0,
+  TOTAL = 1
+};
+}
 
 // =============================================================================
 // Standard constructor
@@ -44,7 +50,12 @@ AsgPhotonEfficiencyCorrectionTool::AsgPhotonEfficiencyCorrectionTool( const std:
   m_rootTool_unc(nullptr),
   m_rootTool_con(nullptr),
   m_appliedSystematics(nullptr),
-  m_sysSubstring("")
+  m_correlation_model(correlationModel::FULL),
+  m_sysSubstring(""),
+  m_corrVarUp{},
+  m_corrVarDown{},
+  m_uncorrVarUp{},
+  m_uncorrVarDown{}
 {
 
   // Create an instances of the underlying ROOT tools
@@ -58,7 +69,8 @@ AsgPhotonEfficiencyCorrectionTool::AsgPhotonEfficiencyCorrectionTool( const std:
   declareProperty( "CorrectionFileNameUnconv", m_corrFileNameUnconv="",
                    "File that stores the correction factors for simulation for unconverted photons");
 				   
-  declareProperty("MapFilePath", m_mapFile = "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt",
+  //  declareProperty("MapFilePath", m_mapFile = "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt",
+    declareProperty("MapFilePath", m_mapFile = "map_For_test.txt",
                   "Full path to the map file");  
 				  
   declareProperty( "ForceDataType", m_dataTypeOverwrite=-1,
@@ -79,7 +91,11 @@ AsgPhotonEfficiencyCorrectionTool::AsgPhotonEfficiencyCorrectionTool( const std:
   declareProperty("DefaultRandomRunNumber",  m_defaultRandomRunNumber = 999999,
                                         "Set default run number manually");
   declareProperty("removeTRTConversion", m_removeTRTConversion = true, 
-  		  "boolean to treat barrel standalone TRT conversion as unconverted for Run3 ");   
+  		  "boolean to treat barrel standalone TRT conversion as unconverted for Run3 ");
+  declareProperty("CorrelationModel",
+                  m_correlation_model_name = "TOTAL",
+                  "Uncertainty correlation model. At the moment TOTAL, FULL,"
+		  "default is FULL");
 										
 
 }
@@ -116,11 +132,12 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
   }
 
   // once the input files are retrieved, update the path using PathResolver or TOOL/data folder
-  for (auto & i : corrFileNameList){
-
+  for (auto & i : corrFileNameList){   
+    //std::cout<<"i is "<<i<<" "<<std::endl;
     //Using the PathResolver to locate the file
-    std::string filename = PathResolverFindCalibFile( i );
-
+    //std::string filename = PathResolverFindCalibFile( i );//Put it back after local test!
+    std::string filename =  "/afs/cern.ch/work/r/rhulsken/private/PhotonId/PhotonEffCorr/Temp_files/"+i ;
+    
     if (filename.empty()){
       ATH_MSG_ERROR ( "Could NOT resolve file name " << i );
       return StatusCode::FAILURE ;
@@ -131,7 +148,8 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
     i = filename;
 
   }
-   
+  //std::cout<<"corr[0] "<<corrFileNameList[0]<<std::endl;
+  //std::cout<<"prefix ID "<<m_file_prefix_ID<<std::endl;
   // Set prefix for sustematics if this is ISO, Trigger or ID SF
   if( corrFileNameList[0].find(m_file_prefix_Trig) != std::string::npos) m_sysSubstring="TRIGGER_";
   if( corrFileNameList[0].find(m_file_prefix_ID) != std::string::npos) m_sysSubstring="ID_";
@@ -139,6 +157,20 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
   if( corrFileNameList[0].find(m_file_prefix_TrigEff) != std::string::npos) m_sysSubstring="TRIGGER_";
   if(m_sysSubstring.empty()) {ATH_MSG_ERROR ( "Invalid input file" ); return StatusCode::FAILURE;}
 
+
+  if (m_correlation_model_name == "FULL") {
+    m_correlation_model = correlationModel::FULL;
+  } else if (m_correlation_model_name == "TOTAL") {
+    m_correlation_model = correlationModel::TOTAL;
+  } else {
+    ATH_MSG_ERROR("Unknown correlation model " + m_correlation_model_name);
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG("Correlation model: " + m_correlation_model_name
+                << " Enum " << m_correlation_model);
+  
+  
+  
   // Configure the underlying Root tool
   m_rootTool_con->addFileName( corrFileNameList[0] );
   m_rootTool_unc->addFileName( corrFileNameList[1] );
@@ -147,6 +179,7 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
   m_rootTool_con->msg().setLevel(this->msg().level());
   m_rootTool_unc->msg().setLevel(this->msg().level());
 
+  
   // We need to initialize the underlying ROOT TSelectorTool
   if ( (0 == m_rootTool_con->initialize()) || (0 == m_rootTool_unc->initialize()) )
     {
@@ -154,6 +187,11 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
       return StatusCode::FAILURE;
     }
 
+  // get Nsyst
+  m_nCorrSyst = m_rootTool_con->getNSyst();
+  //std::cout<<"Number of Systematics "<<m_nCorrSyst<<std::endl;
+
+  
   // get the map of pt/eta bins
   // let's start with converted 
   m_rootTool_con->getNbins(m_pteta_bins);
@@ -243,6 +281,7 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
     return CP::CorrectionCode::Error;
   }
 
+  
   // Retrieve the proper random Run Number
   unsigned int runnumber = m_defaultRandomRunNumber;
   if (m_useRandomRunNumber) {
@@ -256,6 +295,8 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
     }
     runnumber = randomrunnumber(*(eventInfo));
   }
+
+  //std::cout<<"Run Number"<<runnumber<<std::endl;
 
   /* For now the dataType must be set by the user. May be added to the IParticle
    * class later.  */
@@ -271,20 +312,28 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
    if(runnumber >= 410000 && m_removeTRTConversion) excludeTRT = true;
   // check if converted
   const bool isConv = xAOD::EgammaHelpers::isConvertedPhoton(egam, excludeTRT);
-
+  //std::cout<<dataType<<std::endl;
+  //std::cout<<"arrived Here"<<std::endl;
   // Call the ROOT tool to get an answer (for photons we need just the total)
   const int status = isConv ? m_rootTool_con->calculate(dataType, runnumber,
-                                                        eta2, et, result, true)
+                                                        eta2, et, result, false)
                             : m_rootTool_unc->calculate(dataType, runnumber,
-                                                        eta2, et, result, true);
-
+                                                        eta2, et, result, false);
+  //std::cout<<status<<std::endl;
   // if status 0 something went wrong
   if (!status) {
     result.SF = 1;
     result.Total = 1;
     return CP::CorrectionCode::OutOfValidityRange;
   }
-
+  /* if (m_nCorrSyst !=0)
+    {
+      for (int i = 0 ; i<m_nCorrSyst; i++)
+	{
+	  std::cout<<"for corr "<<i <<": "<<result.Corr[i]<<std::endl;
+	}
+	}*/
+  
   return CP::CorrectionCode::Ok;
 }
 
@@ -296,16 +345,58 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(c
   if ( status != CP::CorrectionCode::Ok ) {
     return status;
   }
-
+  //Get the result + the uncertainty
+  float sigma(0);
+  
   if(m_appliedSystematics==nullptr){
     efficiencyScaleFactor=sfresult.SF;
     return CP::CorrectionCode::Ok;
   }
+  //std::cout<<appliedSystematics().name()<<std::endl;
+  if (appliedSystematics().name().size() != 0)
+    {
+      TString last = appliedSystematics().name().substr(appliedSystematics().name().size()-1,appliedSystematics().name().size());
+      std::string uncert_name="";
+      if (last == "n")
+	{
+	  uncert_name = appliedSystematics().name().substr(0,appliedSystematics().name().size()-7);
+	  
+	}
+      else if (last == "p")
+	{
+	  uncert_name = appliedSystematics().name().substr(0,appliedSystematics().name().size()-5);
+	  
+	}
+      //std::cout<<uncert_name<<std::endl;
+      sigma=appliedSystematics().getParameterByBaseName(uncert_name);
+
+      std::string Number_uncert = uncert_name.substr(uncert_name.size()-1,uncert_name.size());
+      if (Number_uncert=="y")
+	{
+	  efficiencyScaleFactor=sfresult.SF+sigma*sfresult.Total;
+	}
+      else
+	{
+	  efficiencyScaleFactor=sfresult.SF+sigma*sfresult.Corr[std::stoi(Number_uncert)];
+
+	}
+    }
+  else {
+    sigma=appliedSystematics().getParameterByBaseName("PH_EFF_"+m_sysSubstring+"Uncertainty");
+    //std::cout<<"Sigma "<<sigma<<" "<<m_sysSubstring<<std::endl;
+    efficiencyScaleFactor=sfresult.SF+sigma*sfresult.Total;
+    //std::cout<<"Total "<<sfresult.Total<<std::endl;
+    //std::cout<<"SF "<< sfresult.SF<<std::endl;
+
+  }
+  //  std::cout<<"Scale Factor "<<efficiencyScaleFactor<<std::endl;
+
+  int m_nCorrSyst = m_rootTool_con->getNSyst();
+
+  //std::cout<<"Corr systematics "<<m_nCorrSyst<<std::endl;
+
+ 
   
-  //Get the result + the uncertainty
-  float sigma(0);
-  sigma=appliedSystematics().getParameterByBaseName("PH_EFF_"+m_sysSubstring+"Uncertainty");
-  efficiencyScaleFactor=sfresult.SF+sigma*sfresult.Total;
   return  CP::CorrectionCode::Ok;
 }
 
@@ -348,8 +439,16 @@ CP::SystematicSet AsgPhotonEfficiencyCorrectionTool::affectingSystematics() cons
   CP::SystematicSet mySysSet;
  
   mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", CP::SystematicVariation::CONTINUOUS));
-  mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", 1));
-  mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", -1));
+  if (m_correlation_model_name == "TOTAL") {
+    mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", 1));
+    mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", -1));
+  }
+  else if (m_correlation_model_name == "FULL") {
+    for (int i = 0; i < m_nCorrSyst; ++i) {
+      mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ Form("Corr_NP%d", i), 1));
+      mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ Form("Corr_NP%d", i), -1));
+    }
+  }
    
   return mySysSet;
 }
@@ -367,8 +466,16 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::registerSystematics() {
 /// returns: the list of all systematics this tool recommends to use
 CP::SystematicSet AsgPhotonEfficiencyCorrectionTool::recommendedSystematics() const {
   CP::SystematicSet mySysSet;
+  if (m_correlation_model_name == "TOTAL") {
   mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", 1));
   mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", -1));
+  }
+  else if (m_correlation_model_name == "FULL") {
+    for (int i = 0; i < m_nCorrSyst; ++i) {
+      mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ Form("Corr_NP%d", i), 1));
+      mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ Form("Corr_NP%d", i), -1));
+    }
+    }
    
   return mySysSet;
 }
@@ -389,10 +496,28 @@ applySystematicVariation ( const CP::SystematicSet& systConfig )
       ATH_MSG_ERROR("Unsupported combination of systematics passed to the tool!");
       return StatusCode::FAILURE;
     }
+    /*   //COPIED FROM ELECTRON CODE
+    // Does filtered make sense,  only one per time
+    if (filteredSys.size() > 1) {
+      ATH_MSG_ERROR(
+        "More than one systematic variation passed at the same time");
+      return StatusCode::FAILURE;
+    }
+
+    if (filteredSys.empty() && !systConfig.empty()) {
+      ATH_MSG_DEBUG("systematics : ");
+      for (const auto& syst : systConfig) {
+        ATH_MSG_DEBUG(syst.name());
+      }
+      ATH_MSG_DEBUG(" Not supported ");
+    }
+    //END COPIED FROM ELECTRON CODE*/
+
+
     // Insert filtered set into the map
     itr = m_systFilter.insert(std::make_pair(systConfig, filteredSys)).first;
   }
-
+  
   CP::SystematicSet& mySysConf = itr->second;
   m_appliedSystematics = &mySysConf;
   return StatusCode::SUCCESS;
@@ -405,7 +530,10 @@ applySystematicVariation ( const CP::SystematicSet& systConfig )
 std::string AsgPhotonEfficiencyCorrectionTool::getFileName(const std::string& isoWP, const std::string& trigWP, bool isConv) {  
 
   // First locate the map file:
-  std::string mapFileName = PathResolverFindCalibFile( m_mapFile );
+  std::string mapFileName2 = PathResolverFindCalibFile( m_mapFile );//Put it back after local test!
+  std::cout<<mapFileName2<< " Is the PATH"<<std::endl; 
+  
+  std::string mapFileName = "/afs/cern.ch/work/r/rhulsken/private/PhotonId/PhotonEffCorr/Temp_files/"+ m_mapFile ;
   if(mapFileName.empty()){
 	ATH_MSG_ERROR ( "Can't read map file " << m_mapFile );
 	return mapFileName;	// return an empty string
