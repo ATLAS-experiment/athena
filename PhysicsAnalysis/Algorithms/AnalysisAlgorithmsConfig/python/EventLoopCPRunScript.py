@@ -15,9 +15,8 @@ class EventLoopCPRunScript(CPBaseRunner):
         derivedGroup = self.parser.add_argument_group('EventLoop specific arguments')
         derivedGroup.add_argument('--direct-driver', dest='direct_driver',
                                  action='store_true', help='Run the job with the direct driver')
-        derivedGroup.add_argument('--strip', dest='strip', action='store_true', help='Move the analysis root file to the top level, and delete the work directory.'
-                                  ' Mainly useful for standardizing the output with the Athena framework.')
-        derivedGroup.add_argument('--work-dir', dest='work_dir', default='workDir', help='The work directory for the EL job')
+        derivedGroup.add_argument('--work-dir', dest='work_dir', nargs='?', const='workDir', default=None,
+                                  help='The work directory for the EL job. defaults to "workDir".')
         derivedGroup.add_argument('--no-factory-preload', dest='no_factory_preload', action='store_true', help='Do not preload the component factories for the EL job. The component factories save memory and sidestep some technical issues, so you should not disable them unless you have a good reason to do so.')
         derivedGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
         return
@@ -43,18 +42,42 @@ class EventLoopCPRunScript(CPBaseRunner):
         for file in self.inputList:
             sampleFiles.add(file)
         self.sampleHandler.add(sampleFiles)
-        
-    def stripPath(self):
-        import os
+            
+    def moveOutputFiles(self):
+        from pathlib import Path
         import shutil
-        self.logger.info("Moving the analysis root file to the top level, and deleting the work directory. (--strip option)")
-        workDir = os.path.realpath(self.args.work_dir)
-        rootfilePath = os.path.realpath(os.path.join(workDir, 'data-ANALYSIS', f'{self.args.output_name}.root'))
-        currentDir = os.getcwd()
-        shutil.move(rootfilePath, os.path.join(currentDir, f"{self.args.output_name}.root"))
-        shutil.rmtree(workDir)
-        os.remove(os.path.join(currentDir, self.args.work_dir))
-    
+        self.logger.info("Moving the analysis root file and the hist file to the top level, and deleting the work directory.")
+        workDir = Path(self.args.work_dir) if self.args.work_dir else Path('workDir')
+        rootfilePath = (workDir / 'data-ANALYSIS' / f'{self.args.output_name}.root').resolve()
+        histfilePath = (workDir / f"hist-{self.args.output_name}.root").resolve()
+        currentDir = Path.cwd()
+        # move ntuple file if it exists
+        if rootfilePath.exists():
+            self.logger.info(f"Moving {rootfilePath} to {currentDir / f'{self.args.output_name}.root'}")
+            shutil.move(str(rootfilePath), str(currentDir / f"{self.args.output_name}.root"))
+        else:
+            self.logger.warning(f"Root file {rootfilePath} does not exist or merging is enabled, skipping move.")
+        #move histogram file if it exists    
+        if histfilePath.exists():
+            self.logger.info(f"Moving {histfilePath} to {currentDir / f'hist-{self.args.output_name}.root'}")
+            shutil.move(str(histfilePath), str(currentDir / f"hist-{self.args.output_name}.root"))
+        else:
+            self.logger.warning(f"Histogram file {histfilePath} does not exist or merging, skipping move.")
+            
+        # rename merged hist-ntuple to output_name.root
+        self.logger.info(f"renmaing the hist-{self.args.output_name}.root to {self.args.output_name}.root")
+        newHistFile = currentDir / f"hist-{self.args.output_name}.root"
+        if newHistFile.exists():
+            newHistFile.rename(currentDir / f"{self.args.output_name}.root")
+            
+        # delete the work directory
+        self.logger.info(f"Deleting the workDir directory {workDir}")
+        real_path = workDir.resolve()
+        workDir.unlink()
+        if real_path.exists():
+            shutil.rmtree(real_path)
+            
+        
     def driverSubmit(self, driver):
         '''
         Important if you want to run code after submitting the job, with external driver e.g., ExecDriver.
@@ -63,7 +86,8 @@ class EventLoopCPRunScript(CPBaseRunner):
         '''
         import os
         if (pid := os.fork()) == 0: # child process
-            driver.submit(self.job, self.args.work_dir)
+            name = self.args.work_dir if self.args.work_dir else 'workDir'
+            driver.submit(self.job, name)
             exit(0)
         else:
             os.waitpid(pid, 0) # parent waits for child process to finish
@@ -97,4 +121,5 @@ class EventLoopCPRunScript(CPBaseRunner):
         
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
         self.driverSubmit(driver)
-        if self.args.strip: self.stripPath()
+        if self.args.work_dir is None: # move output if work_dir is not used
+            self.moveOutputFiles()
