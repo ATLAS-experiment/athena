@@ -48,7 +48,7 @@ int LundVariablesTool::modifyJet(xAOD::Jet& injet) const {
 	  ANA_MSG_WARNING("Failed to cast truth particle  ------");
         }
       }
-      v_LundValues.push_back(LundVariablesTool::getLundVar(v_pj_constituents));
+      v_LundValues.push_back(LundVariablesTool::getLundVar(std::move(v_pj_constituents)));
       
 
       std::vector<double> v_jj_pt;
@@ -57,7 +57,7 @@ int LundVariablesTool::modifyJet(xAOD::Jet& injet) const {
       std::vector<double> v_jj_kt;
 
 
-      for (auto declust : v_LundValues.at(0)){
+      for (const auto & declust : v_LundValues.at(0)){
           v_jj_pt.push_back( declust.jj.pt() );
           v_j1_pt.push_back( declust.j1.pt() );
           v_j2_pt.push_back( declust.j2.pt() );
