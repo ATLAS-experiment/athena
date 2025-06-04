@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,7 +7,6 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: IOVDbTestAlg.h,v 1.17 2009-03-30 12:10:14 ivukotic Exp $
 //<version>	$Name: not supported by cvs2svn $
 
 #ifndef IOVDBTESTALG_IOVDBTESTALG_H
@@ -54,24 +53,24 @@ private:
     StatusCode testCallBack(  IOVSVC_CALLBACK_ARGS  );
     StatusCode registerIOV(const CLID& clid);
 
-    BooleanProperty           m_writeCondObjs;
-    BooleanProperty           m_regIOV;
-    BooleanProperty           m_readWriteCool;
-    BooleanProperty           m_twoStepWriteReg;
-    BooleanProperty           m_createExtraChans;
-    BooleanProperty           m_nameChans;
-    BooleanProperty           m_readInInit;
-    BooleanProperty           m_writeOnlyCool;
-    BooleanProperty           m_fancylist;
-    BooleanProperty           m_printLB;
-    BooleanProperty           m_writeNewTag;
-    BooleanProperty           m_readNewTag;
-    BooleanProperty           m_noStream;
-    IntegerProperty           m_regTime;
-    StringProperty            m_streamName;
-	IntegerProperty           m_run;
-    BooleanProperty           m_online;
-    std::string               m_tagID;
+    BooleanProperty           m_writeCondObjs{this, "WriteCondObjs", false};
+    BooleanProperty           m_regIOV{this, "RegisterIOV", false};
+    BooleanProperty           m_readWriteCool{this, "ReadWriteCool", false};
+    BooleanProperty           m_twoStepWriteReg{this, "TwoStepWriteReg", false};
+    BooleanProperty           m_createExtraChans{this, "CreateExtraChanns", false};
+    BooleanProperty           m_nameChans{this, "NameChanns", false};
+    BooleanProperty           m_readInInit{this, "ReadInInit", false};
+    BooleanProperty           m_writeOnlyCool{this, "WriteOnlyCool", false};
+    BooleanProperty           m_fancylist{this, "FancyList", false};
+    BooleanProperty           m_printLB{this, "PrintLB", false};
+    BooleanProperty           m_writeNewTag{this, "WriteNewTag", false};
+    BooleanProperty           m_readNewTag{this, "ReadNewTag", false};
+    BooleanProperty           m_noStream{this, "NoStream", false};
+    IntegerProperty           m_regTime{this, "RegTime", 0, "Register time in sec"};
+    StringProperty            m_streamName{this, "StreamName", "CondStream1"};
+	IntegerProperty           m_run{this, "run", 0};
+    BooleanProperty           m_online{this, "online", false};
+    StringProperty            m_tagID{this, "TagID", ""};
     
     ServiceHandle<IIOVRegistrationSvc>      m_regSvc;
     ToolHandle<IAthenaOutputStreamTool>     m_streamer;
