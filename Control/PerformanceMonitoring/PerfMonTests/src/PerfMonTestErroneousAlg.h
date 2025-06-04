@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestErroneousAlg.h 
@@ -26,36 +26,13 @@ namespace PerfMonTest {
 class ErroneousAlg : public AthAlgorithm
 { 
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
+ public:
+  using AthAlgorithm::AthAlgorithm;
 
-  // Copy constructor: 
+  virtual StatusCode execute() override;
 
-  /// Constructor with parameters: 
-  ErroneousAlg( const std::string& name, ISvcLocator* pSvcLocator );
+ private:
 
-  /// Destructor: 
-  virtual ~ErroneousAlg(); 
-
-  // Assignment operator: 
-  //ErroneousAlg &operator=(const ErroneousAlg &alg); 
-
-  // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
-
-
-  /////////////////////////////////////////////////////////////////// 
-  // Private data: 
-  /////////////////////////////////////////////////////////////////// 
- private: 
-
-  /// Default constructor: 
-  ErroneousAlg();
-  
   /// three member functions which will exhibit faulty behaviour
   bool jumpOnUninitializedValue();
   bool invalidRead();
@@ -65,7 +42,7 @@ class ErroneousAlg : public AthAlgorithm
   {
     return not shouldIJump;
   }
-  
+
 }; 
 
 

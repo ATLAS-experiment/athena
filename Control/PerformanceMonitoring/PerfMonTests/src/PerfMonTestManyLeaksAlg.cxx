@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestManyLeaksAlg.cxx 
@@ -22,42 +22,7 @@ using namespace PerfMonTest;
 
 long** ManyLeaksAlg::m_pointers ATLAS_THREAD_SAFE = NULL;
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
 
-// Constructors
-////////////////
-ManyLeaksAlg::ManyLeaksAlg( const std::string& name, 
-                            ISvcLocator* pSvcLocator ) : 
-  AthAlgorithm( name,    pSvcLocator ),
-  m_stillReachable ( NULL ),
-  m_possibleLost   ( NULL ),
-  m_indirectlyLost ( NULL ),
-  m_definitelyLost ( NULL )
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-  
-  declareProperty( "LeakSize",
-		   m_leakSize = 10,
-		   "Number of longs to be leaked just once" );
-  declareProperty( "LeakInInit",
-		   m_leakInInit = false,
-		   "Where it will leak: initialize or execute(default)" );
-}
-
-// Destructor
-///////////////
-ManyLeaksAlg::~ManyLeaksAlg()
-{ 
-  ATH_MSG_DEBUG ( "Calling destructor" ) ;
-}
-
-// Athena Algorithm's Hooks
-////////////////////////////
 StatusCode ManyLeaksAlg::initialize()
 {
   ATH_MSG_INFO ( "Initializing " << name() << "..." ) ;
@@ -71,13 +36,6 @@ StatusCode ManyLeaksAlg::initialize()
   
   if ( m_leakInInit )  leakAll();
   
-  return StatusCode::SUCCESS;
-}
-
-StatusCode ManyLeaksAlg::finalize()
-{
-  ATH_MSG_INFO ( "Finalizing " << name() << "..." ) ;
-
   return StatusCode::SUCCESS;
 }
 

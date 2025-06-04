@@ -1,7 +1,5 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestMallocAlg.cxx 
@@ -25,52 +23,6 @@
 
 using namespace PerfMonTest;
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-MallocAlg::MallocAlg( const std::string& name, 
-                      ISvcLocator* pSvcLocator ) : 
-  AthAlgorithm( name,    pSvcLocator )
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-
-  declareProperty( "EvtNbr",
-                   m_evtNbr = 10,
-                   "event number at which to actually do stuff" );
-
-  declareProperty( "UseStdVector",
-                   m_useStdVector = false,
-                   "switch between using a C-array and a std::vector");
-}
-
-// Destructor
-///////////////
-MallocAlg::~MallocAlg()
-{ 
-  ATH_MSG_DEBUG ( "Calling destructor" ) ;
-}
-
-// Athena Algorithm's Hooks
-////////////////////////////
-StatusCode MallocAlg::initialize()
-{
-  ATH_MSG_INFO ( "Initializing " << name() << "..." ) ;
-  
-  return StatusCode::SUCCESS;
-}
-
-StatusCode MallocAlg::finalize()
-{
-  ATH_MSG_INFO ( "Finalizing " << name() << "..." ) ;
-
-  return StatusCode::SUCCESS;
-}
 
 StatusCode MallocAlg::execute()
 {  
