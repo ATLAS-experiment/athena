@@ -25,19 +25,14 @@ std::unique_ptr<Trk::TrackParameters>
 combineToSingle(const MultiComponentState&,
                 const bool useMode = false);
 
-/** @brief Combined/merge a component to another one */
-void
-combineWithWeight(Trk::ComponentParameters& mergeTo,
-                  const Trk::ComponentParameters& addThis);
-
-/** @brief Update parameters */
+/** @brief Combine parameters based on their relevant weigths*/
 void
 combineParametersWithWeight(AmgVector(5) & firstParameters,
                             double& firstWeight,
                             const AmgVector(5) & secondParameters,
                             const double secondWeight);
 
-/** @brief Update cov matrix */
+/** @brief Combine cov matrices based on their relevant weights*/
 void
 combineCovWithWeight(const AmgVector(5) & firstParameters,
                      AmgSymMatrix(5) & firstMeasuredCov,
@@ -46,8 +41,7 @@ combineCovWithWeight(const AmgVector(5) & firstParameters,
                      const AmgSymMatrix(5) & secondMeasuredCov,
                      const double secondWeight);
 
-/** @brief Helper to combine forward with  smoother MultiComponentStates
- */
+/** @brief Helper to combine forward with  smoother MultiComponentStates*/
 Trk::MultiComponentState
 combineWithSmoother(const Trk::MultiComponentState& forwardsMultiState,
                     const Trk::MultiComponentState& smootherMultiState,
