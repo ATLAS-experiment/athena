@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAMVACALIB_EGAMMAMVACALIBTOOL_H
@@ -25,6 +25,11 @@
 #include <string>
 #include <memory>
 #include <functional>
+
+
+namespace egammaMVACalibTool_detail {
+struct Funcs;
+}
 
 
 /**
@@ -67,7 +72,7 @@ class egammaMVACalibTool : public asg::AsgTool, virtual public IegammaMVACalibTo
   ASG_TOOL_CLASS(egammaMVACalibTool, IegammaMVACalibTool)
 public:
   egammaMVACalibTool(const std::string& type);
-  virtual ~egammaMVACalibTool() override = default;
+  virtual ~egammaMVACalibTool() override;
 
   virtual StatusCode initialize() override;
 
@@ -119,7 +124,9 @@ private:
   std::vector<MVAUtils::BDT> m_BDTs;
 
   /// where the pointers to the funcs to calculate the vars per BDT
-  std::vector<std::vector<std::function<float(const xAOD::Egamma*, const xAOD::CaloCluster*)> > > m_funcs;
+  // (Need to hide this type to avoid a cling bug:
+  //  https://github.com/root-project/root/issues/18833)
+  std::unique_ptr<egammaMVACalibTool_detail::Funcs> m_funcs;
 
   /// shifts formulas
   std::vector<TFormula> m_shifts;
