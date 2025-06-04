@@ -204,8 +204,11 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     if "HighPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
         truthMinPt = 10000  # 10 GeV
         truthMaxPt = -9999. # +inf
-    if "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+    elif "VeryLowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
         truthMinPt = 1000   # 1 GeV
+        truthMaxPt = 2000   # 2 GeV
+    elif "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+        truthMinPt = 2000   # 2 GeV
         truthMaxPt = 10000  # 10 GeV
 
     ## SelectTruthObjec: cutomised selections

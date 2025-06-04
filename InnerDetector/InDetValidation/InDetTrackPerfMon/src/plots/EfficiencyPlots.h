@@ -56,6 +56,7 @@ namespace IDTPM {
 
     TEfficiency* m_eff_vs_inclusive{};
     TEfficiency* m_eff_vs_pt{};
+    TEfficiency* m_eff_vs_logPt{};
     TEfficiency* m_eff_vs_lowPt{};
     TEfficiency* m_eff_vs_eta{};
     TEfficiency* m_eff_vs_phi{};

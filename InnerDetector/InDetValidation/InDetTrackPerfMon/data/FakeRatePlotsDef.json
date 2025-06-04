@@ -9,6 +9,11 @@
         "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "50.0" },
         "yAxis" : { "title" : "Fake rate" }
     },
+    "fakerate_vs_$TRKTAG_logPt" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "1.0", "high" : "1000.0", "doLogLinBins" : "true" },
+        "yAxis" : { "title" : "Fake rate" }
+    },
     "fakerate_vs_$TRKTAG_eta" : {
         "type" : "TEfficiency",
         "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "20", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
