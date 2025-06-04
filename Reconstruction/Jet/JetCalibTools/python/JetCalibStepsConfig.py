@@ -144,7 +144,8 @@ def calibConfigToToolList(flags, **configDict):
     toolDic = {}
     foundCS = False # check at least one of the steps starts from constituent scale
     for step in configDict:
-        
+
+        configDict.get(step).pop('prereqs',{}) # removes the 'prereqs' entry not refined in steps       
         # expert option to skip a step
         if configDict.get(step).pop('noRun',False):
             jcslog.warning(f'Expert option: Skipping calib step {step}')
@@ -193,13 +194,20 @@ def calibConfigToToolList(flags, **configDict):
     return ordered_tools
 
 def calibToolFromConfigFile(flags, configFile, name = "jetcalib"):
-    from yaml import safe_load
-    configDic = safe_load(open(configFile))
+
+    configDic = load_yaml_cfg(configFile)
 
     globalSettings = configDic.pop('Global',{})
 
     calibTool = CompFactory.JetCalibTool(name, CalibSteps=calibConfigToToolList(flags, **configDic), **globalSettings)
     return calibTool
+
+def load_yaml_cfg(configFile):
+    from yaml import safe_load
+
+    path_configFile = PathResolver.FindCalibFile(configFile)
+    configDic = safe_load(open(path_configFile))
+    return configDic
 
 
 class JetCalibConfigError(Exception):
