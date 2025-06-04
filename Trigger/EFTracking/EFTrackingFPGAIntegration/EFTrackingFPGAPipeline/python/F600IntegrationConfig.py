@@ -6,9 +6,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def F600IntegrationCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
-    kwarg.setdefault('bdfID','0000:83:00.1') # On the testbed
+    kwarg.setdefault('bdfID','0000:c4:00.1') # On the testbed
     kwarg.setdefault('xclbin', '/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F610/kernels.hw.xclbin')
-    
+
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
     clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
@@ -18,7 +18,10 @@ def F600IntegrationCfg(flags, name = 'BenckmarkAlg', **kwarg):
     from EFTrackingFPGAUtility.FPGADataFormatter import FPGATestVectorToolCfg
     testVectorTool = acc.popToolsAndMerge(FPGATestVectorToolCfg(flags))
     kwarg.setdefault('TestVectorTool', testVectorTool)
-
+ 
+    outputTool = acc.popToolsAndMerge(FPGAOutputConversionToolCfg(flags))
+    kwarg.setdefault('OutputConversionTool', outputTool)
+    
     # Set up Chrono service
     acc.addService(CompFactory.ChronoStatSvc(
         PrintUserTime = True,
@@ -29,6 +32,16 @@ def F600IntegrationCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F600IntegrationAlg(**kwarg))
 
     return acc
+
+def FPGAOutputConversionToolCfg(flags, name = 'FPGAOutputConversionTool', **kwarg):
+
+    acc = ComponentAccumulator()
+
+    kwarg.setdefault('name', name)
+    acc.setPrivateTools(CompFactory.OutputConversionTool(**kwarg))
+
+    return acc
+
 
 
 if __name__ == "__main__":
