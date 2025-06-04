@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_MIXINGEVENTSELECTOR_H
@@ -16,6 +16,7 @@
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventSelector
 
 #include <cassert>
+#include <memory>
 #include <ostream>
 #include <vector>
 
@@ -149,14 +150,33 @@ public:
 
 private:
   bool validTrigger() const { return (m_trigList.end()!=m_pCurrentTrigger);}
+
   /// \name Properties
   //@{
-  StringProperty      m_statusFileName;    ///< optional stream output snapshot
-  StringArrayProperty m_triggerListProp;   ///< the recipe
-  IntegerProperty m_outputRunNumber;        
-  UnsignedLongArrayProperty m_eventNumbers;///< use these as event numbers
-  StringProperty      m_mergedEventInfoKey;///< SG key of MergedEventInfo
-  ToolHandleArray<IAthenaSelectorTool> m_helperTools;
+  Gaudi::Property<std::string> m_statusFileName{this, "StreamStatusFileName", {},
+    "Name of the file recording the last event used and how many were available for each stream. Default is to produce no file."};
+
+  Gaudi::Property<std::vector<std::string>> m_triggerListProp{this, "TriggerList", {}, &MixingEventSelector::setUpTriggerList,
+    "List of triggers (streams) to be used. Format is SelectorType/SelectorName:firstEventToUse:lastEventToUse. "
+    "One assumes events are consecutively numbered."};
+
+  Gaudi::Property<int> m_outputRunNumber{this, "OutputRunNumber", 123456789};
+
+  Gaudi::Property<std::vector<unsigned long>> m_eventNumbers{this, "EventNumbers", {},
+    "List of event numbers to be used for output stream. If list empty or not long enough, event numbers are "
+    "assigned consucutively after last one in list."};
+
+  Gaudi::Property<std::string> m_mergedEventInfoKey{this, "MergedEventInfoKey", "MergedEventInfo",
+    "StoreGate key for output (merged) event info object. Default is MergedEventInfo"};
+
+  Gaudi::Property<std::string> m_randomStreamName{this, "RndmStreamName", "MixingEventSelectorStream",
+    "IAtRndmGenSvc stream used as engine for our random distributions"};
+
+  ToolHandleArray<IAthenaSelectorTool> m_helperTools{this, "HelperTools", {},
+    "Collection of selector tools"};
+
+  ServiceHandle<IAtRndmGenSvc> m_atRndmSvc{this, "RndmGenSvc", "AtRndmGenSvc",
+    "IAtRndmGenSvc controlling the order with which events are takes from streams"};
 
   //@}
 
@@ -251,13 +271,10 @@ private:
   //@{
   ///setup and lookup m_evtsNotUsedSoFar. Returns next event no
   unsigned long getEventNo() const;
-  mutable unsigned long m_eventPos;       ///< the internal event number
+  mutable unsigned long m_eventPos{0};       ///< the internal event number
   //@}
-  typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
-  mutable StoreGateSvc_t m_pEventStore;
-  ServiceHandle<IAtRndmGenSvc> m_atRndmSvc;
-  StringProperty m_randomStreamName;
-  CLHEP::RandFlat* m_chooseRangeRand;
+  ServiceHandle<StoreGateSvc> m_pEventStore;
+  std::unique_ptr<CLHEP::RandFlat> m_chooseRangeRand;
 
 };
 #endif // ATHENASERVICES_MIXINGEVENTSELECTOR_H
