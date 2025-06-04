@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 
 // $Id$
@@ -62,7 +62,7 @@ public:
   Gaudi::Property< int > gp_int {this, "gp_int", 3, "doc for gp_int"};
   Gaudi::Property< SG::ReadHandleKey<MyObj> > 
      gp_rkey {this, "gp_rkey", "aaa_gp", "doc for gp_rkey"};
-
+  Gaudi::CheckedProperty< int > gp_int_check {this, "gp_int_check", 3, "doc for gp_int_check"};
 };
 
 
