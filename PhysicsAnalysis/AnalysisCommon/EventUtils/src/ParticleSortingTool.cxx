@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSortingTool.cxx
@@ -34,26 +34,9 @@
 ParticleSortingTool::ParticleSortingTool( const std::string& type,
                                           const std::string& name,
                                           const IInterface* parent ) :
-  ::AthAlgTool  ( type, name, parent ),
-  m_inCollKey(""),
-  m_outCollKey(""),
-  m_sortVar("pt"),
-  m_sortDescending(true),
-  m_sortID(0),
-  m_nEventsProcessed(0)
+  ::AthAlgTool  ( type, name, parent )
 {
   declareInterface< DerivationFramework::IAugmentationTool >(this);
-
-  declareProperty("InputContainer",  m_inCollKey="",   "Input container name" );
-
-  declareProperty("OutputContainer", m_outCollKey="",
-                  "The name of the output container (with SG::VIEW_ELEMENTS) with the sorted copy of input objects" );
-
-  declareProperty("SortVariable",    m_sortVar="pt",
-                  "Define by what parameter to sort (default: 'pt'; allowed: 'pt', 'eta', 'phi', 'm', 'e', 'rapidity')" );
-
-  declareProperty("SortDescending",   m_sortDescending=true,
-                  "Define if the container should be sorted in a descending order (default=true)" );
 }
 
 

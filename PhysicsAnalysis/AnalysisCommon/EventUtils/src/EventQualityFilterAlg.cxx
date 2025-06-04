@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventQualityFilterAlg.cxx
@@ -29,31 +29,15 @@
 ////////////////
 EventQualityFilterAlg::EventQualityFilterAlg( const std::string& name,
                                               ISvcLocator* pSvcLocator ) :
-  ::AthFilterAlgorithm( name, pSvcLocator ),
-  m_useLArError(true),
-  m_useTileError(true),
-  m_useSCTError(true),
-  m_useCoreError(true)
+  ::AthFilterAlgorithm( name, pSvcLocator )
 {
-  //
-  // Property declaration
-  //
-  declareProperty( "VetoLArError",  m_useLArError,  "Veto events with a LAr error" );
-  declareProperty( "VetoTileError", m_useTileError, "Veto events with a Tile error" );
-  declareProperty( "VetoSCTError",  m_useSCTError,  "Veto events with an SCT error" );
-  declareProperty( "VetoCoreError", m_useCoreError, "Veto events with a Core error" );
-  //declareProperty( "VetoTileTrips", m_useTileTripReader, "Veto events with a Tile trip error" );
 }
-
-
 
 
 // Destructor
 ///////////////
 EventQualityFilterAlg::~EventQualityFilterAlg()
 {}
-
-
 
 
 // Athena Algorithm's Hooks
@@ -69,15 +53,6 @@ StatusCode EventQualityFilterAlg::initialize()
   ATH_CHECK(m_eventInfo.initialize());
   return StatusCode::SUCCESS;
 }
-
-
-
-StatusCode EventQualityFilterAlg::finalize()
-{
-  ATH_MSG_DEBUG ("Finalizing " << name() << "...");
-  return StatusCode::SUCCESS;
-}
-
 
 
 StatusCode EventQualityFilterAlg::execute()

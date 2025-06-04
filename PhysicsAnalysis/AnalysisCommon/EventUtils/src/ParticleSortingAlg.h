@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSortingAlg.h
@@ -75,41 +75,44 @@ private:
  private:
   /// The job options service (will be used to forward this algs properties to
   /// the private tool)
-  ServiceHandle<Gaudi::Interfaces::IOptionsSvc> m_jos;
+  ServiceHandle<Gaudi::Interfaces::IOptionsSvc> m_jos{
+    this, "JobOptionsSvc", "JobOptionsSvc", "The JobOptionService instance." };
 
   /// The ToolHandle to the private ParticleSortingTool
-  ToolHandle<DerivationFramework::IAugmentationTool> m_tool;
+  ToolHandle<DerivationFramework::IAugmentationTool> m_tool{
+    this, "SortingTool", "ParticleSortingTool/ParticleSortingTool", "The private ParticleSortingTool" };
+
 
   /// Input container name
-  StringProperty m_inCollKey;
+  StringProperty m_inCollKey{this, "InputContainer", "", &ParticleSortingAlg::setupInputContainer,
+    "Input container name" };
 
   /// This boolean is true if the user sets the 'InputContainer' property
-  bool m_setInCollKey;
-
+  bool m_setInCollKey{false};
 
   /// The name of the output container (with SG::VIEW_ELEMENTS) with the sorted copy of input objects
-  StringProperty m_outCollKey;
+  StringProperty m_outCollKey{this, "OutputContainer", "", &ParticleSortingAlg::setupOutputContainer,
+    "The name of the output container (with SG::VIEW_ELEMENTS) with the sorted copy of input objects" };
 
   /// This boolean is true if the user sets the 'OutputContainer' property
-  bool m_setOutCollKey;
-
+  bool m_setOutCollKey{false};
 
   /// Define by what parameter to sort (default: 'pt')
-  StringProperty m_sortVar;
+  StringProperty m_sortVar{this, "SortVariable", "pt", &ParticleSortingAlg::setupSortVar,
+    "Define by what parameter to sort (default: 'pt'; allowed: 'pt', 'eta', 'phi', 'm', 'e', 'rapidity')" };
 
   /// This boolean is true if the user sets the 'SortVariable' property
-  bool m_setSortVar;
-
+  bool m_setSortVar{false};
 
   /// Define if the container should be sorted in a descending order (default=true)
-  BooleanProperty m_sortDescending;
+  BooleanProperty m_sortDescending{this, "SortDescending", true, &ParticleSortingAlg::setupSortDescending,
+    "Define if the container should be sorted in a descending order (default=true)" };
 
   /// This boolean is true if the user sets the 'SortDescending' property
-  bool m_setSortDescending;
-
+  bool m_setSortDescending{false};
 
   /// Internal event counter
-  unsigned long m_nEventsProcessed;
+  unsigned long m_nEventsProcessed{0};
 
 };
 

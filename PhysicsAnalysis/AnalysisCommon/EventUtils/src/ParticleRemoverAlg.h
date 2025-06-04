@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTUTILS_PARTICLEREMOVERALG_H
@@ -39,25 +39,25 @@ class ParticleRemoverAlg: public ::AthAlgorithm {
   /// @{
 
   /// The input container name
-  StringProperty m_inCont;
+  Gaudi::Property<std::string> m_inCont{this, "Input", "", "Input container name"};
 
   /// The string separator between the output container name and the sytematic variation (default="___")
-  StringProperty m_separator;
+  Gaudi::Property<std::string> m_separator{this, "Separator", "___", "The string separator between the output container name and the sytematic variation"};
 
   /// The output container name
-  StringProperty m_outCont;
+  Gaudi::Property<std::string> m_outCont{this, "Output", "", "The name of the output container with the deep copy of input objects"};
 
   /// The names of all suffixes for the input and output container names
-  StringArrayProperty m_suffixes;
+  Gaudi::Property<std::vector<std::string>> m_suffixes{this, "Suffixes", {}, "The names of all suffixes for the input and output container names"};
 
   /// The names of all view containers that contain particles that we want to retain
-  StringArrayProperty m_viewContNames;
+  Gaudi::Property<std::vector<std::string>> m_viewContNames{this, "SelectedViewContainers", {}, "The names of all view containers that contain particles that we want to retain"};
 
   /// Boolean to decide if the existing view containers should be re-mapped (default: true)
-  BooleanProperty m_resetViewConts;
+  Gaudi::Property<bool> m_resetViewConts{this, "RemapViewContainers", true, "Boolean to decide if the existing view containers should be re-mapped"};
 
   /// Prefix to be used for all created output view containers
-  StringProperty m_outPrefix;
+  Gaudi::Property<std::string> m_outPrefix{this, "OutputViewContainerPrefix", "", "Prefix to be used for all created output view containers"};
 
   /// @}
 
@@ -102,7 +102,7 @@ class ParticleRemoverAlg: public ::AthAlgorithm {
   };
 
   /// The variable that holds the value that we find for the input container
-  contType_t m_contType;
+  contType_t m_contType{UNKNOWN};
 
   /// @}
 

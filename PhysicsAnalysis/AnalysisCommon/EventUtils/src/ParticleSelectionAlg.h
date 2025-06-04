@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSelectionAlg.h
@@ -72,34 +72,31 @@ class ParticleSelectionAlg
   ToolHandleArray<IAsgSelectionTool> m_selTools;
 
   /// Name of the EventInfo object
-  StringProperty m_evtInfoName;
+  Gaudi::Property<std::string> m_evtInfoName{this, "EventInfo", "EventInfo", "Input container name"};
 
   /// Input container name
-  StringProperty m_inCollKey;
+  Gaudi::Property<std::string> m_inCollKey{this, "InputContainer", "", "Input container name"};
 
   /// Output collection name (deep copies of the original ones)
-  StringProperty m_outCollKey;
+  Gaudi::Property<std::string> m_outCollKey{this, "OutputContainer", "", "The name of the output container with the deep copy of selected xAOD::IParticles"};
 
   /// Decide if we want to write a fully-split AuxContainer such that we can remove any variables
-  BooleanProperty m_writeSplitAux;
+  Gaudi::Property<bool> m_writeSplitAux{this, "WriteSplitOutputContainer", true, "Decide if we want to write a fully-split AuxContainer such that we can remove any variables"};
 
   /// Defines the ownership policy of the output container
-  /// (default: 'VIEW_ELEMENTS'; also allowed: 'OWN_ELEMENTS')".
-  /// TO see what this means, go here:
-  /// https://twiki.cern.ch/twiki/bin/view/AtlasComputing/SoftwareTutorialxAODAnalysisInAthena#Understanding_the_different_type
-  StringProperty m_outOwnPolicyName;
+  Gaudi::Property<std::string> m_outOwnPolicyName{this, "OutputContainerOwnershipPolicy", "VIEW_ELEMENTS", "Defines the ownership policy of the output container"};
 
   /// The selection string that will select which xAOD::IParticles to keep from
   /// an xAOD::IParticleContainer
-  StringProperty m_selection;
+  Gaudi::Property<std::string> m_selection{this, "Selection", "", "The selection string that defines which xAOD::IParticles to select from the container"};
 
-  /// If true (deault: false), do the bookkeeping of how many particles passed
+  /// If true (default: false), do the bookkeeping of how many particles passed
   /// which selection cuts
-  bool m_doCutFlow;
+  Gaudi::Property<bool> m_doCutFlow{this, "DoCutBookkeeping", false, "If true, do the bookkeeping of how many particles passed which selection cuts"};
 
   /// The name of the resulting xAOD::CutBookkeeperContainer.
   /// If an empty name is given (default), the name of the algorithm instance is used.
-  StringProperty m_cutBKCName;
+  Gaudi::Property<std::string> m_cutBKCName{this, "CutBookkeeperContainer", name(), "The name of the resulting xAOD::CutBookkeeperContainer"};
 
 
 
@@ -107,10 +104,10 @@ class ParticleSelectionAlg
   /// @{
 
   /// Internal event counter
-  unsigned long m_nEventsProcessed;
+  unsigned long m_nEventsProcessed{0};
 
   /// The internally used translation for the ownership policy
-  SG::OwnershipPolicy m_outOwnPolicy;
+  SG::OwnershipPolicy m_outOwnPolicy{SG::VIEW_ELEMENTS};
 
   /// An enumaration for the actual container type
   enum contType_t {
@@ -130,10 +127,10 @@ class ParticleSelectionAlg
   };
 
   /// The variable that holds the value that we find for the input container
-  contType_t m_contType;
+  contType_t m_contType{UNKNOWN};
 
   /// The starting index of where in the CutBookkeeperContainer our new CutBookkeepers start
-  std::size_t m_cutBKStartIdx;
+  std::size_t m_cutBKStartIdx{0};
 
   /// The list of pairs of the tool index of the AsgSelectionTools and the
   /// starting index of the corresponding CutBookKeeper inside the CutBookkeeperContainer.
@@ -141,7 +138,7 @@ class ParticleSelectionAlg
 
   /// Store the index of the CutBookKeeper in the CutBookkeeperContainer for the
   /// selection using the ExpressionParser
-  std::size_t m_idxSelParster;
+  std::size_t m_idxSelParster{0};
 
   /// @}
 

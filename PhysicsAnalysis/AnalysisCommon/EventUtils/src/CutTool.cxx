@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CutTool.cxx
@@ -28,12 +28,9 @@
 CutTool::CutTool( const std::string& type,
                   const std::string& name,
                   const IInterface* parent ) :
-  ExpressionParserUserWithTrigSupport<::AthAlgTool>  ( type, name, parent ),
-  m_cut("")
+  ExpressionParserUserWithTrigSupport<::AthAlgTool>  ( type, name, parent )
 {
   declareInterface< DerivationFramework::ISkimmingTool >(this);
-
-  declareProperty("Cut", m_cut="", "The cut expression" );
 }
 
 // Destructor

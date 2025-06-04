@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //  includes
@@ -11,23 +11,8 @@
 
 
 TriggerSelectionAlg::TriggerSelectionAlg( const std::string& name, ISvcLocator* pSvcLocator ):
-  AthFilterAlgorithm( name, pSvcLocator ),
-  m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool"),
-  m_triggerList(),
-  m_decoEvtInfo(true),
-  m_evtInfoName("EventInfo"),
-  m_varPrefix("pass_"),
-  m_storePrescaleInfo(false),
-  m_varNameList()
+  AthFilterAlgorithm( name, pSvcLocator )
 {
-  declareProperty("TrigDecisionTool",  m_trigDecisionTool, "The TrigDecisionTool" );
-  declareProperty("TriggerList",       m_triggerList, "The list of triggers to cut on" );
-  declareProperty("DecorateEventInfo", m_decoEvtInfo,
-                  "Decide if we also want to decorate the xAOD::EventInfo object with the pass/fail information" );
-  declareProperty("EventInfoName",     m_evtInfoName, "Name of the xAOD::EventInfo object that we want to decorate" );
-  declareProperty("VarNamePrefix",     m_varPrefix, "Prefix used for the decoration variables" );
-  declareProperty("StorePrescaleInfo", m_storePrescaleInfo,
-                  "Decide if we also want to decorate the xAOD::EventInfo object with the full-chain prescale information" );
 }
 
 
