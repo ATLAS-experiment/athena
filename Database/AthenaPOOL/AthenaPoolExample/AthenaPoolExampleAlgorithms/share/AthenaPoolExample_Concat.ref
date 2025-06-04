@@ -272,7 +272,7 @@ SimplePoolFile1.root                                DEBUG ---->[0]:DataHeaderFor
 StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
 StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG beam energy "" tag could not be converted to float
-StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Failed to set xAOD::FileMetaData::simFlavour or xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
 StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG set xAOD::FileMetaData::dataType to StreamStream1
 StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Failed to retrieve  'EventInfoKey':'EventInfo' => cannot set xAOD::FileMetaData::mcProcID, runNumbers, or lumiBlockNumbers
 StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Resetting the EventStreamInfo payload at the first event
@@ -365,7 +365,7 @@ SimplePoolFile3.root                                DEBUG ---->[0]:DataHeaderFor
 StreamStream2.StreamStream2Tool                     DEBUG In commitOutput
 SimplePoolFile3.root                                DEBUG DB Action Commit
 StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG beam energy "" tag could not be converted to float
-StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
+StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG Failed to set xAOD::FileMetaData::simFlavour or xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
 StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG set xAOD::FileMetaData::dataType to StreamStream2
 StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG Failed to retrieve  'EventInfoKey':'EventInfo' => cannot set xAOD::FileMetaData::mcProcID, runNumbers, or lumiBlockNumbers
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
