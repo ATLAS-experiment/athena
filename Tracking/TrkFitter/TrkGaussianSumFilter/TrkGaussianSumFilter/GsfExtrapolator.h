@@ -163,7 +163,7 @@ private:
 
   /** Method to initialise navigation parameters including starting state, layer
    * and volume, and destination volume */
-  void initialiseNavigation(
+  std::unique_ptr<Trk::TrackParameters> initialiseNavigation(
     const EventContext& ctx,
     Cache& cache,
     const MultiComponentState& initialState,
@@ -171,8 +171,7 @@ private:
     const Layer*& associatedLayer,
     const TrackingVolume*& currentVolume,
     const TrackingVolume*& destinationVolume,
-    std::unique_ptr<TrackParameters>& referenceParameters,
-    PropDirection direction) const;
+    PropDirection& direction) const;
 
   ToolHandle<IPropagator> m_propagator{ this, "Propagator", "", "" };
   ToolHandle<INavigator> m_navigator{ this,
