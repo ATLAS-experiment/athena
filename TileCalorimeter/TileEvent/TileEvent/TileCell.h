@@ -132,17 +132,17 @@ public:
   /** @brief set CaloDDE pointer */
   void setDDE(CaloDetDescrElement* const & caloDDE) { m_caloDDE = caloDDE; }
 
-  /** @brief set total energy, reset eneDiff to zero */
+  /** @brief set total energy, reset eneDiff to zero (final override of CaloCell method) */
   virtual void setEnergy(float ene) override final;
-  /** @brief set energy and gain for both PMTs */
+  /** @brief set energy and gain for both PMTs (TileCell specific overloads)*/
   void setEnergy(float e1, float e2, int gain1, int gain2); // signal from 2 PMTs
   void setEnergy_nonvirt(float e1, float e2, int gain1, int gain2); // signal from 2 PMTs
   /** @brief set energy for both PMTs */
   void setEnergy(float e1, float e2);
-  /** @brief add energy, keep eneDiff */
-  virtual void addEnergy(float e) override final;
-  /** @brief scale energy and eneDiff */
+  /** @brief scale energy and eneDiff (final override of CaloCell method) */
   virtual void scaleEnergy(float scale) override final;
+  /** @brief add energy, keep eneDiff */
+  using CaloCell::addEnergy;
   /** @brief set energy and gain for one PMT */
   void addEnergy(float e, int pmt, int gain);
   /** @brief set the same gain for two PMTs and set energy diff to zero */
@@ -154,15 +154,9 @@ public:
   /** @brief set time for one PMT, correct timeDiff */
   void setTime(float t, int pmt);
 
-  /** @brief set quality value and quality bits for one PMT */
+  /** @brief set quality value and quality bits for one PMT (TileCell specific overloads)*/
   void setQuality(unsigned char qual, unsigned char qbit, int pmt);
   void setQuality_nonvirt(unsigned char qual, unsigned char qbit, int pmt);
-
-  /** @brief set quality word (from CaloCell base class) */
-  virtual void setQuality (uint16_t quality) override final;
-
-  /** @brief set Quality (from CaloCell base class, obsolete) */
-  virtual void setQuality (double quality) override final;
 
   /** @brief set quality of first PMT */
   void setQual1 (unsigned char qual) { m_tileQual[0] = qual; }

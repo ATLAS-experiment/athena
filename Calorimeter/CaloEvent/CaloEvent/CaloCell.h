@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALOCELL_H
@@ -108,6 +108,11 @@ public:
 
   /** @brief get energy (data member) */
   double energy () const;
+
+  /// @name P4EEtaPhiMBase functions.
+  /// These can be made final.
+  /// @{
+
   /** @brief get phi (through CaloDetDescrElement) */
   virtual double phi    () const override final;
   /** @brief get eta (through CaloDetDescrElement) */
@@ -128,6 +133,9 @@ public:
   virtual double e      () const override final;
   /** @brief get et  */
   virtual double et     () const override final;
+
+  /// @}
+
   /** @brief get x (through CaloDetDescrElement) */
   float x      () const;
   /** @brief get y (through CaloDetDescrElement) */
@@ -148,35 +156,35 @@ public:
   /** @brief get gain (data member ) */
   CaloGain::CaloGain  gain()  const;
 
-  /** @brief check is cell is dead */
-  virtual bool badcell() const;
-
   /** @brief get pointer to CaloDetDescrElement (data member) */
   const CaloDetDescrElement* caloDDE() const;
-
   /** @brief set pointer to CaloDetDescrElement */
-  virtual void setCaloDDE (const CaloDetDescrElement* caloDDE);
+  void setCaloDDE (const CaloDetDescrElement* caloDDE);
+  /** @brief add energy */
+  void addEnergy (float energy);
+   /** @brief add time */
+  void addTime (float delta);
+   /** @brief set Provenance */
+  void setProvenance (uint16_t prov);
+  /** @brief set gain */
+  void setGain(CaloGain::CaloGain gain=CaloGain::INVALIDGAIN);
+  /** @brief set quality */
+  void setQuality (uint16_t quality);
+  /** @brief set Quality (obsolete) */
+  void setQuality (double quality);
+
+  /// @name virtual functions
+  /// That get overriden by TileCell/LarCell
+  /// @{
+  /** @brief check is cell is dead */
+  virtual bool badcell() const;
   /** @brief set energy */
   virtual void setEnergy (float energy);
-  /** @brief add energy */
-  virtual void addEnergy (float energy);
-  /** @brief scale energy */
+ /** @brief scale energy */
   virtual void scaleEnergy (float scale);
   /** @brief set time */
   virtual void setTime (float time);
-  /** @brief add time */
-  void addTime (float delta);
-  /** @brief set quality */
-  virtual void setQuality (uint16_t quality);
-
- /** @brief set Quality (obsolete) */
-  virtual void setQuality (double quality);
-
- /** @brief set Provenance */
-  void setProvenance (uint16_t prov);
-
-  /** @brief set gain */
-  void setGain(CaloGain::CaloGain gain=CaloGain::INVALIDGAIN);
+ /// @}
 
   /** set 4Momentum (will throw exception since cannot be implemented) */
   virtual void set4Mom (const I4Momentum * const theI4Mom ) override final;
@@ -431,6 +439,75 @@ float CaloCell::z() const
   return m_caloDDE->z();
 }
 
+inline
+void CaloCell::addEnergy(float energy) {
+  m_energy += energy;
+}
+
+inline
+void CaloCell::addTime (float delta)
+{
+  m_time += delta;
+}
+
+inline
+void CaloCell::setQuality (uint16_t quality)
+{
+  m_qualProv[0] = quality;
+}
+
+inline
+void CaloCell::setQuality (double quality)
+{
+  m_quality = (int)(quality);
+}
+
+inline
+void CaloCell::setEnergy (float energy)
+{
+  m_energy = energy ;
+}
+
+inline
+void CaloCell::scaleEnergy (float scale)
+{
+  m_energy *= scale ;
+}
+
+inline
+void CaloCell::setTime (float time)
+{
+  m_time = time;
+}
+
+inline
+void CaloCell::setProvenance (uint16_t prov)
+{
+  // cppcheck-suppress objectIndex
+  m_qualProv[1] = prov;
+}
+
+inline
+void CaloCell::setGain(CaloGain::CaloGain gain)
+{
+  m_gain = gain;
+}
+
+inline
+void CaloCell::setCaloDDE(const CaloDetDescrElement* caloDDE) {
+  m_caloDDE = caloDDE;
+  if (m_caloDDE) {
+    m_ID = m_caloDDE->identify();
+  }
+}
+
+inline
+void CaloCell::set(const CaloDetDescrElement* caloDDE,
+                   const Identifier& ID) {
+  m_ID = ID;
+  m_caloDDE = caloDDE;
+}
 
 #endif
+
 
