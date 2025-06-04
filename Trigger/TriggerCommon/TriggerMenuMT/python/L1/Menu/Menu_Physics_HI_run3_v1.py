@@ -259,6 +259,23 @@ def defineMenu():
         'L1_ZDC_ZN',
         'L1_ZDC_LOR',
         'L1_ZDC_YNYN',
+        'L1_ZDC_LOR_EMPTY', 'L1_ZDC_LOR_UNPAIRED_NONISO',
+        
+        # Run3 TRT+ZDC items for O+O runs (ATR-30690)
+        'L1_TRT_ZDC_OR',
+        'L1_TRT_ZDC_XNXN',
+        'L1_TRT_ZDC_XNYN',
+        'L1_TRT_ZDC_XNZN',
+        'L1_TRT_ZDC_XN_XOR',
+        'L1_TRT_ZDC_YN_XOR',
+        'L1_TRT_ZDC_ZN_XOR',
+        'L1_TRT_ZDC_YN',
+        'L1_TRT_ZDC_ZN',
+        'L1_TRT_ZDC_LOR',
+        'L1_TRT_ZDC_YNYN',
+        'L1_TRT_ZDC_A',
+        'L1_TRT_ZDC_C',
+        'L1_TRT_ZDC_A_C',
 
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',

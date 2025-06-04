@@ -136,6 +136,9 @@ class FileMetaDataCreatorTool
   ServiceHandle< StoreGateSvc > m_inputMetaDataStore{
     "InputMetaDataStore", name()};
 
+  ServiceHandle< StoreGateSvc > m_metaDataStore{
+    "MetaDataStore", name()};
+
   /// Access to TagInfoMgr for tags
   ServiceHandle< ITagInfoMgr > m_tagInfoMgr{
     "TagInfoMgr", name()};

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ### This module contains functions which may need to peek at the input file metadata
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import FlagEnum, ProductionStep
@@ -74,6 +74,10 @@ def fillAtlasMetadata(flags, dbFiller):
         # TODO hard-code for now, but set flag properly later
         dbFiller.addSimParam('Simulator', 'AtlasG4')
         dbFiller.addSimParam('SimulationFlavour', 'AtlasG4')
+
+    ## Data overlay
+    if flags.Common.isOverlay and flags.Overlay.DataOverlay:
+        dbFiller.addSimParam('IsDataOverlay', 'True')
 
 
 def writeSimulationParametersMetadata(flags):
