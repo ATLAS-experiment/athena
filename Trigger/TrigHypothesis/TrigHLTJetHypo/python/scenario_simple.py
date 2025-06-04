@@ -135,6 +135,40 @@ def get_condition_args_from_chainpart(cp):
                 }
 
                 condargs.append((k, vals))
+            # Retrained Xbb tagger
+            # Has to go before the rest of "bgntwo*"
+            elif 'bgntwoxt' in v:
+                key = 'bgntwoxt'
+                values = v.split(key)
+                assert values[1] == '','bgntwoxt condition takes only one argument, two were given'
+
+                #This dictionary maps the bgntwoxt efficiency into the WP cut to be applied to the GN2XTrig output
+                gn2xt_WPs = {
+                    '':   float('-inf'),
+                    '95': -1.34433357,
+                    '90': -0.2032497,
+                    '85': 0.54181841,
+                    '80': 1.08486011,
+                    '75': 1.52567965,
+                    '70': 1.90616319,
+                    '65': 2.2397737,
+                    '60': 2.55173745,
+                }
+
+                assert (values[0] in gn2xt_WPs.keys()),f"The efficiency of the specified gn2xt cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the gn2xt WP dictionary."
+
+                lo   = gn2xt_WPs[values[0]]
+                vals = {
+                    'min': str(lo),
+                    'max': '',
+                    'cfrac': '0.25',
+                    'namePb': 'GN2XTrig_phbb',
+                    'namePc': 'GN2XTrig_ptop',
+                    'namePu': 'GN2XTrig_pqcd',
+                    'nameValid': 'TracksForMinimalJetTag_isValid'
+                }
+                condargs.append((k, vals))
+
             # GN2x has to go before GN2 in order to avoid ` elif 'bgntwo' in v:` l149 to pass 'bgntwox'
             elif 'bgntwox' in v:
                 key = 'bgntwox'
@@ -150,7 +184,7 @@ def get_condition_args_from_chainpart(cp):
                     '96': -0.4298,
                 }
 
-                assert (values[0] in gn2x_WPs.keys()),f"The efficiency of the specified gn2x cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the dips WP dictionary."
+                assert (values[0] in gn2x_WPs.keys()),f"The efficiency of the specified gn2x cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the gn2x WP dictionary."
 
                 lo   = gn2x_WPs[values[0]]
                 vals = {
