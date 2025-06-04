@@ -37,8 +37,7 @@ class MuFastStationFitter: public AthAlgTool
       virtual StatusCode initialize() override;
     
    public:
-      StatusCode findSuperPoints(const TrigRoiDescriptor* p_roids,
-				 const TrigL2MuonSA::MuonRoad& muonRoad,
+      StatusCode findSuperPoints(const TrigL2MuonSA::MuonRoad& muonRoad,
 				 TrigL2MuonSA::RpcFitResult& rpcFitResult,
 				 std::vector<TrigL2MuonSA::TrackPattern>& v_trackPatterns) const;
       StatusCode findSuperPointsSimple(const TrigRoiDescriptor* p_roids,
@@ -104,13 +103,24 @@ class MuFastStationFitter: public AthAlgTool
 
    private:
       float SetDriftSpace(float tdr, float rad, float zeta, float phim, float phiDir) const;
-      void  Xline(float *, float *, float *, int *, int ,
-                  float *, float *, float *, float *, float *, float *) const;
-      void  Circfit (int, float *, float *, float *, float *, int *,
-                     float *, float *, float DAB[2][2], float *)  const;
-      void  Circles (int, float *, float *, float *, float *, int *,
-                     float *, float *, float DAB[2][2], float *, float *) const;
-      int   Evlfit (int, TrigL2MuonSA::PBFitResult& fitres) const;
+      void  Xline(const std::array<float, NMEAMX>&, 
+                  const std::array<float, NMEAMX>&, 
+                  const std::array<float, NMEAMX>&, 
+                  const int,
+                  float&, float&, float&, float&, float&, float&, std::vector<int>* idx_vec = nullptr) const;
+      void  Circfit (const int, 
+                     const std::array<float, NMEAMX>&, 
+                     const std::array<float, NMEAMX>&, 
+                     const std::array<float, NMEAMX>&, 
+                     const std::array<float, NMEAMX>&,
+                     float&, float&, float&, std::vector<int>* idx_vec = nullptr)  const;
+      void  Circles (const int, 
+                     const std::array<float, NMEAMX>&, 
+                     const std::array<float, NMEAMX>&, 
+                     const std::array<float, NMEAMX>&, 
+                     const std::array<float, NMEAMX>&,
+                     float&, float&, float&, float&) const;
+      void  Evlfit (TrigL2MuonSA::PBFitResult& fitres) const;
 
       ToolHandle<AlphaBetaEstimate>          m_alphaBetaEstimate {
 	this, "AlphaBetaEstimate", "TrigL2MuonSA::AlphaBetaEstimate"};
@@ -122,12 +132,16 @@ class MuFastStationFitter: public AthAlgTool
       void findSubLayerCombination(std::vector<unsigned int> &a, int n,int r, std::vector<unsigned int> &b, int index ,int num,
                                    std::vector<std::vector<unsigned int> > &c, int &nr) const;
       void makeReferenceLine(TrigL2MuonSA::TrackPattern& trackPattern,const TrigL2MuonSA::MuonRoad&    muonRoad) const;
-      void Circles (int, float *, float *, float *, float *, int *,
-                     float *, float *, float DAB[2][2], float *, float *, float *, float *, float *) const;
+      void Circles (const int, 
+                    const std::array<float, NMEAMX>&, 
+                    const std::array<float, NMEAMX>&, 
+                    const std::array<float, NMEAMX>&, 
+                    const std::array<float, NMEAMX>&,
+                    float&, float&, float&, float&, std::array<float, NCAND>&, std::array<float, NCAND>&, std::array<float, NCAND>&) const;
 
       double fromAlphaPtToInn(TrigL2MuonSA::TgcFitResult& tgcFitResult,TrigL2MuonSA::TrackPattern& trackPattern) const;
       void updateInnSP(TrigL2MuonSA::TrackPattern& trackPattern, double &aw,double &tgc_aw, double &bw) const;
-      void stationSPFit(TrigL2MuonSA::MdtHits*    mdtSegment, TrigL2MuonSA::SuperPoint* superPoint,
+      void stationSPFit(TrigL2MuonSA::MdtHits&    mdtSegment, TrigL2MuonSA::SuperPoint& superPoint,
                         TrigL2MuonSA::PBFitResult& pbFitResult, int s_address, int i_station,double aw, float phiDir) const;
 
 
