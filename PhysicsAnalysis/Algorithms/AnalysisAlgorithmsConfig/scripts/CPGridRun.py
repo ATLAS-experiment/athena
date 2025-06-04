@@ -16,8 +16,9 @@ class CPGridRun:
             self.printHelp()
             sys.exit(0)
         self._tarfile = 'cpgrid.tar.gz'
+        self._isFirstRun = True
         self._tarballRecreated = False
-        self._inputList = None # list of name?
+        self._inputList = None 
         self.cmd = {} # sample name -> command
 
     def _initRunscript(self):
@@ -39,8 +40,8 @@ class CPGridRun:
 
         ioGroup = parser.add_argument_group('Input/Output file configuration')
         ioGroup.add_argument('-i','--input-list', dest='input_list', help='Path to the text file containing list of containers on the panda grid. Each container will be passed to prun as --inDS and is run individually')
-        ioGroup.add_argument('--output-files', dest='output_files', default='output.root',
-                             help='The output files of the grid job. Example: --output-files "A.root,B.txt,B.root" results in A/A.root, B/B.txt, B/B.root in the output directory. No need to specify if using CPRun.py')
+        ioGroup.add_argument('--output-files', dest='output_files', nargs='+', default=['output.root'],
+                             help='The output files of the grid job. Example: --output-files A.root B.txt B.root results in A/A.root, B/B.txt, B/B.root in the output directory. No need to specify if using CPRun.py')
         ioGroup.add_argument('--destSE', dest='destSE', default='', type=str, help='Destination storage element (PanDA)')
         ioGroup.add_argument('--mergeType', dest='mergeType', default='Default', type=str, help='Output merging type, [None, Default, xAOD]')
 
@@ -56,8 +57,7 @@ class CPGridRun:
 
         cpgridGroup.add_argument('--exec', dest='exec', type=str,
                                     help='Executable line for the CPRun.py or custom script to run on the grid encapsulated in a double quote (PanDA)\n'
-                                    'Run CPRun.py with preset behavior including streamlined file i/o. E.g, "-t config.yaml --no-systematics".\n'
-                                    'CPRun.py but overriding the preset behavior （for future and experts): "CPRun.py --input-list ourExpert.txt -t config.yaml --flagB"\n'
+                                    'Run CPRun.py with preset behavior including streamlined file i/o. E.g, "CPRun.py -t config.yaml --no-systematics".\n'
                                     'Run custom script: "customRun.py -i inputs -o output --text-config config.yaml --flagA --flagB"\n'
                                     )
 
@@ -65,8 +65,9 @@ class CPGridRun:
         submissionGroup.add_argument('--noSubmit', dest='noSubmit', action='store_true', help='Do not submit the job to the grid (PanDA). Useful to inspect the prun command')
         submissionGroup.add_argument('--testRun', dest='testRun', action='store_true', help='Will submit job to the grid but greatly limit the number of files per job (10) and number of events (300)')
         submissionGroup.add_argument('--recreateTar', dest='recreateTar', action='store_true', help='Re-compress the source code. Source code are compressed by default in submission, this is useful when the source code is updated')
-
+        submissionGroup.add_argument('-y', '--agreeAll', dest='agreeAll', action='store_true', help='Agree to all the submission details without asking for confirmation. Use with caution!')
         self.args = parser.parse_args()
+        self.outputFilesParsing()
         return parser
 
     @property
@@ -83,6 +84,15 @@ class CPGridRun:
                     'use --input-list to specify input containers')
         return self._inputList
 
+    def outputFilesParsing(self):
+        output_files = []
+        for output in self.args.output_files:
+            if ',' in output:
+                output_files.extend(output.split(','))
+            else:
+                output_files.append(output)
+        self.output_files = output_files
+
     def printHelp(self):
         self.gridParser.print_help()
         logCPGridRun.info("\033[92m\n If you are using CPRun.py, the following flags are for the CPRun.py in this framework\033[0m")
@@ -95,17 +105,15 @@ class CPGridRun:
     # This function do all the checking, cleaning and preparing the command to be submitted to the grid
     # separated for client to be able to change the behavior
     def configureSumbission(self):
-        #check for prun?
-        #check for Merge type?
         for input in self.inputList:
             cmd = self.configureSubmissionSingleSample(input)
             self.cmd[input] = cmd
+            self._isFirstRun = False
 
     def configureSubmissionSingleSample(self, input):
         config = {
             'inDS': input,
             'outDS': self.args.outDS if self.args.outDS else self.outputDSFormatter(input) ,
-            # 'outDS': self.outputDSFormatter(input) if CPGridRun.isAtlasProductionFormat(input) else self.customOutputDSFormatter(input),
             'useAthenaPackages': True,
             'cmtConfig': os.environ["CMTCONFIG"],
             'writeInputToTxt': 'IN:in.txt',
@@ -123,7 +131,7 @@ class CPGridRun:
         if self.args.mergeType != 'None':
             config['mergeOutput'] = True
 
-        if (self.args.recreateTar or not os.path.exists(self._tarfile) or self._filesChanged()) and not self._tarballRecreated:
+        if not self._tarballRecreated and (self.args.recreateTar or not os.path.exists(self._tarfile) or self._filesChanged()):
             config['outTarBall'] = self._tarfile
             self._tarballRecreated = True
         elif os.path.exists(self._tarfile) or self._tarballRecreated:
@@ -156,7 +164,6 @@ class CPGridRun:
                 "\n".join([f"  {k.replace('_', ' ').title()}: {v}" for k, v in parsed_name.items()]))
             logCPGridRun.info(f"Command: \n{cmd}")
             print("-" * 70)
-            # logCPGridRun.info("-" * 40)
         # Add your submission logic here
 
     def outputDSFormatter(self, name):
@@ -255,19 +262,48 @@ class CPGridRun:
 
     def execFormatter(self):
         # Check if the execution command starts with 'CPRun.py' or '-'
-        isCPRunDefault = self.args.exec.startswith('-')
-        if isCPRunDefault:
-            clause = self.args.exec.split(' ')
-            base = ['CPRun.py']
-            inputClause = ['--input-list in.txt']
-            strip = ['--strip'] if not isAthena else []
-            return f'"{ " ".join(base + inputClause + strip + clause) }"'
-        else:
+        isCPRunDefault = self.args.exec.startswith('-') or self.args.exec.startswith('CPRun.py')
+        formatingClause = {
+            'input_list': 'in.txt',
+            'merge_output_files': True,
+        }
+        if not isCPRunDefault:
+            if self._isFirstRun: logCPGridRun.warning("Non-CPRun.py is detected, please ensure the exec string is formatted correctly. Exec string will not be automatically formatted.")
             return f'"{self.args.exec}"'
+        
+        # Parse the exec string using the parser to validate and extract known arguments
+        self._runscript = self._initRunscript()
+        runscriptArgs, unknownArgs = self._runscript.parser.parse_known_args(self.args.exec.split(' '))
+        
+        # Throw error if unknownArgs contains any --args
+        unknown_flags = [arg for arg in unknownArgs if arg.startswith('--')]
+        if unknown_flags:
+            logCPGridRun.error(f"Unknown flags detected in the exec string: {unknown_flags}. Please check the exec string.")
+            raise ValueError(f"Unknown arguments detected: {unknown_flags}")
+
+        # Only override if value is None or the parser default
+        for key, value in formatingClause.items():
+            if hasattr(runscriptArgs, key):
+                old_value = getattr(runscriptArgs, key)
+                if old_value is None or old_value == self._runscript.parser.get_default(key):
+                    setattr(runscriptArgs, key, value)
+                    if self._isFirstRun: logCPGridRun.info(f"Setting '{key}' to '{value}' (CPRun.py default is: '{old_value}')")
+                else:
+                    if self._isFirstRun: logCPGridRun.warning(f"Preserving user-defined '{key}': '{old_value}', default formatting '{value}' will not be applied.")
+            else:
+                logCPGridRun.error(f"Formatting clause '{key}' is not recognized in the CPRun.py script. Check CPGridRun.py")
+                raise ValueError(f"Formatting clause '{key}' is not recognized in the CPRun.py script. Check CPGridRun.py")
+            
+        # Return the formatted arguments as a string
+        arg_string = ' '.join(
+            f'--{k.replace("_", "-")}' if isinstance(v, bool) and v else
+            f'--{k.replace("_", "-")} {v}' for k, v in vars(runscriptArgs).items() if v not in [None, False]
+        )
+        return f'"CPRun.py {arg_string}"'
+
 
     def outputsFormatter(self):
-        outputs = self.args.output_files.split(',')
-        outputs = [f'{output.split(".")[0]}:{output}' for output in outputs]
+        outputs = [f'{output.split(".")[0]}:{output}' for output in self.args.output_files]
         return ','.join(outputs)
 
     def submit(self):
@@ -402,7 +438,11 @@ class CPGridRun:
         return files
 
     def _askSubmission(self):
-        answer = input("[Tenative asking] Please confirm ALL the submission details are correct to submit [y/n]: ")
+        if self.args.agreeAll:
+            logCPGridRun.info("You have agreed to all the submission details, jobs will be submitted without confirmation.")
+            self.submit()
+            return
+        answer = input("Please confirm ALL the submission details are correct to submit [y/n]: ")
         if answer.lower() == 'y':
             self.submit()
         elif answer.lower() == 'n':
