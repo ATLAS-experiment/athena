@@ -354,8 +354,9 @@ SimplePoolReplica1.root                             DEBUG ---->[0]:DataHeaderFor
 StreamCopy.StreamCopyTool                           DEBUG In commitOutput
 SimplePoolReplica1.root                             DEBUG DB Action Commit
 StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG beam energy "" tag could not be converted to float
-StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
-StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG Could not get simulation parameters from input metadata store
+StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG Failed to set xAOD::FileMetaData::simFlavour or xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
+StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG Could not get xAOD::FileMetaData::simFlavour from input metadata store
+StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG Could not get xAOD::FileMetaData::isDataOverlay from input metadata store
 StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG set xAOD::FileMetaData::dataType to StreamCopy
 StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG retrieved existing list of runNumbers
 StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG added 1 to list of runNumbers
