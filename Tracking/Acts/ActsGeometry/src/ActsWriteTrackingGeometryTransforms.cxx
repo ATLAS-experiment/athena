@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PACKAGE
@@ -26,12 +26,6 @@
 
 using gid = Acts::GeometryIdentifier;
 
-ActsWriteTrackingGeometryTransforms::ActsWriteTrackingGeometryTransforms(const std::string& name,
-                                 ISvcLocator* pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator),m_pixelID(nullptr),m_SCT_ID(nullptr),
-    m_writeFullTransform(false)
-{
-}
 
 StatusCode ActsWriteTrackingGeometryTransforms::initialize() {
   
@@ -142,9 +136,5 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
   });
   
   
-  return StatusCode::SUCCESS;
-}
-
-StatusCode ActsWriteTrackingGeometryTransforms::finalize() {
   return StatusCode::SUCCESS;
 }

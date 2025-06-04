@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSWRITETRACKINGGEOMETRYTRANSFORMS_H
@@ -32,17 +32,17 @@ class ActsTrackingGeometryTool;
 
 class ActsWriteTrackingGeometryTransforms : public AthAlgorithm {
 public:
-  ActsWriteTrackingGeometryTransforms (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
+
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
-  virtual StatusCode finalize() override;
 
   virtual ~ActsWriteTrackingGeometryTransforms() = default;
 
 private:
 
-  const PixelID *m_pixelID;
-  const SCT_ID  *m_SCT_ID;
+  const PixelID *m_pixelID{nullptr};
+  const SCT_ID  *m_SCT_ID{nullptr};
 
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
