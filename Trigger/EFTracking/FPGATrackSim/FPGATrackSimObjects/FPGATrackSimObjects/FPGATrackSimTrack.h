@@ -26,7 +26,6 @@ class FPGATrackSimTrack {
   TrackStage getTrackStage() const { return m_trackStage; }
   bool getDoDeltaGPhis() const { return m_doDeltaGPhis; }
   int getBankID() const { return m_bankID; }
-  int getRegion() const { return m_bankID % 100; }
   int getPatternID() const { return m_patternID; }
   int getFirstSectorID() const { return m_firstSectorID; }
   int getSecondSectorID() const { return m_secondSectorID; }
@@ -46,6 +45,7 @@ class FPGATrackSimTrack {
   float getChi2ndof() const { return m_chi2 / (getNCoords() - m_nmissing - 5); }
   float getOrigChi2ndof() const { return m_origchi2 / (getNCoords() - m_nmissing - 5); }
   int getSubRegion() const { return m_subregion; }
+  int getRegion() const { return m_region; }
   unsigned getHoughXBin() const { return m_xBin; }
   unsigned getHoughYBin() const { return m_yBin; }
 
@@ -105,6 +105,7 @@ class FPGATrackSimTrack {
   void setBarcodeFrac(const float& v) { m_barcode_frac = v; }
 
   void setSubRegion(unsigned v) { m_subregion = v; }
+  void setRegion(unsigned v) { m_region = v; }
   void setHoughXBin(unsigned v) { m_xBin = v; }
   void setHoughYBin(unsigned v) { m_yBin = v;}
 
@@ -171,7 +172,8 @@ class FPGATrackSimTrack {
 
   // Subregion (aka slice) number of the corresponding road.
   int m_subregion = 0;
-
+  //Setting region for the bfield to work
+  int m_region = 0;
   // Hough x, y bin numbers (needed for recreation of roads in extrapolation)
   unsigned m_xBin = 0;
   unsigned m_yBin = 0;
