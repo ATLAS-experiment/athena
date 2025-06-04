@@ -70,6 +70,7 @@ JetFastFTagVarsToKeep += ['dipz20231122_negLogSigma2']
 JetFastFTagVars = '.'.join(JetFastFTagVarsToKeep)
 
 LargeRJetVarsToKeep = [f'GN2Xv01_p{x}' for x in ['hbb', 'top', 'qcd']]
+LargeRJetVarsToKeep += [f'GN2XTrig_p{x}' for x in ['hbb', 'top', 'qcd']]
 LargeRJetVarsToKeep += JetVarsToKeep 
 LargeRJetVars = '.'.join(LargeRJetVarsToKeep)
 
