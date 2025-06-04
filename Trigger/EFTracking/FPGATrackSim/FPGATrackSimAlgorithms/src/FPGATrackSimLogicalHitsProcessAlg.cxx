@@ -319,7 +319,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
       ATH_MSG_DEBUG("No tracking. Just running dummy road2track algorith");
       roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0));
     }
-
+    //Loop over tracks and set the region for all of them
+    for (FPGATrackSimTrack& track : tracks_1st) {
+        track.setRegion(m_region);
+    }
     // Loop over roads and store them in SG (after track finding to also copy the sector information)
     for (auto const& road : roads_1st) {
         std::vector<FPGATrackSimHit> road_hits;

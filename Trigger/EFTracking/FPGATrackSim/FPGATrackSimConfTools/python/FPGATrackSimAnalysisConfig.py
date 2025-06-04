@@ -548,7 +548,8 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.secondStageStrips = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
-
+    # Adding region so we can set it for tracks, then get the bfield
+    theFPGATrackSimLogicalHitsProcessAlg.Region = flags.Trigger.FPGATrackSim.region
     # If tracking is set to False or if we do the NN analysis, don't configure the bank service
     if flags.Trigger.FPGATrackSim.tracking and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis:
         result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
