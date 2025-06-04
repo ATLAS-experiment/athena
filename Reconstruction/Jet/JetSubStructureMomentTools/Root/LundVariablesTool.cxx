@@ -32,12 +32,10 @@ int LundVariablesTool::modifyJet(xAOD::Jet& injet) const {
       std::vector<fastjet::PseudoJet> v_pj_constituents;
       
       v_pj_constituents.clear();
-      int nconst_charged = 0;
       
       for(size_t ij = 0; ij < injet.numConstituents(); ij++) {
         const xAOD::FlowElement* constit = dynamic_cast<const xAOD::FlowElement*>(*constit_links[ij]);
         if (constit) {
-          if (constit->isCharged()) { nconst_charged++;}
           TLorentzVector tlv_const;
           tlv_const.SetPtEtaPhiE(constit->pt() / 1.e3, constit->eta(), constit->phi(), constit->e() / 1.e3);
 	  
