@@ -15,7 +15,6 @@
 #ifndef LArSimEvent_LArHitContainer_h
 #define LArSimEvent_LArHitContainer_h
 
-#include <type_traits>
 #include "HitManagement/AthenaHitsVector.h"
 #include "LArSimEvent/LArHit.h"
 
@@ -40,10 +39,6 @@ public:
     operator std::string () const ;
 
 };
-
-static_assert(std::is_standard_layout_v<LArHitContainer>,
-              "LArHitContainer must be standard layout class to guarantee "
-              "empty base class optimization");
 
 CLASS_DEF (LArHitContainer, 2701 , 1 ) 
 

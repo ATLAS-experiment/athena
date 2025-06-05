@@ -13,7 +13,6 @@
 //
 //
 // vector class
-#include <type_traits>
 #include <vector>
 
 #include "AthContainers/tools/DVLInfo.h"
@@ -37,13 +36,12 @@ namespace AthHitVec{
 
 
 struct HitsVectorBase {
-  // This is an empty base class to allow the use of AthenaHitsVector
-  // and AtlasHitsVector in the same container through static downcast,
-  // without having to use type punning, or RTTI through std::any.
-  // This should stay empty.
+  // This base class is used to store AthenaHitsVector
+  // and AtlasHitsVector in the same container, avoiding std::any RTTI.
+  // This should stay empty other than the virtual destructor which is required
+  // when converting a std::unique_ptr<Derived> to std::unique_ptr<Base>.
+  virtual ~HitsVectorBase() = default;
 };
-
-static_assert(std::is_empty_v<HitsVectorBase>, "HitsVectorBase should be an empty base");
 
 //
 template <typename T>
@@ -82,7 +80,7 @@ class AthenaHitsVector : public HitsVectorBase {
     log << MSG::DEBUG << " initialized " << collectionName
         << " with ownership policy " << m_ownPolicy << endmsg;
   }
-  ~AthenaHitsVector() { Clear(); }
+  ~AthenaHitsVector() override { Clear(); }
 
   void Clear() {
     // delete pointers if we own the elements
