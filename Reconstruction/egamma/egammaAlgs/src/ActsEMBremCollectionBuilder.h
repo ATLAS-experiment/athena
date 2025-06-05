@@ -71,7 +71,7 @@ class ActsEMBremCollectionBuilder : public AthReentrantAlgorithm {
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
 
-  ActsTrk::MutableTrackContainerHandlesHelper m_refittedTracksBackendHandles;
+  ActsTrk::MutableTrackContainerHandlesHelper m_refittedTracksBackendHandles{this};
 
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_refittedTracksKey{
       this, "RefittedTracksLocation", "",

@@ -41,7 +41,7 @@ public:
 
 private:
   detail::xAODUncalibMeasSurfAcc m_surfAcc{};
-  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
   SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKey{this, "SeedContainerKey", {}, "Seed containers"};
   SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_actsTrackParamsKey {this, "EstimatedTrackParametersKey", {}, "Track Parameters Key"};
  

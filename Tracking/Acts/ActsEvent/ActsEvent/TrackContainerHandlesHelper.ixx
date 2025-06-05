@@ -1,0 +1,34 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef ACTSTRKEVENT_TRACKCONTAINERHANDLESHELPER_IXX
+#define ACTSTRKEVENT_TRACKCONTAINERHANDLESHELPER_IXX
+
+namespace ActsTrk {
+
+  template <class PropOwner> 
+      MutableTrackContainerHandlesHelper::MutableTrackContainerHandlesHelper(PropOwner* owner):
+           m_statesKey{owner, "TrackStateWriteKey", ""},
+           m_parametersKey{owner, "TrackParameterWriteKey", ""},
+           m_jacobiansKey{owner, "TrackJacobianWriteKey", ""},
+           m_measurementsKey{owner, "TrackMeasurementWriteKey", ""},
+           m_surfacesKey{owner, "TrackSurfacesWriteKey", ""},
+           m_mtjKey{owner, "TrackMTJWriteKey", ""},
+           m_xAODTrackSummaryKey{owner, "xAODTrackSummaryWriteKey", ""},
+           m_trackSurfacesKey{owner, "TrackSurfacesKey", ""},
+           m_trackSummaryKey{owner, "TrackSummaryKey", ""}{}
+   template <class PropOwner> 
+      ConstTrackContainerHandlesHelper::ConstTrackContainerHandlesHelper(PropOwner* owner):
+         m_statesKey{ owner, "TrackStatesReadKey", ""},
+         m_parametersKey{ owner, "ParametersReadKey", ""},
+         m_jacobiansKey{ owner, "JacobianReadKey", ""},
+         m_measurementsKey{ owner, "MeasurementReadKey", ""},
+         m_surfacesKey{ owner, "SurfacesReadKey", ""},
+         m_mtjKey{owner, "MtjWriteKey", ""},
+         m_xAODTrackSummaryKey{owner, "xAODTrackSummaryReadKey", ""},
+         m_trackSurfacesKey{owner, "TrackSurfaceReadKey", ""},
+         m_trackSummaryKey{owner, "TrackSummaryWriteKey", ""}{}
+}
+
+#endif

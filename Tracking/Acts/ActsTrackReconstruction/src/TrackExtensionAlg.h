@@ -65,7 +65,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{
       this, "ACTSTracksLocation", "",
       "Output track collection (ActsTrk variant)"};
-  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};

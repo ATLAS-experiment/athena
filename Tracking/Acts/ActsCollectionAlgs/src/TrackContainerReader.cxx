@@ -7,12 +7,6 @@
 #include "TrackContainerReader.h"
 
 namespace ActsTrk{
-TrackContainerReader::TrackContainerReader(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{
-}
-
-
 StatusCode TrackContainerReader::initialize()
 {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -22,12 +16,6 @@ StatusCode TrackContainerReader::initialize()
 
   return StatusCode::SUCCESS;
 }
-
-StatusCode TrackContainerReader::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-
 StatusCode TrackContainerReader::execute(const EventContext& context) const
 {
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();

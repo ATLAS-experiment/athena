@@ -54,7 +54,7 @@ namespace ActsTrk{
       SG::WriteHandleKey<ActsTrk::ProtoTrackCollection> m_protoTrackCollectionKey{this, "ProtoTracksLocation", "", "Output proto tracks as well"};
       Gaudi::Property<bool> m_copyParametersFromFit{this, "copyParametersFromFit", true, "If enabled proto tracks will have the same parameters as fitted tracks"};
       // acts helper for the output
-      ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+      ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
 
 
