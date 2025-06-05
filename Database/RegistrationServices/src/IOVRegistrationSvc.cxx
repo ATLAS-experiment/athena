@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,11 +16,8 @@
 
 #include "IOVRegistrationSvc.h"
 
-//#include "GaudiKernel/DeclareFactoryEntries.h"
-
 // Athena includes
 #include "IOVDbSvc/IIOVCondDbSvc.h"
-#include "AthenaKernel/IOVTime.h"
 #include "SGTools/TransientAddress.h"
 
 // Gaudi includes
@@ -51,47 +48,12 @@
 IOVRegistrationSvc::IOVRegistrationSvc( const std::string& name, ISvcLocator* svc )
     : 
     base_class( name, svc ),
-    m_recreateFolders(false),
-    m_beginRun(IOVTime::MINRUN),
-    m_endRun(IOVTime::MAXRUN),
-    m_beginLB(IOVTime::MINEVENT),
-    m_endLB(IOVTime::MAXEVENT),
-    m_beginTime(IOVTime::MINTIMESTAMP),
-    m_endTime(IOVTime::MAXEVENT), // as the time parameter is only 32bit
-    m_tag(""),
-    m_timeStamp(false),
-    m_tagDescription("Athena IOVRegistrationSvc"),
-    m_writeKeyInfo(true),
-    m_userTags(true),
-    m_userTagsUH(false),
-    m_svFolder(false),
-    m_payloadTable(false),
-    m_forceGlobalIOV(false),
     m_iov_db  ( "IOVDbSvc",            name ),
     m_detStore( "DetectorStore",       name ),
     m_persSvc ( "EventPersistencySvc", name ),
     m_clidSvc ( "ClassIDSvc",          name )
 {
 
-    // Declare properties
-    declareProperty("RecreateFolders", m_recreateFolders);
-    declareProperty("BeginRun",        m_beginRun);
-    declareProperty("EndRun",          m_endRun);
-    declareProperty("BeginLB",         m_beginLB);
-    declareProperty("EndLB",           m_endLB);
-    declareProperty("BeginTime",       m_beginTime);
-    declareProperty("EndTime",         m_endTime);
-    declareProperty("IOVDbTag",        m_tag);
-    declareProperty("IOVDbTimeStamp",  m_timeStamp);
-    declareProperty("TagDescription",  m_tagDescription);
-    declareProperty("writeKeyInfo",    m_writeKeyInfo);
-    declareProperty("userTags",        m_userTags);
-    declareProperty("userTagsUpdateHead",m_userTagsUH);
-    declareProperty("SVFolder",        m_svFolder);
-    declareProperty("PayloadTable",    m_payloadTable);
-    declareProperty("OverrideNames",   m_overrideName);
-    declareProperty("OverrideTypes",   m_overrideType);
-    declareProperty("UseGlobalIOVForCollections", m_forceGlobalIOV);
 }
 
 //--------------------------------------------------------------------------
