@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPTOOLS_PILEUPXINGFOLDER_H
@@ -62,16 +62,17 @@ public:
   }
 
 private:
-  /// @name Properties
-  //@{
   ToolHandle<SG::IFolder> m_folder;
-  Gaudi::Property<int> m_firstXing;
-  Gaudi::Property<int> m_lastXing;
-  Gaudi::Property<std::vector<std::string>> m_itemList; ///< this must match SG::Folder::m_itemList
-  ///Bound property [0.0, 1.0]: frequency with which data objs in this folder
-  ///should be cleared from bkg caches at end of event. Default 0 (never clear)
-  Gaudi::CheckedProperty<double> m_cacheRefreshFrequency;
-  //@}
+
+  Gaudi::Property<int> m_firstXing{this, "FirstXing", -999,
+    "First bunch crossing"};
+  Gaudi::Property<int> m_lastXing{this, "LastXing", 999,
+    "Last bunch crossing"};
+  Gaudi::Property<std::vector<std::string>> m_itemList{this, "ItemList", {},
+    "List of data object identifiers"};
+  Gaudi::CheckedProperty<double> m_cacheRefreshFrequency{this, "CacheRefreshFrequency", 0.0,
+    "Frequency with which data objs in this folder should be cleared from bkg caches "
+    "at end of event. Default 0 (never clear), range [0.0, 1.0]"};
 };
 
 #endif

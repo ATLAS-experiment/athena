@@ -11,13 +11,11 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthenaKernel/EventContextClid.h"
-#include "AthenaKernel/IEvtIdModifierSvc.h"
 
 #include "PileUpTools/IBeamIntensity.h"
 #include "PileUpTools/IBeamLuminosity.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "PileUpTools/IBkgStreamsCache.h"
-#include "PileUpTools/PileUpMisc.h"
 #include "PileUpTools/PileUpHashHelper.h"
 
 #include "StoreGate/StoreGateSvc.h"
@@ -49,58 +47,9 @@ PileUpEventLoopMgr::PileUpEventLoopMgr(const std::string& name,
                                        ISvcLocator* svcLoc)
   : base_class(name, svcLoc)
   , AthMessaging (name)
-  , m_incidentSvc("IncidentSvc", name) //FIXME should this be configurable?
-  , m_mergeSvc("PileUpMergeSvc", name)
-  , m_evtStore("StoreGateSvc/StoreGateSvc",  name)
-  , m_evtIdModSvc("", name)
-  , m_origSel("EventSelector", name)
-  , m_signalSel("", name)
-  , m_caches(this)
-  , m_maxCollPerXing(23.0)
-  , m_xingFreq(25)
-  , m_firstXing(-2)
-  , m_lastXing(+1)
-  , m_allowSubEvtsEOF(true)
-  , m_xingByXing(false)
-  , m_failureMode(1)
-  , m_evinfName( c_pileUpEventInfoObjName )
-  , m_evinfContName( c_pileUpEventInfoContName )
-  , m_beamInt("FlatBM", name)
-  , m_beamLumi("LumiProfileSvc", name)
-  , m_currentRun(0)
-  , m_firstRun(true)
-  , m_maxBunchCrossingPerOrbit(3564)
-  , m_nevt(0)
-  , m_ncurevt(0)
-  , m_skipExecAlgs(false)
-  , m_loadProxies(true)
-  , m_allowSerialAndMPToDiffer(true)
+  , m_incidentSvc("IncidentSvc", name)
+  , m_evtStore("StoreGateSvc/StoreGateSvc", name)
 {
-  declareProperty("MaxBunchCrossingPerOrbit", m_maxBunchCrossingPerOrbit, "The number of slots in each LHC beam. Default: 3564.");
-  declareProperty("OrigSelector", m_origSel, "EventSelector for original (physics) events stream" );
-  declareProperty("SignalSelector", m_signalSel, "EventSelector for signal (hard-scatter) events stream" );
-  declareProperty("XingFrequency", m_xingFreq, "ns");
-  declareProperty("firstXing", m_firstXing, "time of first xing / XingFrequency (0th xing is 1st after trigger)");
-  declareProperty("lastXing", m_lastXing, "time of last xing / XingFrequency (0th xing is 1st after trigger)");
-  declareProperty("MaxMinBiasCollPerXing", m_maxCollPerXing, "Set to digitization numberOfCollisions prop. for variable-mu and RunDMC jobs.");
-  declareProperty("bkgCaches", m_caches, "list of tools managing bkg events");
-  declareProperty("AllowSubEvtsEOF", m_allowSubEvtsEOF, "if true(default) an EOF condition in the BkgStreamsCaches is not considered to be an error IF maxevt=-1 (loop over all available events)");
-  declareProperty("XingByXing", m_xingByXing, "if set to true we will not cache bkg events from one xing to then next. This greatly increases the amount of I/O and greatly reduces the memory required to run a job");
-  declareProperty("FailureMode", m_failureMode,
-                  "Controls behaviour of event loop depending on return code of"
-                  " Algorithms. 0: all non-SUCCESSes terminate job. "
-                  "1: RECOVERABLE skips to next event, FAILURE terminates job "
-                  "(DEFAULT). 2: RECOVERABLE and FAILURE skip to next events");
-
-  declareProperty("BeamInt", m_beamInt,
-                  "The service providing the beam intensity distribution");
-  declareProperty("BeamLuminosity", m_beamLumi,
-                  "The service providing the beam luminosity distribution vs. run");
-  declareProperty("PileUpMergeSvc", m_mergeSvc, "PileUp Merge Service");
-  declareProperty("EvtIdModifierSvc", m_evtIdModSvc, "ServiceHandle for EvtIdModifierSvc");
-  declareProperty("AllowSerialAndMPToDiffer", m_allowSerialAndMPToDiffer, "When set to False, this will allow the code to reproduce serial output in an AthenaMP job, albeit with a significant performance penalty.");
-  declareProperty("EventInfoName", m_evinfName, "SG key for the EventInfo object");
-  declareProperty("EventInfoContName", m_evinfContName, "SG key for the EventInfoContainer object");
   //  m_caches.push_back("BkgStreamsCache/MinBiasCache");
 }
 
