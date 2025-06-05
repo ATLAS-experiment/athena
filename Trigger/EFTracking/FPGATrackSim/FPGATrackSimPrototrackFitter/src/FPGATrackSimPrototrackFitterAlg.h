@@ -38,7 +38,7 @@ namespace FPGATrackSim{
       // output location to write to 
       SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
       // acts helper for the output
-      ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+      ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
       // prototrack collection from FPGAClusters or FPGATracks
       SG::ReadHandleKey<ActsTrk::ProtoTrackCollection> m_ProtoTrackCollectionFromFPGAKey{this, "FPGATrackSimActsProtoTracks","","FPGATrackSim PrototrackCollection"};
       // chrono service

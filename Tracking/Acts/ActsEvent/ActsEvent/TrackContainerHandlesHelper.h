@@ -32,6 +32,15 @@ std::string prefixFromTrackContainerName(const std::string& tracks);
 
 class MutableTrackContainerHandlesHelper {
  public:
+  
+ /** @brief Constructor taking the pointer to the class holding the object used to declare the 
+  *         data dependency from the WriteHandleKeys to the AvalancheScheduler. The object should be
+  *         defined in the header like
+  *             ActsTrk::MutableTrackContainerHandlesHelper m_trackHelper{this};
+  */ 
+ template <class PropOwner> 
+      MutableTrackContainerHandlesHelper(PropOwner* owner);
+
   /**
    * Sets up the handles
    * @arg prefix - common prefix for all the names
@@ -82,6 +91,14 @@ class ConstTrackContainerHandlesHelper {
    */
   StatusCode initialize(const std::string& prefix);
 
+   /** @brief Constructor taking the pointer to the class holding the object used to declare the 
+  *         data dependency from the WriteHandleKeys to the AvalancheScheduler. The object should be
+  *         defined in the header like
+  *             ActsTrk::ConstTrackContainerHandlesHelper m_trackHelper{this};
+  */ 
+ template <class PropOwner> 
+      ConstTrackContainerHandlesHelper(PropOwner* owner);
+
   std::unique_ptr<ActsTrk::TrackContainer> build(
       const Acts::TrackingGeometry* geo,
       const Acts::GeometryContext& geoContext,
@@ -112,5 +129,5 @@ class ConstTrackContainerHandlesHelper {
 };
 
 }  // namespace ActsTrk
-
+#include "ActsEvent/TrackContainerHandlesHelper.ixx"
 #endif

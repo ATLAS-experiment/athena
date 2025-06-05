@@ -91,7 +91,7 @@ namespace ActsTrk {
     ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_hgtdCalibTool{this, "HGTDCalibrator", "", "Opt. HGTD measurement calibrator"};
 
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
-    ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+    ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};

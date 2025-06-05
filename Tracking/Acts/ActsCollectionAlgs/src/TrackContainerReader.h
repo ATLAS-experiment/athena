@@ -21,16 +21,14 @@
 namespace ActsTrk { 
 class TrackContainerReader : public AthReentrantAlgorithm {
 public:
-  TrackContainerReader(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;  
   virtual ~TrackContainerReader() override = default;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& context) const override final;
-  virtual StatusCode finalize() override;
-
 private:
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-  ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+  ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_tracksKey{this, "TrackContainer", "TrackContainer"};
 };
 }

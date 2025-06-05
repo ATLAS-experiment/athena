@@ -51,7 +51,7 @@ namespace ActsTrk
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksKey
        {this, "TracksLocation", "", "Input track collection"};
-    ActsTrk::MutableTrackContainerHandlesHelper m_resolvedTracksBackendHandles;
+    ActsTrk::MutableTrackContainerHandlesHelper m_resolvedTracksBackendHandles{this};
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_resolvedTracksKey
        {this, "ResolvedTracksLocation", "", "Ambiguity resolved output track collection"};
 
