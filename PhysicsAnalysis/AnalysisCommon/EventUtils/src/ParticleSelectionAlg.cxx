@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSelectionAlg.cxx
@@ -57,41 +57,9 @@
 ////////////////
 ParticleSelectionAlg::ParticleSelectionAlg( const std::string& name,
                                             ISvcLocator* pSvcLocator ) :
-  ExpressionParserUser< ::AthAnalysisAlgorithm>( name, pSvcLocator ),
-  m_selTools(),     // makes these tools public
-  m_evtInfoName("EventInfo"),
-  m_inCollKey(""),
-  m_outCollKey(""),
-  m_writeSplitAux(true),
-  m_outOwnPolicyName("VIEW_ELEMENTS"),
-  m_selection(""),
-  m_doCutFlow(false),
-  m_cutBKCName(name),
-  // m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool"),
-  m_nEventsProcessed(0),
-  m_outOwnPolicy(SG::VIEW_ELEMENTS),
-  m_contType(UNKNOWN),
-  m_cutBKStartIdx(0),
-  m_selToolIdxOffset(),
-  m_idxSelParster(0)
+  ExpressionParserUser< ::AthAnalysisAlgorithm>( name, pSvcLocator )
 {
-  declareProperty("EventInfo",                 m_evtInfoName,   "Input container name");
-  declareProperty("InputContainer",            m_inCollKey,     "Input container name");
-  declareProperty("OutputContainer",           m_outCollKey,
-                  "The name of the output container with the deep copy of selected xAOD::IParticles");
-  declareProperty("WriteSplitOutputContainer", m_writeSplitAux,
-                  "Decide if we want to write a fully-split AuxContainer such that we can remove any variables");
-  declareProperty("OutputContainerOwnershipPolicy", m_outOwnPolicyName,
-                  "Defines the ownership policy of the output container (default: 'OWN_ELEMENTS'; also allowed: 'VIEW_ELEMENTS')");
-
-  declareProperty("SelectionToolList",       m_selTools,     "The list of IAsgSelectionTools");
-  declareProperty("Selection",               m_selection,
-                  "The selection string that defines which xAOD::IParticles to select from the container");
-
-  declareProperty("DoCutBookkeeping",       m_doCutFlow,
-                  "If true (deault: false), do the bookkeeping of how many particles passed which selection cuts");
-  declareProperty("CutBookkeeperContainer", m_cutBKCName,
-                  "The name of the resulting xAOD::CutBookkeeperContainer");
+  m_cutBKCName = name; // cppcheck-suppress useInitializationList; deprecated Property constructor
 }
 
 

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventDecisionAlg.cxx
@@ -16,19 +16,14 @@
 
 // FrameWork includes
 #include "Gaudi/Property.h"
-#include "AthenaKernel/IDecisionSvc.h"
 
 
 // Constructors
 ////////////////
 EventDecisionAlg::EventDecisionAlg( const std::string& name,
                                     ISvcLocator* pSvcLocator ) :
-  ::AthFilterAlgorithm( name, pSvcLocator ),
-  m_decSvc("DecisionSvc/DecisionSvc", name),
-  m_streamNames()
+  ::AthFilterAlgorithm( name, pSvcLocator )
 {
-  declareProperty("DecisionService",   m_decSvc,      "The handle to the IDecisionSvc" );
-  declareProperty("OutputStreamNames", m_streamNames, "The names of all output streams to check");
 }
 
 
