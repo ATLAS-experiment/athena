@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPTOOLS_BKGSTREAMSCACHE_H
@@ -7,7 +7,6 @@
 /** @file BkgStreamsCache.h
  * @brief In memory cache for pileup events
  *
- * $Id: BkgStreamsCache.h,v 1.10 2008-08-28 01:11:06 calaf Exp $
  * @author Paolo Calafiura - ATLAS Collaboration
  */
 
@@ -16,13 +15,13 @@
 #include <functional>
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaKernel/IAtRndmGenSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "Gaudi/Property.h"
 #include "PileUpTools/PileUpStream.h"
 #include "PileUpTools/IBkgStreamsCache.h"
 
 class IEvtSelector;
-class IAtRndmGenSvc;
 class IBeamIntensity;
 namespace CLHEP {
   class RandFlat;
@@ -100,41 +99,60 @@ private:
   StreamVector::iterator m_cursor;
   StreamVector m_streams;
   std::vector<bool> m_usedStreams;
-  unsigned int m_nXings;
-  unsigned int m_nStores;
+  unsigned int m_nXings{0};
+  unsigned int m_nStores{0};
   std::vector<unsigned int> m_nEvtsXing;
 
-  /// @name Properties
-  //@{
-  /// # of collisions per bunch crossing (~beam intensity)
-  Gaudi::Property<float> m_collXing;
-  /// The maximum fraction of bunch-crossings which will be occupied.
-  Gaudi::Property<float> m_occupationFraction;
-  /// select collision distribution
-  Gaudi::Property<std::string> m_collDistrName;
-  ServiceHandle<IEvtSelector> m_selecName;
-  /// read downscale factor (average number of times a min bias is reused)
-  Gaudi::Property<float> m_readDownscale;
-  /// IAtRndmGenSvc controlling the distribution of bkg events per bunch crossing
-  ServiceHandle<IAtRndmGenSvc> m_atRndmSvc;
-  /// the IAtRndmGenSvc stream to generate number of bkg events per bunch crossing
-  Gaudi::Property<std::string> m_randomStreamName;
-  /// the type of events in this cache
-  Gaudi::CheckedProperty<unsigned short> m_pileUpEventTypeProp;
+  ServiceHandle<IEvtSelector> m_selecName{this, "EventSelector", "FakeEventSelector"};
+
+  ServiceHandle<IAtRndmGenSvc> m_atRndmSvc{this, "RndmGenSvc", "AtRndmGenSvc",
+    "IAtRndmGenSvc controlling the distribution of bkg events/xing"};
+
+  Gaudi::Property<float> m_collXing{this, "CollPerXing", 23.0,
+    "(average) number of collisions per beam crossing"};
+
+  Gaudi::Property<float> m_occupationFraction{this, "OccupationFraction", 1.0,
+    "The maximum fraction of bunch-crossings which will be occupied."};
+
+  Gaudi::Property<std::string> m_collDistrName{this, "CollDistribution", "Poisson",
+    "nEvts/Xings can be either Fixed at CollPerXing or Poisson with average CollPerXing"};
+
+  Gaudi::Property<float> m_readDownscale{this, "ReadDownscaleFactor", 150,
+    "read one event every downscaleFactor accesses (asymptotically -> number of times "
+    "an event in the cache will be reused)"};
+
+  Gaudi::Property<std::string> m_randomStreamName{this, "RndmStreamName", "PileUpCollXingStream",
+    "IAtRndmGenSvc stream used as engine for our various random distributions, including the CollPerXing one "};
+
+  Gaudi::CheckedProperty<unsigned short> m_pileUpEventTypeProp{this, "PileUpEventType", 0,
+    &BkgStreamsCache::PileUpEventTypeHandler,
+    "Type of the pileup events in this cache: 0:Signal, 1:MinimumBias, 2:Cavern, 3:HaloGas, "
+    "4:ZeroBias. Default=0 (Signal, Invalid)"};
   void PileUpEventTypeHandler(Gaudi::Details::PropertyBase&);
+
+  Gaudi::Property<unsigned short> m_subtractBC0{this, "SubtractBC0", 0,
+    "reduce the number of events at bunch xing t=0 by m_subtractBC0. Default=0, set to 1 when "
+    "using the same type of events (e.g. minbias) for original and background streams"};
+
+  Gaudi::Property<bool> m_ignoreBM{this, "IgnoreBeamInt", false,
+    "Default=False, set to True to ignore the PileUpEventLoopMgr beam intensity "
+    "tool in setting the number of events per xing."};
+
+  Gaudi::Property<bool> m_ignoreSF{this, "IgnoreBeamLumi", false,
+    "Default=False, set to True to ignore the PileUpEventLoopMgr beam luminosity "
+    "tool in setting the number of events per xing."};
+
+  Gaudi::Property<bool> m_forceReadForBC0{this, "ForceReadForBC0", true,
+    "Force events used in the central bunch crossing to be refreshed"};
+
   /// the type of events in this cache
   xAOD::EventInfo::PileUpType m_pileUpEventType;
-  /// subtract from number of events at bunch xing = 0
-  Gaudi::Property<unsigned short> m_subtractBC0;
-  /// ignore the PileUpEventLoopMgr beam intensity tool
-  Gaudi::Property<bool> m_ignoreBM;
-  //@}
   /// read a new event every downscaleFactor accesses
-  CLHEP::RandFlat* m_readEventRand;
+  CLHEP::RandFlat* m_readEventRand{nullptr};
   /// pickup an event store at random from the cache
-  CLHEP::RandFlat* m_chooseEventRand;
+  CLHEP::RandFlat* m_chooseEventRand{nullptr};
   /// set number of collisions per bunch crossing (if Poisson distribution chosen)
-  CLHEP::RandPoisson* m_collXingPoisson;
+  CLHEP::RandPoisson* m_collXingPoisson{nullptr};
   /// function returning the number of collisions per bunch crossing
   /// before bunch structure modulation
   std::function< long() > m_f_collDistr;
@@ -142,15 +160,11 @@ private:
   /// after bunch structure modulation
   std::function< unsigned int(unsigned int) > m_f_numberOfBackgroundForBunchCrossing;
   /// float scaling number of collisions per bunch crossing
-  float m_collXingSF;
-  /// bool apply scaling number of collisions per bunch crossing ?
-  Gaudi::Property<bool> m_ignoreSF;
+  float m_collXingSF{1.0};
   /// offset of BC=0 xing
-  int m_zeroXing;
+  int m_zeroXing{-1};
   /// pointer to the IBeamIntensity distribution tool
-  IBeamIntensity* m_beamInt;
-  /// Force events used in the central bunch crossing to be refreshed
-  Gaudi::Property<bool> m_forceReadForBC0;
+  IBeamIntensity* m_beamInt{nullptr};
 
 };
 

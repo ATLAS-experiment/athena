@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include<algorithm> /*count_if,max_element*/
@@ -11,20 +11,8 @@
 
 FixedArrayBM::FixedArrayBM(const std::string& name,ISvcLocator* svc)
   : base_class(name,svc)
-  , m_maxBunchCrossingPerOrbit(3564)
-  , m_t0Offset(0)
-  , m_allowEmptyT0BunchCrossing(false)
-  , m_intensityPatternProp()
-  , m_ipLength(1)
   , m_intensityPattern(new double[m_ipLength])
-  , m_largestElementInPattern(1.0)
 {
-  declareProperty("MaxBunchCrossingPerOrbit", m_maxBunchCrossingPerOrbit, "The number of slots in each LHC beam. Default: 3564.");
-  declareProperty("T0Offset", m_t0Offset,  "Offset of the T0 w.r.t. our intensity pattern" );
-  declareProperty("AllowEmptyT0BunchCrossing", m_allowEmptyT0BunchCrossing,  "Allow the offset of the T0 to sit in an empty bunch crossing." );
-  declareProperty("IntensityPattern", m_intensityPatternProp,
-                  "An array of floats containing the beam intensity distribution as a function of time in bins of 25ns. FixedArrayBM normalizes the distribution and uses it as a stencil to determine the relative intensity at each beam xing in the simulated range"
-                  );
   m_intensityPattern[0]=1.0;
 }
 
