@@ -27,6 +27,19 @@ def PoolSvcCfg(flags, withCatalogs=False, **kwargs):
     return acc
 
 
+def AthenaPoolBaseCnvSvcCfg(flags, **kwargs):
+    acc = PoolSvcCfg(flags)
+
+    if flags.PoolSvc.PersSvcPerInputType:
+        kwargs.setdefault("PersSvcPerInputType", "CollectionTree")
+
+    service = CompFactory.AthenaPoolBaseCnvSvc(**kwargs)
+    acc.addService(service)
+    acc.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",
+                                                 CnvServices=[service.getFullJobOptName()]))
+    return acc
+
+
 def AthenaPoolCnvSvcCfg(flags, **kwargs):
     acc = PoolSvcCfg(flags)
 

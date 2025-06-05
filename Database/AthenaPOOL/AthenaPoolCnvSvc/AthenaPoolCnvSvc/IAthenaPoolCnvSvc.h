@@ -12,7 +12,6 @@
 
 #include "AthenaPoolCnvSvc/IAthenaPoolCleanUpSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
-#include "AthenaKernel/IDataShare.h"
 #include "DataModelRoot/RootType.h"
 
 #include <string>
@@ -31,7 +30,7 @@ namespace pool {
 /** @class IAthenaPoolCnvSvc
  *  @brief This class provides the interface between Athena and PoolSvc.
  **/
-class IAthenaPoolCnvSvc : virtual public extend_interfaces<IConversionSvc, IDataShare, IAthenaPoolCleanUpSvc> {
+class IAthenaPoolCnvSvc : virtual public extend_interfaces<IConversionSvc, IAthenaPoolCleanUpSvc> {
 public:
    /// Declare interface ID
    DeclareInterfaceID(IAthenaPoolCnvSvc, 1 ,0);
@@ -97,6 +96,9 @@ public:
    /// Set the input file attributes, if any are requested from jobOpts
    /// @param fileName [IN] name of the input file
    virtual StatusCode setInputAttributes(const std::string& fileName) = 0;
+
+   /// Commit Catalog
+   virtual StatusCode commitCatalog() = 0;
 };
 
 #endif
