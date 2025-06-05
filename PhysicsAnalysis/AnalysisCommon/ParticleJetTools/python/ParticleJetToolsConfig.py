@@ -109,7 +109,7 @@ def _getCommonLabelNames(prefix):
     )
 
 
-def getJetDeltaRFlavorLabelTool(name='jetdrlabeler', jet_pt_min=5000, collection="Final"):
+def getJetDeltaRFlavorLabelTool(name='jetdrlabeler', jet_pt_min=5000, collection="Final", dr_max=0.3):
     """Get the standard flavor tagging delta-R labeling tool
 
     Uses cone matching to B, C and tau truth particles.
@@ -129,7 +129,7 @@ def getJetDeltaRFlavorLabelTool(name='jetdrlabeler', jet_pt_min=5000, collection
         CParticleCollection = "TruthLabelCHadrons"+collection,
         TauParticleCollection = "TruthLabelTausFinal",
         PartPtMin = 5000.,
-        DRMax = 0.3,
+        DRMax = dr_max,
         MatchMode = "MinDR",
         JetPtMin = jet_pt_min,
         )
