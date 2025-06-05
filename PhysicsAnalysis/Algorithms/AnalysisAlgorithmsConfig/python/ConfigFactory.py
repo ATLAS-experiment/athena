@@ -301,6 +301,13 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="TriggerSF", alg=TauTriggerAnalysisSFBlock,
                                superBlocks="TauJets")
 
+        # diTauJets
+        from TauAnalysisAlgorithms.DiTauAnalysisConfig import DiTauCalibrationConfig
+        self.addAlgConfigBlock(algName="DiTauJets", alg=DiTauCalibrationConfig)
+        from TauAnalysisAlgorithms.DiTauAnalysisConfig import DiTauWorkingPointConfig
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=DiTauWorkingPointConfig,
+            superBlocks="DiTauJets")
+
         # SystObjectLink
         from AsgAnalysisAlgorithms.SystObjectLinkConfig import SystObjectLinkBlock
         self.addAlgConfigBlock(algName="SystObjectLink", alg=SystObjectLinkBlock,
@@ -344,7 +351,7 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="PtEtaSelection", alg=PtEtaSelectionBlock,
             defaults={'selectionName': ''},
             superBlocks=[self.ROOTNAME,
-                         "Jets", "Electrons", "Photons", "Muons", "TauJets",
+                         "Jets", "Electrons", "Photons", "Muons", "TauJets", "DiTauJets",
                          "PL_Jets", "PL_Electrons", "PL_Photons", "PL_Muons", "PL_Taus", "PL_Neutrinos"])
 
         # met
