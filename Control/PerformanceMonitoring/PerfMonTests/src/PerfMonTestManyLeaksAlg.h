@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestManyLeaksAlg.h 
@@ -25,35 +25,16 @@ namespace PerfMonTest {
 
 class ManyLeaksAlg : public AthAlgorithm
 {
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  ManyLeaksAlg( const std::string& name, ISvcLocator* pSvcLocator );
-
-  /// Destructor: 
-  virtual ~ManyLeaksAlg(); 
-
-  // Assignment operator: 
-  //ManyLeaksAlg &operator=(const ManyLeaksAlg &alg); 
+ public:
+  /// Constructor:
+  using AthAlgorithm::AthAlgorithm;
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Private data: 
-  /////////////////////////////////////////////////////////////////// 
- private: 
+ private:
 
-  /// Default constructor: 
-  ManyLeaksAlg();
-  
   long* stillReachableFct(long** array);
   
   /// this one's possible lost
@@ -69,24 +50,24 @@ class ManyLeaksAlg : public AthAlgorithm
   void leakAll();
   
   /// Property to setup the size of the leak
-  int m_leakSize;
+  Gaudi::Property<int> m_leakSize{this, "LeakSize", 10, "Number of longs to be leaked just once"};
   
   /// Property to setup the location of the leak, in initialize (true) or execute (false)
-  bool m_leakInInit;
+  Gaudi::Property<bool> m_leakInInit{this, "LeakInInit", false, "Where it will leak: initialize or execute(default)"};
   
  private:
   
   // this one's still reachable
-  long* m_stillReachable;
+  long* m_stillReachable{};
   
   // this one's possible lost
-  long* m_possibleLost;
+  long* m_possibleLost{};
   
   // this one's indirectly lost
-  long* m_indirectlyLost;
+  long* m_indirectlyLost{};
   
   // this one's definitely lost
-  long* m_definitelyLost;
+  long* m_definitelyLost{};
   
   // we still need to reference some pointers,
   // otherwise vagrind labels everything definitely lost

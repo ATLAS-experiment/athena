@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <map>
@@ -12,47 +12,9 @@
 /* #define DEBUG_ME 1 */
 
 using namespace PerfMonTest;
-using namespace::std;
 
 typedef DataVector<IHit> HitPtrContainer;
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-PolyVectorAlg::PolyVectorAlg( const std::string& name, 
-		  ISvcLocator* pSvcLocator ) : 
-  AthAlgorithm   ( name,    pSvcLocator ),
-  m_vectorSize(1024*1024), m_2bReserved(m_vectorSize), m_mixture(1), m_mapIt(false)
-{
-  declareProperty("VectorSize", m_vectorSize, "the size of the Hit container");
-  declareProperty("ToBeReserved", m_2bReserved, "the number of element to be reserved");
-  declareProperty("Mixture", m_mixture, "equal to the ratio DHIT/FHIT - 1 (default 1 == all DHits)");
-  declareProperty("MapIt", m_mapIt, "add current hit to a map");
-}
-
-// Destructor
-///////////////
-PolyVectorAlg::~PolyVectorAlg()
-{ 
-  ATH_MSG_DEBUG("Calling destructor");
-}
-
-// Athena Algorithm's Hooks
-////////////////////////////
-StatusCode PolyVectorAlg::initialize()
-{
-  ATH_MSG_INFO("Initializing ");
-  return StatusCode::SUCCESS;
-}
-
-StatusCode PolyVectorAlg::finalize()
-{
-  ATH_MSG_INFO("Finalizing ");
-  return StatusCode::SUCCESS;
-}
 
 StatusCode PolyVectorAlg::execute()
 {  
@@ -66,7 +28,7 @@ StatusCode PolyVectorAlg::execute()
   IHit* p2(0);
 #endif
   IHit* p3(0);
-  cout << "initial capacity " << vcap << endl;
+  std::cout << "initial capacity " << vcap << std::endl;
   int size(m_vectorSize.value());
   for(int i(0); i<size; ++i) {
     vold=vcap;
@@ -80,11 +42,11 @@ StatusCode PolyVectorAlg::execute()
     vptr.push_back(p3);
     vcap=vptr.capacity();
     if (m_mapIt.value()) m_mixMap[i]=p3;
-    if (vold != vcap) cout << "iteration " << i << " new capacity " << vcap <<endl;
+    if (vold != vcap) std::cout << "iteration " << i << " new capacity " << vcap <<std::endl;
 #ifdef DEBUG_ME
     if (((int)p3-(int)p2) != ((int)p2-(int)p1)) cout << "iteration " << i << " new chunk @" << hex << p3 << " previous was @" << p2 << dec << endl;
 #ifdef REALLY_DEBUG_ME
-    cout << "iteration " << i << " P3 @" << hex << p3 << " p2 @" << p2 << " p1 @" << p1 << dec << ' ' << (int)p3-(int)p2 << ' ' <<(int)p2-(int)p1 <<endl;
+    std::cout << "iteration " << i << " P3 @" << hex << p3 << " p2 @" << p2 << " p1 @" << p1 << dec << ' ' << (int)p3-(int)p2 << ' ' <<(int)p2-(int)p1 <<std::endl;
 #endif
 #endif
   }
