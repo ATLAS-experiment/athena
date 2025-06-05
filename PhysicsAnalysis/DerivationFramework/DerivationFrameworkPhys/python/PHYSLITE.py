@@ -52,15 +52,18 @@ def CPAlgorithmsCfg(flags):
 
     logPLCPAlgCfg.info('Do Muons')
 
-    subConfig = factory.makeConfig ('Muons', containerName='AnalysisMuons')
+    subConfig = factory.makeConfig ('Muons')
+    subConfig.setOptionValue ('.containerName', 'AnalysisMuons')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Muons.WorkingPoint', containerName='AnalysisMuons',
-                                    selectionName='loose')
+    subConfig = factory.makeConfig ('Muons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisMuons')
+    subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.quality', 'Loose')
     subConfig.setOptionValue ('.isolation', 'NonIso')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisMuons')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisMuons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -71,15 +74,17 @@ def CPAlgorithmsCfg(flags):
 
     logPLCPAlgCfg.info('Do Electrons')
 
-    subConfig = factory.makeConfig ('Electrons', containerName='AnalysisElectrons')
+    subConfig = factory.makeConfig ('Electrons')
+    subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
     subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateSamplingPattern', True)
     subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisElectrons',
-                                    selectionName='loose')
+    subConfig = factory.makeConfig ('Electrons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
+    subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.identificationWP', 'LooseLHElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
@@ -94,14 +99,17 @@ def CPAlgorithmsCfg(flags):
     configSeq += subConfig
 
     # So SiHit electrons - should come after the standard selection in order to avoid keeping the same electrons twice
-    subConfig = factory.makeConfig ('Electrons', containerName='AnalysisSiHitElectrons')
+    subConfig = factory.makeConfig ('Electrons')
+    subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
     subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.postfix', 'SiHit')
     subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisSiHitElectrons', selectionName='SiHits')
+    subConfig = factory.makeConfig ('Electrons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
+    subConfig.setOptionValue ('.selectionName', 'SiHits')
     subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.identificationWP', 'SiHitElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
@@ -109,7 +117,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.noEffSF', True)
     subConfig.setOptionValue ('.postfix', 'SiHit')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisSiHitElectrons')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
     subConfig.setOptionValue ('.selectionName', 'SiHits')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -120,14 +129,16 @@ def CPAlgorithmsCfg(flags):
 
     logPLCPAlgCfg.info('Do Photons')
 
-    subConfig = factory.makeConfig ('Photons', containerName='AnalysisPhotons')
+    subConfig = factory.makeConfig ('Photons')
+    subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
     subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Photons.WorkingPoint', containerName='AnalysisPhotons',
-        selectionName='loose')
+    subConfig = factory.makeConfig ('Photons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
+    subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.qualityWP', 'Loose')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
@@ -135,7 +146,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.noEffSFForID', True)
     subConfig.setOptionValue ('.noEffSFForIso', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisPhotons')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -146,13 +158,16 @@ def CPAlgorithmsCfg(flags):
 
     # set up the tau analysis algorithm config:
     # Commented for now due to use of public tools
-    subConfig = factory.makeConfig ('TauJets', containerName='AnalysisTauJets')
+    subConfig = factory.makeConfig ('TauJets')
+    subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('TauJets.WorkingPoint', containerName='AnalysisTauJets',
-        selectionName='baseline')
+    subConfig = factory.makeConfig ('TauJets.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
+    subConfig.setOptionValue ('.selectionName', 'baseline')
     subConfig.setOptionValue ('.quality', 'Baseline')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisTauJets')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
     subConfig.setOptionValue ('.selectionName', 'baseline')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -167,7 +182,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisJets')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisJets')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
@@ -184,7 +200,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.minMass', 0.)
     subConfig.setOptionValue ('.maxMass', 0.)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisLargeRJets')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisLargeRJets')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
