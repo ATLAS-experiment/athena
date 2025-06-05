@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_MUFASTTRACKFITTER_H
@@ -46,16 +46,16 @@ namespace TrigL2MuonSA {
 			  std::vector<TrigL2MuonSA::TrackPattern>& v_trackPatterns,
                           const TrigL2MuonSA::MuonRoad& muonRoad) const;
     
-    StatusCode setMCFlag(const BooleanProperty&  use_mcLUT);
+    StatusCode setMCFlag(bool use_mcLUT);
 
-    void setUseEIFromBarrel( BooleanProperty use_endcapInnerFromBarrel ) {
+    void setUseEIFromBarrel( bool use_endcapInnerFromBarrel ) {
       m_use_endcapInnerFromBarrel = use_endcapInnerFromBarrel;
       m_sagittaRadiusEstimate -> setUseEndcapInner( m_use_endcapInnerFromBarrel );
     };
 
   private:
-    BooleanProperty  m_use_mcLUT {true};
-    BooleanProperty  m_use_endcapInnerFromBarrel {false};
+    bool m_use_mcLUT {true};
+    bool m_use_endcapInnerFromBarrel {false};
 
     ToolHandle<SagittaRadiusEstimate> m_sagittaRadiusEstimate
       {this, "SagittaRadiusEstimate", "TrigL2MuonSA::SagittaRadiusEstimate"};

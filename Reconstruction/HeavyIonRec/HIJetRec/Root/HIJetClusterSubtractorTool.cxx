@@ -18,10 +18,8 @@ HIJetClusterSubtractorTool::HIJetClusterSubtractorTool(const std::string& myname
 										    m_init(false),
 										    m_h3W(nullptr),
 										    m_h3Eta(nullptr),
-										    m_h3Phi(nullptr),
-										    m_useSamplings(true)
+										    m_h3Phi(nullptr)
 {
-	declareProperty("UseSamplings",m_useSamplings=true);
   setUseCells(false);
 }
 
