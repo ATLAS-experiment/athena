@@ -1,16 +1,17 @@
 """Construct Overlay configuration flags
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
 
 
 def createOverlayConfigFlags():
     """Return an AthConfigFlags object with required flags"""
     flags = AthConfigFlags()
     # Data overlay flag
-    flags.addFlag("Overlay.DataOverlay", False)
+    flags.addFlag("Overlay.DataOverlay", lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("IsDataOverlay", "False") == "True")
     # Overlay skip secondary events
     flags.addFlag("Overlay.SkipSecondaryEvents", -1)
     # Overlay flag when reading from ByteStream

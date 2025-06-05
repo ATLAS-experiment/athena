@@ -1,10 +1,8 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def DataOverlay2023(flags):
     """Configuration for HI data overlay for year 2023"""
-    flags.Overlay.DataOverlay = True
-
-    flags.Beam.NumberOfCollisions = 60.
+    flags.Beam.NumberOfCollisions = 0.
 
     from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
     LArConfigRun3PileUp(flags)
