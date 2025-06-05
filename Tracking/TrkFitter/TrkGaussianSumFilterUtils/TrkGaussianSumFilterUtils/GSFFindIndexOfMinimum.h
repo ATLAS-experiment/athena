@@ -44,7 +44,7 @@
  * The original playground with benchmarking code
  * can be found at:
  * https://github.com/AnChristos/FindIdxOfMinimum
- * (benchmark can be moved when we have the
+ * (benchmarks can be moved when we have the
  * right externals)
  */
 
@@ -54,8 +54,6 @@
 #include "CxxUtils/inline_hints.h"
 #include "CxxUtils/restrict.h"
 #include "CxxUtils/vec.h"
-#include "GaudiKernel/Kernel.h"
-#include "TrkGaussianSumFilterUtils/GsfConstants.h"
 //
 #include <algorithm>
 #include <memory>
@@ -109,8 +107,7 @@ T vFindMinimum(const T* distancesIn, int n) {
   using namespace CxxUtils;
   static_assert(std::is_floating_point_v<T>, "T not a floating point type");
   constexpr size_t VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
-  const T* array =
-      std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
+  const T* array = std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
   using vec_t = vec<T, VEC_WIDTH>;
   vec_t minValues1;
   vec_t minValues2;
@@ -156,7 +153,8 @@ T vFindMinimum(const T* distancesIn, int n) {
 
 /// @brief Find the index of an element
 /// in the array of distances
-/// processing four simd vectors at a time
+/// processing four simd vectors at a time.
+/// Returns -1 if the element is not found.
 template <size_t ISA_WIDTH, typename T>
 ATH_ALWAYS_INLINE
 int vIdxOfValue(const T value,
@@ -165,8 +163,7 @@ int vIdxOfValue(const T value,
 
   static_assert(std::is_floating_point_v<T>, "T not a floating point type");
   constexpr int VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
-  const T* array =
-      std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
+  const T* array = std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
   using vec_t = vec<T, VEC_WIDTH>;
   using vec_mask = vec_mask_type_t<vec_t>;
   vec_t values1;
@@ -204,16 +201,22 @@ int vIdxOfValue(const T value,
 }
 
 /// @brief Find the index of the minimum
-/// in the array of distances
+/// in the array of distances.
+/// Inputs are a ptr to the data
+/// and the number of elements to
+/// examine. The input needs to be properly
+/// padded (see numpadded method)
 template <int ISA_WIDTH, typename T>
 ATH_ALWAYS_INLINE
 int vIdxOfMin(const T* distancesIn, int n) {
   using namespace CxxUtils;
-  const T* array =
-      std::assume_aligned<vAlgs::alignmentForArray<ISA_WIDTH>()>(distancesIn);
+  const T* array = std::assume_aligned<vAlgs::alignmentForArray<ISA_WIDTH>()>(distancesIn);
   static_assert(std::is_floating_point_v<T>, "T not a floating point type");
-  //We process elements in blocks. When we find the minimum we also
-  //keep track in which block it was
+  //We process elements in blocks.
+  //When we find the minimum we also
+  //keep track in which block it was.
+  //The blocksize of 512 seemed to be a good enough
+  //compromise in tests.
   constexpr int blockSize = 512;
   // case for n less than blockSize
   if (n <= blockSize) {
@@ -222,9 +225,14 @@ int vIdxOfMin(const T* distancesIn, int n) {
   }
   int idx = 0;
   T min = array[0];
-  // We might have a remainder that we need to handle
+  // We might have a remainder, elements after an integral
+  // number of blockes that we need to handle
   const int remainder = n & (blockSize - 1);
-  // process elements up to the remainder in blocks
+  // Process elements up to the remainder in blocks
+  // For example for blockSize 512 and 1056 elements
+  // (if we opt for padding/multiple of 32)
+  // The loop will run two times and then we need
+  // to handle the 32 remaining elements.
   for (int i = 0; i < (n - remainder); i += blockSize) {
     T mintmp = vFindMinimum<ISA_WIDTH>(array + i, blockSize);
     if (mintmp < min) {
@@ -232,12 +240,10 @@ int vIdxOfMin(const T* distancesIn, int n) {
       idx = i;
     }
   }
-
   //Process the remaining elements if any
   if (remainder != 0) {
     int index = n - remainder;
     T mintmp = vFindMinimum<ISA_WIDTH>(array + index, remainder);
-    // if the minimu is here
     if (mintmp < min) {
       min = mintmp;
       return index + vIdxOfValue<ISA_WIDTH>(min, array + index, remainder);

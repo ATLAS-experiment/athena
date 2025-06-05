@@ -230,30 +230,27 @@ Trk::MultiComponentState mergeFullDistArray(
     Trk::MultiComponentStateAssembler::Cache& cache,
     Trk::MultiComponentState&& statesToMerge,
     const unsigned int maximumNumberOfComponents) {
-  GSFUtils::Component1DArray componentsArray;
   const int n = statesToMerge.size();
-  componentsArray.numComponents = n;
+  GSFUtils::Component1DArray componentsArray(n);
   for (int i = 0; i < n; ++i) {
     const AmgSymMatrix(5)* measuredCov = statesToMerge[i].params->covariance();
     const AmgVector(5)& parameters = statesToMerge[i].params->parameters();
     // Fill in infomation
-    const double cov =
-        measuredCov ? (*measuredCov)(Trk::qOverP, Trk::qOverP) : -1.;
-    componentsArray.components[i].mean = parameters[Trk::qOverP];
-    componentsArray.components[i].cov = cov;
-    componentsArray.components[i].invCov = cov > 0 ? 1. / cov : 1e10;
-    componentsArray.components[i].weight = statesToMerge[i].weight;
+    const double cov = measuredCov ? (*measuredCov)(Trk::qOverP, Trk::qOverP) : -1.;
+    componentsArray[i].mean = parameters[Trk::qOverP];
+    componentsArray[i].cov = cov;
+    componentsArray[i].invCov = cov > 0 ? 1. / cov : 1e10;
+    componentsArray[i].weight = statesToMerge[i].weight;
   }
 
   // Gather the merges
-  const GSFUtils::MergeArray KL =
-      findMerges(componentsArray, maximumNumberOfComponents);
+  const GSFUtils::MergeArray merges = findMerges(std::move(componentsArray), maximumNumberOfComponents);
 
   // Do the full 5D calculations of the merge
-  const int numMerges = KL.numMerges;
+  const int numMerges = merges.size();
   for (int i = 0; i < numMerges; ++i) {
-    const int8_t mini = KL.merges[i].To;
-    const int8_t minj = KL.merges[i].From;
+    const int8_t mini = merges[i].To;
+    const int8_t minj = merges[i].From;
     combineWithWeight(statesToMerge[mini], statesToMerge[minj]);
     statesToMerge[minj].params.reset();
     statesToMerge[minj].weight = 0.;
