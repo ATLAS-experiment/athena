@@ -177,7 +177,7 @@ void sTgcRawDataMonAlg::fillsTgcLumiblockHistograms(const Muon::sTgcPrepDataCont
       }
 
       std::string stationName = m_idHelperSvc->stgcIdHelper().stationNameString(m_idHelperSvc->stgcIdHelper().stationName(id));
-      int stationEta          = std::abs(m_idHelperSvc->stgcIdHelper().stationEta(id));
+      int stationEta          = m_idHelperSvc->stgcIdHelper().stationEta(id);
       int channelType         = m_idHelperSvc->stgcIdHelper().channelType(id);      
       int multiplet           = m_idHelperSvc->stgcIdHelper().multilayer(id);
       int gasGap              = m_idHelperSvc->stgcIdHelper().gasGap(id);
@@ -186,7 +186,7 @@ void sTgcRawDataMonAlg::fillsTgcLumiblockHistograms(const Muon::sTgcPrepDataCont
       int feb                 = getFEBs(stationEta,layer);
       int sector              = m_idHelperSvc -> sector(id);      
       
-      std::string statEtaStr  = std::to_string(stationEta);
+     
       std::string layerStr    = std::to_string(layer);
       std::string side        = GeometricSectors::sTgcSide[iside];      
       std::string channelName = "";
@@ -198,7 +198,7 @@ void sTgcRawDataMonAlg::fillsTgcLumiblockHistograms(const Muon::sTgcPrepDataCont
 
       auto febMon = Monitored::Scalar<int>(channelName+"FEBsector"+side+sectorStr, feb);
       auto lbMon  = Monitored::Scalar<int>(channelName+"LBsector"+side+sectorStr, lb);
-      
+     
       fill("LBShifterGroup", lbMon, febMon);
     }  
   }
@@ -525,7 +525,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
             
             auto xPosStripmon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerIndex), xPos);
             auto yPosStripmon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerIndex), yPos);
-            fill("Overview", xPosStripmon, yPosStripmon, effQuestionMon);
+            fill("padTriggerShifter", xPosStripmon, yPosStripmon, effQuestionMon);
           } // End of loop over efficient layers
         } // End of efficient case
         
@@ -566,7 +566,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
               
             auto xPosStripProbemon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerIndex), xPos);
             auto yPosStripProbemon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerIndex), yPos);
-            fill("Overview", xPosStripProbemon, yPosStripProbemon, effQuestionMon);
+            fill("padTriggerShifter", xPosStripProbemon, yPosStripProbemon, effQuestionMon);
           } // End of loop over probe layers
         } // End of non-efficient case
       } // End of sector loop

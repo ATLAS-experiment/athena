@@ -234,7 +234,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const Eve
             if (st=='M' && chamberType[2]=='G') chamber = xAOD::L2MuonParameters::Chamber::Backup;
         }
 
-        double &cXmid{tmp.cXmid}, &cYmid{tmp.cYmid}, &cPhip{tmp.cPhip};
+        double &cXmid{tmp.cXmid}, &cYmid{tmp.cYmid}, &cPhip{tmp.cPhip};   //tmp.cAmid remains zero
         Amg::Transform3D trans = muonStation->getNominalAmdbLRSToGlobal();
         if(!muonStation->endcap()){
             cXmid = (trans.translation()).z();
@@ -271,8 +271,9 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const Eve
 
         double Rmin = (trans * muonStation->getBlineFixedPointInAmdbLRS()).perp();
         double OrtoRadialPos = mdtReadout->getStationS();
-        tmp.cInCo = 1./std::cos(std::atan(OrtoRadialPos/Rmin));
+        tmp.cInCo = 1./std::cos(std::abs(std::atan(OrtoRadialPos/Rmin)));
         tmp.cPhi0 = cPhip - std::atan(OrtoRadialPos/Rmin);
+        if(tmp.cPhi0 > M_PI) cPhip -= 2*M_PI;
         if(cPhip<0. && (std::abs(M_PI+cPhip) < 0.05) ) cPhip = M_PI;
 
         ATH_MSG_DEBUG(" ...MDT hit Z/R/chamber/MultiLater/TubeLayer/Tube/Layer/adc/tdc = "
