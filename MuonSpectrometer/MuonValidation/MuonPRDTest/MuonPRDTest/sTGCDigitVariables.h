@@ -22,8 +22,6 @@ namespace MuonPRDTest{
     private:
         SG::ReadHandleKey<sTgcDigitContainer> m_key{};
         ScalarBranch<unsigned int>& m_NSWsTGC_nDigits{parent().newScalar<unsigned int>("N_Digits_sTGC")};
-        VectorBranch<float>& m_NSWsTGC_dig_localPosX{parent().newVector<float>("Digits_sTGC_localPosX")};
-        VectorBranch<float>& m_NSWsTGC_dig_localPosY{parent().newVector<float>("Digits_sTGC_localPosY")};
         VectorBranch<double>& m_NSWsTGC_dig_time{parent().newVector<double>("Digits_sTGC_time")};
         VectorBranch<int>& m_NSWsTGC_dig_bctag{parent().newVector<int>("Digits_sTGC_bctag")};
         VectorBranch<double>& m_NSWsTGC_dig_charge{parent().newVector<double>("Digits_sTGC_charge")};
@@ -32,8 +30,7 @@ namespace MuonPRDTest{
         VectorBranch<int>& m_NSWsTGC_dig_channelNumber{parent().newVector<int>("Digits_sTGC_channelNumber")};
         ThreeVectorBranch m_NSWsTGC_dig_globalPos{parent(), "Digits_sTGC_globalPos"};
         ThreeVectorBranch m_NSWsTGC_dig_PadglobalCornerPos{parent(), "Digits_sTGC_PadglobalCornerPos"};
-        VectorBranch<float>& m_NSWsTGC_dig_channelPosX{parent().newVector<float>("Digits_sTGC_localPosX")};
-        VectorBranch<float>& m_NSWsTGC_dig_channelPosY{parent().newVector<float>("Digits_sTGC_localPosY")};
+        TwoVectorBranch m_NSWsTGC_dig_localPos{parent(), "Digits_sTGC_localPos"};
         sTgcIdentifierBranch m_NSWsTGC_dig_id{parent(), "Digits_sTGC"};
     };
 };
