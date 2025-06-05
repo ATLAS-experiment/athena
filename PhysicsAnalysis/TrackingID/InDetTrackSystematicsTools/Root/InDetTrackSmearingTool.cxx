@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ROOT include(s):
@@ -25,25 +25,10 @@ namespace {
 
 namespace InDet {
 
-  static const CP::SystematicSet SmearingSystematics = 
-    {
-      InDet::TrackSystematicMap.at(TRK_RES_D0_MEAS),
-      InDet::TrackSystematicMap.at(TRK_RES_Z0_MEAS),
-      InDet::TrackSystematicMap.at(TRK_RES_D0_MEAS_UP),
-      InDet::TrackSystematicMap.at(TRK_RES_Z0_MEAS_UP),
-      InDet::TrackSystematicMap.at(TRK_RES_D0_MEAS_DOWN),
-      InDet::TrackSystematicMap.at(TRK_RES_Z0_MEAS_DOWN),
-      InDet::TrackSystematicMap.at(TRK_RES_D0_DEAD),
-      InDet::TrackSystematicMap.at(TRK_RES_Z0_DEAD)
-    };
-
   static const CP::SystematicSet RecommendedSystematics = 
     {
       InDet::TrackSystematicMap.at(TRK_RES_D0_MEAS),
       InDet::TrackSystematicMap.at(TRK_RES_Z0_MEAS),
-      // the TRK_RES_[D|Z]0_MEAS_[UP|DOWN] systematics are for advanced users only, who are using TRK_RES_[D|Z]0_MEAS as the nominal point
-      InDet::TrackSystematicMap.at(TRK_RES_D0_DEAD),
-      InDet::TrackSystematicMap.at(TRK_RES_Z0_DEAD)
     };
 
   InDetTrackSmearingTool::InDetTrackSmearingTool( const std::string& name )
@@ -54,11 +39,6 @@ namespace InDet {
     declareInterface<IInDetTrackSmearingTool>(this);
 #endif
 
-    declareProperty("Seed", m_seed);
-
-    declareProperty("calibFileD0Dead", m_calibFileD0Dead = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/res_diff_d0_vs_pt.hist.root");
-    declareProperty("calibFileZ0Dead", m_calibFileZ0Dead = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/res_diff_z0_vs_pt.hist.root");
-    declareProperty("calibFileIP_CTIDE", m_calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/d0z0_smearing_factors.root");
   }
 
 
@@ -70,14 +50,8 @@ namespace InDet {
     ATH_MSG_INFO( "Using seed of " << m_seed << " to initialize RNG" );
     m_rnd = std::make_unique<TRandom3>(m_seed);
 
-    ATH_MSG_INFO( "Using for TRK_RES_D0_DEAD case the calibration file " << PathResolverFindCalibFile(m_calibFileD0Dead) );
-    ATH_MSG_INFO( "Using for TRK_RES_Z0_DEAD case the calibration file " << PathResolverFindCalibFile(m_calibFileZ0Dead) );
-
     ATH_MSG_INFO( "Using dedicated CTIDE smearing maps for tracks in jets" );
     ATH_MSG_INFO( "Using for the full pT range the CTIDE calibration file " << PathResolverFindCalibFile(m_calibFileIP_CTIDE) );
-
-    ATH_CHECK( initObject<TH1>(m_smearD0Dead, m_calibFileD0Dead, "res_pt_d0_0") );
-    ATH_CHECK( initObject<TH1>(m_smearZ0Dead, m_calibFileZ0Dead, "res_pt_z0_0") );
 
     std::string rootfileName = m_calibFileIP_CTIDE;
 
@@ -95,11 +69,6 @@ namespace InDet {
     float pt = 1.e-3*track.pt(); // need to convert pt to GeV
     float eta = track.eta();
     float sigma_D0 = 0.f;
-
-    if ( isActive(TRK_RES_D0_DEAD) ) {
-      float d0Smear = m_smearD0Dead->GetBinContent(std::as_const(m_smearD0Dead)->FindFixBin(pt));
-      sigma_D0 += d0Smear*d0Smear;
-    }
 
     bool isActiveD0Meas = isActive(TRK_RES_D0_MEAS);
 
@@ -130,12 +99,6 @@ namespace InDet {
     float pt = 1.e-3*track.pt(); // need to convert pt to GeV
     float eta = track.eta();
     float sigma_Z0 = 0.f;
-
-    if ( isActive(TRK_RES_Z0_DEAD) ) {
-      // the histogram returns a smeared value for z0*sin(theta), so we need to divide by sin(theta)
-      float z0Smear = m_smearZ0Dead->GetBinContent(std::as_const(m_smearZ0Dead)->FindFixBin(pt))/std::sin(track.theta());
-      sigma_Z0 += z0Smear*z0Smear;
-    }
 
     bool isActiveZ0Meas = isActive(TRK_RES_Z0_MEAS);
 
@@ -194,7 +157,7 @@ CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle&
 
   CP::SystematicSet InDetTrackSmearingTool::affectingSystematics() const
   {
-    return SmearingSystematics;
+    return RecommendedSystematics;
   }
 
   CP::SystematicSet InDetTrackSmearingTool::recommendedSystematics() const

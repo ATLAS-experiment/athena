@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_INDETTRACKSMEARINGTOOL_H
@@ -8,6 +8,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "PATInterfaces/CorrectionTool.h"
 #include "PATInterfaces/SystematicVariation.h"
 
@@ -66,7 +67,7 @@ namespace InDet {
     float GetSmearD0Sigma(const xAOD::TrackParticle&) const;
     float GetSmearZ0Sigma(const xAOD::TrackParticle&) const;
 
-    int m_seed = 0;
+    Gaudi::Property<int> m_seed{this, "Seed", 0};
     std::unique_ptr<TRandom3> m_rnd; //!
 
     // StatusCode initHistogram(TH1*& histogram, std::string rootFileName, std::string histogramName) const;
@@ -76,17 +77,11 @@ namespace InDet {
     // float readHistogram(TH1* histogram, float pt, float eta) const;
     // float readHistograms(std::vector<TH1 *> histogram, float pt, float eta) const;
     // histograms for dead module smearing as a function of p
-    std::unique_ptr<TH1> m_smearD0Dead = nullptr;
-    std::unique_ptr<TH1> m_smearZ0Dead = nullptr;
-
     std::unique_ptr<TH2> m_smearD0 = nullptr;
     std::unique_ptr<TH2> m_smearZ0 = nullptr;
 
     // allow the user to configure which calibration files to use if desired
-    std::string m_calibFileD0Dead;
-    std::string m_calibFileZ0Dead;
-
-    std::string m_calibFileIP_CTIDE;
+    Gaudi::Property<std::string> m_calibFileIP_CTIDE{this, "calibFileIP_CTIDE", ""};
   }; /// class InDetTrackSmearingTool
 
 } /// namespace InDet
