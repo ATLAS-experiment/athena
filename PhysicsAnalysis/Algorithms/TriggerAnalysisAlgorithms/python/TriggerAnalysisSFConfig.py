@@ -51,6 +51,12 @@ def get_input_years(config: ConfigAccumulator) -> list[int]:
         years = [2022]
     elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023):
         years = [2023]
+    elif config.campaign() is Campaign.MC23e or is_data_from(config, 2024):
+        years = [2024]
+    elif config.campaign() is Campaign.MC23g or is_data_from(config, 2025):
+        years = [2025]
+    else:
+        raise ValueError('TriggerAnalysisConfig: unable to deduce data taking year for input file')
 
     return years
 
