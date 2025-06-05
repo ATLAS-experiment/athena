@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AnalysisAlgorithmsConfig.CPBaseRunner import CPBaseRunner
-from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
 import os
 
 class EventLoopCPRunScript(CPBaseRunner):
@@ -19,13 +18,16 @@ class EventLoopCPRunScript(CPBaseRunner):
                                   help='The work directory for the EL job. defaults to "workDir".')
         derivedGroup.add_argument('--no-factory-preload', dest='no_factory_preload', action='store_true', help='Do not preload the component factories for the EL job. The component factories save memory and sidestep some technical issues, so you should not disable them unless you have a good reason to do so.')
         derivedGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
-        derivedGroup.add_argument('--run-perf-stat', dest='run_perf_stat', action='store_true', help='Run xAOD::PerfStats to get input branch access data. This is mostly useful for AMG experts wanting to understand branch access patterns.')
-        self.parser.add_argument('--algorithm-timers', dest='algorithm_timers', action='store_true', help='Enable algorithm timers. This is mostly useful for AMG experts wanting to understand tool performance.')
-        self.parser.add_argument('--algorithm-memory-monitoring', dest='algorithm_memory_monitoring', action='store_true', help='Enable algorithm memory monitoring. This is mostly useful for AMG experts wanting to understand tool memory usage. Note that this is imperfect and may in cases assign memory to the wrong algorithm.')
+        
+        expertGroup = self.parser.add_argument_group('Experts arguments')
+        expertGroup.add_argument('--run-perf-stat', dest='run_perf_stat', action='store_true', help='Run xAOD::PerfStats to get input branch access data. This is mostly useful for AMG experts wanting to understand branch access patterns.')
+        expertGroup.add_argument('--algorithm-timers', dest='algorithm_timers', action='store_true', help='Enable algorithm timers. This is mostly useful for AMG experts wanting to understand tool performance.')
+        expertGroup.add_argument('--algorithm-memory-monitoring', dest='algorithm_memory_monitoring', action='store_true', help='Enable algorithm memory monitoring. This is mostly useful for AMG experts wanting to understand tool memory usage. Note that this is imperfect and may in cases assign memory to the wrong algorithm.')
         return
         
     def makeAlgSequence(self):
         from AnaAlgorithm.AlgSequence import AlgSequence
+        from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
         algSeq = AlgSequence()
         self.logger.info("Configuring algorithms based on YAML file")
         configSeq =  self.config.configure()
@@ -40,7 +42,7 @@ class EventLoopCPRunScript(CPBaseRunner):
     def readSamples(self):
         import ROOT
         self.sampleHandler = ROOT.SH.SampleHandler()
-        sampleFiles = ROOT.SH.SampleLocal(f"{self.args.output_name}")
+        sampleFiles = ROOT.SH.SampleLocal(f"{self.outputName}")
         self.logger.info("Adding files to the sample handler")
         for file in self.inputList:
             sampleFiles.add(file)
@@ -49,37 +51,33 @@ class EventLoopCPRunScript(CPBaseRunner):
     def moveOutputFiles(self):
         from pathlib import Path
         import shutil
-        self.logger.info("Moving the analysis root file and the hist file to the top level, and deleting the work directory.")
+        self.logger.info("Moving the analysis root file and the hist file to the top level.")
         workDir = Path(self.args.work_dir) if self.args.work_dir else Path('workDir')
-        rootfilePath = (workDir / 'data-ANALYSIS' / f'{self.args.output_name}.root').resolve()
-        histfilePath = (workDir / f"hist-{self.args.output_name}.root").resolve()
+        rootfileSymlink = (workDir / 'data-ANALYSIS' / f'{self.outputName}.root')
+        rootfilePath = rootfileSymlink.resolve()
+        histfileSymlink = (workDir / f'hist-{self.outputName}.root')
+        histfilePath = histfileSymlink.resolve()
         currentDir = Path.cwd()
         # move ntuple file if it exists
         if rootfilePath.exists():
-            self.logger.info(f"Moving {rootfilePath} to {currentDir / f'{self.args.output_name}.root'}")
-            shutil.move(str(rootfilePath), str(currentDir / f"{self.args.output_name}.root"))
+            self.logger.info(f"Moving {rootfilePath} to {currentDir / f'{self.outputName}.root'}")
+            rootfileSymlink.unlink()
+            shutil.move(str(rootfilePath), str(currentDir / f"{self.outputName}.root"))
         else:
             self.logger.warning(f"Root file {rootfilePath} does not exist or merging is enabled, skipping move.")
         #move histogram file if it exists    
         if histfilePath.exists():
-            self.logger.info(f"Moving {histfilePath} to {currentDir / f'hist-{self.args.output_name}.root'}")
-            shutil.move(str(histfilePath), str(currentDir / f"hist-{self.args.output_name}.root"))
+            self.logger.info(f"Moving {histfilePath} to {currentDir / f'hist-{self.outputName}.root'}")
+            histfileSymlink.unlink()
+            shutil.move(str(histfilePath), str(currentDir / f"hist-{self.outputName}.root"))
         else:
             self.logger.warning(f"Histogram file {histfilePath} does not exist or merging, skipping move.")
             
+        newHistFile = currentDir / f"hist-{self.outputName}.root"
         # rename merged hist-ntuple to output_name.root
-        self.logger.info(f"renmaing the hist-{self.args.output_name}.root to {self.args.output_name}.root")
-        newHistFile = currentDir / f"hist-{self.args.output_name}.root"
-        if newHistFile.exists():
-            newHistFile.rename(currentDir / f"{self.args.output_name}.root")
-            
-        # delete the work directory
-        self.logger.info(f"Deleting the workDir directory {workDir}")
-        real_path = workDir.resolve()
-        workDir.unlink()
-        if real_path.exists():
-            shutil.rmtree(real_path)
-            
+        if self.args.merge_output_files and newHistFile.exists():
+            self.logger.info(f"renmaing the hist-{self.outputName}.root to {self.outputName}.root")
+            newHistFile.rename(currentDir / f"{self.outputName}.root")
         
     def driverSubmit(self, driver):
         '''
