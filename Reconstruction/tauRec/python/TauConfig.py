@@ -137,6 +137,8 @@ def TauRunnerAlgCfg(flags):
     if flags.Tau.doPanTau:
         import PanTauAlgs.JobOptions_Main_PanTau as pantau
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
+        
+    tools.append(result.popToolsAndMerge(tauTools.TauPi0RecoNNCfg(flags)) )
 
     tools.append(result.popToolsAndMerge(tauTools.TauCombinedTESCfg(flags)) )
     # these tools need pantau info
