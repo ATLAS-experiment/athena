@@ -234,6 +234,9 @@ def initConfigFlags():
                 (25./prevFlags.Beam.BunchSpacing), help='luminosity estimated from pileup')
     acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf, help='source of bunch structure')
 
+    acf.addFlag('Beam.vdMScan.ConfigFile', 'LRAPositioner.root', help='vdM Scan Sim/Reco/BSFit Configuration File')
+    acf.addFlag('Beam.vdMScan.PV.PDF', 'Default', help='vdM Scan Sim/BSFit PV PDF Histogram')
+
     # output
     acf.addFlag('Output.EVNTFileName', '', help='EVNT output file name')
     acf.addFlag('Output.EVNT_TRFileName', '', help='EVNT_TR output file name')

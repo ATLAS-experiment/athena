@@ -49,6 +49,8 @@ def GenEventVertexPositionerCfg(flags, name="GenEventVertexPositioner", **kwargs
         kwargs.setdefault("VertexShifters", [acc.popToolsAndMerge(VertexBeamCondPositionerCfg(flags))])
     elif flags.Sim.VertexSource is VertexSource.LongBeamspotVertexPositioner:
         kwargs.setdefault("VertexShifters", [acc.popToolsAndMerge(LongBeamspotVertexPositionerCfg(flags))])
+    elif flags.Sim.VertexSource is VertexSource.LRAPositioner:
+        kwargs.setdefault("VertexShifters", [acc.popToolsAndMerge(LRAVertexPositionerCfg(flags))])
 
     acc.setPrivateTools(CompFactory.Simulation.GenEventVertexPositioner(name, **kwargs))
     return acc
@@ -71,6 +73,19 @@ def VertexBeamCondPositionerCfg(flags, name="VertexBeamCondPositioner", **kwargs
     acc.setPrivateTools(CompFactory.Simulation.VertexBeamCondPositioner(name, **kwargs))
     return acc
 
+
+def LRAVertexPositionerCfg(flags, name="LRAVertexPositionerCfg", **kwargs):
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
+
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("FileName", flags.Beam.vdMScan.ConfigFile)
+    kwargs.setdefault("HistName", flags.Beam.vdMScan.PV.PDF)
+
+    kwargs.setdefault("RNGService", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+
+    acc.setPrivateTools(CompFactory.Simulation.LRAVertexPositioner(name, **kwargs))
+    return acc
 
 def MatchingBkgVertexPositionerCfg(flags, name="MatchingBkgVertexPositioner", **kwargs):
     """Return a vertex positioner tool that reads a matching vertex from the background input file."""
