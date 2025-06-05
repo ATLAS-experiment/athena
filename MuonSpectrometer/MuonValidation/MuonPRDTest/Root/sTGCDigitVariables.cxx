@@ -44,8 +44,7 @@ namespace MuonPRDTest {
                 rdoEl->surface(Id).localToGlobal(lpos, gpos, gpos);
 
                 m_NSWsTGC_dig_globalPos.push_back(gpos);
-                m_NSWsTGC_dig_localPosX.push_back(lpos.x());
-                m_NSWsTGC_dig_localPosY.push_back(lpos.y());
+                m_NSWsTGC_dig_localPos.push_back(lpos);
                 
                 m_NSWsTGC_dig_channelNumber.push_back(rdoEl->stripNumber(lpos, Id));
                 if(idHelperSvc()->stgcIdHelper().channelType(Id) == sTgcIdHelper::Pad ) {
@@ -59,9 +58,6 @@ namespace MuonPRDTest {
                         m_NSWsTGC_dig_PadglobalCornerPos.push_back(global_corner);
                     }
                 }
-
-                m_NSWsTGC_dig_channelPosX.push_back( lpos.x() );
-                m_NSWsTGC_dig_channelPosY.push_back( lpos.y() );
 
                 m_NSWsTGC_dig_bctag.push_back(digit->bcTag());
                 m_NSWsTGC_dig_time.push_back(digit->time());
