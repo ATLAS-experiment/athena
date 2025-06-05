@@ -470,51 +470,52 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-", **kwa
     
     ################################################################################
     # Track to Truth association and validation
-    from ActsConfig.ActsTruthConfig import ActsTruthParticleHitCountAlgCfg, ActsPixelClusterToTruthAssociationAlgCfg,ActsStripClusterToTruthAssociationAlgCfg
-    result.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
-                                                       name=f"{prefix}PixelClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODTruthLinks",
-                                                       AssociationMapOut=f"{prefix}ITkPixelClustersToTruthParticles",
-                                                       Measurements=kwargs.get('PixelClusterToTruthAssociationAlg.Measurements'))) 
-    
-    result.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
-                                                       name=f"{prefix}StripClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODTruthLinks",
-                                                       AssociationMapOut=f"{prefix}ITkStripClustersToTruthParticles",
-                                                       Measurements=kwargs.get('StripClusterToTruthAssociationAlg.Measurements')))
-    
-    result.merge(ActsTruthParticleHitCountAlgCfg(flags,
-                                              name=f"{prefix}TruthParticleHitCountAlg",
-                                              PixelClustersToTruthAssociationMap=f"{prefix}ITkPixelClustersToTruthParticles",
-                                              StripClustersToTruthAssociationMap=f"{prefix}ITkStripClustersToTruthParticles",
-                                              TruthParticleHitCountsOut=f"{prefix}TruthParticleHitCounts"))
-    
-    from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
-    result.merge(ActsTrackToTruthAssociationAlgCfg(flags,
-                                                name=f"{prefix}TrackToTruthAssociationAlg",
+    if(flags.ITk.doTruth):
+        from ActsConfig.ActsTruthConfig import ActsTruthParticleHitCountAlgCfg, ActsPixelClusterToTruthAssociationAlgCfg,ActsStripClusterToTruthAssociationAlgCfg
+        result.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
+                                                        name=f"{prefix}PixelClusterToTruthAssociationAlg",
+                                                        InputTruthParticleLinks="xAODTruthLinks",
+                                                        AssociationMapOut=f"{prefix}ITkPixelClustersToTruthParticles",
+                                                        Measurements=kwargs.get('PixelClusterToTruthAssociationAlg.Measurements'))) 
+        
+        result.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
+                                                        name=f"{prefix}StripClusterToTruthAssociationAlg",
+                                                        InputTruthParticleLinks="xAODTruthLinks",
+                                                        AssociationMapOut=f"{prefix}ITkStripClustersToTruthParticles",
+                                                        Measurements=kwargs.get('StripClusterToTruthAssociationAlg.Measurements')))
+        
+        result.merge(ActsTruthParticleHitCountAlgCfg(flags,
+                                                name=f"{prefix}TruthParticleHitCountAlg",
                                                 PixelClustersToTruthAssociationMap=f"{prefix}ITkPixelClustersToTruthParticles",
                                                 StripClustersToTruthAssociationMap=f"{prefix}ITkStripClustersToTruthParticles",
-                                                ACTSTracksLocation=acts_tracks,
-                                                AssociationMapOut=f"{acts_tracks}ToTruthParticleAssociation"))
-    
-    result.merge(ActsTrackFindingValidationAlgCfg(flags,
-                                                name=f"{prefix}TrackFindingValidationAlg",
-                                                TrackToTruthAssociationMap=f"{acts_tracks}ToTruthParticleAssociation",
-                                                TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts"
-                                                ))
+                                                TruthParticleHitCountsOut=f"{prefix}TruthParticleHitCounts"))
+        
+        from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
+        result.merge(ActsTrackToTruthAssociationAlgCfg(flags,
+                                                    name=f"{prefix}TrackToTruthAssociationAlg",
+                                                    PixelClustersToTruthAssociationMap=f"{prefix}ITkPixelClustersToTruthParticles",
+                                                    StripClustersToTruthAssociationMap=f"{prefix}ITkStripClustersToTruthParticles",
+                                                    ACTSTracksLocation=acts_tracks,
+                                                    AssociationMapOut=f"{acts_tracks}ToTruthParticleAssociation"))
+        
+        result.merge(ActsTrackFindingValidationAlgCfg(flags,
+                                                    name=f"{prefix}TrackFindingValidationAlg",
+                                                    TrackToTruthAssociationMap=f"{acts_tracks}ToTruthParticleAssociation",
+                                                    TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts"
+                                                    ))
     ################################################################################
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
     result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, name=f"{prefix}TrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation=[acts_tracks],
                                                 TrackParticlesOutKey=f"{prefix}TrackParticles"))
-   
-    from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
-    result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags, name=f"{prefix}TrackParticleTruthDecorationAlg",
-                                                    TrackToTruthAssociationMaps=[f"{acts_tracks}ToTruthParticleAssociation"],
-                                                    TrackParticleContainerName=f"{FinalTracks}TrackParticles",
-                                                    TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts",
-                                                    ComputeTrackRecoEfficiency=True))
+    if(flags.ITk.doTruth):
+        from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
+        result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags, name=f"{prefix}TrackParticleTruthDecorationAlg",
+                                                        TrackToTruthAssociationMaps=[f"{acts_tracks}ToTruthParticleAssociation"],
+                                                        TrackParticleContainerName=f"{FinalTracks}TrackParticles",
+                                                        TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts",
+                                                        ComputeTrackRecoEfficiency=True))
 
 
     if flags.Trigger.FPGATrackSim.writeOfflPRDInfo: 
