@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PtFromRadius.h"
@@ -21,7 +21,7 @@ TrigL2MuonSA::PtFromRadius::PtFromRadius(const std::string& type,
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-void TrigL2MuonSA::PtFromRadius::setMCFlag(const BooleanProperty& use_mcLUT,
+void TrigL2MuonSA::PtFromRadius::setMCFlag(bool use_mcLUT,
                                            const TrigL2MuonSA::PtBarrelLUTSvc* ptBarrelLUTSvc)
 {
   m_use_mcLUT = use_mcLUT;
@@ -34,7 +34,6 @@ void TrigL2MuonSA::PtFromRadius::setMCFlag(const BooleanProperty& use_mcLUT,
 StatusCode TrigL2MuonSA::PtFromRadius::setPt(TrigL2MuonSA::TrackPattern& trackPattern) const
 {
   const double ZERO_LIMIT = 1e-5;
-
   const PtBarrelLUT::LUT&   lut   = (*m_ptBarrelLUT)->lut();
   const PtBarrelLUT::LUTsp& lutSP = (*m_ptBarrelLUT)->lutSP();
 

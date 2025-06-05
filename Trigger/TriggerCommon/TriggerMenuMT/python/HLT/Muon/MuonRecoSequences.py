@@ -597,7 +597,7 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
 
     acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlgInsideOut_"+name+suffix,  MuonCandidateLocation=[candidatesName], TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name+suffix,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons"+suffix,
-                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons"+suffix, CombinedLocation = "InsideOutCBCombinedMuon"+suffix, MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name)))
+                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons"+suffix, CombinedLocation = "InsideOutCBCombinedMuon"+suffix, MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name+suffix)))
 
 
 

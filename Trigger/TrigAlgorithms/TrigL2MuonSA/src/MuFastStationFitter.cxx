@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastStationFitter.h"
 #include "xAODTrigMuon/L2StandAloneMuonAuxContainer.h"
-
 #include <math.h>
-#include <iomanip>
 
 #include "TMath.h"
 
@@ -50,7 +48,7 @@ StatusCode TrigL2MuonSA::MuFastStationFitter::initialize()
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
-StatusCode TrigL2MuonSA::MuFastStationFitter::setMCFlag(const BooleanProperty& use_mcLUT)
+StatusCode TrigL2MuonSA::MuFastStationFitter::setMCFlag(bool use_mcLUT)
 {
   m_use_mcLUT = use_mcLUT;
 
@@ -84,32 +82,27 @@ StatusCode TrigL2MuonSA::MuFastStationFitter::setMCFlag(const BooleanProperty& u
 //--------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::MuFastStationFitter::findSuperPoints(const TrigRoiDescriptor* p_roids,
-                                                              const TrigL2MuonSA::MuonRoad& muonRoad,
+StatusCode TrigL2MuonSA::MuFastStationFitter::findSuperPoints(const TrigL2MuonSA::MuonRoad& muonRoad,
                                                               TrigL2MuonSA::RpcFitResult& rpcFitResult,
                                                               std::vector<TrigL2MuonSA::TrackPattern>& v_trackPatterns) const
 {
 
-  //
-  for (TrigL2MuonSA::TrackPattern& itTrack : v_trackPatterns) { // loop for track candidates
+    //
+    for (TrigL2MuonSA::TrackPattern& itTrack : v_trackPatterns) { // loop for track candidates
 
-    if (rpcFitResult.isSuccess) {
-      //      itTrack->phiMSDir = rpcFitResult.phiDir;
-      itTrack.phiMSDir = (std::abs(std::cos(rpcFitResult.phi)) > ZERO_LIMIT)? std::tan(rpcFitResult.phi): 0;
-    } else {
-      if ( std::abs(muonRoad.extFtfMiddlePhi) > ZERO_LIMIT ) { //inside-out
-	itTrack.phiMSDir = (std::abs(std::cos(muonRoad.extFtfMiddlePhi)) > ZERO_LIMIT)? std::tan(muonRoad.extFtfMiddlePhi): 0;
-      } else {
-	itTrack.phiMSDir = (std::abs(std::cos(p_roids->phi())) > ZERO_LIMIT)? std::tan(p_roids->phi()): 0;
-      }
-      itTrack.isRpcFailure = true;
+        if (!rpcFitResult.isSuccess and std::abs(muonRoad.extFtfMiddlePhi) > ZERO_LIMIT) {   //inside-out
+            itTrack.phiMSDir = (std::abs(std::cos(muonRoad.extFtfMiddlePhi)) > ZERO_LIMIT)? std::tan(muonRoad.extFtfMiddlePhi): 0;
+        }
+        else{
+            itTrack.phiMSDir = (std::abs(std::cos(rpcFitResult.phi)) > ZERO_LIMIT)? std::tan(rpcFitResult.phi): 0;
+        } 
+        itTrack.isRpcFailure = !rpcFitResult.isSuccess;
+
+        ATH_CHECK( superPointFitter(itTrack) );
     }
+    //
 
-    ATH_CHECK( superPointFitter(itTrack) );
-  }
-  //
-
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 // --------------------------------------------------------------------------------
@@ -196,153 +189,102 @@ StatusCode TrigL2MuonSA::MuFastStationFitter::findSuperPoints(const TrigRoiDescr
 
 StatusCode TrigL2MuonSA::MuFastStationFitter::superPointFitter(TrigL2MuonSA::TrackPattern& trackPattern) const
 {
-   int   count;
-   int   FitFlag;
-   float Xor, Yor, sigma, rm=0., phim=0;
-   float Ymid, Xmid, Amid;
+    const unsigned int MAX_STATION = 10; // no BMG(Backup=10)
+    const float SIGMA              = 0.0080;
+    const float DRIFTSPACE_LIMIT   = 16.;
+    const int   MIN_MDT_FOR_FIT    = 3;
 
-   const unsigned int MAX_STATION = 10; // no BMG(Backup=10)
-   const float SIGMA              = 0.0080;
-   const float DRIFTSPACE_LIMIT   = 16.;
-   const int   MIN_MDT_FOR_FIT    = 3;
+    for (unsigned int chamber=0; chamber<MAX_STATION; chamber++) { // loop for station
+        if (chamber==9) continue;//skip BME chamber
 
-   TrigL2MuonSA::MdtHits*    mdtSegment;
-   TrigL2MuonSA::SuperPoint* superPoint;
-   TrigL2MuonSA::PBFitResult pbFitResult;
+        const TrigL2MuonSA::MdtHits& mdtSegment {trackPattern.mdtSegments[chamber]};
+        if (mdtSegment.size()==0) continue;
 
-   for (unsigned int chamber=0; chamber<MAX_STATION; chamber++) { // loop for station
-     if (chamber==9) continue;//skip BME chamber
-     
-     count = 0;
-     Xor = 0.;
-     Yor = 0.;
-     Amid = 0.;
-     Xmid = 0.;
-     Ymid = 0.;
-     
-     mdtSegment = &(trackPattern.mdtSegments[chamber]);
-     superPoint = &(trackPattern.superPoints[chamber]);
-     
-     if (mdtSegment->size()==0) continue;
+        int count {0};
+        float sigma {0.}, phim {0.}, Xor {0.}, Yor {0.}, Ymid {0.}; 
+        TrigL2MuonSA::PBFitResult pbFitResult;
 
-     for (TrigL2MuonSA::MdtHitData& itMdtHit : *mdtSegment) { // loop for MDT hit
-       
-       if (count >= NMEAMX) continue;
-       if (itMdtHit.isOutlier) continue;
-       
-       superPoint->Ndigi++;
-       
-       if (!count) {
-         rm   = itMdtHit.cYmid;
-         Amid = itMdtHit.cAmid;
-         Xmid = itMdtHit.cXmid;
-         Ymid = itMdtHit.cYmid;
-       }
-       if (!Xor) {
-         Xor = itMdtHit.R;
-         Yor = itMdtHit.Z;
-       }
-       
-       phim  = itMdtHit.cPhip;
-       sigma = (std::abs(itMdtHit.DriftSigma) > ZERO_LIMIT)? itMdtHit.DriftSigma: SIGMA;
+        for (const TrigL2MuonSA::MdtHitData& itMdtHit : mdtSegment) { // loop for MDT hit
 
-       int station = 0;
-       if (chamber == 0 || chamber == 3 ) station = 0;
-       if (chamber == 1 || chamber == 4 ) station = 1;
-       if (chamber == 2 || chamber == 5 ) station = 2;
-       if (chamber == 6 ) station = 3;
-       if ( std::abs(itMdtHit.DriftSpace) > ZERO_LIMIT &&
-            std::abs(itMdtHit.DriftSpace) < DRIFTSPACE_LIMIT &&
-            std::abs(itMdtHit.DriftTime) > ZERO_LIMIT ) {
+            if (count >= NMEAMX) continue;
+            if (itMdtHit.isOutlier) continue;
 
-         pbFitResult.XILIN[count] = itMdtHit.R - Xor;
-         pbFitResult.YILIN[count] = itMdtHit.Z - Yor;
-         pbFitResult.IGLIN[count] = 2;
-         pbFitResult.RILIN[count] = (std::abs(itMdtHit.DriftSpace) > ZERO_LIMIT)?
-           itMdtHit.DriftSpace: SetDriftSpace(itMdtHit.DriftTime, itMdtHit.R, itMdtHit.Z, phim, trackPattern.phiMSDir);
-         pbFitResult.WILIN[count] = 1/(sigma*sigma);
-         pbFitResult.JLINE[count] = count;
-         pbFitResult.IDMEA[count] = station*10 + itMdtHit.Layer;
- 
-         pbFitResult.DISTJ[count] = 0.;
-         pbFitResult.RESI[count] = 0.;
- 
-         count++;
-         pbFitResult.NPOI = count;
+            if (!count) {
+                Ymid = itMdtHit.cYmid;
+            }
+            if (!Xor) {
+                Xor = itMdtHit.R;
+                Yor = itMdtHit.Z;
+            }
 
-      } else {
-         superPoint->Ndigi--;
-      }
-       
-     } // end loop for MDT hits
+            phim  = itMdtHit.cPhip;
+            sigma = (std::abs(itMdtHit.DriftSigma) > ZERO_LIMIT)? itMdtHit.DriftSigma: SIGMA;
 
-     ATH_MSG_DEBUG("... MDT hit used in fit #=" << pbFitResult.NPOI);
-     for(int i=0;i<pbFitResult.NPOI;i++) {
-       ATH_MSG_DEBUG("i/XILIN[i]/YILIN[i]/RILIN[i]/WILIN[i] = "
-		     << i << "/" << pbFitResult.XILIN[i] << "/" << pbFitResult.YILIN[i]
-		     << "/" << pbFitResult.RILIN[i] << "/" << pbFitResult.WILIN[i]);
-     }
-     
-     if (count >= MIN_MDT_FOR_FIT) {
+            if ( std::abs(itMdtHit.DriftSpace) > ZERO_LIMIT &&
+                std::abs(itMdtHit.DriftSpace) < DRIFTSPACE_LIMIT &&
+                std::abs(itMdtHit.DriftTime) > ZERO_LIMIT ) {
 
-       FitFlag = Evlfit(1, pbFitResult);
-       ATH_MSG_DEBUG("FitFlag = " << FitFlag);
-       
-       float ac = Amid;
-       float bc = (Ymid - Xor) -ac*(Xmid - Yor);
-       float X = ( (pbFitResult.ALIN*bc)+pbFitResult.BLIN )/( 1-ac*pbFitResult.ALIN );
-       
-       superPoint->Npoint = pbFitResult.NPOI;
-       
-       if (trackPattern.s_address == -1) { // Endcap
+                pbFitResult.XILIN[count] = itMdtHit.R - Xor;
+                pbFitResult.YILIN[count] = itMdtHit.Z - Yor;
+                pbFitResult.RILIN[count] = itMdtHit.DriftSpace;
+                pbFitResult.WILIN[count] = 1/(sigma*sigma);
+                pbFitResult.RESI[count] = 0.;
 
-         if (std::abs(pbFitResult.ALIN) > ZERO_LIMIT) {
-           superPoint->Z = rm;
-           superPoint->R = (rm-Yor)/pbFitResult.ALIN - pbFitResult.BLIN/pbFitResult.ALIN + Xor;
-           superPoint->Alin = 1./pbFitResult.ALIN;
-           superPoint->Blin = -pbFitResult.BLIN/pbFitResult.ALIN;
+                count++;
+            } 
+        } // end loop for MDT hits
+        pbFitResult.NPOI = count;
 
-           if (chamber==0){//barrel inner
-             superPoint->R      = ac*X + bc + Xor;
-             superPoint->Z      = X + Yor;
-             superPoint->Alin   = pbFitResult.ALIN;
-             superPoint->Blin   = pbFitResult.BLIN;
-           }
-         }
- 
-       } else { // Barrel
- 
-         superPoint->R      = ac*X + bc + Xor;
-         superPoint->Z      = X + Yor;
-         superPoint->Alin   = pbFitResult.ALIN;
-         superPoint->Blin   = pbFitResult.BLIN;
-         if ( chamber == 3 ){ //// Endcap Inner
-           superPoint->Z = rm;
-           superPoint->R = (rm-Yor)/pbFitResult.ALIN - pbFitResult.BLIN/pbFitResult.ALIN + Xor;
-           superPoint->Alin = 1./pbFitResult.ALIN;
-           superPoint->Blin = -pbFitResult.BLIN/pbFitResult.ALIN;
-         }
-       }
-       
-       superPoint->Phim   = phim;
-       superPoint->Xor    = Xor;
-       superPoint->Yor    = Yor;
-       superPoint->Chi2   = pbFitResult.CHI2;
-       superPoint->PChi2  = pbFitResult.PCHI2;
-       for(int i=0;i<pbFitResult.NPOI;i++) superPoint->Residual[i] =  pbFitResult.RESI[i];
-       
-     }
-     
-     ATH_MSG_DEBUG("... Superpoint chamber/s_address/count/R/Z/Alin/Blin/Phim/Xor/Yor/Chi2/PChi2="
-		   << chamber << "/" << trackPattern.s_address << "/" << count << "/"
-		   << superPoint->R << "/" << superPoint->Z << "/" << superPoint->Alin << "/"
-		   << superPoint->Blin << "/" << superPoint->Phim << "/" << superPoint->Xor << "/"
-		   << superPoint->Yor << "/" << superPoint->Chi2 << "/" << superPoint->PChi2);
+        ATH_MSG_DEBUG("... MDT hit used in fit #=" << pbFitResult.NPOI);
+        if(msgLevel(MSG::DEBUG)){
+            for(int i=0;i<pbFitResult.NPOI;i++) {
+                ATH_MSG_DEBUG("i/XILIN[i]/YILIN[i]/RILIN[i]/WILIN[i] = "
+                        << i << "/" << pbFitResult.XILIN[i] << "/" << pbFitResult.YILIN[i]
+                        << "/" << pbFitResult.RILIN[i] << "/" << pbFitResult.WILIN[i]);
+            }
+        }
 
-   } // end loop for stations
-   
-   //
-   return StatusCode::SUCCESS;
+        TrigL2MuonSA::SuperPoint& superPoint {trackPattern.superPoints[chamber]};
+        superPoint.Ndigi = pbFitResult.NPOI;
+        if (count >= MIN_MDT_FOR_FIT) {
+
+            Evlfit(pbFitResult);
+
+            superPoint.Npoint = pbFitResult.NPOI;
+
+            if ((trackPattern.s_address == -1 and chamber != 0) or   // Endcap
+                (trackPattern.s_address != -1 and chamber == 3)){   
+
+                if (std::abs(pbFitResult.ALIN) > ZERO_LIMIT) {
+                    superPoint.Z = Ymid;
+                    superPoint.R = (Ymid - Yor - pbFitResult.BLIN)/pbFitResult.ALIN  + Xor;
+                    superPoint.Alin = 1./pbFitResult.ALIN;
+                    superPoint.Blin = -pbFitResult.BLIN/pbFitResult.ALIN;
+                }
+            }
+            else{  // Barrel
+                superPoint.R      = Ymid;
+                superPoint.Z      = pbFitResult.ALIN*(Ymid - Xor) + pbFitResult.BLIN + Yor;
+                superPoint.Alin   = pbFitResult.ALIN;
+                superPoint.Blin   = pbFitResult.BLIN;
+            }
+
+            superPoint.Phim   = phim;
+            superPoint.Xor    = Xor;
+            superPoint.Yor    = Yor;
+            superPoint.Chi2   = pbFitResult.CHI2;
+            superPoint.PChi2  = pbFitResult.PCHI2;
+            for(int i=0;i<pbFitResult.NPOI;i++) superPoint.Residual[i] =  pbFitResult.RESI[i];
+        }
+
+        ATH_MSG_DEBUG("... Superpoint chamber/s_address/count/R/Z/Alin/Blin/Phim/Xor/Yor/Chi2/PChi2="
+            << chamber << "/" << trackPattern.s_address << "/" << count << "/"
+            << superPoint.R << "/" << superPoint.Z << "/" << superPoint.Alin << "/"
+            << superPoint.Blin << "/" << superPoint.Phim << "/" << superPoint.Xor << "/"
+            << superPoint.Yor << "/" << superPoint.Chi2 << "/" << superPoint.PChi2);
+    } // end loop for stations
+
+    return StatusCode::SUCCESS;
 }
 
 // --------------------------------------------------------------------------------
@@ -350,164 +292,146 @@ StatusCode TrigL2MuonSA::MuFastStationFitter::superPointFitter(TrigL2MuonSA::Tra
 StatusCode TrigL2MuonSA::MuFastStationFitter::superPointFitter(TrigL2MuonSA::TrackPattern& trackPattern,
                                                                const TrigL2MuonSA::MuonRoad&    muonRoad) const
 {
-  const unsigned int MAX_STATION = 10;
-  TrigL2MuonSA::MdtHits*    mdtSegment;
-  TrigL2MuonSA::SuperPoint* superPoint;
-  TrigL2MuonSA::PBFitResult pbFitResult;
- 
-  for (unsigned int chamber=0; chamber<MAX_STATION; chamber++) { // loop for station
-    ATH_MSG_DEBUG(" superpoint fit station "<<chamber);
+    constexpr unsigned int MAX_STATION = 10; // no BMG(Backup=10)
+    constexpr float SIGMA              = 0.0080;
+    constexpr float DRIFTSPACE_LIMIT   = 16.;
+    constexpr int   MIN_MDT_FOR_FIT    = 3;
 
-    if(chamber== 1 || chamber == 2 || chamber ==7 || chamber == 9) continue; // only loop for endcap Inner/Middle/Outer/EE/barrel inn
+    for (unsigned int chamber=0; chamber<MAX_STATION; chamber++) { // loop for station
+        ATH_MSG_DEBUG(" superpoint fit station "<<chamber);
+        if(chamber== 1 || chamber == 2 || chamber ==7 || chamber == 9) continue; // only loop for endcap Inner/Middle/Outer/EE/barrel inn
 
-    mdtSegment = &(trackPattern.mdtSegments[chamber]);
-    superPoint = &(trackPattern.superPoints[chamber]);
-    if (mdtSegment->size()==0) continue;
+        TrigL2MuonSA::MdtHits& mdtSegment {trackPattern.mdtSegments[chamber]};
+        if (mdtSegment.size()==0) continue;
+        TrigL2MuonSA::SuperPoint& superPoint {trackPattern.superPoints[chamber]};
+        TrigL2MuonSA::PBFitResult pbFitResult;
 
-    if (chamber==0 || chamber == 6 || chamber==8){
-      int   count=0;
-      int   FitFlag;
-      float Xor   = 0.;
-      float Yor   = 0.;
-      float sigma = 0.;
-      float rm    = 0.;
-      float phim  = 0.;
-      float Ymid  = 0.;
-      float Xmid  = 0.;
-      float Amid  = 0.;
-      const float SIGMA              = 0.0080;
-      const float DRIFTSPACE_LIMIT   = 16.;
-      const int   MIN_MDT_FOR_FIT    = 3;
+        if (chamber==0 || chamber == 6 || chamber==8){
 
-      for (TrigL2MuonSA::MdtHitData& itMdtHit : *mdtSegment) { // loop for MDT hit
-
-       if (count >= NMEAMX) continue;
-       if (itMdtHit.isOutlier) continue;
-
-       superPoint->Ndigi++;
-       if (!count) {
-         rm   = itMdtHit.cYmid;
-         Amid = itMdtHit.cAmid;
-         Xmid = itMdtHit.cXmid;
-         Ymid = itMdtHit.cYmid;
-       }
-       if (!Xor) {
-         Xor = itMdtHit.R;
-         Yor = itMdtHit.Z;
-       }
-       
-       phim  = itMdtHit.cPhip;
-       sigma = (std::abs(itMdtHit.DriftSigma) > ZERO_LIMIT)? itMdtHit.DriftSigma: SIGMA;
-
-       int station = 0;
-       if (chamber == 6 ) station = 3;
-       if (chamber == 0 ) station = 0;
-       if ( std::abs(itMdtHit.DriftSpace) > ZERO_LIMIT &&
-            std::abs(itMdtHit.DriftSpace) < DRIFTSPACE_LIMIT &&
-            std::abs(itMdtHit.DriftTime) > ZERO_LIMIT ) {
-         
-         pbFitResult.XILIN[count] = itMdtHit.R - Xor;
-         pbFitResult.YILIN[count] = itMdtHit.Z - Yor;
-         pbFitResult.IGLIN[count] = 2;
-         pbFitResult.RILIN[count] = (std::abs(itMdtHit.DriftSpace) > ZERO_LIMIT)?
-         	itMdtHit.DriftSpace: SetDriftSpace(itMdtHit.DriftTime, itMdtHit.R, itMdtHit.Z, phim, trackPattern.phiMSDir);
-         pbFitResult.WILIN[count] = 1/(sigma*sigma);
-         pbFitResult.JLINE[count] = count;
-         pbFitResult.IDMEA[count] = station*10 + itMdtHit.Layer;
-         pbFitResult.DISTJ[count] = 0.;
-         pbFitResult.RESI[count] = 0.;
-         count++;
-         pbFitResult.NPOI = count;
-        } else {
-          superPoint->Ndigi--;
-        }
-      } // end loop for MDT hits
-     
-     ATH_MSG_DEBUG("... MDT hit used in fit #=" << pbFitResult.NPOI);
-      for(int i=0;i<pbFitResult.NPOI;i++) {
-        ATH_MSG_DEBUG("i/XILIN[i]/YILIN[i]/RILIN[i]/WILIN[i] = "
-		      << i << "/" << pbFitResult.XILIN[i] << "/" << pbFitResult.YILIN[i]
-		      << "/" << pbFitResult.RILIN[i] << "/" << pbFitResult.WILIN[i]);
-      }
-      if (count >= MIN_MDT_FOR_FIT) {
-        FitFlag = Evlfit(1, pbFitResult);
-        ATH_MSG_DEBUG("FitFlag = " << FitFlag);
-       
-        float ac = Amid;
-        float bc = (Ymid - Xor) -ac*(Xmid - Yor);
-        float X = ( (pbFitResult.ALIN*bc)+pbFitResult.BLIN )/( 1-ac*pbFitResult.ALIN );
-       
-        superPoint->Npoint = pbFitResult.NPOI;
-        if (trackPattern.s_address == -1) { // Endcap
-          if (std::abs(pbFitResult.ALIN) > ZERO_LIMIT) {
-            superPoint->Z = rm;
-            superPoint->R = (rm-Yor)/pbFitResult.ALIN - pbFitResult.BLIN/pbFitResult.ALIN + Xor;
-            superPoint->Alin = 1./pbFitResult.ALIN;
-            superPoint->Blin = -pbFitResult.BLIN/pbFitResult.ALIN;
-            if (chamber==0 || chamber==8){//endcap barrel inner or BEE
-              superPoint->R      = ac*X + bc + Xor;
-              superPoint->Z      = X + Yor;
-              superPoint->Alin   = pbFitResult.ALIN;
-              superPoint->Blin   = pbFitResult.BLIN;
-            }
-           }
-         }
-           superPoint->Phim   = phim;
-           superPoint->Xor    = Xor;
-           superPoint->Yor    = Yor;
-           superPoint->Chi2   = pbFitResult.CHI2;
-           superPoint->PChi2  = pbFitResult.PCHI2;
-           for(int i=0;i<pbFitResult.NPOI;i++) superPoint->Residual[i] =  pbFitResult.RESI[i];
-
-       }
-      ATH_MSG_DEBUG("...Special Superpoint chamber/s_address/count/R/Z/Alin/Blin/Phim/Xor/Yor/Chi2/PChi2="
-		    << chamber << "/" << trackPattern.s_address << "/" << count << "/"
-		    << superPoint->R << "/" << superPoint->Z << "/" << superPoint->Alin << "/"
-		    << superPoint->Blin << "/" << superPoint->Phim << "/" << superPoint->Xor << "/"
-		    << superPoint->Yor << "/" << superPoint->Chi2 << "/" << superPoint->PChi2);
-       continue;
-    }
-
-    double aw = muonRoad.aw[chamber][0];
-    double bw = muonRoad.bw[chamber][0];
-    double nrWidth = 0.;
-    unsigned int  sumN = 0;
-    //chamber=3/4/5 => Endcap Inner/Middle/Outer
-    if(chamber==3) {nrWidth = m_rwidth_Endcapinn_first;}
-    if(chamber==4) {nrWidth = m_rwidth_Endcapmid_first;}
-    if(chamber==5) {nrWidth = m_rwidth_Endcapout_first;}
-
-    for (TrigL2MuonSA::MdtHitData& itMdtHit : *mdtSegment) { // loop for MDT hit
-      if (std::abs(itMdtHit.DriftSpace) < m_mdt_driftspace_downlimit ||
-          std::abs(itMdtHit.DriftSpace) > m_mdt_driftspace_uplimit){
-        itMdtHit.isOutlier = 2;
-        continue;
-      }
+            int count {0};
+            float sigma {0.}, phim {0.}, rm {0}, Xor {0.}, Yor {0.}, Xmid {0.}, Ymid {0.}; 
+            float Amid  = 0.;
             
-      if(itMdtHit.isOutlier > 1)continue;
-      double Z = itMdtHit.Z;
-      double R = itMdtHit.R;
-      double nbw = aw*Z + bw;
-      if (R>(nbw-nrWidth) && R<(nbw+nrWidth)){
-        itMdtHit.isOutlier = 0;
-        sumN++;
-      }  else {
-        itMdtHit.isOutlier = 2;
-         continue;
-      }
-    }
-    if(sumN==0) continue;
-    
-    stationSPFit(mdtSegment, superPoint,pbFitResult, trackPattern.s_address,chamber,aw, trackPattern.phiMSDir);
-    
-  } // end loop for stations
+            for (TrigL2MuonSA::MdtHitData& itMdtHit : mdtSegment) { // loop for MDT hit
+
+                if (count >= NMEAMX) continue;
+                if (itMdtHit.isOutlier) continue;
+
+                superPoint.Ndigi++;
+                if (!count) {
+                    rm   = itMdtHit.cYmid;
+                    Xmid = itMdtHit.cXmid;
+                    Ymid = itMdtHit.cYmid;
+                }
+                if (!Xor) {
+                    Xor = itMdtHit.R;
+                    Yor = itMdtHit.Z;
+                }
+                
+                phim  = itMdtHit.cPhip;
+                sigma = (std::abs(itMdtHit.DriftSigma) > ZERO_LIMIT)? itMdtHit.DriftSigma: SIGMA;
+
+                if ( std::abs(itMdtHit.DriftSpace) > ZERO_LIMIT &&
+                        std::abs(itMdtHit.DriftSpace) < DRIFTSPACE_LIMIT &&
+                        std::abs(itMdtHit.DriftTime) > ZERO_LIMIT ) {
+                    
+                    pbFitResult.XILIN[count] = itMdtHit.R - Xor;
+                    pbFitResult.YILIN[count] = itMdtHit.Z - Yor;
+                    pbFitResult.RILIN[count] = (std::abs(itMdtHit.DriftSpace) > ZERO_LIMIT)?
+                        itMdtHit.DriftSpace: SetDriftSpace(itMdtHit.DriftTime, itMdtHit.R, itMdtHit.Z, phim, trackPattern.phiMSDir);
+                    pbFitResult.WILIN[count] = 1/(sigma*sigma);
+                    pbFitResult.RESI[count] = 0.;
+                    count++;
+                    pbFitResult.NPOI = count;
+                } else {
+                    superPoint.Ndigi--;
+                }
+            } // end loop for MDT hits
+     
+            ATH_MSG_DEBUG("... MDT hit used in fit #=" << pbFitResult.NPOI);
+            if(msgLevel(MSG::DEBUG)){
+                for(int i=0;i<pbFitResult.NPOI;i++) {
+                    ATH_MSG_DEBUG("i/XILIN[i]/YILIN[i]/RILIN[i]/WILIN[i] = "
+                        << i << "/" << pbFitResult.XILIN[i] << "/" << pbFitResult.YILIN[i]
+                        << "/" << pbFitResult.RILIN[i] << "/" << pbFitResult.WILIN[i]);
+                }
+            }
+            if (count >= MIN_MDT_FOR_FIT) {
+                Evlfit(pbFitResult);
+       
+                float ac = Amid;
+                float bc = (Ymid - Xor) -ac*(Xmid - Yor);
+                float X = ( (pbFitResult.ALIN*bc)+pbFitResult.BLIN )/( 1-ac*pbFitResult.ALIN );
+            
+                superPoint.Npoint = pbFitResult.NPOI;
+                if (trackPattern.s_address == -1) { // Endcap
+                    if (std::abs(pbFitResult.ALIN) > ZERO_LIMIT) {
+                            superPoint.Z = rm;
+                            superPoint.R = (rm-Yor)/pbFitResult.ALIN - pbFitResult.BLIN/pbFitResult.ALIN + Xor;
+                            superPoint.Alin = 1./pbFitResult.ALIN;
+                            superPoint.Blin = -pbFitResult.BLIN/pbFitResult.ALIN;
+                        if (chamber==0 || chamber==8){//endcap barrel inner or BEE
+                            superPoint.R      = ac*X + bc + Xor;
+                            superPoint.Z      = X + Yor;
+                            superPoint.Alin   = pbFitResult.ALIN;
+                            superPoint.Blin   = pbFitResult.BLIN;
+                        }
+                    }
+                }
+                superPoint.Phim   = phim;
+                superPoint.Xor    = Xor;
+                superPoint.Yor    = Yor;
+                superPoint.Chi2   = pbFitResult.CHI2;
+                superPoint.PChi2  = pbFitResult.PCHI2;
+                for(int i=0;i<pbFitResult.NPOI;i++) superPoint.Residual[i] =  pbFitResult.RESI[i];
+
+            }
+            ATH_MSG_DEBUG("...Special Superpoint chamber/s_address/count/R/Z/Alin/Blin/Phim/Xor/Yor/Chi2/PChi2="
+                    << chamber << "/" << trackPattern.s_address << "/" << count << "/"
+                    << superPoint.R << "/" << superPoint.Z << "/" << superPoint.Alin << "/"
+                    << superPoint.Blin << "/" << superPoint.Phim << "/" << superPoint.Xor << "/"
+                    << superPoint.Yor << "/" << superPoint.Chi2 << "/" << superPoint.PChi2);
+            continue;
+        }
+        // considering now the other chambers
+        double aw = muonRoad.aw[chamber][0];
+        double bw = muonRoad.bw[chamber][0];
+        double nrWidth = 0.;
+        unsigned int  sumN = 0;
+        //chamber=3/4/5 => Endcap Inner/Middle/Outer
+        if(chamber==3) {nrWidth = m_rwidth_Endcapinn_first;}
+        if(chamber==4) {nrWidth = m_rwidth_Endcapmid_first;}
+        if(chamber==5) {nrWidth = m_rwidth_Endcapout_first;}
+
+        for (TrigL2MuonSA::MdtHitData& itMdtHit : mdtSegment) { // loop for MDT hit
+            if (std::abs(itMdtHit.DriftSpace) < m_mdt_driftspace_downlimit ||
+                std::abs(itMdtHit.DriftSpace) > m_mdt_driftspace_uplimit){
+                itMdtHit.isOutlier = 2;
+                continue;
+            }
+                    
+            if(itMdtHit.isOutlier > 1)continue;
+            double Z = itMdtHit.Z;
+            double R = itMdtHit.R;
+            double nbw = aw*Z + bw;
+            if (R>(nbw-nrWidth) && R<(nbw+nrWidth)){
+                itMdtHit.isOutlier = 0;
+                sumN++;
+            }  else {
+                itMdtHit.isOutlier = 2;
+                continue;
+            }
+        }
+        if(sumN==0) continue;
+        stationSPFit(mdtSegment, superPoint,pbFitResult, trackPattern.s_address,chamber,aw, trackPattern.phiMSDir);
+    } // end loop for stations
   
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
-void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    mdtSegment, 
-                                                     TrigL2MuonSA::SuperPoint* superPoint,
+void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits&    mdtSegment, 
+                                                     TrigL2MuonSA::SuperPoint& superPoint,
                                                      TrigL2MuonSA::PBFitResult& pbFitResult,int s_address, int i_station,double aw, float phiDir) const{
 
   TrigL2MuonSA::MdtHits::iterator itMdtHit;
@@ -551,13 +475,13 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
     sumN[i_st] = 0.;
   }
 
-  for (unsigned int i_hit=0; i_hit<mdtSegment->size(); i_hit++){
+  for (unsigned int i_hit=0; i_hit<mdtSegment.size(); i_hit++){
     //unsigned int i_station =mdtSegment->at(i_hit).Chamber;
 
-    if (mdtSegment->at(i_hit).isOutlier>1) continue;
+    if (mdtSegment.at(i_hit).isOutlier>1) continue;
 
-    double Z = mdtSegment->at(i_hit).Z;
-    double R = mdtSegment->at(i_hit).R;
+    double Z = mdtSegment.at(i_hit).Z;
+    double R = mdtSegment.at(i_hit).R;
 
     sumZ[i_station] = sumZ[i_station] + Z;
     sumR[i_station] = sumR[i_station] + R;
@@ -571,12 +495,12 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
   if (sumN[i_station]==0) return;
 
-  for (unsigned int i_hit=0; i_hit<mdtSegment->size(); i_hit++) {
+  for (unsigned int i_hit=0; i_hit<mdtSegment.size(); i_hit++) {
 
-    if (mdtSegment->at(i_hit).isOutlier>1) continue;
+    if (mdtSegment.at(i_hit).isOutlier>1) continue;
 
-    double Z = mdtSegment->at(i_hit).Z;
-    double R = mdtSegment->at(i_hit).R;
+    double Z = mdtSegment.at(i_hit).Z;
+    double R = mdtSegment.at(i_hit).R;
 
     if (i_station==3) nsWidth = m_rwidth_Endcapinn_second;
     if (i_station==4) nsWidth = m_rwidth_Endcapmid_second;
@@ -585,17 +509,17 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
     double nbw = aw*Z+(avR[i_station]-aw*avZ[i_station]);
 
     if ( R>(nbw-nsWidth) && R<(nbw+nsWidth) ) {
-       mdtSegment->at(i_hit).isOutlier = 0;
+       mdtSegment.at(i_hit).isOutlier = 0;
     } else {
-       mdtSegment->at(i_hit).isOutlier = 2;
+       mdtSegment.at(i_hit).isOutlier = 2;
        continue;
     }
   }
 
-  for (unsigned int i_hit=0; i_hit<mdtSegment->size(); i_hit++) {
+  for (unsigned int i_hit=0; i_hit<mdtSegment.size(); i_hit++) {
 
-    unsigned int i_layer =mdtSegment->at(i_hit).Layer;
-    if (mdtSegment->at(i_hit).isOutlier>1) continue;
+    unsigned int i_layer =mdtSegment.at(i_hit).Layer;
+    if (mdtSegment.at(i_hit).isOutlier>1) continue;
     if (i_layer > i_layer_max) i_layer_max = i_layer;
 
     MdtLayerHits[i_station][i_layer]++;
@@ -698,10 +622,10 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
           unsigned int i_index = MdtLayerHits_index[i_station][i_layer].at(i_hit);
 
-          if (mdtSegment->at(i_index).isOutlier>1) continue;
+          if (mdtSegment.at(i_index).isOutlier>1) continue;
 
-          float nbw3 = (mdtSegment->at(i_index).Z)*(aw) + (avR[i_station]-(aw)*avZ[i_station]) ;
-          float dis_tube = std::abs(std::abs(nbw3-mdtSegment->at(i_index).R)- mdtSegment->at(i_index).DriftSpace);
+          float nbw3 = (mdtSegment.at(i_index).Z)*(aw) + (avR[i_station]-(aw)*avZ[i_station]) ;
+          float dis_tube = std::abs(std::abs(nbw3-mdtSegment.at(i_index).R)- mdtSegment.at(i_index).DriftSpace);
 
           if (dis_tube<tube_1st) {
             tube_2nd  = tube_1st;
@@ -715,13 +639,13 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
         }
 
         if ( layer_1st != 9999 ) {
-          mdtSegment->at(layer_1st).isOutlier = 0;
+          mdtSegment.at(layer_1st).isOutlier = 0;
           tid.push_back(1);
           tindex.push_back(layer_1st);
         }
 
         if ( layer_2nd != 9999 ) {
-          mdtSegment->at(layer_2nd).isOutlier = 1;
+          mdtSegment.at(layer_2nd).isOutlier = 1;
           tid.push_back(1);
           tindex.push_back(layer_2nd);
         }
@@ -775,11 +699,11 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
         if (hitarray.size()==0) continue;
 
-	for (itMdtHit=mdtSegment->begin(); itMdtHit!=mdtSegment->end(); ++itMdtHit) { // loop for MDT hit
+	for (itMdtHit=mdtSegment.begin(); itMdtHit!=mdtSegment.end(); ++itMdtHit) { // loop for MDT hit
 
-          int hit_index = std::distance(mdtSegment->begin(),itMdtHit);
+          int hit_index = std::distance(mdtSegment.begin(),itMdtHit);
 
-          if(mdtSegment->at(hit_index).isOutlier>1) continue;
+          if(mdtSegment.at(hit_index).isOutlier>1) continue;
 
 	  if (count >= NMEAMX) continue;
 
@@ -795,11 +719,10 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
           if (fd==0) continue;
 
-          superPoint->Ndigi++;
+          superPoint.Ndigi++;
 
           if (!count) {
             rm   = itMdtHit->cYmid;
-            Amid = itMdtHit->cAmid;
             Xmid = itMdtHit->cXmid;
             Ymid = itMdtHit->cYmid;
           }
@@ -818,18 +741,9 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
              pbFitResult.XILIN[count] = itMdtHit->R - Xor;
              pbFitResult.YILIN[count] = itMdtHit->Z - Yor;
-             pbFitResult.IGLIN[count] = 2;
              pbFitResult.RILIN[count] = (std::abs(itMdtHit->DriftSpace) > ZERO_LIMIT)?
                itMdtHit->DriftSpace: SetDriftSpace(itMdtHit->DriftTime, itMdtHit->R, itMdtHit->Z, phim, phiDir);//itMdtHit->DriftSpace ;//
              pbFitResult.WILIN[count] = 1/(sigma*sigma);
-             pbFitResult.JLINE[count] = count;
-
-             int i_st = 0;
-             if (i_station==3) i_st = 0;
-             if (i_station==4) i_st = 1;
-             if (i_station==5) i_st = 2;
-             pbFitResult.IDMEA[count] = i_st*10 + itMdtHit->Layer;
-             pbFitResult.DISTJ[count] = 0.;
              pbFitResult.RESI[count] = 0.;
 
              count++;
@@ -838,7 +752,7 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
              sum_Z_used = sum_Z_used + itMdtHit->Z;
              sum_R_used = sum_R_used + itMdtHit->R;
           } else {
-             superPoint->Ndigi--;
+             superPoint.Ndigi--;
           }
         } // end loop for MDT hits
 
@@ -851,10 +765,8 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
         if (count >= MIN_MDT_FOR_FIT) {
           Circles(pbFitResult.NPOI,pbFitResult.XILIN,pbFitResult.YILIN,pbFitResult.RILIN,pbFitResult.WILIN,
-                  pbFitResult.IGLIN,&pbFitResult.ALIN,&pbFitResult.BLIN,pbFitResult.DABLIN,&pbFitResult.CHI2,
-                  &pbFitResult.PCHI2, pbFitResult.SlopeCand, pbFitResult.InterceptCand, pbFitResult.Chi2Cand);
-
-         //FitFlag = Evlfit(1, pbFitResult);
+                  pbFitResult.ALIN,pbFitResult.BLIN,pbFitResult.CHI2,
+                  pbFitResult.PCHI2, pbFitResult.SlopeCand, pbFitResult.InterceptCand, pbFitResult.Chi2Cand);
 
           for (int cand=0; cand<6; cand++) {
 
@@ -880,35 +792,20 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
     if (Line_Chi2.size()==0) continue;
 
-    std::multimap<float, int>chi_map;
-    chi_map.clear();
-    std::vector<float> t_A;
-    std::vector<float> t_B;
-    std::vector<float> t_Chi2;
-    std::vector<float> t_count;
-    std::vector<float> t_Xor;
-    std::vector<float> t_Yor;
-    std::vector<float> t_Amid;
-    std::vector<float> t_Xmid;
-    std::vector<float> t_Ymid;
-    std::vector<float> t_sum_Z;
-    std::vector<float> t_sum_R;
-    std::vector<float> t_rm;
-    std::vector<float> t_phim;
-
-    t_A.clear();
-    t_B.clear();
-    t_Chi2.clear();
-    t_count.clear();
-    t_Xor.clear();
-    t_Yor.clear();
-    t_Amid.clear();
-    t_Xmid.clear();
-    t_Ymid.clear();
-    t_sum_Z.clear();
-    t_sum_R.clear();
-    t_rm.clear();
-    t_phim.clear();
+    std::multimap<float, int>chi_map {};
+    std::vector<float> t_A{};
+    std::vector<float> t_B{};
+    std::vector<float> t_Chi2{};
+    std::vector<float> t_count{};
+    std::vector<float> t_Xor{};
+    std::vector<float> t_Yor{};
+    std::vector<float> t_Amid{};
+    std::vector<float> t_Xmid{};
+    std::vector<float> t_Ymid{};
+    std::vector<float> t_sum_Z{};
+    std::vector<float> t_sum_R{};
+    std::vector<float> t_rm{};
+    std::vector<float> t_phim{};
 
     for (unsigned int ir=0; ir<Line_Chi2.size(); ir++) chi_map.insert(std::make_pair(Line_Chi2.at(ir), ir));
 
@@ -933,7 +830,7 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
       }
     }
 
-    superPoint->Npoint = t_count[0];//pbFitResult.NPOI;
+    superPoint.Npoint = t_count[0];//pbFitResult.NPOI;
     if(i_station==4 && pr==real_layer){
       Maxlayers_Z     = t_sum_Z[0];
       Maxlayers_R     = t_A[0]*t_sum_Z[0]+t_B[0];
@@ -947,25 +844,25 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
     if (s_address == -1) { // Endcap
 
       if (std::abs(t_A[0]) > ZERO_LIMIT ) {
-        superPoint->Z = t_sum_Z[0];
-        superPoint->R = t_A[0]*t_sum_Z[0]+t_B[0];
-        superPoint->Alin =t_A[0];
-        superPoint->Blin =t_B[0];
+        superPoint.Z = t_sum_Z[0];
+        superPoint.R = t_A[0]*t_sum_Z[0]+t_B[0];
+        superPoint.Alin =t_A[0];
+        superPoint.Blin =t_B[0];
       }
 
-      superPoint->Phim   = t_phim[0];
-      superPoint->Xor    = t_Xor[0];
-      superPoint->Yor    = t_Yor[0];
-      superPoint->Chi2   = t_Chi2[0];
-      superPoint->PChi2  = pbFitResult.PCHI2;
+      superPoint.Phim   = t_phim[0];
+      superPoint.Xor    = t_Xor[0];
+      superPoint.Yor    = t_Yor[0];
+      superPoint.Chi2   = t_Chi2[0];
+      superPoint.PChi2  = pbFitResult.PCHI2;
 
-      for (int i=0;i<pbFitResult.NPOI;i++) superPoint->Residual[i] =  pbFitResult.RESI[i];
+      for (int i=0;i<pbFitResult.NPOI;i++) superPoint.Residual[i] =  pbFitResult.RESI[i];
 
       for (int cand=0; cand<6; cand++) {
         if (std::abs(t_A[cand]) > ZERO_LIMIT ) {
-          superPoint->SlopeCand[cand]     = t_A[cand];
-          superPoint->InterceptCand[cand] = t_B[cand];
-          superPoint->Chi2Cand[cand]      = t_Chi2[cand];
+          superPoint.SlopeCand[cand]     = t_A[cand];
+          superPoint.InterceptCand[cand] = t_B[cand];
+          superPoint.Chi2Cand[cand]      = t_Chi2[cand];
         }
       }
     }
@@ -975,15 +872,15 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
     if (real_layer>3) {
       if ((i_station == 3 || i_station == 5) && pr==4 && Chbest > m_endcapmid_mdt_chi2_limit) {
 
-        superPoint->Z =0.;
-        superPoint->R =0.;
-        superPoint->Alin=0.;
-        superPoint->Blin=0.;
+        superPoint.Z =0.;
+        superPoint.R =0.;
+        superPoint.Alin=0.;
+        superPoint.Blin=0.;
 
         for (int cand=0; cand<6; cand++) {
-          superPoint->SlopeCand[cand]     = 0.;
-          superPoint->InterceptCand[cand] = 0.;
-          superPoint->Chi2Cand[cand]      = 0.;
+          superPoint.SlopeCand[cand]     = 0.;
+          superPoint.InterceptCand[cand] = 0.;
+          superPoint.Chi2Cand[cand]      = 0.;
         }
         return;
       }
@@ -992,28 +889,28 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
       ATH_MSG_DEBUG("... Superpoint chamber/s_address/count/R/Z/Alin/Blin/Phim/Xor/Yor/Chi2/PChi2="
 		    << i_station << "/" << s_address << "/" << count << "/"
-		    << superPoint->R << "/" << superPoint->Z << "/" << superPoint->Alin << "/"
-		    << superPoint->Blin << "/" << superPoint->Phim << "/" << superPoint->Xor << "/"
-		    << superPoint->Yor << "/" << superPoint->Chi2 << "/" << superPoint->PChi2);
+		    << superPoint.R << "/" << superPoint.Z << "/" << superPoint.Alin << "/"
+		    << superPoint.Blin << "/" << superPoint.Phim << "/" << superPoint.Xor << "/"
+		    << superPoint.Yor << "/" << superPoint.Chi2 << "/" << superPoint.PChi2);
 
        break;//jump out all cp
     }else{
     	if(i_station==4 && Maxlayers_A.size()>0){
-        superPoint->Npoint = Maxlayers_N;
-        superPoint->Z = Maxlayers_Z;
-        superPoint->R = Maxlayers_R;
-        superPoint->Alin =Maxlayers_A[0];
-        superPoint->Blin =Maxlayers_B[0];
-        superPoint->Phim   = Maxlayers_Phim;
-        superPoint->Xor    = Maxlayers_Xor;
-        superPoint->Yor    = Maxlayers_Yor;
-        superPoint->Chi2   = Maxlayers_Chi2[0];
-        superPoint->PChi2  = Maxlayers_PChi2;
+        superPoint.Npoint = Maxlayers_N;
+        superPoint.Z = Maxlayers_Z;
+        superPoint.R = Maxlayers_R;
+        superPoint.Alin =Maxlayers_A[0];
+        superPoint.Blin =Maxlayers_B[0];
+        superPoint.Phim   = Maxlayers_Phim;
+        superPoint.Xor    = Maxlayers_Xor;
+        superPoint.Yor    = Maxlayers_Yor;
+        superPoint.Chi2   = Maxlayers_Chi2[0];
+        superPoint.PChi2  = Maxlayers_PChi2;
         for (int cand=0; cand<6; cand++) {
           if (std::abs(Maxlayers_A[cand]) > ZERO_LIMIT ) {
-            superPoint->SlopeCand[cand]     = Maxlayers_A[cand];
-            superPoint->InterceptCand[cand] = Maxlayers_B[cand];
-            superPoint->Chi2Cand[cand]      = Maxlayers_Chi2[cand];
+            superPoint.SlopeCand[cand]     = Maxlayers_A[cand];
+            superPoint.InterceptCand[cand] = Maxlayers_B[cand];
+            superPoint.Chi2Cand[cand]      = Maxlayers_Chi2[cand];
           }
         }
       }
@@ -1179,8 +1076,6 @@ double TrigL2MuonSA::MuFastStationFitter::fromAlphaPtToInn(TrigL2MuonSA::TgcFitR
   TrigL2MuonSA::SuperPoint* superPoint;
   float MiddleSlope     = 0;//float MiddleIntercept = 0;
   float OuterSlope      = 0;//float OuterIntercept  = 0;
-  //float MiddleR         = 0; float MiddleZ         = 0;
-  //float OuterR          = 0;float OuterZ          = 0;
 
   for (int i_station=4; i_station<6; i_station++) {
 
@@ -1194,14 +1089,8 @@ double TrigL2MuonSA::MuFastStationFitter::fromAlphaPtToInn(TrigL2MuonSA::TgcFitR
     if ( superPoint->Npoint > 2 && superPoint->R > 0.) {
       if ( i_station==4 ) { 
         MiddleSlope = superPoint->Alin;
-        //MiddleIntercept = superPoint->R - MiddleSlope*superPoint->Z;
-        //MiddleR = superPoint->R;
-        //MiddleZ = superPoint->Z;
       } if ( i_station==5 ) {
         OuterSlope  = superPoint->Alin;
-        //OuterIntercept = superPoint->R - OuterSlope*superPoint->Z;
-        //OuterR = superPoint->R;
-        //OuterZ = superPoint->Z;
       }
     }
   }
@@ -1268,18 +1157,16 @@ void TrigL2MuonSA::MuFastStationFitter::updateInnSP(TrigL2MuonSA::TrackPattern& 
     sumN[i_st] = 0;
   }
 
-  TrigL2MuonSA::MdtHits* mdtSegment;
-  TrigL2MuonSA::SuperPoint* superPoint;
   TrigL2MuonSA::PBFitResult pbFitResult;
   const int i_station = 3;//endcap inner
   int chamberID = i_station;
 
-  mdtSegment = &(trackPattern.mdtSegments[chamberID]);
-  superPoint = &(trackPattern.superPoints[chamberID]);
+  TrigL2MuonSA::MdtHits& mdtSegment {trackPattern.mdtSegments[chamberID]};
+  TrigL2MuonSA::SuperPoint& superPoint {trackPattern.superPoints[chamberID]};
 
-  if (mdtSegment->size()==0) return;
+  if (mdtSegment.size()==0) return;
 
-  for (TrigL2MuonSA::MdtHitData& itMdtHit : *mdtSegment) { // loop for MDT hit
+  for (TrigL2MuonSA::MdtHitData& itMdtHit : mdtSegment) { // loop for MDT hit
     if (std::abs(itMdtHit.DriftSpace) < m_mdt_driftspace_downlimit ||
         std::abs(itMdtHit.DriftSpace) > m_mdt_driftspace_uplimit){
       itMdtHit.isOutlier = 2;
@@ -1308,12 +1195,12 @@ void TrigL2MuonSA::MuFastStationFitter::updateInnSP(TrigL2MuonSA::TrackPattern& 
   float df=1.e25;
 
   for (int cand=0; cand<NCAND; cand++) {
-    float ds=std::abs(superPoint->SlopeCand[cand]-aw);
+    float ds=std::abs(superPoint.SlopeCand[cand]-aw);
     if (ds<df) {
       df=ds;
-      superPoint->Alin = superPoint->SlopeCand[cand];
-      superPoint->Blin = superPoint->InterceptCand[cand];
-      superPoint->Chi2 = superPoint->Chi2Cand[cand];
+      superPoint.Alin = superPoint.SlopeCand[cand];
+      superPoint.Blin = superPoint.InterceptCand[cand];
+      superPoint.Chi2 = superPoint.Chi2Cand[cand];
     }
   }
 
@@ -1412,90 +1299,22 @@ float TrigL2MuonSA::MuFastStationFitter::SetDriftSpace(float tdr, float rad, flo
 
 ==============================================================================*/
 
-int TrigL2MuonSA::MuFastStationFitter::Evlfit(int Ifla, TrigL2MuonSA::PBFitResult& pbFitResult) const
-{
-
-  int i,j,k,Ifit,Ntry,IGcur,Jbad;
-  float Xnor,rlin,Xbad,test;
-  
-  pbFitResult.NDOF = -2;
-  Ntry = 0;
-  Ifit = 0;
-  
-  for(j=0;j<pbFitResult.NPOI;j++) if(pbFitResult.IGLIN[j]>=1) pbFitResult.NDOF++;
-  
-  while(pbFitResult.NDOF>=1) {
-
-    //      printf("pbFitResult.NDOF = %2d\n",pbFitResult.NDOF);
-    Ntry++;
+void TrigL2MuonSA::MuFastStationFitter::Evlfit(TrigL2MuonSA::PBFitResult& pbFitResult) const
+{ 
     Circles(pbFitResult.NPOI,pbFitResult.XILIN,pbFitResult.YILIN,pbFitResult.RILIN,pbFitResult.WILIN,
-            pbFitResult.IGLIN,&pbFitResult.ALIN,&pbFitResult.BLIN,pbFitResult.DABLIN,&pbFitResult.CHI2,
-            &pbFitResult.PCHI2);
+            pbFitResult.ALIN,pbFitResult.BLIN,pbFitResult.CHI2,pbFitResult.PCHI2);
 
-    if(pbFitResult.CHI2<=ZERO_LIMIT) break;
+    if(pbFitResult.CHI2<=ZERO_LIMIT) return;
 
-    Xnor = 1. / std::sqrt(1. + pbFitResult.ALIN * pbFitResult.ALIN);
+    float Xnor = 1. / std::sqrt(1. + pbFitResult.ALIN * pbFitResult.ALIN);
 
-    for(i=0;i<pbFitResult.NPOI;i++) pbFitResult.RESI[i] = 0.;
+    for(int j=0;j<pbFitResult.NPOI;j++) {
 
-    for(j=0;j<pbFitResult.NPOI;j++) {
+        float distj = (pbFitResult.ALIN * pbFitResult.XILIN[j] + pbFitResult.BLIN - pbFitResult.YILIN[j]) * Xnor;
+        float rlin = (distj>=0.) ? pbFitResult.RILIN[j] : -pbFitResult.RILIN[j];
+        pbFitResult.RESI[j] = distj - rlin;
 
-      pbFitResult.DISTJ[j] = (pbFitResult.ALIN * pbFitResult.XILIN[j] + pbFitResult.BLIN - pbFitResult.YILIN[j]) * Xnor;
-      IGcur = std::abs(pbFitResult.IGLIN[j])%100;
-
-      if (IGcur==1) {
-        pbFitResult.RESI[j] = pbFitResult.DISTJ[j];
-      } else if (IGcur==2) {
-        rlin = (pbFitResult.DISTJ[j]>=0.) ? pbFitResult.RILIN[j] : -pbFitResult.RILIN[j];
-        pbFitResult.RESI[j] = pbFitResult.DISTJ[j] - rlin;
-      } else if (IGcur==3) {
-        pbFitResult.RESI[j] = pbFitResult.DISTJ[j] - pbFitResult.RILIN[j];
-      }
     }
-
-    if(pbFitResult.PCHI2>=0.01||Ifla==1) return Ifit;
-     
-    if (pbFitResult.NDOF<=1||Ntry>=6) {
-
-      Ifit  = 1;
-      pbFitResult.NDOF  = 0;
-      pbFitResult.ALIN  = 0.;
-      pbFitResult.BLIN  = 0.;
-      pbFitResult.CHI2  = -1.;
-      pbFitResult.PCHI2 = -.5;
-
-      for (i=0;i<2;i++) {
-        for(k=0;k<2;k++) {
-          pbFitResult.DABLIN[i][k] = 0.;
-        }
-      }
-
-      for(j=0;j<pbFitResult.NPOI;j++) pbFitResult.IGLIN[j] = - std::abs(pbFitResult.IGLIN[j])%100;
-
-      return Ifit;
-    }
-     
-    //    Exclude the worst point       
-    Jbad = 0;
-    Xbad = -1.;
-    for (j=0;j<pbFitResult.NPOI;j++) {
-      if (pbFitResult.IGLIN[j]>=1) {
-        test = pbFitResult.RESI[j] * pbFitResult.RESI[j] * pbFitResult.WILIN[j];
-        if (test>=Xbad) {
-          Xbad = test;
-          Jbad = j;
-        }
-      }
-    }
-     
-    //    Try again
-     
-    pbFitResult.IGLIN[Jbad] = - pbFitResult.IGLIN[Jbad] - 100;
-    pbFitResult.NDOF        = pbFitResult.NDOF - 1;
-     
-  }
-
-  return Ifit;
 }
 
 // --------------------------------------------------------------------------------
@@ -1514,140 +1333,80 @@ int TrigL2MuonSA::MuFastStationFitter::Evlfit(int Ifla, TrigL2MuonSA::PBFitResul
       =======
 
       NMEAS   : number of meas
-      IG(i)   : for each meas, a flag.
-
-      ---- if IG = 1 ---
-      Xi, Yi  : x, y of the points (i=1...NMEAS) (e.g. wire of a mwp)
-      RRi     : meaningless
-
-      ---- if IG = 2 ---
       Xi, Yi  : x, y of the centers (i=1...NMEAS) (i.e. wire of a mdt)
       RRi     : distance line-center (i.e. measured drift distance)
-
-      ---- if IG = 3 ---
-      Xi, Yi  : as above, for IG=2
-      RRi     : as above, but with +ve or -ve sign
- 
-      ---- if IG.le.0 ---> point NOT to be used
-      Xi, Yi  : meaningless
-      RRi     : meaningless
-
       Wi      : weight for the i-th meas (= 1/sigma**2)
 
       Output :
       ========
 
-      A,B,DAB : line coefficients (y = Ax + b) + error matrix (2x2)
+      A,B     : line coefficients (y = Ax + b)
       CHI2    : Chi square = Sum Wi * (RRi - dist) ** 2 (error if .lt.0)
       PCHI2   : P(chisquare,d.o.f.)
-
 ==============================================================================*/
 
-void TrigL2MuonSA::MuFastStationFitter::Circles (int Nmeas,float *XI,float *YI,float *RI,float *WI,int *IG,
-                                                 float *A,float *B,float DAB[2][2],float *Chi2,float *Pchi2) const
+void TrigL2MuonSA::MuFastStationFitter::Circles (const int Nmeas,
+                                                 const std::array<float, NMEAMX>& XI,
+                                                 const std::array<float, NMEAMX>& YI,
+                                                 const std::array<float, NMEAMX>& RI,
+                                                 const std::array<float, NMEAMX>& WI,
+                                                 float& A,float& B, float& Chi2,float& Pchi2) const
 {
-
-  float RRi[NMEAMX],WIlim,CHbest,Abest,Bbest;
-  float A0,B0,SAA,SBB,SAB,Square,Aj,Bj;
-  int i,j,jj,Ntrue,Ngood,Nbest,Ntry,NOgo,Isig,Iflg,Ksign[4];
-  int Ntrue2,Igg[NMEAMX];
-
-//    Find the four "besrit" points (equispaced, wi.gt.1/2*wimax)
-
-  *Chi2 = -1.;
-  if (Nmeas<=2||Nmeas>=NMEAMX+1) return;
-  Ntrue = 0;
-  Ngood = 0;
-  Nbest = 3;
-  WIlim = 0.;
+    if (Nmeas<=2||Nmeas>=NMEAMX+1) return;
     
-  Abest = 0.;
-  Bbest = 0.;
+    //------ First attempt, try with a line through the centers --------
+    float SAA,SBB,SAB;  //SAA,SBB,SAB, not used here
+    Xline(XI,YI,WI,Nmeas,A,B,SAA,SBB,SAB,Chi2);
+
+    //------ Then choose 4 best hits and try all possible combinations (+Ri/-Ri) to identify the best segment candidate
+    const float WIlim = 0.1 * (*std::max_element(WI.begin(), WI.end()));
+    const int Ngood = std::count_if(WI.begin(), WI.end(), [WIlim](const float& w) {
+        return w >= WIlim;
+    });  //we count the good hits
     
-  for(i=0;i<4;i++) Ksign[i] = -1;
-
-  for (j=0;j<Nmeas;j++) {
-    if (IG[j]>=1) {
-      Ntrue++;
-      WIlim = (WIlim>=WI[j])? WIlim : WI[j];
+    std::vector<int> bestIdx{};
+    for (int j=0;j<Nmeas;j++) {    //we save the index of the 3/4 best hits
+        if (WI[j]>=WIlim || Ngood<=3) {    //if we have at least 4 good hits we use them, otherwise we use all
+            if (bestIdx.size() < 4){
+                bestIdx.push_back(j);
+            }
+            else{
+                bestIdx.at(bestIdx.size()-2) = bestIdx.back();
+                bestIdx.back() = j;
+            }
+        }
     }
-  }
+    const int Nbest = bestIdx.size();   // is 3 or 4
 
-  if(Ntrue<=2) return;
+    const int Ntry = (1 << Nbest) - 1;    // all possible combinations (+Ri/-Ri) of the best hits, i.e. Nbest=4 -> Ntry=15.
+    std::array<float,NMEAMX> RRi{};
+    float Abest{0.}, Bbest {0.}, CHbest{1.e25};
+    for (int j=0;j<=Ntry;j++) {   //loop over all combinations E.g. 0010 meas 2-th has -R and the other +R
+        for (int k=0;k<Nbest;k++) {   //loop over best hits
+            const int Isig = (j & (1<<k)) ? 1 : 0;   //is 1 if the k-th hit contributes as -R, otherwise +R
+            RRi[bestIdx[k]] = (Isig==1) ? -RI[bestIdx[k]] : RI[bestIdx[k]];
+        }
+        float Aj = A;
+        float Bj = B;
+        float chi2j = -1;
+        Circfit(Nmeas,XI,YI,RRi,WI,Aj,Bj,chi2j,&bestIdx);
 
-  WIlim = 0.1 * WIlim;
-
-  for(j=0;j<Nmeas;j++) if(IG[j]>=1&&WI[j]>=WIlim) Ngood++;
-      
-  for (j=0;j<Nmeas;j++) {
-    if (IG[j]>=1&&(WI[j]>=WIlim||Ngood<=3)) {
-      if (Ksign[0]==-1) {
-        Ksign[0] = j;
-      } else if (Ksign[1]==-1) {
-        Ksign[1] = j;
-      } else if(Ksign[2]==-1) {
-        Ksign[2] = j;
-      } else if(Ksign[3]==-1) {
-        Ksign[3] = j;
-        Nbest    = 4;
-      } else {
-        Ksign[2] = Ksign[3];
-        Ksign[3] = j;
-      }
-    }
-  }
-
-  //    First attempt, try with a line through the centers
-
-  Xline(XI,YI,WI,IG,Nmeas,&A0,&B0,&SAA,&SBB,&SAB,&Square);
-
-  //    Then try 16 times trough the best four points
-
-  for (i=0;i<NMEAMX;i++) Igg[i] = -1;
-
-  CHbest = 1.e25;
-  Ntry   = (int)floor(pow(2.,Nbest)) - 1;         // 2**4 - 1 = 15
-
-  for (j=0;j<=Ntry;j++) {
-    NOgo = 0;
-    for (jj=1;jj<=Nbest;jj++) {
-      Isig = (j&(int)pow(2.,jj-1))? 1 : 0;
-      //          Isig = ibits(&j,&jj1,&one);            // alternatively 0, 1
-      Iflg = IG[Ksign[jj-1]];
-      Igg[Ksign[jj-1]] = Iflg;
-      RRi[Ksign[jj-1]] = RI[Ksign[jj-1]];
-      if (Iflg==2) {
-        Igg[Ksign[jj-1]] = 3;
-        if (Isig==1) RRi[Ksign[jj-1]] = - RI[Ksign[jj-1]];
-      } else if (Isig==1) {
-        NOgo = 1;
-      }
+        if (chi2j>=0.0&&chi2j<=CHbest) {
+            Abest  = Aj;
+            Bbest  = Bj;
+            CHbest = chi2j;
+        }
     }
 
-    if (NOgo==0) {
-      Aj = A0;
-      Bj = B0;
-      Circfit(Nmeas,XI,YI,RRi,WI,Igg,&Aj,&Bj,DAB,Chi2);
+    //    ... and finally with all the points
+    Chi2 = -1.;
+    A=Abest;
+    B=Bbest;
+    Circfit(Nmeas,XI,YI,RI,WI,A,B,Chi2);
 
-      if (*Chi2>=0.0&&*Chi2<=CHbest) {
-        Abest  = Aj;
-        Bbest  = Bj;
-        CHbest = *Chi2;
-      }
+    if (Chi2>=0.0) {
+        Pchi2 = TMath::Prob(Chi2, Nmeas - 2);
     }
-  }
-  //    ... and finally with all the points
-
-  *A = Abest;
-  *B = Bbest;
-  Circfit(Nmeas,XI,YI,RI,WI,IG,A,B,DAB,Chi2);
-
-  if (*Chi2>=0.0) {
-    Ntrue2 = Ntrue - 2;
-    *Pchi2 = TMath::Prob(*Chi2, Ntrue2);
-  }
-
-  return;
 }
 
 // --------------------------------------------------------------------------------
@@ -1662,59 +1421,51 @@ void TrigL2MuonSA::MuFastStationFitter::Circles (int Nmeas,float *XI,float *YI,f
   
 ==============================================================================*/
 
-void TrigL2MuonSA::MuFastStationFitter::Circfit (int Nmeas,float *XI,float *YI,float *RI,float *WI,int *IG,
-                                                 float *A,float *B,float DAB[2][2],float *Chi2) const
-{
+void TrigL2MuonSA::MuFastStationFitter::Circfit (const int Nmeas,
+                                                 const std::array<float, NMEAMX>& XI,
+                                                 const std::array<float, NMEAMX>& YI,
+                                                 const std::array<float, NMEAMX>& RI,
+                                                 const std::array<float, NMEAMX>& WI,
+                                                 float& A,float& B,float& Chi2, std::vector<int>* idx_vec) const
+{   
+    const bool use_all {!idx_vec};     //if idx_vec=nullptr we use all hits
+    std::vector<int> temp{};
+    if(use_all){
+        temp.resize(Nmeas);
+        std::iota(temp.begin(), temp.end(), 0);   
+        idx_vec = &temp;      //if we use all hits, idx_vec = 0,1,2,..Nmeas-1
+    }
+  
+    std::array<float,NMEAMX> XX{},YY{};
+    int Niter{0};
+    float Test, Toll {.1};
 
-  float XX[NMEAMX],YY[NMEAMX],Test,Toll,Xnor,Aold,Bold,Epsi;
-  float SAA,SAB,SBB,Square;
-  int j,Niter;
+    //    Many iterations ...
+    do {
+        Niter++;
+        float Xnor  = 1. / std::sqrt(1. + A * A);
+        float Aold  = A;
+        float Bold  = B;
 
-  Toll    = .1;
-  Niter   = 0;
-  //      *A      = 0.;
-  //      *B      = 0.;
-  //      SAA     = 0.;
-  //      SAB     = 0.;
-  //      SBB     = 0.;
-  Square  = 0.;
-
-  //    Many iterations ...
-
-  do {
-    Niter++;
-    Xnor  = 1. / std::sqrt(1. + *A * *A);
-    Aold  = *A;
-    Bold  = *B;
-      for(j=0;j<Nmeas;j++) {
-        XX[j] = 0.;
-        YY[j] = 0.;
-        if(IG[j]==1) {
-          XX[j] = XI[j];
-                YY[j] = YI[j];
-            } else if(IG[j]==2) {
-                if(*A * XI[j] + *B - YI[j]>=0.) Epsi = 1.0;    // mod 961017
-                else Epsi = -1.0;
-                XX[j] = XI[j] - Epsi * Xnor * std::abs(RI[j]) * *A;
+        if(use_all){
+            for(const int& j : *idx_vec) {
+                const int Epsi {(A * XI[j] + B - YI[j]>=0.) ? 1 : -1};
+                XX[j] = XI[j] - Epsi * Xnor * std::abs(RI[j]) * A;
                 YY[j] = YI[j] + Epsi * Xnor * std::abs(RI[j]);
-            } else if(IG[j]==3) {
-                XX[j] = XI[j] - Xnor * RI[j] * *A;
+            }
+        } 
+        else {
+            for(const int& j : *idx_vec){
+                XX[j] = XI[j] - Xnor * RI[j] * A;
                 YY[j] = YI[j] + Xnor * RI[j];
             }
         }
-
-        Xline(XX,YY,WI,IG,Nmeas,A,B,&SAA,&SBB,&SAB,&Square);
-        if(Square<=0.) break;
-        Test = ((Aold-*A)*(Aold-*A))/ SAA + ((Bold-*B)*(Bold-*B))/ SBB;
+        float SAA,SAB,SBB;
+        Xline(XX,YY,WI,Nmeas,A,B,SAA,SBB,SAB,Chi2, idx_vec);
+        if(Chi2<=0.) break;
+        Test = ((Aold-A)*(Aold-A))/ SAA + ((Bold-B)*(Bold-B))/ SBB;
 
     } while(Test>=Toll&&Niter<=20);
-
-
-    DAB[0][0] = SAA;
-    DAB[0][1] = SAB;
-    DAB[1][0] = SAB;
-    DAB[1][1] = SBB;
-    *Chi2     = Square;
 }
 
 // --------------------------------------------------------------------------------
@@ -1724,219 +1475,156 @@ void TrigL2MuonSA::MuFastStationFitter::Circfit (int Nmeas,float *XI,float *YI,f
       A simple linear fit : y = A x + B     (see PDG 94, 17.20-25)
 
       W  = weights ( = 1./err**2)
-      IG = flags   (if .le.0, don't use)
 ==============================================================================*/
 
-void TrigL2MuonSA::MuFastStationFitter::Xline (float *X,float *Y,float *W,int *IG,int NP,
-     float *A,float *B,float *SAA,float *SBB,float *SAB,float *Square) const
+void TrigL2MuonSA::MuFastStationFitter::Xline (const std::array<float, NMEAMX>& X,
+                                               const std::array<float, NMEAMX>& Y,
+                                               const std::array<float, NMEAMX>& W,
+                                               const int NP, 
+                                               float& A,float& B,float& SAA,float& SBB,float& SAB,float& Square, std::vector<int>* idx_vec) const
 {
-      
-    int j;
-    float S1,SX,SY,SXX,SXY,SYY,Deter,DY;
+    std::vector<int> temp{};
+    if(!idx_vec){
+        temp.resize(NP);
+        std::iota(temp.begin(), temp.end(), 0);
+        idx_vec = &temp;     //if we use all hits, idx_vec = 0,1,2,..Nmeas-1
+    }
 
-    *Square = -7.;
-    S1      = 0.;
-    SX      = 0.;
-    SY      = 0.;
-    SXX     = 0.;
-    SXY     = 0.;
-    SYY     = 0.;
+    float S1{0.},SX{0.},SY{0.},SXX{0.},SXY{0.},SYY{0.};
   
-    for(j=0;j<NP;j++) {
-        if(IG[j]>=1) {
-            S1  = S1  + W[j];
-            SX  = SX  + W[j] * X[j];
-            SY  = SY  + W[j] * Y[j];
-            SXX = SXX + W[j] * X[j] * X[j];
-            SXY = SXY + W[j] * X[j] * Y[j];
-            SYY = SYY + W[j] * Y[j] * Y[j];
-        }
+    for(const int& j : *idx_vec) {
+        S1  = S1  + W[j];
+        SX  = SX  + W[j] * X[j];
+        SY  = SY  + W[j] * Y[j];
+        SXX = SXX + W[j] * X[j] * X[j];
+        SXY = SXY + W[j] * X[j] * Y[j];
+        SYY = SYY + W[j] * Y[j] * Y[j];
     }
   
-    Deter  = S1 * SXX - SX * SX;
+    float Deter  = S1 * SXX - SX * SX;
 
     if (std::abs(Deter) > ZERO_LIMIT) {
-        *A      = (S1 * SXY - SX * SY)  / Deter;
-        *B      = (SY * SXX - SX * SXY) / Deter;
-        *SAA    =   S1  / Deter;
-        *SBB    =   SXX / Deter;
-        *SAB    = - SX  / Deter;
+        A      = (S1 * SXY - SX * SY)  / Deter;
+        B      = (SY * SXX - SX * SXY) / Deter;    
+        SAA    =   S1  / Deter;
+        SBB    =   SXX / Deter;
+        SAB    = - SX  / Deter;
     }
     else {
-      if(S1 * SXY - SX * SY > 0.) {
-        *A      = 9.e+5;
-      } else {
-        *A      = -9.e+5;
-      }
-        *B      = SY/S1 - SX/S1 * *A;
-        *SAA    =   *A;
-        *SBB    =   *A;
-        *SAB    = - *A;
+        A= (S1 * SXY - SX * SY > 0.) ? 9.e+5 : -9.e+5;
+        B      = SY/S1 - SX/S1 * A;
+        SAA    =   A;
+        SBB    =   A;
+        SAB    = - A;
     }
-    *Square = 0.;
-    for(j=0;j<NP;j++) {
-      if(IG[j]>=1) {
-	DY =(Y[j] - *A * X[j] - *B)/std::sqrt(1 + *A * *A);
-	//printf("Punto n.=%d , DY = %12.6f\n",j,DY);
-	*Square = *Square + W[j] * DY * DY;
-      }
+    Square = 0.;
+    for(const int& j : *idx_vec) {
+        float DY =(Y[j] - A * X[j] - B)/std::sqrt(1 + A * A);
+        Square = Square + W[j] * DY * DY;
     }
 
 }
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
- void TrigL2MuonSA::MuFastStationFitter::Circles (int Nmeas,float *XI,float *YI,float *RI,float *WI,int *IG,
-                                                  float *A,float *B,float DAB[2][2],float *Chi2,float *Pchi2,
-                                                  float *SlopeCand, float *InterceptCand, float *Chi2Cand) const 
+ void TrigL2MuonSA::MuFastStationFitter::Circles (const int Nmeas,
+                                                  const std::array<float, NMEAMX>& XI,
+                                                  const std::array<float, NMEAMX>& YI,
+                                                  const std::array<float, NMEAMX>& RI,
+                                                  const std::array<float, NMEAMX>& WI,
+                                                  float& A,float& B,float& Chi2,float& Pchi2,
+                                                  std::array<float, NCAND>& SlopeCand, 
+                                                  std::array<float, NCAND>& InterceptCand,
+                                                  std::array<float, NCAND>& Chi2Cand) const 
 {
-  float RRi[NMEAMX],WIlim,CHbest,Abest,Bbest;
-  float A0,B0,SAA,SBB,SAB,Square,Aj,Bj;
-  int i,j,jj,Ntrue,Ngood,Nbest,Ntry,NOgo,Isig,Iflg,Ksign[4];
-  int Ntrue2,Igg[NMEAMX];
-
-  std::vector<float> st_chi2;
-  std::vector<float> st_A;
-  std::vector<float> st_B;
-
-  for (int ii=0; ii<NCAND; ii++) {
-    SlopeCand[ii]     = 0.;//99999;
-    InterceptCand[ii] = 0.;//99999;
-    Chi2Cand[ii]      = 0.;
-  }
-
-//    Find the four "besrit" points (equispaced, wi.gt.1/2*wimax)
-
-  *Chi2 = -1.;
-  if (Nmeas<=2||Nmeas>=NMEAMX+1) return;
-  Ntrue = 0;
-  Ngood = 0;
-  Nbest = 3;
-  WIlim = 0.;
-   
-  Abest = 0.;
-  Bbest = 0.;
+    if (Nmeas<=2||Nmeas>=NMEAMX+1) return;
     
-  for (i=0;i<4;i++) Ksign[i] = -1;
+    //------ First attempt, try with a line through the centers --------
+    float A0,B0, SAA,SBB,SAB,Square;  //SAA,SBB,SAB,Square not used here
+    Xline(XI,YI,WI,Nmeas,A0,B0,SAA,SBB,SAB,Square);
 
-  for (j=0;j<Nmeas;j++) {
-    if (IG[j]>=1) {
-       Ntrue++;
-       WIlim = (WIlim>=WI[j])? WIlim : WI[j];
+    //------ Then choose 4 best hits and try all possible combinations (+Ri/-Ri) to identify the best segment candidate
+    const float WIlim = 0.1 * (*std::max_element(WI.begin(), WI.end()));
+    const int Ngood = std::count_if(WI.begin(), WI.end(), [WIlim](const float& w) {
+        return w >= WIlim;
+    });  //we count the good hits
+
+    std::vector<int> bestIdx{};
+    for (int j=0;j<Nmeas;j++) {    //we save the index of the 3/4 best hits
+        if (WI[j]>=WIlim || Ngood<=3) {    //if we have at least 4 good hits we use them, otherwise we use all
+            if (bestIdx.size() < 4){
+                bestIdx.push_back(j);
+            }
+            else{
+                bestIdx.at(bestIdx.size()-2) = bestIdx.back();
+                bestIdx.back() = j;
+            }
+        }
     }
-  }
+    const int Nbest = bestIdx.size();   // is 3 or 4
 
-  if (Ntrue<=2) return;
+    std::vector<float> st_chi2{};
+    std::vector<float> st_A{};
+    std::vector<float> st_B{};
 
-  WIlim = 0.1 * WIlim;
-
-  for(j=0;j<Nmeas;j++) if(IG[j]>=1&&WI[j]>=WIlim) Ngood++;
-      
-  for (j=0;j<Nmeas;j++) {
-    if (IG[j]>=1&&(WI[j]>=WIlim||Ngood<=3)) {
-
-      if (Ksign[0]==-1) {
-        Ksign[0] = j;
-      } else if (Ksign[1]==-1) {
-        Ksign[1] = j;
-      } else if (Ksign[2]==-1) {
-        Ksign[2] = j;
-      } else if(Ksign[3]==-1) {
-        Ksign[3] = j;
-        Nbest    = 4;
-      } else {
-        Ksign[2] = Ksign[3];
-        Ksign[3] = j;
-      }
-    }
-  }
-
-  //    First attempt, try with a line through the centers
-
-  Xline(XI,YI,WI,IG,Nmeas,&A0,&B0,&SAA,&SBB,&SAB,&Square);
-
-//    Then try 16 times trough the best four points
-  st_A.clear(); st_B.clear(); st_chi2.clear();
-
-  for (i=0;i<NMEAMX;i++) Igg[i] = -1;
-
-  CHbest = 1.e25;
-  Ntry   = (int)floor(pow(2.,Nbest)) - 1;         // 2**4 - 1 = 15
-
-  for (j=0;j<=Ntry;j++) {
-
-    NOgo = 0;
-
-    for (jj=1;jj<=Nbest;jj++) {
-      Isig = (j&(int)pow(2.,jj-1))? 1 : 0;
-      //          Isig = ibits(&j,&jj1,&one);            // alternatively 0, 1
-      Iflg = IG[Ksign[jj-1]];
-      Igg[Ksign[jj-1]] = Iflg;
-      RRi[Ksign[jj-1]] = RI[Ksign[jj-1]];
-
-      if (Iflg==2) {
-
-        Igg[Ksign[jj-1]] = 3;
-
-        if (Isig==1) RRi[Ksign[jj-1]] = - RI[Ksign[jj-1]];
-
-      } else if (Isig==1) {
-
-        NOgo = 1;
-
-      }
+    for (int i=0; i<NCAND; i++) {
+        SlopeCand[i]     = 0.;
+        InterceptCand[i] = 0.;
+        Chi2Cand[i]      = 0.;
     }
 
-    if (NOgo==0) {
+    const int Ntry = (1 << Nbest) - 1;    // all possible combinations (+Ri/-Ri) of the best hits, i.e. Nbest=4 -> Ntry=15.
+    std::array<float,NMEAMX> RRi{}; 
+    float CHbest{1.e25}, Abest{0.}, Bbest{0.};
+    Chi2 = -1.;
+    for (int j=0;j<=Ntry;j++) {   //loop over all combinations E.g. 0010 meas 2-th has -R and the other +R
+        for (int k=0;k<Nbest;k++) {   //loop over best hits
+            int Isig = (j & (1<<k)) ? 1 : 0;   ////is 1 if the k-th hit contributes as -R, otherwise +R
+            RRi[bestIdx[k]] = (Isig==1) ? -RI[bestIdx[k]] : RI[bestIdx[k]];
+        }
 
-      Aj = A0;
-      Bj = B0;
-      Circfit(Nmeas,XI,YI,RRi,WI,Igg,&Aj,&Bj,DAB,Chi2);
-      Circfit(Nmeas,XI,YI,RI,WI,IG,&Aj,&Bj,DAB,Chi2);
-      st_A.push_back(Aj); st_B.push_back(Bj); st_chi2.push_back(*Chi2);
+        float Aj = A0;
+        float Bj = B0;
+        Circfit(Nmeas,XI,YI,RRi,WI,Aj,Bj,Chi2,&bestIdx);
+        Circfit(Nmeas,XI,YI,RI,WI,Aj,Bj,Chi2);
+        st_A.push_back(Aj); st_B.push_back(Bj); st_chi2.push_back(Chi2);
 
-      if (*Chi2>=0.0&&*Chi2<=CHbest) {
-        Abest  = Aj;
-        Bbest  = Bj;
-        CHbest = *Chi2;
-      }
+        if (Chi2>=0.0&&Chi2<=CHbest) {
+            Abest  = Aj;
+            Bbest  = Bj;
+            CHbest = Chi2;
+        }
     }
-  }
 
-  std::multimap<float, int>chi_map;
-  chi_map.clear();
-  std::vector<float> t_A;
-  std::vector<float> t_B;
-  std::vector<float> t_chi2;
-  t_A.clear();
-  t_B.clear();
-  t_chi2.clear();
+    std::multimap<float, int>chi_map {};
+    std::vector<float> t_A {};
+    std::vector<float> t_B {};
+    std::vector<float> t_chi2 {};
 
-  for (unsigned int ir=0; ir<st_chi2.size(); ir++) chi_map.insert(std::make_pair(st_chi2.at(ir), ir));
+    for (size_t ir=0; ir<st_chi2.size(); ir++) chi_map.insert(std::make_pair(st_chi2.at(ir), ir));
 
-  for (std::multimap<float, int>::iterator jt = chi_map.begin(); jt != chi_map.end(); ++jt) {
-    t_A.push_back(st_A.at(jt->second));
-    t_B.push_back(st_B.at(jt->second));
-    t_chi2.push_back(st_chi2.at(jt->second));
-  }
+    for (std::multimap<float, int>::iterator jt = chi_map.begin(); jt != chi_map.end(); ++jt) {
+        t_A.push_back(st_A.at(jt->second));
+        t_B.push_back(st_B.at(jt->second));
+        t_chi2.push_back(st_chi2.at(jt->second));
+    }
 
-  for (int nv=0; nv<6; nv++) {
-    SlopeCand[nv]     = t_A[nv];
-    InterceptCand[nv] = t_B[nv];
-    Chi2Cand[nv]      = t_chi2[nv];
-  }
+    for (int nv=0; nv<6; nv++) {
+        SlopeCand[nv]     = t_A[nv];
+        InterceptCand[nv] = t_B[nv];
+        Chi2Cand[nv]      = t_chi2[nv];
+    }
 
-   //    ... and finally with all the points
-  *A = Abest;
-  *B = Bbest;
-  Circfit(Nmeas,XI,YI,RI,WI,IG,A,B,DAB,Chi2);
+    //    ... and finally with all the points
+    A = Abest;
+    B = Bbest;
+    Circfit(Nmeas,XI,YI,RI,WI,A,B,Chi2);
 
-  if (*Chi2>=0.0) {
-    Ntrue2 = Ntrue - 2;
-    *Pchi2 = TMath::Prob(*Chi2, Ntrue2);
-  }
+    if (Chi2>=0.0) {
+        Pchi2 = TMath::Prob(Chi2, Nmeas - 2);
+    }
 
-  return;
+    return;
 }
 
 // --------------------------------------------------------------------------------

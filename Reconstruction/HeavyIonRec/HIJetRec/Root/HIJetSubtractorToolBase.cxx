@@ -7,7 +7,6 @@
 #include <TVector2.h>
 
 HIJetSubtractorToolBase::HIJetSubtractorToolBase(const std::string& myname) : asg::AsgTool(myname),
-									      m_useCells(true),
 									      m_shape(nullptr),
 									      m_index(nullptr),
 									      m_modulator(nullptr)
