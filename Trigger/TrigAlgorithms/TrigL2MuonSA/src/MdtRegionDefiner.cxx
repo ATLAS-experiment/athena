@@ -329,8 +329,10 @@ StatusCode TrigL2MuonSA::MdtRegionDefiner::getMdtRegions(const TrigRoiDescriptor
 void TrigL2MuonSA::MdtRegionDefiner::find_station_sector(const std::string& name, int phi, bool& endcap, 
     int& chamber, int& sector)
 {   
-  endcap = (name[0]=='E' || name[0]=='F' || (name[0]=='B' && name[1]=='E')) ? true : false;
-
+  if(name[0]=='E' || name[0]=='F' || (name[0]=='B' && name[1]=='E'))
+    endcap = true;
+  else 
+    endcap = false;
   int largeSmall=0;
   if(name[2]=='S' || name[2]=='F' || name[2]=='G') largeSmall = 1;//Small
   if (name[1]=='E' && name[2]=='E') largeSmall=1;//BEE
