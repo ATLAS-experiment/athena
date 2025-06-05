@@ -104,8 +104,7 @@ Trk::ElectronMaterialMixtureConvolution::ElectronMaterialMixtureConvolution(
   declareInterface<IMaterialMixtureConvolution>(this);
 }
 
-Trk::ElectronMaterialMixtureConvolution::~ElectronMaterialMixtureConvolution() =
-  default;
+Trk::ElectronMaterialMixtureConvolution::~ElectronMaterialMixtureConvolution() = default;
 
 StatusCode
 Trk::ElectronMaterialMixtureConvolution::initialize()
@@ -124,7 +123,6 @@ Trk::ElectronMaterialMixtureConvolution::initialize()
 /* ==========================================
    Update with full material effects
    ========================================== */
-
 Trk::MultiComponentState
 Trk::ElectronMaterialMixtureConvolution::update(
   std::vector<GsfMaterial::Combined>& caches,
@@ -140,16 +138,13 @@ Trk::ElectronMaterialMixtureConvolution::update(
   if (updatedMergedState.empty()) {
     return {};
   }
-  // Renormalise state
   MultiComponentStateHelpers::renormaliseState(updatedMergedState);
-
   return updatedMergedState;
 }
 
 /* ==========================================
    Update with pre-update material effects
 ========================================== */
-
 Trk::MultiComponentState
 Trk::ElectronMaterialMixtureConvolution::preUpdate(
   std::vector<GsfMaterial::Combined>& caches,
@@ -158,9 +153,6 @@ Trk::ElectronMaterialMixtureConvolution::preUpdate(
   Trk::PropDirection direction,
   Trk::ParticleHypothesis particleHypothesis) const
 {
-  /* -------------------------------------
-     Preliminary checks
-     ------------------------------------- */
   Trk::MultiComponentState updatedMergedState = update(caches,
                                                        multiComponentState,
                                                        layer,
@@ -170,16 +162,13 @@ Trk::ElectronMaterialMixtureConvolution::preUpdate(
   if (updatedMergedState.empty()) {
     return {};
   }
-  // Renormalise state
   MultiComponentStateHelpers::renormaliseState(updatedMergedState);
-
   return updatedMergedState;
 }
 
 /* ==========================================
    Update with post-update material effects
    ========================================== */
-
 Trk::MultiComponentState
 Trk::ElectronMaterialMixtureConvolution::postUpdate(
   std::vector<GsfMaterial::Combined>& caches,
@@ -188,10 +177,6 @@ Trk::ElectronMaterialMixtureConvolution::postUpdate(
   Trk::PropDirection direction,
   Trk::ParticleHypothesis particleHypothesis) const
 {
-
-  /* -------------------------------------
-     Preliminary checks
-     ------------------------------------- */
 
   Trk::MultiComponentState updatedMergedState = update(caches,
                                                        multiComponentState,
@@ -203,9 +188,7 @@ Trk::ElectronMaterialMixtureConvolution::postUpdate(
   if (updatedMergedState.empty()) {
     return {};
   }
-  // Renormalise state
   MultiComponentStateHelpers::renormaliseState(updatedMergedState);
-
   return updatedMergedState;
 }
 
@@ -242,29 +225,26 @@ Trk::ElectronMaterialMixtureConvolution::update(
   caches.resize(inputState.size());
 
   // Fill cache and work out how many final components there should be
-  size_t n(0);
+  size_t numComponents(0);
   for (size_t i(0); i < inputState.size(); ++i) {
     const AmgSymMatrix(5)* measuredCov = inputState[i].params->covariance();
     // If the momentum is too dont apply material effects
     if (inputState[i].params->momentum().mag() <= 250. * Gaudi::Units::MeV) {
       dummyCacheElement(caches[i]);
-      updateCacheElement(
-        caches[i], 0, inputState[i].params->parameters(), measuredCov);
+      updateCacheElement(caches[i], 0, inputState[i].params->parameters(), measuredCov);
       caches[i].weights[0] = inputState[i].weight;
-      n += caches[i].numEntries;
+      numComponents += caches[i].numEntries;
       continue;
     }
-
     // Get the material effects and store them in the cache
     std::pair<const Trk::MaterialProperties*, double> matPropPair =
         getMaterialProperties(inputState[i].params.get(), layer);
 
     if (!matPropPair.first) {
       dummyCacheElement(caches[i]);
-      updateCacheElement(
-        caches[i], 0, inputState[i].params->parameters(), measuredCov);
+      updateCacheElement(caches[i], 0, inputState[i].params->parameters(), measuredCov);
       caches[i].weights[0] = inputState[i].weight;
-      n += caches[i].numEntries;
+      numComponents += caches[i].numEntries;
       continue;
     }
     // Now we can compute/apply actual material effects
@@ -278,8 +258,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
 
     // Apply material effects to input state and store results in cache
     for (size_t j(0); j < caches[i].numEntries; ++j) {
-      updateCacheElement(
-        caches[i], j, inputState[i].params->parameters(), measuredCov);
+      updateCacheElement(caches[i], j, inputState[i].params->parameters(), measuredCov);
       // Adjust q/p of the (delta) Parameters
       // make sure update is good.
       if (!updateP(caches[i].deltaParameters[j][Trk::qOverP],
@@ -296,97 +275,81 @@ Trk::ElectronMaterialMixtureConvolution::update(
         caches[i].weights[j] = std::numeric_limits<float>::min();
       }
     }
-    n += caches[i].numEntries;
+    numComponents += caches[i].numEntries;
   } // End of loop filling the cache
 
   // Fill information for  calculating which components to merge
-  // In addition scan all components for covariance matrices. If one or more
-  // component is missing an error matrix, component reduction is impossible.
+  // In addition scan all components for covariance matrices.
+  // If one component is missing its error matrix,
+  // component reduction is impossible.
   bool componentWithoutMeasurement = false;
 
-  GSFUtils::Component1DArray componentsArray;
-  componentsArray.numComponents = n;
-  std::array<std::pair<size_t, size_t>,
-             GSFConstants::maxComponentsAfterConvolution>
-      indices{};
+  std::vector<std::pair<size_t, size_t>> indices{};
+  indices.resize(numComponents);
+  GSFUtils::Component1DArray componentsArray(numComponents);
 
   size_t k(0);
   for (size_t i(0); i < inputState.size(); ++i) {
     for (size_t j(0); j < caches[i].numEntries; ++j) {
       const AmgSymMatrix(5)* measuredCov = inputState[i].params->covariance();
       // Fill in infomation
-      const double cov =
-        measuredCov ? caches[i].deltaCovariances[j](Trk::qOverP, Trk::qOverP)
-                    : -1.;
+      const double cov = measuredCov ? caches[i].deltaCovariances[j](Trk::qOverP, Trk::qOverP): -1.;
       if (!measuredCov) {
         componentWithoutMeasurement = true;
       }
-
-      componentsArray.components[k].mean =
-        caches[i].deltaParameters[j][Trk::qOverP];
-      componentsArray.components[k].cov = cov;
-      componentsArray.components[k].invCov = cov > 0 ? 1. / cov : 1e10;
-      componentsArray.components[k].weight = caches[i].weights[j];
+      componentsArray[k].mean = caches[i].deltaParameters[j][Trk::qOverP];
+      componentsArray[k].cov = cov;
+      componentsArray[k].invCov = cov > 0 ? 1. / cov : 1e10;
+      componentsArray[k].weight = caches[i].weights[j];
       indices[k] = { i, j };
       ++k;
     }
   }
-
   // fallback if we have a component without measurement
   if (componentWithoutMeasurement) {
     auto* result = std::max_element(
-      componentsArray.components.data(),
-      componentsArray.components.data() + componentsArray.numComponents,
-      [](const auto& a, const auto& b) { return a.weight < b.weight; });
-    auto index = std::distance(componentsArray.components.data(), result);
+        componentsArray.begin(), componentsArray.end(),
+        [](const auto& a, const auto& b) { return a.weight < b.weight; });
+    auto index = std::distance(componentsArray.begin(), result);
 
     // Build the first TP
     const size_t stateIndex = indices[index].first;
     const size_t materialIndex = indices[index].second;
 
-    AmgVector(5)& updatedStateVector =
-      caches[stateIndex].deltaParameters[materialIndex];
-    const AmgSymMatrix(5)* measuredCov =
-      inputState[stateIndex].params->covariance();
+    AmgVector(5)& updatedStateVector = caches[stateIndex].deltaParameters[materialIndex];
+    const AmgSymMatrix(5)* measuredCov = inputState[stateIndex].params->covariance();
     std::optional<AmgSymMatrix(5)> updatedCovariance = std::nullopt;
-    if (measuredCov &&
-        caches[stateIndex].deltaCovariances.size() > materialIndex) {
-      updatedCovariance =
-        AmgSymMatrix(5)(caches[stateIndex].deltaCovariances[materialIndex]);
+    if (measuredCov && caches[stateIndex].deltaCovariances.size() > materialIndex) {
+      updatedCovariance = AmgSymMatrix(5)(caches[stateIndex].deltaCovariances[materialIndex]);
     }
     std::unique_ptr<Trk::TrackParameters> updatedTrackParameters =
-      inputState[stateIndex]
-        .params->associatedSurface()
-        .createUniqueTrackParameters(updatedStateVector[Trk::loc1],
-                                     updatedStateVector[Trk::loc2],
-                                     updatedStateVector[Trk::phi],
-                                     updatedStateVector[Trk::theta],
-                                     updatedStateVector[Trk::qOverP],
-                                     std::move(updatedCovariance));
+        inputState[stateIndex]
+            .params->associatedSurface()
+            .createUniqueTrackParameters(
+                updatedStateVector[Trk::loc1], updatedStateVector[Trk::loc2],
+                updatedStateVector[Trk::phi], updatedStateVector[Trk::theta],
+                updatedStateVector[Trk::qOverP], std::move(updatedCovariance));
 
-    Trk::ComponentParameters dummyCompParams = {std::move(updatedTrackParameters),
-                                             1.};
+    Trk::ComponentParameters dummyCompParams = {std::move(updatedTrackParameters), 1.};
     Trk::MultiComponentState returnMultiState;
     returnMultiState.push_back(std::move(dummyCompParams));
     return returnMultiState;
   }
 
-  // Gather the merges we need
-  GSFUtils::MergeArray KL;
-  if (n > m_maximumNumberOfComponents) {
-    KL = findMerges(componentsArray, m_maximumNumberOfComponents);
+  //Gather the merges we need
+  GSFUtils::MergeArray merges;
+  if (numComponents > m_maximumNumberOfComponents) {
+    merges = findMerges(std::move(componentsArray), m_maximumNumberOfComponents);
   }
-
+  std::vector<char> isMerged(numComponents,0);
   // Merge components "From" to components "To"
+  const int returnedMerges = merges.size();
   MultiComponentStateAssembler::Cache assemblerCache;
-  std::array<bool, GSFConstants::maxComponentsAfterConvolution> isMerged = {};
-  const int returnedMerges = KL.numMerges;
-
   for (int i = 0; i < returnedMerges; ++i) {
-    const int8_t mini = KL.merges[i].To;
-    const int8_t minj = KL.merges[i].From;
+    const int mini = merges[i].To;
+    const int minj = merges[i].From;
     if (isMerged[minj]) {
-      ATH_MSG_WARNING("Component is already merged " << static_cast<int>(minj));
+      ATH_MSG_WARNING("Component is already merged " << minj);
       continue;
     }
     // Get the first TP
@@ -394,24 +357,19 @@ Trk::ElectronMaterialMixtureConvolution::update(
     const size_t materialIndex = indices[mini].second;
     // Copy weight and first parameters as they are needed later on
     // for updating the covariance
-    const AmgVector(5) firstParameters =
-      caches[stateIndex].deltaParameters[materialIndex];
+    const AmgVector(5) firstParameters = caches[stateIndex].deltaParameters[materialIndex];
     const double firstWeight = caches[stateIndex].weights[materialIndex];
-
     // Get the second TP
     const size_t stateIndex2 = indices[minj].first;
     const size_t materialIndex2 = indices[minj].second;
-
-    // Some values for sanity checks
-    isMerged[minj] = true;
-
+    // Set as merged
+    isMerged[minj] = 1;
     // Update first parameters and weight
     Trk::MultiComponentStateCombiner::combineParametersWithWeight(
       caches[stateIndex].deltaParameters[materialIndex],
       caches[stateIndex].weights[materialIndex],
       caches[stateIndex2].deltaParameters[materialIndex2],
       caches[stateIndex2].weights[materialIndex2]);
-
     // Update covariance
     Trk::MultiComponentStateCombiner::combineCovWithWeight(
       firstParameters,
@@ -420,25 +378,21 @@ Trk::ElectronMaterialMixtureConvolution::update(
       caches[stateIndex2].deltaParameters[materialIndex2],
       caches[stateIndex2].deltaCovariances[materialIndex2],
       caches[stateIndex2].weights[materialIndex2]);
-
     // Reset 2nd parameters values just for clarity
     caches[stateIndex2].deltaParameters[materialIndex2].setZero();
     caches[stateIndex2].deltaCovariances[materialIndex2].setZero();
   }
 
   // Loop over remaining unmerged components
-  for (size_t i(0); i < n; ++i) {
+  for (size_t i(0); i < numComponents; ++i) {
     if (isMerged[i]) {
       continue;
     }
-
     // Build the TP
     const size_t stateIndex = indices[i].first;
     const size_t materialIndex = indices[i].second;
-    AmgVector(5)& stateVector =
-      caches[stateIndex].deltaParameters[materialIndex];
-    AmgSymMatrix(5)& measuredCov =
-      caches[stateIndex].deltaCovariances[materialIndex];
+    AmgVector(5)& stateVector = caches[stateIndex].deltaParameters[materialIndex];
+    AmgSymMatrix(5)& measuredCov = caches[stateIndex].deltaCovariances[materialIndex];
 
     std::unique_ptr<Trk::TrackParameters> updatedTrackParameters =
       inputState[stateIndex]
@@ -452,19 +406,18 @@ Trk::ElectronMaterialMixtureConvolution::update(
 
     const double updatedWeight = caches[stateIndex].weights[materialIndex];
 
-    assemblerCache.multiComponentState.push_back({
-      std::move(updatedTrackParameters), updatedWeight});
+    assemblerCache.multiComponentState.push_back({std::move(updatedTrackParameters), updatedWeight});
     assemblerCache.validWeightSum += updatedWeight;
   }
 
   // Check all weights
-  Trk::MultiComponentState mergedState =
-    MultiComponentStateAssembler::assembledState(std::move(assemblerCache));
+  Trk::MultiComponentState mergedState = MultiComponentStateAssembler::assembledState(std::move(assemblerCache));
 
-  if (mergedState.size() > m_maximumNumberOfComponents)
+  if (mergedState.size() > m_maximumNumberOfComponents) {
     ATH_MSG_ERROR("Merging failed, target size: " << m_maximumNumberOfComponents
                                                   << " final size: "
                                                   << mergedState.size());
+  }
   return mergedState;
 }
 

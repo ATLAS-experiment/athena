@@ -28,6 +28,7 @@ struct EnergyLoss
     double deltaQOvePCov = 0;
   };
   std::array<element, GSFConstants::maxNumberofMatComponents> elements = {};
+  //We need to keep track of the actual elements in use
   int numElements = 0;
 };
 
@@ -48,13 +49,11 @@ struct Combined
 {
   std::array<double, GSFConstants::maxNumberofMatComponents> weights = {};
   std::array<double, GSFConstants::maxNumberofMatComponents> deltaPs = {};
-  alignas(GSFConstants::alignment) std::array<
-    AmgVector(5),
+  alignas(GSFConstants::alignment) std::array< AmgVector(5),
     GSFConstants::maxNumberofMatComponents> deltaParameters = {};
-  alignas(GSFConstants::alignment) std::array<
-    AmgSymMatrix(5),
+  alignas(GSFConstants::alignment) std::array<AmgSymMatrix(5),
     GSFConstants::maxNumberofMatComponents> deltaCovariances = {};
-
+  //We need to keep track of the actual elements in use
   size_t numEntries = 0;
 
 };

@@ -93,23 +93,18 @@ correctWeights(BH::MixtureParameters& mixture, const int numberOfComponents)
 
 BH::MixtureParameters
 getTransformedMixtureParameters(
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>&
-    polynomialWeights,
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>&
-    polynomialMeans,
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>&
-    polynomialVariances,
+  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialWeights,
+  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialMeans,
+  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialVariances,
   const double pathlengthInX0,
   const int numberOfComponents)
 {
   BH::MixtureParameters mixture{};
+  //loop over actual components
   for (int i = 0; i < numberOfComponents; ++i) {
-    const double updatedWeight =
-      hornerEvaluate(polynomialWeights[i], pathlengthInX0);
-    const double updatedMean =
-      hornerEvaluate(polynomialMeans[i], pathlengthInX0);
-    const double updatedVariance =
-      hornerEvaluate(polynomialVariances[i], pathlengthInX0);
+    const double updatedWeight = hornerEvaluate(polynomialWeights[i], pathlengthInX0);
+    const double updatedMean = hornerEvaluate(polynomialMeans[i], pathlengthInX0);
+    const double updatedVariance = hornerEvaluate(polynomialVariances[i], pathlengthInX0);
     mixture[i] = { logisticFunction(updatedWeight),
                    logisticFunction(updatedMean),
                    std::exp(updatedVariance) };
@@ -119,23 +114,18 @@ getTransformedMixtureParameters(
 
 BH::MixtureParameters
 getMixtureParameters(
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>&
-    polynomialWeights,
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>&
-    polynomialMeans,
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>&
-    polynomialVariances,
+  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialWeights,
+  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialMeans,
+  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialVariances,
   const double pathlengthInX0,
   const int numberOfComponents)
 {
   BH::MixtureParameters mixture{};
+  //loop over actual components
   for (int i = 0; i < numberOfComponents; ++i) {
-    const double updatedWeight =
-      hornerEvaluate(polynomialWeights[i], pathlengthInX0);
-    const double updatedMean =
-      hornerEvaluate(polynomialMeans[i], pathlengthInX0);
-    const double updatedVariance =
-      hornerEvaluate(polynomialVariances[i], pathlengthInX0);
+    const double updatedWeight = hornerEvaluate(polynomialWeights[i], pathlengthInX0);
+    const double updatedMean = hornerEvaluate(polynomialMeans[i], pathlengthInX0);
+    const double updatedVariance = hornerEvaluate(polynomialVariances[i], pathlengthInX0);
     mixture[i] = { updatedWeight,
                    updatedMean,
                    updatedVariance * updatedVariance };
@@ -497,8 +487,7 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
     else {
       // For backwards propagation
       deltaP = momentum * (1. / mixture[componentIndex].mean - 1.);
-      varianceInverseMomentum =
-        mixture[componentIndex].variance / (momentum * momentum);
+      varianceInverseMomentum = mixture[componentIndex].variance / (momentum * momentum);
     } // end backwards propagation if clause
 
     // set in the cache and increase the elements

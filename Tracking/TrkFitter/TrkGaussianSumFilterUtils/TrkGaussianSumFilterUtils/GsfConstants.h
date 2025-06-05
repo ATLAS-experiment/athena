@@ -9,7 +9,7 @@
  */
 #ifndef GSFCONSTANTS_H
 #define GSFCONSTANTS_H
-
+#include "TrkGaussianSumFilterUtils/GSFFindIndexOfMinimum.h"
 #include <cstddef>
 #include <cstdint>
 namespace GSFConstants {
@@ -20,28 +20,22 @@ namespace GSFConstants {
  * "Track Fitting with non-Gaussan noise" Fruhwirth
  *
  * The state is described by N Gaussian components
+ *
  * The Beth Heitler Material effect are also described
- * by M components
- * Which futher can involve polynomial parametetrization
+ * by M components.
+ *
+ * The can involve polynomial parametetrization
  * with C coeffiencts.
  *
- * Each step we have a N x M convolution
- * And then a reduction back to N
+ * The number of coefficients
+ * fixed as all the parametrization have the same
+ * number. And they are checked during configuration.
  *
- * The max numbers for N , M  should be enforced in configuration.
- * As is an error to configure for more.
+ * The max number of Material Components
+ * and maxNumberOfStateComponents are
+ * more constraint by "reason".
  *
- * This lead to a max allowed NXM after convolution.
- * Trying to somehow  by pass that is a configuration
- * error (GSF code throws an exception).
- *
- * Furthermore, the  number of coefficients is also
- * fixed and checked during configuration.
- *
- * So here is a list of these constants all in one
- * place.
  */
-
 /// Maximum number of Gaussian components for the
 /// state description.
 constexpr int8_t maxNumberofStateComponents = 12;
@@ -54,17 +48,9 @@ constexpr int8_t maxNumberofMatComponents = 6;
 constexpr int8_t polynomialCoefficients = 6;
 
 /**
- * The maximum size State x Bethe-Heitler components
- * The typical number we use is the max 6x12 = 72 i.e as
- * we try to have the maximum practical precision for the GSF.
- */
-constexpr int8_t maxComponentsAfterConvolution =
-  maxNumberofMatComponents * maxNumberofStateComponents;
-
-/**
  * @brief Alignment used  for SIMD operations
  * internally to GSF.
  */
-constexpr size_t alignment = 32;
+constexpr size_t alignment = vAlgs::alignmentForArray<256>();
 }
 #endif
