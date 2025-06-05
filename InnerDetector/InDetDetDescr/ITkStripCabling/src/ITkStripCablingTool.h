@@ -43,7 +43,7 @@ class ITkStripCablingTool: public extends<AthAlgTool, IITkStripCablingTool> {
 
   //@name Tool methods, reimplemented
   //@{
-  ITkStripCablingTool(const std::string& type, const std::string& name, const IInterface* parent);
+  using base_class::base_class;
   virtual ~ITkStripCablingTool() = default;
   virtual StatusCode initialize() override;
   //@}
@@ -67,9 +67,10 @@ class ITkStripCablingTool: public extends<AthAlgTool, IITkStripCablingTool> {
 
  private:
   SG::ReadCondHandleKey<ITkStripCablingData> m_data{this, "ITkStripCablingData", "ITkStripCablingData", "ITkStripCablingData created by ITkStripCablingCondAlgFromCoraCool"};
-  StringProperty m_cablingDataSource; //!< the name of the data source
+  StringProperty m_cablingDataSource{this, "DataSource", "", "the name of the data source"};
+  bool m_usingDatabase{true};
+
   const SCT_ID* m_idHelper{nullptr}; //!< helper for offlineId/hash conversions
-  BooleanProperty m_usingDatabase{true};
 
   const ITkStripCablingData* getData(const EventContext& ctx) const;
 };
