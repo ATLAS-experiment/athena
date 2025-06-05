@@ -12,7 +12,6 @@
 #include "ActsGeometry/ActsMaterialMapping.h"
 #include "ActsGeometry/ActsMaterialStepConverterTool.h"
 #include "ActsGeometry/ActsMaterialTrackWriterSvc.h"
-#include "ActsGeometry/ActsMSTrackingVolumeBuilder.h"
 #include "ActsGeometry/ActsObjWriterTool.h"
 #include "ActsGeometry/ActsPropStepRootWriterSvc.h"
 #include "ActsGeometry/ActsSurfaceMappingTool.h"
@@ -34,7 +33,6 @@ DECLARE_COMPONENT(ActsExtrapolationTool)
 DECLARE_COMPONENT(ActsMaterialMapping)
 DECLARE_COMPONENT(ActsSurfaceMappingTool)
 DECLARE_COMPONENT(ActsVolumeMappingTool)
-DECLARE_COMPONENT(ActsMSTrackingVolumeBuilder)
 DECLARE_COMPONENT(ActsObjWriterTool)
 // DECLARE_COMPONENT( ActsExCellWriterSvc )
 DECLARE_COMPONENT(ActsMaterialTrackWriterSvc)

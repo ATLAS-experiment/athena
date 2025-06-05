@@ -76,8 +76,11 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
         ATH_MSG_FATAL("Failed to interpret " << m_subDetNoAlignProp << " as ActsDetectorElements");
         return StatusCode::FAILURE;
     }
-}
+  }
+  ATH_CHECK(m_caloVolumeBuilder.retrieve(EnableTool{!m_caloVolumeBuilder.empty()}));
+  ATH_CHECK(m_msVolumeBuilder.retrieve(EnableTool{!m_msVolumeBuilder.empty()}));
 
+ 
   // FIXME: ActsCaloTrackingVolumeBuilder holds ReadHandle to
   // CaloDetDescrManager. Hopefully this service is never called before that
   // object is available.
@@ -403,14 +406,14 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     }
 
     // Calo
-    if (buildSubdet.count("Calo") > 0) {
+    if (m_caloVolumeBuilder.isEnabled()) {
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             return m_caloVolumeBuilder->trackingVolume(gctx, inner, nullptr);
           });
     }
 
-    if (buildSubdet.count("Muon")){
+    if (m_msVolumeBuilder.isEnabled()){
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             return m_msVolumeBuilder->trackingVolume(gctx, inner, nullptr);

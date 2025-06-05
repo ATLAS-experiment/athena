@@ -134,11 +134,9 @@ private:
   Gaudi::Property<size_t> m_consistencyCheckPoints{this, "ConsistencyCheckPoints",
     1000, "number of random points for consistency check"};
 
-  ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, 
-      "CaloVolumeBuilder", "", "CaloVolumeBuilder"};
+  ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, "CaloVolumeBuilder", ""};
 
-  ToolHandle<IActsTrackingVolumeBuilder> m_msVolumeBuilder{this, 
-      "MSVolumeBuilder", "", "MSVolumeBuilder"};
+  ToolHandle<IActsTrackingVolumeBuilder> m_msVolumeBuilder{this, "MSVolumeBuilder", ""};
     /// Define the subdetectors for which the tracking geometry does not expect a valid alignment store
   Gaudi::Property<std::vector<unsigned int>> m_subDetNoAlignProp{this, "NotAlignDetectors", {}};
   std::set<ActsTrk::DetectorType> m_subDetNoAlign{};

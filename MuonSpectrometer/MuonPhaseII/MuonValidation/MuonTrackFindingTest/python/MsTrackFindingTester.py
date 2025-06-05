@@ -57,6 +57,9 @@ if __name__=="__main__":
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    cfg.merge(ActsTrackingGeometrySvcCfg(flags))
+
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
     cfg.merge(MSTrackFinderAlgCfg(flags,
                                   VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
