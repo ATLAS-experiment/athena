@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAURECTOOLS_TAUPi0RecoNN_H
-#define TAURECTOOLS_TAUPi0RecoNN_H
+#ifndef TAURECTOOLS_TauNeutralFourVecNNRegression_H
+#define TAURECTOOLS_TauNeutralFourVecNNRegression_H
 
 // base class include(s)
 #include "tauRecTools/TauRecToolBase.h"
@@ -29,13 +29,13 @@
  *
  */
 
-class TauPi0RecoNN : public TauRecToolBase
+class TauNeutralFourVecNNRegression : public TauRecToolBase
 {
 public:
-  ASG_TOOL_CLASS2(TauPi0RecoNN, TauRecToolBase, ITauToolBase)
+  ASG_TOOL_CLASS2(TauNeutralFourVecNNRegression, TauRecToolBase, ITauToolBase)
 
-  explicit TauPi0RecoNN(const std::string &name = "TauPi0RecoNN");
-  virtual ~TauPi0RecoNN();
+  explicit TauNeutralFourVecNNRegression(const std::string &name = "TauNeutralFourVecNNRegression");
+  virtual ~TauNeutralFourVecNNRegression();
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(xAOD::TauJet &xTau) const override;
@@ -68,4 +68,4 @@ private:
   std::unique_ptr<const lwt::LightweightGraph> m_lwtGraph_1pXn; //!
   std::unique_ptr<const lwt::LightweightGraph> m_lwtGraph_3pXn; //!
 };
-#endif // TAURECTOOLS_TauPi0RecoNN_H
+#endif // TAURECTOOLS_TauNeutralFourVecNNRegression_H

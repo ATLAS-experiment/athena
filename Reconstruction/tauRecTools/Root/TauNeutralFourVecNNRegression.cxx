@@ -9,7 +9,7 @@
 */
 
 // local include(s)
-#include "tauRecTools/TauPi0RecoNN.h"
+#include "tauRecTools/TauNeutralFourVecNNRegression.h"
 
 // helper function include(s)
 #include "PathResolver/PathResolver.h"
@@ -31,7 +31,7 @@ using VectorMap = std::map<std::string, std::vector<double>>;
 using InputMap = std::map<std::string, ValueMap>;
 using InputSequenceMap = std::map<std::string, VectorMap>;
 
-TauPi0RecoNN::TauPi0RecoNN(const std::string &name)
+TauNeutralFourVecNNRegression::TauNeutralFourVecNNRegression(const std::string &name)
     : TauRecToolBase(name)
 {
   // declareProperty("OutputName", m_outputName = "TauPi0FourVec"); // not needed, since we decorate three individual values, instead of one vector, so there's not just 1 Output
@@ -48,13 +48,13 @@ TauPi0RecoNN::TauPi0RecoNN(const std::string &name)
   // declareProperty("FourVecDimNames", m_fourVecDimNames = {"E", "eta", "phi"});
 }
 
-TauPi0RecoNN::~TauPi0RecoNN()
+TauNeutralFourVecNNRegression::~TauNeutralFourVecNNRegression()
 {
 }
 
-StatusCode TauPi0RecoNN::initialize()
+StatusCode TauNeutralFourVecNNRegression::initialize()
 {
-  ATH_MSG_INFO("Initializing TauPi0RecoNN");
+  ATH_MSG_INFO("Initializing TauNeutralFourVecNNRegression");
 
   // find input JSON files
   std::string weightFile_1p1n = find_file(m_weightFile_1p1n);
@@ -146,7 +146,7 @@ StatusCode TauPi0RecoNN::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
+StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
 {
   // Read the previously classified decay mode of the tau
   // Decay modes are "1p0n", "1p1n", "1pXn", "3p0n", "3pXn",
@@ -161,7 +161,7 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
   }
   else
   {
-    ATH_MSG_WARNING("Initializing TauPi0RecoNN"); // maybe this should even be an error?
+    ATH_MSG_WARNING("Initializing TauNeutralFourVecNNRegression"); // maybe this should even be an error?
     // decorate zeros.
   }
 
@@ -264,7 +264,7 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
   return StatusCode::SUCCESS;
 }
 
-StatusCode TauPi0RecoNN::getInputs(const xAOD::TauJet &xTau, InputSequenceMap &inputSeqMap) const
+StatusCode TauNeutralFourVecNNRegression::getInputs(const xAOD::TauJet &xTau, InputSequenceMap &inputSeqMap) const
 {
   std::vector<TrkPtr> vTauTracks;
   std::vector<PFOPtr> vNeutralPFOs;

@@ -872,17 +872,17 @@ def TauDecayModeNNClassifierCfg(flags):
     result.setPrivateTools(myTauDecayModeNNClassifier)
     return result
 
-def TauPi0RecoNNCfg(flags):
+def TauNeutralFourVecNNRegressionCfg(flags):
     result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauPi0RecoNN'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauNeutralFourVecNNRegression'
 
-    TauPi0RecoNN = CompFactory.getComp("TauPi0RecoNN")
-    myTauPi0RecoNN = TauPi0RecoNN(name=_name,
+    TauNeutralFourVecNNRegression = CompFactory.getComp("TauNeutralFourVecNNRegression")
+    myTauNeutralFourVecNNRegression = TauNeutralFourVecNNRegression(name=_name,
                                   WeightFile1p1n=flags.Tau.Pi0RecoNNConfig,
                                   WeightFile1pXn=flags.Tau.Pi0RecoNNConfig,
                                   WeightFile3pXn=flags.Tau.Pi0RecoNNConfig)
 
-    result.setPrivateTools(myTauPi0RecoNN)
+    result.setPrivateTools(myTauNeutralFourVecNNRegression)
     return result
 
 def TauAODSelectorCfg(flags):
