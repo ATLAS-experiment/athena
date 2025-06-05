@@ -114,20 +114,27 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
       const xAOD::PixelCluster *cluster1 = matchedClusters[0];
       
-      Monitored::Group(
-        m_monitoringTool,
-        Monitored::Scalar<float>("diff_pixel_locx",cluster0->localPosition<2>()[0] - cluster1->localPosition<2>()[0]),
-        Monitored::Scalar<float>("diff_pixel_locy",cluster0->localPosition<2>()[1] - cluster1->localPosition<2>()[1]),
-        Monitored::Scalar<float>("diff_pixel_covxx",cluster0->localCovariance<2>()(0, 0) - cluster1->localCovariance<2>()(0, 0)),
-        Monitored::Scalar<float>("diff_pixel_covyy",cluster0->localCovariance<2>()(1, 1) - cluster1->localCovariance<2>()(1, 1)),  
-        Monitored::Scalar<float>("diff_pixel_globalx",cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
-        Monitored::Scalar<float>("diff_pixel_globaly",cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
-        Monitored::Scalar<float>("diff_pixel_globalz",cluster0->globalPosition()[2] - cluster1->globalPosition()[2]),
-        Monitored::Scalar<float>("diff_pixel_channelsphi",cluster0->channelsInPhi() - cluster1->channelsInPhi()),
-        Monitored::Scalar<float>("diff_pixel_channelseta",cluster0->channelsInEta() - cluster1->channelsInEta()),
-        Monitored::Scalar<float>("diff_pixel_widtheta",cluster0->widthInEta() - cluster1->widthInEta()),
-        Monitored::Scalar<float>("diff_pixel_tot",cluster0->totalToT() - cluster1->totalToT())
-      );
+      std::vector<std::string> regions {"all"};
+      if(m_pixelid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+      else regions.push_back("endcap");
+
+      for(auto const& region: regions)
+      {
+        Monitored::Group(
+          m_monitoringTool,
+          Monitored::Scalar<float>("diff_pixel_locx_" +region , cluster0->localPosition<2>()[0] - cluster1->localPosition<2>()[0]),
+          Monitored::Scalar<float>("diff_pixel_locy_" +region , cluster0->localPosition<2>()[1] - cluster1->localPosition<2>()[1]),
+          Monitored::Scalar<float>("diff_pixel_covxx_" +region , cluster0->localCovariance<2>()(0, 0) - cluster1->localCovariance<2>()(0, 0)),
+          Monitored::Scalar<float>("diff_pixel_covyy_" +region , cluster0->localCovariance<2>()(1, 1) - cluster1->localCovariance<2>()(1, 1)),  
+          Monitored::Scalar<float>("diff_pixel_globalx_" +region , cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
+          Monitored::Scalar<float>("diff_pixel_globaly_" +region , cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
+          Monitored::Scalar<float>("diff_pixel_globalz_" +region , cluster0->globalPosition()[2] - cluster1->globalPosition()[2]),
+          Monitored::Scalar<float>("diff_pixel_channelsphi_" +region , cluster0->channelsInPhi() - cluster1->channelsInPhi()),
+          Monitored::Scalar<float>("diff_pixel_channelseta_" +region , cluster0->channelsInEta() - cluster1->channelsInEta()),
+          Monitored::Scalar<float>("diff_pixel_widtheta_" +region , cluster0->widthInEta() - cluster1->widthInEta()),
+          Monitored::Scalar<float>("diff_pixel_tot_" +region , cluster0->totalToT() - cluster1->totalToT())
+        );
+      }
     }
     m_chrono->chronoStop("FPGAOutputValidationAlg::pixel diff");
   }
@@ -178,16 +185,22 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       }
 
       const xAOD::StripCluster *cluster1 = matchedClusters[0];
+      std::vector<std::string> regions {"all"};
+      if(m_stripid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+      else regions.push_back("endcap");
 
-      Monitored::Group(
-        m_monitoringTool,
-        Monitored::Scalar<float>("diff_strip_locx",cluster0->localPosition<1>()[0] - cluster1->localPosition<1>()[0]),
-        Monitored::Scalar<float>("diff_strip_covxx",cluster0->localCovariance<1>()(0, 0) - cluster1->localCovariance<1>()(0, 0)),
-        Monitored::Scalar<float>("diff_strip_globalx",cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
-        Monitored::Scalar<float>("diff_strip_globaly",cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
-        Monitored::Scalar<float>("diff_strip_globalz",cluster0->globalPosition()[2] - cluster1->globalPosition()[2]),
-        Monitored::Scalar<float>("diff_strip_channelsphi",cluster0->channelsInPhi() - cluster1->channelsInPhi())
-      );
+      for(auto const& region: regions)
+      {
+        Monitored::Group(
+          m_monitoringTool,
+          Monitored::Scalar<float>("diff_strip_locx_" + region, cluster0->localPosition<1>()[0] - cluster1->localPosition<1>()[0]),
+          Monitored::Scalar<float>("diff_strip_covxx_" + region, cluster0->localCovariance<1>()(0, 0) - cluster1->localCovariance<1>()(0, 0)),
+          Monitored::Scalar<float>("diff_strip_globalx_" + region, cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
+          Monitored::Scalar<float>("diff_strip_globaly_" + region, cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
+          Monitored::Scalar<float>("diff_strip_globalz_" + region, cluster0->globalPosition()[2] - cluster1->globalPosition()[2]),
+          Monitored::Scalar<float>("diff_strip_channelsphi_" + region, cluster0->channelsInPhi() - cluster1->channelsInPhi())
+        );
+      }
     }
     m_chrono->chronoStop("FPGAOutputValidationAlg::strip diff");
   }
@@ -197,42 +210,31 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
     SG::ReadHandle<xAOD::PixelClusterContainer> handle{key, ctx};
     ATH_CHECK(handle.isValid());
 
-    Monitored::Group(
-      m_monitoringTool,
-      Monitored::Collection(key.key() + "_LOCALPOSITION_X", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->localPosition<2>()[0];
-      }),
-      Monitored::Collection(key.key() + "_LOCALPOSITION_Y", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->localPosition<2>()[1];
-      }),
-      Monitored::Collection(key.key() + "_LOCALCOVARIANCE_XX", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->localCovariance<2>()(0, 0);
-      }),
-      Monitored::Collection(key.key() + "_LOCALCOVARIANCE_YY", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->localCovariance<2>()(1, 1);
-      }),
-      Monitored::Collection(key.key() + "_GLOBALPOSITION_X", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->globalPosition()[0];
-      }),
-      Monitored::Collection(key.key() + "_GLOBALPOSITION_Y", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->globalPosition()[1];
-      }),
-      Monitored::Collection(key.key() + "_GLOBALPOSITION_Z", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->globalPosition()[2];
-      }),
-      Monitored::Collection(key.key() + "_CHANNELS_IN_PHI", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->channelsInPhi();
-      }),
-      Monitored::Collection(key.key() + "_CHANNELS_IN_ETA", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->channelsInEta();
-      }),
-      Monitored::Collection(key.key() + "_WIDTH_IN_ETA", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->widthInEta();
-      }),
-      Monitored::Collection(key.key() + "_TOTAL_TOT", *handle, [](const xAOD::PixelCluster* cluster){
-        return cluster->totalToT();
-      })
-    );
+
+    for(auto cluster : *handle)
+    {
+      std::vector<std::string> regions {"all"};
+      if(m_pixelid->barrel_ec(cluster->rdoList()[0]) == 0) regions.push_back("barrel");
+      else regions.push_back("endcap");
+
+      for(auto const& region: regions)
+      {
+        Monitored::Group(
+          m_monitoringTool,
+          Monitored::Scalar<float>(key.key() + "_LOCALPOSITION_X_" + region, cluster->localPosition<2>()[0]),
+          Monitored::Scalar<float>(key.key() + "_LOCALPOSITION_Y_" + region, cluster->localPosition<2>()[1]),
+          Monitored::Scalar<float>(key.key() + "_LOCALCOVARIANCE_XX_" + region, cluster->localCovariance<2>()(0, 0)),
+          Monitored::Scalar<float>(key.key() + "_LOCALCOVARIANCE_YY_" + region, cluster->localCovariance<2>()(1, 1)),
+          Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_X_" + region, cluster->globalPosition()[0]),
+          Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_Y_" + region, cluster->globalPosition()[1]),
+          Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_Z_" + region, cluster->globalPosition()[2]),
+          Monitored::Scalar<float>(key.key() + "_CHANNELS_IN_PHI_" + region, cluster->channelsInPhi()),
+          Monitored::Scalar<float>(key.key() + "_CHANNELS_IN_ETA_" + region, cluster->channelsInEta()),
+          Monitored::Scalar<float>(key.key() + "_WIDTH_IN_ETA_" + region, cluster->widthInEta()),
+          Monitored::Scalar<float>(key.key() + "_TOTAL_TOT_" + region, cluster->totalToT())
+        );
+      }
+    }
   }
       
   for (std::size_t index = 0; index < m_stripKeys.size(); index++) {
@@ -240,27 +242,25 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
     SG::ReadHandle<xAOD::StripClusterContainer> handle{key, ctx};
     ATH_CHECK(handle.isValid());
 
-    Monitored::Group(
-      m_monitoringTool,
-      Monitored::Collection(key.key() + "_LOCALPOSITION_X", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->localPosition<1>()(0,0);
-      }),
-      Monitored::Collection(key.key() + "_LOCALCOVARIANCE_XX", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->localCovariance<1>()(0, 0);
-      }),
-      Monitored::Collection(key.key() + "_GLOBALPOSITION_X", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->globalPosition()[0];
-      }),
-      Monitored::Collection(key.key() + "_GLOBALPOSITION_Y", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->globalPosition()[1];
-      }),
-      Monitored::Collection(key.key() + "_GLOBALPOSITION_Z", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->globalPosition()[2];
-      }),
-      Monitored::Collection(key.key() + "_CHANNELS_IN_PHI", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->channelsInPhi();
-      })
-    );
+    for(auto cluster : *handle)
+    {
+      std::vector<std::string> regions {"all"};
+      if(m_stripid->barrel_ec(cluster->rdoList()[0]) == 0) regions.push_back("barrel");
+      else regions.push_back("endcap");
+
+      for(auto const& region: regions)
+      {
+        Monitored::Group(
+          m_monitoringTool,
+          Monitored::Scalar<float>(key.key() + "_LOCALPOSITION_X_" + region, cluster->localPosition<1>()(0,0)),
+          Monitored::Scalar<float>(key.key() + "_LOCALCOVARIANCE_XX_" + region, cluster->localCovariance<1>()(0, 0)),
+          Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_X_" + region, cluster->globalPosition()[0]),
+          Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_Y_" + region, cluster->globalPosition()[1]),
+          Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_Z_" + region, cluster->globalPosition()[2]),
+          Monitored::Scalar<float>(key.key() + "_CHANNELS_IN_PHI_" + region, cluster->channelsInPhi())
+        );
+      }
+    }
   }
 
   return StatusCode::SUCCESS;

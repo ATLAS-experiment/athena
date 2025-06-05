@@ -35,13 +35,82 @@ StatusCode xAODClusterMaker::initialize() {
 }
 
 StatusCode xAODClusterMaker::makeStripClusterContainer(
+      const uint64_t* stripClusters,
+    const EFTrackingTransient::Metadata *metadata,
+    const EventContext &ctx) const {
+  ATH_MSG_DEBUG("Making xAOD::StripClusterContainer");
+
+  SG::WriteHandle<xAOD::StripClusterContainer> stripClustersHandle{m_stripClustersKey, ctx};
+
+  ATH_CHECK(stripClustersHandle.record(std::make_unique<xAOD::StripClusterContainer>(), std::make_unique<xAOD::StripClusterAuxContainer>()));
+
+
+  for (unsigned int i = 0; i < metadata->numOfStripClusters; i++)
+  {
+    // Push back numClusters of StripCluster
+    auto stripCl = stripClustersHandle->push_back(std::make_unique<xAOD::StripCluster>());
+
+      // Build Matrix
+      Eigen::Matrix<float, 1, 1> localPosition;
+      Eigen::Matrix<float, 1, 1> localCovariance;
+
+      int row = 0; // idhash
+      long unsigned int idHash = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      row = 1; // id
+      unsigned long long id = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      
+      std::vector<Identifier> RDOs;
+      row = 2; // rdo w1
+      unsigned long long rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      if (rdo) RDOs.push_back(Identifier(rdo));
+  
+      row = 3; // rdo w2
+      rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      if (rdo) RDOs.push_back(Identifier(rdo));
+      
+      row = 4; // rdo w3
+      rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      if (rdo) RDOs.push_back(Identifier(rdo));
+    
+      row = 5; // rdo w4
+      rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      if (rdo) RDOs.push_back(Identifier(rdo));
+      row = 6; // local x
+      localPosition(0, 0) = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+      row = 8; // local covariance xx
+      localCovariance(0, 0) = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+      row = 9; // global x
+      double globalX = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+      row = 10; // global y
+      double globalY = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+      row = 11; // global z
+      double globalZ = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+      row = 12; // channels in phi
+      auto channelsinPhi = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+
+
+      Eigen::Matrix<float, 3, 1> globalPosition(globalX, globalY, globalZ);
+      stripCl->setMeasurement<1>(idHash, localPosition, localCovariance);
+
+      stripCl->setIdentifier(id);
+      stripCl->setRDOlist(RDOs);
+      stripCl->globalPosition() = globalPosition;
+      stripCl->setChannelsInPhi(channelsinPhi);
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+
+
+StatusCode xAODClusterMaker::makeStripClusterContainer(
     const EFTrackingTransient::StripClusterAuxInput &scAux,
     const EFTrackingTransient::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::StripClusterContainer");
 
   SG::WriteHandle<xAOD::StripClusterContainer> stripClustersHandle{
-      m_stripClustersKey, ctx};
+      m_stripClustersKey , ctx};
 
   ATH_CHECK(stripClustersHandle.record(
       std::make_unique<xAOD::StripClusterContainer>(),
@@ -81,9 +150,107 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
     stripCl->globalPosition() = globalPosition;
     stripCl->setChannelsInPhi(scAux.channelsInPhi.at(i));
   }
-
   return StatusCode::SUCCESS;
 }
+
+
+StatusCode xAODClusterMaker::makePixelClusterContainer(
+    const uint64_t* pixelClusters,
+    const EFTrackingTransient::Metadata *metadata,
+    const EventContext &ctx) const {
+  ATH_MSG_DEBUG("Making xAOD::PixelClusterContainer");
+
+
+  SG::WriteHandle<xAOD::PixelClusterContainer> pixelClustersHandle{m_pixelClustersKey, ctx};
+
+
+  // --------------------------------------------------------------------
+  // proceed with the element-wise method
+  // --------------------------------------------------------------------
+    ATH_MSG_DEBUG("You are running the element-wise container creation method.");
+    Athena::Chrono chrono("ElementWiseMethod", m_chronoSvc.get());
+
+    ATH_CHECK(pixelClustersHandle.record(std::make_unique<xAOD::PixelClusterContainer>(),std::make_unique<xAOD::PixelClusterAuxContainer>()));
+
+    ATH_CHECK(pixelClustersHandle.isValid());
+
+  for (unsigned int i = 0; i < metadata->numOfPixelClusters; i++)
+  {
+      // Push back numClusters of StripCluster
+      auto pixelCl = pixelClustersHandle->push_back(std::make_unique<xAOD::PixelCluster>());
+
+      int row = 0; // idhash
+      long unsigned int idHash = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      row = 1; // id
+      unsigned long long id = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      
+      std::vector<Identifier> RDOs;
+      row = 2; // rdo w1
+      unsigned long long rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      if (rdo) RDOs.push_back(Identifier(rdo));
+  
+      row = 3; // rdo w2
+      rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      if (rdo) RDOs.push_back(Identifier(rdo));
+      
+      row = 4; // rdo w3
+      rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      if (rdo) RDOs.push_back(Identifier(rdo));
+    
+      row = 5; // rdo w4
+      rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      if (rdo) RDOs.push_back(Identifier(rdo));
+
+      Eigen::Matrix<float, 2, 1> localPosition;
+      Eigen::Matrix<float, 2, 2> localCovariance;
+      localCovariance.setZero();
+      row = 6; // local x
+      localPosition(0 , 0) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+      row = 7; // local y
+      localPosition(1 , 1) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+      row = 8; // local covariance xx
+      localCovariance(0, 0) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+      row = 9; // local covariance yy
+      localCovariance(1, 1) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+      row = 10; // global x
+      float globalX = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+      row = 11; // global y
+      float globalY = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+      row = 12; // global 
+      float globalZ = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+      row = 13; // channels in phi
+      int channelsInPhi = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+
+      row = 14; // channels in eta
+      int channelsInEta = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+
+      row = 15; // width in eta
+      double widthInEta = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+      row = 18; // total ToT
+      int totalToT = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+      
+      Eigen::Matrix<float, 3, 1> globalPosition(globalX, globalY, globalZ);
+
+      pixelCl->setMeasurement<2>(idHash, localPosition,localCovariance);
+      pixelCl->setIdentifier(id);
+      pixelCl->setRDOlist(RDOs);
+      pixelCl->globalPosition() = globalPosition;
+      pixelCl->setTotalToT(totalToT);
+      pixelCl->setChannelsInPhiEta(channelsInPhi, channelsInEta);
+      pixelCl->setWidthInEta(widthInEta);
+  }
+    return StatusCode::SUCCESS;
+}
+
+
 
 StatusCode xAODClusterMaker::makePixelClusterContainer(
     const EFTrackingTransient::PixelClusterAuxInput &pxAux,
@@ -92,8 +259,7 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
   ATH_MSG_DEBUG("Making xAOD::PixelClusterContainer");
 
 
-  SG::WriteHandle<xAOD::PixelClusterContainer> pixelClustersHandle{
-      m_pixelClustersKey, ctx};
+  SG::WriteHandle<xAOD::PixelClusterContainer> pixelClustersHandle{m_pixelClustersKey, ctx};
 
   if (!m_doBulkCopy) {
     // --------------------------------------------------------------------
@@ -145,6 +311,7 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
                                    pxAux.channelsInEta[i]);
       pixelCl->setWidthInEta(pxAux.widthInEta[i]);
     }
+
     return StatusCode::SUCCESS;
   }
 
