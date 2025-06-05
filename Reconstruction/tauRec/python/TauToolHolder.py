@@ -982,6 +982,19 @@ def TauDecayModeNNClassifierCfg(flags):
     result.setPrivateTools(myTauDecayModeNNClassifier)
     return result
 
+def TauPi0RecoNNCfg(flags):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauPi0RecoNN'
+
+    TauPi0RecoNN = CompFactory.getComp("TauPi0RecoNN")
+    myTauPi0RecoNN = TauPi0RecoNN(name=_name,
+                                  WeightFile1p1n=flags.Tau.Pi0RecoNNConfig,
+                                  WeightFile1pXn=flags.Tau.Pi0RecoNNConfig,
+                                  WeightFile3pXn=flags.Tau.Pi0RecoNNConfig)
+
+    result.setPrivateTools(myTauPi0RecoNN)
+    return result
+
 def TauAODSelectorCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauAODSelector'

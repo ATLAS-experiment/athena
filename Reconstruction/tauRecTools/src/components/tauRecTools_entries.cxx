@@ -27,6 +27,7 @@
 #include "tauRecTools/TauJetRNNEvaluator.h"
 #include "tauRecTools/TauGNNEvaluator.h"
 #include "tauRecTools/TauDecayModeNNClassifier.h"
+#include "tauRecTools/TauPi0RecoNN.h"
 #include "tauRecTools/TauVertexedClusterDecorator.h"
 #include "tauRecTools/TauAODSelector.h"
 #include "tauRecTools/TauAODLeptonRemovalTool.h"
