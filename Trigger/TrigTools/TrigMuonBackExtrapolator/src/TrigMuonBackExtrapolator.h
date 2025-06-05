@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONBACKEXTRAPOLATOR_H
@@ -151,8 +151,9 @@ class TrigMuonBackExtrapolator: public AthAlgTool,
 
 
     private:
-    BooleanProperty m_aligned;
-    BooleanProperty m_dataset;
+    BooleanProperty m_aligned{this, "Aligned", true};
+    BooleanProperty m_dataset{this, "DataSet", false};
+
 
     double m_data_Barrel_Param[2][2][2]; 
     double m_data_Barrel_Sigmas[2][2][2][2]; 
