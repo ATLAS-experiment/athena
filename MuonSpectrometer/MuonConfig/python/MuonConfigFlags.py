@@ -52,6 +52,7 @@ def createMuonConfigFlags():
     # 1. Digitization
     mcf.addFlag("Muon.doDigitization",True)
     mcf.addFlag("Muon.doFastMMDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
 
     
     # 2. Reco MuonRecFlags    
