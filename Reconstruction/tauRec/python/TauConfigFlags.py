@@ -18,6 +18,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.doPanTau", True)
     tau_cfg.addFlag("Tau.doRNNTrackClass", True)
     tau_cfg.addFlag("Tau.doTauDiscriminant", True)
+    tau_cfg.addFlag("Tau.doTauNeutralFourVecNNRegression", True)
     tau_cfg.addFlag("Tau.associateLRT", False)
     tau_cfg.addFlag("Tau.isStandalone", False)
     # Classify Large Radius Tracks in tau track classifier
