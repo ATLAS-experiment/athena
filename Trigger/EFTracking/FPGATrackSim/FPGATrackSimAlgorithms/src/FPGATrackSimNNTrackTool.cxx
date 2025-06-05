@@ -139,13 +139,16 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
 
         if (isFirst){
           if (inputTensorValues.size() < 15) {
-            inputTensorValues.resize(15, 0.0f); // Resize to 15 and fill with 0.0f                                                                                                                                  
+            inputTensorValues.resize(15, 0.0f); // Resize to 15 and fill with 0.0f
           }
           else if (m_doGNNTracking) inputTensorValues.resize(15);
         }
         else {
           if (inputTensorValues.size() < 27) {
-            inputTensorValues.resize(27, 0.0f); // Resize to 27 and fill with 0.0f                                                                                                                                
+            inputTensorValues.resize(27, 0.0f); // Resize to 27 and fill with 0.0f
+          }
+          else if (inputTensorValues.size() > 27) {
+            inputTensorValues.resize(27); // Resize to 27 and keep the first 27 elements
           }
         }
 
