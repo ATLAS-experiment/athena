@@ -31,6 +31,13 @@ class CPBaseRunner(ABC):
                                         'Please provide a text file with a list of input files or a single root file.')
             self.logger.info("Initialized input files: %s", self._inputList)
         return self._inputList
+    
+    @property
+    def outputName(self):
+        if self.args.output_name.endswith('.root'):
+            return self.args.output_name[:-5]
+        else:
+            return self.args.output_name
 
     def printFlags(self):
         self.logger.info("="*73)
