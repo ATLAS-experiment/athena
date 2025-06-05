@@ -151,7 +151,7 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   // Read the previously classified decay mode of the tau
   // Decay modes are "1p0n", "1p1n", "1pXn", "3p0n", "3pXn",
   // here they are encoded as 0, 1, 2, 3, 4 (as in TauDecayModeNNClassifier.cxx)
-  const static SG::AuxElement::Accessor<int> accDecayMode(m_decayModeName); // This can probably also be a ConstAccessor?
+  const static SG::Accessor<int> accDecayMode(m_decayModeName); // This can probably also be a ConstAccessor?
   int decayMode = 7; // 7 is the error mode used as initialisation
   if (accDecayMode.isAvailable(xTau))
   {
