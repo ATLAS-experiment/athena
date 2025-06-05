@@ -138,7 +138,7 @@ bool TrigL2MuonSA::RpcPatFinder::findPatternEta(
 
     if (nHits_pat>=2) {
         abcal(result_pat, result_index, result_aw, result_bw, rpcLayerHits);
-        if(msgLevel(MSG::DEBUG)){
+        if(msgLevel(MSG::VERBOSE)){
             std::ostringstream ossR, ossZ;
             bool isFirst{true};
             for (int i=0; i<8; ++i){
@@ -155,7 +155,7 @@ bool TrigL2MuonSA::RpcPatFinder::findPatternEta(
             }
             std::ostringstream oss;
             std::copy(result_index.begin(), result_index.end(), std::ostream_iterator<int>(oss, " "));
-            ATH_MSG_DEBUG("patfinder: BEST pat= " << result_pat << " nHit: " << nHits_pat << " Idx: " << oss.str()
+            ATH_MSG_VERBOSE("patfinder: BEST pat= " << result_pat << " nHit: " << nHits_pat << " Idx: " << oss.str()
                 <<"  dMM= "<<result_dMM <<"  dMO= "<<result_dMO << " R_hits: " << ossR.str() << " Z_hits: " << ossZ.str()
                 <<" Slopes: " << result_aw[0] << "," << result_aw[1] << "," << result_aw[2] << " Offsets: " << result_bw[0] << "," << result_bw[1] << "," << result_bw[2]);
         }
