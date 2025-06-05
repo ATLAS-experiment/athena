@@ -38,7 +38,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="whether to perform LAr crack veto based on the cluster eta, "
             "i.e. remove electrons within 1.37<|eta|<1.52. The default "
             "is False.")
-        self.addOption ('isolationCorrection', False, type=bool,
+        self.addOption ('isolationCorrection', True, type=bool,
             info="whether or not to perform isolation corrections (leakage "
             "corrections), i.e. set up an instance of "
             "CP::EgammaIsolationCorrectionAlg.")
@@ -225,6 +225,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.AFII_corr = (
                 0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
+            alg.isolationCorrectionTool.ToolVer = "REL22"
+            alg.isolationCorrectionTool.CorrFile = "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root"
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
