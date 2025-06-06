@@ -219,7 +219,6 @@ def createBasicFPGATrackSimConfigFlags():
     # second stage fitting
     cf.addFlag('secondStage', False)
     cf.addFlag('secondChi2Cut', 36)
-    cf.addFlag('useVaryingWindow', False) #can be removed once we optimize windows
 
     # fast monitoring
     cf.addFlag('fastMon', False)

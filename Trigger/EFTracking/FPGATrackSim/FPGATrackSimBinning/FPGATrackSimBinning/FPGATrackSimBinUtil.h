@@ -135,6 +135,14 @@ public:
 
     // find the track phi that would be consistent with the other track parameters and the hit (r,phi)
     static double parsToTrkPhi(const FPGATrackSimTrackPars &pars, FPGATrackSimHit const *hit);
+
+    // find the difference between the hit and trk phi as a function of r and track pars
+    static double dPhiHitTrkFromPars(double r, const FPGATrackSimTrackPars &pars);
+
+    // for padding
+    static double dZdEta(double eta);
+    static double dPhidQOverPt(double hitr);
+
 };
 
 

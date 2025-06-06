@@ -83,6 +83,18 @@ public:
     Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for keylayer definition"};
     Gaudi::Property<double> m_rout{this, "rout", {-1.0}, "Radius of outer layer for keylayer definition"};
     Gaudi::Property<bool> m_approxMath{this, "approxMath", {false}, "Use approximate math to emulate possible firmware"};
+    Gaudi::Property<double> m_d0pad{this, "D0Pad", 0.0, "Extra phi padding from d0 resolution"};
+    Gaudi::Property<double> m_phipad{this, "PhiPad", 0.0, "Extra phi padding from phi resolution"};
+    Gaudi::Property<double> m_qptpad{this, "QPtPad", 0.0, "Extra phi padding from q/pT resolution"};
+    Gaudi::Property<double> m_z0pad{this, "Z0Pad", 0.0, "Extra eta padding from z0 resolution"};
+    Gaudi::Property<double> m_etapad{this, "EtaPad", 0.0, "Extra eta padding from eta resolution"};
+    Gaudi::Property<std::vector<double>> m_slPerEtaMod{
+    this,
+        "slPerEtaMod",
+        std::vector<double>{19.0, 24.0, 29.0, 32.0, 18.1, 27.1, 24.1, 15.1, 30.8,
+                            30.8, 26.2, 32.2, 32.2, 26.2, 54.6, 54.6, 40.2, 60.2},
+        "Strip length per eta eta mod"
+    };
 
     // convert to/from the KeyLyrPars struct and the ParSet
     FPGATrackSimBinUtil::ParSet keyparsToParSet(const FPGATrackSimKeyLayerTool::KeyLyrPars& keypars) const {

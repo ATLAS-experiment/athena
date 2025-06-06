@@ -104,7 +104,7 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
     // on the binning tool to match first stage tracks to second stage bins.
     std::vector<std::shared_ptr<const FPGATrackSimHit>> allMappedHits;
     if (m_doBinning && m_FPGATrackSimMapping->GetPlaneMap_2ndSliceSize() == 1) {
-        for (unsigned layer = m_nLayers_1stStage; layer < m_nLayers_2ndStage + m_nLayers_1stStage; layer++) {
+        for (unsigned layer = 0; layer < m_nLayers_2ndStage + m_nLayers_1stStage; layer++) {
             allMappedHits.insert(allMappedHits.end(), m_phits_atLayer[0][layer].begin(), m_phits_atLayer[0][layer].end());
         }
         ATH_MSG_VERBOSE("Attempting to bin nhits = " << allMappedHits.size());
