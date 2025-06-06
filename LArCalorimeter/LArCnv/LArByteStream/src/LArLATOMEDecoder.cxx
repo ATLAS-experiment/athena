@@ -463,6 +463,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
     m_at1type = (status8 >> 2) & 0x3;
   }
   m_nthLATOME = robFrag->rod_source_id();
+  m_LATOMEFW = rod_status[3] & 0x0fff;
 
   LatomeCalibPatterns pat1, pat2, pat3;
   pat1.DAC = rod_status[9];

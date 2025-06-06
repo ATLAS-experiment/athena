@@ -27,6 +27,7 @@ namespace TrigL2MuonSA {
     //
     double cYmid{0.};
     double cXmid{0.};
+    double cAmid{0.};
     double cPhip{0.};
     double cInCo{0.};
     double cPhi0{0.};
