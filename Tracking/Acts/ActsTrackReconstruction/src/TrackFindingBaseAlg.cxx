@@ -59,6 +59,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_maxChi2);
     ATH_MSG_DEBUG("   " << m_branchStopperPtMinFactor);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMaxExtra);
+    ATH_MSG_DEBUG("   " << m_branchStopperMeasCutReduce);
+    ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMeasCut);
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -368,7 +370,10 @@ namespace ActsTrk {
       return BranchStopperResult::StopAndDrop;
     }
 
-    bool enoughMeasurements = (track.nMeasurements() >= cutSet.minMeasurements);
+  
+    // In the pixel endcap regions relax the requirement for minMeasurements before cutting the branch off
+    auto minMeasurementsBranchStop = std::abs(eta) > m_branchStopperAbsEtaMeasCut ? cutSet.minMeasurements - m_branchStopperMeasCutReduce : cutSet.minMeasurements;
+    bool enoughMeasurements = (track.nMeasurements() >= minMeasurementsBranchStop);
     bool tooManyHoles = (track.nHoles() > cutSet.maxHoles);
     bool tooManyOutliers = (track.nOutliers() > cutSet.maxOutliers);
 
