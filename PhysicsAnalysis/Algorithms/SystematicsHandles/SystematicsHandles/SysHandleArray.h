@@ -37,7 +37,7 @@ namespace CP
      * @param values The decoration names of each individual handle
      */
     template <typename OWNER>
-    SysHandleArray(OWNER *owner, const std::vector<std::string> &values);
+    SysHandleArray(const std::vector<std::string> &values, OWNER *owner);
 
     /**
      * @brief Declare the handle as a property on its parent
@@ -112,6 +112,7 @@ namespace CP
     void requireInitialized() const;
     std::vector<std::string> m_decorNames;
     std::vector<HANDLE> m_handles;
+    std::function<HANDLE(const std::string &)> m_makeHandle;
 
   }; //> end class SysHandleArray<HANDLE>
 } //> end namespace CP
