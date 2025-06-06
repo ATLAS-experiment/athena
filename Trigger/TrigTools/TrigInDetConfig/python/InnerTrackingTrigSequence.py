@@ -8,6 +8,8 @@ class InnerTrackingTrigSequence:
   def create(flags : AthConfigFlags, *args, **kwargs) -> InnerTrackerTrigSequence:
     if flags.Trigger.useActsTracking:
       from TrigInDetConfig.ActsTrigSequence import ActsTrigSequence as InnerTrackingSequence
+    elif flags.Trigger.EFTrackPipeline:
+      from EFTrackConfig.AccelTrackTrigSequence import AccelTrackTrigSequence as InnerTrackingSequence
     elif flags.Detector.GeometryITk:
       from TrigInDetConfig.ITkTrigSequence import ITkTrigSequence as InnerTrackingSequence
     else:

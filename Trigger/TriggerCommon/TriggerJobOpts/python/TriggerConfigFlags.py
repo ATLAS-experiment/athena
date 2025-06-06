@@ -507,6 +507,7 @@ def createTriggerRecoFlags():
     flags.addFlagsCategory( 'Trigger.ActsTracking', _idActs )
 
     flags.addFlag('Trigger.useActsTracking', False, help='use ACTS for ITk tracking')
+    flags.addFlag('Trigger.EFTrackPipeline', "",    help='string to specify EFTrack pipeline')
 
     def __trigCalo():
         from TrigCaloRec.TrigCaloConfigFlags import createTrigCaloConfigFlags
