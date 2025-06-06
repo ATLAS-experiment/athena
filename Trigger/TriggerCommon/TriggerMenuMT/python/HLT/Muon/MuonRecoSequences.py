@@ -387,7 +387,7 @@ def VDVEFMuCBCfg(flags, RoIs, name, suffix):
     dataObjects += [( 'Muon::MMPrepDataContainer' , 'StoreGateSvc+MM_Measurements'),
                     ( 'Muon::sTgcPrepDataContainer' , 'StoreGateSvc+STGC_Measurements') ]
 
-  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name,
+  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name+suffix,
                                                DataObjects = dataObjects)
   acc.addEventAlgo(alg)
   return acc

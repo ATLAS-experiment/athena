@@ -487,8 +487,12 @@ def muEFCBAlgSequenceCfg(flags, suffix, selCAName='', is_probe_leg=False):
     acc2.merge(acc3, sequenceName=seqreco.name)
     acc.merge(acc2, sequenceName=seqmerge.name)
     #Merge muon containers from outside-in and inside-out reco
+    if suffix != '':
+      mergedMuonOutputLocation = recordable(muNames.EFCBName+'_'+suffix)
+    else:
+      mergedMuonOutputLocation = muNames.EFCBName
     mergeMuons = MergeEFMuonsAlgCfg(flags, name="MergeEFMuons"+suffix, MuonCBContainerLocation=sequenceOutCB, 
-                                    MuonInsideOutContainerLocation=sequenceOutInsideOut, MuonOutputLocation=muNames.EFCBName+suffix)
+                                    MuonInsideOutContainerLocation=sequenceOutInsideOut, MuonOutputLocation=mergedMuonOutputLocation)
 
     acc.merge(mergeMuons, sequenceName=seqmerge.name)
     recoCB.mergeReco(acc)
@@ -524,7 +528,7 @@ def muEFCBl2ioSequenceGenCfg(flags, is_probe_leg=False):
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFCombinerHypoToolFromDict
     efmuCBHypo = TrigMuonEFHypoAlgCfg( flags,
                               name = 'TrigMuonEFCombinerHypoAlgIOmode',
-                              MuonDecisions = sequenceOut+'IOmode',
+                              MuonDecisions = sequenceOut+'_IOmode',
                               MapToPreviousDecisions=True)
 
     selAcc.addHypoAlgo(efmuCBHypo)
@@ -543,7 +547,7 @@ def muEFCBl2mtSequenceGenCfg(flags, is_probe_leg=False):
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFCombinerHypoToolFromDict
     efmuCBHypo = TrigMuonEFHypoAlgCfg( flags,
                               name = 'TrigMuonEFCombinerHypoAlgl2mtmode',
-                              MuonDecisions = sequenceOut+'l2mtmode',
+                              MuonDecisions = sequenceOut+'_l2mtmode',
                               MapToPreviousDecisions=True)
 
     selAcc.addHypoAlgo(efmuCBHypo)
@@ -562,7 +566,7 @@ def muEFCBidReuseSequenceGenCfg(flags, is_probe_leg=False):
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFCombinerHypoToolFromDict
     efmuCBHypo = TrigMuonEFHypoAlgCfg( flags,
                               name = 'TrigMuonEFCombinerHypoAlgidReuse',
-                              MuonDecisions = sequenceOut+'idReuse',
+                              MuonDecisions = sequenceOut+'_idReuse',
                               MapToPreviousDecisions=True)
 
     selAcc.addHypoAlgo(efmuCBHypo)

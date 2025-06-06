@@ -121,14 +121,14 @@ const xAOD::Muon* MuonMatchingTool :: matchEFSAReadHandle( const EventContext& c
 
 const xAOD::Muon* MuonMatchingTool :: matchEFCB(  const xAOD::TruthParticle *mu, std::string trig, bool &pass) const {
   ATH_MSG_DEBUG("MuonMonitoring::matchEFCB() for TruthParticle");
-  return mu ? match<xAOD::Muon>( mu, std::move(trig), m_EFreqdR, pass, "HLT_MuonsCB_RoI.*", &MuonMatchingTool::trigPosForMatchCBTrack) : nullptr;
+  return mu ? match<xAOD::Muon>( mu, std::move(trig), m_EFreqdR, pass, "HLT_MuonsCB_RoI*.*", &MuonMatchingTool::trigPosForMatchCBTrack) : nullptr;
 }
 
 const xAOD::Muon* MuonMatchingTool :: matchEFCB(  const xAOD::Muon *mu, std::string trig, bool &pass) const {
   ATH_MSG_DEBUG("MuonMonitoring::matchEFCB()");
   const xAOD::TrackParticle* MuonTrack = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
   ATH_MSG_DEBUG("HLT_Muons_RoI CB Muon");
-  return MuonTrack ? match<xAOD::Muon>( MuonTrack, std::move(trig), m_EFreqdR, pass, "HLT_MuonsCB_RoI.*", &MuonMatchingTool::trigPosForMatchCBTrack) : nullptr;
+  return MuonTrack ? match<xAOD::Muon>( MuonTrack, std::move(trig), m_EFreqdR, pass, "HLT_MuonsCB_RoI*.*", &MuonMatchingTool::trigPosForMatchCBTrack) : nullptr;
 }
 
 const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> MuonMatchingTool :: matchEFCBLinkInfo( const xAOD::Muon *mu, std::string trig) const {
@@ -136,7 +136,7 @@ const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> MuonMatchingTool :: matc
   bool pass = false;
   TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> muonLinkInfo;
   const xAOD::TrackParticle* MuonTrack = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
-  return MuonTrack ? matchLinkInfo<xAOD::Muon>(MuonTrack, std::move(trig), m_EFreqdR, pass, "HLT_MuonsCB_RoI.*", &MuonMatchingTool::trigPosForMatchCBTrack) : muonLinkInfo;
+  return MuonTrack ? matchLinkInfo<xAOD::Muon>(MuonTrack, std::move(trig), m_EFreqdR, pass, "HLT_MuonsCB_RoI*.*", &MuonMatchingTool::trigPosForMatchCBTrack) : muonLinkInfo;
 }
 
 const xAOD::Muon* MuonMatchingTool :: matchEFCBReadHandle( const EventContext& ctx, const xAOD::Muon *mu) const {

@@ -616,6 +616,15 @@ TriggerHLTListRun3 = [
     ('xAOD::MuonContainer#HLT_MuonsCB_RoI',                                     'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuCBReco_RoIViews'),InViews('CosmicEFCBViews')]),
     ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoIAux.',                              'BS ESD AODFULL AODSLIM', 'Muon'),
 
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_idReuse',                                     'BS ESD AODFULL', 'Muon', [InViews('EFMuCBReco_RoIidReuseViews')]),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_idReuseAux.',                              'BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_IOmode',                                     'BS ESD AODFULL', 'Muon', [InViews('EFMuCBReco_RoIIOmodeViews')]),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_IOmodeAux.',                              'BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_l2mtmode',                                     'BS ESD AODFULL', 'Muon', [InViews('EFMuCBReco_RoIl2mtmodeViews')]),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_l2mtmodeAux.',                              'BS ESD AODFULL', 'Muon'),
+
     ('xAOD::MuonContainer#HLT_MuonsCB_LRT',                                     'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuCBLRTRecoViews')]),
     ('xAOD::MuonAuxContainer#HLT_MuonsCB_LRTAux.',                              'BS ESD AODFULL AODSLIM', 'Muon'),
 
