@@ -788,6 +788,7 @@ template<> inline bool isBSM(const DecodedPID& p){
   if (std::abs(p.pid()) > 39 && std::abs(p.pid()) < 81) return true;
   if (std::abs(p.pid()) > 6 && std::abs(p.pid()) < 9) return true;
   if (isSUSY(p)) return true;
+  if (isNeutrinoRH(p.pid())) return true;
   if (isGenericMultichargedParticle(p)) return true;
   if (isTechnicolor(p)) return true;
   if (isExcited(p)) return true;
