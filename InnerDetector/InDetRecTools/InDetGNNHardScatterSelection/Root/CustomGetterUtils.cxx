@@ -31,6 +31,14 @@ namespace {
     if (name == "z") {
       return [](const xAOD::Vertex& v) -> float {return v.z();};
     }
+    // Temporary hack to fix GeV/MeV discrepancy between training samples and athena 
+    // TODO: revert this once new model is ready
+    if (name == "sumPt") {
+      return [](const xAOD::Vertex& v) -> float {
+        static const SG::AuxElement::ConstAccessor<float> acc_sumPt("sumPt");
+        return acc_sumPt(v) * 1000;
+      };
+    }
     throw std::logic_error("no match for custom getter " + name);
   }
 

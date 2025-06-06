@@ -123,14 +123,14 @@ namespace InDetGNNHardScatterSelection {
       // type and default value-finding regexes are hardcoded for now
       TypeRegexes type_regexes = {
         {".*_isDefaults"_r, EDMType::CHAR},
-        {"sumPt2|sumPt|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, EDMType::FLOAT},
+        {"sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, EDMType::FLOAT},
         {"ntrk"_r, EDMType::INT},
-        {"(log_)?pt|abs_eta|eta|phi|energy|mass"_r, EDMType::CUSTOM_GETTER},
+        {"(log_)?pt|abs_eta|eta|phi|energy|mass|sumPt"_r, EDMType::CUSTOM_GETTER},
       };
 
       StringRegexes default_flag_regexes{
-        {"ntrk|sumPt2|sumPt|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, ""},
-        {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}}; // no default for custom cases
+        {"ntrk|sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, ""},
+        {"((log_)?pt|abs_eta|eta|phi|energy|mass|sumPt)"_r, ""}}; // no default for custom cases
 
       std::vector<HSGNNInputConfig> input_config;
       for (auto& node: config.inputs){
