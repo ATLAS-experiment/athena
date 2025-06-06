@@ -34,6 +34,10 @@ def FPGATrackSimConstsGenCfg(flags, **kwargs):
     acc.addEventAlgo(theFPGATrackSimConstGenAlg)
     return acc
 
+def prepareFlagsForFPGATrackSimBankGen(flags):
+    newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
+    return newFlags
+
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -42,6 +46,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.fillFromArgs()
+    flags = prepareFlagsForFPGATrackSimBankGen(flags)
     flags.lock()
 
     acc=MainServicesCfg(flags)
