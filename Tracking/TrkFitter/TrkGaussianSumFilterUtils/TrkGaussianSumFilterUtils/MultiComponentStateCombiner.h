@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -40,13 +40,6 @@ combineCovWithWeight(const AmgVector(5) & firstParameters,
                      const AmgVector(5) & secondParameters,
                      const AmgSymMatrix(5) & secondMeasuredCov,
                      const double secondWeight);
-
-/** @brief Helper to combine forward with  smoother MultiComponentStates*/
-Trk::MultiComponentState
-combineWithSmoother(const Trk::MultiComponentState& forwardsMultiState,
-                    const Trk::MultiComponentState& smootherMultiState,
-                    unsigned int maximumNumberOfComponents);
-
-}//end of MultiComponentStateCombiner namespace
-} // end Trk namespace
+}  // namespace MultiComponentStateCombiner
+}  // namespace Trk
 #endif
