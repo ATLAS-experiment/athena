@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H
@@ -59,7 +59,7 @@ namespace Rivet {
       if (prodVtx == nullptr) return false;
       // for each ancestor, check if it matches any of the input particles
       for (auto ancestor:Rivet::HepMCUtils::particles(prodVtx,Relatives::ANCESTORS)){
-        for ( auto part:ptcls )
+        for ( const auto & part:ptcls )
           if ( ancestor==part.genParticle() ) return true;
       }
       // if we get here, no ancetor matched any input particle
@@ -189,7 +189,7 @@ namespace Rivet {
       if ( isVH(prodMode) ) {
         for (auto ptcl:Rivet::HepMCUtils::particles(HSvtx,Relatives::CHILDREN)) {
           if (PID::isW(ptcl->pdg_id())) { ++nWs; cat.V=Particle(ptcl); }
-          if (PID::isZ(ptcl->pdg_id())) { ++nZs; cat.V=Particle(ptcl); }
+          if (PID::isZ(ptcl->pdg_id())) { ++nZs; cat.V=Particle(std::move(ptcl)); }
         }
         if(nWs+nZs>0) cat.V = getLastInstance(cat.V);
         else {
@@ -226,7 +226,7 @@ namespace Rivet {
                 if ( !PID::isTop(ptcl->pdg_id()) ) continue;
           Particle top = getLastInstance(Particle(ptcl));
           if ( top.genParticle()->end_vertex() )
-            for (auto child:top.children())
+            for (const auto &child:top.children())
               if ( PID::isW(child.pid()) ) Ws += getLastInstance(child);
         }
       }
@@ -247,8 +247,8 @@ namespace Rivet {
       Particles leptonicVs;
       if ( !is_uncatdV ){
         if ( isVH(prodMode) && !quarkDecay(cat.V) ) leptonicVs += cat.V;
-      }else leptonicVs = uncatV_decays;
-      for ( auto W:Ws ) if ( W.genParticle()->end_vertex() && !quarkDecay(W) ) leptonicVs += W;
+      }else leptonicVs = std::move(uncatV_decays);
+      for ( const auto & W:Ws ) if ( W.genParticle()->end_vertex() && !quarkDecay(W) ) leptonicVs += W;
 
       // Obtain all stable, final-state particles
       const Particles FS = apply<FinalState>(event, "FS").particles();
