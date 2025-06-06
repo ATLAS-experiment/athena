@@ -470,11 +470,11 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
         if( sum_y < 0) sum_y = 0;
 
     } else {
-        if (sum_x < -0x0007FF) sum_x = -0x0007FF;
-        if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
+        if (sum_x < -0x000800) sum_x = -0x000800; //-2048
+        if (sum_x > 0x0007FF) sum_x  = 0x0007FF; //2047
 
-        if (sum_y < -0x0007FF) sum_y = -0x0007FF;
-        if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
+        if (sum_y < -0x000800) sum_y = -0x000800; //-2048
+        if (sum_y > 0x0007FF) sum_y  = 0x0007FF; //2047
     }
 
     ATH_MSG_DEBUG("  fillGlobal type " << type << std::dec << " sum_x " << sum_x << " sum_y " << sum_y);
