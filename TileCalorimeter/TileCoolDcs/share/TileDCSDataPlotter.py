@@ -1,5 +1,5 @@
 #!/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Author: nils.gollub@cern.ch
 
 from __future__ import print_function
@@ -806,7 +806,10 @@ if __name__ == "__main__":
 
 
     #=== check if we are in Oracle mode
-    useCool = False
+    useCool = True
+    if "--oracle" in sys.argv:
+        useCool=False
+        sys.argv.remove("--oracle")
     if "--cool" in sys.argv:
         useCool=True
         sys.argv.remove("--cool")
