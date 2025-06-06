@@ -384,7 +384,7 @@ private:
   /// if false, suppress any non-error/warning printout from the underlying tool
   /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
   Gaudi::Property<bool> m_useCTag{this, "useCTagging", false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging"};
-  Gaudi::Property<bool> m_readFromBTaggingObject{this, "readFromBTaggingObject", true, "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself."};
+  Gaudi::Property<bool> m_readFromBTaggingObject{this, "readFromBTaggingObject", false, "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself."};
   /// if this string is empty, the onnx tool won't be created
   Gaudi::Property<std::string> m_pathToONNX{this, "pathToONNX", "", "path to the onnx file that will be used for inference"};
   /// @}

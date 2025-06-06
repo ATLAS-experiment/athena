@@ -70,6 +70,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(EGammaCommonCfg(flags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
@@ -90,7 +91,8 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTagJetColl.append('AntiKt4EMTopoJets')
     if flags.Reco.EnableBTagging:
-        acc.merge(FtagJetCollectionsCfg(flags,FTagJetColl))
+        acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
+        acc.merge(FtagJetCollectionsCfg(flags, ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]))
     acc.merge(METCommonCfg(flags))
 
     # Trigger matching

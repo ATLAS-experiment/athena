@@ -97,6 +97,11 @@ class FTagJetSFBlock(ConfigBlock):
         self.addOption ('removeHLTPrefix', True, type=bool,
             info="remove the HLT prefix from trigger chain names, "
             "The default is True.")
+        self.addOption('readFromBTaggingObject', True, type=bool,
+            info="whether to read the b-tagging information from the BTagging object "
+            "instead of the jet container. FTAG group has dropped BTagging object, all"
+            "b-tagging related variables are attached to jet container. This only serves"
+            "as a compatibility option for analysis that use old derivations.")
 
     def configureEfficiencyTool(self, config, btagger, btagWP, jetContainer,
                                 bTagCalibFile, DSID, tool,
@@ -108,6 +113,7 @@ class FTagJetSFBlock(ConfigBlock):
         tool.EfficiencyFileName = bTagCalibFile
         tool.ScaleFactorFileName = bTagCalibFile
         tool.SystematicsStrategy = self.systematicsStrategy
+        tool.readFromBTaggingObject = self.readFromBTaggingObject
         if self.systematicsStrategy == "SFEigen":
             tool.EigenvectorReductionB = self.eigenvectorReductionB
             tool.EigenvectorReductionC = self.eigenvectorReductionC
