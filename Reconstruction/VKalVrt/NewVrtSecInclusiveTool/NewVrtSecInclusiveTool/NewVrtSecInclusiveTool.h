@@ -227,7 +227,7 @@ namespace Rec {
      int getIdHF(const xAOD::TrackParticle* TP ) const;
      static int getG4Inter( const xAOD::TrackParticle* TP );
      static int getMCPileup(const xAOD::TrackParticle* TP );
-     static int getProdVrtBarcode(const xAOD::TrackParticle* TP , float resolLimit=0.1); //Vertex-Vertex resolution limit =100mkm
+     static int getProdVrtBarcode(const xAOD::TrackParticle* TP , float resolLimit=0.1); //Vertex-Vertex resolution limit =100mkm  // FIXME barcode-based
      static bool checkTrue2TrVrt(const xAOD::TrackParticle * TP1, const xAOD::TrackParticle * TP2, float nearCut=0.1); // Check true prod. vrt. closeness, def=100mkm
 
      struct DevTuple 
