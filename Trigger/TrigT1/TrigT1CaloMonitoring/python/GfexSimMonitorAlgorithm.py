@@ -53,9 +53,16 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
                                ybins=1,ymin=0,ymax=1,
                                opt=['kAddBinsDynamically'])
 
-    helper.defineTree('LBN,Signature,LBNString,EventNumber,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
-                      "lbn/l:Signature/string:lbnString/string:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
+
+    helper.defineTree('LBN,Signature,LBNString,L1ID,EventNumber,dataEtas,dataPhis,dataEts,dataWord0s,simEtas,simPhis,simEts,simWord0s;mismatched_jet',
+                      "lbn/l:Signature/string:lbnString/string:L1ID/i:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataEts/vector<int>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simEts/vector<int>:simWord0s/vector<unsigned int>",
                       title="mismatched;LBN;Signature",fillGroup="mismatches")
+
+    helper.defineTree('LBN,Signature,LBNString,L1ID,EventNumber,dataTOB1,dataTOB2,dataWord0s,simTOB1,simTOB2,simWord0s;mismatched_global',
+                      "lbn/l:Signature/string:lbnString/string:L1ID/i:eventNumber/l:dataTOB1/vector<float>:dataTOB2/vector<float>:dataWord0s/vector<unsigned int>:simTOB1/vector<float>:simTOB2/vector<float>:simWord0s/vector<unsigned int>",
+                      title="mismatched;LBN;Signature",fillGroup="mismatches")
+
+
 
     return helper.result()
 
