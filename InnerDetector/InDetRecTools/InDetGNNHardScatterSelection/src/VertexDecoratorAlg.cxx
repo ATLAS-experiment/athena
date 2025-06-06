@@ -9,6 +9,8 @@
 #include "AthContainers/ConstDataVector.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
+#include "PhotonVertexSelection/PhotonVertexHelpers.h"
+
 
 namespace InDetGNNHardScatterSelection
 {
@@ -140,9 +142,6 @@ namespace InDetGNNHardScatterSelection
 
       dec_actualInterPerXing(*vertex) = eventInfo->actualInteractionsPerCrossing();
 
-      // taken from InDetPerfPlot_VertexTruthMatching.cxx
-      float sumPt = 0;
-
       // variables for calculation of delta Z asymmetry and delta d asymmetry
       float z_asym = 0;
       float sumDZ = 0;
@@ -162,7 +161,6 @@ namespace InDetGNNHardScatterSelection
 
         if(!trackTmp) continue;
 
-        sumPt += trackTmp->pt();
         deltaZ = trackTmp->z0() + trackTmp->vz() - vertex->z();
         track_deltaZ.push_back(deltaZ);
         // get the track weight for each track to get the deltaZ/trk_weight
@@ -212,7 +210,7 @@ namespace InDetGNNHardScatterSelection
       dec_ntrk(*vertex) = number_tracks;
 
       if(!dec_sumPt.isAvailable()){
-        dec_sumPt(*vertex) = sumPt;
+        dec_sumPt(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 1, false);
       }
       dec_chi2Over_ndf(*vertex) = vertex->chiSquared() / vertex->numberDoF();
       dec_z_asym(*vertex) = z_asym;
