@@ -103,7 +103,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
 
 
-		fill("gTowers",Toweret,Towersaturationflag);
+		fill("gTowers",Toweret);
 
 		if (eta < -3.17 && eta > -3.25){ eta = -3.225;}
 		if (eta < 3.3 && eta > 3.17){ eta = 3.275;}
@@ -114,40 +114,54 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 			nTowers++;
 		}
 
+		//looking at only saturated gTowers
+		if (int(Towersaturationflag) == 1){	
+			if (std::abs(eta) >= 3.2 ){ //FPGAc
+				Towerphi = phi- 0.1;
+				fill("SatgTowers",Towereta,Towerphi,Toweret);	
+				Towerphi = phi + 0.1;
+				fill("SatgTowers",Towereta,Towerphi,Toweret);
+			} else { //FPGA a&b
+				Towerphi = phi;
+				fill("SatgTowers",Towereta,Towerphi,Toweret);
+			}
+		}
+
+
 		//GREATER THAN 2GEV
 		if (gfexTowerRoI->towerEt() >= 10){
 			if (std::abs(eta) >= 3.2 ){
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
-				fill("highEtgTowers",Towereta,Towerphi);
+				fill("highEtgTowers",Towereta,Towerphi,Toweret);
 				fill("highEtgTowers",lbn,binNumber);	
 				Towerphi = phi + 0.1;
 				binNumber = getBinNumberTower(eta, phi+0.1,0,0);
-				fill("highEtgTowers",Towereta,Towerphi);
+				fill("highEtgTowers",Towereta,Towerphi,Toweret);
 				fill("highEtgTowers",lbn,binNumber);
 			} else {
 				Towerphi = phi;
 				binNumber = getBinNumberTower(eta,phi,0,0);
-				fill("highEtgTowers",Towereta,Towerphi);
+				fill("highEtgTowers",Towereta,Towerphi,Toweret);
 				fill("highEtgTowers",lbn,binNumber);
 			}
 			
 		}
-      //only for h_gTower_coldtowers_etaphimap
+      	//only for h_gTower_coldtowers_etaphimap
 		else if (gfexTowerRoI->towerEt() <= -10){
 			if (std::abs(eta) >= 3.2){
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
-				fill("lowEtgTowers",Towereta,Towerphi);
+				fill("lowEtgTowers",Towereta,Towerphi,Toweret);
 				fill("lowEtgTowers",lbn,binNumber);	
 				Towerphi = phi + 0.1;
 				binNumber = getBinNumberTower(eta, phi+0.1,0,0);
-				fill("lowEtgTowers",Towereta,Towerphi);
+				fill("lowEtgTowers",Towereta,Towerphi,Toweret);
 				fill("lowEtgTowers",lbn,binNumber);
 			} else {
 				Towerphi = phi;
 				binNumber = getBinNumberTower(eta,phi,0,0);
-				fill("lowEtgTowers",Towereta,Towerphi);
+				fill("lowEtgTowers",Towereta,Towerphi,Toweret);
 				fill("lowEtgTowers",lbn,binNumber);
 			}
 		}

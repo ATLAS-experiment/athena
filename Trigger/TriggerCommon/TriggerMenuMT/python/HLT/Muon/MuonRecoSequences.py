@@ -407,7 +407,7 @@ def VDVEFMuCBCfg(flags, RoIs, name, suffix):
       if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
         dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+NswSpacePoints' )]
 
-  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name,
+  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name+suffix,
                                                DataObjects = dataObjects)
   acc.addEventAlgo(alg)
   return acc

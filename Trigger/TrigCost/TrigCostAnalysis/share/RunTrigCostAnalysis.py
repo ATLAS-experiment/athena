@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -194,9 +194,12 @@ def getHltMenu():
 
 
 if __name__=='__main__':
-  import sys
-  from argparse import ArgumentParser
-  parser = ArgumentParser()
+  # Set the Athena configuration flags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+
+  # Add specific command-line arguments
+  parser = flags.getArgumentParser
   parser.add_argument('--outputHist', type=str, default='TrigCostRoot_Results.root', help='Histogram output ROOT file')
   parser.add_argument('--monitorChainAlgorithm', action='store_true', help='Turn on Chain Algorithm monitoring')
   parser.add_argument('--baseWeight', type=float, default=1.0, help='Base events weight')
@@ -212,18 +215,11 @@ if __name__=='__main__':
   parser.add_argument('--MCKFactor', default=1.0, type=float, help='For MC input: Additional multiplicitive fudge-factor to the supplied cross section.')
   parser.add_argument('--MCIgnoreGeneratorWeights', action='store_true', help='For MC input: Flag to disregard any generator weights.')
 
-  parser.add_argument('--maxEvents', type=int, help='Maximum number of events to process')
-  parser.add_argument('--skipEvents',type=int, help='Number of events to skip')
-  parser.add_argument('--loglevel', type=int, default=3, help='Verbosity level: 1 - VERBOSE, 2 - DEBUG, 3 - INFO')
-  parser.add_argument('flags', nargs='*', help='Config flag overrides')  
   args = parser.parse_args()
 
   log.level = args.loglevel
 
-  # Set the Athena configuration flags
-  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   # verbosity defined in Control/AthenaCommon/python/Constants.py
-  flags = initConfigFlags()
   flags.Exec.OutputLevel = args.loglevel
   flags.fillFromArgs(args.flags)
   flags.lock()
@@ -255,4 +251,5 @@ if __name__=='__main__':
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
   cfg.printConfig(withDetails=False) # set True for exhaustive info
   sc = cfg.run(args.maxEvents)
+  import sys
   sys.exit(0 if sc.isSuccess() else 1)
