@@ -107,13 +107,18 @@ def ActsMainTrackFindingAlgCfg(flags,
     # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
     if isFastPrimaryPass(flags):
-        kwargs.setdefault("chi2CutOff", [100])
-        kwargs.setdefault("chi2OutlierCutOff", [100])
+        kwargs.setdefault("chi2CutOff", [20])
+        kwargs.setdefault("chi2OutlierCutOff", [50])
     else:
         kwargs.setdefault("chi2CutOff", [25])
         kwargs.setdefault("chi2OutlierCutOff", [25])
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
+
+    # Loosen the requirement on the minimum number of measurements on track candidate
+    # during track finding for tracks above a certain eta
+    kwargs.setdefault("branchStopperMeasCutReduce", flags.Acts.branchStopperMeasCutReduce)
+    kwargs.setdefault("branchStopperAbsEtaMeasCut", flags.Acts.branchStopperAbsEtaMeasCut)
 
     kwargs.setdefault("numMeasurementsCutOff", [1])
 

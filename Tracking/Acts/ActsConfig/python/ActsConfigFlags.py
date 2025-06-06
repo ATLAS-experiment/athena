@@ -101,6 +101,10 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useStripSeedsFirst', False) # switch order of seed collections
     actscf.addFlag('Acts.autoReverseSearchCKF', False) # track finding starts going inward first if we are outside the defined RZ boundary
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
+    actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
+    actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
+        
+    # Ambiguity resolution
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
