@@ -186,8 +186,8 @@ namespace Rec{
                 getPixelDiscs(selectedTracks[j],jdisk1,jdisk2,jdisk3);
                 vrtVrtDist(primVrt, tmpVrt.fitVertex, tmpVrt.errorMatrix, Sig3D);
                 Dist2D=vrtVrtDist2D(primVrt, tmpVrt.fitVertex, tmpVrt.errorMatrix, Sig2D);
-                int barVrt1=getProdVrtBarcode(tracksForFit[0],0.1);
-                int barVrt2=getProdVrtBarcode(tracksForFit[1],0.1);
+                int barVrt1=getProdVrtBarcode(tracksForFit[0],0.1); // FIXME barcode-based
+                int barVrt2=getProdVrtBarcode(tracksForFit[1],0.1); // FIXME barcode-based
                 h.m_hb_signif3D->Fill(Sig3D,1.);
                 h.m_curTup->VrtTrkHF [h.m_curTup->n2Vrt] = getIdHF(tracksForFit[0])+ getIdHF(tracksForFit[1]);
                 h.m_curTup->VrtTrkI  [h.m_curTup->n2Vrt] = getG4Inter(tracksForFit[0])+ getG4Inter(tracksForFit[1]);

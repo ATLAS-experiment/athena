@@ -59,8 +59,8 @@ namespace Muon {
         if (t1.truthTrack && !t2.truthTrack) return true;
         if (!t1.truthTrack && t2.truthTrack) return false;
         if (!t1.truthTrack && !t2.truthTrack) return false;
-        if (t1.truthTrack->barcode() == t2.truthTrack->barcode()) return t1.numberOfMatchedHits() > t2.numberOfMatchedHits(); // FIXME barcode-based
-        return t1.truthTrack->barcode() < t2.truthTrack->barcode(); // FIXME barcode-based
+        if (HepMC::barcode(t1.truthTrack) == HepMC::barcode(t2.truthTrack)) return t1.numberOfMatchedHits() > t2.numberOfMatchedHits(); // FIXME barcode-based
+        return HepMC::barcode(t1.truthTrack) < HepMC::barcode(t2.truthTrack); // FIXME barcode-based
     }
 
     MuonTrackTruthTool::ResultVec MuonTrackTruthTool::match(const TruthTree& truth_tree, const TrackCollection& tracks) const {
@@ -128,7 +128,7 @@ namespace Muon {
         TrackRecordConstIterator tr_it_end = truthTrackCol->end();
         for (; tr_it != tr_it_end; ++tr_it) {
             int PDGCode((*tr_it).GetPDGCode());
-            int barcode = (*tr_it).barcode(); // FIXME barcode-based
+            int barcode = HepMC::barcode(*tr_it); // FIXME barcode-based
             if (!m_matchAllParticles && !selectPdg(PDGCode)) {
                 ATH_MSG_VERBOSE(" discarding truth track: pdg " << PDGCode << "  barcode " << barcode);
                 continue;
@@ -144,13 +144,13 @@ namespace Muon {
             std::unique_ptr<TruthTrajectory> truthTrajectory;
             // associate the muon truth with the gen event info
             if (genEvent) {
-                HepMC::ConstGenParticlePtr genParticle = HepMC::barcode_to_particle(genEvent, (*tr_it).barcode()); // FIXME barcode-based
+                HepMC::ConstGenParticlePtr genParticle = HepMC::barcode_to_particle(genEvent, HepMC::barcode(*tr_it)); // FIXME barcode-based
                 if (genParticle) {
                     truthTrajectory = std::make_unique<TruthTrajectory>();
                     m_truthTrajectoryBuilder->buildTruthTrajectory(truthTrajectory.get(), genParticle);
                     if (!truthTrajectory->empty()) {
                         // always use barcode of the 'final' particle in chain in map
-                        barcode = truthTrajectory->front().barcode();
+                        barcode = HepMC::barcode(truthTrajectory->front()); // FIXME barcode-based
 
                         if (msgLvl(MSG::VERBOSE)) {
                             auto particle = truthTrajectory->front().cptr();
@@ -165,7 +165,7 @@ namespace Muon {
                         std::vector<HepMcParticleLink>::const_iterator pit = truthTrajectory->begin();
                         std::vector<HepMcParticleLink>::const_iterator pit_end = truthTrajectory->end();
                         for (; pit != pit_end; ++pit) {
-                            int code = (*pit).barcode();
+                            int code = HepMC::barcode(*pit); // FIXME barcode-based
 
                             if (msgLvl(MSG::VERBOSE) && code != barcode) {
                                 auto particle = (*pit).cptr();
@@ -217,13 +217,13 @@ namespace Muon {
             if (nhits < m_minHits) erase = true;
 
             if (erase) {
-                ATH_MSG_VERBOSE(" Erasing entry: barcode " << it->second.truthTrack->barcode() << " manip "
-                                                           << manipulateBarCode(it->second.truthTrack->barcode()) << " hits " << nhits); // FIXME barcode-based
+                ATH_MSG_VERBOSE(" Erasing entry: barcode " << HepMC::barcode(it->second.truthTrack) << " manip "
+                                                           << manipulateBarCode(HepMC::barcode(it->second.truthTrack)) << " hits " << nhits); // FIXME barcode-based
                 badBarcodes.push_back(it->first);
             } else {
                 ++ngood;
-                ATH_MSG_VERBOSE(" Keeping entry: barcode " << it->second.truthTrack->barcode() << " manip "
-                                                           << manipulateBarCode(it->second.truthTrack->barcode()) << " hits " << nhits); // FIXME barcode-based
+                ATH_MSG_VERBOSE(" Keeping entry: barcode " << HepMC::barcode(it->second.truthTrack) << " manip "
+                                                           << manipulateBarCode(HepMC::barcode(it->second.truthTrack)) << " hits " << nhits); // FIXME barcode-based
             }
         }
 
@@ -243,8 +243,8 @@ namespace Muon {
                 if (!it->second.truthTrack)
                     ATH_MSG_INFO(" no TrackRecord ");
                 else {
-                    ATH_MSG_INFO(" PDG " << it->second.truthTrack->GetPDGCode() << " barcode " << it->second.truthTrack->barcode()
-                                         << " manip " << manipulateBarCode(it->second.truthTrack->barcode())); // FIXME barcode-based
+                    ATH_MSG_INFO(" PDG " << it->second.truthTrack->GetPDGCode() << " barcode " << HepMC::barcode(it->second.truthTrack)
+                                         << " manip " << manipulateBarCode(HepMC::barcode(it->second.truthTrack))); // FIXME barcode-based
                 }
                 if (!it->second.mdtHits.empty()) ATH_MSG_INFO(" mdt  " << it->second.mdtHits.size());
                 if (!it->second.rpcHits.empty()) ATH_MSG_INFO(" rpc  " << it->second.rpcHits.size());
@@ -273,7 +273,7 @@ namespace Muon {
             std::vector<MuonSimData::Deposit>::const_iterator dit = it->second.getdeposits().begin();
             std::vector<MuonSimData::Deposit>::const_iterator dit_end = it->second.getdeposits().end();
             for (; dit != dit_end; ++dit) {
-                int barcodeIn = dit->first.barcode();
+                int barcodeIn = HepMC::barcode(dit->first); // FIXME barcode-based
                 std::map<int, int>::const_iterator bit = barcode_map.find(barcodeIn);
                 if (bit == barcode_map.end()) {
                     ATH_MSG_VERBOSE(" discarding "
@@ -326,7 +326,7 @@ namespace Muon {
             std::vector<CscSimData::Deposit>::const_iterator dit = it->second.getdeposits().begin();
             std::vector<CscSimData::Deposit>::const_iterator dit_end = it->second.getdeposits().end();
             for (; dit != dit_end; ++dit) {
-                int barcodeIn = manipulateBarCode(dit->first.barcode());
+              int barcodeIn = manipulateBarCode(HepMC::barcode(dit->first)); // FIXME barcode-based
                 std::map<int, int>::const_iterator bit = barcode_map.find(barcodeIn);
                 if (bit == barcode_map.end()) {
                     ATH_MSG_VERBOSE(" discarding "
@@ -637,7 +637,7 @@ namespace Muon {
         bool foundBC = false;
         for (const auto& pit : traj) {
             if (!pit) continue;
-            if (pit.barcode() == barcodeIn || foundBC) {
+            if (HepMC::barcode(pit) == barcodeIn || foundBC) { // FIXME barcode-based
                 foundBC = true;
                 ATH_MSG_DEBUG("getMother() : " << pit );
 #ifdef HEPMC3
@@ -657,7 +657,7 @@ namespace Muon {
         bool foundBC = false;
         for (const auto& pit : traj) {
             if (!pit) continue;
-            if (pit.barcode() == barcodeIn || foundBC) {
+            if (HepMC::barcode(pit) == barcodeIn || foundBC) { // FIXME barcode-based
                 foundBC = true;
 #ifdef HEPMC3
                 auto particle = pit.scptr();
@@ -682,7 +682,7 @@ namespace Muon {
         double ePrev = 0.;
         HepMC::ConstGenParticlePtr theFirst{nullptr};
         for (auto pit = traj.begin(); pit != traj.end(); ++pit) {
-            if ((*pit).barcode() == barcodeIn || foundBC) {
+            if (HepMC::barcode(*pit) == barcodeIn || foundBC) { // FIXME barcode-based
               auto particle = (*pit).scptr();
 #ifdef HEPMC3
                 if (!foundBC) {

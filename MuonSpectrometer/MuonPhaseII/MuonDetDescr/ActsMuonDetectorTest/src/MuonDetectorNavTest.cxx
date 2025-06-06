@@ -166,8 +166,8 @@ StatusCode MuonDetectorNavTest::execute() {
     for(const xAOD::TruthParticle* truthParticle : *truthParticles){
         
         ATH_MSG_DEBUG("Consider truth particle "<<truthParticle->pt()<<", "<<truthParticle->p4().P()<<", "<<truthParticle->eta()<<", "<<truthParticle->phi()
-                        <<", pdgId: "<<truthParticle->pdgId()<<", status: "<<truthParticle->status()
-                    <<", unique id:"<<truthParticle->id());
+                        <<", pdgId: "<<truthParticle->pdgId()<<", status: "<< HepMC::status(truthParticle)
+                    <<", unique id:"<< HepMC::uniqueID(truthParticle));
         
             //propagated and truth hits expressed in the local frame of the measurement layer           
         std::vector<PropagatorRecorder> propagatedHits;
