@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -41,7 +41,7 @@ TrigGlobalEfficiencyCorrectionTool::TrigGlobalEfficiencyCorrectionTool(const std
 	declareProperty("MuonTools", m_suppliedMuonTools, "muon efficiency/scale factor tool (one per year)");
 	declareProperty("ListOfLegsPerTool", m_legsPerTool, "comma-separated list of trigger legs supported by each electron or photon tool");
 	declareProperty("TriggerCombination", m_triggerCb, "map of trigger combination per period and/or range of runs");
-	for(int y : {15, 16, 17, 18, 22, 23, 24, 25})
+	for(int y : {15, 16, 17, 18, 22, 23, 24, 25, 26})
 	{
 		std::string year = std::to_string(2000 + y);
 		declareProperty("TriggerCombination" + year, m_triggerCbPerYear[year] = "", "trigger combination \"trigger1 || trigger2 || ...\"");
