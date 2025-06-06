@@ -5,8 +5,8 @@ atlas_subdir( MuSAVtxFitter )
 
 atlas_add_library( MuSAVtxFitterLib
                    src/*.cxx
-                   PUBLIC_HEADERS MuSAVtxFitter
-                   LINK_LIBRARIES AthenaBaseComps GaudiKernel StoreGateLib xAODTracking TrkVertexAnalysisUtilsLib BeamSpotConditionsData TruthUtils InDetConversionFinderToolsLib ITrackToVertex TrkExInterfaces TrkToolInterfaces TrkVertexFitterInterfaces xAODEventInfo xAODMuon TrkVKalVrtFitterLib VrtSecInclusiveLib)
+                   PUBLIC_HEADERS MuSAVtxFitter 
+                   LINK_LIBRARIES AthenaBaseComps GaudiKernel StoreGateLib xAODTracking TrkVertexAnalysisUtilsLib BeamSpotConditionsData TruthUtils InDetConversionFinderToolsLib ITrackToVertex TrkExInterfaces TrkToolInterfaces TrkVertexFitterInterfaces xAODEventInfo xAODMuon TrkVKalVrtFitterLib VrtSecInclusiveLib JpsiUpsilonToolsLib)
 
 atlas_add_component( MuSAVtxFitter
                      src/components/*.cxx

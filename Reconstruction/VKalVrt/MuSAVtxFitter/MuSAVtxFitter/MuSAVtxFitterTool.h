@@ -90,6 +90,7 @@ namespace Rec {
         
         DoubleProperty m_etaCutMSTP{this, "etaCutMSTP", 2.5, "Maximum |eta| of input MSTPs"};
         DoubleProperty m_baseChi2Cut{this, "baseChi2Cut", 50., "Maximum allowed chi2 of saved vertices"};
+        Gaudi::Property<bool> m_doValidation{this, "doValidation", false, "Vertex every MSTP in input as part of validation process"};
 
     };
 }

@@ -66,53 +66,73 @@ std::unique_ptr<xAOD::TrackParticle> MuSAVtxFitterTool::extrapolateMuSA(const xA
     return newTrack;
 }
 
-StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt>& workVerticesContainer, const xAOD::MuonContainer& muonContainer, const xAOD::EventInfo& eventInfo, const EventContext& ctx) const
+StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt>& workVerticesContainer,
+                                          const xAOD::MuonContainer& muonContainer,
+                                          const xAOD::EventInfo& eventInfo,
+                                          const EventContext& ctx) const
 {
     ATH_MSG_DEBUG("MuSAVtxFitterTool::doMuSAVtxFit");
 
-    // Allocate standalone muons and perform extrapolation.
-    std::vector<const xAOD::Muon*> standaloneMuons;
-    // Use a vector of unique_ptrs to manage extrapolated tracks (temporarily)
-    std::vector<std::unique_ptr<xAOD::TrackParticle>> extrapolatedMuSATracks;
-    std::map<const xAOD::TrackParticle*, const xAOD::Muon*> muonToExtrapolatedTrackMap;
-
+    // first gather all SA muons that pass basic checks
+    std::vector<const xAOD::Muon*> candidateSAmuons;
     for (const auto muon : muonContainer) {
-        if (muon->muonType() == xAOD::Muon::MuonStandAlone) {
-            const xAOD::TrackParticle* MuSAMSTP = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
-            if (!MuSAMSTP) {
-                ATH_MSG_WARNING("Found StandAlone muon with no MSTP -- check your input!");
-                continue;
-            }
-            standaloneMuons.push_back(muon);
+        bool isSA = (muon->muonType() == xAOD::Muon::MuonStandAlone);
+        bool isCalo = (muon->muonType() == xAOD::Muon::CaloTagged);
+        bool isSegment = (muon->muonType() == xAOD::Muon::SegmentTagged);
+        bool isSiForward = (muon->muonType() == xAOD::Muon::SiliconAssociatedForwardMuon);
 
-            // pre-fit cuts at "seeding" level go here -- primarily eta but more can be added if needed in the future
-            if (std::abs(MuSAMSTP->eta()) > m_etaCutMSTP) {
-                ATH_MSG_VERBOSE("Skipping SA muon with |eta| > 2.5!");
-                continue;
-            }
-
-            // ignore muons with unphysical pT (prevents extrapolator crashes!)
-            if (MuSAMSTP->pt() > 13000000) {
-                ATH_MSG_DEBUG("Skipping SA muon with pT " << (MuSAMSTP->pt() / 1000) << " GeV!");
-                continue;
-            }
-
-            auto extrapolatedMuSATrack = extrapolateMuSA(*MuSAMSTP, eventInfo, ctx);
-
-            //extrapolations can sometimes fail for non-pathological reasons, check for dummy parameters 
-            if (extrapolatedMuSATrack->definingParameters()[Trk::d0] > 8000) { 
-                ATH_MSG_DEBUG("Failed to extrapolate MuSA track, skipping!");
-                continue;
-            }
-            extrapolatedMuSATracks.push_back(std::move(extrapolatedMuSATrack));
-            muonToExtrapolatedTrackMap[extrapolatedMuSATracks.back().get()] = muon;
-            ATH_MSG_VERBOSE("Extrapolated MuSA track! Total extrapolated so far: " << extrapolatedMuSATracks.size());
+        if (!isSA && !m_doValidation) {
+            continue; 
         }
+
+        const xAOD::TrackParticle* MuSAMSTP = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+        if (!MuSAMSTP) {
+            if (isCalo || isSegment || isSiForward) {
+                ATH_MSG_VERBOSE("Skipping non-SA, non-Combined muon type in validation mode!");
+            } else {
+                ATH_MSG_WARNING("Muon has no MSTP, check your input!");
+            }
+            continue;
+        }
+
+        // pre-fit cuts at "seeding" level go here
+        if (std::abs(MuSAMSTP->eta()) > m_etaCutMSTP) {
+            ATH_MSG_VERBOSE("Skipping SA muon with |eta| > 2.5!");
+            continue;
+        }
+        // SA muons can get saved with nonphysical pT values, checking prevents extrap crashes
+        if (MuSAMSTP->pt() > 13000000) {
+            ATH_MSG_DEBUG("Skipping SA muon with pT " << (MuSAMSTP->pt() / 1000.) << " GeV!");
+            continue;
+        }
+        // SA muons can also be saved in regions with 0 magnetic field, which can cause extrapolation crashes
+        if (std::abs(muon->spectrometerFieldIntegral) < 0.1) {
+            ATH_MSG_DEBUG("Skipping SA muon with spectrometerFieldIntegral " << muon->spectrometerFieldIntegral << " T*m!");
+            continue;
+        }
+
+        candidateSAmuons.push_back(muon);
     }
 
-    if (standaloneMuons.size() < 2) {
+    // bail out if we don't have at least two valid SA muons
+    if (candidateSAmuons.size() < 2) {
         ATH_MSG_VERBOSE("Not enough standalone muons to fit a vertex!");
         return StatusCode::SUCCESS;
+    }
+
+    // extrapolate SA muons only if we have enough candidates to form a vertex
+    std::vector<std::unique_ptr<xAOD::TrackParticle>> extrapolatedMuSATracks;
+    std::map<const xAOD::TrackParticle*, const xAOD::Muon*> muonToExtrapolatedTrackMap;
+    for (const auto muon : candidateSAmuons) {
+        const xAOD::TrackParticle* MuSAMSTP = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+        auto extrapolatedMuSATrack = extrapolateMuSA(*MuSAMSTP, eventInfo, ctx);
+        if (extrapolatedMuSATrack->definingParameters()[Trk::d0] > 8000) {
+            ATH_MSG_DEBUG("Failed to extrapolate MuSA track, skipping!");
+            continue;
+        }
+        extrapolatedMuSATracks.push_back(std::move(extrapolatedMuSATrack));
+        muonToExtrapolatedTrackMap[extrapolatedMuSATracks.back().get()] = muon;
+        ATH_MSG_VERBOSE("Extrapolated MuSA track! Total extrapolated so far: " << extrapolatedMuSATracks.size());
     }
 
     if (extrapolatedMuSATracks.size() < 2) {

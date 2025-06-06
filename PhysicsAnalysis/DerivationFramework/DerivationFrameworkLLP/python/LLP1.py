@@ -320,7 +320,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     from VrtSecInclusive.VrtSecInclusiveConfig import VrtSecInclusiveCfg
 
     # MuSAVtxFitter
-    from MuSAVtxFitter.MuSAVtxFitterConfig import MuSAVtxFitterConfig
+    from MuSAVtxFitter.MuSAVtxFitterConfig import MuSAVtxFitterConfig, MuSAVtxJPsiValidationAlgCfg, MuSAVtxFitterValidationConfig
 
     acc.merge(VrtSecInclusiveCfg(flags,
                                  name = "VrtSecInclusive",
@@ -451,7 +451,28 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
 
     # MuSA Vertices
     acc.merge(MuSAVtxFitterConfig(flags, 
-                                  MuonContainerName=MergedMuonContainer))
+                                      MuonContainerName=MergedMuonContainer))
+
+    if flags.Derivation.LLP.doMuSAValidation:
+        acc.merge(MuSAVtxJPsiValidationAlgCfg(flags, 
+                                           MuonContainer=MergedMuonContainer,
+                                           JPsiMuonContainer="JPsiMuons"))
+        
+        # JPsi validation MuSA Vertices
+        acc.merge(MuSAVtxFitterValidationConfig(flags,
+                                                name="MuSAVtxFitterValidationJPsi",
+                                                MuonContainerName="JPsiMuons"))
+        
+        # all MSTPs validation MuSA Vertices
+        acc.merge(MuSAVtxFitterValidationConfig(flags,
+                                                MuonContainerName=MergedMuonContainer,
+                                                MuSAVtxContainerName="ValidationMuSAVertices",
+                                                MuSAExtrapolatedTracksName="ValidationMuSAExtrapolatedTrackParticles",
+                                                MSTPContainerName="MuonSpectrometerTrackParticles"))
+                                            
+
+    
+
 
     # NewVSI: LepTrack variation
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import NewVrtSecInclusiveAlgLLPCfg
@@ -948,6 +969,16 @@ def LLP1Cfg(flags):
     StaticContent += ["xAOD::VertexAuxContainer#MuSAVerticesAux."]
     StaticContent += ["xAOD::TrackParticleContainer#MuSAExtrapolatedTrackParticles"]
     StaticContent += ["xAOD::TrackParticleAuxContainer#MuSAExtrapolatedTrackParticlesAux."]
+
+    if flags.Derivation.LLP.doMuSAValidation:
+        StaticContent += ["xAOD::VertexContainer#JPsiMuSAVertices"]
+        StaticContent += ["xAOD::VertexAuxContainer#JPsiMuSAVerticesAux."]
+        StaticContent += ["xAOD::TrackParticleContainer#JPsiMuSAExtrapolatedTrackParticles"]
+        StaticContent += ["xAOD::TrackParticleAuxContainer#JPsiMuSAExtrapolatedTrackParticlesAux."]
+        StaticContent += ["xAOD::VertexContainer#ValidationMuSAVertices"]
+        StaticContent += ["xAOD::VertexAuxContainer#ValidationMuSAVerticesAux."]
+        StaticContent += ["xAOD::TrackParticleContainer#ValidationMuSAExtrapolatedTrackParticles"]
+        StaticContent += ["xAOD::TrackParticleAuxContainer#ValidationMuSAExtrapolatedTrackParticlesAux."]
 
     LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
                                           "Electrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",

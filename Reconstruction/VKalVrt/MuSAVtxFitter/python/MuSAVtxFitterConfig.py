@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+#default MuSAVtxFitterTool configuration
 def MuSAVtxFitterToolConfig(flags, name="MuSAVtxFitterTool", **kwargs):
     acc = ComponentAccumulator()
 
@@ -18,10 +19,13 @@ def MuSAVtxFitterToolConfig(flags, name="MuSAVtxFitterTool", **kwargs):
 
     kwargs.setdefault("etaCutMSTP", 2.5)
     kwargs.setdefault("baseChi2Cut", 50)
+    
+    kwargs.setdefault("doValidation", False)
 
     acc.setPrivateTools(CompFactory.Rec.MuSAVtxFitterTool(name,**kwargs))
     return acc
 
+#default MuSAVtxFitter configuration
 def MuSAVtxFitterConfig(flags, name="MuSAVtxFitter", **kwargs): 
     acc = ComponentAccumulator()
 
@@ -37,6 +41,45 @@ def MuSAVtxFitterConfig(flags, name="MuSAVtxFitter", **kwargs):
     if "MuSAVtxToolName" not in kwargs:
         from MuSAVtxFitter.MuSAVtxFitterConfig import MuSAVtxFitterToolConfig
         kwargs.setdefault("MuSAVtxToolName", acc.popToolsAndMerge(MuSAVtxFitterToolConfig(flags)))
+        
+    acc.addEventAlgo(CompFactory.Rec.MuSAVtxFitter(name, **kwargs))
+        
+    return acc
+
+# config for J/Psi collection for tag and probe validation
+def MuSAVtxJPsiValidationAlgCfg(flags, name="MuSAVtxJPsiValidationAlg", **kwargs):
+    acc = ComponentAccumulator()
+
+    # Configure the JpsiFinder tool
+    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import JpsiFinderCfg
+    jpsiFinderTool = acc.popToolsAndMerge(JpsiFinderCfg(flags))
+    kwargs.setdefault("JpsiFinderTool", jpsiFinderTool)
+
+    # Set default input/output container names if not provided
+    kwargs.setdefault("MuonContainer", "Muons")
+    kwargs.setdefault("EventInfo", "EventInfo")
+    kwargs.setdefault("JPsiMuonContainer", "JPsiMuons")
+    
+    acc.addEventAlgo( CompFactory.Rec.MuSAVtxJPsiValidationAlg(name, **kwargs) )
+
+    return acc
+
+#config for running MuSAFitter on all MSTPs
+def MuSAVtxFitterValidationConfig(flags, name="MuSAVtxFitterValidation", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("MuSAVtxContainerName", "JPsiMuSAVertices")
+    kwargs.setdefault("MuSAExtrapolatedTracksName", "JPsiMuSAExtrapolatedTrackParticles")
+    kwargs.setdefault("MuonContainerName", "JPsiMuons")
+    kwargs.setdefault("MSTPContainerName", "MuonSpectrometerTrackParticles")
+
+    if "TrackToVertexTool" not in kwargs:
+        from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
+        kwargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
+    
+    if "MuSAVtxToolName" not in kwargs:
+        from MuSAVtxFitter.MuSAVtxFitterConfig import MuSAVtxFitterToolConfig
+        kwargs.setdefault("MuSAVtxToolName", acc.popToolsAndMerge(MuSAVtxFitterToolConfig(flags, doValidation=True)))
         
     acc.addEventAlgo(CompFactory.Rec.MuSAVtxFitter(name, **kwargs))
         
