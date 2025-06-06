@@ -169,7 +169,7 @@ def TauRunnerAlgCfg(flags):
             tools.append( result.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags, version=0, applyTrackSel=True)) )
             tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags, version=0, tauContainerName=flags.Tau.ActiveConfig.TauJets)) )
         if flags.Tau.doTauNeutralFourVecNNRegression:
-            tools.append(result.popToolsAndMerge(tauTools.TauNeutralFourVecNNRegressionCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauNeutralFourVecNNRegressionCfg(flags)) )
 
     TauRunnerAlg = CompFactory.getComp("TauRunnerAlg")
     RunnerAlg = TauRunnerAlg(name                           = flags.Tau.ActiveConfig.prefix+"TauRecRunnerAlg",
