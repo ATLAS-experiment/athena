@@ -1,0 +1,179 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include <type_traits>
+/*
+ * Actual Implementation method for StepForwardFit.
+ * Templated on MeasurementBase or PrepRawData.
+ *
+ * Using std Kalman notation and omitting Covariances
+ * 1. We extrapolate our current best prediction x_{k-1|k−1}
+ * to a surface
+ * 2. We obtain a "predictedState" x_{k|k−1} = Fx_{k-1|k−1}  + w_k
+ * 3. We perform the update with the measurement.
+ * x_{k|k} = x_{k|k−1} + K_k m_k− H_k x_{k|k−1}
+ * 4. Return true if the step was succesful.
+ * In which case
+ * - We add a TSOS containing the "predictedState" x_{k|k−1} to the
+ * forwardTrajectory
+ * - The "updatedState" x_{k|k} is ready for the next step.
+ */
+template <typename T>
+bool
+Trk::GaussianSumFitter::stepForwardFit(
+    const EventContext& ctx,
+    Trk::IMultiStateExtrapolator::Cache& extrapolatorCache,
+    GSFTrajectory& forwardTrajectory,
+    const T* inMeasurement,
+    const Trk::Surface& surface,
+    Trk::MultiComponentState& updatedState,
+    const Trk::ParticleHypothesis particleHypothesis) const {
+
+  static_assert(std::is_same_v<T, Trk::MeasurementBase> ||
+                    std::is_same_v<T, Trk::PrepRawData>,
+                "input should be Trk::MeasurementBase or Trk::PrepRawData");
+  // Protect against undefined Measurement or PrepRawData
+  if (!inMeasurement) {
+    ATH_MSG_WARNING("No measurement passed to StepForwardFit!");
+    return false;
+  }
+  // Propagate the multi-component state to the next measurement surface
+  // accounting for the material effects. This gives us the prediction at that surface.
+  Trk::MultiComponentState predictedState =
+    m_extrapolator->extrapolate(ctx,
+                                extrapolatorCache,
+                                updatedState,
+                                surface,
+                                Trk::alongMomentum,
+                                false,
+                                particleHypothesis);
+  if (predictedState.empty()) {
+    return false;
+  }
+
+  std::unique_ptr<Trk::MeasurementBase> measurement = nullptr;
+  //We need different treatment for the different inputs
+  if constexpr (std::is_same_v<T, Trk::MeasurementBase>){
+    // clone original MeasurementBase object
+    measurement.reset(inMeasurement->clone());
+  } else {
+    // Create a new MeasurementBase object from PrepRawData
+    std::unique_ptr<Trk::TrackParameters> combinedState =
+        MultiComponentStateCombiner::combineToSingle(predictedState);
+    if (!combinedState) {
+      ATH_MSG_WARNING("State combination failed... exiting");
+      return false;
+    }
+    measurement.reset(
+        m_rioOnTrackCreator->correct(*inMeasurement, *combinedState, ctx));
+    if (!measurement) {
+      ATH_MSG_WARNING("stepForwardFit no measurement to update with");
+      return false;
+    }
+  }
+  // Perform measurement update
+  auto fitQuality = Trk::FitQualityOnSurface{};
+  // We need to keep the extrapolatedState so clone
+  updatedState = Trk::GsfMeasurementUpdator::update(
+    MultiComponentStateHelpers::clone(predictedState),
+    *measurement,
+    fitQuality);
+
+  if (updatedState.empty()) {
+    return false;
+  }
+  // Hits with excessive chi2 are outliers.
+  // We ingore the update, reset back to the extrapolated
+  // state before the update
+  if (fitQuality.chiSquared() >
+      m_cutChiSquaredPerNumberDOF * fitQuality.numberDoF()) {
+    fitQuality = FitQualityOnSurface(1, 1);
+    std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type(0);
+    type.set(TrackStateOnSurface::Outlier);
+    forwardTrajectory.emplace_back(
+        fitQuality, std::move(measurement), nullptr,
+        Trk::MultiComponentStateHelpers::clone(predictedState), type);
+    // reset the updated state to the predicted state
+    // before the measurement update
+    updatedState = std::move(predictedState);
+    return true;
+  }
+  forwardTrajectory.emplace_back(fitQuality, std::move(measurement), nullptr,
+                                   std::move(predictedState));
+  return true;
+}
+
+/* @ Forward fit on a set of MeasurementBase or PrepRawData */
+template <typename T>
+Trk::GaussianSumFitter::GSFTrajectory
+Trk::GaussianSumFitter::forwardFit(
+    const EventContext& ctx,
+    Trk::IMultiStateExtrapolator::Cache& extrapolatorCache,
+    const T& inputSet,
+    const Trk::TrackParameters& estimatedTrackParametersNearOrigin,
+    const Trk::ParticleHypothesis particleHypothesis) const {
+
+  static_assert(std::is_same_v<T, Trk::MeasurementSet> ||
+                    std::is_same_v<T, Trk::PrepRawDataSet>,
+                "input should be Trk::MeasurementSet or Trk::PrepRawDataSe");
+  if (inputSet.empty()) {
+    ATH_MSG_ERROR("forwardFit: Input Set is empty!");
+    return GSFTrajectory{};
+  }
+
+  // For starting guess a multicompoment state
+  // that has single component with weight 1
+  const AmgVector(5)& par = estimatedTrackParametersNearOrigin.parameters();
+  Trk::ComponentParameters componentParametersNearOrigin = {
+    estimatedTrackParametersNearOrigin.associatedSurface()
+      .createUniqueTrackParameters(par[Trk::loc1],
+                                   par[Trk::loc2],
+                                   par[Trk::phi],
+                                   par[Trk::theta],
+                                   par[Trk::qOverP],
+                                   std::nullopt /*no errors*/),
+    1.};
+  Trk::MultiComponentState multiComponentStateNearOrigin{};
+  multiComponentStateNearOrigin.push_back(std::move(componentParametersNearOrigin));
+  GSFTrajectory forwardTrajectory{};
+  forwardTrajectory.reserve(inputSet.size());
+
+  if constexpr (std::is_same_v<T, Trk::MeasurementSet>){
+    for (const auto* measurement : inputSet) {
+      // Every step the ForwardTrajectory is updated
+      const bool stepIsValid =
+          stepForwardFit(ctx, extrapolatorCache, forwardTrajectory,
+                         measurement, measurement->associatedSurface(),
+                         multiComponentStateNearOrigin, particleHypothesis);
+      if (!stepIsValid) {
+        return GSFTrajectory{};
+      }
+    }
+  }
+  else{
+    // Extract PrepRawDataSet into new local object and check that the
+    // PrepRawData is associated with a detector element
+    T prepRawDataSet;
+    for (const auto* rawData : inputSet) {
+      if (!(rawData->detectorElement())) {
+        ATH_MSG_WARNING("PrepRawData has no Element link... disregard it");
+      } else {
+        prepRawDataSet.push_back(rawData);
+      }
+    }
+    for (const auto* prepRawData : prepRawDataSet) {
+      // Every step the ForwardTrajectory is updated
+      const bool stepIsValid = stepForwardFit(
+          ctx, extrapolatorCache, forwardTrajectory, prepRawData,
+          prepRawData->detectorElement()->surface(prepRawData->identify()),
+          multiComponentStateNearOrigin, particleHypothesis);
+
+      if (!stepIsValid) {
+        return GSFTrajectory{};
+      }
+    }
+  }//end of if constexpr
+  return forwardTrajectory;
+}
+

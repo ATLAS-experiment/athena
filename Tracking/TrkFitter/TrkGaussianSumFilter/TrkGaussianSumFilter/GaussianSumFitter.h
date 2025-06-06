@@ -1,19 +1,23 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
  * @file   GaussianSumFitter.h
  * @date   Monday 7th March 2005
  * @author Tom Athkinson, Anthony Morley, Christos Anastopoulos
- * @brief  Class for fitting according to the Gaussian Sum Filter  formalism
+ * @brief  Class for fitting according to the Gaussian Sum Filter
+ * Formalism Implements Algorithm C described in
+ * "Track fitting with non-Gaussian noise" R.Fruhwirth.
  */
 #ifndef TrkGaussianSumFitter_H
 #define TrkGaussianSumFitter_H
 
 #include "TrkGaussianSumFilter/IMultiStateExtrapolator.h"
-#include "TrkGaussianSumFilterUtils/GsfMeasurementUpdator.h"
 #include "TrkGaussianSumFilter/GSFTsos.h"
+//
+#include "TrkGaussianSumFilterUtils/GsfMeasurementUpdator.h"
+#include "TrkGaussianSumFilterUtils/MultiComponentStateCombiner.h"
 //
 #include "TrkTrack/MultiComponentStateOnSurface.h"
 //
@@ -34,8 +38,6 @@
 #include <atomic>
 
 namespace Trk {
-class IMultiStateMeasurementUpdator;
-class MultiComponentStateOnSurface;
 class FitQuality;
 class Track;
 
@@ -69,8 +71,7 @@ public:
     const PrepRawDataSet&,
     const TrackParameters&,
     const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis particleHypothesis =
-      nonInteracting) const override final;
+    const ParticleHypothesis particleHypothesis = nonInteracting) const override final;
 
   /** Fit a collection of 'RIO_OnTrack' objects using the Gaussian Sum Filter
       - This requires that an trackParameters object be supplied also as an
@@ -80,8 +81,7 @@ public:
     const MeasurementSet&,
     const TrackParameters&,
     const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis particleHypothesis =
-      nonInteracting) const override final;
+    const ParticleHypothesis particleHypothesis = nonInteracting) const override final;
 
   /** Refit a track adding a PrepRawDataSet*/
   virtual std::unique_ptr<Track> fit(
@@ -111,49 +111,42 @@ public:
  using GSFTrajectory = std::vector<GSFTsos>;
 
 private:
+/** @brief Helper to convert the GSFTrajectory to a Trk::Track */
  std::unique_ptr<MultiComponentStateOnSurfaceDV> convertTrajToTrack(
      GSFTrajectory& trajectory) const;
 
- /** Produces a perigee from a smoothed trajectory */
+ /** @brief Produces a perigee from a smoothed trajectory */
  GSFTsos makePerigee(
      const EventContext& ctx,
      Trk::IMultiStateExtrapolator::Cache&,
      const GSFTrajectory& smoothedTrajectory,
      const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
- /** Progress one step along the fit */
+  /** @brief Forward GSF fit */
+ template <typename T>
+ GSFTrajectory forwardFit(
+     const EventContext& ctx,
+     IMultiStateExtrapolator::Cache& cache,
+     const T& inputSet,
+     const TrackParameters& estimatedTrackParametersNearOrigin,
+     const ParticleHypothesis particleHypothesis = nonInteracting) const;
+
+ /** @brief Progress one step along the forward fit */
+ template <typename T>
  bool stepForwardFit(
      const EventContext& ctx,
      IMultiStateExtrapolator::Cache&,
      GSFTrajectory& forwardTrajectory,
-     const PrepRawData* originalPrepRawData,
-     const MeasurementBase* originalMeasurement,
+     const T* measurement,
      const Surface& surface,
      MultiComponentState& updatedState,
      const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
- /** Forward GSF fit using PrepRawData */
- GSFTrajectory forwardPRDfit(
-     const EventContext& ctx,
-     IMultiStateExtrapolator::Cache& cache,
-     const PrepRawDataSet& inputPrepRawDataSet,
-     const TrackParameters& estimatedTrackParametersNearOrigin,
-     const ParticleHypothesis particleHypothesis = nonInteracting) const;
-
- /** Forward GSF fit using MeasurementSet */
- GSFTrajectory forwardMeasurementFit(
-     const EventContext& ctx,
-     IMultiStateExtrapolator::Cache& cache,
-     const MeasurementSet& inputMeasurementSet,
-     const TrackParameters& estimatedTrackParametersNearOrigin,
-     const ParticleHypothesis particleHypothesis = nonInteracting) const;
-
- /** Gsf smoothed trajectory. This method can handle additional info like
+ /** @brief Gsf smoothed trajectory. This method can handle additional info like
   * calorimeter cluster constraints. It also produces what we actually store in
   * Trk::Tracks.*/
  GSFTrajectory smootherFit(
-     const EventContext& ctx,
-     Trk::IMultiStateExtrapolator::Cache&,
+     const EventContext& ctx, Trk::IMultiStateExtrapolator::Cache&,
      GSFTrajectory& forwardTrajectory,
      const ParticleHypothesis particleHypothesis = nonInteracting,
      const CaloCluster_OnTrack* ccot = nullptr) const;
@@ -218,11 +211,11 @@ private:
      50.,
      "Cut on Chi2 per NDOF"};
 
- PropDirection m_directionToPerigee;
  TrkParametersComparisonFunction m_trkParametersComparisonFunction;
- std::vector<double> m_sortingReferencePoint;
 
 };
 
 } // end Trk namespace
+#include "TrkGaussianSumFilter/GaussianSumFitter.icc"
+
 #endif
