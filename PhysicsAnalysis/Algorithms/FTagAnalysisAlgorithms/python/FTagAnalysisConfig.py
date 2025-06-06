@@ -25,6 +25,11 @@ class FTagConfig (ConfigBlock):
             "is GN2v01.")
         self.addOption ('bTagCalibFile', None, type=str,
             info="calibration file for CDI")
+        self.addOption('readFromBTaggingObject', True, type=bool,
+            info="whether to read the b-tagging information from the BTagging object "
+            "instead of the jet container. FTAG group has dropped BTagging object, all"
+            "b-tagging related variables are attached to jet container. This only serves"
+            "as a compatibility option for analysis that use old derivations.")
         self.addOption ('saveScores', '', type=str,
             info="whether or not to save the scores from the tagger. Set to 'True' "
             "to save only the overall score, or to 'All' to save also the per-flavour"
@@ -63,6 +68,7 @@ class FTagConfig (ConfigBlock):
         alg.selectionTool.JetAuthor = jetCollection
         alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
         alg.selectionTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
+        alg.selectionTool.readFromBTaggingObject = self.readFromBTaggingObject
         alg.preselection = config.getPreselection (self.containerName, selectionName)
 
         if 'Continuous' in self.btagWP:
@@ -88,20 +94,22 @@ class FTagConfig (ConfigBlock):
             alg.selectionTool.OperatingPoint = 'Continuous'
             alg.selectionTool.JetAuthor = jetCollection
             alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
+            alg.selectionTool.readFromBTaggingObject = self.readFromBTaggingObject
             alg.selectionTool.MinPt = 0.
             config.addOutputVar(self.containerName, alg.taggerWeightDecoration, alg.taggerWeightDecoration, noSys=True)
 
         # Save the per-flavour probabilities or additional custom variables
         if self.saveScores == 'All' or self.saveCustomVariables:
-            alg = config.createAlgorithm('CP::BTaggingScoresAlg',
-                                         'BTagScoringAlg_' + self.btagger,
-                                         reentrant=True)
-            alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
-            alg.taggerName = self.btagger
-
             variables = [f'{self.btagger}_{x}' for x in ['pb','pc','pu','ptau'] if x != 'ptau' or self.btagger == 'GN2v01']
             variables += self.saveCustomVariables
 
-            alg.vars = variables
+            if self.readFromBTaggingObject:
+                alg = config.createAlgorithm('CP::BTaggingScoresAlg',
+                                             'BTagScoringAlg_' + self.btagger,
+                                             reentrant=True)
+                alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
+                alg.taggerName = self.btagger
+                alg.vars = variables
+
             for var in variables:
                 config.addOutputVar(self.containerName, var, var, noSys=True)

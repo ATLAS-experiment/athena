@@ -56,7 +56,7 @@ BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
   declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrived. default behaviour is to give an error, switching to false will turn it into a warning");
   declareProperty( "CutBenchmarksContinuousWP",     m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");
   declareProperty( "useCTagging",                   m_useCTag=false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
-  declareProperty( "readFromBTaggingObject",        m_readFromBTaggingObject=true,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself.");
+  declareProperty( "readFromBTaggingObject",        m_readFromBTaggingObject=false,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself.");
 }
 
 StatusCode BTaggingSelectionTool::initialize() {

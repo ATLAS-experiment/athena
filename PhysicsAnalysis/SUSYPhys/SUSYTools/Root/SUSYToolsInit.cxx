@@ -1788,6 +1788,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagSelTool.setProperty("JetAuthor",      jetcollBTag   ) );
       ATH_CHECK( m_btagSelTool.setProperty("MinPt",          m_BtagMinPt   ) );
       ATH_CHECK( m_btagSelTool.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
+      // Read from BTagging object. This will be needed until the input file is produced from
+      // a derivation release that includes !80336.
+      ATH_CHECK( m_btagSelTool.setProperty("readFromBTaggingObject", true ) );  
       ATH_CHECK( m_btagSelTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_btagSelTool.retrieve() );
     } else if (m_btagSelTool.isUserConfigured()) ATH_CHECK( m_btagSelTool.retrieve() );
@@ -1806,6 +1809,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagSelTool_OR.setProperty("JetAuthor",      jetcollBTag   ) );
       ATH_CHECK( m_btagSelTool_OR.setProperty("MinPt",          m_BtagMinPt   ) );
       ATH_CHECK( m_btagSelTool_OR.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
+      // Read from BTagging object. This will be needed until the input file is produced from
+      // a derivation release that includes !80336.
+      ATH_CHECK( m_btagSelTool_OR.setProperty("readFromBTaggingObject", true ) );  
       ATH_CHECK( m_btagSelTool_OR.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_btagSelTool_OR.retrieve() );
     } else if (m_btagSelTool_OR.isUserConfigured()) ATH_CHECK( m_btagSelTool_OR.retrieve() );
@@ -1834,6 +1840,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("JetAuthor",      BTagColl_TrkJet   ) );
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("MinPt",          m_BtagMinPt_trkJet ) );
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
+        // Read from BTagging object. This will be needed until the input file is produced from
+        // a derivation release that includes !80336.
+        ATH_CHECK( m_btagSelTool_trkJet.setProperty("readFromBTaggingObject", true ) );  
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( m_btagSelTool_trkJet.retrieve() );
       } else if (m_btagSelTool_trkJet.isUserConfigured()) ATH_CHECK( m_btagSelTool_trkJet.retrieve() );
@@ -1920,6 +1929,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagEffTool.setProperty("ScaleFactorFileName",  m_bTaggingCalibrationFilePath) );
       ATH_CHECK( m_btagEffTool.setProperty("OperatingPoint", m_BtagWP ) );
       ATH_CHECK( m_btagEffTool.setProperty("JetAuthor",      jetcollBTag ) );
+      // Read from BTagging object. This will be needed until the input file is produced from
+      // a derivation release that includes !80336.
+      ATH_CHECK( m_btagEffTool.setProperty("readFromBTaggingObject", true) );
       ATH_CHECK( m_btagEffTool.setProperty("MinPt",          m_BtagMinPt ) );
       ATH_CHECK( m_btagEffTool.setProperty("SystematicsStrategy", m_BtagSystStrategy ) );
       ATH_CHECK( m_btagEffTool.setProperty("EfficiencyBCalibrations",     MCshowerID   ));
