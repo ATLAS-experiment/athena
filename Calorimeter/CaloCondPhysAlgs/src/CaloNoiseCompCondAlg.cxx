@@ -723,7 +723,7 @@ CaloNoiseCompCondAlg::calculatePileUpNoise(const IdentifierHash & idCaloHash,
   float OFC_AC_OFC,OFC_OFC; 
   unsigned int firstSample=m_firstSample; 
   // for HEC, always use firstSample=1 when the number of samples is 4 
-  if (m_lar_hec_id->is_lar_hec(id) && m_nsamples==4 && m_firstSample==0) firstSample=1; 
+  if (m_lar_hec_id->is_lar_hec(id) && m_nsamples==4 && m_firstSample==0u) firstSample=1; 
   this->commonCalculations(OFC_AC_OFC,OFC_OFC,2,firstSample); 
  
   //::::::::::::::::::::::::::::::::::::::
