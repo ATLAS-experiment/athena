@@ -694,6 +694,28 @@ def getDevSignatures():
         ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni7Trk33_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
         ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni8Trk33_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
         ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni9Trk33_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        # Looser ditauOmni cuts Trk44 chains
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni0Trk44_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni01Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni02Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni03Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni04Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni05Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni06Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni07Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni08Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni09Trk44_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk44_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        # Looser ditauOmni cuts Trk55 chains
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni01Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni02Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni03Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni04Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni05Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni06Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni07Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni08Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni09Trk55_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
     ]
 
     chains['Bphysics'] = [

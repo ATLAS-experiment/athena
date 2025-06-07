@@ -16469,6 +16469,150 @@ HLT_j250_3timeSig15_L1jJ160:
   eventCount: 0
 HLT_j250_3timeSig_L1jJ160:
   eventCount: 0
+HLT_j250_a10sd_cssk_ditauOmni01Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni01Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni02Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni02Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni03Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni03Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni04Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni04Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni05Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni05Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni06Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni06Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni07Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni07Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni08Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni08Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni09Trk44_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni09Trk55_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
 HLT_j250_a10sd_cssk_ditauOmni0Trk33_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
   eventCount: 0
   stepCounts:
@@ -16478,6 +16622,14 @@ HLT_j250_a10sd_cssk_ditauOmni0Trk33_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
     0: 2
     1: 2
 HLT_j250_a10sd_cssk_ditauOmni0Trk33_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni0Trk44_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
   stepCounts:
     0: 2
@@ -16530,6 +16682,14 @@ HLT_j250_a10sd_cssk_ditauOmni1Trk33_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
     0: 2
     1: 2
 HLT_j250_a10sd_cssk_ditauOmni1Trk33_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
+HLT_j250_a10sd_cssk_ditauOmni1Trk44_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
   stepCounts:
     0: 2
