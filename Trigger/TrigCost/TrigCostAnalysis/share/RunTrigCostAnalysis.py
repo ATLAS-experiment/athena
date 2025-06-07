@@ -31,7 +31,7 @@ def trigCostAnalysisCfg(flags, args, isMC=False):
     enhancedBiasWeighter.MCIgnoreGeneratorWeights = MCpayload.get('MCIgnoreGeneratorWeights')
 
   trigCostAnalysis = CompFactory.TrigCostAnalysis()
-  trigCostAnalysis.OutputLevel = args.loglevel
+  trigCostAnalysis.OutputLevel = flags.Exec.OutputLevel
   trigCostAnalysis.BaseEventWeight = args.baseWeight
   trigCostAnalysis.EnhancedBiasTool = enhancedBiasWeighter
   trigCostAnalysis.AlgToChainTool = CompFactory.getComp("TrigCompositeUtils::AlgToChainTool")()
@@ -199,7 +199,7 @@ if __name__=='__main__':
   flags = initConfigFlags()
 
   # Add specific command-line arguments
-  parser = flags.getArgumentParser
+  parser = flags.getArgumentParser()
   parser.add_argument('--outputHist', type=str, default='TrigCostRoot_Results.root', help='Histogram output ROOT file')
   parser.add_argument('--monitorChainAlgorithm', action='store_true', help='Turn on Chain Algorithm monitoring')
   parser.add_argument('--baseWeight', type=float, default=1.0, help='Base events weight')
@@ -215,13 +215,8 @@ if __name__=='__main__':
   parser.add_argument('--MCKFactor', default=1.0, type=float, help='For MC input: Additional multiplicitive fudge-factor to the supplied cross section.')
   parser.add_argument('--MCIgnoreGeneratorWeights', action='store_true', help='For MC input: Flag to disregard any generator weights.')
 
-  args = parser.parse_args()
-
-  log.level = args.loglevel
-
-  # verbosity defined in Control/AthenaCommon/python/Constants.py
-  flags.Exec.OutputLevel = args.loglevel
-  flags.fillFromArgs(args.flags)
+  (args, rest) = parser.parse_known_args()
+  flags.fillFromArgs(listOfArgs=rest)
   flags.lock()
 
   # Initialize configuration object, add accumulator, merge, and run.
@@ -250,6 +245,6 @@ if __name__=='__main__':
   # If you want to turn on more detailed messages ...
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
   cfg.printConfig(withDetails=False) # set True for exhaustive info
-  sc = cfg.run(args.maxEvents)
+  sc = cfg.run(flags.Exec.MaxEvents)
   import sys
   sys.exit(0 if sc.isSuccess() else 1)
