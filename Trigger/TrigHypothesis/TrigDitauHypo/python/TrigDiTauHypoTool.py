@@ -11,12 +11,12 @@ def TrigDiTauHypoToolFromDict(flags, chainDict):
     chainPart = chainDict['chainParts'][0]
     cut_pt = float(chainPart['threshold']) * GeV
     ditau_tag_str = chainPart['ditauTag']
-    pattern = r"ditauOmni([0-9])Trk([0-9]{2})"
+    pattern = r"ditauOmni([0-9]+)Trk([0-9]{2})"
     match = re.match(pattern, ditau_tag_str)
     if match is None:
         log.error(f"Invalid ditau tag: {ditau_tag_str}")
         raise ValueError(f"Invalid ditau tag: {ditau_tag_str}")
-    id_cut = float(match.group(1))/10
+    id_cut = float(f'0.{match.group(1)}')
     n_trk_lead = int(match.group(2)[0])
     n_trk_subl = int(match.group(2)[1])
     if n_trk_lead < 3 or n_trk_subl < 3:
