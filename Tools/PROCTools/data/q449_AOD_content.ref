@@ -1165,6 +1165,12 @@ HLT_MuonsCB_LRTAuxDyn.viewIndex
 HLT_MuonsCB_RoI
 HLT_MuonsCB_RoIAux.
 HLT_MuonsCB_RoIAuxDyn.viewIndex
+HLT_MuonsCB_RoI_IOmode
+HLT_MuonsCB_RoI_IOmodeAux.
+HLT_MuonsCB_RoI_idReuse
+HLT_MuonsCB_RoI_idReuseAux.
+HLT_MuonsCB_RoI_l2mtmode
+HLT_MuonsCB_RoI_l2mtmodeAux.
 HLT_MuonsIso
 HLT_MuonsIsoAux.
 HLT_MuonsIsoAuxDyn.ptcone02
