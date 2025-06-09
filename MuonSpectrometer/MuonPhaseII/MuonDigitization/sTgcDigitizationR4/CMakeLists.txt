@@ -27,8 +27,3 @@ atlas_add_component( sTgcDigitizationR4
   src/components/*.cxx
   LINK_LIBRARIES sTgcDigitizationR4Lib
 )
-
-# Install runtime configuration files
-atlas_install_runtime( share/*.dat )
-atlas_install_runtime( share/*.config )
-
