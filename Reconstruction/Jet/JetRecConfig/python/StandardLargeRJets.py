@@ -58,7 +58,8 @@ ufo_softdrop_mods = ("planarflow","angularity","comshapes","ktdr","ecorrgeneral"
 AntiKt10LCTopo = JetDefinition("AntiKt",1.0,cst.LCTopoOrigin,
                                ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"] ,
                                modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel"),
-                               standardRecoMode = True,                               
+                               standardRecoMode = True,
+                               ghostarea = 0.,
                                lock = True
 )
 
@@ -97,25 +98,29 @@ AntiKt10UFOCHS = JetDefinition("AntiKt",1.0,cst.UFO,
 AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"] ,
                                 modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
-                                standardRecoMode = True,                               
+                                standardRecoMode = True,
+                                ghostarea = 0.,                                
                                 )
 
 AntiKt10UFOCSSK_noElectrons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noElectrons,
                                             ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
                                             modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
                                             standardRecoMode = True,
+                                            ghostarea = 0.,                                            
                                             )
 
 AntiKt10UFOCSSK_noMuons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noMuons,
                                         ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
                                         modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
                                         standardRecoMode = True,
+                                        ghostarea = 0.,                                        
                                         )
 
 AntiKt10UFOCSSK_noLeptons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noLeptons,
                                           ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
                                           modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
                                           standardRecoMode = True,
+                                          ghostarea = 0.,                                          
                                           )
 
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
@@ -153,7 +158,8 @@ AntiKt10UFOCSSKSoftDrop_trigger = JetSoftDrop(AntiKt10UFOCSSK,
 AntiKt10Truth = JetDefinition("AntiKt",1.0,cst.Truth,
                                ghostdefs = flavourghosts , 
                                modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
-                               standardRecoMode = True,                               
+                               standardRecoMode = True,
+                               ghostarea = 0.,                               
                                lock = True
 )
 
@@ -172,6 +178,7 @@ AntiKt10TruthWZ = JetDefinition("AntiKt",1.0, cst.TruthWZ,
                                 ghostdefs = flavourghosts,
                                 modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
                                 standardRecoMode = True,
+                                ghostarea = 0.,                                
                                 lock = True,
 )
 
