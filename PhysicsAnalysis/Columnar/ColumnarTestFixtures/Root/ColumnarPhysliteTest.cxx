@@ -776,6 +776,160 @@ namespace columnar
       }
     };
 
+    template<typename T>
+    struct ColumnDataVectorVectorVariantLink final : public PhysliteTestHelpers::IColumnData
+    {
+      BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
+      std::vector<ColumnarOffsetType> offsets = {0};
+      std::vector<ColumnarOffsetType> columnData;
+      std::vector<std::uint8_t> keysColumn;
+      std::vector<std::string> containers;
+      std::vector<SG::sgkey_t> containerKeys;
+      std::vector<const std::vector<ColumnarOffsetType>*> containerOffsets;
+      Benchmark benchmark;
+
+      bool checkUnknownKeys = false;
+      std::unordered_map<SG::sgkey_t,std::unordered_set<std::string>> unknownKeys;
+
+      explicit ColumnDataVectorVectorVariantLink (const std::string& val_branchName)
+        : branchReader (val_branchName), benchmark (branchReader.columnName())
+      {
+        outputColumns.push_back ({.name = branchReader.columnName() + ".data"});
+        outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
+        outputColumns.push_back ({.name = branchReader.columnName() + ".keys"});
+      }
+
+      ~ColumnDataVectorVectorVariantLink ()
+      {
+        // print unknown keys and containers they may be associated
+        // with, based on whether they were always within the range of
+        // elements allowed for the container.
+        for (auto& [key, forbiddenContainer] : unknownKeys)
+        {
+          std::cout << "unknown key: " << std::hex << key << std::dec << ", allowed containers:";
+          for (const auto& container : containers)
+          {
+            if (forbiddenContainer.find (container) == forbiddenContainer.end())
+              std::cout << " " << container;
+          }
+          std::cout << std::endl;
+        }
+      }
+
+      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      {
+        auto iter = requestedColumns.find (outputColumns.at(0).name);
+        if (iter == requestedColumns.end())
+          return false;
+        outputColumns.at(0).enabled = true;
+
+        branchReader.connectTree (tree);
+
+        if (iter->second.offsetName != outputColumns.at(1).name)
+          throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
+        containers = iter->second.variantLinkContainers;
+        if (containers.empty() || iter->second.variantLinkKeyColumn.empty())
+          throw std::runtime_error ("no variant link containers for: " + outputColumns.at(0).name);
+        if (iter->second.variantLinkKeyColumn != outputColumns.at(2).name)
+          throw std::runtime_error ("variant link key column mismatch: " + iter->second.variantLinkKeyColumn + " != " + outputColumns.at(2).name);
+
+        for ([[maybe_unused]] auto& container : containers)
+        {
+          keysColumn.push_back (keysColumn.size()+1);
+          containerOffsets.push_back (offsetColumns.at (container));
+          if (auto iter = knownKeys.find (container); iter != knownKeys.end())
+          {
+            containerKeys.push_back (iter->second);
+          } else
+          {
+            checkUnknownKeys = true;
+            containerKeys.push_back (0u);
+          }
+        }
+
+        requestedColumns.erase (iter);
+
+        iter = requestedColumns.find (outputColumns.at(1).name);
+        if (iter != requestedColumns.end())
+        {
+          outputColumns.at(1).enabled = true;
+          requestedColumns.erase (iter);
+        }
+
+        iter = requestedColumns.find (outputColumns.at(2).name);
+        if (iter != requestedColumns.end())
+        {
+          outputColumns.at(2).enabled = true;
+          requestedColumns.erase (iter);
+        }
+        return true;
+      }
+
+      virtual void clearColumns () override
+      {
+        columnData.clear();
+        offsets.clear();
+        offsets.push_back (0);
+      }
+
+      virtual void getEntry (Long64_t entry) override
+      {
+        benchmark.startTimer ();
+        const auto& branchData = branchReader.getEntry (entry);
+        benchmark.stopTimer ();
+        for (auto& data : branchData)
+        {
+          for (auto& element : data)
+          {
+            if (element.isDefault())
+              columnData.push_back (invalidObjectIndex);
+            else
+            {
+              ColumnarOffsetType key = 0xff;
+              ColumnarOffsetType index = 0;
+              for (std::size_t i = 0; i < containers.size(); ++i)
+              {
+                if (element.key() == containerKeys[i])
+                {
+                  if (containerOffsets[i]->back() <= element.index())
+                    throw std::runtime_error ("invalid index: " + std::to_string (element.index()) + " in container: " + containers[i] + " with size: " + std::to_string (containerOffsets[i]->back()));
+                  key = keysColumn[i];
+                  if (containerOffsets[i]->size() < 2)
+                    throw std::runtime_error ("container offset not yet filled for: " + containers[i]);
+                  index = containerOffsets[i]->at (containerOffsets[i]->size()-2) + element.index();
+                  break;
+                }
+              }
+              if (key == 0xff && checkUnknownKeys)
+              {
+                // this records which containers the unknown key is
+                // compatible with, so that I may figure out which
+                // container it is and hard-code it above.
+                auto& forbiddenContainers = unknownKeys[element.key()];
+                for (std::size_t i = 0; i < containers.size(); ++i)
+                {
+                  if (containerOffsets[i]->back() <= containerOffsets[i]->at (containerOffsets[i]->size()-2) + element.index())
+                    forbiddenContainers.insert (containers[i]);
+                }
+              }
+              columnData.push_back (index | (key << 8*(sizeof(ColumnarOffsetType)-1)));
+            }
+          }
+          offsets.push_back (columnData.size());
+        }
+      }
+
+      virtual void setData (ColumnarToolWrapperData& tool) override
+      {
+        if (outputColumns.at(0).enabled)
+          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
+        if (outputColumns.at(1).enabled)
+          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+        if (outputColumns.at(2).enabled)
+          tool.setColumn (outputColumns.at(2).name, keysColumn.size(), keysColumn.data());
+      } 
+    };
+
     struct ColumnDataMetNames final : public PhysliteTestHelpers::IColumnData
     {
       BranchReader<std::vector<std::string>> branchReader;
@@ -1215,6 +1369,7 @@ namespace columnar
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint64_t>> ("OutputMET.source", 0));
 
     knownColumns.push_back (std::make_shared<ColumnDataVectorLink<xAOD::JetContainer>>("METAssoc_AnalysisMETAux.jetLink"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer>>("METAssoc_AnalysisMETAux.objectLinks"));
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<MissingETBase::Types::bitmask_t>> ("METAssoc_AnalysisMET.useObjectFlags", 0));
   }
