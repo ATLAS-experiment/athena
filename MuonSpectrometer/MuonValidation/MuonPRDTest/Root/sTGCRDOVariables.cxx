@@ -88,7 +88,7 @@ namespace MuonPRDTest {
                return -1;
             }
             Amg::Vector2D localStripPos(0.,0.);
-            if ( rdoEl->stripPosition(Id,localStripPos) )  {
+            if (!rdoEl->stripPosition(Id,localStripPos) )  {
                 ATH_MSG_WARNING("The sTGC hit "<<idHelperSvc()->toString(Id)<<" does not have a valid strip position.");
                 return -1;
             }
