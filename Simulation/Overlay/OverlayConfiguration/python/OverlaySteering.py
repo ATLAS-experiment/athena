@@ -12,7 +12,7 @@ from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from DigitizationConfig.DigitizationParametersConfig import writeDigitizationParameters
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \
-    CopyTrackRecordCollectionsCfg
+    CopyTrackRecordCollectionsCfg, CopyBackgroundVertexCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
 
@@ -133,6 +133,9 @@ def OverlayMainContentCfg(configFlags):
            acc.merge(CopyPixelClusterContainerCfg(configFlags))
            acc.merge(CopySCT_ClusterContainerCfg(configFlags))
            acc.merge(CopyTRT_DriftCircleContainerCfg(configFlags))
+
+    if configFlags.Overlay.DataOverlay:
+        acc.merge(CopyBackgroundVertexCfg(configFlags))
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg

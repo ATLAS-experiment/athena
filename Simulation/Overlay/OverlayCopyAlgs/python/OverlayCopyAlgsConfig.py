@@ -621,3 +621,11 @@ def CopyPRD_MultiTruthCollectionsCfg(flags, **kwargs):
         acc.merge(CopyPRD_MultiTruthCollectionAlgCfg(flags, container, **kwargs))
 
     return acc
+
+def CopyBackgroundVertexCfg(flags):
+    acc = ComponentAccumulator()
+    if flags.Output.doWriteRDO:
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[f"xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices", 
+            f'xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z']))
+    return acc
