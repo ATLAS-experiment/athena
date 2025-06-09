@@ -140,6 +140,16 @@ if __name__ == "__main__":
                     "xAOD::TrackParticleContainer#FPGATrackParticles",
                     "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
                     ]
+        
+        # This part is needed to extract technical efficiency
+        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+        cfg.merge( ITkActsPrepDataToxAODCfg( flags,
+                    PixelMeasurementContainer = "ITkPixelMeasurements_offl",
+                    StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
+        OutputItemList += ['xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl',
+                            'xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
+                            'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl',
+                            'xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.']
 
     from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
     cfg.merge(FPGAOutputValidationCfg(flags, **{
