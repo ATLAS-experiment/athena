@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNEvaluator.h"
@@ -14,14 +14,12 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
   TauRecToolBase(name),
   m_net_inclusive(nullptr),
   m_net_0p(nullptr), m_net_1p(nullptr), m_net_2p(nullptr), m_net_3p(nullptr) {
-
-  declareProperty("MaxTracks", m_max_tracks = 30);  
 }
 
 TauGNNEvaluator::~TauGNNEvaluator() {}
 
 StatusCode TauGNNEvaluator::initialize() {
-  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks<<" tracks and "<<m_max_clusters<<" clusters...");
+  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks.value()<<" tracks and "<<m_max_clusters<<" clusters...");
 
   // Set the layer and node names in the weight file
   TauGNN::Config config;
@@ -120,7 +118,7 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   ATH_MSG_DEBUG("Constituent fetching done...");
 
   // Truncate tracks
-  int numTracksMax = std::min(m_max_tracks, static_cast<int>(tracks.size()));
+  int numTracksMax = std::min(m_max_tracks.value(), static_cast<int>(tracks.size()));
   std::vector<const xAOD::TauTrack *> trackVec(tracks.begin(), tracks.begin()+numTracksMax);
 
   // Network outputs

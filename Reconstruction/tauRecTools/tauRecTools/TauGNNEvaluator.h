@@ -67,7 +67,7 @@ private:
     Gaudi::Property<std::string> m_output_pjet{this, "OutputPJet", "GNTauProbJet"};
     Gaudi::Property<unsigned int> m_output_discriminant{this, "OutputDiscriminant", Discriminant::NegLogPJet, 
     "Discriminant used to calculate the output score: 0 -> -log(PJet), 1 -> PTau"};
-    //Gaudi::Property<int> m_max_tracks{this, "MaxTracks", 30};
+    Gaudi::Property<int> m_max_tracks{this, "MaxTracks", 30};
     Gaudi::Property<int> m_max_clusters{this, "MaxClusters", 20};
     Gaudi::Property<float> m_max_cluster_dr{this, "MaxClusterDR", 1.0f};
     Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
@@ -80,8 +80,6 @@ private:
     Gaudi::Property<std::string> m_input_layer_clusters{this, "InputLayerClusters", "cluster_vars"};
     Gaudi::Property<std::string> m_outnode_tau{this, "NodeNameTau", "GN2TauNoAux_pb"};
     Gaudi::Property<std::string> m_outnode_jet{this, "NodeNameJet", "GN2TauNoAux_pu"};  
-
-    int m_max_tracks;
 
     // Wrappers for lwtnn
     std::unique_ptr<TauGNN> m_net_inclusive;
