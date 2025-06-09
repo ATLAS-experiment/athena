@@ -29,8 +29,8 @@ public:
     virtual StatusCode execute(xAOD::TauJet& pTau) const override;
 
 private:
-   
-    int m_isolationTrackType; 
+ 
+    Gaudi::Property<int> m_isolationTrackType{this, "isolationTrackType", xAOD::TauJetParameters::modifiedIsolationTrack};  
 
 };
 
