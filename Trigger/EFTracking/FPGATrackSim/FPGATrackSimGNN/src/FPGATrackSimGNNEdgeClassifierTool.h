@@ -50,7 +50,8 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
         
         std::vector<float> getNodeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits);
         std::vector<int64_t> getEdgeList(const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
-        std::vector<float> getEdgeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
+        std::vector<float> getEdgeFeatures(std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, const std::vector<float> & gNodeFeatures);
+        void computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge, const int& hit1_index, const int& hit2_index, const std::vector<float> & gNodeFeatures);
 
         StringArrayProperty m_gnnFeatureNamesVec{
             this, "GNNFeatureNames",

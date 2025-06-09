@@ -160,7 +160,6 @@ void FPGATrackSimGNNGraphConstructionTool::applyDoubletCuts(const std::shared_pt
     std::shared_ptr<FPGATrackSimGNNEdge> edge = std::make_shared<FPGATrackSimGNNEdge>();
     edge->setEdgeIndex1(hit1_index);
     edge->setEdgeIndex2(hit2_index);
-    computeEdgeFeatures(edge, hit1, hit2);
     edges.emplace_back(edge);
 }
 
@@ -278,7 +277,6 @@ void FPGATrackSimGNNGraphConstructionTool::doClustering(const std::vector<std::s
                 
                 edge->setEdgeIndex1(index1);
                 edge->setEdgeIndex2(index2);
-                computeEdgeFeatures(edge, hits[index1], hits[index2]);
                 edges.emplace_back(edge);
                 ++count;
             }
@@ -289,20 +287,4 @@ void FPGATrackSimGNNGraphConstructionTool::doClustering(const std::vector<std::s
         }
 
     }
-}
-
-void FPGATrackSimGNNGraphConstructionTool::computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge, const std::shared_ptr<FPGATrackSimGNNHit> & hit1, const std::shared_ptr<FPGATrackSimGNNHit> & hit2)
-{
-    float deta = hit1->getEta() - hit2->getEta();
-    float dz = hit2->getZ() - hit1->getZ();
-    float dr = hit2->getR() - hit1->getR();
-    float dphi = P4Helpers::deltaPhi(hit2->getPhi(),hit1->getPhi());
-    float phislope = dr==0. ? 0. : dphi / dr;
-    
-    edge->setEdgeDR(dr);
-    edge->setEdgeDPhi(dphi);
-    edge->setEdgeDZ(dz);
-    edge->setEdgeDEta(deta);
-    edge->setEdgePhiSlope(phislope);
-    edge->setEdgeRPhiSlope(0.5 * (hit2->getR() + hit1->getR()) * phislope);
 }

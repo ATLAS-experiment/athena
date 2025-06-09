@@ -92,7 +92,6 @@ class FPGATrackSimGNNGraphConstructionTool : public AthAlgTool
         std::vector<float> getNodeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits);
         std::vector<float> embed(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits);
         void doClustering(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits, std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, std::vector<float> & gEmbedded);
-        void computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge, const std::shared_ptr<FPGATrackSimGNNHit> & hit1, const std::shared_ptr<FPGATrackSimGNNHit> & hit2);
         // Metric Learning Properties
         StringArrayProperty m_MLFeatureNamesVec{
             this, "MLFeatureNames",
