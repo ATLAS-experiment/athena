@@ -5,6 +5,8 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-input: group.trig-hlt.valid1.MGPy8EG_A14NNPDF23LO_SlepSlep_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799
+# art-input-nfiles: 3
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
