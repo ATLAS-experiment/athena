@@ -22,7 +22,7 @@ source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
 
 run_F610(){
     python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
-        --evtMax=${RDO_EVT_ANALYSIS} \
+        --evtMax=${RDO_EVT_ANALYSIS}\
         --filesInput=${RDO_ANALYSIS} \
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
@@ -42,7 +42,8 @@ run_F610(){
         Trigger.FPGATrackSim.ExtensionNNVolonnxFile=$ONNX_INPUT_VOL \
         Trigger.FPGATrackSim.ExtensionNNHitonnxFile=$ONNX_INPUT_HIT \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
-        Output.AODFileName=$xAODOutput
+        Trigger.FPGATrackSim.writeOfflPRDInfo=True \
+        Output.AODFileName=$xAODOutput 
 }
 
 echo "... Running ${TEST_LABEL} analysis"

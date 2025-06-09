@@ -653,7 +653,7 @@ if __name__ == "__main__":
     ############################################
     # Flags used in the prototrack chain
     FinalProtoTrackChainxAODTracksKey="FPGA"
-    flags.Detector.EnableCalo = False
+    flags.Detector.EnableCalo = False 
 
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
@@ -672,6 +672,7 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
+
     ConfigureMultiRegionFlags(flags)
 
 
@@ -708,6 +709,7 @@ if __name__ == "__main__":
 
     if (not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')): ### if DP pipeline skip everything else!
 
+        flags.Tracking.writeExtendedSi_PRDInfo = not flags.Trigger.FPGATrackSim.writeOfflPRDInfo
         splitPipeline=flags.Trigger.FPGATrackSim.pipeline.split('-')
         trackingOption=9999999
         if (len(splitPipeline) > 1): trackingOption=int(splitPipeline[1])
@@ -774,10 +776,16 @@ if __name__ == "__main__":
             if flags.Tracking.recoChain:
                 from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
                 acc.merge(InDetTrackRecoCfg(flags))
+                if flags.Trigger.FPGATrackSim.writeOfflPRDInfo: 
+                    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+                    acc.merge( ITkActsPrepDataToxAODCfg( flags,
+                                    PixelMeasurementContainer = "ITkPixelMeasurements_offl",
+                                    StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
                 from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
                 acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
                 from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
                 acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
+    
 
         # Configure both the dataprep and logical hits algorithms.
         acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
