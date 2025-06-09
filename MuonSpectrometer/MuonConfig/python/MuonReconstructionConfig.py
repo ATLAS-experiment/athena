@@ -188,7 +188,7 @@ def MuonReconstructionCfg(flags):
 
         # Check if we're making PRDs
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.
-        if flags.Muon.makePRDs and flags.Input.isMC:
+        if flags.Muon.makePRDs:
             if not flags.Muon.usePhaseIIGeoSetup:
                 from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
                 result.merge(MuonPRD_MultiTruthMakerCfg(flags))
