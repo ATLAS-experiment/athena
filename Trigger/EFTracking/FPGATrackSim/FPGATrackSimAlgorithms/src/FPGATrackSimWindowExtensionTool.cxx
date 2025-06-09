@@ -300,7 +300,7 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
         if (diffphi < m_windows[layer] && diffz < m_zwindows[layer]) {
             numHits[layer]++;
             road_hits[layer].push_back(hit);
-            hitLayers |= 1 << hit->getLayer();
+            hitLayers |= 1 << layer;
         }
     }
 
