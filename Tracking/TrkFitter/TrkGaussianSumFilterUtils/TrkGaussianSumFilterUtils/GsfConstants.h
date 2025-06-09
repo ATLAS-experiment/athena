@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -9,33 +9,35 @@
  */
 #ifndef GSFCONSTANTS_H
 #define GSFCONSTANTS_H
-#include "TrkGaussianSumFilterUtils/GSFFindIndexOfMinimum.h"
+#include "TrkGaussianSumFilterUtils/GsfFindIndexOfMinimum.h"
 #include <cstddef>
 #include <cstdint>
 namespace GSFConstants {
+/**
+ * @brief Alignment used  for SIMD operations
+ * internally to GSF.
+ */
+constexpr size_t alignment = vAlgs::alignmentForArray<256>();
 
 /**
- * Note the Gaussian sum approach as describe
- * e.g in " Optimal Filtering" Anderson and Moore
- * "Track Fitting with non-Gaussan noise" Fruhwirth
- *
- * The state is described by N Gaussian components
- *
+ * @brief The state is described by N Gaussian components
  * The Beth Heitler Material effect are also described
  * by M components.
- *
- * The can involve polynomial parametetrization
- * with C coeffiencts.
+ * Thee components are parametetrization
+ * via polynomials  with C coeffiencts.
  *
  * The number of coefficients
- * fixed as all the parametrization have the same
- * number. And they are checked during configuration.
+ * is assumed to be fixed as all the parametrization
+ * have the same number.
  *
  * The max number of Material Components
  * and maxNumberOfStateComponents are
  * more constraint by "reason".
  *
+ * These numbers also mean we can use
+ * std::array in places.
  */
+
 /// Maximum number of Gaussian components for the
 /// state description.
 constexpr int8_t maxNumberofStateComponents = 12;
@@ -46,11 +48,5 @@ constexpr int8_t maxNumberofMatComponents = 6;
 /// parametrizing the mean,variace, weights of the
 /// Gaussian components describing the material effects.
 constexpr int8_t polynomialCoefficients = 6;
-
-/**
- * @brief Alignment used  for SIMD operations
- * internally to GSF.
- */
-constexpr size_t alignment = vAlgs::alignmentForArray<256>();
 }
 #endif
