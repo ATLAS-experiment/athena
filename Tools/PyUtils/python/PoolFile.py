@@ -620,7 +620,11 @@ class PoolFile(object):
                 if isinstance(obj, self.ROOT.TTree):
                     nEntries = obj.GetEntries()
                 elif isRNTuple(obj):
-                    nEntries = self.ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                    try:
+                        nEntries = self.ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                    except AttributeError:
+                        # ROOT 6.36 and later
+                        nEntries = self.ROOT.RNTupleReader.Open(obj).GetNEntries()
                 else:
                     raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
                 break
@@ -637,7 +641,11 @@ class PoolFile(object):
                 nEntries = obj.GetEntries()
                 dirType = "T"
             elif isRNTuple(obj):
-                reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                try:
+                    reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                except AttributeError:
+                    # ROOT 6.36 and later
+                    reader = self.ROOT.RNTupleReader.Open(obj)
                 containerName = reader.GetDescriptor().GetName()
                 nEntries = reader.GetNEntries()
                 dirType = "N"
@@ -662,7 +670,10 @@ class PoolFile(object):
             if isinstance(obj, self.ROOT.TTree):
                 name = obj.GetName()
             elif isRNTuple(obj):
-                inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                try:
+                    inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                except AttributeError:
+                    inspector = self.ROOT.RNTupleInspector.Create(obj)
                 name = inspector.GetDescriptor().GetName()
 
             if PoolOpts.isDataHeader(name):
