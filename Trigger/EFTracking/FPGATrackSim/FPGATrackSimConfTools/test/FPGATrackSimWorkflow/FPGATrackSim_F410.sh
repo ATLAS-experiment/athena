@@ -37,7 +37,8 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.runCKF=$RUN_CKF \
     Trigger.FPGATrackSim.pipeline='F-410' \
-    Trigger.FPGATrackSim.GNN.graphTool=graphTool.MetricLearning \
+    Trigger.FPGATrackSim.GNN.graphTool=graphTool.ModuleMap \
+    Trigger.FPGATrackSim.GNN.moduleMapTol=0.001 \
     Trigger.FPGATrackSim.GNN.moduleMapPath=$GNN_MODULE_MAP \
     Trigger.FPGATrackSim.GNN.MLModelPath=$GNN_METRIC_LEARNING \
     Trigger.FPGATrackSim.GNN.GNNModelPath=$GNN_ONNX_MODEL \
@@ -52,7 +53,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
     Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
     Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM \
-    Trigger.FPGATrackSim.outputMonitorFile="monitoring${TEST_LABEL}.root"
+    Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root"
 }
 run_F410
 if [ -z $ArtJobType ];then # skip file check for ART (this has already been done in CI)
