@@ -606,7 +606,7 @@ Trk::GaussianSumFitter::smootherFit(
   }
   // This is the 1st track state on surface for a measurement
   // in the reverse direction. Our starting point for the smoother
-  MultiComponentState smootherPredictionMultiState = std::move(trackStateOnSurfaceItr->multiComponentState);
+  auto smootherPredictionMultiState = std::move(trackStateOnSurfaceItr->multiComponentState);
   // Perform an update with the measurement.
   // This will be the first entry in the trajectory
   std::unique_ptr<Trk::MeasurementBase> firstSmootherMeasurementOnTrack =
@@ -647,11 +647,14 @@ Trk::GaussianSumFitter::smootherFit(
   // in the first smoothed state.
   // This way there is no dependance on error of prediction
   //
-  // NB local Y and theta are not blown out too due to TRT.
+  // NB local Y and theta need care due to TRT.
+  //
   Trk::MultiComponentState smoothedStateWithScaledError =
-      MultiComponentStateHelpers::WithScaledError(std::move(firstSmoothedState),
-                                                  15., 5., 15., 5., 15.);
-  //Do the 1st update using the state with inflated covariance.
+      MultiComponentStateHelpers::WithScaledError(
+          std::move(firstSmoothedState), m_smootherCovFactors[0],
+          m_smootherCovFactors[1], m_smootherCovFactors[2],
+          m_smootherCovFactors[3], m_smootherCovFactors[4]);
+  // Do the 1st update using the state with inflated covariance.
   Trk::FitQualityOnSurface fitQualityWithScaledErrors;
   Trk::MultiComponentState updatedState = Trk::GsfMeasurementUpdator::update(
     std::move(smoothedStateWithScaledError),
@@ -661,7 +664,7 @@ Trk::GaussianSumFitter::smootherFit(
     ATH_MSG_WARNING("Smoother prediction could not be determined");
     return {};
   }
-  // loopUpdatedState is a plain ptr to the most recent predicted MultiComponentState.
+  // loopUpdatedState points to the most recent predicted MultiComponentState.
   Trk::MultiComponentState* loopUpdatedState = &updatedState;
   // Increase reverse iterator by one.
   ++trackStateOnSurfaceItr;
@@ -673,7 +676,7 @@ Trk::GaussianSumFitter::smootherFit(
   for (; trackStateOnSurfaceItr != forwardTrajectory.rend();++trackStateOnSurfaceItr) {
     auto& trackStateOnSurface = (*trackStateOnSurfaceItr);
     // Retrieve the MeasurementBase object from the TrackStateOnSurface object
-    std::unique_ptr<Trk::MeasurementBase> measurement = std::move(trackStateOnSurface.measurementOnTrack);
+    auto measurement = std::move(trackStateOnSurface.measurementOnTrack);
     if (!measurement) {
       ATH_MSG_WARNING("MeasurementBase object could not be extracted from a "
                       "measurement TSOS...continuing");
@@ -702,7 +705,8 @@ Trk::GaussianSumFitter::smootherFit(
       continue;
     }
     // Update with the measurement
-    updatedState = Trk::GsfMeasurementUpdator::update(std::move(extrapolatedState), *measurement, fitQuality);
+    updatedState = Trk::GsfMeasurementUpdator::update(
+        std::move(extrapolatedState), *measurement, fitQuality);
     if (updatedState.empty()) {
       ATH_MSG_WARNING("Could not update the multi-component state");
       return {};

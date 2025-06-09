@@ -151,43 +151,64 @@ Trk::TwoStateCombiner::combine(
   const Trk::MultiComponentState& smootherMultiState,
   unsigned int maximumNumberOfComponents)
 {
-
   auto combinedMultiState = std::make_unique<Trk::MultiComponentState>();
 
   // Loop over all components in forwards multi-state
   for (const auto& forwardsComponent : forwardsMultiState) {
-    const AmgSymMatrix(5)* forwardMeasuredCov = forwardsComponent.params->covariance();
-
+    const AmgSymMatrix(5)* forwardCov = forwardsComponent.params->covariance();
     // Loop over all components in the smoother multi-state
     for (const auto& smootherComponent : smootherMultiState) {
-      const AmgSymMatrix(5)* smootherMeasuredCov = smootherComponent.params->covariance();
+      const AmgSymMatrix(5)* smootherCov = smootherComponent.params->covariance();
 
       // If not covariances return here.
-      if (!smootherMeasuredCov && !forwardMeasuredCov) {
+      if (!smootherCov && !forwardCov) {
         return {};
       }
-
-      if (!forwardMeasuredCov) {
+      //No forward only smoothed.
+      if (!forwardCov) {
         Trk::ComponentParameters smootherComponentOnly = {
             smootherComponent.params->uniqueClone(), smootherComponent.weight};
         combinedMultiState->push_back(std::move(smootherComponentOnly));
         continue;
       }
-
-      if (!smootherMeasuredCov) {
+      //No smoothed only forward.
+      if (!smootherCov) {
         Trk::ComponentParameters forwardComponentOnly = {
             forwardsComponent.params->uniqueClone(), forwardsComponent.weight};
         combinedMultiState->push_back(std::move(forwardComponentOnly));
         continue;
       }
-
+      /* A comment on te Algebra.
+       * For the covariances P and states X
+       * the most pedagogical presentation found
+       * in textbooks is :
+       *
+       * P_k^s = \left( \left( P_{k|k}^f \right)^{-1}
+       * + \left( P_{k|k-1}^b \right)^{-1}
+       *
+       * X_k^s = P_k^s \left( \left( P_{k|k}^f \right)^{-1} X_{k|k}^f
+       * + \left( P_{k|k-1}^b \right)^{-1} X_{k|k-1}^b \right)
+       *
+       * The  f, b, s notation refers to forward, backward, and smoothed
+       * values. The k|k-1 subscript for the backward estimates refers to the
+       * update sequence.
+       *
+       * These can be written (via inversion lemmas) as
+       * P_k^s \left( P_{k|k}^f \right)^{-1} =
+       * I - P_k^s \left( P_{k|k-1}^b \right)^{-1}
+       *
+       * X_k^s = X_{k|k}^f + P_k^s \left( P_{k|k-1}^b \right)^{-1}
+       * \left( X_{k|k-1}^b - X_{k|k}^f \right)
+       *
+       * We use K = P_k^s \left( P_{k|k-1}^b \right)^{-1} below
+       */
       const AmgVector(5) smootherParams = smootherComponent.params->parameters();
       const AmgVector(5) forwardParams = forwardsComponent.params->parameters();
-      const AmgSymMatrix(5) summedCovariance = *forwardMeasuredCov + *smootherMeasuredCov;
+      const AmgSymMatrix(5) summedCovariance = *forwardCov + *smootherCov;
       const AmgSymMatrix(5) invertedSummedCovariance = summedCovariance.inverse();
-      const AmgSymMatrix(5) K = *forwardMeasuredCov * invertedSummedCovariance;
+      const AmgSymMatrix(5) K = *forwardCov * invertedSummedCovariance;
       const AmgVector(5) newParameters = forwardParams + K * (smootherParams - forwardParams);
-      AmgSymMatrix(5) covarianceOfNewParameters = AmgSymMatrix(5)(K * *smootherMeasuredCov);
+      AmgSymMatrix(5) covarianceOfNewParameters = K * (*smootherCov);
 
       std::unique_ptr<Trk::TrackParameters> combinedTrackParameters =
           (forwardsComponent.params)
@@ -200,8 +221,9 @@ Trk::TwoStateCombiner::combine(
                   newParameters[Trk::qOverP],
                   std::move(covarianceOfNewParameters));
 
-      // Determine the scaling factor for the new weighting. Determined from the
-      // PDF of the many-dimensional gaussian
+      // Determine the scaling factor for the new weighting.
+      // We need to include the prob for suh  difference
+      // via the many-dimensional gaussian pdf.
       const AmgVector(5) parametersDiff = forwardParams - smootherParams;
       double const exponent = parametersDiff.transpose() *
                               invertedSummedCovariance * parametersDiff;

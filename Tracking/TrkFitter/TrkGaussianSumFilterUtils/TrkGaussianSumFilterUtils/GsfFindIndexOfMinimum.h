@@ -7,12 +7,9 @@
  * @author Christos Anastopoulos
  * @author Lucy Lewitt
  *
- *
  * @brief Finding the index of a minimum
  * is an importand operation for the
  * the KL mixture reduction.
- * We rely on having an as fast as
- * possible implementation
  *
  * The issues are described in ATLASRECTS-5244
  * Some timing improvements in the overall
@@ -22,24 +19,21 @@
  * significantly the time for the GSF refititng
  * algorithm.
  *
- * There is literature in the internet
- * namely in blogs by Wojciech Mula
- * and Sergey Slotin
- * They solve the problem for
- * integers using intrinsics and various
- * AVX levels.
+ * Solution using intrinsics
+ * can be found in logs by Wojciech Mula
+ * and Sergey Slotin.
  *
  * In ATLAS currently we need to solve it for float types.
- *
- * Furthermore, after discussion with Scott Snyder
+ * After discussion with Scott Snyder
  * we opted for using the gnu vector types from "CxxUtils/vec.h".
  *
- * Additionally, gcc for
- * combination that are too wide for the current architecture
- * synthesizes the instructions using a narrower mode.
- * But can result in quite poor assembly in cases.
- * So we opt to pass the ISA width in bits and
+ * gcc for combination that are too wide for the current
+ * architecture synthesizes the instructions using a
+ * narrower mode. But can result in quite poor assembly
+ * in cases. So we opt to pass the ISA width in bits and
  * always use the right sized vector types.
+ * Currently this is achieved via FMV from the
+ * caller side.
  *
  * The original playground with benchmarking code
  * can be found at:

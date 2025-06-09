@@ -3,7 +3,7 @@
 */
 
 #include "TrkGaussianSumFilterUtils/KLGaussianMixtureReduction.h"
-#include "TrkGaussianSumFilterUtils/GSFFindIndexOfMinimum.h"
+#include "TrkGaussianSumFilterUtils/GsfFindIndexOfMinimum.h"
 //
 #include "CxxUtils/restrict.h"
 #include "CxxUtils/vec.h"

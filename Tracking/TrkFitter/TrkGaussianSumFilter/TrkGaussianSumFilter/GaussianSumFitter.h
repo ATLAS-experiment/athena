@@ -158,61 +158,45 @@ private:
 
 private:
  ToolHandle<IMultiStateExtrapolator> m_extrapolator{
-     this,
-     "ToolForExtrapolation",
-     "Trk::GsfExtrapolator/GsfExtrapolator",
-      ""};
+     this, "ToolForExtrapolation", "Trk::GsfExtrapolator/GsfExtrapolator", ""};
+
  ToolHandle<IRIO_OnTrackCreator> m_rioOnTrackCreator{
-     this,
-     "ToolForROTCreation", "",
-     "Tool for converting Raw Data to measurements if we do not fit "
-     "measurements directly"};
+     this, "ToolForROTCreation", "",
+     "Tool for converting Raw Data to measurements"};
 
- Gaudi::Property<unsigned int> m_maximumNumberOfComponents{
-     this,
-     "MaximumNumberOfComponents",
-     12,
-     "Maximum number of components"};
-
- Gaudi::Property<bool> m_reintegrateOutliers{
-   this,
-   "ReintegrateOutliers",
-   true,
-   "Reintegrate Outliers"};
+ Gaudi::Property<bool> m_reintegrateOutliers{this, "ReintegrateOutliers", true,
+                                             "Reintegrate Outliers"};
 
  Gaudi::Property<bool> m_refitOnMeasurementBase{
-     this,
-     "RefitOnMeasurementBase",
-     true,
-     "Refit On Measurement Base"};
+     this, "RefitOnMeasurementBase", true, "Refit On Measurement Base"};
 
  Gaudi::Property<bool> m_combineWithFitter{
-     this,
-     "CombineStateWithFitter",
-     false,
+     this, "CombineStateWithFitter", false,
      "Combine with forwards state during Smoothing"};
 
  Gaudi::Property<bool> m_useMode{
-     this,
-     "useMode",
-     true,
-     "Combine/Collapse MultiComponent State Mode rather than mean"};
+     this, "useMode", true,
+     "Collapse MultiComponent States using Mode rather than Mean"};
 
  Gaudi::Property<bool> m_slimTransientMTSOS{
-     this,
-     "slimTransientMTSOS",
-     true,
-     "Slim the transient MTSOS . keeping just the combined state and not all "
+     this, "slimTransientMTSOS", true,
+     "Slim the transient MTSOS . Keeping just the combined state and not all "
      "components"};
 
  Gaudi::Property<double> m_cutChiSquaredPerNumberDOF{
+     this, "StateChi2PerNDOFCut", 50., "Cut on Chi2 per NDOF"};
+
+ Gaudi::Property<unsigned int> m_maximumNumberOfComponents{
+     this, "MaximumNumberOfComponents", 12, "Maximum number of components"};
+
+ DoubleArrayProperty m_smootherCovFactors{
      this,
-     "StateChi2PerNDOFCut",
-     50.,
-     "Cut on Chi2 per NDOF"};
+     "smootherStartCovFactors",
+     {15., 5., 15., 5., 15.},
+     "Inflation factors for the covariance at the start of smoothing [LocX, LocY, phi, "
+     "theta, q / p]"};
 
  TrkParametersComparisonFunction m_trkParametersComparisonFunction;
-
 };
 
 } // end Trk namespace
