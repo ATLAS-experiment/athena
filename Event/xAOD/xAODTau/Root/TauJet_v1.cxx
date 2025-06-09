@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJet_v1.cxx 740338 2016-04-14 16:03:58Z griffith $
@@ -62,18 +62,6 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, phiTauEtaCalib)
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, mTauEtaCalib)
 
-  // //primitive setters and getters for jetseed 4-vector
-  // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, ptPanTauEFlowRecProto)
-  // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, etaPanTauEFlowRecProto)
-  // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, phiPanTauEFlowRecProto)
-  // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, mPanTauEFlowRecProto)
-
-  // //primitive setters and getters for jetseed 4-vector
-  // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, ptPanTauEFlowRec)
-  // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, etaPanTauEFlowRec)
-  // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, phiPanTauEFlowRec)
-  // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, mPanTauEFlowRec)
-
   //primitive setters and getters for jetseed 4-vector
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, ptPanTauCellBasedProto)
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauJet_v1, float, double, etaPanTauCellBasedProto)
@@ -125,12 +113,6 @@ namespace xAOD {
     case TauJetParameters::TauEtaCalib:
       p4.SetPtEtaPhiM( ptTauEtaCalib(), etaTauEtaCalib(), phiTauEtaCalib(), mTauEtaCalib());
       break;
-      // case TauJetParameters::PanTauEFlowRecProto:
-      // 	p4.SetPtEtaPhiM( ptPanTauEFlowRecProto(), etaPanTauEFlowRecProto(), phiPanTauEFlowRecProto(), mPanTauEFlowRecProto());
-      // 	break;
-      // case TauJetParameters::PanTauEFlowRec:
-      // 	p4.SetPtEtaPhiM( ptPanTauEFlowRec(), etaPanTauEFlowRec(), phiPanTauEFlowRec(), mPanTauEFlowRec());
-      // 	break;
     case TauJetParameters::PanTauCellBasedProto:
       p4.SetPtEtaPhiM( ptPanTauCellBasedProto(), etaPanTauCellBasedProto(), phiPanTauCellBasedProto(), mPanTauCellBasedProto());
       break;
@@ -156,10 +138,6 @@ namespace xAOD {
       return GenVecFourMom_t( ptTauEnergyScale(), etaTauEnergyScale(), phiTauEnergyScale(), mTauEnergyScale());
     case TauJetParameters::TauEtaCalib:
       return GenVecFourMom_t( ptTauEtaCalib(), etaTauEtaCalib(), phiTauEtaCalib(), mTauEtaCalib());
-      // case TauJetParameters::PanTauEFlowRecProto:
-      // 	return GenVecFourMom_t( ptPanTauEFlowRecProto(), etaPanTauEFlowRecProto(), phiPanTauEFlowRecProto(), mPanTauEFlowRecProto());
-      // case TauJetParameters::PanTauEFlowRec:
-      // 	return GenVecFourMom_t( ptPanTauEFlowRec(), etaPanTauEFlowRec(), phiPanTauEFlowRec(), mPanTauEFlowRec());
     case TauJetParameters::PanTauCellBasedProto:
       return GenVecFourMom_t( ptPanTauCellBasedProto(), etaPanTauCellBasedProto(), phiPanTauCellBasedProto(), mPanTauCellBasedProto());
     case TauJetParameters::PanTauCellBased:

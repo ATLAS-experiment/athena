@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DiTauJet_v1.cxx 631921 2015-09-23 23:30:59Z dkirchme $
@@ -10,7 +10,6 @@
 
 // Local include(s):
 #include "xAODTau/versions/DiTauJet_v1.h"
-// #include "xAODDiTau/versions/TauJetCalibMapper_v1.h"
 #include "DiTauJetAccessors_v1.h"
 #include <stdexcept>
 
@@ -207,43 +206,10 @@ namespace xAOD {
     vertexAcc( *this ).toContainedElement( *cont, vertex );
   }
 
-  // // ----------------------------------------------------------------------------
-  // // setters and getters for the secondary vertex links
-  // // ----------------------------------------------------------------------------
-  // AUXSTORE_OBJECT_SETTER_AND_GETTER( DiTauJet_v1,
-  //                    DiTauJet_v1::SecVertexLinks_t,
-  //                    secVertexLinks,
-  //                    setSecVertexLinks )
-  
-  // static const SG::AuxElement::Accessor< DiTauJet_v1::SecVertexLinks_t > secVtxAcc( "secVertexLinks" );
-  
-  // const Vertex* DiTauJet_v1::secVertex( size_t i ) const {
-  //   return ( *secVtxAcc( *this )[ i ] );
-  // }
-  
-  // size_t DiTauJet_v1::nSecVertex() const {
-  //   return secVtxAcc( *this ).size();
-  // }
-  
-  // void DiTauJet_v1::addSecVertex( const xAOD::VertexContainer* pVertexCont, 
-  //                                       const xAOD::Vertex* pVertex) {
-  //   ElementLink<xAOD::VertexContainer> linkToVertex;
-  //   linkToVertex.toContainedElement(*pVertexCont, pVertex);
-
-  //   secVtxAcc( *this ).push_back( linkToVertex );
-
-  //   return;
-  // }
-  
-  // void DiTauJet_v1::clearSecVertexLinks() {
-  //   secVtxAcc( *this ).clear();
-  //   return;
-  // }
-
   // ----------------------------------------------------------------------------
   // setters and getters for the track links
   // ----------------------------------------------------------------------------
-  // tacks inside subjets
+  // tracks inside subjets
   AUXSTORE_OBJECT_SETTER_AND_GETTER( DiTauJet_v1,
                      DiTauJet_v1::TrackParticleLinks_t,
                      trackLinks,
@@ -275,7 +241,7 @@ namespace xAOD {
   }
 
 
-  // tacks inside isolation region
+  // tracks inside isolation region
   AUXSTORE_OBJECT_SETTER_AND_GETTER( DiTauJet_v1,
                      DiTauJet_v1::TrackParticleLinks_t,
                      isoTrackLinks,
@@ -307,7 +273,7 @@ namespace xAOD {
   }
 
 
-  // tacks in seed jet that do not fulfill quality cuts
+  // tracks in seed jet that do not fulfill quality cuts
   AUXSTORE_OBJECT_SETTER_AND_GETTER( DiTauJet_v1,
                      DiTauJet_v1::TrackParticleLinks_t,
                      otherTrackLinks,
