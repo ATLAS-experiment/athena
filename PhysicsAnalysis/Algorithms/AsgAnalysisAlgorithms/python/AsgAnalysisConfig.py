@@ -127,6 +127,8 @@ class PileupReweightingBlock (ConfigBlock):
         self.addOption ('alternativeConfig', False, type=bool,
             info="whether this is used as an additional alternative config for PileupReweighting. "
             "Will only store the alternative pile up weight in that case.")
+        self.addOption ('writeColumnarToolVariables', False, type=bool,
+            info="whether to add EventInfo variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL)")
 
 
     def makeAlgs (self, config) :
@@ -142,6 +144,11 @@ class PileupReweightingBlock (ConfigBlock):
         eventInfoVar = ['runNumber', 'eventNumber', 'actualInteractionsPerCrossing', 'averageInteractionsPerCrossing']
         if config.dataType() is not DataType.Data:
             eventInfoVar += ['mcChannelNumber']
+        if self.writeColumnarToolVariables:
+            # This is not strictly necessary, as the columnar users
+            # could recreate this, but it is also a single constant int,
+            # that should compress exceedingly well.
+            eventInfoVar += ['eventTypeBitmask']
 
         if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output

@@ -41,6 +41,8 @@ class MuonCalibrationConfig (ConfigBlock):
             info="decorate truth particle information on the reconstructed one")
         self.addOption ('writeTrackD0Z0', False, type = bool,
             info="save the d0 significance and z0sinTheta variables so they can be written out")
+        self.addOption ('writeColumnarToolVariables', False, type=bool,
+            info="whether to add variables needed for running the columnar muon tool(s) on the output n-tuple. (EXPERIMENTAL)")
 
     def makeAlgs (self, config) :
 
@@ -137,6 +139,8 @@ class MuonCalibrationConfig (ConfigBlock):
         if self.decorateTruth and config.dataType() is not DataType.Data:
             config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
             config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
+        
+        config.addOutputVar (self.containerName, 'muonType', 'muonType', noSys=True, enabled=self.writeColumnarToolVariables)
 
 class MuonWorkingPointConfig (ConfigBlock) :
     """the ConfigBlock for the muon working point
