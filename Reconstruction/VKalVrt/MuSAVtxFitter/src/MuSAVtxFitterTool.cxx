@@ -106,7 +106,7 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
             continue;
         }
         // SA muons can also be saved in regions with 0 magnetic field, which can cause extrapolation crashes
-        if (std::abs(muon->spectrometerFieldIntegral) < 0.1) {
+        if (muon->spectrometerFieldIntegral < 0.1) {
             ATH_MSG_DEBUG("Skipping SA muon with spectrometerFieldIntegral " << muon->spectrometerFieldIntegral << " T*m!");
             continue;
         }
