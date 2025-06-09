@@ -763,7 +763,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if self.jetInput == "LCTopo":
             configFile = _largeLCTopoConfigFile(config, self)
         if self.jetInput == "UFO":
-            configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_02Aug2024.config"
+            configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.config"
+            calibArea = "00-04-83"
         if self.calibToolConfigFile is not None:
             configFile = self.calibToolConfigFile
 
