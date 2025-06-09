@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -198,33 +198,6 @@ namespace xAOD {
     else {
       return false;
     }
-
-    // TauJetCalibTypeMapper_v3 typeMapper;
-    // std::string calibStringPt, calibStringEta, calibStringPhi, calibStringM;
-    // bool result = typeMapper.getValue(calib, calibStringPt, calibStringEta, calibStringPhi, calibStringM);
-    // if (result) {
-    //   if(calibStringPt.size()) {
-    // 	Accessor< float > accTauPtCalib( calibStringPt );
-    // 	accTauPtCalib( *this )=pt;
-    //   }
-    //   if(calibStringEta.size()) {
-    // 	Accessor< float > accTauEtaCalib( calibStringEta );
-    // 	accTauEtaCalib( *this )=eta;
-    //   }
-    //   if(calibStringPhi.size()) {
-    // 	Accessor< float > accTauPhiCalib( calibStringPhi );
-    // 	accTauPhiCalib( *this )=phi;
-    //   }
-    //   if(calibStringM.size()) {
-    // 	Accessor< float > accTauMCalib( calibStringM );
-    // 	accTauMCalib( *this )=m;
-    //   }
-    //   return true;
-    // }
-    // else {
-    //   return false;
-    // }
-
     
   }
 
@@ -482,10 +455,6 @@ namespace xAOD {
     TauTrack* trk=tauTrackContainer->at(container_index);
     if(trk!=c_trk) std::cout << "Did not properly retrieve non-const tauTrack" << std::endl;
     return trk;
-    // for( xAOD::TauTrack* trk : *tauTrackContainer){
-    //   if(trk==c_trk) return trk;
-    // }
-    //return 0;
   }
 #endif
 
@@ -512,12 +481,6 @@ namespace xAOD {
 
   /// Get the v<const pointer> to all tracks associated with this tau, regardless of classification
   std::vector<const TauTrack*> TauJet_v3::allTracks() const{
-    // std::vector<const TauTrack*> trks;
-    // for(const ElementLink< xAOD::TauTrackContainer > link : tauTrackAcc(*this) ){
-    //   const TauTrack* trk = *link;
-    //   trks.push_back(trk);
-    // }
-    // return trks;
     TauTrack::TrackFlagType mask=0;
     return tracksWithMask( mask );
   }
@@ -552,8 +515,6 @@ namespace xAOD {
 
   //all tracks regardless of classification or lack thereof
   size_t TauJet_v3::nAllTracks() const{
-    // unsafe w.r.t. tau track thinning
-    //return tauTrackAcc( *this ).size();
     // return the number of tracks with valid element link
     TauTrack::TrackFlagType mask=0;
     return nTracksWithMask( mask );

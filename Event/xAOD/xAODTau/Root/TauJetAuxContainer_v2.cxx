@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJetAuxContainer_v2.cxx 747258 2016-05-15 02:57:19Z griffith $
@@ -44,15 +44,6 @@ namespace xAOD {
     AUX_VARIABLE( mTauEtaCalib );
 
 
-    // AUX_VARIABLE( ptPanTauEFlowRecProto );
-    // AUX_VARIABLE( etaPanTauEFlowRecProto );
-    // AUX_VARIABLE( phiPanTauEFlowRecProto );
-    // AUX_VARIABLE( mPanTauEFlowRecProto );
-   
-    // AUX_VARIABLE( ptPanTauEFlowRec );
-    // AUX_VARIABLE( etaPanTauEFlowRec );
-    // AUX_VARIABLE( phiPanTauEFlowRec );
-    // AUX_VARIABLE( mPanTauEFlowRec );
    
     AUX_VARIABLE( ptPanTauCellBasedProto );
     AUX_VARIABLE( etaPanTauCellBasedProto );
@@ -247,30 +238,7 @@ namespace xAOD {
     AUX_VARIABLE( pantau_CellBasedInput_BDTVar_Neutral_Shots_NPhotonsInSeed );
     AUX_VARIABLE( pantau_CellBasedInput_BDTVar_Combined_DeltaR1stNeutralTo1stCharged );
     AUX_VARIABLE( pantau_CellBasedInput_BDTVar_Charged_HLV_SumM );
-    
-    ////!PanTau variables when using eflowRec pfos
-    ////Flag whether this seed has pantau info
-    //AUX_VARIABLE( pantau_eflowRecInput_isPanTauCandidate );
-    ////decay modes (input mode [proto] and output mode )
-    //AUX_VARIABLE( pantau_eflowRecInput_DecayModeProto );
-    //AUX_VARIABLE( pantau_eflowRecInput_DecayMode );
-    ////BDT output distributions
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTValue_1p0n_vs_1p1n );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTValue_1p1n_vs_1pXn );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTValue_3p0n_vs_3pXn );
-    ////Variables used in BDTs
-    ////NOTE: They are different from the CellBased ones in general!
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Basic_NPi0NeutConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Basic_NNeutralConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Charged_HLV_SumPt );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Charged_Ratio_EtOverEtAllConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_HLV_SumM );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_PID_BDTValues_EtSort_1 );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_PID_BDTValues_BDTSort_2 );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_Ratio_EtOverEtAllConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_Mean_DRToLeading_WrtEtAllConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Combined_DeltaR1stNeutralTo1stCharged );
-    
+   
   }
   
 } // namespace xAOD
