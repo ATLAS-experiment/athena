@@ -5,6 +5,8 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-input: group.trig-hlt.valid1.900341.Epos_LHC_minbias_inelastic.recon.RDO.e8514_e8528_s4159_s4114_r14838_tid34209701_00
+# art-input-nfiles: 2
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
