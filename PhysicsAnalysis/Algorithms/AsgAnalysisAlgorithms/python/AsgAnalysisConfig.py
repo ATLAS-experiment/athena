@@ -341,12 +341,12 @@ class GeneratorAnalysisBlock (ConfigBlock):
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (PtEtaSelectionBlock, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the selection to append this to. The default is "
             "'' (empty string), meaning that the cuts are applied to every "
@@ -405,12 +405,12 @@ class PtEtaSelectionBlock (ConfigBlock):
 class ObjectCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an object cutflow"""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (ObjectCutFlowBlock, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the selection to perform the cutflow for. The "
             "default is '' (empty string), meaning that the cutflow is "
@@ -434,12 +434,12 @@ class ObjectCutFlowBlock (ConfigBlock):
 class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (EventCutFlowBlock, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container, typically EventInfo.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of an optional selection decoration to use.")
         self.addOption ('customSelections', [], type=None,
@@ -480,10 +480,9 @@ class EventCutFlowBlock (ConfigBlock):
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
-    def __init__ (self, containerName='', configName='') :
-        # configName is not used. To be removed.
+    def __init__ (self) :
         super (OutputThinningBlock, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
         self.addOption ('postfix', '', type=str,
@@ -547,9 +546,9 @@ class OutputThinningBlock (ConfigBlock):
 class IFFLeptonDecorationBlock (ConfigBlock):
     """the ConfigBlock for the IFF classification of leptons"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (IFFLeptonDecorationBlock, self).__init__()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input electron or muon container.")
         self.addOption ('separateChargeFlipElectrons', True, type=bool,
@@ -578,10 +577,10 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 
 class MCTCLeptonDecorationBlock (ConfigBlock):
 
-    def __init__ (self, containerName="") :
+    def __init__ (self) :
         super (MCTCLeptonDecorationBlock, self).__init__ ()
 
-        self.addOption ("containerName", containerName, type=str,
+        self.addOption ("containerName", '', type=str,
                         noneAction='error',
                         info="the input lepton container, with a possible selection, "
                         "in the format container or container.selection.")
@@ -607,9 +606,9 @@ class MCTCLeptonDecorationBlock (ConfigBlock):
 class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
-    def __init__ (self, algoName=''):
+    def __init__ (self):
         super(PerEventSFBlock, self).__init__()
-        self.addOption('algoName', algoName, type=str,
+        self.addOption('algoName', '', type=str,
             noneAction='error',
             info="unique name given to the underlying algorithm computing the "
             "per-event scale factors")
@@ -638,10 +637,10 @@ class PerEventSFBlock (ConfigBlock):
 class SelectionDecorationBlock (ConfigBlock):
     """the ConfigBlock to add selection decoration to a container"""
 
-    def __init__ (self, containers='') :
+    def __init__ (self) :
         super (SelectionDecorationBlock, self).__init__ ()
         # TODO: add info string
-        self.addOption('containers', containers, type=list,
+        self.addOption('containers', [], type=list,
             noneAction='error',
             info="")
 
@@ -675,7 +674,9 @@ def makeEventCutFlowConfig(seq, containerName,
     customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
     """
 
-    config = EventCutFlowBlock(containerName, selectionName)
+    config = EventCutFlowBlock()
+    config.setOptionValue('containerName', containerName)
+    config.setOptionValue('selectionName', selectionName)
     config.setOptionValue('postfix', postfix)
     config.setOptionValue('customSelections', customSelections)
     seq.append(config)
