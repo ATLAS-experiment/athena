@@ -38,6 +38,7 @@ StatusCode eFexTowerBuilder::initialize() {
     CHECK( m_scellKey.initialize(true) );
     CHECK( m_outKey.initialize(true) );
     CHECK( m_eiKey.initialize(true) );
+    CHECK( m_LArLatomeHeaderContainerKey.initialize(SG::AllowEmpty) );
 
     if (auto fileName = PathResolverFindCalibFile( m_mappingFile ); !fileName.empty()) {
         std::unique_ptr<TFile> f( TFile::Open(fileName.c_str()) );
@@ -222,6 +223,22 @@ StatusCode eFexTowerBuilder::fillMap(const EventContext& ctx) const {
         ATH_MSG_FATAL("Cannot fill sc -> eFexTower mapping with an incomplete sc collection");
         return StatusCode::FAILURE;
     }
+
+    // read the LATOME header if a key is given, so that we can determine LATOME version and get mapping right
+    bool doV6Mapping = m_v6Mapping;
+
+    if(!m_LArLatomeHeaderContainerKey.empty()) {
+        SG::ReadHandle<LArLATOMEHeaderContainer> hdrCont(m_LArLatomeHeaderContainerKey,ctx);
+        if(hdrCont.isValid()) {
+            for (const LArLATOMEHeader* hit : *hdrCont) {
+                doV6Mapping = (hit->FWversion()>1600);
+            }
+            if (doV6Mapping != m_v6Mapping) {
+                ATH_MSG_WARNING("Used LATOME Hardware to determine mapping different to python configuration (use V6 Mapping = " << doV6Mapping << " )");
+            }
+        }
+
+    }
     struct TowerSCells {
         std::vector<unsigned long long> ps;
         std::vector<std::pair<float,unsigned long long>> l1;
@@ -294,10 +311,10 @@ StatusCode eFexTowerBuilder::fillMap(const EventContext& ctx) const {
         // handle case @ |eta|~1.8-2 with 6 L1 cells
         if (sc.l1.size()==6) {
             m_scMap[sc.l1.at(0).second] = std::pair(coord,std::pair(1,11));
-            m_scMap[sc.l1.at(1).second] = std::pair(coord,(m_v6Mapping && coord.first < 0) ? std::pair(2,1) : std::pair(1,2)); // in LATOME v5 FW this was (1,2) for both sides
+            m_scMap[sc.l1.at(1).second] = std::pair(coord,(doV6Mapping && coord.first < 0) ? std::pair(2,1) : std::pair(1,2)); // in LATOME v5 FW this was (1,2) for both sides
             m_scMap[sc.l1.at(2).second] = std::pair(coord,std::pair(2,11));
             m_scMap[sc.l1.at(3).second] = std::pair(coord,std::pair(3,11));
-            m_scMap[sc.l1.at(4).second] = std::pair(coord,(m_v6Mapping && coord.first < 0) ? std::pair(4,3) : std::pair(3,4)); // in LATOME v5 FW this was (3,4) for both sides
+            m_scMap[sc.l1.at(4).second] = std::pair(coord,(doV6Mapping && coord.first < 0) ? std::pair(4,3) : std::pair(3,4)); // in LATOME v5 FW this was (3,4) for both sides
             m_scMap[sc.l1.at(5).second] = std::pair(coord,std::pair(4,11));
             slotVector[1] = eTowerSlots[sc.l1.at(0).second];
             slotVector[2] = eTowerSlots[sc.l1.at(2).second];

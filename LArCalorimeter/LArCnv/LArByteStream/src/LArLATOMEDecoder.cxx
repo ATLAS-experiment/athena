@@ -1130,7 +1130,7 @@ void LArLATOMEDecoder::EventProcess::fillRaw(const LArLATOMEMapping* map) {
 void LArLATOMEDecoder::EventProcess::fillHeader() {
 
   if (m_header_coll) {
-    LArLATOMEHeader* latome = new LArLATOMEHeader(m_nthLATOME, m_latomeID, m_activeSC, m_latomeBCID, m_l1ID, m_ROBFragSize);
+    LArLATOMEHeader* latome = new LArLATOMEHeader(m_nthLATOME, m_latomeID, m_activeSC, m_latomeBCID, m_l1ID, m_ROBFragSize, m_LATOMEFW);
     m_header_coll->push_back(latome);
   }
 }
