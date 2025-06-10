@@ -134,7 +134,6 @@ namespace PanTau {
     const PanTau::TauFeature*                           getFeatures() const;
     PanTau::TauFeature*                                 getFeatures();
     TLorentzVector                                      getProtoMomentumCore() const;
-    TLorentzVector                                      getProtoMomentumWide() const;
 
     bool                                                getIsValidSeed() const;
     const std::vector<int>&                             getTechnicalQuality() const;
@@ -182,9 +181,6 @@ namespace PanTau {
     // the TauConstituent objects are owned by PanTauSeed (this class), so they need to be deleted in the destructor                                                                                                                           
     std::vector< std::vector<PanTau::TauConstituent*> > m_Constituents;
 
-    //the momentum as calculated by using all constituents added to this seed                                                                                                                                                                  
-    TLorentzVector                                      m_ProtoMomentum_Wide;
-
     //the momentum as calculated by using only core constituents                                                                                                                                                                               
     TLorentzVector                                      m_ProtoMomentum_Core;
 
@@ -229,7 +225,6 @@ inline const xAOD::TauJet*                                  PanTau::PanTauSeed::
 inline xAOD::TauJet*                                        PanTau::PanTauSeed::getTauJet()                         {return m_TauJet;}
 inline const PanTau::TauFeature*                            PanTau::PanTauSeed::getFeatures() const                 {return m_Features;}
 inline PanTau::TauFeature*                                  PanTau::PanTauSeed::getFeatures()                       {return m_Features;}
-inline TLorentzVector                                       PanTau::PanTauSeed::getProtoMomentumWide() const        {return m_ProtoMomentum_Wide;}
 inline TLorentzVector                                       PanTau::PanTauSeed::getProtoMomentumCore() const        {return m_ProtoMomentum_Core;}
 inline const std::vector< std::vector<PanTau::TauConstituent*> >&  PanTau::PanTauSeed::getConstituents() const      {return m_Constituents;}
 inline const std::vector<PanTau::TauConstituent*>&          PanTau::PanTauSeed::getConstituentsAsList_Core() const  {return m_ConstituentsList_Core;}

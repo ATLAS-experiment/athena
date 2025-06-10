@@ -46,11 +46,8 @@ namespace PanTau {
   protected:
         
     //member variables 
-    PanTau::HelperFunctions   m_HelperFunctions;
-    ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore", "Link to tool with all information"};
     ToolHandle<PanTau::ITool_InputConverter>    m_Tool_InputConverter{this, "Tool_InputConverter", "PanTau::Tool_InputConverter/Tool_InputConverter", "Link to tool to convert into TauConstituents"};
 
-    Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "", "Link to tool with all information"};
     Gaudi::Property<std::string> m_Tool_InputConverterName{this, "Tool_InputConverterName", "", "Link to tool to convert into TauConstituents"};
 
     bool m_init=false;
