@@ -1,15 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LumiCalc/LumiCalculator.h"
 
 // GoodRunsLists
-#include "GoodRunsLists/TMsgLogger.h"
 #include "GoodRunsLists/TGoodRunsList.h"
 #include "GoodRunsLists/TGoodRunsListWriter.h"
 
+//
+#include "LumiCalc/CoolQuery.h"
+#include "LumiCalc/LumiBlockRangeContainerConverter.h"
+
 // ROOT
+#include "TH1F.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TString.h"
@@ -17,10 +21,12 @@
 #include "TROOT.h"
 
 // stl includes
+#include <memory>
 #include <iomanip>
 #include <iostream>
 #include <set>
 #include <regex.h>
+#include <stdexcept>
 
 LumiCalculator::LumiCalculator()
  : m_LumiTree (nullptr)
@@ -339,10 +345,10 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
   // check for online DB
   if(m_onlinelumi){
     m_lumi_database = m_lumionl + m_data_db;
-    m_parlumiestfolder = onlfolder;
+    m_parlumiestfolder = std::move(onlfolder);
   } else {
     m_lumi_database = m_lumioff + m_data_db;
-    m_parlumiestfolder = oflfolder;
+    m_parlumiestfolder = std::move(oflfolder);
   }
 
   m_trig_database = m_trigger + m_data_db;
@@ -516,7 +522,7 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
   std::map<cool::ValidityKey, CoolQuery::L1CountFolderData> L1accept_map;
 
   for(xAOD::LumiBlockRangeContainer::const_iterator it = iovc->begin(); it != iovc->end(); ++it){
-    const IOVRange* iovr = new IOVRange(IOVTime((*it)->startRunNumber(),(*it)->startLumiBlockNumber()), 
+    const auto iovr = std::make_unique<IOVRange>(IOVTime((*it)->startRunNumber(),(*it)->startLumiBlockNumber()), 
                                         IOVTime((*it)->stopRunNumber(),(*it)->stopLumiBlockNumber()));
     
     // Bookkeeping temporary results
@@ -581,6 +587,9 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
 	m_triggerlowerchains.push_back(lowerch); 
 	//
 	m_L2id = cq_trigger->getHLTChannelId(lowerch, m_parhltmenufolder);
+	if (m_L2id == UINT_MAX) { //nonsense value for getHLTChannelId
+	  throw std::runtime_error("LumiCalculator::IntegrateLumi : getHLTChannelId returned invalid value.");
+	}
 	m_L2Valid = cq_trigger->channelIdValid();
 
 	lowerch = cq_trigger->getHLTLowerChainName(lowerch, m_parhltmenufolder); 
@@ -995,14 +1004,18 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
 	std::string ttrig = "";
 	ttrig = triggerchain;
 	if(m_uselivetrigger)ttrig = m_livetrigger;
-	m_logger << Root::kWARNING << "L1 counts after prescale (before veto) are 0.0 for trigger " << ttrig << "! Livefraction set to zero!" << Root::GEndl;
+	m_logger << Root::kWARNING << "L1 counts after prescale (before veto) are 0.0 for trigger " << std::move(ttrig) << "! Livefraction set to zero!" << Root::GEndl;
 	m_logger << Root::kWARNING << "Try using a high rate L1 trigger for livetime calculation: --livetrigger=<high rate L1 trigger> " << Root::GEndl;
 	m_logger << Root::kINFO << m_runnbr << "[" << m_clumiblocknbr << "]: L1Acc: " << m_l1acc << ", AfterPrescale: " << m_afterprescale  << ", L1Presc: " << m_l1prescale << Root::GEndl;
       }	    
 
       //------------------------
       // Calculate LAr veto time
-
+      auto itStartTime = L1starttime_map.find(currentVK);
+      auto itEndTime = L1endtime_map.find(currentVK);
+      if (itStartTime == L1starttime_map.end()  or itEndTime == L1endtime_map.end()){
+        throw std::runtime_error("LumiCalculator::IntegrateLumi Start or End times not found in map.");
+      }
       cool::ValidityKey lbstarttime = L1starttime_map.find(currentVK)->second;
       cool::ValidityKey lbendtime = L1endtime_map.find(currentVK)->second;
 
