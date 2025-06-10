@@ -45,9 +45,10 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
-        self.addOption ('minPt', 4.5*GeV, type=float,
+        self.addOption ('minPt', None, type=float,
             info="the minimum pT cut to apply to calibrated electrons. "
-            "The default is 4.5 GeV.")
+            "The default is 15 GeV for Run 2 and 4.5 GeV for Run 3, "
+            "based on the current coverage by the scale factors.")
         self.addOption ('maxEta', 2.47, type=float,
             info="maximum electron |eta| (float). The default is 2.47.")
         self.addOption ('forceFullSimConfigForP4', False, type=bool,
@@ -203,6 +204,17 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.calibrationAndSmearingTool.doScaleCorrection = False
             alg.calibrationAndSmearingTool.useMVACalibration = False
             alg.calibrationAndSmearingTool.decorateEmva = False
+        
+        if self.minPt is None:
+            if config.geometry() is LHCPeriod.Run2:
+                self.minPt = 15*GeV
+            else:
+                self.minPt = 4.5*GeV
+        elif self.minPt < 15*GeV and config.geometry() is LHCPeriod.Run2:
+            log.warning("You are applying pT selection smaller than 15 GeV for Run 2. "
+                        "Be aware that for electrons below 15 GeV, no scale factors "
+                        "are currently available.")
+        
 
         if self.minPt > 0 :
             # Set up the the pt selection
@@ -340,6 +352,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('correlationModelReco', 'SIMPLIFIED', type=str,
             info="the correlation model (string) to use for reconstruction scale factors "
             "Supported models: SIMPLIFIED (default), FULL, TOTAL, TOYS")
+        self.addOption('addChargeMisIDSF', False, type=bool,
+            info="Adds scale factors for charge-misID.")
 
 
     def makeAlgs (self, config) :
@@ -514,14 +528,12 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
-
+        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v2/map1.txt' \
+                   if config.geometry() is LHCPeriod.Run2 else \
+                   'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Precision2023_Recommendation/trigger/map1.txt'
         sfList = []
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
-
-            if config.geometry() is LHCPeriod.Run2:
-                raise ValueError('Run 2 does not yet have efficiency correction, '
-                                 'please disable it by setting `noEffSF` to True.')
             if 'DNN' in self.identificationWP:
                 raise ValueError('DNN does not yet have efficiency correction, '
                                  'please disable it by setting `noEffSF` to True.')
@@ -531,6 +543,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_reco_effSF' + selectionPostfix + '_%SYS%'
+            alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
             if self.correlationModelReco not in correlationModels:
                 raise ValueError('Invalid correlation model for reconstruction efficiency, '
@@ -564,6 +577,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
+            alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
             if self.correlationModelId not in correlationModels:
                 raise ValueError('Invalid correlation model for identification efficiency, '
@@ -592,17 +606,16 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
+            alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP
             if self.correlationModelIso not in correlationModels:
                 raise ValueError('Invalid correlation model for isolation efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
-            if config.geometry() >= LHCPeriod.Run3:
+            if self.correlationModelIso != 'TOTAL':
                 log.warning("Only TOTAL correlation model is currently supported "
                       "for isolation efficiency correction in Run 3.")
-                alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
-            else:
-                alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelIso
+            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
                     PATCore.ParticleDataType.Full if self.forceFullSimConfig
@@ -619,12 +632,82 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                      'isol_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
 
-        # TO-DO: add trigger SFs, for which we need ID key + ISO key + Trigger key !
+        if (self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3 and 
+            config.dataType() is not DataType.Data and not self.noEffSF):
+            alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
+                                          'ElectronEfficiencyCorrectionAlgEcids' + postfix )
+            config.addPrivateTool( 'efficiencyCorrectionTool',
+                                   'AsgElectronEfficiencyCorrectionTool' )
+            alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
+            if self.isolationWP != 'Tight_VarRad':
+                raise ValueError('ECIDS are supported only for Tight_VarRad isolation.')
+            if self.identificationWP == 'LooseBLayerLH':
+                ecids_lh = 'loose'
+            elif self.identificationWP == 'MediumLH':
+                ecids_lh = 'medium'
+            elif self.identificationWP == 'TightLH':
+                ecids_lh = 'tight'
+            else:  
+                raise ValueError('ECIDS are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
 
-        if self.chargeIDSelectionRun2:
-            # ECIDS is currently not supported in R22.
-            # SFs might become available or it will be part of the DNN ID.
-            pass
+            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
+            alg.efficiencyCorrectionTool.CorrectionFileNameList = \
+                [f'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v2/ecids/efficiencySF.ChargeID.{ecids_lh}_ECIDS_Tight_VarRad.root']
+            if config.dataType() is DataType.FastSim:
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig
+                    else PATCore.ParticleDataType.Fast)
+            elif config.dataType() is DataType.FullSim:
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Full
+            alg.outOfValidity = 2 #silent
+            alg.outOfValidityDeco = 'el_ecids_bad_eff' + selectionPostfix
+            alg.electrons = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'ecids_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
+        
+        if self.addChargeMisIDSF and  config.dataType() is not DataType.Data and not self.noEffSF:
+            if config.geometry() >= LHCPeriod.Run3:
+                raise ValueError('Run 3 does not yet have charge mis-ID correction, '
+                                 'please disable it by setting `noEffSF` to False.')
+
+            alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
+                                          'ElectronEfficiencyCorrectionAlgMisid' + postfix )
+            config.addPrivateTool( 'efficiencyCorrectionTool',
+                                   'CP::ElectronChargeEfficiencyCorrectionTool' )
+            alg.scaleFactorDecoration = 'el_chargeMisID_effSF' + selectionPostfix + '_%SYS%'
+            if self.isolationWP != 'Tight_VarRad':
+                raise ValueError('ECIDS are supported only for Tight_VarRad isolation.')
+            if self.identificationWP == 'LooseBLayerLH':
+                misid_lh = 'LooseAndBLayerLLH'
+            elif self.identificationWP == 'MediumLH':
+                misid_lh = 'MediumLLH'
+            elif self.identificationWP == 'TightLH':
+                misid_lh = 'TightLLH'
+            else:  
+                raise ValueError('ECIDS are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
+            misid_suffix = '_ECIDSloose' if self.chargeIDSelectionRun2 else ''
+
+            alg.efficiencyCorrectionTool.CorrectionFileName = \
+                f'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v2/charge_misID/chargeEfficiencySF.{misid_lh}_d0z0_TightVarRad{misid_suffix}.root'
+            if config.dataType() is DataType.FastSim:
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig
+                    else PATCore.ParticleDataType.Fast)
+            elif config.dataType() is DataType.FullSim:
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Full
+            alg.outOfValidity = 2 #silent
+            alg.outOfValidityDeco = 'el_misid_bad_eff' + selectionPostfix
+            alg.electrons = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'charge_misid_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
         if config.dataType() is not DataType.Data and not self.noEffSF and self.saveCombinedSF:
             alg = config.createAlgorithm( 'CP::AsgObjectScaleFactorAlg',
@@ -633,6 +716,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.inScaleFactors = sfList
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
             config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
+        
 
 
 class ElectronTriggerAnalysisSFBlock (ConfigBlock):
