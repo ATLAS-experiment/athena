@@ -114,15 +114,21 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
         doV6Mapping = (runinfo.FWversion()==6)
     
-    if doV6Mapping:
-        # add required dbOverride
+    if doV6Mapping and len(flags.Input.RunNumbers)>0:
+        # add required dbOverride (don't do in athena HLT where we will rely on LAr/LATOME to have set it to the right thing)
         from IOVDbSvc.IOVDbSvcConfig import addOverride
         acc.merge( addOverride(flags,folder="/LAR/Identifier/LatomeMapping",tag="LARIdentifierLatomeMapping-fw6") )
 
     if 'L1_eFexEmulatedTowers' in eFexTowerInputs and "L1_eFexEmulatedTowers" not in flags.Input.Collections:
         builderAlg = CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",UseLATOMEv6Mapping=doV6Mapping,
                                                             CaloCellContainerReadKey=sCellType,ApplyMasking=not flags.Input.isMC) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
-        if doV6Mapping: builderAlg.MappingFile='' # need to regenerate mapping on-the-fly for v6
+        if flags.Input.isMC: builderAlg.LArLatomeHeaderKey=""
+        elif doV6Mapping or len(flags.Input.RunNumbers)==0:
+            builderAlg.MappingFile='' # need to regenerate mapping on-the-fly for v6 or in athena hlt jobs
+            # if regenerating mapping file and this is data, we will need the LATOME headers, otherwise don't use them
+            from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+            acc.merge(LArRawSCDataReadingCfg(flags))
+
         acc.addEventAlgo( builderAlg )
 
     if flags.Trigger.L1.doeFex:
