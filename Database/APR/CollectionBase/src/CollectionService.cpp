@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionBase/CollectionService.h"
@@ -64,7 +64,7 @@ pool::CollectionService::create( const pool::ICollectionDescription& description
 pool::ICollection*
 pool::CollectionService::createAndRegister( const pool::ICollectionDescription& description,
                                             bool overwrite,
-                                            std::string logicalName )
+                                            const std::string & logicalName )
 {
    if( description.name().empty() )  {
       std::string errorMsg = "Must specify name of collection in description input argument.";
@@ -95,10 +95,10 @@ pool::CollectionService::createAndRegister( const pool::ICollectionDescription& 
 
 
 bool
-pool::CollectionService::registerExisting( const std::string& name,
-                                           const std::string& type,
-                                           std::string connection,
-                                           std::string logicalName )
+pool::CollectionService::registerExisting( const std::string & name,
+                                           const std::string & type,
+                                           const std::string & connection,
+                                           const std::string & logicalName )
 {
    if( name.empty() )  {
     std::string errorMsg = "Must specify name of collection as input.";
@@ -133,7 +133,7 @@ pool::CollectionService::registerExisting( const std::string& name,
 bool
 pool::CollectionService::registerExisting( ICollection* collection,
 					   bool overwrite,
-                                           std::string logicalName )
+                                           const std::string & logicalName )
 {
   return CollectionFactory::get()->registerExisting( collection,
 						     overwrite,
@@ -145,7 +145,7 @@ pool::CollectionService::registerExisting( ICollection* collection,
 pool::ICollection* 
 pool::CollectionService::handle( const std::string& name,
                                  const std::string& type,
-                                 std::string connection,
+                                 const std::string & connection,
                                  bool readOnly,
                                  pool::ISession* session ) const
 {
