@@ -71,6 +71,7 @@ class WorkflowType(Enum):
     MCOverlay = "MCOverlay"
     DataOverlay = "DataOverlay"
     DataOverlayChain = "DataOverlayChain"
+    DataOverlayReco = "DataOverlayReco"
     MCReco = "MCReco"
     MCPileUpReco = "MCPileUpReco"
     DataReco = "DataReco"

@@ -122,6 +122,11 @@ atlas_add_citest( RecoRun3MC_PileUp
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --conditionsTag OFLCOND-MC23-SDR-RUN3-08 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1919/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun3 )
 
+atlas_add_citest( RecoRun3Data_Overlay
+   SCRIPT RunWorkflowTests_Run3.py --CI -o -w DataOverlayReco --threads 2 -e '--maxEvents 3 --inputRDOFile=../../OverlayRun3DataChain/run_d2030/myRDO.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 2
+   DEPENDS_SUCCESS OverlayRun3DataChain )
+
 atlas_add_citest( RecoRun4MC
    SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root --conditionsTag OFLCOND-MC21-SDR-RUN4-03' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS SimulationRun4FullSim )
