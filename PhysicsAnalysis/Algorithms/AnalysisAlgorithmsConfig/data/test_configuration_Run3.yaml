@@ -32,11 +32,13 @@ Electrons:
     decorateTruth: true
     decorateCaloClusterEta: true
     writeTrackD0Z0: True
+    minPt: 10000.0
     WorkingPoint:
       - selectionName: loose
         forceFullSimConfig: True
         identificationWP: LooseBLayerLH
-        isolationWP: Loose_VarRad
+        isolationWP: Tight_VarRad
+        chargeIDSelectionRun2: True
     PtEtaSelection:
       minPt: 10000.0
     IFFClassification: {}

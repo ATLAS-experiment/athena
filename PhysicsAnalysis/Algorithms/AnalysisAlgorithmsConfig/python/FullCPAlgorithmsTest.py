@@ -166,17 +166,18 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.writeTrackD0Z0', True)
     configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
-
+    configSeq.setOptionValue ('.minPt', electronMinPt)
     configSeq += config.makeConfig ('Electrons.WorkingPoint')
     configSeq.setOptionValue ('.containerName', 'AnaElectrons')
     configSeq.setOptionValue ('.selectionName', 'loose')
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
-    configSeq.setOptionValue ('.noEffSF', geometry is LHCPeriod.Run2)
     if likelihood:
         configSeq.setOptionValue ('.identificationWP', 'LooseBLayerLH')
     else:
         configSeq.setOptionValue ('.identificationWP', 'LooseDNN')
-    configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
+    configSeq.setOptionValue ('.isolationWP', 'Tight_VarRad')
+    configSeq.setOptionValue ('.chargeIDSelectionRun2', True)
+    configSeq.setOptionValue ('.addChargeMisIDSF', geometry is LHCPeriod.Run2)
 
     configSeq += config.makeConfig ('Electrons.IFFClassification')
     configSeq.setOptionValue ('.containerName', 'AnaElectrons')

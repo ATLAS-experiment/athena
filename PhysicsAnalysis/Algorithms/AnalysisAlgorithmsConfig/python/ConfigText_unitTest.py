@@ -100,14 +100,16 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (decorateTruth=True)
     config.setOptions (decorateCaloClusterEta=True)
     config.setOptions (writeTrackD0Z0=True)
+    config.setOptions (minPt=10000.0)
     # Electrons.WorkingPoint
     config.addBlock ('Electrons.WorkingPoint')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (selectionName='loose')
     config.setOptions (forceFullSimConfig=True)
-    config.setOptions (noEffSF=True)
     config.setOptions (identificationWP='LooseBLayerLH')
-    config.setOptions (isolationWP='Loose_VarRad')
+    config.setOptions (isolationWP='Tight_VarRad')
+    config.setOptions (chargeIDSelectionRun2=True)
+    config.setOptions (addChargeMisIDSF=True)
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
