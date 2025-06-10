@@ -24,12 +24,12 @@ namespace TrigL2MuonSA {
 
 struct MdtLayerHits
 {
-  unsigned int ntot;
-  unsigned int ntot_all;
-  unsigned int ndigi;
-  unsigned int ndigi_all;
-  double ResSum;
-  std::vector<unsigned int> indexes;
+  unsigned int ntot{0};
+  unsigned int ntot_all{0};
+  unsigned int ndigi{0};
+  unsigned int ndigi_all{0};
+  double ResSum{0};
+  std::vector<unsigned int> indexes{};
 };
 
 // --------------------------------------------------------------------------------
