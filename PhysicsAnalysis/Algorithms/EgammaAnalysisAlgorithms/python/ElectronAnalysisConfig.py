@@ -18,12 +18,12 @@ import PATCore.ParticleDataType
 class ElectronCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the electron four-momentum correction"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (ElectronCalibrationConfig, self).__init__ ()
         self.setBlockName('Electrons')
         self.addOption ('inputContainer', '', type=str,  
             info="select electron input container, by default set to Electrons")
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('ESModel', '', type=str,
@@ -268,12 +268,12 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (ElectronWorkingPointConfig, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the electron selection to define (e.g. tight or "
             "loose).")
@@ -637,7 +637,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
 class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
-    def __init__ (self, configName='') :
+    def __init__ (self) :
         super (ElectronTriggerAnalysisSFBlock, self).__init__ ()
 
         self.addOption ('triggerChainsPerYear', {}, type=None,
