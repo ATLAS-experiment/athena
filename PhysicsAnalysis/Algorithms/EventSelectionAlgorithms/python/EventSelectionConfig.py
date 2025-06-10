@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeEventCutFlowConfig
@@ -34,9 +34,9 @@ class EventSelectionMergerConfig(ConfigBlock):
 class EventSelectionConfig(ConfigBlock):
     """ConfigBlock for interpreting text-based event selections"""
 
-    def __init__(self, name=''):
+    def __init__(self):
         super(EventSelectionConfig, self).__init__()
-        self.addOption('name', name, type=str,
+        self.addOption('name', '', type=str,
             noneAction='error',
             info="the name of the event selection, used to uniquely identify "
             "the EventSelectionConfig block.")
@@ -91,7 +91,6 @@ class EventSelectionConfig(ConfigBlock):
         self.step = 0
         self.currentDecoration = ''
         self.cutflow = []
-        self.name = name
 
     def makeAlgs(self, config):
         # need to re-initialize here to deal with multiple passes
@@ -938,7 +937,8 @@ def makeEventSelectionConfig(seq,
         cutFlowHistograms -- whether to toggle event cutflow histograms per systematic
     """
 
-    config = EventSelectionConfig(name)
+    config = EventSelectionConfig()
+    config.setOptionValue ('name', name)
     config.setOptionValue ('electrons', electrons)
     config.setOptionValue ('muons', muons)
     config.setOptionValue ('jets', jets)
