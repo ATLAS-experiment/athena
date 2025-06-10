@@ -978,6 +978,8 @@ def getDevSignatures():
         ChainProp(name='HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetM_L1ADVAEL', l1SeedThresholds=['eEM18L','eEM18L','MU3V','FSNOSEED','FSNOSEED'], groups=PrimaryPhIGroup+Topo2Group),
         ChainProp(name='HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetT_L1ADVAET', l1SeedThresholds=['eEM18L','eEM18L','MU3V','FSNOSEED','FSNOSEED'], groups=PrimaryPhIGroup+Topo2Group),
         ChainProp(name='HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetT_L1ADVAEL', l1SeedThresholds=['eEM18L','eEM18L','MU3V','FSNOSEED','FSNOSEED'], groups=PrimaryPhIGroup+Topo2Group),
+        # gamma + boosted ditau t&p chain
+        ChainProp(name='HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1eEM26M', l1SeedThresholds=['eEM26M', 'FSNOSEED'], groups=TagAndProbePhIGroup+DevGroup)
 
     ]
 

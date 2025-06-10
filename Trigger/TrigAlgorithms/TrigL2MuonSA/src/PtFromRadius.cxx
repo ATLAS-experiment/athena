@@ -34,7 +34,6 @@ void TrigL2MuonSA::PtFromRadius::setMCFlag(bool use_mcLUT,
 StatusCode TrigL2MuonSA::PtFromRadius::setPt(TrigL2MuonSA::TrackPattern& trackPattern) const
 {
   const double ZERO_LIMIT = 1e-5;
-
   const PtBarrelLUT::LUT&   lut   = (*m_ptBarrelLUT)->lut();
   const PtBarrelLUT::LUTsp& lutSP = (*m_ptBarrelLUT)->lutSP();
 

@@ -74,7 +74,7 @@ if [ ${rec} -eq 0 ]
 then
    ArtPackage=$1
    ArtJobName=$2
-   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${AOD_File}
+   art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${AOD_File}
    reg=$?
    status=$reg
 fi

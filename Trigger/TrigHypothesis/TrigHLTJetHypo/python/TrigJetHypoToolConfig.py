@@ -22,7 +22,7 @@ def trigJetHypoToolFromDict(flags, chain_dict):
     from DecisionHandling.TrigCompositeUtils import isLegId, getLegIndexInt
     chain_name = chain_dict['chainName']
     chain_mg   = chain_dict['monGroups']
-    jet_signature_identifiers = ['Jet', 'Bjet']
+    jet_signature_identifiers = ['Jet:Jet', 'Bjet:Bjet', 'Tau:Ditau']
 
     if isLegId(chain_name):
         # For multi-leg chains which include jet legs we have a -- SPECIAL BEHAVIOUR --
@@ -35,36 +35,37 @@ def trigJetHypoToolFromDict(flags, chain_dict):
         # Can we fetch this from elsewhere?
 
         leg_id = getLegIndexInt(chain_name)
-        # CHECK: If we have called trigJetHypoToolFromDict, then the chain_dict['signatures'] list must contain at minimum one entry from the jet_signature_identifiers list. 
-        if not any(signature in chain_dict['signatures'] for signature in jet_signature_identifiers):
-            raise Exception("[trigJetHypoToolFromDict] No {} in {} for chain {}. Please update this list of jet signatures.".format(tuple(jet_signature_identifiers),tuple(chain_dict['signatures']),chain_name))
+        chain_sig_w_sub_sig = [f'{sig}:{subsig}' for sig, subsigs in chain_dict['sigDicts'].items() for subsig in subsigs]
+        # CHECK: If we have called trigJetHypoToolFromDict, then the chain_sig_w_sub_sig list must contain at minimum one entry from the jet_signature_identifiers list. 
+        if not any(signature in chain_sig_w_sub_sig for signature in jet_signature_identifiers):
+            raise Exception("[trigJetHypoToolFromDict] No {} in {} for chain {}. Please update this list of jet signatures.".format(tuple(jet_signature_identifiers),tuple(chain_sig_w_sub_sig),chain_name))
 
         # CHECK: All Jet and Bjet legs (i.e. signatures from jet_signature_identifiers) must be contiguous
         # (this check is probable best put somewhere else?)
         status = 0
-        for entry in chain_dict['signatures']:
+        for entry in chain_sig_w_sub_sig:
             if status == 0 and entry in jet_signature_identifiers:
                 status = 1
             elif status == 1 and entry not in jet_signature_identifiers:
                 status = 2
             elif status == 2 and entry in jet_signature_identifiers:
-                raise Exception("[trigJetHypoToolFromDict] All {} legs should be contiguous in the signatures list, modify the ordering of the chain {}. Signatures:{}.".format(tuple(jet_signature_identifiers),chain_name, tuple(chain_dict['signatures'])))
+                raise Exception("[trigJetHypoToolFromDict] All {} legs should be contiguous in the signatures list, modify the ordering of the chain {}. Signatures:{}.".format(tuple(jet_signature_identifiers),chain_name, tuple(chain_sig_w_sub_sig)))
         
         # CHECK: The leg_id must correspond to a Signature from jet_signature_identifiers. At the time of implementation, this is not guaranteed and can be affected by alignment.
-        # If this check fails for any chain, then we need to look again at how the legXXX ordering maps to the chain_dict['signatures'] ordering.
-        if not any(signature in chain_dict['signatures'][leg_id] for signature in jet_signature_identifiers):
-            raise Exception("[trigJetHypoToolFromDict] For this code to work for chain {}, the signature at index {} must be one of {}. But the signature list is: {}".format(chain_name,leg_id,tuple(jet_signature_identifiers),tuple(chain_dict['signatures'])))
+        # If this check fails for any chain, then we need to look again at how the legXXX ordering maps to the chain_sig_w_sub_sig ordering.
+        if not any(signature in chain_sig_w_sub_sig[leg_id] for signature in jet_signature_identifiers):
+            raise Exception("[trigJetHypoToolFromDict] For this code to work for chain {}, the signature at index {} must be one of {}. But the signature list is: {}".format(chain_name,leg_id,tuple(jet_signature_identifiers),tuple(chain_sig_w_sub_sig)))
 
-        # Locate the first index within chain_dict['signatures'] which contains an signature listed in jet_signature_identifiers
+        # Locate the first index within chain_sig_w_sub_sig which contains an signature listed in jet_signature_identifiers
         first_leg_index = 999
         for signature in jet_signature_identifiers:
-            if signature in chain_dict['signatures']:
-                first_leg_index = min(first_leg_index, chain_dict['signatures'].index(signature))
+            if signature in chain_sig_w_sub_sig:
+                first_leg_index = min(first_leg_index, chain_sig_w_sub_sig.index(signature))
 
         if leg_id > first_leg_index:
             logger.debug("Not returning a HypoTool for %s as this is not the first leg "
                          "with any of %s (leg signatures are %s)",
-                         chain_name, tuple(jet_signature_identifiers), tuple(chain_dict['signatures']))
+                         chain_name, tuple(jet_signature_identifiers), tuple(chain_sig_w_sub_sig))
             raise NoHypoToolCreated("No HypoTool created for %s" % chain_name)
 
     logger.debug("Returning a HypoTool for %s as this is the first leg with any of %s (leg signatures are %s)",
