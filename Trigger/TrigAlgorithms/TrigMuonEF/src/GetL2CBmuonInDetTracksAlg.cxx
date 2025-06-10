@@ -31,7 +31,7 @@ StatusCode GetL2CBmuonInDetTracksAlg::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("adding combined muon container with size: "<<cbMuons->size());
 
   for(auto cbmuon : *cbMuons) {
-    idtracksout->push_back(new xAOD::TrackParticle(*cbmuon->idTrack()));
+    if(cbmuon->idTrack()) idtracksout->push_back(new xAOD::TrackParticle(*cbmuon->idTrack()));
   }
   ATH_MSG_DEBUG("output ID muon tracks with size: " << idtracksout->size());
   return StatusCode::SUCCESS;
