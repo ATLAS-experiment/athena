@@ -230,6 +230,12 @@ TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJ
 TauTrack_vars_str = '.'.join(TauTrack_vars)
 
 # ===========
+# == boosted ditau ==
+DiTauJet_vars = ['pt', 'eta', 'phi', 'm', 'TauJetVtxFraction', 'subjet_pt', 'subjet_phi', 'subjet_e', 'subjet_f_core', 'subjet_eta', 'isoTrackLinks', 'jetLink', 'vertexLink', 'trackLinks']
+DiTauJet_vars += ["ditau_pt", "f_core_lead", "f_core_subl", "f_subjet_lead", "f_subjet_subl", "f_subjets", "f_track_lead", "f_track_subl", "R_max_lead", "R_max_subl", "n_track", "n_tracks_lead", "n_tracks_subl", "n_isotrack", "R_track", "R_track_core", "R_track_all", "R_isotrack", "R_core_lead", "R_core_subl", "R_tracks_lead", "R_tracks_subl", "m_track", "m_track_core", "m_core_lead", "m_core_subl", "m_track_all", "m_tracks_lead", "m_tracks_subl", "E_frac_subl", "E_frac_subsubl", "R_subjets_subl", "R_subjets_subsubl", "d0_leadtrack_lead", "d0_leadtrack_subl", "f_isotracks", "omni_score"]
+DiTauJet_vars_str = '.'.join(DiTauJet_vars)
+
+# ===========
 # === LLP ===
 MuRoiToKeep = ['ClusterEta','ClusterPhi','nRoIs']
 MuRoiVars = '.'.join(MuRoiToKeep)
@@ -719,9 +725,17 @@ TriggerHLTListRun3 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIso_probe',     'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',        'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe',  'BS ESD AODFULL',  'Tau'),
+    # boosted ditau roi
+    ('TrigRoiDescriptorCollection#HLT_Roi_DiTau',            'BS ESD',          'Tau'),
 
     ('xAOD::JetContainer#HLT_jet_seed',                         '', 'Tau', [InViews('tauCaloMVAViews')]),
     ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  '', 'Tau'),
+
+    #boosted ditau tracks
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_DiTau_FTF',                      'BS ESD', 'Tau', [InViews('DitauViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_DiTau_FTFAux.',               'BS ESD', 'Tau'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_DiTau_IDTrig',                   'BS ESD', 'Tau', [InViews('DitauViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_DiTau_IDTrigAux.',            'BS ESD', 'Tau'),
 
     # Jet
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
@@ -828,6 +842,7 @@ TriggerHLTListRun3 = [
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftf',                '', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftfAux.'+JetVars, '', 'Jet'),
+
 
     ## event info
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_jet',                                 'BS ESD AODFULL', 'Jet' ),
@@ -1010,6 +1025,10 @@ TriggerHLTListRun3 = [
     ('xAOD::TauTrackAuxContainer#HLT_tautrack_LLPAux.'+TauTrack_vars_str,       'BS ESD AODFULL AODSLIM', 'Tau'),
     ('xAOD::TauTrackContainer#HLT_tautrack_LRT',                                'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLRTTauViews'), InViews('tauPrecisionReco_LRTViews')]),
     ('xAOD::TauTrackAuxContainer#HLT_tautrack_LRTAux.'+TauTrack_vars_str,       'BS ESD AODFULL AODSLIM', 'Tau'),
+
+    # boosted ditau
+    ('xAOD::DiTauJetContainer#HLT_DiTauJets',                                   'BS ESD AODFULL AODSLIM', 'Tau', [InViews('DitauViews')]),
+    ('xAOD::DiTauJetAuxContainer#HLT_DiTauJetsAux.'+DiTauJet_vars_str,          'BS ESD AODFULL AODSLIM', 'Tau'),
 
     # bjet RoI Descriptor used for EventView creation
     ('TrigRoiDescriptorCollection#HLT_Roi_Bjet',                   'BS ESD AODFULL', 'Bjet'),

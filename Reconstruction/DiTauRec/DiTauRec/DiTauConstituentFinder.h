@@ -2,24 +2,21 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DITAUREC_CLUSTERFINDER_H
-#define DITAUREC_CLUSTERFINDER_H
+#pragma once
 
 #include "DiTauToolBase.h"
-
 #include "AsgTools/PropertyWrapper.h"
-
 #include "GaudiKernel/ToolHandle.h"
 
 
-class ClusterFinder : public DiTauToolBase {
+class DiTauConstituentFinder : public DiTauToolBase {
  public:
 
-  ClusterFinder(const std::string& type,
+  DiTauConstituentFinder(const std::string& type,
 	     const std::string& name,
 	     const IInterface * parent);
 
-  virtual ~ClusterFinder();
+  virtual ~DiTauConstituentFinder();
 
   virtual StatusCode initialize() override;
 
@@ -28,10 +25,7 @@ class ClusterFinder : public DiTauToolBase {
 
 
  private:
-
-  Gaudi::Property<float> m_Rsubjet{this, "Rsubjet", 0.2};
-
+  Gaudi::Property<bool>  m_useRawConstit {this, "UseRawConstit", true, "If true, use clusters instead of constituents. Relevant when seeding from PF jets"};
+  Gaudi::Property<float> m_Rsubjet       {this, "Rsubjet",       0.2};
 };
-
-#endif  // DITAUREC_CLUSTERFINDER_H
 

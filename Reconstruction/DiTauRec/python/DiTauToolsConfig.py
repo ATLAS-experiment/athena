@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -73,16 +73,6 @@ def DiTauTrackFinderCfg(flags, name="DiTauRec_DiTauTrackFinder", **kwargs):
     acc.setPrivateTools(CompFactory.DiTauTrackFinder(name, **kwargs))
     return acc
 
-def ClusterFinderCfg(flags, name="DiTauRec_ClusterFinder", **kwargs):
-    """Configure the cluster finder"""
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("Rsubjet", 0.2)
-
-    ClusterFinder = CompFactory.ClusterFinder(name, **kwargs)
-    acc.setPrivateTools(ClusterFinder)
-    return acc
-
 def CellFinderCfg(flags, name="DiTauRec_CellFinder", **kwargs):
     """Configure the cell finder"""
     acc = ComponentAccumulator()
@@ -93,9 +83,25 @@ def CellFinderCfg(flags, name="DiTauRec_CellFinder", **kwargs):
     acc.setPrivateTools(CellFinder)
     return acc
 
-
-def IDVarCalculatorCfg(flags, name="DiTauRec_IDVarCalculator", **kwargs):
-    """Configure the IDVarCalculator"""
+def DiTauConstituentFinderCfg(flags, name="DiTauRec_DiTauConstituentFinder", **kwargs):
+    """Configure the di-tau constituent finder"""
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.IDVarCalculator(name, **kwargs))
+    kwargs.setdefault("Rsubjet", 0.2)
+    kwargs.setdefault("UseRawConstit", True)
+
+    acc.setPrivateTools(CompFactory.DiTauConstituentFinder(name, **kwargs))
+    return acc
+
+def DiTauIDVarDecoratorCfg(flags, name="DiTauRec_IDVarDecorator", **kwargs):
+    """Configure the IDVarDecorator"""
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.DiTauIDVarDecorator(name, **kwargs))
+    return acc
+
+def DiTauOnnxScoreCalculatorCfg(flags, name="DiTauRec_OnnxScoreCalculator", **kwargs):
+    """Configure the OnnxScoreCalculator"""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("onnxModelPath", "DiTauRec/omni.onnx")
+    kwargs.setdefault("maxTracks", 10)
+    acc.setPrivateTools(CompFactory.DiTauOnnxDiscriminantTool(name, **kwargs))
     return acc
