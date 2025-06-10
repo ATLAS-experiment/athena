@@ -200,8 +200,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('Photons.WorkingPoint')
     configSeq.setOptionValue ('.containerName', 'AnaPhotons')
     configSeq.setOptionValue ('.selectionName', 'tight')
-    # Needed for now, can be removed soon
-    configSeq.setOptionValue ('.postfix', 'tight')
     configSeq.setOptionValue ('.forceFullSimConfigForID', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.qualityWP', 'Tight')

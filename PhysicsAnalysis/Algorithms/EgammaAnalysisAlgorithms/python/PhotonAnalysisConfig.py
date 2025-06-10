@@ -17,10 +17,10 @@ import PATCore.ParticleDataType
 class PhotonCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the photon four-momentum correction"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (PhotonCalibrationConfig, self).__init__ ()
         self.setBlockName('Photons')
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('ESModel', '', type=str,
@@ -299,16 +299,16 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (PhotonWorkingPointConfig, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the photon selection to define (e.g. tight or "
             "loose).")
-        self.addOption ('postfix', selectionName, type=str,
+        self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
         self.addOption ('qualityWP', None, type=str,
@@ -369,6 +369,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             log.warning("This is only intended to be used for testing purposes") 
 
         postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
