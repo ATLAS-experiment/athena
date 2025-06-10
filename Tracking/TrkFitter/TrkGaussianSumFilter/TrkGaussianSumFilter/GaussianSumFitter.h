@@ -55,7 +55,32 @@ public:
   /** AlgTool initialise method */
   virtual StatusCode initialize() override final;
 
-  /** Refit a track using the Gaussian Sum Filter */
+  /// @{
+  /// @name Inteface method. The main one are the ones taking
+  /// Measurement or Raw Data inputs. The rest are implemented on top
+  /// of these two.
+
+  /** @brief Fit a collection of 'PrepRawData' objects using the Gaussian Sum Filter
+      - This requires that an trackParameters object be supplied also as an
+     initial guess */
+  virtual std::unique_ptr<Track> fit(
+    const EventContext& ctx,
+    const PrepRawDataSet&,
+    const TrackParameters&,
+    const RunOutlierRemoval /*Not used*/,
+    const ParticleHypothesis particleHypothesis = nonInteracting) const override final;
+
+  /** @brief Fit a collection of 'RIO_OnTrack' objects using the Gaussian Sum Filter
+      - This requires that an trackParameters object be supplied also as an
+     initial guess */
+  virtual std::unique_ptr<Track> fit(
+    const EventContext& ctx,
+    const MeasurementSet&,
+    const TrackParameters&,
+    const RunOutlierRemoval /*Not used*/,
+    const ParticleHypothesis particleHypothesis = nonInteracting) const override final;
+
+  /** @brief Refit a track*/
   virtual std::unique_ptr<Track> fit(
     const EventContext& ctx,
     const Track&,
@@ -63,27 +88,7 @@ public:
     const ParticleHypothesis particleHypothesis =
       nonInteracting) const override final;
 
-  /** Fit a collection of 'PrepRawData' objects using the Gaussian Sum Filter
-      - This requires that an trackParameters object be supplied also as an
-     initial guess */
-  virtual std::unique_ptr<Track> fit(
-    const EventContext& ctx,
-    const PrepRawDataSet&,
-    const TrackParameters&,
-    const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const override final;
-
-  /** Fit a collection of 'RIO_OnTrack' objects using the Gaussian Sum Filter
-      - This requires that an trackParameters object be supplied also as an
-     initial guess */
-  virtual std::unique_ptr<Track> fit(
-    const EventContext& ctx,
-    const MeasurementSet&,
-    const TrackParameters&,
-    const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const override final;
-
-  /** Refit a track adding a PrepRawDataSet*/
+  /** @brief Refit a track adding a PrepRawDataSet*/
   virtual std::unique_ptr<Track> fit(
     const EventContext& ctx,
     const Track&,
@@ -91,7 +96,7 @@ public:
     const RunOutlierRemoval /*Not used*/,
     const ParticleHypothesis matEffects = nonInteracting) const override final;
 
-  /** Refit a track adding a measurement base set*/
+  /** @brief Refit a track adding a measurement base set*/
   virtual std::unique_ptr<Track> fit(
     const EventContext& ctx,
     const Track&,
@@ -99,14 +104,14 @@ public:
     const RunOutlierRemoval /*Not used*/,
     const ParticleHypothesis matEffects = nonInteracting) const override final;
 
-  /** Combine two tracks by refitting */
+  /** @brief Combine two tracks by refitting their measurements*/
   virtual std::unique_ptr<Track> fit(
     const EventContext& ctx,
     const Track&,
     const Track&,
     const RunOutlierRemoval /*Not used*/,
     const ParticleHypothesis matEffects = nonInteracting) const override final;
-
+  /// @}
  // Internally we can use a simple std::vector
  using GSFTrajectory = std::vector<GSFTsos>;
 
