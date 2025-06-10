@@ -410,8 +410,19 @@ def InDetTrackRecoCfg(flags):
         result.merge(InDetTRT_PrepDataToxAODCfg(flags))
 
         from DerivationFrameworkInDet.InDetToolsConfig import TrackStateOnSurfaceDecoratorCfg
+        # Nominal tracks
         TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="TrackStateOnSurfaceDecorator"))
-        result.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("InDetCommonKernel", AugmentationTools = [TrackStateOnSurfaceDecorator]))
+        # Disappearing tracks
+        DisappearingTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="DisappearingTrackStateOnSurfaceDecorator"))
+        DisappearingTrackStateOnSurfaceDecorator.ContainerName = "InDetDisappearingTrackParticles"
+        DisappearingTrackStateOnSurfaceDecorator.PRDtoTrackMap = "PRDtoTrackMapMerge_DisappearingTracks"
+        DisappearingTrackStateOnSurfaceDecorator.PixelMsosName = "DisappearingPixelMSOSs"
+        DisappearingTrackStateOnSurfaceDecorator.SctMsosName = "DisappearingSCT_MSOSs"
+        DisappearingTrackStateOnSurfaceDecorator.TrtMsosName = "DisappearingTRT_MSOSs"
+        # Add decorators
+        result.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("InDetCommonKernel", AugmentationTools = [
+            TrackStateOnSurfaceDecorator,
+            DisappearingTrackStateOnSurfaceDecorator]))
 
         if flags.Input.isMC:
             from InDetPhysValMonitoring.InDetPhysValDecorationConfig import InDetPhysHitDecoratorAlgCfg
@@ -622,7 +633,13 @@ def InDetTrackRecoOutputCfg(flags):
             "xAOD::TrackStateValidationContainer#SCT_MSOSs",
             "xAOD::TrackStateValidationAuxContainer#SCT_MSOSsAux.",
             "xAOD::TrackStateValidationContainer#TRT_MSOSs",
-            "xAOD::TrackStateValidationAuxContainer#TRT_MSOSsAux."
+            "xAOD::TrackStateValidationAuxContainer#TRT_MSOSsAux.",
+            "xAOD::TrackStateValidationContainer#DisappearingPixelMSOSs",
+            "xAOD::TrackStateValidationAuxContainer#DisappearingPixelMSOSsAux.",
+            "xAOD::TrackStateValidationContainer#DisappearingSCT_MSOSs",
+            "xAOD::TrackStateValidationAuxContainer#DisappearingSCT_MSOSsAux.",
+            "xAOD::TrackStateValidationContainer#DisappearingTRT_MSOSs",
+            "xAOD::TrackStateValidationAuxContainer#DisappearingTRT_MSOSsAux."
         ]
 
     result = ComponentAccumulator()
