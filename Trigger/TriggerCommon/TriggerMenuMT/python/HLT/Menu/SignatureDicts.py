@@ -102,7 +102,7 @@ ChainDictTemplate = {
     'groups'        : [],
     'EBstep'        : '',
     'chainParts'   : [],
-    'sigDicts' : {},
+    'sigDicts' : OrderedDict(),
     'sigFolder'     : [],
     'subSigs'        : [],
     'extraComboHypos' : []

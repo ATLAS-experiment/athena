@@ -704,8 +704,9 @@ def dictFromChainName(flags, chainInfo):
                 chainDict['sigDicts'][sf].extend(chainPart['subSigs'])                
             else:
                 chainDict['sigDicts'].update({sf:chainPart['subSigs']})
-            if sf == 'Bjet':
-                chainDict['sigDicts'].update({'Jet':['Jet']})
+            if sf == 'Bjet' or 'Ditau' in chainPart['subSigs']:
+                if 'Jet' not in chainDict['sigDicts']:
+                    chainDict['sigDicts'].update({'Jet':['Jet']})
                 
 
         thisSignature = chainPart['signature']
