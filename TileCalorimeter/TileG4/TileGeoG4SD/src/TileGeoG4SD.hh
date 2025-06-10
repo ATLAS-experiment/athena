@@ -16,15 +16,12 @@
 #ifndef TILEGEOG4SD_TILEGEOG4SD_H
 #define TILEGEOG4SD_TILEGEOG4SD_H
 
+#include <string>
+
 // Base class header
 #include "G4VSensitiveDetector.hh"
 
-// Member variables
-#include "StoreGate/WriteHandle.h"
-#include "TileSimEvent/TileHitVector.h"
-
 class ITileCalculator;
-class TileGeoG4LookupBuilder;
 
 class G4HCofThisEvent;
 class G4Step;
@@ -33,12 +30,9 @@ class G4String;
 class TileGeoG4SD: public G4VSensitiveDetector {
 public:
   TileGeoG4SD(G4String name, const std::string& hitCollectionName, ITileCalculator* tileCalculator);
-  ~TileGeoG4SD();
+  ~TileGeoG4SD() override = default;
 
-  void Initialize(G4HCofThisEvent*) override final;
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
-  void EndOfAthenaEvent();
-
   ITileCalculator* GetCalculator() {
     return m_calc;
   }
@@ -48,11 +42,8 @@ public:
   TileGeoG4SD& operator=(const TileGeoG4SD&) = delete;
 
 private:
-
   ITileCalculator* m_calc;
-  TileGeoG4LookupBuilder* m_lookup;
-
-  SG::WriteHandle<TileHitVector> m_HitColl;
+  std::string m_hitCollectionName; // Name of the hit collection
 };
 
 #endif // TILEGEOG4SD_TILEGEOG4SD_H

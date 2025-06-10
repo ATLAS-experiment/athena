@@ -30,9 +30,11 @@ public:
 
   ///
   virtual StatusCode initialize() override final;
+  
+  StatusCode SetupEvent(HitCollectionMap&) override final;
 
   /// End of an athena event
-  StatusCode Gather() override final; //FIXME would be good to be able to avoid this.
+  StatusCode Gather(HitCollectionMap&) override final;
 
 protected:
   /// Make me an SD!
@@ -41,6 +43,10 @@ protected:
 private:
   /// Calculator Service
   ServiceHandle<ITileCalculator> m_tileCalculator;
+  std::string m_tileHits;
+  std::string m_tileActiveCellCalibHits;
+  std::string m_tileInactiveCellCalibHits;
+  std::string m_tileDeadMaterialCalibHits;
 
 };
 
