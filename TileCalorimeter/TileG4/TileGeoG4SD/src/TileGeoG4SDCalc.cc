@@ -21,11 +21,13 @@
 //package headers
 #include "TileGeoG4SD/TileGeoG4LookupBuilder.hh"
 #include "TileGeoG4SD/TileGeoG4Lookup.hh"
+#include "TileGeoG4SD/TileHitVectorBuilder.hh"
 //Athena headers
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "TileSimEvent/TileHitVector.h"
 #include "TileGeoModel/TileDetectorTool.h"
 //Gaudi headers
 #include "GaudiKernel/ISvcLocator.h"
@@ -33,6 +35,8 @@
 //CLHEP headers
 #include "CLHEP/Units/SystemOfUnits.h"
 //Geant4 headers
+#include <G4Event.hh>
+#include <G4EventManager.hh>
 #include "G4Geantino.hh"
 #include "G4LogicalVolume.hh"
 #include "G4SDManager.hh"
@@ -45,16 +49,11 @@
 #include "G4VTouchable.hh"
 //STL headers
 #include <iostream>
+#include <memory>
 #include <string>
-#include <stdexcept>
 
 
 ATLAS_CHECK_FILE_THREAD_SAFETY;
-
-namespace
-{
-  thread_local std::unique_ptr<TileGeoG4LookupBuilder> s_lookup(nullptr);
-}
 
 static const double tanPi64 = 0.049126849769467254105343321271314; //FIXME!!!!!
 
@@ -225,14 +224,12 @@ int TileGeoG4SDCalc::getUshapeFromGM() const {
   return (tileDetectorTool) ? tileDetectorTool->uShape() : 0;
 }
 
-TileGeoG4LookupBuilder* TileGeoG4SDCalc::GetLookupBuilder() const
+std::unique_ptr<TileGeoG4LookupBuilder> TileGeoG4SDCalc::GetLookupBuilder() const
 {
-  // Setup the lookup table if necessary
-  if(!s_lookup) {
-    s_lookup = std::make_unique<TileGeoG4LookupBuilder>(&*m_detStore, m_options.verboseLevel);
-    s_lookup->BuildLookup(m_options.tileTB);
-  }
-  return s_lookup.get();
+  auto lookupBuilder = std::make_unique<TileGeoG4LookupBuilder>(&*m_detStore, m_options.verboseLevel);
+
+  lookupBuilder->BuildLookup(m_options.tileTB);
+  return lookupBuilder;
 }
 
 const TileSDOptions* TileGeoG4SDCalc::GetOptions() const
@@ -242,8 +239,10 @@ const TileSDOptions* TileGeoG4SDCalc::GetOptions() const
 
 G4bool TileGeoG4SDCalc::FindTileScinSection(const G4Step* aStep, TileHitData& hitData) const
 {
-  // Get the lookup table
-  auto lookup = GetLookupBuilder();
+  // Get the lookup table for the current event
+  auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
+  auto* hitColl = eventInfo->GetHitCollectionMap()->GetSDHitCollection<TileHitVectorBuilder>(m_outputCollectionNames[0]);
+  auto lookup = hitColl->GetLookupBuilder();
 
   // Determine touchablehistory for the step
   const G4TouchableHistory* theTouchable = dynamic_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());

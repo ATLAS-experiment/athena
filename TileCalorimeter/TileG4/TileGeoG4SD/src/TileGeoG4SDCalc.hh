@@ -68,8 +68,8 @@ public:
   virtual G4bool ManageScintHit(TileHitData& hitData, double deltaTime) const override final;
   /// Used by FastCaloSimParamAction
   virtual TileMicroHit GetTileMicroHit(const G4Step*, TileHitData& hitData) const override final;
-  ///
-  virtual TileGeoG4LookupBuilder* GetLookupBuilder() const override final;
+  /// Create a lookup builder for the client TileGeoG4SDTool
+  virtual std::unique_ptr<TileGeoG4LookupBuilder> GetLookupBuilder() const override final;
   /// pointer to class with all options
   virtual const TileSDOptions* GetOptions() const override final;
 
@@ -111,6 +111,8 @@ private:
 
   Gaudi::Property<double> m_birk1{this, "birk1",0.02002 * CLHEP::g / (CLHEP::MeV * CLHEP::cm2), "value updated for G4 10.6.p03"};
   Gaudi::Property<double> m_birk2{this, "birk2",0.0 * CLHEP::g / (CLHEP::MeV * CLHEP::cm2) * CLHEP::g / (CLHEP::MeV * CLHEP::cm2), "value updated for G4 10.6.p03"};
+
+  Gaudi::Property<std::vector<std::string> > m_outputCollectionNames{this, "OutputCollectionNames", {}};
 
   /** @brief Keep hit time */
   bool m_keepHitTime{};

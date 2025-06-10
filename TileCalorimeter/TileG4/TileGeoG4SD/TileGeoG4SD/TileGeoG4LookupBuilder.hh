@@ -14,7 +14,9 @@
 #define TILEGEOG4SD_TILEGEOG4LOOKUPBUILDER_H
 
 #include <map>
+#include <memory>
 #include <string>
+
 #include "TileDetDescr/TileDddbManager.h"
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "TileSimEvent/TileHitVector.h"
@@ -26,7 +28,6 @@ class StoreGateSvc;
 class TileGeoG4LookupBuilder {
 public:
   TileGeoG4LookupBuilder(StoreGateSvc* pDetStore, const int verboseLevel);
-  ~TileGeoG4LookupBuilder();
   void BuildLookup(bool test_beam = false);
   TileGeoG4Section* GetSection(TileDddbManager::TileSections key) const;
 
@@ -62,8 +63,8 @@ private:
   const TileDetDescrManager* m_theManager;
   const TileID* m_tileID;
   TileDddbManager* m_dbManager;
-  TileGeoG4CellMap* m_cellMap;
-  TileGeoG4SectionMap* m_sectionMap;
+  std::unique_ptr<TileGeoG4CellMap> m_cellMap;
+  std::unique_ptr<TileGeoG4SectionMap> m_sectionMap;
   bool m_isE5;
   int m_npmtC10[2][64]{}; //array of number of PMTs for C10 Cells
   int m_npmtD4[2][64]{};  //array of number of PMTs for D4 Cells
