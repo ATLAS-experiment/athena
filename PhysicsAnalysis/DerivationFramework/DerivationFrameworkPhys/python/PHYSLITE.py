@@ -91,7 +91,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.noEffSF', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisElectrons')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
