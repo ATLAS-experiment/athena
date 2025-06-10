@@ -196,12 +196,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateBasicFeatures(PanTau::PanTauS
   featureMap->addFeature(name + "_ProtoMomentumCore_phi", tlv_ProtoMomentumCore.Phi());
   featureMap->addFeature(name + "_ProtoMomentumCore_m", tlv_ProtoMomentumCore.M());
     
-  TLorentzVector tlv_ProtoMomentumWide = inSeed->getProtoMomentumWide();
-  featureMap->addFeature(name + "_ProtoMomentumWide_pt", tlv_ProtoMomentumWide.Perp());
-  featureMap->addFeature(name + "_ProtoMomentumWide_eta", tlv_ProtoMomentumWide.Eta());
-  featureMap->addFeature(name + "_ProtoMomentumWide_phi", tlv_ProtoMomentumWide.Phi());
-  featureMap->addFeature(name + "_ProtoMomentumWide_m", tlv_ProtoMomentumWide.M());    
-    
   return StatusCode::SUCCESS;
 }
 

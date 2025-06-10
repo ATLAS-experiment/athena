@@ -215,7 +215,6 @@ class FeatureHandler:
         
         Types = []
         Types += ["ProtoMomentumCore"]
-        Types += ["ProtoMomentumWide"]
         
         for iVar in Variables:
             for iType in Types:

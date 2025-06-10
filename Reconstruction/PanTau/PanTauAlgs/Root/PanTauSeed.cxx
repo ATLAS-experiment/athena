@@ -267,8 +267,6 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
     if(curConst->isOfType(PanTau::TauConstituent::t_Pi0Neut)) {hlv_SumConstituents_Core += curConst->p4(); continue;}
 
   }//end loop over constituents                                                                                                                                                                                                                  
-
-  m_ProtoMomentum_Wide = hlv_SumConstituents_Wide;
   m_ProtoMomentum_Core = hlv_SumConstituents_Core;
 
   //set mode as obtained from subalg                                                                                                                                                                                                             

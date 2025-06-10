@@ -5,7 +5,6 @@
 #include "PanTauAlgs/Tool_TauConstituentGetter.h"
 #include "PanTauAlgs/TauConstituent.h"
 #include "PanTauAlgs/HelperFunctions.h"
-#include "PanTauAlgs/Tool_InformationStore.h"
 #include "PanTauAlgs/Tool_InputConverter.h"
 #include "xAODTau/TauJet.h"
 #include "xAODPFlow/PFO.h"
@@ -22,10 +21,8 @@ StatusCode PanTau::Tool_TauConstituentGetter::initialize() {
   ATH_MSG_INFO(" initialize()");
   m_init=true;
 
-  ATH_CHECK( HelperFunctions::bindToolHandle( m_Tool_InformationStore, m_Tool_InformationStoreName ) );
   ATH_CHECK( HelperFunctions::bindToolHandle( m_Tool_InputConverter, m_Tool_InputConverterName ) );
     
-  ATH_CHECK( m_Tool_InformationStore.retrieve() );
   ATH_CHECK( m_Tool_InputConverter.retrieve() );
     
   return StatusCode::SUCCESS;
