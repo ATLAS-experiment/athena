@@ -36,6 +36,10 @@ to the third digit of decimal number of the  pdgid.
 // SB
 #include "AtlasHepMC/GenParticle.h"
 //
+
+// Added:
+#include "TruthUtils/AtlasPID.h"
+
 double chargeCalculator(const MDTSimHit& hit, unsigned short eventId = 0) {
     const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
     const HepMcParticleLink::PositionFlag idxFlag = (eventId == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
@@ -53,6 +57,12 @@ double chargeCalculator(const MDTSimHit& hit, unsigned short eventId = 0) {
             qcharge = (double)((std::abs(particleEncoding) / 1000) % 100) / (double)((std::abs(particleEncoding) / 10) % 100);
             if (particleEncoding < 0.0) qcharge = -qcharge;
         }
+        // Adding else-if clause: if pdgID corresponds to a BSM particle, calculate the charge correspondingly	
+	else if (MC::isBSM(genParticle)){
+		// using Generators/TruthUtils/TruthUtils/AtlasPID.h#L485
+		qcharge = charge(genParticle); 
+		ATH_MSG_INFO("DEBUG: BSM particle with Q = ", qcharge);
+	}
     } else {
         //      std::cout << "SB: genParticle=0 " <<std::endl;
     }
