@@ -62,8 +62,7 @@ double chargeCalculator(const MDTSimHit& hit, unsigned short eventId = 0) {
 	else if (isBSM(genParticle)){
 		// using Generators/TruthUtils/TruthUtils/AtlasPID.h#L485
 		qcharge = charge(genParticle); 
-		//ATH_MSG_INFO("DEBUG: BSM particle with Q = ", qcharge);
-		std::cout << "DEBUG chargeCalculator: BSM particle with Q = " << qcharge << ", pdgID = " << genParticle->pdg_id()<< std::endl;
+		//std::cout << "DEBUG chargeCalculator: BSM particle with Q = " << qcharge << ", pdgID = " << genParticle->pdg_id()<< std::endl;
 	}
     } else {
         //      std::cout << "SB: genParticle=0 " <<std::endl;
