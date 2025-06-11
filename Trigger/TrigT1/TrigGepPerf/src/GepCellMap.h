@@ -17,8 +17,6 @@ namespace Gep{
   class GepCellMap {
 
   public:
-    GepCellMap() {}
-    ~GepCellMap() {}
 
   void insert(unsigned int id, const Gep::GepCaloCell & cell) {
 	  m_cellMap.emplace(id, cell);
