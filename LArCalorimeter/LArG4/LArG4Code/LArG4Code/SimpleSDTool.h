@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4CODE_SIMPLESDTOOL_H
 #define LARG4CODE_SIMPLESDTOOL_H
 
-/// @file SimpleSDTool.h
-/// @brief Defines the SimpleSDTool class
-/// @author Steve Farrell <Steven.Farrell@cern.ch>
-/// @date 2016-03-26
+/**
+ * @file SimpleSDTool.h
+ * @brief Defines the SimpleSDTool class
+ * @author Steve Farrell <Steven.Farrell@cern.ch>
+ * @date 2016-03-26
+ */
 
 // System includes
 #include <string>
@@ -19,6 +21,9 @@
 
 // Local includes
 #include "LArG4SimpleSD.h"
+
+// External includes
+#include "CLHEP/Units/SystemOfUnits.h"
 
 // Forward declarations
 class ILArCalculatorSvc;
@@ -71,19 +76,19 @@ namespace LArG4
       /// @{
 
       /// What time binning type for regular hits?
-      std::string m_timeBinType;
+      Gaudi::Property<std::string> m_timeBinType{this, "TimeBinType", "Default"};
       /// What time bin width for regular hits?
-      float m_timeBinWidth;
+      Gaudi::Property<float> m_timeBinWidth{this, "TimeBinWidth", 2.5*CLHEP::ns};
       /// Is there going to be a fast simulation coming into this SD?
-      G4bool m_useFrozenShowers;
+      Gaudi::Property<G4bool> m_useFrozenShowers{this, "UseFrozenShowers", false};
 
       /// @}
 
       /// @name Calo identifier helpers
       /// @{
-      const LArEM_ID*       m_larEmID;
-      const LArFCAL_ID*     m_larFcalID;
-      const LArHEC_ID*      m_larHecID;
+      const LArEM_ID*       m_larEmID{nullptr};
+      const LArFCAL_ID*     m_larFcalID{nullptr};
+      const LArHEC_ID*      m_larHecID{nullptr};
       /// @}
 
   }; // class SimpleSDTool
