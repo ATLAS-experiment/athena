@@ -40,14 +40,6 @@ public:
       const std::string& parameterisationFileName,
       const std::string& parameterisationFileNameHighX0);
 
-  // ctor with arguments
-  ElectronCombinedMaterialEffects() = default;
-  ElectronCombinedMaterialEffects(const ElectronCombinedMaterialEffects&) = default;
-  ElectronCombinedMaterialEffects(ElectronCombinedMaterialEffects&&) = default;
-  ElectronCombinedMaterialEffects& operator=(const ElectronCombinedMaterialEffects&) = default;
-  ElectronCombinedMaterialEffects& operator=(ElectronCombinedMaterialEffects&&) = default;
-  ~ElectronCombinedMaterialEffects() = default;
-
   void compute(GsfMaterial::Combined&,
                const Trk::ComponentParameters&,
                const Trk::MaterialProperties&,
@@ -55,15 +47,13 @@ public:
                Trk::PropDirection = anyDirection) const;
 
 private:
-  // Electron energy loss due to Bremsstrahlung
+  /* brief Electron energy loss due to Bremsstrahlung*/
   void BetheHeitler(GsfMaterial::EnergyLoss& cache,
                     const ComponentParameters& componentParameters,
                     const MaterialProperties& materialProperties,
                     double pathLenght,
                     PropDirection direction = anyDirection) const;
 
-  int m_BHtransformationCode{};
-  int m_BHtransformationCodeHighX0{};
   //Actual number of Material components
   int m_BHnumberOfComponents{};
   int m_BHnumberOfComponentsHighX0{};
