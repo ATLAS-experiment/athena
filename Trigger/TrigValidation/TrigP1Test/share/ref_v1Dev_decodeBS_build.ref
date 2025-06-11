@@ -5880,9 +5880,11 @@ HLT_g13_loose_g10_loose_EgammaPEBTLA_L12DR15-0M30-eEM12LeEM9L:
   eventCount: 0
 HLT_g140_loose_L1eEM26M:
   eventCount: 0
+HLT_g140_loose_L1eEM28M:
+  eventCount: 0
 HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1eEM26M:
   eventCount: 0
-HLT_g140_loose_L1eEM28M:
+HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1eEM28M:
   eventCount: 0
 HLT_g140_loose_noringer_L1eEM26M:
   eventCount: 0
