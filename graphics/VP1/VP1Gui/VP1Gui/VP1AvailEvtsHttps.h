@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,7 +30,7 @@ class VP1AvailEvtsHttps : public VP1AvailEvents
 
 public:
 
-  VP1AvailEvtsHttps(QString fileinfoUrl,
+  VP1AvailEvtsHttps(const QString & fileinfoUrl,
 		    int updateInterval,
 		    int timeCutForNew,
 		    const QString& tmpcopydir,

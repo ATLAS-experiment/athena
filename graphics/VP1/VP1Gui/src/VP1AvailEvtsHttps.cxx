@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Gui/VP1AvailEvtsHttps.h"
@@ -118,7 +118,7 @@ void VP1AvailEvtsHttps::Imp::connectNetworkSignalsToSlots()
   m_bytesReceived = 0;
 }
 
-VP1AvailEvtsHttps::VP1AvailEvtsHttps(QString fileinfoUrl,
+VP1AvailEvtsHttps::VP1AvailEvtsHttps(const QString & fileinfoUrl,
 				     int updateInterval,
 				     int timeCutForNew,
 				     const QString& tmpcopydir,
@@ -265,7 +265,7 @@ void VP1AvailEvtsHttps::finished()
     if(m_d->m_stage==0) {
       if(!lastModified.isEmpty() && lastModified!=m_d->m_urlLastMod) {
 	// The file info has been modified, go to the stage 1
-	m_d->m_urlLastMod = lastModified;
+	m_d->m_urlLastMod = std::move(lastModified);
 	m_d->m_stage = 1; 
       } else {
 	// Reuse the already downloaded file info

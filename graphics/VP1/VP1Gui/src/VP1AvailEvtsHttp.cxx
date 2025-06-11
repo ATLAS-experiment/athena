@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -49,7 +49,7 @@ public:
 unsigned VP1AvailEvtsHttp::Imp::ntmpdlcount = 0;
 
 //____________________________________________________________________
-VP1AvailEvtsHttp::VP1AvailEvtsHttp( QString fileinfoUrl,
+VP1AvailEvtsHttp::VP1AvailEvtsHttp( const QString & fileinfoUrl,
 				    int updateInterval,
 				    int timeCutForNew,
 				    const QString& tmpcopydir,

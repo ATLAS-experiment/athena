@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1LocalEvtRetriever_h
@@ -18,11 +18,11 @@ class VP1LocalEvtRetriever : public QThread
 
  public:
   VP1LocalEvtRetriever(VP1AvailEvtsLocalDir*
-		       ,QString
+		       ,const QString &
 		       ,QObject* parent = 0);
   ~VP1LocalEvtRetriever();
 
-  void setSourceDir(QString);
+  void setSourceDir(QString );
 
  public Q_SLOTS:
   void updateLocalDirFromSource();

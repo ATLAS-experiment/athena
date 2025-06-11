@@ -99,7 +99,7 @@ public:
 	//responsible for new'ing systems in its constructor, but
 	//create/uncreate/delete of systems are handled by the
 	//channelmanager. Controllers are also deleted by the channelmanager.
-	IVP1ChannelWidget * constructChannel( QString channelbasename, QString& err, bool init = true );
+	IVP1ChannelWidget * constructChannel( const QString & channelbasename, QString& err, bool init = true );
 
 	QString channelTypeToIconLocation(const IVP1ChannelWidget::Type& type) const;
 };
@@ -129,7 +129,7 @@ VP1ChannelManager::~VP1ChannelManager()
 
 //___________________________________________________________________________________
 //Fixme: Return error string in case of problems.
-bool VP1ChannelManager::deleteChannel(QString channeluniquename) {
+bool VP1ChannelManager::deleteChannel(const QString & channeluniquename) {
 
 	//Find info:
 	assert(m_d->uniquename_2_channel.find(channeluniquename)!=m_d->uniquename_2_channel.end());
@@ -181,7 +181,7 @@ bool VP1ChannelManager::deleteChannel(QString channeluniquename) {
 
 
 //___________________________________________________________________________________
-bool VP1ChannelManager::unloadPluginFile(QString filename) {
+bool VP1ChannelManager::unloadPluginFile(const QString & filename) {
 
 	VP1Msg::messageVerbose("VP1ChannelManager::unloadPluginFile()");
 
@@ -226,7 +226,7 @@ bool VP1ChannelManager::unloadPluginFile(QString filename) {
 }
 
 //___________________________________________________________________________________
-QString VP1ChannelManager::loadPluginFile(QString filename)
+QString VP1ChannelManager::loadPluginFile(const QString & filename)
 {
 
 	VP1Msg::messageVerbose("VP1ChannelManager::loadPluginFile() - filename: " + filename);
@@ -355,14 +355,14 @@ QString VP1ChannelManager::loadPluginFile(QString filename)
 }
 
 //___________________________________________________________________________________
-QStringList VP1ChannelManager::channelsInPluginFile(QString filename) const {
+QStringList VP1ChannelManager::channelsInPluginFile(const QString & filename) const {
 	if (m_d->pluginfile_2_basenamesAndFactory.find(filename)==m_d->pluginfile_2_basenamesAndFactory.end())
 		return QStringList();
 	return m_d->pluginfile_2_basenamesAndFactory[filename].first;
 }
 
 //___________________________________________________________________________________
-IVP1ChannelWidget * VP1ChannelManager::Imp::constructChannel( QString channelbasename, QString& err, bool init ) {
+IVP1ChannelWidget * VP1ChannelManager::Imp::constructChannel( const QString & channelbasename, QString& err, bool init ) {
 	if (basename_2_pluginfile.find(channelbasename)==basename_2_pluginfile.end()) {
 		err = "Did not find plugin providing channel named '"+channelbasename+"'";
 		return 0;
@@ -388,7 +388,7 @@ IVP1ChannelWidget * VP1ChannelManager::Imp::constructChannel( QString channelbas
 
 	//Cache the icon associated with this channel for future use (and override if there is already a cache):
 	QString icontext = channelTypeToIconLocation(cw->type());
-	basename2iconlocation[cw->name()]=icontext;
+	basename2iconlocation[cw->name()]=std::move(icontext);
 
 	if (init)
 		cw->init();
@@ -443,7 +443,7 @@ QWidget* VP1ChannelManager::getController(IVP1ChannelWidget*cw) {
 }
 
 //___________________________________________________________________________________
-unsigned VP1ChannelManager::nActive( QString channelbasename ) const {
+unsigned VP1ChannelManager::nActive( const QString & channelbasename ) const {
 	if (m_d->basename_2_channels.find(channelbasename)==m_d->basename_2_channels.end())
 		return 0;
 	return m_d->basename_2_channels[channelbasename].size();
@@ -452,19 +452,19 @@ unsigned VP1ChannelManager::nActive( QString channelbasename ) const {
 //fixme: Always check uniqueness (and <20chars) of basenames!
 
 //___________________________________________________________________________________
-IVP1ChannelWidget* VP1ChannelManager::uniqueName2Channel(QString uniquename) const {
+IVP1ChannelWidget* VP1ChannelManager::uniqueName2Channel(const QString & uniquename) const {
 	if (m_d->uniquename_2_channel.find(uniquename)==m_d->uniquename_2_channel.end())
 		return 0;
 	return m_d->uniquename_2_channel[uniquename];
 }
 
 //___________________________________________________________________________________
-bool VP1ChannelManager::uniqueNameExists(QString uniquename) const {
+bool VP1ChannelManager::uniqueNameExists(const QString & uniquename) const {
 	return (m_d->uniquename_2_channel.find(uniquename)!=m_d->uniquename_2_channel.end());
 }
 
 //___________________________________________________________________________________
-bool VP1ChannelManager::baseNameExists(QString basename) const {
+bool VP1ChannelManager::baseNameExists(const QString & basename) const {
 	return (m_d->basename_2_pluginfile.find(basename)!=m_d->basename_2_pluginfile.end());
 }
 
@@ -543,7 +543,7 @@ QStringList VP1ChannelManager::currentPluginFiles() const {
 }
 
 //___________________________________________________________________________________
-QStringList VP1ChannelManager::basename2UniqueNames(QString basename) const {
+QStringList VP1ChannelManager::basename2UniqueNames(const QString & basename) const {
 
 	if (m_d->basename_2_channels.find(basename)==m_d->basename_2_channels.end())
 		return QStringList();
@@ -559,7 +559,7 @@ QStringList VP1ChannelManager::basename2UniqueNames(QString basename) const {
 }
 
 //___________________________________________________________________________________
-bool VP1ChannelManager::channelWithBasenameIsLoaded(QString basename) const {
+bool VP1ChannelManager::channelWithBasenameIsLoaded(const QString & basename) const {
 	if (m_d->basename_2_channels.find(basename)==m_d->basename_2_channels.end())
 		return false;
 	return !m_d->basename_2_channels[basename].empty();
