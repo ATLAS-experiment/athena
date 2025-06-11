@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJet_v3.h 725228 2016-02-19 22:59:42Z griffith $
@@ -160,16 +160,6 @@ namespace xAOD {
     /// @param flag flag to set
     /// @param value value to set
     void setIsTau( TauJetParameters::IsTauFlag flag, bool value );
-
-    /// Set veto flag
-    /// @param flag flag to set
-    /// @param value value to set
-    // void setFlag( TauJetParameters::VetoFlags flag, bool value );//r21 cleanup
-
-    /// Get veto flag
-    /// @param flag flag to check
-    // bool flag( TauJetParameters::VetoFlags flag ) const;//r21 cleanup
-
 
     /// Get and set values of common details variables via enum
     bool detail( TauJetParameters::Detail detail, int& value ) const;

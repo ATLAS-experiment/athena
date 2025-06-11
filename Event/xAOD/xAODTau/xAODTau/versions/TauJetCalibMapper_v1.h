@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -30,12 +30,6 @@ struct TauJetCalibTypeMapper_v1 {
      case TauJetParameters::TauEtaCalib:
        stringName = "TauEtaCalib";
        return true;
-     // case TauJetParameters::PanTauEFlowRecProto:
-     //   stringName = "PanTauEFlowRecProto";
-     //   return true;
-     // case TauJetParameters::PanTauEFlowRec:
-     //   stringName = "PanTauEFlowRec";
-     //   return true;
      case TauJetParameters::PanTauCellBasedProto:
        stringName = "PanTauCellBasedProto";
        return true;

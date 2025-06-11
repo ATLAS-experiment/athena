@@ -12,7 +12,6 @@
 // Local include(s):
 #include "xAODTau/versions/TauJet_v3.h"
 #include "xAODTau/versions/TauJetCalibMapper_v1.h"
-//#include "xAODTau/versions/TauJetCalibMapper_v3.h"
 #include "TauJetAccessors_v3.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 

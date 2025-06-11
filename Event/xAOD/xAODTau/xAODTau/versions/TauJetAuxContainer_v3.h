@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTAU_VERSIONS_TAUJETAUXCONTAINER_V3_H
@@ -108,7 +108,6 @@ namespace xAOD {
 
     //additional discriminant output
     std::vector< float > BDTJetScoreSigTrans;
-    // std::vector< float > BDTJetScoreBkgTrans;
 
     typedef std::vector< ElementLink< TauTrackContainer > > TauTrackLink_t;
     std::vector< TauTrackLink_t > tauTrackLinks;
@@ -157,10 +156,6 @@ namespace xAOD {
     std::vector< float > massTrkSys;
     std::vector< float > trkWidth2;
     std::vector< float > trFlightPathSig;
-    ///electron LLH variables
-    // std::vector< float > ele_E237E277; //r21 cleanup
-    // std::vector< float > ele_PresamplerFraction; //r21 cleanup
-    // std::vector< float > ele_ECALFirstFraction; //r21 cleanup
     //for topocluster ID variables
     std::vector< int > numCells;
     ///number of topocluster constituents of jet associated to tau candidate
@@ -191,14 +186,6 @@ namespace xAOD {
     std::vector< float > stripWidth2;
     /// number of strips
     std::vector< int > nStrip;
-    /// calibrated EM transverse energy
-    //    std::vector< float > etEMCalib;//r21 cleanup
-    /// calibrated hadronic transverse energy
-    //    std::vector< float > etHadCalib;//r21 cleanup
-    /// eta of TauJet calculated from calorimeter
-    //std::vector< float > seedCalo_eta; //r21 cleanup DetectorAxis eta
-    /// phi of TauJet calculated from calorimeter
-    //    std::vector< float > seedCalo_phi;//r21 cleanup DetectorAxis phi
     /// the average track distance to calorimeter seed
     std::vector< float > trkAvgDist;
     /// the RMS of track distance to calorimeter seed
@@ -218,11 +205,6 @@ namespace xAOD {
     std::vector< float > secMaxStripEt;
     std::vector< float > sumEMCellEtOverLeadTrkPt;
     std::vector< float > hadLeakEt;
-
-    /// EM+TES final scale
-    //std::vector< float > EM_TES_scale;//r21 cleanup
-    /// LC+TES precalibration
-    //std::vector< float > LC_TES_precalib; //r21 cleanup
  
     std::vector< float > TESOffset;
     std::vector< float > TESCalibConstant;
@@ -253,17 +235,7 @@ namespace xAOD {
 
 
     //generic substructure details
-    //    std::vector< float > etEflow;//r21 cleanup
-    //    std::vector< float > mEflow;//r21 cleanup
-    //    std::vector< float > ptRatioEflow;//r21 cleanup
-    //    std::vector< int > nPi0;//r21 cleanup
     std::vector< int > nCharged; //used in PanTau/PanTauAlgs/src/Tool_DetailsArranger.cxx
-
-    //    std::vector< float > etEflowTopo;//r21 cleanup
-    //    std::vector< float > mEflowTopo;//r21 cleanup
-    //    std::vector< float > ptRatioEflowTopo;//r21 cleanup
-    //    std::vector< int > nPi0Topo;//r21 cleanup
-    //    std::vector< int > nChargedTopo;//r21 cleanup
 
     std::vector< float > mEflowApprox;
     std::vector< float > ptRatioEflowApprox;

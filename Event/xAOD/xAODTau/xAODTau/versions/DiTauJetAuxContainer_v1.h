@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DiTauJetAuxContainer_v2.h 631921 2015-09-23 23:30:59Z dkirchme $
@@ -43,8 +43,6 @@ namespace xAOD {
 
     typedef ElementLink< xAOD::VertexContainer > VertexLink_t;
     std::vector< VertexLink_t > vertexLink;
-    // typedef std::vector< ElementLink< xAOD::VertexContainer > >  SecondaryVertexLinks_t;
-    // std::vector< VertexLink_t > secVertexLinks;
 
     std::vector< float > R_jet;
     std::vector< float > R_subjet;
