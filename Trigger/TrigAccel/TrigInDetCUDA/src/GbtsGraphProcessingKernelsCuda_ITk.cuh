@@ -118,15 +118,15 @@ __device__ inline void edgeState::initialize(const float4& node1_params, const f
 	m_Y[0] = node2_params.z;
 	m_Y[1] = (node1_params.z - node2_params.z)/(r1 - r2);
 
-	memset(&m_Cx[0][0], 0, sizeof(m_Cx));
-	memset(&m_Cy[0][0], 0, sizeof(m_Cy));
+	memset(&m_Cx[0], 0, sizeof(m_Cx));
+	memset(&m_Cy[0], 0, sizeof(m_Cy));
 
-	m_Cx[0][0] = 0.25f;
-	m_Cx[1][1] = 0.001f;
-	m_Cx[2][2] = 0.001f;
+	m_Cx[M3_0_0] = 0.25f;
+	m_Cx[M3_1_1] = 0.001f;
+	m_Cx[M3_2_2] = 0.001f;
 
-	m_Cy[0][0] = 1.5f;
-	m_Cy[1][1] = 0.001f;
+	m_Cy[M2_0_0] = 1.5f;
+	m_Cy[M2_1_1] = 0.001f;
 
 }
 
@@ -160,8 +160,8 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 
 	//add ms.
 
-	float m_Cx22 = ts->m_Cx[2][2] + sigma_w*sigma_w;
-	float m_Cx11 = ts->m_Cx[1][1] + sigma_t*sigma_t;
+	float m_Cx22 = ts->m_Cx[M3_2_2] + sigma_w*sigma_w;
+	float m_Cx11 = ts->m_Cx[M3_1_1] + sigma_t*sigma_t;
 
 	float t2 = node1_params.w != -1 ? 1 + ts->m_Y[1]*ts->m_Y[1] : 1 + 1/(ts->m_Y[1]*ts->m_Y[1]); 
 	
@@ -170,7 +170,7 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 
 	s2 *= sqrtf(t2);
 
-	float m_Cy11 = ts->m_Cy[1][1] + s2;  
+	float m_Cy11 = ts->m_Cy[M2_1_1] + s2;  
 
 	//extrapolation
 
@@ -193,34 +193,29 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 	new_ts->m_X[1] = ts->m_X[1] + ts->m_X[2]*A;
 	new_ts->m_X[2] = ts->m_X[2];
 	
-	new_ts->m_Cx[0][0] = ts->m_Cx[0][0] + 2*ts->m_Cx[0][1]*A + 2*ts->m_Cx[0][2]*B + A*m_Cx11*A + 2*A*ts->m_Cx[1][2]*B + B*m_Cx22*B;
-	new_ts->m_Cx[0][1] = new_ts->m_Cx[1][0] = ts->m_Cx[0][1] + m_Cx11*A + ts->m_Cx[1][2]*B + ts->m_Cx[0][2]*A + A*A*ts->m_Cx[1][2]  + A*m_Cx22*B;
-	new_ts->m_Cx[0][2] = new_ts->m_Cx[2][0] = ts->m_Cx[0][2] + ts->m_Cx[1][2]*A + ts->m_Cx[2][2]*B;   
+	new_ts->m_Cx[M3_0_0] = ts->m_Cx[M3_0_0] + 2*ts->m_Cx[M3_0_1]*A + 2*ts->m_Cx[M3_0_2]*B + A*m_Cx11*A + 2*A*ts->m_Cx[M3_1_2]*B + B*m_Cx22*B;
+	new_ts->m_Cx[M3_0_1] = ts->m_Cx[M3_0_1] + m_Cx11*A + ts->m_Cx[M3_1_2]*B + ts->m_Cx[M3_0_2]*A + A*A*ts->m_Cx[M3_1_2]  + A*m_Cx22*B;
+	new_ts->m_Cx[M3_0_2] = ts->m_Cx[M3_0_2] + ts->m_Cx[M3_1_2]*A + m_Cx22*B;   
 		
-	new_ts->m_Cx[1][1] = m_Cx11 + 2*A*ts->m_Cx[1][2] + A*ts->m_Cx[2][2]*A;
-	new_ts->m_Cx[1][2] = new_ts->m_Cx[2][1] = ts->m_Cx[1][2] + m_Cx22*A;
+	new_ts->m_Cx[M3_1_1] = m_Cx11 + 2*A*ts->m_Cx[M3_1_2] + A*m_Cx22*A;
+	new_ts->m_Cx[M3_1_2] = ts->m_Cx[M3_1_2] + m_Cx22*A;
 
-	new_ts->m_Cx[2][2] = m_Cx22;
+	new_ts->m_Cx[M3_2_2] = m_Cx22;
 
 	new_ts->m_Y[0] = ts->m_Y[0] + ts->m_Y[1]*dr;
 	new_ts->m_Y[1] = ts->m_Y[1];
 	
-	new_ts->m_Cy[0][0] = ts->m_Cy[0][0] + 2*ts->m_Cy[0][1]*dr + dr*m_Cy11*dr;
-	new_ts->m_Cy[0][1] = new_ts->m_Cy[1][0] = ts->m_Cy[0][1] + dr*m_Cy11;
-	new_ts->m_Cy[1][1] = m_Cy11;
+	new_ts->m_Cy[M2_0_0] = ts->m_Cy[M2_0_0] + 2*ts->m_Cy[M2_0_1]*dr + dr*m_Cy11*dr;
+	new_ts->m_Cy[M2_0_1] = ts->m_Cy[M2_0_1] + dr*m_Cy11;
+	new_ts->m_Cy[M2_1_1] = m_Cy11;
 	
 	//chi2 test
 	float resid_x = mx - new_ts->m_X[0];
 	float resid_y = my - new_ts->m_Y[0];
 	
-	float CHx[3] = {new_ts->m_Cx[0][0], new_ts->m_Cx[0][1], new_ts->m_Cx[0][2]};
-	float CHy[2] = {new_ts->m_Cy[0][0], new_ts->m_Cy[0][1]};
-
-
 	float sigma_rz = 0;
-	float type = ts->m_head_node_type; //head nodes' type; 
 
-	if(type != -1) {//barrel TO-DO: split into barrel Pixel and barrel SCT
+	if(ts->m_head_node_type != -1) {//barrel TO-DO: split into barrel Pixel and barrel SCT
 		sigma_rz = sigma_y*sigma_y;
 	}
 	else {
@@ -228,14 +223,13 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 		sigma_rz = sigma_rz*sigma_rz;
 	}
 
-	float Dx = 1/(new_ts->m_Cx[0][0] + sigma_x*sigma_x);
+	float Dx = 1/(new_ts->m_Cx[M3_0_0] + sigma_x*sigma_x);
 
-	float Dy = 1/(new_ts->m_Cy[0][0] + sigma_rz);
+	float Dy = 1/(new_ts->m_Cy[M3_0_0] + sigma_rz);
 
 	float dchi2_x = resid_x*resid_x*Dx;
 	float dchi2_y = resid_y*resid_y*Dy;
 	
-
 	if(dchi2_x > maxDChi2_x || dchi2_y > maxDChi2_y) {
 		return false;
 	}
@@ -244,23 +238,19 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 	new_ts->m_J = ts->m_J + add_hit - dchi2_x*weight_x - dchi2_y*weight_y;
 	new_ts->m_length = ts->m_length+1;	
 
-	float Kx[3] = {Dx*new_ts->m_Cx[0][0], Dx*new_ts->m_Cx[0][1], Dx*new_ts->m_Cx[0][2]};
-	float Ky[2] = {Dy*new_ts->m_Cy[0][0], Dy*new_ts->m_Cy[0][1]};
-
-	for(int i=0;i<3;i++) new_ts->m_X[i] += Kx[i]*resid_x;
-	for(int i=0;i<2;i++) new_ts->m_Y[i] += Ky[i]*resid_y;
-
-	for(int i=0;i<3;i++) {
-		for(int j=0;j<3;j++) {
-			new_ts->m_Cx[i][j] -= Kx[i]*CHx[j];
-		}	
-	}
-
-	for(int i=0;i<2;i++) {
-		for(int j=0;j<2;j++) {
-			new_ts->m_Cy[i][j] -= Ky[i]*CHy[j];
-		}
-	}
+	for(int i=0;i<3;i++) new_ts->m_X[i] += Dx*new_ts->m_Cx[i]*resid_x; //M3_0_i
+	for(int i=0;i<2;i++) new_ts->m_Y[i] += Dx*new_ts->m_Cy[i]*resid_y; //M2_0_i
+	
+	new_ts->m_Cx[M3_2_2] -= Dx*new_ts->m_Cx[M3_0_2]*new_ts->m_Cx[M3_0_2];
+	new_ts->m_Cx[M3_1_2] -= Dx*new_ts->m_Cx[M3_0_1]*new_ts->m_Cx[M3_0_2];
+	new_ts->m_Cx[M3_1_1] -= Dx*new_ts->m_Cx[M3_0_1]*new_ts->m_Cx[M3_0_1];
+	new_ts->m_Cx[M3_0_2] -= Dx*new_ts->m_Cx[M3_0_0]*new_ts->m_Cx[M3_0_2];
+	new_ts->m_Cx[M3_0_1] -= Dx*new_ts->m_Cx[M3_0_0]*new_ts->m_Cx[M3_0_1];
+	new_ts->m_Cx[M3_0_0] -= Dx*new_ts->m_Cx[M3_0_0]*new_ts->m_Cx[M3_0_0];
+	
+	new_ts->m_Cy[M2_1_1] -= Dx*new_ts->m_Cy[M2_0_1]*new_ts->m_Cy[M2_0_1];
+	new_ts->m_Cy[M2_0_1] -= Dx*new_ts->m_Cy[M2_0_0]*new_ts->m_Cy[M2_0_1];
+	new_ts->m_Cy[M2_0_0] -= Dx*new_ts->m_Cy[M2_0_0]*new_ts->m_Cy[M2_0_0];
 	
 	new_ts->m_c = ts->m_c;
 	new_ts->m_s = ts->m_s;	

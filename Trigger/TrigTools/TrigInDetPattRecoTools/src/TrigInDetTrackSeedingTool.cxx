@@ -386,7 +386,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 		pJobData->m_nLayers      = nLayers;
 		pJobData->m_nEtaBins     = nEtaBins;
 		pJobData->m_maxEtaBin    = MaxEtaBin;
-		pJobData->m_nMaxEdges    = m_nMaxEdges;
+		pJobData->m_nMaxEdges    = m_nBufferEdges + 5*spIdx; 
 
 		//load bin pairs
 
