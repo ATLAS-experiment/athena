@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/LArG4SDTool.h"
@@ -18,24 +18,9 @@
 #include "G4SDManager.hh"
 #include "G4VSensitiveDetector.hh"
 
-// Units!
-#include "CLHEP/Units/SystemOfUnits.h"
-
-
 LArG4SDTool::LArG4SDTool(const std::string& type, const std::string& name, const IInterface *parent)
   : SensitiveDetectorBase(type,name,parent)
-  , m_doPID(false)
-  , m_timeBinType("Default")
-  , m_timeBinWidth(2.5*CLHEP::ns)
-  , m_larEmID (nullptr)
-  , m_larFcalID (nullptr)
-  , m_larHecID (nullptr)
-  , m_caloDmID (nullptr)
 {
-  declareProperty("ParticleID",m_doPID=false);
-  declareProperty("TimeBinType",m_timeBinType);
-  declareProperty("TimeBinWidth",m_timeBinWidth);
-  declareProperty("UseFrozenShowers",m_useFrozenShowers);
 }
 
 StatusCode LArG4SDTool::initialize()

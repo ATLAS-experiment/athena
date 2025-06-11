@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef LARG4BARRELSDTOOL_H
-#define LARG4BARRELSDTOOL_H
+#ifndef LARG4CODE_LARG4SDTOOL_H
+#define LARG4CODE_LARG4SDTOOL_H
 
 // Base class
 #include "G4AtlasTools/SensitiveDetectorBase.h"
+// Units!
+#include "CLHEP/Units/SystemOfUnits.h"
 
 #include <string>
 #include <vector>
@@ -36,7 +38,7 @@ class LArG4SDTool : public SensitiveDetectorBase
   LArG4SDTool(const std::string& type, const std::string& name, const IInterface *parent);
 
   /// Destructor
-  virtual ~LArG4SDTool() {}
+  virtual ~LArG4SDTool() = default;
 
   StatusCode initialize() override final;
 
@@ -52,13 +54,13 @@ class LArG4SDTool : public SensitiveDetectorBase
   G4VSensitiveDetector* makeSD() const override final { return nullptr; }
 
   /// Are we set up to run with PID hits?
-  G4bool m_doPID;
+  Gaudi::Property<G4bool> m_doPID{this, "ParticleID", false};
   /// What time binning type for regular hits?
-  std::string m_timeBinType;
+  Gaudi::Property<std::string> m_timeBinType{this, "TimeBinType", "Default"};
   /// What time bin width for regular hits?
-  float m_timeBinWidth;
+  Gaudi::Property<float> m_timeBinWidth{this, "TimeBinWidth", 2.5*CLHEP::ns};
   /// Is there going to be a fast simulation coming into this SD?
-  G4bool m_useFrozenShowers = false;
+  Gaudi::Property<G4bool> m_useFrozenShowers{this, "UseFrozenShowers", false};
 
   /// Method actually doing the work to assign all of these SDs
   /// FIXME: this argument type is nasty:
@@ -66,10 +68,10 @@ class LArG4SDTool : public SensitiveDetectorBase
   void setupAllSDs(const std::map<G4VSensitiveDetector*,std::vector<std::string>*>& configuration) const;
 
   /// Pointers to the identifier helpers
-  const LArEM_ID*       m_larEmID;
-  const LArFCAL_ID*     m_larFcalID;
-  const LArHEC_ID*      m_larHecID;
-  const CaloDM_ID*      m_caloDmID;
+  const LArEM_ID*       m_larEmID{nullptr};
+  const LArFCAL_ID*     m_larFcalID{nullptr};
+  const LArHEC_ID*      m_larHecID{nullptr};
+  const CaloDM_ID*      m_caloDmID{nullptr};
 
   /// Helper function for matching strings with wildcards
   bool match(const char *first, const char * second) const;
