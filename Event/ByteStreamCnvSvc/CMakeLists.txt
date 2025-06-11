@@ -34,9 +34,12 @@ atlas_add_executable( AtlListBSEvents test/AtlListBSEvents.cxx
    LINK_LIBRARIES CxxUtils ${TDAQ-COMMON_LIBRARIES} )
 
 # Test(s) in the package:
+
+set( testFileRawRun2 "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1" )
+
 atlas_add_test( AtlCopyBSEvent1
    PRE_EXEC_SCRIPT "rm -f test.data*"
-   SCRIPT "AtlCopyBSEvent -e 186882810,187403142,187404922,187419528 -o test.data /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1" )
+   SCRIPT "AtlCopyBSEvent -e 186882810,187403142,187404922,187419528 -o test.data ${testFileRawRun2}" )
 
 atlas_add_test( AtlFindBSEvent2
    SCRIPT "AtlFindBSEvent -e 187403142 test.data"
@@ -63,7 +66,7 @@ atlas_add_test( AtlCopyBSEvent6
    DEPENDS AtlCopyBSEvent5 )
 
 atlas_add_test( AtlListBSEvents
-   SCRIPT "AtlListBSEvents -s -c -l /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1" )
+   SCRIPT "AtlListBSEvents -s -c -l ${testFileRawRun2}" )
 
 atlas_add_test( ByteStreamConfigTest
    SCRIPT "python -m ByteStreamCnvSvc.ByteStreamConfig"
