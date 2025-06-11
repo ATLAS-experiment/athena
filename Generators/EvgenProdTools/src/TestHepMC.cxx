@@ -357,6 +357,12 @@ StatusCode TestHepMC::execute() {
       if(beams.first->pdg_id() == MC::PROTON && beams.second->pdg_id() == MC::LEAD){//pPb collisions
         cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::LEAD))/MC::baryonNumber(MC::LEAD));
       }
+      if(beams.first->pdg_id() == MC::OXYGEN && beams.second->pdg_id() == MC::HELIUM){//OHe collisions
+        cmenergy /= std::sqrt(static_cast<double>(MC::baryonNumber(MC::OXYGEN)*MC::baryonNumber(MC::HELIUM)));
+      }
+      if(beams.first->pdg_id() == MC::HELIUM && beams.second->pdg_id() == MC::OXYGEN){//HeO collisions
+        cmenergy /= std::sqrt(static_cast<double>(MC::baryonNumber(MC::OXYGEN)*MC::baryonNumber(MC::HELIUM)));
+      }
 
       if (m_cm_energy > 0 && std::abs(cmenergy - m_cm_energy) > m_cme_diff) {
         ATH_MSG_FATAL("Beam particles have incorrect energy: " << m_cm_energy/Gaudi::Units::GeV << " GeV expected, vs. " << cmenergy/Gaudi::Units::GeV << " GeV found");

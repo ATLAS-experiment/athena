@@ -133,6 +133,7 @@ static const int  WBOSON_LRSM = 9900024;
 static const int LEAD = 1000822080;
 static const int OXYGEN = 1000080160;
 static const int NEON = 1000100200;
+static const int HELIUM =  1000020040;
 
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
