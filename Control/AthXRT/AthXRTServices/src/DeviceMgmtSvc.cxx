@@ -136,7 +136,8 @@ StatusCode DeviceMgmtSvc::inspect_xclbins(SystemInfo &si) {
           xclbin_info.kernel_names.push_back(kernel.get_name());
         }
       }
-    } catch (...) {
+    } catch (const std::exception &e) {
+      ATH_MSG_ERROR(e.what());
       ATH_MSG_ERROR("Could not create xrt::xclbin from " << xclbin_path);
       return StatusCode::FAILURE;
     }
