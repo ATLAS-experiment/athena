@@ -6,6 +6,7 @@ from ActsConfig.ActsConfigFlags import SeedingStrategy
 from ActsConfig.ActsUtilities import extractChildKwargs
 from ActsInterop import UnitConstants
 from AthenaCommon.Utils.unixtools import find_datafile
+import AthenaCommon.SystemOfUnits as Units
 
 def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -20,10 +21,8 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
 
   isLRT=flags.Tracking.ActiveConfig.extension == "LargeD0"
   
-  kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
-  kwargs.setdefault("MaxGraphEdges", 1500000)   # do we want ITkTrigTrackSeedingToolStandaloneCfg definition: if flags.Acts.GbtsConnectionTableVersion == 0 else 1800000)
-  if flags.Acts.GbtsConnectionTableVersion == 0:
-    kwargs.setdefault("MatchBeforeCreate", True)
+  kwargs.setdefault("pTmin", 1.0 * Units.GeV)
+  kwargs.setdefault("MaxGraphEdges", 1500000)   # do we want ITkTrigTrackSeedingToolStandaloneCfg setting of 1800000
   kwargs.setdefault("ConnectionFileName",
                     "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
 
