@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file ElectronCombinedMaterialEffects.cxx
@@ -22,15 +22,55 @@
 #include <sstream>
 
 namespace {
+/* brief Multiple Scattering description*/
+void
+scattering(GsfMaterial::Scattering& cache,
+           const Trk::ComponentParameters& componentParameters,
+           const Trk::MaterialProperties& materialProperties,
+           double pathLength)
+{
+  // Reset the cache
+  cache.reset();
+
+  // Request track parameters from component parameters
+  const Trk::TrackParameters* trackParameters = componentParameters.params.get();
+  const AmgSymMatrix(5)* measuredTrackCov = trackParameters->covariance();
+
+  if (!measuredTrackCov) {
+    return;
+  }
+
+  const Amg::Vector3D& globalMomentum = trackParameters->momentum();
+  const double p = globalMomentum.mag();
+  double pathcorrection = 1.;
+  if (materialProperties.thickness() != 0) {
+    pathcorrection = pathLength / materialProperties.thickness();
+  }
+  const double t = pathcorrection * materialProperties.thicknessInX0();
+  constexpr double m = Trk::ParticleMasses::mass[Trk::electron];
+  const double E = std::sqrt(p * p + m * m);
+  const double beta = p / E;
+  const double sigma = Trk::MaterialInteraction::sigmaMS(t, p, beta);
+  const double angularVariation = sigma * sigma;
+
+  const double sinTheta = std::sin(trackParameters->parameters()[Trk::theta]);
+  cache.deltaThetaCov = angularVariation;
+  cache.deltaPhiCov = angularVariation / (sinTheta * sinTheta);
+}
+
+/**
+ * @brief Helpers for the Bethe Heitler parametrization
+ */
 constexpr double s_singleGaussianRange = 0.0001;
 constexpr double s_lowerRange = 0.002;
 constexpr double s_xOverRange = 0.10;
 constexpr double s_upperRange = 0.20;
 constexpr double s_componentMeanCut = 0.0;
-
+//
+using BH = Trk::ElectronCombinedMaterialEffects;
+using polyArray = std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>;
 /**
- * use Horner's method to evaluate Polynomials
- * We unroll up to order 5
+ * @brief Horner's method to evaluate Polynomials. We unroll up to order 5
  */
 template<size_t N>
 inline constexpr double
@@ -58,12 +98,6 @@ hornerEvaluate(const std::array<double, N>& a, const double& x)
     return result;
   }
 }
-inline constexpr bool
-inRange(int var, int lo, int hi)
-{
-  return ((var <= hi) and (var >= lo));
-}
-
 // Logistic function - needed for transformation of weight and mean
 inline double
 logisticFunction(const double x)
@@ -71,7 +105,6 @@ logisticFunction(const double x)
   return 1. / (1. + std::exp(-x));
 }
 
-using BH = Trk::ElectronCombinedMaterialEffects;
 // Correct weights of components
 void
 correctWeights(BH::MixtureParameters& mixture, const int numberOfComponents)
@@ -112,67 +145,17 @@ getTransformedMixtureParameters(
   return mixture;
 }
 
-BH::MixtureParameters
-getMixtureParameters(
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialWeights,
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialMeans,
-  const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>& polynomialVariances,
-  const double pathlengthInX0,
-  const int numberOfComponents)
-{
-  BH::MixtureParameters mixture{};
-  //loop over actual components
-  for (int i = 0; i < numberOfComponents; ++i) {
-    const double updatedWeight = hornerEvaluate(polynomialWeights[i], pathlengthInX0);
-    const double updatedMean = hornerEvaluate(polynomialMeans[i], pathlengthInX0);
-    const double updatedVariance = hornerEvaluate(polynomialVariances[i], pathlengthInX0);
-    mixture[i] = { updatedWeight,
-                   updatedMean,
-                   updatedVariance * updatedVariance };
-  }
-  return mixture;
+/**
+ * @brief Helpers to read in the Bethe-Heitler
+ * parametrization from files
+ */
+// for sanity checks of read in parameters
+inline constexpr bool inRange(int var, int lo, int hi) {
+  return ((var <= hi) and (var >= lo));
 }
-
-inline void
-scattering(GsfMaterial::Scattering& cache,
-           const Trk::ComponentParameters& componentParameters,
-           const Trk::MaterialProperties& materialProperties,
-           double pathLength)
-{
-  // Reset the cache
-  cache.reset();
-
-  // Request track parameters from component parameters
-  const Trk::TrackParameters* trackParameters = componentParameters.params.get();
-  const AmgSymMatrix(5)* measuredTrackCov = trackParameters->covariance();
-
-  if (!measuredTrackCov) {
-    return;
-  }
-
-  const Amg::Vector3D& globalMomentum = trackParameters->momentum();
-  const double p = globalMomentum.mag();
-  double pathcorrection = 1.;
-  if (materialProperties.thickness() != 0) {
-    pathcorrection = pathLength / materialProperties.thickness();
-  }
-  const double t = pathcorrection * materialProperties.thicknessInX0();
-  constexpr double m = Trk::ParticleMasses::mass[Trk::electron];
-  const double E = sqrt(p * p + m * m);
-  const double beta = p / E;
-  const double sigma = Trk::MaterialInteraction::sigmaMS(t, p, beta);
-  const double angularVariation = sigma * sigma;
-
-  const double sinTheta = std::sin(trackParameters->parameters()[Trk::theta]);
-  cache.deltaThetaCov = angularVariation;
-  cache.deltaPhiCov = angularVariation / (sinTheta * sinTheta);
-}
-
 // Helper to read in polynomials
-Trk::ElectronCombinedMaterialEffects::Polynomial
-readPolynomial(std::ifstream& fin)
-{
-  Trk::ElectronCombinedMaterialEffects::Polynomial poly{};
+BH::Polynomial readPolynomial(std::ifstream& fin) {
+  BH::Polynomial poly{};
   for (size_t i = 0; i < GSFConstants::polynomialCoefficients; ++i) {
     if (!fin) {
       throw std::logic_error("Reached end of stream but still expecting data.");
@@ -182,19 +165,66 @@ readPolynomial(std::ifstream& fin)
   return poly;
 }
 
-} //  end of anonymous namespace
+// Helper struct to read in info from file
+struct readPolys {
+  polyArray weights{};
+  polyArray means{};
+  polyArray variances{};
+  int numberOfComponents{};
+};
+
+// Helper to read in info from file
+readPolys fillFromFile(const std::string& fileName) {
+
+  readPolys result;
+  // open file
+  const char* filename = fileName.c_str();
+  std::ifstream fin(filename);
+  if (fin.bad()) {
+    std::ostringstream ss;
+    ss << "Error opening file: " << fileName;
+    throw std::logic_error(ss.str());
+  }
+
+  // read in the 1st line
+  fin >> result.numberOfComponents;
+  int orderPolynomial = 0;
+  fin >> orderPolynomial;
+  if (not inRange(result.numberOfComponents, 0,
+                  GSFConstants::maxNumberofMatComponents)) {
+    std::ostringstream ss;
+    ss << "numberOfComponents Parameter out of range 0- "
+       << GSFConstants::maxNumberofMatComponents << " : "
+       << result.numberOfComponents;
+    throw std::logic_error(ss.str());
+  }
+  if (orderPolynomial != (GSFConstants::polynomialCoefficients - 1)) {
+    std::ostringstream ss;
+    ss << "orderPolynomial  order !=  "
+       << (GSFConstants::polynomialCoefficients - 1);
+    throw std::logic_error(ss.str());
+  }
+
+  // read in  the polynomials
+  int componentIndex = 0;
+  for (; componentIndex < result.numberOfComponents; ++componentIndex) {
+    result.weights[componentIndex] = readPolynomial(fin);
+    result.means[componentIndex] = readPolynomial(fin);
+    result.variances[componentIndex] = readPolynomial(fin);
+  }
+  return result;
+}
+
+}  //  end of anonymous namespace
 
 // ElectronCombinedMaterialEffects methods
 Trk::ElectronCombinedMaterialEffects::ElectronCombinedMaterialEffects(
-  const std::string& parameterisationFileName,
-  const std::string& parameterisationFileNameHighX0)
-{
-  // The following is a bit repetitive code
-  // we could consider refactoring
-  // The low X0 polynomials
+    const std::string& parameterisationFileName,
+    const std::string& parameterisationFileNameHighX0) {
+  // Read the std  polynomials
   {
     const std::string resolvedFileName =
-      PathResolver::find_file(parameterisationFileName, "DATAPATH");
+        PathResolver::find_file(parameterisationFileName, "DATAPATH");
     if (resolvedFileName.empty()) {
       std::ostringstream ss;
       ss << "Parameterisation file : " << parameterisationFileName
@@ -202,109 +232,32 @@ Trk::ElectronCombinedMaterialEffects::ElectronCombinedMaterialEffects(
       throw std::logic_error(ss.str());
     }
 
-    const char* filename = resolvedFileName.c_str();
-    std::ifstream fin(filename);
-    if (fin.bad()) {
-      std::ostringstream ss;
-      ss << "Error opening file: " << resolvedFileName;
-      throw std::logic_error(ss.str());
-    }
-
-    fin >> m_BHnumberOfComponents;
-    int orderPolynomial = 0;
-    fin >> orderPolynomial;
-    fin >> m_BHtransformationCode;
-    if (not inRange(
-          m_BHnumberOfComponents, 0, GSFConstants::maxNumberofMatComponents)) {
-      std::ostringstream ss;
-      ss << "numberOfComponents Parameter out of range 0- "
-         << GSFConstants::maxNumberofMatComponents << " : "
-         << m_BHnumberOfComponents;
-      throw std::logic_error(ss.str());
-    }
-    if (orderPolynomial != (GSFConstants::polynomialCoefficients - 1)) {
-      std::ostringstream ss;
-      ss << "orderPolynomial  order !=  "
-         << (GSFConstants::polynomialCoefficients - 1);
-      throw std::logic_error(ss.str());
-    }
-    if (not inRange(m_BHtransformationCode, 0, 1)) {
-      std::ostringstream ss;
-      ss << "transformationCode Parameter out of range 0-1: "
-         << m_BHtransformationCode;
-      throw std::logic_error(ss.str());
-    }
-    if (!fin) {
-      std::ostringstream ss;
-      ss << "Error while reading file : " << resolvedFileName;
-      throw std::logic_error(ss.str());
-    }
-    // Fill the polynomials
-    int componentIndex = 0;
-    for (; componentIndex < m_BHnumberOfComponents; ++componentIndex) {
-      m_BHpolynomialWeights[componentIndex] = readPolynomial(fin);
-      m_BHpolynomialMeans[componentIndex] = readPolynomial(fin);
-      m_BHpolynomialVariances[componentIndex] = readPolynomial(fin);
-    }
+    readPolys readin = fillFromFile(resolvedFileName);
+    m_BHnumberOfComponents = readin.numberOfComponents;
+    m_BHpolynomialWeights = readin.weights;
+    m_BHpolynomialMeans = readin.means;
+    m_BHpolynomialVariances = readin.variances;
   }
   // Read the high X0 polynomials
   {
     const std::string resolvedFileName =
-      PathResolver::find_file(parameterisationFileNameHighX0, "DATAPATH");
+        PathResolver::find_file(parameterisationFileNameHighX0, "DATAPATH");
     if (resolvedFileName.empty()) {
       std::ostringstream ss;
       ss << "Parameterisation file : " << parameterisationFileNameHighX0
          << " not found";
       throw std::logic_error(ss.str());
     }
-
-    const char* filename = resolvedFileName.c_str();
-    std::ifstream fin(filename);
-    if (fin.bad()) {
-      std::ostringstream ss;
-      ss << "Error opening file: " << resolvedFileName;
-      throw std::logic_error(ss.str());
-    }
-    fin >> m_BHnumberOfComponentsHighX0;
-    int orderPolynomial = 0;
-    fin >> orderPolynomial;
-    fin >> m_BHtransformationCodeHighX0;
-    //
-    if (not inRange(m_BHnumberOfComponentsHighX0,
-                    0,
-                    GSFConstants::maxNumberofMatComponents)) {
-      std::ostringstream ss;
-      ss << "numberOfComponentsHighX0 Parameter out of range 0- "
-         << GSFConstants::maxNumberofMatComponents << " : "
-         << m_BHnumberOfComponentsHighX0;
-      throw std::logic_error(ss.str());
-    }
-    if (m_BHnumberOfComponentsHighX0 != m_BHnumberOfComponents) {
-      std::ostringstream ss;
-      ss << " numberOfComponentsHighX0 != numberOfComponents";
-      throw std::logic_error(ss.str());
-    }
-    if (orderPolynomial != (GSFConstants::polynomialCoefficients - 1)) {
-      std::ostringstream ss;
-      ss << "orderPolynomial  order !=  "
-         << (GSFConstants::polynomialCoefficients - 1);
-      throw std::logic_error(ss.str());
-    }
-    if (not inRange(m_BHtransformationCodeHighX0, 0, 1)) {
-      std::ostringstream ss;
-      ss << "transformationCode Parameter out of range "
-            "0-1: "
-         << m_BHtransformationCodeHighX0;
-      throw std::logic_error(ss.str());
-    }
-
-    // Fill the polynomials
-    int componentIndex = 0;
-    for (; componentIndex < m_BHnumberOfComponentsHighX0; ++componentIndex) {
-      m_BHpolynomialWeightsHighX0[componentIndex] = readPolynomial(fin);
-      m_BHpolynomialMeansHighX0[componentIndex] = readPolynomial(fin);
-      m_BHpolynomialVariancesHighX0[componentIndex] = readPolynomial(fin);
-    }
+    readPolys readin = fillFromFile(resolvedFileName);
+    m_BHnumberOfComponentsHighX0 = readin.numberOfComponents;
+    m_BHpolynomialWeightsHighX0 = readin.weights;
+    m_BHpolynomialMeansHighX0 = readin.means;
+    m_BHpolynomialVariancesHighX0 = readin.variances;
+  }
+  if (m_BHnumberOfComponentsHighX0 != m_BHnumberOfComponents) {
+    std::ostringstream ss;
+    ss << " numberOfComponentsHighX0 != numberOfComponents";
+    throw std::logic_error(ss.str());
   }
 }
 
@@ -321,10 +274,10 @@ Trk::ElectronCombinedMaterialEffects::compute(
    * 1.  Retrieve multiple scattering corrections
    */
   GsfMaterial::Scattering cache_multipleScatter;
-  scattering(
-    cache_multipleScatter, componentParameters, materialProperties, pathLength);
+  scattering(cache_multipleScatter, componentParameters, materialProperties, pathLength);
   /*
    * 2. Retrieve energy loss corrections
+   * This for electrons comes from the Bethe-Heitler
    */
   GsfMaterial::EnergyLoss cache_energyLoss;
   this->BetheHeitler(cache_energyLoss,
@@ -333,9 +286,7 @@ Trk::ElectronCombinedMaterialEffects::compute(
                      pathLength,
                      direction);
   // Protect if there are no new energy loss
-  // components
-  // we want at least on dummy to "combine"
-  // with scattering
+  // components.
   if (cache_energyLoss.numElements == 0) {
     cache_energyLoss.elements[0] = { 1, 0, 0 };
     cache_energyLoss.numElements = 1;
@@ -343,28 +294,25 @@ Trk::ElectronCombinedMaterialEffects::compute(
   /*
    * 3. Combine the multiple scattering with each of the  energy loss components
    */
-  // Cache is to be filled so 0 entries here
-  cache.numEntries = 0;
+  cache.numEntries = 0; //cahce to be filled
   for (int i = 0; i < cache_energyLoss.numElements; ++i) {
-    const double combinedWeight = cache_energyLoss.elements[i].weight;
-    const double combinedDeltaP = cache_energyLoss.elements[i].deltaP;
-    cache.weights[i] = combinedWeight;
-    cache.deltaPs[i] = combinedDeltaP;
+    cache.weights[i] = cache_energyLoss.elements[i].weight;
+    cache.deltaPs[i] = cache_energyLoss.elements[i].deltaP;
     if (measuredCov) {
       // Create the covariance
       const double covPhi = cache_multipleScatter.deltaPhiCov;
       const double covTheta = cache_multipleScatter.deltaThetaCov;
       const double covQoverP = cache_energyLoss.elements[i].deltaQOvePCov;
-      cache.deltaCovariances[i] << 0, 0, 0, 0, 0, // 5
-        0, 0, 0, 0, 0,                            // 10
-        0, 0, covPhi, 0, 0,                       // 15
-        0, 0, 0, covTheta, 0,                     // 20
-        0, 0, 0, 0, covQoverP;
+      cache.deltaCovariances[i] << 0, 0, 0, 0, 0,  // 5
+          0, 0, 0, 0, 0,                           // 10
+          0, 0, covPhi, 0, 0,                      // 15
+          0, 0, 0, covTheta, 0,                    // 20
+          0, 0, 0, 0, covQoverP;
     } else {
       cache.deltaCovariances[i].setZero();
     }
     ++cache.numEntries;
-  } // end for loop over energy loss components
+  }  // end for loop over energy loss components
 }
 
 /*
@@ -400,8 +348,8 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
     const double meanZ = std::exp(-1. * pathlengthInX0);
     const double sign = (direction == Trk::oppositeMomentum) ? 1. : -1.;
     const double varZ =
-      std::exp(-1. * pathlengthInX0 * std::log(3.) / std::log(2.)) -
-      std::exp(-2. * pathlengthInX0);
+        std::exp(-1. * pathlengthInX0 * std::log(3.) / std::log(2.)) -
+        std::exp(-2. * pathlengthInX0);
     double deltaP(0.);
     double varQoverP(0.);
     if (direction == Trk::alongMomentum) {
@@ -423,39 +371,24 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
   // Get proper mixture parameters
   MixtureParameters mixture;
   if (pathlengthInX0 > s_xOverRange) {
-    if (m_BHtransformationCodeHighX0) {
-      mixture = getTransformedMixtureParameters(m_BHpolynomialWeightsHighX0,
-                                               m_BHpolynomialMeansHighX0,
-                                               m_BHpolynomialVariancesHighX0,
-                                               pathlengthInX0,
-                                               m_BHnumberOfComponents);
-    } else {
-      mixture = getMixtureParameters(m_BHpolynomialWeightsHighX0,
-                                     m_BHpolynomialMeansHighX0,
-                                     m_BHpolynomialVariancesHighX0,
-                                     pathlengthInX0,
-                                     m_BHnumberOfComponents);
-    }
+    mixture = getTransformedMixtureParameters(m_BHpolynomialWeightsHighX0,
+                                              m_BHpolynomialMeansHighX0,
+                                              m_BHpolynomialVariancesHighX0,
+                                              pathlengthInX0,
+                                              m_BHnumberOfComponents);
   } else {
-    if (m_BHtransformationCode) {
-      mixture = getTransformedMixtureParameters(m_BHpolynomialWeights,
-                                               m_BHpolynomialMeans,
-                                               m_BHpolynomialVariances,
-                                               pathlengthInX0,
-                                               m_BHnumberOfComponents);
-    } else {
-      mixture = getMixtureParameters(m_BHpolynomialWeights,
-                                     m_BHpolynomialMeans,
-                                     m_BHpolynomialVariances,
-                                     pathlengthInX0,
-                                     m_BHnumberOfComponents);
-    }
+    mixture = getTransformedMixtureParameters(m_BHpolynomialWeights,
+                                              m_BHpolynomialMeans,
+                                              m_BHpolynomialVariances,
+                                              pathlengthInX0,
+                                              m_BHnumberOfComponents);
   }
   // Correct the mixture
   correctWeights(mixture, m_BHnumberOfComponents);
   int componentIndex = 0;
   double weightToBeRemoved(0.);
   int componentWithHighestMean(0);
+
   for (; componentIndex < m_BHnumberOfComponents; ++componentIndex) {
     if (mixture[componentIndex].mean > mixture[componentWithHighestMean].mean) {
       componentWithHighestMean = componentIndex;
@@ -469,26 +402,26 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
   componentIndex = 0;
   for (; componentIndex < m_BHnumberOfComponents; ++componentIndex) {
     double varianceInverseMomentum = 0;
+
     // This is not mathematically correct but it does stabilize the GSF
     if (mixture[componentIndex].mean < s_componentMeanCut) {
       continue;
     }
+
     double weight = mixture[componentIndex].weight;
     if (componentIndex == componentWithHighestMean) {
       weight += weightToBeRemoved;
     }
+
     double deltaP(0.);
-    if (direction == alongMomentum) {
-      // For forward propagation
+    if (direction == alongMomentum) { // For forward propagation
       deltaP = momentum * (mixture[componentIndex].mean - 1.);
       const double f = 1. / (momentum * mixture[componentIndex].mean);
       varianceInverseMomentum = f * f * mixture[componentIndex].variance;
-    } // end forward propagation if clause
-    else {
-      // For backwards propagation
+    } else { // For backwards propagation
       deltaP = momentum * (1. / mixture[componentIndex].mean - 1.);
       varianceInverseMomentum = mixture[componentIndex].variance / (momentum * momentum);
-    } // end backwards propagation if clause
+    }
 
     // set in the cache and increase the elements
     cache.elements[cache.numElements] = { weight,

@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2020-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
  * @file ElectronMaterialMixtureConvolution.cxx
  * @begin         July 20 2020
  * @author        Anthony Morley, Christos Anastopoulos
- * @brief         Implementation code for GSF material mixture convolution
+ * @brief         Implementation code for GSF electron
+ * material effects via mixture convolution
  */
 
 #include "TrkGaussianSumFilter/ElectronMaterialMixtureConvolution.h"
@@ -115,7 +116,7 @@ Trk::ElectronMaterialMixtureConvolution::initialize()
     return StatusCode::FAILURE;
   }
 
-  m_materialEffects = ElectronCombinedMaterialEffects(
+  m_materialEffects = std::make_unique<ElectronCombinedMaterialEffects>(
     m_parameterisationFileName, m_parameterisationFileNameHighX0);
   return StatusCode::SUCCESS;
 }
@@ -250,7 +251,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
     // Now we can compute/apply actual material effects
     // Apply the update factor
     matPropPair.second *= updateFactor;
-    m_materialEffects.compute(caches[i],
+    m_materialEffects->compute(caches[i],
                               inputState[i],
                               *matPropPair.first,
                               matPropPair.second,
@@ -411,7 +412,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
   }
 
   // Check all weights
-  Trk::MultiComponentState mergedState = MultiComponentStateAssembler::assembledState(std::move(assemblerCache));
+  auto mergedState = MultiComponentStateAssembler::assembledState(std::move(assemblerCache));
 
   if (mergedState.size() > m_maximumNumberOfComponents) {
     ATH_MSG_ERROR("Merging failed, target size: " << m_maximumNumberOfComponents

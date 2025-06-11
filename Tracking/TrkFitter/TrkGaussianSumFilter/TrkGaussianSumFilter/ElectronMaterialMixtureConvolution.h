@@ -81,7 +81,8 @@ private:
                                   Trk::ParticleHypothesis particleHypothesis,
                                   MaterialUpdateType updateType) const;
 
-  ElectronCombinedMaterialEffects m_materialEffects{};
+  //pimpl
+  std::unique_ptr<ElectronCombinedMaterialEffects> m_materialEffects;
 
   Gaudi::Property<unsigned int> m_maximumNumberOfComponents{
     this,
