@@ -133,10 +133,7 @@ public:
   int* d_edge_nodes{};
   float* d_edge_params{};
   
-  unsigned int* d_num_incoming_edges{};
-  
-  int* d_link_counters{};
-  
+  unsigned int* d_num_incoming_edges{}; 
   int* d_edge_links{};
   
   unsigned char* d_num_neighbours{};

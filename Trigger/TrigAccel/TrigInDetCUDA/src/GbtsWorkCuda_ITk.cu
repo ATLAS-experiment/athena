@@ -72,14 +72,12 @@ GbtsWorkCudaITk::~GbtsWorkCudaITk() {
 	cudaFree(ctx.d_bin_pair_dphi);
 
 	cudaFree(ctx.d_counters);
-	cudaFree(ctx.d_edge_nodes);
 
+	cudaFree(ctx.d_edge_nodes);
 	cudaFree(ctx.d_edge_params);
 
 	cudaFree(ctx.d_num_incoming_edges);
-
 	cudaFree(ctx.d_edge_links);
-	cudaFree(ctx.d_link_counters);
 	
 	cudaFree(ctx.d_num_neighbours);
 	cudaFree(ctx.d_reIndexer);
@@ -370,7 +368,7 @@ bool GbtsWorkCudaITk::run() {
 	graphEdgeMakingKernel_ITk<<<nBlocks, nThreads, 0, ctx.m_stream>>>(reinterpret_cast<uint4*>(ctx.d_bin_pair_views),
 	                                                 ctx.d_bin_pair_dphi, ctx.d_node_params,
 	                                                 ctx.d_algo_params, ctx.d_counters, reinterpret_cast<int2*>(ctx.d_edge_nodes), 
-	                                                 reinterpret_cast<float4*>(ctx.d_edge_params),
+	                                                 reinterpret_cast<half4*>(ctx.d_edge_params),
 	                                                 ctx.d_num_incoming_edges, ctx.m_nMaxEdges);
 
 	cudaStreamSynchronize(ctx.m_stream);
@@ -386,7 +384,7 @@ bool GbtsWorkCudaITk::run() {
 
 	cudaMemcpy(&nStats[0], ctx.d_counters, 4*sizeof(unsigned int), cudaMemcpyDeviceToHost);
 	
-	//printf("Created %d edges\n",nStats[0]);
+	//printf("Created %d edges under a cap of %d\n",nStats[0], ctx.m_nMaxEdges);
 
 	m_context->m_nEdges = nStats[0];
 		
@@ -394,18 +392,19 @@ bool GbtsWorkCudaITk::run() {
 
 	//4. import incoming edges counters and calculate prefix sum
 
-	unsigned int* cusum = new unsigned int[ctx.m_nNodes];
+	unsigned int* cusum = new unsigned int[ctx.m_nNodes+1];
 
-	data_size = ctx.m_nNodes*sizeof(unsigned int);
+	data_size = (ctx.m_nNodes+1)*sizeof(unsigned int);
 	
 	cudaMemcpyAsync(&cusum[0], ctx.d_num_incoming_edges, data_size, cudaMemcpyDeviceToHost, ctx.m_stream);
 
 	cudaStreamSynchronize(ctx.m_stream);
-
-	for(int k=1;k<ctx.m_nNodes;k++) cusum[k] += cusum[k-1];
+	
+	cusum[ctx.m_nNodes-1] = 0;
+	for(int k=0;k<ctx.m_nNodes;k++) cusum[k+1] += cusum[k];
 
 	cudaMemcpyAsync(ctx.d_num_incoming_edges, &cusum[0], data_size, cudaMemcpyHostToDevice, ctx.m_stream);
-
+	
 	delete[] cusum;
 
 	cudaStreamSynchronize(ctx.m_stream);
@@ -421,11 +420,12 @@ bool GbtsWorkCudaITk::run() {
 	nThreads = 256;
 	nBlocks = (int)(std::ceil((1.0*ctx.m_nEdges)/nThreads));
 
-	graphEdgeLinkingKernel_ITk<<<nBlocks, nThreads, 0, ctx.m_stream>>>(reinterpret_cast<int2*>(ctx.d_edge_nodes), ctx.d_num_incoming_edges,
-	                                                                  ctx.d_edge_links, ctx.d_link_counters, ctx.m_nEdges);
+	graphEdgeLinkingKernel_ITk<<<nBlocks, nThreads, 0, ctx.m_stream>>>(reinterpret_cast<int2*>(ctx.d_edge_nodes), 
+	                                                                  ctx.d_edge_links, ctx.d_num_incoming_edges,
+	                                                                  ctx.m_nEdges);
 
 	cudaStreamSynchronize(ctx.m_stream);
-
+	
 	error = cudaGetLastError();
 
 	if(error != cudaSuccess) {
@@ -454,8 +454,8 @@ bool GbtsWorkCudaITk::run() {
 
 	m_context->d_size += data_size;
 
-	graphEdgeMatchingKernel_ITk<<<nBlocks, nThreads, 0, ctx.m_stream>>>(ctx.d_algo_params, reinterpret_cast<float4*>(ctx.d_edge_params),
-	                                         reinterpret_cast<int2*>(ctx.d_edge_nodes), ctx.d_link_counters, ctx.d_num_incoming_edges, ctx.d_edge_links,
+	graphEdgeMatchingKernel_ITk<<<nBlocks, nThreads, 0, ctx.m_stream>>>(ctx.d_algo_params, reinterpret_cast<half4*>(ctx.d_edge_params),
+	                                         reinterpret_cast<int2*>(ctx.d_edge_nodes), ctx.d_num_incoming_edges, ctx.d_edge_links,
 	                                         ctx.d_num_neighbours, ctx.d_neighbours, ctx.d_reIndexer, ctx.d_counters, ctx.m_nEdges);
 
 	cudaStreamSynchronize(ctx.m_stream);
@@ -578,8 +578,8 @@ bool GbtsWorkCudaITk::run() {
 		int SM_count; cudaDeviceGetAttribute(&SM_count, cudaDevAttrMultiProcessorCount, device);
 		int smem; cudaDeviceGetAttribute(&smem, cudaDevAttrMaxSharedMemoryPerMultiprocessor, device);
 
-		nThreads = 640;
-
+		nThreads = 448; //two blocks limited by registers
+		
 		nBlocks = 0;
 		int soft_max_blocks = 0.8*SM_count*(smem/(sizeof(edgeState)*TrigAccel::ITk::GBTS_MAX_SHARED_STATES)); 
 
@@ -671,7 +671,7 @@ bool GbtsWorkCudaITk::run() {
 	cudaStreamSynchronize(ctx.m_stream);
 
 	m_timeLine->push_back(WorkTimeStamp(m_workId, 1, tbb::tick_count::now()));
-
+	
 	return true;
 }
 
