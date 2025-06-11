@@ -13,12 +13,12 @@ from AthenaCommon.Logging import logging
 class MuonCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the muon four-momentum correction"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (MuonCalibrationConfig, self).__init__ ()
         self.setBlockName('Muons')
         self.addOption ('inputContainer', '', type=str,
             info="select muon input container, by default set to Muons")
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('postfix', "", type=str,
@@ -147,16 +147,16 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (10 Mar 22)."""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (MuonWorkingPointConfig, self).__init__ ()
         self.setBlockName('MuonsWorkingPoint')
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the muon selection to define (e.g. tight or loose).")
-        self.addOption ('postfix', selectionName, type=str,
+        self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
         self.addOption ('trackSelection', True, type=bool,
@@ -228,6 +228,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
             raise ValueError ("Can't set up the MuonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 
         postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
@@ -369,7 +371,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
 class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
-    def __init__ (self, configName='') :
+    def __init__ (self) :
         super (MuonTriggerAnalysisSFBlock, self).__init__ ()
 
         self.addOption ('triggerChainsPerYear', {}, type=None,

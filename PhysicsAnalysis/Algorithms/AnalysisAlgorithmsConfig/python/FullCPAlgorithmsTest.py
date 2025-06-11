@@ -221,8 +221,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('Muons.WorkingPoint')
     configSeq.setOptionValue ('.containerName', 'AnaMuons')
     configSeq.setOptionValue ('.selectionName', 'medium')
-    # Needed for now, can be removed soon
-    configSeq.setOptionValue ('.postfix', 'medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
 
