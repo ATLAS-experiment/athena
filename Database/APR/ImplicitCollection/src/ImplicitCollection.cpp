@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ImplicitCollection.h"
@@ -102,7 +102,7 @@ namespace pool {
                           "ImplicitCollection" );
       }
   
-      IDatabase* database = session->databaseHandle( dbName, dbNameType );
+      auto database = session->databaseHandle( dbName, dbNameType );
       if( !database ) {
          throw Exception( "Could not retrieve a database handle",
                           "ImplicitCollection::ImplicitCollection",
@@ -134,14 +134,12 @@ namespace pool {
             break;
          }
       }
-      delete database;
 
       if( !m_container ) {
          throw Exception( "Could not open the container " + name,
                           "ImplicitCollection::ImplicitCollection",
                           "ImplicitCollection" );
       }
-
       log << coral::Info << "Opened the implicit collection with connection string \""
           << connection << "\"" << coral::MessageStream::endmsg
           << "and a name \"" << name << "\"" << coral::MessageStream::endmsg;

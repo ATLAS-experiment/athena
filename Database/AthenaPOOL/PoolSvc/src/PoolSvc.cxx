@@ -993,7 +993,6 @@ PoolSvc::~PoolSvc() {
 }
 //__________________________________________________________________________
 std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, const std::string& dbName) const {
-   pool::IDatabase* dbH = nullptr;
    if (contextId >= m_persistencySvcVec.size()) {
       ATH_MSG_WARNING("getDbHandle: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
@@ -1011,15 +1010,13 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       }
    }
    if (dbName.compare(0, 4,"PFN:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
    } else if (dbName.compare(0, 4, "LFN:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
    } else if (dbName.compare(0, 4,"FID:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
-   } else {
-      dbH = sesH.databaseHandle(dbName, pool::DatabaseSpecification::PFN);
-   }
-   return(std::unique_ptr<pool::IDatabase>(dbH));
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
+   } 
+   return sesH.databaseHandle(dbName, pool::DatabaseSpecification::PFN);
 }
 //__________________________________________________________________________
 std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* dbH, const std::string& contName) const {

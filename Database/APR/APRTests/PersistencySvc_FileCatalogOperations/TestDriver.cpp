@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -137,7 +137,7 @@ pool::TestDriver::read()
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  pool::IDatabase* db = persistencySvc->session().databaseHandle( m_lfn1, pool::DatabaseSpecification::LFN );
+  auto db = persistencySvc->session().databaseHandle( m_lfn1, pool::DatabaseSpecification::LFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -179,7 +179,6 @@ pool::TestDriver::read()
 
   delete tokenIterator;
   delete container;
-  delete db;
 
   std::cout << "Committing the transaction." << std::endl;
   if ( ! persistencySvc->session().transaction().commit() ) {

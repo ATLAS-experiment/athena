@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -358,7 +358,7 @@ pool::TestDriver::readCollections()
   }
 
   // Opening again a database
-  pool::IDatabase* db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
+  auto db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -397,8 +397,6 @@ pool::TestDriver::readCollections()
     delete container;
   }
 
-  delete db;
-
   std::cout << "Committing the transaction." << std::endl;
   if ( ! persistencySvc->session().transaction().commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
@@ -423,7 +421,7 @@ pool::TestDriver::readBackUpdatedObjects()
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  pool::IDatabase* db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
+  auto db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -468,7 +466,6 @@ pool::TestDriver::readBackUpdatedObjects()
 
   delete tokenIterator;
   delete container;
-  delete db;
 
   // Committing
   std::cout << "Committing the transaction." << std::endl;
