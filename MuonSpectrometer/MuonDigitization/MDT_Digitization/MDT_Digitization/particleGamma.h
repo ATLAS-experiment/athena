@@ -64,7 +64,6 @@ double particleGamma(const MDTSimHit& hit, unsigned short eventId = 0) {
                 QGamma = -9999.;
             }
         }
-	//std::cout<<"DEBUG particleGamma: PDG ID = " << genParticle->pdg_id() << ", gamma = " << QGamma << std::endl;
     } else {
         QGamma = -9999.;
     }
