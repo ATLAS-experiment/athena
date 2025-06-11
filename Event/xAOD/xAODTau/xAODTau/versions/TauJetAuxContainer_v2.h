@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJetAuxContainer_v2.h 750177 2016-05-27 08:12:45Z krasznaa $
@@ -72,17 +72,6 @@ namespace xAOD {
     std::vector< float > etaTauEtaCalib;
     std::vector< float > phiTauEtaCalib;
     std::vector< float > mTauEtaCalib;
-   
-
-    // std::vector< float > ptPanTauEFlowRecProto;
-    // std::vector< float > etaPanTauEFlowRecProto;
-    // std::vector< float > phiPanTauEFlowRecProto;
-    // std::vector< float > mPanTauEFlowRecProto;
-   
-    // std::vector< float > ptPanTauEFlowRec;
-    // std::vector< float > etaPanTauEFlowRec;
-    // std::vector< float > phiPanTauEFlowRec;
-    // std::vector< float > mPanTauEFlowRec;
    
     std::vector< float > ptPanTauCellBasedProto;
     std::vector< float > etaPanTauCellBasedProto;
