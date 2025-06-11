@@ -1,1 +1,0 @@
-Herwig7ConfigLHEF.py
