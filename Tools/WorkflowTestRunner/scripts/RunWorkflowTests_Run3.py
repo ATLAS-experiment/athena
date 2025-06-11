@@ -70,6 +70,9 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.DataReco:
             ami_tag = "q449" if not options.ami_tag else options.ami_tag
             tests_to_run.append(QTest(ami_tag, run, WorkflowType.DataReco, ["RAWtoALL", "DQHistogramMerge"], setup, options.extra_args))
+        if options.workflow is WorkflowType.DataOverlayReco:
+            ami_tag = "q458" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(QTest(ami_tag, run, WorkflowType.DataOverlayReco, ["RAWtoALL"], setup, options.extra_args))
 
     # Define which perfomance checks to run
     performance_checks = get_standard_performance_checks(setup)
