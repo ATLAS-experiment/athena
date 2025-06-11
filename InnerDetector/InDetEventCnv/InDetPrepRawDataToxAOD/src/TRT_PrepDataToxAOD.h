@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -64,15 +64,15 @@ private:
 
 
   // --- Services and Tools
-  ToolHandle< ITRT_DriftFunctionTool >      m_driftFunctionTool ; //!< DriftFunctionTool
-  ToolHandle<ITRT_CalDbTool>                m_trtcaldbTool      ;
-  ServiceHandle<ITRT_StrawNeighbourSvc>     m_neighbourSvc      ;
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool; 
-  const TRT_ID *m_TRTHelper;
-  const InDetDD::TRT_DetectorManager* m_trtman;
+  ToolHandle< ITRT_DriftFunctionTool >      m_driftFunctionTool{this, "TRTDriftFunctionTool", "TRT_DriftFunctionTool", "DriftFunctionTool"};
+  ToolHandle<ITRT_CalDbTool>                m_trtcaldbTool{this, "TRTCalDbTool", "TRT_CalDbTool", ""};
+  ServiceHandle<ITRT_StrawNeighbourSvc>     m_neighbourSvc{this, "NeighbourSvc", "TRT_StrawNeighbourSvc", ""};
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool{this, "TRTStrawSummaryTool", "TRT_StrawStatusSummaryTool", ""};
+  const TRT_ID *m_TRTHelper{};
+  const InDetDD::TRT_DetectorManager* m_trtman{};
 
   // ---- Internal members
-  bool m_firstEventWarnings;
+  bool m_firstEventWarnings{true};
 
 };
 

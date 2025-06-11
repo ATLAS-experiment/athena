@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ## @brief this function sets up the L1 simulation sequence with the TRT
 ## it covers the case of rerunning the L1 on run2 HI data
 
@@ -9,6 +9,9 @@ def L1TRTSimCfg(flags, name="TrigT1TRT"):
     acc = ComponentAccumulator()
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTStrawStatusCondAlgCfg
     acc.merge(TRTStrawStatusCondAlgCfg(flags))
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg,TRT_StrawNeighbourSvcCfg
+    trtStrawStatusSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
+    trtStrawNeighbourSvc = acc.getPrimary(TRT_StrawNeighbourSvcCfg(flags))
     from AthenaConfiguration.ComponentFactory import CompFactory
     if flags.Input.Format is Format.BS:
         from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
@@ -18,6 +21,8 @@ def L1TRTSimCfg(flags, name="TrigT1TRT"):
         acc.merge(L1ConfigSvcCfg(flags))
     acc.addEventAlgo(CompFactory.LVL1.TrigT1TRT(name,
                                                 TTCMultiplicity = flags.Trigger.TRT.TTCMultiplicity,
-                                                maskedChipsFile = flags.Trigger.TRT.maskedChipsFile
+                                                maskedChipsFile = flags.Trigger.TRT.maskedChipsFile,
+                                                ConditionsSummaryTool = trtStrawStatusSummaryTool,
+                                                StrawNeighbourSvc = trtStrawNeighbourSvc
                                                 ))
     return acc

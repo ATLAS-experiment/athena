@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <stdint.h>
@@ -17,11 +17,8 @@ namespace LVL1 {
   //--------------------------------
 
   TrigT1TRT::TrigT1TRT(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator),
-    m_ConditionsSummary("TRT_StrawStatusSummaryTool", this),
-    m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc", name)
+    AthReentrantAlgorithm(name, pSvcLocator)
     {
-      declareProperty("ConditionsSummaryTool",m_ConditionsSummary);
     }
 
   //---------------------------------

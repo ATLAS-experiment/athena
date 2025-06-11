@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTMonitoringRun3/TRTMonitoringRun3ESD_Alg.h"
@@ -15,7 +15,6 @@
 #include "TrkTrack/TrackCollection.h"
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 #include "TRT_ConditionsServices/ITRT_ConditionsSvc.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 #include "TRT_ConditionsServices/ITRT_DAQ_ConditionsSvc.h"
 #include "TRT_ConditionsServices/ITRT_StrawNeighbourSvc.h"
 #include "InDetConditionsSummaryService/IInDetConditionsSvc.h"
@@ -40,37 +39,7 @@ const int TRTMonitoringRun3ESD_Alg::s_moduleNum[2] = {96, 64};
 
 TRTMonitoringRun3ESD_Alg::TRTMonitoringRun3ESD_Alg( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator)
-,m_idHelper(nullptr)
-,m_sumTool("TRT_StrawStatusSummaryTool", this)
-,m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc", name)
-,m_TRTCalDbTool("TRT_CalDbTool", this)
-,m_drifttool("TRT_DriftFunctionTool", this)
-,m_pTRTHelper(nullptr)
-,m_mgr(nullptr)
-,m_isCosmics(false)
-,m_minTRThits(10)
-,m_minP(0)
-,m_EventBurstCut(-1)
-,m_trackSelTool("InDet::InDetTrackSelectionTool/TrackSelectionTool", this)
 {
-    declareProperty("InDetTRTStrawStatusSummaryTool",                 m_sumTool);
-    declareProperty("NeighbourSvc",                                   m_TRTStrawNeighbourSvc);
-    declareProperty("ITRT_CalDbTool",                                 m_TRTCalDbTool);
-    declareProperty("DriftFunctionTool",                              m_drifttool);
-    declareProperty("TrackSelectionTool",                             m_trackSelTool);
-    declareProperty("doExpert",                 m_doExpert            = false);
-    declareProperty("DoTracksMon",              m_doTracksMon         = true);
-    declareProperty("doStraws",                 m_doStraws            = true);
-    declareProperty("doChips",                  m_doChips             = true);
-    declareProperty("doShift",                  m_doShift             = true);
-    declareProperty("DistanceToStraw",          m_DistToStraw         = 0.4);
-    declareProperty("min_si_hits",              m_min_si_hits         = 1);
-    declareProperty("min_pixel_hits",           m_min_pixel_hits      = 0);
-    declareProperty("min_sct_hits",             m_min_sct_hits        = 0);
-    declareProperty("min_trt_hits",             m_min_trt_hits        = 10);
-    declareProperty("MinTRTHitCut",             m_minTRThits          = 10);
-    declareProperty("MinTrackP",                m_minP                = 0.0 * CLHEP::GeV);
-    declareProperty("min_pT",                   m_min_pT              = 0.5 * CLHEP::GeV);
 }
 
 TRTMonitoringRun3ESD_Alg::~TRTMonitoringRun3ESD_Alg() {}
@@ -581,7 +550,7 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
 
         const bool passed_track_preselection = (static_cast<bool>(m_trackSelTool->accept(**p_trk)) || m_isCosmics) &&
                                                n_trt_hits >= m_min_trt_hits &&
-                                               mPer->pT() > (m_isCosmics?m_min_pT : 2.0 * CLHEP::GeV); // Hardcoded cut for pT 2.0 GeV for collision setup
+                                               mPer->pT() > (m_isCosmics?m_min_pT.value() : 2.0 * CLHEP::GeV); // Hardcoded cut for pT 2.0 GeV for collision setup
         if (!passed_track_preselection) continue;
 
         nTotalTracks++;

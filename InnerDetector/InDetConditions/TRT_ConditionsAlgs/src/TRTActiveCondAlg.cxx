@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -11,11 +11,9 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 TRTActiveCondAlg::TRTActiveCondAlg(const std::string& name
-				 , ISvcLocator* pSvcLocator )
-  : ::AthReentrantAlgorithm(name,pSvcLocator),
-    m_strawStatus("TRT_StrawStatusSummaryTool",this),
-    m_trtId(nullptr)
-{ declareProperty("TRTStrawStatusSummaryTool",m_strawStatus); }
+                                   , ISvcLocator* pSvcLocator )
+  : ::AthReentrantAlgorithm(name,pSvcLocator)
+{ }
 TRTActiveCondAlg::~TRTActiveCondAlg()= default;
 
 StatusCode TRTActiveCondAlg::initialize()

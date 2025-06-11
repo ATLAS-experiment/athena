@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////
@@ -45,16 +45,16 @@ class TRTStrawStatusRead : public AthAlgorithm
  private:
 
 
-  bool m_setup;                             //false before first event
-  const TRT_ID* m_trtid;                    //!< trt id helper
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_status;
+  bool m_setup{false};                      //false before first event
+  const TRT_ID* m_trtid{};                    //!< trt id helper
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_status{this, "SummaryTool", "TRT_StrawStatusSummaryTool"};
   //  ReadHandle  keys
   SG::ReadCondHandleKey<StrawStatusContainer> m_statReadKey{this,"StatReadKeyName","/TRT/Cond/Status","StrawStatus in-key"};
   SG::ReadCondHandleKey<StrawStatusContainer> m_permReadKey{this,"PermReadKeyName","/TRT/Cond/StatusPermanent","StrawStatusPermanent in-key"};
   SG::ReadCondHandleKey<StrawStatusContainer> m_statHTReadKey{this,"StatHTReadKeyName","/TRT/Cond/StatusHT","StrawStatusHT in-key"};
 
   // Which folder to print
-  std::string m_printfolder;
+  Gaudi::Property<std::string> m_printfolder{this, "FolderToPrint", "Status"};
 };
 
 

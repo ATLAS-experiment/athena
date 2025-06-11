@@ -82,6 +82,10 @@ def TRT_dEdxToolCfg(flags, name="TRT_dEdxTool", **kwargs):
         kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
             InDetPrdAssociationToolCfg(flags)))
 
+    if "TRTStrawSummaryTool" not in kwargs:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+        kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
+
     from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep in [ProductionStep.MinbiasPreprocessing]:
         kwargs.setdefault("averageInteractionsPerCrossingKey", f"{flags.Overlay.BkgPrefix}EventInfo.averageInteractionsPerCrossing")
@@ -117,13 +121,11 @@ def TRT_ElectronPidToolCfg(flags, name="TRT_ElectronPidTool", **kwargs):
 
     if "TRTStrawSummaryTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-        StrawStatusTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
-        acc.addPublicTool(StrawStatusTool)  # public as it is has many clients to save some memory
-        kwargs.setdefault("TRTStrawSummaryTool", StrawStatusTool)
+        kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
 
     if "TRT_LocalOccupancyTool" not in kwargs:
         kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TRT_LocalOccupancyCfg(flags)))
-    
+
     if "TRT_ToT_dEdx_Tool" not in kwargs:
         kwargs.setdefault("TRT_ToT_dEdx_Tool", acc.popToolsAndMerge(TRT_dEdxToolCfg(flags)))
 
@@ -135,9 +137,7 @@ def TrigTRT_ElectronPidToolCfg(flags, name="InDetTrigTRT_ElectronPidTool", **kwa
     acc = ComponentAccumulator()
 
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-    StrawStatusTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags,name="InDetTrigTRTStrawStatusSummaryTool"))
-    acc.addPublicTool(StrawStatusTool)  # public as it is has many clients to save some memory
-    kwargs.setdefault("TRTStrawSummaryTool", StrawStatusTool)
+    kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags,name="InDetTrigTRTStrawStatusSummaryTool")))
 
     kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TrigTRT_LocalOccupancyCfg(flags)))
     kwargs.setdefault("TRT_ToT_dEdx_Tool", acc.popToolsAndMerge(TrigTRT_dEdxToolCfg(flags)))
