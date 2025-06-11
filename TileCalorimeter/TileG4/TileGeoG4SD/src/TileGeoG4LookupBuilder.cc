@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -21,7 +21,6 @@
 #include "TileGeoG4SD/TileGeoG4Lookup.hh"
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
-
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "TileDetDescr/TileDddbManager.h"
 #include "TileDetDescr/TileCellDim.h"    //added by Sergey
@@ -492,7 +491,10 @@ void TileGeoG4LookupBuilder::CreateGeoG4Sections(bool is_tb) {
     section->nrOfModules = nModules;
     section->nrOfPeriods = m_dbManager->TILBnperiod();
     section->nrOfScintillators = m_dbManager->TILBnscin();
-
+    if (section->nrOfScintillators<0){
+      //m_dbManager->TILBnscin(); may return -999
+      throw std::range_error("TileGeoG4LookupBuilder::CreateGeoG4Sections: nrScintillators is less than zero, which is subsequently used as a vector element index.");
+    }
     if (m_verboseLevel >= 5)
       G4cout << " counter=" << counter
              << "  key=" << key

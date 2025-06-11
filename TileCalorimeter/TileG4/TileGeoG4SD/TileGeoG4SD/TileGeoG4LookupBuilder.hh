@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -13,17 +13,18 @@
 #ifndef TILEGEOG4SD_TILEGEOG4LOOKUPBUILDER_H
 #define TILEGEOG4SD_TILEGEOG4LOOKUPBUILDER_H
 
+
+#include "TileDetDescr/TileDddbManager.h"
+#include "TileSimEvent/TileHitVector.h" //typedef
 #include <map>
 #include <memory>
 #include <string>
 
-#include "TileDetDescr/TileDddbManager.h"
-#include "TileDetDescr/TileDetDescrManager.h"
-#include "TileSimEvent/TileHitVector.h"
-
 class TileGeoG4Cell;
 class TileGeoG4Section;
 class StoreGateSvc;
+class TileDetDescrManager;
+class TileID;
 
 class TileGeoG4LookupBuilder {
 public:
@@ -65,7 +66,7 @@ private:
   TileDddbManager* m_dbManager;
   std::unique_ptr<TileGeoG4CellMap> m_cellMap;
   std::unique_ptr<TileGeoG4SectionMap> m_sectionMap;
-  bool m_isE5;
+  bool m_isE5{};
   int m_npmtC10[2][64]{}; //array of number of PMTs for C10 Cells
   int m_npmtD4[2][64]{};  //array of number of PMTs for D4 Cells
   int m_npmtE5[2][64]{};  //array of number of PMTs for E4' Cells
