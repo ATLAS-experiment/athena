@@ -63,7 +63,13 @@ StatusCode PhysValDiTau::fillHistograms()
 
   // Retrieve tau container
   const xAOD::DiTauJetContainer* ditaus = nullptr;
-  ATH_CHECK( evtStore()->retrieve(ditaus, m_DiTauJetContainerName) ); 
+  if(evtStore()->contains<xAOD::DiTauJetContainer>(m_DiTauJetContainerName)){
+    ATH_CHECK( evtStore()->retrieve(ditaus, m_DiTauJetContainerName) ); 
+  } else {
+    ATH_MSG_INFO("Input collection " << m_DiTauJetContainerName << " not found. Skip the monitoring ..");
+    return StatusCode::SUCCESS;   
+  } 
+
 
   ATH_MSG_DEBUG("Number of ditaus: " << ditaus->size());
   
