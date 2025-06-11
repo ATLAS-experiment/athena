@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -163,11 +163,11 @@ void VP1AvailEvents::actualCheckForEventListChanges()
   QList<VP1EventFile> allLocal = allLocalEvents();
   QList<VP1EventFile> fresh = freshEvents();
   if (m_d->lastAllLocal != allLocal) {
-    m_d->lastAllLocal = allLocal;
+    m_d->lastAllLocal = std::move(allLocal);
     allLocalEventsChanged();
   }
   if (m_d->lastFresh != fresh) {
-    m_d->lastFresh = fresh;
+    m_d->lastFresh = std::move(fresh);
     freshEventsChanged();
   }
 }

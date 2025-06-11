@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -551,7 +551,7 @@ void VP1EventDisplayEditor::setTextLabel()
 
 //	}
 
-	this->addTextLabel(text, font);
+	this->addTextLabel(std::move(text), font);
 }
 
 
