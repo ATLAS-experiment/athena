@@ -12,8 +12,9 @@ def createDiTauConfigFlags():
     ditau_cfg.addFlag("DiTau.Rsubjet", 0.2)
     ditau_cfg.addFlag("DiTau.Rcore", 0.1)
     ditau_cfg.addFlag("DiTau.CalibFolder", 'TrigTauRec/00-11-02/')
-    ditau_cfg.addFlag("DiTau.DiTauIDModel", "dev/boosted_ditau_omni_model.onnx")
+    ditau_cfg.addFlag('DiTau.DiTauIDModel', 'DiTauOmni_v1p0/boosted_ditau_omni_model.onnx')
     return ditau_cfg
+
 
 class DiTestTauRecConfigFlags(unittest.TestCase):
     def runTest(self):
