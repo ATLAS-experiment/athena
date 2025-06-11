@@ -45,38 +45,7 @@ constexpr int TRTMonitoringRun3RAW_Alg::s_iChip_max[2] = {104, 240};
 
 TRTMonitoringRun3RAW_Alg::TRTMonitoringRun3RAW_Alg( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator)
-,m_idHelper(nullptr)
-,m_pTRTHelper(nullptr)
-,m_mgr(nullptr)
-,m_sumTool("TRT_StrawStatusSummaryTool", this)
-,m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc", name)
-,m_BSSvc("TRT_ByteStream_ConditionsSvc", name)
-,m_trackSelTool("InDet::InDetTrackSelectionTool/TrackSelectionTool", this)
 {
-    declareProperty("InDetTRTStrawStatusSummaryTool", m_sumTool);
-    declareProperty("TrackSelectionTool",             m_trackSelTool);
-    declareProperty("doStraws",                       m_doStraws         = true);
-    declareProperty("doExpert",                       m_doExpert         = false);
-    declareProperty("doChips",                        m_doChips          = true);
-    declareProperty("doTracksMon",                    m_doTracksMon      = true);
-    declareProperty("doRDOsMon",                      m_doRDOsMon        = true);
-    declareProperty("doShift",                        m_doShift          = true);
-    declareProperty("doMaskStraws",                   m_doMaskStraws     = true);
-    declareProperty("useHoleFinder",                  m_useHoleFinder    = false);
-    declareProperty("DoHitsMon",                      m_doHitsMon        = true);
-    declareProperty("DistanceToStraw",                m_DistToStraw      = 0.4);
-    declareProperty("totalEvents",                    m_usedEvents      = -1);
-    declareProperty("min_si_hits",                    m_min_si_hits      = 1);
-    declareProperty("min_pixel_hits",                 m_min_pixel_hits   = 0);
-    declareProperty("min_sct_hits",                   m_min_sct_hits     = 0);
-    declareProperty("min_trt_hits",                   m_min_trt_hits     = 10);
-    declareProperty("MinTRTHitCut",                   m_minTRThits       = 10);
-    declareProperty("every_xth_track",                m_every_xth_track  = 1);
-    declareProperty("max_abs_eta",                    m_max_abs_eta      = 2.5);
-    declareProperty("max_abs_d0",                     m_max_abs_d0       = 10  * CLHEP::mm);
-    declareProperty("max_abs_z0",                     m_max_abs_z0       = 300 * CLHEP::mm);
-    declareProperty("MinTrackP",                      m_minP             = 0.0 * CLHEP::GeV);
-    declareProperty("min_pT",                         m_min_pT           = 0.5 * CLHEP::GeV);
 }
 
 TRTMonitoringRun3RAW_Alg::~TRTMonitoringRun3RAW_Alg() {}
@@ -1807,7 +1776,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const EventContext& ctx,
         const bool passed_track_preselection = (static_cast<bool>(m_trackSelTool->accept(**track)) || m_isCosmics) &&
                                          n_trt_hits >= m_min_trt_hits && 
                                          p > m_minP &&
-                                         perigee->pT() > (m_isCosmics?m_min_pT : 2.0 * CLHEP::GeV);
+                                         perigee->pT() > (m_isCosmics?m_min_pT.value() : 2.0 * CLHEP::GeV);
 
         ATH_MSG_DEBUG("track has ntrt = " << n_trt_hits
                       << " and nsct = " << n_sct_hits
@@ -2169,7 +2138,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const EventContext& ctx,
 
         const bool passed_track_preselection = (static_cast<bool>(m_trackSelTool->accept(**p_trk)) || m_isCosmics) &&
                                                summary->get(Trk::numberOfTRTHits) >= m_min_trt_hits &&
-                                               mPer->pT() > (m_isCosmics?m_min_pT : 2.0 * CLHEP::GeV);
+                                               mPer->pT() > (m_isCosmics?m_min_pT.value() : 2.0 * CLHEP::GeV);
 
         if (!passed_track_preselection) continue;
 

@@ -39,22 +39,8 @@
 //
 /////////////////////////////////////////////////////////////////////
 TRT_PrepDataToxAOD::TRT_PrepDataToxAOD(const std::string &name, ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_driftFunctionTool("TRT_DriftFunctionTool", this),
-  m_trtcaldbTool("TRT_CalDbTool", this),
-  m_neighbourSvc("TRT_StrawNeighbourSvc", name),
-  m_TRTStrawSummaryTool("TRT_StrawStatusSummaryTool",this),
-  m_TRTHelper(nullptr),
-  m_trtman(nullptr),
-  m_firstEventWarnings(true)
-{ 
-  
-  // --- Services and Tools
-  declareProperty("TRTDriftFunctionTool",  m_driftFunctionTool);
-  declareProperty("TRTCalDbTool",           m_trtcaldbTool);
-  declareProperty("NeighbourSvc",          m_neighbourSvc);
-  declareProperty("TRTStrawSummaryTool",    m_TRTStrawSummaryTool);
-
+  AthAlgorithm(name,pSvcLocator)
+{
 }
 
 /////////////////////////////////////////////////////////////////////

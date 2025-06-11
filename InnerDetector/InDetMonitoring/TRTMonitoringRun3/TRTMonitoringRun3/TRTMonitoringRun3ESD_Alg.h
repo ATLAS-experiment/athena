@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTMONITORINGRUN3ESD_ALG_H
@@ -27,6 +27,9 @@
 #include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
+
+#include "CLHEP/Units/SystemOfUnits.h"
 
 // STDLIB
 #include <string>
@@ -51,7 +54,6 @@ class Identifier;
 class ComTime;
 class IInDetConditionsSvc;
 class ITRT_CalDbTool;
-class ITRT_StrawStatusSummaryTool;
 class ITRT_ConditionsSvc;
 class ITRT_DAQ_ConditionsSvc;
 class ITRT_StrawNeighbourSvc;
@@ -63,10 +65,6 @@ public:
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 private:
-    BooleanProperty m_ArgonXenonSplitter{this, "doArgonXenonSeparation", true};
-    enum GasType{ Xe = 0, Ar = 1, Kr = 2 };
-
-    const AtlasDetectorID * m_idHelper;
 
     StatusCode fillTRTTracks(const EventContext& ctx,
                              const xAOD::TrackParticleContainer& trackCollection,
@@ -92,7 +90,6 @@ private:
     int strawNumberEndCap(int strawNumber, int strawLayerNumber, int LayerNumber, int phi_stack, int side) const;
     bool checkEventBurst(const TRT_RDO_Container& rdoContainer) const;
 
-private:
     static const int s_numberOfBarrelStacks;
     static const int s_numberOfEndCapStacks;
     static const int s_Straw_max[2];
@@ -101,10 +98,13 @@ private:
     static const int s_numberOfStacks[2];
     static const int s_moduleNum[2];
 
+    BooleanProperty m_ArgonXenonSplitter{this, "doArgonXenonSeparation", true};
+    const AtlasDetectorID * m_idHelper{};
+
     // Services
-    ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool;
-    ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc;
-    ToolHandle<ITRT_CalDbTool> m_TRTCalDbTool;
+    ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool{this, "InDetTRTStrawStatusSummaryTool", "TRT_StrawStatusSummaryTool",""};
+    ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc{this, "NeighbourSvc", "TRT_StrawNeighbourSvc", ""};
+    ToolHandle<ITRT_CalDbTool> m_TRTCalDbTool{this, "ITRT_CalDbTool", "TRT_CalDbTool", ""};
 
     // Data handles
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackCollectionKey{this, "TrackParticleContainerKeys", "InDetTrackParticles", "Keys for TrackParticle Container"};
@@ -115,31 +115,32 @@ private:
 
     // Tools
     ToolHandle<Trk::ITrackSummaryTool> m_TrackSummaryTool{this, "TrackSummaryTool", "InDetTrackSummaryTool", "Track summary tool name"};
-    ToolHandle<ITRT_DriftFunctionTool> m_drifttool;
+    ToolHandle<ITRT_DriftFunctionTool> m_drifttool{this, "DriftFunctionTool", "TRT_DriftFunctionTool", ""};
 
-    const TRT_ID* m_pTRTHelper;
-    const InDetDD::TRT_DetectorManager *m_mgr;
+    const TRT_ID* m_pTRTHelper{};
+    const InDetDD::TRT_DetectorManager *m_mgr{};
 
-    bool m_doTracksMon;
-    bool m_doStraws;
-    bool m_doChips;
-    bool m_doShift;
-    bool m_doExpert;
+    Gaudi::Property<bool> m_doTracksMon{this, "DoTracksMon", true, ""};
+    Gaudi::Property<bool> m_doStraws{this, "doStraws", true, ""};
+    Gaudi::Property<bool> m_doChips{this, "doChips", true, ""};
+    Gaudi::Property<bool> m_doShift{this, "doShift", true, ""};
+    Gaudi::Property<bool> m_doExpert{this, "doExpert", false, ""};
 
     std::vector<std::vector<unsigned char>> m_mat_chip_B{64, std::vector<unsigned char>(1642)};
     std::vector<std::vector<unsigned char>> m_mat_chip_E{64, std::vector<unsigned char>(3840)};
 
-    float m_DistToStraw;
-    bool m_isCosmics;
+    Gaudi::Property<float> m_DistToStraw{this, "DistanceToStraw", 0.4f, ""};
+    bool m_isCosmics{false};
 
-    int m_min_si_hits;
-    int m_min_pixel_hits;
-    int m_min_sct_hits;
-    int m_min_trt_hits;
-    int m_minTRThits;
-    float m_minP;
-    float m_min_pT;
+    Gaudi::Property<int> m_min_si_hits{this, "min_si_hits", 1, ""};
+    Gaudi::Property<int> m_min_pixel_hits{this, "min_pixel_hits", 0, ""};
+    Gaudi::Property<int> m_min_sct_hits{this, "min_sct_hits", 0, ""};
+    Gaudi::Property<int> m_min_trt_hits{this, "min_trt_hits", 10, ""};
+    Gaudi::Property<int> m_minTRThits{this, "MinTRTHitCut", 10, ""};
+    Gaudi::Property<float> m_minP{this, "MinTrackP", 0.0 * CLHEP::GeV};
+    Gaudi::Property<float> m_min_pT{this, "min_pT", 0.5 * CLHEP::GeV};
 
+    enum GasType{ Xe = 0, Ar = 1, Kr = 2 };
     // Deciphers status HT to  GasType Enumerator
     inline GasType Straw_Gastype(int stat) const {
         // getStatusHT returns enum {Undefined, Dead, Good, Xenon, Argon, Krypton}.
@@ -159,7 +160,7 @@ private:
         return Gas;
     }
 
-    int  m_EventBurstCut;
-    ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelTool;
+  int  m_EventBurstCut{-1};
+  ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelTool{this, "TrackSelectionTool", "InDet::InDetTrackSelectionTool/TrackSelectionTool", ""};
 };
 #endif

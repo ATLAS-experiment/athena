@@ -21,82 +21,53 @@
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 
-TRTStrawStatusWrite::TRTStrawStatusWrite( const std::string &name, ISvcLocator *pSvcLocator)  :  
-  AthAlgorithm( name, pSvcLocator ),
-  m_detStore("DetectorStore",name),
-  m_par_strawstatuscontainerkey("/TRT/Cond/Status"),
-  m_par_strawstatuspermanentcontainerkey("/TRT/Cond/StatusPermanent"),
-  m_par_strawstatusHTcontainerkey("/TRT/Cond/StatusHT"),
-  m_par_stattextfile(""), 
-  m_par_stattextfilepermanent(""),
-  m_par_stattextfileHT(""),
-  m_trtid(0),
-  m_status("TRT_StrawStatusSummaryTool",this)
-{ 
+TRTStrawStatusWrite::TRTStrawStatusWrite( const std::string &name, ISvcLocator *pSvcLocator)  :
+  AthAlgorithm( name, pSvcLocator )
+{
 
-  declareProperty("StatusInputFile",m_par_stattextfile);
-  declareProperty("StatusInputFilePermanent",m_par_stattextfilepermanent);
-  declareProperty("StatusInputFileHT",m_par_stattextfileHT);
-  declareProperty("SummaryTool",m_status);
 }
 
 StatusCode TRTStrawStatusWrite::initialize()
 {
 
   ATH_MSG_INFO( " Initializing TRTStrawStatusWrite " );
-  // Retrieve the DetectorStore
-  if (StatusCode::SUCCESS!=m_detStore.retrieve()) {
-    ATH_MSG_FATAL( "Unable to retrieve " << m_detStore.name());
-    return StatusCode::FAILURE;
-  }
 
   // Get the TRT ID helper
-  if (StatusCode::SUCCESS!=m_detStore->retrieve(m_trtid,"TRT_ID")) {
+  if (StatusCode::SUCCESS!=detStore()->retrieve(m_trtid,"TRT_ID")) {
     ATH_MSG_FATAL( "Problem retrieving TRTID helper" );
     return StatusCode::FAILURE;
   }
 
-  StatusCode sc;
    if (!m_par_stattextfile.empty()) {
       ATH_MSG_INFO( "Recording StrawStatusContainer for key " << m_par_strawstatuscontainerkey );
-      sc=readStatFromTextFile(m_par_stattextfile);
-      if(sc!=StatusCode::SUCCESS) {
+      if(!readStatFromTextFile(m_par_stattextfile).isSuccess()) {
         ATH_MSG_ERROR(" Could not read TRT StrawStatus objects ");
         return StatusCode::FAILURE;
-      } else {
-        ATH_MSG_INFO(" Filled " << m_par_strawstatuscontainerkey << " using input file " << m_par_stattextfile );
       }
-
+      ATH_MSG_INFO(" Filled " << m_par_strawstatuscontainerkey << " using input file " << m_par_stattextfile );
    }
 
 
    if (!m_par_stattextfilepermanent.empty()) {
       ATH_MSG_INFO( "Recording StrawStatusPermanent Container for key " << m_par_strawstatuspermanentcontainerkey );
-      sc=readStatPermFromTextFile(m_par_stattextfilepermanent);
-      if(sc!=StatusCode::SUCCESS) {
+      if(!readStatPermFromTextFile(m_par_stattextfilepermanent).isSuccess()) {
         ATH_MSG_ERROR(" Could not read TRT StrawStatus permanent objects ");
         return StatusCode::FAILURE;
-      } else {
-        ATH_MSG_INFO(" Filled " << m_par_strawstatuspermanentcontainerkey << " using input file " << m_par_stattextfilepermanent );
       }
-
+      ATH_MSG_INFO(" Filled " << m_par_strawstatuspermanentcontainerkey << " using input file " << m_par_stattextfilepermanent );
     }
 
-   
    if (!m_par_stattextfileHT.empty()) {
       ATH_MSG_INFO( "Recording StrawStatusHTContainer for key " << m_par_strawstatusHTcontainerkey );
-      sc=readStatHTFromTextFile(m_par_stattextfileHT);
-      if(sc!=StatusCode::SUCCESS) {
+      if(!readStatHTFromTextFile(m_par_stattextfileHT).isSuccess()) {
         ATH_MSG_ERROR(" Could not read TRT StrawStatus HT objects ");
         return StatusCode::FAILURE;
-      } else {
-        ATH_MSG_INFO(" Filled " << m_par_strawstatusHTcontainerkey << " using input file " << m_par_stattextfileHT );
       }
-
+      ATH_MSG_INFO(" Filled " << m_par_strawstatusHTcontainerkey << " using input file " << m_par_stattextfileHT );
    }
 
   return StatusCode::SUCCESS;
-} 
+}
 
 StatusCode TRTStrawStatusWrite::execute()
 {
@@ -149,7 +120,7 @@ StatusCode TRTStrawStatusWrite::readStatFromTextFile(const std::string& filename
   ATH_MSG_INFO( " readStatFromTextFile called with file name " << filename );
   
   const InDetDD::TRT_DetectorManager* TRTDetectorManager ;
-  if ((m_detStore->retrieve(TRTDetectorManager)).isFailure()) {
+  if ((detStore()->retrieve(TRTDetectorManager)).isFailure()) {
     ATH_MSG_FATAL( "Problem retrieving TRT_DetectorManager" );
   }
 
@@ -309,7 +280,7 @@ StatusCode TRTStrawStatusWrite::readStatFromTextFile(const std::string& filename
 		                     deadec[12] << ", " << deadec[13] << "}; " );
 
    ATH_MSG_INFO( "Recording StrawStatus Container. Number of dead straws  " << line << " straws"  );
-   if( (m_detStore->record(strawstatus,m_par_strawstatuscontainerkey))!=StatusCode::SUCCESS ) {
+   if( (detStore()->record(strawstatus,m_par_strawstatuscontainerkey))!=StatusCode::SUCCESS ) {
       ATH_MSG_ERROR( "Could not record StrawStatus Container for key " << m_par_strawstatuscontainerkey );
       return StatusCode::FAILURE;
    } else {
@@ -336,7 +307,7 @@ StatusCode TRTStrawStatusWrite::readStatHTFromTextFile(const std::string& filena
   if(ifsHT) {
 
     const InDetDD::TRT_DetectorManager* TRTDetectorManager ;
-    if ((m_detStore->retrieve(TRTDetectorManager)).isFailure()) {
+    if ((detStore()->retrieve(TRTDetectorManager)).isFailure()) {
       ATH_MSG_FATAL( "Problem retrieving TRT_DetectorManager");
     }
 
@@ -410,7 +381,7 @@ StatusCode TRTStrawStatusWrite::readStatHTFromTextFile(const std::string& filena
     ATH_MSG_INFO( "All the rest is running Xenon");
     ATH_MSG_INFO( "HT Status. Read  " << line << " layers. " << "    Xenon: " << lineXe << " Argon:  "<< lineAr << "  Krypton: " << lineKr  << " EmulateArgon: " << lineEAr << " EmulateKrypton: " << lineEKr );
 
-    if( (m_detStore->record(strawstatusHT,m_par_strawstatusHTcontainerkey))!=StatusCode::SUCCESS ) {
+    if( (detStore()->record(strawstatusHT,m_par_strawstatusHTcontainerkey))!=StatusCode::SUCCESS ) {
       ATH_MSG_ERROR( "Could not record StrawStatusHT Container for key " << m_par_strawstatusHTcontainerkey );
       return StatusCode::FAILURE;
     } else {
@@ -499,7 +470,7 @@ StatusCode TRTStrawStatusWrite::readStatPermFromTextFile(const std::string& file
 
 
       ATH_MSG_INFO( " Record Permanent Straw Status. Dead modules : " << nmodu << "  Number of lines:  " << line << " of dead identifiers " );
-     if( (m_detStore->record(strawstatuspermanent,m_par_strawstatuspermanentcontainerkey))!=StatusCode::SUCCESS ) {
+     if( (detStore()->record(strawstatuspermanent,m_par_strawstatuspermanentcontainerkey))!=StatusCode::SUCCESS ) {
         ATH_MSG_ERROR( "Could not record StrawStatusPermanent Container for key " << m_par_strawstatuspermanentcontainerkey );
         return StatusCode::FAILURE;
      } else {
