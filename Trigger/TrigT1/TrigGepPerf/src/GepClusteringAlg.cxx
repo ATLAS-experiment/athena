@@ -12,6 +12,7 @@
 
 // concrete cluster maker classes:
 #include "./WFSClusterMaker.h"
+#include "./BasicGepClusterMaker.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
@@ -62,6 +63,10 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
   // Instantiate a cluster creater object 
   if( m_clusterAlg == "WFS" ){
     clusterMaker.reset(new Gep::WFSClusterMaker());
+  }
+
+  if( m_clusterAlg == "GEPBasic" ){
+    clusterMaker.reset(new Gep::BasicGepClusterMaker());
   }
 
   if( !clusterMaker ){ 
