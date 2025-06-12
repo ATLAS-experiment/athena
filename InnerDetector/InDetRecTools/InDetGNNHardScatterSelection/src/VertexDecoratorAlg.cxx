@@ -127,18 +127,50 @@ namespace InDetGNNHardScatterSelection
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_photon_deltaPhi(m_mDecor_photon_deltaPhi,ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_actualInterPerXing(m_mDecor_actualInterPerXing,ctx);
 
-    std::map< const xAOD::Vertex*, std::vector<const xAOD::Jet*> > jetsInVertex;
+    std::map< const xAOD::Vertex*, std::vector<ElementLink<xAOD::JetContainer>> > jetsInVertex;
     std::map< const xAOD::Jet*, std::map< const xAOD::Vertex*, int> > jetVertexPt;
+
+    // initialize jet-vertex map 
+    for(const xAOD::Vertex *vertex : *vertices){
+      jetsInVertex[vertex] = {};
+      for(const xAOD::Jet *jet : *jetsIn){
+        jetVertexPt[jet][vertex] = 0;
+      }
+    }
+
+    // pre-fill the jet-vertex map
+    for(const xAOD::Jet* jet : *jetsIn){
+
+      // for each jet, calculate the track pT associated to each vertex
+      std::vector<const xAOD::TrackParticle*> ghostTracks = jet->getAssociatedObjects<xAOD::TrackParticle >(xAOD::JetAttribute::GhostTrack);
+      for(const xAOD::TrackParticle* jtrk : ghostTracks){
+        if( !jtrk ) continue;
+        auto jetTrackVertex = m_trkVtxAssociationTool->getUniqueMatchVertexLink(*jtrk, *vertices);
+        if(jetTrackVertex) jetVertexPt[jet][*jetTrackVertex] += jtrk->pt();
+      }
+
+      // find vertex with the largest fraction of jet track pt
+      float maxPtFrac = -1;
+      const xAOD::Vertex* uniqueVertexAddress = nullptr;
+      for (const xAOD::Vertex *vertex : *vertices) {
+        if (vertex->vertexType() == xAOD::VxType::NoVtx) continue;
+        if(jetVertexPt[jet][vertex] > maxPtFrac){
+          maxPtFrac = jetVertexPt[jet][vertex];
+          uniqueVertexAddress = vertex;
+        }
+      }
+
+      // add jet to that vertex's vector of links
+      ElementLink<xAOD::JetContainer> jetLink;
+      jetLink.setElement(jet);
+      jetLink.setStorableObject(*jetsIn.ptr(), true);
+      jetsInVertex[uniqueVertexAddress].push_back(jetLink);
+    }
 
     for (const xAOD::Vertex *vertex : *vertices)
     {
       if (vertex->vertexType() == xAOD::VxType::NoVtx)
         continue;
-
-      jetsInVertex[vertex] = {};
-      for(const xAOD::Jet *jet : *jetsIn){
-        jetVertexPt[jet][vertex] = 0;
-      }
 
       dec_actualInterPerXing(*vertex) = eventInfo->actualInteractionsPerCrossing();
 
@@ -257,7 +289,6 @@ namespace InDetGNNHardScatterSelection
             elLink.setStorableObject(*electronsIn.ptr(), true);
             electronLinks.push_back(elLink);
         }
-
       }
       dec_electronLinks(*vertex) = electronLinks;
 
@@ -270,35 +301,8 @@ namespace InDetGNNHardScatterSelection
       }
       dec_photonLinks(*vertex) = photonLinks;
 
-      float maxPtFrac = -1;
-      const xAOD::Jet* uniqueJetAddress = nullptr;
-
-      std::vector<ElementLink<xAOD::JetContainer>> jetLinks;
-      for(const xAOD::Jet* jet : *jetsIn){
-      
-        std::vector<const xAOD::TrackParticle*> ghostTracks = jet->getAssociatedObjects<xAOD::TrackParticle >(xAOD::JetAttribute::GhostTrack);
-
-        for(const xAOD::TrackParticle* jtrk : ghostTracks){
-          if( !jtrk ) continue;
-          auto jetTrackVertex = m_trkVtxAssociationTool->getUniqueMatchVertexLink(*jtrk, *vertices);
-          if(jetTrackVertex) jetVertexPt[jet][*jetTrackVertex] += jtrk->pt();
-        }
-        if(jetVertexPt[jet][vertex] > maxPtFrac){
-          maxPtFrac = jetVertexPt[jet][vertex];
-          uniqueJetAddress = jet;
-        }
-      }
-
-      for(const xAOD::Jet* jet : *jetsIn){
-        if(uniqueJetAddress == jet){
-          ElementLink<xAOD::JetContainer> jetLink;
-          jetLink.setElement(jet);
-          jetLink.setStorableObject(*jetsIn.ptr(), true);
-          jetLinks.push_back(jetLink);
-          break;
-        }
-      }
-      dec_jetLinks(*vertex) = jetLinks;
+      // for jets, use prefilled map
+      dec_jetLinks(*vertex) = jetsInVertex[vertex];
 
       std::vector<ElementLink<xAOD::MuonContainer>> muonLinks;
       for(const xAOD::Muon* muon : *muonsIn){
