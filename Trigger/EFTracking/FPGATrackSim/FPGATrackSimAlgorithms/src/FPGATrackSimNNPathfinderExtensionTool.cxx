@@ -23,8 +23,9 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
     // Retrieve the mapping service.
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
 
-    m_nLayers_1stStage = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
-    m_nLayers_2ndStage = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers() - m_nLayers_1stStage;
+    // hard code this for now but we may chance in the future
+    m_nLayers_1stStage = 5;
+    m_nLayers_2ndStage = 8;
 
     if (m_windowR.size() != 1 && m_windowR.size() != m_nLayers_2ndStage) {
       ATH_MSG_ERROR("Window r size = " << m_windowR << " is not equal to 1 (for all layers) and not equal to " << m_nLayers_2ndStage);

@@ -66,6 +66,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('missedHitZScaling', -1.0)
     cf.addFlag('maxBranches', -1)
     cf.addFlag('hitThreshold', 2)
+    cf.addFlag('varyingThreshold', True)
+    cf.addFlag('varyingHitThresholds', [])
 
     def __httHough1DFlags():
         """Additional function delays import"""

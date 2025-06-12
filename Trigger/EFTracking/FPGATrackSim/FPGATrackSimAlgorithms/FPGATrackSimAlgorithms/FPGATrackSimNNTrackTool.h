@@ -53,7 +53,12 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	static float getXScale() { return 1015.;};
 	static float getYScale() { return 1015.;};
 	static float getZScale() { return 3000.;};
-
+        static float getQoverPtScale() { return 0.001;};
+        static float getEtaScale() { return 5.0;};
+        static float getPhiScale() { return 3.15;};
+        static float getD0Scale() { return 2.0;};
+        static float getZ0Scale() { return 200.;};        
+  
 	// Flags
 	Gaudi::Property <unsigned int> m_minNumberOfRealHitsInATrack{ this, "MinNumberOfRealHitsInATrack", 4, "Minimum number of real hits in a track candidate to process" };
 	Gaudi::Property <bool> m_doGNNTracking{ this, "doGNNTracking", false, "Flag to turn on GNN Tracking configuration for road-to-track" };
