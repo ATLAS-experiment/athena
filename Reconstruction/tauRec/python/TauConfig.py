@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -162,6 +162,10 @@ def TauRunnerAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauDecayModeNNClassifierCfg(flags)) )
+        # added for offline tau trigger monitoring at T0, not needed for TauJets_EleRM
+        if not flags.Tau.ActiveConfig.inTauEleRM:
+            tools.append( result.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags, version=0)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags, version=0, tauContainerName=flags.Tau.ActiveConfig.TauJets)) )
 
     TauRunnerAlg = CompFactory.getComp("TauRunnerAlg")
     RunnerAlg = TauRunnerAlg(name                           = flags.Tau.ActiveConfig.prefix+"TauRecRunnerAlg",
@@ -209,14 +213,18 @@ def TauOutputCfg(flags):
     # Set common to ESD too
     TauESDList = list(TauAODList)
 
-    # add AOD specific
-    #Also remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
-    TauAODList += [ "xAOD::TauJetAuxContainer#{}Aux.-VertexedClusters.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
-                    .format(flags.Tau.ActiveConfig.TauJets) ]
+    # AOD specific
+    # remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
+    removeAODvars = "-VertexedClusters.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    if not flags.Tau.ActiveConfig.inTauEleRM:
+        removeAODvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
+    TauAODList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeAODvars) ]
 
-    # addEOD specific
-    #Also remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
-    TauESDList += [ "xAOD::TauJetAuxContainer#{}Aux.-VertexedClusters.-chargedGlobalFELinks.-neutralGlobalFELinks".format(flags.Tau.ActiveConfig.TauJets) ]
+    # ESD specific
+    removeESDvars = "-VertexedClusters.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    if not flags.Tau.ActiveConfig.inTauEleRM:
+        removeESDvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
+    TauESDList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeESDvars) ]
     TauESDList += [ "xAOD::PFOContainer#{}"        .format(flags.Tau.ActiveConfig.TauChargedPFOs) ]
     TauESDList += [ "xAOD::PFOAuxContainer#{}Aux." .format(flags.Tau.ActiveConfig.TauChargedPFOs) ]
 

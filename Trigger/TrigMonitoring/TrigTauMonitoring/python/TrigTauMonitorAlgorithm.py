@@ -11,8 +11,8 @@ def TrigTauMonConfig(flags):
     acc.addSequence(seqAND(seq_name))
 
 
-    # Schedule the offline GNTau inference
-    if flags.Reco.EnableTau:
+    # Schedule the offline GNTau inference when running from AOD (GNTau is now transiently available in RAWtoALL)
+    if flags.DQ.Environment == 'AOD':
         TauContainerCopy = 'TTMTauJets'
 
         from tauRec.TauToolHolder import TauVertexedClusterDecoratorCfg, TauGNNEvaluatorCfg, TauWPDecoratorGNNCfg
@@ -53,7 +53,10 @@ def TrigTauMonConfig(flags):
     # Configure the actual TrigTauMonitoring algorithm(s)
     from TrigTauMonitoring.TrigTauMonitoringConfig import TrigTauMonAlgBuilder
     monAlgCfg = TrigTauMonAlgBuilder(helper)
-    monAlgCfg.offline_taujets = 'TTMTauJets'
+    if flags.DQ.Environment == 'AOD':
+        monAlgCfg.offline_taujets = 'TTMTauJets'
+    else:
+        monAlgCfg.offline_taujets = 'TauJets'
     monAlgCfg.offline_GNTau_WP = flags.Tau.GNTauDecorWPNames[0][2]
     monAlgCfg.configure()
     acc.merge(helper.result(), seq_name)
