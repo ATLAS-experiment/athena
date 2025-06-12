@@ -16,6 +16,20 @@
 #include <TFile.h>
 namespace CP {
 
+    struct MuonEfficiencyScaleFactors::Accessors : public columnar::ColumnarTool<>
+    {
+        columnar::EventInfoAccessor<columnar::ObjectColumn> eventInfoCol {*this, "EventInfo"};
+        columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
+        columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
+        columnar::EventInfoAccessor<unsigned int> acc_rnd{*this, "RandomRunNumber"};
+
+        columnar::MuonAccessor<columnar::ObjectColumn> muons {*this, "Muons"};
+        columnar::MuonDecorator<float> sfDec {*this, "sfOut"};
+        columnar::MuonDecorator<char> validDec {*this, "validOut"};
+
+        using ColumnarTool::ColumnarTool;
+    };
+
     MuonEfficiencyScaleFactors::MuonEfficiencyScaleFactors(const std::string& name) :
                 asg::AsgTool(name),
                 m_wp("Medium"),
@@ -44,6 +58,8 @@ namespace CP {
                 m_applyKineDepSys(true),
                 m_useLRT(false),
                 m_Type(CP::MuonEfficiencyType::Undefined) {
+
+        m_accessors = std::make_unique<Accessors>(this);
 
         declareProperty("WorkingPoint", m_wp);
 
@@ -79,6 +95,7 @@ namespace CP {
         /// Turn on if using LRT muons
         declareProperty("UseLRT", m_useLRT);
     }
+    MuonEfficiencyScaleFactors::~MuonEfficiencyScaleFactors() = default;
     const std::string& MuonEfficiencyScaleFactors::close_by_jet_decoration() const{
         return m_iso_jet_dR;
     }
@@ -228,18 +245,19 @@ namespace CP {
         return getRandomRunNumber (columnar::EventInfoId (*info));
     }
     unsigned int MuonEfficiencyScaleFactors::getRandomRunNumber(columnar::EventInfoId info) const {
-        if (!eventTypeAcc(info,xAOD::EventInfo::IS_SIMULATION)) {
+        const auto& acc = *m_accessors;
+        if (!acc.eventTypeAcc(info,xAOD::EventInfo::IS_SIMULATION)) {
             ATH_MSG_DEBUG("The current event is a data event. Return runNumber instead.");
-            return runNumberAcc (info);
+            return acc.runNumberAcc (info);
         }
-        if (!acc_rnd.isAvailable(info)) {
+        if (!acc.acc_rnd.isAvailable(info)) {
             ATH_MSG_WARNING("Failed to find the RandomRunNumber decoration. Please call the apply() method from the PileupReweightingTool before hand in order to get period dependent SFs. You'll receive SFs from the most recent period.");
             return 999999;
-        } else if (acc_rnd(info) == 0) {
+        } else if (acc.acc_rnd(info) == 0) {
             ATH_MSG_DEBUG("Pile up tool has given runNumber 0. Return SF from latest period.");
             return 999999;
         }
-        return acc_rnd(info);
+        return acc.acc_rnd(info);
     }
     CorrectionCode MuonEfficiencyScaleFactors::getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info) const {
         if (!m_init) {
@@ -667,18 +685,19 @@ namespace CP {
 
     void MuonEfficiencyScaleFactors::callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const
     {
+        const auto& acc = *m_accessors;
         for (columnar::MuonId muon : muons)
         {
             float sf = 0;
             switch (getEfficiencyScaleFactor(muon, sf, event).code())
             {
             case CP::CorrectionCode::Ok:
-                sfDec(muon) = sf;
-                validDec(muon) = true;
+                acc.sfDec(muon) = sf;
+                acc.validDec(muon) = true;
                 break;
             case CP::CorrectionCode::OutOfValidityRange:
-                sfDec(muon) = sf;
-                validDec(muon) = false;
+                acc.sfDec(muon) = sf;
+                acc.validDec(muon) = false;
                 break;
             default:
                 throw std::runtime_error("Error in getEfficiencyScaleFactor");
@@ -687,10 +706,11 @@ namespace CP {
     }
 
     void MuonEfficiencyScaleFactors::callEvents (columnar::EventContextRange events) const {
+        const auto& acc = *m_accessors;
         for (columnar::EventContextId event : events)
         {
-            auto eventInfo = m_eventInfoCol(event);
-            callSingleEvent (m_muons(event), eventInfo);
+            auto eventInfo = acc.eventInfoCol(event);
+            callSingleEvent (acc.muons(event), eventInfo);
         }
     }
 

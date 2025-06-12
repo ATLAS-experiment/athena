@@ -31,7 +31,7 @@ namespace CP {
         public:
             MuonEfficiencyScaleFactors(const std::string& name);
 
-            virtual ~MuonEfficiencyScaleFactors() = default;
+            virtual ~MuonEfficiencyScaleFactors();
             //Proper constructor for Athena
             ASG_TOOL_CLASS3( MuonEfficiencyScaleFactors, CP::IMuonEfficiencyScaleFactors, CP::ISystematicsTool, CP::IReentrantSystematicsTool )
 
@@ -211,19 +211,15 @@ namespace CP {
 
             CP::MuonEfficiencyType m_Type;
 
+            // a struct holding all columnar accessors, as those interfere
+            // with the root dictionaries.
+            struct Accessors;
+            std::unique_ptr<Accessors> m_accessors;
+
     public:
 
-        columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfoCol {*this, "EventInfo"};
-        columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
-        columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
-        columnar::EventInfoAccessor<unsigned int> acc_rnd{*this, "RandomRunNumber"};
-
-        columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
-        columnar::MuonDecorator<float> sfDec {*this, "sfOut"};
-        columnar::MuonDecorator<char> validDec {*this, "validOut"};
-
-        void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
-        virtual void callEvents (columnar::EventContextRange events) const override;
+            void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
+            virtual void callEvents (columnar::EventContextRange events) const override;
     };
 
 } /* namespace CP */
