@@ -74,9 +74,6 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
       if (!track.passedOR()) continue; /// only set this for tracks passing goodness of fit AND overlap removal
         std::vector<float> inputTensorValues;
         const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
-        int index = 1;
-        bool flipZ = false;
-        double rotateAngle = 0;
         bool gotSecondSP = false;
         float tmp_xf;
         float tmp_yf;
@@ -86,22 +83,9 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
             if (!hit.isReal()) continue;
 
             // Need to rotate hits
-            float x0 = hit.getX();
-            float y0 = hit.getY();
-            float z0 = hit.getZ();
-            if (index == 1) {
-                if (z0 < 0)
-                    flipZ = true;
-                rotateAngle = std::atan(x0 / y0);
-                if (y0 < 0)
-                    rotateAngle += M_PI;
-            }
-
-            float xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
-            float yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
-            float zf = z0;
-
-            if (flipZ) zf = z0 * -1;
+            float xf = hit.getX();
+            float yf = hit.getY();
+            float zf = hit.getZ();
 
             // Get average of values for strip hit pairs
             // TODO: this needs to be fixed in the future, for this to work for other cases
@@ -122,7 +106,6 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
                     inputTensorValues.push_back(xf_scaled);
                     inputTensorValues.push_back(yf_scaled);
                     inputTensorValues.push_back(zf_scaled);
-                    index++;
                     gotSecondSP = false;
                 }
             }
@@ -133,7 +116,6 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
                 inputTensorValues.push_back(xf_scaled);
                 inputTensorValues.push_back(yf_scaled);
                 inputTensorValues.push_back(zf_scaled);
-                index++;
             }
         }
 
@@ -161,11 +143,11 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
             ATH_MSG_DEBUG(paramNNoutputs[i]);
         }
 
-        track.setQOverPt(paramNNoutputs[0]);
-        track.setEta(paramNNoutputs[1]);
-        track.setPhi(paramNNoutputs[2]);
-        track.setD0(paramNNoutputs[3]);
-        track.setZ0(paramNNoutputs[4]);
+        track.setQOverPt(paramNNoutputs[0]*getQoverPtScale());
+        track.setEta(paramNNoutputs[1]*getEtaScale());
+        track.setPhi(paramNNoutputs[2]*getPhiScale());
+        track.setD0(paramNNoutputs[3]*getD0Scale());
+        track.setZ0(paramNNoutputs[4]*getZ0Scale());	
     }
     return StatusCode::SUCCESS;
 }
@@ -416,14 +398,11 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
         int nMissing = 0;
         layer_bitmask_t missing_mask = 0;
 
-        // Just used to get number of layers considered
-        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_2nd(iroad->getSubRegion());
-
         // Create a template track with common parameters filled already for
         // initializing below
         FPGATrackSimTrack temp;
         temp.setTrackStage(TrackStage::SECOND);
-        temp.setNLayers(planeMap->getNLogiLayers());
+        temp.setNLayers(13);
         temp.setBankID(-1);
         temp.setPatternID(iroad->getPID());
         temp.setFirstSectorID(iroad->getSector());
@@ -452,7 +431,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
             std::vector<std::shared_ptr<const FPGATrackSimHit>> hit_list;
 
             // Loop over all layers
-            for (unsigned layer = 0; layer < planeMap->getNLogiLayers(); layer++) {
+            for (unsigned layer = 0; layer < 13; layer++) {
 
                 // Check to see if this is a valid hit
                 if (hit_indices[layer] >= 0) {
@@ -537,8 +516,8 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
                 }
             }
 
-            if (inputTensorValues.size() != planeMap->getNLogiLayers()*3) {
-                inputTensorValues.resize(planeMap->getNLogiLayers()*3);
+            if (inputTensorValues.size() != 39) {
+	      inputTensorValues.resize(39);
             }
 
             if (!m_doGNNTracking) {
@@ -557,7 +536,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
             n_track++;
             FPGATrackSimTrack track_cand;
             track_cand.setTrackID(n_track);
-            track_cand.setNLayers(planeMap->getNLogiLayers());
+            track_cand.setNLayers(13);
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
                 track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
             }
@@ -597,7 +576,8 @@ void FPGATrackSimNNTrackTool::compute_truth(FPGATrackSimTrack &t) const {
     if (!m_do2ndStage) planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
     else planeMap = m_FPGATrackSimMapping->PlaneMap_2nd(0);
 
-    for (unsigned layer = 0; layer < planeMap->getNLogiLayers(); layer++) {
+    unsigned nl = (m_do2ndStage ? 13 : 5);
+    for (unsigned layer = 0; layer < nl; layer++) {
         if (t.getHitMap() & (1 << planeMap->getCoordOffset(layer)))
             continue;  // no hit in this plane
         // Sanity check that we have enough hits.

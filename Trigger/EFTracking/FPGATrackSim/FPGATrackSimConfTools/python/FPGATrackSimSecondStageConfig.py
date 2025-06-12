@@ -69,6 +69,30 @@ def getPadding(region):
     }
 
 
+def getMaxMissing_PathFinder(region, overRide=[]):
+    maxMissing = [3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+    if (overRide != []):
+        maxMissing = overRide
+        
+    binSize = 0.2
+    side = (region >> 5) & 0x1
+    etaBin = (region >> 6) & 0x1F
+    etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
+
+    abs_etaRange = tuple(round(abs(val), 1) for val in etaRange)
+    eta_to_maxMissing = {
+        (0.0, 0.2): maxMissing[0], (0.2, 0.4): maxMissing[1], (0.4, 0.6): maxMissing[2],
+        (0.6, 0.8): maxMissing[3], (0.8, 1.0): maxMissing[4], (1.0, 1.2): maxMissing[5],
+        (1.2, 1.4): maxMissing[6], (1.4, 1.6): maxMissing[7], (1.6, 1.8): maxMissing[8],
+        (1.8, 2.0): maxMissing[9], (2.0, 2.2): maxMissing[10], (2.2, 2.4): maxMissing[11],
+        (2.4, 2.6): maxMissing[12], (2.6, 2.8): maxMissing[13], (2.8, 3.0): maxMissing[14],
+        (3.0, 3.2): maxMissing[15], (3.2, 3.4): maxMissing[16], (3.4, 3.6): maxMissing[17],
+        (3.6, 3.8): maxMissing[18], (3.8, 4.0): maxMissing[19]
+    }
+    return eta_to_maxMissing.get(abs_etaRange, 20)
+
+
+
 def FPGATrackSimBinnedHitsToolCfg_2nd(flags,name="FPGATrackSimBinnedHitsTool_2nd"):
     result = ComponentAccumulator()
 
@@ -247,7 +271,10 @@ def FPGATrackSimNNPathfinderExtensionToolCfg(flags,name="FPGATrackSimNNPathfinde
     FPGATrackSimNNPathfinderExtensionTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
 
     # Hardcoded settings for now, hook up to flags later...
-    FPGATrackSimNNPathfinderExtensionTool.threshold = flags.Trigger.FPGATrackSim.hitThreshold
+    if (flags.Trigger.FPGATrackSim.varyingThreshold):
+        FPGATrackSimNNPathfinderExtensionTool.threshold = getMaxMissing_PathFinder(flags.Trigger.FPGATrackSim.region,flags.Trigger.FPGATrackSim.varyingHitThresholds)
+    else:
+        FPGATrackSimNNPathfinderExtensionTool.threshold = flags.Trigger.FPGATrackSim.hitThreshold
     FPGATrackSimNNPathfinderExtensionTool.windowR = flags.Trigger.FPGATrackSim.windowR
     FPGATrackSimNNPathfinderExtensionTool.windowZ = flags.Trigger.FPGATrackSim.windowZ
     FPGATrackSimNNPathfinderExtensionTool.lowPtValueWindowR = flags.Trigger.FPGATrackSim.lowPtvalueR
