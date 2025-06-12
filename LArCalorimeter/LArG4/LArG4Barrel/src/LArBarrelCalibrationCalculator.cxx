@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -35,9 +35,7 @@ namespace LArG4 {
 
     CalibrationCalculator::CalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_geometryCalculator("LArBarrelGeometry", name)
     {
-      declareProperty("GeometryCalculator", m_geometryCalculator);
     }
 
     StatusCode CalibrationCalculator::initialize() {
@@ -45,11 +43,6 @@ namespace LArG4 {
       ATH_CHECK(m_geometryCalculator.retrieve());
       return StatusCode::SUCCESS;
     }
-
-    CalibrationCalculator::~CalibrationCalculator()
-    {
-    }
-
 
     G4bool CalibrationCalculator::Process(const G4Step* step, LArG4Identifier & identifier,
                                           std::vector<G4double> & energies,
@@ -59,28 +52,25 @@ namespace LArG4 {
       // identifier associated with this G4Step.  Note that the
       // default is to process both the energy and the ID.
 
-      if ( process == kEnergyAndID  ||  process == kOnlyEnergy )
-        {
+      if ( process == kEnergyAndID  ||  process == kOnlyEnergy ) {
 #ifdef DEBUG_HITS
           std::cout << "LArG4::Barrel::CalibrationCalculator::Process"
                     << " calling SimulationEnergies" << std::endl;
 #endif
           m_energyCalculator.Energies( step, energies );
-
-          // First, get the energy.
-          //      m_energy = step->GetTotalEnergyDeposit();
-        }
-      else
+      }
+      else {
         for (unsigned int i=0; i != 4; i++) energies.push_back( 0. );
+      }
 
 
-      if ( process == kEnergyAndID  ||  process == kOnlyID )
-        {
-          // Calculate the identifier.
-          identifier = m_geometryCalculator->CalculateIdentifier( step );
-        }
-      else
+      if ( process == kEnergyAndID  ||  process == kOnlyID ) {
+	// Calculate the identifier.
+	identifier = m_geometryCalculator->CalculateIdentifier( step );
+      }
+      else {
         identifier = LArG4Identifier();
+      }
 
 
 #ifdef DEBUG_HITS
@@ -96,10 +86,7 @@ namespace LArG4 {
 #endif
 
       // Check for bad result.
-      if ( identifier == LArG4Identifier() )
-        return false;
-
-      return true;
+      return ( identifier != LArG4Identifier() );
     }
 
   } // namespace Barrel

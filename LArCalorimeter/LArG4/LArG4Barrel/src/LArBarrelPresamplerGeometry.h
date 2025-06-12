@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArBarrelPresamplerGeometry.hh
@@ -31,7 +31,7 @@ namespace LArG4 {
        //constructor
       Geometry(const std::string& name, ISvcLocator * pSvcLocator);
 
-      virtual ~Geometry();
+      virtual ~Geometry() = default;
 
       virtual StatusCode initialize() override final;
 
@@ -49,10 +49,13 @@ namespace LArG4 {
         if (zCoord > 0.) { return 1; }
         return -1;
       }
-
+      
       // detector name, for translated geometry
-      std::string m_detectorName{"LArMgr"};
+      Gaudi::Property<std::string> m_detectorName{this, "DetectorName", "LArMgr"};
+      // is this a test beam simulation job
+      Gaudi::Property<bool> m_testbeam{this, "TestBeam", false};
 
+      
 #include "PresParameterDef.h"
 
       // end z of the various modules
@@ -72,9 +75,6 @@ namespace LArG4 {
       G4int    m_ncell_module[8]{};
       // total LAr thickness
       G4double m_halfThickLAr{0.5*13.*Athena::Units::mm}; // LAr total gap
-      // is this a test beam simulation job
-      bool m_testbeam{false};
-
     } ;
 
   } //end of Barrel namespace

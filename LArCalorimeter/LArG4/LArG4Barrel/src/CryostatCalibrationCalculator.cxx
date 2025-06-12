@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::BarrelCryostat::CalibrationCalculator
@@ -442,9 +442,7 @@ namespace LArG4 {
 
     CalibrationCalculator::CalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_backupCalculator("BarrelCryostatCalibrationLArCalculator",name)
     {
-      declareProperty("BackupCalculator",m_backupCalculator);
     }
 
     StatusCode CalibrationCalculator::initialize(){
@@ -475,14 +473,6 @@ namespace LArG4 {
       return StatusCode::SUCCESS;
     }
 
-
-    CalibrationCalculator::~CalibrationCalculator()
-    {
-      // Cleanup pointers.
-      //delete m_backupCalculator;
-      //m_backupCalculator = 0;
-    }
-
     G4bool CalibrationCalculator::Process(const G4Step* step, LArG4Identifier & identifier,
                                           std::vector<G4double> & energies,
                                           const eCalculatorProcessing process) const
@@ -491,13 +481,12 @@ namespace LArG4 {
       // identifier associated with this G4Step.  Note that the
       // default is to process both the energy and the ID.
 
-      if ( process == kEnergyAndID  ||  process == kOnlyEnergy )
-        {
-          m_energyCalculator.Energies( step, energies );
-        }
-      else
+      if ( process == kEnergyAndID  ||  process == kOnlyEnergy ) {
+	m_energyCalculator.Energies( step, energies );
+      }
+      else {
         for (unsigned int i=0; i != 4; i++) energies.push_back( 0. );
-
+      }
 
       identifier.clear();
       if ( process == kEnergyAndID  ||  process == kOnlyID )
@@ -672,10 +661,7 @@ namespace LArG4 {
 #endif
 
       // Check for bad result.
-      if ( identifier == LArG4Identifier() )
-        return false;
-
-      return true;
+      return ( identifier != LArG4Identifier() );
     }
 
   } // namespace BarrelCryostat

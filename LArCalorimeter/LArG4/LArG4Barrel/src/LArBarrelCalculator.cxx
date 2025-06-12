@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // The Cell Identifier for the EM Barrel readout cells
@@ -18,8 +18,6 @@
 
 #include "LArG4Code/LArG4BirksLaw.h"
 #include "LArG4Code/LArVG4DetectorParameters.h"
-
-//#include "LArG4RunControl/LArG4BarrelOptions.h"
 
 #include "G4ThreeVector.hh"
 #include "G4StepPoint.hh"
@@ -48,34 +46,7 @@ namespace Units = Athena::Units;
 // ================================================================================
 LArBarrelCalculator::LArBarrelCalculator(const std::string& name, ISvcLocator* pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
-  , m_geometry("LArBarrelGeometry", name)
-  , m_accmap(nullptr)
-  , m_IflCur(true)
-  , m_IflMapTrans(true)
-  , m_IflXtalk(true)
-  , m_dstep(.2*CLHEP::mm)
-  , m_birksLaw(nullptr)
-  , m_doHV(false)
-  , m_etaMaxBarrel(0)
-  , m_zMinBarrel(0)
-  , m_zMaxBarrel(0)
-  , m_rMinAccordion(0)
-  , m_rMaxAccordion(0)
-  , m_ThickAbs(0)
-  , m_ThickEle(0)
-  , m_NCellTot(0)
-  , m_NCellMax(0)
-  , m_testbeam(false)
 {
-  ATH_MSG_DEBUG("LArBarrelCalculator: Beginning construction ");
-
-  declareProperty("GeometryCalculator", m_geometry);
-  // define RUN conditions for the Barrel
-  declareProperty("EMBCurr",m_IflCur);
-  declareProperty("EMBEtaTrans",m_IflMapTrans);
-  declareProperty("EMBXtalk",m_IflXtalk);
-  declareProperty("EMBdstep", m_dstep);
-  declareProperty("EMBHVEnable",m_doHV);
 }
 
 StatusCode LArBarrelCalculator::initialize()
