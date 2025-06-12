@@ -12,8 +12,6 @@
 
 #include "TileGeoG4SD/TileGeoG4LookupBuilder.hh"
 
-#include <mutex>
-
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/DataHandle.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -38,6 +36,14 @@ namespace {
 
 
 } // anonymous namespace
+
+// out-of-class static member definition
+std::mutex TileGeoG4LookupBuilder::m_dbManagerMutex;
+
+std::mutex& TileGeoG4LookupBuilder::getDbManagerMutex()
+{
+  return m_dbManagerMutex;
+}
 
 TileGeoG4LookupBuilder::TileGeoG4LookupBuilder(StoreGateSvc* pDetStore, const int verboseLevel)
   : m_tileID(0),
@@ -68,7 +74,6 @@ TileGeoG4LookupBuilder::TileGeoG4LookupBuilder(StoreGateSvc* pDetStore, const in
 }
 
 void TileGeoG4LookupBuilder::BuildLookup(bool is_tb) {
-  static std::mutex builderMutex;
   // initializations
   // TODO: just clean up the old maps and don't use pointers?
   m_cellMap = std::make_unique<TileGeoG4CellMap>();
@@ -78,7 +83,7 @@ void TileGeoG4LookupBuilder::BuildLookup(bool is_tb) {
     // we need to lock the initialization of TileGeoG4LookupBuilder because each instance
     // is sharing the m_dbManager object, which is accessed in a non-thread-safe way (calling SetCurrentTicl)
     // resulting in potential race condition
-    std::scoped_lock lock(builderMutex);
+    std::scoped_lock lock(m_dbManagerMutex);
     m_isE5 = (m_dbManager->SetCurrentSection(10 + TileDddbManager::TILE_PLUG4, false));
     // Building
     CreateGeoG4Cells();
