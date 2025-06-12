@@ -9,7 +9,7 @@ should be added there, not here.
 """
 
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
-    ParentDecoratorCfg
+    ParentDecoratorCfg, trackTruthDecorator
 )
 from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
@@ -194,6 +194,9 @@ def addCommonAugmentation(flags, cfg, helper):
 
     if not flags.Input.isMC:
         return
+
+    # add track truth info
+    cfg.merge(trackTruthDecorator(flags))
 
     # match jets to the parent particles
     cfg.merge(

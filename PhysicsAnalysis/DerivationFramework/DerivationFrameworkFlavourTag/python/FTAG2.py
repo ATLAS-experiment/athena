@@ -23,10 +23,6 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-    # Add GN3 b-tagging algorithms
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
-
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
