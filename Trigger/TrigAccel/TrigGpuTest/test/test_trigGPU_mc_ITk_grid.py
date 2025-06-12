@@ -4,6 +4,8 @@
 # art-description: Trigger AthenaMT test running new-style job options
 # art-type: grid
 # art-include: main/Athena
+# art-input: group.trig-hlt.mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # If you create a grid version, check art-output in existing grid tests.

@@ -4,6 +4,8 @@
 # art-description: Trigger RDO->RDO_TRIG athena CaloGPU for Run4 with ttbar mu=200
 # art-type: grid
 # art-include: main/Athena
+# art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583
+# art-input-nfiles: 10
 # art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # art-output: *.txt
