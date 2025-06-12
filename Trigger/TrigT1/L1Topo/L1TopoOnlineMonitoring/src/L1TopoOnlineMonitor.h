@@ -89,6 +89,9 @@ private:
   std::unique_ptr<float[]> m_overflow_countSim;
   std::unique_ptr<float[]> m_overflow_countAny;
 
+  std::unique_ptr<float[]> m_currentHdwBit;
+  std::unique_ptr<float[]> m_currentSimBit;
+
   std::vector<unsigned> m_ctpIds;
 
   std::vector<std::vector<std::pair<unsigned,unsigned>>> m_startbit;
