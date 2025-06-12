@@ -518,11 +518,14 @@ def SPRoadFilterToolCfg(flags,secondStage=False,name="FPGATrackSimSpacepointRoad
     SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
     SPRoadFilter.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
     SPRoadFilter.isSecondStage = secondStage
-    # TODO guard here against threshold being more than one value?
-    if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
-        SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
+
+    # This threshold is the number of *missing* hits allowed. For now, assume that if 1st stage this is always 1.
+    # We don't actually run this tool in the first stage anymore, so this is more to preserve backwards compatibility
+    if secondStage:
+        SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.hitThreshold
     else:
-        SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
+        SPRoadFilter.threshold = 1
+
     SPRoadFilter.setSectors = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     result.setPrivateTools(SPRoadFilter)
     return result
