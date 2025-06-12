@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArBarrelPresamplerCalculator.hh
@@ -27,6 +27,9 @@ class LArBarrelPresamplerCalculator : public LArCalculatorSvcImp {
 public:
 
   LArBarrelPresamplerCalculator(const std::string& name, ISvcLocator *pSvcLocator);
+  LArBarrelPresamplerCalculator(const LArBarrelPresamplerCalculator&) = delete;
+  LArBarrelPresamplerCalculator& operator=(const  LArBarrelPresamplerCalculator&) = delete;
+
   virtual StatusCode initialize() override final;
   virtual StatusCode finalize() override final;
 
@@ -43,27 +46,20 @@ public:
   }
 
 private:
-
-  //copy constructor
-  LArBarrelPresamplerCalculator(const LArBarrelPresamplerCalculator&);//coverity issue fix. Declared, but not implemented
-  LArBarrelPresamplerCalculator& operator=(const  LArBarrelPresamplerCalculator&);//coverity issue fix. Declared, but not implemented
-  //
+  
   // Class for calculating the identifier.
-  ServiceHandle<ILArBarrelPresamplerGeometry> m_geometry;
+  ServiceHandle<ILArBarrelPresamplerGeometry> m_geometry{this, "GeometryCalculator", "LArBarrelPresamplerGeometry"};
 
-  const PsMap* m_psmap;
-
-  bool m_IflCur;
-
-  const LArG4BirksLaw *m_birksLaw;
+  Gaudi::Property<bool> m_IflCur{this, "IflCur", true};
 
   // detector name, for translated geometry
-  std::string m_detectorName;
+  Gaudi::Property<std::string> m_detectorName{this, "DetectorName", "LArMgr"};
 
-  bool m_testbeam;
+  Gaudi::Property<bool> m_testbeam{this, "isTestbeam", false};
 
-  G4String m_volname;
-
+  const PsMap* m_psmap{nullptr};
+  const LArG4BirksLaw *m_birksLaw{nullptr};
+  G4String m_volname{"LArMgr::LAr::Barrel::Presampler"};
 };
 
 #endif // __LArBarrelPresamplerCalculator_H__

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArBarrelGeometry.hh
@@ -40,7 +40,7 @@ namespace LArG4 {
       //constructor
       Geometry(const std::string& name, ISvcLocator * pSvcLocator);
 
-      virtual ~Geometry() { };
+      virtual ~Geometry() = default;
 
       virtual StatusCode initialize() override final;
       virtual StatusCode finalize() override final;
@@ -61,52 +61,54 @@ namespace LArG4 {
       bool CheckDMIdentifier(int type, int sampling, int region, int eta, int phi) const;
 
       // detector name, for translated geometry
-      std::string m_detectorName;
+      Gaudi::Property<std::string> m_detectorName{this, "DetectorName", "LArMgr"};
+      // to handle small difference (mostly phi wrapping and +-z symmetry)
+      // between atlas and test beam
+      Gaudi::Property<bool> m_testbeam{this, "TestBeam", false};
+
       G4String m_ecamName;
 
       // global EMBarrel dimensions
-      double m_rMinAccordion;
-      double m_rMaxAccordion;
-      double m_zMinBarrel;
-      double m_zMaxBarrel;
-      double m_zMaxBarrelDMMargin;
-      double m_etaMaxBarrel;
+      double m_rMinAccordion{0.};
+      double m_rMaxAccordion{0.};
+      double m_zMinBarrel{0.};
+      double m_zMaxBarrel{0.};
+      double m_zMaxBarrelDMMargin{0.};
+      double m_etaMaxBarrel{0.};
 
       // GU 11/06/2003  total number of cells in phi
-      int m_NCellTot;    // either 64 or 1024 for TestBeam or Atlas
-      int m_NCellMax;    // 1024
+      int m_NCellTot{0};    // either 64 or 1024 for TestBeam or Atlas
+      int m_NCellMax{0};    // 1024
 
       // Accordion parameters
-      int m_Nbrt;         //   number of straight sections (=14)
-      int m_Nbrt1;        //   number of folds (=15)
+      int m_Nbrt{0};         //   number of straight sections (=14)
+      int m_Nbrt1{0};        //   number of folds (=15)
 
       // Accordion parameters, refering to the neutral fibre
-      double m_gam0 ;         //phi position for the first absorber  neutral fiber
-      double m_rint_eleFib ; //2.78
-      double *m_rc, *m_phic, *m_xc, *m_yc, *m_delta;// double m_rc[15] ;     // R and
-      int m_parity;
-      //double m_phic[15] ;   // phi positions of center of fold for first absorber
-      // double m_xc[15];       // corresponding x,y values
-      // double m_yc[15];
-      //double m_delta[15];   // zig-zag angles
+      double m_gam0{0.};         //phi position for the first absorber  neutral fiber
+      double m_rint_eleFib{0.}; //2.78
+
+      double *m_rc{nullptr};
+      double *m_phic{nullptr};
+      double *m_xc{nullptr};
+      double *m_yc{nullptr};
+      double *m_delta{nullptr};
+      int m_parity{0};
+
       // to access G4 geometry
-      const LArCoudeElectrodes* m_coudeelec;
-      const LArCoudeAbsorbers* m_coudeabs;
-      const LArStraightElectrodes* m_electrode;
-      const LArStraightAbsorbers* m_absorber;
+      const LArCoudeElectrodes* m_coudeelec{nullptr};
+      const LArCoudeAbsorbers* m_coudeabs{nullptr};
+      const LArStraightElectrodes* m_electrode{nullptr};
+      const LArStraightAbsorbers* m_absorber{nullptr};
 
-      // to handle small difference (mostly phi wrapping and +-z symmetry)
-      // between atlas and test beam
-      bool m_testbeam;
-
-      bool m_iflSAG;
+      bool m_iflSAG{false};
 
       // intermediate values for phi cell computation
-      G4int m_NRphi;
-      G4double m_Rmin;
-      G4double m_Rmax;
-      G4double m_Rphi[5000];
-      G4double m_dR;
+      G4int m_NRphi{0};
+      G4double m_Rmin{0.};
+      G4double m_Rmax{0.};
+      G4double m_Rphi[5000] = {0};
+      G4double m_dR{0.};
 
       // function to compute distance to electrode
       double Distance_Ele(const double &x, const double &y,
