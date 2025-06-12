@@ -49,7 +49,7 @@ def _addDepsByDirname(cfgFlags, dirname: str, jetCollection: str) -> ComponentAc
     return acc
 
 
-def JetBTagginglessAlgCfg(
+def FlavorTaggingCfg(
           cfgFlags,
           JetCollection,
           pv_col='PrimaryVertices',

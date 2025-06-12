@@ -25,7 +25,7 @@ from JetRecConfig.JetRecConfig import JetRecCfg
 from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
 
 # b-tagging imports
-from BTagging.JetBTagginglessConfig import JetBTagginglessAlgCfg
+from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
 
 from argparse import ArgumentParser
 import sys
@@ -80,7 +80,7 @@ def run():
     ca.merge(JetRecCfg(flags, jetdef))
 
     # add b-tagging
-    ca.merge(JetBTagginglessAlgCfg(flags, jetdef.fullname(), fast=args.fast))
+    ca.merge(FlavorTaggingCfg(flags, jetdef.fullname(), fast=args.fast))
 
     # add output
     ca.merge(OutputCfg(flags, args.output_file, jetdef))

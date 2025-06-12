@@ -172,10 +172,13 @@ def FTAG_PUCfg(flags):
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(FTAG_PUSlimmingHelper, jetOutputList, FTAG_PUSlimmingHelper.SmartCollections)
 
-    # Flavour tagging 
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True, dzCut_vec=[5, 4, 3, 2], useMinZ0Vertex_vec=[True,False]))
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
+    # Flavour tagging
+    from BTagging.FlavorTaggingConfig import JetBTagginglessByVertexAlgCfg
+    acc.merge(JetBTagginglessByVertexAlgCfg(
+        flags,
+        "AntiKt4EMPFlowByVertexJets",
+        dzCut_vec=[5, 4, 3, 2],
+        useMinZ0Vertex_vec=[True,False]))
 
     # Output stream
     FTAG_PUItemList = FTAG_PUSlimmingHelper.GetItemList()

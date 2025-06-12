@@ -4,89 +4,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
-from BTagging.JetBTagginglessConfig import JetBTagginglessAlgCfg, JetBTagginglessByVertexAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 
-from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
-from AthenaConfiguration.Enums import LHCPeriod
 import ParticleJetTools.ParentDecoratorConfig as pdc
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
-def JetCollectionsBTaggingCfg(cfgFlags, jet_cols, pv_cols=None,
-                             trackAugmenterPrefix=None, ByVertex=False, dzCut_vec=[10], useMinZ0Vertex_vec=[True]):
-
-    if pv_cols is None:
-        pv_cols = ['PrimaryVertices'] * len(jet_cols)
-    if len(pv_cols) != len(jet_cols):
-        raise ValueError('PV collection length is not the same as Jets')
-
-    acc = ComponentAccumulator()
-
-    for jet_col, pv_col in zip(jet_cols, pv_cols):
-        if ByVertex:
-            acc.merge(JetBTagginglessByVertexAlgCfg(cfgFlags, JetCollection=jet_col, pv_col=pv_col, trackAugmenterPrefix=trackAugmenterPrefix,
-                                                    dzCut_vec=dzCut_vec, useMinZ0Vertex_vec=useMinZ0Vertex_vec))
-        else:
-            acc.merge(JetBTagginglessAlgCfg(cfgFlags, JetCollection=jet_col, pv_col=pv_col, trackAugmenterPrefix=trackAugmenterPrefix))
-
-    return acc
-
-def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
-                          trackAugmenterPrefix=None):
-    """
-    Run flavour tagging in derivations.
-    Configures several jet collections at once.
-    """
-
-    if pv_cols is None:
-        pv_cols = ['PrimaryVertices'] * len(jet_cols)
-    if len(pv_cols) != len(jet_cols):
-        raise ValueError('PV collection length is not the same as Jets')
-
-    acc = ComponentAccumulator()
-
-    acc.merge(JetTagCalibCfg(cfgFlags))
-
-    if 'AntiKt4EMTopoJets' in jet_cols:
-        acc.merge(
-            RenameInputContainerEmTopoHacksCfg('oldAODVersion')
-        )
-
-    if PFLOW_JETS in jet_cols and cfgFlags.BTagging.Trackless:
-        acc.merge(
-            RenameInputContainerEmPflowHacksCfg('tracklessAODVersion')
-        )
-
-    # decorate tracks with detailed truth info and reco lepton info
-    acc.merge(trackTruthDecorator(cfgFlags))
-    acc.merge(TrackLeptonDecorationCfg(cfgFlags))
-
-    # Treat large-R jets as a special case
-    largeRJetCollection = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-
-    # Run flavour tagging on each jet collection
-    for jet_col, pv_col in zip(jet_cols, pv_cols):
-
-        if jet_col == largeRJetCollection:
-            acc.merge(BTagLargeRDecoration(cfgFlags, largeRJetCollection))
-        else:
-            # Run flavour tagging on this jet collection
-            acc.merge(
-                tagSingleJetCollection(
-                    cfgFlags, jet_col, pv_col,
-                    trackAugmenterPrefix=trackAugmenterPrefix
-                )
-            )
-    
-
-    if  cfgFlags.BTagging.GNNVertexFitter  and cfgFlags.GeoModel.Run < LHCPeriod.Run4:
-      from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
-      acc.merge(GNNVertexFitterAlgCfg(cfgFlags))
-      acc.merge(GNNVertexFitterAlgCfg(cfgFlags, inclusive=True))
-    
-    return acc
 
 def HLTJetFTagDecorationCfg(cfgFlags):
     from ParticleJetTools.ParticleJetToolsConfig import getJetDeltaRFlavorLabelTool
@@ -143,7 +66,7 @@ def BTagLargeRDecoration(cfgFlags, jet_col):
     return acc
 
 
-def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
+def LegacyBTaggingCfg(cfgFlags, jet_col, pv_col='PrimaryVertices',
                            trackAugmenterPrefix=None):
     """
     Return a component accumulator which runs tagging on a single jet collection.
@@ -164,16 +87,16 @@ def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
     ))
 
     # schedule tagging algorithms for this jet collection
-    if cfgFlags.BTagging.EnableLegacyBTagging:
-        acc.merge(BTagAlgsCfg(
-            inputFlags=cfgFlags,
-            JetCollection=jet_col_name_without_Jets,
-            nnList=GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets),
-            trackCollection=track_collection,
-            primaryVertices=pv_col,
-            muons=input_muons,
-            AddedJetSuffix='Jets',
-        ))
+
+    acc.merge(BTagAlgsCfg(
+        inputFlags=cfgFlags,
+        JetCollection=jet_col_name_without_Jets,
+        nnList=GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets),
+        trackCollection=track_collection,
+        primaryVertices=pv_col,
+        muons=input_muons,
+        AddedJetSuffix='Jets',
+    ))
 
     return acc
 
