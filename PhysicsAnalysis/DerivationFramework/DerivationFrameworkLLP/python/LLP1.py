@@ -313,8 +313,8 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     acc.merge(RecoverZeroPixelHitMuonsCfg(flags))
     
     # flavor tagging
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMTopoJets']))
+    from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+    acc.merge(FlavorTaggingCfg(flags, 'AntiKt4EMTopoJets'))
 
     # VrtSecInclusive
     from VrtSecInclusive.VrtSecInclusiveConfig import VrtSecInclusiveCfg
@@ -893,6 +893,7 @@ def LLP1Cfg(flags):
                                            "InDetLargeD0TrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
+                                           "AntiKt4EMPFlowJets_FTAG",
                                            "BTagging_AntiKt4EMTopo",
                                            "BTagging_AntiKt4EMPFlow",
                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",

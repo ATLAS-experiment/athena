@@ -74,21 +74,13 @@ def FlavorTaggingCfg(
                 pfx=trackAugmenterPrefix,
             )
         )
-    else:      
+    else:
         acc.merge(BTagTrackAugmenterAlgCfg(
             cfgFlags,
             TrackCollection='InDetTrackParticles',
             PrimaryVertexCollectionName=pv_col,
             prefix=trackAugmenterPrefix,
         ))
-            
-
-    acc.merge(JetParticleAssociationAlgCfg(
-        cfgFlags,
-        JetCollection,
-        trackCollection,
-        JetTrackAssociator,
-    ))
 
     if not fast:
         acc.merge(JetTagVertexDecoratorCfg(
@@ -242,16 +234,24 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
     jetcol_no_suffix = jet.replace("Jets","")
 
     acc = ComponentAccumulator()
+
+    acc.merge(JetParticleAssociationAlgCfg(
+        flags,
+            jet,
+        trackCollection,
+        JetTrackAssociator,
+    ))
+
     options = {}
 
     options['BTagTool'] = acc.popToolsAndMerge(BTagToolCfg(
         flags, ['SV1'], pv_col, SetupScheme))
 
-    SecVertexers = ['SV1','JetFitter'] 
+    SecVertexers = ['SV1','JetFitter']
     if flags.BTagging.RunFlipTaggers:
         SecVertexers += ['JetFitterFlip','SV1Flip']
-        
-    secVtxFinderxAODBaseNameList = [] 
+
+    secVtxFinderxAODBaseNameList = []
 
     OutputFilesJFVxname = "JFVtx"
     OutputFilesJFVxFlipname = "JFVtxFlip"
@@ -291,7 +291,9 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
         ))
 
     # Add secondary vertices to jet
-    options = {}
+    options = {
+        'name': f'JetTagVertexDecoratorAlg{jet}'
+    }
     options.setdefault('SecVtxFinderxAODBaseNameList', secVtxFinderxAODBaseNameList)
     options.setdefault('vxPrimaryCollectionName', pv_col)
     options.setdefault('JetFitterVariableFactory', jetFitterVF)
