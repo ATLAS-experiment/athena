@@ -1523,20 +1523,26 @@ def promote_keys(meta_dict, mode):
                 if mode == 'peeker' and 'isDataOverlay' in md[key]:
                     md['IsDataOverlay'] = md[key]['isDataOverlay']
 
-                if 'simFlavour' in md[key] and ('FullG4' in md[key]['simFlavour'] or 'ATLFAST' in md[key]['simFlavour']):
+                if 'dataType' in md[key]:
+                    md['processingTags'] = [md[key]['dataType']]
+
+                if (
+                    ('simFlavour' in md[key] and ('FullG4' in md[key]['simFlavour'] or 'ATLFAST' in md[key]['simFlavour']))
+                    or 'DAOD_TRUTH' in md[key]['dataType']
+                ):
                     md['eventTypes'].append('IS_SIMULATION')
                 else:
                     md['eventTypes'].append('IS_DATA')
 
-                if 'GeoAtlas' in md and 'ATLAS' in md['GeoAtlas']:
+                if (
+                    'GeoAtlas' in md and 'ATLAS' in md['GeoAtlas']
+                    or 'DAOD_TRUTH' in md[key]['dataType']
+                ):
                     md['eventTypes'].append('IS_ATLAS')
                     # this is probably safe to assume for all files used in AnalysisBase
                     md['eventTypes'].append('IS_PHYSICS')
                 else:
                     md['eventTypes'].append('IS_TESTBEAM')
-
-                if 'dataType' in md[key]:
-                    md['processingTags'] = [md[key]['dataType']]
 
                 if mode == 'peeker':
                     if 'productionRelease' in md[key]:
