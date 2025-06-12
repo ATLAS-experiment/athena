@@ -303,13 +303,15 @@ Trk::ElectronCombinedMaterialEffects::compute(
       const double covPhi = cache_multipleScatter.deltaPhiCov;
       const double covTheta = cache_multipleScatter.deltaThetaCov;
       const double covQoverP = cache_energyLoss.elements[i].deltaQOvePCov;
-      cache.deltaCovariances[i] << 0, 0, 0, 0, 0,  // 5
+      //Here set the "delta" for the covariance
+      //due to material effects
+      cache.covariances[i] << 0, 0, 0, 0, 0,  // 5
           0, 0, 0, 0, 0,                           // 10
           0, 0, covPhi, 0, 0,                      // 15
           0, 0, 0, covTheta, 0,                    // 20
           0, 0, 0, 0, covQoverP;
     } else {
-      cache.deltaCovariances[i].setZero();
+      cache.covariances[i].setZero();
     }
     ++cache.numEntries;
   }  // end for loop over energy loss components

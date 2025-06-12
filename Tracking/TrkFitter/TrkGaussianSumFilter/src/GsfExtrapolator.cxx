@@ -498,8 +498,7 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
         cache.m_materialEffectsCaches,
         *(cache.m_stateAtBoundary),
         *layer,
-        direction,
-        particleHypothesis);
+        direction);
 
     if (!updatedState.empty()) {
       addMultiComponentToCache(cache,std::move(updatedState));
@@ -571,8 +570,7 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
             cache.m_materialEffectsCaches,
             *(cache.m_stateAtBoundary),
             *layerAtBoundary,
-            direction,
-            particleHypothesis);
+            direction);
       }
     }
 
@@ -646,8 +644,7 @@ Trk::GsfExtrapolator::extrapolateInsideVolume(
     updatedState = m_materialUpdator->postUpdate(cache.m_materialEffectsCaches,
                                                  *currentState,
                                                  *associatedLayer,
-                                                 direction,
-                                                 particleHypothesis);
+                                                 direction);
 
     if (!updatedState.empty()) {
       // Refresh the current state pointer
@@ -845,8 +842,7 @@ Trk::GsfExtrapolator::extrapolateToIntermediateLayer(
     m_materialUpdator->update(cache.m_materialEffectsCaches,
                               destinationState,
                               layer,
-                              direction,
-                              particleHypothesis);
+                              direction);
 
   if (updatedState.empty()) {
     return destinationState;
@@ -914,8 +910,7 @@ Trk::GsfExtrapolator::extrapolateToDestinationLayer(
     updatedState = m_materialUpdator->preUpdate(cache.m_materialEffectsCaches,
                                                 destinationState,
                                                 layer,
-                                                direction,
-                                                particleHypothesis);
+                                                direction);
   }
 
   if (updatedState.empty()) {

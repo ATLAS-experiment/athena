@@ -47,12 +47,17 @@ struct Scattering
 /** Helper struct for combined material effects, multicomponent  description*/
 struct Combined
 {
+  //weights
   std::array<double, GSFConstants::maxNumberofMatComponents> weights = {};
+  //difference in momentum due to material effects
   std::array<double, GSFConstants::maxNumberofMatComponents> deltaPs = {};
+  //parameters after material update
   alignas(GSFConstants::alignment) std::array< AmgVector(5),
-    GSFConstants::maxNumberofMatComponents> deltaParameters = {};
+    GSFConstants::maxNumberofMatComponents> parameters = {};
+  //Covariance after material effects
+  //(we hold initially the delta and then sum it with the covariance)
   alignas(GSFConstants::alignment) std::array<AmgSymMatrix(5),
-    GSFConstants::maxNumberofMatComponents> deltaCovariances = {};
+    GSFConstants::maxNumberofMatComponents> covariances = {};
   //We need to keep track of the actual elements in use
   size_t numEntries = 0;
 
