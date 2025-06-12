@@ -240,8 +240,8 @@ const TileSDOptions* TileGeoG4SDCalc::GetOptions() const
 G4bool TileGeoG4SDCalc::FindTileScinSection(const G4Step* aStep, TileHitData& hitData) const
 {
   // Get the lookup table for the current event
-  auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-  auto* hitColl = eventInfo->GetHitCollectionMap()->GetSDHitCollection<TileHitVectorBuilder>(m_outputCollectionNames[0]);
+  auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetUserInformation());
+  auto* hitColl = eventInfo->GetHitCollectionMap()->Find<TileHitVectorBuilder>(m_outputCollectionNames[0]);
   auto lookup = hitColl->GetLookupBuilder();
 
   // Determine touchablehistory for the step

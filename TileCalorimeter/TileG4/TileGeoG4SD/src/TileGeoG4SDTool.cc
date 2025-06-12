@@ -36,22 +36,17 @@ StatusCode TileGeoG4SDTool::initialize()
 StatusCode TileGeoG4SDTool::SetupEvent(HitCollectionMap& hitCollections)
 {
   ATH_MSG_VERBOSE( "Setting up Tile hits for event");
-  hitCollections.SetSDHitCollection(m_outputCollectionNames[0], std::make_unique<TileHitVectorBuilder>(m_outputCollectionNames[0], m_tileCalculator->GetLookupBuilder()));
+  hitCollections.Emplace<TileHitVectorBuilder>(m_outputCollectionNames[0], m_outputCollectionNames[0], m_tileCalculator->GetLookupBuilder());
   return StatusCode::SUCCESS;
 }
 
 StatusCode TileGeoG4SDTool::Gather(HitCollectionMap& hitCollections)
 {
-  auto hitColl = hitCollections.ExtractSDHitCollection<TileHitVectorBuilder>(m_outputCollectionNames[0]);
-  
-  // Because ISF transports multiple G4Event per Athena event, ResetCells must be called here.
-  // Once we have a one-to-one G4Event to Athena event mapping, this should be moved to G4VSensitiveDetector::EndOfEvent
-  hitColl->ResetCells();
-  ATH_MSG_VERBOSE( "Gathering Tile hits, size = " << hitColl->size());
-
-  // register the collection to SG
-  SG::WriteHandle<TileHitVector> hitCollHandle(m_outputCollectionNames[0]);
-  hitCollHandle = std::move(hitColl);
+  hitCollections.TransformAndRecord<TileHitVector>(m_outputCollectionNames[0], [](TileHitVector& hits){
+    // Because ISF transports multiple G4Event per Athena event, ResetCells must be called here.
+    // Once we have a one-to-one G4Event to Athena event mapping, this should be moved to G4VSensitiveDetector::EndOfEvent
+    static_cast<TileHitVectorBuilder&>(hits).ResetCells();
+  });
   return StatusCode::SUCCESS;
 }
 

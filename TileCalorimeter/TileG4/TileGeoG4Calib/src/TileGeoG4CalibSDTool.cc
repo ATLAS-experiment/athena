@@ -52,34 +52,23 @@ G4VSensitiveDetector* TileGeoG4CalibSDTool::makeSD() const {
 StatusCode TileGeoG4CalibSDTool::SetupEvent(HitCollectionMap& hitCollections) {
   ATH_MSG_VERBOSE("Setting up Tile calibration hits for event");
 
-  hitCollections.SetSDHitCollection(m_tileHits, std::make_unique<TileHitVectorDMBuilder>(m_tileHits, m_tileCalculator->GetLookupBuilder()));
-
-  auto set_hitcollection = [&hitCollections](const std::string& collectionName) {
-    hitCollections.SetSDHitCollection(collectionName, std::make_unique<CaloCalibrationHitContainer>(collectionName));
-  };
-  set_hitcollection(m_tileActiveCellCalibHits);
-  set_hitcollection(m_tileInactiveCellCalibHits);
-  set_hitcollection(m_tileDeadMaterialCalibHits);
+  hitCollections.Emplace<TileHitVectorDMBuilder>(m_tileHits, m_tileHits, m_tileCalculator->GetLookupBuilder());
+  hitCollections.Emplace<CaloCalibrationHitContainer>(m_tileActiveCellCalibHits, m_tileActiveCellCalibHits);
+  hitCollections.Emplace<CaloCalibrationHitContainer>(m_tileInactiveCellCalibHits, m_tileInactiveCellCalibHits);
+  hitCollections.Emplace<CaloCalibrationHitContainer>(m_tileDeadMaterialCalibHits, m_tileDeadMaterialCalibHits);
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode TileGeoG4CalibSDTool::Gather(HitCollectionMap& hitCollections) {
 
-  {  // WriteHandle scope
-    SG::WriteHandle<TileHitVector> handle(m_tileHits);
-    auto hitColl = hitCollections.ExtractSDHitCollection<TileHitVectorDMBuilder>(m_tileHits);
-    hitColl->ResetCells();
-    handle = std::move(hitColl);
-  }
+  hitCollections.TransformAndRecord<TileHitVector>(m_tileHits, [](TileHitVector& hits) {
+    static_cast<TileHitVectorDMBuilder&>(hits).ResetCells();
+  });
 
-  auto extract_hits = [&hitCollections](const std::string& collectionName) {
-    SG::WriteHandle<CaloCalibrationHitContainer> handle(collectionName);
-    handle = hitCollections.ExtractSDHitCollection<CaloCalibrationHitContainer>(collectionName);
-  };
-  extract_hits(m_tileActiveCellCalibHits);
-  extract_hits(m_tileInactiveCellCalibHits);
-  extract_hits(m_tileDeadMaterialCalibHits);
+  hitCollections.Record<CaloCalibrationHitContainer>(m_tileActiveCellCalibHits);
+  hitCollections.Record<CaloCalibrationHitContainer>(m_tileInactiveCellCalibHits);
+  hitCollections.Record<CaloCalibrationHitContainer>(m_tileDeadMaterialCalibHits);
   return StatusCode::SUCCESS;
 }
 
