@@ -48,17 +48,16 @@ class TRTStrawStatusWrite : public AthAlgorithm
  private:
 
 
-  ServiceHandle<StoreGateSvc> m_detStore;
-  std::string m_par_strawstatuscontainerkey;
-  std::string m_par_strawstatuspermanentcontainerkey;
-  std::string m_par_strawstatusHTcontainerkey;
-  std::string m_par_stattextfile;           //input text file
-  std::string m_par_stattextfilepermanent;  //input text file: permanent
-  std::string m_par_stattextfileHT;         //input text file: HT
+  std::string m_par_strawstatuscontainerkey{"/TRT/Cond/Status"};
+  std::string m_par_strawstatuspermanentcontainerkey{"/TRT/Cond/StatusPermanent"};
+  std::string m_par_strawstatusHTcontainerkey{"/TRT/Cond/StatusHT"};
+  Gaudi::Property<std::string> m_par_stattextfile{this, "StatusInputFile", "", "input text file"};
+  Gaudi::Property<std::string> m_par_stattextfilepermanent{this, "StatusInputFilePermanent", "", "input text file: permanent"};
+  Gaudi::Property<std::string> m_par_stattextfileHT{this, "StatusInputFileHT", "", "input text file: HT"};
 
 
-  const TRT_ID* m_trtid;                    //TRT id helper
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_status;
+  const TRT_ID* m_trtid{};                    //TRT id helper
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_status{this, "SummaryTool", "TRT_StrawStatusSummaryTool"};
 };
 
 

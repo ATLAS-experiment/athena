@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONINSIDEOUTRECOTOOL_H
@@ -70,7 +70,7 @@ namespace MuonCombined {
         /** handle a single candidate */
         void handleCandidate(const InDetCandidate& inDetCandidate, InDetCandidateToTagMap* tagMap,
                              const IMuonCombinedInDetExtensionTool::MuonPrdData& prdData, TrackCollection* combTracks, TrackCollection* meTracks,
-                             Trk::SegmentCollection* segments, const EventContext& ctx) const;
+                             Trk::SegmentCollection* segments, std::vector<std::shared_ptr<const Muon::MuonSegment>> msegments, const EventContext& ctx) const;
 
         /** add muon candidate to indet candidate */
         void addTag(const EventContext& ctx, const InDetCandidate& indetCandidate, InDetCandidateToTagMap* tagMap,
@@ -113,6 +113,8 @@ namespace MuonCombined {
 
         // vertex container key
         SG::ReadHandleKey<xAOD::VertexContainer> m_vertexKey{this, "VertexContainer", "PrimaryVertices", "vertex container key"};
+
+      SG::ReadHandleKey<Trk::SegmentCollection> m_inputSegments{this, "InputSegments", "", "Input Segment Collection"};
     };
 }  // namespace MuonCombined
 

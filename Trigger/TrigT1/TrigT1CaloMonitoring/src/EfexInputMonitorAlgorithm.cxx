@@ -267,11 +267,16 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                           SlotSCID = itr->second.second;
                       }
                   }
-                  ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
-                  fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
-                  if(!reportedErrors.count(Decision)) {
-                      ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
-                      reportedErrors.insert(Decision);
+                  if(!(isLAr && timeUntil>=0 && timeUntil<=1)) { // lar errors within 1s of an otf masking update are not treated as errors
+                      ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
+                      fill("errors", Decision, ErrorAndLocation, timeSince, timeUntil, evtNumber, lbn, lbnString,
+                           TowerId, Towereta, Towerphi, Toweremstatus, Towerhadstatus, TowerSlot, TowerCount,
+                           TowerRefCount, SlotSCID);
+                      if (!reportedErrors.count(Decision)) {
+                          ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb "
+                                                                << std::string(lbnString));
+                          reportedErrors.insert(Decision);
+                      }
                   }
               }
           }

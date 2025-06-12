@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_T1_TRT_H
@@ -38,7 +38,7 @@ namespace LVL1 {
     // These are the functions inherited from Algorithm
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    
+
   private:
     /* Output handles */
     SG::WriteHandleKey<TrtCTP> m_trtCTPLocation{this, "TrtCTPLocation", LVL1::DEFAULT_TrtCTPLocation, "Write handle key for TrtCTP"};
@@ -47,10 +47,10 @@ namespace LVL1 {
     SG::ReadHandleKey<TRT_RDO_Container> m_trtRDOKey{this, "TrtRDOLocation", "TRT_RDOs", "Read handle key for TRT_RDO_Container"};
 
     /* Tool handles */
-    ToolHandle<ITRT_StrawStatusSummaryTool> m_ConditionsSummary;
+    ToolHandle<ITRT_StrawStatusSummaryTool> m_ConditionsSummary{this, "ConditionsSummaryTool", "TRT_StrawStatusSummaryTool"};
 
     /* Service handles */
-    ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc;
+    ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc{this, "StrawNeighbourSvc", "TRT_StrawNeighbourSvc"};
 
     /* RDO hit containers */
     const InDetDD::TRT_DetectorManager *m_mgr{};

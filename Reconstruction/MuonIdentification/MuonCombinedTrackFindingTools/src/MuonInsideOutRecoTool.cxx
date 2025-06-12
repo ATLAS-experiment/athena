@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonInsideOutRecoTool.h"
@@ -24,7 +24,7 @@ namespace MuonCombined {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_edmHelperSvc.retrieve());
         ATH_CHECK(m_printer.retrieve());
-        ATH_CHECK(m_segmentFinder.retrieve());
+        ATH_CHECK(m_segmentFinder.retrieve(DisableTool(m_segmentFinder.empty())));
         ATH_CHECK(m_segmentMatchingTool.retrieve());
         ATH_CHECK(m_ambiguityResolver.retrieve());
         ATH_CHECK(m_candidateTrackBuilder.retrieve());
@@ -34,6 +34,7 @@ namespace MuonCombined {
         ATH_CHECK(m_vertexKey.initialize(!m_vertexKey.empty()));
         ATH_CHECK(m_trackSummaryTool.retrieve());
         ATH_CHECK(m_recoValidationTool.retrieve(DisableTool{m_recoValidationTool.empty()}));
+	ATH_CHECK(m_inputSegments.initialize(!m_inputSegments.empty()));
         return StatusCode::SUCCESS;
     }
 
@@ -49,12 +50,26 @@ namespace MuonCombined {
                                                IMuonCombinedInDetExtensionTool::MuonPrdData prdData, TrackCollection* combTracks,
                                                TrackCollection* meTracks, Trk::SegmentCollection* segments, const EventContext& ctx) const {
         ATH_MSG_DEBUG(" extending " << inDetCandidates.size());
-        for (const InDetCandidate* it : inDetCandidates) { handleCandidate(*it, tagMap, prdData, combTracks, meTracks, segments, ctx); }
+	// vector to store segments
+	std::vector<std::shared_ptr<const Muon::MuonSegment>> msegments;
+
+	if(!m_inputSegments.empty()){
+	  SG::ReadHandle<Trk::SegmentCollection> rh_segments(m_inputSegments, ctx);
+	  const Trk::SegmentCollection *segInColl = rh_segments.ptr();
+	  for(auto trkSeg : *segInColl){
+	    auto muonSeg = dynamic_cast<const Muon::MuonSegment*>(trkSeg);
+	    std::shared_ptr<const Muon::MuonSegment> mseg2 = std::make_shared<const Muon::MuonSegment>(*muonSeg);
+	    msegments.push_back(mseg2);
+	  }
+	}
+	
+
+        for (const InDetCandidate* it : inDetCandidates) { handleCandidate(*it, tagMap, prdData, combTracks, meTracks, segments, msegments, ctx); }
     }
 
     void MuonInsideOutRecoTool::handleCandidate(const InDetCandidate& indetCandidate, InDetCandidateToTagMap* tagMap,
                                                 const IMuonCombinedInDetExtensionTool::MuonPrdData& prdData, TrackCollection* combTracks,
-                                                TrackCollection* meTracks, Trk::SegmentCollection* segColl, const EventContext& ctx) const {
+                                                TrackCollection* meTracks, Trk::SegmentCollection* segColl, std::vector<std::shared_ptr<const Muon::MuonSegment>> segments, const EventContext& ctx) const {
         if (m_ignoreSiAssocated && indetCandidate.isSiliconAssociated()) {
             ATH_MSG_DEBUG(" skip silicon associated track for extension ");
             return;
@@ -79,9 +94,10 @@ namespace MuonCombined {
         ATH_MSG_DEBUG(" ID track: pt " << indetTrackParticle.pt() << " eta " << indetTrackParticle.eta() << " phi "
                                        << indetTrackParticle.phi() << " layers " << layerIntersections.size());
 
-        for (const Muon::MuonSystemExtension::Intersection& layer_intersect : layerIntersections) {
-            // vector to store segments
-            std::vector<std::shared_ptr<const Muon::MuonSegment>> segments;
+
+	
+
+	for (const Muon::MuonSystemExtension::Intersection& layer_intersect : layerIntersections) {
 
             // find segments for intersection
             Muon::MuonLayerPrepRawData layerPrepRawData;
@@ -89,7 +105,11 @@ namespace MuonCombined {
                 ATH_MSG_VERBOSE("Failed to get layer data");
                 continue;
             }
-            m_segmentFinder->find(ctx, layer_intersect, layerPrepRawData, segments);
+	    
+            if(!m_segmentFinder.empty()){
+	      segments.clear();
+	      m_segmentFinder->find(ctx, layer_intersect, layerPrepRawData, segments);
+	    }
             if (segments.empty()) continue;
 
             // fill validation content

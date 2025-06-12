@@ -24,18 +24,9 @@
 #include "TRT_ConditionsData/ExpandedIdentifier.h"
 
 
-TRTStrawStatusRead::TRTStrawStatusRead( const std::string &name, ISvcLocator *pSvcLocator)  :  
-  AthAlgorithm( name, pSvcLocator ),
-  m_setup(false),
-  m_trtid(0),
-  m_status("TRT_StrawStatusSummaryTool",this),
-  m_statReadKey("/TRT/Cond/Status"),
-  m_permReadKey("/TRT/Cond/StatusPermanent"),
-  m_statHTReadKey("/TRT/Cond/StatusHT"),
-  m_printfolder("Status")
-{ 
-  declareProperty("FolderToPrint",m_printfolder);
-  declareProperty("SummaryTool",m_status);
+TRTStrawStatusRead::TRTStrawStatusRead( const std::string &name, ISvcLocator *pSvcLocator)  :
+  AthAlgorithm( name, pSvcLocator )
+{
 }
 
 StatusCode TRTStrawStatusRead::initialize()

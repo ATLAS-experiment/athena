@@ -40,29 +40,31 @@ StatusCode eFexTowerBuilder::initialize() {
     CHECK( m_eiKey.initialize(true) );
     CHECK( m_LArLatomeHeaderContainerKey.initialize(SG::AllowEmpty) );
 
-    if (auto fileName = PathResolverFindCalibFile( m_mappingFile ); !fileName.empty()) {
-        std::unique_ptr<TFile> f( TFile::Open(fileName.c_str()) );
-        if (f) {
-            TTree* t = f->Get<TTree>("mapping");
-            if(t) {
-                unsigned long long scid = 0;
-                std::pair<int,int> coord = {0,0};
-                std::pair<int,int> slot;
-                t->SetBranchAddress("scid",&scid);
-                t->SetBranchAddress("etaIndex",&coord.first);
-                t->SetBranchAddress("phiIndex",&coord.second);
-                t->SetBranchAddress("slot1",&slot.first);
-                t->SetBranchAddress("slot2",&slot.second);
-                for(Long64_t i=0;i<t->GetEntries();i++) {
-                    t->GetEntry(i);
-                    m_scMap[scid] = std::make_pair(coord,slot);
+    if(!m_mappingFile.empty()) {
+        if (auto fileName = PathResolverFindCalibFile(m_mappingFile); !fileName.empty()) {
+            std::unique_ptr <TFile> f(TFile::Open(fileName.c_str()));
+            if (f) {
+                TTree *t = f->Get<TTree>("mapping");
+                if (t) {
+                    unsigned long long scid = 0;
+                    std::pair<int, int> coord = {0, 0};
+                    std::pair<int, int> slot;
+                    t->SetBranchAddress("scid", &scid);
+                    t->SetBranchAddress("etaIndex", &coord.first);
+                    t->SetBranchAddress("phiIndex", &coord.second);
+                    t->SetBranchAddress("slot1", &slot.first);
+                    t->SetBranchAddress("slot2", &slot.second);
+                    for (Long64_t i = 0; i < t->GetEntries(); i++) {
+                        t->GetEntry(i);
+                        m_scMap[scid] = std::make_pair(coord, slot);
+                    }
                 }
             }
-        }
-        if (m_scMap.empty()) {
-            ATH_MSG_WARNING("Failed to load sc -> eFexTower map from " << fileName);
-        } else {
-            ATH_MSG_INFO("Loaded sc -> eFexTower map from " << fileName);
+            if (m_scMap.empty()) {
+                ATH_MSG_WARNING("Failed to load sc -> eFexTower map from " << fileName);
+            } else {
+                ATH_MSG_INFO("Loaded sc -> eFexTower map from " << fileName);
+            }
         }
     }
 

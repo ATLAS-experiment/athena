@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
@@ -526,7 +526,8 @@ def VDVMuInsideOutCfg(flags, name, candidatesName, suffix):
   acc = ComponentAccumulator()
   dataObjects = [( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
                  ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
-                 ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName )]
+                 ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName ),
+                 ('Trk::SegmentCollection' , 'StoreGateSvc+TrackMuonSegments')]
   if not isCosmic(flags): dataObjects += [( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec')]
   if flags.Detector.GeometryCSC:
     dataObjects += [( 'Muon::CscPrepDataContainer' , 'StoreGateSvc+CSC_Clusters' )]
@@ -545,6 +546,7 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
   from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
   from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuGirlStauAlgCfg, StauCreatorAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg, MuonInsideOutRecoAlgCfg, MuonCombinedInDetCandidateAlgCfg
+  from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonInsideOutRecoToolCfg
 
   acc = ComponentAccumulator()
   
@@ -593,7 +595,13 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
   else:
     acc.merge(MuonInDetToMuonSystemExtensionAlgCfg(flags, name="TrigInDetMuonExtensionAlg_"+name+suffix, InputInDetCandidates="InDetCandidates_"+name+suffix,
                                                           WriteInDetCandidates="InDetCandidatesSystemExtended_"+name+suffix))
-    acc.merge(MuonInsideOutRecoAlgCfg(flags, name="TrigMuonInsideOutRecoAlg_"+name+suffix,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name+suffix))
+    if 'RoI' in name:
+      ioTool = MuonInsideOutRecoToolCfg(flags, MuonLayerSegmentFinderTool="", InputSegments="TrackMuonSegments")
+    else:
+      ioTool = MuonInsideOutRecoToolCfg(flags)
+    InsideOutRecoTool = acc.popToolsAndMerge(ioTool)
+
+    acc.merge(MuonInsideOutRecoAlgCfg(flags, name="TrigMuonInsideOutRecoAlg_"+name+suffix,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name+suffix, MuonCombinedInDetExtensionTool=InsideOutRecoTool))
 
     acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlgInsideOut_"+name+suffix,  MuonCandidateLocation=[candidatesName], TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name+suffix,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons"+suffix,
