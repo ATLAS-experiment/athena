@@ -20,6 +20,7 @@ def createTrigTauConfigFlags():
 
     #####################################################################################
     # DeepSet Nominal ID (xxxxxRNN/perf/idperf_tracktwoMVA chains)
+    # LEGACY: MC/Dev trigger menus only!
     #####################################################################################
     # Using LVNN inference
 
