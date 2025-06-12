@@ -41,7 +41,7 @@ TauValidationPlots::TauValidationPlots(PlotBase* pParent, const std::string& sDi
   // Plots with the "nominal" tau selection
   m_oElMatchedParamPlotsNom(this, "Nominal/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates and passing nominal selection        
   m_oElMatchedEVetoPlotsNom(this, "Nominal/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates and passing nominal selection
-
+  m_oElMatchedEff1PPlotsNom(this, "Nominal/Elec/Eff/1P/", sTauJetContainerName),
   m_oFakeGeneralNom(this,"Nominal/Fake/", sTauJetContainerName),
   m_oFakeHad1ProngNom(this,"Nominal/Fake/Jet1P/", sTauJetContainerName),
   m_oFakeHad3ProngNom(this,"Nominal/Fake/Jet3P/", sTauJetContainerName),

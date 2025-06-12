@@ -186,7 +186,9 @@ StatusCode PhysValTau::fillHistograms()
         if ( nominal ) {
            m_oTauValidationPlots->m_oElMatchedParamPlotsNom.fill(*tau, weight);
            m_oTauValidationPlots->m_oElMatchedEVetoPlotsNom.fill(*tau, weight);
+	   if(recProng == 1) m_oTauValidationPlots->m_oElMatchedEff1PPlotsNom.fill(*tau, weight);
         }
+	
       } else if( MC::isSMQuark(trueTau) || MC::isGluon(trueTau) ){
         ATH_MSG_DEBUG("Tau is matched to a jet");
         m_oTauValidationPlots->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
