@@ -40,7 +40,23 @@ public:
   TProfile* m_eff_jetGNTauloose{};
   TProfile* m_eff_jetGNTaumed{};
   TProfile* m_eff_jetGNTautight{};
-  
+
+  TProfile* m_eff_pt_eVetoloose{};
+  TProfile* m_eff_pt_eVetomed{};
+  TProfile* m_eff_pt_eVetotight{};
+
+  TProfile* m_eff_pt_eVetolooseHighPt{};
+  TProfile* m_eff_pt_eVetomedHighPt{};
+  TProfile* m_eff_pt_eVetotightHighPt{};
+
+  TProfile* m_eff_eta_eVetoloose{};
+  TProfile* m_eff_eta_eVetomed{};
+  TProfile* m_eff_eta_eVetotight{};
+
+  TProfile* m_eff_eVetoloose{};
+  TProfile* m_eff_eVetomed{};
+  TProfile* m_eff_eVetotight{};
+
   
 private:
   void initializePlots();
