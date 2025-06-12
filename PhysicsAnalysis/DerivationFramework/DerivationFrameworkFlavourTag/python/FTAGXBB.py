@@ -1,9 +1,9 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
-# DAOD_FTAG_XBB.py
-# This defines DAOD_FTAG_XBB, an skimmed DAOD format for Run 3.
+# DAOD_FTAGXBB.py
+# This defines DAOD_FTAGXBB, an skimmed DAOD format for Run 3.
 # It is designed for the X->bb calibration.
-# It requires the flag FTAG_XBB in Derivation_tf.py   
+# It requires the flag FTAGXBB in Derivation_tf.py   
 #====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -11,8 +11,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 # Main algorithm config
-def FTAG_XBBKernelCfg(flags, name='FTAG_XBBKernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for FTAG_XBB"""
+def FTAGXBBKernelCfg(flags, name='FTAGXBBKernel', **kwargs):
+    """Configure the derivation framework driving algorithm (kernel) for FTAGXBB"""
     acc = ComponentAccumulator()
     
     from DerivationFrameworkPhys.PHYS import PHYSKernelCfg
@@ -26,19 +26,19 @@ def FTAG_XBBKernelCfg(flags, name='FTAG_XBBKernel', **kwargs):
 
     # filter large-R jets
     UFOjets_skimming_expression = 'count( AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.pt > 150*GeV ) >= 1' 
-    FTAG_XBBUFOjetsSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAG_XBBUFOjetsSkimmingTool",
+    FTAGXBBUFOjetsSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
+            name = "FTAGXBBUFOjetsSkimmingTool",
             expression = UFOjets_skimming_expression )
-    acc.addPublicTool(FTAG_XBBUFOjetsSkimmingTool)
+    acc.addPublicTool(FTAGXBBUFOjetsSkimmingTool)
 
     # Trigger skimming
-    acc.merge(FTAG_XBBTriggerSkimmingToolCfg(flags, skimmingTools))
+    acc.merge(FTAGXBBTriggerSkimmingToolCfg(flags, skimmingTools))
 
     # thinning tools
     thinningTools = []
 
     skimmingTools += [
-        FTAG_XBBUFOjetsSkimmingTool,
+        FTAGXBBUFOjetsSkimmingTool,
         ]
 
     thinningTools = [
@@ -50,7 +50,7 @@ def FTAG_XBBKernelCfg(flags, name='FTAG_XBBKernel', **kwargs):
     return acc
 
 
-def FTAG_XBBCfg(flags, skimmingTools=None):
+def FTAGXBBCfg(flags, skimmingTools=None):
     acc = ComponentAccumulator()
     
     # Get the lists of triggers needed for trigger matching.
@@ -58,31 +58,31 @@ def FTAG_XBBCfg(flags, skimmingTools=None):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG_XBBTriggerListsHelper = TriggerListsHelper(flags)
+    FTAGXBBTriggerListsHelper = TriggerListsHelper(flags)
 
     # the name_tag has to consistent between KernelCfg and CoreCfg
-    FTAG_XBB_name_tag = 'FTAG_XBB'
+    FTAGXBB_name_tag = 'FTAGXBB'
 
     # Common augmentations
-    acc.merge(FTAG_XBBKernelCfg(flags, 
-                                name= FTAG_XBB_name_tag + "Kernel", 
-                                StreamName = 'StreamDAOD_'+FTAG_XBB_name_tag, 
-                                TriggerListsHelper = FTAG_XBBTriggerListsHelper))
+    acc.merge(FTAGXBBKernelCfg(flags, 
+                                name= FTAGXBB_name_tag + "Kernel", 
+                                StreamName = 'StreamDAOD_'+FTAGXBB_name_tag, 
+                                TriggerListsHelper = FTAGXBBTriggerListsHelper))
 
     gn3x_extra_variables = ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GN3XV00_phtautauhad.GN3XV00_phbb.GN3XV00_phcc.GN3XV00_ptop.GN3XV00_pqcdbb.GN3XV00_pqcdbx.GN3XV00_pqcdcx.GN3XV00_pqcdll.GN3XV00_pWqq"]
     
     # PHYS content
     from DerivationFrameworkPhys.PHYS import PHYSCoreCfg
     acc.merge(PHYSCoreCfg(flags, 
-        FTAG_XBB_name_tag,
-        StreamName = 'StreamDAOD_'+FTAG_XBB_name_tag,
-        TriggerListsHelper = FTAG_XBBTriggerListsHelper,
+        FTAGXBB_name_tag,
+        StreamName = 'StreamDAOD_'+FTAGXBB_name_tag,
+        TriggerListsHelper = FTAGXBBTriggerListsHelper,
         addExtraVariables = gn3x_extra_variables
         ))
 
     return acc
 
-def FTAG_XBBTriggerSkimmingToolCfg(flags, skimmingTools=None):
+def FTAGXBBTriggerSkimmingToolCfg(flags, skimmingTools=None):
     """configure the trigger skimming tool"""
     acc = ComponentAccumulator()
 
@@ -110,10 +110,10 @@ def FTAG_XBBTriggerSkimmingToolCfg(flags, skimmingTools=None):
 
     triggers = photon_run2 + photon_run3 + large_r_jet_run2 + large_r_jet_run3 + lepton_run2 + lepton_run3
 
-    FTAG_XBBTrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "FTAG_XBBTrigSkimmingTool1",
+    FTAGXBBTrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "FTAGXBBTrigSkimmingTool1",
             TriggerListOR          = triggers )
-    acc.addPublicTool(FTAG_XBBTrigSkimmingTool)
+    acc.addPublicTool(FTAGXBBTrigSkimmingTool)
     skimmingTools += [
-            FTAG_XBBTrigSkimmingTool
+            FTAGXBBTrigSkimmingTool
             ]
     return(acc)

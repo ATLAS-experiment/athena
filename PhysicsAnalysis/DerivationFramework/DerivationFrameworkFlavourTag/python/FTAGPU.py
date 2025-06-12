@@ -1,10 +1,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #====================================================================
-# DAOD_FTAG_PU.py
-# This defines DAOD_FTAG_PU, an unskimmed DAOD format for Run 3.
+# DAOD_FTAGPU.py
+# This defines DAOD_FTAGPU, an unskimmed DAOD format for Run 3.
 # It contains the variables and objects needed for the large majority 
 # of physics analyses in ATLAS.
-# It requires the flag FTAG_PU in Derivation_tf.py   
+# It requires the flag FTAGPU in Derivation_tf.py   
 #====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -14,27 +14,27 @@ from DerivationFrameworkFlavourTag.FtagBaseContent import (
     addCommonAugmentation
 )
 #skimming tool
-def FTAG_PUSkimmingToolCfg(flags):
+def FTAGPUSkimmingToolCfg(flags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
 
 
     jetSelection = '(count(AntiKt4EMPFlowJets.pt > 10.*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.5) >= 1)'
-    FTAG_PUOfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "FTAG_PUOfflineSkimmingTool1",
+    FTAGPUOfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "FTAGPUOfflineSkimmingTool1",
                                                                                         expression = jetSelection)
 
-    acc.addPublicTool(FTAG_PUOfflineSkimmingTool, primary=True)
+    acc.addPublicTool(FTAGPUOfflineSkimmingTool, primary=True)
 
     return(acc)
 
 # Main algorithm config
-def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for FTAG_PU"""
+def FTAGPUKernelCfg(flags, name='FTAGPUKernel', **kwargs):
+    """Configure the derivation framework driving algorithm (kernel) for FTAGPU"""
     acc = ComponentAccumulator()
     # Skimming
     skimmingTools = []
     if not flags.Input.isMC:
-        skimmingTools = [acc.getPrimaryAndMerge(FTAG_PUSkimmingToolCfg(flags)),]
+        skimmingTools = [acc.getPrimaryAndMerge(FTAGPUSkimmingToolCfg(flags)),]
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
@@ -48,41 +48,41 @@ def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
     jetSelectionString = "(AntiKt4EMPFlowByVertexJets.pt > 7.*GeV && AntiKt4EMPFlowByVertexJets.Jvt > 0.4)"
 
     # Store EMPFlowByVertexJets with JVT > 0.4. This will result in jets extending up to about 2.6 in |eta|
-    FTAG_PUAkt4PFlowByVertexJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
-                                                                                 name             = "FTAG_PUAkt4PFlowByVertexJetThinningTool",
+    FTAGPUAkt4PFlowByVertexJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                                 name             = "FTAGPUAkt4PFlowByVertexJetThinningTool",
                                                                                  ContainerName    = "AntiKt4EMPFlowByVertexJets",
                                                                                  StreamName       = kwargs['StreamName'],
                                                                                  SelectionString  = jetSelectionString))
 
-    FTAG_PUMuonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
-                                                                        name             = "FTAG_PUMuonThinningTool",
+    FTAGPUMuonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                        name             = "FTAGPUMuonThinningTool",
                                                                         ContainerName    = "Muons",
                                                                         StreamName       = kwargs['StreamName'],
                                                                         SelectionString  = muonSelectionString))
 
 
-    FTAG_PUElectronThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
-                                                                            name             = "FTAG_PUElectronThinningTool",
+    FTAGPUElectronThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                            name             = "FTAGPUElectronThinningTool",
                                                                             ContainerName    = "Electrons",
                                                                             StreamName       = kwargs['StreamName'],
                                                                             SelectionString  = electronSelectionString))
 
 
-    FTAG_PUPhotonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
-                                                                        name             = "FTAG_PUPhotonThinningTool",
+    FTAGPUPhotonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                        name             = "FTAGPUPhotonThinningTool",
                                                                         ContainerName    = "Photons",
                                                                         StreamName       = kwargs['StreamName'],
                                                                         SelectionString  = photonSelectionString))
 
 
     # Extra jet content:
-    acc.merge(FTAG_PUExtraContentCfg(flags))
+    acc.merge(FTAGPUExtraContentCfg(flags))
 
     # Finally the kernel itself
-    thinningTools = [FTAG_PUAkt4PFlowByVertexJetThinningTool,
-                     FTAG_PUMuonThinningTool,
-                     FTAG_PUElectronThinningTool,
-                     FTAG_PUPhotonThinningTool,
+    thinningTools = [FTAGPUAkt4PFlowByVertexJetThinningTool,
+                     FTAGPUMuonThinningTool,
+                     FTAGPUElectronThinningTool,
+                     FTAGPUPhotonThinningTool,
                      ]
     
 
@@ -90,12 +90,12 @@ def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
     acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))       
     
     # Extra jet content:
-    acc.merge(FTAG_PUExtraContentCfg(flags))
+    acc.merge(FTAGPUExtraContentCfg(flags))
     
     return acc
 
 
-def FTAG_PUCfg(flags):
+def FTAGPUCfg(flags):
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -103,10 +103,10 @@ def FTAG_PUCfg(flags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG_PUTriggerListsHelper = TriggerListsHelper(flags)
+    FTAGPUTriggerListsHelper = TriggerListsHelper(flags)
 
     # Common augmentations
-    acc.merge(FTAG_PUKernelCfg(flags, name="FTAG_PUKernel", StreamName = 'StreamDAOD_FTAG_PU', TriggerListsHelper = FTAG_PUTriggerListsHelper))
+    acc.merge(FTAGPUKernelCfg(flags, name="FTAGPUKernel", StreamName = 'StreamDAOD_FTAGPU', TriggerListsHelper = FTAGPUTriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -115,18 +115,18 @@ def FTAG_PUCfg(flags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG_PUSlimmingHelper = SlimmingHelper("FTAG_PUSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    FTAGPUSlimmingHelper = SlimmingHelper("FTAGPUSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
-    addCommonAugmentation(flags, acc, FTAG_PUSlimmingHelper)
+    addCommonAugmentation(flags, acc, FTAGPUSlimmingHelper)
 
-    FTAG_PUSlimmingHelper.SmartCollections = ["AntiKt4EMPFlowJets",
+    FTAGPUSlimmingHelper.SmartCollections = ["AntiKt4EMPFlowJets",
                                             "AntiKt4TruthJets",
                                             ]
-    #FtagBaseContent.add_baseline_slimming_smartcollections(FTAG_PUSlimmingHelper)
+    #FtagBaseContent.add_baseline_slimming_smartcollections(FTAGPUSlimmingHelper)
     
-    FTAG_PUSlimmingHelper.AllVariables = ["Electrons", "Photons", "Muons",
+    FTAGPUSlimmingHelper.AllVariables = ["Electrons", "Photons", "Muons",
                                           "EventInfo",
                                           "PrimaryVertices",
                                           "InDetTrackParticles",
@@ -136,7 +136,7 @@ def FTAG_PUCfg(flags):
     
     # Add truth containers
     if flags.Input.isMC:
-        FtagBaseContent.add_truth_to_SlimmingHelper(FTAG_PUSlimmingHelper)
+        FtagBaseContent.add_truth_to_SlimmingHelper(FTAGPUSlimmingHelper)
         if flags.Trigger.EDMVersion == 3:
             # Add truth labels to Run 3 trigger jets
             from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
@@ -144,33 +144,33 @@ def FTAG_PUCfg(flags):
 
    
     # Trigger content
-    FTAG_PUSlimmingHelper.IncludeTriggerNavigation = True
-    FTAG_PUSlimmingHelper.IncludeJetTriggerContent = False
-    FTAG_PUSlimmingHelper.IncludeMuonTriggerContent = True
-    FTAG_PUSlimmingHelper.IncludeEGammaTriggerContent = True
-    FTAG_PUSlimmingHelper.IncludeTauTriggerContent = False
-    FTAG_PUSlimmingHelper.IncludeEtMissTriggerContent = False
-    FTAG_PUSlimmingHelper.IncludeBJetTriggerContent = False
-    FTAG_PUSlimmingHelper.IncludeBPhysTriggerContent = False
-    FTAG_PUSlimmingHelper.IncludeMinBiasTriggerContent = False
+    FTAGPUSlimmingHelper.IncludeTriggerNavigation = True
+    FTAGPUSlimmingHelper.IncludeJetTriggerContent = False
+    FTAGPUSlimmingHelper.IncludeMuonTriggerContent = True
+    FTAGPUSlimmingHelper.IncludeEGammaTriggerContent = True
+    FTAGPUSlimmingHelper.IncludeTauTriggerContent = False
+    FTAGPUSlimmingHelper.IncludeEtMissTriggerContent = False
+    FTAGPUSlimmingHelper.IncludeBJetTriggerContent = False
+    FTAGPUSlimmingHelper.IncludeBPhysTriggerContent = False
+    FTAGPUSlimmingHelper.IncludeMinBiasTriggerContent = False
 
     # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = FTAG_PUSlimmingHelper, 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = FTAGPUSlimmingHelper, 
                                                OutputContainerPrefix = "TrigMatch_",
-                                               TriggerList = FTAG_PUTriggerListsHelper.Run2TriggerNamesNoTau)
+                                               TriggerList = FTAGPUTriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(FTAG_PUSlimmingHelper)
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(FTAGPUSlimmingHelper)
     
 
 
     jetOutputList = ["AntiKt4EMPFlowByVertexJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
-    addJetsToSlimmingTool(FTAG_PUSlimmingHelper, jetOutputList, FTAG_PUSlimmingHelper.SmartCollections)
+    addJetsToSlimmingTool(FTAGPUSlimmingHelper, jetOutputList, FTAGPUSlimmingHelper.SmartCollections)
 
     # Flavour tagging
     from BTagging.FlavorTaggingConfig import JetBTagginglessByVertexAlgCfg
@@ -181,13 +181,13 @@ def FTAG_PUCfg(flags):
         useMinZ0Vertex_vec=[True,False]))
 
     # Output stream
-    FTAG_PUItemList = FTAG_PUSlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(flags, "DAOD_FTAG_PU", ItemList=FTAG_PUItemList, AcceptAlgs=["FTAG_PUKernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_FTAG_PU", AcceptAlgs=["FTAG_PUKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    FTAGPUItemList = FTAGPUSlimmingHelper.GetItemList()
+    acc.merge(OutputStreamCfg(flags, "DAOD_FTAGPU", ItemList=FTAGPUItemList, AcceptAlgs=["FTAGPUKernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_FTAGPU", AcceptAlgs=["FTAGPUKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 
-def FTAG_PUExtraContentCfg(flags):
+def FTAGPUExtraContentCfg(flags):
     acc = ComponentAccumulator()
 
     from JetRecConfig.JetRecConfig import JetRecCfg
