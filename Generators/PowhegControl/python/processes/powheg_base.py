@@ -70,6 +70,13 @@ class PowhegBase(Configurable):
 
         ## Powheg executable that will be used
         self.executable = os.path.join(base_directory, version, executable_name, powheg_executable)
+        # Check if the file exists, if not, prepend "bin" to the path
+        if not os.path.exists(self.executable):
+            self.executable = os.path.join(base_directory, version, executable_name, "bin", powheg_executable)
+        if os.path.exists(self.executable):
+            logger.info('Executable exists = {0}'.format(self.executable))
+        else:
+            logger.info('Executable does not exist = {0}'.format(self.executable))
 
         ## Add to Python path "python" directory on POWHEG process directory
         os.environ["PYTHONPATH"] = os.path.join(base_directory, version, executable_name, "python") + ":" + os.environ.get("PYTHONPATH", "")
