@@ -43,7 +43,7 @@ def L1LegacyTopoSimulationCfg(flags):
     acc.addEventAlgo(topoSimAlg)
     return acc
 
-def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1TopoSimulation", DeactivateL1TopoMuons=False, UseMuonDecoder=False):
+def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1TopoSimulation", deactivateL1TopoMuons=False, useMuonRoIs=False, useMuonDecoder=False, writeMuonRoIs = True):
 
     acc = ComponentAccumulator()
 
@@ -53,7 +53,7 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
     #Configure the MuonInputProvider
     muProvider=""
 
-    if flags.Trigger.L1.doMuon and not DeactivateL1TopoMuons:
+    if flags.Trigger.L1.doMuon and not deactivateL1TopoMuons:
         muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider")
 
         """
@@ -65,6 +65,11 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
         if readMuCTPI:
             muProvider.locationMuCTPItoL1Topo = ""
             muProvider.locationMuCTPItoL1Topo1 = ""
+            muProvider.locationMuonRoI =  "L1MuCTPItoL1TopoLocationFromMuonRoI"
+            muProvider.locationMuonRoI1 = "L1MuCTPItoL1TopoLocationFromMuonRoI1"
+            if useMuonRoIs:
+                muProvider.locationMuonRoI =  "LVL1MuonRoIs"
+                muProvider.locationMuonRoI1 = "LVL1MuonRoIsBCp1"
         else:
             muProvider.locationMuonRoI = ""
             muProvider.locationMuonRoI1 = ""
@@ -74,14 +79,14 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
         muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
         muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
 
-        if UseMuonDecoder:
-            from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
-            acc.merge(RpcBytestreamDecodeCfg(flags))
-            acc.merge(TgcBytestreamDecodeCfg(flags))
+        if useMuonDecoder:
+            #from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
+            #acc.merge(RpcBytestreamDecodeCfg(flags))
+            #acc.merge(TgcBytestreamDecodeCfg(flags))
             from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuonRoIByteStreamToolCfg
-            muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(flags, name="L1MuonBSDecoderToolInL1Topo", writeBS=False))
+            muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(flags, name="L1MuonBSDecoderToolInL1Topo", writeBS=False, writeDecodedMuonRoIs = writeMuonRoIs))
             decoderTools += [muonRoiTool]
-            maybeMissingRobs += muonRoiTool.ROBIDs
+            #maybeMissingRobs += muonRoiTool.ROBIDs
             
     emtauProvider = ""
     jetProvider = ""

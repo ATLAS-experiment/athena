@@ -125,13 +125,6 @@ StatusCode MuonRoIByteStreamTool::initialize() {
 // -----------------------------------------------------------------------------
 StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vrobf,
                                                 const EventContext& eventContext) const {
-  // Create and record the RoI containers
-  std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>> roiHandles = m_roiWriteKeys.makeHandles(eventContext);
-  for (auto& roiHandle : roiHandles) {
-    ATH_CHECK(roiHandle.record(std::make_unique<xAOD::MuonRoIContainer>(),
-                               std::make_unique<xAOD::MuonRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded MuonRoIContainer with key " << roiHandle.key());
-  }
 
   // Create a WriteHandle for L1Topo output
   std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>> topoHandles;
@@ -170,7 +163,7 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
   // Check for empty data
   if (ndata==0) {
     ATH_MSG_ERROR("Empty ROD data in MUCTPI ROB 0x" << std::hex << sid.code() << std::dec);
-    Monitored::Group(m_monTool, monNumWords);
+    if(m_writeDecodedMuonRoIs){Monitored::Group(m_monTool, monNumWords);}
     return StatusCode::FAILURE;
   }
   ATH_MSG_DEBUG("Starting to decode " << ndata << " ROD words");
@@ -209,7 +202,7 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
         ATH_MSG_DEBUG("This is a RoI candidate word");
         if (roiSlices.empty()) {
           ATH_MSG_ERROR("Unexpected data format - found candidate word before any timeslice header");
-          Monitored::Group(m_monTool, monNumWords, monWordType, monWordTypeCount, monBCIDOffsetsWrtROB);
+          if(m_writeDecodedMuonRoIs){Monitored::Group(m_monTool, monNumWords, monWordType, monWordTypeCount, monBCIDOffsetsWrtROB);}
           return StatusCode::FAILURE;
         }
         // advance slice edges
@@ -241,13 +234,13 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             ATH_MSG_DEBUG("Error bit " << bit << ": " << LVL1::MuCTPIBits::DataStatusWordErrors.at(bit));
           }
           auto monErrorBits = Monitored::Collection("DataStatusWordErrors", errorBits);
-          Monitored::Group(m_monTool, monErrorBits);
+          if(m_writeDecodedMuonRoIs){Monitored::Group(m_monTool, monErrorBits);}
         }
         break;
       }
       default: {
         ATH_MSG_ERROR("The MUCTPI word 0x" << std::hex << word << std::dec << " does not match any known word type");
-        Monitored::Group(m_monTool, monNumWords, monWordType, monWordTypeCount, monBCIDOffsetsWrtROB);
+        if(m_writeDecodedMuonRoIs){Monitored::Group(m_monTool, monNumWords, monWordType, monWordTypeCount, monBCIDOffsetsWrtROB);}
         return StatusCode::FAILURE;
       }
     }
@@ -255,7 +248,7 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
   } // Loop over all ROD words
 
   // Fill data format monitoring histograms
-  Monitored::Group(m_monTool, monNumWords, monWordType, monWordTypeCount, monBCIDOffsetsWrtROB);
+  if(m_writeDecodedMuonRoIs){Monitored::Group(m_monTool, monNumWords, monWordType, monWordTypeCount, monBCIDOffsetsWrtROB);}
 
   // Validate the number of slices and decode the RoI candidate words in each time slice
   const size_t nSlices{roiSlices.size()};
@@ -272,7 +265,6 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
     return StatusCode::FAILURE;
   }
   const size_t outputOffset = nOutputSlices/2 - nSlices/2;
-  ATH_CHECK(decodeRoiSlices(data, roiSlices, roiHandles, outputOffset, eventContext));
 
   // Validate the number of slices and decode the Topo TOB words in each time slice
   if (m_doTopo.value()) {
@@ -293,27 +285,38 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
     ATH_CHECK(decodeTopoSlices(data, topoSlices, topoHandles, topoOutputOffset, eventContext));
   }
 
-  // Output monitoring
-  short bcOffset{static_cast<short>(5/2 - m_readoutWindow/2 - 2)};
-  auto topoHandleIt = topoHandles.begin();
-  for (auto& roiHandle : roiHandles) {
-    auto& topoHandle = *topoHandleIt;
-    Monitored::Scalar<short> monBCOffset{"BCOffset", bcOffset};
-    Monitored::Scalar<size_t> monNumRoIs{"NumOutputRoIs", roiHandle->size()};
-    if (m_doTopo.value()) {
-      Monitored::Scalar<size_t> monNumTopo{"NumOutputTopoTOBs", topoHandle->size()};
-      Monitored::Scalar<int> monNumDiff{"NumOutputDiffRoITopo", static_cast<int>(monNumRoIs)-static_cast<int>(monNumTopo)};
-      ATH_MSG_DEBUG("Decoded " << monNumRoIs << " RoIs into the " << roiHandle.key() << " container "
-                    "and " << monNumTopo << " Topo TOBs into the " << topoHandle.key() << " container");
-      Monitored::Group(m_monTool, monBCOffset, monNumRoIs, monNumTopo, monNumDiff);
-      ++topoHandleIt;
-    } else {
-      ATH_MSG_DEBUG("Decoded " << monNumRoIs << " RoIs into the " << roiHandle.key() << " container");
-      Monitored::Group(m_monTool, monBCOffset, monNumRoIs);
+  if(m_writeDecodedMuonRoIs){
+    // Create and record the RoI containers
+    std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>> roiHandles = m_roiWriteKeys.makeHandles(eventContext);
+    for (auto& roiHandle : roiHandles) {
+      ATH_CHECK(roiHandle.record(std::make_unique<xAOD::MuonRoIContainer>(),
+				 std::make_unique<xAOD::MuonRoIAuxContainer>()));
+      ATH_MSG_DEBUG("Recorded MuonRoIContainer with key " << roiHandle.key());
     }
-    ++bcOffset;
+    
+    ATH_CHECK(decodeRoiSlices(data, roiSlices, roiHandles, outputOffset, eventContext));
+  
+    // Output monitoring
+    short bcOffset{static_cast<short>(5/2 - m_readoutWindow/2 - 2)};
+    auto topoHandleIt = topoHandles.begin();
+    for (auto& roiHandle : roiHandles) {
+      auto& topoHandle = *topoHandleIt;
+      Monitored::Scalar<short> monBCOffset{"BCOffset", bcOffset};
+      Monitored::Scalar<size_t> monNumRoIs{"NumOutputRoIs", roiHandle->size()};
+      if (m_doTopo.value()) {
+	Monitored::Scalar<size_t> monNumTopo{"NumOutputTopoTOBs", topoHandle->size()};
+	Monitored::Scalar<int> monNumDiff{"NumOutputDiffRoITopo", static_cast<int>(monNumRoIs)-static_cast<int>(monNumTopo)};
+	ATH_MSG_DEBUG("Decoded " << monNumRoIs << " RoIs into the " << roiHandle.key() << " container "
+		      "and " << monNumTopo << " Topo TOBs into the " << topoHandle.key() << " container");
+	Monitored::Group(m_monTool, monBCOffset, monNumRoIs, monNumTopo, monNumDiff);
+	++topoHandleIt;
+      } else {
+	ATH_MSG_DEBUG("Decoded " << monNumRoIs << " RoIs into the " << roiHandle.key() << " container");
+	Monitored::Group(m_monTool, monBCOffset, monNumRoIs);
+      }
+      ++bcOffset;
+    }
   }
-
   return StatusCode::SUCCESS;
 }
 

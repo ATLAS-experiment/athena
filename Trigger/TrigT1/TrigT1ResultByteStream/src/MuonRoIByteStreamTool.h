@@ -72,6 +72,8 @@ private:
     this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
   Gaudi::Property<bool> m_doTopo {
     this, "DoTopo", false, "Enable decoding/encoding MUCTPI Topo TOBs"};
+  Gaudi::Property<bool> m_writeDecodedMuonRoIs {
+    this, "WriteDecodedMuonRoIs", true, "Write the MuonRoIs"};
 
   const std::string m_barrelRoIFile            = "TrigConfMuctpi/Data_ROI_Mapping_Barrel_040422.txt";
   const std::string m_ecfRoIFile               = "TrigConfMuctpi/Data_RoI_Mapping_EF_040422.txt";

@@ -65,6 +65,9 @@ StatusCode L1TopoOnlineMonitor::initialize() {
   m_overflow_countSim.reset(new float[s_nTopoCTPOutputs]);
   m_overflow_countAny.reset(new float[s_nTopoCTPOutputs]);
 
+  m_currentHdwBit.reset(new float[s_nTopoCTPOutputs]);
+  m_currentSimBit.reset(new float[s_nTopoCTPOutputs]);
+
   for (size_t i=0;i<s_nTopoCTPOutputs;i++){
     m_rateHdwNotSim[i] = 0;
     m_rateSimNotHdw[i] = 0;
@@ -86,6 +89,9 @@ StatusCode L1TopoOnlineMonitor::initialize() {
     m_overflow_countHdw[i] = 0;
     m_overflow_countSim[i] = 0;
     m_overflow_countAny[i] = 0;
+
+    m_currentHdwBit[i] = 0;
+    m_currentSimBit[i] = 0;
   }
 
   ATH_CHECK(m_l1topoKey.initialize());
@@ -653,13 +659,15 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits, const EventC
           m_countHdw[32*i+j]+=triggerBitsHdw[32*i+j];
           m_countSim[32*i+j]+=triggerBitsSim[32*i+j];
           m_countAny[32*i+j]+=triggerBitsAny[32*i+j];
+          m_currentHdwBit[32*i+j]=triggerBitsHdw[32*i+j];
+          m_currentSimBit[32*i+j]=triggerBitsSim[32*i+j];
         }
 
 	//Simplified plot for L1Calo DQ
-	if ( m_countSim[32*i+j]  < m_countHdw[32*i+j] ){ mon_match_DQ = 0;  mon_matchVsLumi_DQ = 1;}
-	if ( m_countSim[32*i+j]  > m_countHdw[32*i+j] ){ mon_match_DQ = 1;  mon_matchVsLumi_DQ = 1;}
-	if ( m_countSim[32*i+j] == m_countHdw[32*i+j] ){ mon_match_DQ = 2;  mon_matchVsLumi_DQ = 0;}
-	if ( (m_countSim[32*i+j] > 0 ||  m_countHdw[32*i+j] > 0 ) && m_TopoAlgTriggerNotVetoed[32*i+j] ) {
+	if ( m_currentSimBit[32*i+j]  < m_currentHdwBit[32*i+j] ){ mon_match_DQ = 0;  mon_matchVsLumi_DQ = 1;}
+	if ( m_currentSimBit[32*i+j]  > m_currentHdwBit[32*i+j] ){ mon_match_DQ = 1;  mon_matchVsLumi_DQ = 1;}
+	if ( m_currentSimBit[32*i+j] == m_currentHdwBit[32*i+j] ){ mon_match_DQ = 2;  mon_matchVsLumi_DQ = 0;}
+	if ( (m_currentSimBit[32*i+j] > 0 || m_currentHdwBit[32*i+j] > 0 ) && m_TopoAlgTriggerNotVetoed[32*i+j] ){
 	  Monitored::Group(m_monTool, mon_trig, mon_match_DQ);
 	  Monitored::Group(m_monTool, lbn, mon_trig_allboards, mon_matchVsLumi_DQ);
 	}
@@ -739,24 +747,24 @@ StatusCode L1TopoOnlineMonitor::doMultComp( std::vector<std::vector<unsigned>> &
 
   auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
   auto mon_multiplicity_allboards = Monitored::Scalar<unsigned>("MultiplicityAllBoards");
-  auto mon_matchVsLumi_DQ = Monitored::Scalar<unsigned>("L1TopoMultiplicityMissMatchVsLumi");
+  auto mon_multVsLumi_DQ = Monitored::Scalar<unsigned>("L1TopoMultiplicityMissMatchVsLumi");
   int AccumulatedPosition=0;
   for (size_t i=0;i<multWeightsSim.size();i++) {
     auto mon_multiplicity = Monitored::Scalar<unsigned>("MultiplicityTopo1Opt" + std::to_string(i));
-    auto mon_match = Monitored::Scalar<unsigned>("MultiplicityMatchTopo1Opt" + std::to_string(i));
+    auto mon_mult = Monitored::Scalar<unsigned>("MultiplicityMatchTopo1Opt" + std::to_string(i));
     for (size_t k=0;k<multWeightsSim[i].size();k++) {
       std::string colName = "Topo1Opt" + std::to_string(i) + "_" + std::to_string(k);
       auto monMultSim = Monitored::Scalar<unsigned>(colName+"_Sim", multWeightsSim[i][k]);
       auto monMultHdw = Monitored::Scalar<unsigned>(colName+"_Hdw", multWeightsHdw[i][k]);
       Monitored::Group(m_monTool, monMultSim, monMultHdw);
-      if (monMultSim < monMultHdw) {mon_match = 0; mon_matchVsLumi_DQ = 1;}
-      if (monMultSim > monMultHdw) {mon_match = 1;  mon_matchVsLumi_DQ = 1;}
-      if (monMultSim == monMultHdw){mon_match = 2;  mon_matchVsLumi_DQ = 0;}
+      if (monMultSim < monMultHdw) {mon_mult = 0; mon_multVsLumi_DQ = 1;}
+      if (monMultSim > monMultHdw) {mon_mult = 1;  mon_multVsLumi_DQ = 1;}
+      if (monMultSim == monMultHdw){mon_mult = 2;  mon_multVsLumi_DQ = 0;}
       mon_multiplicity = static_cast<unsigned>(k);
       mon_multiplicity_allboards = static_cast<unsigned>(k+AccumulatedPosition);
       if (( monMultSim > 0 ||  monMultHdw > 0) && m_TopoMultTriggerNotVetoed[k+AccumulatedPosition]) {
-	Monitored::Group(m_monTool, mon_multiplicity, mon_match);
-	Monitored::Group(m_monTool, lbn, mon_multiplicity_allboards, mon_matchVsLumi_DQ);
+	Monitored::Group(m_monTool, mon_multiplicity, mon_mult);
+	Monitored::Group(m_monTool, lbn, mon_multiplicity_allboards, mon_multVsLumi_DQ);
       }
     }
     AccumulatedPosition=AccumulatedPosition+multWeightsSim[i].size();
