@@ -11,9 +11,6 @@
 namespace Gep{
   struct GepCaloCell
   {
-    GepCaloCell() {}
-    ~GepCaloCell() {}
-    
     float e{};
     float et{};
     float time{};
