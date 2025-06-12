@@ -32,6 +32,8 @@
 
 #include "xAODEventInfo/EventInfo.h"
 
+#include "LArRawEvent/LArLATOMEHeaderContainer.h"
+
 class CaloIdManager;
 
 
@@ -75,7 +77,8 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
 
     Gaudi::Property<bool> m_applyMasking{this,"ApplyMasking",true,"Apply masking of supercells based on provenance bits. Should be set to False for MC"};
 
-    Gaudi::Property<bool> m_v6Mapping{this,"UseLATOMEv6Mapping",false,"If true, will use the LATOME v6 mapping"};
+    Gaudi::Property<bool> m_v6Mapping{this,"UseLATOMEv6Mapping",false,"If true, will use the LATOME v6 mapping if cannot determine from latome header"};
+    SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LArLatomeHeaderContainerKey { this, "LArLatomeHeaderKey", "SC_LATOME_HEADER" };
 
 };
 
