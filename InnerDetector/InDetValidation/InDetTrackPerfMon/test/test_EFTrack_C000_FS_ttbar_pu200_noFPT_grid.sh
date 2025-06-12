@@ -1,6 +1,7 @@
 #!/bin/bash
 # art-description: Nightly test to compare C-000 reference to latest C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
+# art-memory: 6144
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: main/Athena/x86_64-el9-gcc13-opt
 # art-include: main/Athena/x86_64-el9-clang19-opt
