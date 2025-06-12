@@ -1,6 +1,6 @@
 """Define methods to construct configured TRT Digitization tools and algorithms
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -43,9 +43,9 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     # default arguments
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
     kwargs.setdefault("InDetTRTStrawStatusSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
-    kwargs.setdefault("PAI_Tool_Ar", TRT_PAI_Process_ArToolCfg(flags))
-    kwargs.setdefault("PAI_Tool_Kr", TRT_PAI_Process_KrToolCfg(flags))
-    kwargs.setdefault("PAI_Tool_Xe", TRT_PAI_Process_XeToolCfg(flags))
+    kwargs.setdefault("PAI_Tool_Ar", acc.popToolsAndMerge(TRT_PAI_Process_ArToolCfg(flags)))
+    kwargs.setdefault("PAI_Tool_Kr", acc.popToolsAndMerge(TRT_PAI_Process_KrToolCfg(flags)))
+    kwargs.setdefault("PAI_Tool_Xe", acc.popToolsAndMerge(TRT_PAI_Process_XeToolCfg(flags)))
     kwargs.setdefault("Override_TrtRangeCutProperty", flags.Sim.TRTRangeCut)
     kwargs.setdefault("RandomSeedOffset", flags.Digitization.RandomSeedOffset)
     if not flags.Digitization.DoInnerDetectorNoise:
