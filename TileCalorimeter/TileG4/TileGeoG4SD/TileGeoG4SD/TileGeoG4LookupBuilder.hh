@@ -18,6 +18,7 @@
 #include "TileSimEvent/TileHitVector.h" //typedef
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 
 class TileGeoG4Cell;
@@ -31,6 +32,8 @@ public:
   TileGeoG4LookupBuilder(StoreGateSvc* pDetStore, const int verboseLevel);
   void BuildLookup(bool test_beam = false);
   TileGeoG4Section* GetSection(TileDddbManager::TileSections key) const;
+  
+  static std::mutex& getDbManagerMutex();
 
   // Method invoked at the end of each event by SD
   // it copies all TileHits to TileHitVector and deletes them
@@ -64,6 +67,8 @@ private:
   const TileDetDescrManager* m_theManager;
   const TileID* m_tileID;
   TileDddbManager* m_dbManager;
+  // Synchronize access to this DddbManager that is shared between all TileGeoG4LookupBuilder instances
+  static std::mutex m_dbManagerMutex;
   std::unique_ptr<TileGeoG4CellMap> m_cellMap;
   std::unique_ptr<TileGeoG4SectionMap> m_sectionMap;
   bool m_isE5{};
