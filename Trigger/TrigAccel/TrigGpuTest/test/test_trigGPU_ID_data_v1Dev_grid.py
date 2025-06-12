@@ -4,9 +4,9 @@
 # art-description: Trigger GPU test on data
 # art-type: grid
 # art-include: main/Athena
+# art-input: group.trig-hlt.data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW
+# art-input-nfiles: 1
 # art-athena-mt: 8
-# Skipping art-output which has no effect for build tests.
-# If you create a grid version, check art-output in existing grid tests.
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log

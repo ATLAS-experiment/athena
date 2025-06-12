@@ -4,6 +4,8 @@
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
+# art-input: group.trig-hlt.data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # art-output: *.txt
