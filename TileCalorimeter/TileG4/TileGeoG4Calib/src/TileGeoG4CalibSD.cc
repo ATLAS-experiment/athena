@@ -56,8 +56,6 @@
 #include "G4SDManager.hh"
 #include "G4ios.hh"
 #include "G4EventManager.hh"
-#include "G4Event.hh"
-#include "G4RunManager.hh"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 
 #include "MCTruth/VTrackInformation.h"
@@ -183,11 +181,15 @@ TileGeoG4CalibSD::~TileGeoG4CalibSD() {
 
 TileHitVectorDMBuilder* TileGeoG4CalibSD::GetHitCollection()
 {
-  auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-  if(!eventInfo){
-    return nullptr;
+  // Check that the event manager is available, ISF will call this before the Geant4 run starts
+  if(auto* eventManager = G4EventManager::GetEventManager())
+  {
+    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation()))
+    {
+      return eventInfo->GetHitCollectionMap()->Find<TileHitVectorDMBuilder>(m_tileHits);
+    }
   }
-  return eventInfo->GetHitCollectionMap()->GetSDHitCollection<TileHitVectorDMBuilder>(m_tileHits);
+  return nullptr;
 }
 
 //-----------------------------------------------------
@@ -199,7 +201,7 @@ void TileGeoG4CalibSD::Initialize(G4HCofThisEvent* /*HCE*/) {
   //BUILD TILECAL ORDINARY AND CALIBRATION LOOK-UP TABLES FOR CURRENT EVENT
   TileHitVectorDMBuilder* hitColl = GetHitCollection();
   // if the DMLookupBuilder is not set this is a new Athena event, build a new DMLookupBuilder
-  if(!hitColl->GetDMLookupBuilder())
+  if(hitColl && !hitColl->GetDMLookupBuilder())
   {
     auto lookupDM = std::make_unique<TileGeoG4DMLookupBuilder>(hitColl->GetLookupBuilder(), m_rdbSvc, m_geoModSvc, m_detStoreSvc, verboseLevel);
     lookupDM->BuildLookup(m_tileTB,m_calc->GetOptions()->plateToCell);
@@ -253,7 +255,7 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
   }
 
   if (!m_atlasG4EvtUserInfo)
-    m_atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
+    m_atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetUserInformation());
 
   // Update the event information to note that this step has been dealt with
   if ( m_atlasG4EvtUserInfo ) {
@@ -451,10 +453,10 @@ void TileGeoG4CalibSD::EndOfEvent(G4HCofThisEvent*) {
 
   //CREATE CALIBHITS FROME THEIR VECTORS AND
   //STORE THEM IN THE RESPECTIEVE CONTAINERS
-  auto hitCollections = static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation())->GetHitCollectionMap();
+  auto hitCollections = static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetUserInformation())->GetHitCollectionMap();
 
   auto score_hits = [&hitCollections](const std::string& collectionName, auto const& hits) {
-    auto hitCol = hitCollections->GetSDHitCollection<CaloCalibrationHitContainer>(collectionName);
+    auto hitCol = hitCollections->Find<CaloCalibrationHitContainer>(collectionName);
     // Cell Active Material Container
     m_calibrationHits_ptr_t it;
     hitCol->reserve(hits.size());
@@ -468,9 +470,9 @@ void TileGeoG4CalibSD::EndOfEvent(G4HCofThisEvent*) {
   score_hits(m_tileDeadMaterialCalibHits, m_deadCalibrationHits);
 
 #ifdef HITSINFO  // added by Sergey
-    auto tileActiveCellHits = hitCollections->GetSDHitCollection<CaloCalibrationHitContainer>(m_tileActiveCellCalibHits);
-    auto tileInactiveCellHits = hitCollections->GetSDHitCollection<CaloCalibrationHitContainer>(m_tileInactiveCellCalibHits);
-    auto tileDeadMaterialHits = hitCollections->GetSDHitCollection<CaloCalibrationHitContainer>(m_tileDeadMaterialCalibHits);
+    auto tileActiveCellHits = hitCollections->Find<CaloCalibrationHitContainer>(m_tileActiveCellCalibHits);
+    auto tileInactiveCellHits = hitCollections->Find<CaloCalibrationHitContainer>(m_tileInactiveCellCalibHits);
+    auto tileDeadMaterialHits = hitCollections->Find<CaloCalibrationHitContainer>(m_tileDeadMaterialCalibHits);
     if(m_ntupleCnt->StoreCNT(tileActiveCellHits,tileInactiveCellHits,tileDeadMaterialHits).isFailure()) {
       G4cout << "Failed to store calib hit info in ntuple" << G4endl;
     }
