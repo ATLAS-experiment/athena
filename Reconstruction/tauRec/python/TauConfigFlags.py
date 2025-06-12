@@ -89,6 +89,8 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.doTauEleRMRec", True)
     # helper for derivations, TauJets_EleRM not available for AODs produced before 24.0.17
     tau_cfg.addFlag("Tau.TauEleRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_EleRM" in prevFlags.Input.TypedCollections)
+    # helper for derivations, used in PHYSVAL monitoring
+    tau_cfg.addFlag("Tau.TauMuonRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_MuonRM" in prevFlags.Input.TypedCollections)
     # had-had boosted ditaus
     tau_cfg.addFlag("Tau.doDiTauRec", True)
 
