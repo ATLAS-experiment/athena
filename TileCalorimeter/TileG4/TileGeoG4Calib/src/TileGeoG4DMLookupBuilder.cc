@@ -102,7 +102,7 @@ void TileGeoG4DMLookupBuilder::BuildLookup(bool is_tb, int plateToCell) {
   // initializations
   m_sectionMap = std::make_unique<TileGeoG4CalibSectionMap>();
   {
-    std::scoped_lock lock(TileGeoG4LookupBuilder::getDbManagerMutex());
+    std::scoped_lock lock(TileGeoG4LookupBuilder::GetDbManagerMutex());
     // Building Section Look-up tables for Calibration Hits
     CreateGeoG4CalibSections(is_tb, plateToCell);
   }

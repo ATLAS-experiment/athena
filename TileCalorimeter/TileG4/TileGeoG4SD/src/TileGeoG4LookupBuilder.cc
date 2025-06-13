@@ -38,11 +38,11 @@ namespace {
 } // anonymous namespace
 
 // out-of-class static member definition
-std::mutex TileGeoG4LookupBuilder::m_dbManagerMutex;
+std::mutex TileGeoG4LookupBuilder::s_dbManagerMutex;
 
-std::mutex& TileGeoG4LookupBuilder::getDbManagerMutex()
+std::mutex& TileGeoG4LookupBuilder::GetDbManagerMutex()
 {
-  return m_dbManagerMutex;
+  return s_dbManagerMutex;
 }
 
 TileGeoG4LookupBuilder::TileGeoG4LookupBuilder(StoreGateSvc* pDetStore, const int verboseLevel)
@@ -83,7 +83,7 @@ void TileGeoG4LookupBuilder::BuildLookup(bool is_tb) {
     // we need to lock the initialization of TileGeoG4LookupBuilder because each instance
     // is sharing the m_dbManager object, which is accessed in a non-thread-safe way (calling SetCurrentTicl)
     // resulting in potential race condition
-    std::scoped_lock lock(m_dbManagerMutex);
+    std::scoped_lock lock(s_dbManagerMutex);
     m_isE5 = (m_dbManager->SetCurrentSection(10 + TileDddbManager::TILE_PLUG4, false));
     // Building
     CreateGeoG4Cells();
