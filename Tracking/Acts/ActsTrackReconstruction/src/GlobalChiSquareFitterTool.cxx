@@ -52,7 +52,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ATLASConverterTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{m_doReFitFromPRD}));
-  
+  ATH_CHECK(m_muonCalibrator.retrieve(EnableTool{!m_muonCalibrator.empty()}));
 
   m_logger = makeActsAthenaLogger(this, "Gx2fRefit");
   // Fitter
@@ -91,15 +91,25 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
     m_prdCalibrator = detail::TrkPrepRawDataCalibrator{m_ATLASConverterTool.get(), m_ROTcreator.get()};
     m_prdSurfaceAcc = detail::TrkPrepRawDataSurfaceAcc{m_ATLASConverterTool.get()};
     Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::TrkPrepRawData)];
+    configureMe = extensionTemplate;
     configureMe.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<MutableTrackStateBackend>>(&m_prdCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&m_prdSurfaceAcc);
   }
   {
     m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
     /// Needs to be filled with live.
-    m_uncalibMeasCalibrator = detail::xAODUncalibMeasCalibrator{};
     Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::xAODUnCalibMeas)];
+    configureMe = extensionTemplate;
     configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
+    configureMe.calibrator.connect<&detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
+    /// Connect the muon types with the muon calibrator
+    if (m_muonCalibrator.isEnabled()) {
+      for (const auto& muonType : {xAOD::UncalibMeasType::MdtDriftCircleType, xAOD::UncalibMeasType::RpcStripType, 
+                                   xAOD::UncalibMeasType::TgcStripType, xAOD::UncalibMeasType::MMClusterType, 
+                                   xAOD::UncalibMeasType::sTgcStripType}) {
+        m_uncalibMeasCalibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(muonType, m_muonCalibrator.get());
+      }
+    }
   }
   return StatusCode::SUCCESS;
 }
@@ -116,9 +126,8 @@ GlobalChiSquareFitterTool::Gx2FitterOptions_t
     return Gx2FitterOptions_t{tgContext, mfContext, calContext, 
                               m_gx2fExtensions[static_cast<int>(slType)], 
                               std::move(propagationOption),
-                              surface, true, true};
-  
-                                        
+                              surface, m_option_includeScat, 
+                              m_option_includeELoss};
 }
 
 // refit a track
@@ -274,15 +283,44 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(const EventContext& c
 
 // fit a set of PrepRawData objects
 // --------------------------------
-std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
-    const std::vector<ATLASUncalibSourceLink>& /*clusterList*/,
-    const Acts::BoundTrackParameters& /*initialParams*/,
-    const Acts::GeometryContext& /*tgContext*/,
-    const Acts::MagneticFieldContext& /*mfContext*/,
-    const Acts::CalibrationContext& /*calContext*/,    
-    const Acts::Surface* /*targetSurface*/) const {
-  ATH_MSG_ERROR("The ACTS Global Chi Square Fitter has no direct fitter.");
-  return nullptr;
+std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(    
+    const std::vector<ATLASUncalibSourceLink>& measList,
+    const Acts::BoundTrackParameters& initialParams,
+    const Acts::GeometryContext& tgContext,
+    const Acts::MagneticFieldContext& mfContext,
+    const Acts::CalibrationContext& calContext,   
+    const Acts::Surface* targetSurface) const {
+  
+  if (measList.empty()) {
+      ATH_MSG_DEBUG("No measurements given. Nothing to do");
+      return nullptr;
+  }
+  // Construct a perigee surface as the target surface
+  std::shared_ptr<Acts::Surface> pSurface{};
+  if (!targetSurface) {
+    pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
+    targetSurface = pSurface.get();
+  }
+ 
+  std::vector<Acts::SourceLink> sourceLinks;
+  sourceLinks.reserve(measList.size());
+  std::ranges::transform(measList, std::back_inserter(sourceLinks), 
+                         [](const xAOD::UncalibratedMeasurement* meas){
+                             return detail::xAODUncalibMeasCalibrator::pack(meas);
+                         });
+
+  Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
+                                                targetSurface, detail::SourceLinkType::xAODUnCalibMeas);
+
+  auto tracks = std::make_unique<MutableTrackContainer>(); 
+  // Perform the fit
+  auto result = m_fitter->fit(sourceLinks.begin(), sourceLinks.end(),
+                              initialParams, gx2fOptions, *tracks);
+  if (not result.ok()) {
+      ATH_MSG_VERBOSE("Global chi2 fit failed");
+      return nullptr;
+  }
+  return tracks;
 }
 
 // extend a track fit to include an additional set of MeasurementBase objects
