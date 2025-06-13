@@ -70,7 +70,7 @@ namespace MuonCombined {
         /** handle a single candidate */
         void handleCandidate(const InDetCandidate& inDetCandidate, InDetCandidateToTagMap* tagMap,
                              const IMuonCombinedInDetExtensionTool::MuonPrdData& prdData, TrackCollection* combTracks, TrackCollection* meTracks,
-                             Trk::SegmentCollection* segments, std::vector<std::shared_ptr<const Muon::MuonSegment>> msegments, const EventContext& ctx) const;
+                             Trk::SegmentCollection* segColl, std::vector<std::shared_ptr<const Muon::MuonSegment>> segments, const EventContext& ctx) const;
 
         /** add muon candidate to indet candidate */
         void addTag(const EventContext& ctx, const InDetCandidate& indetCandidate, InDetCandidateToTagMap* tagMap,
