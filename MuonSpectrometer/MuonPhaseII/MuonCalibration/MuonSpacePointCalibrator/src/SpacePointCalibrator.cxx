@@ -13,7 +13,9 @@
 #include "MuonSpacePoint/UtilFunctions.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MdtCalibData/MdtFullCalibData.h"
+
 #include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "MuonPatternHelpers/MatrixUtils.h"
 
 #include "ActsCalibration/xAODUncalibMeasCalibrator.h"
 namespace {
@@ -249,8 +251,7 @@ namespace MuonR4{
         
         /** Construct bound track parameters to fetch the global track position */
         const Acts::BoundTrackParameters trackPars{trackState.referenceSurface().getSharedPtr(), 
-                                                   trackState.predicted(),
-                                                   trackState.predictedCovariance(), 
+                                                   trackState.parameters(), trackState.covariance(), 
                                                    Acts::ParticleHypothesis::muon()};
         
         const Amg::Vector3D trackPos{trackPars.position(geoctx)};
@@ -264,8 +265,10 @@ namespace MuonR4{
                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(muonMeas);
                 MdtCalibInput calibInput{*dc, *gctx};
                 calibInput.setClosestApproach(trackPos);
-                calibInput.setTimeOfFlight(trackPars.parameters()[Acts::eBoundTime]);
+                //calibInput.setTimeOfFlight(trackPars.parameters()[Acts::eBoundTime]);
                 calibInput.setTrackDirection(trackDir, true);
+                const double driftSign = sign(trackPars.parameters()[Acts::eBoundLoc0]);
+
                 /** Vast majority of the measurements are ordinary drift tubes */
                 if (ATH_LIKELY(muonMeas->numDimensions() == 1)) {
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(*ctx, calibInput);
@@ -278,7 +281,7 @@ namespace MuonR4{
                                         <<std::endl<<calibInput<<std::endl<<calibOutput);
                         cov(Acts::eBoundLoc0,Acts::eBoundLoc0) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
                     } else {
-                        pos[Acts::eBoundLoc0] = calibOutput.driftRadius();
+                        pos[Acts::eBoundLoc0] = driftSign*calibOutput.driftRadius();
                         cov(Acts::eBoundLoc0, Acts::eBoundLoc0) = std::pow(calibOutput.driftRadiusUncert(), 2);
                     }
                     setState<1, ActsTrk::MutableMultiTrajectory>(ProjectorType::e1DimNoTime, pos, cov, link, trackState);
@@ -303,7 +306,7 @@ namespace MuonR4{
                     } else {
                         locCov(Acts::eBoundLoc0, Acts::eBoundLoc0) = std::pow(calibOutput.uncertPrimaryR(), 2);
                         locCov(Acts::eBoundLoc1, Acts::eBoundLoc1) = std::pow(calibOutput.sigmaZ(), 2);
-                        locPos[Acts::eBoundLoc0] = calibOutput.primaryDriftR();
+                        locPos[Acts::eBoundLoc0] = driftSign*calibOutput.primaryDriftR();
                         locPos[Acts::eBoundLoc1] = calibOutput.locZ();
                     }
                     setState<2, ActsTrk::MutableMultiTrajectory>(ProjectorType::e2DimNoTime, locPos, locCov, link, trackState);
