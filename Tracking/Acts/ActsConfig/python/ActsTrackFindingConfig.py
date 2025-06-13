@@ -79,6 +79,13 @@ def ActsMainTrackFindingAlgCfg(flags,
       if flags.Detector.GeometryITkStrip:
         ret += [ strip_col ]
       return ret
+
+    if flags.Detector.EnableITkPixel:
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
+        acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+    if flags.Detector.EnableITkStrip:
+        from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
+        acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
     kwargs.setdefault("DetElStatus",filterCollections(flags,'ITkStripDetectorElementStatus','ITkPixelDetectorElementStatus'))
 
     # Seed labels and collections.
