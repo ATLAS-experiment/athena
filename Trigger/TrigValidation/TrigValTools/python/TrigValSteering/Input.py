@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # This file defines the default input files for trigger validation tests
 # and keywords to retrieve them in test configuration
@@ -98,16 +98,11 @@ def get_input(keyword):
 
     log = get_logger()
 
-    # for grid jobs run on the grid, use rucio dataset input if defined, else rely on TrigValInputs.json
+    # use rucio dataset for grid jobs, else rely on EOS/cvmfs inputs (TrigValInputs.json)
     import os
-    # "local" or "grid" job
-    grid = os.getenv("ArtJobType",None) == "grid"
-    # job run on the grid
-    panda = os.getenv("PandaID",None)
-    # rucio dataset input
-    paths=os.getenv("ArtInFile",None)
+    paths = os.getenv("ArtInFile",None)
 
-    if grid and panda and paths:
+    if paths:
         source = "data" if "data" in paths else "mc"
         format = None
         for key,value in {'RAW':'BS', 'HITS':'HITS', 'RDO':'RDO', 'ESD':'ESD', 'AOD':'AOD'}.items():
@@ -115,8 +110,6 @@ def get_input(keyword):
                 format = value
                 break
         data_object = {"source":source, "format":format, "paths":[paths]}
-        print("Using rucio dataset input")
-        print(data_object)
     else:
         data = load_input_json()
         if keyword not in data.keys():

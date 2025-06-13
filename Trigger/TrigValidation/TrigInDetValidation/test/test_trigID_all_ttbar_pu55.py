@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for all_ttbar_pu55
 # art-type: grid
@@ -37,7 +37,6 @@ Slots   = 8
 Release = "current"
 
 Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json  
-GridFiles = True
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline.dat      -r Offline -o data-hists-offline.root" ),
          ( "OfflineVtx",  " TIDAdata-run3-offline-vtx.dat  -r Offline -o data-hists-offline-vtx.root" ) ]
