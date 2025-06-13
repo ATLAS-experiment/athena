@@ -482,7 +482,10 @@ namespace TrkDriftCircleMath {
     minimum.SetFunction(minFunct);
 
     // do the minimization
-    minimum.Minimize();
+    if ( !minimum.Minimize() ) {
+      ATH_MSG_DEBUG("MinuitMinimizer::Minimize() fit did not converge");
+      return false;
+    }
 
     const double *results = minimum.X();
     const double *errors = minimum.Errors();
