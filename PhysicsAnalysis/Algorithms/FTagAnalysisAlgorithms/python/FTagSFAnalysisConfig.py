@@ -38,12 +38,12 @@ def trigger_set(campaign, triggerChainsPerYear, includeAllYears, log):
 
 class FTagJetSFBlock(ConfigBlock):
     """the ConfigBlock for the FTAG scale factor per jet"""
-    def __init__(self, containerName='', selectionName=''):
+    def __init__(self):
         super(FTagJetSFBlock, self).__init__()
-        self.addOption('containerName', containerName, type=str,
+        self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption('selectionName', selectionName, type=str,
+        self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
@@ -255,13 +255,13 @@ class FTagJetSFBlock(ConfigBlock):
 class FTagEventSFBlock(ConfigBlock):
     """the ConfigBlock for the event FTAG scale factor"""
 
-    def __init__(self, containerName='', selectionName=''):
+    def __init__(self):
         super(FTagEventSFBlock, self).__init__()
         self.addDependency('OverlapRemoval', required=False)
-        self.addOption('containerName', containerName, type=str,
+        self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption('selectionName', selectionName, type=str,
+        self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
@@ -328,5 +328,9 @@ class FTagEventSFBlock(ConfigBlock):
 
 @groupBlocks
 def FlavourTaggingEventSF(seq, containerName='', selectionName=''):
-    seq.append(FTagJetSFBlock(containerName, selectionName))
-    seq.append(FTagEventSFBlock(containerName, selectionName))
+    seq.append(FTagJetSFBlock())
+    seq.setOptionValue('containerName', containerName)
+    seq.setOptionValue('selectionName', selectionName)
+    seq.append(FTagEventSFBlock())
+    seq.setOptionValue('containerName', containerName)
+    seq.setOptionValue('selectionName', selectionName)

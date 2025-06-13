@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -7,13 +7,13 @@ from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
 class FTagConfig (ConfigBlock):
     """the ConfigBlock for the flavor tagging config"""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (FTagConfig, self).__init__ ()
         self.setBlockName('FTag')
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "

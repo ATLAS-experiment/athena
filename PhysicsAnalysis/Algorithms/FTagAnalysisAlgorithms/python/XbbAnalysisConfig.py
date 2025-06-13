@@ -5,10 +5,10 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 class XbbConfig (ConfigBlock):
     """the ConfigBlock for the Xbb tagging config"""
-    def __init__ (self, containerName=''):
+    def __init__ (self):
         super (XbbConfig, self).__init__ ()
         self.setBlockName('Xbb')
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
                         noneAction='error',
                         info="the name of the input container.")
         self.addOption('XbbWP', 'FlatMassQCDEff_0p25', type=str,
