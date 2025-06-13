@@ -34,6 +34,7 @@ atlas_add_component( ActsTrackReconstruction
                InDetRecToolInterfaces
                MagFieldConditions
                MagFieldElements
+               MuonRecToolInterfacesR4
                PixelConditionsData
                StoreGateLib
                TRT_ReadoutGeometry
