@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -11,7 +11,6 @@
 #include "LArFCALCalculatorBase.h"
 
 #include "LArG4Code/LArG4Identifier.h"
-#include "LArG4Code/LArG4BirksLaw.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -36,16 +35,7 @@ namespace Units = Athena::Units;
 //
 LArFCALCalculatorBase::LArFCALCalculatorBase(const std::string& name, ISvcLocator *pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
-  , m_doHV(false)
-  , m_ChannelMap(nullptr)
-  , m_posModule(nullptr)
-  , m_negModule(nullptr)
-  , m_FCalSampling(0)
-  , m_birksLaw(nullptr)
 {
-  declareProperty("FCALHVEnable",m_doHV);
-  declareProperty("FCALSampling",m_FCalSampling);
-  //m_FCalSampling.verifier().setUpper(3); //Would need to make m_FCalSampling an IntegerProperty for this to work. Overkill?
 }
 
 StatusCode LArFCALCalculatorBase::initialize()
@@ -55,7 +45,7 @@ StatusCode LArFCALCalculatorBase::initialize()
 
   if (m_BirksLaw) {
     const double Birks_LAr_density = 1.396;
-    m_birksLaw = new LArG4BirksLaw(Birks_LAr_density,m_Birksk);
+    m_birksLaw = std::make_unique<LArG4BirksLaw>(Birks_LAr_density,m_Birksk);
   }
   if(m_doHV) {
 
@@ -65,21 +55,12 @@ StatusCode LArFCALCalculatorBase::initialize()
     }
     else {
       const FCALDetectorManager* fcalManager=manager->getFcalManager();
-      m_posModule = fcalManager->getFCAL(FCALModule::Module(m_FCalSampling),FCALModule::POS);
-      m_negModule = fcalManager->getFCAL(FCALModule::Module(m_FCalSampling),FCALModule::NEG);
+      m_posModule = fcalManager->getFCAL(FCALModule::Module(m_FCalSampling.value()),FCALModule::POS);
+      m_negModule = fcalManager->getFCAL(FCALModule::Module(m_FCalSampling.value()),FCALModule::NEG);
 
       m_hvdata = fcalManager->getHVManager().getDataSim();
     }
   }
-  return StatusCode::SUCCESS;
-}
-
-//
-// destructor
-//
-StatusCode LArFCALCalculatorBase::finalize()
-{
-  if(m_birksLaw) delete m_birksLaw;
   return StatusCode::SUCCESS;
 }
 

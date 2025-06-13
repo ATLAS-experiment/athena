@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::FCAL::LArFCALCalibCalculator
@@ -38,9 +38,7 @@ namespace LArG4 {
     public:
       LArFCALCalibCalculatorBase(const std::string& name, ISvcLocator *pSvcLocator);
       virtual StatusCode initialize() override;
-      virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
-      virtual ~LArFCALCalibCalculatorBase(){};
-
+      virtual ~LArFCALCalibCalculatorBase() = default;
 
       // The Process method returns a boolean value.  If it's true, the
       // hit can be used by Geant4; if it's false, there's something wrong
@@ -53,32 +51,27 @@ namespace LArG4 {
       // yet, but you can never tell).  Use the enum (defined in
       // VCalibrationCalculator.h) to control any special processing.
 
-
       virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
                               std::vector<G4double> & energies,
                               const eCalculatorProcessing process = kEnergyAndID) const override final;
 
       /////////////////////////////////////////////
-
       virtual G4double GetdeltaX(){return m_deltaX;} //FIXME public but not part of interface class
       virtual G4double GetdeltaY(){return m_deltaY;} //FIXME public but not part of interface class
 
     protected:
+      Gaudi::Property<G4double> m_deltaX{this, "FCALdeltaX", 0.};
+      Gaudi::Property<G4double> m_deltaY{this, "FCALdeltaY", 0.};
 
-      G4double m_deltaX;
-      G4double m_deltaY;
-
-      G4int m_FCalSampling;
+      Gaudi::Property<G4int> m_FCalSampling{this, "FCALSampling", 0};
 
     private:
-
       // Energy calculator
-      CaloG4::SimulationEnergies m_energyCalculator;
+      CaloG4::SimulationEnergies m_energyCalculator{};
 
-      G4float m_zShift;
+      G4float m_zShift{0.f};
 
-      FCAL_ChannelMap   *m_ChannelMap;
-
+      FCAL_ChannelMap   *m_ChannelMap{nullptr};
     };
   }  // namespace FCAL
 
