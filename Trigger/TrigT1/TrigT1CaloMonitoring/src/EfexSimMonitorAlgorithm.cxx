@@ -78,7 +78,10 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
         EventType = "EmulatedTowers";
         // removing next two lines until further investigation of cause of mismatches by LATOME
         //if((timeSince>=0&&timeSince<10)) EventType+="+JustAfter";
-        //else if((timeUntil>=0&&timeUntil<10)) EventType+="+JustBefore";
+        if((timeUntil>=0&&timeUntil<=1)) { // events within 1s of an OTF masking change may have mismatches
+            EventType+="+JustBeforeOTF";
+            IsEmulatedTowers=false; // wont fill emulated tower plots with mismatches from these types of events
+        }
     }
 
     SG::ReadHandle<T> tobs1{key1, ctx};

@@ -35,6 +35,7 @@ TauMETGroup =['RATE:TauMET', 'BW:Tau']
 TauJetGroup =['RATE:TauJet', 'BW:Tau']
 TauBJetGroup =['RATE:TauBJet', 'BW:Tau']
 TauPhotonGroup =['RATE:TauPhoton', 'BW:Tau']
+DiTauPhotonGroup =['RATE:DiTauPhoton', 'BW:Tau']
 MuonMETGroup =['RATE:MuonMET', 'BW:Muon']
 EgammaJetGroup = ['RATE:EgammaJet', 'BW:Egamma']
 EgammaTauGroup =['RATE:EgammaTau', 'BW:Egamma', 'BW:Tau']
@@ -1698,7 +1699,7 @@ def setupMenu():
         ChainProp(name='HLT_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], stream=['VBFDelayed'], groups=SupportPhIGroup+MultiTauGroup),
 
 
-        # Boosted di-tau chains
+        # Boosted low-pT di-tau chains
         ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB10_L1cTAU20M_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['cTAU20M', 'eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
         ChainProp(name='HLT_tau20_mediumGNTau_tau20_mediumGNTau_02dRAB10_L1cTAU20M_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['cTAU20M',  'eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
         ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_02dRAB10_L1cTAU20M_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['cTAU20M', 'eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
@@ -1706,6 +1707,16 @@ def setupMenu():
 
         ChainProp(name='HLT_tau25_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_02dRAB10_L1cTAU20M_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['cTAU20M', 'eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
         ChainProp(name='HLT_tau25_mediumGNTau_tau20_mediumGNTau_02dRAB10_L1cTAU20M_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['cTAU20M',  'eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
+
+        
+        # Boosted high-pT di-tau chains (ATR-30999)
+        # Primaries (NTrack <= 5)
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+
+        # Backup primaries (NTrack <= 3)
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk33_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk33_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
 
 
         # HH->2b2tau: di-tau support chains (ATR-28890)
@@ -1871,12 +1882,12 @@ def setupMenu():
         ChainProp(name='HLT_mu6_mu4_bBmumu_Lxy0_L1BPH-2M9-0DR15-C-MU5VFMU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-C-MU5VFMU3V']+Topo3Group),
         ChainProp(name='HLT_mu6_mu4_bDimu_L1BPH-2M9-0DR15-C-MU5VFMU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-C-MU5VFMU3V']+Topo3Group),
         #-- 2mu4 chains
-        ChainProp(name='HLT_2mu4_bJpsimumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V'], monGroups=['bphysMon:online','bphysMon:val']),
+        ChainProp(name='HLT_2mu4_bJpsimumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V'], monGroups=['bphysMon:online','bphysMon:t0']),
         ChainProp(name='HLT_2mu4_bJpsimumu_Lxy0_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']),
         ChainProp(name='HLT_2mu4_bJpsimumu_sigmaLxy3_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']),
         ChainProp(name='HLT_2mu4_bBmumu_Lxy0_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']),
         ChainProp(name='HLT_2mu4_bBmumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']),
-        ChainProp(name='HLT_2mu4_bDimu_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V'], monGroups=['bphysMon:online','bphysMon:val']),
+        ChainProp(name='HLT_2mu4_bDimu_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V'], monGroups=['bphysMon:online','bphysMon:t0']),
         ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy3_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']),
         ChainProp(name='HLT_2mu4_bUpsimumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']),
         #-- 2mu4 chains, backup with MU3VF
@@ -2520,6 +2531,9 @@ def setupMenu():
         ChainProp(name='HLT_g140_loose_tau20_mediumGNTau_probe_L1eTAU12_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEeTAU12'], groups=TagAndProbePhIGroup+TauPhotonGroup),
         ChainProp(name='HLT_g140_loose_tau20_mediumRNN_tracktwoMVA_probe_L1eTAU12_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEeTAU12'], groups=TagAndProbePhIGroup+TauPhotonGroup),
         ChainProp(name='HLT_g140_loose_tau20_mediumGNTau_probe_L1eTAU12_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M', 'PROBEeTAU12'], groups=TagAndProbePhIGroup+TauPhotonGroup),
+
+        ChainProp(name='HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1eEM26M', l1SeedThresholds=['eEM26M', 'FSNOSEED'], groups=TagAndProbePhIGroup+DiTauPhotonGroup),
+        ChainProp(name='HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1eEM28M', l1SeedThresholds=['eEM28M', 'FSNOSEED'], groups=TagAndProbePhIGroup+DiTauPhotonGroup),
         
 
         # MET + Tau T&P chains (ATR-23507)     

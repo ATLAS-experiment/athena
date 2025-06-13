@@ -10,7 +10,7 @@ log = logging.getLogger('RunTrigCostAnalysis.py')
 
 
 # Configure Cost Analysis algorithm
-def trigCostAnalysisCfg(flags, args, isMC=False):
+def trigCostAnalysisCfg(flags, args):
   from TrigCostAnalysis.ROSToROB import ROSToROBMap
 
   acc = ComponentAccumulator()
@@ -22,8 +22,8 @@ def trigCostAnalysisCfg(flags, args, isMC=False):
   enhancedBiasWeighter = CompFactory.EnhancedBiasWeighter()
   enhancedBiasWeighter.RunNumber = flags.Input.RunNumbers[0]
   enhancedBiasWeighter.UseBunchCrossingData = False
-  enhancedBiasWeighter.IsMC = isMC
-  if isMC:
+  enhancedBiasWeighter.IsMC = flags.Input.isMC
+  if flags.Input.isMC:
     MCpayload = readMCpayload(args)
     enhancedBiasWeighter.MCCrossSection = MCpayload.get('MCCrossSection')
     enhancedBiasWeighter.MCFilterEfficiency = MCpayload.get('MCFilterEfficiency')
@@ -38,11 +38,11 @@ def trigCostAnalysisCfg(flags, args, isMC=False):
   trigCostAnalysis.UseEBWeights = args.useEBWeights
   trigCostAnalysis.MaxFullEventDumps = 100
   trigCostAnalysis.FullEventDumpProbability = 1 # X. Where probability is 1 in X
-  trigCostAnalysis.UseSingleTimeRange = isMC or args.useEBWeights
+  trigCostAnalysis.UseSingleTimeRange = flags.Input.isMC or args.useEBWeights
   trigCostAnalysis.ROSToROBMap = ROSToROBMap().get_mapping()
   trigCostAnalysis.DoMonitorChainAlgorithm = args.monitorChainAlgorithm
 
-  if not isMC:
+  if not flags.Input.isMC:
     trigCostAnalysis.AdditionalHashList = readHashesFromHLTJO(args.joFile, args.smk, args.dbAlias)
   else:
     log.debug("Hashes from the HLTJO won't be retrieved for MC job")
@@ -215,8 +215,7 @@ if __name__=='__main__':
   parser.add_argument('--MCKFactor', default=1.0, type=float, help='For MC input: Additional multiplicitive fudge-factor to the supplied cross section.')
   parser.add_argument('--MCIgnoreGeneratorWeights', action='store_true', help='For MC input: Flag to disregard any generator weights.')
 
-  (args, rest) = parser.parse_known_args()
-  flags.fillFromArgs(listOfArgs=rest)
+  args = flags.fillFromArgs(parser=parser)
   flags.lock()
 
   # Initialize configuration object, add accumulator, merge, and run.
@@ -240,7 +239,7 @@ if __name__=='__main__':
     (args.smk, args.dbAlias) = readConfigFromCool(flags, args.smk, args.dbAlias)
 
   cfg.merge(hltConfigSvcCfg(flags, args.smk, args.dbAlias))
-  cfg.merge(trigCostAnalysisCfg(flags, args, flags.Input.isMC))
+  cfg.merge(trigCostAnalysisCfg(flags, args))
 
   # If you want to turn on more detailed messages ...
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG

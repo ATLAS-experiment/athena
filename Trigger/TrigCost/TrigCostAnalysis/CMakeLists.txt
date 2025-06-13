@@ -20,3 +20,8 @@ set_target_properties( TrigCostAnalysis
 
 atlas_install_scripts( share/RunTrigCostAnalysis.py share/CostAnalysisPostProcessing.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_python_modules( python/*.py python/TableConstructors/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_add_test( RunTrigCostAnalysis
+                SCRIPT test/test_runTrigCostAnalysis_config.sh
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT noerror.sh )
