@@ -24,6 +24,8 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODJet/Jet.h"
+#include "xAODPFlow/PFO.h"
+#include "xAODPFlow/FlowElement.h"
 
 namespace DerivationFramework {
 
