@@ -188,6 +188,7 @@ Trk::GaussianSumFitter::initialize()
   // Initialise the closest track parameters search algorithm
   const Amg::Vector3D referencePosition(0, 0, 0);
   m_trkParametersComparisonFunction = Trk::TrkParametersComparisonFunction(referencePosition);
+  m_particleHypothesis = m_extrapolator->particleHypothesis();
   return StatusCode::SUCCESS;
 }
 
@@ -342,7 +343,7 @@ Trk::GaussianSumFitter::fit(
   const Trk::PrepRawDataSet& prepRawDataSet,
   const Trk::TrackParameters& estimatedParametersNearOrigin,
   const Trk::RunOutlierRemoval /* Not used*/,
-  const Trk::ParticleHypothesis particleHypothesis) const
+  const Trk::ParticleHypothesis /* Not used*/) const
 {
   if (prepRawDataSet.size() < 3) {
     ATH_MSG_WARNING("Requesting Fit with less than three prep Raw Data!!!");
@@ -363,14 +364,14 @@ Trk::GaussianSumFitter::fit(
   // Perform GSF forward fit
   GSFTrajectory forwardTrajectory =
       forwardFit(ctx, extrapolatorCache, sortedPrepRawDataSet,
-                 estimatedParametersNearOrigin, particleHypothesis);
+                 estimatedParametersNearOrigin);
 
   if (forwardTrajectory.empty()) {
     return nullptr;
   }
   // Perform GSF smoother operation
   GSFTrajectory smoothedTrajectory = smootherFit(
-      ctx, extrapolatorCache, forwardTrajectory, particleHypothesis);
+      ctx, extrapolatorCache, forwardTrajectory);
   if (smoothedTrajectory.empty()) {
     return nullptr;
   }
@@ -383,7 +384,7 @@ Trk::GaussianSumFitter::fit(
 
   // Create parameters at perigee if needed
   auto perigeeMultiStateOnSurface = makePerigee(
-      ctx, extrapolatorCache, smoothedTrajectory, particleHypothesis);
+      ctx, extrapolatorCache, smoothedTrajectory);
   if (!perigeeMultiStateOnSurface.multiComponentState.empty()) {
     smoothedTrajectory.push_back(std::move(perigeeMultiStateOnSurface));
   } else {
@@ -395,7 +396,7 @@ Trk::GaussianSumFitter::fit(
   std::reverse(smoothedTrajectory.begin(), smoothedTrajectory.end());
 
   // Create Trk::Track
-  Trk::TrackInfo info(Trk::TrackInfo::GaussianSumFilter, particleHypothesis);
+  Trk::TrackInfo info(Trk::TrackInfo::GaussianSumFilter, m_particleHypothesis);
   info.setTrackProperties(TrackInfo::BremFit);
   info.setTrackProperties(TrackInfo::BremFitSuccessful);
   return std::make_unique<Track>(info, convertTrajToTrack(smoothedTrajectory),
@@ -412,7 +413,7 @@ Trk::GaussianSumFitter::fit(
   const Trk::MeasurementSet& measurementSet,
   const Trk::TrackParameters& estimatedParametersNearOrigin,
   const Trk::RunOutlierRemoval /* Not used*/,
-  const Trk::ParticleHypothesis particleHypothesis) const
+  const Trk::ParticleHypothesis /*Not used*/) const
 {
   if (measurementSet.size() < 3) {
     ATH_MSG_WARNING("Requesting fit with less than 3 Measurements!!!");
@@ -454,7 +455,7 @@ Trk::GaussianSumFitter::fit(
   // Perform GSF forwards fit
   GSFTrajectory forwardTrajectory =
       forwardFit(ctx, extrapolatorCache, sortedMeasurementSet,
-                 estimatedParametersNearOrigin, particleHypothesis);
+                 estimatedParametersNearOrigin);
 
   if (forwardTrajectory.empty()) {
     return nullptr;
@@ -462,7 +463,7 @@ Trk::GaussianSumFitter::fit(
 
   // Perform GSF smoother operation
   GSFTrajectory smoothedTrajectory = smootherFit(
-      ctx, extrapolatorCache, forwardTrajectory, particleHypothesis, ccot);
+      ctx, extrapolatorCache, forwardTrajectory, ccot);
   if (smoothedTrajectory.empty()) {
     return nullptr;
   }
@@ -475,7 +476,7 @@ Trk::GaussianSumFitter::fit(
 
   // Create parameters at perigee if needed
   auto perigeeMultiStateOnSurface = makePerigee(
-      ctx, extrapolatorCache, smoothedTrajectory, particleHypothesis);
+      ctx, extrapolatorCache, smoothedTrajectory);
   if (!perigeeMultiStateOnSurface.multiComponentState.empty()) {
     smoothedTrajectory.push_back(std::move(perigeeMultiStateOnSurface));
   } else {
@@ -486,7 +487,7 @@ Trk::GaussianSumFitter::fit(
   std::reverse(smoothedTrajectory.begin(), smoothedTrajectory.end());
 
   // Create track
-  Trk::TrackInfo info(Trk::TrackInfo::GaussianSumFilter, particleHypothesis);
+  Trk::TrackInfo info(Trk::TrackInfo::GaussianSumFilter, m_particleHypothesis);
   info.setTrackProperties(TrackInfo::BremFit);
   info.setTrackProperties(TrackInfo::BremFitSuccessful);
   return std::make_unique<Track>(info, convertTrajToTrack(smoothedTrajectory),
@@ -514,8 +515,7 @@ GSFTsos
 Trk::GaussianSumFitter::makePerigee(
   const EventContext& ctx,
   Trk::IMultiStateExtrapolator::Cache& extrapolatorCache,
-  const GSFTrajectory& smoothedTrajectory,
-  const Trk::ParticleHypothesis particleHypothesis) const
+  const GSFTrajectory& smoothedTrajectory) const
 {
 
   // Start at the end of the smoothed trajectory
@@ -533,8 +533,7 @@ Trk::GaussianSumFitter::makePerigee(
                                 *multiComponentState,
                                 perigeeSurface,
                                 Trk::oppositeMomentum,
-                                false,
-                                particleHypothesis);
+                                false);
 
   if (stateExtrapolatedToPerigee.empty()) {
     return {};
@@ -587,7 +586,6 @@ Trk::GaussianSumFitter::smootherFit(
   const EventContext& ctx,
   Trk::IMultiStateExtrapolator::Cache& extrapolatorCache,
   GSFTrajectory& forwardTrajectory,
-  const ParticleHypothesis particleHypothesis,
   const Trk::CaloCluster_OnTrack* ccot) const
 {
   if (forwardTrajectory.empty()) {
@@ -697,8 +695,7 @@ Trk::GaussianSumFitter::smootherFit(
     // is opposite to the direction of momentum
     Trk::MultiComponentState extrapolatedState = m_extrapolator->extrapolate(
         ctx, extrapolatorCache, (*loopUpdatedState),
-        measurement->associatedSurface(), Trk::oppositeMomentum, false,
-        particleHypothesis);
+        measurement->associatedSurface(), Trk::oppositeMomentum, false);
 
     if (extrapolatedState.empty()) {
       return {};
@@ -786,7 +783,7 @@ Trk::GaussianSumFitter::addCCOT(
   // Extrapolate to the Calo to get prediction
   Trk::MultiComponentState extrapolatedToCaloState = m_extrapolator->extrapolateDirectly(
     ctx, currentMultiComponentState, ownCCOT->associatedSurface(),
-    Trk::alongMomentum, false, Trk::nonInteracting);
+    Trk::alongMomentum, false);
 
   if (extrapolatedToCaloState.empty()) {
     return false;
@@ -803,7 +800,7 @@ Trk::GaussianSumFitter::addCCOT(
   // Extrapolate back to the surface near the origin
   auto improvedState = m_extrapolator->extrapolateDirectly(
       ctx, updatedStateAtCalo, currentSurface, Trk::oppositeMomentum,
-      false, Trk::nonInteracting);
+      false);
 
   if (improvedState.empty()) {
     return false;

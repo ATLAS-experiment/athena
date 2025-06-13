@@ -67,7 +67,11 @@ public:
                                          const Layer&,
                                          PropDirection direction = anyDirection) const override final;
 
-private:
+  virtual Trk::ParticleHypothesis particleHypothesis() const override final {
+    return Trk::electron;
+  }
+
+ private:
   Trk::MultiComponentState update(std::vector<GsfMaterial::Combined>&,
                                   const Trk::MultiComponentState& inputState,
                                   const Trk::Layer& layer,
