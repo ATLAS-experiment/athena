@@ -13,6 +13,8 @@
 #include "PixelSensorSD.h"
 #include "PixelSensorGmxSD.h"
 
+#include "HitManagement/HitCollectionMap.h"
+#include "InDetSimEvent/SiHitCollection.h"
 #include <GeoModelRead/ReadGeoModel.h>
 
 // STL includes
@@ -23,6 +25,18 @@
 PixelSensorSDTool::PixelSensorSDTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase( type , name , parent )
 {
+}
+
+StatusCode PixelSensorSDTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<SiHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PixelSensorSDTool::Gather(HitCollectionMap& hitCollections)
+{
+  hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

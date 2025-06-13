@@ -13,6 +13,8 @@
 #include "SctSensorGmxSD.h"
 
 #include <GeoModelRead/ReadGeoModel.h>
+#include "HitManagement/HitCollectionMap.h"
+#include "InDetSimEvent/SiHitCollection.h"
 
 // STL includes
 #include <exception>
@@ -23,6 +25,18 @@ SctSensorSDTool::SctSensorSDTool(const std::string& type, const std::string& nam
   : SensitiveDetectorBase( type , name , parent ),m_isGmxSensor(false)
 {
   declareProperty("GmxSensor",m_isGmxSensor);
+}
+
+StatusCode SctSensorSDTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<SiHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode SctSensorSDTool::Gather(HitCollectionMap& hitCollections)
+{
+  hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

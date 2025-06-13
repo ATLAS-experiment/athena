@@ -15,7 +15,6 @@
 
 // use of the hits
 #include "InDetSimEvent/SiHitCollection.h"
-#include "StoreGate/WriteHandle.h"
 #include <gtest/gtest_prod.h>
 
 // G4 needed classes
@@ -26,15 +25,11 @@ class G4HCofThisEvent;
 
 class PixelSensorSD : public G4VSensitiveDetector
 {
- FRIEND_TEST( PixelSensorSDtest, Initialize );
  FRIEND_TEST( PixelSensorSDtest, ProcessHits );
  FRIEND_TEST( PixelSensorSDtest, AddHit );
  public:
   // Constructor
   PixelSensorSD(const std::string& name, const std::string& hitCollectionName);
-
-  // Destructor
-  virtual ~PixelSensorSD() { /* I don't own myHitColl if all has gone well */ }
 
   // Process the hits from G4
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
@@ -49,7 +44,8 @@ class PixelSensorSD : public G4VSensitiveDetector
 
  private:
   // The hits collection
-  SG::WriteHandle<SiHitCollection> m_HitColl;
+  std::string m_HitCollName;
+  SiHitCollection* m_HitColl{nullptr};
 };
 
 #endif //PIXEL_G4_SD_PIXELSENSORSD_H
