@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTACKER_MAGNET_H
@@ -31,7 +31,7 @@ namespace FPTracker{
 	   double aper_A4,
 	   double xb,
 	   Side side,
-	   IBender::ConstPtr_t bender, 
+	   IBender* bender, 
 	   const std::string& label
 	   );
     /*
@@ -79,7 +79,7 @@ namespace FPTracker{
     double              m_aper_A4;
     double              m_xb;
     Side                m_side;
-    IBender::ConstPtr_t m_bender;
+    IBender * m_bender{};
     std::string m_label;
 
 

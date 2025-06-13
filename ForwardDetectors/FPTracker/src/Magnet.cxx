@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/Magnet.h"
@@ -8,7 +8,6 @@
 #include "FPTracker/IBender.h"
 #include <sstream>
 #include <cmath>
-//#include <iostream>
 #include <cassert>
 
 namespace FPTracker{
@@ -30,7 +29,7 @@ namespace FPTracker{
 		 double aper_A4,
 		 double xb,
 		 Side side,
-		 IBender::ConstPtr_t  bender, 
+		 IBender * bender, 
 		 const std::string& label):
     m_center(x, y, center),
     m_frontFace(center>0 ? center-0.5*length:center+0.5*length),

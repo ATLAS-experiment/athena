@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/magnetFactory.h"
@@ -115,7 +115,7 @@ namespace FPTracker{
 					  A4, 
 					  X, 
 					  side, 
-					  bender, 
+					  bender.get(), 
 					  label
 					  )
 			      );
