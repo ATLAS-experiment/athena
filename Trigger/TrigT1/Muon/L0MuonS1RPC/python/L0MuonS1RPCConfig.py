@@ -6,7 +6,7 @@ from AthenaCommon.Logging import logging
 _log = logging.getLogger(__name__)
 
 def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
-
+    
     result = ComponentAccumulator()
 
     alg = CompFactory.L0Muon.RPCSimulation(name = name, **kwargs)
@@ -22,6 +22,9 @@ def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
 
     result.addEventAlgo(alg)
     result.addService(histSvc)
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags))
+    
     return result
   
 
