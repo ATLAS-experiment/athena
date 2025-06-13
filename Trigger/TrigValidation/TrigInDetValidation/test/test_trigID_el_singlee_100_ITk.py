@@ -4,7 +4,7 @@
 # art-description: art job for el_singlee_100_ITk
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-input: mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697
+# art-input: mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
 # art-input-nfiles: 20
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
@@ -37,7 +37,7 @@ GridFiles = True
 # by default, all MC tests override the global conditions tag and force defaultConditionsTags.RUN3_MC, which is not suitable for Run4
 conditionsOverride = 'Run4'
 
-preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;"
+preexec_trig = "flags.Tracking.doTruth=False;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run4.dat                    -o data-hists.root -p 11" ),
          ( "Offline",     " TIDAdata-run4-offline.dat -r Offline -o data-hists-offline.root" ) ]
