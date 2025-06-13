@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EndcapCryostat::CalibrationMixedCalculator
@@ -134,16 +134,11 @@ namespace LArG4 {
 
     CalibrationMixedCalculator::CalibrationMixedCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_par(nullptr)
-      , m_backupCalculator("EndcapCryostatCalibrationLArCalculator",name)
     {
-      declareProperty("BackupCalculator",m_backupCalculator);
     }
 
     StatusCode CalibrationMixedCalculator::initialize() {
       // Get a "backup" calculator.
-      //if ( m_backupCalculator == 0)
-      //m_backupCalculator = new CalibrationLArCalculator();
       ATH_CHECK(m_backupCalculator.retrieve());
       m_par = new Parameters();
       return StatusCode::SUCCESS;
@@ -153,8 +148,6 @@ namespace LArG4 {
     CalibrationMixedCalculator::~CalibrationMixedCalculator()
     {
       // Cleanup pointers.
-      //delete m_backupCalculator;
-      //m_backupCalculator = 0;
       delete m_par;
     }
 
