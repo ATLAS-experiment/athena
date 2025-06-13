@@ -34,6 +34,9 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::initialize()
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     if (m_setSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
 
+    // Convert number of missing hits to threshold.
+    m_threshold = ((m_isSecondStage) ? m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers() : m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers()) - m_threshold;
+
     // This should be done properly through the monitors, later.
     m_inputRoads = new TH1I((m_isSecondStage) ? "srft_input_roads2" : "srft_input_roads", "srft_input_roads", 1000, -0.5, 1000-0.5);
     m_badRoads = new TH1I((m_isSecondStage) ? "srft_bad_roads2" : "srft_bad_roads", "srft_bad_roads", 1000, -0.5, 1000-0.5);
