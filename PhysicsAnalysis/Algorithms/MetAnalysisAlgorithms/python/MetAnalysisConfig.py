@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -8,9 +8,9 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 class MetAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the MET configuration"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (MetAnalysisConfig, self).__init__ ()
-        self.addOption('containerName', containerName, type=str,
+        self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container")
         self.addOption ('useJVT', True, type=bool,
