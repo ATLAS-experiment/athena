@@ -84,8 +84,7 @@ public:
     const MultiComponentState&,
     const Surface&,
     PropDirection direction,
-    const BoundaryCheck& boundaryCheck,
-    ParticleHypothesis particleHypothesis) const = 0;
+    const BoundaryCheck& boundaryCheck) const = 0;
 
   /** Configured AlgTool extrapolation without material effects method (2) */
   virtual MultiComponentState extrapolateDirectly(
@@ -93,8 +92,12 @@ public:
     const MultiComponentState&,
     const Surface&,
     PropDirection direction,
-    const BoundaryCheck& boundaryCheck,
-    ParticleHypothesis particleHypothesis) const = 0;
+    const BoundaryCheck& boundaryCheck) const = 0;
+
+  //!< The particle hypothesis used.
+  virtual Trk::ParticleHypothesis particleHypothesis() const = 0;
+
+
 };
 
 } // end trk namespace

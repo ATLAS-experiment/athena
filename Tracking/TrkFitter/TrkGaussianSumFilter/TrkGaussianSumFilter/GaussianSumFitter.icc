@@ -27,8 +27,7 @@ Trk::GaussianSumFitter::stepForwardFit(
     GSFTrajectory& forwardTrajectory,
     const T* inMeasurement,
     const Trk::Surface& surface,
-    Trk::MultiComponentState& updatedState,
-    const Trk::ParticleHypothesis particleHypothesis) const {
+    Trk::MultiComponentState& updatedState) const {
 
   static_assert(std::is_same_v<T, Trk::MeasurementBase> ||
                     std::is_same_v<T, Trk::PrepRawData>,
@@ -46,8 +45,7 @@ Trk::GaussianSumFitter::stepForwardFit(
                                 updatedState,
                                 surface,
                                 Trk::alongMomentum,
-                                false,
-                                particleHypothesis);
+                                false);
   if (predictedState.empty()) {
     return false;
   }
@@ -111,8 +109,7 @@ Trk::GaussianSumFitter::forwardFit(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache& extrapolatorCache,
     const T& inputSet,
-    const Trk::TrackParameters& estimatedTrackParametersNearOrigin,
-    const Trk::ParticleHypothesis particleHypothesis) const {
+    const Trk::TrackParameters& estimatedTrackParametersNearOrigin) const {
 
   static_assert(std::is_same_v<T, Trk::MeasurementSet> ||
                     std::is_same_v<T, Trk::PrepRawDataSet>,
@@ -145,7 +142,7 @@ Trk::GaussianSumFitter::forwardFit(
       const bool stepIsValid =
           stepForwardFit(ctx, extrapolatorCache, forwardTrajectory,
                          measurement, measurement->associatedSurface(),
-                         multiComponentStateNearOrigin, particleHypothesis);
+                         multiComponentStateNearOrigin);
       if (!stepIsValid) {
         return GSFTrajectory{};
       }
@@ -167,7 +164,7 @@ Trk::GaussianSumFitter::forwardFit(
       const bool stepIsValid = stepForwardFit(
           ctx, extrapolatorCache, forwardTrajectory, prepRawData,
           prepRawData->detectorElement()->surface(prepRawData->identify()),
-          multiComponentStateNearOrigin, particleHypothesis);
+          multiComponentStateNearOrigin);
 
       if (!stepIsValid) {
         return GSFTrajectory{};

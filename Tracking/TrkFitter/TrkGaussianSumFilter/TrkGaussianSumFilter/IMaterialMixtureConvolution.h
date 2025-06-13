@@ -59,6 +59,10 @@ public:
     const MultiComponentState&,
     const Layer&,
     PropDirection direction) const = 0;
+
+  //!< The particle hypothesis we implement material effects for.
+  virtual Trk::ParticleHypothesis particleHypothesis() const = 0;
+
 };
 
 } // end Trk namespace

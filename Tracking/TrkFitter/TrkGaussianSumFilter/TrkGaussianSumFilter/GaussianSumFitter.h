@@ -59,6 +59,15 @@ public:
   /// @name Inteface method. The main one are the ones taking
   /// Measurement or Raw Data inputs. The rest are implemented on top
   /// of these two.
+  /// We follow the ITrackFitter interface but not all arguements
+  /// are meaningfull
+  ///
+  /// We do not implement outlier remove.
+  /// Actually by default we try to
+  /// re-integrate possible outliers from non-GSF fits.
+  ///
+  /// The material effects actually applied are determined
+  /// by the dedicated configured GsfExtrapolator.
 
   /** @brief Fit a collection of 'PrepRawData' objects using the Gaussian Sum Filter
       - This requires that an trackParameters object be supplied also as an
@@ -68,7 +77,7 @@ public:
     const PrepRawDataSet&,
     const TrackParameters&,
     const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const override final;
+    const ParticleHypothesis /*Not used*/) const override final;
 
   /** @brief Fit a collection of 'RIO_OnTrack' objects using the Gaussian Sum Filter
       - This requires that an trackParameters object be supplied also as an
@@ -78,15 +87,14 @@ public:
     const MeasurementSet&,
     const TrackParameters&,
     const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const override final;
+    const ParticleHypothesis particleHypothesis /*Not used*/) const override final;
 
   /** @brief Refit a track*/
   virtual std::unique_ptr<Track> fit(
     const EventContext& ctx,
     const Track&,
     const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis particleHypothesis =
-      nonInteracting) const override final;
+    const ParticleHypothesis /*Not used*/) const override final;
 
   /** @brief Refit a track adding a PrepRawDataSet*/
   virtual std::unique_ptr<Track> fit(
@@ -94,7 +102,7 @@ public:
     const Track&,
     const PrepRawDataSet&,
     const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis matEffects = nonInteracting) const override final;
+    const ParticleHypothesis /*Not used*/) const override final;
 
   /** @brief Refit a track adding a measurement base set*/
   virtual std::unique_ptr<Track> fit(
@@ -102,7 +110,7 @@ public:
     const Track&,
     const MeasurementSet&,
     const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis matEffects = nonInteracting) const override final;
+    const ParticleHypothesis /*Not used*/) const override final;
 
   /** @brief Combine two tracks by refitting their measurements*/
   virtual std::unique_ptr<Track> fit(
@@ -110,13 +118,16 @@ public:
     const Track&,
     const Track&,
     const RunOutlierRemoval /*Not used*/,
-    const ParticleHypothesis matEffects = nonInteracting) const override final;
+    const ParticleHypothesis /*Not used*/) const override final;
   /// @}
  // Internally we can use a simple std::vector
  using GSFTrajectory = std::vector<GSFTsos>;
 
 private:
-/** @brief Helper to convert the GSFTrajectory to a Trk::Track */
+ /// @{
+ /// @name Helper methods
+
+ /** @brief Helper to convert the GSFTrajectory to a Trk::Track */
  std::unique_ptr<MultiComponentStateOnSurfaceDV> convertTrajToTrack(
      GSFTrajectory& trajectory) const;
 
@@ -124,17 +135,23 @@ private:
  GSFTsos makePerigee(
      const EventContext& ctx,
      Trk::IMultiStateExtrapolator::Cache&,
-     const GSFTrajectory& smoothedTrajectory,
-     const ParticleHypothesis particleHypothesis = nonInteracting) const;
+     const GSFTrajectory& smoothedTrajectory) const;
+/** Methof to add the CaloCluster onto the track */
+ bool  addCCOT(const EventContext& ctx,
+               const Trk::CaloCluster_OnTrack* ccot,
+               GSFTrajectory& smoothedTrajectory) const;
+ /// @}
 
-  /** @brief Forward GSF fit */
+ /// @{
+ /// @name Actual implementation of the GSF formalism
+
+ /** @brief Forward GSF fit */
  template <typename T>
  GSFTrajectory forwardFit(
      const EventContext& ctx,
      IMultiStateExtrapolator::Cache& cache,
      const T& inputSet,
-     const TrackParameters& estimatedTrackParametersNearOrigin,
-     const ParticleHypothesis particleHypothesis = nonInteracting) const;
+     const TrackParameters& estimatedTrackParametersNearOrigin) const;
 
  /** @brief Progress one step along the forward fit */
  template <typename T>
@@ -144,8 +161,7 @@ private:
      GSFTrajectory& forwardTrajectory,
      const T* measurement,
      const Surface& surface,
-     MultiComponentState& updatedState,
-     const ParticleHypothesis particleHypothesis = nonInteracting) const;
+     MultiComponentState& updatedState) const;
 
  /** @brief Gsf smoothed trajectory. This method can handle additional info like
   * calorimeter cluster constraints. It also produces what we actually store in
@@ -153,15 +169,10 @@ private:
  GSFTrajectory smootherFit(
      const EventContext& ctx, Trk::IMultiStateExtrapolator::Cache&,
      GSFTrajectory& forwardTrajectory,
-     const ParticleHypothesis particleHypothesis = nonInteracting,
      const CaloCluster_OnTrack* ccot = nullptr) const;
 
- /** Methof to add the CaloCluster onto the track */
- bool  addCCOT(const EventContext& ctx,
-               const Trk::CaloCluster_OnTrack* ccot,
-               GSFTrajectory& smoothedTrajectory) const;
-
-private:
+ /// @}
+ private:
  ToolHandle<IMultiStateExtrapolator> m_extrapolator{
      this, "ToolForExtrapolation", "Trk::GsfExtrapolator/GsfExtrapolator", ""};
 
@@ -202,6 +213,7 @@ private:
      "theta, q / p]"};
 
  TrkParametersComparisonFunction m_trkParametersComparisonFunction;
+ Trk::ParticleHypothesis m_particleHypothesis = Trk::electron;
 };
 
 } // end Trk namespace
