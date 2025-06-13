@@ -27,8 +27,8 @@ class SctSensorSDTool : public SensitiveDetectorBase
   // Constructor
   SctSensorSDTool(const std::string& type, const std::string& name, const IInterface *parent);
 
-  // Destructor
-  ~SctSensorSDTool() { /* If all goes well we do not own myHitColl here */ }
+  virtual StatusCode SetupEvent(HitCollectionMap&) override;
+  virtual StatusCode Gather(HitCollectionMap&) override;
 
 protected:
   // Make me an SD!

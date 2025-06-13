@@ -14,7 +14,6 @@
 
 // use of the hits
 #include "InDetSimEvent/SiHitCollection.h"
-#include "StoreGate/WriteHandle.h"
 #include <gtest/gtest_prod.h>
 
 // G4 needed classes
@@ -27,15 +26,11 @@ namespace GeoModelIO{
 
 class PixelSensorGmxSD : public G4VSensitiveDetector
 {
- FRIEND_TEST( PixelSensorGmxSDtest, Initialize );
  FRIEND_TEST( PixelSensorGmxSDtest, ProcessHits );
  FRIEND_TEST( PixelSensorGmxSDtest, AddHit );
  public:
   // Constructor
   PixelSensorGmxSD(const std::string& name, const std::string& hitCollectionName, GeoModelIO::ReadGeoModel * sqlreader=nullptr);
-
-  // Destructor
-  virtual ~PixelSensorGmxSD() { /* I don't own myHitColl if all has gone well */ }
 
   // Process the hits from G4
   virtual G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
@@ -50,8 +45,9 @@ class PixelSensorGmxSD : public G4VSensitiveDetector
 
  private:
   // The hits collection
-  SG::WriteHandle<SiHitCollection> m_HitColl;
-  GeoModelIO::ReadGeoModel * m_sqlreader;
+  std::string m_HitCollName;
+  SiHitCollection* m_HitColl{nullptr};
+  GeoModelIO::ReadGeoModel * m_sqlreader{nullptr};
 
 };
 

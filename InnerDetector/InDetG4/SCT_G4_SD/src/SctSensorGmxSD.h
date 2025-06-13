@@ -34,7 +34,7 @@ public:
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
 
   private:
-  GeoModelIO::ReadGeoModel * m_sqlreader;
+  GeoModelIO::ReadGeoModel * m_sqlreader{nullptr};
 
 };
 

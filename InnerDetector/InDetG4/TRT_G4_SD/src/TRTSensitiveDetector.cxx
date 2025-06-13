@@ -7,6 +7,7 @@
 #include "TRTSensitiveDetector.h"
 
 // Athena includes
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "TRT_G4Utilities/TRTParameters.hh"
 #include "TRT_G4Utilities/TRTOutputFile.hh"
 #include "TRTParametersForBarrelHits.h"
@@ -25,6 +26,7 @@
 #include "G4ThreeVector.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
+#include <G4EventManager.hh>
 #include "G4Gamma.hh"
 #include "G4Electron.hh"
 #include "G4Positron.hh"
@@ -35,7 +37,6 @@
 
 //stl includes
 #include <cmath>
-#include <memory> // For make unique
 #include <utility>
 
 TRTSensitiveDetector::TRTSensitiveDetector(const std::string& name, const std::string& hitCollectionName, int setVerboseLevel)
@@ -53,7 +54,7 @@ TRTSensitiveDetector::TRTSensitiveDetector(const std::string& name, const std::s
     m_preStepY(0.0), m_preStepZ(0.0), m_postStepX(0.0), m_postStepY(0.0),
     m_postStepZ(0.0), m_globalTime(0.0),
     //End of Properties of current TRTUncompressedHit
-    m_HitColl( hitCollectionName ), m_pParameters(nullptr),
+    m_HitCollName( hitCollectionName ), m_pParameters(nullptr),
     m_pProcessingOfBarrelHits(nullptr), m_pProcessingOfEndCapHits(nullptr),
     m_pMaterialXe(nullptr), m_pMaterialKr(nullptr), m_pMaterialAr(nullptr)
 {
@@ -203,8 +204,14 @@ void TRTSensitiveDetector::Initialize(G4HCofThisEvent* /*pHCofThisEvent*/)
     G4cout << GetName() << "ERROR Did not find the photoelectic process!!!" << G4endl;
   }
 
-
-  if (!m_HitColl.isValid()) m_HitColl = std::make_unique<TRTUncompressedHitCollection>();
+  // nullptr checks are needed for unit tests because geant4 run is not initialized
+  // in real jobs, event manager, and event info are always set
+  if(auto* eventManager = G4EventManager::GetEventManager())
+  {
+    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation())) {
+      m_HitColl = eventInfo->GetHitCollectionMap()->Find<TRTUncompressedHitCollection>(m_HitCollName);
+    }
+  }
 
   if(verboseLevel>4)
     {

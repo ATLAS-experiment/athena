@@ -7,13 +7,27 @@
 #include "TRTSensitiveDetectorTool.h"
 
 // Package headers
+#include "InDetSimEvent/TRTUncompressedHitCollection.h"
 #include "TRTSensitiveDetector.h"
+#include "HitManagement/HitCollectionMap.h"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 TRTSensitiveDetectorTool::TRTSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase( type , name , parent )
 {
+}
+
+StatusCode TRTSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<TRTUncompressedHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode TRTSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
+{
+  hitCollections.Record<TRTUncompressedHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
