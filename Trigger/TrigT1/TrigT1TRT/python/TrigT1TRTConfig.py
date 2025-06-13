@@ -11,7 +11,7 @@ def L1TRTSimCfg(flags, name="TrigT1TRT"):
     acc.merge(TRTStrawStatusCondAlgCfg(flags))
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg,TRT_StrawNeighbourSvcCfg
     trtStrawStatusSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
-    trtStrawNeighbourSvc = acc.getPrimary(TRT_StrawNeighbourSvcCfg(flags))
+    trtStrawNeighbourSvc = acc.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags))
     from AthenaConfiguration.ComponentFactory import CompFactory
     if flags.Input.Format is Format.BS:
         from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
