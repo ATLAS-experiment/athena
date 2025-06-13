@@ -177,6 +177,7 @@ StatusCode FixHepMC::execute() {
       size_t no_endv = 0;
       size_t no_prov = 0;
       HepMC::FourVector sum(0,0,0,0);
+      std::set<HepMC::GenVertexPtr> standalone;
       for (const auto& part : semi_disconnected) {
         if (!part->production_vertex() || !part->production_vertex()->id()) {
           no_prov++; sum += part->momentum();
@@ -184,10 +185,13 @@ StatusCode FixHepMC::execute() {
         if (!part->end_vertex()) { 
           no_endv++;  sum -= part->momentum();
         }
+        if (part->production_vertex()) standalone.insert(part->production_vertex());
+        if (part->end_vertex()) standalone.insert(part->end_vertex());
       }
-      ATH_MSG_INFO("Heuristics: found " << semi_disconnected.size() << " semi-disconnected particles. Momentum sum is " << sum);
+      ATH_MSG_INFO("Heuristics: found " << semi_disconnected.size() << " semi-disconnected particles. Momentum sum is " << sum << " Standalone vertices " << standalone.size());
+      bool standalonevertex = (standalone.size() == 1 && (*standalone.begin())->particles_in().size() + (*standalone.begin())->particles_out().size() == semi_disconnected.size());
       /// The condition below will cover 1->1, 1->2 and 2->1 cases
-      if (no_endv && no_prov  && ( no_endv + no_prov  == semi_disconnected.size() )) {
+      if (! standalonevertex && no_endv && no_prov  && ( no_endv + no_prov  == semi_disconnected.size() )) {
         if (std::abs(sum.px()) < 1e-2  && std::abs(sum.py()) < 1e-2  && std::abs(sum.pz()) < 1e-2 ) {
           ATH_MSG_INFO("Try " << no_endv << "->" << no_prov << " splitting/merging.");
           auto v = HepMC::newGenVertexPtr();
