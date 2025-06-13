@@ -7,9 +7,11 @@ from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
 class KLFitterBlock(ConfigBlock):
     """ConfigBlock for KLFitter algorithms"""
 
-    def __init__(self, containerName):
+    def __init__(self):
         super(KLFitterBlock, self).__init__()
-        self.containerName = containerName
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
         self.addOption(
             "electrons",
             "",
