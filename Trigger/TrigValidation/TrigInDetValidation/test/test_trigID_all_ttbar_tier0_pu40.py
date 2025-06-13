@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for all_ttbar_tier0_pu40
 # art-type: grid
@@ -39,7 +39,6 @@ Release = "current"
 ExtraAna = " --doTIDATier0=True "
 
 Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json  
-GridFiles = True
 
 Jobs = [] 
 
