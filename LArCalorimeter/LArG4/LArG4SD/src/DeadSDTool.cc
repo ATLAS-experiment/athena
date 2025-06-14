@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DeadSDTool.h"
@@ -22,46 +22,7 @@ namespace LArG4
   DeadSDTool::DeadSDTool(const std::string& type, const std::string& name,
                          const IInterface* parent)
     : CalibSDTool(type, name, parent)
-    , m_hitCollName("LArCalibrationHitDeadMaterial")
-    , m_embccalc("BarrelCryostatCalibrationCalculator", name)
-    , m_embclarcalc("BarrelCryostatCalibrationLArCalculator", name)
-    , m_mixcalc("BarrelCryostatCalibrationMixedCalculator", name)
-    , m_dmcalc("DMCalibrationCalculator", name)
-    , m_embpscalc("BarrelPresamplerCalibrationCalculator", name)
-    , m_embcalc("BarrelCalibrationCalculator", name)
-    , m_emeccalc("EndcapCryostatCalibrationCalculator", name)
-    , m_emecclarcalc("EndcapCryostatCalibrationLArCalculator", name)
-    , m_ememixcalc("EndcapCryostatCalibrationMixedCalculator", name)
-    , m_emesupcalc("EMECSupportCalibrationCalculator", name)
-    , m_heccalc("HECCalibrationWheelDeadCalculator", name)
-    , m_defcalc("CalibrationDefaultCalculator", name)
   {
-    declareProperty("HitCollectionName", m_hitCollName);
-    declareProperty("BarrelCryVolumes", m_barCryVolumes);
-    declareProperty("BarrelCryLArVolumes", m_barCryLArVolumes);
-    declareProperty("BarrelCryMixVolumes", m_barCryMixVolumes);
-    declareProperty("DeadMaterialVolumes", m_DMVolumes);
-    declareProperty("BarrelPresVolumes", m_barPresVolumes);
-    declareProperty("BarrelVolumes", m_barVolumes);
-    declareProperty("ECCryVolumes", m_ECCryVolumes);
-    declareProperty("ECCryLArVolumes", m_ECCryLArVolumes);
-    declareProperty("ECCryMixVolumes", m_ECCryMixVolumes);
-    declareProperty("ECSupportVolumes", m_ECSupportVolumes);
-    declareProperty("HECWheelVolumes", m_HECWheelVolumes);
-    declareProperty("doEscapedEnergy", m_do_eep=false);
-
-    declareProperty("EMBCryoCalibrationCalculator",m_embccalc);
-    declareProperty("EMBCryoLArCalibrationCalculator",m_embclarcalc);
-    declareProperty("EMBCryoMixCalibrationCalculator",m_mixcalc);
-    declareProperty("DMCalibrationCalculator",m_dmcalc);
-    declareProperty("EMBPSCalibrationCalculator",m_embpscalc);
-    declareProperty("EMBCalibrationCalculator",m_embcalc);
-    declareProperty("ECCryoCalibrationCalculator",m_emeccalc);
-    declareProperty("ECCryoLArCalibrationCalculator",m_emecclarcalc);
-    declareProperty("ECCryoMixCalibrationCalculator",m_ememixcalc);
-    declareProperty("EMECSuppCalibrationCalculator",m_emesupcalc);
-    declareProperty("HECWheelDeadCalculator",m_heccalc);
-    declareProperty("DefaultCalibrationCalculator",m_defcalc);
   }
 
   //---------------------------------------------------------------------------
