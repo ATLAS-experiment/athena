@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for cosmic
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-input: group.trig-hlt.mc23_13p6TeV.310772.CosmicRays_CollisionSetup.recon.RDO.s4261_s4260_r15236_tid36836491_00
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -29,6 +31,7 @@
 
 
 Slices  = ['cosmic']
+# currently only 1k events available, bump up to 4k once staging from tape to disk is complete
 Events  = 4000
 Threads = 8 
 Slots   = 8

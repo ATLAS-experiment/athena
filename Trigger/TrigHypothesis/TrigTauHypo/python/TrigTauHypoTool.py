@@ -106,7 +106,7 @@ def TrigTauPrecisionIDHypoToolFromDict(flags, chainDict):
         # Monitor this algorithm only
         id_score_monitoring[identification] = getTauIDScoreVariables(identification, precision_seq_name)
 
-    # For any triggers following the tracktwo reconstruction (2023 DeepSet)
+    # For any triggers following the tracktwoMVA reconstruction (2023+ DeepSet and GNTau)
     if chainPart['reconstruction'] == 'tracktwoMVA':
         currentHypo.TrackPtCut = 1.5*GeV
         currentHypo.HighPtSelectionLooseIDThr = 200*GeV

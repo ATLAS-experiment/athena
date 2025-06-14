@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import re
 
@@ -9,10 +9,9 @@ from TrigInDetValidation.TrigInDetArtSteps import TrigInDetAna, TrigCostStep, Tr
 import os,sys,getopt
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:],"lcxptirmn:",["local","config"])
+    opts, args = getopt.getopt(sys.argv[1:],"cxptirmn:",["config"])
 except getopt.GetoptError:
     print("Usage:  ")
-    print("-l | --local   run locally with input file from art eos grid-input")
     print("-x             don't run athena or post post-processing, only plotting")
     print("-m             run cost monitoring plotting, even if -x is set")
     print("-p             run post-processing, even if -x is set")
@@ -24,7 +23,6 @@ except getopt.GetoptError:
     sys.exit(1)
 
 Events_local  = 0
-local         = False
 exclude       = False
 costplot      = False
 postproc      = False
@@ -35,14 +33,11 @@ abort_dry_run = True
 
 
 if "Art_type"  not in locals(): Art_type = 'grid'
-if "GridFiles" not in locals(): GridFiles=False
 if "Malloc" not in locals(): Malloc=False
 if "AbortDryRun" in locals(): abort_dry_run=AbortDryRun
 if "MultipleLB" not in locals(): MultipleLB=False
 
 for opt,arg in opts:
-    if opt in ("-l", "--local"):
-        local=True
     if opt=="-x":
         exclude=True
     if opt=="-p":
@@ -103,13 +98,14 @@ else :
 hlt.perfmon = False
 hlt.costmon = True
 hlt.timeout = 18*3600
-hlt.input   = Input    # defined in TrigValTools/share/TrigValInputs.json  
 
-if GridFiles:
-    if local:
-       hlt.input = Input   # should match definition in TrigValTools/share/TrigValInputs.json  
-    else:
-       hlt.input = os.getenv('ArtInFile')
+
+# use rucio dataset for grid jobs, else use EOS/cvmfs input
+if os.getenv("ArtInFile",None):
+    hlt.input = os.getenv('ArtInFile')
+else:
+    hlt.input = Input   # should match definition in TrigValTools/share/TrigValInputs.json
+
 
 if (Malloc):
     import os

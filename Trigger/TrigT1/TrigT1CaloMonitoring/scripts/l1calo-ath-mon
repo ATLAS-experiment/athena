@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#
+# Alias script for "athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py".
+#
+
+# Fail on errors.
+set -e
+
+# Run the command.
+echo "Executing: athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py ... "
+athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py "$@"

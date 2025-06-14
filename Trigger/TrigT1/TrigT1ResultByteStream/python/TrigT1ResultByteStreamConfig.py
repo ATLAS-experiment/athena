@@ -66,13 +66,14 @@ def ExampleL1TriggerByteStreamToolCfg(flags, name, writeBS=False):
   acc.setPrivateTools(tool)
   return acc
 
-def MuonRoIByteStreamToolCfg(flags, name, writeBS=False):
+def MuonRoIByteStreamToolCfg(flags, name, writeBS=False, writeDecodedMuonRoIs=True):
   acc = ComponentAccumulator()
   tool = CompFactory.MuonRoIByteStreamTool(name)
   muctpi_moduleid = 0  # No RoIB in Run 3, we always read the DAQ ROB
   muctpi_robid = int(SourceIdentifier(SubDetector.TDAQ_MUON_CTP_INTERFACE, muctpi_moduleid)) # 0x760000
   tool.ROBIDs = [muctpi_robid]
   tool.DoTopo = flags.Trigger.L1.doMuonTopoInputs
+  tool.WriteDecodedMuonRoIs = writeDecodedMuonRoIs
 
   from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoringConfig import L1MuonBSConverterMonitoringCfg
   tool.MonTool = acc.popToolsAndMerge(L1MuonBSConverterMonitoringCfg(flags, name, writeBS))
@@ -155,9 +156,9 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   ########################################
   # Run-3 L1Muon decoding (only when running HLT - offline we read it from HLT result)
   ########################################
-  if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1 and flags.Trigger.doHLT:
+  if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
     muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(
-      flags, name="L1MuonBSDecoderTool", writeBS=False))
+      flags, name="L1MuonBSDecoderTool", writeBS=False, writeDecodedMuonRoIs=flags.Trigger.doHLT ))
     decoderTools += [muonRoiTool]
 
   ########################################

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for el_zee_pu40_elreco
 # art-type: grid
@@ -35,7 +35,6 @@ Events  = 16000
 Threads = 8 
 Slots   = 8
 Input   = 'Zee'    # defined in TrigValTools/share/TrigValInputs.json
-GridFiles = True
 Release = "current"
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline.dat -r Electrons_MediumLH -o data-hists-offline.root" ) ]
