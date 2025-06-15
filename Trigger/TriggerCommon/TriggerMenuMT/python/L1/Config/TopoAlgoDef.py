@@ -266,7 +266,7 @@ class TopoAlgoDef:
         # No additional parameters
         algoList = [
             {"otype" : "jJ",   "ocut" : 50, "olist" : "ab", "etamin" : 0,  "etamax" : 32}, # jJab
-            {"otype" : "CjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
+            {"otype" : "CjJ",  "ocut" : 20, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
             {"otype" : "SCjJ", "ocut" : 10, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # SCjJab
             {"otype" : "FjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 30, "etamax" : 49}, # FjJab
         ]

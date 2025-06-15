@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for all_ttbar_pu80
 # art-type: grid
@@ -35,7 +35,6 @@ Events  = 4000
 Threads = 8 
 Slots   = 8
 Input   = 'ttbar_pu80'    # defined in TrigValTools/share/TrigValInputs.json  
-GridFiles = True
 
 # the conditions override is needed because the RDO was produced with a single beamspot
 # postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_singlebeamspot'
