@@ -1420,14 +1420,14 @@ void ClusterMomentsCalculator::calculateClusterPropertiesAndMoments(CaloRecGPU::
     {
       auto grid_for_cells = [&](const auto & process, const unsigned int grid)
       {
-        constexpr unsigned int mult = process.number * 2;
+        unsigned int mult = process.number * 2;
 
         return dim3{Helpers::int_ceil_div(grid, mult), process.number, 2};
       };
 
       auto grid_for_clusters = [&](const auto & finalize, const auto & init, const unsigned int grid)
       {
-        constexpr unsigned int number = (finalize.number > init.number ? finalize.number : init.number);
+        unsigned int number = (finalize.number > init.number ? finalize.number : init.number);
 
         return dim3{Helpers::int_ceil_div(grid, number), number, 1};
       };
