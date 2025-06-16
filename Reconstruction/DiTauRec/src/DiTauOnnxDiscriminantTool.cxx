@@ -18,13 +18,9 @@ using TrackParticleLinks_t = std::vector<ElementLink<xAOD::TrackParticleContaine
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________
 DiTauOnnxDiscriminantTool::DiTauOnnxDiscriminantTool( const std::string& type, const std::string& name, const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_onnxModelPath(""),
-  m_maxTracks(10)
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty( "onnxModelPath", m_onnxModelPath = "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx");
-  declareProperty( "maxTracks", m_maxTracks = 10);
 }
 
 //______________________________________________________________________________
