@@ -5,10 +5,11 @@ def EFTrackingDataStreamLoaderAlgorithmCfg(flags, **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
+    kwargs.setdefault("name", "EFTrackingDataStreamLoaderAlgorithm")
     kwargs.setdefault("bufferSize", 8192)
 
     from AthenaConfiguration.ComponentFactory import CompFactory 
-    acc.addEventAlgo(CompFactory.EFTrackingDataStreamLoaderAlgorithm("EFTrackingDataStreamLoaderAlgorithm", **kwargs))
+    acc.addEventAlgo(CompFactory.EFTrackingDataStreamLoaderAlgorithm(**kwargs))
 
     return acc
 
