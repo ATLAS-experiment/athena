@@ -73,8 +73,6 @@ namespace xAODMaker {
     void setLinks(const Analysis::TauJet& aodtau, xAOD::TauJet& xaodtau) const;
     ElementLink<xAOD::TrackParticleContainer> getNewTrackLink(const ElementLink<Rec::TrackParticleContainer>& oldLink, const std::string& name) const;
     ElementLink<xAOD::JetContainer> getNewJetLink(const ElementLink<JetCollection>& oldLink, const std::string& name) const;
-    void copyPanTauDetails(const Analysis::TauJet& aodtau, xAOD::TauJet& xaodtau) const ;
-
 
     /// Containers
     std::string m_inDetTrackParticles; //!< Location/Key for TrackParticles from ID. 
