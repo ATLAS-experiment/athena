@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_GeoModelFactory.h"
+#include "AFP_Geometry/AFP_Geometry.h"
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
@@ -30,13 +31,10 @@
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
-#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <list>
-#include <map>
 #include <string>
 
 void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* pszStationName, HepGeom::Transform3D& TransInMotherVolume)
