@@ -442,9 +442,9 @@ def addLowMuP1Signatures(chains):
         # BeamspotPEB chains -- only run preselection without tracking, write PEB data
         ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ40']+SupportPhIGroup),
         # Oxygen
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ZDC_YN',   l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ZDC_XNYN', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ZDC_XNZN', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1ZDC_YN',   l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1ZDC_XNYN', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1ZDC_XNZN', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot']+SupportPhIGroup),
     ]
 
     chainsP1['Calib'] = [
@@ -508,9 +508,9 @@ def addLowMuP1Signatures(chains):
         # Beamspot chains using FS tracking -- no PEB, fill BeamSpot histograms then reject all events
         ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_jJ40']+SupportPhIGroup),
         # Oxygen
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ZDC_YN',   l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ZDC_XNYN', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ZDC_XNZN', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1ZDC_YN',   l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1ZDC_XNYN', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1ZDC_XNZN', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']+SupportPhIGroup),
     ]
 
     addP1Signatures(chains,chainsP1)
