@@ -11,6 +11,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
+#include "CaloRecGPU/CaloGPUTimed.h"
 #include "GPUClusterInfoAndMomentsCalculatorImpl.h"
 
 #include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
@@ -30,7 +31,7 @@
 
 
 class GPUClusterInfoAndMomentsCalculator:
-  public extends<AthAlgTool, CaloClusterGPUProcessor>, public CaloGPUCUDAInitialization
+  public extends<AthAlgTool, CaloClusterGPUProcessor>, public CaloGPUTimed, public CaloGPUCUDAInitialization
 {
  public:
 
@@ -109,13 +110,7 @@ class GPUClusterInfoAndMomentsCalculator:
   /** @brief Options for the algorithm, held in a GPU-friendly way.
   */
   ClusterMomentsCalculator::CMCOptionsHolder m_options;
-  
-  
-  /** @brief If @p true, synchronize the kernel calls to ensure accurate per-step/per-tool time measurements.
-   *  Defaults to @p false.
-   */
-  Gaudi::Property<bool> m_measureTimes {this, "MeasureTimes", false, "Synchronize for time measurements"};
-  
+    
   /** @brief Handle to the CUDA kernel block and grid size optimization service. */
   ServiceHandle<IGPUKernelSizeOptimizerSvc> m_kernelSizeOptimizer { this, "KernelSizeOptimizer", "GPUKernelSizeOptimizerSvc", "CUDA kernel size optimization service." };
 };
