@@ -63,7 +63,7 @@ public:
   /// Default constructor.  Sets the element to null.
   CachedPointer();
 
-    
+
   /// Constructor from an element.
   CachedPointer (pointer_t elt);
 
@@ -71,11 +71,9 @@ public:
   /// Copy constructor.
   CachedPointer (const CachedPointer& other) noexcept;
 
-  /// Move constructor.
-  CachedPointer ( CachedPointer&& other) noexcept;
 
   /// Assignment.
-  CachedPointer& operator= (const CachedPointer& other);
+  CachedPointer& operator= (const CachedPointer& other) noexcept;
 
 
   /// Set the element, assuming it is currently null.
@@ -85,7 +83,7 @@ public:
   /// Store a new value to the element.
   void store (pointer_t elt);
 
-  
+
   /// Return the current value of the element.
   pointer_t get() const;
 
@@ -100,7 +98,6 @@ private:
   mutable std::atomic<pointer_t> m_a;  //! Transient
   pointer_t m_e;    //! Transient
 };
-
 
 } // namespace CxxUtils
 
