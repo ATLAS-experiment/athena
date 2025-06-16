@@ -712,6 +712,11 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_noalg_L1ZDC_LOR_EMPTY',           l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_noalg_L1ZDC_OR_UNPAIRED_NONISO',  l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_noalg_L1ZDC_LOR_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+
+        # ATR-31426
+        ChainProp(name='HLT_noalg_L1LHCF',              l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1LHCF_EMPTY',        l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_noalg_L1LHCF_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:NoBulkMCProd']+MinBiasGroup+LowMuGroup),
     ]
 
     chains['EnhancedBias'] += [
