@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -73,11 +73,6 @@
 #include "xAODCutFlow/CutBookkeeperContainer.h"
 
 #include "TrigDecisionTool/ChainGroup.h"
-
-// ConstAccessors
-const static SG::ConstAccessor<size_t> acc_TruthProng("TruthProng");
-const static SG::ConstAccessor<int> acc_TruthCharge("TruthCharge");
-const static SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
 
 const size_t Ncuts = 10;
 const char *cut_name[] =
@@ -961,12 +956,10 @@ int main( int argc, char* argv[] ) {
       if (slices["tau"] && (isNominal || (sysInfo.affectsKinematics && syst_affectsTaus))) {
         for(const auto& tau : *taus){
           if (!isData){
-            const xAOD::TruthParticle* truthTau = T2MT->getTruth(*tau) ;
-            if (acc_IsTruthMatched(*tau) || !truthTau){
-              ANA_MSG_DEBUG("Tau was matched to a truth tau, which has "
-                            << int(acc_TruthProng(*tau))
-                            << " prongs and a charge of "
-                            << acc_TruthCharge(*tau));
+            const xAOD::TruthParticle* truthTau = T2MT->getTruth(*tau);
+            if (truthTau){
+              ANA_MSG_DEBUG("Tau was matched to a truth particle, which has a charge of "
+                             << static_cast<int>(truthTau->charge()));  
             } else { ANA_MSG_DEBUG( "Tau was not matched to truth" ); }
           }
         }
