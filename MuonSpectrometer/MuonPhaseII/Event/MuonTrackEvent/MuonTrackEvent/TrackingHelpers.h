@@ -12,6 +12,13 @@ namespace MuonR4{
      *         The segment should be decorated with 'parentSegment' decoration.
      *  @param seg: Reference to the segment of interest. */
     const Segment* detailedSegment(const xAOD::MuonSegment& seg);
+    /** @brief Helper function to extract the measurements from the segment
+     *  @param seg: Reference to the segment of interest
+     *  @param skipOutlier: Switch toggling whether outlier measurements or invalid calib state
+     *                      measurements should be ignored */
+    std::vector<const xAOD::UncalibratedMeasurement*> collectMeasurements(const Segment& seg,
+                                                                          bool skipOutlier = true);
+
 }
 
 #endif
