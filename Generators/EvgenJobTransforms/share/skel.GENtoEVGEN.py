@@ -517,6 +517,10 @@ else:
 if 'Hijing' in evgenConfig.generators or 'Herwig7' in evgenConfig.generators:
     fixSeq.FixHepMC.PurgeUnstableWithoutEndVtx = True
 
+## Skip the semi-disconnected particles correction when running Sherpa with HEPMC_TREE_LIKE: 1
+if 'Sherpa' in evgenConfig.generators:
+    fixSeq.FixHepMC.IgnoreSemiDisconnected = True
+
 ## Propagate debug output level requirement to generators
 if (hasattr( runArgs, "VERBOSE") and runArgs.VERBOSE ) or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "DEBUG") or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "VERBOSE"):
    include("EvgenJobTransforms/Generate_debug_level.py")
