@@ -69,6 +69,7 @@ private:
     int m_max_clusters;
     float m_max_cluster_dr;
     float m_minTauPt;
+    bool m_applyTrackSel;
     bool m_doVertexCorrection;
     bool m_doTrackClassification;
     bool m_decorateTracks;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNEvaluator.h"
@@ -35,6 +35,7 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
   declareProperty("DecorateTracks", m_decorateTracks = false);
   declareProperty("TrackClassification", m_doTrackClassification = true);
   declareProperty("MinTauPt", m_minTauPt = 0.);
+  declareProperty("ApplyTrackSel", m_applyTrackSel = false);
 
   // Prongness selection minimum track pT
   declareProperty("MinProngTrackPt", m_min_prong_track_pt = 0);
@@ -137,6 +138,10 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   //Skip execution for low-pT taus to save resources
   if (tau.pt() < m_minTauPt) {
     return StatusCode::SUCCESS;
+  }
+  // save CPU when running in RAWtoALL for tau trigger monitoring purpose
+  if (m_applyTrackSel) {
+    if (tau.nTracks()!=1 && tau.nTracks()!=3) return StatusCode::SUCCESS;
   }
 
   // Get input objects
