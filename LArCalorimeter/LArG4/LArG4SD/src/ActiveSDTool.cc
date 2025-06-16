@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActiveSDTool.h"
@@ -16,49 +16,7 @@ namespace LArG4
   ActiveSDTool::ActiveSDTool(const std::string& type, const std::string& name,
                              const IInterface *parent)
     : CalibSDTool(type, name, parent)
-    , m_hitCollName("LArCalibrationHitActive")
-    , m_bpsmodcalc("BarrelPresamplerCalibrationCalculator", name)
-    , m_embcalc("BarrelCalibrationCalculator", name)
-    , m_emepiwcalc("EMECPosInnerWheelCalibrationCalculator", name)
-    , m_emeniwcalc("EMECNegInnerWheelCalibrationCalculator", name)
-    , m_emepowcalc("EMECPosOuterWheelCalibrationCalculator", name)
-    , m_emenowcalc("EMECNegOuterWheelCalibrationCalculator", name)
-    , m_emepscalc("EMECPresamplerCalibrationCalculator", name)
-    , m_emepobarcalc("EMECPosBackOuterBarretteCalibrationCalculator", name)
-    , m_emenobarcalc("EMECNegBackOuterBarretteCalibrationCalculator", name)
-    , m_heccalc("HECCalibrationWheelActiveCalculator", name)
-    , m_fcal1calc("FCAL1CalibCalculator", name)
-    , m_fcal2calc("FCAL2CalibCalculator", name)
-    , m_fcal3calc("FCAL3CalibCalculator", name)
   {
-    declareProperty("HitCollectionName", m_hitCollName);
-    declareProperty("StacVolumes", m_stacVolumes);
-    declareProperty("PresamplerVolumes", m_presBarVolumes);
-    declareProperty("PosIWVolumes", m_posIWVolumes);
-    declareProperty("NegIWVolumes", m_negIWVolumes);
-    declareProperty("PosOWVolumes", m_posOWVolumes);
-    declareProperty("NegOWVolumes", m_negOWVolumes);
-    declareProperty("PresVolumes", m_presECVolumes);
-    declareProperty("PosBOBarretteVolumes", m_pBOBVolumes);
-    declareProperty("NegBOBarretteVolumes", m_nBOBVolumes);
-    declareProperty("FCAL1Volumes", m_fcal1Volumes);
-    declareProperty("FCAL2Volumes", m_fcal2Volumes);
-    declareProperty("FCAL3Volumes", m_fcal3Volumes);
-    declareProperty("SliceVolumes", m_sliceVolumes);
-
-    declareProperty("EMBPSCalibrationCalculator",m_bpsmodcalc);
-    declareProperty("EMBCalibrationCalculator",m_embcalc);
-    declareProperty("EMECPosIWCalibrationCalculator",m_emepiwcalc);
-    declareProperty("EMECNegIWCalibrationCalculator",m_emeniwcalc);
-    declareProperty("EMECPosOWCalibrationCalculator",m_emepowcalc);
-    declareProperty("EMECNegOWCalibrationCalculator",m_emenowcalc);
-    declareProperty("EMECPSCalibrationCalculator",m_emepscalc);
-    declareProperty("EMECPosBOBCalibrationCalculator",m_emepobarcalc);
-    declareProperty("EMECNegBOBCalibrationCalculator",m_emenobarcalc);
-    declareProperty("HECWActiveCalculator",m_heccalc);
-    declareProperty("FCAL1CalibCalculator",m_fcal1calc);
-    declareProperty("FCAL2CalibCalculator",m_fcal2calc);
-    declareProperty("FCAL3CalibCalculator",m_fcal3calc);
   }
 
   //---------------------------------------------------------------------------

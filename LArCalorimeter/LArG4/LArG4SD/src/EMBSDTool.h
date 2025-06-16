@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4SD_EMBSDTOOL_H
@@ -23,36 +23,29 @@ namespace LArG4
   ///
   class EMBSDTool : public SimpleSDTool
   {
+  public:
+    /// Constructor
+    EMBSDTool(const std::string& type, const std::string& name,
+	      const IInterface* parent);
 
-    public:
+  private:
+    /// Initialize Calculator Services
+    StatusCode initializeCalculators() override final;
+    
+    /// Create the SD wrapper for current worker thread
+    G4VSensitiveDetector* makeSD() const override final;
 
-      /// Constructor
-      EMBSDTool(const std::string& type, const std::string& name,
-                const IInterface* parent);
+    /// @name Configuration
+    /// @{
 
-    private:
+    /// List of volumes for the stac SD
+    Gaudi::Property<std::vector<std::string>> m_stacVolumes{this, "StacVolumes"};
+    /// List of volumes for the presampler SD
+    Gaudi::Property<std::vector<std::string>> m_presVolumes{this, "PresamplerVolumes"};
+    /// @}
 
-      /// Initialize Calculator Services
-      StatusCode initializeCalculators() override final;
-
-      /// Create the SD wrapper for current worker thread
-      G4VSensitiveDetector* makeSD() const override final;
-
-      /// @name Configuration
-      /// @{
-
-      /// List of volumes for the stac SD
-      std::vector<std::string> m_stacVolumes;
-      /// List of volumes for the presampler SD
-      std::vector<std::string> m_presVolumes;
-
-      /// @}
-
-     ServiceHandle<ILArCalculatorSvc> m_embcalc; //LArBarrelCalculator::GetCalculator()
-     ServiceHandle<ILArCalculatorSvc> m_pscalc; //LArBarrelPresamplerCalculator::GetCalculator()
-
+    ServiceHandle<ILArCalculatorSvc> m_embcalc{this, "EMBCalculator", "EMBCalculator"}; //LArBarrelCalculator::GetCalculator()
+    ServiceHandle<ILArCalculatorSvc> m_pscalc{this, "EMBPSCalculator", "EMBPresamplerCalculator"}; //LArBarrelPresamplerCalculator::GetCalculator()
   }; // class EMBSDTool
-
 } // namespace LArG4
-
 #endif

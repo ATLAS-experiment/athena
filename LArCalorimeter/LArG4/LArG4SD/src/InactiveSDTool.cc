@@ -1,57 +1,19 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InactiveSDTool.h"
-
 #include "LArG4Code/SDWrapper.h"
-
 
 namespace LArG4
 {
-
   //---------------------------------------------------------------------------
   // Constructor
   //---------------------------------------------------------------------------
   InactiveSDTool::InactiveSDTool(const std::string& type, const std::string& name,
                                  const IInterface *parent)
     : CalibSDTool(type, name, parent)
-    , m_hitCollName("LArCalibrationHitInactive")
-    , m_embpscalc("BarrelPresamplerCalibrationCalculator", name)
-    , m_embcalc("BarrelCalibrationCalculator", name)
-    , m_emepiwcalc("EMECPosInnerWheelCalibrationCalculator", name)
-    , m_emeniwcalc("EMECNegInnerWheelCalibrationCalculator", name)
-    , m_emepowcalc("EMECPosOuterWheelCalibrationCalculator", name)
-    , m_emenowcalc("EMECNegOuterWheelCalibrationCalculator", name)
-    , m_heccalc("HECCalibrationWheelInactiveCalculator", name)
-    , m_fcal1calc("FCAL1CalibCalculator", name)
-    , m_fcal2calc("FCAL2CalibCalculator", name)
-    , m_fcal3calc("FCAL3CalibCalculator", name)
   {
-    declareProperty("HitCollectionName", m_hitCollName);
-    declareProperty("BarrelPreVolumes", m_barPreVolumes);
-    declareProperty("BarrelVolumes", m_barVolumes);
-    declareProperty("ECPosInVolumes", m_ECPosInVolumes);
-    declareProperty("ECPosOutVolumes", m_ECPosOutVolumes);
-    declareProperty("ECNegInVolumes", m_ECNegInVolumes);
-    declareProperty("ECNegOutVolumes", m_ECNegOutVolumes);
-    //declareProperty("HECVolumes", m_HECVolumes={"LAr::HEC::Inactive"});
-    //declareProperty("HECLocalVolumes", m_HECLocVolumes={"LAr::HEC::Local::Inactive"});
-    declareProperty("HECWheelVolumes", m_HECWheelVolumes);
-    declareProperty("FCAL1Volumes", m_fcal1Volumes);
-    declareProperty("FCAL2Volumes", m_fcal2Volumes);
-    declareProperty("FCAL3Volumes", m_fcal3Volumes);
-
-    declareProperty("EMBPSCalibrationCalculator", m_embpscalc);
-    declareProperty("EMBCalibrationCalculator", m_embcalc);
-    declareProperty("EMECPosIWCalibrationCalculator", m_emepiwcalc);
-    declareProperty("EMECNegIWCalibrationCalculator", m_emeniwcalc);
-    declareProperty("EMECPosOWCalibrationCalculator", m_emepowcalc);
-    declareProperty("EMECNegOWCalibrationCalculator", m_emenowcalc);
-    declareProperty("HECWheelInactiveCalculator", m_heccalc);
-    declareProperty("FCAL1CalibCalculator", m_fcal1calc);
-    declareProperty("FCAL2CalibCalculator", m_fcal2calc);
-    declareProperty("FCAL3CalibCalculator", m_fcal3calc);
   }
 
   //---------------------------------------------------------------------------
