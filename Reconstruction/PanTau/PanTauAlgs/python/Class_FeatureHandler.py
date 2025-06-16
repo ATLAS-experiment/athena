@@ -122,8 +122,6 @@ class FeatureHandler:
         self.m_ConstituentTypeName_Charged  = "Charged"
         self.m_ConstituentTypeName_Neutral  = "Neutral"
         self.m_ConstituentTypeName_Pi0Neut  = "Pi0Neut"
-        self.m_ConstituentTypeName_OutNeut  = "OuterNeut"
-        self.m_ConstituentTypeName_OutChrg  = "OuterChrg"
         
         self.m_ConstituentTypes = []
         #baseline
@@ -200,8 +198,6 @@ class FeatureHandler:
         
         #add the inclusive one
         self.addToFeatures("N" + self.m_ConstituentTypeName_All     + "Consts", self.m_VarTypeName_Basic, "F")
-        self.addToFeatures("N" + self.m_ConstituentTypeName_OutChrg + "Consts", self.m_VarTypeName_Basic, "F")
-        self.addToFeatures("N" + self.m_ConstituentTypeName_OutNeut + "Consts", self.m_VarTypeName_Basic, "F")
         
     #end def addMultiplicities
     
@@ -311,13 +307,6 @@ class FeatureHandler:
                 curDefVal = -200.
             self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_HLV, "F", curDefVal)
             
-            # also add the OutChrg and OutNeut
-            featName = self.m_ConstituentTypeName_OutChrg + "_" + self.m_VarTypeName_HLV + "_" + iVar
-            self.addToFeatures_FullName(featName, self.m_VarTypeName_HLV, "F", curDefVal)
-            
-            featName = self.m_ConstituentTypeName_OutNeut + "_" + self.m_VarTypeName_HLV + "_" + iVar
-            self.addToFeatures_FullName(featName, self.m_VarTypeName_HLV, "F", curDefVal)
-            
         #end loop over variables
         
         VariablesVec = []
@@ -335,12 +324,6 @@ class FeatureHandler:
                 curDefVal = -200.
             self.addToFeatures_AllTypes(featName, self.m_VarTypeName_HLV, "V", curDefVal)
                 
-            # also add the OutChrg and OutNeut
-            featName = self.m_ConstituentTypeName_OutChrg + "_" + self.m_VarTypeName_HLV + "_BDTSort_" + iVecVar
-            self.addToFeatures_FullName(featName, self.m_VarTypeName_HLV, "V", curDefVal)
-                
-            featName = self.m_ConstituentTypeName_OutNeut + "_" + self.m_VarTypeName_HLV + "_BDTSort_" + iVecVar
-            self.addToFeatures_FullName(featName, self.m_VarTypeName_HLV, "V", curDefVal)
                 
         #end loop over variables
     #end addTypeSpecificFeatures_HLV

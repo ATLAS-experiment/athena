@@ -18,7 +18,6 @@ PanTau::PanTauSeed::PanTauSeed()
   m_Constituents(),
   m_TypeHLVs(),
   m_ConstituentsList_Core(),
-  m_ConstituentsList_Wide(),
   m_ConstituentsList_AllSelected(),
   m_ConstituentsList_All(),
   m_DecayMode_BySubAlg(0),
@@ -42,7 +41,6 @@ PanTau::PanTauSeed::~PanTauSeed()
   m_ConstituentsList_All.clear();
   m_ConstituentsList_AllSelected.clear();
   m_ConstituentsList_Core.clear();
-  m_ConstituentsList_Wide.clear();
 
   // also clear the constituent matrix
   // dont delete the entries as they point to the (at this point already deleted) constituents in m_ConstituentsList
@@ -66,7 +64,6 @@ PanTau::PanTauSeed::PanTauSeed(const PanTau::PanTauSeed& rhs)
   m_Constituents(rhs.m_Constituents),
   m_TypeHLVs(rhs.m_TypeHLVs),
   m_ConstituentsList_Core(rhs.m_ConstituentsList_Core),
-  m_ConstituentsList_Wide(rhs.m_ConstituentsList_Wide),
   m_ConstituentsList_AllSelected(rhs.m_ConstituentsList_AllSelected),
   m_ConstituentsList_All(rhs.m_ConstituentsList_All),
   m_DecayMode_BySubAlg(rhs.m_DecayMode_BySubAlg),
@@ -94,7 +91,6 @@ PanTau::PanTauSeed& PanTau::PanTauSeed::operator=(const PanTau::PanTauSeed& seed
     m_Constituents          = seed.m_Constituents;
     m_TypeHLVs              = seed.m_TypeHLVs;
     m_ConstituentsList_Core = seed.m_ConstituentsList_Core;
-    m_ConstituentsList_Wide = seed.m_ConstituentsList_Wide;
     m_ConstituentsList_AllSelected  = seed.m_ConstituentsList_AllSelected;
     m_ConstituentsList_All          = seed.m_ConstituentsList_All;
     m_decayModeHack_CellBasedShots  = seed.m_decayModeHack_CellBasedShots;
@@ -221,9 +217,6 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
 
     if(isCoreChrg || isCoreNeut || isCorePi0) m_ConstituentsList_Core.push_back(tauConstituents[iConst]); // Core only contains the currently used objects                                                             
 
-    bool isWideChrg = tauConstituents[iConst]->isOfType(PanTau::TauConstituent::t_OutChrg);
-    bool isWideNeut = tauConstituents[iConst]->isOfType(PanTau::TauConstituent::t_OutNeut);
-    if(isWideChrg || isWideNeut) m_ConstituentsList_Wide.push_back(tauConstituents[iConst]); // Wide contains objectsin 0.2-0.4                                                                                                
   }
 
   //create the constituents lists                                                                                                                                                                                                                
@@ -233,7 +226,6 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
   }
 
   //assign tauConstituents                                                                                                                                                                                                                       
-  TLorentzVector hlv_SumConstituents_Wide = TLorentzVector(0,0,0,0);
   TLorentzVector hlv_SumConstituents_Core = TLorentzVector(0,0,0,0);
 
   int nCharged = 0;
@@ -258,9 +250,6 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
       m_TypeHLVs.at(curType) += curConst->p4();
 
     }//end loop over types                                                                                                                                                                                                                     
-
-    //add each constituent to wide proto momentum                                                                                                                                                                                              
-    hlv_SumConstituents_Wide += curConst->p4();
 
     //add all charged and neutral constituents (i.e. from core region) to core proto momentum                                                                                                                                                  
     if(curConst->isOfType(PanTau::TauConstituent::t_Charged)) {hlv_SumConstituents_Core += curConst->p4(); continue;}

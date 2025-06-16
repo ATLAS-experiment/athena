@@ -39,7 +39,6 @@ namespace PanTau {
         
     virtual bool    passesSelection_NeutralConstituent(TauConstituent* tauConstituent) const;
     virtual bool    passesSelection_Pi0NeutConstituent(TauConstituent* tauConstituent) const;
-    virtual bool    passesSelection_OutNeutConstituent(TauConstituent* TauConstituent) const;
         
     virtual double  getEtCut(double eta, PanTau::TauConstituent::Type constituentType) const;
         
@@ -53,8 +52,6 @@ namespace PanTau {
     std::vector<double>     m_Selection_Neutral_EtaBinned_EtCut;
     std::vector<double>     m_Selection_Pi0Neut_EtaBinned_EtCut;
     std::vector<double>     m_Selection_Charged_EtaBinned_EtCut;
-    std::vector<double>     m_Selection_OutNeut_EtaBinned_EtCut;
-    std::vector<double>     m_Selection_OutChrg_EtaBinned_EtCut;
 
     bool m_init=false;
 
