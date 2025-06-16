@@ -193,6 +193,8 @@ namespace Muon {
         "Cut on the number of MicroMega clusters in a particular occupancy bin"};
         Gaudi::Property<unsigned int> m_ocupMmNumPerPair{this, "MmOccupancyPairCut", 7,
         "Cut on the number of MicroMega clusters in two neighbouring occupancy bins"};
+        Gaudi::Property<uint> m_maxInputPads{this, "maxInputPads", 40, "Maximum number of pads per wedge layer."};
+
     public:
         using SeedMeasurement = NSWSeed::SeedMeasurement;
         using MeasVec = NSWSeed::MeasVec;
