@@ -1692,8 +1692,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   //
   configFromFile(m_prwActualMu2017File, "PRW.ActualMu2017File", rEnv, "GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root");
   configFromFile(m_prwActualMu2018File, "PRW.ActualMu2018File", rEnv, "GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root");
-  configFromFile(m_prwActualMu2022File, "PRW.ActualMu2022File", rEnv, "GoodRunsLists/data22_13p6TeV/20230207/purw.actualMu.2022.root");
-  configFromFile(m_prwActualMu2023File, "PRW.ActualMu2023File", rEnv, "GoodRunsLists/data23_13p6TeV/20230828/purw.actualMu.2023.root");
+  configFromFile(m_prwActualMu2022File, "PRW.ActualMu2022File", rEnv, "GoodRunsLists/data22_13p6TeV/20250321/purw.actualMu.root");
+  configFromFile(m_prwActualMu2023File, "PRW.ActualMu2023File", rEnv, "GoodRunsLists/data23_13p6TeV/20250321/purw.actualMu.root");
   configFromFile(m_prwActualMu2024File, "PRW.ActualMu2024File", rEnv, "GoodRunsLists/data24_13p6TeV/20241118/purw.actualMu.root");
   configFromFile(m_prwDataSF, "PRW.DataSF", rEnv, 1./1.03); // default for mc16, see: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ExtendedPileupReweighting#Tool_Properties
   configFromFile(m_prwDataSF_UP, "PRW.DataSF_UP", rEnv, 1./0.99); // mc16 uncertainty? defaulting to the value in PRWtool
