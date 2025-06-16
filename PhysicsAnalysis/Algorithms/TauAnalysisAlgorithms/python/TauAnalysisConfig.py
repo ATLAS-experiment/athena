@@ -190,6 +190,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
         if config.dataType() is not DataType.Data and not self.noEffSF and not self.useGNTau:
+            log = logging.getLogger('TauJetSFConfig')
             # need multiple instances of the TauEfficiencyCorrectionTool
             # 1) Reco 2) TauID, 3) eVeto for fake tau 4) eVeto for true tau
             # 3) and 4) are optional if eVeto is used in TauSelectionTool
@@ -263,6 +264,9 @@ class TauWorkingPointConfig (ConfigBlock) :
                 if self.quality=="Loose":
                     JetIDLevel = 7
                 elif self.quality=="Medium":
+                    JetIDLevel = 8
+                elif self.quality=="Tight": 
+                    log.warning("eVeto SFs are not available for Tight WP -> fallback to Medium WP")
                     JetIDLevel = 8
                 alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel 
                 alg.outOfValidity = 2 #silent
