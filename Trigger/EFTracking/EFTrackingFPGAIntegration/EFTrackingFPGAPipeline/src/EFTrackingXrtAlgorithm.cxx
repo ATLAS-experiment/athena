@@ -3,6 +3,7 @@
  */
 
 #include <set>
+#include <regex>
 
 #include "EFTrackingFPGAPipeline/EFTrackingXrtAlgorithm.h"
 #include "EFTrackingFPGAPipeline/EFTrackingXrtParameters.h"
@@ -27,8 +28,14 @@ bool deviceHasKernels(
   const std::shared_ptr<xrt::device>& device
 ) {
   for (const auto& [kernelName, dummy] : kernelDefinitionsJson.items()) {
-    if (!deviceHasKernel(device, 
-                         deviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName))) {
+    // Strip compute unit specification from kernelName.
+    const std::regex computeUnitSpecification(R"(:\{.*\})");
+    
+    if (!deviceHasKernel(device, deviceMgmtSvc->get_xrt_devices_by_kernel_name(std::regex_replace(
+      kernelName,
+      computeUnitSpecification,
+      ""
+    )))) {
       return false;
     }
   }
@@ -44,8 +51,15 @@ std::shared_ptr<xrt::device> getDevice(
   std::vector<std::shared_ptr<xrt::device>> finalDevices{};
 
   for (const auto& [kernelName, dummy] : kernelDefinitionsJson.items()) {
+    // Strip compute unit specification from kernelName.
+    const std::regex computeUnitSpecification(R"(:\{.*\})");
+
     std::vector<std::shared_ptr<xrt::device>> devices = 
-      deviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
+      deviceMgmtSvc->get_xrt_devices_by_kernel_name(std::regex_replace(
+        kernelName,
+        computeUnitSpecification,
+        ""
+      ));
 
     devicesSet.insert(devices.begin(), devices.end());
   }
@@ -73,6 +87,8 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
 
   // Too complicated to implement as a Gaudi::Property (would require a new 
   // grammar) so get a string and make the nlohmann::json in initialize. 
+  //
+  // This should probably just be a std container e.g. vector of map etc.
   const std::optional<nlohmann::json> kernelDefinitionsJson {
     [](const std::string& kernelDefinitionsJsonString)->std::optional<nlohmann::json> {
       try {
