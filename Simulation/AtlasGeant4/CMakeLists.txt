@@ -128,7 +128,6 @@ if( NOT SIMULATIONBASE )
 	LUCID_G4_SD
 	LUCID_OpProcess
 	ZDC_SD
-	LArG4FastSimSvc
 	LArG4GenShowerLib
 	LArG4H6SD
 	G4AtlasTests
