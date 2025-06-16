@@ -182,11 +182,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateBasicFeatures(PanTau::PanTauS
   featureMap->addFeature(name + "_SumCharge", SumCharge);
   featureMap->addFeature(name + "_AbsCharge", AbsCharge);
     
-  //! Fill multiplicity for any constituents
-  //all constituents
-  std::string typeNameAll = PanTau::TauConstituent::AllConstituentsName();
-  featureMap->addFeature(name + "_N" + typeNameAll + "Consts", inSeed->getConstituentsAsList_Core().size() + inSeed->getConstituentsAsList_Wide().size());
-    
   //! Fill the proto vector (i.e. sum momentum of constituents)
   //proto 4-vector (just the sum of all constituents)
   // will have better four momentum after mode ID

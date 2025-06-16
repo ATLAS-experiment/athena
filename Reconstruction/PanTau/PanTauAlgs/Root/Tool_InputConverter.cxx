@@ -97,10 +97,6 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     if (pfo->isCharged()) {
       typeFlags.at((int)PanTau::TauConstituent::t_Charged) = 1;
     }
-    else {
-      typeFlags.at((int)PanTau::TauConstituent::t_OutNeut) = 1;
-      mvaValue = pfo->bdtPi0Score();
-    }
   }//end if pfo is not in core
     
   if (deltaR_toTauJet <= m_Config_TauConstituents_Types_DeltaRCore) {

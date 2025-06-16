@@ -160,8 +160,6 @@ std::string  PanTau::TauConstituent::getTypeName(PanTau::TauConstituent::Type aT
   case PanTau::TauConstituent::t_Charged: return "Charged";
   case PanTau::TauConstituent::t_Neutral: return "Neutral";
   case PanTau::TauConstituent::t_Pi0Neut: return "Pi0Neut";
-  case PanTau::TauConstituent::t_OutChrg: return "OuterChrg";
-  case PanTau::TauConstituent::t_OutNeut: return "OuterNeut";
   case PanTau::TauConstituent::t_NoType: return "All";
   default: return "UnkownType";
   }
@@ -173,7 +171,6 @@ bool PanTau::TauConstituent::isNeutralType(int tauConstituentType) {
   switch(type) {
   case PanTau::TauConstituent::t_Neutral: return true;
   case PanTau::TauConstituent::t_Pi0Neut: return true;
-  case PanTau::TauConstituent::t_OutNeut: return true;
   default: return false;
   }
   return false;
