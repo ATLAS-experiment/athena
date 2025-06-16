@@ -47,7 +47,8 @@ filter_bs = ExecStep.ExecStep('FilterBS')
 filter_bs.type = 'other'
 filter_bs.executable = 'trigbs_extractStream.py'
 filter_bs.input = ''
-filter_bs.args = '-s FTagPEBTLA ' + find_file('*_HLTMPPy_output.*.data')
+# cannot use 'find_file' as it only keeps the last file matching the pattern
+filter_bs.args = '-s FTagPEBTLA ' + '`find . -name "*_HLTMPPy_output.*.data"`'
 
 # Tier-0 reco step (BS->AOD)
 tlarecoPreExec = f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';"
