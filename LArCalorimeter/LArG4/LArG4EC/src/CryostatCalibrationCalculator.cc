@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EndcapCryostat::CalibrationCalculator
@@ -385,9 +385,7 @@ namespace LArG4 {
 
     CalibrationCalculator::CalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_backupCalculator("EndcapCryostatCalibrationLArCalculator",name)
     {
-      declareProperty("BackupCalculator",m_backupCalculator);
     }
 
     StatusCode CalibrationCalculator::initialize() {
@@ -418,13 +416,6 @@ namespace LArG4 {
     }// initialize
 
 
-    CalibrationCalculator::~CalibrationCalculator()
-    {
-      // Clean up pointers.
-      //delete m_backupCalculator;
-      //m_backupCalculator = 0;
-    }
-
     G4bool CalibrationCalculator::Process (const G4Step* a_step,
                                            LArG4Identifier & identifier,
                                            std::vector<G4double> & energies,
@@ -435,16 +426,14 @@ namespace LArG4 {
       // default is to process both the energy and the ID.
 
       energies.clear();
-      if ( a_process == kEnergyAndID  ||  a_process == kOnlyEnergy )
-        {
-          m_energyCalculator.Energies( a_step, energies );
-        } else {
+      if ( a_process == kEnergyAndID  ||  a_process == kOnlyEnergy ) {
+	m_energyCalculator.Energies( a_step, energies );
+      } else {
         for (unsigned int i=0; i != 4; i++) energies.push_back( 0. );
       }
 
       identifier.clear();
-      if ( a_process == kEnergyAndID  ||  a_process == kOnlyID )
-        {
+      if ( a_process == kEnergyAndID  ||  a_process == kOnlyID ) {
           // Calculate the identifier.
 
           // First, find the physical volume copy number, and the
@@ -633,8 +622,7 @@ namespace LArG4 {
       LArG4::CalibrationDefaultCalculator::Print("DMXYZ LArG4EC/CryostatCalibrationCalculator",identifier,a_step);
 #endif
       // Check for bad result.
-      if ( identifier == LArG4Identifier() ) return false;
-      return true;
+      return ( identifier != LArG4Identifier() );
     }
 
   } // namespace EndcapCryostat

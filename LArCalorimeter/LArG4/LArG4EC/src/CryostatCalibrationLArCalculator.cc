@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EndcapCryostat::CalibrationLArCalculator
@@ -44,9 +44,7 @@ namespace LArG4 {
 
     CalibrationLArCalculator::CalibrationLArCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_defaultCalculator("CalibrationDefaultCalculator", name)
     {
-      declareProperty("CalibrationDefaultCalculator", m_defaultCalculator);
     }
 
     StatusCode CalibrationLArCalculator::initialize() {
@@ -112,14 +110,6 @@ namespace LArG4 {
         m_parameters->GetValue("LArHECbetweenWheel") + 10.0;
 
       return StatusCode::SUCCESS;
-    }
-
-
-    CalibrationLArCalculator::~CalibrationLArCalculator()
-    {
-      // Cleanup pointers.
-      //delete m_defaultCalculator;
-      //m_defaultCalculator = 0;
     }
 
     G4bool CalibrationLArCalculator::Process (const G4Step* a_step,
