@@ -52,6 +52,7 @@ private:
   bool m_killPDG0;    // Kill PDG0 particles?
   bool m_cleanDecays; // Clean decays?
   bool m_purgeUnstableWithoutEndVtx; // Remove unstable particles without decay vertex?
+  bool m_ignoreSemiDisconnected; // Ignore semi-disconnected particles (normal in Sherpa)
   //@}
 
   /// @name Cleaned-particle counters

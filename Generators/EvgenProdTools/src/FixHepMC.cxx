@@ -24,6 +24,7 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("KillPDG0", m_killPDG0 = true, "Remove particles with PDG ID 0?");
   declareProperty("CleanDecays", m_cleanDecays = true, "Clean decay chains from non-propagating particles?");
   declareProperty("PurgeUnstableWithoutEndVtx", m_purgeUnstableWithoutEndVtx = false, "Remove unstable particles without decay vertex?");
+  declareProperty("IgnoreSemiDisconnected", m_ignoreSemiDisconnected = false, "Ignore semi-disconnected particles (normal in Sherpa)");
   declareProperty("PIDmap", m_pidmap = std::map<int,int>(), "Map of PDG IDs to replace");
 }
 #ifndef HEPMC3
@@ -173,7 +174,12 @@ StatusCode FixHepMC::execute() {
     /// AV: In case we have 3 particles, we try to add a vertex 
     /// that corresponds to 1->2 and 1->1 splitting.
     /// AV: In case we have 4 particles, we can try to do that as well.
-    if ( semi_disconnected.size() == 4 || semi_disconnected.size() == 3 || semi_disconnected.size() == 2) {
+
+    /// YH: In the case of Sherpa with HEPMC_TREE_LIKE: 1, where the
+    /// YH: incoming/outgoing particles of the signal process have no
+    /// YH: production/end vertices, this treatment can produce a loop.
+    /// YH: Skip it by setting IgnoreSemiDisconnected = True.
+    if ( !m_ignoreSemiDisconnected && (semi_disconnected.size() == 4 || semi_disconnected.size() == 3 || semi_disconnected.size() == 2)) {
       size_t no_endv = 0;
       size_t no_prov = 0;
       HepMC::FourVector sum(0,0,0,0);
