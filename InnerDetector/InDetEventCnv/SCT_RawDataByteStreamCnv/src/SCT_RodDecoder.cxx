@@ -368,8 +368,8 @@ int SCT_RodDecoder::makeRDO(const bool isOld,
 
   int strip{isOld ? data.oldStrip : data.strip};
   if (((strip & 0x7F) + (data.groupSize-1) >= N_STRIPS_PER_CHIP) or (strip<0) or (strip>=N_STRIPS_PER_SIDE)) {
-    ATH_MSG_WARNING("Cluster with " << data.groupSize << " strips, starting at strip " << strip
-                    << " in collection " << data.linkIDHash << " out of range. Will not make RDO");
+    ATH_MSG_DEBUG("Cluster with " << data.groupSize << " strips, starting at strip " << (strip & 0x7F) << " in Chip" << (strip / N_STRIPS_PER_SIDE) << " Side " << data.side <<", (old side, old strip) = (" << data.oldSide << ", " << data.oldStrip << ")"
+		  << " in collection " << data.linkIDHash << " (= " << m_cabling->getSerialNumberFromHash(data.linkIDHash) << ")  out of range. Will not make RDO");
     return -1;
   }
 
