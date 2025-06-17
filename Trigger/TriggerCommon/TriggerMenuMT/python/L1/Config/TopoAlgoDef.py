@@ -1255,7 +1255,7 @@ class TopoAlgoDef:
         tm.registerTopoAlgo(alg)        
 
         # TODO: to be updated with phase1 met, jets
-        xemap = [{"etcut": 0, "Threlist": [ 40, 50, 55, 60, 65, 75 ]}]
+        xemap = [{"etcut": 0, "Threlist": [55, 60, 65, 75 ]}]
         for x in xemap:                
             class d:
                 pass
@@ -2407,31 +2407,6 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
  
-        # CEP_CjJ
-        CEPmap = [
-            {"algoname": 'CEP_CjJ', "minETlist": [90, 100]}
-        ]
-        for x in CEPmap:
-            class d:
-                pass
-            for k in x:
-                setattr (d, k, x[k])
-            inputList = ['CjJs']
-            toponames=[]
-            for minET in d.minETlist:  # noqa: F821
-                toponames.append ("CEP-CjJ%is6" % (minET))     # noqa: F821 
-            alg = AlgConf.ExclusiveJets( name = d.algoname, inputs = inputList, outputs = toponames) # noqa: F821
-            alg.addgeneric('InputWidth', HW.jJetOutputWidthSort) # noqa: F821
-            alg.addgeneric('MaxTob', HW.jJetOutputWidthSort)       # noqa: F821
-            alg.addgeneric('NumResultBits',  len(toponames)) # noqa: F821
-            alg.addvariable('PtScale', 1.4*10) # noqa: F821
-            alg.addvariable('PtShift', 20*_et_conversion) # noqa: F821
-            for bitid,minET in enumerate(d.minETlist):  # noqa: F821
-                alg.addvariable('MinET1', get_threshold_cut('CjJ', minET)*_et_conversion, bitid)# noqa: F821
-                alg.addvariable('MinXi', 13600.0*_et_conversion*0.02, bitid) # noqa: F821
-                alg.addvariable('MaxXi', 13600.0*_et_conversion*0.05, bitid) # noqa: F821
-            tm.registerTopoAlgo(alg)
-
         # dphi with s+s #ATR-29784
         # Parameter ordering:
         # 1. MinEt1

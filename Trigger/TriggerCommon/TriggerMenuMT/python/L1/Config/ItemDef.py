@@ -1990,9 +1990,6 @@ class ItemDef:
         MenuItem('L1_AFP_A_AND_C_MBTS_2').setLogic( AFP_A & AFP_C & MBTS_2 & physcond )
         MenuItem('L1_AFP_A_OR_C_MBTS_2').setLogic( (AFP_A | AFP_C) & MBTS_2 & physcond )
 
-        MenuItem('L1_AFP_A_AND_C_TOF_CEP-CjJ100').setLogic( AFP_TOF_A & AFP_TOF_C & d.TOPO_CEP_CjJ100s6 & physcond )
-        MenuItem('L1_AFP_A_AND_C_TOF_T0T1_CEP-CjJ100').setLogic( (d.AFP_FSA_TOF_T0 | d.AFP_FSA_TOF_T1) & (d.AFP_FSC_TOF_T0 | d.AFP_FSC_TOF_T1) & d.TOPO_CEP_CjJ100s6 & physcond )
-
         MenuItem('L1_AFP_A_AND_C_TOF_J20').setLogic( AFP_TOF_A & AFP_TOF_C & d.J20 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_T0T1_J20').setLogic( (d.AFP_FSA_TOF_T0 | d.AFP_FSA_TOF_T1) & (d.AFP_FSC_TOF_T0 | d.AFP_FSC_TOF_T1) & d.J20 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_J30').setLogic( AFP_TOF_A & AFP_TOF_C & d.J30 & physcond )
@@ -2084,9 +2081,6 @@ class ItemDef:
             MenuItem('L1_DY-BOX-MU5VFMU3V').setLogic( d.TOPO_5DETA99_5DPHI99_MU5VFab_MU3Vab & physcond) 
             MenuItem('L1_DY-BOX-2MU5VF').setLogic( d.TOPO_5DETA99_5DPHI99_2MU5VFab & physcond) 
 
-            #ATR-17320
-            MenuItem('L1_CEP-CjJ100').setLogic( d.TOPO_CEP_CjJ100s6 & physcond )
-            MenuItem('L1_CEP-CjJ90' ).setLogic( d.TOPO_CEP_CjJ90s6 & physcond )
             #ATR-18824
             MenuItem('L1_ZAFB-04DPHI-eEM18M' ).setLogic( d.TOPO_60INVM_04DPHI32_eEM18abm_jEM25s625ETA49 & physcond)
             MenuItem('L1_ZAFB-25DPHI-eEM18M' ).setLogic( d.TOPO_60INVM_25DPHI32_eEM18abm_jEM25s625ETA49 & physcond)
