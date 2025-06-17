@@ -179,7 +179,7 @@ JetChainParts = {
     'scan'         : # No longer used?
       ['FS',],
     'ionopt'       : # Heavy ion configuration
-      ['noion','ion'],
+      ['noion','ion','ionp'],
     'trkopt'       : # Tracking configuration
       ['notrk','ftf','roiftf'],
     'trkpresel'    : # Tracking preselection
