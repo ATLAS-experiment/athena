@@ -230,7 +230,7 @@ namespace Crest {
 
       nlohmann::json createRowArray(const nlohmann::json& data_row) const;
       const nlohmann::json& getRow();
-      void parseOldFormat(std::string& colName, TypeId& typespec,const nlohmann::json & j);
+      void parseOldFormat(const std::string& colName, const TypeId& typespec, const nlohmann::json & j);
       void readCommonType(uint64_t since, const nlohmann::json &j_in);
       std::vector<uint64_t> readDcsFullType(const nlohmann::json &j_in);
       void setIovData(const nlohmann::json& j);
