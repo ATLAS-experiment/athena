@@ -237,12 +237,20 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   std::shared_ptr<const Acts::Surface> actsSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3(0., 0., 0.));
   Acts::BoundVector params;
 
-  constexpr double GeVToMeV = 1000;
+  constexpr double GeVToMeV = 1000.;
   double d0=track.getD0();
   double z0=track.getZ0();
   double phi=track.getPhi();
+  double eta=track.getEta();
   double theta=track.getTheta();
-  double qop=track.getQOverPt();
+  double qopt=track.getQOverPt()*GeVToMeV;
+  double pt=track.getPt()/GeVToMeV;
+  double px=pt*std::cos(phi);
+  double py=pt*std::sin(phi);
+  double pz=pt*std::sinh(eta);
+  double p=std::sqrt(px*px+py*py+pz*pz);
+  double qop=((p > 1e-10) ? (1/p) : 1e10);
+  if (qopt < 0) qop *= -1;  
   double t=0.;
 
   params << d0, z0, phi, theta, qop, t;  
