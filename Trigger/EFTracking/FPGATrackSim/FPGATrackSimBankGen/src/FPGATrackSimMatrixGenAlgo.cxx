@@ -288,11 +288,9 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
             FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
             std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
 
-            // Only pass hits that weren't already used
+            // Pass all hits-- it's not possible to only select second stage hits here...
             for (const auto& hit : sector_hits) {
-              if (m_FPGATrackSimMapping->RegionMap_1st()->getRegions(hit).size() == 0) {
-                phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
-              }
+              phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
             }
 
             // Use the track extension tool to actually produce a new set of roads.
