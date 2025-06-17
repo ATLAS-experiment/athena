@@ -23,8 +23,6 @@ def createPanTauConfigFlags():
 
     flags.addFlag("TauConstituents_BinEdges_Eta", [0.000, 0.800, 1.400, 1.500, 1.900, 9.900])
     flags.addFlag("TauConstituents_Selection_Neutral_EtaBinned_EtCut", [2.1*Units.GeV, 2.5*Units.GeV, 2.6*Units.GeV, 2.4*Units.GeV, 1.9*Units.GeV])
-    flags.addFlag("TauConstituents_Selection_Pi0Neut_EtaBinned_EtCut", [2.1*Units.GeV, 2.5*Units.GeV, 2.6*Units.GeV, 2.4*Units.GeV, 1.9*Units.GeV])
-    flags.addFlag("TauConstituents_Selection_Charged_EtaBinned_EtCut", [1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV])
     flags.addFlag("CellBased_BinEdges_Eta", [0.000, 0.800, 1.400, 1.500, 1.900, 9.900])
     flags.addFlag("CellBased_EtaBinned_Pi0MVACut_1prong", [0.46, 0.39, 0.51, 0.47, 0.54])
     flags.addFlag("CellBased_EtaBinned_Pi0MVACut_3prong", [0.47, 0.52, 0.60, 0.55, 0.50])
