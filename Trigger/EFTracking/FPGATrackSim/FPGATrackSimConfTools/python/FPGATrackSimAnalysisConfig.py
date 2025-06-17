@@ -461,6 +461,7 @@ def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool"):
     NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 9
     NNTrackTool.useSectors = False
     NNTrackTool.doGNNTracking = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
+    NNTrackTool.nInputsGNN = flags.Trigger.FPGATrackSim.GNN.nInputsGNN
     result.setPrivateTools(NNTrackTool)
     return result
 

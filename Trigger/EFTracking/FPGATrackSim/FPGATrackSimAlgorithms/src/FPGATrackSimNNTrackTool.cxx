@@ -134,6 +134,10 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
           }
         }
 
+        if (m_doGNNTracking) {
+            inputTensorValues.resize(m_nInputsGNN * 3);
+        }
+
 
         if (isFirst) paramNNoutputs = m_paramNN_1st.runONNXInference(inputTensorValues);
         else paramNNoutputs = m_paramNN_2nd.runONNXInference(inputTensorValues);
@@ -154,6 +158,11 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
 
 
 StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
+
+    if(m_doGNNTracking) {
+        ATH_CHECK(getTracks_GNN(roads, tracks));
+        return StatusCode::SUCCESS;
+    }
 
     ATH_CHECK(setRoadSectors(roads));
     int n_track = 0;
@@ -194,63 +203,27 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
         // Get a list of indices for all possible combinations given a certain
         // number of layers
         std::vector<std::vector<int>> combs;
-        std::vector<std::shared_ptr<const FPGATrackSimHit>> all_hits;
-
-        if (m_doGNNTracking) {
-            std::vector<std::shared_ptr<const FPGATrackSimHit>> all_pixel_hits;
-            std::vector<std::shared_ptr<const FPGATrackSimHit>> all_strip_hits;
-            size_t pixelCount = 0;
-
-            // Temporarily do not make a road if it has more than 40 hits, there is an issue with some big roads which we do not want to work with right now.
-            if (iroad->getNHits() > 40) continue;
-
-            for (unsigned layer = 0; layer < iroad->getNLayers(); ++layer) {
-                all_hits.insert(all_hits.end(), iroad->getHits(layer).begin(), iroad->getHits(layer).end());
-            }
-
-            for (const auto& hit : all_hits) {
-                if(hit->isPixel()) {
-                    pixelCount++;
-                }
-            }
-
-            if (pixelCount < 1) continue; // Cannot use a form a track candidate from a road that does not have a pixel hit
-
-            combs.push_back({}); //Dummy vector such that each road to corresponds to one track combination
-        }
-        else { 
-            combs = getComboIndices(iroad->getNHits_layer());
-        }
+        
+        combs = getComboIndices(iroad->getNHits_layer());
 
         // Loop over possible combinations for this road
         for (size_t icomb = 0; icomb < combs.size(); icomb++) {
             std::vector<float> inputTensorValues;
             std::vector<std::shared_ptr<const FPGATrackSimHit>> hit_list;
 
-            if (m_doGNNTracking) {
-                for (const auto &hit : all_hits) {
-                    if (hit->isReal()) {
+            // list of indices for this particular combination
+            std::vector<int> const &hit_indices = combs[icomb];
+
+            // Loop over all layers
+            for (unsigned layer = 0; layer < planeMap->getNLogiLayers(); layer++) {
+
+                // Check to see if this is a valid hit
+                if (hit_indices[layer] >= 0) {
+
+                    std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
+                    // Add this hit to the road
+                    if (hit->isReal()){
                         hit_list.push_back(hit);
-                    }
-                }
-
-                if (hit_list.size() < m_minNumberOfRealHitsInATrack) continue;
-            }
-            else {
-                // list of indices for this particular combination
-                std::vector<int> const &hit_indices = combs[icomb];
-
-                // Loop over all layers
-                for (unsigned layer = 0; layer < planeMap->getNLogiLayers(); layer++) {
-
-                    // Check to see if this is a valid hit
-                    if (hit_indices[layer] >= 0) {
-
-                        std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
-                        // Add this hit to the road
-                        if (hit->isReal()){
-                            hit_list.push_back(hit);
-                        }
                     }
                 }
             }
@@ -271,16 +244,9 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
             float tmp_xf;
             float tmp_yf;
             float tmp_zf;
-            int missingHits = 10; //For the NN input, we need 5 spacepoints as inputs
 
             // Loop over all hits
             for (const auto &hit : hit_list) {
-                if (m_doGNNTracking) {
-                    if (missingHits <= 0) break;  // Stop looping once enough hits are found
-                    if(hit->isPixel()) missingHits-= 2; // Each pixel counts as two hits so that strip counts half as much 
-                    else if(hit->isStrip()) missingHits-= 1; // Since two strip hits is a single spacepoints in the GNN algorithm
-                }
-
                 // Need to rotate hits
                 float x0 = hit->getX();
                 float y0 = hit->getY();
@@ -333,29 +299,19 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
                 }
             }
 
-            if (!m_doGNNTracking) {
-                if (inputTensorValues.size() != planeMap->getNLogiLayers()*3) {
-                    inputTensorValues.resize(planeMap->getNLogiLayers()*3);
-                }
-                inputTensorValues.resize(15); // Retain only the first 15 values for consistency
+            if (inputTensorValues.size() != planeMap->getNLogiLayers()*3) {
+                inputTensorValues.resize(planeMap->getNLogiLayers()*3);
             }
+            inputTensorValues.resize(15); // Retain only the first 15 values for consistency
+
             inputTensorValuesAll.push_back(inputTensorValues);
             FPGATrackSimTrack track_cand;
             track_cand.setTrackID(n_track);
             track_cand.setNLayers(planeMap->getNLogiLayers());
-            if(m_doGNNTracking) {
-                for (const auto &ihit : hit_list) {
-                    unsigned int layer = ihit->getLayer();
-                    track_cand.setFPGATrackSimHit(layer, *ihit);
-                }
-            }
-            else {
-                for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
-                    track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
-                }
+            for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
+                track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
             }
             tracks.push_back(track_cand);
-
 
             ATH_MSG_DEBUG("NN InputTensorValues:");
             ATH_MSG_DEBUG(inputTensorValues);
@@ -382,6 +338,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
 
     return StatusCode::SUCCESS;
 }
+
 
 StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
 
@@ -566,6 +523,195 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
 
     return StatusCode::SUCCESS;
 }
+
+StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
+
+    ATH_CHECK(setRoadSectors(roads));
+    int n_track = 0;
+
+    std::vector<std::vector<float> >inputTensorValuesAll;
+
+    // Loop over roads
+    for (auto const &iroad : roads) {
+
+        double y = iroad->getY();
+
+        // Get info on layers with missing hits
+        int nMissing = 0;
+        layer_bitmask_t missing_mask = 0;
+
+        // Just used to get number of layers considered
+        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(iroad->getSubRegion());
+
+        // Create a template track with common parameters filled already for
+        // initializing below
+        FPGATrackSimTrack temp;
+        temp.setTrackStage(TrackStage::FIRST);
+        temp.setNLayers(planeMap->getNLogiLayers());
+        temp.setBankID(-1);
+        temp.setPatternID(iroad->getPID());
+        temp.setFirstSectorID(iroad->getSector());
+        temp.setHitMap(missing_mask);
+        temp.setNMissing(nMissing);
+        temp.setQOverPt(y);
+
+        temp.setSubRegion(iroad->getSubRegion());
+        temp.setHoughX(iroad->getX());
+        temp.setHoughY(iroad->getY());
+        temp.setHoughXBin(iroad->getXBin());
+        temp.setHoughYBin(iroad->getYBin());
+
+        ////////////////////////////////////////////////////////////////////////
+        // Get a list of indices for all possible combinations given a certain
+        // number of layers
+        std::vector<std::vector<int>> combs;
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> all_hits;
+
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> all_pixel_hits;
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> all_strip_hits;
+        size_t pixelCount = 0;
+
+        // Temporarily do not make a road if it has more than 40 hits, there is an issue with some big roads which we do not want to work with right now.
+        if (iroad->getNHits() > 40) continue;
+
+        for (unsigned layer = 0; layer < iroad->getNLayers(); ++layer) {
+            all_hits.insert(all_hits.end(), iroad->getHits(layer).begin(), iroad->getHits(layer).end());
+        }
+
+        for (const auto& hit : all_hits) {
+            if(hit->isPixel()) {
+                pixelCount++;
+            }
+        }
+
+        if (pixelCount < 1) continue; // Cannot use a form a track candidate from a road that does not have a pixel hit
+
+        std::vector<float> inputTensorValues;
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> hit_list;
+
+        for (const auto &hit : all_hits) {
+            if (hit->isReal()) {
+                hit_list.push_back(hit);
+            }
+        }
+
+        if (hit_list.size() < m_minNumberOfRealHitsInATrack) continue;
+
+        // Sort the list by radial distance
+        std::sort(hit_list.begin(), hit_list.end(),
+                [](std::shared_ptr<const FPGATrackSimHit> &hit1, std::shared_ptr<const FPGATrackSimHit> &hit2) {
+                double rho1 = std::hypot(hit1->getX(), hit1->getY());
+                double rho2 = std::hypot(hit2->getX(), hit2->getY());
+                return rho1 < rho2;
+                });
+
+
+        int index = 1;
+        bool flipZ = false;
+        double rotateAngle = 0;
+        bool gotSecondSP = false;
+        float tmp_xf;
+        float tmp_yf;
+        float tmp_zf;
+
+        // Loop over all hits
+        for (const auto &hit : hit_list) {
+            // Need to rotate hits
+            float x0 = hit->getX();
+            float y0 = hit->getY();
+            float z0 = hit->getZ();
+            if (index == 1) {
+                if (z0 < 0)
+                    flipZ = true;
+                rotateAngle = std::atan(x0 / y0);
+                if (y0 < 0)
+                    rotateAngle += M_PI;
+            }
+
+            float xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
+            float yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
+            float zf = z0;
+
+            if (flipZ) zf = z0 * -1;
+
+            // Get average of values for strip hit pairs
+            // TODO: this needs to be fixed in the future, for this to work for other cases
+            if (hit->isStrip()) {
+                if (!gotSecondSP) {
+                    tmp_xf = xf;
+                    tmp_yf = yf;
+                    tmp_zf = zf;
+                    gotSecondSP = true;
+                }
+                else {
+
+                    float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
+                    float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
+                    float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+
+                    // Get average of two hits for strip hits 
+                    inputTensorValues.push_back(xf_scaled);
+                    inputTensorValues.push_back(yf_scaled);
+                    inputTensorValues.push_back(zf_scaled);
+                    index++;
+                    gotSecondSP = false;
+                }
+            }
+            else {
+                float xf_scaled = (xf) / (getXScale());
+                float yf_scaled = (yf) / (getYScale());
+                float zf_scaled = (zf) / (getZScale());
+                inputTensorValues.push_back(xf_scaled);
+                inputTensorValues.push_back(yf_scaled);
+                inputTensorValues.push_back(zf_scaled);
+                index++;
+            }
+        }
+
+        // NN Estimator can either be 5 or 9 spacepoints as inputs
+        // Let this be decided by m_nInputsGNN
+
+        // NN Estimator needs 9 spacepoints -> 27 inputs
+        // If there are more than 9 spacepoints entered, then it accepts the first 9
+        // If there are less than 9 spacepoints, then it enters no values for it (although I actually probably need to just reject these)
+        inputTensorValues.resize(m_nInputsGNN*3); 
+        
+        inputTensorValuesAll.push_back(inputTensorValues);
+        FPGATrackSimTrack track_cand;
+        track_cand.setTrackID(n_track);
+        track_cand.setNLayers(hit_list.size());
+        for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
+            track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
+        }
+        tracks.push_back(track_cand);
+
+
+        ATH_MSG_DEBUG("NN InputTensorValues:");
+        ATH_MSG_DEBUG(inputTensorValues);
+    }  // loop over roads
+
+    /// now we have saved our values, time to run inference and get the output
+    auto NNoutputs = m_fakeNN_1st.runONNXInference(inputTensorValuesAll);
+
+    for (unsigned itrack = 0; itrack < NNoutputs.size(); itrack++) {
+
+        float nn_val = NNoutputs[itrack][0];
+        ATH_MSG_DEBUG("NN output:" << nn_val);
+        double chi2 = (1 - nn_val) * (tracks[itrack].getNCoords() - tracks[itrack].getNMissing() - 5);
+	    tracks[itrack].setOrigChi2(chi2);
+        tracks[itrack].setChi2(chi2);
+    }
+
+    // Add truth info
+    for (FPGATrackSimTrack &t : tracks) {
+        compute_truth(t);  // match the track to a geant particle using the
+        // channel-level geant info in the hit data.
+    }
+
+    return StatusCode::SUCCESS;
+}
+
+
 
 
 // Borrowed same code from TrackFitter - probably a nicer way to inherit instead
