@@ -5,6 +5,7 @@
 #include "src/GaussianSumFitterTool.h"
 
 // ATHENA
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkTrackSummary/TrackSummary.h"
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"

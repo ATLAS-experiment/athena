@@ -14,6 +14,7 @@
 
 //Tracking ACTS
 #include "ActsGeometry/ActsDetectorElement.h"
+#include "TrkSurfaces/Surface.h"
 
 
 ActsFatrasWriteHandler::ActsFatrasWriteHandler(const std::string& type, const std::string& name,

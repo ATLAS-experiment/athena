@@ -11,6 +11,7 @@ def ActsTrackingGeometrySvcCfg(flags,
   from ROOT.ActsTrk import DetectorType 
   kwargs.setdefault("NotAlignDetectors", [DetectorType.Trt, 
                                           DetectorType.Hgtd])
+  kwargs.setdefault("UseBlueprint", flags.Acts.TrackingGeometry.UseBlueprint)
 
   subDetectors = []
   if flags.Detector.GeometryBpipe:

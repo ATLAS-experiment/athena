@@ -38,6 +38,10 @@ public:
     m_vec.push_back (p);
   }
 
+  // Allow access if we have a mutable reference
+  std::vector<std::shared_ptr<const ActsDetectorElement>>& vector() {
+    return m_vec;
+  }
 
 private:
   mutable std::vector<std::shared_ptr<const ActsDetectorElement>> m_vec ATLAS_THREAD_SAFE;
