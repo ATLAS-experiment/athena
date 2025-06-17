@@ -139,7 +139,7 @@ Gep::Cluster Gep::BasicGepClusterMaker::getClusterFromListOfCells(const std::vec
 
   cluster.ncells = cells.size();
   cluster.time = cells[0].time; // Take time of seed cell
-  cluster.cell_id = v_cellIDs;
+  cluster.cell_id = std::move(v_cellIDs);
   cluster.setEtEtaPhi(tlv_cluster.Et(), tlv_cluster.Eta(), tlv_cluster.Phi());
 
   return cluster;
