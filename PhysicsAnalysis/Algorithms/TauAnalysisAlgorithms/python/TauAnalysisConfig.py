@@ -126,6 +126,9 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('use_eVeto', False, type=bool,
             info="use selection with or without eVeto combined with tauID "
             "recommendations: set it to True if electron mis-reconstructed as tau is a large background for your analysis")
+        self.addOption ('use_muonOLR', False, type=bool,
+            info="use selection with or without muonOLR with TauID "
+            "recommendations: set it to True if muon mis-reconstructed as tau is a large background for your analysis")
         self.addOption ('useGNTau', False, type=bool,
             info="use GNTau based ID instead of RNNTau ID "
             "recommendations: that's new experimental feature and might come default soon")
@@ -168,6 +171,8 @@ class TauWorkingPointConfig (ConfigBlock) :
             nameFormat = nameFormat + 'eleid'
         else:
             nameFormat = nameFormat + 'noeleid'
+        if self.use_muonOLR:
+            nameFormat = nameFormat + '_muonolr' 
         nameFormat = nameFormat + '.conf'    
 
         if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
