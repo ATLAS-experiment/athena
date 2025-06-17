@@ -797,14 +797,6 @@ class ItemDef:
         MenuItem('L1_MU3V_jJ60'      ).setLogic( d.MU3V & d.jJ60    & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU5VF_jJ80'      ).setLogic( d.MU5VF & d.jJ80  & physcond).setTriggerType(TT.calo)
 
-        MenuItem('L1_jLJ60'         ).setLogic( d.jLJ60        & physcond).setTriggerType(TT.calo) # Not in commissioning
-        MenuItem('L1_jLJ80'         ).setLogic( d.jLJ80        & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_jLJ100'        ).setLogic( d.jLJ100       & physcond).setTriggerType(TT.calo) # Not in commissioning
-        MenuItem('L1_jLJ120'        ).setLogic( d.jLJ120       & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_jLJ140'        ).setLogic( d.jLJ140       & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_jLJ160'        ).setLogic( d.jLJ160       & physcond).setTriggerType(TT.calo) # Not in commissioning
-        MenuItem('L1_jLJ180'        ).setLogic( d.jLJ180       & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_jLJ200'        ).setLogic( d.jLJ200       & physcond).setTriggerType(TT.calo) # Not in commissioning
 
         MenuItem('L1_gJ20p0ETA25'         ).setLogic( d.gJ200ETA25        & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gJ20p25ETA49'         ).setLogic( d.gJ2025ETA49        & physcond).setTriggerType(TT.calo)

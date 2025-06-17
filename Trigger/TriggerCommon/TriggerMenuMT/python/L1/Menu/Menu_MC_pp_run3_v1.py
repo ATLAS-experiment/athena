@@ -55,8 +55,6 @@ def defineMenu():
         'L1_2DR15-0M30-eEM12LeEM9L',
         'L1_13DR25-25M70-eEM12LeEM9L',
         
-        # jLJ, Production thresholds, not used in commissioning
-        'L1_jLJ60', 'L1_jLJ100', 'L1_jLJ160', 'L1_jLJ200',
         #ATR28783
         'L1_6J15',
         # TOPO
@@ -258,7 +256,6 @@ def defineMenu():
         'L1_jJ80p0ETA25':'',
         'L1_jJ85p0ETA21':'',
         'L1_jJ140':'',
-        'L1_jLJ180':'',
 
         # other non-primary
         'L1_jEM25':'',

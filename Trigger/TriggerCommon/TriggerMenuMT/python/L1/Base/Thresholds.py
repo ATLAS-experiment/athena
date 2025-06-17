@@ -854,39 +854,6 @@ class jJetThreshold( Threshold ):
         return confObj
 
 
-class jLJetThreshold( Threshold ):
-
-    def __init__(self, name, ttype = 'jLJ', mapping = -1):
-        super(jLJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jLJ' else 2)
-
-    def addThrValue(self, value, *args, **kwargs):
-        defargs = ThresholdValue.getDefaults(self.ttype.name)
-        posargs = dict(zip(['etamin', 'etamax', 'phimin', 'phimax', 'priority'], args))
-
-        # then we evaluate the arguments: first defaults, then positional arguments, then named arguments
-        p = deepcopy(defargs)
-        p.update(posargs)
-        p.update(kwargs)
-
-        thrv = ThresholdValue(self.ttype, value,
-                              etamin = p['etamin'], etamax=p['etamax'], phimin=p['phimin'], phimax=p['phimax'],
-                              priority = p['priority'], name = self.name+'full')
-
-        self.thresholdValues.append(thrv)
-        return self
-
-    def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["thrValues"] = []
-        for thrV in self.thresholdValues:
-            tvco = odict()
-            tvco["value"] = thrV.value
-            tvco["etamin"] = thrV.etamin
-            tvco["etamax"] = thrV.etamax
-            tvco["priority"] = thrV.priority
-            confObj["thrValues"].append( tvco )
-        return confObj
 
 class gJetThreshold( Threshold ):
 

@@ -150,8 +150,6 @@ def defineMenu():
         'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ80',  
         #Kept as Phase-1 ATR-28761 
   
-        # jLJ
-        'L1_jLJ80', 'L1_jLJ120', 'L1_jLJ140', 'L1_jLJ180',
 
         # jEM
         'L1_jEM25', 'L1_jEM20M',
