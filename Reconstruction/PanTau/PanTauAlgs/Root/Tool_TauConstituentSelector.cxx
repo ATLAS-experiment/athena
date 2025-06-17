@@ -32,8 +32,6 @@ StatusCode PanTau::Tool_TauConstituentSelector::initialize() {
     
   //et cuts for types used in mode reco
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Neutral_EtaBinned_EtCut", m_Selection_Neutral_EtaBinned_EtCut) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Pi0Neut_EtaBinned_EtCut", m_Selection_Pi0Neut_EtaBinned_EtCut) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Charged_EtaBinned_EtCut", m_Selection_Charged_EtaBinned_EtCut) );
     
   return StatusCode::SUCCESS;
 } 
@@ -44,9 +42,7 @@ double PanTau::Tool_TauConstituentSelector::getEtCut(double eta, PanTau::TauCons
   for (unsigned int iEtaBin=0; iEtaBin<m_BinEdges_Eta.size()-1; iEtaBin++) {
     if (m_BinEdges_Eta[iEtaBin] <= eta && eta < m_BinEdges_Eta[iEtaBin+1]) {
       switch(constituentType) {
-      case PanTau::TauConstituent::t_Charged:  return m_Selection_Charged_EtaBinned_EtCut[iEtaBin];
       case PanTau::TauConstituent::t_Neutral:  return m_Selection_Neutral_EtaBinned_EtCut[iEtaBin];
-      case PanTau::TauConstituent::t_Pi0Neut:  return m_Selection_Pi0Neut_EtaBinned_EtCut[iEtaBin];
       default:
 	return 9999999.;
       }
@@ -116,18 +112,6 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutralConstituent(Pan
     return false;
   }
 
-  return true;
-}
-
-
-bool PanTau::Tool_TauConstituentSelector::passesSelection_Pi0NeutConstituent(PanTau::TauConstituent* tauConstituent) const {
-
-  TLorentzVector tlv_Constituent = tauConstituent->p4();
-  if (tlv_Constituent.Et() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_Pi0Neut)) {
-    ATH_MSG_DEBUG("\tNot using constituent at eta " << tlv_Constituent.Eta() << " with et of " << tlv_Constituent.Et());
-    return false;
-  }
-    
   return true;
 }
 

@@ -397,7 +397,7 @@ def TauConfigTest(flags=None):
     if flags is None:
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
         from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
-       
+
         flags = initConfigFlags()
 
         flags.Input.Files = defaultTestFiles.RDO_RUN3

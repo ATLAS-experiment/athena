@@ -60,8 +60,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
   MapVecDouble m04 = {
     {"TauConstituents_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
     {"TauConstituents_Selection_Neutral_EtaBinned_EtCut",{2.1*GeV, 2.5*GeV, 2.6*GeV, 2.4*GeV, 1.9*GeV}},
-    {"TauConstituents_Selection_Pi0Neut_EtaBinned_EtCut",{2.1*GeV, 2.5*GeV, 2.6*GeV, 2.4*GeV, 1.9*GeV}},
-    {"TauConstituents_Selection_Charged_EtaBinned_EtCut",{1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV}},
     // Eta Binned    P I 0 - B D T   C U T S
     {"CellBased_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
     {"CellBased_EtaBinned_Pi0MVACut_1prong",{0.46, 0.39, 0.51, 0.47, 0.54}},
