@@ -117,8 +117,6 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
         return getConfig_jTAU(do_HI_tob_thresholds)
     if ttype == ThrType.jJ:
         return getConfig_jJ(do_HI_tob_thresholds)
-    if ttype == ThrType.jLJ:
-        return getConfig_jLJ()
     if ttype == ThrType.gJ:
         return getConfig_gJ()
     if ttype == ThrType.gLJ:
@@ -615,16 +613,6 @@ def getConfig_jJ(do_HI_tob_thresholds):
     confObj["seedThreshold3"] = 3 
     return confObj
 
-def getConfig_jLJ():
-    confObj = odict()
-    confObj["ptMinToTopo1"] = 15 # PLACEHOLDER
-    confObj["ptMinToTopo2"] = 15 # PLACEHOLDER
-    confObj["ptMinToTopo3"] = 15 # PLACEHOLDER
-    confObj["ptMinxTOB1"] = 15 # PLACEHOLDER
-    confObj["ptMinxTOB2"] = 15 # PLACEHOLDER
-    confObj["ptMinxTOB3"] = 15 # PLACEHOLDER
-    confObj["resolutionMeV"] = 200
-    return confObj
 
 def getConfig_gJ():
     confObj = odict()

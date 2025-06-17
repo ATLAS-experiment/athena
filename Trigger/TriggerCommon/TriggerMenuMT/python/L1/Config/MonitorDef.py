@@ -218,7 +218,6 @@ class MonitorDef:
                     "L1_jJ30p0ETA25", "L1_jJ40p0ETA25",
                     "L1_jJ70p0ETA23", "L1_jJ55p0ETA23",
                     "L1_jJ80p0ETA25", "L1_jJ85p0ETA21",
-                    "L1_jLJ180",
                     "L1_jEM25", "L1_jEM20M",
                     #
                     "L1_eEM7", "L1_eEM10L", "L1_eEM15",

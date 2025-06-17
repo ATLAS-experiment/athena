@@ -222,7 +222,7 @@ class TauMultiplicityAlgo(MultiplicityAlgo):
         mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[HLMT]*)",threshold).groupdict()
         self.input = mres["type"].replace('SPARE','')
 
-# jJ and jLJ, gJ and gLJ
+# jJ, gJ and gLJ
 class JetMultiplicityAlgo(MultiplicityAlgo):
     def __init__(self, name, threshold, nbits, classtype ):
         super(JetMultiplicityAlgo, self).__init__(classtype=classtype, name=name, 
