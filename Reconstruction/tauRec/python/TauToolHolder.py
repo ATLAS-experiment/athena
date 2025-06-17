@@ -14,7 +14,6 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon.SystemOfUnits import GeV, deg
 
-
 ########################################################################
 # JetSeedBuilder
 @AccumulatorCache
