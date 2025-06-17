@@ -1792,6 +1792,9 @@ class TopoAlgoDef:
               "MinET2" : 0, # eTaus
               "MinET3" : 0, # muons
               "MinET4" : 0, # jXE
+              "ScaleSqr1" : [128, 128], #corresponds to Tight and Loose WPs
+              "ScaleSqr2" : [128, 128], #corresponds to Tight and Loose WPs
+              "ScaleSqr3" : [128, 128], #corresponds to Tight and Loose WPs
               "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
         }
         class d:
@@ -1822,6 +1825,9 @@ class TopoAlgoDef:
         alg.addvariable('MinET3', d.MinET3 * _et_conversion)
         alg.addvariable('MinET4', d.MinET4 * _et_conversion)
         for bitId in range(len(toponames)):
+            alg.addvariable('ScaleSqr1', d.ScaleSqr1[bitId], bitId)
+            alg.addvariable('ScaleSqr2', d.ScaleSqr2[bitId], bitId)
+            alg.addvariable('ScaleSqr3', d.ScaleSqr3[bitId], bitId)
             alg.addvariable('AnomalyScoreThresh', d.AnomalyScoreThresh[bitId], bitId)
         tm.registerTopoAlgo(alg)
 
