@@ -277,6 +277,10 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
   valueMap["log_sumpt_PV0"] = std::vector<double>(n_timeSteps);
   valueMap["log_sumpt2_PV0"] = std::vector<double>(n_timeSteps);
   valueMap["charge"] = std::vector<double>(n_timeSteps);
+  // used by RNN track classifier for upgrade
+  valueMap["(trackPt/jetSeedPt)"] = std::vector<double>(n_timeSteps); 
+  valueMap["numberOfInnermostPixelLayerEndcapHits"] = std::vector<double>(n_timeSteps);
+  valueMap["nSiHits"] = std::vector<double>(n_timeSteps);
 
   // tau variable
   double log_ptJetSeed = std::log( xTau.ptJetSeed() );
@@ -318,6 +322,14 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
       uint8_t nTRTHits = 0; ATH_CHECK( xTrackParticle->summaryValue(nTRTHits, xAOD::numberOfTRTHits) );
       float eProbabilityHT; ATH_CHECK( xTrackParticle->summaryValue( eProbabilityHT, xAOD::eProbabilityHT) );
 
+      // used by RNN track classifier for upgrade
+      uint8_t numberOfInnermostPixelLayerEndcapHits = 0; 
+      uint8_t tmp_var = 0; 
+      if(xTrackParticle->summaryValue(tmp_var, xAOD::numberOfInnermostPixelLayerEndcapHits) ){
+         numberOfInnermostPixelLayerEndcapHits = tmp_var;  
+      }
+      uint8_t nSiHits = nPixelHits + nPixelDeadSensors + nSCTHits + nSCTDeadSensors;  
+        
       valueMap["log(trackPt)"][i] = std::log( xTrackParticle->pt() );
       valueMap["log(jetSeedPt)"][i] = log_ptJetSeed;
       valueMap["trackPt/tauPtIntermediateAxis"][i] = xTrackParticle->pt()/xTau.ptIntermediateAxis();
@@ -345,6 +357,10 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
       valueMap["log_sumpt_PV0"][i] = log_sumpt_PV0;
       valueMap["log_sumpt2_PV0"][i] = log_sumpt2_PV0;
       valueMap["charge"][i] = xTrackParticle->charge();
+      // used by RNN track classifier for upgrade
+      valueMap["(trackPt/jetSeedPt)"][i] = xTrackParticle->pt()/xTau.ptJetSeed();
+      valueMap["numberOfInnermostPixelLayerEndcapHits"][i] = (double) numberOfInnermostPixelLayerEndcapHits;
+      valueMap["nSiHits"][i] = (double) nSiHits;
 
       ++i;
       if(m_nMaxNtracks > 0 && i >= m_nMaxNtracks) {
