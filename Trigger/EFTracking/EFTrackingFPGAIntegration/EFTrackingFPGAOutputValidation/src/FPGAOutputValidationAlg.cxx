@@ -51,6 +51,8 @@ FPGAOutputValidationAlg::FPGAOutputValidationAlg(
 {}
 
 StatusCode FPGAOutputValidationAlg::initialize() {
+  ATH_MSG_INFO("Initializing FPGAOutputValidationAlg");
+
   ATH_CHECK(m_pixelKeys.initialize(!m_pixelKeys.empty()));
   ATH_CHECK(m_stripKeys.initialize(!m_stripKeys.empty()));
 
@@ -90,7 +92,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
       Monitored::Group(
         m_monitoringTool,
-        Monitored::Scalar<unsigned>("nmatched_pixel_clusters", matchedClusters.size())
+        Monitored::Scalar<float>("nmatched_pixel_clusters", matchedClusters.size() - 0.5)
       );
 
       if (matchedClusters.size() == 0) {
@@ -125,14 +127,14 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
           Monitored::Scalar<float>("diff_pixel_locx_" +region , cluster0->localPosition<2>()[0] - cluster1->localPosition<2>()[0]),
           Monitored::Scalar<float>("diff_pixel_locy_" +region , cluster0->localPosition<2>()[1] - cluster1->localPosition<2>()[1]),
           Monitored::Scalar<float>("diff_pixel_covxx_" +region , cluster0->localCovariance<2>()(0, 0) - cluster1->localCovariance<2>()(0, 0)),
-          Monitored::Scalar<float>("diff_pixel_covyy_" +region , cluster0->localCovariance<2>()(1, 1) - cluster1->localCovariance<2>()(1, 1)),  
+          Monitored::Scalar<float>("diff_pixel_covyy_" +region , cluster0->localCovariance<2>()(1, 1) - cluster1->localCovariance<2>()(1, 1)),
           Monitored::Scalar<float>("diff_pixel_globalx_" +region , cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
           Monitored::Scalar<float>("diff_pixel_globaly_" +region , cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
           Monitored::Scalar<float>("diff_pixel_globalz_" +region , cluster0->globalPosition()[2] - cluster1->globalPosition()[2]),
-          Monitored::Scalar<float>("diff_pixel_channelsphi_" +region , cluster0->channelsInPhi() - cluster1->channelsInPhi()),
-          Monitored::Scalar<float>("diff_pixel_channelseta_" +region , cluster0->channelsInEta() - cluster1->channelsInEta()),
+          Monitored::Scalar<int>("diff_pixel_channelsphi_" +region , cluster0->channelsInPhi() - cluster1->channelsInPhi()),
+          Monitored::Scalar<int>("diff_pixel_channelseta_" +region , cluster0->channelsInEta() - cluster1->channelsInEta()),
           Monitored::Scalar<float>("diff_pixel_widtheta_" +region , cluster0->widthInEta() - cluster1->widthInEta()),
-          Monitored::Scalar<float>("diff_pixel_tot_" +region , cluster0->totalToT() - cluster1->totalToT())
+          Monitored::Scalar<int>("diff_pixel_tot_" +region , cluster0->totalToT() - cluster1->totalToT())
         );
       }
     }
@@ -228,10 +230,10 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
           Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_X_" + region, cluster->globalPosition()[0]),
           Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_Y_" + region, cluster->globalPosition()[1]),
           Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_Z_" + region, cluster->globalPosition()[2]),
-          Monitored::Scalar<float>(key.key() + "_CHANNELS_IN_PHI_" + region, cluster->channelsInPhi()),
-          Monitored::Scalar<float>(key.key() + "_CHANNELS_IN_ETA_" + region, cluster->channelsInEta()),
+          Monitored::Scalar<int>(key.key() + "_CHANNELS_IN_PHI_" + region, cluster->channelsInPhi()),
+          Monitored::Scalar<int>(key.key() + "_CHANNELS_IN_ETA_" + region, cluster->channelsInEta()),
           Monitored::Scalar<float>(key.key() + "_WIDTH_IN_ETA_" + region, cluster->widthInEta()),
-          Monitored::Scalar<float>(key.key() + "_TOTAL_TOT_" + region, cluster->totalToT())
+          Monitored::Scalar<int>(key.key() + "_TOTAL_TOT_" + region, cluster->totalToT())
         );
       }
     }
