@@ -113,9 +113,11 @@ dqm_core::Result* TileBinsOutRange::execute(const std::string& name,
       if((binValue == ignoreValue) || (binValue > minValue && binValue < maxValue )) continue;
 
       ++nBins;
-      resultHistogram->SetBinContent(i, binValue);
-      if (publish && nBins < maxPublish) {
-        dqm_algorithms::tools::PublishBin(histogram, i, 0, binValue, result);
+      if (resultHistogram){
+        resultHistogram->SetBinContent(i, binValue);
+        if (publish && nBins < maxPublish) {
+          dqm_algorithms::tools::PublishBin(histogram, i, 0, binValue, result);
+        }
       }
     }
   }
