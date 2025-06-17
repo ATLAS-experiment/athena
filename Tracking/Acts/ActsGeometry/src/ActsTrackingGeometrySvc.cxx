@@ -2,13 +2,17 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+// This absolutely needs to go first to ensure Eigen plugin is loaded
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 // ATHENA
 #include "GaudiKernel/EventContext.h"
-#include "GeoPrimitives/GeoPrimitives.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PathResolver/PathResolver.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorManager.h"
@@ -51,6 +55,7 @@
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/LoggerUtils.h"
+#include "src/ActsBlueprintConstruction.h"
 
 #include <Acts/Utilities/AxisDefinitions.hpp>
 #include <limits>
@@ -143,6 +148,26 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     m_passiveITkStripBarrelLayerHalflengthZ.size() != m_passiveITkStripBarrelLayerThickness.size()) {
         ATH_MSG_FATAL("Consistency check for ITk strip barrel passive layer construction failed. Please check your inputs! ");
         return StatusCode::FAILURE;
+  }
+
+  if (m_useBlueprint) {
+    ATH_MSG_INFO("Using Blueprint API for geometry construction");
+  std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
+                                    m_buildSubdetectors.end());
+    ActsTrk::ActsBlueprintConstruction::Config cfg;
+    cfg.beamPipeMgr = p_beamPipeMgr;
+    cfg.itkPixelManager = p_ITkPixelManager;
+    cfg.itkStripManager = p_ITkStripManager;
+    cfg.graphviz = m_blueprintGraphviz;
+    cfg.objDebugOutput = m_objDebugOutput;
+    cfg.elementStore = m_elementStore.get();
+
+    ActsTrk::ActsBlueprintConstruction helper(cfg, msgSvc().get(), msg(),
+                                              msgLevel());
+
+    m_trackingGeometry = helper.buildBlueprintGeometry(getNominalContext().context());
+
+    return StatusCode::SUCCESS;
   }
 
   ATH_MSG_DEBUG("Setting up ACTS geometry helpers");

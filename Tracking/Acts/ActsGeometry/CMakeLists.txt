@@ -4,7 +4,7 @@
 atlas_subdir( ActsGeometry )
 
 # External dependencies:
-find_package( Acts COMPONENTS Core PluginJson )
+find_package( Acts COMPONENTS Core PluginJson)
 find_package( Boost )
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
@@ -20,6 +20,7 @@ atlas_add_library( ActsGeometryLib
                    src/ActsTrackingGeometrySvc.cxx
                    src/DetectorVolumeSvc.cxx
                    src/SimpleCylinderDetBuilderTool.cxx
+                   src/ActsBlueprintConstruction.cxx
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}

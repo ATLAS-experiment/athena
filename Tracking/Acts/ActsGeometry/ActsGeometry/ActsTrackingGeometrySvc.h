@@ -45,8 +45,11 @@ class ILayerBuilder;
 class GeometryIdentifier;
 class BinnedSurfaceMaterial;
 
+namespace Experimental {
+class BlueprintNode;
 }
 
+}
 
 class ActsTrackingGeometrySvc : public extends<AthService, IActsTrackingGeometrySvc> {
 public:
@@ -141,6 +144,10 @@ private:
   Gaudi::Property<std::vector<unsigned int>> m_subDetNoAlignProp{this, "NotAlignDetectors", {}};
   std::set<ActsTrk::DetectorType> m_subDetNoAlign{};
 
+  Gaudi::Property<bool> m_useBlueprint{this, "UseBlueprint", false, "Use the new Blueprint API for geometry construction"};
+  Gaudi::Property<std::string> m_blueprintGraphviz{this, "BlueprintGraphviz", 
+                                                   "", "Write the blueprint graph to a file. No file will be written if empty"};
+  Gaudi::Property<bool> m_doEndcapLayerMerging{this, "DoEndcapLayerMerging", true, "Merge overlapping endcap layers in z"};
 
 };
 

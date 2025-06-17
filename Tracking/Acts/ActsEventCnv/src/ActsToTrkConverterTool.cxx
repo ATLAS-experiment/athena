@@ -5,6 +5,8 @@
 #include "ActsToTrkConverterTool.h"
 
 // Trk
+#include "TRT_ReadoutGeometry/TRT_BaseElement.h"
+#include "TrkSurfaces/AnnulusBounds.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/Track.h"
 

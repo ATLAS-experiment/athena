@@ -8,6 +8,8 @@
 
 // ATHENA
 #include "ActsInterop/IdentityHelper.h"
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SCT_ReadoutGeometry/StripBoxDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"

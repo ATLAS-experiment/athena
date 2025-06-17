@@ -20,6 +20,9 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "TRT_ReadoutGeometry/TRT_BaseElement.h"
 
 // STL
 #include <string>
