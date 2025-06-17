@@ -54,16 +54,23 @@ def HeavyIonJetRecoDataDeps(flags, **jetRecoDict):
          calib_seq += "_Insitu"
 
     # Second seed
+    SeedPtMin = 25000
+    if jetRecoDict["ionopt"] == "ionp":
+        SeedPtMin = 8000
+
     # Copy default jets: seed1
     jetDef_seed1 = jetDef_unsub.clone()
     jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
     jetDef_seed1.radius = 0.2
-    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
+    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:{}".format(SeedPtMin)]
 
     # Final subracted jets
+    RecoOutputPtMin = 20000
+    if jetRecoDict["ionopt"] == "ionp":
+        RecoOutputPtMin = 10000
     jetDef_final = jetDef_unsub.clone()
     jetDef_final.suffix = jetDef_unsub.suffix.replace("_Unsubtracted","")
-    jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Sort", "Filter:20000"]
+    jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Sort", "Filter:{}".format(RecoOutputPtMin)]
 
     jetDefDict = {
         "unsub": (jetDef_unsub.fullname(), jetDef_unsub),
@@ -73,7 +80,7 @@ def HeavyIonJetRecoDataDeps(flags, **jetRecoDict):
     }
     return jetDefDict
 
-def jetHIEventShapeSequenceCA(configFlags, clustersKey, towerKey):
+def jetHIEventShapeSequenceCA(configFlags, clustersKey, towerKey,**jetRecoDict):
     acc = ComponentAccumulator()
     
     #Import the map tool - it will have to harvest configuration along the path
@@ -93,7 +100,7 @@ def jetHIEventShapeSequenceCA(configFlags, clustersKey, towerKey):
     
     #Add weight tool to filler tool
     TWTool=CompFactory.HITowerWeightTool()
-    TWTool.ApplyCorrection=True
+    TWTool.ApplyCorrection={"ion": True, "ionp": False}.get(jetRecoDict["ionopt"])
     TWTool.ConfigDir='HIJetCorrection/'
     from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
     TWTool.InputFile=getHIClusterGeoWeightFile(configFlags)
@@ -146,7 +153,7 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     dataSource = "mc" if configFlags.Input.isMC else "data"
 
-    jetHIEvtShapeSequence, eventShapeKey, eventShapeMapTool = jetHIEventShapeSequenceCA(configFlags, clustersKey=clustersKey, towerKey=towerKey)
+    jetHIEvtShapeSequence, eventShapeKey, eventShapeMapTool = jetHIEventShapeSequenceCA(configFlags, clustersKey=clustersKey, towerKey=towerKey, **jetRecoDict)
     acc.merge(jetHIEvtShapeSequence)
 
     jetNamePrefix = JetRecoCommon.getHLTPrefix()
@@ -184,12 +191,18 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetsInUnsub = jetsFullName_Unsub
 
     JES_is_data=False
-    calib_seq='EtaJES' #only do in situ for R=0.4 jets in data
+    calib_seq='EtaJES' #only do in situ jets in data
     if jetRecoDict["jetCalib"].endswith("IS") and (dataSource=="data"):
          JES_is_data=True
          calib_seq += "_Insitu"
 
     target_jetReco = f'_for_{jetRecoDict["jetDefStr"]}'
+
+    SeedPtMin = 25000
+    vnharmonics = [2,3,4]
+    if jetRecoDict["ionopt"] == "ionp":
+        SeedPtMin = 8000
+        vnharmonics = []
 
     # Copy unsubtracted jets: seed0
     jetDef_seed0 = jetDef.clone()
@@ -207,7 +220,7 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
     acc.addEventAlgo(copySeed0Alg)
 
     # First iteration!
-    iter0=HLTAddIteration(configFlags, jetsFullName_seed0, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, suffix="iter0"+target_jetReco) # subtract UE from jets
+    iter0=HLTAddIteration(configFlags, jetsFullName_seed0, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, suffix="iter0"+target_jetReco, harmonics = vnharmonics) # subtract UE from jets
     acc.addEventAlgo(HLTRunTools([iter0], "jetalgHI_iter0"+target_jetReco))
     modulator0=iter0.Modulator
     subtractor0=iter0.Subtractor
@@ -221,15 +234,16 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
     GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_iter0_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter0"+target_jetReco)
 
     # Copy default jets: seed1
+    # Second seed
     jetDef_seed1 = jetDef.clone()
     jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
     jetDef_seed1.radius = 0.2
-    jetDef_seed1.modifiers=["HLTHIJetAssoc", f"HLTHIJetConstSub_iter0{target_jetReco}:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
+    jetDef_seed1.modifiers=["HLTHIJetAssoc", f"HLTHIJetConstSub_iter0{target_jetReco}:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:{}".format(SeedPtMin)]
     jetsFullName_seed1 = jetDef_seed1.fullname()
     copySeed1Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed1,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     acc.addEventAlgo(copySeed1Alg)
 
-    iter1=HLTAddIteration(configFlags, jetsFullName_seed1, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, sub_tool=subtractor0, suffix="iter1"+target_jetReco)
+    iter1=HLTAddIteration(configFlags, jetsFullName_seed1, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, sub_tool=subtractor0, suffix="iter1"+target_jetReco, harmonics = vnharmonics)
     iter1.OutputEventShapeKey="HLTHIEventShape_iter1"+target_jetReco
     modulator1=iter1.Modulator
     subtractor1=iter1.Subtractor
@@ -245,9 +259,12 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_final_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter1"+target_jetReco)
 
+    RecoOutputPtMin = 20000
+    if jetRecoDict["ionopt"] == "ionp":
+        RecoOutputPtMin = 10000
     jetDef_final = jetDef.clone()
     jetDef_final.suffix = jetDef.suffix.replace("_Unsubtracted","")
-    jetDef_final.modifiers=[f"HLTHIJetConstSub_iter1{target_jetReco}:iter1", "HLTHIJetJetConstMod_iter1"+target_jetReco, "HLTHIJetCalib:{}___{}___{}".format(calib_seq, JES_is_data, jet_collection_name), "Sort", "Filter:20000"]
+    jetDef_final.modifiers=[f"HLTHIJetConstSub_iter1{target_jetReco}:iter1", "HLTHIJetJetConstMod_iter1"+target_jetReco, "HLTHIJetCalib:{}___{}___{}".format(calib_seq, JES_is_data, jet_collection_name), "Sort", "Filter:{}".format(RecoOutputPtMin)]
     copyAlg_final= getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     acc.addEventAlgo(copyAlg_final)
 

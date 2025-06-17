@@ -115,7 +115,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         # define here the names of the steps and obtain the chainStep configuration 
         # --------------------
         chainSteps = []
-        if self.recoDict["ionopt"]=="ion":
+        if self.recoDict["ionopt"] in ['ion', 'ionp']:
             jetHICaloHypoStep = self.getJetHICaloHypoChainStep(flags)
             chainSteps.append( jetHICaloHypoStep )
         elif self.recoDict["trkopt"]=="roiftf":
