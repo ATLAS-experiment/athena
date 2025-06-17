@@ -343,11 +343,6 @@ def defineMenu():
         'L1_DPHI-M70-2eEM12M', 'L1_DPHI-M70-2eEM15M', #ATR-19302
         'L1_DPHI-M70-2eEM9', 'L1_DPHI-M70-2eEM9L', # ATR-21637 (no or loose shower shape cuts)
                 
-        #ATR-17320
-        'L1_CEP-CjJ100',
-        'L1_CEP-CjJ90',
-        'L1_AFP_A_AND_C_TOF_CEP-CjJ100','L1_AFP_A_AND_C_TOF_T0T1_CEP-CjJ100',
-
         #ATR-28563
         'L1_LLPDPHI-jXE40-jJ40',
         'L1_LLPNODPHI-jXE40-jJ40',

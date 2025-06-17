@@ -810,10 +810,6 @@ HLT_2j100_2timeSig15_L1jJ90:
   eventCount: 0
 HLT_2j100_2timeSig_L1jJ90:
   eventCount: 0
-HLT_2j100_L1CEP-CjJ100:
-  eventCount: 0
-HLT_2j100_L1CEP-CjJ90:
-  eventCount: 0
 HLT_2j110_0eta180_emergingPTF0p09dR1p2_a10sd_cssk_pf_jes_ftf_L1jLJ140:
   eventCount: 0
   stepCounts:
@@ -28603,10 +28599,6 @@ HLT_noalg_L1All:
 HLT_noalg_L1BPH-2M9-0DR15-2MU3VF:
   eventCount: 0
 HLT_noalg_L1BPH-8M15-0DR22-2MU5VF:
-  eventCount: 0
-HLT_noalg_L1CEP-CjJ100:
-  eventCount: 0
-HLT_noalg_L1CEP-CjJ90:
   eventCount: 0
 HLT_noalg_L1LLPDPHI-jXE40-jJ40:
   eventCount: 3

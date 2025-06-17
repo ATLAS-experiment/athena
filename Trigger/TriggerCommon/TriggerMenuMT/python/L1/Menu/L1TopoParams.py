@@ -248,7 +248,7 @@ L1TopoParams = {
                                                       'MaxMSqr']},
  'JetHT': {'comment': 'All following pars are MinHt',
            'parameters': ['MinET', 'MinEta', 'MaxEta', 'MinHt']},
- 'KalmanMETCorrection': {'comment': '', 'parameters': [f'weights{i}' for i in range(49)] + ['MinET'] + 6*['KFXE']},
+ 'KalmanMETCorrection': {'comment': '', 'parameters': [f'weights{i}' for i in range(49)] + ['MinET'] + 4*['KFXE']},
  'MetNoSort': {'comment': '', 'parameters': []},
  'MetSort': {'comment': '', 'parameters': []},
  'DeltaPhiMinIncl2': {'comment': '',
