@@ -17,6 +17,7 @@ export TRF_ECHO=1;
 export ATHENA_CORE_NUMBER=${NTHREADS}
 FastChain_tf.py \
    --CA \
+   --perfmon 'fullmonmt' \
    --steering 'doFCtoDAOD' 'doRDO_TRIG' 'doTRIGtoALL' \
    --simulator ATLFAST3MT \
    --physicsList FTFP_BERT_ATL \
