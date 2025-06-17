@@ -23,6 +23,9 @@ class FTagConfig (ConfigBlock):
         self.addOption ('btagger', "GN2v01", type=str,
             info="the flavour tagging algorithm: DL1dv01, GN2v01. The default "
             "is GN2v01.")
+        self.addOption('useCTagging', False, type=bool,
+            info="whether the fixed WP refer to b-tagging or c-tagging. Set to 'True' "
+            "for referring to c-tagging")
         self.addOption ('bTagCalibFile', None, type=str,
             info="calibration file for CDI")
         self.addOption('readFromBTaggingObject', True, type=bool,
@@ -69,6 +72,7 @@ class FTagConfig (ConfigBlock):
         alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
         alg.selectionTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
         alg.selectionTool.readFromBTaggingObject = self.readFromBTaggingObject
+        alg.selectionTool.useCTagging = self.useCTagging
         alg.preselection = config.getPreselection (self.containerName, selectionName)
 
         if 'Continuous' in self.btagWP:
@@ -95,6 +99,7 @@ class FTagConfig (ConfigBlock):
             alg.selectionTool.JetAuthor = jetCollection
             alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
             alg.selectionTool.readFromBTaggingObject = self.readFromBTaggingObject
+            alg.selectionTool.useCTagging = self.useCTagging
             alg.selectionTool.MinPt = 0.
             config.addOutputVar(self.containerName, alg.taggerWeightDecoration, alg.taggerWeightDecoration, noSys=True)
 

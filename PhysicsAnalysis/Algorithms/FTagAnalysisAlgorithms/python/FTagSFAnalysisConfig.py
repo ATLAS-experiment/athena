@@ -52,6 +52,9 @@ class FTagJetSFBlock(ConfigBlock):
             info="the flavour tagging WP. The default is Continuous.")
         self.addOption('btagger', "GN2v01", type=str,
             info="the flavour tagging algorithm: DL1dv01, GN2v01. The default is GN2v01.")
+        self.addOption('useCTagging', False, type=bool,
+            info="whether the fixed WP refer to b-tagging or c-tagging. Set to 'True' "
+            "for referring to c-tagging")
         self.addOption ('bTagCalibFile', None, type=str,
             info="calibration file for CDI")
         self.addOption ('bTagCalibTriggerFile', None, type=str,
@@ -113,6 +116,7 @@ class FTagJetSFBlock(ConfigBlock):
         tool.EfficiencyFileName = bTagCalibFile
         tool.ScaleFactorFileName = bTagCalibFile
         tool.SystematicsStrategy = self.systematicsStrategy
+        tool.useCTagging = self.useCTagging
         tool.readFromBTaggingObject = self.readFromBTaggingObject
         if self.systematicsStrategy == "SFEigen":
             tool.EigenvectorReductionB = self.eigenvectorReductionB
@@ -284,7 +288,7 @@ class FTagEventSFBlock(ConfigBlock):
 
         if config.dataType() is DataType.Data: return
 
-        if 'FixedCutBEff' in self.btagWP:
+        if 'FixedCut' in self.btagWP:
             raise ValueError('FTAG calibration is only available for Continuous WP. '
                              'Please configure the Continuous btagWP to retrieve scale factors.')
 
