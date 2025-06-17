@@ -288,6 +288,7 @@ namespace Muon {
                         [](const std::unique_ptr<const MuonClusterOnTrack>& cl){return cl.get();});
         ATH_MSG_DEBUG("Entering MuonNSWSegmentFinderTool with " << muonClusters.size() << " clusters to be fit");
 
+        // Find segments using the MM strips as a seed
         MuonSegmentVec out_segments{};
         {
             MuonSegmentVec stereoSegs = findStereoSegments(ctx, muonClusters, 0);
@@ -296,6 +297,7 @@ namespace Muon {
                                                     std::make_move_iterator(stereoSegs.end()));
         }
 
+        // Push back mm seded segments and cache used hits
         auto dump_output = [&]() {
             cache.constructedSegs.reserve(cache.constructedSegs.size() + out_segments.size());
             for (std::unique_ptr<Muon::MuonSegment>& seg : out_segments) {
@@ -317,12 +319,16 @@ namespace Muon {
             }
         }
 
+        // Create new vector of clusters excluding the ones used in the mm seeded segments
         if (!out_segments.empty()) {
             clustPostStereo.reserve(muonClusters.size());
             for (const Muon::MuonClusterOnTrack* clus : muonClusters) {
                 if (!masked_segs[layerNumber(clus)].count(clus->identify())) clustPostStereo.push_back(clus);
             }
         }
+
+        // If we did not find any mm seeded segments use the full hit vector to build stgc seeded segments
+        // otherwise use the ones that did not make it onto a segment yet 
         const std::vector<const Muon::MuonClusterOnTrack*>& segmentInput = !out_segments.empty() ? clustPostStereo : muonClusters;
 
         /// All segments
@@ -406,7 +412,7 @@ namespace Muon {
 
 
         std::vector<NSWSeed> seeds = segmentSeedFromMM(orderedClust);
-        ATH_MSG_VERBOSE("Retrieved " << seeds.size() << " seeds in the MMStereoAlg after the ambiguity resolution" );
+        ATH_MSG_DEBUG("Retrieved " << seeds.size() << " seeds in the MMStereoAlg after the ambiguity resolution" );
 
         if (seeds.empty()) return {};
         TrackCollection trackSegs{SG::OWN_ELEMENTS};
@@ -441,12 +447,12 @@ namespace Muon {
     std::unique_ptr<Trk::Track> MuonNSWSegmentFinderTool::fit(const EventContext& ctx,
                                                               const std::vector<const Trk::MeasurementBase*>& fit_meas,
                                                               const Trk::TrackParameters& perigee) const {
-        ATH_MSG_VERBOSE("Fit segment from (" << to_string(perigee.position())<< "  pointing to " <<
+        ATH_MSG_DEBUG("Fit segment from (" << to_string(perigee.position())<< "  pointing to " <<
                                             to_string(perigee.momentum())<<". Contained measurements in candidate: " << std::endl
                                             << m_printer->print(fit_meas));
         std::unique_ptr<Trk::Track> segtrack = m_slTrackFitter->fit(ctx, fit_meas, perigee, false, Trk::nonInteracting);
         if (!segtrack) {
-            ATH_MSG_VERBOSE("Fit failed");
+            ATH_MSG_DEBUG("Fit failed");
             return nullptr;
         }
         ATH_MSG_VERBOSE("--> Fit succeeded");
@@ -462,7 +468,7 @@ namespace Muon {
         }
         // update the track summary and add the track to the collection
         m_trackSummary->updateTrack(ctx, *segtrack);
-        ATH_MSG_VERBOSE("Segment accepted with chi^2/nDoF = " << segtrack->fitQuality()->chiSquared() << "/"
+        ATH_MSG_DEBUG("Segment accepted with chi^2/nDoF = " << segtrack->fitQuality()->chiSquared() << "/"
                                                                << segtrack->fitQuality()->numberDoF());
         return segtrack;
     }
@@ -625,8 +631,15 @@ namespace Muon {
             }
 
             // 3 - last resort, try sTGC pads
-            if (seeds.empty()) {
-                seeds = segmentSeedFromPads(orderedPadClusters, *etaSeg);
+            if (seeds.empty() ) {
+
+                // only perform seeding with layers that have less than m_maxInputPads hits
+                LayerMeasVec orderedPadClustersForSeeding;
+                std::ranges::copy_if(orderedPadClusters,
+                             std::back_inserter(orderedPadClustersForSeeding),
+                             [this](const MeasVec& vec) { return vec.size() < m_maxInputPads; });
+
+                seeds = segmentSeedFromPads(orderedPadClustersForSeeding, *etaSeg);
                 ATH_MSG_DEBUG(" Seeding from sTGC pads");
             }
 
@@ -762,7 +775,7 @@ namespace Muon {
             vecFitPts.push_back(pseudoPhi1.get());
             std::copy(etaHitVec.begin(), etaHitVec.end(), std::back_inserter(vecFitPts));
             vecFitPts.push_back(pseudoPhi2.get());
-            ATH_MSG_VERBOSE("Fitting a 2D-segment track with " << nHitsEta << " Eta hits");
+            ATH_MSG_DEBUG("Fitting a 2D-segment track with " << nHitsEta << " Eta hits");
 
         } else {
             // sorted eta and sorted phi hits combined (sorted by their the z-coordinate)
@@ -772,7 +785,7 @@ namespace Muon {
                            double z2 = std::abs(c2->detectorElement()->center(c2->identify()).z());
                            return z1 < z2;
                        });
-            ATH_MSG_VERBOSE("Fitting a 3D-segment track with " << nHitsEta << " Eta hits and " << nHitsPhi << " Phi hits");
+            ATH_MSG_DEBUG("Fitting a 3D-segment track with " << nHitsEta << " Eta hits and " << nHitsPhi << " Phi hits");
         }
 
         // fit the hits and generate the Trk::Track
@@ -887,7 +900,23 @@ namespace Muon {
                             if (eta < minEtaNSW || eta > maxEtaNSW) {
                                 continue;
                             }
+                        } else if (usePhi && m_ipConstraint) {
+                            // first make sure that the wires are in the same or neigbouring quads
+                            if(std::abs(std::abs(m_idHelperSvc->stationEta(hitL->identify())) - std::abs(m_idHelperSvc->stationEta(hitR->identify()))) > 1) {
+                                continue;
+                            }
+                            // project the hit in the first layer assuming the track comes from the IP
+                            Trk::Intersection intersect = hitR->detectorElement()->surface(hitR->identify()).straightLineIntersection(hitL->globalPosition(),hitL->globalPosition().unit(), false, false);
+                            Amg::Vector2D lpos_intersect{Amg::Vector2D::Zero()};
+                            hitR->detectorElement()->surface(hitR->identify()).globalToLocal(intersect.position, intersect.position, lpos_intersect);
+
+                            Amg::Vector2D lPosR;
+                            hitR->detectorElement()->surface(hitR->identify()).globalToLocal(hitR->globalPosition(), hitR->globalPosition(), lPosR);
+
+                            
+                            if(std::abs(lpos_intersect.x() - lPosR.x()) > 87.5 ) continue; // reject seed if the projection is more than 2.5 wire groups away
                         }
+
                         usedLayerR = true;
                         usedLayerL = true;
                         getClustersOnSegment(orderedClusters, seed, {ilayerL, ilayerR}, false);
@@ -1049,8 +1078,32 @@ namespace Muon {
             Amg::Vector3D gpL1{Amg::Vector3D::Zero()};
             surfPrdL1.localToGlobal(lp1, gpL1, gpL1);
 
+            Amg::Vector2D lp1_lowPhi{range1.first, prdL1->localPosition().y()};
+            Amg::Vector2D lp1_highPhi{range1.second, prdL1->localPosition().y()};
+
+            Amg::Vector3D gp1_lowPhi{Amg::Vector3D::Zero()};
+            Amg::Vector3D gp1_highPhi{Amg::Vector3D::Zero()};
+
+            surfPrdL1.localToGlobal(lp1_lowPhi, gp1_lowPhi, gp1_lowPhi);
+            surfPrdL1.localToGlobal(lp1_highPhi, gp1_highPhi, gp1_highPhi);
+
+            Trk::Intersection intersect_lowPhi = surfPrdL2.straightLineIntersection(gp1_lowPhi, gp1_lowPhi, false, false);
+            Trk::Intersection intersect_highPhi = surfPrdL2.straightLineIntersection(gp1_highPhi, gp1_highPhi, false, false);
+
+            Amg::Vector2D lpIntersect_lowPhi{Amg::Vector2D::Zero()};
+            Amg::Vector2D lpIntersect_highPhi{Amg::Vector2D::Zero()};
+
+            surfPrdL2.globalToLocal(intersect_lowPhi.position, intersect_lowPhi.position, lpIntersect_lowPhi);
+            surfPrdL2.globalToLocal(intersect_highPhi.position, intersect_highPhi.position, lpIntersect_highPhi);
+
             for (const std::pair<double, double>& range2 : sTgcHO_phiRanges) {
                 double midPhi2 = 0.5 * (range2.first + range2.second);
+                // let's check that the phi ranges in the two multilayer overlap 
+                if( lpIntersect_highPhi.x() - range2.first < 0 ||   range2.second - lpIntersect_lowPhi.x() < 0) {
+                    ATH_MSG_DEBUG(" segmentSeedFromPads: skipping seed with non-overlapping phi ranges");
+                    continue;
+                }
+
                 Amg::Vector2D lp2(midPhi2, prdL2->localPosition().y());
                 Amg::Vector3D gpL2{Amg::Vector3D::Zero()};
                 surfPrdL2.localToGlobal(lp2, gpL2, gpL2);

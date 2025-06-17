@@ -107,6 +107,10 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   if (tau.pt() < m_minTauPt) {
     return StatusCode::SUCCESS;
   }
+  // save CPU when running in RAWtoALL for tau trigger monitoring purpose
+  if (m_applyTrackSel) {
+    if (tau.nTracks()!=1 && tau.nTracks()!=3) return StatusCode::SUCCESS;
+  }
 
   // Get input objects
   ATH_MSG_DEBUG("Fetching Tracks");

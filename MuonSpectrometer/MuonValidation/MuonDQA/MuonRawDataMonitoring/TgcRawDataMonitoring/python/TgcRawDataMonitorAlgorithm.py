@@ -1414,7 +1414,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                 title='InnerCoin_Eff1D_CoinFlagC_Eta;RoI Eta;Efficiency',
                                 path=coinPath,type='TEfficiency',xbins=100,xmin=-2.5,xmax=2.5)
     myGroupCoin.defineHistogram('coin_inner_tgc_coinflagC,coin_inner_tgc_fake_eta;InnerCoin_Reduction1D_CoinFlagC_Eta',
-                                title='InnerCoin_Reduction1D_CoinFlagC_EtaVsPhi;RoI Eta;Efficiency',
+                                title='InnerCoin_Reduction1D_CoinFlagC_Eta;RoI Eta;Efficiency',
                                 path=coinPath,type='TEfficiency',xbins=100,xmin=-2.5,xmax=2.5)
 
     for coinType in ['SL','HPT','LPT','EIFI']:
