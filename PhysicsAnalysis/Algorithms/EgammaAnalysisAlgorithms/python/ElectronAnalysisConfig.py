@@ -530,7 +530,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
         map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v2/map1.txt' \
                    if config.geometry() is LHCPeriod.Run2 else \
-                   'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Precision2023_Recommendation/trigger/map1.txt'
+                   'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt'
         sfList = []
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
