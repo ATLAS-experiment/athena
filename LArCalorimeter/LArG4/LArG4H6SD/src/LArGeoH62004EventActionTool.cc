@@ -19,7 +19,6 @@ namespace G4UA
   {
     declareProperty("yTable", m_config.yTable);
     declareProperty("CryoXPosition", m_config.cryoXposition);
-    //declareProperty("PrintStep", m_config.printstep);
   }
 
   //---------------------------------------------------------------------------

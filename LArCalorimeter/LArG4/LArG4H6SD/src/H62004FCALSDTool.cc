@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H62004FCALSDTool.h"
@@ -16,17 +16,7 @@ namespace LArG4
   H62004FCALSDTool::H62004FCALSDTool(const std::string& type, const std::string& name,
                                      const IInterface *parent)
     : H62004SimpleSDTool(type, name, parent)
-    , m_hitCollName("LArHitFCAL")
-    , m_fcal1calc("FCAL1Calculator", name)
-    , m_fcal2calc("FCAL2Calculator", name)
-    , m_fcalcoldcalc("FCALColdCalculator", name)
   {
-    declareProperty("FCAL1Calculator", m_fcal1calc);
-    declareProperty("FCAL2Calculator", m_fcal2calc);
-    declareProperty("FCALColdCalculator", m_fcalcoldcalc);
-    declareProperty("FCAL1Volumes", m_fcal1Volumes);
-    declareProperty("FCAL2Volumes", m_fcal2Volumes);
-    declareProperty("FCALColdVolumes", m_fcalColdVolumes);
   }
 
   StatusCode H62004FCALSDTool::initializeCalculators()
@@ -46,9 +36,9 @@ namespace LArG4
     auto *sdWrapper = new SimpleSDWrapper("LArH62004FCALSDWrapper", m_hitCollName);
 
     // Add the SDs
-    sdWrapper->addSD( makeOneSD( "LAr::FCAL::Module1::Gap::H6", &*m_fcal1calc, m_fcal1Volumes ) );
-    sdWrapper->addSD( makeOneSD( "LAr::FCAL::Module2::Gap::H6", &*m_fcal2calc, m_fcal2Volumes ) );
-    sdWrapper->addSD( makeOneSD("LAr::FCAL::ColdTC::H6", &*m_fcalcoldcalc, m_fcalColdVolumes) );
+    sdWrapper->addSD( makeOneSD( "LAr::FCAL::Module1::Gap::H6", &*m_fcal1calc, m_fcal1Volumes.value() ) );
+    sdWrapper->addSD( makeOneSD( "LAr::FCAL::Module2::Gap::H6", &*m_fcal2calc, m_fcal2Volumes.value() ) );
+    sdWrapper->addSD( makeOneSD( "LAr::FCAL::ColdTC::H6", &*m_fcalcoldcalc, m_fcalColdVolumes.value() ) );
 
     // Return the wrapper as my SD
     return sdWrapper;

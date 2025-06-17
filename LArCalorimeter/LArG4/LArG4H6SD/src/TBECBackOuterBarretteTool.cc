@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBECBackOuterBarretteTool.h"
@@ -14,28 +14,7 @@ TBECBackOuterBarretteTool::TBECBackOuterBarretteTool(const std::string& type, co
   , m_HitColl_gap_se("LArHitEMEC_gap_se")
   , m_HitColl_chcoll("LArHitEMEC_chcoll")
   , m_HitColl_ropt("LArHitEMEC_ropt")
-  , m_emecbobgadjcalc("EMECPosBOBWheel_ECOR_GADJCalculator", name)
-  , m_emecbobgadjoldcalc("EMECPosBOBWheel_ECOR_GADJ_OLDCalculator", name)
-  , m_emecbobgadjecalc("EMECPosBOBWheel_ECOR_GADJ_ECalculator", name)
-  , m_emecbobgadjscalc("EMECPosBOBWheel_ECOR_GADJ_SCalculator", name)
-  , m_emecbobgadjsecalc("EMECPosBOBWheel_ECOR_GADJ_SECalculator", name)
-  , m_emecbobchclcalc("EMECPosBOBWheel_ECOR_CHCLCalculator", name)
-  , m_emecbobcalc("EMECPosBOBWheelCalculator", name)
-  , m_gapadjSD(nullptr)
-  , m_gapoldSD(nullptr)
-  , m_gap_eSD(nullptr)
-  , m_gap_sSD(nullptr)
-  , m_gap_seSD(nullptr)
-  , m_chcollSD(nullptr)
-  , m_roptSD(nullptr)
 {
-  declareProperty("EMECPosBOBWheel_ECOR_GADJCalculator", m_emecbobgadjcalc);
-  declareProperty("EMECPosBOBWheel_ECOR_GADJ_OLDCalculator", m_emecbobgadjoldcalc);
-  declareProperty("EMECPosBOBWheel_ECOR_GADJ_ECalculator", m_emecbobgadjecalc);
-  declareProperty("EMECPosBOBWheel_ECOR_GADJ_SCalculator", m_emecbobgadjscalc);
-  declareProperty("EMECPosBOBWheel_ECOR_GADJ_SECalculator", m_emecbobgadjsecalc);
-  declareProperty("EMECPosBOBWheel_ECOR_CHCLCalculator", m_emecbobchclcalc);
-  declareProperty("EMECPosBOBWheelCalculator", m_emecbobcalc);
 }
 
 StatusCode TBECBackOuterBarretteTool::initializeCalculators()

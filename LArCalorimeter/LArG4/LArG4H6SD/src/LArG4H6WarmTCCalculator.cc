@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4H6WarmTCCalculator.h"
 #include "LArG4Code/LArG4Identifier.h"
-// #include "LArG4Code/LArVG4DetectorParameters.h"
 
 #include "G4ThreeVector.hh"
 #include "G4StepPoint.hh"
@@ -24,10 +23,7 @@ namespace Units = Athena::Units;
 
 LArG4H6WarmTCCalculator::LArG4H6WarmTCCalculator(const std::string& name, ISvcLocator* pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
-    //, m_addr(0)
 {
-  declareProperty("isX", m_isX);
-  declareProperty("isABS", m_isABS);
 }
 
 G4bool LArG4H6WarmTCCalculator::Process(const G4Step* a_step, std::vector<LArHitData>& hdata) const
@@ -44,8 +40,6 @@ G4bool LArG4H6WarmTCCalculator::Process(const G4Step* a_step, std::vector<LArHit
   G4ThreeVector startPoint = pre_step_point->GetPosition();
   G4ThreeVector endPoint   = post_step_point->GetPosition();
   G4ThreeVector p = (startPoint + endPoint) * 0.5;
-  //  G4cout<<"LArG4H6WarmTCCalculator::Global point: "<<p.x()<<" "<<p.y()<<" "<<p.z()<<std::endl;
-  //larhit.time = timeOfFlight/ns - p.mag()/c_light/ns;
   larhit.time = timeOfFlight/Units::ns;
 
   //  Get local coordinates of the step, independently of how it was positioned  in World
@@ -54,8 +48,6 @@ G4bool LArG4H6WarmTCCalculator::Process(const G4Step* a_step, std::vector<LArHit
   G4ThreeVector startPointinLocal = transformation.TransformPoint(startPoint);
   G4ThreeVector   endPointinLocal = transformation.TransformPoint  (endPoint);
   G4ThreeVector          pinLocal =(startPointinLocal+endPointinLocal)*0.5;
-  //
-  //  G4cout<<"LArG4H6WarmTCCalculator::Local point: "<<pinLocal.x()<<" "<<pinLocal.y()<<" "<<pinLocal.z()<<std::endl;
 
   G4int zSide;
   G4int sampling;
@@ -109,19 +101,6 @@ G4bool LArG4H6WarmTCCalculator::Process(const G4Step* a_step, std::vector<LArHit
   }
   region = 0;
 
-
-
-
-  /*
-     if(!m_isABS) {
-     std::cout<<"LArG4H6WarmTCCalculator: "<<hitVolume<<" "<<copyModule<<" :  "<<pinLocal.x()<<" "<<pinLocal.y()<<std::endl;
-     std::cout <<"zSide = "<<zSide<<" , sampling = "<<sampling<<"  ,  region="<<region <<
-     " , phiBin="<<phiBin<< " ,  etaBin="<<etaBin <<std::endl;
-     std::cout<<m_energy<<" "<<m_time<<std::endl;
-     std::cout<<m_isInTime<<" "<<m_isX<<" "<<m_isABS<<"   "<<this<<std::endl;
-     }
-  */
-
   larhit.id.clear();
   larhit.id << 10          // LArCalorimeter
             << zSide
@@ -131,7 +110,6 @@ G4bool LArG4H6WarmTCCalculator::Process(const G4Step* a_step, std::vector<LArHit
             << etaBin
             << phiBin;
   hdata.push_back(larhit);
-  // m_addr =  100*sampling+10*etaBin+phiBin;
-  // if(m_isABS) m_addr *= -1;
+
   return true;
 }

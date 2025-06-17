@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4H62004FCALSDTool.h"
@@ -8,19 +8,7 @@
 LArG4H62004FCALSDTool::LArG4H62004FCALSDTool(const std::string& type, const std::string& name, const IInterface *parent)
   : LArG4SDTool(type,name,parent)
   , m_HitColl("LArHitFCAL")
-  , m_fcal1calc("FCAL1Calculator", name)
-  , m_fcal2calc("FCAL2Calculator", name)
-  , m_fcalcoldcalc("FCALColdCalculator", name)
-  , m_fcal1SD(nullptr)
-  , m_fcal2SD(nullptr)
-  , m_fcalColdSD(nullptr)
 {
-  declareProperty("FCAL1Calculator", m_fcal1calc);
-  declareProperty("FCAL2Calculator", m_fcal2calc);
-  declareProperty("FCALColdCalculator", m_fcalcoldcalc);
-  declareProperty( "FCAL1Volumes" , m_fcal1Volumes );
-  declareProperty( "FCAL2Volumes" , m_fcal2Volumes );
-  declareProperty( "FCALColdVolumes" , m_fcalColdVolumes );
 }
 
 StatusCode LArG4H62004FCALSDTool::initializeCalculators()
@@ -38,9 +26,9 @@ StatusCode LArG4H62004FCALSDTool::initializeSD()
   m_fcalColdSD = new LArG4H62004SD( "LAr::FCAL::ColdTC::H6" , &*m_fcalcoldcalc , m_timeBinType , m_timeBinWidth );
 
   std::map<G4VSensitiveDetector*,std::vector<std::string>*> configuration;
-  configuration[m_fcal1SD] = &m_fcal1Volumes;
-  configuration[m_fcal2SD] = &m_fcal2Volumes;
-  configuration[m_fcalColdSD] = &m_fcalColdVolumes;
+  configuration[m_fcal1SD] = &m_fcal1Volumes.value();
+  configuration[m_fcal2SD] = &m_fcal2Volumes.value();
+  configuration[m_fcalColdSD] = &m_fcalColdVolumes.value();
   setupAllSDs(configuration);
 
   // Make sure the ID helpers are all set up

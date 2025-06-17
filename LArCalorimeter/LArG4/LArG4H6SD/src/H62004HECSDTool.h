@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004SD_H62004HECSDTOOL_H
@@ -25,22 +25,22 @@ namespace LArG4
   class H62004HECSDTool : public H62004SimpleSDTool
   {
 
-    public:
+  public:
 
-      /// Constructor
-      H62004HECSDTool(const std::string& type, const std::string& name,
-                      const IInterface* parent);
+    /// Constructor
+    H62004HECSDTool(const std::string& type, const std::string& name,
+		    const IInterface* parent);
 
-    private:
+  private:
 
-      StatusCode initializeCalculators() override final;
+    StatusCode initializeCalculators() override final;
 
-      /// Create the SD wrapper for current worker thread
-      G4VSensitiveDetector* makeSD() const override final;
+    /// Create the SD wrapper for current worker thread
+    G4VSensitiveDetector* makeSD() const override final;
 
-      /// Hit collection name
-      std::string m_hitCollName;
-    ServiceHandle<ILArCalculatorSvc> m_calculator;
+    /// Hit collection name
+    std::string m_hitCollName {"LArHitHEC"};
+    ServiceHandle<ILArCalculatorSvc> m_calculator{this, "Calculator", "LArH62004HECLocalCalculator"};
   }; // class H62004HECSDTool
 
 } // namespace LArG4

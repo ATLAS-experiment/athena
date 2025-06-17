@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004SD_H62004ACTIVESDTOOL_H
@@ -41,19 +41,19 @@ namespace LArG4
 
     /// Hit collection name
     std::string m_hitCollName;
-    ServiceHandle<ILArCalibCalculatorSvc> m_emepiwcalc;
-    ServiceHandle<ILArCalibCalculatorSvc> m_heccalc;
-    ServiceHandle<ILArCalibCalculatorSvc> m_fcal1calc;
-    ServiceHandle<ILArCalibCalculatorSvc> m_fcal2calc;
-    ServiceHandle<ILArCalibCalculatorSvc> m_fcalcoldcalc;
+    ServiceHandle<ILArCalibCalculatorSvc> m_emepiwcalc {this, "EMECPosIWCalibrationCalculator", "EMECPosInnerWheelCalibrationCalculator"};
+    ServiceHandle<ILArCalibCalculatorSvc> m_heccalc {this, "HECWheelActiveCalculator", "LocalCalibrationActiveCalculator"};
+    ServiceHandle<ILArCalibCalculatorSvc> m_fcal1calc {this, "FCAL1CalibCalculator", "LArFCAL1H62004CalibCalculator"};
+    ServiceHandle<ILArCalibCalculatorSvc> m_fcal2calc {this, "FCAL2CalibCalculator", "LArFCAL2H62004CalibCalculator"};
+    ServiceHandle<ILArCalibCalculatorSvc> m_fcalcoldcalc {this, "FCALCOLDMod0CalibCalculator", "LArG4H6COLDTCMod0CalibCalculator"};
 
     /// @name SD volumes
     /// @{
-    std::vector<std::string> m_emecVolumes;
-    std::vector<std::string> m_hecVolumes;
-    std::vector<std::string> m_fcal1Volumes;
-    std::vector<std::string> m_fcal2Volumes;
-    std::vector<std::string> m_fcalColdVolumes;
+    Gaudi::Property<std::vector<std::string>> m_emecVolumes {this, "EMECVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_hecVolumes {this, "HECVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_fcal1Volumes {this, "FCAL1Volumes"};
+    Gaudi::Property<std::vector<std::string>> m_fcal2Volumes {this, "FCAL2Volumes"};
+    Gaudi::Property<std::vector<std::string>> m_fcalColdVolumes {this, "FCALColdVolumes"};
     /// @}
 
   }; // class H62004ActiveSDTool

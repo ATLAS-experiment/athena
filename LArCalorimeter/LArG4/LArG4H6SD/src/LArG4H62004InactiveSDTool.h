@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004INACTIVESDTOOL_H
@@ -25,7 +25,7 @@ class LArG4H62004InactiveSDTool : public LArG4SDTool
   LArG4H62004InactiveSDTool(const std::string& type, const std::string& name, const IInterface *parent);
 
   // Destructor
-  virtual ~LArG4H62004InactiveSDTool() {}
+  virtual ~LArG4H62004InactiveSDTool() = default;
 
   virtual StatusCode initializeCalculators() override final;
 
@@ -39,24 +39,24 @@ class LArG4H62004InactiveSDTool : public LArG4SDTool
   // The actual hit container - here because the base class is for both calib and standard SD tools
   SG::WriteHandle<CaloCalibrationHitContainer> m_HitColl;
 
-  ServiceHandle<ILArCalibCalculatorSvc>m_emepiwcalc;
-  ServiceHandle<ILArCalibCalculatorSvc>m_heccalc;
-  ServiceHandle<ILArCalibCalculatorSvc>m_fcal1calc;
-  ServiceHandle<ILArCalibCalculatorSvc>m_fcal2calc;
+  ServiceHandle<ILArCalibCalculatorSvc>m_emepiwcalc {this, "EMECPosIWCalibrationCalculator"
+    , "EMECPosInnerWheelCalibrationCalculator"};
+  ServiceHandle<ILArCalibCalculatorSvc>m_heccalc {this, "HECWheelInactiveCalculator"
+    , "LocalCalibrationInactiveCalculator"};
+  ServiceHandle<ILArCalibCalculatorSvc>m_fcal1calc {this, "FCAL1CalibCalculator"
+    , "LArFCAL1H62004CalibCalculator"};
+  ServiceHandle<ILArCalibCalculatorSvc>m_fcal2calc {this, "FCAL2CalibCalculator"
+    , "LArFCAL2H62004CalibCalculator"};
 
   // The list of volumes and the corresponding SDs
-  LArG4CalibSD* m_emecSD;
-  LArG4CalibSD* m_hecSD;
-  LArG4CalibSD* m_fcal1SD;
-  LArG4CalibSD* m_fcal2SD;
-  std::vector<std::string> m_emecVolumes;
-  std::vector<std::string> m_hecVolumes;
-  std::vector<std::string> m_fcal1Volumes;
-  std::vector<std::string> m_fcal2Volumes;
-
-  /// Am I running with particle ID calibration hits?
-  //bool m_particleId;
-
+  LArG4CalibSD* m_emecSD {nullptr};
+  LArG4CalibSD* m_hecSD {nullptr};
+  LArG4CalibSD* m_fcal1SD {nullptr};
+  LArG4CalibSD* m_fcal2SD {nullptr};
+  Gaudi::Property<std::vector<std::string>> m_emecVolumes {this, "EMECVolumes"};
+  Gaudi::Property<std::vector<std::string>> m_hecVolumes {this, "HECVolumes"};
+  Gaudi::Property<std::vector<std::string>> m_fcal1Volumes {this, "FCAL1Volumes"};
+  Gaudi::Property<std::vector<std::string>> m_fcal2Volumes {this, "FCAL2Volumes"};
 };
 
 #endif
