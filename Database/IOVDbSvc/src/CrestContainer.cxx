@@ -4,11 +4,7 @@
 
 #include "CrestContainer.h"
 #include "CrestApi/CrestCondException.h"
-#include <stdarg.h>
-#include <boost/archive/iterators/base64_from_binary.hpp>
-#include <boost/archive/iterators/binary_from_base64.hpp>
-#include <boost/archive/iterators/transform_width.hpp>
-#include <boost/algorithm/string.hpp>
+#include <cstdarg>
 #include <fstream>
 #include <iomanip>
 
@@ -127,16 +123,14 @@ void Crest::CrestContainer::addExternalData(const std::string& channel_id, const
 {
   nlohmann::json arr_data = m_isVectorPayload ? nlohmann::json::array() : nlohmann::json();
   if (m_isVectorPayload){
-  for (const auto &data_row : data)
-  {
-    auto row_arr_data = createRowArray(data_row);
-      arr_data.push_back(row_arr_data);
+    for (const auto &data_row : data)
+    {
+        arr_data.emplace_back(createRowArray(data_row));
     }
-  m_payload[channel_id] = arr_data;
-  }
+    m_payload[channel_id] = std::move(arr_data);
+    }
   else{
-    auto row_arr_data = createRowArray(data);
-    m_payload[channel_id] = row_arr_data;
+    m_payload[channel_id] = createRowArray(data);
   }
   m_vector_data.clear();
   m_row.clear();
@@ -398,7 +392,7 @@ nlohmann::json Crest::CrestContainer::readJsonFromFile(const std::string &filena
   return j;
 }
 
-void Crest::CrestContainer::parseOldFormat(std::string& colName, TypeId& typespec,const nlohmann::json & thisVal){
+void Crest::CrestContainer::parseOldFormat(const std::string& colName, const TypeId& typespec,const nlohmann::json & thisVal){
   try{
     if (thisVal.is_null()){
       m_row[colName] ="NULL";
@@ -500,9 +494,9 @@ void Crest::CrestContainer::parseData(const nlohmann::json & values){
         {
           for (size_t i = 0; i < values.size(); ++i)
           {
-            const auto &spec = m_payload_spec[i];
-            std::string colName = spec.first;
-            TypeId colType = spec.second;
+            const auto & [colName,colType] = m_payload_spec[i];
+            //const std::string & colName = spec.first;
+            //TypeId colType = spec.second;
             if(values[i].is_string() &&( colType== TypeId::UChar || colType==TypeId::Bool || colType==TypeId::Int16 || colType==TypeId::UInt16
              || colType==TypeId::Int32 || colType==TypeId::UInt32 || colType==TypeId::Int64 || colType==TypeId::UInt63 || colType==TypeId::Float || colType==TypeId::Double))
 	    {
