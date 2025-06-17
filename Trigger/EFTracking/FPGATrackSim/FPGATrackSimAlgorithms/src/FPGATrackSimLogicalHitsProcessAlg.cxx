@@ -170,7 +170,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
 
-    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_all, phits_1st, phits_2nd;
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_output, phits_all, phits_1st, phits_2nd;
     phits_1st.reserve(FPGAHits->size());
     phits_2nd.reserve(FPGAHits->size());
     ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
@@ -198,6 +198,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
     for (auto& hit : phits_2nd) {
         FPGAHits_2nd->push_back(*hit);
+    }
+
+    // Add all hits including SPs to this for the HoughRootOutputTool
+    for (const FPGATrackSimHit& hit : *(FPGAHits_2nd.cptr())) {
+        phits_output.emplace_back(&hit, [](const FPGATrackSimHit*){});
     }
 
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
@@ -453,7 +458,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
 
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_all, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_output, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
     }
 
     // Reset data pointers
