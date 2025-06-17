@@ -107,10 +107,10 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
 
     CaloClusterCellLink *cccl = new CaloClusterCellLink();
 
-    for (auto cell_id : gepclus.cell_id) 
+    for (auto cell_id : gepclus.cell_id)
         cccl->addCell(pCellMap->at(cell_id).index, 1.0);
 
-    ptr->addCellLink(cccl);
+    ptr->addCellLink(std::make_unique<CaloClusterCellLink>(*cccl));
   }
   
     
