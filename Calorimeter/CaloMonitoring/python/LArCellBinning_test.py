@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaPython.PyAthenaComps import Alg, StatusCode
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN3
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA22
     flags.Output.HISTFileName = 'LArCellMonOutput.root'
     flags.DQ.useTrigger = False
     flags.fillFromArgs()
