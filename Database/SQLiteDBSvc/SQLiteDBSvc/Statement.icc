@@ -1,0 +1,135 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+#include <format>
+
+#include "Statement.h"
+
+namespace SQLite {
+namespace {
+// Utility function to compare SQLite type to C++ type
+template <ValidColumnType T>
+[[maybe_unused]] bool checkType(int sqliteType) {
+  if constexpr (std::is_floating_point_v<T>) {
+    return sqliteType == SQLITE_FLOAT || sqliteType == SQLITE_NULL;
+  } else if constexpr (std::is_integral_v<T>) {
+    return sqliteType == SQLITE_INTEGER || sqliteType == SQLITE_NULL;
+  } else if constexpr (std::is_same_v<T, std::string>) {
+    return sqliteType == SQLITE_TEXT || sqliteType == SQLITE_BLOB ||
+           sqliteType == SQLITE_NULL;
+  } else {
+    return false;
+  }
+}
+}  // namespace
+
+template <typename I>
+  requires std::integral<I>
+void Statement::bind(int index, I value) {
+  bind(index, std::int64_t(value));
+}
+
+template <ValidColumnType T, std::size_t I>
+T Statement::column() {
+  if constexpr (std::is_floating_point_v<T>) {
+    return sqlite3_column_double(m_stmt, I);
+  } else if constexpr (std::is_integral_v<T>) {
+    return sqlite3_column_int64(m_stmt, I);
+  } else if constexpr (std::is_same_v<T, std::string>) {
+    return std::string((char*)sqlite3_column_text(m_stmt, I));
+  } else {
+    static_assert(false,
+                  "Unsupported result type for column. Supported types are "
+                  "std::int64_t, double, and std::string");
+  }
+}
+
+template <ValidColumnType... Ts, std::size_t... Is>
+std::tuple<Ts...> Statement::columns(std::index_sequence<Is...>) {
+  return std::make_tuple<Ts...>(column<Ts, Is>()...);
+}
+
+template <ValidColumnType... ReturnArgs, ValidParamType... ParamArgs>
+ResultTypeWrapper<ReturnArgs...>::type Statement::run(ParamArgs... params) {
+  if (!m_stmt) {
+    throw std::logic_error("Can't run unfilled Statement!");
+  }
+  // Lock mutex for thread safety
+  std::lock_guard lck{m_stmtMutex};
+  // Reset everything
+  reset();
+
+  // Handle parameters
+  if (sqlite3_bind_parameter_count(m_stmt) != sizeof...(params)) {
+    throw std::logic_error(
+        std::format("Parameter count mismatch in SQLite statement execution: "
+                    "got {} but need {}\n"
+                    "Statement defined at {} [{}:{}]",
+                    sqlite3_bind_parameter_count(m_stmt), sizeof...(params),
+                    m_creationPoint.function_name(),
+                    m_creationPoint.file_name(), m_creationPoint.line()));
+  }
+  // bind parameters
+  int param_idx = 1;
+  try {
+    // Using post-increment, which returns the current value of param_idx
+    // then increments before the next call to bind
+    (bind(param_idx++, params), ...);
+  } catch (const std::tuple<int, int>& e) {
+    std::string err_msg = std::format(
+        "Error while binding parameter {} of {}: {} ({})"
+        "Statement defined at {} [{}:{}]",
+        std::get<1>(e), sizeof...(params), sqlite3_errstr(std::get<0>(e)),
+        sqlite3_errmsg(m_db), m_creationPoint.function_name(),
+        m_creationPoint.file_name(), m_creationPoint.line());
+    if (std::get<0>(e) == SQLITE_RANGE || std::get<0>(e) == SQLITE_MISUSE) {
+      throw std::logic_error(err_msg);
+    }
+    throw std::runtime_error(err_msg);
+  }
+  // ensure number of result arguments is correct
+  if (sqlite3_column_count(m_stmt) != sizeof...(ReturnArgs)) {
+    throw std::logic_error(
+        std::format("Return type count mismatch in SQLite statement execution: "
+                    "got {} but need {}\n"
+                    "Statement defined at {} [{}:{}]",
+                    sizeof...(params), sqlite3_column_count(m_stmt),
+                    m_creationPoint.function_name(),
+                    m_creationPoint.file_name(), m_creationPoint.line()));
+  }
+
+  // Run statement
+  if constexpr (sizeof...(ReturnArgs) == 0) {
+    // Loop anyway in case we have a multi-step statement that returns no data
+    while (step()) {
+    }
+    return;
+  } else {
+    ResultType<ReturnArgs...> result{};
+    while (step()) {
+      if (result.empty()) {  // i.e. if this is the first row returned
+        // Check types match
+        std::array<int, sizeof...(ReturnArgs)> sqlColumnTypes{};
+        for (int i = 0; std::size_t(i) < sizeof...(ReturnArgs); ++i) {
+          sqlColumnTypes[i] = sqlite3_column_type(m_stmt, i);
+        }
+        std::size_t colIdx = 0;
+        const bool typesOK =
+            (checkType<ReturnArgs>(sqlColumnTypes[colIdx++]) && ...);
+        if (!typesOK) {
+          throw std::runtime_error(
+              std::format("Return type mismatch (column {} should be {}) in "
+                          "SQLite statement execution!\n"
+                          "Statement defined at {} [{}:{}]",
+                          colIdx - 1, sqlColumnTypes[colIdx - 1],
+                          m_creationPoint.function_name(),
+                          m_creationPoint.file_name(), m_creationPoint.line()));
+        }
+      }
+      result.push_back(columns<ReturnArgs...>(
+          std::make_index_sequence<sizeof...(ReturnArgs)>{}));
+    }
+    return result;
+  }
+}
+}  // namespace SQLite
