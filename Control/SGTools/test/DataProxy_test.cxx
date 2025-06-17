@@ -86,15 +86,15 @@ public:
   { std::cout << "objType\n"; std::abort(); }
   virtual long repSvcType() const override
   { std::cout << "repSvcType\n"; std::abort(); }
-  virtual StatusCode setDataProvider(IDataProviderSvc* /*pService*/)
+  virtual StatusCode setDataProvider(IDataProviderSvc* /*pService*/) override
   { std::cout << "setDataProvider\n"; std::abort(); }
   virtual SmartIF<IDataProviderSvc>& dataProvider() const override
   { std::cout << "dataProvider\n"; std::abort(); }
-  virtual StatusCode setConversionSvc(IConversionSvc* /*pService*/)
+  virtual StatusCode setConversionSvc(IConversionSvc* /*pService*/) override
   { std::cout << "setConversionSvc\n"; std::abort(); }
   virtual SmartIF<IConversionSvc>& conversionSvc()    const override
   { std::cout << "conversionSvc\n"; std::abort(); }
-  virtual StatusCode setAddressCreator(IAddressCreator* /*creator*/)
+  virtual StatusCode setAddressCreator(IAddressCreator* /*creator*/) override
   { std::cout << "setAddressCreator\n"; std::abort(); }
   virtual SmartIF<IAddressCreator>& addressCreator()    const override
   { std::cout << "addressCreator\n"; std::abort(); }
