@@ -80,12 +80,13 @@ def testCfg (flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles, defaultConditionsTags
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN3
     flags.Output.HISTFileName = 'LArCellMonOutput.root'
     flags.DQ.useTrigger = False
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA22
     flags.fillFromArgs()
     flags.lock()
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
