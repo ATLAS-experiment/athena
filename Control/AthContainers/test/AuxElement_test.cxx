@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxElement_test.cxx
@@ -31,8 +31,8 @@ class AuxVectorBase
   : public SG::AuxVectorData
 {
 public:
-  virtual size_t size_v() const { return 10; }
-  virtual size_t capacity_v() const { return 10; }
+  virtual size_t size_v() const override { return 10; }
+  virtual size_t capacity_v() const override { return 10; }
 
   using SG::AuxVectorData::setStore;
   void set (SG::AuxElement& b, size_t index)

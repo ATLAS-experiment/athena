@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/Root/AuxElement.h
@@ -30,8 +30,8 @@ class AuxElementData
   : public AuxVectorData
 {
 public:
-  virtual size_t size_v() const { return 1; }
-  virtual size_t capacity_v() const { return 1; }
+  virtual size_t size_v() const override { return 1; }
+  virtual size_t capacity_v() const override { return 1; }
 };
 
 

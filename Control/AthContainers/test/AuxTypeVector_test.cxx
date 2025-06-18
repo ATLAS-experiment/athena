@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxTypeVector_test.cxx
@@ -340,7 +340,7 @@ class TestContainer
   : public std::vector<int>, public SG::IAuxSetOption
 {
 public:
-  virtual bool setOption (const SG::AuxDataOption& option) 
+  virtual bool setOption (const SG::AuxDataOption& option) override
   { lastopt = option; return true; }
 
   static SG::AuxDataOption lastopt ATLAS_THREAD_SAFE;

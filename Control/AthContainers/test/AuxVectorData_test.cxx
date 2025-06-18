@@ -37,8 +37,8 @@ public:
   using AuxVectorData::setStore;
   using AuxVectorData::s_minCacheLen;
 
-  virtual size_t size_v() const { return 10; }
-  virtual size_t capacity_v() const { return 20; }
+  virtual size_t size_v() const override { return 10; }
+  virtual size_t capacity_v() const override { return 20; }
 };
 
 
@@ -473,8 +473,8 @@ public:
   {
     setCache (auxid, ptr);
   }
-  virtual size_t size_v() const { return m_size; }
-  virtual size_t capacity_v() const { return m_size; }
+  virtual size_t size_v() const override { return m_size; }
+  virtual size_t capacity_v() const override { return m_size; }
   size_t m_size;
 };
 void test_setcache()

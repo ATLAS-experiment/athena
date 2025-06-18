@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -62,8 +62,8 @@ struct DerivedFluff : public AbsFluff {
     m_string("this is the Fluff struct") { }
   DerivedFluff& operator= (const DerivedFluff&) = delete;
 
-  virtual void foo() { /* cout << "foo called" << std::endl; */ }
-  virtual void cfoo() const { /* cout << "foo called" << std::endl; */ }
+  virtual void foo() override { /* cout << "foo called" << std::endl; */ }
+  virtual void cfoo() const override { /* cout << "foo called" << std::endl; */ }
 };
 
 class FluffContainer : public DataVector<DerivedFluff>
