@@ -35,7 +35,7 @@ auto charAccessors = initAccessors<char>(
   "vsi_isFake", "vsi_isPassMMV", "vsi_trkd0cut", "vsi_twoCircErrcut", "vsi_twoCircRcut", "vsi_fastErrcut", "vsi_fastRcut", "vsi_fitErrcut", "vsi_chi2cut",
   "overflow",
   "GNTau_VeryLoose", "GNTau_Loose", "GNTau_Medium", "GNTau_Tight",
-  "NNJvtPass"
+  "NNJvtTrkAugV1Pass"
   );
 
 auto intAccessors = initAccessors<int>(
@@ -78,7 +78,7 @@ auto uint64Accessors = initAccessors<uint64_t>("start", "stop", "thresholdPatter
 auto sizeAccessors = initAccessors<size_t>("alg_idx");
 
 auto floatAccessors = initAccessors<float>(
-  "EBWeight", "Jvt", "JvtRpt", "NNJvt", "IP2D_bc", "IP2D_bu", "IP2D_cu", "IP3D_bc", "IP3D_bu", "IP3D_cu",
+  "EBWeight", "Jvt", "JvtRpt", "NNJvtTrkAugV1", "IP2D_bc", "IP2D_bu", "IP2D_cu", "IP3D_bc", "IP3D_bu", "IP3D_cu",
   "ActiveArea", "ActiveArea4vec_eta", "ActiveArea4vec_m", "ActiveArea4vec_phi", "ActiveArea4vec_pt",
   "JetEtaJESScaleMomentum_eta", "JetEtaJESScaleMomentum_m", "JetEtaJESScaleMomentum_phi", "JetEtaJESScaleMomentum_pt",
   "JetGSCScaleMomentum_eta", "JetGSCScaleMomentum_m", "JetGSCScaleMomentum_phi", "JetGSCScaleMomentum_pt",
