@@ -275,10 +275,10 @@ L1TopoSimulation::execute() {
      std::string conn2 = l1menu->board("Topo3").connectorNames()[0];
      for(unsigned int clock=0; clock<2; ++clock) {
        ATH_MSG_DEBUG("Word 1 " << conn1 << " clock " << clock << "  " << globalOutput.decision_field( conn1, clock) );
-       topoOutput2CTP->setCableWord1( clock, globalOutput.decision_field( conn1, clock) );  // TOPO 0
+       topoOutput2CTP->setCableWord1( clock, globalOutput.decision_field( conn1, clock) | globalOutput.overflow_field(conn1, clock) );  // TOPO 0
        WriteEDM(outputHandle,conn1,clock,globalOutput.decision_field( conn1, clock));
        ATH_MSG_DEBUG("Word 2 " << conn2 << " clock " << clock << "  " << globalOutput.decision_field( conn2, clock) );
-       topoOutput2CTP->setCableWord2( clock, globalOutput.decision_field( conn2, clock) );  // TOPO 1
+       topoOutput2CTP->setCableWord2( clock, globalOutput.decision_field( conn2, clock) | globalOutput.overflow_field(conn2, clock) );  // TOPO 1
        WriteEDM(outputHandle,conn2,clock,globalOutput.decision_field( conn2, clock));
        
        topoOverflow2CTP->setCableWord0( clock, 0 ); // ALFA
