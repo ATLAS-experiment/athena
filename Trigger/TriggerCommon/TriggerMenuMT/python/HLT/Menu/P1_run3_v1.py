@@ -476,6 +476,11 @@ def addLowMuP1Signatures(chains):
         # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A2_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
         # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C2_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
 
+        # ATR-31450
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_LOR',                 l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_LOR_EMPTY',           l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_LOR_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
+
         # End of event chains for MET
         ChainProp(name='HLT_acceptedevts_metcalo_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']),
         ChainProp(name='HLT_acceptedevts_mettrk_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']),
@@ -491,6 +496,7 @@ def addLowMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM5_EMPTY',  l1SeedThresholds=['eEM5'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
 
         # Oxygen
+        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1jJ30', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ZDC_YN', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ZDC_XNYN', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ZDC_XNZN', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
