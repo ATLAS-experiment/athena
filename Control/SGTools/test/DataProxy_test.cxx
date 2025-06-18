@@ -43,7 +43,7 @@ class XLock : public ILockable
 {
 public:
   XLock() : m_locked (false) {}
-  void lock() { m_locked = true; std::cout << "lock\n"; }
+  virtual void lock() override { m_locked = true; std::cout << "lock\n"; }
   bool m_locked;
 };
 CLASS_DEF(XLock, 8114, 1)
@@ -52,7 +52,7 @@ class XLockObj : public DataObject, public ILockable
 {
 public:
   XLockObj() : m_locked (false) {}
-  void lock() { m_locked = true; std::cout << "lock\n"; }
+  virtual void lock() override { m_locked = true; std::cout << "lock\n"; }
   bool m_locked;
 };
 CLASS_DEF(XLockObj, 8124, 1)
@@ -122,19 +122,19 @@ class TestOpaqueAddress
 {
 public:
   // dummy ref-counting
-  virtual unsigned long        addRef     () { return 1; }
-  virtual unsigned long        release    () { return 1; }
-  virtual const CLID&          clID       () const
+  virtual unsigned long        addRef     () override { return 1; }
+  virtual unsigned long        release    () override { return 1; }
+  virtual const CLID&          clID       () const override
   { std::cout << "clID\n"; std::abort(); }
-  virtual long                 svcType    () const
+  virtual long                 svcType    () const override
   { std::cout << "svcType\n"; std::abort(); }
-  virtual IRegistry*           registry   () const
+  virtual IRegistry*           registry   () const override
   { std::cout << "registry\n"; std::abort(); }
-  virtual void                 setRegistry(IRegistry* /*r*/)
+  virtual void                 setRegistry(IRegistry* /*r*/) override
   { std::cout << "setRegistry\n"; std::abort(); }
-  virtual const std::string*   par        () const
+  virtual const std::string*   par        () const override
   { std::cout << "par\n"; std::abort(); }
-  virtual const unsigned long* ipar       () const
+  virtual const unsigned long* ipar       () const override
   { std::cout << "ipar\n"; std::abort(); }
 };
 
@@ -215,7 +215,7 @@ class Test3Loader
 public:
   Test3Loader();
 
-  virtual StatusCode createObj(IOpaqueAddress* /*pAddress*/, DataObject*& refpObject)
+  virtual StatusCode createObj(IOpaqueAddress* /*pAddress*/, DataObject*& refpObject) override
   {
     m_store = SG::CurrentEventStore::store();
     refpObject = m_bucket;
