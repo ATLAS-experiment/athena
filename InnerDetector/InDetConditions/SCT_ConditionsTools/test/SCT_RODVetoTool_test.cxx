@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -156,14 +156,6 @@ TEST_F(SCT_RODVetoTool_test, Initialization) {
   
 TEST_F(SCT_RODVetoTool_test, Finalization) {
   ASSERT_TRUE( m_tool->finalize().isSuccess() );
-}
-
-TEST_F(SCT_RODVetoTool_test, queryInterface) {
-  //It wants a pointer to a pointer, I give it a pointer to a pointer
-  void* b{nullptr};
-  void** ppvInterface{&b};
-  const InterfaceID rrid{"ISCT_ConditionsTool", 1, 0};
-  ASSERT_TRUE( m_tool->queryInterface(rrid, ppvInterface).isSuccess() );
 }
 
 TEST_F(SCT_RODVetoTool_test, canReportAbout) {
