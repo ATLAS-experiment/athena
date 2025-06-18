@@ -389,7 +389,8 @@ def getDecorList(jetDef):
                       "NumTrkPt500","NumTrkPt1000",
                       "SumPtTrkPt500","SumPtTrkPt1000",
                       "TrackWidthPt1000",
-                      "JVFCorr", "JvtRpt", "Jvt"]
+                      "JVFCorr", "JvtRpt", "Jvt",
+                      'NNJvtTrkAugV1','NNJvtTrkAugV1Pass', 'RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000']
         if 'PFlow' in jetDef.basename:
             decorlist += ["SumPtChargedPFOPt500"]
     return decorlist

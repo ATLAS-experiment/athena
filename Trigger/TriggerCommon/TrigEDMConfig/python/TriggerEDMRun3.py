@@ -38,36 +38,56 @@ JetVarsToKeep = ['ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'Active
              ]
 JetVars = '.'.join(JetVarsToKeep)
 
+# Tailors the requested dynamic variables according to the string argument
+# which mirrors the expanded reconstruction suffix in the HLT chain, e.g.
+# pf_subresjesgscIS_ftf: [constituents]_[calibration]_[tracking]
+def getJetCopyVars(suffix):
+    JetCopyVars = [
+        'pt', 'eta', 'phi', 'm',
+        # additional variables also stored in TLA stream for jet cleaning studies
+        # stored for calibrated HLT container in the same way as in the TLA streams
+        "N90Constituents", "LArQuality", "FracSamplingMax", "NegativeE", "HECQuality", "AverageLArQF", "BchCorrCell",
+        'Timing',
+    ]
+    if 'sub' in suffix:
+        JetCopyVars += ['JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt']
+    if 'jes' in suffix:
+        JetCopyVars += [
+            'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
+            'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt'
+        ]
+    if '_ftf' in suffix:
+        JetCopyVars += [
+            'Jvt', 'JvtRpt',
+            # NN JVT -- TrkAug version
+            'NNJvtTrkAugV1','NNJvtTrkAugV1Pass',
+        ]
+        if 'TLA' not in suffix:
+            JetCopyVars += ['RPtTrkPt500','DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000']
+        if 'pf_subresjesgscIS' in suffix:
+            discriminants = ['dips20211116','fastDIPS20211215','GN120230331','tlaGN220240122']
+            JetCopyVars += [f'{disc}_p{flavour}' for disc in discriminants for flavour in 'cub']
+            if 'TLA' not in suffix:
+                JetCopyVars += ['TracksForMinimalJetTag']
 
-JetCopyVarsToKeep = ['pt', 'eta', 'phi', 'm',
-                     'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
-                     'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
-                     'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
-                     'Jvt', 'JvtRpt','Timing', 'TracksForMinimalJetTag',
-                     # additional variables also stored in TLA stream for jet cleaning studies
-                     # stored for calibrated HLT container in the same way as in the TLA streams
-                     "N90Constituents", "LArQuality", "FracSamplingMax", "NegativeE", "HECQuality", "AverageLArQF", "BchCorrCell",
-                     # NN JVT -- TrkAug version
-                     'NNJvt','NNJvtPass', 'RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000',
-                    ]
+    if 'fastftag' in suffix:
+        discriminants = ['fastDips','fastGN120230327','fastGN120230331','fastGN220240122',]
+        JetCopyVars += [f'{disc}_p{flavour}' for disc in discriminants for flavour in 'cub']
+        JetCopyVars += [f'fastGNTau20240216_p{flavour}' for disc in discriminants for flavour in ['tau','u']]
+        JetCopyVars += ['dipz20231122_z','dipz20231122_negLogSigma2']
+        JetCopyVars.append('TracksForMinimalJetTag')
 
-FastFtagPFlowVarsToKeep = [f'dips20211116_p{x}' for x in 'cub']
-FastFtagPFlowVarsToKeep += [f'fastDIPS20211215_p{x}' for x in 'cub']
-FastFtagPFlowVarsToKeep += [f'GN120230331_p{x}' for x in 'cub']
-FastFtagPFlowVarsToKeep += [f'tlaGN220240122_p{x}' for x in 'cub']
+    TLAJetVarsToKeep = [
+        'ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt',
+        'JetConstitScaleMomentum_eta', 'JetConstitScaleMomentum_m', 'JetConstitScaleMomentum_phi', 'JetConstitScaleMomentum_pt',
+        'DetectorEta', 'DetectorPhi', 'EMFrac', 'HECFrac', 'EnergyPerSampling', 'EnergyPerSamplingCaloBased',
+    ]
+    if 'TLA' in suffix:
+        JetCopyVars += TLAJetVarsToKeep
+        if '_ftf' in suffix:
+            JetCopyVars += ['SumPtChargedPFOPt500', 'NumTrkPt1000', 'SumPtTrkPt500', 'TrackWidthPt1000', 'JVFCorr']
 
-JetCopyVarsToKeep += FastFtagPFlowVarsToKeep
-JetCopyVars = '.'.join(JetCopyVarsToKeep)
-
-JetFastFTagVarsToKeep = JetCopyVarsToKeep
-JetFastFTagVarsToKeep += [f'fastDips_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGN120230327_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGN120230331_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGN220240122_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGNTau20240216_p{x}' for x in ["tau" , "u"]]
-JetFastFTagVarsToKeep += ['dipz20231122_z']
-JetFastFTagVarsToKeep += ['dipz20231122_negLogSigma2']
-JetFastFTagVars = '.'.join(JetFastFTagVarsToKeep)
+    return '.'.join(JetCopyVars)
 
 LargeRJetVarsToKeep = [f'GN2Xv01_p{x}' for x in ['hbb', 'top', 'qcd']]
 LargeRJetVarsToKeep += [f'GN2XTrig_p{x}' for x in ['hbb', 'top', 'qcd']]
@@ -81,24 +101,6 @@ VSIVarsToKeep = ['vsi_mass', 'vsi_pT', 'vsi_charge', 'vsi_isFake',
                  'vsi_isPassMMV', 'vsi_trkd0cut', 'vsi_twoCircErrcut', 'vsi_twoCircRcut', 'vsi_fastErrcut', 
                  'vsi_fastRcut', 'vsi_fitErrcut', 'vsi_chi2cut']
 VSIVars = '.'.join(VSIVarsToKeep)
-
-
-# ===========
-# === TLA ===
-TLAJetVarsToKeep = [
-                   'pt', 'eta', 'phi', 'm', 'ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt',
-                   'DetectorEta', 'DetectorPhi', 'EMFrac', 'HECFrac', 'EnergyPerSampling', 'EnergyPerSamplingCaloBased',
-                   'JetConstitScaleMomentum_eta', 'JetConstitScaleMomentum_m', 'JetConstitScaleMomentum_phi', 'JetConstitScaleMomentum_pt',
-                   'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
-                   'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
-                   'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
-                   'Jvt', 'JVFCorr', 'JvtRpt',
-                   'NNJvt','NNJvtPass',
-                   'SumPtChargedPFOPt500', 'NumTrkPt1000', 'SumPtTrkPt500', 'TrackWidthPt1000', 'N90Constituents',
-                   'LArQuality','FracSamplingMax',  'NegativeE', 'Timing', 'HECQuality','AverageLArQF', 'BchCorrCell',
-                   ]
-TLAJetVarsToKeep+= FastFtagPFlowVarsToKeep
-TLAJetVars='.'.join(TLAJetVarsToKeep)
 
 # ==============
 # === EGAMMA ===
@@ -157,7 +159,7 @@ BTagOutput_highLevelTaggers = [
 BTagOutput += BTagOutput_IP2D + BTagOutput_IP3D + BTagOutput_SV1 + BTagOutput_JetFitter + BTagOutput_rnnip + BTagOutput_highLevelTaggers
 BTagVars = '.'.join(BTagOutput)
 
-BTagJetOutput = ['btaggingLink', 'Jvt', 'JVFCorr', 'SumPtTrkPt500']
+BTagJetOutput = ['btaggingLink', 'Jvt', 'JVFCorr', 'SumPtTrkPt500','NNJvtTrkAugV1','NNJvtTrkAugV1Pass']
 BTagJetVars  ='.'.join(BTagJetOutput)
 
 hitDVToKeepBase = ['seed_eta','seed_phi','seed_type','n_track_qual','ly0_sp_frac','ly1_sp_frac','ly2_sp_frac','ly3_sp_frac',
@@ -738,11 +740,11 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_DiTau_IDTrigAux.',            'BS ESD', 'Tau'),
 
     # Jet
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesISAux.'+JetCopyVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS',                                       'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesISAux.'+getJetCopyVars('subjesIS'), 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_fastftag',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_fastftagAux.'+JetFastFTagVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_fastftag',                                                'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_fastftagAux.'+getJetCopyVars('subjesIS_fastftag'), 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib_ftf',                  'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalib_ftfAux.'+JetVars,   'BS ESD AODFULL AODSLIM', 'Jet'),
@@ -750,26 +752,26 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib_roiftf',                  'BS ESD', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalib_roiftfAux.'+JetVars,   'BS ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftf',                                           '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftfAux.'+getJetCopyVars('subjesIS_ftf'), '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftf',                        'BS ESD', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftfAux.'+JetCopyVars, 'BS ESD', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftf',                                       'BS ESD', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftfAux.'+getJetCopyVars('subjesIS'), 'BS ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',                                              'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftfAux.'+getJetCopyVars('subjesgscIS_ftf'), 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftf',                                            'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftfAux.'+getJetCopyVars('subjesgsc_ftf'), 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf',                                                 'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux.'+getJetCopyVars('subresjesgscIS_ftf'), 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftf',                                               '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftfAux.'+getJetCopyVars('subresjesgsc_ftf'), '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjes',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjes',                                     '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesAux.'+getJetCopyVars('subjes'), '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib',                      'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalibAux.'+JetVars,       'BS ESD AODFULL AODSLIM', 'Jet'),
@@ -780,8 +782,8 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoCSSKJets_nojcalib',                  '', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoCSSKJets_nojcalibAux.'+JetVars,   '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10LCTopoJets_subjes',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt10LCTopoJets_subjesAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10LCTopoJets_subjes',                                     'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt10LCTopoJets_subjesAux.'+getJetCopyVars('subjes'), 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10LCTopoJets_nojcalib',                     'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoJets_nojcalibAux.'+JetVars,      'BS ESD AODFULL', 'Jet'),
@@ -816,26 +818,26 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftf',                'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',                      'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.'+LargeRJetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftf',                                              '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftfAux.'+getJetCopyVars('pf_subjesIS_ftf'), '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf',                                                 'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftfAux.'+getJetCopyVars('pf_subjesgscIS_ftf'), 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftf',                                               '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftfAux.'+getJetCopyVars('pf_subjesgsc_ftf'), '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.'+JetFastFTagVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                                                             'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.'+getJetCopyVars('pf_subresjesgscIS_ftf'), 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftf',                                                  '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftfAux.'+getJetCopyVars('pf_subresjesgsc_ftf'), '', 'Jet'),
     
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_jes_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_jes_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_jes_ftf',                                         'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_jes_ftfAux.'+getJetCopyVars('pf_jes_ftf'), 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
@@ -867,11 +869,11 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',                                 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet' ),
     ('xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',         'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'    ),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLA',                      'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLAAux.'+TLAJetVars,       'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLA',                                                'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLAAux.'+getJetCopyVars('subjesIS_fastftag_TLA'), 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',                      'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.'+TLAJetVars,       'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',                                                             'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.'+getJetCopyVars('pf_subresjesgscIS_ftf_TLA'), 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
 
 
     # TLA Photons
@@ -1091,7 +1093,7 @@ TriggerHLTListRun3 = [
 
     # TLA bjet b-tagging
     ('xAOD::BTaggingContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTagging',                      'BS PhysicsTLA ESD', 'Bjet'),
-    ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTaggingAux.'+BTagVars,       'BS PhysicsTLA ESD', 'Bjet'),
+    ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTaggingAux.'+BTagVars,      'BS PhysicsTLA ESD', 'Bjet'),
 
     # MinBias
 
