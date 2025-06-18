@@ -3,7 +3,6 @@
 */
 #include <format>
 
-#include "Statement.h"
 
 namespace SQLite {
 namespace {
