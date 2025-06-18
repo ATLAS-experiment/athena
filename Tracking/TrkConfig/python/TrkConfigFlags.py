@@ -63,6 +63,7 @@ class TrackingComponent(FlagEnum):
     GNNChain = "GNNChain"
     # FPGA
     FPGAChain = "FPGAChain"
+    ActsValidateF100 = "ActsValidateF100"
 
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
@@ -588,7 +589,8 @@ def createTrackingConfigFlags():
         createActsValidateLargeRadiusSeedsTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
-        createActsHeavyIonTrackingPassFlags
+        createActsHeavyIonTrackingPassFlags,
+        createEFValidateF100TrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
@@ -617,12 +619,17 @@ def createTrackingConfigFlags():
                           createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
                           createActsHeavyIonTrackingPassFlags, prefix=True)
+    
+    # Acts F100 validation pass
+    icf.addFlagsCategory ("Tracking.ITkActsValidateF100Pass",
+                          createEFValidateF100TrackingPassFlags, prefix=True)
+    
 
     # GNN
     from InDetGNNTracking.InDetGNNTrackingFlags import createGNNTrackingPassFlags
     icf.addFlagsCategory ("Tracking.ITkGNNPass",
                           createGNNTrackingPassFlags, prefix=True)
-    #FPGA 
+    # FPGA 
     from TrkConfig.InDetFPGATrackingFlags import createFPGATrackingPassFlags 
     icf.addFlagsCategory ("Tracking.ITkFPGAPass",
                           createFPGATrackingPassFlags, prefix=True)    

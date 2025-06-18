@@ -125,13 +125,18 @@ def ITkRecPreProcessingSiliconCfg(flags,
         acc.merge(ActsRegionsOfInterestCreatorAlgCfg(flags,
                                                      name=f"{flags.Tracking.ActiveConfig.extension}RegionsOfInterestCreatorAlg"))
 
-        # If running FPGA tracking, use ACTS clusterization + FPGA pass-through
-        if flags.Tracking.ActiveConfig.doFPGATrack:
+        from ActsConfig.ActsClusterizationConfig import ActsClusterizationCfg
+        acc.merge(ActsClusterizationCfg(flags, previousActsExtension=previousActsExtension))
+    
+    # If running FPGA tracking, use ACTS clusterization + FPGA pass-through
+    if flags.Tracking.ActiveConfig.doFPGACluster:
+        if flags.Tracking.ActiveConfig.doFPGATrackSim:
+            from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimClusteringCfg
+            acc.merge(FPGATrackSimClusteringCfg(flags))
+        else:
             from EFTrackingFPGAIntegration.EFClusterizationConfig import EFPassThroughClusterizationCfg
             acc.merge(EFPassThroughClusterizationCfg(flags))
-        else:
-            from ActsConfig.ActsClusterizationConfig import ActsClusterizationCfg
-            acc.merge(ActsClusterizationCfg(flags, previousActsExtension=previousActsExtension))
+        
 
     #
     # ---  Cluster EDM converters
@@ -199,7 +204,7 @@ def ITkRecPreProcessingSiliconCfg(flags,
             from InDetConfig.InDetTruthAlgsConfig import ITkPRD_MultiTruthMakerSiCfg
             acc.merge(ITkPRD_MultiTruthMakerSiCfg(flags))
 
-        if flags.Tracking.ActiveConfig.doActsCluster or flags.Tracking.ActiveConfig.doAthenaToActsCluster:
+        if flags.Tracking.ActiveConfig.doActsCluster or flags.Tracking.ActiveConfig.doAthenaToActsCluster or flags.Tracking.ActiveConfig.doFPGACluster:
             from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
             acc.merge(ActsTruthAssociationAlgCfg(flags))
             acc.merge(ActsTruthParticleHitCountAlgCfg(flags))

@@ -20,7 +20,7 @@ def createFPGATrackingPassFlags():
     icf.doActsSeed = True
     icf.doActsTrack = True
 
-    icf.doFPGATrack = True
+    icf.doFPGACluster = True
 
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
     return icf
