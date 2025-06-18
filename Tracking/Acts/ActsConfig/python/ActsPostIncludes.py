@@ -30,7 +30,7 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
         if flags.Acts.doITkConversion:
             toAOD += ['xAOD::StripClusterContainer#ITkConversionStripClusters',
                       'xAOD::StripClusterAuxContainer#ITkConversionStripClustersAux.' + strip_cluster_variables]
-        
+
     if flags.Acts.EDM.PersistifySpacePoints:
         pixel_spacepoint_shortlist = ['-measurements',
                                       '-pixelSpacePointLink']
@@ -89,19 +89,57 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
     acc.merge(addToAOD(flags, toAOD))
     return acc
 
-def ACTSClusterPostInclude(flags):
-
-    flags = flags.cloneAndReplace(
-        "Tracking.ActiveConfig",
-        f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")
+def ACTSClusterPostInclude(flags) -> ComponentAccumulator:
+    # Schedule ACTS Data Preparation and Measurement persistification
+    # This is used for technical efficiencies studies of tracking pipelines
     
-    from InDetConfig.ITkActsDataPreparationConfig import ITkActsDataPreparationCfg
-    acc = ITkActsDataPreparationCfg(flags)
+    acc = ComponentAccumulator()
+    
+    # Schedule Full Scan RoI
+    from ActsConfig.ActsRegionsOfInterestConfig import ActsMainRegionsOfInterestCreatorAlgCfg
+    acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags,
+                                                     name = "ActsOfflineRegionsOfInterestCreatorAlg",
+                                                     RoIs = "ActsOfflineRegionOfInterest"))
+    
+    # Cluster formation
+    # This includes Pixel and Strip
+    clusteringKwargs = dict()
+    clusteringKwargs["PixelClusterizationAlg.name"] = "ActsOfflinePixelClusterizationAlg"
+    clusteringKwargs["PixelClusterizationAlg.ClustersKey"] = "ITkOfflinePixelClusters"
+    clusteringKwargs["StripClusterizationAlg.name"] = "ActsOfflineStripClusterizationAlg"
+    clusteringKwargs["StripClusterizationAlg.ClustersKey"] = "ITkOfflineStripClusters"
+    from ActsConfig.ActsClusterizationConfig import ActsMainClusterizationCfg
+    acc.merge(ActsMainClusterizationCfg(flags,
+                                        RoIs = "ActsOfflineRegionOfInterest",
+                                        processHGTD = False,
+                                        **clusteringKwargs))
 
+    # Attach truth to clusters
+    if flags.Tracking.doTruth:
+        truthAssociationKwargs = dict()
+        truthAssociationKwargs["PixelClusterToTruthAssociationAlg.name"] = "ActsOfflinePixelClusterToTruthAssociationAlg"
+        truthAssociationKwargs["PixelClusterToTruthAssociationAlg.Measurements"] = "ITkOfflinePixelClusters"
+        truthAssociationKwargs["PixelClusterToTruthAssociationAlg.AssociationMapOut"] = "ITkOfflinePixelClustersToTruthParticles"
+        truthAssociationKwargs["StripClusterToTruthAssociationAlg.name"] = "ActsOfflineStripClusterToTruthAssociationAlg"
+        truthAssociationKwargs["StripClusterToTruthAssociationAlg.Measurements"] = "ITkOfflineStripClusters"
+        truthAssociationKwargs["StripClusterToTruthAssociationAlg.AssociationMapOut"] = "ITkOfflineStripClustersToTruthParticles"
+
+        from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
+        acc.merge(ActsTruthAssociationAlgCfg(flags,
+                                             **truthAssociationKwargs))
+        acc.merge(ActsTruthParticleHitCountAlgCfg(flags,
+                                                  name = "ActsOfflineTruthParticleHitCountAlg",
+                                                  PixelClustersToTruthAssociationMap = "ITkOfflinePixelClustersToTruthParticles",
+                                                  StripClustersToTruthAssociationMap = "ITkOfflineStripClustersToTruthParticles",
+                                                  TruthParticleHitCountsOut = "OfflineTruthParticleHitCounts"))
+        
+    
     from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
     acc.merge( ITkActsPrepDataToxAODCfg( flags,
-                    PixelMeasurementContainer = "ITkPixelMeasurements_offl",
-                    StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
+                                         PixelClusterContainer = 'ITkOfflinePixelClusters',
+                                         StripClusterContainer = 'ITkOfflineStripClusters',
+                                         PixelMeasurementContainer = 'ITkPixelMeasurements_offl',
+                                         StripMeasurementContainer = 'ITkStripMeasurements_offl' ) )
 
     ## write out measurements containers in any case
     toAOD = [
@@ -110,7 +148,7 @@ def ACTSClusterPostInclude(flags):
         'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl',
         'xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.'
     ]
+    
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
     acc.merge( addToAOD( flags, toAOD ) )
-
     return acc
