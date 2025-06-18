@@ -53,10 +53,9 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
   }
   
   if(m_sRecommendationTag == "2025-prerec") {
-    ATH_MSG_WARNING("2025-prerec are available. Tau trigger recommendations for Run2 still missing");
     ATH_CHECK(initializeTools_2025_prerec());
   } else if (m_sRecommendationTag == "2022-prerec") {
-    ATH_MSG_WARNING("2022-prerec tag are pre-recommendations and still under development.");
+    ATH_MSG_WARNING("2022-prerec tag are pre-recommendations are superseeded by 2025-prerec");
     ATH_CHECK(initializeTools_2022_prerec());
   }
   else {
@@ -397,8 +396,17 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
             return StatusCode::FAILURE;
           }
-        } else {
-            ATH_MSG_ERROR("SFs are not available for " << m_sCampaign << " campaign.  For Run2, please fallback to the 2022-prerec tag. If the config is correct, then please contact the tau trigger coordinators");
+        } else if(m_sCampaign=="mc20"){
+          if (m_sTriggerName.value().find("tracktwoEF") != std::string::npos) {
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data2018"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+          } else if (m_sTriggerName.value().find("tracktwo") != std::string::npos) {
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data161718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	  } else {
+            ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported. Please fix \"TriggerName\" property. If this is correct, then please contact the tau trigger coordinators");
+            return StatusCode::FAILURE;
+          }
+	} else {
+            ATH_MSG_ERROR("SFs are not available for " << m_sCampaign << " campaign. If the config is correct, then please contact the tau trigger coordinators");
 	    return StatusCode::FAILURE;
 	}
       }

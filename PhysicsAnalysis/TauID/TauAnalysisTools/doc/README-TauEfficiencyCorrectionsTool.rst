@@ -166,7 +166,7 @@ are available for tool steering:
    * - ``TriggerName``
      - ``std::string``
      - ``""``
-     - ``"HLT_tau25_mediumRNN_tracktwoMVA"``, ``"HLT_tau35_mediumRNN_tracktwoMVA"``,``"HLT_tau40_mediumRNN_tracktwoMVA"``,``"HLT_tau60_mediumRNN_tracktwoMVA"``,``"HLT_tau80_mediumRNN_tracktwoMVA"``,``"HLT_tau160_mediumRNN_tracktwoMVA"``
+     - ``"HLT_tau25_mediumRNN_tracktwoMVA"``, ``"HLT_tau35_mediumRNN_tracktwoMVA"``,``"HLT_tau40_mediumRNN_tracktwoMVA"``,``"HLT_tau60_mediumRNN_tracktwoMVA"``,``"HLT_tau80_mediumRNN_tracktwoMVA"``,``"HLT_tau160_mediumRNN_tracktwoMVA"``,``"HLT_tau80L1TAU60_medium1_tracktwoEF"``,``HLT_tau35_medium1_tracktwoEF"``,``"HLT_tau25_medium1_tracktwoEF"``,``"HLT_tau160L1TAU100_medium1_tracktwoEF"``,``HLT_tau80L1TAU60_medium1_tracktwo"``,``HLT_tau50L1TAU12_medium1_tracktwo"``,``"HLT_tau35_medium1_tracktwo"``,``HLT_tau25_medium1_tracktwo"``,``HLT_tau160_medium1_tracktwo"``
 
    * - ``TriggerSFMeasurement``
      - ``std::string``
