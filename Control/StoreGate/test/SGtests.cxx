@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -481,34 +481,34 @@ namespace Athena_test
     : public implements<IConversionSvc>
   {
   public:
-    virtual StatusCode addConverter(IConverter*) { abort(); }
-    virtual StatusCode addConverter(const CLID&) { abort(); }
-    virtual StatusCode removeConverter(const CLID&) { abort(); }
-    virtual IConverter* converter(const CLID&) { abort(); }
-    virtual StatusCode connectOutput(const std::string&) { abort(); }
+    virtual StatusCode addConverter(IConverter*) override { abort(); }
+    virtual StatusCode addConverter(const CLID&) override { abort(); }
+    virtual StatusCode removeConverter(const CLID&) override { abort(); }
+    virtual IConverter* converter(const CLID&) override { abort(); }
+    virtual StatusCode connectOutput(const std::string&) override { abort(); }
     virtual StatusCode connectOutput(const std::string&,
-                                     const std::string&) { abort(); }
+                                     const std::string&) override { abort(); }
     virtual StatusCode commitOutput(const std::string&,
-                                    bool) { abort(); }
-    virtual StatusCode initialize() { abort(); }
-    virtual StatusCode finalize() { abort(); }
-    virtual const CLID& objType() const { abort(); }
-    virtual long repSvcType() const { abort(); }
-    virtual StatusCode setDataProvider(IDataProviderSvc*) { abort(); }
-    virtual SmartIF<IDataProviderSvc>& dataProvider() const { abort(); }
-    virtual StatusCode setConversionSvc(IConversionSvc*) { abort(); }
-    virtual SmartIF<IConversionSvc>& conversionSvc()    const { abort(); }
-    virtual StatusCode setAddressCreator(IAddressCreator*) { abort(); }
-    virtual SmartIF<IAddressCreator>& addressCreator()    const { abort(); }
-    virtual StatusCode fillObjRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateObj(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateObjRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode createRep(DataObject*, IOpaqueAddress*&) { abort(); }
-    virtual StatusCode fillRepRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateRep(IOpaqueAddress*, DataObject*)  { abort(); }
-    virtual StatusCode updateRepRefs(IOpaqueAddress*, DataObject*) { abort(); }
+                                    bool) override { abort(); }
+    virtual StatusCode initialize() override { abort(); }
+    virtual StatusCode finalize() override { abort(); }
+    virtual const CLID& objType() const override { abort(); }
+    virtual long repSvcType() const override { abort(); }
+    virtual StatusCode setDataProvider(IDataProviderSvc*) override { abort(); }
+    virtual SmartIF<IDataProviderSvc>& dataProvider() const override { abort(); }
+    virtual StatusCode setConversionSvc(IConversionSvc*) override { abort(); }
+    virtual SmartIF<IConversionSvc>& conversionSvc()    const override { abort(); }
+    virtual StatusCode setAddressCreator(IAddressCreator*) override { abort(); }
+    virtual SmartIF<IAddressCreator>& addressCreator()    const override { abort(); }
+    virtual StatusCode fillObjRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateObj(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateObjRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode createRep(DataObject*, IOpaqueAddress*&) override { abort(); }
+    virtual StatusCode fillRepRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateRep(IOpaqueAddress*, DataObject*)  override { abort(); }
+    virtual StatusCode updateRepRefs(IOpaqueAddress*, DataObject*) override { abort(); }
 
-    virtual StatusCode createObj(IOpaqueAddress*, DataObject*&);
+    virtual StatusCode createObj(IOpaqueAddress*, DataObject*&) override;
   };
 
 
@@ -525,14 +525,14 @@ namespace Athena_test
     : public IOpaqueAddress
   {
   public:
-    virtual unsigned long        addRef     () { return 0; }
-    virtual unsigned long        release    () { return 0; }
-    virtual const CLID&          clID       () const { abort(); }
-    virtual long                 svcType    () const { abort(); }
-    virtual IRegistry*           registry   () const { abort(); }
-    virtual void                 setRegistry(IRegistry*) { abort(); }
-    virtual const std::string*   par        () const { abort(); }
-    virtual const unsigned long* ipar       () const { abort(); }
+    virtual unsigned long        addRef     () override { return 0; }
+    virtual unsigned long        release    () override { return 0; }
+    virtual const CLID&          clID       () const override { abort(); }
+    virtual long                 svcType    () const override { abort(); }
+    virtual IRegistry*           registry   () const override { abort(); }
+    virtual void                 setRegistry(IRegistry*) override { abort(); }
+    virtual const std::string*   par        () const override { abort(); }
+    virtual const unsigned long* ipar       () const override { abort(); }
   };
 } // namespace Athena_test
 
