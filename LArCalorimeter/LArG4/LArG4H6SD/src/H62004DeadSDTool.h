@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004SD_H62004DEADSDTOOL_H
@@ -40,12 +40,14 @@ namespace LArG4
     G4VSensitiveDetector* makeSD() const override final;
 
     /// Hit collection name
-    std::string m_hitCollName;
+    std::string m_hitCollName{"LArCalibrationHitDeadMaterial"};
 
-    ServiceHandle<ILArCalibCalculatorSvc> m_calculator;
+    ServiceHandle<ILArCalibCalculatorSvc> m_calculator{this, "Calculator"
+      , "LArG4H62004DeadCalibrationCalculator"};
+
     /// Do we add the escaped energy processing?
     /// This is only in "mode 1" (Tile+LAr), not in "DeadLAr" mode
-    bool m_do_eep;
+    Gaudi::Property<bool> m_do_eep{this, "doEscapedEnergy", false};
 
   }; // class H62004DeadSDTool
 

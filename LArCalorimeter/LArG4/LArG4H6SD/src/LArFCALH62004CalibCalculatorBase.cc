@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFCALH62004CalibCalculatorBase.h"
-//#include "LArG4FCAL/LArFCALCalculatorBase.h"
 
 #include "LArG4Code/LArG4Identifier.h"
 
@@ -70,16 +69,7 @@ namespace {
 
 LArFCALH62004CalibCalculatorBase::LArFCALH62004CalibCalculatorBase(const std::string& name, ISvcLocator * pSvcLocator)
   : LArCalibCalculatorSvcImp(name, pSvcLocator)
-  , m_deltaX(0.0)
-  , m_deltaY(0.0)
-  , m_FCalSampling(0)
-  , m_ChannelMap(nullptr)
-  , m_Zshift(0.0)
 {
-  declareProperty("deltaX"            , m_deltaX);
-  declareProperty("deltaY"            , m_deltaY);
-  declareProperty("FCalSampling"      , m_FCalSampling);
-  //declareProperty("Zshift"            , m_Zshift);
 }
 
 StatusCode LArFCALH62004CalibCalculatorBase::initialize()
@@ -115,22 +105,18 @@ StatusCode LArFCALH62004CalibCalculatorBase::initialize()
   return StatusCode::SUCCESS;
 }
 
-LArFCALH62004CalibCalculatorBase::~LArFCALH62004CalibCalculatorBase() {
-}
-
-
 G4bool LArFCALH62004CalibCalculatorBase::Process(const G4Step* a_step, LArG4Identifier & identifier,
                                                  std::vector<G4double> & energies,
                                                  const LArG4::eCalculatorProcessing a_process) const {
   // First, get the energy.
 
   energies.clear();
-  if ( a_process == LArG4::kEnergyAndID  ||  a_process == LArG4::kOnlyEnergy )
-    {
+  if ( a_process == LArG4::kEnergyAndID  ||  a_process == LArG4::kOnlyEnergy ) {
       m_energyCalculator.Energies( a_step, energies );
-    }
-  else
+  }
+  else {
     for (unsigned int i=0; i != 4; i++) energies.push_back( 0. );
+  }
 
   // find the space point for this deposit
   G4StepPoint* pre_step_point = a_step->GetPreStepPoint();
@@ -211,24 +197,6 @@ G4bool LArFCALH62004CalibCalculatorBase::Process(const G4Step* a_step, LArG4Iden
                << etaIndex
                << phiIndex;
 
-    //	std::cout << "LArG4FCAL/LArFCALH62004CalibCalculatorBase: 4/3/"
-    //            <<zSide<<"/"
-    //            <<sampling<<"/"
-    //            <<etaIndex<<"/"
-    //            <<phiIndex<<": "
-    //            << energies[0] << ", "
-    //            << energies[1] << ", "
-    //            << energies[2] << ", "
-    //            << energies[3]
-    //            << ", i=" << i
-    //            << ", j=" << j
-    //            << ", l.x=" << theLocalPoint.x()
-    //            << ", l.y=" << theLocalPoint.y()
-    //            << ", p.x=" << p.x()
-    //            << ", p.y=" << p.y()
-    //            << ", deltaX=" << m_deltaX
-    //            << ", deltaY=" << m_deltaY
-    //            << std::endl;
   }
   else {
     // S.M.: we have a hit which fails the electrode identifier
@@ -237,13 +205,6 @@ G4bool LArFCALH62004CalibCalculatorBase::Process(const G4Step* a_step, LArG4Iden
     // better method of assigning it to a correct cell I make a
     // dead material identifier for it ...
 
-    /*
-      int dubina=theTouchable->GetHistoryDepth();
-      std::cout<<"----------------------"<<std::endl;
-      for( int kk=0; kk<=dubina; ++kk ) {
-      std::cout<<theTouchable->GetHistory()->GetVolume(kk)->GetName()<<" "<<theTouchable->GetHistory()->GetVolume(kk)->GetCopyNo()<<std::endl;
-      }
-    */
     G4int sampling(3); // FCAL leakage
     G4int type(1); // FCAL leakage
     G4double eta = fabs( pointShift.pseudoRapidity() );
@@ -295,33 +256,6 @@ G4bool LArFCALH62004CalibCalculatorBase::Process(const G4Step* a_step, LArG4Iden
                << region
                << etaIndex
                << phiIndex;
-    /*
-      std::cout << "LArG4FCAL/LArFCALH62004CalibCalculatorBase: 10/4/"
-      <<type<<"/"
-      <<sampling<<"/"
-      <<region<<"/"
-      <<etaIndex<<"/"
-      <<phiIndex<<": "
-      //                  << energies[0] << ", "
-      //                  << energies[1] << ", "
-      //                  << energies[2] << ", "
-      //                  << energies[3]
-      //                  << ", i=" << i
-      //                  << ", j=" << j
-      << std::fixed
-      << ", l.r=" << rho
-      << ", l.x=" << theLocalPoint.x()
-      << ", l.y=" << theLocalPoint.y()
-      << ", l.z=" << theLocalPoint.z()<< std::endl;
-
-      std::cout << ", p.x=" << p.x()
-      << ", p.y=" << p.y()
-      << ", p.z=" << p.z()
-      << ", l.zshift "<< theLocalPoint.z() + m_Zshift
-      << ", deltaX=" << m_deltaX
-      << ", deltaY=" << m_deltaY
-      << std::endl;
-    */
   }
 
   return true;

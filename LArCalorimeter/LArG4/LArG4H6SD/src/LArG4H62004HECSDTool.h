@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004HECSDTOOL_H
@@ -25,7 +25,7 @@ class LArG4H62004HECSDTool : public LArG4SDTool
   LArG4H62004HECSDTool(const std::string& type, const std::string& name, const IInterface *parent);
 
   // Destructor
-  virtual ~LArG4H62004HECSDTool() {}
+  virtual ~LArG4H62004HECSDTool() = default;
 
   virtual StatusCode initializeCalculators() override final;
 
@@ -38,9 +38,8 @@ class LArG4H62004HECSDTool : public LArG4SDTool
  private:
   // The actual hit container - here because the base class is for both calib and standard SD tools
   SG::WriteHandle<LArHitContainer> m_HitColl;
-  ServiceHandle<ILArCalculatorSvc> m_calculator;
-  LArG4SimpleSD* m_wheelSD;
-
+  ServiceHandle<ILArCalculatorSvc> m_calculator{this, "Calculator", "LArH62004HECLocalCalculator"};
+  LArG4SimpleSD* m_wheelSD{nullptr};
 };
 
 #endif

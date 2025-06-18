@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArTBH6BeamInfo.h"
@@ -14,26 +14,13 @@
 using namespace Gaudi::Units;
 
 LArTBH6BeamInfo::LArTBH6BeamInfo(const std::string& name, ISvcLocator* pSvcLocator)
- :AthAlgorithm(name, pSvcLocator),
-  m_Primary(true),
-  m_pcode(999),
-  m_cryoX(0.),
-  m_numEv(0),
-  m_theEventInfo("TBEventInfo")
+  : AthAlgorithm(name, pSvcLocator)
+  , m_theEventInfo("TBEventInfo")
 {
-   declareProperty("HitsContainer",m_HitsCollNames);
-//   m_HitsCollNames.push_back("LArTBFrontHitCollection");
-   declareProperty("PrimaryTrackOnly",m_Primary);
-   declareProperty("PrimaryParticle",m_pcode);
-
   for (const auto &it : m_HitsCollNames){
     m_hitcoll.push_back( SG::ReadHandle< AthenaHitsVector<LArG4H6FrontHit> >( it ) );
   }
-
 }
-
-LArTBH6BeamInfo::~LArTBH6BeamInfo()
-{}
 
 //****************************************************************************
 //* Initialization

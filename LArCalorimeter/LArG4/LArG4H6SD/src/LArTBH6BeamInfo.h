@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArTBH6BeamInfo_H
@@ -26,15 +26,14 @@ public:
    LArTBH6BeamInfo(const std::string& name, ISvcLocator* pSvcLocator);
 
 // Destructor
-   virtual ~LArTBH6BeamInfo();
+   virtual ~LArTBH6BeamInfo() = default;
 
 // Gaudi
-   StatusCode initialize();
-   StatusCode execute();
-   StatusCode finalize();
+   virtual StatusCode initialize() override;
+   virtual StatusCode execute() override;
+   virtual StatusCode finalize() override;
 
 private:
-
    typedef std::vector<double> dVect;
 
   ////////////////////////////////////////////////////////////////////////
@@ -44,15 +43,15 @@ private:
   bool fitVect(const dVect &vec_x, const dVect &vec_xz, const dVect &vec_ex,
                double &a1, double &a2, double &chi2, dVect &residual);
 
-   std::vector<std::string> m_HitsCollNames;
-   bool                     m_Primary;
-   int                      m_pcode;
+  Gaudi::Property<std::vector<std::string>> m_HitsCollNames{this, "HitsContainer"};
+  Gaudi::Property<bool> m_Primary{this, "PrimaryTrackOnly", true};
+  Gaudi::Property<int>  m_pcode{this, "PrimaryParticle", 999};
 
-   float                    m_cryoX;
-   int                      m_numEv;
+  float                    m_cryoX{0.f};
+  int                      m_numEv{0};
 
-   SG::ReadHandle<TBEventInfo> m_theEventInfo;
-   SG::WriteHandle<TBTrack> m_track;
-   std::vector< SG::ReadHandle< AthenaHitsVector<LArG4H6FrontHit> > > m_hitcoll;
+  SG::ReadHandle<TBEventInfo> m_theEventInfo;
+  SG::WriteHandle<TBTrack> m_track;
+  std::vector< SG::ReadHandle< AthenaHitsVector<LArG4H6FrontHit> > > m_hitcoll;
 };
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004DEADSDTOOL_H
@@ -25,7 +25,7 @@ class LArG4H62004DeadSDTool : public LArG4SDTool
   LArG4H62004DeadSDTool(const std::string& type, const std::string& name, const IInterface *parent);
 
   // Destructor
-  virtual ~LArG4H62004DeadSDTool() {}
+  virtual ~LArG4H62004DeadSDTool() = default;
 
   // Method in which all the SDs are created and assigned to the relevant volumes
   StatusCode initializeSD() override final;
@@ -41,16 +41,16 @@ class LArG4H62004DeadSDTool : public LArG4SDTool
   StatusCode initializeCalculators() override final;
 
   // Do we add the escaped energy processing?  This is only in "mode 1" (Tile+LAr), not in "DeadLAr" mode
-  bool m_do_eep;
+  Gaudi::Property<bool> m_do_eep{this, "doEscapedEnergy", false};
 
   // The actual hit container - here because the base class is for both calib and standard SD tools
   SG::WriteHandle<CaloCalibrationHitContainer> m_HitColl;
 
-  ServiceHandle<ILArCalibCalculatorSvc> m_calculator;
+  ServiceHandle<ILArCalibCalculatorSvc> m_calculator{this, "Calculator", "LArG4H62004DeadCalibrationCalculator"};
 
   // The volumes per SD, and the corresponding SDs
-  LArG4H62004CalibSD* m_deadSD;
-  LArG4H62004CalibSD* m_uninstSD;
+  LArG4H62004CalibSD* m_deadSD{nullptr};
+  LArG4H62004CalibSD* m_uninstSD{nullptr};
 
 };
 

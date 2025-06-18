@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArTBH6TriggerTimeTool_H
@@ -16,30 +16,28 @@ class LArTBH6TriggerTimeTool : public extends<AthAlgTool, ITriggerTime, IInciden
 {
 
 public:
-   LArTBH6TriggerTimeTool(const std::string& type,
+  LArTBH6TriggerTimeTool(const std::string& type,
                          const std::string& name,
                          const IInterface* parent);
+  
+  
+  virtual StatusCode initialize() override;
 
+  virtual ~LArTBH6TriggerTimeTool() = default;
+  
+  /// returns the time offset of the current trigger
+  virtual double time() override;
 
-   virtual StatusCode initialize() ;
+  virtual void handle(const Incident& incident) override;
 
-   virtual ~LArTBH6TriggerTimeTool() {}
-
-   /// returns the time offset of the current trigger
-   virtual double time() ;
-
-   virtual void handle(const Incident& incident);
-
-    double larTime();
-    double trackRecordTime()   ;
+  double larTime();
+  double trackRecordTime();
 
 private:
-
-   double m_time;
-   bool m_newEvent ;
-   bool m_fixed;
-
-   std::vector< SG::ReadHandle< LArHitContainer > > m_hitcoll;
+  Gaudi::Property<double> m_time{this, "FixedTime", 0.};
+  Gaudi::Property<bool> m_fixed{this, "isFixed", true};
+  bool m_newEvent{true};
+  std::vector< SG::ReadHandle< LArHitContainer > > m_hitcoll;
 };
 
 

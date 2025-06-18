@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __LArG4H6WarmTCCalculator_H__
-#define __LArG4H6WarmTCCalculator_H__
+#ifndef LArG4H6WarmTCCalculator_H
+#define LArG4H6WarmTCCalculator_H
 
 #include "LArG4Code/LArCalculatorSvcImp.h"
 #include "LArG4Code/LArG4Identifier.h"
@@ -16,7 +16,7 @@ class LArG4H6WarmTCCalculator : public LArCalculatorSvcImp
 public:
 
   LArG4H6WarmTCCalculator(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~LArG4H6WarmTCCalculator() {};
+  virtual ~LArG4H6WarmTCCalculator() = default;
   /////////////////////////////////////////////
   // The interface for ILArCalculatorSvc.
 
@@ -30,8 +30,8 @@ public:
   }
 
 private:
-  bool m_isX = false;
-  bool m_isABS = false;
+  Gaudi::Property<bool> m_isX {this, "isX", false};
+  Gaudi::Property<bool> m_isABS {this,"isABS", false};
 };
 
 #endif

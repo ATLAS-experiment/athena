@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBECInnerModuleTool.h"
@@ -14,28 +14,7 @@ TBECInnerModuleTool::TBECInnerModuleTool(const std::string& type, const std::str
   , m_HitColl_gap_se("LArHitEMEC_gap_se")
   , m_HitColl_chcoll("LArHitEMEC_chcoll")
   , m_HitColl_ropt("LArHitEMEC_ropt")
-  , m_emecinnergadjcalc("EMECPosInnerWheel_ECOR_GADJCalculator", name)
-  , m_emecinnergadjoldcalc("EMECPosInnerWheel_ECOR_GADJ_OLDCalculator", name)
-  , m_emecinnergadjecalc("EMECPosInnerWheel_ECOR_GADJ_ECalculator", name)
-  , m_emecinnergadjscalc("EMECPosInnerWheel_ECOR_GADJ_SCalculator", name)
-  , m_emecinnergadjsecalc("EMECPosInnerWheel_ECOR_GADJ_SECalculator", name)
-  , m_emecinnerchclcalc("EMECPosInnerWheel_ECOR_CHCLCalculator", name)
-  , m_emecinnercalc("EMECPosInnerWheelCalculator", name)
-  , m_gapadjSD(nullptr)
-  , m_gapoldSD(nullptr)
-  , m_gap_eSD(nullptr)
-  , m_gap_sSD(nullptr)
-  , m_gap_seSD(nullptr)
-  , m_chcollSD(nullptr)
-  , m_roptSD(nullptr)
 {
-  declareProperty("EMECPosInnerWheel_ECOR_GADJCalculator", m_emecinnergadjcalc);
-  declareProperty("EMECPosInnerWheel_ECOR_GADJ_OLDCalculator", m_emecinnergadjoldcalc);
-  declareProperty("EMECPosInnerWheel_ECOR_GADJ_ECalculator", m_emecinnergadjecalc);
-  declareProperty("EMECPosInnerWheel_ECOR_GADJ_SCalculator", m_emecinnergadjscalc);
-  declareProperty("EMECPosInnerWheel_ECOR_GADJ_SECalculator", m_emecinnergadjsecalc);
-  declareProperty("EMECPosInnerWheel_ECOR_CHCLCalculator", m_emecinnerchclcalc);
-  declareProperty("EMECPosInnerWheelCalculator", m_emecinnercalc);
 }
 
 StatusCode TBECInnerModuleTool::initializeCalculators()
