@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "xAODTracking/TrackSummary.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
+#include "ActsGeoUtils/SurfaceEncoding.h"
 
 // this is list of xAOD container variable names that are "hardcoded" in TrackSummary_v1
 // their compatibility is maintain ed by the unit tests: AllStaticxAODVaraiblesAreKnown

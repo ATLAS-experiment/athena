@@ -11,6 +11,7 @@
 #include "src/detail/FitterHelperFunctions.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "ActsInterop/TableUtils.h"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
 
 namespace ActsTrk {
   struct TrackFindingBaseAlg::CKF_pimpl : public detail::CKF_config {};

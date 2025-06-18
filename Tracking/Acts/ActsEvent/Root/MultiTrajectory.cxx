@@ -3,7 +3,7 @@
 */
 #include "ActsEvent/MultiTrajectory.h"
 #include <Acts/Geometry/GeometryIdentifier.hpp>
-#include "ActsEvent/SurfaceEncoding.h"
+#include "ActsGeoUtils/SurfaceEncoding.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODCore/AuxContainerBase.h"
 #include "xAODTracking/TrackState.h"
