@@ -3,9 +3,7 @@
 import ROOT
 
 def EFTrackingXrtAlgorithmCfg(flags, **kwargs):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    acc = ComponentAccumulator()
-
+    kwargs.setdefault("name", "EFTrackingXrtAlgorithm")
     kwargs.setdefault("bufferSize", 8192)
 
     from json import dumps
@@ -17,10 +15,11 @@ def EFTrackingXrtAlgorithmCfg(flags, **kwargs):
                     "argumentIndex": "1",
                     "interfaceMode": ROOT.EFTrackingXrtParameters.InterfaceMode.OUTPUT}]}))
 
-    from AthenaConfiguration.ComponentFactory import CompFactory 
-    EFTrackingXrtAlgorithm = CompFactory.EFTrackingXrtAlgorithm("EFTrackingXrtAlgorithm", **kwargs)
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    acc = ComponentAccumulator()
 
-    acc.addEventAlgo(EFTrackingXrtAlgorithm)
+    from AthenaConfiguration.ComponentFactory import CompFactory 
+    acc.addEventAlgo(CompFactory.EFTrackingXrtAlgorithm(**kwargs))
 
     return acc
 
@@ -28,9 +27,6 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.lock()
-
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(flags)
 
     from argparse import ArgumentParser
     argumentParser = ArgumentParser()
@@ -64,8 +60,19 @@ if __name__ == "__main__":
 
     arguments = argumentParser.parse_args()
 
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    acc = MainServicesCfg(flags)
+
     from AthenaConfiguration.ComponentFactory import CompFactory 
-    acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(XclbinPathsList = [arguments.xclbinPath]))
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True,
+    ))
+
+    acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(
+        XclbinPathsList = [arguments.xclbinPath],
+    ))
 
     for inputCsvPath, sgKey in arguments.inputCsvPathToSgKeyMap.items():
         from EFTrackingFPGAUtility.EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg

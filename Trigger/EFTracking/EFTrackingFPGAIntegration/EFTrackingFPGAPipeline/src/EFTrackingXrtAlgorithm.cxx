@@ -5,6 +5,8 @@
 #include <set>
 #include <regex>
 
+#include "AthenaKernel/Chrono.h"
+
 #include "EFTrackingFPGAPipeline/EFTrackingXrtAlgorithm.h"
 #include "EFTrackingFPGAPipeline/EFTrackingXrtParameters.h"
 
@@ -111,6 +113,7 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   }
 
   ATH_CHECK(m_DeviceMgmtSvc.retrieve());
+  ATH_CHECK(m_chronoSvc.retrieve());
 
   // Todo: Fix this disgusting mess (probably just add a new method to the 
   //       AthXrt service to enumerate devices and a method to check if a 
@@ -213,11 +216,26 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
       return StatusCode::FAILURE;
     }
 
-    for (std::size_t index = 0; index < inputDataStream->size(); index++) {
-      inputMap[index] = inputDataStream->at(index);
+    {
+      Athena::Chrono  chrono(
+        "Copy " + inputDataStream.name() + " from storegate to host side map",
+        m_chronoSvc.get()
+      );
+
+      for (std::size_t index = 0; index < inputDataStream->size(); index++) {
+        inputMap[index] = inputDataStream->at(index);
+      }
     }
     
-    m_inputBuffers.at(handleIndex).sync(XCL_BO_SYNC_BO_TO_DEVICE);
+    {
+      Athena::Chrono  chrono(
+        "Copy " + inputDataStream.name() + " from host side map to device",
+        m_chronoSvc.get()
+      );
+
+      m_inputBuffers.at(handleIndex).sync(XCL_BO_SYNC_BO_TO_DEVICE);
+    }
+
     handleIndex++;
   }
 
@@ -228,14 +246,18 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     m_runs.at(vsize.runIndex)->set_arg(vsize.argumentIndex, inputDataStream->size());
   }
 
-  ATH_MSG_DEBUG("Starting Kernels");
-  for (std::size_t index = 0; index < m_runs.size(); index++) {
-    m_runs.at(index)->start();
-  }
+  {
+    Athena::Chrono  chrono("Run accelerated algorithms", m_chronoSvc.get());
 
-  ATH_MSG_DEBUG("Waiting for Kernels");
-  for (std::size_t index = 0; index < m_runs.size(); index++) {
-    m_runs.at(index)->wait();
+    ATH_MSG_DEBUG("Starting Kernels");
+    for (std::size_t index = 0; index < m_runs.size(); index++) {
+      m_runs.at(index)->start();
+    }
+
+    ATH_MSG_DEBUG("Waiting for Kernels");
+    for (std::size_t index = 0; index < m_runs.size(); index++) {
+      m_runs.at(index)->wait();
+    }
   }
 
   ATH_MSG_DEBUG("Reading Outputs");
@@ -247,14 +269,28 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     SG::WriteHandle<std::vector<unsigned long>> outputDataStream(outputDataStreamKey, ctx);
     ATH_CHECK(outputDataStream.record(std::make_unique<std::vector<unsigned long>>(m_bufferSize)));
 
-    m_outputBuffers.at(handleIndex).sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+    {
+      Athena::Chrono  chrono(
+        "Copy " + outputDataStream.name() + " from device to host side map",
+        m_chronoSvc.get()
+      );
+
+      m_outputBuffers.at(handleIndex).sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+    }
 
     const unsigned long* outputMap = m_outputBuffers.at(handleIndex).map<unsigned long*>();
 
-    for (std::size_t index = 0; index < outputDataStream->size(); index++) {
-      outputDataStream->at(index) = outputMap[index];
-    }
-    
+    {
+      Athena::Chrono  chrono(
+        "Copy " + outputDataStream.name() + " from host side map to storegate",
+        m_chronoSvc.get()
+      );
+
+      for (std::size_t index = 0; index < outputDataStream->size(); index++) {
+        outputDataStream->at(index) = outputMap[index];
+      }
+    };
+
     handleIndex++;
   }
 
