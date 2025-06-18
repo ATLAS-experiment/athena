@@ -38,7 +38,7 @@ StatusCode TauPi0Selector::executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer
     neutralPFO->setAttribute<int>(xAOD::PFODetails::PFOAttributes::nPi0Proto, 0);
 
     // Only consider PFOs within 0.2 cone of the tau axis
-    if (pTau.p4().DeltaR(neutralPFO->p4()) > 0.2) continue;
+    if (pTau.p4().DeltaR(neutralPFO->p4()) > m_maxDeltaRNeutral) continue;
     
     int etaBin = getEtaBin( neutralPFO->cluster(0)->eta() );
     

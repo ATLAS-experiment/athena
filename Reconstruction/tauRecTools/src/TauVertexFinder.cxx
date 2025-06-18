@@ -129,7 +129,6 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
 {
   const xAOD::Jet* pJetSeed = pTau.jet();
   std::vector<const xAOD::TrackParticle*> tracksForTJVA;
-  const double dDeltaRMax(0.2);
 
   // the implementation follows closely the example given in modifyJet(...) in https://svnweb.cern.ch/trac/atlasoff/browser/Reconstruction/Jet/JetMomentTools/trunk/Root/JetVertexFractionTool.cxx#15
 
@@ -144,7 +143,7 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
   // Maybe not as efficient as deleting unwanted tracks from assocTrack but quicker and safer for now.
   float sumTrackAll = 0.0;
   for ( auto xTrack : assocTracks ) {
-    if ( (xTrack->p4().DeltaR(pJetSeed->p4())<dDeltaRMax) && m_TrackSelectionToolForTJVA->accept(*xTrack) ) {
+    if ( (xTrack->p4().DeltaR(pJetSeed->p4())<m_dDeltaRMax) && m_TrackSelectionToolForTJVA->accept(*xTrack) ) {
       if (!inEleRM()) { 
           tracksForTJVA.push_back(xTrack); 
       } 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -63,8 +63,7 @@ StatusCode TauPi0ClusterCreator::executePi0ClusterCreator(xAOD::TauJet& tau,
     }
 
     // Clusters must have enough energy, and within 0.4 cone of the tau candidate
-    if (clusterP4.Pt() < m_clusterEtCut)   continue;
-    if (clusterP4.DeltaR(tauAxis) > 0.4) continue;
+    if ((clusterP4.Pt() < m_clusterEtCut) || (clusterP4.DeltaR(tauAxis) > m_maxDeltaRJetClust))   continue;
 
     // Create the neutral PFOs
     xAOD::PFO* neutralPFO = new xAOD::PFO();
@@ -87,8 +86,7 @@ StatusCode TauPi0ClusterCreator::executePi0ClusterCreator(xAOD::TauJet& tau,
     TLorentzVector clusterP4 = vertexedCluster.p4();
        
     // Clusters must have positive energy, and within 0.2 cone of the tau candidate 
-    if(clusterP4.E()<=0.) continue;
-    if(clusterP4.DeltaR(tauAxis) > 0.2) continue;
+    if((clusterP4.E()<=0.) || (clusterP4.DeltaR(tauAxis) > m_maxDeltaRNeutral) ) continue;
 
     double clusterEnergyHad = 0.;
     
@@ -165,8 +163,7 @@ std::map<unsigned, const xAOD::CaloCluster*> TauPi0ClusterCreator::getShotToClus
       }
       
       weightInCluster = -1.;
-      if (clusterP4.Et() < m_clusterEtCut) continue;
-      if (clusterP4.DeltaR(tauAxis) > 0.4)  continue;
+      if ((clusterP4.Et() < m_clusterEtCut) || (clusterP4.DeltaR(tauAxis) > m_maxDeltaRJetClust)) continue;
         
       const CaloClusterCellLink* cellLinks = cluster->getCellLinks();
       CaloClusterCellLink::const_iterator cellLink = cellLinks->begin();
