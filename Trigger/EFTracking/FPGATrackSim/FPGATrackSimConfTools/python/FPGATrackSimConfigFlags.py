@@ -115,9 +115,10 @@ def createFPGATrackSimConfigFlags():
 
     # Monitoring
     cf.addFlag('writeAdditionalOutputData', True)
+    cf.addFlag('readOfflineObjects', True)
 
     # ACTS Tracking
-    cf.addFlag('runCKF',True)
+    cf.addFlag('runCKF',False)
     cf.addFlag('useFPGATruthTrackMatching',False)
     return cf
 

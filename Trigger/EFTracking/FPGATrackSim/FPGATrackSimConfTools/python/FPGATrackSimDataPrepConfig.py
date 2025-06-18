@@ -362,6 +362,7 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     flags = prepareFlagsForFPGATrackSimDataPrepAlg(inputFlags)
 
     result=ComponentAccumulator()
+    
 
     theFPGATrackSimDataPrepAlg=CompFactory.FPGATrackSimDataPrepAlg()
     theFPGATrackSimDataPrepAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
@@ -395,6 +396,8 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
         theFPGATrackSimDataPrepAlg.InputTool2 = ""
         from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
         theFPGATrackSimDataPrepAlg.SGInputTool = result.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
+        theFPGATrackSimDataPrepAlg.SGInputTool.ReadOfflineClusters=False
+        theFPGATrackSimDataPrepAlg.SGInputTool.ReadOfflineTracks=False
 
     theFPGATrackSimDataPrepAlg.HitFilteringTool = result.getPrimaryAndMerge(FPGATrackSimHitFilteringToolCfg(flags))
 
@@ -526,6 +529,64 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-", **kwa
     
     return result
 
+def FPGATrackSimRegionFlagCfg(flags):
+    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
+        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
+    else: # otherwise use the regionList (this overrides the region flag)
+        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
+    return flags
+
+def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
+    acc=ComponentAccumulator()
+    acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
+    acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
+        'xAODPixelClusterFromFPGAClusterKey': 'ITkPixelClusters',
+        'xAODStripClusterFromFPGAClusterKey': 'ITkStripClusters',
+        'doActsTrk': False,
+        'doSP': False,
+    }))
+    
+    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
+    acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+    
+    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
+    acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+
+    if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
+        toAOD = []
+
+        pixel_cluster_shortlist = ['-pixelClusterLink']
+        strip_cluster_shortlist = ['-sctClusterLink']
+        
+        pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
+        strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+
+        toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
+                  'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
+                  'xAOD::StripClusterContainer#ITkStripClusters',
+                  'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+        acc.merge(addToAOD(flags, toAOD))
+        
+    return acc
+
+def FPGATrackSimDataPrepFlagCfg(flags): # to be used in the Reco_tf configuration
+    flags.Scheduler.ShowDataDeps=True
+    flags.Scheduler.CheckDependencies=True
+    
+    flags.Concurrency.NumThreads=1
+    flags.Concurrency.NumConcurrentEvents=1
+    flags.Concurrency.NumProcs=0
+    
+    flags.Trigger.FPGATrackSim.readOfflineObjects=False
+    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False
+    flags.Trigger.FPGATrackSim.doMultiTruth=False
+    
+    flags = FPGATrackSimRegionFlagCfg(flags)
+    
+    return flags
+
 def runDataPrepChain():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -561,12 +622,8 @@ def runDataPrepChain():
     flags.Tracking.writeExtendedSi_PRDInfo = not flags.Trigger.FPGATrackSim.writeOfflPRDInfo    # Don't write ITkPixel/StripMeasurements if writeOfflPRDInfo = True
                                                                                                 # In this case, ITkPixel/StripMeasurements_offl written based on F100 clustering
     
-    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
-        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
-    else: # otherwise use the regionList (this overrides the region flag)
-        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
-        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
-    
+    flags = FPGATrackSimRegionFlagCfg(flags)
+
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
     

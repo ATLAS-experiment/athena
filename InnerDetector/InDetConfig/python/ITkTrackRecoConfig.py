@@ -7,7 +7,7 @@ from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
-_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt'] # Possible Acts Alone Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags):
@@ -27,6 +27,7 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateLargeRadiusSeeds: "ActsValidateLargeRadiusSeeds",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
         TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
+        TrackingComponent.ActsValidateF100 : "ActsValidateF100",
     }
     
     # Athena Pass
@@ -102,7 +103,7 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkFPGAPass")]
-
+        
     # Photon conversion tracking reco
     if flags.Detector.EnableCalo and flags.Tracking.doITkConversion:
         flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",

@@ -109,3 +109,6 @@ def actsGSFEgammaFlags(flags) -> None:
     flags.Acts.GsfRefitActs = True
     flags.Acts.GsfDirectNavigation = True
     
+def actsValidateF100Flags(flags) -> None:
+    actsWorkflowFlags(flags)
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateF100]

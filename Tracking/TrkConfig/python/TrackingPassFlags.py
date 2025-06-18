@@ -222,7 +222,8 @@ def createITkTrackingPassFlags():
 
     # ---flag for FPGA tracking
     icf.addFlag("doFPGASpacePoint", False)
-    icf.addFlag("doFPGATrack", False)
+    icf.addFlag("doFPGACluster", False)
+    icf.addFlag("doFPGATrackSim", False)
 
     # --- Flags for detailed information. 
     #     Ignored for Primary Pass (always active); 

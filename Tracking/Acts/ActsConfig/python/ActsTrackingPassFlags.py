@@ -216,3 +216,14 @@ def createActsValidateAmbiguityResolutionTrackingPassFlags():
     icf.doActsAmbiguityResolution = True
     icf.doActsToAthenaResolvedTrack = True
     return icf
+
+def createEFValidateF100TrackingPassFlags():
+    icf = createActsTrackingPassFlags()
+    icf.extension = "ActsValidateF100"
+    icf.doActsCluster = False
+    icf.doFPGACluster = True
+    icf.doFPGATrackSim = True
+    icf.doActsSpacePoint = True
+    icf.doActsSeed = True
+    icf.doActsTrack = True
+    return icf

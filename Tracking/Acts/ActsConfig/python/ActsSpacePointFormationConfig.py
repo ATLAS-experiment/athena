@@ -279,7 +279,8 @@ def ActsSpacePointFormationCfg(flags,
         processPixels = False
     elif isPrimaryPass(flags) and flags.Tracking.doITkFastTracking:
         processStrips = reconstructStripSpacePointsInPrimaryPass(flags)
-    
+    elif flags.Tracking.ActiveConfig.extension == "ActsValidateF100" and flags.Tracking.doITkFastTracking:
+        processStrips = False
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
