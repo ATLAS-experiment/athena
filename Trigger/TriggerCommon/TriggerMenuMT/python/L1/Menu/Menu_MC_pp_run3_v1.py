@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.L1.Base.L1MenuFlags import L1MenuFlags
 import TriggerMenuMT.L1.Menu.Menu_Physics_pp_run3_v1 as physics_menu
@@ -48,12 +48,6 @@ def defineMenu():
         # ATR-22696
         'L1_eTAU60HL',
         'L1_eTAU80HL',
-
-        # ATR-27782 - test eEM M/DR Topo
-        'L1_2DR15-M70-2eEM9L',
-        'L1_2DR15-M70-2eEM12L',
-        'L1_2DR15-0M30-eEM12LeEM9L',
-        'L1_13DR25-25M70-eEM12LeEM9L',
         
         #ATR28783
         'L1_6J15',

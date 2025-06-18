@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Run this file in order to print out the empty slots
 
@@ -317,11 +317,6 @@ def defineMenu():
         'L1_BPH-7M14-0DR25-MU5VFMU3VF',
         'L1_BPH-7M14-2MU3V', 
         'L1_BPH-7M14-2MU3VF',
-
-        # INVM + DPHI 
-        'L1_jMJJ-400-NFF-0DPHI22',
-        'L1_jMJJ-400-NFF-0DPHI24',
-        'L1_jMJJ-400-NFF-0DPHI26',
 
         'L1_LATE-MU8F_jXE70', 'L1_LATE-MU8F_jJ90',
 
