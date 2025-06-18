@@ -43,7 +43,7 @@ ExcBadDataProxyCast::ExcBadDataProxyCast (CLID id, const std::type_info& tid)
 /**
  * @brief Return the message for this exception.
  */
-const char* ExcBadDataProxyCast::what() const throw()
+const char* ExcBadDataProxyCast::what() const noexcept
 {
   return m_what.c_str();
 }
