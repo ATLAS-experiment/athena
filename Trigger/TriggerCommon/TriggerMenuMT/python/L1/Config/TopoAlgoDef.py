@@ -1965,39 +1965,6 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
 
-        # jINVM_NFF + DPHI
-        NFFDphimap = [
-            { "itemNameMinInvm": 400, "minInvm": 640 , "minDphi": 0, "maxDphiList": [26, 24, 22, 20],
-                         "otype1" : "jJ", "ocut1" : 60, "olist1" : "s", "nleading1" : 6, "inputwidth": HW.jJetOutputWidthSort,
-                         "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
-        ]
-        for x in NFFDphimap:
-            class d:
-                pass
-            for k in x:
-                setattr (d, k, x[k])
-            inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
-            toponames=[]
-            for maxDphi in d.maxDphiList:
-                toponames.append ("%iINVM-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.itemNameMinInvm, d.minDphi, maxDphi,
-                                                                 d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
-                                                                 d.otype2, str(d.ocut2) , d.olist2, str(d.nleading2) if d.olist2=="s" else ""))
-            alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'jINVM_DPHI_NFF', inputs = inputList, outputs = toponames)
-            alg.addgeneric('InputWidth1', d.inputwidth)
-            alg.addgeneric('InputWidth2', d.inputwidth)
-            alg.addgeneric('MaxTob1', d.nleading1)
-            alg.addgeneric('MaxTob2', d.nleading2)
-            alg.addgeneric('NumResultBits',  len(toponames))
-            for bitid,maxDphi in enumerate(d.maxDphiList):
-                alg.addvariable('MinET1',      get_threshold_cut(d.otype1, d.ocut1)*_et_conversion , bitid)
-                alg.addvariable('MinET2',      get_threshold_cut(d.otype2, d.ocut2)*_et_conversion , bitid)
-                alg.addvariable('MinMSqr',     d.minInvm*d.minInvm *_et_conversion*_et_conversion , bitid)
-                alg.addvariable('MaxMSqr',     _no_m_upper_threshold , bitid)  # no upper threshold
-                alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion , bitid)
-                alg.addvariable('MaxDeltaPhi', maxDphi*_phi_conversion, bitid)
-            tm.registerTopoAlgo(alg)
-
-
         # CF
         algoList = [
             {  "itemNameMinInvm": 400, "minInvm": 640, "otype1" : "AjJ", "ocut1": 60, "olist1" : "s", "nleading1" : 6, "inputwidth1": HW.jJetOutputWidthSort,

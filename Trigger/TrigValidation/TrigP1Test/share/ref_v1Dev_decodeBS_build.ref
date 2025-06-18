@@ -510,8 +510,6 @@ HLT_2e5_lhvloose_bBeeM6000_L1eEM26M:
     0: 3
     1: 2
     2: 1
-HLT_2g10_loose_EgammaPEBTLA_L12DR15-M70-2eEM9L:
-  eventCount: 0
 HLT_2g10_loose_L1eEM9_mu20_L1MU14FCH:
   eventCount: 0
   stepFeatures:
@@ -520,19 +518,13 @@ HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH:
   eventCount: 0
   stepFeatures:
     0: 2
-HLT_2g10_medium_EgammaPEBTLA_L12DR15-M70-2eEM9L:
-  eventCount: 0
 HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L:
   eventCount: 0
 HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L:
   eventCount: 0
-HLT_2g13_loose_EgammaPEBTLA_L12DR15-M70-2eEM12L:
-  eventCount: 0
 HLT_2g13_loose_L113DR25-25M70-2eEM12L:
   eventCount: 0
 HLT_2g13_loose_L12DR15-0M30-2eEM12L:
-  eventCount: 0
-HLT_2g13_medium_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
 HLT_2g15_loose_25dphiAA_invmAA80_L12eEM9:
   eventCount: 0
@@ -615,7 +607,6 @@ HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9L:
 HLT_2j100_2timeSig15_L1jJ90:
   eventCount: 0
 HLT_2j100_2timeSig_L1jJ90:
-  eventCount: 0
   eventCount: 0
 HLT_2j120_mb_afprec_afpdijet_L1AFP_A_AND_C:
   eventCount: 0
@@ -5860,10 +5851,6 @@ HLT_g120_loose_L1eEM28M:
 HLT_g120_loose_ringer_L1eEM26M:
   eventCount: 0
 HLT_g120_nopid_L1eEM26M:
-  eventCount: 0
-HLT_g13_loose_g10_loose_EgammaPEBTLA_L113DR25-25M70-eEM12LeEM9L:
-  eventCount: 0
-HLT_g13_loose_g10_loose_EgammaPEBTLA_L12DR15-0M30-eEM12LeEM9L:
   eventCount: 0
 HLT_g140_loose_L1eEM26M:
   eventCount: 0

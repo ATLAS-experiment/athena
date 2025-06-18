@@ -2093,14 +2093,9 @@ class ItemDef:
             #ATR-27782 Boosted diPhoton
             MenuItem('L1_DPHI12-M70-2eEM9L').setLogic(d.TOPO_0INVM70_0DPHI12_eEM9sl1_eEM9sl6 & physcond)
             MenuItem('L1_DPHI12-M70-2eEM12L').setLogic(d.TOPO_0INVM70_0DPHI12_eEM12sl1_eEM12sl6 & physcond)
-            MenuItem('L1_2DR15-M70-2eEM9L').setLogic(d.TOPO_0INVM70_2DR15_eEM9sl1_eEM9sl6 & physcond)
-            MenuItem('L1_2DR15-M70-2eEM12L').setLogic(d.TOPO_0INVM70_2DR15_eEM12sl1_eEM12sl6 & physcond)
             # dr-m ranges
             MenuItem('L1_13DR25-25M70-2eEM12L').setLogic(d.TOPO_25INVM70_13DR25_eEM12sl1_eEM12sl6 & physcond)
             MenuItem('L1_2DR15-0M30-2eEM12L').setLogic(d.TOPO_0INVM30_2DR15_eEM12sl1_eEM12sl6 & physcond)
-            # asymmetric et + ranges
-            MenuItem('L1_13DR25-25M70-eEM12LeEM9L').setLogic(d.TOPO_25INVM70_13DR25_eEM12sl1_eEM9sl6 & physcond)
-            MenuItem('L1_2DR15-0M30-eEM12LeEM9L').setLogic(d.TOPO_0INVM30_2DR15_eEM12sl1_eEM9sl6 & physcond)
 
             #ATR-19376
             MenuItem('L1_10DR-MU14FCH-MU5VF'             ).setLogic( d.TOPO_10DR99_2MU5VFab & d.MU14FCH & physcond) 
@@ -2143,10 +2138,6 @@ class ItemDef:
             MenuItem('L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12').setLogic ( d.cTAU20M & d.cTAU12M & d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30ab_eTAU12ab  & physcond)
             MenuItem('L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12').setLogic( d.cTAU20M & d.cTAU12M & d.jJ300ETA25.x(4) & d.TOPO_0DETA24_10DPHI99_eTAU30ab_eTAU12ab & physcond)
 
-            MenuItem('L1_jMJJ-400-NFF-0DPHI20').setLogic( d.TOPO_400INVM_0DPHI20_jJ60s6_AjJ50s6 & physcond)
-            MenuItem('L1_jMJJ-400-NFF-0DPHI22').setLogic( d.TOPO_400INVM_0DPHI22_jJ60s6_AjJ50s6 & physcond)
-            MenuItem('L1_jMJJ-400-NFF-0DPHI24').setLogic( d.TOPO_400INVM_0DPHI24_jJ60s6_AjJ50s6 & physcond)
-            MenuItem('L1_jMJJ-400-NFF-0DPHI26').setLogic( d.TOPO_400INVM_0DPHI26_jJ60s6_AjJ50s6 & physcond)
             MenuItem('L1_jMJJ-300-NFF').setLogic( d.TOPO_300INVM_jJ60s6_AjJ50s6 & physcond)
             MenuItem('L1_jMJJ-400-NFF').setLogic( d.TOPO_400INVM_jJ60s6_AjJ50s6 & physcond)
             MenuItem('L1_jMJJ-500-NFF').setLogic( d.TOPO_500INVM_jJ60s6_AjJ50s6 & physcond)

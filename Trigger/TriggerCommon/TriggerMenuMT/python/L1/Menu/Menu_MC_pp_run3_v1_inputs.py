@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from ..Base.L1MenuFlags import L1MenuFlags
 from ..Base.MenuConfObj import TopoMenuDef
@@ -28,31 +28,24 @@ def defineInputsMenu():
                 # Add more decision algorithms
                 if conn["name"] == "Topo2El":
                     for group in conn["algorithmGroups"]:
-                        if group["fpga"]==0 and group["clock"]==0:
+                        if group["fpga"]==0 and group["clock"]==1:
                             group["algorithms"] += [
+                                    TopoMenuDef( '0DR04-MU5VFab-CjJ20ab' , outputbits = 14 ),
+                                    TopoMenuDef( '0DR04-MU3VFab-CjJ20ab' , outputbits = 15 ),
                             ]
-                        elif group["fpga"]==0 and group["clock"]==1:
+                        elif group["fpga"]==1 and group["clock"]==1:
                             group["algorithms"] += [
-                                    TopoMenuDef( '0DR04-MU5VFab-CjJ20ab' , outputbits = 13),
-                                    TopoMenuDef( '0DR04-MU3VFab-CjJ20ab' , outputbits = 14),
-                            ]
-                        elif group["fpga"]==1 and group["clock"]==0:
-                            group["algorithms"] += [
-                                    TopoMenuDef( 'INVM_BOOSTDR_eEMsl6',                       outputbits = (12,13), outputlines = ['0INVM70-2DR15-eEM9sl1-eEM9sl6', 
-                                                                                                                                   '0INVM70-2DR15-eEM12sl1-eEM12sl6']),   
-                                    TopoMenuDef( 'INVM_BOOSTDR_Ranges_Asymm_eEMsl6',          outputbits = (14,15), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM9sl6', 
-                                                                                                                                   '25INVM70-13DR25-eEM12sl1-eEM9sl6']),
                             ]
                 if conn["name"] == "Topo3El":
                     for group in conn["algorithmGroups"]:
-                        if group["fpga"]==0 and group["clock"]==1:
+                        if group['fpga']==1 and group['clock']==0:
                             group["algorithms"] += [
+                                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30ab-eTAU20ab',  outputbits = 10 ),
+                                    TopoMenuDef( '0DETA24-10DPHI99-eTAU30ab-eTAU12ab', outputbits = 11 ),
+                                    TopoMenuDef( '0DR28-eTAU30abm-eTAU20abm',          outputbits = 12 ),
                             ]
-                        elif group['fpga']==1 and group['clock']==0:
+                        elif group["fpga"]==1 and group["clock"]==1:
                             group["algorithms"] += [
-                                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30ab-eTAU20ab',  outputbits = 2),
-                                    TopoMenuDef( '0DETA24-10DPHI99-eTAU30ab-eTAU12ab', outputbits = 3),
-                                    TopoMenuDef( '0DR28-eTAU30abm-eTAU20abm',          outputbits = 4),
                             ]
     #----------------------------------------------
 
