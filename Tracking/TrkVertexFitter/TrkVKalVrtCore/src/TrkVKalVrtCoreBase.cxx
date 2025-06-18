@@ -289,7 +289,7 @@ namespace Trk {
     int Ntrk=std::min((int)Index.size(),NtrkTot);
     for(int it=0; it<Ntrk; it++) sumM +=   vk_forcft.wm[Index[it]];                 //sum of particle masses
     if(sumM<Mass) {
-      vk_forcft.wmfit[0]=Mass;
+      vk_forcft.wmfit[vk_forcft.nmcnst]=Mass;
       for(int it=0; it<Ntrk; it++) vk_forcft.indtrkmc[vk_forcft.nmcnst][Index[it]-1]=1;  //Set participating particles
       vk_forcft.nmcnst++;
     }
