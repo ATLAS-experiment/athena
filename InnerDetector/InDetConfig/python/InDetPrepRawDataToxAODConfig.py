@@ -43,9 +43,12 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     return acc
 
 
-def ITkActsPrepDataToxAODCfg(
-        flags, PixelMeasurementContainer = "ITkPixelMeasurements",
-        StripMeasurementContainer = "ITkStripMeasurements") -> ComponentAccumulator:
+def ITkActsPrepDataToxAODCfg(flags,
+                             *,
+                             PixelClusterContainer: str = "ITkPixelClusters",
+                             StripClusterContainer: str = "ITkStripClusters",
+                             PixelMeasurementContainer: str = "ITkPixelMeasurements",
+                             StripMeasurementContainer: str = "ITkStripMeasurements") -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # need to decorate truth particles and clusters with same unique identified
@@ -56,10 +59,12 @@ def ITkActsPrepDataToxAODCfg(
     acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
 
     from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecoratorAlgCfg,ActsStripClusterTruthDecoratorAlgCfg
-    acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(
-        flags, MeasurementContainer=PixelMeasurementContainer))
-    acc.merge(ActsStripClusterTruthDecoratorAlgCfg(
-        flags, MeasurementContainer=StripMeasurementContainer))
+    acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(flags,
+                                                   ClusterContainer = PixelClusterContainer,
+                                                   MeasurementContainer = PixelMeasurementContainer))
+    acc.merge(ActsStripClusterTruthDecoratorAlgCfg(flags,
+                                                   ClusterContainer = StripClusterContainer,
+                                                   MeasurementContainer = StripMeasurementContainer))
 
     return acc
 
