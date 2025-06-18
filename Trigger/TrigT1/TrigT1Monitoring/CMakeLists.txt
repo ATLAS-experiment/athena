@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT1Monitoring )
@@ -7,7 +7,7 @@ atlas_subdir( TrigT1Monitoring )
 atlas_add_component( TrigT1Monitoring
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthContainers AthenaMonitoringLib CaloDetDescrLib CaloEvent CaloIdentifier CaloTriggerToolLib GaudiKernel Identifier L1TopoRDO LArCablingLib LArElecCalib LWHists StoreGateLib TileCalibBlobObjs TileConditionsLib TileEvent TileIdentifier TrigConfInterfaces TrigConfL1Data TrigT1CaloCalibConditions TrigT1CaloCalibToolInterfaces TrigT1CaloCondSvcLib TrigT1CaloEventLib TrigT1CaloMonitoringToolsLib TrigT1CaloToolInterfaces TrigT1Interfaces TrigT1Result xAODTrigL1Calo )
+                     LINK_LIBRARIES AthContainers AthenaMonitoringLib CaloDetDescrLib CaloEvent CaloIdentifier CaloTriggerToolLib GaudiKernel Identifier L1TopoRDO LArCablingLib LArElecCalib LWHists StoreGateLib TileCalibBlobObjs TileConditionsLib TileEvent TileIdentifier TrigConfInterfaces TrigConfL1Data TrigT1CaloCalibConditions TrigT1CaloCalibToolInterfaces TrigT1CaloCondSvcLib TrigT1CaloEventLib TrigT1CaloMonitoringToolsLib TrigT1CaloToolInterfaces TrigT1Interfaces TrigT1Result L1TopoCommon xAODTrigger xAODTrigL1Calo )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

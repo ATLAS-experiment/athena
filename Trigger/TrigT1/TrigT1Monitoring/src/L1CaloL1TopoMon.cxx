@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <map>
@@ -39,7 +39,11 @@
 #include "L1TopoRDO/Status.h"
 #include "L1TopoRDO/L1TopoTOB.h"
 #include "L1TopoRDO/BlockTypes.h"
+#include "L1TopoCommon/Types.h"
+
 #include "L1CaloL1TopoMon.h"
+
+#include "StoreGate/ReadHandle.h"
 
 // ============================================================================
 // To be moved to L1TopoRDO Helpers.cxx
@@ -153,7 +157,7 @@ StatusCode L1CaloL1TopoMon::initialize()
     return sc;
   }
 
-  ATH_CHECK( m_topoCTPLoc.initialize( SG::AllowEmpty ) );
+  ATH_CHECK(m_topoSimKey.initialize(SG::AllowEmpty));
 
   return StatusCode::SUCCESS;
 }
@@ -505,49 +509,56 @@ StatusCode L1CaloL1TopoMon::fillHistograms()
     m_h_l1topo_1d_CMXTobs->Fill(std::min((int)cmxtobs.size(),MAXTOBS-1));
   }
   
-  // Retrieve L1Topo CTP simulted decision if present
-  if (!evtStore()->contains<LVL1::FrontPanelCTP>(m_topoCTPLoc.key())){
-    ATH_MSG_DEBUG("Could not retrieve LVL1::FrontPanelCTP with key "
-		  << m_topoCTPLoc.key());
-  }
-  else {
-    const LVL1::FrontPanelCTP* topoCTP = SG::get(m_topoCTPLoc);
-    if (!topoCTP){
-      ATH_MSG_INFO( "Retrieve of LVL1::FrontPanelCTP failed." );
-    }
-    else {
-      for(unsigned int i=0; i<32; ++i) {
-	uint64_t topores0=topoCTP->cableWord0(1);
-	topores0<<=32;
-	topores0+=topoCTP->cableWord0(0);
-	uint64_t topores1=topoCTP->cableWord1(1);
-	topores1<<=32;
-	topores1+=topoCTP->cableWord1(0);
-	if( (topores0 & (0x1UL << (2*i+0))))
-	  m_h_l1topo_1d_Simulation->Fill(i); // cable 0, clock 0
-	if( (topores0 & (0x1UL << (2*i+1))))
-	  m_h_l1topo_1d_Simulation->Fill(32 + i); // cable 0, clock 1
-	if( (topores1 & (0x1UL << (2*i+0))))
-	  m_h_l1topo_1d_Simulation->Fill(64 + i); // cable 1, clock 0
-	if( (topores1 & (0x1UL << (2*i+1))))
-	  m_h_l1topo_1d_Simulation->Fill(96 + i); // cable 1, clock 1
+
+  // Retrieve L1Topo simulated decision if present
+  if (!evtStore()->contains<xAOD::L1TopoSimResultsContainer>(m_topoSimKey.key())){
+    ATH_MSG_DEBUG("Could not retrieve xAOD::L1TopoSimResultsContainer with key " << m_topoSimKey.key());
+  } else {
+    SG::ReadHandle<xAOD::L1TopoSimResultsContainer> topo_sim_results(m_topoSimKey);
+    if(!topo_sim_results.isValid()) {
+      ATH_MSG_INFO("Retrieve of xAOD::L1TopoSimResultsContainer failed");
+    } else {
+      // Retrieve the decision words
+      uint64_t topo_w1_c0 = 0;
+      uint64_t topo_w1_c1 = 0;
+      uint64_t topo_w2_c0 = 0;
+      uint64_t topo_w2_c1 = 0;
+      for(const xAOD::L1TopoSimResults* res : *topo_sim_results) {
+        if(res->connectionId() == TCS::TOPO2EL) {
+          if(res->clock() == 0) topo_w1_c0 = res->topoWord();
+          else if(res->clock() == 1) topo_w1_c1 = res->topoWord();
+        } else if(res->connectionId() == TCS::TOPO3EL) {
+          if(res->clock() == 0) topo_w2_c0 = res->topoWord();
+          else if(res->clock() == 1) topo_w2_c1 = res->topoWord();
+        }
       }
-      ATH_MSG_DEBUG("Simulated output from L1Topo from StoreGate with key "
-		    << m_topoCTPLoc);
-      ATH_MSG_DEBUG("L1Topo word 1 at clock 0 is: 0x"
-		    << std::hex << std::setw( 8 ) << std::setfill( '0' )
-		    << topoCTP->cableWord0(0));
-      ATH_MSG_DEBUG("L1Topo word 2 at clock 0 is: 0x"
-		    << std::hex << std::setw( 8 ) << std::setfill( '0' )
-		    << topoCTP->cableWord1(0));
-      ATH_MSG_DEBUG("L1Topo word 1 at clock 1 is: 0x"
-		    << std::hex << std::setw( 8 ) << std::setfill( '0' )
-		    << topoCTP->cableWord0(1));
-      ATH_MSG_DEBUG("L1Topo word 2 at clock 1 is: 0x"
-		    << std::hex << std::setw( 8 ) << std::setfill( '0' )
-		    << topoCTP->cableWord1(1));
-    }       
+
+
+      uint64_t topo_res_1 = topo_w1_c1;
+      topo_res_1 <<= 32;
+      topo_res_1 += topo_w1_c0;
+
+      uint64_t topo_res_2 = topo_w2_c1;
+      topo_res_2 <<= 32;
+      topo_res_2 += topo_w2_c0;
+
+      // This is not ordered by cable/clock, but follows the DAQ readout convention
+      for(unsigned int i = 0; i < 32; ++i) {
+        if(topo_res_1 & (0x1UL << (2*i+0))) m_h_l1topo_1d_Simulation->Fill(i);
+        if(topo_res_1 & (0x1UL << (2*i+1))) m_h_l1topo_1d_Simulation->Fill(32+i);
+
+        if(topo_res_2 & (0x1UL << (2*i+0))) m_h_l1topo_1d_Simulation->Fill(64+i);
+        if(topo_res_2 & (0x1UL << (2*i+1))) m_h_l1topo_1d_Simulation->Fill(96+i);
+      }
+
+      ATH_MSG_DEBUG("Simulated output from L1Topo from StoreGate with key " << m_topoSimKey);
+      ATH_MSG_DEBUG("L1Topo word 1 at clock 0 is: 0x" << std::hex << std::setw(8) << std::setfill('0') << topo_w1_c0);
+      ATH_MSG_DEBUG("L1Topo word 2 at clock 0 is: 0x" << std::hex << std::setw(8) << std::setfill('0') << topo_w2_c0);
+      ATH_MSG_DEBUG("L1Topo word 1 at clock 1 is: 0x" << std::hex << std::setw(8) << std::setfill('0') << topo_w1_c1);
+      ATH_MSG_DEBUG("L1Topo word 2 at clock 1 is: 0x" << std::hex << std::setw(8) << std::setfill('0') << topo_w2_c1);
+    }
   }
+
 
   // Retrieve the L1Topo RDOs from the DAQ RODs
   const int NFPGA=4;

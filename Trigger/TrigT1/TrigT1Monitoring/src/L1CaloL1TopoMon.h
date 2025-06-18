@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -25,8 +25,7 @@
 #include "AthContainers/DataVector.h"
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 
-#include "TrigT1Interfaces/FrontPanelCTP.h"
-#include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
+#include "xAODTrigger/L1TopoSimResultsContainer.h"
 
 class LWHist;
 class TH1F_LW;
@@ -42,7 +41,6 @@ namespace LVL1 {
 // ============================================================================
 class ITrigT1CaloMonErrorTool;
 class TrigT1CaloLWHistogramTool;
-//class FrontPanelCTP;
 // ============================================================================
   
  class L1CaloL1TopoMon : public ManagedMonitorToolBase
@@ -89,7 +87,7 @@ class TrigT1CaloLWHistogramTool;
    //const DataHandle< LVL1::FrontPanelCTP > m_topoCTP;
    StringProperty m_CMXJetTobLocation;
    StringProperty m_CMXCPTobLocation;
-   SG::ReadHandleKey<LVL1::FrontPanelCTP> m_topoCTPLoc { this, "TopoCTPLocation", LVL1::DEFAULT_L1TopoCTPLocation, "StoreGate location of topo inputs" };
+   SG::ReadHandleKey<xAOD::L1TopoSimResultsContainer> m_topoSimKey {this, "L1TopoSimContainer", "L1_TopoSimResults", "Output L1Topo simulation container"};
 
    /// Root directory
    std::string m_PathInRootFile;   
