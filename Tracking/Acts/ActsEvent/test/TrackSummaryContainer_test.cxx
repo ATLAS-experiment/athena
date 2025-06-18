@@ -18,6 +18,8 @@
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 
+#include "Acts/Surfaces/ConeSurface.hpp"
+#include "ActsGeoUtils/SurfaceEncoding.h"
 
 BOOST_AUTO_TEST_SUITE(EventDataTrackStorage)
 

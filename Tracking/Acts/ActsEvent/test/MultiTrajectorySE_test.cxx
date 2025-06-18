@@ -24,7 +24,7 @@
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 
-#include "ActsEvent/SurfaceEncoding.h"
+#include "ActsGeoUtils/SurfaceEncoding.h"
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/ConeSurface.hpp"
 #include "Acts/Surfaces/CylinderSurface.hpp"

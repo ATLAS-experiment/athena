@@ -16,6 +16,8 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include <AthenaKernel/RNGWrapper.h>
 #include "CLHEP/Random/RandGaussZiggurat.h"
+
+#include "Acts/Surfaces/PlaneSurface.hpp"
 namespace{
     constexpr double straightQoverP = 1. / (100. *Gaudi::Units::TeV);
 }

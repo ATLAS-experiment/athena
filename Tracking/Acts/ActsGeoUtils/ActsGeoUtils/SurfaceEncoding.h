@@ -1,23 +1,16 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_SurfaceEncoding_h
 #define ActsEvent_SurfaceEncoding_h
 
+#ifndef SIMULATIONBASE
+
 #include <xAODTracking/TrackSurface.h>
 #include <xAODTracking/TrackSurfaceAuxContainer.h>
 
-#include "Acts/Geometry/GeometryContext.hpp"
-#include "Acts/Surfaces/ConeSurface.hpp"
-#include "Acts/Surfaces/CylinderSurface.hpp"
-#include "Acts/Surfaces/DiscSurface.hpp"
-#include "Acts/Surfaces/PerigeeSurface.hpp"
-#include "Acts/Surfaces/PlaneSurface.hpp"
-#include "Acts/Surfaces/RectangleBounds.hpp"
-#include "Acts/Surfaces/StrawSurface.hpp"
-#include "Acts/Surfaces/Surface.hpp"
-#include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "Acts/Surfaces/Surface.hpp"
 
 namespace ActsTrk {
 
@@ -60,4 +53,5 @@ std::shared_ptr<const Acts::Surface> decodeSurface(
 
 }  // namespace ActsTrk
 
+#endif
 #endif

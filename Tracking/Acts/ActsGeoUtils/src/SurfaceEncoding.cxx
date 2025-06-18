@@ -1,8 +1,19 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef SIMULATIONBASE
 
-#include "ActsEvent/SurfaceEncoding.h"
+#include "ActsGeoUtils/SurfaceEncoding.h"
+
+#include "Acts/Surfaces/ConeSurface.hpp"
+#include "Acts/Surfaces/CylinderSurface.hpp"
+#include "Acts/Surfaces/DiscSurface.hpp"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/StrawSurface.hpp"
+#include "Acts/Surfaces/SurfaceBounds.hpp"
+
 namespace ActsTrk {
 void encodeSurface(xAOD::SurfaceType& surfaceType,
                    std::vector<float>& translation,
@@ -154,3 +165,4 @@ std::shared_ptr<const Acts::Surface> decodeSurface(
 }
 
 }  // namespace ActsTrk
+#endif
