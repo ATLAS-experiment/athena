@@ -83,6 +83,9 @@ def defineMenu():
         'L1_MU8F_cTAU20M_jXE70',
         'L1_eTAU60_2cTAU20M_jXE80',
 
+         # ATR-31097
+        'L1_TeAsymmetry-jTENoSort',
+        'L1_TeATIME-jTENoSort',
 
         # ATR-28761 Phase1 combined em - jet
         'L1_eEM22M_3jJ50',
@@ -341,6 +344,7 @@ def defineMenu():
         'L1_DPHI-M70-2eEM12M', 'L1_DPHI-M70-2eEM15M', #ATR-19302
         'L1_DPHI-M70-2eEM9', 'L1_DPHI-M70-2eEM9L', # ATR-21637 (no or loose shower shape cuts)
                 
+
         #ATR-28563
         'L1_LLPDPHI-jXE40-jJ40',
         'L1_LLPNODPHI-jXE40-jJ40',

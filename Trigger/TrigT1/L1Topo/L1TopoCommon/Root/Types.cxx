@@ -107,7 +107,7 @@ TCS::inputType(const std::string& input) {
    if ( input == "jXEPerf")
       return TCS::JXEPERF;
 
-   if ( input == "jTE")
+   if ( input == "jTE" || input == "jTETobs")
       return TCS::JTE;
 
    if ( input == "jTEC")

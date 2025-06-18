@@ -201,8 +201,8 @@ class TopoAlgoDefMultiplicity:
 
             'jXEPerf100',
 
-            # spares (for any energy thresholds)
-            'jXESPARE1', 
+            # spares (for any energy thresholds) 
+            'jXESPARE1',
 
         ]
 

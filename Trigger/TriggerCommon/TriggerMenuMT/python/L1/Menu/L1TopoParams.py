@@ -301,6 +301,10 @@ L1TopoParams = {
                               'parameters': ['MinET1',
                                              'MinET2',
                                              'MinTransverseMassSqr']},
+'TeAsymmetry' : {'comment': '',
+                'parameters': ['deltaAbsMin', 'asymFactor', 'asymOffset', 'maxTeProduct']},
+'TeATIME' : {'comment': '',
+                'parameters': []},
  'eEmNoSort': {'comment': '', 'parameters': ['REtaMin', 'RHadMin', 'WsTotMin']},
  'eEmSelect': {'comment': '',
                'parameters': ['MinET', 'REtaMin', 'RHadMin', 'WsTotMin']},
@@ -321,4 +325,5 @@ L1TopoParams = {
  'jXENoSort': {'comment': '', 'parameters': []},
  'jXESort': {'comment': '', 'parameters': []},
  'gXENoSort': {'comment': '', 'parameters': []},
+ 'jTENoSort': {'comment': '', 'parameters': []},
 }

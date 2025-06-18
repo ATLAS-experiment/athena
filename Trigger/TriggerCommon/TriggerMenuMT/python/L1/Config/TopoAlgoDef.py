@@ -367,6 +367,12 @@ class TopoAlgoDef:
         alg.addgeneric('OutputWidth', HW.metOutputWidth)
         tm.registerTopoAlgo(alg)
 
+        # jTE - use the same widths as XE as single TE TOB
+        alg = AlgConf.jTENoSort( name = 'jTENoSort_1BC', inputs = 'jTETobs', outputs = 'jTENoSort_1BC' )
+        alg.addgeneric('InputWidth', HW.jSumEtTotalInputWidth)
+        alg.addgeneric('OutputWidth', 1)
+        alg.addgeneric('NumRegisters', 1)
+        tm.registerTopoAlgo(alg)
 
         # Decision algorithms
 
@@ -1691,7 +1697,7 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
         # ATR-30401
-        # topoitems will be the follwoing:
+        # topoitems will be the following:
         # 0DPHI10_jXE40delay_jJ40s
         # 0DPHI99_jXE40delay_jJ40s
         DPHI_jXE40delay_jJ40s_map = [
@@ -1737,6 +1743,67 @@ class TopoAlgoDef:
                 alg.addvariable('MinDeltaPhi', d.MinDeltaPhi, bitId)
                 alg.addvariable('MaxDeltaPhi', d.phi_thresholds[bitId]*_phi_conversion, bitId)
             tm.registerTopoAlgo(alg)
+
+        # ATR-31097
+        TeAsymmetry_map = [
+        {  
+            "algoname"  : "TeAsymmetry-jTENoSort",
+            "deltaAbsMin" : [0,10,0,0],
+            "asymFactor" : [0,0,0.2,0],
+            "asymOffset" : [0,0,0,0],
+            "maxTeProduct": [5000,10000,999999,999999],
+        }
+        ]
+
+        for x in TeAsymmetry_map:
+            class d:
+                pass
+            for k in x:
+                setattr(d,k,x[k])
+            inputList = ['jTENoSort_1BC']
+            # To update with correct names
+            toponames = []
+            for bitId in range(len(d.deltaAbsMin)):
+                toponames.append("TeAsymmetry_jTENoSort_ParamSet%d"  % (bitId))
+            
+            alg = AlgConf.TeAsymmetry( name = d.algoname, inputs = inputList, outputs =  toponames )
+            alg.addgeneric('InputWidth', 1)
+            alg.addgeneric('NumResultBits', len(toponames))
+            alg.addgeneric("Delay", 1)
+
+            for bitId in range(len(toponames)):
+                #Update with the correct algo parameters
+                alg.addvariable('deltaAbsMin', d.deltaAbsMin[bitId]*_et_conversion, bitId)  #Units of 100MeV
+                alg.addvariable('asymFactor', d.asymFactor[bitId], bitId)
+                alg.addvariable('asymOffset', d.asymOffset[bitId]*_et_conversion, bitId)   #Units of 100MeV
+                alg.addvariable('maxTeProduct', d.maxTeProduct[bitId]*_et_conversion*_et_conversion, bitId)  #Units of (100MeV)^2
+            tm.registerTopoAlgo(alg)
+        
+        #TeATIME
+        TeATIME_map = [
+        {  
+            "algoname"  : "TeATIME-jTENoSort",
+        }
+        ]
+
+        for x in TeATIME_map:
+            class d:
+                pass
+            for k in x:
+                setattr(d,k,x[k])
+            inputList = ['jTENoSort_1BC']
+            # To update with correct names
+            toponames = []
+            for bitId in range(4):
+                toponames.append("TeATIME_jTENoSort_ParamSet%d"  % (bitId))
+            
+            
+            alg = AlgConf.TeATIME( name = d.algoname, inputs = inputList, outputs =  toponames )
+            alg.addgeneric('InputWidth', 1)
+            alg.addgeneric('NumResultBits', len(toponames))
+            tm.registerTopoAlgo(alg)
+
+
 
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
         algolist=[
@@ -2412,7 +2479,7 @@ class TopoAlgoDef:
             alg.addvariable('DeltaRMax', d.maxDr*d.maxDr*_dr_conversion*_dr_conversion)
             tm.registerTopoAlgo(alg)
 
- 
+
         # dphi with s+s #ATR-29784
         # Parameter ordering:
         # 1. MinEt1

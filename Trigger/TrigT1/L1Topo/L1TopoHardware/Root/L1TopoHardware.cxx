@@ -30,7 +30,8 @@ const std::map<std::string, TCS::HardwareParam>& TCS::L1TopoHWParameters::get() 
       DEF_HW(jTauInputWidth),
       DEF_HW(jEmInputWidth),
       DEF_HW(jMetInputWidth),
-
+      DEF_HW(jSumEtTotalInputWidth),
+      
       DEF_HW(gJetInputWidth),
       DEF_HW(gLargeRJetInputWidth),
 
