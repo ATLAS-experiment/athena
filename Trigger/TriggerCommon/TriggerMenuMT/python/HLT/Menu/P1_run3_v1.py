@@ -62,20 +62,21 @@ def addCommonP1Signatures(chains):
     ]
 
     chainsP1['Calib'] = [
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1RD0_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEB'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1RD0_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['LArPEB'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1RD2_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['LArPEB'], groups=['RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1RD0_LAR_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_LAR_EMPTY','BW:Detector']),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1RD0_LAR_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_LAR_FILLED','BW:Detector']),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1RD0_LAR_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_LAR_FIRSTEMPTY','BW:Detector']),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1RD0_LAR_BGRP7', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_LAR_BGRP7','BW:Detector']),
         ChainProp(name='HLT_noalg_Lvl1CaloPEB_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['L1CaloCalib'], groups=['RATE:Calibration','BW:Detector']),
 
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ500_LAR', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ500_LAR', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_jJ500_LAR','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1LAR-ZEE-eEM', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup+Topo2Group),
 
-        ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_LAR_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_LAR_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_LAR_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_LAR_BGRP7', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_LAR_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_LAR_FILLED','BW:Detector']),
+        ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_LAR_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_LAR_EMPTY','BW:Detector']),
+        ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_LAR_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_LAR_FIRSTEMPTY','BW:Detector']),
+        ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_LAR_BGRP7', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_LAR_BGRP7','BW:Detector']),
         ChainProp(name='HLT_noalg_LATOMEPEB_L1LAR-ZEE-eEM', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup+Topo2Group),
-        ChainProp(name='HLT_noalg_LATOMEPEB_L1jJ500_LAR', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LATOMEPEB_L1jJ500_LAR', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','RATE:CPS_jJ500_LAR','BW:Detector']+SupportPhIGroup),
 
 
         ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ40', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
