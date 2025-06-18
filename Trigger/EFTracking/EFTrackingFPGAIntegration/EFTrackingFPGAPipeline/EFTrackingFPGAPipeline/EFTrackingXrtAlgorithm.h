@@ -15,6 +15,7 @@
 #include "Gaudi/Property.h"
 
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/IChronoSvc.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/WriteHandleKeyArray.h"
 
@@ -57,6 +58,13 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
     "DeviceMgmtSvc", 
     "AthXRT::DeviceMgmtSvc",
     "The XRT device manager service to use"
+  };
+
+  ServiceHandle<IChronoSvc> m_chronoSvc{
+    this,
+    "ChronoStatSvc",
+    "ChronoStatSvc",
+    "Stop watch"
   };
 
   Gaudi::Property<std::string> m_kernelDefinitionsJsonString {

@@ -3,44 +3,42 @@
 import ROOT
 
 def PathfinderHlsCfg(flags, **kwargs):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    acc = ComponentAccumulator()
-
     kwargs.setdefault("bufferSize", 8192)
-    kwargs.setdefault("inputTrackDataStream", "inputTrackDataStream")
-    kwargs.setdefault("inputHitDataStream", "inputHitDataStream")
-    kwargs.setdefault("outputDataStream", "outputDataStream")
 
-    from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
     from json import dumps
-    acc.merge(EFTrackingXrtAlgorithmCfg(
-        flags, 
-        bufferSize = kwargs["bufferSize"],
-        kernelDefinitionsJsonString = dumps({
+    kwargs.setdefault(
+        "kernelDefinitionsJsonString",
+        dumps({
             "loader:{loader_1}": [{
-                "storeGateKey": kwargs["inputTrackDataStream"],
+                "storeGateKey": "inputTrackDataStream",
                 "argumentIndex": "0",
                 "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT),
             }],
             "loader:{loader_2}": [{
-                "storeGateKey": kwargs["inputHitDataStream"],
+                "storeGateKey": "inputHitDataStream",
                 "argumentIndex": "0",
                 "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT),
             }],
             "unloader": [{
-                "storeGateKey": kwargs["outputDataStream"],
+                "storeGateKey": "outputDataStream",
                 "argumentIndex": "1",
                 "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.OUTPUT),
             }],
         }),
-    ))
+    )
+
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    acc = ComponentAccumulator()
+
+    from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
+    acc.merge(EFTrackingXrtAlgorithmCfg(flags, **kwargs))
 
     return acc
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     argumentParser = ArgumentParser()
-    argumentParser.add_argument("--eosPath")
+    argumentParser.add_argument("--eosPath", default = "/eos/")
     argumentParser.add_argument("--bufferSize", type = int, default = 8192)
     argumentParser.add_argument("--verbose", action = "store_true")
 
@@ -59,9 +57,15 @@ if __name__ == "__main__":
     acc = MainServicesCfg(flags)
 
     from AthenaConfiguration.ComponentFactory import CompFactory 
-    acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(XclbinPathsList = [
-        f"{arguments.eosPath}/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/22_pathfinder_HLS/Pathfinder_hw.xclbin",
-    ]))
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True,
+    ))
+
+    acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(
+        XclbinPathsList = [f"{arguments.eosPath}/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/22_pathfinder_HLS/Pathfinder_hw.xclbin"],
+    ))
 
     from EFTrackingFPGAUtility.EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
     acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
@@ -99,11 +103,27 @@ if __name__ == "__main__":
         cartesianDataStream = "inputMasqueradedHitDataStream",
     ))
 
+    from json import dumps
     acc.merge(PathfinderHlsCfg(
         flags,
         bufferSize = arguments.bufferSize,
-        inputTrackDataStream = "inputTrackDataStream",
-        inputHitDataStream = "inputHitDataStream",
+        kernelDefinitionsJsonString = dumps({
+            "loader:{loader_1}": [{
+                "storeGateKey": "inputMasqueradedTrackDataStream",
+                "argumentIndex": "0",
+                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT),
+            }],
+            "loader:{loader_2}": [{
+                "storeGateKey": "inputMasqueradedHitDataStream",
+                "argumentIndex": "0",
+                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT),
+            }],
+            "unloader": [{
+                "storeGateKey": "outputDataStream",
+                "argumentIndex": "1",
+                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.OUTPUT),
+            }],
+        }),
     ))
 
     from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
