@@ -257,11 +257,12 @@ def defineInputsMenu():
             # test thresholds
             ('jXEC100',1),
             ('jTE200',1), ('jTEC200',1), ('jTEFWD100',1), ('jTEFWDA100',1), ('jTEFWDC100',1),
+            #
             # additional heavy ion jTE items
             ('jTE3',1), ('jTE4',1), ('jTE10',1), ('jTE5',1), ('jTE20',1), ('jTE50',1),
             ('jTE100',1) , ('jTE600',1), ('jTE1500',1), ('jTE4000',1), ('jTE6500',1), ('jTE8300',1), ('jTE9000',1), ('jTE10000',1),('jTE12000',1),
             ('jTEFWDA1',1), ('jTEFWDC1',1), ('jTEFWDA5',1), ('jTEFWDC5',1),
-
+           
             # spare energy thresholds for commissioning
             ('jXESPARE1',1),
 
@@ -371,6 +372,7 @@ def defineInputsMenu():
                 "fpga" : 0,
                 "clock" : 0,
                 "algorithms" : [
+                    
                     TopoMenuDef( 'HT190-jJ40s5pETA21',                       outputbits = 0 ),
                     TopoMenuDef( 'jINVM_NFF',                                outputbits = (1,4), outputlines = ['300INVM-jJ60s6-AjJ50s6',
                                                                                                                 '400INVM-jJ60s6-AjJ50s6',
@@ -388,6 +390,7 @@ def defineInputsMenu():
                     TopoMenuDef('23DPHI32-2eEM1s', outputbits=13), #ATR-29784
                     TopoMenuDef('23DPHI32-2eTAU1s', outputbits=14), #ATR-29784
                     TopoMenuDef('23DPHI32-2jTAU1s', outputbits=15), #ATR-29784
+                    
                 ]
             },
 
@@ -403,6 +406,14 @@ def defineInputsMenu():
                                                                                                        '60INVM-25DPHI32-eEM18abm-jEM25s625ETA49'] ),
                     TopoMenuDef( 'ZAFB_DPHIM',                    outputbits = (6,7), outputlines = [ '60INVM-04DPHI32-eEM18abm-jEM20sm625ETA49',
                                                                                                          '60INVM-25DPHI32-eEM18abm-jEM20sm625ETA49'] ),
+                    TopoMenuDef( 'TeAsymmetry-jTENoSort',                    outputbits = (8,11), outputlines = ['TeAsymmetry_jTENoSort_ParamSet0',
+                                                                                                                        'TeAsymmetry_jTENoSort_ParamSet1',
+                                                                                                                        'TeAsymmetry_jTENoSort_ParamSet2',
+                                                                                                                        'TeAsymmetry_jTENoSort_ParamSet3',] ),
+                    TopoMenuDef( 'TeATIME-jTENoSort',                    outputbits = (12,15), outputlines = ['TeATIME_jTENoSort_ParamSet0',
+                                                                                                                        'TeATIME_jTENoSort_ParamSet1',
+                                                                                                                        'TeATIME_jTENoSort_ParamSet2',
+                                                                                                                        'TeATIME_jTENoSort_ParamSet3',] ),
                 ]
             },
 
