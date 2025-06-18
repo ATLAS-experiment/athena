@@ -808,7 +808,8 @@ void showerAxisPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments
       const float center_x   = moments_arr->centerX[cluster];
       const float center_y   = moments_arr->centerY[cluster];
       const float center_z   = moments_arr->centerZ[cluster];
-      const float center_mag_inv = rnorm3df(center_x, center_y, center_z);
+      const float center_mag_inv_base = rnorm3df(center_x, center_y, center_z);
+      const float center_mag_inv = (isnan(center_mag_inv_base) || isinf(center_mag_inv_base) ? 1.f : center_mag_inv_base);
       moments_arr->centerMag[cluster] = 1.0f / center_mag_inv;
       float axis_x = center_x * center_mag_inv;
       float axis_y = center_y * center_mag_inv;
@@ -1049,6 +1050,12 @@ void finalClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> momen
 
               moments_arr->maxPhiPerSample[sampling][cluster] = geometry->phi[max_cell];
               moments_arr->maxEtaPerSample[sampling][cluster] = geometry->eta[max_cell];
+            }
+          else
+            {
+              moments_arr->maxEPerSample[sampling][cluster]   = 0.f;
+              moments_arr->maxPhiPerSample[sampling][cluster] = 0.f;
+              moments_arr->maxEtaPerSample[sampling][cluster] = 0.f;
             }
         }
       else if (thread_index == NumSamplings && sum_energies <= 0.f)
