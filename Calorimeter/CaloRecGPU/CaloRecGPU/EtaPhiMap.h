@@ -43,10 +43,12 @@ namespace CaloRecGPU
 
     float m_eta_limits[1 + !continuous];
     float m_delta_eta;
+    
+    static constexpr int s_eta_grid_size = eta_grid * (1 + !continuous);
 
-    int   m_cells           [eta_grid * (1 + !continuous)][phi_grid][s_max_overlap_cells];
-    float m_eta_coordinates [eta_grid * (1 + !continuous)][phi_grid][s_max_overlap_cells];
-    float m_phi_coordinates [eta_grid * (1 + !continuous)][phi_grid][s_max_overlap_cells];
+    int   m_cells           [s_eta_grid_size][phi_grid][s_max_overlap_cells];
+    float m_eta_coordinates [s_eta_grid_size][phi_grid][s_max_overlap_cells];
+    float m_phi_coordinates [s_eta_grid_size][phi_grid][s_max_overlap_cells];
     //If respect_deltas is true:
     // -> m_{eta, phi}_coordinates[h][f][n] > 0
     //    means the cell ends at this fraction of the grid.
@@ -141,7 +143,8 @@ namespace CaloRecGPU
       const float frac = (phi - start_phi()) / delta_phi();
       const float rounded = floorf(frac);
       interval = frac - rounded;
-      return static_cast<int>(rounded) % phi_grid;
+      const int to_return = static_cast<int>(rounded) % phi_grid;
+      return to_return + (to_return < 0) * phi_grid;
     }
 
     constexpr int phi_coordinate(const float phi) const
@@ -178,14 +181,14 @@ namespace CaloRecGPU
 
     constexpr void add_cell_to_grid(const int cell, const float eta_fraction, const float phi_fraction, const int eta, const int phi)
     {
-#if CALORECGPU_ETA_PHI_MAP_DEBUG
-      if (eta < 0 || eta >= eta_grid * (1 + !continuous) || phi < 0 || phi >= phi_grid)
+      if (eta < 0 || eta >= s_eta_grid_size || phi < 0 || phi >= phi_grid)
         {
+#if CALORECGPU_ETA_PHI_MAP_DEBUG
           printf("CALORECGPU ETA PHI MAP DEBUG OUTPUT: Attempt out of bounds store %d (%d): %f %f (%d / %d, %d / %d)\n",
                  cell, sampling_number, eta_fraction, phi_fraction, eta, eta_grid, phi, phi_grid);
+#endif
           return;
         }
-#endif
 
       for (int i = 0; i < s_max_overlap_cells; ++i)
         {
@@ -204,7 +207,7 @@ namespace CaloRecGPU
         {
           printf("%d ", m_cells[eta][phi][i]);
         }
-      printf("(%d / %d , %d / %d)\n", eta, eta_grid * (1 + !continuous), phi, phi_grid);
+      printf("(%d / %d , %d / %d)\n", eta, s_eta_grid_size, phi, phi_grid);
 
       if (!respect_deltas)
         {
@@ -323,7 +326,7 @@ namespace CaloRecGPU
 
     constexpr void initialize()
     {
-      for (int i = 0; i < eta_grid * (1 + !continuous); ++i)
+      for (int i = 0; i < s_eta_grid_size; ++i)
         {
           for (int j = 0; j < phi_grid; ++j)
             {
@@ -370,11 +373,11 @@ namespace CaloRecGPU
 
     struct FinishInitializingTemporaries
     {
-      int   cells  [eta_grid * (1 + !continuous)][phi_grid][s_max_overlap_cells];
-      float etas   [eta_grid * (1 + !continuous)][phi_grid][s_max_overlap_cells];
-      float phis   [eta_grid * (1 + !continuous)][phi_grid][s_max_overlap_cells];
+      int   cells  [s_eta_grid_size][phi_grid][s_max_overlap_cells];
+      float etas   [s_eta_grid_size][phi_grid][s_max_overlap_cells];
+      float phis   [s_eta_grid_size][phi_grid][s_max_overlap_cells];
 
-      static constexpr int s_max_cells = phi_grid * eta_grid * (1 + !continuous);
+      static constexpr int s_max_cells = phi_grid * s_eta_grid_size;
 
       int grid_list[2][s_max_cells];
       int counter[2];
@@ -430,13 +433,13 @@ namespace CaloRecGPU
 
       constexpr bool add_next_gridcell(const int value)
       {
-#if CALORECGPU_ETA_PHI_MAP_DEBUG
         if (get_next_counter() >= s_max_cells)
           {
+#if CALORECGPU_ETA_PHI_MAP_DEBUG
             printf("CALORECGPU ETA PHI MAP DEBUG OUTPUT: cannot add more cells! (%d)\n", sampling_number);
+#endif
             return false;
           }
-#endif
         get_next_gridcells()[get_next_counter()] = value;
         ++get_next_counter();
         return true;
@@ -610,13 +613,13 @@ namespace CaloRecGPU
                 cells[i - i] = -1;
                 --replace_count;
                 --i;
-#if CALORECGPU_ETA_PHI_MAP_DEBUG
                 if (i < 0 || (i == 0 && replace_count > 0))
                   {
+#if CALORECGPU_ETA_PHI_MAP_DEBUG
                     printf("CALORECGPU ETA PHI MAP DEBUG OUTPUT: Negative count on cell list update, somehow... (%d)\n", sampling_number);
+#endif
                     break;
                   }
-#endif
               }
 
             if (i < s_max_overlap_cells)
@@ -664,7 +667,7 @@ namespace CaloRecGPU
 
                 calculate_minima(min_dist_eta, min_dist_phi, this_eta, this_phi, gridcell_eta, gridcell_phi);
 
-                updated = updated || update_cell_list(cells, min_etas, min_phis, etas, phis,
+                updated = updated || update_cell_list(cells, etas, phis, min_etas, min_phis,
                                                       this_cell, this_eta, this_phi, min_dist_eta, min_dist_phi);
 
               }
@@ -700,29 +703,29 @@ namespace CaloRecGPU
             bool added = false;
 
             added = added || add_possible_cells(temps.cells[eta][phi],
-                                                min_etas, min_phis,
                                                 temps.etas[eta][phi], temps.phis[eta][phi],
+                                                min_etas, min_phis,
                                                 this_grid_eta, this_grid_phi,
                                                 eta, phi_before);
             added = added || add_possible_cells(temps.cells[eta][phi],
-                                                min_etas, min_phis,
                                                 temps.etas[eta][phi], temps.phis[eta][phi],
+                                                min_etas, min_phis,
                                                 this_grid_eta, this_grid_phi,
                                                 eta, phi_after);
 
             if (eta_before >= 0)
               {
                 added = added || add_possible_cells(temps.cells[eta][phi],
-                                                    min_etas, min_phis,
                                                     temps.etas[eta][phi], temps.phis[eta][phi],
+                                                    min_etas, min_phis,
                                                     this_grid_eta, this_grid_phi,
                                                     eta_before, phi);
               }
             if (eta_after >= 0)
               {
                 added = added || add_possible_cells(temps.cells[eta][phi],
-                                                    min_etas, min_phis,
                                                     temps.etas[eta][phi], temps.phis[eta][phi],
+                                                    min_etas, min_phis,
                                                     this_grid_eta, this_grid_phi,
                                                     eta_after, phi);
               }
@@ -752,7 +755,7 @@ namespace CaloRecGPU
 
           temps.swap();
 
-          for (int eta = 0; eta < eta_grid * (1 + !continuous); ++eta)
+          for (int eta = 0; eta < s_eta_grid_size; ++eta)
             {
               for (int phi = 0; phi < phi_grid; ++phi)
                 {
@@ -766,7 +769,7 @@ namespace CaloRecGPU
                       const int phi_before = (phi == 0 ? phi_grid - 1 : phi - 1);
                       const int phi_after  = (phi == phi_grid - 1 ? 0 : phi + 1);
                       const int eta_before = (eta == 0 || eta == eta_grid ? -1 : eta - 1);
-                      const int eta_after  = (eta == eta_grid - 1 || eta == 2 * eta_grid - 1 ? -1 : eta + 1);
+                      const int eta_after  = (eta == eta_grid - 1 || eta == s_eta_grid_size - 1 ? -1 : eta + 1);
 
                       temps.try_add_next_gridcell(eta, phi);
 
@@ -894,7 +897,11 @@ namespace CaloRecGPU
 
       const int eta_coord = eta_coordinate(test_eta, frac_eta);
       const int phi_coord = phi_coordinate(test_phi, frac_phi);
-
+      
+      if (eta_coord < 0 || eta_coord >= s_eta_grid_size || phi_coord < 0 || phi_coord >= phi_grid)
+        {
+          return 0;
+        }
 
       if (respect_deltas)
         {
@@ -987,6 +994,11 @@ namespace CaloRecGPU
       const int eta_coord = eta_coordinate(test_eta, frac_eta);
       const int phi_coord = phi_coordinate(test_phi, frac_phi);
 
+      if (eta_coord < 0 || eta_coord >= s_eta_grid_size || phi_coord < 0 || phi_coord >= phi_grid)
+        {
+          return false;
+        }
+        
       if (respect_deltas)
         {
           auto check_coord = [](const float test, const float target)
@@ -1038,7 +1050,7 @@ namespace CaloRecGPU
     {
       int ret = 0;
 
-      for (int eta = 0; eta < eta_grid * (1 + !continuous); ++eta)
+      for (int eta = 0; eta < s_eta_grid_size; ++eta)
         {
           for (int phi = 0; phi < phi_grid; ++phi)
             {

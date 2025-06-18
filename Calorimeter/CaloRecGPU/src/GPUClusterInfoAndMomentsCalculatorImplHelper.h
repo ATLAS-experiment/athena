@@ -1041,7 +1041,7 @@ namespace
      (WeightedEnergy),
      (CellVolume),
      (float w_E_over_V;),
-     (w_E_over_V = f.weighted_energy / f.volume;)
+     (w_E_over_V = (f.volume > 0.f ? f.weighted_energy / f.volume : 1.f);)
     );
 
     CALORECGPU_CMC_LOAD
@@ -1095,7 +1095,10 @@ namespace
     struct ShowerAxisX;
     struct ShowerAxisY;
     struct ShowerAxisZ;
-    
+
+    // Possible simplification if we need more performance
+    // when calculating both Lambda and R (but probably worse accuracy):
+    //
     //d\vec{v} = \vec{r}_{cell} - \vec{r}_{center}
     //
     //  r      = ||d\vec{v} \cross \vec{axis}||
@@ -1105,7 +1108,6 @@ namespace
     //  r      = ||d\vec{v}|| |sin(\theta)|
     //
     //  |sin(\theta)| = sqrt(1 - cos(\theta)^2)
-
 
     CALORECGPU_CMC_LOAD
     (Deltas,
@@ -1117,7 +1119,7 @@ namespace
       dz = f.z - f.center_z;
      )
     );
-    
+
     CALORECGPU_CMC_LOAD
     (Lambda,
      (Deltas, ShowerAxisX, ShowerAxisY, ShowerAxisZ),
@@ -1223,7 +1225,7 @@ namespace
      (SumAbsEnergyNonMoments),
      (),
      (float rev_abs_energy_non_moments;),
-     (rev_abs_energy_non_moments = 1.f / f.abs_energy_non_moments;)
+     (rev_abs_energy_non_moments = 1.f / (f.abs_energy_non_moments != 0.f ? f.abs_energy_non_moments : 1.f);)
     );
 
     CALORECGPU_CMC_LOAD_SIMPLE_MOMENT_INFO(CenterX, center_x, centerX);
@@ -1694,17 +1696,20 @@ namespace
      (),
      (p.moments_arr->firstEngDens[cluster] = 0.f;
       CMCTemporaries::firstEngDensAux(p.moments_arr, cluster) = 0.f;),
-     (),
+     (ToLoad::CellVolume),
      (ToLoad::WeightedEnergy, ToLoad::WeightedEnergyOverVolume),
-     (add_with_corr(p.moments_arr->firstEngDens,
+     (if (data.volume > 0.f)
+    {
+      add_with_corr(p.moments_arr->firstEngDens,
                     CMCTemporaries::firstEngDensAux(p.moments_arr),
                     cluster,
                     data.weighted_energy * data.w_E_over_V);
+      }
      ),
-     (ToLoad::ReverseEnergyDensityNormalization),
-     (const float new_firstEngDens = p.moments_arr->firstEngDens[cluster] + CMCTemporaries::firstEngDensAux(p.moments_arr, cluster);
-      p.moments_arr->firstEngDens[cluster] = new_firstEngDens * data.rev_energy_density_norm;
-     )
+    (ToLoad::ReverseEnergyDensityNormalization),
+    (const float new_firstEngDens = p.moments_arr->firstEngDens[cluster] + CMCTemporaries::firstEngDensAux(p.moments_arr, cluster);
+     p.moments_arr->firstEngDens[cluster] = new_firstEngDens * data.rev_energy_density_norm;
+    )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
@@ -1766,7 +1771,7 @@ namespace
     (const float new_lateral = p.moments_arr->lateral[cluster] + CMCTemporaries::lateralAux(p.moments_arr, cluster);
      const float new_norm    = CMCTemporaries::lateralNormalization(p.moments_arr, cluster) +
                                CMCTemporaries::lateralNormalizationAux(p.moments_arr, cluster);
-     p.moments_arr->lateral[cluster] = new_lateral / new_norm;
+     p.moments_arr->lateral[cluster] = new_lateral / (new_norm != 0.f ? new_norm : 1.f);
     )
     );
 
@@ -1790,7 +1795,7 @@ namespace
     (const float new_longitudinal = p.moments_arr->longitudinal[cluster] + CMCTemporaries::longitudinalAux(p.moments_arr, cluster);
      const float new_norm          = CMCTemporaries::longitudinalNormalization(p.moments_arr, cluster) +
                                      CMCTemporaries::longitudinalNormalizationAux(p.moments_arr, cluster);
-     p.moments_arr->longitudinal[cluster] = new_longitudinal / new_norm;
+     p.moments_arr->longitudinal[cluster] = new_longitudinal / (new_norm != 0.f ? new_norm : 1.f);
     )
     );
 
@@ -1805,17 +1810,17 @@ namespace
      (const float mx = CMCTemporaries::mX(p.moments_arr, cluster) + CMCTemporaries::mXAux(p.moments_arr, cluster);
       const float my = CMCTemporaries::mY(p.moments_arr, cluster) + CMCTemporaries::mYAux(p.moments_arr, cluster);
       const float mz = CMCTemporaries::mZ(p.moments_arr, cluster) + CMCTemporaries::mZAux(p.moments_arr, cluster);
-      
+
       const float v_1 = mx * mx;
       const float v_2 = my * my;
       const float v_3 = mz * mz;
       const float v_4 = data.sum_energies * data.sum_energies;
-      
+
       const float c_1 = fmaf(mx, mx, -v_1);
       const float c_2 = fmaf(my, my, -v_2);
       const float c_3 = fmaf(mz, mz, -v_3);
       const float c_4 = fmaf(data.sum_energies, data.sum_energies, -v_4);
-      
+
       const float sq_mass = ClusterMomentsCalculator::sum_kahan_babushka_neumaier(v_4, -v_1, -v_2, -v_3, c_4, -c_1, -c_2, -c_3);
 
       p.moments_arr->mass[cluster] = sqrtf(fabsf(sq_mass)) * ((sq_mass > 0.f) - (sq_mass < 0.f));
@@ -1886,21 +1891,21 @@ namespace
      (),
      (ToLoad::SquareWeightedEnergy),
      (add_with_corr(p.moments_arr->PTD,
-                           CMCTemporaries::PTDAux(p.moments_arr),
-                           cluster,
-                           data.square_w_E);
+                    CMCTemporaries::PTDAux(p.moments_arr),
+                    cluster,
+                    data.square_w_E);
 
-             //Comment on there:
-             //
-             //  +--------------- begin comment on there ---------------+
-             //  |                                                      |
-             //  | do not convert to pT since clusters are small and    |
-             //  | there is virtually no difference and cosh just costs |
-             //  | time ...                                             |
-             //  |                                                      |
-             //  +---------------- end comment on there ----------------+
-             //
-             //So maybe we could change this here?
+      //Comment on there:
+      //
+      //  +--------------- begin comment on there ---------------+
+      //  |                                                      |
+      //  | do not convert to pT since clusters are small and    |
+      //  | there is virtually no difference and cosh just costs |
+      //  | time ...                                             |
+      //  |                                                      |
+      //  +---------------- end comment on there ----------------+
+      //
+      //So maybe we could change this here?
      ),
      (ToLoad::SumEnergies),
      (const float new_PTD = p.moments_arr->PTD[cluster] + CMCTemporaries::PTDAux(p.moments_arr, cluster);
@@ -1915,16 +1920,19 @@ namespace
      (p.moments_arr->secondEngDens[cluster] = 0.f;
       CMCTemporaries::secondEngDensAux(p.moments_arr, cluster) = 0.f;
      ),
-     (),
+     (ToLoad::CellVolume),
      (ToLoad::WeightedEnergy, ToLoad::WeightedEnergyOverVolume),
-     (add_with_corr(p.moments_arr->secondEngDens,
+     (if (data.volume > 0.f)
+    {
+      add_with_corr(p.moments_arr->secondEngDens,
                     CMCTemporaries::secondEngDensAux(p.moments_arr),
                     cluster,
                     data.weighted_energy * data.w_E_over_V * data.w_E_over_V);
+      }
      ),
-     (ToLoad::ReverseEnergyDensityNormalization),
-     (const float new_secondEngDens = p.moments_arr->secondEngDens[cluster] + CMCTemporaries::secondEngDensAux(p.moments_arr, cluster);
-      p.moments_arr->secondEngDens[cluster] = new_secondEngDens * data.rev_energy_density_norm;)
+    (ToLoad::ReverseEnergyDensityNormalization),
+    (const float new_secondEngDens = p.moments_arr->secondEngDens[cluster] + CMCTemporaries::secondEngDensAux(p.moments_arr, cluster);
+     p.moments_arr->secondEngDens[cluster] = new_secondEngDens * data.rev_energy_density_norm;)
     );
 
     CALORECGPU_CMC_MOMENT_CALC
@@ -2199,15 +2207,18 @@ namespace
      (CMCTemporaries::energyDensityNormalization(p.moments_arr, cluster) = 0.f;
       CMCTemporaries::energyDensityNormalizationAux(p.moments_arr, cluster) = 0.f;
      ),
-     (),
+     (ToLoad::CellVolume),
      (ToLoad::WeightedEnergy),
-     (add_with_corr(CMCTemporaries::energyDensityNormalization(p.moments_arr),
+     (if (data.volume > 0.f)
+    {
+      add_with_corr(CMCTemporaries::energyDensityNormalization(p.moments_arr),
                     CMCTemporaries::energyDensityNormalizationAux(p.moments_arr),
                     cluster,
                     data.weighted_energy);
+      }
      ),
-     (),
-     ()
+    (),
+    ()
     );
 
     CALORECGPU_CMC_MOMENT_CALC
