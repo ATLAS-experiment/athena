@@ -127,7 +127,7 @@ class XCopyConversion
   : public SG::CopyConversion<X1, X3>
 {
 public:
-  void convert (const X1& src, X3& dst) const
+  virtual void convert (const X1& src, X3& dst) const override
   { dst.a = src.a; }
 };
 
@@ -157,7 +157,7 @@ class XLock : public ILockable
 {
 public:
   XLock() : m_locked (false) {}
-  void lock() { m_locked = true; std::cout << "lock\n"; }
+  virtual void lock() override { m_locked = true; std::cout << "lock\n"; }
   bool m_locked;
 };
 CLASS_DEF(XLock, 8114, 1)
@@ -168,7 +168,7 @@ class TestRegisterTransient
   : public SG::IRegisterTransient
 {
 public:
-  virtual void registerTransient (void* trans) { m_xtrans.push_back (trans); }
+  virtual void registerTransient (void* trans) override { m_xtrans.push_back (trans); }
 
   std::vector<void*> m_xtrans;
 };

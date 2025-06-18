@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 
 #ifndef ATHENAKERNEL_CONDCONTMAKER_H
@@ -26,7 +26,7 @@ namespace CondContainer {
     
     virtual
     SG::DataObjectSharedPtr<DataObject>
-    Create(Athena::IRCUSvc& rcusvc, const CLID& clid, const std::string& key)  const {
+    Create(Athena::IRCUSvc& rcusvc, const CLID& clid, const std::string& key) const override {
       DataObjID id(clid,key);
       
       return SG::DataObjectSharedPtr<DataObject>
