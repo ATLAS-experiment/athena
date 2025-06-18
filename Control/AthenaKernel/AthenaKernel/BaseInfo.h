@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaKernel/BaseInfo.h
@@ -411,14 +411,14 @@ public:
   typedef DST target_type;
 
   /// Create an instance of the destination class.
-  virtual void* create() const { return new DST; }
+  virtual void* create() const override { return new DST; }
 
   /// Destroy an instance of the destination class.
-  virtual void destroy (void* p) const { delete reinterpret_cast<DST*>(p); }
+  virtual void destroy (void* p) const override { delete reinterpret_cast<DST*>(p); }
 
   /// Convert the contents of an instance of the source class SRC
   /// to an instance of the destination class DST.
-  virtual void convertUntyped (const void* src, void* dst) const
+  virtual void convertUntyped (const void* src, void* dst) const override
   {
     convert (*reinterpret_cast<const SRC*>(src),
              *reinterpret_cast<DST*>(dst));
