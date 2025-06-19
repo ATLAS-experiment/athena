@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -13,10 +13,9 @@
 using namespace CaloRecGPU;
 
 CaloGPUOutput::CaloGPUOutput(const std::string & type, const std::string & name, const IInterface * parent):
-  AthAlgTool(type, name, parent),
+  base_class(type, name, parent),
   m_constantDataSaved(false)
 {
-  declareInterface<CaloClusterGPUProcessor> (this);
 }
 
 StatusCode CaloGPUOutput::execute(const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data, void * /*temporary_buffer*/) const

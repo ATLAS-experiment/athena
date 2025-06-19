@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -16,9 +16,8 @@
 using namespace CaloRecGPU;
 
 CaloCellsCounterGPU::CaloCellsCounterGPU(const std::string & type, const std::string & name, const IInterface * parent):
-  AthAlgTool(type, name, parent)
+  base_class(type, name, parent)
 {
-  declareInterface<CaloClusterGPUProcessor> (this);
 }
 
 

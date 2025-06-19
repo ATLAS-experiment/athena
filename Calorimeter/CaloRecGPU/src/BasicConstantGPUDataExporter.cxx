@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -23,11 +23,10 @@
 using namespace CaloRecGPU;
 
 BasicConstantGPUDataExporter::BasicConstantGPUDataExporter(const std::string & type, const std::string & name, const IInterface * parent):
-  AthAlgTool(type, name, parent),
+  base_class(type, name, parent),
   CaloGPUTimed(this),
   m_hasBeenInitialized(false)
 {
-  declareInterface<ICaloClusterGPUConstantTransformer> (this);
 }
 
 StatusCode BasicConstantGPUDataExporter::initialize()
@@ -72,12 +71,17 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
   const CaloCell_ID * calo_id = calo_dd_man->getCaloCell_ID();
 
+#if CALORECGPU_ETA_PHI_MAP_DEBUG
   float min_eta_pos[NumSamplings], max_eta_pos[NumSamplings],
         min_eta_neg[NumSamplings], max_eta_neg[NumSamplings],
         min_phi_pos[NumSamplings], max_phi_pos[NumSamplings],
         min_phi_neg[NumSamplings], max_phi_neg[NumSamplings],
-        min_deta   [NumSamplings], min_dphi   [NumSamplings];
-
+        min_deta   [NumSamplings], min_dphi   [NumSamplings],
+        max_deta   [NumSamplings], max_dphi   [NumSamplings],
+        avg_deta   [NumSamplings], avg_dphi   [NumSamplings],
+        min_dr     [NumSamplings], min_dz     [NumSamplings],
+        max_dr     [NumSamplings], max_dz     [NumSamplings];
+        
   for (int i = 0; i < NumSamplings; ++i)
     {
       min_eta_pos[i] = std::numeric_limits<float>::max();
@@ -90,7 +94,28 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
       max_phi_neg[i] = std::numeric_limits<float>::lowest();
       min_deta   [i] = std::numeric_limits<float>::max();
       min_dphi   [i] = std::numeric_limits<float>::max();
+      max_deta   [i] = std::numeric_limits<float>::lowest();
+      max_dphi   [i] = std::numeric_limits<float>::lowest();
+      avg_deta   [i] = 0.f;
+      avg_dphi   [i] = 0.f;
+      min_dr     [i] = std::numeric_limits<float>::max();
+      min_dz     [i] = std::numeric_limits<float>::max();
+      max_dr     [i] = std::numeric_limits<float>::lowest();
+      max_dz     [i] = std::numeric_limits<float>::lowest();
+      
+      cd.m_geometry->nCellsPerSampling[i] = 0;
     }
+#else
+  float min_eta[NumSamplings], max_eta[NumSamplings];
+
+  for (int i = 0; i < NumSamplings; ++i)
+    {
+      min_eta[i] = std::numeric_limits<float>::max();
+      max_eta[i] = std::numeric_limits<float>::lowest();
+      
+      cd.m_geometry->nCellsPerSampling[i] = 0;
+    }
+#endif
 
   for (int cell = 0; cell < NCaloCells; ++cell)
     {
@@ -131,35 +156,97 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
       cd.m_geometry->volume[cell] = caloElement->volume();
       cd.m_geometry->neighbours.offsets[cell] = 0;
 
+#if CALORECGPU_ETA_PHI_MAP_DEBUG
+      const float eta_minus = caloElement->eta() - caloElement->deta() / 2;
+      const float eta_plus  = caloElement->eta() + caloElement->deta() / 2;
+      const float phi_minus = caloElement->phi() - caloElement->dphi() / 2;
+      const float phi_plus  = caloElement->phi() + caloElement->dphi() / 2;
+      
       if (caloElement->eta() >= 0)
         {
-          min_eta_pos[sampling] = std::min(min_eta_pos[sampling], caloElement->eta() - caloElement->deta() / 2);
-          min_phi_pos[sampling] = std::min(min_phi_pos[sampling], caloElement->phi() - caloElement->dphi() / 2);
-          max_eta_pos[sampling] = std::max(max_eta_pos[sampling], caloElement->eta() + caloElement->deta() / 2);
-          max_phi_pos[sampling] = std::max(max_phi_pos[sampling], caloElement->phi() + caloElement->dphi() / 2);
+          min_eta_pos[sampling] = std::min({min_eta_pos[sampling], eta_minus, eta_plus});
+          min_phi_pos[sampling] = std::min({min_phi_pos[sampling], phi_minus, phi_plus});
+          max_eta_pos[sampling] = std::max({max_eta_pos[sampling], eta_minus, eta_plus});
+          max_phi_pos[sampling] = std::max({max_phi_pos[sampling], phi_minus, phi_plus});
         }
       else
         {
-          min_eta_neg[sampling] = std::min(min_eta_neg[sampling], caloElement->eta() - caloElement->deta() / 2);
-          min_phi_neg[sampling] = std::min(min_phi_neg[sampling], caloElement->phi() - caloElement->dphi() / 2);
-          max_eta_neg[sampling] = std::max(max_eta_neg[sampling], caloElement->eta() + caloElement->deta() / 2);
-          max_phi_neg[sampling] = std::max(max_phi_neg[sampling], caloElement->phi() + caloElement->dphi() / 2);
+          min_eta_neg[sampling] = std::min({min_eta_neg[sampling], eta_minus, eta_plus});
+          min_phi_neg[sampling] = std::min({min_phi_neg[sampling], phi_minus, phi_plus});
+          max_eta_neg[sampling] = std::max({max_eta_neg[sampling], eta_minus, eta_plus});
+          max_phi_neg[sampling] = std::max({max_phi_neg[sampling], phi_minus, phi_plus});
         }
       min_deta[sampling] = std::min(min_deta[sampling], caloElement->deta());
       min_dphi[sampling] = std::min(min_dphi[sampling], caloElement->dphi());
-
+      max_deta[sampling] = std::max(max_deta[sampling], caloElement->deta());
+      max_dphi[sampling] = std::max(max_dphi[sampling], caloElement->dphi());
+      min_dr  [sampling] = std::min(min_dr  [sampling], caloElement->dr  ());
+      min_dz  [sampling] = std::min(min_dz  [sampling], caloElement->dz  ());
+      max_dr  [sampling] = std::max(max_dr  [sampling], caloElement->dr  ());
+      max_dz  [sampling] = std::max(max_dz  [sampling], caloElement->dz  ());
+      
+      avg_deta[sampling] += caloElement->deta();
+      avg_dphi[sampling] += caloElement->dphi();
+#else
+      const float eta_below = fabsf(caloElement->eta() - caloElement->deta() / 2);
+      const float eta_above = fabsf(caloElement->eta() + caloElement->deta() / 2);
+      min_eta[sampling] = std::min(min_eta[sampling], std::min(eta_below, eta_above));
+      max_eta[sampling] = std::max(max_eta[sampling], std::max(eta_below, eta_above));
+#endif
+      
+      cd.m_geometry->nCellsPerSampling[sampling] += 1;
     }
+    
+  auto after_geo = clock_type::now();
 
   for (int i = 0; i < NumSamplings; ++i)
     {
-      constexpr float corrective_factor = 0.99f;
-      cd.m_geometry->etaPhiToCell.initialize(i, min_eta_neg[i], min_phi_neg[i], max_eta_neg[i], max_phi_neg[i],
-                                             min_eta_pos[i], min_phi_pos[i], max_eta_pos[i], max_phi_pos[i],
-                                             min_deta[i]*corrective_factor, min_dphi[i]*corrective_factor);
+#if CALORECGPU_ETA_PHI_MAP_DEBUG
+      avg_deta[i] /= cd.m_geometry->nCellsPerSampling[i];
+      avg_dphi[i] /= cd.m_geometry->nCellsPerSampling[i];
+      if (cd.m_geometry->nCellsPerSampling[i] > 0)
+        {
+          printf("CALORECGPU ETA PHI MAP DEBUG OUTPUT: %d | %f %f %f %f | %f %f %f %f | %f %f | %f %f | %f %f %d | %f %f | %f %f\n",
+                 i, min_eta_neg[i], min_phi_neg[i], max_eta_neg[i], max_phi_neg[i],
+                 min_eta_pos[i], min_phi_pos[i], max_eta_pos[i], max_phi_pos[i],
+                 min_deta[i], min_dphi[i], max_deta[i], max_dphi[i],
+                 avg_deta[i], avg_dphi[i], cd.m_geometry->nCellsPerSampling[i],
+                 min_dr[i], min_dz[i], max_dr[i], max_dz[i]);
+        }
+      const float this_min_eta = std::min(fabsf(max_eta_neg[i]), fabsf(min_eta_pos[i]));
+      const float this_max_eta = std::max(fabsf(min_eta_neg[i]), fabsf(max_eta_pos[i]));
+#else
+      const float this_min_eta = min_eta[i];
+      const float this_max_eta = max_eta[i];
+#endif
+
+      if (cd.m_geometry->nCellsPerSampling[i] <= 0)
+        {
+          cd.m_geometry->etaPhiToCell.initialize(i, -1, 1);
+          //Just to prevent NaN.
+        }
+      else
+        {
+          cd.m_geometry->etaPhiToCell.initialize(i, this_min_eta, this_max_eta);
+        }
     }
 
   cd.m_geometry->fill_eta_phi_map();
+  
+#if CALORECGPU_ETA_PHI_MAP_DEBUG
+  for (int i = 0; i < NumSamplings; ++i)
+    {
+      auto printer = [&](const auto & entry)
+      { 
+        printf("CALORECGPU ETA PHI MAP DEBUG OUTPUT: %d | %d\n", i, entry.get_max_real_overlap());
+      };
+      
+      cd.m_geometry->etaPhiToCell.apply_to_sampling(i, printer);
+    }
+#endif
 
+  auto after_eta_phi = clock_type::now();
+  
   std::vector<IdentifierHash> neighbour_vector, full_neighs, prev_neighs;
 
   for (int cell = 0; cell < NCaloCells; ++cell)
@@ -308,7 +395,7 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
     }
 #endif
 
-  auto after_geo = clock_type::now();
+  auto after_pairs = clock_type::now();
 
   /*
     //Useful output for debugging and studying regularities in calorimeter geometry...
@@ -406,8 +493,11 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
   if (m_measureTimes)
     {
-      record_times(ctx.evt(), time_cast(start, after_geo),
-                   time_cast(after_geo, after_noise),
+      record_times(ctx.evt(),
+                   time_cast(start, after_geo),
+                   time_cast(after_geo, after_eta_phi),
+                   time_cast(after_eta_phi, after_pairs),
+                   time_cast(after_pairs, after_noise),
                    time_cast(after_noise, after_send)
                   );
     }
@@ -421,7 +511,7 @@ StatusCode BasicConstantGPUDataExporter::finalize()
 
   if (m_measureTimes)
     {
-      print_times("Geometry Geometry_Correction Noise Transfer_to_GPU", 3 /*4*/);
+      print_times("Basic_Geometry Eta_Phi_Map_Finalize Pairs Noise Transfer_to_GPU", 5);
     }
   return StatusCode::SUCCESS;
 }

@@ -373,7 +373,7 @@ def hltCaloTopoClusteringCfg(
     clustermakername = clustermakername_nosuffix + nameSuffix
     
     # TODO - Don't use hasFlag here, use another concrete flag instead
-    if flags.hasFlag("CaloRecGPU.GlobalFlags.UseCaloRecGPU") and flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU and not doTau and "FS" in clustermakername:
+    if flags.hasFlag("CaloRecGPU.GlobalFlags.UseCaloRecGPU") and flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU and "FS" in clustermakername:
       flags = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "Trigger.CaloRecGPU.Default", True)
       from CaloRecGPU.CaloRecGPUConfig import GPUCaloTopoClusterCfg
       
@@ -381,18 +381,24 @@ def hltCaloTopoClusteringCfg(
       GPUKernelSvc = CompFactory.GPUKernelSizeOptimizerSvc()
       acc.addService(GPUKernelSvc)
       
-      monitorCells = "FS" in clustermakername
-      
       gpuhyb = GPUCaloTopoClusterCfg(flags,
                                      True,
                                      CellsName,
                                      clustersname = clusters if "CaloMon" in clustermakername else recordable(clusters),
                                      name = clustermakername,
-                                     MonitorTool = trigCaloClusterMonitoringTool(flags, monitorCells),
-                                     MonitorCells = monitorCells,
                                      ReallyUseGPUTools = not flags.CaloRecGPU.GlobalFlags.UseCPUToolsInstead)
                                      
       acc.merge(gpuhyb)
+      
+      monitorCells = "FS" in clustermakername
+      
+      monitor = CompFactory.TrigCaloClusterMonitor(clustermakername_nosuffix + 'Monitoring' + nameSuffix,
+                                                   CellsName = CellsName,
+                                                   ClustersName = clusters,
+                                                   MonitorCells = monitorCells,
+                                                   MonitoringTool = trigCaloClusterMonitoringTool(flags, monitorCells))
+      acc.addEventAlgo(monitor, primary=False)
+      
     else : 
        calt=hltTopoClusterMakerCfg(flags, clustermakername_nosuffix, cellsKey=CellsName, clustersKey=clusters, doLC=doTau, suffix = nameSuffix)
        acc.merge(calt)

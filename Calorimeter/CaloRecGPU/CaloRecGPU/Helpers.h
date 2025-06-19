@@ -209,15 +209,17 @@ namespace CaloRecGPU
 
   namespace Helpers
   {
-
+    
     /// \brief Returns the ceiling of num/denom, with proper rounding.
-    inline constexpr int int_ceil_div(const int num, const int denom)
+    template <class T1, class T2>
+    inline constexpr auto int_ceil_div(const T1 num, const T2 denom)
     {
       return num / denom + (num % denom != 0);
     }
 
     /// \brief Returns the floor of num/denom, with proper rounding.
-    inline constexpr int int_floor_div(const int num, const int denom)
+    template <class T1, class T2>
+    inline constexpr auto int_floor_div(const T1 num, const T2 denom)
     {
       return num / denom;
     }
@@ -335,8 +337,8 @@ namespace CaloRecGPU
       //Copied directly from ROOT...
 
       int kMaxit    = 50;
-      float kEps   = 1e-14;
-      float kConst = 0.8862269254527579;     // sqrt(pi)/2.0
+      float kEps   = 1e-14f;
+      float kConst = 0.8862269254527579f;     // sqrt(pi)/2.0
 
       if (abs(x) <= kEps)
         {
@@ -349,10 +351,10 @@ namespace CaloRecGPU
         {
           erfi  = kConst * fabsf(x);
           y0    = erff(0.9f * erfi);
-          derfi = 0.1 * erfi;
+          derfi = 0.1f * erfi;
           for (int iter = 0; iter < kMaxit; iter++)
             {
-              y1  = 1. - erfc(erfi);
+              y1  = 1.f - erfc(erfi);
               dy1 = fabsf(x) - y1;
               if (fabsf(dy1) < kEps)
                 {
@@ -371,7 +373,7 @@ namespace CaloRecGPU
               erfi  += derfi;
               if (fabsf(derfi / erfi) < kEps)
                 {
-                  if (x < 0)
+                  if (x < 0.f)
                     {
                       return -erfi;
                     }
@@ -386,14 +388,18 @@ namespace CaloRecGPU
 #endif
     }
 
+    //Food for thought: any sort of proper argument reduction here?
+    //(E. g. Cody-Waite or Payne-Hanek algorithm?)
+
     CUDA_HOS_DEV static inline
     float regularize_angle(const float b, const float a = 0.f)
     //a. k. a. proxim in Athena code.
     {
       using namespace std;
-      const float diff = b - a;
-      const float divi = (fabsf(diff) - Helpers::Constants::pi<float>) / (2 * Helpers::Constants::pi<float>);
-      return b - ceilf(divi) * ((b > a + Helpers::Constants::pi<float>) - (b < a - Helpers::Constants::pi<float>)) * 2 * Helpers::Constants::pi<float>;
+      constexpr float pi = Helpers::Constants::pi<float>;
+      constexpr float two_pi = 2 * pi;
+      const float ret = remainderf(b, two_pi);
+      return ret + ((ret < a - pi) - (ret > a + pi)) * two_pi;
     }
 
     CUDA_HOS_DEV static inline
@@ -401,38 +407,36 @@ namespace CaloRecGPU
     //a. k. a. proxim in Athena code.
     {
       using namespace std;
-      const float diff = b - a;
-      const float divi = (fabs(diff) - Helpers::Constants::pi<double>) / (2 * Helpers::Constants::pi<double>);
-      return b - ceil(divi) * ((b > a + Helpers::Constants::pi<double>) - (b < a - Helpers::Constants::pi<double>)) * 2 * Helpers::Constants::pi<double>;
+      constexpr double pi = Helpers::Constants::pi<double>;
+      constexpr double two_pi = 2 * pi;
+      const double ret = remainderf(b, two_pi);
+      return ret + ((ret < a - pi) - (ret > a + pi)) * two_pi;
     }
 
     template <class T>
     CUDA_HOS_DEV static inline
     T angular_difference(const T x, const T y)
     {
-      return regularize_angle(x - y, T(0));
-      //Might be problematic if x and y have a significant difference
-      //in terms of factors of pi, in which case one should add
-      //a regularize_angle(x) and regularize_angle(y) in there.
-      //For our use case, I think this will be fine.
-      //(The Athena ones are even worse,
-      // being a branchy thing that only
-      // takes care of one factor of 2 pi...)
+      return regularize_angle(regularize_angle(x) - regularize_angle(y));
     }
 
     CUDA_HOS_DEV static inline
     float eta_from_coordinates(const float x, const float y, const float z)
     {
       using namespace std;
-      const float rho2 = x * x + y * y;
-      if (rho2 > 0.)
+      
+      if (x != 0 || y != 0)
         {
-          const float m = sqrtf(rho2 + z * z);
-          return 0.5 * logf((m + z) / (m - z));
+#ifdef __CUDA_ARCH__
+          const float m = norm3df(x, y, z);
+#else
+          const float m = hypot(x, y, z);
+#endif
+          return 0.5f * logf((m + z) / (m - z));
         }
       else
         {
-          constexpr float s_etaMax = 22756.0;
+          constexpr float s_etaMax = 22756.0f;
           return z + ((z > 0) - (z < 0)) * s_etaMax;
         }
     }
@@ -441,10 +445,13 @@ namespace CaloRecGPU
     double eta_from_coordinates(const double x, const double y, const double z)
     {
       using namespace std;
-      const double rho2 = x * x + y * y;
-      if (rho2 > 0.)
+      if (x != 0 || y != 0)
         {
-          const double m = sqrt(rho2 + z * z);
+#ifdef __CUDA_ARCH__
+          const float m = norm3d(x, y, z);
+#else
+          const float m = hypot(x, y, z);
+#endif
           return 0.5 * log((m + z) / (m - z));
         }
       else
@@ -751,49 +758,46 @@ namespace CaloRecGPU
       {
       }
 
-      SimpleContainer(const indexer sz)
+      SimpleContainer(const indexer sz) : m_size(sz)
       {
         m_array = Manager::template allocate<Context>(sz);
-        m_size = sz;
       }
 
       /*!
         \warning We assume the pointer is in a valid memory location!
       */
-      SimpleContainer(T * other_array, const indexer sz)
+      SimpleContainer(T * other_array, const indexer sz) : m_size(sz)
       {
         m_array = Manager::template allocate<Context>(sz);
         Manager::template copy<Context, Context>(m_array, other_array, sz);
-        m_size = sz;
       }
 
-      SimpleContainer(const SimpleContainer & other)
+      SimpleContainer(const SimpleContainer & other) : m_size(other.m_size)
       {
-        m_size = other.m_size;
         m_array = Manager::template allocate<Context>(m_size);
         Manager::template copy<Context, Context>(m_array, other.m_array, m_size);
       }
 
-      SimpleContainer(SimpleContainer && other)
+      SimpleContainer(SimpleContainer && other) : m_size(other.m_size)
       {
-        m_size = other.m_size;
         m_array = nullptr;
         Manager::template move<Context, Context>(m_array, other.m_array, m_size);
         other.m_size = 0;
       }
 
       template <class other_indexer, class other_context, bool other_hold>
-      SimpleContainer(const SimpleContainer<T, other_indexer, other_context, other_hold> & other)
+      SimpleContainer(const SimpleContainer<T, other_indexer, other_context, other_hold> & other) :
+        m_size(other.m_size)
       {
-        m_size = other.m_size;
+
         m_array = Manager::template allocate<Context>(m_size);
         Manager::template copy<Context, other_context>(m_array, other.m_array, m_size);
       }
 
       template <class other_indexer, class other_context>
-      SimpleContainer(SimpleContainer<T, other_indexer, other_context, true> && other)
+      SimpleContainer(SimpleContainer<T, other_indexer, other_context, true> && other) :
+        m_size(other.m_size)
       {
-        m_size = other.m_size;
         m_array = nullptr;
         Manager::template move<Context, other_context>(m_array, other.m_array, m_size);
         other.m_size = 0;
@@ -1005,10 +1009,10 @@ namespace CaloRecGPU
       template <class other_indexer, bool other_hold>
       // cppcheck-suppress  uninitMemberVar
       //Try to suppress the uninitialized member thing that is probably being thrown off by the CUDA_HOS_DEV macro...
-      CUDA_HOS_DEV SimpleContainer(const SimpleContainer<T, other_indexer, Context, other_hold> & other)
+      CUDA_HOS_DEV SimpleContainer(const SimpleContainer<T, other_indexer, Context, other_hold> & other) :
+        m_size(other.m_size),
+        m_array(other.m_array)
       {
-        m_size = other.m_size;
-        m_array = other.m_array;
       }
 
       // cppcheck-suppress  operatorEqVarError
