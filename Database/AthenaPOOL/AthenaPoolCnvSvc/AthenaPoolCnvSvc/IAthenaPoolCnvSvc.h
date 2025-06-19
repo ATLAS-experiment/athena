@@ -96,9 +96,6 @@ public:
    /// Set the input file attributes, if any are requested from jobOpts
    /// @param fileName [IN] name of the input file
    virtual StatusCode setInputAttributes(const std::string& fileName) = 0;
-
-   /// Commit Catalog
-   virtual StatusCode commitCatalog() = 0;
 };
 
 #endif

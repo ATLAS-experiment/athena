@@ -16,14 +16,12 @@
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 
-#include "AthenaKernel/IAthMetaDataSvc.h"
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "FileCatalog/IFileCatalog.h"
 #include "RootUtils/APRDefaults.h"
 
 #include <algorithm>
@@ -427,7 +425,7 @@ Token* AthenaPoolBaseCnvSvc::registerForWrite(Placement* placement, const void* 
 void AthenaPoolBaseCnvSvc::setObjPtr(void*& obj, const Token* token) {
    ATH_MSG_VERBOSE("Requesting object for: " << token->toString());
    // StopWatch listens from here until the end of this current scope
-   PMonUtils::BasicStopWatch stopWatchOuter("cObjR_ALL", m_chronoMap);
+   PMonUtils::BasicStopWatch stopWatch("cObjR_ALL", m_chronoMap);
    if (token->dbID() != Guid::null()) {
       ATH_MSG_VERBOSE("Requesting object for: " << token->toString());
       m_poolSvc->setObjPtr(obj, token);
@@ -553,14 +551,6 @@ StatusCode AthenaPoolBaseCnvSvc::setInputAttributes(const std::string& fileName)
          }
       }
    }
-   return(StatusCode::SUCCESS);
-}
-//________________________________________________________________________________
-StatusCode AthenaPoolBaseCnvSvc::commitCatalog() {
-   pool::IFileCatalog* catalog ATLAS_THREAD_SAFE =  // This is on the SharedWriter, after mother process finishes events
-	   const_cast<pool::IFileCatalog*>(m_poolSvc->catalog());
-   catalog->commit();
-   catalog->start();
    return(StatusCode::SUCCESS);
 }
 

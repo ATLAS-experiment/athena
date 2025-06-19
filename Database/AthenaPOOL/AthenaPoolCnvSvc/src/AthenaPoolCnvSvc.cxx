@@ -9,24 +9,20 @@
 
 #include "AthenaPoolCnvSvc.h"
 
-#include "GaudiKernel/AttribStringParser.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/FileIncident.h"
+#include "GaudiKernel/GenericAddress.h"
 #include "GaudiKernel/IIncidentSvc.h"
-#include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 
-#include "AthenaKernel/IAthenaSerializeSvc.h"
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "AthenaKernel/IAthMetaDataSvc.h"
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
-#include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
 
 #include "StorageSvc/DbReflex.h"
 #include "FileCatalog/IFileCatalog.h"
-#include "RootUtils/APRDefaults.h"
 
 #include "AuxDiscoverySvc.h"
 
@@ -89,12 +85,6 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
 StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
 // This is called before DataObjects are being converted.
    std::string outputConnection = outputConnectionSpec.substr(0, outputConnectionSpec.find('['));
-   // Extract the technology
-   int tech = m_dbType.type();
-   if (!decodeOutputSpec(outputConnection, tech).isSuccess()) {
-      ATH_MSG_ERROR("connectOutput FAILED extract file name and technology.");
-      return(StatusCode::FAILURE);
-   }
    if (m_makeStreamingToolClient.value() > 0 && !m_outputStreamingTool.empty() && !m_outputStreamingTool->isServer() && !m_outputStreamingTool->isClient()) {
       if (!makeClient(m_makeStreamingToolClient.value()).isSuccess()) {
          ATH_MSG_ERROR("Could not make AthenaPoolCnvSvc a Share Client");
@@ -171,7 +161,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
             }
             // StopWatch listens from here until the end of this current scope
             {
-               PMonUtils::BasicStopWatch stopWatch("cRep_" + objName, m_chronoMap);
+               PMonUtils::BasicStopWatch stopWatch("cRep_" + objName, this->m_chronoMap);
                std::string tokenStr = placementStr;
                std::string contName = strstr(placementStr, "[CONT=");
                tokenStr.erase(tokenStr.find("[CONT=")); //throws if [CONT= not found
@@ -565,7 +555,7 @@ void AthenaPoolCnvSvc::setObjPtr(void*& obj, const Token* token) {
          StatusCode sc = StatusCode::FAILURE;
          // StopWatch listens from here until the end of this current scope
          {
-            PMonUtils::BasicStopWatch stopWatchInner("gObj_ALL", m_chronoMap);
+            PMonUtils::BasicStopWatch stopWatch("gObj_ALL", this->m_chronoMap);
             sc = m_inputStreamingTool->getObject(&buffer, nbytes);
             while (sc.isRecoverable()) {
                // sleep
@@ -679,7 +669,7 @@ StatusCode AthenaPoolCnvSvc::readData() {
          objName = token.classID().toString();
       }
       // StopWatch listens from here until the end of this current scope
-      PMonUtils::BasicStopWatch stopWatchInner("cObj_" + objName, m_chronoMap);
+      PMonUtils::BasicStopWatch stopWatch("cObj_" + objName, this->m_chronoMap);
       this->setObjPtr(instance, &token);
       // Serialize object via ROOT
       RootType cltype(pool::DbReflex::forGuid(token.classID()));

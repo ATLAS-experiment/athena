@@ -12,9 +12,9 @@
 
 #include "AthenaPoolBaseCnvSvc.h"
 #include "AthenaKernel/IDataShare.h"
+#include "AthenaKernel/IAthenaSerializeSvc.h"
 
 // Forward declarations
-class IAthenaSerializeSvc;
 class Guid;
 
 template <class TYPE> class SvcFactory;
@@ -109,22 +109,13 @@ public:
    virtual ~AthenaPoolCnvSvc() = default;
 
 private: // data
-   /// decoded storage tech requested in "StorageTechnology" property
-   pool::DbType                  m_dbType;
-   std::string                   m_lastInputFileName;
    ServiceHandle<IAthenaSerializeSvc> m_serializeSvc{this,"AthenaRootSerializeSvc","AthenaRootSerializeSvc"};
    ToolHandle<IAthenaIPCTool>    m_inputStreamingTool{this,"InputStreamingTool",{}};
    ToolHandle<IAthenaIPCTool>    m_outputStreamingTool{this,"OutputStreamingTool",{}};
    bool m_streamServerActive=false;
    int m_metadataClient=0;
 
-   /// Map that holds chrono information
-   PMonUtils::BasicStopWatchResultMap_t m_chronoMap{};
-
 private: // properties
-   std::vector<unsigned int> m_contextAttr;
-   std::map<std::string, int> m_fileCommitCounter;
-   std::map<std::string, int> m_fileFlushSetting;
    /// For SharedWriter:
    /// To use MetadataSvc to merge data placed in a certain container
    StringProperty  m_metadataContainerProp{this,"OutputMetadataContainer","MetaData"};

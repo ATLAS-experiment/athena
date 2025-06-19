@@ -30,7 +30,6 @@
 #include <limits>
 
 // Forward declarations
-class IAthenaSerializeSvc;
 class Guid;
 
 template <class TYPE> class SvcFactory;
@@ -145,9 +144,6 @@ public:
    /// @param fileName [IN] name of the input file
    virtual StatusCode setInputAttributes(const std::string& fileName) override;
 
-   /// Commit Catalog
-   virtual StatusCode commitCatalog() override;
-
    /// Implementation of IIncidentListener: Handle for EndEvent incidence
    virtual void handle(const Incident& incident) override;
 
@@ -181,6 +177,7 @@ private: // data
    ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    ServiceHandle<IClassIDSvc>    m_clidSvc{this,"ClassIDSvc","ClassIDSvc"};
 
+protected: // shared with derived services
    /// Map that holds chrono information
    PMonUtils::BasicStopWatchResultMap_t m_chronoMap{};
 
