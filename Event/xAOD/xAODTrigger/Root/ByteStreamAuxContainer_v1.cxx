@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
 #include <iostream>
+#include <atomic>
 
 // EDM include(s):
 #include "xAODCore/tools/AuxPersVector.h"
@@ -163,14 +164,14 @@ namespace xAOD {
       }
 
       // Make a new variable.
-      SG::IAuxTypeVector* v = getVector1 (auxid, size, capacity, false, true);
-      if( v ) {
-         ret = v->toPtr();
-      }
-
       // If locked, mark as a decoration.
       if (m_locked) {
         m_decorations.insert (auxid);
+        std::atomic_thread_fence (std::memory_order_seq_cst);
+      }
+      SG::IAuxTypeVector* v = getVector1 (auxid, size, capacity, false, true);
+      if( v ) {
+         ret = v->toPtr();
       }
 
       return ret;
