@@ -80,7 +80,8 @@ def findTLAStep(chainConfig):
 
 def alignTLASteps(chain_configs, chain_dicts):
 
-    all_tla_chain_configs = [ch for ch in chain_configs if 'PhysicsTLA' in chain_dicts[ch.name]['eventBuildType']]
+    TLAEventBuildTypes = ('PhysicsTLA', 'FTagPEBTLA', 'EgammaPEBTLA', 'DarkJetPEBTLA')
+    all_tla_chain_configs = [ch for ch in chain_configs if any(ebtype in chain_dicts[ch.name]['eventBuildType'] for ebtype in TLAEventBuildTypes)]
 
     def getTLAStepPosition(chainConfig):
         tlaStep = findTLAStep(chainConfig)

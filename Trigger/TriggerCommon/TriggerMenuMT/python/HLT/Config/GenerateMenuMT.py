@@ -478,9 +478,10 @@ class GenerateMenuMT(metaclass=Singleton):
 
         # Configure event building strategy
         eventBuildType = mainChainDict['eventBuildType']
+        TLAEventBuildTypes = ('PhysicsTLA', 'FTagPEBTLA', 'EgammaPEBTLA', 'DarkJetPEBTLA')
         if eventBuildType:
             try:
-                if 'PhysicsTLA' in eventBuildType:
+                if any(ebtype in eventBuildType for ebtype in TLAEventBuildTypes):
                     log.debug("Adding TLA Step for chain %s", mainChainDict['chainName'])
                     TLABuildingSequences.addTLAStep(flags, theChainConfig, mainChainDict)
                 log.debug('Configuring event building sequence %s for chain %s', eventBuildType, mainChainDict['chainName'])

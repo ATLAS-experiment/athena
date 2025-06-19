@@ -8484,12 +8484,14 @@ HLT_g7_loose_EgammaPEBTLA_L1eEM5:
     2: 15
     3: 3
     4: 3
+    5: 3
   stepFeatures:
     0: 54
     1: 37
     2: 29
     3: 3
     4: 3
+    5: 3
 HLT_g7_loose_L1eEM5:
   eventCount: 3
   stepCounts:

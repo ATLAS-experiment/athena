@@ -892,8 +892,8 @@ TriggerHLTListRun3 = [
     ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.'+TLAMuonVars,                                'BS PhysicsTLA ESD', 'Muon'),
     
     # FS vertices
-    ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA DarkJetPEBTLA ESD AODFULL AODSLIM', 'Jet' ),
-    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,   'BS PhysicsTLA DarkJetPEBTLA ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD AODFULL AODSLIM', 'Jet' ),
+    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,   'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD AODFULL AODSLIM', 'Jet'),
 
     ('xAOD::VertexContainer#HLT_IDVertex_FSJet',                  'BS ESD AODFULL', 'Jet'),
     ('xAOD::VertexAuxContainer#HLT_IDVertex_FSJetAux.',           'BS ESD AODFULL', 'Jet'),
