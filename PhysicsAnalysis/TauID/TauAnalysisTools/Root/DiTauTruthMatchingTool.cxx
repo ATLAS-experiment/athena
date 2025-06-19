@@ -16,10 +16,6 @@
 #include "AthContainers/ConstAccessor.h"
 #include "AthContainers/Decorator.h"
 
-// EDM include(s):
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODMuon/MuonContainer.h"
-
 #include "MCTruthClassifier/MCTruthClassifier.h"
 
 using namespace TauAnalysisTools;
@@ -193,44 +189,6 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
         decTruthTaus ("TruthTaus");
       decTruthTaus(xDiTau) = vTruthLinks;
     }
-  
-  ElementLink<xAOD::TruthParticleContainer> lTruthLeptonLink;
-  static const SG::Decorator<unsigned int> decClassifierParticleType("classifierParticleTypeTruthLepton");
-  static const SG::Decorator<unsigned int> decClassifierParticleOrigin("classifierParticleOriginTruthLepton");
-  static const SG::Decorator<ElementLink<xAOD::TruthParticleContainer>> decTruthLeptonLink("truthLeptonLink");
-  
-  int mcTruthType = MCTruthPartClassifier::ParticleType::Unknown;
-  int mcTruthOrigin = MCTruthPartClassifier::ParticleOrigin::NonDefined;
-  static const SG::ConstAccessor<int> accTruthType("truthType");
-  static const SG::ConstAccessor<int> accTruthOrigin("truthOrigin");
-  static const SG::ConstAccessor<ElementLink<xAOD::ElectronContainer>> accElLink("elLink");
-  static const SG::ConstAccessor<ElementLink<xAOD::MuonContainer>> accMuLink("muonLink");
-  if(accElLink.isAvailable(xDiTau) && accMuLink.isAvailable(xDiTau))
-    ATH_MSG_ERROR("Links to reco electron and reco muon available for one ditau candidate.");
-  if(accElLink.isAvailable(xDiTau)){
-    const xAOD::Electron* pElectron = *accElLink(xDiTau);
-    if ((accTruthType.isAvailable(*pElectron) && accTruthOrigin.isAvailable(*pElectron)))
-      {
-	mcTruthType = accTruthType(*pElectron);
-	mcTruthOrigin = accTruthOrigin(*pElectron);
-      }
-    lTruthLeptonLink = checkTruthLepton(pElectron);
-  }
-  if(accMuLink.isAvailable(xDiTau)){
-    const xAOD::Muon* pMuon = *accMuLink(xDiTau);
-    if (accTruthType.isAvailable(*pMuon) && accTruthOrigin.isAvailable(*pMuon))
-      {
-	mcTruthType = accTruthType(*pMuon);
-	mcTruthOrigin = accTruthOrigin(*pMuon);
-      }
-    lTruthLeptonLink = checkTruthLepton(pMuon);
-  }
-
-  decIsTruthHadEl(xDiTau) = (char)(mcTruthType == MCTruthPartClassifier::ParticleType::IsoElectron && accNSubjets(xDiTau) != 0 && vTruthMatchedParticleType[0] == TruthHadronicTau);
-  decIsTruthHadMu(xDiTau) = (char)(mcTruthType == MCTruthPartClassifier::ParticleType::IsoMuon && accNSubjets(xDiTau) != 0 && vTruthMatchedParticleType[0] == TruthHadronicTau);
-  decClassifierParticleType(xDiTau) = mcTruthType;
-  decClassifierParticleOrigin(xDiTau) = mcTruthOrigin;
-  decTruthLeptonLink(xDiTau) = lTruthLeptonLink;
 
   static const SG::Decorator<float> decTruthLeadPt("TruthVisLeadPt");
   static const SG::Decorator<float> decTruthLeadEta("TruthVisLeadEta");
