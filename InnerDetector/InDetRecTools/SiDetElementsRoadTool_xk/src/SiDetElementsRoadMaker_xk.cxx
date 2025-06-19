@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -175,7 +175,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
     for (const auto & i : layer[1]) nc+=i.nElements();
     out<<"|----------------------------------------------------------------|"
        <<"\n";
-    out<<"| Barrel map containt "
+    out<<"| Barrel map contains "
        <<std::setw(3)<<nl<<" layers and"
        <<std::setw(5)<<nc<<" elements               |"
        <<"\n";
@@ -207,7 +207,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
     for (const auto & i : layer[0]) nc+=i.nElements();
     out<<"|----------------------------------------------------------------|"
        <<"\n";
-    out<<"| L.Endcap map containt"
+    out<<"| L.Endcap map contains"
        <<std::setw(3)<<nl<<" layers and"
        <<std::setw(5)<<nc<<" elements              |"
        <<"\n";
@@ -239,7 +239,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
     for (const auto & i : layer[2]) nc+=i.nElements();
     out<<"|----------------------------------------------------------------|"
        <<"\n";
-    out<<"| R.Endcap map containt"
+    out<<"| R.Endcap map contains"
        <<std::setw(3)<<nl<<" layers and"
        <<std::setw(5)<<nc<<" elements              |"
        <<"\n";
@@ -250,8 +250,8 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
     out<<"|------|-----------|------------|------------|------------|------|"
        <<"\n";
     for (unsigned int i=0; i!=layer[2].size(); ++i) {
-      double rmin = layer[2].at(i).r()-layer[0].at(i).dr();
-      double rmax = layer[2].at(i).r()+layer[0].at(i).dr();
+      double rmin = layer[2].at(i).r()-layer[2].at(i).dr();
+      double rmax = layer[2].at(i).r()+layer[2].at(i).dr();
       out<<"| "
 	 <<std::setw(4)<<i<<" |"
 	 <<std::setw(10)<<std::setprecision(4)<<  layer[2].at(i).z()<<" | "
