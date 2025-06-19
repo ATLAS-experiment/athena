@@ -17,6 +17,8 @@
 // ROOT include(s):
 #include <TError.h>
 
+#include <atomic>
+
 namespace xAOD::details {
 
 AuxStoreBase::AuxStoreBase(bool topStore, EStructMode mode)
@@ -157,17 +159,17 @@ void* AuxStoreBase::getDecoration(SG::auxid_t auxid, std::size_t size,
     void* result =
         m_data.m_transientStore->getDecoration(auxid, size, capacity);
     if (result && (nids != m_data.m_transientStore->getAuxIDs().size())) {
-      m_data.m_auxIDs.insert(auxid);
       if (m_data.m_transientStore->isDecoration(auxid)) {
         m_data.m_decorIDs.insert(auxid);
       }
+      std::atomic_thread_fence( std::memory_order_seq_cst );
+      m_data.m_auxIDs.insert(auxid);
     }
     // Return the memory address from the transient store:
     return result;
   }
 
   // Doesn't exist yet. So let's make it:
-  void* result = getData(auxid, size, capacity);
   if (m_locked) {
     // If the container is locked, remember that this is a decoration:
     if (m_data.m_isDecoration.size() <= auxid) {
@@ -175,7 +177,9 @@ void* AuxStoreBase::getDecoration(SG::auxid_t auxid, std::size_t size,
     }
     m_data.m_isDecoration[auxid] = true;
     m_data.m_decorIDs.insert(auxid);
+    std::atomic_thread_fence( std::memory_order_seq_cst );
   }
+  void* result = getData(auxid, size, capacity);
 
   // Return the pointer made by getData(...):
   return result;

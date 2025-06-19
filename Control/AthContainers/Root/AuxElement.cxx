@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/Root/AuxElement.h
@@ -619,12 +619,12 @@ void AuxElement::copyAux (const ConstAuxElement& other,
     return;
   }
 
-  size_t oindex = other.index();
-  SG::auxid_set_t other_ids = ocont->getAuxIDs();
 #ifndef XAOD_STANDALONE
-  SG::auxid_set_t other_decors = ocont->getDecorIDs();
+  const SG::auxid_set_t& other_decors = ocont->getDecorIDs();
 #endif
+  SG::auxid_set_t other_ids = ocont->getAuxIDs();
 
+  size_t oindex = other.index();
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
   SG::AuxVectorData& cont = *container();
@@ -686,12 +686,12 @@ void AuxElement::copyAux (const AuxElement& other,
     return;
   }
 
-  size_t oindex = other.index();
-  SG::auxid_set_t other_ids = ocont->getAuxIDs();
 #ifndef XAOD_STANDALONE
-  SG::auxid_set_t other_decors = ocont->getDecorIDs();
+  const SG::auxid_set_t& other_decors = ocont->getDecorIDs();
 #endif
+  SG::auxid_set_t other_ids = ocont->getAuxIDs();
 
+  size_t oindex = other.index();
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
   AuxVectorData& cont = *container();
