@@ -102,6 +102,9 @@ VSIVarsToKeep = ['vsi_mass', 'vsi_pT', 'vsi_charge', 'vsi_isFake',
                  'vsi_fastRcut', 'vsi_fitErrcut', 'vsi_chi2cut']
 VSIVars = '.'.join(VSIVarsToKeep)
 
+TLAMuonVarsToKeep = ["pt","eta","phi","charge","muonType","quality","inDetTrackParticleLink","muonSpectrometerTrackParticleLink","combinedTrackParticleLink","clusterLink"]
+TLAMuonVars='.'.join(TLAMuonVarsToKeep)
+
 # ==============
 # === EGAMMA ===
 ElToKeep = ['ptcone20', 'ptvarcone20', 'ptcone30', 'ptvarcone30', 'trk_d0','cl_eta2','cl_phi2', 'deltaEta1PearDistortion']
@@ -213,6 +216,10 @@ DisTrkBDTSelToKeep = []
 for var in DisTrkBDTSelToKeepBase:
     DisTrkBDTSelToKeep.append('disTrk_'+var)
 DisTrkBDTSelVars = '.'.join(DisTrkBDTSelToKeep)
+
+
+VtxToKeep = ['chiSquared','numberDoF','x','y','z','covariance','vertexType']
+VtxVars = '.'.join(VtxToKeep)
 
 # ==============
 # === L1Topo ===
@@ -830,7 +837,7 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftf',                                               '', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftfAux.'+getJetCopyVars('pf_subjesgsc_ftf'), '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                                                             'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.'+getJetCopyVars('pf_subresjesgscIS_ftf'), 'BS ESD AODFULL AODSLIM', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftf',                                                  '', 'Jet', [Alias('JetContainerShallowCopy')]),
@@ -869,24 +876,24 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',                                 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet' ),
     ('xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',         'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'    ),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLA',                                                'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLAAux.'+getJetCopyVars('subjesIS_fastftag_TLA'), 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLA',                      'BS PhysicsTLA ESD', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLAAux.'+getJetCopyVars('subjesIS_fastftag_TLA'),       'BS PhysicsTLA ESD', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',                                                             'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.'+getJetCopyVars('pf_subresjesgscIS_ftf_TLA'), 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
 
 
     # TLA Photons
-    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA DarkJetPEBTLA EgammaPEBTLA ESD', 'Egamma'),
-    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA DarkJetPEBTLA EgammaPEBTLA ESD', 'Egamma'),
+    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA EgammaPEBTLA ESD', 'Egamma'),
+    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA EgammaPEBTLA ESD', 'Egamma'),
 
     # TLA Muons
-    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
-    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.',                                'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS PhysicsTLA ESD', 'Muon'),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.'+TLAMuonVars,                                'BS PhysicsTLA ESD', 'Muon'),
     
     # FS vertices
-    ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA ESD AODFULL AODSLIM', 'Jet'),
-    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.',           'BS PhysicsTLA ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA DarkJetPEBTLA ESD AODFULL AODSLIM', 'Jet' ),
+    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,   'BS PhysicsTLA DarkJetPEBTLA ESD AODFULL AODSLIM', 'Jet'),
 
     ('xAOD::VertexContainer#HLT_IDVertex_FSJet',                  'BS ESD AODFULL', 'Jet'),
     ('xAOD::VertexAuxContainer#HLT_IDVertex_FSJetAux.',           'BS ESD AODFULL', 'Jet'),
@@ -1093,7 +1100,7 @@ TriggerHLTListRun3 = [
 
     # TLA bjet b-tagging
     ('xAOD::BTaggingContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTagging',                      'BS PhysicsTLA ESD', 'Bjet'),
-    ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTaggingAux.'+BTagVars,      'BS PhysicsTLA ESD', 'Bjet'),
+    ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTaggingAux.'+BTagVars,       'BS PhysicsTLA ESD', 'Bjet'),
 
     # MinBias
 
@@ -1183,7 +1190,7 @@ TriggerHLTListRun3 = [
     # FS tracks (moved as last because of the truncation errors ATR-29142)
     ('xAOD::TrackParticleContainer#HLT_IDTrack_FS_FTF',                 'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FS_FTFAux.passPFTrackPresel.muonCaloTag.muonScore.ptCone20.etConeCore.trackIso.RErr.EOverP.caloIso.trkPtFraction.tagFakeTrack.tagMuonTrack.tagIsoTrack',          'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
-    
+ 
 ]
 
 
