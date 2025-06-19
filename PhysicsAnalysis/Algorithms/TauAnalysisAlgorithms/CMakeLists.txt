@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -31,12 +31,14 @@ atlas_install_data( data/* )
 atlas_add_test( TestCPRun2Taus
    SCRIPT CPRun.py --text-config TauAnalysisAlgorithms/test_configuration_Run2_Taus.yaml -e 30 --input-list $ASG_TEST_FILE_MC
    POST_EXEC_SCRIPT nopost.sh
+   PRIVATE_WORKING_DIRECTORY
    PROPERTIES TIMEOUT 400 
 )
 
 atlas_add_test( TestCPRun3Taus
    SCRIPT CPRun.py --text-config TauAnalysisAlgorithms/test_configuration_Run3_Taus.yaml -e 30 --input-list $ASG_TEST_FILE_RUN3_MC
    POST_EXEC_SCRIPT nopost.sh
+   PRIVATE_WORKING_DIRECTORY
    PROPERTIES TIMEOUT 400
 )
 
