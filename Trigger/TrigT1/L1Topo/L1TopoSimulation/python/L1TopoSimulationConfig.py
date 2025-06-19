@@ -80,9 +80,9 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
         muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
 
         if useMuonDecoder:
-            #from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
-            #acc.merge(RpcBytestreamDecodeCfg(flags))
-            #acc.merge(TgcBytestreamDecodeCfg(flags))
+            from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
+            acc.merge(RpcBytestreamDecodeCfg(flags))
+            acc.merge(TgcBytestreamDecodeCfg(flags))
             from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuonRoIByteStreamToolCfg
             muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(flags, name="L1MuonBSDecoderToolInL1Topo", writeBS=False, writeDecodedMuonRoIs = writeMuonRoIs))
             decoderTools += [muonRoiTool]
