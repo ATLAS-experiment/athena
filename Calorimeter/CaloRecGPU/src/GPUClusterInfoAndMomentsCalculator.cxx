@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -12,9 +12,9 @@ using namespace CaloRecGPU;
 using namespace ClusterMomentsCalculator;
 
 GPUClusterInfoAndMomentsCalculator::GPUClusterInfoAndMomentsCalculator(const std::string & type, const std::string & name, const IInterface * parent):
-  AthAlgTool(type, name, parent)
+  base_class(type, name, parent),
+  CaloGPUTimed(this)
 {
-  declareInterface<CaloClusterGPUProcessor> (this);
 }
 
 StatusCode GPUClusterInfoAndMomentsCalculator::initialize_non_CUDA()
@@ -44,16 +44,41 @@ StatusCode GPUClusterInfoAndMomentsCalculator::initialize_CUDA()
   return StatusCode::SUCCESS;
 }
 
-StatusCode GPUClusterInfoAndMomentsCalculator::execute(const EventContext & /*ctx*/, const ConstantDataHolder & constant_data,
+StatusCode GPUClusterInfoAndMomentsCalculator::execute(const EventContext & ctx, const ConstantDataHolder & constant_data,
                                                        EventDataHolder & event_data, void * /*temporary_buffer*/) const
 {
-  calculateClusterPropertiesAndMoments(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
+  size_t times[num_time_measurements];
+  
+  calculateClusterPropertiesAndMoments(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), times, m_measureTimes);
+  
+  if (m_measureTimes)
+    {
+      record_times(ctx.evt(),
+                   times[ 0],
+                   times[ 1],
+                   times[ 2],
+                   times[ 3],
+                   times[ 4],
+                   times[ 5],
+                   times[ 6],
+                   times[ 7],
+                   times[ 8],
+                   times[ 9],
+                   times[10]
+                   );
+    }
+    
   return StatusCode::SUCCESS;
-
 }
 
 StatusCode GPUClusterInfoAndMomentsCalculator::finalize()
 {
+  if (m_measureTimes)
+    {
+      print_times("Isolation_Clusters Isolation_Cells Zeroth_Clusters "
+                  "First_Cells First_Clusters Second_Cells Shower_Axis Second_Clusters "
+                  "Third_Cells Third_Clusters Finalize_Clusters", num_time_measurements);
+    }
   return StatusCode::SUCCESS;
 }
 

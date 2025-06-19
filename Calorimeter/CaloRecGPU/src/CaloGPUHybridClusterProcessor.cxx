@@ -100,25 +100,10 @@ StatusCode CaloGPUHybridClusterProcessor::initialize_non_CUDA()
       m_plotterTool.disable();
     }
 
-  if (m_doMonitoring)
-    {
-      checker = true;
-      retrieve_and_report(m_moniTool, "monitoring tool", checker);
-      m_doMonitoring = checker;
-    }
-  else
-    {
-      m_moniTool.disable();
-    }
-
   if (any_failed)
     {
       return StatusCode::FAILURE;
     }
-
-  ATH_CHECK(m_avgMuKey.initialize(m_doMonitoring));
-  ATH_CHECK(m_noiseCDOKey.initialize(m_doMonitoring && m_monitorCells));
-  ATH_CHECK(m_cellsKey.initialize(m_doMonitoring && m_monitorCells));
 
   m_temporariesSize = 0;
 
@@ -178,22 +163,6 @@ StatusCode CaloGPUHybridClusterProcessor::initialize_CUDA()
 
 StatusCode CaloGPUHybridClusterProcessor::execute(const EventContext & ctx) const
 {
-  auto time_tot = Monitored::Timer("TIME_execute");
-  auto time_clusMaker = Monitored::Timer("TIME_ClustMaker");
-  auto time_clusCorr = Monitored::Timer("TIME_ClustCorr");
-  //No good way to not declare this here at the outer scope
-  //since we do need the timers to be available when we do our operations.
-  //Also: contrary to what the CPU does, we don't have a clear distinction
-  //between what is cluster making and cluster corrections;
-  //for now, ClustMaker = Pre-GPU + (CPU -> GPU) + GPU Tools + (GPU -> CPU)
-  //and ClustCorr = Post-GPU...
-
-  if (m_doMonitoring)
-    {
-      time_tot.start();
-    }
-
-
   SG::WriteHandle<xAOD::CaloClusterContainer> cluster_collection (m_clusterOutput, ctx);
 
   if (m_writeTriggerSpecificInfo)
@@ -286,12 +255,7 @@ StatusCode CaloGPUHybridClusterProcessor::execute(const EventContext & ctx) cons
           plot_time += time_cast(t1, t2);
         }
     }
-
-  if (m_doMonitoring)
-    {
-      time_clusMaker.start();
-    }
-
+  
   for (const auto & pre_GPU_tool : m_preGPUoperations)
     {
       auto t1 = clock_type::now();
@@ -378,12 +342,6 @@ StatusCode CaloGPUHybridClusterProcessor::execute(const EventContext & ctx) cons
         }
     }
 
-  if (m_doMonitoring)
-    {
-      time_clusMaker.stop();
-      time_clusCorr.start();
-    }
-
   for (const auto & post_GPU_tool : m_postGPUoperations)
     {
       auto t9 = clock_type::now();
@@ -447,113 +405,6 @@ StatusCode CaloGPUHybridClusterProcessor::execute(const EventContext & ctx) cons
           times.push_back(plot_time);
         }
       record_times(ctx.evt(), times);
-    }
-
-  if (m_doMonitoring)
-    //For monitoring.
-    {
-      time_clusCorr.stop();
-
-      auto mon_clusEt = Monitored::Collection("Et", *cluster_collection_ptr, &xAOD::CaloCluster::et);
-      auto mon_clusSignalState = Monitored::Collection("signalState", *cluster_collection_ptr, &xAOD::CaloCluster::signalState);
-      auto mon_clusSize = Monitored::Collection("clusterSize", *cluster_collection_ptr, &xAOD::CaloCluster::clusterSize);
-      std::vector<double>       clus_phi;
-      std::vector<double>       clus_eta;
-      std::vector<double>       N_BAD_CELLS;
-      std::vector<double>       ENG_FRAC_MAX;
-      std::vector<unsigned int> sizeVec;
-      auto mon_clusPhi = Monitored::Collection("Phi", clus_phi);
-      auto mon_clusEta = Monitored::Collection("Eta", clus_eta);
-      auto mon_badCells = Monitored::Collection("N_BAD_CELLS", N_BAD_CELLS);
-      auto mon_engFrac = Monitored::Collection("ENG_FRAC_MAX", N_BAD_CELLS);
-      auto mon_size = Monitored::Collection("size", sizeVec);
-      auto monmu = Monitored::Scalar("mu", -999.0);
-      auto mon_container_size = Monitored::Scalar("container_size", 0.);
-      auto moncount_1thrsigma = Monitored::Scalar("count_1thrsigma", -999.0);
-      auto moncount_2thrsigma = Monitored::Scalar("count_2thrsigma", -999.0);
-      auto mon_container_size_by_mu  = Monitored::Scalar("container_size_by_mu", 0.);
-      auto moncount_1thrsigma_by_mu2 = Monitored::Scalar("count_1thrsigma_by_mu2", -999.0);
-      auto moncount_2thrsigma_by_mu2 = Monitored::Scalar("count_2thrsigma_by_mu2", -999.0);
-      auto monitorIt = Monitored::Group( m_moniTool, time_tot, time_clusMaker, time_clusCorr, mon_container_size,
-                                         mon_clusEt, mon_clusPhi, mon_clusEta, mon_clusSignalState, mon_clusSize,
-                                         mon_badCells, mon_engFrac, mon_size, monmu,  moncount_1thrsigma, moncount_2thrsigma,
-                                         mon_container_size_by_mu, moncount_1thrsigma_by_mu2, moncount_2thrsigma_by_mu2 );
-      // fill monitored variables
-
-      mon_container_size = cluster_collection_ptr->size();
-
-      for (const xAOD::CaloCluster * cl : *cluster_collection_ptr)
-        {
-          const CaloClusterCellLink * num_cell_links = cl->getCellLinks();
-          if (! num_cell_links)
-            {
-              sizeVec.push_back(0);
-            }
-          else
-            {
-              sizeVec.push_back(num_cell_links->size());
-            }
-          clus_phi.push_back(cl->phi());
-          clus_eta.push_back(cl->eta());
-          N_BAD_CELLS.push_back(cl->getMomentValue(xAOD::CaloCluster::N_BAD_CELLS));
-          ENG_FRAC_MAX.push_back(cl->getMomentValue(xAOD::CaloCluster::ENG_FRAC_MAX));
-        }
-
-      float read_mu = 0;
-
-      SG::ReadDecorHandle<xAOD::EventInfo, float> eventInfoDecor(m_avgMuKey, ctx);
-      if (eventInfoDecor.isPresent())
-        {
-          read_mu = eventInfoDecor(0);
-          monmu = read_mu;
-        }
-
-
-      int count_1thrsigma = 0, count_2thrsigma = 0;
-
-      if (m_monitorCells)
-        {
-          SG::ReadHandle<CaloCellContainer> cell_collection(m_cellsKey, ctx);
-          if ( !cell_collection.isValid() )
-            {
-              ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-              return StatusCode::FAILURE;
-            }
-
-          SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
-          const CaloNoise * noisep = *noiseHdl;
-          for (const auto & cell : *cell_collection)
-            {
-              const CaloDetDescrElement * cdde = cell->caloDDE();
-              if (cdde->is_tile())
-                {
-                  continue;
-                }
-              float thr = noisep->getNoise(cdde->identifyHash(), cell->gain());
-              if (cell->energy() > m_monitoring1thr * thr)
-                {
-                  count_1thrsigma += 1;
-                  if (cell->energy() > m_monitoring2thr * thr)
-                    {
-                      count_2thrsigma += 1;
-                    }
-                }
-            }
-        }
-
-      moncount_1thrsigma = count_1thrsigma;
-      moncount_2thrsigma = count_2thrsigma;
-
-      if (read_mu > 5)
-        {
-          const float rev_mu = 1.f / read_mu;
-          mon_container_size_by_mu = rev_mu * cluster_collection_ptr->size();
-          const float sqr_rev_mu = rev_mu * rev_mu;
-          moncount_1thrsigma_by_mu2 = sqr_rev_mu * count_1thrsigma;
-          moncount_2thrsigma_by_mu2 = sqr_rev_mu * count_2thrsigma;
-        }
-
-      time_tot.stop();
     }
 
   return StatusCode::SUCCESS;
