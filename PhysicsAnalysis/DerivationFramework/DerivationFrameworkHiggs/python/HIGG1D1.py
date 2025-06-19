@@ -38,8 +38,8 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
                  acc.getSequence ('EventCleanLockSeq')]
     seq.Members = [a for a in seq.Members if a not in cleanSeqs] + cleanSeqs
 
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMPFlowCustomVtxJets'], ['HggPrimaryVertices'], trackAugmenterPrefix='btagIpHgg_'))
+    from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+    acc.merge(FlavorTaggingCfg(flags, 'AntiKt4EMPFlowCustomVtxJets', 'HggPrimaryVertices', trackAugmenterPrefix='btagIpHgg_'))
 
     #Custom MET
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCustomVtxCfg

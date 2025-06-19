@@ -18,7 +18,7 @@ def FTagElectronAssociationCfg(cfgFlags, jetCollection: str) -> ComponentAccumul
     acc = ComponentAccumulator()
     acc.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.FTagGhostElectronAssociationAlg(
-            "FTagGhostElectronAssociationAlg",
+            f"FTagGhostElectronAssociationAlg{jetCollection}",
             jetContainer=jetCollection,
             outElectrons=f"{jetCollection}.FTagElectrons",
         )
