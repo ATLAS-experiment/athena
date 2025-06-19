@@ -58,6 +58,7 @@ find_package( Qt5 ${_quietFlag} COMPONENTS Core OpenGL Gui PrintSupport Widgets
 find_package( GTest ${_quietFlag} )
 find_package( Geant4 ${_quietFlag} )
 find_package( Boost ${_quietFlag} COMPONENTS ALL )
+find_package( SQLite3 ${_quietFlag} )
 
 # Set the versions of the TDAQ projects:
 set( TDAQ_PROJECT_NAME "@TDAQ_PROJECT_NAME@" CACHE STRING
