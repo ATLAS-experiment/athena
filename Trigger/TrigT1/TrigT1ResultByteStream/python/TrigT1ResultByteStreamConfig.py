@@ -156,9 +156,9 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   ########################################
   # Run-3 L1Muon decoding (only when running HLT - offline we read it from HLT result)
   ########################################
-  if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
+  if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1 and flags.Trigger.doHLT :
     muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(
-      flags, name="L1MuonBSDecoderTool", writeBS=False, writeDecodedMuonRoIs=flags.Trigger.doHLT ))
+      flags, name="L1MuonBSDecoderTool", writeBS=False))
     decoderTools += [muonRoiTool]
 
   ########################################
