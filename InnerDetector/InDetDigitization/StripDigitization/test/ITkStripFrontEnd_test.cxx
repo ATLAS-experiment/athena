@@ -160,15 +160,6 @@ BOOST_AUTO_TEST_SUITE(TEST_ITkStripFrontEnd)
 
   // Contains strip hit info, reset to 0 for each wafer processed
   data.m_StripHitsOnWafer.assign(strip_max, 0);
-
-  // Containes the charge for each bin on each hit strip
-
-  for (int i = 0; i < strip_max; ++i) {
-      data.m_Analogue[0][i] = 0.0;
-      data.m_Analogue[1][i] = 0.0;
-      data.m_Analogue[2][i] = 0.0;
-    }
-
   }
   
 BOOST_AUTO_TEST_SUITE_END()

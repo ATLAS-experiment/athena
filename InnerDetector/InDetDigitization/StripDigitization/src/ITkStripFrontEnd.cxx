@@ -73,14 +73,11 @@ StatusCode ITkStripFrontEnd::initialize() {
 // Init the class variable  vectors
 // ----------------------------------------------------------------------
 void ITkStripFrontEnd::initVectors(int strips, ITkStripFrontEndData& data) const {
-  //previously, these were all zero'd as well here
-  //however, this takes up a lot of CPU (especially for ITk)
-  //and doesn't seem necessary
-  data.m_GainFactor.reserve(strips);
+  data.m_GainFactor.resize(strips);
 
-  data.m_Analogue[0].reserve(strips);
-  data.m_Analogue[1].reserve(strips);
-  data.m_Analogue[2].reserve(strips);
+  data.m_Analogue[0].resize(strips);
+  data.m_Analogue[1].resize(strips);
+  data.m_Analogue[2].resize(strips);
 
 }
 
@@ -108,12 +105,7 @@ ITkStripFrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRandom
   // Contains strip hit info, reset to 0 for each wafer processed
   data.m_StripHitsOnWafer.assign(strip_max, 0);
 
-  // Containes the charge for each bin on each hit strip
-  for (int i = 0; i < strip_max; ++i) {
-    data.m_Analogue[0][i] = 0.0;
-    data.m_Analogue[1][i] = 0.0;
-    data.m_Analogue[2][i] = 0.0;
-  }
+  // data.m_Analogue were cleared in initVectors().
 
   // Check if collection empty
   if (not collection.empty()) {
