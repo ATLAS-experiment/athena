@@ -48,7 +48,7 @@ def configureFlags(runArgs):
     elif hasattr(runArgs, 'outputDAOD_TLAEGAMPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAEGAMPEBFile
         log.info("---------- Configured DAOD_TLAEGAMPEB output")
-        flags.Trigger.AODEDMSet='EGamPEBTLA'
+        flags.Trigger.AODEDMSet='EgammaPEBTLA'
         disabled_detectors = [
             'MBTS',
             'CSC', 'MDT', 'RPC', 'TGC',
@@ -157,7 +157,7 @@ def fromRunArgs(runArgs):
             # 'xAOD::TrigMissingETContainer#HLT_MET_nn',
             # 'xAOD::TrigMissingETAuxContainer#HLT_MET_nnAux',
         ],
-        'EGamPEBTLA':
+        'EgammaPEBTLA':
         [
             'xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',
             'xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',
@@ -176,10 +176,6 @@ def fromRunArgs(runArgs):
     if flags.Trigger.AODEDMSet == 'FTagPEBTLA':
         from TLARecoConfig.FTagPEBRecoConfig import FTagPEBJetTagConfig
         cfg.merge(FTagPEBJetTagConfig(flags))
-
-    # if flags.Trigger.AODEDMSet == 'DarkJetPEBTLA':
-    #     from TLARecoConfig.DJetPEBRecoConfig import DJetPEBJetTagConfig
-    #     cfg.merge(DJetPEBJetTagConfig(flags))
 
     # setup Metadata writer
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
