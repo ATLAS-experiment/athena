@@ -1,4 +1,4 @@
-\#!/bin/bash
+#!/bin/bash
 # art-description: Nightly test to compare C-100 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 noFPT sample
 # art-type: grid
 # art-memory: 6144
