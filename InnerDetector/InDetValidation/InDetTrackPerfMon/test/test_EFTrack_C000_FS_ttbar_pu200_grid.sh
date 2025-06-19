@@ -1,6 +1,7 @@
 #!/bin/bash
 # art-description: Nightly test to compare C-000 reference to latest C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
+# art-memory: 6144
 # art-include: main/Athena
 # art-output: IDTPM.*.root
 # art-output: *.json
