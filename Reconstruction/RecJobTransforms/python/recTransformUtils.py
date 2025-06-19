@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Module with standard reconstruction transform options and substeps
 
@@ -83,6 +83,9 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--outputDAOD_TLAFTAGPEBFile', nargs='+',
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
                         help='Output DAOD_TLAFTAGPEB file', group='Reco Files')
+    parser.add_argument('--outputDAOD_TLADJETPEBFile', nargs='+',
+                        type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
+                        help='Output DAOD_TLADJETPEB file', group='Reco Files')
     parser.add_argument('--outputDAOD_TLAEGAMPEBFile', nargs='+',
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
                         help='Output DAOD_TLAEGAMPEB file', group='Reco Files')
@@ -113,6 +116,9 @@ def addRecoSubsteps(executorSet):
     executorSet.add(athenaExecutor(name = 'RAWtoDAODTLAFTAGPEB',
                                    skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
                                    substep = 'r2TLAFTAGPEB', inData = ['BS'], outData = ['DAOD_TLAFTAGPEB'], ))
+    executorSet.add(athenaExecutor(name = 'RAWtoDAODTLADJETPEB',
+                                   skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
+                                   substep = 'r2TLADJETPEB', inData = ['BS'], outData = ['DAOD_TLADJETPEB'], ))
     executorSet.add(athenaExecutor(name = 'RAWtoDAODTLAEGAMPEB',
                                    skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
                                    substep = 'r2TLAEGAMPEB', inData = ['BS'], outData = ['DAOD_TLAEGAMPEB'], ))

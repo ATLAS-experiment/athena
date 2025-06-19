@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from RecJobTransforms.RecoSteering import RecoSteering
@@ -35,6 +35,14 @@ def configureFlags(runArgs):
             'LAr', 'Tile', 'MBTS',
             'CSC', 'MDT', 'RPC', 'TGC',
             'sTGC', 'MM',
+            'Lucid', 'ZDC', 'ALFA', 'AFP',
+        ]
+    elif hasattr(runArgs, 'outputDAOD_TLADJETPEBFile'):
+        flags.Output.AODFileName = runArgs.outputDAOD_TLADJETPEBFile
+        log.info("---------- Configured DAOD_TLADJETPEB output")
+        flags.Trigger.AODEDMSet='DarkJetPEBTLA'
+        disabled_detectors = [
+            'MBTS',
             'Lucid', 'ZDC', 'ALFA', 'AFP',
         ]
     elif hasattr(runArgs, 'outputDAOD_TLAEGAMPEBFile'):
@@ -116,6 +124,8 @@ def fromRunArgs(runArgs):
 
     PhToKeep = ['topoetcone20', 'topoetcone40', 'etcone20']
     PhVars = '.'.join(PhToKeep)
+    VtxToKeep = ['chiSquared','numberDoF','x','y','z','covariance','vertexType']
+    VtxVars = '.'.join(VtxToKeep)
 
     additional_output_items = {
         'PhysicsTLA': [],
@@ -123,6 +133,29 @@ def fromRunArgs(runArgs):
         [
             'xAOD::BTaggingContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
             'xAOD::BTaggingAuxContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.',
+        ],
+        'DarkJetPEBTLA': [
+            # Jets
+            'xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA', 
+            'xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.',
+            # General
+            'xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',
+            'xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',
+            'xAOD::TrigRoiDescriptorCollection#HLT_Roi_DarkJetPEBTLA',
+            'xAOD::VertexContainer#HLT_IDVertex_FS',
+            'xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,
+            # MET 
+            # Disabled for now, to be added when TLA/PEB MET dev is completed
+            # 'xAOD::TrigMissingETContainer#HLT_MET_tcpufit',
+            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_tcpufitAux',
+            # 'xAOD::TrigMissingETContainer#HLT_MET_trkmht',
+            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_trkmhtAux',
+            # 'xAOD::TrigMissingETContainer#HLT_MET_pfopufit',
+            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_pfopufitAux',
+            # 'xAOD::TrigMissingETContainer#HLT_MET_mhtpufit_pf',
+            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_mhtpufit_pfAux',
+            # 'xAOD::TrigMissingETContainer#HLT_MET_nn',
+            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_nnAux',
         ],
         'EGamPEBTLA':
         [
@@ -143,6 +176,10 @@ def fromRunArgs(runArgs):
     if flags.Trigger.AODEDMSet == 'FTagPEBTLA':
         from TLARecoConfig.FTagPEBRecoConfig import FTagPEBJetTagConfig
         cfg.merge(FTagPEBJetTagConfig(flags))
+
+    # if flags.Trigger.AODEDMSet == 'DarkJetPEBTLA':
+    #     from TLARecoConfig.DJetPEBRecoConfig import DJetPEBJetTagConfig
+    #     cfg.merge(DJetPEBJetTagConfig(flags))
 
     # setup Metadata writer
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
