@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxVectorBase_test.cxx
@@ -24,8 +24,8 @@ public:
   explicit dv_test_err (const char* file,
                         int line,
                         const std::string& what);
-  virtual ~dv_test_err() throw() {}
-  virtual const char* what() const throw() { return m_what.c_str(); }
+  virtual ~dv_test_err() noexcept override {}
+  virtual const char* what() const noexcept override { return m_what.c_str(); }
 private:
   std::string m_what;
 };
@@ -154,8 +154,8 @@ public:
   using AuxVectorBase::resortAux;
   using AuxVectorBase::swap;
 
-  virtual size_t size_v() const { return 10; }
-  virtual size_t capacity_v() const { return 20; }
+  virtual size_t size_v() const override { return 10; }
+  virtual size_t capacity_v() const override { return 20; }
 
   template <class Iterator>
   void check_ordered (Iterator beg, Iterator end, size_t index = 0)

@@ -33,8 +33,8 @@ class AuxVectorBase
 {
 public:
   AuxVectorBase (size_t sz = 10) : m_sz (sz) {}
-  virtual size_t size_v() const { return m_sz; }
-  virtual size_t capacity_v() const { return m_sz; }
+  virtual size_t size_v() const override { return m_sz; }
+  virtual size_t capacity_v() const override { return m_sz; }
 
   using SG::AuxVectorData::setStore;
 

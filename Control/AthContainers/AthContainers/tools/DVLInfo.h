@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/tools/DVLInfo.h
@@ -216,7 +216,7 @@ public:
    * cast to the type described by elt_tinfo().  Null pointers are skipped;
    * this function signals the end of iteration by returning 0.
    */
-   virtual const void* next();
+   virtual const void* next() override;
 
 
 private:
@@ -256,7 +256,7 @@ public:
    * @param nreserve Number of elements for which to reserve space.
    *                 (Ignored if not appropriate.)
    */
-  virtual void* make (size_t nreserve) const;
+  virtual void* make (size_t nreserve) const override;
 
 
   /**
@@ -265,49 +265,49 @@ public:
    * @param elt_p Pointer to the element to push.
    *              (Must match the container's declared element type.)
    */
-  virtual void push (void* cont_p, void* elt_p) const;
+  virtual void push (void* cont_p, void* elt_p) const override;
 
 
   /**
    * @brief Return the size of the container.
    * @param cont_p Pointer to the container.
    */
-  virtual size_t size (void* cont_p) const;
+  virtual size_t size (void* cont_p) const override;
 
 
   /**
    * @brief Erase the elements in the container.
    * @param cont_p Pointer to the container.
    */
-  virtual void clear (void* cont_p) const;
+  virtual void clear (void* cont_p) const override;
 
 
   /**
    * @brief Delete a container.
    * @param cont_p Pointer to the container.
    */
-  virtual void del (void* cont_p) const;
+  virtual void del (void* cont_p) const override;
 
 
   /**
    * @brief Copy a container.
    * @param cont_p Pointer to the container.
    */
-  virtual void* clone (void* cont_p) const;
+  virtual void* clone (void* cont_p) const override;
 
 
   /**
    * @brief Return a new iterator object.
    * @param cont_p Pointer to the container.
    */
-  virtual DVLIteratorBase* iterator (const void* cont_p) const;
+  virtual DVLIteratorBase* iterator (const void* cont_p) const override;
 
 
   /**
    * @brief Return a pointer to the container base.
    * @param cont_p Pointer to the container.
    */
-  virtual SG::AuxVectorBase* base (void* cont_p) const;
+  virtual SG::AuxVectorBase* base (void* cont_p) const override;
 
 
   /**

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/DataVector.icc
@@ -105,15 +105,15 @@ protected:
 
   // We need these here to prevent ambiguities,
   // but they shouldn't actually be called.
-  virtual const std::type_info& dv_typeid() const
+  virtual const std::type_info& dv_typeid() const override
   {
     return typeid(VirtBases);
   }
-  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const
+  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const override
   {
     return DataVector<B1>::dvlinfo();
   }
-  virtual void setMostDerived()
+  virtual void setMostDerived() override
   {
     std::abort();
   }
@@ -186,15 +186,15 @@ protected:
 
   // We need these here to prevent ambiguities,
   // but they shouldn't actually be called.
-  virtual const std::type_info& dv_typeid() const
+  virtual const std::type_info& dv_typeid() const override
   {
     return typeid(VirtBases);
   }
-  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const
+  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const override
   {
     return DataVector<B1>::dvlinfo();
   }
-  virtual void setMostDerived()
+  virtual void setMostDerived() override
   {
     std::abort();
   }
@@ -275,15 +275,15 @@ protected:
 
   // We need these here to prevent ambiguities,
   // but they shouldn't actually be called.
-  virtual const std::type_info& dv_typeid() const
+  virtual const std::type_info& dv_typeid() const override
   {
     return typeid(VirtBases);
   }
-  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const
+  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const override
   {
     return DataVector<B1>::dvlinfo();
   }
-  virtual void setMostDerived()
+  virtual void setMostDerived() override
   {
     std::abort();
   }

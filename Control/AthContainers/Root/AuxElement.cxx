@@ -30,8 +30,8 @@ class AuxElementData
   : public AuxVectorData
 {
 public:
-  virtual size_t size_v() const { return 1; }
-  virtual size_t capacity_v() const { return 1; }
+  virtual size_t size_v() const override { return 1; }
+  virtual size_t capacity_v() const override { return 1; }
 };
 
 
