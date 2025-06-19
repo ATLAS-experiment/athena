@@ -431,6 +431,8 @@ def defineInputsMenu():
                     TopoMenuDef( '4INVM200-23DPHI32-2eTAU1s', outputbits = 7 ), # ATR-30728
                     TopoMenuDef( '3SUM200-23DPHI32-2eTAU1s',  outputbits = 8 ), # ATR-30728
                     TopoMenuDef( '4SUM200-23DPHI32-2eTAU1s',  outputbits = 9 ), # ATR-30728
+                    TopoMenuDef( 'ADBDT-MU0s',outputbits = (13,14), outputlines=['ADBDT-3MU0s-Tight',
+                                                                              'ADBDT-3MU0s-Loose']),
                 ]
             },
 

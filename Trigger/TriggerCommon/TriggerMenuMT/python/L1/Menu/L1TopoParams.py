@@ -83,6 +83,10 @@ L1TopoParams = {
                           'ScaleSqr2',
                           'ScaleSqr3',
                           'AnomalyScoreThresh']},
+  'AnomalyDetectionBDT': {
+     'comment': 'BDT-based muon anomaly trigger',
+     'parameters': ['ScoreThreshold']
+  }, 
  'DisambiguationIncl2': {'ApplyDR = 1': {'comment': '',
                                          'parameters': ['MinET1',
                                                         'MinET2',

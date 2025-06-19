@@ -257,6 +257,9 @@ def defineMenu():
         #ATR-30618
         'L1_ADVAET',
         'L1_ADVAEL',
+        #ATR-31154 - BDT AD with muons
+        'L1_ADBDTT',
+        'L1_ADBDTL',
 
         # tau 
         'L1_cTAU30M_2cTAU20M',

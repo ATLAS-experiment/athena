@@ -972,6 +972,10 @@ class ItemDef:
        #ATR-30618
         MenuItem('L1_ADVAET').setLogic( d.TOPO_ADVAE2A_6jJ0s_4eTAU0s_4MU0s_jXE0s_Tight & physcond )
         MenuItem('L1_ADVAEL').setLogic( d.TOPO_ADVAE2A_6jJ0s_4eTAU0s_4MU0s_jXE0s_Loose & physcond )
+        #ATR-31154
+        MenuItem('L1_ADBDTT').setLogic(d.TOPO_ADBDT_3MU0s_Tight & physcond).setTriggerType(TT.muon)
+        MenuItem('L1_ADBDTL').setLogic(d.TOPO_ADBDT_3MU0s_Loose & physcond).setTriggerType(TT.muon)
+
         # HI
         MenuItem('L1_J15_NZ' ).setLogic( d.J15      & Not(ZDC_AND) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2J15_NZ').setLogic( d.J15.x(2) & Not(ZDC_AND) & physcond).setTriggerType(TT.calo)
