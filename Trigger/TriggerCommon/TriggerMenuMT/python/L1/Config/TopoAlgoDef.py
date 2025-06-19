@@ -1840,6 +1840,35 @@ class TopoAlgoDef:
             alg.addvariable('DisambDRSqr', d.disamb*d.disamb*_dr_conversion*_dr_conversion, 0)
             tm.registerTopoAlgo(alg)
 
+        # AnomalyDetectionBDT muon-only anomaly trigger
+        algo = {
+            "algoname": "ADBDT-MU0s",
+            "otype1": "MU", "olist1": "s", "inputwidth1": 6, "nleading1": 3,
+            "WPList": ["Tight", "Loose"],
+            "ScoreThreshold": [25, 40]
+        }
+        
+        class d:
+            pass
+        
+        for k in algo:
+            setattr(d, k, algo[k])
+            
+        toponames = [f"ADBDT-{d.nleading1}{d.otype1}0{d.olist1}-{wp}" for wp in d.WPList]
+            
+        alg = AlgConf.AnomalyDetectionBDT(
+            name=d.algoname,
+            inputs=[d.otype1 + d.olist1],
+            outputs=toponames
+        )
+        
+        for bitId in range(len(toponames)):
+            alg.addgeneric('NumResultBits', 2)
+            alg.addvariable('ScoreThreshold', d.ScoreThreshold[bitId], bitId)
+
+        tm.registerTopoAlgo(alg)
+
+            
         #VAE-based anomaly trigger
         # output lines: 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight', 
         #               'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose'
