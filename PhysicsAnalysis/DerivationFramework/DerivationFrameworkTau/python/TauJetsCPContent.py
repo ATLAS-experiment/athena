@@ -14,6 +14,6 @@ TauJetsCPContent = [
     "TauNeutralParticleFlowObjects",
     "TauNeutralParticleFlowObjectsAux.pt.eta.phi.m",
     "TruthTaus",
-    "TruthTausAux.pt_vis_neutral_pions.pt_vis_neutral_others.numCharged.classifierParticleType.classifierParticleOrigin.IsHadronicTau.numNeutralPion.numNeutral.numChargedPion.pt_vis.eta_vis.phi_vis.m_vis",
+    "TruthTausAux.pt_vis_neutral.numCharged.classifierParticleType.classifierParticleOrigin.IsHadronicTau.numNeutralPion.numNeutral.numChargedPion.pt_vis.eta_vis.phi_vis.m_vis",
 ]
 
