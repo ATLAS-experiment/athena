@@ -65,8 +65,8 @@ namespace TCS {
       std::vector<Tree> m_trees;  // list of all trees
       int m_nVar{0};              // dimension of the BDT
       int64_t m_totalScore{0};    // score of the input event
-      float m_mu1_ptmin, m_mu1_ptmax, m_mu1_etamin, m_mu1_etamax, m_mu1_phimin, m_mu1_phimax; // range of the first muon
-      float m_mu2_ptmin, m_mu2_ptmax, m_mu2_etamin, m_mu2_etamax, m_mu2_phimin, m_mu2_phimax; // range of the second muon
+      float m_mu1_ptmin{0}, m_mu1_ptmax{0}, m_mu1_etamin{0}, m_mu1_etamax{0}, m_mu1_phimin{0}, m_mu1_phimax{0}; // range of the first muon
+      float m_mu2_ptmin{0}, m_mu2_ptmax{0}, m_mu2_etamin{0}, m_mu2_etamax{0}, m_mu2_phimin{0}, m_mu2_phimax{0}; // range of the second muon
       parType_t p_ScoreThreshold[2] = { 0, 0 };
    };
 }
