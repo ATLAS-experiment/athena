@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoH62004EventActionTool.h"
@@ -17,8 +17,6 @@ namespace G4UA
                                                            const IInterface* parent)
     : UserActionToolBase<LArGeoH62004EventAction>(type, name, parent)
   {
-    declareProperty("yTable", m_config.yTable);
-    declareProperty("CryoXPosition", m_config.cryoXposition);
   }
 
   //---------------------------------------------------------------------------
@@ -30,10 +28,13 @@ namespace G4UA
     const LArGeoTB2004Options *largeoTB2004Options = nullptr;
     if(detStore()->retrieve(largeoTB2004Options, "LArGeoTB2004Options").isFailure()) {
       ATH_MSG_WARNING ( "Can't access LArGeoTB2004Options, using default values" );
+      m_config.yTable = m_yTable;
+      m_config.cryoXposition = m_cryoXposition;
     }
-    m_config.yTable = largeoTB2004Options->TableYPosition();
-    m_config.cryoXposition = largeoTB2004Options->CryoXPosition();
-
+    else {
+      m_config.yTable = largeoTB2004Options->TableYPosition();
+      m_config.cryoXposition = largeoTB2004Options->CryoXPosition();
+    }
     return StatusCode::SUCCESS;
   }
 
