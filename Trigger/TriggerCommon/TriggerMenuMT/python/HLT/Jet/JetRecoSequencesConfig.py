@@ -57,7 +57,7 @@ def JetRecoDataDeps(flags, **jetRecoDict):
 
     jetalg, jetradius, extra = interpretRecoAlg(jetRecoDict["recoAlg"])
 
-    if jetRecoDict['ionopt']=='ion':
+    if jetRecoDict['ionopt'] in ['ion', 'ionp']:
         jetDefDict = HeavyIonJetRecoDataDeps(
             flags, **jetRecoDict
         )

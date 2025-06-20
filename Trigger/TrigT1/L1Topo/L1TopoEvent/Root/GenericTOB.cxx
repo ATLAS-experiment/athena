@@ -231,9 +231,16 @@ TCS::GenericTOB::GenericTOB(const jXETOB & jxe) :
 TCS::GenericTOB::GenericTOB(const jTETOB & jte) :
    BaseTOB(jte.roiWord(), jte.tobName())
    , m_sumEt(jte.sumEt())
+   , m_sumEtSideA(jte.sumEtSideA())
+   , m_sumEtSideC(jte.sumEtSideC())
    , m_sumEtDouble(jte.sumEtDouble())
+   , m_sumEtDoubleSideA(jte.sumEtDoubleSideA())
+   , m_sumEtDoubleSideC(jte.sumEtDoubleSideC())
    , m_tobType(jte.tobType())
 {}
+
+
+
 
 // constructor from gFEX XE
 TCS::GenericTOB::GenericTOB(const gXETOB & gxe) :

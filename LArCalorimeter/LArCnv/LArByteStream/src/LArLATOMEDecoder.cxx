@@ -537,6 +537,16 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 
   /// OK all headers checked and we have all info we need to decode each packet, so lets start
   m_iPacket = 0;
+  if (m_nPackets==0) {
+    ATH_MSG_WARNING("Data corruption, nPackets=0");
+    return;
+  }
+
+  if (m_nPackets>m_packetEnd.size()) {
+    ATH_MSG_WARNING("Data corruption, nPackets " << m_nPackets << " exceeds size " << m_packetEnd.size());
+    return;
+  }
+     
   if (m_packetEnd[m_nPackets - 1] + m_monTrailerSize != n) {
     ATH_MSG_WARNING("problem in packet size loop " << m_packetEnd[m_nPackets - 1] << " != " << n);
   }

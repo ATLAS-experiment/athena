@@ -647,7 +647,8 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
                                                     {"lhtight"  , "lhtight"  },
                                                     {"dnnloose" , "dnnloose" },
                                                     {"dnnmedium", "dnnmedium"},
-                                                    {"dnntight" , "dnntight" } };
+                                                    {"dnntight" , "dnntight" },
+                                                    {"nopid"    , "nopid"    } };
 
     std::vector<std::string> isoNames = {"ivarloose","ivarmedium","ivartight","icaloloose","icalomedium","icalotight"};
 
@@ -694,6 +695,9 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     }
     else { // remap online pidname to offline pidname
         ATH_MSG_DEBUG("This is nominal");
+        if (pidMap.count(parts.at(1)) != 1) {
+          ATH_MSG_ERROR("Unknown trigger type: " << parts.at(1) << " (" << trigger << ")");
+        }
         pidname = pidMap.at(parts.at(1));
     }
 

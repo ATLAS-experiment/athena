@@ -43,10 +43,10 @@ def jetChainParts(chainParts):
 
 # Translate the reco dict to a string for suffixing etc
 def jetRecoDictToString(jetRecoDict):
-    if jetRecoDict['ionopt']=='ion':
+    if jetRecoDict['ionopt'] in ['ion', 'ionp']:
         # Unique settings for heavy ions
         # other values will be default
-        return jetRecoDict['recoAlg'] + "_ion"
+        return jetRecoDict['recoAlg'] + "_" + jetRecoDict['ionopt']
     strtemp = "{recoAlg}_{constitMod}{constitType}_{clusterCalib}_{jetCalib}"
     if doTracking(jetRecoDict):
         strtemp += "_{trkopt}"
@@ -134,7 +134,8 @@ def jetDefToString(jetDef):
     algstr = f'{str.lower(_jetDef.algorithm[0])}{formatRvalue(_jetDef._radius)}{poststr}'
     constitdef = _jetDef.inputdef
     if constitdef.label == 'HI':
-        constitstr = 'ion'
+        if _jetDef.context == 'hi': constitstr = 'ion'
+        else: constitstr = 'ionp'
     else:
         clusterCalib = 'lcw' if 'LC' in constitdef.label else 'em'
         constittype = 'pf' if 'PFlow' in constitdef.label else 'tc'
@@ -248,7 +249,7 @@ def getHLTPrefix():
     return prefix
 
 def getClustersKey(recoDict):
-        if recoDict['ionopt'] == 'ion':
+        if recoDict['ionopt'] in ['ion', 'ionp']:
             return "HLT_HICaloClustersFS"
         clusterCalib = recoDict["clusterCalib"]
         if clusterCalib == "em":
@@ -388,7 +389,8 @@ def getDecorList(jetDef):
                       "NumTrkPt500","NumTrkPt1000",
                       "SumPtTrkPt500","SumPtTrkPt1000",
                       "TrackWidthPt1000",
-                      "JVFCorr", "JvtRpt", "Jvt"]
+                      "JVFCorr", "JvtRpt", "Jvt",
+                      'NNJvtTrkAugV1','NNJvtTrkAugV1Pass', 'RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000']
         if 'PFlow' in jetDef.basename:
             decorlist += ["SumPtChargedPFOPt500"]
     return decorlist
@@ -518,11 +520,12 @@ def defineHIJets(jetRecoDict,clustersKey=None,prefix='',suffix=''):
     minpt = {2:7000, 3:7000, 4:7000, 6:7000, 10:50000}
     jetalg, jetradius, jetextra = interpretRecoAlg(jetRecoDict["recoAlg"])
     actualradius = float(jetradius)/10
+    context = "hip" if jetRecoDict["ionopt"] == "ionp" else "hi"
     constitMods = [] # modifiers
     jetConstit = []
     jetConstit = JetInputConstitSeq( "HLT_HIConstit",xAODType.CaloCluster, constitMods, inputname=clustersKey, outputname=clustersKey,label='HI')
     from JetRecConfig.StandardJetConstits import stdConstitDic
     stdConstitDic.setdefault(jetConstit.name, jetConstit)
 
-    jetDef = JetDefinition( "AntiKt", actualradius, jetConstit, ptmin=minpt[jetradius], prefix=prefix, suffix=suffix)
+    jetDef = JetDefinition( "AntiKt", actualradius, jetConstit, ptmin=minpt[jetradius], prefix=prefix, suffix=suffix, context = context)
     return jetDef
