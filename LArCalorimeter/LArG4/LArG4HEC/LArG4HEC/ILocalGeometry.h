@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// ILocalGeometry.h
-
-#ifndef __LARG4HEC_ILOCALGEOMETRY_H__
-#define __LARG4HEC_ILOCALGEOMETRY_H__
+#ifndef LARG4HEC_ILOCALGEOMETRY_H
+#define LARG4HEC_ILOCALGEOMETRY_H
 
 #include "GaudiKernel/IService.h"
 #include "CLHEP/Units/SystemOfUnits.h"
@@ -34,7 +32,6 @@ namespace LArG4
                                                    int depthadd = 0, double deadzone = 4.*CLHEP::mm, double locyadd = 0.*CLHEP::mm) const = 0;
 
     };
-
   }
 }
-#endif //__LARG4HEC_ILOCALGEOMETRY_H__
+#endif //LARG4HEC_ILOCALGEOMETRY_H

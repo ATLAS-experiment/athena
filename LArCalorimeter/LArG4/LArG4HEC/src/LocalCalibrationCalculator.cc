@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LocalCalibrationCalculator.h"
@@ -18,12 +18,7 @@ namespace LArG4 {
 
     LocalCalibrationCalculator::LocalCalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_geometryCalculator("LocalHECGeometry",name)
-      , m_geometryType(kLocActive)
      {
-       declareProperty("GeometryCalculator", m_geometryCalculator);
-       declareProperty("GeometryType",m_strgeometryType="ACTIVE");
-       m_strgeometryType.declareUpdateHandler(&LocalCalibrationCalculator::GeometryTypeUpdateHandler, this);
      }
 
     void LocalCalibrationCalculator::GeometryTypeUpdateHandler(Gaudi::Details::PropertyBase&)
@@ -44,12 +39,10 @@ namespace LArG4 {
         }
       else
         {
-          std::ostringstream merr;
-          merr <<
-            "LArG4::HEC::LocalCalibrationCalculator::GeometryTypeUpdateHandler FATAL: invalid eHECGeometryType specified "
-               << geoTypeString;
-          std::cerr << merr.str() << std::endl;
-          throw GaudiException(merr.str(), "LArG4::HEC::LocalCalibrationCalculator::GeometryTypeUpdateHandler", StatusCode::FAILURE);
+          std::string merr{"LArG4::HEC::LocalCalibrationCalculator::GeometryTypeUpdateHandler FATAL: invalid eHECGeometryType specified "};
+          merr += geoTypeString;
+	  ATH_MSG_ERROR(merr);
+          throw GaudiException(merr, "LArG4::HEC::LocalCalibrationCalculator::GeometryTypeUpdateHandler", StatusCode::FAILURE);
         }
 
     }
@@ -62,23 +55,18 @@ namespace LArG4 {
       return StatusCode::SUCCESS;
     }
 
-    LocalCalibrationCalculator::~LocalCalibrationCalculator() {
-    }
-
-
     G4bool LocalCalibrationCalculator::Process(const G4Step* step, LArG4Identifier & identifier,
                                           std::vector<G4double> & energies,
                                           const eCalculatorProcessing process) const
     {
 
       energies.clear();
-      if ( process == kEnergyAndID  ||  process == kOnlyEnergy )
-	{
-	  m_energyCalculator.Energies( step, energies );
-	}
-      else
+      if ( process == kEnergyAndID  ||  process == kOnlyEnergy ) {
+	m_energyCalculator.Energies( step, energies );
+      }
+      else {
 	for (unsigned int i=0; i != 4; i++) energies.push_back( 0. );
-
+      }
 
       if ( process == kEnergyAndID  ||  process == kOnlyID )
 	{
@@ -118,9 +106,7 @@ namespace LArG4 {
 	  } else identifier = m_geometryCalculator->CalculateIdentifier(step, m_geometryType, 0, 4.*CLHEP::mm);
 
           // Check for bad result.
-          if ( identifier == LArG4Identifier() ) return false;
-
-          return true;
+          return ( identifier != LArG4Identifier() );
         }
       return true;
     }

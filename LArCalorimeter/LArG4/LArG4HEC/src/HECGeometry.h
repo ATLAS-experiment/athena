@@ -1,11 +1,15 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// This class contains the geometry calculations needed to calculate
-// an identifier for a given G4Step in the HEC.
-
-// Jan-2008: (M.Fincke)  To be used for new Module-Geometry
+/**
+ *  @class LArG4::HEC::HECGeometry
+ *
+ *  @brief This class contains the geometry calculations needed to calculate
+ *  an identifier for a given G4Step in the HEC.
+ *
+ *  @author M.Fincke
+ */
 
 #ifndef LArG4_HEC_HECGeometry_H
 #define LArG4_HEC_HECGeometry_H
@@ -14,7 +18,6 @@
 #include "AthenaBaseComps/AthService.h"
 
 #include "LArReadoutGeometry/HECDetectorManager.h"
-//#include "LArReadoutGeometry/HECDetectorRegion.h"
 #include "globals.hh"
 
 // Forward declarations.
@@ -33,7 +36,7 @@ namespace LArG4 {
 
       HECGeometry(const std::string& name, ISvcLocator * pSvcLocator);
       StatusCode initialize() override final;
-      virtual ~HECGeometry(){;}
+      virtual ~HECGeometry() = default;
 
       void initializeForSDCreation() override final;
       LArG4Identifier CalculateIdentifier( const G4Step* a_step, const eHECGeometryType type = kWheelActive, int *subgap=NULL) const override final;

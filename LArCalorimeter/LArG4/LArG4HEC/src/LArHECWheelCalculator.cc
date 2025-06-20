@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHECWheelCalculator.h"
@@ -34,15 +34,8 @@ namespace Units = Athena::Units;
 
 LArHECWheelCalculator::LArHECWheelCalculator(const std::string& name, ISvcLocator *pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
-  , m_Geometry("HECGeometry",name) //FIXME LArG4::HEC::HECGeometry
-  , m_DetectorManager(nullptr)
-  , m_birksLaw(nullptr)
-  , m_doHV(false)
 {
-  declareProperty("GeometryCalculator",m_Geometry);
-  declareProperty("HECHVEnable",m_doHV);
 }
-
 
 LArHECWheelCalculator::~LArHECWheelCalculator()
 {
