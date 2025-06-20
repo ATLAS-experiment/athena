@@ -27,7 +27,9 @@ tauTriggerChainsSF = {
     2015: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
     2016: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
     2017: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
-    2018: ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
+    2018: ['HLT_tau25_medium1_tracktwoEF', 'HLT_tau35_medium1_tracktwoEF'],
+    2022: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
+    2023: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
 }
 
 # Example cuts used for event selection algorithm test

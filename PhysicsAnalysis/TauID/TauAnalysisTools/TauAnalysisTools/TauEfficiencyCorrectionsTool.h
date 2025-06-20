@@ -104,7 +104,7 @@ private:
   Gaudi::Property<std::string> m_sVarNameJetIDHadTau{this, "VarNameJetIDHadTau", ""};
   Gaudi::Property<std::string> m_sVarNameDecayModeHadTau{this, "VarNameDecayModeHadTau", ""};  
   Gaudi::Property<std::string> m_sVarNameTriggerHadTau{this, "VarNameTriggerHadTau", ""};
-  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2022-prerec"};
+  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2025-prerec"};
   Gaudi::Property<std::string> m_sTriggerName{this, "TriggerName", ""};
   Gaudi::Property<bool> m_bReadRandomRunNumber{this, "AutoTriggerYear", false}; 
   Gaudi::Property<std::string> m_sTriggerSFMeasurement{this, "TriggerSFMeasurement", "combined"}; 
