@@ -88,32 +88,37 @@ def PrdMultiTruthMakerCfg(flags):
     return result
 
 
-def SdoMultiTruthMakerCfg(flags):
+def SdoMultiTruthMakerCfg(flags, useSDO = False):
     result = ComponentAccumulator()
 
     if flags.Detector.GeometryMDT: 
+        container = "xMdtSimHits" if not useSDO else "MDT_SDO"
         the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerMdt",
-                                                        SimContainer = "xMdtSimHits", 
+                                                        SimContainer = container, 
                                                         WriteKey = "MDT_TruthMap")
         result.addEventAlgo(the_alg)
     if flags.Detector.GeometryRPC:
+        container = "xRpcSimHits" if not useSDO else "RPC_SDO"
         the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerRpc",
-                                                        SimContainer = "xRpcSimHits", 
+                                                        SimContainer = container, 
                                                         WriteKey = "RPC_TruthMap")
         result.addEventAlgo(the_alg)
     if flags.Detector.GeometryTGC: 
+        container = "xTgcSimHits" if not useSDO else "TGC_SDO"
         the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerTgc",
-                                                        SimContainer ="xTgcSimHits",
+                                                        SimContainer = container,
                                                         WriteKey = "TGC_TruthMap")
         result.addEventAlgo(the_alg)       
     if flags.Detector.GeometryMM: 
+        container = "xMmSimHits" if not useSDO else "MM_SDO"
         the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerMm",
-                                                        SimContainer = "xMmSimHits", 
+                                                        SimContainer = container, 
                                                         WriteKey = "MM_TruthMap")
         result.addEventAlgo(the_alg) 
     if flags.Detector.GeometrysTGC: 
+        container = "xStgcSimHits" if not useSDO else "sTGC_SDO"
         the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerSTGC",
-                                                        SimContainer = "xStgcSimHits", 
+                                                        SimContainer = container, 
                                                         WriteKey = "STGC_TruthMap")
         result.addEventAlgo(the_alg) 
 
