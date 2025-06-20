@@ -24,7 +24,7 @@ def ITkTrigTrackSeedingToolStandaloneCfg(flags: AthConfigFlags, **kwargs) -> Com
   kwargs.setdefault("UsePixelSpacePoints", (not isLRT))
   kwargs.setdefault("UseSctSpacePoints", isLRT)
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
-  kwargs.setdefault("MaxGraphEdges", 2500000 if flags.Trigger.InDetTracking.doGPU else 1800000)
+  kwargs.setdefault("MaxGraphEdges", 2500000 if flags.Trigger.InDetTracking.doGPU else 3000000)
   kwargs.setdefault("ConnectionFileName", "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
 
   kwargs.setdefault("UseGPU", flags.Trigger.InDetTracking.doGPU)
