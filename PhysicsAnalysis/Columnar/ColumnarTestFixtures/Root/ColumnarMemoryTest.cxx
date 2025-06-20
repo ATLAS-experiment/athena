@@ -13,10 +13,6 @@
 
 #include <ColumnarCore/ColumnarDef.h>
 
-#ifdef XAOD_STANDALONE
-#include <ComponentFactoryPreloader/ComponentFactoryPreloader.h>
-#endif
-
 //
 // method implementations
 //
@@ -26,16 +22,6 @@ namespace columnar
   ColumnarMemoryTest ::
   ColumnarMemoryTest ()
   {
-#ifdef XAOD_STANDALONE
-    static std::once_flag flag;
-    std::call_once (flag, [] ()
-    {
-      // Preload the component factories:  Alternately this could be
-      // loaded and executed via a dictionary, but I had some technical
-      // issue with that, and this seems to be working.
-      CP::preloadComponentFactories();
-    });
-#endif
   }
 
 
