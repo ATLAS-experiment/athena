@@ -36,9 +36,10 @@ def RecoSteering(flags):
     acc.flagPerfmonDomain('Truth')
     if flags.Input.isMC or flags.Overlay.DataOverlay:
         # AOD2xAOD Truth conversion
-        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-        acc.merge(GEN_AOD2xAODCfg(flags))
-        log.info("---------- Configured AODtoxAOD Truth Conversion")
+        if flags.Output.doGEN_AOD2xAOD:
+            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+            acc.merge(GEN_AOD2xAODCfg(flags))
+            log.info("---------- Configured AODtoxAOD Truth Conversion")
         # copy background vertex collection to AOD
         if flags.Overlay.DataOverlay:
             from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
