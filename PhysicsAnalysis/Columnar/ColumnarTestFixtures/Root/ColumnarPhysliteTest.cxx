@@ -248,11 +248,12 @@ namespace columnar
     struct ColumnDataScalar final : public PhysliteTestHelpers::IColumnData
     {
       BranchReader<T> branchReader;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
       std::vector<T> outData;
 
       explicit ColumnDataScalar (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName())
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName()});
       }
@@ -280,7 +281,9 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         outData.push_back (branchData);
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
@@ -297,10 +300,11 @@ namespace columnar
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<T> outData;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
 
       explicit ColumnDataVector (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName())
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName()});
         outputColumns.push_back ({.name = branchReader.containerName(), .isOffset = true, .primary = false});
@@ -347,8 +351,10 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         outData.insert (outData.end(), branchData.begin(), branchData.end());
         offsets.push_back (outData.size());
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
@@ -425,10 +431,11 @@ namespace columnar
       BranchReader<std::vector<std::vector<T>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<T> columnData;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
 
       explicit ColumnDataVectorVector (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName())
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName() + ".data"});
         outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
@@ -468,11 +475,13 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         for (auto& data : branchData)
         {
           columnData.insert (columnData.end(), data.begin(), data.end());
           offsets.push_back (columnData.size());
         }
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
@@ -493,10 +502,11 @@ namespace columnar
       const std::vector<ColumnarOffsetType>* targetOffsetColumn = nullptr;
       SG::sgkey_t targetKey = 0;
       std::string targetContainerName;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
 
       explicit ColumnDataVectorVectorLink (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName())
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName() + ".data"});
         outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
@@ -544,6 +554,7 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         if (targetOffsetColumn->size() < 2)
           throw std::runtime_error ("target offset column not yet filled for: " + outputColumns.at(0).name);
         for (auto& data : branchData)
@@ -570,6 +581,7 @@ namespace columnar
           }
           offsets.push_back (columnData.size());
         }
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
@@ -589,10 +601,11 @@ namespace columnar
       std::vector<ColumnarOffsetType> outerOffsets = {0};
       std::vector<ColumnarOffsetType> innerOffsets = {0};
       std::vector<T> columnData;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
 
       explicit ColumnDataVectorVectorVector (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName())
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName() + ".data"});
         outputColumns.push_back ({.name = branchReader.columnName() + ".innerOffset", .isOffset = true});
@@ -645,6 +658,7 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         for (auto& outerData : branchData)
         {
           for (auto& innerData : outerData)
@@ -654,6 +668,7 @@ namespace columnar
           }
           outerOffsets.push_back (innerOffsets.size()-1);
         }
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
@@ -677,10 +692,11 @@ namespace columnar
       const std::vector<ColumnarOffsetType>* targetOffsetColumn = nullptr;
       SG::sgkey_t targetKey = 0;
       std::string targetContainerName;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
 
       ColumnDataVectorLink (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName())
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName()});
         outputColumns.push_back ({.name = branchReader.containerName(), .isOffset = true, .primary = false});
@@ -735,6 +751,7 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         if (targetOffsetColumn->size() < 2)
           throw std::runtime_error ("target offset column not yet filled for: " + outputColumns.at(0).name);
         for (auto& element : branchData)
@@ -765,6 +782,7 @@ namespace columnar
           if (offsetColumn->back() != offsets.back())
             throw std::runtime_error ("offset column does not match: " + outputColumns.at(1).name);
         }
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
@@ -786,13 +804,14 @@ namespace columnar
       std::vector<std::string> containers;
       std::vector<SG::sgkey_t> containerKeys;
       std::vector<const std::vector<ColumnarOffsetType>*> containerOffsets;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
 
       bool checkUnknownKeys = false;
       std::unordered_map<SG::sgkey_t,std::unordered_set<std::string>> unknownKeys;
 
       explicit ColumnDataVectorVectorVariantLink (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName())
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName() + ".data"});
         outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
@@ -877,6 +896,7 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         for (auto& data : branchData)
         {
           for (auto& element : data)
@@ -917,6 +937,7 @@ namespace columnar
           }
           offsets.push_back (columnData.size());
         }
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
@@ -936,10 +957,11 @@ namespace columnar
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<char> columnData;
       std::vector<std::size_t> columnHashData;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
 
       ColumnDataMetNames (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName())
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName() + ".data"});
         outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
@@ -990,12 +1012,14 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         for (auto& data : branchData)
         {
           columnData.insert (columnData.end(), data.begin(), data.end());
           offsets.push_back (columnData.size());
           columnHashData.push_back (std::hash<std::string> () (data));
         }
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
@@ -1103,10 +1127,11 @@ namespace columnar
       BranchReader<xAOD::CaloClusterContainer> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<std::uint32_t> columnData;
+      Benchmark benchmarkUnpack;
       Benchmark benchmark;
 
       ColumnDataSamplingPattern (const std::string& val_branchName)
-        : branchReader (val_branchName), benchmark (branchReader.columnName() + ".samplingPattern(fallback)")
+        : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+".samplingPattern(fallback)(unpack)"), benchmark (branchReader.columnName() + ".samplingPattern(fallback)")
       {
         outputColumns.push_back ({.name = branchReader.columnName() + ".samplingPattern"});
         outputColumns.push_back ({.name = branchReader.columnName(), .isOffset = true, .primary = false});
@@ -1148,11 +1173,13 @@ namespace columnar
         benchmark.startTimer ();
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
         for (auto data : branchData)
         {
           columnData.push_back (data->samplingPattern());
         }
         offsets.push_back (columnData.size());
+        benchmarkUnpack.stopTimer ();
       }
 
       virtual void setData (ColumnarToolWrapperData& tool) override
