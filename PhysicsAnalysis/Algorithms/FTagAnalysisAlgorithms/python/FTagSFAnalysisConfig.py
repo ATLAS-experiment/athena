@@ -8,7 +8,7 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
 
-from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
+from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getReadFromBTaggingObject
 from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
 from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
 from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
@@ -100,7 +100,10 @@ class FTagJetSFBlock(ConfigBlock):
         self.addOption ('removeHLTPrefix', True, type=bool,
             info="remove the HLT prefix from trigger chain names, "
             "The default is True.")
-        self.addOption('readFromBTaggingObject', True, type=bool,
+        # Peculiar case default value set to None while type is bool 
+        # A default value will be assigned by the getReadFromBTaggingObject function 
+        # if this flag is not set 
+        self.addOption('readFromBTaggingObject', None, type=bool,
             info="whether to read the b-tagging information from the BTagging object "
             "instead of the jet container. FTAG group has dropped BTagging object, all"
             "b-tagging related variables are attached to jet container. This only serves"
@@ -109,6 +112,7 @@ class FTagJetSFBlock(ConfigBlock):
     def configureEfficiencyTool(self, config, btagger, btagWP, jetContainer,
                                 bTagCalibFile, DSID, tool,
                                 selectionCDI="", selectionTagger=""):
+        
         tool.TaggerName = btagger
         tool.OperatingPoint = btagWP
         tool.JetAuthor = config.originalName(jetContainer)
@@ -170,6 +174,11 @@ class FTagJetSFBlock(ConfigBlock):
 
         # Need to split container name from selections, to support AnaJets.baselineJvt
         jetContainer = self.containerName.split('.')[0]
+        
+        jetCollection = config.originalName(jetContainer)
+        # Potentially modify the readFromBTaggingObject as here determining 
+        # if input files has jet tagging probabilities attached to the jet (or still only to the BTagging object)
+        self.readFromBTaggingObject = getReadFromBTaggingObject(config, jetCollection, self.readFromBTaggingObject)
 
         # b-jet trigger-aware SF
         if self.triggerChainsPerYear:
