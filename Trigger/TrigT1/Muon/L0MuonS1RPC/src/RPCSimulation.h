@@ -7,17 +7,19 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaKernel/IAthRNGSvc.h"
+
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
+
+#include "xAODTruth/TruthParticleContainer.h"
 #include "xAODMuonRDO/NRPCRDOContainer.h"
 #include "xAODTrigger/MuonRoIContainer.h"
+#include "xAODMuonSimHit/MuonSimHit.h"
+
 #include "L0MuonInterface/BarrelCandDataContainer.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
-#include "MuonDigitContainer/RpcDigitContainer.h"
-#include "GeneratorObjects/McEventCollection.h"
-#include "AsgTools/PropertyWrapper.h"
-#include "xAODMuonSimHit/MuonSimHitContainer.h"
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
 
 namespace L0Muon
 {
@@ -33,9 +35,11 @@ namespace L0Muon
 
   private:
     /// build the candidates from the MC truth
-    StatusCode buildFromTruth(SG::WriteHandle<L0Muon::BarrelCandDataContainer>
-                                  outputCands,
+    StatusCode buildFromTruth(L0Muon::BarrelCandDataContainer& outputCands,
                               const EventContext &ctx) const;
+
+    std::vector<const xAOD::MuonSimHit*> collectHits(const xAOD::TruthParticle& truthPart,
+                                                     const EventContext& ctx) const;
 
 
     /// configuration options
@@ -51,10 +55,11 @@ namespace L0Muon
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
 
     /// truth containers
-    SG::ReadHandleKey<McEventCollection> m_mcEventCollectionKey{this, "TruthEventKey", "TruthEvent"};
-    SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_simHitContainerKey{this, "RPC_SDO", "RPC_SDO",
-                                                                       "RPC SimHit container key"};
- 
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartKey{this, "TruthPartKey", "MuonTruthParticles"};
+
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_segmentLinkKey{this, "SegmentLinkKey", m_truthPartKey, 
+                                                                          "truthSegmentLinks"};
+    
     /// helper service
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc",
                                                          "Muon Id Helper Service"};  
