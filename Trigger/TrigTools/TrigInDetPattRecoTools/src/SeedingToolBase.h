@@ -62,6 +62,7 @@ class SeedingToolBase: public AthAlgTool {
   StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4.txt"};
 
   BooleanProperty m_useGPUseedExtraction{this, "UseGPUseedExtraction", true};
+  BooleanProperty m_useOldTunings{this, "UseOldTunings", false};
 
   float m_phiSliceWidth = 0.;
 
