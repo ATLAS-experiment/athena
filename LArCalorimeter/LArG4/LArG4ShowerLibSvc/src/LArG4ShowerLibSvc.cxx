@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArG4ShowerLibSvc/LArG4ShowerLibSvc.h"
+#include "LArG4ShowerLibSvc.h"
 
 // shower lib classes
 #include "LArG4ShowerLib/ShowerLibList.h"
@@ -18,13 +18,9 @@
 
 namespace Units = Athena::Units;
 
-
 LArG4ShowerLibSvc::LArG4ShowerLibSvc(const std::string& name,ISvcLocator* svc)
   : base_class(name,svc)
-  , m_fileNameList()
-{
-  declareProperty( "FileNameList",    m_fileNameList,   "List of filenames for direct reading" );
-  
+{ 
   /* BE SURE THIS ONE IS THE SAME AS IN LArG4FastSimSvc!!! */
   enum DETECTOR {EMB=100000,EMEC=200000,FCAL1=300000,FCAL2=400000,FCAL3=500000,HECLOC=600000,HEC=700000};
 
@@ -35,10 +31,6 @@ LArG4ShowerLibSvc::LArG4ShowerLibSvc(const std::string& name,ISvcLocator* svc)
   m_detmap["FCAL3"]=FCAL3;
   m_detmap["HECLOC"]=HECLOC;
   m_detmap["HEC"]=HEC;
-}
-
-LArG4ShowerLibSvc::~LArG4ShowerLibSvc()
-{
 }
 
 StatusCode LArG4ShowerLibSvc::initialize()
