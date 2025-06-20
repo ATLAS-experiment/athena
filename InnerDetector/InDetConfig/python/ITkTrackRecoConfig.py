@@ -714,7 +714,7 @@ if __name__ == "__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     top_acc.merge(PoolReadCfg(flags))
 
-    if flags.Input.isMC:
+    if flags.Input.isMC and flags.Output.doGEN_AOD2xAOD:
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
         top_acc.merge(GEN_AOD2xAODCfg(flags))
 
