@@ -6,7 +6,6 @@ from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict, MapKeysDict
-from Campaigns.Utils import Campaign
 from AthenaCommon.Logging import logging
 
 # E/gamma import(s).
@@ -795,16 +794,10 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                 if any(year in years for year in [2015, 2016, 2017, 2018]) \
                     and any(year in years for year in [2022, 2023, 2024, 2025]):
                     raise ValueError("Mixing years from Run 2 and Run 3 in the same job is currently not supported.")
-            elif config.campaign() is Campaign.MC20a:
-                years = [2015, 2016]
-            elif config.campaign() is Campaign.MC20d:
-                years = [2017]
-            elif config.campaign() is Campaign.MC20e:
-                years = [2018]
-            elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
-                years = [2022]
-            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
-                years = [2023]
+            else:
+                from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import (
+                    get_input_years)
+                years = get_input_years(config)
 
             # prepare keys
             import ROOT
