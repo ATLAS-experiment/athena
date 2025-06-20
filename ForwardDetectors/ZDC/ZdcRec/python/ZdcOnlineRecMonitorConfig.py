@@ -158,13 +158,13 @@ def ZdcOnlinePrintDebugMsgs():
 
     # Check environmental variables
     log.debug ('check if the os environment configs are correctly set')
-    log.debug ('ZDC_RELEASE_NAME ', os.getenv("ZDC_RELEASE"))
-    log.debug ('ENVIORNMENT ', os.getenv("ENVIORNMENT"))
-    log.debug ('ZDC_KEY_COUNT ', os.getenv("ZDC_KEY_COUNT"))
-    log.debug ('ZDC_KEY ', os.getenv("ZDC_KEY"))
-    log.debug ('ZDC_ATHENA_JOB_NAME ', os.getenv("ZDC_ATHENA_JOB_NAME"))
-    log.debug ('ZDC_STREAM_NAME ', os.getenv("ZDC_STREAM_NAME"))
-    log.debug ('ZDC_STREAM_TYPE ', os.getenv("ZDC_STREAM_TYPE"))
+    log.debug ('ZDC_RELEASE_NAME %s', os.getenv("ZDC_RELEASE"))
+    log.debug ('ENVIORNMENT %s', os.getenv("ENVIORNMENT"))
+    log.debug ('ZDC_KEY_COUNT %s', os.getenv("ZDC_KEY_COUNT"))
+    log.debug ('ZDC_KEY %s', os.getenv("ZDC_KEY"))
+    log.debug ('ZDC_ATHENA_JOB_NAME %s', os.getenv("ZDC_ATHENA_JOB_NAME"))
+    log.debug ('ZDC_STREAM_NAME %s', os.getenv("ZDC_STREAM_NAME"))
+    log.debug ('ZDC_STREAM_TYPE %s', os.getenv("ZDC_STREAM_TYPE"))
 
 
 # -------------------------------- BYTE STREAM EMON INPUT SERVICE --------------------------------
@@ -187,7 +187,7 @@ def ZdcOnlineByteStreamCfg(flags, partition, isTestbed):
         bsSvc.Key = "ReadoutApplication"
     else:
         bsSvc.Key = os.environ.get("ZDC_KEY", "dcm")
-        log.debug('the value being assigned to bssvc key is', os.environ.get("ZDC_KEY", "dcm"))
+        log.debug('the value being assigned to bssvc key is %s', os.environ.get("ZDC_KEY", "dcm"))
     
     log.info('final bssvc key: %s', bsSvc.Key)
     bsSvc.KeyCount = int(os.environ.get("ZDC_KEY_COUNT","250"))
@@ -207,9 +207,9 @@ def ZdcOnlineByteStreamCfg(flags, partition, isTestbed):
 
     log.debug('Printing out for debugging at testing/developing stage')
     log.debug('Testing if settings of these variables in ZDC athena segment OKS are correctly picked up by the python code')
-    log.debug('the stream type is:', bsSvc.StreamType)
-    log.debug('the stream names are:', bsSvc.StreamNames)
-    log.debug('the stream logic is:', bsSvc.StreamLogic)
+    log.debug('the stream type is: %s', bsSvc.StreamType)
+    log.debug('the stream names are: %s', bsSvc.StreamNames)
+    log.debug('the stream logic is: %s', bsSvc.StreamLogic)
 
     return acc
 
@@ -260,7 +260,7 @@ def RunZdcOnlineRecoCfg(flags, isLED, isInj, isCalib):
         acc.merge(ZdcLEDRecAcc)
         daqMode = 1 if partition.name() == 'zdcStandalone' else 2
         ZdcLEDRecAcc.getEventAlgo('ZdcRecRun3').DAQMode = daqMode
-        log.info ('CHECK: The DAQ mode for the LED reconstruction is', ZdcLEDRecAcc.getEventAlgo('ZdcRecRun3').DAQMode)
+        log.info ('CHECK: The DAQ mode for the LED reconstruction is %s', ZdcLEDRecAcc.getEventAlgo('ZdcRecRun3').DAQMode)
     if isCalib or isInj: # should be able to run both if in standalone data
         from ZdcRec.ZdcRecConfig import ZdcRecCfg
         ZdcRecAcc = ZdcRecCfg(flags)

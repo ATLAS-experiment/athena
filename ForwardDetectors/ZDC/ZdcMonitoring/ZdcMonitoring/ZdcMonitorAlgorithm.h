@@ -48,6 +48,7 @@ public:
     StatusCode fillPhysicsDataHistograms( const EventContext& ctx ) const;
 
 private:
+    bool check_equal_within_rounding(float a, float b, float epsilon = 1e-6f) const;
     void calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
     float calculate_inverse_bin_width(float event_value, const std::string& variable_name, const std::vector<float>& bin_edges) const;
     
@@ -104,6 +105,7 @@ private:
     std::map<std::string,int> m_ZDCSideToolIndices;
     std::map<std::string,std::map<std::string,int>> m_ZDCModuleToolIndices;
     std::map<std::string,std::map<std::string,int>> m_RPDChannelToolIndices;
+    std::map<std::string,std::map<std::string,std::map<std::string,int>>> m_LucrodResponseSingleVoltageToolIndices;
 
     std::vector<float> m_ZdcModuleChisqBinEdges;
     std::vector<float> m_ZdcModuleChisqOverAmpBinEdges;
@@ -129,6 +131,8 @@ private:
     Gaudi::Property<bool> m_enableRPDAmp {this,"EnableRPDAmp",true};
     Gaudi::Property<bool> m_enableCentroid {this,"EnableCentroid",true};
     
+    Gaudi::Property<std::vector<float>> m_injPulseVoltageSteps {this, "InjPulseVoltageSteps", {0.}};
+    Gaudi::Property<std::vector<std::string>> m_injPulseVoltageStepsStr {this, "InjPulseVoltageStepsStr", {""}};
 
     // owner, name (allows us to modify the key in python configuration), key
     SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumContainerKey {this, "ZdcSumContainerKey", "ZdcSums"};

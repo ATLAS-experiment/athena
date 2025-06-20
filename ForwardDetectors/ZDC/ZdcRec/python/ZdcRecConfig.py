@@ -149,8 +149,6 @@ def ZdcGenericFlagSetting(flags): # pass flags object by reference: directly set
     parser.add_argument('--runInjForStandaloneData',default="Inj",help="indicate if we run inj/LED reconstruction for standalone data: inj (default) --> run injected-pulse reconstruction for injector-pulse events; LED --> run LED reconstruction for LED events")
     flags.fillFromArgs(parser=parser)
 
-    flags.GeoModel.AtlasVersion=zdcGeometry(flags)
-
 
 def ZdcStreamDependentFlagSetting(flags): 
     '''Function that checks on data type from triggerstream tag
@@ -223,6 +221,8 @@ def ZdcStreamDependentFlagSetting(flags):
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: no trigger info available
         flags.DQ.useTrigger = False
         flags.DQ.triggerDataAvailable = False 
+
+    flags.GeoModel.AtlasVersion=zdcGeometry(flags)
 
     return isLED, isInj, isCalib, pn # return a ntuple of stream and project-name info for further use
 
