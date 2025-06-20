@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -98,7 +98,7 @@ namespace Analysis {
     }
     
 
-    JpsiFinder::JpsiFinder(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p),
+    JpsiFinder::JpsiFinder(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
     m_mumu(true),
     m_mutrk(false),
     m_trktrk(false),
@@ -126,7 +126,6 @@ namespace Analysis {
     m_forceTagAndProbe(false) //forcing T&P method for any charge combinations
     
     {
-        declareInterface<JpsiFinder>(this);
         declareProperty("muAndMu",m_mumu);
         declareProperty("muAndTrack",m_mutrk);
         declareProperty("TrackAndTrack",m_trktrk);
