@@ -418,16 +418,10 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
             if self.includeAllYears:
                 years = [int(year) for year in self.triggerChainsPerYear.keys()]
-            elif config.campaign() is Campaign.MC20a:
-                years = [2015, 2016]
-            elif config.campaign() is Campaign.MC20d:
-                years = [2017]
-            elif config.campaign() is Campaign.MC20e:
-                years = [2018]
-            elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
-                years = [2022]
-            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
-                years = [2023]
+            else:
+                from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import (
+                    get_input_years)
+                years = get_input_years(config)
 
             triggerYearStartBoundaries = {
                 2015: 260000,
