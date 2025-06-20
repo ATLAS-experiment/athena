@@ -118,6 +118,8 @@ namespace TCS {
       int Ey() const { return m_Ey; }
       unsigned int Et2() const { return m_Et2; }
       unsigned int sumEt() const { return m_sumEt; }
+      unsigned int sumEtSideA() const { return m_sumEtSideA; }
+      unsigned int sumEtSideC() const { return m_sumEtSideC; }
 
       int eta() const { return m_eta; }
       int phi() const { return m_phi; }
@@ -136,6 +138,8 @@ namespace TCS {
       double ExDouble() const { return m_ExDouble; }
       double EyDouble() const { return m_EyDouble; }
       double sumEtDouble() const { return m_sumEtDouble; }
+      double sumEtDoubleSideA() const { return m_sumEtDoubleSideA; }
+      double sumEtDoubleSideC() const { return m_sumEtDoubleSideC; }
 
       virtual void print(std::ostream &o) const;
 
@@ -152,6 +156,8 @@ namespace TCS {
       int m_Ey { 0 };
       unsigned int m_Et2 { 0 };
       unsigned int m_sumEt { 0 };
+      unsigned int m_sumEtSideA { 0 };
+      unsigned int m_sumEtSideC { 0 };
 
       int m_eta { 0 };
       int m_phi { 0 };
@@ -169,6 +175,8 @@ namespace TCS {
       double m_ExDouble { 0 };
       double m_EyDouble { 0 };
       double m_sumEtDouble { 0 };
+      double m_sumEtDoubleSideA { 0 };
+      double m_sumEtDoubleSideC { 0 };
 
       inputTOBType_t   m_tobType { NONE };
 

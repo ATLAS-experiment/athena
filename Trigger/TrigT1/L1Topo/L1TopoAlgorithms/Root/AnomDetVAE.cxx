@@ -9,6 +9,9 @@
  * Uses 6 jets, 4 muons, 4 taus, and MET to calculate the anomaly score
  * based on the KL-divergence in a lower dimension latent space
  *
+ * @param ScaleSqr1 
+ * @param ScaleSqr2 
+ * @param ScaleSqr3 
  * @param AnomalyScoreThresh
 **********************************/
 
@@ -36,13 +39,20 @@ TCS::ADVAE_2A::ADVAE_2A(const std::string & name) : DecisionAlg(name)
 
    // Version parameter, used for L1TopoFW book-keeping, no practical application
    defineParameter("ADVAEVersion", 1);
-   //minEt cuts, one per input list (TOBs failing these are set to ET = eta = phi = 0)
+   // minEt cuts, one per input list (TOBs failing these are set to ET = eta = phi = 0)
    defineParameter("MinET1",0);
    defineParameter("MinET2",0);
    defineParameter("MinET3",0);
    defineParameter("MinET4",0);
-   //The value used is sum of squares of the NN result vector elements, bit-shifted by 8 to get all decimal bits
+   // Configurable scale for the mu parameters in the latent space and AD score threshold
+   // The value used is sum of squares of the NN result vector elements, bit-shifted by 8 to get all decimal bits
+   defineParameter("ScaleSqr1",128,0); 
+   defineParameter("ScaleSqr2",128,0); 
+   defineParameter("ScaleSqr3",128,0); 
    defineParameter("AnomalyScoreThresh", 1000000, 0);
+   defineParameter("ScaleSqr1",128,1); 
+   defineParameter("ScaleSqr2",128,1); 
+   defineParameter("ScaleSqr3",128,1); 
    defineParameter("AnomalyScoreThresh", 1000000, 1);
 
    setNumberOutputBits(2);
@@ -69,6 +79,9 @@ TCS::ADVAE_2A::initialize() {
    p_minEt4 = parameter("MinET4").value();
 
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
+      p_ScaleSqr1[i] = parameter("ScaleSqr1", i).value();
+      p_ScaleSqr2[i] = parameter("ScaleSqr2", i).value();
+      p_ScaleSqr3[i] = parameter("ScaleSqr3", i).value();
       p_AnomalyScoreThresh[i] = parameter("AnomalyScoreThresh", i).value();
    }
 
@@ -169,11 +182,17 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
                               mu_pt [2], mu_eta [2], mu_phi [2],
                               mu_pt [3], mu_eta [3], mu_phi [3],
                               met_pt[0], met_phi[0] );
-      int64_t anomScoreInt64 = AD_Network.getAnomalyScoreInt64();
+      std::vector<int64_t> anomScoreInt64Vec = AD_Network.getAnomalyScoreInt64Vec();
 
       for(u_int i=0; i<numberOutputBits(); ++i) {
          bool accept = false;
+         // Retrieve threshold
          int32_t threshold = int32_t ( p_AnomalyScoreThresh[i] );
+         // Calculate event score
+         int64_t anomScoreInt64 = 0;
+         anomScoreInt64 = (p_ScaleSqr1[i] * anomScoreInt64Vec.at(0)*anomScoreInt64Vec.at(0) >> p_ScaleSqr_DropBits) + 
+                          (p_ScaleSqr2[i] * anomScoreInt64Vec.at(1)*anomScoreInt64Vec.at(1) >> p_ScaleSqr_DropBits) + 
+                          (p_ScaleSqr3[i] * anomScoreInt64Vec.at(2)*anomScoreInt64Vec.at(2) >> p_ScaleSqr_DropBits);
          if ( anomScoreInt64 > threshold ) {
             accept = true;
             decision.setBit(i, true);
@@ -259,11 +278,17 @@ TCS::ADVAE_2A::process( const std::vector<TCS::TOBArray const *> & input,
                               mu_pt [2], mu_eta [2], mu_phi [2],
                               mu_pt [3], mu_eta [3], mu_phi [3],
                               met_pt[0], met_phi[0] );
-      int64_t anomScoreInt64 = AD_Network.getAnomalyScoreInt64();
+      std::vector<int64_t> anomScoreInt64Vec = AD_Network.getAnomalyScoreInt64Vec();
 
       for(u_int i=0; i<numberOutputBits(); ++i) {
          bool accept = false;
+         // Retrieve threshold
          int32_t threshold = int32_t ( p_AnomalyScoreThresh[i] );
+         // Calculate event score
+         int64_t anomScoreInt64 = 0;
+         anomScoreInt64 = p_ScaleSqr1[i]/std::pow(2,p_ScaleSqr_DropBits) * anomScoreInt64Vec.at(0)*anomScoreInt64Vec.at(0) + 
+                          p_ScaleSqr2[i]/std::pow(2,p_ScaleSqr_DropBits) * anomScoreInt64Vec.at(1)*anomScoreInt64Vec.at(1) + 
+                          p_ScaleSqr3[i]/std::pow(2,p_ScaleSqr_DropBits) * anomScoreInt64Vec.at(2)*anomScoreInt64Vec.at(2);
          if ( anomScoreInt64 > threshold ) {
             accept = true;
             decision.setBit(i, true);

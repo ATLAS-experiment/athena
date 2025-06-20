@@ -56,6 +56,7 @@ namespace TCS {
    const uint32_t jTauOutputWidthSelect = 10;
    const uint32_t jEmOutputWidthSelect = 10;
    const uint32_t muonOutputWidthSelect = 10;
+   const uint32_t  jSumEtTotalInputWidth = 12;
 
 
    // Legacy Topo constants
