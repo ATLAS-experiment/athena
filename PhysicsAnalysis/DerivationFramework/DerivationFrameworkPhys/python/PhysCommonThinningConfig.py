@@ -73,6 +73,15 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             TauSecondaryVertices = "TauSecondaryVertices_EleRM",
             SelectionString      = tau_erm_thinning_expression))
 
+    # di-tau thinning
+    if "DiTauThinningToolName" in kwargs:
+        acc.merge(GenericObjectThinningCfg(
+            flags,
+            name            = kwargs['DiTauThinningToolName'],
+            StreamName      = StreamName,
+            ContainerName   = "DiTauJets",
+            SelectionString = "DiTauJets.nSubjets > 1"))
+
     # ID tracks associated with high-pt di-tau
     if "DiTauTPThinningToolName" in kwargs:
         acc.merge(DiTauTrackParticleThinningCfg(
@@ -80,7 +89,8 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             name                    = kwargs['DiTauTPThinningToolName'],
             StreamName              = StreamName,
             DiTauKey                = "DiTauJets",
-            InDetTrackParticlesKey  = "InDetTrackParticles"))
+            InDetTrackParticlesKey  = "InDetTrackParticles",
+            SelectionString         = "DiTauJets.nSubjets > 1"))
  
     ## Low-pt di-tau thinning
     if "DiTauLowPtThinningToolName" in kwargs:

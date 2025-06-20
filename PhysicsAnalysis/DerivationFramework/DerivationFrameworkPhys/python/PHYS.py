@@ -38,6 +38,7 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
         'MuonTPThinningToolName'              : nametag+"MuonTPThinningTool",
         'TauJetThinningToolName'              : nametag+"TauJetThinningTool",
         'TauJets_MuonRMThinningToolName'      : nametag+"TauJets_MuonRMThinningTool",
+        'DiTauThinningToolName'               : nametag+"DiTauThinningTool",
         'DiTauTPThinningToolName'             : nametag+"DiTauTPThinningTool",
         'DiTauLowPtThinningToolName'          : nametag+"DiTauLowPtThinningTool",
         'DiTauLowPtTPThinningToolName'        : nametag+"DiTauLowPtTPThinningTool",

@@ -49,6 +49,7 @@ def STDM6KernelCfg(flags, name='STDM6Kernel', **kwargs):
         'MuonTPThinningToolName'              : "STDM6MuonTPThinningTool",
         'TauJetThinningToolName'              : "STDM6TauJetThinningTool",
         'TauJets_MuonRMThinningToolName'      : "STDM6TauJets_MuonRMThinningTool",
+        'DiTauThinningToolName'               : "STDM6DiTauThinningTool",
         'DiTauTPThinningToolName'             : "STDM6DiTauTPThinningTool",
         'DiTauLowPtThinningToolName'          : "STDM6DiTauLowPtThinningTool",
         'DiTauLowPtTPThinningToolName'        : "STDM6DiTauLowPtTPThinningTool",
