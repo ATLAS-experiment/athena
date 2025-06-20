@@ -97,8 +97,12 @@ def InDetTrackSmearingToolCfg(flags, name="InDetTrackSmearingTool", **kwargs):
     # 2022 recommendations (MC23a)
     if flags.Input.MCCampaign is Campaign.MC23a:
         kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2022_d0z0_smearing_factors_v2.root")
+    # 2023 recommendations (MC23d)
     elif flags.Input.MCCampaign is Campaign.MC23d:
         kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0_smearing_factors_v2.root")
+    # 2024 recommendations (MC23e)
+    elif flags.Input.MCCampaign is Campaign.MC23d:
+        kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0_smearing_factors.root")
     # Run 2 recommendations (MC20)
     elif flags.GeoModel.Run is LHCPeriod.Run2:
         kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/d0z0_smearing_factors_Run2_v2.root")
