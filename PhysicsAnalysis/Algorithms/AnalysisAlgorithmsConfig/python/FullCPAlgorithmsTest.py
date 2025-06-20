@@ -139,17 +139,11 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq.setOptionValue ('.selectionName', 'ftag')
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)
-        # Read from BTagging object. This will be needed until the input file is produced from
-        # a derivation release that includes !80336.
-        configSeq.setOptionValue ('.readFromBTaggingObject', not bleedingEdge)
         configSeq.setOptionValue ('.saveScores', 'All')
 
         configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF' )
         configSeq.setOptionValue ('.containerName', 'AnaJets.baselineJvt')
         configSeq.setOptionValue ('.btagger', btagger)
-        # Read from BTagging object. This will be needed until the input file is produced from
-        # a derivation release that includes !80336.
-        configSeq.setOptionValue ('.readFromBTaggingObject', not bleedingEdge)
 
     if largeRJets :
         configSeq += config.makeConfig( 'Jets',

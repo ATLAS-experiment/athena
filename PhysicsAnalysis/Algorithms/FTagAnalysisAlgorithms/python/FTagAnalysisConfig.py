@@ -2,7 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
+from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getReadFromBTaggingObject
 
 class FTagConfig (ConfigBlock):
     """the ConfigBlock for the flavor tagging config"""
@@ -28,7 +28,10 @@ class FTagConfig (ConfigBlock):
             "for referring to c-tagging")
         self.addOption ('bTagCalibFile', None, type=str,
             info="calibration file for CDI")
-        self.addOption('readFromBTaggingObject', True, type=bool,
+        # Peculiar case default value set to None while type is bool 
+        # A default value will be assigned by the getReadFromBTaggingObject function 
+        # if this flag is not set 
+        self.addOption('readFromBTaggingObject', None, type=bool,
             info="whether to read the b-tagging information from the BTagging object "
             "instead of the jet container. FTAG group has dropped BTagging object, all"
             "b-tagging related variables are attached to jet container. This only serves"
@@ -40,10 +43,15 @@ class FTagConfig (ConfigBlock):
         self.addOption ('saveCustomVariables', [], type=list,
             info="[Expert mode] additional variables to save from the b-tagging object associated "
             "to each jet. E.g. ['pb','pc','pu', 'ptau'] to replicate 'saveScores=All'.")
-
+    
     def makeAlgs (self, config) :
-
+        # print(config.autoconfigFlags())
+    
         jetCollection = config.originalName (self.containerName)
+        
+        # Potentially modify the readFromBTaggingObject as here determining 
+        # if input files has jet tagging probabilities attached to the jet (or still only to the BTagging object)
+        self.readFromBTaggingObject = getReadFromBTaggingObject(config, jetCollection, self.readFromBTaggingObject)
 
         selectionName = self.selectionName
         if selectionName is None or selectionName == '' :
@@ -58,7 +66,7 @@ class FTagConfig (ConfigBlock):
             bTagCalibFile = self.bTagCalibFile
         else:
             bTagCalibFile = getRecommendedBTagCalib(config.geometry())
-
+        
         # Set up the ftag selection algorithm(s):
         if 'Continuous' in self.btagWP:
             alg = config.createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' + postfix )
