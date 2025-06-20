@@ -8,7 +8,7 @@ find_package( GTest )
 
 set (extra_libs)
 if (XAOD_STANDALONE)
-  set (extra_libs ComponentFactoryPreloaderLib)
+  set (extra_libs )
 else()
   set (extra_libs POOLRootAccessLib)
 endif ()

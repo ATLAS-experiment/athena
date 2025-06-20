@@ -26,9 +26,7 @@
 #include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
 
-#ifdef XAOD_STANDALONE
-#include <ComponentFactoryPreloader/ComponentFactoryPreloader.h>
-#else
+#ifndef XAOD_STANDALONE
 #include <POOLRootAccess/TEvent.h>
 #endif
 
@@ -1174,11 +1172,6 @@ namespace columnar
     {
 #ifdef XAOD_STANDALONE
       xAOD::Init().ignore();
-
-      // Preload the component factories:  Alternately this could be
-      // loaded and executed via a dictionary, but I had some technical
-      // issue with that, and this seems to be working.
-      CP::preloadComponentFactories();
 #else
       POOL::Init();
 #endif
