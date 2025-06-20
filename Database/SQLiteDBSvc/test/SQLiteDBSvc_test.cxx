@@ -51,7 +51,12 @@ int main() {
   std::uniform_real_distribution<float> floatDist(0, 1200);
 
   for (int i = 1; i <= 250; ++i) {
-    insertStatement.run(i, floatDist(prng), intDist(prng));
+    // Precompute random numbers because order of function
+    // argument evaluation is undefined, and gcc and clang
+    // do it in opposite orders.
+    int randInt = intDist(prng);
+    float randFloat = floatDist(prng);
+    insertStatement.run(i, randFloat, randInt);
   }
 
   SQLite::Statement selectStatement = dbSvc->createStatement(
