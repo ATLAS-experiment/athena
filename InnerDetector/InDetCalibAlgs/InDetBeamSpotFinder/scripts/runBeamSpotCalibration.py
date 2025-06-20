@@ -70,12 +70,15 @@ if 'useBeamSpot' not in configMy.jobConfig:
     # change to True as soon as I have PrimaryVertexMonitoring in as well
     configMy.jobConfig['useBeamSpot'] = configMy.jobConfig.get('beamspottag','')!='' or configMy.jobConfig.get('beamspotfile','')!=''
 
+#Job options for trigger configuration
+if 'triggerConfig' not in configMy.jobConfig:                 configMy.jobConfig['triggerConfig'] = 'DB'
+
 #Printout of job configuration
 print("Job configuration: ")
 for option in configMy.jobConfig:
     print("    ",option,': ',configMy.jobConfig[option])
 print("    ")
-    
+
 flags.Exec.OutputLevel = configMy.jobConfig['outputlevel']
 flags.Exec.SkipEvents = configMy.jobConfig['skipEvents']
 flags.Exec.MaxEvents = configMy.jobConfig['maxEvents']
@@ -87,7 +90,7 @@ for path in configMy.jobConfig['inputfiles']:
     flags.Input.Files += glob(path)
 
 
-flags.Trigger.triggerConfig = "DB"
+flags.Trigger.triggerConfig = configMy.jobConfig['triggerConfig']
 flags.DQ.enableLumiAccess = False
 flags.Output.HISTFileName = configMy.jobConfig['monfile']
 flags.fillFromArgs()
