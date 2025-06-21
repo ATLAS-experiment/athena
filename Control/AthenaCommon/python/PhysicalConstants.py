@@ -1,5 +1,5 @@
 #####################################################################################
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #                                                                                   #
 # This software is distributed under the terms of the Apache version 2 licence,     #
 # copied verbatim in the file "LICENSE".                                            #
@@ -11,7 +11,7 @@
 # File: AthenaCommon/share/PhysicalConstants.py
 # Author: Wim Lavrijsen (LBNL, WLavrijsen@lbl.gov)
 # Created: 01/21/04
-# Last: 10/15/04
+# Last: 06/20/25
 
 # This script is a direct adaptation of CLHEP/Units/PhysicalConstants.h
 # and the following is the originial CLHEP comment:
@@ -48,6 +48,7 @@
 # 26.03.96 Added constants for standard conditions of temperature
 #          and pressure; also added Gas threshold.
 # 08.07.20 Updated
+# 06.20.25 Updated Avogardo, h_Planck, k_Boltzmann
 # -----
 
 import AthenaCommon.SystemOfUnits as Units
@@ -63,7 +64,7 @@ pi2 = pi * pi
 #
 #
 #
-Avogadro = 6.0221367e23 / Units.mole
+Avogadro = 6.02214076e23 / Units.mole
 
 #
 # c   = 299.792458 mm/ns
@@ -77,7 +78,7 @@ c_squared = c_light * c_light
 # hbar  = 6.58212e-13 MeV*ns
 # hbarc = 197.32705e-12 MeV*mm
 #
-h_Planck = 6.62606896e-34 * Units.joule * Units.s
+h_Planck = 6.62607015e-34 * Units.joule * Units.s
 hbar_Planck = h_Planck / twopi
 hbarc = hbar_Planck * c_light
 hbarc_squared = hbarc * hbarc
@@ -122,7 +123,7 @@ twopi_mc2_rcl2 = (
 #
 #
 #
-k_Boltzmann = 8.617343e-11 * Units.MeV / Units.kelvin
+k_Boltzmann = 8.617333e-11 * Units.MeV / Units.kelvin
 
 #
 #
