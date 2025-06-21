@@ -30,13 +30,13 @@ def getLumicalcFiles(campaign):
             'GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root'
         ],
         Campaign.MC23a: [
-            'GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root'
+            'GoodRunsLists/data22_13p6TeV/20250321/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-004.root'
         ],
         Campaign.MC23c: [
-            'GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root'
+            'GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root'
         ],
         Campaign.MC23d: [
-            'GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root'
+            'GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root'
         ],
         Campaign.MC23e: [
             'GoodRunsLists/data24_13p6TeV/20241118/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-005.root'
@@ -62,11 +62,11 @@ def actualMuFiles(campaign):
         )
     elif campaign in [Campaign.MC21a, Campaign.MC23a]:
         list.append(
-            'GoodRunsLists/data22_13p6TeV/20230207/purw.actualMu.2022.root'
+            'GoodRunsLists/data22_13p6TeV/20250321/purw.actualMu.root'
         )
     elif campaign in [Campaign.MC23c, Campaign.MC23d]:
         list.append(
-            'GoodRunsLists/data23_13p6TeV/20230828/purw.actualMu.2023.root'
+            'GoodRunsLists/data23_13p6TeV/20250321/purw.actualMu.root'
         )
     elif campaign in [Campaign.MC23e]:
         list.append(
