@@ -48,11 +48,12 @@ AuxStoreInternal::~AuxStoreInternal()
  * @brief Copy constructor.
  */
 AuxStoreInternal::AuxStoreInternal (const AuxStoreInternal& other)
-  : m_standalone (other.m_standalone),
-    m_decorations (other.m_decorations),
-    m_auxids (other.m_auxids),
-    m_locked (other.m_locked)
 {
+  guard_t guard (other.m_mutex);
+  m_standalone = other.m_standalone;
+  m_decorations = other.m_decorations;
+  m_auxids = other.m_auxids;
+  m_locked = other.m_locked;
   size_t size = other.m_vecs.size();
   m_vecs.resize (size);
   for (size_t i = 0; i < size; i++) {
@@ -387,8 +388,8 @@ bool AuxStoreInternal::insertMove (size_t pos,
           if (sz < other_size) sz = other_size + pos;
           IAuxTypeVector* v = getVectorInternal_noLock (id, sz, sz, false);
           v->resize (sz - other_size);
-          v->insertMove (pos, src_ptr, 0, other_size,
-                         other);
+          (void)v->insertMove (pos, src_ptr, 0, other_size,
+                               other);
           nomove = false;
         }
       }
