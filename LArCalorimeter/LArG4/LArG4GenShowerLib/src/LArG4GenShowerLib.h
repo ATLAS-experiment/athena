@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4GENSHOWERLIB_LARG4GENSHLIB_H
@@ -40,12 +40,11 @@ namespace ShowerLib {
 class LArG4GenShowerLib : public AthAlgorithm {
 
  public:
+  using AthAlgorithm::AthAlgorithm;
 
-  LArG4GenShowerLib(const std::string& name, ISvcLocator* pSvcLocator);
-
-  StatusCode initialize();
-  StatusCode finalize();
-  StatusCode execute();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
+  virtual StatusCode execute() override;
 
  private:
 
@@ -68,30 +67,32 @@ class LArG4GenShowerLib : public AthAlgorithm {
   void addingTagsToLibrary();
 
   /* data members */
-
-  DoubleProperty            m_maxDistance;          //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
-  DoubleProperty            m_maxRadius;            //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
-  DoubleProperty            m_minEnergy;            //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
-  DoubleProperty            m_containmentEnergy;    //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
-  DoubleProperty            m_energyFraction;       //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
-
-  StringArrayProperty		m_lib_struct_files;
+  DoubleProperty m_maxDistance {this, "MaxDistance", 50000.
+    , "max distance squared after which the hits will be truncated"}; //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
+  DoubleProperty m_maxRadius {this, "MaxRadius", 25.
+    , "maximal radius squared until two hits will be combined"};      //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
+  DoubleProperty m_minEnergy {this, "MinEnergy", .99
+    , "energy border, that truncation won't cross"};                  //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
+  DoubleProperty m_containmentEnergy {this, "ContainmentEnergy", 0.95
+    , "energy fraction that will be inside containment borders"};     //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
+  DoubleProperty m_energyFraction {this, "EnergyFraction", .02
+    ,  "the allowed amount of energy that can be deposited outside calorimeter region"}; //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib @endlink
+  StringProperty m_physicslist_name {this, "PhysicsList", "FTFP_BERT"
+    , "Geant4 PhysicsList used in the simulation"};
+  StringArrayProperty m_lib_struct_files {this, "LibStructFiles", {}
+    , "List of files to read library structures from"};
 
   typedef std::map<std::string, ShowerLib::IShowerLib*> libMap;
   libMap m_libraries;                  //!< pointer to shower library
   libMap m_libraries_by_filename;
 
-  int m_stat_numshowers;
-  int m_stat_valid;
-  int m_stat_invalid;
-  int m_stat_nolib;
+  int m_stat_numshowers{0};
+  int m_stat_valid{0};
+  int m_stat_invalid{0};
+  int m_stat_nolib{0};
 
   std::map<ShowerLib::IShowerLib*, int> m_stat_lib_saved;
   std::map<ShowerLib::IShowerLib*, int> m_stat_lib_notsaved;
-
-  std::string m_physicslist_name;
-
-
 }; // class LArG4GenShowerLib
 
 #endif // LARG4GENSHOWERLIB_LARG4GENSHLIB_H
