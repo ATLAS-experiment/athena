@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/src/AuxVectorBase.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -229,12 +227,15 @@ AuxVectorBase::moveAux (size_t index, SG::AuxElement* p,
 
   SG::AuxElement to (this, index);
   if (!p) {
-    if (!skipDestClear) to.clearAux();
+    if (!skipDestClear) {
+      AuxElement::clearAuxHelper (*this, index);
+    }
     return;
   }
 
-  if (p->hasStore() || !skipDestClear)
-    to.copyAux (*p);
+  if (p->hasStore() || !skipDestClear) {
+    AuxElement::copyAuxHelper (*this, index, *p, false);
+  }
   if (clear)
     p->clearAux();
   p->setIndex (index, this);
