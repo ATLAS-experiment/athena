@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -37,8 +37,9 @@ struct applePie
                 "DataVector fails is_copy_assignable");
   static_assert(std::is_nothrow_move_constructible<apples>::value,
                 "DataVector fails is_nothrow_move_constructible");
-  static_assert(std::is_nothrow_move_assignable<apples>::value,
-                "DataVector fails is_nothrow_move_assignable ");
+  // DataVector move assignment can in fact throw.
+  static_assert(std::is_move_assignable<apples>::value,
+                "DataVector fails is_move_assignable ");
   static_assert(std::is_destructible<apples>::value,
                 "DataVector fails is_destructible");
 };
