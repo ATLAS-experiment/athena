@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -15,11 +15,12 @@
 // Base class header
 #include "G4AtlasTools/SensitiveDetectorBase.h"
 
+#include "TileG4Interfaces/ITileCalculator.h"
+
 // STL headers
 #include <string>
 
 class G4VSensitiveDetector;
-class ITileCalculator;
 
 class TileGeoG4SDTool : public SensitiveDetectorBase
 {
@@ -42,7 +43,7 @@ protected:
 
 private:
   /// Calculator Service
-  ServiceHandle<ITileCalculator> m_tileCalculator;
+  ServiceHandle<ITileCalculator> m_tileCalculator{this, "TileCalculator", "TileGeoG4SDCalc"};
 
 };
 

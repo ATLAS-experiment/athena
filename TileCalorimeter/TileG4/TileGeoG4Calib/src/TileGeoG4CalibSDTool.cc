@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -26,9 +26,7 @@
 
 TileGeoG4CalibSDTool::TileGeoG4CalibSDTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase(type, name, parent)
-  , m_tileCalculator("TileGeoG4SDCalc", name)
 {
-  declareProperty("TileCalculator", m_tileCalculator);
 }
 
 StatusCode TileGeoG4CalibSDTool::initialize()
