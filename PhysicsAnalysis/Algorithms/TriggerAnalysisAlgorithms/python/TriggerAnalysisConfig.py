@@ -204,16 +204,21 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         # if we are only given the trigger dictionary, we fill the selection list automatically
         if self.triggerChainsPerYear and not self.triggerChainsForSelection:
-            triggers = set()
+            triggers_for_selection = set()
+            triggers_for_decoration = set()
+            from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import get_input_years
+            years = get_input_years(config)
             for trigger_chains in self.multiTriggerChainsPerYear.values():
-                for chain_list in trigger_chains.values():
+                for year, chain_list in trigger_chains.items():
+                    target_triggers = triggers_for_selection if int(year) in years else triggers_for_decoration
                     for chain in chain_list:
                         if '||' in chain:
                             chains = chain.split('||')
-                            triggers.update(map(str.strip, chains))
+                            target_triggers.update(map(str.strip, chains))
                         else:
-                            triggers.add(chain.strip())
-            self.triggerChainsForSelection = list(triggers)
+                            target_triggers.add(chain.strip())
+            self.triggerChainsForSelection = list(triggers_for_selection)
+            self.triggerChainsForDecoration += list(triggers_for_decoration)
 
         # Create the decision algorithm, keeping track of the decision tool for later
         decisionTool = self.makeTriggerDecisionTool(config)
