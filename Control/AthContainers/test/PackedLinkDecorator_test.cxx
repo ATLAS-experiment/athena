@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkDecorator_test.cxx
@@ -345,24 +345,24 @@ void test2()
   assert (cspan.back().key() == 124);
   assert (cspan.back().index() == 14);
 
-  std::vector<unsigned> idx;
+  std::vector<size_t> idx;
   spanc = ptyp1.getDataSpan (vc);
   for (ElementLink<Cont> el : spanc) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {10, 11, 0, 13, 14}));
+  assert (idx == (std::vector<size_t> {10, 11, 0, 13, 14}));
 
   idx.clear();
   for (ElementLink<Cont> el : span) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {10, 11, 0, 13, 14}));
+  assert (idx == (std::vector<size_t> {10, 11, 0, 13, 14}));
 
   idx.clear();
   for (ElementLink<Cont> el : cspan) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {10, 11, 0, 13, 14}));
+  assert (idx == (std::vector<size_t> {10, 11, 0, 13, 14}));
 
   span[1] = ElementLink<Cont> (125, 21);
   assert (span[1].key() == 125);
@@ -395,14 +395,14 @@ void test2()
   for (ElementLink<Cont> el : cspan) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {0, 22, 0, 14, 23}));
+  assert (idx == (std::vector<size_t> {0, 22, 0, 14, 23}));
 
   idx.clear();
   spanc = ptyp1.getDataSpan (vc);
   for (ElementLink<Cont> el : spanc) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {0, 22, 0, 14, 23}));
+  assert (idx == (std::vector<size_t> {0, 22, 0, 14, 23}));
 
   v.lock();
   EXPECT_EXCEPTION (SG::ExcStoreLocked, ptyp1.getDecorationSpan(v));
@@ -754,13 +754,13 @@ void test4()
   assert (span.front().front().key() == 123);
   assert (span.front().front().index() == 10);
 
-  std::vector<unsigned> idx;
+  std::vector<size_t> idx;
   for (auto s : span) {
     for (ElementLink<Cont> el : s) {
       idx.push_back (el.isDefault() ? 0 : el.index());
     }
   }
-  assert (idx == (std::vector<unsigned> {10, 0, 11, 12, 0, 13, 14}));
+  assert (idx == (std::vector<size_t> {10, 0, 11, 12, 0, 13, 14}));
 
   span[0][1] = ElementLink<Cont> (125, 21);
 

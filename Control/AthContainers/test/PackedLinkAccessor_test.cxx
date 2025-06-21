@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkAccessor_test.cxx
@@ -506,11 +506,11 @@ void test4()
 
 
 // To study generated code.
-int asmtest [[maybe_unused]] (SG::AuxElement& e,
-                              SG::Accessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
+unsigned int asmtest [[maybe_unused]] (SG::AuxElement& e,
+                                       SG::Accessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
 {
   using Cont = std::vector<int>;
-  int out = 0;
+  unsigned int out = 0;
   for (const ElementLink<Cont> el : acc(e)) {
     out += el.key() + el.index();
   }
