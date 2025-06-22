@@ -131,6 +131,9 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('useGNTau', False, type=bool,
             info="use GNTau based ID instead of RNNTau ID "
             "recommendations: that's new experimental feature and might come default soon")
+        self.addOption ('dropPtCut', False, type=bool,
+            info="select taus without explicit min Pt cut. For PHYS/PHYSLITE, this would mean selecting taus starting from 13 GeV "
+            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs")
         self.addOption ('useLowPt', False, type=bool, 
             info="select taus starting from 15 GeV instead of the default 20 GeV cut "
             "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs")
@@ -161,6 +164,8 @@ class TauWorkingPointConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         nameFormat = 'TauAnalysisAlgorithms/tau_selection_'
+        if self.dropPtCut:
+            nameFormat = nameFormat + 'nopt_'
         if self.useLowPt:
             nameFormat = nameFormat + 'lowpt_'
         if self.useGNTau:
