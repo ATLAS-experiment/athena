@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COMBINEDSCINTILLATOR_COMBINEDSCINTILLATORTOOL_H
@@ -20,17 +20,17 @@ class CombinedScintillatorTool final : public DetectorGeometryBase {
   public:
     // Basic constructor and destructor
     CombinedScintillatorTool(const std::string& type, const std::string& name, const IInterface *parent);
-    ~CombinedScintillatorTool();
+    ~CombinedScintillatorTool() = default;
 
     /** virtual methods being implemented here */
     virtual void BuildGeometry() override final;
 
   private:
-    double m_rMin;
-    double m_rMax;
-    double m_dzSci;
-    double m_phiPos;
-    double m_phiNeg;
+    Gaudi::Property<double> m_rMin{this, "RMin", 0.0};
+    Gaudi::Property<double> m_rMax{this, "RMax", 0.0};
+    Gaudi::Property<double> m_dzSci{this, "DZSci", 0.0};
+    Gaudi::Property<double> m_phiPos{this, "PhiPos", 0.0};
+    Gaudi::Property<double> m_phiNeg{this, "PhiNeg", 0.0};
 };
 
 #endif //COMBINEDSCINTILLATOR_COMBINEDSCINTILLATORTOOL_H
