@@ -68,10 +68,19 @@ def FPGATrackSimBankSvcCfg(flags,name="FPGATrackSimBankSvc"):
         f'{pathBankSvc}corrgen_raw_13L_skipPlane6.gcon',
         f'{pathBankSvc}corrgen_raw_13L_skipPlane7.gcon']
     layers="5L" if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else "9L"
+    s2_layers = 13
+    pathMapSvc = flags.Trigger.FPGATrackSim.mapsDir if flags.Trigger.FPGATrackSim.mapsDir != '' else f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/'+FPGATrackSimDataPrepConfig.getBaseName(flags)+'/SectorMaps/'
+    pathMapSvc = PathResolver.FindCalibDirectory(pathMapSvc)
+    pmap_file = os.path.join(pathMapSvc, f"region{flags.Trigger.FPGATrackSim.region}.pmap")
+    with open(pmap_file) as f:
+        for line in f:
+            if 'logical_s2' in line:
+                s2_layers = int(line.strip().split()[0])
+                break
     FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_{layers}_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
-    FPGATrackSimBankSvc.constants_2nd = f'{pathBankSvc}corrgen_raw_13L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
+    FPGATrackSimBankSvc.constants_2nd = f'{pathBankSvc}corrgen_raw_{s2_layers}L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
     FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_{layers}_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
-    FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
+    FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_{s2_layers}L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
     FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_{layers}_reg{flags.Trigger.FPGATrackSim.region}.root'
     FPGATrackSimBankSvc.phiShift = flags.Trigger.FPGATrackSim.phiShift
 
@@ -618,7 +627,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     return result
 
 def getChi2Cut(region):
-    chi2cut_l = [12, 16, 16, 17, 17, 19, 15, 17, 16, 16, 19, 15, 18, 15, 15, 15, 14, 14, 12, 16]
+    chi2cut_l = [12, 16, 16, 17, 17, 19, 15, 17, 16, 16, 19, 15, 18, 15, 18, 15, 14, 14, 12, 16]
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F
