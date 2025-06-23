@@ -29,7 +29,7 @@ namespace LArG4 {
       LArHECCalibrationWheelCalculator(const std::string& name, ISvcLocator *pSvcLocator);
       void GeometryTypeUpdateHandler(Gaudi::Details::PropertyBase&);
       StatusCode initialize() override final;
-      virtual ~LArHECCalibrationWheelCalculator();
+      virtual ~LArHECCalibrationWheelCalculator() = default;
 
       virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
                               std::vector<G4double> & energies,
@@ -38,7 +38,7 @@ namespace LArG4 {
 
       ServiceHandle<IHECGeometry> m_geometryCalculator{this, "GeometryCalculator", "HECGeometry"}; //FIXME LArG4::HEC::HECGeometry
       UnsignedShortProperty m_geometryTypeProp{this, "GeometryType", 0, &LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler};
-      eHECGeometryType m_geometryType;
+      eHECGeometryType m_geometryType{kWheelActive};
 
       CaloG4::SimulationEnergies m_energyCalculator;
 
