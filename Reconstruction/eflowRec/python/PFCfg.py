@@ -283,7 +283,7 @@ def getEGamFlowElementAssocAlgorithm(inputFlags, algName="", **kwargs):
         #then the converse case (FE -> Electron)
         
         PFEGamFlowElementLinkerAlgorithm.ChargedFEElectronDecorKey="GlobalChargedParticleFlowObjects.GlobalFE_ElectronLinks"
-        PFEGamFlowElementLinkerAlgorithm.NeutralFEElectronDecorKey="GlobalNeutralParticleFlowObjects.GLobalFE_ElectronLinks"
+        PFEGamFlowElementLinkerAlgorithm.NeutralFEElectronDecorKey="GlobalNeutralParticleFlowObjects.GlobalFE_ElectronLinks"
         
 
         # first the Photon -> FE links

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PathResolver/PathResolver.h"
@@ -223,17 +223,23 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
 
       bf::recursive_directory_iterator end_itr;
       try {
-        for ( bf::recursive_directory_iterator ritr( *itr );
+        for ( bf::recursive_directory_iterator ritr( *itr, bf::directory_options::skip_permission_denied );
               ritr != end_itr; ++ritr) {
 
           // skip if not a directory
           if (! is_directory( bf::path(*ritr) ) ) { continue; }
 
           bf::path fp2 = bf::path(*ritr) / file;
-          if ( ( file_type == PR_regular_file && is_regular_file( fp2 ) ) ||
-               ( file_type == PR_directory && is_directory( fp2 ) ) ) {
-            result = bf::system_complete( fp2 ).string();
-            return true;
+          try {
+            if ( ( file_type == PR_regular_file && is_regular_file( fp2 ) ) ||
+                 ( file_type == PR_directory && is_directory( fp2 ) ) ) {
+              result = bf::system_complete( fp2 ).string();
+              return true;
+            }
+          } catch (const bf::filesystem_error& err) {
+            // This can happen if permissions are defined (ATEAM-1089)
+            ritr.disable_recursion_pending();  // continue with next iteration
+            continue;
           }
         }
       } catch (const bf::filesystem_error& /*err*/) {
