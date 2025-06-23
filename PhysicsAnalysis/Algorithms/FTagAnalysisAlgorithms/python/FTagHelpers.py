@@ -3,10 +3,10 @@
 from AthenaConfiguration.Enums import LHCPeriod
 
 def getRecommendedBTagCalib_Run2():
-    return "xAODBTaggingEfficiency/13TeV/MC20_2024-10-17_GN2v01_v1.root"
+    return "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root"
 
 def getRecommendedBTagCalib_Run3():
-    return "xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root"
+    return "xAODBTaggingEfficiency/13p6TeV/MC23_2025-06-17_GN2v01_v4.root"
 
 def getRecommendedBTagCalib(geometry):
     """return the recommended FTag calibration files
