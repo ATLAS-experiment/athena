@@ -53,4 +53,5 @@ atlas_add_dictionary(
 )
 
 atlas_install_python_modules(python/*.py)
+atlas_install_scripts(test/*.sh test/FPGARunScripts/*.sh)
 
