@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -127,13 +127,26 @@ StatusCode DeviceMgmtSvc::inspect_xclbins(SystemInfo &si) {
       xclbin_info.xsa_name = xrt_xclbin.get_xsa_name();
       xclbin_info.fpga_device_name = xrt_xclbin.get_fpga_device_name();
       xclbin_info.uuid = xrt_xclbin.get_uuid().to_string();
+
       for (const xrt::xclbin::kernel &kernel : xrt_xclbin.get_kernels()) {
+        const std::string& kernelName = kernel.get_name();
+
         // Ensure that the kernel have a least one compute unit.
         // Having a kernel without compute unit is not a common use case,
         // but it is possible if a .xo with a kernel is linked in the
         // .xclbin, but the number of said kernel is set to 0.
         if (!kernel.get_cus().empty()) {
-          xclbin_info.kernel_names.push_back(kernel.get_name());
+          xclbin_info.kernel_names.push_back(kernelName);
+        }
+
+        for (const xrt::xclbin::ip &computeUnit : kernel.get_cus()) {
+          const std::string& computeUnitName = computeUnit.get_name();
+          const std::string computeUnitIsolatedName = 
+            computeUnitName.substr(kernelName.size() + 1);
+
+          const std::string computeUnitUsableName = kernelName + ":{" + computeUnitIsolatedName + "}";
+
+          xclbin_info.cu_names.push_back(std::move(computeUnitUsableName));
         }
       }
     } catch (const std::exception &e) {
@@ -489,6 +502,14 @@ DeviceMgmtSvc::get_xrt_devices_by_kernel_name(const std::string &name) const {
     if (std::find(ath_cl_context.xclbin_info.kernel_names.begin(),
                   ath_cl_context.xclbin_info.kernel_names.end(),
                   name) != ath_cl_context.xclbin_info.kernel_names.end()) {
+      for (const cl::Device &device : ath_cl_context.devices) {
+        devices.push_back(std::make_shared<xrt::device>(
+            xrt::opencl::get_xrt_device(device())));
+      }
+    }
+    else if (std::find(ath_cl_context.xclbin_info.cu_names.begin(),
+                       ath_cl_context.xclbin_info.cu_names.end(),
+                       name) != ath_cl_context.xclbin_info.cu_names.end()) {
       for (const cl::Device &device : ath_cl_context.devices) {
         devices.push_back(std::make_shared<xrt::device>(
             xrt::opencl::get_xrt_device(device())));

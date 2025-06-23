@@ -30,14 +30,7 @@ bool deviceHasKernels(
   const std::shared_ptr<xrt::device>& device
 ) {
   for (const auto& [kernelName, dummy] : kernelDefinitionsJson.items()) {
-    // Strip compute unit specification from kernelName.
-    const std::regex computeUnitSpecification(R"(:\{.*\})");
-    
-    if (!deviceHasKernel(device, deviceMgmtSvc->get_xrt_devices_by_kernel_name(std::regex_replace(
-      kernelName,
-      computeUnitSpecification,
-      ""
-    )))) {
+    if (!deviceHasKernel(device, deviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName))) {
       return false;
     }
   }
@@ -50,18 +43,10 @@ std::shared_ptr<xrt::device> getDevice(
   const ServiceHandle<AthXRT::IDeviceMgmtSvc>& deviceMgmtSvc
 ) {
   std::set<std::shared_ptr<xrt::device>> devicesSet{};
-  std::vector<std::shared_ptr<xrt::device>> finalDevices{};
 
   for (const auto& [kernelName, dummy] : kernelDefinitionsJson.items()) {
-    // Strip compute unit specification from kernelName.
-    const std::regex computeUnitSpecification(R"(:\{.*\})");
-
     std::vector<std::shared_ptr<xrt::device>> devices = 
-      deviceMgmtSvc->get_xrt_devices_by_kernel_name(std::regex_replace(
-        kernelName,
-        computeUnitSpecification,
-        ""
-      ));
+      deviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
     devicesSet.insert(devices.begin(), devices.end());
   }
