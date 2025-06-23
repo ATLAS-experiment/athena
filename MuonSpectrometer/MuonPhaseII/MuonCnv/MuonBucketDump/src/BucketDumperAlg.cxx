@@ -9,6 +9,9 @@
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
+#include "MuonTrackEvent/TrackingHelpers.h"
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
+#include "MuonPatternEvent/SegmentFitterEventData.h"
 #include <fstream>
 #include <TString.h>
 #include <AthenaKernel/RNGWrapper.h>
@@ -18,7 +21,12 @@ namespace MuonR4{
     StatusCode BucketDumperAlg::initialize() {
         ATH_CHECK(m_spacePointKeys.initialize());
         ATH_CHECK(m_inSegmentKeys.initialize());
-
+        if (m_isMC) {
+            for (const auto& key : m_inSegmentKeys) {
+                m_truthDecorKeys.emplace_back(key, "truthParticleLink");
+            }
+        }
+        ATH_CHECK(m_truthDecorKeys.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         m_tree.addBranch(std::make_shared<MuonVal::EventHashBranch>(m_tree.tree()));
@@ -40,7 +48,7 @@ namespace MuonR4{
     
     StatusCode BucketDumperAlg::execute(){
         const EventContext& ctx{Gaudi::Hive::currentContext()};
-        SG::ReadHandleKey<SegmentContainer> emptyKey{};
+        SG::ReadHandleKey<xAOD::MuonSegmentContainer> emptyKey{};
         ATH_CHECK(emptyKey.initialize(SG::AllowEmpty));
         for (unsigned  keyNum = 0 ; keyNum < m_spacePointKeys.size(); ++keyNum) {
             ATH_CHECK(dumpContainer(ctx, m_spacePointKeys[keyNum], 
@@ -50,15 +58,16 @@ namespace MuonR4{
     }
     StatusCode BucketDumperAlg::dumpContainer(const EventContext& ctx,
                                               const SG::ReadHandleKey<SpacePointContainer>& spacePointKey,
-                                              const SG::ReadHandleKey<SegmentContainer>& segmentKey) {
+                                              const SG::ReadHandleKey<xAOD::MuonSegmentContainer>& segmentKey) {
 
-        std::unordered_map <const SpacePointBucket*, std::vector<const Segment*>> segmentMap;  // MuonR4Segment 
+        std::unordered_map <const SpacePointBucket*, 
+                            std::vector<const xAOD::MuonSegment*>> segmentMap;  // MuonR4Segment 
         
-        const SegmentContainer* readSegment{nullptr};
+        const xAOD::MuonSegmentContainer* readSegment{nullptr};
         ATH_CHECK(SG::get(readSegment, segmentKey, ctx));
         if (readSegment) {
-            for (const Segment* segment : *readSegment) {
-                segmentMap[segment->parent()->parentBucket()].push_back(segment);
+            for (const xAOD::MuonSegment* segment : *readSegment) {
+                segmentMap[detailedSegment(*segment)->parent()->parentBucket()].push_back(segment);
             }
         }
 
@@ -74,7 +83,7 @@ namespace MuonR4{
 
         for(const SpacePointBucket* bucket : *spContainer) {
 
-            if (!m_isMC && segmentMap[bucket].size() && m_fracToKeep < 1. &&
+            if (!m_isMC && segmentMap[bucket].empty() && m_fracToKeep < 1. &&
                 CLHEP::RandFlat::shoot(rndEngine,0.,1.) > m_fracToKeep) {
                 ATH_MSG_VERBOSE("Skipping bucket without segment");
                 continue;
@@ -100,21 +109,30 @@ namespace MuonR4{
             auto match_itr = segmentMap.find(bucket);
 
             if (match_itr != segmentMap.end()) {
-                unsigned int segIdx{0};
-                for (const Segment* segment : match_itr->second) {
-                    for (const auto& meas : segment->measurements()) {
+                for (const xAOD::MuonSegment* segment : match_itr->second) {
+                    for (const auto& meas : detailedSegment(*segment)->measurements()) {
                         if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
-                            spacePointToSegment[meas->spacePoint()].push_back(segIdx);
+                            spacePointToSegment[meas->spacePoint()].push_back(segment->index());
                         }
                     }
-                    ++segIdx;
-                }
-                
-                for ( const Segment* segment: match_itr->second) {
+                    using namespace SegmentFit;
+                    const auto pars = localSegmentPars(*segment);
+                    m_segmentLocX += pars[toInt(ParamDefs::x0)];
+                    m_segmentLocY += pars[toInt(ParamDefs::y0)];
+                    m_segmentLocTheta += pars[toInt(ParamDefs::theta)];
+                    m_segmentLocPhi += pars[toInt(ParamDefs::phi)];
+
+                    /** For the moment this only works on MC */
+                    unsigned truthLink = -1;
+                    if (const xAOD::TruthParticle* truthPart = getTruthMatchedParticle(*segment)) {
+                         truthLink = truthPart->index();
+                    }
+                    m_segmentTruthIdx+=truthLink;
+
                     m_segmentPos.push_back(segment->position());
                     m_segmentDir.push_back(segment->direction());
-                    m_segment_chiSquared.push_back(segment->chi2());
-                    m_segment_numberDoF.push_back(segment->nDoF());
+                    m_segment_chiSquared.push_back(segment->chiSquared());
+                    m_segment_numberDoF.push_back(segment->numberDoF());
                 }
             }
 
