@@ -128,14 +128,14 @@ def ITkRecPreProcessingSiliconCfg(flags,
         from ActsConfig.ActsClusterizationConfig import ActsClusterizationCfg
         acc.merge(ActsClusterizationCfg(flags, previousActsExtension=previousActsExtension))
     
-    # If running FPGA tracking, use ACTS clusterization + FPGA pass-through
+    # In case of FPGA-based clusterization, schedule the corresponding data preparation (FPGA/simulation)
     if flags.Tracking.ActiveConfig.doFPGACluster:
         if flags.Tracking.ActiveConfig.doFPGATrackSim:
             from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimClusteringCfg
             acc.merge(FPGATrackSimClusteringCfg(flags))
         else:
-            from EFTrackingFPGAIntegration.EFClusterizationConfig import EFPassThroughClusterizationCfg
-            acc.merge(EFPassThroughClusterizationCfg(flags))
+            from EFTrackingFPGAPipeline.F100IntegrationConfig import FPGADataPreparation
+            acc.merge(FPGADataPreparation(flags))
         
 
     #

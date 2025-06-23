@@ -53,6 +53,7 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
+        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; doClusters="1" ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -73,11 +74,20 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-run "${pipelineName}" \
-    FPGATrackSim_F100.sh -t -q \
-      -i ${inputRDO} \
-      -o ${outputAOD} \
-      -n ${nEvents}
+if [ "$doClusters" == "1" ]; then
+    run "${pipelineName}" \
+        FPGATrackSim_F100.sh \
+        -i ${inputRDO} \
+        -o ${outputAOD} \
+        -n ${nEvents} \
+        -c
+else
+    run "${pipelineName}" \
+        FPGATrackSim_F100.sh \
+        -i ${inputRDO} \
+        -o ${outputAOD} \
+        -n ${nEvents}
+fi
     
 rc=$?
 echo "Reco_tf.py result: $rc"

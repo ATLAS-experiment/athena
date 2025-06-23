@@ -37,13 +37,59 @@ def F100IntegrationCFG(flags, name = 'F100IntegrationAlog', **kwarg):
 
     return acc
 
-def FPGAClusterSortingCfg(flags):
+def FPGAClusterSortingCfg(flags,**kwargs):
     acc = ComponentAccumulator()
     from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg
-    ClusterSorting = FPGAClusterSortingAlgCfg(flags)
+    ClusterSorting = FPGAClusterSortingAlgCfg(flags,**kwargs)
     
     acc.merge(ClusterSorting)
     return acc
+
+def F100FlagsCfg(flags):
+    flags.Concurrency.NumThreads=1
+    flags.Concurrency.NumConcurrentEvents=1
+    flags.Concurrency.NumProcs=0
+    flags.Scheduler.ShowDataDeps=True
+    flags.Scheduler.CheckDependencies=True
+    flags.Debug.DumpEvtStore=False
+    
+    from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
+    addFPGADataPrepFlags(flags)
+    
+    return flags
+
+
+def FPGADataPreparation(flags): # thsi is used to run the F100 through Reco_tf
+    acc = ComponentAccumulator()
+    acc.merge(F100IntegrationCFG(flags))
+    acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'ITkPixelClusters',
+                                             'sortedxAODStripClusterContainer': 'ITkStripClusters'}))
+    
+    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
+    acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+    
+    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
+    acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+
+    if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
+        toAOD = []
+
+        pixel_cluster_shortlist = ['-pixelClusterLink']
+        strip_cluster_shortlist = ['-sctClusterLink']
+        
+        pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
+        strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+
+        toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
+                  'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
+                  'xAOD::StripClusterContainer#ITkStripClusters',
+                  'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+        acc.merge(addToAOD(flags, toAOD))
+    return acc
+    
+    
+    
     
 
 if __name__ == "__main__":
