@@ -33,7 +33,7 @@ def FPGAPrototrackFitAlgCfg(flags,
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
         kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags,
                                                                            ReverseFilteringPt=0,
-                                                                           OutlierChi2Cut=30)))
+                                                                           OutlierChi2Cut=float('inf'))))
         
     acc.addEventAlgo(CompFactory.FPGATrackSim.FPGATrackSimPrototrackFitterAlg(name,**kwargs),
                      primary=True)

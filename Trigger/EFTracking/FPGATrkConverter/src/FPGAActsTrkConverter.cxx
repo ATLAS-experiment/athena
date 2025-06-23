@@ -173,7 +173,12 @@ StatusCode FPGAActsTrkConverter::matchTrackMeasurements(const EventContext& ctx,
                                                         std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
                                                         const DataVector<XAOD_CLUSTER>& clusterContainer) const
 {
-  std::vector<Identifier> rdoIDs = getRdoIdList(trackHit);
+  std::vector<Identifier> rdoIDs;
+  if (trackHit.getHitType() ==  HitType::spacepoint)
+    rdoIDs = getRdoIdList(trackHit.getOriginalHit());
+  else
+    rdoIDs = getRdoIdList(trackHit);
+
   const auto& rdoList = cluster.rdoList();
   if (rdoIDs.size() != rdoList.size()) return StatusCode::SUCCESS;
   size_t matchedCounter = 0;
