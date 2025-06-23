@@ -496,7 +496,7 @@ def addFileValidationArguments(parser):
                         group='File Validation', help='Use multithreaded ROOT file validation if True')
 
 def addParallelJobProcessorArguments(parser):
-    parser.defineArgGroup('Parallel Job Processor', 'Parallel Job Processor arguments')
+    parser.defineArgGroup('pool', 'Parallel Job Processor arguments')
     parser.add_argument('----parallelProcessPool', group='pool', type=argFactory(trfArgClasses.argInt, runarg=False), help='Number of processes in pool requested (int)')
 
 def addValidationArguments(parser):

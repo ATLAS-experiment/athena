@@ -42,6 +42,27 @@ def getTransform(skip_post_processing=False):
     addNTUPMergeSubsteps(executorSet, skip_post_processing)
     trf = transform(executor = executorSet, description = 'ATLAS NTUPLE merge and post-processing transform')
     addPhysValidationMergeFiles(trf.parser)
+    args = trf.parser.parse_args()
+    msg.debug("args:", args)
+
+    # get the modified executor
+    mergeStepSet = set()
+
+    # Check the user's optional parameters
+    # NOTE: we need to first check if the arg is present, 
+    # then we get the value. When not specified, in fact, 
+    # the optional args are not present in the list of
+    # args. Also, if we only check its existance, 
+    # we don't get its value when set with set()
+    skipPP = False
+    if 'skipPostProcessing' in args:
+        skipPP = args.skipPostProcessing
+
+    # add to the transform the merge and 
+    # post-processing steps conditionally 
+    # based on user's input
+    addNTUPMergeSubsteps(mergeStepSet, skip_post_processing = skipPP)
+    trf.appendToExecutorSet(list(mergeStepSet))
 
     # additional setup
     addExtraDPDTypes(trf.parser, transform=trf, NTUPMergerArgs = True)
