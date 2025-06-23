@@ -21,7 +21,7 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
 
   isLRT=flags.Tracking.ActiveConfig.extension == "LargeD0"
   
-  kwargs.setdefault("pTmin", 1.0 * Units.GeV)
+  kwargs.setdefault("pTmin", 0.9 * Units.GeV)
   kwargs.setdefault("MaxGraphEdges", 1500000)   # do we want ITkTrigTrackSeedingToolStandaloneCfg setting of 1800000
   kwargs.setdefault("ConnectionFileName",
                     "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
@@ -65,7 +65,7 @@ def ActsFastPixelSeedingToolCfg(flags,
                                 name: str = "ActsFastPixelSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
     ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
+    kwargs.setdefault("minPt", 900 * UnitConstants.MeV)
     kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
     kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
     kwargs.setdefault("maxPhiBins", 200)
@@ -149,7 +149,7 @@ def ActsFastPixelOrthogonalSeedingToolCfg(flags,
     ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
 
     ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
+    kwargs.setdefault("minPt", 900 * UnitConstants.MeV)
     kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
     kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
     kwargs.setdefault("useExperimentCuts", True)
