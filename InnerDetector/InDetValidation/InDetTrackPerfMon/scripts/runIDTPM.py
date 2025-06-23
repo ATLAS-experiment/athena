@@ -18,6 +18,7 @@ def GetCustomAthArgs() :
     IDTPMparser.add_argument( "--plotsDefFileList", help='Plain txt file containing the list of .json file names with the plots definitions', default="InDetTrackPerfMon/PlotsDefFileList_default.txt" )
     IDTPMparser.add_argument( "--plotsCommonValuesFile", help='JSON file listing all the default values to be used in plots', default="" )
     IDTPMparser.add_argument( "--sortPlotsByChain", help="Arrange plots first in subdirectories named after the current chain", action="store_true", default=False )
+    IDTPMparser.add_argument( "--commonTrkAnaFlags", help="Common flags to be overridden for all track Analises in the format flag_name=value", nargs='*', default=[] )
     return IDTPMparser.parse_args()
 
 ## Parse the arguments
@@ -50,6 +51,7 @@ flags.PhysVal.IDTPM.sortPlotsByChain = MyArgs.sortPlotsByChain
 flags.PhysVal.IDTPM.trkAnaCfgFile = MyArgs.trkAnaCfgFile
 flags.Output.doWriteAOD_IDTPM = MyArgs.writeAOD_IDTPM
 flags.PhysVal.IDTPM.unpackTrigChains = MyArgs.unpackTrigChains
+flags.PhysVal.IDTPM.commonTrkAnaFlags = MyArgs.commonTrkAnaFlags
 
 # initialize individual TrkAnalises flags (and output file names)
 flags = initializeIDTPMTrkAnaConfigFlags( flags )

@@ -84,7 +84,7 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     if qualityWP == "EFTracking" :
         etaBins = [-1., 2., 2.6, 9999.]
         minHitsVector = [9, 8, 7]
-        minPtVector = [1000., 400., 400.]
+        minPtVector = [900., 400., 400.]
         maxD0Vector = [2., 2., 10.]
         maxZ0Vector = [150., 150., 150.]
         qualityWP = "" # to avoid conflicts with InDetTrackSelectionTool options
@@ -208,7 +208,7 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
         truthMinPt = 1000   # 1 GeV
         truthMaxPt = 2000   # 2 GeV
     elif "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
-        truthMinPt = 2000   # 2 GeV
+        truthMinPt = 1000   # 1 GeV
         truthMaxPt = 10000  # 10 GeV
 
     ## SelectTruthObjec: cutomised selections
