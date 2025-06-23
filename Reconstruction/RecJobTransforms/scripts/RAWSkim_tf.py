@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-## SkimRAW_tf.py - Bytestream skimmer transform
+## RAWSkim_tf.py - Bytestream skimmer transform
 # @version $Id: RAWSkim_tf.py 643395 2015-02-01 19:51:21Z graemes $ 
 
 import sys
@@ -37,7 +37,7 @@ def main():
 
 def getTransform():
     executorSet = set()
-    executorSet.add(skimRawExecutor(name = 'SkimRAW', inData = ['BS'], outData = ['BS_SKIM'], exe = 'acmd.py'))
+    executorSet.add(skimRawExecutor(name = 'SkimRAW', inData = ['BS'], outData = ['BS_SKIM'], exe = 'AtlCopyBSEvent'))
 
     trf = transform(executor = executorSet)
     
