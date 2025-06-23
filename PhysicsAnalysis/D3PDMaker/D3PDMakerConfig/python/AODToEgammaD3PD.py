@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
 #
 # File: D3PDMakerConfig/python/AODToEgammaD3PD.py
 # Author: snyder@bnl.gov
@@ -10,6 +10,7 @@
 from D3PDMakerConfig.D3PDMakerFlags import configFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
+configFlags.Reco.EnableBTagging = False
 configFlags.fillFromArgs()
 configFlags.lock()
 
