@@ -51,9 +51,9 @@ ASCIICondDbSvc::initialize() {
 
   std::ostringstream ost;
   ost << " Printing CondDB registry";
-  for (auto e : m_registry) {
+  for (const auto& e : m_registry) {
     ost << std::endl << "  - id: " << e.first << "  r:";
-    for (auto r : e.second) {
+    for (const IOVEntryT<IASCIICondDbSvc::dbData_t>& r : e.second) {
       ost << "  " << r.range() << " :: " << *r.objPtr();
     }
   }
@@ -250,7 +250,7 @@ ASCIICondDbSvc::getRange(const std::string& dbKey , const EventContext& ctx,
     return StatusCode::FAILURE;
   }
 
-  for (auto e : itr->second) {
+  for (const IOVEntryT<IASCIICondDbSvc::dbData_t>& e : itr->second) {
     debug() << "compare " << e.range() << " with " << ctx.eventID()
             << endmsg;
     if (e.range().isInRange(EventIDBase(ctx.eventID()))) {
