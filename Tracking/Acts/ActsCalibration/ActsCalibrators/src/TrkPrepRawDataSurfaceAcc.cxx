@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "ActsCalibration/TrkPrepRawDataSurfaceAcc.h"
-#include "ActsCalibration/TrkPrepRawDataCalibrator.h"
+#include "ActsCalibrators/TrkPrepRawDataSurfaceAcc.h"
+#include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
 namespace ActsTrk::detail{
     TrkPrepRawDataSurfaceAcc::TrkPrepRawDataSurfaceAcc(const IActsToTrkConverterTool* trkConvTool):
     m_trkConvTool{trkConvTool} {}

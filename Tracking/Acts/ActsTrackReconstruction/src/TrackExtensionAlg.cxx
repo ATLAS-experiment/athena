@@ -29,8 +29,8 @@
 #include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
-#include "ActsCalibration/CalibrationContext.h"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibBase/CalibrationContext.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"

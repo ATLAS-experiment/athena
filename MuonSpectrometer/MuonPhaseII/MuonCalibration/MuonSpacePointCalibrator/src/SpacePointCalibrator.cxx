@@ -17,7 +17,7 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternHelpers/MatrixUtils.h"
 
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
 }

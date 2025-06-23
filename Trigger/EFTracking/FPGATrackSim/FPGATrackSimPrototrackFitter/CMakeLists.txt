@@ -12,7 +12,7 @@ atlas_add_component(FPGATrackSimPrototrackFitter
     LINK_LIBRARIES 
     ActsCore
     ActsToolInterfacesLib
-    ActsCalibrationLib
+    ActsCalibratorsLib
     LINK_LIBRARIES ActsEventLib
 )
 

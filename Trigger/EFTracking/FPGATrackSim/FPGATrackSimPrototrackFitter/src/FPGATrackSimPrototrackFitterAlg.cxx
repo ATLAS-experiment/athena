@@ -4,7 +4,7 @@
 
 #include "FPGATrackSimPrototrackFitterAlg.h"
 
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
 
 constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_FPGATRACKSIM

@@ -16,7 +16,7 @@ atlas_add_component( ActsTrackReconstruction
                ActsEventLib
                ActsGeometryLib
                ActsGeometryInterfacesLib
-               ActsCalibrationLib
+               ActsCalibratorsLib
                ActsInteropLib
                ActsToolInterfacesLib
                AthenaBaseComps

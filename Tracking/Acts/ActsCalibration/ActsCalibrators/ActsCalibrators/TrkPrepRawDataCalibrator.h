@@ -4,7 +4,7 @@
 #ifndef ACTSCALIBRATION_DETAIL_PREPRAWDATACALIBRATOR_H
 #define ACTSCALIBRATION_DETAIL_PREPRAWDATACALIBRATOR_H
 
-#include "ActsCalibration/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
@@ -65,5 +65,5 @@ namespace ActsTrk::detail {
          const Trk::IRIO_OnTrackCreator* m_rotCreator{nullptr};
    };
 }
-#include "ActsCalibration/TrkPrepRawDataCalibrator.icc"
+#include "ActsCalibrators/TrkPrepRawDataCalibrator.icc"
 #endif

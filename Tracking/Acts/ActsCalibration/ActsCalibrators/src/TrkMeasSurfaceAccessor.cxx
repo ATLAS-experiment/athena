@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "ActsCalibration/TrkMeasSurfaceAccessor.h"
-#include "ActsCalibration/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
 namespace ActsTrk::detail {
     TrkMeasSurfaceAccessor::TrkMeasSurfaceAccessor(const IActsToTrkConverterTool* trkConvTool):
         m_trkConvTool{trkConvTool} {}

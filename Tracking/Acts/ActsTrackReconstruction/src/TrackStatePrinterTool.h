@@ -28,7 +28,7 @@
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 // Other
 #include <vector>
 #include <memory>

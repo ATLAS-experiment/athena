@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "GeoModelKernel/throwExcept.h"
 
 namespace ActsTrk::detail{

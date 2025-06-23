@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef ACTSEVENT_SOURCELINKTYPE_H
-#define ACTSEVENT_SOURCELINKTYPE_H
+#ifndef ACTSCALIBBASE_SOURCELINKTYPE_H
+#define ACTSCALIBBASE_SOURCELINKTYPE_H
 
 namespace ActsTrk::detail{
     /** @brief Enumeration to distinguish between the ATLAS EDM -> Acts::SourceLink variants */

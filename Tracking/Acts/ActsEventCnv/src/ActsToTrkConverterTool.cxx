@@ -22,7 +22,7 @@
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
 
 // PACKAGE
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
@@ -46,8 +46,8 @@
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 
-#include "ActsCalibration/TrkMeasurementCalibrator.h"
-#include "ActsCalibration/TrkPrepRawDataCalibrator.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
 // STL
 #include <cmath>
 #include <iostream>

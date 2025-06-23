@@ -4,7 +4,7 @@
 #ifndef ACTSCALIBRATION_DETAIL_XAODUNCALIBMEASCALIBRATOR_H
 #define ACTSCALIBRATION_DETAIL_XAODUNCALIBMEASCALIBRATOR_H
 
-#include "ActsCalibration/MeasurementCalibratorBase.h"
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "ActsEvent/TrackContainer.h"
 #include "Acts/TrackFitting/GlobalChiSquareFitter.hpp"

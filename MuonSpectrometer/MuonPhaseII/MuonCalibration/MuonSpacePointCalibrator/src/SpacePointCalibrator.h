@@ -8,7 +8,7 @@
 
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ActsCalibration/MeasurementCalibratorBase.h"
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "MuonSpacePoint/SpacePoint.h"
 #include "MuonSpacePoint/CalibratedSpacePoint.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"

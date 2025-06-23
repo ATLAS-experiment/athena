@@ -13,7 +13,7 @@ atlas_add_component( MuonPatternRecognitionAlgs
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES MuonVisualizationHelpersR4 MuonPatternEvent AthenaKernel StoreGateLib
                                     xAODMuonPrepData MuonSpacePoint MuonPatternHelpers MuonRecToolInterfacesR4 
-                                    MuonTruthHelpers TruthUtils ActsToolInterfacesLib MuonTrackEvent ActsCalibrationLib)
+                                    MuonTruthHelpers TruthUtils ActsToolInterfacesLib MuonTrackEvent ActsCalibratorsLib)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

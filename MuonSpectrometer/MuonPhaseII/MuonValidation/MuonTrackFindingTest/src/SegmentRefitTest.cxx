@@ -3,8 +3,8 @@
 */
 #include "SegmentRefitTest.h"
 
-#include "ActsCalibration/CalibrationContext.h"
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibBase/CalibrationContext.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 
 #include "MuonTrackEvent/TrackingHelpers.h"

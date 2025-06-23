@@ -15,7 +15,7 @@ atlas_add_component( MuonTrackFindingTest
                                     MuonTruthHelpers xAODMuon xAODMuonSimHit xAODMuonPrepData MuonVisualizationHelpersR4 
                                     MuonPatternEvent MuonPatternHelpers MuonTrackEvent MuonReadoutGeometryR4 MuonPRDTestR4Lib 
                                     ActsToolInterfacesLib ActsGeometryInterfacesLib MuonTrackFindingToolsLib MuonDetDescrUtils 
-                                    ActsCalibrationLib
+                                    ActsCalibratorsLib
                                     ${ROOT_LIBRARIES} )
 
 # Install files from the package:

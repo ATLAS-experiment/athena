@@ -33,12 +33,12 @@
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
-#include "ActsCalibration/TrkMeasurementCalibrator.h"
-#include "ActsCalibration/TrkPrepRawDataCalibrator.h"
-#include "ActsCalibration/TrkMeasSurfaceAccessor.h"
-#include "ActsCalibration/TrkPrepRawDataSurfaceAcc.h"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
+#include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
+#include "ActsCalibrators/TrkPrepRawDataSurfaceAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 // STL
 #include <cmath>   //std::abs
