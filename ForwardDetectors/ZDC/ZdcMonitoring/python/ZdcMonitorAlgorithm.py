@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file ZdcMonitorAlgorithm.py
@@ -159,6 +159,20 @@ def ZdcMonitoringConfig(inputFlags):
     zdcMonAlg.EnergyCutForModuleFractMonitor = 402 if zdcMonAlg.IsPPMode else 13400
     zdcMonAlg.triggerSideA = "L1_ZDC_PP_A" if zdcMonAlg.IsPPMode else "L1_ZDC_A"
     zdcMonAlg.triggerSideC = "L1_ZDC_PP_C" if zdcMonAlg.IsPPMode else "L1_ZDC_C"
+
+# --------------------------------------------------------------------------------------------------
+    if (zdcMonAlg.IsInjectedPulse):
+        from ZdcMonitoring.ZdcInjPulserVoltageReader import load_voltage_steps
+        voltage_values_list = []
+        voltage_strs_list = []
+        load_voltage_steps(zdcMonAlg.RunNumber, voltage_values_list, voltage_strs_list)
+
+        if len(voltage_values_list) == 0:
+            voltage_values_list = [0.]
+            voltage_strs_list = ["0.00000"]
+
+        zdcMonAlg.InjPulseVoltageSteps = voltage_values_list
+        zdcMonAlg.InjPulseVoltageStepsStr = voltage_strs_list
 
     amp_LG_refit_max_ADC = module_FPGA_max_ADC
 
@@ -636,28 +650,19 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=n_fpga_bins,xmin=0.0,xmax=module_amp_xmax / 2.)
     
 
-    if (zdcMonAlg.IsInjectedPulse or not zdcMonAlg.IsOnline):
-        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_HG_profile',type='TProfile',title=';Module Max ADC HG [ADC];Avg Amp/Max ADC',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
-                                cutmask='zdcModuleHG',
-                                xbins=n_fpga_bins,xmin=0.0,xmax=module_FPGA_max_ADC)
-    
+    # ---------------------------- ZDC-module amplitude to max ADC ratio (debug purpose) ---------------------------- 
+    if (not zdcMonAlg.IsOnline): # 2D (memory consuming): offline only for calib stream
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_HG',type='TH2F',title=';Module Max ADC HG [ADC];Avg Amp/Max ADC',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
                                 cutmask='zdcModuleHG',
                                 xbins=n_fpga_bins,xmin=0.0,xmax=module_FPGA_max_ADC,
                                 ybins=100,ymin=0.0,ymax=2.)
 
-        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_LG_profile',type='TProfile',title=';Module Max ADC LG [ADC];Avg Amp/Max ADC',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
-                                cutmask='zdcModuleLG',
-                                xbins=n_fpga_bins,xmin=0.0,xmax=nominal_lg_max_ADC) #max ADC has no LG gain factor
-
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_LG',type='TH2F',title=';Module Max ADC LG [ADC];Avg Amp/Max ADC',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
                                 cutmask='zdcModuleLG',
                                 xbins=n_fpga_bins,xmin=0.0,xmax=nominal_lg_max_ADC, #max ADC has no LG gain factor
-                                ybins=100,ymin=0.0,ymax=2./nominal_lg_gain_factor)
+                                ybins=100,ymin=0.0,ymax=2.)
     
     # ---------------------------- ZDC-module amplitude fractions & correlations with energy deposits ---------------------------- 
     
@@ -712,18 +717,17 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=create_vinj_bins(),
                                 ybins=create_hg_fit_amp_inj_bins())
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleFitAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcHGInjPulseValid',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltage',
-                                xbins=create_vinj_bins())
-        
-        # ---------------------------- HG response max ADC ----------------------------
-
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCHG', type='TH2F', title=';Pulse amp [V];Max ADC HG',
-                                cutmask='zdcHGInjPulseValid',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltage',
-                                xbins=create_vinj_bins(),
-                                ybins=create_hg_fit_amp_inj_bins())
+        if (zdcMonAlg.IsOnline): # also plot profile online in case 2D-hist scale is wrong by a large factor (e.g, due to attenuator setting)
+            zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleFitAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
+                                    cutmask='zdcHGInjPulseValid',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltage',
+                                    xbins=create_vinj_bins())
+        else: # ---------------------------- HG response max ADC (offline only) ----------------------------
+            zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCHG', type='TH2F', title=';Pulse amp [V];Max ADC HG',
+                                    cutmask='zdcHGInjPulseValid',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltage',
+                                    xbins=create_vinj_bins(),
+                                    ybins=create_hg_fit_amp_inj_bins())
 
         # ---------------------------- LG response ----------------------------
         zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGFitAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
@@ -732,18 +736,46 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=create_vinj_bins(),
                                 ybins=create_lg_fit_amp_inj_bins())
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGFitAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcLGInjPulseValid',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltage',
-                                xbins=create_vinj_bins())
-        
-        # ---------------------------- LG response max ADC ----------------------------
+        if (zdcMonAlg.IsOnline): # also plot profile online in case 2D-hist scale is wrong by a large factor (e.g, due to attenuator setting)
+            zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGFitAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
+                                    cutmask='zdcLGInjPulseValid',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltage',
+                                    xbins=create_vinj_bins())
+        else: # ---------------------------- LG response max ADC (offline only) ----------------------------
+            zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG;zdcModuleMaxADCLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Max ADC LG',
+                                    cutmask='zdcLGInjPulseValid',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltage',
+                                    xbins=create_vinj_bins(),
+                                    ybins=create_hg_fit_amp_inj_bins()) # maxADC has no LG gain factor multiplied
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG;zdcModuleMaxADCLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Max ADC LG',
-                                cutmask='zdcLGInjPulseValid',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltage',
-                                xbins=create_vinj_bins(),
-                                ybins=create_hg_fit_amp_inj_bins()) # maxADC has no LG gain factor multiplied
+        # ---------------------------- HG & LG response binned by the voltage strings ----------------------------
+        if (not zdcMonAlg.IsOnline):
+            zdcModuleMonToolArr.defineHistogram('VoltageIndex, zdcModuleFitAmp', type='TH2F', title=';;Signal Fit Amp [ADC Counts]',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltageStr',
+                            cutmask='zdcHGInjPulseValid',
+                            xbins=len(voltage_strs_list),xmin=0.0,xmax=len(voltage_strs_list),
+                            ybins=create_hg_fit_amp_inj_bins(),
+                            xlabels=voltage_strs_list)
+
+            zdcModuleMonToolArr.defineHistogram('VoltageIndex, zdcModuleLGFitAmp', type='TH2F', title=';;Signal Fit Amp [ADC Counts]',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltageStr',
+                            cutmask='zdcLGInjPulseValid',
+                            xbins=len(voltage_strs_list),xmin=0.0,xmax=len(voltage_strs_list),
+                            ybins=create_lg_fit_amp_inj_bins(),
+                            xlabels=voltage_strs_list)
+
+        # ---------------------------- HG & LG response 1D histograms ----------------------------
+        # ---------------------------- only offline ----------------------------
+
+        if (not zdcMonAlg.IsOnline):
+            zdcModuleSingleVoltageResponseArr = helper.addArray([sides,modules,voltage_strs_list],zdcMonAlg,'LucrodResponseSingleVoltageMonitor', topPath = 'ZDC/EXPERT/ZDC/ZdcModule/LucrodResponseSingleVoltage')
+            zdcModuleSingleVoltageResponseArr.defineHistogram('zdcModuleFitAmp;zdcModuleAmpHG_fixed_vInj', type='TH1F', title=';Signal Fit Amp [ADC Counts];Events',
+                                    cutmask='zdcHGInjPulseValid',
+                                    xbins=create_hg_fit_amp_inj_bins())
+
+            zdcModuleSingleVoltageResponseArr.defineHistogram('zdcModuleLGFitAmp;zdcModuleAmpLG_fixed_vInj', type='TH1F', title=';Signal Fit Amp [ADC Counts];Events',
+                                    cutmask='zdcLGInjPulseValid',
+                                    xbins=create_lg_fit_amp_inj_bins())
 
     # ---------------------------- ZDC-module times ---------------------------- 
 

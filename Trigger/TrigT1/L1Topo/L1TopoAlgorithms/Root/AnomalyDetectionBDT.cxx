@@ -122,10 +122,9 @@ TCS::AnomalyDetectionBDT::initialize() {
    for (size_t i=0; i <numberOutputBits(); ++i) {
       p_ScoreThreshold[i] = parameter("ScoreThreshold", i).value();
    }
-   
    TRG_MSG_INFO("ADBDT: Threshold set to " << p_ScoreThreshold);
-
-   const std::string bdtfn = "fwX-config_nomAD_Jun3_2pi200t20d.json";
+   const std::string bdtfn = "TrigAnomalyDetectionBDT/2025-06-18/fwX-config_nomAD_Jun3_2pi200t20d.json";
+   
    std::string fileLocation;
    
    #ifndef TRIGCONF_STANDALONE
@@ -137,7 +136,7 @@ TCS::AnomalyDetectionBDT::initialize() {
    std::ifstream configFile(fileLocation); 
 
    if (!configFile.is_open()) {
-      TRG_MSG_ERROR("Unable to open BDT configuration file.");
+      TRG_MSG_ERROR("Unable to open BDT configuration file." << fileLocation);
       return StatusCode::FAILURE;
    }
 
