@@ -17,6 +17,7 @@ def __createIDTPMConfigFlags():
     icf.addFlag( "trkAnaCfgFile", '' )
     icf.addFlag( 'outputFilePrefix','myIDTPM_out')
     icf.addFlag( 'unpackTrigChains', False )
+    icf.addFlag( 'commonTrkAnaFlags', [] )
     return icf
 
 
@@ -170,7 +171,7 @@ def initializeIDTPMConfigFlags(flags):
 
 
 ### Create flags category and corresponding set of flags
-def initializeIDTPMTrkAnaConfigFlags(flags):
+def initializeIDTPMTrkAnaConfigFlags( flags ):
     # Set output file names
     flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.HIST.root'
     flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.AOD_IDTPM.pool.root'
@@ -179,11 +180,28 @@ def initializeIDTPMTrkAnaConfigFlags(flags):
     flags.addFlagsCategory( "PhysVal.IDTPM.Default", 
                             __createIDTPMTrkAnaConfigFlags, 
                             prefix=True )
-    
+
+    # Common TrackAnalysis configuration flags category
+    # to override individual flags in all the trkanalyses configurations with a common value
+    flags.addFlagsCategory( "PhysVal.IDTPM.Common",
+                            __createIDTPMTrkAnaConfigFlags,
+                            prefix=True )
+
+    ## adding prefix if necessary
+    commonTrkAnaFlags_new = []
+    for f in flags.PhysVal.IDTPM.commonTrkAnaFlags :
+        if "PhysVal.IDTPM.Common." not in f :
+            commonTrkAnaFlags_new.append( "PhysVal.IDTPM.Common."+f )
+        else : commonTrkAnaFlags_new.append(f)
+
+    # Update PhysVal.IDTPM.Common flags category with values parsed from commonTrkAnaFlags_new
+    # This is used to keep flags values of the correct/consitent type
+    if commonTrkAnaFlags_new :
+        flags.fillFromArgs( listOfArgs=commonTrkAnaFlags_new )
+
     from InDetTrackPerfMon.ConfigUtils import getTrkAnaDicts
     analysesDict = getTrkAnaDicts( flags )
     trkAnaNames = []
-    print (str(analysesDict))
 
     if analysesDict:
         for trkAnaName, trkAnaDict in analysesDict.items():
@@ -200,8 +218,13 @@ def initializeIDTPMTrkAnaConfigFlags(flags):
                 ## skipping comments
                 if fname.startswith( "_comment" ): continue
                 ## updating flags from json items
-                setattr( flags.PhysVal.IDTPM, 
-                        trkAnaName+"."+fname, fvalue )
+                setattr( flags.PhysVal.IDTPM, trkAnaName+"."+fname, fvalue )
+
+            # override flags for this trkAna with common ones from commonTrkAnaFlags
+            for cflag in commonTrkAnaFlags_new :
+                cfname  = cflag.split('=')[0].split('.')[-1] # parsing only the name of the flag
+                cfvalue = getattr( flags.PhysVal.IDTPM.Common, cfname ) # getting its value in the correct type
+                setattr( flags.PhysVal.IDTPM, trkAnaName+"."+cfname, cfvalue )
 
             ## overwrite doTrigNavigation flag if test or reference
             ## is "Trigger" (not "EFTrigger")
