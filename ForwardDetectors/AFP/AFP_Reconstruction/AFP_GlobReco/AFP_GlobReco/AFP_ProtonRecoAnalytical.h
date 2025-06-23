@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_GLOBRECO_AFP_PROTONRECOANALYTICAL_H
@@ -92,7 +92,7 @@ class AFP_ProtonRecoAnalytical : public AFP_ProtonRecoBase {
     double m_distanceBetweenStations = 0.0; // [m]
 
     /// Name of the file containing parameterization
-    Gaudi::Property<std::string> m_parametrizationFileName{this, "parametrizationFileName", "none.txt", "Name of the file containing parameterization"};
+    Gaudi::Property<std::string> m_parametrizationFileName{this, "parametrizationFileName", {}, "Name of the file containing parameterization"};
 
     /// Position for which parameterization was performed
     double m_parametrizationPosition = 0.0; // [m]

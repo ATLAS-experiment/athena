@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_GlobReco/AFP_ProtonRecoAnalytical.h"
@@ -71,14 +71,19 @@ StatusCode AFP_ProtonRecoAnalytical::initialize ()
     ATH_MSG_ERROR("there are "<<m_detectorPositions.size()<<" entries for m_detectorPositions, we have only 2 detectors on each side");
     return StatusCode::FAILURE;
   }
-  
-  
-  if(m_parametrizationFileName=="")
+
+  if(m_parametrizationFileName.empty())
   {
-    m_parametrizationFileName = (m_side) ? "param_mad_b1_def.txt" : "param_mad_b2_def.txt";
+    ATH_MSG_ERROR("parametrizationFileName is not set");
+    return StatusCode::FAILURE;
   }
   
-  const std::string parametrization = PathResolver::find_file(m_parametrizationFileName, "DATAPATH", PathResolver::RecursiveSearch);
+  const std::string parametrization = PathResolverFindDataFile(m_parametrizationFileName);
+  if(parametrization.empty())
+  {
+    ATH_MSG_ERROR("Cannot find " << m_parametrizationFileName);
+    return StatusCode::FAILURE;
+  }
 
   m_parametrization = std::make_unique<AFP::Parameterization>(parametrization);
   m_parametrizationPosition = m_parametrization->parametrizationPosition();
