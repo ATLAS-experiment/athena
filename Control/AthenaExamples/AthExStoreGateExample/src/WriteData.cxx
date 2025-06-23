@@ -241,7 +241,7 @@ StatusCode WriteData::execute() {
 
   DataLink<MyDataObj> dobjLink3(name()); 
   // now access it.  DataLink will do a retrieve to get it from the store. 
-  dobjLink3->val(); 
+  (void)dobjLink3.cptr();
 
   //
   // ElementLinks referring to contained objects

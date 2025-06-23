@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // DFlowAlg3.cxx 
@@ -127,7 +127,7 @@ StatusCode DFlowAlg3::execute (const EventContext& ctx) const
   ATH_MSG_INFO("data mbr w-handle[ints] - size: " << w_ints->size());
 
   ATH_MSG_INFO("--restore--");
-  *w_ints = save;
+  *w_ints = std::move(save);
   ATH_MSG_INFO("temporary r-handle[ints] - size: " << ints->size());
   if (r_int.isValid()) {
     ATH_MSG_INFO("data mbr  r-handle[ints] - size: " << r_ints->size());
