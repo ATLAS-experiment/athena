@@ -25,6 +25,7 @@
 
 #include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
+#include <xAODTracking/VertexContainer.h>
 
 #ifndef XAOD_STANDALONE
 #include <POOLRootAccess/TEvent.h>
@@ -108,6 +109,8 @@ namespace columnar
       {"AnalysisPhotons", 0x35d1472f},
       {"AnalysisJets", 0x1afd1919},
       {"egammaClusters", 0x15788d1f},
+      {"InDetTrackParticles", 0x2e42db0b},
+      {"GSFConversionVertices", 0x1f3e85c9}
     };
 
     template<typename T>
@@ -559,7 +562,7 @@ namespace columnar
         {
           for (auto& element : data)
           {
-            if (element.isDefault())
+            if (element.isDefault() || (element.key() == 0 && element.index() == 0))
               columnData.push_back (invalidObjectIndex);
             else
             {
@@ -572,7 +575,10 @@ namespace columnar
                   std::cout << "assume target key for " << targetContainerName << " is " << std::hex << targetKey << std::dec << std::endl;
                 } else
                 {
-                  throw std::runtime_error ("target key mismatch: " + std::to_string (element.key()) + " != " + std::to_string (targetKey) + " for " + outputColumns.at(0).name);
+                  throw std::runtime_error(
+                      std::format("target key mismatch: {:x} != {:x} for {} with element index {}",
+                                  element.key(), targetKey, outputColumns.at(0).name, element.index())
+                  );
                 }
               }
             }
@@ -1352,10 +1358,18 @@ namespace columnar
 
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisElectronsAuxDyn.caloClusterLinks"));
 
+    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer>> ("GSFConversionVerticesAuxDyn.trackParticleLinks"));
+
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisElectrons.ptOut", 0));
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisElectrons.sfOut", 0));
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisElectrons.validOut", 0));
+
+    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisPhotonsAuxDyn.caloClusterLinks"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::VertexContainer>> ("AnalysisPhotonsAuxDyn.vertexLinks"));
+
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisPhotons.sfOut", 0));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisPhotons.validOut", 0));
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisMuons.objectType", xAOD::Type::Muon));
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.m", 0));
