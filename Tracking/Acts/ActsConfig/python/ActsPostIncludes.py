@@ -133,22 +133,30 @@ def ACTSClusterPostInclude(flags) -> ComponentAccumulator:
                                                   StripClustersToTruthAssociationMap = "ITkOfflineStripClustersToTruthParticles",
                                                   TruthParticleHitCountsOut = "OfflineTruthParticleHitCounts"))
         
-    
-    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
-    acc.merge( ITkActsPrepDataToxAODCfg( flags,
-                                         PixelClusterContainer = 'ITkOfflinePixelClusters',
-                                         StripClusterContainer = 'ITkOfflineStripClusters',
-                                         PixelMeasurementContainer = 'ITkPixelMeasurements_offl',
-                                         StripMeasurementContainer = 'ITkStripMeasurements_offl' ) )
+        from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
+        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
 
-    ## write out measurements containers in any case
-    toAOD = [
-        'xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl',
-        'xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
-        'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl',
-        'xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.'
-    ]
-    
-    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-    acc.merge( addToAOD( flags, toAOD ) )
+        from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecoratorAlgCfg,ActsStripClusterTruthDecoratorAlgCfg
+        acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(flags,
+                                                       name = "ActsOfflinePixelClusterTruthDecoratorAlgCfg",
+                                                       ClusterContainer = "ITkOfflinePixelClusters",
+                                                       AssociationMapOut = "ITkOfflinePixelClustersToTruthParticles",
+                                                       MeasurementContainer = "ITkPixelMeasurements_offl"))
+        acc.merge(ActsStripClusterTruthDecoratorAlgCfg(flags,
+                                                       name = "ActsOfflineStripClusterTruthDecoratorAlgCfg",
+                                                       ClusterContainer = "ITkOfflineStripClusters",
+                                                       AssociationMapOut = "ITkOfflineStripClustersToTruthParticles",
+                                                       MeasurementContainer = "ITkStripMeasurements_offl"))
+
+        ## write out measurements containers in any case
+        toAOD = [
+            'xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl',
+            'xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
+            'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl',
+            'xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.'
+        ]
+        
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+        acc.merge( addToAOD( flags, toAOD ) )
+
     return acc
