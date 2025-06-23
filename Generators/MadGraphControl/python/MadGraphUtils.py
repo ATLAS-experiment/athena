@@ -2055,6 +2055,20 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
     # Make sure nevents is an integer
     if 'nevents' in settings_lower:
         settings_lower['nevents'] = int(settings_lower['nevents'])
+        
+    # Normalise custom_fcts early so the rewritten run_card uses the full path
+    if 'custom_fcts' in settings_lower and settings_lower['custom_fcts']:
+        raw_name = str(settings_lower['custom_fcts']).split()[0]
+        # Determine jobConfig directory
+        if runArgs is not None and hasattr(runArgs, 'jobConfig'):
+            cfgdir = runArgs.jobConfig[0] if isinstance(runArgs.jobConfig, (list, tuple)) else runArgs.jobConfig
+            # Build full path and make absolute
+            full_path = os.path.join(cfgdir, raw_name)
+            settings_lower['custom_fcts'] = os.path.abspath(full_path)
+            print(f"Using custom function(s), specified in custom_fcts with path: {settings_lower['custom_fcts']}")
+        else:
+            # For internal tests, where jobConfig is not set
+            settings_lower['custom_fcts'] = os.path.abspath(raw_name)
 
     mglog.info('Modifying run card located at '+run_card_input)
     if run_card_backup is not None:
@@ -2085,9 +2099,15 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
                         mglog.info('Removing '+stripped_setting+'.')
                         used_settings += [ stripped_setting.lower() ]
                     else:
-                        line = oldValue.replace(oldValue.strip(), str(settings_lower[stripped_setting.lower()]))+'='+setting
-                        if comment != '':
-                            line += '  !' + comment
+                        if stripped_setting.lower() == 'custom_fcts':
+                            # Overwrite completely to avoid duplicating in custom_fcts, else MadGraph will crash
+                            line = ' '+str(settings_lower[stripped_setting.lower()])+' = '+setting
+                            if comment != '':
+                                line += '  !'+comment
+                        else:
+                            line = oldValue.replace(oldValue.strip(), str(settings_lower[stripped_setting.lower()]))+'='+setting
+                            if comment != '':
+                                line += '  !' + comment
                         mglog.info('Setting '+stripped_setting+' = '+str(settings_lower[stripped_setting.lower()]))
                         used_settings += [ stripped_setting.lower() ]
         newCard.write(line.strip()+'\n')
