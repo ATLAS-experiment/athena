@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEgamma/PhotonxAODHelpers.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
+#include "xAODEgamma/EgammaDetails.h"
 #include "xAODEgamma/Photon.h"
 #include "xAODTracking/Vertex.h"
 
@@ -13,15 +14,8 @@
 // ==================================================================
 
 bool xAOD::EgammaHelpers::isConvertedPhoton(const xAOD::Photon *ph, bool excludeTRT) {
-  const bool hasVertices = ph && (ph->nVertices() > 0);
-  if (excludeTRT) {
-    // special case for Run3: consider unconv if TRT Conv in the barrel
-    using enum xAOD::EgammaParameters::ConversionType;
-    const xAOD::EgammaParameters::ConversionType conversionType = xAOD::EgammaHelpers::conversionType(ph);
-    const bool isTRTConv = (conversionType == singleTRT) || (conversionType == doubleTRT);
-    return hasVertices && (std::abs(ph->eta()) > 0.8 || !isTRTConv); 
-  }
-  return hasVertices;
+  if (!ph) return false;
+  return EgammaDetails::isConvertedPhoton(excludeTRT, ph->eta(), ph->nVertices(), conversionType(ph));
 }
 
 xAOD::EgammaParameters::ConversionType xAOD::EgammaHelpers::conversionType(const xAOD::Photon *ph){
@@ -37,20 +31,7 @@ xAOD::EgammaParameters::ConversionType xAOD::EgammaHelpers::conversionType(const
   uint8_t nSiHits1 = numberOfSiHits(trk1);
   uint8_t nSiHits2 = numberOfSiHits(trk2);
 
-  if (!trk1) {return xAOD::EgammaParameters::unconverted;}
-
-  if (!trk2)
-    {return nSiHits1 ? xAOD::EgammaParameters::singleSi : xAOD::EgammaParameters::singleTRT;}
-  
-  if (nSiHits1 && nSiHits2){
-    return xAOD::EgammaParameters::doubleSi;
-  }
-  if (nSiHits1 || nSiHits2){
-    return xAOD::EgammaParameters::doubleSiTRT;
-  }  
-  else{
-    return xAOD::EgammaParameters::doubleTRT;
-  }
+  return EgammaDetails::conversionType (trk1 != nullptr, trk2 != nullptr, nSiHits1, nSiHits2);
 }
 
 // ==================================================================

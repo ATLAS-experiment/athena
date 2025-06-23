@@ -236,6 +236,8 @@ namespace columnar
   template<typename CT,typename CM=ColumnarModeDefault> using Track1Decorator = AccessorTemplate<ContainerId::track1,CT,ColumnAccessMode::output,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using Track2Accessor  = AccessorTemplate<ContainerId::track2,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using Track2Decorator = AccessorTemplate<ContainerId::track2,CT,ColumnAccessMode::output,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using VertexAccessor  = AccessorTemplate<ContainerId::vertex,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using VertexDecorator = AccessorTemplate<ContainerId::vertex,CT,ColumnAccessMode::output,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using ElectronAccessor  = AccessorTemplate<ContainerId::electron,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using ElectronDecorator = AccessorTemplate<ContainerId::electron,CT,ColumnAccessMode::output,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using PhotonAccessor  = AccessorTemplate<ContainerId::photon,CT,ColumnAccessMode::input,CM>;
