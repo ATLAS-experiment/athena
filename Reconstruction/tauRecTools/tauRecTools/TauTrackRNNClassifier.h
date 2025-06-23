@@ -66,6 +66,7 @@ public:
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey {this, "Key_vertexInputContainer", "PrimaryVertices", "Vertex container key"};
 
   Gaudi::Property<bool> m_classifyLRT{this, "classifyLRT", true}; 
+  Gaudi::Property<bool> m_classifyOnlyCoreTracks{this, "ClassifyOnlyCoreTracks", false};
 
 }; // class TauTrackRNNClassifier
   

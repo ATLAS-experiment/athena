@@ -84,6 +84,30 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
     }
   }
 
+  // With this options, RNN track classifier will only be applied to a unique set of tracks 
+  // without any duplication between different taus (see the dedicated protection in the TauTrackFinder). 
+  // This option is currently NOT applied as default, since this will change AODs in R22+ reconstruction
+  // and also can lead to reconstruction inefficiency when compared to current reconstruction.
+  // Put here as this can used for Run4 studies    
+  if(m_classifyOnlyCoreTracks){
+    std::vector<xAOD::TauTrack*> excludedTracks;
+    std::vector<xAOD::TauTrack*>::iterator it = vTracks.begin();
+    while(it != vTracks.end()) {
+      if(!((*it)->flagWithMask( (1<<xAOD::TauJetParameters::TauTrackFlag::coreTrack) | (1<<xAOD::TauJetParameters::TauTrackFlag::passTrkSelector)))){ 
+
+        excludedTracks.push_back(*it);
+        it = vTracks.erase(it);
+      }
+      else {
+        ++it;
+      }
+    }
+    // decorate excludedTracks with default RNN scores
+    for (auto classifier : m_vClassifier) {
+      ATH_CHECK(classifier->classifyTracks(excludedTracks, xTau, vertexContainer, true));
+    }
+  } 
+
   // classify tracks
   for (auto classifier : m_vClassifier) {
     ATH_CHECK(classifier->classifyTracks(vTracks, xTau, vertexContainer));
