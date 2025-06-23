@@ -111,7 +111,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('writeToAOD', False)
     cf.addFlag('writeClustersToAOD', False)
     cf.addFlag('writeOfflPRDInfo', False)
-
+    cf.addFlag('broadErrors', False)
 
     # Monitoring
     cf.addFlag('writeAdditionalOutputData', True)

@@ -305,8 +305,15 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, co
   Amg::MatrixX cov(2,2);
   cov.setZero();
 
-  cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
-  cov(1,1) = siWidth.z()*siWidth.z()/12;
+  if (m_broadErrors) {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
+    cov(1,1) = siWidth.z()*siWidth.z()/12;
+  }
+  else {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/(12*siWidth.colRow().x()*siWidth.colRow().x()); 
+    cov(1,1) = siWidth.z()*siWidth.z()/(12*siWidth.colRow().y()*siWidth.colRow().y());
+  }
+  
   float dummy_omegax = 0.5; 
   float dummy_omegay = 0.5;
   bool split = false;
@@ -353,9 +360,11 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   int rowMin = static_cast<int>(phiIndex-0.5*phiWidth);
   int rowMax = rowMin+phiWidth;
 
-  double etaW = design->widthFromColumnRange(colMin, colMax-1); 
-  double phiW = design->widthFromRowRange(rowMin, rowMax-1); 
+  double etaW = design->widthFromColumnRange(colMin, colMax); 
+  double phiW = design->widthFromRowRange(rowMin, rowMax); 
 
+
+  
   InDet::SiWidth siWidth(Amg::Vector2D(phiWidth,etaWidth),Amg::Vector2D(phiW,etaW));
 
   // **** Get SiLocalPosition from cell id and define Amg::Vector2D position
@@ -378,9 +387,15 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
 
   Amg::MatrixX cov(2,2); 
   cov.setZero();
-
-  cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
-  cov(1,1) = siWidth.z()*siWidth.z()/12; 
+  
+  if (m_broadErrors) {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/12;
+    cov(1,1) = siWidth.z()*siWidth.z()/12;
+  }
+  else {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/(12*siWidth.colRow().x()*siWidth.colRow().x());
+    cov(1,1) = siWidth.z()*siWidth.z()/(12*siWidth.colRow().y()*siWidth.colRow().y());
+  }
 
   bool split = false;
   float splitProb1 = 0;

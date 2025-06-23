@@ -644,7 +644,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::findHitinNextStripLayer(std::s
     float EPSILON = 0.00001;
     for (const std::shared_ptr<const FPGATrackSimHit>& hit: hitList)
     {
-        if (abs(hit->getX() - hitToSearch->getX()) < EPSILON && abs(hit->getY() - hitToSearch->getY()) < EPSILON && abs(hit->getZ() - hitToSearch->getZ()) < EPSILON)
+      if (abs(hit->getX() - hitToSearch->getX()) < EPSILON && abs(hit->getY() - hitToSearch->getY()) < EPSILON && abs(hit->getZ() - hitToSearch->getZ()) < EPSILON && hit->getIdentifierHash() != hitToSearch->getIdentifierHash())
         {
             hits.push_back(hit);
             return StatusCode::SUCCESS;

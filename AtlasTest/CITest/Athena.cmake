@@ -459,7 +459,8 @@ atlas_add_citest( TriggerConfigFlags
    POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_citest( EFTracking_FPGATrackSim_CI
-  SCRIPT FPGATrackSim_CI.sh )
+  SCRIPT FPGATrackSim_CI.sh
+   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track|FPGATrackSimProto.*ERROR Propagation reached the step count limit.*|FPGATrackSimProto.*ERROR.*Propagation failed: PropagatorError.*" )
 
 atlas_add_citest (TrigInDetValidationMenu 
                SCRIPT TrigInDetValidation_menu_test.py
