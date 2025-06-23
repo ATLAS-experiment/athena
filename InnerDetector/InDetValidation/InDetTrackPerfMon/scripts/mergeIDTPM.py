@@ -4,10 +4,10 @@
 def GetCustomAthArgs() :
     from argparse import ArgumentParser
     myparser = ArgumentParser( description='Parser for IDTPM merger' )
-    myparser.add_argument( "-i", "--inputFileNames", help="List of input files. Regex is allowed.", nargs='+', required=True )
+    myparser.add_argument( "-i", "--inputFileNames", help="List (comma- or space-separated) of input files. Regex is allowed.", nargs='+', required=True )
     myparser.add_argument( "-o", "--outputFileName", help="Output file name", default='IDTPM.output.root' )
     myparser.add_argument( "-s", "--saveNonPostProcessed", help="Enable debugging messages", action="store_true", default=False )
-    myparser.add_argument( "-m", "--method", help="Method for recomputing resolutions", choices=['iterRMS', 'gaussFit', 'iterRMSgaussFit'], default='iterRMS' )
+    myparser.add_argument( "-m", "--method", help="Method for recomputing resolutions", choices=['iterRMS', 'gaussFit', 'iterRMSgaussFit', 'iterGaussFit', 'None'], default='iterRMS' )
     return myparser.parse_args()
 
 ## Parse the arguments
@@ -16,8 +16,9 @@ MyArgs = GetCustomAthArgs()
 ## Inputs
 from glob import glob
 InputFiles = []
-for path in MyArgs.inputFileNames :
-    InputFiles += glob( path )
+for paths in MyArgs.inputFileNames :
+    for path in paths.split(',') :
+        InputFiles += glob( path )
 
 import subprocess
 ## hadd inputs
@@ -33,6 +34,7 @@ if MyArgs.saveNonPostProcessed :
     subprocess.run( cmd_1a, check=True )
 
 ## Post-process output to recompute resolutions
-cmd_2 = [ 'postProcessIDTPMHistos', MyArgs.outputFileName, MyArgs.method ]
-print( "Running: "+(' '.join( cmd_2 )) )
-subprocess.run( cmd_2, check=True )
+if MyArgs.method != 'None' :
+    cmd_2 = [ 'postProcessIDTPMHistos', MyArgs.outputFileName, MyArgs.method ]
+    print( "Running: "+(' '.join( cmd_2 )) )
+    subprocess.run( cmd_2, check=True )
