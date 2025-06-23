@@ -242,7 +242,7 @@ class MetaDataSvc : public extends<::AthService,
 
   class ToolLockGuard {
    public:
-    ToolLockGuard(const MetaDataSvc& mds) : m_mds(mds) { m_mds.lockTools(); }
+    explicit ToolLockGuard(const MetaDataSvc& mds) : m_mds(mds) { m_mds.lockTools(); }
     ~ToolLockGuard() { m_mds.unlockTools(); }
     ToolLockGuard(const ToolLockGuard&) = delete;
     void operator=(const ToolLockGuard&) = delete;
