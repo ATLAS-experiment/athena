@@ -153,7 +153,8 @@ int pproc_file( const std::string& p_infile, const std::string& methodStr ) {
     methodMap_t methodMap = {
       { "iterRMS"         , IDPVM::ResolutionHelper::iterRMS_convergence },
       { "gaussFit"        , IDPVM::ResolutionHelper::Gauss_fit },
-      { "iterRMSgaussFit" , IDPVM::ResolutionHelper::fusion_iterRMS_Gaussfit }
+      { "iterRMSgaussFit" , IDPVM::ResolutionHelper::fusion_iterRMS_Gaussfit },
+      { "iterGaussFit"    , IDPVM::ResolutionHelper::iterGaussFit_convergence }
     };
 
     methodMap_t::const_iterator mitr = methodMap.find( methodStr );
