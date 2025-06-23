@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H6SD_LARGEOH62004STEPPINGACTIONTOOL_H
@@ -47,6 +47,9 @@ namespace G4UA
 
     /// Configuration parameters
     LArGeoH62004SteppingAction::Config m_config;
+    Gaudi::Property<float> m_yTable   {this, "yTable",    0.f};
+    Gaudi::Property<bool>  m_checkprim{this, "CheckPrim", false};
+    Gaudi::Property<bool>  m_printstep{this, "PrintStep", false};
 
   }; // class LArGeoH62004SteppingActionTool
 
