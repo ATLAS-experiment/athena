@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -124,7 +124,8 @@ IOVTime::isValid() const noexcept {
   
   // Check run/event to be < max
   if (m_timestamp == IOVTime::UNDEFTIMESTAMP) {
-      if ( run() > IOVTime::MAXRUN || event() > IOVTime::MAXEVENT ) {
+      // event() can never be more than MAXEVENT, by construction.
+      if ( run() > IOVTime::MAXRUN /*|| event() > IOVTime::MAXEVENT*/ ) {
 	  return 0;
       }
   }
@@ -139,7 +140,8 @@ IOVTime::isValid() const noexcept {
   if (m_timestamp != IOVTime::UNDEFTIMESTAMP &&
       m_time      != IOVTime::UNDEFRETIME) {
       // May have both timestamp and run/event set 
-      if ( run() > IOVTime::MAXRUN || event() > IOVTime::MAXEVENT ) {
+      // event() can never be more than MAXEVENT, by construction.
+      if ( run() > IOVTime::MAXRUN /*|| event() > IOVTime::MAXEVENT*/ ) {
 	  return 0;
       }
       if ( m_timestamp > IOVTime::MAXTIMESTAMP ) {

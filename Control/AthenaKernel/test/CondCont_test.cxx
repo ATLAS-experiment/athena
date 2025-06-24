@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/CondCont_test.cxx
@@ -1160,10 +1160,10 @@ void testThread_MixedWriter::operator()()
     if (i >= ninflight/2) {
       std::vector<CondContBase::key_type> keys;
       keys.reserve (ninflight/2);
-      for (int j = i/2-ninflight/2; j<i/2; j++) {
+      for (int j = std::max(0, i/2-ninflight/2); j<i/2; j++) {
         keys.push_back (j);
       }
-      m_map.trim (keys,keys);
+      (void)m_map.trim (keys,keys);
     }
     EventIDRange r = makeRange(i);
     int payload = r.start().lumi_block() + r.start().time_stamp();

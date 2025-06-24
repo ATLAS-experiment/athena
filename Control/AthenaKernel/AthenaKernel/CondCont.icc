@@ -518,7 +518,7 @@ CondContMixed<T>::CondContMixed (Athena::IRCUSvc& rcusvc,
                                  SG::DataProxy* proxy,
                                  std::shared_ptr<typename CondContSet::IPayloadDeleter> payloadDeleter,
                                  size_t capacity)
-  : Base (rcusvc, clid, id, proxy, payloadDeleter, capacity)
+  : Base (rcusvc, clid, id, proxy, std::move(payloadDeleter), capacity)
 {
   CondContMixed<T>::registerBaseInit();
 }

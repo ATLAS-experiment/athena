@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_METACONT_H
@@ -105,7 +105,7 @@ namespace SG {
 
 template <typename T>
 MetaCont<T>::~MetaCont() {
-  for (auto t : m_metaSet) {
+  for (auto& t : m_metaSet) {
     delete t.second;
   }
   m_metaSet.clear();
@@ -202,7 +202,7 @@ MetaCont<T>::sources() const {
   std::lock_guard<std::mutex> lock(m_mut);
 
   std::vector<MetaContBase::SourceID> r;
-  for (auto ent : m_metaSet) {
+  for (const auto& ent : m_metaSet) {
     r.push_back(ent.first);
   }
 
