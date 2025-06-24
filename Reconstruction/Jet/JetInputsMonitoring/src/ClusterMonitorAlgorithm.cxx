@@ -137,7 +137,9 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       // NCB specific histograms:
       PhiRegion1 = std::abs(phi) <= 0.3 || std::abs(phi) >= 2.7;
       PhiRegion2 = std::abs(phi) > 0.3 && std::abs(phi) < 2.7;
-      fill("ClusterMonitorNCBPlots", eta, ClusTime, PhiRegion1, PhiRegion2);
+      if(std::abs(ClusTime) > 1e-6){
+	fill("ClusterMonitorNCBPlots", eta, ClusTime, PhiRegion1, PhiRegion2);
+      }
 
       // cutmasks for cluster energy thresholds
       Threshold1 = E>m_lowEthresh;
