@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardRegionFieldSvc.h"
@@ -221,8 +221,7 @@ void MagField::ForwardRegionFieldSvc::InitMagData()
 
         ATH_MSG_INFO("Using magnets.dat as the field settings source");
 
-        const std::string fileMagnets("magnets.dat");
-        m_magnets = loadDataFile(fileMagnets.c_str(),5);
+        m_magnets = loadDataFile("ForwardRegionMgField/magnets.dat" ,5);
     }
     else
     {
@@ -431,7 +430,7 @@ std::vector<std::vector<std::string> > MagField::ForwardRegionFieldSvc::loadData
 
     std::ifstream file (fileName);
     if(!file){
-        std::string datapath = PathResolver::find_file(fileName,"DATAPATH", PathResolver::RecursiveSearch);
+        std::string datapath = PathResolverFindDataFile(fileName);
         LogStream << MSG::DEBUG << "File " << fileName << " not found in run directory, trying to load it from DATAPATH" << endmsg;
         file.open(datapath.c_str());
     }
