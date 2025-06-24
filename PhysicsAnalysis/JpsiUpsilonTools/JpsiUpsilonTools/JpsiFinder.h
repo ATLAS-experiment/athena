@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -28,8 +28,6 @@
 
 namespace Analysis {
     
-    static const InterfaceID IID_JpsiFinder("JpsiFinder", 1, 0);
-
     // Struct and enum to associate muon pairs with track pairs
     // and make the program flow more straightforward
     enum PairType{ MUMU=0, MUTRK=1, TRKTRK=2};
@@ -46,14 +44,12 @@ namespace Analysis {
         MuonTypes muonTypes{CC};
     };
     
-    class JpsiFinder:  public Analysis::ICandidateSearch, public AthAlgTool
+    class JpsiFinder:  public extends<AthAlgTool, Analysis::ICandidateSearch>
     {
     public:
         JpsiFinder(const std::string& t, const std::string& n, const IInterface*  p);
         ~JpsiFinder();
         virtual StatusCode initialize() override;
-        
-        static const InterfaceID& interfaceID() { return IID_JpsiFinder;}
         
         //-------------------------------------------------------------------------------------
         //Doing Calculation and inline functions
