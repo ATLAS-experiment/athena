@@ -2164,6 +2164,9 @@ DATAVECTOR::DataVector(DataVector&& rhs) noexcept
   rhs.m_deleter = nullptr;
 
   // Need to reset the container pointer on elements.
+  // Functions called from here can throw GaudiException.
+  // However, logically that should not actually happen; so leave this
+  // declared as noexcept.
   this->setIndices (this->begin(), this->end());
 
   // This doesn't get called from derived classes.
@@ -2245,6 +2248,7 @@ DATAVECTOR& DATAVECTOR::operator= (const DataVector& rhs)
 {
   if (&rhs != this) {
     // Ensure we're not being called via a base class.
+    // This can throw an exception, so this method should not be noexcept.
     testInsert ("assignment operator");
     clear();                // Release any currently-owned elements.
     m_ownPolicy = SG::VIEW_ELEMENTS;
@@ -2264,10 +2268,11 @@ DATAVECTOR& DATAVECTOR::operator= (const DataVector& rhs)
  * Any auxiliary data will be moved along with the container contents.
  */
 template <class T>
-DATAVECTOR& DATAVECTOR::operator= (DATAVECTOR&& rhs) noexcept
+DATAVECTOR& DATAVECTOR::operator= (DATAVECTOR&& rhs)
 {
   if (this != &rhs) {
     // Ensure we're not being called via a base class.
+    // This can throw an exception, so this method should not be noexcept.
     testInsert ("assignment operator");
 
     this->clear();                // Release any currently-owned elements.
