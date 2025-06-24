@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaHandleBase_test.cxx
@@ -47,8 +47,9 @@ void test1()
   SG::ArenaHeader header;
   SG::ArenaBase arena;
   header.setArena (&arena);
-  size_t elt_size =
-    dynamic_cast<SG::ArenaPoolAllocator*>(arena.allocator (0).get())->params().eltSize;
+  auto alloc = dynamic_cast<SG::ArenaPoolAllocator*>(arena.allocator (0).get());
+  if (!alloc) std::abort();
+  size_t elt_size = alloc->params().eltSize;
   size_t block_ov = SG::ArenaBlock::overhead();
 
   {
