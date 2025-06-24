@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDControl/XercesParser.h"
@@ -46,7 +46,7 @@ bool XercesParser::ParseFile(const std::string& s_in)
 {
 	bool errorsOccured = false;
         m_fileName=s_in;
-        std::string s=PathResolver::find_file(s_in,"XMLPATH",PathResolver::RecursiveSearch);
+        std::string s=PathResolver::find_file(s_in,"XMLPATH");
 	if (s.empty()) {
 		MsgStream log(Athena::getMessageSvc(), "XercesParser");
 		log<<MSG::WARNING<<"ParseFile() - something wrong, could not find XML file "<<s<<endmsg;
