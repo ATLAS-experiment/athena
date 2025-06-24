@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
@@ -117,8 +117,8 @@ TFile* AthAnalysisHelper::getOutputFile(const std::string& streamName) {
     if( output.substr(0,output.find(' '))!=streamName ) continue;
 
     //got here .. means we found the stream ...
-    for(auto attrib : Gaudi::Utils::AttribStringParser(output.substr(output.find(' ')+1))) {
-      auto TAG = attrib.tag;
+    for(const auto& attrib : Gaudi::Utils::AttribStringParser(output.substr(output.find(' ')+1))) {
+      std::string TAG = attrib.tag;
       std::transform(TAG.begin(), TAG.end(), TAG.begin(), [](unsigned char c){ return std::toupper(c); });
 
       if(TAG=="FILE" || TAG=="DATAFILE") {
