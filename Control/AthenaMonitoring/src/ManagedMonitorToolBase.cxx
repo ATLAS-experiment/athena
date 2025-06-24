@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolBase_CXX
@@ -695,7 +695,7 @@ initialize()
    const std::string client( m_managerNameProp + "Properties" );
    ATH_MSG_DEBUG("  --> Asking for properties " << client);
 
-   auto getProp = [this,joSvc](std::string& var, const std::string& name) {
+   auto getProp = [this,&joSvc](std::string& var, const std::string& name) {
      if (joSvc->has(name))
        var = joSvc->get(name);
      else
@@ -2148,7 +2148,7 @@ updateTriggersForGroups(std::vector<std::string>& vTrigChainNames) {
       // replace with new value
       std::string newval = oss.str();
       ATH_MSG_DEBUG("Replaced with " << newval);
-      vTrigChainNames[i] = newval;
+      vTrigChainNames[i] = std::move(newval);
     }
   }
 }
