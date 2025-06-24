@@ -1,11 +1,16 @@
+#!/usr/bin/env python
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def EventDisplaysOnlineCfg(flags, **kwargs):
-    from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetBFields, WaitForPartition, GetUniqueJobID, GetRunNumber
+    from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetBFields, WaitForPartition, GetUniqueJobID, GetRunNumber, Ready4Physics
+    
+    from AthenaCommon.Logging import logging
+    mlog = logging.getLogger( 'EventDisplaysOnlineCfg' )
 
     if not flags.OnlineEventDisplays.OfflineTest:
         from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
         autoConfigOnlineRecoFlags(flags, flags.OnlineEventDisplays.PartitionName)
+        flags.OnlineEventDisplays.Ready4PhysicsAtStart=Ready4Physics()
 
     # An explicit list for nominal data taking to exclude some high rate streams
     # Empty list to read all
@@ -24,29 +29,33 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     ## partitions that serve events from a raw data file.                   ##
     ## To see which files will be ran over on the test partitions, at       ##
     ## point 1, see the uncommented lines in:                               ##
-    ## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-11-02-01/         ##
+    ## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-12-00-00/         ##
     ## without_gatherer/GMTestPartitionT9.data.xml                          ##
     ## and in:                                                              ##
-    ## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-11-02-01/         ##
+    ## /det/dqm/GlobalMonitoring/GMTextPartition_oks/tdaq-12-00-00/         ##
     ## without_gatherer/GMTestPartition.data.xml                            ##
     ##----------------------------------------------------------------------##
     flags.OnlineEventDisplays.PartitionName='ATLAS' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
 
     if flags.OnlineEventDisplays.HIMode:
         flags.OnlineEventDisplays.MaxEvents=200
-        flags.OnlineEventDisplays.ProjectTag='data24_hi'
+        flags.OnlineEventDisplays.ProjectTag='data25_hi'
         flags.OnlineEventDisplays.PublicStreams=['HardProbes']
+    if flags.OnlineEventDisplays.HIPMode:
+        flags.OnlineEventDisplays.MaxEvents=200
+        flags.OnlineEventDisplays.ProjectTag='data25_hip'
+        flags.OnlineEventDisplays.PublicStreams=['Main']
     if flags.OnlineEventDisplays.CosmicMode:
         flags.OnlineEventDisplays.MaxEvents=200
-        flags.OnlineEventDisplays.ProjectTag='data24_cos'
+        flags.OnlineEventDisplays.ProjectTag='data25_cos'
         flags.OnlineEventDisplays.PublicStreams=['']
     if flags.OnlineEventDisplays.BeamSplashMode:
         flags.OnlineEventDisplays.MaxEvents=-1 # keep all the events
-        flags.OnlineEventDisplays.ProjectTag='data24_13p6TeV'
+        flags.OnlineEventDisplays.ProjectTag='data25_comm'
         flags.OnlineEventDisplays.PublicStreams=['']
     else:
         flags.OnlineEventDisplays.MaxEvents=50
-        flags.OnlineEventDisplays.ProjectTag='data24_13p6TeV'
+        flags.OnlineEventDisplays.ProjectTag='data25_13p6TeV'
         flags.OnlineEventDisplays.PublicStreams=['Main']
 
     # Pause this thread until the partition is up
@@ -59,17 +68,13 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         print(" IPC_timeout Envrionment Variable = %d" %IPC_timeout)
 
     # Conditions tag
-    flags.IOVDb.DatabaseInstance = "CONDBR2"
     if flags.OnlineEventDisplays.OfflineTest:
-        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2024-03'
+        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2025-02'
     else:
-        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2024-02' # Online conditions tag
+        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2025-01' # Online conditions tag
 
     # Geometry tag
     flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
-
-    if flags.OnlineEventDisplays.HIMode:
-        flags.Beam.BunchSpacing = 100 # ns
 
     flags.Trigger.triggerConfig='DB'
 
@@ -83,11 +88,15 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         flags.Exec.MaxEvents = 20000 # hack until we find a way to fix the memory fragmentation ATEAM-896, this resets the memory after 20k events
         flags.Output.ESDFileName = "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
 
-    flags.Output.doWriteESD = True
-    flags.Output.doJiveXML = False #we call the AlgoJive later on
+    if flags.OnlineEventDisplays.MakeVP1File:
+        flags.Output.doWriteESD = True
+    else:
+        flags.Output.doWriteESD = False
+
+    flags.Output.doJiveXML = False # We call the AlgoJive later on
 
     if flags.OnlineEventDisplays.OfflineTest:
-        flags.Input.Files = ['/eos/home-m/myexley/sharedWithATLASauthors/data24_13p6TeV.00482485.physics_Main.daq.RAW._lb0111._SFO-13._0002.data']
+        flags.Input.Files = ['/eos/home-m/myexley/sharedWithATLASauthors/data25_13p6TeV.00499912.physics_Main.daq.RAW._lb0600._SFO-11._0001.data']
     else:
         flags.Input.Files = [] # Files are read from the ATLAS (or GM test) partition
 
@@ -95,6 +104,27 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     flags.Detector.GeometryForward = False
     flags.Detector.EnableFwdRegion = False
     flags.LAr.doHVCorr = False # ATLASRECTS-6823
+    flags.DQ.doMonitoring = False
+    flags.DQ.doPostProcessing = False
+    flags.Concurrency.NumThreads = 1
+
+    if flags.OnlineEventDisplays.MakeVP1File:
+        flags.Concurrency.NumThreads = 0 # We cannot run multithread if we want one ESD file per event named with the event number etc. changing the name of the output ESD file when multithreading is not so simple...
+        if flags.OnlineEventDisplays.HIMode or flags.OnlineEventDisplays.HIPMode:
+            mlog.warning("You have said you want to create a vp1 file 'flags.OnlineEventDisplays.MakeVP1File=True' but you have also said you want to run reconstruction in an heavy ion mode, this will not work as heavy ion mode needs to run in multithreading mode, and in this mode we cannot write out one ESD file (i.e. vp1 file) per event.")
+        
+    if flags.OnlineEventDisplays.HIMode:
+        from AthenaConfiguration.Enums import HIMode
+        flags.Reco.HIMode = HIMode.HI
+        flags.Concurrency.NumThreads = 1
+        flags.OnlineEventDisplays.MakeVP1File = False
+        flags.Beam.BunchSpacing = 50
+
+    if flags.OnlineEventDisplays.HIPMode:
+        from AthenaConfiguration.Enums import HIMode
+        flags.Reco.HIMode = HIMode.HIP
+        flags.Concurrency.NumThreads = 1
+        flags.OnlineEventDisplays.MakeVP1File = False
 
     if flags.OnlineEventDisplays.BeamSplashMode:
         flags.Reco.EnableJet=False
@@ -107,7 +137,6 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
 
     from AthenaCommon.Constants import INFO
     flags.Exec.OutputLevel = INFO
-    flags.Concurrency.NumThreads = 0
 
     flags.Common.isOnline = not flags.OnlineEventDisplays.OfflineTest
 
@@ -119,17 +148,14 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
 
         # Get the B field
         (solenoidOn,toroidOn)=GetBFields()
-        flags.BField.override = True
         flags.BField.solenoidOn = solenoidOn
         flags.BField.barrelToroidOn = toroidOn
         flags.BField.endcapToroidOn = toroidOn
 
     # GM test partition needs to be given the below info
     if (flags.OnlineEventDisplays.PartitionName == 'GMTestPartition' or flags.OnlineEventDisplays.PartitionName == 'GMTestPartitionT9'):
-        flags.Input.OverrideRunNumber = True
-        flags.Input.RunNumbers = [454188] # keep this number the same as (or close to) the run number of the file you are testing on
-        flags.Input.LumiBlockNumbers = [1]
-        flags.Input.ProjectName = flags.OnlineEventDisplays.ProjectTag
+        flags.Input.RunNumbers = [482485] # keep this number the same as (or close to) the run number of the file you are testing on
+        flags.Input.LumiBlockNumbers = [111]
 
     from AthenaConfiguration.Enums import BeamType
     if not flags.OnlineEventDisplays.OfflineTest:
@@ -170,15 +196,25 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
                              StreamToServerTool = streamToServerTool,
                              OnlineMode = not flags.OnlineEventDisplays.OfflineTest))
 
-    # This creates an ESD file per event which is renamed and moved to the desired output
-    # dir in the VP1 Event Prod alg
-    from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
-    cfg.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
-    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
-    streamESD = cfg.getEventAlgo(outputStreamName("ESD"))
-
-    from VP1AlgsEventProd.VP1AlgsEventProdConfig import VP1AlgsEventProdCfg
-    cfg.merge(VP1AlgsEventProdCfg(flags, streamESD, **kwargs))
+    if flags.OnlineEventDisplays.HIMode:
+        from EventDisplaysOnline.ContainerKeysCfg import getHIContainterKeys
+        getHIContainterKeys(cfg)
+        
+    if flags.OnlineEventDisplays.HIPMode:
+        from EventDisplaysOnline.ContainerKeysCfg import getHIPContainterKeys
+        getHIPContainterKeys(cfg)
+        
+    if flags.OnlineEventDisplays.MakeVP1File:
+        # This gets the ESD output file which is renamed and moved to the desired output stream
+        # in the VP1 Event Prod alg, this creates one ESD file per event
+        from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
+        cfg.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
+        from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
+        streamESD = cfg.getEventAlgo(outputStreamName("ESD"))
+        streamESD.OutputFile=flags.Output.ESDFileName
+    
+        from VP1AlgsEventProd.VP1AlgsEventProdConfig import VP1AlgsEventProdCfg
+        cfg.merge(VP1AlgsEventProdCfg(flags, streamESD, **kwargs))
 
     # switch of the NSW segment making as it takes too much CPU in beamsplashes
     if flags.OnlineEventDisplays.BeamSplashMode:
@@ -187,6 +223,10 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         cfg.getEventAlgo("MuonSegmentMaker_NCB").doStgcSegments=False
         cfg.getEventAlgo("MuonSegmentMaker_NCB").doMMSegments=False
         cfg.dropEventAlgo("QuadNSW_MuonSegmentCnvAlg")
+
+    if flags.OnlineEventDisplays.HorizontalMuonsMode:
+        from MuonConfig.MuonReconstructionConfig import MuonNCBTrackCfg
+        cfg.merge(MuonNCBTrackCfg(flags))
 
     cfg.getService("PoolSvc").WriteCatalog = "xmlcatalog_file:PoolFileCatalog_%s_%s.xml" % (jobId[3], jobId[4])
 
@@ -206,8 +246,11 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
+    flags.OnlineEventDisplays.HorizontalMuonsMode = False
+    flags.OnlineEventDisplays.MakeVP1File = True
     flags.OnlineEventDisplays.CosmicMode = False
     flags.OnlineEventDisplays.HIMode = False
+    flags.OnlineEventDisplays.HIPMode = False
     flags.OnlineEventDisplays.BeamSplashMode = False
     flags.OnlineEventDisplays.OfflineTest = False
 
