@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcConditions/ZdcLucrodMapRun3.h"
@@ -18,7 +18,7 @@ ZdcLucrodMapRun3::ZdcLucrodMapRun3() : asg::AsgMessaging("ZdcLucrodMapRun3")
 {
   msg().setLevel(MSG::INFO);
 
-  std::string filePath = PathResolver::find_file("ZDC_Run3_conditions.json","DATAPATH", PathResolver::RecursiveSearch);
+  std::string filePath = PathResolverFindDataFile("ZdcConditions/ZDC_Run3_conditions.json");
   if (!filePath.empty())
     {
       ATH_MSG_DEBUG( "ZdcLucrodMapRun3::found ZDC JSON at " << filePath );
