@@ -57,6 +57,7 @@ StatusCode OutputStreamSequencerSvc::initialize() {
 
    // Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() not set yet
    // m_rangeIDinSlot.resize( );
+   std::lock_guard lockg( m_mutex );
    m_finishedRange = m_fnToRangeId.end();
 
    return(StatusCode::SUCCESS);
@@ -77,6 +78,7 @@ bool    OutputStreamSequencerSvc::inConcurrentEventsMode() {
 
 //__________________________________________________________________________
 bool    OutputStreamSequencerSvc::inUse() const {
+   std::lock_guard lockg( m_mutex );
    return m_fileSequenceNumber >= 0;
 }
 
@@ -106,6 +108,7 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
             ATH_MSG_DEBUG("MetaData transition");
             // immediate write and disconnect for ES, otherwise do it after Event write is done
             bool disconnect { true };
+            std::lock_guard lockg( m_mutex );
             if( !m_metaDataSvc->transitionMetaDataFile( m_lastFileName, disconnect ).isSuccess() ) {
                throw GaudiException("Cannot transition MetaData", name(), StatusCode::FAILURE);
             }
@@ -146,8 +149,8 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
    }
    else if( inc.type() == IncidentType::BeginProcessing ) {
       // new event start - assing current rangeId to its slot
-      ATH_MSG_DEBUG("Assigning rangeID = " << m_currentRangeID << " to slot " << slot);
       std::lock_guard lockg( m_mutex );
+      ATH_MSG_DEBUG("Assigning rangeID = " << m_currentRangeID << " to slot " << slot);
       // If this service is enabled but not getting NextRange incidents, need to resize here
       if( slot >= m_rangeIDinSlot.size() ) {
          m_rangeIDinSlot.resize( std::max(slot+1, Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents()) );
