@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCRAWDATAMONITORING_RPCTRACKANAALG_H
@@ -110,7 +110,7 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm {
     StringProperty m_packageName{this, "PackageName", "RpcTrackAnaAlg",
                                  "group name for histograming"};
 
-    StringProperty m_elementsFileName{this, "ElementsFileName", "Element.xml",
+    StringProperty m_elementsFileName{this, "ElementsFileName", "RpcRawDataMonitoring/Element.xml",
                                       "Elements xml file"};
 
     StringProperty m_trigTagList{
