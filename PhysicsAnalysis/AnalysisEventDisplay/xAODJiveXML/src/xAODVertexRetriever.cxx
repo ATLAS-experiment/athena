@@ -24,6 +24,13 @@ namespace JiveXML {
   xAODVertexRetriever::xAODVertexRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent){}
 
+
+   StatusCode xAODVertexRetriever::initialize(){
+    ATH_CHECK(m_keys.initialize());
+    return StatusCode::SUCCESS;
+  }
+
+  
   /**
    * For each Vertex collections retrieve basic parameters.
    * @param FormatTool the tool that will create formated output from the DataMap
@@ -32,27 +39,21 @@ namespace JiveXML {
 
     ATH_MSG_DEBUG("In retrieve()");
 
-    std::vector<std::string> keys = getKeys();
-
-    if(keys.empty()){
-      ATH_MSG_WARNING("No StoreGate keys found");
-      return StatusCode::SUCCESS;
-    }
-
     // Loop through the keys and retrieve the corresponding data
-    for (const std::string& key : keys) {
+    for (const auto& key : m_keys) {
       SG::ReadHandle<xAOD::VertexContainer> cont(key);
       if (cont.isValid()) {
-	DataMap data = getData(&(*cont),key);
-	if (FormatTool->AddToEvent(dataTypeName(), key + "_xAOD", &data).isFailure()) {
-	  ATH_MSG_WARNING("Failed to retrieve Collection " << key);
+	DataMap data = getData(&(*cont));
+	if (FormatTool->AddToEvent(dataTypeName(), key.key() + "_xAOD", &data).isFailure()) {
+	  ATH_MSG_WARNING("Failed to add collection " << key.key());
 	} else {
-	  ATH_MSG_DEBUG(" (" << key << ") retrieved");
+	  ATH_MSG_DEBUG(" (" << key.key() << ") retrieved");
 	}
       } else {
-	ATH_MSG_WARNING("Collection " << key << " not found in SG");
+	ATH_MSG_WARNING("Collection " << key.key() << " not found in SG");
       }
     }
+
     return StatusCode::SUCCESS;
   }
 
@@ -60,7 +61,7 @@ namespace JiveXML {
    * Retrieve basic parameters, mainly four-vectors, for each collection.
    * Also association with clusters and tracks (ElementLink).
    */
-  const DataMap xAODVertexRetriever::getData(const xAOD::VertexContainer* cont, const std::string &key) {
+  const DataMap xAODVertexRetriever::getData(const xAOD::VertexContainer* cont) {
 
     ATH_MSG_DEBUG("in getData()");
 
@@ -81,9 +82,6 @@ namespace JiveXML {
 
     //Get size of current container
     xAOD::VertexContainer::size_type NVtx = cont->size();
-
-    ATH_MSG_DEBUG("Reading vertex container " << key
-		  << " with " << NVtx << " entries");
 
     x.reserve(x.size()+NVtx);
     y.reserve(y.size()+NVtx);
@@ -112,12 +110,8 @@ namespace JiveXML {
       y.emplace_back(DataType((*VertexItr)->y()/cm));
       z.emplace_back(DataType((*VertexItr)->z()/cm));
 
-      if ( key == m_secondaryVertexKey){
-	vertexType.emplace_back( 2 );
-      }else{
-	vertexType.emplace_back( DataType((*VertexItr)->vertexType()));
-      }
-
+      vertexType.emplace_back( DataType((*VertexItr)->vertexType()));
+    
       if ((*VertexItr)->vertexType() == 1 ){
 	primVxCand.emplace_back( 1 );
       }else{
@@ -190,51 +184,5 @@ namespace JiveXML {
 
   }
 
-
-  const std::vector<std::string> xAODVertexRetriever::getKeys() {
-    ATH_MSG_DEBUG("in getKeys()");
-    
-    std::vector<std::string> keys = {};
-    
-    // Remove m_primaryVertexKey and m_secondaryVertexKey from m_otherKeys if they  exist, we don't want to write them twice
-    auto it = std::find(m_otherKeys.begin(), m_otherKeys.end(), m_primaryVertexKey);
-    if(it != m_otherKeys.end()){
-      m_otherKeys.erase(it);
-    }
-    auto it2 = std::find(m_otherKeys.begin(), m_otherKeys.end(), m_secondaryVertexKey);
-    if(it2 != m_otherKeys.end()){
-      m_otherKeys.erase(it2);
-    }
-
-    // Add m_primaryVertexKey as the first element and m_secondaryVertexKey as the second if they are not ""
-    if(m_primaryVertexKey!=""){
-      keys.push_back(m_primaryVertexKey);
-    }
-    if(m_secondaryVertexKey!=""){
-      keys.push_back(m_secondaryVertexKey);
-    }
-
-    if(!m_otherKeys.empty()){
-      keys.insert(keys.end(), m_otherKeys.begin(), m_otherKeys.end());
-    }
-
-    // If all collections are requested, obtain all available keys from StoreGate
-    std::vector<std::string> allKeys;
-
-    if(m_doWriteAllCollections){
-      evtStore()->keys<xAOD::VertexContainer>(allKeys);
-
-      // Add keys that are not the priority key and do not add containers with "HLT" in their name if requested, , and do not contain V0 in their name, if requested
-      for(const std::string& key : allKeys){
-	// Don't include key if it's already in keys
-	auto it2 = std::find(keys.begin(), keys.end(), key);
-	if(it2 != keys.end())continue;
-	if((key.find("HLT") == std::string::npos || m_doWriteHLT) && (m_doWriteV0 || key.find("V0") == std::string::npos)){
-	  keys.emplace_back(key);
-	}
-      }
-    }
-    return keys;
-  }
 
 } // JiveXML namespace

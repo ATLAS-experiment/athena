@@ -246,6 +246,7 @@ _knownHistos = [
     # ---------------------
     # 2D histogram (x and y vars are separated by ';' )
     HistoSpec( 'pt:GeV;m:GeV',  (100,0,1000, 100,0,300) , title='mass vs p_{T};p_{T};mass [GeV];'),
+    HistoSpec( "eta;Timing", (98,-4.9,4.9, 100, -50, 50), title='Timing vs. eta; #eta; Timing;'),
 
 ]
     

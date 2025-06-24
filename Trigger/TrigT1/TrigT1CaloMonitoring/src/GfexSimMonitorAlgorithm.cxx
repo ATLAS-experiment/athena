@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 #include "GfexSimMonitorAlgorithm.h"
 
@@ -164,7 +164,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 		// fill the debugging tree with all the words for this signature
 		auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
 		auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
-		auto l1id = Monitored::Scalar<int>("L1ID",GetEventInfo(ctx)->extendedLevel1ID());
+		auto l1id = Monitored::Scalar<unsigned int>("L1ID",GetEventInfo(ctx)->extendedLevel1ID());
 		{
 			std::scoped_lock lock(m_firstEventsMutex);
 			auto itr = m_firstEvents.find(lbn);
@@ -261,7 +261,7 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 		// fill the debugging tree with all the words for this signature
 		auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
 		auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
-		auto l1id = Monitored::Scalar<int>("L1ID",GetEventInfo(ctx)->extendedLevel1ID());
+		auto l1id = Monitored::Scalar<unsigned int>("L1ID",GetEventInfo(ctx)->extendedLevel1ID());
 		{
 			std::scoped_lock lock(m_firstEventsMutex);
 			auto itr = m_firstEvents.find(lbn);

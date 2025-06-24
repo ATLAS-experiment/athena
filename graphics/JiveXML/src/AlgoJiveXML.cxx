@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JiveXML/AlgoJiveXML.h"
@@ -13,6 +13,8 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ServiceHandle.h"
+
+#include "RootUtils/PyAthenaGILStateEnsure.h"
 
 #include <algorithm>
 
@@ -112,8 +114,50 @@ namespace JiveXML{
    */
   StatusCode AlgoJiveXML::execute() {
 
+    if(m_onlineMode){
+      bool isR4PinThisEvent = false;
+      // Get the ready4physics bool at the start of this job and for the current time, during the job ATLAS might have become ready for physics, if this is the case we need to stop the jobs and let the partition restart them
+      
+      // Acquire the Global Interpreter Lock (GIL) to ensure thread safety when interacting with Python objects
+      RootUtils::PyGILStateEnsure ensure;
+
+      // Import the EventDisplaysOnlineHelpers Python module
+      PyObject* pHelper = PyImport_ImportModule("EventDisplaysOnline.EventDisplaysOnlineHelpers");
+      if (!pHelper) {
+	// Error handling: Print Python exception if import fails
+	PyErr_Print();
+	ATH_MSG_WARNING("Failed to import EventDisplaysOnline.EventDisplaysOnlineHelpers module");
+      } else {
+	  ATH_MSG_INFO("ready4Physics at start of job: " << m_ready4PhysicsAtStart);
+	  // Get the "Ready4Physics" function from the module
+          PyObject* Ready4Physics = PyObject_GetAttrString(pHelper, "Ready4Physics");
+          if (!Ready4Physics || !PyCallable_Check(Ready4Physics)) {
+            // Error handling: Print warning if function not found or not callable
+            ATH_MSG_WARNING("Could not find or call Ready4Physics function in EventDisplaysOnline.EventDisplaysOnlineHelpers module");
+          } else {
+            // Call the "Ready4Physics" function
+            PyObject* r4p = PyObject_CallFunctionObjArgs(Ready4Physics, NULL);
+            if (!r4p) {
+              PyErr_Print();
+              ATH_MSG_WARNING("Failed to call Ready4Physics function");
+            } else {
+              // Convert the result to a boolean value
+              isR4PinThisEvent = PyObject_IsTrue(r4p);
+	      ATH_MSG_INFO("isR4PinThisEvent: " << isR4PinThisEvent);
+	      if(!m_ready4PhysicsAtStart && isR4PinThisEvent){
+		ATH_MSG_INFO("ATLAS was not ready for physics at the start of this job, but is now, so stopping job so that the partition can restart the jobs with any new configuration, i.e. after a warm start to pick back up pixel hits");
+		return StatusCode::FAILURE;
+	      }
+              Py_DECREF(r4p); // Decrement reference count of the r4p object
+            }
+          }
+          Py_XDECREF(Ready4Physics);
+      }
+      Py_DECREF(pHelper);
+    }// End of if online
+    
     /**
-     * Firstly retrieve all the event header information
+     * Retrieve all the event header information
      */
     //The run and event number of the current event
     unsigned int runNo = 0, lumiBlock = 0;
@@ -126,15 +170,14 @@ namespace JiveXML{
     // geometry-version/geometry-tag from Athena (sourced via jOs)
     std::string geometryVersion = "default";
     geometryVersion = DataType(m_geometryVersionIn).toString();
-
+    
     //Retrieve eventInfo from StoreGate
     const xAOD::EventInfo* eventInfo = nullptr;
     if (evtStore()->retrieve(eventInfo).isFailure()){
       ATH_MSG_FATAL("Could not find xAODEventInfo" );
       return StatusCode::FAILURE;
     }else{
-    // Event/xAOD/xAODEventInfo/trunk/xAODEventInfo/versions/EventInfo_v1.h
-     ATH_MSG_DEBUG(" xAODEventInfo: runNumber: "  << eventInfo->runNumber()  // is '222222' for mc events ?
+     ATH_MSG_DEBUG(" xAODEventInfo: runNumber: "  << eventInfo->runNumber()
           << ", eventNumber: " << eventInfo->eventNumber()
           << ", mcChannelNumber: " << eventInfo->mcChannelNumber()
           << ", mcEventNumber: "  << eventInfo->mcEventNumber() // MC: use this instead of runNumber
@@ -147,6 +190,20 @@ namespace JiveXML{
           );
     }
 
+    //when running online, if a new run has started stop the jobs and let the partition restart the jobs to pick up any new configuration for the run
+    if(m_onlineMode){
+      ATH_MSG_INFO("m_previousRunNumber: " << m_previousRunNumber);
+      ATH_MSG_INFO("eventInfo->runNumber(): " << eventInfo->runNumber());
+      //don't check for first event
+      if(m_previousRunNumber!=0){
+	if(m_previousRunNumber != eventInfo->runNumber()){
+	  ATH_MSG_INFO("Got a new run number, a new run has started whilst this job was running, stopping now to let the partition restart the jobs and pick up any new configuration");
+	  return StatusCode::FAILURE;
+	}
+      }
+      //store run number to look at in the next event
+      m_previousRunNumber = eventInfo->runNumber();
+    }
     // new treatment of mc_channel_number for mc12
     // from: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/PileupDigitization#Contents_of_Pileup_RDO
     unsigned int mcChannelNo = 0;
