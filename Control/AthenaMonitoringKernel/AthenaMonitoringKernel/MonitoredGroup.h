@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_MonitoredGroup_h
@@ -83,7 +83,13 @@ namespace Monitored {
     
     ~Group() {
       if (m_autoFill) {
-        fill();
+        try {
+          fill();
+        }
+        catch (const GaudiException&) {
+          // fill can throw due to dereferencing a Gaudi handle
+          std::abort();
+        }
       }
     }
 
