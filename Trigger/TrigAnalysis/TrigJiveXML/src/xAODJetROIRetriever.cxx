@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/xAODJetROIRetriever.h"
@@ -7,11 +7,6 @@
 #include <string>
 
 #include "CLHEP/Units/SystemOfUnits.h"
-
-//#include "AnalysisTriggerEvent/LVL1_ROI.h"
-
-//#include "TrigT1CaloEvent/CPMRoI.h"
-//#include "TrigT1Interfaces/CPRoIDecoder.h"
 
 #include "xAODTrigger/JetRoIContainer.h"
 
@@ -40,7 +35,6 @@ namespace JiveXML {
 
   const xAOD::JetRoIContainer* jetROIs = 0; 
 
-    //xAOD::JetROIContainer* jetROIs = 0;
 
     // L1JetObject -not- available
     m_sgKey = "LVL1JetRoIs"; 
@@ -53,7 +47,6 @@ namespace JiveXML {
     xAOD::JetRoIContainer::const_iterator itJET  = jetROIs->begin();
     xAOD::JetRoIContainer::const_iterator itJETe = jetROIs->end();
 
-    //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "xAOD JetROIs retrieved from StoreGate with size: " << (JetROIs->size()) <<endmsg;
 
     int counter = 0;
     for (; itJET != itJETe; ++itJET)
@@ -82,13 +75,14 @@ namespace JiveXML {
       }
 
     DataMap myDataMap;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["energy"] = energy;
-    myDataMap["roiWord"] = roiWord;
-    myDataMap["thrPattern"] = thrPattern;
+    const auto nPhi = phi.size();
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["energy"] = std::move(energy);
+    myDataMap["roiWord"] = std::move(roiWord);
+    myDataMap["thrPattern"] = std::move(thrPattern);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size()
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi
 					    << " from: " << m_sgKey << endmsg;
 
     //forward data to formating tool
