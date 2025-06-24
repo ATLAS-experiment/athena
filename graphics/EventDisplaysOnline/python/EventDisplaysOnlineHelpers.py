@@ -1,5 +1,5 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-from ispy import ISObject, IPCPartition, ISInfoAny, ISInfoDictionary
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+from ispy import ISObject, IPCPartition
 import time
 from AthenaCommon.Logging import logging
 import sys
@@ -57,6 +57,18 @@ def WaitForPartition(partitionName=None):
       mlog.info("%s partition is not up, sleeping for 30 seconds", partitionName)
       time.sleep(30)
 
+def Ready4Physics():
+  mlog = logging.getLogger( 'EventDisplays, Ready4Physics' )
+  try:
+    partition = IPCPartition('ATLAS')
+    physicsReady = ISObject(partition, 'RunParams.Ready4Physics','Ready4PhysicsInfo')
+    physicsReady.checkout()
+    return bool(physicsReady.ready4physics)
+
+  except Exception:
+    mlog.warning('Failed to get physicsReady bool, this is expected for offline test and GM test paritions')
+    return False
+
 def EventCanBeSeenByPublic(projectTags):
 # Is the data allowed to be seen by the general public on atlas live and in the CCC
   mlog = logging.getLogger( 'EventDisplays' )
@@ -65,14 +77,8 @@ def EventCanBeSeenByPublic(projectTags):
     RunParams = ISObject(partition, 'RunParams.RunParams', 'RunParams')
     RunParams.checkout()
 
-    ready4physics = ISInfoAny()
-    ISInfoDictionary(partition).getValue('RunParams.Ready4Physics', ready4physics)
-    print("physicsReady: %s " % ready4physics.get())
-
     physicsReady = ISObject(partition, 'RunParams.Ready4Physics','Ready4PhysicsInfo')
     physicsReady.checkout()
-    print("Ready for physics: %r" % (physicsReady.ready4physics))
-    print("RunParams.T0_project_tag", RunParams.T0_project_tag)
 
     sendToPublicStream = False
     if physicsReady.ready4physics and RunParams.T0_project_tag in projectTags:

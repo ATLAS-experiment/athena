@@ -26,6 +26,7 @@ namespace JiveXML {
     AthAlgTool(type,name,parent){}
 
   StatusCode xAODJetRetriever::initialize() {
+    ATH_CHECK(m_keys.initialize());
     if (m_bTaggerNames.size()!=m_CDIPaths.size()){
       ATH_MSG_WARNING("Number of btaggers and CDI files do not match. Will not retrieve b-tagging information.");
       return StatusCode::SUCCESS;
@@ -48,6 +49,7 @@ namespace JiveXML {
     return StatusCode::SUCCESS;
   }
 
+  
   /**
    * For each jet collections retrieve basic parameters.
    * @param FormatTool the tool that will create formated output from the DataMap
@@ -56,28 +58,21 @@ namespace JiveXML {
 
     ATH_MSG_DEBUG( "in retrieve()" );
 
-    std::vector<std::string> keys = getKeys();
-
-    if(keys.empty()){
-      ATH_MSG_WARNING("No StoreGate keys found");
-      return StatusCode::SUCCESS;
-    }
-
     // Loop through the keys and retrieve the corresponding data
-    for (const std::string& key : keys) {
+    for (const auto& key : m_keys) {
       SG::ReadHandle<xAOD::JetContainer> cont(key);
-      if(cont.isValid()){
-	DataMap data = getData(&(*cont), key);
-	if (FormatTool->AddToEvent(dataTypeName(), key + "_xAOD", &data).isFailure()) {
-	  ATH_MSG_WARNING("Failed to retrieve Collection " << key);
+      if (cont.isValid()) {
+	DataMap data = getData(&(*cont), key.key());
+	if (FormatTool->AddToEvent(dataTypeName(), key.key() + "_xAOD", &data).isFailure()) {
+	  ATH_MSG_WARNING("Failed to add collection " << key.key());
 	} else {
-	  ATH_MSG_DEBUG(" (" << key << ") retrieved");
+	  ATH_MSG_DEBUG(" (" << key.key() << ") retrieved");
 	}
-      }
-      else {
-	ATH_MSG_WARNING("Collection " << key << " not found in SG");
+      } else {
+	ATH_MSG_WARNING("Collection " << key.key() << " not found in SG");
       }
     }
+
     return StatusCode::SUCCESS;
   }
 
@@ -325,44 +320,5 @@ namespace JiveXML {
     return DataMap;
   }
 
-
-  const std::vector<std::string> xAODJetRetriever::getKeys() {
-
-    ATH_MSG_DEBUG("in getKeys()");
-
-    std::vector<std::string> keys = {};
-
-    // Remove m_priorityKey from m_otherKeys if it exists, we don't want to write it twice
-    auto it = std::find(m_otherKeys.begin(), m_otherKeys.end(), m_priorityKey);
-    if(it != m_otherKeys.end()){
-      m_otherKeys.erase(it);
-    }
-
-    // Add m_priorityKey as the first element if it is not ""
-    if(m_priorityKey!=""){
-      keys.push_back(m_priorityKey);
-    }
-
-    if(!m_otherKeys.empty()){
-      keys.insert(keys.end(), m_otherKeys.begin(), m_otherKeys.end());
-    }
-
-    // If all collections are requested, obtain all available keys from StoreGate
-    std::vector<std::string> allKeys;
-    if(m_doWriteAllCollections){
-      evtStore()->keys<xAOD::JetContainer>(allKeys);
-
-      // Add keys that are not the priority key and do not add containers with "HLT" in their name if requested
-      for(const std::string& key : allKeys){
-	// Don't include key if it's already in keys
-	auto it2 = std::find(keys.begin(), keys.end(), key);
-	if(it2 != keys.end())continue;
-	if(key.find("HLT") == std::string::npos || m_doWriteHLT){
-	  keys.emplace_back(key);
-	}
-      }
-    }
-    return keys;
-  }
 
 } // JiveXML namespace

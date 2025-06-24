@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "EventDisplaysOnline/OnlineEventDisplaysSvc.h"
 #include "RootUtils/PyAthenaGILStateEnsure.h"
@@ -56,7 +56,7 @@ void OnlineEventDisplaysSvc::beginEvent(){
     else{
       //If the stream is in the list of streams requested, add it
       if(std::find(m_streamsWanted.begin(), m_streamsWanted.end(), tag.name()) != m_streamsWanted.end()){
-        streams.emplace_back(stream_fullname);
+	streams.emplace_back(stream_fullname);
       }
       bool isPublic = false;
       //if the stream is not in the list of public streams wanted, continue
@@ -67,42 +67,42 @@ void OnlineEventDisplaysSvc::beginEvent(){
       std::string tag = m_projectTag;
       PyObject* pProjectTag = PyUnicode_FromString(tag.c_str());
       if (!pProjectTag) {
-        // Error handling: Print Python exception if conversion fails
-        PyErr_Print();
-        ATH_MSG_WARNING("Failed to create Python Unicode object from project tag");
+	// Error handling: Print Python exception if conversion fails
+	PyErr_Print();
+	ATH_MSG_WARNING("Failed to create Python Unicode object from project tag");
       } else {
-        // Import the Python module
-        PyObject* pHelper = PyImport_ImportModule("EventDisplaysOnline.EventDisplaysOnlineHelpers");
-        if (!pHelper) {
-          // Error handling: Print Python exception if import fails
-          PyErr_Print();
-          ATH_MSG_WARNING("Failed to import EventDisplaysOnline.EventDisplaysOnlineHelpers module");
-        } else {
-          // Get the "EventCanBeSeenByPublic" function from the module
-          PyObject* EventCanBeSeenByPublic = PyObject_GetAttrString(pHelper, "EventCanBeSeenByPublic");
-          if (!EventCanBeSeenByPublic || !PyCallable_Check(EventCanBeSeenByPublic)) {
-            // Error handling: Print warning if function not found or not callable
-            ATH_MSG_WARNING("Could not find or call EventCanBeSeenByPublic function in EventDisplaysOnline.EventDisplaysOnlineHelpers module");
-          } else {
-            // Call the "EventCanBeSeenByPublic" function with the project tag as argument
-            PyObject* result = PyObject_CallFunctionObjArgs(EventCanBeSeenByPublic, pProjectTag, NULL);
-            if (!result) {
-              PyErr_Print();
-              ATH_MSG_WARNING("Failed to call EventCanBeSeenByPublic function");
-            } else {
-              // Convert the result to a boolean value
-              isPublic = PyObject_IsTrue(result);
-              Py_DECREF(result); // Decrement reference count of the result object
-            }
-          }
-          Py_XDECREF(EventCanBeSeenByPublic);
-          Py_DECREF(pHelper);
-        }
-        Py_DECREF(pProjectTag);
+	// Import the Python module
+	PyObject* pHelper = PyImport_ImportModule("EventDisplaysOnline.EventDisplaysOnlineHelpers");
+	if (!pHelper) {
+	  // Error handling: Print Python exception if import fails
+	  PyErr_Print();
+	  ATH_MSG_WARNING("Failed to import EventDisplaysOnline.EventDisplaysOnlineHelpers module");
+	} else {
+	  // Get the "EventCanBeSeenByPublic" function from the module
+	  PyObject* EventCanBeSeenByPublic = PyObject_GetAttrString(pHelper, "EventCanBeSeenByPublic");
+	  if (!EventCanBeSeenByPublic || !PyCallable_Check(EventCanBeSeenByPublic)) {
+	    // Error handling: Print warning if function not found or not callable
+	    ATH_MSG_WARNING("Could not find or call EventCanBeSeenByPublic function in EventDisplaysOnline.EventDisplaysOnlineHelpers module");
+	  } else {
+	    // Call the "EventCanBeSeenByPublic" function with the project tag as argument
+	    PyObject* result = PyObject_CallFunctionObjArgs(EventCanBeSeenByPublic, pProjectTag, NULL);
+	    if (!result) {
+	      PyErr_Print();
+	      ATH_MSG_WARNING("Failed to call EventCanBeSeenByPublic function");
+	    } else {
+	      // Convert the result to a boolean value
+	      isPublic = PyObject_IsTrue(result);
+	      Py_DECREF(result); // Decrement reference count of the result object
+	    }
+	  }
+	  Py_XDECREF(EventCanBeSeenByPublic);
+	  Py_DECREF(pHelper);
+	}
+	Py_DECREF(pProjectTag);
       }
       if(isPublic){
-        streams.emplace_back("Public");
-        ATH_MSG_DEBUG("Can send event to public stream");
+	streams.emplace_back("Public");
+	ATH_MSG_DEBUG("Can send event to public stream");
       }
     }
   }
@@ -155,7 +155,7 @@ void OnlineEventDisplaysSvc::endEvent(){
       // Call the "cleanDirectory" function with the provided arguments
       PyObject_CallObject(cleanDirectory, pArgs);
       if (PyErr_Occurred()) {
-        PyErr_Print();
+	PyErr_Print();
       }
     }
     if (anyNullPtr(cleanDirectory)){
@@ -164,25 +164,6 @@ void OnlineEventDisplaysSvc::endEvent(){
     Py_DECREF(cleanDirectory);
   }
 
-  if(m_BeamSplash){
-    std::string JiveXMLFileName ="JiveXML_"+ std::to_string(m_runNumber)+"_"+std::to_string(m_eventNumber)+".xml";
-    const char* JiveXMLFileName_cString = JiveXMLFileName.c_str();
-    PyObject* pJiveXMLFileName = PyUnicode_FromString(JiveXMLFileName_cString);
-    PyObject* pArgs_zip = PyTuple_Pack(2, pDirectory, pJiveXMLFileName);
-    PyObject* zipXMLFile = PyObject_GetAttrString(pModule, "zipXMLFile");
-    if (!zipXMLFile) {
-      PyErr_Print();
-      ATH_MSG_WARNING("Failed to import EventDisplaysOnline.EventUtils.zipXMLFile");
-    } else {
-      PyObject_CallObject(zipXMLFile, pArgs_zip);
-    }
-    if (anyNullPtr(pJiveXMLFileName, zipXMLFile, pArgs_zip)){
-      throw std::runtime_error("OnlineEventDisplaysSvc::endEvent: Py_DECREF on nullptr argument");
-    }
-    Py_DECREF(pJiveXMLFileName);
-    Py_DECREF(zipXMLFile);
-    Py_DECREF(pArgs_zip);
-  }
   if (anyNullPtr(pModule, pArgs, pCheckPair, pMaxEvents, pDirectory)){
     throw std::runtime_error("OnlineEventDisplaysSvc::endEvent: Py_DECREF on nullptr argument");
   }
@@ -211,11 +192,11 @@ void OnlineEventDisplaysSvc::createWriteableDir(const std::string& directory, gi
   if (access(char_dir, F_OK) == 0) {
     struct stat directoryStat;
     if (stat(char_dir, &directoryStat) == 0 && S_ISDIR(directoryStat.st_mode) &&
-        access(char_dir, W_OK) == 0) {
+	access(char_dir, W_OK) == 0) {
       ATH_MSG_DEBUG("Going to write file to existing directory: " << directory);
       if (directoryStat.st_gid != zpgid) {
-        ATH_MSG_DEBUG("Setting group to 'zp' for directory: " << directory);
-        chown(char_dir, -1, zpgid);
+	ATH_MSG_DEBUG("Setting group to 'zp' for directory: " << directory);
+	chown(char_dir, -1, zpgid);
       }
     } else {
       ATH_MSG_WARNING("Directory '" << directory << "' is not usable, trying next alternative");
@@ -263,7 +244,7 @@ StatusCode OnlineEventDisplaysSvc::initialize(){
   }
   if(m_BeamSplash){
     m_CheckPair = false;
-  }  
+  }
   incSvc->addListener( this, "BeginEvent");
   incSvc->addListener( this, "StoreCleared");
 

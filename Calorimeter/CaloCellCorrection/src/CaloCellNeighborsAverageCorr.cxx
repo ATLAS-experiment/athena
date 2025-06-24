@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************************
@@ -20,25 +20,8 @@
 #include "CaloIdentifier/CaloIdManager.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
+#include "LArElecCalib/LArProvenance.h"
 #include <map> //useful in testMode
-
-// ======================================================
-// Constructor
-
-CaloCellNeighborsAverageCorr::CaloCellNeighborsAverageCorr(
-			     const std::string& type, 
-			     const std::string& name, 
-			     const IInterface* parent)
-  :base_class(type, name, parent),
-   m_calo_id(nullptr),
-   m_tile_id(nullptr)
-{
-  declareProperty("testMode",m_testMode=false,"test mode");
-  declareProperty("skipDeadFeb",    m_skipDeadFeb=true,     "Skip dead LAr Febs (default = true)");
-  declareProperty("skipDeadLAr",    m_skipDeadLAr=false,    "Skip all dead LAr cells (default = false)");
-  declareProperty("skipDeadDrawer", m_skipDeadDrawer=false, "Skip dead Tile drawers (default = false)");
-  declareProperty("skipDeadTile",   m_skipDeadTile=true,    "Skip all dead Tile cells (default = true)");
-}
 
 //========================================================
 // Initialize
@@ -57,10 +40,10 @@ StatusCode CaloCellNeighborsAverageCorr::initialize()
     m_skipDeadDrawer=false; 
   }
   
-  ATH_MSG_INFO ( "Skip Dead Feb    = " << ((m_skipDeadFeb)?"true":"false")    );
-  ATH_MSG_INFO ( "Skip Dead LAr    = " << ((m_skipDeadLAr)?"true":"false")    );
-  ATH_MSG_INFO ( "Skip Dead Drawer = " << ((m_skipDeadDrawer)?"true":"false") );
-  ATH_MSG_INFO ( "Skip Dead Tile   = " << ((m_skipDeadTile)?"true":"false")   );
+  ATH_MSG_INFO ( "Skip already pached = " << ((m_skipDeadFeb)?"true":"false")    );
+  ATH_MSG_INFO ( "Skip Dead LAr       = " << ((m_skipDeadLAr)?"true":"false")    );
+  ATH_MSG_INFO ( "Skip Dead Drawer    = " << ((m_skipDeadDrawer)?"true":"false") );
+  ATH_MSG_INFO ( "Skip Dead Tile      = " << ((m_skipDeadTile)?"true":"false")   );
 
   
   ATH_CHECK( detStore()->retrieve (m_calo_id, "CaloCell_ID") );
@@ -88,7 +71,6 @@ CaloCellNeighborsAverageCorr::process (CaloCellContainer* theCont,
     for (; itrCell_test!=theCont->end();++itrCell_test){
       const CaloCell* pointerToCell=*itrCell_test; //yes, this is an iterator that when dereferenced returns a pointer, not a CaloCell directly.
       cannedUncorrectedEnergies[pointerToCell] = pointerToCell->energy();
-      //std::cout << "GEORGIOS DEBUGGING For CaloCell* = " << pointerToCell << " we have energy = " << cannedUncorrectedEnergies[pointerToCell] << std::endl;
     }
   }
 
@@ -159,18 +141,16 @@ CaloCellNeighborsAverageCorr::process (CaloCellContainer* theCont,
         if (m_skipDeadLAr) {
           ATH_MSG_VERBOSE ( " skipping LAr hash " << m_calo_id->calo_cell_hash(aCell->ID()) );
           continue;
-        } else if (m_skipDeadFeb && ((aCell->provenance() & 0x0200) == 0x0200) ) {
-          ATH_MSG_VERBOSE ( " skipping LAr Feb hash " << m_calo_id->calo_cell_hash(aCell->ID()) );
+        } else if (m_skipDeadFeb && LArProv::test(aCell->provenance(),LArProv::PATCHED)) {
+          ATH_MSG_VERBOSE ( " skipping already patched hash " << m_calo_id->calo_cell_hash(aCell->ID()) );
           continue;
         }
       }
       
-      //inspired from http://alxr.usatlas.bnl.gov/lxr-stb3/source/atlas/Calorimeter/CaloRec/src/CaloTopoClusterMaker.cxx#585
       //We need a IdentifierHash to pass as input to the get_neighbors().
-      //   IdentifierHash theCellHashID = theCell->getID(); //this doesn't work (any more?)
-      Identifier theCellID = aCell->ID();
+      const Identifier theCellID = aCell->ID();
       const float oldE=aCell->energy();
-      IdentifierHash theCellHashID = m_calo_id->calo_cell_hash(theCellID); 
+      const IdentifierHash theCellHashID = m_calo_id->calo_cell_hash(theCellID); 
       
       //Find now the neighbors around theCell, and store them in theNeighbors vector.
       m_calo_id->get_neighbours(theCellHashID,LArNeighbours::all2D,theNeighbors);
@@ -180,7 +160,7 @@ CaloCellNeighborsAverageCorr::process (CaloCellContainer* theCont,
       //first let's find the volume of theCell we are correcting.
       float volumeOfTheCell=0;
       if (caloDDE) volumeOfTheCell = caloDDE->volume();
-      //     std::cout << " volumeOfTheCell " << volumeOfTheCell << std::endl;
+      
       if (volumeOfTheCell==0) continue;
       //int theCellSampling = caloDDE->getSampling();
       //      if (theCellSubCalo == CaloCell_ID::TILE) {
@@ -190,9 +170,7 @@ CaloCellNeighborsAverageCorr::process (CaloCellContainer* theCont,
 
       const Identifier theCellRegion=m_calo_id->region_id(theCellID);
       //loop through neighbors, and calculate average energy density of guys who have a legitimate volume (namely >0).
-      //float totalEnergyDensity=0;
-      //float legitimateNeighbors=0;
-
+      
       float goodNeighborEnergyDensitySum=0;
       unsigned goodNeighbors=0;
 
@@ -208,9 +186,8 @@ CaloCellNeighborsAverageCorr::process (CaloCellContainer* theCont,
 	float thisEnergy = thisNeighbor->energy();
 	if (m_testMode) {
 	  thisEnergy = cannedUncorrectedEnergies[thisNeighbor];
-	  //	  std::cout << "GEORGIOS DEBUGGING Retrieving cannedUncorrectedEnergies[" << thisNeighbor << "] = " << cannedUncorrectedEnergies[thisNeighbor] << std::endl;
 	}
-	if (thisNeighbor->badcell()) {
+	if (thisNeighbor->badcell() || (!thisNeighbor->caloDDE()->is_tile() && LArProv::test(thisNeighbor->provenance(),LArProv::PATCHED))) {
 	  ATH_MSG_VERBOSE("Ignoring neighbor " << thisNeighbor->ID().get_identifier32().get_compact() << " because of it's bad cell status");
 	  continue;
 	}
@@ -236,10 +213,6 @@ CaloCellNeighborsAverageCorr::process (CaloCellContainer* theCont,
 	  betterNeighbors++;
 	  betterNeighborEnergyDensitySum+=thisEnergyDensity;
 	}
-       
-	//	if (theCellSubCalo == CaloCell_ID::TILE && theCellSampling == CaloCell_ID::TileBar0)
-	//	std::cout << "Neighbor " << iN << " : " << thisNeighborSubCalo << " , " << thisNeighborSampling << " : " << thisNeighbor->eta() << " , " << thisNeighbor->phi() << " E=" << thisNeighbor->energy() << " V=" << thisVolume*1e-6 << " D=" << thisEnergyDensity*1e6 << std::endl;
-
       } //end loop over neighbors
 
 
@@ -266,6 +239,7 @@ CaloCellNeighborsAverageCorr::process (CaloCellContainer* theCont,
       //now use the average energy density to make a prediction for the energy of theCell
       const float predictedEnergy = averageEnergyDensity * volumeOfTheCell;
       aCell->setEnergy(predictedEnergy);
+      //aCell->setProvenance(aCell->provenance()| LArProv::PATCHED); W.L. I think it would be better to label patched cells as 'patched' but this breaks FT0. 
       ATH_MSG_VERBOSE ( " correcting " << ((isTile)?"Tile":"LAr") <<  " id " << theCellID.get_identifier32().get_compact() << " Eold=" 
 			<<oldE << "Enew=" << predictedEnergy << ", used " << nNeighbors <<  " neighbors" );
     }  // end of if(badcell)

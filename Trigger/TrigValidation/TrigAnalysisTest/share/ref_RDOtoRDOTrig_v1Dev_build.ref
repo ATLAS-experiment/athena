@@ -1674,6 +1674,18 @@ HLT_2mu4_L12MU3V:
     1: 6
     2: 6
     3: 6
+HLT_2mu4_L1ADBDTL:
+  eventCount: 1
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 2
+    1: 2
+    2: 2
+    3: 2
 HLT_2mu4_L1BPH-7M11-25DR99-2MU3VF:
   eventCount: 0
 HLT_2mu4_L1BPH-7M14-0DR25-MU5VFMU3VF:
@@ -2129,6 +2141,19 @@ HLT_2mu4_bBmux_BdmuDstarX_L12MU3VF:
     2: 6
     3: 6
     4: 6
+HLT_2mu4_bDimu2700_L1ADBDTL:
+  eventCount: 0
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 2
+    1: 4
+    2: 2
+    3: 2
+    4: 2
 HLT_2mu4_bDimu2700_sigmaLxy3_L12MU3V:
   eventCount: 0
   stepCounts:
@@ -2181,6 +2206,19 @@ HLT_2mu4_bDimu_L12MU3VF:
     2: 4
     3: 4
     4: 4
+HLT_2mu4_bDimu_L1ADBDTL:
+  eventCount: 0
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 2
+    1: 4
+    2: 2
+    3: 2
+    4: 2
 HLT_2mu4_bJpsimumu_L12MU3V:
   eventCount: 0
   stepCounts:
@@ -2324,6 +2362,17 @@ HLT_2mu4_l2io_invmDimu_L12MU3VF:
     1: 8
     2: 6
     3: 6
+HLT_2mu4_l2io_invmDimu_L1ADBDTL:
+  eventCount: 0
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 2
+    1: 4
+    2: 2
+    3: 2
 HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3V:
   eventCount: 0
 HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3VF:

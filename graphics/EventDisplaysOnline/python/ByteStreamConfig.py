@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -17,16 +17,16 @@ def ByteStreamCfg(flags, **kwargs):
     bytestreamInput.KeyCount = 1
     bytestreamInput.Timeout = 600000
     bytestreamInput.UpdatePeriod = 200
-    bytestreamInput.BufferSize = 10 # three times of keycount for beam splashes
+    bytestreamInput.BufferSize = 10
     bytestreamInput.ISServer = '' # Disable histogramming
     bytestreamInput.StreamNames = flags.OnlineEventDisplays.TriggerStreams
     #bytestreamInput.StreamType = "physics" #comment out for all streams, e.g. if you also want claibration streams
     bytestreamInput.StreamLogic = "Or"
 
     if flags.OnlineEventDisplays.BeamSplashMode:
-        bytestreamInput.KeyCount = 62 # equal or greater than the number of DCMs for beam splashes
-        bytestreamInput.BufferSize = 186 # three times of keycount for beam splashes
-        bytestreamInput.Timeout = 144000000 #(40 hrs) for beam splashes
+        bytestreamInput.KeyCount = 64 # equal or greater than the number of DCMs for beam splashes
+        bytestreamInput.BufferSize = 192 # at least three times of keycount for beam splashes
+        bytestreamInput.Timeout = 144000000 #(40 hrs)
         bytestreamInput.StreamType = "physics" #if trigger fails it will go to debug_HltError
 
     if flags.OnlineEventDisplays.PartitionName != 'ATLAS':

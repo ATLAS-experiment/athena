@@ -348,9 +348,10 @@ namespace JiveXML {
     if (m_doWriteResiduals){
       ATH_CHECK(m_residualPullCalculator.retrieve());
     }
-
-    ATH_CHECK(m_trackSumTool.retrieve());
     
+    ATH_CHECK(m_trackSumTool.retrieve());
+    ATH_CHECK(m_keys.initialize());
+    ATH_CHECK(m_TrackTruthCollections.initialize());
     return StatusCode::SUCCESS;
   }
 
@@ -366,27 +367,21 @@ namespace JiveXML {
     
     ATH_MSG_DEBUG("In retrieve()");
 
-    std::vector<std::string> keys = getKeys();
-
-    if(keys.empty()){
-      ATH_MSG_WARNING("No StoreGate keys found");
-      return StatusCode::SUCCESS;
-    }
-
     // Loop through the keys and retrieve the corresponding data
-    for (const std::string& key : keys) {
+    for (const auto& key : m_keys) {
       SG::ReadHandle<TrackCollection> cont(key);
       if (cont.isValid()) {
-	DataMap data = getData(&(*cont),key);
-	if (FormatTool->AddToEvent(dataTypeName(), key, &data).isFailure()) {
-	  ATH_MSG_WARNING("Failed to retrieve Collection " << key);
+	DataMap data = getData(&(*cont),key.key());
+	if (FormatTool->AddToEvent(dataTypeName(), key.key(), &data).isFailure()) {
+	  ATH_MSG_WARNING("Failed to add collection " << key.key());
 	} else {
-	  ATH_MSG_DEBUG(" (" << key << ") retrieved");
+	  ATH_MSG_DEBUG(" (" << key.key() << ") retrieved");
 	}
       } else {
-	ATH_MSG_WARNING("Collection " << key << " not found in SG");
+	ATH_MSG_WARNING("Collection " << key.key() << " not found in SG");
       }
     }
+
     return StatusCode::SUCCESS;
   }
 
@@ -401,34 +396,6 @@ namespace JiveXML {
       ATH_MSG_DEBUG( "Retrieving data for track collection " << collectionName);
     }
 
-    /**
-     * Try to find the appropiate truth collection
-     * StoreGate key can be either 'TruthCollection' or just 'Truth' suffix. Check both.
-     * Using 'SG::contains' check first, avoids spitting out SG warnings
-     */
-
-    SG::ReadHandle<TrackTruthCollection> truthCollection;
-    
-    // Check for given truth collection
-    if (collectionName == m_priorityKey) {
-      truthCollection = SG::ReadHandle<TrackTruthCollection>(m_TrackTruthCollection);
-      if (truthCollection.isValid()) {
-        ATH_MSG_DEBUG("Found TrackTruthCollection with key " << m_TrackTruthCollection);
-      }
-    }else {
-      truthCollection = SG::ReadHandle<TrackTruthCollection>(collectionName + "TruthCollection");
-      if (truthCollection.isValid()) {
-        ATH_MSG_DEBUG("Found TrackTruthCollection with key " << collectionName << "TruthCollection");
-      } else {
-        truthCollection = SG::ReadHandle<TrackTruthCollection>(collectionName + "Truth");
-        if (truthCollection.isValid()) {
-	  ATH_MSG_DEBUG("Found TrackTruthCollection with key " << collectionName << "Truth");
-        } else {
-	  ATH_MSG_DEBUG("Could not find matching TrackTruthCollection for " << collectionName);
-        }
-      }
-    }
-      
     // Make a list of track-wise entries and reserve enough space
     DataVect id; id.reserve(trackCollection->size());
     DataVect chi2; chi2.reserve(trackCollection->size());
@@ -479,7 +446,34 @@ namespace JiveXML {
       /**
        * Get truth Information
        */
-      TrackRetrieverHelpers::getTruthFromTrack(*track,trackCollection,truthCollection,barcode);
+
+      if(m_isMC){
+	std::string matchingKey = "";
+	for (const auto& key : m_TrackTruthCollections.keys()) {
+	  if (key->key().find(collectionName) != std::string::npos) {
+	    matchingKey=key->key();
+	    break;
+	  }
+	}      
+	if(!matchingKey.empty()){
+	  SG::ReadHandle<TrackTruthCollection>truthCollection(matchingKey);
+	  if (truthCollection.isValid()) {
+	    ATH_MSG_DEBUG("Found TrackTruthCollection for \"" << collectionName << "\": " << matchingKey);
+	    TrackRetrieverHelpers::getTruthFromTrack(*track,trackCollection,truthCollection,barcode);
+	  } else {
+	    ATH_MSG_WARNING("TrackTruthCollection \"" << matchingKey << "\" is not valid");
+	    //Fill with zero if none found
+	    barcode.emplace_back(0);
+	  }
+	} else {
+	  ATH_MSG_DEBUG("No matching TrackTruthCollection key found containing \"" << collectionName << "\"");
+	   barcode.emplace_back(0);
+	}
+      }
+      else{
+	ATH_MSG_DEBUG("Not MC so no truth tracks, fill with 0s");
+	barcode.emplace_back(0);
+      }
 
       /**
        * Get Perigee parameters (if available)
@@ -621,34 +615,5 @@ namespace JiveXML {
     return DataMap;
   }
 
-
-
-  const std::vector<std::string> TrackRetriever::getKeys() {
-
-    ATH_MSG_DEBUG("in getKeys()");
-
-    // Initialize keys with the priority key first and then the other requested keys
-    std::vector<std::string> keys = {m_priorityKey};
-
-    if (!m_otherKeys.empty() && !m_doWriteAllCollections) {
-      keys.insert(keys.end(), m_otherKeys.begin(), m_otherKeys.end());
-    }
-    else {
-      // If all collections are requested, obtain all available keys from StoreGate
-      std::vector<std::string> allKeys;
-      //if(m_doWriteAllCollections){
-	evtStore()->keys<TrackCollection>(allKeys);
-	//}
-
-      // Add keys that are not the priority key and do not add containers with "HLT" in their name if requested, ignore TRTSeed and MuonSlimmedTrackCollections
-      for (const std::string& key : allKeys) {
-	if (key != m_priorityKey && (key.find("HLT") == std::string::npos || m_doWriteHLT) && (key!="TRTSeeds") && (key !="MuonSlimmedTrackCollection")) {
-	  keys.emplace_back(key);
-	  ATH_MSG_DEBUG("key: " << key);
-	}
-      }
-    }
-    return keys;
-  }
   
 } //namespace JiveXML

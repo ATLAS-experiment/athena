@@ -1,196 +1,312 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-
-import os, re, time, glob, shutil
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+import os
+import re
+import time
+import glob
+import shutil
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 from AthenaCommon.Logging import logging
 
-# This method reads the files in the given directory, sorts them by run/event number,
-# finds atlantis and vp1 files belonging to the same event and returns a list of events
-# and their corresponing files: (event, run, atlantis, vp1)
-# checkpair=True and remove=True, remove the files that do not form an atlanits-vp1 pair
-# checkpair=True and remove=False, generate event list for atlantis-vp1 pairs
-# checkpair=False, generate event list without checking for valid pairs
-def getEventlist(directory, checkpair, remove=False, patternAtlantis='.xml', patternVP1='.pool.root'):
-    msg = logging.getLogger( 'EventUtils' )
-    msg.verbose('%s begin get event list', time.ctime(time.time()))
-    filelist = []
-    eventlist = []
-    if os.path.exists(directory):
-        files = os.listdir(directory)
+"""
+Event file cleanup and transfer preparation utility for JiveXML and VP1 outputs.
+Handles pairing, validation, pruning, and transfer staging of event files
+based on run and event numbers, with special support for beam splash events.
+"""
 
-        # look for JiveXML_{RunNumber}_{EventNumber}.xml or vp1_r{RunNumber}_ev{EventNumber}_{TimeStamps}CEST.pool.root files
-        # excluding the CastorScript bookkeeping files with .STATUS suffix to the original data files
-        pattern = r'(?:JiveXML|vp1)_(?:|r)(\d+)_(?:|ev)(\d+)'+f'(?:{re.escape(patternAtlantis)}|_.+CEST{re.escape(patternVP1)})'+r'(?!\.)'
+def cleanDirectory(directory, max_pairs, check_pair, is_beam_splash_mode):
 
-        # Build a list of files ordered by run/event number
-        for file in files:
-            matches = re.search(pattern, file)
-
-            # Event file, add tot the list
-            if matches:
-                run = "%012d" % int(matches.group(1))
-                event = "%012d" % int(matches.group(2))
-
-                fileentry = run, event, file
-                filelist.append(fileentry)
-
-        i = 0
-        eventlist = []
-        filelist.sort()
-        numfiles = len(filelist)
-
-        # Now loop through the files to form pairs
-        while i < numfiles-1:
-            if checkpair and (filelist[i][0] != filelist[i+1][0] or filelist[i][1] != filelist[i+1][1]):
-
-                # Make sure that files without a partner (atlantis-vp1) are also removed
-                if remove and i == 0:
-                    msg.warning("One of the files is missing for run %s, event %s, removing the other as well.", filelist[i][0], filelist[i][1])
-                    try:
-                        msg.info("Removing %s/%s", directory, filelist[i][2])
-                        os.unlink("%s/%s" % (directory, filelist[i][2]))
-                    except OSError as err:
-                        msg.warning("Could not remove '%s': %s", filelist[i][2], err)
-
-                # Do not include such files in the event list
-                i = i + 1
-            else:
-                # Build event list
-                evententry = filelist[i][0], filelist[i][1], filelist[i][2], filelist[i+1][2]
-                eventlist.append(evententry)
-                i = i + 1
-
-        msg.verbose('%s end get event list', time.ctime(time.time()))
-    else:
-          msg.warning('The directory %s does not exist.', directory)
-    return eventlist
-
-# Prune events in the given directory if the number exceeds the specified number
-def pruneEvents(directory, maxevents, eventlist):
-    msg = logging.getLogger( 'EventUtils' )
-    msg.verbose('%s begin prune events', time.ctime(time.time()))
-    i = 0
-    numevents = len(eventlist)
-
-    # Check if there are more events than allowed and prune a number of files equal to the excess
-    if numevents > maxevents:
-        for i in range(numevents-maxevents):
-            msg.verbose("maxevents=%d, numevents=%d, i=%d", maxevents, numevents, i)
-            run, event, atlantis, vp1 = eventlist.pop(0)
-            msg.verbose("Going to prune files %s and %s for run %s and event %s.", atlantis, vp1, run, event)
-            try:
-                msg.verbose("%s Trying to unlink %s", time.ctime(time.time()), atlantis)
-                os.unlink("%s/%s" % (directory, atlantis))
-                msg.verbose("%s Trying to unlink %s", time.ctime(time.time()), vp1)
-                os.unlink("%s/%s" % (directory, vp1))
-                msg.verbose("%s Done with unlink", time.ctime(time.time()))
-            except OSError as err:
-                msg.warning("Could not remove files for run %s, event %s: %s", run, event, err)
-
-    else:
-        msg.debug("Nothing to prune (%d <= %d).", numevents, maxevents)
-    msg.verbose('%s end prune events', time.ctime(time.time()))
-
-# Build the event.list file that is used by atlas-live.cern.ch for synchronizing events
-def writeEventlist(directory, eventlist, listname='event'):
-    msg = logging.getLogger( 'EventUtils' )
-    msg.verbose('%s begin write event list', time.ctime(time.time()))
-    pid = os.getpid()
-    try:
-        file = open("%s/%s.%d" % (directory, listname, pid), 'w')
-        for run, event, atlantis, vp1 in eventlist:
-            file.write("run:%s,event:%s,atlantis:%s,vp1:%s\n" % (run, event, atlantis, vp1))
-        file.close()
-    except IOError as err:
-        msg.warning("Could not write event list: %s", err)
-
-    # Rename for an atomic overwrite operation
-    try:
-        os.rename("%s/%s.%d" % (directory, listname, pid), "%s/%s.list" % (directory, listname))
-    except OSError as err:
-        msg.warning("Could not rename %s.%d to %s.list: %s", listname, pid, listname, err)
-    msg.verbose('%s end write event list', time.ctime(time.time()))
-
-# Perform all of these in one command
-def cleanDirectory(directory, maxevents, checkpair,isBeamSplashMode):
-    msg = logging.getLogger( 'EventUtils' )
-
-    msg.verbose('%s begin clean directory', time.ctime(time.time()))
-    eventlist = getEventlist(directory, checkpair)
-    if maxevents>0:
-        pruneEvents(directory, maxevents, eventlist)
-    writeEventlist(directory, eventlist)
-
-    # disable this for beam splashes. Call zipXMLFile directly in OnlineEventDisplaysSvc.py to transfer every event.
-    if len(eventlist)>0 and not isBeamSplashMode:
-        prepareFilesForTransfer(directory, eventlist, pair=checkpair, timeinterval=60)
-
-    if isBeamSplashMode:
-        for filename in os.listdir(directory):
-            if filename.startswith("vp1") and "CEST.pool.root" in filename:
-                orgname = f'{directory}/{filename}'
-                newname = orgname.replace('.pool.root', '.online.pool.root')
-                try:
-                    shutil.copyfile(Path(orgname), Path(newname))
-                except OSError as err:
-                    msg.warning("Could not copy %s to %s: %s", orgname, newname, err)
-    msg.verbose('%s end clean directory', time.ctime(time.time()))
-
-def prepareFilesForTransfer(directory, eventlist, pair, timeinterval):
-    msg = logging.getLogger( 'EventUtils' )
-    """Preparing the list of files for CastorScript to transfer to EOS
-
-    CastorScript is configured to look for *.zip and *.online.pool.root files to transfer.
-    This function count the number of CastorScript bookkeeping files *.COPIED
-    and compare with the number of original data files *.zip and *.online.pool.root to obtain the transfer status.
-    If all transfer has been completed, get the most recent event from eventlist and add it to the transferlist.
-    Zip the corresponding xml file or rename the corresponding pool.root file to trigger the transfer.
-
-    eventlist: list of events that can be transferred
-    pair: True to transfer atlantis-vp1 pairs. False to transfer atlantis file only.
-    timeinterval: time interval between two events in the transfer list (in seconds).
     """
-    msg.verbose('%s begin prepare files for transfer', time.ctime(time.time()))
-    transferlist = getEventlist(directory, checkpair=pair, remove=False, patternAtlantis='.zip', patternVP1='.online.pool.root')
-    if len(transferlist)>0 and eventlist[-1][0] == transferlist[-1][0] and eventlist[-1][1] == transferlist[-1][1]:
-        msg.debug("Last event already in transfer list. No new event to transfer.")
+    Main routine for managing cleanup and preparation of JiveXML/VP1 event files.
+
+    Parameters:
+    - directory (str): Path where event files are stored.
+    - max_pairs (int): Maximum number of event pairs to keep in the directory.
+    - check_pair (bool): If True, remove unpaired files before pruning.
+    - is_beam_splash_mode (bool): If True, disables pruning and pairing to preserve rare beam splash data.
+    """
+
+    msg = logging.getLogger('EventUtils')
+    msg.info('%s: Starting to clean directory %s', time.ctime(time.time()), directory)
+
+    """
+    We want to transfer everything for beam splash events are they are rare,
+    so we don't want to miss them
+    """
+
+    if is_beam_splash_mode:
+        check_pair = False
+    try:
+        file_pairs = getEventlist(directory)
+        if check_pair:
+            file_pairs = checkPairs(file_pairs, directory)
+        if not is_beam_splash_mode:
+            prune(file_pairs, max_pairs,directory)
+            writeEventlist(directory,file_pairs)
+            prepareFilesForTransfer(directory, file_pairs, timeinterval=60)
+        else:
+            prepareALLFilesForTransfer(directory, file_pairs)
+    except Exception as e:
+        msg.error('Error occurred while cleaning directory %s: %s', directory, str(e))
+
+    msg.info('%s: Finished cleaning directory %s', time.ctime(time.time()), directory)
+
+
+def getEventlist(directory):
+    """
+    Retrieves a list of paired files (JiveXML and VP1) from the specified directory.
+    """
+    msg = logging.getLogger('EventUtils')
+    msg.info('%s: Starting to get event list from directory %s', time.ctime(time.time()), directory)
+
+    # Find all relevant files in the directory
+    jive_files = [os.path.basename(f) for f in glob.glob(f"{directory}/JiveXML*.xml")]
+    vp1_files = [os.path.basename(f) for f in glob.glob(f"{directory}/vp1*CEST.pool.root")]
+
+    # Compile regex patterns for matching run and event numbers in filenames
+    vp1_pattern = re.compile(r'vp1_r(\d+)_ev(\d+)_')
+    jive_pattern = re.compile(r'JiveXML_(\d+)_(\d+)\.xml')
+
+    # Dictionary to store VP1 files by (run, event) tuple
+    vp1_dict = {}
+    for vp1_file in vp1_files:
+        match = vp1_pattern.search(vp1_file)
+        if match:
+            run, event = match.groups()
+            vp1_dict[(run, event)] = vp1_file
+
+    # Generate file pairs
+    file_pairs = []
+    for jive_file in jive_files:
+        match = jive_pattern.search(jive_file)
+        if match:
+            run, event = match.groups()
+            # Get corresponding VP1 file
+            vp1_file = vp1_dict.get((run, event))
+            file_pairs.append((jive_file, vp1_file))
+        else:
+            # Add jive file without a matching VP1 file
+            file_pairs.append((jive_file, None))
+
+    # Add any VP1 files that don't have a matching JiveXML file
+    for vp1_file in vp1_files:
+        if not any(vp1_file in pair for pair in file_pairs):
+            file_pairs.append((None, vp1_file))
+
+    # Sort file pairs by last modified time (newest last)
+    file_pairs.sort(key=lambda pair: (
+        max(os.path.getmtime(os.path.join(directory, f)) if f else 0 for f in pair)
+    ), reverse=False)
+
+    msg.info('%s: Event list retrieved with %d pairs', time.ctime(time.time()), len(file_pairs))
+
+    return file_pairs
+
+def checkPairs(file_pairs, directory):
+    """
+    Ensures only valid JiveXML-VP1 pairs remain in the list, removing unmatched files.
+    """
+    msg = logging.getLogger('EventUtils')
+    updated_file_pairs = []
+
+    for jive_file, vp1_file in file_pairs[:-1]:  # Ignore last entry
+        if jive_file and vp1_file:
+            updated_file_pairs.append((jive_file, vp1_file))
+        else:
+            file_to_remove = jive_file or vp1_file
+            if file_to_remove:
+                file_path = os.path.join(directory, file_to_remove)
+                remove_file(file_path)
+                msg.info('Removed unmatched file: %s', file_path)
+
+    return updated_file_pairs
+
+def prune(file_pairs, max_pairs, directory):
+    """
+    Removes the oldest event pairs to keep only the latest `max_pairs`.
+
+    Parameters:
+    - file_pairs (list): List of (JiveXML, VP1) file pairs sorted by timestamp.
+    - max_pairs (int): Maximum number of file pairs to retain.
+    - directory (str): Directory where files are located.
+
+    Returns:
+    - list: The pruned list of `max_pairs` most recent file pairs.
+    """
+
+    if len(file_pairs) <= max_pairs:
+        return []  # No files removed
+
+    msg = logging.getLogger('EventUtils')
+    msg.info('Pruning file list: Keeping latest %d out of %d entries.', max_pairs, len(file_pairs))
+
+    # Determine files to remove (oldest entries)
+    removed_pairs = file_pairs[:-max_pairs]
+
+    # Remove old files from the directory
+    for jive_file, vp1_file in removed_pairs:
+        for file in (jive_file, vp1_file):
+            if file:
+                file_path = os.path.join(directory, file)
+                remove_file(file_path)
+
+    msg.info('Removed %d file pairs.', len(removed_pairs))
+
+    # Return the remaining pairs (latest `max_pairs`)
+    return file_pairs[-max_pairs:]
+
+
+def writeEventlist(directory, file_pairs, listname='event'):
+    msg = logging.getLogger('EventUtils')
+    msg.info('%s begin write event list', time.ctime())
+
+    pid = os.getpid()
+    temp_filename = os.path.join(directory, f"{listname}.{pid}")
+    final_filename = os.path.join(directory, f"{listname}.list")
+
+    try:
+        with open(temp_filename, 'w') as file:
+            for jive_file, vp1_file in file_pairs:
+                run_number, event_number = None, None
+
+                # Extract run and event numbers from the available file
+                if jive_file:
+                    run_number, event_number = extract_numbers(jive_file)
+                elif vp1_file:
+                    run_number, event_number = extract_numbers(vp1_file)
+
+                msg.info(f"JiveXML: {jive_file}, VP1: {vp1_file}, Run: {run_number}, Event: {event_number}")
+
+                # Write to file, replacing None values with 'N/A' for clarity
+                file.write(f"run:{run_number or 'N/A'},event:{event_number or 'N/A'},"
+                           f"atlantis:{jive_file or 'N/A'},vp1:{vp1_file or 'N/A'}\n")
+
+    except IOError as err:
+        msg.warning(f"Could not write event list: {err}")
+        return  # Exit early if writing fails
+
+    # Perform atomic rename operation
+    try:
+        os.rename(temp_filename, final_filename)
+    except OSError as err:
+        msg.warning(f"Could not rename {temp_filename} to {final_filename}: {err}")
+
+    msg.info('%s end write event list', time.ctime())
+
+def prepareFilesForTransfer(directory, file_pairs, timeinterval):
+    msg = logging.getLogger( 'EventUtils' )
+    msg.info('%s begin prepare files for transfer', time.ctime(time.time()))
+
+    ready_jive = glob.glob(f"{directory}/*.zip") # atlantis files ready for transfer
+    copied_jive = glob.glob(f"{directory}/*.zip.COPIED") # CastorScript bookkeeping files indicating the transfer is done
+    ready_vp1 = glob.glob(f"{directory}/*.online.pool.root") # VP1 files ready for transfer
+    copied_vp1 = glob.glob(f"{directory}/*.online.pool.root.COPIED") # CastorScript bookkeeping files indicating the transfer is done
+
+    if len(ready_jive)>len(copied_jive) or len(ready_vp1)>len(copied_vp1):
+        msg.info("There are files about to be transferred. Do not attempt to add new files to be transferred.")
         return
 
-    # Check transfer status
-    matchAtlantis = glob.glob(f"{directory}/*.zip") # atlantis files ready for transfer
-    copiedAtlantis = glob.glob(f"{directory}/*.zip.COPIED") # CastorScript bookkeeping files indicating the transfer is done
-    matchVP1 = glob.glob(f"{directory}/*.online.pool.root") # VP1 files ready for transfer
-    copiedVP1 = glob.glob(f"{directory}/*.online.pool.root.COPIED") # CastorScript bookkeeping files indicating the transfer is done
-    # Check if the transfer is done
-    if len(matchAtlantis)>len(copiedAtlantis) or len(matchVP1)>len(copiedVP1):
-        msg.debug("There are files in transfer. Do not attemp to add new event to the transfer list.")
+    latest_ready_jive_age = time.time() - get_latest_file_timestamp(ready_jive)
+    latest_ready_vp1_age = time.time() - get_latest_file_timestamp(ready_vp1)
+
+    # If files are too recent, wait before adding new files, but only if there are existing files
+    if (latest_ready_jive_age < timeinterval) or (latest_ready_vp1_age < timeinterval):
+        msg.info("Wait for %ds before adding new events to the transfer queue. Last jive event in the queue was added %ds ago, last vp1 event in the queue was added %ds ago", timeinterval, latest_ready_jive_age, latest_ready_vp1_age)
         return
-    # Check if the previous transferred event is too new
-    elif len(transferlist)>0: # use the sorted list here
-        try:
-            age = time.time() - os.path.getmtime(f'{directory}/{transferlist[-1][2]}') # check the timestamp of the latest atlantis zip file
-            if age < timeinterval:
-                msg.debug("Wait for %ds before adding new events to the transfer queue. Last event in the queue was added %ds ago.", timeinterval, age)
-                return
-        except OSError as err:
-            msg.warning("Failed to check the timestamp of %s. %s", transferlist[-1][2], err)
+
+    #if the last but one pair is already ready for transfer, return, otherwise prepare it for transfer
+    if len(file_pairs) > 1:  # Ensure there are at least two elements to be able to get last but one element
+        second_last_element = file_pairs[-2]
+        jive_file, vp1_file = second_last_element
+
+        jive_without_extension = os.path.splitext(jive_file)[0] if jive_file else None
+
+        # Extract relevant part from VP1 file using regex
+        vp1_match = re.match(r"(vp1_r\d+_ev\d+_u\d+)", vp1_file) if vp1_file else None
+        vp1_without_extension = vp1_match.group(1) if vp1_match else None
+
+        has_match = any(jive_without_extension in os.path.basename(f) for f in ready_jive) or any(vp1_without_extension in os.path.basename(f) for f in ready_vp1)
+        if has_match:
             return
+        if jive_file:
+            msg.info('%s going to zip file %s ready for transfer to eos', time.ctime(time.time()), jive_file)
+            zipXMLFile(directory, jive_file)
+        if vp1_file:
+            msg.info('%s going to rename ESD file %s ready for transfer to eos', time.ctime(time.time()), vp1_file)
+            renameESDFile(directory, vp1_file)
 
-    # Get the latest event from event list to transfer
-    run, event, atlantis, vp1 = eventlist[-1]
+def prepareALLFilesForTransfer(directory, file_pairs):
+    msg = logging.getLogger('EventUtils')
+    beamsplash_file = os.path.join(directory, 'beamsplash.list')
+    files_in_beamsplash_file = set()
 
-    # Handle atlantis files
-    msg.debug('%s going to zip file %s', time.ctime(time.time()), atlantis)
-    zipXMLFile(directory, atlantis)
+    # Check if beamsplash.list exists and is older than 1 day
+    if os.path.exists(beamsplash_file):
+        file_mod_time = os.path.getmtime(beamsplash_file)
+        if (time.time() - file_mod_time) > 86400:  # 1 day = 86400 seconds
+            msg.info(f"{beamsplash_file} is older than 1 day. Recreating...")
+            open(beamsplash_file, "w").close()  # Recreate the file (empty)
+        else:
+            with open(beamsplash_file, "r") as f:
+                files_in_beamsplash_file = set(f.read().splitlines())  # Read existing lines into a set
+    else:
+        msg.info(f"{beamsplash_file} does not exist. Creating a new one...")
+        open(beamsplash_file, "w").close()  # Create the file
 
-    # Handle VP1 files
-    if pair:
-        msg.debug('%s going to rename ESD file %s', time.ctime(time.time()), vp1)
-        renameESDFile(directory, vp1)
+    files_to_transfer = []
+    for jive_file, vp1_file in file_pairs:
+        if jive_file and jive_file not in files_in_beamsplash_file:
+            files_to_transfer.append(jive_file)
+            zipXMLFile(directory, jive_file)
+        if vp1_file and vp1_file not in files_in_beamsplash_file:
+            files_to_transfer.append(vp1_file)
+            renameESDFile(directory, vp1_file)
 
-    writeEventlist(directory, transferlist, listname='transfer')
-    msg.verbose('%s end prepare files for transfer', time.ctime(time.time()))
+    if files_to_transfer:
+        try:
+            with open(beamsplash_file, "a+") as f:
+                f.seek(0)
+                existing_data = f.read().strip()
+                existing_files = set(existing_data.split(",")) if existing_data else set()
+
+                # Determine new files to add
+                new_files = set(files_to_transfer) - existing_files
+                if new_files:
+                    separator = "," if existing_files else ""
+                    f.write(separator + ",".join(new_files))
+        except IOError as e:
+            msg.error(f"Error handling file {beamsplash_file}: {e}")
+
+def extract_numbers(filename):
+    # Try to match the pattern "r<run>_ev<event>" (for VP1 files)
+    match_vp1 = re.search(r'r(\d+)_ev(\d+)', filename)
+    if match_vp1:
+        return match_vp1.group(1), match_vp1.group(2)
+
+    # Try to match the pattern "JiveXML_<run>_<event>" (for JiveXML files)
+    match_jivexml = re.search(r'JiveXML_(\d+)_(\d+)', filename)
+    if match_jivexml:
+        return match_jivexml.group(1), match_jivexml.group(2)
+
+    return None, None
+
+def remove_file(file_path):
+    msg = logging.getLogger('EventUtils')
+    try:
+        if os.path.exists(file_path):
+            os.unlink(file_path)
+            msg.info('Removed file: %s', file_path)
+        else:
+            msg.warning('File not found, skipping: %s', file_path)
+    except Exception as e:
+        msg.error('Error removing file %s: %s', file_path, str(e))
+
+def get_latest_file_timestamp(file_list):
+    """Returns the latest modified file timestamp from a list of files."""
+    if not file_list:
+        return (time.time() - 120)
+    latest_file = max(file_list, key=os.path.getmtime)
+    return os.path.getmtime(latest_file)
 
 def zipXMLFile(directory, filename):
     msg = logging.getLogger( 'EventUtils' )
@@ -201,26 +317,26 @@ def zipXMLFile(directory, filename):
     Zip the file to .tmp first, and then rename to .zip
     to avoid triggering the transfer before the zip file is closed.
     """
-    msg.verbose('%s begin zipXMLFile', time.ctime(time.time()))
+    msg.info('%s begin zipXMLFile', time.ctime(time.time()))
     if Path(filename).suffix != '.xml':
         msg.warning("Unexpected Atlantis file name: %s", filename)
         return
     matchingFiles = glob.glob(f"{directory}/{filename}")
     if len(matchingFiles) == 1: # Only proceed if exactly one matching file found, for safety
-        msg.verbose('exactly one matching file found')
+        msg.info('exactly one matching file found')
         matchingFilePath = Path(matchingFiles[0])
         tmpFilePath      = matchingFilePath.with_suffix('.tmp')
         zipFilePath      = matchingFilePath.with_suffix('.zip')
         matchingFilePath = Path(matchingFilePath)
         matchingFileName = matchingFilePath.name
-        msg.verbose('Zipping %s to %s', matchingFileName, zipFilePath.name)
+        msg.info('Zipping %s to %s', matchingFileName, zipFilePath.name)
         try:
             with ZipFile(tmpFilePath,'w', compression=ZIP_DEFLATED) as z:
                 z.write(matchingFilePath.as_posix(), arcname=matchingFileName)
             os.rename(f'{directory}/{tmpFilePath.name}', f'{directory}/{zipFilePath.name}')
         except OSError as err:
             msg.warning("Could not zip %s: %s", filename, err)
-    msg.verbose('%s end of zipXMLFile', time.ctime(time.time()))
+    msg.info('%s end of zipXMLFile', time.ctime(time.time()))
 
 def renameESDFile(directory, filename):
     msg = logging.getLogger( 'EventUtils' )
@@ -229,7 +345,7 @@ def renameESDFile(directory, filename):
     Looks for an ESD file with the required filename in the given directory,
     and if one is found, rename it to .online.pool.root. The original file is not deleted.
     """
-    msg.verbose('%s begin renameESD', time.ctime(time.time()))
+    msg.info('Begin renaming VP1 file %s for transfer', filename)
     if Path(filename).suffixes != ['.pool', '.root']:
         msg.warning("Unexpected VP1 file name: %s", filename)
         return
@@ -239,4 +355,3 @@ def renameESDFile(directory, filename):
         shutil.copyfile(Path(orgname), Path(newname))
     except OSError as err:
         msg.warning("Could not copy %s to %s: %s", orgname, newname, err)
-    msg.verbose('%s end of renameESD', time.ctime(time.time()))

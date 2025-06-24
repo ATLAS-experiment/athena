@@ -7,12 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def xAODElectronRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODElectronRetriever(
-            name="xAODElectronRetriever",
-            PriorityElectronCollection="Electrons",
-            OtherElectronCollections=[],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-        )
+            name="xAODElectronRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
@@ -20,17 +15,7 @@ def xAODElectronRetrieverCfg(flags, **kwargs):
 def xAODMissingETRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODMissingETRetriever(
-            name="xAODMissingETRetriever",
-            PriorityMETCollection="MET_Reference_AntiKt4EMPFlow",
-            OtherMETCollections=[
-                "MET_Reference_AntiKt4EMTopo",
-                "MET_Calo",
-                "MET_LocHadTopo",
-                "MET_Core_AntiKt4LCTopo",
-            ],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-        )
+        name="xAODMissingETRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
@@ -38,12 +23,7 @@ def xAODMissingETRetrieverCfg(flags, **kwargs):
 def xAODMuonRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODMuonRetriever(
-            name="xAODMuonRetriever",
-            PriorityMuonCollection="Muons",
-            OtherMuonCollections=[],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-        )
+            name="xAODMuonRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
@@ -51,12 +31,7 @@ def xAODMuonRetrieverCfg(flags, **kwargs):
 def xAODPhotonRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODPhotonRetriever(
-            name="xAODPhotonRetriever",
-            PriorityPhotonCollection="Photons",
-            OtherPhotonCollections=[],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-        )
+            name="xAODPhotonRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
@@ -64,25 +39,7 @@ def xAODPhotonRetrieverCfg(flags, **kwargs):
 def xAODJetRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODJetRetriever(
-            name="xAODJetRetriever",
-            PriorityJetCollection="AntiKt4EMPFlowJets",
-            OtherJetCollections=[
-                "AntiKt4EMTopoJets",
-                "AntiKt4LCTopoJets",
-                "AntiKt10LCTopoJets",
-                "AntiKt10UFOCSSKJets",
-            ],
-            BTaggerNames=[
-                "DL1dv01",
-                "GN2v01",
-            ],
-            CDIPaths=[
-                "xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root",
-                "xAODBTaggingEfficiency/13p6TeV/2023-02_MC23_CDI_GN2v01-noSF.root",
-            ],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-        )
+        name="xAODJetRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
@@ -90,12 +47,7 @@ def xAODJetRetrieverCfg(flags, **kwargs):
 def xAODTauRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODTauRetriever(
-            name="xAODTauRetriever",
-            PriorityTauCollection="TauJets",
-            OtherTauCollections=[],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-        )
+            name="xAODTauRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
@@ -103,16 +55,7 @@ def xAODTauRetrieverCfg(flags, **kwargs):
 def xAODTrackParticleRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODTrackParticleRetriever(
-            name="xAODTrackParticleRetriever",
-            PriorityTrackParticleCollection="InDetTrackParticles",
-            OtherTrackParticleCollections=[
-                "InDetLargeD0TrackParticles",
-                "CombinedMuonTrackParticles",
-                "GSFTrackParticles",
-            ],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-        )
+        name="xAODTrackParticleRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
@@ -120,15 +63,7 @@ def xAODTrackParticleRetrieverCfg(flags, **kwargs):
 def xAODVertexRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODVertexRetriever(
-            name="xAODVertexRetriever",
-            PrimaryVertexCollection="PrimaryVertices",
-            SecondaryVertexCollection="BTagging_AntiKt4EMPFlowSecVtx",
-            TracksName="InDetTrackParticles_xAOD",
-            OtherVertexCollections=["BTagging_AntiKt4EMTopoSecVtx"],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-            DoWriteV0=False,
-        )
+            name="xAODVertexRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
@@ -136,12 +71,7 @@ def xAODVertexRetrieverCfg(flags, **kwargs):
 def xAODCaloClusterRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODCaloClusterRetriever(
-            name="xAODCaloClusterRetriever",
-            PriorityClusterCollection="egammaClusters",
-            OtherClusterCollections=["CaloCalTopoClusters"],
-            DoWriteAllCollections=False,
-            DoWriteHLT=False,
-        )
+            name="xAODCaloClusterRetriever")
     result.addPublicTool(the_tool, primary=True)
     return result
 
