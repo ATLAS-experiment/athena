@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ALFA_Raw2Digit )
@@ -14,4 +14,4 @@ atlas_add_component( ALFA_Raw2Digit
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps ALFA_RawEv GaudiKernel PathResolver )
 
 # Install files from the package:
-atlas_install_runtime( mapping/*.dat )
+atlas_install_data( mapping/*.dat )
