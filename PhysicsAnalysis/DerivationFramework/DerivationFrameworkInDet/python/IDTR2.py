@@ -24,6 +24,7 @@ def IDTR2Cfg(flags):
     acc.merge(VrtSecInclusiveCfg(
         flags,
         name="VrtSecInclusive",
+        AugmentingVersionString="",
         FillIntermediateVertices=False,
         TrackLocation="InDetWithLRTTrackParticles"))
 
