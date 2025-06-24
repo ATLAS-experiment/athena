@@ -18,6 +18,7 @@
 #include <PATInterfaces/ISystematicsTool.h>
 #include <PATInterfaces/SystematicsUtil.h>
 #include <span>
+#include <iomanip>
 
 namespace columnar
 {
