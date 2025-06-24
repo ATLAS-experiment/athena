@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardRegionGeoModelFactory.h"
@@ -393,8 +393,8 @@ void ForwardRegionGeoModelFactory::create(GeoPhysVol *world)
   DefineMaterials();
 
   // Load "geometry" files
-  std::vector<std::vector<std::string> > loadedDataFileR = this->loadDataFile((char*)"LSS1Rout.csv",11);
-  std::vector<std::vector<std::string> > loadedDataFileL = this->loadDataFile((char*)"LSS1Lout.csv",11);
+  std::vector<std::vector<std::string> > loadedDataFileR = this->loadDataFile("ForwardRegionGeoModel/LSS1Rout.csv",11);
+  std::vector<std::vector<std::string> > loadedDataFileL = this->loadDataFile("ForwardRegionGeoModel/LSS1Lout.csv",11);
 
   double startZ,endZ;
 
@@ -457,7 +457,7 @@ const ForwardRegionGeoModelManager * ForwardRegionGeoModelFactory::getDetectorMa
 }
 
 // Load data from file into 2D array of strings. Input is filename and wanted numbestd::stringof columns
-std::vector<std::vector<std::string> > ForwardRegionGeoModelFactory::loadDataFile(char* fileName, int cols)
+std::vector<std::vector<std::string> > ForwardRegionGeoModelFactory::loadDataFile(const std::string& fileName, int cols)
 {
     std::vector<std::vector<std::string> > loadedData;
 
@@ -465,7 +465,7 @@ std::vector<std::vector<std::string> > ForwardRegionGeoModelFactory::loadDataFil
 
     std::ifstream file (fileName);
     if(!file){
-        std::string datapath = PathResolver::find_file(fileName,"DATAPATH", PathResolver::RecursiveSearch);
+        std::string datapath = PathResolverFindDataFile(fileName);
         LogStream << MSG::DEBUG << "File " << fileName << " not found in run directory, trying to load it from DATAPATH" << endmsg;
         file.open(datapath.c_str());
     }
