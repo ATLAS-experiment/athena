@@ -14,7 +14,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "StoreGate/WriteHandle.h"
 
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 
 #include "SeedToTrackCnvAlg.h"

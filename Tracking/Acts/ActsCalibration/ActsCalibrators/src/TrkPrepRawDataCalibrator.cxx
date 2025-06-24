@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "ActsCalibration/TrkPrepRawDataCalibrator.h"
+#include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
 
 namespace ActsTrk::detail {
   TrkPrepRawDataCalibrator::TrkPrepRawDataCalibrator(const ActsTrk::IActsToTrkConverterTool* convTool,

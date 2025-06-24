@@ -4,7 +4,7 @@
 
 #include "ProtoTrackCreationAndFitAlg.h"
 
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
 #include "xAODEventInfo/EventInfo.h"
 #include <stdlib.h>
 

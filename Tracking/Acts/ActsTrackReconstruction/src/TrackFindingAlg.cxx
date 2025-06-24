@@ -18,7 +18,7 @@
 #include "Acts/TrackFitting/MbfSmoother.hpp"
 
 // ActsTrk
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"

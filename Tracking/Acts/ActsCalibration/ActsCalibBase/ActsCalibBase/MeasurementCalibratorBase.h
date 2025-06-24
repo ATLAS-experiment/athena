@@ -1,18 +1,18 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef ACTSCALIBRATION_DETAIL_MEASUREMENTCALIBRATORBASE_H
-#define ACTSCALIBRATION_DETAIL_MEASUREMENTCALIBRATORBASE_H
+#ifndef ACTSCALIBBASE_DETAIL_MEASUREMENTCALIBRATORBASE_H
+#define ACTSCALIBBASE_DETAIL_MEASUREMENTCALIBRATORBASE_H
 
 #include "GeoPrimitives/GeoPrimitives.h"
-
+/// Athena definition of the Eigen plugin
 #include "Acts/EventData/Types.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackStateProxy.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 
-#include "ActsCalibration/SourceLinkType.h"
+#include "ActsCalibBase/SourceLinkType.h"
 
 #include <array>
 
@@ -75,6 +75,6 @@ namespace ActsTrk::detail {
   
 } // namespace ActsTrk::detail
 
-#include "ActsCalibration/MeasurementCalibratorBase.icc"
+#include "ActsCalibBase/MeasurementCalibratorBase.icc"
 
 #endif

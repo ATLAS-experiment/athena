@@ -3,8 +3,8 @@
 */
 #include "SegmentActsRefitAlg.h"
 
-#include "ActsCalibration/CalibrationContext.h"
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibBase/CalibrationContext.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "xAODMuon/MuonSegmentAuxContainer.h"
 #include "StoreGate/WriteDecorHandle.h"

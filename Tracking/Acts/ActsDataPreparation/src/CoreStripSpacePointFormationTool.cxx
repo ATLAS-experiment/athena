@@ -12,8 +12,8 @@
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "Acts/SpacePointFormation/SpacePointBuilderConfig.hpp"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
 #include "StoreGate/WriteHandle.h"

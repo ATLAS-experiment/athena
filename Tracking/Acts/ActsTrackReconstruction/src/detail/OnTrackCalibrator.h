@@ -7,11 +7,11 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
-#include "ActsCalibration/MeasurementCalibratorBase.h"
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "xAODInDetMeasurement/HGTDCluster.h"

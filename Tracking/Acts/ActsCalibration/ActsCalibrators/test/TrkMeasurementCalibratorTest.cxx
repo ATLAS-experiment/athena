@@ -7,7 +7,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "ActsCalibration/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"

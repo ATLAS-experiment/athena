@@ -36,7 +36,7 @@
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsInterop/Logger.h"
 
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
 // STL
 #include <vector>
 

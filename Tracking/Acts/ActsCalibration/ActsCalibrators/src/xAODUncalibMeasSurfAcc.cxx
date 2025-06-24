@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "xAODMuonPrepData/UtilFunctions.h"

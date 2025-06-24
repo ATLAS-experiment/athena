@@ -4,7 +4,7 @@
 #ifndef ACTSCALIBRATION_DETAIL_TRKMEASUREMENTCALIBRATOR_H
 #define ACTSCALIBRATION_DETAIL_TRKMEASUREMENTCALIBRATOR_H
 
-#include "ActsCalibration/MeasurementCalibratorBase.h"
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
 
 #include "Acts/EventData/Types.hpp"
 #include "Acts/EventData/SourceLink.hpp"
@@ -41,6 +41,6 @@ namespace ActsTrk::detail {
   };
 }
 
-#include "ActsCalibration/TrkMeasurementCalibrator.icc"
+#include "ActsCalibrators/TrkMeasurementCalibrator.icc"
 
 #endif

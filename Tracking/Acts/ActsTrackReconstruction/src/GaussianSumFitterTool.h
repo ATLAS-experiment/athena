@@ -32,8 +32,8 @@
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
 
-#include "ActsCalibration/TrkMeasurementCalibrator.h"
-#include "ActsCalibration/TrkMeasSurfaceAccessor.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
 
 // STL
 #include <string>

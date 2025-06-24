@@ -4,7 +4,7 @@
 
 #undef NDEBUG
 
-#include "ActsCalibration/MeasurementCalibratorBase.h"
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 /** @brief Dummy measurement helper class */

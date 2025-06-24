@@ -11,7 +11,7 @@
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 #include "ActsEvent/TrackParametersContainer.h"
 

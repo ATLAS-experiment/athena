@@ -30,7 +30,7 @@
 #include "ActsEvent/TrackContainer.h"
 
 // PACKAGE
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"

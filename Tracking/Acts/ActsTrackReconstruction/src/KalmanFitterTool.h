@@ -33,11 +33,11 @@
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 
-#include "ActsCalibration/CalibrationContext.h"
-#include "ActsCalibration/TrkMeasSurfaceAccessor.h"
-#include "ActsCalibration/TrkPrepRawDataCalibrator.h"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
-#include "ActsCalibration/TrkPrepRawDataSurfaceAcc.h"
+#include "ActsCalibBase/CalibrationContext.h"
+#include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
+#include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/TrkPrepRawDataSurfaceAcc.h"
 #include "src/detail/OnTrackCalibrator.h"
 // STL
 #include <string>

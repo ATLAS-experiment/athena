@@ -16,7 +16,7 @@ atlas_add_component(ActsEventCnv
     ActsGeometryLib
     ActsGeometryInterfacesLib
     ActsToolInterfacesLib
-    ActsCalibrationLib
+    ActsCalibratorsLib
     ActsInteropLib
     AthenaBaseComps
     GaudiKernel

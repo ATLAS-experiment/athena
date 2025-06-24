@@ -2,7 +2,7 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "ActsCalibration/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
 
 namespace ActsTrk::detail {
     Acts::SourceLink TrkMeasurementCalibrator::pack(const Trk::MeasurementBase* meas) {
