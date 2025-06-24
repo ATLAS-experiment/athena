@@ -26,7 +26,7 @@ atlas_add_test( ConfigTextCompareBlock
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 30 )
 atlas_add_test( TestCPRunFullSim
-   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_MC --text-config test_configuration_Run2.yaml -e 150
+   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_MC --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml -e 150
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 1000
    )
