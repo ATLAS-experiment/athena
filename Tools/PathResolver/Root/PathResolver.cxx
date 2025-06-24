@@ -120,7 +120,7 @@ asg::AsgMessaging& PathResolver::asgMsg() {
 
 bool
 PathResolver::PR_find( const std::string& logical_file_name, const string& search_list,
-         PR_file_type file_type, PathResolver::SearchType search_type,
+         PR_file_type file_type,
          string& result ) {
 
    std::string trimmed_logical_file_name = logical_file_name;
@@ -216,36 +216,6 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
     } catch (const bf::filesystem_error& /*err*/) {
     }
 
-
-    // if recursive searching requested, drill down
-    if (search_type == PathResolver::RecursiveSearch &&
-        is_directory( bf::path(*itr) ) ) {
-
-      bf::recursive_directory_iterator end_itr;
-      try {
-        for ( bf::recursive_directory_iterator ritr( *itr, bf::directory_options::skip_permission_denied );
-              ritr != end_itr; ++ritr) {
-
-          // skip if not a directory
-          if (! is_directory( bf::path(*ritr) ) ) { continue; }
-
-          bf::path fp2 = bf::path(*ritr) / file;
-          try {
-            if ( ( file_type == PR_regular_file && is_regular_file( fp2 ) ) ||
-                 ( file_type == PR_directory && is_directory( fp2 ) ) ) {
-              result = bf::system_complete( fp2 ).string();
-              return true;
-            }
-          } catch (const bf::filesystem_error& err) {
-            // This can happen if permissions are defined (ATEAM-1089)
-            ritr.disable_recursion_pending();  // continue with next iteration
-            continue;
-          }
-        }
-      } catch (const bf::filesystem_error& /*err*/) {
-      }
-    }
-
   }
 
   return found;
@@ -255,9 +225,7 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
 
 string
 PathResolver::find_file(const std::string& logical_file_name,
-              const std::string& search_path,
-              SearchType search_type) {
-   //std::cout << "finding file: " <<logical_file_name << " in path=" << search_path);
+                        const std::string& search_path) {
 
   std::string path_list;
 
@@ -278,22 +246,21 @@ PathResolver::find_file(const std::string& logical_file_name,
   }
 #endif
 
-  return (find_file_from_list (logical_file_name, path_list, search_type));
+  return (find_file_from_list (logical_file_name, path_list));
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 std::string
 PathResolver::find_file_from_list (const std::string& logical_file_name,
-                                   const std::string& search_list,
-                                   SearchType search_type)
+                                   const std::string& search_list)
 {
   std::string result("");
 
   
 
   /* bool found = */
-  PR_find (logical_file_name, search_list, PR_regular_file, search_type, result);
+  PR_find (logical_file_name, search_list, PR_regular_file, result);
 
   // The following functionality was in the original PathResolver, but I believe
   // that it's WRONG. It extracts the filename of the requested item, and searches
@@ -311,8 +278,7 @@ PathResolver::find_file_from_list (const std::string& logical_file_name,
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 string PathResolver::find_directory (const std::string& logical_file_name,
-                                     const std::string& search_path,
-                                     SearchType search_type)
+                                     const std::string& search_path)
 {
      std::string path_list;
 
@@ -327,19 +293,18 @@ string PathResolver::find_directory (const std::string& logical_file_name,
   System::getEnv(search_path, path_list);
 #endif
 
-  return (find_directory_from_list (logical_file_name, path_list, search_type));
+  return (find_directory_from_list (logical_file_name, path_list));
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 string
 PathResolver::find_directory_from_list (const std::string& logical_file_name,
-                                        const std::string& search_list,
-                                        SearchType search_type)
+                                        const std::string& search_list)
 {
   std::string result;
 
-  if (!PR_find (logical_file_name, search_list, PR_directory, search_type, result))
+  if (!PR_find (logical_file_name, search_list, PR_directory, result))
   {
     result = "";
   }

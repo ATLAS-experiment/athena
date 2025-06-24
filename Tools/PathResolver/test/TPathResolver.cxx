@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -66,9 +66,6 @@ void batch( )
 
   name = PathResolver::find_file ("A/e.txt", "APATH");
   std::cout << "8) [A/e.txt] Name = " << name << " [expected : ]" << std::endl;
-
-  name = PathResolver::find_file ("e.txt", "APATH", PathResolver::RecursiveSearch);
-  std::cout << "9) [e.txt] Name = " << name << " [expected : ./s/t/u/e.txt]" << std::endl;
 
 }
 

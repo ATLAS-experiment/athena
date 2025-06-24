@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -33,11 +33,6 @@ int main ()
   cout << "*** PathResolver_test starts ***" << endl;
   std::string filename = "a.txt";
   std::string fileLocation;
-
-  fileLocation = PathResolver::find_file (filename, "DATAPATH", PathResolver::RecursiveSearch);
-  std::cout << "filename " << filename << std::endl;
-  std::cout << "fileLocation " << cleanLoc(fileLocation) << std::endl;
-
 
   filename = "B/a.txt";
   fileLocation = PathResolver::find_file (filename, "DATAPATH");
