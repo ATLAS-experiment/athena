@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ForwardRegionGeoModelFactory_h
@@ -91,7 +91,7 @@ class ForwardRegionGeoModelFactory : public GeoVDetectorFactory  {
   void insertTCLElement(const std::string& name, double x, double y, double z, GeoPhysVol* fwrPhys, double TCLJawDistO, double TCLJawDistI, bool tungstenInsteadOfCopper = false);
 
   // Load data from file into 2D array of strings
-  std::vector<std::vector<std::string> > loadDataFile(char * fileName, int cols);
+  std::vector<std::vector<std::string> > loadDataFile(const std::string& fileName, int cols);
 
   // convert number to string
   template <class T>
