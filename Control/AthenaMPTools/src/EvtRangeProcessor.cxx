@@ -218,7 +218,6 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
   // ____________________ Step 2: decode worker result (if any) ______________________________
   AthenaInterprocess::ProcessResult* presult = m_processGroup->pullOneResult();
   if(presult) {
-    int res{0};
     if((unsigned)(presult->output.size)>=sizeof(int)) {
       // Decode result
       const AthenaInterprocess::ScheduledWork& output = presult->output;
@@ -228,6 +227,7 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
       auto itChildState = m_procStates.find(childPid);
       if(itChildState==m_procStates.end()) {
 	ATH_MSG_ERROR("Unable to find PID=" << childPid << " in the Proc States map!");
+        free(presult->output.data);
 	delete presult;
 	return StatusCode::FAILURE;
       }
@@ -239,6 +239,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	// Schedule exec_func()
 	if(mapAsyncFlag(AthenaMPToolBase::FUNC_EXEC,childPid)) {
 	  ATH_MSG_ERROR("Problem scheduling execution on PID=" << childPid);
+          free(presult->output.data);
+          delete presult;
 	  return StatusCode::FAILURE;
 	}
 
@@ -265,6 +267,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	if(m_finQueue.size()==1) {
 	  if(mapAsyncFlag(AthenaMPToolBase::FUNC_FIN,childPid)) {
 	    ATH_MSG_ERROR("Problem scheduling finalization on PID=" << childPid);
+            free(presult->output.data);
+            delete presult;
 	    return StatusCode::FAILURE;
 	  }
 	  else {
@@ -284,6 +288,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	  // Set the process free
 	  if(m_processGroup->map_async(0,0,pidFront)) {
 	    ATH_MSG_ERROR("Failed to set the process PID=" << pidFront << " free");
+            free(presult->output.data);
+            delete presult;
 	    return StatusCode::FAILURE;
 	  }
 
@@ -294,6 +300,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	  if(m_finQueue.size()) {
 	    if(mapAsyncFlag(AthenaMPToolBase::FUNC_FIN,m_finQueue.front())) {
 	      ATH_MSG_ERROR("Problem scheduling finalization on PID=" << m_finQueue.front());
+              free(presult->output.data);
+              delete presult;
 	      return StatusCode::FAILURE;
 	    }
 	    else  {
@@ -304,6 +312,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	else {
 	  // Error: unexpected pid received from presult
 	  ATH_MSG_ERROR("Finalized PID=" << childPid << " while PID=" << pid << " was expected");
+          free(presult->output.data);
+          delete presult;
 	  return StatusCode::FAILURE;
 	}
 
@@ -313,7 +323,6 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
     }
     free(presult->output.data);
     delete presult;
-    if(res) return StatusCode::FAILURE;
   }
   // ____________________ ______________________________________________ ______________________________
 
