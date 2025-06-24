@@ -46,16 +46,16 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
 
-  virtual bool                    checkLibrary(G4int particleCode, int detectorTag);
+  virtual bool                    checkLibrary(G4int particleCode, int detectorTag) override;
 
   //! return list of energy depositions for given track (interface implementation)
 #ifdef DEBUG_FrozenShowers
   virtual std::vector<EnergySpot> getShower(const G4FastTrack& track, int detectorTag);
 #else
-  virtual std::vector<EnergySpot> getShower(const G4FastTrack& track, int detectorTag) const;
+  virtual std::vector<EnergySpot> getShower(const G4FastTrack& track, int detectorTag) const override;
 #endif
-  virtual double                  getContainmentZ(const G4FastTrack& track, int detectorTag);
-  virtual double                  getContainmentR(const G4FastTrack& track, int detectorTag);
+  virtual double                  getContainmentZ(const G4FastTrack& track, int detectorTag) override;
+  virtual double                  getContainmentR(const G4FastTrack& track, int detectorTag) override;
 
 private:
   //! get shower library from StoreGate by track (using current volume name)
