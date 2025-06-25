@@ -49,10 +49,12 @@ def AddHitValAlgCfg(flags, name = "HitValAlg", outFile="NSWPRDValAlg.ntuple.root
     kwargs.setdefault("doRPCHit", flags.Detector.EnableRPC)
     kwargs.setdefault("doRPCSDO", flags.Detector.EnableRPC)
     kwargs.setdefault("doRPCDigit", flags.Detector.EnableRPC)
+    kwargs.setdefault("doRPCPRD", flags.Detector.EnableRPC)
 
     kwargs.setdefault("doMDTHit", flags.Detector.EnableMDT)
     kwargs.setdefault("doMDTSDO", flags.Detector.EnableMDT)
     kwargs.setdefault("doMDTDigit", flags.Detector.EnableMDT) 
+    kwargs.setdefault("doMDTPRD", flags.Detector.EnableMDT) 
 
     kwargs.setdefault("doTGCHit", flags.Detector.EnableTGC)
     kwargs.setdefault("doTGCSDO", flags.Detector.EnableTGC)
