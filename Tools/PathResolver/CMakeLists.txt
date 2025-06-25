@@ -26,7 +26,6 @@ atlas_add_dictionary( PathResolverDict
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_scripts( python/showReleaseNotes.py )
 
 # Set up a helper environment variable for the test(s):
 set( _dpath "${CMAKE_CURRENT_SOURCE_DIR}/test" )
