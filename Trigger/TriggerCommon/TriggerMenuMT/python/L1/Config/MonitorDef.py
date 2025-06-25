@@ -444,7 +444,7 @@ class MonitorDef:
             if "lowMu" in menuFullName:
                 monItemsHF[TBP|TAP|TAV].extend([
                     # ATR-31296 – Oxygen/Neon runs
-                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_XOR",
+                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_LOR",
                     "L1_ZDC_XN_XOR", "L1_ZDC_YN_XOR", "L1_ZDC_ZN_XOR"
                 ])
             else: # HI HLT menu
