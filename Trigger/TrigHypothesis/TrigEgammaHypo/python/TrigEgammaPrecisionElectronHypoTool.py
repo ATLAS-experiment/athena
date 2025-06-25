@@ -142,6 +142,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     tool.AcceptAll      = False
     tool.DoNoPid	= False
     tool.UseRelptvarcone30 = False
+    tool.UseTopoetcone20 = False
     self.__tool         = tool    
 
     self.__log.debug( 'Electron_Chain     :%s', self.__name )
@@ -215,10 +216,13 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
   def addIsoCut(self,flags):
     # rely on flag rather than self.__isolationCut
     valIsoCut = {None:None, 'ivarloose':flags.Trigger.egamma.isoWPs[0], 'ivarmedium':flags.Trigger.egamma.isoWPs[1], 'ivartight':flags.Trigger.egamma.isoWPs[2]}
+    topoIsoCut = {None:None, 'ivarloose':flags.Trigger.egamma.topoIsoWPs[0], 'ivarmedium':flags.Trigger.egamma.topoIsoWPs[1], 'ivartight':flags.Trigger.egamma.topoIsoWPs[2]}
     if not self.isoInfo() in valIsoCut:
       self.__log.fatal(f"Bad Iso selection name: {self.isoInfo()}")
     self.tool().UseRelptvarcone30 = flags.Trigger.egamma.useRelptvarcone30
     self.tool().RelPtConeCut = valIsoCut[self.isoInfo()]
+    self.tool().UseTopoetcone20 = flags.Trigger.egamma.useTopoetcone20
+    self.tool().TopoEtConeCut = topoIsoCut[self.isoInfo()]
 
 
  
