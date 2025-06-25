@@ -361,8 +361,8 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::createStaus(const EventContext& ct
         cache.requireSystemExtension = true;
 
         if (!m_muonSystemExtensionTool->muonLayerInterSections(ctx, *idMuidCo.cmb_trk, cache)) {
-            ATH_MSG_FATAL("Could not determine the intersections. Although that should be possible");
-            return StatusCode::FAILURE;
+            ATH_MSG_DEBUG("Could not determine the intersections. Although that should be possible");
+            continue;
         }
         stau_cache.outputContainer->push_back(std::move(cache.candidate));
     }
