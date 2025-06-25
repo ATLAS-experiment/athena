@@ -1537,7 +1537,7 @@ namespace CP {
                     ATH_MSG_DEBUG("Random run number not available and this is mc16e or mc20e, returning dummy 2018 run number.");
                     return 351359;
                 }
-                else if (eventInfo->runNumber() < 500000) //mc21 is 330000, mc23a is 410000, mc23c is 4500000
+                else if (eventInfo->runNumber() < 600000) //mc21 is 330000, mc23a is 410000, mc23c is 4500000
                 {
                     ATH_MSG_DEBUG("Random run number not available and this is mc21/mc23, for the time being we're returing a dummy run number.");
                     return 399999;
