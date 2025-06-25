@@ -134,7 +134,7 @@ TCS::AnomalyDetectionBDT::initialize() {
    std::string fileLocation;
    
    #ifndef TRIGCONF_STANDALONE
-   fileLocation = PathResolver::find_file(bdtfn,"CALIBPATH", PathResolver::RecursiveSearch);
+   fileLocation = PathResolver::find_calib_file(bdtfn);
    #else
    return StatusCode::SUCCESS;
    #endif 
