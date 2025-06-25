@@ -239,6 +239,20 @@ def SCTErrMonAlgConfig(flags):
             xmax=sctMon.NBINS_LBs+0.5,
             opt='kAlwaysCreate')
 
+        if iProblem == sctMon.summary:
+            myMonGroup.defineHistogram(
+                varname="lumiBlock, detectorCoverage" +
+                sctMon.coverageVarNames[iProblem]+"InR4P;SCT_Coverage" +
+                sctMon.coverageVarNames[iProblem]+"InR4PVsLbs",
+                type="TProfile",
+                title=coverageTitles[iProblem] + " in Ready for Physics" +
+                ";LumiBlock;Detector Coverage [%]",
+                path="DetectorCoverage",
+                xbins=sctMon.NBINS_LBs,
+                xmin=0.5,
+                xmax=sctMon.NBINS_LBs+0.5,
+                opt='kAlwaysCreate')
+
     # Fiiled in fillByteStreamErrors
     myMonGroup.defineHistogram(varname="lumiBlock, psTripModules;SCT_ModulesWithPSTripVsLbs",
                                type="TProfile",

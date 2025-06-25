@@ -15,6 +15,7 @@
 #include "TClass.h"
 #include "TObject.h"
 #include "TH1.h"
+#include "TProfile.h"
 
 #include <iostream>
 #include <cmath>
@@ -26,6 +27,7 @@ dqm_algorithms::LastBinThreshold instance("LastBinThreshold"); // global instanc
 dqm_algorithms::LastBinThreshold::LastBinThreshold(const std::string &name): 
 	m_nBinsToWatch(0)
 	, m_nBinsToExceed(0)
+	, m_binMinEntries(0)
 	, m_greaterThan(false)
 	, m_valueThresholds(false)
 	, m_getEntries(0)
@@ -55,6 +57,10 @@ dqm_core::Result *dqm_algorithms::LastBinThreshold::execute(const std::string &n
     if (histogram.GetDimension() > 1) { // only one-dimensional histograms have a last bin, but feel free to generalise this for D > 1 if you like
         throw dqm_core::BadConfig(ERS_HERE, name, "has more than one dimension");
     }
+    bool is_tProfile = false;
+    if (object.IsA()->InheritsFrom("TProfile")) { // BinMinEntries is used only when the histogram is TProfile
+      is_tProfile = true;
+    }
 
     getParameters(name, config);
     getThresholds(name, config);
@@ -82,6 +88,13 @@ dqm_core::Result *dqm_algorithms::LastBinThreshold::execute(const std::string &n
             if (m_greaterThan) content = histogram.GetXaxis()->GetBinUpEdge(currentBin);
             else               content = histogram.GetXaxis()->GetBinLowEdge(currentBin);
 	}
+	if (is_tProfile) { // if the histogram is TProfile, the bin entries are checked
+	  const TProfile &profile = dynamic_cast<const TProfile &>(object);
+	  if (profile.GetBinEntries(currentBin) < m_binMinEntries) { // if the bin entries is less than MinBinEntries, the count is skipped
+	    --currentBin;
+	    continue;
+	  }
+	}
         if (exceeds(content, m_grn)) ++grnExceeded; // can be less-than or greater-than relation
         if (exceeds(content, m_red)) ++redExceeded; // can be less-than or greater-than relation
         --currentBin;
@@ -106,6 +119,8 @@ void dqm_algorithms::LastBinThreshold::printDescription(std::ostream& out)
         "    The result of the algorithm is the worst-case result of all checked bins.\n"
         "Optional parameter: NBinsToExceed - minimal number of checked bins that have to exceed the given thresholds\n"
         "    before the corresponding result is returned. (1 <= NBinsToExceed <= NBinsToWatch, default = 1)\n"
+        "Optional parameter: BinMinEntries: Minimum number of entries in a TProfile (1D only) for a bin to be checked against thresolds\n"
+        "    If a bin does not have a sufficient number of entries it also will not be printed (default = 0)\n"
         "Optional parameter: GreaterThan - how the values will be compared. (GreaterThan = {0, 1}, default = 1)\n"
         "    GreaterThan == 0: the given thresholds are lower thresholds. (requires green >= red)\n"
         "    GreaterThan == 1: the given thresholds are upper thresholds. (requires green <= red)\n"
@@ -133,6 +148,7 @@ void dqm_algorithms::LastBinThreshold::getParameters(const std::string &name, co
     const double par2 = dqm_algorithms::tools::GetFirstFromMap("GreaterThan",     config.getParameters(), 1); // default = true
     const double par3 = dqm_algorithms::tools::GetFirstFromMap("ValueThresholds", config.getParameters(), 0); // default = false
     const double par4 = dqm_algorithms::tools::GetFirstFromMap("GetEntries",      config.getParameters(), 0); // default = 0
+    const double par5 = dqm_algorithms::tools::GetFirstFromMap("BinMinEntries",   config.getParameters(), 0); // default = 0
 
     if (par0 < 1)
         throw dqm_core::BadConfig(ERS_HERE, name, "NBinsToWatch must be 1 or greater");
@@ -152,6 +168,7 @@ void dqm_algorithms::LastBinThreshold::getParameters(const std::string &name, co
     m_greaterThan     = static_cast<bool>(par2);
     m_valueThresholds = static_cast<bool>(par3);
     m_getEntries      = static_cast<int>(par4);
+    m_binMinEntries   = static_cast<int>(par5);
 }
 
 void dqm_algorithms::LastBinThreshold::getThresholds(const std::string &name, const dqm_core::AlgorithmConfig &config)
