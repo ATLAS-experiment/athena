@@ -63,7 +63,7 @@ StatusCode FPGATrackSimNNTrackTool::initialize() {
 }
 
 
-StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst) {
+StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max) {
 
     ATH_MSG_DEBUG("Running NN-based track parameter estimation!");
     std::vector<float> paramNNoutputs;
@@ -147,11 +147,27 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
             ATH_MSG_DEBUG(paramNNoutputs[i]);
         }
 
-        track.setQOverPt(paramNNoutputs[0]*getQoverPtScale());
-        track.setEta(paramNNoutputs[1]*getEtaScale());
-        track.setPhi(paramNNoutputs[2]*getPhiScale());
-        track.setD0(paramNNoutputs[3]*getD0Scale());
-        track.setZ0(paramNNoutputs[4]*getZ0Scale());	
+	double qopt = paramNNoutputs[0]*getQoverPtScale();
+	double eta = paramNNoutputs[1]*getEtaScale();
+	double phi = paramNNoutputs[2]*getPhiScale();
+	double d0 = paramNNoutputs[3]*getD0Scale();
+	double z0 = paramNNoutputs[4]*getZ0Scale();
+	if (qopt < min[FPGATrackSimTrackPars::IHIP]) qopt = min[FPGATrackSimTrackPars::IHIP];
+	if (qopt > max[FPGATrackSimTrackPars::IHIP]) qopt = max[FPGATrackSimTrackPars::IHIP];
+	if (eta < min[FPGATrackSimTrackPars::IETA]) eta = min[FPGATrackSimTrackPars::IETA];
+	if (eta > max[FPGATrackSimTrackPars::IETA]) eta = max[FPGATrackSimTrackPars::IETA];
+	if (phi < min[FPGATrackSimTrackPars::IPHI]) phi = min[FPGATrackSimTrackPars::IPHI];
+	if (phi > max[FPGATrackSimTrackPars::IPHI]) phi = max[FPGATrackSimTrackPars::IPHI];
+	if (d0 < min[FPGATrackSimTrackPars::ID0]) d0 = min[FPGATrackSimTrackPars::ID0];
+	if (d0 > max[FPGATrackSimTrackPars::ID0]) d0 = max[FPGATrackSimTrackPars::ID0];
+	if (z0 < min[FPGATrackSimTrackPars::IZ0]) z0 = min[FPGATrackSimTrackPars::IZ0];
+	if (z0 > max[FPGATrackSimTrackPars::IZ0]) z0 = max[FPGATrackSimTrackPars::IZ0];
+	
+        track.setQOverPt(qopt);
+        track.setEta(eta);
+        track.setPhi(phi);
+        track.setD0(d0);
+        track.setZ0(z0);
     }
     return StatusCode::SUCCESS;
 }

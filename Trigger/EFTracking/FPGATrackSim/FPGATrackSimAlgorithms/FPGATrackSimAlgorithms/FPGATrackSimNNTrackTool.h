@@ -49,7 +49,7 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	StatusCode getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
 	StatusCode getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
 	StatusCode getTracks_GNN(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
-	StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst);
+        StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max);
 
 	static float getXScale() { return 1015.;};
 	static float getYScale() { return 1015.;};
