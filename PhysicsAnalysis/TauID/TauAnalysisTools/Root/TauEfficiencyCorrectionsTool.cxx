@@ -398,9 +398,19 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
           }
         } else if(m_sCampaign=="mc20"){
           if (m_sTriggerName.value().find("tracktwoEF") != std::string::npos) {
-            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data2018"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	    // check explicitly tau160 as the root file for this trigger was renamed 	  
+            if (m_sTriggerName.value().find("tau160") != std::string::npos) { 		  
+               m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data2018_comb_HLT_tau160L1TAU100_medium1_tracktwoEF_v1.root";
+	    } else {
+               m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data2018"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	    }   
           } else if (m_sTriggerName.value().find("tracktwo") != std::string::npos) {
-            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data161718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+            // check explicitly tau160 as the root file for this trigger was renamed      
+            if (m_sTriggerName.value().find("tau160") != std::string::npos) {
+	       m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data161718_comb_HLT_tau160_medium1_tracktwo_v1.root";   	    
+	    } else {		    
+               m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data161718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	    }
 	  } else {
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported. Please fix \"TriggerName\" property. If this is correct, then please contact the tau trigger coordinators");
             return StatusCode::FAILURE;
