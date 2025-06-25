@@ -184,10 +184,14 @@ class OutputAnalysisConfig (ConfigBlock):
             if filter_dsids([dsid], config):
                 self.commands += dsid_commands
 
+        outputConfigsRename = {}
         for command in self.commands :
             words = command.split (' ')
             if len (words) == 0 :
                 raise ValueError ('received empty command for "commands" option')
+            optional = words[0] == 'optional'
+            if optional :
+                words = words[1:]  # remove the 'optional' keyword
             if words[0] == 'enable' :
                 if len (words) != 2 :
                     raise ValueError ('enable takes exactly one argument: ' + command)
@@ -196,7 +200,7 @@ class OutputAnalysisConfig (ConfigBlock):
                     if re.match (words[1], name) :
                         outputConfigs[name].enabled = True
                         used = True
-                if not used and config.dataType() is not DataType.Data:
+                if not used and not optional and config.dataType() is not DataType.Data:
                     raise KeyError ('unknown branch pattern for enable: ' + words[1])
             elif words[0] == 'disable' :
                 if len (words) != 2 :
@@ -206,16 +210,30 @@ class OutputAnalysisConfig (ConfigBlock):
                     if re.match (words[1], name) :
                         outputConfigs[name].enabled = False
                         used = True
-                if not used and config.dataType() is not DataType.Data:
+                if not used and not optional and config.dataType() is not DataType.Data:
                     raise KeyError ('unknown branch pattern for disable: ' + words[1])
+            elif words[0] == 'rename' :
+                if len (words) != 3 :
+                    raise ValueError ('rename takes exactly two arguments: ' + command)
+                used = False
+                for name in outputConfigs :
+                    if re.match (words[1], name) :
+                        new_name = re.sub (words[1], words[2], name)
+                        outputConfigsRename[new_name] = copy.deepcopy(outputConfigs[name])
+                        outputConfigs[name].enabled = False
+                        used = True
+                if not used and not optional and config.dataType() is not DataType.Data:
+                    raise KeyError ('unknown branch pattern for rename: ' + words[1])
             else :
                 raise KeyError ('unknown command for "commands" option: ' + words[0])
+
+        # update the outputConfigs with renamed branches
+        outputConfigs.update(outputConfigsRename)
 
         autoVars = set()
         autoMetVars = set()
         autoTruthMetVars = set()
-        for outputName in outputConfigs :
-            outputConfig = outputConfigs[outputName]
+        for outputName, outputConfig in outputConfigs.items():
             if outputConfig.enabled :
                 if config.isMetContainer (outputConfig.origContainerName) and outputConfig.prefix not in self.containersFullMET:
                     if "Truth" in outputConfig.origContainerName:
