@@ -1,0 +1,54 @@
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
+// DType traits for Triton
+template <typename T> struct TritonDType;
+template <> struct TritonDType<float>    { static constexpr const char* value = "FP32"; };
+template <> struct TritonDType<int64_t>  { static constexpr const char* value = "INT64"; };
+
+// Input handling
+template <typename T>
+StatusCode AthInfer::TritonTool::prepareInput(const std::string& name,
+                                    const std::vector<int64_t>& shape,
+                                    const std::vector<T>& data,
+                                    std::vector<std::shared_ptr<tc::InferInput>>& inputs) const
+{
+    const char* dtype = TritonDType<T>::value;
+    tc::InferInput* rawInputPtr = nullptr;
+
+    // create the InferInput object with the predefined name, shape, and data type.
+    FAIL_IF_ERR(tc::InferInput::Create(&rawInputPtr, name, shape, dtype),
+                "unable to create input: " + name);
+
+    // Append tensor values for this input from a byte array.
+    // Note: The vector is not copied and so it must not be modified or destroyed
+    // until this input is no longer needed (that is until the Infer() call(s) that use the input have completed). 
+    // Multiple calls can be made to this API to keep adding tensor data for this input. 
+    // The data will be delivered in the order it was added.
+    std::shared_ptr<tc::InferInput> input(rawInputPtr);
+    FAIL_IF_ERR(input->AppendRaw(reinterpret_cast<const uint8_t*>(data.data()),
+                                 data.size() * sizeof(T)),
+                "unable to set input data for: " + name);
+
+    inputs.push_back(std::move(input));
+    return StatusCode::SUCCESS;
+}
+
+// Output handling
+template <typename T>
+StatusCode AthInfer::TritonTool::extractOutput(const std::string& name,
+                                     const std::shared_ptr<tc::InferResult>& result,
+                                     std::vector<T>& outputVec) const
+{
+    const uint8_t* rawData = nullptr;
+    size_t size = 0;
+
+    // Get access to the buffer holding raw results of specified output returned by the server.
+    // Note: the buffer is owned by InferResult instance.
+    // Users can copy out the data if required to extend the lifetime.
+    FAIL_IF_ERR(result->RawData(name, &rawData, &size),
+                "unable to get raw output for: " + name);
+
+    outputVec.resize(size / sizeof(T));
+    std::memcpy(outputVec.data(), rawData, size);
+    return StatusCode::SUCCESS;
+}
