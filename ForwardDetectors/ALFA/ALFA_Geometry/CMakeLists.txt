@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ALFA_Geometry )
@@ -16,5 +16,4 @@ atlas_add_library( ALFA_Geometry
                    PRIVATE_LINK_LIBRARIES PathResolver StoreGateLib )
 
 # Install files from the package:
-atlas_install_runtime( share/metrology/*.dat )
-
+atlas_install_data( share/metrology/*.dat )
