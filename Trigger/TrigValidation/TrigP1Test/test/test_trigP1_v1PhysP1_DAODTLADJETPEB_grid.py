@@ -3,7 +3,8 @@
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
@@ -44,7 +45,8 @@ filter_bs = ExecStep.ExecStep('FilterBS')
 filter_bs.type = 'other'
 filter_bs.executable = 'trigbs_extractStream.py'
 filter_bs.input = ''
-filter_bs.args = '-s DarkJetPEBTLA ' + find_file('*_HLTMPPy_output.*.data')
+# cannot use 'find_file' as it only returns the last file matching the pattern
+filter_bs.args = '-s DarkJetPEBTLA ' + '`find . -name "*_HLTMPPy_output.*.data"`'
 
 # Tier-0 reco step (BS->AOD)
 tlarecoPreExec = f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';"
