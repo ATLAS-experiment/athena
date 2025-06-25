@@ -33,7 +33,7 @@ public:
 
   StatusCode initialize() override;
 
-  StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads, std::vector<FPGATrackSimTrack> & tracks);
+  StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads, std::vector<FPGATrackSimTrack> & tracks, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max);
   StatusCode getMissingHitsCheckTracks(std::vector<FPGATrackSimTrack> & tracks_guessed);
 
   StatusCode getNFits(int & n)            { n = m_tfpobj->getNFits();             return StatusCode::SUCCESS; }

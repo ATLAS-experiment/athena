@@ -277,7 +277,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
                     // Collect tracks for this road
                     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadVec = {road};
-                    ATH_CHECK(m_trackFitterTool_1st->getTracks(roadVec, tracksForCurrentRoad));
+                    ATH_CHECK(m_trackFitterTool_1st->getTracks(roadVec, tracksForCurrentRoad, m_evtSel->getMin(), m_evtSel->getMax()));
 
                     // Find the best track for this road
                     if (!tracksForCurrentRoad.empty()) {
@@ -308,7 +308,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                     Monitored::Group(m_monTool, mon_best_chi2_1st);
                 }
             } else { // Pass all tracks with chi2 < 1e15
-                ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
+	      ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st, m_evtSel->getMin(), m_evtSel->getMax()));
                 float bestchi2 = 1.e15;
                 for (const FPGATrackSimTrack& track : tracks_1st) {
                     float chi2 = track.getChi2ndof();
@@ -351,7 +351,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // If running NN Track tool, now we get the track parameters (it's slow so we only do it for tracks passing OLR)
     if (m_doTracking && m_doNNTrack) {
-      ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks_1st,true));
+      ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks_1st,true,m_evtSel->getMin(), m_evtSel->getMax()));
     }
     
     unsigned ntrackOLRChi2 = 0;

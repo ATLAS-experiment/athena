@@ -272,7 +272,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
         // In first stage mode we'll make the track fitter just generate combinations
         std::vector<FPGATrackSimTrack> tracks_1st;
         if (m_doSecondStage) {
-          ATH_CHECK(m_trackFitterTool_1st->getTracks(houghRoads, tracks_1st));
+	  ATH_CHECK(m_trackFitterTool_1st->getTracks(houghRoads, tracks_1st, m_EvtSel->getMin(), m_EvtSel->getMax()));
           ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks_1st));
         } else {
           roadsToTrack(houghRoads, tracks_1st, m_pmap_1st);

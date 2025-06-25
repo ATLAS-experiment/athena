@@ -263,7 +263,13 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
 
   // Covariance - let's be honest and say we have no clue ;-) 
   Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
-  cov *= (GeVToMeV*GeVToMeV); 
+  (cov)(0,0) *= 1.3; // go from +2 to -2 = 4, divide by sqrt(12), square that to get 16/12 = 4/3
+  (cov)(1,1) *= 13000; // go from +200 to -200 = 400, divide by sqrt(12), square that to get 400^2 / 12
+  (cov)(2,2) *= 0.0003; // width is 0.2, divide by sqrt(12), square that to get 0.004/12
+  (cov)(3,3) *= 0.0003; // width in eta is nearly 0.2, but width in theta = 2*atan(e^-eta) will vary. Take biggest one, which is at eta of 0 when width is 0.2, so get same as phi
+  (cov)(4,4) *= 1.3; // qop also varies with eta, we will just take +1 to -1 and then double it to start, giving us 1.3
+  
+  ////  cov *= (GeVToMeV*GeVToMeV); 
 
   // some ACTS paperwork 
   Trk::ParticleHypothesis hypothesis = Trk::pion;
