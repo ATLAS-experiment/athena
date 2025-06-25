@@ -5,6 +5,10 @@
 // Include files
 #include <type_traits>
 
+#include "G4LogicalVolumeStore.hh"
+#include "G4PhysicalVolumeStore.hh"
+#include "G4Version.hh"
+
 // local
 #include "G4AtlasTools/G4AtlasDetectorConstructionTool.h"
 
@@ -111,7 +115,18 @@ G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::Construct() {
     }
   }
 
-  return m_detConstructionTool->m_detTool->GetWorldVolume();
+  // Build world volume and rebuild LV/PV stores if Geant4 is 11 or newer
+  // - Rebuild necessary because Athena may install LV/PV notifiers that change
+  //   volume names, which invalidates store maps.
+  G4VPhysicalVolume* wv = m_detConstructionTool->m_detTool->GetWorldVolume();
+#if G4VERSION_NUMBER > 1079
+  G4LogicalVolumeStore::GetInstance()->SetMapValid(false);
+  G4LogicalVolumeStore::GetInstance()->UpdateMap();
+  G4PhysicalVolumeStore::GetInstance()->SetMapValid(false);
+  G4PhysicalVolumeStore::GetInstance()->UpdateMap();
+#endif
+
+  return wv;
 }
 
 void G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
