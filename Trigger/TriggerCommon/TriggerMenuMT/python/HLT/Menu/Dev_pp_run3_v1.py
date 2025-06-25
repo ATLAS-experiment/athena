@@ -589,10 +589,18 @@ def getDevSignatures():
             # Test chains with b-tagging in preselection but no main selection at all:
         ChainProp(name='HLT_j0_j0_pf_ftf_presel2c20XX2c20b85_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=DevGroup+MultiBjetGroup),  #Baseline
         ChainProp(name='HLT_j0_j0_pf_ftf_preselZ120XX2c20XX2c20b85_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=DevGroup+MultiBjetGroup),
-                
+
         # Tests of potential TLA chains for cost/rate
         # ATR-23002 - b-jets
-        
+        # Potential impovements of the FTagPEB stream (mid 2025)
+        ChainProp(name='HLT_j20c_2j20c_pf_ftf_presel1c100XX2c20bgtwo85_FTagPEBTLA_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, stream=['FTagPEBTLA'], groups=MultiJetGroup+SupportPhIGroup, monGroups=['tlaMon:shifter']),
+        ChainProp(name='HLT_j20c_2j20c_pf_ftf_presel1c120XX2c20bgtwo90_FTagPEBTLA_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, stream=['FTagPEBTLA'], groups=MultiJetGroup+SupportPhIGroup, monGroups=['tlaMon:shifter']),
+        ChainProp(name='HLT_j20c_j20c_j20c_pf_ftf_presel1c120CXX1c20XX1c20bgtwo85_FTagPEBTLA_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*3, stream=['FTagPEBTLA'], groups=MultiJetGroup+SupportPhIGroup, monGroups=['tlaMon:shifter']),
+        # using single jet L1
+        ChainProp(name='HLT_j180c_j20c_pf_ftf_presel1c160XX1c20bgtwo90_FTagPEBTLA_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, stream=['FTagPEBTLA'], groups=MultiJetGroup+SupportPhIGroup, monGroups=['tlaMon:shifter']),
+        ChainProp(name='HLT_j180c_j20c_pf_ftf_presel1c160XX1c20bgtwo85_FTagPEBTLA_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, stream=['FTagPEBTLA'], groups=MultiJetGroup+SupportPhIGroup, monGroups=['tlaMon:shifter']),
+
+
         # ATR-29016: EOF TLA chains aiming for H->cc+ISRJet signature
         ChainProp(name='HLT_3j20c_pf_ftf_presel3c30_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=EOFTLALegGroup+MultiJetGroup, monGroups=['tlaMon:shifter']),
         ChainProp(name='HLT_3j20c_pf_ftf_presel3c40_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=EOFTLALegGroup+MultiJetGroup, monGroups=['tlaMon:shifter']),
@@ -602,7 +610,6 @@ def getDevSignatures():
         ChainProp(name='HLT_j0_roiftf_presel3c40_L1jJ85p0ETA21_3jJ40p0ETA25', groups=MultiJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j0_roiftf_presel3c45_L1jJ85p0ETA21_3jJ40p0ETA25', groups=MultiJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
 
-        
         ## with calo fast-tag presel
         ChainProp(name='HLT_2j20_2j20_0eta290_boffperf_pf_ftf_presel2j25XX2j25b85_PhysicsTLA_L14jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, stream=['TLA'], groups=MultiBjetGroup+DevGroup),
         ChainProp(name='HLT_2j20_2j20_0eta290_boffperf_pf_ftf_presel2c20XX2c20b85_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, stream=['TLA'], groups=MultiBjetGroup+DevGroup),
