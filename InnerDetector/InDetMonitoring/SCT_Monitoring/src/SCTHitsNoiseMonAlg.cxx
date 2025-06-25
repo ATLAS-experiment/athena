@@ -284,6 +284,13 @@ StatusCode SCTHitsNoiseMonAlg::generalHistsandNoise(const std::array<std::unorde
       auto phihitsmapRecentAcc{Monitored::Collection("phi_"+hitmaprecent, vPhi)};
       auto numberOfStripsRecentAcc{Monitored::Collection("numberOfStrips_"+hitmaprecent, vNumberOfStrips)};
       fill("SCTHitsNoiseMonitor_" + std::to_string(systemIndex), etahitsmapRecentAcc, phihitsmapRecentAcc, numberOfStripsAcc);
+
+      const std::string streamhitmaprecent{"mapsOfHitsOnTracksrecent" + abbreviations[systemIndex] + "_" +
+        "trackhitsmap_" + layerSide.name()};
+
+      auto etaMapsOfHitsOnTracksRecentAcc{Monitored::Collection("eta_"+streamhitmaprecent, vEtaOnTrack)};
+      auto phiMapsOfHitsOnTracksRecentAcc{Monitored::Collection("phi_"+streamhitmaprecent, vPhiOnTrack)};
+      fill("SCTHitsNoiseMonitor_" + std::to_string(systemIndex), etaMapsOfHitsOnTracksRecentAcc, phiMapsOfHitsOnTracksRecentAcc);
     }
 
     if (numberOfHitsFromAllRDOs > 0) {
