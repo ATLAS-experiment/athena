@@ -53,6 +53,7 @@
 #include "G4VEmModel.hh"
 #include "G4VEmFluctuationModel.hh"
 #include "G4Version.hh"
+#include "G4BetheBlochModel.hh"
 
 class G4ParticleChangeForLoss;
 
@@ -128,6 +129,8 @@ private:
   void SetParticle(const G4ParticleDefinition* p);
 
   G4double ComputeDEDXAhlen(const G4Material* material, G4double bg2, G4double cut);
+  
+  G4BetheBlochModel* BetheBlochModel;
 
   // hide assignment operator
   G4mplAtlasIonisationWithDeltaModel & operator=(const  G4mplAtlasIonisationWithDeltaModel &right);

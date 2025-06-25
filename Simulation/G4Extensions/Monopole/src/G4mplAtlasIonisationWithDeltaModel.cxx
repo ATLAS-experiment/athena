@@ -89,6 +89,7 @@ G4mplAtlasIonisationWithDeltaModel::G4mplAtlasIonisationWithDeltaModel(G4double 
   dedxlim = 45.*nmpl*nmpl*CLHEP::GeV*CLHEP::cm2/CLHEP::g;
   fParticleChange = 0;
   theElectron = G4Electron::Electron();
+  BetheBlochModel = new G4BetheBlochModel(); // initialize the model for use in ComputeDEDXPerVolume and ComputeCrossSectionPerElectron
   G4cout << "### Monopole ionisation model with d-electron production, Gmag= "
          << magCharge/CLHEP::eplus << G4endl;
 }
@@ -102,7 +103,7 @@ G4mplAtlasIonisationWithDeltaModel::~G4mplAtlasIonisationWithDeltaModel()
 
 void
 G4mplAtlasIonisationWithDeltaModel::Initialise(const G4ParticleDefinition* p,
-                                               const G4DataVector&)
+                                               const G4DataVector& G4DataVec)
 {
   monopole = p;
   mass     = monopole->GetPDGMass();
@@ -113,6 +114,7 @@ G4mplAtlasIonisationWithDeltaModel::Initialise(const G4ParticleDefinition* p,
   else
     fParticleChange = new G4ParticleChangeForLoss();
 
+  BetheBlochModel->Initialise(p, G4DataVec);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
@@ -151,6 +153,10 @@ G4mplAtlasIonisationWithDeltaModel::ComputeDEDXPerVolume(const G4Material* mater
       const G4double kapa1 = betalim - beta;
       dedx = (kapa1*dedx1 + kapa2*dedx2)/(kapa1 + kapa2);
     }
+  }
+  if(p->GetPDGCharge() != 0) {
+        G4double dedxBetheBloch = BetheBlochModel->ComputeDEDXPerVolume(material, p, kineticEnergy, maxEnergy);
+        dedx += dedxBetheBloch; // only dyons would be electrically charged here, then add Bethe-Bloch DEDX to total
   }
   return dedx;
 }
@@ -208,6 +214,12 @@ G4mplAtlasIonisationWithDeltaModel::ComputeCrossSectionPerElectron(
   if(cutEnergy < maxEnergy) {
     cross = (1.0/cutEnergy - 1.0/maxEnergy)*CLHEP::twopi_mc2_rcl2*chargeSquare;
   }
+
+  if(p->GetPDGCharge() != 0) { // if dyon, include the Bethe-Bloch Cross-section to total calculation
+      G4double crossBetheBloch = BetheBlochModel->ComputeCrossSectionPerElectron(p, kineticEnergy, cutEnergy, maxKinEnergy);
+      cross += crossBetheBloch; // additive since they are different processes
+  }
+
   return cross;
 }
 
