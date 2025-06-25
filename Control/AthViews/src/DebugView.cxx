@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthViews/DebugView.h"
@@ -15,10 +15,16 @@ DebugView::DebugView( std::string const& Name, bool AllowFallThrough, std::strin
 DebugView::~DebugView()
 {
   // Debugging info
-  ATH_MSG_INFO( "Loaded via fallthrough from view " << m_name << ": " );
-  for ( auto const& key : m_fallList ) ATH_MSG_INFO( key );
+  try {
+    ATH_MSG_INFO( "Loaded via fallthrough from view " << m_name << ": " );
+    for ( auto const& key : m_fallList ) ATH_MSG_INFO( key );
 
-  ATH_MSG_INFO( "View " << m_name << " has " << m_parents.size() << " parents" );
+    ATH_MSG_INFO( "View " << m_name << " has " << m_parents.size() << " parents" );
+  }
+  catch (const GaudiException&) {
+    // ATH_MSG_* can throw --- don't let the exception escape the destructor.
+    std::abort();
+  }
 }
 
 void DebugView::linkParent( const IProxyDict* parent ) {
@@ -124,10 +130,9 @@ SG::DataProxy * DebugView::findProxy( const CLID& id, const std::string& key, co
   return nullptr;
 }
 
-SG::DataProxy * DebugView::proxy( const void* const pTransient ) const
+SG::DataProxy * DebugView::proxy( const void* const /*pTransient*/ ) const
 {
   throw std::runtime_error( "Not implemented: SimpleView::proxy" );
-  return m_store->proxy( pTransient );
 }
 
 SG::DataProxy * DebugView::recordObject( SG::DataObjectSharedPtr<DataObject> obj, const std::string& key, bool allowMods, bool returnExisting )
