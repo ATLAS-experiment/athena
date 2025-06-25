@@ -133,6 +133,8 @@ def fromRunArgs(runArgs):
         [
             'xAOD::BTaggingContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
             'xAOD::BTaggingAuxContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.',
+            'xAOD::VertexContainer#HLT_IDVertex_FS',
+            'xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,
         ],
         'DarkJetPEBTLA': [
             # Jets
