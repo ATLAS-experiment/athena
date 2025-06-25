@@ -85,6 +85,8 @@ L1TopoParams = {
                           'AnomalyScoreThresh']},
   'AnomalyDetectionBDT': {
      'comment': 'BDT-based muon anomaly trigger',
+     'common_parameters' : ['MinET1',
+                            'MinET2'],
      'parameters': ['ScoreThreshold']
   }, 
  'DisambiguationIncl2': {'ApplyDR = 1': {'comment': '',
@@ -308,7 +310,7 @@ L1TopoParams = {
 'TeAsymmetry' : {'comment': '',
                 'parameters': ['deltaAbsMin', 'asymFactor', 'asymOffset', 'maxTeProduct']},
 'TeATIME' : {'comment': '',
-                'parameters': []},
+                'parameters': ['algoLogic', 'nextBcOffset', 'nextBcFactor']},
  'eEmNoSort': {'comment': '', 'parameters': ['REtaMin', 'RHadMin', 'WsTotMin']},
  'eEmSelect': {'comment': '',
                'parameters': ['MinET', 'REtaMin', 'RHadMin', 'WsTotMin']},

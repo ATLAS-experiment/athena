@@ -1782,7 +1782,11 @@ class TopoAlgoDef:
         #TeATIME
         TeATIME_map = [
         {  
-            "algoname"  : "TeATIME-jTENoSort",
+            "algoname"     : "TeATIME-jTENoSort",
+            "teFlavor"     : [1,1,1,3], # 0 = off, 1 = full jTE, 2 = central jTE, 3 = forward jTE (A+C side)
+            "combination"  : [0,1,2,1], # 0 = require both, 1 = require offset, 2 = require factor, 3 = require any of the two criteria
+            "nextBcOffset" : [10,10,10,10], # offset by which upcoming BC's jTE must exceed current BC's jTE value
+            "nextBcFactor" : [2.5,2.5,2.5,2.5] # factor by which upcoming BC's jTE must be larger than current BC's jTE value
         }
         ]
 
@@ -1801,6 +1805,10 @@ class TopoAlgoDef:
             alg = AlgConf.TeATIME( name = d.algoname, inputs = inputList, outputs =  toponames )
             alg.addgeneric('InputWidth', 1)
             alg.addgeneric('NumResultBits', len(toponames))
+            for bitId in range(len(d.teFlavor)):
+                alg.addvariable('algoLogic', d.teFlavor[bitId] + ( d.combination[bitId] << 2 ) , bitId)  #two bit fields (of 2 bits each) merged into on FW register
+                alg.addvariable('nextBcOffset', round(d.nextBcOffset[bitId] * _et_conversion), bitId) #converted to units of 100MeV
+                alg.addvariable('nextBcFactor', round(d.nextBcFactor[bitId] * pow(2,8)), bitId) #integer representation of factor corresponding to 8 fractional bits
             tm.registerTopoAlgo(alg)
 
 
@@ -1845,6 +1853,8 @@ class TopoAlgoDef:
             "algoname": "ADBDT-MU0s",
             "otype1": "MU", "olist1": "s", "inputwidth1": 6, "nleading1": 3,
             "WPList": ["Tight", "Loose"],
+            "MinET1": 0,#min muon1 threshold in GeV, the 0 sets the muon to the min TOB threshold avaiable in Topo 
+            "MinET2": 0,#min muon2 threshold in Gev 
             "ScoreThreshold": [25, 40]
         }
         
@@ -1861,9 +1871,12 @@ class TopoAlgoDef:
             inputs=[d.otype1 + d.olist1],
             outputs=toponames
         )
-        
+        alg.addgeneric('NumResultBits', 2)
+        alg.addgeneric('MaxTob',d.nleading1) #Set the number of Tobs to 3 (leading pT 3 muons)
+
+        alg.addvariable('MinET1',d.MinET1*_et_conversion)
+        alg.addvariable('MinET2',d.MinET2*_et_conversion)
         for bitId in range(len(toponames)):
-            alg.addgeneric('NumResultBits', 2)
             alg.addvariable('ScoreThreshold', d.ScoreThreshold[bitId], bitId)
 
         tm.registerTopoAlgo(alg)
