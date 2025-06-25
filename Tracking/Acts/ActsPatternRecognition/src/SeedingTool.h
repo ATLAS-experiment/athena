@@ -305,7 +305,13 @@ namespace ActsTrk {
       float r = sp.radius();
       float zabs = std::abs(sp.z());
 
-      if (zabs > 200. && r < m_ExpCutrMin) {
+      // We perform a triangular cut and remove the space points
+      // that have |z| < 200 and radius < m_ExpCutrMin
+      // But we do that only if the eta of the space point wrt origin is < 3.6
+      // eta 3.6 corresponds to 18.2855
+      if (zabs > 200. and
+	  zabs < 18.2855 * r and
+	  r < m_ExpCutrMin) {
 	return false;
       }
             
@@ -315,19 +321,31 @@ namespace ActsTrk {
       if ((zabs - 150.) > cotTheta * r) {
 	return false;
       }
+
       return true;
     }
 
     static inline bool itkFastDoubletCut(float bottomRadius, float cotTheta) {
-      //float fastTrackingRMin = m_ExpCutrMin;
-      float fastTrackingCotThetaMax = 1.5;
-      
-      //if (bottomRadius < fastTrackingRMin and
+      // We remove here some seeds, in case the bottom space point radius is
+      // too small (i.e. < fastTrackingRMin)
+
+      // This operation is done only within a specific eta window
+      // Instead of eta we use the doublet cottheta
+      // We require:
+      //     fastTrackingCotThetaWindowMin < cottheta doublet < fastTrackingCotThetaWindowMax
+      // with stranslates to an eta window.
+      // cottheta of 1.5 is about eta 1.2
+      // cottheta of 18.2855 is about eta of 3.6
+      float fastTrackingCotThetaWindowMin = 1.5;
+      float fastTrackingCotThetaWindowMax = 18.2855;
+
+      float absCotTheta = std::abs(cotTheta);
       if (bottomRadius < m_ExpCutrMin and
-	  (cotTheta > fastTrackingCotThetaMax or
-	   cotTheta < -fastTrackingCotThetaMax)) {
+	  absCotTheta > fastTrackingCotThetaWindowMin and
+	  absCotTheta < fastTrackingCotThetaWindowMax) {
 	return false;
       }
+
       return true;
     }
   };
