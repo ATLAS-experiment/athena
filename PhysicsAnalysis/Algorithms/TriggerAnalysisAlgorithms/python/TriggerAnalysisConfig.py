@@ -170,6 +170,7 @@ class TriggerAnalysisBlock (ConfigBlock):
                         for lumicalc in lumicalc_year
                     ]
                     triggers_output.update(self._get_lumicalc_triggers(all_lumicalc_files))
+                    alg.triggersAll = list(triggers_output)
                 for trigger in triggers_output:
                     trigger = trigger.replace("-", "_")
                     config.addOutputVar(
