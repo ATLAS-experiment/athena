@@ -331,9 +331,8 @@ private:
   static constexpr unsigned int s_fnDiscEtBinsOneExtra = 10;
   static constexpr unsigned int s_fnEtaBins = 10;
   static constexpr unsigned int s_fnVariables = 13;
-  // 5D array of ptr to SafeTH1  // [sig(0)/bkg(1)][ip][et][eta][variable]
-  EGSelectors::SafeTH1* fPDFbins[2][IP_BINS][s_fnEtBinsHist][s_fnEtaBins]
-                                [s_fnVariables]{};
+  // 5D array of unique_ptr to SafeTH1  // [sig(0)/bkg(1)][ip][et][eta][variable]
+  std::unique_ptr<EGSelectors::SafeTH1> m_fPDFbins[2][IP_BINS][s_fnEtBinsHist][s_fnEtaBins][s_fnVariables];
   static const std::string s_fVariables[s_fnVariables];
 
   static unsigned int getIpBin(double ip) ;
