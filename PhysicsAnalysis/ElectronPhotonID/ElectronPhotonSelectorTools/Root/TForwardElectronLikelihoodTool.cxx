@@ -174,9 +174,8 @@ Root::TForwardElectronLikelihoodTool::loadVarHistograms(const std::string& vstr,
                 ->Contains(pdf.c_str())) {
             TH1F* hist =
               (TH1F*)(((TDirectory*)m_pdfFile->Get(pdfdir.c_str()))->Get(pdf.c_str()));
-            fPDFbins[s_or_b][ip][et][eta][varIndex] =
-              new EGSelectors::SafeTH1(hist);
-            delete hist;
+            m_fPDFbins[s_or_b][ip][et][eta][varIndex] =
+              std::make_unique<EGSelectors::SafeTH1>(hist);
           } else {
             ATH_MSG_INFO("Warning: Object " << pdf << " does not exist.");
             ATH_MSG_INFO("Skipping all other histograms with this variable.");
@@ -219,7 +218,7 @@ Root::TForwardElectronLikelihoodTool::accept(
   bool passKineEt(true);
   bool passLH(true);
 
-  if (fabs(vars_struct.eta) < 2.5) {
+  if (std::fabs(vars_struct.eta) < 2.5) {
     ATH_MSG_DEBUG("This forward electron has"
                   << vars_struct.eta
                   << ", which is fabs(eta)<2.5 Returning False.");
@@ -320,7 +319,7 @@ Root::TForwardElectronLikelihoodTool::calculate(
 
 double
 Root::TForwardElectronLikelihoodTool::evaluateLikelihood(
-  std::vector<float>& varVector,
+  const std::vector<float>& varVector,
   double et,
   double eta,
   double ip) const
@@ -334,7 +333,7 @@ Root::TForwardElectronLikelihoodTool::evaluateLikelihood(
 
 double
 Root::TForwardElectronLikelihoodTool::evaluateLikelihood(
-  std::vector<double>& varVector,
+  const std::vector<double>& varVector,
   double et,
   double eta,
   double ip) const
@@ -373,11 +372,11 @@ Root::TForwardElectronLikelihoodTool::evaluateLikelihood(
     for (unsigned int s_or_b = 0; s_or_b < 2; s_or_b++) {
 
       int bin =
-        fPDFbins[s_or_b][ipbin][etbin][etabin][var]->FindBin(varVector[var]);
+        m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->FindBin(varVector[var]);
       double prob = 0;
 
       double integral =
-        double(fPDFbins[s_or_b][ipbin][etbin][etabin][var]->Integral());
+        double(m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->Integral());
       if (integral == 0) { // currently, the crack always has integral == 0
         ATH_MSG_DEBUG(
           "Error! PDF integral == 0!"); // changed it to debug message since we
@@ -386,7 +385,7 @@ Root::TForwardElectronLikelihoodTool::evaluateLikelihood(
         return -1.35;
       }
 
-      prob = double(fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetBinContent(
+      prob = double(m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetBinContent(
                bin)) /
              integral;
 
@@ -421,7 +420,7 @@ Root::TForwardElectronLikelihoodTool::TransformLikelihoodOutput(double ps,
     disc = fEpsilon;
 
   double tau = 15.0;
-  disc = -log(1.0 / disc - 1.0) * (1. / double(tau));
+  disc = -std::log(1.0 / disc - 1.0) * (1. / double(tau));
 
   ATH_MSG_DEBUG("disc is " << disc);
   return disc;
@@ -446,7 +445,7 @@ Root::TForwardElectronLikelihoodTool::getLikelihoodEtaBin(double eta)
   const double etaBins[nEtaBins] = { 2.6, 2.7,  2.8,  2.9, 3.0,
                                      3.1, 3.16, 3.35, 3.6, 4.9 };
   for (unsigned int etaBin = 0; etaBin < nEtaBins; ++etaBin) {
-    if (fabs(eta) < etaBins[etaBin])
+    if (std::fabs(eta) < etaBins[etaBin])
       return etaBin;
   }
   return (nEtaBins - 1);

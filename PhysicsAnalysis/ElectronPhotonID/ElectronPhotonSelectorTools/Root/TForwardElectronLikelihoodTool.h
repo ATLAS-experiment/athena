@@ -145,11 +145,11 @@ private:
   // For every input "varVector", make sure elements of vector are
   // in the same order as prescribed in fVariables
   // Internal methods to calculate the LH discriminant from a set of variables
-  double evaluateLikelihood(std::vector<double>& varVector,
+  double evaluateLikelihood(const std::vector<double>& varVector,
                             double et,
                             double eta,
                             double ip = 0) const;
-  double evaluateLikelihood(std::vector<float>& varVector,
+  double evaluateLikelihood(const std::vector<float>& varVector,
                             double et,
                             double eta,
                             double ip = 0) const;
@@ -236,9 +236,8 @@ private:
   static const unsigned int s_fnEtaBins = 10;
   static const unsigned int s_fnVariables = 8;
   static const std::string fVariables[s_fnVariables];
-  // 5D array of ptr to SafeTH1  // [sig(0)/bkg(1)][ip][et][eta][variable]
-  EGSelectors::SafeTH1* fPDFbins[2][IP_FBINS][s_fnEtBinsHist][s_fnEtaBins]
-                                [s_fnVariables]{};
+  // 5D array of unique_ptr to SafeTH1  // [sig(0)/bkg(1)][ip][et][eta][variable]
+  std::unique_ptr<EGSelectors::SafeTH1> m_fPDFbins[2][IP_FBINS][s_fnEtBinsHist][s_fnEtaBins][s_fnVariables];
 
   static unsigned int getIpBin(double ip) ;
   static std::string getBinName(int etbin,
