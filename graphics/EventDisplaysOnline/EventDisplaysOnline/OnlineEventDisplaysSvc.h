@@ -10,34 +10,22 @@
 #include "GaudiKernel/IIncidentListener.h"
 #include "StoreGate/ReadHandle.h"
 #include "xAODEventInfo/EventInfo.h"
-#include <iostream>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <grp.h>
 
-template <class TYPE> class SvcFactory;
 
-class OnlineEventDisplaysSvc : public AthService, virtual public IOnlineEventDisplaysSvc, virtual public IIncidentListener {
 
-protected:
-  friend class SvcFactory<OnlineEventDisplaysSvc>;
-
+class OnlineEventDisplaysSvc : public extends<AthService,
+                                              IOnlineEventDisplaysSvc,
+                                              IIncidentListener> {
 public:
 
   OnlineEventDisplaysSvc( const std::string& name, ISvcLocator* pSvcLocator );
-
-  static const InterfaceID& interfaceID();
-
-  //To allow access to the IOnlineEventDisplaysSvc interface
-  StatusCode queryInterface( const InterfaceID& riid, void** ppvIf ) override;
 
   StatusCode initialize() override;
   StatusCode finalize() override;
   void beginEvent();
   void endEvent();
   void handle(const Incident& incident ) override;
-  void createWriteableDir(std::string directory, gid_t zpgid);
+  void createWriteableDir(const std::string& directory, gid_t zpgid);
   gid_t setOwnershipToZpGrpOrDefault();
   std::string getFileNamePrefix() override;
   std::string getEntireOutputStr() override;
@@ -56,14 +44,9 @@ private:
   std::string m_FileNamePrefix = "JiveXML";
   std::string m_outputStreamDir = ".Unknown";
   std::string m_entireOutputStr = ".";
-  int m_runNumber;
-  long m_eventNumber;
+  int m_runNumber{};
+  long m_eventNumber{};
 
 };
-
-inline const InterfaceID& OnlineEventDisplaysSvc::interfaceID()
-{
-  return IOnlineEventDisplaysSvc::interfaceID();
-}
 
 #endif

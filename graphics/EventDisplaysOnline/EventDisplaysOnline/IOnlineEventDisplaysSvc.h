@@ -5,24 +5,18 @@
 #ifndef IONLINEEVENTDISPLAYSSVC_H
 #define IONLINEEVENTDISPLAYSSVC_H
 
-#include "GaudiKernel/IService.h"
+#include "GaudiKernel/IInterface.h"
 
-class IOnlineEventDisplaysSvc : virtual public IService {
+class IOnlineEventDisplaysSvc : virtual public IInterface {
 
 public:
+  DeclareInterfaceID(IOnlineEventDisplaysSvc, 1, 0);
 
   virtual ~IOnlineEventDisplaysSvc(){};
 
-  static const InterfaceID& interfaceID();
   virtual std::string getFileNamePrefix() = 0;
   virtual std::string getStreamName() = 0;
   virtual std::string getEntireOutputStr() = 0;
 };
-
-inline const InterfaceID& IOnlineEventDisplaysSvc::interfaceID()
-{
-  static const InterfaceID IID_IOnlineEventDisplaysSvc("IOnlineEventDisplaysSvc", 1, 0);
-  return IID_IOnlineEventDisplaysSvc;
-}
 
 #endif
