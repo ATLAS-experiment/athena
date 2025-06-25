@@ -342,19 +342,19 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 
         if(m_sCampaign=="mc23"){
             if( m_iJetIDLevel == (int)JETIDRNNLOOSE){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_2022_looseRNNTauID_1p.root"; 
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2022_looseRNNTauID_1p.root"; 
             } else if( m_iJetIDLevel == (int)JETIDRNNMEDIUM){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_2022_mediumRNNTauID_1p.root";
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2022_mediumRNNTauID_1p.root";
             }
             else {
                 ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
-                return StatusCode::FAILURE;
+		return StatusCode::FAILURE;
             }
         } else if(m_sCampaign=="mc20"){
             if( m_iJetIDLevel == (int)JETIDRNNLOOSE){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_Run2_looseRNNTauID_1p.root";
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseRNNTauID_1p.root";
             } else if( m_iJetIDLevel == (int)JETIDRNNMEDIUM){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_Run2_mediumRNNTauID_1p_v1.root";
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_mediumRNNTauID_1p_v1.root";
             }
             else {
                 ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
