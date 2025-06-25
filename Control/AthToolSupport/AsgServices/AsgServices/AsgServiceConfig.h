@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -171,7 +171,13 @@ namespace asg
     ANA_CHECK (configureComponentExpert ("", false));
     service.setTypeAndName (typeAndName());
     ANA_CHECK (service.retrieve());
-    ANA_CHECK (dynamic_cast<::AthService*>(&*service)->sysInitialize());
+    if (auto svc = dynamic_cast<::AthService*> (service.get())) {
+      ANA_CHECK (svc->sysInitialize());
+    }
+    else {
+      ANA_MSG_ERROR ("Cannot cast to AthService");
+      return StatusCode::FAILURE;
+    }
 
     ANA_MSG_DEBUG ("Created component of type " << type());
     return StatusCode::SUCCESS;
