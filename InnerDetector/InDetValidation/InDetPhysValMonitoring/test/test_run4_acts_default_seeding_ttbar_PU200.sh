@@ -43,9 +43,11 @@ run "Reconstruction" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --postInclude "InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsSeedingConfig.ActsMainSeedingCfg" \
-    --preExec "flags.Tracking.doTruth=False;flags.DQ.useTrigger=False;flags.Acts.doAnalysis=True;flags.Output.HISTFileName=\"ActsMonitoringOutput.root\"" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
+    --preExec "flags.Tracking.doTruth=False; \
+    	       flags.DQ.useTrigger=False; \
+	       flags.Acts.doAnalysis=True; \
+	       flags.Output.HISTFileName=\"ActsMonitoringOutput.root\";" \
     --perfmon fullmonmt \
     --maxEvents 5
 
