@@ -54,7 +54,7 @@
 
 template<typename C>
 bool isEmptyCont(C& c) {
-  return (c==nullptr || c->size()==0); 
+  return (!c.isValid() || c->size()==0); 
 }
 
 
@@ -84,10 +84,10 @@ StatusCode LArDigitalTriggMonAlg::initialize()
   ATH_CHECK(m_bcContKey.initialize());
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
 
-  ATH_CHECK(m_digitContainerKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_digitContainerKey.initialize());
   ATH_CHECK(m_keyPedestalSC.initialize());
   ATH_CHECK(m_caloSuperCellMgrKey.initialize());
-  ATH_CHECK(m_rawSCContainerKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_rawSCContainerKey.initialize());
   ATH_CHECK(m_rawSCEtRecoContainerKey.initialize());
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_actualMuKey.initialize());
@@ -142,7 +142,10 @@ struct SC_MonValues {
   float sc_time;
   int sc_bcid;
   unsigned int sc_lb;
-  bool sc_passSCNom;
+  bool sc_zeroET; 
+  bool sc_passSCNomInvalid;
+  bool sc_passSCNom0_0p325;
+  bool sc_passSCNom0p325_1;
   bool sc_passSCNom1;
   bool sc_passSCNom10;
   bool sc_passSCNom10tauGt3;
@@ -210,6 +213,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   // cuts
   auto passTauSel = Monitored::Scalar<bool>("passTauSel",false);
   auto nonZeroET = Monitored::Scalar<bool>("nonZeroET",false); // eTgt0GeV
+  auto zeroET = Monitored::Scalar<bool>("zeroET",false); // eTgt0GeV
   auto nonZeroETofl = Monitored::Scalar<bool>("nonZeroETofl",false); // eTgt0GeV
   auto onlofflEmismatch = Monitored::Scalar<bool>("onlofflEmismatch",false);
   auto notSatur = Monitored::Scalar<bool>("notSatur",false);
@@ -217,11 +221,18 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto tauGt3 = Monitored::Scalar<bool>("tauGt3",false);
   auto nonZeroEtau = Monitored::Scalar<bool>("nonZeroEtau",false);
   auto eTgt1GeV = Monitored::Scalar<bool>("eTgt1GeV",false);
+  auto eTlt1GeV = Monitored::Scalar<bool>("eTlt1GeV",false);
+  auto eTgt0p325GeV = Monitored::Scalar<bool>("eTgt0p325GeV",false);
+  auto eTgt0lt0p325GeV = Monitored::Scalar<bool>("eTgt0lt0p325GeV",false);
   auto eTgt10GeV = Monitored::Scalar<bool>("eTgt10GeV",false);
+  auto eTlt10GeV = Monitored::Scalar<bool>("eTlt10GeV",false);
   auto eToflGt1GeV = Monitored::Scalar<bool>("eToflGt1GeV",false);
 
 
-  auto passSCNom = Monitored::Scalar<bool>("passSCNom",false);  // pass tau, not satur, not OFCb OF, not masked  nonZeroET
+  //auto passSCNom = Monitored::Scalar<bool>("passSCNom",false);  // pass tau, not satur, not OFCb OF, not masked  nonZeroET < 10 GeV
+  auto passSCNomInvalid = Monitored::Scalar<bool>("passSCNomInvalid",false);  // pass tau, not satur, not OFCb OF, not masked  ET <  0.0 , should be equal to -999? 
+  auto passSCNom0_0p325 = Monitored::Scalar<bool>("passSCNom0_0p325",false);  // pass tau, not satur, not OFCb OF, not masked  nonZeroET < 0.2 GeV
+  auto passSCNom0p325_1 = Monitored::Scalar<bool>("passSCNom0p325_1",false);  // pass tau, not satur, not OFCb OF, not masked  0.2 < ET < 1 GeV
   auto passSCNom1 = Monitored::Scalar<bool>("passSCNom1",false);  // pass tau, not satur, not OFCb OF, not masked eTgt1GeV
   auto passSCNom10 = Monitored::Scalar<bool>("passSCNom10",false);  // pass tau, not satur, not OFCb OF, not masked eTgt10GeV
   auto passSCNom10tauGt3 = Monitored::Scalar<bool>("passSCNom10tauGt3",false);  // pass tau, not satur, not OFCb OF, not masked eTgt10GeV  tauGt3
@@ -238,50 +249,35 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,ctx};
   const LArOnOffIdMapping* cabling=*cablingHdl;
 
-  const LArDigitContainer* pLArDigitContainer=nullptr;
-  if (!m_digitContainerKey.empty()) {
-    SG::ReadHandle<LArDigitContainer> hLArDigitContainer{m_digitContainerKey,ctx}; //"SC"
-    if (!hLArDigitContainer.isValid()) {
-      ATH_MSG_WARNING("The requested digit container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-    }else{
-      ATH_MSG_DEBUG("hLArDigitContainer.size() " << hLArDigitContainer->size());
-      pLArDigitContainer=hLArDigitContainer.cptr();
-    }
+  SG::ReadHandle<LArDigitContainer> hLArDigitContainer{m_digitContainerKey,ctx}; //"SC"
+  if (!hLArDigitContainer.isValid()) {
+    ATH_MSG_WARNING("The requested digit container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+  }else{
+    ATH_MSG_DEBUG("hLArDigitContainer.size() " << hLArDigitContainer->size());
   }
-  const LArRawSCContainer* pSCetContainer=nullptr;
-  if (!m_rawSCContainerKey.empty()) {
-     SG::ReadHandle<LArRawSCContainer> hSCetContainer{m_rawSCContainerKey,ctx}; //"SC_ET"
-    if (!hSCetContainer.isValid()) {
-      ATH_MSG_WARNING("The requested SC ET container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-    }else{
-      ATH_MSG_DEBUG("hSCetContainer.size() " << hSCetContainer->size());
-      pSCetContainer=hSCetContainer.cptr();
-    }
+  SG::ReadHandle<LArRawSCContainer > hSCetContainer{m_rawSCContainerKey,ctx}; //"SC_ET"
+  if (!hSCetContainer.isValid()) {
+    ATH_MSG_WARNING("The requested SC ET container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+  }else{
+    ATH_MSG_DEBUG("hSCetContainer.size() " << hSCetContainer->size());
+  }
+  SG::ReadHandle<LArRawSCContainer > hSCetRecoContainer{m_rawSCEtRecoContainerKey,ctx}; //"SC_ET_RECO"
+  if (!hSCetRecoContainer.isValid()) {
+    ATH_MSG_WARNING("The requested SC ET reco container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+  }else{
+    ATH_MSG_DEBUG("hSCetRecoContainer.size() " << hSCetRecoContainer->size());
   }
 
-  const LArRawSCContainer* pSCetRecoContainer = nullptr;
-  if (!m_rawSCEtRecoContainerKey.empty()) {
-    SG::ReadHandle<LArRawSCContainer> hSCetRecoContainer{m_rawSCEtRecoContainerKey, ctx};  //"SC_ET_RECO"
-    if (!hSCetRecoContainer.isValid()) {
-      ATH_MSG_WARNING("The requested SC ET reco container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-    } else {
-      ATH_MSG_DEBUG("hSCetRecoContainer.size() " << hSCetRecoContainer->size());
-      pSCetRecoContainer=hSCetRecoContainer.cptr();
-    }
+
+  SG::ReadHandle<LArLATOMEHeaderContainer> hLArLATOMEHeaderContainer{m_LATOMEHeaderContainerKey,ctx}; //"SC_LATOME_HEADER"
+  if (!hLArLATOMEHeaderContainer.isValid()) {
+    ATH_MSG_WARNING("The requested LATOME header container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+  }else{
+    ATH_MSG_DEBUG("hLArLATOMEHeaderContainer.size() " << hLArLATOMEHeaderContainer->size());
   }
 
-  const LArLATOMEHeaderContainer* pLArLATOMEHeaderContainer=nullptr;
-  if (!m_LATOMEHeaderContainerKey.empty()) {
-    SG::ReadHandle<LArLATOMEHeaderContainer> hLArLATOMEHeaderContainer{m_LATOMEHeaderContainerKey, ctx};  //"SC_LATOME_HEADER"
-    if (!hLArLATOMEHeaderContainer.isValid()) {
-      ATH_MSG_WARNING("The requested LATOME header container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-    } else {
-      ATH_MSG_DEBUG("hLArLATOMEHeaderContainer.size() " << hLArLATOMEHeaderContainer->size());
-      pLArLATOMEHeaderContainer=hLArLATOMEHeaderContainer.cptr();
-    }
-  }
-  if (isEmptyCont(pLArDigitContainer) && isEmptyCont(pSCetContainer) && isEmptyCont(pSCetRecoContainer) && isEmptyCont(pLArLATOMEHeaderContainer)) {
-    // Make this only warning, come CI tests use the runs without DT info
+  if (isEmptyCont(hLArDigitContainer) && isEmptyCont(hSCetContainer) && isEmptyCont(hSCetRecoContainer) && isEmptyCont(hLArLATOMEHeaderContainer)) {
+    //Make this only warning, come CI tests use the runs without DT info
     ATH_MSG_WARNING("All of the requested containers are empty. Was there a problem retrieving information from the run logger?");
     return StatusCode::SUCCESS;
   }
@@ -309,14 +305,14 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
     SG::ReadCondHandle<LArBadChannelCont> bcContHdl{m_bcContKey, ctx};
     bcCont = (*bcContHdl);
 
-    if (pLArDigitContainer) {
+    if ((hLArDigitContainer.isValid())) {
       std::vector<std::vector<Digi_MonValues>> digiMonValueVec(m_layerNames.size());
       for (auto& innerVec : digiMonValueVec) {
         innerVec.reserve(1600);  // (m_layerNcells[ilayer]) * nsamples;
       }
 
       // Loop over digits
-      for (const LArDigit* pLArDigit : *pLArDigitContainer) {
+      for (const LArDigit* pLArDigit : *hLArDigitContainer) {
         HWIdentifier id = pLArDigit->hardwareID();  // gives online ID
         // skip disconnected channels:
         if (!cabling->isOnlineConnected(id))
@@ -460,10 +456,11 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 
     }  // End if(LArDigitContainer is valid)
 
-    if (pSCetContainer && pSCetRecoContainer) {
-      LArRawSCContainer::const_iterator itSC = pSCetContainer->begin();
-      LArRawSCContainer::const_iterator itSC_e = pSCetContainer->end();
-      LArRawSCContainer::const_iterator itSCReco = pSCetRecoContainer->begin();
+
+    if (hSCetContainer.isValid() && hSCetRecoContainer.isValid()) {
+      LArRawSCContainer::const_iterator itSC = hSCetContainer->begin();
+      LArRawSCContainer::const_iterator itSC_e= hSCetContainer->end();
+      LArRawSCContainer::const_iterator itSCReco = hSCetRecoContainer->begin();
       const LArRawSC* rawSC = 0;
       const LArRawSC* rawSCReco = 0;
 
@@ -475,12 +472,11 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       // Loop over SCs
       for (; itSC != itSC_e; ++itSC, ++itSCReco) {
         rawSC = *itSC;
-        if (itSCReco < pSCetRecoContainer->end()) {
+        if (itSCReco < hSCetRecoContainer->end()) {
           rawSCReco = *itSCReco;
         } else {
-          ATH_MSG_WARNING(
-              "Looping SC ET container, but we have reached the end of the SC ET Reco iterator. Check the sizes of these containers. Is SC ET Reco size zero? "
-              "Is there a problem with the digit container name sent by the run logger?");
+        //temporarily removed
+        //ATH_MSG_WARNING("Looping SC ET container, but we have reached the end of the SC ET Reco iterator. Check the sizes of these containers. Is SC ET Reco size zero? Is there a problem with the digit container name sent by the run logger?");
           rawSCReco = 0;
         }
         SC_SCChannel = rawSC->chan();
@@ -518,14 +514,20 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         notMasked = false;
         passTauSel = false;
         nonZeroET = false;
+        zeroET = false;
         notSatur = false;
         nonZeroEtau = false;
+        eTgt0p325GeV = false;
+        eTgt0lt0p325GeV = false;
         eTgt1GeV = false;
+        eTlt1GeV = false;
         eTgt10GeV = false;
+        eTlt10GeV = false;
         notOFCbOF = false;
         tauGt3 = false;
         onlofflEmismatch = false;
-        passSCNom = false;
+        passSCNom0_0p325 = false;
+        passSCNom0p325_1 = false;
         passSCNom1 = false;
         passSCNom10 = false;
         passSCNom10tauGt3 = false;
@@ -592,12 +594,25 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         ATH_MSG_DEBUG("Energy onl - Energy ofl: " << SC_energy_onl << ",  " << SC_energy_ofl << std::endl);
         if (SC_ET_onl != 0) {
           nonZeroET = true;
+        } else {
+          zeroET = true;
+        }
+        if (SC_ET_onl > 0.325) {
+          eTgt0p325GeV = true;
+        } else if (SC_ET_onl < 0.325 &&  SC_ET_onl > 0.) {
+          eTgt0lt0p325GeV = true;
         }
         if (SC_ET_onl > 1) {
           eTgt1GeV = true;
         }
+        if (SC_ET_onl < 1) {
+          eTlt1GeV = true;
+        }
         if (SC_ET_onl > 10) {
           eTgt10GeV = true;
+        }
+        if (SC_ET_onl < 10) {
+          eTlt10GeV = true;
         }
         if (SC_ET_ofl != 0) {
           nonZeroETofl = true;
@@ -635,10 +650,17 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
           if (eToflGt1GeV) {
             notMaskedEoflGt1 = true;
           }
+          if  (SC_energy_onl == -99999) {
+            passSCNomInvalid = true;
+          }
 
-          if (passTauSel) {
-            if (nonZeroET) {
-              passSCNom = true;
+          //if ( passTauSel ){
+          //if ( nonZeroET && eTgt0lt0p325GeV ){
+          if (eTgt0lt0p325GeV) {
+              passSCNom0_0p325 = true;
+            }
+            if (eTgt0p325GeV && eTlt1GeV) {
+              passSCNom0p325_1 = true;
             }
             if (eTgt1GeV) {
               passSCNom1 = true;
@@ -652,14 +674,14 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
             if (SC_energy_onl != SC_energy_ofl) {
               onlofflEmismatch = true;
             }
-          }
+        //}
         }  // end nominal selections
 
         lvaluemap_sc.emplace_back(SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID,
-                                  lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0,
+                                  lumi_block, zeroET, passSCNomInvalid, passSCNom0_0p325, passSCNom0p325_1, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0,
                                   notMaskedEoflGt1);
         lvaluemap_sc_ALL.emplace_back(SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time,
-                                      BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked,
+                                      BCID, lumi_block, zeroET, passSCNomInvalid, passSCNom0_0p325, passSCNom0p325_1, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked,
                                       notMaskedEoflNe0, notMaskedEoflGt1);
 
       }  // end loop over SCs
@@ -679,7 +701,11 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         auto sc_part_time = Monitored::Collection("SC_part_time", tool, [](const auto& v) { return v.sc_time; });
         auto sc_part_bcid = Monitored::Collection("SC_part_BCID", tool, [](const auto& v) { return v.sc_bcid; });
         auto sc_part_lb = Monitored::Collection("SC_part_LB", tool, [](const auto& v) { return v.sc_lb; });
-        auto sc_part_passSCNom = Monitored::Collection("SC_part_passSCNom", tool, [](const auto& v) { return v.sc_passSCNom; });
+        // auto sc_part_passSCNom = Monitored::Collection("SC_part_passSCNom", tool, [](const auto& v) { return v.sc_passSCNom; });
+        auto sc_zeroET = Monitored::Collection("SC_part_zeroET", tool, [](const auto& v) { return v.sc_zeroET; });
+        auto sc_part_passSCNomInvalid = Monitored::Collection("SC_part_passSCNomInvalid", tool, [](const auto& v) { return v.sc_passSCNomInvalid; });
+        auto sc_part_passSCNom0_0p325 = Monitored::Collection("SC_part_passSCNom0_0p325", tool, [](const auto& v) { return v.sc_passSCNom0_0p325; });
+        auto sc_part_passSCNom0p325_1 = Monitored::Collection("SC_part_passSCNom0p325_1", tool, [](const auto& v) { return v.sc_passSCNom0p325_1; });
         auto sc_part_passSCNom1 = Monitored::Collection("SC_part_passSCNom1", tool, [](const auto& v) { return v.sc_passSCNom1; });
         auto sc_part_passSCNom10 = Monitored::Collection("SC_part_passSCNom10", tool, [](const auto& v) { return v.sc_passSCNom10; });
         auto sc_part_passSCNom10tauGt3 = Monitored::Collection("SC_part_passSCNom10tauGt3", tool, [](const auto& v) { return v.sc_passSCNom10tauGt3; });
@@ -688,18 +714,22 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         auto sc_part_notMaskedEoflNe0 = Monitored::Collection("SC_part_notMaskedEoflNe0", tool, [](const auto& v) { return v.sc_notMaskedEoflNe0; });
         auto sc_part_notMaskedEoflGt1 = Monitored::Collection("SC_part_notMaskedEoflGt1", tool, [](const auto& v) { return v.sc_notMaskedEoflGt1; });
 
+
         fill(m_tools[m_toolmapLayerNames_sc.at(m_layerNames[ilayer])], sc_part_eta, sc_part_phi, sc_part_ieta, sc_part_iphi, sc_part_latomesourceidbin,
-             sc_part_et_ofl, sc_part_et_diff, sc_part_et_onl, sc_part_et_onl_muscaled, sc_part_time, sc_part_bcid, sc_part_lb, sc_part_passSCNom,
-             sc_part_passSCNom1, sc_part_passSCNom10, sc_part_passSCNom10tauGt3, sc_part_saturNotMasked, sc_part_OFCbOFNotMasked, sc_part_notMaskedEoflNe0,
+             sc_part_et_ofl, sc_part_et_diff, sc_part_et_onl, sc_part_et_onl_muscaled, sc_part_time, sc_part_bcid, sc_part_lb, sc_zeroET, sc_part_passSCNomInvalid,
+             sc_part_passSCNom0_0p325, sc_part_passSCNom0p325_1, sc_part_passSCNom1, sc_part_passSCNom10, sc_part_passSCNom10tauGt3, sc_part_saturNotMasked, sc_part_OFCbOFNotMasked, sc_part_notMaskedEoflNe0,
              sc_part_notMaskedEoflGt1);
       }
 
+
     }  // End if(LArSCContainer is valid)
 
+
+
     // LATOME event size
-    if (pLArLATOMEHeaderContainer) {
+    if ((hLArLATOMEHeaderContainer.isValid())) {
       auto event_size = Monitored::Scalar<float>("event_size", 0);
-      for (const LArLATOMEHeader* pLArLATOMEHeader : *pLArLATOMEHeaderContainer) {
+      for (const LArLATOMEHeader* pLArLATOMEHeader : *hLArLATOMEHeaderContainer) {
         event_size += pLArLATOMEHeader->ROBFragSize() + 48;  // 48 is the offset between rod_ndata and ROB fragment size
       }
       event_size /= (1024 * 1024 / 4);
