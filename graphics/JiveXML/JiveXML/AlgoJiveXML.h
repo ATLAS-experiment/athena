@@ -7,15 +7,13 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/MsgStream.h"
 #include "JiveXML/IDataRetriever.h"
-#include "xAODEventInfo/EventInfo.h"
+
 #include <vector>
 
 //Forward declarations
 namespace JiveXML{
-  //  class IDataRetriever;
   class IFormatTool;
   class IStreamTool;
 }

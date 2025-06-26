@@ -11,7 +11,6 @@
 
 #include "xAODEventInfo/EventInfo.h"
 
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "RootUtils/PyAthenaGILStateEnsure.h"
@@ -127,6 +126,7 @@ namespace JiveXML{
 	// Error handling: Print Python exception if import fails
 	PyErr_Print();
 	ATH_MSG_WARNING("Failed to import EventDisplaysOnline.EventDisplaysOnlineHelpers module");
+	return StatusCode::FAILURE;
       } else {
 	  ATH_MSG_INFO("ready4Physics at start of job: " << m_ready4PhysicsAtStart);
 	  // Get the "Ready4Physics" function from the module
