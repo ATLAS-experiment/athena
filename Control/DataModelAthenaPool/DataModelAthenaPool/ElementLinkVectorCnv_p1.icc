@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ElementLinkVectorCnv_p1.icc
@@ -44,11 +44,11 @@ ElementLinkVectorCnv_p1<LINK_TYPE>::transToPers(const LinkVect_t& trans,
     size_t link_n = tmpTrans.size();
     pers.m_elementRefs.reserve(link_n);
     for ( std::size_t i=0; i!=link_n; ++i ) {
-      typedef typename PersLinkVect_t::ElementRef PElemRef_t;
+      using Index_t = typename PersLinkVect_t::Index_t;
       size_t idx = SG::ThinningDecisionBase::RemovedIdx;
       if (shortrefs[i] != SG::ThinningDecisionBase::RemovedIdx)
         idx = tmpTrans.elementIndex(i);
-      pers.m_elementRefs.push_back( PElemRef_t (idx, shortrefs[i]) );
+      pers.m_elementRefs.emplace_back( static_cast<Index_t>(idx), shortrefs[i] );
     }
     return;
   }
