@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/AuxStoreInternal.cxx
@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <atomic>
 
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
@@ -148,10 +149,14 @@ AuxStoreInternal::addVector (std::unique_ptr<IAuxTypeVector> vec,
 
   // Add it to the store.
   m_vecs[auxid] = std::move (vec);
-  addAuxID (auxid);
+
+  // Need to be sure that the addition to the decoration bitset is visible
+  // to other threads before the addition to the variable bitset.
   if (isDecoration) {
     m_decorations.insert (auxid);
+    std::atomic_thread_fence (std::memory_order_seq_cst);
   }
+  addAuxID (auxid);
 }
 
 
@@ -185,10 +190,13 @@ AuxStoreInternal::getDecoration (auxid_t auxid, size_t size, size_t capacity)
   }
   if (m_vecs[auxid] == 0) {
     m_vecs[auxid] = AuxTypeRegistry::instance().makeVector (auxid, size, capacity);
-    addAuxID (auxid);
     if (m_locked) {
+      // Need to be sure that the addition to the decoration bitset is visible
+      // to other threads before the addition to the variable bitset.
       m_decorations.insert (auxid);
+      std::atomic_thread_fence (std::memory_order_seq_cst);
     }
+    addAuxID (auxid);
   }
   if (m_locked && !m_decorations.test (auxid)) {
     throw ExcStoreLocked (auxid);
