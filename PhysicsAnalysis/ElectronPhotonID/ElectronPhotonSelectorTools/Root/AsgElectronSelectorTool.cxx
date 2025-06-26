@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,6 +22,7 @@
 #include <string>
 #include <cstdint>
 #include <cmath>
+#include <unordered_map>
 
 //EDM includes
 #include "xAODEgamma/Electron.h"
@@ -31,6 +32,58 @@
 #include "AsgTools/CurrentContext.h"
 #include "PathResolver/PathResolver.h"
 
+namespace AllowedVariables
+{
+  enum e {
+    eta,
+    et,
+    f3,
+    Rhad,
+    Rhad1,
+    Reta,
+    weta2,
+    f1,
+    Eratio,
+    deltaEta1,
+    d0,
+    qd0,
+    d0significance,
+    Rphi,
+    dPOverP,
+    deltaPhiRescaled2,
+    trans_TRTPID,
+    wtots1,
+    EoverP,
+    nPixHitsPlusDeadSensors,
+    nSCTHitsPlusDeadSensors,
+    SCTWeightedCharge
+  };
+
+  const std::unordered_map<std::string, int> variableMap = {
+    {"eta", eta},
+    {"et", et},
+    {"f3", f3},
+    {"Rhad", Rhad},
+    {"Rhad1", Rhad1},
+    {"Reta", Reta},
+    {"weta2", weta2},
+    {"f1", f1},
+    {"Eratio", Eratio},
+    {"deltaEta1", deltaEta1},
+    {"d0", d0},
+    {"qd0", qd0},
+    {"d0significance", d0significance},
+    {"Rphi", Rphi},
+    {"dPOverP", dPOverP},
+    {"deltaPhiRescaled2", deltaPhiRescaled2},
+    {"trans_TRTPID", trans_TRTPID},
+    {"wtots1", wtots1},
+    {"EoverP", EoverP},
+    {"nPixHitsPlusDeadSensors", nPixHitsPlusDeadSensors},
+    {"nSCTHitsPlusDeadSensors", nSCTHitsPlusDeadSensors},
+    {"SCTWeightedCharge", SCTWeightedCharge},
+  };
+};
 
 //=============================================================================
 // Standard constructor
@@ -49,29 +102,6 @@ AsgElectronSelectorTool::AsgElectronSelectorTool( const std::string& myname ) :
   declareProperty("inputModelFileName", m_modelFileName="", "The input file name that holds the model" );
   // QuantileTransformer file name ( required for preprocessing ). Managed in the ElectronDNNCalculator.
   declareProperty("quantileFileName", m_quantileFileName="", "The input file name that holds the QuantileTransformer");
-  // Model used is a multiclass or a binary model
-  declareProperty("multiClass", m_multiClass, "Whether the given model is multiclass or not");
-  // DNN menu used is CF+ID or regular ID
-  declareProperty("CFReject", m_CFReject, "Whether we use the DNN CF+ID approach or the regular DNN ID");
-  // If multiclass, how to treat the chargeflip output node when combining into one discriminant
-  declareProperty("cfSignal", m_cfSignal, "Whether to include the CF fraction in the numerator or denominator");
-  // If multiclass, fractions with which the different output nodes get multiplied before combining them
-  declareProperty("Fractions", m_fractions, "Fractions to combine the single outputs into one discriminant");
-  // Variable list
-  declareProperty("Variables", m_variables, "Variables used in the MVA tool");
-  // The mva cut values
-  declareProperty("CutSelector", m_cutSelector, "Cut on prompt electrons MVA discriminant");
-  declareProperty("CutSelectorCF", m_cutSelectorCF, "Cut on CF electrons MVA discriminant");
-  // do the ambiguity cut
-  declareProperty("CutAmbiguity" , m_cutAmbiguity, "Apply a cut on the ambiguity bit");
-  // cut on b-layer
-  declareProperty("CutBL", m_cutBL, "Apply a cut on b-layer");
-  // cut on pixel hits
-  declareProperty("CutPi", m_cutPi, "Apply a cut on pixel hits");
-  // cut on precision hits
-  declareProperty("CutSCT", m_cutSCT, "Apply a cut on SCT hits");
-  // use smooth interpolation between discriminant bins
-  declareProperty("doSmoothBinInterpolation", m_doSmoothBinInterpolation, "use smooth interpolation between discriminant bins");
   // especially for  trigger electron
   declareProperty("skipDeltaPoverP",m_skipDeltaPoverP = false,"If true, it will skip the check of deltaPoverP");
 
@@ -96,197 +126,204 @@ StatusCode AsgElectronSelectorTool::initialize()
     ATH_MSG_INFO("operating point : " << this->getOperatingPointName());
   }
 
-  if (!m_configFile.empty()){
-    std::string configFile = PathResolverFindCalibFile(m_configFile);
-    if (configFile.empty()){
-      ATH_MSG_ERROR("Could not locate " << m_configFile);
-      return StatusCode::FAILURE;
-    }
-
-
-    ATH_MSG_DEBUG("Configfile to use: " << m_configFile);
-    TEnv env;
-    env.ReadFile(configFile.c_str(), kEnvLocal);
-
-    std::string modelFilename("");
-    std::string quantileFilename("");
-
-    // Get the input model in the tool.
-    ATH_MSG_DEBUG("Get the input model in the tool.");
-
-    if (!m_modelFileName.empty()){  // If the property was set by the user, take that.
-      ATH_MSG_INFO("Setting user specified Model file: " << m_modelFileName);
-      modelFilename = m_modelFileName;
-    }
-    else {
-      modelFilename = env.GetValue("inputModelFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNNetwork.json");
-      ATH_MSG_DEBUG("Getting the input Model from: " << modelFilename );
-    }
-    std::string filename = PathResolverFindCalibFile(modelFilename);
-    if (filename.empty()){
-      ATH_MSG_ERROR("Could not find model file " << modelFilename);
-      return StatusCode::FAILURE;
-    }
-
-    // Get the input transformer in the tool.
-    ATH_MSG_DEBUG("Get the input transformer in the tool.");
-
-    if (!m_quantileFileName.empty()){  // If the property was set by the user, take that.
-      ATH_MSG_INFO("Setting user specified QuantileTransformer file: " << m_quantileFileName);
-      quantileFilename = m_quantileFileName;
-    }
-    else {
-      quantileFilename = env.GetValue("inputQuantileFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNQuantileTransformer.root");
-      ATH_MSG_DEBUG("Getting the input QuantileTransformer from: " << quantileFilename);
-    }
-    std::string qfilename = PathResolverFindCalibFile(quantileFilename);
-    if (qfilename.empty()){
-        ATH_MSG_ERROR("Could not find QuantileTransformer file " << quantileFilename);
-        return StatusCode::FAILURE;
-    }
-
-    // Variables used in the MVA tool as comma separated string;
-    std::stringstream vars(env.GetValue("Variables", ""));
-    // parse variables string into vector
-    while(vars.good()){
-      std::string substr;
-      std::getline(vars, substr, ',');
-      m_variables.push_back( substr );
-    }
-
-    // Model is multiclass or not, default is binary model
-    m_multiClass = env.GetValue("multiClass", false);
-    // Include cf node in numerator or denominator when combining different outputs
-    m_cfSignal = env.GetValue("cfSignal", true);
-    // Fractions to multiply different outputs with before combining
-    m_fractions = AsgConfigHelper::HelperDouble("Fractions", env);
-
-    // cut on MVA discriminant
-    m_cutSelector = AsgConfigHelper::HelperDouble("CutSelector", env);
-    m_cutSelectorCF = AsgConfigHelper::HelperDouble("CutSelectorCF", env);
-
-    // cut on ambiuity bit
-    m_cutAmbiguity = AsgConfigHelper::HelperInt("CutAmbiguity", env);
-    // cut on b-layer
-    m_cutBL = AsgConfigHelper::HelperInt("CutBL", env);
-    // cut on pixel hits
-    m_cutPi = AsgConfigHelper::HelperInt("CutPi", env);
-    // cut on precision hits
-    m_cutSCT = AsgConfigHelper::HelperInt("CutSCT", env);
-    // do smooth interpolation between bins
-    m_doSmoothBinInterpolation = env.GetValue("doSmoothBinInterpolation", false);
-
-
-
-    unsigned int numberOfExpectedBinCombinedMVA ;
-    numberOfExpectedBinCombinedMVA = s_fnDiscEtBins * s_fnDiscEtaBins;
-    unsigned int numberOfExpectedEtaBins = s_fnDiscEtBins;
-
-    if (m_cutSelector.size() != numberOfExpectedBinCombinedMVA){
-      ATH_MSG_ERROR("Configuration issue :  cutSelector expected size " << numberOfExpectedBinCombinedMVA <<
-                    " input size " << m_cutSelector.size());
-      return StatusCode::FAILURE;
-    }
-
-    if (!m_cutSelectorCF.empty()){
-      m_CFReject = true;
-      if (m_cutSelectorCF.size() != numberOfExpectedBinCombinedMVA){
-        ATH_MSG_ERROR("Configuration issue :  cutSelectorCF expected size " << numberOfExpectedBinCombinedMVA <<
-                      " input size " << m_cutSelectorCF.size());
-        return StatusCode::FAILURE;
-      }
-    }
-    else {
-      m_CFReject = false;
-    }
-
-    // Create an instance of the class calculating the DNN score
-    m_mvaTool = std::make_unique<ElectronDNNCalculator>(this, filename.c_str(), qfilename.c_str(), m_variables, m_multiClass, m_CFReject);
-
-    if (m_multiClass){
-      // Fractions are only needed if multiclass model is used
-      // There are five fractions for the combination, the signal fraction is either one (cfSignal == false) or 1 - cf fraction (cfSignal == true)
-      if (m_fractions.size() != numberOfExpectedEtaBins * 5){
-        ATH_MSG_ERROR("Configuration issue : multiclass but not the right amount of fractions." << m_fractions.size());
-        return StatusCode::FAILURE;
-      }
-    }
-
-
-    if (!m_cutSCT.empty()){
-      if (m_cutSCT.size() != numberOfExpectedEtaBins){
-        ATH_MSG_ERROR("Configuration issue :  cutSCT expected size " << numberOfExpectedEtaBins <<
-                      " input size " << m_cutSCT.size());
-        return StatusCode::FAILURE;
-      }
-    }
-
-    if (!m_cutPi.empty()){
-      if (m_cutPi.size() != numberOfExpectedEtaBins){
-        ATH_MSG_ERROR("Configuration issue :  cutPi expected size " << numberOfExpectedEtaBins <<
-                      " input size " << m_cutPi.size());
-        return StatusCode::FAILURE;
-      }
-    }
-
-    if (!m_cutBL.empty()){
-      if (m_cutBL.size() != numberOfExpectedEtaBins){
-        ATH_MSG_ERROR("Configuration issue :  cutBL expected size " << numberOfExpectedEtaBins <<
-                      " input size " << m_cutBL.size());
-        return StatusCode::FAILURE;
-      }
-    }
-
-    if (!m_cutAmbiguity.empty()){
-      if (m_cutAmbiguity.size() != numberOfExpectedEtaBins){
-        ATH_MSG_ERROR("Configuration issue :  cutAmbiguity expected size " << numberOfExpectedEtaBins <<
-                      " input size " << m_cutAmbiguity.size());
-        return StatusCode::FAILURE;
-      }
-    }
-
-    // --------------------------------------------------------------------------
-    // Register the cuts and check that the registration worked:
-    // NOTE: THE ORDER IS IMPORTANT!!! Cut0 corresponds to bit 0, Cut1 to bit 1,...
-    // use an int as a StatusCode
-    int sc(1);
-
-    // Cut position for the kineatic pre-selection
-    m_cutPosition_kinematic = m_acceptMVA.addCut("kinematic", "pass kinematic");
-    if (m_cutPosition_kinematic < 0) sc = 0;
-
-    // NSilicon
-    m_cutPosition_NSilicon = m_acceptMVA.addCut("NSCT", "pass NSCT");
-    if (m_cutPosition_NSilicon < 0) sc = 0;
-
-    // NPixel
-    m_cutPosition_NPixel = m_acceptMVA.addCut("NPixel", "pass NPixel");
-    if (m_cutPosition_NPixel < 0) sc = 0;
-
-    // NBlayer
-    m_cutPosition_NBlayer = m_acceptMVA.addCut("NBlayer", "pass NBlayer");
-    if (m_cutPosition_NBlayer < 0) sc = 0;
-
-    // Ambiguity
-    m_cutPosition_ambiguity = m_acceptMVA.addCut("ambiguity", "pass ambiguity");
-    if (m_cutPosition_ambiguity < 0) sc = 0;
-
-
-    // Cut position for the likelihood selection - DO NOT CHANGE ORDER!
-    m_cutPosition_MVA = m_acceptMVA.addCut("passMVA", "pass MVA");
-    if (m_cutPosition_MVA < 0) sc = 0;
-
-    // Check that we got everything OK
-    if (sc == 0){
-      ATH_MSG_ERROR("ERROR: Something went wrong with the setup of the decision objects...");
-      return StatusCode::FAILURE;
-    }
-
-  }
-  else {  //Error if it cant find the conf
+  if (m_configFile.empty()){
     ATH_MSG_ERROR("Could not find configuration file " << m_configFile);
     return StatusCode::FAILURE;
   }
+
+  std::string configFile = PathResolverFindCalibFile(m_configFile);
+  if (configFile.empty()){
+    ATH_MSG_ERROR("Could not locate " << m_configFile);
+    return StatusCode::FAILURE;
+  }
+
+
+  ATH_MSG_DEBUG("Configfile to use: " << m_configFile);
+  TEnv env;
+  env.ReadFile(configFile.c_str(), kEnvLocal);
+
+  std::string modelFilename("");
+  std::string quantileFilename("");
+
+  // Get the input model in the tool.
+  ATH_MSG_DEBUG("Get the input model in the tool.");
+
+  if (!m_modelFileName.empty()){  // If the property was set by the user, take that.
+    ATH_MSG_INFO("Setting user specified Model file: " << m_modelFileName);
+    modelFilename = m_modelFileName;
+  }
+  else {
+    modelFilename = env.GetValue("inputModelFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNNetwork.json");
+    ATH_MSG_DEBUG("Getting the input Model from: " << modelFilename );
+  }
+  std::string filename = PathResolverFindCalibFile(modelFilename);
+  if (filename.empty()){
+    ATH_MSG_ERROR("Could not find model file " << modelFilename);
+    return StatusCode::FAILURE;
+  }
+
+  // Get the input transformer in the tool.
+  ATH_MSG_DEBUG("Get the input transformer in the tool.");
+
+  if (!m_quantileFileName.empty()){  // If the property was set by the user, take that.
+    ATH_MSG_INFO("Setting user specified QuantileTransformer file: " << m_quantileFileName);
+    quantileFilename = m_quantileFileName;
+  }
+  else {
+    quantileFilename = env.GetValue("inputQuantileFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNQuantileTransformer.root");
+    ATH_MSG_DEBUG("Getting the input QuantileTransformer from: " << quantileFilename);
+  }
+  std::string qfilename = PathResolverFindCalibFile(quantileFilename);
+  if (qfilename.empty()){
+      ATH_MSG_ERROR("Could not find QuantileTransformer file " << quantileFilename);
+      return StatusCode::FAILURE;
+  }
+
+  // Variables used in the MVA tool as comma separated string;
+  std::stringstream vars(env.GetValue("Variables", ""));
+  // parse variables string into vector
+  while(vars.good()){
+    std::string substr;
+    std::getline(vars, substr, ',');
+    m_variables.push_back( substr );
+    if(!AllowedVariables::variableMap.contains(substr)){
+      ATH_MSG_ERROR("Unsupported variable " << substr << " found in the config.");
+      return StatusCode::FAILURE;
+    }
+    m_enum_variables.push_back(AllowedVariables::variableMap.at(substr));
+  }
+
+  // Model is multiclass or not, default is binary model
+  m_multiClass = env.GetValue("multiClass", false);
+  // Include cf node in numerator or denominator when combining different outputs
+  m_cfSignal = env.GetValue("cfSignal", true);
+  // Fractions to multiply different outputs with before combining
+  m_fractions = AsgConfigHelper::HelperDouble("Fractions", env);
+
+  // cut on MVA discriminant
+  m_cutSelector = AsgConfigHelper::HelperDouble("CutSelector", env);
+  m_cutSelectorCF = AsgConfigHelper::HelperDouble("CutSelectorCF", env);
+
+  // cut on ambiguity bit
+  m_cutAmbiguity = AsgConfigHelper::HelperInt("CutAmbiguity", env);
+  // cut on b-layer
+  m_cutBL = AsgConfigHelper::HelperInt("CutBL", env);
+  // cut on pixel hits
+  m_cutPi = AsgConfigHelper::HelperInt("CutPi", env);
+  // cut on precision hits
+  m_cutSCT = AsgConfigHelper::HelperInt("CutSCT", env);
+  // do smooth interpolation between bins
+  m_doSmoothBinInterpolation = env.GetValue("doSmoothBinInterpolation", false);
+
+
+
+  unsigned int numberOfExpectedBinCombinedMVA ;
+  numberOfExpectedBinCombinedMVA = s_fnDiscEtBins * s_fnDiscEtaBins;
+  unsigned int numberOfExpectedEtaBins = s_fnDiscEtBins;
+
+  if (m_cutSelector.size() != numberOfExpectedBinCombinedMVA){
+    ATH_MSG_ERROR("Configuration issue :  cutSelector expected size " << numberOfExpectedBinCombinedMVA <<
+                  " input size " << m_cutSelector.size());
+    return StatusCode::FAILURE;
+  }
+
+  if (!m_cutSelectorCF.empty()){
+    m_CFReject = true;
+    if (m_cutSelectorCF.size() != numberOfExpectedBinCombinedMVA){
+      ATH_MSG_ERROR("Configuration issue :  cutSelectorCF expected size " << numberOfExpectedBinCombinedMVA <<
+                    " input size " << m_cutSelectorCF.size());
+      return StatusCode::FAILURE;
+    }
+    if(!m_multiClass){
+      ATH_MSG_ERROR("Configuration issue :  CF rejection is only defined "
+                    "for multiClass: TRUE");
+      return StatusCode::FAILURE;
+    }
+  }
+  else {
+    m_CFReject = false;
+  }
+  // Create an instance of the class calculating the DNN score
+  m_mvaTool = std::make_unique<ElectronDNNCalculator>(this, filename.c_str(), qfilename.c_str(), m_variables, m_multiClass);
+
+  if (m_multiClass){
+    // Fractions are only needed if multiclass model is used
+    // There are five fractions for the combination, the signal fraction is either one (cfSignal == false) or 1 - cf fraction (cfSignal == true)
+    if (m_fractions.size() != numberOfExpectedEtaBins * 5){
+      ATH_MSG_ERROR("Configuration issue : multiclass but not the right amount of fractions." << m_fractions.size());
+      return StatusCode::FAILURE;
+    }
+  }
+
+  if (!m_cutSCT.empty()){
+    if (m_cutSCT.size() != numberOfExpectedEtaBins){
+      ATH_MSG_ERROR("Configuration issue :  cutSCT expected size " << numberOfExpectedEtaBins <<
+                    " input size " << m_cutSCT.size());
+      return StatusCode::FAILURE;
+    }
+  }
+
+  if (!m_cutPi.empty()){
+    if (m_cutPi.size() != numberOfExpectedEtaBins){
+      ATH_MSG_ERROR("Configuration issue :  cutPi expected size " << numberOfExpectedEtaBins <<
+                    " input size " << m_cutPi.size());
+      return StatusCode::FAILURE;
+    }
+  }
+
+  if (!m_cutBL.empty()){
+    if (m_cutBL.size() != numberOfExpectedEtaBins){
+      ATH_MSG_ERROR("Configuration issue :  cutBL expected size " << numberOfExpectedEtaBins <<
+                    " input size " << m_cutBL.size());
+      return StatusCode::FAILURE;
+    }
+  }
+
+  if (!m_cutAmbiguity.empty()){
+    if (m_cutAmbiguity.size() != numberOfExpectedEtaBins){
+      ATH_MSG_ERROR("Configuration issue :  cutAmbiguity expected size " << numberOfExpectedEtaBins <<
+                    " input size " << m_cutAmbiguity.size());
+      return StatusCode::FAILURE;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // Register the cuts and check that the registration worked:
+  // NOTE: THE ORDER IS IMPORTANT!!! Cut0 corresponds to bit 0, Cut1 to bit 1,...
+  // use an int as a StatusCode
+  int sc(1);
+
+  // Cut position for the kineatic pre-selection
+  m_cutPosition_kinematic = m_acceptMVA.addCut("kinematic", "pass kinematic");
+  if (m_cutPosition_kinematic < 0) sc = 0;
+
+  // NSilicon
+  m_cutPosition_NSilicon = m_acceptMVA.addCut("NSCT", "pass NSCT");
+  if (m_cutPosition_NSilicon < 0) sc = 0;
+
+  // NPixel
+  m_cutPosition_NPixel = m_acceptMVA.addCut("NPixel", "pass NPixel");
+  if (m_cutPosition_NPixel < 0) sc = 0;
+
+  // NBlayer
+  m_cutPosition_NBlayer = m_acceptMVA.addCut("NBlayer", "pass NBlayer");
+  if (m_cutPosition_NBlayer < 0) sc = 0;
+
+  // Ambiguity
+  m_cutPosition_ambiguity = m_acceptMVA.addCut("ambiguity", "pass ambiguity");
+  if (m_cutPosition_ambiguity < 0) sc = 0;
+
+
+  // Cut position for the likelihood selection - DO NOT CHANGE ORDER!
+  m_cutPosition_MVA = m_acceptMVA.addCut("passMVA", "pass MVA");
+  if (m_cutPosition_MVA < 0) sc = 0;
+
+  // Check that we got everything OK
+  if (sc == 0){
+    ATH_MSG_ERROR("ERROR: Something went wrong with the setup of the decision objects...");
+    return StatusCode::FAILURE;
+  }
+
   ///-----------End of text config----------------------------
 
   // define a default vector to return in the calculateMultipleOutputs methods
@@ -364,9 +401,9 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
 
   // get the ambiguity type from the decoration
   if (!m_skipAmbiguityCut){
-    if (eg->isAvailable<uint8_t>("ambiguityType")){
-      static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
-      ambiguityBit = acc(*eg);
+    static const SG::AuxElement::Accessor<uint8_t> ambiguityTypeAcc("ambiguityType");
+    if (ambiguityTypeAcc.isAvailable(*eg)) {
+      ambiguityBit = ambiguityTypeAcc(*eg);
     }
     else {
       allFound = false;
@@ -379,7 +416,9 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
   passBLayerRequirement = ElectronSelectorHelpers::passBLayerRequirement(*track);
 
   // calculate the output of the selector tool
-  double mvaScore = calculate(ctx, eg, mu);
+
+  std::vector<float> mvaOutputs = calculateMultipleOutputs(ctx, eg, mu);
+  double mvaScore = getDiscriminant(mvaOutputs, eg);
   ATH_MSG_VERBOSE(Form("PassVars: MVA=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
                        mvaScore, eta, et,
                        nSiHitsPlusDeadSensors, nPixHitsPlusDeadSensors,
@@ -387,7 +426,7 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
                        ambiguityBit, mu));
   double mvaScoreCF = 0;
   if (m_CFReject){
-    mvaScoreCF = calculateCF(ctx, eg, mu);
+    mvaScoreCF = combineOutputsCF(mvaOutputs);
     ATH_MSG_VERBOSE(Form("PassVars: MVA=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
                         mvaScoreCF, eta, et,
                         nSiHitsPlusDeadSensors, nPixHitsPlusDeadSensors,
@@ -519,6 +558,11 @@ double AsgElectronSelectorTool::calculate( const EventContext& ctx, const xAOD::
   // Get all outputs of the mva tool
   std::vector<float> mvaOutputs = calculateMultipleOutputs(ctx, eg, mu);
 
+  return getDiscriminant(mvaOutputs, eg);
+}
+
+double AsgElectronSelectorTool::getDiscriminant(std::vector<float>& mvaOutputs, const xAOD::Electron* eg ) const
+{
   double discriminant = 0;
   // If a binary model is used, vector will have one entry, if multiclass is used vector will have six entries
   if (!m_multiClass){
@@ -534,23 +578,6 @@ double AsgElectronSelectorTool::calculate( const EventContext& ctx, const xAOD::
   return discriminant;
 }
 
-double AsgElectronSelectorTool::calculateCF( const EventContext& ctx, const xAOD::Electron* eg, double mu ) const
-{
-  // Get all outputs of the mva tool
-  std::vector<float> mvaOutputs = calculateMultipleOutputs(ctx, eg, mu);
-
-  double discriminant = 0;
-  // If a binary model is used, vector will have one entry, if multiclass is used vector will have six entries
-  if (!m_multiClass){
-    discriminant = transformMLOutput(mvaOutputs.at(0));
-  }
-  else{
-    // combine the six output nodes into one discriminant to cut on, any necessary transformation is applied within combineOutputs()
-    discriminant = combineOutputsCF(mvaOutputs);
-  }
-
-  return discriminant;
-}
 
 std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const EventContext &ctx, const xAOD::Electron *eg, double mu) const
 {
@@ -767,36 +794,64 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
     throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for MVA calculation are found. The following variables are missing: " + notFoundList );
   }
 
-
-  MVAEnum::MVACalcVars vars{};
-  vars.eta = std::abs(eta);
-  vars.et = et;
-  vars.f3 = f3;
-  vars.Rhad = Rhad;
-  vars.Rhad1 = Rhad1;
-  vars.Reta = Reta;
-  vars.weta2 = w2;
-  vars.f1 = f1;
-  vars.Eratio = Eratio;
-  vars.deltaEta1 = deltaEta1;
-  if (m_CFReject){
-    vars.qd0 = qd0;
-    vars.SCTWeightedCharge = SCTWeightedCharge;
+  std::vector<double> variableValues;
+  for(const auto varID : m_enum_variables)
+  {
+    switch(varID)
+    {
+      case AllowedVariables::eta:
+        variableValues.push_back(std::abs(eta));  break; // TODO - rename to abseta?
+      case AllowedVariables::et:
+        variableValues.push_back(et); break;
+      case AllowedVariables::f3:
+        variableValues.push_back(f3); break;
+      case AllowedVariables::Rhad:
+        variableValues.push_back(Rhad); break;
+      case AllowedVariables::Rhad1:
+        variableValues.push_back(Rhad1); break;
+      case AllowedVariables::Reta:
+        variableValues.push_back(Reta); break;
+      case AllowedVariables::weta2:
+        variableValues.push_back(w2); break;
+      case AllowedVariables::f1:
+        variableValues.push_back(f1); break;
+      case AllowedVariables::Eratio:
+        variableValues.push_back(Eratio); break;
+      case AllowedVariables::deltaEta1:
+        variableValues.push_back(deltaEta1); break;
+      case AllowedVariables::d0:
+        variableValues.push_back(d0); break;
+      case AllowedVariables::qd0:
+        variableValues.push_back(qd0); break;
+      case AllowedVariables::d0significance:
+        variableValues.push_back(d0significance); break;
+      case AllowedVariables::Rphi:
+        variableValues.push_back(Rphi); break;
+      case AllowedVariables::dPOverP:
+        variableValues.push_back(dPOverP); break;
+      case AllowedVariables::deltaPhiRescaled2:
+        variableValues.push_back(deltaPhiRescaled2); break;
+      case AllowedVariables::trans_TRTPID:
+        variableValues.push_back(trans_TRTPID); break;
+      case AllowedVariables::wtots1:
+        variableValues.push_back(wtots1); break;
+      case AllowedVariables::EoverP:
+        variableValues.push_back(EoverP); break;
+      case AllowedVariables::nPixHitsPlusDeadSensors:
+        variableValues.push_back(nPixHitsPlusDeadSensors); break;
+      case AllowedVariables::nSCTHitsPlusDeadSensors:
+        variableValues.push_back(nSCTHitsPlusDeadSensors); break;
+      case AllowedVariables::SCTWeightedCharge:
+        variableValues.push_back(SCTWeightedCharge); break;
+      default:
+        // Handle unknown varID or error case
+        throw std::runtime_error("AsgElectronSelectorTool: unknown variable "
+          "index, something went wrong in initialization!" );
+        break;
+    }
   }
-  else {
-    vars.d0 = d0;
-  }
-  vars.d0significance = d0significance;
-  vars.Rphi = Rphi;
-  vars.dPOverP = dPOverP;
-  vars.deltaPhiRescaled2 = deltaPhiRescaled2;
-  vars.trans_TRTPID = trans_TRTPID;
-  vars.wtots1 = wtots1;
-  vars.EoverP = EoverP;
-  vars.nPixHitsPlusDeadSensors = nPixHitsPlusDeadSensors;
-  vars.nSCTHitsPlusDeadSensors = nSCTHitsPlusDeadSensors;
 
-  Eigen::Matrix<float, -1, 1> mvaScores = m_mvaTool->calculate(vars);
+  Eigen::Matrix<float, -1, 1> mvaScores = m_mvaTool->calculate(variableValues);
 
   // Return a vector of all outputs of the MVA
   std::vector<float> mvaOutputs;

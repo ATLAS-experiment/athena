@@ -84,12 +84,11 @@ public:
   /** The main result method: the actual mva score is calculated here */
   double calculate( const EventContext &ctx, const xAOD::Electron* eg, double mu ) const override;
 
-  /** The main result method: the actual CF mva score is calculated here */
-  double calculateCF( const EventContext &ctx, const xAOD::Electron* eg, double mu) const;
-
   /** The main result method: the actual mva score is calculated here */
   double calculate( const EventContext &ctx, const xAOD::Egamma* eg, double mu ) const override;
 
+  /** Computes discrimiant value from mva output based on whether multiclass is true or false */
+  double getDiscriminant(std::vector<float>& mvaOutputs, const xAOD::Electron* egu ) const;
 
   /** The result method for multiple outputs: can return multiple outputs of the MVA */
   std::vector<float> calculateMultipleOutputs( const EventContext &ctx, const xAOD::Electron *eg, double mu = -99) const override;
@@ -145,6 +144,9 @@ private:
   /// Variables used in the MVA Tool
   std::vector<std::string> m_variables;
 
+  /// Enum version of used variables
+  std::vector<int> m_enum_variables;
+
   /// Flag for skip the use of deltaPoverP in dnn calculation (like at HLT)
   bool m_skipDeltaPoverP;
 
@@ -152,7 +154,7 @@ private:
 
   /// Multiclass model or not
   bool m_multiClass{};
-  /// Multiclass model or not
+  /// Run CF rejection or not
   bool m_CFReject{};
   /// Use the CF output node in the numerator or the denominator
   bool m_cfSignal{};
