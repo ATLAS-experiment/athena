@@ -950,8 +950,8 @@ bool ALFA_GeometryReader::ReadSource(const eGeoSourceType eSourceType, const eRP
 		break;
 	case EGST_FILE:
 
-		GeomFile=std::string("geom_")+strDetType+std::string("_")+std::string(GetRPotLabel(eRPName))+std::string(".dat");
-		if(szDataSource==nullptr || !strcmp(szDataSource,"")) FilePath = PathResolver::find_file(GeomFile,"DATAPATH", PathResolver::RecursiveSearch);
+		GeomFile="ALFA_Geometry/geom_"+strDetType+"_"+std::string(GetRPotLabel(eRPName))+".dat";
+		if(szDataSource==nullptr || !strcmp(szDataSource,"")) FilePath = PathResolverFindDataFile(GeomFile);
 		else FilePath=std::string(szDataSource);
 
 		LogStream<<MSG::INFO<<"The "<<strDetType<<" fiber geometry will be loaded from FILE "<<FilePath.c_str()<<" for RP "<<GetRPotLabel(eRPName)<<endmsg;
