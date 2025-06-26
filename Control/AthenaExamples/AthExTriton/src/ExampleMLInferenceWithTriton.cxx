@@ -19,7 +19,7 @@ StatusCode ExampleMLInferenceWithTriton::initialize() {
 	   return StatusCode::FAILURE;
    }
    // read input file, and the target file for comparison.
-   std::string pixelFilePath = PathResolver::find_file(m_pixelFileName.value(), "CALIBPATH", PathResolver::RecursiveSearch);
+   std::string pixelFilePath = PathResolver::find_calib_file(m_pixelFileName);
    ATH_MSG_INFO( "Using pixel file: " << pixelFilePath );
   
    m_input_tensor_values_notFlat = read_mnist_pixel_notFlat(pixelFilePath);
