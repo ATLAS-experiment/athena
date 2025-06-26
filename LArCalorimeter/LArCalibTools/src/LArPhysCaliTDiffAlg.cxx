@@ -5,7 +5,6 @@
 #include "LArCalibTools/LArPhysCaliTDiffAlg.h"
 #include "LArRawConditions/LArPhysCaliTdiffComplete.h"
 
-//#include <ifstream>
 #include <fstream>
 
 LArPhysCaliTDiffAlg::LArPhysCaliTDiffAlg(const std::string & name, ISvcLocator * pSvcLocator) :

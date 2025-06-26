@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArPhysWaveFromStdNtuple.h"
@@ -17,7 +17,6 @@
 
 #include <vector>
 #include <iostream>
-#include <fstream>
 #include <string>
 
 LArPhysWaveFromStdNtuple::LArPhysWaveFromStdNtuple(const std::string & name, ISvcLocator * pSvcLocator):AthAlgorithm(name, pSvcLocator) {};
@@ -52,9 +51,9 @@ StatusCode LArPhysWaveFromStdNtuple::stop()
   Double_t        timeOffset;
   Int_t           channelId;
   Int_t           FT, slot, channel;
-
-  Double_t        Amplitude[2000]; // The function
-  Double_t        Error[2000]; // The function
+  //avoid large stack use, with heap allocation
+  auto Amplitude = std::make_unique<Double_t[]>(2000); // The function
+  auto Error     = std::make_unique<Double_t[]>(2000); // The function
   Int_t          Triggers[2000]; // The function
   Int_t           gain = 0; // LARHIGHGAIN = 0, LARMEDIUMGAIN = 1,  LARLOWGAIN = 2,
   outfit->SetBranchAddress("channelId", &channelId);
@@ -66,8 +65,8 @@ StatusCode LArPhysWaveFromStdNtuple::stop()
   outfit->SetBranchAddress("timeOffset", &timeOffset);
   outfit->SetBranchAddress("flag", &flag);
   outfit->SetBranchAddress("gain", &gain);
-  outfit->SetBranchAddress("Amplitude", Amplitude);
-  outfit->SetBranchAddress("Error", Error);
+  outfit->SetBranchAddress("Amplitude", Amplitude.get());
+  outfit->SetBranchAddress("Error", Error.get());
   outfit->SetBranchAddress("Triggers", Triggers);
 
   // Create new LArPhysWaveContainer
@@ -129,8 +128,7 @@ StatusCode LArPhysWaveFromStdNtuple::stop()
 	  
     // Add physics wave to container
     larPhysWaveContainerNew->setPdata(id, newLArPhysWave, (CaloGain::CaloGain)gain);
-  }
-
+  } 
   ATH_CHECK( detStore()->record(larPhysWaveContainerNew,m_store_key) );
   ATH_MSG_INFO ( "LArPhysWaveFromStdNtuple finalized!" );
   return StatusCode::SUCCESS;
