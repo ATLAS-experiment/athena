@@ -49,6 +49,9 @@ def createTrigEgammaConfigFlags():
     # Fast Electron Ringer Validation
     flags.addFlag('Trigger.egamma.enableFastElectronRinger', False)
 
+    flags.addFlag('Trigger.egamma.monitorEffLH', False)
+    flags.addFlag('Trigger.egamma.monitorEffDNN', False)
+
     return flags
 
 

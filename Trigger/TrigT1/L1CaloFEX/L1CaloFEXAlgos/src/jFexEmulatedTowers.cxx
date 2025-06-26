@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -339,8 +339,8 @@ StatusCode  jFexEmulatedTowers::ReadSCfromFile(const std::string& fileName){
             }
         }        
         
-        m_map_TTower2SCellsEM[TTID] = SCellvectorEM;
-        m_map_TTower2SCellsHAD[TTID] = SCellvectorHAD;
+        m_map_TTower2SCellsEM[TTID] = std::move(SCellvectorEM);
+        m_map_TTower2SCellsHAD[TTID] = std::move(SCellvectorHAD);
         
     }
     file.close();
