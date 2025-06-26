@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <atomic>
 
 // EDM include(s):
 #include "AthContainers/AuxStoreInternal.h"
@@ -599,13 +600,15 @@ namespace xAOD {
      if( m_parentLink.isValid() ) {
        ids.insert (m_parentLink->getAuxIDs());
      }
-     m_auxids = ids;
 
      auxid_set_t decors = m_store->getDecorIDs();
      if( m_parentLink.isValid() ) {
        ids.insert (m_parentLink->getDecorIDs());
      }
+
      m_decorids = decors;
+     std::atomic_thread_fence( std::memory_order_seq_cst );
+     m_auxids = ids;
 
      m_auxidsValid = true;
    }

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 // System include(s):
 #include <cassert>
@@ -383,17 +383,17 @@ namespace xAOD {
          void* result = m_transientStore->getDecoration( auxid, size,
                                                          capacity );
          if( result && ( nids != m_transientStore->getAuxIDs().size() ) ) {
-            m_auxIDs.insert( auxid );
             if( m_transientStore->isDecoration( auxid ) ) {
                m_decorIDs.insert( auxid );
+               std::atomic_thread_fence( std::memory_order_seq_cst );
             }
+            m_auxIDs.insert( auxid );
          }
          // Return the memory address from the transient store:
          return result;
       }
 
       // Doesn't exist yet. So let's make it:
-      void* result = getData( auxid, size, capacity );
       if( m_locked ) {
          // If the container is locked, remember that this is a decoration:
          if( m_isDecoration.size() <= auxid ) {
@@ -401,7 +401,9 @@ namespace xAOD {
          }
          m_isDecoration[ auxid ] = ::kTRUE;
          m_decorIDs.insert( auxid );
+         std::atomic_thread_fence( std::memory_order_seq_cst );
       }
+      void* result = getData( auxid, size, capacity );
 
       // Return the pointer made by getData(...):
       return result;
