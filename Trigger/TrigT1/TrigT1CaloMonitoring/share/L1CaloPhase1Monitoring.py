@@ -576,7 +576,7 @@ for conf in args.postConfig:
 
 # -------- CHANGES GO ABOVE ------------
 
-if flags.Exec.MaxEvents==0: cfg.printConfig(summariseProps=True)
+if flags.Exec.MaxEvents==0: cfg.printConfig(withDetails = True, summariseProps = True, printDefaults = True)
 log.info( " ".join(("Configured Services:",*[svc.name for svc in cfg.getServices()])) )
 #print("Configured EventAlgos:",*[alg.name for alg in cfg.getEventAlgos()])
 #print("Configured CondAlgos:",*[alg.name for alg in cfg.getCondAlgos()])

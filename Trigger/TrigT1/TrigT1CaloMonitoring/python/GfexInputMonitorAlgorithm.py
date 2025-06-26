@@ -4,10 +4,14 @@
 def GfexInputMonitoringConfig(flags):
     '''Function to configure LVL1 GfexInput algorithm in the monitoring system.'''
 
-    
     # get the component factory - used for getting the algorithms
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
+
+    # for input monitoring we will require the emulated gFexTowers (built from supercells)
+    from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
+    result.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
+
 
     # use L1Calo's special MonitoringCfgHelper
     from AthenaConfiguration.ComponentFactory import CompFactory

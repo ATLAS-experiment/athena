@@ -245,8 +245,16 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputgFexTool], MaybeMissingROBs=maybeMissingRobs)
             acc.addEventAlgo(decoderAlg)
 
+        if flags.Input.isMC and "L1_gFexEmulatedTowers" not in flags.Input.Collections:
+            # need to create the Emulated gFexTowers container from supercells
+            from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
+            acc.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
+
+
+
         gFEXInputs = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers')
         gFEXInputs.IsMC = flags.Input.isMC
+        gFEXInputs.InputDataTowers = "L1_gFexDataTowers200"
         gFEXInputs.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
         gFEXInputs.gSuperCellTowerMapperTool.SCellMasking = True
 
