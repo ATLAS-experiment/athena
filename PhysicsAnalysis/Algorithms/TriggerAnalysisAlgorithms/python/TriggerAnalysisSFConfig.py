@@ -5,7 +5,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
-from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
+from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock, is_year_in_current_period
 
 
 def is_mc_from(config: ConfigAccumulator, campaign_list: Union[Campaign, Iterable[Campaign]]) -> bool:
@@ -118,9 +118,9 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addOption ('triggerMatchingChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. The default is {} (empty dictionary).")
-        self.addOption("includeAllYears", False, type=bool,
+        self.addOption("includeAllYearsPerRun", False, type=bool,
             info="if True, trigger matching will include all configured years "
-            "in all jobs. The default is False.")
+            "in the LHC run in all jobs. The default is False.")
         self.addOption ('postfix', '', type=str,
             info="a unique identifier for the trigger matching decorations. Only "
             "useful when defining multiple setups. The default is '' (empty string).")
@@ -232,9 +232,11 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             for trig in get_year_data(self.triggerMatchingChainsPerYear, year):
                 trig = trig.replace(' || ', '_OR_')
                 triggerMatchingChains.update(trig.split('_OR_'))
-        if self.includeAllYears:
+        if self.includeAllYearsPerRun:
             triggerMatchingChainsAll = set()
             for year in self.triggerMatchingChainsPerYear:
+                if not is_year_in_current_period(config, year):
+                    continue
                 for trig in get_year_data(self.triggerMatchingChainsPerYear, year):
                     trig = trig.replace(' || ', '_OR_')
                     triggerMatchingChainsAll.update(trig.split('_OR_'))

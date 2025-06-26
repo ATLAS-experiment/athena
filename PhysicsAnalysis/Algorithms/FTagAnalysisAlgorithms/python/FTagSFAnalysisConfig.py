@@ -11,28 +11,30 @@ from Campaigns.Utils import Campaign
 from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getReadFromBTaggingObject
 from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
 from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
-from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
+from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock, is_year_in_current_period
 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import get_year_data
 
 
-def trigger_set(campaign, triggerChainsPerYear, includeAllYears, log):
+def trigger_set(config, triggerChainsPerYear, includeAllYearsPerRun, log):
     triggers = set()
-    if includeAllYears:
+    if includeAllYearsPerRun:
         for year in triggerChainsPerYear:
+            if not is_year_in_current_period(config, year):
+                continue
             triggers.update(get_year_data(triggerChainsPerYear, year))
-    elif campaign is Campaign.MC20a:
+    elif config.campaign() is Campaign.MC20a:
         triggers.update(get_year_data(triggerChainsPerYear, 2015))
         triggers.update(get_year_data(triggerChainsPerYear, 2016))
-    elif campaign is Campaign.MC20d:
+    elif config.campaign() is Campaign.MC20d:
         triggers.update(get_year_data(triggerChainsPerYear, 2017))
-    elif campaign is Campaign.MC20e:
+    elif config.campaign() is Campaign.MC20e:
         triggers.update(get_year_data(triggerChainsPerYear, 2018))
-    elif campaign in [Campaign.MC21a, Campaign.MC23a]:
+    elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
         triggers.update(get_year_data(triggerChainsPerYear, 2022))
-    elif campaign in [Campaign.MC23c, Campaign.MC23d]:
+    elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
         triggers.update(get_year_data(triggerChainsPerYear, 2023))
     else:
-        log.warning("unknown campaign, skipping triggers: %s", str(campaign))
+        log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))
     return triggers
 
 
@@ -94,8 +96,8 @@ class FTagJetSFBlock(ConfigBlock):
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. The default is {} (empty dictionary).")
-        self.addOption ('includeAllYears', False, type=bool,
-            info="if True, all configured years will be included in all jobs. "
+        self.addOption ('includeAllYearsPerRun', False, type=bool,
+            info="if True, all configured years in the LHC run will be included in all jobs. "
             "The default is False.")
         self.addOption ('removeHLTPrefix', True, type=bool,
             info="remove the HLT prefix from trigger chain names, "
@@ -185,8 +187,8 @@ class FTagJetSFBlock(ConfigBlock):
             log.warning("The configuration of the FTAG trigger-aware SF is still "
                         "under development. This is not ready yet for analysis usage!")
 
-            triggers = trigger_set(config.campaign(), self.triggerChainsPerYear,
-                                   self.includeAllYears, log)
+            triggers = trigger_set(config, self.triggerChainsPerYear,
+                                   self.includeAllYearsPerRun, log)
             decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
             for chain in triggers:
                 chain_noHLT = chain.replace("HLT_", "")
@@ -286,9 +288,9 @@ class FTagEventSFBlock(ConfigBlock):
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. The default is {} (empty dictionary).")
-        self.addOption ('includeAllYears', False, type=bool,
-            info="if True, all configured years will be included in all jobs. "
-            "The default is False.")
+        self.addOption ('includeAllYearsPerRun', False, type=bool,
+            info="if True, all configured years in the LHC run will be included "
+            "in all jobs. The default is False.")
         self.addOption ('removeHLTPrefix', True, type=bool,
             info="remove the HLT prefix from trigger chain names, "
             "The default is True.")
@@ -314,8 +316,8 @@ class FTagEventSFBlock(ConfigBlock):
 
         triggers = set()
         if self.triggerChainsPerYear:
-            triggers = trigger_set(config.campaign(), self.triggerChainsPerYear,
-                                   self.includeAllYears, log)
+            triggers = trigger_set(config, self.triggerChainsPerYear,
+                                   self.includeAllYearsPerRun, log)
         # Always add computation for non-trigger FTAG SF
         triggers.add("")
 
