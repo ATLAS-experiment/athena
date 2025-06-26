@@ -369,11 +369,15 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(c
 	}
       //std::cout<<uncert_name<<std::endl;
       sigma=appliedSystematics().getParameterByBaseName(uncert_name);
-
+      
       std::string Number_uncert = uncert_name.substr(uncert_name.size()-1,uncert_name.size());
       if (Number_uncert=="y")
 	{
 	  efficiencyScaleFactor=sfresult.SF+sigma*sfresult.Total;
+	}
+      else if (Number_uncert=="r")
+	{
+	  efficiencyScaleFactor=sfresult.SF+sigma*sfresult.UnCorr;
 	}
       else
 	{
@@ -448,6 +452,9 @@ CP::SystematicSet AsgPhotonEfficiencyCorrectionTool::affectingSystematics() cons
       mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ Form("Corr_NP%d", i), 1));
       mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ Form("Corr_NP%d", i), -1));
     }
+    mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ "Uncorr", 1));
+    mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ "Uncorr", -1));
+    
   }
    
   return mySysSet;
@@ -467,15 +474,18 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::registerSystematics() {
 CP::SystematicSet AsgPhotonEfficiencyCorrectionTool::recommendedSystematics() const {
   CP::SystematicSet mySysSet;
   if (m_correlation_model_name == "TOTAL") {
-  mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", 1));
-  mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", -1));
+    mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", 1));
+    mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+"Uncertainty", -1));
   }
   else if (m_correlation_model_name == "FULL") {
     for (int i = 0; i < m_nCorrSyst; ++i) {
       mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ Form("Corr_NP%d", i), 1));
       mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ Form("Corr_NP%d", i), -1));
     }
-    }
+    mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ "Uncorr", 1));
+    mySysSet.insert(CP::SystematicVariation("PH_EFF_"+m_sysSubstring+ "Uncorr", -1));
+    
+  }
    
   return mySysSet;
 }

@@ -93,7 +93,7 @@ int main (int argc, const char * argv[]) {
 
 	if (argv[2] == "FULL")
 	  {
-	    TDirectory * dir = (TDirectory*)TFile::Open(file)->Get(Form("%s/",dirName.Data()))
+	    TDirectory * dir = (TDirectory*)TFile::Open(file)->Get(Form("%s/",dirName.Data()));
 	    
 	    
 	  }
