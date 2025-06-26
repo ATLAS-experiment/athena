@@ -12,7 +12,7 @@ from .Test import WorkflowRun
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 # common
 input_HITS = {
-    WorkflowRun.Run2: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/HITS/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3681/100events.HITS.pool.root",
+    WorkflowRun.Run2: defaultTestFiles.HITS_RUN3_2022[0],
     WorkflowRun.Run3: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root",
 }
 input_HITS_minbias_low = {

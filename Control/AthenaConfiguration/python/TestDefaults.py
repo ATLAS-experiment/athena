@@ -13,7 +13,7 @@ class defaultTestFiles:
 
     HITS_RUN2_1K = [f"{d}/Tier0ChainTests/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3681/HITS.25836812._004813.pool.root.1"] #MC20 10k events
     HITS_RUN2 = HITS_RUN2_1K # FIXME replace with a 20 event file
-    HITS_RUN3_2022 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root"] #MC23a
+    HITS_RUN3_2022 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root"] #MC23a 100 events # TODO Update DigitizationTests(MT) jobs to use this input
     HITS_RUN3_2023 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4159/100events.HITS.pool.root"] #MC23d
     HITS_RUN3_2024 = HITS_RUN3_2022 # Temporary back-compatibility [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.HITS.e8514_e8528_s4369/100events.HITS.pool.root"] #MC23e
     HITS_RUN3_HI = HITS_RUN3_2022 # Temporary back-compatibility
