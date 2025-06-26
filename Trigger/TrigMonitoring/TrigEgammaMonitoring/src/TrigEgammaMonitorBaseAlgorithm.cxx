@@ -59,25 +59,31 @@ bool TrigEgammaMonitorBaseAlgorithm::ApplyElectronPid( const xAOD::Electron *eg,
         return (bool) this->m_electronIsEMTool[2]->accept(ctx,eg);
     }
     else if (pidname == "lhtight"){
-        return (bool) this->m_electronLHTool[0]->accept(ctx,eg);
+        if (!m_doEffwithDNN) return (bool) this->m_electronLHTool[0]->accept(ctx,eg);
+        else return (bool) this->m_electronDNNTool[0]->accept(ctx,eg);
     }
     else if (pidname == "lhmedium"){
-        return (bool) this->m_electronLHTool[1]->accept(ctx,eg);
+        if (!m_doEffwithDNN) return (bool) this->m_electronLHTool[1]->accept(ctx,eg);
+        else return (bool) this->m_electronDNNTool[1]->accept(ctx,eg);
     }
     else if (pidname == "lhloose"){
-        return (bool) this->m_electronLHTool[2]->accept(ctx,eg);
+        if (!m_doEffwithDNN) return (bool) this->m_electronLHTool[2]->accept(ctx,eg);
+        else return (bool) this->m_electronDNNTool[2]->accept(ctx,eg);
     }
     else if (pidname == "lhvloose"){
         return (bool) this->m_electronLHTool[3]->accept(ctx,eg);
     }
     else if (pidname == "dnntight"){
-        return (bool) this->m_electronDNNTool[0]->accept(ctx,eg);
+        if (!m_doEffwithLH) return (bool) this->m_electronDNNTool[0]->accept(ctx,eg);
+        else return (bool) this->m_electronLHTool[0]->accept(ctx,eg);
     }
     else if (pidname == "dnnmedium"){
-        return (bool) this->m_electronDNNTool[1]->accept(ctx,eg);
+        if (!m_doEffwithLH) return (bool) this->m_electronDNNTool[1]->accept(ctx,eg);
+        else return (bool) this->m_electronLHTool[1]->accept(ctx,eg);
     }
     else if (pidname == "dnnloose"){
-        return (bool) this->m_electronDNNTool[2]->accept(ctx,eg);
+        if (!m_doEffwithLH) return (bool) this->m_electronDNNTool[2]->accept(ctx,eg);
+        else return (bool) this->m_electronLHTool[2]->accept(ctx,eg);
     }
     else ATH_MSG_DEBUG("No Pid tool, continue without PID");
     return false;
