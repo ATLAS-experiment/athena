@@ -6,6 +6,21 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
+def gFexEmulatedTowersCfg(flags, name="L1_gFexEmulatedTowers", writeKey="L1_gFexEmulatedTowers"):
+    """
+    Config for emulating gFex input data from LATOME readout
+    """
+    acc=ComponentAccumulator()
+
+    acc.addEventAlgo( CompFactory.LVL1.gFexTowerBuilder(name=name,
+                                                             SCell=flags.Trigger.L1.L1CaloSuperCellContainerName,
+                                                             gTowersWriteKey = writeKey,
+                                                             isDATA = not flags.Input.isMC,
+                                                             gFEX2SCmapping = "L1CaloFEXAlgos/fiber_towers_to_scells_v5.txt",
+                                                             gFEX2Tilemapping = "L1CaloFEXAlgos/fiber_towers_to_tile_v5.txt",
+                                                             gFexFiberTowerMapping = "L1CaloFEXAlgos/gFexFiberTowerMap.txt") )
+    return acc
+
 def jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMaker",writeKey="L1_jFexEmulatedTowers"):
     """
     Config for emulating jFex input data from LATOME readout
