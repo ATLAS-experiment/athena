@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -95,7 +95,7 @@ namespace LVL1 {
       WstotDenDec (*emRoI) = WstotSums[0];
       WstotNumDec (*emRoI) = WstotSums[1];
 
-      ClusterSCellEtSumsDec (*emRoI) = ClusterCellETs;
+      ClusterSCellEtSumsDec (*emRoI) = std::move(ClusterCellETs);
     }
 
     //Setup Tau Decorator Handlers
