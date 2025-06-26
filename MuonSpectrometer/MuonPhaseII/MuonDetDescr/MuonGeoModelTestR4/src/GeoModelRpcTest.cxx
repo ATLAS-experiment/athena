@@ -8,6 +8,19 @@
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <fstream>
 
+namespace {
+// Splitting this out into a separate function avoids a false positive
+// out-of-bounds array access warning from gcc14 in the archflag build.
+// (It should also be addressed in versions of Eigen after 3.4.)
+std::string stripPosToString (const MuonGMR4::RpcReadoutElement* reElement,
+                              const ActsGeometryContext& gctx,
+                              const IdentifierHash measHash)
+{
+  Amg::Vector3D v = reElement->stripPosition(gctx, measHash);
+  return Amg::toString(v);
+}
+}
+
 using namespace ActsTrk;
 namespace MuonGMR4{
 
@@ -149,7 +162,7 @@ StatusCode GeoModelRpcTest::execute() {
                         return StatusCode::FAILURE;
                     }
                     ATH_MSG_VERBOSE("Channel "<<m_idHelperSvc->toString(chId)<<" strip position "
-                                            <<Amg::toString(reElement->stripPosition(gctx, measHash)));
+                                    <<stripPosToString(reElement, gctx, measHash));
                 }                
             }
         }
