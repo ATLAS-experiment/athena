@@ -8,7 +8,8 @@ class defaultTestFiles:
     import os
     d = os.environ.get ("ATLAS_REFERENCE_DATA",
                         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art")
-    EVNT = [f"{d}/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1"]
+    EVNT_RUN3_1K = [f"{d}/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1"] # MC23 10k events - max 1k events used by ART jobs SPOT jobs use full 10k events
+    EVNT_RUN3_50 =  EVNT_RUN3_1K # FIXME replace with a 50 event file
 
     HITS_RUN2 = [f"{d}/Tier0ChainTests/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3681/HITS.25836812._004813.pool.root.1"] #MC20
     HITS_RUN3_2022 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root"] #MC23a

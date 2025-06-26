@@ -17,7 +17,7 @@ if __name__ == '__main__':
   from AthenaConfiguration.Enums import Project
   from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   flags = initConfigFlags()
-  flags.Input.Files = defaultTestFiles.EVNT
+  flags.Input.Files = defaultTestFiles.EVNT_RUN3_50
   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
   # Arbitrary configuration for Twiss Files
   flags.Sim.TwissFileBeam1 = '4.0TeV/0090.00m/nominal/v01/beam1.tfs'

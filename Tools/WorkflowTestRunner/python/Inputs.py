@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 import os
 
 # corresponding EOS path: /eos/atlas/atlascerngroupdisk/data-art/grid-input/WorkflowReferences
@@ -9,6 +9,7 @@ references_override_url = os.environ.get("ATLAS_WORKFLOW_REFERENCES_OVERRIDE_URL
 # CI special input files
 #####
 from .Test import WorkflowRun
+from AthenaConfiguration.TestDefaults import defaultTestFiles
 # common
 input_HITS = {
     WorkflowRun.Run2: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/HITS/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3681/100events.HITS.pool.root",
@@ -42,7 +43,7 @@ input_HITS_neutrino = {
 # simulation
 input_EVNT = {
     WorkflowRun.Run2: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1",
-    WorkflowRun.Run3: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1",
+    WorkflowRun.Run3: defaultTestFiles.EVNT_RUN3_50[0],
     WorkflowRun.Run4: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc21_14TeV.601190.PhPy8EG_AZNLO_Zmumu.evgen.EVNT.e8481/EVNT.30802236._000313.pool.root.1",
 }
 

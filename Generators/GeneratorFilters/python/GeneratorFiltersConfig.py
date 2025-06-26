@@ -579,7 +579,7 @@ if __name__ == "__main__":
     log.setLevel(DEBUG)
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.EVNT
+    flags.Input.Files = defaultTestFiles.EVNT_RUN3_50
     flags.lock()
 
     acc = ComponentAccumulator()

@@ -3,7 +3,7 @@
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
 flags = initConfigFlags()
-flags.Input.Files = defaultTestFiles.EVNT
+flags.Input.Files = defaultTestFiles.EVNT_RUN3_50
 
 # Load Sim flags if available
 flagsAvailableSim = True

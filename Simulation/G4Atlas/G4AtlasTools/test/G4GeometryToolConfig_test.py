@@ -19,7 +19,7 @@ if __name__ == '__main__':
   flags.Common.ProductionStep = ProductionStep.Simulation
 
   from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
-  flags.Input.Files = defaultTestFiles.EVNT
+  flags.Input.Files = defaultTestFiles.EVNT_RUN3_50
   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
   if flags.Common.Project is Project.AthSimulation:

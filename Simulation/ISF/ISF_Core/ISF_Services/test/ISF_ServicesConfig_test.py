@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
   from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   flags = initConfigFlags()
-  flags.Input.Files = defaultTestFiles.EVNT
+  flags.Input.Files = defaultTestFiles.EVNT_RUN3_50
   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
   flags.Sim.WorldRRange = 15000
