@@ -26,6 +26,7 @@ namespace IDTPM {
         const std::string& dirName,
         const std::string& anaTag,
         const std::string& trackType,
+        bool isTechnical = false,
         bool doGlobalPlots = false,
         bool doTruthMuPlots = false );
 
@@ -50,7 +51,11 @@ namespace IDTPM {
 
   private:
 
+    /// Update y axis labels for technical efficiencies
+    void updateYaxisLabel( TEfficiency*& eff );
+
     std::string m_trackType;
+    bool m_isTechnical{};
     bool m_doGlobalPlots{};
     bool m_doTruthMuPlots{};
 

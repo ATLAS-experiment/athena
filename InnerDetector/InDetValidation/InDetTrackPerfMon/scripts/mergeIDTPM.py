@@ -8,10 +8,10 @@ def GetCustomAthArgs() :
     myparser.add_argument( "-o", "--outputFileName", help="Output file name", default='IDTPM.output.root' )
     myparser.add_argument( "-s", "--saveNonPostProcessed", help="Enable debugging messages", action="store_true", default=False )
     myparser.add_argument( "-m", "--method", help="Method for recomputing resolutions", choices=['iterRMS', 'gaussFit', 'iterRMSgaussFit', 'iterGaussFit', 'None'], default='iterRMS' )
-    return myparser.parse_args()
+    return myparser.parse_known_args()
 
 ## Parse the arguments
-MyArgs = GetCustomAthArgs()
+MyArgs, otherHaddArgs = GetCustomAthArgs()
 
 ## Inputs
 from glob import glob
@@ -23,6 +23,8 @@ for paths in MyArgs.inputFileNames :
 import subprocess
 ## hadd inputs
 cmd_1 = [ 'hadd', '-f', MyArgs.outputFileName ] + InputFiles
+if otherHaddArgs :
+    cmd_1.insert( 1, ' '.join( otherHaddArgs ) )
 print( "Running: "+(' '.join( cmd_1 )) )
 subprocess.run( cmd_1, check=True )
 
