@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -18,13 +18,10 @@
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "HitManagement/HitCollectionMap.h"
-#include "TileG4Interfaces/ITileCalculator.h"
 
 TileGeoG4SDTool::TileGeoG4SDTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase(type,name,parent)
-  , m_tileCalculator("TileGeoG4SDCalc", name)
 {
-  declareProperty( "TileCalculator", m_tileCalculator);
 }
 
 StatusCode TileGeoG4SDTool::initialize()

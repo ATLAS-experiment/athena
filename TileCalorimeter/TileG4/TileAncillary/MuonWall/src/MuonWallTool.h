@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONWALL_MUONWALLTOOL_H
@@ -17,20 +17,20 @@
  */
 
 class MuonWallTool final : public DetectorGeometryBase {
-  public:
+public:
     // Basic constructor and destructor
     MuonWallTool(const std::string& type, const std::string& name, const IInterface *parent);
-    ~MuonWallTool();
+    ~MuonWallTool() = default;
 
     /** Override DetectorGeometryBase::BuildGeometry method */
     virtual void BuildGeometry() override final;
 
-  private:
-    double m_zLength;
-    double m_yLength;
-    double m_xLength;
-    bool m_backWall;
-    bool m_sideWall;
+private:
+  Gaudi::Property<double> m_zLength{this,  "ZLength", 0.};
+  Gaudi::Property<double> m_yLength{this,  "YLength", 0.};
+  Gaudi::Property<double> m_xLength{this,  "XLength", 0.};
+  Gaudi::Property<bool>   m_backWall{this, "backWall", true};
+  Gaudi::Property<bool>   m_sideWall{this, "sideWall", false};
 };
 
 #endif //MUONWALL_MUONWALLTOOL_H
