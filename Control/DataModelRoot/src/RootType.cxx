@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -826,7 +826,7 @@ TScopeAdapter TScopeAdapter::TemplateArgumentAt( size_t nth ) const
          ++tpl_open;
          if (tpl_open == 1) last = pos+1;
          continue;
-      } else if (c == '>') {
+      } else if (c == '>' && tpl_open > 0) {
          --tpl_open;
       }
       if ((c == ',' && tpl_open == 1) || (c == '>' && tpl_open == 0)) {
@@ -861,7 +861,7 @@ size_t TScopeAdapter::TemplateArgumentSize() const
       if ( c == '<' ) {
           ++tpl_open;
           continue;
-      } else if ( c == '>' )
+      } else if ( c == '>' && tpl_open > 0 )
           --tpl_open;
 
       if ((c == ',' && tpl_open == 1) || (c == '>' && tpl_open == 0))
