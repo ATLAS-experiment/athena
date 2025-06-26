@@ -14,10 +14,21 @@ selStr = {}
 selStr["passDigiNom"] ="for unmasked SCs with ADC_max-pedestal > 10*RMS(DB) & good quality bits"
 selStr["badNotMasked"] = "for unmasked SCs which have bad quality bits"
 # selections from the sc (ET) loop
-selStr["passSCNom"] = "for unmasked SCs which pass #tau selection with non-zero ET"
-selStr["passSCNom1"] = "for unmasked SCs which pass #tau selection with ET > 1 GeV"
-selStr["passSCNom10"] = "for unmasked SCs which pass tau selection with ET > 10 GeV"
-selStr["passSCNom10tauGt3"] = "for unmasked SCs which pass tau selection with ET > 10 GeV and #tau > 3"
+#selStr["passSCNom"] = "for unmasked SCs which pass #tau selection with non-zero ET < 10 GeV"
+selStr["zeroET"] = "for unmasked SCs with ET == 0 GeV"
+
+selStr["passSCNom"] = "for unmasked SCs with non-zero ET < 10 GeV"
+#selStr["passSCNom0_0p325"] = "for unmasked SCs which pass #tau selection with non-zero ET < 0.2 GeV"
+selStr["passSCNomInvalid"] = "for unmasked SCs with raw E -99999" # notMasked && NotSaturated && notOFCbOF
+selStr["passSCNom0_0p325"] = "for unmasked SCs with 0 GeV < ET < 0.325 GeV"
+#selStr["passSCNom0p325_1"] = "for unmasked SCs which pass #tau selection with 0.2 GeV < ET < 1 GeV"
+selStr["passSCNom0p325_1"] = "for unmasked SCs with 0.325 GeV < ET < 1 GeV"
+#selStr["passSCNom1"] = "for unmasked SCs which pass #tau selection with ET > 1 GeV"
+selStr["passSCNom1"] = "for unmasked SCs with ET > 1 GeV"
+#selStr["passSCNom10"] = "for unmasked SCs which pass tau selection with ET > 10 GeV"
+selStr["passSCNom10"] = "for unmasked SCs with ET > 10 GeV"
+#selStr["passSCNom10tauGt3"] = "for unmasked SCs which pass tau selection with ET > 10 GeV and #tau > 3"
+selStr["passSCNom10tauGt3"] = "for unmasked SCs with ET > 10 GeV and #tau > 3"
 selStr["saturNotMasked"] = "for unmasked SCs which are saturated"
 selStr["OFCbOFNotMasked"] = "for unmasked SCs with OFCb in overflow"
 selStr["onlofflEmismatch"] = "for unmasked SCs which pass #tau selection where online & offline energies are different"
@@ -56,6 +67,8 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 
     larDigitalTriggMonAlg = helper.addAlgorithm(CompFactory.LArDigitalTriggMonAlg('larDigitalTriggMonAlg'))
     larDigitalTriggMonAlg.ProblemsToMask=["maskedOSUM"] #highNoiseHG","highNoiseMG","highNoiseLG","deadReadout","deadPhys"]
+    if nsamples < 4:
+        larDigitalTriggMonAlg.LArRawSCEtRecoContainerKey="dummy" # this will not exists, so not used in monitoring
          
     hasEtId = False
     hasEt = False
@@ -367,10 +380,19 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            ybins=500, ymin=-5, ymax=5,
                                            pattern=[(part)])
 
+            partGroup_digi.defineHistogram('Digi_part_LB, Digi_part_adc;ADC_vs_LB_'+thisSel,
+                                           title='ADC value vs LB '+selStrPart[thisSel]+'; LB; ADC Value',
+                                           type='TProfile',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                                           ybins=500, ymin=0, ymax=5000,
+                                           pattern=[(part)])
 
         #### Plots from SC ET loop 
 
-        for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked", "onlofflEmismatch", "notMaskedEoflNe0", "notMaskedEoflGt1"]:
+        #for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked", "onlofflEmismatch", "notMaskedEoflNe0", "notMaskedEoflGt1"]:
+        for thisSel in [ "zeroET", "passSCNom0_0p325", "passSCNom0p325_1", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked", "onlofflEmismatch", "notMaskedEoflNe0", "notMaskedEoflGt1"]:
             thisTopPath=f"/{thisSel}/{topPath}"
             # Histos that we only want for all partitions/layers combined lalala
             if part == "ALL":
@@ -520,7 +542,19 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                          xbins=3564,xmin=-0.5,xmax=3563.5,
                                          ybins=10, ymin=-20, ymax=20,
                                          pattern=[(part)])
-            
+        
+        for thisSel in ["passSCNomInvalid"]:
+            thisTopPath=f"/{thisSel}/{topPath}"
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi;Coverage_Eta_Phi_'+thisSel,
+                                        title='SC coverage '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                        type='TH2F',
+                                        path=thisTopPath+'/Coverage',
+                                        cutmask='SC_part_'+thisSel,
+                                        xbins=partxbins,
+                                        ybins=partybins,
+                                        pattern=[(part)])
+
+                
 
     return helper.result()
 
