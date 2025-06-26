@@ -131,7 +131,6 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     kargsTool={}
     kargsTool.setdefault("SCTTwoSide",True)
     kargsTool.setdefault("DBRoot",outputAlignFolder)
-    kargsTool.setdefault("DBKey",outputAlignFolder)
     kargsTool.setdefault("forceUserDBConfig",True)
     if writeDBPoolFile:
         print("Writing DB Pool File")

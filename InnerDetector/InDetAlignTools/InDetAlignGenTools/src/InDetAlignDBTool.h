@@ -190,6 +190,8 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
 
   CondAttrListCollection* m_attrListCollection{};
 
+  std::string m_par_dbkey;
+
   Gaudi::Property<bool> m_par_newdb{this, "NewDB", true, "create database using new (collection) format"};  // FIXME: "New" is misleading
   Gaudi::Property<bool> m_par_scttwoside{this, "SCTTwoSide", false, "create structures with separated SCT module sides"};
   Gaudi::Property<int> m_par_fake{this, "FakeDB", 0, "set to 1 to fake full ATLAS geom, 2 to fake CTB geom"};
@@ -197,9 +199,6 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
   /** name of the root folder for constants, which can be set via 
       the <key> syntax. Default: /Indet/Align. */
   Gaudi::Property<std::string> m_par_dbroot{ this, "DBRoot", "/Indet/Align", "Root folder for alignment" };
-  /** the base part of the key for loading AlignableTransform objects
-      from the Transient Data Store. Default: /Indet/Align */
-  Gaudi::Property<std::string> m_par_dbkey{this, "DBKey", "/Indet/Align", "base part of the key for loading AlignableTransforms"};
   Gaudi::Property<bool> m_par_oldTextFile{this, "OldTextFile", false, "Input text file using old format"};
   Gaudi::Property<bool> m_forceUserDBConfig{this, "forceUserDBConfig", false, "Set to true to override any DB auto-configuration"};
   Gaudi::Property<std::string> m_pixmanName{this, "PixelManager", "Pixel", "Pixel manager name" };

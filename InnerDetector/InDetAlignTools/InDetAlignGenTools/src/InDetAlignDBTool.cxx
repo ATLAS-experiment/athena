@@ -121,7 +121,7 @@ StatusCode InDetAlignDBTool::initialize()
       }
   }
 
-  m_par_dbkey = m_par_dbroot;
+  m_par_dbkey = m_par_dbroot.value();
 
   if(m_pixman && (detStore()->retrieve(m_pixid).isFailure())) {
     ATH_MSG_FATAL("No Pixel ID Found!");
@@ -428,6 +428,7 @@ std::string InDetAlignDBTool::dirkey(const int det,const int bec,const
                                      int layer, const int level, const int sector) const {
   // given SCT/pixel det/bec/layer/sector, and level (1,2 or 3) return
   // directory key name for associated alignment data
+  // re-write using std::format at some point...
   std::ostringstream result;
   if (m_dynamicDB){
     result << "/Indet/AlignL";
@@ -453,6 +454,7 @@ std::string InDetAlignDBTool::dirkey(const int det,const int bec,const
     }
   }
   return result.str();
+
 }
 
 std::string InDetAlignDBTool::DBMkey(const int det,const int bec,
