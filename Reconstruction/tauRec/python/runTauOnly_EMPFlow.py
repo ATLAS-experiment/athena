@@ -49,6 +49,8 @@ def _run():
     from tauRec.ConfigurationHelpers import StandaloneTauRecoFlags
     StandaloneTauRecoFlags(flags)
     flags.Tau.TauRec.SeedJetCollection = "AntiKt4EMPFlowJets" 
+    flags.Tau.TauEleRM.SeedJetCollection = "AntiKt4EMPFlow_tauSeedEleRMJets" 
+
     flags.lock()
 
     from RecJobTransforms.RecoSteering import RecoSteering

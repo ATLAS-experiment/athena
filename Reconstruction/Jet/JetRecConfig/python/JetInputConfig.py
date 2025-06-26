@@ -92,6 +92,26 @@ def buildPFlowSel(parentjetdef, spec):
                                               NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects"
                                              )
 
+#This is to be used to seed tau jets which exclude electrons.
+#Therefore it is an inclusive selection, which means we have
+#to change the default settings and include all muons.
+#Then we also exclude charged + neutral FE linked to electrons
+#passing the relevant egamma PID WP.
+def buildPFlowSel_tauSeedEleRM(parentjetdef,spec):
+    return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_tauSeedEleRM",
+                                              electronIDToExclude = "LHMedium",
+                                              ElectronInputContainer="Electrons",
+                                              excludeNeutralElectronFE=True,
+                                              muonIDToInclude = "Loose",
+                                              excludeChargedMuonFE=False,
+                                              includeChargedMuonFE=True,
+                                              includeNeutralMuonFE=True,
+                                              ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
+                                              NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
+                                              ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_tauSeedEleRM",
+                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects_tauSeedEleRM"
+                                             )
+
 def buildPFlowSel_noElectrons(parentjetdef,spec):
     return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_noElectrons",
                                               electronIDToExclude = "LHMedium",
