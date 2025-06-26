@@ -12,13 +12,13 @@ class defaultTestFiles:
     EVNT_RUN3_50 =  EVNT_RUN3_1K # FIXME replace with a 50 event file
 
     HITS_RUN2_1K = [f"{d}/Tier0ChainTests/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3681/HITS.25836812._004813.pool.root.1"] #MC20 10k events
-    HITS_RUN2 = HITS_RUN2_1K # FIXME replace with a 20 event file
+    HITS_RUN2 = HITS_RUN2_1K # FIXME replace with a 25 event file # TODO Update DigitizationTests(MT) jobs to use this input
     HITS_RUN3_2022 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root"] #MC23a 100 events # TODO Update DigitizationTests(MT) jobs to use this input
-    HITS_RUN3_2023 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4159/100events.HITS.pool.root"] #MC23d
-    HITS_RUN3_2024 = HITS_RUN3_2022 # Temporary back-compatibility [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.HITS.e8514_e8528_s4369/100events.HITS.pool.root"] #MC23e
+    HITS_RUN3_2023 = [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4159/100events.HITS.pool.root"] #MC23d 100 events # TODO Update DigitizationTests(MT) jobs to use this input
+    HITS_RUN3_2024 = HITS_RUN3_2022 # Temporary back-compatibility [f"{d}/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.HITS.e8514_e8528_s4369/100events.HITS.pool.root"] #MC23e # TODO Update DigitizationTests(MT) jobs to use this input
     HITS_RUN3_HI = HITS_RUN3_2022 # Temporary back-compatibility
     HITS_RUN3 = HITS_RUN3_2022 # Temporary back-compatibility
-    HITS_RUN4 = [f"{d}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4149/HITS.33605501._000106.pool.root.1"]
+    HITS_RUN4 = [f"{d}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4149/HITS.33605501._000106.pool.root.1"] # 1k events - most jobs use 25/50 events, some use 400 events
     HITS_RUN2_MINBIAS_HIGH = [
         f"{d}/Tier0ChainTests/mc16_13TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.simul.HITS_FILT.e8341_s3687_s3704/HITS_FILT.26106512._000149.pool.root.1",
         f"{d}/Tier0ChainTests/mc16_13TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.simul.HITS_FILT.e8341_s3687_s3704/HITS_FILT.26106512._000581.pool.root.1",
@@ -31,18 +31,19 @@ class defaultTestFiles:
     ]
     HITS_DATA_OVERLAY_HI_RUN3_2023 = [f"{d}//OverlayTests/DataOverlaySimulation/24.0/v1/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.pool.root"]
 
-    RAW_RUN1 =          [f"{d}/Tier0ChainTests/data12_8TeV.00209109.physics_JetTauEtmiss.merge.RAW._lb0186._SFO-1._0001.1"]
+    RAW_RUN1 =          [f"{d}/Tier0ChainTests/data12_8TeV.00209109.physics_JetTauEtmiss.merge.RAW._lb0186._SFO-1._0001.1"] # 1.3GB
     RAW_RUN2 =          [f"{d}/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1_50evt"]
-    RAW_RUN3 =          [f"{d}/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"]
+    RAW_RUN3 =          [f"{d}/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"] # 1.2GB
 
-    RAW_RUN1_DATA11 =   [f"{d}/RecJobTransformTests/high_mu-data11_7TeV.00179725.physics_JetTauEtmiss.merge.RAW._lb0021.data"]
-    RAW_RUN1_DATA12 =   [f"{d}/RecJobTransformTests/data12_8TeV.00209109.physics_JetTauEtmiss.merge.RAW._lb0186._SFO-1._0001.1"]
-    RAW_RUN2_DATA15 =   [f"{d}/RecJobTransformTests/data15_13TeV.00283429.physics_Main.daq.RAW._lb0154._SFO-1._0001.data"]
-    RAW_RUN2_DATA16 =   [f"{d}/RecJobTransformTests/data16_13TeV.00310809.physics_Main.daq.RAW._lb1219._SFO-2._0001.data"]
-    RAW_RUN2_DATA17 =   [f"{d}/RecJobTransformTests/data17_13TeV/data17_13TeV.00336782.physics_Main.daq.RAW._lb0875._SFO-3._0001.data"]
-    RAW_RUN2_DATA18 =   [f"{d}/RecJobTransformTests/data18_13TeV/data18_13TeV.00348885.physics_Main.daq.RAW._lb0827._SFO-8._0002.data"]
-    RAW_RUN3_DATA22 =   [f"{d}/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data"]
-    RAW_RUN3_DATA24 =   [f"{d}/CampaignInputs/data24/RAW/data24_13p6TeV.00484909.physics_Main.daq.RAW/1627events_data24_13p6TeV.00484909.physics_Main.daq.RAW._lb0098._SFO-16._0001.data"]
+    RAW_RUN1_DATA11 =   [f"{d}/RecJobTransformTests/high_mu-data11_7TeV.00179725.physics_JetTauEtmiss.merge.RAW._lb0021.data"] # 198MB # see also RecJobTransformTests/data11_7TeV.00191920.physics_JetTauEtmiss.merge.RAW._lb0257._SFO-9._0001.1.10evts 198MB
+    RAW_RUN1_DATA12 =   [f"{d}/RecJobTransformTests/data12_8TeV.00209109.physics_JetTauEtmiss.merge.RAW._lb0186._SFO-1._0001.1"] # 1.3GB
+    RAW_RUN2_DATA15 =   [f"{d}/RecJobTransformTests/data15_13TeV.00283429.physics_Main.daq.RAW._lb0154._SFO-1._0001.data"] # 2.5GB
+    RAW_RUN2_DATA16 =   [f"{d}/RecJobTransformTests/data16_13TeV.00310809.physics_Main.daq.RAW._lb1219._SFO-2._0001.data"] # 2.5GB
+    RAW_RUN2_DATA17 =   [f"{d}/RecJobTransformTests/data17_13TeV/data17_13TeV.00336782.physics_Main.daq.RAW._lb0875._SFO-3._0001.data"] # 2.5GB
+    RAW_RUN2_DATA18 =   [f"{d}/RecJobTransformTests/data18_13TeV/data18_13TeV.00348885.physics_Main.daq.RAW._lb0827._SFO-8._0002.data"] # 1.8GB
+    RAW_RUN3_DATA22 =   [f"{d}/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data"] # 2.5GB
+    RAW_RUN3_DATA24 =   [f"{d}/CampaignInputs/data24/RAW/data24_13p6TeV.00484909.physics_Main.daq.RAW/1627events_data24_13p6TeV.00484909.physics_Main.daq.RAW._lb0098._SFO-16._0001.data"] # 2.7GB
+    RAW_BKG =           [f"{d}/OverlayTests/mc15_valid.00200010.overlay_streamsAll_2016_pp_1.skim.DRAW.r8381/DRAW.09331084._000146.pool.root.1"] # 192MB
 
     RDO_RUN2 = [f"{d}/CampaignInputs/mc20/RDO/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/100events.RDO.pool.root"]
     RDO_RUN3 = [f"{d}/CampaignInputs/mc23/RDO/mc23_13p6TeV.801451.Py8EG_A3_NNPDF23LO_minbias_ND.recon.RDO.e8486_e8528_s4232_s4114_r15112/300events_RDO.39752217._004082.pool.root.1"] #low-mu minbias sample
@@ -67,12 +68,12 @@ class defaultTestFiles:
     AOD_RUN4_MC = [f"{d}/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.AOD.e8481_s4149_r14697_r14702/AOD.33629011._000002.pool.root.1"]
 
     # Files for dedicated detector setups
-    RAW_RUN1_DATA11_HI =[f"{d}/RecJobTransformTests/data11_hi.00193321.physics_HardProbes.merge.RAW._lb0050._SFO-9._0002.1"]
-    RAW_RUN2_DATA15_HI =[f"{d}/RecJobTransformTests/data15_hi.00286711.physics_MinBiasOverlay.daq.RAW._lb0217._SFO-2._0001.data"]
-    RAW_RUN2_DATA18_HI =[f"{d}/RecJobTransformTests/data18_hi.00367384.physics_HardProbes.daq.RAW._lb0145._SFO-8._0001.data"]
-    RAW_RUN3_DATA22_HI =[f"{d}/RecJobTransformTests/data22_hi/RAWFiles/data22_hi.00440101.physics_MinBias.daq.RAW/data22_hi.00440101.physics_MinBias.daq.RAW._lb0214._SFO-11._0001.data"]
-    RAW_RUN3_DATA23_HI =[f"{d}/RecJobTransformTests/data23_hi/data23_hi.00462809.physics_EnhancedBias.merge.RAW._lb0422._SFO-11._0001.1"]
-    RAW_RUN3_DATA24_HI =[f"{d}/RecJobTransformTests/data24_hi/data24_hi.00490145.physics_MinBias.daq.RAW._lb0142._SFO-15._0001.data"]
+    RAW_RUN1_DATA11_HI =[f"{d}/RecJobTransformTests/data11_hi.00193321.physics_HardProbes.merge.RAW._lb0050._SFO-9._0002.1"] # 57MB
+    RAW_RUN2_DATA15_HI =[f"{d}/RecJobTransformTests/data15_hi.00286711.physics_MinBiasOverlay.daq.RAW._lb0217._SFO-2._0001.data"] # 343MB
+    RAW_RUN2_DATA18_HI =[f"{d}/RecJobTransformTests/data18_hi.00367384.physics_HardProbes.daq.RAW._lb0145._SFO-8._0001.data"] # 2.5GB
+    RAW_RUN3_DATA22_HI =[f"{d}/RecJobTransformTests/data22_hi/RAWFiles/data22_hi.00440101.physics_MinBias.daq.RAW/data22_hi.00440101.physics_MinBias.daq.RAW._lb0214._SFO-11._0001.data"] # 4.0 GB
+    RAW_RUN3_DATA23_HI =[f"{d}/RecJobTransformTests/data23_hi/data23_hi.00462809.physics_EnhancedBias.merge.RAW._lb0422._SFO-11._0001.1"] # 843MB
+    RAW_RUN3_DATA24_HI =[f"{d}/RecJobTransformTests/data24_hi/data24_hi.00490145.physics_MinBias.daq.RAW._lb0142._SFO-15._0001.data"] # 140MB
 
 
     # AFP tests should update? https://its.cern.ch/jira/browse/ATLASRECTS-8109
