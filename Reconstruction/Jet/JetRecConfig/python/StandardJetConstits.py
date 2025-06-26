@@ -166,7 +166,12 @@ _stdInputList = [
                      algoBuilder = inputcfg.buildPFlowSel_noLeptons,
                      prereqs = ["input:JetETMissParticleFlowObjects", ],
                      ),
-    
+
+    JetInputExternal("GlobalParticleFlowObjects_tauSeedEleRM", xAODType.FlowElement,
+                     algoBuilder = inputcfg.buildPFlowSel_tauSeedEleRM,
+                     prereqs = ["input:JetETMissParticleFlowObjects", ],
+                    ),
+
     # *****************************
     JetInputExternal("InDetTrackParticles",   xAODType.TrackParticle,
                      algoBuilder = standardReco("Tracks"),
@@ -411,6 +416,11 @@ _stdSeqList = [
 
     JetInputConstitSeq("GPFlow_noLeptons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noLeptons', 'CHSGParticleFlowObjects_noLeptons',
                        label='EMPFlow_noLeptons'),
+
+    #GPFlow with tau seed electrons removed
+    JetInputConstitSeq("GPFlow_tauSeedEleRM", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_tauSeedEleRM', 'CHSGParticleFlowObjects_tauSeedEleRM',
+                        label='EMPFlow_tauSeedEleRM'),
+
 
     # Particle Flow Objects with several neutral PFO copies for by-vertex reconstruction
     JetInputConstitSeq("GPFlowByVtx", xAODType.FlowElement, ["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSByVtxGParticleFlowObjects',

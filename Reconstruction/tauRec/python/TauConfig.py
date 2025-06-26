@@ -327,15 +327,20 @@ def TauReconstructionCfg(flags):
 
         # jet reclustering
         from JetRecConfig.JetRecConfig import JetRecCfg
-        from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
-        AntiKt4LCTopo_EleRM = AntiKt4LCTopo.clone(suffix="_EleRM")
-        AntiKt4LCTopo_EleRM.inputdef.name = flags_TauEleRM.Tau.ActiveConfig.LCTopoOrigin_EleRM
-        AntiKt4LCTopo_EleRM.inputdef.inputname = flags_TauEleRM.Tau.ActiveConfig.CaloCalTopoClusters_EleRM
-        AntiKt4LCTopo_EleRM.inputdef.containername = flags_TauEleRM.Tau.ActiveConfig.LCOriginTopoClusters_EleRM
-        AntiKt4LCTopo_EleRM.standardRecoMode = True
-        AntiKt4LCTopo_EleRM.context = "EleRM"
-
-        result.merge(JetRecCfg(flags_TauEleRM, AntiKt4LCTopo_EleRM))
+        if 'LCTopo' in flags.Tau.TauRec.SeedJetCollection:
+           from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
+           AntiKt4LCTopo_EleRM = AntiKt4LCTopo.clone(suffix="_EleRM")
+           AntiKt4LCTopo_EleRM.inputdef.name = flags_TauEleRM.Tau.ActiveConfig.LCTopoOrigin_EleRM
+           AntiKt4LCTopo_EleRM.inputdef.inputname = flags_TauEleRM.Tau.ActiveConfig.CaloCalTopoClusters_EleRM
+           AntiKt4LCTopo_EleRM.inputdef.containername = flags_TauEleRM.Tau.ActiveConfig.LCOriginTopoClusters_EleRM
+           AntiKt4LCTopo_EleRM.standardRecoMode = True
+           AntiKt4LCTopo_EleRM.context = "EleRM"
+           result.merge(JetRecCfg(flags_TauEleRM, AntiKt4LCTopo_EleRM))
+        else:
+           # use PFlow instead of LCTopo for seeding 
+           from JetRecConfig.JetRecConfig import JetRecCfg
+           from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow_tauSeedEleRM 
+           result.merge( JetRecCfg(flags_TauEleRM,AntiKt4EMPFlow_tauSeedEleRM )) 
 
         result.merge(TauBuildAlgCfg(flags_TauEleRM))
 
