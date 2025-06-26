@@ -102,6 +102,7 @@ class SCTErrMonAlg : public AthMonitorAlgorithm {
   ToolHandle<ISCT_DCSConditionsTool> m_dcsTool{this, "SCT_DCSConditionsTool", "SCT_DCSConditionsTool/InDetSCT_DCSConditionsTool", "Tool to retrieve SCT DCS information"};
   ToolHandle<IInDetConditionsTool> m_pSummaryTool{this, "SCT_ConditionsSummaryTool", "SCT_ConditionsSummaryTool/InDetSCT_ConditionsSummaryTool", "Tool to retrieve SCT Conditions summary"};
   ToolHandle<ISCT_FlaggedConditionTool> m_flaggedTool{this, "SCT_FlaggedConditionTool", "SCT_FlaggedConditionTool/InDetSCT_FlaggedConditionTool", "Tool to retrieve bad wafers with many fired strips"};
+  ToolHandle<IDQFilterTool> m_atlasReadyFilter{this,"ReadyFilterTool","DQAtlasReadyFilterTool/DQAtlasReadyFilterTool", "Tool to retrieve R4P flag"};
 
   const SCT_ID* m_pSCTHelper{nullptr};
 

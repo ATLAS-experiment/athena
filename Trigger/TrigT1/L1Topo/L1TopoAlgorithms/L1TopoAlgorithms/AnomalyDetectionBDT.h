@@ -68,6 +68,9 @@ namespace TCS {
       float m_mu1_ptmin{0}, m_mu1_ptmax{0}, m_mu1_etamin{0}, m_mu1_etamax{0}, m_mu1_phimin{0}, m_mu1_phimax{0}; // range of the first muon
       float m_mu2_ptmin{0}, m_mu2_ptmax{0}, m_mu2_etamin{0}, m_mu2_etamax{0}, m_mu2_phimin{0}, m_mu2_phimax{0}; // range of the second muon
       parType_t p_ScoreThreshold[2] = { 0, 0 };
+      parType_t p_minEt1{0};
+      parType_t p_minEt2{0};
+      size_t p_MaxTob{3}; //Number of TOBs (e.g., 3 muon events)
    };
 }
 

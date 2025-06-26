@@ -36,6 +36,7 @@ private:
     // optional parameters
     int m_nBinsToWatch{}; // how many bins to watch (default = 1), returning worst-case result of those bins
     int m_nBinsToExceed{}; // how many bins have to exceed the threshold (default = 1), less will be ignored
+    int m_binMinEntries{}; // Minimum number of entries in a TProfile (1D only) for a bin to be checked against thresolds
     bool m_greaterThan{}; // greater-than or less-than comparison against thresholds? (default = true)
     bool m_valueThresholds{}; // thresholds set w.r.t num entries per bin (false) or w.r.t to X-axis value? (default = false)
     int  m_getEntries{}; // search the rightmost non-zero bin (default) 

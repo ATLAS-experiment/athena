@@ -307,6 +307,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      ATH_MSG_DEBUG("relptvarcone20 = " << relptvarcone20  );
      ATH_MSG_DEBUG("relptcone20 = " << relptcone20  );
      ATH_MSG_DEBUG("m_RelPtConeCut = " << m_RelPtConeCut );
+     ATH_MSG_DEBUG("m_TopoEtConeCut = " << m_TopoEtConeCut);
    
      // Only for LH
      if( input.valueDecorator.count(m_pidName+"LHValue")){
@@ -347,7 +348,16 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
         ATH_MSG_DEBUG(" ACCEPT Isolation ptvarcon30_rel cut passed");
         cutCounter++;
       }
-     }else{
+     }
+     if (m_useTopoetCone20){
+      pass = (relptvarcone30 < m_RelPtConeCut && topoetcone20/input.electron->pt() < m_TopoEtConeCut);
+      if (!pass){
+        return pass;
+      }else{
+        cutCounter++;
+      }
+     }
+     if(!(m_useRelptvarcone30 && m_useTopoetCone20)){
       // Then, It will pass if relptcone20 is less than cut:
       pass = (relptvarcone20 < m_RelPtConeCut);
       ATH_MSG_DEBUG("reptvarcon20_rel cut is: " << m_RelPtConeCut);

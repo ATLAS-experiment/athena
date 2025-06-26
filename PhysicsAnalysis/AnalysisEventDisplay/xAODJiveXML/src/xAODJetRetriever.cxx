@@ -228,8 +228,10 @@ namespace JiveXML {
 
       // bjet tagger values
       if (jetkey!="AntiKt4EMPFlowJets" || (m_nTaggers==0)){
-	bTagName.emplace_back(DataType("None"));
-	bTagValue.emplace_back(DataType(0.));
+	for (auto taggerName : m_bTaggerNames) {
+	  bTagName.emplace_back(DataType("None"));
+	  bTagValue.emplace_back(DataType(0.));
+	}
       }else{
 	double btagValue;
 	for (auto taggerName : m_bTaggerNames) {

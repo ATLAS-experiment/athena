@@ -105,8 +105,11 @@ TCS::Tree::getTreeScore(const std::vector<int64_t>& inputEvent) const {
 // constructor
 TCS::AnomalyDetectionBDT::AnomalyDetectionBDT(const std::string& name)
 : DecisionAlg(name) {
+   defineParameter("MinET1",0);
+   defineParameter("MinET2",0); 
    defineParameter("ScoreThreshold", 1, 0);
    defineParameter("ScoreThreshold", 1, 1);
+   defineParameter("MaxTob",3);
    defineParameter("NumResultBits",2);
    setNumberOutputBits(2); // 2 decision bit for 2 different score thresholds
                            // (BDT Regression score is calculated internally)  
@@ -118,7 +121,10 @@ TCS::AnomalyDetectionBDT::~AnomalyDetectionBDT()
 
 TCS::StatusCode
 TCS::AnomalyDetectionBDT::initialize() {
-
+   
+   p_MaxTob = parameter("MaxTob").value(); 
+   p_minEt1 = parameter("MinET1").value();
+   p_minEt2 = parameter("MinET2").value();
    for (size_t i=0; i <numberOutputBits(); ++i) {
       p_ScoreThreshold[i] = parameter("ScoreThreshold", i).value();
    }
@@ -128,7 +134,7 @@ TCS::AnomalyDetectionBDT::initialize() {
    std::string fileLocation;
    
    #ifndef TRIGCONF_STANDALONE
-   fileLocation = PathResolver::find_file(bdtfn,"CALIBPATH", PathResolver::RecursiveSearch);
+   fileLocation = PathResolver::find_calib_file(bdtfn);
    #else
    return StatusCode::SUCCESS;
    #endif 
@@ -198,11 +204,12 @@ TCS::AnomalyDetectionBDT::processBitCorrect(const std::vector<TCS::TOBArray cons
    }
 
    int64_t maxScore = 0;
-
+   
+   size_t nMuons = p_MaxTob > 0 ? std::min(muons->size(), p_MaxTob) : muons->size();
    //We define muon pairs based on the 2-3 leading muons
    std::vector<std::pair<int, int>> muonPairs;
-   for (size_t i = 0; i < muons->size(); ++i) {
-     for (size_t j = i+1; j < muons->size(); ++j) {
+   for (size_t i = 0; i < nMuons; ++i) {
+     for (size_t j = i+1; j < nMuons; ++j) {
        muonPairs.emplace_back(i, j);
      }
    }
@@ -213,7 +220,11 @@ TCS::AnomalyDetectionBDT::processBitCorrect(const std::vector<TCS::TOBArray cons
     
       const auto& mu1 = (*muons)[i];
       const auto& mu2 = (*muons)[j];
-
+      
+      //ignore combinations failing minET cuts
+      if ( parType_t( mu1.Et() ) <= p_minEt1 ) continue; 
+      if ( parType_t( mu2.Et() ) <= p_minEt2 ) continue; 
+      
       eventValues.push_back(scale(mu1.Et(), m_mu1_ptmin, m_mu1_ptmax)); // muon pT (100MeV)
       eventValues.push_back(scale(mu1.eta()/40, m_mu1_etamin, m_mu1_etamax)); // muon eta (25mrad)
       eventValues.push_back(scale(mu1.phi()/20, m_mu1_phimin, m_mu1_phimax)); // muon phi (50mrad)
