@@ -637,7 +637,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                           'ElectronEfficiencyCorrectionAlgEcids' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
-            alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
+            alg.scaleFactorDecoration = 'el_ecids_effSF' + selectionPostfix + '_%SYS%'
             if self.isolationWP != 'Tight_VarRad':
                 raise ValueError('ECIDS are supported only for Tight_VarRad isolation.')
             if self.identificationWP == 'LooseBLayerLH':
@@ -677,7 +677,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                           'ElectronEfficiencyCorrectionAlgMisid' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'CP::ElectronChargeEfficiencyCorrectionTool' )
-            alg.scaleFactorDecoration = 'el_chargeMisID_effSF' + selectionPostfix + '_%SYS%'
+            alg.scaleFactorDecoration = 'el_charge_misid_effSF' + selectionPostfix + '_%SYS%'
             if self.isolationWP != 'Tight_VarRad':
                 raise ValueError('ECIDS are supported only for Tight_VarRad isolation.')
             if self.identificationWP == 'LooseBLayerLH':
