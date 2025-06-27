@@ -2,8 +2,20 @@
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
+
+
+def is_year_in_current_period(config: ConfigAccumulator, year: int | str) -> bool:
+    """
+    Utility function to check whether the year is valid for the current configuration
+    """
+    if config.geometry() is LHCPeriod.Run2 and year >= 2022:
+        return False
+    if config.geometry() is LHCPeriod.Run3 and year < 2022:
+        return False
+
+    return True
 
 
 class TriggerAnalysisBlock (ConfigBlock):
@@ -53,6 +65,8 @@ class TriggerAnalysisBlock (ConfigBlock):
         self.addOption ('prescaleIncludeAllYears', False, type=bool,
             info="if True, trigger prescales will include all configured years "
             "from prescaleLumiCalcFilesPerYear in all jobs. The default is False.")
+        self.addOption ('splitPerLHCRun', False, type=bool,
+            info="if True, trigger branches will only be processed for the current LHC run.")
         self.addOption ('noFilter', False, type=bool,
             info="do not apply an event filter. The default is False, i.e. "
             "remove events not passing trigger selection and matching.")
@@ -211,6 +225,8 @@ class TriggerAnalysisBlock (ConfigBlock):
             years = get_input_years(config)
             for trigger_chains in self.multiTriggerChainsPerYear.values():
                 for year, chain_list in trigger_chains.items():
+                    if self.splitPerLHCRun and not is_year_in_current_period(config, year):
+                        continue
                     target_triggers = triggers_for_selection if int(year) in years else triggers_for_decoration
                     for chain in chain_list:
                         if '||' in chain:

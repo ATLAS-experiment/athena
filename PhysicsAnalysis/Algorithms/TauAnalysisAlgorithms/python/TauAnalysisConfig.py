@@ -355,9 +355,9 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('prefixSF', 'trigEffSF', type=str,
                         info="the decoration prefix for trigger scale factors, "
                         "the default is 'trigEffSF'")
-        self.addOption ('includeAllYears', False, type=bool,
-                        info="if True, all configured years will be included in all jobs. "
-                        "The default is False.")
+        self.addOption ('includeAllYearsPerRun', False, type=bool,
+                        info="if True, all configured years in the LHC run will "
+                        "be included in all jobs. The default is False.")
         self.addOption ('removeHLTPrefix', True, type=bool,
                         info="remove the HLT prefix from trigger chain names, "
                         "The default is True.")
@@ -373,9 +373,13 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
         if config.dataType() is not DataType.Data:
             log = logging.getLogger('TauJetTriggerSFConfig')
 
+            from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import is_year_in_current_period
+
             triggers = set()
-            if self.includeAllYears:
+            if self.includeAllYearsPerRun:
                 for year in self.triggerChainsPerYear:
+                    if not is_year_in_current_period(config, year):
+                        continue
                     triggers.update(self.get_year_data(self.triggerChainsPerYear, year))
             elif config.campaign() is Campaign.MC20a:
                 triggers.update(self.get_year_data(self.triggerChainsPerYear, 2015))

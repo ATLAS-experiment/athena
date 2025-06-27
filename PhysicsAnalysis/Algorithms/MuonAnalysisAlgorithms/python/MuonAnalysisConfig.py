@@ -397,9 +397,9 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('prefixEffData', 'trigEffData', type=str,
                         info="the decoration prefix for data trigger efficiencies, "
                         "the default is 'trigEffData'")
-        self.addOption ('includeAllYears', False, type=bool,
-                        info="if True, all configured years will be included in all jobs. "
-                        "The default is False.")
+        self.addOption ('includeAllYearsPerRun', False, type=bool,
+                        info="if True, all configured years in the LHC run will "
+                        "be included in all jobs. The default is False.")
         self.addOption ('removeHLTPrefix', True, type=bool,
                         info="remove the HLT prefix from trigger chain names, "
                         "The default is True.")
@@ -416,7 +416,7 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
             # Value is empty for single leg trigger or list of legs
             triggerDict = TriggerDict()
 
-            if self.includeAllYears:
+            if self.includeAllYearsPerRun:
                 years = [int(year) for year in self.triggerChainsPerYear.keys()]
             else:
                 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import (
@@ -435,7 +435,11 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
             triggerConfigs = {}
             triggerConfigYears = {}
+            from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import is_year_in_current_period
             for year in years:
+                if not is_year_in_current_period(config, year):
+                    continue
+
                 triggerChains = self.triggerChainsPerYear.get(int(year), self.triggerChainsPerYear.get(str(year), []))
                 for chain in triggerChains:
                     chain = chain.replace(" || ", "_OR_")
@@ -472,7 +476,7 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 alg.efficiencyScaleFactorTool.AllowZeroSF = True
 
                 # Avoid warnings for missing triggers
-                if self.includeAllYears:
+                if self.includeAllYearsPerRun:
                     alg.minRunNumber = 0
                     alg.maxRunNumber = 999999
 

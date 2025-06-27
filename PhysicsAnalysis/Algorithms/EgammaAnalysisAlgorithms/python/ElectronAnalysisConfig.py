@@ -739,9 +739,9 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('prefixEff', 'trigEff', type=str,
                         info="the decoration prefix for MC trigger efficiencies, "
                         "the default is 'trigEff'")
-        self.addOption ('includeAllYears', False, type=bool,
-                        info="if True, all configured years will be included in all jobs. "
-                        "The default is False.")
+        self.addOption ('includeAllYearsPerRun', False, type=bool,
+                        info="if True, all configured years in the LHC run will "
+                        "be included in all jobs. The default is False.")
         self.addOption ('removeHLTPrefix', True, type=bool,
                         info="remove the HLT prefix from trigger chain names, "
                         "The default is True.")
@@ -757,8 +757,8 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
         if config.dataType() is not DataType.Data:
             log = logging.getLogger('ElectronTriggerSFConfig')
 
-            if self.includeAllYears and not self.useToolKeyAsOutput:
-                log.warning('`includeAllYears` is set to True, but `useToolKeyAsOutput` is set to False. '
+            if self.includeAllYearsPerRun and not self.useToolKeyAsOutput:
+                log.warning('`includeAllYearsPerRun` is set to True, but `useToolKeyAsOutput` is set to False. '
                             'This will cause multiple branches to be written out with the same content.')
 
             # Dictionary from TrigGlobalEfficiencyCorrection/Triggers.cfg
@@ -768,7 +768,9 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
             # currently recommended versions
             version_Run2 = "2015_2018/rel21.2/Precision_Summer2020_v1"
-            version_Run3 = "2015_2025/rel22.2/2022_Summer_Prerecom_v1"
+            map_Run2 = f"{version_Run2}/map4.txt"
+            version_Run3 = "2015_2025/rel22.2/2025_Precision2023_Recommendation"
+            map_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt"
 
             version = version_Run2 if config.geometry() is LHCPeriod.Run2 else version_Run3
             # Dictionary from TrigGlobalEfficiencyCorrection/MapKeys.cfg
@@ -789,11 +791,8 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
                 return conf[0]
 
-            if self.includeAllYears:
+            if self.includeAllYearsPerRun:
                 years = [int(year) for year in self.triggerChainsPerYear.keys()]
-                if any(year in years for year in [2015, 2016, 2017, 2018]) \
-                    and any(year in years for year in [2022, 2023, 2024, 2025]):
-                    raise ValueError("Mixing years from Run 2 and Run 3 in the same job is currently not supported.")
             else:
                 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import (
                     get_input_years)
@@ -824,8 +823,12 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             electronMapKeys = dict(electronMapKeys_Run2) | dict(electronMapKeys_Run3)
 
             # collect configurations
+            from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import is_year_in_current_period
             triggerConfigs = {}
             for year in years:
+                if not is_year_in_current_period(config, year):
+                    continue
+
                 triggerChains = self.triggerChainsPerYear.get(int(year), self.triggerChainsPerYear.get(str(year), []))
                 for chain in triggerChains:
                     chain = chain.replace(" || ", "_OR_")
@@ -858,7 +861,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                                            'AsgElectronEfficiencyCorrectionTool' )
 
                     # Reproduce config from TrigGlobalEfficiencyAlg
-                    alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/" + version + "/map4.txt"
+                    alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/" + (map_Run3 if config.geometry() is LHCPeriod.Run3 else map_Run2)
                     alg.efficiencyCorrectionTool.IdKey = self.electronID.replace("LH","")
                     alg.efficiencyCorrectionTool.IsoKey = self.electronIsol
                     alg.efficiencyCorrectionTool.TriggerKey = (
