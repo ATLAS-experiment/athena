@@ -559,9 +559,11 @@ def TrigJetMonConfig(inputFlags):
     jetcoll = chainDict['HLTColl']
     # kinematic plots
     # only use passing jets
-    chainMonitorConfT = jetChainMonitoringConfig(inputFlags,jetcoll,chain,True)
-    alg=chainMonitorConfT.toAlg(helper)
-    alg.FilterTools = [ EventFlagFilterToolCfg(inputFlags),helper.resobj.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))]
+    # skip for noalg chains
+    if 'noalg' not in chain:
+      chainMonitorConfT = jetChainMonitoringConfig(inputFlags,jetcoll,chain,True)
+      alg=chainMonitorConfT.toAlg(helper)
+      alg.FilterTools = [ EventFlagFilterToolCfg(inputFlags),helper.resobj.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))]
     # all jets
     chainMonitorConfF = jetChainMonitoringConfig(inputFlags,jetcoll,chain,False)
     alg=chainMonitorConfF.toAlg(helper)
@@ -1243,8 +1245,10 @@ if __name__=='__main__':
     jetcoll = chainDict['HLTColl']
     # kinematic plots
     # only passing jets
-    chainMonitorConfT = jetChainMonitoringConfig(flags,jetcoll,chain,True)
-    chainMonitorConfT.toAlg(helper)
+    # skip for noalg chains
+    if 'noalg' not in chain:
+      chainMonitorConfT = jetChainMonitoringConfig(flags,jetcoll,chain,True)
+      chainMonitorConfT.toAlg(helper)
     # all jets
     chainMonitorConfF = jetChainMonitoringConfig(flags,jetcoll,chain,False)
     chainMonitorConfF.toAlg(helper)
