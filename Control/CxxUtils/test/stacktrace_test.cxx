@@ -394,7 +394,10 @@ void testbad()
   act.sa_handler = testhandle;
   sigemptyset (&act.sa_mask);
   act.sa_flags = 0;
-  sigaction (SIGSEGV, &act, nullptr);
+  if (sigaction (SIGSEGV, &act, nullptr) < 0) {
+    perror ("sigaction fails!");
+    exit (1);
+  }
 
   unsigned long xbuf[1024];
   xbuf[0] = (unsigned long)&xbuf[1];
