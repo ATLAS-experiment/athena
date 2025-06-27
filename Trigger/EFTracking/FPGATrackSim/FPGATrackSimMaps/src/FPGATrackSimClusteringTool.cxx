@@ -63,6 +63,7 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
         unsigned int pixelCounter =  0;
         unsigned int stripCounter = 0;
         for ( auto &cluster: towerClusters){
+            SetMinMaxIndicies(cluster);
             if (m_reduceCoordPrecision)
                 reduceGlobalCoordPrecision(cluster);
 
@@ -93,6 +94,24 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
     }
     ATH_MSG_DEBUG("Produced "<< clusters.size()<< " clusters");
     return StatusCode::SUCCESS;
+}
+
+void FPGATrackSimClusteringTool::SetMinMaxIndicies(FPGATrackSimCluster &cluster) const {
+    //Set the min and max indices for the cluster equivalent
+    FPGATrackSimHit clusterEquiv = cluster.getClusterEquiv();
+    int maxPhiIdx{-std::numeric_limits<int>::max()}, maxEtaIdx{-std::numeric_limits<int>::max()};
+    int minPhiIdx{std::numeric_limits<int>::max()}, minEtaIdx{std::numeric_limits<int>::max()};
+    for (const FPGATrackSimHit& hit : cluster.getHitList()){
+         maxPhiIdx = std::max(maxPhiIdx, static_cast<int>(hit.getPhiIndex()));
+         minPhiIdx = std::min(minPhiIdx, static_cast<int>(hit.getPhiIndex()));
+         maxEtaIdx = std::max(maxEtaIdx, static_cast<int>(hit.getEtaIndex()));
+         minEtaIdx = std::min(minEtaIdx, static_cast<int>(hit.getEtaIndex()));
+    }
+    clusterEquiv.setMinPhiIndex(minPhiIdx);
+    clusterEquiv.setMaxPhiIndex(maxPhiIdx);
+    clusterEquiv.setMinEtaIndex(minEtaIdx);
+    clusterEquiv.setMaxEtaIndex(maxEtaIdx);
+    cluster.setClusterEquiv(clusterEquiv);
 }
 
 //Attempt to implement clustering using FPGATrackSim objects.
