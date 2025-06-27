@@ -956,7 +956,7 @@ void test7 (SGTest::TestStore& store)
   linkset.setElement(pCF);  // set only element
   linkset.toPersistent(); // XXX SHOULD BE AN ERROR???
 
-  linkset.setStorableObject(*fooVec);  // set Collection
+  (void)linkset.setStorableObject(*fooVec);  // set Collection
   assert (linkset.index() == 2);
   assert ((**linkset).x == 3);
   assert( linkset.toPersistent() );
