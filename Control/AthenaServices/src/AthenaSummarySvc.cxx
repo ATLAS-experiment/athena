@@ -179,8 +179,9 @@ StatusCode AthenaSummarySvc::initialize() {
 
   // save some space for the summary output if we run out of memory
   ATH_MSG_DEBUG("allocating block of 100 pages");
-  const int pageSize = sysconf( _SC_PAGESIZE );
-  if (pageSize < 1){
+  const long pageSize = sysconf( _SC_PAGESIZE );
+  if (pageSize < 1 || pageSize > 1024*1024*1024) {
+    ATH_MSG_FATAL ("Bad page size from sysconf");
     return StatusCode::FAILURE;
   }
   s_block = new char[ pageSize * 100 ];
@@ -195,7 +196,12 @@ StatusCode AthenaSummarySvc::initialize() {
 StatusCode AthenaSummarySvc::reinitialize() {
 
   delete[] s_block; s_block = nullptr;
-  s_block = new char[ sysconf( _SC_PAGESIZE ) * 100 ];
+  long pageSize = sysconf( _SC_PAGESIZE );
+  if (pageSize < 1 || pageSize > 1024*1024*1024) {
+    ATH_MSG_FATAL ("Bad page size from sysconf");
+    return StatusCode::FAILURE;
+  }
+  s_block = new char[ pageSize * 100 ];
   return s_block ? StatusCode::SUCCESS : StatusCode::FAILURE;
 
 }
