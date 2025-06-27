@@ -1,46 +1,38 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 
-import ROOT
-
-def PathfinderHlsCfg(flags, **kwargs):
-    kwargs.setdefault("bufferSize", 8192)
-
-    from json import dumps
-    kwargs.setdefault(
-        "kernelDefinitionsJsonString",
-        dumps({
-            "loader:{loader_1}": [{
-                "storeGateKey": "inputTrackDataStream",
-                "argumentIndex": "0",
-                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT),
-            }],
-            "loader:{loader_2}": [{
-                "storeGateKey": "inputHitDataStream",
-                "argumentIndex": "0",
-                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT),
-            }],
-            "unloader": [{
-                "storeGateKey": "outputDataStream",
-                "argumentIndex": "1",
-                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.OUTPUT),
-            }],
-        }),
-    )
-
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    acc = ComponentAccumulator()
-
-    from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
-    acc.merge(EFTrackingXrtAlgorithmCfg(flags, **kwargs))
-
-    return acc
-
 if __name__ == "__main__":
     from argparse import ArgumentParser
     argumentParser = ArgumentParser()
-    argumentParser.add_argument("--eosPath", default = "/eos/")
-    argumentParser.add_argument("--bufferSize", type = int, default = 8192)
-    argumentParser.add_argument("--verbose", action = "store_true")
+    argumentParser.add_argument(
+        "--xclbinPath", 
+        default = "/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/22_pathfinder_HLS/Pathfinder_hw.xclbin",
+    )
+
+    argumentParser.add_argument(
+        "--hitTestVectorPath",
+        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/pattern_reco_output.txt",
+    )
+
+    argumentParser.add_argument(
+        "--trackTestVectorPath",
+        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/spacepoint_strips_output.txt",
+    )
+
+    argumentParser.add_argument(
+        "--outputPath", 
+        default = "pathfinder_output.txt",
+    )
+
+    argumentParser.add_argument(
+        "--bufferSize", 
+        type = int, 
+        default = 8192,
+    )
+
+    argumentParser.add_argument(
+        "--verbose", 
+        action = "store_true",
+    )
 
     arguments = argumentParser.parse_args()
 
@@ -63,16 +55,14 @@ if __name__ == "__main__":
         PrintEllapsedTime = True,
     ))
 
-    acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(
-        XclbinPathsList = [f"{arguments.eosPath}/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/22_pathfinder_HLS/Pathfinder_hw.xclbin"],
-    ))
+    acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(XclbinPathsList = [arguments.xclbinPath]))
 
     from EFTrackingFPGAUtility.EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
     acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
         flags,
         name = "trackDataStreamLoader",
         bufferSize = arguments.bufferSize,
-        inputCsvPath = f"{arguments.eosPath}/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/pattern_reco_output.txt",
+        inputCsvPath = arguments.trackTestVectorPath,
         inputDataStream = "inputTrackDataStream",
     ))
 
@@ -80,9 +70,7 @@ if __name__ == "__main__":
         flags,
         name = "hitDataStreamLoader",
         bufferSize = arguments.bufferSize,
-        # We are still waiting on a proper hits test vector for the pathfinder 
-        # but this will do in the meantime (just needs to run without crashing).
-        inputCsvPath = f"{arguments.eosPath}/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/pattern_reco_output.txt",
+        inputCsvPath = arguments.hitTestVectorPath,
         inputDataStream = "inputHitDataStream",
     ))
 
@@ -103,33 +91,22 @@ if __name__ == "__main__":
         cartesianDataStream = "inputMasqueradedHitDataStream",
     ))
 
-    from json import dumps
-    acc.merge(PathfinderHlsCfg(
-        flags,
-        bufferSize = arguments.bufferSize,
-        kernelDefinitionsJsonString = dumps({
-            "loader:{loader_1}": [{
-                "storeGateKey": "inputMasqueradedTrackDataStream",
-                "argumentIndex": "0",
-                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT),
-            }],
-            "loader:{loader_2}": [{
-                "storeGateKey": "inputMasqueradedHitDataStream",
-                "argumentIndex": "0",
-                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT),
-            }],
-            "unloader": [{
-                "storeGateKey": "outputDataStream",
-                "argumentIndex": "1",
-                "interfaceMode": str(ROOT.EFTrackingXrtParameters.InterfaceMode.OUTPUT),
-            }],
-        }),
+    from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
+    acc.merge(EFTrackingXrtAlgorithmCfg(
+        flags, 
+        inputInterfaces = [
+            ["loader:{loader_1}", "inputMasqueradedTrackDataStream", 0],
+            ["loader:{loader_2}", "inputMasqueradedHitDataStream", 0],
+        ],
+        outputInterfaces = [
+            ["unloader:{unloader_1}", "outputDataStream", 1],
+        ],
     ))
 
     from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
     acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
         flags,
-        outputCsvPath = "PathfinderHls.txt",
+        outputCsvPath = arguments.outputPath,
         outputDataStream = "outputDataStream",
     ))
 

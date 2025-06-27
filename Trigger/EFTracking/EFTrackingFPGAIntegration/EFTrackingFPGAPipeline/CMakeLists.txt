@@ -46,12 +46,6 @@ atlas_add_component(EFTrackingFPGAPipeline
                                    FPGATrackSimObjectsLib
                                    EFTrackingFPGAUtilityLib)
 
-atlas_add_dictionary(
-  EFTrackingXrtParametersDict
-  EFTrackingFPGAPipeline/EFTrackingXrtParametersDict.h
-  EFTrackingFPGAPipeline/selection.xml
-)
-
 atlas_install_python_modules(python/*.py)
 atlas_install_scripts(test/*.sh test/FPGARunScripts/*.sh)
 
