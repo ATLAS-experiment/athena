@@ -33,13 +33,14 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <string>
 
 void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* pszStationName, HepGeom::Transform3D& TransInMotherVolume)
 {
-	char szLabel[32];
+	std::string szLabel;
 	GeoLogVol* pLogElement=nullptr;
 	GeoFullPhysVol* pPhysElement;
 	eAFPStation eStation=m_pGeometry->parseStationName(pszStationName);
@@ -52,10 +53,10 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 
 	//add global vacuum sensitive volume (ID=11)
 	int nSpecVacSensorID=AFP_CONSTANTS::Stat_GlobalVacuumSensorID;
-	sprintf(szLabel,"%s_LogSIDVacuumSensor[%i]",pszStationName,nSpecVacSensorID);
+	szLabel = std::format("{}_LogSIDVacuumSensor[{}]",pszStationName,nSpecVacSensorID);
 	GeoLogVol* pLogSIDVacuumSensor=new GeoLogVol(szLabel,pSolidSIDVacuumSensor,m_MapMaterials[std::string("std::Vacuum")]);
 	GeoFullPhysVol* pPhysSIDVacuumSensor=new GeoFullPhysVol(pLogSIDVacuumSensor);
-	sprintf(szLabel,"%s_SIDVacuumSensor[%i]",pszStationName,nSpecVacSensorID);
+	szLabel = std::format("{}_SIDVacuumSensor[{}]",pszStationName,nSpecVacSensorID);
 	pPhysMotherVol->add(new GeoNameTag(szLabel));
 	pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(m_pGeometry->getSIDTransform(ESTT_VACUUMSENSOR,pszStationName,nSpecVacSensorID))));
 	pPhysMotherVol->add(pPhysSIDVacuumSensor);
@@ -64,29 +65,29 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 	for(int i=0;i<m_pGeometry->getSIDPlatesCnt(eStation);i++)
 	{
 		// create SID plate
-		sprintf(szLabel,"%s_LogSIDPlate[%i]",pszStationName,i);
+		szLabel = std::format("{}_LogSIDPlate[{}]",pszStationName,i);
 		pLogElement=new GeoLogVol(szLabel,pSolidSIDPlate,m_MapMaterials[std::string("CE7")]);
 		pPhysElement=new GeoFullPhysVol(pLogElement);
-		sprintf(szLabel,"%s_SIDPlate[%i]",pszStationName,i);
+		szLabel = std::format("{}_SIDPlate[{}]",pszStationName,i);
 		pPhysMotherVol->add(new GeoNameTag(szLabel));
 		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_PLATE,pszStationName,i))));
 		pPhysMotherVol->add(pPhysElement);
 
 		// create SID chip
 		GeoShape* pSolidFEI4Chip=new GeoBox(0.5*sidcfg.vecChipXLength[i],0.5*sidcfg.vecChipYLength[i],0.5*AFP_CONSTANTS::SiT_Chip_thickness);
-		sprintf(szLabel,"%s_LogSIDChip[%i]",pszStationName,i);
+		szLabel = std::format("{}_LogSIDChip[{}]",pszStationName,i);
 		pLogElement=new GeoLogVol(szLabel,pSolidFEI4Chip,m_MapMaterials[std::string("CE7")]);
 		pPhysElement=new GeoFullPhysVol(pLogElement);
-		sprintf(szLabel,"%s_SIDChip[%i]",pszStationName,i);
+		szLabel = std::format("{}_SIDChip[{}]",pszStationName,i);
 		pPhysMotherVol->add(new GeoNameTag(szLabel));
 		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_FEI4CHIP,pszStationName,i))));
 		pPhysMotherVol->add(pPhysElement);
 
 		// create SID sensor (pixel area)
-		sprintf(szLabel,"%s_LogSIDSensor[%i]",pszStationName,i);
+		szLabel = std::format("{}_LogSIDSensor[{}]",pszStationName,i);
 		pLogElement=new GeoLogVol(szLabel,pSolidSIDSensor,m_MapMaterials[std::string("Silicon")]);
 		pPhysElement=new GeoFullPhysVol(pLogElement);
-		sprintf(szLabel,"%s_SIDSensor[%i]",pszStationName,i);
+		szLabel = std::format("{}_SIDSensor[{}]",pszStationName,i);
 		pPhysMotherVol->add(new GeoNameTag(szLabel));
 		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_SENSOR,pszStationName,i))));
 		pPhysMotherVol->add(pPhysElement);
@@ -94,11 +95,11 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 		if(m_CfgParams.sidcfg[eStation].bAddVacuumSensors)
 		{
 			// create logic SID Vacuum Layer
-			sprintf(szLabel,"%s_LogSIDVacuumSensor[%i]",pszStationName,i);
+			szLabel = std::format("{}_LogSIDVacuumSensor[{}]",pszStationName,i);
 			GeoLogVol* pLogSIDVacuumSensor=new GeoLogVol(szLabel,pSolidSIDVacuumSensor,m_MapMaterials[std::string("std::Vacuum")]);
 			GeoFullPhysVol* pPhysSIDVacuumSensor=new GeoFullPhysVol(pLogSIDVacuumSensor);
 
-			sprintf(szLabel,"%s_SIDVacuumSensor[%i]",pszStationName,i);
+			szLabel = std::format("{}_SIDVacuumSensor[{}]",pszStationName,i);
 			pPhysMotherVol->add(new GeoNameTag(szLabel));
 			pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(m_pGeometry->getSIDTransform(ESTT_VACUUMSENSOR,pszStationName,i))));
 			pPhysMotherVol->add(pPhysSIDVacuumSensor);
