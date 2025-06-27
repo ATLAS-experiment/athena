@@ -45,8 +45,6 @@ namespace Monitored {
         return 0;
       }
 
-      auto cutMaskAccessor = cutMaskValuePair.second;
-
       auto tree = this->histogram<TTree>();
       if (tree->GetListOfBranches()->GetEntries() == 0) {
         createBranches(tree);

@@ -32,7 +32,7 @@ namespace Monitored {
         log << MSG::ERROR << "CutMask does not match the size of plotted variable: " 
             << cutMaskValuePair.first << " " << vars.var[0]->size() << endmsg;
       }
-      auto cutMaskAccessor = cutMaskValuePair.second;
+      const auto& cutMaskAccessor = cutMaskValuePair.second;
 
       TEfficiency* efficiency = this->histogram<TEfficiency>();
       const TH1* efftot = efficiency->GetTotalHistogram();
