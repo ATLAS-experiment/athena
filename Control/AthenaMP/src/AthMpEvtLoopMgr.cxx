@@ -56,8 +56,10 @@ StatusCode AthMpEvtLoopMgr::initialize()
     return StatusCode::FAILURE;
   }
 
-  std::string evtSelName = prpMgr->getProperty("EvtSel").toString();
-  m_evtSelector = serviceLocator()->service(evtSelName);
+  {
+    std::string evtSelName = prpMgr->getProperty("EvtSel").toString();
+    m_evtSelector = serviceLocator()->service(std::move(evtSelName));
+  }
   ATH_CHECK(m_evtSelector.isValid());
 
   if(m_strategy=="EventService") {
