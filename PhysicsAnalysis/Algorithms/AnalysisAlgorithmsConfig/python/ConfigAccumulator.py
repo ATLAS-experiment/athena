@@ -42,7 +42,8 @@ class OutputConfig :
         self.noSys = noSys
         self.enabled = enabled
 
-
+    def __repr__ (self):
+        return f'OutputConfig("{self.outputContainerName}.{self.variableName}" [enabled={self.enabled}])'
 
 class ContainerConfig :
     """all the auto-generated meta-configuration data for a single container
