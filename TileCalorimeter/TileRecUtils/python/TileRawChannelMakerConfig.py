@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile raw channel maker algorithm"""
 
@@ -46,6 +46,13 @@ def TileRawChannelMakerCfg(flags, **kwargs):
         tileRawChannelBuilder += [tileRawChannelBuilderFitFilter]
         mlog.info(" adding now TileRawChannelBuilderFitFilter with name %s to the algorithm: %s",
                   tileRawChannelBuilderFitFilter.name, name)
+
+    if flags.Tile.doMF:
+        from TileRecUtils.TileRawChannelBuilderMFConfig import TileRawChannelBuilderMFCfg
+        tileRawChannelBuilderMF = acc.popToolsAndMerge( TileRawChannelBuilderMFCfg(flags) )
+        tileRawChannelBuilder += [tileRawChannelBuilderMF]
+        mlog.info(" adding now TileRawChannelBuilderMF with name %s to the algorithm: %s",
+                  tileRawChannelBuilderMF.name, name)
 
     if flags.Tile.doOF1:
         from TileRecUtils.TileRawChannelBuilderOptConfig import TileRawChannelBuilderOF1Cfg
