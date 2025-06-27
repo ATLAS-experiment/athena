@@ -794,6 +794,338 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   return zdcDataAnalyzer;
 }
 
+std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeOONeNe2025()
+{
+  // Key configuration parameters needed for the data analyzer construction                                   
+  //                                                                                                          
+  m_deltaTSample = 3.125;
+  m_numSample = 24;
+  
+  const int deriv2ndThreshDSHG = -45;
+  const int deriv2ndThreshDSLG = -10;
+  const unsigned int peakSample = 10;
+
+  const float deltaTcutLow = -10;
+  const float deltaTcutHigh = 10;
+  const float chisqDivAmpCutHGVal = 30;
+  const float chisqDivAmpCutLGVal = 50;
+
+  ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples;
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh;
+  ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCutHG, chisqDivAmpCutLG;
+  ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{1.2, 1.4, 1.3, 1.2},
+						{1.35, 1.4, 1.3, 1.1}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{4.4, 4.7, 4.5, 4.6}, {4.8, 4.6, 4.4, 4.2}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.5, 31.5, 29.5, 30.5}, {34.5, 33.0, 33, 34.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{32.25, 32.0, 30.5, 30.5}, {32.4, 33.5, 30.5, 31.4}}};
+    
+  ATH_MSG_DEBUG( "PbPb2024: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      fixTau1Arr[side][module] = true;
+      fixTau2Arr[side][module] = false;
+
+      peak2ndDerivMinSamples[side][module] = peakSample;
+      peak2ndDerivMinThresholdsHG[side][module] = deriv2ndThreshDSHG;
+      peak2ndDerivMinThresholdsLG[side][module] = deriv2ndThreshDSLG;
+      
+      deltaT0CutLow[side][module] = deltaTcutLow;
+      deltaT0CutHigh[side][module] = deltaTcutHigh;
+      chisqDivAmpCutLG[side][module] = chisqDivAmpCutLGVal;
+      chisqDivAmpCutHG[side][module] = chisqDivAmpCutHGVal;
+    }
+  }
+  
+  //  Construct the data analyzer                                                                             
+  //                                                                                                          
+  std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
+									m_numSample, m_deltaTSample,
+									m_presample, "FermiExpLHCf",
+									peak2ndDerivMinSamples,
+									peak2ndDerivMinThresholdsHG,
+									peak2ndDerivMinThresholdsLG,
+									ZDCPulseAnalyzer::LGModeRefitLG));
+  zdcDataAnalyzer->set2ndDerivStep(2);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{1, 1, 1, 1.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{4,4,4,4}, {4,4,4,4}}};
+
+  zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 4 applied to LG ADC, 1 to HG ADC values
+
+  // These noise sigmas we read off from the ch_x_BaselineStdev monitoring histograms with our 
+  //   final readout configuration for the Pb+Pb run by BAC on 25-09-2023
+  //
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{1.5, 1.5,  1.5,  1.5}, {1.5, 1.5, 1.5, 1.5}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
+  
+  zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
+
+  // Now set cuts and default fit parameters                                                                  
+  //                                                                                                            
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGOverFlowADC = {{{{3500, 3500, 3500, 3500}}, {{3500, 3500, 3500, 3500}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGUnderFlowADC = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray LGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
+  
+  zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
+  zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
+  zdcDataAnalyzer->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
+  
+  // Enable two-pass analysis                                                                                 
+  //                                                                                                          
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-30, -30, -30, -30},
+								   {-30, -30, -30, -30},}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
+								   {-8, -8, -8, -8}}};
+  
+  zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
+
+  // Turn on exclusion of early and late samples to address OOT pileup
+  //
+  zdcDataAnalyzer->enablePreExclusion(4, 500, 200);
+  zdcDataAnalyzer->enablePostExclusion(4, 300, 200);
+  
+  // Set up non-linear corrections for the ZDC
+  //
+  std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoefficHG, nonLinearCorrCoefficLG;
+
+  nonLinearCorrCoefficHG[0][0] = {-0.0225871, 0.00702802, 0.00201155, -0.00675293, 0.00186212} ;
+  nonLinearCorrCoefficHG[0][1] = {-0.0155562, 0.00594092, 0.00382112, -0.00665466, 0.00143384} ;
+  nonLinearCorrCoefficHG[0][2] = {-0.0313621, 0.0134528, 0.00529013, -0.0111751, 0.0029913} ;
+  nonLinearCorrCoefficHG[0][3] = {-0.025108, 0.00301898, 0.022472, -0.0204288, 0.00453215} ;
+  nonLinearCorrCoefficHG[1][0] = {-0.0266648, 0.0106792, -0.00939959, 0.000833011, 0.000199051} ;
+  nonLinearCorrCoefficHG[1][1] = {-0.0246541, 0.000327376, 0.00754946, -0.00710273, 0.00136899} ;
+  nonLinearCorrCoefficHG[1][2] = {-0.0175283, 0.0127954, 0.000235749, -0.00769698, 0.00221995} ;;
+  nonLinearCorrCoefficHG[1][3] = {-0.0279931, 0.0188122, 0.0126234, -0.0169907, 0.00398826} ;
+  
+
+  // Remove nonlinear corrections while we study the injector pulse
+  nonLinearCorrCoefficHG = {{ {{{0},
+				{0},
+				{0},
+				{0}}},
+			      {{{0},
+				{0},
+				{0},
+				{0}}} }};
+
+  //
+  // We are disabling the old FADC correction moving forward
+  if (m_doNonLinCorr)
+    zdcDataAnalyzer->SetNonlinCorrParams(1000, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
+  
+  std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoefficHG, timeCorrCoefficLG;
+  timeCorrCoefficHG[0][0] = {0.07, -0.020672, 0.070206, 0.004961, -0.010821, -0.001835};
+  timeCorrCoefficHG[0][1] = {0.04, -0.012961, 0.008204, 0.010771, 0.011593, 0.002045};
+  timeCorrCoefficHG[0][2] = {0.04, 0.017393, 0.017597, 0.003736, -0.001696, -0.000465};
+  timeCorrCoefficHG[0][3] = {0.04, 0.018463, 0.009862, -0.000277, -0.000268, 0.000192};
+  
+  timeCorrCoefficHG[1][0] = {0.13, -0.106068, 0.078153, 0.034479, -0.004964, -0.001688};
+  timeCorrCoefficHG[1][1] = {0.03, -0.007518, 0.008937, 0.015319, 0.012290, 0.001889};
+  timeCorrCoefficHG[1][2] = {-0.01, 0.006711, -0.001652, -0.004223, -0.000573, 0.000161};
+  timeCorrCoefficHG[1][3] = {0.015, 0.017993, 0.006339, 0.003122, 0.002980, 0.000735};
+
+  // +++ BAC 07-26-24
+  //
+  //  The +3.25 in the constant t0 correction term accounts for a change in the nominal T0 from 31.25 to 28
+  //    made at the same time to match the timing shift of the LG channels 
+  //
+  // ---
+  timeCorrCoefficLG[0][0] = {0.035f+3.25f, -0.126189, 0.022724, 0.039116, -0.098255};
+  timeCorrCoefficLG[0][1] = {0.022f+3.25f, -0.165988, -0.014125, 0.057323, -0.205109};
+  timeCorrCoefficLG[0][2] = {0.01f+3.25f, -0.136087, -0.007248, -0.014452, -0.060469};
+  timeCorrCoefficLG[0][3] = {0.0f+3.25f, -0.131067, 0.025579, 0.059994, -0.065595};
+  
+  timeCorrCoefficLG[1][0] = {0.076f+3.25f, -0.300587, -0.041827, 0.641108, -0.594157};
+  timeCorrCoefficLG[1][1] = {0.057f+3.25f, -0.223443, -0.125013, -0.176900, 0.348081};
+  timeCorrCoefficLG[1][2] = {0.015f+3.25f, -0.141721, 0.023936, 0.099657, -0.188526};
+  timeCorrCoefficLG[1][3] = {0.01f+3.25f, -0.152589, 0.016122, -0.086580, 0.563625};
+
+  // Commenting out the timing correlation for PbPb2024: re-calibraton needed
+  // zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
+  
+  // Set the amplitude fit range limits                                                                       
+  //                                                                                                          
+  zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
+
+  return zdcDataAnalyzer;
+}
+
+std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepO2025()
+{
+  // Key configuration parameters needed for the data analyzer construction                                   
+  //                                                                                                          
+  m_deltaTSample = 3.125;
+  m_numSample = 24;
+  
+  const int deriv2ndThreshDSHG = -45;
+  const int deriv2ndThreshDSLG = -10;
+  const unsigned int peakSample = 10;
+
+  const float deltaTcutLow = -10;
+  const float deltaTcutHigh = 10;
+  const float chisqDivAmpCutHGVal = 30;
+  const float chisqDivAmpCutLGVal = 50;
+
+  ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples;
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh;
+  ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCutHG, chisqDivAmpCutLG;
+  ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{1.2, 1.4, 1.3, 1.2},
+						{1.35, 1.4, 1.3, 1.1}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{4.4, 4.7, 4.5, 4.6}, {4.8, 4.6, 4.4, 4.2}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.5, 31.5, 29.5, 30.5}, {34.5, 33.0, 33, 34.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{32.25, 32.0, 30.5, 30.5}, {32.4, 33.5, 30.5, 31.4}}};
+    
+  ATH_MSG_DEBUG( "PbPb2024: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      fixTau1Arr[side][module] = true;
+      fixTau2Arr[side][module] = false;
+
+      peak2ndDerivMinSamples[side][module] = peakSample;
+      peak2ndDerivMinThresholdsHG[side][module] = deriv2ndThreshDSHG;
+      peak2ndDerivMinThresholdsLG[side][module] = deriv2ndThreshDSLG;
+      
+      deltaT0CutLow[side][module] = deltaTcutLow;
+      deltaT0CutHigh[side][module] = deltaTcutHigh;
+      chisqDivAmpCutLG[side][module] = chisqDivAmpCutLGVal;
+      chisqDivAmpCutHG[side][module] = chisqDivAmpCutHGVal;
+    }
+  }
+  
+  //  Construct the data analyzer                                                                             
+  //                                                                                                          
+  std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
+									m_numSample, m_deltaTSample,
+									m_presample, "FermiExpLHCf",
+									peak2ndDerivMinSamples,
+									peak2ndDerivMinThresholdsHG,
+									peak2ndDerivMinThresholdsLG,
+									ZDCPulseAnalyzer::LGModeRefitLG));
+  zdcDataAnalyzer->set2ndDerivStep(2);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{1, 1, 1, 1.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{9.36, 9.7, 10.95, 10.5}, {9.9, 10.5, 11.2, 10.4}}};
+
+  zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
+
+  // These noise sigmas we read off from the ch_x_BaselineStdev monitoring histograms with our 
+  //   final readout configuration for the Pb+Pb run by BAC on 25-09-2023
+  //
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{1.5, 1.5,  1.5,  1.5}, {1.5, 1.5, 1.5, 1.5}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
+  
+  zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
+
+  // Now set cuts and default fit parameters                                                                  
+  //                                                                                                            
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGOverFlowADC = {{{{3500, 3500, 3500, 3500}}, {{3500, 3500, 3500, 3500}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGUnderFlowADC = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray LGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
+  
+  zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
+  zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
+  zdcDataAnalyzer->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
+  
+  // Enable two-pass analysis                                                                                 
+  //                                                                                                          
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-30, -30, -30, -30},
+								   {-30, -30, -30, -30},}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
+								   {-8, -8, -8, -8}}};
+  
+  zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
+
+  // Turn on exclusion of early and late samples to address OOT pileup
+  //
+  zdcDataAnalyzer->enablePreExclusion(4, 500, 200);
+  zdcDataAnalyzer->enablePostExclusion(4, 300, 200);
+  
+  // Set up non-linear corrections for the ZDC
+  //
+  std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoefficHG, nonLinearCorrCoefficLG;
+
+  nonLinearCorrCoefficHG[0][0] = {-0.0225871, 0.00702802, 0.00201155, -0.00675293, 0.00186212} ;
+  nonLinearCorrCoefficHG[0][1] = {-0.0155562, 0.00594092, 0.00382112, -0.00665466, 0.00143384} ;
+  nonLinearCorrCoefficHG[0][2] = {-0.0313621, 0.0134528, 0.00529013, -0.0111751, 0.0029913} ;
+  nonLinearCorrCoefficHG[0][3] = {-0.025108, 0.00301898, 0.022472, -0.0204288, 0.00453215} ;
+  nonLinearCorrCoefficHG[1][0] = {-0.0266648, 0.0106792, -0.00939959, 0.000833011, 0.000199051} ;
+  nonLinearCorrCoefficHG[1][1] = {-0.0246541, 0.000327376, 0.00754946, -0.00710273, 0.00136899} ;
+  nonLinearCorrCoefficHG[1][2] = {-0.0175283, 0.0127954, 0.000235749, -0.00769698, 0.00221995} ;;
+  nonLinearCorrCoefficHG[1][3] = {-0.0279931, 0.0188122, 0.0126234, -0.0169907, 0.00398826} ;
+  
+
+  // Remove nonlinear corrections while we study the injector pulse
+  nonLinearCorrCoefficHG = {{ {{{0},
+				{0},
+				{0},
+				{0}}},
+			      {{{0},
+				{0},
+				{0},
+				{0}}} }};
+
+  //
+  // We are disabling the old FADC correction moving forward
+  if (m_doNonLinCorr)
+    zdcDataAnalyzer->SetNonlinCorrParams(1000, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
+  
+  std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoefficHG, timeCorrCoefficLG;
+  timeCorrCoefficHG[0][0] = {0.07, -0.020672, 0.070206, 0.004961, -0.010821, -0.001835};
+  timeCorrCoefficHG[0][1] = {0.04, -0.012961, 0.008204, 0.010771, 0.011593, 0.002045};
+  timeCorrCoefficHG[0][2] = {0.04, 0.017393, 0.017597, 0.003736, -0.001696, -0.000465};
+  timeCorrCoefficHG[0][3] = {0.04, 0.018463, 0.009862, -0.000277, -0.000268, 0.000192};
+  
+  timeCorrCoefficHG[1][0] = {0.13, -0.106068, 0.078153, 0.034479, -0.004964, -0.001688};
+  timeCorrCoefficHG[1][1] = {0.03, -0.007518, 0.008937, 0.015319, 0.012290, 0.001889};
+  timeCorrCoefficHG[1][2] = {-0.01, 0.006711, -0.001652, -0.004223, -0.000573, 0.000161};
+  timeCorrCoefficHG[1][3] = {0.015, 0.017993, 0.006339, 0.003122, 0.002980, 0.000735};
+
+  // +++ BAC 07-26-24
+  //
+  //  The +3.25 in the constant t0 correction term accounts for a change in the nominal T0 from 31.25 to 28
+  //    made at the same time to match the timing shift of the LG channels 
+  //
+  // ---
+  timeCorrCoefficLG[0][0] = {0.035f+3.25f, -0.126189, 0.022724, 0.039116, -0.098255};
+  timeCorrCoefficLG[0][1] = {0.022f+3.25f, -0.165988, -0.014125, 0.057323, -0.205109};
+  timeCorrCoefficLG[0][2] = {0.01f+3.25f, -0.136087, -0.007248, -0.014452, -0.060469};
+  timeCorrCoefficLG[0][3] = {0.0f+3.25f, -0.131067, 0.025579, 0.059994, -0.065595};
+  
+  timeCorrCoefficLG[1][0] = {0.076f+3.25f, -0.300587, -0.041827, 0.641108, -0.594157};
+  timeCorrCoefficLG[1][1] = {0.057f+3.25f, -0.223443, -0.125013, -0.176900, 0.348081};
+  timeCorrCoefficLG[1][2] = {0.015f+3.25f, -0.141721, 0.023936, 0.099657, -0.188526};
+  timeCorrCoefficLG[1][3] = {0.01f+3.25f, -0.152589, 0.016122, -0.086580, 0.563625};
+
+  // Commenting out the timing correlation for PbPb2024: re-calibraton needed
+  // zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
+  
+  // Set the amplitude fit range limits                                                                       
+  //                                                                                                          
+  zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
+
+  zdcDataAnalyzer->disableModule(0, 0); // required since EM not installed
+
+  return zdcDataAnalyzer;
+}
+
 std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpp2024()
 {
   // Key configuration parameters needed for the data analyzer construction                                   
@@ -985,6 +1317,97 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorPbPb2024()
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
 
   zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
+
+  // These noise sigmas we read off from the ch_x_BaselineStdev monitoring histograms with our 
+  //   final readout configuration for the Pb+Pb run by BAC on 25-09-2023
+  //
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{2.0, 2.0,  2.0,  2.0}, {2.0, 2.0, 2.0, 2.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{15.0, 15.0,  15.0,  15.0}, {15.0, 15.0, 15.0, 15.0}}};
+  
+  zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
+
+  // Now set cuts and default fit parameters                                                                  
+  //                                                                                                            
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGOverFlowADC = {{{{3500, 3500, 3500, 3500}}, {{3500, 3500, 3500, 3500}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGUnderFlowADC = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray LGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
+  
+  zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
+  zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
+  zdcDataAnalyzer->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
+  
+  // Set the amplitude fit range limits                                                                       
+  //                                                                                                          
+  zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
+
+  return zdcDataAnalyzer;
+}
+
+std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpOOONeNe2025()
+{
+  // Key configuration parameters needed for the data analyzer construction                                   
+  //                                                                                                          
+  m_deltaTSample = 3.125;
+  m_numSample = 24;
+  
+  const int deriv2ndThreshDSHG = -25;
+  const int deriv2ndThreshDSLG = -10;
+  const unsigned int peakSample = 10;
+
+  const float deltaTcutLow = -10;
+  const float deltaTcutHigh = 10;
+  const float chisqDivAmpCutHGVal = 30;
+  const float chisqDivAmpCutLGVal = 50;
+
+  ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples;
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh;
+  ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCutHG, chisqDivAmpCutLG;
+  ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{1.8, 1.8, 1.8, 1.8}, {1.8, 1.8, 1.8, 1.8}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{5.5, 5.5, 5.5, 5.5}, {5.5, 5.5, 5.5, 5.5}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{33.25, 33, 29.5, 33}, {31.5, 32.5, 32, 32.25}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{30.5, 30, 26.75, 30}, {29.5, 32.5, 29.5, 29}}};
+    
+  ATH_MSG_DEBUG( "PbPb2023: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      fixTau1Arr[side][module] = false;
+      fixTau2Arr[side][module] = true;
+
+      peak2ndDerivMinSamples[side][module] = peakSample;
+      peak2ndDerivMinThresholdsHG[side][module] = deriv2ndThreshDSHG;
+      peak2ndDerivMinThresholdsLG[side][module] = deriv2ndThreshDSLG;
+      
+      deltaT0CutLow[side][module] = deltaTcutLow;
+      deltaT0CutHigh[side][module] = deltaTcutHigh;
+      chisqDivAmpCutLG[side][module] = chisqDivAmpCutLGVal;
+      chisqDivAmpCutHG[side][module] = chisqDivAmpCutHGVal;
+    }
+  }
+  
+  //  Construct the data analyzer                                                                             
+  //                                                                                                          
+  std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
+                  m_numSample, m_deltaTSample,
+                  m_presample, "FermiExpLHCf",
+                  peak2ndDerivMinSamples,
+                  peak2ndDerivMinThresholdsHG,
+                  peak2ndDerivMinThresholdsLG,
+                  ZDCPulseAnalyzer::LGModeRefitLG));
+
+  zdcDataAnalyzer->set2ndDerivStep(2);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{4,4,4,4}, {4,4,4,4}}};
+
+  zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 4 applied to LG ADC, 1 to HG ADC values
 
   // These noise sigmas we read off from the ch_x_BaselineStdev monitoring histograms with our 
   //   final readout configuration for the Pb+Pb run by BAC on 25-09-2023
@@ -1833,11 +2256,20 @@ StatusCode ZdcAnalysisTool::initialize()
     else if (m_configuration == "PbPb2024") {
       m_zdcDataAnalyzer = initializePbPb2024();
     }
+    else if (m_configuration == "OONeNe2025") {
+      m_zdcDataAnalyzer = initializeOONeNe2025();
+    }
+    else if (m_configuration == "pO2025") {
+      m_zdcDataAnalyzer = initializepO2025();
+    }
     else if (m_configuration == "Injectorpp2024") {
       m_zdcDataAnalyzer = initializeInjectorpp2024();
     }
     else if (m_configuration == "InjectorPbPb2024") {
       m_zdcDataAnalyzer = initializeInjectorPbPb2024();
+    }
+    else if (m_configuration == "InjectorpOOONeNe2025") {
+      m_zdcDataAnalyzer = initializeInjectorpOOONeNe2025();
     }
     else if (m_configuration == "MonteCarloPbPb2023") {
       m_zdcDataAnalyzer = initializeMonteCarloPbPb2023();
