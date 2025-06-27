@@ -117,6 +117,10 @@ class TrackFitter
         FPGATrackSimPlaneMap const *m_pmap = nullptr;
         FPGATrackSimRegionMap const* m_rmap = nullptr;
 
+        // Internally for iterating over track candidates to fit.
+        // Caching this information avoids needing to allocate all the track candidates before fitting,
+        // which can be hugely expensive in terms of memory.
+        std::vector<std::vector<int>> m_comboIndices;
 
         // This bank should always exist. If we are guessing hits there is only one bank and it is this one
         // and if we are not guessing hits it is for 8/8
@@ -148,6 +152,7 @@ class TrackFitter
         void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPixel, bool & missStrip,
                             layer_bitmask_t & missing_mask, layer_bitmask_t & norecovery_mask);
         void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack> &track_cands);
+        FPGATrackSimTrack makeTrackCandidate(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, const std::vector<int>& hit_indices);
         FPGATrackSimTrack recoverTrack(FPGATrackSimTrack const & t, sector_t sector, layer_bitmask_t norecovery_mask, double qoverpt);
         void compute_truth(FPGATrackSimTrack & newtrk) const;
 };

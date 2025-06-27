@@ -40,6 +40,7 @@ def FPGATrackSimSlicingEngineCfg(flags,name="FPGATrackSimSlicingEngineTool"):
     FPGATrackSimSlicingEngineTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     # If the GNN is enabled (i.e. this is F-4xx) then we don't want to separate first vs second stage.
     FPGATrackSimSlicingEngineTool.doSecondStage = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
+    FPGATrackSimSlicingEngineTool.RootOutput = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
     result.setPrivateTools(FPGATrackSimSlicingEngineTool)
     return result
 
