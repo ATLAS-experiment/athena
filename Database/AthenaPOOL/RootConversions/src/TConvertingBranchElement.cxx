@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -940,12 +940,12 @@ Int_t TConvertingBranchElement::GetEntry(Long64_t entry, Int_t getall)
       Int_t bufbegin = buffer->Length();
 
       // Suppress false positive seen with gcc.
-#if __GNUC__ >= 11 && __GNUC__ <= 13
+#if __GNUC__ >= 11 && __GNUC__ <= 14
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
       (this->*fReadLeaves) (*buffer);
-#if __GNUC__ >= 11 && __GNUC__ <= 13
+#if __GNUC__ >= 11 && __GNUC__ <= 14
 # pragma GCC diagnostic pop
 #endif
 
