@@ -36,6 +36,7 @@ StatusCode gFexInputByteStreamTool::initialize() {
     ATH_CHECK(gTowersmode!=ConversionMode::Undefined);
     ATH_CHECK(m_gTowersWriteKey.initialize(gTowersmode==ConversionMode::Decoding));
     ATH_CHECK(m_gTowers50WriteKey.initialize(gTowersmode==ConversionMode::Decoding));
+    ATH_CHECK(m_gTowers200WriteKey.initialize(gTowersmode==ConversionMode::Decoding));
     ATH_CHECK(m_gTowersReadKey.initialize(gTowersmode==ConversionMode::Encoding));
     ATH_MSG_DEBUG((gTowersmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gTowers ");
     
@@ -56,14 +57,18 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     //WriteHandle for gFEX EDMs
     
     //---gTower EDM
-    SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey, ctx);
+    SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowers200WriteKey, ctx);
     ATH_CHECK(gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexTowerContainer (200 MeV resolution, default) with key " << gTowersContainer.key());
+    ATH_MSG_DEBUG("Recorded gFexTowerContainer (200 MeV resolution, default) with key " << m_gTowers200WriteKey.key());
 
     SG::WriteHandle<xAOD::gFexTowerContainer> gTowers50Container(m_gTowers50WriteKey, ctx);
     ATH_CHECK(gTowers50Container.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
     ATH_MSG_DEBUG("Recorded gFexTower50Container (50 MeV resolution) with key " << gTowers50Container.key());
-        
+
+    SG::WriteHandle<xAOD::gFexTowerContainer> gFexDataTowersContainer(m_gTowersWriteKey, ctx);
+    ATH_CHECK(gFexDataTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
+    ATH_MSG_DEBUG("Recorded main gFexDataTowerContainer with key " << gFexDataTowersContainer.key());
+
     // Iterate over ROBFragments to decode
     for (const ROBF* rob : vrobf) {
         // Iterate over ROD words and decode
@@ -159,7 +164,11 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         int fpgaA = 0;
         int fBcidA = -1; 
         int do_lconv = 1; 
-   
+
+	std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> FiberTowerA = {};
+        std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> FiberTowerB = {};
+        std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> FiberTowerC = {}; // slightly larger than needed
+
         gtReconstructABC(fpgaA,
                          AMapped,               // input fibers AB_FIBER = 80 > C fibers
                          gPos::AB_FIBERS,
@@ -173,7 +182,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                          gPos::AMPD_DSTRT_ARR, 
                          gPos::AMPD_DTYP_ARR, 
                          gPos::AMSK,
-                         Asatur  );
+                         Asatur,
+			 FiberTowerA);
 
 
 
@@ -194,7 +204,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::BMPD_DSTRT_ARR, 
                           gPos::BMPD_DTYP_ARR, 
                           gPos::BMSK,
-                          Bsatur  );
+                          Bsatur,
+			  FiberTowerB);
 
     
         c_gtrx_map(Cfiber, CMapped);
@@ -214,7 +225,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::CMPD_DSTRT_ARR, 
                           gPos::CMPD_DTYP_ARR, 
                           gPos::CMSK, 
-                          Csatur );
+                          Csatur,
+			  FiberTowerC);
 
 
         // Fill the gTower EDM with the corresponding towers
@@ -307,11 +319,52 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 towerID += 1;
 
             }
-        }  
-        
+        }
 
+	// Save the Fiber towers
+        unsigned int n_fiber_twrs = FiberTowerA.size();
+        Fpga = 0;
+        towerID = 0;
+        for (unsigned int i = 0; i < n_fiber_twrs; i++){
+            iEta = i; // iEta and iPhi not so much meaning for fiber towers
+            iPhi = i;
+            Eta = 0.; // eta and phi could be filled with averaged values
+            Phi = 0.;
+            Et = FiberTowerA[i];
+            IsSaturated = 0;
+            gFexDataTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
+            gFexDataTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+            towerID += 1;
+        }
+        Fpga = 1;
+        towerID = 10000;
+        for (unsigned int i = 0; i < n_fiber_twrs; i++){
+            iEta = i;
+            iPhi = i;
+            Eta = 0.;
+            Phi = 0.;
+            Et = FiberTowerB[i];
+            IsSaturated = 0;
+            gFexDataTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
+            gFexDataTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+            towerID += 1;
+        }
+        // FPGA C has fewer fibers, fill only those
+        unsigned int n_fiber_twrsC = gPos::C_FIBERS*gPos::MAX_E_FIELDS;
+        Fpga = 2;
+        towerID = 20000;
+        for (unsigned int i = 0; i < n_fiber_twrsC; i++){
+            iEta = i;
+            iPhi = i;
+            Eta = 0.;
+            Phi = 0.;
+            Et = FiberTowerC[i];
+            IsSaturated = 0;
+            gFexDataTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
+            gFexDataTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+            towerID += 1;
+        }
     }
-        
     return StatusCode::SUCCESS;
 }
 
@@ -392,7 +445,8 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                                                const gType & XMPD_DSTRT_ARR,  
                                                gTypeChar XMPD_DTYP_ARR,
                                                const std::array<int, gPos::MAX_FIBERS> &XMSK,
-                                               gtFPGA &Xsaturation) const{
+                                               gtFPGA &Xsaturation,
+					       std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> &FiberTower) const{
  
 // Output is uncalibrated gTowers with 50MeV LSB
 //       Xfiber -- 80 fibers, each with seven words, 32 bits per word
@@ -419,6 +473,8 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
         }
     }
 
+    FiberTower.fill(0);
+    
     // detector (data field type) type :
     // -- "0000" - EMB, EMB/EMEC -> EM contribution  0
     // -- "0001" - TREX,HEC - Had contribution       1
@@ -574,7 +630,7 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         Xsaturation[ krow][kcolumn] = 1;
                     }
                 } 
-            }// close fibreSaturation loop
+            }// close fiberSaturation loop
         } // k (max 8) loop close
     } // i (max 100) loop close
 
@@ -1222,7 +1278,17 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
         }
     } 
     else {
-    ATH_MSG_DEBUG("[gFexInputByteStreamTool::gtReconstructABC]: Bad FPGA # "<< XFPGA);
+      ATH_MSG_DEBUG("[gFexInputByteStreamTool::gtReconstructABC]: Bad FPGA # "<< XFPGA);
+    }
+    //
+
+    // MLE fiber data
+    for(int iFiber = 0; iFiber < Xin; ++iFiber) {
+        for(int iDatum = 0; iDatum < 16; ++iDatum) {
+            int codedData = fiberFieldsUndecoded[iFiber][iDatum];
+            unsigned int index = (16*iFiber) + iDatum;
+            FiberTower[index] = codedData;
+        }
     }
 }
 
@@ -1616,37 +1682,25 @@ void gFexInputByteStreamTool::gtCalib(gtFPGA &gtf, int towerLSB,  int fpga, unsi
 
       // 200  MEV Towers 
       if( towerLSB == 200 ) {
-    if(  gtf[irow][icolumn] > 1500 ){
-      // printf( "*I gtCalib:  gtf before calibration  %x offset %x \n", gtf[irow][icolumn], offset);
-    }
-    gtf[irow][icolumn] =  gtf[irow][icolumn] + offset;
+	gtf[irow][icolumn] =  gtf[irow][icolumn] + offset;
 
-    if( gtf[irow][icolumn] > 2047 ) {
-      gtf[irow][icolumn] = 2047;
-    }  else if( gtf[irow][icolumn] < 0 ){
-      gtf[irow][icolumn] = 0;
-    }
-    gtf[irow][icolumn] = gtf[irow][icolumn]  - offset;
+	if( gtf[irow][icolumn] > 2047 ) {
+	  gtf[irow][icolumn] = 2047;
+	}  else if( gtf[irow][icolumn] < 0 ){
+	  gtf[irow][icolumn] = 0;
+	}
+	gtf[irow][icolumn] = gtf[irow][icolumn]  - offset;
 
-    if(  gtf[irow][icolumn] > 1500 ){
-      // printf( "*I gtCalib:  gtf after calibration  %x \n", gtf[irow][icolumn] );
-    }
-
-    //printf( "gtf out %x \n ", gtf[irow][icolumn] ); 
-    //#endif
-
-    
-      // 50 MEV Towers 
       } else {
     
-    gtf[irow][icolumn] =  gtf[irow][icolumn] + offset;
+	gtf[irow][icolumn] =  gtf[irow][icolumn] + offset;
     
-    if( gtf[irow][icolumn] > 1023 ){
-      gtf[irow][icolumn] = 1023;
-    } else if ( gtf[irow][icolumn] < 0 ){
-      gtf[irow][icolumn] = 0; 
-    }
-    gtf[irow][icolumn] = gtf[irow][icolumn]  - offset;
+	if( gtf[irow][icolumn] > 1023 ){
+	  gtf[irow][icolumn] = 1023;
+	} else if ( gtf[irow][icolumn] < 0 ){
+	  gtf[irow][icolumn] = 0; 
+	}
+	gtf[irow][icolumn] = gtf[irow][icolumn]  - offset;
         
       }
     }

@@ -103,6 +103,9 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
     /*! Do emulation */
     Gaudi::Property<bool> m_doEmulation{this, "DoEmulation", false };
 
+    Gaudi::Property<bool> m_doEffwithLH{this, "ComputeEffLH", false};
+    Gaudi::Property<bool> m_doEffwithDNN{this, "ComputeEffDNN", false};
+
     /*! TP Trigger Analysis */
     Gaudi::Property<bool> m_tp{this, "TPTrigger", false };
     /*! default probe pid for electron trigitems that don't have pid in their name */

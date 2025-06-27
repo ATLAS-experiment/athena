@@ -30,7 +30,7 @@ def TrigEgammaMonConfig(inputFlags, emulator=None, onlyHLT = False):
 
     # configure alg and ana tools
     from TrigEgammaMonitoring.TrigEgammaMonitoringConfig import TrigEgammaMonAlgBuilder
-    monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', moniAccess, detailedHistograms=False, emulator=emulator, onlyHLT = onlyHLT ) # Using 2018 e/g tunings
+    monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', moniAccess, detailedHistograms=False, emulator=emulator, onlyHLT = onlyHLT, ComputeEffLH = inputFlags.Trigger.egamma.monitorEffLH, ComputeEffDNN = inputFlags.Trigger.egamma.monitorEffDNN ) # Using 2018 e/g tunings
     # build monitor and book histograms
     monAlgCfg.configure()
 
