@@ -266,7 +266,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
       std::string strVal = keyValue.substr(colonPos+1);
       trimRangeStrings(strKey);
       trimRangeStrings(strVal);
-      eventRangeMap[strKey]=strVal;
+      eventRangeMap[strKey]=std::move(strVal);
       // Next iteration
       startpos = endpos+1;
       endpos = eventRange.find(',',startpos);
