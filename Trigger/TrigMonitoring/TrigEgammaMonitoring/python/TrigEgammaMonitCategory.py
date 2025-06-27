@@ -56,6 +56,10 @@ def mongroupsCfg(moniAccess, data_type):
                 mongroups['monitoring_electron_TP_hi'] = ['HLT_e20_lhloose_nogsf_ion_L1eEM18','HLT_e20_loose_nogsf_ion_L1eEM18']
                 mongroups['monitoring_photon_hi'] = ['HLT_g15_loose_ion_L1eEM12','HLT_g20_etcut_ion_L1eEM15','HLT_g50_loose_ion_L1eEM26']
                 mongroups['monitoring_bootstrap_hi']    = {'HLT_g18_etcut_ion_L1eEM12' : 'HLT_g18_etcut_ion_L1eEM12'}
+                mongroups['monitoring_electron_hi_oo']=['HLT_e10_nopid_L1eEM9','HLT_e10_etcut_L1eEM9','HLT_e10_loose_L1eEM9','HLT_e10_lhloose_L1eEM9','HLT_e10_lhmedium_L1eEM9']
+                mongroups['monitoring_photonn_hi_oo'] = ['HLT_g10_nopid_L1eEM9','HLT_g10_etcut_L1eEM9','HLT_g10_loose_L1eEM9','HLT_g10_medium_L1eEM9']
+                mongroups['monitoring_electron_TP_hi_oo'] = ['HLT_e10_lhmedium_L1eEM9','HLT_e10_medium_L1eEM9']
+                mongroups['monitoring_bootstrap_hi_oo']    = {'HLT_g10_nopid_L1eEM9' : 'HLT_g10_nopid_L1eEM9'}
 
         elif data_type is DQDataType.Cosmics:
                 monitoring_electron_cosmic=['HLT_e5_etcut_L1eEM5']
