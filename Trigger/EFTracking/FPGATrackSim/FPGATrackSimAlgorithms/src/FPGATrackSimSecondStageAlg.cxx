@@ -72,8 +72,8 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
     m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
 
-    // Connect the sliced hit tool accordingly.
-    ATH_CHECK(m_trackExtensionTool->setupSlices(m_slicedHitHeader));
+    // Connect the sliced hit tool accordingly. This may need to be a separate flag.
+    if (m_writeOutputData) ATH_CHECK(m_trackExtensionTool->setupSlices(m_slicedHitHeader));
 
     ATH_MSG_DEBUG("initialize() Setting branch");
 
@@ -205,6 +205,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         FPGAHitsInRoads_2nd->push_back(road_hits);
         FPGARoads_2nd->push_back(*road);
     }
+
     if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: TrackExtension");
     auto mon_nroads = Monitored::Scalar<unsigned>("nroads_2nd", roads.size());
     unsigned bitmask_best(0);

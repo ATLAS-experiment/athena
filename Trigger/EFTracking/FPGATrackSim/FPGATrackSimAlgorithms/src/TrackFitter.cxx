@@ -85,7 +85,7 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     if (m_IdealCoordFitType != TrackCorrType::None ) {
       y = road->getY();
       x = road->getX();
-      ATH_MSG_DEBUG("Attempting to fit Hough road with y = " << y << ", x = " << x << ", sector = " << road->getSector());
+      ATH_MSG_DEBUG("Attempting to fit Hough road with y = " << y << ", x = " << x << ", sector = " << road->getSector() << "and nhits = " << road->getNHits());
     }
 
     // Error checking
@@ -137,21 +137,24 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
 
     // Create a list of track candidates by taking all possible combinations of hits in road.
     std::vector<FPGATrackSimTrack> track_cands;
-    makeTrackCandidates(*road, temp, track_cands);
 
-    // Fit the track candidates
-    size_t nFits = std::min((size_t)m_max_ncomb, track_cands.size());
-    for (size_t icomb = 0; icomb < nFits; icomb++)
-    {
+    // This may not even need to be a class member. Create the vector of possible combinations.
+    std::vector<std::vector<int>> comboIndices = getComboIndices(road->getNHits_layer());
+    ATH_MSG_DEBUG("There are theoretically " << comboIndices.size() << " combinations to process for this road");
+    size_t nFits = 0;
+    for (size_t icomb = 0; icomb < comboIndices.size(); icomb++) {
+        FPGATrackSimTrack track_cand = makeTrackCandidate(*road, temp, comboIndices[icomb]);
+
         // Before we start, make sure this track candidate has not been marked as invalid
         // due to combinatorics issues with spacepoints.
-        bool ok = track_cands[icomb].isValidCand();
+        bool ok = track_cand.isValidCand();
         if (!ok) {
             continue;
         }
+
         if (nMissing == 0 || m_guessinghits)
         {
-	        ok = m_nominalBank->linfit(sector, track_cands[icomb], m_do2ndStage);
+            ok = m_nominalBank->linfit(sector, track_cand, m_do2ndStage);
         }
         else
         {
@@ -160,18 +163,18 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
                 if (!( (missing_mask >> ic) & 0x1)) break; // if we found one, stop
             }
             // banks are indexed by plane, not by coordinate
-            ok = m_droppedLayerBanks[m_pmap->getCoordLayer(ic)]->linfit(sector, track_cands[icomb], m_do2ndStage);
+            ok = m_droppedLayerBanks[m_pmap->getCoordLayer(ic)]->linfit(sector, track_cand, m_do2ndStage);
         }
 
         if (!ok) {
-	  continue;
-    	}
-        track_cands[icomb].setOrigChi2(track_cands[icomb].getChi2());
+            continue;
+        }
+        track_cand.setOrigChi2(track_cand.getChi2());
         if (getDoMissingHitsCheck()) {
-            if (track_cands[icomb].getNMissing() == 0) { // missing 0 hits, drop hits one at a time and refit!
+            if (track_cand.getNMissing() == 0) { // missing 0 hits, drop hits one at a time and refit!
                 for (unsigned icoord = 0; icoord < m_pmap->getNCoords(); icoord++) { // 9 coordinates to refit, nominally
 
-                    FPGATrackSimTrack newtrack = track_cands[icomb];
+                    FPGATrackSimTrack newtrack = track_cand;
                     newtrack.setNMissing(1);
                     unsigned int bitmask = ( 1 << m_pmap->getNCoords() ) - 1; // all bits set to 1
                     bitmask &= ~(1 << icoord); // remove this coordinate
@@ -188,8 +191,16 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
                 }
             }
         }
-        tracks.push_back(track_cands[icomb]);
+        tracks.push_back(track_cand);
+
+        // Enforce m_max_ncomb here, but only for the tracks that we actually fit.
+        // Let's see how often this warning fires.
+        nFits += 1;
+        if (nFits > (size_t)m_max_ncomb) {
+            ATH_MSG_WARNING("Reached " << m_max_ncomb << " fits when processing track combinations for single road, breaking");
+        }
     }
+    ATH_MSG_DEBUG("Processed " << tracks.size() << " actual/valid tracks for this road");
 
     // Increment counters
     m_nfits += nFits;
@@ -295,7 +306,9 @@ void TrackFitter::getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, 
  *
  * NB: If the number of combinations becomes large and memory is a concern,
  * it may be worth turning this function into a sort of iterator
- * over `combs`, return a single track each call. 
+ * over `combs`, return a single track each call.
+ *
+ * This has now been done, but this function preserved for legacy support.
  */
 void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack>& track_cands)
 {
@@ -304,7 +317,6 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
 
     //get the WC hits:
     layer_bitmask_t wcbits= road.getWCLayers();
-    // Add the hits from each combination to the track, and set ID
     for (size_t icomb = 0; icomb < combs.size(); icomb++)
     {
       //Need to set the ID and the hits size of this track
@@ -314,7 +326,7 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
       // If this is an idealized coordinate fit; keep references to the idealized radii.
       track_cands[icomb].setIdealRadii(m_rmap->getAvgRadii(0));
 
-      std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
+      std::vector<int> const & hit_indices = m_comboIndices[icomb]; // size nLayers
         for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++)
         {
             if (hit_indices[layer] < 0) // Set a dummy hit if road has no hits in this layer
@@ -339,7 +351,7 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes
                 // of arrays computed above.
-                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1 && layer>0) {
+                if (hit->getHitType() == HitType::spacepoint && hit->getSide() == 1 && layer > 0) {
                     const FPGATrackSimHit inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);//avoid negative index
                     if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
                         track_cands[icomb].setValidCand(false);
@@ -353,7 +365,60 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
     m_idbase += combs.size();
 }
 
+// This is a version of the above that produces a single track candidate on demand.
+FPGATrackSimTrack TrackFitter::makeTrackCandidate(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, const std::vector<int>& hit_indices)
+{
+    m_idbase += 1;
 
+    FPGATrackSimTrack track_cand(temp);
+
+    //get the WC hits:
+    layer_bitmask_t wcbits= road.getWCLayers();
+
+    //Need to set the ID and the hits size of this track
+    track_cand.setTrackID(m_idbase);
+    track_cand.setNLayers(m_pmap->getNLogiLayers());
+
+    // If this is an idealized coordinate fit; keep references to the idealized radii.
+    track_cand.setIdealRadii(m_rmap->getAvgRadii(0));
+
+    for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++)
+    {
+        if (hit_indices[layer] < 0) // Set a dummy hit if road has no hits in this layer
+        {
+            FPGATrackSimHit newhit=FPGATrackSimHit();
+            newhit.setLayer(layer);
+            newhit.setSection(0);
+            if (m_pmap->getDim(layer) == 2) newhit.setDetType(SiliconTech::pixel);
+            else newhit.setDetType(SiliconTech::strip);
+
+            if (wcbits & (1 << layer ) ) {
+                newhit.setHitType(HitType::wildcard);
+                newhit.setLayer(layer);
+            }
+
+            track_cand.setFPGATrackSimHit(layer, newhit);
+        }
+        else
+        {
+            const std::shared_ptr<const FPGATrackSimHit> hit = road.getHits(layer)[hit_indices[layer]];
+            // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
+            // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
+            // That require another field on the track object, but it avoids having to change the sizes
+            // of arrays computed above.
+            if (hit->getHitType() == HitType::spacepoint && hit->getSide() == 1 && layer > 0) {
+                const FPGATrackSimHit inner_hit = track_cand.getFPGATrackSimHits().at(layer - 1);//avoid negative index
+                if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
+                    track_cand.setValidCand(false);
+                    break;
+                }
+            }
+            track_cand.setFPGATrackSimHit(layer, *hit);
+        }
+    }
+
+    return track_cand;
+}
 
 /**
  * Given a N/N track that has a bad chi2, try to refit the track by taking away a single hit,
