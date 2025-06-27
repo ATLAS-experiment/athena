@@ -52,6 +52,12 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       // Retrieve AthenaSerializeSvc
       ATH_CHECK(m_serializeSvc.retrieve());
    }
+   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
+   long int pri = 1000;
+   if (!m_outputStreamingTool.empty()) {
+      incSvc->addListener(this, "StoreCleared", pri);
+      ATH_MSG_DEBUG("Subscribed to StoreCleared");
+   }
    return this->AthenaPoolBaseCnvSvc::initialize();
 }
 //______________________________________________________________________________
