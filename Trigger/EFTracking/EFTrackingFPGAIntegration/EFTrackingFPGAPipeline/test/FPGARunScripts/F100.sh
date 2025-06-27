@@ -7,11 +7,12 @@ usage () {
     for the F-100 pipeline as offline-like algorithms (Full-Scan)
 
     Usage:
-    FPGATrackSim_F100_RecoTF.sh -i <your_input_RDO_file> -o <your_output_AOD_file_name>
+    F100.sh -i <your_input_RDO_file> -o <your_output_AOD_file_name>
 
     Options:
     -i  |  --inputRDO       STRING      full path to input RDO file (mandatory)
     -o  |  --outputAOD      STRING      name of the output AOD file (mandatory)
+    -x  |  --xclbin         STRING      path to the xclbin that needs to be run
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
     -s  |  --skipCheck                  skip checks on output AOD file
     -c  |  --doClusters                 persistify xAOD cluster and space point containers
@@ -40,6 +41,7 @@ while [ $# -ge 1 ];do
         --) shift ; break ;;
         -i  | --inputRDO )      if [ $# -lt 2 ] ; then usage ; fi ; inputRDO="$2"  ; shift ;;
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
+        -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    storeClusters=True ;;
