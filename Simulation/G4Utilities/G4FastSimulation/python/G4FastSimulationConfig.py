@@ -48,7 +48,6 @@ def FastCaloSimCfg(flags, **kwargs):
     kwargs.setdefault('doPunchThrough', flags.Sim.FastCalo.doPunchThrough)
 
     # Config FastCaloSim
-    kwargs.setdefault('doEMECFCS', flags.Sim.FastCalo.doEMECFCS)
     if flags.Sim.FastCalo.doEMECFCS:  # AF3 in EMEC and G4 in rest
         kwargs.setdefault('doPhotons', True)
         kwargs.setdefault('doElectrons', True)
