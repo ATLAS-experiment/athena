@@ -53,7 +53,6 @@ class FastCaloSim: public G4VFastSimulationModel
               float EkinMaxPhotons,
               float EkinMinElectrons,
               float EkinMaxElectrons,
-              bool doEMECFCS,
               bool doPunchThrough,
               FastCaloSimTool * FastCaloSimTool);
   ~FastCaloSim() {}
@@ -107,7 +106,6 @@ class FastCaloSim: public G4VFastSimulationModel
   float m_EkinMaxPhotons;
   float m_EkinMinElectrons;
   float m_EkinMaxElectrons;
-  float m_doEMECFCS;
 
   //For PunchThrough
   bool m_doPunchThrough;

@@ -54,7 +54,6 @@ FastCaloSim::FastCaloSim(const std::string& name,
                          float EkinMaxPhotons,
                          float EkinMinElectrons,
                          float EkinMaxElectrons,
-                         bool doEMECFCS,
                          bool doPunchThrough,
                          FastCaloSimTool * FastCaloSimTool)
 
@@ -76,7 +75,6 @@ FastCaloSim::FastCaloSim(const std::string& name,
   m_EkinMaxPhotons(EkinMaxPhotons),
   m_EkinMinElectrons(EkinMinElectrons),
   m_EkinMaxElectrons(EkinMaxElectrons),
-  m_doEMECFCS(doEMECFCS),
   m_doPunchThrough(doPunchThrough),
   m_FastCaloSimTool(FastCaloSimTool)
 {
