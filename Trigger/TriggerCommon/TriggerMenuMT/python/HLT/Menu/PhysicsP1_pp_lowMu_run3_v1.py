@@ -599,6 +599,8 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_mb_mbts_L1AFP_A_AND_C',  l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_mbts_L1AFP_A_OR_C',   l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
 
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_A_C_VjTE50_OVERLAY', l1SeedThresholds=['FSNOSEED'], stream=['MinBiasOverlay'], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1jTE50_OVERLAY',             l1SeedThresholds=['FSNOSEED'], stream=['MinBiasOverlay'], groups=MinBiasGroup+SupportPhIGroup),
     ]
 
     chains['Monitor'] = [
