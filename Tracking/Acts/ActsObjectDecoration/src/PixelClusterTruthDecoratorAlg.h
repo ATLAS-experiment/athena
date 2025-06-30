@@ -53,6 +53,8 @@ namespace ActsTrk {
     SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key{this,"MeasurementContainer","", "Output Pixel Validation Clusters"};
 
     // Decorations
+    SG::WriteDecorHandleKey< xAOD::PixelClusterContainer > m_trackMeasurement_link {this, "MeasurementLink", m_clustercontainer_key, "validationMeasurementLink"};
+
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_indices {this, "MeasurementTruthIndices", m_write_xaod_key, "truth_index"};
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_barcodes {this, "MeasurementTruthBarcode", m_write_xaod_key, "truth_barcode"};
 
