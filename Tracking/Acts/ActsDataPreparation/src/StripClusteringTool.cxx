@@ -19,7 +19,7 @@
 namespace ActsTrk {
 constexpr double ONE_TWELFTH = 1./12.;
   
-// Required by ACTS clusterization
+  // Required by ACTS clusterization
 static
 int getCellColumn(const StripClusteringTool::Cell& cell)
 {
@@ -37,7 +37,7 @@ int& getCellLabel(StripClusteringTool::Cell& cell)
 static
 void clusterAddCell(StripClusteringTool::Cluster& cl, const StripClusteringTool::Cell& cell)
 {
-    cl.ids.push_back(cell.id);
+    cl.ids.push_back(cell.id.get_compact());
     if (cl.ids.size() < (sizeof(cl.hitsInThirdTimeBin) * 8)) {
 	cl.hitsInThirdTimeBin |= cell.timeBits.test(0) << cl.ids.size();
     }
@@ -203,7 +203,7 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 			  << e.what());
 	    ATH_MSG_FATAL("Detector Element identifier: " << element->identify());
 	    ATH_MSG_FATAL("Strip Identifiers in cluster:");
-	    for (const Identifier& id : cl.ids)
+	    for (const auto& id : cl.ids)
 		ATH_MSG_FATAL("  " << id);
 	    return StatusCode::FAILURE;
 	}
@@ -218,16 +218,19 @@ std::pair<
     Eigen::Matrix<float,1,1>,
     Eigen::Matrix<float,3,1>>
 computePosition(const StripClusteringTool::Cluster& cluster,
+		std::size_t size,
 		double lorentzShift,
 		const IStripClusteringTool::IDHelper& stripID,
 		const InDetDD::SiDetectorElement* element,
 		const InDetDD::SiDetectorDesign& design)
 {
-    std::size_t size = cluster.ids.size();
-    InDetDD::SiCellId frontId = stripID.strip(cluster.ids.front());
+
+    Identifier ids_front(cluster.ids.front());
+    Identifier ids_back(cluster.ids.back());
+    InDetDD::SiCellId frontId = stripID.strip(ids_front);
     InDetDD::SiLocalPosition pos = design.localPositionOfCell(frontId);
     if (size > 1) {
-	InDetDD::SiCellId backId = stripID.strip(cluster.ids.back());
+      InDetDD::SiCellId backId = stripID.strip(ids_back);
 	InDetDD::SiLocalPosition backPos =
 	    design.localPositionOfCell(backId);
 	pos = 0.5 * (pos + backPos);
@@ -236,7 +239,7 @@ computePosition(const StripClusteringTool::Cluster& cluster,
     // update the xPhi position
     pos.xPhi( pos.xPhi() + lorentzShift );
     Eigen::Matrix<float,3,1> posG(element->surface().localToGlobal(pos).cast<float>());
-
+    
     if (!element->isBarrel()) {
 	const InDetDD::StripStereoAnnulusDesign& annulusDesign =
 	    dynamic_cast<const InDetDD::StripStereoAnnulusDesign&>
@@ -251,7 +254,7 @@ computePosition(const StripClusteringTool::Cluster& cluster,
 
 // N.B. the cluster is added to the container
 StatusCode
-StripClusteringTool::makeCluster(const Cluster &cluster,
+StripClusteringTool::makeCluster(Cluster &cluster,
 				 double lorentzShift,
 				 Eigen::Matrix<float,1,1>& localCov,
 				 const StripID& stripID,
@@ -259,19 +262,24 @@ StripClusteringTool::makeCluster(const Cluster &cluster,
 				 const InDetDD::SiDetectorDesign& design,
 				 xAOD::StripCluster& cl) const
 {
+    std::size_t size = cluster.ids.size();
+    
     auto [localPos, globalPos]
-      = computePosition(cluster, lorentzShift, stripID, element, design);
+      = computePosition(cluster, size, lorentzShift, stripID, element, design);
 
     // For Strip Clusters the identifier is taken from the front rod list object
     // This is the same strategy used in Athena:
     // Since clusterId is arbitary (it only needs to be unique) just use ID of first strip
     // For strip Cluster it has been found that "identifierOfPosition" does not produces unique values
     cl.setMeasurement<1>(element->identifyHash(), localPos, localCov);
-    cl.setIdentifier( cluster.ids.front().get_compact() );
-    cl.globalPosition() = globalPos;
-    cl.setRDOlist(cluster.ids);
-    cl.setChannelsInPhi(cluster.ids.size());
+    cl.setIdentifier( cluster.ids.front() );
 
+    // Do I really need the global position in fast tracking?
+    cl.globalPosition() = globalPos;     
+    
+    cl.setChannelsInPhi(size);
+    cl.setRDOlist(std::move(cluster.ids));
+    
     return StatusCode::SUCCESS;
 }
 
@@ -316,6 +324,13 @@ StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& R
     cells.reserve(60);
     bool badStripOnModule{false};
 
+    
+    // Simple single-entry cache
+    Identifier::value_type waferId_compact_cache = 0;
+    IdentifierHash waferHash_cache(0);
+    bool cache_valid = false;
+    std::size_t strip_max_cache = 0;
+    
     for (const StripRDORawData * raw : RDOs) {
 	const SCT3_RawData* raw3 = dynamic_cast<const SCT3_RawData*>(raw);
 	if (!raw3) {
@@ -331,16 +346,25 @@ StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& R
 
 	Identifier firstStripId = raw->identify();
 	Identifier waferId = stripID.wafer_id(firstStripId);
-	IdentifierHash waferHash = stripID.wafer_hash(waferId);
+	Identifier::value_type waferId_compact = waferId.get_compact();
+	
+	// Check cache - will be invalid when switching wafer groups
+	if (!cache_valid || waferId_compact != waferId_compact_cache) {
+	  waferId_compact_cache = waferId_compact;
+	  waferHash_cache = stripID.wafer_hash(waferId);
+	  strip_max_cache = static_cast<std::size_t>(stripID.strip_max(waferId));
+	  cache_valid = true;
+	}
+	
 	size_t iFirstStrip = static_cast<size_t>(stripID.strip(firstStripId));
 	size_t iMaxStrip = std::min(
 	    iFirstStrip + raw->getGroupSize(),
-	    static_cast<size_t>(stripID.strip_max(waferId)) + 1
+	    strip_max_cache + 1
         );
-
+	
 	for (size_t i = iFirstStrip; i < iMaxStrip; i++) {
 	    Identifier stripIdent = stripID.strip_id(waferId, i);
-	    if (isBadStrip(ctx, stripDetElStatus, stripID, waferHash, stripIdent)) {
+	    if (isBadStrip(ctx, stripDetElStatus, stripID, waferHash_cache, stripIdent)) {
 		// Bad strip, throw it out to minimize useless work.
 		ATH_MSG_DEBUG("Bad strip encountered:" << stripIdent
 			      << ", wafer is: " << waferId);
