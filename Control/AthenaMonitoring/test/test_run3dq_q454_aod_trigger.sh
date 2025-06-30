@@ -8,9 +8,13 @@
 # art-output: log*
 # art-athena-mt: 2
 
-ATHENA_CORE_NUMBER=1 Reco_tf.py --AMI=q445 \
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
+ATHENA_CORE_NUMBER=1 Reco_tf.py --AMI=q454 \
 --preExec 'all:flags.Trigger.AODEDMSet="AODFULL"' \
+--multithreaded \
 --outputAODFile=myAOD.pool.root \
+--conditionsTag "all:${conditions}" \
 --imf False
 
 echo "art-result: $? AOD_Creation"
