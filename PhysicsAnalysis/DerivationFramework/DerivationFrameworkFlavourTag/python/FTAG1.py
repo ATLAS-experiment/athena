@@ -102,6 +102,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
             "AntiKt4UFOCSSKJets",
+            "CaloCalFwdTopoTowers",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             "UFOCSSK",
             "GlobalChargedParticleFlowObjects",
