@@ -284,7 +284,7 @@ StatusCode TauNeutralFourVecNNRegression::getInputs(const xAOD::TauJet &xTau, In
   {
     const auto pfo = xTau.neutralPFO(i);
     // Apply pt threshold
-    if (pfo->pt() < m_neutralPFOPtCut * 1e3)
+    if (pfo->pt() < m_neutralPFOPtCut * Gaudi::Units::MeV)
       continue;
     vNeutralPFOs.push_back(pfo);
   }
