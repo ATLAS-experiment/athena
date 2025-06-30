@@ -51,7 +51,7 @@ if( XAOD_STANDALONE )
 endif()
 
 # Build the executables of the package:
-foreach( exec xAODChecker xAODMerge xAODFileReadTest )
+foreach( exec xAODChecker xAODMerge xAODFileReadTest xAODRNChecker xAODRNFileReadTest)
    atlas_add_executable( ${exec} util/${exec}.cxx
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess )
 endforeach()

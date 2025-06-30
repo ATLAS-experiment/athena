@@ -251,6 +251,7 @@ namespace xAOD {
    MACRO(std::uint32_t)               \
    MACRO(std::int64_t)                \
    MACRO(std::uint64_t)               \
+   MACRO(char)                        \
    MACRO(float)                       \
    MACRO(double)
 
