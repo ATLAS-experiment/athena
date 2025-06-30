@@ -22,7 +22,7 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
   isLRT=flags.Tracking.ActiveConfig.extension == "LargeD0"
   
   kwargs.setdefault("pTmin", 0.9 * Units.GeV)
-  kwargs.setdefault("MaxGraphEdges", 1500000)   # do we want ITkTrigTrackSeedingToolStandaloneCfg setting of 1800000
+  kwargs.setdefault("MaxGraphEdges", 3000000)
   kwargs.setdefault("ConnectionFileName",
                     "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
 
