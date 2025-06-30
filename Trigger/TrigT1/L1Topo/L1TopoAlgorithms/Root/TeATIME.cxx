@@ -38,9 +38,6 @@ TCS::TeATIME::TeATIME(const std::string & name) : DecisionAlg(name)
   
 }
 
-TCS::TeATIME::~TeATIME(){}
-
-
 TCS::StatusCode
 TCS::TeATIME::initialize() {
 
