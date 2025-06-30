@@ -42,17 +42,18 @@ public:
 
 private:
     // properties of the tool
-    std::string m_outputPrefix;                   //!
-    std::string m_weightFile_1p1n;                //!
-    std::string m_weightFile_1pXn;                //!
-    std::string m_weightFile_3pXn;                //!
-    std::size_t m_maxTauTracks;                   //!
-    std::size_t m_maxNeutralPFOs;                 //!
-    std::size_t m_maxShotPFOs;                    //!
-    std::size_t m_maxConvTracks;                  //!
-    float m_neutralPFOPtCut;                      //!
-    std::string m_decayModeName;                  //!
-    // std::array<std::string, 3> m_fourVecDimNames; //!
+    // Gaudi::Property<std::string> m_outputName{this, "OutputName", "TauNeutralFourVec"}; // not needed, since we decorate three individual values, instead of one vector, so there's not just 1 Output
+  Gaudi::Property<std::string> m_outputPrefix{this, "OutputPrefix", "neutralFourVecNN_"};
+  Gaudi::Property<std::string> m_weightFile_1p1n{this, "WeightFile_1p1n", ""};
+  Gaudi::Property<std::string> m_weightFile_1pXn{this, "WeightFile_1pXn", ""};
+  Gaudi::Property<std::string> m_weightFile_3pXn{this, "WeightFile_3pXn", ""};
+  Gaudi::Property<std::size_t> m_maxTauTracks{this, "MaxTauTracks", 3};
+  Gaudi::Property<std::size_t> m_maxNeutralPFOs{this, "MaxNeutralPFOs", 8};
+  Gaudi::Property<std::size_t> m_maxShotPFOs{this, "MaxShotPFOs", 6};
+  Gaudi::Property<std::size_t> m_maxConvTracks{this, "MaxConvTracks", 4};
+  Gaudi::Property<float> m_neutralPFOPtCut{this, "NeutralPFOPtCut", 1.5};
+  Gaudi::Property<bool> m_decayModeName{this, "DecayModeName", true}; // needs to be same as m_outputName in TauDecayModeNNClassifier.cxx
+  // Gaudi::Property<std::array<std::string, 3>> m_fourVecDimNames{this, "FourVecDimNames", {"E", "eta", "phi"}};
   /**
    * @brief retrieve the input variables from a TauJet
    * @param xTau a TauJet object

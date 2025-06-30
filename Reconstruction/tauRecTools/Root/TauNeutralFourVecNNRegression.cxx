@@ -36,18 +36,6 @@ static const std::set<std::string> branches = {"TauTrack", "NeutralPFO", "ShotPF
 TauNeutralFourVecNNRegression::TauNeutralFourVecNNRegression(const std::string &name)
     : TauRecToolBase(name)
 {
-  // declareProperty("OutputName", m_outputName = "TauPi0FourVec"); // not needed, since we decorate three individual values, instead of one vector, so there's not just 1 Output
-  declareProperty("OutputPrefix", m_outputPrefix = "pi0_NN_");
-  declareProperty("WeightFile_1p1n", m_weightFile_1p1n = "");
-  declareProperty("WeightFile_1pXn", m_weightFile_1pXn = "");
-  declareProperty("WeightFile_3pXn", m_weightFile_3pXn = "");
-  declareProperty("MaxTauTracks", m_maxTauTracks = 3);
-  declareProperty("MaxNeutralPFOs", m_maxNeutralPFOs = 8);
-  declareProperty("MaxShotPFOs", m_maxShotPFOs = 6);
-  declareProperty("MaxConvTracks", m_maxConvTracks = 4);
-  declareProperty("NeutralPFOPtCut", m_neutralPFOPtCut = 1.5);
-  declareProperty("DecayModeName", m_decayModeName = "NNDecayMode"); // needs to be same as m_outputName in TauDecayModeNNClassifier.cxx
-  // declareProperty("FourVecDimNames", m_fourVecDimNames = {"E", "eta", "phi"});
 }
 
 TauNeutralFourVecNNRegression::~TauNeutralFourVecNNRegression()
