@@ -472,6 +472,7 @@ def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool"):
     NNTrackTool.useSectors = False
     NNTrackTool.doGNNTracking = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
     NNTrackTool.nInputsGNN = flags.Trigger.FPGATrackSim.GNN.nInputsGNN
+    NNTrackTool.useCartesian = flags.Trigger.FPGATrackSim.NNCartesianCoordinates
     result.setPrivateTools(NNTrackTool)
     return result
 

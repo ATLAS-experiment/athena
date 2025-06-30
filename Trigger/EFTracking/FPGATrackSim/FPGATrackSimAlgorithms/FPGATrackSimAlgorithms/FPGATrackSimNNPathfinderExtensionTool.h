@@ -153,16 +153,22 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         // and then running the eta pattern filter a second time.
         Gaudi::Property<std::vector<float>> m_windowR { this, "windowR", {20.0}, "Window Size to search in for r, either pass one value for all layers or use the number of layers"};
         Gaudi::Property<std::vector<float>> m_windowZ { this, "windowZ", {20.0}, "Window Size to search in for z, either pass one value for all layers or use the number of layers"};
+        Gaudi::Property<std::vector<float>> m_windowPhi { this, "windowPhi", {0.4}, "Window Size to search in for phi, either pass one value for all layers or use the number of layers"};  
         Gaudi::Property <float> m_lowPtValueForWindowRScaling { this, "lowPtValueWindowR", -1, "Value in MeV below which we scale the r window size"};
         Gaudi::Property <float> m_lowPtWindowRScaling {this, "lowPtRScaling", 1.0, "Scaling factor for low pt in R"};
         Gaudi::Property <float> m_lowPtValueForWindowZScaling { this, "lowPtValueWindowZ", -1, "Value in MeV below which we scale the r window size"};
         Gaudi::Property <float> m_lowPtWindowZScaling {this, "lowPtZScaling", 1.0, "Scaling factor for low pt in Z"};
+        Gaudi::Property <float> m_lowPtValueForWindowPhiScaling { this, "lowPtValueWindowPhi", -1, "Value in MeV below which we scale the phi window size"};
+        Gaudi::Property <float> m_lowPtWindowPhiScaling {this, "lowPtPhiScaling", 1.0, "Scaling factor for low pt in Phi"};
+
         Gaudi::Property <float> m_missedHitRScaling {this, "missedHitRScaling", -1, "Amount to scale R window if previous hit was missed. Negative means this is disabled"};
-        Gaudi::Property <float> m_missedHitZScaling {this, "missedHitZScaling", -1, "Amount to scale Z window if previous hit was missed. Negative means this is disabled"};  
+        Gaudi::Property <float> m_missedHitZScaling {this, "missedHitZScaling", -1, "Amount to scale Z window if previous hit was missed. Negative means this is disabled"};
+        Gaudi::Property <float> m_missedHitPhiScaling {this, "missedHitPhiScaling", -1, "Amount to scale Phi window if previous hit was missed. Negative means this is disabled"};    
         Gaudi::Property <int> m_maxBranches { this, "maxBranches", -1, "Max number of branches before we stop, if negative this is disabled"};
         Gaudi::Property <bool> m_doOutsideIn { this, "doOutsideIn", true, "Setup the tool so it's doing outside in extrap"};
         Gaudi::Property <int> m_predictionWindowLength { this, "predictionWindowLength", 3, "Length of hits needed for prediction"};
-
+        Gaudi::Property <bool> m_useCartesian { this, "useCartesian", true, "If true, NNs use Cartestian coordinates. If false,they use cylindrical coordiantes"};
+  
         StatusCode bookTree();
         TTree *m_tree = nullptr; // output tree
         std::vector<unsigned long> m_NcompletedRoads;
@@ -180,6 +186,9 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         static float getXScale() { return 1015.;};
         static float getYScale() { return 1015.;};
         static float getZScale() { return 3000.;};
+        static float getRScale() {return 1015.;};
+        static float getPhiScale() {return 3.15;};
+  
         bool m_debugEvent = false;
 
         // Internal storage for the sliced hits (implemented as a LogicalEventInputHeader,

@@ -16,7 +16,9 @@
 
 #include <cmath>
 #include <algorithm>
+#include "CLHEP/Units/SystemOfUnits.h"
 
+using CLHEP::pi;
 
 StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
 
@@ -31,6 +33,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
       ATH_MSG_ERROR("Window r size = " << m_windowR << " is not equal to 1 (for all layers) and not equal to " << m_nLayers_2ndStage);
       return StatusCode::FAILURE;
     }
+
+    if (m_windowPhi.size() != 1 && m_windowPhi.size() != m_nLayers_2ndStage) {
+      ATH_MSG_ERROR("Window phi size = " << m_windowPhi << " is not equal to 1 (for all layers) and not equal to " << m_nLayers_2ndStage);
+      return StatusCode::FAILURE;
+    }    
 
     if (m_windowZ.size() != 1 && m_windowZ.size() != m_nLayers_2ndStage) {
       ATH_MSG_ERROR("Window z size = " << m_windowZ << " is not equal to 1 (for all layers) and not equal to " << m_nLayers_2ndStage);
@@ -88,11 +95,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         m_slicedHitHeader->addTower(tower);
       }
     }
-    // JAA need to update this
-    // for (const std::shared_ptr<const FPGATrackSimHit>& hit : hits) {
-    //   // Also Store a copy of the hit object in the header class, for ROOT Output + TV creation.
-    //   if (m_slicedHitHeader) m_slicedHitHeader->getTower(i)->addHit(*hit);
-    // }
     if(m_debugEvent) ATH_MSG_DEBUG("Got: "<<tracks.size()<<" tracks to extrapolate");
 
     // Now, loop over the tracks.
@@ -114,7 +116,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         if(m_debugEvent) {
             ATH_MSG_DEBUG("-----------------Hits in event");
             for (const std::shared_ptr<const FPGATrackSimHit>& hit: hits) {
-                ATH_MSG_DEBUG("Hit " << " X: " << hit->getX() << " Y: " << hit->getY() << " Z: " << hit->getZ() << " R: " << hit->getR() << " hitType: " << hit->getHitType() << " getDetType: " << hit->getDetType());
+	      ATH_MSG_DEBUG("Hit " << " X: " << hit->getX() << " Y: " << hit->getY() << " Z: " << hit->getZ() << " R: " << hit->getR() << "phi = " << hit->getGPhi() << " hitType: " << hit->getHitType() << " getDetType: " << hit->getDetType());
             }
         }
 
@@ -176,9 +178,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             }
             // Check if exist conditions are there
             if (m_doOutsideIn) {
-                // Make sure we are not predicting inside the inner most layer (x and y < 25)
+                // Make sure we are not predicting inside the inner most layer (x and y < 25, or r < 25)
                 // If we are, road is done
-                if (abs(predhit[0]) < 25 && abs(predhit[1]) < 25) {
+	      if ((m_useCartesian && (abs(predhit[0]) < 25 && abs(predhit[1]) < 25)) ||
+		  (!m_useCartesian && abs(predhit[0]) < 25))
+		{
                     completedRoads.push_back(currentRoad);
                     m_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
                     m_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
@@ -189,8 +193,9 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             else {
                 // Make sure we are not predicting outside the outer most layer
                 // if we are, road is done
-                double rad = std::sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
-                if (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || rad > 1024 || abs(predhit[2]) > 3000) {
+                double radius = std::sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+                if ((m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || radius > 1024 || abs(predhit[2]) > 3000)) ||
+		    (!m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[2]) > 3000))) {
                     completedRoads.push_back(currentRoad);
                     m_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
                     m_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
@@ -236,7 +241,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 if (!m_doOutsideIn && (hit->getR() < lastHitR)) continue;
                 if ((hit->getHitType() == HitType::spacepoint) && ((hit->getPhysLayer(true)) %2 == 1)) continue; // ignore outer parts of SP, they get added separately
                 if(m_debugEvent) {
-                    ATH_MSG_DEBUG("In the hit loop hit at: " << hit->getX() << " " << hit->getY() << " " << hit->getZ());
+		  ATH_MSG_DEBUG("In the hit loop hit at x: " << hit->getX() << " y " << hit->getY() << " z " << hit->getZ() << " phi " << hit->getGPhi());
                 }
 
                 // loop over hits in that layer
@@ -244,9 +249,12 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     // a hit is in the right fine ID == layer
                     double hitz = hit->getZ();
                     double hitr = hit->getR();
-                    double predr = sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+                    double hitphi = hit->getGPhi();		    
+                    double predr = (m_useCartesian ? sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]) : predhit[0]);
+		    double predphi = predhit[1]; // only for non cartesian, ie cylinndrical
                     double predz = predhit[2];
                     double windowR = m_windowR[0]; // default for all layers
+                    double windowPhi = m_windowPhi[0]; // default for all layers		    
                     double windowZ = m_windowZ[0]; // default for all layers
                     // But if available pick up per-window values
                     if (m_windowR.size() > 1) {
@@ -255,16 +263,26 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     if (m_windowZ.size() > 1) {
                         windowZ = m_windowZ[layer-m_nLayers_1stStage]; // offset by n1st stage
                     }
+                    if (m_windowPhi.size() > 1) {
+                        windowPhi = m_windowPhi[layer-m_nLayers_1stStage]; // offset by n1st stage
+                    }
 
                 // If last hit was not real and we want to, scale the window
                 if (m_missedHitRScaling > 0 && !lastHitWasReal) windowR *= m_missedHitRScaling;
                 if (m_missedHitZScaling > 0 && !lastHitWasReal) windowZ *= m_missedHitZScaling;
-
+                if (m_missedHitPhiScaling > 0 && !lastHitWasReal) windowPhi *= m_missedHitPhiScaling;	      
                 // now scale windows for low pt, if desired
                 if (pt < m_lowPtValueForWindowRScaling.value()) windowR *= m_lowPtWindowRScaling.value();
                 if (pt < m_lowPtValueForWindowZScaling.value()) windowZ *= m_lowPtWindowZScaling.value();
 
-                if (abs(hitr - predr) < windowR && abs(hitz - predz) < windowZ) {
+		double dr = abs(hitr - predr);
+		double dz = abs(hitz - predz);
+		double dphi = abs(hitphi - predphi);
+		while (dphi > pi) dphi -= pi;
+		
+                if ((m_useCartesian && dr < windowR && dz < windowZ) ||
+		    (!m_useCartesian && dphi < windowPhi && dz < windowZ))
+		  {
                     std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits {hit};
                     hitsInWindow = hitsInWindow + 1;
                     // If the hit is a space point, skip the next layer, as it will be a duplicated space point and we have already taken care of that in the adding of the hits
@@ -293,24 +311,54 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     }
                 }
             }
-
-            // Sort the hit by the distance
-            std::sort(listofHitsFound.begin(), listofHitsFound.end(), [&predhit](auto& a, auto& b){
-                double predr = sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
-                double predz = predhit[2];
-
-                // HitA
-                double hitz = a[0]->getZ();
-                double hitr = a[0]->getR();
-                float distance_a = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
-
+	    // Sort the hit by the distance
+	    if (m_useCartesian) {
+	      std::sort(listofHitsFound.begin(), listofHitsFound.end(), [&predhit](auto& a, auto& b){
+		double predr = sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+		double predz = predhit[2];
+		
+		// HitA
+		double hitz = a[0]->getZ();
+		double hitr = a[0]->getR();
+                float distance_a = (hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz);
+		
                 // HitB
                 hitz = b[0]->getZ();
                 hitr = b[0]->getR();
-                float distance_b = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
-
+                float distance_b = (hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz);
+		
                 return distance_a < distance_b;
-            });
+	      });
+	    }
+	    else {
+	      std::sort(listofHitsFound.begin(), listofHitsFound.end(), [&predhit](auto& a, auto& b){
+		double predphi = predhit[1];
+		double predz = predhit[2];
+		
+		// HitA
+		double hitphi = a[0]->getGPhi();
+		double hitz = a[0]->getZ();
+                double dz = abs(hitz - predz);
+                double dphi = abs(hitphi - predphi);
+		while (dphi > pi) dphi -= pi;
+
+		// scaled distance because z and phi are not in same units
+                float distance_a = dz*dz*getPhiScale()*getPhiScale() + dphi*dphi*getZScale()*getZScale();
+		
+                // HitB
+
+		hitphi = b[0]->getGPhi();
+		hitz = b[0]->getZ();
+                dz = abs(hitz - predz);
+                dphi = abs(hitphi - predphi);
+		while (dphi > pi) dphi -= pi;
+
+		// scaled distance because z and phi are not in same units
+                float distance_b = dz*dz*getPhiScale()*getPhiScale() + dphi*dphi*getZScale()*getZScale();
+		
+                return distance_a < distance_b;
+	      });
+	    }
 
             // Select the top N hits
             std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> cleanHitsToGrow;
@@ -333,9 +381,16 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 // a hit is in the right fine ID == layer
                 double hitz = hit->getZ();
                 double hitr = hit->getR();
-                double predr = sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+                double hitphi = hit->getGPhi();		
+		double predr = (m_useCartesian ? sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]) : predhit[0]);
                 double predz = predhit[2];
-                float distancePredFound = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
+		double predphi = predhit[1];
+		double dz = abs(hitz - predz);
+                double dphi = abs(hitphi - predphi);
+		while (dphi > pi) dphi -= pi;
+
+                float distancePredFound = (m_useCartesian ? sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz)) : 
+					   sqrt(dphi*dphi*getZScale()*getZScale()/(getPhiScale()*getPhiScale()) + dz*dz));
 
                 // We got a hit, lets make a road
                 miniRoad newRoad;
@@ -478,7 +533,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
     if(m_debugEvent) ATH_MSG_DEBUG("hitsR");
     for (auto thit : hitsR)
     {
-        if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ());
+      if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ() << " and phi = " << thit->getGPhi());
     }
 
     // Remove all the duplicate space points
@@ -537,7 +592,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
     if(m_debugEvent) ATH_MSG_DEBUG("Clean hits");
     for (auto thit : cleanHits)
     {
-        if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ()<<" "<<thit->isStrip());
+      if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ()<<" "<<thit->isStrip() << " and gphi = " << thit->getGPhi());
     }
 
     // Reverse this vector so we can encode it the format as expected from the NN
@@ -546,11 +601,18 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
     if(m_debugEvent) ATH_MSG_DEBUG("Input for NN prediction");
     for (auto thit : hitsToEncode)
     {
+      if (m_useCartesian) {
         inputTensorValues.push_back(thit->getX()/ getXScale());
         inputTensorValues.push_back(thit->getY()/ getYScale());
         inputTensorValues.push_back(thit->getZ()/ getZScale());
+      }
+      else {
+        inputTensorValues.push_back(thit->getR()/ getRScale());
+        inputTensorValues.push_back(thit->getGPhi()/ getPhiScale());
+        inputTensorValues.push_back(thit->getZ()/ getZScale());
+      }
 
-        if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ());
+      if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ() << " and gphi = " << thit->getGPhi());
     }
 
     return StatusCode::SUCCESS;
@@ -569,9 +631,16 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::getPredictedHit(std::vector<fl
     outputTensorValues = m_extensionHitNN.runONNXInference(inputTensorValues);
 
     // now scale back
-    outputTensorValues[0] *= getXScale();
-    outputTensorValues[1] *= getYScale();
-    outputTensorValues[2] *= getZScale();
+    if (m_useCartesian) {
+      outputTensorValues[0] *= getXScale();
+      outputTensorValues[1] *= getYScale();
+      outputTensorValues[2] *= getZScale();
+    }
+    else {
+      outputTensorValues[0] *= getRScale();
+      outputTensorValues[1] *= getPhiScale();
+      outputTensorValues[2] *= getZScale();
+    }
 
     return StatusCode::SUCCESS;
 }
@@ -588,9 +657,19 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::getFakeHit(miniRoad& currentRo
   unsigned guessedLayer(0);
 
     std::shared_ptr<FPGATrackSimHit> guessedHitPtr = std::make_shared<FPGATrackSimHit>();
-    guessedHitPtr->setX(predhit[0]);
-    guessedHitPtr->setY(predhit[1]);
-    guessedHitPtr->setZ(predhit[2]);
+    if (m_useCartesian) {
+      guessedHitPtr->setX(predhit[0]);
+      guessedHitPtr->setY(predhit[1]);
+      guessedHitPtr->setZ(predhit[2]);
+    }
+    else {
+      double r = predhit[0];
+      double phi = predhit[1];
+      guessedHitPtr->setX(r*cos(phi));
+      guessedHitPtr->setY(r*sin(phi));
+      guessedHitPtr->setZ(predhit[2]);
+    }
+     
 
     if (m_doOutsideIn) { // outside in
       // TODO
@@ -686,7 +765,7 @@ void FPGATrackSimNNPathfinderExtensionTool::printRoad(miniRoad& currentRoad)
 
         for (unsigned long i = 0; i < hitsR.size(); i++)
         {
-            ATH_MSG_DEBUG("Hit i "<<i<<" X: "<<hitsR[i]->getX()<<" Y: "<<hitsR[i]->getY()<<" Z: "<<hitsR[i]->getZ()<<" R: "<<hitsR[i]->getR()<< " hitType: "<<hitsR[i]->getHitType()<<" getDetType: "<<hitsR[i]->getDetType());
+	  ATH_MSG_DEBUG("Hit i "<<i<<" X: "<<hitsR[i]->getX()<<" Y: "<<hitsR[i]->getY()<<" Z: "<<hitsR[i]->getZ()<<" R: "<<hitsR[i]->getR()<< " hitType: "<<hitsR[i]->getHitType()<<" getDetType: "<<hitsR[i]->getDetType() << "phi = " << hitsR[i]->getGPhi());
         }
     }
 
