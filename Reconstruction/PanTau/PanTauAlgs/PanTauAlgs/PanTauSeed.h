@@ -114,8 +114,7 @@ namespace PanTau {
 
 
     /** Main constructor to be used */
-    PanTauSeed( const std::string&                   nameInputAlgorithm,
-		xAOD::TauJet*                        tauJet,
+    PanTauSeed( xAOD::TauJet*                        tauJet,
 		const std::vector<PanTau::TauConstituent*>& tauConstituents,
 		const std::vector<PanTau::TauConstituent*>& tauConstituentsWithUnselected,
 		const std::vector<int>&              pantauSeed_TechnicalQuality
@@ -123,12 +122,10 @@ namespace PanTau {
 
 
     /** Constructor for invalid seeds */
-    PanTauSeed( const std::string&                    nameInputAlgorithm,
-		 xAOD::TauJet*                        tauJet,
+    PanTauSeed(  xAOD::TauJet*                        tauJet,
 		 const std::vector<int>&              pantauSeed_TechnicalQuality
 		 );
 
-    const std::string&                                  getNameInputAlgorithm() const;
     const xAOD::TauJet*                                 getTauJet() const;
     xAOD::TauJet*                                       getTauJet();
     const PanTau::TauFeature*                           getFeatures() const;
@@ -169,9 +166,6 @@ namespace PanTau {
     bool                                                m_IsValidSeed;
 
     std::vector<int>                                    m_TechnicalQuality;
-
-    //place to store which input alg created this pantauseed: CellBased, ClusterBased..                                                                                                                                              
-    std::string                                         m_NameInputAlgorithm;
 
     //pointer to the TauJet this PanTauSeed was build from (pointer not owned by PanTauSeed)                                                                                                                                                   
     xAOD::TauJet*                                       m_TauJet;
@@ -218,7 +212,6 @@ namespace PanTau {
 } //end name space pantau
 
 
-inline const std::string&                                   PanTau::PanTauSeed::getNameInputAlgorithm() const       {return m_NameInputAlgorithm;}
 inline const xAOD::TauJet*                                  PanTau::PanTauSeed::getTauJet() const                   {return m_TauJet;}
 inline xAOD::TauJet*                                        PanTau::PanTauSeed::getTauJet()                         {return m_TauJet;}
 inline const PanTau::TauFeature*                            PanTau::PanTauSeed::getFeatures() const                 {return m_Features;}

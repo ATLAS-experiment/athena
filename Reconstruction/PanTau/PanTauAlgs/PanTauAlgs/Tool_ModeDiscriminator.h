@@ -53,7 +53,6 @@ namespace PanTau {
         
     ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore", "Handle to the information store tool"}; 
     Gaudi::Property<std::string> m_calib_path{this, "calibFolder", "", "Location of calib files in cvmfs"};
-    Gaudi::Property<std::string> m_Name_InputAlg{this, "Name_InputAlg", "InvalidInputAlg", "Name of the input algorithm for this instance"};
     Gaudi::Property<std::string> m_Name_ModeCase{this, "Name_ModeCase", "InvalidModeCase", "Name of the two modes to be distinguished for this instance"};
     Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "PanTau::Tool_InformationStore/Tool_InformationStore", "Handle to the information store tool"};
 

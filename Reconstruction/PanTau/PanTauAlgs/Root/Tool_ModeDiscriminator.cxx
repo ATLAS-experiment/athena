@@ -37,10 +37,10 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("ModeDiscriminator_TMVAMethod", m_MethodName) );
     
   // build the name of the variable that contains the variable list for this discri tool
-  std::string varNameList_Full    = "ModeDiscriminator_BDTVariableNames_" + m_Name_InputAlg + "_" + m_Name_ModeCase;
+  std::string varNameList_Full    = "ModeDiscriminator_BDTVariableNames_CellBased_" + m_Name_ModeCase;
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecString(varNameList_Full, m_List_BDTVariableNames) );
     
-  std::string varDefaultValueList_Full    = "ModeDiscriminator_BDTVariableDefaults_" + m_Name_InputAlg + "_" + m_Name_ModeCase;
+  std::string varDefaultValueList_Full    = "ModeDiscriminator_BDTVariableDefaults_CellBased_" + m_Name_ModeCase;
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble(varDefaultValueList_Full, m_List_BDTVariableDefaultValues) );
     
     
@@ -61,7 +61,7 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
     // weight files
     std::string curWeightFile = m_calib_path + (!m_calib_path.empty() ? "/" : "");
     curWeightFile += "TrainModes_";
-    curWeightFile += m_Name_InputAlg + "_";
+    curWeightFile += "CellBased_";
     curWeightFile += curPtBin + "_";
     curWeightFile += m_Name_ModeCase + "_";
     curWeightFile += m_MethodName + ".weights.root";
@@ -99,7 +99,7 @@ void PanTau::Tool_ModeDiscriminator::updateReaderVariables(PanTau::PanTauSeed* i
   PanTau::TauFeature* seedFeatures = inSeed->getFeatures();
 
   for (unsigned int iVar=0; iVar<m_List_BDTVariableNames.size(); iVar++) {
-    std::string curVar = m_Name_InputAlg + "_" + m_List_BDTVariableNames[iVar];
+    std::string curVar = "CellBased_" + m_List_BDTVariableNames[iVar];
         
     bool isValid;
     double newValue = seedFeatures->value(curVar, isValid);

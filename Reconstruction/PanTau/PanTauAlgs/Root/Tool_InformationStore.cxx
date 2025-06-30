@@ -74,7 +74,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
 
   // vector<string> values
   MapVecString m05 = {
-    {"Names_InputAlgorithms",{"CellBased"}},
     {"Names_ModeCases",{"1p0n_vs_1p1n","1p1n_vs_1pXn","3p0n_vs_3pXn"}},
     // ---> CellBased BDT variables
     {"ModeDiscriminator_BDTVariableNames_CellBased_1p0n_vs_1p1n",{"Neutral_PID_BDTValues_BDTSort_1","Neutral_Ratio_1stBDTEtOverEtAllConsts","Combined_DeltaR1stNeutralTo1stCharged","Charged_JetMoment_EtDRxTotalEt","Neutral_Shots_NPhotonsInSeed"}},

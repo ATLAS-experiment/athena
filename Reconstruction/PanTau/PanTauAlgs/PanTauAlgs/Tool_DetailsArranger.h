@@ -67,9 +67,9 @@ namespace PanTau {
 	
         StatusCode arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const;
 
-        static void SetHLVTau(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& inputAlg, const std::string& varTypeName_Basic) ;
+        static void SetHLVTau(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& varTypeName_Basic) ;
 
-	bool HasMultPi0sInOneCluster(const xAOD::PFO* pfo, int decayModeProto, const std::string& inputAlg) const ;
+	bool HasMultPi0sInOneCluster(const xAOD::PFO* pfo, int decayModeProto) const ;
 
 	static void SetNeutralConstituentMass(xAOD::PFO* neutral_pfo, double mass) ;
 

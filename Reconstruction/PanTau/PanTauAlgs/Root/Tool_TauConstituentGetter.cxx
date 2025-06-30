@@ -33,13 +33,7 @@ StatusCode PanTau::Tool_TauConstituentGetter::initialize() {
  * Function to get the PFOs for a given TauJet object (Shots in each PFO etc are collected in "ConvertToTauConstituent")
  */
 StatusCode PanTau::Tool_TauConstituentGetter::GetTauConstituents(const xAOD::TauJet* tauJet,
-                                                                 std::vector<TauConstituent*>& outputConstituents,
-                                                                 const std::string& algName) const {
-    
-  if(algName != "CellBased") {
-    ATH_MSG_WARNING("Unknown input algorithm: " << algName << " -> Pantau BDT Training not done for this algorithm!");
-    return StatusCode::FAILURE;
-  }
+                                                                 std::vector<TauConstituent*>& outputConstituents) const {
     
   //loop over charged PFOs
   for(unsigned int iChrgPFO=0; iChrgPFO<tauJet->nProtoChargedPFOs(); iChrgPFO++) {

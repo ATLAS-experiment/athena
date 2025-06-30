@@ -28,7 +28,6 @@ def createPanTauConfigFlags():
     flags.addFlag("CellBased_EtaBinned_Pi0MVACut_3prong", [0.47, 0.52, 0.60, 0.55, 0.50])
     flags.addFlag("ModeDiscriminator_BinEdges_Pt", [10*Units.GeV, 100000*Units.GeV])
 
-    flags.addFlag("Names_InputAlgorithms", ["CellBased"])
     flags.addFlag("Names_ModeCases", ["1p0n_vs_1p1n", "1p1n_vs_1pXn", "3p0n_vs_3pXn"])
     flags.addFlag("ModeDiscriminator_BDTVariableNames_CellBased_1p0n_vs_1p1n", ["Neutral_PID_BDTValues_BDTSort_1", "Neutral_Ratio_1stBDTEtOverEtAllConsts", "Combined_DeltaR1stNeutralTo1stCharged", "Charged_JetMoment_EtDRxTotalEt", "Neutral_Shots_NPhotonsInSeed"])
     flags.addFlag("ModeDiscriminator_BDTVariableNames_CellBased_1p1n_vs_1pXn", ["Neutral_PID_BDTValues_BDTSort_2", "Neutral_HLV_SumM", "Neutral_Ratio_EtOverEtAllConsts", "Basic_NNeutralConsts", "Neutral_Shots_NPhotonsInSeed"])
